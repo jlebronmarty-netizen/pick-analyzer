@@ -2,12 +2,11 @@
 
 import { useUpcomingGames } from '@/hooks/useUpcomingGames'
 import {
-  americanOddsToProbability,
-  calculateConfidence,
-  calculateEV,
-  calculateSimpleModelProbability,
+  analyzeMoneylinePick,
   formatEV,
   formatProbability,
+  getBestPick,
+  PickAnalysis,
 } from '@/utils/betting'
 
 function formatGameDate(date: string) {
@@ -53,50 +52,31 @@ function getPrimaryMoneyline(game: {
   }
 }
 
-function BettingAnalysisCard({
-  team,
-  odds,
-}: {
-  team: string
-  odds: number | undefined
-}) {
-  if (odds === undefined) {
-    return (
-      <div className="rounded-lg bg-slate-900 p-3">
-        <p className="text-slate-400">{team}</p>
-        <p className="text-sm text-slate-500">No odds</p>
-      </div>
-    )
-  }
-
-  const impliedProbability = americanOddsToProbability(odds)
-  const modelProbability = calculateSimpleModelProbability(impliedProbability)
-  const edge = modelProbability - impliedProbability
-  const ev = calculateEV(modelProbability, odds)
-  const confidence = calculateConfidence(edge)
-
-  const hasValue = ev > 0
-
+function BettingAnalysisCard({ pick }: { pick: PickAnalysis }) {
   return (
     <div className="rounded-lg bg-slate-900 p-3">
-      <p className="text-slate-400">{team}</p>
+      <p className="text-slate-400">{pick.team}</p>
 
-      <p className="text-lg font-bold text-green-400">{odds}</p>
+      <p className="text-lg font-bold text-green-400">{pick.odds}</p>
 
       <div className="mt-2 space-y-1 text-xs text-slate-400">
-        <p>Implied: {formatProbability(impliedProbability)}</p>
-        <p>Model: {formatProbability(modelProbability)}</p>
-        <p className={hasValue ? 'text-green-400' : 'text-red-400'}>
-          EV: {formatEV(ev)}
+        <p>Implied: {formatProbability(pick.impliedProbability)}</p>
+        <p>Model: {formatProbability(pick.modelProbability)}</p>
+        <p className={pick.hasValue ? 'text-green-400' : 'text-red-400'}>
+          EV: {formatEV(pick.ev)}
         </p>
-        <p>Confidence: {confidence}/10</p>
+        <p>Confidence: {pick.confidence}/10</p>
       </div>
 
-      {hasValue && (
-        <p className="mt-2 rounded-full bg-green-500/10 px-2 py-1 text-center text-xs font-bold text-green-400">
-          Value Detected
-        </p>
-      )}
+      <p
+        className={
+          pick.hasValue
+            ? 'mt-2 rounded-full bg-green-500/10 px-2 py-1 text-center text-xs font-bold text-green-400'
+            : 'mt-2 rounded-full bg-slate-700 px-2 py-1 text-center text-xs font-bold text-slate-400'
+        }
+      >
+        {pick.rating}
+      </p>
     </div>
   )
 }
@@ -126,6 +106,18 @@ export default function UpcomingGames() {
       {games.slice(0, 8).map((game) => {
         const moneyline = getPrimaryMoneyline(game)
 
+        const picks: PickAnalysis[] = []
+
+        if (moneyline?.awayOdds !== undefined) {
+          picks.push(analyzeMoneylinePick(game.away_team, moneyline.awayOdds))
+        }
+
+        if (moneyline?.homeOdds !== undefined) {
+          picks.push(analyzeMoneylinePick(game.home_team, moneyline.homeOdds))
+        }
+
+        const bestPick = getBestPick(picks)
+
         return (
           <div
             key={game.id}
@@ -146,17 +138,36 @@ export default function UpcomingGames() {
               </span>
             </div>
 
-            {moneyline ? (
-              <div className="mt-3 grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
-                <BettingAnalysisCard
-                  team={game.away_team}
-                  odds={moneyline.awayOdds}
-                />
+            {bestPick ? (
+              <div className="mb-3 rounded-xl border border-green-500/20 bg-green-500/10 p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-green-400">
+                  Recommended Pick
+                </p>
+                <p className="mt-1 text-lg font-bold text-white">
+                  {bestPick.team} ML
+                </p>
+                <p className="text-sm text-green-300">
+                  EV {formatEV(bestPick.ev)} · Confidence{' '}
+                  {bestPick.confidence}/10 · {bestPick.rating}
+                </p>
+              </div>
+            ) : (
+              <div className="mb-3 rounded-xl border border-slate-700 bg-slate-900 p-3">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                  Recommended Pick
+                </p>
+                <p className="mt-1 text-lg font-bold text-slate-300">Pass</p>
+                <p className="text-sm text-slate-500">
+                  No positive EV detected.
+                </p>
+              </div>
+            )}
 
-                <BettingAnalysisCard
-                  team={game.home_team}
-                  odds={moneyline.homeOdds}
-                />
+            {moneyline && picks.length > 0 ? (
+              <div className="mt-3 grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
+                {picks.map((pick) => (
+                  <BettingAnalysisCard key={pick.team} pick={pick} />
+                ))}
 
                 <p className="md:col-span-2 text-xs text-slate-500">
                   Odds from {moneyline.sportsbook}

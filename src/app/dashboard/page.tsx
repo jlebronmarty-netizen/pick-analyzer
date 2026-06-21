@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import SportsList from '@/components/dashboard/SportsList'
 import UpcomingGames from '@/components/dashboard/UpcomingGames'
+import TeamStatsPanel from '@/components/dashboard/TeamStatsPanel'
 
 export default function DashboardPage() {
   const [email, setEmail] = useState<string | undefined>('')
@@ -30,7 +31,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-slate-950 p-4 text-white">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -53,16 +54,21 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="mb-4 grid gap-4 lg:grid-cols-3">
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 lg:col-span-1">
             <h2 className="mb-4 text-xl font-bold">Sports</h2>
             <SportsList />
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 lg:col-span-2">
-            <h2 className="mb-4 text-xl font-bold">Upcoming MLB Games</h2>
-            <UpcomingGames />
+            <h2 className="mb-4 text-xl font-bold">Team Stats</h2>
+            <TeamStatsPanel />
           </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
+          <h2 className="mb-4 text-xl font-bold">Upcoming MLB Games</h2>
+          <UpcomingGames />
         </div>
       </div>
     </main>
