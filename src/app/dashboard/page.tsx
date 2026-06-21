@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import SportsList from '@/components/dashboard/SportsList'
 
 export default function DashboardPage() {
   const [email, setEmail] = useState<string | undefined>('')
@@ -28,40 +29,30 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-white p-4">
-      <div className="max-w-md mx-auto">
-        <div className="flex justify-between items-center mb-6">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-slate-400 text-sm">{email}</p>
+            <p className="text-sm text-slate-400">{email}</p>
           </div>
 
           <button
             onClick={logout}
-            className="bg-slate-800 px-4 py-2 rounded-lg text-sm"
+            className="rounded-lg bg-slate-800 px-4 py-2 text-sm hover:bg-slate-700"
           >
             Logout
           </button>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-4">
-          <h2 className="text-xl font-bold mb-2">Today&apos;s Best Pick</h2>
-          <p className="text-green-400 text-2xl font-bold">San Germán ML</p>
+        <div className="mb-4 rounded-2xl border border-slate-800 bg-slate-900 p-4">
+          <h2 className="mb-2 text-xl font-bold">Today&apos;s Best Pick</h2>
+          <p className="text-2xl font-bold text-green-400">San Germán ML</p>
           <p className="text-slate-400">Confidence: 8.2 / 10</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-          <h2 className="text-xl font-bold mb-4">Sports</h2>
-
-          <div className="grid grid-cols-2 gap-3">
-            {['MLB', 'NBA', 'NFL', 'Soccer', 'BSN', 'UFC'].map((sport) => (
-              <div
-                key={sport}
-                className="bg-slate-800 rounded-xl p-4 text-center font-bold"
-              >
-                {sport}
-              </div>
-            ))}
-          </div>
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
+          <h2 className="mb-4 text-xl font-bold">Sports</h2>
+          <SportsList />
         </div>
       </div>
     </main>
