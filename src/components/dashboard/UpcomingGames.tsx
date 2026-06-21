@@ -1,25 +1,27 @@
 'use client'
 
 import { useUpcomingGames } from '@/hooks/useUpcomingGames'
-import {
-  analyzeMoneylinePick,
-  formatEV,
-  formatProbability,
-  getBestPick,
-  PickAnalysis,
-} from '@/utils/betting'
 
-function formatGameDate(date: string) {
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(date))
+type PredictionV2 = {
+  team: string
+  opponent: string
+  odds: number | null
+  impliedProbability: number | null
+  modelProbability: number | null
+  edge: number | null
+  ev: number | null
+  confidence: number | null
+  recommendedPick: boolean
 }
 
-function getPrimaryMoneyline(game: {
+type GameWithPredictions = {
+  id: string
+  sport_key: string
+  sport_title: string
+  commence_time: string
   home_team: string
   away_team: string
-  bookmakers: {
+  bookmakers?: {
     title: string
     markets: {
       key: string
@@ -29,60 +31,99 @@ function getPrimaryMoneyline(game: {
       }[]
     }[]
   }[]
-}) {
-  const bookmaker = game.bookmakers[0]
-  const moneyline = bookmaker?.markets.find((market) => market.key === 'h2h')
-
-  if (!bookmaker || !moneyline) {
-    return null
-  }
-
-  const homeOdds = moneyline.outcomes.find(
-    (outcome) => outcome.name === game.home_team
-  )
-
-  const awayOdds = moneyline.outcomes.find(
-    (outcome) => outcome.name === game.away_team
-  )
-
-  return {
-    sportsbook: bookmaker.title,
-    homeOdds: homeOdds?.price,
-    awayOdds: awayOdds?.price,
-  }
+  predictions?: PredictionV2[]
+  recommendedPick?: PredictionV2 | null
 }
 
-function BettingAnalysisCard({ pick }: { pick: PickAnalysis }) {
+function safeNumber(value: number | null | undefined) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function formatGameDate(date: string) {
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(date))
+}
+
+function formatPercent(value: number | null | undefined) {
+  const safe = safeNumber(value)
+  return safe === null ? 'N/A' : `${safe.toFixed(2)}%`
+}
+
+function formatEV(value: number | null | undefined) {
+  const safe = safeNumber(value)
+  if (safe === null) return 'N/A'
+
+  const sign = safe > 0 ? '+' : ''
+  return `${sign}${safe.toFixed(2)}%`
+}
+
+function formatOdds(odds: number | null | undefined) {
+  const safe = safeNumber(odds)
+  if (safe === null) return 'N/A'
+
+  return safe > 0 ? `+${safe}` : `${safe}`
+}
+
+function formatConfidence(value: number | null | undefined) {
+  const safe = safeNumber(value)
+  return safe === null ? 'N/A' : `${safe.toFixed(2)}/99`
+}
+
+function getPrimarySportsbook(game: GameWithPredictions) {
+  return game.bookmakers?.[0]?.title ?? 'Unknown sportsbook'
+}
+
+function PredictionCard({ pick }: { pick: PredictionV2 }) {
+  const edge = safeNumber(pick.edge)
+  const ev = safeNumber(pick.ev)
+
   return (
     <div className="rounded-lg bg-slate-900 p-3">
-      <p className="text-slate-400">{pick.team}</p>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="font-bold text-white">{pick.team}</p>
+          <p className="text-xs text-slate-500">vs {pick.opponent}</p>
+        </div>
 
-      <p className="text-lg font-bold text-green-400">{pick.odds}</p>
+        <p className="text-lg font-bold text-green-400">
+          {formatOdds(pick.odds)}
+        </p>
+      </div>
 
-      <div className="mt-2 space-y-1 text-xs text-slate-400">
-        <p>Implied: {formatProbability(pick.impliedProbability)}</p>
-        <p>Model: {formatProbability(pick.modelProbability)}</p>
-        <p className={pick.hasValue ? 'text-green-400' : 'text-red-400'}>
+      <div className="mt-3 space-y-1 text-xs text-slate-400">
+        <p>Implied Probability: {formatPercent(pick.impliedProbability)}</p>
+        <p>Model Probability: {formatPercent(pick.modelProbability)}</p>
+
+        <p className={edge !== null && edge > 0 ? 'text-green-400' : 'text-red-400'}>
+          Edge: {formatEV(pick.edge)}
+        </p>
+
+        <p className={ev !== null && ev > 0 ? 'text-green-400' : 'text-red-400'}>
           EV: {formatEV(pick.ev)}
         </p>
-        <p>Confidence: {pick.confidence}/10</p>
+
+        <p>Confidence: {formatConfidence(pick.confidence)}</p>
       </div>
 
       <p
         className={
-          pick.hasValue
-            ? 'mt-2 rounded-full bg-green-500/10 px-2 py-1 text-center text-xs font-bold text-green-400'
-            : 'mt-2 rounded-full bg-slate-700 px-2 py-1 text-center text-xs font-bold text-slate-400'
+          pick.recommendedPick
+            ? 'mt-3 rounded-full bg-green-500/10 px-2 py-1 text-center text-xs font-bold text-green-400'
+            : 'mt-3 rounded-full bg-slate-700 px-2 py-1 text-center text-xs font-bold text-slate-400'
         }
       >
-        {pick.rating}
+        {pick.recommendedPick ? 'VALUE PICK' : 'NO VALUE'}
       </p>
     </div>
   )
 }
 
 export default function UpcomingGames() {
-  const { games, loading, error } = useUpcomingGames('baseball_mlb')
+  const { games = [], loading, error } = useUpcomingGames('baseball_mlb')
+
+  const typedGames = games as GameWithPredictions[]
 
   if (loading) {
     return <p className="text-slate-400">Loading upcoming games...</p>
@@ -97,26 +138,16 @@ export default function UpcomingGames() {
     )
   }
 
-  if (games.length === 0) {
+  if (!typedGames.length) {
     return <p className="text-slate-400">No upcoming games found.</p>
   }
 
   return (
     <div className="space-y-3">
-      {games.slice(0, 8).map((game) => {
-        const moneyline = getPrimaryMoneyline(game)
-
-        const picks: PickAnalysis[] = []
-
-        if (moneyline?.awayOdds !== undefined) {
-          picks.push(analyzeMoneylinePick(game.away_team, moneyline.awayOdds))
-        }
-
-        if (moneyline?.homeOdds !== undefined) {
-          picks.push(analyzeMoneylinePick(game.home_team, moneyline.homeOdds))
-        }
-
-        const bestPick = getBestPick(picks)
+      {typedGames.slice(0, 8).map((game) => {
+        const predictions = game.predictions ?? []
+        const bestPick = game.recommendedPick ?? null
+        const sportsbook = getPrimarySportsbook(game)
 
         return (
           <div
@@ -134,7 +165,7 @@ export default function UpcomingGames() {
               </div>
 
               <span className="rounded-full bg-slate-900 px-3 py-1 text-xs text-slate-300">
-                {game.bookmakers.length} books
+                {game.bookmakers?.length ?? 0} books
               </span>
             </div>
 
@@ -143,12 +174,15 @@ export default function UpcomingGames() {
                 <p className="text-xs font-bold uppercase tracking-wide text-green-400">
                   Recommended Pick
                 </p>
+
                 <p className="mt-1 text-lg font-bold text-white">
-                  {bestPick.team} ML
+                  {bestPick.team} ML {formatOdds(bestPick.odds)}
                 </p>
+
                 <p className="text-sm text-green-300">
-                  EV {formatEV(bestPick.ev)} · Confidence{' '}
-                  {bestPick.confidence}/10 · {bestPick.rating}
+                  Model {formatPercent(bestPick.modelProbability)} · Edge{' '}
+                  {formatEV(bestPick.edge)} · EV {formatEV(bestPick.ev)} ·
+                  Confidence {formatConfidence(bestPick.confidence)}
                 </p>
               </div>
             ) : (
@@ -158,24 +192,24 @@ export default function UpcomingGames() {
                 </p>
                 <p className="mt-1 text-lg font-bold text-slate-300">Pass</p>
                 <p className="text-sm text-slate-500">
-                  No positive EV detected.
+                  Prediction Engine V2 did not detect positive value.
                 </p>
               </div>
             )}
 
-            {moneyline && picks.length > 0 ? (
-              <div className="mt-3 grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
-                {picks.map((pick) => (
-                  <BettingAnalysisCard key={pick.team} pick={pick} />
+            {predictions.length > 0 ? (
+              <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                {predictions.map((pick) => (
+                  <PredictionCard key={`${game.id}-${pick.team}`} pick={pick} />
                 ))}
 
-                <p className="md:col-span-2 text-xs text-slate-500">
-                  Odds from {moneyline.sportsbook}
+                <p className="text-xs text-slate-500 md:col-span-2">
+                  Odds from {sportsbook}. Model powered by Prediction Engine V2.
                 </p>
               </div>
             ) : (
               <p className="mt-3 text-sm text-slate-400">
-                Moneyline not available.
+                Prediction data not available for this game.
               </p>
             )}
           </div>
