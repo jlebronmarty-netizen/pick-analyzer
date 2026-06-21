@@ -1,6 +1,14 @@
 'use client'
 
 import { useUpcomingGames } from '@/hooks/useUpcomingGames'
+import {
+  americanOddsToProbability,
+  calculateConfidence,
+  calculateEV,
+  calculateSimpleModelProbability,
+  formatEV,
+  formatProbability,
+} from '@/utils/betting'
 
 function formatGameDate(date: string) {
   return new Intl.DateTimeFormat('en-US', {
@@ -43,6 +51,54 @@ function getPrimaryMoneyline(game: {
     homeOdds: homeOdds?.price,
     awayOdds: awayOdds?.price,
   }
+}
+
+function BettingAnalysisCard({
+  team,
+  odds,
+}: {
+  team: string
+  odds: number | undefined
+}) {
+  if (odds === undefined) {
+    return (
+      <div className="rounded-lg bg-slate-900 p-3">
+        <p className="text-slate-400">{team}</p>
+        <p className="text-sm text-slate-500">No odds</p>
+      </div>
+    )
+  }
+
+  const impliedProbability = americanOddsToProbability(odds)
+  const modelProbability = calculateSimpleModelProbability(impliedProbability)
+  const edge = modelProbability - impliedProbability
+  const ev = calculateEV(modelProbability, odds)
+  const confidence = calculateConfidence(edge)
+
+  const hasValue = ev > 0
+
+  return (
+    <div className="rounded-lg bg-slate-900 p-3">
+      <p className="text-slate-400">{team}</p>
+
+      <p className="text-lg font-bold text-green-400">{odds}</p>
+
+      <div className="mt-2 space-y-1 text-xs text-slate-400">
+        <p>Implied: {formatProbability(impliedProbability)}</p>
+        <p>Model: {formatProbability(modelProbability)}</p>
+        <p className={hasValue ? 'text-green-400' : 'text-red-400'}>
+          EV: {formatEV(ev)}
+        </p>
+        <p>Confidence: {confidence}/10</p>
+      </div>
+
+      {hasValue && (
+        <p className="mt-2 rounded-full bg-green-500/10 px-2 py-1 text-center text-xs font-bold text-green-400">
+          Value Detected
+        </p>
+      )}
+    </div>
+  )
 }
 
 export default function UpcomingGames() {
@@ -91,22 +147,18 @@ export default function UpcomingGames() {
             </div>
 
             {moneyline ? (
-              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                <div className="rounded-lg bg-slate-900 p-3">
-                  <p className="text-slate-400">{game.away_team}</p>
-                  <p className="text-lg font-bold text-green-400">
-                    {moneyline.awayOdds}
-                  </p>
-                </div>
+              <div className="mt-3 grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
+                <BettingAnalysisCard
+                  team={game.away_team}
+                  odds={moneyline.awayOdds}
+                />
 
-                <div className="rounded-lg bg-slate-900 p-3">
-                  <p className="text-slate-400">{game.home_team}</p>
-                  <p className="text-lg font-bold text-green-400">
-                    {moneyline.homeOdds}
-                  </p>
-                </div>
+                <BettingAnalysisCard
+                  team={game.home_team}
+                  odds={moneyline.homeOdds}
+                />
 
-                <p className="col-span-2 text-xs text-slate-500">
+                <p className="md:col-span-2 text-xs text-slate-500">
                   Odds from {moneyline.sportsbook}
                 </p>
               </div>
