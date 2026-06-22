@@ -1,75 +1,66 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import AnalyticsPanel from '@/components/dashboard/AnalyticsPanel'
 import SportsList from '@/components/dashboard/SportsList'
-import UpcomingGames from '@/components/dashboard/UpcomingGames'
 import TeamStatsPanel from '@/components/dashboard/TeamStatsPanel'
+import UpcomingGames from '@/components/dashboard/UpcomingGames'
 
 export default function DashboardPage() {
-  const [email, setEmail] = useState<string | undefined>('')
-
-  useEffect(() => {
-    async function getUser() {
-      const { data } = await supabase.auth.getUser()
-
-      if (!data.user) {
-        window.location.href = '/login'
-        return
-      }
-
-      setEmail(data.user.email)
-    }
-
-    getUser()
-  }, [])
-
-  async function logout() {
-    await supabase.auth.signOut()
-    window.location.href = '/login'
-  }
-
   return (
-    <main className="min-h-screen bg-slate-950 p-4 text-white">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-sm text-slate-400">{email}</p>
-          </div>
-
-          <button
-            onClick={logout}
-            className="rounded-lg bg-slate-800 px-4 py-2 text-sm hover:bg-slate-700"
-          >
-            Logout
-          </button>
-        </div>
-
-        <div className="mb-4 rounded-2xl border border-slate-800 bg-slate-900 p-4">
-          <h2 className="mb-2 text-xl font-bold">Today&apos;s Best Pick</h2>
-          <p className="text-2xl font-bold text-green-400">Coming soon</p>
-          <p className="text-slate-400">
-            AI picks will appear here after predictions are connected.
+    <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold">Pick Analyzer Dashboard</h1>
+          <p className="mt-2 text-sm text-slate-400">
+            Sports data, prediction engine results, model performance and ROI
+            tracking.
           </p>
         </div>
 
-        <div className="mb-4 grid gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 lg:col-span-1">
-            <h2 className="mb-4 text-xl font-bold">Sports</h2>
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-xl font-bold text-white">Model Performance</h2>
+            <p className="text-sm text-slate-400">
+              Tracks recommended picks, win rate, profit and ROI.
+            </p>
+          </div>
+
+          <AnalyticsPanel />
+        </section>
+
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-xl font-bold text-white">Upcoming MLB Games</h2>
+            <p className="text-sm text-slate-400">
+              Live odds, implied probability, model probability, edge, EV and
+              recommended picks.
+            </p>
+          </div>
+
+          <UpcomingGames />
+        </section>
+
+        <section className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-xl font-bold text-white">Sports</h2>
+              <p className="text-sm text-slate-400">
+                Sports currently available in the platform.
+              </p>
+            </div>
+
             <SportsList />
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 lg:col-span-2">
-            <h2 className="mb-4 text-xl font-bold">Team Stats</h2>
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-xl font-bold text-white">Team Stats</h2>
+              <p className="text-sm text-slate-400">
+                Calculated from synced game results.
+              </p>
+            </div>
+
             <TeamStatsPanel />
           </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
-          <h2 className="mb-4 text-xl font-bold">Upcoming MLB Games</h2>
-          <UpcomingGames />
-        </div>
+        </section>
       </div>
     </main>
   )
