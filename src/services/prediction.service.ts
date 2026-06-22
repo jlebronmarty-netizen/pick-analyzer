@@ -1,9 +1,10 @@
 import { supabase } from '@/lib/supabase'
 import {
-  calculatePredictionV2,
+  calculatePredictionV3,
   PredictionResult,
+  TeamMatchupInput,
   TeamStatsInput,
-} from '@/utils/prediction-engine-v2'
+} from '@/utils/prediction-engine-v3'
 import { savePredictionHistory } from '@/services/prediction-history.service'
 
 type OddsOutcome = {
@@ -55,6 +56,15 @@ function normalizeTeamName(name: string): string {
   return name.trim().toLowerCase()
 }
 
+function normalizePairKey(sportKey: string, teamA: string, teamB: string) {
+  const [first, second] = [
+    normalizeTeamName(teamA),
+    normalizeTeamName(teamB),
+  ].sort()
+
+  return `${sportKey}:${first}:${second}`
+}
+
 function safeNumber(value: unknown, fallback = 0) {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
 }
@@ -80,11 +90,38 @@ async function getTeamStats(sportKey: string): Promise<TeamStatsInput[]> {
   return data ?? []
 }
 
+async function getTeamMatchups(sportKey: string): Promise<TeamMatchupInput[]> {
+  const { data, error } = await supabase
+    .from('team_matchups')
+    .select('*')
+    .eq('sport_key', sportKey)
+
+  if (error) {
+    console.error('Error loading team matchups:', error.message)
+    return []
+  }
+
+  return data ?? []
+}
+
 function buildStatsMap(stats: TeamStatsInput[]) {
   const map = new Map<string, TeamStatsInput>()
 
   for (const team of stats) {
     map.set(normalizeTeamName(team.team_name), team)
+  }
+
+  return map
+}
+
+function buildMatchupsMap(matchups: TeamMatchupInput[]) {
+  const map = new Map<string, TeamMatchupInput>()
+
+  for (const matchup of matchups) {
+    map.set(
+      normalizePairKey(matchup.sport_key, matchup.team_a, matchup.team_b),
+      matchup
+    )
   }
 
   return map
@@ -119,7 +156,6 @@ function getFallbackRating(stats?: TeamStatsInput | null): number {
   const ties = safeNumber(stats.ties, 0)
 
   const totalGames = wins + losses + ties
-
   const rawWinPercentage = safeNumber(stats.win_percentage, 0.5)
 
   const winPercentage =
@@ -133,15 +169,13 @@ function getFallbackRating(stats?: TeamStatsInput | null): number {
   const last10Losses = safeNumber(stats.last_10_losses, 0)
   const last10Total = last10Wins + last10Losses
 
-  const last10Percentage =
-    last10Total > 0 ? last10Wins / last10Total : 0.5
+  const last10Percentage = last10Total > 0 ? last10Wins / last10Total : 0.5
 
   const homeWins = safeNumber(stats.home_wins, 0)
   const homeLosses = safeNumber(stats.home_losses, 0)
   const homeTotal = homeWins + homeLosses
 
-  const homePercentage =
-    homeTotal > 0 ? homeWins / homeTotal : 0.5
+  const homePercentage = homeTotal > 0 ? homeWins / homeTotal : 0.5
 
   const streak = clamp(safeNumber(stats.streak, 0), -5, 5)
 
@@ -152,6 +186,73 @@ function getFallbackRating(stats?: TeamStatsInput | null): number {
     (50 + streak * 5) * 0.1
 
   return Number(clamp(rating, 1, 99).toFixed(2))
+}
+
+function getSplitPercentage(
+  stats: TeamStatsInput | null,
+  type: 'home' | 'away'
+): number {
+  if (!stats) return 0.5
+
+  const wins =
+    type === 'home'
+      ? safeNumber(stats.home_wins, 0)
+      : safeNumber(stats.away_wins, 0)
+
+  const losses =
+    type === 'home'
+      ? safeNumber(stats.home_losses, 0)
+      : safeNumber(stats.away_losses, 0)
+
+  const total = wins + losses
+
+  if (total <= 0) return 0.5
+
+  return wins / total
+}
+
+function calculateHomeAwayAdvantage(
+  teamStats: TeamStatsInput | null,
+  opponentStats: TeamStatsInput | null,
+  isHomeTeam: boolean
+): number {
+  const teamSplit = getSplitPercentage(teamStats, isHomeTeam ? 'home' : 'away')
+  const opponentSplit = getSplitPercentage(
+    opponentStats,
+    isHomeTeam ? 'away' : 'home'
+  )
+
+  const diff = teamSplit - opponentSplit
+
+  return Number(clamp(diff * 8, -4, 4).toFixed(2))
+}
+
+function calculateHeadToHeadAdvantage(
+  teamName: string,
+  matchup: TeamMatchupInput | null
+): number {
+  if (!matchup || !matchup.games_played || matchup.games_played <= 0) {
+    return 0
+  }
+
+  const normalizedTeam = normalizeTeamName(teamName)
+  const normalizedTeamA = normalizeTeamName(matchup.team_a)
+  const normalizedTeamB = normalizeTeamName(matchup.team_b)
+
+  let teamWins = 0
+
+  if (normalizedTeam === normalizedTeamA) {
+    teamWins = safeNumber(matchup.team_a_wins, 0)
+  } else if (normalizedTeam === normalizedTeamB) {
+    teamWins = safeNumber(matchup.team_b_wins, 0)
+  } else {
+    return 0
+  }
+
+  const winRate = teamWins / matchup.games_played
+  const diffFromNeutral = winRate - 0.5
+
+  return Number(clamp(diffFromNeutral * 6, -3, 3).toFixed(2))
 }
 
 function buildPredictionHistoryRows(
@@ -182,9 +283,7 @@ function buildPredictionHistoryRows(
 export async function generatePredictionsForGames(
   games: GameWithOdds[],
   sportKey: string,
-  options?: {
-    saveHistory?: boolean
-  }
+  options?: { saveHistory?: boolean }
 ): Promise<
   Array<
     GameWithOdds & {
@@ -193,8 +292,13 @@ export async function generatePredictionsForGames(
     }
   >
 > {
-  const stats = await getTeamStats(sportKey)
+  const [stats, matchups] = await Promise.all([
+    getTeamStats(sportKey),
+    getTeamMatchups(sportKey),
+  ])
+
   const statsMap = buildStatsMap(stats)
+  const matchupsMap = buildMatchupsMap(matchups)
 
   const allHistoryRows: PredictionHistoryRow[] = []
 
@@ -211,6 +315,11 @@ export async function generatePredictionsForGames(
 
     const homeStats = statsMap.get(normalizeTeamName(game.home_team)) ?? null
     const awayStats = statsMap.get(normalizeTeamName(game.away_team)) ?? null
+
+    const matchup =
+      matchupsMap.get(
+        normalizePairKey(game.sport_key, game.home_team, game.away_team)
+      ) ?? null
 
     const homeOutcome = outcomes.find(
       (outcome) =>
@@ -233,29 +342,45 @@ export async function generatePredictionsForGames(
     const homeRating = getFallbackRating(homeStats)
     const awayRating = getFallbackRating(awayStats)
 
-    const homePrediction = calculatePredictionV2({
-      teamName: game.home_team,
-      opponentName: game.away_team,
-      americanOdds: homeOutcome.price,
-      opponentAmericanOdds: awayOutcome.price,
-      teamRating: homeRating,
-      opponentRating: awayRating,
-      teamStats: homeStats,
-      opponentStats: awayStats,
-      isHomeTeam: true,
-    })
+    const homeAwayHome = calculateHomeAwayAdvantage(homeStats, awayStats, true)
+    const homeAwayAway = calculateHomeAwayAdvantage(awayStats, homeStats, false)
 
-    const awayPrediction = calculatePredictionV2({
-      teamName: game.away_team,
-      opponentName: game.home_team,
-      americanOdds: awayOutcome.price,
-      opponentAmericanOdds: homeOutcome.price,
-      teamRating: awayRating,
-      opponentRating: homeRating,
-      teamStats: awayStats,
-      opponentStats: homeStats,
-      isHomeTeam: false,
-    })
+    const h2hHome = calculateHeadToHeadAdvantage(game.home_team, matchup)
+    const h2hAway = calculateHeadToHeadAdvantage(game.away_team, matchup)
+
+    const homePrediction = calculatePredictionV3(
+      {
+        teamName: game.home_team,
+        opponentName: game.away_team,
+        americanOdds: homeOutcome.price,
+        opponentAmericanOdds: awayOutcome.price,
+        teamRating: homeRating,
+        opponentRating: awayRating,
+        teamStats: homeStats,
+        opponentStats: awayStats,
+      },
+      {
+        homeAwayAdvantage: homeAwayHome,
+        headToHeadAdvantage: h2hHome,
+      }
+    )
+
+    const awayPrediction = calculatePredictionV3(
+      {
+        teamName: game.away_team,
+        opponentName: game.home_team,
+        americanOdds: awayOutcome.price,
+        opponentAmericanOdds: homeOutcome.price,
+        teamRating: awayRating,
+        opponentRating: homeRating,
+        teamStats: awayStats,
+        opponentStats: homeStats,
+      },
+      {
+        homeAwayAdvantage: homeAwayAway,
+        headToHeadAdvantage: h2hAway,
+      }
+    )
 
     const predictions = [homePrediction, awayPrediction]
 
