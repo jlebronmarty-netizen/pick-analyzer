@@ -3,17 +3,22 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 type PredictionRow = {
   sport_key: string
   team: string
-  result: string
+  status: string | null
+  result: string | null
   stake: number | null
   profit: number | null
   recommended_pick: boolean | null
 }
 
+function getRowResult(row: PredictionRow) {
+  return row.status ?? row.result ?? 'pending'
+}
+
 function calculateSummary(rows: PredictionRow[]) {
-  const settled = rows.filter((row) => row.result !== 'pending')
-  const wins = settled.filter((row) => row.result === 'win').length
-  const losses = settled.filter((row) => row.result === 'loss').length
-  const pushes = settled.filter((row) => row.result === 'push').length
+  const settled = rows.filter((row) => getRowResult(row) !== 'pending')
+  const wins = settled.filter((row) => getRowResult(row) === 'win').length
+  const losses = settled.filter((row) => getRowResult(row) === 'loss').length
+  const pushes = settled.filter((row) => getRowResult(row) === 'push').length
 
   const totalProfit = settled.reduce(
     (sum, row) => sum + Number(row.profit ?? 0),
@@ -42,7 +47,7 @@ function calculateSummary(rows: PredictionRow[]) {
   }
 }
 
-function groupBy<T>(
+function groupBy(
   rows: PredictionRow[],
   getKey: (row: PredictionRow) => string
 ) {
@@ -67,8 +72,7 @@ function groupBy<T>(
 export async function getAnalyticsDashboard() {
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
-    .select('sport_key, team, result, stake, profit, recommended_pick')
-    .eq('recommended_pick', true)
+    .select('sport_key, team, status, result, stake, profit, recommended_pick')
 
   if (error) {
     throw new Error(error.message)
