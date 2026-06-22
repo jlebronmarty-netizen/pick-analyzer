@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase'
-import { calculateTeamRating } from '@/utils/team-rating'
 import {
   calculatePredictionV2,
   PredictionResult,
@@ -33,8 +32,35 @@ type GameWithOdds = {
   bookmakers?: OddsBookmaker[]
 }
 
+type PredictionHistoryRow = {
+  sport_key: string
+  game_id: string
+  commence_time: string
+  home_team: string
+  away_team: string
+  team: string
+  opponent: string
+  market: string
+  sportsbook: string
+  odds: number
+  implied_probability: number
+  model_probability: number
+  edge: number
+  ev: number
+  confidence: number
+  recommended_pick: boolean
+}
+
 function normalizeTeamName(name: string): string {
   return name.trim().toLowerCase()
+}
+
+function safeNumber(value: unknown, fallback = 0) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
 }
 
 async function getTeamStats(sportKey: string): Promise<TeamStatsInput[]> {
@@ -88,24 +114,51 @@ function getMoneylineOutcomes(game: GameWithOdds): {
 function getFallbackRating(stats?: TeamStatsInput | null): number {
   if (!stats) return 50
 
-  return calculateTeamRating({
-    wins: stats.wins ?? 0,
-    losses: stats.losses ?? 0,
-    ties: stats.ties ?? 0,
-    home_wins: stats.home_wins ?? 0,
-    home_losses: stats.home_losses ?? 0,
-    away_wins: stats.away_wins ?? 0,
-    away_losses: stats.away_losses ?? 0,
-    last_5_wins: stats.last_5_wins ?? 0,
-    last_5_losses: stats.last_5_losses ?? 0,
-    last_10_wins: stats.last_10_wins ?? 0,
-    last_10_losses: stats.last_10_losses ?? 0,
-    streak: stats.streak ?? 0,
-    win_percentage: stats.win_percentage ?? 0,
-  })
+  const wins = safeNumber(stats.wins, 0)
+  const losses = safeNumber(stats.losses, 0)
+  const ties = safeNumber(stats.ties, 0)
+
+  const totalGames = wins + losses + ties
+
+  const rawWinPercentage = safeNumber(stats.win_percentage, 0.5)
+
+  const winPercentage =
+    totalGames > 0
+      ? wins / totalGames
+      : rawWinPercentage > 1
+        ? rawWinPercentage / 100
+        : rawWinPercentage
+
+  const last10Wins = safeNumber(stats.last_10_wins, 0)
+  const last10Losses = safeNumber(stats.last_10_losses, 0)
+  const last10Total = last10Wins + last10Losses
+
+  const last10Percentage =
+    last10Total > 0 ? last10Wins / last10Total : 0.5
+
+  const homeWins = safeNumber(stats.home_wins, 0)
+  const homeLosses = safeNumber(stats.home_losses, 0)
+  const homeTotal = homeWins + homeLosses
+
+  const homePercentage =
+    homeTotal > 0 ? homeWins / homeTotal : 0.5
+
+  const streak = clamp(safeNumber(stats.streak, 0), -5, 5)
+
+  const rating =
+    winPercentage * 45 +
+    last10Percentage * 30 +
+    homePercentage * 15 +
+    (50 + streak * 5) * 0.1
+
+  return Number(clamp(rating, 1, 99).toFixed(2))
 }
 
-function buildPredictionHistoryRows(game: GameWithOdds, sportsbook: string, predictions: PredictionResult[]) {
+function buildPredictionHistoryRows(
+  game: GameWithOdds,
+  sportsbook: string,
+  predictions: PredictionResult[]
+): PredictionHistoryRow[] {
   return predictions.map((prediction) => ({
     sport_key: game.sport_key,
     game_id: game.id,
@@ -143,7 +196,7 @@ export async function generatePredictionsForGames(
   const stats = await getTeamStats(sportKey)
   const statsMap = buildStatsMap(stats)
 
-  const allHistoryRows = []
+  const allHistoryRows: PredictionHistoryRow[] = []
 
   const gamesWithPredictions = games.map((game) => {
     const { sportsbook, outcomes } = getMoneylineOutcomes(game)
