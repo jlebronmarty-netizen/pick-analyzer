@@ -1,3 +1,4 @@
+import AnalyticsChartsPanel from '@/components/dashboard/AnalyticsChartsPanel'
 import AnalyticsPanel from '@/components/dashboard/AnalyticsPanel'
 import SportsList from '@/components/dashboard/SportsList'
 import TeamStatsPanel from '@/components/dashboard/TeamStatsPanel'
@@ -24,6 +25,20 @@ export default function DashboardPage() {
           </div>
 
           <AnalyticsPanel />
+        </section>
+
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-xl font-bold text-white">
+              Advanced Analytics
+            </h2>
+            <p className="text-sm text-slate-400">
+              Profit curve, daily performance, sport performance and team ROI
+              rankings.
+            </p>
+          </div>
+
+          <AnalyticsChartsPanel />
         </section>
 
         <section className="space-y-3">

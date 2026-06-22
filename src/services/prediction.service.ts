@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { getAdvancedPredictionFactors } from '@/services/advanced-factors.service'
 import {
   calculatePredictionV3,
   PredictionResult,
@@ -302,105 +303,133 @@ export async function generatePredictionsForGames(
 
   const allHistoryRows: PredictionHistoryRow[] = []
 
-  const gamesWithPredictions = games.map((game) => {
-    const { sportsbook, outcomes } = getMoneylineOutcomes(game)
+  const gamesWithPredictions = await Promise.all(
+    games.map(async (game) => {
+      const { sportsbook, outcomes } = getMoneylineOutcomes(game)
 
-    if (outcomes.length < 2) {
-      return {
-        ...game,
-        predictions: [],
-        recommendedPick: null,
+      if (outcomes.length < 2) {
+        return {
+          ...game,
+          predictions: [],
+          recommendedPick: null,
+        }
       }
-    }
 
-    const homeStats = statsMap.get(normalizeTeamName(game.home_team)) ?? null
-    const awayStats = statsMap.get(normalizeTeamName(game.away_team)) ?? null
+      const homeStats = statsMap.get(normalizeTeamName(game.home_team)) ?? null
+      const awayStats = statsMap.get(normalizeTeamName(game.away_team)) ?? null
 
-    const matchup =
-      matchupsMap.get(
-        normalizePairKey(game.sport_key, game.home_team, game.away_team)
-      ) ?? null
+      const matchup =
+        matchupsMap.get(
+          normalizePairKey(game.sport_key, game.home_team, game.away_team)
+        ) ?? null
 
-    const homeOutcome = outcomes.find(
-      (outcome) =>
-        normalizeTeamName(outcome.name) === normalizeTeamName(game.home_team)
-    )
-
-    const awayOutcome = outcomes.find(
-      (outcome) =>
-        normalizeTeamName(outcome.name) === normalizeTeamName(game.away_team)
-    )
-
-    if (!homeOutcome || !awayOutcome) {
-      return {
-        ...game,
-        predictions: [],
-        recommendedPick: null,
-      }
-    }
-
-    const homeRating = getFallbackRating(homeStats)
-    const awayRating = getFallbackRating(awayStats)
-
-    const homeAwayHome = calculateHomeAwayAdvantage(homeStats, awayStats, true)
-    const homeAwayAway = calculateHomeAwayAdvantage(awayStats, homeStats, false)
-
-    const h2hHome = calculateHeadToHeadAdvantage(game.home_team, matchup)
-    const h2hAway = calculateHeadToHeadAdvantage(game.away_team, matchup)
-
-    const homePrediction = calculatePredictionV3(
-      {
-        teamName: game.home_team,
-        opponentName: game.away_team,
-        americanOdds: homeOutcome.price,
-        opponentAmericanOdds: awayOutcome.price,
-        teamRating: homeRating,
-        opponentRating: awayRating,
-        teamStats: homeStats,
-        opponentStats: awayStats,
-      },
-      {
-        homeAwayAdvantage: homeAwayHome,
-        headToHeadAdvantage: h2hHome,
-      }
-    )
-
-    const awayPrediction = calculatePredictionV3(
-      {
-        teamName: game.away_team,
-        opponentName: game.home_team,
-        americanOdds: awayOutcome.price,
-        opponentAmericanOdds: homeOutcome.price,
-        teamRating: awayRating,
-        opponentRating: homeRating,
-        teamStats: awayStats,
-        opponentStats: homeStats,
-      },
-      {
-        homeAwayAdvantage: homeAwayAway,
-        headToHeadAdvantage: h2hAway,
-      }
-    )
-
-    const predictions = [homePrediction, awayPrediction]
-
-    const recommendedPick =
-      predictions
-        .filter((prediction) => prediction.recommendedPick)
-        .sort((a, b) => b.ev - a.ev || b.confidence - a.confidence)[0] ?? null
-
-    if (options?.saveHistory) {
-      allHistoryRows.push(
-        ...buildPredictionHistoryRows(game, sportsbook, predictions)
+      const homeOutcome = outcomes.find(
+        (outcome) =>
+          normalizeTeamName(outcome.name) === normalizeTeamName(game.home_team)
       )
-    }
 
-    return {
-      ...game,
-      predictions,
-      recommendedPick,
-    }
-  })
+      const awayOutcome = outcomes.find(
+        (outcome) =>
+          normalizeTeamName(outcome.name) === normalizeTeamName(game.away_team)
+      )
+
+      if (!homeOutcome || !awayOutcome) {
+        return {
+          ...game,
+          predictions: [],
+          recommendedPick: null,
+        }
+      }
+
+      const homeRating = getFallbackRating(homeStats)
+      const awayRating = getFallbackRating(awayStats)
+
+      const homeAwayHome = calculateHomeAwayAdvantage(homeStats, awayStats, true)
+      const homeAwayAway = calculateHomeAwayAdvantage(
+        awayStats,
+        homeStats,
+        false
+      )
+
+      const h2hHome = calculateHeadToHeadAdvantage(game.home_team, matchup)
+      const h2hAway = calculateHeadToHeadAdvantage(game.away_team, matchup)
+
+      const [homeAdvancedFactors, awayAdvancedFactors] = await Promise.all([
+        getAdvancedPredictionFactors({
+          sportKey: game.sport_key,
+          gameId: game.id,
+          teamName: game.home_team,
+          opponentName: game.away_team,
+        }),
+        getAdvancedPredictionFactors({
+          sportKey: game.sport_key,
+          gameId: game.id,
+          teamName: game.away_team,
+          opponentName: game.home_team,
+        }),
+      ])
+
+      const homePrediction = calculatePredictionV3(
+        {
+          teamName: game.home_team,
+          opponentName: game.away_team,
+          americanOdds: homeOutcome.price,
+          opponentAmericanOdds: awayOutcome.price,
+          teamRating: homeRating,
+          opponentRating: awayRating,
+          teamStats: homeStats,
+          opponentStats: awayStats,
+        },
+        {
+          homeAwayAdvantage: homeAwayHome,
+          headToHeadAdvantage: h2hHome,
+          pitcherAdvantage: homeAdvancedFactors.pitcherAdvantage,
+          injuryImpact: homeAdvancedFactors.injuryImpact,
+          weatherImpact: homeAdvancedFactors.weatherImpact,
+        }
+      )
+
+      const awayPrediction = calculatePredictionV3(
+        {
+          teamName: game.away_team,
+          opponentName: game.home_team,
+          americanOdds: awayOutcome.price,
+          opponentAmericanOdds: homeOutcome.price,
+          teamRating: awayRating,
+          opponentRating: homeRating,
+          teamStats: awayStats,
+          opponentStats: homeStats,
+        },
+        {
+          homeAwayAdvantage: homeAwayAway,
+          headToHeadAdvantage: h2hAway,
+          pitcherAdvantage: awayAdvancedFactors.pitcherAdvantage,
+          injuryImpact: awayAdvancedFactors.injuryImpact,
+          weatherImpact: awayAdvancedFactors.weatherImpact,
+        }
+      )
+
+      const predictions = [homePrediction, awayPrediction]
+
+      const recommendedPick =
+        predictions
+          .filter((prediction) => prediction.recommendedPick)
+          .sort((a, b) => b.ev - a.ev || b.confidence - a.confidence)[0] ??
+        null
+
+      if (options?.saveHistory) {
+        allHistoryRows.push(
+          ...buildPredictionHistoryRows(game, sportsbook, predictions)
+        )
+      }
+
+      return {
+        ...game,
+        predictions,
+        recommendedPick,
+      }
+    })
+  )
 
   if (options?.saveHistory && allHistoryRows.length > 0) {
     try {
