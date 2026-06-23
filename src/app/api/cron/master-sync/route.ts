@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server'
-import {
-  capturePredictionsForAllSports,
-  capturePredictionsForSport,
-} from '@/services/prediction-capture.service'
+import { runMasterSync } from '@/services/master-sync.service'
 
 function isAuthorized(request: Request) {
   const cronSecret = process.env.CRON_SECRET
@@ -10,8 +7,8 @@ function isAuthorized(request: Request) {
   if (!cronSecret) return true
 
   const authHeader = request.headers.get('authorization')
-  const { searchParams } = new URL(request.url)
-  const secret = searchParams.get('secret')
+  const url = new URL(request.url)
+  const secret = url.searchParams.get('secret')
 
   return authHeader === `Bearer ${cronSecret}` || secret === cronSecret
 }
@@ -28,22 +25,21 @@ export async function GET(request: Request) {
       )
     }
 
-    const { searchParams } = new URL(request.url)
-    const sport = searchParams.get('sport')
+    const result = await runMasterSync()
 
-    const result = sport
-      ? await capturePredictionsForSport(sport)
-      : await capturePredictionsForAllSports()
-
-    return NextResponse.json(result)
+    return NextResponse.json({
+      success: result.success,
+      message: 'Master sync completed',
+      result,
+    })
   } catch (error) {
-    console.error('Capture predictions cron error:', error)
+    console.error('Master sync failed:', error)
 
     return NextResponse.json(
       {
         success: false,
         error:
-          error instanceof Error ? error.message : 'Unexpected server error',
+          error instanceof Error ? error.message : 'Unknown master sync error',
       },
       { status: 500 }
     )

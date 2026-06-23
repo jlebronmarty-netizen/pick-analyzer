@@ -1,5 +1,6 @@
 import AnalyticsChartsPanel from '@/components/dashboard/AnalyticsChartsPanel'
 import AnalyticsPanel from '@/components/dashboard/AnalyticsPanel'
+import DashboardProPanel from '@/components/dashboard/DashboardProPanel'
 import SportsList from '@/components/dashboard/SportsList'
 import TeamStatsPanel from '@/components/dashboard/TeamStatsPanel'
 import UpcomingGames from '@/components/dashboard/UpcomingGames'
@@ -11,10 +12,21 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold">Pick Analyzer Dashboard</h1>
           <p className="mt-2 text-sm text-slate-400">
-            Sports data, prediction engine results, model performance and ROI
-            tracking.
+            Best bets, model performance, ROI tracking and automated sports
+            analytics.
           </p>
         </div>
+
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-xl font-bold text-white">Dashboard Pro</h2>
+            <p className="text-sm text-slate-400">
+              Best bets, top EV picks, top confidence picks and model summary.
+            </p>
+          </div>
+
+          <DashboardProPanel />
+        </section>
 
         <section className="space-y-3">
           <div>

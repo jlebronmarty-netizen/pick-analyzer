@@ -1,23 +1,28 @@
 import { NextResponse } from 'next/server'
 import { recalculateTeamStatsFromResults } from '@/services/team-stats-calculator.service'
 
+function isAuthorized(request: Request) {
+  const cronSecret = process.env.CRON_SECRET
+
+  if (!cronSecret) return true
+
+  const authHeader = request.headers.get('authorization')
+  const { searchParams } = new URL(request.url)
+  const secret = searchParams.get('secret')
+
+  return authHeader === `Bearer ${cronSecret}` || secret === cronSecret
+}
+
 export async function POST(request: Request) {
   try {
-    const cronSecret = process.env.CRON_SECRET
-    const authHeader = request.headers.get('authorization')
-
-    if (cronSecret) {
-      const expectedHeader = `Bearer ${cronSecret}`
-
-      if (authHeader !== expectedHeader) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Unauthorized',
-          },
-          { status: 401 }
-        )
-      }
+    if (!isAuthorized(request)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Unauthorized',
+        },
+        { status: 401 }
+      )
     }
 
     const { searchParams } = new URL(request.url)
@@ -33,11 +38,13 @@ export async function POST(request: Request) {
       {
         success: false,
         error:
-          error instanceof Error
-            ? error.message
-            : 'Unexpected server error',
+          error instanceof Error ? error.message : 'Unexpected server error',
       },
       { status: 500 }
     )
   }
+}
+
+export async function GET(request: Request) {
+  return POST(request)
 }
