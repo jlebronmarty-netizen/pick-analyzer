@@ -1,11 +1,11 @@
 import { supabase } from '@/lib/supabase'
 import { getAdvancedPredictionFactors } from '@/services/advanced-factors.service'
 import {
-  calculatePredictionV3,
+  calculatePredictionV4,
   PredictionResult,
   TeamMatchupInput,
   TeamStatsInput,
-} from '@/utils/prediction-engine-v3'
+} from '@/utils/prediction-engine-v4'
 import { savePredictionHistory } from '@/services/prediction-history.service'
 
 type OddsOutcome = {
@@ -369,7 +369,7 @@ export async function generatePredictionsForGames(
         }),
       ])
 
-      const homePrediction = calculatePredictionV3(
+      const homePrediction = calculatePredictionV4(
         {
           teamName: game.home_team,
           opponentName: game.away_team,
@@ -389,7 +389,7 @@ export async function generatePredictionsForGames(
         }
       )
 
-      const awayPrediction = calculatePredictionV3(
+      const awayPrediction = calculatePredictionV4(
         {
           teamName: game.away_team,
           opponentName: game.home_team,
