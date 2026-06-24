@@ -1,19 +1,17 @@
 import { NextResponse } from 'next/server'
+import { normalizeBankroll } from '@/services/bankroll.service'
 import { buildHedges } from '@/services/hedge-builder.service'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const result =
-      await buildHedges()
+    const { searchParams } = new URL(request.url)
+    const bankroll = normalizeBankroll(searchParams.get('bankroll'))
 
-    return NextResponse.json(
-      result
-    )
+    const result = await buildHedges(bankroll)
+
+    return NextResponse.json(result)
   } catch (error) {
-    console.error(
-      'Hedge builder error:',
-      error
-    )
+    console.error('Hedge builder error:', error)
 
     return NextResponse.json(
       {
@@ -23,9 +21,7 @@ export async function GET() {
             ? error.message
             : 'Unknown hedge error',
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     )
   }
 }
