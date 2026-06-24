@@ -21,6 +21,7 @@ type PipelineStep = {
   path: string
   method: StepMethod
   includeSecret?: boolean
+  timeoutMs?: number
 }
 
 function getBaseUrl() {
@@ -53,8 +54,12 @@ async function runStep(
   step: string,
   path: string,
   method: StepMethod = 'GET',
-  includeSecret = false
+  includeSecret = false,
+  timeoutMs = 20000
 ): Promise<StepResult> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+
   try {
     const baseUrl = getBaseUrl()
     const finalPath = includeSecret ? withSecret(path) : path
@@ -62,6 +67,7 @@ async function runStep(
     const response = await fetch(`${baseUrl}${finalPath}`, {
       method,
       cache: 'no-store',
+      signal: controller.signal,
     })
 
     const text = await response.text()
@@ -86,8 +92,15 @@ async function runStep(
       step,
       success: false,
       method,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error:
+        error instanceof Error && error.name === 'AbortError'
+          ? `Step timed out after ${timeoutMs / 1000}s`
+          : error instanceof Error
+            ? error.message
+            : 'Unknown error',
     }
+  } finally {
+    clearTimeout(timeout)
   }
 }
 
@@ -102,55 +115,65 @@ export async function runMasterSync(): Promise<MasterSyncResult> {
       path: '/api/results/sync',
       method: 'POST',
       includeSecret: true,
+      timeoutMs: 15000,
     },
     {
       step: 'Backfill Results',
       path: '/api/results/backfill',
       method: 'POST',
       includeSecret: true,
-    },    
+      timeoutMs: 25000,
+    },
     {
       step: 'Recalculate Team Stats',
       path: '/api/team-stats/recalculate',
       method: 'POST',
       includeSecret: true,
+      timeoutMs: 20000,
     },
     {
       step: 'Recalculate Head To Head',
       path: '/api/head-to-head/recalculate',
       method: 'POST',
       includeSecret: true,
+      timeoutMs: 20000,
     },
     {
-      step: 'Capture Predictions',
-      path: '/api/cron/capture-predictions',
+      step: 'Capture MLB Predictions',
+      path: '/api/cron/capture-predictions?sport=baseball_mlb',
       method: 'GET',
       includeSecret: true,
+      timeoutMs: 30000,
     },
     {
       step: 'BSN Sync Results',
       path: '/api/bsn/sync',
       method: 'GET',
+      timeoutMs: 15000,
     },
     {
       step: 'BSN Generate Predictions',
       path: '/api/bsn/predictions',
       method: 'GET',
+      timeoutMs: 15000,
     },
     {
       step: 'Settle Predictions',
       path: '/api/predictions/settle',
       method: 'GET',
+      timeoutMs: 25000,
     },
     {
       step: 'Refresh Analytics',
       path: '/api/analytics/dashboard',
       method: 'GET',
+      timeoutMs: 15000,
     },
     {
       step: 'Refresh Top Picks',
       path: '/api/predictions/top',
       method: 'GET',
+      timeoutMs: 15000,
     },
   ]
 
@@ -159,7 +182,8 @@ export async function runMasterSync(): Promise<MasterSyncResult> {
       item.step,
       item.path,
       item.method,
-      item.includeSecret ?? false
+      item.includeSecret ?? false,
+      item.timeoutMs ?? 20000
     )
 
     steps.push(result)

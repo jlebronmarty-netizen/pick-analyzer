@@ -1,6 +1,7 @@
 import AnalyticsChartsPanel from '@/components/dashboard/AnalyticsChartsPanel'
 import AnalyticsPanel from '@/components/dashboard/AnalyticsPanel'
 import DashboardProPanel from '@/components/dashboard/DashboardProPanel'
+import PlayOfTheDayPanel from '@/components/dashboard/PlayOfTheDayPanel'
 import SportsList from '@/components/dashboard/SportsList'
 import TeamStatsPanel from '@/components/dashboard/TeamStatsPanel'
 import UpcomingGames from '@/components/dashboard/UpcomingGames'
@@ -16,6 +17,10 @@ export default function DashboardPage() {
             analytics.
           </p>
         </div>
+
+        <section className="space-y-3">
+          <PlayOfTheDayPanel />
+        </section>
 
         <section className="space-y-3">
           <div>

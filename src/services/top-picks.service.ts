@@ -1,4 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getRiskGrade } from '@/services/risk-grade.service'
+import { calculateQuarterKellyStake } from '@/services/kelly.service'
+import { calculateSmartScore } from '@/services/smart-ranking.service'
 
 type PredictionRow = {
   id: string
@@ -21,38 +24,60 @@ type PredictionRow = {
   status: string | null
   result: string | null
   created_at?: string | null
+  risk_grade?: string
+  risk_stars?: number
+  risk_label?: string
+  kelly_percent?: number
+  recommended_stake?: number
+  smart_score?: number
 }
 
 function getStatus(row: PredictionRow) {
   return row.status ?? row.result ?? 'pending'
 }
 
+function normalizeName(value: string) {
+  return value.trim().toLowerCase()
+}
+
+function getGameDate(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value.slice(0, 10)
+  return date.toISOString().slice(0, 10)
+}
+
 function isTodayOrFuture(value: string) {
   const now = new Date()
   const gameDate = new Date(value)
-
   if (Number.isNaN(gameDate.getTime())) return false
-
   const startOfToday = new Date(now)
   startOfToday.setHours(0, 0, 0, 0)
-
   return gameDate >= startOfToday
 }
 
-function dedupeByGameAndTeam(rows: PredictionRow[]) {
-  const seen = new Set<string>()
-  const output: PredictionRow[] = []
+function getCreatedTime(row: PredictionRow) {
+  const createdAt = row.created_at ? new Date(row.created_at).getTime() : 0
+  return Number.isFinite(createdAt) ? createdAt : 0
+}
+
+function getMatchupKey(row: PredictionRow) {
+  const teams = [normalizeName(row.team), normalizeName(row.opponent)].sort()
+  return `${row.sport_key}:${getGameDate(row.commence_time)}:${teams.join(':')}`
+}
+
+function dedupeByLatestMatchup(rows: PredictionRow[]) {
+  const map = new Map<string, PredictionRow>()
 
   for (const row of rows) {
-    const key = `${row.game_id}:${row.team}`
+    const key = getMatchupKey(row)
+    const existing = map.get(key)
 
-    if (seen.has(key)) continue
-
-    seen.add(key)
-    output.push(row)
+    if (!existing || getCreatedTime(row) > getCreatedTime(existing)) {
+      map.set(key, row)
+    }
   }
 
-  return output
+  return [...map.values()]
 }
 
 function passesSafetyFilter(row: PredictionRow) {
@@ -62,7 +87,6 @@ function passesSafetyFilter(row: PredictionRow) {
   if (row.odds >= 1000) return row.model_probability <= 15
   if (row.odds >= 700) return row.model_probability <= 20
   if (row.odds >= 500) return row.model_probability <= 25
-
   return true
 }
 
@@ -77,8 +101,47 @@ function passesBestBetFilter(row: PredictionRow) {
   )
 }
 
-function sortByBestBet(a: PredictionRow, b: PredictionRow) {
-  return b.confidence - a.confidence || b.ev - a.ev || b.edge - a.edge
+function sortBySmartScore(a: PredictionRow, b: PredictionRow) {
+  return (
+    (b.smart_score ?? 0) - (a.smart_score ?? 0) ||
+    b.confidence - a.confidence ||
+    b.ev - a.ev ||
+    b.edge - a.edge
+  )
+}
+
+function capStake(stake: number, maxStake = 50) {
+  return Number(Math.min(stake, maxStake).toFixed(2))
+}
+
+function enrichRow(row: PredictionRow): PredictionRow {
+  const risk = getRiskGrade(row.confidence, row.ev, row.edge)
+
+  const kelly = calculateQuarterKellyStake(
+    1000,
+    row.model_probability,
+    row.odds
+  )
+
+  const cappedStake = capStake(kelly.stake)
+
+  const smartScore = calculateSmartScore({
+    confidence: row.confidence,
+    ev: row.ev,
+    edge: row.edge,
+    risk_stars: risk.stars,
+    kelly_percent: kelly.kellyPercent,
+  })
+
+  return {
+    ...row,
+    risk_grade: risk.grade,
+    risk_stars: risk.stars,
+    risk_label: risk.label,
+    kelly_percent: kelly.kellyPercent,
+    recommended_stake: cappedStake,
+    smart_score: smartScore,
+  }
 }
 
 export async function getTopPicks() {
@@ -88,7 +151,7 @@ export async function getTopPicks() {
       'id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, recommended_pick, status, result, created_at'
     )
     .or('status.is.null,status.eq.pending')
-    .order('commence_time', { ascending: true })
+    .order('created_at', { ascending: false })
     .limit(1000)
 
   if (error) {
@@ -99,25 +162,26 @@ export async function getTopPicks() {
     (row) => getStatus(row) === 'pending' && isTodayOrFuture(row.commence_time)
   )
 
-  const rows = dedupeByGameAndTeam(pendingRows)
+  const rows = dedupeByLatestMatchup(pendingRows)
   const safeRows = rows.filter(passesSafetyFilter)
+  const enrichedRows = safeRows.map(enrichRow)
 
-  const topEv = [...safeRows]
+  const topEv = [...enrichedRows]
     .filter((row) => row.ev >= 3 && row.edge >= 4 && row.odds < 500)
-    .sort((a, b) => b.ev - a.ev)
+    .sort(sortBySmartScore)
     .slice(0, 10)
 
-  const topConfidence = [...safeRows]
+  const topConfidence = [...enrichedRows]
     .filter((row) => row.confidence >= 60 && row.edge >= 2 && row.odds < 300)
-    .sort((a, b) => b.confidence - a.confidence)
+    .sort(sortBySmartScore)
     .slice(0, 10)
 
-  const bestBets = [...safeRows]
+  const bestBets = [...enrichedRows]
     .filter(passesBestBetFilter)
-    .sort(sortByBestBet)
+    .sort(sortBySmartScore)
     .slice(0, 10)
 
-  const recommended = safeRows.filter(
+  const recommended = enrichedRows.filter(
     (row) => row.recommended_pick === true && row.odds < 500
   )
 
