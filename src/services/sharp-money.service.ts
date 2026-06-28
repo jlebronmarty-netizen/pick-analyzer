@@ -24,7 +24,11 @@ export function getSharpMoneySignal({
   marketMovementScore: number
   valueGap: number
 }): SharpMoneyResult {
-  if (sharpConfidence >= 80 && staleLine && valueGap >= 3) {
+  if (
+    sharpConfidence >= 80 &&
+    staleLine &&
+    valueGap >= 3
+  ) {
     return {
       sharpSignal: true,
       sharpLabel: 'SHARP_VALUE',
@@ -33,7 +37,10 @@ export function getSharpMoneySignal({
     }
   }
 
-  if (steamMove && marketMovementScore >= 70) {
+  if (
+    steamMove &&
+    marketMovementScore >= 70
+  ) {
     return {
       sharpSignal: true,
       sharpLabel: 'POSSIBLE_STEAM',
@@ -42,7 +49,10 @@ export function getSharpMoneySignal({
     }
   }
 
-  if (staleLine) {
+  if (
+    staleLine &&
+    valueGap >= 3
+  ) {
     return {
       sharpSignal: true,
       sharpLabel: 'STALE_BOOK',

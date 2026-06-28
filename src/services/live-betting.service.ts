@@ -1,4 +1,6 @@
+import { buildBettingExplanation } from '@/services/betting-explanation.service'
 import { calculateQuarterKellyStake } from '@/services/kelly.service'
+import { getMarketIntelligence } from '@/services/market-intelligence.service'
 import { analyzeMarketMovement } from '@/services/market-movement.service'
 import { getRiskGrade } from '@/services/risk-grade.service'
 import { getSharpMoneySignal } from '@/services/sharp-money.service'
@@ -332,6 +334,45 @@ function groupOpportunities(opportunities: FlatOpportunity[]) {
       valueGap: marketMovement.valueGap,
     })
 
+    const intelligence = getMarketIntelligence({
+      alertType: best.alertType,
+      sharpSignal: sharpMoney.sharpSignal,
+      sharpConfidence: marketMovement.sharpConfidence,
+      marketMovementScore: marketMovement.marketMovementScore,
+      valueGap: marketMovement.valueGap,
+      staleLine: marketMovement.staleLine,
+      steamMove: marketMovement.steamMove,
+      reverseLineMovement: marketMovement.reverseLineMovement,
+      lineValue,
+      marketPressure: marketMovement.marketPressure,
+    })
+
+    const bettingExplanation = buildBettingExplanation({
+      team: best.team,
+      opponent: best.opponent,
+      formattedBestOdds: formatOdds(bestOdds),
+      bestSportsbook: best.sportsbook,
+      formattedConsensusOdds: formatOdds(consensusOdds),
+      modelProbability: best.modelProbability,
+      impliedProbability: best.impliedProbability,
+      edge: best.edge,
+      ev: best.ev,
+      confidence: best.confidence,
+      riskGrade: best.riskGrade,
+      riskLabel: best.riskLabel,
+      smartScore: best.smartScore,
+      lineValue,
+      valueGap: marketMovement.valueGap,
+      sharpSignal: sharpMoney.sharpSignal,
+      sharpLabel: sharpMoney.sharpLabel,
+      bettingUrgency: intelligence.bettingUrgency,
+      urgencyScore: intelligence.urgencyScore,
+      valueWindow: intelligence.valueWindow,
+      closingLineProjection: intelligence.closingLineProjection,
+      intelligenceSummary: intelligence.intelligenceSummary,
+      recommendedStake: best.recommendedStake,
+    })
+
     return {
       ...best,
       bestOdds,
@@ -343,10 +384,14 @@ function groupOpportunities(opportunities: FlatOpportunity[]) {
       formattedWorstOdds: formatOdds(worstOdds),
       lineValue,
       booksCompared: group.length,
-      marketSpread: round((getDecimalOdds(bestOdds) - getDecimalOdds(worstOdds)) * 100),
+      marketSpread: round(
+        (getDecimalOdds(bestOdds) - getDecimalOdds(worstOdds)) * 100
+      ),
       books,
       ...marketMovement,
       ...sharpMoney,
+      ...intelligence,
+      ...bettingExplanation,
     }
   })
 }
@@ -386,7 +431,10 @@ export async function getLiveBettingOpportunities({
   const opportunities = groupOpportunities(qualifiedFlat)
     .sort(
       (a, b) =>
+        Number(b.bettingUrgency === 'BET_NOW') -
+          Number(a.bettingUrgency === 'BET_NOW') ||
         Number(b.sharpSignal) - Number(a.sharpSignal) ||
+        b.urgencyScore - a.urgencyScore ||
         b.sharpConfidence - a.sharpConfidence ||
         b.marketMovementScore - a.marketMovementScore ||
         b.smartScore - a.smartScore ||
@@ -415,6 +463,12 @@ export async function getLiveBettingOpportunities({
       steamMoveCount: opportunities.filter((item) => item.steamMove).length,
       staleLineCount: opportunities.filter((item) => item.staleLine).length,
       sharpSignalCount: opportunities.filter((item) => item.sharpSignal).length,
+      betNowCount: opportunities.filter((item) => item.bettingUrgency === 'BET_NOW')
+        .length,
+      waitCount: opportunities.filter((item) => item.bettingUrgency === 'WAIT')
+        .length,
+      avoidCount: opportunities.filter((item) => item.bettingUrgency === 'AVOID')
+        .length,
     },
     opportunities,
   }

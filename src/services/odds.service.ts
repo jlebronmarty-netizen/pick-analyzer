@@ -42,5 +42,5 @@ export async function getUpcomingOddsGames(
     throw new Error(result.error || 'Could not load upcoming odds games.')
   }
 
-  return result.data as OddsGame[]
+  return result.games as OddsGame[]
 }

@@ -1,3 +1,4 @@
+import AICopilotPanel from '@/components/dashboard/AICopilotPanel'
 import AnalyticsChartsPanel from '@/components/dashboard/AnalyticsChartsPanel'
 import AnalyticsPanel from '@/components/dashboard/AnalyticsPanel'
 import ClvAnalyticsPanel from '@/components/dashboard/ClvAnalyticsPanel'
@@ -25,6 +26,10 @@ export default function DashboardPage() {
           <div className="xl:col-span-7">
             <LiveOddsShoppingPanel />
           </div>
+        </section>
+
+        <section className="space-y-3">
+          <AICopilotPanel />
         </section>
 
         <section className="space-y-3">
