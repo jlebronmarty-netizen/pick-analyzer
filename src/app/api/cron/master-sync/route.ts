@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { runMasterSync } from '@/services/master-sync.service'
+import { runSelfLearningEngine } from '@/services/self-learning-engine.service'
+import { clearServerCache } from '@/lib/server-cache'
 
 function isAuthorized(request: Request) {
   const cronSecret = process.env.CRON_SECRET
@@ -27,10 +29,18 @@ export async function GET(request: Request) {
 
     const result = await runMasterSync()
 
+    const selfLearning = await runSelfLearningEngine({
+      sportKey: 'baseball_mlb',
+      force: false,
+    })
+
+    clearServerCache()
+
     return NextResponse.json({
       success: result.success,
       message: 'Master sync completed',
       result,
+      selfLearning,
     })
   } catch (error) {
     console.error('Master sync failed:', error)

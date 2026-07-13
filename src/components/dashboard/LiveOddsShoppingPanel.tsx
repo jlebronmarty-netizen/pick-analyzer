@@ -435,9 +435,30 @@ export default function LiveOddsShoppingPanel() {
   }
 
   if (error) {
+    const quotaExceeded =
+      error.includes('OUT_OF_USAGE_CREDITS') ||
+      error.includes('quota') ||
+      error.includes('Usage quota')
+
     return (
-      <div className="rounded-xl border border-red-900/60 bg-red-950/40 p-6 text-sm text-red-300">
-        {error}
+      <div className="rounded-2xl border border-amber-500/30 bg-amber-950/20 p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-300">
+          Live Odds Status
+        </p>
+
+        <h2 className="mt-2 text-xl font-black text-white">
+          {quotaExceeded ? 'Live Odds Offline' : 'Live Odds Temporarily Unavailable'}
+        </h2>
+
+        <p className="mt-3 text-sm leading-6 text-amber-100">
+          {quotaExceeded
+            ? 'The Odds API quota has been exhausted. Historical analytics, AI reports, portfolios, calibration and CLV remain available.'
+            : 'The live odds provider is not responding right now. The rest of the dashboard can still be used normally.'}
+        </p>
+
+        <p className="mt-3 text-xs text-slate-500">
+          Technical detail: {error}
+        </p>
       </div>
     )
   }

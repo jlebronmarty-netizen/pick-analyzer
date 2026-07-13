@@ -25,6 +25,24 @@ type WeatherImpactRow = {
   impact_score: number | null
 }
 
+const CACHE_TTL = 5 * 60_000
+
+let pitcherCache: { data: PitcherStatRow[]; expiresAt: number } | null = null
+let injuryCache: { data: InjuryRow[]; expiresAt: number } | null = null
+let weatherCache: { data: WeatherImpactRow[]; expiresAt: number } | null = null
+
+let pitcherPromise: Promise<PitcherStatRow[]> | null = null
+let injuryPromise: Promise<InjuryRow[]> | null = null
+let weatherPromise: Promise<WeatherImpactRow[]> | null = null
+
+let lastPitcherErrorAt = 0
+let lastInjuryErrorAt = 0
+let lastWeatherErrorAt = 0
+
+function shouldLog(lastLoggedAt: number) {
+  return Date.now() - lastLoggedAt > 60_000
+}
+
 function safeNumber(value: unknown, fallback = 0) {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
 }
@@ -51,17 +69,112 @@ function calculatePitcherRating(pitcher: PitcherStatRow | null) {
   return clamp(eraScore * 0.45 + whipScore * 0.35 + strikeoutScore * 0.2, 1, 99)
 }
 
-async function getPitcherAdvantage(teamName: string, opponentName: string) {
-  const { data, error } = await supabaseAdmin
-    .from('pitcher_stats')
-    .select('team, era, whip, k_per_9, is_probable_starter')
-
-  if (error) {
-    console.error('Pitcher factor error:', error.message)
-    return 0
+async function loadPitchers() {
+  if (pitcherCache && pitcherCache.expiresAt > Date.now()) {
+    return pitcherCache.data
   }
 
-  const rows = (data ?? []) as PitcherStatRow[]
+  if (pitcherPromise) return pitcherPromise
+
+  pitcherPromise = Promise.resolve(
+    supabaseAdmin
+      .from('pitcher_stats')
+      .select('team, era, whip, k_per_9, is_probable_starter')
+  )
+    .then(({ data, error }) => {
+      if (error) {
+        if (shouldLog(lastPitcherErrorAt)) {
+          console.error('Pitcher factor error:', error.message)
+          lastPitcherErrorAt = Date.now()
+        }
+
+        return pitcherCache?.data ?? []
+      }
+
+      pitcherCache = {
+        data: (data ?? []) as PitcherStatRow[],
+        expiresAt: Date.now() + CACHE_TTL,
+      }
+
+      return pitcherCache.data
+    })
+    .finally(() => {
+      pitcherPromise = null
+    })
+
+  return pitcherPromise
+}
+
+async function loadInjuries() {
+  if (injuryCache && injuryCache.expiresAt > Date.now()) {
+    return injuryCache.data
+  }
+
+  if (injuryPromise) return injuryPromise
+
+  injuryPromise = Promise.resolve(
+    supabaseAdmin.from('injuries').select('team, status, impact_score')
+  )
+    .then(({ data, error }) => {
+      if (error) {
+        if (shouldLog(lastInjuryErrorAt)) {
+          console.error('Injury factor error:', error.message)
+          lastInjuryErrorAt = Date.now()
+        }
+
+        return injuryCache?.data ?? []
+      }
+
+      injuryCache = {
+        data: (data ?? []) as InjuryRow[],
+        expiresAt: Date.now() + CACHE_TTL,
+      }
+
+      return injuryCache.data
+    })
+    .finally(() => {
+      injuryPromise = null
+    })
+
+  return injuryPromise
+}
+
+async function loadWeatherImpacts() {
+  if (weatherCache && weatherCache.expiresAt > Date.now()) {
+    return weatherCache.data
+  }
+
+  if (weatherPromise) return weatherPromise
+
+  weatherPromise = Promise.resolve(
+    supabaseAdmin.from('weather_impacts').select('game_id, impact_score')
+  )
+    .then(({ data, error }) => {
+      if (error) {
+        if (shouldLog(lastWeatherErrorAt)) {
+          console.error('Weather factor error:', error.message)
+          lastWeatherErrorAt = Date.now()
+        }
+
+        return weatherCache?.data ?? []
+      }
+
+      weatherCache = {
+        data: (data ?? []) as WeatherImpactRow[],
+        expiresAt: Date.now() + CACHE_TTL,
+      }
+
+      return weatherCache.data
+    })
+    .finally(() => {
+      weatherPromise = null
+    })
+
+  return weatherPromise
+}
+
+async function getPitcherAdvantage(teamName: string, opponentName: string) {
+  const rows = await loadPitchers()
 
   const teamPitcher =
     rows.find(
@@ -78,9 +191,7 @@ async function getPitcherAdvantage(teamName: string, opponentName: string) {
         normalizeTeamName(row.team) === normalizeTeamName(opponentName) &&
         row.is_probable_starter === true
     ) ??
-    rows.find(
-      (row) => normalizeTeamName(row.team) === normalizeTeamName(opponentName)
-    ) ??
+    rows.find((row) => normalizeTeamName(row.team) === normalizeTeamName(opponentName)) ??
     null
 
   const teamRating = calculatePitcherRating(teamPitcher)
@@ -90,16 +201,9 @@ async function getPitcherAdvantage(teamName: string, opponentName: string) {
 }
 
 async function getInjuryImpact(teamName: string) {
-  const { data, error } = await supabaseAdmin
-    .from('injuries')
-    .select('team, status, impact_score')
+  const rows = await loadInjuries()
 
-  if (error) {
-    console.error('Injury factor error:', error.message)
-    return 0
-  }
-
-  const activeInjuries = ((data ?? []) as InjuryRow[]).filter((row) => {
+  const activeInjuries = rows.filter((row) => {
     const status = String(row.status ?? '').toLowerCase()
 
     return (
@@ -119,18 +223,8 @@ async function getInjuryImpact(teamName: string) {
 }
 
 async function getWeatherImpact(gameId: string) {
-  const { data, error } = await supabaseAdmin
-    .from('weather_impacts')
-    .select('game_id, impact_score')
-    .eq('game_id', gameId)
-    .maybeSingle()
-
-  if (error) {
-    console.error('Weather factor error:', error.message)
-    return 0
-  }
-
-  const row = data as WeatherImpactRow | null
+  const rows = await loadWeatherImpacts()
+  const row = rows.find((item) => String(item.game_id ?? '') === String(gameId)) ?? null
 
   return Number(clamp(safeNumber(row?.impact_score, 0), -4, 4).toFixed(2))
 }

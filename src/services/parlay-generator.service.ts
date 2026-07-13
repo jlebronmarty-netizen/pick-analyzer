@@ -18,6 +18,8 @@ type ParlayPick = {
   risk_grade?: string
   risk_label?: string
   smart_score?: number
+  adaptive_score?: number
+  adaptive_adjustment?: unknown
   recommended_pick: boolean | null
 }
 
@@ -30,6 +32,7 @@ type GeneratedParlay = {
   estimatedProbability: number
   averageConfidence: number
   averageEv: number
+  averageAdaptiveScore: number
   correlationScore: number
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH'
   warnings: string[]
@@ -42,10 +45,7 @@ function decimalOdds(americanOdds: number) {
 }
 
 function americanFromDecimal(decimal: number) {
-  if (decimal >= 2) {
-    return Math.round((decimal - 1) * 100)
-  }
-
+  if (decimal >= 2) return Math.round((decimal - 1) * 100)
   return Math.round(-100 / (decimal - 1))
 }
 
@@ -55,8 +55,21 @@ function round(value: number) {
 
 function average(values: number[]) {
   if (!values.length) return 0
-
   return values.reduce((sum, value) => sum + value, 0) / values.length
+}
+
+function getPrimaryScore(pick: ParlayPick) {
+  return Number(pick.adaptive_score ?? pick.smart_score ?? 0)
+}
+
+function sortByAdaptiveScore(a: ParlayPick, b: ParlayPick) {
+  return (
+    getPrimaryScore(b) - getPrimaryScore(a) ||
+    (b.smart_score ?? 0) - (a.smart_score ?? 0) ||
+    b.confidence - a.confidence ||
+    b.ev - a.ev ||
+    b.edge - a.edge
+  )
 }
 
 function buildParlay(
@@ -83,6 +96,7 @@ function buildParlay(
     estimatedProbability: round(estimatedProbability * 100),
     averageConfidence: round(average(legs.map((pick) => pick.confidence))),
     averageEv: round(average(legs.map((pick) => pick.ev))),
+    averageAdaptiveScore: round(average(legs.map(getPrimaryScore))),
     correlationScore: correlation.correlationScore,
     riskLevel: correlation.riskLevel,
     warnings: correlation.warnings,
@@ -94,11 +108,8 @@ function dedupePicks(picks: ParlayPick[]) {
 
   return picks.filter((pick) => {
     const key = `${pick.sport_key}:${pick.team}:${pick.opponent}`
-
     if (seen.has(key)) return false
-
     seen.add(key)
-
     return true
   })
 }
@@ -124,24 +135,25 @@ export async function generateSmartParlays() {
       .filter(
         (pick) =>
           ['A+', 'A'].includes(pick.risk_grade ?? '') &&
-          pick.confidence >= 75
+          pick.confidence >= 75 &&
+          getPrimaryScore(pick) >= 65
       )
-      .sort(
-        (a, b) =>
-          (b.smart_score ?? 0) - (a.smart_score ?? 0) ||
-          b.confidence - a.confidence
-      ),
+      .sort(sortByAdaptiveScore),
     1,
     2
   ).slice(0, 2)
 
   const valueLegs = removeHighlyCorrelatedPicks(
     [...source]
-      .filter((pick) => ['A+', 'A', 'B'].includes(pick.risk_grade ?? ''))
+      .filter(
+        (pick) =>
+          ['A+', 'A', 'B'].includes(pick.risk_grade ?? '') &&
+          getPrimaryScore(pick) >= 55
+      )
       .sort(
         (a, b) =>
-          (b.ev ?? 0) - (a.ev ?? 0) ||
-          (b.smart_score ?? 0) - (a.smart_score ?? 0)
+          getPrimaryScore(b) - getPrimaryScore(a) ||
+          (b.ev ?? 0) - (a.ev ?? 0)
       ),
     1,
     3
@@ -152,10 +164,12 @@ export async function generateSmartParlays() {
       .filter(
         (pick) =>
           ['A+', 'A', 'B'].includes(pick.risk_grade ?? '') &&
-          pick.odds > 0
+          pick.odds > 0 &&
+          getPrimaryScore(pick) >= 50
       )
       .sort(
         (a, b) =>
+          getPrimaryScore(b) - getPrimaryScore(a) ||
           b.odds - a.odds ||
           (b.ev ?? 0) - (a.ev ?? 0)
       ),
@@ -179,6 +193,7 @@ export async function generateSmartParlays() {
 
   return {
     success: true,
+    adaptiveWeightsAvailable: topPicks.adaptiveWeightsAvailable,
     generatedAt: new Date().toISOString(),
     count: parlays.length,
     parlays,

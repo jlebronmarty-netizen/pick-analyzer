@@ -2,6 +2,16 @@
 
 import { useEffect, useState } from 'react'
 
+type AdaptiveAdjustment = {
+  adjusted?: {
+    adaptiveScore?: number
+  }
+  strongestAdjustment?: {
+    factor: string
+    multiplier: number
+  } | null
+}
+
 type PlayOfTheDay = {
   id: string
   team: string
@@ -20,12 +30,17 @@ type PlayOfTheDay = {
   kelly_percent?: number
   recommended_stake?: number
   smart_score?: number
+  adaptive_score?: number
+  adaptive_adjustment?: AdaptiveAdjustment
+  primary_score?: number
+  primary_score_label?: string
   recommendation: string
   reason: string
 }
 
 type PlayOfTheDayResponse = {
   success: boolean
+  adaptiveWeightsAvailable?: boolean
   generatedAt: string
   play: PlayOfTheDay | null
   message?: string
@@ -42,6 +57,15 @@ function formatCurrency(value?: number) {
 
 function renderStars(stars?: number) {
   return '⭐'.repeat(stars ?? 0)
+}
+
+function factorLabel(value?: string) {
+  if (!value) return 'No adjustment'
+  if (value === 'confidenceMultiplier') return 'Confidence'
+  if (value === 'evMultiplier') return 'EV'
+  if (value === 'edgeMultiplier') return 'Edge'
+  if (value === 'oddsMultiplier') return 'Odds Style'
+  return value
 }
 
 export default function PlayOfTheDayPanel() {
@@ -99,6 +123,19 @@ export default function PlayOfTheDayPanel() {
     )
   }
 
+  const primaryScore =
+    play.primary_score ??
+    play.adaptive_score ??
+    play.adaptive_adjustment?.adjusted?.adaptiveScore ??
+    play.smart_score ??
+    0
+
+  const primaryLabel =
+    play.primary_score_label ??
+    (typeof play.adaptive_score === 'number' ? 'Adaptive Score' : 'Smart Score')
+
+  const strongestAdjustment = play.adaptive_adjustment?.strongestAdjustment
+
   return (
     <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-6 shadow-lg shadow-emerald-950/20">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -124,6 +161,10 @@ export default function PlayOfTheDayPanel() {
               {play.risk_grade} {play.risk_label}
             </span>
 
+            <span className="rounded-full border border-purple-500/30 bg-purple-950/30 px-3 py-1 text-xs font-semibold text-purple-300">
+              Adaptive {data?.adaptiveWeightsAvailable ? 'ON' : 'OFF'}
+            </span>
+
             <span className="text-xs text-amber-300">
               {renderStars(play.risk_stars)}
             </span>
@@ -133,6 +174,12 @@ export default function PlayOfTheDayPanel() {
         <div className="rounded-xl border border-slate-700 bg-slate-950/70 p-4 text-right">
           <p className="text-xs text-slate-400">Odds</p>
           <p className="text-3xl font-bold text-white">{play.formatted_odds}</p>
+
+          <p className="mt-3 text-xs text-purple-300">{primaryLabel}</p>
+          <p className="text-xl font-black text-white">
+            {Number(primaryScore).toFixed(2)}
+          </p>
+
           <p className="mt-2 text-xs text-slate-500">
             Smart Score {play.smart_score?.toFixed(2) ?? '0.00'}
           </p>
@@ -168,6 +215,21 @@ export default function PlayOfTheDayPanel() {
           </p>
         </div>
       </div>
+
+      {strongestAdjustment && Number(strongestAdjustment.multiplier) !== 1 && (
+        <div className="mt-5 rounded-xl border border-purple-500/20 bg-purple-950/10 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-purple-300">
+            Adaptive Adjustment
+          </p>
+
+          <p className="mt-2 text-sm text-slate-300">
+            {factorLabel(strongestAdjustment.factor)} multiplier:{' '}
+            <span className="font-bold text-white">
+              {Number(strongestAdjustment.multiplier).toFixed(2)}x
+            </span>
+          </p>
+        </div>
+      )}
 
       <div className="mt-5 rounded-xl border border-slate-800 bg-slate-950/50 p-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">

@@ -1,12 +1,17 @@
 import { supabase } from '@/lib/supabase'
 import { getAdvancedPredictionFactors } from '@/services/advanced-factors.service'
+import { getModelWeights } from '@/services/model-learning.service'
+import {
+  BookMarketLine,
+  getPredictionMarketIntelligence,
+} from '@/services/prediction-market-intelligence.service'
+import { savePredictionHistory } from '@/services/prediction-history.service'
 import {
   calculatePredictionV4,
   PredictionResult,
   TeamMatchupInput,
   TeamStatsInput,
 } from '@/utils/prediction-engine-v4'
-import { savePredictionHistory } from '@/services/prediction-history.service'
 
 type OddsOutcome = {
   name: string
@@ -32,6 +37,35 @@ type GameWithOdds = {
   home_team: string
   away_team: string
   bookmakers?: OddsBookmaker[]
+}
+
+type EnhancedPredictionResult = PredictionResult & {
+  marketAverageOdds: number
+  bestOdds: number
+  worstOdds: number
+  bestBook: string
+  slowBook: string
+  valueGap: number
+  steamMove: boolean
+  reverseLineMovement: boolean
+  staleLine: boolean
+  movementSignal:
+    | 'STEAM_MOVE'
+    | 'STALE_LINE'
+    | 'REVERSE_LINE'
+    | 'VALUE_GAP'
+    | 'NORMAL'
+  marketMovementScore: number
+  sharpConfidence: number
+  sharpSignal: boolean
+  sharpLabel:
+    | 'SHARP_VALUE'
+    | 'POSSIBLE_STEAM'
+    | 'STALE_BOOK'
+    | 'MARKET_WATCH'
+    | 'NO_SHARP_SIGNAL'
+  bettingUrgency: 'BET_NOW' | 'PLAYABLE' | 'MONITOR' | 'AVOID'
+  urgencyScore: number
 }
 
 type PredictionHistoryRow = {
@@ -149,6 +183,26 @@ function getMoneylineOutcomes(game: GameWithOdds): {
   }
 }
 
+function getAllMoneylineMarketLines(game: GameWithOdds): BookMarketLine[] {
+  const lines: BookMarketLine[] = []
+
+  for (const bookmaker of game.bookmakers ?? []) {
+    const market = bookmaker.markets.find((item) => item.key === 'h2h')
+
+    if (!market) continue
+
+    for (const outcome of market.outcomes) {
+      lines.push({
+        sportsbook: bookmaker.title,
+        team: outcome.name,
+        odds: outcome.price,
+      })
+    }
+  }
+
+  return lines
+}
+
 function getFallbackRating(stats?: TeamStatsInput | null): number {
   if (!stats) return 50
 
@@ -256,6 +310,28 @@ function calculateHeadToHeadAdvantage(
   return Number(clamp(diffFromNeutral * 6, -3, 3).toFixed(2))
 }
 
+function enrichPredictionWithMarketIntelligence({
+  prediction,
+  marketLines,
+}: {
+  prediction: PredictionResult
+  marketLines: BookMarketLine[]
+}): EnhancedPredictionResult {
+  const market = getPredictionMarketIntelligence({
+    team: prediction.team,
+    odds: prediction.odds,
+    edge: prediction.edge,
+    ev: prediction.ev,
+    confidence: prediction.confidence,
+    lines: marketLines,
+  })
+
+  return {
+    ...prediction,
+    ...market,
+  }
+}
+
 function buildPredictionHistoryRows(
   game: GameWithOdds,
   sportsbook: string,
@@ -288,8 +364,8 @@ export async function generatePredictionsForGames(
 ): Promise<
   Array<
     GameWithOdds & {
-      predictions: PredictionResult[]
-      recommendedPick: PredictionResult | null
+      predictions: EnhancedPredictionResult[]
+      recommendedPick: EnhancedPredictionResult | null
     }
   >
 > {
@@ -297,6 +373,8 @@ export async function generatePredictionsForGames(
     getTeamStats(sportKey),
     getTeamMatchups(sportKey),
   ])
+
+  const learnedWeights = await getModelWeights(sportKey)
 
   const statsMap = buildStatsMap(stats)
   const matchupsMap = buildMatchupsMap(matchups)
@@ -306,6 +384,7 @@ export async function generatePredictionsForGames(
   const gamesWithPredictions = await Promise.all(
     games.map(async (game) => {
       const { sportsbook, outcomes } = getMoneylineOutcomes(game)
+      const marketLines = getAllMoneylineMarketLines(game)
 
       if (outcomes.length < 2) {
         return {
@@ -379,6 +458,7 @@ export async function generatePredictionsForGames(
           opponentRating: awayRating,
           teamStats: homeStats,
           opponentStats: awayStats,
+          isHomeTeam: true,
         },
         {
           homeAwayAdvantage: homeAwayHome,
@@ -386,7 +466,8 @@ export async function generatePredictionsForGames(
           pitcherAdvantage: homeAdvancedFactors.pitcherAdvantage,
           injuryImpact: homeAdvancedFactors.injuryImpact,
           weatherImpact: homeAdvancedFactors.weatherImpact,
-        }
+        },
+        learnedWeights
       )
 
       const awayPrediction = calculatePredictionV4(
@@ -399,6 +480,7 @@ export async function generatePredictionsForGames(
           opponentRating: homeRating,
           teamStats: awayStats,
           opponentStats: homeStats,
+          isHomeTeam: false,
         },
         {
           homeAwayAdvantage: homeAwayAway,
@@ -406,16 +488,26 @@ export async function generatePredictionsForGames(
           pitcherAdvantage: awayAdvancedFactors.pitcherAdvantage,
           injuryImpact: awayAdvancedFactors.injuryImpact,
           weatherImpact: awayAdvancedFactors.weatherImpact,
-        }
+        },
+        learnedWeights
       )
 
-      const predictions = [homePrediction, awayPrediction]
+      const predictions = [homePrediction, awayPrediction].map((prediction) =>
+        enrichPredictionWithMarketIntelligence({
+          prediction,
+          marketLines,
+        })
+      )
 
       const recommendedPick =
         predictions
           .filter((prediction) => prediction.recommendedPick)
-          .sort((a, b) => b.ev - a.ev || b.confidence - a.confidence)[0] ??
-        null
+          .sort(
+            (a, b) =>
+              b.marketMovementScore - a.marketMovementScore ||
+              b.ev - a.ev ||
+              b.confidence - a.confidence
+          )[0] ?? null
 
       if (options?.saveHistory) {
         allHistoryRows.push(

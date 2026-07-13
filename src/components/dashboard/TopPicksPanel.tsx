@@ -1,6 +1,26 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import PickExplanationCard from '@/components/dashboard/PickExplanationCard'
+
+type AdaptiveAdjustment = {
+  original?: {
+    confidence?: number
+    ev?: number
+    edge?: number
+    smartScore?: number
+  }
+  adjusted?: {
+    confidence?: number
+    ev?: number
+    edge?: number
+    adaptiveScore?: number
+  }
+  strongestAdjustment?: {
+    factor: string
+    multiplier: number
+  } | null
+}
 
 type Pick = {
   id: string
@@ -20,12 +40,19 @@ type Pick = {
   ev: number
   confidence: number
   recommended_pick: boolean | null
+  risk_grade?: string
+  risk_label?: string
+  smart_score?: number
+  adaptive_score?: number
+  adaptive_adjustment?: AdaptiveAdjustment
 }
 
 type TopPicksResponse = {
   success: boolean
+  adaptiveWeightsAvailable?: boolean
   summary: {
     pendingPicks: number
+    safePendingPicks?: number
     recommendedPicks: number
     topEvCount: number
     topConfidenceCount: number
@@ -38,7 +65,6 @@ type TopPicksResponse = {
 
 function formatDate(value: string) {
   const date = new Date(value)
-
   if (Number.isNaN(date.getTime())) return value
 
   return date.toLocaleString([], {
@@ -53,73 +79,186 @@ function formatOdds(value: number) {
   return value > 0 ? `+${value}` : `${value}`
 }
 
-function formatPercent(value: number) {
-  return `${value.toFixed(2)}%`
+function formatPercent(value?: number) {
+  return `${Number(value ?? 0).toFixed(2)}%`
+}
+
+function scoreClass(value?: number) {
+  const score = Number(value ?? 0)
+
+  if (score >= 80) return 'text-emerald-400'
+  if (score >= 65) return 'text-amber-300'
+
+  return 'text-slate-300'
+}
+
+function factorLabel(value?: string) {
+  if (!value) return 'No adjustment'
+  if (value === 'confidenceMultiplier') return 'Confidence'
+  if (value === 'evMultiplier') return 'EV'
+  if (value === 'edgeMultiplier') return 'Edge'
+  if (value === 'oddsMultiplier') return 'Odds Style'
+
+  return value
 }
 
 function PickCard({ pick }: { pick: Pick }) {
+  const [loadingExplanation, setLoadingExplanation] = useState(false)
+  const [explanation, setExplanation] = useState<any>(null)
+
+  const adaptiveScore = pick.adaptive_score ?? pick.smart_score ?? 0
+  const smartScore = pick.smart_score ?? 0
+  const strongest = pick.adaptive_adjustment?.strongestAdjustment
+
+  async function toggleExplanation() {
+    if (explanation) {
+      setExplanation(null)
+      return
+    }
+
+    try {
+      setLoadingExplanation(true)
+
+      const response = await fetch('/api/picks/explain', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+        body: JSON.stringify(pick),
+      })
+
+      const json = await response.json()
+
+      if (!response.ok || json?.success === false) {
+        throw new Error(json?.error ?? 'Unable to explain pick')
+      }
+
+      setExplanation(json)
+    } catch (error) {
+      console.error('Pick explanation failed:', error)
+    } finally {
+      setLoadingExplanation(false)
+    }
+  }
+
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-white">{pick.team} ML</p>
-          <p className="mt-1 text-xs text-slate-400">
-            vs {pick.opponent} · {formatDate(pick.commence_time)}
-          </p>
-          <p className="mt-1 text-xs text-slate-500">{pick.sport_key}</p>
+    <div className="space-y-3">
+      <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-semibold text-white">{pick.team} ML</p>
+
+              {pick.risk_grade && (
+                <span className="rounded-full bg-slate-800 px-2 py-1 text-[11px] font-semibold text-slate-300">
+                  {pick.risk_grade} {pick.risk_label ?? ''}
+                </span>
+              )}
+            </div>
+
+            <p className="mt-1 text-xs text-slate-400">
+              vs {pick.opponent} · {formatDate(pick.commence_time)}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {pick.sport_key} · {pick.sportsbook}
+            </p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-sm font-bold text-white">{formatOdds(pick.odds)}</p>
+            {pick.recommended_pick && (
+              <span className="mt-1 inline-block rounded-full bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-400">
+                Recommended
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="text-right">
-          <p className="text-sm font-bold text-white">{formatOdds(pick.odds)}</p>
-          {pick.recommended_pick && (
-            <span className="mt-1 inline-block rounded-full bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-400">
-              Recommended
-            </span>
-          )}
+        <div className="mt-4 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
+          <div>
+            <p className="text-slate-500">Adaptive</p>
+            <p className={`font-bold ${scoreClass(adaptiveScore)}`}>
+              {adaptiveScore.toFixed(2)}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-slate-500">Smart</p>
+            <p className="font-semibold text-white">{smartScore.toFixed(2)}</p>
+          </div>
+
+          <div>
+            <p className="text-slate-500">EV</p>
+            <p
+              className={
+                pick.ev >= 0
+                  ? 'font-semibold text-emerald-400'
+                  : 'font-semibold text-red-400'
+              }
+            >
+              {formatPercent(pick.ev)}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-slate-500">Edge</p>
+            <p
+              className={
+                pick.edge >= 0
+                  ? 'font-semibold text-emerald-400'
+                  : 'font-semibold text-red-400'
+              }
+            >
+              {formatPercent(pick.edge)}
+            </p>
+          </div>
         </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+          <div className="rounded-lg bg-slate-900/70 p-3">
+            <p className="text-slate-500">Model</p>
+            <p className="font-semibold text-white">
+              {formatPercent(pick.model_probability)}
+            </p>
+          </div>
+
+          <div className="rounded-lg bg-slate-900/70 p-3">
+            <p className="text-slate-500">Confidence</p>
+            <p className="font-semibold text-white">
+              {formatPercent(pick.confidence)}
+            </p>
+          </div>
+        </div>
+
+        {strongest && Number(strongest.multiplier) !== 1 && (
+          <div className="mt-4 rounded-lg border border-purple-500/20 bg-purple-950/10 p-3">
+            <p className="text-xs font-semibold text-purple-300">
+              Adaptive Adjustment
+            </p>
+            <p className="mt-1 text-xs text-slate-300">
+              {factorLabel(strongest.factor)} multiplier:{' '}
+              <span className="font-bold text-white">
+                {Number(strongest.multiplier).toFixed(2)}x
+              </span>
+            </p>
+          </div>
+        )}
+
+        <button
+          onClick={toggleExplanation}
+          disabled={loadingExplanation}
+          className="mt-4 w-full rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-4 py-2 text-xs font-bold text-cyan-300 transition hover:bg-cyan-950/40 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {loadingExplanation
+            ? 'Analyzing...'
+            : explanation
+              ? 'Hide AI Analysis'
+              : 'AI Analysis'}
+        </button>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
-        <div>
-          <p className="text-slate-500">Model</p>
-          <p className="font-semibold text-white">
-            {formatPercent(pick.model_probability)}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-slate-500">Edge</p>
-          <p
-            className={
-              pick.edge >= 0
-                ? 'font-semibold text-emerald-400'
-                : 'font-semibold text-red-400'
-            }
-          >
-            {formatPercent(pick.edge)}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-slate-500">EV</p>
-          <p
-            className={
-              pick.ev >= 0
-                ? 'font-semibold text-emerald-400'
-                : 'font-semibold text-red-400'
-            }
-          >
-            {formatPercent(pick.ev)}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-slate-500">Confidence</p>
-          <p className="font-semibold text-white">
-            {formatPercent(pick.confidence)}
-          </p>
-        </div>
-      </div>
+      {explanation && <PickExplanationCard explanation={explanation} />}
     </div>
   )
 }
@@ -210,11 +349,18 @@ export default function TopPicksPanel() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
           <p className="text-xs text-slate-400">Pending Picks</p>
           <p className="mt-1 text-2xl font-bold text-white">
             {data.summary.pendingPicks}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+          <p className="text-xs text-slate-400">Safe Pending</p>
+          <p className="mt-1 text-2xl font-bold text-white">
+            {data.summary.safePendingPicks ?? 0}
           </p>
         </div>
 
@@ -226,16 +372,22 @@ export default function TopPicksPanel() {
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs text-slate-400">Top EV</p>
+          <p className="text-xs text-slate-400">Best Bets</p>
           <p className="mt-1 text-2xl font-bold text-white">
-            {data.summary.topEvCount}
+            {data.summary.bestBetsCount}
           </p>
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs text-slate-400">Best Bets</p>
-          <p className="mt-1 text-2xl font-bold text-white">
-            {data.summary.bestBetsCount}
+          <p className="text-xs text-slate-400">Adaptive</p>
+          <p
+            className={
+              data.adaptiveWeightsAvailable
+                ? 'mt-1 text-2xl font-bold text-purple-300'
+                : 'mt-1 text-2xl font-bold text-slate-500'
+            }
+          >
+            {data.adaptiveWeightsAvailable ? 'ON' : 'OFF'}
           </p>
         </div>
       </div>
@@ -243,19 +395,19 @@ export default function TopPicksPanel() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <PicksColumn
           title="Best Bets Today"
-          description="Recommended picks ranked by EV, edge and confidence."
+          description="Recommended picks ranked by adaptive score, EV, edge and confidence."
           picks={data.bestBets}
         />
 
         <PicksColumn
           title="Top EV Picks"
-          description="Highest expected value pending picks."
+          description="Highest expected value pending picks, adjusted by adaptive scoring."
           picks={data.topEv}
         />
 
         <PicksColumn
           title="Top Confidence"
-          description="Highest model confidence pending picks."
+          description="Highest model confidence pending picks with adaptive ranking."
           picks={data.topConfidence}
         />
       </div>

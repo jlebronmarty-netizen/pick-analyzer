@@ -11,8 +11,9 @@ export async function GET(request: Request) {
     const regions = searchParams.get('regions') ?? 'us'
     const markets = searchParams.get('markets') ?? 'h2h'
     const oddsFormat = searchParams.get('oddsFormat') ?? 'american'
-
     const saveHistory = searchParams.get('saveHistory') === 'true'
+    const includePredictions =
+      searchParams.get('includePredictions') === 'true' || saveHistory
 
     const apiKey = process.env.ODDS_API_KEY
 
@@ -32,11 +33,17 @@ export async function GET(request: Request) {
     url.searchParams.set('markets', markets)
     url.searchParams.set('oddsFormat', oddsFormat)
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000)
+
     const response = await fetch(url.toString(), {
+      signal: controller.signal,
       next: {
         revalidate: 60,
       },
     })
+
+    clearTimeout(timeoutId)
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -46,12 +53,26 @@ export async function GET(request: Request) {
           success: false,
           error: 'Failed to fetch odds',
           details: errorText,
+          quotaExceeded:
+            errorText.includes('OUT_OF_USAGE_CREDITS') ||
+            errorText.includes('Usage quota'),
         },
         { status: response.status }
       )
     }
 
     const games = await response.json()
+
+    if (!includePredictions) {
+      return NextResponse.json({
+        success: true,
+        sport,
+        count: games.length,
+        saveHistory,
+        includePredictions: false,
+        games,
+      })
+    }
 
     const gamesWithPredictions = await generatePredictionsForGames(
       games,
@@ -66,6 +87,7 @@ export async function GET(request: Request) {
       sport,
       count: gamesWithPredictions.length,
       saveHistory,
+      includePredictions: true,
       games: gamesWithPredictions,
     })
   } catch (error) {
@@ -74,7 +96,10 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Unexpected server error',
+        error:
+          error instanceof DOMException && error.name === 'AbortError'
+            ? 'Odds API request timed out'
+            : 'Unexpected server error',
       },
       { status: 500 }
     )

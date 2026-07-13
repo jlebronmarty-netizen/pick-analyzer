@@ -146,6 +146,13 @@ export async function runMasterSync(): Promise<MasterSyncResult> {
       timeoutMs: 30000,
     },
     {
+      step: 'NBA Incremental Data Sync',
+      path: '/api/nba/sync?mode=incremental',
+      method: 'POST',
+      includeSecret: true,
+      timeoutMs: 30000,
+    },
+    {
       step: 'BSN Sync Results',
       path: '/api/bsn/sync',
       method: 'GET',

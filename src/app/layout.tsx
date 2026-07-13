@@ -1,15 +1,17 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next'
+import './globals.css'
+
+import { DashboardProvider } from '@/context/DashboardContext'
 
 export const metadata: Metadata = {
-  title: "Pick Analyzer",
-  description: "Professional Sports Betting Analytics Platform",
-};
+  title: 'Pick Analyzer',
+  description: 'Professional Sports Betting Analytics Platform',
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html
@@ -17,8 +19,10 @@ export default function RootLayout({
       className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col">
-        {children}
+        <DashboardProvider>
+          {children}
+        </DashboardProvider>
       </body>
     </html>
-  );
+  )
 }

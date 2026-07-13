@@ -1,0 +1,114 @@
+import { SportKey } from '@/config/sports.config'
+import { SportsProvider } from '@/types/multi-sport'
+
+function hasEnv(name: string) {
+  return Boolean(process.env[name])
+}
+
+export function getSportsProviders(): SportsProvider[] {
+  const oddsConfigured = hasEnv('ODDS_API_KEY')
+  const apiSportsConfigured = hasEnv('API_SPORTS_KEY')
+
+  return [
+    {
+      id: 'the-odds-api',
+      name: 'The Odds API',
+      sportCoverage: [
+        'baseball_mlb',
+        'basketball_nba',
+        'americanfootball_nfl',
+        'icehockey_nhl',
+        'soccer',
+        'tennis',
+        'mma_ufc',
+      ],
+      requiresAuth: true,
+      rateLimit: { requests: 500, interval: 'day' },
+      features: ['schedule', 'event', 'odds', 'results'],
+      priority: 1,
+      fallbackOrder: 1,
+      health: oddsConfigured ? 'healthy' : 'unavailable',
+      lastError: oddsConfigured ? undefined : 'Missing ODDS_API_KEY',
+      metadata: {
+        baseUrl: 'https://api.the-odds-api.com/v4',
+      },
+    },
+    {
+      id: 'api-sports',
+      name: 'API-Sports',
+      sportCoverage: ['baseball_mlb', 'soccer'],
+      requiresAuth: true,
+      rateLimit: { requests: 100, interval: 'day' },
+      features: ['leagues', 'teams', 'schedule', 'standings', 'stats'],
+      priority: 2,
+      fallbackOrder: 2,
+      health: apiSportsConfigured ? 'degraded' : 'unavailable',
+      lastError: apiSportsConfigured
+        ? 'Provider adapters are only wired for targeted sync services.'
+        : 'Missing API_SPORTS_KEY',
+      metadata: {
+        baseballBaseUrl: 'https://v1.baseball.api-sports.io',
+        footballBaseUrl: 'https://v3.football.api-sports.io',
+      },
+    },
+    {
+      id: 'supabase-bsn',
+      name: 'Supabase BSN Dataset',
+      sportCoverage: ['basketball_bsn'],
+      requiresAuth: true,
+      rateLimit: { requests: 1000, interval: 'minute' },
+      features: ['teams', 'schedule', 'event', 'results'],
+      priority: 1,
+      fallbackOrder: 1,
+      health:
+        hasEnv('NEXT_PUBLIC_SUPABASE_URL') &&
+        hasEnv('SUPABASE_SERVICE_ROLE_KEY')
+          ? 'healthy'
+          : 'unavailable',
+      lastError:
+        hasEnv('NEXT_PUBLIC_SUPABASE_URL') &&
+        hasEnv('SUPABASE_SERVICE_ROLE_KEY')
+          ? undefined
+          : 'Missing Supabase server credentials',
+      metadata: {
+        tables: ['bsn_teams', 'bsn_games', 'bsn_results'],
+      },
+    },
+    {
+      id: 'supabase-model-store',
+      name: 'Supabase Model Store',
+      sportCoverage: [
+        'baseball_mlb',
+        'basketball_bsn',
+        'basketball_nba',
+        'americanfootball_nfl',
+        'icehockey_nhl',
+        'soccer',
+        'tennis',
+        'mma_ufc',
+      ],
+      requiresAuth: true,
+      rateLimit: { requests: 1000, interval: 'minute' },
+      features: ['stats', 'standings', 'results'],
+      priority: 3,
+      fallbackOrder: 3,
+      health:
+        hasEnv('NEXT_PUBLIC_SUPABASE_URL') &&
+        hasEnv('SUPABASE_SERVICE_ROLE_KEY')
+          ? 'healthy'
+          : 'unavailable',
+      metadata: {
+        tables: ['team_stats', 'team_matchups', 'prediction_history'],
+      },
+    },
+  ]
+}
+
+export function getProvidersForSport(sportKey: SportKey): SportsProvider[] {
+  return getSportsProviders()
+    .filter((provider) => provider.sportCoverage.includes(sportKey))
+    .sort(
+      (a, b) =>
+        a.fallbackOrder - b.fallbackOrder || a.priority - b.priority
+    )
+}

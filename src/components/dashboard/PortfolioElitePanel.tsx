@@ -2,6 +2,16 @@
 
 import { useEffect, useState } from 'react'
 
+type AdaptiveAdjustment = {
+  adjusted?: {
+    adaptiveScore?: number
+  }
+  strongestAdjustment?: {
+    factor: string
+    multiplier: number
+  } | null
+}
+
 type PortfolioPick = {
   id: string
   team: string
@@ -15,6 +25,8 @@ type PortfolioPick = {
   risk_label?: string
   recommended_stake?: number
   smart_score?: number
+  adaptive_score?: number
+  adaptive_adjustment?: AdaptiveAdjustment
 }
 
 type Portfolio = {
@@ -44,15 +56,128 @@ type PortfolioResponse = {
 }
 
 function formatMoney(value: number) {
-  return `$${value.toFixed(2)}`
+  return `$${Number(value ?? 0).toFixed(2)}`
 }
 
 function formatPercent(value: number) {
-  return `${value.toFixed(2)}%`
+  return `${Number(value ?? 0).toFixed(2)}%`
 }
 
 function formatOdds(value: number) {
   return value > 0 ? `+${value}` : `${value}`
+}
+
+function factorLabel(value?: string) {
+  if (!value) return 'No adjustment'
+  if (value === 'confidenceMultiplier') return 'Confidence'
+  if (value === 'evMultiplier') return 'EV'
+  if (value === 'edgeMultiplier') return 'Edge'
+  if (value === 'oddsMultiplier') return 'Odds Style'
+
+  return value
+}
+
+function scoreClass(value?: number) {
+  const score = Number(value ?? 0)
+
+  if (score >= 80) return 'text-emerald-400'
+  if (score >= 65) return 'text-amber-300'
+
+  return 'text-white'
+}
+
+function PortfolioPickCard({
+  pick,
+  portfolioName,
+}: {
+  pick: PortfolioPick
+  portfolioName: string
+}) {
+  const adaptiveScore =
+    pick.adaptive_score ??
+    pick.adaptive_adjustment?.adjusted?.adaptiveScore ??
+    pick.smart_score ??
+    0
+
+  const smartScore = pick.smart_score ?? 0
+  const strongestAdjustment = pick.adaptive_adjustment?.strongestAdjustment
+
+  return (
+    <div
+      key={`${portfolioName}-${pick.id}`}
+      className="rounded-lg border border-slate-800 bg-slate-950/70 p-3"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-semibold text-white">{pick.team} ML</p>
+
+            {pick.risk_grade && (
+              <span className="rounded-full bg-slate-800 px-2 py-1 text-[10px] font-semibold text-slate-300">
+                {pick.risk_grade} {pick.risk_label ?? ''}
+              </span>
+            )}
+          </div>
+
+          <p className="mt-1 text-xs text-slate-400">vs {pick.opponent}</p>
+          <p className="mt-1 text-xs text-slate-500">{pick.sport_key}</p>
+        </div>
+
+        <div className="text-right">
+          <p className="text-sm font-bold text-white">
+            {formatOdds(pick.odds)}
+          </p>
+          <p className="text-xs text-slate-500">
+            {formatMoney(pick.recommended_stake ?? 0)}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+        <div className="rounded-lg bg-slate-900/70 p-2">
+          <p className="text-slate-500">Adaptive</p>
+          <p className={`font-bold ${scoreClass(adaptiveScore)}`}>
+            {Number(adaptiveScore).toFixed(2)}
+          </p>
+        </div>
+
+        <div className="rounded-lg bg-slate-900/70 p-2">
+          <p className="text-slate-500">Smart</p>
+          <p className="font-semibold text-white">
+            {Number(smartScore).toFixed(2)}
+          </p>
+        </div>
+
+        <div className="rounded-lg bg-slate-900/70 p-2">
+          <p className="text-slate-500">Conf.</p>
+          <p className="font-semibold text-white">
+            {formatPercent(pick.confidence)}
+          </p>
+        </div>
+
+        <div className="rounded-lg bg-slate-900/70 p-2">
+          <p className="text-slate-500">EV</p>
+          <p className="font-semibold text-emerald-400">
+            {formatPercent(pick.ev)}
+          </p>
+        </div>
+      </div>
+
+      {strongestAdjustment && Number(strongestAdjustment.multiplier) !== 1 && (
+        <div className="mt-3 rounded-lg border border-purple-500/20 bg-purple-950/10 p-3">
+          <p className="text-xs font-semibold text-purple-300">
+            Adaptive Adjustment
+          </p>
+          <p className="mt-1 text-xs text-slate-300">
+            {factorLabel(strongestAdjustment.factor)}:{' '}
+            <span className="font-bold text-white">
+              {Number(strongestAdjustment.multiplier).toFixed(2)}x
+            </span>
+          </p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function PortfolioCard({ portfolio }: { portfolio: Portfolio }) {
@@ -75,7 +200,9 @@ function PortfolioCard({ portfolio }: { portfolio: Portfolio }) {
       <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
         <div className="rounded-lg bg-slate-950/70 p-3">
           <p className="text-slate-500">Total Stake</p>
-          <p className="font-bold text-white">{formatMoney(portfolio.totalStake)}</p>
+          <p className="font-bold text-white">
+            {formatMoney(portfolio.totalStake)}
+          </p>
         </div>
 
         <div className="rounded-lg bg-slate-950/70 p-3">
@@ -113,51 +240,11 @@ function PortfolioCard({ portfolio }: { portfolio: Portfolio }) {
 
       <div className="mt-4 space-y-3">
         {portfolio.picks.map((pick) => (
-          <div
+          <PortfolioPickCard
             key={`${portfolio.name}-${pick.id}`}
-            className="rounded-lg border border-slate-800 bg-slate-950/70 p-3"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  {pick.team} ML
-                </p>
-                <p className="text-xs text-slate-400">vs {pick.opponent}</p>
-              </div>
-
-              <div className="text-right">
-                <p className="text-sm font-bold text-white">
-                  {formatOdds(pick.odds)}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {formatMoney(pick.recommended_stake ?? 0)}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
-              <div>
-                <p className="text-slate-500">Conf.</p>
-                <p className="font-semibold text-white">
-                  {formatPercent(pick.confidence)}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-slate-500">EV</p>
-                <p className="font-semibold text-emerald-400">
-                  {formatPercent(pick.ev)}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-slate-500">Score</p>
-                <p className="font-semibold text-white">
-                  {pick.smart_score?.toFixed(2) ?? '0.00'}
-                </p>
-              </div>
-            </div>
-          </div>
+            pick={pick}
+            portfolioName={portfolio.name}
+          />
         ))}
       </div>
     </div>
@@ -218,9 +305,12 @@ export default function PortfolioElitePanel() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Elite Portfolio Builder</h2>
+          <h2 className="text-xl font-bold text-white">
+            Elite Portfolio Builder
+          </h2>
           <p className="text-sm text-slate-400">
-            Conservative, balanced and aggressive betting portfolios.
+            Conservative, balanced and aggressive betting portfolios with
+            adaptive score visibility.
           </p>
         </div>
 

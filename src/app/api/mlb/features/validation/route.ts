@@ -1,0 +1,19 @@
+import { NextRequest } from 'next/server'
+import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
+import { runMlbFeatureStoreIntegrationValidation } from '@/services/mlb-feature-store-integration.service'
+
+export async function GET(request: NextRequest) {
+  const id = requestId(request)
+
+  try {
+    return apiOk(runMlbFeatureStoreIntegrationValidation(), id)
+  } catch (error) {
+    console.error('MLB Feature Store validation error:', { requestId: id, error })
+
+    return apiError({
+      id,
+      code: 'INTERNAL_ERROR',
+      message: errorMessage(error, 'Unknown MLB Feature Store validation error'),
+    })
+  }
+}

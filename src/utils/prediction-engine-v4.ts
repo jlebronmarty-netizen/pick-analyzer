@@ -21,6 +21,22 @@ export type {
   TeamStatsInput,
 } from './prediction-engine-v3'
 
+export type PredictionV4Weights = {
+  homeAwayAdvantage?: number
+  headToHeadAdvantage?: number
+  pitcherAdvantage?: number
+  injuryImpact?: number
+  weatherImpact?: number
+}
+
+const defaultWeights: Required<PredictionV4Weights> = {
+  homeAwayAdvantage: 1.05,
+  headToHeadAdvantage: 1.15,
+  pitcherAdvantage: 1.45,
+  injuryImpact: 1.3,
+  weatherImpact: 0.75,
+}
+
 function round(value: number) {
   return Number(value.toFixed(2))
 }
@@ -31,40 +47,51 @@ function getDecimalOdds(americanOdds: number) {
     : 1 + americanOdds / 100
 }
 
-function calculateWeightedFactorAdjustment(
-  factors: PredictionV3Factors
+function getWeight(
+  weights: PredictionV4Weights | undefined,
+  key: keyof PredictionV4Weights
 ) {
-  const homeAway = (factors.homeAwayAdvantage ?? 0) * 1.05
+  return weights?.[key] ?? defaultWeights[key]
+}
+
+function calculateWeightedFactorAdjustment(
+  factors: PredictionV3Factors,
+  weights?: PredictionV4Weights
+) {
+  const homeAway =
+    (factors.homeAwayAdvantage ?? 0) *
+    getWeight(weights, 'homeAwayAdvantage')
 
   const headToHead =
-    (factors.headToHeadAdvantage ?? 0) * 1.15
+    (factors.headToHeadAdvantage ?? 0) *
+    getWeight(weights, 'headToHeadAdvantage')
 
   const pitcher =
-    (factors.pitcherAdvantage ?? 0) * 1.45
+    (factors.pitcherAdvantage ?? 0) *
+    getWeight(weights, 'pitcherAdvantage')
 
   const injury =
-    (factors.injuryImpact ?? 0) * 1.3
+    (factors.injuryImpact ?? 0) *
+    getWeight(weights, 'injuryImpact')
 
   const weather =
-    (factors.weatherImpact ?? 0) * 0.75
+    (factors.weatherImpact ?? 0) *
+    getWeight(weights, 'weatherImpact')
 
-  return (
-    homeAway +
-    headToHead +
-    pitcher -
-    injury +
-    weather
-  )
+  return homeAway + headToHead + pitcher - injury + weather
 }
 
 export function calculatePredictionV4(
   input: PredictionInput,
-  factors: PredictionV3Factors = {}
+  factors: PredictionV3Factors = {},
+  weights?: PredictionV4Weights
 ): PredictionResult {
   const base = calculatePredictionV3(input, factors)
 
-  const weightedAdjustment =
-    calculateWeightedFactorAdjustment(factors)
+  const weightedAdjustment = calculateWeightedFactorAdjustment(
+    factors,
+    weights
+  )
 
   const rawModelProbability = clamp(
     base.modelProbability + weightedAdjustment * 0.45,
@@ -72,11 +99,10 @@ export function calculatePredictionV4(
     97
   )
 
-  const adjustedModelProbability =
-    adjustModelProbabilityForExtremeOdds(
-      rawModelProbability,
-      base.odds
-    )
+  const adjustedModelProbability = adjustModelProbabilityForExtremeOdds(
+    rawModelProbability,
+    base.odds
+  )
 
   const edge =
     adjustedModelProbability -
@@ -97,10 +123,7 @@ export function calculatePredictionV4(
     99
   )
 
-  const roundedModelProbability = round(
-    adjustedModelProbability
-  )
-
+  const roundedModelProbability = round(adjustedModelProbability)
   const roundedEdge = round(edge)
 
   const roundedEv = adjustEvForDisplay(
@@ -108,11 +131,10 @@ export function calculatePredictionV4(
     base.odds
   )
 
-  const roundedConfidence =
-    adjustConfidenceForRisk(
-      round(confidence),
-      base.odds
-    )
+  const roundedConfidence = adjustConfidenceForRisk(
+    round(confidence),
+    base.odds
+  )
 
   return {
     ...base,
@@ -123,8 +145,7 @@ export function calculatePredictionV4(
     recommendedPick: isRecommendedPick({
       americanOdds: base.odds,
       impliedProbability: base.impliedProbability,
-      modelProbability:
-        roundedModelProbability,
+      modelProbability: roundedModelProbability,
       edge: roundedEdge,
       ev: roundedEv,
       confidence: roundedConfidence,

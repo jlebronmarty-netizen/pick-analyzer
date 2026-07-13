@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-type PredictionHistoryInput = {
+export type PredictionHistoryInput = {
   sport_key: string
   game_id: string
   commence_time: string
@@ -17,6 +17,23 @@ type PredictionHistoryInput = {
   ev: number
   confidence: number
   recommended_pick: boolean
+  selection?: string | null
+  line?: number | null
+  projected_line?: number | null
+  odds_timestamp?: string | null
+  generated_at?: string
+  cutoff_at?: string | null
+  model_version?: string | null
+  feature_snapshot?: Record<string, unknown>
+  validation_warnings?: string[]
+  validation_status?: string
+  lifecycle_status?: string
+  skip_reason?: string | null
+  settlement_market?: string | null
+  status?: string
+  result?: string
+  stake?: number
+  profit?: number | null
 }
 
 export async function savePredictionHistory(rows: PredictionHistoryInput[]) {

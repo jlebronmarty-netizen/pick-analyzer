@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/capture-predictions",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/nba/sync",
+      "schedule": "0 9,15,21 * * *"
     }
   ]
 }

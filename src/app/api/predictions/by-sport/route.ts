@@ -1,9 +1,23 @@
-import { NextResponse } from 'next/server'
-import { getTopPicksBySport } from '@/services/sport-top-picks.service'
+import { NextRequest, NextResponse } from 'next/server'
+import { isSupportedSport } from '@/config/sports.config'
+import { getTopPicks } from '@/services/top-picks.service'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const result = await getTopPicksBySport()
+    const { searchParams } = new URL(request.url)
+    const requestedSport = searchParams.get('sport') ?? 'all'
+
+    if (!isSupportedSport(requestedSport)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Unsupported sport: ${requestedSport}`,
+        },
+        { status: 400 }
+      )
+    }
+
+    const result = await getTopPicks(requestedSport)
 
     return NextResponse.json(result)
   } catch (error) {
