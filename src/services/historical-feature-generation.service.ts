@@ -1128,7 +1128,6 @@ async function buildMlbLineMovementSnapshotCandidates({
 }) {
   const blockingReasons: Record<string, number> = {}
   const warnings: string[] = []
-  const targetProviderGameId = eventId ? null : '78723'
   let eventsQuery = supabaseAdmin
     .from('sport_events')
     .select('id, sport_key, league_key, season, home_team_id, away_team_id, home_team, away_team, start_time, status, provider_ids, metadata, created_at, updated_at')
@@ -1146,12 +1145,7 @@ async function buildMlbLineMovementSnapshotCandidates({
     throw new Error(`Failed to load MLB event for snapshot candidates: ${eventsResult.error.message}`)
   }
 
-  const events = ((eventsResult.data ?? []) as StoredEventRow[])
-    .filter((event) => {
-      if (eventId) return true
-      return providerIdFrom(event.provider_ids) === targetProviderGameId
-    })
-    .slice(0, maximumEvents)
+  const events = ((eventsResult.data ?? []) as StoredEventRow[]).slice(0, maximumEvents)
   const candidates: HistoricalFeatureSnapshotWriteCandidate[] = []
   let eligibleEvents = 0
   let rejectedEvents = 0

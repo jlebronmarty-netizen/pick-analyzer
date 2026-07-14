@@ -1,6 +1,6 @@
 # SportsDataIO MLB Catalog
 
-Status: Discovery Lab endpoint catalog confirmed. MLB Real Data Validation Batch V1 persisted quarantined teams, players, events, stats and odds. GameId `78723` completed bounded quarantined feature/prediction lineage validation; production promotion remains blocked.
+Status: Discovery Lab endpoint catalog confirmed. MLB Real Data Validation Batch V1 persisted quarantined teams, players, events, stats and odds. All 15 `2026-JUL-12` events now have line-movement coverage and bounded quarantined feature/prediction lineage validation; production promotion remains blocked.
 
 ## Provider Variants
 
@@ -39,6 +39,8 @@ Line Movement Probe V1 selected completed mapped GameId `78723` and called `Game
 
 Bounded Feature/Prediction Lineage V1 used zero provider calls after the line-movement probe. The existing Feature Store route selected the `Consensus` odds rows at `2026-07-12T12:04:59.000Z`, one second before the `2026-07-12T12:05:00.000Z` cutoff: moneyline home `-126`, run line home `-1.5` at `+165` mapped internally to `spread`, and total over `7.5` at `-118`. It inserted 3 quarantined feature snapshots on first run, reused all 3 on rerun, inserted 3 linked predictions on first run, reused all 3 on rerun, settled them as 3 wins and verified 0 duplicate identities, 0 orphan links, 0 recommended picks, 0 production-eligible rows, 0 production leakage and 0 CLV rows claimed.
 
+Line Movement Expansion Batch V1 called the same `GameOddsLineMovement/{gameid}` endpoint once for each remaining persisted `2026-JUL-12` GameId: `78729`, `78724`, `78730`, `78732`, `78731`, `78722`, `78725`, `78727`, `78726`, `78733`, `78734`, `78735`, `78728`, `78736`. All 14 calls returned HTTP 200, inserted 32,722 new quarantined line-movement rows, and brought the full date to 36,442 line-movement rows with 25,498 cutoff-safe rows. The multi-game lineage batch inserted 42 new feature snapshots and reused 3, inserted 42 new linked predictions and reused 3, then reran idempotently with 45 reused rows. Settlement completed for all 45 technical predictions as 21 wins and 24 losses, with 0 pushes, 0 voids, 0 production recommendations and 0 production leakage.
+
 Date formats observed from provider docs remain endpoint-specific. Most Fantasy and game/stat feeds use `YYYY-MMM-DD`, for example `2026-JUL-13`. `GameOddsByDate` documentation also shows `YYYY-MM-DD`; do not assume the formats are interchangeable.
 
 ## Batch V1 Stop
@@ -47,7 +49,7 @@ The first selected date, `2026-07-13`, was chosen because it was the most recent
 
 No raw payloads were stored and no production promotion occurred.
 
-The next executable step is not a broad provider retry or production promotion. The bounded feature/prediction lineage extension over GameId `78723` is complete; approve a maximum-14-call line-movement expansion for the remaining `2026-07-12` events only if the same quarantine and no-promotion rules should be applied to a larger sample.
+The next executable step is not a broad provider retry or production promotion. The full `2026-JUL-12` line-movement and quarantined technical lineage batch is complete. Next steps require explicit approval for production-promotion rules, a closing-line policy and a larger-sample validation plan.
 
 ## Data Promotion
 

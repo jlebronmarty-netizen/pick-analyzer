@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-14 - Expand MLB Line Movement And Keep Production Gate Closed
+
+Context: GameId `78723` had proven one-game line-movement normalization and bounded Feature Store -> Prediction History -> Settlement lineage. The next approved step was the remaining 14 persisted `2026-JUL-12` MLB events, with a hard cap of 14 provider calls and no production promotion.
+
+Decision: Run a pre-expansion Supabase audit, exclude `78723`, verify the remaining 14 provider GameIds, and call only `GET /api/mlb/odds/json/GameOddsLineMovement/{gameid}` sequentially with concurrency 1, no retries and a 15 second timeout. Reuse the validated MLB line-movement normalizer, persist only quarantined full-game moneyline, run-line and total rows, write one sync-job audit scope per game, then reuse the existing Feature Store route actions for a bounded 45-snapshot and 45-prediction technical batch.
+
+Consequences: All 14 expansion calls returned HTTP 200. The batch inserted 32,722 new line-movement rows and brought full-date line movement coverage to 36,442 rows, including 25,498 cutoff-safe rows across all 15 events. The Feature Store batch inserted 42 new snapshots and reused 3, then reran with 45 reused. Prediction lineage inserted 42 new linked predictions and reused 3, then reran with 45 reused. Settlement is complete for 45 rows: 21 wins, 24 losses, 0 pushes, 0 voids and 0 pending. Direct audits found 0 duplicate keys, 0 orphan links, 0 public recommendations, 0 production-eligible rows and 0 production leakage. CLV readiness has 42 later-pregame comparison candidates but remains quarantined and not a production closing-line metric.
+
+Affected modules: SportsDataIO MLB normalization/persistence runner, Feature Store MLB branch, Daily Sync disabled MLB capture descriptor, expansion docs and governance docs.
+
 ## 2026-07-14 - Complete One-Game MLB Feature Prediction Lineage Under Quarantine
 
 Context: The GameId `78723` line-movement probe had already persisted 3,720 quarantined odds rows and identified 2,586 cutoff-safe pregame rows, but the durable feature snapshot and prediction lineage actions were NBA-specific.

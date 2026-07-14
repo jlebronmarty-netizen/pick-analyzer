@@ -36,4 +36,4 @@ The 27 SportsDataIO NBA trial predictions remain technical-validation data. Prod
 
 ## Current MLB Quarantine Result
 
-SportsDataIO MLB Discovery Lab rows are real and non-scrambled, but remain quarantined with `production_eligible=false`. The GameId `78723` line-movement probe produced timestamp-safe odds, but no production recommendations, ROI, CLV, calibration, model learning or promotion are enabled until an MLB-compatible lineage path and explicit production approval exist.
+SportsDataIO MLB Discovery Lab rows are real and non-scrambled, but remain quarantined with `production_eligible=false`. MLB Line Movement Expansion Batch V1 produced full-date `2026-JUL-12` line-movement coverage with 36,442 line-movement odds rows, 45 quarantined feature snapshots, 45 linked settled technical predictions, 0 production recommendations, 0 production-eligible rows and 0 production leakage. Production ROI, CLV, calibration, model learning, bankroll, Kelly, portfolio output and promotion remain blocked until explicit production approval, a closing-line policy and sufficient production-eligible sample rules exist.

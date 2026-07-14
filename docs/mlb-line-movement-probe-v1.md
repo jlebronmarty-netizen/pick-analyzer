@@ -89,14 +89,16 @@ Reason: the bounded validation proves the durable Feature Store -> Prediction Hi
 
 ## Expansion Packet
 
-Recommended later expansion: yes, with explicit approval.
+Expansion status: completed as MLB Line Movement Expansion Batch V1 with explicit approval.
 
-- maximum additional provider calls: 14
-- eligible events estimate: 14
-- expected rows per event from probe: about 3,720
-- estimated maximum rows: about 52,080
+- additional provider calls used: 14
+- completed remaining events: 14
+- new line-movement rows inserted: 32,722
+- full-date line-movement rows: 36,442
+- full-date cutoff-safe rows: 25,498
 - persistence targets: `sports_odds_snapshots`, `sports_sync_jobs`
 - rollback/quarantine plan: no destructive action; rows are identifiable by `metadata.sourceEndpoint`, deterministic `line_movement` IDs and `production_eligible=false`
+- downstream technical lineage: 45 quarantined feature snapshots, 45 linked settled predictions, 0 production leakage
 
 ## Daily Pregame Capture Plan
 

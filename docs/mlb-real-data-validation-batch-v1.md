@@ -4,9 +4,9 @@ Last updated: 2026-07-14
 
 ## Status
 
-Status: completed for quarantined events, players, team game stats, player game stats, date-level full-game odds and one-event line-movement odds; feature/prediction handoff remains blocked.
+Status: completed for quarantined events, players, team game stats, player game stats, date-level full-game odds, full-date line-movement odds and bounded technical feature/prediction lineage.
 
-Reason: the first selected completed date, `2026-07-13`, returned no games, team game stats, player game stats or game odds. A reserved validation call confirmed `2026-07-12` has 15 game records, but the 10-call budget was mostly consumed, so the batch stopped safely before persistence. The first follow-up stopped on a Supabase `sport_player_stats` existing-ID preflight `Bad Request` before any upsert. The corrected retry used conservative 100-ID preflight chunks and completed bounded quarantined persistence for the one-date batch. The approved odds-only retry fixed the `GameId`/`GameID` and nested `PregameOdds` normalizer, persisted 90 quarantined odds rows, then stopped before feature/prediction handoff because 0 date-level odds rows were timestamp-safe relative to stored event starts. Line Movement Probe V1 then proved timestamp-safe historical movement exists for GameId `78723`, but feature/prediction handoff remains blocked because the current durable lineage pilot is NBA-specific.
+Reason: the first selected completed date, `2026-07-13`, returned no games, team game stats, player game stats or game odds. A reserved validation call confirmed `2026-07-12` has 15 game records, but the 10-call budget was mostly consumed, so the batch stopped safely before persistence. The first follow-up stopped on a Supabase `sport_player_stats` existing-ID preflight `Bad Request` before any upsert. The corrected retry used conservative 100-ID preflight chunks and completed bounded quarantined persistence for the one-date batch. The approved odds-only retry fixed the `GameId`/`GameID` and nested `PregameOdds` normalizer, persisted 90 quarantined odds rows, then stopped before feature/prediction handoff because 0 date-level odds rows were timestamp-safe relative to stored event starts. Line Movement Probe V1 proved timestamp-safe historical movement exists for GameId `78723`. Line Movement Expansion Batch V1 then expanded to the remaining 14 events, and the existing Feature Store route completed a bounded 45-snapshot, 45-prediction quarantined technical lineage and settlement batch.
 
 ## Scope
 
@@ -25,6 +25,8 @@ Reason: the first selected completed date, `2026-07-13`, returned no games, team
 - Odds-only retry calls used: 1
 - Line-movement probe call cap: 1
 - Line-movement probe calls used: 1
+- Line-movement expansion call cap: 14
+- Line-movement expansion calls used: 14
 - Concurrency: 1
 - Retries: 0
 - Timeout: 15 seconds
@@ -93,6 +95,12 @@ Line-movement probe endpoint counts:
 | # | Endpoint | Status | Records |
 | --- | --- | --- | ---: |
 | 1 | `/api/mlb/odds/json/GameOddsLineMovement/78723` | 200 | 1 top-level game, 624 nested movement records |
+
+Line-movement expansion endpoint counts:
+
+| Calls | Endpoint family | Status | Records |
+| ---: | --- | --- | ---: |
+| 14 | `/api/mlb/odds/json/GameOddsLineMovement/{gameid}` | all HTTP 200 | 14 top-level games, 5,490 nested movement records |
 
 ## Sanitized Payload Shapes
 
@@ -215,6 +223,25 @@ Line-movement probe persistence:
 - at/after event start: 1,086
 - local idempotency: would insert 0 on local reprocessing
 - sync job: `56db235c-8837-426f-8e84-e6e0ebc70a97`
+
+Line-movement expansion persistence:
+
+- remaining provider GameIds: `78729`, `78724`, `78730`, `78732`, `78731`, `78722`, `78725`, `78727`, `78726`, `78733`, `78734`, `78735`, `78728`, `78736`
+- provider calls used: 14
+- HTTP statuses: all 200
+- nested movement records returned: 5,490
+- new normalized rows inserted: 32,722
+- reused: 0
+- rejected persisted rows: 0
+- unresolved events: 0
+- duplicate logical rows: 0
+- full-date line-movement rows: 36,442
+- full-date cutoff-safe rows: 25,498
+- events with usable history: 15 of 15
+- feature snapshots: 42 inserted, 3 reused; rerun 45 reused
+- predictions: 42 inserted, 3 reused; rerun 45 reused
+- settlement: 21 wins, 24 losses, 0 pushes, 0 voids, 0 pending
+- production leakage: 0
 
 Rows skipped: 0.
 
