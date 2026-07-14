@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { isProductionEligibleRow } from '@/services/production-data-gate.service'
 
 export type BacktestResult = {
   roi: number
@@ -14,6 +15,9 @@ type Prediction = {
   status: string | null
   profit: number | null
   stake: number | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 function getResult(p: Prediction) {
@@ -24,11 +28,12 @@ export async function runHistoricalBacktest() {
   const { data } = await supabaseAdmin
     .from('prediction_history')
     .select(
-      'confidence,edge,ev,result,status,profit,stake'
+      'confidence,edge,ev,result,status,profit,stake,production_eligible,trial,scrambled'
     )
     .eq('recommended_pick', true)
+    .eq('production_eligible', true)
 
-  const rows = (data ?? []) as Prediction[]
+  const rows = ((data ?? []) as Prediction[]).filter(isProductionEligibleRow)
 
   const settled = rows.filter(r =>
     ['win', 'loss'].includes(getResult(r))

@@ -676,13 +676,29 @@ function eventIsTrial(row: TrialLineageEventRow) {
 function firstAvailableOdds(snapshot: StoredHistoricalFeatureSnapshotRow) {
   const values = safeJsonObject(snapshot.feature_values)
   const rows = Array.isArray(values.odds) ? values.odds : []
+  const market = String(snapshot.market ?? '')
+  const preferredOutcome = market === 'total' ? 'over' : 'home'
   for (const row of rows) {
     const item = safeJsonObject(row)
+    if (String(item.market ?? '') !== market) continue
+    const outcome = String(item.outcome ?? '').toLowerCase()
+    if (preferredOutcome && outcome !== preferredOutcome) continue
     const price = Number(item.price)
     if (Number.isFinite(price) && price !== 0) {
       return {
         price,
-        line: Number.isFinite(Number(item.line)) ? Number(item.line) : null,
+        line: market === 'moneyline' ? null : Number.isFinite(Number(item.line)) ? Number(item.line) : null,
+      }
+    }
+  }
+  for (const row of rows) {
+    const item = safeJsonObject(row)
+    if (String(item.market ?? '') !== market) continue
+    const price = Number(item.price)
+    if (Number.isFinite(price) && price !== 0) {
+      return {
+        price,
+        line: market === 'moneyline' ? null : Number.isFinite(Number(item.line)) ? Number(item.line) : null,
       }
     }
   }
@@ -1135,17 +1151,18 @@ async function buildNbaTrialSnapshotCandidates({
     for (const market of selectedMarkets) {
       if (candidates.length >= maximumSnapshots) break
 
+      const marketSafeOdds = safeOdds.filter((row) => row.market === market)
       const modelVersion = `${event.sport_key}_model_v1`
       const featureSetVersion = `${event.sport_key}_${market}_feature_set_v1`
       const sourceRecordIds = [
         ...safeLineups.map((row) => `sport_lineups:${row.id}`),
         ...safeStats.map((row) => `sport_player_stats:${row.id}`),
-        ...safeOdds.map((row) => `sports_odds_snapshots:${row.id}`),
+        ...marketSafeOdds.map((row) => `sports_odds_snapshots:${row.id}`),
       ].sort()
       const sourceTimestamps = Object.fromEntries([
         ...safeLineups.map((row) => [`sport_lineups:${row.id}`, iso(row.source_timestamp)!]),
         ...safeStats.map((row) => [`sport_player_stats:${row.id}`, iso(row.source_timestamp)!]),
-        ...safeOdds.map((row) => [`sports_odds_snapshots:${row.id}`, iso(row.snapshot_time)!]),
+        ...marketSafeOdds.map((row) => [`sports_odds_snapshots:${row.id}`, iso(row.snapshot_time)!]),
       ])
       const featureLineage = {
         source: 'persisted_normalized_records_only',
@@ -1153,7 +1170,7 @@ async function buildNbaTrialSnapshotCandidates({
           new Set([
             safeLineups.length ? 'sport_lineups' : null,
             safeStats.length ? 'sport_player_stats' : null,
-            safeOdds.length ? 'sports_odds_snapshots' : null,
+            marketSafeOdds.length ? 'sports_odds_snapshots' : null,
           ].filter(Boolean))
         ),
         sourceRecordIds,
@@ -1204,7 +1221,7 @@ async function buildNbaTrialSnapshotCandidates({
           contextCounts: {
             lineups: safeLineups.length,
             playerStats: safeStats.length,
-            odds: safeOdds.length,
+            odds: marketSafeOdds.length,
             sourceRecords: sourceCount,
           },
           lineups: safeLineups.slice(0, 50).map((row) => ({
@@ -1227,7 +1244,7 @@ async function buildNbaTrialSnapshotCandidates({
             assists: row.assists,
             minutes: row.minutes,
           })),
-          odds: safeOdds.slice(0, 20).map((row) => ({
+          odds: marketSafeOdds.slice(0, 20).map((row) => ({
             id: row.id,
             sportsbook: row.sportsbook,
             market: row.market,
@@ -2097,9 +2114,9 @@ export async function runHistoricalFeatureSnapshotWritePilot(
   const generatedAt = new Date().toISOString()
   const dryRun = request.dryRun ?? true
   const confirmed = request.confirmed === true
-  const maximumEvents = clampWriteCap(request.maximumEvents, 5, 5)
+  const maximumEvents = clampWriteCap(request.maximumEvents, 5, 50)
   const maximumMarketsPerEvent = clampWriteCap(request.maximumMarketsPerEvent, 3, 3)
-  const maximumSnapshots = clampWriteCap(request.maximumSnapshots, 15, 15)
+  const maximumSnapshots = clampWriteCap(request.maximumSnapshots, 15, 50)
   const markets = (request.markets?.length ? request.markets : ['moneyline', 'spread', 'total'])
     .filter((market): market is MarketKey => ['moneyline', 'spread', 'total'].includes(String(market)))
     .slice(0, maximumMarketsPerEvent)
@@ -2699,8 +2716,8 @@ export async function runHistoricalPredictionLineagePilot(
   const generatedAt = new Date().toISOString()
   const dryRun = request.dryRun ?? true
   const confirmed = request.confirmed === true
-  const maximumSnapshots = clampWriteCap(request.maximumSnapshots, 15, 15)
-  const maximumPredictions = clampWriteCap(request.maximumPredictions, 5, 5)
+  const maximumSnapshots = clampWriteCap(request.maximumSnapshots, 15, 50)
+  const maximumPredictions = clampWriteCap(request.maximumPredictions, 5, 50)
   const settle = request.settle !== false
   const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
   const schemaStatus = featureSnapshotSchemaStatus(schemaCapabilities)

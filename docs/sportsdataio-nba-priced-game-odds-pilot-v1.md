@@ -84,6 +84,23 @@ Immediate idempotency rerun:
 
 Backtesting/calibration remain blocked for production use because the linked rows are trial/scrambled/non-production and have no genuine distinct closing snapshots.
 
+## Trial Validation Batch V1
+
+NBA Trial Validation Batch V1 reused the corrected priced odds rows without additional provider calls. The existing Feature Store actions generated 27 market-specific trial snapshots across 9 completed SportsDataIO NBA events, inserted 22 new trial predictions while reusing the 5 existing linked predictions, and reused all 27 on immediate rerun. Final linked trial state is:
+
+- moneyline predictions: 9
+- spread predictions: 9
+- total predictions: 9
+- settled predictions: 27
+- wins: 9
+- losses: 18
+- pushes: 0
+- voids: 0
+- duplicate prediction identities: 0
+- production leakage: 0
+
+These rows are technical validation only and cannot feed production ROI, CLV, calibration, recommendations, bankroll, portfolio or model-promotion paths.
+
 ## Cleanup Verification
 
 Approved cleanup was executed on 2026-07-14 using this selector:

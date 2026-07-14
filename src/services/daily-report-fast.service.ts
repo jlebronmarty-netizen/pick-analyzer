@@ -3,6 +3,7 @@ import { getClvAnalytics } from '@/services/clv-analytics.service'
 import { getModelCalibration } from '@/services/model-calibration.service'
 import { getModelWeights } from '@/services/model-learning.service'
 import { getTopPicks } from '@/services/top-picks.service'
+import { PRODUCTION_DATA_GATE_V1_POLICY } from '@/services/production-data-gate.service'
 
 type Pick = {
   id: string
@@ -182,6 +183,7 @@ export async function getDailyReportFast(bankroll = 1000) {
       sportKey: 'baseball_mlb',
       adaptiveWeightsAvailable: false,
       summary: {
+        productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
         pendingPicks: 0,
         safePendingPicks: 0,
         recommendedPicks: 0,

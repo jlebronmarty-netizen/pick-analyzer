@@ -1,4 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import {
+  PRODUCTION_DATA_GATE_V1_POLICY,
+  isProductionEligibleRow,
+} from '@/services/production-data-gate.service'
 
 type PredictionRow = {
   id: string
@@ -13,6 +17,9 @@ type PredictionRow = {
   profit: number | null
   model_version: string | null
   feature_snapshot: Record<string, unknown> | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 type MetricSegment = {
@@ -125,13 +132,14 @@ async function loadRows() {
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
     .select(
-      'id, sport_key, market, result, odds, model_probability, confidence, ev, stake, profit, model_version, feature_snapshot'
+      'id, sport_key, market, result, odds, model_probability, confidence, ev, stake, profit, model_version, feature_snapshot, production_eligible, trial, scrambled'
     )
+    .eq('production_eligible', true)
     .limit(5000)
 
   if (error) throw error
 
-  return (data ?? []) as PredictionRow[]
+  return ((data ?? []) as PredictionRow[]).filter(isProductionEligibleRow)
 }
 
 export async function getModelMetricsFramework() {
@@ -145,6 +153,7 @@ export async function getModelMetricsFramework() {
     providerUsage: {
       externalProviderCallsMade: 0,
       source: 'prediction_history',
+      productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
     },
     status:
       settled.length >= 100

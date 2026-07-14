@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { isProductionEligibleRow } from '@/services/production-data-gate.service'
 
 type PredictionRow = {
   sport_key: string
@@ -9,6 +10,9 @@ type PredictionRow = {
   profit: number | null
   settled_at: string | null
   commence_time: string | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 function getRowResult(row: PredictionRow) {
@@ -136,14 +140,15 @@ export async function getAnalyticsCharts() {
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
     .select(
-      'sport_key, team, status, result, stake, profit, settled_at, commence_time'
+      'sport_key, team, status, result, stake, profit, settled_at, commence_time, production_eligible, trial, scrambled'
     )
+    .eq('production_eligible', true)
 
   if (error) {
     throw new Error(error.message)
   }
 
-  const rows = (data ?? []) as PredictionRow[]
+  const rows = ((data ?? []) as PredictionRow[]).filter(isProductionEligibleRow)
 
   const teamPerformance = buildTeamPerformance(rows)
 

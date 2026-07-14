@@ -12,8 +12,8 @@ Action: `historical_prediction_snapshot_lineage_pilot`
 
 Caps:
 
-- maximum snapshots considered: 15
-- maximum predictions persisted: 5
+- maximum snapshots considered: 50
+- maximum predictions persisted: 50
 - maximum one prediction per snapshot
 - concurrency: 1
 - retries: 0
@@ -50,6 +50,47 @@ Corrected verification result:
 - wins: 3
 - losses: 2
 
+## Batch V1 Result
+
+NBA Trial Validation Batch V1 reused the same action with `maximumSnapshots=50`, `maximumPredictions=50`, `dryRun=false`, `confirmed=true` and `settle=true`.
+
+First batch run:
+
+- provider calls: 0
+- snapshots considered: 47
+- eligible snapshots: 27
+- rejected snapshots: 20
+- rejection reason: `missing_genuine_offered_price=15`
+- predictions inserted: 22
+- predictions reused: 5
+- predictions rejected: 0
+- prediction failures: 0
+- duplicate prediction identities: 0
+- duplicate snapshot links: 0
+- settlement attempted: 22
+- settlement completed: 22
+
+Immediate rerun:
+
+- predictions inserted: 0
+- predictions reused: 27
+- settlement attempted: 0
+- duplicate prediction identities: 0
+- duplicate snapshot links: 0
+
+Final linked trial state:
+
+- linked trial predictions: 27
+- moneyline: 9
+- spread: 9
+- total: 9
+- wins: 9
+- losses: 18
+- pushes: 0
+- voids: 0
+- production-eligible predictions: 0
+- production recommendations: 0
+
 ## Priced Odds Follow-Up
 
 The 2026-07-14 SportsDataIO `GameOddsByDate/2025-12-26` pilot confirmed HTTP 200 priced payload access and persisted trial-only odds rows. The approved cleanup deleted 936 alternate-like rows and retained 540 full-game `PregameOdds` rows.
@@ -61,10 +102,10 @@ Read-only cutoff comparison found 15 matching event/market snapshots and 15 vali
 ## Safety
 
 - Provider calls: 0
-- Prediction rows inserted: 5
-- Prediction rows reused on rerun: 5
+- Prediction rows inserted across Batch V1: 22
+- Prediction rows reused on Batch V1 rerun: 27
 - Snapshot rows mutated: 0
-- Settlement rows updated: 5
+- Settlement rows updated across Batch V1: 22
 - Production recommendations created: 0
 - ROI, CLV, calibration and model promotion remain blocked
 

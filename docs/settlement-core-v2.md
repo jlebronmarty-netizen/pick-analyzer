@@ -1,5 +1,7 @@
 # Settlement Core V2
 
+Update 2026-07-14: Deterministic NBA total fixtures now cover over wins/loses, under wins/loses, push, decimal line, full-game overtime score basis, first-half score basis, missing line rejection, missing final pending state and ambiguous mapping rejection.
+
 Settlement Core V2 adds reusable settlement primitives for common market grading.
 
 ## Scope
@@ -34,7 +36,7 @@ NBA Prediction Settlement V1 remains unchanged. The generic settlement primitive
 
 Settlement alone does not make a prediction eligible for production backtesting, ROI, CLV or calibration. Those paths also require durable prediction-time feature lineage through applied migration `202607140001_historical_feature_snapshots_v1.sql`, a genuine offered price, production eligibility and a real closing snapshot for CLV. Trial lineage rows may validate settlement contracts but cannot feed production metrics.
 
-The SportsDataIO `GameOddsByDate` trial odds cleanup does not change settlement readiness. No linked trial predictions were inserted and no settlement updates were attempted.
+The SportsDataIO `GameOddsByDate` trial odds cleanup plus NBA Trial Validation Batch V1 validated settlement over linked trial rows without changing production readiness. The bounded batch settled 27 trial predictions across moneyline, spread and total with 9 wins, 18 losses, 0 pushes and 0 voids, then reran idempotently with 0 additional settlement updates. These rows remain trial/scrambled/non-production and do not feed production ROI, CLV, calibration or model promotion.
 
 ## Deterministic Validation
 

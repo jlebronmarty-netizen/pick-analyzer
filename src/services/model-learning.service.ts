@@ -3,6 +3,7 @@ import { saveModelVersion } from '@/services/model-versioning.service'
 import { getModelCalibration } from '@/services/model-calibration.service'
 import { runHistoricalBacktest } from '@/services/model-backtest.service'
 import { optimizeModelWeights } from '@/services/weight-optimizer.service'
+import { isProductionEligibleRow } from '@/services/production-data-gate.service'
 
 export type ModelFactor =
   | 'homeAwayAdvantage'
@@ -22,6 +23,9 @@ type PredictionRow = {
   confidence: number | null
   edge: number | null
   ev: number | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 type ModelWeightRow = {
@@ -179,16 +183,19 @@ export async function runModelLearning(sportKey = 'baseball_mlb') {
   const { data: predictions, error: predictionError } = await supabaseAdmin
     .from('prediction_history')
     .select(
-      'sport_key, result, status, profit, stake, recommended_pick, model_probability, confidence, edge, ev'
+      'sport_key, result, status, profit, stake, recommended_pick, model_probability, confidence, edge, ev, production_eligible, trial, scrambled'
     )
     .eq('sport_key', sportKey)
     .eq('recommended_pick', true)
+    .eq('production_eligible', true)
 
   if (predictionError) {
     throw new Error(predictionError.message)
   }
 
-  const performance = calculatePerformance((predictions ?? []) as PredictionRow[])
+  const performance = calculatePerformance(
+    ((predictions ?? []) as PredictionRow[]).filter(isProductionEligibleRow)
+  )
 
   const { data: weights, error: weightError } = await supabaseAdmin
     .from('model_weights')

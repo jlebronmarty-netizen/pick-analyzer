@@ -1,4 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import {
+  PRODUCTION_DATA_GATE_V1_POLICY,
+  isProductionEligibleRow,
+} from '@/services/production-data-gate.service'
 
 type SettledPredictionRow = {
   id: string
@@ -15,6 +19,9 @@ type SettledPredictionRow = {
   edge: number
   ev: number
   recommended_pick: boolean | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
   status: string | null
   result: string | null
   created_at?: string | null
@@ -575,8 +582,9 @@ export async function getAICoachAnalysis({
   let query = supabaseAdmin
     .from('prediction_history')
     .select(
-      'id, sport_key, game_id, commence_time, team, opponent, market, sportsbook, odds, model_probability, confidence, edge, ev, recommended_pick, status, result, created_at'
+      'id, sport_key, game_id, commence_time, team, opponent, market, sportsbook, odds, model_probability, confidence, edge, ev, recommended_pick, production_eligible, trial, scrambled, status, result, created_at'
     )
+    .eq('production_eligible', true)
     .order('commence_time', {
       ascending: false,
     })
@@ -598,7 +606,7 @@ export async function getAICoachAnalysis({
 
   const settledRows = (
     (data ?? []) as SettledPredictionRow[]
-  ).filter((row) => Boolean(getResolvedResult(row)))
+  ).filter((row) => isProductionEligibleRow(row) && Boolean(getResolvedResult(row)))
 
   const overallAccumulator = createAccumulator(
     'overall',
@@ -820,6 +828,7 @@ export async function getAICoachAnalysis({
     },
 
     dataQuality: {
+      productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
       level: dataQuality,
       settledPredictions: overall.bets,
       message:

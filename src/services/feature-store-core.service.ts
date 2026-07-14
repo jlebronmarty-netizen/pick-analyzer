@@ -1,5 +1,9 @@
 import { SportKey } from '@/config/sports.config'
 import { MarketKey } from '@/types/multi-sport'
+import {
+  PRODUCTION_DATA_GATE_V1_POLICY,
+  evaluateProductionDataGate,
+} from '@/services/production-data-gate.service'
 
 export type FeatureValueType = 'number' | 'string' | 'boolean' | 'json'
 export type FeatureSeverity = 'info' | 'warning' | 'error'
@@ -371,9 +375,33 @@ export function runFeatureStoreValidation() {
   })
   const validCheck = validateFeatureSnapshotLeakage(validSnapshot)
   const leakageCheck = validateFeatureSnapshotLeakage(leakageSnapshot)
+  const productionGateCheck = evaluateProductionDataGate(
+    {
+      production_eligible: true,
+      trial: false,
+      scrambled: false,
+      feature_snapshot_id: validSnapshot.id,
+      feature_set_version: validSnapshot.storeVersion,
+      feature_snapshot_generated_at: validSnapshot.generatedAt,
+      generated_at: validSnapshot.generatedAt,
+      cutoff_at: validSnapshot.cutoffAt,
+      odds: -110,
+    },
+    'feature_store'
+  )
+  const trialGateCheck = evaluateProductionDataGate(
+    {
+      production_eligible: false,
+      trial: true,
+      scrambled: true,
+      feature_snapshot_id: validSnapshot.id,
+      odds: -110,
+    },
+    'feature_store'
+  )
 
   return {
-    success: validCheck.valid && !leakageCheck.valid,
+    success: validCheck.valid && !leakageCheck.valid && productionGateCheck.eligible && !trialGateCheck.eligible,
     mode: 'feature_store_core_validation_v1',
     generatedAt: new Date().toISOString(),
     providerUsage: {
@@ -386,6 +414,14 @@ export function runFeatureStoreValidation() {
       validSnapshotIssues: validCheck.issues.length,
       leakageSnapshotIssues: leakageCheck.issues.length,
       detectedLeakage: !leakageCheck.valid,
+      productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
+      productionGateAcceptedFixture: productionGateCheck.eligible,
+      productionGateRejectedTrialFixture: !trialGateCheck.eligible,
+    },
+    productionDataGate: {
+      policy: PRODUCTION_DATA_GATE_V1_POLICY,
+      productionFixture: productionGateCheck,
+      trialFixture: trialGateCheck,
     },
     validSnapshot,
     leakageSnapshot: {

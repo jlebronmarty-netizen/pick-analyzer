@@ -1,4 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import {
+  evaluateProductionDataGate,
+  isProductionEligibleRow,
+} from '@/services/production-data-gate.service'
 
 export type PredictionHistoryInput = {
   sport_key: string
@@ -51,9 +55,29 @@ export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
     }
   }
 
+  const gatedRows = rows.map((row) => {
+    const gate = evaluateProductionDataGate(row, 'prediction_persistence')
+    const validationWarnings = [
+      ...(row.validation_warnings ?? []),
+      ...(row.production_eligible === true && !gate.eligible
+        ? [`Production Data Gate blocked production eligibility: ${gate.blockedReasons.join('; ')}`]
+        : []),
+    ]
+
+    return {
+      ...row,
+      production_eligible: gate.eligible,
+      validation_warnings: validationWarnings,
+      validation_status:
+        row.production_eligible === true && !gate.eligible
+          ? 'blocked_by_production_data_gate_v1'
+          : row.validation_status,
+    }
+  })
+
   const { error } = await supabaseAdmin
     .from('prediction_history')
-    .upsert(rows, {
+    .upsert(gatedRows, {
       onConflict: 'sport_key,game_id,team,market,sportsbook',
     })
 
@@ -63,7 +87,7 @@ export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
 
   return {
     success: true,
-    saved: rows.length,
+    saved: gatedRows.length,
   }
 }
 
@@ -133,6 +157,7 @@ export async function getPredictionPerformance(sportKey?: string) {
     .from('prediction_history')
     .select('*')
     .neq('result', 'pending')
+    .eq('production_eligible', true)
 
   if (sportKey) {
     query = query.eq('sport_key', sportKey)
@@ -142,7 +167,7 @@ export async function getPredictionPerformance(sportKey?: string) {
 
   if (error) throw new Error(error.message)
 
-  const rows = data ?? []
+  const rows = ((data ?? []) as PredictionHistoryInput[]).filter(isProductionEligibleRow)
   const wins = rows.filter((row) => row.result === 'win').length
   const losses = rows.filter((row) => row.result === 'loss').length
   const pushes = rows.filter((row) => row.result === 'push').length

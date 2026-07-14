@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { isProductionEligibleRow } from '@/services/production-data-gate.service'
 
 type PredictionRow = {
   sport_key: string
@@ -10,6 +11,9 @@ type PredictionRow = {
   stake: number | null
   status: string | null
   result: string | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 function getResult(row: PredictionRow) {
@@ -91,15 +95,19 @@ export async function discoverPatterns() {
       profit,
       stake,
       status,
-      result
+      result,
+      production_eligible,
+      trial,
+      scrambled
     `)
+    .eq('production_eligible', true)
 
   if (error) {
     throw new Error(error.message)
   }
 
   const rows = ((data ?? []) as PredictionRow[])
-    .filter(r => ['win', 'loss'].includes(getResult(r)))
+    .filter(r => isProductionEligibleRow(r) && ['win', 'loss'].includes(getResult(r)))
 
   const sports = groupBy(rows, r => r.sport_key)
   const books = groupBy(rows, r => r.sportsbook)

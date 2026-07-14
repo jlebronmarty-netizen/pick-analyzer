@@ -1,4 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import {
+  PRODUCTION_DATA_GATE_V1_POLICY,
+  isProductionEligibleRow,
+} from '@/services/production-data-gate.service'
 
 type PredictionRow = {
   sport_key: string
@@ -8,6 +12,9 @@ type PredictionRow = {
   status: string | null
   recommended_pick: boolean | null
   odds: number | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 type CalibrationBucket = {
@@ -159,16 +166,17 @@ export async function getModelCalibration() {
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
     .select(
-      'sport_key, model_probability, confidence, result, status, recommended_pick, odds'
+      'sport_key, model_probability, confidence, result, status, recommended_pick, odds, production_eligible, trial, scrambled'
     )
+    .eq('production_eligible', true)
     .neq('status', 'pending')
 
   if (error) {
     throw new Error(error.message)
   }
 
-  const rows = ((data ?? []) as PredictionRow[]).filter((row) =>
-    ['win', 'loss', 'push'].includes(getResult(row))
+  const rows = ((data ?? []) as PredictionRow[]).filter(
+    (row) => isProductionEligibleRow(row) && ['win', 'loss', 'push'].includes(getResult(row))
   )
 
   const recommendedRows = rows.filter((row) => row.recommended_pick === true)
@@ -188,6 +196,7 @@ export async function getModelCalibration() {
     success: true,
     generatedAt: new Date().toISOString(),
     sample: {
+      productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
       settledRows: rows.length,
       recommendedSettledRows: recommendedRows.length,
     },

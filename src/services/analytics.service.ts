@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { isProductionEligibleRow } from '@/services/production-data-gate.service'
 
 type PredictionRow = {
   sport_key: string
@@ -8,6 +9,9 @@ type PredictionRow = {
   stake: number | null
   profit: number | null
   recommended_pick: boolean | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 function getRowResult(row: PredictionRow) {
@@ -72,13 +76,14 @@ function groupBy(
 export async function getAnalyticsDashboard() {
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
-    .select('sport_key, team, status, result, stake, profit, recommended_pick')
+    .select('sport_key, team, status, result, stake, profit, recommended_pick, production_eligible, trial, scrambled')
+    .eq('production_eligible', true)
 
   if (error) {
     throw new Error(error.message)
   }
 
-  const rows = (data ?? []) as PredictionRow[]
+  const rows = ((data ?? []) as PredictionRow[]).filter(isProductionEligibleRow)
 
   const overall = calculateSummary(rows)
 

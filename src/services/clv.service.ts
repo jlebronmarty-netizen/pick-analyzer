@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { isProductionEligibleRow } from '@/services/production-data-gate.service'
 
 const ODDS_API_BASE_URL = 'https://api.the-odds-api.com/v4'
 
@@ -13,6 +14,9 @@ type PredictionRow = {
   market: string
   sportsbook: string
   odds: number
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 type OddsOutcome = {
@@ -228,16 +232,17 @@ export async function updateClosingLineValue() {
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
     .select(
-      'id, sport_key, game_id, commence_time, home_team, away_team, team, market, sportsbook, odds'
+      'id, sport_key, game_id, commence_time, home_team, away_team, team, market, sportsbook, odds, production_eligible, trial, scrambled'
     )
     .eq('status', 'pending')
+    .eq('production_eligible', true)
     .limit(1000)
 
   if (error) {
     throw new Error(error.message)
   }
 
-  const picks = (data ?? []) as PredictionRow[]
+  const picks = ((data ?? []) as PredictionRow[]).filter(isProductionEligibleRow)
 
   const sports = [...new Set(picks.map((pick) => pick.sport_key))]
   const oddsBySport = new Map<string, OddsGame[]>()

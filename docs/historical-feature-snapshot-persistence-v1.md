@@ -12,6 +12,7 @@ Implemented as an additive migration, typed service contract and bounded trial w
 - Build: `npm.cmd run build` exits 0
 - Runtime probe status on 2026-07-14: `applied`
 - Verified write pilot on 2026-07-14: first run inserted 15 trial snapshots; immediate rerun reused 15 and inserted 0
+- Verified Batch V1 on 2026-07-14: first run inserted 27 market-specific trial snapshots; immediate rerun reused 27 and inserted 0
 
 ## Migration Summary
 
@@ -61,7 +62,7 @@ The migration creates `prevent_linked_feature_snapshot_mutation()`. Once a snaps
 
 The existing `/api/features/store/validation` route includes these checks through the current Feature Store validation contract. Existing historical import planning, NBA daily sync dry-run and NBA backtest/calibration surfaces expose the same blocker without new routes. The existing `/api/features/store` route accepts `POST` action `historical_feature_snapshot_write_pilot` for the capped write pilot; no new route was added.
 
-The write path is insert-only for new deterministic keys. Existing rows are reused only when `feature_values` and `feature_lineage` match. Changed-lineage attempts are rejected instead of overwriting historical prediction-time evidence. The verified NBA trial pilot used `maximumEvents=5`, `maximumMarketsPerEvent=3`, `maximumSnapshots=15`, `concurrency=1`, `retries=0`, `trial=true`, `scrambled=true` and `production_eligible=false`.
+The write path is insert-only for new deterministic keys. Existing rows are reused only when `feature_values` and `feature_lineage` match. Changed-lineage attempts are rejected instead of overwriting historical prediction-time evidence. The initial verified NBA trial pilot used `maximumEvents=5`, `maximumMarketsPerEvent=3`, `maximumSnapshots=15`, `concurrency=1`, `retries=0`, `trial=true`, `scrambled=true` and `production_eligible=false`. NBA Trial Validation Batch V1 used the same action with `maximumEvents=9`, `maximumMarketsPerEvent=3` and `maximumSnapshots=50`; it inserted 27 market-specific trial snapshots on first run and reused all 27 on rerun.
 
 ## Backtesting Gate
 
@@ -108,4 +109,4 @@ The follow-up bounded lineage pilot uses existing `/api/features/store` action `
 
 The initial 2026-07-14 validation considered the 15 persisted NBA trial snapshots and returned `no_eligible_candidates` because all 15 lacked a genuine offered price. Since `prediction_history.odds` is not nullable, inserting a prediction row would have required fabricated odds, so the pilot correctly inserted 0 rows at that stage.
 
-The follow-up `GameOddsByDate/2025-12-26` priced odds pilot confirmed provider access and persisted trial-only odds rows. The approved cleanup removed 936 alternate-like rows, the corrected retry inserted 180 null-line moneyline replacements and updated 360 spread/total rows, and the supersession cleanup deleted 180 legacy non-null-line moneylines. Existing immutable base snapshots were not mutated in place; five odds-enriched trial snapshot versions were created. The corrected lineage run inserted 5 trial-only prediction rows, settled them locally, and reused all 5 on immediate rerun. Settlement/backtesting production metrics remain blocked because the linked rows are trial/scrambled/non-production and lack genuine closing snapshots.
+The follow-up `GameOddsByDate/2025-12-26` priced odds pilot confirmed provider access and persisted trial-only odds rows. The approved cleanup removed 936 alternate-like rows, the corrected retry inserted 180 null-line moneyline replacements and updated 360 spread/total rows, and the supersession cleanup deleted 180 legacy non-null-line moneylines. Existing immutable base snapshots were not mutated in place; five odds-enriched trial snapshot versions were created for the first lineage validation. NBA Trial Validation Batch V1 then created 27 market-specific trial snapshots across 9 completed trial events, inserted 22 new linked trial prediction rows, reused the 5 existing linked predictions and reused all 27 on immediate rerun. Settlement/backtesting production metrics remain blocked because the linked rows are trial/scrambled/non-production and lack genuine closing snapshots.

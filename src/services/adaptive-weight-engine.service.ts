@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { isProductionEligibleRow } from '@/services/production-data-gate.service'
 
 type PredictionRow = {
   sport_key: string
@@ -10,6 +11,9 @@ type PredictionRow = {
   stake: number | null
   status: string | null
   result: string | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 type AdaptiveAction =
@@ -78,15 +82,16 @@ function getAction(sample: number, multiplier: number): AdaptiveAction {
 export async function getAdaptiveWeightRecommendations(sportKey = 'baseball_mlb') {
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
-    .select('sport_key, odds, confidence, ev, edge, profit, stake, status, result')
+    .select('sport_key, odds, confidence, ev, edge, profit, stake, status, result, production_eligible, trial, scrambled')
     .eq('sport_key', sportKey)
+    .eq('production_eligible', true)
 
   if (error) {
     throw new Error(error.message)
   }
 
-  const settled = ((data ?? []) as PredictionRow[]).filter((row) =>
-    ['win', 'loss'].includes(getResult(row))
+  const settled = ((data ?? []) as PredictionRow[]).filter(
+    (row) => isProductionEligibleRow(row) && ['win', 'loss'].includes(getResult(row))
   )
 
   const highConfidence = settled.filter((row) => safeNumber(row.confidence) >= 75)

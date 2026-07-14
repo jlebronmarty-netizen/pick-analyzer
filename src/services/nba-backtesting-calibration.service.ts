@@ -9,6 +9,10 @@ import {
   NBA_PREDICTION_MODEL_VERSION,
   NBA_SPORT_KEY,
 } from '@/services/nba-prediction-validation.service'
+import {
+  PRODUCTION_DATA_GATE_V1_POLICY,
+  isProductionEligibleRow,
+} from '@/services/production-data-gate.service'
 
 type NbaBacktestFilters = {
   dateFrom?: string | null
@@ -352,9 +356,11 @@ async function loadRows(filters: NbaBacktestFilters) {
 
 export async function getNbaBacktest(filters: NbaBacktestFilters = {}) {
   const rows = await loadRows(filters)
-  const settled = rows.filter(isSettled)
-  const summary = summarize(rows)
-  const checks = leakageChecks(rows)
+  const productionRows = rows.filter(isProductionEligibleRow)
+  const trialRows = rows.filter((row) => !isProductionEligibleRow(row))
+  const settled = productionRows.filter(isSettled)
+  const summary = summarize(productionRows)
+  const checks = leakageChecks(productionRows)
   const calibration = buildCalibration(settled)
   const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
   const featureSnapshotCounts = await getNbaFeatureSnapshotBacktestCounts()
@@ -394,10 +400,23 @@ export async function getNbaBacktest(filters: NbaBacktestFilters = {}) {
     },
     sample: {
       totalRows: rows.length,
+      productionMetricRows: productionRows.length,
+      trialTechnicalRows: trialRows.length,
       settledRows: settled.length,
-      recommendedRows: rows.filter((row) => row.recommended_pick).length,
+      recommendedRows: productionRows.filter((row) => row.recommended_pick).length,
       markets: Array.from(new Set(rows.map((row) => row.market).filter(Boolean))).sort(),
       modelVersions: Array.from(new Set(rows.map((row) => row.model_version).filter(Boolean))).sort(),
+    },
+    productionGate: {
+      mode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
+      productionMetricsExcludeTrialRows: true,
+      excludedTrialOrNonProductionRows: trialRows.length,
+    },
+    trialTechnicalValidation: {
+      rows: trialRows.length,
+      settledRows: trialRows.filter(isSettled).length,
+      summary: summarize(trialRows),
+      label: 'Trial/non-production rows are retained for technical validation only and excluded from production metrics.',
     },
     summary,
     schemaCapabilities,
@@ -406,31 +425,38 @@ export async function getNbaBacktest(filters: NbaBacktestFilters = {}) {
     featureSnapshotEligibility,
     calibration,
     leakageChecks: checks,
-    byMarket: groupRows(rows, (row) => String(row.market ?? 'unknown')).map(({ key, rows }) => ({
+    byMarket: groupRows(productionRows, (row) => String(row.market ?? 'unknown')).map(({ key, rows }) => ({
       market: key,
       ...summarize(rows),
     })),
-    byModelVersion: groupRows(rows, (row) => String(row.model_version ?? 'unknown')).map(({ key, rows }) => ({
+    byModelVersion: groupRows(productionRows, (row) => String(row.model_version ?? 'unknown')).map(({ key, rows }) => ({
       modelVersion: key,
       ...summarize(rows),
     })),
-    byConfidence: groupRows(rows, confidenceBucket).map(({ key, rows }) => ({
+    byConfidence: groupRows(productionRows, confidenceBucket).map(({ key, rows }) => ({
       bucket: key,
       ...summarize(rows),
     })),
-    byDataSufficiency: groupRows(rows, dataSufficiencyBucket).map(({ key, rows }) => ({
+    byDataSufficiency: groupRows(productionRows, dataSufficiencyBucket).map(({ key, rows }) => ({
       bucket: key,
       ...summarize(rows),
     })),
-    warnings: warningsFor(rows, summary, checks),
+    warnings: [
+      ...warningsFor(productionRows, summary, checks),
+      ...(trialRows.length
+        ? [`${trialRows.length} NBA trial/non-production rows are excluded from production backtest metrics.`]
+        : []),
+    ],
   }
 }
 
 export async function getNbaCalibration(filters: NbaBacktestFilters = {}) {
   const rows = await loadRows(filters)
-  const settled = rows.filter(isSettled)
+  const productionRows = rows.filter(isProductionEligibleRow)
+  const trialRows = rows.filter((row) => !isProductionEligibleRow(row))
+  const settled = productionRows.filter(isSettled)
   const calibration = buildCalibration(settled)
-  const checks = leakageChecks(rows)
+  const checks = leakageChecks(productionRows)
   const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
   const featureSnapshotCounts = await getNbaFeatureSnapshotBacktestCounts()
   const migrationApplied =
@@ -469,8 +495,20 @@ export async function getNbaCalibration(filters: NbaBacktestFilters = {}) {
     },
     sample: {
       totalRows: rows.length,
+      productionMetricRows: productionRows.length,
+      trialTechnicalRows: trialRows.length,
       settledRows: settled.length,
       moneylineRows: calibration.sample,
+    },
+    productionGate: {
+      mode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
+      productionMetricsExcludeTrialRows: true,
+      excludedTrialOrNonProductionRows: trialRows.length,
+    },
+    trialTechnicalValidation: {
+      rows: trialRows.length,
+      settledRows: trialRows.filter(isSettled).length,
+      label: 'Trial/non-production rows are retained for technical validation only and excluded from production calibration.',
     },
     calibration,
     schemaCapabilities,
@@ -478,6 +516,11 @@ export async function getNbaCalibration(filters: NbaBacktestFilters = {}) {
     backtestInputReadiness,
     featureSnapshotEligibility,
     leakageChecks: checks,
-    warnings: warningsFor(rows, summarize(rows), checks),
+    warnings: [
+      ...warningsFor(productionRows, summarize(productionRows), checks),
+      ...(trialRows.length
+        ? [`${trialRows.length} NBA trial/non-production rows are excluded from production calibration.`]
+        : []),
+    ],
   }
 }

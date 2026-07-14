@@ -4,6 +4,10 @@ import { calculateQuarterKellyStake } from '@/services/kelly.service'
 import { calculateSmartScore } from '@/services/smart-ranking.service'
 import { calculateAdaptiveScore } from '@/services/adaptive-scoring.service'
 import { getAdaptiveWeightRecommendations } from '@/services/adaptive-weight-engine.service'
+import {
+  PRODUCTION_DATA_GATE_V1_POLICY,
+  isProductionEligibleRow,
+} from '@/services/production-data-gate.service'
 
 type PredictionRow = {
   id: string
@@ -23,6 +27,9 @@ type PredictionRow = {
   ev: number
   confidence: number
   recommended_pick: boolean | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
   status: string | null
   result: string | null
   created_at?: string | null
@@ -185,9 +192,10 @@ export async function getTopPicks(sportKey = 'baseball_mlb') {
   const query = supabaseAdmin
     .from('prediction_history')
     .select(
-      'id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, recommended_pick, status, result, created_at'
+      'id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, recommended_pick, production_eligible, trial, scrambled, status, result, created_at'
     )
     .or('status.is.null,status.eq.pending')
+    .eq('production_eligible', true)
     .order('created_at', { ascending: false })
     .limit(1500)
 
@@ -217,6 +225,7 @@ export async function getTopPicks(sportKey = 'baseball_mlb') {
 
   const pendingRows = ((data ?? []) as PredictionRow[]).filter(
     (row) =>
+      isProductionEligibleRow(row) &&
       getStatus(row) === 'pending' &&
       isTodayOrFuture(row.commence_time)
   )
@@ -269,6 +278,7 @@ export async function getTopPicks(sportKey = 'baseball_mlb') {
     adaptiveWeightsAvailable: Boolean(adaptiveWeights),
 
     summary: {
+      productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
       pendingPicks: rows.length,
       safePendingPicks: safeRows.length,
       recommendedPicks: recommended.length,

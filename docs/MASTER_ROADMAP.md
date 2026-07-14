@@ -48,9 +48,17 @@ Evidence: `docs/nba-prediction-validation-settlement-v1.md`, `src/services/nba-p
 
 ### NBA Backtesting & Calibration V1
 
-Status: Completed and build verified.
+Status: Completed and build verified. Production summaries are gated by Production Data Gate V1; trial rows are exposed only as technical validation evidence.
 
 Evidence: `docs/nba-backtesting-calibration-v1.md`, `src/services/nba-backtesting-calibration.service.ts`, `/api/nba/predictions/backtest`, `/api/nba/predictions/backtest/run`, `/api/nba/predictions/calibration` and `NbaBacktestingCalibrationPanel`.
+
+### Production Data Gate V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/production-data-gate.service.ts`, `docs/production-data-gate-v1.md`, Feature Store validation fixtures, production-only prediction-history filters in analytics/model/recommendation services, and NBA backtest/calibration `trialTechnicalValidation` sections.
+
+Note: Trial rows can validate mechanics only. Real production import promotion still requires explicit approval and the first real-data validation plan in `docs/first-real-data-validation-plan-v1.md`.
 
 ### NBA Data Quality And Historical Reconciliation Phase A
 
@@ -305,6 +313,14 @@ Status: Completed as a bounded trial-only lineage verification and build verifie
 Evidence: `docs/historical-feature-trial-lineage-pilot-v1.md`, `src/services/historical-feature-generation.service.ts`, existing `/api/features/store`, existing `/api/historical-import/plan`, `src/services/daily-pipeline.service.ts`, `src/services/nba-backtesting-calibration.service.ts` and `src/services/nba-prediction-settlement.service.ts`.
 
 Note: The bounded pilot now prioritizes odds-enriched trial snapshots from the local snapshot pool while still considering at most 15 snapshots. After the corrected priced odds retry and legacy-moneyline cleanup, the first lineage execution found 5 eligible trial candidates, inserted 5 prediction rows, settled them locally as 3 wins and 2 losses, and the immediate rerun reused all 5 rows with 0 inserts. Provider calls remained 0. The rows remain `trial=true`, `scrambled=true`, `production_eligible=false`, so production recommendations, ROI, CLV, calibration, model promotion and confidence improvement remain blocked.
+
+### NBA Trial Validation Batch V1
+
+Status: Completed bounded technical trial validation and build verified.
+
+Evidence: `docs/nba-trial-validation-batch-v1.md`, `src/services/historical-feature-generation.service.ts`, existing `/api/features/store`, existing `/api/nba/predictions/backtest`, existing `/api/settlement/core` and existing NBA market/readiness endpoints.
+
+Note: The batch reused the existing Feature Store actions with no new routes, no migrations and 0 provider calls. It generated 27 market-specific trial snapshots across 9 completed SportsDataIO NBA events, verified snapshot idempotency by reusing all 27 on rerun, inserted 22 new trial predictions while reusing the 5 prior linked predictions, then reused all 27 on immediate prediction rerun. Final linked trial state is 27 settled predictions: 9 moneyline, 9 spread and 9 total, with 9 wins, 18 losses, 0 pushes, 0 voids, 0 duplicate prediction identities, 0 duplicate snapshot links and 0 production leakage. The result is technical trial validation only; production ROI, CLV, calibration and model promotion remain blocked.
 
 ### Settlement Core Multi-Sport Fixture Coverage V1
 

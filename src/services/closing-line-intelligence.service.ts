@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { isProductionEligibleRow } from '@/services/production-data-gate.service'
 
 type GenericPredictionRow = Record<string, unknown>
 
@@ -602,6 +603,7 @@ export async function getClosingLineIntelligence({
   let query = supabaseAdmin
     .from('prediction_history')
     .select('*')
+    .eq('production_eligible', true)
     .order('created_at', {
       ascending: false,
     })
@@ -620,6 +622,7 @@ export async function getClosingLineIntelligence({
   const records = (
     (data ?? []) as GenericPredictionRow[]
   )
+    .filter((row) => isProductionEligibleRow(row))
     .map(normalizeRow)
     .filter(
       (record) =>

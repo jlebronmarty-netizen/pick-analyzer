@@ -6,6 +6,7 @@ import { getModelWeights } from '@/services/model-learning.service'
 import { buildPortfolios } from '@/services/portfolio-builder.service'
 import { getSportsbookIntelligence } from '@/services/sportsbook-intelligence.service'
 import { getTopPicks } from '@/services/top-picks.service'
+import { PRODUCTION_DATA_GATE_V1_POLICY } from '@/services/production-data-gate.service'
 
 type ReportPick = {
   id: string
@@ -186,6 +187,7 @@ export async function getDailyReport(bankroll = 1000) {
       sportKey: 'baseball_mlb',
       adaptiveWeightsAvailable: false,
       summary: {
+        productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
         pendingPicks: 0,
         safePendingPicks: 0,
         recommendedPicks: 0,

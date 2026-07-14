@@ -30,6 +30,8 @@ type SettlementFixture = {
   contractOnly: boolean
   input: SettlementInput | null
   decision: SettlementDecision | null
+  expectedOutcome: SettlementOutcome | null
+  passed: boolean | null
   rule: string
   warning: string | null
 }
@@ -55,7 +57,12 @@ function baseGuard(input: SettlementInput): SettlementDecision | null {
     return decision(input, 'pending', 'Event is not final or scores are unavailable.')
   }
 
-  if (input.market !== 'moneyline' && !Number.isFinite(Number(input.line))) {
+  if (
+    input.market !== 'moneyline' &&
+    (input.line === null ||
+      input.line === undefined ||
+      !Number.isFinite(Number(input.line)))
+  ) {
     return decision(input, 'void', 'Line is required for spread and total settlement.')
   }
 
@@ -148,6 +155,7 @@ function fixture({
   rule,
   warning = null,
   contractOnly = false,
+  expectedOutcome,
 }: {
   sport: SettlementFixture['sport']
   marketLabel: string
@@ -155,14 +163,19 @@ function fixture({
   rule: string
   warning?: string | null
   contractOnly?: boolean
+  expectedOutcome?: SettlementOutcome
 }): SettlementFixture {
+  const settlementDecision = input && !contractOnly ? settleMarket(input) : null
+
   return {
     sport,
     marketLabel,
     supported: Boolean(input) && !contractOnly,
     contractOnly,
     input,
-    decision: input && !contractOnly ? settleMarket(input) : null,
+    decision: settlementDecision,
+    expectedOutcome: expectedOutcome ?? null,
+    passed: expectedOutcome ? settlementDecision?.outcome === expectedOutcome : null,
     rule,
     warning,
   }
@@ -184,27 +197,101 @@ function buildSettlementFixtureCoverage(): SettlementFixture[] {
     }),
     fixture({
       sport: 'NBA',
-      marketLabel: 'total',
+      marketLabel: 'total over wins',
       input: { market: 'total', selection: 'Over 220.5', selectedScore: 114, opponentScore: 110, line: 220.5, eventStatus: 'completed' },
       rule: 'Total grades selected over/under against combined score.',
+      expectedOutcome: 'win',
+    }),
+    fixture({
+      sport: 'NBA',
+      marketLabel: 'total over loses',
+      input: { market: 'total', selection: 'Over 220.5', selectedScore: 108, opponentScore: 107, line: 220.5, eventStatus: 'completed' },
+      rule: 'Over loses when combined full-game score stays below the line.',
+      expectedOutcome: 'loss',
+    }),
+    fixture({
+      sport: 'NBA',
+      marketLabel: 'total under wins',
+      input: { market: 'total', selection: 'Under 220.5', selectedScore: 108, opponentScore: 107, line: 220.5, eventStatus: 'completed' },
+      rule: 'Under wins when combined full-game score stays below the line.',
+      expectedOutcome: 'win',
+    }),
+    fixture({
+      sport: 'NBA',
+      marketLabel: 'total under loses',
+      input: { market: 'total', selection: 'Under 220.5', selectedScore: 114, opponentScore: 110, line: 220.5, eventStatus: 'completed' },
+      rule: 'Under loses when combined full-game score clears the line.',
+      expectedOutcome: 'loss',
+    }),
+    fixture({
+      sport: 'NBA',
+      marketLabel: 'total push',
+      input: { market: 'total', selection: 'Over 220', selectedScore: 110, opponentScore: 110, line: 220, eventStatus: 'completed' },
+      rule: 'Whole-number NBA totals push when combined score equals the line.',
+      expectedOutcome: 'push',
+    }),
+    fixture({
+      sport: 'NBA',
+      marketLabel: 'decimal total',
+      input: { market: 'total', selection: 'Under 219.5', selectedScore: 109, opponentScore: 110, line: 219.5, eventStatus: 'completed' },
+      rule: 'Decimal totals cannot push and grade strictly above or below the line.',
+      expectedOutcome: 'win',
+    }),
+    fixture({
+      sport: 'NBA',
+      marketLabel: 'full-game total includes overtime',
+      input: { market: 'total', selection: 'Over 239.5 incl OT', selectedScore: 124, opponentScore: 121, line: 239.5, eventStatus: 'completed', overtimePolicy: 'include' },
+      rule: 'Full-game NBA totals include overtime when the supplied score basis includes overtime.',
+      expectedOutcome: 'win',
     }),
     fixture({
       sport: 'NBA',
       marketLabel: 'first half',
       input: { market: 'spread', selection: 'Home -1.5 1H', selectedScore: 58, opponentScore: 55, line: -1.5, eventStatus: 'completed' },
       rule: 'Period markets can reuse spread/total primitives only when period scores are supplied.',
+      expectedOutcome: 'win',
+    }),
+    fixture({
+      sport: 'NBA',
+      marketLabel: 'first-half total excludes second half',
+      input: { market: 'total', selection: 'Under 112.5 1H', selectedScore: 54, opponentScore: 56, line: 112.5, eventStatus: 'completed' },
+      rule: 'First-half totals must use first-half scores only; second-half points are not supplied to the primitive.',
+      expectedOutcome: 'win',
     }),
     fixture({
       sport: 'NBA',
       marketLabel: 'first quarter',
       input: { market: 'total', selection: 'Under 56.5 1Q', selectedScore: 27, opponentScore: 26, line: 56.5, eventStatus: 'completed' },
       rule: 'Quarter markets require quarter-specific scores and must not use full-game scores.',
+      expectedOutcome: 'win',
     }),
     fixture({
       sport: 'NBA',
       marketLabel: 'overtime inclusion',
       input: { market: 'moneyline', selection: 'Home incl OT', selectedScore: 121, opponentScore: 119, eventStatus: 'completed', overtimePolicy: 'include' },
       rule: 'Overtime policy is an explicit contract field; sport adapters must supply the right score basis.',
+      expectedOutcome: 'win',
+    }),
+    fixture({
+      sport: 'NBA',
+      marketLabel: 'missing total line rejected',
+      input: { market: 'total', selection: 'Over', selectedScore: 110, opponentScore: 105, line: null, eventStatus: 'completed' },
+      rule: 'Total settlement requires a numeric line.',
+      expectedOutcome: 'void',
+    }),
+    fixture({
+      sport: 'NBA',
+      marketLabel: 'missing final score pending',
+      input: { market: 'total', selection: 'Over 220.5', selectedScore: null, opponentScore: null, line: 220.5, eventStatus: 'scheduled' },
+      rule: 'Missing final scores remain pending when the event is not final.',
+      expectedOutcome: 'pending',
+    }),
+    fixture({
+      sport: 'NBA',
+      marketLabel: 'ambiguous total mapping rejected',
+      input: { market: 'total', selection: 'Selected side total 110.5', selectedScore: 112, opponentScore: 108, line: 110.5, eventStatus: 'completed' },
+      rule: 'A total selection must identify over or under; ambiguous or reversed mapping is rejected.',
+      expectedOutcome: 'void',
     }),
     fixture({
       sport: 'MLB',
@@ -421,6 +508,9 @@ export function getSettlementCoreStatus() {
   const decisions = samples.map(settleMarket)
   const fixtureCoverage = buildSettlementFixtureCoverage()
   const supportedFixtureDecisions = fixtureCoverage.filter((item) => item.decision)
+  const deterministicFixtureChecks = fixtureCoverage.filter(
+    (item) => item.expectedOutcome !== null
+  )
 
   return {
     success: true,
@@ -458,6 +548,9 @@ export function getSettlementCoreStatus() {
       pushes: supportedFixtureDecisions.filter((item) => item.decision?.outcome === 'push').length,
       voids: supportedFixtureDecisions.filter((item) => item.decision?.outcome === 'void').length,
       pending: supportedFixtureDecisions.filter((item) => item.decision?.outcome === 'pending').length,
+      deterministicChecks: deterministicFixtureChecks.length,
+      deterministicPassed: deterministicFixtureChecks.filter((item) => item.passed === true).length,
+      deterministicFailed: deterministicFixtureChecks.filter((item) => item.passed === false).length,
       warnings: fixtureCoverage
         .map((item) => item.warning)
         .filter((item): item is string => Boolean(item)),

@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { ModelFactor } from '@/services/model-learning.service'
+import { isProductionEligibleRow } from '@/services/production-data-gate.service'
 
 type CandidateWeights = Record<ModelFactor, number>
 
@@ -12,6 +13,9 @@ type ReplayRow = {
   stake: number | null
   status: string | null
   result: string | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 const defaultWeights: CandidateWeights = {
@@ -115,16 +119,17 @@ export async function optimizeModelWeights({
 } = {}) {
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
-    .select('confidence, edge, ev, odds, profit, stake, status, result')
+    .select('confidence, edge, ev, odds, profit, stake, status, result, production_eligible, trial, scrambled')
     .eq('sport_key', sportKey)
     .eq('recommended_pick', true)
+    .eq('production_eligible', true)
 
   if (error) {
     throw new Error(error.message)
   }
 
-  const rows = ((data ?? []) as ReplayRow[]).filter((row) =>
-    ['win', 'loss'].includes(resultOf(row))
+  const rows = ((data ?? []) as ReplayRow[]).filter(
+    (row) => isProductionEligibleRow(row) && ['win', 'loss'].includes(resultOf(row))
   )
 
   let bestWeights = defaultWeights

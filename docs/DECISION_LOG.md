@@ -1,5 +1,25 @@
 # Decision Log
 
+## 2026-07-14 - Add Production Data Gate V1 After NBA Trial Validation
+
+Context: The NBA trial validation batch produced 27 settled trial predictions. The totals market finished 0-9, requiring a technical audit before any production-readiness expansion. The audit showed all 9 total predictions were Overs and all 9 completed game totals stayed under their trial lines, so settlement was correct and no rows needed correction.
+
+Decision: Add one shared `production_data_gate_v1` service and wire it into existing production-facing feature validation, prediction persistence, settlement metrics, backtesting/calibration, CLV, model metrics, model learning, adaptive weights, recommendations, pattern discovery, AI Coach and closing-line intelligence surfaces. Preserve NBA trial evidence under explicit `trialTechnicalValidation` sections and exclude it from production summaries.
+
+Consequences: Trial/scrambled rows remain useful for transport, normalization, lineage, settlement and idempotency validation, but cannot improve production confidence, production recommendations, ROI, CLV, calibration, model learning or model promotion. The next executable production step is an explicitly approved first real-data validation window with non-trial, non-scrambled, production-eligible rows.
+
+Affected modules: Production Data Gate, Feature Store Core, Prediction History, NBA Backtesting/Calibration, Settlement Core, CLV, analytics, model learning, adaptive weights, top picks, AI Coach and production-readiness docs.
+
+## 2026-07-14 - Complete NBA Trial Validation Batch V1
+
+Context: The first end-to-end NBA trial validation proved 5 linked trial predictions with genuine cutoff-safe offered prices. The next requested phase was to scale the same proven flow to a bounded 20-50 prediction batch using existing persisted trial data and existing provider integrations only.
+
+Decision: Keep the existing Feature Store route and service architecture. Extend the bounded trial caps to 50 and make snapshot odds market-specific so moneyline, spread and total candidates use their own offered prices and lines. Run `historical_feature_snapshot_write_pilot` twice with 9 events, 3 markets and 50 snapshots, then run `historical_prediction_snapshot_lineage_pilot` twice with 50 snapshots and 50 predictions. Do not add routes, migrations, dashboards or provider calls.
+
+Consequences: The batch used 0 provider calls, inserted 27 market-specific trial snapshots on first snapshot run and reused all 27 on rerun. Prediction lineage inserted 22 new trial predictions, reused 5 existing predictions, settled 22 newly inserted predictions, and then reused all 27 on immediate rerun with 0 additional settlement updates. Final linked trial state is 27 settled predictions across moneyline, spread and total, with 9 wins, 18 losses, 0 pushes, 0 voids, 0 duplicate prediction identities, 0 duplicate snapshot links and 0 production leakage. The result is technical trial validation only; production ROI, CLV, calibration and model promotion remain blocked.
+
+Affected modules: Historical Feature Generation, Feature Store route, NBA Prediction Settlement, NBA Backtesting/Calibration, SportsDataIO trial odds documentation and governance docs.
+
 ## 2026-07-14 - Complete Corrected Priced Odds And Trial Lineage Verification
 
 Context: After the initial SportsDataIO `GameOddsByDate/2025-12-26` run and alternate-like cleanup, 540 intended full-game trial odds rows remained, but 180 retained legacy moneyline rows still had invalid non-null line values. The user approved exactly one corrected provider retry and deletion of exactly proven superseded legacy moneyline rows.

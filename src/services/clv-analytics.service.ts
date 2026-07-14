@@ -1,4 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import {
+  PRODUCTION_DATA_GATE_V1_POLICY,
+  isProductionEligibleRow,
+} from '@/services/production-data-gate.service'
 
 type ClvRow = {
   id: string
@@ -11,6 +15,9 @@ type ClvRow = {
   clv_quality: string | null
   opening_odds: number | null
   closing_odds: number | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
 }
 
 function round(value: number) {
@@ -99,16 +106,17 @@ export async function getClvAnalytics() {
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
     .select(
-      'id, sport_key, sportsbook, odds, confidence, clv_percent, clv_status, clv_quality, opening_odds, closing_odds'
+      'id, sport_key, sportsbook, odds, confidence, clv_percent, clv_status, clv_quality, opening_odds, closing_odds, production_eligible, trial, scrambled'
     )
     .not('clv_percent', 'is', null)
+    .eq('production_eligible', true)
     .limit(5000)
 
   if (error) {
     throw new Error(error.message)
   }
 
-  const rows = (data ?? []) as ClvRow[]
+  const rows = ((data ?? []) as ClvRow[]).filter(isProductionEligibleRow)
   const overall = summarizeGroup(rows)
 
   const bySport = groupBy(rows, (row) => row.sport_key).sort(
@@ -133,6 +141,7 @@ export async function getClvAnalytics() {
     success: true,
     generatedAt: new Date().toISOString(),
     summary: {
+      productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
       trackedPicks: rows.length,
       ...overall,
     },

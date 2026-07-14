@@ -30,7 +30,7 @@ The orchestrator plans deterministic historical feature snapshots with:
 
 Durable feature snapshot persistence is represented by migration `202607140001_historical_feature_snapshots_v1.sql`. Runtime readiness is based on server-side schema probing, not migration filename presence. When the configured Supabase project exposes the required table and columns, service readiness reports `ready`.
 
-The existing `/api/features/store` route now supports a bounded `historical_feature_snapshot_write_pilot` action. The pilot is server-side, insert-only for new deterministic keys, reuses identical existing snapshots on rerun and refuses changed-lineage overwrites. It preserves season in snapshot metadata because the deployed `historical_feature_snapshots` table has no top-level `season` column. The verified NBA trial run inserted 15 snapshots on first execution and reused all 15 on the idempotency rerun.
+The existing `/api/features/store` route now supports a bounded `historical_feature_snapshot_write_pilot` action. The pilot is server-side, insert-only for new deterministic keys, reuses identical existing snapshots on rerun and refuses changed-lineage overwrites. It preserves season in snapshot metadata because the deployed `historical_feature_snapshots` table has no top-level `season` column. The initial verified NBA trial run inserted 15 snapshots on first execution and reused all 15 on the idempotency rerun. NBA Trial Validation Batch V1 used the same action with a 50-snapshot cap, inserted 27 market-specific trial snapshots across 9 events and reused all 27 on immediate rerun.
 
 ## Leakage Policy
 
@@ -70,7 +70,7 @@ Backtest input readiness is typed but blocked until durable historical feature s
 
 Daily Sync V2 now reports historical feature eligibility, write-pilot availability and immutable pregame snapshot policy. Postgame results, stats and settlement may prepare performance inputs, but they must not overwrite the original prediction-time feature snapshot.
 
-The bounded trial prediction lineage pilot is also exposed through the existing Feature Store route. It links predictions only when a trial snapshot has valid lineage and a genuine offered price. After corrected SportsDataIO priced odds were available, runtime verification inserted 5 trial/scrambled/non-production linked predictions, settled them locally and reused all 5 on immediate rerun with 0 provider calls. Production metrics remain blocked for trial rows and missing genuine closing snapshots.
+The bounded trial prediction lineage pilot is also exposed through the existing Feature Store route. It links predictions only when a trial snapshot has valid lineage and a genuine offered price. After corrected SportsDataIO priced odds were available, runtime verification inserted 5 trial/scrambled/non-production linked predictions, settled them locally and reused all 5 on immediate rerun with 0 provider calls. NBA Trial Validation Batch V1 then scaled the same path to 27 linked, settled trial predictions across moneyline, spread and total. Production metrics remain blocked for trial rows and missing genuine closing snapshots.
 
 ## Provider Calls
 
