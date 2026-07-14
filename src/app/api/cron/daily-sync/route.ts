@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
-import { runDailySportsPipeline } from '@/services/daily-pipeline.service'
+import {
+  runDailySportsPipeline,
+  runDailySyncOrchestratorV2,
+} from '@/services/daily-pipeline.service'
 
 export async function GET(request: Request) {
   try {
@@ -20,7 +23,21 @@ export async function GET(request: Request) {
       }
     }
 
-    const result = await runDailySportsPipeline()
+    const url = new URL(request.url)
+    const version = url.searchParams.get('version')
+    const dryRunParam = url.searchParams.get('dryRun')
+    const providerCallBudget = Number(url.searchParams.get('providerCallBudget') ?? 0)
+    const timeoutMs = Number(url.searchParams.get('timeoutMs') ?? 15000)
+    const result =
+      version === '2' || version === 'v2'
+        ? await runDailySyncOrchestratorV2({
+            dryRun: dryRunParam === null ? true : dryRunParam !== 'false',
+            providerCallBudget: Number.isFinite(providerCallBudget) ? providerCallBudget : 0,
+            resumeFromStep: url.searchParams.get('resumeFromStep'),
+            cancelAfterStep: url.searchParams.get('cancelAfterStep'),
+            timeoutMs: Number.isFinite(timeoutMs) ? timeoutMs : 15000,
+          })
+        : await runDailySportsPipeline()
 
     return NextResponse.json(result)
   } catch (error) {

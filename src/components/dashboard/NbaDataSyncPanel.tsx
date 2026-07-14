@@ -23,6 +23,22 @@ type DataHealth = {
     lastSync: string | null
     lastOddsSnapshot: string | null
   }
+  orchestration?: {
+    mode: string
+    routeCountDelta: number
+    defaultProviderCallsAllowed: number
+    concurrencyLimit: number
+    automaticRetries: boolean
+    summary: {
+      steps: number
+      mutatingSteps: number
+      readOnlySteps: number
+      readySteps: number
+      blockedExternalSteps: number
+      protectedSteps: number
+    }
+    blockers: string[]
+  }
   recentJobs: SyncJob[]
 }
 
@@ -279,6 +295,30 @@ export default function NbaDataSyncPanel() {
         </div>
       ) : null}
 
+      {health?.orchestration ? (
+        <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
+          <p className="text-sm font-black text-white">Daily Orchestration Contract</p>
+          <div className="mt-4 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
+            <MiniRow label="Steps" value={String(health.orchestration.summary.steps)} />
+            <MiniRow label="Ready" value={String(health.orchestration.summary.readySteps)} />
+            <MiniRow label="Blocked" value={String(health.orchestration.summary.blockedExternalSteps)} />
+            <MiniRow label="Protected" value={String(health.orchestration.summary.protectedSteps)} />
+            <MiniRow label="Provider Calls" value={String(health.orchestration.defaultProviderCallsAllowed)} />
+            <MiniRow label="Route Delta" value={String(health.orchestration.routeCountDelta)} />
+          </div>
+          <div className="mt-4 grid gap-2">
+            {health.orchestration.blockers.slice(0, 2).map((blocker) => (
+              <p
+                key={blocker}
+                className="rounded-xl border border-amber-500/20 bg-amber-950/10 px-4 py-3 text-sm text-amber-100"
+              >
+                {blocker}
+              </p>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className="mt-6 overflow-hidden rounded-2xl border border-slate-800">
         <div className="grid grid-cols-[1fr_110px_110px_90px] bg-slate-900 px-4 py-3 text-xs font-bold text-slate-500">
           <span>Job</span>
@@ -334,6 +374,17 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
       <p className="text-xs text-slate-500">{label}</p>
       <p className="mt-1 text-2xl font-black text-white">{value}</p>
+    </div>
+  )
+}
+
+function MiniRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+        {label}
+      </p>
+      <p className="mt-1 text-sm font-black text-white">{value}</p>
     </div>
   )
 }

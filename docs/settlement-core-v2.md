@@ -14,6 +14,7 @@ Settlement Core V2 adds reusable settlement primitives for common market grading
 - pending
 - overtime policy contract
 - period market contract
+- multi-sport deterministic fixture coverage for NBA, MLB, NFL, NHL and soccer
 
 ## Files
 
@@ -31,6 +32,8 @@ Returns deterministic local settlement self-tests and primitive readiness. It ma
 
 NBA Prediction Settlement V1 remains unchanged. The generic settlement primitives are additive and should be adopted incrementally only where behavior matches existing sport-specific rules.
 
+Settlement alone does not make a prediction eligible for production backtesting, ROI, CLV or calibration. Those paths also require durable prediction-time feature lineage through pending migration `202607140001_historical_feature_snapshots_v1.sql`.
+
 ## Deterministic Validation
 
 The status API checks:
@@ -41,8 +44,15 @@ The status API checks:
 - total push
 - pending event
 - cancelled event void
+- NBA moneyline, spread, total, first-half, first-quarter and overtime-inclusion contracts
+- MLB moneyline, run line, total, first-five, extra-innings and postponed/suspended/void contracts
+- NFL moneyline, spread, total, first-half, overtime and push contracts
+- NHL moneyline including OT/shootout, regulation moneyline, puck line, total and first-period contracts
+- Soccer 1X2, draw, total, first-half, extra-time/penalties, abandoned/canceled and two-leg aggregate contracts
 
 These are deterministic local examples, not production settlement records.
+
+Soccer draw, double chance, extra-time/penalties and two-leg aggregate remain contract-only where the generic primitive lacks dedicated result-type metadata. Props remain out of scope until grading feeds and result semantics are proven.
 
 ## Future Work
 

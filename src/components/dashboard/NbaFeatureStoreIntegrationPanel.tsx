@@ -25,6 +25,13 @@ type NbaFeatureStoreResponse = {
     injuryConfidencePenalty: number
     injuryProductionEligible: boolean
     lineupFeedStatus: string
+    playerStatsStatus: string
+    playerStatsRows: number
+    playerStatsSeasonRows: number
+    playerStatsGameRows: number
+    playerStatsUnresolvedPlayers: number
+    playerStatsTrialRows: number
+    playerStatsCanImproveProductionConfidence: boolean
   }
   compatibility: {
     usesExistingPredictionHistoryFeatureSnapshot: boolean
@@ -185,7 +192,7 @@ export default function NbaFeatureStoreIntegrationPanel() {
       </div>
 
       <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
-        <p className="text-sm font-black text-white">Injury & Lineup Confidence</p>
+        <p className="text-sm font-black text-white">Injury, Lineup & Player-Stat Confidence</p>
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <MiniRow
             label="Injury Feed"
@@ -223,6 +230,30 @@ export default function NbaFeatureStoreIntegrationPanel() {
           <MiniRow
             label="Lineups"
             value={data?.summary.lineupFeedStatus ?? 'unknown'}
+          />
+          <MiniRow
+            label="Player Stats"
+            value={data?.summary.playerStatsStatus ?? 'unknown'}
+          />
+          <MiniRow
+            label="Stat Rows"
+            value={String(data?.summary.playerStatsRows ?? 0)}
+          />
+          <MiniRow
+            label="Season/Game"
+            value={`${data?.summary.playerStatsSeasonRows ?? 0}/${data?.summary.playerStatsGameRows ?? 0}`}
+          />
+          <MiniRow
+            label="Stat Trial Rows"
+            value={String(data?.summary.playerStatsTrialRows ?? 0)}
+          />
+          <MiniRow
+            label="Stat Unresolved"
+            value={String(data?.summary.playerStatsUnresolvedPlayers ?? 0)}
+          />
+          <MiniRow
+            label="Stats Lift Confidence"
+            value={data?.summary.playerStatsCanImproveProductionConfidence ? 'yes' : 'no'}
           />
         </div>
       </div>

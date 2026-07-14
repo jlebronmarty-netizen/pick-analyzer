@@ -1,5 +1,10 @@
 import { SportKey } from '@/config/sports.config'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { HistoricalFeatureSchemaCapabilities } from '@/lib/server-schema-capabilities'
+import {
+  HistoricalFeatureGenerationPlan,
+  planHistoricalFeatureGeneration,
+} from '@/services/historical-feature-generation.service'
 import { getLeaguesForSport, getSportsRegistry } from '@/services/multi-sport-registry.service'
 import {
   CostTier,
@@ -20,6 +25,53 @@ export type HistoricalImportStatus =
   | 'partial'
   | 'completed'
   | 'failed'
+
+export type HistoricalImportReadinessState =
+  | 'current_api'
+  | 'recent_historical_feeds'
+  | 'archived_historical_api_required'
+  | 'unsupported_domain'
+  | 'entitlement_blocked'
+  | 'migration_pending'
+  | 'pilot_validated_current_feed'
+  | 'pilot_validated_date_feed'
+  | 'pilot_validated_season_date_feeds'
+  | 'historical_range_requires_per_date_execution'
+  | 'historical_scope_limited'
+  | 'safe_to_execute'
+  | 'trial_only_execution'
+  | 'production_eligible_execution_requires_approval'
+
+export type HistoricalImportScopeType =
+  | 'season'
+  | 'date_range'
+  | 'week'
+  | 'competition'
+
+export type HistoricalImportDomainManifest = {
+  dataType: ProviderDataType
+  dependencyIndex: number
+  dependsOn: ProviderDataType[]
+  scopeTypes: HistoricalImportScopeType[]
+  readiness: HistoricalImportReadinessState
+  executionMode: 'blocked' | 'dry_run_only' | 'trial_only' | 'approval_required'
+  estimatedProviderCalls: number
+  maximumProviderCalls: number
+  maximumRecords: number
+  checkpoint: string
+  naturalKey: string
+  stableIdComponents: string[]
+  destinationTables: string[]
+  conflictTargets: string[]
+  oneToManyExpansionPossible: boolean
+  blockers: string[]
+  handoffs: {
+    validation: string
+    featureGeneration: string
+    settlement: string
+    backtesting: string
+  }
+}
 
 export type HistoricalImportRequest = {
   sportKey?: string | null
@@ -107,6 +159,101 @@ export type HistoricalImportPlan = {
     persistence: string
   }
   checkpoints: HistoricalImportCheckpoint[]
+  multiSportPlanning: HistoricalImportMultiSportPlanning
+  featureGenerationHandoff: HistoricalFeatureGenerationPlan
+  schemaCapabilities: HistoricalFeatureSchemaCapabilities | null
+}
+
+export type HistoricalImportSportPlan = {
+  sportKey: SportKey
+  leagueKey: string
+  manifestVersion: 'historical_import_manifest_v2'
+  status: 'planned' | 'blocked'
+  providerCallsMade: 0
+  supportedDomains: ProviderDataType[]
+  dependencyOrder: ProviderDataType[]
+  domainManifests: HistoricalImportDomainManifest[]
+  destinationTables: string[]
+  naturalKeys: string[]
+  conflictTargets: string[]
+  requestCaps: {
+    providerCalls: number
+    concurrency: 1
+    automaticRetries: false
+    recommendedBatchSizeDays: number
+  }
+  scope: {
+    supportsSeason: boolean
+    supportsDateRange: boolean
+    checkpointStrategy: string
+    resumeStrategy: string
+  }
+  isolation: {
+    trialRowsDefault: true
+    productionEligibleDefault: false
+    predictionTrainingAllowed: false
+  }
+  handoffs: {
+    dataQuality: string
+    featureStore: string
+    predictionPreview: string
+  }
+  progress: {
+    totalDomains: number
+    plannedDomains: number
+    blockedDomains: number
+    migrationPendingDomains: number
+    entitlementBlockedDomains: number
+    archiveRequiredDomains: number
+  }
+  providerCallAccounting: {
+    callsMade: 0
+    estimatedCalls: number
+    maximumCalls: number
+    concurrency: 1
+    automaticRetries: false
+  }
+  recordAccounting: {
+    providerRecordsFetched: 0
+    normalizedRowsProduced: 0
+    skippedProviderRecords: 0
+    skippedNormalizedRows: 0
+    recordsSkipped: 0
+    oneToManyExpansionSupported: true
+  }
+  sportSpecificNotes: string[]
+  warnings: string[]
+  requiresApproval: string[]
+}
+
+export type HistoricalImportMultiSportPlanning = {
+  mode: 'historical_import_multi_sport_planning_v2'
+  providerCallsMade: 0
+  canonicalRoute: '/api/historical-import/plan'
+  sports: HistoricalImportSportPlan[]
+  dependencyGraph: Array<{
+    sportKey: SportKey
+    leagueKey: string
+    domains: Array<{
+      dataType: ProviderDataType
+      dependsOn: ProviderDataType[]
+      readiness: HistoricalImportReadinessState
+    }>
+  }>
+  validation: {
+    valid: boolean
+    checks: Record<string, boolean>
+    warnings: string[]
+  }
+  safeguards: string[]
+}
+
+type DomainPersistenceContract = {
+  naturalKey: string
+  stableIdComponents: string[]
+  destinationTables: string[]
+  conflictTargets: string[]
+  oneToManyExpansionPossible: boolean
 }
 
 type SyncJobRow = {
@@ -145,6 +292,7 @@ const IMPORT_DATA_TYPES: ProviderDataType[] = [
   'standings',
   'team_stats',
   'game_stats',
+  'player_stats',
   'players',
   'injuries',
   'lineups',
@@ -165,6 +313,7 @@ const DATA_TYPE_ORDER: ProviderDataType[] = [
   'standings',
   'team_stats',
   'game_stats',
+  'player_stats',
   'players',
   'injuries',
   'lineups',
@@ -268,6 +417,865 @@ function quotaImpact(calls: number, costTier: CostTier) {
   return 'low'
 }
 
+function readinessForDataType({
+  sportKey,
+  dataType,
+  routeSupported,
+  schemaCapabilities,
+}: {
+  sportKey: SportKey
+  dataType: ProviderDataType
+  routeSupported: boolean
+  schemaCapabilities?: HistoricalFeatureSchemaCapabilities | null
+}): HistoricalImportReadinessState {
+  if (sportKey === 'basketball_nba') {
+    if (dataType === 'players') return 'pilot_validated_current_feed'
+    if (dataType === 'injuries') return 'pilot_validated_current_feed'
+    if (dataType === 'lineups') {
+      return schemaCapabilities?.probes.sportLineups.applied
+        ? 'pilot_validated_date_feed'
+        : 'migration_pending'
+    }
+    if (dataType === 'player_stats') {
+      return schemaCapabilities?.probes.sportPlayerStats.applied
+        ? 'pilot_validated_season_date_feeds'
+        : 'migration_pending'
+    }
+  }
+
+  if (!routeSupported) return 'unsupported_domain'
+  if (dataType === 'historical_odds') return 'archived_historical_api_required'
+  if (dataType === 'player_props') return 'entitlement_blocked'
+  if (['injuries', 'lineups', 'odds'].includes(dataType)) return 'trial_only_execution'
+  if (['team_stats', 'game_stats', 'standings'].includes(dataType)) return 'recent_historical_feeds'
+  return 'current_api'
+}
+
+function executionModeForReadiness(
+  readiness: HistoricalImportReadinessState
+): HistoricalImportDomainManifest['executionMode'] {
+  if (
+    [
+      'unsupported_domain',
+      'archived_historical_api_required',
+      'entitlement_blocked',
+      'migration_pending',
+    ].includes(readiness)
+  ) {
+    return 'blocked'
+  }
+
+  if (
+    [
+      'trial_only_execution',
+      'pilot_validated_current_feed',
+      'pilot_validated_date_feed',
+      'pilot_validated_season_date_feeds',
+      'historical_range_requires_per_date_execution',
+      'historical_scope_limited',
+    ].includes(readiness)
+  ) {
+    return 'trial_only'
+  }
+  if (readiness === 'production_eligible_execution_requires_approval') {
+    return 'approval_required'
+  }
+  return 'dry_run_only'
+}
+
+function scopeTypesForSportAndDomain({
+  sportKey,
+  dataType,
+}: {
+  sportKey: SportKey
+  dataType: ProviderDataType
+}): HistoricalImportScopeType[] {
+  const scopes: HistoricalImportScopeType[] = ['season', 'date_range']
+
+  if (sportKey === 'americanfootball_nfl') {
+    scopes.push('week')
+  }
+
+  if (sportKey === 'soccer') {
+    scopes.push('competition')
+  }
+
+  if (dataType === 'historical_odds') {
+    return scopes.filter((scope) => scope !== 'season')
+  }
+
+  return scopes
+}
+
+function maximumRecordsForDomain(dataType: ProviderDataType) {
+  if (['players', 'player_stats', 'player_props'].includes(dataType)) return 1000
+  if (['odds', 'historical_odds'].includes(dataType)) return 5000
+  if (['lineups', 'injuries'].includes(dataType)) return 1500
+  return 500
+}
+
+function domainPersistenceContract(dataType: ProviderDataType): DomainPersistenceContract {
+  const mappingTarget = 'provider_entity_mappings(provider, entity_type, provider_entity_id, sport_key)'
+
+  switch (dataType) {
+    case 'schedules':
+      return {
+        naturalKey: 'provider:event_id_or_game_id',
+        stableIdComponents: ['sport_key', 'league_key', 'provider', 'provider_event_id'],
+        destinationTables: ['sport_events', 'sports_teams', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['sport_events.id', mappingTarget],
+        oneToManyExpansionPossible: false,
+      }
+    case 'scores':
+      return {
+        naturalKey: 'provider:event_id_or_game_id',
+        stableIdComponents: ['sport_key', 'league_key', 'provider', 'provider_event_id'],
+        destinationTables: ['sport_events', 'game_results', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['sport_events.id', 'game_results.id', mappingTarget],
+        oneToManyExpansionPossible: false,
+      }
+    case 'standings':
+      return {
+        naturalKey: 'sport_key:league_key:season:team_id:provider',
+        stableIdComponents: ['sport_key', 'league_key', 'season', 'provider_team_id'],
+        destinationTables: ['sport_standings', 'sports_teams', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['sport_standings.id', 'sports_teams.id', mappingTarget],
+        oneToManyExpansionPossible: false,
+      }
+    case 'players':
+      return {
+        naturalKey: 'provider:player_id',
+        stableIdComponents: ['sport_key', 'league_key', 'provider', 'provider_player_id'],
+        destinationTables: ['sport_players', 'sports_teams', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['sport_players.id', mappingTarget],
+        oneToManyExpansionPossible: false,
+      }
+    case 'injuries':
+      return {
+        naturalKey: 'provider:injury_id_or_player_team_status_source_timestamp',
+        stableIdComponents: [
+          'sport_key',
+          'league_key',
+          'provider',
+          'provider_injury_id_or_player_team_status_source_timestamp',
+        ],
+        destinationTables: ['sport_injuries', 'sport_players', 'sports_teams', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['sport_injuries.id', mappingTarget],
+        oneToManyExpansionPossible: false,
+      }
+    case 'lineups':
+      return {
+        naturalKey:
+          'sport_key:league_key:event_id_or_season:team_id:player_id_or_provider_player_id:lineup_type:position:depth_order',
+        stableIdComponents: [
+          'sport_key',
+          'league_key',
+          'provider',
+          'provider_event_id_or_season',
+          'provider_team_id',
+          'provider_player_id',
+          'lineup_type',
+          'position',
+          'depth_order',
+        ],
+        destinationTables: ['sport_lineups', 'sport_players', 'sports_teams', 'sport_events', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['sport_lineups.id', mappingTarget],
+        oneToManyExpansionPossible: true,
+      }
+    case 'team_stats':
+      return {
+        naturalKey: 'sport_key:league_key:season:team_id:stat_scope',
+        stableIdComponents: ['sport_key', 'league_key', 'season', 'provider_team_id', 'stat_scope'],
+        destinationTables: ['team_stats', 'sports_teams', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['team_stats.id', mappingTarget],
+        oneToManyExpansionPossible: false,
+      }
+    case 'game_stats':
+      return {
+        naturalKey: 'sport_key:league_key:event_id:team_id:stat_scope',
+        stableIdComponents: ['sport_key', 'league_key', 'provider_event_id', 'provider_team_id', 'stat_scope'],
+        destinationTables: ['sport_game_stats', 'sport_events', 'sports_teams', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['sport_game_stats.id', mappingTarget],
+        oneToManyExpansionPossible: true,
+      }
+    case 'player_stats':
+      return {
+        naturalKey: 'sport_key:league_key:season:stat_type:event_id:team_id:player_id',
+        stableIdComponents: [
+          'sport_key',
+          'league_key',
+          'season',
+          'stat_type',
+          'provider_event_id',
+          'provider_team_id',
+          'provider_player_id',
+        ],
+        destinationTables: ['sport_player_stats', 'sport_players', 'sports_teams', 'sport_events', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['sport_player_stats.id', mappingTarget],
+        oneToManyExpansionPossible: true,
+      }
+    case 'odds':
+    case 'historical_odds':
+      return {
+        naturalKey: 'sport_key:league_key:event_id:market:period:sportsbook:selection:snapshot_timestamp',
+        stableIdComponents: [
+          'sport_key',
+          'league_key',
+          'provider_event_id',
+          'market',
+          'period',
+          'sportsbook',
+          'selection',
+          'snapshot_timestamp',
+        ],
+        destinationTables: ['sports_odds_snapshots', 'sport_events', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['sports_odds_snapshots.id', mappingTarget],
+        oneToManyExpansionPossible: true,
+      }
+    case 'player_props':
+      return {
+        naturalKey: 'provider:event_id:market_id:outcome_id:sportsbook',
+        stableIdComponents: [
+          'sport_key',
+          'league_key',
+          'provider_event_id',
+          'provider_market_id',
+          'provider_outcome_id',
+          'sportsbook',
+        ],
+        destinationTables: ['sports_odds_snapshots', 'sport_events', 'sport_players', 'provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: ['sports_odds_snapshots.id', mappingTarget],
+        oneToManyExpansionPossible: true,
+      }
+    default:
+      return {
+        naturalKey: 'provider:entity_id',
+        stableIdComponents: ['sport_key', 'league_key', 'provider', 'provider_entity_id'],
+        destinationTables: ['provider_entity_mappings', 'sports_sync_jobs'],
+        conflictTargets: [mappingTarget],
+        oneToManyExpansionPossible: false,
+      }
+  }
+}
+
+function buildDomainManifests({
+  sportKey,
+  leagueKey,
+  dependencyOrder,
+  recommendedBatchSizeDays,
+  schemaCapabilities,
+}: {
+  sportKey: SportKey
+  leagueKey: string
+  dependencyOrder: ProviderDataType[]
+  recommendedBatchSizeDays: number
+  schemaCapabilities?: HistoricalFeatureSchemaCapabilities | null
+}): HistoricalImportDomainManifest[] {
+  return dependencyOrder.map((dataType, index) => {
+    const persistence = domainPersistenceContract(dataType)
+    const route = planProviderRoute({
+      sportKey,
+      leagueKey,
+      dataType,
+      dryRun: true,
+    })
+    const routeSupported = route.success && route.supported === true
+    const readiness = readinessForDataType({
+      sportKey,
+      dataType,
+      routeSupported,
+      schemaCapabilities,
+    })
+    const executionMode = executionModeForReadiness(readiness)
+    const dependsOn = dependencyOrder.slice(0, index)
+    const estimatedProviderCalls = executionMode === 'blocked' ? 0 : 1
+    const maximumProviderCalls =
+      executionMode === 'blocked' ? 0 : Math.max(1, Math.ceil(recommendedBatchSizeDays / 7))
+    const blockers: string[] = []
+
+    if (!routeSupported) {
+      blockers.push('No confirmed executable provider route in the current planner.')
+    }
+    if (readiness === 'archived_historical_api_required') {
+      blockers.push('Historical archive endpoint and date window require explicit approval.')
+    }
+    if (readiness === 'entitlement_blocked') {
+      blockers.push('Provider entitlement, sportsbook/result coverage and grading rules are unverified.')
+    }
+    if (readiness === 'migration_pending') {
+      blockers.push('Destination schema must be confirmed before provider-backed execution.')
+    }
+    if (
+      [
+        'pilot_validated_current_feed',
+        'pilot_validated_date_feed',
+        'pilot_validated_season_date_feeds',
+        'historical_range_requires_per_date_execution',
+        'historical_scope_limited',
+      ].includes(readiness)
+    ) {
+      blockers.push(
+        'Pilot validation confirms the normalized path, but production/historical execution remains trial-only until explicitly approved.'
+      )
+    }
+    if (executionMode === 'trial_only') {
+      blockers.push('Trial rows remain non-production and cannot improve prediction confidence.')
+    }
+
+    return {
+      dataType,
+      dependencyIndex: index + 1,
+      dependsOn,
+      scopeTypes: scopeTypesForSportAndDomain({ sportKey, dataType }),
+      readiness,
+      executionMode,
+      estimatedProviderCalls,
+      maximumProviderCalls,
+      maximumRecords: maximumRecordsForDomain(dataType),
+      checkpoint: `${sportKey}:${leagueKey}:${dataType}:checkpoint`,
+      naturalKey: persistence.naturalKey,
+      stableIdComponents: persistence.stableIdComponents,
+      destinationTables: persistence.destinationTables,
+      conflictTargets: persistence.conflictTargets,
+      oneToManyExpansionPossible: persistence.oneToManyExpansionPossible,
+      blockers,
+      handoffs: {
+        validation: 'Run mapping, duplicate, orphan, trial-isolation and nonnegative-counter checks before handoff.',
+        featureGeneration:
+          'Feature generation may consume only rows available before prediction cutoff and only after sufficiency checks.',
+        settlement:
+          ['scores', 'odds'].includes(dataType)
+            ? 'Settlement can consume production-eligible results/prices after event completion and market validation.'
+            : 'No settlement handoff for this domain.',
+        backtesting:
+          'Backtesting requires leakage-safe features, settled predictions and production-eligible historical rows.',
+      },
+    }
+  })
+}
+
+function summarizeDomainManifests(domainManifests: HistoricalImportDomainManifest[]) {
+  return {
+    totalDomains: domainManifests.length,
+    plannedDomains: domainManifests.filter((domain) => domain.executionMode !== 'blocked').length,
+    blockedDomains: domainManifests.filter((domain) => domain.executionMode === 'blocked').length,
+    migrationPendingDomains: domainManifests.filter((domain) => domain.readiness === 'migration_pending').length,
+    entitlementBlockedDomains: domainManifests.filter((domain) => domain.readiness === 'entitlement_blocked').length,
+    archiveRequiredDomains: domainManifests.filter(
+      (domain) => domain.readiness === 'archived_historical_api_required'
+    ).length,
+  }
+}
+
+function buildSportPlan({
+  sportKey,
+  leagueKey,
+  supportedDomains,
+  dependencyOrder,
+  destinationTables,
+  naturalKeys,
+  conflictTargets,
+  recommendedBatchSizeDays,
+  sportSpecificNotes,
+  warnings,
+  schemaCapabilities,
+}: {
+  sportKey: SportKey
+  leagueKey: string
+  supportedDomains: ProviderDataType[]
+  dependencyOrder: ProviderDataType[]
+  destinationTables: string[]
+  naturalKeys: string[]
+  conflictTargets: string[]
+  recommendedBatchSizeDays: number
+  sportSpecificNotes: string[]
+  warnings: string[]
+  schemaCapabilities?: HistoricalFeatureSchemaCapabilities | null
+}): HistoricalImportSportPlan {
+  const routeChecks = dependencyOrder.map((dataType) =>
+    planProviderRoute({
+      sportKey,
+      leagueKey,
+      dataType,
+      dryRun: true,
+    })
+  )
+  const blockedDomains = routeChecks
+    .filter((route) => !route.success || !route.supported)
+    .map((route, index) => dependencyOrder[index])
+  const plannedDomains = routeChecks
+    .filter((route) => route.success && route.supported)
+    .map((route, index) => dependencyOrder[index])
+  const domainManifests = buildDomainManifests({
+    sportKey,
+    leagueKey,
+    dependencyOrder,
+    recommendedBatchSizeDays,
+    schemaCapabilities,
+  })
+  const aggregateDestinationTables = Array.from(
+    new Set(domainManifests.flatMap((domain) => domain.destinationTables))
+  )
+  const aggregateNaturalKeys = Array.from(
+    new Set(domainManifests.map((domain) => domain.naturalKey))
+  )
+  const aggregateConflictTargets = Array.from(
+    new Set(domainManifests.flatMap((domain) => domain.conflictTargets))
+  )
+  const progress = summarizeDomainManifests(domainManifests)
+  const estimatedCalls = domainManifests.reduce(
+    (sum, domain) => sum + domain.estimatedProviderCalls,
+    0
+  )
+  const maximumCalls = domainManifests.reduce(
+    (sum, domain) => sum + domain.maximumProviderCalls,
+    0
+  )
+
+  return {
+    sportKey,
+    leagueKey,
+    manifestVersion: 'historical_import_manifest_v2',
+    status: blockedDomains.length === dependencyOrder.length ? 'blocked' : 'planned',
+    providerCallsMade: 0,
+    supportedDomains,
+    dependencyOrder,
+    domainManifests,
+    destinationTables: aggregateDestinationTables,
+    naturalKeys: aggregateNaturalKeys,
+    conflictTargets: aggregateConflictTargets,
+    requestCaps: {
+      providerCalls: plannedDomains.length,
+      concurrency: 1,
+      automaticRetries: false,
+      recommendedBatchSizeDays,
+    },
+    scope: {
+      supportsSeason: true,
+      supportsDateRange: true,
+      checkpointStrategy:
+        'One checkpoint per sport, league, data type and season/date window; checkpoints remain idempotent and resumable.',
+      resumeStrategy:
+        'Resume from the last incomplete checkpoint using the existing idempotency key and cursor contract.',
+    },
+    isolation: {
+      trialRowsDefault: true,
+      productionEligibleDefault: false,
+      predictionTrainingAllowed: false,
+    },
+    handoffs: {
+      dataQuality:
+        'Run global and sport data-quality audits after persistence; surface typed partial coverage instead of fabricating rows.',
+      featureStore:
+        'Only promote normalized, production-eligible rows into feature views after mapping and quality gates pass.',
+      predictionPreview:
+        'Preview predictions with persistence disabled until provider mappings, coverage and trial isolation are approved.',
+    },
+    progress,
+    providerCallAccounting: {
+      callsMade: 0,
+      estimatedCalls,
+      maximumCalls,
+      concurrency: 1,
+      automaticRetries: false,
+    },
+    recordAccounting: {
+      providerRecordsFetched: 0,
+      normalizedRowsProduced: 0,
+      skippedProviderRecords: 0,
+      skippedNormalizedRows: 0,
+      recordsSkipped: 0,
+      oneToManyExpansionSupported: true,
+    },
+    sportSpecificNotes,
+    warnings: [
+      ...warnings,
+      ...blockedDomains.map(
+        (dataType) => `${dataType} has no confirmed executable provider route in the current dry-run planner.`
+      ),
+    ],
+    requiresApproval: [
+      'Provider and quota cap for any live execution.',
+      'Exact provider endpoint/date-window confirmation before transport.',
+      'Promotion from trial rows to production-eligible rows.',
+    ],
+  }
+}
+
+function buildMultiSportPlanning(
+  batchSizeDays: number,
+  schemaCapabilities?: HistoricalFeatureSchemaCapabilities | null
+): HistoricalImportMultiSportPlanning {
+  const sports = [
+      buildSportPlan({
+        sportKey: 'basketball_nba',
+        leagueKey: 'nba',
+        supportedDomains: [
+          'schedules',
+          'scores',
+          'standings',
+          'team_stats',
+          'game_stats',
+          'player_stats',
+          'players',
+          'injuries',
+          'lineups',
+          'odds',
+          'historical_odds',
+          'player_props',
+        ],
+        dependencyOrder: [
+          'schedules',
+          'scores',
+          'standings',
+          'players',
+          'injuries',
+          'lineups',
+          'team_stats',
+          'game_stats',
+          'player_stats',
+          'odds',
+          'player_props',
+        ],
+        destinationTables: [
+          'sport_events',
+          'sports_teams',
+          'sport_players',
+          'sport_injuries',
+          'sport_lineups',
+          'sport_player_stats',
+          'sports_odds_snapshots',
+          'provider_entity_mappings',
+          'sports_sync_jobs',
+        ],
+        naturalKeys: [
+          'provider:event_id',
+          'provider:team_id',
+          'provider:player_id',
+          'provider:injury_id',
+          'sport_key:league_key:event_or_team:player:lineup_type:position:depth_order',
+          'sport_key:league_key:season:stat_type:event:team:player',
+          'sport_key:league_key:event_id:market:sportsbook:snapshot_time',
+        ],
+        conflictTargets: [
+          'sport_events.id',
+          'sports_teams.id',
+          'sport_players.id',
+          'sport_injuries.id',
+          'sport_lineups.id',
+          'sport_player_stats.id',
+          'sports_odds_snapshots.id',
+          'provider_entity_mappings(provider, entity_type, provider_entity_id, sport_key)',
+        ],
+        recommendedBatchSizeDays: Math.min(batchSizeDays, 2),
+        sportSpecificNotes: [
+          'Trial SportsDataIO rows are validated for transport and normalization only.',
+          'Confirmed lineups can improve production confidence only when rows are non-trial, non-scrambled and prediction-cutoff safe.',
+          'BettingEvents is currently discovery/index data; priced sportsbook outcomes remain blocked.',
+        ],
+        warnings: [
+          'NBA production prediction use remains blocked for SportsDataIO trial rows and unpriced odds discovery records.',
+        ],
+        schemaCapabilities,
+      }),
+      buildSportPlan({
+        sportKey: 'baseball_mlb',
+        leagueKey: 'mlb',
+        supportedDomains: [
+          'schedules',
+          'scores',
+          'standings',
+          'team_stats',
+          'game_stats',
+          'players',
+          'injuries',
+          'lineups',
+          'odds',
+          'historical_odds',
+          'player_props',
+        ],
+        dependencyOrder: [
+          'schedules',
+          'scores',
+          'standings',
+          'players',
+          'team_stats',
+          'game_stats',
+          'injuries',
+          'lineups',
+          'odds',
+          'player_props',
+        ],
+        destinationTables: [
+          'sport_events',
+          'sports_teams',
+          'sport_players',
+          'sports_odds_snapshots',
+          'provider_entity_mappings',
+          'sports_sync_jobs',
+        ],
+        naturalKeys: [
+          'provider:event_id',
+          'provider:team_id',
+          'provider:player_id',
+          'sport_key:league_key:event_id:market:sportsbook:snapshot_time',
+        ],
+        conflictTargets: [
+          'sport_events.id',
+          'sports_teams.id',
+          'sport_players.id',
+          'provider_entity_mappings(provider, entity_type, provider_entity_id, sport_key)',
+        ],
+        recommendedBatchSizeDays: Math.min(batchSizeDays, 3),
+        sportSpecificNotes: [
+          'Doubleheaders require game-number or provider event ID disambiguation.',
+          'Starting pitchers, bullpen workload and lineup locks must remain nullable until confirmed.',
+          'Suspended/resumed games and extra innings must preserve provider status and final-score semantics.',
+        ],
+        warnings: [
+          'MLB advanced stat and lineup destinations need confirmation before production promotion.',
+        ],
+        schemaCapabilities,
+      }),
+      buildSportPlan({
+        sportKey: 'americanfootball_nfl',
+        leagueKey: 'nfl',
+        supportedDomains: [
+          'schedules',
+          'scores',
+          'standings',
+          'team_stats',
+          'game_stats',
+          'players',
+          'injuries',
+          'lineups',
+          'odds',
+          'historical_odds',
+          'player_props',
+        ],
+        dependencyOrder: [
+          'schedules',
+          'scores',
+          'standings',
+          'players',
+          'injuries',
+          'lineups',
+          'team_stats',
+          'game_stats',
+          'odds',
+          'player_props',
+        ],
+        destinationTables: [
+          'sport_events',
+          'sports_teams',
+          'sport_players',
+          'sports_odds_snapshots',
+          'provider_entity_mappings',
+          'sports_sync_jobs',
+        ],
+        naturalKeys: [
+          'provider:event_id',
+          'provider:team_id',
+          'provider:player_id',
+          'sport_key:league_key:season:week:season_type',
+        ],
+        conflictTargets: [
+          'sport_events.id',
+          'sports_teams.id',
+          'sport_players.id',
+          'provider_entity_mappings(provider, entity_type, provider_entity_id, sport_key)',
+        ],
+        recommendedBatchSizeDays: Math.min(batchSizeDays, 7),
+        sportSpecificNotes: [
+          'Season type, week and playoff round must be explicit on every event.',
+          'Quarter and overtime scoring should remain structured metadata until normalized columns exist.',
+          'QB status, depth chart changes and injury designations are gating inputs for production predictions.',
+        ],
+        warnings: [
+          'NFL live execution requires endpoint confirmation for season type and week-scoped requests.',
+        ],
+        schemaCapabilities,
+      }),
+      buildSportPlan({
+        sportKey: 'icehockey_nhl',
+        leagueKey: 'nhl',
+        supportedDomains: [
+          'schedules',
+          'scores',
+          'standings',
+          'team_stats',
+          'game_stats',
+          'players',
+          'injuries',
+          'lineups',
+          'odds',
+          'historical_odds',
+          'player_props',
+        ],
+        dependencyOrder: [
+          'schedules',
+          'scores',
+          'standings',
+          'players',
+          'injuries',
+          'lineups',
+          'team_stats',
+          'game_stats',
+          'odds',
+          'player_props',
+        ],
+        destinationTables: [
+          'sport_events',
+          'sports_teams',
+          'sport_players',
+          'sports_odds_snapshots',
+          'provider_entity_mappings',
+          'sports_sync_jobs',
+        ],
+        naturalKeys: [
+          'provider:event_id',
+          'provider:team_id',
+          'provider:player_id',
+          'sport_key:league_key:event_id:period',
+        ],
+        conflictTargets: [
+          'sport_events.id',
+          'sports_teams.id',
+          'sport_players.id',
+          'provider_entity_mappings(provider, entity_type, provider_entity_id, sport_key)',
+        ],
+        recommendedBatchSizeDays: Math.min(batchSizeDays, 3),
+        sportSpecificNotes: [
+          'Regulation, overtime and shootout outcomes must be normalized distinctly.',
+          'Starting goalie, line combinations and scratches are production-gating signals.',
+          'Special teams, period scoring and empty-net context should remain explicit metadata until modeled.',
+        ],
+        warnings: [
+          'NHL goalie and line data must not be inferred when the provider omits confirmation.',
+        ],
+        schemaCapabilities,
+      }),
+      buildSportPlan({
+        sportKey: 'soccer',
+        leagueKey: 'soccer_generic',
+        supportedDomains: [
+          'schedules',
+          'scores',
+          'standings',
+          'team_stats',
+          'game_stats',
+          'players',
+          'lineups',
+          'odds',
+          'historical_odds',
+          'player_props',
+        ],
+        dependencyOrder: [
+          'schedules',
+          'scores',
+          'standings',
+          'players',
+          'lineups',
+          'team_stats',
+          'game_stats',
+          'odds',
+          'player_props',
+        ],
+        destinationTables: [
+          'sport_events',
+          'sports_teams',
+          'sport_players',
+          'sports_odds_snapshots',
+          'provider_entity_mappings',
+          'sports_sync_jobs',
+        ],
+        naturalKeys: [
+          'provider:event_id',
+          'provider:competition_id',
+          'provider:team_id',
+          'provider:player_id',
+          'sport_key:league_key:event_id:market:sportsbook:snapshot_time',
+        ],
+        conflictTargets: [
+          'sport_events.id',
+          'sports_teams.id',
+          'sport_players.id',
+          'provider_entity_mappings(provider, entity_type, provider_entity_id, sport_key)',
+        ],
+        recommendedBatchSizeDays: Math.min(batchSizeDays, 7),
+        sportSpecificNotes: [
+          'Competition, season, stage, group and round must be preserved for every event.',
+          '1X2 markets, draws, two-leg ties, extra time, penalties and qualification outcomes need explicit status fields.',
+          'First-half scores can feed previews only after competition-specific coverage is validated.',
+        ],
+        warnings: [
+          'Soccer is multi-competition; exact competitions and endpoint keys require approval before import execution.',
+        ],
+        schemaCapabilities,
+      }),
+    ]
+
+  const dependencyGraph = sports.map((sport) => ({
+    sportKey: sport.sportKey,
+    leagueKey: sport.leagueKey,
+    domains: sport.domainManifests.map((domain) => ({
+      dataType: domain.dataType,
+      dependsOn: domain.dependsOn,
+      readiness: domain.readiness,
+    })),
+  }))
+  const checks = {
+    includesPrioritySports: ['basketball_nba', 'baseball_mlb', 'americanfootball_nfl', 'icehockey_nhl', 'soccer'].every(
+      (sportKey) => sports.some((sport) => sport.sportKey === sportKey)
+    ),
+    zeroProviderCalls: sports.every((sport) => sport.providerCallsMade === 0),
+    concurrencyOne: sports.every((sport) => sport.providerCallAccounting.concurrency === 1),
+    automaticRetriesDisabled: sports.every(
+      (sport) => sport.providerCallAccounting.automaticRetries === false
+    ),
+    trialIsolationDefault: sports.every(
+      (sport) =>
+        sport.isolation.trialRowsDefault &&
+        !sport.isolation.productionEligibleDefault &&
+        !sport.isolation.predictionTrainingAllowed
+    ),
+    oneToManyCountersNonnegative: sports.every(
+      (sport) =>
+        sport.recordAccounting.recordsSkipped >= 0 &&
+        sport.recordAccounting.skippedProviderRecords >= 0 &&
+        sport.recordAccounting.skippedNormalizedRows >= 0
+    ),
+    dependencyIndexesStable: sports.every((sport) =>
+      sport.domainManifests.every(
+        (domain, index) => domain.dependencyIndex === index + 1
+      )
+    ),
+  }
+
+  return {
+    mode: 'historical_import_multi_sport_planning_v2',
+    providerCallsMade: 0,
+    canonicalRoute: '/api/historical-import/plan',
+    safeguards: [
+      'Planning is dry-run only and performs zero provider calls.',
+      'No endpoints are guessed; unsupported or unconfirmed capabilities remain blocked warnings.',
+      'Every future execution must use concurrency 1 unless explicitly approved otherwise.',
+      'Trial rows default to production_eligible=false and cannot improve production confidence.',
+      'Provider records fetched and normalized rows produced are tracked separately for one-to-many payload expansion.',
+    ],
+    sports,
+    dependencyGraph,
+    validation: {
+      valid: Object.values(checks).every(Boolean),
+      checks,
+      warnings: [
+        'V2 planning is still a dry-run contract; it does not authorize full historical imports.',
+        'Production-eligible execution requires explicit provider quota, endpoint and promotion approval.',
+      ],
+    },
+  }
+}
+
 function buildDateWindows({
   dateFrom,
   dateTo,
@@ -295,6 +1303,97 @@ function buildDateWindows({
   }
 
   return windows
+}
+
+export function runHistoricalImportEngineV2Validation() {
+  const plan = planHistoricalImport({
+    sportKey: 'basketball_nba',
+    leagueKey: 'nba',
+    providerId: 'sportsdataio',
+    season: '2026',
+    dateFrom: '2025-12-26',
+    dateTo: '2025-12-26',
+    dataTypes: ['schedules', 'scores', 'players', 'lineups', 'player_stats', 'odds'],
+    dryRun: true,
+    batchSizeDays: 1,
+  })
+  const multiSport = plan.multiSportPlanning
+  const nba = multiSport.sports.find((sport) => sport.sportKey === 'basketball_nba')
+  const oneToManyFixture = recordCountersFromMetadata(
+    {
+      recordCounters: {
+        providerRecordsFetched: 39,
+        normalizedRowsProduced: 758,
+        skippedProviderRecords: 0,
+        skippedNormalizedRows: 0,
+        recordsSkipped: 0,
+        oneToManyExpansion: true,
+        expansionRatio: 758 / 39,
+      },
+    },
+    { fetched: 39, skipped: 0 }
+  )
+  const checks = {
+    dryRunOnly: plan.dryRun && plan.providerUsage.externalProviderCallsMade === 0,
+    canonicalRouteStable: multiSport.canonicalRoute === '/api/historical-import/plan',
+    prioritySportsIncluded:
+      multiSport.validation.checks.includesPrioritySports && multiSport.sports.length >= 5,
+    nbaManifestPresent: Boolean(nba?.domainManifests.length),
+    deterministicDependencies:
+      Boolean(nba) &&
+      nba!.domainManifests.every((domain, index) => domain.dependencyIndex === index + 1),
+    providerCallAccounting:
+      Boolean(nba) &&
+      nba!.providerCallAccounting.callsMade === 0 &&
+      nba!.providerCallAccounting.concurrency === 1 &&
+      nba!.providerCallAccounting.automaticRetries === false,
+    trialIsolation:
+      Boolean(nba) &&
+      nba!.isolation.trialRowsDefault &&
+      !nba!.isolation.productionEligibleDefault &&
+      !nba!.isolation.predictionTrainingAllowed,
+    oneToManyExpansionCounters:
+      oneToManyFixture.providerRecordsFetched === 39 &&
+      oneToManyFixture.normalizedRowsProduced === 758 &&
+      oneToManyFixture.recordsSkipped === 0 &&
+      oneToManyFixture.skippedProviderRecords === 0 &&
+      oneToManyFixture.skippedNormalizedRows === 0 &&
+      oneToManyFixture.oneToManyExpansion,
+  }
+
+  return {
+    success: Object.values(checks).every(Boolean),
+    mode: 'historical_import_engine_v2_validation',
+    generatedAt: generatedAt(),
+    providerUsage: {
+      externalProviderCallsMade: 0,
+      source: 'deterministic_local_validation_only',
+    },
+    checks,
+    oneToManyFixture: {
+      providerRecordsFetched: oneToManyFixture.providerRecordsFetched,
+      normalizedRowsProduced: oneToManyFixture.normalizedRowsProduced,
+      recordsSkipped: oneToManyFixture.recordsSkipped,
+      skippedProviderRecords: oneToManyFixture.skippedProviderRecords,
+      skippedNormalizedRows: oneToManyFixture.skippedNormalizedRows,
+      oneToManyExpansion: oneToManyFixture.oneToManyExpansion,
+    },
+    summary: {
+      sportsPlanned: multiSport.sports.length,
+      nbaDomains: nba?.domainManifests.length ?? 0,
+      totalEstimatedProviderCalls: multiSport.sports.reduce(
+        (sum, sport) => sum + sport.providerCallAccounting.estimatedCalls,
+        0
+      ),
+      totalMaximumProviderCalls: multiSport.sports.reduce(
+        (sum, sport) => sum + sport.providerCallAccounting.maximumCalls,
+        0
+      ),
+    },
+    warnings: [
+      'Validation is local and deterministic; it does not execute provider transport or mutate Supabase.',
+    ],
+  }
 }
 
 function buildCheckpoints({
@@ -403,7 +1502,8 @@ function buildCheckpoints({
 }
 
 export function planHistoricalImport(
-  request: HistoricalImportRequest = {}
+  request: HistoricalImportRequest = {},
+  schemaCapabilities: HistoricalFeatureSchemaCapabilities | null = null
 ): HistoricalImportPlan {
   const errors: string[] = []
   const warnings: string[] = []
@@ -560,6 +1660,16 @@ export function planHistoricalImport(
         'Core V1 is read-only/dry-run; future execution can record status in sports_sync_jobs metadata.',
     },
     checkpoints: checkpointResult.checkpoints,
+    multiSportPlanning: buildMultiSportPlanning(batchSizeDays, schemaCapabilities),
+    featureGenerationHandoff: planHistoricalFeatureGeneration({
+      sportKey,
+      leagueKey,
+      market: 'moneyline',
+      predictionCutoff: dateFrom ? `${dateFrom}T12:00:00.000Z` : null,
+      batchSize: batchSizeDays,
+      executionMode: 'trial_only',
+    }, schemaCapabilities),
+    schemaCapabilities,
   }
 }
 

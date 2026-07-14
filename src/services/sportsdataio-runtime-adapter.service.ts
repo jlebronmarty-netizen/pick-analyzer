@@ -14,6 +14,7 @@ import {
   getDefaultRetryPolicy,
   isRetryableStatus,
 } from '@/services/sync-reliability.service'
+import { runSportsDataIoBettingNormalizerValidation } from '@/services/sportsdataio-betting-normalizer.service'
 import {
   normalizeOddsSnapshots,
   normalizeProviderEvent,
@@ -56,6 +57,7 @@ export type SportsDataIoRuntimeDomain =
   | 'odds'
   | 'historical_odds'
   | 'player_props'
+  | 'betting_metadata'
 
 export type SportsDataIoDomainContract = {
   domain: SportsDataIoRuntimeDomain
@@ -277,6 +279,21 @@ const DOMAIN_CONTRACTS: SportsDataIoDomainContract[] = [
     warnings: [
       'Exact NBA player prop market endpoint paths are not confirmed in repository metadata.',
       'Player props must not feed production recommendations until prop settlement and validation are implemented.',
+    ],
+  },
+  {
+    domain: 'betting_metadata',
+    capabilityStatus: 'requires_subscription_verification',
+    destination: 'catalog/runtime metadata for market, bet, period, outcome, result and sportsbook identities',
+    naturalKey: ['sport_key', 'provider', 'metadata_type', 'provider_metadata_id'],
+    conflictTarget: 'typed catalog metadata; no raw mirror table in V1',
+    dependencyOrder: 16,
+    estimatedCalls: 0,
+    expectedPagination: 'none',
+    freshnessRequirement: 'Verify before interpreting numeric betting market IDs.',
+    warnings: [
+      'BettingMetadata and ActiveSportsbooks must be normalized before numeric market IDs are interpreted.',
+      'No provider calls are made by runtime capability metadata.',
     ],
   },
 ]
@@ -600,15 +617,17 @@ export function runSportsDataIoRuntimeValidation() {
   const fixture = normalizeSportsDataIoFixturePayloads()
   const retry429 = retryHintForSportsDataIoStatus(429)
   const retry500 = retryHintForSportsDataIoStatus(500)
+  const bettingNormalizer = runSportsDataIoBettingNormalizerValidation()
   const checks = {
     missingKeySafe: env.status === 'missing' || env.status === 'configured' || env.status === 'invalid_format',
     runtimeDisabled: getSportsDataIoRuntimeAdapterStatus().runtime.liveCallsEnabled === false,
-    capabilitiesResolved: getSportsDataIoRuntimeCapabilities().domains.length >= 15,
+    capabilitiesResolved: getSportsDataIoRuntimeCapabilities().domains.length >= 16,
     fixtureEventsNormalized: fixture.events.length === 1 && Boolean(fixture.events[0].providerIds.sportsdataio),
     fixtureOddsNormalized: fixture.odds.length > 0,
     fixturePlayersNormalized: fixture.players.length === 1,
     retry429Contract: retry429.retryable && retry429.retryAfterMs === 60_000,
     retry5xxContract: retry500.retryable,
+    bettingNormalizerFixturesValid: bettingNormalizer.success,
     zeroExternalProviderCalls: true,
     zeroSecretExposure: !JSON.stringify(getSportsDataIoRuntimeAdapterStatus()).includes(process.env[env.envVarName ?? ''] ?? 'never-match-secret'),
   }
@@ -636,8 +655,10 @@ export function runSportsDataIoRuntimeValidation() {
       normalizedInjuries: fixture.injuries.length,
       normalizedLineups: fixture.lineups.length,
       normalizedOdds: fixture.odds.length,
+      bettingNormalizerChecks: Object.keys(bettingNormalizer.checks).length,
     },
     checks,
+    bettingNormalizer,
     environment: env,
     warnings: [
       'Fixture payloads are deterministic non-production test fixtures.',

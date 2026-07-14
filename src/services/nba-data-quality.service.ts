@@ -88,6 +88,39 @@ type PlayerStatsRow = {
   updated_at: string | null
 }
 
+type InjuryRow = {
+  id: string
+  sport_key: string
+  league_key: string
+  player_id: string | null
+  team_id: string | null
+  player_name: string | null
+  status: string | null
+  provider_ids: Record<string, unknown> | null
+  metadata: Record<string, unknown> | null
+  updated_at: string | null
+}
+
+type LineupRow = {
+  id: string
+  sport_key: string
+  league_key: string
+  event_id: string | null
+  team_id: string | null
+  player_id: string | null
+  player_name: string | null
+  lineup_type: string
+  position: string | null
+  depth_order: number | null
+  role: string | null
+  starter: boolean | null
+  lineup_status: string | null
+  confirmation_level: string | null
+  provider_ids: Record<string, unknown> | null
+  metadata: Record<string, unknown> | null
+  updated_at: string | null
+}
+
 type StandingRow = {
   id: string
   sport_key: string
@@ -177,6 +210,10 @@ type AuditRows = {
   players: PlayerRow[]
   playerStats: PlayerStatsRow[]
   playerStatsUnavailableReason: string | null
+  injuries: InjuryRow[]
+  injuriesUnavailableReason: string | null
+  lineups: LineupRow[]
+  lineupsUnavailableReason: string | null
   standings: StandingRow[]
   odds: OddsRow[]
   jobs: SyncJobRow[]
@@ -371,6 +408,8 @@ async function loadRows(seasonKey: string, seasonStartYear: number): Promise<Aud
     gameStats,
     players,
     playerStats,
+    injuries,
+    lineups,
     standings,
     odds,
     jobs,
@@ -384,6 +423,8 @@ async function loadRows(seasonKey: string, seasonStartYear: number): Promise<Aud
     supabaseAdmin.from('sport_game_stats').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
     supabaseAdmin.from('sport_players').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
     supabaseAdmin.from('sport_player_stats').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
+    supabaseAdmin.from('sport_injuries').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
+    supabaseAdmin.from('sport_lineups').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
     supabaseAdmin.from('sport_standings').select('*').eq('sport_key', NBA_SPORT_KEY).limit(1000),
     supabaseAdmin.from('sports_odds_snapshots').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
     supabaseAdmin.from('sports_sync_jobs').select('*').eq('sport_key', NBA_SPORT_KEY).limit(500),
@@ -414,6 +455,12 @@ async function loadRows(seasonKey: string, seasonStartYear: number): Promise<Aud
   const playerStatsUnavailableReason = playerStats.error
     ? `sport_player_stats unavailable: ${playerStats.error.message}`
     : null
+  const injuriesUnavailableReason = injuries.error
+    ? `sport_injuries unavailable: ${injuries.error.message}`
+    : null
+  const lineupsUnavailableReason = lineups.error
+    ? `sport_lineups unavailable: ${lineups.error.message}`
+    : null
 
   return {
     teams: (teams.data ?? []) as TeamRow[],
@@ -422,6 +469,10 @@ async function loadRows(seasonKey: string, seasonStartYear: number): Promise<Aud
     players: (players.data ?? []) as PlayerRow[],
     playerStats: (playerStats.error ? [] : (playerStats.data ?? [])) as PlayerStatsRow[],
     playerStatsUnavailableReason,
+    injuries: (injuries.error ? [] : (injuries.data ?? [])) as InjuryRow[],
+    injuriesUnavailableReason,
+    lineups: (lineups.error ? [] : (lineups.data ?? [])) as LineupRow[],
+    lineupsUnavailableReason,
     standings: ((standings.data ?? []) as StandingRow[]).filter((row) => row.season === seasonKey),
     odds: ((odds.data ?? []) as OddsRow[]).filter((row) => !row.season || row.season === seasonKey),
     jobs: (jobs.data ?? []) as SyncJobRow[],
@@ -448,6 +499,8 @@ function buildCoverage(rows: AuditRows) {
     coverageMetric('completedGames', 'Completed Games', completedEvents.length, Math.max(rows.results.length, completedEvents.length, 1)),
     coverageMetric('gameStats', 'Game Stats', completedWithStats.length, Math.max(completedEvents.length, 1)),
     coverageMetric('playerStats', 'Player Stats', rows.playerStats.length, Math.max(rows.players.length, 1)),
+    coverageMetric('injuries', 'Injuries', rows.injuries.length, Math.max(rows.players.length, 1)),
+    coverageMetric('lineups', 'Lineups', rows.lineups.length, Math.max(rows.players.length, 1)),
     coverageMetric('standings', 'Standings', rows.standings.length, EXPECTED_NBA_TEAMS),
     coverageMetric('oddsSnapshots', 'Odds Snapshots', rows.odds.length, Math.max(rows.events.length, 1)),
     coverageMetric('predictions', 'Predictions', rows.predictions.length, Math.max(rows.events.length, 1)),
@@ -478,6 +531,25 @@ function buildIssues(rows: AuditRows, seasonKey: string) {
   const duplicatePlayerStats = groupBy(rows.playerStats, (row) =>
     [row.stat_type, row.season, row.event_id ?? 'season', row.team_id ?? 'unresolved_team', row.player_id ?? row.player_name ?? 'unresolved_player'].join('|')
   ).filter((group) => group.rows.length > 1)
+  const duplicateLineups = groupBy(rows.lineups, (row) =>
+    [
+      row.lineup_type,
+      row.event_id ?? 'depth_chart',
+      row.team_id ?? 'unresolved_team',
+      row.player_id ?? row.player_name ?? 'unresolved_player',
+      row.position ?? 'unknown_position',
+      row.depth_order ?? 'unknown_depth',
+    ].join('|')
+  ).filter((group) => group.rows.length > 1)
+  const contradictoryInjuries = groupBy(rows.injuries, (row) =>
+    String(row.player_id ?? row.player_name ?? row.id)
+  ).filter((group) => new Set(group.rows.map((row) => normalize(row.status))).size > 1)
+  const staleInjuries = rows.injuries.filter(
+    (row) => !row.updated_at || nowMs - new Date(row.updated_at).getTime() > 24 * 60 * 60 * 1000
+  )
+  const staleLineups = rows.lineups.filter(
+    (row) => !row.updated_at || nowMs - new Date(row.updated_at).getTime() > 6 * 60 * 60 * 1000
+  )
   const duplicateOdds = groupBy(rows.odds, (row) =>
     [
       row.event_id,
@@ -675,6 +747,122 @@ function buildIssues(rows: AuditRows, seasonKey: string) {
         (row) => metadataFlag(row, 'trial') === true && metadataFlag(row, 'production_eligible') !== false
       ),
       recommendation: 'Trial player stats must remain production_eligible=false and excluded from confidence lifts.',
+    }),
+    issue({
+      severity: 'info',
+      category: 'injuries',
+      entity: 'sport_injuries',
+      message: 'Injury table unavailable',
+      rows: rows.injuriesUnavailableReason ? [{ id: 'sport_injuries_not_available' }] : [],
+      recommendation: 'Keep injury context unavailable until the stored injury table is present.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'injuries',
+      entity: 'sport_injuries',
+      message: 'Injury rows have unresolved player links',
+      rows: rows.injuries.filter((row) => !row.player_id || !playerIds.has(row.player_id)),
+      recommendation: 'Resolve player mappings before using injuries as production feature inputs.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'injuries',
+      entity: 'sport_injuries',
+      message: 'Injury rows have unresolved team links',
+      rows: rows.injuries.filter((row) => !row.team_id || !teamIds.has(row.team_id)),
+      recommendation: 'Resolve team mappings before using injuries as production feature inputs.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'injuries',
+      entity: 'sport_injuries',
+      message: 'Contradictory injury statuses',
+      rows: contradictoryInjuries.flatMap((group) => group.rows),
+      recommendation: 'Resolve multiple statuses for the same player before applying production injury impact.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'injuries',
+      entity: 'sport_injuries',
+      message: 'Stale injury rows',
+      rows: staleInjuries,
+      recommendation: 'Refresh injuries before relying on injury freshness or availability.',
+    }),
+    issue({
+      severity: 'error',
+      category: 'injuries',
+      entity: 'sport_injuries',
+      message: 'Trial injuries marked production eligible',
+      rows: rows.injuries.filter(
+        (row) => metadataFlag(row, 'trial') === true && metadataFlag(row, 'production_eligible') !== false
+      ),
+      recommendation: 'Trial injuries must remain production_eligible=false and excluded from confidence lifts.',
+    }),
+    issue({
+      severity: 'info',
+      category: 'lineups',
+      entity: 'sport_lineups',
+      message: 'Lineup table unavailable',
+      rows: rows.lineupsUnavailableReason ? [{ id: 'sport_lineups_not_available' }] : [],
+      recommendation: 'Keep lineup context unavailable until the stored lineup table is present.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'lineups',
+      entity: 'sport_lineups',
+      message: 'Duplicate lineup natural keys',
+      rows: duplicateLineups.flatMap((group) => group.rows),
+      recommendation: 'Deduplicate lineups by type, event, team, player, position and depth order before feature generation.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'lineups',
+      entity: 'sport_lineups',
+      message: 'Lineup rows have unresolved player links',
+      rows: rows.lineups.filter((row) => !row.player_id || !playerIds.has(row.player_id)),
+      recommendation: 'Preserve unresolved rows safely, but do not use them for production lineup features until mapped.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'lineups',
+      entity: 'sport_lineups',
+      message: 'Lineup rows have unresolved team links',
+      rows: rows.lineups.filter((row) => !row.team_id || !teamIds.has(row.team_id)),
+      recommendation: 'Resolve team mappings before using lineups in feature generation.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'lineups',
+      entity: 'sport_lineups',
+      message: 'Starting lineups have unresolved event links',
+      rows: rows.lineups.filter((row) => row.lineup_type === 'starting_lineup' && (!row.event_id || !eventIds.has(row.event_id))),
+      recommendation: 'Resolve event mappings before using starting lineups as event-specific features.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'lineups',
+      entity: 'sport_lineups',
+      message: 'Lineup rows have invalid depth order',
+      rows: rows.lineups.filter((row) => row.lineup_type === 'depth_chart' && (row.depth_order === null || row.depth_order < 1)),
+      recommendation: 'Normalize depth order to positive integers for depth-chart feature generation.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'lineups',
+      entity: 'sport_lineups',
+      message: 'Stale lineup rows',
+      rows: staleLineups,
+      recommendation: 'Refresh lineups before relying on lineup freshness or starter availability.',
+    }),
+    issue({
+      severity: 'error',
+      category: 'lineups',
+      entity: 'sport_lineups',
+      message: 'Trial lineups marked production eligible',
+      rows: rows.lineups.filter(
+        (row) => metadataFlag(row, 'trial') === true && metadataFlag(row, 'production_eligible') !== false
+      ),
+      recommendation: 'Trial lineups must remain production_eligible=false and excluded from confidence lifts.',
     }),
     issue({
       severity: 'warning',
@@ -887,6 +1075,8 @@ function buildPlan(rows: AuditRows, issues: DataQualityIssue[], gaps: ReturnType
       oddsSnapshots: oddsGapDays,
       providerMappings: issues.filter((item) => item.category === 'mappings').reduce((sum, item) => sum + item.count, 0),
       playerStats: issues.filter((item) => item.category === 'player_stats').reduce((sum, item) => sum + item.count, 0),
+      injuries: issues.filter((item) => item.category === 'injuries').reduce((sum, item) => sum + item.count, 0),
+      lineups: issues.filter((item) => item.category === 'lineups').reduce((sum, item) => sum + item.count, 0),
     },
     eventsRequiringScoreReconciliation: eventsRequiringScores.map((event) => ({
       id: event.id,
@@ -921,7 +1111,9 @@ function buildPlan(rows: AuditRows, issues: DataQualityIssue[], gaps: ReturnType
       'standings_from_results',
       'game_stats_from_results',
       'odds_by_upcoming_window',
-      'player_stats_after_exact_endpoint_confirmation_and_migration',
+      'injuries_after_exact_endpoint_confirmation',
+      'lineups_after_exact_endpoint_confirmation',
+      'player_stats_after_exact_endpoint_confirmation',
       'settlement_after_scores',
       'backtest_after_settlement',
     ],

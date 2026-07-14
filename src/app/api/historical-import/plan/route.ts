@@ -1,12 +1,15 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
+import { probeHistoricalFeatureSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { planHistoricalImport } from '@/services/historical-import-engine.service'
+import { runHistoricalFeatureSnapshotWritePilot } from '@/services/historical-feature-generation.service'
 
 export async function POST(request: NextRequest) {
   const id = requestId(request)
 
   try {
     const body = await request.json().catch(() => ({}))
+    const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
     const result = planHistoricalImport({
       sportKey: body?.sportKey ?? body?.sport ?? null,
       leagueKey: body?.leagueKey ?? body?.league ?? null,
@@ -17,7 +20,7 @@ export async function POST(request: NextRequest) {
       dataTypes: Array.isArray(body?.dataTypes) ? body.dataTypes : null,
       dryRun: body?.dryRun ?? true,
       batchSizeDays: body?.batchSizeDays ?? body?.batchSize ?? null,
-    })
+    }, schemaCapabilities)
 
     if (!result.success) {
       return apiError({
@@ -28,7 +31,18 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    return apiOk(result, id)
+    const snapshotWritePilot = await runHistoricalFeatureSnapshotWritePilot({
+      dryRun: true,
+      confirmed: false,
+      maximumEvents: 5,
+      maximumMarketsPerEvent: 3,
+      maximumSnapshots: 15,
+    })
+
+    return apiOk({
+      ...result,
+      historicalFeatureSnapshotWritePilot: snapshotWritePilot,
+    }, id)
   } catch (error) {
     console.error('Historical import plan error:', { requestId: id, error })
 
@@ -46,6 +60,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const dataTypes = searchParams.get('dataTypes')
+    const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
     const result = planHistoricalImport({
       sportKey: searchParams.get('sport') ?? searchParams.get('sportKey'),
       leagueKey: searchParams.get('league') ?? searchParams.get('leagueKey'),
@@ -56,7 +71,7 @@ export async function GET(request: NextRequest) {
       dataTypes: dataTypes ? dataTypes.split(',') : null,
       dryRun: true,
       batchSizeDays: Number(searchParams.get('batchSizeDays') ?? 7),
-    })
+    }, schemaCapabilities)
 
     if (!result.success) {
       return apiError({
@@ -67,7 +82,18 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    return apiOk(result, id)
+    const snapshotWritePilot = await runHistoricalFeatureSnapshotWritePilot({
+      dryRun: true,
+      confirmed: false,
+      maximumEvents: 5,
+      maximumMarketsPerEvent: 3,
+      maximumSnapshots: 15,
+    })
+
+    return apiOk({
+      ...result,
+      historicalFeatureSnapshotWritePilot: snapshotWritePilot,
+    }, id)
   } catch (error) {
     console.error('Historical import plan GET error:', { requestId: id, error })
 

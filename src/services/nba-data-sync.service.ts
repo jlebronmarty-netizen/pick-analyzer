@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { planHistoricalFeatureGeneration } from '@/services/historical-feature-generation.service'
 import { getMultiSportHealth } from '@/services/multi-sport-health.service'
 import {
   getMultiSportEvents,
@@ -67,6 +68,35 @@ type SyncResult = {
   errorCount: number
   errors: string[]
   warnings: string[]
+}
+
+type NbaDailyOrchestrationStep = {
+  order: number
+  id: string
+  label: string
+  domain:
+    | 'schedules'
+    | 'results'
+    | 'injuries'
+    | 'lineups'
+    | 'team_stats'
+    | 'player_stats'
+    | 'feature_store'
+    | 'prediction_preview'
+    | 'settlement'
+    | 'data_quality'
+  route: string
+  method: 'GET' | 'POST'
+  protected: boolean
+  mutates: boolean
+  status:
+    | 'ready_existing_route'
+    | 'read_only_ready'
+    | 'contract_only_blocked_external'
+  providerCallsAllowedByDefault: number
+  idempotencyKey: string
+  checkpoint: string
+  productionSafetyGate: string
 }
 
 type TeamRecord = {
@@ -882,6 +912,215 @@ export async function getNbaSyncStatus() {
   return {
     success: true,
     jobs: data ?? [],
+    orchestration: getNbaDailySyncOrchestrationContract(),
+  }
+}
+
+export function getNbaDailySyncOrchestrationContract() {
+  const featureGenerationHandoff = planHistoricalFeatureGeneration({
+    sportKey: NBA_SPORT_KEY,
+    leagueKey: NBA_LEAGUE_KEY,
+    market: 'moneyline',
+    executionMode: 'trial_only',
+    batchSize: 100,
+  })
+  const steps: NbaDailyOrchestrationStep[] = [
+    {
+      order: 1,
+      id: 'nba_daily_schedules',
+      label: 'Schedules and event updates',
+      domain: 'schedules',
+      route: '/api/nba/sync/games?mode=incremental',
+      method: 'POST',
+      protected: true,
+      mutates: true,
+      status: 'ready_existing_route',
+      providerCallsAllowedByDefault: 0,
+      idempotencyKey: 'sport_events.id',
+      checkpoint: 'sports_sync_jobs:nba:games',
+      productionSafetyGate: 'Exclude trial/non-production events from prediction generation.',
+    },
+    {
+      order: 2,
+      id: 'nba_daily_results',
+      label: 'Results and scores',
+      domain: 'results',
+      route: '/api/nba/sync/games?mode=incremental',
+      method: 'POST',
+      protected: true,
+      mutates: true,
+      status: 'ready_existing_route',
+      providerCallsAllowedByDefault: 0,
+      idempotencyKey: 'sport_events.id',
+      checkpoint: 'sports_sync_jobs:nba:results',
+      productionSafetyGate: 'Settle only completed or voidable events with final scores.',
+    },
+    {
+      order: 3,
+      id: 'nba_daily_injuries',
+      label: 'Injuries',
+      domain: 'injuries',
+      route: '/api/nba/sync/injuries?mode=incremental',
+      method: 'POST',
+      protected: true,
+      mutates: true,
+      status: 'contract_only_blocked_external',
+      providerCallsAllowedByDefault: 0,
+      idempotencyKey: 'sport_injuries.id',
+      checkpoint: 'sports_sync_jobs:nba:injuries',
+      productionSafetyGate: 'Trial injury rows cannot improve production confidence.',
+    },
+    {
+      order: 4,
+      id: 'nba_daily_lineups',
+      label: 'Depth charts and lineups',
+      domain: 'lineups',
+      route: '/api/nba/sync/lineups?mode=incremental',
+      method: 'POST',
+      protected: true,
+      mutates: true,
+      status: 'contract_only_blocked_external',
+      providerCallsAllowedByDefault: 0,
+      idempotencyKey: 'sport_lineups.id',
+      checkpoint: 'sports_sync_jobs:nba:lineups',
+      productionSafetyGate: 'Trial lineup rows cannot remove lineup confidence penalties.',
+    },
+    {
+      order: 5,
+      id: 'nba_daily_team_stats',
+      label: 'Team and game stats',
+      domain: 'team_stats',
+      route: '/api/nba/sync/stats?mode=incremental',
+      method: 'POST',
+      protected: true,
+      mutates: true,
+      status: 'ready_existing_route',
+      providerCallsAllowedByDefault: 0,
+      idempotencyKey: 'team_stats(team_name,sport_key,season), sport_game_stats.id',
+      checkpoint: 'sports_sync_jobs:nba:stats',
+      productionSafetyGate: 'Use completed results only for derived stats.',
+    },
+    {
+      order: 6,
+      id: 'nba_daily_player_stats',
+      label: 'Player season and game stats',
+      domain: 'player_stats',
+      route: '/api/historical-import/execute',
+      method: 'POST',
+      protected: true,
+      mutates: true,
+      status: 'contract_only_blocked_external',
+      providerCallsAllowedByDefault: 0,
+      idempotencyKey: 'sport_player_stats.id',
+      checkpoint: 'sports_sync_jobs:nba:player_stats',
+      productionSafetyGate: 'Trial player stats cannot improve production confidence or train models.',
+    },
+    {
+      order: 7,
+      id: 'nba_daily_feature_preview',
+      label: 'Feature Store preview',
+      domain: 'feature_store',
+      route: '/api/nba/features/preview',
+      method: 'GET',
+      protected: false,
+      mutates: false,
+      status: 'read_only_ready',
+      providerCallsAllowedByDefault: 0,
+      idempotencyKey: 'feature_store_core_v1:snapshot_id',
+      checkpoint: 'computed:feature_preview:historical_feature_generation_orchestrator_v1',
+      productionSafetyGate:
+        'Historical/current feature eligibility is checked with provider calls 0; no durable feature persistence or production confidence lift until no-leakage and persistence gates pass.',
+    },
+    {
+      order: 8,
+      id: 'nba_daily_prediction_preview',
+      label: 'Prediction preview',
+      domain: 'prediction_preview',
+      route: '/api/nba/predictions',
+      method: 'GET',
+      protected: false,
+      mutates: false,
+      status: 'read_only_ready',
+      providerCallsAllowedByDefault: 0,
+      idempotencyKey: 'prediction_preview:event_market_team',
+      checkpoint: 'computed:prediction_preview',
+      productionSafetyGate: 'Preview does not persist picks and excludes trial/non-production rows.',
+    },
+    {
+      order: 9,
+      id: 'nba_daily_settlement',
+      label: 'Settlement',
+      domain: 'settlement',
+      route: '/api/nba/predictions/settle',
+      method: 'POST',
+      protected: true,
+      mutates: true,
+      status: 'ready_existing_route',
+      providerCallsAllowedByDefault: 0,
+      idempotencyKey: 'prediction_history.id',
+      checkpoint: 'prediction_history:lifecycle_status',
+      productionSafetyGate: 'Settle from stored prediction terms and final scores only.',
+    },
+    {
+      order: 10,
+      id: 'nba_daily_data_quality',
+      label: 'Data-quality audit',
+      domain: 'data_quality',
+      route: '/api/nba/data-quality',
+      method: 'GET',
+      protected: false,
+      mutates: false,
+      status: 'read_only_ready',
+      providerCallsAllowedByDefault: 0,
+      idempotencyKey: 'read_only_audit',
+      checkpoint: 'computed:data_quality',
+      productionSafetyGate: 'Report trial contamination and orphan rows before production use.',
+    },
+  ]
+
+  return {
+    mode: 'nba_daily_sync_orchestration_contract_v1',
+    generatedAt: nowIso(),
+    providerUsage: {
+      externalProviderCallsMade: 0,
+      source: 'static_existing_route_contracts',
+    },
+    routeCountDelta: 0,
+    defaultProviderCallsAllowed: 0,
+    concurrencyLimit: 1,
+    automaticRetries: false,
+    steps,
+    summary: {
+      steps: steps.length,
+      mutatingSteps: steps.filter((step) => step.mutates).length,
+      readOnlySteps: steps.filter((step) => !step.mutates).length,
+      readySteps: steps.filter((step) => step.status !== 'contract_only_blocked_external').length,
+      blockedExternalSteps: steps.filter((step) => step.status === 'contract_only_blocked_external').length,
+      protectedSteps: steps.filter((step) => step.protected).length,
+    },
+    blockers: [
+      'Production injury, lineup and player-stat refreshes remain blocked until real-data approval and production eligibility rules are supplied.',
+      'Live odds, historical odds and player props remain blocked by endpoint, entitlement and settlement approval gates.',
+      ...featureGenerationHandoff.eligibility.blockingMissingDomains,
+    ],
+    featureGenerationHandoff: {
+      mode: featureGenerationHandoff.mode,
+      eligible: featureGenerationHandoff.eligibility.eligible,
+      providerCallsMade: featureGenerationHandoff.providerUsage.externalProviderCallsMade,
+      predictionCutoffStrategy: featureGenerationHandoff.eligibility.predictionCutoffStrategy,
+      persistenceReady: featureGenerationHandoff.eligibility.persistenceReady,
+      persistenceStatus: featureGenerationHandoff.persistenceReadiness.status,
+      migrationFilename: featureGenerationHandoff.persistenceReadiness.migration.filename,
+      migrationApplied: featureGenerationHandoff.persistenceReadiness.migration.applied,
+      leakageValidationReady: featureGenerationHandoff.eligibility.leakageValidationReady,
+      backtestHandoffReady: featureGenerationHandoff.eligibility.backtestHandoffReady,
+      backtestReady: featureGenerationHandoff.backtestInputReadiness.ready,
+      immutablePregameSnapshots:
+        'Postgame updates must not mutate original pregame snapshots; corrected data requires a new versioned audit/research snapshot.',
+      checkpointStrategy: featureGenerationHandoff.batching.checkpointStrategy,
+      deterministicSnapshotId: featureGenerationHandoff.idempotency.deterministicSnapshotId,
+      deterministicPersistenceKey: featureGenerationHandoff.persistenceReadiness.deterministicKey,
+    },
   }
 }
 
@@ -1009,6 +1248,7 @@ export async function getNbaDataHealth() {
         )[0]?.snapshot_time ?? null,
     },
     recentJobs: jobs.jobs.slice(0, 10),
+    orchestration: getNbaDailySyncOrchestrationContract(),
   }
 }
 

@@ -44,6 +44,8 @@ Core V1 supports:
 - partial failure isolation by checkpoint
 - import validation
 - read-only import health from existing Supabase metadata
+- additive multi-sport import planning for NBA, MLB, NFL, NHL and soccer through the existing plan response
+- historical feature generation handoff through the existing plan response
 
 ## Dry-Run Behavior
 
@@ -52,6 +54,10 @@ All responses force `dryRun: true`.
 If a request sends `dryRun: false`, Core V1 returns a warning and still does not execute a provider import. This is intentional because provider-backed historical execution needs explicit quota approval and execution guardrails.
 
 `providerUsage.externalProviderCallsMade` is always `0`.
+
+The additive `multiSportPlanning` section is also planning-only. It declares sport-specific dependency order, destination tables, natural keys, conflict targets, request caps, checkpoint/resume strategy, trial isolation defaults, data-quality/Feature Store/prediction-preview handoffs and approval gates for NBA, MLB, NFL, NHL and soccer. It does not confirm provider endpoints or execute provider transport.
+
+The additive `featureGenerationHandoff` section is planning-only, and the existing plan response also includes a dry-run `historicalFeatureSnapshotWritePilot` summary when schema readiness allows it. These sections report required source domains, blocking missing domains, inclusive prediction cutoff strategy, estimated event/snapshot counts, batch size, checkpoint strategy, persistence readiness, write-mode availability, leakage validation readiness and backtest handoff readiness from Historical Feature Generation Orchestrator V1.
 
 ## Persistence
 
@@ -121,6 +127,42 @@ The dashboard panel appears in Multi-Sport Coverage and shows:
 - warnings
 
 There is no execution button in Core V1.
+
+## Multi-Sport Planning V2
+
+The existing `/api/historical-import/plan` route now returns:
+
+- `multiSportPlanning.mode`: `historical_import_multi_sport_planning_v2`
+- `multiSportPlanning.providerCallsMade`: `0`
+- `multiSportPlanning.sports`: planning contracts for `basketball_nba`, `baseball_mlb`, `americanfootball_nfl`, `icehockey_nhl` and `soccer`
+- `multiSportPlanning.dependencyGraph`: per-sport domain dependencies with readiness classifications
+- `multiSportPlanning.validation`: deterministic zero-call checks for priority-sport coverage, concurrency, retry policy, trial isolation, dependency indexes and nonnegative one-to-many counters
+
+Each sport plan includes supported domains, dependency order, domain manifests, destination tables, natural keys, conflict targets, request caps, season/date-range scope support, checkpoint/resume strategy, trial isolation defaults, provider-call accounting, record accounting and handoffs into data-quality, Feature Store and prediction-preview validation.
+
+Domain manifests distinguish `current_api`, `recent_historical_feeds`, `archived_historical_api_required`, `unsupported_domain`, `entitlement_blocked`, `migration_pending`, `pilot_validated_current_feed`, `pilot_validated_date_feed`, `pilot_validated_season_date_feeds`, `trial_only_execution` and approval-required states without inventing endpoint paths. They also declare scope types, dependency indexes, maximum provider-call/record budgets, stable ID components, conflict targets, one-to-many expansion possibility and validation/feature-generation/settlement/backtesting handoffs.
+
+NBA manifests use per-domain persistence contracts. Scores/results use provider event/game identity, standings use sport/league/season/team/provider identity, players use provider player identity, injuries use provider injury identity or a stable player/team/status/source key, lineups use the validated depth/lineup natural key, team and game stats use team/event stat scope, player stats use season/stat type/event/team/player identity, odds use event/market/period/sportsbook/selection/snapshot timestamp identity and player props remain contract-only around provider event/market/outcome/sportsbook identity.
+
+Sport-specific notes are explicit. NBA flags trial SportsDataIO rows, lineup confidence gates and discovery-only BettingEvents. MLB flags doubleheaders, starting pitchers, bullpen workload, suspended/resumed games and extra innings. NFL flags season type, week/playoff round, quarter/overtime scoring and quarterback/injury/depth-chart gates. NHL flags regulation/overtime/shootout outcomes, starting goalie, line combinations, scratches and special teams. Soccer flags competition/season/stage/group/round, 1X2 markets, two-leg ties, extra time, penalties, qualification outcomes and first-half scoring.
+
+Validation on 2026-07-14 used the existing plan/build path and returned `historical_import_engine_core_v1`, `historical_import_multi_sport_planning_v2`, five sport plans, zero provider calls and nonnegative one-to-many counter validation for the 39 provider records -> 758 normalized rows fixture. The API route count remained 205.
+
+## Historical Feature Generation Handoff
+
+The existing `/api/historical-import/plan` route now includes `featureGenerationHandoff.mode = historical_feature_generation_orchestrator_v1`.
+
+The handoff is blocked for production execution because linked production prediction rows, prices, closing snapshots and sufficient settled production samples are still missing. Runtime schema probing verifies whether the durable generic historical feature snapshot schema is applied; the bounded trial write path is implemented and verified for stored NBA trial rows.
+
+Schema migration: `supabase/migrations/202607140001_historical_feature_snapshots_v1.sql`
+
+The planned stable natural key is:
+
+`sport:event_id:market:prediction_cutoff:model_version:feature_set_version:execution_mode`
+
+The handoff makes zero provider calls and must never read raw provider payloads directly.
+
+When the server schema probe succeeds, `/api/historical-import/plan` reports `featureGenerationHandoff.persistenceReadiness.status = ready` and a dry-run write-pilot summary. The verified bounded pilot found 15 eligible NBA trial candidates under the 5-event/3-market/15-snapshot cap. Backtest eligibility can still remain closed for missing linked prediction snapshots, valid prices, closing snapshots or settled production sample reasons.
 
 ## Future Execution Phase
 

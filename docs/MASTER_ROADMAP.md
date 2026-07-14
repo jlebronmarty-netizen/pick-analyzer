@@ -242,6 +242,70 @@ Evidence: `docs/nba-data-quality-player-stats-expansion-v1.md`, `src/services/nb
 
 Note: The read-only NBA data-quality audit now includes player identity coverage, duplicate player keys, unresolved player-team links, optional `sport_player_stats` coverage, duplicate player-stat natural keys, missing event/team/player references, season mismatches and trial production-eligibility violations. If the additive `sport_player_stats` migration is not applied yet, the audit reports an informational unavailable-table issue instead of failing the whole quality report.
 
+### NBA Player Stats Feature Quality Integration V1
+
+Status: Completed zero-call Feature Store and data-quality integration; build verified.
+
+Evidence: `src/services/feature-store-core.service.ts`, `src/services/multi-sport-feature-registry.service.ts`, `src/services/nba-feature-store-integration.service.ts`, `src/services/nba-data-quality.service.ts`, `src/components/dashboard/NbaFeatureStoreIntegrationPanel.tsx`, `/api/nba/features/store`, `/api/nba/features/preview`, `/api/nba/features/validation`, `/api/nba/data-quality`, `/api/nba/data-quality/coverage` and `/api/nba/data-quality/issues`.
+
+Note: The module adds `player_stats_context` as an optional Feature Store feature, registers it for NBA moneyline/spread/total feature sets, reads stored `sport_player_stats` rows into NBA feature previews and dashboard summaries, and keeps trial player stats from improving production confidence. The existing NBA data-quality APIs now also audit stored injuries and lineups for unresolved mappings, stale feeds, duplicate lineup keys, invalid depth order and trial/production contamination. No routes, migrations or provider calls were added.
+
+### NBA Daily Sync Orchestration Contract V1
+
+Status: Completed zero-call orchestration contract and build verified.
+
+Evidence: `src/services/nba-data-sync.service.ts`, `src/components/dashboard/NbaDataSyncPanel.tsx`, `/api/nba/sync/status` and `/api/nba/data-health`.
+
+Note: The existing sync status and data-health responses now expose an ordered daily NBA workflow covering schedules, results, injuries, lineups, team stats, player stats, Feature Store preview, prediction preview, settlement and data-quality audit. The contract declares route, method, protection, mutation, checkpoint, idempotency key, provider-call default, concurrency and production safety gates for each step. No new route, provider call, migration or cosmetic dashboard module was added.
+
+### NBA Daily Sync Orchestrator V2
+
+Status: Completed compatibility-preserving dry-run/read-only orchestrator and build verified.
+
+Evidence: `src/services/daily-pipeline.service.ts`, existing `/api/cron/daily-sync`, `/api/nba/features/preview`, `/api/nba/predictions`, `/api/nba/predictions/model-health` and `/api/nba/data-quality`.
+
+Note: The existing cron route now accepts `version=2` to return `daily_sync_orchestrator_v2` with dry-run defaults, provider-call budget checks, concurrency `1`, no automatic retries, checkpoint/resume/cancel metadata and dependency-aware execution planning across the 10-step NBA workflow. Runtime validation used `dryRun=true` and `providerCallBudget=0`, returned 10 steps, made 0 provider calls, left production gates closed for trial-only or externally blocked domains and kept prediction persistence disabled.
+
+### Historical Import Multi-Sport Planning V1
+
+Status: Superseded by V2 additive planning contract and build verified.
+
+Evidence: `src/services/historical-import-engine.service.ts`, existing `/api/historical-import/plan` and `docs/historical-import-engine-core-v1.md`.
+
+Note: The existing historical import planner now returns `historical_import_multi_sport_planning_v2` for NBA, MLB, NFL, NHL and soccer without adding routes, migrations or provider calls. Each sport plan declares supported domains, dependency order, V2 domain manifests, destination tables, natural keys, conflict targets, request caps, provider-call accounting, record accounting, checkpoint/resume strategy, trial isolation defaults, data-quality/Feature Store/prediction-preview handoffs and sport-specific warnings. Domain manifests distinguish current API, recent historical feeds, archive-required, unsupported, entitlement-blocked, migration-pending and trial-only execution states without inventing endpoint paths. Live execution remains blocked pending provider, quota, exact endpoint/date-window and production-promotion approvals.
+
+### Production Readiness Phase 1 - Historical Import Engine V2 Planning
+
+Status: Completed first shared-layer increment and build verified.
+
+Evidence: `src/services/historical-import-engine.service.ts`, existing `/api/historical-import/plan` and `docs/historical-import-engine-core-v1.md`.
+
+Note: The V2 planning increment adds NBA to the shared multi-sport manifest, exposes a dependency graph, season/date/week/competition scope metadata, provider-call and maximum-record budgets, stable ID components, one-to-many expansion flags and deterministic validation for priority-sport coverage, concurrency `1`, retries disabled, trial isolation defaults, stable dependency indexes and nonnegative counters for the 39 provider records -> 758 normalized rows fixture. It makes zero provider calls, adds no API routes and creates no migration.
+
+### Historical Feature Generation Orchestrator V1
+
+Status: Completed dry-run contract and build verified; durable persistence handoff now uses runtime schema probing.
+
+Evidence: `docs/historical-feature-generation-orchestrator-v1.md`, `src/services/historical-feature-generation.service.ts`, existing `/api/features/store/validation`, existing `/api/historical-import/plan`, `src/services/nba-data-sync.service.ts`, `src/services/daily-pipeline.service.ts` and `src/services/nba-backtesting-calibration.service.ts`.
+
+Note: The orchestrator plans leakage-safe historical pregame feature snapshots from persisted normalized records only. It defines deterministic snapshot IDs, sport/event/market/cutoff/model/feature-set identity, trial/scrambled/production flags, lineage metadata, checkpoint/resume/cancel contracts, partial-failure isolation, nonnegative counters and a typed backtest input readiness contract. The deterministic suite covers leakage and persistence cases including cutoff inclusivity, post-cutoff rows, final scores, postgame player stats, injuries/lineups after cutoff, closing lines, trial rows in production generation, missing timestamps, deterministic regeneration, changed-lineage distinct keys, linked-snapshot immutability, batch dedupe, ROI/CLV blockers and cancellation/resume determinism. Runtime schema probing now distinguishes migration-file presence from remote schema application. Provider calls remain 0 and no route was added.
+
+### Historical Feature Snapshot Persistence V1
+
+Status: Implemented, runtime schema verified against the configured Supabase project and build verified.
+
+Evidence: `supabase/migrations/202607140001_historical_feature_snapshots_v1.sql`, `docs/historical-feature-snapshot-persistence-v1.md`, `src/services/historical-feature-generation.service.ts`, existing `/api/features/store/validation`, existing `/api/historical-import/plan`, `src/services/nba-data-sync.service.ts`, `src/services/daily-pipeline.service.ts` and `src/services/nba-backtesting-calibration.service.ts`.
+
+Note: The migration creates generic `historical_feature_snapshots` persistence and adds `prediction_history.feature_snapshot_id` plus companion lineage columns. Service contracts now use a server-only Supabase schema probe and report `applied` only when required tables/columns are selectable. The existing Feature Store route now supports a bounded write-mode pilot that inserted 15 NBA trial snapshots on first execution and reused all 15 on immediate rerun, with zero provider calls, zero duplicate rows and zero prediction mutations. Production backtesting, ROI, CLV and calibration remain blocked until real prediction rows are linked to durable snapshots and have valid prices, closing snapshots and sufficient settled production samples.
+
+### Settlement Core Multi-Sport Fixture Coverage V1
+
+Status: Completed deterministic fixture expansion and build verified.
+
+Evidence: `src/services/settlement-core.service.ts`, existing `/api/settlement/core` and `docs/settlement-core-v2.md`.
+
+Note: The existing settlement core status now includes multi-sport deterministic fixtures for NBA, MLB, NFL, NHL and Soccer. It covers moneyline/spread/total equivalents, first-half/quarter/period contracts, overtime/extra-innings inclusion, push and void scenarios. Soccer draw, double chance, extra-time/penalties and two-leg aggregate remain contract-only when dedicated result-type metadata is missing. Props remain contract-only until grading feeds and settlement rules are proven. No route, provider call or migration was added.
+
 ### SportsDataIO NBA Player Props Readiness V1
 
 Status: Completed zero-call readiness and build verified; live prop pilot blocked pending endpoint, market, entitlement and settlement confirmation.
@@ -257,6 +321,30 @@ Status: Completed zero-call readiness and build verified.
 Evidence: `docs/sportsdataio-nba-odds-readiness-v1.md`, `src/services/sportsdataio-nba-odds-readiness.service.ts`, `/api/providers/sportsdataio/nba/odds/readiness`, `/api/providers/sportsdataio/nba/odds/endpoint-preflight` and existing `sports_odds_snapshots` migration `supabase/migrations/202607110001_nba_data_sync_v1.sql`.
 
 Note: The module validates deterministic moneyline, spread and total odds rows for future `sports_odds_snapshots` persistence with zero provider calls and no migration. It now returns endpoint and entitlement preflight gates through readiness and direct endpoint-preflight APIs. Live odds and historical odds execution remain blocked until exact authenticated endpoint paths, entitlement, sportsbook coverage and capped historical windows are approved.
+
+### SportsDataIO NBA Betting Events And Odds Contract Pilot V1
+
+Status: Completed discovery-only verification and build verified.
+
+Evidence: `docs/sportsdataio-nba-odds-readiness-v1.md`, `src/services/sportsdataio-historical-import-readiness.service.ts`, `src/config/sportsdataio-endpoint-catalog.ts`, existing `/api/historical-import/execute` and existing `sports_odds_snapshots` persistence contract.
+
+Note: The approved pilot used `maximumRequests=2`, concurrency `1`, no retries, `trial=true`, `scrambled=true` and `production_eligible=false`. `BettingEventsByDate/2025-12-26` returned HTTP 200 with 9 records and nested `BettingMarkets` discovery metadata. The approved one-event follow-up `BettingMarkets/22888` returned HTTP 200 with 0 records. The executor now treats this honestly as discovery/index data, completed sync job `1a72e504-9737-4dd0-9b9e-8fd722b51c05`, persisted no unsupported odds snapshots, created no migration and kept production predictions, CLV, ROI, backtesting, calibration and model training disabled. The supplied `LveGameOddsByDate` path and broad alternate-market endpoint remain uncalled.
+
+### SportsDataIO Canonical Endpoint Catalog V1
+
+Status: Completed provider-independent catalog and build verified.
+
+Evidence: `src/config/sportsdataio-endpoint-catalog.ts` and `docs/providers/sportsdataio/`.
+
+Note: The catalog records exact path templates, API version, domain, parameter format, production/historical purpose, trial status, entitlement status, implementation status, normalization status, persistence status and last pilot status for the SportsDataIO feeds Pick Analyzer actually needs across NBA, MLB, NFL, NHL and Soccer. It adds no route, performs no provider call and does not unlock production use.
+
+### SportsDataIO Betting Market Normalization Core V1
+
+Status: Completed provider-independent normalization/routing hardening and build verified.
+
+Evidence: `src/services/sportsdataio-betting-normalizer.service.ts`, `src/services/sportsdataio-historical-import-readiness.service.ts`, `src/services/sportsdataio-runtime-adapter.service.ts`, `src/config/sportsdataio-endpoint-catalog.ts` and `docs/providers/sportsdataio/`.
+
+Note: The shared normalizer separates `BettingEventID`, `GameID`, `BettingMarketID`, `BettingOutcomeID` and `SportsbookID`, classifies payloads as `DISCOVERY_ONLY`, `MARKET_INDEX_AVAILABLE`, `PRICED_OUTCOMES_AVAILABLE`, `ARCHIVE_REQUIRED`, `ENTITLEMENT_BLOCKED`, `EMPTY_VALID_RESPONSE` or `UNSUPPORTED_SCHEMA`, and preserves provider-record, event, market, outcome, sportsbook, priced-outcome and normalized-snapshot counters. Runtime capabilities now include a zero-call `betting_metadata` domain for BettingMetadata and ActiveSportsbooks contracts. No provider calls, routes or migrations were added.
 
 ### SportsDataIO NBA Integration Readiness V1
 

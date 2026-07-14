@@ -9,6 +9,9 @@ NBA Backtesting & Calibration V1 measures NBA prediction quality from stored `pr
 - Segments performance by market, model version, confidence bucket and data sufficiency bucket.
 - Builds moneyline calibration buckets from settled NBA rows.
 - Checks timestamp leakage risk using `cutoff_at`, `generated_at`, `odds_timestamp` and `commence_time`.
+- Exposes shared `backtestInputReadiness` from Historical Feature Generation Orchestrator V1.
+- Exposes `featureSnapshotEligibility` so durable feature lineage blockers are explicit.
+- Reports durable feature snapshot counts by total, trial, production-eligible, linked predictions, settled linked predictions, ROI eligibility and CLV eligibility.
 - Reports missing model version and feature snapshot counts.
 - Returns typed empty responses when no settled NBA predictions exist.
 
@@ -44,6 +47,8 @@ Supported query parameters:
 ## Persistence
 
 No migration is required for V1. The module reads from `prediction_history`, including metadata added by NBA Prediction Validation & Settlement V1.
+
+Durable historical feature snapshots use migration `202607140001_historical_feature_snapshots_v1.sql`, which is verified by runtime schema probing rather than migration-file presence. The bounded NBA trial write pilot inserted 15 trial snapshots and reused all 15 on rerun, but real production backtesting, ROI, CLV and calibration remain blocked when rows lack `feature_snapshot_id` lineage, when feature snapshots were generated after prediction time, when offered price is missing, when CLV lacks a genuine closing snapshot, or when trial/scrambled rows are involved.
 
 ## Validation
 

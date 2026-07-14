@@ -1,4 +1,9 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { probeHistoricalFeatureSchemaCapabilities } from '@/lib/server-schema-capabilities'
+import {
+  evaluateHistoricalFeatureBacktestEligibility,
+  getBacktestInputReadiness,
+} from '@/services/historical-feature-generation.service'
 import {
   NBA_PREDICTION_MODEL_VERSION,
   NBA_SPORT_KEY,
@@ -37,6 +42,12 @@ type PredictionRow = {
   lifecycle_status: string | null
   model_version: string | null
   feature_snapshot: Record<string, unknown> | null
+  feature_snapshot_id?: string | null
+  feature_snapshot_generated_at?: string | null
+  feature_set_version?: string | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
   validation_warnings: string[] | null
   odds_timestamp: string | null
   generated_at: string | null
@@ -338,12 +349,115 @@ async function loadRows(filters: NbaBacktestFilters) {
   return (data ?? []) as PredictionRow[]
 }
 
+async function loadFeatureSnapshotBacktestCounts() {
+  const [
+    totalSnapshots,
+    trialSnapshots,
+    productionSnapshots,
+    linkedPredictions,
+    settledLinkedPredictions,
+    roiEligibleRows,
+    clvCandidateRows,
+  ] = await Promise.all([
+    supabaseAdmin
+      .from('historical_feature_snapshots')
+      .select('id', { count: 'exact', head: true })
+      .eq('sport_key', NBA_SPORT_KEY),
+    supabaseAdmin
+      .from('historical_feature_snapshots')
+      .select('id', { count: 'exact', head: true })
+      .eq('sport_key', NBA_SPORT_KEY)
+      .eq('trial', true),
+    supabaseAdmin
+      .from('historical_feature_snapshots')
+      .select('id', { count: 'exact', head: true })
+      .eq('sport_key', NBA_SPORT_KEY)
+      .eq('production_eligible', true),
+    supabaseAdmin
+      .from('prediction_history')
+      .select('id', { count: 'exact', head: true })
+      .eq('sport_key', NBA_SPORT_KEY)
+      .not('feature_snapshot_id', 'is', null),
+    supabaseAdmin
+      .from('prediction_history')
+      .select('id', { count: 'exact', head: true })
+      .eq('sport_key', NBA_SPORT_KEY)
+      .not('feature_snapshot_id', 'is', null)
+      .in('result', ['win', 'loss', 'push', 'void']),
+    supabaseAdmin
+      .from('prediction_history')
+      .select('id', { count: 'exact', head: true })
+      .eq('sport_key', NBA_SPORT_KEY)
+      .eq('production_eligible', true)
+      .eq('trial', false)
+      .eq('scrambled', false)
+      .not('feature_snapshot_id', 'is', null)
+      .not('odds', 'is', null)
+      .in('result', ['win', 'loss', 'push', 'void']),
+    supabaseAdmin
+      .from('prediction_history')
+      .select('id, settlement_details')
+      .eq('sport_key', NBA_SPORT_KEY)
+      .eq('production_eligible', true)
+      .eq('trial', false)
+      .eq('scrambled', false)
+      .not('feature_snapshot_id', 'is', null)
+      .not('odds', 'is', null)
+      .limit(5000),
+  ])
+  const results = [
+    totalSnapshots,
+    trialSnapshots,
+    productionSnapshots,
+    linkedPredictions,
+    settledLinkedPredictions,
+    roiEligibleRows,
+    clvCandidateRows,
+  ]
+  const error = results.find((result) => result.error)?.error
+  if (error) throw new Error(`Failed to load feature snapshot backtest counts: ${error.message}`)
+
+  return {
+    totalHistoricalFeatureSnapshots: totalSnapshots.count ?? 0,
+    trialSnapshots: trialSnapshots.count ?? 0,
+    productionEligibleSnapshots: productionSnapshots.count ?? 0,
+    linkedPredictions: linkedPredictions.count ?? 0,
+    settledLinkedPredictions: settledLinkedPredictions.count ?? 0,
+    rowsEligibleForRoi: roiEligibleRows.count ?? 0,
+    rowsEligibleForClv: ((clvCandidateRows.data ?? []) as Array<{ settlement_details?: Record<string, unknown> | null }>)
+      .filter((row) => Boolean(row.settlement_details?.closingSnapshotId)).length,
+  }
+}
+
 export async function getNbaBacktest(filters: NbaBacktestFilters = {}) {
   const rows = await loadRows(filters)
   const settled = rows.filter(isSettled)
   const summary = summarize(rows)
   const checks = leakageChecks(rows)
   const calibration = buildCalibration(settled)
+  const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
+  const featureSnapshotCounts = await loadFeatureSnapshotBacktestCounts()
+  const migrationApplied =
+    schemaCapabilities.probes.historicalFeatureSnapshots.applied &&
+    schemaCapabilities.probes.predictionHistoryFeatureSnapshotLinkage.applied
+  const backtestInputReadiness = getBacktestInputReadiness(schemaCapabilities)
+  const firstSettled = settled[0]
+  const featureSnapshotEligibility = evaluateHistoricalFeatureBacktestEligibility({
+    hasSnapshot: Boolean(firstSettled?.feature_snapshot_id),
+    hasLineage: Boolean(firstSettled?.feature_snapshot_id && firstSettled?.feature_set_version),
+    snapshotGeneratedAt: firstSettled?.feature_snapshot_generated_at ?? null,
+    predictionTimestamp: firstSettled?.generated_at ?? firstSettled?.created_at ?? null,
+    cutoffTimestamp: firstSettled?.cutoff_at ?? null,
+    noLeakage: checks.leakageRisk === 0,
+    settled: Boolean(firstSettled),
+    hasValidPrice: firstSettled ? Number.isFinite(Number(firstSettled.odds)) : false,
+    productionEligible: firstSettled?.production_eligible === true,
+    trial: firstSettled?.trial === true,
+    scrambled: firstSettled?.scrambled === true,
+    sampleSize: settled.length,
+    hasClosingSnapshot: false,
+    migrationApplied,
+  })
 
   return {
     success: true,
@@ -365,6 +479,10 @@ export async function getNbaBacktest(filters: NbaBacktestFilters = {}) {
       modelVersions: Array.from(new Set(rows.map((row) => row.model_version).filter(Boolean))).sort(),
     },
     summary,
+    schemaCapabilities,
+    featureSnapshotCounts,
+    backtestInputReadiness,
+    featureSnapshotEligibility,
     calibration,
     leakageChecks: checks,
     byMarket: groupRows(rows, (row) => String(row.market ?? 'unknown')).map(({ key, rows }) => ({
@@ -392,6 +510,29 @@ export async function getNbaCalibration(filters: NbaBacktestFilters = {}) {
   const settled = rows.filter(isSettled)
   const calibration = buildCalibration(settled)
   const checks = leakageChecks(rows)
+  const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
+  const featureSnapshotCounts = await loadFeatureSnapshotBacktestCounts()
+  const migrationApplied =
+    schemaCapabilities.probes.historicalFeatureSnapshots.applied &&
+    schemaCapabilities.probes.predictionHistoryFeatureSnapshotLinkage.applied
+  const backtestInputReadiness = getBacktestInputReadiness(schemaCapabilities)
+  const firstSettled = settled[0]
+  const featureSnapshotEligibility = evaluateHistoricalFeatureBacktestEligibility({
+    hasSnapshot: Boolean(firstSettled?.feature_snapshot_id),
+    hasLineage: Boolean(firstSettled?.feature_snapshot_id && firstSettled?.feature_set_version),
+    snapshotGeneratedAt: firstSettled?.feature_snapshot_generated_at ?? null,
+    predictionTimestamp: firstSettled?.generated_at ?? firstSettled?.created_at ?? null,
+    cutoffTimestamp: firstSettled?.cutoff_at ?? null,
+    noLeakage: checks.leakageRisk === 0,
+    settled: Boolean(firstSettled),
+    hasValidPrice: firstSettled ? Number.isFinite(Number(firstSettled.odds)) : false,
+    productionEligible: firstSettled?.production_eligible === true,
+    trial: firstSettled?.trial === true,
+    scrambled: firstSettled?.scrambled === true,
+    sampleSize: settled.length,
+    hasClosingSnapshot: false,
+    migrationApplied,
+  })
 
   return {
     success: true,
@@ -411,6 +552,10 @@ export async function getNbaCalibration(filters: NbaBacktestFilters = {}) {
       moneylineRows: calibration.sample,
     },
     calibration,
+    schemaCapabilities,
+    featureSnapshotCounts,
+    backtestInputReadiness,
+    featureSnapshotEligibility,
     leakageChecks: checks,
     warnings: warningsFor(rows, summarize(rows), checks),
   }

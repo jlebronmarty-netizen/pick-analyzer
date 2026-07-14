@@ -130,6 +130,19 @@ const DEFINITIONS: FeatureDefinition[] = [
     description: 'Expected or confirmed lineup state when a provider supplies it.',
     noLeakageRule: 'Lineups must be timestamped before cutoff_at; unavailable lineups return warnings.',
   },
+  {
+    key: 'player_stats_context',
+    displayName: 'Player Stats Context',
+    version: '1.0.0',
+    sportKeys: ['basketball_nba', 'baseball_mlb', 'americanfootball_nfl', 'icehockey_nhl', 'soccer'],
+    markets: ['moneyline', 'spread', 'total'],
+    valueType: 'json',
+    maxAgeMinutes: 24 * 60,
+    required: false,
+    sourceTables: ['sport_player_stats'],
+    description: 'Player season and game stat coverage, mapping quality and production eligibility.',
+    noLeakageRule: 'Player stat rows must be observed before cutoff_at; trial rows cannot improve production confidence.',
+  },
 ]
 
 function round(value: number, digits = 2) {
@@ -215,7 +228,7 @@ export function createFeatureSnapshot({
     const stale = freshnessMinutes > definition.maxAgeMinutes
     const unavailableOptional =
       !definition.required &&
-      ['injury_context', 'lineup_context'].includes(definition.key)
+      ['injury_context', 'lineup_context', 'player_stats_context'].includes(definition.key)
 
     return {
       key: definition.key,
