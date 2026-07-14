@@ -41,6 +41,38 @@ export type SportsDataIoEnvStatus = {
   checkedEnvVars: string[]
 }
 
+export type SportsDataIoProviderVariant =
+  | 'sportsdataio_enterprise'
+  | 'sportsdataio_discovery_lab'
+
+export type SportsDataIoSubscriptionChannel = {
+  sportKey: SportKey
+  leagueKey: string
+  providerVariant: SportsDataIoProviderVariant
+  configured: boolean
+  envVarName: string
+  baseOrigin: string
+  pathTemplate: string
+  products: string[]
+  confirmedEndpoints: Array<{
+    product: string
+    method: 'GET'
+    path: string
+    domain: string
+    status: 'confirmed' | 'unconfirmed'
+  }>
+  authentication: {
+    header: 'Ocp-Apim-Subscription-Key'
+    serverOnly: true
+    keyLogged: false
+  }
+  executionDefaults: {
+    concurrency: 1
+    automaticRetries: 0
+    timeoutMs: number
+  }
+}
+
 export type SportsDataIoRuntimeDomain =
   | 'leagues'
   | 'teams'
@@ -299,8 +331,9 @@ const DOMAIN_CONTRACTS: SportsDataIoDomainContract[] = [
 ]
 
 function envFormatStatus(value: string | undefined) {
-  if (!value) return 'missing' as const
-  if (/\s/.test(value) || value.length < 16) return 'invalid_format' as const
+  const trimmed = value?.trim()
+  if (!trimmed) return 'missing' as const
+  if (/\s/.test(trimmed) || trimmed.length < 16) return 'invalid_format' as const
   return 'configured' as const
 }
 
@@ -315,6 +348,57 @@ export function getSportsDataIoEnvironmentStatus(): SportsDataIoEnvStatus {
     status,
     envVarName: configuredName ?? null,
     checkedEnvVars: SPORTSDATAIO_ENV_NAMES,
+  }
+}
+
+export function getSportsDataIoMlbDiscoveryLabChannel(): SportsDataIoSubscriptionChannel {
+  const retryPolicy = getDefaultRetryPolicy()
+  const keyStatus = envFormatStatus(process.env.SPORTSDATAIO_MLB_API_KEY)
+
+  return {
+    sportKey: 'baseball_mlb',
+    leagueKey: 'mlb',
+    providerVariant: 'sportsdataio_discovery_lab',
+    configured: keyStatus === 'configured',
+    envVarName: 'SPORTSDATAIO_MLB_API_KEY',
+    baseOrigin: 'https://api.sportsdata.io',
+    pathTemplate: '/api/mlb/{product}/json/{endpoint}',
+    products: ['fantasy', 'odds'],
+    confirmedEndpoints: [
+      {
+        product: 'fantasy',
+        method: 'GET',
+        path: '/api/mlb/fantasy/json/CurrentSeason',
+        domain: 'metadata',
+        status: 'confirmed',
+      },
+      { product: 'fantasy', method: 'GET', path: '/api/mlb/fantasy/json/Players', domain: 'players', status: 'confirmed' },
+      { product: 'fantasy', method: 'GET', path: '/api/mlb/fantasy/json/FreeAgents', domain: 'players', status: 'confirmed' },
+      { product: 'fantasy', method: 'GET', path: '/api/mlb/fantasy/json/Standings/{season}', domain: 'standings', status: 'confirmed' },
+      { product: 'fantasy', method: 'GET', path: '/api/mlb/fantasy/json/Teams', domain: 'teams', status: 'confirmed' },
+      { product: 'fantasy', method: 'GET', path: '/api/mlb/fantasy/json/DfsSlatesByDate/{date}', domain: 'metadata', status: 'confirmed' },
+      { product: 'fantasy', method: 'GET', path: '/api/mlb/fantasy/json/PlayerGameStatsByDate/{date}', domain: 'player_stats', status: 'confirmed' },
+      { product: 'fantasy', method: 'GET', path: '/api/mlb/fantasy/json/PlayerSeasonStats/{season}', domain: 'player_stats', status: 'confirmed' },
+      { product: 'fantasy', method: 'GET', path: '/api/mlb/fantasy/json/PlayerGameProjectionStatsByDate/{date}', domain: 'projections', status: 'confirmed' },
+      { product: 'fantasy', method: 'GET', path: '/api/mlb/fantasy/json/PlayerSeasonProjectionStats/{season}', domain: 'projections', status: 'confirmed' },
+      { product: 'odds', method: 'GET', path: '/api/mlb/odds/json/GamesByDate/{date}', domain: 'schedules', status: 'confirmed' },
+      { product: 'odds', method: 'GET', path: '/api/mlb/odds/json/GameOddsByDate/{date}', domain: 'odds', status: 'confirmed' },
+      { product: 'odds', method: 'GET', path: '/api/mlb/odds/json/GameOddsLineMovement/{gameid}', domain: 'odds', status: 'confirmed' },
+      { product: 'odds', method: 'GET', path: '/api/mlb/odds/json/Games/{season}', domain: 'schedules', status: 'confirmed' },
+      { product: 'odds', method: 'GET', path: '/api/mlb/odds/json/Stadiums', domain: 'metadata', status: 'confirmed' },
+      { product: 'odds', method: 'GET', path: '/api/mlb/odds/json/TeamGameStatsByDate/{date}', domain: 'game_stats', status: 'confirmed' },
+      { product: 'odds', method: 'GET', path: '/api/mlb/odds/json/TeamSeasonStats/{season}', domain: 'team_stats', status: 'confirmed' },
+    ],
+    authentication: {
+      header: 'Ocp-Apim-Subscription-Key',
+      serverOnly: true,
+      keyLogged: false,
+    },
+    executionDefaults: {
+      concurrency: 1,
+      automaticRetries: 0,
+      timeoutMs: retryPolicy.timeoutMs,
+    },
   }
 }
 
@@ -482,6 +566,15 @@ export function getSportsDataIoRuntimeAdapterStatus() {
       'PILOT_IMPORT_PENDING',
     ],
     environment: env,
+    subscriptionChannels: {
+      mlb: getSportsDataIoMlbDiscoveryLabChannel(),
+      enterprise: {
+        providerVariant: 'sportsdataio_enterprise',
+        configured: env.configured,
+        note:
+          'Enterprise /v3/{sport}/... paths remain available only to enterprise-configured integrations and are not inferred for Discovery Lab MLB.',
+      },
+    },
     runtime: {
       liveCallsEnabled: false,
       serverOnly: true,
@@ -526,6 +619,9 @@ export function getSportsDataIoRuntimeCapabilities() {
       source: 'contract_and_domain_capabilities_only',
     },
     environment: getSportsDataIoEnvironmentStatus(),
+    subscriptionChannels: {
+      mlb: getSportsDataIoMlbDiscoveryLabChannel(),
+    },
     coverage: contract.coverage,
     domains: DOMAIN_CONTRACTS,
     dependencyGraph: DOMAIN_CONTRACTS
@@ -622,6 +718,10 @@ export function runSportsDataIoRuntimeValidation() {
     missingKeySafe: env.status === 'missing' || env.status === 'configured' || env.status === 'invalid_format',
     runtimeDisabled: getSportsDataIoRuntimeAdapterStatus().runtime.liveCallsEnabled === false,
     capabilitiesResolved: getSportsDataIoRuntimeCapabilities().domains.length >= 16,
+    mlbDiscoveryLabConfigured:
+      getSportsDataIoMlbDiscoveryLabChannel().configured ||
+      env.status === 'missing' ||
+      env.status === 'configured',
     fixtureEventsNormalized: fixture.events.length === 1 && Boolean(fixture.events[0].providerIds.sportsdataio),
     fixtureOddsNormalized: fixture.odds.length > 0,
     fixturePlayersNormalized: fixture.players.length === 1,

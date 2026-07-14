@@ -370,6 +370,24 @@ Evidence: `src/config/sportsdataio-endpoint-catalog.ts` and `docs/providers/spor
 
 Note: The catalog records exact path templates, API version, domain, parameter format, production/historical purpose, trial status, entitlement status, implementation status, normalization status, persistence status and last pilot status for the SportsDataIO feeds Pick Analyzer actually needs across NBA, MLB, NFL, NHL and Soccer. It adds no route, performs no provider call and does not unlock production use.
 
+### SportsDataIO MLB Discovery Lab Variant Correction V1
+
+Status: Completed route-family correction and auth probe; import execution blocked pending exact endpoint confirmation.
+
+Evidence: `src/config/sportsdataio-endpoint-catalog.ts`, `src/services/sportsdataio-runtime-adapter.service.ts`, `src/services/multi-sport-providers.service.ts`, `src/services/historical-import-engine.service.ts`, `docs/providers/sportsdataio/MLB.md` and `docs/providers/sportsdataio/CAPABILITY_MATRIX.md`.
+
+Note: The purchased personal-use MLB subscription is modeled as `sportsdataio_discovery_lab`, using `https://api.sportsdata.io/api/mlb/{product}/json/{endpoint}` with `SPORTSDATAIO_MLB_API_KEY` and the `Ocp-Apim-Subscription-Key` header. `GET /api/mlb/fantasy/json/CurrentSeason` returned HTTP 200 as a sanitized auth/capability probe. Enterprise `/v3/mlb/...` paths remain cataloged separately but are not executable with the Discovery Lab key, and the Historical Import planner blocks MLB live import domains until exact Discovery Lab Fantasy/Odds endpoints are confirmed.
+
+### SportsDataIO MLB Real Data Validation Batch V1
+
+Status: Completed for quarantined teams, players, events and stats; odds/feature handoff blocked; build verified.
+
+Evidence: `docs/mlb-real-data-validation-batch-v1.md`, `src/config/sportsdataio-endpoint-catalog.ts`, `src/services/sportsdataio-runtime-adapter.service.ts`, `src/services/historical-import-engine.service.ts`, `docs/providers/sportsdataio/MLB.md` and `docs/providers/sportsdataio/CAPABILITY_MATRIX.md`.
+
+Note: The confirmed Discovery Lab Fantasy + Odds endpoint catalog now includes Teams, Players, FreeAgents, Standings, DFS slates, player game/season stats, player projections, GamesByDate, GameOddsByDate, GameOddsLineMovement, Games, Stadiums, TeamGameStatsByDate and TeamSeasonStats. Batch V1 first identified `2026-07-12` as the viable date, then fixed the `sport_player_stats` preflight blocker caused by oversized `.in()` chunks. The corrected retry used 5 provider calls, all HTTP 200, and inserted 30 teams, 7,258 players, 15 events, 30 team game stats, 463 player game stats, 7,796 provider mappings and 1 sync job as quarantined non-production rows. The approved odds-only retry fixed `GameId`/`GameID` and nested `PregameOdds` normalization, used 1 provider call to `GameOddsByDate/2026-07-12`, returned HTTP 200 with 15 records, inserted 90 quarantined full-game odds rows and completed sync job `4214c5a3-38de-41c8-9f53-7eab1714a34f`. Feature snapshots, predictions, settlement, backtest and production promotion remain blocked because 0 persisted odds rows were timestamp-safe relative to stored event starts.
+
+Line Movement Probe V1 selected mapped completed GameId `78723` and used exactly 1 provider call to `GameOddsLineMovement/78723`. The endpoint returned HTTP 200 with 624 nested movement snapshots, inserted 3,720 quarantined timestamp-aware odds rows, found 2,586 cutoff-safe rows before the 10-minute pregame cutoff and completed sync job `56db235c-8837-426f-8e84-e6e0ebc70a97`. The approved one-game MLB lineage extension then used 0 provider calls and the existing Feature Store route actions to insert 3 quarantined feature snapshots, reuse all 3 on rerun, insert 3 linked predictions, reuse all 3 on rerun, and settle the bounded moneyline, spread/run-line and total rows. The rows remain `trial=false`, `scrambled=false`, `production_eligible=false`, recommended picks are 0, production leakage is 0 and CLV is blocked because no distinct closing snapshot was claimed. A later maximum-14-call expansion is technically recommended only with explicit approval.
+
 ### SportsDataIO Betting Market Normalization Core V1
 
 Status: Completed provider-independent normalization/routing hardening and build verified.

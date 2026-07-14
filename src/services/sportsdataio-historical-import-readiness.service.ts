@@ -25,6 +25,7 @@ import {
   getSportsDataIoRuntimeCapabilities,
   runSportsDataIoRuntimeValidation,
 } from '@/services/sportsdataio-runtime-adapter.service'
+import { safeExistingValueSet } from '@/services/safe-supabase-preflight.service'
 
 export type SportsDataIoExecutionStatus =
   | 'dry_run_ready'
@@ -1086,19 +1087,20 @@ async function fetchSportsDataIoJson({
 }
 
 async function countExistingIds(table: string, ids: string[]) {
-  if (ids.length === 0) return new Set<string>()
-  const existing = new Set<string>()
-  const uniqueIds = Array.from(new Set(ids))
-  const chunkSize = 100
-  for (let index = 0; index < uniqueIds.length; index += chunkSize) {
-    const chunk = uniqueIds.slice(index, index + chunkSize)
-    const result = await supabaseAdmin.from(table).select('id').in('id', chunk)
-    if (result.error) throw new Error(`${table} preflight failed: ${result.error.message}`)
-    for (const row of result.data ?? []) {
-      existing.add(String(row.id))
-    }
+  const preflight = await safeExistingValueSet({
+    table,
+    column: 'id',
+    values: ids,
+    validate: 'text',
+    chunkSize: 100,
+  })
+  if (preflight.errors.length > 0) {
+    const first = preflight.errors[0]
+    throw new Error(
+      `${table} preflight failed for ${first.column} chunk ${first.chunkIndex} (${first.chunkSize} values): ${first.message}`
+    )
   }
-  return existing
+  return preflight.existing
 }
 
 async function loadOddsRowsByIds(ids: string[]) {

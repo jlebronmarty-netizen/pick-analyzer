@@ -111,6 +111,65 @@ const NBA_DAILY_DEPENDENCIES: Record<string, string[]> = {
   nba_daily_data_quality: ['nba_daily_feature_preview', 'nba_daily_settlement'],
 }
 
+const MLB_PERSONAL_PLAN_CAPTURE_SCHEDULE = {
+  mode: 'sportsdataio_mlb_personal_plan_capture_schedule_v1',
+  active: false,
+  cronEnabled: false,
+  sportKey: 'baseball_mlb',
+  leagueKey: 'mlb',
+  provider: 'sportsdataio_discovery_lab',
+  providerCallPolicy: {
+    concurrency: 1,
+    automaticRetries: false,
+    productionEligibleByDefault: false,
+    noProviderCallsFromDailySyncV2: true,
+  },
+  quarantinePolicy: {
+    trial: false,
+    scrambled: false,
+    productionEligible: false,
+    productionRecommendationsEnabled: false,
+    modelPromotionEnabled: false,
+  },
+  plannedWindows: [
+    {
+      id: 'mlb_personal_schedule_sync',
+      label: 'Morning schedule sync',
+      endpointTemplate: '/api/mlb/odds/json/GamesByDate/{date}',
+      plannedProviderCalls: 1,
+      purpose: 'Identify scheduled games and provider GameIds for the slate.',
+    },
+    {
+      id: 'mlb_personal_initial_odds_capture',
+      label: 'Initial odds capture',
+      endpointTemplate: '/api/mlb/odds/json/GameOddsByDate/{date}',
+      plannedProviderCalls: 1,
+      purpose: 'Capture current full-game consensus odds when available.',
+    },
+    {
+      id: 'mlb_personal_line_movement_capture',
+      label: 'Pregame line-movement capture',
+      endpointTemplate: '/api/mlb/odds/json/GameOddsLineMovement/{gameid}',
+      plannedProviderCalls: 'one per explicitly approved game',
+      purpose: 'Capture timestamped pregame odds movement for approved mapped games only.',
+    },
+    {
+      id: 'mlb_personal_final_pregame_capture',
+      label: 'Final pregame capture',
+      endpointTemplate: '/api/mlb/odds/json/GameOddsLineMovement/{gameid}',
+      plannedProviderCalls: 'one per explicitly approved unstarted game',
+      purpose: 'Refresh selected games 10-15 minutes before first pitch while skipping started games.',
+    },
+    {
+      id: 'mlb_personal_postgame_results_stats',
+      label: 'Postgame results and stats',
+      endpointTemplate: 'GamesByDate plus TeamGameStatsByDate and PlayerGameStatsByDate',
+      plannedProviderCalls: 'bounded by approved slate size',
+      purpose: 'Prepare settlement and technical validation inputs without changing pregame snapshots.',
+    },
+  ],
+}
+
 function summarizeExecutionData(stepId: string, data: unknown) {
   if (!data || typeof data !== 'object') return data
   const value = data as Record<string, unknown>
@@ -382,6 +441,7 @@ export async function runDailySyncOrchestratorV2(options: DailySyncOrchestratorV
       historicalFeatureGenerationUsesProviderCalls: false,
       pregameFeatureSnapshotsImmutable: true,
     },
+    mlbPersonalPlanCaptureSchedule: MLB_PERSONAL_PLAN_CAPTURE_SCHEDULE,
     featureGenerationHandoff: {
       mode: featureGenerationHandoff.mode,
       eligible: featureGenerationHandoff.eligibility.eligible,

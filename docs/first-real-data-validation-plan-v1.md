@@ -30,9 +30,16 @@ Rows must be:
 - Generated at or before cutoff and before event start.
 - Settled only from final results with supported market rules.
 
+Discovery/provider-specific quarantine:
+
+- SportsDataIO MLB Discovery Lab rows must start as `trial=false`, `scrambled=false`, `production_eligible=false` and `validation_status=quarantined`.
+- If a table constraint does not yet permit literal `validation_status='quarantined'`, preserve quarantine in row metadata and keep `production_eligible=false` until an additive schema decision is approved.
+- The Discovery Lab paid key proves access only to confirmed endpoints. It does not authorize production promotion.
+- Enterprise `/v3/mlb/...` paths are not valid substitutes for Discovery Lab `/api/mlb/{product}/json/{endpoint}` paths.
+
 ## First Validation Window
 
-Use a narrow completed NBA date window first. Validate one market at a time, starting with moneyline, then spread and total after moneyline passes. Keep provider calls capped and sequential.
+Use a narrow completed NBA date window first for production-eligible validation because NBA has the deepest trial lineage evidence. For MLB Discovery Lab, endpoint confirmation now exists and Batch V1 persisted quarantined `2026-07-12` teams, players, events, stats, 90 date-level odds rows and 3,720 GameId `78723` line-movement odds rows. The line-movement probe proved timestamp-safe pregame odds exist, with 2,586 rows at or before a 10-minute pregame cutoff. The bounded GameId `78723` lineage validation now proves the Feature Store -> Prediction History -> Settlement path for one quarantined MLB game across moneyline, spread/run line and total, with 0 provider calls during lineage and 0 production leakage. Broader MLB validation still requires explicit approval for remaining-game expansion, production promotion rules, genuine closing-snapshot/CLV handling and larger-sample confidence thresholds. Keep provider calls capped and sequential.
 
 ## Acceptance Checks
 

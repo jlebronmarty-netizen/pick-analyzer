@@ -33,3 +33,7 @@ Feature Store validation includes a production-like fixture that passes the gate
 ## Current Trial Batch Result
 
 The 27 SportsDataIO NBA trial predictions remain technical-validation data. Production metric rows are 0 until real non-trial, non-scrambled, production-eligible rows with genuine offered prices and required lineage are approved and persisted.
+
+## Current MLB Quarantine Result
+
+SportsDataIO MLB Discovery Lab rows are real and non-scrambled, but remain quarantined with `production_eligible=false`. The GameId `78723` line-movement probe produced timestamp-safe odds, but no production recommendations, ROI, CLV, calibration, model learning or promotion are enabled until an MLB-compatible lineage path and explicit production approval exist.

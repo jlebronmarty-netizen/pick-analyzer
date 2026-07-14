@@ -64,6 +64,15 @@ export type HistoricalImportDomainManifest = {
   destinationTables: string[]
   conflictTargets: string[]
   oneToManyExpansionPossible: boolean
+  providerEndpointStatus?: {
+    providerVariant: 'sportsdataio_enterprise' | 'sportsdataio_discovery_lab'
+    enterpriseEndpointConfirmed: boolean
+    discoveryLabEndpointConfirmed: boolean
+    discoveryLabProduct: 'fantasy' | 'odds' | null
+    confirmedEndpoint: string | null
+    routeFamily: string
+    notes: string[]
+  }
   blockers: string[]
   handoffs: {
     validation: string
@@ -213,6 +222,9 @@ export type HistoricalImportSportPlan = {
     concurrency: 1
     automaticRetries: false
   }
+  providerVariant?: 'sportsdataio_enterprise' | 'sportsdataio_discovery_lab'
+  providerRouteFamily?: string
+  confirmedDiscoveryLabEndpoints?: string[]
   recordAccounting: {
     providerRecordsFetched: 0
     normalizedRowsProduced: 0
@@ -421,13 +433,19 @@ function readinessForDataType({
   sportKey,
   dataType,
   routeSupported,
+  providerVariant,
   schemaCapabilities,
 }: {
   sportKey: SportKey
   dataType: ProviderDataType
   routeSupported: boolean
+  providerVariant?: 'sportsdataio_enterprise' | 'sportsdataio_discovery_lab'
   schemaCapabilities?: HistoricalFeatureSchemaCapabilities | null
 }): HistoricalImportReadinessState {
+  if (sportKey === 'baseball_mlb' && providerVariant === 'sportsdataio_discovery_lab') {
+    return 'entitlement_blocked'
+  }
+
   if (sportKey === 'basketball_nba') {
     if (dataType === 'players') return 'pilot_validated_current_feed'
     if (dataType === 'injuries') return 'pilot_validated_current_feed'
@@ -449,6 +467,22 @@ function readinessForDataType({
   if (['injuries', 'lineups', 'odds'].includes(dataType)) return 'trial_only_execution'
   if (['team_stats', 'game_stats', 'standings'].includes(dataType)) return 'recent_historical_feeds'
   return 'current_api'
+}
+
+function sportsDataIoMlbDiscoveryEndpointForDomain(dataType: ProviderDataType) {
+  const endpoints: Partial<Record<ProviderDataType, { product: 'fantasy' | 'odds'; path: string }>> = {
+    schedules: { product: 'odds', path: '/api/mlb/odds/json/GamesByDate/{date}' },
+    scores: { product: 'odds', path: '/api/mlb/odds/json/GamesByDate/{date}' },
+    standings: { product: 'fantasy', path: '/api/mlb/fantasy/json/Standings/{season}' },
+    team_stats: { product: 'odds', path: '/api/mlb/odds/json/TeamSeasonStats/{season}' },
+    game_stats: { product: 'odds', path: '/api/mlb/odds/json/TeamGameStatsByDate/{date}' },
+    player_stats: { product: 'fantasy', path: '/api/mlb/fantasy/json/PlayerGameStatsByDate/{date}' },
+    players: { product: 'fantasy', path: '/api/mlb/fantasy/json/Players' },
+    odds: { product: 'odds', path: '/api/mlb/odds/json/GameOddsByDate/{date}' },
+    historical_odds: { product: 'odds', path: '/api/mlb/odds/json/GameOddsLineMovement/{gameid}' },
+  }
+
+  return endpoints[dataType] ?? null
 }
 
 function executionModeForReadiness(
@@ -663,16 +697,19 @@ function buildDomainManifests({
   leagueKey,
   dependencyOrder,
   recommendedBatchSizeDays,
+  providerVariant,
   schemaCapabilities,
 }: {
   sportKey: SportKey
   leagueKey: string
   dependencyOrder: ProviderDataType[]
   recommendedBatchSizeDays: number
+  providerVariant?: 'sportsdataio_enterprise' | 'sportsdataio_discovery_lab'
   schemaCapabilities?: HistoricalFeatureSchemaCapabilities | null
 }): HistoricalImportDomainManifest[] {
   return dependencyOrder.map((dataType, index) => {
     const persistence = domainPersistenceContract(dataType)
+    const mlbDiscoveryEndpoint = sportsDataIoMlbDiscoveryEndpointForDomain(dataType)
     const route = planProviderRoute({
       sportKey,
       leagueKey,
@@ -684,6 +721,7 @@ function buildDomainManifests({
       sportKey,
       dataType,
       routeSupported,
+      providerVariant,
       schemaCapabilities,
     })
     const executionMode = executionModeForReadiness(readiness)
@@ -701,6 +739,16 @@ function buildDomainManifests({
     }
     if (readiness === 'entitlement_blocked') {
       blockers.push('Provider entitlement, sportsbook/result coverage and grading rules are unverified.')
+    }
+    if (sportKey === 'baseball_mlb' && providerVariant === 'sportsdataio_discovery_lab') {
+      blockers.push(
+        'Configured MLB SportsDataIO channel is Discovery Lab; enterprise /v3/mlb/... endpoints are not executable for this key.'
+      )
+      blockers.push(
+        mlbDiscoveryEndpoint
+          ? 'Discovery Lab endpoint is confirmed, but MLB import execution remains blocked until payload normalization, persistence validation and quarantine gates pass.'
+          : 'Exact Discovery Lab endpoint for this domain is unconfirmed or excluded from this validation batch; do not guess /api/mlb/{product}/json/... routes.'
+      )
     }
     if (readiness === 'migration_pending') {
       blockers.push('Destination schema must be confirmed before provider-backed execution.')
@@ -738,6 +786,35 @@ function buildDomainManifests({
       destinationTables: persistence.destinationTables,
       conflictTargets: persistence.conflictTargets,
       oneToManyExpansionPossible: persistence.oneToManyExpansionPossible,
+      providerEndpointStatus:
+        sportKey === 'baseball_mlb'
+          ? {
+              providerVariant: providerVariant ?? 'sportsdataio_enterprise',
+              enterpriseEndpointConfirmed: providerVariant !== 'sportsdataio_discovery_lab' && routeSupported,
+              discoveryLabEndpointConfirmed: Boolean(mlbDiscoveryEndpoint),
+              discoveryLabProduct: mlbDiscoveryEndpoint?.product ?? (
+                ['odds', 'historical_odds', 'player_props'].includes(dataType)
+                  ? 'odds'
+                  : 'fantasy'
+              ),
+              confirmedEndpoint: mlbDiscoveryEndpoint?.path ?? null,
+              routeFamily:
+                providerVariant === 'sportsdataio_discovery_lab'
+                  ? '/api/mlb/{product}/json/{endpoint}'
+                  : '/v3/mlb/{product}/json/{endpoint}',
+              notes: [
+                ...(providerVariant === 'sportsdataio_discovery_lab'
+                  ? [
+                      'Discovery Lab MLB endpoints are confirmed from the purchased Fantasy + Odds plan.',
+                      mlbDiscoveryEndpoint
+                        ? `Confirmed endpoint for this domain: ${mlbDiscoveryEndpoint.path}.`
+                        : 'No executable endpoint is approved for this specific domain in the current validation batch.',
+                      'Live execution remains blocked in the generic planner until the MLB normalizer and quarantine persistence path pass.',
+                    ]
+                  : ['Enterprise MLB endpoint status is separate from Discovery Lab entitlement.']),
+              ],
+            }
+          : undefined,
       blockers,
       handoffs: {
         validation: 'Run mapping, duplicate, orphan, trial-isolation and nonnegative-counter checks before handoff.',
@@ -779,6 +856,9 @@ function buildSportPlan({
   sportSpecificNotes,
   warnings,
   schemaCapabilities,
+  providerVariant,
+  providerRouteFamily,
+  confirmedDiscoveryLabEndpoints,
 }: {
   sportKey: SportKey
   leagueKey: string
@@ -791,6 +871,9 @@ function buildSportPlan({
   sportSpecificNotes: string[]
   warnings: string[]
   schemaCapabilities?: HistoricalFeatureSchemaCapabilities | null
+  providerVariant?: 'sportsdataio_enterprise' | 'sportsdataio_discovery_lab'
+  providerRouteFamily?: string
+  confirmedDiscoveryLabEndpoints?: string[]
 }): HistoricalImportSportPlan {
   const routeChecks = dependencyOrder.map((dataType) =>
     planProviderRoute({
@@ -800,17 +883,15 @@ function buildSportPlan({
       dryRun: true,
     })
   )
-  const blockedDomains = routeChecks
+  const routeBlockedDomains = routeChecks
     .filter((route) => !route.success || !route.supported)
-    .map((route, index) => dependencyOrder[index])
-  const plannedDomains = routeChecks
-    .filter((route) => route.success && route.supported)
     .map((route, index) => dependencyOrder[index])
   const domainManifests = buildDomainManifests({
     sportKey,
     leagueKey,
     dependencyOrder,
     recommendedBatchSizeDays,
+    providerVariant,
     schemaCapabilities,
   })
   const aggregateDestinationTables = Array.from(
@@ -823,6 +904,12 @@ function buildSportPlan({
     new Set(domainManifests.flatMap((domain) => domain.conflictTargets))
   )
   const progress = summarizeDomainManifests(domainManifests)
+  const blockedDomains = domainManifests
+    .filter((domain) => domain.executionMode === 'blocked')
+    .map((domain) => domain.dataType)
+  const plannedDomains = domainManifests
+    .filter((domain) => domain.executionMode !== 'blocked')
+    .map((domain) => domain.dataType)
   const estimatedCalls = domainManifests.reduce(
     (sum, domain) => sum + domain.estimatedProviderCalls,
     0
@@ -879,6 +966,9 @@ function buildSportPlan({
       concurrency: 1,
       automaticRetries: false,
     },
+    providerVariant,
+    providerRouteFamily,
+    confirmedDiscoveryLabEndpoints,
     recordAccounting: {
       providerRecordsFetched: 0,
       normalizedRowsProduced: 0,
@@ -890,8 +980,11 @@ function buildSportPlan({
     sportSpecificNotes,
     warnings: [
       ...warnings,
-      ...blockedDomains.map(
+      ...routeBlockedDomains.map(
         (dataType) => `${dataType} has no confirmed executable provider route in the current dry-run planner.`
+      ),
+      ...blockedDomains.map(
+        (dataType) => `${dataType} is blocked by provider variant, entitlement, migration or endpoint confirmation state.`
       ),
     ],
     requiresApproval: [
@@ -981,6 +1074,18 @@ function buildMultiSportPlanning(
       buildSportPlan({
         sportKey: 'baseball_mlb',
         leagueKey: 'mlb',
+        providerVariant: 'sportsdataio_discovery_lab',
+        providerRouteFamily: '/api/mlb/{product}/json/{endpoint}',
+        confirmedDiscoveryLabEndpoints: [
+          '/api/mlb/fantasy/json/CurrentSeason',
+          '/api/mlb/fantasy/json/Teams',
+          '/api/mlb/fantasy/json/Standings/{season}',
+          '/api/mlb/fantasy/json/PlayerGameStatsByDate/{date}',
+          '/api/mlb/odds/json/Stadiums',
+          '/api/mlb/odds/json/GamesByDate/{date}',
+          '/api/mlb/odds/json/TeamGameStatsByDate/{date}',
+          '/api/mlb/odds/json/GameOddsByDate/{date}',
+        ],
         supportedDomains: [
           'schedules',
           'scores',
@@ -1028,11 +1133,16 @@ function buildMultiSportPlanning(
         ],
         recommendedBatchSizeDays: Math.min(batchSizeDays, 3),
         sportSpecificNotes: [
+          'Purchased SportsDataIO MLB plan is Discovery Lab Fantasy + Odds and uses /api/mlb/{product}/json/{endpoint}.',
+          'The enterprise /v3/mlb/... route family is cataloged separately and must not be selected automatically for this key.',
+          'Confirmed Discovery Lab endpoints include Teams, Standings, Stadiums, GamesByDate, TeamGameStatsByDate, PlayerGameStatsByDate and GameOddsByDate.',
+          'MLB Real Data Validation Batch V1 selected 2026-07-13 first, but game/stat/odds feeds were empty; 2026-07-12 was verified as a 15-game candidate after the call budget was mostly consumed.',
           'Doubleheaders require game-number or provider event ID disambiguation.',
           'Starting pitchers, bullpen workload and lineup locks must remain nullable until confirmed.',
           'Suspended/resumed games and extra innings must preserve provider status and final-score semantics.',
         ],
         warnings: [
+          'MLB Discovery Lab import execution is blocked until the confirmed endpoint payloads are normalized and persisted under quarantined real-data gates.',
           'MLB advanced stat and lineup destinations need confirmation before production promotion.',
         ],
         schemaCapabilities,

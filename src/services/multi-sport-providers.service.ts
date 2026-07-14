@@ -8,6 +8,7 @@ function hasEnv(name: string) {
 export function getSportsProviders(): SportsProvider[] {
   const oddsConfigured = hasEnv('ODDS_API_KEY')
   const apiSportsConfigured = hasEnv('API_SPORTS_KEY')
+  const sportsDataIoMlbConfigured = hasEnv('SPORTSDATAIO_MLB_API_KEY')
 
   return [
     {
@@ -49,6 +50,47 @@ export function getSportsProviders(): SportsProvider[] {
       metadata: {
         baseballBaseUrl: 'https://v1.baseball.api-sports.io',
         footballBaseUrl: 'https://v3.football.api-sports.io',
+      },
+    },
+    {
+      id: 'sportsdataio-discovery-lab',
+      name: 'SportsDataIO Discovery Lab',
+      sportCoverage: ['baseball_mlb'],
+      requiresAuth: true,
+      rateLimit: { requests: 100, interval: 'day' },
+      features: ['leagues'],
+      priority: 2,
+      fallbackOrder: 2,
+      health: sportsDataIoMlbConfigured ? 'degraded' : 'unavailable',
+      lastError: sportsDataIoMlbConfigured
+        ? 'MLB Discovery Lab key is configured; confirmed Fantasy/Odds endpoints are quarantined validation only until normalization, persistence and production gates pass.'
+        : 'Missing SPORTSDATAIO_MLB_API_KEY',
+      metadata: {
+        providerVariant: 'sportsdataio_discovery_lab',
+        baseOrigin: 'https://api.sportsdata.io',
+        pathTemplate: '/api/mlb/{product}/json/{endpoint}',
+        products: ['fantasy', 'odds'],
+        confirmedEndpoints: [
+          '/api/mlb/fantasy/json/CurrentSeason',
+          '/api/mlb/fantasy/json/Players',
+          '/api/mlb/fantasy/json/FreeAgents',
+          '/api/mlb/fantasy/json/Standings/{season}',
+          '/api/mlb/fantasy/json/Teams',
+          '/api/mlb/fantasy/json/DfsSlatesByDate/{date}',
+          '/api/mlb/fantasy/json/PlayerGameStatsByDate/{date}',
+          '/api/mlb/fantasy/json/PlayerSeasonStats/{season}',
+          '/api/mlb/fantasy/json/PlayerGameProjectionStatsByDate/{date}',
+          '/api/mlb/fantasy/json/PlayerSeasonProjectionStats/{season}',
+          '/api/mlb/odds/json/GamesByDate/{date}',
+          '/api/mlb/odds/json/GameOddsByDate/{date}',
+          '/api/mlb/odds/json/GameOddsLineMovement/{gameid}',
+          '/api/mlb/odds/json/Games/{season}',
+          '/api/mlb/odds/json/Stadiums',
+          '/api/mlb/odds/json/TeamGameStatsByDate/{date}',
+          '/api/mlb/odds/json/TeamSeasonStats/{season}',
+        ],
+        enterpriseFallback: false,
+        productionEligibility: 'quarantined_only',
       },
     },
     {

@@ -11,6 +11,8 @@ import {
 } from '@/services/feature-store-core.service'
 import { lookupFeatureSet } from '@/services/multi-sport-feature-registry.service'
 import { settleNbaPredictionsByIds } from '@/services/nba-prediction-settlement.service'
+import { settleMarket } from '@/services/settlement-core.service'
+import { buildSportPrediction } from '@/services/sport-prediction-engine-sdk.service'
 import { MarketKey } from '@/types/multi-sport'
 
 type HistoricalFeatureExecutionMode = 'trial_only' | 'production'
@@ -269,7 +271,8 @@ export type HistoricalFeatureSnapshotWriteRequest = {
   sportKey?: SportKey | null
   leagueKey?: string | null
   season?: string | null
-  markets?: MarketKey[] | null
+  eventId?: string | null
+  markets?: Array<MarketKey | 'run_line'> | null
   maximumEvents?: number | null
   maximumMarketsPerEvent?: number | null
   maximumSnapshots?: number | null
@@ -297,8 +300,8 @@ type HistoricalFeatureSnapshotWriteCandidate = {
   unresolvedMappingCount: number
   leakageStatus: 'passed' | 'warning' | 'blocked' | 'unknown'
   leakageWarnings: string[]
-  trial: true
-  scrambled: true
+  trial: boolean
+  scrambled: boolean
   productionEligible: false
   metadata: Record<string, unknown>
 }
@@ -372,6 +375,11 @@ export type HistoricalFeatureSnapshotWriteResult = {
 export type HistoricalPredictionLineagePilotRequest = {
   dryRun?: boolean | null
   confirmed?: boolean | null
+  sportKey?: SportKey | null
+  leagueKey?: string | null
+  season?: string | null
+  eventId?: string | null
+  markets?: Array<MarketKey | 'run_line'> | null
   maximumSnapshots?: number | null
   maximumPredictions?: number | null
   settle?: boolean | null
@@ -424,10 +432,13 @@ type TrialPredictionCandidate = {
   identityKey: string
   team: string
   opponent: string
-  sportsbook: 'Trial Lineage Pilot'
+  sportsbook: string
   market: string
   line: number | null
   odds: number | null
+  oddsSnapshotId?: string | null
+  oddsTimestamp?: string | null
+  providerMarket?: string | null
   impliedProbability: number | null
   modelProbability: number
   edge: number
@@ -688,6 +699,10 @@ function firstAvailableOdds(snapshot: StoredHistoricalFeatureSnapshotRow) {
       return {
         price,
         line: market === 'moneyline' ? null : Number.isFinite(Number(item.line)) ? Number(item.line) : null,
+        id: typeof item.id === 'string' ? item.id : null,
+        sportsbook: typeof item.sportsbook === 'string' ? item.sportsbook : null,
+        snapshotTime: typeof item.snapshotTime === 'string' ? item.snapshotTime : null,
+        providerMarket: typeof item.providerMarket === 'string' ? item.providerMarket : null,
       }
     }
   }
@@ -699,10 +714,14 @@ function firstAvailableOdds(snapshot: StoredHistoricalFeatureSnapshotRow) {
       return {
         price,
         line: market === 'moneyline' ? null : Number.isFinite(Number(item.line)) ? Number(item.line) : null,
+        id: typeof item.id === 'string' ? item.id : null,
+        sportsbook: typeof item.sportsbook === 'string' ? item.sportsbook : null,
+        snapshotTime: typeof item.snapshotTime === 'string' ? item.snapshotTime : null,
+        providerMarket: typeof item.providerMarket === 'string' ? item.providerMarket : null,
       }
     }
   }
-  return { price: null, line: null }
+  return { price: null, line: null, id: null, sportsbook: null, snapshotTime: null, providerMarket: null }
 }
 
 function selectionForSnapshot(snapshot: StoredHistoricalFeatureSnapshotRow, event: TrialLineageEventRow) {
@@ -1015,6 +1034,342 @@ function rowIsTrial(row: { metadata?: Record<string, unknown> | null }) {
 
 function countReason(reasons: Record<string, number>, reason: string) {
   reasons[reason] = (reasons[reason] ?? 0) + 1
+}
+
+function normalizeSnapshotMarkets(markets: Array<MarketKey | 'run_line'> | null | undefined) {
+  const normalized = (markets?.length ? markets : ['moneyline', 'spread', 'total'])
+    .map((market) => String(market) === 'run_line' ? 'spread' : String(market))
+    .filter((market): market is MarketKey => ['moneyline', 'spread', 'total'].includes(market))
+
+  return Array.from(new Set(normalized))
+}
+
+function providerMarketForFeatureMarket(market: MarketKey) {
+  return market === 'spread' ? 'run_line' : market
+}
+
+function preferredOutcomeForMarket(market: MarketKey) {
+  if (market === 'total') return 'over'
+  return 'home'
+}
+
+function projectionForMarket(market: string, line: number | null) {
+  if (market === 'total') {
+    const total = Number.isFinite(Number(line)) ? Number(line) : 8.5
+    return {
+      selectionScore: Number((total / 2 + 0.1).toFixed(2)),
+      opponentScore: Number((total / 2).toFixed(2)),
+      total,
+      margin: 0.2,
+      uncertainty: 24,
+    }
+  }
+
+  if (market === 'spread') {
+    const margin = Number.isFinite(Number(line)) ? Number((-Number(line) * 0.25).toFixed(2)) : 0.2
+    return {
+      selectionScore: Number((4.4 + Math.max(-1, Math.min(1, margin / 2))).toFixed(2)),
+      opponentScore: 4.2,
+      total: 8.6,
+      margin,
+      uncertainty: 25,
+    }
+  }
+
+  return {
+    selectionScore: 4.4,
+    opponentScore: 4.2,
+    total: 8.6,
+    margin: 0.2,
+    uncertainty: 24,
+  }
+}
+
+async function loadMlbLineMovementOddsRows(eventId: string) {
+  const rows: StoredOddsRow[] = []
+  const pageSize = 1000
+
+  for (let from = 0; ; from += pageSize) {
+    const result = await supabaseAdmin
+      .from('sports_odds_snapshots')
+      .select('id, event_id, sportsbook, market, outcome, price, line, snapshot_time, is_closing, metadata')
+      .eq('sport_key', 'baseball_mlb')
+      .eq('league_key', 'mlb')
+      .eq('provider', 'sportsdataio')
+      .eq('event_id', eventId)
+      .range(from, from + pageSize - 1)
+
+    if (result.error) {
+      throw new Error(`Failed to load MLB line-movement odds rows: ${result.error.message}`)
+    }
+
+    const page = (result.data ?? []) as StoredOddsRow[]
+    rows.push(...page)
+    if (page.length < pageSize) break
+  }
+
+  return rows
+}
+
+async function buildMlbLineMovementSnapshotCandidates({
+  maximumEvents,
+  maximumMarketsPerEvent,
+  maximumSnapshots,
+  markets,
+  season,
+  eventId,
+}: {
+  maximumEvents: number
+  maximumMarketsPerEvent: number
+  maximumSnapshots: number
+  markets: MarketKey[]
+  season: string
+  eventId: string | null
+}) {
+  const blockingReasons: Record<string, number> = {}
+  const warnings: string[] = []
+  const targetProviderGameId = eventId ? null : '78723'
+  let eventsQuery = supabaseAdmin
+    .from('sport_events')
+    .select('id, sport_key, league_key, season, home_team_id, away_team_id, home_team, away_team, start_time, status, provider_ids, metadata, created_at, updated_at')
+    .eq('sport_key', 'baseball_mlb')
+    .eq('league_key', 'mlb')
+    .eq('season', season)
+
+  if (eventId) {
+    eventsQuery = eventsQuery.eq('id', eventId)
+  }
+
+  const eventsResult = await eventsQuery.order('start_time', { ascending: true }).limit(50)
+
+  if (eventsResult.error) {
+    throw new Error(`Failed to load MLB event for snapshot candidates: ${eventsResult.error.message}`)
+  }
+
+  const events = ((eventsResult.data ?? []) as StoredEventRow[])
+    .filter((event) => {
+      if (eventId) return true
+      return providerIdFrom(event.provider_ids) === targetProviderGameId
+    })
+    .slice(0, maximumEvents)
+  const candidates: HistoricalFeatureSnapshotWriteCandidate[] = []
+  let eligibleEvents = 0
+  let rejectedEvents = 0
+
+  for (const event of events) {
+    if (candidates.length >= maximumSnapshots) break
+
+    const eventStart = iso(event.start_time)
+    if (!eventStart) {
+      rejectedEvents += 1
+      countReason(blockingReasons, 'missing_event_start_time')
+      continue
+    }
+
+    const predictionCutoff = new Date(dateMs(eventStart)! - 10 * 60 * 1000).toISOString()
+    if (dateMs(predictionCutoff)! >= dateMs(eventStart)!) {
+      rejectedEvents += 1
+      countReason(blockingReasons, 'prediction_cutoff_not_before_event_start')
+      continue
+    }
+
+    const allOdds = await loadMlbLineMovementOddsRows(event.id)
+    const lineMovementOdds = allOdds.filter((row) => {
+      const metadata = safeJsonObject(row.metadata)
+      const sourceEndpoint = String(metadata.sourceEndpoint ?? '')
+      const sourceType = String(metadata.sourceType ?? '')
+      const isLive = metadata.isLive === true
+      const isAlternate = metadata.isAlternate === true
+      return (
+        (sourceEndpoint.includes('GameOddsLineMovement') || sourceType === 'line_movement') &&
+        metadata.production_eligible === false &&
+        !isLive &&
+        !isAlternate
+      )
+    })
+    const safeOdds = lineMovementOdds.filter((row) => {
+      const source = dateMs(row.snapshot_time)
+      return source !== null && source <= dateMs(predictionCutoff)! && row.is_closing !== true
+    })
+
+    if (safeOdds.length === 0) {
+      rejectedEvents += 1
+      countReason(blockingReasons, 'no_cutoff_safe_line_movement_odds')
+      continue
+    }
+
+    eligibleEvents += 1
+    const selectedMarkets = markets.slice(0, maximumMarketsPerEvent)
+
+    for (const market of selectedMarkets) {
+      if (candidates.length >= maximumSnapshots) break
+
+      const providerMarket = providerMarketForFeatureMarket(market)
+      const preferredOutcome = preferredOutcomeForMarket(market)
+      const marketRows = safeOdds
+        .filter((row) => {
+          const price = Number(row.price)
+          const line = Number(row.line)
+          return (
+            row.market === providerMarket &&
+            String(row.outcome ?? '').toLowerCase() === preferredOutcome &&
+            Number.isFinite(price) &&
+            price !== 0 &&
+            (market === 'moneyline' ? row.line === null : Number.isFinite(line))
+          )
+        })
+        .sort((left, right) => {
+          const rightDistance = Math.abs(dateMs(predictionCutoff)! - dateMs(right.snapshot_time)!)
+          const leftDistance = Math.abs(dateMs(predictionCutoff)! - dateMs(left.snapshot_time)!)
+          if (leftDistance !== rightDistance) return leftDistance - rightDistance
+          return String(left.id).localeCompare(String(right.id))
+        })
+
+      const selectedOdds = marketRows[0]
+      if (!selectedOdds) {
+        countReason(blockingReasons, `missing_valid_${providerMarket}_odds`)
+        continue
+      }
+
+      const modelVersion = 'baseball_mlb_model_v1'
+      const featureSetVersion = `baseball_mlb_${market}_feature_set_v1`
+      const sourceRecordIds = [`sports_odds_snapshots:${selectedOdds.id}`]
+      const sourceTimestamps = {
+        [`sports_odds_snapshots:${selectedOdds.id}`]: iso(selectedOdds.snapshot_time)!,
+      }
+      const cutoffDistanceSeconds = Math.max(
+        0,
+        Math.round((dateMs(predictionCutoff)! - dateMs(selectedOdds.snapshot_time)!) / 1000)
+      )
+      const featureLineage = {
+        source: 'persisted_normalized_records_only',
+        sourceTables: ['sport_events', 'sports_odds_snapshots'],
+        sourceRecordIds,
+        sport: 'baseball_mlb',
+        provider: 'sportsdataio',
+        providerEventId: providerIdFrom(event.provider_ids),
+        providerMarket,
+        selectedOddsSnapshotId: selectedOdds.id,
+        selectedOddsTimestamp: iso(selectedOdds.snapshot_time),
+        cutoffDistanceSeconds,
+        quarantine: true,
+        trial: false,
+        scrambled: false,
+        productionEligible: false,
+      }
+      const lineageHash = simpleHash(stableJson(featureLineage))
+      const deterministicKey = stableId([
+        'historical_feature_snapshot_v1',
+        event.sport_key,
+        event.id,
+        market,
+        predictionCutoff,
+        modelVersion,
+        featureSetVersion,
+        lineageHash,
+        'mlb-quarantined',
+      ])
+      const oddsRow = {
+        id: selectedOdds.id,
+        sportsbook: selectedOdds.sportsbook,
+        market,
+        providerMarket,
+        outcome: preferredOutcome,
+        price: selectedOdds.price,
+        line: market === 'moneyline' ? null : selectedOdds.line,
+        snapshotTime: iso(selectedOdds.snapshot_time),
+        cutoffDistanceSeconds,
+      }
+
+      candidates.push({
+        deterministicKey,
+        sportKey: 'baseball_mlb',
+        leagueKey: 'mlb',
+        season: event.season,
+        eventId: event.id,
+        providerEventId: providerIdFrom(event.provider_ids),
+        market,
+        predictionCutoff,
+        asOfTimestamp: predictionCutoff,
+        eventStartTime: eventStart,
+        modelVersion,
+        featureSetVersion,
+        featureValues: {
+          event: {
+            id: event.id,
+            providerGameId: providerIdFrom(event.provider_ids),
+            homeTeamId: event.home_team_id,
+            awayTeamId: event.away_team_id,
+            homeTeam: event.home_team,
+            awayTeam: event.away_team,
+            startTime: eventStart,
+            statusAtGeneration: 'historical_schedule_context_only',
+          },
+          contextCounts: {
+            lineMovementOddsRows: lineMovementOdds.length,
+            cutoffSafeLineMovementOddsRows: safeOdds.length,
+            selectedOddsRows: 1,
+            sourceRecords: sourceRecordIds.length,
+            unsafePostgameRowsUsed: 0,
+          },
+          selectedOdds: oddsRow,
+          odds: [oddsRow],
+        },
+        featureLineage,
+        sourceTimestamps,
+        dataQualityScore: 58,
+        dataSufficiencyScore: 35,
+        unresolvedMappingCount: 0,
+        leakageStatus: 'warning',
+        leakageWarnings: [
+          'MLB one-game technical validation uses event identity plus timestamp-safe line-movement odds only.',
+          'Final score, postgame stats and current player status are excluded from feature values.',
+          'Feature row is quarantined and cannot improve production confidence.',
+        ],
+        trial: false,
+        scrambled: false,
+        productionEligible: false,
+        metadata: {
+          mode: 'bounded_mlb_line_movement_feature_snapshot_write_v1',
+          season: event.season,
+          maximumEvents,
+          maximumMarketsPerEvent,
+          maximumSnapshots,
+          eventStartTime: eventStart,
+          selectedOddsSnapshotId: selectedOdds.id,
+          selectedOddsTimestamp: iso(selectedOdds.snapshot_time),
+          selectedSportsbook: selectedOdds.sportsbook,
+          selectedMarket: providerMarket,
+          selectedFeatureMarket: market,
+          selectedOutcome: preferredOutcome,
+          selectedLine: market === 'moneyline' ? null : selectedOdds.line,
+          selectedPrice: selectedOdds.price,
+          cutoffDistanceSeconds,
+          providerCalls: 0,
+          trial: false,
+          scrambled: false,
+          production_eligible: false,
+          quarantine: true,
+        },
+      })
+    }
+  }
+
+  if (events.length === 0) {
+    warnings.push('No persisted MLB event matched GameId 78723 or the requested eventId.')
+    countReason(blockingReasons, 'missing_target_event')
+  } else if (candidates.length === 0) {
+    warnings.push('No MLB line-movement odds row satisfied cutoff-safe market selection rules.')
+  }
+
+  return {
+    candidates,
+    eventsConsidered: events.length,
+    eligibleEvents,
+    rejectedEvents,
+    blockingReasons,
+    warnings,
+  }
 }
 
 async function buildNbaTrialSnapshotCandidates({
@@ -1348,22 +1703,22 @@ export function getBacktestInputReadiness(
   }
 }
 
-export async function getNbaFeatureSnapshotBacktestCounts() {
+export async function getNbaFeatureSnapshotBacktestCounts(sportKey: SportKey = 'basketball_nba') {
   try {
     const totalSnapshots = await supabaseAdmin
       .from('historical_feature_snapshots')
       .select('id, created_at')
-      .eq('sport_key', 'basketball_nba')
+      .eq('sport_key', sportKey)
       .order('created_at', { ascending: true })
       .limit(5000)
     if (totalSnapshots.error) {
-      throw new Error(`Failed to load NBA feature snapshot counters: ${totalSnapshots.error.message}`)
+      throw new Error(`Failed to load ${sportKey} feature snapshot counters: ${totalSnapshots.error.message}`)
     }
 
     const trialSnapshots = await supabaseAdmin
       .from('historical_feature_snapshots')
       .select('id, created_at')
-      .eq('sport_key', 'basketball_nba')
+      .eq('sport_key', sportKey)
       .eq('trial', true)
       .order('created_at', { ascending: true })
       .limit(5000)
@@ -1374,7 +1729,7 @@ export async function getNbaFeatureSnapshotBacktestCounts() {
     const productionSnapshots = await supabaseAdmin
       .from('historical_feature_snapshots')
       .select('id, created_at')
-      .eq('sport_key', 'basketball_nba')
+      .eq('sport_key', sportKey)
       .eq('production_eligible', true)
       .order('created_at', { ascending: true })
       .limit(5000)
@@ -1387,7 +1742,7 @@ export async function getNbaFeatureSnapshotBacktestCounts() {
       .select(
         'id, result, status, market, odds, production_eligible, trial, scrambled, feature_snapshot_id, settlement_details'
       )
-      .eq('sport_key', 'basketball_nba')
+      .eq('sport_key', sportKey)
       .not('feature_snapshot_id', 'is', null)
       .limit(5000)
     if (linkedRows.error) {
@@ -1397,7 +1752,7 @@ export async function getNbaFeatureSnapshotBacktestCounts() {
     const allPredictionRows = await supabaseAdmin
       .from('prediction_history')
       .select('id, feature_snapshot_id')
-      .eq('sport_key', 'basketball_nba')
+      .eq('sport_key', sportKey)
       .limit(5000)
     if (allPredictionRows.error) {
       throw new Error(`Failed to load prediction linkage counters: ${allPredictionRows.error.message}`)
@@ -2114,12 +2469,13 @@ export async function runHistoricalFeatureSnapshotWritePilot(
   const generatedAt = new Date().toISOString()
   const dryRun = request.dryRun ?? true
   const confirmed = request.confirmed === true
+  const sportKey = request.sportKey ?? 'basketball_nba'
+  const leagueKey = request.leagueKey ?? (sportKey === 'baseball_mlb' ? 'mlb' : 'nba')
+  const season = request.season ?? (sportKey === 'baseball_mlb' ? '2026' : '2025')
   const maximumEvents = clampWriteCap(request.maximumEvents, 5, 50)
   const maximumMarketsPerEvent = clampWriteCap(request.maximumMarketsPerEvent, 3, 3)
   const maximumSnapshots = clampWriteCap(request.maximumSnapshots, 15, 50)
-  const markets = (request.markets?.length ? request.markets : ['moneyline', 'spread', 'total'])
-    .filter((market): market is MarketKey => ['moneyline', 'spread', 'total'].includes(String(market)))
-    .slice(0, maximumMarketsPerEvent)
+  const markets = normalizeSnapshotMarkets(request.markets).slice(0, maximumMarketsPerEvent)
   const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
   const schemaStatus = featureSnapshotSchemaStatus(schemaCapabilities)
   const schemaApplied = featureSnapshotSchemaApplied(schemaCapabilities)
@@ -2197,12 +2553,22 @@ export async function runHistoricalFeatureSnapshotWritePilot(
     }
   }
 
-  const selection = await buildNbaTrialSnapshotCandidates({
-    maximumEvents,
-    maximumMarketsPerEvent,
-    maximumSnapshots,
-    markets,
-  })
+  const selection =
+    sportKey === 'baseball_mlb'
+      ? await buildMlbLineMovementSnapshotCandidates({
+          maximumEvents,
+          maximumMarketsPerEvent,
+          maximumSnapshots,
+          markets,
+          season,
+          eventId: request.eventId ?? null,
+        })
+      : await buildNbaTrialSnapshotCandidates({
+          maximumEvents,
+          maximumMarketsPerEvent,
+          maximumSnapshots,
+          markets,
+        })
   warnings.push(...selection.warnings)
 
   const dedupedCandidates = Array.from(
@@ -2261,7 +2627,7 @@ export async function runHistoricalFeatureSnapshotWritePilot(
         partialFailures,
       },
       checkpoint: {
-        stableKey: stableId(['historical-feature-snapshot-write', 'basketball_nba', 'no-candidates']),
+        stableKey: stableId(['historical-feature-snapshot-write', sportKey, leagueKey, season, 'no-candidates']),
         canResume: true,
         cancelled: false,
         nextCandidateIndex: null,
@@ -2330,7 +2696,7 @@ export async function runHistoricalFeatureSnapshotWritePilot(
         partialFailures,
       },
       checkpoint: {
-        stableKey: stableId(['historical-feature-snapshot-write', 'basketball_nba', 'dry-run']),
+        stableKey: stableId(['historical-feature-snapshot-write', sportKey, leagueKey, season, 'dry-run']),
         canResume: true,
         cancelled: false,
         nextCandidateIndex: 0,
@@ -2516,7 +2882,9 @@ export async function runHistoricalFeatureSnapshotWritePilot(
     checkpoint: {
       stableKey: stableId([
         'historical-feature-snapshot-write',
-        'basketball_nba',
+        sportKey,
+        leagueKey,
+        season,
         maximumEvents,
         maximumMarketsPerEvent,
         maximumSnapshots,
@@ -2553,31 +2921,55 @@ async function buildTrialPredictionLineageCandidates({
   maximumSnapshots,
   maximumPredictions,
   generatedAt,
+  sportKey,
+  leagueKey,
+  season,
+  eventId,
+  markets,
 }: {
   maximumSnapshots: number
   maximumPredictions: number
   generatedAt: string
+  sportKey: SportKey
+  leagueKey: string | null
+  season: string | null
+  eventId: string | null
+  markets: MarketKey[]
 }) {
   const blockingReasons: Record<string, number> = {}
   const warnings: string[] = []
   const snapshotPoolLimit = Math.max(maximumSnapshots * 5, maximumSnapshots)
-  const snapshotsResult = await supabaseAdmin
+  let snapshotsQuery = supabaseAdmin
     .from('historical_feature_snapshots')
     .select(
       'id, deterministic_key, sport_key, league_key, event_id, market, prediction_cutoff, as_of_timestamp, generated_at, model_version, feature_set_version, feature_values, feature_lineage, source_timestamps, data_quality_score, data_sufficiency_score, unresolved_mapping_count, leakage_status, leakage_warnings, trial, scrambled, production_eligible, metadata, created_at'
     )
-    .eq('sport_key', 'basketball_nba')
-    .eq('trial', true)
-    .eq('scrambled', true)
+    .eq('sport_key', sportKey)
     .eq('production_eligible', false)
+
+  if (leagueKey) snapshotsQuery = snapshotsQuery.eq('league_key', leagueKey)
+  if (eventId) snapshotsQuery = snapshotsQuery.eq('event_id', eventId)
+  if (sportKey === 'basketball_nba') {
+    snapshotsQuery = snapshotsQuery.eq('trial', true).eq('scrambled', true)
+  } else if (sportKey === 'baseball_mlb') {
+    snapshotsQuery = snapshotsQuery.eq('trial', false).eq('scrambled', false)
+  }
+  if (markets.length) snapshotsQuery = snapshotsQuery.in('market', markets)
+
+  const snapshotsResult = await snapshotsQuery
     .order('created_at', { ascending: false })
     .limit(snapshotPoolLimit)
 
   if (snapshotsResult.error) {
-    throw new Error(`Failed to load trial historical feature snapshots: ${snapshotsResult.error.message}`)
+    throw new Error(`Failed to load historical feature snapshots: ${snapshotsResult.error.message}`)
   }
 
   const snapshots = ((snapshotsResult.data ?? []) as StoredHistoricalFeatureSnapshotRow[])
+    .filter((snapshot) => {
+      if (!season) return true
+      const metadata = safeJsonObject(snapshot.metadata)
+      return String(metadata.season ?? '') === String(season)
+    })
     .sort((left, right) => {
       const leftHasOdds = firstAvailableOdds(left).price === null ? 0 : 1
       const rightHasOdds = firstAvailableOdds(right).price === null ? 0 : 1
@@ -2590,7 +2982,7 @@ async function buildTrialPredictionLineageCandidates({
     ? await supabaseAdmin
         .from('sport_events')
         .select('id, sport_key, league_key, season, home_team, away_team, start_time, status, home_score, away_score, metadata')
-        .eq('sport_key', 'basketball_nba')
+        .eq('sport_key', sportKey)
         .in('id', eventIds)
     : { data: [], error: null }
 
@@ -2612,8 +3004,16 @@ async function buildTrialPredictionLineageCandidates({
       continue
     }
 
-    if (!eventIsTrial(event)) {
+    if (sportKey === 'basketball_nba' && !eventIsTrial(event)) {
       countReason(blockingReasons, 'event_not_trial_isolated')
+      continue
+    }
+
+    if (
+      sportKey === 'baseball_mlb' &&
+      (snapshot.trial === true || snapshot.scrambled === true || snapshot.production_eligible === true)
+    ) {
+      countReason(blockingReasons, 'mlb_snapshot_not_quarantined_non_production')
       continue
     }
 
@@ -2663,11 +3063,52 @@ async function buildTrialPredictionLineageCandidates({
       countReason(blockingReasons, 'missing_genuine_offered_price')
       continue
     }
-    const implied = impliedProbabilityFromAmerican(odds.price)
-    const modelProbability = trialLineageProbability(snapshot)
-    const edge = implied === null ? 0 : Number((modelProbability - implied).toFixed(2))
-    const ev = odds.price === null ? 0 : Number(((modelProbability / 100) * (odds.price > 0 ? 1 + odds.price / 100 : 1 + 100 / Math.abs(odds.price)) - 1).toFixed(4))
-    const confidence = Math.max(
+    const featureSnapshot = createFeatureSnapshot({
+      sportKey,
+      leagueKey: event.league_key,
+      eventId: snapshot.event_id ?? event.id,
+      market: snapshot.market as MarketKey,
+      generatedAt: snapshot.as_of_timestamp,
+      cutoffAt,
+      eventStartTime: eventStart,
+    })
+    featureSnapshot.featureQualityScore = Number(snapshot.data_quality_score ?? featureSnapshot.featureQualityScore)
+    featureSnapshot.dataSufficiencyScore = Number(snapshot.data_sufficiency_score ?? featureSnapshot.dataSufficiencyScore)
+    featureSnapshot.noLeakage = snapshot.leakage_status === 'passed' || snapshot.leakage_status === 'warning'
+    featureSnapshot.warnings = [
+      ...featureSnapshot.warnings,
+      ...(Array.isArray(snapshot.leakage_warnings) ? snapshot.leakage_warnings.map(String) : []),
+      ...(sportKey === 'baseball_mlb'
+        ? [
+            'MLB bounded lineage row is quarantined and not a production recommendation.',
+            'No Kelly stake, portfolio action or model promotion is enabled for this row.',
+          ]
+        : []),
+    ]
+    const sdkPrediction = odds.price === null
+      ? null
+      : buildSportPrediction({
+          sportKey,
+          leagueKey: event.league_key,
+          eventId: snapshot.event_id ?? event.id,
+          market: String(snapshot.market),
+          selection: selection.team,
+          opponent: selection.opponent,
+          sportsbook: odds.sportsbook ?? (sportKey === 'basketball_nba' ? 'Trial Lineage Pilot' : 'Consensus'),
+          americanOdds: odds.price,
+          line: snapshot.market === 'moneyline' ? null : odds.line,
+          bankroll: 0,
+          generatedAt,
+          cutoffAt,
+          eventStartTime: eventStart,
+          featureSnapshot,
+          projection: projectionForMarket(String(snapshot.market), odds.line),
+        })
+    const implied = sdkPrediction?.impliedProbability ?? impliedProbabilityFromAmerican(odds.price)
+    const modelProbability = sdkPrediction?.modelProbability ?? trialLineageProbability(snapshot)
+    const edge = sdkPrediction?.edge ?? (implied === null ? 0 : Number((modelProbability - implied).toFixed(2)))
+    const ev = sdkPrediction?.expectedValue ?? (odds.price === null ? 0 : Number(((modelProbability / 100) * (odds.price > 0 ? 1 + odds.price / 100 : 1 + 100 / Math.abs(odds.price)) - 1).toFixed(4)))
+    const confidence = sdkPrediction?.confidence ?? Math.max(
       1,
       Math.min(99, Number((modelProbability * 0.6 + Number(snapshot.data_quality_score ?? 0) * 0.2).toFixed(2)))
     )
@@ -2677,10 +3118,13 @@ async function buildTrialPredictionLineageCandidates({
       identityKey: '',
       team: selection.team,
       opponent: selection.opponent,
-      sportsbook: 'Trial Lineage Pilot',
+      sportsbook: odds.sportsbook ?? (sportKey === 'basketball_nba' ? 'Trial Lineage Pilot' : 'Consensus'),
       market: String(snapshot.market),
       line: snapshot.market === 'moneyline' ? null : odds.line,
       odds: odds.price,
+      oddsSnapshotId: odds.id,
+      oddsTimestamp: odds.snapshotTime,
+      providerMarket: odds.providerMarket,
       impliedProbability: implied,
       modelProbability,
       edge,
@@ -2689,7 +3133,9 @@ async function buildTrialPredictionLineageCandidates({
       generatedAt: predictionTimestamp,
       cutoffAt,
       warnings: [
-        'Trial-only lineage validation row; not a production recommendation.',
+        sportKey === 'baseball_mlb'
+          ? 'MLB one-game technical validation row; quarantined and not a production recommendation.'
+          : 'Trial-only lineage validation row; not a production recommendation.',
         ...(odds.price === null ? ['No genuine offered price was available; ROI is blocked.'] : []),
         ...(Array.isArray(snapshot.leakage_warnings) ? snapshot.leakage_warnings.map(String) : []),
       ],
@@ -2710,12 +3156,197 @@ async function buildTrialPredictionLineageCandidates({
   }
 }
 
+function profitForFlatStake(outcome: string, odds: number | null, stake: number) {
+  if (outcome === 'push') return 0
+  if (outcome === 'void' || outcome === 'pending') return null
+  if (outcome === 'loss') return -stake
+  if (!Number.isFinite(Number(odds)) || odds === null || odds === 0) return null
+  return odds > 0
+    ? Number(((stake * odds) / 100).toFixed(2))
+    : Number(((stake * 100) / Math.abs(odds)).toFixed(2))
+}
+
+async function settleMlbPredictionsByIds(ids: string[]) {
+  const summary = {
+    checked: ids.length,
+    settled: 0,
+    pending: 0,
+    wins: 0,
+    losses: 0,
+    pushes: 0,
+    voids: 0,
+    skipped: 0,
+    errors: [] as string[],
+  }
+
+  if (!ids.length) return summary
+
+  const predictionsResult = await supabaseAdmin
+    .from('prediction_history')
+    .select('id, sport_key, game_id, team, opponent, market, selection, line, odds, result, status, stake, settlement_details')
+    .eq('sport_key', 'baseball_mlb')
+    .in('id', ids)
+
+  if (predictionsResult.error) {
+    summary.errors.push(predictionsResult.error.message)
+    return summary
+  }
+
+  const predictions = (predictionsResult.data ?? []) as Array<{
+    id: string
+    sport_key: string
+    game_id: string | null
+    team: string | null
+    opponent: string | null
+    market: string | null
+    selection: string | null
+    line: number | null
+    odds: number | null
+    result: string | null
+    status: string | null
+    stake: number | null
+    settlement_details: Record<string, unknown> | null
+  }>
+  const eventIds = Array.from(new Set(predictions.map((row) => row.game_id).filter(Boolean))) as string[]
+  const eventsResult = eventIds.length
+    ? await supabaseAdmin
+        .from('sport_events')
+        .select('id, sport_key, home_team, away_team, status, home_score, away_score')
+        .eq('sport_key', 'baseball_mlb')
+        .in('id', eventIds)
+    : { data: [], error: null }
+
+  if (eventsResult.error) {
+    summary.errors.push(eventsResult.error.message)
+    return summary
+  }
+
+  const eventsById = new Map(
+    ((eventsResult.data ?? []) as Array<{
+      id: string
+      sport_key: string
+      home_team: string | null
+      away_team: string | null
+      status: string | null
+      home_score: number | null
+      away_score: number | null
+    }>).map((event) => [event.id, event])
+  )
+
+  for (const prediction of predictions) {
+    const existingVersion = String(safeJsonObject(prediction.settlement_details).settlementVersion ?? '')
+    if (existingVersion === 'mlb_prediction_bounded_lineage_settlement_v1') {
+      summary.skipped += 1
+      const outcome = String(prediction.result ?? prediction.status ?? '')
+      if (outcome === 'win') summary.wins += 1
+      else if (outcome === 'loss') summary.losses += 1
+      else if (outcome === 'push') summary.pushes += 1
+      else if (outcome === 'void') summary.voids += 1
+      else summary.pending += 1
+      continue
+    }
+
+    const event = prediction.game_id ? eventsById.get(prediction.game_id) : undefined
+    if (!event) {
+      summary.errors.push(`Missing MLB event for prediction ${prediction.id}.`)
+      continue
+    }
+
+    const market = String(prediction.market ?? '')
+    if (!['moneyline', 'spread', 'total'].includes(market)) {
+      summary.errors.push(`Unsupported MLB settlement market ${market} for prediction ${prediction.id}.`)
+      continue
+    }
+
+    const team = String(prediction.team ?? prediction.selection ?? '')
+    const isHome = team === String(event.home_team ?? '')
+    const isAway = team === String(event.away_team ?? '')
+    const selectedScore =
+      market === 'total'
+        ? event.home_score
+        : isHome
+          ? event.home_score
+          : isAway
+            ? event.away_score
+            : null
+    const opponentScore =
+      market === 'total'
+        ? event.away_score
+        : isHome
+          ? event.away_score
+          : isAway
+            ? event.home_score
+            : null
+    const decision = settleMarket({
+      market: market as 'moneyline' | 'spread' | 'total',
+      selection: market === 'total' ? team : team || 'Selected',
+      line: market === 'moneyline' ? null : prediction.line,
+      selectedScore,
+      opponentScore,
+      eventStatus: event.status ?? 'unknown',
+      overtimePolicy: 'include',
+    })
+    const stake = Number.isFinite(Number(prediction.stake)) ? Number(prediction.stake) : 100
+    const profit = profitForFlatStake(decision.outcome, prediction.odds, stake)
+    const updateResult = await supabaseAdmin
+      .from('prediction_history')
+      .update({
+        result: decision.outcome,
+        status: decision.outcome,
+        profit,
+        settled_at: new Date().toISOString(),
+        lifecycle_status: ['win', 'loss', 'push', 'void'].includes(decision.outcome) ? 'settled' : 'active',
+        settlement_source: 'historical_mlb_bounded_lineage_v1',
+        settlement_version: 'mlb_prediction_bounded_lineage_settlement_v1',
+        settlement_details: {
+          ...(safeJsonObject(prediction.settlement_details)),
+          settlementVersion: 'mlb_prediction_bounded_lineage_settlement_v1',
+          settlementMode: 'one_game_mlb_technical_validation',
+          eventId: event.id,
+          eventStatus: event.status,
+          homeTeam: event.home_team,
+          awayTeam: event.away_team,
+          homeScore: event.home_score,
+          awayScore: event.away_score,
+          market,
+          selectedScore,
+          opponentScore,
+          decision,
+          productionEligible: false,
+          productionRecommendation: false,
+        },
+      })
+      .eq('id', prediction.id)
+
+    if (updateResult.error) {
+      summary.errors.push(updateResult.error.message)
+      continue
+    }
+
+    if (decision.outcome === 'pending') summary.pending += 1
+    else {
+      summary.settled += 1
+      if (decision.outcome === 'win') summary.wins += 1
+      if (decision.outcome === 'loss') summary.losses += 1
+      if (decision.outcome === 'push') summary.pushes += 1
+      if (decision.outcome === 'void') summary.voids += 1
+    }
+  }
+
+  return summary
+}
+
 export async function runHistoricalPredictionLineagePilot(
   request: HistoricalPredictionLineagePilotRequest = {}
 ): Promise<HistoricalPredictionLineagePilotResult> {
   const generatedAt = new Date().toISOString()
   const dryRun = request.dryRun ?? true
   const confirmed = request.confirmed === true
+  const sportKey = request.sportKey ?? 'basketball_nba'
+  const leagueKey = request.leagueKey ?? (sportKey === 'baseball_mlb' ? 'mlb' : 'nba')
+  const season = request.season ?? (sportKey === 'baseball_mlb' ? '2026' : null)
+  const eventId = request.eventId ?? null
+  const markets = normalizeSnapshotMarkets(request.markets)
   const maximumSnapshots = clampWriteCap(request.maximumSnapshots, 15, 50)
   const maximumPredictions = clampWriteCap(request.maximumPredictions, 5, 50)
   const settle = request.settle !== false
@@ -2800,7 +3431,7 @@ export async function runHistoricalPredictionLineagePilot(
         trialLinkedPredictions: 0,
         productionLinkedPredictions: 0,
       },
-      backtestEligibility: await getNbaFeatureSnapshotBacktestCounts(),
+      backtestEligibility: await getNbaFeatureSnapshotBacktestCounts(sportKey),
       cleanupPlan: {
         destructiveActionExecuted: false,
         filters: ['trial=true', 'scrambled=true', 'production_eligible=false'],
@@ -2814,6 +3445,11 @@ export async function runHistoricalPredictionLineagePilot(
     maximumSnapshots,
     maximumPredictions,
     generatedAt,
+    sportKey,
+    leagueKey,
+    season,
+    eventId,
+    markets,
   })
   const duplicateInputIdentities =
     selection.candidates.length - new Set(selection.candidates.map((candidate) => candidate.identityKey)).size
@@ -2877,7 +3513,7 @@ export async function runHistoricalPredictionLineagePilot(
         trialLinkedPredictions: 0,
         productionLinkedPredictions: 0,
       },
-      backtestEligibility: await getNbaFeatureSnapshotBacktestCounts(),
+      backtestEligibility: await getNbaFeatureSnapshotBacktestCounts(sportKey),
       cleanupPlan: {
         destructiveActionExecuted: false,
         filters: ['trial=true', 'scrambled=true', 'production_eligible=false'],
@@ -2943,7 +3579,7 @@ export async function runHistoricalPredictionLineagePilot(
         trialLinkedPredictions: 0,
         productionLinkedPredictions: 0,
       },
-      backtestEligibility: await getNbaFeatureSnapshotBacktestCounts(),
+      backtestEligibility: await getNbaFeatureSnapshotBacktestCounts(sportKey),
       cleanupPlan: {
         destructiveActionExecuted: false,
         filters: ['trial=true', 'scrambled=true', 'production_eligible=false'],
@@ -2965,7 +3601,7 @@ export async function runHistoricalPredictionLineagePilot(
     ? await supabaseAdmin
         .from('prediction_history')
         .select('id, sport_key, game_id, team, market, sportsbook, feature_snapshot_id, feature_snapshot_key, trial, production_eligible')
-        .eq('sport_key', 'basketball_nba')
+        .eq('sport_key', sportKey)
         .in('game_id', gameIds)
     : { data: [], error: null }
 
@@ -2997,7 +3633,7 @@ export async function runHistoricalPredictionLineagePilot(
       if (
         existing.feature_snapshot_id === candidate.snapshot.id &&
         existing.feature_snapshot_key === candidate.snapshot.deterministic_key &&
-        existing.trial === true &&
+        existing.trial === (sportKey === 'basketball_nba') &&
         existing.production_eligible === false
       ) {
         reusedIds.push(existing.id)
@@ -3027,7 +3663,7 @@ export async function runHistoricalPredictionLineagePilot(
       selection: candidate.team,
       line: candidate.line,
       projected_line: null,
-      odds_timestamp: null,
+      odds_timestamp: candidate.oddsTimestamp,
       generated_at: candidate.generatedAt,
       cutoff_at: candidate.cutoffAt,
       model_version: candidate.snapshot.model_version,
@@ -3039,9 +3675,12 @@ export async function runHistoricalPredictionLineagePilot(
         dataSufficiencyScore: candidate.snapshot.data_sufficiency_score,
         unresolvedMappingCount: candidate.snapshot.unresolved_mapping_count,
         leakageStatus: candidate.snapshot.leakage_status,
-        trial: true,
-        scrambled: true,
+        trial: candidate.snapshot.trial,
+        scrambled: candidate.snapshot.scrambled,
         productionEligible: false,
+        oddsSnapshotId: candidate.oddsSnapshotId,
+        oddsTimestamp: candidate.oddsTimestamp,
+        providerMarket: candidate.providerMarket,
         noProductionRecommendation: true,
         missingOfferedPrice: candidate.odds === null,
       },
@@ -3050,8 +3689,8 @@ export async function runHistoricalPredictionLineagePilot(
       feature_set_version: candidate.snapshot.feature_set_version,
       feature_snapshot_generated_at: candidate.snapshot.generated_at,
       production_eligible: false,
-      trial: true,
-      scrambled: true,
+      trial: candidate.snapshot.trial,
+      scrambled: candidate.snapshot.scrambled,
       validation_warnings: candidate.warnings,
       validation_status: 'valid',
       lifecycle_status: 'active',
@@ -3080,9 +3719,11 @@ export async function runHistoricalPredictionLineagePilot(
   const linkedIds = [...insertedIds, ...reusedIds]
   const settlementResult =
     settle && linkedIds.length
-      ? await settleNbaPredictionsByIds(linkedIds)
+      ? sportKey === 'baseball_mlb'
+        ? await settleMlbPredictionsByIds(linkedIds)
+        : await settleNbaPredictionsByIds(linkedIds)
       : null
-  const counts = await getNbaFeatureSnapshotBacktestCounts()
+  const counts = await getNbaFeatureSnapshotBacktestCounts(sportKey)
   const duplicateRows = linkedIds.length
     ? await supabaseAdmin
         .from('prediction_history')
@@ -3145,7 +3786,7 @@ export async function runHistoricalPredictionLineagePilot(
         'The pilot used insert/reuse-only prediction linkage. No snapshot update was sent; incompatible replacement is rejected by service contract and the applied trigger protects linked snapshots.',
     },
     trialIsolation: {
-      trialPredictions: linkedIds.length,
+      trialPredictions: sportKey === 'basketball_nba' ? linkedIds.length : 0,
       productionEligiblePredictions: 0,
       productionRecommendationsCreated: 0,
       productionMetricsEnabled: false,
@@ -3184,11 +3825,13 @@ export async function runHistoricalPredictionLineagePilot(
     cleanupPlan: {
       destructiveActionExecuted: false,
       filters: [
-        'prediction_history.trial=true',
-        'prediction_history.scrambled=true',
+        `prediction_history.sport_key=${sportKey}`,
+        sportKey === 'baseball_mlb' ? 'prediction_history.trial=false' : 'prediction_history.trial=true',
+        sportKey === 'baseball_mlb' ? 'prediction_history.scrambled=false' : 'prediction_history.scrambled=true',
         'prediction_history.production_eligible=false',
-        'historical_feature_snapshots.trial=true',
-        'historical_feature_snapshots.scrambled=true',
+        `historical_feature_snapshots.sport_key=${sportKey}`,
+        sportKey === 'baseball_mlb' ? 'historical_feature_snapshots.trial=false' : 'historical_feature_snapshots.trial=true',
+        sportKey === 'baseball_mlb' ? 'historical_feature_snapshots.scrambled=false' : 'historical_feature_snapshots.scrambled=true',
         'historical_feature_snapshots.production_eligible=false',
         'feature_snapshot_id links predictions to snapshots',
       ],

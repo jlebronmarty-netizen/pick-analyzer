@@ -5,7 +5,7 @@ The typed source of truth is `src/config/sportsdataio-endpoint-catalog.ts`.
 | Sport | Catalog Status | Trial Persistence | Odds Snapshot Status | Next Blocker |
 | --- | --- | --- | --- | --- |
 | NBA | Cataloged and partially implemented | Teams, players, injuries, lineups, player stats | BettingEvents discovery confirmed; no sportsbook-priced snapshots | Confirm exact priced market/outcome endpoint |
-| MLB | Cataloged | Pending | Pending | Build sport-specific fixture normalizers before any calls |
+| MLB | Discovery Lab Fantasy + Odds endpoints confirmed; Batch V1 persisted quarantined teams, players, events, stats and odds | 30 teams, 7,258 players, 15 events, 30 team game stats, 463 player game stats, 3,810 odds rows, 3 feature snapshots, 3 linked predictions and 7,796 mappings | `GameOddsLineMovement/78723` returned HTTP 200 with 624 movement snapshots; 3,720 line-movement rows persisted, including 2,586 cutoff-safe rows; one-game feature/prediction lineage completed with 0 provider calls | Explicit approval for remaining-game expansion and production promotion rules |
 | NFL | Cataloged | Pending | Pending | Build season/week fixture normalizers before any calls |
 | NHL | Cataloged | Pending | Pending | Build goalie/line fixture normalizers before any calls |
 | Soccer | Cataloged | Pending | Pending | Select one competition and build scoped fixtures |
@@ -13,3 +13,11 @@ The typed source of truth is `src/config/sportsdataio-endpoint-catalog.ts`.
 Shared betting normalization now supports deterministic zero-call fixtures for discovery-only events, market-index records, priced outcomes, consensus outcomes, unlisted outcomes, entitlement-blocked statuses and archive-required routing.
 
 No catalog entry authorizes production use by itself. Production eligibility still requires entitlement, payload validation, persistence validation, trial isolation, data-quality checks and explicit production approval.
+
+MLB Discovery Lab notes:
+
+- Active variant: `sportsdataio_discovery_lab`.
+- Route family: `/api/mlb/{product}/json/{endpoint}` under `https://api.sportsdata.io`.
+- Confirmed endpoints: Fantasy `CurrentSeason`, `Teams`, `Players`, `FreeAgents`, `Standings`, DFS slates, player stats/projections; Odds `GamesByDate`, `GameOddsByDate`, `GameOddsLineMovement`, `Games`, `Stadiums`, team stats.
+- Batch V1 calls returned HTTP 200 for all called endpoints, but `2026-07-13` had no games/stats/odds. A reserved `GamesByDate/2026-JUL-12` call returned 15 games. The corrected `2026-JUL-12` retry reached HTTP 200 transport for the planned one-date feeds and Players, then persisted quarantined event/stat/player rows after fixing the `sport_player_stats` preflight chunk size. The one-game line-movement probe for GameId `78723` proved timestamp-safe historical pregame odds exist, and the bounded lineage validation inserted/reused 3 quarantined feature snapshots plus 3 linked settled technical predictions with 0 production leakage. No production gate opened.
+- Enterprise `/v3/mlb/...` entries are not automatically available to the Discovery Lab key and must not be selected for live MLB imports under that variant.

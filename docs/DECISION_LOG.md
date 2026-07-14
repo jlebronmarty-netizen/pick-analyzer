@@ -1,5 +1,75 @@
 # Decision Log
 
+## 2026-07-14 - Complete One-Game MLB Feature Prediction Lineage Under Quarantine
+
+Context: The GameId `78723` line-movement probe had already persisted 3,720 quarantined odds rows and identified 2,586 cutoff-safe pregame rows, but the durable feature snapshot and prediction lineage actions were NBA-specific.
+
+Decision: Extend the existing Feature Store route actions and historical feature-generation service for a bounded `baseball_mlb` branch without adding routes, dashboards, tables or provider calls. Select one deterministic cutoff-safe persisted `Consensus` odds row per market before the 10-minute pregame cutoff, map provider `run_line` to the shared `spread` market while preserving original provider-market metadata, persist only quarantined `trial=false`, `scrambled=false`, `production_eligible=false` snapshots, link at most three predictions, and settle only those linked rows with Settlement Core.
+
+Consequences: The approved run inserted 3 MLB feature snapshots on first execution and reused all 3 on rerun. It inserted 3 linked predictions on first execution and reused all 3 on rerun. Settlement graded the one-game technical rows as 3 wins, 0 losses, 0 pushes and 0 voids for moneyline, spread/run line and total. Direct audit found 0 duplicate deterministic keys, 0 duplicate prediction identities, 0 duplicate snapshot links, 0 orphan links, 0 recommended picks, 0 production-eligible linked rows, 0 production leakage and 0 CLV rows claimed. Expansion to the remaining 14 games remains approval-gated.
+
+Affected modules: Feature Store route, historical feature-generation service, Settlement Core integration, MLB provider docs and governance docs.
+
+## 2026-07-14 - Probe MLB Line Movement And Preserve Quarantine Gate
+
+Context: The MLB `GameOddsByDate/2026-07-12` retry proved valid full-game odds rows, but all 90 date-level rows had timestamps after stored event starts. The next bounded question was whether Discovery Lab `GameOddsLineMovement/{gameid}` provides genuine historical pregame timestamps for an already persisted event.
+
+Decision: Add deterministic line-movement normalization support to the MLB normalization service before transport, including multiple historical snapshots, timestamp-aware IDs, duplicate timestamp/selection dedupe, same-price/different-timestamp retention, cutoff classification, live/alternate exclusion, no opening/closing claims and nonnegative counters. Select one completed mapped event, GameId `78723`, and call `GET /api/mlb/odds/json/GameOddsLineMovement/78723` exactly once with concurrency 1, no retries and a 15 second timeout.
+
+Consequences: The endpoint returned HTTP 200 with one top-level game record and 624 nested `PregameOdds` records. The probe normalized and inserted 3,720 quarantined `sports_odds_snapshots` rows with source-aware `line_movement` IDs, 0 duplicate logical rows, 0 unresolved events and local idempotency would insert 0 additional rows. Timestamp classification found 2,586 cutoff-safe rows before the 10-minute pregame cutoff, 48 rows after cutoff but before start and 1,086 at/after event start. No feature snapshots, predictions, settlement or technical backtest were run because the current durable lineage pilot is NBA-specific and MLB feature sufficiency/prediction lineage needs an approved bounded extension.
+
+Affected modules: SportsDataIO MLB normalization service, MLB line-movement probe docs, `sports_odds_snapshots`, sync-job metadata and governance docs.
+
+## 2026-07-14 - Persist MLB Discovery Lab Odds And Stop Before Feature Leakage
+
+Context: MLB Batch V1 had quarantined `2026-07-12` teams, players, events and stats, but no odds rows because the first temporary `GameOddsByDate` normalizer expected `GameID` while the real Discovery Lab payload used `GameId` and nested priced rows under `PregameOdds`.
+
+Decision: Add a provider-specific MLB odds normalizer with deterministic zero-call fixtures for `GameId`/`GameID` aliases, nested `PregameOdds`, moneyline `line=null`, signed run lines, totals, missing price/line rejection, missing event rejection, alternate/live ignoring, duplicate dedupe, stable IDs, local idempotency and nonnegative `recordsSkipped`. After a clean pre-call build, execute exactly one approved `GET /api/mlb/odds/json/GameOddsByDate/2026-07-12` call with concurrency 1, no retries and a 15 second timeout. Persist only mapped full-game `PregameOdds` rows to `sports_odds_snapshots` with quarantine metadata.
+
+Consequences: The one-call retry returned HTTP 200 with 15 top-level records and 15 nested `PregameOdds`, normalized and inserted 90 full-game odds rows split evenly across moneyline, run line and total, recorded sync job `4214c5a3-38de-41c8-9f53-7eab1714a34f`, and produced 0 unresolved events, 0 duplicate rows, 0 orphan rows and 0 trial-isolation violations. Local reprocessing would insert 0 additional rows. No feature snapshots or predictions were inserted because 0 odds rows were timestamp-safe relative to stored event starts; settlement, backtest, CLV, calibration, model learning and production promotion remain blocked.
+
+Affected modules: SportsDataIO MLB normalization service, `sports_odds_snapshots`, MLB batch docs, provider docs and governance docs.
+
+## 2026-07-14 - Complete MLB Quarantined Persistence And Block Odds Handoff
+
+Context: The MLB `2026-JUL-12` continuation had previously stopped before mutation because a temporary runner queried `sport_player_stats.id` with oversized 500-ID `.in()` chunks. The approved continuation required root cause analysis, a safe preflight fix, build verification and then the same capped five-endpoint retry.
+
+Decision: Add a shared safe Supabase preflight helper that sanitizes, deduplicates and chunks values at 100 maximum before `.in()` reads. Read-only synthetic probes confirmed the root cause: long text ID queries worked through 150 IDs and returned `Bad Request` at 250/500 IDs. Add a SportsDataIO MLB availability normalizer for Player.Status and run the corrected five-call batch for `2026-JUL-12`. Persist only quarantined rows with `trial=false`, `scrambled=false`, `production_eligible=false` and quarantine metadata.
+
+Consequences: The corrected retry used 5 provider calls, all HTTP 200, fetched 7,781 provider records, normalized 15,592 rows and inserted 30 teams, 7,258 players, 15 events, 30 team game stats, 463 player game stats, 7,796 provider mappings and 1 sync job. Availability metadata was corrected without provider calls and now has 0 unknown statuses. Odds persistence remains blocked because `GameOddsByDate` uses `GameId` casing and nested `PregameOdds`; the temporary odds normalizer persisted 0 odds rows before the call cap was reached. Feature snapshots, predictions, settlement, backtest, production ROI/CLV/calibration, learning and promotion remain blocked.
+
+Affected modules: Safe Supabase preflight helper, SportsDataIO historical import readiness helper, SportsDataIO MLB normalization service, MLB batch docs, provider docs and governance docs.
+
+## 2026-07-14 - Stop MLB Real Data Validation Continuation On Persistence Preflight
+
+Context: The previous SportsDataIO MLB Discovery Lab batch identified `2026-07-12` as the correct one-date validation target after `2026-07-13` returned empty game/stat/odds feeds. The continuation was approved with a maximum of 8 provider calls, concurrency 1, no retries, quarantined non-production rows and no new APIs or dashboards.
+
+Decision: Execute the bounded provider sequence for `2026-JUL-12` and stop immediately on persistence failure. The run reached HTTP 200 transport for `GamesByDate/2026-JUL-12`, `TeamGameStatsByDate/2026-JUL-12`, `PlayerGameStatsByDate/2026-JUL-12`, `GameOddsByDate/2026-07-12` and `Players`, then stopped before mutation when the `sport_player_stats` existing-ID preflight returned `Bad Request`. Do not spend additional provider calls after the persistence stop.
+
+Consequences: No MLB teams, players, events, team stats, player stats, odds, mappings, feature snapshots, predictions, settlement rows, backtest results or MLB sync jobs were inserted or updated. Post-failure Supabase audit confirmed all MLB target counts remain 0. The next executable step is to fix the existing-ID preflight/chunking and sanitized summary capture locally before another capped provider run.
+
+Affected modules: SportsDataIO MLB batch documentation, project status, roadmap, architecture and provider capability docs.
+
+## 2026-07-14 - Stop MLB Real Data Validation Batch V1 Before Persistence
+
+Context: The MLB Discovery Lab Fantasy + Odds endpoint list was confirmed by the user. The first real-data validation batch selected `2026-07-13` as the most recent non-today completed date, with a maximum of 10 provider calls, concurrency 1, no retries and sanitized shape inspection only.
+
+Decision: Register the exact confirmed Discovery Lab endpoints in the typed catalog and execute the capped provider shape probe. All called endpoints returned HTTP 200, but `2026-07-13` produced 0 `GamesByDate`, 0 team game stats, 0 player game stats and 0 game odds rows. One reserved validation call to `GamesByDate/2026-JUL-12` returned 15 game records, identifying the next viable date. Stop before persistence because the remaining call budget was insufficient for a complete one-date import/feature/prediction/settlement/backtest batch.
+
+Consequences: No Supabase rows were inserted, updated or deleted. No feature snapshots, predictions, settlement, backtest, CLV, model training or production promotion occurred. The next executable step is a fresh bounded MLB batch on `2026-07-12`, using the confirmed endpoint order and keeping all rows quarantined until validation and manual approval.
+
+Affected modules: SportsDataIO endpoint catalog, runtime adapter metadata, Historical Import planner, SportsDataIO MLB docs, Capability Matrix, first real-data validation plan and MLB batch report.
+
+## 2026-07-14 - Separate SportsDataIO MLB Discovery Lab From Enterprise Routes
+
+Context: A prior MLB probe used the enterprise `/v3/mlb/scores/json/Teams` route and returned HTTP 401. The purchased personal-use Discovery Lab subscription exposes MLB through `https://api.sportsdata.io/api/mlb/{product}/json/{endpoint}` with header authentication, not the enterprise `/v3/mlb/...` route family.
+
+Decision: Add a typed `sportsdataio_discovery_lab` provider variant for MLB, keep enterprise `/v3/mlb/...` catalog entries separate, select `SPORTSDATAIO_MLB_API_KEY` for MLB Discovery Lab only, and block historical import execution for MLB domains until exact Discovery Lab Fantasy/Odds data endpoints are confirmed. The capped auth probe confirmed `GET /api/mlb/fantasy/json/CurrentSeason` with HTTP 200 and did not store or document the raw payload.
+
+Consequences: Provider status, runtime capability metadata and historical import planning now report the Discovery Lab route family and prevent enterprise fallback for MLB. Future Discovery Lab rows remain quarantined (`trial=false`, `scrambled=false`, `production_eligible=false`) until endpoint shape, persistence, leakage and production-promotion checks are approved. No new routes, migrations, imports, predictions, backtests or model-training actions were added.
+
+Affected modules: SportsDataIO endpoint catalog, SportsDataIO runtime adapter, multi-sport provider metadata, Historical Import Engine, SportsDataIO MLB docs and production-readiness governance docs.
+
 ## 2026-07-14 - Add Production Data Gate V1 After NBA Trial Validation
 
 Context: The NBA trial validation batch produced 27 settled trial predictions. The totals market finished 0-9, requiring a technical audit before any production-readiness expansion. The audit showed all 9 total predictions were Overs and all 9 completed game totals stayed under their trial lines, so settlement was correct and no rows needed correction.
