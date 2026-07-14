@@ -145,6 +145,9 @@ export interface ProviderAdapterSdk {
   fetchHistoricalOdds(
     query: ProviderAdapterQuery
   ): Promise<AdapterResult<ProviderAdapterPage<NormalizedOddsSnapshot>>>
+  fetchPlayerProps(
+    query: ProviderAdapterQuery
+  ): Promise<AdapterResult<ProviderAdapterPage<NormalizedOddsSnapshot>>>
   normalizeProviderPayload(dataType: ProviderDataType, payload: unknown): AdapterResult<unknown>
   retryHint(status: number): ProviderRetryHint
 }
@@ -203,14 +206,14 @@ const ENDPOINTS: ProviderAdapterEndpointContract[] = [
   },
   {
     name: 'fetchPlayerStats',
-    dataType: 'players',
+    dataType: 'player_stats',
     required: false,
     paginated: true,
-    normalizedReturnType: 'NormalizedPlayer[]',
+    normalizedReturnType: 'unknown[]',
     queryFields: ['sportKey', 'leagueKey', 'season', 'participantId', 'cursor', 'limit'],
     executionModes: ['fixture', 'dry_run', 'live'],
     retryableStatuses: [408, 429, 500, 502, 503, 504],
-    unsupportedBehavior: 'Return empty players and provider capability warning.',
+    unsupportedBehavior: 'Return empty player stats and provider capability warning.',
   },
   {
     name: 'fetchInjuries',
@@ -255,6 +258,17 @@ const ENDPOINTS: ProviderAdapterEndpointContract[] = [
     executionModes: ['fixture', 'dry_run', 'live'],
     retryableStatuses: [408, 409, 425, 429, 500, 502, 503, 504],
     unsupportedBehavior: 'Return empty historical odds and quota warning unless explicitly approved.',
+  },
+  {
+    name: 'fetchPlayerProps',
+    dataType: 'player_props',
+    required: false,
+    paginated: true,
+    normalizedReturnType: 'NormalizedOddsSnapshot[]',
+    queryFields: ['sportKey', 'leagueKey', 'eventId', 'marketKeys', 'dateFrom', 'dateTo', 'cursor', 'limit'],
+    executionModes: ['fixture', 'dry_run', 'live'],
+    retryableStatuses: [408, 409, 425, 429, 500, 502, 503, 504],
+    unsupportedBehavior: 'Return empty player props and settlement-readiness warnings unless explicitly approved.',
   },
 ]
 
@@ -308,7 +322,7 @@ export function getProviderAdapterSdkContract(): ProviderAdapterContract {
       {
         input: 'provider_specific_payload',
         output: 'NormalizedOddsSnapshot',
-        rule: 'Odds must normalize sportsbook, market, outcomes, prices, lines and snapshot timestamps.',
+        rule: 'Odds and props must normalize sportsbook, market, outcomes, prices, lines, snapshot timestamps and player/event references where applicable.',
       },
       {
         input: 'provider_specific_payload',

@@ -3,6 +3,7 @@ import 'server-only'
 import { SportKey, getSupportedSport } from '@/config/sports.config'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { idempotencyKey } from '@/services/sync-reliability.service'
+import { getSportsDataIoNbaIntegrationReadiness } from '@/services/sportsdataio-nba-integration-readiness.service'
 import {
   SportsDataIoRuntimeDomain,
   getSportsDataIoEnvironmentStatus,
@@ -67,6 +68,59 @@ type SportsDataIoEndpointResult = {
   reason?: string
 }
 
+type SportsDataIoSanitizedShape = {
+  feed: string
+  topLevelType: 'array' | 'object' | 'null' | 'other'
+  topLevelCount: number
+  topLevelFields: string[]
+  arrayPaths: Array<{ path: string; count: number; sampleItemType: string; sampleFields: string[] }>
+  objectPaths: Array<{ path: string; fields: string[] }>
+  fieldCandidates: {
+    playerId: string[]
+    teamId: string[]
+    eventId: string[]
+    position: string[]
+    depthOrder: string[]
+    starterBench: string[]
+    lineupStatus: string[]
+    confirmationStatus: string[]
+    timestamps: string[]
+  }
+  nullability: Array<{ path: string; nullCount: number; observedCount: number }>
+  redactedExamples: Array<{ path: string; type: string; example: string }>
+  trialScrambledQuirks: string[]
+}
+
+type ImportRecordCounters = {
+  providerRecordsFetched: number
+  normalizedRowsProduced: number
+  skippedProviderRecords: number
+  skippedNormalizedRows: number
+  recordsSkipped: number
+  oneToManyExpansion: boolean
+  expansionRatio: number
+}
+
+type LineupDepthContext = {
+  providerGameId?: string | null
+  providerTeamId?: string | null
+  providerTeamKey?: string | null
+  providerTeamName?: string | null
+  position?: string | null
+  lineupStatus?: string | null
+  confirmationStatus?: string | null
+  sourceTimestamp?: string | null
+  role?: string | null
+  starter?: boolean | null
+  depthOrder?: number | null
+  rawPaths: string[]
+}
+
+type FlattenedProviderRow = SportsDataIoStatsPayload & {
+  __shapePath?: string
+  __contextPaths?: string[]
+}
+
 const VALID_DOMAINS: SportsDataIoRuntimeDomain[] = [
   'leagues',
   'teams',
@@ -82,6 +136,7 @@ const VALID_DOMAINS: SportsDataIoRuntimeDomain[] = [
   'lineups',
   'odds',
   'historical_odds',
+  'player_props',
 ]
 
 const DEFAULT_DOMAINS: SportsDataIoRuntimeDomain[] = [
@@ -176,6 +231,41 @@ function generatedAt() {
 function numberOrDefault(value: number | null | undefined, fallback: number) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : fallback
+}
+
+function importRecordCounters({
+  providerRecordsFetched,
+  normalizedRowsProduced,
+  skippedProviderRecords,
+  skippedNormalizedRows,
+}: {
+  providerRecordsFetched: number
+  normalizedRowsProduced: number
+  skippedProviderRecords?: number
+  skippedNormalizedRows?: number
+}): ImportRecordCounters {
+  const safeProviderRecordsFetched = Math.max(0, Math.floor(providerRecordsFetched))
+  const safeNormalizedRowsProduced = Math.max(0, Math.floor(normalizedRowsProduced))
+  const derivedSkippedProviderRecords = Math.max(0, safeProviderRecordsFetched - safeNormalizedRowsProduced)
+  const safeSkippedProviderRecords = Math.max(
+    0,
+    Math.floor(skippedProviderRecords ?? derivedSkippedProviderRecords)
+  )
+  const safeSkippedNormalizedRows = Math.max(0, Math.floor(skippedNormalizedRows ?? 0))
+  const recordsSkipped = Math.max(safeSkippedProviderRecords, safeSkippedNormalizedRows)
+
+  return {
+    providerRecordsFetched: safeProviderRecordsFetched,
+    normalizedRowsProduced: safeNormalizedRowsProduced,
+    skippedProviderRecords: safeSkippedProviderRecords,
+    skippedNormalizedRows: safeSkippedNormalizedRows,
+    recordsSkipped,
+    oneToManyExpansion: safeNormalizedRowsProduced > safeProviderRecordsFetched,
+    expansionRatio:
+      safeProviderRecordsFetched > 0
+        ? Number((safeNormalizedRowsProduced / safeProviderRecordsFetched).toFixed(4))
+        : 0,
+  }
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -280,6 +370,7 @@ function estimatedRecordsFor(domain: SportsDataIoRuntimeDomain) {
     lineups: 60,
     odds: 250,
     historical_odds: 500,
+    player_props: 250,
   }
 
   return estimates[domain]
@@ -347,6 +438,15 @@ function validateGuardrails(normalized: ReturnType<typeof normalizeRequest>) {
   const errors: string[] = []
   const warnings: string[] = []
   const env = getSportsDataIoEnvironmentStatus()
+  const nbaReadiness =
+    normalized.provider === 'sportsdataio' && normalized.sportKey === 'basketball_nba'
+      ? getSportsDataIoNbaIntegrationReadiness()
+      : null
+  const providerExecutionGate = nbaReadiness?.providerExecutionGate ?? null
+  const externalBlockerResolutionChecklist =
+    nbaReadiness?.externalBlockerResolutionChecklist ?? null
+  const productionUsageExclusionAudit =
+    nbaReadiness?.productionUsageExclusionAudit ?? null
   const from = parseDate(normalized.dateFrom)
   const to = parseDate(normalized.dateTo)
 
@@ -461,6 +561,41 @@ function validateGuardrails(normalized: ReturnType<typeof normalizeRequest>) {
       errors.push('A valid SportsDataIO API key is required for non-dry-run execution.')
     }
     if (
+      providerExecutionGate &&
+      (!providerExecutionGate.valid ||
+        !providerExecutionGate.liveExecutionAllowed ||
+        providerExecutionGate.providerCallsAllowedNow <= 0)
+    ) {
+      errors.push(
+        `SportsDataIO NBA provider execution gate is ${providerExecutionGate.status}; liveExecutionAllowed=false and providerCallsAllowedNow=0.`
+      )
+    }
+    if (
+      externalBlockerResolutionChecklist &&
+      (!externalBlockerResolutionChecklist.valid ||
+        externalBlockerResolutionChecklist.summary.blockers > 0 ||
+        externalBlockerResolutionChecklist.summary.providerCallsAllowedBeforeResolution > 0 ||
+        externalBlockerResolutionChecklist.liveExecutionAllowedAfterResolution)
+    ) {
+      errors.push(
+        `SportsDataIO NBA external blocker resolution checklist is ${externalBlockerResolutionChecklist.status}; blockers=${externalBlockerResolutionChecklist.summary.blockers} and providerCallsAllowedBeforeResolution=${externalBlockerResolutionChecklist.summary.providerCallsAllowedBeforeResolution}.`
+      )
+    }
+    if (
+      productionUsageExclusionAudit &&
+      (!productionUsageExclusionAudit.valid ||
+        !productionUsageExclusionAudit.generatedWithoutProviderCalls ||
+        productionUsageExclusionAudit.trialRowsProductionEligible ||
+        productionUsageExclusionAudit.predictionPersistenceEnabled ||
+        productionUsageExclusionAudit.backtestingEnabled ||
+        productionUsageExclusionAudit.modelTrainingEnabled ||
+        productionUsageExclusionAudit.confidenceImprovementAllowed)
+    ) {
+      errors.push(
+        `SportsDataIO NBA production usage exclusion audit is ${productionUsageExclusionAudit.status}; predictionPersistenceEnabled=${productionUsageExclusionAudit.predictionPersistenceEnabled}, backtestingEnabled=${productionUsageExclusionAudit.backtestingEnabled}, modelTrainingEnabled=${productionUsageExclusionAudit.modelTrainingEnabled}, confidenceImprovementAllowed=${productionUsageExclusionAudit.confidenceImprovementAllowed}.`
+      )
+    }
+    if (
       !isApprovedNbaPilot &&
       !isApprovedNbaPilotV2 &&
       !isApprovedNbaPlayersPilot &&
@@ -481,11 +616,56 @@ function validateGuardrails(normalized: ReturnType<typeof normalizeRequest>) {
     warnings.push('historical_odds has high quota risk and must remain capped during future pilot execution.')
   }
 
+  if (normalized.domains.includes('player_props')) {
+    warnings.push('player_props is readiness-only until exact markets, entitlement, persistence validation and settlement support are approved.')
+  }
+
   return {
     valid: errors.length === 0,
     errors,
     warnings,
     environment: env,
+    providerExecutionGate: providerExecutionGate
+      ? {
+          status: providerExecutionGate.status,
+          valid: providerExecutionGate.valid,
+          liveExecutionAllowed: providerExecutionGate.liveExecutionAllowed,
+          providerCallsAllowedNow: providerExecutionGate.providerCallsAllowedNow,
+          blockedDomains: providerExecutionGate.blockedDomains.map((domain) => domain.domain),
+        }
+      : null,
+    externalBlockerResolutionChecklist: externalBlockerResolutionChecklist
+      ? {
+          status: externalBlockerResolutionChecklist.status,
+          valid: externalBlockerResolutionChecklist.valid,
+          blockers: externalBlockerResolutionChecklist.summary.blockers,
+          providerCallsAllowedBeforeResolution:
+            externalBlockerResolutionChecklist.summary
+              .providerCallsAllowedBeforeResolution,
+          liveExecutionAllowedAfterResolution:
+            externalBlockerResolutionChecklist.liveExecutionAllowedAfterResolution,
+          domains: externalBlockerResolutionChecklist.items.map((item) => item.domain),
+        }
+      : null,
+    productionUsageExclusionAudit: productionUsageExclusionAudit
+      ? {
+          status: productionUsageExclusionAudit.status,
+          valid: productionUsageExclusionAudit.valid,
+          generatedWithoutProviderCalls:
+            productionUsageExclusionAudit.generatedWithoutProviderCalls,
+          trialRowsProductionEligible:
+            productionUsageExclusionAudit.trialRowsProductionEligible,
+          predictionPersistenceEnabled:
+            productionUsageExclusionAudit.predictionPersistenceEnabled,
+          backtestingEnabled: productionUsageExclusionAudit.backtestingEnabled,
+          modelTrainingEnabled: productionUsageExclusionAudit.modelTrainingEnabled,
+          confidenceImprovementAllowed:
+            productionUsageExclusionAudit.confidenceImprovementAllowed,
+          checkedSurfaces: productionUsageExclusionAudit.checkedSurfaces.map(
+            (surface) => surface.surface
+          ),
+        }
+      : null,
   }
 }
 
@@ -563,6 +743,36 @@ function safeString(value: unknown, fallback = '') {
   return typeof value === 'string' && value.trim() ? value.trim() : fallback
 }
 
+function safeProviderString(value: unknown, fallback = '') {
+  if (typeof value === 'string' && value.trim()) return value.trim()
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  if (typeof value === 'boolean') return String(value)
+  return fallback
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null
+}
+
+function directValue(row: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    if (row[key] !== undefined && row[key] !== null && safeProviderString(row[key])) return row[key]
+  }
+  return null
+}
+
+function uniqueBy<T>(rows: T[], keyOf: (row: T) => string) {
+  const deduped = new Map<string, T>()
+  for (const row of rows) {
+    const key = keyOf(row)
+    if (!key) continue
+    deduped.set(key, row)
+  }
+  return Array.from(deduped.values())
+}
+
 function safeNumber(value: unknown) {
   if (typeof value === 'number' && Number.isFinite(value)) return value
   if (typeof value === 'string' && value.trim() && Number.isFinite(Number(value))) {
@@ -629,7 +839,7 @@ function teamProviderId(team: SportsDataIoTeamPayload) {
 }
 
 function playerProviderId(player: SportsDataIoStatsPayload) {
-  return String(player.PlayerID ?? player.SportsDataID ?? '')
+  return providerIdFromKeys(player, PLAYER_ID_KEYS, PLAYER_OBJECT_KEYS)
 }
 
 function playerIdFromProviderId(providerId: string) {
@@ -637,12 +847,17 @@ function playerIdFromProviderId(providerId: string) {
 }
 
 function playerDisplayName(player: SportsDataIoStatsPayload) {
-  const fullName = safeString(player.Name) || safeString(player.FullName)
-  const firstName = safeString(player.FirstName)
-  const lastName = safeString(player.LastName)
+  const nested = asRecord(player.Player) ?? asRecord(player.player)
+  const fullName =
+    safeProviderString(player.Name) ||
+    safeProviderString(player.FullName) ||
+    safeProviderString(nested?.Name) ||
+    safeProviderString(nested?.FullName)
+  const firstName = safeProviderString(player.FirstName) || safeProviderString(nested?.FirstName)
+  const lastName = safeProviderString(player.LastName) || safeProviderString(nested?.LastName)
   if (fullName) return fullName
   if (firstName || lastName) return `${firstName} ${lastName}`.trim()
-  return safeString(player.PlayerID, 'Unknown SportsDataIO Player')
+  return safeProviderString(playerProviderId(player), 'Unknown SportsDataIO Player')
 }
 
 function dateOnlyOrNull(value: unknown) {
@@ -1041,7 +1256,7 @@ function gamesNeedScoresByDate(games: SportsDataIoGamePayload[]) {
 }
 
 function teamProviderIdFromStats(row: SportsDataIoStatsPayload) {
-  return String(row.TeamID ?? row.TeamId ?? row.GlobalTeamID ?? row.Key ?? '')
+  return providerIdFromKeys(row, TEAM_ID_KEYS, TEAM_OBJECT_KEYS) || safeProviderString(row.Key)
 }
 
 function opponentProviderIdFromStats(row: SportsDataIoStatsPayload) {
@@ -1329,20 +1544,159 @@ function buildInjuryMappings({
   }))
 }
 
+const PLAYER_ID_KEYS = [
+  'PlayerID',
+  'PlayerId',
+  'playerId',
+  'SportsDataID',
+  'SportsDataId',
+  'SportsDataIOPlayerID',
+  'SportsDataIoPlayerID',
+  'FantasyDataPlayerID',
+]
+
+const TEAM_ID_KEYS = [
+  'TeamID',
+  'TeamId',
+  'teamId',
+  'GlobalTeamID',
+  'GlobalTeamId',
+  'SportsDataTeamID',
+  'SportsDataIoTeamID',
+  'HomeTeamID',
+  'HomeTeamId',
+  'AwayTeamID',
+  'AwayTeamId',
+]
+
+const TEAM_KEY_KEYS = [
+  'Team',
+  'TeamKey',
+  'Key',
+  'Abbreviation',
+  'HomeTeam',
+  'AwayTeam',
+  'HomeTeamKey',
+  'AwayTeamKey',
+]
+
+const EVENT_ID_KEYS = [
+  'GameID',
+  'GameId',
+  'gameId',
+  'GlobalGameID',
+  'GlobalGameId',
+  'EventID',
+  'EventId',
+]
+
+const POSITION_KEYS = [
+  'Position',
+  'PositionCategory',
+  'DepthChartPosition',
+  'LineupPosition',
+  'RosterPosition',
+  'FantasyPosition',
+  'DepthPosition',
+]
+
+const DEPTH_ORDER_KEYS = [
+  'DepthOrder',
+  'DepthChartOrder',
+  'Depth',
+  'Order',
+  'Rank',
+  'DepthRank',
+  'PlayerOrder',
+  'SortOrder',
+]
+
+const ROLE_KEYS = [
+  'Role',
+  'DepthChartRole',
+  'LineupRole',
+  'StartingLineupRole',
+  'Starter',
+  'IsStarter',
+  'IsStarting',
+  'Started',
+  'Bench',
+]
+
+const LINEUP_STATUS_KEYS = [
+  'Status',
+  'LineupStatus',
+  'GameStatus',
+  'PlayerStatus',
+  'StartingLineupStatus',
+]
+
+const CONFIRMATION_KEYS = [
+  'ConfirmationStatus',
+  'Confirmed',
+  'IsConfirmed',
+  'LineupConfirmed',
+  'IsProjected',
+  'Projected',
+]
+
+const TIMESTAMP_KEYS = [
+  'Updated',
+  'UpdatedDate',
+  'LastUpdated',
+  'DateTime',
+  'DateTimeUTC',
+  'GameDate',
+  'Day',
+]
+
+const PLAYER_OBJECT_KEYS = ['Player', 'player', 'Athlete', 'athlete']
+const TEAM_OBJECT_KEYS = ['Team', 'team', 'HomeTeam', 'AwayTeam', 'Home', 'Away']
+const BASKETBALL_POSITION_KEYS = new Map([
+  ['pg', 'PG'],
+  ['pointguard', 'PG'],
+  ['sg', 'SG'],
+  ['shootingguard', 'SG'],
+  ['sf', 'SF'],
+  ['smallforward', 'SF'],
+  ['pf', 'PF'],
+  ['powerforward', 'PF'],
+  ['c', 'C'],
+  ['center', 'C'],
+])
+
+function directNestedValue(row: SportsDataIoStatsPayload, objectKeys: string[], candidateKeys: string[]) {
+  for (const objectKey of objectKeys) {
+    const nested = asRecord(row[objectKey])
+    if (!nested) continue
+    const value = directValue(nested, candidateKeys)
+    if (value !== null) return value
+  }
+  return null
+}
+
+function providerIdFromKeys(row: SportsDataIoStatsPayload, keys: string[], nestedObjectKeys: string[] = []) {
+  return safeProviderString(directValue(row, keys) ?? directNestedValue(row, nestedObjectKeys, keys))
+}
+
 function depthProviderId(row: SportsDataIoStatsPayload) {
   const playerId = playerProviderId(row)
-  const teamId = String(row.TeamID ?? row.GlobalTeamID ?? '')
+  const teamId = teamProviderIdFromStats(row)
   const position = lineupPosition(row)
   const order = depthOrder(row)
-  return safeString(row.DepthChartID) || [teamId, position, order, playerId].filter(Boolean).join(':')
+  return safeProviderString(row.DepthChartID) || [teamId, position, order, playerId].filter(Boolean).join(':')
 }
 
 function lineupProviderId(row: SportsDataIoStatsPayload) {
-  const explicit = safeString(row.LineupID) || safeString(row.StartingLineupID)
+  const explicit =
+    safeProviderString(row.LineupID) ||
+    safeProviderString(row.StartingLineupID) ||
+    safeProviderString(row.StartingLineupPlayerID) ||
+    safeProviderString(row.LineupPlayerID)
   if (explicit) return explicit
   return [
-    safeString(row.GameID),
-    String(row.TeamID ?? row.GlobalTeamID ?? ''),
+    eventProviderIdFromStats(row),
+    teamProviderIdFromStats(row),
     playerProviderId(row),
     lineupPosition(row),
   ].filter(Boolean).join(':')
@@ -1350,27 +1704,22 @@ function lineupProviderId(row: SportsDataIoStatsPayload) {
 
 function lineupPosition(row: SportsDataIoStatsPayload) {
   return (
-    safeString(row.Position) ||
-    safeString(row.DepthChartPosition) ||
-    safeString(row.LineupPosition) ||
-    safeString(row.PositionCategory) ||
+    safeProviderString(directValue(row, POSITION_KEYS)) ||
+    safeProviderString(directNestedValue(row, PLAYER_OBJECT_KEYS, POSITION_KEYS)) ||
     null
   )
 }
 
 function depthOrder(row: SportsDataIoStatsPayload) {
-  return safeIntegerNumber(
-    row.DepthOrder ??
-      row.DepthChartOrder ??
-      row.Depth ??
-      row.Order ??
-      row.Rank
-  )
+  return safeIntegerNumber(directValue(row, DEPTH_ORDER_KEYS))
 }
 
 function roleFromDepth(order: number | null, row: SportsDataIoStatsPayload) {
-  const explicit = safeString(row.Role) || safeString(row.DepthChartRole)
-  if (explicit) return explicit.toLowerCase()
+  const explicit = safeProviderString(directValue(row, ROLE_KEYS))
+  const lower = explicit.toLowerCase()
+  if (['starter', 'starting', 'start', 'true', '1', 'yes'].includes(lower)) return 'starter'
+  if (['bench', 'reserve', 'backup', 'false', '0', 'no'].includes(lower)) return 'bench'
+  if (explicit) return lower
   if (order === 1) return 'starter'
   if (order !== null && order > 1) return 'bench'
   return 'unknown'
@@ -1378,24 +1727,270 @@ function roleFromDepth(order: number | null, row: SportsDataIoStatsPayload) {
 
 function lineupSourceTimestamp(row: SportsDataIoStatsPayload) {
   const candidate =
-    safeString(row.Updated) ||
-    safeString(row.UpdatedDate) ||
-    safeString(row.LastUpdated) ||
-    safeString(row.DateTime) ||
-    safeString(row.GameDate) ||
+    safeProviderString(directValue(row, TIMESTAMP_KEYS)) ||
     generatedAt()
   const parsed = new Date(candidate)
   return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : generatedAt()
 }
 
 function confirmationLevel(row: SportsDataIoStatsPayload) {
-  const status = safeString(row.Status) || safeString(row.LineupStatus) || safeString(row.ConfirmationStatus)
+  const status = safeProviderString(directValue(row, LINEUP_STATUS_KEYS)) || safeProviderString(directValue(row, CONFIRMATION_KEYS))
   const normalized = status.toLowerCase()
-  const confirmed = row.Confirmed === true || row.IsConfirmed === true || normalized.includes('confirmed')
+  const confirmed =
+    row.Confirmed === true ||
+    row.IsConfirmed === true ||
+    row.LineupConfirmed === true ||
+    normalized.includes('confirmed')
   if (confirmed) return 'confirmed'
   if (normalized.includes('expected')) return 'expected'
   if (normalized.includes('projected')) return 'projected'
   return 'unknown'
+}
+
+function teamKeyFromStats(row: SportsDataIoStatsPayload) {
+  return (
+    safeProviderString(directValue(row, TEAM_KEY_KEYS)) ||
+    safeProviderString(directNestedValue(row, TEAM_OBJECT_KEYS, TEAM_KEY_KEYS))
+  )
+}
+
+function eventProviderIdFromStats(row: SportsDataIoStatsPayload) {
+  return providerIdFromKeys(row, EVENT_ID_KEYS)
+}
+
+function isStarterFromLineup(row: SportsDataIoStatsPayload) {
+  const direct = directValue(row, ROLE_KEYS)
+  if (typeof direct === 'boolean') return direct
+  const value = safeProviderString(direct).toLowerCase()
+  if (['starter', 'starting', 'start', 'true', '1', 'yes'].includes(value)) return true
+  if (['bench', 'reserve', 'backup', 'false', '0', 'no'].includes(value)) return false
+  return true
+}
+
+function mergeProviderContext(row: SportsDataIoStatsPayload, context: LineupDepthContext): FlattenedProviderRow {
+  return {
+    ...row,
+    ...(context.providerGameId && !eventProviderIdFromStats(row) ? { GameID: context.providerGameId } : {}),
+    ...(context.providerTeamId && !teamProviderIdFromStats(row) ? { TeamID: context.providerTeamId } : {}),
+    ...(context.providerTeamKey && !teamKeyFromStats(row) ? { Team: context.providerTeamKey } : {}),
+    ...(context.position && !lineupPosition(row) ? { Position: context.position } : {}),
+    ...(context.lineupStatus && !safeProviderString(directValue(row, LINEUP_STATUS_KEYS)) ? { LineupStatus: context.lineupStatus } : {}),
+    ...(context.confirmationStatus && !safeProviderString(directValue(row, CONFIRMATION_KEYS)) ? { ConfirmationStatus: context.confirmationStatus } : {}),
+    ...(context.depthOrder !== undefined && context.depthOrder !== null && depthOrder(row) === null
+      ? { DepthOrder: context.depthOrder }
+      : {}),
+    ...(context.role && !safeProviderString(directValue(row, ROLE_KEYS)) ? { Role: context.role } : {}),
+    ...(context.starter !== undefined && context.starter !== null && row.Starter === undefined ? { Starter: context.starter } : {}),
+    ...(context.sourceTimestamp && !safeProviderString(directValue(row, TIMESTAMP_KEYS)) ? { Updated: context.sourceTimestamp } : {}),
+    __contextPaths: context.rawPaths,
+  }
+}
+
+function contextFromRow(row: SportsDataIoStatsPayload, context: LineupDepthContext, path: string): LineupDepthContext {
+  const status = safeProviderString(directValue(row, LINEUP_STATUS_KEYS))
+  const confirmation = safeProviderString(directValue(row, CONFIRMATION_KEYS))
+  return {
+    providerGameId: eventProviderIdFromStats(row) || context.providerGameId || null,
+    providerTeamId: teamProviderIdFromStats(row) || context.providerTeamId || null,
+    providerTeamKey: teamKeyFromStats(row) || context.providerTeamKey || null,
+    providerTeamName: safeProviderString(row.TeamName ?? row.Name ?? row.FullName) || context.providerTeamName || null,
+    position: lineupPosition(row) || context.position || null,
+    lineupStatus: status || context.lineupStatus || null,
+    confirmationStatus: confirmation || context.confirmationStatus || null,
+    sourceTimestamp: safeProviderString(directValue(row, TIMESTAMP_KEYS)) || context.sourceTimestamp || null,
+    role: safeProviderString(directValue(row, ROLE_KEYS)) || context.role || null,
+    starter: typeof directValue(row, ROLE_KEYS) === 'boolean' ? Boolean(directValue(row, ROLE_KEYS)) : context.starter ?? null,
+    depthOrder: depthOrder(row) ?? context.depthOrder ?? null,
+    rawPaths: [...context.rawPaths, path],
+  }
+}
+
+function isPlayerCandidate(row: SportsDataIoStatsPayload) {
+  return Boolean(playerProviderId(row) || directNestedValue(row, PLAYER_OBJECT_KEYS, PLAYER_ID_KEYS))
+}
+
+function flattenProviderPlayerRows(payload: SportsDataIoStatsPayload[], mode: 'depth' | 'lineup') {
+  const rows: FlattenedProviderRow[] = []
+  const maxDepth = 6
+
+  const visit = (value: unknown, context: LineupDepthContext, path: string, depth: number) => {
+    if (depth > maxDepth) return
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => visit(item, context, `${path}[${index}]`, depth + 1))
+      return
+    }
+    const row = asRecord(value)
+    if (!row) return
+    const current = contextFromRow(row, context, path)
+    const merged = mergeProviderContext(row, current)
+    if (isPlayerCandidate(merged)) {
+      rows.push({
+        ...merged,
+        __shapePath: path.replace(/\[\d+\]/g, '[]'),
+      })
+      return
+    }
+
+    for (const [key, child] of Object.entries(row)) {
+      if (child === null || child === undefined) continue
+      if (Array.isArray(child) || asRecord(child)) {
+        const childContext = contextFromRow(row, current, `${path}.${key}`)
+        const lowerKey = key.toLowerCase()
+        if (mode === 'lineup' && lowerKey.includes('home')) {
+          childContext.providerTeamId =
+            safeProviderString(row.HomeTeamID ?? row.HomeTeamId ?? row.HomeGlobalTeamID) ||
+            childContext.providerTeamId
+          childContext.providerTeamKey =
+            safeProviderString(row.HomeTeam ?? row.HomeTeamKey) ||
+            childContext.providerTeamKey
+        }
+        if (mode === 'lineup' && lowerKey.includes('away')) {
+          childContext.providerTeamId =
+            safeProviderString(row.AwayTeamID ?? row.AwayTeamId ?? row.AwayGlobalTeamID) ||
+            childContext.providerTeamId
+          childContext.providerTeamKey =
+            safeProviderString(row.AwayTeam ?? row.AwayTeamKey) ||
+            childContext.providerTeamKey
+        }
+        const positionFromKey = BASKETBALL_POSITION_KEYS.get(normalizeKey(key))
+        if (positionFromKey && !childContext.position) childContext.position = positionFromKey
+        if (lowerKey.includes('starter') || lowerKey.includes('starting')) {
+          childContext.role = childContext.role ?? 'starter'
+          childContext.starter = true
+        }
+        if (lowerKey.includes('bench') || lowerKey.includes('reserve')) {
+          childContext.role = childContext.role ?? 'bench'
+          childContext.starter = false
+        }
+        visit(child, childContext, `${path}.${key}`, depth + 1)
+      }
+    }
+  }
+
+  payload.forEach((row, index) => {
+    visit(row, { rawPaths: [], starter: mode === 'lineup' ? true : null }, `$[${index}]`, 0)
+  })
+
+  const seen = new Set<string>()
+  return rows.filter((row) => {
+    const key = `${row.__shapePath}:${eventProviderIdFromStats(row)}:${teamProviderIdFromStats(row)}:${playerProviderId(row)}:${lineupPosition(row)}:${depthOrder(row) ?? ''}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+function valueKind(value: unknown) {
+  if (value === null) return 'null'
+  if (Array.isArray(value)) return 'array'
+  return typeof value
+}
+
+function redactedExample(value: unknown) {
+  if (value === null) return 'null'
+  if (Array.isArray(value)) return `array:${value.length}`
+  if (typeof value === 'object') return 'object'
+  if (typeof value === 'number') return Number.isInteger(value) ? 'number:int' : 'number:decimal'
+  if (typeof value === 'boolean') return `boolean:${value}`
+  if (typeof value === 'string') {
+    if (!value.trim()) return 'string:empty'
+    return value.length <= 3 ? 'string:short' : `string:${value.slice(0, 3)}...`
+  }
+  return typeof value
+}
+
+function sanitizedPayloadShape(feed: string, payload: unknown): SportsDataIoSanitizedShape {
+  const fieldPaths = new Map<string, { nullCount: number; observedCount: number; examples: Set<string>; types: Set<string> }>()
+  const arrayPaths = new Map<string, { count: number; sampleItemType: string; sampleFields: string[] }>()
+  const objectPaths = new Map<string, string[]>()
+  const topLevelType = Array.isArray(payload) ? 'array' : payload === null ? 'null' : asRecord(payload) ? 'object' : 'other'
+  const topLevel = Array.isArray(payload) ? payload : asRecord(payload) ? [payload] : []
+  const topLevelFields = Array.from(new Set(topLevel.flatMap((row) => Object.keys(asRecord(row) ?? {})))).sort()
+
+  const visit = (value: unknown, path: string, depth: number) => {
+    if (depth > 5) return
+    if (Array.isArray(value)) {
+      const sample = value.find((item) => item !== null && item !== undefined)
+      arrayPaths.set(path, {
+        count: value.length,
+        sampleItemType: valueKind(sample),
+        sampleFields: Object.keys(asRecord(sample) ?? {}).sort(),
+      })
+      value.slice(0, 2).forEach((item, index) => visit(item, `${path}[${index}]`, depth + 1))
+      return
+    }
+    const row = asRecord(value)
+    if (!row) {
+      const entry = fieldPaths.get(path) ?? { nullCount: 0, observedCount: 0, examples: new Set<string>(), types: new Set<string>() }
+      entry.observedCount += 1
+      if (value === null || value === undefined) entry.nullCount += 1
+      entry.types.add(valueKind(value))
+      entry.examples.add(redactedExample(value))
+      fieldPaths.set(path, entry)
+      return
+    }
+    objectPaths.set(path, Object.keys(row).sort())
+    for (const [key, child] of Object.entries(row)) {
+      const childPath = `${path}.${key}`.replace(/^\$\[\d+\]\./, '$[].')
+      if (Array.isArray(child) || asRecord(child)) {
+        visit(child, childPath, depth + 1)
+      } else {
+        const entry = fieldPaths.get(childPath) ?? { nullCount: 0, observedCount: 0, examples: new Set<string>(), types: new Set<string>() }
+        entry.observedCount += 1
+        if (child === null || child === undefined || child === '') entry.nullCount += 1
+        entry.types.add(valueKind(child))
+        entry.examples.add(redactedExample(child))
+        fieldPaths.set(childPath, entry)
+      }
+    }
+  }
+
+  topLevel.slice(0, 3).forEach((row, index) => visit(row, `$[${index}]`, 0))
+  const paths = Array.from(fieldPaths.keys())
+  const candidatePaths = (keys: string[]) =>
+    paths.filter((path) => keys.some((key) => path.toLowerCase().endsWith(`.${key.toLowerCase()}`))).sort()
+
+  const redactedExamples = Array.from(fieldPaths.entries())
+    .slice(0, 40)
+    .map(([path, entry]) => ({
+      path,
+      type: Array.from(entry.types).sort().join('|'),
+      example: Array.from(entry.examples).slice(0, 2).join(', '),
+    }))
+
+  const trialScrambledQuirks = [
+    ...(topLevelFields.length > 0 ? ['Payload is accepted as trial/scrambled; values are treated as import-path validation only.'] : []),
+    ...(candidatePaths(PLAYER_ID_KEYS).length === 0 ? ['No direct top-level player ID candidate was observed; nested traversal is required.'] : []),
+    ...(candidatePaths(EVENT_ID_KEYS).length === 0 && feed === 'startingLineupsByDate'
+      ? ['No direct event/game ID candidate was observed in inspected scalar paths.']
+      : []),
+  ]
+
+  return {
+    feed,
+    topLevelType,
+    topLevelCount: topLevel.length,
+    topLevelFields,
+    arrayPaths: Array.from(arrayPaths.entries()).map(([path, value]) => ({ path, ...value })).slice(0, 25),
+    objectPaths: Array.from(objectPaths.entries()).map(([path, fields]) => ({ path, fields })).slice(0, 25),
+    fieldCandidates: {
+      playerId: candidatePaths(PLAYER_ID_KEYS),
+      teamId: candidatePaths(TEAM_ID_KEYS),
+      eventId: candidatePaths(EVENT_ID_KEYS),
+      position: candidatePaths(POSITION_KEYS),
+      depthOrder: candidatePaths(DEPTH_ORDER_KEYS),
+      starterBench: candidatePaths(ROLE_KEYS),
+      lineupStatus: candidatePaths(LINEUP_STATUS_KEYS),
+      confirmationStatus: candidatePaths(CONFIRMATION_KEYS),
+      timestamps: candidatePaths(TIMESTAMP_KEYS),
+    },
+    nullability: Array.from(fieldPaths.entries())
+      .filter(([, entry]) => entry.nullCount > 0)
+      .map(([path, entry]) => ({ path, nullCount: entry.nullCount, observedCount: entry.observedCount }))
+      .slice(0, 25),
+    redactedExamples,
+    trialScrambledQuirks,
+  }
 }
 
 function buildDepthChartRows({
@@ -1409,14 +2004,15 @@ function buildDepthChartRows({
 }) {
   const teamMaps = buildTeamProviderMap(existingTeams)
   const playerMaps = buildPlayerProviderMap(existingPlayers)
+  const flattenedDepthCharts = flattenProviderPlayerRows(depthCharts, 'depth')
 
-  return depthCharts
+  return flattenedDepthCharts
     .map((row) => {
       const providerId = depthProviderId(row)
       const providerPlayerId = playerProviderId(row)
       if (!providerId || !providerPlayerId) return null
-      const providerTeamId = String(row.TeamID ?? row.GlobalTeamID ?? '')
-      const providerTeamKey = safeString(row.Team)
+      const providerTeamId = teamProviderIdFromStats(row)
+      const providerTeamKey = teamKeyFromStats(row)
       const team =
         teamMaps.teamByProviderId.get(providerTeamId) ??
         teamMaps.teamByName.get(normalizeKey(providerTeamKey))
@@ -1438,7 +2034,9 @@ function buildDepthChartRows({
         role,
         starter: role === 'starter',
         sourceTimestamp: lineupSourceTimestamp(row),
-        rawKeys: Object.keys(row).sort(),
+        rawKeys: Object.keys(row).filter((key) => !key.startsWith('__')).sort(),
+        shapePath: row.__shapePath ?? null,
+        contextPaths: row.__contextPaths ?? [],
       }
     })
     .filter((row): row is NonNullable<typeof row> => Boolean(row))
@@ -1531,6 +2129,8 @@ function buildDepthLineupRows({
       hasUnresolvedPlayer: !depth.playerId,
       hasUnresolvedTeam: !depth.teamId,
       rawKeys: depth.rawKeys,
+      shapePath: depth.shapePath,
+      contextPaths: depth.contextPaths,
     }),
     updated_at: generatedAt(),
   }))
@@ -1551,6 +2151,7 @@ function buildStartingLineupRows({
 }) {
   const teamMaps = buildTeamProviderMap(existingTeams)
   const playerMaps = buildPlayerProviderMap(existingPlayers)
+  const flattenedLineups = flattenProviderPlayerRows(lineups, 'lineup')
   const eventByProviderId = new Map<string, (typeof existingEvents)[number]>()
   for (const event of existingEvents) {
     const providerIds = (event.provider_ids as Record<string, unknown> | null) ?? {}
@@ -1559,14 +2160,14 @@ function buildStartingLineupRows({
     }
   }
 
-  return lineups
+  return flattenedLineups
     .map((row) => {
       const providerId = lineupProviderId(row)
       const providerPlayerId = playerProviderId(row)
       if (!providerId || !providerPlayerId) return null
-      const providerGameId = safeString(row.GameID)
-      const providerTeamId = String(row.TeamID ?? row.GlobalTeamID ?? '')
-      const providerTeamKey = safeString(row.Team)
+      const providerGameId = eventProviderIdFromStats(row)
+      const providerTeamId = teamProviderIdFromStats(row)
+      const providerTeamKey = teamKeyFromStats(row)
       const event = eventByProviderId.get(providerGameId)
       const team =
         teamMaps.teamByProviderId.get(providerTeamId) ??
@@ -1608,7 +2209,9 @@ function buildStartingLineupRows({
           hasUnresolvedEvent: !event,
           hasUnresolvedPlayer: !player,
           hasUnresolvedTeam: !team && !player?.team_id,
-          rawKeys: Object.keys(row).sort(),
+          rawKeys: Object.keys(row).filter((key) => !key.startsWith('__')).sort(),
+          shapePath: row.__shapePath ?? null,
+          contextPaths: row.__contextPaths ?? [],
         }),
         updated_at: generatedAt(),
       }
@@ -2750,6 +3353,10 @@ async function executeSportsDataIoNbaDepthLineupsPilotImport(
     ]
     const rawDepthCharts = depthResponse.payload
     const rawLineups = lineupsResponse.payload
+    const payloadShapes = [
+      sanitizedPayloadShape('depthCharts', rawDepthCharts),
+      sanitizedPayloadShape('startingLineupsByDate', rawLineups),
+    ]
     const recordsFetched = rawDepthCharts.length + rawLineups.length
     if (recordsFetched > normalized.maximumRecords) {
       throw new Error(
@@ -2780,10 +3387,13 @@ async function executeSportsDataIoNbaDepthLineupsPilotImport(
       depthRows,
       season,
     })
-    const depthPlayerRows = buildDepthPlayerRows({
-      depthRows,
-      existingPlayers: existingNbaPlayers,
-    })
+    const depthPlayerRows = uniqueBy(
+      buildDepthPlayerRows({
+        depthRows,
+        existingPlayers: existingNbaPlayers,
+      }),
+      (row) => row.id
+    )
     const lineupRows = buildStartingLineupRows({
       lineups: rawLineups,
       existingTeams: existingNbaTeams,
@@ -2791,8 +3401,11 @@ async function executeSportsDataIoNbaDepthLineupsPilotImport(
       existingEvents: (existingEventsResult.data ?? []) as Array<{ id: string; provider_ids: Record<string, unknown> | null }>,
       season,
     })
-    const lineupRelationRows = [...depthLineupRows, ...lineupRows]
-    const mappingRows = buildLineupMappings({ depthRows, lineupRows, season })
+    const lineupRelationRows = uniqueBy([...depthLineupRows, ...lineupRows], (row) => row.id)
+    const mappingRows = uniqueBy(
+      buildLineupMappings({ depthRows, lineupRows, season }),
+      (row) => `${row.sport_key}:${row.entity_type}:${row.provider}:${row.provider_id}:${row.season}`
+    )
 
     const [existingPlayers, existingLineupRows, existingMappings] = await Promise.all([
       countExistingIds('sport_players', depthPlayerRows.map((row) => row.id)),
@@ -2838,7 +3451,12 @@ async function executeSportsDataIoNbaDepthLineupsPilotImport(
     ).length
     const updatedMappings = mappingRows.length - insertedMappings
     const recordsNormalized = depthRows.length + lineupRows.length
-    const skipped = recordsFetched - recordsNormalized
+    const recordCounters = importRecordCounters({
+      providerRecordsFetched: recordsFetched,
+      normalizedRowsProduced: recordsNormalized,
+      skippedProviderRecords: 0,
+      skippedNormalizedRows: 0,
+    })
 
     await recordPilotJob({
       jobId,
@@ -2850,7 +3468,7 @@ async function executeSportsDataIoNbaDepthLineupsPilotImport(
         fetched: recordsFetched,
         inserted: insertedPlayers + insertedLineupRows + insertedMappings,
         updated: updatedPlayers + updatedLineupRows + updatedMappings,
-        skipped,
+        skipped: recordCounters.recordsSkipped,
         errors: validation.errors.length,
       },
       metadata: {
@@ -2866,9 +3484,11 @@ async function executeSportsDataIoNbaDepthLineupsPilotImport(
           status: endpoint.status,
           records: endpoint.records,
         })),
+        payloadShapes,
         migrationRequired: false,
         appliedMigration: 'supabase/migrations/202607130001_sport_lineups_depth_charts_v1.sql',
         externalCallsUsed,
+        recordCounters,
       },
       lastError: validation.errors.join('; ') || null,
     })
@@ -2902,6 +3522,7 @@ async function executeSportsDataIoNbaDepthLineupsPilotImport(
             ? `/v3/nba/projections/json${endpoint.endpoint}`
             : `/v3/nba/scores/json${endpoint.endpoint}`,
       })),
+      payloadShapes,
       request: plan.request,
       job: {
         id: jobId,
@@ -2910,7 +3531,9 @@ async function executeSportsDataIoNbaDepthLineupsPilotImport(
       },
       counters: {
         recordsFetched,
+        providerRecordsFetched: recordCounters.providerRecordsFetched,
         recordsNormalized,
+        normalizedRowsProduced: recordCounters.normalizedRowsProduced,
         depthChartsNormalized: depthRows.length,
         startingLineupsNormalized: lineupRows.length,
         playersInserted: insertedPlayers,
@@ -2919,7 +3542,11 @@ async function executeSportsDataIoNbaDepthLineupsPilotImport(
         lineupRowsUpdated: updatedLineupRows,
         mappingsInserted: insertedMappings,
         mappingsUpdated: updatedMappings,
-        recordsSkipped: skipped,
+        recordsSkipped: recordCounters.recordsSkipped,
+        skippedProviderRecords: recordCounters.skippedProviderRecords,
+        skippedNormalizedRows: recordCounters.skippedNormalizedRows,
+        oneToManyExpansion: recordCounters.oneToManyExpansion,
+        expansionRatio: recordCounters.expansionRatio,
         unresolvedPlayers: validation.checks.unresolvedPlayers,
         unresolvedTeams: validation.checks.unresolvedTeams,
         unresolvedEvents: validation.checks.unresolvedEvents,
@@ -3888,7 +4515,7 @@ async function validateSportsDataIoDepthLineupsPilot({
       .eq('provider', 'sportsdataio'),
   ])
 
-  for (const result of [playersResult, teamsResult, eventsResult, mappingsResult]) {
+  for (const result of [playersResult, teamsResult, eventsResult, lineupsResult, mappingsResult]) {
     if (result.error) errors.push(result.error.message)
   }
 
@@ -4396,6 +5023,11 @@ export function planSportsDataIoHistoricalExecution(
       liveExecutionBlockedInThisModule: true,
       hardCaps: HARD_CAPS,
       environment: validation.environment,
+      providerExecutionGate: validation.providerExecutionGate,
+      externalBlockerResolutionChecklist:
+        validation.externalBlockerResolutionChecklist,
+      productionUsageExclusionAudit:
+        validation.productionUsageExclusionAudit,
     },
     job: {
       id: jobId,
@@ -4661,14 +5293,72 @@ export function runSportsDataIoExecutionReadinessValidation() {
     confirmed: false,
     maximumRequests: 0,
   })
+  const gateRejectedLive = planSportsDataIoHistoricalExecution({
+    provider: 'sportsdataio',
+    sportKey: 'basketball_nba',
+    leagueKey: 'nba',
+    season: '2026',
+    domains: ['players'],
+    dryRun: false,
+    confirmed: true,
+    maximumRequests: 1,
+    maximumRecords: NBA_PLAYERS_PILOT_CAPS.maximumRecords,
+    batchSizeDays: NBA_PLAYERS_PILOT_CAPS.batchSizeDays,
+    concurrencyLimit: NBA_PLAYERS_PILOT_CAPS.concurrencyLimit,
+  })
   const pilot = buildSportsDataIoPilotPlan()
   const jobValidation = validateSportsDataIoHistoricalImportJob('readiness-validation-job')
+  const oneToManyExpansionCounters = importRecordCounters({
+    providerRecordsFetched: 39,
+    normalizedRowsProduced: 758,
+    skippedProviderRecords: 0,
+    skippedNormalizedRows: 0,
+  })
 
   const checks = {
     missingRequestRejected: defaultPlan.success === false,
     dryRunDefaultNoProviderCalls:
       dryRunPlan.providerUsage.externalProviderCallsMade === 0 && dryRunPlan.success,
     liveExecutionRejected: rejectedLive.success === false && rejectedLive.status === 'rejected',
+    providerExecutionGateRejectsLiveBeforeTransport:
+      gateRejectedLive.success === false &&
+      gateRejectedLive.status === 'rejected' &&
+      gateRejectedLive.providerUsage.externalProviderCallsMade === 0 &&
+      gateRejectedLive.guardrails.providerExecutionGate?.liveExecutionAllowed === false &&
+      gateRejectedLive.guardrails.providerExecutionGate?.providerCallsAllowedNow === 0 &&
+      gateRejectedLive.validation.errors.some((error) =>
+        error.includes('provider execution gate')
+      ),
+    resolutionChecklistRejectsLiveBeforeTransport:
+      gateRejectedLive.success === false &&
+      gateRejectedLive.status === 'rejected' &&
+      gateRejectedLive.providerUsage.externalProviderCallsMade === 0 &&
+      gateRejectedLive.guardrails.externalBlockerResolutionChecklist?.valid === true &&
+      (gateRejectedLive.guardrails.externalBlockerResolutionChecklist?.blockers ?? 0) > 0 &&
+      gateRejectedLive.guardrails.externalBlockerResolutionChecklist
+        ?.providerCallsAllowedBeforeResolution === 0 &&
+      gateRejectedLive.guardrails.externalBlockerResolutionChecklist
+        ?.liveExecutionAllowedAfterResolution === false &&
+      gateRejectedLive.validation.errors.some((error) =>
+        error.includes('external blocker resolution checklist')
+      ),
+    productionUsageExclusionGuardrailPresentBeforeTransport:
+      gateRejectedLive.success === false &&
+      gateRejectedLive.status === 'rejected' &&
+      gateRejectedLive.providerUsage.externalProviderCallsMade === 0 &&
+      gateRejectedLive.guardrails.productionUsageExclusionAudit?.valid === true &&
+      gateRejectedLive.guardrails.productionUsageExclusionAudit
+        ?.generatedWithoutProviderCalls === true &&
+      gateRejectedLive.guardrails.productionUsageExclusionAudit
+        ?.trialRowsProductionEligible === false &&
+      gateRejectedLive.guardrails.productionUsageExclusionAudit
+        ?.predictionPersistenceEnabled === false &&
+      gateRejectedLive.guardrails.productionUsageExclusionAudit
+        ?.backtestingEnabled === false &&
+      gateRejectedLive.guardrails.productionUsageExclusionAudit
+        ?.modelTrainingEnabled === false &&
+      gateRejectedLive.guardrails.productionUsageExclusionAudit
+        ?.confidenceImprovementAllowed === false,
     pilotPlanCapped:
       pilot.estimates.estimatedProviderCalls <= 10 &&
       pilot.request.concurrencyLimit === 1,
@@ -4681,7 +5371,15 @@ export function runSportsDataIoExecutionReadinessValidation() {
       defaultPlan.providerUsage.externalProviderCallsMade === 0 &&
       dryRunPlan.providerUsage.externalProviderCallsMade === 0 &&
       rejectedLive.providerUsage.externalProviderCallsMade === 0 &&
+      gateRejectedLive.providerUsage.externalProviderCallsMade === 0 &&
       pilot.providerUsage.externalProviderCallsMade === 0,
+    oneToManyExpansionSkippedCounterNonnegative:
+      oneToManyExpansionCounters.providerRecordsFetched === 39 &&
+      oneToManyExpansionCounters.normalizedRowsProduced === 758 &&
+      oneToManyExpansionCounters.recordsSkipped === 0 &&
+      oneToManyExpansionCounters.skippedProviderRecords === 0 &&
+      oneToManyExpansionCounters.skippedNormalizedRows === 0 &&
+      oneToManyExpansionCounters.oneToManyExpansion,
   }
 
   return {
@@ -4704,11 +5402,27 @@ export function runSportsDataIoExecutionReadinessValidation() {
       dryRunCheckpoints: dryRunPlan.checkpoints.length,
       pilotEstimatedCalls: pilot.estimates.estimatedProviderCalls,
       providerCallsMade: 0,
+      oneToManyExpansionRecordsSkipped: oneToManyExpansionCounters.recordsSkipped,
+      providerExecutionGateStatus:
+        gateRejectedLive.guardrails.providerExecutionGate?.status ?? 'not_applicable',
+      externalBlockerResolutionChecklistStatus:
+        gateRejectedLive.guardrails.externalBlockerResolutionChecklist?.status ??
+        'not_applicable',
+      productionUsageExclusionAuditStatus:
+        gateRejectedLive.guardrails.productionUsageExclusionAudit?.status ??
+        'not_applicable',
     },
     checks,
+    deterministicFixtures: {
+      oneToManyExpansionCounters,
+    },
     plans: {
       dryRunStatus: dryRunPlan.status,
       rejectedLiveStatus: rejectedLive.status,
+      gateRejectedLiveStatus: gateRejectedLive.status,
+      gateRejectedLiveResolutionChecklistStatus:
+        gateRejectedLive.guardrails.externalBlockerResolutionChecklist?.status ??
+        'not_applicable',
       pilotStatus: pilot.status,
     },
     warnings: [

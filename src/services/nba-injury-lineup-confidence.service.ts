@@ -343,7 +343,7 @@ export async function getNbaInjuryLineupConfidenceStatus() {
       dataSufficiencyPenalty,
       featureQualityPenalty: round(clamp(confidencePenalty * 0.7, 0, 25)),
       canImproveProductionConfidence: productionEligible.length > 0 && !stale && contradictionCount === 0,
-      trialDataExcludedFromProductionConfidence: trialCount > 0,
+      trialDataExcludedFromProductionConfidence: trialCount > 0 || lineupTrialCount > 0,
     },
     explanation: {
       availability:
@@ -356,9 +356,9 @@ export async function getNbaInjuryLineupConfidenceStatus() {
               : injuryStatus,
       confidenceImpact: `NBA injury and lineup context applies a ${confidencePenalty}-point production confidence penalty.`,
       trialDataExclusionNotice:
-        trialCount > 0
-          ? 'Trial/scrambled injury rows are excluded from production confidence improvements.'
-          : 'No trial injury rows detected.',
+        trialCount > 0 || lineupTrialCount > 0
+          ? 'Trial/scrambled injury and lineup rows are excluded from production confidence improvements.'
+          : 'No trial injury or lineup rows detected.',
     },
     warnings,
   }

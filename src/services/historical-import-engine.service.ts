@@ -129,6 +129,16 @@ type SyncJobRow = {
   metadata: Record<string, unknown> | null
 }
 
+type StoredRecordCounters = {
+  providerRecordsFetched?: number
+  normalizedRowsProduced?: number
+  skippedProviderRecords?: number
+  skippedNormalizedRows?: number
+  recordsSkipped?: number
+  oneToManyExpansion?: boolean
+  expansionRatio?: number
+}
+
 const IMPORT_DATA_TYPES: ProviderDataType[] = [
   'schedules',
   'scores',
@@ -140,6 +150,7 @@ const IMPORT_DATA_TYPES: ProviderDataType[] = [
   'lineups',
   'odds',
   'historical_odds',
+  'player_props',
 ]
 
 const DEFAULT_DATA_TYPES: ProviderDataType[] = [
@@ -166,6 +177,33 @@ const DATA_TYPE_ORDER: ProviderDataType[] = [
 
 function generatedAt() {
   return new Date().toISOString()
+}
+
+function numberFromMetadata(value: unknown, fallback: number) {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
+function recordCountersFromMetadata(
+  metadata: Record<string, unknown> | null,
+  fallback: { fetched: number; skipped: number }
+): Required<StoredRecordCounters> {
+  const counters =
+    metadata &&
+    typeof metadata.recordCounters === 'object' &&
+    metadata.recordCounters !== null &&
+    !Array.isArray(metadata.recordCounters)
+      ? (metadata.recordCounters as StoredRecordCounters)
+      : {}
+
+  return {
+    providerRecordsFetched: numberFromMetadata(counters.providerRecordsFetched, fallback.fetched),
+    normalizedRowsProduced: numberFromMetadata(counters.normalizedRowsProduced, fallback.fetched - fallback.skipped),
+    skippedProviderRecords: numberFromMetadata(counters.skippedProviderRecords, fallback.skipped),
+    skippedNormalizedRows: numberFromMetadata(counters.skippedNormalizedRows, fallback.skipped),
+    recordsSkipped: Math.max(0, numberFromMetadata(counters.recordsSkipped, fallback.skipped)),
+    oneToManyExpansion: counters.oneToManyExpansion === true,
+    expansionRatio: numberFromMetadata(counters.expansionRatio, 0),
+  }
 }
 
 function isSportKey(value: string | null | undefined): value is SportKey {
@@ -635,27 +673,40 @@ export async function listHistoricalImportJobs() {
 
   const data =
     result.status === 'fulfilled' && !result.value.error ? result.value.data : []
-  const jobs = ((data ?? []) as SyncJobRow[]).map((job) => ({
-    id: job.id,
-    jobType: job.job_type,
-    sportKey: job.sport_key,
-    leagueKey: job.league_key,
-    provider: job.provider,
-    season: job.season,
-    startedAt: job.started_at,
-    completedAt: job.completed_at,
-    status: job.status,
-    durationMs: job.duration_ms,
-    counters: {
-      fetched: job.records_fetched ?? 0,
-      inserted: job.records_inserted ?? 0,
-      updated: job.records_updated ?? 0,
-      skipped: job.records_skipped ?? 0,
-      errors: job.error_count ?? 0,
-    },
-    lastError: job.last_error,
-    metadata: job.metadata ?? {},
-  }))
+  const jobs = ((data ?? []) as SyncJobRow[]).map((job) => {
+    const fetched = job.records_fetched ?? 0
+    const skipped = Math.max(0, job.records_skipped ?? 0)
+    const recordCounters = recordCountersFromMetadata(job.metadata, { fetched, skipped })
+
+    return {
+      id: job.id,
+      jobType: job.job_type,
+      sportKey: job.sport_key,
+      leagueKey: job.league_key,
+      provider: job.provider,
+      season: job.season,
+      startedAt: job.started_at,
+      completedAt: job.completed_at,
+      status: job.status,
+      durationMs: job.duration_ms,
+      counters: {
+        fetched,
+        providerRecordsFetched: recordCounters.providerRecordsFetched,
+        normalizedRowsProduced: recordCounters.normalizedRowsProduced,
+        inserted: job.records_inserted ?? 0,
+        updated: job.records_updated ?? 0,
+        skipped,
+        recordsSkipped: recordCounters.recordsSkipped,
+        skippedProviderRecords: recordCounters.skippedProviderRecords,
+        skippedNormalizedRows: recordCounters.skippedNormalizedRows,
+        oneToManyExpansion: recordCounters.oneToManyExpansion,
+        expansionRatio: recordCounters.expansionRatio,
+        errors: job.error_count ?? 0,
+      },
+      lastError: job.last_error,
+      metadata: job.metadata ?? {},
+    }
+  })
 
   return {
     success: true,

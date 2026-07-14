@@ -91,14 +91,25 @@ const ENDPOINTS: ProviderAdapterEndpointContract[] = [
   },
   {
     name: 'playerSeasonStats',
-    dataType: 'players',
+    dataType: 'player_stats',
     required: false,
     paginated: true,
-    normalizedReturnType: 'NormalizedPlayer[]',
+    normalizedReturnType: 'unknown[]',
     queryFields: ['sportKey', 'leagueKey', 'season', 'participantId', 'cursor', 'limit'],
     executionModes: ['fixture', 'dry_run'],
     retryableStatuses: [408, 429, 500, 502, 503, 504],
-    unsupportedBehavior: 'Return empty player records and a provider warning.',
+    unsupportedBehavior: 'Return empty player season stats and a provider warning.',
+  },
+  {
+    name: 'playerGameStats',
+    dataType: 'player_stats',
+    required: false,
+    paginated: true,
+    normalizedReturnType: 'unknown[]',
+    queryFields: ['sportKey', 'leagueKey', 'season', 'eventId', 'dateFrom', 'dateTo', 'cursor', 'limit'],
+    executionModes: ['fixture', 'dry_run'],
+    retryableStatuses: [408, 429, 500, 502, 503, 504],
+    unsupportedBehavior: 'Return empty player game stats and a provider warning.',
   },
   {
     name: 'injuries',
@@ -144,6 +155,18 @@ const ENDPOINTS: ProviderAdapterEndpointContract[] = [
     retryableStatuses: [408, 409, 425, 429, 500, 502, 503, 504],
     unsupportedBehavior: 'Return empty historical odds and quota warning until approved.',
   },
+  {
+    name: 'playerProps',
+    dataType: 'player_props',
+    required: false,
+    paginated: true,
+    normalizedReturnType: 'NormalizedOddsSnapshot[]',
+    queryFields: ['sportKey', 'leagueKey', 'eventId', 'marketKeys', 'dateFrom', 'dateTo', 'cursor', 'limit'],
+    executionModes: ['fixture', 'dry_run'],
+    retryableStatuses: [408, 409, 425, 429, 500, 502, 503, 504],
+    unsupportedBehavior:
+      'Return empty player props with warnings until exact markets, entitlement, persistence and settlement are approved.',
+  },
 ]
 
 const COVERAGE: SportsDataIoSportCoverage[] = [
@@ -157,12 +180,14 @@ const COVERAGE: SportsDataIoSportCoverage[] = [
       'standings',
       'team_stats',
       'players',
+      'player_stats',
       'injuries',
       'lineups',
       'odds',
       'historical_odds',
+      'player_props',
     ],
-    warnings: ['Contract only; live NBA calls are disabled.'],
+    warnings: ['Contract only; live NBA calls are disabled.', 'Player props remain readiness-only until market entitlement and settlement are approved.'],
   },
   {
     sportKey: 'americanfootball_nfl',
@@ -220,10 +245,28 @@ const MAPPINGS: SportsDataIoMapping[] = [
     notes: ['Unavailable injuries must return warnings, not fabricated statuses.'],
   },
   {
+    sportsDataIoConcept: 'PlayerStat',
+    normalizedModel: 'unknown',
+    keyFields: ['Season', 'GameID', 'PlayerID', 'TeamID', 'StatID'],
+    notes: [
+      'Persist player season and game stat rows into sport_player_stats after exact endpoint paths are confirmed.',
+      'Keep provider payload fields out of prediction engines; feature services consume normalized rows only.',
+    ],
+  },
+  {
     sportsDataIoConcept: 'ProjectedLineup',
     normalizedModel: 'NormalizedLineup',
     keyFields: ['GameID', 'TeamID', 'PlayerID', 'Confirmed'],
     notes: ['Expected and confirmed lineups must be distinguished before prediction features consume them.'],
+  },
+  {
+    sportsDataIoConcept: 'PlayerProp',
+    normalizedModel: 'NormalizedOddsSnapshot',
+    keyFields: ['GameID', 'PlayerID', 'SportsBook', 'Market', 'Line', 'OverPrice', 'UnderPrice', 'Updated'],
+    notes: [
+      'Persist only after exact prop market paths and entitlement are confirmed.',
+      'Keep player prop rows out of production predictions until player-prop settlement and validation exist.',
+    ],
   },
 ]
 

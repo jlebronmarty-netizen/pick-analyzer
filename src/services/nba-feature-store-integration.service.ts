@@ -117,18 +117,19 @@ export async function previewNbaFeatureStoreSnapshot() {
     }
 
     if (value.key === 'lineup_context') {
+      const hasStoredLineups = availability.lineupFeed.sampleSize > 0
       return {
         ...value,
         value: availability.featureValues.lineupAvailability,
-        freshnessMinutes: 0,
-        qualityScore: 55,
-        sampleSize: 0,
+        freshnessMinutes: availability.lineupFeed.freshnessMinutes ?? value.freshnessMinutes,
+        qualityScore: clamp(85 - availability.lineupFeed.confidencePenalty * 2.5, 0, 100),
+        sampleSize: availability.lineupFeed.sampleSize,
         provenance: [
           {
-            provider: 'unavailable',
-            sourceTable: 'sport_players',
-            sourceId: 'nba_lineup_unavailable',
-            observedAt: snapshot.generatedAt,
+            provider: hasStoredLineups ? 'sportsdataio-stored' : 'unavailable',
+            sourceTable: hasStoredLineups ? 'sport_lineups' : 'sport_players',
+            sourceId: hasStoredLineups ? 'nba_injury_lineup_confidence_v1' : 'nba_lineup_unavailable',
+            observedAt: availability.lineupFeed.latestUpdatedAt ?? snapshot.generatedAt,
           },
         ],
         warnings: availability.lineupFeed.warnings,

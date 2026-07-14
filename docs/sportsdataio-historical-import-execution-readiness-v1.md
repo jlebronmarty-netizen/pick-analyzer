@@ -25,6 +25,7 @@ APIs:
 
 - `GET /api/providers/sportsdataio/status`
 - `GET /api/providers/sportsdataio/capabilities`
+- `GET /api/providers/sportsdataio/execution-readiness/validation`
 - `POST /api/historical-import/execute`
 - `POST /api/historical-import/resume`
 - `POST /api/historical-import/cancel`
@@ -46,6 +47,14 @@ Non-dry-run requests are rejected unless they exactly match the approved capped 
 - a positive request cap
 
 This preserves the execution contract while preventing accidental live imports before explicit approval. Broader provider-backed reconciliation remains blocked.
+
+For SportsDataIO NBA requests, non-dry-run validation also reads the aggregate NBA readiness guardrails before any provider transport can start:
+
+- `providerExecutionGate`
+- `externalBlockerResolutionChecklist`
+- `productionUsageExclusionAudit`
+
+While external blockers remain open, the execution planner returns all three summaries in `guardrails`, reports `providerCallsAllowedNow=0` and `providerCallsAllowedBeforeResolution=0`, confirms prediction persistence/backtesting/model training/confidence lift remain disabled for trial-only rows, and rejects the request before dispatching a provider call.
 
 ## Supported Import Domains
 
@@ -106,12 +115,20 @@ Validation checks:
 - no secret value is returned
 - dry-run plans use zero provider calls
 - uncapped/non-confirmed live execution is rejected
+- live-shaped SportsDataIO NBA execution is rejected by the aggregate provider execution gate before provider transport while the gate is closed
+- live-shaped SportsDataIO NBA execution is rejected by the external blocker resolution checklist before provider transport while blocker evidence is missing
+- live-shaped SportsDataIO NBA execution exposes production-usage exclusion guardrails before provider transport
+- one-to-many provider payload expansion reports nonnegative skipped counters
 - pilot plan is capped
 - dependency graph is present
 - persistence plan targets existing tables
 - validation no-op is safe
 
 Deterministic fixtures are explicitly non-production data.
+
+`GET /api/providers/sportsdataio/execution-readiness/validation` exposes this deterministic validation packet directly. It is read-only, makes zero provider calls, performs no mutations and does not dispatch the historical import execution route.
+
+`HistoricalImportEnginePanel` now displays the same validation packet beside the import planning and NBA handoff controls. The card shows pass counts, zero-call accounting, provider execution gate status, external blocker resolution status, production usage exclusion status, live-shaped rejection before provider transport and the 39 provider records -> 758 normalized rows counter fixture with `recordsSkipped=0`.
 
 ## Future Activation Beyond The Pilot
 

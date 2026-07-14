@@ -55,6 +55,7 @@ export type SportsDataIoRuntimeDomain =
   | 'lineups'
   | 'odds'
   | 'historical_odds'
+  | 'player_props'
 
 export type SportsDataIoDomainContract = {
   domain: SportsDataIoRuntimeDomain
@@ -203,14 +204,17 @@ const DOMAIN_CONTRACTS: SportsDataIoDomainContract[] = [
   {
     domain: 'player_stats',
     capabilityStatus: 'requires_subscription_verification',
-    destination: 'future normalized player stats or feature snapshots',
-    naturalKey: ['sport_key', 'season', 'player_id', 'stat_scope'],
-    conflictTarget: 'deferred until player-stat persistence is approved',
+    destination: 'sport_player_stats',
+    naturalKey: ['sport_key', 'league_key', 'season', 'provider_player_id', 'stat_type', 'provider_event_id'],
+    conflictTarget: 'sport_player_stats.id',
     dependencyOrder: 10,
     estimatedCalls: 1,
     expectedPagination: 'season_window',
-    freshnessRequirement: 'Refresh before prop engines only after persistence is approved.',
-    warnings: ['No player-stat table is introduced in this readiness module.'],
+    freshnessRequirement: 'Refresh before feature generation and prop-readiness validation after exact endpoints are confirmed.',
+    warnings: [
+      'Exact player season/game stat endpoint paths must be confirmed before live calls.',
+      'Additive sport_player_stats migration must be applied before persistence.',
+    ],
   },
   {
     domain: 'injuries',
@@ -227,14 +231,14 @@ const DOMAIN_CONTRACTS: SportsDataIoDomainContract[] = [
   {
     domain: 'lineups',
     capabilityStatus: 'requires_subscription_verification',
-    destination: 'sport_players plus future lineup persistence',
-    naturalKey: ['sport_key', 'event_id', 'team_id', 'lineup_type'],
-    conflictTarget: 'deferred until lineup persistence is approved',
+    destination: 'sport_lineups, sport_players, provider_entity_mappings',
+    naturalKey: ['sport_key', 'league_key', 'event_id', 'team_id', 'player_id', 'lineup_type', 'position', 'depth_order'],
+    conflictTarget: 'sport_lineups.id',
     dependencyOrder: 12,
     estimatedCalls: 1,
     expectedPagination: 'date_window',
     freshnessRequirement: 'Refresh near event cutoff; keep expected vs confirmed distinct.',
-    warnings: ['No lineup table is introduced in this readiness module.'],
+    warnings: ['Trial lineup rows must remain production_eligible=false until non-scrambled production data is approved.'],
   },
   {
     domain: 'odds',
@@ -259,6 +263,21 @@ const DOMAIN_CONTRACTS: SportsDataIoDomainContract[] = [
     expectedPagination: 'date_window',
     freshnessRequirement: 'Import only capped historical windows.',
     warnings: ['High quota risk; require explicit request cap and subscription verification.'],
+  },
+  {
+    domain: 'player_props',
+    capabilityStatus: 'requires_subscription_verification',
+    destination: 'sports_odds_snapshots with player prop metadata, provider_entity_mappings',
+    naturalKey: ['sport_key', 'event_id', 'provider_player_id', 'sportsbook', 'prop_market', 'outcome', 'snapshot_time'],
+    conflictTarget: 'sports_odds_snapshots.id',
+    dependencyOrder: 15,
+    estimatedCalls: 1,
+    expectedPagination: 'date_window',
+    freshnessRequirement: 'Refresh only after exact prop market entitlement and settlement support are approved.',
+    warnings: [
+      'Exact NBA player prop market endpoint paths are not confirmed in repository metadata.',
+      'Player props must not feed production recommendations until prop settlement and validation are implemented.',
+    ],
   },
 ]
 
@@ -557,7 +576,7 @@ export const sportsDataIoRuntimeAdapter = {
     return result(page<Record<string, unknown>>([], disabledWarning('team_stats')))
   },
   async fetchPlayerStats(_query: ProviderAdapterQuery) {
-    return result(page<NormalizedPlayer>([], disabledWarning('players')))
+    return result(page<Record<string, unknown>>([], disabledWarning('player_stats')))
   },
   async fetchInjuries(_query: ProviderAdapterQuery) {
     return result(page<NormalizedInjury>([], disabledWarning('injuries')))
@@ -571,6 +590,9 @@ export const sportsDataIoRuntimeAdapter = {
   async fetchHistoricalOdds(_query: ProviderAdapterQuery) {
     return result(page<NormalizedOddsSnapshot>([], disabledWarning('historical_odds')))
   },
+  async fetchPlayerProps(_query: ProviderAdapterQuery) {
+    return result(page<NormalizedOddsSnapshot>([], disabledWarning('player_props')))
+  },
 }
 
 export function runSportsDataIoRuntimeValidation() {
@@ -581,7 +603,7 @@ export function runSportsDataIoRuntimeValidation() {
   const checks = {
     missingKeySafe: env.status === 'missing' || env.status === 'configured' || env.status === 'invalid_format',
     runtimeDisabled: getSportsDataIoRuntimeAdapterStatus().runtime.liveCallsEnabled === false,
-    capabilitiesResolved: getSportsDataIoRuntimeCapabilities().domains.length >= 14,
+    capabilitiesResolved: getSportsDataIoRuntimeCapabilities().domains.length >= 15,
     fixtureEventsNormalized: fixture.events.length === 1 && Boolean(fixture.events[0].providerIds.sportsdataio),
     fixtureOddsNormalized: fixture.odds.length > 0,
     fixturePlayersNormalized: fixture.players.length === 1,

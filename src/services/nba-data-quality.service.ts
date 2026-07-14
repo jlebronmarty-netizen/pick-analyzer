@@ -54,6 +54,40 @@ type GameStatsRow = {
   updated_at: string | null
 }
 
+type PlayerRow = {
+  id: string
+  sport_key: string
+  league_key: string
+  team_id: string | null
+  team_name: string | null
+  display_name: string
+  position: string | null
+  active: boolean | null
+  provider_ids: Record<string, unknown> | null
+  metadata: Record<string, unknown> | null
+  updated_at: string | null
+}
+
+type PlayerStatsRow = {
+  id: string
+  sport_key: string
+  league_key: string
+  season: string
+  stat_type: 'season' | 'game' | string
+  event_id: string | null
+  team_id: string | null
+  player_id: string | null
+  player_name: string | null
+  provider: string
+  games: number | null
+  starts: number | null
+  minutes: number | null
+  points: number | null
+  provider_ids: Record<string, unknown> | null
+  metadata: Record<string, unknown> | null
+  updated_at: string | null
+}
+
 type StandingRow = {
   id: string
   sport_key: string
@@ -140,6 +174,9 @@ type AuditRows = {
   teams: TeamRow[]
   events: EventRow[]
   gameStats: GameStatsRow[]
+  players: PlayerRow[]
+  playerStats: PlayerStatsRow[]
+  playerStatsUnavailableReason: string | null
   standings: StandingRow[]
   odds: OddsRow[]
   jobs: SyncJobRow[]
@@ -316,6 +353,10 @@ function issue({
   }
 }
 
+function metadataFlag(row: { metadata: Record<string, unknown> | null }, key: string) {
+  return row.metadata ? row.metadata[key] : undefined
+}
+
 function statusFromIssues(issues: DataQualityIssue[]) {
   if (issues.some((item) => item.severity === 'critical')) return 'critical'
   if (issues.some((item) => item.severity === 'error')) return 'error'
@@ -328,6 +369,8 @@ async function loadRows(seasonKey: string, seasonStartYear: number): Promise<Aud
     teams,
     events,
     gameStats,
+    players,
+    playerStats,
     standings,
     odds,
     jobs,
@@ -339,6 +382,8 @@ async function loadRows(seasonKey: string, seasonStartYear: number): Promise<Aud
     supabaseAdmin.from('sports_teams').select('*').eq('sport_key', NBA_SPORT_KEY).limit(1000),
     supabaseAdmin.from('sport_events').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
     supabaseAdmin.from('sport_game_stats').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
+    supabaseAdmin.from('sport_players').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
+    supabaseAdmin.from('sport_player_stats').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
     supabaseAdmin.from('sport_standings').select('*').eq('sport_key', NBA_SPORT_KEY).limit(1000),
     supabaseAdmin.from('sports_odds_snapshots').select('*').eq('sport_key', NBA_SPORT_KEY).limit(5000),
     supabaseAdmin.from('sports_sync_jobs').select('*').eq('sport_key', NBA_SPORT_KEY).limit(500),
@@ -352,6 +397,7 @@ async function loadRows(seasonKey: string, seasonStartYear: number): Promise<Aud
     teams.error,
     events.error,
     gameStats.error,
+    players.error,
     standings.error,
     odds.error,
     jobs.error,
@@ -365,10 +411,17 @@ async function loadRows(seasonKey: string, seasonStartYear: number): Promise<Aud
     throw new Error(errors.map((error) => error?.message).join('; '))
   }
 
+  const playerStatsUnavailableReason = playerStats.error
+    ? `sport_player_stats unavailable: ${playerStats.error.message}`
+    : null
+
   return {
     teams: (teams.data ?? []) as TeamRow[],
     events: (events.data ?? []) as EventRow[],
     gameStats: (gameStats.data ?? []) as GameStatsRow[],
+    players: (players.data ?? []) as PlayerRow[],
+    playerStats: (playerStats.error ? [] : (playerStats.data ?? [])) as PlayerStatsRow[],
+    playerStatsUnavailableReason,
     standings: ((standings.data ?? []) as StandingRow[]).filter((row) => row.season === seasonKey),
     odds: ((odds.data ?? []) as OddsRow[]).filter((row) => !row.season || row.season === seasonKey),
     jobs: (jobs.data ?? []) as SyncJobRow[],
@@ -390,9 +443,11 @@ function buildCoverage(rows: AuditRows) {
 
   return [
     coverageMetric('teams', 'Teams', rows.teams.length, EXPECTED_NBA_TEAMS),
+    coverageMetric('players', 'Players', rows.players.length, EXPECTED_NBA_TEAMS * 12),
     coverageMetric('events', 'Events', rows.events.length, Math.max(rows.results.length, rows.events.length, 1)),
     coverageMetric('completedGames', 'Completed Games', completedEvents.length, Math.max(rows.results.length, completedEvents.length, 1)),
     coverageMetric('gameStats', 'Game Stats', completedWithStats.length, Math.max(completedEvents.length, 1)),
+    coverageMetric('playerStats', 'Player Stats', rows.playerStats.length, Math.max(rows.players.length, 1)),
     coverageMetric('standings', 'Standings', rows.standings.length, EXPECTED_NBA_TEAMS),
     coverageMetric('oddsSnapshots', 'Odds Snapshots', rows.odds.length, Math.max(rows.events.length, 1)),
     coverageMetric('predictions', 'Predictions', rows.predictions.length, Math.max(rows.events.length, 1)),
@@ -404,17 +459,24 @@ function buildCoverage(rows: AuditRows) {
 function buildIssues(rows: AuditRows, seasonKey: string) {
   const teamIds = new Set(rows.teams.map((row) => row.id))
   const eventIds = new Set(rows.events.map((row) => row.id))
+  const playerIds = new Set(rows.players.map((row) => row.id))
   const standingsTeamIds = new Set(rows.standings.map((row) => row.team_id))
   const nowMs = Date.now()
   const staleMs = 7 * 24 * 60 * 60 * 1000
   const staleOddsMs = 24 * 60 * 60 * 1000
 
   const duplicateTeams = groupBy(rows.teams, (row) => normalize(row.name)).filter((group) => group.rows.length > 1)
+  const duplicatePlayers = groupBy(rows.players, (row) =>
+    [normalize(row.display_name), normalize(row.team_id), normalize(row.position)].join('|')
+  ).filter((group) => group.rows.length > 1)
   const duplicateEvents = groupBy(rows.events, (row) =>
     [normalize(row.home_team), normalize(row.away_team), dateKey(row.start_time)].join('|')
   ).filter((group) => group.rows.length > 1)
   const duplicateStats = groupBy(rows.gameStats, (row) =>
     [row.event_id, row.team_id].join('|')
+  ).filter((group) => group.rows.length > 1)
+  const duplicatePlayerStats = groupBy(rows.playerStats, (row) =>
+    [row.stat_type, row.season, row.event_id ?? 'season', row.team_id ?? 'unresolved_team', row.player_id ?? row.player_name ?? 'unresolved_player'].join('|')
   ).filter((group) => group.rows.length > 1)
   const duplicateOdds = groupBy(rows.odds, (row) =>
     [
@@ -457,6 +519,22 @@ function buildIssues(rows: AuditRows, seasonKey: string) {
       message: 'Teams missing provider IDs',
       rows: rows.teams.filter((row) => !row.provider_ids || Object.keys(row.provider_ids).length === 0),
       recommendation: 'Refresh team provider mappings.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'players',
+      entity: 'sport_players',
+      message: 'Duplicate NBA player identity keys',
+      rows: duplicatePlayers.flatMap((group) => group.rows),
+      recommendation: 'Deduplicate player identity rows by provider player ID before player-stat imports.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'players',
+      entity: 'sport_players',
+      message: 'Players missing team links',
+      rows: rows.players.filter((row) => !row.team_id || (row.team_id && !teamIds.has(row.team_id))),
+      recommendation: 'Refresh roster and team mappings before player-stat or prop readiness work.',
     }),
     issue({
       severity: 'error',
@@ -537,6 +615,66 @@ function buildIssues(rows: AuditRows, seasonKey: string) {
       message: 'Duplicate game stat rows',
       rows: duplicateStats.flatMap((group) => group.rows),
       recommendation: 'Deduplicate stats by sport, event and team.',
+    }),
+    issue({
+      severity: 'info',
+      category: 'player_stats',
+      entity: 'sport_player_stats',
+      message: 'Player stats table unavailable',
+      rows: rows.playerStatsUnavailableReason ? [{ id: 'sport_player_stats_not_available' }] : [],
+      recommendation: 'Apply supabase/migrations/202607130002_sport_player_stats_v1.sql before any player-stat persistence pilot.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'player_stats',
+      entity: 'sport_player_stats',
+      message: 'Duplicate player stat rows',
+      rows: duplicatePlayerStats.flatMap((group) => group.rows),
+      recommendation: 'Deduplicate player stats by stat type, season, event, team and player before feature generation.',
+    }),
+    issue({
+      severity: 'error',
+      category: 'player_stats',
+      entity: 'sport_player_stats',
+      message: 'Player game stats reference missing events',
+      rows: rows.playerStats.filter(
+        (row) => row.stat_type === 'game' && (!row.event_id || !eventIds.has(row.event_id))
+      ),
+      recommendation: 'Persist or resolve event mappings before player game stat imports.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'player_stats',
+      entity: 'sport_player_stats',
+      message: 'Player stat rows have unresolved player links',
+      rows: rows.playerStats.filter((row) => !row.player_id || !playerIds.has(row.player_id)),
+      recommendation: 'Preserve unresolved rows safely, but do not use them for production player features until mapped.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'player_stats',
+      entity: 'sport_player_stats',
+      message: 'Player stat rows have unresolved team links',
+      rows: rows.playerStats.filter((row) => !row.team_id || !teamIds.has(row.team_id)),
+      recommendation: 'Resolve team mappings before using player stats in feature generation.',
+    }),
+    issue({
+      severity: 'warning',
+      category: 'player_stats',
+      entity: 'sport_player_stats',
+      message: 'Player stat rows have season mismatches',
+      rows: rows.playerStats.filter((row) => row.season !== seasonKey),
+      recommendation: 'Filter player-stat features by active season and provider season key.',
+    }),
+    issue({
+      severity: 'error',
+      category: 'player_stats',
+      entity: 'sport_player_stats',
+      message: 'Trial player stats marked production eligible',
+      rows: rows.playerStats.filter(
+        (row) => metadataFlag(row, 'trial') === true && metadataFlag(row, 'production_eligible') !== false
+      ),
+      recommendation: 'Trial player stats must remain production_eligible=false and excluded from confidence lifts.',
     }),
     issue({
       severity: 'warning',
@@ -748,6 +886,7 @@ function buildPlan(rows: AuditRows, issues: DataQualityIssue[], gaps: ReturnType
       events: eventGapDays,
       oddsSnapshots: oddsGapDays,
       providerMappings: issues.filter((item) => item.category === 'mappings').reduce((sum, item) => sum + item.count, 0),
+      playerStats: issues.filter((item) => item.category === 'player_stats').reduce((sum, item) => sum + item.count, 0),
     },
     eventsRequiringScoreReconciliation: eventsRequiringScores.map((event) => ({
       id: event.id,
@@ -782,6 +921,7 @@ function buildPlan(rows: AuditRows, issues: DataQualityIssue[], gaps: ReturnType
       'standings_from_results',
       'game_stats_from_results',
       'odds_by_upcoming_window',
+      'player_stats_after_exact_endpoint_confirmation_and_migration',
       'settlement_after_scores',
       'backtest_after_settlement',
     ],

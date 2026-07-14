@@ -16,6 +16,7 @@ export type ProviderDataType =
   | 'standings'
   | 'team_stats'
   | 'game_stats'
+  | 'player_stats'
   | 'players'
   | 'injuries'
   | 'lineups'
@@ -63,6 +64,7 @@ const DATA_TYPES: ProviderDataType[] = [
   'standings',
   'team_stats',
   'game_stats',
+  'player_stats',
   'players',
   'injuries',
   'lineups',
@@ -80,7 +82,7 @@ const FEATURE_TO_DATA_TYPES: Record<string, ProviderDataType[]> = {
   schedule: ['schedules'],
   event: ['schedules'],
   standings: ['standings'],
-  stats: ['team_stats', 'game_stats'],
+  stats: ['team_stats', 'game_stats', 'player_stats'],
   injuries: ['injuries'],
   lineups: ['lineups'],
   odds: ['odds'],

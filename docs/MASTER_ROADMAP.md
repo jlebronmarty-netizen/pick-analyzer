@@ -166,9 +166,9 @@ Note: The module maps SportsDataIO-style concepts into Provider Adapter SDK cont
 
 Status: Completed execution architecture and deterministic validation.
 
-Evidence: `docs/sportsdataio-historical-import-execution-readiness-v1.md`, `src/services/sportsdataio-runtime-adapter.service.ts`, `src/services/sportsdataio-historical-import-readiness.service.ts`, `/api/providers/sportsdataio/status`, `/api/providers/sportsdataio/capabilities`, `/api/historical-import/execute`, `/api/historical-import/resume`, `/api/historical-import/cancel`, `/api/historical-import/jobs/[jobId]`, `/api/historical-import/pilot-plan`, `/api/historical-import/validate/[jobId]` and `HistoricalImportEnginePanel`.
+Evidence: `docs/sportsdataio-historical-import-execution-readiness-v1.md`, `src/services/sportsdataio-runtime-adapter.service.ts`, `src/services/sportsdataio-historical-import-readiness.service.ts`, `/api/providers/sportsdataio/status`, `/api/providers/sportsdataio/capabilities`, `/api/providers/sportsdataio/execution-readiness/validation`, `/api/historical-import/execute`, `/api/historical-import/resume`, `/api/historical-import/cancel`, `/api/historical-import/jobs/[jobId]`, `/api/historical-import/pilot-plan`, `/api/historical-import/validate/[jobId]` and `HistoricalImportEnginePanel`.
 
-Note: The module prepares server-only SportsDataIO execution architecture with hard caps, dry-run defaults, resume/cancel contracts, validation contracts, pilot planning and dashboard guardrails. The initial 401 on `GamesByDate` was resolved during NBA Pilot Import V1. Completion labels are `EXECUTION_ARCHITECTURE_COMPLETE`, `DETERMINISTIC_VALIDATION_COMPLETE`, `LIVE_PROVIDER_VALIDATION_COMPLETE` and `PILOT_IMPORT_COMPLETE_FOR_APPROVED_TRIAL_SCOPE`.
+Note: The module prepares server-only SportsDataIO execution architecture with hard caps, dry-run defaults, resume/cancel contracts, validation contracts, a zero-call execution-readiness validation API, pilot planning and dashboard guardrails. `HistoricalImportEnginePanel` also displays the execution-readiness validation packet with pass counts, closed guardrail statuses, pre-transport live-shape rejection and the one-to-many counter fixture. The initial 401 on `GamesByDate` was resolved during NBA Pilot Import V1. Completion labels are `EXECUTION_ARCHITECTURE_COMPLETE`, `DETERMINISTIC_VALIDATION_COMPLETE`, `LIVE_PROVIDER_VALIDATION_COMPLETE` and `PILOT_IMPORT_COMPLETE_FOR_APPROVED_TRIAL_SCOPE`.
 
 ### SportsDataIO NBA Pilot Import V1
 
@@ -212,11 +212,87 @@ Note: The successful import execution called `Players` once, fetched 579 trial/s
 
 ### SportsDataIO NBA Depth Charts And Starting Lineups Pilot V1
 
-Status: Live endpoint validation complete; persistence blocked by payload-shape normalization.
+Status: Completed capped live verification and build verified.
 
 Evidence: `docs/sportsdataio-nba-depth-lineups-pilot-v1.md`, `src/services/sportsdataio-historical-import-readiness.service.ts`, `src/services/nba-injury-lineup-confidence.service.ts` and `supabase/migrations/202607130001_sport_lineups_depth_charts_v1.sql`.
 
-Note: The guarded execution path is implemented for `/v3/nba/scores/json/DepthCharts` and `/v3/nba/projections/json/StartingLineupsByDate/2025-DEC-26`, with a maximum of 2 external calls, trial isolation, no prediction persistence, no backtesting and no model training. The `sport_lineups` migration is applied remotely and the service now upserts lineup/depth relationship rows by `sport_lineups.id`. The capped live run returned HTTP 200 for both approved endpoints and fetched 39 trial/scrambled records, but current normalizers produced 0 persistable rows and skipped all 39 records. No lineup/depth rows were inserted, no production confidence improved and provider payload-shape follow-up is required before another live execution.
+Note: The guarded execution path for `/v3/nba/scores/json/DepthCharts` and `/v3/nba/projections/json/StartingLineupsByDate/2025-DEC-26` completed with exactly 2 external calls, trial isolation, no prediction persistence, no backtesting and no model training. The `sport_lineups` migration is applied remotely and the service upserts lineup/depth relationship rows by `sport_lineups.id`. Payload Normalization V1 added sanitized payload-shape summaries, nested player-row flattening, home/away lineup context, position-group depth context and duplicate upsert-batch prevention. The verified rerun persisted 758 `sport_lineups` rows and 758 provider mappings, preserved 54 unresolved player references safely, completed sync job `ae45b0bd-57d9-4f58-9095-0f014781185c`, blocked production confidence leakage and kept trial rows excluded from production predictions. Historical Import Reporting Counter Fix V1 keeps `records_skipped` nonnegative and separately reports provider records, normalized rows, skipped provider records and skipped normalized rows for future one-to-many imports.
+
+### SportsDataIO NBA Player Stats Readiness V1
+
+Status: Completed zero-call readiness and build verified; live pilot blocked pending endpoint confirmation.
+
+Evidence: `docs/sportsdataio-nba-player-stats-readiness-v1.md`, `src/services/sportsdataio-nba-player-stats-readiness.service.ts`, `/api/providers/sportsdataio/nba/player-stats/readiness`, `/api/providers/sportsdataio/nba/player-stats/migration-preflight`, `supabase/migrations/202607130002_sport_player_stats_v1.sql`, `src/services/provider-adapter-sdk.service.ts`, `src/services/sportsdataio-adapter-contract.service.ts` and `src/services/sportsdataio-runtime-adapter.service.ts`.
+
+Note: The module adds the additive `sport_player_stats` persistence contract for player season and player game stat rows, corrects provider metadata so `player_stats` is distinct from roster `players`, validates deterministic fixture normalization with zero provider calls, and returns migration preflight queries plus go/no-go gates through readiness and direct migration-preflight APIs. It does not guess SportsDataIO endpoint paths, does not apply the migration automatically and does not enable production confidence improvement.
+
+### NBA Data Quality Player Stats Expansion V1
+
+Status: Completed zero-call audit expansion and build verified.
+
+Evidence: `docs/nba-data-quality-player-stats-expansion-v1.md`, `src/services/nba-data-quality.service.ts` and existing `/api/nba/data-quality`, `/api/nba/data-quality/issues`, `/api/nba/data-quality/coverage`, `/api/nba/reconciliation/plan` and `/api/nba/reconciliation/status` routes.
+
+Note: The read-only NBA data-quality audit now includes player identity coverage, duplicate player keys, unresolved player-team links, optional `sport_player_stats` coverage, duplicate player-stat natural keys, missing event/team/player references, season mismatches and trial production-eligibility violations. If the additive `sport_player_stats` migration is not applied yet, the audit reports an informational unavailable-table issue instead of failing the whole quality report.
+
+### SportsDataIO NBA Player Props Readiness V1
+
+Status: Completed zero-call readiness and build verified; live prop pilot blocked pending endpoint, market, entitlement and settlement confirmation.
+
+Evidence: `docs/sportsdataio-nba-player-props-readiness-v1.md`, `src/services/sportsdataio-nba-player-props-readiness.service.ts`, `/api/providers/sportsdataio/nba/player-props/readiness`, `/api/providers/sportsdataio/nba/player-props/endpoint-preflight`, `src/services/provider-adapter-sdk.service.ts`, `src/services/sportsdataio-adapter-contract.service.ts`, `src/services/sportsdataio-runtime-adapter.service.ts` and `src/services/historical-import-engine.service.ts`.
+
+Note: The module adds `player_props` to contract/runtime/import-planning readiness and validates a deterministic local over/under prop fixture with zero provider calls. It now returns endpoint and settlement preflight gates through readiness and direct endpoint-preflight APIs. It uses existing `sports_odds_snapshots` as the future persistence target with player/event metadata, creates no migration and keeps production prediction, backtesting, model training and settlement disabled.
+
+### SportsDataIO NBA Odds Readiness V1
+
+Status: Completed zero-call readiness and build verified.
+
+Evidence: `docs/sportsdataio-nba-odds-readiness-v1.md`, `src/services/sportsdataio-nba-odds-readiness.service.ts`, `/api/providers/sportsdataio/nba/odds/readiness`, `/api/providers/sportsdataio/nba/odds/endpoint-preflight` and existing `sports_odds_snapshots` migration `supabase/migrations/202607110001_nba_data_sync_v1.sql`.
+
+Note: The module validates deterministic moneyline, spread and total odds rows for future `sports_odds_snapshots` persistence with zero provider calls and no migration. It now returns endpoint and entitlement preflight gates through readiness and direct endpoint-preflight APIs. Live odds and historical odds execution remain blocked until exact authenticated endpoint paths, entitlement, sportsbook coverage and capped historical windows are approved.
+
+### SportsDataIO NBA Integration Readiness V1
+
+Status: Completed zero-call aggregate readiness and build verified.
+
+Evidence: `docs/sportsdataio-nba-integration-readiness-v1.md`, `src/services/sportsdataio-nba-integration-readiness.service.ts`, `src/components/dashboard/HistoricalImportEnginePanel.tsx`, `/api/providers/sportsdataio/nba/readiness`, `/api/providers/sportsdataio/nba/provider-gate`, `/api/providers/sportsdataio/nba/external-blockers`, `/api/providers/sportsdataio/nba/blocker-resolution`, `/api/providers/sportsdataio/nba/production-gate`, `/api/providers/sportsdataio/nba/production-usage-exclusion`, `/api/providers/sportsdataio/nba/domain-proof`, `/api/providers/sportsdataio/nba/completion-evidence`, `/api/providers/sportsdataio/nba/objective-audit`, `/api/providers/sportsdataio/nba/safe-next-actions`, `/api/providers/sportsdataio/nba/evidence-export`, `/api/providers/sportsdataio/nba/next-pilot-preflight`, `/api/providers/sportsdataio/nba/approval-packet`, `/api/providers/sportsdataio/nba/completion-audit`, `/api/providers/sportsdataio/nba/contract-audit`, runtime capabilities/status routes and NBA odds/player-props/player-stats readiness services including `/api/providers/sportsdataio/nba/odds/endpoint-preflight`, `/api/providers/sportsdataio/nba/player-props/endpoint-preflight` and `/api/providers/sportsdataio/nba/player-stats/migration-preflight`.
+
+Note: The module aggregates local runtime validation, capability metadata and NBA readiness services into one blocker and safety-invariant report. `/api/providers/sportsdataio/nba/readiness` is the canonical readiness surface for new consumers. Focused domain-proof, completion-evidence, objective-audit and safe-next-actions routes remain compatibility aliases that preserve their response contracts while identifying the canonical readiness section; odds/player-props endpoint preflights and player-stats migration preflight remain operational aliases for focused approval checks. The aggregate response now carries next-pilot preflight summaries so the Historical Import dashboard can render one Readiness Summary and next-pilot gates without fetching duplicate domain readiness endpoints. It still includes the handoff matrix, production gates, safe next actions, objective completion audit, external blocker ledger and route, validated readiness evidence export and route, production gate audit, provider execution gate and route, external blocker resolution checklist, production usage exclusion audit and route, next-pilot approval checklist, next-pilot preflight route, external approval packet, blocked-state audit, contract-audit route, domain completion proof ledger, completion evidence matrix, response-shape audit and surface consistency audit. It makes zero provider calls, exposes no secrets and reports the integration as ready with external blockers rather than production-ready for uncapped provider execution.
+
+Blocker Resolution API V1 adds `/api/providers/sportsdataio/nba/blocker-resolution` as the direct zero-call route for the external blocker resolution checklist. Historical Import and Runtime Observability now display the resolution route, and surface consistency requires the blocker-resolution route across operator surfaces.
+
+Production Gate API V1 adds `/api/providers/sportsdataio/nba/production-gate` as the direct zero-call route for the production gate audit. Historical Import and Runtime Observability now display the production gate route, and surface consistency requires the production-gate route across operator surfaces.
+
+Domain Proof API V1 adds `/api/providers/sportsdataio/nba/domain-proof` as the direct zero-call route for the domain completion proof ledger. Historical Import and Runtime Observability now display the domain proof route, and surface consistency requires the domain-proof route across operator surfaces.
+
+Completion Evidence API V1 adds `/api/providers/sportsdataio/nba/completion-evidence` as the direct zero-call route for the completion evidence matrix. Historical Import and Runtime Observability now display the completion evidence route, and surface consistency requires the completion-evidence route across operator surfaces.
+
+Objective Audit API V1 adds `/api/providers/sportsdataio/nba/objective-audit` as the direct zero-call route for objective-level remaining work and completion blockers. Historical Import and Runtime Observability now display the objective audit route, and surface consistency requires the objective-audit route across operator surfaces.
+
+Safe Next Actions API V1 adds `/api/providers/sportsdataio/nba/safe-next-actions` as the direct zero-call route for allowed local next actions and still-closed production gates. Historical Import and Runtime Observability now display the safe-next-actions route, and surface consistency requires the route across operator surfaces.
+
+### NBA Stored Lineup Feature Enrichment V1
+
+Status: Completed zero-call feature enrichment and build verified.
+
+Evidence: `src/services/nba-feature-store-integration.service.ts`, `src/services/nba-injury-lineup-confidence.service.ts`, `docs/PROJECT_STATUS.md` and existing NBA feature preview/validation APIs.
+
+Note: The NBA Feature Store preview now uses stored `sport_lineups` sample size, freshness and provenance when lineup/depth rows exist. Trial/scrambled lineup rows remain excluded from production confidence improvement and continue to apply conservative confidence penalties.
+
+### SportsDataIO NBA Trial Isolation Audit V1
+
+Status: Completed read-only audit surface and build verified.
+
+Evidence: `docs/sportsdataio-nba-trial-isolation-audit-v1.md`, `src/services/sportsdataio-nba-trial-isolation-audit.service.ts`, `/api/providers/sportsdataio/nba/trial-isolation` and `prediction_history` trial leakage checks.
+
+Note: The audit scans stored SportsDataIO NBA rows for trial/scrambled metadata and `production_eligible=false`, tolerates optional `sport_player_stats` absence and checks that NBA prediction rows do not reference SportsDataIO trial events or carry trial feature markers.
+
+### SportsDataIO NBA Observability Integration V1
+
+Status: Completed zero-call runtime and dashboard observability extension; build verified.
+
+Evidence: `docs/sportsdataio-nba-observability-integration-v1.md`, `src/services/runtime-observability.service.ts`, `src/components/dashboard/RuntimeObservabilityPanel.tsx`, `/api/observability/runtime`, `src/services/sportsdataio-nba-integration-readiness.service.ts` and `src/services/sportsdataio-nba-trial-isolation-audit.service.ts`.
+
+Note: Runtime Observability V1 now exposes and displays a nested SportsDataIO NBA section with readiness blockers, external blocker ledger summaries and blocker route, readiness evidence export validation and route, production gate audit status, provider execution gate status and route, external blocker resolution checklist status, execution-readiness validation status, production usage exclusion audit status and route, next-pilot approval checklist status and preflight route, external approval packet status, blocked-state audit status, domain completion proof ledger status, completion evidence matrix status, response-shape audit status and contract route, surface consistency audit status and contract route, readiness-area summaries, trial-isolation totals, prediction leakage counts and safety invariants. The ledger summary preserves zero pre-approval provider calls and closed production gate visibility from the aggregate readiness endpoint, and the blocker route, evidence export validation/route, production gate audit, provider execution gate route, external blocker resolution checklist, execution-readiness validation, production usage exclusion route, next-pilot approval checklist/preflight route, external approval packet, blocked-state audit, domain completion proof ledger, completion evidence matrix, response-shape audit plus surface consistency audit give runtime observability consumer checks for the handoff packet. The extension makes zero provider calls, adds no migration and performs no mutations.
 
 ### Feature Store Core V1
 
