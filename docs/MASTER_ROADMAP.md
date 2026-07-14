@@ -220,11 +220,19 @@ Note: The guarded execution path for `/v3/nba/scores/json/DepthCharts` and `/v3/
 
 ### SportsDataIO NBA Player Stats Readiness V1
 
-Status: Completed zero-call readiness and build verified; live pilot blocked pending endpoint confirmation.
+Status: Completed readiness and build verified; capped live pilot completed.
 
 Evidence: `docs/sportsdataio-nba-player-stats-readiness-v1.md`, `src/services/sportsdataio-nba-player-stats-readiness.service.ts`, `/api/providers/sportsdataio/nba/player-stats/readiness`, `/api/providers/sportsdataio/nba/player-stats/migration-preflight`, `supabase/migrations/202607130002_sport_player_stats_v1.sql`, `src/services/provider-adapter-sdk.service.ts`, `src/services/sportsdataio-adapter-contract.service.ts` and `src/services/sportsdataio-runtime-adapter.service.ts`.
 
-Note: The module adds the additive `sport_player_stats` persistence contract for player season and player game stat rows, corrects provider metadata so `player_stats` is distinct from roster `players`, validates deterministic fixture normalization with zero provider calls, and returns migration preflight queries plus go/no-go gates through readiness and direct migration-preflight APIs. It does not guess SportsDataIO endpoint paths, does not apply the migration automatically and does not enable production confidence improvement.
+Note: The module adds the additive `sport_player_stats` persistence contract for player season and player game stat rows, corrects provider metadata so `player_stats` is distinct from roster `players`, validates deterministic fixture normalization and returns migration preflight queries plus go/no-go gates through readiness and direct migration-preflight APIs. The confirmed paths are `/v3/nba/stats/json/PlayerSeasonStats/{season}` and `/v3/nba/stats/json/PlayerGameStatsByDate/{date}`. It does not enable production confidence improvement.
+
+### SportsDataIO NBA Player Stats Pilot V1
+
+Status: Completed capped live trial import and build verified.
+
+Evidence: `docs/sportsdataio-nba-player-stats-pilot-v1.md`, `src/services/sportsdataio-historical-import-readiness.service.ts`, `src/services/sportsdataio-nba-player-stats-readiness.service.ts`, `src/services/sportsdataio-nba-trial-isolation-audit.service.ts`, `/api/historical-import/execute`, `/api/nba/data-quality`, `/api/nba/features/preview`, `/api/nba/features/validation` and `supabase/migrations/202607130002_sport_player_stats_v1.sql`.
+
+Note: The approved pilot called `PlayerSeasonStats/2026` and `PlayerGameStatsByDate/2025-12-26` sequentially with no retry and exactly 2 provider calls. It persisted 918 trial-isolated `sport_player_stats` rows, including 602 season rows and 316 game rows, plus 918 provider mappings. It preserved 203 unresolved player mappings safely, found zero unresolved teams/events, zero duplicate row IDs, zero duplicate mapping keys, zero trial-isolation violations and zero production leakage. Sync job `777f9ac7-efeb-4396-a007-259557dfdcf8` is completed after a local post-persistence audit compatibility fix; no provider retry was made.
 
 ### NBA Data Quality Player Stats Expansion V1
 

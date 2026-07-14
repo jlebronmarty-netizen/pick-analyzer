@@ -1,18 +1,20 @@
 # SportsDataIO NBA Player Stats Readiness V1
 
-Last updated: 2026-07-13 21:45:11 -04:00
+Last updated: 2026-07-13 22:38:25 -04:00
 
 ## Scope
 
-This module prepares NBA player season stats and player game stats for a future capped SportsDataIO pilot without making provider calls or guessing endpoint paths.
+This module prepared NBA player season stats and player game stats for the capped SportsDataIO NBA Player Stats Pilot V1 without guessing endpoint paths.
 
-Status: readiness complete, live pilot blocked pending exact authenticated endpoint confirmation.
+Status: readiness complete, endpoint paths confirmed, capped trial pilot complete.
 
 ## Provider Call Policy
 
-- External provider calls used: 0.
-- No SportsDataIO endpoint was called.
-- Exact endpoint paths are not present in the repository contract metadata, so live execution remains blocked.
+- Readiness phase external provider calls used: 0.
+- Pilot phase external provider calls used: 2.
+- Confirmed endpoints:
+  - `GET /v3/nba/stats/json/PlayerSeasonStats/2026`
+  - `GET /v3/nba/stats/json/PlayerGameStatsByDate/2025-12-26`
 - No secrets were read, printed, stored or documented.
 
 ## Persistence
@@ -33,7 +35,7 @@ The migration creates `sport_player_stats` with:
 - raw stat metadata
 - trial/scrambled/production eligibility metadata
 
-The migration was not applied automatically.
+The migration was later applied remotely with explicit approval and verified by the pilot persistence path.
 
 ## Migration Preflight
 
@@ -86,12 +88,12 @@ The API returns:
 - natural keys
 - conflict targets
 - dependency order
-- blocked endpoint-readiness status
+- confirmed endpoint-readiness status
 - deterministic normalized fixture rows
 - trial isolation checks
 - production confidence blocking
 
-The migration-preflight API returns the migration block directly with expected columns/indexes, verification SQL, persistence targets, endpoint blockers and validation status. It does not apply the migration automatically.
+The migration-preflight API returns the migration block directly with expected columns/indexes, verification SQL, persistence targets, endpoint gates and validation status. It does not apply the migration automatically.
 
 ## Contract Updates
 
@@ -123,6 +125,20 @@ Validation confirms:
 - trial isolation remains `trial=true`, `scrambled=true`, `production_eligible=false`
 - production confidence cannot improve from fixture/trial rows
 
-## Remaining Blocker
+## Pilot Result
 
-Exact SportsDataIO NBA player season stats and player game stats endpoint paths must be confirmed from authenticated provider documentation or existing verified contract metadata before any live call or persistence pilot.
+SportsDataIO NBA Player Stats Pilot V1 completed the approved capped trial scope:
+
+- 602 season rows fetched from `PlayerSeasonStats/2026`
+- 316 game rows fetched from `PlayerGameStatsByDate/2025-12-26`
+- 918 `sport_player_stats` rows persisted
+- 918 provider mappings persisted
+- 203 unresolved player references preserved safely
+- 0 unresolved teams
+- 0 unresolved events
+- 0 duplicate row IDs
+- 0 duplicate provider mapping keys
+- 0 trial-isolation violations
+- 0 production leakage findings
+
+Production use remains blocked until real-data validation, quota/date-window approval and confidence rules are approved for non-trial data.

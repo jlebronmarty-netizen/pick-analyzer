@@ -13,7 +13,7 @@ Completion labels:
 
 SportsDataIO Historical Import Execution Readiness V1 prepared the project for capped SportsDataIO historical import execution with strict dry-run defaults and live-execution guardrails.
 
-The module is not Historical Reconciliation Phase B. The only live import currently approved and completed is NBA Pilot Import V1 for the trial/scrambled `2025-DEC-25` NBA date.
+The module is not Historical Reconciliation Phase B. Approved completed live imports are limited to narrow trial/scrambled NBA pilots, including teams/events, V2 team/game stats, injuries, players, depth/lineups and Player Stats Pilot V1.
 
 ## Implementation
 
@@ -37,7 +37,7 @@ APIs:
 
 Execution defaults to `dryRun=true` and `maximumRequests=0`.
 
-Non-dry-run requests are rejected unless they exactly match the approved capped NBA pilot shape:
+Non-dry-run requests are rejected unless they exactly match an approved capped NBA pilot shape:
 
 - `confirmed=true`
 - `provider=sportsdataio`
@@ -54,7 +54,7 @@ For SportsDataIO NBA requests, non-dry-run validation also reads the aggregate N
 - `externalBlockerResolutionChecklist`
 - `productionUsageExclusionAudit`
 
-While external blockers remain open, the execution planner returns all three summaries in `guardrails`, reports `providerCallsAllowedNow=0` and `providerCallsAllowedBeforeResolution=0`, confirms prediction persistence/backtesting/model training/confidence lift remain disabled for trial-only rows, and rejects the request before dispatching a provider call.
+While external blockers remain open, the execution planner returns all three summaries in `guardrails`, reports `providerCallsAllowedNow=0` and `providerCallsAllowedBeforeResolution=0`, and confirms prediction persistence/backtesting/model training/confidence lift remain disabled for trial-only rows. Explicitly approved capped pilots may pass only when their exact shape, request cap, sequential execution, trial isolation and non-production constraints match the allowlist.
 
 ## Supported Import Domains
 
@@ -85,7 +85,7 @@ No provider-specific payload dependency is introduced into sport engines.
 
 ## Persistence Plan
 
-Readiness V1 uses existing persistence targets only:
+Readiness V1 uses existing persistence targets plus additive pilot tables that have been explicitly approved:
 
 - `sports_teams`
 - `sport_events`
@@ -93,11 +93,24 @@ Readiness V1 uses existing persistence targets only:
 - `sport_game_stats`
 - `sport_players`
 - `sport_injuries`
+- `sport_lineups`
+- `sport_player_stats`
 - `sports_odds_snapshots`
 - `provider_entity_mappings`
 - `sports_sync_jobs`
 
-No migration is required for V1. NBA Pilot Import V1 writes job metadata into `sports_sync_jobs` using existing fields.
+`sport_lineups` and `sport_player_stats` were introduced by additive migrations and applied manually before their live trial pilots. SportsDataIO NBA Player Stats Pilot V1 writes player season/game stat rows to `sport_player_stats` and job metadata into `sports_sync_jobs`.
+
+## Player Stats Pilot V1
+
+SportsDataIO NBA Player Stats Pilot V1 used:
+
+- `GET /v3/nba/stats/json/PlayerSeasonStats/2026`
+- `GET /v3/nba/stats/json/PlayerGameStatsByDate/2025-12-26`
+
+The run used exactly 2 sequential provider calls, no automatic retry, `trial=true`, `scrambled=true` and `production_eligible=false`. It persisted 918 `sport_player_stats` rows, including 602 season stat rows and 316 game stat rows, plus 918 `provider_entity_mappings` rows. It preserved 203 unresolved player mappings with null `player_id`, resolved teams/events, found zero duplicate row IDs and zero duplicate mapping keys, and kept trial rows excluded from prediction persistence, backtesting, calibration, model training and production confidence improvement.
+
+The initial sync job failed after persistence because a post-persistence trial-isolation audit selected `sport_game_stats.metadata`, while the deployed table stores trial metadata in `sport_game_stats.stats`. The audit now reads that existing JSON column. Sync job `777f9ac7-efeb-4396-a007-259557dfdcf8` was completed from local persisted-row validation without another provider call.
 
 ## Deterministic Validation
 

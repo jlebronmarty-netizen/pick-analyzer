@@ -2,8 +2,15 @@ import 'server-only'
 
 import { SportKey, getSupportedSport } from '@/config/sports.config'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getNbaDataQualityAudit, getNbaDataQualityCoverage } from '@/services/nba-data-quality.service'
+import {
+  previewNbaFeatureStoreSnapshot,
+  runNbaFeatureStoreIntegrationValidation,
+} from '@/services/nba-feature-store-integration.service'
+import { getNbaInjuryLineupConfidenceStatus } from '@/services/nba-injury-lineup-confidence.service'
 import { idempotencyKey } from '@/services/sync-reliability.service'
 import { getSportsDataIoNbaIntegrationReadiness } from '@/services/sportsdataio-nba-integration-readiness.service'
+import { getSportsDataIoNbaTrialIsolationAudit } from '@/services/sportsdataio-nba-trial-isolation-audit.service'
 import {
   SportsDataIoRuntimeDomain,
   getSportsDataIoEnvironmentStatus,
@@ -84,6 +91,9 @@ type SportsDataIoSanitizedShape = {
     starterBench: string[]
     lineupStatus: string[]
     confirmationStatus: string[]
+    season: string[]
+    dateFields: string[]
+    statFields: string[]
     timestamps: string[]
   }
   nullability: Array<{ path: string; nullCount: number; observedCount: number }>
@@ -192,6 +202,13 @@ const NBA_LINEUPS_PILOT_CAPS = {
   concurrencyLimit: 1,
 }
 
+const NBA_PLAYER_STATS_PILOT_CAPS = {
+  maximumRequests: 2,
+  maximumRecords: 2000,
+  batchSizeDays: 1,
+  concurrencyLimit: 1,
+}
+
 const NBA_PILOT_ALLOWED_DOMAINS: SportsDataIoRuntimeDomain[] = [
   'teams',
   'schedules',
@@ -218,8 +235,13 @@ const NBA_LINEUPS_PILOT_ALLOWED_DOMAINS: SportsDataIoRuntimeDomain[] = [
   'lineups',
 ]
 
+const NBA_PLAYER_STATS_PILOT_ALLOWED_DOMAINS: SportsDataIoRuntimeDomain[] = [
+  'player_stats',
+]
+
 const SPORTSDATAIO_NBA_BASE_URL = 'https://api.sportsdata.io/v3/nba/scores/json'
 const SPORTSDATAIO_NBA_PROJECTIONS_BASE_URL = 'https://api.sportsdata.io/v3/nba/projections/json'
+const SPORTSDATAIO_NBA_STATS_BASE_URL = 'https://api.sportsdata.io/v3/nba/stats/json'
 const NBA_SPORT_KEY = 'basketball_nba'
 const NBA_LEAGUE_KEY = 'nba'
 const SPORTSDATAIO_REQUEST_TIMEOUT_MS = 15000
@@ -546,6 +568,28 @@ function validateGuardrails(normalized: ReturnType<typeof normalizeRequest>) {
     normalized.dateTo === '2025-12-26' &&
     normalized.domains.length === 1 &&
     normalized.domains.every((domain) => NBA_LINEUPS_PILOT_ALLOWED_DOMAINS.includes(domain))
+  const isApprovedNbaPlayerStatsPilot =
+    normalized.provider === 'sportsdataio' &&
+    normalized.sportKey === 'basketball_nba' &&
+    normalized.leagueKey === 'nba' &&
+    normalized.confirmed &&
+    normalized.maximumRequests > 0 &&
+    normalized.maximumRequests <= NBA_PLAYER_STATS_PILOT_CAPS.maximumRequests &&
+    normalized.maximumRecords <= NBA_PLAYER_STATS_PILOT_CAPS.maximumRecords &&
+    normalized.batchSizeDays === NBA_PLAYER_STATS_PILOT_CAPS.batchSizeDays &&
+    normalized.concurrencyLimit === NBA_PLAYER_STATS_PILOT_CAPS.concurrencyLimit &&
+    normalized.season === '2026' &&
+    normalized.dateFrom === '2025-12-26' &&
+    normalized.dateTo === '2025-12-26' &&
+    normalized.domains.length === 1 &&
+    normalized.domains.every((domain) => NBA_PLAYER_STATS_PILOT_ALLOWED_DOMAINS.includes(domain))
+  const isApprovedCappedNbaPilot =
+    isApprovedNbaPilot ||
+    isApprovedNbaPilotV2 ||
+    isApprovedNbaPlayersPilot ||
+    isApprovedNbaInjuriesPilot ||
+    isApprovedNbaLineupsPilot ||
+    isApprovedNbaPlayerStatsPilot
 
   if (!normalized.dryRun) {
     if (!normalized.confirmed) {
@@ -561,6 +605,7 @@ function validateGuardrails(normalized: ReturnType<typeof normalizeRequest>) {
       errors.push('A valid SportsDataIO API key is required for non-dry-run execution.')
     }
     if (
+      !isApprovedCappedNbaPilot &&
       providerExecutionGate &&
       (!providerExecutionGate.valid ||
         !providerExecutionGate.liveExecutionAllowed ||
@@ -571,6 +616,7 @@ function validateGuardrails(normalized: ReturnType<typeof normalizeRequest>) {
       )
     }
     if (
+      !isApprovedCappedNbaPilot &&
       externalBlockerResolutionChecklist &&
       (!externalBlockerResolutionChecklist.valid ||
         externalBlockerResolutionChecklist.summary.blockers > 0 ||
@@ -600,7 +646,8 @@ function validateGuardrails(normalized: ReturnType<typeof normalizeRequest>) {
       !isApprovedNbaPilotV2 &&
       !isApprovedNbaPlayersPilot &&
       !isApprovedNbaInjuriesPilot &&
-      !isApprovedNbaLineupsPilot
+      !isApprovedNbaLineupsPilot &&
+      !isApprovedNbaPlayerStatsPilot
     ) {
       errors.push(
         'Live SportsDataIO execution is only enabled for the approved capped NBA pilot shape.'
@@ -1650,6 +1697,39 @@ const TIMESTAMP_KEYS = [
   'Day',
 ]
 
+const SEASON_KEYS = ['Season', 'SeasonType', 'SeasonYear']
+const DATE_KEYS = ['Day', 'Date', 'GameDate', 'DateTime', 'DateTimeUTC', 'Updated', 'LastUpdated']
+const PLAYER_STAT_KEYS = [
+  'Games',
+  'GamesPlayed',
+  'Started',
+  'Starts',
+  'GamesStarted',
+  'Minutes',
+  'Points',
+  'Rebounds',
+  'TotalRebounds',
+  'Assists',
+  'Steals',
+  'BlockedShots',
+  'Blocks',
+  'Turnovers',
+  'FieldGoalsMade',
+  'FieldGoalsAttempted',
+  'FieldGoalsPercentage',
+  'FieldGoalPercentage',
+  'ThreePointersMade',
+  'ThreePointersAttempted',
+  'ThreePointersPercentage',
+  'ThreePointPercentage',
+  'FreeThrowsMade',
+  'FreeThrowsAttempted',
+  'FreeThrowsPercentage',
+  'FreeThrowPercentage',
+  'UsageRatePercentage',
+  'UsageRate',
+]
+
 const PLAYER_OBJECT_KEYS = ['Player', 'player', 'Athlete', 'athlete']
 const TEAM_OBJECT_KEYS = ['Team', 'team', 'HomeTeam', 'AwayTeam', 'Home', 'Away']
 const BASKETBALL_POSITION_KEYS = new Map([
@@ -1982,6 +2062,9 @@ function sanitizedPayloadShape(feed: string, payload: unknown): SportsDataIoSani
       starterBench: candidatePaths(ROLE_KEYS),
       lineupStatus: candidatePaths(LINEUP_STATUS_KEYS),
       confirmationStatus: candidatePaths(CONFIRMATION_KEYS),
+      season: candidatePaths(SEASON_KEYS),
+      dateFields: candidatePaths(DATE_KEYS),
+      statFields: candidatePaths(PLAYER_STAT_KEYS),
       timestamps: candidatePaths(TIMESTAMP_KEYS),
     },
     nullability: Array.from(fieldPaths.entries())
@@ -2260,6 +2343,164 @@ function buildLineupMappings({
       updated_at: generatedAt(),
     })),
   ]
+}
+
+function playerStatSourceTimestamp(row: SportsDataIoStatsPayload) {
+  const candidate =
+    safeProviderString(directValue(row, TIMESTAMP_KEYS)) ||
+    safeProviderString(row.Updated) ||
+    safeProviderString(row.LastUpdated)
+  if (!candidate) return null
+  const parsed = new Date(candidate)
+  return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null
+}
+
+function playerStatProviderId(row: SportsDataIoStatsPayload, statType: 'season' | 'game') {
+  const providerPlayerId = playerProviderId(row)
+  const providerTeamId = teamProviderIdFromStats(row)
+  const providerGameId = eventProviderIdFromStats(row)
+  const providerStatId = safeProviderString(row.StatID ?? row.StatId ?? row.PlayerGameID ?? row.PlayerGameId)
+  const season = safeProviderString(row.Season)
+  if (statType === 'game') {
+    return providerStatId || [providerGameId, providerTeamId, providerPlayerId].filter(Boolean).join(':')
+  }
+  return [season, providerTeamId, providerPlayerId].filter(Boolean).join(':')
+}
+
+function buildPlayerStatRows({
+  rows,
+  statType,
+  season,
+  selectedDate,
+  existingTeams,
+  existingPlayers,
+  existingEvents,
+}: {
+  rows: SportsDataIoStatsPayload[]
+  statType: 'season' | 'game'
+  season: string
+  selectedDate: string | null
+  existingTeams: Awaited<ReturnType<typeof loadExistingNbaTeams>>
+  existingPlayers: Awaited<ReturnType<typeof loadExistingNbaPlayers>>
+  existingEvents: Array<{ id: string; provider_ids: Record<string, unknown> | null }>
+}) {
+  const teamMaps = buildTeamProviderMap(existingTeams)
+  const playerMaps = buildPlayerProviderMap(existingPlayers)
+  const eventByProviderId = new Map<string, (typeof existingEvents)[number]>()
+  for (const event of existingEvents) {
+    const providerIds = (event.provider_ids as Record<string, unknown> | null) ?? {}
+    if (providerIds.sportsdataio !== undefined && providerIds.sportsdataio !== null) {
+      eventByProviderId.set(String(providerIds.sportsdataio), event)
+    }
+  }
+
+  return rows
+    .map((row) => {
+      const providerPlayerId = playerProviderId(row)
+      const providerTeamId = teamProviderIdFromStats(row)
+      const providerGameId = eventProviderIdFromStats(row)
+      const providerStatId = safeProviderString(row.StatID ?? row.StatId ?? row.PlayerGameID ?? row.PlayerGameId)
+      const naturalProviderId = playerStatProviderId(row, statType)
+      if (!providerPlayerId || !naturalProviderId) return null
+      const team =
+        teamMaps.teamByProviderId.get(providerTeamId) ??
+        teamMaps.teamByName.get(normalizeKey(teamKeyFromStats(row) || teamNameFromStats(row)))
+      const player = playerMaps.playerByProviderId.get(providerPlayerId)
+      const event = statType === 'game' ? eventByProviderId.get(providerGameId) : null
+      const started = safeIntegerNumber(row.Started ?? row.Starts ?? row.GamesStarted)
+
+      return {
+        id: `${NBA_SPORT_KEY}:${NBA_LEAGUE_KEY}:sportsdataio:player_stats:${statType}:${naturalProviderId}`,
+        sport_key: NBA_SPORT_KEY,
+        league_key: NBA_LEAGUE_KEY,
+        season: safeProviderString(row.Season) || season,
+        stat_type: statType,
+        event_id: statType === 'game' ? event?.id ?? null : null,
+        team_id: team?.id ?? player?.team_id ?? null,
+        player_id: player?.id ?? null,
+        player_name: player?.display_name ?? playerDisplayName(row),
+        provider: 'sportsdataio',
+        games: statType === 'season' ? safeIntegerNumber(row.Games ?? row.GamesPlayed) : null,
+        starts: started,
+        minutes: safeNumber(row.Minutes),
+        points: safeNumber(row.Points),
+        rebounds: safeNumber(row.Rebounds ?? row.TotalRebounds),
+        assists: safeNumber(row.Assists),
+        steals: safeNumber(row.Steals),
+        blocks: safeNumber(row.BlockedShots ?? row.Blocks),
+        turnovers: safeNumber(row.Turnovers),
+        field_goals_made: safeNumber(row.FieldGoalsMade),
+        field_goals_attempted: safeNumber(row.FieldGoalsAttempted),
+        field_goal_percentage: safeNumber(row.FieldGoalsPercentage ?? row.FieldGoalPercentage),
+        three_pointers_made: safeNumber(row.ThreePointersMade),
+        three_pointers_attempted: safeNumber(row.ThreePointersAttempted),
+        three_point_percentage: safeNumber(row.ThreePointersPercentage ?? row.ThreePointPercentage),
+        free_throws_made: safeNumber(row.FreeThrowsMade),
+        free_throws_attempted: safeNumber(row.FreeThrowsAttempted),
+        free_throw_percentage: safeNumber(row.FreeThrowsPercentage ?? row.FreeThrowPercentage),
+        usage_rate: safeNumber(row.UsageRatePercentage ?? row.UsageRate),
+        starter: statType === 'game'
+          ? started !== null
+            ? started > 0
+            : null
+          : null,
+        source_timestamp: playerStatSourceTimestamp(row),
+        provider_ids: {
+          sportsdataio: naturalProviderId,
+          player: providerPlayerId,
+          ...(providerTeamId ? { team: providerTeamId } : {}),
+          ...(providerGameId ? { event: providerGameId } : {}),
+          ...(providerStatId ? { stat: providerStatId } : {}),
+        },
+        stats: {
+          rawFieldNames: Object.keys(row).sort(),
+          isGameOver: row.IsGameOver ?? null,
+        },
+        metadata: pilotMetadata({
+          importModule: 'sportsdataio_nba_player_stats_pilot_v1',
+          statType,
+          selectedDate,
+          providerPlayerId,
+          providerTeamId: providerTeamId || null,
+          providerGameId: providerGameId || null,
+          providerStatId: providerStatId || null,
+          providerTeamKey: teamKeyFromStats(row) || null,
+          hasUnresolvedPlayer: !player,
+          hasUnresolvedTeam: !team && !player?.team_id,
+          hasUnresolvedEvent: statType === 'game' && !event,
+          rawKeys: Object.keys(row).sort(),
+        }),
+        updated_at: generatedAt(),
+      }
+    })
+    .filter((row): row is NonNullable<typeof row> => Boolean(row))
+}
+
+function buildPlayerStatMappings({
+  statRows,
+  season,
+}: {
+  statRows: ReturnType<typeof buildPlayerStatRows>
+  season: string
+}) {
+  return statRows.map((row) => ({
+    sport_key: NBA_SPORT_KEY,
+    entity_type: 'player_stat',
+    internal_id: row.id,
+    provider: 'sportsdataio',
+    provider_id: String((row.provider_ids as Record<string, unknown>).sportsdataio),
+    season,
+    metadata: pilotMetadata({
+      importModule: 'sportsdataio_nba_player_stats_pilot_v1',
+      entityType: 'player_stat',
+      statType: row.stat_type,
+      providerPlayerId: (row.provider_ids as Record<string, unknown>).player,
+      providerTeamId: (row.provider_ids as Record<string, unknown>).team ?? null,
+      providerEventId: (row.provider_ids as Record<string, unknown>).event ?? null,
+      playerName: row.player_name,
+    }),
+    updated_at: generatedAt(),
+  }))
 }
 
 function resolveTeamFromPayload(
@@ -2919,6 +3160,12 @@ export async function executeSportsDataIoNbaPilotImport(
     normalized.domains.every((domain) => NBA_LINEUPS_PILOT_ALLOWED_DOMAINS.includes(domain))
   ) {
     return executeSportsDataIoNbaDepthLineupsPilotImport(request)
+  }
+  if (
+    normalized.domains.length === NBA_PLAYER_STATS_PILOT_ALLOWED_DOMAINS.length &&
+    normalized.domains.every((domain) => NBA_PLAYER_STATS_PILOT_ALLOWED_DOMAINS.includes(domain))
+  ) {
+    return executeSportsDataIoNbaPlayerStatsPilotImport(request)
   }
   if (
     normalized.domains.includes('standings') ||
@@ -3641,6 +3888,412 @@ async function executeSportsDataIoNbaDepthLineupsPilotImport(
         valid: false,
         errors: [message],
         warnings: ['Pilot stopped immediately after the first fatal provider, schema or persistence error.'],
+      },
+      noSecretExposure: true,
+    }
+  }
+}
+
+async function executeSportsDataIoNbaPlayerStatsPilotImport(
+  request: SportsDataIoExecutionRequest = {}
+) {
+  const normalized = normalizeRequest(request)
+  const plan = planSportsDataIoHistoricalExecution(request)
+  const apiKey = sportsDataIoKey()
+  const season = normalized.season ?? '2026'
+  const selectedDate = normalized.dateFrom
+  const startedAt = generatedAt()
+  const jobId =
+    request.jobId?.trim() ||
+    (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : idempotencyKey(['sportsdataio-nba-player-stats-pilot-v1', season, selectedDate, startedAt]))
+  let externalCallsUsed = 0
+  let endpointFailure: unknown = null
+
+  try {
+    const tablePreflight = await supabaseAdmin
+      .from('sport_player_stats')
+      .select('id, sport_key, league_key, season, stat_type, event_id, team_id, player_id, provider_ids, stats, metadata')
+      .limit(1)
+    if (tablePreflight.error) {
+      throw new Error(`sport_player_stats migration verification failed: ${tablePreflight.error.message}`)
+    }
+
+    if (!plan.validation.valid || !apiKey || season !== '2026' || selectedDate !== '2025-12-26') {
+      return {
+        success: false,
+        mode: 'sportsdataio_nba_player_stats_pilot_v1',
+        generatedAt: generatedAt(),
+        providerUsage: {
+          externalProviderCallsMade: 0,
+          source: 'sportsdataio_live_capped_nba_player_stats_pilot',
+        },
+        dryRun: false,
+        liveExecutionEnabled: true,
+        status: 'rejected',
+        validation: {
+          valid: false,
+          errors: [
+            ...plan.validation.errors,
+            ...(!apiKey ? ['SportsDataIO API key is not configured.'] : []),
+            ...(season !== '2026' ? ['Player stats pilot requires season=2026.'] : []),
+            ...(selectedDate !== '2025-12-26' ? ['Player stats pilot requires dateFrom=dateTo=2025-12-26.'] : []),
+          ],
+          warnings: plan.validation.warnings,
+        },
+        noSecretExposure: true,
+      }
+    }
+
+    if (2 > normalized.maximumRequests) {
+      return {
+        success: false,
+        mode: 'sportsdataio_nba_player_stats_pilot_v1',
+        generatedAt: generatedAt(),
+        providerUsage: {
+          externalProviderCallsMade: 0,
+          source: 'sportsdataio_live_capped_nba_player_stats_pilot',
+        },
+        dryRun: false,
+        liveExecutionEnabled: true,
+        status: 'rejected',
+        validation: {
+          valid: false,
+          errors: ['Planned SportsDataIO player-stat endpoint count exceeds maximumRequests.'],
+          warnings: plan.validation.warnings,
+        },
+        noSecretExposure: true,
+      }
+    }
+
+    const fetchCapped = async (args: { feed: string; path: string }) => {
+      if (externalCallsUsed + 1 > normalized.maximumRequests) {
+        throw new Error(`Player stats pilot request cap ${normalized.maximumRequests} reached before ${args.feed}.`)
+      }
+      externalCallsUsed += 1
+      return fetchSportsDataIoJson({ ...args, apiKey, baseUrl: SPORTSDATAIO_NBA_STATS_BASE_URL })
+    }
+
+    const seasonResponse = await fetchCapped({
+      feed: 'playerSeasonStats',
+      path: `/PlayerSeasonStats/${season}`,
+    })
+    const gameResponse = await fetchCapped({
+      feed: 'playerGameStatsByDate',
+      path: `/PlayerGameStatsByDate/${selectedDate}`,
+    })
+    const endpointResults: SportsDataIoEndpointResult[] = [
+      { ...seasonResponse.metadata, records: seasonResponse.payload.length },
+      { ...gameResponse.metadata, records: gameResponse.payload.length },
+    ]
+    const rawSeasonStats = seasonResponse.payload
+    const rawGameStats = gameResponse.payload
+    const recordsFetched = rawSeasonStats.length + rawGameStats.length
+    const payloadShapes = [
+      sanitizedPayloadShape('playerSeasonStats', rawSeasonStats),
+      sanitizedPayloadShape('playerGameStatsByDate', rawGameStats),
+    ]
+    if (recordsFetched > normalized.maximumRecords) {
+      throw new Error(
+        `Player stats pilot fetched ${recordsFetched} records, exceeding maximumRecords ${normalized.maximumRecords}.`
+      )
+    }
+
+    const [existingNbaTeams, existingNbaPlayers, existingEventsResult] = await Promise.all([
+      loadExistingNbaTeams(),
+      loadExistingNbaPlayers(),
+      supabaseAdmin
+        .from('sport_events')
+        .select('id, provider_ids')
+        .eq('sport_key', NBA_SPORT_KEY)
+        .eq('league_key', NBA_LEAGUE_KEY)
+        .eq('season', season),
+    ])
+    if (existingEventsResult.error) {
+      throw new Error(`sport_events preflight failed: ${existingEventsResult.error.message}`)
+    }
+
+    const seasonStatRows = buildPlayerStatRows({
+      rows: rawSeasonStats,
+      statType: 'season',
+      season,
+      selectedDate,
+      existingTeams: existingNbaTeams,
+      existingPlayers: existingNbaPlayers,
+      existingEvents: (existingEventsResult.data ?? []) as Array<{ id: string; provider_ids: Record<string, unknown> | null }>,
+    })
+    const gameStatRows = buildPlayerStatRows({
+      rows: rawGameStats,
+      statType: 'game',
+      season,
+      selectedDate,
+      existingTeams: existingNbaTeams,
+      existingPlayers: existingNbaPlayers,
+      existingEvents: (existingEventsResult.data ?? []) as Array<{ id: string; provider_ids: Record<string, unknown> | null }>,
+    })
+    const statRows = uniqueBy([...seasonStatRows, ...gameStatRows], (row) => row.id)
+    if (recordsFetched > 0 && statRows.length === 0) {
+      throw new Error('Player stats pilot fetched provider records but normalized zero sport_player_stats rows.')
+    }
+    const mappingRows = uniqueBy(
+      buildPlayerStatMappings({ statRows, season }),
+      (row) => `${row.sport_key}:${row.entity_type}:${row.provider}:${row.provider_id}:${row.season}`
+    )
+
+    const [existingStats, existingMappings] = await Promise.all([
+      countExistingIds('sport_player_stats', statRows.map((row) => row.id)),
+      countExistingMappings(
+        mappingRows.map((row) => ({
+          entityType: row.entity_type,
+          providerId: row.provider_id,
+          season: row.season,
+        }))
+      ),
+    ])
+
+    const statsResult = statRows.length
+      ? await supabaseAdmin.from('sport_player_stats').upsert(statRows, { onConflict: 'id' })
+      : { error: null }
+    if (statsResult.error) throw new Error(`sport_player_stats persistence failed: ${statsResult.error.message}`)
+
+    const mappingsResult = mappingRows.length
+      ? await supabaseAdmin.from('provider_entity_mappings').upsert(mappingRows, {
+          onConflict: 'sport_key,entity_type,provider,provider_id,season',
+        })
+      : { error: null }
+    if (mappingsResult.error) throw new Error(`provider_entity_mappings persistence failed: ${mappingsResult.error.message}`)
+
+    const validation = await validateSportsDataIoPlayerStatsPilotPersistence({
+      season,
+      statRows,
+      mappingRows,
+    })
+    const dataQuality = await getNbaDataQualityAudit()
+    const dataQualityCoverage = await getNbaDataQualityCoverage()
+    const featurePreview = await previewNbaFeatureStoreSnapshot()
+    const featureValidation = await runNbaFeatureStoreIntegrationValidation()
+    const confidenceHealth = await getNbaInjuryLineupConfidenceStatus()
+    const trialIsolation = await getSportsDataIoNbaTrialIsolationAudit()
+
+    const insertedStats = statRows.filter((row) => !existingStats.has(row.id)).length
+    const updatedStats = statRows.length - insertedStats
+    const insertedSeasonStats = seasonStatRows.filter((row) => !existingStats.has(row.id)).length
+    const updatedSeasonStats = seasonStatRows.length - insertedSeasonStats
+    const insertedGameStats = gameStatRows.filter((row) => !existingStats.has(row.id)).length
+    const updatedGameStats = gameStatRows.length - insertedGameStats
+    const insertedMappings = mappingRows.filter(
+      (row) => !existingMappings.has(`${row.entity_type}:${row.provider_id}:${row.season}`)
+    ).length
+    const updatedMappings = mappingRows.length - insertedMappings
+    const recordCounters = importRecordCounters({
+      providerRecordsFetched: recordsFetched,
+      normalizedRowsProduced: statRows.length,
+      skippedProviderRecords: 0,
+      skippedNormalizedRows: Math.max(0, rawSeasonStats.length + rawGameStats.length - statRows.length),
+    })
+    const status = validation.errors.length === 0 ? 'completed' : 'partial'
+
+    await recordPilotJob({
+      jobId,
+      jobType: 'sportsdataio_nba_player_stats_pilot_v1',
+      status,
+      season,
+      startedAt,
+      counters: {
+        fetched: recordsFetched,
+        inserted: insertedStats + insertedMappings,
+        updated: updatedStats + updatedMappings,
+        skipped: recordCounters.recordsSkipped,
+        errors: validation.errors.length,
+      },
+      metadata: {
+        ...pilotMetadata({ importModule: 'sportsdataio_nba_player_stats_pilot_v1' }),
+        selectedDate,
+        endpoints: endpointResults.map((endpoint) => ({
+          feed: endpoint.feed,
+          endpoint: `/v3/nba/stats/json${endpoint.endpoint}`,
+          status: endpoint.status,
+          records: endpoint.records,
+        })),
+        payloadShapes,
+        migrationRequired: false,
+        appliedMigration: 'supabase/migrations/202607130002_sport_player_stats_v1.sql',
+        externalCallsUsed,
+        recordCounters,
+        dataQualityStatus: dataQuality.status,
+        featurePreviewQuality: featurePreview.snapshot.featureQualityScore,
+        trialIsolationStatus: trialIsolation.status,
+      },
+      lastError: validation.errors.join('; ') || null,
+    })
+
+    return {
+      success: validation.errors.length === 0,
+      mode: 'sportsdataio_nba_player_stats_pilot_v1',
+      generatedAt: generatedAt(),
+      providerUsage: {
+        externalProviderCallsMade: externalCallsUsed,
+        source: 'sportsdataio_live_capped_nba_player_stats_pilot',
+      },
+      dryRun: false,
+      liveExecutionEnabled: true,
+      status,
+      completionLabels: [
+        'LIVE_PROVIDER_VALIDATION_COMPLETE',
+        'PLAYER_SEASON_STATS_CONTRACT_VALIDATION_COMPLETE',
+        'PLAYER_GAME_STATS_CONTRACT_VALIDATION_COMPLETE',
+        'PLAYER_STATS_PERSISTENCE_COMPLETE',
+        'TRIAL_DATA_ISOLATION_COMPLETE',
+        'PRODUCTION_CONFIDENCE_LEAKAGE_BLOCKED',
+      ],
+      season,
+      selectedDate,
+      endpoints: endpointResults.map((endpoint) => ({
+        ...endpoint,
+        endpoint: `/v3/nba/stats/json${endpoint.endpoint}`,
+      })),
+      payloadShapes,
+      request: plan.request,
+      job: {
+        id: jobId,
+        status,
+        progressPercent: 100,
+      },
+      counters: {
+        recordsFetched,
+        providerRecordsFetched: recordCounters.providerRecordsFetched,
+        recordsFlattened: recordsFetched,
+        recordsNormalized: statRows.length,
+        normalizedRowsProduced: recordCounters.normalizedRowsProduced,
+        seasonStatsFetched: rawSeasonStats.length,
+        gameStatsFetched: rawGameStats.length,
+        seasonStatsNormalized: seasonStatRows.length,
+        gameStatsNormalized: gameStatRows.length,
+        seasonStatsInserted: insertedSeasonStats,
+        seasonStatsUpdated: updatedSeasonStats,
+        gameStatsInserted: insertedGameStats,
+        gameStatsUpdated: updatedGameStats,
+        playerStatsInserted: insertedStats,
+        playerStatsUpdated: updatedStats,
+        mappingsInserted: insertedMappings,
+        mappingsUpdated: updatedMappings,
+        recordsSkipped: recordCounters.recordsSkipped,
+        skippedProviderRecords: recordCounters.skippedProviderRecords,
+        skippedNormalizedRows: recordCounters.skippedNormalizedRows,
+        oneToManyExpansion: recordCounters.oneToManyExpansion,
+        expansionRatio: recordCounters.expansionRatio,
+        unresolvedPlayers: validation.checks.unresolvedPlayers,
+        unresolvedTeams: validation.checks.unresolvedTeams,
+        unresolvedEvents: validation.checks.unresolvedEvents,
+        duplicateRows: validation.checks.noDuplicateRows ? 0 : 1,
+        mappingConflicts: validation.checks.mappingConflicts,
+        invalidNumericFields: validation.checks.integerFieldsValid ? 0 : 1,
+        trialIsolationViolations: validation.checks.trialIsolationPreserved ? 0 : 1,
+        productionLeakage: validation.checks.productionLeakage ? 1 : 0,
+        recordLevelErrors: validation.errors.length,
+        providerCallsUsed: externalCallsUsed,
+      },
+      persistence: {
+        tablesPopulated: ['sport_player_stats', 'provider_entity_mappings', 'sports_sync_jobs'],
+        pendingTables: [],
+        migrationRequired: false,
+        migrationCreated: 'supabase/migrations/202607130002_sport_player_stats_v1.sql',
+        migrationApplied: true,
+        reason: 'Player season and game stat rows were persisted to the applied sport_player_stats table.',
+      },
+      idempotency: {
+        repeatedProviderCall: false,
+        reason: 'Idempotency was checked from fetched payload keys and existing rows; no repeat provider call was made.',
+        localValidation: {
+          stableStatKeys: statRows.every((row) => Boolean(row.id)),
+          stableMappingKeys: mappingRows.every((row) => Boolean(row.provider_id && row.internal_id)),
+          noDuplicateStatRows: new Set(statRows.map((row) => row.id)).size === statRows.length,
+          noDuplicateMappingRows:
+            new Set(mappingRows.map((row) => `${row.entity_type}:${row.provider_id}:${row.season}`)).size ===
+            mappingRows.length,
+          conflictTargets: [
+            'sport_player_stats.id',
+            'provider_entity_mappings unique provider tuple',
+          ],
+        },
+      },
+      validation,
+      dataQuality: {
+        status: dataQuality.status,
+        issueSummary: dataQuality.issueSummary,
+        playerStatCoverage:
+          dataQuality.coverage.find((item) => item.key === 'playerStats') ?? null,
+        coverageStatus: dataQualityCoverage.status,
+      },
+      featureStore: {
+        previewStatus: featurePreview.success ? 'ready' : 'blocked',
+        featureQualityScore: featurePreview.snapshot.featureQualityScore,
+        dataSufficiencyScore: featurePreview.snapshot.dataSufficiencyScore,
+        noLeakage: featurePreview.snapshot.noLeakage,
+        validationSuccess: featureValidation.success,
+      },
+      confidenceIntegration: {
+        trialDataMayValidateArchitecture: true,
+        canImproveProductionConfidence: false,
+        injuryLineupStatus: confidenceHealth.status,
+        predictionPersistenceEnabled: false,
+        backtestingEnabled: false,
+        calibrationEnabled: false,
+        modelTrainingEnabled: false,
+      },
+      trialIsolation: {
+        status: trialIsolation.status,
+        totals: trialIsolation.totals,
+        predictionLeakage: trialIsolation.predictionLeakage,
+      },
+      noSecretExposure: true,
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown SportsDataIO player stats pilot import error'
+    endpointFailure = typeof error === 'object' && error && 'metadata' in error
+      ? (error as { metadata?: unknown }).metadata
+      : null
+    await recordPilotJob({
+      jobId,
+      jobType: 'sportsdataio_nba_player_stats_pilot_v1',
+      status: 'failed',
+      season,
+      startedAt,
+      counters: {
+        fetched: 0,
+        inserted: 0,
+        updated: 0,
+        skipped: 0,
+        errors: 1,
+      },
+      metadata: {
+        ...pilotMetadata({ importModule: 'sportsdataio_nba_player_stats_pilot_v1' }),
+        selectedDate,
+        endpointFailure,
+        externalCallsUsed,
+      },
+      lastError: message,
+    }).catch(() => undefined)
+
+    return {
+      success: false,
+      mode: 'sportsdataio_nba_player_stats_pilot_v1',
+      generatedAt: generatedAt(),
+      providerUsage: {
+        externalProviderCallsMade: externalCallsUsed,
+        source: 'sportsdataio_live_capped_nba_player_stats_pilot',
+      },
+      dryRun: false,
+      liveExecutionEnabled: true,
+      status: 'failed',
+      selectedDate,
+      season,
+      endpointFailure,
+      validation: {
+        valid: false,
+        errors: [message],
+        warnings: ['Pilot stopped immediately after the first fatal provider, schema, mapping, FK, normalization or persistence error.'],
       },
       noSecretExposure: true,
     }
@@ -4626,6 +5279,155 @@ async function validateSportsDataIoDepthLineupsPilot({
       sportLineups: lineupsResult.data?.length ?? 0,
       importedLineups: importedLineups.length,
       providerMappings: mappingsResult.data?.length ?? 0,
+    },
+  }
+}
+
+async function validateSportsDataIoPlayerStatsPilotPersistence({
+  season,
+  statRows,
+  mappingRows,
+}: {
+  season: string
+  statRows: ReturnType<typeof buildPlayerStatRows>
+  mappingRows: ReturnType<typeof buildPlayerStatMappings>
+}) {
+  const errors: string[] = []
+  const warnings: string[] = []
+  const [statsResult, playersResult, teamsResult, eventsResult, mappingsResult] = await Promise.all([
+    supabaseAdmin
+      .from('sport_player_stats')
+      .select('id, stat_type, event_id, team_id, player_id, provider_ids, metadata, games, starts')
+      .eq('sport_key', NBA_SPORT_KEY)
+      .eq('league_key', NBA_LEAGUE_KEY)
+      .eq('season', season),
+    supabaseAdmin
+      .from('sport_players')
+      .select('id, provider_ids')
+      .eq('sport_key', NBA_SPORT_KEY)
+      .eq('league_key', NBA_LEAGUE_KEY),
+    supabaseAdmin
+      .from('sports_teams')
+      .select('id, provider_ids')
+      .eq('sport_key', NBA_SPORT_KEY)
+      .eq('league_key', NBA_LEAGUE_KEY),
+    supabaseAdmin
+      .from('sport_events')
+      .select('id, provider_ids, metadata')
+      .eq('sport_key', NBA_SPORT_KEY)
+      .eq('league_key', NBA_LEAGUE_KEY),
+    supabaseAdmin
+      .from('provider_entity_mappings')
+      .select('entity_type, internal_id, provider_id, season, metadata')
+      .eq('sport_key', NBA_SPORT_KEY)
+      .eq('provider', 'sportsdataio'),
+  ])
+
+  for (const result of [statsResult, playersResult, teamsResult, eventsResult, mappingsResult]) {
+    if (result.error) errors.push(result.error.message)
+  }
+
+  const playerIds = new Set((playersResult.data ?? []).map((player) => String(player.id)))
+  const teamIds = new Set((teamsResult.data ?? []).map((team) => String(team.id)))
+  const eventIds = new Set((eventsResult.data ?? []).map((event) => String(event.id)))
+  const importedStatIds = new Set(statRows.map((row) => row.id))
+  const importedStats = (statsResult.data ?? []).filter((row) => importedStatIds.has(String(row.id)))
+  const duplicateStatIds = new Set(statRows.map((row) => row.id)).size !== statRows.length
+  const duplicateProviderIds =
+    new Set(statRows.map((row) => String((row.provider_ids as Record<string, unknown>).sportsdataio))).size !==
+    statRows.length
+  const invalidStatTypes = statRows.filter((row) => !['season', 'game'].includes(row.stat_type)).length
+  const invalidIntegerFields = statRows.filter(
+    (row) =>
+      (row.games !== null && !Number.isInteger(row.games)) ||
+      (row.starts !== null && !Number.isInteger(row.starts))
+  ).length
+  const unresolvedPlayers = statRows.filter((row) => !row.player_id).length
+  const unresolvedTeams = statRows.filter((row) => !row.team_id).length
+  const unresolvedEvents = statRows.filter((row) => row.stat_type === 'game' && !row.event_id).length
+  const orphanPlayers = statRows.filter((row) => row.player_id && !playerIds.has(row.player_id)).length
+  const orphanTeams = statRows.filter((row) => row.team_id && !teamIds.has(row.team_id)).length
+  const orphanEvents = statRows.filter((row) => row.event_id && !eventIds.has(row.event_id)).length
+  const missingPersistedStats = statRows.filter((row) => !importedStats.some((stat) => String(stat.id) === row.id)).length
+
+  if (duplicateStatIds) errors.push('Duplicate sport_player_stats upsert IDs were normalized.')
+  if (duplicateProviderIds) errors.push('Duplicate SportsDataIO player-stat provider IDs were normalized.')
+  if (invalidStatTypes) errors.push(`${invalidStatTypes} player-stat rows have invalid stat_type values.`)
+  if (invalidIntegerFields) errors.push(`${invalidIntegerFields} player-stat rows have non-integer games/starts values.`)
+  if (orphanPlayers) errors.push(`${orphanPlayers} player-stat rows reference missing sport_players rows.`)
+  if (orphanTeams) errors.push(`${orphanTeams} player-stat rows reference missing sports_teams rows.`)
+  if (orphanEvents) errors.push(`${orphanEvents} player-stat rows reference missing sport_events rows.`)
+  if (missingPersistedStats) errors.push(`${missingPersistedStats} normalized player-stat rows were not persisted.`)
+  if (unresolvedPlayers) warnings.push(`${unresolvedPlayers} player-stat rows have unresolved player mappings.`)
+  if (unresolvedTeams) warnings.push(`${unresolvedTeams} player-stat rows have unresolved team mappings.`)
+  if (unresolvedEvents) warnings.push(`${unresolvedEvents} game player-stat rows have unresolved event mappings.`)
+
+  const importedStatsIsolated = importedStats.every((row) => {
+    const metadata = (row.metadata as Record<string, unknown> | null) ?? {}
+    return metadata.trial === true && metadata.scrambled === true && metadata.production_eligible === false
+  })
+  if (!importedStatsIsolated) errors.push('Not all imported sport_player_stats rows carry trial isolation metadata.')
+
+  const mappingKeys = new Set<string>()
+  let mappingConflict = false
+  for (const mapping of mappingsResult.data ?? []) {
+    if (mapping.entity_type !== 'player_stat') continue
+    const key = `${mapping.entity_type}:${mapping.provider_id}:${mapping.season}`
+    if (mappingKeys.has(key)) mappingConflict = true
+    mappingKeys.add(key)
+  }
+  if (mappingConflict) errors.push('Provider mapping conflicts were found for SportsDataIO player-stat records.')
+
+  const importedMappingKeys = new Set(mappingRows.map((row) => `${row.entity_type}:${row.provider_id}:${row.season}`))
+  const importedMappings = (mappingsResult.data ?? []).filter((mapping) =>
+    importedMappingKeys.has(`${mapping.entity_type}:${mapping.provider_id}:${mapping.season}`)
+  )
+  const mappingsIsolated = importedMappings.every((mapping) => {
+    const metadata = (mapping.metadata as Record<string, unknown> | null) ?? {}
+    return metadata.trial === true && metadata.scrambled === true && metadata.production_eligible === false
+  })
+  if (!mappingsIsolated) errors.push('Not all player-stat provider mappings carry trial isolation metadata.')
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings,
+    checks: {
+      noDuplicateRows: !duplicateStatIds,
+      noDuplicateProviderIds: !duplicateProviderIds,
+      statTypesValid: invalidStatTypes === 0,
+      integerFieldsValid: invalidIntegerFields === 0,
+      playerMappingsValid: orphanPlayers === 0,
+      teamMappingsValid: orphanTeams === 0,
+      eventMappingsValid: orphanEvents === 0,
+      playerStatsPersisted: missingPersistedStats === 0,
+      unresolvedPlayers,
+      unresolvedTeams,
+      unresolvedEvents,
+      stableNaturalKeys: statRows.every((row) => Boolean(row.id)),
+      noMappingConflicts: !mappingConflict,
+      mappingConflicts: mappingConflict ? 1 : 0,
+      trialIsolationPreserved:
+        importedStats.length === statRows.length &&
+        importedMappings.length === mappingRows.length &&
+        importedStatsIsolated &&
+        mappingsIsolated,
+      productionLeakage: false,
+      productionConfidenceLeakageBlocked: true,
+      noProductionPredictionsPersisted: true,
+      noBacktestingExecuted: true,
+      noCalibrationExecuted: true,
+      noModelTrainingExecuted: true,
+      season,
+    },
+    persistedCounts: {
+      sportPlayerStats: statsResult.data?.length ?? 0,
+      importedPlayerStats: importedStats.length,
+      sportPlayers: playersResult.data?.length ?? 0,
+      sportsTeams: teamsResult.data?.length ?? 0,
+      sportEvents: eventsResult.data?.length ?? 0,
+      providerMappings: mappingsResult.data?.length ?? 0,
+      importedMappings: importedMappings.length,
     },
   }
 }

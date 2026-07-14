@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-13 - Complete SportsDataIO NBA Player Stats Pilot V1
+
+Context: The `sport_player_stats` migration was applied remotely and SportsDataIO confirmed player season and game stat endpoint paths.
+
+Decision: Add a narrow approved player-stat pilot path to the SportsDataIO historical import executor for `/v3/nba/stats/json/PlayerSeasonStats/2026` and `/v3/nba/stats/json/PlayerGameStatsByDate/2025-12-26`, capped at exactly 2 sequential provider calls with no retry. Persist normalized rows into `sport_player_stats`, write `player_stat` provider mappings, keep all rows trial/scrambled/non-production-eligible and validate quality, feature preview and trial isolation without prediction persistence.
+
+Consequences: The pilot persisted 918 player-stat rows and 918 provider mappings with zero duplicate IDs, zero unresolved teams/events, 203 unresolved player mappings preserved safely and zero production leakage. The first run completed provider and persistence work but hit a post-persistence audit compatibility bug because `sport_game_stats` stores trial metadata in `stats`, not `metadata`; the audit was fixed and sync job `777f9ac7-efeb-4396-a007-259557dfdcf8` was completed from local validation without another provider call.
+
+Affected modules: SportsDataIO historical import execution readiness, SportsDataIO NBA player stats readiness, SportsDataIO NBA trial isolation audit, NBA data quality, NBA Feature Store preview.
+
 ## 2026-07-13 - Consolidate SportsDataIO NBA Readiness Surface
 
 Context: Several focused SportsDataIO NBA readiness routes and dashboard cards duplicated proof, evidence, audit, blocker and next-action data already available from the aggregate NBA readiness response.

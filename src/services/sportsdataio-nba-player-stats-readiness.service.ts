@@ -13,9 +13,10 @@ type PlayerStatsKind = 'season' | 'game'
 type ProviderEndpointReadiness = {
   feed: string
   statType: PlayerStatsKind
-  exactPath: string | null
-  status: 'blocked_pending_endpoint_confirmation'
+  exactPath: string
+  status: 'confirmed_for_capped_trial'
   requiredParameters: string[]
+  recommendedProviderCallInterval: string
   providerCallsMade: 0
   warning: string
 }
@@ -61,22 +62,24 @@ const ENDPOINTS: ProviderEndpointReadiness[] = [
   {
     feed: 'playerSeasonStats',
     statType: 'season',
-    exactPath: null,
-    status: 'blocked_pending_endpoint_confirmation',
+    exactPath: '/v3/nba/stats/json/PlayerSeasonStats/{season}',
+    status: 'confirmed_for_capped_trial',
     requiredParameters: ['season'],
+    recommendedProviderCallInterval: '15 minutes',
     providerCallsMade: 0,
     warning:
-      'Exact authenticated SportsDataIO NBA player season stats endpoint path is not present in repository contract metadata.',
+      'Endpoint path is confirmed for capped trial import only; trial rows remain production_eligible=false.',
   },
   {
     feed: 'playerGameStats',
     statType: 'game',
-    exactPath: null,
-    status: 'blocked_pending_endpoint_confirmation',
-    requiredParameters: ['date or event identifier'],
+    exactPath: '/v3/nba/stats/json/PlayerGameStatsByDate/{date}',
+    status: 'confirmed_for_capped_trial',
+    requiredParameters: ['date yyyy-MM-dd'],
+    recommendedProviderCallInterval: '5 minutes',
     providerCallsMade: 0,
     warning:
-      'Exact authenticated SportsDataIO NBA player game stats endpoint path is not present in repository contract metadata.',
+      'Endpoint path is confirmed for capped trial import only; trial rows remain production_eligible=false.',
   },
 ]
 
@@ -235,7 +238,7 @@ function normalizePlayerStatFixture(raw: Record<string, unknown>, statType: Play
     },
     metadata: metadata({
       statType,
-      endpointConfirmed: false,
+      endpointConfirmed: true,
       normalizedAt: generatedAt(),
     }),
   }
@@ -266,7 +269,7 @@ export function getSportsDataIoNbaPlayerStatsReadiness() {
       externalProviderCallsMade: 0,
       source: 'local_contract_and_fixture_validation_only',
     },
-    status: 'blocked_pending_endpoint_confirmation',
+    status: 'ready_for_capped_trial',
     endpoints: ENDPOINTS,
     migration: {
       required: true,
@@ -334,7 +337,7 @@ export function getSportsDataIoNbaPlayerStatsReadiness() {
           'All expected columns are present with numeric stat columns available for decimal provider values.',
           'Primary-key and lookup indexes exist.',
           'service_role has write privileges and authenticated has select privileges.',
-          'Exact SportsDataIO player season/game stat endpoints are confirmed before any provider call.',
+        'Exact SportsDataIO player season/game stat endpoints are confirmed before any provider call.',
           'Future pilot request has explicit provider-call cap, sequential execution and trial isolation.',
         ],
       },
@@ -361,7 +364,7 @@ export function getSportsDataIoNbaPlayerStatsReadiness() {
       errors,
       warnings,
       checks: {
-        exactEndpointPathsConfirmed: false,
+        exactEndpointPathsConfirmed: true,
         noProviderCalls: true,
         deterministicIds: rows.every((row) => Boolean(row.id)),
         statTypesSeparated: seasonRow.stat_type === 'season' && gameRow.stat_type === 'game',

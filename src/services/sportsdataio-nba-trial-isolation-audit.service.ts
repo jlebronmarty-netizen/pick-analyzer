@@ -37,7 +37,7 @@ const TABLES = [
   { table: 'sports_teams', select: 'id, provider_ids, metadata' },
   { table: 'sport_events', select: 'id, provider_ids, metadata' },
   { table: 'sport_standings', select: 'id, provider_ids, metadata' },
-  { table: 'sport_game_stats', select: 'id, provider_ids, metadata' },
+  { table: 'sport_game_stats', select: 'id, provider_ids, stats' },
   { table: 'sport_injuries', select: 'id, provider_ids, metadata' },
   { table: 'sport_players', select: 'id, provider_ids, metadata' },
   { table: 'sport_lineups', select: 'id, provider_ids, metadata' },
@@ -125,7 +125,7 @@ async function loadAuditRows(table: string, select: string, optional = false) {
       return {
         table,
         id: rowId(record),
-        metadata: objectValue(record.metadata),
+        metadata: objectValue(record.metadata ?? record.stats),
         providerIds: objectValue(record.provider_ids),
       }
     }),
