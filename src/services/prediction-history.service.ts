@@ -10,8 +10,8 @@ export type PredictionHistoryInput = {
   opponent: string
   market?: string
   sportsbook?: string
-  odds: number
-  implied_probability: number
+  odds: number | null
+  implied_probability: number | null
   model_probability: number
   edge: number
   ev: number
@@ -25,6 +25,13 @@ export type PredictionHistoryInput = {
   cutoff_at?: string | null
   model_version?: string | null
   feature_snapshot?: Record<string, unknown>
+  feature_snapshot_id?: string | null
+  feature_snapshot_key?: string | null
+  feature_set_version?: string | null
+  feature_snapshot_generated_at?: string | null
+  production_eligible?: boolean
+  trial?: boolean
+  scrambled?: boolean
   validation_warnings?: string[]
   validation_status?: string
   lifecycle_status?: string

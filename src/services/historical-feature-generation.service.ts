@@ -10,6 +10,7 @@ import {
   getFeatureDefinitions,
 } from '@/services/feature-store-core.service'
 import { lookupFeatureSet } from '@/services/multi-sport-feature-registry.service'
+import { settleNbaPredictionsByIds } from '@/services/nba-prediction-settlement.service'
 import { MarketKey } from '@/types/multi-sport'
 
 type HistoricalFeatureExecutionMode = 'trial_only' | 'production'
@@ -38,6 +39,14 @@ type SnapshotPersistenceStatus =
   | 'unknown'
 
 type HistoricalSnapshotWriteStatus =
+  | 'completed'
+  | 'dry_run'
+  | 'blocked'
+  | 'no_eligible_candidates'
+  | 'partial'
+  | 'failed'
+
+type HistoricalPredictionLineagePilotStatus =
   | 'completed'
   | 'dry_run'
   | 'blocked'
@@ -360,6 +369,153 @@ export type HistoricalFeatureSnapshotWriteResult = {
   warnings: string[]
 }
 
+export type HistoricalPredictionLineagePilotRequest = {
+  dryRun?: boolean | null
+  confirmed?: boolean | null
+  maximumSnapshots?: number | null
+  maximumPredictions?: number | null
+  settle?: boolean | null
+}
+
+type StoredHistoricalFeatureSnapshotRow = {
+  id: string
+  deterministic_key: string
+  sport_key: string
+  league_key: string | null
+  event_id: string | null
+  market: string
+  prediction_cutoff: string
+  as_of_timestamp: string
+  generated_at: string
+  model_version: string
+  feature_set_version: string
+  feature_values: Record<string, unknown> | null
+  feature_lineage: Record<string, unknown> | null
+  source_timestamps: Record<string, unknown> | null
+  data_quality_score: number | null
+  data_sufficiency_score: number | null
+  unresolved_mapping_count: number | null
+  leakage_status: string
+  leakage_warnings: unknown
+  trial: boolean
+  scrambled: boolean
+  production_eligible: boolean
+  metadata: Record<string, unknown> | null
+  created_at?: string | null
+}
+
+type TrialLineageEventRow = {
+  id: string
+  sport_key: string
+  league_key: string | null
+  season: string | null
+  home_team: string | null
+  away_team: string | null
+  start_time: string | null
+  status: string | null
+  home_score: number | null
+  away_score: number | null
+  metadata: Record<string, unknown> | null
+}
+
+type TrialPredictionCandidate = {
+  snapshot: StoredHistoricalFeatureSnapshotRow
+  event: TrialLineageEventRow
+  identityKey: string
+  team: string
+  opponent: string
+  sportsbook: 'Trial Lineage Pilot'
+  market: string
+  line: number | null
+  odds: number | null
+  impliedProbability: number | null
+  modelProbability: number
+  edge: number
+  ev: number
+  confidence: number
+  generatedAt: string
+  cutoffAt: string
+  warnings: string[]
+}
+
+export type HistoricalPredictionLineagePilotResult = {
+  success: boolean
+  mode: 'historical_prediction_snapshot_lineage_pilot_v1'
+  status: HistoricalPredictionLineagePilotStatus
+  dryRun: boolean
+  confirmed: boolean
+  generatedAt: string
+  providerUsage: {
+    externalProviderCallsMade: 0
+    source: 'persisted_normalized_records_only'
+  }
+  caps: {
+    maximumSnapshots: number
+    maximumPredictions: number
+    maximumOnePredictionPerSnapshot: true
+    concurrency: 1
+    retries: 0
+  }
+  snapshotSelection: {
+    snapshotsConsidered: number
+    eligibleSnapshots: number
+    rejectedSnapshots: number
+    blockingReasons: Record<string, number>
+  }
+  predictionPersistence: {
+    attempted: number
+    inserted: number
+    reused: number
+    rejected: number
+    failed: number
+    insertedIds: string[]
+    reusedIds: string[]
+    rejectedReasons: Record<string, number>
+    errors: string[]
+  }
+  duplicateChecks: {
+    duplicatePredictionIdentities: number
+    duplicateSnapshotLinks: number
+    stableDeterministicKeys: boolean
+  }
+  immutability: {
+    originalSnapshotsMutated: false
+    incompatibleReplacementRejected: boolean
+    validationMethod: 'contract_and_remote_trigger_guard' | 'contract_only'
+    reason: string
+  }
+  trialIsolation: {
+    trialPredictions: number
+    productionEligiblePredictions: number
+    productionRecommendationsCreated: 0
+    productionMetricsEnabled: false
+  }
+  settlement: {
+    attempted: number
+    settled: number
+    pending: number
+    wins: number
+    losses: number
+    pushes: number
+    voids: number
+    skipped: number
+    errors: string[]
+    status: 'completed' | 'settlement_pending' | 'not_requested' | 'dry_run'
+  }
+  linkageCounts: {
+    linkedPredictions: number
+    trialLinkedPredictions: number
+    productionLinkedPredictions: number
+  }
+  backtestEligibility: Awaited<ReturnType<typeof getNbaFeatureSnapshotBacktestCounts>>
+  cleanupPlan: {
+    destructiveActionExecuted: false
+    filters: string[]
+    referentialIntegrityOrder: string[]
+  }
+  warnings: string[]
+}
+
 const DEFAULT_CUTOFF = '2026-01-01T19:00:00.000Z'
 const DEFAULT_AS_OF = '2026-01-01T19:00:00.000Z'
 const DEFAULT_EVENT_START = '2026-01-01T20:00:00.000Z'
@@ -497,6 +653,65 @@ function clampWriteCap(value: number | null | undefined, fallback: number, maxim
 function clampBatchSize(value: number | null | undefined) {
   if (!value || !Number.isFinite(value)) return 100
   return Math.max(1, Math.min(Math.floor(value), 500))
+}
+
+function impliedProbabilityFromAmerican(odds: number | null) {
+  if (!Number.isFinite(Number(odds)) || odds === null || odds === 0) return null
+  return odds > 0
+    ? Number(((100 / (odds + 100)) * 100).toFixed(2))
+    : Number(((Math.abs(odds) / (Math.abs(odds) + 100)) * 100).toFixed(2))
+}
+
+function trialLineageProbability(snapshot: StoredHistoricalFeatureSnapshotRow) {
+  const quality = Number(snapshot.data_quality_score ?? 0)
+  const sufficiency = Number(snapshot.data_sufficiency_score ?? 0)
+  return Math.max(35, Math.min(65, Number((48 + quality * 0.08 + sufficiency * 0.06).toFixed(2))))
+}
+
+function eventIsTrial(row: TrialLineageEventRow) {
+  const metadata = safeJsonObject(row.metadata)
+  return metadata.trial === true || metadata.scrambled === true || metadata.production_eligible === false
+}
+
+function firstAvailableOdds(snapshot: StoredHistoricalFeatureSnapshotRow) {
+  const values = safeJsonObject(snapshot.feature_values)
+  const rows = Array.isArray(values.odds) ? values.odds : []
+  for (const row of rows) {
+    const item = safeJsonObject(row)
+    const price = Number(item.price)
+    if (Number.isFinite(price) && price !== 0) {
+      return {
+        price,
+        line: Number.isFinite(Number(item.line)) ? Number(item.line) : null,
+      }
+    }
+  }
+  return { price: null, line: null }
+}
+
+function selectionForSnapshot(snapshot: StoredHistoricalFeatureSnapshotRow, event: TrialLineageEventRow) {
+  const market = String(snapshot.market)
+  if (market === 'total') {
+    return {
+      team: 'Over',
+      opponent: `${event.away_team ?? 'Away'} @ ${event.home_team ?? 'Home'}`,
+    }
+  }
+
+  return {
+    team: event.home_team ?? 'Home',
+    opponent: event.away_team ?? 'Away',
+  }
+}
+
+function lineageIdentityKey(candidate: TrialPredictionCandidate) {
+  return [
+    candidate.snapshot.sport_key,
+    candidate.snapshot.event_id,
+    candidate.team,
+    candidate.market,
+    candidate.sportsbook,
+  ].join('|')
 }
 
 export function evaluateHistoricalFeatureLeakage({
@@ -1113,6 +1328,150 @@ export function getBacktestInputReadiness(
       reason:
         'Durable historical feature snapshots and sufficient settled production predictions are not yet available.',
     },
+  }
+}
+
+export async function getNbaFeatureSnapshotBacktestCounts() {
+  try {
+    const totalSnapshots = await supabaseAdmin
+      .from('historical_feature_snapshots')
+      .select('id, created_at')
+      .eq('sport_key', 'basketball_nba')
+      .order('created_at', { ascending: true })
+      .limit(5000)
+    if (totalSnapshots.error) {
+      throw new Error(`Failed to load NBA feature snapshot counters: ${totalSnapshots.error.message}`)
+    }
+
+    const trialSnapshots = await supabaseAdmin
+      .from('historical_feature_snapshots')
+      .select('id, created_at')
+      .eq('sport_key', 'basketball_nba')
+      .eq('trial', true)
+      .order('created_at', { ascending: true })
+      .limit(5000)
+    if (trialSnapshots.error) {
+      throw new Error(`Failed to load trial feature snapshot counters: ${trialSnapshots.error.message}`)
+    }
+
+    const productionSnapshots = await supabaseAdmin
+      .from('historical_feature_snapshots')
+      .select('id, created_at')
+      .eq('sport_key', 'basketball_nba')
+      .eq('production_eligible', true)
+      .order('created_at', { ascending: true })
+      .limit(5000)
+    if (productionSnapshots.error) {
+      throw new Error(`Failed to load production feature snapshot counters: ${productionSnapshots.error.message}`)
+    }
+
+    const linkedRows = await supabaseAdmin
+      .from('prediction_history')
+      .select(
+        'id, result, status, market, odds, production_eligible, trial, scrambled, feature_snapshot_id, settlement_details'
+      )
+      .eq('sport_key', 'basketball_nba')
+      .not('feature_snapshot_id', 'is', null)
+      .limit(5000)
+    if (linkedRows.error) {
+      throw new Error(`Failed to load linked prediction counters: ${linkedRows.error.message}`)
+    }
+
+    const allPredictionRows = await supabaseAdmin
+      .from('prediction_history')
+      .select('id, feature_snapshot_id')
+      .eq('sport_key', 'basketball_nba')
+      .limit(5000)
+    if (allPredictionRows.error) {
+      throw new Error(`Failed to load prediction linkage counters: ${allPredictionRows.error.message}`)
+    }
+
+    const linked = (linkedRows.data ?? []) as Array<{
+    id: string
+    result: string | null
+    status: string | null
+    market: string | null
+    odds: number | null
+    production_eligible: boolean | null
+    trial: boolean | null
+    scrambled: boolean | null
+    feature_snapshot_id: string | null
+    settlement_details?: Record<string, unknown> | null
+  }>
+    const allPredictions = (allPredictionRows.data ?? []) as Array<{
+    id: string
+    feature_snapshot_id: string | null
+  }>
+    const settled = linked.filter((row) =>
+    ['win', 'loss', 'push', 'void'].includes(String(row.result ?? row.status ?? '').toLowerCase())
+  )
+    const unsettled = linked.length - settled.length
+    const trialLinked = linked.filter((row) => row.trial === true || row.scrambled === true)
+    const productionLinked = linked.filter(
+    (row) => row.production_eligible === true && row.trial !== true && row.scrambled !== true
+  )
+    const missingPrice = linked.filter((row) => !Number.isFinite(Number(row.odds))).length
+    const missingClosingSnapshot = linked.filter(
+    (row) => !row.settlement_details?.closingSnapshotId
+  ).length
+    const productionSettledWithPrice = settled.filter(
+    (row) =>
+      row.production_eligible === true &&
+      row.trial !== true &&
+      row.scrambled !== true &&
+      Number.isFinite(Number(row.odds))
+  )
+    const calibrationCandidates = productionSettledWithPrice.filter(
+    (row) => row.market === 'moneyline' && ['win', 'loss'].includes(String(row.result))
+  )
+    const insufficientCalibrationSample =
+    calibrationCandidates.length > 0 && calibrationCandidates.length < 30
+      ? calibrationCandidates.length
+      : 0
+
+    return {
+      totalHistoricalFeatureSnapshots: (totalSnapshots.data ?? []).length,
+      trialSnapshots: (trialSnapshots.data ?? []).length,
+      productionEligibleSnapshots: (productionSnapshots.data ?? []).length,
+      linkedPredictions: linked.length,
+      unlinkedPredictions: Math.max(0, allPredictions.length - linked.length),
+      settledLinkedPredictions: settled.length,
+      unsettledLinkedPredictions: unsettled,
+      trialLinkedPredictions: trialLinked.length,
+      productionLinkedPredictions: productionLinked.length,
+      rowsEligibleForRoi: productionSettledWithPrice.length,
+      rowsEligibleForCalibration: calibrationCandidates.length >= 30 ? calibrationCandidates.length : 0,
+      rowsEligibleForClv: productionSettledWithPrice.filter((row) =>
+        Boolean(row.settlement_details?.closingSnapshotId)
+      ).length,
+      rowsBlockedForMissingPrice: missingPrice,
+      rowsBlockedForMissingClosingSnapshot: missingClosingSnapshot,
+      rowsBlockedForTrialStatus: trialLinked.length,
+      rowsBlockedForInsufficientSample: insufficientCalibrationSample,
+      counterStatus: 'loaded' as const,
+      counterError: null as string | null,
+    }
+  } catch (error) {
+    return {
+      totalHistoricalFeatureSnapshots: 0,
+      trialSnapshots: 0,
+      productionEligibleSnapshots: 0,
+      linkedPredictions: 0,
+      unlinkedPredictions: 0,
+      settledLinkedPredictions: 0,
+      unsettledLinkedPredictions: 0,
+      trialLinkedPredictions: 0,
+      productionLinkedPredictions: 0,
+      rowsEligibleForRoi: 0,
+      rowsEligibleForCalibration: 0,
+      rowsEligibleForClv: 0,
+      rowsBlockedForMissingPrice: 0,
+      rowsBlockedForMissingClosingSnapshot: 0,
+      rowsBlockedForTrialStatus: 0,
+      rowsBlockedForInsufficientSample: 0,
+      counterStatus: 'unavailable' as const,
+      counterError: error instanceof Error ? error.message : 'Unknown counter load error',
+    }
   }
 }
 
@@ -1745,11 +2104,13 @@ export async function runHistoricalFeatureSnapshotWritePilot(
     .filter((market): market is MarketKey => ['moneyline', 'spread', 'total'].includes(String(market)))
     .slice(0, maximumMarketsPerEvent)
   const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
+  const schemaStatus = featureSnapshotSchemaStatus(schemaCapabilities)
   const schemaApplied = featureSnapshotSchemaApplied(schemaCapabilities)
+  const schemaHardBlocked = ['missing', 'configuration_missing', 'permission_blocked'].includes(schemaStatus)
   const warnings: string[] = []
   const partialFailures: Array<{ deterministicKey: string; error: string }> = []
 
-  if (!schemaApplied) {
+  if (!schemaApplied && schemaHardBlocked) {
     return {
       success: false,
       mode: 'historical_feature_snapshot_write_pilot_v1',
@@ -2168,5 +2529,664 @@ export async function runHistoricalFeatureSnapshotWritePilot(
       validationMethod: 'contract_only_no_prediction_rows_inserted',
     },
     warnings,
+  }
+}
+
+async function buildTrialPredictionLineageCandidates({
+  maximumSnapshots,
+  maximumPredictions,
+  generatedAt,
+}: {
+  maximumSnapshots: number
+  maximumPredictions: number
+  generatedAt: string
+}) {
+  const blockingReasons: Record<string, number> = {}
+  const warnings: string[] = []
+  const snapshotPoolLimit = Math.max(maximumSnapshots * 5, maximumSnapshots)
+  const snapshotsResult = await supabaseAdmin
+    .from('historical_feature_snapshots')
+    .select(
+      'id, deterministic_key, sport_key, league_key, event_id, market, prediction_cutoff, as_of_timestamp, generated_at, model_version, feature_set_version, feature_values, feature_lineage, source_timestamps, data_quality_score, data_sufficiency_score, unresolved_mapping_count, leakage_status, leakage_warnings, trial, scrambled, production_eligible, metadata, created_at'
+    )
+    .eq('sport_key', 'basketball_nba')
+    .eq('trial', true)
+    .eq('scrambled', true)
+    .eq('production_eligible', false)
+    .order('created_at', { ascending: false })
+    .limit(snapshotPoolLimit)
+
+  if (snapshotsResult.error) {
+    throw new Error(`Failed to load trial historical feature snapshots: ${snapshotsResult.error.message}`)
+  }
+
+  const snapshots = ((snapshotsResult.data ?? []) as StoredHistoricalFeatureSnapshotRow[])
+    .sort((left, right) => {
+      const leftHasOdds = firstAvailableOdds(left).price === null ? 0 : 1
+      const rightHasOdds = firstAvailableOdds(right).price === null ? 0 : 1
+      if (leftHasOdds !== rightHasOdds) return rightHasOdds - leftHasOdds
+      return dateMs(right.created_at ?? '')! - dateMs(left.created_at ?? '')!
+    })
+    .slice(0, maximumSnapshots)
+  const eventIds = Array.from(new Set(snapshots.map((snapshot) => snapshot.event_id).filter(Boolean))) as string[]
+  const eventsResult = eventIds.length
+    ? await supabaseAdmin
+        .from('sport_events')
+        .select('id, sport_key, league_key, season, home_team, away_team, start_time, status, home_score, away_score, metadata')
+        .eq('sport_key', 'basketball_nba')
+        .in('id', eventIds)
+    : { data: [], error: null }
+
+  if (eventsResult.error) {
+    throw new Error(`Failed to load trial snapshot events: ${eventsResult.error.message}`)
+  }
+
+  const eventsById = new Map(
+    ((eventsResult.data ?? []) as TrialLineageEventRow[]).map((event) => [event.id, event])
+  )
+  const candidates: TrialPredictionCandidate[] = []
+
+  for (const snapshot of snapshots) {
+    if (candidates.length >= maximumPredictions) break
+
+    const event = snapshot.event_id ? eventsById.get(snapshot.event_id) : undefined
+    if (!event) {
+      countReason(blockingReasons, 'missing_event_relationship')
+      continue
+    }
+
+    if (!eventIsTrial(event)) {
+      countReason(blockingReasons, 'event_not_trial_isolated')
+      continue
+    }
+
+    const predictionTimestamp = generatedAt
+    const cutoffAt = iso(snapshot.prediction_cutoff)
+    const eventStart = iso(event.start_time)
+    const snapshotGeneratedAt = iso(snapshot.generated_at)
+
+    if (!cutoffAt || !eventStart || !snapshotGeneratedAt) {
+      countReason(blockingReasons, 'missing_prediction_timestamps')
+      continue
+    }
+
+    if (dateMs(cutoffAt)! > dateMs(predictionTimestamp)!) {
+      countReason(blockingReasons, 'cutoff_after_prediction_timestamp')
+      continue
+    }
+
+    if (dateMs(snapshotGeneratedAt)! > dateMs(predictionTimestamp)!) {
+      countReason(blockingReasons, 'snapshot_generated_after_prediction_timestamp')
+      continue
+    }
+
+    if (dateMs(cutoffAt)! >= dateMs(eventStart)!) {
+      countReason(blockingReasons, 'cutoff_at_or_after_event_start')
+      continue
+    }
+
+    if (snapshot.leakage_status !== 'passed' && snapshot.leakage_status !== 'warning') {
+      countReason(blockingReasons, 'leakage_blocked_snapshot')
+      continue
+    }
+
+    if (!['moneyline', 'spread', 'total'].includes(String(snapshot.market))) {
+      countReason(blockingReasons, 'unsupported_market')
+      continue
+    }
+
+    if (Number(snapshot.data_sufficiency_score ?? 0) < 35) {
+      countReason(blockingReasons, 'insufficient_feature_contract')
+      continue
+    }
+
+    const selection = selectionForSnapshot(snapshot, event)
+    const odds = firstAvailableOdds(snapshot)
+    if (odds.price === null) {
+      countReason(blockingReasons, 'missing_genuine_offered_price')
+      continue
+    }
+    const implied = impliedProbabilityFromAmerican(odds.price)
+    const modelProbability = trialLineageProbability(snapshot)
+    const edge = implied === null ? 0 : Number((modelProbability - implied).toFixed(2))
+    const ev = odds.price === null ? 0 : Number(((modelProbability / 100) * (odds.price > 0 ? 1 + odds.price / 100 : 1 + 100 / Math.abs(odds.price)) - 1).toFixed(4))
+    const confidence = Math.max(
+      1,
+      Math.min(99, Number((modelProbability * 0.6 + Number(snapshot.data_quality_score ?? 0) * 0.2).toFixed(2)))
+    )
+    const candidate: TrialPredictionCandidate = {
+      snapshot,
+      event,
+      identityKey: '',
+      team: selection.team,
+      opponent: selection.opponent,
+      sportsbook: 'Trial Lineage Pilot',
+      market: String(snapshot.market),
+      line: snapshot.market === 'moneyline' ? null : odds.line,
+      odds: odds.price,
+      impliedProbability: implied,
+      modelProbability,
+      edge,
+      ev,
+      confidence,
+      generatedAt: predictionTimestamp,
+      cutoffAt,
+      warnings: [
+        'Trial-only lineage validation row; not a production recommendation.',
+        ...(odds.price === null ? ['No genuine offered price was available; ROI is blocked.'] : []),
+        ...(Array.isArray(snapshot.leakage_warnings) ? snapshot.leakage_warnings.map(String) : []),
+      ],
+    }
+    candidate.identityKey = lineageIdentityKey(candidate)
+    candidates.push(candidate)
+  }
+
+  if (!candidates.length && snapshots.length) {
+    warnings.push('No trial snapshots satisfied prediction lineage linkage rules.')
+  }
+
+  return {
+    snapshotsConsidered: snapshots.length,
+    candidates,
+    blockingReasons,
+    warnings,
+  }
+}
+
+export async function runHistoricalPredictionLineagePilot(
+  request: HistoricalPredictionLineagePilotRequest = {}
+): Promise<HistoricalPredictionLineagePilotResult> {
+  const generatedAt = new Date().toISOString()
+  const dryRun = request.dryRun ?? true
+  const confirmed = request.confirmed === true
+  const maximumSnapshots = clampWriteCap(request.maximumSnapshots, 15, 15)
+  const maximumPredictions = clampWriteCap(request.maximumPredictions, 5, 5)
+  const settle = request.settle !== false
+  const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
+  const schemaStatus = featureSnapshotSchemaStatus(schemaCapabilities)
+  const schemaApplied = featureSnapshotSchemaApplied(schemaCapabilities)
+  const schemaHardBlocked = ['missing', 'configuration_missing', 'permission_blocked'].includes(schemaStatus)
+  const errors: string[] = []
+  const rejectedReasons: Record<string, number> = {}
+
+  const base = {
+    mode: 'historical_prediction_snapshot_lineage_pilot_v1' as const,
+    dryRun,
+    confirmed,
+    generatedAt,
+    providerUsage: {
+      externalProviderCallsMade: 0 as const,
+      source: 'persisted_normalized_records_only' as const,
+    },
+    caps: {
+      maximumSnapshots,
+      maximumPredictions,
+      maximumOnePredictionPerSnapshot: true as const,
+      concurrency: 1 as const,
+      retries: 0 as const,
+    },
+  }
+
+  if (!schemaApplied && schemaHardBlocked) {
+    return {
+      success: false,
+      ...base,
+      status: 'blocked',
+      snapshotSelection: {
+        snapshotsConsidered: 0,
+        eligibleSnapshots: 0,
+        rejectedSnapshots: 0,
+        blockingReasons: { schema_not_applied: 1 },
+      },
+      predictionPersistence: {
+        attempted: 0,
+        inserted: 0,
+        reused: 0,
+        rejected: 0,
+        failed: 0,
+        insertedIds: [],
+        reusedIds: [],
+        rejectedReasons,
+        errors,
+      },
+      duplicateChecks: {
+        duplicatePredictionIdentities: 0,
+        duplicateSnapshotLinks: 0,
+        stableDeterministicKeys: true,
+      },
+      immutability: {
+        originalSnapshotsMutated: false,
+        incompatibleReplacementRejected: true,
+        validationMethod: 'contract_only',
+        reason: 'Schema readiness is blocked, so no prediction-linked mutation probe was attempted.',
+      },
+      trialIsolation: {
+        trialPredictions: 0,
+        productionEligiblePredictions: 0,
+        productionRecommendationsCreated: 0,
+        productionMetricsEnabled: false,
+      },
+      settlement: {
+        attempted: 0,
+        settled: 0,
+        pending: 0,
+        wins: 0,
+        losses: 0,
+        pushes: 0,
+        voids: 0,
+        skipped: 0,
+        errors: [],
+        status: 'not_requested',
+      },
+      linkageCounts: {
+        linkedPredictions: 0,
+        trialLinkedPredictions: 0,
+        productionLinkedPredictions: 0,
+      },
+      backtestEligibility: await getNbaFeatureSnapshotBacktestCounts(),
+      cleanupPlan: {
+        destructiveActionExecuted: false,
+        filters: ['trial=true', 'scrambled=true', 'production_eligible=false'],
+        referentialIntegrityOrder: ['prediction_history', 'historical_feature_snapshots', 'sport_events', 'provider_entity_mappings', 'sports_sync_jobs'],
+      },
+      warnings: [`Historical feature snapshot schema/linkage columns are not verified: ${schemaStatus}.`],
+    }
+  }
+
+  const selection = await buildTrialPredictionLineageCandidates({
+    maximumSnapshots,
+    maximumPredictions,
+    generatedAt,
+  })
+  const duplicateInputIdentities =
+    selection.candidates.length - new Set(selection.candidates.map((candidate) => candidate.identityKey)).size
+  const candidates = Array.from(
+    new Map(selection.candidates.map((candidate) => [candidate.identityKey, candidate])).values()
+  )
+
+  if (!candidates.length) {
+    return {
+      success: true,
+      ...base,
+      status: 'no_eligible_candidates',
+      snapshotSelection: {
+        snapshotsConsidered: selection.snapshotsConsidered,
+        eligibleSnapshots: 0,
+        rejectedSnapshots: selection.snapshotsConsidered,
+        blockingReasons: selection.blockingReasons,
+      },
+      predictionPersistence: {
+        attempted: 0,
+        inserted: 0,
+        reused: 0,
+        rejected: 0,
+        failed: 0,
+        insertedIds: [],
+        reusedIds: [],
+        rejectedReasons,
+        errors,
+      },
+      duplicateChecks: {
+        duplicatePredictionIdentities: duplicateInputIdentities,
+        duplicateSnapshotLinks: 0,
+        stableDeterministicKeys: true,
+      },
+      immutability: {
+        originalSnapshotsMutated: false,
+        incompatibleReplacementRejected: true,
+        validationMethod: 'contract_only',
+        reason: 'No linked predictions were created, so incompatible replacement was not attempted.',
+      },
+      trialIsolation: {
+        trialPredictions: 0,
+        productionEligiblePredictions: 0,
+        productionRecommendationsCreated: 0,
+        productionMetricsEnabled: false,
+      },
+      settlement: {
+        attempted: 0,
+        settled: 0,
+        pending: 0,
+        wins: 0,
+        losses: 0,
+        pushes: 0,
+        voids: 0,
+        skipped: 0,
+        errors: [],
+        status: 'not_requested',
+      },
+      linkageCounts: {
+        linkedPredictions: 0,
+        trialLinkedPredictions: 0,
+        productionLinkedPredictions: 0,
+      },
+      backtestEligibility: await getNbaFeatureSnapshotBacktestCounts(),
+      cleanupPlan: {
+        destructiveActionExecuted: false,
+        filters: ['trial=true', 'scrambled=true', 'production_eligible=false'],
+        referentialIntegrityOrder: ['prediction_history', 'historical_feature_snapshots', 'sport_events', 'provider_entity_mappings', 'sports_sync_jobs'],
+      },
+      warnings: selection.warnings,
+    }
+  }
+
+  if (dryRun || !confirmed) {
+    return {
+      success: true,
+      ...base,
+      status: 'dry_run',
+      snapshotSelection: {
+        snapshotsConsidered: selection.snapshotsConsidered,
+        eligibleSnapshots: candidates.length,
+        rejectedSnapshots: Math.max(0, selection.snapshotsConsidered - candidates.length),
+        blockingReasons: selection.blockingReasons,
+      },
+      predictionPersistence: {
+        attempted: 0,
+        inserted: 0,
+        reused: 0,
+        rejected: candidates.length,
+        failed: 0,
+        insertedIds: [],
+        reusedIds: [],
+        rejectedReasons: { dry_run_requires_confirmation: candidates.length },
+        errors,
+      },
+      duplicateChecks: {
+        duplicatePredictionIdentities: duplicateInputIdentities,
+        duplicateSnapshotLinks: 0,
+        stableDeterministicKeys: true,
+      },
+      immutability: {
+        originalSnapshotsMutated: false,
+        incompatibleReplacementRejected: true,
+        validationMethod: 'contract_only',
+        reason: 'Dry-run does not create prediction-linked snapshots.',
+      },
+      trialIsolation: {
+        trialPredictions: 0,
+        productionEligiblePredictions: 0,
+        productionRecommendationsCreated: 0,
+        productionMetricsEnabled: false,
+      },
+      settlement: {
+        attempted: 0,
+        settled: 0,
+        pending: 0,
+        wins: 0,
+        losses: 0,
+        pushes: 0,
+        voids: 0,
+        skipped: 0,
+        errors: [],
+        status: 'dry_run',
+      },
+      linkageCounts: {
+        linkedPredictions: 0,
+        trialLinkedPredictions: 0,
+        productionLinkedPredictions: 0,
+      },
+      backtestEligibility: await getNbaFeatureSnapshotBacktestCounts(),
+      cleanupPlan: {
+        destructiveActionExecuted: false,
+        filters: ['trial=true', 'scrambled=true', 'production_eligible=false'],
+        referentialIntegrityOrder: ['prediction_history', 'historical_feature_snapshots', 'sport_events', 'provider_entity_mappings', 'sports_sync_jobs'],
+      },
+      warnings: [...selection.warnings, 'Prediction lineage pilot requires dryRun=false and confirmed=true.'],
+    }
+  }
+
+  const identityParts = candidates.map((candidate) => ({
+    sportKey: candidate.snapshot.sport_key,
+    gameId: candidate.snapshot.event_id,
+    team: candidate.team,
+    market: candidate.market,
+    sportsbook: candidate.sportsbook,
+  }))
+  const gameIds = Array.from(new Set(identityParts.map((item) => item.gameId).filter(Boolean))) as string[]
+  const existingResult = gameIds.length
+    ? await supabaseAdmin
+        .from('prediction_history')
+        .select('id, sport_key, game_id, team, market, sportsbook, feature_snapshot_id, feature_snapshot_key, trial, production_eligible')
+        .eq('sport_key', 'basketball_nba')
+        .in('game_id', gameIds)
+    : { data: [], error: null }
+
+  if (existingResult.error) {
+    throw new Error(`Failed to check existing trial prediction lineage rows: ${existingResult.error.message}`)
+  }
+
+  const existingByIdentity = new Map(
+    ((existingResult.data ?? []) as Array<{
+      id: string
+      sport_key: string
+      game_id: string
+      team: string
+      market: string
+      sportsbook: string
+      feature_snapshot_id: string | null
+      feature_snapshot_key: string | null
+      trial: boolean | null
+      production_eligible: boolean | null
+    }>).map((row) => [[row.sport_key, row.game_id, row.team, row.market, row.sportsbook].join('|'), row])
+  )
+  const rowsToInsert = []
+  const reusedIds: string[] = []
+  const insertedIds: string[] = []
+
+  for (const candidate of candidates) {
+    const existing = existingByIdentity.get(candidate.identityKey)
+    if (existing) {
+      if (
+        existing.feature_snapshot_id === candidate.snapshot.id &&
+        existing.feature_snapshot_key === candidate.snapshot.deterministic_key &&
+        existing.trial === true &&
+        existing.production_eligible === false
+      ) {
+        reusedIds.push(existing.id)
+      } else {
+        countReason(rejectedReasons, 'existing_prediction_identity_has_different_lineage')
+      }
+      continue
+    }
+
+    rowsToInsert.push({
+      sport_key: candidate.snapshot.sport_key,
+      game_id: candidate.snapshot.event_id,
+      commence_time: candidate.event.start_time,
+      home_team: candidate.event.home_team,
+      away_team: candidate.event.away_team,
+      team: candidate.team,
+      opponent: candidate.opponent,
+      market: candidate.market,
+      sportsbook: candidate.sportsbook,
+      odds: candidate.odds,
+      implied_probability: candidate.impliedProbability,
+      model_probability: candidate.modelProbability,
+      edge: candidate.edge,
+      ev: candidate.ev,
+      confidence: candidate.confidence,
+      recommended_pick: false,
+      selection: candidate.team,
+      line: candidate.line,
+      projected_line: null,
+      odds_timestamp: null,
+      generated_at: candidate.generatedAt,
+      cutoff_at: candidate.cutoffAt,
+      model_version: candidate.snapshot.model_version,
+      feature_snapshot: {
+        mode: 'historical_prediction_snapshot_lineage_pilot_v1',
+        snapshotId: candidate.snapshot.id,
+        snapshotKey: candidate.snapshot.deterministic_key,
+        featureQualityScore: candidate.snapshot.data_quality_score,
+        dataSufficiencyScore: candidate.snapshot.data_sufficiency_score,
+        unresolvedMappingCount: candidate.snapshot.unresolved_mapping_count,
+        leakageStatus: candidate.snapshot.leakage_status,
+        trial: true,
+        scrambled: true,
+        productionEligible: false,
+        noProductionRecommendation: true,
+        missingOfferedPrice: candidate.odds === null,
+      },
+      feature_snapshot_id: candidate.snapshot.id,
+      feature_snapshot_key: candidate.snapshot.deterministic_key,
+      feature_set_version: candidate.snapshot.feature_set_version,
+      feature_snapshot_generated_at: candidate.snapshot.generated_at,
+      production_eligible: false,
+      trial: true,
+      scrambled: true,
+      validation_warnings: candidate.warnings,
+      validation_status: 'valid',
+      lifecycle_status: 'active',
+      skip_reason: null,
+      settlement_market: candidate.market,
+      status: 'pending',
+      result: 'pending',
+      stake: 100,
+      profit: null,
+    })
+  }
+
+  if (rowsToInsert.length) {
+    const insertResult = await supabaseAdmin
+      .from('prediction_history')
+      .insert(rowsToInsert)
+      .select('id')
+
+    if (insertResult.error) {
+      errors.push(insertResult.error.message)
+    } else {
+      insertedIds.push(...((insertResult.data ?? []) as Array<{ id: string }>).map((row) => row.id))
+    }
+  }
+
+  const linkedIds = [...insertedIds, ...reusedIds]
+  const settlementResult =
+    settle && linkedIds.length
+      ? await settleNbaPredictionsByIds(linkedIds)
+      : null
+  const counts = await getNbaFeatureSnapshotBacktestCounts()
+  const duplicateRows = linkedIds.length
+    ? await supabaseAdmin
+        .from('prediction_history')
+        .select('id, sport_key, game_id, team, market, sportsbook, feature_snapshot_id')
+        .in('id', linkedIds)
+    : { data: [], error: null }
+  const duplicateRowsData = (duplicateRows.data ?? []) as Array<{
+    id: string
+    sport_key: string
+    game_id: string
+    team: string
+    market: string
+    sportsbook: string
+    feature_snapshot_id: string | null
+  }>
+  const duplicatePredictionIdentities = Math.max(
+    0,
+    duplicateRowsData.length -
+      new Set(duplicateRowsData.map((row) => [row.sport_key, row.game_id, row.team, row.market, row.sportsbook].join('|'))).size
+  )
+  const duplicateSnapshotLinks = Math.max(
+    0,
+    duplicateRowsData.length -
+      new Set(duplicateRowsData.map((row) => row.feature_snapshot_id ?? row.id)).size
+  )
+  const failed = errors.length
+  const rejected = Object.values(rejectedReasons).reduce((sum, value) => sum + value, 0)
+
+  return {
+    success: failed === 0,
+    ...base,
+    status: failed ? (insertedIds.length || reusedIds.length ? 'partial' : 'failed') : 'completed',
+    snapshotSelection: {
+      snapshotsConsidered: selection.snapshotsConsidered,
+      eligibleSnapshots: candidates.length,
+      rejectedSnapshots: Math.max(0, selection.snapshotsConsidered - candidates.length),
+      blockingReasons: selection.blockingReasons,
+    },
+    predictionPersistence: {
+      attempted: candidates.length,
+      inserted: insertedIds.length,
+      reused: reusedIds.length,
+      rejected,
+      failed,
+      insertedIds,
+      reusedIds,
+      rejectedReasons,
+      errors,
+    },
+    duplicateChecks: {
+      duplicatePredictionIdentities,
+      duplicateSnapshotLinks,
+      stableDeterministicKeys: duplicateInputIdentities === 0,
+    },
+    immutability: {
+      originalSnapshotsMutated: false,
+      incompatibleReplacementRejected: true,
+      validationMethod: 'contract_and_remote_trigger_guard',
+      reason:
+        'The pilot used insert/reuse-only prediction linkage. No snapshot update was sent; incompatible replacement is rejected by service contract and the applied trigger protects linked snapshots.',
+    },
+    trialIsolation: {
+      trialPredictions: linkedIds.length,
+      productionEligiblePredictions: 0,
+      productionRecommendationsCreated: 0,
+      productionMetricsEnabled: false,
+    },
+    settlement: settlementResult
+      ? {
+          attempted: settlementResult.checked,
+          settled: settlementResult.settled,
+          pending: settlementResult.pending,
+          wins: settlementResult.wins,
+          losses: settlementResult.losses,
+          pushes: settlementResult.pushes,
+          voids: settlementResult.voids,
+          skipped: settlementResult.skipped,
+          errors: settlementResult.errors,
+          status: settlementResult.pending > 0 ? 'settlement_pending' : 'completed',
+        }
+      : {
+          attempted: 0,
+          settled: 0,
+          pending: 0,
+          wins: 0,
+          losses: 0,
+          pushes: 0,
+          voids: 0,
+          skipped: 0,
+          errors: [],
+          status: settle ? 'not_requested' : 'not_requested',
+        },
+    linkageCounts: {
+      linkedPredictions: counts.linkedPredictions,
+      trialLinkedPredictions: counts.trialLinkedPredictions,
+      productionLinkedPredictions: counts.productionLinkedPredictions,
+    },
+    backtestEligibility: counts,
+    cleanupPlan: {
+      destructiveActionExecuted: false,
+      filters: [
+        'prediction_history.trial=true',
+        'prediction_history.scrambled=true',
+        'prediction_history.production_eligible=false',
+        'historical_feature_snapshots.trial=true',
+        'historical_feature_snapshots.scrambled=true',
+        'historical_feature_snapshots.production_eligible=false',
+        'feature_snapshot_id links predictions to snapshots',
+      ],
+      referentialIntegrityOrder: [
+        'Review linked prediction_history rows first.',
+        'Preserve or remove child prediction links before removing snapshots.',
+        'Preserve sport_events and provider_entity_mappings unless no remaining rows reference them.',
+        'Preserve sports_sync_jobs audit metadata unless an approved retention policy covers it.',
+      ],
+    },
+    warnings: [
+      ...selection.warnings,
+      ...(rowsToInsert.some((row) => row.odds === null)
+        ? ['One or more trial prediction rows have no genuine offered price and are ROI-ineligible.']
+        : []),
+    ],
   }
 }

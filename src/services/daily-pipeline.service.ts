@@ -12,6 +12,7 @@ import { getNbaModelHealthV2 } from '@/services/nba-prediction-settlement.servic
 import {
   planHistoricalFeatureGeneration,
   runHistoricalFeatureSnapshotWritePilot,
+  runHistoricalPredictionLineagePilot,
 } from '@/services/historical-feature-generation.service'
 
 export type DailySyncOrchestratorV2Options = {
@@ -201,6 +202,13 @@ export async function runDailySyncOrchestratorV2(options: DailySyncOrchestratorV
     maximumEvents: 5,
     maximumMarketsPerEvent: 3,
     maximumSnapshots: 15,
+  })
+  const predictionLineagePilot = await runHistoricalPredictionLineagePilot({
+    dryRun: true,
+    confirmed: false,
+    maximumSnapshots: 15,
+    maximumPredictions: 5,
+    settle: false,
   })
   const resumeFromStep = options.resumeFromStep ?? null
   const cancelAfterStep = options.cancelAfterStep ?? null
@@ -414,6 +422,49 @@ export async function runDailySyncOrchestratorV2(options: DailySyncOrchestratorV
         originalSnapshotImmutable: snapshotWritePilot.immutability.linkedSnapshotMutationProtected,
         linkedPredictionBacktestEligibility:
           'requires linked production snapshot, valid price, genuine closing snapshot and settled production result',
+      },
+    },
+    historicalPredictionLineagePilot: {
+      mode: predictionLineagePilot.mode,
+      status: predictionLineagePilot.status,
+      eligibleSnapshotCount: predictionLineagePilot.snapshotSelection.eligibleSnapshots,
+      maximumPredictions: predictionLineagePilot.caps.maximumPredictions,
+      linkedPredictionCount: predictionLineagePilot.linkageCounts.linkedPredictions,
+      trialLinkedPredictionCount: predictionLineagePilot.linkageCounts.trialLinkedPredictions,
+      productionLinkedPredictionCount: predictionLineagePilot.linkageCounts.productionLinkedPredictions,
+      settlementStatus: predictionLineagePilot.settlement.status,
+      backtestContractEligibility: {
+        roiEligibleRows: predictionLineagePilot.backtestEligibility.rowsEligibleForRoi,
+        calibrationEligibleRows:
+          predictionLineagePilot.backtestEligibility.rowsEligibleForCalibration,
+        clvEligibleRows: predictionLineagePilot.backtestEligibility.rowsEligibleForClv,
+        blockedForTrialStatus:
+          predictionLineagePilot.backtestEligibility.rowsBlockedForTrialStatus,
+      },
+      productionGate:
+        'closed_for_trial_lineage; production performance requires production_eligible linked predictions with real prices, closing snapshots and settled samples.',
+      pregame: {
+        normalizedData: snapshotWritePilot.schema.applied,
+        featureSnapshotGeneration: featureGenerationHandoff.eligibility.leakageValidationReady,
+        snapshotPersistence:
+          snapshotWritePilot.persistence.inserted + snapshotWritePilot.persistence.reused,
+        predictionCreationAndLinkage: predictionLineagePilot.status,
+        productionTrialGate:
+          'trial=true and production_eligible=false rows validate linkage only',
+      },
+      postgame: {
+        resultSynchronization: 'uses existing sport_events and sport_game_stats only',
+        settlement: predictionLineagePilot.settlement.status,
+        performanceEligibility:
+          predictionLineagePilot.backtestEligibility.rowsEligibleForRoi > 0
+            ? 'production_roi_candidates_present'
+            : 'blocked',
+        calibrationEligibility:
+          predictionLineagePilot.backtestEligibility.rowsEligibleForCalibration > 0
+            ? 'production_calibration_candidates_present'
+            : 'blocked',
+        originalSnapshotImmutability:
+          predictionLineagePilot.immutability.incompatibleReplacementRejected,
       },
     },
     summary: {

@@ -21,7 +21,15 @@ Verified on 2026-07-14:
 - `GET /v3/nba/odds/json/BettingMarkets/22888` returned HTTP 200 with 0 records.
 - No odds snapshots were inserted or updated.
 
-Current blocker: identify the exact SportsDataIO endpoint that returns sportsbook-priced outcomes for the discovered betting markets. Do not call broad odds, live odds, typo-sensitive, props or historical archive endpoints until the endpoint is cataloged and approved.
+## Priced Game Odds
+
+Verified on 2026-07-14:
+
+- `GET /v3/nba/odds/json/GameOddsByDate/2025-12-26` returned HTTP 200 with 9 top-level game records.
+- The payload contained `PregameOdds`, `AlternateMarketPregameOdds` and `LiveOdds` arrays.
+- The first persistence run inserted trial-only `sports_odds_snapshots` rows but stopped as partial because alternate-like rows were included by the initial traversal and validation used a broad first-page read.
+
+Current blocker: approve cleanup/quarantine for the trial-only alternate-like rows and rerun the corrected full-game-only `GameOddsByDate` pilot if desired. Do not call alternate, live, props, typo-sensitive or historical archive endpoints during that cleanup.
 
 ## Registered Odds Endpoints
 
@@ -47,3 +55,4 @@ The misspelled `LveGameOddsByDate` path is not cataloged and must not be called.
 - Preserve `BettingMarketID`, `BettingOutcomeID` and `SportsbookID` separately.
 - Never use `GameID`, `BettingMarketID` or a trial mapping ID as a `BettingEventID`.
 - Do not persist `sports_odds_snapshots` rows unless an actual sportsbook-priced outcome exists.
+- For `GameOddsByDate` pilots, persist only `PregameOdds` full-game moneyline, spread and total rows; skip `AlternateMarketPregameOdds` and `LiveOdds`.

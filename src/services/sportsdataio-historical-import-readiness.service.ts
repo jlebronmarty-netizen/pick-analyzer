@@ -615,8 +615,8 @@ function validateGuardrails(normalized: ReturnType<typeof normalizeRequest>) {
     normalized.maximumRecords <= NBA_BETTING_ODDS_PILOT_CAPS.maximumRecords &&
     normalized.batchSizeDays === NBA_BETTING_ODDS_PILOT_CAPS.batchSizeDays &&
     normalized.concurrencyLimit === NBA_BETTING_ODDS_PILOT_CAPS.concurrencyLimit &&
-    normalized.dateFrom === '2025-12-26' &&
-    normalized.dateTo === '2025-12-26' &&
+    normalized.dateFrom !== null &&
+    normalized.dateFrom === normalized.dateTo &&
     normalized.domains.length === 1 &&
     normalized.domains.every((domain) => NBA_BETTING_ODDS_PILOT_ALLOWED_DOMAINS.includes(domain))
   const isApprovedCappedNbaPilot =
@@ -1099,6 +1099,33 @@ async function countExistingIds(table: string, ids: string[]) {
     }
   }
   return existing
+}
+
+async function loadOddsRowsByIds(ids: string[]) {
+  if (ids.length === 0) return []
+  const rows: Array<{
+    id: string
+    event_id: string
+    sportsbook: string
+    market: string
+    outcome: string
+    price: number | null
+    line: number | null
+    snapshot_time: string
+    metadata: Record<string, unknown> | null
+  }> = []
+  const uniqueIds = Array.from(new Set(ids))
+  const chunkSize = 100
+  for (let index = 0; index < uniqueIds.length; index += chunkSize) {
+    const chunk = uniqueIds.slice(index, index + chunkSize)
+    const result = await supabaseAdmin
+      .from('sports_odds_snapshots')
+      .select('id, event_id, sportsbook, market, outcome, price, line, snapshot_time, metadata')
+      .in('id', chunk)
+    if (result.error) throw new Error(`sports_odds_snapshots validation failed: ${result.error.message}`)
+    rows.push(...((result.data ?? []) as typeof rows))
+  }
+  return rows
 }
 
 async function countExistingMappings(keys: Array<{ entityType: string; providerId: string; season: string }>) {
@@ -2199,9 +2226,16 @@ function impliedProbabilityFromAmerican(american: number | null) {
 }
 
 function normalizeMarketKey(market: string, period: string | null, isAlternate: boolean) {
-  const base = market.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'unknown_market'
-  const periodKey = period ? period.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') : 'full_game'
-  return `${isAlternate ? 'alternate_' : ''}${base}:${periodKey}`
+  const normalized = market.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+  const base =
+    normalized.includes('moneyline') || normalized.includes('money_line')
+      ? 'moneyline'
+      : normalized.includes('spread') || normalized.includes('point_spread')
+        ? 'spread'
+        : normalized.includes('total') || normalized.includes('over_under')
+          ? 'total'
+          : normalized || 'unknown_market'
+  return isAlternate ? `alternate_${base}` : base
 }
 
 function normalizeOutcomeName(value: string) {
@@ -2213,7 +2247,7 @@ function resolveEventId(providerEventId: string, existingEvents: Array<{ id: str
     const providerIds = event.provider_ids ?? {}
     return String(providerIds.sportsdataio ?? providerIds.game ?? '') === providerEventId
   })
-  return match?.id ?? eventIdFromProviderId(providerEventId)
+  return match?.id ?? null
 }
 
 function oddsContextFromRow(row: Record<string, unknown>, context: OddsContext, path: string): OddsContext {
@@ -2262,7 +2296,9 @@ function outcomeRowsFromObject({
   const marketRaw = firstString(row, MARKET_TYPE_KEYS) || context.marketType || context.marketName
   const outcomeRaw = firstString(row, OUTCOME_KEYS)
   const price = safeNumber(oddsCandidate(row, PRICE_KEYS))
-  const line = safeNumber(oddsCandidate(row, LINE_KEYS))
+  const line = Object.prototype.hasOwnProperty.call(row, 'Line')
+    ? safeNumber(row.Line)
+    : safeNumber(oddsCandidate(row, LINE_KEYS))
   if (!providerEventId || !sportsbook || !marketRaw || !outcomeRaw || price === null || price === 0) return []
 
   const period = firstString(row, PERIOD_KEYS) || context.marketPeriod || 'full_game'
@@ -2273,6 +2309,7 @@ function outcomeRowsFromObject({
   const market = normalizeMarketKey(marketRaw, period, context.isAlternate)
   const outcome = normalizeOutcomeName(outcomeRaw)
   const eventId = resolveEventId(providerEventId, existingEvents)
+  if (!eventId) return []
   const rowId = idempotencyKey([
     NBA_SPORT_KEY,
     NBA_LEAGUE_KEY,
@@ -2310,12 +2347,14 @@ function outcomeRowsFromObject({
       marketType: marketRaw,
       marketName: context.marketName,
       marketPeriod: period,
+      period: period,
       selection: outcomeRaw,
       side: outcome,
+      providerGameId: providerEventId,
       decimalOdds: americanToDecimalOdds(price),
       impliedProbability: impliedProbabilityFromAmerican(price),
       providerTimestamp: context.providerTimestamp,
-      capturedAt: generatedAt(),
+      capturedAt: snapshotTime,
       isLive: context.isLive,
       isAlternate: context.isAlternate,
       sourcePath: context.sourcePath,
@@ -2393,10 +2432,14 @@ function buildSportsDataIoOddsRows({
     const row = asRecord(value)
     if (!row) return
     const current = oddsContextFromRow(row, context, path)
+    const sourcePath = current.sourcePath.toLowerCase()
+    if (sourcePath.includes('alternatemarket') || sourcePath.includes('liveodds')) return
     rows.push(...outcomeRowsFromObject({ row, context: current, season, selectedDate, existingEvents }))
     rows.push(...wideGameOddRows({ row, context: current, season, selectedDate, existingEvents }))
     for (const [key, child] of Object.entries(row)) {
       if (child === null || child === undefined) continue
+      const childKey = key.toLowerCase()
+      if (childKey.includes('alternatemarket') || childKey.includes('liveodds')) continue
       if (Array.isArray(child) || asRecord(child)) {
         visit(child, current, `${path}.${key}`, depth + 1)
       }
@@ -2443,6 +2486,48 @@ function validateSportsDataIoBettingEventsNormalizationFixtures() {
     Price: -120,
     Updated: `${selectedDate}T12:00:00Z`,
   }]
+  const gameOddsFixture: SportsDataIoStatsPayload[] = [{
+    GameID: 9001,
+    PregameOdds: [{
+      SportsbookID: 77,
+      Sportsbook: 'FixtureBook',
+      Updated: `${selectedDate}T12:00:00Z`,
+      HomeTeam: 'BOS',
+      AwayTeam: 'NY',
+      HomeMoneyLine: -135,
+      AwayMoneyLine: 115,
+      HomePointSpread: -4.5,
+      HomePointSpreadPayout: -110,
+      AwayPointSpread: 4.5,
+      AwayPointSpreadPayout: -110,
+      OverUnder: 224.5,
+      OverPayout: -108,
+      UnderPayout: -112,
+    }],
+    AlternateMarketPregameOdds: [{
+      SportsbookID: 77,
+      Sportsbook: 'FixtureBook',
+      Updated: `${selectedDate}T12:00:00Z`,
+      HomeTeam: 'BOS',
+      AwayTeam: 'NY',
+      HomeMoneyLine: -150,
+      AwayMoneyLine: 125,
+      HomePointSpread: -6.5,
+      HomePointSpreadPayout: -110,
+      AwayPointSpread: 6.5,
+      AwayPointSpreadPayout: -110,
+      OverUnder: 229.5,
+      OverPayout: -110,
+      UnderPayout: -110,
+    }],
+    LiveOdds: [{
+      SportsbookID: 77,
+      Sportsbook: 'FixtureBook',
+      Updated: `${selectedDate}T12:30:00Z`,
+      HomeMoneyLine: -160,
+      AwayMoneyLine: 130,
+    }],
+  }]
   const discoveryFixture: SportsDataIoStatsPayload[] = [{
     BettingEventID: 9001,
     GameID: 9001,
@@ -2457,6 +2542,13 @@ function validateSportsDataIoBettingEventsNormalizationFixtures() {
   }]
   const directRows = buildSportsDataIoOddsRows({
     payload: directSnapshotFixture,
+    season,
+    selectedDate,
+    existingEvents,
+    defaultAlternate: false,
+  })
+  const gameOddsRows = buildSportsDataIoOddsRows({
+    payload: gameOddsFixture,
     season,
     selectedDate,
     existingEvents,
@@ -2486,6 +2578,22 @@ function validateSportsDataIoBettingEventsNormalizationFixtures() {
   const discoveryShape = sanitizedPayloadShape('bettingEventsByDate', discoveryFixture)
   const checks = {
     directSnapshotRowsNormalize: directRows.length === 1,
+    gameOddsWideRowsNormalize:
+      gameOddsRows.length === 6 &&
+      gameOddsRows.filter((row) => row.market === 'moneyline').length === 2 &&
+      gameOddsRows.filter((row) => row.market === 'spread').length === 2 &&
+      gameOddsRows.filter((row) => row.market === 'total').length === 2,
+    gameOddsIgnoresAlternateAndLive:
+      gameOddsRows.every((row) => !String(row.metadata.sourcePath).includes('AlternateMarketPregameOdds')) &&
+      gameOddsRows.every((row) => !String(row.metadata.sourcePath).includes('LiveOdds')),
+    gameOddsMoneylineLineNull:
+      gameOddsRows.filter((row) => row.market === 'moneyline').every((row) => row.line === null),
+    gameOddsSpreadTotalLinesRetained:
+      gameOddsRows.filter((row) => row.market === 'spread' || row.market === 'total').every((row) => row.line !== null),
+    gameOddsRowsUseMappedEvent:
+      gameOddsRows.every((row) => row.event_id === eventIdFromProviderId('9001')),
+    gameOddsRowsAreFullGamePregame:
+      gameOddsRows.every((row) => row.metadata.period === 'full_game' && row.metadata.isLive === false && row.metadata.isAlternate === false),
     directSnapshotClassifiedPersistable:
       directClassification.status === 'PRICED_OUTCOMES_AVAILABLE' &&
       directClassification.canPersistSnapshotsDirectly,
@@ -2509,6 +2617,7 @@ function validateSportsDataIoBettingEventsNormalizationFixtures() {
     valid: Object.values(checks).every(Boolean),
     checks,
     directRowsNormalized: directRows.length,
+    gameOddsRowsNormalized: gameOddsRows.length,
     discoveryRowsNormalized: discoveryRows.length,
     discoveryClassification,
     discoveryCounters,
@@ -3975,10 +4084,10 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
   let endpointResultsForFailure: SportsDataIoEndpointResult[] = []
   let payloadShapesForFailure: SportsDataIoSanitizedShape[] = []
   let recordsFetchedForFailure = 0
-  let bettingEventsClassificationForFailure: SportsDataIoBettingClassification | null = null
+  let gameOddsClassificationForFailure: SportsDataIoBettingClassification | null = null
 
   try {
-    if (!plan.validation.valid || !apiKey || selectedDate !== '2025-12-26' || normalized.dateTo !== '2025-12-26') {
+    if (!plan.validation.valid || !apiKey || !selectedDate || normalized.dateTo !== selectedDate) {
       return {
         success: false,
         mode: 'sportsdataio_nba_betting_odds_pilot_v1',
@@ -3995,13 +4104,13 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
           errors: [
             ...plan.validation.errors,
             ...(!apiKey ? ['SportsDataIO API key is not configured.'] : []),
-            ...(selectedDate !== '2025-12-26' || normalized.dateTo !== '2025-12-26'
-              ? ['Betting odds pilot requires dateFrom=dateTo=2025-12-26.']
+            ...(!selectedDate || normalized.dateTo !== selectedDate
+              ? ['Betting odds pilot requires one selected date with dateFrom=dateTo.']
               : []),
           ],
           warnings: [
             ...plan.validation.warnings,
-            'SportsDataIO public documentation notes betting odds older than 30 days are stored in the Historical API data warehouse; this pilot stops on any entitlement/date-window failure.',
+            'SportsDataIO GameOddsByDate is used only for bounded full-game pregame moneyline/spread/total prices; this pilot stops on any entitlement/date-window failure.',
           ],
         },
         noSecretExposure: true,
@@ -4056,62 +4165,55 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
       return fetchSportsDataIoJson({ ...args, apiKey, baseUrl: SPORTSDATAIO_NBA_ODDS_BASE_URL })
     }
 
-    const bettingEventsResponse = await fetchCapped({
-      feed: 'bettingEventsByDate',
-      path: `/BettingEventsByDate/${selectedDate}`,
+    const gameOddsResponse = await fetchCapped({
+      feed: 'gameOddsByDate',
+      path: `/GameOddsByDate/${selectedDate}`,
     })
     endpointResultsForFailure = [
-      { ...bettingEventsResponse.metadata, records: bettingEventsResponse.payload.length },
+      { ...gameOddsResponse.metadata, records: gameOddsResponse.payload.length },
     ]
     payloadShapesForFailure = [
-      sanitizedPayloadShape('bettingEventsByDate', bettingEventsResponse.payload),
+      sanitizedPayloadShape('gameOddsByDate', gameOddsResponse.payload),
     ]
-    recordsFetchedForFailure = bettingEventsResponse.payload.length
-    const bettingEventRows = buildSportsDataIoOddsRows({
-      payload: bettingEventsResponse.payload,
+    recordsFetchedForFailure = gameOddsResponse.payload.length
+    const gameOddsRows = buildSportsDataIoOddsRows({
+      payload: gameOddsResponse.payload,
       season,
       selectedDate,
       existingEvents,
       defaultAlternate: false,
     })
-    const bettingEventsClassification = classifySportsDataIoBettingPayload({
-      payload: bettingEventsResponse.payload,
+    const gameOddsClassification = classifySportsDataIoBettingPayload({
+      payload: gameOddsResponse.payload,
       providerSport: 'nba',
-      httpStatus: bettingEventsResponse.metadata.status,
+      httpStatus: gameOddsResponse.metadata.status,
     })
-    bettingEventsClassificationForFailure = bettingEventsClassification
-    if (bettingEventsClassification.status === 'UNSUPPORTED_SCHEMA') {
-      throw new Error(bettingEventsClassification.reason)
+    gameOddsClassificationForFailure = {
+      ...gameOddsClassification,
+      status: gameOddsRows.length > 0 ? 'PRICED_OUTCOMES_AVAILABLE' : gameOddsClassification.status,
+      canPersistSnapshotsDirectly: gameOddsRows.length > 0,
+      requiresMarketDetail: false,
+      reason: gameOddsRows.length > 0
+        ? 'GameOddsByDate payload includes sportsbook-priced full-game moneyline, spread or total rows.'
+        : gameOddsClassification.reason,
+      counters: {
+        ...gameOddsClassification.counters,
+        pricedOutcomes: gameOddsRows.length,
+        normalizedSnapshots: gameOddsRows.length,
+        sportsbooksDiscovered: new Set(gameOddsRows.map((row) => row.sportsbook)).size,
+      },
     }
-    if (bettingEventsClassification.status === 'ENTITLEMENT_BLOCKED') {
-      throw new Error(bettingEventsClassification.reason)
+    if (gameOddsClassification.status === 'ENTITLEMENT_BLOCKED') {
+      throw new Error(gameOddsClassification.reason)
     }
-
-    let marketDetailResponse: Awaited<ReturnType<typeof fetchCapped>> | null = null
-    let marketDetailRows: NormalizedOddsPilotRow[] = []
-    if (bettingEventsClassification.requiresMarketDetail && bettingEventsClassification.selectedProviderEventId) {
-      marketDetailResponse = await fetchCapped({
-        feed: 'bettingMarketsByEvent',
-        path: `/BettingMarkets/${encodeURIComponent(bettingEventsClassification.selectedProviderEventId)}`,
-      })
-      endpointResultsForFailure = [
-        ...endpointResultsForFailure,
-        { ...marketDetailResponse.metadata, records: marketDetailResponse.payload.length },
-      ]
-      payloadShapesForFailure = [
-        ...payloadShapesForFailure,
-        sanitizedPayloadShape('bettingMarketsByEvent', marketDetailResponse.payload),
-      ]
-      marketDetailRows = buildSportsDataIoOddsRows({
-        payload: marketDetailResponse.payload,
-        season,
-        selectedDate,
-        existingEvents,
-        defaultAlternate: true,
-      })
+    if (gameOddsResponse.payload.length > 0 && gameOddsRows.length === 0) {
+      throw new Error('GameOddsByDate returned provider records but zero usable full-game sportsbook-priced outcomes.')
+    }
+    if (gameOddsResponse.payload.length === 0) {
+      throw new Error('GameOddsByDate returned zero provider records for the selected date.')
     }
 
-    const rawRecordsFetched = bettingEventsResponse.payload.length + (marketDetailResponse?.payload.length ?? 0)
+    const rawRecordsFetched = gameOddsResponse.payload.length
     recordsFetchedForFailure = rawRecordsFetched
     if (rawRecordsFetched > normalized.maximumRecords) {
       throw new Error(
@@ -4119,32 +4221,10 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
       )
     }
 
-    const oddsRows = uniqueBy([...bettingEventRows, ...marketDetailRows], (row) => row.id)
-    if (
-      rawRecordsFetched > 0 &&
-      oddsRows.length === 0 &&
-      bettingEventsClassification.canPersistSnapshotsDirectly
-    ) {
-      throw new Error('Betting odds pilot fetched provider records but normalized zero supported odds rows.')
-    }
+    const oddsRows = uniqueBy(gameOddsRows, (row) => row.id)
 
     const endpointResults: SportsDataIoEndpointResult[] = [
-      { ...bettingEventsResponse.metadata, records: bettingEventsResponse.payload.length },
-      ...(marketDetailResponse
-        ? [{ ...marketDetailResponse.metadata, records: marketDetailResponse.payload.length }]
-        : [{
-            feed: 'bettingMarketsByEvent',
-            endpoint: bettingEventsClassification.selectedProviderEventId
-              ? `/BettingMarkets/${bettingEventsClassification.selectedProviderEventId}`
-              : '/BettingMarkets/{eventId}',
-            status: 0,
-            rateLimitMetadata: {},
-            records: 0,
-            skipped: true,
-            reason: bettingEventsClassification.requiresMarketDetail
-              ? 'Skipped because no safe provider event id was available for the approved one-event market-detail call.'
-              : 'Skipped because BettingEventsByDate was directly classified without requiring a market-detail call.',
-          } satisfies SportsDataIoEndpointResult]),
+      { ...gameOddsResponse.metadata, records: gameOddsResponse.payload.length },
     ]
     const payloadShapes = payloadShapesForFailure
     const existingOdds = await countExistingIds('sports_odds_snapshots', oddsRows.map((row) => row.id))
@@ -4196,8 +4276,8 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
           reason: endpoint.reason ?? null,
         })),
         payloadShapes,
-        bettingEventsClassification,
-        bettingCounters: bettingEventsClassification.counters,
+        gameOddsClassification: gameOddsClassificationForFailure,
+        bettingCounters: gameOddsClassificationForFailure.counters,
         externalCallsUsed,
         recordCounters,
         multiBookStatus: multiBookPreview.status,
@@ -4221,9 +4301,8 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
       status,
       completionLabels: [
         'LIVE_PROVIDER_VALIDATION_COMPLETE',
-        'BETTING_EVENTS_CONTRACT_VALIDATION_COMPLETE',
-        ...(marketDetailResponse ? ['BETTING_MARKETS_CONTRACT_VALIDATION_COMPLETE'] : []),
-        ...(oddsRows.length > 0 ? ['ODDS_SNAPSHOT_PERSISTENCE_COMPLETE'] : ['BETTING_EVENTS_DISCOVERY_ONLY_CONFIRMED']),
+        'GAME_ODDS_BY_DATE_CONTRACT_VALIDATION_COMPLETE',
+        'ODDS_SNAPSHOT_PERSISTENCE_COMPLETE',
         'TRIAL_DATA_ISOLATION_COMPLETE',
         'PRODUCTION_CONFIDENCE_LEAKAGE_BLOCKED',
       ],
@@ -4235,16 +4314,20 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
       })),
       skippedEndpoints: [
         {
-          endpoint: '/v3/nba/odds/json/AlternateMarketGameOddsByDate/2025-12-26',
-          reason: 'Not called in this verification because the approved follow-up is BettingMarkets/{eventId} only when BettingEventsByDate proves market detail is required.',
+          endpoint: '/v3/nba/odds/json/BettingEventsByDate/{date}',
+          reason: 'Not called because this pilot uses GameOddsByDate as the confirmed priced snapshot source.',
         },
         {
-          endpoint: '/v3/nba/odds/json/LveGameOddsByDate/{date}',
-          reason: 'Exact spelling was supplied as LveGameOddsByDate and was not verified from provider documentation; no call was made.',
+          endpoint: '/v3/nba/odds/json/AlternateMarketGameOddsByDate/{date}',
+          reason: 'Not called because alternate markets are excluded from this pilot.',
+        },
+        {
+          endpoint: '/v3/nba/odds/json/LiveGameOddsByDate/{date}',
+          reason: 'Not called because live odds are excluded from this pregame full-game pilot.',
         },
       ],
       payloadShapes,
-      bettingEventsClassification,
+      gameOddsClassification: gameOddsClassificationForFailure,
       request: plan.request,
       job: {
         id: jobId,
@@ -4257,21 +4340,24 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
         recordsFlattened: oddsRows.length,
         recordsNormalized: oddsRows.length,
         normalizedRowsProduced: recordCounters.normalizedRowsProduced,
-        bettingEventsFetched: bettingEventsResponse.payload.length,
-        bettingMarketsFetched: marketDetailResponse?.payload.length ?? 0,
-        bettingEventRowsNormalized: bettingEventRows.length,
-        marketDetailRowsNormalized: marketDetailRows.length,
-        discoveryRecords: bettingEventsResponse.payload.length,
-        eventsDiscovered: bettingEventsClassification.counters.eventsDiscovered,
-        marketsDiscovered: bettingEventsClassification.counters.marketsDiscovered,
-        outcomesDiscovered: bettingEventsClassification.counters.outcomesDiscovered,
-        pricedOutcomes: bettingEventsClassification.counters.pricedOutcomes,
-        sportsbooksDiscovered: bettingEventsClassification.counters.sportsbooksDiscovered,
-        normalizedSnapshots: bettingEventsClassification.counters.normalizedSnapshots,
-        archiveRequired: bettingEventsClassification.counters.archiveRequired,
-        discoveryOnly:
-          bettingEventsClassification.canPersistSnapshotsDirectly === false &&
-          oddsRows.length === 0,
+        gameInfoRecordsFetched: gameOddsResponse.payload.length,
+        gameOddRecordsFlattened: oddsRows.length,
+        bettingEventsFetched: 0,
+        bettingMarketsFetched: 0,
+        bettingEventRowsNormalized: 0,
+        marketDetailRowsNormalized: 0,
+        discoveryRecords: 0,
+        eventsDiscovered: gameOddsClassificationForFailure.counters.eventsDiscovered,
+        marketsDiscovered: gameOddsClassificationForFailure.counters.marketsDiscovered,
+        outcomesDiscovered: gameOddsClassificationForFailure.counters.outcomesDiscovered,
+        pricedOutcomes: gameOddsClassificationForFailure.counters.pricedOutcomes,
+        sportsbooksDiscovered: gameOddsClassificationForFailure.counters.sportsbooksDiscovered,
+        normalizedSnapshots: gameOddsClassificationForFailure.counters.normalizedSnapshots,
+        archiveRequired: gameOddsClassificationForFailure.counters.archiveRequired,
+        discoveryOnly: false,
+        moneylineRows: oddsRows.filter((row) => row.market === 'moneyline').length,
+        spreadRows: oddsRows.filter((row) => row.market === 'spread').length,
+        totalRows: oddsRows.filter((row) => row.market === 'total').length,
         snapshotsInserted: insertedOdds,
         snapshotsUpdated: updatedOdds,
         recordsSkipped: recordCounters.recordsSkipped,
@@ -4295,13 +4381,13 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
         tablesPopulated: ['sports_odds_snapshots', 'sports_sync_jobs'],
         pendingTables: oddsRows.length > 0
           ? ['provider_entity_mappings for sportsbook/market graph remains unnecessary for current table shape']
-          : ['sports_odds_snapshots remains empty because BettingEventsByDate behaved as discovery/index data only'],
+          : ['sports_odds_snapshots remains empty because GameOddsByDate produced no usable priced outcomes'],
         migrationRequired: false,
         migrationCreated: null,
         migrationApplied: true,
         reason: oddsRows.length > 0
-          ? 'Core odds outcomes were persisted to the existing sports_odds_snapshots table; betting-event graph and prop settlement details remain metadata/contract-only.'
-          : 'BettingEventsByDate was treated as discovery/index data; no unsupported odds snapshots were fabricated.',
+          ? 'Full-game moneyline, spread and total outcomes were persisted to the existing sports_odds_snapshots table from GameOddsByDate.'
+          : 'No unsupported odds snapshots were fabricated.',
       },
       idempotency: {
         repeatedProviderCall: false,
@@ -4384,8 +4470,8 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
           records: endpoint.records,
         })),
         payloadShapes: payloadShapesForFailure,
-        bettingEventsClassification: bettingEventsClassificationForFailure,
-        bettingCounters: bettingEventsClassificationForFailure?.counters ?? null,
+        gameOddsClassification: gameOddsClassificationForFailure,
+        bettingCounters: gameOddsClassificationForFailure?.counters ?? null,
         recordsFetchedBeforeFailure: recordsFetchedForFailure,
         externalCallsUsed,
       },
@@ -4411,7 +4497,7 @@ async function executeSportsDataIoNbaBettingOddsPilotImport(
         endpoint: `/v3/nba/odds/json${endpoint.endpoint}`,
       })),
       payloadShapes: payloadShapesForFailure,
-      bettingEventsClassification: bettingEventsClassificationForFailure,
+      gameOddsClassification: gameOddsClassificationForFailure,
       recordsFetchedBeforeFailure: recordsFetchedForFailure,
       validation: {
         valid: false,
@@ -6354,18 +6440,13 @@ async function validateSportsDataIoBettingOddsPilot({
 }) {
   const errors: string[] = []
   const warnings: string[] = []
-  const oddsResult = await supabaseAdmin
-    .from('sports_odds_snapshots')
-    .select('id, event_id, sportsbook, market, outcome, price, line, snapshot_time, metadata')
-    .eq('sport_key', NBA_SPORT_KEY)
-    .eq('league_key', NBA_LEAGUE_KEY)
-    .eq('provider', 'sportsdataio')
-    .limit(5000)
-
-  if (oddsResult.error) errors.push(oddsResult.error.message)
-
   const importedIds = new Set(oddsRows.map((row) => row.id))
-  const importedRows = (oddsResult.data ?? []).filter((row) => importedIds.has(String(row.id)))
+  let importedRows: Awaited<ReturnType<typeof loadOddsRowsByIds>> = []
+  try {
+    importedRows = await loadOddsRowsByIds(Array.from(importedIds))
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : 'sports_odds_snapshots validation failed.')
+  }
   const duplicateSnapshots = new Set(oddsRows.map((row) => row.id)).size !== oddsRows.length
   const invalidPrices = oddsRows.filter((row) => row.price === null || row.price === 0 || Math.abs(Number(row.price)) > 5000).length
   const invalidLines = oddsRows.filter((row) => row.line !== null && !Number.isFinite(Number(row.line))).length
@@ -6384,6 +6465,7 @@ async function validateSportsDataIoBettingOddsPilot({
       .map((row) => String((row.metadata as Record<string, unknown>).marketPeriod ?? ''))
       .filter((period) => period && period !== 'full_game')
   ).size
+  const nonCanonicalMarkets = oddsRows.filter((row) => !['moneyline', 'spread', 'total'].includes(row.market)).length
   const missingPersistedRows = oddsRows.filter((row) => !importedRows.some((persisted) => String(persisted.id) === row.id)).length
   const trialIsolationPreserved = importedRows.every((row) => {
     const metadata = (row.metadata as Record<string, unknown> | null) ?? {}
@@ -6393,9 +6475,10 @@ async function validateSportsDataIoBettingOddsPilot({
   if (duplicateSnapshots) errors.push('Duplicate sports_odds_snapshots IDs were normalized.')
   if (invalidPrices) errors.push(`${invalidPrices} odds rows have invalid American prices.`)
   if (invalidLines) errors.push(`${invalidLines} odds rows have invalid line values.`)
+  if (unresolvedEvents) errors.push(`${unresolvedEvents} odds rows reference provider events not present in sport_events for this season.`)
+  if (nonCanonicalMarkets) errors.push(`${nonCanonicalMarkets} odds rows are outside full-game moneyline/spread/total markets.`)
   if (missingPersistedRows) errors.push(`${missingPersistedRows} normalized odds rows were not persisted.`)
   if (!trialIsolationPreserved) errors.push('Not all imported odds rows carry trial isolation metadata.')
-  if (unresolvedEvents) warnings.push(`${unresolvedEvents} odds rows reference provider events not present in sport_events for this season.`)
   if (playerPropMarketsFound) warnings.push(`${playerPropMarketsFound} prop-like rows were detected; settlement remains contract-only.`)
 
   return {
@@ -6414,6 +6497,7 @@ async function validateSportsDataIoBettingOddsPilot({
       periodMarketsFound,
       unresolvedEvents,
       unresolvedPlayers,
+      nonCanonicalMarkets,
       mappingConflicts: 0,
       invalidPricesOrLines: invalidPrices + invalidLines,
       trialIsolationPreserved:
@@ -6426,7 +6510,7 @@ async function validateSportsDataIoBettingOddsPilot({
       noModelTrainingExecuted: true,
     },
     persistedCounts: {
-      sportsOddsSnapshots: oddsResult.data?.length ?? 0,
+      sportsOddsSnapshots: importedRows.length,
       importedOddsSnapshots: importedRows.length,
     },
   }

@@ -2,7 +2,7 @@
 
 ## Status
 
-Completed as a provider-independent computed feature contract. It does not persist feature snapshots, does not require a migration and makes zero external provider calls.
+Completed as a provider-independent computed feature contract. Durable historical snapshot persistence now lives in Historical Feature Snapshot Persistence V1; Feature Store Core itself still makes zero external provider calls.
 
 ## Objective
 
@@ -91,11 +91,9 @@ Required features drive data sufficiency. Optional features such as injuries and
 
 ## Persistence
 
-Durable feature snapshot persistence is deferred. A future additive migration can store snapshots if operational needs justify it.
+Core V1 remains the computed feature contract. Durable historical snapshot storage is handled by `historical_feature_snapshots` through Historical Feature Snapshot Persistence V1.
 
-Core V1 is compatible with existing `prediction_history.feature_snapshot` and provides a typed contract for future prediction engines.
-
-Historical Feature Generation Orchestrator V1 is dry-run/contract-only until a generic durable snapshot table is approved. It plans deterministic snapshot IDs and lineage but does not write rows.
+Core V1 is compatible with existing `prediction_history.feature_snapshot`, but durable backtest lineage should use `prediction_history.feature_snapshot_id` plus snapshot key/version metadata. The bounded trial lineage pilot now validates that path with 5 trial/scrambled/non-production linked predictions after corrected priced odds were available; production metrics remain blocked for trial rows and missing genuine closing snapshots.
 
 ## Provider Calls
 

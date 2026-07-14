@@ -156,10 +156,10 @@ export const SPORTSDATAIO_ENDPOINT_CATALOG: SportsDataIoEndpointCatalogEntry[] =
     lastPilotStatus: 'not_called_settlement_rules_not_approved',
   }),
   entry('nba', 'v3', 'odds', '/v3/nba/odds/json/GameOddsByDate/{date}', {
-    implementedStatus: 'planned',
+    implementedStatus: 'implemented',
     normalizedStatus: 'pending_payload',
     persistenceStatus: 'existing_table_ready',
-    lastPilotStatus: 'not_called',
+    lastPilotStatus: 'http_200_priced_payload_partial_trial_persistence_2025_12_26',
   }),
   entry('nba', 'v3', 'odds', '/v3/nba/odds/json/AlternateMarketGameOddsByDate/{date}', {
     trialStatus: 'blocked',

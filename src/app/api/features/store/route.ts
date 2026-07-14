@@ -1,7 +1,10 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import { getFeatureStoreStatus } from '@/services/feature-store-core.service'
-import { runHistoricalFeatureSnapshotWritePilot } from '@/services/historical-feature-generation.service'
+import {
+  runHistoricalFeatureSnapshotWritePilot,
+  runHistoricalPredictionLineagePilot,
+} from '@/services/historical-feature-generation.service'
 
 export async function GET(request: NextRequest) {
   const id = requestId(request)
@@ -25,14 +28,29 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
 
-    if (body?.action !== 'historical_feature_snapshot_write_pilot') {
+    if (
+      body?.action !== 'historical_feature_snapshot_write_pilot' &&
+      body?.action !== 'historical_prediction_snapshot_lineage_pilot'
+    ) {
       return apiError({
         id,
         code: 'BAD_REQUEST',
         message:
-          'Unsupported Feature Store action. Use historical_feature_snapshot_write_pilot for the bounded snapshot write pilot.',
+          'Unsupported Feature Store action. Use historical_feature_snapshot_write_pilot or historical_prediction_snapshot_lineage_pilot for bounded pilots.',
         status: 400,
       })
+    }
+
+    if (body?.action === 'historical_prediction_snapshot_lineage_pilot') {
+      const result = await runHistoricalPredictionLineagePilot({
+        dryRun: body?.dryRun ?? true,
+        confirmed: body?.confirmed ?? false,
+        maximumSnapshots: body?.maximumSnapshots ?? null,
+        maximumPredictions: body?.maximumPredictions ?? null,
+        settle: body?.settle ?? true,
+      })
+
+      return apiOk(result, id)
     }
 
     const result = await runHistoricalFeatureSnapshotWritePilot({

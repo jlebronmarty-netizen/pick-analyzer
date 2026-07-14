@@ -1,5 +1,45 @@
 # Decision Log
 
+## 2026-07-14 - Complete Corrected Priced Odds And Trial Lineage Verification
+
+Context: After the initial SportsDataIO `GameOddsByDate/2025-12-26` run and alternate-like cleanup, 540 intended full-game trial odds rows remained, but 180 retained legacy moneyline rows still had invalid non-null line values. The user approved exactly one corrected provider retry and deletion of exactly proven superseded legacy moneyline rows.
+
+Decision: Reuse the existing historical import execution path for one corrected `GameOddsByDate/2025-12-26` call. The retry returned HTTP 200 with 9 top-level game records, produced 540 normalized `PregameOdds` rows, inserted 180 corrected null-line moneylines and updated 360 spread/total rows. After verifying 180 corrected replacements, 0 feature-snapshot references and 0 prediction references, delete exactly 180 legacy non-null-line moneylines and record audit metadata on both priced-odds sync jobs. Create five odds-enriched trial feature snapshot versions and run the existing bounded lineage pilot with provider calls 0.
+
+Consequences: Final SportsDataIO trial odds state is 540 rows: 180 moneyline, 180 spread and 180 total, with 0 legacy moneylines, 0 duplicate logical rows and 0 production leakage. The lineage pilot inserted 5 trial/scrambled/non-production predictions, settled them locally as 3 wins and 2 losses, and reused all 5 rows on immediate rerun. Production recommendations, real ROI, CLV, calibration, model promotion and confidence improvement remain blocked because the rows are trial-only and lack genuine closing snapshots.
+
+Affected modules: SportsDataIO historical import execution, `sports_odds_snapshots`, Historical Feature Trial Lineage Pilot, NBA Backtesting/Calibration, NBA Prediction Settlement and governance docs.
+
+## 2026-07-14 - Stop Priced Game Odds Pilot After Partial Trial Persistence
+
+Context: Historical Feature Trial Lineage Pilot V1 was blocked because 15 durable NBA trial snapshots had no genuine offered price. The next approved step was a capped SportsDataIO `GameOddsByDate` pilot through the existing historical import execution route, with at most 2 sequential provider calls and no alternate/live odds.
+
+Decision: Extend the existing SportsDataIO NBA odds pilot path to use `GameOddsByDate/{date}` as the priced source and select `2025-12-26` from stored trial event provider-day evidence. The first live call returned HTTP 200 with 9 game records and persisted 1,476 trial/scrambled/non-production odds rows. The job was stopped as `partial`: the service validation read only the first 1,000 rows and the first-run normalizer traversed `AlternateMarketPregameOdds`, producing 936 alternate-like rows outside the pilot scope. The code now skips alternate/live odds arrays, keeps moneyline `line=null`, requires mapped `sport_events`, and validates persisted IDs by chunks.
+
+Consequences: The endpoint and priced payload shape are confirmed, but the pilot is not complete and the lineage retry remains blocked. No second provider call, prediction persistence, settlement, backtesting, calibration, model training or production recommendation was run. Cleanup/quarantine of the trial-only alternate-like rows requires explicit approval before a corrected retry.
+
+Affected modules: SportsDataIO historical import execution, `sports_odds_snapshots`, Historical Feature Trial Lineage Pilot and governance docs.
+
+## 2026-07-14 - Clean Up Alternate-Like Trial Odds Rows
+
+Context: The first `GameOddsByDate/2025-12-26` run persisted 1,476 trial-only odds rows, including 936 rows from `AlternateMarketPregameOdds` that were outside the approved full-game pregame pilot.
+
+Decision: Use a narrow deterministic selector over `sports_odds_snapshots`: NBA sport/league, provider `sportsdataio`, metadata import module `sportsdataio_nba_betting_odds_pilot_v1`, trial/scrambled/non-production flags and `sourcePath` attributable to `AlternateMarketPregameOdds`. The pre-deletion audit found 1,476 total pilot rows, 540 intended `PregameOdds` rows, 936 alternate-like rows, 0 live rows, 0 ambiguous rows and 0 feature-snapshot/prediction references. Delete the 936 alternate-like rows in chunks and record the exact deleted ID list plus checksum in sync-job metadata.
+
+Consequences: The pilot scope now retains 540 trial-only full-game pregame rows and 0 alternate/live rows. Prediction lineage was not retried because the retained 180 moneyline rows still carry pre-fix non-null line values and old deterministic IDs. Future work needs explicit approval to correct or supersede those moneyline rows before using the prices for lineage.
+
+Affected modules: `sports_odds_snapshots`, SportsDataIO historical import execution, Historical Feature Trial Lineage Pilot and governance docs.
+
+## 2026-07-14 - Block Trial Prediction Lineage Without Genuine Offered Prices
+
+Context: Historical Feature Snapshot Persistence V1 produced 15 durable NBA trial snapshots. The next Production Readiness Phase 1 check was to validate Prediction -> Snapshot -> Settlement -> Backtest lineage without provider calls, production recommendations or fabricated market data.
+
+Decision: Extend the existing `/api/features/store` route with action `historical_prediction_snapshot_lineage_pilot`. The pilot reads at most 15 trial snapshots, permits at most 5 prediction rows, requires stable snapshot/event/market lineage, preserves trial/scrambled/non-production flags and refuses existing prediction identities with incompatible snapshot lineage. Runtime validation found all 15 trial snapshots lacked a genuine offered price. Because `prediction_history.odds` is not nullable and odds must not be fabricated, the pilot returns `no_eligible_candidates` and inserts no prediction rows.
+
+Consequences: The lineage write path is implemented but safely blocked by priced-odds dependency. No provider calls, new routes, production predictions, settlement mutations, ROI/CLV/calibration metrics or model-training actions were created. The next dependency is genuine priced odds snapshot persistence or an explicit schema decision for no-price watch-only prediction contracts.
+
+Affected modules: Historical Feature Generation, Feature Store route, Historical Import plan, Daily Sync V2, NBA Backtesting/Calibration, NBA Prediction Settlement and governance docs.
+
 ## 2026-07-14 - Verify Historical Feature Snapshot Write-Mode Pilot
 
 Context: Runtime schema probing confirmed `historical_feature_snapshots` and `prediction_history` lineage columns were applied, but Production Readiness Phase 1 still needed a safe server-side write path and idempotency proof before durable snapshots could be considered operational even for trial data.

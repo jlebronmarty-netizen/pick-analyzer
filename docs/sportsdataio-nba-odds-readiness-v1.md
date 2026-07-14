@@ -1,6 +1,6 @@
 # SportsDataIO NBA Odds Readiness V1
 
-Last updated: 2026-07-14 09:19:31 -04:00
+Last updated: 2026-07-14 15:05:00 -04:00
 
 ## Summary
 
@@ -100,7 +100,61 @@ Execution result on 2026-07-14:
 - Migration created: none.
 - Production predictions, CLV, ROI, backtesting, calibration and model training remained disabled.
 
-The pilot completed as discovery-only. No unsupported odds snapshots were fabricated, and the next blocker is identifying the exact priced-outcome endpoint for discovered SportsDataIO betting markets.
+The pilot completed as discovery-only. No unsupported odds snapshots were fabricated, and the next blocker was identifying the exact priced-outcome endpoint for discovered SportsDataIO betting markets.
+
+## Priced Game Odds Pilot V1
+
+The bounded priced pilot used the existing protected `/api/historical-import/execute` route with:
+
+- endpoint: `GET /v3/nba/odds/json/GameOddsByDate/2025-12-26`
+- initial provider calls used: 1
+- corrected retry provider calls used: 1
+- concurrency: 1
+- retries: 0
+- `trial=true`
+- `scrambled=true`
+- `production_eligible=false`
+
+Execution result on 2026-07-14:
+
+- HTTP status: 200
+- top-level game records fetched: 9
+- normalized rows produced by the first run: 1,476
+- persisted rows recorded by sync-job metadata: 1,476
+- intended pregame full-game rows found by read-only audit: 540
+- alternate-like rows found by read-only audit: 936
+- sportsbook identity: `Scrambled`
+- `records_skipped`: 0
+- sync job: `8ee9314a-f8e4-4a13-b861-2574a904bdc8`
+- sync job status: `partial`
+
+The first run stopped before lineage retry because post-persistence validation reported missing rows and the first-run traversal included alternate-like rows, which are outside this pilot. The local service now fixes those two issues by exact-id chunk validation, skipping `AlternateMarketPregameOdds`/`LiveOdds`, requiring mapped events and keeping moneyline `line=null`.
+
+Cleanup result:
+
+- deleted alternate-like trial rows: 936
+- retained `PregameOdds` rows: 540
+- remaining alternate-like rows: 0
+- remaining live rows: 0
+- retained market counts: 180 moneyline, 180 spread, 180 total
+- unresolved events: 0
+- duplicate retained rows: 0
+
+Corrected retry and supersession result:
+
+- endpoint: `GET /v3/nba/odds/json/GameOddsByDate/2025-12-26`
+- HTTP status: 200
+- normalized rows: 540
+- inserted corrected null-line moneylines: 180
+- updated spread/total rows: 360
+- deleted superseded legacy moneylines: 180
+- final rows: 540
+- final market counts: 180 moneyline, 180 spread, 180 total
+- legacy non-null-line moneylines: 0
+- duplicate logical rows: 0
+- production leakage: 0
+
+The bounded lineage pilot then used provider calls `0`, inserted 5 trial-only prediction rows, settled them locally, and reused all 5 on immediate rerun. These rows validate the architecture only; production predictions, CLV, ROI, calibration and model training remain blocked for trial/scrambled/non-production rows and missing genuine closing snapshots.
 
 ## Identifier And Routing Hardening
 

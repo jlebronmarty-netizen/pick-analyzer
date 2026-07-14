@@ -298,6 +298,14 @@ Evidence: `supabase/migrations/202607140001_historical_feature_snapshots_v1.sql`
 
 Note: The migration creates generic `historical_feature_snapshots` persistence and adds `prediction_history.feature_snapshot_id` plus companion lineage columns. Service contracts now use a server-only Supabase schema probe and report `applied` only when required tables/columns are selectable. The existing Feature Store route now supports a bounded write-mode pilot that inserted 15 NBA trial snapshots on first execution and reused all 15 on immediate rerun, with zero provider calls, zero duplicate rows and zero prediction mutations. Production backtesting, ROI, CLV and calibration remain blocked until real prediction rows are linked to durable snapshots and have valid prices, closing snapshots and sufficient settled production samples.
 
+### Historical Feature Trial Lineage Pilot V1
+
+Status: Completed as a bounded trial-only lineage verification and build verified.
+
+Evidence: `docs/historical-feature-trial-lineage-pilot-v1.md`, `src/services/historical-feature-generation.service.ts`, existing `/api/features/store`, existing `/api/historical-import/plan`, `src/services/daily-pipeline.service.ts`, `src/services/nba-backtesting-calibration.service.ts` and `src/services/nba-prediction-settlement.service.ts`.
+
+Note: The bounded pilot now prioritizes odds-enriched trial snapshots from the local snapshot pool while still considering at most 15 snapshots. After the corrected priced odds retry and legacy-moneyline cleanup, the first lineage execution found 5 eligible trial candidates, inserted 5 prediction rows, settled them locally as 3 wins and 2 losses, and the immediate rerun reused all 5 rows with 0 inserts. Provider calls remained 0. The rows remain `trial=true`, `scrambled=true`, `production_eligible=false`, so production recommendations, ROI, CLV, calibration, model promotion and confidence improvement remain blocked.
+
 ### Settlement Core Multi-Sport Fixture Coverage V1
 
 Status: Completed deterministic fixture expansion and build verified.
@@ -329,6 +337,14 @@ Status: Completed discovery-only verification and build verified.
 Evidence: `docs/sportsdataio-nba-odds-readiness-v1.md`, `src/services/sportsdataio-historical-import-readiness.service.ts`, `src/config/sportsdataio-endpoint-catalog.ts`, existing `/api/historical-import/execute` and existing `sports_odds_snapshots` persistence contract.
 
 Note: The approved pilot used `maximumRequests=2`, concurrency `1`, no retries, `trial=true`, `scrambled=true` and `production_eligible=false`. `BettingEventsByDate/2025-12-26` returned HTTP 200 with 9 records and nested `BettingMarkets` discovery metadata. The approved one-event follow-up `BettingMarkets/22888` returned HTTP 200 with 0 records. The executor now treats this honestly as discovery/index data, completed sync job `1a72e504-9737-4dd0-9b9e-8fd722b51c05`, persisted no unsupported odds snapshots, created no migration and kept production predictions, CLV, ROI, backtesting, calibration and model training disabled. The supplied `LveGameOddsByDate` path and broad alternate-market endpoint remain uncalled.
+
+### SportsDataIO NBA Priced Game Odds Pilot V1
+
+Status: Corrected priced odds, legacy cleanup and trial lineage verification complete for the approved scope.
+
+Evidence: `docs/sportsdataio-nba-priced-game-odds-pilot-v1.md`, `src/services/sportsdataio-historical-import-readiness.service.ts`, existing `/api/historical-import/execute` and existing `sports_odds_snapshots` persistence.
+
+Note: `GameOddsByDate/2025-12-26` returned HTTP 200 with 9 game records. The first run persisted 1,476 trial/scrambled/non-production odds rows and recorded `records_skipped=0`. The approved cleanup deleted only 936 unintended `AlternateMarketPregameOdds` rows. The approved corrected one-call retry inserted 180 null-line moneyline replacements and updated 360 spread/total rows, then the approved supersession cleanup deleted exactly 180 legacy non-null-line moneylines after verifying 180 corrected replacements and 0 feature-snapshot/prediction references. Final stored SportsDataIO trial odds are 540 rows: 180 moneyline, 180 spread and 180 total, with 0 legacy moneylines, 0 duplicate logical rows and 0 production leakage.
 
 ### SportsDataIO Canonical Endpoint Catalog V1
 

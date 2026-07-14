@@ -70,6 +70,8 @@ Backtest input readiness is typed but blocked until durable historical feature s
 
 Daily Sync V2 now reports historical feature eligibility, write-pilot availability and immutable pregame snapshot policy. Postgame results, stats and settlement may prepare performance inputs, but they must not overwrite the original prediction-time feature snapshot.
 
+The bounded trial prediction lineage pilot is also exposed through the existing Feature Store route. It links predictions only when a trial snapshot has valid lineage and a genuine offered price. After corrected SportsDataIO priced odds were available, runtime verification inserted 5 trial/scrambled/non-production linked predictions, settled them locally and reused all 5 on immediate rerun with 0 provider calls. Production metrics remain blocked for trial rows and missing genuine closing snapshots.
+
 ## Provider Calls
 
 Provider calls: 0.

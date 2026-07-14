@@ -101,3 +101,11 @@ Re-run these read-only endpoints after schema changes:
 Expected post-application status is `applied` for the schema probe and `ready` for durable snapshot persistence readiness. Backtesting can still be `eligible=false` for legitimate missing linked snapshots, prices, closing snapshots and settled production sample reasons.
 
 The 2026-07-14 write-mode verification returned 15 eligible candidates, inserted 15 snapshots on first confirmed execution, inserted 0 and reused 15 on the immediate rerun, found 0 duplicate rows after local reprocessing, made 0 provider calls and did not create or mutate prediction rows.
+
+## Trial Prediction Lineage Pilot
+
+The follow-up bounded lineage pilot uses existing `/api/features/store` action `historical_prediction_snapshot_lineage_pilot`. It validates snapshot-to-prediction linkage without adding routes or creating production recommendations.
+
+The initial 2026-07-14 validation considered the 15 persisted NBA trial snapshots and returned `no_eligible_candidates` because all 15 lacked a genuine offered price. Since `prediction_history.odds` is not nullable, inserting a prediction row would have required fabricated odds, so the pilot correctly inserted 0 rows at that stage.
+
+The follow-up `GameOddsByDate/2025-12-26` priced odds pilot confirmed provider access and persisted trial-only odds rows. The approved cleanup removed 936 alternate-like rows, the corrected retry inserted 180 null-line moneyline replacements and updated 360 spread/total rows, and the supersession cleanup deleted 180 legacy non-null-line moneylines. Existing immutable base snapshots were not mutated in place; five odds-enriched trial snapshot versions were created. The corrected lineage run inserted 5 trial-only prediction rows, settled them locally, and reused all 5 on immediate rerun. Settlement/backtesting production metrics remain blocked because the linked rows are trial/scrambled/non-production and lack genuine closing snapshots.

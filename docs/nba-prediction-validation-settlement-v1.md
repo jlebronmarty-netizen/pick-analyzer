@@ -42,10 +42,13 @@ Protected POST routes use the existing `CRON_SECRET` authorization pattern.
 - Cancelled events are void.
 - Postponed, live, scheduled or incomplete events remain pending.
 - Manual adjustments and already-final predictions are not overwritten.
+- Trial lineage settlement may grade only bounded trial rows when deterministic event results exist. Missing offered prices are not backfilled; ROI remains ineligible and profit is not fabricated.
 
 ## Database
 
 Migration `202607110003_nba_prediction_validation_settlement_v1.sql` adds NBA prediction metadata to `prediction_history`.
+
+Migration `202607140001_historical_feature_snapshots_v1.sql` adds durable feature-snapshot lineage columns. The bounded trial lineage pilot requires `feature_snapshot_id`, `feature_snapshot_key`, `feature_set_version`, `feature_snapshot_generated_at`, `trial`, `scrambled` and `production_eligible` to be preserved on any linked prediction row.
 
 Apply it after the NBA Data Sync migrations:
 

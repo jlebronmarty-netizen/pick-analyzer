@@ -31,6 +31,10 @@ type PredictionRow = {
   manual_adjustment: boolean | null
   model_version: string | null
   feature_snapshot: Record<string, unknown> | null
+  feature_snapshot_id?: string | null
+  production_eligible?: boolean | null
+  trial?: boolean | null
+  scrambled?: boolean | null
   validation_warnings: string[] | null
   odds_timestamp: string | null
   generated_at: string | null
@@ -101,6 +105,10 @@ function profitFor(outcome: SettlementOutcome, odds: number, stake: number) {
   if (outcome === 'loss') return -stake
   if (outcome === 'push' || outcome === 'void' || outcome === 'pending') return 0
   return odds > 0 ? stake * (odds / 100) : stake * (100 / Math.abs(odds))
+}
+
+function hasGenuineOfferedPrice(prediction: PredictionRow) {
+  return Number.isFinite(Number(prediction.odds))
 }
 
 function getPeriodValue(periodScores: Record<string, unknown> | null, keys: string[]) {
@@ -287,6 +295,23 @@ async function loadPendingPredictions(eventId?: string) {
   return (data ?? []) as PredictionRow[]
 }
 
+async function loadPendingPredictionsByIds(predictionIds: string[]) {
+  if (!predictionIds.length) return []
+
+  const { data, error } = await supabaseAdmin
+    .from('prediction_history')
+    .select('*')
+    .eq('sport_key', NBA_SPORT_KEY)
+    .in('id', predictionIds)
+    .limit(100)
+
+  if (error) throw new Error(`Failed to load bounded NBA predictions: ${error.message}`)
+
+  return ((data ?? []) as PredictionRow[]).filter(
+    (row) => !isFinalResult(row.result) && row.lifecycle_status !== 'skipped'
+  )
+}
+
 export async function settleNbaPredictions(eventId?: string): Promise<NbaSettlementResult> {
   const summary: NbaSettlementResult = {
     success: true,
@@ -343,8 +368,9 @@ export async function settleNbaPredictions(eventId?: string): Promise<NbaSettlem
     }
 
     const stake = safeNumber(prediction.stake, 100)
-    const odds = safeNumber(prediction.odds, -110)
-    const profit = round(profitFor(decision.outcome, odds, stake))
+    const hasPrice = hasGenuineOfferedPrice(prediction)
+    const odds = hasPrice ? Number(prediction.odds) : 0
+    const profit = hasPrice ? round(profitFor(decision.outcome, odds, stake)) : 0
     const lifecycleStatus = decision.outcome === 'void' ? 'void' : 'settled'
 
     const { error } = await supabaseAdmin
@@ -363,6 +389,118 @@ export async function settleNbaPredictions(eventId?: string): Promise<NbaSettlem
           market: prediction.market,
           line: prediction.line,
           odds: prediction.odds,
+          roiEligible: hasPrice && prediction.production_eligible === true && prediction.trial !== true,
+          missingOfferedPrice: !hasPrice,
+          trial: prediction.trial === true,
+          productionEligible: prediction.production_eligible === true,
+          homeScore: decision.homeScore,
+          awayScore: decision.awayScore,
+          firstHalfHome: decision.firstHalfHome,
+          firstHalfAway: decision.firstHalfAway,
+        },
+      })
+      .eq('id', prediction.id)
+      .eq('manual_adjustment', false)
+
+    if (error) {
+      summary.errors.push(`${prediction.id}: ${error.message}`)
+      summary.skipped += 1
+      continue
+    }
+
+    summary.settled += 1
+    if (decision.outcome === 'win') summary.wins += 1
+    if (decision.outcome === 'loss') summary.losses += 1
+    if (decision.outcome === 'push') summary.pushes += 1
+    if (decision.outcome === 'void') summary.voids += 1
+  }
+
+  return summary
+}
+
+export async function settleNbaPredictionsByIds(
+  predictionIds: string[]
+): Promise<NbaSettlementResult> {
+  const summary: NbaSettlementResult = {
+    success: true,
+    mode: 'nba_prediction_bounded_lineage_settlement_v1',
+    generatedAt: new Date().toISOString(),
+    checked: 0,
+    settled: 0,
+    wins: 0,
+    losses: 0,
+    pushes: 0,
+    voids: 0,
+    pending: 0,
+    skipped: 0,
+    errors: [],
+  }
+
+  const predictions = await loadPendingPredictionsByIds(predictionIds)
+  summary.checked = predictions.length
+
+  if (!predictions.length) return summary
+
+  const eventIds = Array.from(new Set(predictions.map((prediction) => prediction.game_id)))
+  const [{ data: events, error: eventError }, { data: statsRows, error: statsError }] =
+    await Promise.all([
+      supabaseAdmin
+        .from('sport_events')
+        .select('*')
+        .eq('sport_key', NBA_SPORT_KEY)
+        .in('id', eventIds),
+      supabaseAdmin
+        .from('sport_game_stats')
+        .select('event_id, team_name, is_home, points_for, quarter_scores')
+        .eq('sport_key', NBA_SPORT_KEY)
+        .in('event_id', eventIds),
+    ])
+
+  if (eventError) throw new Error(`Failed to load NBA events: ${eventError.message}`)
+  if (statsError) throw new Error(`Failed to load NBA game stats: ${statsError.message}`)
+
+  const eventsById = new Map((events ?? []).map((event) => [event.id, event as EventRow]))
+  const stats = (statsRows ?? []) as StatsRow[]
+
+  for (const prediction of predictions) {
+    if (prediction.manual_adjustment || isFinalResult(prediction.result)) {
+      summary.skipped += 1
+      continue
+    }
+
+    const decision = settlePrediction(prediction, eventsById.get(prediction.game_id), stats)
+
+    if (decision.outcome === 'pending') {
+      summary.pending += 1
+      continue
+    }
+
+    const stake = safeNumber(prediction.stake, 100)
+    const hasPrice = hasGenuineOfferedPrice(prediction)
+    const odds = hasPrice ? Number(prediction.odds) : 0
+    const profit = hasPrice ? round(profitFor(decision.outcome, odds, stake)) : 0
+    const lifecycleStatus = decision.outcome === 'void' ? 'void' : 'settled'
+
+    const { error } = await supabaseAdmin
+      .from('prediction_history')
+      .update({
+        result: decision.outcome,
+        status: decision.outcome,
+        lifecycle_status: lifecycleStatus,
+        stake,
+        profit,
+        settled_at: new Date().toISOString(),
+        settlement_source: 'sport_events',
+        settlement_version: 'nba_prediction_bounded_lineage_settlement_v1',
+        settlement_details: {
+          reason: decision.reason,
+          market: prediction.market,
+          line: prediction.line,
+          odds: prediction.odds,
+          roiEligible: hasPrice && prediction.production_eligible === true && prediction.trial !== true,
+          missingOfferedPrice: !hasPrice,
+          trial: prediction.trial === true,
+          productionEligible: prediction.production_eligible === true,
           homeScore: decision.homeScore,
           awayScore: decision.awayScore,
           firstHalfHome: decision.firstHalfHome,

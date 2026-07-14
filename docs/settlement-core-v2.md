@@ -32,7 +32,9 @@ Returns deterministic local settlement self-tests and primitive readiness. It ma
 
 NBA Prediction Settlement V1 remains unchanged. The generic settlement primitives are additive and should be adopted incrementally only where behavior matches existing sport-specific rules.
 
-Settlement alone does not make a prediction eligible for production backtesting, ROI, CLV or calibration. Those paths also require durable prediction-time feature lineage through pending migration `202607140001_historical_feature_snapshots_v1.sql`.
+Settlement alone does not make a prediction eligible for production backtesting, ROI, CLV or calibration. Those paths also require durable prediction-time feature lineage through applied migration `202607140001_historical_feature_snapshots_v1.sql`, a genuine offered price, production eligibility and a real closing snapshot for CLV. Trial lineage rows may validate settlement contracts but cannot feed production metrics.
+
+The SportsDataIO `GameOddsByDate` trial odds cleanup does not change settlement readiness. No linked trial predictions were inserted and no settlement updates were attempted.
 
 ## Deterministic Validation
 

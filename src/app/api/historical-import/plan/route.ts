@@ -2,7 +2,10 @@ import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import { probeHistoricalFeatureSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { planHistoricalImport } from '@/services/historical-import-engine.service'
-import { runHistoricalFeatureSnapshotWritePilot } from '@/services/historical-feature-generation.service'
+import {
+  runHistoricalFeatureSnapshotWritePilot,
+  runHistoricalPredictionLineagePilot,
+} from '@/services/historical-feature-generation.service'
 
 export async function POST(request: NextRequest) {
   const id = requestId(request)
@@ -38,10 +41,18 @@ export async function POST(request: NextRequest) {
       maximumMarketsPerEvent: 3,
       maximumSnapshots: 15,
     })
+    const predictionLineagePilot = await runHistoricalPredictionLineagePilot({
+      dryRun: true,
+      confirmed: false,
+      maximumSnapshots: 15,
+      maximumPredictions: 5,
+      settle: false,
+    })
 
     return apiOk({
       ...result,
       historicalFeatureSnapshotWritePilot: snapshotWritePilot,
+      historicalPredictionLineagePilot: predictionLineagePilot,
     }, id)
   } catch (error) {
     console.error('Historical import plan error:', { requestId: id, error })
@@ -89,10 +100,18 @@ export async function GET(request: NextRequest) {
       maximumMarketsPerEvent: 3,
       maximumSnapshots: 15,
     })
+    const predictionLineagePilot = await runHistoricalPredictionLineagePilot({
+      dryRun: true,
+      confirmed: false,
+      maximumSnapshots: 15,
+      maximumPredictions: 5,
+      settle: false,
+    })
 
     return apiOk({
       ...result,
       historicalFeatureSnapshotWritePilot: snapshotWritePilot,
+      historicalPredictionLineagePilot: predictionLineagePilot,
     }, id)
   } catch (error) {
     console.error('Historical import plan GET error:', { requestId: id, error })
