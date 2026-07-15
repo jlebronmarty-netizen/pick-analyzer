@@ -703,3 +703,147 @@ export async function getHistoricalValidationReplay(options: HistoricalReplayOpt
     ],
   }
 }
+
+export async function getMlbProspectivePreview() {
+  const { data, error } = await supabaseAdmin
+    .from('prediction_history')
+    .select(
+      'id, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, recommended_pick, selection, line, odds_timestamp, generated_at, cutoff_at, feature_snapshot_id, feature_snapshot_key, feature_set_version, feature_snapshot_generated_at, production_eligible, trial, scrambled, validation_warnings, validation_status, lifecycle_status, skip_reason, feature_snapshot'
+    )
+    .eq('sport_key', 'baseball_mlb')
+    .eq('production_eligible', false)
+    .eq('trial', false)
+    .eq('scrambled', false)
+    .order('commence_time', { ascending: true })
+    .order('market', { ascending: true })
+
+  if (error) throw new Error(error.message)
+
+  const rows = ((data ?? []) as Array<Record<string, unknown>>).filter(
+    (row) => asObject(row.feature_snapshot).prospective_preview === true
+  )
+  const statusOf = (row: Record<string, unknown>) => {
+    const blockers = String(row.skip_reason ?? '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+    if (row.recommended_pick === true || row.production_eligible === true) return 'Blocked'
+    if (!blockers.length) return 'Qualified Preview'
+    if (
+      blockers.every((blocker) =>
+        ['CALIBRATION_INSUFFICIENT', 'LOW_CONFIDENCE', 'LOW_EDGE', 'LOW_EV'].includes(blocker)
+      )
+    ) {
+      return 'Watch'
+    }
+    return 'Analyzed / Not Recommended'
+  }
+  const candidates = rows.map((row) => {
+    const snapshot = asObject(row.feature_snapshot)
+    const comparison = asObject(snapshot.comparison)
+    const previousPreview = asObject(snapshot.previousPreview)
+    const blockers = String(row.skip_reason ?? '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+    return {
+      id: row.id,
+      category: statusOf(row),
+      matchup: `${row.away_team ?? 'Away'} @ ${row.home_team ?? 'Home'}`,
+      startTime: row.commence_time,
+      market: row.market,
+      selection: row.selection ?? row.team,
+      line: row.line,
+      odds: row.odds,
+      impliedProbability: row.implied_probability,
+      modelProbability: row.model_probability,
+      calibratedProbability: null,
+      edge: row.edge,
+      ev: row.ev,
+      confidence: row.confidence,
+      confidenceLabel: snapshot.confidenceLabel ?? null,
+      reliability: snapshot.reliabilityLabel ?? null,
+      reliabilityScore: snapshot.reliabilityScore ?? null,
+      aiRating: snapshot.aiRating ?? null,
+      aiGrade: snapshot.aiGrade ?? null,
+      rankingScore: snapshot.rankingScore ?? null,
+      featureQuality: asObject(snapshot).quality ?? null,
+      dataSufficiency: asObject(snapshot).sufficiency ?? null,
+      positiveFactors: Array.isArray(snapshot.positiveFactors)
+        ? snapshot.positiveFactors.map(String)
+        : [],
+      negativeFactors: Array.isArray(snapshot.negativeFactors)
+        ? snapshot.negativeFactors.map(String)
+        : [],
+      missingData: Array.isArray(snapshot.missingData)
+        ? snapshot.missingData.map(String)
+        : [],
+      marketStability: asObject(snapshot.marketStability),
+      previousPreview,
+      comparison,
+      sportsbook: row.sportsbook,
+      oddsTimestamp: row.odds_timestamp,
+      cutoff: row.cutoff_at,
+      recommendationStatus: String(snapshot.recommendationStatus ?? 'ANALYZED_ONLY'),
+      blockers,
+      warnings: Array.isArray(row.validation_warnings)
+        ? row.validation_warnings.map(String)
+        : [],
+      labels: [
+        'QUARANTINED MODEL PREVIEW',
+        'NOT AN OFFICIAL PICK',
+        'NOT A WAGERING RECOMMENDATION',
+      ],
+    }
+  }).sort((left, right) => {
+    const leftRank = Number(left.rankingScore ?? 0)
+    const rightRank = Number(right.rankingScore ?? 0)
+    if (leftRank !== rightRank) return rightRank - leftRank
+    return String(left.market).localeCompare(String(right.market))
+  })
+  const latestOddsCapture = candidates
+    .map((item) => String(item.oddsTimestamp ?? ''))
+    .filter(Boolean)
+    .sort()
+    .at(-1) ?? null
+  const nextGameTime = candidates
+    .map((item) => String(item.startTime ?? ''))
+    .filter(Boolean)
+    .sort()[0] ?? null
+
+  return {
+    success: true,
+    mode: 'mlb_prospective_model_preview_v1',
+    generatedAt: new Date().toISOString(),
+    providerUsage: {
+      externalProviderCallsMade: 0,
+      source: 'stored_quarantined_prospective_preview_rows',
+    },
+    labels: [
+      'MLB MODEL PREVIEW',
+      'QUARANTINED MODEL PREVIEW',
+      'NOT AN OFFICIAL PICK',
+      'NOT A WAGERING RECOMMENDATION',
+    ],
+    summary: {
+      nextGameTime,
+      latestOddsCapture,
+      gamesWithOdds: new Set(candidates.map((item) => item.matchup)).size,
+      previewCandidates: candidates.length,
+      qualifiedPreviews: candidates.filter((item) => item.category === 'Qualified Preview').length,
+      watch: candidates.filter((item) => item.category === 'Watch').length,
+      analyzedNotRecommended: candidates.filter((item) => item.category === 'Analyzed / Not Recommended').length,
+      blocked: candidates.filter((item) => item.category === 'Blocked').length,
+      officialPicks: 0,
+      nextRequiredCaptureAction:
+        'Run a final pregame odds refresh before cutoff if still within the approved provider-call budget.',
+    },
+    categories: {
+      qualifiedPreview: candidates.filter((item) => item.category === 'Qualified Preview'),
+      watch: candidates.filter((item) => item.category === 'Watch'),
+      analyzedNotRecommended: candidates.filter((item) => item.category === 'Analyzed / Not Recommended'),
+      blocked: candidates.filter((item) => item.category === 'Blocked'),
+    },
+    candidates,
+  }
+}

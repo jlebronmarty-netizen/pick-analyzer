@@ -84,6 +84,70 @@ Evidence: `src/components/dashboard/DashboardShell.tsx`, `src/components/dashboa
 
 Note: Recovery audit confirmed the current API route count remains 205 and no provider calls or remote mutations were made during the correction pass. The dashboard now labels the product as Day 1 ready with official picks off, treats deterministic MLB engine previews as fixture validation, groups quarantined MLB historical replay rows by matchup, keeps AI recommendation detail collapsed when official picks are 0, exposes an MLB operational summary in the fast Daily Report, and distinguishes historical failed sync jobs from active import blockers. MLB 2025/2026 provider-backed historical enrichment was not executed because the existing protected historical-import execute path is still NBA-pilot-specific for live writes; safe MLB execution requires an MLB Discovery Lab executor with durable season/date/domain checkpoints before provider calls resume.
 
+### MLB Discovery Lab Historical Import Executor V1
+
+Status: Partial live execution completed; stopped at the next unsupported persistence branch.
+
+Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts` and `src/app/api/historical-import/execute/route.ts`.
+
+Note: The existing protected execute route now dispatches `baseball_mlb` requests to an MLB Discovery Lab manifest with durable checkpoint identities in `sports_sync_jobs.metadata`, zero-call dry-run planning, completed-checkpoint skip behavior, quarantine flags and production gate closure. The first approved live unit called `GET /api/mlb/odds/json/Games/2026` once, received HTTP 200, fetched 2,456 provider records, inserted 2,441 new `sport_events`, inserted 2,441 provider mappings, reused/updated 30 teams, wrote completed sync job `dbd8ab2b-8351-4b3b-b5ff-3865d672a748`, and preserved `trial=false`, `scrambled=false`, `production_eligible=false`. Resume dry-run skips that checkpoint with zero calls. The next incomplete unit is `Standings/2026`; live execution blocks before transport until the standings persistence branch is implemented.
+
+### MLB Discovery Lab Season-Wide Completion V1
+
+Status: Completed season-wide 2026 branches and one bounded date-domain pilot; bulk date import not started.
+
+Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts`, `/api/historical-import/execute` and `sports_sync_jobs` jobs `2aed3a85-768f-4a13-9b22-5ed93649879f`, `4cb59805-8f2e-4632-9afd-319b2df5c236`, `de7ed98f-1182-44b1-a030-330c6e186229` and `816ec464-e838-4e6e-aa62-f62f8bff74b4`.
+
+Note: The resumed executor completed the three approved season-wide calls: `Standings/2026` persisted 30 standings plus 30 mappings, `TeamSeasonStats/2026` persisted 30 canonical `team_stats` rows, and `PlayerSeasonStats/2026` persisted 1,303 season `sport_player_stats` plus 1,303 mappings while preserving 708 unresolved player mappings as non-blocking evidence. The generated 2026 date ledger found 76 completed import-eligible dates. The first bounded date-domain pilot called `TeamGameStatsByDate/2026-MAR-26`, inserted 26 `sport_game_stats` rows and wrote a completed checkpoint. All rows remain quarantined with `production_eligible=false`; official picks, feature generation, predictions and bulk date import remain disabled.
+
+### MLB Discovery Lab Date Import Batch V1
+
+Status: Completed bounded 180-call 2026 date-domain import batch; feature sample blocked by missing complete settlement inputs.
+
+Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts`, `/api/historical-import/execute`, `docs/PROJECT_STATUS.md` and 180 completed `sports_sync_jobs` from `c4a42303-44f9-4951-b9cd-816216941742` through `a3b70538-42be-4157-ad7a-37d1bd6f02ba`.
+
+Note: The batch resumed from `PlayerGameStatsByDate/2026-MAR-26`, used exactly 180 of 180 approved provider calls, completed 60 player-stat, 60 odds and 60 team-stat checkpoints, and stopped at the cap after `TeamGameStatsByDate/2026-MAY-25`. All endpoints returned HTTP 200. The batch persisted 1,614 `sport_game_stats` rows, 23,346 game `sport_player_stats` rows, 23,346 provider mappings, 4,824 `sports_odds_snapshots` rows and 180 sync-job checkpoints, with 0 duplicate logical rows, 0 orphan rows, 0 invalid odds fields, 0 live/alternate contamination and 0 production-eligible leakage. The exact next resume unit is `PlayerGameStatsByDate/2026-MAY-25`; 47 date-domain calls remain for the current 2026 ledger. The requested historical feature/prediction sample was not generated because the new batch had only 36 cutoff-safe odds rows across 6 events and 0 events with complete result/team-game-stat settlement inputs.
+
+### MLB Discovery Lab Date Import Resume V2
+
+Status: Partially completed; stopped on June 8 team-stat unresolved-event validation before retrying or promoting the checkpoint.
+
+Evidence: `sports_sync_jobs` jobs from `6bbe3543-0a05-44d6-b2c0-bc8bf00c541f` through partial job `f3f6949d-8f39-4c91-8912-493df4a2a0c0`, plus `docs/PROJECT_STATUS.md`.
+
+Note: The resume used 42 of 47 approved provider calls. Calls 1-41 completed through `GameOddsByDate/2026-06-07`; call 42 reached `TeamGameStatsByDate/2026-JUN-08`, returned HTTP 200, inserted 10 team-stat rows for all 5 persisted June 8 events, but remained partial because 3 provider records could not be mapped to persisted events and the skipped provider IDs were not preserved in metadata. The resume persisted 358 `sport_game_stats` rows, 5,504 game `sport_player_stats` rows, 5,504 provider mappings and 1,122 `sports_odds_snapshots` rows with 0 duplicate/orphan/invalid/live/alternate/production-leakage findings. Dry-run now reports 6 incomplete units beginning with the partial June 8 team-stat checkpoint. Feature/prediction generation was not run because the ledger is incomplete and a zero-provider eligibility audit found 0 eligible completed-window events.
+
+### MLB Discovery Lab June 8/9 Checkpoint Completion V1
+
+Status: Completed through the approved June 8/9 ledger; feature generation blocked by cutoff-safety.
+
+Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts`, `/api/historical-import/execute`, completed sync jobs `182965b6-9e70-4f11-a376-8dc112d6c9fd`, `e87f15ef-128e-4e67-b8e7-890c07b9025b`, `50cad854-ae08-4ca1-9770-141d1fa3d142`, `551bd293-d8c3-4aa3-926b-02849bb30577`, `e5ae21a5-a426-4b40-a774-04770a428492`, `8dd683f0-180a-4674-9323-0ce623c125d5` and `docs/PROJECT_STATUS.md`.
+
+Note: The paginated event resolver fixed the June 8 partial checkpoint safely. The final retry of `TeamGameStatsByDate/2026-JUN-08` reused the existing 10 rows, inserted the 6 missing rows and completed with 0 unresolved teams/events. The continuation completed `PlayerGameStatsByDate/2026-JUN-08`, `GameOddsByDate/2026-06-08`, `TeamGameStatsByDate/2026-JUN-09`, `PlayerGameStatsByDate/2026-JUN-09` and `GameOddsByDate/2026-06-09`, for 6 total HTTP 200 provider calls in this completion pass. The pass inserted 36 new `sport_game_stats` rows, 1,448 `sport_player_stats` rows, 1,448 player-stat provider mappings and 138 `sports_odds_snapshots` rows, with 0 duplicate/orphan/invalid/live/alternate/production-leakage findings. Dry-run now reports no pending June 8/9 units. Feature snapshots, predictions and settlement updates were not generated because a zero-provider eligibility audit found 0 cutoff-safe odds events and 0 eligible feature events in the completed May 25 through June 9 window.
+
+### MLB Prospective Slate Capture And First Model Preview V1
+
+Status: Completed for the first selected future slate; official picks remain blocked.
+
+Evidence: `src/services/sportsdataio-mlb-prospective-preview.service.ts`, `/api/historical-import/execute`, `/api/predictions/by-sport?sport=baseball_mlb&prospectivePreview=true`, `src/components/dashboard/MlbProspectivePreviewPanel.tsx`, `src/app/dashboard/page.tsx`, completed SportsDataIO prospective checkpoints and `docs/PROJECT_STATUS.md`.
+
+Note: The first prospective capture selected `2026-07-16`, used 3 of 6 approved provider calls with HTTP 200 statuses for `GamesByDate/2026-JUL-16`, `GameOddsByDate/2026-07-16` and `PlayerGameProjectionStatsByDate/2026-JUL-16`, and persisted 6 genuine pregame `Consensus` odds rows for `NYM @ PHI`. The projections endpoint returned 0 rows, so pitcher, lineup, injury, weather and bullpen domains remain explicit unavailable warnings rather than fabricated features. The local-only feature/prediction resume inserted or reused 3 prospective feature snapshots and 3 linked preview predictions, then reran idempotently with 3 snapshots and 3 predictions reused. All rows are non-trial, non-scrambled, quarantined and `production_eligible=false`; official picks, Play of the Day, parlays, Kelly, bankroll, portfolio, settlement, model training and production promotion remain off. Safety validation found 0 duplicate snapshots, 0 duplicate predictions, 0 orphan links, 0 official picks and 0 production leakage. The Today dashboard now exposes `MLB MODEL PREVIEW` separately from historical replay.
+
+### MLB Prospective Final Pregame Refresh V1
+
+Status: Completed for the `2026-07-16` slate; official picks remain blocked.
+
+Evidence: `src/services/sportsdataio-mlb-prospective-preview.service.ts`, `/api/historical-import/execute`, completed checkpoint `ec1bf8f7-0126-46b6-877e-76afe07112b6`, `/api/predictions/by-sport?sport=baseball_mlb&prospectivePreview=true` and `docs/PROJECT_STATUS.md`.
+
+Note: The final bounded pregame refresh used exactly 1 provider call to `GameOddsByDate/2026-07-16`, returned HTTP 200, inserted 6 new timestamped pregame `Consensus` odds rows at `2026-07-15T19:57:26Z`, and preserved the initial `2026-07-15T19:03:13Z` capture. Local snapshot/prediction refresh then reused the completed odds checkpoint without another provider call, leaving 6 prospective snapshots and 3 logical preview predictions tied to the latest safe odds. All three rows remained `ANALYZED_ONLY`; official Top Picks stayed 0, Play of the Day stayed none, Bet Slip stayed `no_ticket`, and safety checks found 0 duplicates, 0 orphan links and 0 production leakage.
+
+### MLB Prediction Intelligence V1
+
+Status: Completed for quarantined prospective previews; official picks remain blocked.
+
+Evidence: `src/services/sportsdataio-mlb-prospective-preview.service.ts`, `src/services/prediction-history.service.ts`, `src/components/dashboard/MlbProspectivePreviewPanel.tsx`, `/api/predictions/by-sport?sport=baseball_mlb&prospectivePreview=true` and `docs/PROJECT_STATUS.md`.
+
+Note: The prospective model now derives baseball-specific intelligence from already imported rows only: last 3/5/10 and season form, home/away split, opponent difficulty, rest/schedule density, momentum, explicit bullpen-unavailable status, Team Strength Index, confidence label, reliability score, AI rating/grade, ranking score, market stability and baseball-language factors. The Team Strength Index formula is `0.30 season win pct + 0.20 last-10 win pct + 0.20 per-game run differential + 0.10 home/away split + 0.10 opponent difficulty + 0.10 rest score`. The local recompute made 0 provider calls, created immutable `mlb_prediction_intelligence_v1` snapshot lineage for the existing final odds, kept all visible previews `ANALYZED_ONLY`, and reran idempotently with 3 snapshots reused and 3 predictions reused. Missing MLB domains remain starting pitcher, confirmed lineup, injury diagnosis, weather and derivable bullpen context before official recommendations can be considered.
+
 ### NBA Data Quality And Historical Reconciliation Phase A
 
 Status: Completed and build verified.

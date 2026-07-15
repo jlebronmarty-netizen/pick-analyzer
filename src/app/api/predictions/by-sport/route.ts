@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isSupportedSport } from '@/config/sports.config'
 import { getTopPicks } from '@/services/top-picks.service'
-import { getHistoricalValidationReplay } from '@/services/prediction-history.service'
+import {
+  getHistoricalValidationReplay,
+  getMlbProspectivePreview,
+} from '@/services/prediction-history.service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,6 +12,7 @@ export async function GET(request: NextRequest) {
     const requestedSport = searchParams.get('sport') ?? 'all'
     const historicalValidation = searchParams.get('historicalValidation') === 'true'
     const validationMode = searchParams.get('validationMode')
+    const prospectivePreview = searchParams.get('prospectivePreview') === 'true'
     const date = searchParams.get('date') ?? ''
 
     if (!isSupportedSport(requestedSport)) {
@@ -19,6 +23,25 @@ export async function GET(request: NextRequest) {
         },
         { status: 400 }
       )
+    }
+
+    if (
+      prospectivePreview ||
+      validationMode === 'prospective_preview' ||
+      validationMode === 'prospective'
+    ) {
+      if (requestedSport !== 'baseball_mlb') {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Prospective preview is currently supported only for baseball_mlb.',
+          },
+          { status: 400 }
+        )
+      }
+
+      const result = await getMlbProspectivePreview()
+      return NextResponse.json(result)
     }
 
     if (historicalValidation || validationMode === 'quarantined') {

@@ -34,6 +34,7 @@ import FeatureStoreCorePanel from '@/components/dashboard/FeatureStoreCorePanel'
 import MultiSportFeatureRegistryPanel from '@/components/dashboard/MultiSportFeatureRegistryPanel'
 import MlbFeatureStoreIntegrationPanel from '@/components/dashboard/MlbFeatureStoreIntegrationPanel'
 import MlbPredictionEnginePanel from '@/components/dashboard/MlbPredictionEnginePanel'
+import MlbProspectivePreviewPanel from '@/components/dashboard/MlbProspectivePreviewPanel'
 import NflFeatureStoreIntegrationPanel from '@/components/dashboard/NflFeatureStoreIntegrationPanel'
 import NflPredictionEnginePanel from '@/components/dashboard/NflPredictionEnginePanel'
 import SoccerFeatureStoreIntegrationPanel from '@/components/dashboard/SoccerFeatureStoreIntegrationPanel'
@@ -108,6 +109,7 @@ export default function DashboardPage() {
         description="Current recommendation state, daily report, preview readiness and official pick gates."
       >
         <DailyReportPanel />
+        <MlbProspectivePreviewPanel />
         <PlayOfTheDayPanel />
         <TopPicksPanel />
         <BetSlipOptimizerPanel />
