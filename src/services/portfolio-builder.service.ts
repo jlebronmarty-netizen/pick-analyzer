@@ -244,13 +244,39 @@ function convertIntelligencePick(item: any): PortfolioPick {
 }
 
 export async function buildPortfolios(bankroll = 1000) {
-  const [topPicks, sportsbook] = await Promise.all([
-    getTopPicks(),
-    getSportsbookIntelligence({
+  const topPicks = await getTopPicks()
+  const officialPickCount = Number(topPicks.summary?.recommendedPicks ?? 0)
+  const sportsbook = officialPickCount
+    ? await getSportsbookIntelligence({
       sportKey: 'baseball_mlb',
       bankroll,
-    }),
-  ])
+    })
+    : {
+        success: true,
+        sportKey: 'baseball_mlb',
+        bankroll,
+        generatedAt: new Date().toISOString(),
+        summary: {
+          gamesChecked: 0,
+          sportsbookMarketsChecked: 0,
+          opportunities: 0,
+          betNow: 0,
+          sharpSignals: 0,
+          steamMoves: 0,
+          staleLines: 0,
+          averageLineValue: 0,
+          averageSharpConfidence: 0,
+          averageUrgencyScore: 0,
+        },
+        lists: {
+          betNow: [],
+          bestOdds: [],
+          bestClv: [],
+          sharpMoney: [],
+          steamMoves: [],
+          staleLines: [],
+        },
+      }
 
   const standardPicks = dedupePicks([
     ...(topPicks.bestBets as PortfolioPick[]),

@@ -4,7 +4,7 @@ Last updated: 2026-07-14
 
 ## Status
 
-Status: completed for quarantined events, players, team game stats, player game stats, date-level full-game odds, full-date line-movement odds and bounded technical feature/prediction lineage.
+Status: completed for quarantined events, players, team game stats, player game stats, date-level full-game odds, full-date line-movement odds and bounded technical feature/prediction lineage. Prospective Day 1 readiness is prepared but disabled pending explicit activation.
 
 Reason: the first selected completed date, `2026-07-13`, returned no games, team game stats, player game stats or game odds. A reserved validation call confirmed `2026-07-12` has 15 game records, but the 10-call budget was mostly consumed, so the batch stopped safely before persistence. The first follow-up stopped on a Supabase `sport_player_stats` existing-ID preflight `Bad Request` before any upsert. The corrected retry used conservative 100-ID preflight chunks and completed bounded quarantined persistence for the one-date batch. The approved odds-only retry fixed the `GameId`/`GameID` and nested `PregameOdds` normalizer, persisted 90 quarantined odds rows, then stopped before feature/prediction handoff because 0 date-level odds rows were timestamp-safe relative to stored event starts. Line Movement Probe V1 proved timestamp-safe historical movement exists for GameId `78723`. Line Movement Expansion Batch V1 then expanded to the remaining 14 events, and the existing Feature Store route completed a bounded 45-snapshot, 45-prediction quarantined technical lineage and settlement batch.
 

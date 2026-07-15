@@ -179,6 +179,104 @@ function getExecutiveSummary({
   return 'Moderate betting board. Focus on highest-confidence singles and keep exposure controlled.'
 }
 
+function getMlbValidationReportSection() {
+  return {
+    mode: 'mlb_validation_report_section_v1',
+    labels: [
+      'QUARANTINED REAL-DATA VALIDATION',
+      'NOT A WAGERING RECOMMENDATION',
+      'NOT PRODUCTION PERFORMANCE',
+    ],
+    status: 'ready_disabled_pending_explicit_activation',
+    productionGate: {
+      mode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
+      publicRecommendationsEnabled: false,
+      productionMetricsEnabled: false,
+      productionEligibleRequiredForPublicOutputs: true,
+    },
+    pregame: {
+      fieldsReady: [
+        'gamesScheduled',
+        'mappedGames',
+        'oddsCoverage',
+        'snapshotsCaptured',
+        'predictionCandidates',
+        'predictionsCreated',
+        'predictionsBlockedByReason',
+        'dataQuality',
+        'providerCallsUsed',
+      ],
+      currentValues: {
+        gamesScheduled: null,
+        mappedGames: null,
+        oddsCoverage: null,
+        snapshotsCaptured: null,
+        predictionCandidates: null,
+        predictionsCreated: null,
+        predictionsBlockedByReason: [],
+        dataQuality: null,
+        providerCallsUsed: 0,
+      },
+    },
+    postgame: {
+      fieldsReady: [
+        'predictionsSettled',
+        'wins',
+        'losses',
+        'pushes',
+        'voids',
+        'pending',
+        'byMarketResults',
+        'technicalUnits',
+        'brierScore',
+        'dataIncidents',
+        'unresolvedSettlement',
+        'providerReliability',
+      ],
+      currentValues: {
+        predictionsSettled: null,
+        wins: null,
+        losses: null,
+        pushes: null,
+        voids: null,
+        pending: null,
+        byMarketResults: [],
+        technicalUnits: null,
+        brierScore: null,
+        dataIncidents: [],
+        unresolvedSettlement: [],
+        providerReliability: null,
+      },
+    },
+    cumulativeThirtyDay: {
+      fieldsReady: [
+        'totalPredictions',
+        'settledSample',
+        'hitRate',
+        'brierScore',
+        'calibration',
+        'technicalUnitsRoi',
+        'maxDrawdown',
+        'byMarketPerformance',
+        'oddsCoverage',
+        'closingComparisonCoverage',
+        'costPerGame',
+        'costPerSettledPrediction',
+        'subscriptionContinuationScorecard',
+      ],
+      decisionCategories: [
+        'insufficient_evidence',
+        'continue_collecting',
+        'continue_mlb_only',
+        'reduce_provider_scope',
+        'replace_free_compatible_feeds',
+        'pause_subscription',
+        'proceed_toward_controlled_production_review',
+      ],
+    },
+  }
+}
+
 export async function getDailyReport(bankroll = 1000) {
   const topPicks = await safeSection(
     'top picks',
@@ -188,9 +286,14 @@ export async function getDailyReport(bankroll = 1000) {
       adaptiveWeightsAvailable: false,
       summary: {
         productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
+        recommendationPolicyMode: 'recommendation_eligibility_policy_v1',
+        automaticProductionApproval: false,
+        calibrationStatus: 'probationary',
         pendingPicks: 0,
         safePendingPicks: 0,
         recommendedPicks: 0,
+        officialQualifiedPicks: 0,
+        watchCandidates: 0,
         topEvCount: 0,
         topConfidenceCount: 0,
         bestBetsCount: 0,
@@ -222,6 +325,8 @@ export async function getDailyReport(bankroll = 1000) {
     () => buildPortfolios(bankroll)
   )
 
+  const officialPickCount = Number(topPicks.summary?.recommendedPicks ?? 0)
+
   const sportsbook = await safeSection(
     'sportsbook intelligence',
     {
@@ -241,10 +346,27 @@ export async function getDailyReport(bankroll = 1000) {
       },
     } as any,
     () =>
-      getSportsbookIntelligence({
-        sportKey: 'baseball_mlb',
-        bankroll,
-      })
+      officialPickCount
+        ? getSportsbookIntelligence({
+            sportKey: 'baseball_mlb',
+            bankroll,
+          })
+        : Promise.resolve({
+            success: true,
+            sportKey: 'baseball_mlb',
+            bankroll,
+            generatedAt: new Date().toISOString(),
+            summary: {
+              averageLineValue: 0,
+              averageSharpConfidence: 0,
+            },
+            lists: {
+              betNow: [],
+              bestOdds: [],
+              bestClv: [],
+              sharpMoney: [],
+            },
+          } as any)
   )
 
   const bankrollManager = await safeSection(
@@ -413,6 +535,7 @@ export async function getDailyReport(bankroll = 1000) {
       learnedWeights,
       clv: clv.summary,
     },
+    mlbValidation: getMlbValidationReportSection(),
     riskAlerts: [...new Set(riskAlerts)].slice(0, 8),
     notes: [
       'Use portfolio recommendations as decision support, not guaranteed outcomes.',

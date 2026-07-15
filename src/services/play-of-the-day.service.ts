@@ -1,4 +1,5 @@
 import { getTopPicks } from '@/services/top-picks.service'
+import { RECOMMENDATION_THRESHOLDS_V1 } from '@/services/recommendation-eligibility-policy.service'
 
 type PlayPick = {
   id: string
@@ -12,6 +13,8 @@ type PlayPick = {
   edge: number
   ev: number
   recommended_pick: boolean | null
+  recommendation_status?: string
+  recommendationStatus?: string
   risk_grade?: string
   risk_label?: string
   risk_stars?: number
@@ -68,10 +71,12 @@ export async function getPlayOfTheDay() {
   const qualified = [...unique.values()]
     .filter(
       (pick) =>
-        pick.recommended_pick === true &&
-        pick.confidence >= 75 &&
-        pick.ev >= 10 &&
-        pick.edge >= 8 &&
+        (pick.recommendation_status ?? pick.recommendationStatus) ===
+          'PLAY_OF_DAY_CANDIDATE' &&
+        pick.confidence >=
+          RECOMMENDATION_THRESHOLDS_V1.minimumPlayOfDayConfidence &&
+        pick.ev >= RECOMMENDATION_THRESHOLDS_V1.minimumPlayOfDayEv &&
+        pick.edge >= RECOMMENDATION_THRESHOLDS_V1.minimumPlayOfDayEdge &&
         pick.odds < 300
     )
     .sort(sortByPlayScore)
@@ -82,6 +87,7 @@ export async function getPlayOfTheDay() {
     return {
       success: true,
       adaptiveWeightsAvailable: topPicks.adaptiveWeightsAvailable,
+      recommendationPolicyMode: 'recommendation_eligibility_policy_v1',
       generatedAt: new Date().toISOString(),
       play: null,
       message: 'No qualified Play of the Day available right now.',
@@ -97,6 +103,7 @@ export async function getPlayOfTheDay() {
   return {
     success: true,
     adaptiveWeightsAvailable: topPicks.adaptiveWeightsAvailable,
+    recommendationPolicyMode: 'recommendation_eligibility_policy_v1',
     generatedAt: new Date().toISOString(),
     play: {
       ...play,

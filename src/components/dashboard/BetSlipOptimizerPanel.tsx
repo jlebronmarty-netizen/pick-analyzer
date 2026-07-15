@@ -19,21 +19,21 @@ type OptimizerPick = {
 type OptimizedTicket = {
   label: string
   legs: number
-  qualityScore: number
+  qualityScore: number | null
   riskLevel: string
-  riskScore: number
+  riskScore: number | null
   correlation: {
     level: string
-    score: number
+    score: number | null
     notes: string[]
   }
-  americanOdds: number
-  decimalOdds: number
-  probability: number
-  expectedValue: number
-  averageConfidence: number
-  averageEv: number
-  averageEdge: number
+  americanOdds: number | null
+  decimalOdds: number | null
+  probability: number | null
+  expectedValue: number | null
+  averageConfidence: number | null
+  averageEv: number | null
+  averageEdge: number | null
   recommendedStake: number
   estimatedPayout: number
   expectedProfit: number
@@ -57,13 +57,23 @@ type OptimizedTicket = {
 
 type OptimizerResponse = {
   success: boolean
+  mode?: string
+  emptyState?: {
+    message: string
+    reason: string
+  } | null
   optimizer: {
-    ticketQualityScore: number
+    mode?: string
+    emptyState?: {
+      message: string
+      reason: string
+    } | null
+    ticketQualityScore: number | null
     riskLevel: string
-    riskScore: number
+    riskScore: number | null
     correlation: {
       level: string
-      score: number
+      score: number | null
       notes: string[]
     }
     recommendedStake: number
@@ -94,12 +104,14 @@ function formatMoney(value?: number) {
   return `$${Number(value ?? 0).toFixed(2)}`
 }
 
-function formatOdds(value?: number) {
-  const odds = Number(value ?? 0)
+function formatOdds(value?: number | null) {
+  if (value === null || value === undefined) return '-'
+  const odds = Number(value)
   return odds > 0 ? `+${odds}` : `${odds}`
 }
 
-function formatPercent(value?: number) {
+function formatPercent(value?: number | null) {
+  if (value === null || value === undefined) return 'N/A'
   return `${Number(value ?? 0).toFixed(2)}%`
 }
 
@@ -110,10 +122,11 @@ function scoreValue(pick: OptimizerPick) {
 function riskClass(level?: string) {
   if (level === 'LOW') return 'text-emerald-300'
   if (level === 'MEDIUM') return 'text-amber-300'
+  if (level === 'NO_TICKET' || level === 'NOT_APPLICABLE') return 'text-slate-300'
   return 'text-red-300'
 }
 
-function barWidth(value?: number) {
+function barWidth(value?: number | null) {
   return `${Math.min(Math.max(Number(value ?? 0), 0), 100)}%`
 }
 
@@ -179,6 +192,10 @@ export default function BetSlipOptimizerPanel() {
 
   const { optimizer } = data
   const ticket = optimizer.parlay
+  const noTicket =
+    data.mode === 'no_ticket' ||
+    optimizer.mode === 'no_ticket' ||
+    ticket.legs === 0
 
   return (
     <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
@@ -228,8 +245,10 @@ export default function BetSlipOptimizerPanel() {
             AI Ticket Score
           </p>
           <p className="mt-2 text-5xl font-black text-white">
-            {optimizer.ticketQualityScore}
-            <span className="text-xl text-slate-500">/100</span>
+            {optimizer.ticketQualityScore === null ? 'N/A' : optimizer.ticketQualityScore}
+            {optimizer.ticketQualityScore === null ? null : (
+              <span className="text-xl text-slate-500">/100</span>
+            )}
           </p>
           <p className="mt-3 text-sm text-slate-300">
             {optimizer.explanation.summary}
@@ -250,7 +269,7 @@ export default function BetSlipOptimizerPanel() {
           </div>
 
           <p className="mt-2 text-xs text-slate-500">
-            Risk score: {optimizer.riskScore}/100
+            Risk score: {optimizer.riskScore === null ? 'N/A' : `${optimizer.riskScore}/100`}
           </p>
         </div>
 
@@ -268,11 +287,24 @@ export default function BetSlipOptimizerPanel() {
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-5">
         <Stat label="Legs" value={`${ticket.legs}`} />
-        <Stat label="Parlay Odds" value={formatOdds(ticket.americanOdds)} />
+        <Stat label="Parlay Odds" value={noTicket ? '-' : formatOdds(ticket.americanOdds)} />
         <Stat label="Probability" value={formatPercent(ticket.probability)} />
         <Stat label="Expected EV" value={formatPercent(ticket.expectedValue)} />
-        <Stat label="Stake" value={formatMoney(ticket.recommendedStake)} />
+        <Stat label="Stake" value={noTicket ? '$0.00' : formatMoney(ticket.recommendedStake)} />
       </div>
+
+      {noTicket ? (
+        <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+          <p className="text-sm font-bold text-white">
+            No eligible picks are available to build a ticket.
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            {data.emptyState?.reason ??
+              optimizer.emptyState?.reason ??
+              'The optimizer activates only after official qualified picks pass the production, calibration, quality and value gates.'}
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <div className="rounded-2xl border border-emerald-500/20 bg-emerald-950/10 p-5">
@@ -361,7 +393,7 @@ export default function BetSlipOptimizerPanel() {
         <h3 className="mb-3 font-bold text-white">Alternative Parlays</h3>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {optimizer.alternatives.map((alternative) => (
+          {optimizer.alternatives.filter((alternative) => alternative.legs > 0).map((alternative) => (
             <AlternativeTicket
               key={alternative.label}
               ticket={alternative}
@@ -447,7 +479,7 @@ function AlternativeTicket({
         </div>
 
         <p className="text-lg font-black text-purple-300">
-          {ticket.qualityScore}
+          {ticket.qualityScore ?? 'N/A'}
         </p>
       </div>
 

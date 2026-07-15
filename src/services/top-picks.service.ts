@@ -8,6 +8,13 @@ import {
   PRODUCTION_DATA_GATE_V1_POLICY,
   isProductionEligibleRow,
 } from '@/services/production-data-gate.service'
+import {
+  evaluateRecommendationEligibility,
+  isOfficialRecommendationStatus,
+  RECOMMENDATION_THRESHOLDS_V1,
+  type RecommendationEligibilityResult,
+  type RecommendationStatus,
+} from '@/services/recommendation-eligibility-policy.service'
 
 type PredictionRow = {
   id: string
@@ -33,6 +40,25 @@ type PredictionRow = {
   status: string | null
   result: string | null
   created_at?: string | null
+  selection?: string | null
+  line?: number | null
+  odds_timestamp?: string | null
+  generated_at?: string | null
+  cutoff_at?: string | null
+  model_version?: string | null
+  feature_snapshot?: Record<string, unknown> | null
+  feature_snapshot_id?: string | null
+  feature_set_version?: string | null
+  feature_snapshot_generated_at?: string | null
+  validation_warnings?: string[] | null
+  recommendation_status?: RecommendationStatus
+  recommendationStatus?: RecommendationStatus
+  recommendation_label?: string
+  confidence_label?: string
+  reliability_label?: string
+  value_label?: string
+  qualification_blockers?: string[]
+  eligibility_policy?: RecommendationEligibilityResult
   risk_grade?: string
   risk_stars?: number
   risk_label?: string
@@ -119,17 +145,6 @@ function passesSafetyFilter(row: PredictionRow) {
   return true
 }
 
-function passesBestBetFilter(row: PredictionRow) {
-  return (
-    row.recommended_pick === true &&
-    row.odds < 300 &&
-    row.ev >= 5 &&
-    row.edge >= 5 &&
-    row.confidence >= 65 &&
-    passesSafetyFilter(row)
-  )
-}
-
 function sortByAdaptiveScore(a: PredictionRow, b: PredictionRow) {
   return (
     (b.adaptive_score ?? 0) - (a.adaptive_score ?? 0) ||
@@ -188,11 +203,50 @@ function enrichRow(
   }
 }
 
+function featureNumber(
+  snapshot: Record<string, unknown> | null | undefined,
+  keys: string[]
+) {
+  for (const key of keys) {
+    const value = snapshot?.[key]
+    const number = Number(value)
+    if (Number.isFinite(number)) return number
+  }
+
+  return null
+}
+
+function applyEligibility(row: PredictionRow): PredictionRow {
+  const policy = evaluateRecommendationEligibility({
+    ...row,
+    data_quality_score: featureNumber(row.feature_snapshot, [
+      'featureQualityScore',
+      'dataQualityScore',
+    ]),
+    data_sufficiency_score: featureNumber(row.feature_snapshot, [
+      'dataSufficiencyScore',
+    ]),
+    calibrationStatus: 'probationary',
+  })
+
+  return {
+    ...row,
+    recommendation_status: policy.status,
+    recommendationStatus: policy.status,
+    recommendation_label: policy.labels.recommendation,
+    confidence_label: policy.labels.confidence,
+    reliability_label: policy.labels.reliability,
+    value_label: policy.labels.value,
+    qualification_blockers: policy.blockers,
+    eligibility_policy: policy,
+  }
+}
+
 export async function getTopPicks(sportKey = 'baseball_mlb') {
   const query = supabaseAdmin
     .from('prediction_history')
     .select(
-      'id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, recommended_pick, production_eligible, trial, scrambled, status, result, created_at'
+      'id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, recommended_pick, production_eligible, trial, scrambled, status, result, created_at, selection, line, odds_timestamp, generated_at, cutoff_at, model_version, feature_snapshot, feature_snapshot_id, feature_set_version, feature_snapshot_generated_at, validation_warnings'
     )
     .or('status.is.null,status.eq.pending')
     .eq('production_eligible', true)
@@ -233,40 +287,47 @@ export async function getTopPicks(sportKey = 'baseball_mlb') {
   const rows = dedupeByLatestMatchup(pendingRows)
   const safeRows = rows.filter(passesSafetyFilter)
 
-  const enrichedRows = safeRows.map((row) =>
-    enrichRow(row, adaptiveWeights)
+  const enrichedRows = safeRows
+    .map(applyEligibility)
+    .map((row) => enrichRow(row, adaptiveWeights))
+
+  const officialRows = enrichedRows.filter((row) =>
+    isOfficialRecommendationStatus(row.recommendation_status ?? 'INELIGIBLE')
   )
 
-  const topEv = [...enrichedRows]
+  const watchRows = enrichedRows.filter(
+    (row) => row.recommendation_status === 'WATCH'
+  )
+
+  const topEv = [...officialRows]
     .filter(
       (row) =>
-        row.ev >= 3 &&
-        row.edge >= 4 &&
+        row.ev >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialEv &&
+        row.edge >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialEdge &&
         row.odds < 500
     )
     .sort(sortByAdaptiveScore)
     .slice(0, 10)
 
-  const topConfidence = [...enrichedRows]
+  const topConfidence = [...officialRows]
     .filter(
       (row) =>
-        row.confidence >= 60 &&
-        row.edge >= 2 &&
+        row.confidence >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialConfidence &&
+        row.edge >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialEdge &&
         row.odds < 300
     )
     .sort(sortByAdaptiveScore)
     .slice(0, 10)
 
-  const bestBets = [...enrichedRows]
-    .filter(passesBestBetFilter)
+  const bestBets = [...officialRows]
+    .filter((row) =>
+      row.recommendation_status === 'BEST_BET_CANDIDATE' ||
+      row.recommendation_status === 'PLAY_OF_DAY_CANDIDATE'
+    )
     .sort(sortByAdaptiveScore)
     .slice(0, 10)
 
-  const recommended = enrichedRows.filter(
-    (row) =>
-      row.recommended_pick === true &&
-      row.odds < 500
-  )
+  const recommended = officialRows.filter((row) => row.odds < 500)
 
   const sportsAvailable = [
     ...new Set(rows.map((row) => row.sport_key)),
@@ -279,9 +340,15 @@ export async function getTopPicks(sportKey = 'baseball_mlb') {
 
     summary: {
       productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
+      recommendationPolicyMode: 'recommendation_eligibility_policy_v1',
+      automaticProductionApproval:
+        RECOMMENDATION_THRESHOLDS_V1.automaticProductionApproval,
+      calibrationStatus: 'probationary',
       pendingPicks: rows.length,
       safePendingPicks: safeRows.length,
       recommendedPicks: recommended.length,
+      officialQualifiedPicks: officialRows.length,
+      watchCandidates: watchRows.length,
       topEvCount: topEv.length,
       topConfidenceCount: topConfidence.length,
       bestBetsCount: bestBets.length,

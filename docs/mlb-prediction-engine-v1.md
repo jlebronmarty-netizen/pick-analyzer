@@ -73,6 +73,16 @@ Those unavailable domains remain warnings and keep the engine in partial status.
 
 No migration is required. V1 returns deterministic previews only and does not write to `prediction_history`.
 
+## Historical Replay
+
+MLB Historical Recommendation Replay V1 is separate from the architecture-only preview engine. It reads already-persisted, linked and settled July 12, 2026 validation predictions through explicit quarantined historical mode on `/api/predictions/by-sport`, then renders them inside the existing MLB Prediction Engine panel. It does not generate predictions, mutate settlement, call providers or change production recommendation defaults.
+
+Recommendation Experience V1 updates replay semantics so each row shows model
+selection, current shared-policy status, qualification blockers and final result
+as separate concepts. A historical win does not turn an analyzed row into an
+official pick, and negative-edge or negative-EV rows remain visibly not
+recommended.
+
 ## Future Work
 
 - Real stored-data candidate generation after normalized MLB event and odds coverage is verified.

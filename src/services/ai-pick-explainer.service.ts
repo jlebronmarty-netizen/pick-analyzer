@@ -17,6 +17,12 @@ type PickInput = {
   smart_score?: number
   adaptive_score?: number
   adaptive_adjustment?: any
+  recommendation_status?: string
+  recommendation_label?: string
+  confidence_label?: string
+  reliability_label?: string
+  value_label?: string
+  qualification_blockers?: string[]
 }
 
 function num(value: unknown, fallback = 0) {
@@ -29,6 +35,9 @@ function formatOdds(odds: number) {
 }
 
 function getVerdict(pick: PickInput) {
+  if (pick.recommendation_label) return pick.recommendation_label
+  if (num(pick.edge) <= 0 || num(pick.ev) <= 0) return 'Not recommended'
+
   const confidence = num(pick.confidence)
   const edge = num(pick.edge)
   const ev = num(pick.ev)
@@ -65,6 +74,8 @@ function buildReasons(pick: PickInput) {
 
   if (num(pick.ev) > 0) {
     reasons.push(`Expected value is positive at ${num(pick.ev).toFixed(2)}%.`)
+  } else {
+    reasons.push('No modeled value is present because expected value is not positive.')
   }
 
   if (num(pick.confidence) >= 75) {
@@ -100,6 +111,10 @@ function buildReasons(pick: PickInput) {
 function buildWarnings(pick: PickInput) {
   const warnings: string[] = []
 
+  if (num(pick.edge) <= 0 || num(pick.ev) <= 0) {
+    warnings.push('This selection is analyzed only and is not an official recommended wager.')
+  }
+
   if (num(pick.odds) > 250) {
     warnings.push('This is a plus-money underdog with elevated variance.')
   }
@@ -110,6 +125,10 @@ function buildWarnings(pick: PickInput) {
 
   if (num(pick.edge) < 5) {
     warnings.push('Edge is thin compared with stronger value spots.')
+  }
+
+  for (const blocker of pick.qualification_blockers ?? []) {
+    warnings.push(`Policy blocker: ${blocker}.`)
   }
 
   if (num(pick.adaptive_score ?? pick.smart_score) < num(pick.smart_score)) {
@@ -141,6 +160,12 @@ export function explainPick(pick: PickInput) {
     },
     verdict,
     risk,
+    recommendationStatus: pick.recommendation_status ?? 'UNKNOWN',
+    labels: {
+      confidence: pick.confidence_label ?? 'Unknown',
+      reliability: pick.reliability_label ?? 'Unknown',
+      value: pick.value_label ?? 'Unknown',
+    },
     scores: {
       confidence: num(pick.confidence),
       modelProbability: num(pick.model_probability),

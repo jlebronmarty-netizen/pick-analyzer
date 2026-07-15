@@ -40,6 +40,12 @@ type Pick = {
   ev: number
   confidence: number
   recommended_pick: boolean | null
+  recommendation_status?: string
+  recommendation_label?: string
+  confidence_label?: string
+  reliability_label?: string
+  value_label?: string
+  qualification_blockers?: string[]
   risk_grade?: string
   risk_label?: string
   smart_score?: number
@@ -54,6 +60,10 @@ type TopPicksResponse = {
     pendingPicks: number
     safePendingPicks?: number
     recommendedPicks: number
+    officialQualifiedPicks?: number
+    watchCandidates?: number
+    calibrationStatus?: string
+    automaticProductionApproval?: boolean
     topEvCount: number
     topConfidenceCount: number
     bestBetsCount: number
@@ -167,9 +177,11 @@ function PickCard({ pick }: { pick: Pick }) {
 
           <div className="text-right">
             <p className="text-sm font-bold text-white">{formatOdds(pick.odds)}</p>
-            {pick.recommended_pick && (
+            {pick.recommendation_status &&
+              pick.recommendation_status !== 'INELIGIBLE' &&
+              pick.recommendation_status !== 'ANALYZED_ONLY' && (
               <span className="mt-1 inline-block rounded-full bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-400">
-                Recommended
+                {pick.recommendation_label ?? 'Qualified pick'}
               </span>
             )}
           </div>
@@ -226,7 +238,23 @@ function PickCard({ pick }: { pick: Pick }) {
           <div className="rounded-lg bg-slate-900/70 p-3">
             <p className="text-slate-500">Confidence</p>
             <p className="font-semibold text-white">
-              {formatPercent(pick.confidence)}
+              {pick.confidence_label ?? formatPercent(pick.confidence)}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+          <div className="rounded-lg bg-slate-900/70 p-3">
+            <p className="text-slate-500">Reliability</p>
+            <p className="font-semibold text-white">
+              {pick.reliability_label ?? 'Developing'}
+            </p>
+          </div>
+
+          <div className="rounded-lg bg-slate-900/70 p-3">
+            <p className="text-slate-500">Value</p>
+            <p className="font-semibold text-white">
+              {pick.value_label ?? 'Positive value'}
             </p>
           </div>
         </div>
@@ -281,7 +309,7 @@ function PicksColumn({
 
       {picks.length === 0 ? (
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-400">
-          No picks available yet.
+          No official picks currently satisfy the model's quality, calibration and value thresholds.
         </div>
       ) : (
         <div className="space-y-3">
@@ -349,7 +377,7 @@ export default function TopPicksPanel() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
           <p className="text-xs text-slate-400">Pending Picks</p>
           <p className="mt-1 text-2xl font-bold text-white">
@@ -372,6 +400,13 @@ export default function TopPicksPanel() {
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+          <p className="text-xs text-slate-400">Watch</p>
+          <p className="mt-1 text-2xl font-bold text-amber-300">
+            {data.summary.watchCandidates ?? 0}
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
           <p className="text-xs text-slate-400">Best Bets</p>
           <p className="mt-1 text-2xl font-bold text-white">
             {data.summary.bestBetsCount}
@@ -390,6 +425,12 @@ export default function TopPicksPanel() {
             {data.adaptiveWeightsAvailable ? 'ON' : 'OFF'}
           </p>
         </div>
+      </div>
+
+      <div className="rounded-xl border border-amber-500/20 bg-amber-950/10 p-4 text-sm leading-6 text-amber-100">
+        No official picks are enabled until production rows pass the shared
+        recommendation policy and calibration is no longer probationary.
+        Calibration status: {data.summary.calibrationStatus ?? 'probationary'}.
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">

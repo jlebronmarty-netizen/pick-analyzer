@@ -1,5 +1,35 @@
 # Decision Log
 
+## 2026-07-14 - Keep Official Picks Closed Behind Shared Eligibility Policy
+
+Context: The July 12 MLB replay shows 45 analyzed, settled, quarantined rows, including negative-edge and negative-EV rows. Top Picks and Bet Slip Optimizer currently show no official picks, which is correct while production eligibility and calibration are incomplete.
+
+Decision: Add `recommendation_eligibility_policy_v1` over Production Data Gate V1, centralize conservative thresholds, keep calibration probationary, and require official pick consumers to use only `QUALIFIED`, `BEST_BET_CANDIDATE` and `PLAY_OF_DAY_CANDIDATE`. Update historical replay semantics so analyzed rows, watch/qualification status and final results are separate. Return a no-ticket optimizer state when eligible official picks are zero.
+
+Consequences: No quarantined rows are promoted, no provider calls or remote mutations occur, API route count remains unchanged and official recommendations remain blocked until prospective production-eligible rows, current odds, mature calibration and explicit activation approval exist.
+
+Affected modules: Recommendation eligibility policy, Top Picks, Play of the Day, parlays, Bet Slip Optimizer, portfolio, daily report, MLB replay panel and official-picks readiness docs.
+
+## 2026-07-14 - Expose MLB Historical Replay Without Production Leakage
+
+Context: The July 12 MLB validation batch had 45 linked, settled, quarantined predictions but no way to inspect them in the application like recommendations.
+
+Decision: Extend existing `/api/predictions/by-sport` with an explicit historical validation mode instead of adding a new route. Require `historicalValidation=true`, `validationMode=quarantined`, `sport=baseball_mlb` and `date=2026-07-12`. Filter the replay to linked Feature Store lineage rows only, expose curated prediction/final-score/settlement fields, and extend the existing MLB Prediction Engine panel with one replay section and local filters.
+
+Consequences: The replay shows 45 predictions, 21 wins, 24 losses, 15 rows per market, 45 linked feature snapshots and compact pregame explanations. Default production queries still exclude the rows, public recommendations remain 0, provider calls remain 0 and no remote mutations occur.
+
+Affected modules: Prediction history service, `/api/predictions/by-sport`, MLB Prediction Engine dashboard panel and MLB validation docs.
+
+## 2026-07-14 - Prepare MLB Day 1 Prospective Validation But Keep It Disabled
+
+Context: The completed `2026-JUL-12` MLB validation date proved timestamped odds, durable feature snapshots, linked predictions and settlement under quarantine. The next step was operational readiness for a prospective Day 1 run, not more architecture or live provider execution.
+
+Decision: Reuse existing `/api/cron/daily-sync?version=2`, Feature Store route actions and `/api/daily-report`. Add a disabled MLB Day 1 readiness packet with Puerto Rico capture windows, event-aware cutoff policy, conservative 6/8/12 daily call budget, technical closing-comparison contract, recovery/checkpoint rules and zero-call acceptance checks. Extend the daily report with a labeled `mlbValidation` section while keeping public picks and production metrics filtered to `production_eligible=true`.
+
+Consequences: Day 1 can be manually activated only after explicit approval. This pass made 0 provider calls, performed 0 remote mutations, added 0 routes, added 0 dashboards, added 0 migrations, enabled no recurring schedule and promoted no data to production.
+
+Affected modules: Daily Sync V2, Daily Report, production-readiness docs and MLB operations docs.
+
 ## 2026-07-14 - Expand MLB Line Movement And Keep Production Gate Closed
 
 Context: GameId `78723` had proven one-game line-movement normalization and bounded Feature Store -> Prediction History -> Settlement lineage. The next approved step was the remaining 14 persisted `2026-JUL-12` MLB events, with a hard cap of 14 provider calls and no production promotion.

@@ -3,6 +3,10 @@ import {
   removeHighlyCorrelatedPicks,
 } from '@/services/correlation.service'
 import { getTopPicks } from '@/services/top-picks.service'
+import {
+  isOfficialRecommendationStatus,
+  RECOMMENDATION_THRESHOLDS_V1,
+} from '@/services/recommendation-eligibility-policy.service'
 
 type ParlayPick = {
   id: string
@@ -21,6 +25,8 @@ type ParlayPick = {
   adaptive_score?: number
   adaptive_adjustment?: unknown
   recommended_pick: boolean | null
+  recommendation_status?: string
+  recommendationStatus?: string
 }
 
 type GeneratedParlay = {
@@ -123,10 +129,12 @@ export async function generateSmartParlays() {
     ...(topPicks.topEv as ParlayPick[]),
   ]).filter(
     (pick) =>
-      pick.recommended_pick === true &&
-      pick.confidence >= 60 &&
-      pick.ev >= 3 &&
-      pick.edge >= 4 &&
+      isOfficialRecommendationStatus(
+        (pick.recommendation_status ?? pick.recommendationStatus ?? 'INELIGIBLE') as never
+      ) &&
+      pick.confidence >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialConfidence &&
+      pick.ev >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialEv &&
+      pick.edge >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialEdge &&
       pick.odds < 500
   )
 
@@ -194,6 +202,7 @@ export async function generateSmartParlays() {
   return {
     success: true,
     adaptiveWeightsAvailable: topPicks.adaptiveWeightsAvailable,
+    recommendationPolicyMode: 'recommendation_eligibility_policy_v1',
     generatedAt: new Date().toISOString(),
     count: parlays.length,
     parlays,

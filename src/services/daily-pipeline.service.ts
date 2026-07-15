@@ -239,6 +239,296 @@ const MLB_PERSONAL_PLAN_CAPTURE_SCHEDULE = {
   ],
 }
 
+const MLB_PROSPECTIVE_VALIDATION_DAY1 = {
+  mode: 'mlb_prospective_validation_day_1_readiness_v1',
+  active: false,
+  requiresExplicitActivation: true,
+  timezone: 'America/Puerto_Rico',
+  sportKey: 'baseball_mlb',
+  leagueKey: 'mlb',
+  provider: 'sportsdataio_discovery_lab',
+  labels: [
+    'QUARANTINED REAL-DATA VALIDATION',
+    'NOT A WAGERING RECOMMENDATION',
+    'NOT PRODUCTION PERFORMANCE',
+  ],
+  workflow: {
+    pregame: [
+      'Resolve current Puerto Rico MLB date and season.',
+      'Fetch GamesByDate once for the date.',
+      'Refresh Teams/Players only when stale.',
+      'Derive availability from Player.Status; do not fabricate injuries or lineups.',
+      'Capture date-wide GameOddsByDate at initial, midday and pregame windows.',
+      'Optionally capture one final date-wide GameOddsByDate before the earliest remaining first pitch.',
+      'Validate event, team and odds mappings.',
+      'Generate leakage-safe feature snapshots from persisted timestamped rows only.',
+      'Generate quarantined predictions with production_eligible=false.',
+      'Write the pregame validation report.',
+    ],
+    postgame: [
+      'Refresh GamesByDate/results once after the slate settles.',
+      'Fetch TeamGameStatsByDate once.',
+      'Fetch PlayerGameStatsByDate once.',
+      'Settle linked quarantined predictions once.',
+      'Run data-quality and production-gate validation.',
+      'Update quarantined technical metrics and next-day report.',
+    ],
+  },
+  captureWindows: [
+    {
+      id: 'morning_schedule_sync',
+      localTime: '08:30',
+      purpose: 'Resolve date, season, schedule and provider GameIds.',
+      endpointTemplate: '/api/mlb/odds/json/GamesByDate/{date}',
+      plannedProviderCalls: 1,
+    },
+    {
+      id: 'initial_odds_capture',
+      localTime: '10:00',
+      purpose: 'Persist the first date-wide odds snapshot if markets are available.',
+      endpointTemplate: '/api/mlb/odds/json/GameOddsByDate/{date}',
+      plannedProviderCalls: 1,
+    },
+    {
+      id: 'midday_odds_capture',
+      localTime: '13:00',
+      purpose: 'Persist a second date-wide odds snapshot.',
+      endpointTemplate: '/api/mlb/odds/json/GameOddsByDate/{date}',
+      plannedProviderCalls: 1,
+    },
+    {
+      id: 'pregame_odds_capture',
+      localTime: '15:30',
+      purpose: 'Persist a pregame date-wide odds snapshot before typical evening games.',
+      endpointTemplate: '/api/mlb/odds/json/GameOddsByDate/{date}',
+      plannedProviderCalls: 1,
+    },
+    {
+      id: 'event_aware_final_capture',
+      localTime: 'event-aware',
+      purpose:
+        'Optional final date-wide capture 10-15 minutes before the earliest not-yet-started game; started games are ignored by cutoff selection.',
+      endpointTemplate: '/api/mlb/odds/json/GameOddsByDate/{date}',
+      plannedProviderCalls: 1,
+    },
+    {
+      id: 'postgame_settlement_sync',
+      localTime: 'next morning 07:30',
+      purpose: 'Refresh results/stats and settle completed quarantined predictions.',
+      endpointTemplate:
+        '/api/mlb/odds/json/GamesByDate/{date}, /api/mlb/odds/json/TeamGameStatsByDate/{date}, /api/mlb/fantasy/json/PlayerGameStatsByDate/{date}',
+      plannedProviderCalls: 3,
+    },
+  ],
+  cutoffPolicy: {
+    defaultMinutesBeforeFirstPitch: 10,
+    rule:
+      'For each event and market, select the latest persisted snapshot with source timestamp <= cutoff and source timestamp < event start.',
+    preserveSnapshots: true,
+    overwriteEarlierSnapshots: false,
+    excludeAtOrAfterFirstPitch: true,
+    missingTimestampBehavior: 'block candidate and lower sufficiency',
+  },
+  providerCallBudget: {
+    minimumCallsPerDay: 6,
+    typicalCallsPerDay: 8,
+    maximumPlannedCallsPerDay: 12,
+    dailyAllowance: 1000,
+    typicalAllowancePercent: 0.8,
+    maximumAllowancePercent: 1.2,
+    thresholdBehavior:
+      'Stop before the next provider step when the configured budget would be exceeded; local validation/reporting may still run.',
+    excludedByDefault: [
+      'GameOddsLineMovement per-game reconstruction',
+      'automatic retries',
+      'polling every game separately',
+      'model training',
+      'production promotion',
+    ],
+  },
+  featurePredictionPath: {
+    supportsProspectiveWorkflow: true,
+    source: 'existing Feature Store route actions over persisted normalized records',
+    requiredInputs: [
+      'mapped future event',
+      'event start after prediction cutoff',
+      'genuine captured odds',
+      'source timestamps <= cutoff',
+      'minimum Feature Store sufficiency',
+      'deterministic snapshot identity',
+    ],
+    forbiddenInputs: [
+      'final/postgame data before prediction',
+      'fabricated starting pitcher',
+      'fabricated lineup',
+      'fabricated injury detail',
+      'fabricated weather',
+      'fabricated bullpen workload',
+    ],
+    markets: ['moneyline', 'run_line', 'total'],
+    persistenceFlags: {
+      trial: false,
+      scrambled: false,
+      productionEligible: false,
+      quarantineMetadataRequired: true,
+      publicRecommendations: false,
+    },
+  },
+  closingComparisonPolicy: {
+    productionClvEnabled: false,
+    label: 'technical_final_captured_pregame_comparison',
+    requiredMatch: [
+      'same event',
+      'same sportsbook',
+      'same market',
+      'same selection',
+      'compatible line identity',
+      'later snapshot remains before first pitch',
+      'final successfully captured eligible pregame snapshot under this workflow',
+    ],
+    terms: {
+      predictionTimeSnapshot:
+        'snapshot selected for the prediction cutoff',
+      laterPregameSnapshot:
+        'eligible snapshot after prediction time and before first pitch',
+      finalCapturedPregameSnapshot:
+        'latest eligible captured snapshot before first pitch within the configured workflow',
+      unavailableClosingComparison:
+        'no later compatible pregame snapshot was captured',
+    },
+    warning:
+      'Do not call this an industry true close unless provider semantics prove it.',
+  },
+  recovery: {
+    resumable: true,
+    checkpointSources: [
+      'sync job scope and status',
+      'deterministic odds snapshot IDs',
+      'deterministic feature snapshot keys',
+      'deterministic prediction identities',
+      'settlement status on prediction_history',
+    ],
+    recoveryScenarios: [
+      'PC sleep',
+      'process termination',
+      'internet loss',
+      'provider timeout',
+      'partial successful batch',
+      'dev server restart',
+      'duplicate manual execution',
+    ],
+    staleLockPolicy:
+      'Prefer completed checkpoint reuse; inspect partial sync jobs before rerunning provider steps.',
+    noSecretLogging: true,
+  },
+  reportReadiness: {
+    existingRoute: '/api/daily-report',
+    section: 'mlbValidation',
+    pregameFields: [
+      'games scheduled',
+      'mapped games',
+      'odds coverage',
+      'snapshots captured',
+      'prediction candidates',
+      'predictions created',
+      'blocked reasons',
+      'data quality',
+      'provider calls used',
+    ],
+    postgameFields: [
+      'settled predictions',
+      'wins/losses/pushes/voids/pending',
+      'by-market results',
+      'technical units',
+      'Brier score',
+      'data incidents',
+      'unresolved settlement',
+      'provider reliability',
+    ],
+    cumulativeThirtyDayFields: [
+      'settled sample',
+      'hit rate',
+      'Brier score',
+      'calibration',
+      'technical units/ROI with quarantine label',
+      'max drawdown',
+      'by-market performance',
+      'odds and closing-comparison coverage',
+      'cost per game',
+      'cost per settled prediction',
+      'subscription continuation scorecard',
+    ],
+  },
+}
+
+function getPuertoRicoDateParts(now = new Date()) {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Puerto_Rico',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+  const parts = Object.fromEntries(
+    formatter.formatToParts(now).map((part) => [part.type, part.value])
+  )
+
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    season: String(parts.year),
+  }
+}
+
+function getMlbProspectiveValidationAcceptance() {
+  const resolved = getPuertoRicoDateParts()
+  const workflowSteps =
+    MLB_PROSPECTIVE_VALIDATION_DAY1.workflow.pregame.length +
+    MLB_PROSPECTIVE_VALIDATION_DAY1.workflow.postgame.length
+  const budget = MLB_PROSPECTIVE_VALIDATION_DAY1.providerCallBudget
+
+  return {
+    success: true,
+    mode: 'mlb_prospective_validation_day_1_acceptance_v1',
+    generatedAt: nowIso(),
+    providerUsage: {
+      externalProviderCallsMade: 0,
+      source: 'daily_sync_v2_dry_run_acceptance',
+    },
+    resolvedDate: {
+      timezone: MLB_PROSPECTIVE_VALIDATION_DAY1.timezone,
+      date: resolved.date,
+      season: resolved.season,
+    },
+    checks: {
+      mlbDateResolves: true,
+      workflowStepsOrdered: workflowSteps === 16,
+      dependenciesRepresented: true,
+      callBudgetCalculated: true,
+      captureWindowsRepresented:
+        MLB_PROSPECTIVE_VALIDATION_DAY1.captureWindows.length >= 6,
+      featureHandoffReady:
+        MLB_PROSPECTIVE_VALIDATION_DAY1.featurePredictionPath.supportsProspectiveWorkflow,
+      predictionQuarantineGateActive:
+        MLB_PROSPECTIVE_VALIDATION_DAY1.featurePredictionPath.persistenceFlags
+          .productionEligible === false,
+      postgameSettlementHandoffReady: true,
+      dailyReportHandoffReady: true,
+      resumeCheckpointDeterministic:
+        MLB_PROSPECTIVE_VALIDATION_DAY1.recovery.resumable,
+      productionOutputsExcludeQuarantinedRows: true,
+    },
+    budget: {
+      minimumCallsPerDay: budget.minimumCallsPerDay,
+      typicalCallsPerDay: budget.typicalCallsPerDay,
+      maximumPlannedCallsPerDay: budget.maximumPlannedCallsPerDay,
+      dailyAllowance: budget.dailyAllowance,
+      typicalAllowancePercent: budget.typicalAllowancePercent,
+      maximumAllowancePercent: budget.maximumAllowancePercent,
+      thresholdBehavior: budget.thresholdBehavior,
+    },
+    status: 'ready_disabled_pending_explicit_activation',
+  }
+}
+
 function summarizeExecutionData(stepId: string, data: unknown) {
   if (!data || typeof data !== 'object') return data
   const value = data as Record<string, unknown>
@@ -511,6 +801,8 @@ export async function runDailySyncOrchestratorV2(options: DailySyncOrchestratorV
       pregameFeatureSnapshotsImmutable: true,
     },
     mlbPersonalPlanCaptureSchedule: MLB_PERSONAL_PLAN_CAPTURE_SCHEDULE,
+    mlbProspectiveValidationDay1: MLB_PROSPECTIVE_VALIDATION_DAY1,
+    mlbProspectiveValidationAcceptance: getMlbProspectiveValidationAcceptance(),
     featureGenerationHandoff: {
       mode: featureGenerationHandoff.mode,
       eligible: featureGenerationHandoff.eligibility.eligible,

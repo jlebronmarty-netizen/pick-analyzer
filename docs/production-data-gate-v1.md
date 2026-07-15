@@ -16,6 +16,8 @@ Production Data Gate V1 is the shared rule that prevents trial, scrambled or oth
 
 The gate is used by production-facing feature validation, prediction persistence, settlement metrics, backtesting/calibration, CLV analytics/update selection, model metrics, model learning, adaptive weights, top picks, AI Coach, pattern discovery, closing-line intelligence and downstream recommendation/portfolio surfaces that read from top picks.
 
+Recommendation Eligibility Policy V1 builds on this gate for official picks. Production Data Gate decides whether a row can enter production-facing consumers at all; the recommendation policy then applies event timing, odds freshness, lineage, calibration, quality, sufficiency, confidence, edge, EV and duplicate-identity rules before a row can become `QUALIFIED`, `BEST_BET_CANDIDATE` or `PLAY_OF_DAY_CANDIDATE`.
+
 ## Trial Policy
 
 Trial rows may validate transport, normalization, lineage, settlement mechanics and idempotency only. They cannot:
@@ -37,3 +39,7 @@ The 27 SportsDataIO NBA trial predictions remain technical-validation data. Prod
 ## Current MLB Quarantine Result
 
 SportsDataIO MLB Discovery Lab rows are real and non-scrambled, but remain quarantined with `production_eligible=false`. MLB Line Movement Expansion Batch V1 produced full-date `2026-JUL-12` line-movement coverage with 36,442 line-movement odds rows, 45 quarantined feature snapshots, 45 linked settled technical predictions, 0 production recommendations, 0 production-eligible rows and 0 production leakage. Production ROI, CLV, calibration, model learning, bankroll, Kelly, portfolio output and promotion remain blocked until explicit production approval, a closing-line policy and sufficient production-eligible sample rules exist.
+
+MLB Prospective Validation Day 1 readiness keeps the same gate. The daily loop is ready but disabled, expected to write only quarantined rows with `trial=false`, `scrambled=false` and `production_eligible=false` when explicitly activated, and exposes technical validation reporting through the existing daily report. Public picks, bankroll/Kelly recommendations, production ROI, production CLV, calibration, model learning and promotion remain excluded from Day 1 rows.
+
+Official Picks Readiness V1 keeps automatic activation closed. Top Picks, Play of the Day, parlays, bankroll/portfolio and Bet Slip Optimizer now require the shared official recommendation statuses, and the current correct state is zero official picks plus a no-ticket optimizer state.

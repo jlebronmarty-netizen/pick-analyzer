@@ -1,4 +1,9 @@
 import { getTopPicks } from '@/services/top-picks.service'
+import {
+  isOfficialRecommendationStatus,
+  RECOMMENDATION_THRESHOLDS_V1,
+  type RecommendationStatus,
+} from '@/services/recommendation-eligibility-policy.service'
 
 type BetSelection = {
   id?: string
@@ -15,6 +20,8 @@ type BetSelection = {
   recommended_stake?: number
   sport_key?: string
   market?: string
+  recommendation_status?: RecommendationStatus
+  recommendationStatus?: RecommendationStatus
 }
 
 type TicketType = 'safe' | 'balanced' | 'high_ev' | 'longshot'
@@ -96,6 +103,50 @@ function detectCorrelation(picks: BetSelection[]) {
 }
 
 function calculateTicket(picks: BetSelection[], bankroll: number, label: string) {
+  if (!picks.length) {
+    return {
+      label,
+      legs: 0,
+      qualityScore: null,
+      riskLevel: 'NO_TICKET',
+      riskScore: null,
+      correlation: {
+        level: 'NOT_APPLICABLE',
+        score: null,
+        notes: ['No eligible picks are available to build a ticket.'],
+      },
+      americanOdds: null,
+      decimalOdds: null,
+      probability: null,
+      expectedValue: null,
+      averageConfidence: null,
+      averageEv: null,
+      averageEdge: null,
+      recommendedStake: 0,
+      estimatedPayout: 0,
+      expectedProfit: 0,
+      kelly: {
+        full: 0,
+        half: 0,
+        quarter: 0,
+      },
+      distribution: {
+        winProbability: null,
+        lossProbability: null,
+        estimatedWinProfit: 0,
+        estimatedLoss: 0,
+      },
+      explanation: {
+        summary: 'No eligible picks are available to build a ticket.',
+        reasons: [
+          'Official ticket construction requires at least one qualified pick.',
+          'Parlay construction requires at least two qualified, non-correlated legs.',
+        ],
+      },
+      picks,
+    }
+  }
+
   let combinedDecimal = 1
   let combinedProbability = 1
 
@@ -276,6 +327,15 @@ function buildTicket(
 ) {
   const filtered = [...picks]
     .filter((pick) => {
+      if (
+        !isOfficialRecommendationStatus(
+          (pick.recommendation_status ?? pick.recommendationStatus ?? 'INELIGIBLE') as RecommendationStatus
+        )
+      ) {
+        return false
+      }
+      if (pick.ev < RECOMMENDATION_THRESHOLDS_V1.minimumOfficialEv) return false
+      if (pick.edge < RECOMMENDATION_THRESHOLDS_V1.minimumOfficialEdge) return false
       if (mode === 'safe') return pick.odds < 250 && pick.confidence >= 65
       if (mode === 'longshot') return pick.odds > -250
       return true
@@ -305,13 +365,15 @@ export async function optimizeBetSlip({
       sportsbook: pick.sportsbook ?? 'Sportsbook',
     })) as BetSelection[]
 
+  const noTicket = pool.length === 0
+
   const balanced = buildTicket(pool, bankroll, maxLegs, 'balanced', 'Balanced Parlay')
   const safe = buildTicket(pool, bankroll, Math.min(maxLegs, 3), 'safe', 'Safe Parlay')
   const highEv = buildTicket(pool, bankroll, maxLegs, 'high_ev', 'High EV Parlay')
   const longshot = buildTicket(pool, bankroll, maxLegs, 'longshot', 'Longshot Value')
 
   const alternatives = [balanced, safe, highEv, longshot].sort(
-    (a, b) => b.qualityScore - a.qualityScore
+    (a, b) => Number(b.qualityScore ?? -1) - Number(a.qualityScore ?? -1)
   )
 
   const bestTicket = alternatives[0]
@@ -327,6 +389,14 @@ export async function optimizeBetSlip({
 
   return {
     success: true,
+    mode: noTicket ? 'no_ticket' : 'optimized_ticket',
+    emptyState: noTicket
+      ? {
+          message: 'No eligible picks are available to build a ticket.',
+          reason:
+            'Official picks must satisfy production gate, calibration, quality and value thresholds before optimizer activation.',
+        }
+      : null,
     generatedAt: new Date().toISOString(),
     bankroll,
     requestedLegs: maxLegs,

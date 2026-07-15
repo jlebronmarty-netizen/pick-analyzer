@@ -102,6 +102,8 @@ Technical backtest summary:
 
 This is real non-scrambled data, quarantined, technical validation only. It is not production performance, not model-promotion evidence and not a wagering recommendation.
 
+MLB Historical Recommendation Replay V1 now exposes these same 45 linked settled predictions through explicit historical validation mode on the existing `/api/predictions/by-sport` route and the existing MLB Prediction Engine dashboard panel. The replay is read-only, uses 0 provider calls, makes 0 remote mutations and keeps every row `production_eligible=false`.
+
 ## CLV Readiness
 
 - Rows with valid later pregame comparison candidates: 42
@@ -115,6 +117,8 @@ No row was labeled as closing-line evidence. CLV remains quarantined technical r
 ## Production Data Gate
 
 All paid MLB rows remain `trial=false`, `scrambled=false`, `production_eligible=false` and quarantined in metadata. Production-facing recommendations, bankroll, Kelly, portfolio, model learning, calibration, production ROI and production CLV remain blocked.
+
+Prospective Day 1 readiness is now prepared separately from this historical reconstruction. Normal prospective capture should use date-wide `GameOddsByDate` windows and event-aware cutoff selection; `GameOddsLineMovement/{gameid}` remains reserved for explicitly approved reconstruction.
 
 Gate counts:
 

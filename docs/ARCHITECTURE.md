@@ -15,6 +15,7 @@ Major service groups:
 
 - Prediction: `prediction.service.ts`, `prediction-engine-v4.service.ts`, `prediction-history.service.ts`, `prediction-settlement.service.ts`, `nba-prediction-engine.service.ts`, `nba-prediction-validation.service.ts`, `nba-prediction-settlement.service.ts`.
 - Production gating: `production-data-gate.service.ts` is the shared guard for production-eligible rows and is used by feature validation, prediction persistence, production metrics, CLV, calibration, backtesting, model learning, recommendations and portfolio-facing consumers.
+- Recommendation eligibility: `recommendation-eligibility-policy.service.ts` builds on Production Data Gate V1 and classifies analyzed rows into `ANALYZED_ONLY`, `INELIGIBLE`, `WATCH`, `QUALIFIED`, `BEST_BET_CANDIDATE` and `PLAY_OF_DAY_CANDIDATE`. Official pick consumers use only qualified statuses; calibration remains probationary until sufficient settled production samples exist.
 - Shared prediction SDK: `sport-prediction-engine-sdk.service.ts` defines provider-independent sport engine strategy/input/output contracts, market capability declarations, deterministic probability/edge/EV/recommendation building and integration contracts for Kelly, Smart Ranking, Monte Carlo, persistence, settlement and model health.
 - Shared settlement: `settlement-core.service.ts` defines generic moneyline/spread/total primitives plus deterministic multi-sport fixture coverage for common market, period, overtime, push and void contracts.
 - Scoring and risk: `smart-ranking.service.ts`, `kelly.service.ts`, `risk-grade.service.ts`, `adaptive-scoring.service.ts`, `adaptive-weight-engine.service.ts`.
@@ -203,6 +204,12 @@ Cron and operational routes use `CRON_SECRET` authorization. Current cron surfac
 `vercel.json` may schedule recurring jobs. Any new scheduled job must be idempotent and safe to rerun.
 
 NBA Daily Sync Orchestration Contract V1 is exposed through existing NBA sync status/data-health surfaces rather than a new route. It declares the ordered daily workflow for schedules, results, injuries, lineups, team stats, player stats, Feature Store preview, prediction preview, settlement and data-quality audit. Each step includes route, method, protected/mutating flags, checkpoint, idempotency key, provider-call default, concurrency assumption and production safety gate. Production injury, lineup and player-stat refresh steps remain externally blocked while trial rows stay excluded from production confidence.
+
+MLB Prospective Validation Day 1 readiness is exposed through the existing `/api/cron/daily-sync?version=2` dry-run response rather than a new route. The section is disabled by default and documents Puerto Rico capture windows, date-wide `GameOddsByDate` captures, event-aware cutoff selection, conservative call budgets, checkpoint/recovery behavior and quarantined Feature Store -> prediction -> settlement handoffs. The existing `/api/daily-report` response includes an `mlbValidation` section for labeled validation reporting while public pick surfaces still require `production_eligible=true`.
+
+MLB Historical Recommendation Replay V1 reuses existing `/api/predictions/by-sport` instead of adding a replay route. The normal response still returns production-eligible top picks, while explicit `historicalValidation=true&validationMode=quarantined` returns only curated, linked MLB validation predictions for the requested date. The MLB Prediction Engine dashboard panel consumes that explicit mode to display settled historical replay rows and compact pregame lineage explanations without raw provider payloads or production labels.
+
+Recommendation Experience and Official Picks Readiness V1 keeps the existing route surface while making `/api/predictions/top`, `/api/play-of-the-day`, `/api/parlays`, bankroll/portfolio consumers and the Bet Slip Optimizer depend on the shared recommendation policy. With current probationary calibration, official picks remain empty, Play of the Day remains unavailable and the optimizer returns a no-ticket state instead of constructing zero-leg odds or probability.
 
 ## Security Patterns
 

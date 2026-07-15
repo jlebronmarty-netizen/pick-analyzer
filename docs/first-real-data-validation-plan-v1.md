@@ -34,6 +34,8 @@ Discovery/provider-specific quarantine:
 
 - SportsDataIO MLB Discovery Lab rows must start as `trial=false`, `scrambled=false`, `production_eligible=false` and `validation_status=quarantined`.
 - If a table constraint does not yet permit literal `validation_status='quarantined'`, preserve quarantine in row metadata and keep `production_eligible=false` until an additive schema decision is approved.
+
+Prospective MLB Day 1 readiness is now documented in `docs/mlb-live-validation-readiness-v1.md`, `docs/mlb-daily-operations-v1.md` and `docs/mlb-30-day-validation-scorecard-v1.md`. It uses Puerto Rico local-date resolution, date-wide capture windows, event-aware cutoff selection and a conservative 6/8/12 daily call budget, but remains disabled until explicitly activated.
 - The Discovery Lab paid key proves access only to confirmed endpoints. It does not authorize production promotion.
 - Enterprise `/v3/mlb/...` paths are not valid substitutes for Discovery Lab `/api/mlb/{product}/json/{endpoint}` paths.
 
