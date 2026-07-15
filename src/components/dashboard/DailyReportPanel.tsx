@@ -73,6 +73,21 @@ type DailyReportResponse = {
     recommendedAction?: string
     picks?: AnyPick[]
   }
+  mlbOperationalSummary?: {
+    selectedSport: string
+    providerStatus: string
+    gamesToday: number
+    futureGames: number
+    gamesWithOdds: number
+    lastSuccessfulSync: string | null
+    lastSuccessfulSyncType: string | null
+    latestOddsCapture: string | null
+    nextRequiredAction: string
+    previewCandidateCount: number
+    officialPickCount: number
+    officialPicksEnabled: boolean
+    providerCallsMadeByThisReport: number
+  }
   riskAlerts: string[]
   error?: string
 }
@@ -114,6 +129,18 @@ function statusClass(value: string) {
   if (value === 'NEEDS_MONITORING') return 'text-amber-300'
   if (value === 'NEEDS_RECALIBRATION') return 'text-red-300'
   return 'text-slate-300'
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return 'n/a'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleString([], {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 }
 
 function PickMiniCard({
@@ -396,6 +423,47 @@ export default function DailyReportPanel() {
         </div>
       </div>
 
+      {data.mlbOperationalSummary ? (
+        <div className="rounded-3xl border border-emerald-500/20 bg-slate-900/60 p-6">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-300">
+                Today Operational Summary
+              </p>
+              <h2 className="mt-2 text-2xl font-black text-white">
+                MLB Model Preview State
+              </h2>
+              <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-300">
+                {data.mlbOperationalSummary.nextRequiredAction}
+              </p>
+            </div>
+            <span className="rounded-full border border-amber-500/30 bg-amber-950/20 px-4 py-2 text-xs font-bold uppercase text-amber-200">
+              {data.mlbOperationalSummary.officialPicksEnabled
+                ? 'Official picks on'
+                : 'Official picks off'}
+            </span>
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-8">
+            <SummaryStat label="Games Today" value={data.mlbOperationalSummary.gamesToday} />
+            <SummaryStat label="Future Games" value={data.mlbOperationalSummary.futureGames} />
+            <SummaryStat label="Games With Odds" value={data.mlbOperationalSummary.gamesWithOdds} />
+            <SummaryStat label="Preview Candidates" value={data.mlbOperationalSummary.previewCandidateCount} />
+            <SummaryStat label="Official Picks" value={data.mlbOperationalSummary.officialPickCount} />
+            <SummaryStat label="Provider Calls" value={data.mlbOperationalSummary.providerCallsMadeByThisReport} />
+            <SummaryStat label="Last Sync" value={formatDateTime(data.mlbOperationalSummary.lastSuccessfulSync)} />
+            <SummaryStat label="Latest Odds" value={formatDateTime(data.mlbOperationalSummary.latestOddsCapture)} />
+          </div>
+
+          <p className="mt-4 text-xs uppercase tracking-[0.2em] text-slate-500">
+            Provider status: {data.mlbOperationalSummary.providerStatus}
+            {data.mlbOperationalSummary.lastSuccessfulSyncType
+              ? ` | Last sync type: ${data.mlbOperationalSummary.lastSuccessfulSyncType}`
+              : ''}
+          </p>
+        </div>
+      ) : null}
+
       {data.riskAlerts.length > 0 && (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-950/20 p-4">
           <p className="text-sm font-bold text-amber-300">Risk Alerts</p>
@@ -444,6 +512,15 @@ export default function DailyReportPanel() {
           ))}
         </div>
       </div>
+    </div>
+  )
+}
+
+function SummaryStat({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="mt-1 break-words text-lg font-black text-white">{value}</p>
     </div>
   )
 }

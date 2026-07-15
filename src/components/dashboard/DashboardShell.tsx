@@ -95,8 +95,12 @@ export default function DashboardShell({
                 <div className="flex items-center gap-3">
                   <SportSelector />
 
-                  <span className="hidden rounded-full border border-emerald-500/30 bg-emerald-950/20 px-4 py-2 text-xs font-bold text-emerald-300 md:inline-flex">
-                    LIVE
+                  <span className="hidden rounded-full border border-amber-500/30 bg-amber-950/20 px-4 py-2 text-xs font-bold text-amber-200 md:inline-flex">
+                    DAY 1 READY
+                  </span>
+
+                  <span className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 lg:inline-flex">
+                    OFFICIAL PICKS OFF
                   </span>
 
                   <a

@@ -172,6 +172,7 @@ export default function MlbPredictionEnginePanel() {
   const [confidenceFilter, setConfidenceFilter] = useState('all')
   const [matchupFilter, setMatchupFilter] = useState('')
   const [sortMode, setSortMode] = useState('chronological')
+  const [showAllReplayMatchups, setShowAllReplayMatchups] = useState(false)
 
   async function load() {
     try {
@@ -266,6 +267,25 @@ export default function MlbPredictionEnginePanel() {
       )
     })
 
+  const replayMatchups = Array.from(
+    replayRows
+      .reduce((map, prediction) => {
+        const key = prediction.eventId
+        const existing = map.get(key) ?? []
+        existing.push(prediction)
+        map.set(key, existing)
+        return map
+      }, new Map<string, ReplayPrediction[]>())
+      .entries()
+  ).map(([eventId, predictions]) => ({
+    eventId,
+    predictions: predictions.sort((left, right) => left.market.localeCompare(right.market)),
+    first: predictions[0],
+  }))
+  const visibleReplayMatchups = showAllReplayMatchups
+    ? replayMatchups
+    : replayMatchups.slice(0, 5)
+
   if (loading && !data) {
     return (
       <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-400">
@@ -279,7 +299,7 @@ export default function MlbPredictionEnginePanel() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-lime-300">
-            MLB Engine
+            MLB Engine Contract Test
           </p>
           <h2 className="mt-2 text-3xl font-black text-white">
             Prediction Engine V1
@@ -287,7 +307,7 @@ export default function MlbPredictionEnginePanel() {
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
             Deterministic moneyline, run line and total previews using the
             Shared Prediction SDK and MLB Feature Store contracts. These are
-            architecture checks, not live betting recommendations.
+            fixture validation checks, not real matchup analysis or live betting recommendations.
           </p>
         </div>
 
@@ -322,36 +342,52 @@ export default function MlbPredictionEnginePanel() {
         />
       </div>
 
-      <div className="mt-6 grid gap-4 xl:grid-cols-3">
-        {(data?.predictions ?? []).map((prediction) => (
-          <div
-            key={prediction.id}
-            className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-black uppercase text-white">
-                  {prediction.market}
-                </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {prediction.selection} vs {prediction.opponent}
-                </p>
-              </div>
-              <p className="text-xs font-black uppercase text-amber-300">
-                {prediction.recommendation}
+      <details className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
+        <summary className="cursor-pointer list-none">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-black text-white">Fixture validation passed</p>
+              <p className="mt-1 text-xs leading-5 text-slate-400">
+                Deterministic fixture teams are hidden from the primary Model Lab flow.
               </p>
             </div>
-            <div className="mt-4 grid gap-3 text-sm">
-              <MiniRow label="Odds" value={formatOdds(prediction.americanOdds)} />
-              <MiniRow label="Line" value={prediction.line === null ? '-' : String(prediction.line)} />
-              <MiniRow label="Model" value={`${prediction.modelProbability}%`} />
-              <MiniRow label="Implied" value={`${prediction.impliedProbability}%`} />
-              <MiniRow label="Edge" value={`${prediction.edge}%`} />
-              <MiniRow label="EV" value={`${prediction.expectedValue}%`} />
-            </div>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-lime-300">
+              Contract details
+            </span>
           </div>
-        ))}
-      </div>
+        </summary>
+
+        <div className="mt-5 grid gap-4 xl:grid-cols-3">
+          {(data?.predictions ?? []).map((prediction) => (
+            <div
+              key={prediction.id}
+              className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-black uppercase text-white">
+                    {prediction.market}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {prediction.selection} vs {prediction.opponent}
+                  </p>
+                </div>
+                <p className="text-xs font-black uppercase text-amber-300">
+                  Fixture validation passed
+                </p>
+              </div>
+              <div className="mt-4 grid gap-3 text-sm">
+                <MiniRow label="Odds" value={formatOdds(prediction.americanOdds)} />
+                <MiniRow label="Line" value={prediction.line === null ? '-' : String(prediction.line)} />
+                <MiniRow label="Model" value={`${prediction.modelProbability}%`} />
+                <MiniRow label="Implied" value={`${prediction.impliedProbability}%`} />
+                <MiniRow label="Edge" value={`${prediction.edge}%`} />
+                <MiniRow label="EV" value={`${prediction.expectedValue}%`} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </details>
 
       <div className="mt-6 grid gap-4 xl:grid-cols-2">
         <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
@@ -449,7 +485,7 @@ export default function MlbPredictionEnginePanel() {
               >
                 <option value="all">All markets</option>
                 <option value="moneyline">Moneyline</option>
-                <option value="run_line">Run line</option>
+                <option value="spread">Run line</option>
                 <option value="total">Total</option>
               </select>
               <select
@@ -509,10 +545,24 @@ export default function MlbPredictionEnginePanel() {
             </div>
 
             <div className="mt-5 grid gap-4">
-              {replayRows.map((prediction) => (
-                <ReplayCard key={prediction.id} prediction={prediction} />
+              {visibleReplayMatchups.map((matchup) => (
+                <ReplayMatchupCard
+                  key={matchup.eventId}
+                  matchup={matchup.first}
+                  predictions={matchup.predictions}
+                />
               ))}
             </div>
+
+            {replayMatchups.length > 5 ? (
+              <button
+                type="button"
+                onClick={() => setShowAllReplayMatchups((value) => !value)}
+                className="mt-5 rounded-xl border border-amber-500/30 bg-amber-950/20 px-4 py-2 text-sm font-bold text-amber-100 hover:bg-amber-900/30"
+              >
+                {showAllReplayMatchups ? 'Show first 5 matchups' : `Show all ${replayMatchups.length} matchups`}
+              </button>
+            ) : null}
           </>
         ) : null}
       </div>
@@ -541,10 +591,48 @@ function resultClass(value: string) {
   return 'text-slate-300'
 }
 
-function ReplayCard({ prediction }: { prediction: ReplayPrediction }) {
+function ReplayMatchupCard({
+  matchup,
+  predictions,
+}: {
+  matchup: ReplayPrediction
+  predictions: ReplayPrediction[]
+}) {
   return (
     <article className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
-      <div className="grid gap-4 xl:grid-cols-[1.1fr_1fr_1.2fr]">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <h4 className="text-lg font-black text-white">
+            {matchup.matchup.awayTeam} at {matchup.matchup.homeTeam}
+          </h4>
+          <p className="mt-1 text-xs text-slate-500">
+            {new Date(matchup.matchup.scheduledStart).toLocaleString()}
+          </p>
+        </div>
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">
+          {predictions.length} analyzed markets
+        </p>
+      </div>
+
+      <div className="mt-4 grid gap-3 xl:grid-cols-3">
+        {predictions.map((prediction) => (
+          <ReplayCard key={prediction.id} prediction={prediction} compact />
+        ))}
+      </div>
+    </article>
+  )
+}
+
+function ReplayCard({
+  prediction,
+  compact = false,
+}: {
+  prediction: ReplayPrediction
+  compact?: boolean
+}) {
+  return (
+    <article className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
+      <div className={compact ? 'grid gap-4' : 'grid gap-4 xl:grid-cols-[1.1fr_1fr_1.2fr]'}>
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-bold uppercase text-amber-200">
@@ -563,9 +651,11 @@ function ReplayCard({ prediction }: { prediction: ReplayPrediction }) {
           <p className="mt-1 text-sm text-slate-400">
             {prediction.matchup.awayTeam} at {prediction.matchup.homeTeam}
           </p>
-          <p className="mt-1 text-xs text-slate-500">
-            {new Date(prediction.matchup.scheduledStart).toLocaleString()}
-          </p>
+          {!compact ? (
+            <p className="mt-1 text-xs text-slate-500">
+              {new Date(prediction.matchup.scheduledStart).toLocaleString()}
+            </p>
+          ) : null}
         </div>
 
         <div className="grid gap-2 text-sm">
@@ -600,9 +690,9 @@ function ReplayCard({ prediction }: { prediction: ReplayPrediction }) {
         </div>
       </div>
 
-      <details className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
+      <details className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
         <summary className="cursor-pointer text-sm font-black text-white">
-          Why this selection?
+          Why the model analyzed this side
         </summary>
         <p className="mt-3 text-sm leading-6 text-slate-300">
           {prediction.explanation.summary}

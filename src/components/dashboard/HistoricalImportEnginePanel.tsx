@@ -588,6 +588,7 @@ function statusClass(status: string) {
   if (
     status === 'watch' ||
     status === 'partial' ||
+    status === 'ready_with_historical_failures' ||
     status === 'dry_run_ready' ||
     status === 'configured_disabled' ||
     status === 'ready_with_external_blockers' ||

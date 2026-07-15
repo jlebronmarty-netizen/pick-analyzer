@@ -125,7 +125,7 @@ export default function FeatureStoreCorePanel() {
         <Stat label="Sufficiency" value={data?.summary.dataSufficiencyScore ?? 0} />
         <Stat
           label="Leakage Test"
-          value={data?.summary.validationPassed ? 'pass' : 'check'}
+          value={data?.summary.validationPassed ? 'Fixture validation passed' : 'Check required'}
         />
         <Stat
           label="Provider Calls"

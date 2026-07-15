@@ -76,6 +76,14 @@ Evidence: `src/app/dashboard/page.tsx`, `src/components/dashboard/DashboardShell
 
 Note: The dashboard is consolidated into Today, Model Lab, Data & Operations and Advanced surfaces so the default MLB workflow leads with daily status, official pick gates and quarantined replay instead of provider/debug sprawl. Advanced model tools, NBA readiness, provider contracts and inactive sport engines remain available behind collapsed groups. The consolidation audit verified the configured Supabase schema probes as applied, confirmed no running historical import jobs, preserved 45 quarantined July 12 MLB replay rows with 0 production-eligible rows and made 0 SportsDataIO provider calls or remote mutations.
 
+### MLB Day 1 Recovery Corrections V1
+
+Status: Completed local recovery corrections; provider execution not started.
+
+Evidence: `src/components/dashboard/DashboardShell.tsx`, `src/components/dashboard/AICommandCenterPanel.tsx`, `src/components/dashboard/DailyReportPanel.tsx`, `src/components/dashboard/MlbPredictionEnginePanel.tsx`, `src/components/dashboard/FeatureStoreCorePanel.tsx`, `src/components/dashboard/HistoricalImportEnginePanel.tsx`, `src/services/daily-report-fast.service.ts` and `src/services/historical-import-engine.service.ts`.
+
+Note: Recovery audit confirmed the current API route count remains 205 and no provider calls or remote mutations were made during the correction pass. The dashboard now labels the product as Day 1 ready with official picks off, treats deterministic MLB engine previews as fixture validation, groups quarantined MLB historical replay rows by matchup, keeps AI recommendation detail collapsed when official picks are 0, exposes an MLB operational summary in the fast Daily Report, and distinguishes historical failed sync jobs from active import blockers. MLB 2025/2026 provider-backed historical enrichment was not executed because the existing protected historical-import execute path is still NBA-pilot-specific for live writes; safe MLB execution requires an MLB Discovery Lab executor with durable season/date/domain checkpoints before provider calls resume.
+
 ### NBA Data Quality And Historical Reconciliation Phase A
 
 Status: Completed and build verified.

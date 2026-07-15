@@ -1784,7 +1784,8 @@ export function planHistoricalImport(
 }
 
 export async function getHistoricalImportHealth() {
-  const [jobsResult, mappingsResult] = await Promise.allSettled([
+  const [jobsResult, mappingsResult, jobsCountResult, mappingsCountResult] =
+    await Promise.allSettled([
     supabaseAdmin
       .from('sports_sync_jobs')
       .select(
@@ -1796,6 +1797,12 @@ export async function getHistoricalImportHealth() {
       .from('provider_entity_mappings')
       .select('sport_key, entity_type, provider, season')
       .limit(5000),
+    supabaseAdmin
+      .from('sports_sync_jobs')
+      .select('*', { count: 'exact', head: true }),
+    supabaseAdmin
+      .from('provider_entity_mappings')
+      .select('*', { count: 'exact', head: true }),
   ])
 
   const jobWarning =
@@ -1809,6 +1816,18 @@ export async function getHistoricalImportHealth() {
       ? `provider_entity_mappings unavailable: ${mappingsResult.reason instanceof Error ? mappingsResult.reason.message : 'unknown error'}`
       : mappingsResult.value.error
         ? `provider_entity_mappings unavailable: ${mappingsResult.value.error.message}`
+        : null
+  const jobsCountWarning =
+    jobsCountResult.status === 'rejected'
+      ? `sports_sync_jobs exact count unavailable: ${jobsCountResult.reason instanceof Error ? jobsCountResult.reason.message : 'unknown error'}`
+      : jobsCountResult.value.error
+        ? `sports_sync_jobs exact count unavailable: ${jobsCountResult.value.error.message}`
+        : null
+  const mappingsCountWarning =
+    mappingsCountResult.status === 'rejected'
+      ? `provider_entity_mappings exact count unavailable: ${mappingsCountResult.reason instanceof Error ? mappingsCountResult.reason.message : 'unknown error'}`
+      : mappingsCountResult.value.error
+        ? `provider_entity_mappings exact count unavailable: ${mappingsCountResult.value.error.message}`
         : null
 
   const jobsData =
@@ -1827,13 +1846,21 @@ export async function getHistoricalImportHealth() {
   const failedJobs = jobs.filter((job) => job.status === 'failed')
   const runningJobs = jobs.filter((job) => job.status === 'running')
   const partialJobs = jobs.filter((job) => job.status === 'partial')
+  const totalJobs =
+    jobsCountResult.status === 'fulfilled' && !jobsCountResult.value.error
+      ? jobsCountResult.value.count ?? jobs.length
+      : jobs.length
+  const totalMappings =
+    mappingsCountResult.status === 'fulfilled' && !mappingsCountResult.value.error
+      ? mappingsCountResult.value.count ?? mappings.length
+      : mappings.length
   const status =
-    jobWarning || mappingWarning
-      ? 'degraded'
-      : failedJobs.length > 0
+    jobWarning || mappingWarning || jobsCountWarning || mappingsCountWarning
       ? 'degraded'
       : runningJobs.length > 0 || partialJobs.length > 0
         ? 'watch'
+        : failedJobs.length > 0
+          ? 'ready_with_historical_failures'
         : 'ready'
 
   return {
@@ -1848,10 +1875,12 @@ export async function getHistoricalImportHealth() {
     status,
     summary: {
       recentJobs: jobs.length,
+      totalJobs,
       failedJobs: failedJobs.length,
       runningJobs: runningJobs.length,
       partialJobs: partialJobs.length,
-      providerMappings: mappings.length,
+      providerMappings: totalMappings,
+      sampledProviderMappings: mappings.length,
       sportsWithMappings: new Set(mappings.map((row) => row.sport_key)).size,
       providersWithMappings: new Set(mappings.map((row) => row.provider)).size,
     },
@@ -1864,7 +1893,12 @@ export async function getHistoricalImportHealth() {
       externalExecution: false,
     },
     warnings: [
-      ...[jobWarning, mappingWarning].filter((item): item is string => Boolean(item)),
+      ...[jobWarning, mappingWarning, jobsCountWarning, mappingsCountWarning].filter(
+        (item): item is string => Boolean(item)
+      ),
+      ...(failedJobs.length
+        ? [`${failedJobs.length} historical failed sync jobs remain in the audit ledger; no jobs are currently running.`]
+        : []),
       'Core V1 does not execute provider imports.',
       'Manual provider activation, quota caps and optional persistence migrations belong to a later execution phase.',
     ],

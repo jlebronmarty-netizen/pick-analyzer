@@ -58,6 +58,14 @@ export default function AICommandCenterPanel() {
   }
 
   const summary = advisor.summary
+  const officialPickCount = Number(
+    dashboard?.topPicks?.summary?.recommendedPicks ??
+      dashboard?.dailyReport?.summary?.recommendedPicks ??
+      summary?.recommendedPicks ??
+      0
+  )
+  const officialPicksClosed = officialPickCount === 0
+
   return (
     <section className="rounded-3xl border border-cyan-900/40 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-8 shadow-2xl shadow-cyan-950/10">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -139,40 +147,60 @@ export default function AICommandCenterPanel() {
           </p>
         </div>
       </div>
-            <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/60 p-6">
-        <h3 className="text-lg font-bold text-white">AI Outlook</h3>
 
-        <p className="mt-4 text-sm leading-7 text-slate-300">
-          {advisor.outlook}
-        </p>
-      </div>
-
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        {advisor.recommendations?.map((item: any, index: number) => (
-          <div
-            key={`${item.title}-${index}`}
-            className={`rounded-2xl border p-5 ${severityColor(item.severity)}`}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                {item.type}
-              </p>
-
-              <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs font-bold uppercase text-slate-300">
-                {item.severity}
-              </span>
+      <details
+        className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/60 p-6"
+        open={!officialPicksClosed}
+      >
+        <summary className="cursor-pointer list-none">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-white">AI Outlook</h3>
+              {officialPicksClosed ? (
+                <p className="mt-1 text-sm text-slate-400">
+                  Collapsed while official picks are off; Top Picks and MLB preview surfaces remain visible above.
+                </p>
+              ) : null}
             </div>
-
-            <h4 className="mt-3 text-lg font-black text-white">
-              {item.title}
-            </h4>
-
-            <p className="mt-2 text-sm leading-6 text-slate-300">
-              {item.message}
-            </p>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-300">
+              Details
+            </span>
           </div>
-        ))}
-      </div>
+        </summary>
+
+        <div className="mt-4">
+          <p className="text-sm leading-7 text-slate-300">{advisor.outlook}</p>
+        </div>
+      </details>
+
+      {officialPicksClosed ? null : (
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          {advisor.recommendations?.map((item: any, index: number) => (
+            <div
+              key={`${item.title}-${index}`}
+              className={`rounded-2xl border p-5 ${severityColor(item.severity)}`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  {item.type}
+                </p>
+
+                <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-xs font-bold uppercase text-slate-300">
+                  {item.severity}
+                </span>
+              </div>
+
+              <h4 className="mt-3 text-lg font-black text-white">
+                {item.title}
+              </h4>
+
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                {item.message}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {advisor.warnings?.length > 0 && (
         <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-950/20 p-5">
