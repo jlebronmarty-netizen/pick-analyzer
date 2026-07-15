@@ -68,6 +68,14 @@ Evidence: `src/services/recommendation-eligibility-policy.service.ts`, `docs/rec
 
 Note: Official Top Picks, Play of the Day, parlays, Kelly/bankroll/portfolio and Bet Slip Optimizer now consume only `QUALIFIED`, `BEST_BET_CANDIDATE` and `PLAY_OF_DAY_CANDIDATE` statuses from the shared policy. Calibration is probationary, automatic production approval is false, current official picks remain 0 and quarantined replay/preview rows remain excluded from production consumers.
 
+### MLB Day 1 Product Consolidation V1
+
+Status: Completed without provider calls and build verified.
+
+Evidence: `src/app/dashboard/page.tsx`, `src/components/dashboard/DashboardShell.tsx`, `/api/daily-report?mode=summary`, `/api/features/store/validation`, `/api/historical-import/jobs`, `/api/predictions/by-sport?historicalValidation=true&validationMode=quarantined&sport=baseball_mlb&date=2026-07-12`.
+
+Note: The dashboard is consolidated into Today, Model Lab, Data & Operations and Advanced surfaces so the default MLB workflow leads with daily status, official pick gates and quarantined replay instead of provider/debug sprawl. Advanced model tools, NBA readiness, provider contracts and inactive sport engines remain available behind collapsed groups. The consolidation audit verified the configured Supabase schema probes as applied, confirmed no running historical import jobs, preserved 45 quarantined July 12 MLB replay rows with 0 production-eligible rows and made 0 SportsDataIO provider calls or remote mutations.
+
 ### NBA Data Quality And Historical Reconciliation Phase A
 
 Status: Completed and build verified.

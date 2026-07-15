@@ -72,6 +72,14 @@ Invoke-RestMethod "$baseUrl/api/daily-report"
 
 The `mlbValidation` section is technical validation only. Public top-pick sections remain filtered to `production_eligible=true`.
 
+For a bounded dashboard-safe summary, use the existing route with summary mode:
+
+```powershell
+Invoke-RestMethod "$baseUrl/api/daily-report?mode=summary"
+```
+
+This reuses the fast Daily Report path, defers advanced sections and makes no provider calls.
+
 ## Resume After Interruption
 
 Dry-run resume check:
@@ -94,4 +102,3 @@ Before repeating a live provider step, inspect completed sync-job scopes and det
 - Production gate violations.
 - Daily report `mlbValidation` completeness.
 - Cost per scheduled game and cost per settled technical prediction.
-

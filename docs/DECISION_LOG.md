@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-14 - Consolidate MLB Day 1 Dashboard And Preserve Provider Gates
+
+Context: The MLB historical foundation had completed July 12 quarantined imports, full-date line movement, 45 linked validation predictions, replay, Day 1 readiness and official-picks gating, but the dashboard still presented provider diagnostics, NBA readiness and inactive sport modules ahead of the user-facing MLB workflow.
+
+Decision: Reorganize the existing dashboard only. Lead with Today, Model Lab, Data & Operations and Advanced sections; keep advanced model tools, NBA readiness, provider contracts and inactive sport engines available in collapsed groups; keep `/api/providers/sportsdataio/nba/readiness` as the canonical NBA readiness surface; and add `mode=summary`/`summary=true` to the existing `/api/daily-report` route by reusing the existing fast report service instead of adding another route.
+
+Consequences: No API routes, migrations, provider calls, remote mutations, production promotion, public picks or model training were added. Read-only checks verified the Supabase schema capability probe as applied, 37 stored historical import jobs with 0 running jobs, 45 quarantined MLB replay predictions with 0 production-eligible rows and official recommendation gates still closed.
+
+Affected modules: Dashboard page, dashboard navigation, Daily Report route, project status, roadmap and MLB operations docs.
+
 ## 2026-07-14 - Keep Official Picks Closed Behind Shared Eligibility Policy
 
 Context: The July 12 MLB replay shows 45 analyzed, settled, quarantined rows, including negative-edge and negative-EV rows. Top Picks and Bet Slip Optimizer currently show no official picks, which is correct while production eligibility and calibration are incomplete.

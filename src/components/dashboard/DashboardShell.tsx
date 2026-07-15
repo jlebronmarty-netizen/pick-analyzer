@@ -23,6 +23,14 @@ const navItems = [
   { id: 'sports-brain', label: 'Sports Brain', icon: '✦' },
 ]
 
+const compactNavItems = [
+  { id: 'overview', label: 'Overview', icon: '01' },
+  { id: 'today', label: 'Today', icon: '02' },
+  { id: 'model-lab', label: 'Model Lab', icon: '03' },
+  { id: 'data-operations', label: 'Data Ops', icon: '04' },
+  { id: 'advanced', label: 'Advanced', icon: '05' },
+]
+
 export default function DashboardShell({
   children,
 }: {
@@ -48,7 +56,7 @@ export default function DashboardShell({
             </div>
 
             <nav className="mt-8 space-y-2 pb-24">
-              {navItems.map((item) => (
+              {compactNavItems.map((item) => (
                 <a
                   key={item.id}
                   href={`#${item.id}`}

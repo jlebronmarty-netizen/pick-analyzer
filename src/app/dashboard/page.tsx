@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import DashboardSection from '@/components/dashboard/DashboardSection'
 import DashboardQuickStats from '@/components/dashboard/DashboardQuickStats'
@@ -57,6 +58,36 @@ import NbaFeatureStoreIntegrationPanel from '@/components/dashboard/NbaFeatureSt
 import NbaMultiBookComparisonPanel from '@/components/dashboard/NbaMultiBookComparisonPanel'
 import NbaSteamMovePanel from '@/components/dashboard/NbaSteamMovePanel'
 
+function DashboardPanelGroup({
+  title,
+  description,
+  children,
+}: {
+  title: string
+  description: string
+  children: ReactNode
+}) {
+  return (
+    <details className="rounded-3xl border border-slate-800 bg-slate-950/40 p-5">
+      <summary className="cursor-pointer list-none">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-black text-white">{title}</p>
+            <p className="mt-1 text-sm leading-6 text-slate-400">
+              {description}
+            </p>
+          </div>
+          <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-300">
+            Expand
+          </span>
+        </div>
+      </summary>
+
+      <div className="mt-5 space-y-5">{children}</div>
+    </details>
+  )
+}
+
 export default function DashboardPage() {
   return (
     <DashboardShell>
@@ -68,179 +99,120 @@ export default function DashboardPage() {
       >
         <DashboardQuickStats />
         <DashboardHeroPanel />
+      </DashboardSection>
+
+      <DashboardSection
+        id="today"
+        eyebrow="Today"
+        title="MLB Day 1 Workspace"
+        description="Current recommendation state, daily report, preview readiness and official pick gates."
+      >
+        <DailyReportPanel />
+        <PlayOfTheDayPanel />
+        <TopPicksPanel />
+        <BetSlipOptimizerPanel />
         <AICommandCenterPanel />
       </DashboardSection>
 
       <DashboardSection
-        id="multi-sport"
-        eyebrow="Sports"
-        title="Multi-Sport Coverage"
-        description="Select a sport and view only real predictions currently available for that league."
+        id="model-lab"
+        eyebrow="Model Lab"
+        title="Historical Validation"
+        description="Quarantined MLB replay, feature quality, prediction contracts, calibration and settlement evidence."
       >
-        <MultiSportEnginePanel />
-        <ProviderIntelligencePanel />
-        <ProviderAdapterSdkPanel />
-        <SportsDataIoContractPanel />
-        <HistoricalImportEnginePanel />
-        <FeatureStoreCorePanel />
-        <MultiSportFeatureRegistryPanel />
-        <MlbFeatureStoreIntegrationPanel />
         <MlbPredictionEnginePanel />
-        <NflFeatureStoreIntegrationPanel />
-        <NflPredictionEnginePanel />
-        <SoccerFeatureStoreIntegrationPanel />
-        <SoccerPredictionEnginePanel />
-        <NhlFeatureStoreIntegrationPanel />
-        <NhlPredictionEnginePanel />
-        <TennisFeatureStoreIntegrationPanel />
-        <TennisPredictionEnginePanel />
-        <UfcFeatureStoreIntegrationPanel />
-        <UfcPredictionEnginePanel />
-        <GlobalDataQualityPanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="nba-adapter"
-        eyebrow="NBA"
-        title="NBA Adapter"
-        description="NBA team intelligence, data coverage and production-readiness monitoring."
-      >
-        <NbaAdapterPanel />
-        <NbaDataSyncPanel />
-        <NbaDataQualityPanel />
-        <NbaFeatureStoreIntegrationPanel />
-        <NbaMultiBookComparisonPanel />
-        <NbaSteamMovePanel />
-        <NbaPredictionEnginePanel />
-        <NbaBacktestingCalibrationPanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="sports-brain"
-        eyebrow="Strategy"
-        title="AI Sports Brain"
-        description="Build a bankroll strategy from your target profit, risk tolerance and selected sport."
-      >
-        <AISportsBrainPanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="daily-report"
-        eyebrow="Daily"
-        title="Daily Report"
-        description="Fast daily betting report with bankroll guidance."
-      >
-        <DailyReportPanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="prediction-v4"
-        eyebrow="AI Rating"
-        title="Prediction Engine V4"
-        description="Unified AI rating combining model confidence, edge, EV, sharp money and Monte Carlo simulation."
-      >
+        <MlbFeatureStoreIntegrationPanel />
         <PredictionEngineV4Panel />
         <SportPredictionSdkPanel />
         <PredictionSafetyPanel />
         <SettlementCorePanel />
+        <ModelMetricsFrameworkPanel />
+
+        <DashboardPanelGroup
+          title="Advanced model tools"
+          description="Risk simulation, portfolio construction, market intelligence, coaching and learning modules stay available but are not the default Day 1 path."
+        >
+          <MonteCarloSimulatorPanel />
+          <PortfolioAIV2Panel />
+          <PortfolioElitePanel />
+          <SharpMoneyIntelligencePanel />
+          <ClosingLineIntelligencePanel />
+          <LiveBettingEnginePanel />
+          <AISportsBrainPanel />
+          <AICoachPanel />
+          <PatternDiscoveryPanel />
+          <AdaptiveWeightsPanel />
+        </DashboardPanelGroup>
       </DashboardSection>
 
       <DashboardSection
-        id="top-picks"
-        eyebrow="Picks"
-        title="Top Picks"
-        description="Adaptive-ranked picks, play of the day and strongest model edges."
+        id="data-operations"
+        eyebrow="Data"
+        title="Data & Operations"
+        description="Provider status, sync jobs, historical imports, runtime health, checkpoints and data quality."
       >
-        <PlayOfTheDayPanel />
-        <TopPicksPanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="bet-slip"
-        eyebrow="Optimizer"
-        title="Bet Slip Optimizer"
-        description="AI optimized singles and parlays using EV, confidence, edge and adaptive score."
-      >
-        <BetSlipOptimizerPanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="risk-lab"
-        eyebrow="Risk"
-        title="Risk Lab"
-        description="Monte Carlo simulation, downside risk, probability of profit and bankroll stress testing."
-      >
-        <MonteCarloSimulatorPanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="sharp-money"
-        eyebrow="Market"
-        title="Sharp Money Intelligence"
-        description="Steam profiles, reverse line movement, public fade spots and value windows."
-      >
-        <SharpMoneyIntelligencePanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="closing-line"
-        eyebrow="CLV"
-        title="Closing Line Intelligence"
-        description="Sportsbook rankings, line movement, entry timing and current value windows."
-      >
-        <ClosingLineIntelligencePanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="live-betting"
-        eyebrow="Live"
-        title="Live Betting Engine"
-        description="Live EV, win probability, momentum, Kelly stake, cash-out and hedge intelligence."
-      >
-        <LiveBettingEnginePanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="portfolio"
-        eyebrow="Portfolio"
-        title="Portfolio Builder"
-        description="AI allocation, diversification, exposure control and target-profit planning."
-      >
-        <PortfolioAIV2Panel />
-        <PortfolioElitePanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="ai-coach"
-        eyebrow="Coach"
-        title="AI Performance Coach"
-        description="Settled performance patterns, calibration warnings and personalized model rules."
-      >
-        <AICoachPanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="learning"
-        eyebrow="Learning"
-        title="Learning Engine"
-        description="Historical pattern discovery and adaptive weight recommendations."
-      >
-        <PatternDiscoveryPanel />
-        <AdaptiveWeightsPanel />
-      </DashboardSection>
-
-      <DashboardSection
-        id="model-center"
-        eyebrow="Model"
-        title="AI Model Center"
-        description="Model versioning, rollback and auto tuning."
-      >
+        <HistoricalImportEnginePanel />
         <RuntimeObservabilityPanel />
         <SyncReliabilityPanel />
-        <ModelMetricsFrameworkPanel />
-        <ModelVersionsPanel />
-        <ModelRollbackPanel />
-        <AutoModelTuningPanel />
+        <GlobalDataQualityPanel />
+        <ProviderIntelligencePanel />
+        <MultiSportEnginePanel />
+      </DashboardSection>
+
+      <DashboardSection
+        id="advanced"
+        eyebrow="Advanced"
+        title="Developer & Inactive Domains"
+        description="Detailed contracts, migrations, NBA readiness and non-MLB sport modules."
+      >
+        <DashboardPanelGroup
+          title="Provider contracts and feature registries"
+          description="Static contracts and deterministic validation surfaces for future provider work."
+        >
+          <ProviderAdapterSdkPanel />
+          <SportsDataIoContractPanel />
+          <FeatureStoreCorePanel />
+          <MultiSportFeatureRegistryPanel />
+        </DashboardPanelGroup>
+
+        <DashboardPanelGroup
+          title="NBA operational readiness"
+          description="NBA integration evidence remains available without dominating the MLB Day 1 dashboard."
+        >
+          <NbaAdapterPanel />
+          <NbaDataSyncPanel />
+          <NbaDataQualityPanel />
+          <NbaFeatureStoreIntegrationPanel />
+          <NbaMultiBookComparisonPanel />
+          <NbaSteamMovePanel />
+          <NbaPredictionEnginePanel />
+          <NbaBacktestingCalibrationPanel />
+        </DashboardPanelGroup>
+
+        <DashboardPanelGroup
+          title="Inactive sport engines"
+          description="Provider-independent modules for other sports stay collapsed until real data validation is active."
+        >
+          <NflFeatureStoreIntegrationPanel />
+          <NflPredictionEnginePanel />
+          <SoccerFeatureStoreIntegrationPanel />
+          <SoccerPredictionEnginePanel />
+          <NhlFeatureStoreIntegrationPanel />
+          <NhlPredictionEnginePanel />
+          <TennisFeatureStoreIntegrationPanel />
+          <TennisPredictionEnginePanel />
+          <UfcFeatureStoreIntegrationPanel />
+          <UfcPredictionEnginePanel />
+        </DashboardPanelGroup>
+
+        <DashboardPanelGroup
+          title="Model administration"
+          description="Versioning, rollback and tuning controls remain accessible for maintenance."
+        >
+          <ModelVersionsPanel />
+          <ModelRollbackPanel />
+          <AutoModelTuningPanel />
+        </DashboardPanelGroup>
       </DashboardSection>
     </DashboardShell>
   )
