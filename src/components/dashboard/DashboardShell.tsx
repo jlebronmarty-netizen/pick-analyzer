@@ -32,6 +32,7 @@ const compactNavItems = [
 ]
 
 const toolNavItems = [
+  { href: '/betting-workbench', label: 'Betting Workbench', icon: 'BW' },
   { href: '/most-likely', label: 'Most Likely', icon: 'ML' },
   { href: '/best-value', label: 'Best Value', icon: 'BV' },
   { href: '/arbitrage', label: 'Arbitrage', icon: 'AR' },
@@ -128,6 +129,13 @@ export default function DashboardShell({
                   <span className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 lg:inline-flex">
                     OFFICIAL PICKS OFF
                   </span>
+
+                  <a
+                    href="/betting-workbench"
+                    className="hidden rounded-full border border-emerald-500/30 bg-emerald-950/20 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-900/30 lg:inline-flex"
+                  >
+                    Betting Workbench
+                  </a>
 
                   <a
                     href="/most-likely"

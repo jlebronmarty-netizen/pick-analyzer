@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { getBestValueOpportunities } from '@/services/best-value-scanner.service'
-import { getCurrentBoard, type CurrentBoardCandidate } from '@/services/current-board.service'
+import { getCurrentBoardCached, type CurrentBoardCandidate } from '@/services/current-board.service'
 import { getArbitrageOpportunities, getMostLikelyOpportunities } from '@/services/market-opportunity-suite.service'
 import { optimizeBetSlip } from '@/services/bet-slip-optimizer.service'
 import { getTopPicks } from '@/services/top-picks.service'
@@ -94,6 +94,28 @@ function applyFilters(candidates: CurrentBoardCandidate[], query: string) {
 
 function findCandidate(candidates: CurrentBoardCandidate[], text: string) {
   const q = normalized(text)
+  const explicitMarket = q.includes('moneyline')
+    ? 'moneyline'
+    : q.includes('run line') || q.includes('spread')
+      ? 'spread'
+      : q.includes('under') || q.includes('over') || q.includes('total')
+        ? 'total'
+        : null
+  const explicitSelection = q.includes('mets') || q.includes('nym')
+    ? 'NYM'
+    : q.includes('under')
+      ? 'Under'
+      : q.includes('over')
+        ? 'Over'
+        : null
+  if (explicitMarket || explicitSelection) {
+    const exact = candidates.find((candidate) => {
+      if (explicitMarket && candidate.market !== explicitMarket) return false
+      if (explicitSelection && !candidate.selection.toLowerCase().includes(explicitSelection.toLowerCase())) return false
+      return true
+    })
+    if (exact) return exact
+  }
   return candidates.find((candidate) => {
     const haystack = normalized(`${candidate.selection} ${candidate.market} ${candidate.marketLabel} ${candidate.matchup} ${candidate.line ?? ''}`)
     if (q.includes('mets') && candidate.selection === 'NYM') return true
@@ -106,8 +128,9 @@ function findCandidate(candidates: CurrentBoardCandidate[], text: string) {
   }) ?? candidates[0] ?? null
 }
 
-function responseMeta(board: Awaited<ReturnType<typeof getCurrentBoard>>, matched: number) {
+function responseMeta(board: Awaited<ReturnType<typeof getCurrentBoardCached>>, matched: number, query = '') {
   return {
+    queryUnderstood: query || 'current-board query',
     boardMode: board.boardMode,
     dataAsOf: board.generatedAt,
     latestOddsCapture: board.latestOddsTimestamp,
@@ -146,7 +169,7 @@ function summarizeCandidate(candidate: CurrentBoardCandidate) {
 }
 
 async function search(query: string) {
-  const board = await getCurrentBoard({ mode: 'CURRENT', limit: 100 })
+  const board = await getCurrentBoardCached('baseball_mlb', 'CURRENT', 100)
   const ask = intent(query)
   if (ask === 'PROPS') {
     return {
@@ -154,7 +177,7 @@ async function search(query: string) {
       action: 'SEARCH',
       intent: ask,
       summary: 'Pitcher/player props are not currently available because verified prop odds and the required player-level context are missing.',
-      meta: responseMeta(board, 0),
+      meta: responseMeta(board, 0, query),
       results: [],
     }
   }
@@ -164,8 +187,10 @@ async function search(query: string) {
       success: true,
       action: 'SEARCH',
       intent: ask,
-      summary: 'No confirmed arbitrage is available because verified multi-book pricing is absent from stored data.',
-      meta: responseMeta(board, 0),
+      summary: arbitrage.summary.status === 'SCANNER_DATA_ERROR'
+        ? 'Arbitrage data is temporarily unavailable.'
+        : 'Verified multi-book pricing is unavailable.',
+      meta: responseMeta(board, 0, query),
       arbitrage: arbitrage.summary,
       results: [],
     }
@@ -178,7 +203,7 @@ async function search(query: string) {
       action: 'SEARCH',
       intent: ask,
       summary: results.length ? 'Best Value ranked current-board candidates.' : 'No positive modeled-value candidate is available.',
-      meta: responseMeta(board, results.length),
+      meta: responseMeta(board, results.length, query),
       results,
     }
   }
@@ -196,7 +221,7 @@ async function search(query: string) {
       action: 'SEARCH',
       intent: ask,
       summary: results.length ? 'Most likely current-board candidates. High probability is not the same as value.' : 'No current candidate matches these filters.',
-      meta: responseMeta(board, results.length),
+      meta: responseMeta(board, results.length, query),
       rankingSource: mostLikely.mode,
       results: results.map(summarizeCandidate),
     }
@@ -207,13 +232,13 @@ async function search(query: string) {
     action: 'SEARCH',
     intent: ask,
     summary: filtered.length ? 'Filtered current-board candidates.' : 'No current candidate matches these filters.',
-    meta: responseMeta(board, filtered.length),
+    meta: responseMeta(board, filtered.length, query),
     results: filtered.map(summarizeCandidate),
   }
 }
 
 async function compare(input: Input) {
-  const board = await getCurrentBoard({ mode: 'CURRENT', limit: 100 })
+  const board = await getCurrentBoardCached('baseball_mlb', 'CURRENT', 100)
   const q = normalized(input.query)
   const picks = input.candidateIds?.length
     ? board.candidates.filter((candidate) => input.candidateIds?.includes(candidate.predictionId))
@@ -227,7 +252,7 @@ async function compare(input: Input) {
       success: true,
       action: 'COMPARE',
       summary: 'Compare needs at least two current-board candidates.',
-      meta: responseMeta(board, unique.length),
+      meta: responseMeta(board, unique.length, input.query ?? ''),
       candidates: unique.map(summarizeCandidate),
       conclusion: 'Insufficient evidence to prefer one.',
     }
@@ -243,7 +268,7 @@ async function compare(input: Input) {
     success: true,
     action: 'COMPARE',
     summary: 'Compared current-board candidates.',
-    meta: responseMeta(board, unique.length),
+    meta: responseMeta(board, unique.length, input.query ?? ''),
     candidates: unique.map((candidate) => ({
       ...summarizeCandidate(candidate),
       positiveFactors: candidate.positiveFactors,
@@ -257,14 +282,34 @@ async function compare(input: Input) {
 }
 
 async function explain(input: Input) {
-  const board = await getCurrentBoard({ mode: 'CURRENT', limit: 100 })
+  const board = await getCurrentBoardCached('baseball_mlb', 'CURRENT', 100)
+  const q = normalized(input.query)
+  if (q.includes('no picks') || q.includes('no official')) {
+    return {
+      success: true,
+      action: 'EXPLAIN',
+      summary: 'No official picks today because every current candidate remains preview-only or fails value/policy gates.',
+      meta: responseMeta(board, board.candidates.length, input.query ?? ''),
+      explanation: {
+        title: 'No official picks today',
+        summary: 'The Current Board has analyzed candidates, but Top Picks stays at zero until production eligibility, recommendation policy, calibration, confidence and positive edge/EV gates all pass.',
+        whatSupportsIt: board.candidates.map((candidate) => `${candidateTitle(candidate)} was analyzed from the Current Board.`),
+        whatWorksAgainstIt: board.candidates.map((candidate) => `${candidateTitle(candidate)}: ${candidate.semanticLabel}, ${candidate.officialEligibility.replaceAll('_', ' ').toLowerCase()}.`),
+        price: 'Current prices do not create positive modeled value for the official recommendation path.',
+        missingInformation: Array.from(new Set(board.candidates.flatMap((candidate) => candidate.missingInformation))),
+        officialEligibilityBlockers: Array.from(new Set(board.candidates.flatMap((candidate) => candidate.blockers))),
+        confidence: 'The model currently believes waiting has the highest expected value. Calibration remains limited.',
+        plainAnswer: 'NO OFFICIAL PICKS TODAY',
+      },
+    }
+  }
   const candidate = findCandidate(board.candidates, input.query ?? '')
   if (!candidate) {
     return {
       success: true,
       action: 'EXPLAIN',
       summary: 'No current candidate matches this explanation request.',
-      meta: responseMeta(board, 0),
+      meta: responseMeta(board, 0, input.query ?? ''),
       explanation: null,
     }
   }
@@ -277,12 +322,12 @@ async function explain(input: Input) {
       ? 'NOT OFFICIALLY ELIGIBLE'
       : candidate.modeledValueStatus === 'MODELED_VALUE'
         ? 'WATCH'
-        : 'NO VALUE'
+        : 'NO MODELED VALUE'
   return {
     success: true,
     action: 'EXPLAIN',
     summary: `${candidateTitle(candidate)} is analyzed, but it is not an official pick.`,
-    meta: responseMeta(board, 1),
+    meta: responseMeta(board, 1, input.query ?? ''),
     explanation: {
       title: candidateTitle(candidate),
       summary: candidate.summary,
@@ -298,7 +343,7 @@ async function explain(input: Input) {
 }
 
 async function buildTicket(input: Input) {
-  const board = await getCurrentBoard({ mode: 'CURRENT', limit: 100 })
+  const board = await getCurrentBoardCached('baseball_mlb', 'CURRENT', 100)
   const mode = input.mode ?? (normalized(input.query).includes('preview') ? 'preview_exploration' : 'official_only')
   if (mode === 'official_only') {
     const optimizer = await optimizeBetSlip({})
@@ -306,7 +351,7 @@ async function buildTicket(input: Input) {
       success: true,
       action: 'BUILD_TICKET',
       summary: optimizer.mode === 'no_ticket' ? 'NO TICKET TODAY' : 'Official ticket available.',
-      meta: responseMeta(board, 0),
+      meta: responseMeta(board, 0, input.query ?? ''),
       ticketMode: mode,
       ticket: optimizer,
     }
@@ -322,7 +367,7 @@ async function buildTicket(input: Input) {
     success: true,
     action: 'BUILD_TICKET',
     summary: legs.length ? 'Preview exploration only. Not a wagering recommendation.' : 'No preview ticket can be built from current-board value rules.',
-    meta: responseMeta(board, legs.length),
+    meta: responseMeta(board, legs.length, input.query ?? ''),
     ticketMode: mode,
     label: 'QUARANTINED PREVIEW - NOT A WAGERING RECOMMENDATION',
     stakeRecommendation: null,
@@ -332,14 +377,14 @@ async function buildTicket(input: Input) {
 }
 
 async function whatChanged(input: Input) {
-  const board = await getCurrentBoard({ mode: 'CURRENT', limit: 100 })
+  const board = await getCurrentBoardCached('baseball_mlb', 'CURRENT', 100)
   const candidate = findCandidate(board.candidates, input.query ?? '')
   if (!candidate) {
     return {
       success: true,
       action: 'WHAT_CHANGED',
       summary: 'No current candidate matches this change request.',
-      meta: responseMeta(board, 0),
+      meta: responseMeta(board, 0, input.query ?? ''),
       changes: null,
     }
   }
@@ -358,7 +403,7 @@ async function whatChanged(input: Input) {
       success: true,
       action: 'WHAT_CHANGED',
       summary: 'No prior comparable version is available.',
-      meta: responseMeta(board, 1),
+      meta: responseMeta(board, 1, input.query ?? ''),
       changes: null,
     }
   }
@@ -366,7 +411,7 @@ async function whatChanged(input: Input) {
     success: true,
     action: 'WHAT_CHANGED',
     summary: 'Compared current candidate with prior stored preview lineage.',
-    meta: responseMeta(board, 1),
+    meta: responseMeta(board, 1, input.query ?? ''),
     changes: {
       candidate: candidateTitle(candidate),
       previousOdds: previous?.odds ?? null,

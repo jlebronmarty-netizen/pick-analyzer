@@ -9,13 +9,17 @@ import {
   normalizeSportsDataIoMlbGameOdds,
   type SportsDataIoMlbEventReference,
 } from '@/services/sportsdataio-mlb-normalization.service'
+import {
+  SPORTSDATAIO_DISCOVERY_LAB_ORIGIN,
+  resolveSportsDataIoDiscoveryLabUrl,
+} from '@/services/sportsdataio-discovery-lab-url.service'
 
 const PROVIDER = 'sportsdataio'
 const PROVIDER_VARIANT = 'sportsdataio_discovery_lab'
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
 const SEASON = '2026'
-const BASE_ORIGIN = 'https://api.sportsdata.io'
+const BASE_ORIGIN = SPORTSDATAIO_DISCOVERY_LAB_ORIGIN
 const MODE = 'sportsdataio_mlb_prospective_preview_v1'
 const INTELLIGENCE_VERSION = 'mlb_prediction_intelligence_v1'
 const DEFAULT_TIMEOUT_MS = 15000
@@ -26,12 +30,16 @@ type Request = {
   confirmed?: boolean | null
   selectedDate?: string | null
   finalPregameRefresh?: boolean | null
+  operatingDayRefresh?: boolean | null
+  operatingDayFinalRefresh?: boolean | null
   maximumRequests?: number | null
   timeoutMs?: number | null
 }
 
 type EndpointResult = {
   endpoint: string
+  origin: string
+  pathname: string
   status: number
   contentType: string | null
   rateLimitRemaining: string | null
@@ -193,8 +201,9 @@ function quarantine(extra: Record<string, unknown> = {}) {
 async function fetchJson(endpoint: string, apiKey: string, timeoutMs: number) {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
+  const resolvedUrl = resolveSportsDataIoDiscoveryLabUrl(endpoint)
   try {
-    const response = await fetch(`${BASE_ORIGIN}${endpoint}`, {
+    const response = await fetch(resolvedUrl.url, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -205,6 +214,8 @@ async function fetchJson(endpoint: string, apiKey: string, timeoutMs: number) {
     })
     const endpointResult: EndpointResult = {
       endpoint,
+      origin: resolvedUrl.origin,
+      pathname: resolvedUrl.pathname,
       status: response.status,
       contentType: response.headers.get('content-type'),
       rateLimitRemaining: response.headers.get('x-ratelimit-remaining'),
@@ -532,6 +543,26 @@ function round(value: number, places = 2) {
   return Math.round(value * factor) / factor
 }
 
+function outcomePreference(row: OddsRow) {
+  const market = marketForPrediction(row.market)
+  const outcome = String(row.outcome).toLowerCase()
+  if (market === 'total') return outcome === 'under' ? 0 : 1
+  return outcome === 'away' ? 0 : outcome === 'home' ? 1 : 2
+}
+
+function shouldReplaceChosenOdds(row: OddsRow, existing: OddsRow) {
+  const rowTime = parseDateMs(row.snapshot_time) ?? 0
+  const existingTime = parseDateMs(existing.snapshot_time) ?? 0
+  if (rowTime !== existingTime) return rowTime > existingTime
+  const rowPreference = outcomePreference(row)
+  const existingPreference = outcomePreference(existing)
+  if (rowPreference !== existingPreference) return rowPreference < existingPreference
+  const rowSportsbook = row.sportsbook === 'Consensus' ? 0 : 1
+  const existingSportsbook = existing.sportsbook === 'Consensus' ? 0 : 1
+  if (rowSportsbook !== existingSportsbook) return rowSportsbook < existingSportsbook
+  return row.id < existing.id
+}
+
 function chooseOddsRows(events: EventRow[], odds: OddsRow[]) {
   const eventsById = new Map(events.map((event) => [event.id, event]))
   const chosen = new Map<string, OddsRow>()
@@ -545,7 +576,7 @@ function chooseOddsRows(events: EventRow[], odds: OddsRow[]) {
     if (ts > cutoff) continue
     const key = `${row.event_id}:${marketForPrediction(row.market)}`
     const existing = chosen.get(key)
-    if (!existing || row.snapshot_time > existing.snapshot_time || row.sportsbook === 'Consensus') {
+    if (!existing || shouldReplaceChosenOdds(row, existing)) {
       chosen.set(key, row)
     }
   }
@@ -1634,6 +1665,8 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   const dryRun = request.dryRun ?? true
   const confirmed = request.confirmed === true
   const finalPregameRefresh = request.finalPregameRefresh === true
+  const operatingDayRefresh = request.operatingDayRefresh === true
+  const operatingDayFinalRefresh = request.operatingDayFinalRefresh === true
   const maximumRequests = Math.min(Number(request.maximumRequests ?? MAX_CALLS) || MAX_CALLS, MAX_CALLS)
   const timeoutMs = Number(request.timeoutMs ?? DEFAULT_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS
   const futureEvents = await loadFutureEvents()
@@ -1679,7 +1712,8 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   let calls = 0
   const endpoints: EndpointResult[] = []
   const scheduleEndpoint = `/api/mlb/odds/json/GamesByDate/${sportsDataIoMlbDate(selectedDate)}`
-  const existingScheduleCheckpoint = await loadCompletedCheckpoint(selectedDate, 'slate_discovery')
+  const schedulePhase = operatingDayRefresh ? 'operating_day_slate_discovery' : 'slate_discovery'
+  const existingScheduleCheckpoint = await loadCompletedCheckpoint(selectedDate, schedulePhase)
   let scheduleJobId = existingScheduleCheckpoint ? String(existingScheduleCheckpoint.id) : ''
   let gamesFound = 0
   if (!existingScheduleCheckpoint && !finalPregameRefresh) {
@@ -1714,7 +1748,7 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
       normalizedSchedule.mappings.filter((row) => !existingMappings.has(String(row.provider_id))).length
     const scheduleUpdated = normalizedSchedule.teams.length + normalizedSchedule.events.length + normalizedSchedule.mappings.length - scheduleInserted
     scheduleJobId = await writeCheckpoint({
-      phase: 'slate_discovery',
+      phase: schedulePhase,
       selectedDate,
       status: normalizedSchedule.unresolved.length ? 'partial' : 'completed',
       startedAt: scheduleStarted,
@@ -1750,9 +1784,14 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   }
 
   const oddsEndpoint = `/api/mlb/odds/json/GameOddsByDate/${selectedDate}`
-  const existingOddsCheckpoint = finalPregameRefresh
-    ? await loadCompletedCheckpoint(selectedDate, 'final_pregame_odds_capture')
-    : await loadCompletedCheckpoint(selectedDate, 'odds_capture')
+  const oddsPhase = operatingDayRefresh
+    ? 'operating_day_odds_capture'
+    : operatingDayFinalRefresh
+      ? 'operating_day_final_odds_capture'
+    : finalPregameRefresh
+      ? 'final_pregame_odds_capture'
+      : 'odds_capture'
+  const existingOddsCheckpoint = await loadCompletedCheckpoint(selectedDate, oddsPhase)
   let oddsJobId = existingOddsCheckpoint ? String(existingOddsCheckpoint.id) : ''
   let safeOddsRows = await loadPersistedSafeOddsForDate(events)
   let duplicateRows = 0
@@ -1793,7 +1832,7 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     const oddsInserted = safeOddsRows.filter((row) => !existingOdds.has(row.id)).length
     const oddsUpdated = safeOddsRows.length - oddsInserted
     oddsJobId = await writeCheckpoint({
-      phase: finalPregameRefresh ? 'final_pregame_odds_capture' : 'odds_capture',
+      phase: oddsPhase,
       selectedDate,
       status: normalizedOdds.unresolvedProviderGameIds.length || oddsAfterStart ? 'partial' : 'completed',
       startedAt: oddsStarted,
@@ -1824,7 +1863,8 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   const eventById = new Map(events.map((event) => [event.id, event]))
 
   const projectionsEndpoint = `/api/mlb/fantasy/json/PlayerGameProjectionStatsByDate/${sportsDataIoMlbDate(selectedDate)}`
-  const existingProjectionsCheckpoint = await loadCompletedCheckpoint(selectedDate, 'projections_availability')
+  const projectionsPhase = operatingDayRefresh ? 'operating_day_projections_availability' : 'projections_availability'
+  const existingProjectionsCheckpoint = await loadCompletedCheckpoint(selectedDate, projectionsPhase)
   let projectionsJobId = existingProjectionsCheckpoint ? String(existingProjectionsCheckpoint.id) : ''
   let projectionRows = 0
   if (!existingProjectionsCheckpoint && !finalPregameRefresh) {
@@ -1834,7 +1874,7 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     endpoints.push(projections.endpointResult)
     projectionRows = projections.payload.length
     projectionsJobId = await writeCheckpoint({
-      phase: 'projections_availability',
+      phase: projectionsPhase,
       selectedDate,
       status: 'completed',
       startedAt: projectionsStarted,

@@ -80,6 +80,8 @@ export default function MarketIntelligenceSummaryPanel() {
   }, [])
 
   const topRows = useMemo(() => data?.opportunities.slice(0, 4) ?? [], [data])
+  const supportedMarkets = data?.scanner.supported ?? '--'
+  const unavailableMarkets = data?.scanner.unavailable ?? '--'
 
   return (
     <section className="rounded-3xl border border-slate-800 bg-slate-950/50 p-5">
@@ -103,12 +105,11 @@ export default function MarketIntelligenceSummaryPanel() {
         <div className="mt-4 rounded-2xl border border-rose-500/30 bg-rose-950/20 p-4 text-sm text-rose-200">{error}</div>
       ) : null}
 
-      <div className="mt-5 grid gap-4 md:grid-cols-5">
-        <Stat label="Scanned" value={data?.scanner.marketsScanned ?? '--'} />
-        <Stat label="Available" value={data?.scanner.supported ?? '--'} />
-        <Stat label="Watch" value={data?.scanner.watch ?? '--'} />
-        <Stat label="Strong" value={data?.scanner.strongValue ?? '--'} />
-        <Stat label="Elite" value={data?.scanner.elite ?? '--'} />
+      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Stat label="Current Markets Analyzed" value={supportedMarkets} />
+        <Stat label="Additional Market Types Monitored" value={unavailableMarkets} />
+        <Stat label="Supported Markets" value={supportedMarkets} />
+        <Stat label="Unavailable Market Types" value={unavailableMarkets} />
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -125,7 +126,7 @@ export default function MarketIntelligenceSummaryPanel() {
         </div>
 
         <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Top Attention</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Current Market Review</p>
           <div className="mt-3 space-y-3">
             {topRows.map((row) => (
               <div key={row.id} className="rounded-xl bg-slate-900/70 p-3">
@@ -134,7 +135,9 @@ export default function MarketIntelligenceSummaryPanel() {
                   <span className="rounded-full bg-slate-800 px-2 py-1 text-xs font-black text-emerald-200">{row.recommendation}</span>
                 </div>
                 <p className="mt-1 text-xs text-slate-400">{row.game ?? row.reason}</p>
-                <p className="mt-2 text-xs text-slate-500">Score {row.score} | {row.health}</p>
+                <p className="mt-2 text-xs text-slate-500">
+                  Market Score {Math.round(row.score)}/100 | Data Status {row.health === 'Missing Data' ? 'Limited' : row.health} | Verdict {row.recommendation}
+                </p>
               </div>
             ))}
             {!loading && !topRows.length ? <p className="text-sm text-slate-400">No markets need attention right now.</p> : null}

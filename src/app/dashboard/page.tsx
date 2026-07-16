@@ -123,19 +123,42 @@ export default function DashboardPage() {
       <DashboardSection
         id="model-lab"
         eyebrow="Model Lab"
-        title="Historical Validation"
-        description="Quarantined MLB replay, feature quality, prediction contracts, calibration and settlement evidence."
+        title="Model Lab"
+        description="Production status, historical replay, fixtures, contracts, feature store evidence and current preview are separated so metrics do not blur together."
       >
-        <MlbPredictionEnginePanel />
-        <MlbFeatureStoreIntegrationPanel />
-        <PredictionEngineV4Panel />
-        <SportPredictionSdkPanel />
-        <PredictionSafetyPanel />
-        <SettlementCorePanel />
-        <ModelMetricsFrameworkPanel />
+        <DashboardPanelGroup
+          title="Historical Replay"
+          description="Quarantined completed-game replay for learning only; it is separate from production and current previews."
+        >
+          <MlbPredictionEnginePanel />
+        </DashboardPanelGroup>
 
         <DashboardPanelGroup
-          title="Advanced model tools"
+          title="Current Preview"
+          description="Current preview evidence stays in Today. This section keeps model context visible without promoting official picks."
+        >
+          <PredictionEngineV4Panel />
+          <ModelMetricsFrameworkPanel />
+        </DashboardPanelGroup>
+
+        <DashboardPanelGroup
+          title="Feature Store"
+          description="Feature quality and sufficiency checks for MLB model inputs."
+        >
+          <MlbFeatureStoreIntegrationPanel />
+        </DashboardPanelGroup>
+
+        <DashboardPanelGroup
+          title="Contracts"
+          description="Prediction contracts, safety checks and settlement contracts."
+        >
+          <SportPredictionSdkPanel />
+          <PredictionSafetyPanel />
+          <SettlementCorePanel />
+        </DashboardPanelGroup>
+
+        <DashboardPanelGroup
+          title="Production and advanced model tools"
           description="Risk simulation, portfolio construction, market intelligence, coaching and learning modules stay available but are not the default Day 1 path."
         >
           <MonteCarloSimulatorPanel />

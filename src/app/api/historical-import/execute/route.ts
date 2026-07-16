@@ -7,6 +7,7 @@ import {
 import {
   executeSportsDataIoMlbDiscoveryImport,
   planSportsDataIoMlbDiscoveryExecution,
+  verifySportsDataIoMlbTeamsForStandings2025,
 } from '@/services/sportsdataio-mlb-historical-import-executor.service'
 import { runSportsDataIoMlbProspectivePreview } from '@/services/sportsdataio-mlb-prospective-preview.service'
 
@@ -59,6 +60,8 @@ export async function POST(request: NextRequest) {
       mode: body?.mode ?? body?.action ?? null,
       selectedDate: body?.selectedDate ?? body?.date ?? null,
       finalPregameRefresh: body?.finalPregameRefresh ?? false,
+      operatingDayRefresh: body?.operatingDayRefresh ?? false,
+      operatingDayFinalRefresh: body?.operatingDayFinalRefresh ?? false,
     }
     if (
       requestPayload.mode === 'mlb_prospective_preview' ||
@@ -69,7 +72,21 @@ export async function POST(request: NextRequest) {
         confirmed: requestPayload.confirmed,
         selectedDate: requestPayload.selectedDate,
         finalPregameRefresh: requestPayload.finalPregameRefresh,
+        operatingDayRefresh: requestPayload.operatingDayRefresh,
+        operatingDayFinalRefresh: requestPayload.operatingDayFinalRefresh,
         maximumRequests: requestPayload.maximumRequests,
+        timeoutMs: requestPayload.timeoutMs,
+      })
+
+      return apiOk(result, id)
+    }
+
+    if (
+      requestPayload.mode === 'sportsdataio_mlb_teams_verification_v1' ||
+      requestPayload.mode === 'mlb_teams_verification'
+    ) {
+      const result = await verifySportsDataIoMlbTeamsForStandings2025({
+        confirmed: requestPayload.confirmed,
         timeoutMs: requestPayload.timeoutMs,
       })
 

@@ -284,7 +284,7 @@ export default function MlbPredictionEnginePanel() {
   }))
   const visibleReplayMatchups = showAllReplayMatchups
     ? replayMatchups
-    : replayMatchups.slice(0, 5)
+    : replayMatchups.slice(0, 3)
 
   if (loading && !data) {
     return (
@@ -435,7 +435,7 @@ export default function MlbPredictionEnginePanel() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
-              MLB Historical Validation Replay
+              Historical Replay
             </p>
             <h3 className="mt-2 text-2xl font-black text-white">
               July 12, 2026
@@ -450,7 +450,7 @@ export default function MlbPredictionEnginePanel() {
             onClick={loadReplay}
             className="rounded-xl border border-amber-500/30 bg-amber-950/30 px-4 py-2 text-sm font-bold text-amber-100 hover:bg-amber-900/40"
           >
-            Refresh Replay
+            Open Replay
           </button>
         </div>
 
@@ -553,13 +553,13 @@ export default function MlbPredictionEnginePanel() {
               ))}
             </div>
 
-            {replayMatchups.length > 5 ? (
+            {replayMatchups.length > 3 ? (
               <button
                 type="button"
                 onClick={() => setShowAllReplayMatchups((value) => !value)}
                 className="mt-5 rounded-xl border border-amber-500/30 bg-amber-950/20 px-4 py-2 text-sm font-bold text-amber-100 hover:bg-amber-900/30"
               >
-                {showAllReplayMatchups ? 'Show first 5 matchups' : `Show all ${replayMatchups.length} matchups`}
+                {showAllReplayMatchups ? 'Show first 3 matchups' : `Open all ${replayMatchups.length} replay matchups`}
               </button>
             ) : null}
           </>

@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { getCurrentBoard, type CurrentBoardCandidate } from '@/services/current-board.service'
+import { getCurrentBoardCached, type CurrentBoardCandidate } from '@/services/current-board.service'
 
 export type BestValueMode = 'current' | 'upcoming' | 'historical_explorer' | 'all_stored_advanced'
 
@@ -41,7 +41,8 @@ export async function getBestValueOpportunities({
   includePasses?: boolean
   limit?: number
 } = {}) {
-  const board = await getCurrentBoard({ mode: mapMode(mode), limit: 200 })
+  try {
+  const board = await getCurrentBoardCached('baseball_mlb', mapMode(mode), 200)
   const ranked = [...board.candidates]
     .filter((candidate) => includePasses || candidate.expectedValue > 0 || candidate.edge > 0)
     .sort((left, right) => score(right) - score(left))
@@ -71,6 +72,11 @@ export async function getBestValueOpportunities({
       latestOddsCapture: board.latestOddsTimestamp,
       dataFreshness: board.dataFreshness,
       warning: 'MODELED VALUE is not an official pick. Official picks still require production gate and recommendation policy approval.',
+      scanCompleted: true,
+      dataAvailable: true,
+      errorCode: null,
+      errorMessageSafe: null,
+      positiveValueCount: board.candidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0).length,
     },
     rankingContract: ['positive expected value', 'positive edge', 'confidence', 'reliability', 'market stability', 'feature quality', 'data sufficiency', 'odds freshness'],
     categories,
@@ -87,5 +93,39 @@ export async function getBestValueOpportunities({
           ? 'MODELED VALUE DETECTED'
           : 'NO MODELED VALUE',
     })),
+  }
+  } catch {
+    return {
+      success: true,
+      mode: 'best_value_scanner_v1',
+      generatedAt: new Date().toISOString(),
+      boardMode: mapMode(mode),
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+      summary: {
+        candidatesScanned: 0,
+        candidatesReturned: 0,
+        positiveValueCandidates: 0,
+        noModeledValueCandidates: 0,
+        officialPickCount: 0,
+        latestOddsCapture: null,
+        dataFreshness: null,
+        warning: 'DATA TEMPORARILY UNAVAILABLE',
+        scanCompleted: false,
+        dataAvailable: false,
+        errorCode: 'CURRENT_BOARD_UNAVAILABLE',
+        errorMessageSafe: 'DATA TEMPORARILY UNAVAILABLE',
+        positiveValueCount: 0,
+      },
+      rankingContract: ['positive expected value', 'positive edge', 'confidence', 'reliability', 'market stability', 'feature quality', 'data sufficiency', 'odds freshness'],
+      categories: {
+        strongModeledValue: [],
+        developingValue: [],
+        thinValue: [],
+        noModeledValue: [],
+        notOfficiallyEligible: [],
+      },
+      opportunities: [],
+    }
   }
 }

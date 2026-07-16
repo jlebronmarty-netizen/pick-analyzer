@@ -26,6 +26,23 @@ Required props response:
 
 `Pitcher/player props are not currently available because verified prop odds and the required player-level context are missing.`
 
+## Query QA Contract
+
+Each response includes deterministic metadata:
+
+- query understood
+- Current Board mode and as-of timestamp
+- latest odds capture
+- candidates scanned
+- candidates matched
+- official-pick status
+- provider calls made
+- remote mutations made
+
+The supported QA prompts are `Most likely today`, `Best value today`, `Best underdog between +100 and +180`, `Totals only`, `Low risk`, `Compare Mets moneyline with Under 9.5`, `Why no picks today?`, `Why not Mets moneyline?`, `Build my ticket`, `What changed?` and `Arbitrage`.
+
+Candidate matching is selection-aware: an explicit Mets/NYM moneyline query resolves to `NYM Moneyline`, while total queries resolve to `Under 9.5 Total` when that stored current-board row is available. `Why no picks today?` explains the official gate globally rather than selecting an unrelated candidate.
+
 ## Current Validation
 
 The deterministic fixture suite covers 24 cases across search, Best Value, empty positive-EV results, favorite/underdog filters, odds range filters, compare, explain, ticket building, unavailable props, unavailable arbitrage, What Changed, zero-call accounting and official-gate preservation.

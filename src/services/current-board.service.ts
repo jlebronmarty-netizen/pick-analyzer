@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { cache } from 'react'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
@@ -259,6 +260,64 @@ export const CURRENT_BOARD_FRESHNESS_POLICY = {
 
 function emptyReasonCounts() {
   return Object.fromEntries(ALL_REASON_CODES.map((code) => [code, 0])) as Record<CurrentBoardReasonCode, number>
+}
+
+function chunks<T>(values: T[], size = 100) {
+  const result: T[][] = []
+  for (let index = 0; index < values.length; index += size) {
+    result.push(values.slice(index, index + size))
+  }
+  return result
+}
+
+async function readEventsById(sportKey: string, ids: string[]) {
+  const rows: EventRow[] = []
+  for (const chunk of chunks(Array.from(new Set(ids.filter(Boolean))), 100)) {
+    if (!chunk.length) continue
+    const result = await supabaseAdmin
+      .from('sport_events')
+      .select('id, sport_key, league_key, season, home_team, away_team, start_time, status')
+      .eq('sport_key', sportKey)
+      .in('id', chunk)
+    if (result.error) throw new Error(`current board event read failed: ${result.error.message}`)
+    rows.push(...((result.data ?? []) as EventRow[]))
+  }
+  return rows
+}
+
+async function readOddsForEvents({
+  sportKey,
+  eventIds,
+  mode,
+  nowMs,
+}: {
+  sportKey: string
+  eventIds: string[]
+  mode: CurrentBoardMode
+  nowMs: number
+}) {
+  const rows: OddsRow[] = []
+  const uniqueIds = Array.from(new Set(eventIds.filter(Boolean)))
+  const currentWindowStart =
+    mode === 'HISTORICAL_EXPLORER' || mode === 'ALL_STORED_ADVANCED'
+      ? null
+      : new Date(nowMs - CURRENT_BOARD_FRESHNESS_POLICY.baseball_mlb.defaultMaxOddsAgeMinutes * 60000).toISOString()
+  for (const chunk of chunks(uniqueIds, 50)) {
+    if (!chunk.length) continue
+    let query = supabaseAdmin
+      .from('sports_odds_snapshots')
+      .select('id, sport_key, league_key, season, event_id, provider, sportsbook, market, outcome, price, line, snapshot_time, metadata')
+      .eq('sport_key', sportKey)
+      .in('event_id', chunk)
+      .in('market', ['moneyline', 'run_line', 'total'])
+      .order('snapshot_time', { ascending: false })
+      .limit(1000)
+    if (currentWindowStart) query = query.gte('snapshot_time', currentWindowStart)
+    const result = await query
+    if (result.error) throw new Error(`current board odds read failed: ${result.error.message}`)
+    rows.push(...((result.data ?? []) as OddsRow[]))
+  }
+  return rows
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -592,38 +651,31 @@ export async function getCurrentBoard({
 } = {}): Promise<CurrentBoardResponse> {
   const safeLimit = Math.max(1, Math.min(limit, 200))
   const nowMs = Date.now()
-  const [predictionsResult, eventsResult, oddsResult] = await Promise.all([
-    supabaseAdmin
-      .from('prediction_history')
-      .select(
-        'id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, line, odds_timestamp, generated_at, cutoff_at, model_version, feature_snapshot_id, feature_set_version, validation_status, lifecycle_status, status, result, production_eligible, recommended_pick, feature_snapshot, validation_warnings, skip_reason, trial, scrambled'
-      )
-      .eq('sport_key', sportKey)
-      .not('model_probability', 'is', null)
-      .not('odds', 'is', null)
-      .order('odds_timestamp', { ascending: false })
-      .limit(1500),
-    supabaseAdmin
-      .from('sport_events')
-      .select('id, sport_key, league_key, season, home_team, away_team, start_time, status')
-      .eq('sport_key', sportKey)
-      .order('start_time', { ascending: false })
-      .limit(3000),
-    supabaseAdmin
-      .from('sports_odds_snapshots')
-      .select('id, sport_key, league_key, season, event_id, provider, sportsbook, market, outcome, price, line, snapshot_time, metadata')
-      .eq('sport_key', sportKey)
-      .order('snapshot_time', { ascending: false })
-      .limit(5000),
-  ])
+  const predictionsResult = await supabaseAdmin
+    .from('prediction_history')
+    .select(
+      'id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, line, odds_timestamp, generated_at, cutoff_at, model_version, feature_snapshot_id, feature_set_version, validation_status, lifecycle_status, status, result, production_eligible, recommended_pick, feature_snapshot, validation_warnings, skip_reason, trial, scrambled'
+    )
+    .eq('sport_key', sportKey)
+    .not('model_probability', 'is', null)
+    .not('odds', 'is', null)
+    .order('odds_timestamp', { ascending: false })
+    .limit(1500)
 
   if (predictionsResult.error) throw new Error(`current board prediction read failed: ${predictionsResult.error.message}`)
-  if (eventsResult.error) throw new Error(`current board event read failed: ${eventsResult.error.message}`)
-  if (oddsResult.error) throw new Error(`current board odds read failed: ${oddsResult.error.message}`)
 
   const rows = (predictionsResult.data ?? []) as PredictionRow[]
-  const eventsById = new Map(((eventsResult.data ?? []) as EventRow[]).map((event) => [event.id, event]))
-  const oddsRows = (oddsResult.data ?? []) as OddsRow[]
+  const events = await readEventsById(sportKey, rows.map((row) => row.game_id))
+  const eventsById = new Map(events.map((event) => [event.id, event]))
+  const oddsEventIds = rows
+    .filter((row) => SUPPORTED_MARKETS.includes(canonicalPredictionMarket(row.market) as never))
+    .filter((row) => {
+      const event = eventsById.get(row.game_id)
+      const base = baseReasons(row, event, nowMs)
+      return base.size === 0 || mode === 'HISTORICAL_EXPLORER' || mode === 'ALL_STORED_ADVANCED'
+    })
+    .map((row) => row.game_id)
+  const oddsRows = await readOddsForEvents({ sportKey, eventIds: oddsEventIds, mode, nowMs })
   const reasonCounts = emptyReasonCounts()
   const excludedIds = new Set<string>()
   const included: Array<{ row: PredictionRow; odds: OddsRow | null; event: EventRow | undefined }> = []
@@ -796,6 +848,11 @@ export async function getCurrentBoard({
     },
   }
 }
+
+export const getCurrentBoardCached = cache(
+  async (sportKey: string = 'baseball_mlb', mode: CurrentBoardMode = 'CURRENT', limit: number = 100) =>
+    getCurrentBoard({ sportKey, mode, limit })
+)
 
 export function mapLegacyBoardMode(mode: string | null | undefined): CurrentBoardMode {
   if (mode === 'upcoming' || mode === 'UPCOMING') return 'UPCOMING'

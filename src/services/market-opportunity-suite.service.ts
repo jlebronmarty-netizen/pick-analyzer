@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { getCurrentBoard, mapLegacyBoardMode, type CurrentBoardCandidate } from '@/services/current-board.service'
+import { getCurrentBoardCached, mapLegacyBoardMode, type CurrentBoardCandidate } from '@/services/current-board.service'
 
 type PredictionRow = {
   id: string
@@ -110,6 +110,14 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {}
+}
+
+function chunks<T>(values: T[], size = 100) {
+  const result: T[][] = []
+  for (let index = 0; index < values.length; index += size) {
+    result.push(values.slice(index, index + size))
+  }
+  return result
 }
 
 function numberValue(value: unknown) {
@@ -519,11 +527,11 @@ export async function getMostLikelyOpportunities({
   mode?: BoardMode
 } = {}) {
   const safeLimit = Math.max(1, Math.min(limit, 100))
-  const board = await getCurrentBoard({
-    sportKey: 'baseball_mlb',
-    mode: mapLegacyBoardMode(mode),
-    limit: 200,
-  })
+  const board = await getCurrentBoardCached(
+    'baseball_mlb',
+    mapLegacyBoardMode(mode),
+    200
+  )
   const rows = board.candidates
     .map(currentBoardCandidateToMostLikelyCard)
     .sort(compareCurrentBoardOpportunity(sort))
@@ -710,26 +718,45 @@ export async function getArbitrageOpportunities({
   staleMinutes?: number
   investment?: number
 } = {}) {
+  try {
   const safeStale = Math.max(5, Math.min(staleMinutes, 1440))
   const safeInvestment = Math.max(10, Math.min(investment, 100000))
-  const [oddsResult, eventsResult] = await Promise.all([
-    supabaseAdmin
-      .from('sports_odds_snapshots')
-      .select('id, sport_key, league_key, season, event_id, provider, sportsbook, market, outcome, price, line, snapshot_time, metadata')
-      .order('snapshot_time', { ascending: false })
-      .limit(3000),
-    supabaseAdmin
-      .from('sport_events')
-      .select('id, sport_key, league_key, season, home_team, away_team, start_time, status')
-      .limit(3000),
-  ])
+  const now = new Date()
+  const windowStart = new Date(now.getTime() - safeStale * 60000).toISOString()
+  const eventsResult = await supabaseAdmin
+    .from('sport_events')
+    .select('id, sport_key, league_key, season, home_team, away_team, start_time, status')
+    .eq('sport_key', 'baseball_mlb')
+    .gt('start_time', now.toISOString())
+    .order('start_time', { ascending: true })
+    .limit(100)
 
-  if (oddsResult.error) throw new Error(`arbitrage odds read failed: ${oddsResult.error.message}`)
   if (eventsResult.error) throw new Error(`arbitrage event read failed: ${eventsResult.error.message}`)
 
-  const eventsById = new Map(((eventsResult.data ?? []) as EventRow[]).map((event) => [event.id, event]))
+  const futureEvents = ((eventsResult.data ?? []) as EventRow[]).filter((event) => {
+    const status = String(event.status ?? '').toLowerCase()
+    return !['live', 'in_progress', 'completed', 'final', 'closed', 'cancelled', 'postponed'].includes(status)
+  })
+  const eventIds = futureEvents.map((event) => event.id)
+  const oddsRows: OddsRow[] = []
+  for (const chunk of chunks(eventIds, 50)) {
+    if (!chunk.length) continue
+    const oddsResult = await supabaseAdmin
+      .from('sports_odds_snapshots')
+      .select('id, sport_key, league_key, season, event_id, provider, sportsbook, market, outcome, price, line, snapshot_time, metadata')
+      .eq('sport_key', 'baseball_mlb')
+      .in('event_id', chunk)
+      .in('market', ['moneyline', 'run_line', 'total'])
+      .gte('snapshot_time', windowStart)
+      .order('snapshot_time', { ascending: false })
+      .limit(1000)
+    if (oddsResult.error) throw new Error(`arbitrage odds read failed: ${oddsResult.error.message}`)
+    oddsRows.push(...((oddsResult.data ?? []) as OddsRow[]))
+  }
+
+  const eventsById = new Map(futureEvents.map((event) => [event.id, event]))
   const latestByBookOutcome = new Map<string, OddsRow>()
-  for (const row of (oddsResult.data ?? []) as OddsRow[]) {
+  for (const row of oddsRows) {
     if (!isValidOddsRow(row)) continue
     const age = ageMinutes(row.snapshot_time)
     if (age > safeStale) continue
@@ -789,7 +816,7 @@ export async function getArbitrageOpportunities({
   opportunities.sort((left, right) => right.margin - left.margin || right.expectedProfit - left.expectedProfit)
 
   const verifiedSportsbooks = new Set(
-    ((oddsResult.data ?? []) as OddsRow[])
+    oddsRows
       .map((row) => row.sportsbook)
       .filter((book): book is string => Boolean(book && book.toLowerCase() !== 'consensus'))
   )
@@ -812,12 +839,12 @@ export async function getArbitrageOpportunities({
     summary: {
       status:
         verifiedSportsbooks.size < 2
-          ? 'ARBITRAGE_UNAVAILABLE'
+          ? 'MULTIBOOK_DATA_UNAVAILABLE'
           : opportunities.length > 0
-            ? 'GUARANTEED_ARBITRAGE_FOUND'
+            ? 'ARBITRAGE_FOUND'
             : potentialCount > 0
-              ? 'POTENTIAL_ARBITRAGE_ONLY'
-              : 'NO_ARBITRAGE',
+              ? 'NO_ARBITRAGE_FOUND'
+              : 'NO_ARBITRAGE_FOUND',
       guaranteedCount: opportunities.length,
       potentialCount,
       verifiedSportsbooks: Array.from(verifiedSportsbooks).sort(),
@@ -841,5 +868,45 @@ export async function getArbitrageOpportunities({
       emailPlaceholder: '',
       futureMobilePlaceholder: '',
     },
+  }
+  } catch {
+    return {
+      success: true,
+      mode: 'market_opportunity_arbitrage_v1',
+      generatedAt: new Date().toISOString(),
+      providerUsage: {
+        externalProviderCallsMade: 0,
+        source: 'stored_sports_odds_snapshots',
+      },
+      isolation: {
+        feedsRecommendationEngine: false,
+        feedsKelly: false,
+        feedsPortfolio: false,
+        feedsOfficialPicks: false,
+        mutatesRemoteState: false,
+      },
+      summary: {
+        status: 'SCANNER_DATA_ERROR',
+        guaranteedCount: 0,
+        potentialCount: 0,
+        verifiedSportsbooks: [],
+        checkedGroups: 0,
+        warning: 'Data temporarily unavailable. Arbitrage scan did not complete.',
+      },
+      opportunities: [],
+      notificationSettings: {
+        architectureOnly: true,
+        backendServiceEnabled: false,
+        guaranteedArbitrage: true,
+        minimumMarginPercent: 1,
+        minimumProfit: 25,
+        maximumStake: Math.max(10, Math.min(investment, 100000)),
+        preferredSportsbooks: [],
+        maximumOddsAgeMinutes: Math.max(5, Math.min(staleMinutes, 1440)),
+        browserNotificationEnabled: false,
+        emailPlaceholder: '',
+        futureMobilePlaceholder: '',
+      },
+    }
   }
 }

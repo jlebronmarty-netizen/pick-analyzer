@@ -76,6 +76,30 @@ Evidence: `src/app/dashboard/page.tsx`, `src/components/dashboard/DashboardShell
 
 Note: The dashboard is consolidated into Today, Model Lab, Data & Operations and Advanced surfaces so the default MLB workflow leads with daily status, official pick gates and quarantined replay instead of provider/debug sprawl. Advanced model tools, NBA readiness, provider contracts and inactive sport engines remain available behind collapsed groups. The consolidation audit verified the configured Supabase schema probes as applied, confirmed no running historical import jobs, preserved 45 quarantined July 12 MLB replay rows with 0 production-eligible rows and made 0 SportsDataIO provider calls or remote mutations.
 
+### Pick Analyzer UX Consolidation & Semantic Cleanup V1
+
+Status: Completed presentation pass and build verified.
+
+Evidence: `src/components/dashboard/MlbProspectivePreviewPanel.tsx`, `src/components/dashboard/MarketIntelligenceSummaryPanel.tsx`, `src/components/dashboard/MlbPredictionEnginePanel.tsx`, `src/app/dashboard/page.tsx`, `src/components/market-opportunities/MostLikelyTool.tsx`, `src/components/market-opportunities/BestValueTool.tsx`, `src/components/market-opportunities/AiBetFinderTool.tsx` and display-only semantic cleanup in `src/services/ai-bet-finder.service.ts`.
+
+Note: This pass intentionally made no provider calls, no remote mutations and no prediction-calculation changes. It clarified selected-side explanations, current-market metrics, official-picks-off messaging, final-odds refresh wording, AI rating display, historical replay defaults and consistent opportunity-card semantics.
+
+### Betting Workbench V1
+
+Status: Completed and build verified.
+
+Evidence: `src/app/betting-workbench/page.tsx`, `src/components/market-opportunities/BettingWorkbenchTool.tsx`, and the Betting Workbench navigation links in `src/components/dashboard/DashboardShell.tsx`.
+
+Note: Betting Workbench is a workspace layer over existing read-only APIs. It compares candidates by probability, confidence, AI rating, value, risk, rationale and recommendation; drafts preview or official-only tickets; explores supported markets with search/filter/sort; and stores favorites plus notes in browser localStorage. It does not mutate Top Picks, Recommendation Policy, Current Board, production data or provider state.
+
+### Premium Tools Reliability And Visual QA V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/current-board.service.ts`, `src/services/best-value-scanner.service.ts`, `src/services/market-opportunity-suite.service.ts`, `src/services/ai-bet-finder.service.ts`, `src/services/market-intelligence-engine.service.ts`, `src/components/market-opportunities/MostLikelyTool.tsx`, `src/components/market-opportunities/BestValueTool.tsx`, `src/components/market-opportunities/ArbitrageTool.tsx`, `src/components/market-opportunities/AiBetFinderTool.tsx`, `src/components/market-opportunities/BettingWorkbenchTool.tsx`, `docs/current-board-intelligence-engine-v1.md`, `docs/best-value-scanner-v1.md`, `docs/ai-bet-finder-v1.md`, `docs/arbitrage-scanner-v1.md` and `docs/betting-workbench-v1.md`.
+
+Note: This pass fixed timeout-prone broad selection by making premium tools consume the canonical Current Board and scoped odds reads. It added safe scanner states for Best Value and Arbitrage, query-understood metadata for AI Bet Finder, selection-aware explanations, mobile/tablet/desktop responsive hardening and screenshot-based QA evidence. It made 0 provider calls, 0 remote mutations, 0 prediction calculation changes, 0 official-pick changes and no Production Gate changes.
+
 ### MLB Day 1 Recovery Corrections V1
 
 Status: Completed local recovery corrections; provider execution not started.
@@ -110,11 +134,27 @@ Note: The readiness audit verifies the full Current Board -> Market Intelligence
 
 ### MLB Discovery Lab Historical Import Executor V1
 
-Status: Partial live execution completed; stopped at the next unsupported persistence branch.
+Status: Live executor and 2025 standings reconciliation checkpoint verified.
 
 Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts` and `src/app/api/historical-import/execute/route.ts`.
 
-Note: The existing protected execute route now dispatches `baseball_mlb` requests to an MLB Discovery Lab manifest with durable checkpoint identities in `sports_sync_jobs.metadata`, zero-call dry-run planning, completed-checkpoint skip behavior, quarantine flags and production gate closure. The first approved live unit called `GET /api/mlb/odds/json/Games/2026` once, received HTTP 200, fetched 2,456 provider records, inserted 2,441 new `sport_events`, inserted 2,441 provider mappings, reused/updated 30 teams, wrote completed sync job `dbd8ab2b-8351-4b3b-b5ff-3865d672a748`, and preserved `trial=false`, `scrambled=false`, `production_eligible=false`. Resume dry-run skips that checkpoint with zero calls. The next incomplete unit is `Standings/2026`; live execution blocks before transport until the standings persistence branch is implemented.
+Note: The existing protected execute route now dispatches `baseball_mlb` requests to an MLB Discovery Lab manifest with durable checkpoint identities in `sports_sync_jobs.metadata`, zero-call dry-run planning, completed-checkpoint skip behavior, quarantine flags and production gate closure. The first approved live unit called `GET /api/mlb/odds/json/Games/2026` once, received HTTP 200, fetched 2,456 provider records, inserted 2,441 new `sport_events`, inserted 2,441 provider mappings, reused/updated 30 teams, wrote completed sync job `dbd8ab2b-8351-4b3b-b5ff-3865d672a748`, and preserved `trial=false`, `scrambled=false`, `production_eligible=false`. The executor now uses the shared Discovery Lab URL resolver for app-path SportsDataIO calls; the 2025 `Standings` checkpoint was later reconciled after a single app-path `Teams` verification classified IDs `7` and `27` as non-schedule provider records. Current 2025 dry-run skips `Standings/2025` and selects `TeamSeasonStats/2025` as the next safe unit.
+
+### MLB First Live Recommendations Operating Day V1
+
+Status: Current slate analyzed; official bet correctly blocked.
+
+Evidence: `src/services/sportsdataio-mlb-prospective-preview.service.ts`, `src/app/api/historical-import/execute/route.ts`, `/api/current-board`, `/api/market-intelligence`, `/api/market-opportunities/most-likely`, `/api/market-opportunities/best-value`, `/api/ai-bet-finder`, `/api/predictions/top`, `/api/play-of-the-day` and `/api/daily-report?mode=summary`.
+
+Note: The operating run completed `TeamSeasonStats/2025`, `PlayerSeasonStats/2025`, `GamesByDate/2026-JUL-16`, `GameOddsByDate/2026-07-16` and `PlayerGameProjectionStatsByDate/2026-JUL-16` with 5 provider calls and no raw payload storage. Current Board has 3 `NYM @ PHI` analyzed candidates using fresh odds at `2026-07-16T14:57:10Z`; Market Intelligence marks all current markets as passes; Best Value has 0 positive modeled-value rows; AI Bet Finder ticket building returns `NO TICKET TODAY`; Top Picks and Play of the Day remain empty. A distinct `operatingDayFinalRefresh` path is available for one final pre-cutoff odds refresh without reusing the completed operating-day odds checkpoint.
+
+### Prospective Official Eligibility Gate V1
+
+Status: Completed as zero-call policy/audit and protected exact-candidate action.
+
+Evidence: `src/services/prospective-official-eligibility-gate.service.ts`, `/api/recommendation-readiness?eligibilityGate=true`, `/api/recommendation-readiness?validate=eligibilityGate`, protected `POST /api/recommendation-readiness`, and `docs/prospective-official-eligibility-gate-v1.md`.
+
+Note: The gate distinguishes permanent validation rows from real prospective rows, preserves the strict calibration and recommendation thresholds, and represents `PROSPECTIVE_OFFICIAL_ELIGIBLE` as an audit state rather than a public pick. `PROSPECTIVE_OFFICIAL` requires exact candidate activation with prediction/event/snapshot/odds identity, model and feature versions, reason and idempotency key. Current `NYM @ PHI` rows remain not official because edge and EV are negative and calibration/confidence gates fail. Fixture validation proves an excellent future candidate would become eligible for review while insufficient calibration, stale odds, historical rows and tiny edge remain blocked.
 
 ### MLB Discovery Lab Season-Wide Completion V1
 
@@ -147,6 +187,22 @@ Status: Completed through the approved June 8/9 ledger; feature generation block
 Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts`, `/api/historical-import/execute`, completed sync jobs `182965b6-9e70-4f11-a376-8dc112d6c9fd`, `e87f15ef-128e-4e67-b8e7-890c07b9025b`, `50cad854-ae08-4ca1-9770-141d1fa3d142`, `551bd293-d8c3-4aa3-926b-02849bb30577`, `e5ae21a5-a426-4b40-a774-04770a428492`, `8dd683f0-180a-4674-9323-0ce623c125d5` and `docs/PROJECT_STATUS.md`.
 
 Note: The paginated event resolver fixed the June 8 partial checkpoint safely. The final retry of `TeamGameStatsByDate/2026-JUN-08` reused the existing 10 rows, inserted the 6 missing rows and completed with 0 unresolved teams/events. The continuation completed `PlayerGameStatsByDate/2026-JUN-08`, `GameOddsByDate/2026-06-08`, `TeamGameStatsByDate/2026-JUN-09`, `PlayerGameStatsByDate/2026-JUN-09` and `GameOddsByDate/2026-06-09`, for 6 total HTTP 200 provider calls in this completion pass. The pass inserted 36 new `sport_game_stats` rows, 1,448 `sport_player_stats` rows, 1,448 player-stat provider mappings and 138 `sports_odds_snapshots` rows, with 0 duplicate/orphan/invalid/live/alternate/production-leakage findings. Dry-run now reports no pending June 8/9 units. Feature snapshots, predictions and settlement updates were not generated because a zero-provider eligibility audit found 0 cutoff-safe odds events and 0 eligible feature events in the completed May 25 through June 9 window.
+
+### MLB Historical Foundation 2026 Completion And 2025 Checkpoint V1
+
+Status: Partially completed; 2026 date-domain ledger complete, 2025 safely stopped on standings mapping ambiguity.
+
+Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts`, `/api/historical-import/execute`, completed sync jobs from `a91f963b-194c-4372-a02c-2ac802736583` through `a73baa79-52a0-4d07-82fe-70f67cb1cb16`, 2025 schedule job `6654651b-948e-481e-94e6-0b61b59de3fb`, partial standings job `61d79b52-1c60-4997-8e32-891a35f6cc07` and `docs/PROJECT_STATUS.md`.
+
+Note: The guarded resume completed the remaining 2026 imported game dates through July 12. A failed `TeamGameStatsByDate/2026-JUL-12` attempt exposed that MLB team game stats must upsert against the deployed natural unique key `sport_key,event_id,team_id`, not only deterministic `id`; the executor now uses that key and the repaired retry reused/updated 30 existing July 12 team-stat rows without duplicating persistence. Final 2026 dry-run reports `estimatedCalls=0` and `nextIncompleteUnit=null`. The 2025 import started with `Games/2025`, which completed with HTTP 200 and built the regular-season date ledger. `Standings/2025` returned HTTP 200 and inserted 60 normalized rows, but remains partial because 2 provider standing records could not be mapped to stored teams. Further 2025 team/player/odds imports, recalibration, official picks and production promotion are blocked until that mapping ambiguity is reviewed without provider calls.
+
+### MLB Standings/2025 Partial Checkpoint Resume V1
+
+Status: Safely stopped; exact unresolved provider team IDs captured, no deterministic local repair.
+
+Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts`, `/api/historical-import/execute`, partial jobs `61d79b52-1c60-4997-8e32-891a35f6cc07` and `adbf4908-71fb-4800-8f62-0af23e753a64`, and `docs/PROJECT_STATUS.md`.
+
+Note: Zero-provider audit proved the 30 persisted 2025 schedule teams already have canonical team rows, provider mappings and 2025 standings rows. The original partial checkpoint did not retain the skipped provider IDs, so season-wide validation metadata now records sanitized unresolved IDs. The single approved `Standings/2025` retry used one provider call, returned HTTP 200, reused/updated the existing 60 normalized standing/mapping rows and captured unresolved provider team IDs `7` and `27`. Read-only evidence found no persisted 2025 events, `sports_teams` rows or provider mappings for those IDs. No synthetic teams, broad mapping changes, feature generation, calibration, official picks or production promotion were performed. The next safe action is external/provider identity confirmation for IDs `7` and `27` or an explicit non-team skip rule before any further 2025 import.
 
 ### MLB Prospective Slate Capture And First Model Preview V1
 

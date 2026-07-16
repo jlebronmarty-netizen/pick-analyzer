@@ -57,6 +57,10 @@ Most Likely consumes Current Board for filtering and uses only presentation rank
 
 Top Picks, Play of the Day, Bet Slip Optimizer, parlays, Kelly, portfolio and AI Coach were audited as official-facing consumers. They continue to use Production Data Gate V1 and Recommendation Eligibility Policy V1 and do not consume Current Board as official eligibility.
 
+## Reliability Update
+
+Current Board now loads prediction lineage first, then scopes event and odds reads to those candidate event IDs. It no longer performs a broad stored-odds scan for default current-board consumers. Event and odds reads are chunked, latest safe pregame odds are still selected per candidate, and request-scoped React caching is exposed through `getCurrentBoardCached()` so Most Likely, Best Value, Market Intelligence, AI Bet Finder and Betting Workbench can share the canonical board without creating a second board engine or stale persistent cache.
+
 ## AI Bet Finder Readiness
 
 The service exposes a read-only orchestration contract for a future AI Bet Finder. The future tool should query Current Board, Most Likely ranking, Best Value ranking, official Top Picks, Bet Slip eligibility and Arbitrage availability. No LLM and no AI chat system are implemented in V1.

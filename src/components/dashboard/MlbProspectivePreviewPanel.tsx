@@ -85,19 +85,30 @@ function marketLabel(value: string) {
   return value
 }
 
+function selectionLabel(candidate: PreviewCandidate) {
+  if (candidate.market === 'total') {
+    return `${candidate.selection} ${candidate.line ?? ''} Total`.trim()
+  }
+  if (candidate.market === 'spread') {
+    const line = candidate.line === null ? '' : candidate.line > 0 ? `+${candidate.line}` : String(candidate.line)
+    return `${candidate.selection} ${line} Run Line`.trim()
+  }
+  return `${candidate.selection} Moneyline`
+}
+
 function recommendationSummary(candidate: PreviewCandidate) {
   if (candidate.recommendationStatus === 'QUALIFIED') return 'GOOD BET'
   if (candidate.recommendationStatus === 'BEST_BET_CANDIDATE') return 'GOOD BET'
   if (candidate.recommendationStatus === 'PLAY_OF_DAY_CANDIDATE') return 'GOOD BET'
   if (candidate.recommendationStatus === 'WATCH') return 'WATCH'
-  if (candidate.edge <= 0 || candidate.ev <= 0) return 'NO VALUE'
+  if (candidate.edge <= 0 || candidate.ev <= 0) return 'NO MODELED VALUE'
   return 'PASS'
 }
 
 function summaryClass(summary: string) {
   if (summary === 'GOOD BET') return 'border-emerald-500/40 bg-emerald-950/20 text-emerald-200'
   if (summary === 'WATCH') return 'border-amber-500/40 bg-amber-950/20 text-amber-200'
-  if (summary === 'NO VALUE') return 'border-red-500/40 bg-red-950/20 text-red-200'
+  if (summary === 'NO MODELED VALUE') return 'border-red-500/40 bg-red-950/20 text-red-200'
   return 'border-slate-700 bg-slate-900 text-slate-300'
 }
 
@@ -120,13 +131,13 @@ function aiRatingLabel(value: number | null) {
   if (value === null) return 'Unknown'
   if (value >= 85) return 'Excellent'
   if (value >= 70) return 'Very Good'
-  if (value >= 60) return 'Average'
+  if (value >= 60) return 'Average Confidence'
   if (value >= 50) return 'Weak'
   return 'Poor'
 }
 
 function stars(value: number | null) {
-  if (value === null) return '-----'
+  if (value === null) return '☆☆☆☆☆'
   const filled = Math.max(1, Math.min(5, Math.round(value / 20)))
   return `${'★'.repeat(filled)}${'☆'.repeat(5 - filled)}`
 }
@@ -157,17 +168,17 @@ function conversationalFactor(factor: string, market: string) {
 function marketReason(candidate: PreviewCandidate) {
   if (candidate.market === 'total') {
     return candidate.edge <= 0
-      ? 'The model projects a lower chance than the sportsbook price requires, so the total is not worth betting.'
-      : 'The model sees enough scoring mismatch to keep this total on the radar.'
+      ? `For ${selectionLabel(candidate)}, the projected scoring environment is not far enough from the sportsbook total to justify a bet.`
+      : `For ${selectionLabel(candidate)}, projected runs, offensive form and defensive context create modeled value at the current price.`
   }
   if (candidate.market === 'spread') {
     return candidate.edge <= 0
-      ? 'The expected margin is not strong enough for the current run-line price.'
-      : 'The expected margin supports the run-line price.'
+      ? `For ${selectionLabel(candidate)}, the expected margin does not clear the run-line price with enough cushion.`
+      : `For ${selectionLabel(candidate)}, the expected margin, run differential and scoring profile support the price.`
   }
   return candidate.edge <= 0
-    ? 'The model does not like the team enough at this moneyline price.'
-    : 'The model likes the team more than the sportsbook does.'
+    ? `For ${selectionLabel(candidate)}, team strength, recent form and venue context do not beat the moneyline price.`
+    : `For ${selectionLabel(candidate)}, team strength, recent form, home-field context and price create modeled value.`
 }
 
 function missingLabel(value: string) {
@@ -190,6 +201,18 @@ function shortTime(value: string | null) {
   })
 }
 
+function fullTime(value: string | null, timeZone?: string) {
+  if (!value) return 'None'
+  return new Date(value).toLocaleString(undefined, {
+    timeZone,
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  })
+}
+
 function CandidateRow({ candidate }: { candidate: PreviewCandidate }) {
   const summary = recommendationSummary(candidate)
   return (
@@ -200,7 +223,7 @@ function CandidateRow({ candidate }: { candidate: PreviewCandidate }) {
             {summary}
           </span>
           <h3 className="mt-3 text-xl font-black text-white">
-            {candidate.selection} {candidate.line === null ? '' : candidate.line}
+            {selectionLabel(candidate)}
           </h3>
           <p className="mt-1 text-sm text-slate-400">
             {marketLabel(candidate.market)} at {formatOdds(candidate.odds)} | {candidate.matchup}
@@ -237,7 +260,7 @@ function CandidateRow({ candidate }: { candidate: PreviewCandidate }) {
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Bet Readiness</p>
           <p className="mt-2 text-2xl font-black text-white">{stars(candidate.aiRating)}</p>
           <p className="mt-1 text-sm font-bold text-slate-200">
-            AI Rating: {aiRatingLabel(candidate.aiRating)}
+            AI Rating: {stars(candidate.aiRating)} · {aiRatingLabel(candidate.aiRating)}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <span className={`rounded-full px-3 py-1 text-xs font-black ${confidenceClass(candidate.confidenceLabel)}`}>
@@ -276,6 +299,8 @@ function CandidateRow({ candidate }: { candidate: PreviewCandidate }) {
           <Mini label="Rank Score" value={formatNumber(candidate.rankingScore)} />
           <Mini label="Odds Capture" value={shortTime(candidate.oddsTimestamp)} />
           <Mini label="Cutoff" value={shortTime(candidate.cutoff)} />
+          <Mini label="Local Cutoff" value={fullTime(candidate.cutoff, 'America/Puerto_Rico')} />
+          <Mini label="UTC Cutoff" value={fullTime(candidate.cutoff, 'UTC')} />
           <Mini label="Line Move" value={candidate.marketStability?.direction ?? 'stable'} />
           <Mini label="Data Quality Score" value={formatNumber(candidate.featureQuality)} />
           <Mini label="Coverage Score" value={formatNumber(candidate.dataSufficiency)} />
@@ -359,13 +384,13 @@ export default function MlbProspectivePreviewPanel() {
             <span className="rounded-full border border-amber-500/30 px-3 py-1 text-amber-200">
               Preview Only
             </span>
-            <span className="rounded-full border border-red-500/30 px-3 py-1 text-red-200">
-              No Official Pick Yet
-            </span>
             <span className="rounded-full border border-slate-700 px-3 py-1 text-slate-300">
-              Wait For Better Value
+              Official Picks Off
             </span>
           </div>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
+            The model currently believes waiting has the highest expected value. Calibration remains limited.
+          </p>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           <div>
@@ -394,7 +419,7 @@ export default function MlbProspectivePreviewPanel() {
           {[
             ['Qualified Preview', data.categories.qualifiedPreview],
             ['Watch', data.categories.watch],
-            ['No Value', data.categories.analyzedNotRecommended],
+            ['No Modeled Value', data.categories.analyzedNotRecommended],
             ['Pass', data.categories.blocked],
           ].map(([label, rows]) => (
             <div key={String(label)} className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
@@ -424,7 +449,7 @@ export default function MlbProspectivePreviewPanel() {
 
       {data && (
         <p className="mt-4 text-sm text-slate-400">
-          {data.summary.nextRequiredCaptureAction}
+          Final Odds Refresh: Recommended 6:45-6:50 PM AST, before 7:00 PM cutoff.
         </p>
       )}
     </section>

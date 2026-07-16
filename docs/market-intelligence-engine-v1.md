@@ -14,6 +14,8 @@ Market Intelligence Engine scans the current stored market universe and decides 
 
 The service makes zero provider calls and performs zero remote mutations.
 
+Current Board reads are request-cached where safe so the suite can share one canonical board load. This is not a persistent stale cache and it does not create a second current-board engine.
+
 ## Scanner
 
 The scanner returns one market list with available and unavailable entries. Current supported MLB markets are:

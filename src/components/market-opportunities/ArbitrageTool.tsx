@@ -60,10 +60,11 @@ function odds(value: number) {
 }
 
 function statusText(value: string) {
-  if (value === 'GUARANTEED_ARBITRAGE_FOUND') return 'Guaranteed arbitrage found'
-  if (value === 'POTENTIAL_ARBITRAGE_ONLY') return 'Potential arbitrage only'
-  if (value === 'ARBITRAGE_UNAVAILABLE') return 'Arbitrage unavailable'
-  return 'No arbitrage right now'
+  if (value === 'ARBITRAGE_FOUND') return 'Arbitrage found'
+  if (value === 'NO_ARBITRAGE_FOUND') return 'No arbitrage found'
+  if (value === 'MULTIBOOK_DATA_UNAVAILABLE') return 'Multi-book data unavailable'
+  if (value === 'SCANNER_DATA_ERROR') return 'Data temporarily unavailable'
+  return 'Unsupported'
 }
 
 export default function ArbitrageTool() {
@@ -91,22 +92,22 @@ export default function ArbitrageTool() {
   }, [investment, staleMinutes])
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl space-y-8 p-4 md:p-8">
-        <header className="flex flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-900/60 p-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+        <header className="flex min-w-0 flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-900/60 p-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
             <a href="/dashboard" className="text-sm font-bold text-emerald-300 hover:text-emerald-200">
               Back to Dashboard
             </a>
             <p className="mt-5 text-xs font-bold uppercase tracking-[0.3em] text-slate-500">
               Optional Tool
             </p>
-            <h1 className="mt-2 text-4xl font-black">Arbitrage</h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+            <h1 className="mt-2 break-words text-3xl font-black sm:text-4xl">Arbitrage</h1>
+            <p className="mt-3 max-w-[18rem] break-words text-sm leading-6 text-slate-400 sm:max-w-3xl">
               Stored-odds scanner for mathematically covered markets. It never claims guaranteed arbitrage unless every outcome is covered by fresh, matching rules.
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid w-full max-w-full gap-3 sm:grid-cols-2 lg:w-auto">
             <label className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
               Investment
               <input
@@ -134,10 +135,10 @@ export default function ArbitrageTool() {
           </div>
         </header>
 
-        {error ? <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-red-200">{error}</div> : null}
+        {error ? <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-red-200">Data temporarily unavailable. Arbitrage scan did not complete.</div> : null}
 
-        <section className="grid gap-4 md:grid-cols-4">
-          <Summary label="Status" value={statusText(data?.summary.status ?? 'NO_ARBITRAGE')} />
+        <section className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Summary label="Status" value={statusText(data?.summary.status ?? 'MULTIBOOK_DATA_UNAVAILABLE')} />
           <Summary label="Guaranteed" value={data?.summary.guaranteedCount ?? 0} />
           <Summary label="Potential" value={data?.summary.potentialCount ?? 0} />
           <Summary label="Provider Calls" value="0" />
@@ -152,28 +153,40 @@ export default function ArbitrageTool() {
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
               <p className="text-2xl font-black">No guaranteed arbitrage found.</p>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-                The scanner will stay conservative. If stored data cannot prove sportsbook separation, matching market rules, fresh odds and all outcomes covered, it will not call the opportunity guaranteed.
+                {data?.summary.status === 'SCANNER_DATA_ERROR'
+                  ? 'The scan did not complete, so this page is not claiming there is no arbitrage.'
+                  : data?.summary.status === 'MULTIBOOK_DATA_UNAVAILABLE'
+                    ? 'Verified multi-book pricing is unavailable. Consensus-only prices cannot prove arbitrage.'
+                    : 'The scanner will stay conservative. If stored data cannot prove sportsbook separation, matching market rules, fresh odds and all outcomes covered, it will not call the opportunity guaranteed.'}
               </p>
+              <details className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+                <summary className="cursor-pointer text-sm font-black">Advanced Details</summary>
+                <div className="mt-3 grid gap-3 md:grid-cols-3">
+                  <Metric label="Scanner State" value={data?.summary.status ?? 'MULTIBOOK_DATA_UNAVAILABLE'} />
+                  <Metric label="Checked Groups" value={String(data?.summary.checkedGroups ?? 0)} />
+                  <Metric label="Verified Books" value={data?.summary.verifiedSportsbooks.join(', ') || 'none'} />
+                </div>
+              </details>
             </div>
           ) : (
             data?.opportunities.map((item) => (
-              <article key={item.id} className="rounded-3xl border border-emerald-500/30 bg-emerald-950/10 p-5">
-                <div className="grid gap-5 lg:grid-cols-[1fr_1fr_1fr]">
-                  <div>
+              <article key={item.id} className="min-w-0 rounded-3xl border border-emerald-500/30 bg-emerald-950/10 p-5">
+                <div className="grid min-w-0 gap-5 lg:grid-cols-3">
+                  <div className="min-w-0">
                     <span className="rounded-full border border-emerald-500/40 bg-emerald-950/30 px-3 py-1 text-xs font-black text-emerald-200">
                       Guaranteed Arbitrage
                     </span>
-                    <h2 className="mt-3 text-2xl font-black">{item.matchup}</h2>
-                    <p className="mt-1 text-sm text-slate-400">{item.market}</p>
-                    <p className="mt-3 text-sm text-slate-300">{item.executionRisk}</p>
+                    <h2 className="mt-3 break-words text-2xl font-black">{item.matchup}</h2>
+                    <p className="mt-1 break-words text-sm text-slate-400">{item.market}</p>
+                    <p className="mt-3 break-words text-sm text-slate-300">{item.executionRisk}</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
                     <Metric label="Investment" value={money(item.investment)} />
                     <Metric label="Return" value={money(item.guaranteedReturn)} />
                     <Metric label="Profit" value={money(item.expectedProfit)} tone="good" />
                     <Metric label="Margin" value={`${item.margin.toFixed(2)}%`} tone="good" />
                   </div>
-                  <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+                  <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Stake Plan</p>
                     <div className="mt-3 space-y-2">
                       {item.stakes.map((stake) => (
@@ -215,8 +228,8 @@ export default function ArbitrageTool() {
 
 function Summary({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
-      <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{label}</p>
+    <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+      <p className="break-words text-xs font-bold uppercase tracking-[0.08em] text-slate-500 sm:tracking-[0.18em]">{label}</p>
       <p className="mt-2 text-2xl font-black">{value}</p>
     </div>
   )
@@ -224,18 +237,18 @@ function Summary({ label, value }: { label: string; value: string | number }) {
 
 function Metric({ label, value, tone = 'neutral' }: { label: string; value: string; tone?: 'good' | 'neutral' }) {
   return (
-    <div className="rounded-xl bg-slate-950/70 p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className={`mt-1 font-black ${tone === 'good' ? 'text-emerald-300' : 'text-white'}`}>{value}</p>
+    <div className="min-w-0 rounded-xl bg-slate-950/70 p-3">
+      <p className="break-words text-xs text-slate-500">{label}</p>
+      <p className={`mt-1 break-words font-black ${tone === 'good' ? 'text-emerald-300' : 'text-white'}`}>{value}</p>
     </div>
   )
 }
 
 function Setting({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+    <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
       <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-2 font-bold text-white">{value}</p>
+      <p className="mt-2 break-words font-bold text-white">{value}</p>
     </div>
   )
 }

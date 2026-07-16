@@ -6,7 +6,18 @@ Best Value Scanner ranks stored, current, actionable candidates by modeled value
 
 ## Source
 
-Best Value consumes `getCurrentBoard()` as the trusted source for current-slate filtering, safe odds selection, anomaly checks, stale-row exclusion, dedupe, event status and official eligibility. It does not query raw `prediction_history` directly for candidate selection.
+Best Value consumes `getCurrentBoardCached()` as the trusted source for current-slate filtering, safe odds selection, anomaly checks, stale-row exclusion, dedupe, event status and official eligibility. It does not query raw `prediction_history` directly for candidate selection and does not run a broad odds scan.
+
+If Current Board cannot be loaded, Best Value returns an explicit scanner state instead of claiming there are no value candidates:
+
+- `scanCompleted`
+- `dataAvailable`
+- `errorCode`
+- `errorMessageSafe`
+- `candidatesScanned`
+- `positiveValueCount`
+
+The UI shows `DATA TEMPORARILY UNAVAILABLE` for scanner errors. The text `No positive modeled-value candidate is available` is reserved for completed scans with data available and zero positive-value candidates.
 
 ## Ranking Signals
 

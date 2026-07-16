@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { getBestValueOpportunities } from '@/services/best-value-scanner.service'
-import { getCurrentBoard, type CurrentBoardCandidate } from '@/services/current-board.service'
+import { getCurrentBoardCached, type CurrentBoardCandidate } from '@/services/current-board.service'
 import { getArbitrageOpportunities, getMostLikelyOpportunities } from '@/services/market-opportunity-suite.service'
 
 export type MarketIntelligenceSort =
@@ -286,7 +286,7 @@ export async function getMarketIntelligence({
 } = {}) {
   const safeLimit = Math.max(1, Math.min(limit, 100))
   const [board, mostLikely, bestValue, arbitrage] = await Promise.all([
-    getCurrentBoard({ mode: 'CURRENT', limit: 200 }),
+    getCurrentBoardCached('baseball_mlb', 'CURRENT', 200),
     getMostLikelyOpportunities({ sort: 'highest_probability', limit: 100 }),
     getBestValueOpportunities({ includePasses: true, limit: 100 }),
     getArbitrageOpportunities(),
