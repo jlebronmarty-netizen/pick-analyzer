@@ -1410,6 +1410,46 @@ Consequences: The handoff packet can now prove that execution-readiness validati
 
 Affected modules: SportsDataIO NBA Integration Readiness V1, SportsDataIO Historical Import Execution Readiness V1, Historical Import dashboard, Runtime Observability V1.
 
+## 2026-07-15 - Canonicalize Current Board Candidate Selection
+
+Context: Most Likely had been corrected to show only the current `NYM @ PHI` prospective slate, but the selection rules still lived inside the Market Opportunity Suite. Future Best Value, Today summaries and AI Bet Finder readiness needed one shared answer to "what valid betting candidates exist right now" without weakening official-pick gates.
+
+Decision: Create `current-board.service.ts` and `/api/current-board` as the canonical read-only Current Board source. Move current-slate filtering, freshness policy, anomaly policy, dedupe keys, safe odds selection, candidate contract, exclusion accounting and deterministic fixture validation into that service. Refactor Most Likely to consume Current Board for filtering and rank only for presentation. Update Daily Report Today counts to use Current Board instead of all-season future event counts.
+
+Consequences: Current Board returns the `NYM @ PHI` 2026-07-16 slate with three analyzed preview candidates across moneyline, run line and total, 0 official picks, 0 provider calls and 0 remote mutations. Official consumers still require Production Data Gate V1 and Recommendation Eligibility Policy V1. Arbitrage remains independent and unavailable without verified multi-book prices.
+
+Affected modules: Current Board Intelligence Engine V1, Market Opportunity Suite V1, Daily Report, official-consumer safety documentation.
+
+## 2026-07-15 - Add Read-Only Intelligence Suite V2
+
+Context: Current Board became the trusted source for current, actionable stored-market candidates. The product needed optional premium tools for Best Value, natural-language bet finding, comparison, explanations, ticket building and change review without creating a second prediction engine or weakening official gates.
+
+Decision: Add Best Value Scanner V1 and AI Bet Finder V1 as deterministic orchestration layers over Current Board, Most Likely, Arbitrage and Bet Slip Optimizer. Add `/best-value`, `/ai-bet-finder`, `/api/market-opportunities/best-value` and `/api/ai-bet-finder`. Keep provider calls and remote mutations at zero, keep prediction probabilities unchanged, and preserve Production Data Gate V1 plus Recommendation Eligibility Policy V1 for all official consumers.
+
+Consequences: The current `NYM @ PHI` board has three analyzed preview candidates, zero positive modeled-value candidates, zero official picks and no ticket. Best Value defaults to an empty positive-value view and can show the three no-modeled-value passes. AI Bet Finder routes deterministic prompts for search, compare, explain, ticket and what-changed behavior, returns the required unavailable-props message, and leaves Arbitrage conservatively unavailable without verified multi-book pricing.
+
+Affected modules: Intelligence Suite V2, Current Board Intelligence Engine V1, Best Value Scanner V1, AI Bet Finder V1, Market Opportunity Suite V1, Bet Slip Optimizer, dashboard navigation.
+
+## 2026-07-15 - Add Market Intelligence Engine V1
+
+Context: Current Board, Most Likely, Best Value, AI Bet Finder and Arbitrage existed as separate read-only tools. The product needed one Bloomberg-style scanner that summarizes every supported or cataloged market opportunity without adding another prediction engine.
+
+Decision: Add `market-intelligence-engine.service.ts` and one API route, `/api/market-intelligence`. The service consumes Current Board as the only actionable candidate source and cross-checks Most Likely, Best Value, AI Bet Finder readiness and Arbitrage status. It classifies markets as Elite, Strong Value, Watch, Pass or Unavailable, assigns display-only scores and health labels, exposes explorer filters and preserves unavailable market families as explicit extension points.
+
+Consequences: Current validation scans 16 market entries: 3 available current-board markets, 3 passes, 13 unavailable/future/blocked entries, 0 elite, 0 strong value and 0 watch. The route makes 0 provider calls, performs 0 remote mutations, changes no prediction calculations and leaves official picks off. The dashboard gets a compact Market Intelligence summary rather than another large dashboard surface.
+
+Affected modules: Market Intelligence Engine V1, Current Board Intelligence Engine V1, Market Opportunity Suite V1, Best Value Scanner V1, AI Bet Finder V1, dashboard Today summary.
+
+## 2026-07-15 - Add Day 1 Recommendation Readiness Audit
+
+Context: The product had Current Board, Prediction Intelligence, Market Intelligence, Most Likely, Best Value, AI Bet Finder, Recommendation Policy and Production Gate complete. Before the next slate, the recommendation path needed a quality audit that proves zero bets remains correct when no candidate qualifies and proves excellent value would activate automatically when all gates are met.
+
+Decision: Add `day1-recommendation-readiness.service.ts`, `/api/recommendation-readiness` and a compact dashboard panel. The service uses Current Board as the shared source, evaluates current candidates through the recommendation policy, confirms Top Picks and Bet Slip remain official-only, classifies missing MLB domains, reviews thresholds and runs an in-memory excellent-value production simulation without creating rows.
+
+Consequences: Current validation reports 3 shared candidates, pipeline aligned, 0 official picks, Bet Slip `no_ticket`, 0 provider calls, 0 remote mutations and fixture validation 20/20. The excellent-value simulation reaches `PLAY_OF_DAY_CANDIDATE`, showing the policy path would activate automatically if production eligibility, maturity, quality, sufficiency, freshness and value were honestly present. Current previews remain quarantined and not official.
+
+Affected modules: Day 1 Recommendation Readiness V1, Current Board, Recommendation Eligibility Policy, Top Picks, Bet Slip Optimizer, AI Bet Finder readiness, dashboard Today summary.
+
 ## 2026-07-13 - Add SportsDataIO NBA External Approval Packet API
 
 Context: The aggregate SportsDataIO NBA readiness response included an `externalApprovalPacket`, but operators had to retrieve the large readiness payload to hand off the approval evidence bundle.

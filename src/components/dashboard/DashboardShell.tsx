@@ -31,6 +31,13 @@ const compactNavItems = [
   { id: 'advanced', label: 'Advanced', icon: '05' },
 ]
 
+const toolNavItems = [
+  { href: '/most-likely', label: 'Most Likely', icon: 'ML' },
+  { href: '/best-value', label: 'Best Value', icon: 'BV' },
+  { href: '/arbitrage', label: 'Arbitrage', icon: 'AR' },
+  { href: '/ai-bet-finder', label: 'AI Bet Finder', icon: 'AI' },
+]
+
 export default function DashboardShell({
   children,
 }: {
@@ -69,6 +76,25 @@ export default function DashboardShell({
                   {item.label}
                 </a>
               ))}
+              <div className="pt-4">
+                <p className="px-4 text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
+                  Extra Utilities
+                </p>
+                <div className="mt-2 space-y-2">
+                  {toolNavItems.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      className="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
+                    >
+                      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-amber-300 group-hover:bg-amber-500/15">
+                        {item.icon}
+                      </span>
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
             </nav>
 
             <div className="fixed bottom-6 w-[224px] rounded-2xl border border-slate-800 bg-slate-900/95 p-4">
@@ -102,6 +128,34 @@ export default function DashboardShell({
                   <span className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 lg:inline-flex">
                     OFFICIAL PICKS OFF
                   </span>
+
+                  <a
+                    href="/most-likely"
+                    className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
+                  >
+                    Most Likely
+                  </a>
+
+                  <a
+                    href="/best-value"
+                    className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
+                  >
+                    Best Value
+                  </a>
+
+                  <a
+                    href="/ai-bet-finder"
+                    className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
+                  >
+                    AI Bet Finder
+                  </a>
+
+                  <a
+                    href="/arbitrage"
+                    className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
+                  >
+                    Arbitrage
+                  </a>
 
                   <a
                     href="/model"

@@ -93,6 +93,32 @@ function formatPercent(value?: number) {
   return `${Number(value ?? 0).toFixed(2)}%`
 }
 
+function stars(value?: number) {
+  const score = Number(value ?? 0)
+  const filled = Math.max(1, Math.min(5, Math.round(score / 20)))
+  return `${'★'.repeat(filled)}${'☆'.repeat(5 - filled)}`
+}
+
+function plainRecommendation(pick: Pick) {
+  if (
+    pick.recommendation_status === 'PLAY_OF_DAY_CANDIDATE' ||
+    pick.recommendation_status === 'BEST_BET_CANDIDATE' ||
+    pick.recommendation_status === 'QUALIFIED'
+  ) {
+    return 'Recommended'
+  }
+  if (pick.recommendation_status === 'WATCH') return 'Worth Watching'
+  if (pick.edge <= 0 || pick.ev <= 0) return 'No Value'
+  return 'Pass'
+}
+
+function opportunityLabel(score: number) {
+  if (score >= 85) return 'Elite Opportunity'
+  if (score >= 70) return 'Strong Opportunity'
+  if (score >= 55) return 'Worth Watching'
+  return 'Needs More Proof'
+}
+
 function scoreClass(value?: number) {
   const score = Number(value ?? 0)
 
@@ -158,6 +184,9 @@ function PickCard({ pick }: { pick: Pick }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-emerald-500/30 bg-emerald-950/20 px-3 py-1 text-xs font-black text-emerald-200">
+                {plainRecommendation(pick)}
+              </span>
               <p className="text-sm font-semibold text-white">{pick.team} ML</p>
 
               {pick.risk_grade && (
@@ -177,87 +206,66 @@ function PickCard({ pick }: { pick: Pick }) {
 
           <div className="text-right">
             <p className="text-sm font-bold text-white">{formatOdds(pick.odds)}</p>
-            {pick.recommendation_status &&
-              pick.recommendation_status !== 'INELIGIBLE' &&
-              pick.recommendation_status !== 'ANALYZED_ONLY' && (
-              <span className="mt-1 inline-block rounded-full bg-emerald-500/15 px-2 py-1 text-xs font-semibold text-emerald-400">
-                {pick.recommendation_label ?? 'Qualified pick'}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
-          <div>
-            <p className="text-slate-500">Adaptive</p>
-            <p className={`font-bold ${scoreClass(adaptiveScore)}`}>
-              {adaptiveScore.toFixed(2)}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-slate-500">Smart</p>
-            <p className="font-semibold text-white">{smartScore.toFixed(2)}</p>
-          </div>
-
-          <div>
-            <p className="text-slate-500">EV</p>
-            <p
-              className={
-                pick.ev >= 0
-                  ? 'font-semibold text-emerald-400'
-                  : 'font-semibold text-red-400'
-              }
-            >
-              {formatPercent(pick.ev)}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-slate-500">Edge</p>
-            <p
-              className={
-                pick.edge >= 0
-                  ? 'font-semibold text-emerald-400'
-                  : 'font-semibold text-red-400'
-              }
-            >
-              {formatPercent(pick.edge)}
+            <p className="mt-1 text-xs font-bold text-amber-200">
+              {stars(adaptiveScore)}
             </p>
           </div>
         </div>
+
+        <p className={`mt-4 text-lg font-black ${scoreClass(adaptiveScore)}`}>
+          {opportunityLabel(adaptiveScore)}
+        </p>
+        <p className="mt-1 text-sm leading-6 text-slate-300">
+          Pick Analyzer thinks this price is {pick.value_label?.toLowerCase() ?? 'worth reviewing'} with {pick.confidence_label?.toLowerCase() ?? 'model'} confidence.
+        </p>
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
           <div className="rounded-lg bg-slate-900/70 p-3">
-            <p className="text-slate-500">Model</p>
+            <p className="text-slate-500">Pick Analyzer thinks</p>
             <p className="font-semibold text-white">
               {formatPercent(pick.model_probability)}
             </p>
           </div>
 
           <div className="rounded-lg bg-slate-900/70 p-3">
-            <p className="text-slate-500">Confidence</p>
+            <p className="text-slate-500">Sportsbook thinks</p>
             <p className="font-semibold text-white">
-              {pick.confidence_label ?? formatPercent(pick.confidence)}
+              {formatPercent(pick.implied_probability)}
             </p>
           </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
           <div className="rounded-lg bg-slate-900/70 p-3">
-            <p className="text-slate-500">Reliability</p>
+            <p className="text-slate-500">Confidence</p>
             <p className="font-semibold text-white">
-              {pick.reliability_label ?? 'Developing'}
+              {pick.confidence_label ?? formatPercent(pick.confidence)}
             </p>
           </div>
 
           <div className="rounded-lg bg-slate-900/70 p-3">
-            <p className="text-slate-500">Value</p>
+            <p className="text-slate-500">Risk</p>
             <p className="font-semibold text-white">
-              {pick.value_label ?? 'Positive value'}
+              {pick.risk_label ?? pick.reliability_label ?? 'Developing'}
             </p>
           </div>
         </div>
+
+        <details className="mt-4 rounded-lg border border-slate-800 bg-slate-900/70 p-3">
+          <summary className="cursor-pointer text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+            Advanced Details
+          </summary>
+          <div className="mt-3 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
+            <Detail label="EV" value={formatPercent(pick.ev)} tone={pick.ev >= 0 ? 'good' : 'bad'} />
+            <Detail label="Edge" value={formatPercent(pick.edge)} tone={pick.edge >= 0 ? 'good' : 'bad'} />
+            <Detail label="Adaptive" value={adaptiveScore.toFixed(2)} />
+            <Detail label="Smart" value={smartScore.toFixed(2)} />
+            <Detail label="Internal Status" value={pick.recommendation_status ?? 'n/a'} />
+            <Detail label="Reliability" value={pick.reliability_label ?? 'Developing'} />
+            <Detail label="Sportsbook" value={pick.sportsbook} />
+            <Detail label="Market" value={pick.market} />
+          </div>
+        </details>
 
         {strongest && Number(strongest.multiplier) !== 1 && (
           <div className="mt-4 rounded-lg border border-purple-500/20 bg-purple-950/10 p-3">
@@ -281,8 +289,8 @@ function PickCard({ pick }: { pick: Pick }) {
           {loadingExplanation
             ? 'Analyzing...'
             : explanation
-              ? 'Hide AI Analysis'
-              : 'AI Analysis'}
+              ? 'Hide Why'
+              : 'Why This Pick?'}
         </button>
       </div>
 
@@ -309,7 +317,7 @@ function PicksColumn({
 
       {picks.length === 0 ? (
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-400">
-          No official picks currently satisfy the model's quality, calibration and value thresholds.
+          No bets worth recommending right now.
         </div>
       ) : (
         <div className="space-y-3">
@@ -318,6 +326,29 @@ function PicksColumn({
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function Detail({
+  label,
+  value,
+  tone = 'neutral',
+}: {
+  label: string
+  value?: string
+  tone?: 'good' | 'bad' | 'neutral'
+}) {
+  const color =
+    tone === 'good'
+      ? 'text-emerald-300'
+      : tone === 'bad'
+        ? 'text-red-300'
+        : 'text-white'
+  return (
+    <div className="rounded-lg bg-slate-950/70 p-3">
+      <p className="text-slate-500">{label}</p>
+      <p className={`mt-1 font-bold ${color}`}>{value ?? 'n/a'}</p>
     </div>
   )
 }
@@ -386,14 +417,14 @@ export default function TopPicksPanel() {
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs text-slate-400">Safe Pending</p>
+          <p className="text-xs text-slate-400">Safe To Review</p>
           <p className="mt-1 text-2xl font-bold text-white">
             {data.summary.safePendingPicks ?? 0}
           </p>
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs text-slate-400">Recommended</p>
+          <p className="text-xs text-slate-400">Good Bets</p>
           <p className="mt-1 text-2xl font-bold text-emerald-400">
             {data.summary.recommendedPicks}
           </p>
@@ -414,7 +445,7 @@ export default function TopPicksPanel() {
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs text-slate-400">Adaptive</p>
+          <p className="text-xs text-slate-400">AI Learning</p>
           <p
             className={
               data.adaptiveWeightsAvailable
@@ -428,27 +459,26 @@ export default function TopPicksPanel() {
       </div>
 
       <div className="rounded-xl border border-amber-500/20 bg-amber-950/10 p-4 text-sm leading-6 text-amber-100">
-        No official picks are enabled until production rows pass the shared
-        recommendation policy and calibration is no longer probationary.
-        Calibration status: {data.summary.calibrationStatus ?? 'probationary'}.
+        Official picks are still off. Pick Analyzer will only show a bet here
+        after the model has enough real, calibrated proof.
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <PicksColumn
           title="Best Bets Today"
-          description="Recommended picks ranked by adaptive score, EV, edge and confidence."
+          description="The clearest bets once official recommendations are enabled."
           picks={data.bestBets}
         />
 
         <PicksColumn
           title="Top EV Picks"
-          description="Highest expected value pending picks, adjusted by adaptive scoring."
+          description="Prices that could offer the best value."
           picks={data.topEv}
         />
 
         <PicksColumn
           title="Top Confidence"
-          description="Highest model confidence pending picks with adaptive ranking."
+          description="Sides the model trusts most."
           picks={data.topConfidence}
         />
       </div>

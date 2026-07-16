@@ -32,6 +32,19 @@ function scoreColor(value: number) {
   return 'text-red-400'
 }
 
+function confidenceLabel(value: number) {
+  if (value >= 80) return 'Very High'
+  if (value >= 70) return 'High'
+  if (value >= 60) return 'Medium'
+  return 'Low'
+}
+
+function betRating(value: number) {
+  if (value >= 70) return 'Strong'
+  if (value >= 55) return 'Watch'
+  return 'Pass'
+}
+
 export default function PickExplanationCard({
   explanation,
 }: {
@@ -42,7 +55,7 @@ export default function PickExplanationCard({
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-300">
-            AI Pick Explanation
+            Why This Pick?
           </p>
 
           <h3 className="mt-2 text-2xl font-black text-white">
@@ -70,19 +83,19 @@ export default function PickExplanationCard({
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Confidence" value={`${explanation.scores.confidence.toFixed(2)}%`} />
-        <Stat label="Edge" value={`${explanation.scores.edge.toFixed(2)}%`} />
-        <Stat label="EV" value={`${explanation.scores.ev.toFixed(2)}%`} />
+        <Stat label="Confidence" value={confidenceLabel(explanation.scores.confidence)} />
+        <Stat label="Sportsbook Thinks" value={`${explanation.scores.impliedProbability.toFixed(0)}%`} />
+        <Stat label="Pick Analyzer Thinks" value={`${explanation.scores.modelProbability.toFixed(0)}%`} />
         <Stat
-          label="Adaptive Score"
-          value={explanation.scores.adaptiveScore.toFixed(2)}
+          label="Bet Rating"
+          value={betRating(explanation.scores.adaptiveScore)}
           className={scoreColor(explanation.scores.adaptiveScore)}
         />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-emerald-500/20 bg-emerald-950/10 p-5">
-          <p className="text-sm font-bold text-emerald-300">Why this pick</p>
+          <p className="text-sm font-bold text-emerald-300">Why We Like It</p>
 
           <ul className="mt-3 space-y-2 text-sm text-slate-300">
             {explanation.reasons.map((reason, index) => (
@@ -92,7 +105,7 @@ export default function PickExplanationCard({
         </div>
 
         <div className="rounded-2xl border border-amber-500/20 bg-amber-950/10 p-5">
-          <p className="text-sm font-bold text-amber-300">Risk notes</p>
+          <p className="text-sm font-bold text-amber-300">Why We Might Pass</p>
 
           {explanation.warnings.length > 0 ? (
             <ul className="mt-3 space-y-2 text-sm text-slate-300">
@@ -107,6 +120,18 @@ export default function PickExplanationCard({
           )}
         </div>
       </div>
+
+      <details className="mt-6 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+        <summary className="cursor-pointer text-sm font-black text-white">
+          Advanced Details
+        </summary>
+        <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <Stat label="Edge" value={`${explanation.scores.edge.toFixed(2)}%`} />
+          <Stat label="EV" value={`${explanation.scores.ev.toFixed(2)}%`} />
+          <Stat label="Smart Score" value={explanation.scores.smartScore.toFixed(2)} />
+          <Stat label="Kelly" value={`${explanation.scores.kellyPercent.toFixed(2)}%`} />
+        </div>
+      </details>
     </div>
   )
 }

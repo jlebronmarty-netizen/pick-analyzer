@@ -84,6 +84,30 @@ Evidence: `src/components/dashboard/DashboardShell.tsx`, `src/components/dashboa
 
 Note: Recovery audit confirmed the current API route count remains 205 and no provider calls or remote mutations were made during the correction pass. The dashboard now labels the product as Day 1 ready with official picks off, treats deterministic MLB engine previews as fixture validation, groups quarantined MLB historical replay rows by matchup, keeps AI recommendation detail collapsed when official picks are 0, exposes an MLB operational summary in the fast Daily Report, and distinguishes historical failed sync jobs from active import blockers. MLB 2025/2026 provider-backed historical enrichment was not executed because the existing protected historical-import execute path is still NBA-pilot-specific for live writes; safe MLB execution requires an MLB Discovery Lab executor with durable season/date/domain checkpoints before provider calls resume.
 
+### Pick Analyzer Intelligence Suite V2
+
+Status: Completed as read-only orchestration and build verified.
+
+Evidence: `src/services/best-value-scanner.service.ts`, `src/services/ai-bet-finder.service.ts`, `/api/market-opportunities/best-value`, `/api/ai-bet-finder`, `/best-value`, `/ai-bet-finder`, `docs/best-value-scanner-v1.md` and `docs/ai-bet-finder-v1.md`.
+
+Note: Best Value Scanner and AI Bet Finder consume Current Board as the trusted candidate source. They add optional premium workflows for Best Value, deterministic natural-language search, Compare, Explain/Why Not, Build My Ticket and What Changed. They made 0 provider calls, performed 0 remote mutations, did not alter prediction calculations, did not promote official picks and did not change Production Data Gate or Recommendation Eligibility Policy behavior. Current validation shows 0 positive modeled-value Best Value candidates by default, 3 no-modeled-value passes when shown, AI Bet Finder fixture validation 24/24 and official picks still 0.
+
+### Market Intelligence Engine V1
+
+Status: Completed as read-only orchestration and build verified.
+
+Evidence: `src/services/market-intelligence-engine.service.ts`, `/api/market-intelligence`, `src/components/dashboard/MarketIntelligenceSummaryPanel.tsx` and `docs/market-intelligence-engine-v1.md`.
+
+Note: Market Intelligence Engine scans Current Board candidates plus cataloged unavailable market families and returns availability, health, quality, confidence, classification, score, reason and explanation. It adds ranking modes for highest probability, EV, confidence, AI rating, lowest risk and best combined, plus explorer filters for sport, game, market, sportsbook, odds, risk, AI rating, confidence, edge, EV and recommendation. Current validation scans 16 markets, supports 3 current `NYM @ PHI` markets, marks all 3 current candidates as Pass, keeps 13 unavailable/future/blocked entries visible, passes fixtures 18/18, makes 0 provider calls and performs 0 remote mutations.
+
+### Day 1 Recommendation Readiness V1
+
+Status: Completed as read-only audit and build verified.
+
+Evidence: `src/services/day1-recommendation-readiness.service.ts`, `/api/recommendation-readiness`, `src/components/dashboard/RecommendationReadinessPanel.tsx` and `docs/day1-recommendation-readiness-v1.md`.
+
+Note: The readiness audit verifies the full Current Board -> Market Intelligence -> Recommendation Policy -> Top Picks -> AI Bet Finder -> Bet Slip -> Dashboard path using stored data only. Current result is 3 shared candidates, 0 official picks, Bet Slip `no_ticket`, 0 provider calls, 0 remote mutations and fixture validation 20/20. Candidate-level quality audit reports probability, confidence, reliability, AI rating, feature quality, data sufficiency, market stability, edge, EV, recommendation and explanation. Threshold review keeps Day 1 gates conservative; a tiny positive edge does not qualify. An in-memory excellent-value production simulation reaches `PLAY_OF_DAY_CANDIDATE`, proving automatic activation would work when every real gate is met without promoting current quarantined previews.
+
 ### MLB Discovery Lab Historical Import Executor V1
 
 Status: Partial live execution completed; stopped at the next unsupported persistence branch.
@@ -147,6 +171,32 @@ Status: Completed for quarantined prospective previews; official picks remain bl
 Evidence: `src/services/sportsdataio-mlb-prospective-preview.service.ts`, `src/services/prediction-history.service.ts`, `src/components/dashboard/MlbProspectivePreviewPanel.tsx`, `/api/predictions/by-sport?sport=baseball_mlb&prospectivePreview=true` and `docs/PROJECT_STATUS.md`.
 
 Note: The prospective model now derives baseball-specific intelligence from already imported rows only: last 3/5/10 and season form, home/away split, opponent difficulty, rest/schedule density, momentum, explicit bullpen-unavailable status, Team Strength Index, confidence label, reliability score, AI rating/grade, ranking score, market stability and baseball-language factors. The Team Strength Index formula is `0.30 season win pct + 0.20 last-10 win pct + 0.20 per-game run differential + 0.10 home/away split + 0.10 opponent difficulty + 0.10 rest score`. The local recompute made 0 provider calls, created immutable `mlb_prediction_intelligence_v1` snapshot lineage for the existing final odds, kept all visible previews `ANALYZED_ONLY`, and reran idempotently with 3 snapshots reused and 3 predictions reused. Missing MLB domains remain starting pitcher, confirmed lineup, injury diagnosis, weather and derivable bullpen context before official recommendations can be considered.
+
+### Pick Analyzer User Experience And Betting Intelligence V2
+
+Status: Completed as presentation-only UX polish; official picks remain blocked.
+
+Evidence: `src/app/dashboard/page.tsx`, `src/components/dashboard/MlbProspectivePreviewPanel.tsx`, `src/components/dashboard/TopPicksPanel.tsx`, `src/components/dashboard/PickExplanationCard.tsx`, `src/components/dashboard/BetSlipOptimizerPanel.tsx`, `src/components/dashboard/MlbPredictionEnginePanel.tsx` and `docs/PROJECT_STATUS.md`.
+
+Note: The dashboard now leads with the user question `Should I Bet Today?` and translates internal statuses into `GOOD BET`, `WATCH`, `NO VALUE` and `PASS` presentation labels while preserving internal recommendation enums. MLB preview cards separate model opinion from bet value, use `Sportsbook thinks` and `Pick Analyzer thinks`, group explanations into `Why We Like It`, `Why We Don't` and `Missing Information`, and keep edge, EV, feature quality, sufficiency, cutoff, timestamps and lineage under `Advanced Details`. Top Picks, Bet Slip, Pick Explanation and Historical Replay now use consumer wording and educational flows without changing recommendation policy, model calculations, provider integrations, persistence or production gates. Data Ops opens with a simple system-health summary and collapses engineering surfaces.
+
+### Pick Analyzer Market Opportunity Suite V1
+
+Status: Completed as optional read-only tools; no workflow or recommendation policy changes.
+
+Evidence: `src/services/market-opportunity-suite.service.ts`, `/api/market-opportunities/most-likely`, `/api/market-opportunities/arbitrage`, `src/app/most-likely/page.tsx`, `src/app/arbitrage/page.tsx`, `src/components/market-opportunities/MostLikelyTool.tsx`, `src/components/market-opportunities/ArbitrageTool.tsx`, `src/components/dashboard/DashboardShell.tsx` and `docs/PROJECT_STATUS.md`.
+
+Note: The suite adds separate `Most Likely` and `Arbitrage` navigation items as extra utilities. Most Likely ranks stored prediction rows by probability first and supports alternate user sorts without feeding Top Picks, Bet Slip, Play of the Day or official picks. Arbitrage scans stored odds only and refuses guaranteed-arbitrage claims unless all outcomes are covered for the same game, market, period/rules and fresh verified sportsbook prices with positive margin. Current validation used 0 provider calls and 0 remote mutations: Most Likely returned stored rows; Arbitrage returned unavailable because the current stored data does not expose verified multi-book pricing. Notification controls are UI placeholders only and do not create a backend notification service.
+
+Correction: Most Likely now defaults to `Current Board` instead of all stored rows. The default board requires future/unstarted current-slate candidates, latest non-superseded prediction rows, latest safe pregame odds before start/cutoff, deduplication by sport/event/market/period/selection/model version, and exclusion of historical, settled, stale, live/alternate, fixture and legacy-unlinked rows. Explicit modes are `Current Board`, `Upcoming`, `Historical Explorer` and advanced `All Stored Data`. Current validation returned the `NYM @ PHI` 2026-07-16 preview slate only, with 3 analyzed candidates across moneyline, run line and total, 0 qualified official picks, 0 provider calls and 0 remote mutations.
+
+### Current Board Intelligence Engine V1
+
+Status: Completed as canonical read-only candidate selection.
+
+Evidence: `src/services/current-board.service.ts`, `/api/current-board`, `src/services/market-opportunity-suite.service.ts`, `src/services/daily-report-fast.service.ts`, `docs/current-board-intelligence-engine-v1.md` and `docs/PROJECT_STATUS.md`.
+
+Note: Current Board is the shared source for "what valid betting candidates exist right now" and does not create a prediction engine, recommendation policy or production promotion path. Default `CURRENT` mode includes only future/unstarted current-slate candidates with valid event and snapshot linkage, latest safe pregame odds before cutoff/start, supported markets, no stale/live/alternate/fixture/historical/settled/legacy rows and no duplicate logical candidate. Most Likely now consumes Current Board and only ranks/presents candidates. Daily Report Today counts now use Current Board for slate games, current odds, analyzed candidates, modeled-value candidates, watch candidates, qualified previews, official picks, latest odds and next refresh action. Official consumers still require Production Data Gate V1 plus Recommendation Eligibility Policy V1. Current validation returned `NYM @ PHI`, 3 analyzed preview candidates, 0 official picks, fixture validation 20/20, 0 provider calls and 0 remote mutations.
 
 ### NBA Data Quality And Historical Reconciliation Phase A
 

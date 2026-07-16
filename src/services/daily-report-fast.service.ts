@@ -4,6 +4,7 @@ import { getModelCalibration } from '@/services/model-calibration.service'
 import { getModelWeights } from '@/services/model-learning.service'
 import { getTopPicks } from '@/services/top-picks.service'
 import { PRODUCTION_DATA_GATE_V1_POLICY } from '@/services/production-data-gate.service'
+import { getCurrentBoard } from '@/services/current-board.service'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 type Pick = {
@@ -187,40 +188,14 @@ async function countRows(table: string, filters: (query: any) => any) {
 
 async function getMlbOperationalSummary({
   officialPickCount,
-  previewCandidateCount,
 }: {
   officialPickCount: number
-  previewCandidateCount: number
 }) {
-  const now = new Date()
-  const today = now.toISOString().slice(0, 10)
-  const tomorrow = new Date(`${today}T00:00:00.000Z`)
-  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+  const board = await getCurrentBoard({ sportKey: 'baseball_mlb', mode: 'CURRENT', limit: 100 })
 
   const [
-    gamesToday,
-    futureGames,
-    eventsWithOdds,
     latestSync,
-    latestOdds,
   ] = await Promise.all([
-    countRows('sport_events', (query) =>
-      query
-        .eq('sport_key', 'baseball_mlb')
-        .gte('start_time', `${today}T00:00:00.000Z`)
-        .lt('start_time', tomorrow.toISOString())
-    ),
-    countRows('sport_events', (query) =>
-      query
-        .eq('sport_key', 'baseball_mlb')
-        .gt('start_time', now.toISOString())
-        .not('status', 'in', '("completed","cancelled","postponed")')
-    ),
-    supabaseAdmin
-      .from('sports_odds_snapshots')
-      .select('event_id')
-      .eq('sport_key', 'baseball_mlb')
-      .limit(5000),
     supabaseAdmin
       .from('sports_sync_jobs')
       .select('job_type, completed_at, status')
@@ -229,37 +204,32 @@ async function getMlbOperationalSummary({
       .order('completed_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
-    supabaseAdmin
-      .from('sports_odds_snapshots')
-      .select('snapshot_time, created_at')
-      .eq('sport_key', 'baseball_mlb')
-      .order('snapshot_time', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
   ])
-
-  const oddsEventIds = new Set(
-    ((eventsWithOdds.data ?? []) as Array<{ event_id?: string | null }>)
-      .map((row) => row.event_id)
-      .filter(Boolean)
-  )
 
   return {
     mode: 'mlb_daily_operational_summary_v1',
     selectedSport: 'baseball_mlb',
     providerStatus: 'ready_disabled_no_live_capture',
-    gamesToday,
-    futureGames,
-    gamesWithOdds: oddsEventIds.size,
+    gamesToday: board.games.length,
+    slateGames: board.games.length,
+    futureGames: board.games.length,
+    gamesWithOdds: board.games.filter((game) => Boolean(game.latestOddsTimestamp)).length,
+    analyzedCandidates: board.candidates.length,
+    modeledValueCandidates: board.modeledValueCount,
+    watchCandidates: board.watchCount,
+    qualifiedPreviews: board.qualifiedPreviewCount,
     lastSuccessfulSync: latestSync.data?.completed_at ?? null,
     lastSuccessfulSyncType: latestSync.data?.job_type ?? null,
-    latestOddsCapture:
-      latestOdds.data?.snapshot_time ?? latestOdds.data?.created_at ?? null,
+    latestOddsCapture: board.latestOddsTimestamp,
+    dataFreshness: board.dataFreshness,
+    boardHealth: board.boardHealth,
     nextRequiredAction:
-      futureGames > 0
-        ? 'Capture timestamp-safe current odds for the next future MLB slate.'
+      board.games.length > 0
+        ? board.dataFreshness.nextRecommendedRefreshTime
+          ? `Refresh stored odds by ${board.dataFreshness.nextRecommendedRefreshTime} if the game has not started.`
+          : 'Monitor the current board and wait for postgame result/stat refresh.'
         : 'Import broader 2025/2026 foundations or wait for the next scheduled MLB slate.',
-    previewCandidateCount,
+    previewCandidateCount: board.previewCount,
     officialPickCount,
     officialPicksEnabled: false,
     providerCallsMadeByThisReport: 0,
@@ -363,18 +333,36 @@ export async function getDailyReportFast(bankroll = 1000) {
       selectedSport: 'baseball_mlb',
       providerStatus: 'summary_unavailable',
       gamesToday: 0,
+      slateGames: 0,
       futureGames: 0,
       gamesWithOdds: 0,
+      analyzedCandidates: 0,
+      modeledValueCandidates: 0,
+      watchCandidates: 0,
+      qualifiedPreviews: 0,
       lastSuccessfulSync: null,
       lastSuccessfulSyncType: null,
       latestOddsCapture: null,
+      dataFreshness: {
+        status: 'empty',
+        latestOddsTimestamp: null,
+        latestOddsAgeMinutes: null,
+        maxAllowedAgeMinutes: 1440,
+        nextRecommendedRefreshTime: null,
+      },
+      boardHealth: {
+        status: 'EMPTY',
+        warnings: ['Current board summary unavailable.'],
+        providerCallsMade: 0,
+        remoteMutationsMade: 0,
+      },
       nextRequiredAction: 'Retry the read-only MLB operational summary.',
       previewCandidateCount,
       officialPickCount,
       officialPicksEnabled: false,
       providerCallsMadeByThisReport: 0,
     },
-    () => getMlbOperationalSummary({ officialPickCount, previewCandidateCount })
+    () => getMlbOperationalSummary({ officialPickCount })
   )
 
   const riskAlerts: string[] = []

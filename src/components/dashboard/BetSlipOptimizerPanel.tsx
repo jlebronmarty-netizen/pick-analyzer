@@ -202,16 +202,16 @@ export default function BetSlipOptimizerPanel() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-300">
-            Bet Slip Optimizer
+            Should I Build a Ticket?
           </p>
 
           <h2 className="mt-2 text-3xl font-black text-white">
-            AI Optimized Ticket
+            Bet Slip
           </h2>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-            Builds suggested singles and parlays using adaptive score, EV,
-            confidence, correlation, risk and Kelly stake sizing.
+            Shows a ticket only when official picks are strong enough. If the
+            model sees no good bets, it tells you to pass.
           </p>
         </div>
 
@@ -242,7 +242,7 @@ export default function BetSlipOptimizerPanel() {
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <div className="rounded-3xl border border-emerald-500/20 bg-emerald-950/10 p-6">
           <p className="text-sm font-bold text-emerald-300">
-            AI Ticket Score
+            Ticket Answer
           </p>
           <p className="mt-2 text-5xl font-black text-white">
             {optimizer.ticketQualityScore === null ? 'N/A' : optimizer.ticketQualityScore}
@@ -256,7 +256,7 @@ export default function BetSlipOptimizerPanel() {
         </div>
 
         <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-6">
-          <p className="text-sm font-bold text-white">Risk Meter</p>
+          <p className="text-sm font-bold text-white">Risk</p>
           <p className={`mt-2 text-3xl font-black ${riskClass(optimizer.riskLevel)}`}>
             {optimizer.riskLevel}
           </p>
@@ -274,7 +274,7 @@ export default function BetSlipOptimizerPanel() {
         </div>
 
         <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-6">
-          <p className="text-sm font-bold text-white">Correlation Detector</p>
+          <p className="text-sm font-bold text-white">Same-Game Risk</p>
           <p className={`mt-2 text-3xl font-black ${riskClass(optimizer.correlation.level)}`}>
             {optimizer.correlation.level}
           </p>
@@ -288,21 +288,30 @@ export default function BetSlipOptimizerPanel() {
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-5">
         <Stat label="Legs" value={`${ticket.legs}`} />
         <Stat label="Parlay Odds" value={noTicket ? '-' : formatOdds(ticket.americanOdds)} />
-        <Stat label="Probability" value={formatPercent(ticket.probability)} />
-        <Stat label="Expected EV" value={formatPercent(ticket.expectedValue)} />
+        <Stat label="Chance To Hit" value={formatPercent(ticket.probability)} />
+        <Stat label="Value" value={formatPercent(ticket.expectedValue)} />
         <Stat label="Stake" value={noTicket ? '$0.00' : formatMoney(ticket.recommendedStake)} />
       </div>
 
       {noTicket ? (
         <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
           <p className="text-sm font-bold text-white">
-            No eligible picks are available to build a ticket.
+            No ticket today.
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-400">
-            {data.emptyState?.reason ??
-              optimizer.emptyState?.reason ??
-              'The optimizer activates only after official qualified picks pass the production, calibration, quality and value gates.'}
+            There are no official bets strong enough to combine. Passing is the
+            recommended action until the model finds qualified value.
           </p>
+          <details className="mt-4 rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+            <summary className="cursor-pointer text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+              Advanced Details
+            </summary>
+            <p className="mt-3 text-sm leading-6 text-slate-400">
+              {data.emptyState?.reason ??
+                optimizer.emptyState?.reason ??
+                'The optimizer activates only after official qualified picks pass production, calibration, quality and value gates.'}
+            </p>
+          </details>
         </div>
       ) : null}
 

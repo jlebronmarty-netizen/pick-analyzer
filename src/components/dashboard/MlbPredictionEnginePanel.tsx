@@ -441,9 +441,8 @@ export default function MlbPredictionEnginePanel() {
               July 12, 2026
             </h3>
             <p className="mt-2 max-w-4xl text-sm leading-6 text-amber-100">
-              REAL NON-SCRAMBLED DATA | QUARANTINED HISTORICAL VALIDATION |
-              GAMES ALREADY COMPLETED | NOT A CURRENT WAGERING RECOMMENDATION |
-              NOT PRODUCTION PERFORMANCE
+              Learn from completed games: what the model thought, what happened,
+              and whether the same pick would still pass today&apos;s stricter rules.
             </p>
           </div>
           <button
@@ -468,13 +467,13 @@ export default function MlbPredictionEnginePanel() {
         {replay ? (
           <>
             <div className="mt-5 grid gap-3 md:grid-cols-3 xl:grid-cols-7">
-              <Stat label="Predictions" value={replay.summary.predictions} />
+              <Stat label="Analyzed" value={replay.summary.predictions} />
               <Stat label="Wins" value={replay.summary.wins} />
               <Stat label="Losses" value={replay.summary.losses} />
               <Stat label="Win Rate" value={`${replay.summary.winRate}%`} />
-              <Stat label="Units" value={replay.summary.technicalUnits} />
-              <Stat label="Brier" value={replay.summary.brierScore ?? 'n/a'} />
-              <Stat label="Prod Leaks" value={replay.productionGate.productionEligibleRows} />
+              <Stat label="Net Units" value={replay.summary.technicalUnits} />
+              <Stat label="Accuracy Check" value={replay.summary.brierScore ?? 'n/a'} />
+              <Stat label="Official Picks" value={replay.productionGate.productionEligibleRows} />
             </div>
 
             <div className="mt-5 grid gap-3 lg:grid-cols-5">
@@ -537,8 +536,8 @@ export default function MlbPredictionEnginePanel() {
                     {market.key}
                   </p>
                   <p className="mt-2 text-sm text-slate-400">
-                    {market.predictions} analyzed | {market.wins}-{market.losses}
-                    {market.pushes ? `-${market.pushes}` : ''} | {market.winRate}%
+                    {market.predictions} studied | {market.wins} won, {market.losses} lost
+                    {market.pushes ? `, ${market.pushes} pushed` : ''} | {market.winRate}%
                   </p>
                 </div>
               ))}
@@ -591,6 +590,20 @@ function resultClass(value: string) {
   return 'text-slate-300'
 }
 
+function replayDecisionLabel(prediction: ReplayPrediction) {
+  if (prediction.wouldPassCurrentOfficialPickPolicy) return 'Would Still Consider'
+  if (prediction.edge <= 0 || prediction.ev <= 0) return 'Would Pass Today'
+  return 'Needs More Proof'
+}
+
+function resultLabel(value: string) {
+  if (value === 'win') return 'Won'
+  if (value === 'loss') return 'Lost'
+  if (value === 'push') return 'Pushed'
+  if (value === 'void') return 'Voided'
+  return value
+}
+
 function ReplayMatchupCard({
   matchup,
   predictions,
@@ -610,7 +623,7 @@ function ReplayMatchupCard({
           </p>
         </div>
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-200">
-          {predictions.length} analyzed markets
+          {predictions.length} studied markets
         </p>
       </div>
 
@@ -639,10 +652,10 @@ function ReplayCard({
               {prediction.market}
             </span>
             <span className={`text-xs font-black uppercase ${resultClass(prediction.settlement.result)}`}>
-              {prediction.settlement.result}
+              {resultLabel(prediction.settlement.result)}
             </span>
             <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-bold uppercase text-slate-300">
-              {prediction.recommendationLabel}
+              {replayDecisionLabel(prediction)}
             </span>
           </div>
           <h4 className="mt-3 text-lg font-black text-white">
@@ -659,40 +672,33 @@ function ReplayCard({
         </div>
 
         <div className="grid gap-2 text-sm">
-          <MiniRow label="Price" value={prediction.formattedOdds ?? formatOdds(prediction.offeredAmericanOdds)} />
-          <MiniRow label="Line" value={prediction.line === null ? '-' : String(prediction.line)} />
-          <MiniRow label="Model" value={`${Number(prediction.predictedProbability ?? 0).toFixed(2)}%`} />
-          <MiniRow label="Implied" value={`${Number(prediction.impliedProbability ?? 0).toFixed(2)}%`} />
-          <MiniRow label="Confidence" value={`${Number(prediction.confidence ?? 0).toFixed(2)}%`} />
-          <MiniRow label="Conf. Label" value={prediction.confidenceLabel} />
-          <MiniRow label="Reliability" value={prediction.reliabilityLabel} />
-          <MiniRow label="Edge" value={formatSigned(prediction.edge, '%')} />
-          <MiniRow label="EV" value={formatSigned(prediction.ev, '%')} />
-          <MiniRow label="Value" value={prediction.valueLabel} />
+          <MiniRow label="Model Decision" value={prediction.recommendationLabel} />
+          <MiniRow label="Pick Analyzer Thought" value={`${Number(prediction.predictedProbability ?? 0).toFixed(0)}%`} />
+          <MiniRow label="Sportsbook Thought" value={`${Number(prediction.impliedProbability ?? 0).toFixed(0)}%`} />
+          <MiniRow label="Confidence" value={prediction.confidenceLabel} />
+          <MiniRow label="Bet Value" value={prediction.valueLabel} />
         </div>
 
         <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-            After Game
+            What Happened
           </p>
           <p className="mt-2 text-sm font-bold text-white">
             Final: {prediction.matchup.awayTeam} {prediction.finalScore.awayScore ?? '-'} -{' '}
             {prediction.matchup.homeTeam} {prediction.finalScore.homeScore ?? '-'}
           </p>
           <p className="mt-1 text-sm text-slate-300">
-            Technical result: {prediction.settlement.result} - units{' '}
-            {prediction.settlement.technicalUnits ?? 'n/a'}
+            Result: {resultLabel(prediction.settlement.result)}
           </p>
-          <p className="mt-3 text-xs leading-5 text-slate-500">
-            Current official policy:{' '}
-            {prediction.wouldPassCurrentOfficialPickPolicy ? 'passes' : 'blocked'}
+          <p className="mt-3 text-sm font-bold text-white">
+            Today&apos;s answer: {replayDecisionLabel(prediction)}
           </p>
         </div>
       </div>
 
       <details className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
         <summary className="cursor-pointer text-sm font-black text-white">
-          Why the model analyzed this side
+          Why The Model Looked Here
         </summary>
         <p className="mt-3 text-sm leading-6 text-slate-300">
           {prediction.explanation.summary}
@@ -710,7 +716,7 @@ function ReplayCard({
         {prediction.qualificationBlockers.length ? (
           <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-950/10 p-3">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-200">
-              Qualification blockers
+              Why It Would Not Be Official Today
             </p>
             <p className="mt-2 text-sm leading-5 text-amber-100">
               {prediction.qualificationBlockers.slice(0, 6).join(', ')}
@@ -738,6 +744,10 @@ function ReplayCard({
             <MiniRow label="Cutoff" value={prediction.cutoffTimestamp ?? 'n/a'} />
             <MiniRow label="Odds Time" value={prediction.oddsTimestamp ?? 'n/a'} />
             <MiniRow label="Quarantined" value={prediction.flags.quarantined ? 'true' : 'false'} />
+            <MiniRow label="Price" value={prediction.formattedOdds ?? formatOdds(prediction.offeredAmericanOdds)} />
+            <MiniRow label="Edge" value={formatSigned(prediction.edge, '%')} />
+            <MiniRow label="EV" value={formatSigned(prediction.ev, '%')} />
+            <MiniRow label="Units" value={String(prediction.settlement.technicalUnits ?? 'n/a')} />
           </div>
         </details>
         <div className="mt-3 grid gap-2">

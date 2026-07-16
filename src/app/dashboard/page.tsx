@@ -6,6 +6,8 @@ import DashboardQuickStats from '@/components/dashboard/DashboardQuickStats'
 import DashboardHeroPanel from '@/components/dashboard/DashboardHeroPanel'
 import AICommandCenterPanel from '@/components/dashboard/AICommandCenterPanel'
 import DailyReportPanel from '@/components/dashboard/DailyReportPanel'
+import MarketIntelligenceSummaryPanel from '@/components/dashboard/MarketIntelligenceSummaryPanel'
+import RecommendationReadinessPanel from '@/components/dashboard/RecommendationReadinessPanel'
 import TopPicksPanel from '@/components/dashboard/TopPicksPanel'
 import PlayOfTheDayPanel from '@/components/dashboard/PlayOfTheDayPanel'
 import PredictionEngineV4Panel from '@/components/dashboard/PredictionEngineV4Panel'
@@ -105,10 +107,12 @@ export default function DashboardPage() {
       <DashboardSection
         id="today"
         eyebrow="Today"
-        title="MLB Day 1 Workspace"
-        description="Current recommendation state, daily report, preview readiness and official pick gates."
+        title="Should I Bet Today?"
+        description="Quick answer first: good bets, watchlist, no-value plays and the next MLB game."
       >
         <DailyReportPanel />
+        <MarketIntelligenceSummaryPanel />
+        <RecommendationReadinessPanel />
         <MlbProspectivePreviewPanel />
         <PlayOfTheDayPanel />
         <TopPicksPanel />
@@ -151,14 +155,33 @@ export default function DashboardPage() {
         id="data-operations"
         eyebrow="Data"
         title="Data & Operations"
-        description="Provider status, sync jobs, historical imports, runtime health, checkpoints and data quality."
+        description="Simple system health first. Engineering evidence stays available below."
       >
-        <HistoricalImportEnginePanel />
-        <RuntimeObservabilityPanel />
-        <SyncReliabilityPanel />
-        <GlobalDataQualityPanel />
-        <ProviderIntelligencePanel />
-        <MultiSportEnginePanel />
+        <div className="grid gap-4 md:grid-cols-4">
+          {[
+            ['System', 'Healthy'],
+            ['Provider Calls', '0 in this view'],
+            ['Official Picks', 'Off'],
+            ['Imported MLB Data', 'Available'],
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{label}</p>
+              <p className="mt-2 text-2xl font-black text-white">{value}</p>
+            </div>
+          ))}
+        </div>
+
+        <DashboardPanelGroup
+          title="Engineering details"
+          description="Sync jobs, provider health, runtime checks, data quality and route contracts."
+        >
+          <HistoricalImportEnginePanel />
+          <RuntimeObservabilityPanel />
+          <SyncReliabilityPanel />
+          <GlobalDataQualityPanel />
+          <ProviderIntelligencePanel />
+          <MultiSportEnginePanel />
+        </DashboardPanelGroup>
       </DashboardSection>
 
       <DashboardSection
