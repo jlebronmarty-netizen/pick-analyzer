@@ -24,8 +24,8 @@ const navItems = [
 ]
 
 const compactNavItems = [
-  { id: 'overview', label: 'Overview', icon: '01' },
-  { id: 'today', label: 'Today', icon: '02' },
+  { id: 'today', label: 'Today', icon: '01' },
+  { id: 'overview', label: 'Developer Mode', icon: '02' },
   { id: 'model-lab', label: 'Model Lab', icon: '03' },
   { id: 'data-operations', label: 'Data Ops', icon: '04' },
   { id: 'advanced', label: 'Advanced', icon: '05' },
@@ -49,17 +49,17 @@ export default function DashboardShell({
       <div className="min-h-screen bg-slate-950 text-white">
         <div className="flex">
           <aside className="sticky top-0 hidden h-screen w-72 overflow-y-auto border-r border-slate-800 bg-slate-950/95 p-6 xl:block">
-            <div className="rounded-3xl border border-emerald-500/20 bg-emerald-950/10 p-5">
+            <div className="rounded-lg border border-sky-500/20 bg-sky-950/10 p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-300">
                 Pick Analyzer
               </p>
 
               <h1 className="mt-2 text-2xl font-black">
-                AI Command
+                AI Briefing
               </h1>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                Adaptive multi-sport betting intelligence system.
+                A professional daily answer to whether there is a bet worth making.
               </p>
             </div>
 
@@ -68,9 +68,9 @@ export default function DashboardShell({
                 <a
                   key={item.id}
                   href={`#${item.id}`}
-                  className="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
+                  className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
                     {item.icon}
                   </span>
 
@@ -86,9 +86,9 @@ export default function DashboardShell({
                     <a
                       key={item.href}
                       href={item.href}
-                      className="group flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
+                      className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
                     >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-900 text-amber-300 group-hover:bg-amber-500/15">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-amber-300 group-hover:bg-amber-500/15">
                         {item.icon}
                       </span>
                       {item.label}
@@ -98,10 +98,10 @@ export default function DashboardShell({
               </div>
             </nav>
 
-            <div className="fixed bottom-6 w-[224px] rounded-2xl border border-slate-800 bg-slate-900/95 p-4">
+            <div className="fixed bottom-6 w-[224px] rounded-lg border border-slate-800 bg-slate-900/95 p-4">
               <p className="text-xs text-slate-500">System</p>
               <p className="mt-1 text-sm font-bold text-emerald-300">
-                Multi-Sport Engine Active
+                MLB board active
               </p>
             </div>
           </aside>
@@ -111,23 +111,23 @@ export default function DashboardShell({
               <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                    Dashboard V4
+                    Pick Analyzer
                   </p>
 
                   <h2 className="text-xl font-black text-white">
-                    Betting Intelligence Center
+                    Today's Betting Briefing
                   </h2>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <SportSelector />
 
-                  <span className="hidden rounded-full border border-amber-500/30 bg-amber-950/20 px-4 py-2 text-xs font-bold text-amber-200 md:inline-flex">
-                    DAY 1 READY
+                  <span className="hidden rounded-full border border-emerald-500/30 bg-emerald-950/20 px-4 py-2 text-xs font-bold text-emerald-200 md:inline-flex">
+                    MLB ACTIVE
                   </span>
 
                   <span className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 lg:inline-flex">
-                    OFFICIAL PICKS OFF
+                    OFFICIAL PICKS STRICT
                   </span>
 
                   <a

@@ -2,9 +2,11 @@ import { ReactNode } from 'react'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import DashboardSection from '@/components/dashboard/DashboardSection'
 import DashboardQuickStats from '@/components/dashboard/DashboardQuickStats'
+import DeveloperDetails from '@/components/dashboard/DeveloperDetails'
 
 import DashboardHeroPanel from '@/components/dashboard/DashboardHeroPanel'
 import ProductionTodayPanel from '@/components/dashboard/ProductionTodayPanel'
+import ProductTodayPanel from '@/components/dashboard/ProductTodayPanel'
 import AICommandCenterPanel from '@/components/dashboard/AICommandCenterPanel'
 import DailyReportPanel from '@/components/dashboard/DailyReportPanel'
 import MarketIntelligenceSummaryPanel from '@/components/dashboard/MarketIntelligenceSummaryPanel'
@@ -74,23 +76,9 @@ function DashboardPanelGroup({
   children: ReactNode
 }) {
   return (
-    <details className="rounded-3xl border border-slate-800 bg-slate-950/40 p-5">
-      <summary className="cursor-pointer list-none">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm font-black text-white">{title}</p>
-            <p className="mt-1 text-sm leading-6 text-slate-400">
-              {description}
-            </p>
-          </div>
-          <span className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-300">
-            Expand
-          </span>
-        </div>
-      </summary>
-
-      <div className="mt-5 space-y-5">{children}</div>
-    </details>
+    <DeveloperDetails title={title} description={description}>
+      {children}
+    </DeveloperDetails>
   )
 }
 
@@ -98,27 +86,27 @@ export default function DashboardPage() {
   return (
     <DashboardShell>
       <DashboardSection
-        id="overview"
-        eyebrow="Overview"
-        title="Command Center"
-        description="Main AI recommendation, model status and best current opportunity."
-      >
-        <DashboardQuickStats />
-        <DashboardHeroPanel />
-      </DashboardSection>
-
-      <DashboardSection
         id="today"
         eyebrow="Today"
         title="Should I Bet Today?"
-        description="The first screen answers whether to bet, what the best informational opportunities are, why the board is blocked, and what the system learned."
+        description="A concise AI briefing, current MLB board, daily timeline and system health."
       >
-        <ProductionTodayPanel />
+        <ProductTodayPanel />
+      </DashboardSection>
 
+      <DashboardSection
+        id="overview"
+        eyebrow="Developer Mode"
+        title="Legacy Overview"
+        description="Detailed historical widgets and internal views are available for maintenance."
+      >
         <DashboardPanelGroup
-          title="Supporting detail"
-          description="Expanded Current Board, operating-day, daily-report and legacy pick surfaces. The summary above is the canonical first-read experience."
+          title="Developer Mode"
+          description="Raw model, daily report and operating-day diagnostics."
         >
+          <DashboardQuickStats />
+          <DashboardHeroPanel />
+          <ProductionTodayPanel />
           <DailyReportPanel />
           <NextSlateStatusPanel />
           <MarketIntelligenceSummaryPanel />
@@ -134,9 +122,9 @@ export default function DashboardPage() {
 
       <DashboardSection
         id="model-lab"
-        eyebrow="Model Lab"
+        eyebrow="Developer Mode"
         title="Model Lab"
-        description="Production status, historical replay, fixtures, contracts, feature store evidence and current preview are separated so metrics do not blur together."
+        description="Advanced model evidence, contracts and simulations."
       >
         <DashboardPanelGroup
           title="Historical Replay"
@@ -188,9 +176,9 @@ export default function DashboardPage() {
 
       <DashboardSection
         id="data-operations"
-        eyebrow="Data"
+        eyebrow="Developer Mode"
         title="Data & Operations"
-        description="Simple system health first. Engineering evidence stays available below."
+        description="Provider, sync and runtime diagnostics."
       >
         <div className="grid gap-4 md:grid-cols-4">
           {[
@@ -221,7 +209,7 @@ export default function DashboardPage() {
 
       <DashboardSection
         id="advanced"
-        eyebrow="Advanced"
+        eyebrow="Developer Mode"
         title="Developer & Inactive Domains"
         description="Detailed contracts, migrations, NBA readiness and non-MLB sport modules."
       >

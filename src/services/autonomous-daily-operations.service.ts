@@ -176,6 +176,45 @@ function compactCandidate(candidate: CurrentBoardCandidate | null | undefined, s
   }
 }
 
+function humanizeReason(value: unknown) {
+  const text = String(value ?? '').trim()
+  const normalized = text.toLowerCase()
+  if (!text) return 'Waiting for more verified data.'
+  if (normalized.includes('quality_gate') || normalized.includes('promotion')) return 'Model still validating before any promotion.'
+  if (normalized.includes('shadow') || normalized.includes('insufficient_sample')) return 'Waiting for enough settled games.'
+  if (normalized.includes('manual approval') || normalized.includes('manual_approval') || normalized.includes('manual_review')) return 'Manual review required before model changes.'
+  if (normalized.includes('current-board') || normalized.includes('candidate')) return 'No current wager has enough value.'
+  if (normalized.includes('calibration')) return 'Model confidence needs more settled results.'
+  if (normalized.includes('missing') || normalized.includes('blocked')) return 'Insufficient verified market data.'
+  if (normalized.includes('official pick')) return 'No official recommendation passed today.'
+  return text.replaceAll('_', ' ')
+}
+
+function productStageStatus(status: unknown) {
+  const value = String(status ?? '').toLowerCase()
+  if (value === 'complete') return 'Complete'
+  if (value === 'warning') return 'Waiting'
+  if (value === 'running') return 'Running'
+  if (value === 'blocked' || value === 'failed') return 'Blocked'
+  return 'Waiting'
+}
+
+function productHealth(value: unknown) {
+  const status = String(value ?? '').toLowerCase()
+  if (['healthy', 'ready', 'fresh', 'complete'].some((item) => status.includes(item))) return 'Healthy'
+  if (['blocked', 'failed', 'low'].some((item) => status.includes(item))) return 'Blocked'
+  if (['waiting', 'insufficient', 'limited', 'warning', 'partial'].some((item) => status.includes(item))) return 'Waiting'
+  return 'Warning'
+}
+
+function recommendationCopy(candidate: CurrentBoardCandidate | null | undefined, official: boolean) {
+  if (official) return 'Official recommendation available.'
+  if (!candidate) return 'No eligible market is ready yet.'
+  if (candidate.expectedValue <= 0) return 'Likely price is not attractive enough.'
+  if (candidate.edge <= 0) return 'The market price does not beat the model.'
+  return 'Informational only. Official gates did not clear it.'
+}
+
 function candidateKey(candidate: ReturnType<typeof compactCandidate>) {
   return candidate ? `${candidate.eventId}|${candidate.market}|${candidate.selection}|${candidate.line ?? ''}` : ''
 }
@@ -463,16 +502,55 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
       shadow,
       dataQuality,
     }),
+    displayStatus: productStageStatus(statusForStage({
+      stageId: id,
+      operatingDay,
+      board,
+      mostLikely,
+      bestBets,
+      comparison,
+      shadow,
+      dataQuality,
+    })),
+    displayLabel: {
+      morning_sync: 'Morning refresh',
+      games: "Today's games",
+      odds: 'Market prices',
+      players: 'Players',
+      pitchers: 'Pitchers',
+      bullpen: 'Bullpen',
+      weather: 'Weather',
+      stadium: 'Ballparks',
+      features: 'Data review',
+      predictions: 'Predictions',
+      current_board: 'Best opportunities',
+      best_bets: 'Best bets',
+      most_likely: 'Most likely',
+      moneyline: 'Moneyline read',
+      parlay: 'Parlay read',
+      ai_coach: 'AI briefing',
+      pregame_refresh: 'Pregame refresh',
+      late_lineups: 'Late lineup check',
+      late_odds: 'Late prices',
+      lock: 'Recommendation lock',
+      results: 'Results',
+      settlement: 'Settlement',
+      replay: 'Replay',
+      champion_vs_challenger: 'Model comparison',
+      calibration: 'Calibration',
+      learning: 'Learning',
+      tomorrow_ready: 'Next slate',
+    }[id] ?? label,
     timestamp: null,
     durationMs: null,
     checkpoint: `${selected}:${id}`,
     providerCallsMade: 0,
-    warnings: id === 'bullpen' || id === 'late_lineups' ? ['Domain is foundation-ready but not production-injected.'] : [],
+    warnings: id === 'bullpen' || id === 'late_lineups' ? ['Waiting for verified data.'] : [],
     nextAction: automation.nextAction ?? 'status',
     persistedIn: 'operating_day_lifecycle_events',
   }))
 
-  const blockers = Array.from(
+  const rawBlockers = Array.from(
     new Set([
       ...(!topOfficial ? ['No official pick passed production, calibration and recommendation gates.'] : []),
       ...(board.boardHealth.warnings ?? []),
@@ -481,6 +559,7 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
       ...((promotion.blockers as string[] | undefined) ?? []),
     ])
   )
+  const blockers = Array.from(new Set(rawBlockers.map(humanizeReason)))
 
   const learningReport = buildLearningReport({ comparison, shadow, calibration, board })
   const nextScheduledAction = nextActionLabel(timeline)
@@ -536,11 +615,12 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
       bestOpportunityTitle: opportunityTitle(primaryRaw, Boolean(topOfficial)),
       bestOpportunity: primaryOpportunity,
       blockers: blockers.slice(0, 5),
+      rawBlockers: rawBlockers.slice(0, 5),
       gameCount: board.games.length,
       officialCount: board.officialPickCount,
       noPositiveValue,
       summary: primaryOpportunity
-        ? `${primaryOpportunity.selection} ${primaryOpportunity.market}${primaryOpportunity.line === null ? '' : ` ${primaryOpportunity.line}`} at ${primaryOpportunity.odds && primaryOpportunity.odds > 0 ? '+' : ''}${primaryOpportunity.odds ?? 'n/a'} is the highest-ranked display candidate, but it is ${topOfficial ? 'official' : 'informational only'}.`
+        ? `${primaryOpportunity.selection} is the best informational read, but current price and confidence do not justify an official wager.`
         : 'No attractive current opportunity is available.',
     },
     topSection: {
@@ -574,12 +654,16 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
         confidence: recommendation?.confidence ?? null,
         value: recommendation?.expectedValue ?? null,
         status: publicBetStatus(recommendation),
+        recommendationText: recommendationCopy(recommendation, recommendation?.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'),
+        keyReason: recommendation?.summary ?? (gameCandidates.length ? 'Market reviewed. No official edge at the current price.' : 'Market prices are not ready yet.'),
+        candidateCount: gameCandidates.length,
       }
     }),
     timeline,
     systemHealth: {
       provider: {
         status: Number(budget.estimatedCallsRemaining ?? 0) > 0 ? 'Healthy' : 'Limited',
+        displayStatus: productHealth(Number(budget.estimatedCallsRemaining ?? 0) > 0 ? 'Healthy' : 'Limited'),
         lastSync: timeLabel(String(automation.lastSuccessfulRefresh ?? automation.lastSuccessfulAt ?? '') || null),
         callsToday: Number(budget.callsMadeToday ?? automation.providerCallsToday ?? 0),
         estimatedCallsRemaining: Number(budget.estimatedCallsRemaining ?? 0),
@@ -590,14 +674,22 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
       },
       model: {
         status: String((calibration.overall as Record<string, unknown> | undefined)?.modelStatus ?? 'INSUFFICIENT_DATA'),
+        displayStatus: productHealth((calibration.overall as Record<string, unknown> | undefined)?.modelStatus ?? 'INSUFFICIENT_DATA'),
         current: 'Champion',
-        challenger: String(shadow.status ?? 'unknown'),
+        challenger: humanizeReason(shadow.status ?? 'unknown'),
         promotion: 'Manual review required',
       },
       learningHealth: {
         status: learningReport.settledCount > 0 ? 'Learning from settled results' : 'Waiting for settled production history',
+        displayStatus: learningReport.settledCount > 0 ? 'Healthy' : 'Waiting',
         settledCount: learningReport.settledCount,
         weightsChanged: false,
+      },
+      automation: {
+        status: automation.schedulerEnabled === false ? 'Blocked' : 'Healthy',
+        displayStatus: automation.schedulerEnabled === false ? 'Blocked' : 'Healthy',
+        nextAction: nextScheduledAction.action,
+        nextDueAt: automation.nextScheduledTime ?? null,
       },
       currentModel: 'Champion',
       challenger: String(shadow.status ?? 'unknown'),
@@ -635,9 +727,11 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
         { item: 'Manual approval recorded', passed: false },
       ],
       rollbackConfidence: promotion.state === 'review_ready' ? 'medium' : 'high',
-      blockers: promotion.blockers ?? [],
+      blockers: Array.from(new Set(((promotion.blockers as string[] | undefined) ?? []).map(humanizeReason))),
+      rawBlockers: promotion.blockers ?? [],
     },
     blockers,
+    rawBlockers,
     canonicalPersistenceContract: {
       table: 'operating_day_lifecycle_events',
       requiredFields: ['started_at', 'duration_ms', 'status', 'action', 'provider_calls_made', 'warnings', 'blocking_reason', 'metadata'],

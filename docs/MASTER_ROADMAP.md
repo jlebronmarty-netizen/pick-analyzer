@@ -10,6 +10,14 @@ Provider-dependent modules such as historical reconciliation execution, injuries
 
 ## Completed
 
+### Product Experience Polish V1
+
+Status: Completed and build verified.
+
+Evidence: `src/components/dashboard/ProductTodayPanel.tsx`, `src/components/dashboard/DeveloperDetails.tsx`, `src/components/dashboard/SportSelector.tsx`, `src/components/dashboard/DashboardShell.tsx`, `src/app/dashboard/page.tsx` and the human-facing daily-operations response fields in `src/services/autonomous-daily-operations.service.ts`.
+
+Note: The dashboard now opens on the question "Should I bet today?" and keeps advanced diagnostics behind lazy Developer Mode sections. This was a product-surface change only; no new prediction models, sports, official thresholds, settlement logic or champion promotion paths were added.
+
 ### Autonomous Daily Execution, Settlement, and Learning V1
 
 Status: Completed and build verified.
