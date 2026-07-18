@@ -2,17 +2,19 @@ import 'server-only'
 
 import { getCurrentBoard } from '@/services/current-board.service'
 import { getMlbGamesPayloadAudit } from '@/services/mlb-games-payload-audit.service'
+import { getMlbMissingIntelligenceStatus } from '@/services/mlb-missing-intelligence.service'
 import { getMlbPitcherBullpenFoundations } from '@/services/mlb-model-platform.service'
 import { getMlbOddsCoverage } from '@/services/mlb-odds-coverage.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
 
 export async function getMlbDataQualityStatus(date = '2026-07-17') {
-  const [coverage, board, payloadAudit, intelligence, pitcherBullpen] = await Promise.all([
+  const [coverage, board, payloadAudit, intelligence, pitcherBullpen, missingIntelligence] = await Promise.all([
     getMlbOddsCoverage(date),
     getCurrentBoard({ sportKey: 'baseball_mlb', mode: 'CURRENT', limit: 200 }),
     getMlbGamesPayloadAudit(date),
     getMlbStarterWeatherStadiumIntelligence(date),
     getMlbPitcherBullpenFoundations(date),
+    getMlbMissingIntelligenceStatus({ selectedDate: date }),
   ])
   const candidateCount = board.candidates.length
   const average = (values: number[]) => (values.length ? Math.round(values.reduce((total, value) => total + value, 0) / values.length) : 0)
@@ -90,6 +92,18 @@ export async function getMlbDataQualityStatus(date = '2026-07-17') {
           bullpenCoverage: pitcherBullpen.bullpenIntelligence.coverage,
           productReadiness: pitcherBullpen.productReadiness,
         },
+        missingIntelligence: {
+          mode: missingIntelligence.mode,
+          playerMetadata: missingIntelligence.coverage.playerMetadata,
+          rosterAvailability: missingIntelligence.coverage.rosterAvailability,
+          teamAvailability: missingIntelligence.coverage.teamAvailability,
+          handedness: missingIntelligence.coverage.handedness,
+          lineups: missingIntelligence.coverage.lineups,
+          injuries: missingIntelligence.coverage.injuries,
+          pitcherGameStats: missingIntelligence.coverage.pitcherGameStats,
+          bullpen: missingIntelligence.coverage.bullpen,
+          dataQuality: missingIntelligence.dataQuality,
+        },
       },
       note:
         payloadAudit.contractCorrection.retainedEvidenceSufficientForStarterDecision === true
@@ -102,6 +116,11 @@ export async function getMlbDataQualityStatus(date = '2026-07-17') {
       total: 'preview_only_missing_critical_inputs',
       calibration: 'insufficient_sample',
       officialRecommendationReadiness: 'blocked',
+      missingIntelligence: missingIntelligence.dataQuality.modelSufficiency,
+      recommendationSufficiency: missingIntelligence.dataQuality.recommendationSufficiency,
+      learning: missingIntelligence.replayCalibrationLearning.learning,
+      detailedInjuryFeed: missingIntelligence.coverage.injuries.detailedInjuryFeed,
+      rosterAvailability: missingIntelligence.coverage.rosterAvailability.status,
     },
     providerCallsMade: 0,
   }

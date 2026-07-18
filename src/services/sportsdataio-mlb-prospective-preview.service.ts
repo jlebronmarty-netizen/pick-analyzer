@@ -6,6 +6,7 @@ import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema
 import { createFeatureSnapshot } from '@/services/feature-store-core.service'
 import { evaluateRecommendationEligibility } from '@/services/recommendation-eligibility-policy.service'
 import { buildSportPrediction } from '@/services/sport-prediction-engine-sdk.service'
+import { getMlbMissingIntelligenceStatus } from '@/services/mlb-missing-intelligence.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
 import {
   normalizeSportsDataIoMlbGameOdds,
@@ -1257,6 +1258,7 @@ function buildConfidenceEngineV2({
   dataSufficiency,
   edge,
   ev,
+  missingIntelligence,
 }: {
   sdkConfidence: number
   marketStabilityScore: number
@@ -1266,20 +1268,43 @@ function buildConfidenceEngineV2({
   dataSufficiency: number
   edge: number
   ev: number
+  missingIntelligence: Awaited<ReturnType<typeof getMlbMissingIntelligenceStatus>> | null
 }) {
   const missing = new Set(v6Contract?.missingInputFlags ?? [])
+  const handednessReady = Boolean(
+    missingIntelligence &&
+      (missingIntelligence.coverage.handedness.battingHandCoveragePct > 0 ||
+        missingIntelligence.coverage.handedness.throwingHandCoveragePct > 0)
+  )
+  const bullpenReady = Boolean(
+    missingIntelligence?.coverage.bullpen.readiness === 'ready_for_confidence_context'
+  )
+  const lineupReady = Boolean(
+    missingIntelligence?.coverage.lineups.status === 'confirmed' ||
+      missingIntelligence?.coverage.lineups.status === 'projected'
+  )
+  const injuryReady = Boolean(missingIntelligence?.coverage.injuries.status === 'available')
+  const rosterAvailabilityReady = Boolean(missingIntelligence?.coverage.rosterAvailability?.status === 'available')
+  const unknownRosterStatuses = Number(missingIntelligence?.coverage.rosterAvailability?.unknownStatusCount ?? 0)
+  const staleRosterStatuses = Number(missingIntelligence?.coverage.rosterAvailability?.staleStatusCount ?? 0)
+  const injuredListStatuses = Number(missingIntelligence?.coverage.rosterAvailability?.injuredListStatusRows ?? 0)
   const criticalBlockers = [
     ...Array.from(missing),
-    'bullpen_game_workload_unavailable',
-    'handedness_unavailable',
-  ]
+    bullpenReady ? null : 'bullpen_game_workload_unavailable',
+    handednessReady ? null : 'handedness_unavailable',
+    lineupReady ? null : 'lineup_unavailable',
+    rosterAvailabilityReady ? null : 'roster_availability_unavailable',
+    injuryReady ? null : 'detailed_injury_feed_unavailable',
+  ].filter(Boolean) as string[]
   const starterEvidence =
     (v6Contract?.homeStarter.identityAvailable ? 1 : 0) +
     (v6Contract?.awayStarter.identityAvailable ? 1 : 0)
   const weatherEvidence = v6Contract?.weather.available ? 1 : 0
   const stadiumEvidence = v6Contract?.stadium.stadiumId ? 1 : 0
   const modelScore = round(clamp(sdkConfidence - 8 + starterEvidence * 2 + weatherEvidence * 1.5, 25, 88))
-  const dataPenalty = criticalBlockers.length * 4 + (missing.has('confirmed_lineup') ? 6 : 0) + (missing.has('injury_diagnosis') ? 6 : 0)
+  const rosterQualityPenalty = Math.min(8, Math.ceil(unknownRosterStatuses / 25) + Math.ceil(staleRosterStatuses / 25))
+  const ilContextPenalty = Math.min(4, Math.ceil(injuredListStatuses / 30))
+  const dataPenalty = criticalBlockers.length * 4 + (missing.has('confirmed_lineup') ? 6 : 0) + (missing.has('injury_diagnosis') ? 6 : 0) + rosterQualityPenalty + ilContextPenalty
   const dataScore = round(clamp(featureQuality * 0.45 + dataSufficiency * 0.4 + starterEvidence * 4 + weatherEvidence * 3 + stadiumEvidence * 2 - dataPenalty, 15, 86))
   const marketScore = round(clamp(marketStabilityScore + (odds.price ? 5 : -35) + (odds.snapshot_time ? 4 : -20), 10, 92))
   const recommendationScore = round(clamp(modelScore * 0.25 + dataScore * 0.3 + marketScore * 0.25 + clamp(edge, -8, 8) * 1.2 + clamp(ev, -12, 12) * 0.8, 0, 90))
@@ -1310,8 +1335,19 @@ function buildConfidenceEngineV2({
       supportingEvidence: [
         v6Contract ? 'Verified GamesByDate starter/weather/stadium context available.' : null,
         stadiumEvidence ? 'StadiumID verified.' : null,
+        handednessReady ? 'Cached player handedness coverage is available.' : null,
+        bullpenReady ? 'Game-level bullpen workload evidence is cached.' : null,
+        rosterAvailabilityReady ? `${missingIntelligence?.coverage.rosterAvailability.playerStatusRows ?? 0} roster statuses are cached from Player.Status.` : null,
+        injuredListStatuses > 0 ? `${injuredListStatuses} cached players are marked on an injured list.` : null,
+        lineupReady ? `Lineup context is ${missingIntelligence?.coverage.lineups.status}.` : null,
+        injuryReady ? 'Detailed injury feed has cached rows.' : null,
       ].filter(Boolean),
-      reducingEvidence: criticalBlockers,
+      reducingEvidence: [
+        ...criticalBlockers,
+        unknownRosterStatuses > 0 ? `${unknownRosterStatuses} cached roster statuses are unknown.` : null,
+        staleRosterStatuses > 0 ? `${staleRosterStatuses} cached roster statuses are stale.` : null,
+        injuredListStatuses > 0 ? 'Injured-list status is context only because player importance and confirmed lineups are unavailable.' : null,
+      ].filter(Boolean),
       missingCriticalInputs: criticalBlockers,
     },
     marketConfidence: {
@@ -1340,7 +1376,26 @@ function buildConfidenceEngineV2({
       noOfficialPickForced: true,
       bullpenPositiveEdgeAllowed: false,
       playerIdentityEdgeAllowed: false,
+      missingIntelligencePositiveEdgeAllowed: false,
+      rosterStatusStrongPenaltyAllowed: false,
+      injurySeverityInferred: false,
     },
+    missingIntelligence: missingIntelligence
+      ? {
+          playerMetadataRows: missingIntelligence.coverage.playerMetadata.rows,
+          rosterAvailabilityStatus: missingIntelligence.coverage.rosterAvailability?.status ?? 'unknown',
+          playerStatusCoveragePct: missingIntelligence.coverage.rosterAvailability?.playerStatusCoveragePct ?? 0,
+          injuredListStatusRows: missingIntelligence.coverage.rosterAvailability?.injuredListStatusRows ?? 0,
+          staleStatusCount: missingIntelligence.coverage.rosterAvailability?.staleStatusCount ?? 0,
+          unknownStatusCount: missingIntelligence.coverage.rosterAvailability?.unknownStatusCount ?? 0,
+          battingHandCoveragePct: missingIntelligence.coverage.handedness.battingHandCoveragePct,
+          throwingHandCoveragePct: missingIntelligence.coverage.handedness.throwingHandCoveragePct,
+          lineupStatus: missingIntelligence.coverage.lineups.status,
+          injuryStatus: missingIntelligence.coverage.injuries.status,
+          bullpenReadiness: missingIntelligence.coverage.bullpen.readiness,
+          historicalPilot: missingIntelligence.replayCalibrationLearning.historicalPilot,
+        }
+      : null,
   }
 }
 
@@ -1477,6 +1532,7 @@ export function validateMlbPredictionV7DeterministicFixtures() {
     dataSufficiency: 68,
     edge: -2,
     ev: -3,
+    missingIntelligence: null,
   })
   const failedChecks = [
     v6.success ? null : 'v6_regression_failed',
@@ -1487,14 +1543,16 @@ export function validateMlbPredictionV7DeterministicFixtures() {
       : 'model_confidence_decomposition_failed',
     confidence.dataConfidence.missingCriticalInputs.includes('bullpen_context') ? null : 'bullpen_blocker_missing',
     confidence.dataConfidence.missingCriticalInputs.includes('handedness_unavailable') ? null : 'handedness_blocker_missing',
+    confidence.dataConfidence.missingCriticalInputs.includes('lineup_unavailable') ? null : 'lineup_blocker_missing',
+    confidence.dataConfidence.missingCriticalInputs.includes('injury_feed_unavailable') ? null : 'injury_blocker_missing',
     confidence.recommendationConfidence.officialConsideration === false ? null : 'negative_ev_official_gate_failed',
     confidence.policy.bullpenPositiveEdgeAllowed === false ? null : 'bullpen_positive_edge_guard_failed',
   ].filter(Boolean) as string[]
   return {
     success: failedChecks.length === 0,
     mode: 'mlb_prediction_v7_confidence_engine_v2_validation_v1',
-    checks: 6,
-    passed: 6 - failedChecks.length,
+    checks: 8,
+    passed: 8 - failedChecks.length,
     failed: failedChecks.length,
     failedChecks,
     confidence,
@@ -1643,7 +1701,10 @@ async function writeSnapshotsAndPredictions(
   const regenerationReason = useV7Calculation ? V7_REGENERATION_REASON : useV6Calculation ? V6_REGENERATION_REASON : 'prospective_preview_generation'
   const predictionVersion = useV7Calculation ? 7 : useV6Calculation ? 6 : 1
   const featureSetVersionFor = (market: string) => useV7Calculation ? V7_FEATURE_SET_VERSION : useV6Calculation ? V6_FEATURE_SET_VERSION : `baseball_mlb_${market}_prospective_feature_set_v2`
-  const verified = useV6Calculation ? await getMlbStarterWeatherStadiumIntelligence(selectedDate) : null
+  const [verified, missingIntelligence] = await Promise.all([
+    useV6Calculation ? getMlbStarterWeatherStadiumIntelligence(selectedDate) : Promise.resolve(null),
+    useV7Calculation ? getMlbMissingIntelligenceStatus({ selectedDate }) : Promise.resolve(null),
+  ])
   const verifiedByEvent = new Map((verified?.games ?? []).filter((game) => game.eventId).map((game) => [String(game.eventId), game]))
   const selectedOdds = chooseOddsRows(events, oddsRows)
   const historyCountByCutoff = new Map<string, number>()
@@ -1935,6 +1996,7 @@ async function writeSnapshotsAndPredictions(
           dataSufficiency: candidate.sufficiency,
           edge: sdk.edge,
           ev: sdk.expectedValue,
+          missingIntelligence,
         })
       : null
     const groupKey = predictionGroupKey({
@@ -2048,6 +2110,24 @@ async function writeSnapshotsAndPredictions(
           featureDomains: candidate.intelligence.featureDomains,
         },
         ...(candidate.v6Contract ? { mlbV6FeatureContract: candidate.v6Contract } : {}),
+        ...(useV7Calculation && missingIntelligence ? {
+          mlbMissingIntelligence: {
+            playerMetadataRows: missingIntelligence.coverage.playerMetadata.rows,
+            rosterAvailabilityStatus: missingIntelligence.coverage.rosterAvailability.status,
+            playerStatusCoveragePct: missingIntelligence.coverage.rosterAvailability.playerStatusCoveragePct,
+            injuredListStatusRows: missingIntelligence.coverage.rosterAvailability.injuredListStatusRows,
+            staleStatusCount: missingIntelligence.coverage.rosterAvailability.staleStatusCount,
+            unknownStatusCount: missingIntelligence.coverage.rosterAvailability.unknownStatusCount,
+            battingHandCoveragePct: missingIntelligence.coverage.handedness.battingHandCoveragePct,
+            throwingHandCoveragePct: missingIntelligence.coverage.handedness.throwingHandCoveragePct,
+            lineupStatus: missingIntelligence.coverage.lineups.status,
+            detailedInjuryFeed: missingIntelligence.coverage.injuries.detailedInjuryFeed,
+            bullpenReadiness: missingIntelligence.coverage.bullpen.readiness,
+            historicalPilot: missingIntelligence.replayCalibrationLearning.historicalPilot,
+            positiveEdgeAllowed: false,
+            injurySeverityInferred: false,
+          },
+        } : {}),
         ...(confidenceV2 ? { confidenceEngineV2: confidenceV2 } : {}),
         positiveFactors: [
           ...candidate.intelligence.home.positiveFactors.map((factor) => `${candidate.event.home_team}: ${factor}`),

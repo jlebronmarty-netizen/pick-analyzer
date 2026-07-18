@@ -10,6 +10,30 @@ Provider-dependent modules such as historical reconciliation execution, injuries
 
 ## Completed
 
+### MLB Operations Center V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/mlb-operations-center.service.ts`, `/api/mlb/operations-center` and `/mlb-operations`.
+
+Note: This is an internal admin monitor, not a user-facing recommendation feature. It aggregates operating-day lifecycle, Current Board, provider health and budget, intelligence coverage, prediction engine, model quality, settlement, automation, known limitations, developer links and a non-inflated MLB readiness score from existing read-only services. It makes 0 provider calls and does not alter official thresholds, champion rows, settlement, learning, provider budget rules, Current Board logic or V7 promotion state.
+
+### MLB Player Status Availability Integration V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/mlb-missing-intelligence.service.ts`, `src/services/sportsdataio-mlb-prospective-preview.service.ts`, MLB Data Quality integration, MLB AI Coach integration and `src/components/dashboard/MlbMissingIntelligencePanel.tsx`.
+
+Note: SportsDataIO `Player.Status` is now normalized as roster availability and injured-list detection while the detailed injury endpoint remains subscription-blocked. The integration preserves raw provider status, normalized availability, provider/canonical player IDs, team mapping, source and freshness. V7 Confidence Engine V2 applies only bounded data-confidence effects for stale/unknown status and IL context; no injury severity, expected return, confirmed lineup absence, official-threshold change, champion mutation or V7 promotion is inferred.
+
+### MLB Missing Intelligence Integration V1
+
+Status: Completed with provider limitations and build verified.
+
+Evidence: `src/services/mlb-missing-intelligence.service.ts`, `/api/mlb/missing-intelligence/health`, `src/components/dashboard/MlbMissingIntelligencePanel.tsx`, MLB Data Quality integration, MLB AI Coach integration and V7 Confidence Engine V2 missing-intelligence metadata in `src/services/sportsdataio-mlb-prospective-preview.service.ts`.
+
+Note: The module reuses existing `sport_players`, `provider_entity_mappings`, `sport_lineups`, `sport_injuries`, `sport_player_stats` and `sports_sync_jobs` tables. It supports cache-first coverage, budget-checked live preflight and idempotent player metadata hydration when the SportsDataIO MLB `Players` feed is available. Confirmed lineups and injury feeds remain typed provider limitations for the current Discovery Lab path unless entitlement is verified. V7 remains challenger-only, official thresholds are unchanged, champion history is untouched and missing data never becomes positive evidence.
+
 ### Product Experience Polish V1
 
 Status: Completed and build verified.

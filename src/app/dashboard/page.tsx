@@ -40,6 +40,7 @@ import SportsDataIoContractPanel from '@/components/dashboard/SportsDataIoContra
 import FeatureStoreCorePanel from '@/components/dashboard/FeatureStoreCorePanel'
 import MultiSportFeatureRegistryPanel from '@/components/dashboard/MultiSportFeatureRegistryPanel'
 import MlbFeatureStoreIntegrationPanel from '@/components/dashboard/MlbFeatureStoreIntegrationPanel'
+import MlbMissingIntelligencePanel from '@/components/dashboard/MlbMissingIntelligencePanel'
 import MlbPredictionEnginePanel from '@/components/dashboard/MlbPredictionEnginePanel'
 import MlbProspectivePreviewPanel from '@/components/dashboard/MlbProspectivePreviewPanel'
 import NflFeatureStoreIntegrationPanel from '@/components/dashboard/NflFeatureStoreIntegrationPanel'
@@ -198,6 +199,7 @@ export default function DashboardPage() {
           title="Engineering details"
           description="Sync jobs, provider health, runtime checks, data quality and route contracts."
         >
+          <MlbMissingIntelligencePanel />
           <HistoricalImportEnginePanel />
           <RuntimeObservabilityPanel />
           <SyncReliabilityPanel />

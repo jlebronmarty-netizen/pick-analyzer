@@ -4,6 +4,7 @@ import { getCurrentBoard, type CurrentBoardCandidate } from '@/services/current-
 import { buildBestBetsTodayFromBoard } from '@/services/best-bets-today.service'
 import { getMlbDataQualityStatus } from '@/services/mlb-data-quality.service'
 import { getMlbGamesPayloadAudit } from '@/services/mlb-games-payload-audit.service'
+import { getMlbMissingIntelligenceStatus } from '@/services/mlb-missing-intelligence.service'
 import { getMlbPitcherBullpenFoundations } from '@/services/mlb-model-platform.service'
 import { getMlbProviderCapabilityAudit } from '@/services/mlb-provider-capability-audit.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
@@ -82,12 +83,13 @@ function findCandidate(candidates: CurrentBoardCandidate[], query: string) {
 
 export async function getMlbAiCoach({ query = '', date = '2026-07-17' }: { query?: string | null; date?: string | null } = {}) {
   const safeDate = date ?? '2026-07-17'
-  const [board, quality, audit, gamesPayloadAudit, pitcherBullpen] = await Promise.all([
+  const [board, quality, audit, gamesPayloadAudit, pitcherBullpen, missingIntelligence] = await Promise.all([
     getCurrentBoard({ sportKey: 'baseball_mlb', mode: 'CURRENT', limit: 200 }),
     getMlbDataQualityStatus(safeDate),
     getMlbProviderCapabilityAudit(safeDate),
     getMlbGamesPayloadAudit(safeDate),
     getMlbPitcherBullpenFoundations(safeDate),
+    getMlbMissingIntelligenceStatus({ selectedDate: safeDate }),
   ])
   const intelligence = await getMlbStarterWeatherStadiumIntelligence(safeDate)
   const mostLikely = await getMostLikelyOpportunities({ sort: 'highest_probability', mode: 'current_board', limit: 50 })
@@ -163,9 +165,19 @@ export async function getMlbAiCoach({ query = '', date = '2026-07-17' }: { query
     candidates = top ? [candidateSummaryFromMostLikely(top)] : []
   } else if (q.includes('missing') || q.includes('hurts') || q.includes('data')) {
     answerType = 'missing_data'
-    answer = readyFor?.starterEngine
+    answer = q.includes('lineup') || q.includes('injur') || q.includes('hand') || q.includes('bullpen') || q.includes('status')
+      ? `MLB missing intelligence status: player metadata has ${missingIntelligence.coverage.playerMetadata.rows} cached rows, roster status is ${missingIntelligence.coverage.rosterAvailability.status}, ${missingIntelligence.coverage.rosterAvailability.injuredListStatusRows} cached players are marked on an injured list, batting-hand coverage is ${missingIntelligence.coverage.handedness.battingHandCoveragePct}%, throwing-hand coverage is ${missingIntelligence.coverage.handedness.throwingHandCoveragePct}%, lineups are ${missingIntelligence.coverage.lineups.status}, the detailed injury feed is ${missingIntelligence.coverage.injuries.detailedInjuryFeed}, and bullpen workload is ${missingIntelligence.coverage.bullpen.readiness}. Missing feeds reduce confidence; they do not create positive evidence.`
+      : readyFor?.starterEngine
       ? `The latest corrected GamesByDate verification found starter IDs for ${gamesPayloadAudit.summary.gamesWithStarterIds} games, weather for ${gamesPayloadAudit.summary.gamesWithWeather} games, wind for ${gamesPayloadAudit.summary.gamesWithWind ?? 0} games, and StadiumID for ${gamesPayloadAudit.summary.gamesWithVenueData} games. Lineups, injuries, bullpen context and projections remain unverified.`
       : `The largest model-quality blocker is critical data completeness: ${quality.scores.criticalDataCompleteness}%. Stored GamesByDate evidence verifies weather forecast values for ${gamesPayloadAudit.summary.gamesWithWeather} games, but documented starter fields are ${gamesPayloadAudit.normalizationDecision.starter.split('_').join(' ')}. Lineups, injuries, bullpen context and projections also remain unverified.`
+    candidates = []
+  } else if (q.includes('injur') || q.includes('available')) {
+    answerType = 'injury_availability'
+    answer = `Roster status confirms ${missingIntelligence.coverage.rosterAvailability.injuredListStatusRows} cached players are on an injured list and ${missingIntelligence.coverage.rosterAvailability.inactivePlayers} are inactive. Detailed injury information is unavailable under the current provider plan. Availability impact is limited because lineup confirmation and grounded player-importance evidence are unavailable.`
+    candidates = []
+  } else if (q.includes('hand') || q.includes('platoon') || q.includes('left') || q.includes('right')) {
+    answerType = 'handedness_context'
+    answer = `Handedness coverage is ${missingIntelligence.coverage.handedness.battingHandCoveragePct}% for batting hand and ${missingIntelligence.coverage.handedness.throwingHandCoveragePct}% for throwing hand across cached MLB players. Unknown handedness stays unknown, switch hitters are typed separately, and platoon context is not used as a strong edge without verified split data.`
     candidates = []
   } else if (q.includes('changed') || q.includes('refresh')) {
     answerType = 'refresh_status'
@@ -250,6 +262,13 @@ export async function getMlbAiCoach({ query = '', date = '2026-07-17' }: { query
       pitcherCoverage: pitcherBullpen.pitcherIntelligence.coverage,
       bullpenCoverage: pitcherBullpen.bullpenIntelligence.coverage,
       productReadiness: pitcherBullpen.productReadiness,
+    },
+    missingIntelligence: {
+      capabilityMatrix: missingIntelligence.capabilityMatrix,
+      coverage: missingIntelligence.coverage,
+      dataQuality: missingIntelligence.dataQuality,
+      operationsMonitor: missingIntelligence.operationsMonitor,
+      providerCallsMade: missingIntelligence.providerCallsMade,
     },
     guardrails: {
       llmUsed: false,
