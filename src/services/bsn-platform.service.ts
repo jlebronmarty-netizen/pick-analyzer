@@ -1,6 +1,12 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import {
+  getBasketballSourceFramework,
+  getBasketballSourceQualityReport,
+  planBasketballSourceImport,
+  validateBasketballSourceFrameworkFixtures,
+} from '@/services/basketball-source-framework.service'
 
 export type BsnCapabilityStatus =
   | 'SUPPORTED'
@@ -357,6 +363,21 @@ function pct(numerator: number, denominator: number) {
   return Number(((numerator / denominator) * 100).toFixed(2))
 }
 
+function localDateInTimezone(value: string | null | undefined, timezone = BSN_TIMEZONE) {
+  const date = value ? new Date(value) : new Date()
+  if (!Number.isFinite(date.getTime())) return ''
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const year = parts.find((part) => part.type === 'year')?.value
+  const month = parts.find((part) => part.type === 'month')?.value
+  const day = parts.find((part) => part.type === 'day')?.value
+  return year && month && day ? `${year}-${month}-${day}` : date.toISOString().slice(0, 10)
+}
+
 async function safeCount(table: string, filters: Record<string, string> = {}): Promise<CountResult> {
   try {
     let query = supabaseAdmin.from(table).select('*', { count: 'exact', head: true })
@@ -392,6 +413,7 @@ async function loadBsnEvents(limit = 50) {
 }
 
 export function getBsnSourceIntelligence() {
+  const sourceFramework = getBasketballSourceFramework()
   return {
     success: true,
     mode: 'bsn_source_intelligence_v1',
@@ -400,6 +422,15 @@ export function getBsnSourceIntelligence() {
     leagueKey: BSN_LEAGUE_KEY,
     timezone: BSN_TIMEZONE,
     providerCallsMade: 0,
+    sourceFramework: {
+      mode: sourceFramework.mode,
+      blueprintFor: sourceFramework.blueprintFor,
+      connectorTypes: sourceFramework.connectorTypes,
+      normalizedDomains: sourceFramework.normalizedDomains,
+      basketballAbstractions: sourceFramework.basketballAbstractions,
+      teamDnaDomains: sourceFramework.teamDnaDomains,
+      guardrails: sourceFramework.guardrails,
+    },
     sourceMatrix: SOURCE_MATRIX,
     architectureDecision: {
       primaryProductionArchitecture: 'approved_provider_or_permissioned_feed_required',
@@ -411,6 +442,7 @@ export function getBsnSourceIntelligence() {
 }
 
 export function getBsnCapabilityMatrix() {
+  const sourceFramework = getBasketballSourceFramework()
   const supported = CAPABILITIES.filter((capability) => capability.status === 'SUPPORTED').length
   const partial = CAPABILITIES.filter((capability) => capability.status === 'PARTIAL').length
   const blocked = CAPABILITIES.filter((capability) => ['BLOCKED', 'UNSUPPORTED', 'UNKNOWN'].includes(capability.status)).length
@@ -431,6 +463,15 @@ export function getBsnCapabilityMatrix() {
       productionReady: false,
     },
     capabilities: CAPABILITIES,
+    sourceConnectors: sourceFramework.connectors.map((connector) => ({
+      id: connector.id,
+      type: connector.type,
+      status: connector.status,
+      priority: connector.priority,
+      approvedForLiveImport: connector.approvedForLiveImport,
+      approvedForProductionPredictions: connector.approvedForProductionPredictions,
+      writePathEnabled: connector.writePathEnabled,
+    })),
     guardrails: {
       noFabricatedCapabilities: true,
       noProviderSpecificLeakage: true,
@@ -547,6 +588,8 @@ export async function runBsnSyncPlan({
   idempotencyKey?: string | null
 } = {}) {
   const dataQuality = await getBsnDataQualityStatus()
+  const sourceFramework = getBasketballSourceFramework()
+  const sourceQuality = getBasketballSourceQualityReport({ sourceId: 'official_bsn' })
 
   return {
     success: true,
@@ -558,6 +601,18 @@ export async function runBsnSyncPlan({
     confirmed,
     idempotencyKey,
     status: 'source_approval_required',
+    sourceFramework: {
+      status: 'ready_for_validation',
+      connectorTypes: sourceFramework.connectorTypes,
+      connectors: sourceFramework.connectors.length,
+      normalizedDomains: sourceFramework.normalizedDomains,
+      basketballBlueprint: sourceFramework.blueprintFor,
+      sourceQuality: {
+        sourceId: sourceQuality.source.id,
+        status: sourceQuality.status,
+        score: sourceQuality.score,
+      },
+    },
     providerCallsPlanned: 0,
     providerCallsMade: 0,
     writesPlanned: 0,
@@ -750,6 +805,8 @@ export function getBsnBasketballKnowledgeEngine() {
 }
 
 export async function getBsnOperationsReadiness() {
+  const sourceFramework = getBasketballSourceFramework()
+  const sourceValidation = validateBasketballSourceFrameworkFixtures()
   const [dataQuality, prediction, teamIntelligence] = await Promise.all([
     getBsnDataQualityStatus(),
     runBsnPredictionEngineV7({ dryRun: true, confirmed: false }),
@@ -766,6 +823,7 @@ export async function getBsnOperationsReadiness() {
     status: 'prepared_provider_blocked',
     modules: {
       sourceIntelligence: 'ready',
+      sourceConnectorFramework: sourceValidation.success ? 'ready' : 'degraded',
       capabilityMatrix: 'ready',
       dataQuality: 'ready',
       teamIntelligence: teamIntelligence.status,
@@ -779,6 +837,13 @@ export async function getBsnOperationsReadiness() {
       calibration: 'contract_ready_waiting_for_settled_sample',
       learning: 'contract_ready_waiting_for_settled_sample',
       adminTools: 'validation_ready_write_routes_not_enabled',
+    },
+    reusableBasketballBlueprint: {
+      connectorTypes: sourceFramework.connectorTypes,
+      abstractions: sourceFramework.basketballAbstractions,
+      teamDnaDomains: sourceFramework.teamDnaDomains,
+      markets: sourceFramework.supportedMarkets,
+      validation: sourceValidation,
     },
     modelOps: MODEL_OPS_CONTRACTS,
     dataQuality: {
@@ -796,6 +861,9 @@ export async function getBsnCurrentBoardReadiness() {
     runBsnPredictionEngineV7({ dryRun: true, confirmed: false }),
     getBsnTeamIntelligenceReadiness(),
   ])
+  const today = localDateInTimezone(null)
+  const events = await loadBsnEvents(200)
+  const todaysGames = events.rows.filter((row) => localDateInTimezone(row.start_time) === today)
 
   return {
     success: true,
@@ -806,7 +874,18 @@ export async function getBsnCurrentBoardReadiness() {
     providerCallsMade: 0,
     status: 'placeholder_ready_data_blocked',
     board: {
-      gamesToday: 0,
+      gamesToday: todaysGames.length,
+      games: todaysGames.map((row) => ({
+        eventId: row.id,
+        matchup: `${row.away_team ?? 'Away'} @ ${row.home_team ?? 'Home'}`,
+        scheduledTime: row.start_time,
+        status: row.status,
+        venue: row.venue ?? null,
+        projectedScore: null,
+        confidence: null,
+        reasons: [],
+        blockers: ['verified_bsn_odds_missing', 'bsn_predictions_missing'],
+      })),
       candidates: [],
       officialPicks: 0,
       informationalCandidates: 0,
@@ -836,6 +915,7 @@ export async function getBsnCurrentBoardReadiness() {
       noMostLikelyWithoutPredictions: true,
       currentBoardUnchangedForOtherSports: true,
     },
+    sourceErrors: events.error ? [events.error] : [],
   }
 }
 
@@ -943,6 +1023,22 @@ export function validateBsnManualEntry(input: Record<string, unknown> = {}) {
       officialPickMutationAllowed: false,
     },
   }
+}
+
+export function getBsnSourceFramework() {
+  return getBasketballSourceFramework()
+}
+
+export function getBsnSourceQuality(sourceId?: string | null) {
+  return getBasketballSourceQualityReport({ sourceId })
+}
+
+export function validateBsnSourceInput(input: Record<string, unknown> = {}) {
+  return planBasketballSourceImport(input)
+}
+
+export function validateBsnSourceFrameworkFixtures() {
+  return validateBasketballSourceFrameworkFixtures()
 }
 
 export async function getBsnFeatureEngineeringValidation() {

@@ -39,6 +39,10 @@ Capability statuses use `SUPPORTED`, `PARTIAL`, `UNSUPPORTED`, `DEGRADED`, `BLOC
 
 ## Implemented Surfaces
 
+- `/api/bsn/sources`
+- `/api/bsn/source-quality`
+- `/api/bsn/sources/validate`
+- `/api/bsn/import`
 - `/api/bsn/capabilities`
 - `/api/bsn/data-quality`
 - `/api/bsn/sync`
@@ -52,6 +56,16 @@ Capability statuses use `SUPPORTED`, `PARTIAL`, `UNSUPPORTED`, `DEGRADED`, `BLOC
 - `/api/bsn/analytics/readiness`
 
 All new BSN surfaces make zero provider calls. `/api/bsn/predictions` now returns a V7 preflight and does not fabricate odds or write prediction history.
+
+## Source Framework
+
+`src/services/basketball-source-framework.service.ts` defines the reusable basketball connector layer for BSN and future basketball leagues. It supports Official BSN, future API, CSV import, manual entry and future provider connectors. The framework produces source-quality reports, validates CSV/manual rows, normalizes dry-run import records and returns import plans for `sports_teams`, `sport_events`, `sport_standings`, `sport_players`, `sport_game_stats` and `sports_odds_snapshots`.
+
+The source framework is dry-run only. It requires source lineage, timestamps, idempotency, provider mapping validation, audit-trail writes and rollback planning before any persistence path can be enabled.
+
+## Data Acquisition Strategy
+
+The permanent BSN acquisition strategy is documented in `docs/bsn-data-acquisition-strategy.md`. The official ecosystem exposes enough public web/app evidence to prove schedule, results, standings, teams, players, statistics, playoffs, leaders and boxscore-style data exist, but robots disallow `/api/` and `/_next/` and terms prohibit mass extraction/scraping/commercial reuse without authorization. Production acquisition should use a permissioned official feed/API first, legally sourced CSV second, audited manual entry only for emergency corrections, and a licensed future provider only after BSN coverage is verified.
 
 ## Team Intelligence And Knowledge Engine
 

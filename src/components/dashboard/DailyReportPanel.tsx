@@ -277,6 +277,7 @@ export default function DailyReportPanel() {
   const [data, setData] = useState<DailyReportResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     async function load() {
@@ -285,7 +286,7 @@ export default function DailyReportPanel() {
         setError(null)
 
         const controller = new AbortController()
-        const timeoutId = window.setTimeout(() => controller.abort(), 20000)
+        const timeoutId = window.setTimeout(() => controller.abort(), 8000)
 
         const response = await fetch(`/api/daily-report/fast?bankroll=${bankroll}`, {
           cache: 'no-store',
@@ -315,7 +316,7 @@ export default function DailyReportPanel() {
     }
 
     load()
-  }, [bankroll])
+  }, [bankroll, reloadKey])
 
   if (loading) {
     return (
@@ -327,8 +328,22 @@ export default function DailyReportPanel() {
 
   if (error) {
     return (
-      <div className="rounded-3xl border border-red-900/60 bg-red-950/40 p-6 text-sm text-red-300">
-        {error}
+      <div className="rounded-3xl border border-amber-500/30 bg-amber-950/20 p-6 text-sm text-amber-100">
+        <p className="font-black">Daily Report is deferred.</p>
+        <p className="mt-2 leading-6">
+          {error} Today&apos;s recommendation and slate status do not depend on this report.
+        </p>
+        <button
+          onClick={() => {
+            setData(null)
+            setError(null)
+            setLoading(true)
+            setReloadKey((value) => value + 1)
+          }}
+          className="mt-4 rounded-xl border border-amber-400/40 px-4 py-2 text-xs font-bold text-amber-100"
+        >
+          Retry
+        </button>
       </div>
     )
   }

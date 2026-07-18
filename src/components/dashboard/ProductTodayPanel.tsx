@@ -2,30 +2,45 @@
 
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 
-type DailyOpsResponse = {
+type TodayResponse = {
   success: boolean
+  mode: 'dashboard_today_contract_v1'
   generatedAt: string
-  shouldBetToday: 'YES' | 'NO'
-  answer: string
-  aiBriefing?: Record<string, any>
-  nextScheduledAction?: Record<string, any>
-  topSection: Record<string, any>
-  gameCards: Array<Record<string, any>>
-  timeline: Array<Record<string, any>>
-  systemHealth: Record<string, any>
+  nowPuertoRico: string
+  timezone: string
+  operatingDate: string
+  activeSlateDate: string | null
+  nextSlateDate: string | null
+  currentStage: string
+  activeOperatingDayStatus: string
+  currentGames: number
+  upcomingGames: number
+  finalGames: number
+  gamesWaitingForOdds: number
+  gamesReadyForAnalysis: number
+  predictionCandidates: number
+  officialPicks: number
+  informationalCandidates: number
+  latestOddsTimestamp: string | null
+  freshness: 'fresh' | 'stale' | 'empty'
+  nextAction: string
+  nextActionAt: string | null
+  automationStatus: string
+  providerCallsToday: number
+  providerCallsMade: 0
+  remoteMutationsMade: 0
+  summary: {
+    recommendation: string
+    aiBriefing: string
+    currentOperatingDay: string
+    nextSlate: string
+    marketPrices: string
+  }
+  currentGameCards: Array<Record<string, any>>
+  nextSlateGames: Array<Record<string, any>>
+  pipeline: Array<Record<string, any>>
+  warnings: string[]
   blockers: string[]
-}
-
-function numberText(value: unknown, suffix = '') {
-  const parsed = Number(value)
-  if (!Number.isFinite(parsed)) return 'Not ready'
-  return `${parsed.toFixed(1).replace(/\.0$/, '')}${suffix}`
-}
-
-function oddsText(value: unknown) {
-  const parsed = Number(value)
-  if (!Number.isFinite(parsed)) return 'No price'
-  return parsed > 0 ? `+${parsed}` : String(parsed)
 }
 
 function timeText(value: unknown) {
@@ -42,8 +57,8 @@ function timeText(value: unknown) {
 
 function statusTone(value: unknown): 'green' | 'yellow' | 'blue' | 'gray' | 'red' {
   const status = String(value ?? '').toLowerCase()
-  if (status.includes('official') || status.includes('healthy') || status.includes('complete')) return 'green'
-  if (status.includes('waiting') || status.includes('watch')) return 'yellow'
+  if (status.includes('official') || status.includes('healthy') || status.includes('complete') || status.includes('fresh')) return 'green'
+  if (status.includes('waiting') || status.includes('watch') || status.includes('stale')) return 'yellow'
   if (status.includes('informational')) return 'blue'
   if (status.includes('blocked') || status.includes('problem')) return 'red'
   return 'gray'
@@ -72,7 +87,7 @@ function EmptyState({ title, detail }: { title: string; detail: string }) {
   )
 }
 
-function Metric({ label, value, tone = 'gray' }: { label: string; value: string; tone?: 'green' | 'yellow' | 'blue' | 'gray' | 'red' }) {
+function Metric({ label, value, tone = 'gray' }: { label: string; value: string | number; tone?: 'green' | 'yellow' | 'blue' | 'gray' | 'red' }) {
   const color = {
     green: 'text-emerald-200',
     yellow: 'text-amber-100',
@@ -88,56 +103,58 @@ function Metric({ label, value, tone = 'gray' }: { label: string; value: string;
   )
 }
 
-function BriefingCard({ data }: { data: DailyOpsResponse }) {
-  const primary = data.topSection.primaryOpportunity ?? data.topSection.bestBetToday
-  const shouldBet = data.shouldBetToday === 'YES'
-  const reasons = data.blockers?.length ? data.blockers.slice(0, 3) : ['Current prices do not justify a wager.']
+function dateText(value: string | null) {
+  if (!value) return 'Not resolved'
+  return new Date(`${value}T12:00:00.000Z`).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  })
+}
+
+function displayStatus(value: unknown) {
+  const text = String(value ?? 'Waiting')
+  if (text === 'started_or_results_pending') return 'Results pending'
+  return text.replaceAll('_', ' ')
+}
+
+function BriefingCard({ data }: { data: TodayResponse }) {
+  const shouldBet = data.officialPicks > 0
+  const reasons = data.blockers?.length ? data.blockers.slice(0, 3) : ['No official recommendation passed policy.']
 
   return (
     <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 md:p-6">
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Good Morning Jeffrey</p>
-          <h2 className="mt-2 text-3xl font-black text-white md:text-4xl">Today's AI Briefing</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Today</p>
+          <h2 className="mt-2 text-3xl font-black text-white md:text-4xl">AI Briefing</h2>
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <Pill tone={shouldBet ? 'green' : 'yellow'}>{shouldBet ? 'Official bet available' : 'No official bet today'}</Pill>
-            <Pill tone="blue">{data.gameCards.length} MLB games reviewed</Pill>
+            <Pill tone="blue">Operating day {dateText(data.operatingDate)}</Pill>
+            {data.nextSlateDate && <Pill tone="gray">Next slate {dateText(data.nextSlateDate)}</Pill>}
             <Pill tone="gray">Updated {timeText(data.generatedAt)}</Pill>
           </div>
-          <p className="mt-5 max-w-3xl text-lg leading-7 text-slate-200">{data.aiBriefing?.firstAnswer ?? data.answer}</p>
+          <p className="mt-5 max-w-3xl text-lg leading-7 text-slate-200">{data.summary.aiBriefing}</p>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-            {data.aiBriefing?.why ?? 'The board is waiting for a price that gives the model enough value.'}
+            {data.summary.currentOperatingDay}
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <Metric label="Recommendation" value={shouldBet ? 'Bet with official staking' : 'Preserve bankroll'} tone={shouldBet ? 'green' : 'yellow'} />
-            <Metric label="Next Check" value={`${data.nextScheduledAction?.action ?? 'Waiting'} - ${data.nextScheduledAction?.estimate ?? 'No refresh is due right now.'}`} tone="blue" />
+            <Metric label="Next Safe Action" value={data.nextAction} tone="blue" />
           </div>
         </div>
 
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-5">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Today's Best Opportunity</p>
-          {primary ? (
-            <>
-              <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-2xl font-black text-white">{primary.selection}</h3>
-                  <p className="mt-1 text-sm text-slate-400">{primary.market} | {primary.matchup}</p>
-                </div>
-                <Pill tone={statusTone(primary.status)}>{primary.status ?? 'Informational'}</Pill>
-              </div>
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <Metric label="Probability" value={numberText(primary.probability, '%')} tone="blue" />
-                <Metric label="Confidence" value={numberText(primary.confidence)} tone="yellow" />
-                <Metric label="Price" value={oddsText(primary.odds)} tone="gray" />
-                <Metric label="Value" value={numberText(primary.value, '%')} tone={Number(primary.value ?? 0) > 0 ? 'green' : 'yellow'} />
-              </div>
-              <p className="mt-4 text-sm leading-6 text-slate-300">
-                {primary.summary ?? 'Best informational read. Official value gates did not clear a wager.'}
-              </p>
-            </>
-          ) : (
-            <EmptyState title="No eligible opportunity yet" detail="Market prices are either unavailable or not attractive enough. The board will refresh automatically." />
-          )}
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Recommendation</p>
+          <h3 className="mt-3 text-2xl font-black text-white">{data.summary.recommendation}</h3>
+          <p className="mt-3 text-sm leading-6 text-slate-300">{data.summary.marketPrices}</p>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <Metric label="Candidates" value={data.predictionCandidates} tone={data.predictionCandidates ? 'blue' : 'gray'} />
+            <Metric label="Official Picks" value={data.officialPicks} tone={data.officialPicks ? 'green' : 'yellow'} />
+            <Metric label="Ready Games" value={data.gamesReadyForAnalysis} tone={data.gamesReadyForAnalysis ? 'green' : 'gray'} />
+            <Metric label="Waiting Odds" value={data.gamesWaitingForOdds} tone={data.gamesWaitingForOdds ? 'yellow' : 'green'} />
+          </div>
         </div>
       </div>
 
@@ -154,8 +171,6 @@ function BriefingCard({ data }: { data: DailyOpsResponse }) {
 }
 
 function GameCard({ game }: { game: Record<string, any> }) {
-  const pick = game.currentRecommendation
-  const status = game.recommendationText ?? (pick ? 'Informational read only.' : 'Market prices are not ready yet.')
   return (
     <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -163,34 +178,28 @@ function GameCard({ game }: { game: Record<string, any> }) {
           <p className="text-xs font-bold text-slate-500">{timeText(game.scheduledTime)}</p>
           <h4 className="mt-1 truncate text-lg font-black text-white">{game.matchup}</h4>
         </div>
-        <Pill tone={statusTone(game.status)}>{game.status ?? 'Waiting'}</Pill>
+        <Pill tone={statusTone(game.status)}>{displayStatus(game.status)}</Pill>
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Metric label="Probability" value={numberText(game.probability, '%')} tone="blue" />
-        <Metric label="Confidence" value={numberText(game.confidence)} tone="yellow" />
-        <Metric label="Projection" value="Score pending" tone="gray" />
-        <Metric label="Price" value={oddsText(pick?.odds)} tone="gray" />
-      </div>
-      <p className="mt-4 text-sm font-bold text-slate-200">{status}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-400">
-        {game.keyReason ?? pick?.summary ?? 'This game is available, but there is no official wager at the current price.'}
+      <p className="mt-4 text-sm leading-6 text-slate-400">
+        {game.oddsPresent === false
+          ? 'Market prices have not been refreshed yet.'
+          : game.predictionReady === false
+            ? 'Prediction analysis is waiting for verified market data.'
+            : 'Tracked separately from the Current Board recommendation gate.'}
       </p>
     </article>
   )
 }
 
 function Timeline({ stages }: { stages: Array<Record<string, any>> }) {
-  const ids = ['players', 'pitchers', 'weather', 'odds', 'predictions', 'best_bets', 'results', 'settlement', 'learning']
-  const visible = ids.map((id) => stages.find((stage) => stage.id === id)).filter(Boolean) as Array<Record<string, any>>
-
   return (
     <section className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Today's Pipeline</p>
+      <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Pipeline</p>
       <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-        {visible.map((stage) => (
+        {stages.map((stage) => (
           <div key={stage.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-3">
             <span className="text-sm font-bold text-white">{stage.displayLabel ?? stage.label}</span>
-            <Pill tone={statusTone(stage.displayStatus ?? stage.status)}>{stage.displayStatus ?? 'Waiting'}</Pill>
+            <Pill tone={statusTone(stage.status)}>{stage.status ?? 'Waiting'}</Pill>
           </div>
         ))}
       </div>
@@ -198,12 +207,12 @@ function Timeline({ stages }: { stages: Array<Record<string, any>> }) {
   )
 }
 
-function SystemStatus({ health }: { health: Record<string, any> }) {
+function SystemStatus({ data }: { data: TodayResponse }) {
   const rows = [
-    ['Provider', health.provider?.displayStatus ?? health.provider?.status ?? 'Waiting', `${health.provider?.callsToday ?? 0} calls today`],
-    ['Model', health.model?.displayStatus ?? 'Waiting', health.model?.promotion ?? 'Manual review required'],
-    ['Learning', health.learningHealth?.displayStatus ?? 'Waiting', health.learningHealth?.status ?? 'Waiting for settled games'],
-    ['Automation', health.automation?.displayStatus ?? 'Healthy', health.automation?.nextAction ?? 'Waiting'],
+    ['Provider', 'Healthy', `${data.providerCallsToday} calls today`],
+    ['Current Board', data.freshness === 'empty' ? 'Waiting' : data.freshness, `${data.predictionCandidates} candidates`],
+    ['Learning', 'Not due', 'Sample-gated; no automatic promotion.'],
+    ['Automation', data.automationStatus, data.nextAction],
   ]
 
   return (
@@ -225,13 +234,13 @@ function SystemStatus({ health }: { health: Record<string, any> }) {
 }
 
 export default function ProductTodayPanel() {
-  const [data, setData] = useState<DailyOpsResponse | null>(null)
+  const [data, setData] = useState<TodayResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
       try {
-        const response = await fetch('/api/autonomous-daily-operations/status', { cache: 'no-store' })
+        const response = await fetch('/api/dashboard?mode=today', { cache: 'no-store' })
         const json = await response.json()
         if (!response.ok || !json.success) throw new Error(json.error?.message ?? 'Unable to load today.')
         setData(json)
@@ -242,7 +251,8 @@ export default function ProductTodayPanel() {
     load()
   }, [])
 
-  const games = useMemo(() => data?.gameCards ?? [], [data])
+  const currentGames = useMemo(() => data?.currentGameCards ?? [], [data])
+  const nextSlateGames = useMemo(() => data?.nextSlateGames ?? [], [data])
 
   if (error) return <EmptyState title="Today is temporarily unavailable" detail={error} />
 
@@ -263,23 +273,48 @@ export default function ProductTodayPanel() {
     <section className="space-y-5">
       <BriefingCard data={data} />
 
+      <section className="grid gap-5 xl:grid-cols-2">
+        <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Today's Operating Day</p>
+          <h3 className="mt-1 text-2xl font-black text-white">{dateText(data.operatingDate)}</h3>
+          <p className="mt-3 text-sm leading-6 text-slate-300">{data.summary.currentOperatingDay}</p>
+          <div className="mt-5 grid grid-cols-3 gap-3">
+            <Metric label="Games" value={data.currentGames} tone={data.currentGames ? 'blue' : 'gray'} />
+            <Metric label="Final" value={data.finalGames} tone={data.finalGames ? 'green' : 'gray'} />
+            <Metric label="Stage" value={data.currentStage.replaceAll('_', ' ')} tone="gray" />
+          </div>
+        </div>
+        <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Next Slate</p>
+          <h3 className="mt-1 text-2xl font-black text-white">{dateText(data.nextSlateDate)}</h3>
+          <p className="mt-3 text-sm leading-6 text-slate-300">{data.summary.nextSlate}</p>
+          <div className="mt-5 grid grid-cols-3 gap-3">
+            <Metric label="Games" value={data.upcomingGames} tone={data.upcomingGames ? 'blue' : 'gray'} />
+            <Metric label="Waiting Odds" value={data.gamesWaitingForOdds} tone={data.gamesWaitingForOdds ? 'yellow' : 'green'} />
+            <Metric label="Ready" value={data.gamesReadyForAnalysis} tone={data.gamesReadyForAnalysis ? 'green' : 'gray'} />
+          </div>
+        </div>
+      </section>
+
       <section className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Today's Games</p>
-            <h3 className="mt-1 text-2xl font-black text-white">Current MLB Board</h3>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Games</p>
+            <h3 className="mt-1 text-2xl font-black text-white">{currentGames.length ? "Today's Games" : 'Scheduled Games'}</h3>
           </div>
-          <Pill tone={games.length ? 'green' : 'yellow'}>{games.length ? `${games.length} games` : 'Waiting'}</Pill>
+          <Pill tone={currentGames.length || nextSlateGames.length ? 'green' : 'yellow'}>
+            {currentGames.length || nextSlateGames.length ? `${currentGames.length || nextSlateGames.length} games` : 'Waiting'}
+          </Pill>
         </div>
         <div className="mt-5 grid gap-4 xl:grid-cols-2">
-          {games.length ? games.map((game) => <GameCard key={game.eventId} game={game} />) : (
-            <EmptyState title="No eligible MLB games are currently available" detail={`The next refresh is scheduled for ${data.nextScheduledAction?.action ?? 'the next safe refresh window'}.`} />
+          {currentGames.length ? currentGames.map((game) => <GameCard key={game.eventId} game={game} />) : nextSlateGames.length ? nextSlateGames.map((game) => <GameCard key={game.eventId} game={game} />) : (
+            <EmptyState title="No actionable games remain for today" detail="No separate next slate is resolved from stored data yet." />
           )}
         </div>
       </section>
 
-      <Timeline stages={data.timeline} />
-      <SystemStatus health={data.systemHealth} />
+      <Timeline stages={data.pipeline} />
+      <SystemStatus data={data} />
     </section>
   )
 }

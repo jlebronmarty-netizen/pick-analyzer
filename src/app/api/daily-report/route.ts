@@ -19,7 +19,7 @@ export async function GET(request: Request) {
         }
       : await getDailyReport(bankroll)
 
-    return NextResponse.json(result)
+    return NextResponse.json(result, { headers: { 'Cache-Control': summaryOnly ? 'private, max-age=30, stale-while-revalidate=120' : 'no-store, max-age=0' } })
   } catch (error) {
     console.error('Daily report error:', error)
 

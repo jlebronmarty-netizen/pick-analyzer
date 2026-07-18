@@ -10,6 +10,30 @@ Provider-dependent modules such as historical reconciliation execution, injuries
 
 ## Completed
 
+### Dashboard Unification, Performance And Slate Consistency V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/dashboard-today.service.ts`, `/api/dashboard?mode=today`, `src/components/dashboard/ProductTodayPanel.tsx`, `src/components/dashboard/DashboardDeveloperGroups.tsx`.
+
+Note: The dashboard now has one canonical Today contract and one primary user-facing answer. It separates Puerto Rico operating date from next slate date, distinguishes current-day games from next-slate scheduled games, reports odds/prediction/recommendation readiness from the same resolver, labels evening actions without stale Morning Sync wording and keeps advanced legacy panels collapsed behind lazy Developer Mode groups. Daily Report no longer blocks the primary dashboard. No official-pick thresholds, champion rows, settlement policy, provider-budget policy or V7 promotion state were changed.
+
+### BSN Official Ecosystem Data Acquisition Audit V1
+
+Status: Completed and build verified.
+
+Evidence: `docs/bsn-data-acquisition-strategy.md`.
+
+Note: This was a discovery-only strategy sprint. It did not add imports, prediction modules or dashboard pages. Official BSN pages and app-store metadata were audited with bounded public requests. Robots and terms make unapproved internal API/chunk scraping unsuitable; the permanent recommendation is permissioned official feed/API primary, legally sourced CSV fallback, audited manual entry emergency path and licensed provider only after BSN coverage is verified.
+
+### BSN Source Framework V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/basketball-source-framework.service.ts`, `/api/bsn/sources`, `/api/bsn/source-quality`, `/api/bsn/sources/validate`, `/api/bsn/import`, BSN capability/sync/readiness integration and `docs/bsn-source-framework-v1.md`.
+
+Note: This is the reusable basketball connector blueprint for BSN, NBA, NCAA, EuroLeague, FIBA, WNBA and future basketball leagues. It supports official-source discovery, future APIs, CSV import, manual entry and future providers with validation, dry-run import planning, quality reporting, normalized target-table mapping and strict no-fabrication/no-write guardrails. BSN remains source/provider/odds/calibration blocked for production betting.
+
 ### MLB Operations Center V1
 
 Status: Completed and build verified.
