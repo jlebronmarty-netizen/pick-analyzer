@@ -2,7 +2,7 @@ import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
-const DEFAULT_DAILY_CALL_BUDGET = 100
+const DEFAULT_DAILY_CALL_BUDGET = 1000
 const DEFAULT_SOFT_RESERVE = 25
 const DEFAULT_MAX_CALLS_PER_ACTION = 3
 const TIMEZONE = 'America/Puerto_Rico'

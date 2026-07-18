@@ -362,7 +362,6 @@ async function loadStatusEvents({
 }) {
   const range = operatingDayUtcRange(date)
   const linkedEventIds = operatingDayId ? await loadLinkedEventIds(operatingDayId) : []
-  if (operatingDayId && linkedEventIds.length === 0) return { events: [] as SportEventRow[], linkedEventIds, range }
 
   let query = supabaseAdmin
     .from('sport_events')
@@ -900,7 +899,7 @@ export async function getOperatingDayStatus(input: { sportKey?: string | null; l
     nextRequiredAction: nextAction(day?.status ?? 'planned'),
     selectedEventIds: statusEvents.events.map((event) => event.id),
     linkedEventIds: statusEvents.linkedEventIds,
-    blockingReason: lifecycleEvents.map((event) => event.blocking_reason).filter(Boolean).at(-1) ?? null,
+    blockingReason: lifecycleEvents.at(-1)?.blocking_reason ?? null,
     lifecycleEvents,
     providerCallsMade: 0,
   }
@@ -1021,6 +1020,7 @@ export async function executeOperatingDay(request: ExecuteRequest) {
       try {
         const realDay = await getOrCreateOperatingDay(sportKey, leagueKey, slate.selectedSlateDate, false)
         realOperatingDayId = String(realDay?.id ?? realOperatingDayId)
+        linkedEvents = await linkEvents(realOperatingDayId, sportKey, leagueKey, slate.selectedSlateDate)
         const preview = await runSportsDataIoMlbProspectivePreview({
           dryRun: false,
           confirmed: true,
@@ -1031,7 +1031,7 @@ export async function executeOperatingDay(request: ExecuteRequest) {
           timeoutMs: request.timeoutMs,
         })
         providerCallsMade = Number(asRecord(preview.providerUsage).externalProviderCallsMade ?? preview.providerCallsMade ?? 0)
-        linkedEvents = await linkEvents(realOperatingDayId, sportKey, leagueKey, slate.selectedSlateDate)
+        linkedEvents = Math.max(linkedEvents, await linkEvents(realOperatingDayId, sportKey, leagueKey, slate.selectedSlateDate))
         const refreshedSlate = await getNextSlateStatus({ sportKey, leagueKey, searchDays: request.searchDays ?? 7 })
         const intelligence = await refreshIntelligenceSurfaceSummary(sportKey)
         const status = String(preview.status) === 'completed' || String(preview.status) === 'final_refresh_completed'

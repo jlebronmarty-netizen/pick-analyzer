@@ -1065,14 +1065,14 @@ export async function getAutonomousSchedulerStatus() {
     },
     githubActions: {
       workflow: '.github/workflows/operating-day-refresh.yml',
-      schedulesUtc: ['0 12 * * *', '0 16 * * *', '0 19 * * *', '30 21 * * *'],
-      schedulesPuertoRico: ['08:00 AST', '12:00 AST', '15:00 AST', '17:30 AST'],
+      schedulesUtc: ['0 12 * * *', '0 16 * * *', '0 19 * * *', '30 21 * * *', '30 3 * * *', '0 5 * * *'],
+      schedulesPuertoRico: ['08:00 AST', '12:00 AST', '15:00 AST', '17:30 AST', '23:30 AST', '01:00 AST'],
       purpose: 'External multi-stage scheduler. Server still decides due stage.',
     },
     lateNightStages: {
       recommendedUtc: ['03:30 * * *', '05:00 * * *'],
       recommendedPuertoRico: ['23:30 AST results/settlement', '01:00 AST replay/learning'],
-      configuredInRepository: false,
+      configuredInRepository: true,
     },
     requiredSecretsPresent,
     externalSchedulerVerified,

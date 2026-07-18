@@ -22,6 +22,8 @@ Controlled validation: The first confirmed production attempt intentionally did 
 
 Postgame validation: `sync_results` now returns `WAITING_FOR_FINALS` while any operating-day game remains active pregame or unresolved in stored operating-day status. Results sync, settlement, replay and learning proof remain pending until the cohort is terminal and a safe postgame window exists.
 
+July 18 activation validation: The MLB operating day was idempotently created from 15 stored events, but production odds/features/predictions remained blocked by missing `SPORTSDATAIO_MLB_API_KEY` in the deployed environment. Status/linking robustness and late-night external schedules were tightened; official thresholds, champion rows and settlement gates remain unchanged.
+
 ### MLB Bullpen And Pitcher Intelligence V1
 
 Status: Completed and build verified.

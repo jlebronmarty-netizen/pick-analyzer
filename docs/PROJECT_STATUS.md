@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-18 03:15:00 -04:00
+Last updated: 2026-07-18 08:25:00 -04:00
 
 ## Current Architecture
 
@@ -16,6 +16,7 @@ Pick Analyzer is a Next.js 16 App Router application using React 19, TypeScript,
 
 ## Completed Modules Confirmed From Repository
 
+- MLB 2026-07-18 Operating-Day Activation Validation V1: production validation resolved 15 stored MLB events for the Puerto Rico operating date and idempotently created operating day `56c2a58d-04f9-4f64-9190-ee6042678e4d`, but provider refresh was externally blocked because production reported `SPORTSDATAIO_MLB_API_KEY is not configured`. The operating-day status path now falls back to stored date-bounded events when event links are absent, preparation links stored events before provider calls, the default SportsDataIO budget is aligned to 1000 calls/day, and the external scheduler includes late-night results/settlement and replay/learning windows.
 - Autonomous Daily Execution, Settlement, and Learning V1: extended Autonomous Daily Operations from read-only status into a protected, idempotent operating layer. The module adds `/api/autonomous-daily-operations/execute` plus read-only daily report, learning report, scheduler, health, simulation and demo routes. Execution is `CRON_SECRET` protected, dry-run by default, confirmation-gated, provider-budget-aware and delegates eligible work to the existing Operating Day executor. Learning remains suggestion-only; model weights, recommendation thresholds, official history and promotion state are not mutated automatically.
 - Controlled Live Operating Day Validation V1: production readiness at 2026-07-17 21:47 AST returned `UNSAFE_TIMING` for `final_refresh` because 14 of 15 operating-day games were no longer active pregame. The confirmed live execution attempt stopped as a structured `unsafe_timing` no-op with 1 blocked planned provider call, 0 provider calls made, 0 rows written and an idempotent same-key rerun. Current Board now exposes additive `operatingDate` to distinguish Puerto Rico operating-day date from UTC slate date.
 - Postgame Results, Settlement, Replay and Learning Proof V1: initial readiness at 2026-07-17 22:08 AST returned `WAITING_FOR_FINALS` because one operating-day game was still active pregame. Follow-up validation after all games had left Current Board still found 15 unresolved stored game statuses and `final=0`; the autonomous execution gate now blocks `sync_results` until every operating-day game is terminal (`final`, `postponed` or `canceled`), making 0 provider calls and 0 writes while preserving official, champion and challenger history.
