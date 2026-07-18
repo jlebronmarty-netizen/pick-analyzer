@@ -327,7 +327,8 @@ export const SPORTSDATAIO_ENDPOINT_CATALOG: SportsDataIoEndpointCatalogEntry[] =
   discoveryLabMlb('schedules', 'odds', '/api/mlb/odds/json/GamesByDate/{date}', {
     destinationTables: ['sport_events', 'provider_entity_mappings', 'sports_sync_jobs'],
     parameterFormat: 'date path parameter uses provider documented YYYY-MMM-DD, e.g. 2026-JUL-12',
-    returnType: 'MLB games with status, scores, weather, stadium, pitcher and current odds fields',
+    returnType:
+      'MLB Game objects with status, scores, StadiumID, ForecastTempLow/High/Description/WindChill/WindSpeed/WindDirection and documented starter fields AwayTeamProbablePitcherID/HomeTeamProbablePitcherID/AwayTeamStartingPitcherID/HomeTeamStartingPitcherID/AwayTeamStartingPitcher/HomeTeamStartingPitcher/AwayTeamOpener/HomeTeamOpener',
     lastPilotStatus: 'http_200_15_records_for_2026_JUL_12_batch_v1_shape_only',
   }),
   discoveryLabMlb('odds', 'odds', '/api/mlb/odds/json/GameOddsByDate/{date}', {
@@ -355,7 +356,7 @@ export const SPORTSDATAIO_ENDPOINT_CATALOG: SportsDataIoEndpointCatalogEntry[] =
   discoveryLabMlb('metadata', 'odds', '/api/mlb/odds/json/Stadiums', {
     destinationTables: ['sport_events.metadata', 'sports_teams.metadata', 'sports_sync_jobs'],
     parameterFormat: 'no path parameter',
-    returnType: 'stadium dimensions/location metadata',
+    returnType: 'StadiumID, Name, City, State, Country, Capacity, Surface, field dimensions, GeoLat, GeoLong, Altitude, HomePlateDirection and Type',
     persistenceStatus: 'discovery_only',
     lastPilotStatus: 'http_200_97_records_batch_v1_shape_only',
   }),

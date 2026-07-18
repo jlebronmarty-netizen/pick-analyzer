@@ -134,9 +134,21 @@ function americanToDecimal(odds: number) {
   return odds > 0 ? 1 + odds / 100 : 1 + 100 / Math.abs(odds)
 }
 
+function decimalToAmerican(decimal: number) {
+  if (!Number.isFinite(decimal) || decimal <= 1) return null
+  return Math.round(decimal >= 2 ? (decimal - 1) * 100 : -100 / (decimal - 1))
+}
+
 function impliedFromAmerican(odds: number) {
   if (odds > 0) return 100 / (odds + 100)
   return Math.abs(odds) / (Math.abs(odds) + 100)
+}
+
+function fairAmericanFromProbability(probabilityPercent: number) {
+  const probability = probabilityPercent / 100
+  if (!Number.isFinite(probability) || probability <= 0 || probability >= 1) return null
+  const decimal = 1 / probability
+  return decimalToAmerican(decimal)
 }
 
 function ageMinutes(value: string | null | undefined, now = Date.now()) {
@@ -399,6 +411,7 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     recommendation: candidate.semanticLabel,
     recommendationStatus: candidate.recommendationPolicyStatus,
     semanticLabel: candidate.semanticLabel,
+    probabilityOrigin: candidate.probabilityOrigin,
     officialEligibility:
       candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
         ? 'ELIGIBLE_FOR_OFFICIAL_REVIEW'
@@ -415,7 +428,26 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
         ? ['High probability does not always mean good betting value.']
         : []),
     ],
+    blockers: candidate.blockers,
     missingData: candidate.missingInformation,
+    featureQuality: candidate.featureQuality,
+    dataSufficiency: candidate.dataSufficiency,
+    criticalDataCompleteness: candidate.criticalDataCompleteness ?? null,
+    fairOdds: fairAmericanFromProbability(candidate.rawProbability),
+    actionability:
+      candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
+        ? 'official_review_candidate'
+        : candidate.expectedValue > 0
+          ? 'preview_value_only_not_official'
+          : 'informational_probability_only',
+    explanation: {
+      primaryDrivers: candidate.positiveFactors.slice(0, 3),
+      secondaryContext: candidate.summary ? [candidate.summary] : [],
+      missingData: candidate.missingInformation,
+      recommendationBlockers: candidate.blockers,
+      probabilityVsValue:
+        'Higher probability does not necessarily mean a bet is profitable at the available price.',
+    },
     oddsTimestamp: candidate.oddsTimestamp,
     oddsAgeMinutes: candidate.oddsAgeMinutes,
     storedOddsTimestamp: candidate.oddsTimestamp,
@@ -424,6 +456,120 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     anomalies: candidate.anomalyReasons,
     productionEligible: candidate.productionEligible,
     independentTool: true,
+  }
+}
+
+type CanonicalProbabilityCard = ReturnType<typeof currentBoardCandidateToMostLikelyCard>
+
+function topPickFrom(rows: CanonicalProbabilityCard[]) {
+  const official = rows.find((row) => row.officialEligibility === 'ELIGIBLE_FOR_OFFICIAL_REVIEW')
+  const candidate = official ?? rows[0] ?? null
+  return {
+    type: official ? 'official_pick' : candidate ? 'most_likely_outcome' : 'none',
+    candidate,
+    disclaimer: official
+      ? 'Official recommendation status is controlled by recommendation policy.'
+      : candidate
+        ? 'No official pick is being forced. This is informational and probability-focused.'
+        : 'No valid current supported outcome is available.',
+  }
+}
+
+function moneylineRank(rows: CanonicalProbabilityCard[]) {
+  return rows
+    .filter((row) => row.market === 'moneyline')
+    .sort(
+      (left, right) =>
+        right.probability - left.probability ||
+        right.confidence - left.confidence ||
+        Number(right.dataSufficiency ?? 0) - Number(left.dataSufficiency ?? 0) ||
+        Number(right.featureQuality ?? 0) - Number(left.featureQuality ?? 0) ||
+        right.reliabilityScore - left.reliabilityScore
+    )
+}
+
+function mostLikelyMoneylineFrom(rows: CanonicalProbabilityCard[]) {
+  const candidate = moneylineRank(rows)[0] ?? null
+  if (!candidate) {
+    return {
+      candidate: null,
+      probability: null,
+      fairOdds: null,
+      marketOdds: null,
+      ev: null,
+      confidence: null,
+      officialStatus: 'unavailable',
+      blockers: ['NO_VALID_CURRENT_MONEYLINE'],
+      explanation: 'No valid current moneyline candidate is available.',
+    }
+  }
+  return {
+    candidate,
+    probability: candidate.probability,
+    fairOdds: candidate.fairOdds,
+    marketOdds: candidate.odds,
+    ev: candidate.expectedValue,
+    confidence: candidate.confidence,
+    officialStatus: candidate.officialEligibility,
+    blockers: candidate.blockers,
+    explanation: {
+      primaryDrivers: candidate.explanation.primaryDrivers,
+      secondaryContext: candidate.explanation.secondaryContext,
+      missingData: candidate.missingData,
+      recommendationBlockers: candidate.blockers,
+      probabilityVsValue:
+        'This is the highest modeled moneyline probability, not automatically the best bet.',
+    },
+  }
+}
+
+function parlayFrom(rows: CanonicalProbabilityCard[]) {
+  const legs = moneylineRank(rows)
+    .filter((row, index, all) => all.findIndex((candidate) => candidate.eventId === row.eventId) === index)
+    .slice(0, 2)
+  if (legs.length < 2) {
+    return {
+      legs: [],
+      rawJointProbability: null,
+      adjustedJointProbability: null,
+      impliedProbability: null,
+      combinedOdds: null,
+      ev: null,
+      confidence: null,
+      independenceAssumed: true,
+      correlationAdjustment: 'not_enough_eligible_legs',
+      officialStatus: 'informational_only',
+      blockers: ['NEEDS_TWO_DISTINCT_VALID_MONEYLINES'],
+      disclaimer: 'No informational two-leg moneyline parlay is available.',
+    }
+  }
+  const rawJoint = round((legs[0].probability / 100) * (legs[1].probability / 100) * 100, 2)
+  const adjustedJoint = round(rawJoint * 0.92, 2)
+  const decimalOdds = legs.reduce((product, leg) => product * americanToDecimal(Number(leg.odds ?? 0)), 1)
+  const combinedAmerican = decimalToAmerican(decimalOdds)
+  const implied = combinedAmerican === null ? null : round(impliedFromAmerican(combinedAmerican) * 100, 2)
+  const ev = combinedAmerican === null ? null : displayEv(adjustedJoint, combinedAmerican)
+  const confidence = round(legs.reduce((sum, leg) => sum + leg.confidence, 0) / legs.length)
+  return {
+    legs,
+    rawJointProbability: rawJoint,
+    adjustedJointProbability: adjustedJoint,
+    impliedProbability: implied,
+    combinedOdds: {
+      decimal: round(decimalOdds, 3),
+      american: combinedAmerican,
+    },
+    ev,
+    confidence,
+    independenceAssumed: true,
+    correlationAdjustment: '8_percent_conservative_haircut_no_correlation_model',
+    officialStatus: 'informational_only',
+    blockers: [
+      'PARLAY_NOT_OFFICIAL_RECOMMENDATION',
+      ...Array.from(new Set(legs.flatMap((leg) => leg.blockers))),
+    ],
+    disclaimer:
+      'Estimated joint probability assumes independence, then applies a conservative haircut. This is informational only and may still be negative EV.',
   }
 }
 
@@ -533,9 +679,14 @@ export async function getMostLikelyOpportunities({
     200
   )
   const rows = board.candidates
+    .filter((candidate) => !['fallback', 'unavailable'].includes(candidate.probabilityOrigin))
     .map(currentBoardCandidateToMostLikelyCard)
     .sort(compareCurrentBoardOpportunity(sort))
     .slice(0, safeLimit)
+  const probabilityRankedRows = [...rows].sort(compareCurrentBoardOpportunity('highest_probability'))
+  const topPick = topPickFrom(probabilityRankedRows)
+  const mostLikelyMoneyline = mostLikelyMoneylineFrom(probabilityRankedRows)
+  const mostLikelyMoneylineParlay = parlayFrom(probabilityRankedRows)
 
   const shownMarkets = new Set(rows.map((row) => row.marketLabel))
   const unavailableMarkets = [
@@ -625,6 +776,20 @@ export async function getMostLikelyOpportunities({
           board.excludedRowSummary.exclusionReasonCounts.ALTERNATE_MARKET,
       },
       warning: 'High probability does not always mean good betting value.',
+    },
+    topPick,
+    highestProbabilitySupportedOutcome: topPick.candidate,
+    mostLikelyMoneyline,
+    mostLikelyMoneylineParlay,
+    probabilityEducation: {
+      headline: 'Higher probability does not necessarily mean a bet is profitable at the available price.',
+      labels: [
+        'Highest Modeled Probability',
+        'Informational Only',
+        'Preview - Not Officially Recommended',
+      ],
+      officialSeparation:
+        'Official picks remain controlled by recommendation policy. This scanner never promotes an informational candidate.',
     },
     opportunities: rows,
   }

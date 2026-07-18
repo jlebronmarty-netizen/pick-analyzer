@@ -326,6 +326,7 @@ function fixtureCandidate(overrides: Partial<CurrentBoardCandidate> = {}): Curre
     expectedValue: 32,
     modeledValueStatus: 'MODELED_VALUE',
     semanticLabel: 'MODELED VALUE',
+    probabilityOrigin: 'calculated',
     recommendationPolicyStatus: 'PLAY_OF_DAY_CANDIDATE',
     officialEligibility: 'NOT_OFFICIALLY_ELIGIBLE',
     blockers: [],

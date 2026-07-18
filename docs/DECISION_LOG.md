@@ -1,5 +1,85 @@
 # Decision Log
 
+## 2026-07-17 - Block Postgame Results Sync Until Finals Are Safe
+
+Context: Postgame lifecycle proof found that `sync_results` dry-run could report safe while the operating-day board still had unresolved games. Running a real results sync at that point could spend provider quota before the slate was ready for end-to-end results, settlement and learning validation.
+
+Decision: Extend the autonomous execution safety gate so `sync_results` returns `WAITING_FOR_FINALS` while any operating-day game remains active pregame or is not terminal in stored operating-day status. Terminal games are final, postponed or canceled. The route now returns a structured zero-call, zero-write no-op before provider budget is consumed or settlement can run.
+
+Consequences: Postgame proof correctly pauses until final games are safely available. No provider calls, result writes, settlement updates, official-history changes, model promotion or threshold changes were made.
+
+Affected modules: Autonomous daily operations execution safety, postgame validation docs.
+
+## 2026-07-17 - Block Unsafe Live Final Refresh After Slate Start
+
+Context: Controlled live operating-day validation found that the autonomous dry-run selected `final_refresh` at 21:47 AST, when only 1 of 15 operating-day games remained active pregame and 14 games had crossed the safe pregame window.
+
+Decision: Add an execution safety gate to `/api/autonomous-daily-operations/execute` before dry-run or confirmed execution. Date-level `final_refresh` and `lock` now return structured `unsafe_timing` no-ops when the operating-day cohort is broader than the active pregame board or when the call is inside the final pregame cutoff. Current Board also exposes additive `operatingDate` alongside existing `slateDate` to clarify Puerto Rico operating-day semantics.
+
+Consequences: The confirmed controlled live call with idempotency key `controlled-live-final-refresh-20260717-unsafe-timing-v1` made 0 provider calls, wrote 0 rows and reran idempotently as the same no-op. Official history, champion/challenger separation, thresholds and model promotion state were unchanged.
+
+Affected modules: Autonomous daily operations service, Current Board response contract and docs.
+
+## 2026-07-17 - Add Protected Autonomous Daily Execution Without Auto Promotion
+
+Context: Autonomous Daily Operations V1 exposed read-only production status, but the next step needed a safe daily operating layer for execution, settlement readiness, reports, simulation, demo mode and learning feedback.
+
+Decision: Add a protected `/api/autonomous-daily-operations/execute` route and read-only daily-report, learning-report, scheduler, health, simulation and demo routes. Execution is dry-run by default, requires confirmation for write mode, uses provider budget/lock checks, accepts idempotency keys and delegates eligible work to the existing Operating Day executor. Learning produces manual suggestions only.
+
+Consequences: The product now has an operational control plane without changing recommendation thresholds, model weights, official history or promotion state. Read-only and dry-run validations make zero provider calls and zero remote mutations unless an authorized confirmed execution stage is explicitly requested.
+
+Affected modules: Autonomous daily operations service, autonomous operations API routes, Production Today panel, system version metadata and docs.
+
+## 2026-07-17 - Add V6 Comparison Report And Correct Legacy Unique Pick Drop
+
+Context: After Prediction Versioning Engine V1 columns were applied remotely, V6 write mode still failed because legacy unique object `prediction_history_unique_pick` remained and blocked side-by-side challenger inserts.
+
+Decision: Add corrective migration `202607170003_prediction_versioning_drop_legacy_unique_pick.sql`, update the original migration to drop both constraint and index forms, and make V6 regeneration return structured `persistence_failed` responses plus a zero-provider-call champion-vs-challenger `modelComparison`.
+
+Consequences: Production no longer returns an opaque 500 for the V6 write blocker. The comparison report can quantify V6 deltas while persistence waits for the corrective migration. No provider calls, official-history changes, settlement or threshold changes were made.
+
+Affected modules: MLB Prediction Engine V6, Prediction Versioning Engine V1, V6 Model Comparison Report V1, migrations.
+
+## 2026-07-17 - Add Prediction Versioning Engine V1
+
+Context: MLB Prediction Engine V6 can calculate starter/weather/stadium-adjusted probabilities, but `prediction_history_unique_pick` prevented side-by-side immutable V6 rows for the same event, market and selection.
+
+Decision: Keep `prediction_history` as the canonical prediction table and add versioning columns through `202607170002_prediction_versioning_engine_v1.sql`. Current Board uses `is_current=true` when the migration is applied. V6 regeneration writes challenger rows with `is_current=false` and does not overwrite champion rows.
+
+Consequences: Champion, challenger, shadow and rollback rows can coexist after the migration is applied remotely. Existing production surfaces remain stable before migration because runtime schema probing preserves the legacy read path. Provider calls, official history, settlement and thresholds remain unchanged.
+
+Affected modules: Prediction Versioning Engine V1, MLB Prediction Engine V6, Current Board, schema capability probing.
+
+## 2026-07-17 - Correct MLB GamesByDate Starter Field Contract
+
+Context: User-supplied official MLB API dictionary showed the GamesByDate Game object uses starter fields such as `AwayTeamProbablePitcherID`, `HomeTeamProbablePitcherID`, `AwayTeamStartingPitcherID`, `HomeTeamStartingPitcherID`, `AwayTeamStartingPitcher`, `HomeTeamStartingPitcher`, `AwayTeamOpener` and `HomeTeamOpener`. The previous audit checked non-contract names such as `AwayProbablePitcherID` and `HomeProbablePitcherID`.
+
+Decision: Centralize the documented SportsDataIO MLB Game contract, update the verification sanitizer to retain exact documented starter/weather/venue fields, and update read-only audits to classify omitted fields as `DOCUMENTED_NOT_YET_VERIFIED` rather than unsupported. Keep the existing verified weather low/high/description and `StadiumID` evidence, but do not fabricate starter values or activate normalizers.
+
+Consequences: Retained evidence is sufficient for weather low/high/description and `StadiumID`, but insufficient for starter and wind fields because the prior sanitized snapshot omitted them and raw payload was not retained. Data-quality, provider capability audit and AI Coach now distinguish documented, verified populated, verified null, not yet verified, subscription blocked and unsupported states. Provider calls made in this correction pass: 0.
+
+Affected modules: SportsDataIO MLB contract types, GamesByDate verification service, games payload audit, data-quality, provider capability audit, AI Coach and docs.
+
+## 2026-07-17 - Add A Narrow MLB GamesByDate Provider Verification Path
+
+Context: The attempted `GET /api/mlb/odds/json/GamesByDate/2026-JUL-17` request returned the Next.js 404 page because that string is a SportsDataIO Discovery Lab provider path, not an application route.
+
+Decision: Keep the broad historical/prospective executor unchanged and add a constrained admin-only route at `/api/mlb/provider-verification/games-by-date`. The route accepts only a date, requires `confirmed=true`, checks provider budget, calls exactly `https://api.sportsdata.io/api/mlb/odds/json/GamesByDate/{date}` with the server-side `Ocp-Apim-Subscription-Key`, writes one sanitized `sports_sync_jobs` verification ledger row and never accepts arbitrary provider paths.
+
+Consequences: Dry-run, missing-confirmation and invalid-date validations make zero provider calls. A single approved verification call can now inspect starter/weather/venue field values without running odds capture, projections, prediction regeneration, settlement or recommendation changes.
+
+Affected modules: MLB provider verification service/route, system version fallback and provider-path docs.
+
+## 2026-07-17 - Do Not Normalize MLB Starters Or Weather From Field Names Alone
+
+Context: The next MLB data-quality step was to verify whether stored SportsDataIO `GamesByDate` payload evidence already contained starter, weather and venue fields that were present but not normalized.
+
+Decision: Add a zero-provider-call `/api/mlb/games-payload-audit` route over stored `sport_events` and `sports_sync_jobs` evidence. Treat `metadata.rawFieldNames` as schema evidence only, not populated coverage. Do not add starter/weather normalizers, migrations, score increases or prediction regeneration unless populated stored values exist.
+
+Consequences: The 2026-07-17 audit found 15 games, raw payloads not retained, no starter fields, weather field names `ForecastTempLow`, `ForecastTempHigh` and `ForecastDescription` without values, venue field name `StadiumID` without normalized venue values, 0 starter IDs/names, 0 weather values and 0 venue values. Data-quality remains 35/30/0 with `INSUFFICIENT` coverage, AI Coach now explains the stored-payload blocker, and official picks remain 0.
+
+Affected modules: MLB games payload audit service/route, MLB data quality, MLB AI Coach and project docs.
+
 ## 2026-07-16 - Keep Premium Betting Tools On Canonical Current Board
 
 Context: The premium tools could time out or show misleading empty states when optional scanners performed broad reads or interpreted scanner failure as no betting value.
@@ -1529,6 +1609,76 @@ Decision: Resume 2026 date-domain imports from the first incomplete checkpoint a
 Consequences: The 2026 ledger is complete through the available imported game-date ledger; final dry-run reports zero remaining 2026 calls. The repaired July 12 team-stat retry reused/updated 30 existing natural-key rows rather than duplicating persistence. The 2025 schedule import completed and built the date ledger, but `Standings/2025` stopped as partial after HTTP 200 because 2 provider records had unresolved team mappings. No recalibration, feature promotion, official recommendation, settlement, model training or production eligibility change was performed. The exact safe next action is a zero-provider 2025 standings mapping review before any further 2025 calls.
 
 Affected modules: SportsDataIO MLB historical import executor, historical import execute route, sports sync job checkpointing, MLB historical foundation docs.
+
+## 2026-07-17 - Add MLB Operating Day Lifecycle V1
+
+Context: The first real MLB operating-day test on 2026-07-16 correctly produced 0 official picks and NO TICKET for `NYM @ PHI`, but exposed three lifecycle risks: final refresh depended on `GamesByDate` rediscovery, result sync could report provider quota rejection as outer success, and generic settlement processed a broad pending backlog instead of only the operating day.
+
+Decision: Add an additive operating-day model, orchestrator service, protected execute route, read-only status route, scoped settlement route, validation route and compact dashboard panel. Treat `operatingDayFinalRefresh=true` as a true final-refresh path that resolves persisted prospective events first, skips schedule rediscovery and makes zero odds calls after lock/start. Rewrite `/api/results/sync` through the service layer so quota/provider errors return structured statuses. Keep broad historical `/api/predictions/settle` intact, but add operating-day scoped settlement for daily use.
+
+Consequences: 2026-07-16 remains auditable as 0 official picks, 0 Top Picks and no official bet. Hypothetical candidate outcomes can be replayed separately without becoming official performance. Result quota blocks leave events pending. Build validation passed with zero provider calls.
+
+Affected modules: MLB prospective preview, result sync, operating-day orchestration, scoped settlement, dashboard Today panel, docs and Supabase migration.
+
+## 2026-07-17 - Fix Operating-Day Cron Reliability and MLB Data Quality V1
+
+Context: Production `POST /api/cron/operating-day?dryRun=false` returned a generic HTTP 500 while dry-run reported a healthy current slate. Local reproduction showed the scheduler selected `morning_sync` even when all 15 games already had odds, features and predictions, then returned a very large nested provider-preparation payload after a zero-call regeneration.
+
+Decision: Make the cron route return a compact structured `already_current` no-op when the current slate is fresh, and normalize future execution outcomes into auditable statuses with selected action, selected date, operatingDayId, stage, retryability, provider calls, writes and warnings. Automation status now separates Vercel cron configuration from verified external scheduler activation. Current Board now canonicalizes MLB missing critical inputs from stored snapshot warnings and caps feature quality/data sufficiency when starting pitcher, lineup, injury, weather and bullpen context are absent. `/api/mlb/data-quality` exposes the same readiness model read-only.
+
+Consequences: Real cron validation returns HTTP 200 with `status=already_current`, providerCallsMade 0 and writes 0 for the current 2026-07-17 slate. Data quality is now `INSUFFICIENT` rather than null or excellent-looking when critical MLB inputs are missing. No recommendation thresholds, official picks, settlement, provider endpoints or market support were changed.
+
+Affected modules: Operating-day cron route, automation status service, Current Board, MLB data-quality status route and docs.
+
+## 2026-07-17 - Repair MLB Odds Coverage and Hobby Cron Deployment V1
+
+Context: The 2026-07-17 slate had 15 scheduled SportsDataIO games and 15 provider odds records, but only 6 games reached mapped odds/current candidates. Production deployment was also blocked because `vercel.json` used an hourly cron that Vercel Hobby rejects.
+
+Decision: Keep the existing operating-day architecture and patch the narrow fault. The SportsDataIO MLB prospective-preview resolver now loads persisted events by the America/Puerto_Rico operating-day UTC interval (`04:00Z` to next-day `04:00Z`) instead of the UTC calendar day. Partial odds checkpoints are no longer treated as completed odds coverage. A zero-call `/api/mlb/odds/coverage` diagnostic reports schedule, odds, mapping, normalization, feature, prediction, Current Board and missing-input readiness. `vercel.json` now uses one daily cron (`0 12 * * *`) and `.github/workflows/operating-day-refresh.yml` provides an external scheduler-ready fallback.
+
+Consequences: The bounded reprocess used 1 additional `GameOddsByDate/2026-07-17` call because the old partial checkpoint did not retain a reusable raw payload. Stored coverage is now 15/15 mapped games, 0 unresolved provider IDs, 45 prospective predictions, 21 Current Board actionable candidates across 7 game entries, 2 positive-value previews and 0 official picks. Missing pitcher, lineup, injury, weather and projection inputs remain explicit partial-coverage blockers. Recommendation thresholds, settlement, official history and unsupported markets were unchanged.
+
+Affected modules: SportsDataIO MLB prospective preview, MLB odds coverage diagnostic, operating-day automation status, system version route, Vercel config, GitHub Actions scheduler and docs.
+
+## 2026-07-17 - Consolidate Today Into Autonomous Daily Operations V1
+
+Context: Pick Analyzer had the core betting, model, provider, operating-day and versioning modules, but the Today dashboard was too long and spread the user answer across duplicated panels. The next product goal was a production prototype that can explain itself quickly without rebuilding existing engines.
+
+Decision: Add one canonical read-only autonomous daily operations service and route that composes existing modules. Redesign Today so the first viewport answers `Should I Bet Today?`, shows the canonical official/informational opportunity slots, compact game cards, timeline, health, learning and promotion readiness. Move detailed duplicate Today modules under collapsed supporting detail.
+
+Consequences: First-time users get the daily betting answer and blockers in one place. Operators still retain access to the full diagnostic panels. The new route makes zero provider calls, performs no remote mutations, does not regenerate predictions, does not alter history and does not promote models.
+
+Affected modules: Autonomous daily operations service, `/api/autonomous-daily-operations/status`, Today dashboard page, ProductionTodayPanel and docs.
+
+## 2026-07-17 - Verify Prediction Versioning Corrective Migration And Keep V6 Challenger-Only
+
+Context: The versioning columns were present remotely, but V6 challenger persistence had been blocked by a legacy unique object named `prediction_history_unique_pick`. The operator applied the corrective migration remotely and requested autonomous verification plus safe model-ops surfaces.
+
+Decision: Verify schema readiness through the protected V6 regeneration route instead of assuming catalog state. Persist V6 rows only as `model_role=challenger` and `is_current=false`, add read-only comparison/shadow-evaluation surfaces, dry-run-only promotion and rollback plans, and zero-call player/stadium/pitcher-bullpen foundation audits. Preserve default Current Board behavior by keeping champion/current rows as the default and requiring explicit `modelRole` for challenger inspection.
+
+Consequences: The first confirmed write inserted 15 challenger rows with 0 provider calls, and the same idempotency key rerun reused all 15 with no additional inserts. No official picks, settlements, thresholds, production history or provider quota were touched. Promotion remains blocked pending quality review and sufficient settled challenger sample.
+
+Affected modules: V6 regeneration, Current Board, MLB model platform service, comparison/shadow/promotion/rollback routes, player/stadium metadata-cache routes, pitcher-bullpen foundation route and docs.
+
+## 2026-07-17 - Add MLB Next Slate Rollover V1
+
+Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.
+
+Decision: Centralize active-event filtering, add a stored-data next-slate resolver and route, filter MLB prospective preview rows after start, update Current Board active eligibility and expose read-only operating-day planning actions for next-slate preview/preparation. `prepare_next_slate` returns the exact bounded SportsDataIO endpoint plan but does not perform transport in this patch.
+
+Consequences: Current Board and MLB prospective preview no longer display started/final rows as active. Stored validation selected `2026-07-17` with 15 scheduled MLB games, 0 odds-ready games, 0 active candidates and 0 official picks. Provider calls and remote mutations remain 0; real provider preparation requires explicit future approval.
+
+Affected modules: Active-event service, next-slate service, operating-day planner, Current Board, MLB prospective preview, dashboard Today panel and docs.
+
+## 2026-07-17 - Enable Approved MLB Live Data Refresh V1
+
+Context: The user approved the bounded SportsDataIO MLB Fantasy + Odds preparation calls for the selected 2026-07-17 slate. The previous safety patch still blocked non-dry `prepare_next_slate`.
+
+Decision: Remove only the blanket artificial stop and route authenticated, confirmed `prepare_next_slate` through the existing SportsDataIO MLB prospective preview service. Add provider budget status, local action locking, structured provider-error statuses, market capability registry, automation status, consolidated cron route and non-sensitive version route. Preserve recommendation thresholds and official-history separation.
+
+Consequences: The initial approved preparation linked 15 events but only generated 18 prospective candidates before the later odds-coverage reconciliation repaired the date-scoped event resolver. The current reconciled state is 45 prospective predictions, 21 Current Board actionable candidates and 0 official picks. The unresolved odds mapping condition is now a warning when usable mapped pregame odds are preserved; post-start odds remain blocked. Vercel cron configuration now uses one consolidated operating-day cron entry.
+
+Affected modules: Operating-day orchestration, SportsDataIO MLB prospective preview, provider budget, MLB market registry, automation status, Vercel config and docs.
 
 ## 2026-07-15 - Add Market Intelligence Engine V1
 

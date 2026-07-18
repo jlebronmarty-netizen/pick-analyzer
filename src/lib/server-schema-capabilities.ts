@@ -40,6 +40,21 @@ export type HistoricalFeatureSchemaCapabilities = {
   warnings: string[]
 }
 
+export type PredictionVersioningSchemaCapabilities = {
+  mode: 'prediction_versioning_schema_capability_probe_v1'
+  generatedAt: string
+  providerUsage: {
+    externalProviderCallsMade: 0
+    source: 'supabase_schema_probe_only'
+  }
+  status: SchemaCapabilityStatus
+  applied: boolean
+  probes: {
+    predictionHistoryVersioning: SchemaCapabilityProbe
+  }
+  warnings: string[]
+}
+
 const REQUIRED_COLUMNS = {
   historicalFeatureSnapshots: [
     'id',
@@ -61,6 +76,19 @@ const REQUIRED_COLUMNS = {
     'feature_snapshot_key',
     'feature_set_version',
     'feature_snapshot_generated_at',
+  ],
+  predictionHistoryVersioning: [
+    'is_current',
+    'prediction_version',
+    'model_role',
+    'prediction_group_key',
+    'parent_prediction_id',
+    'challenger_of_prediction_id',
+    'superseded_at',
+    'superseded_by_prediction_id',
+    'version_created_reason',
+    'idempotency_key',
+    'version_lineage',
   ],
   sportPlayerStats: [
     'id',
@@ -263,6 +291,32 @@ export async function probeHistoricalFeatureSchemaCapabilities(): Promise<Histor
       predictionHistoryFeatureSnapshotLinkage,
       sportPlayerStats,
       sportLineups,
+    },
+    warnings: probes
+      .map((probe) => probe.warning)
+      .filter((warning): warning is string => Boolean(warning)),
+  }
+}
+
+export async function probePredictionVersioningSchemaCapabilities(): Promise<PredictionVersioningSchemaCapabilities> {
+  const predictionHistoryVersioning = await probeTableColumns({
+    table: 'prediction_history',
+    requiredColumns: REQUIRED_COLUMNS.predictionHistoryVersioning,
+  })
+  const probes = [predictionHistoryVersioning]
+  const status = aggregateStatus(probes)
+
+  return {
+    mode: 'prediction_versioning_schema_capability_probe_v1',
+    generatedAt: new Date().toISOString(),
+    providerUsage: {
+      externalProviderCallsMade: 0,
+      source: 'supabase_schema_probe_only',
+    },
+    status,
+    applied: status === 'applied',
+    probes: {
+      predictionHistoryVersioning,
     },
     warnings: probes
       .map((probe) => probe.warning)

@@ -4,10 +4,13 @@ import DashboardSection from '@/components/dashboard/DashboardSection'
 import DashboardQuickStats from '@/components/dashboard/DashboardQuickStats'
 
 import DashboardHeroPanel from '@/components/dashboard/DashboardHeroPanel'
+import ProductionTodayPanel from '@/components/dashboard/ProductionTodayPanel'
 import AICommandCenterPanel from '@/components/dashboard/AICommandCenterPanel'
 import DailyReportPanel from '@/components/dashboard/DailyReportPanel'
 import MarketIntelligenceSummaryPanel from '@/components/dashboard/MarketIntelligenceSummaryPanel'
 import RecommendationReadinessPanel from '@/components/dashboard/RecommendationReadinessPanel'
+import OperatingDayPanel from '@/components/dashboard/OperatingDayPanel'
+import NextSlateStatusPanel from '@/components/dashboard/NextSlateStatusPanel'
 import TopPicksPanel from '@/components/dashboard/TopPicksPanel'
 import PlayOfTheDayPanel from '@/components/dashboard/PlayOfTheDayPanel'
 import PredictionEngineV4Panel from '@/components/dashboard/PredictionEngineV4Panel'
@@ -108,16 +111,25 @@ export default function DashboardPage() {
         id="today"
         eyebrow="Today"
         title="Should I Bet Today?"
-        description="Quick answer first: good bets, watchlist, no-value plays and the next MLB game."
+        description="The first screen answers whether to bet, what the best informational opportunities are, why the board is blocked, and what the system learned."
       >
-        <DailyReportPanel />
-        <MarketIntelligenceSummaryPanel />
-        <RecommendationReadinessPanel />
-        <MlbProspectivePreviewPanel />
-        <PlayOfTheDayPanel />
-        <TopPicksPanel />
-        <BetSlipOptimizerPanel />
-        <AICommandCenterPanel />
+        <ProductionTodayPanel />
+
+        <DashboardPanelGroup
+          title="Supporting detail"
+          description="Expanded Current Board, operating-day, daily-report and legacy pick surfaces. The summary above is the canonical first-read experience."
+        >
+          <DailyReportPanel />
+          <NextSlateStatusPanel />
+          <MarketIntelligenceSummaryPanel />
+          <RecommendationReadinessPanel />
+          <OperatingDayPanel />
+          <MlbProspectivePreviewPanel />
+          <PlayOfTheDayPanel />
+          <TopPicksPanel />
+          <BetSlipOptimizerPanel />
+          <AICommandCenterPanel />
+        </DashboardPanelGroup>
       </DashboardSection>
 
       <DashboardSection

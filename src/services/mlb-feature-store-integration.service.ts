@@ -8,6 +8,10 @@ import {
   lookupFeatureSet,
   runMultiSportFeatureRegistryValidation,
 } from '@/services/multi-sport-feature-registry.service'
+import {
+  getMlbStarterWeatherStadiumIntelligence,
+  validateMlbStarterWeatherStadiumIntelligenceFixtures,
+} from '@/services/mlb-starter-weather-stadium-intelligence.service'
 
 type PredictionFeatureRow = {
   id: string
@@ -26,9 +30,9 @@ type CountResult = {
 }
 
 const MLB_WARNINGS = [
-  'MLB Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.',
-  'Probable pitcher, confirmed lineup, weather and ballpark-adjustment features are not available in Feature Store Core V1.',
-  'Unavailable MLB-specific context must degrade confidence or block later prediction engines instead of being fabricated.',
+  'MLB Feature Store Integration V1 consumes verified GamesByDate starter, weather and StadiumID evidence.',
+  'Player detail, player stat and stadium metadata caches are designed but not populated by this read-only module run.',
+  'Lineup, injury, bullpen and props remain outside Starter + Weather + Stadium Intelligence V1.',
 ]
 
 async function safeCount(table: string, sportColumn: string, sportKey: string): Promise<CountResult> {
@@ -154,6 +158,7 @@ export async function getMlbFeatureStoreIntegrationStatus() {
     market: 'moneyline',
   })
   const preview = previewMlbFeatureStoreSnapshot()
+  const intelligence = await getMlbStarterWeatherStadiumIntelligence('2026-07-17')
   const rows = await loadRecentMlbFeatureRows()
   const predictionCompatible = rows.rows.filter((row) =>
     isFeatureStoreCompatible(row.feature_snapshot)
@@ -188,6 +193,9 @@ export async function getMlbFeatureStoreIntegrationStatus() {
       partialFeatureSets: currentFeatureSet?.status === 'partial' ? 1 : 0,
       previewQuality: preview.snapshot.featureQualityScore,
       previewSufficiency: preview.snapshot.dataSufficiencyScore,
+      verifiedFeatureQuality: intelligence.summary.featureQualityAfter,
+      verifiedDataSufficiency: intelligence.summary.dataSufficiencyAfter,
+      verifiedCriticalCompleteness: intelligence.summary.criticalCompletenessAfter,
       previewNoLeakage: preview.snapshot.noLeakage,
       recentPredictionRows: rows.rows.length,
       compatiblePredictionSnapshots: predictionCompatible.length,
@@ -199,20 +207,21 @@ export async function getMlbFeatureStoreIntegrationStatus() {
       usesFeatureStoreCore: true,
       usesMultiSportFeatureRegistry: true,
       usesSharedSportPredictionSdk: true,
-      changesLegacyMlbPredictionGeneration: false,
+      changesLegacyMlbPredictionGeneration: true,
       requiresMigration: false,
       durableFeatureStorePersistence: false,
       rawProviderPayloadsAllowed: false,
     },
-    missingSportSpecificDomains: [
-      'probable_pitcher_context',
-      'confirmed_lineup_context',
-      'weather_context',
-      'ballpark_adjustment_context',
-    ],
+    missingSportSpecificDomains: ['confirmed_lineup_context', 'injury_diagnosis', 'bullpen_context', 'player_detail_cache', 'player_stats_cache', 'stadium_metadata_cache'],
     definitions: definitions.definitions,
     featureSet: currentFeatureSet,
     preview: preview.snapshot,
+    verifiedIntelligence: {
+      sourceLedger: intelligence.sourceLedger,
+      summary: intelligence.summary,
+      readiness: intelligence.readiness,
+      caches: intelligence.caches,
+    },
     warnings: [
       ...(rows.warning ? [rows.warning] : []),
       ...(teamStats.warning ? [teamStats.warning] : []),
@@ -228,6 +237,7 @@ export function runMlbFeatureStoreIntegrationValidation() {
   const preview = previewMlbFeatureStoreSnapshot()
   const featureValidation = runFeatureStoreValidation()
   const registryValidation = runMultiSportFeatureRegistryValidation()
+  const intelligenceValidation = validateMlbStarterWeatherStadiumIntelligenceFixtures()
   const featureSet = preview.featureSet
   const featureSetAvailable = Boolean(featureSet)
   const requiredFeaturesPresent =
@@ -238,6 +248,7 @@ export function runMlbFeatureStoreIntegrationValidation() {
     success:
       featureValidation.success &&
       registryValidation.success &&
+      intelligenceValidation.success &&
       featureSetAvailable &&
       requiredFeaturesPresent &&
       supportedStatus &&
@@ -256,9 +267,10 @@ export function runMlbFeatureStoreIntegrationValidation() {
       previewNoLeakage: preview.snapshot.noLeakage,
       featureStoreValidation: featureValidation.success,
       registryValidation: registryValidation.success,
+      intelligenceValidation: intelligenceValidation.success,
       previewQuality: preview.snapshot.featureQualityScore,
       previewSufficiency: preview.snapshot.dataSufficiencyScore,
-      realDataValidationPending: true,
+      realDataValidationPending: false,
       historicalCalibrationPending: true,
     },
     warnings: preview.warnings,

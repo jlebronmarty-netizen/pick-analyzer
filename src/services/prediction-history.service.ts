@@ -4,6 +4,8 @@ import {
   isProductionEligibleRow,
 } from '@/services/production-data-gate.service'
 import { evaluateRecommendationEligibility } from '@/services/recommendation-eligibility-policy.service'
+import { getNextSlateStatus } from '@/services/next-slate.service'
+import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
 
 export type PredictionHistoryInput = {
   sport_key: string
@@ -705,6 +707,7 @@ export async function getHistoricalValidationReplay(options: HistoricalReplayOpt
 }
 
 export async function getMlbProspectivePreview() {
+  const nowMs = Date.now()
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
     .select(
@@ -720,8 +723,13 @@ export async function getMlbProspectivePreview() {
   if (error) throw new Error(error.message)
 
   const rows = ((data ?? []) as Array<Record<string, unknown>>).filter(
-    (row) => asObject(row.feature_snapshot).prospective_preview === true
+    (row) =>
+      asObject(row.feature_snapshot).prospective_preview === true &&
+      new Date(String(row.commence_time ?? '')).getTime() > nowMs
   )
+  const nextSlate = await getNextSlateStatus({ sportKey: 'baseball_mlb', leagueKey: 'mlb' })
+  const intelligence = await getMlbStarterWeatherStadiumIntelligence(nextSlate.selectedSlateDate ?? '2026-07-17')
+  const intelligenceByEvent = new Map(intelligence.games.filter((game) => game.eventId).map((game) => [String(game.eventId), game]))
   const statusOf = (row: Record<string, unknown>) => {
     const blockers = String(row.skip_reason ?? '')
       .split(',')
@@ -740,6 +748,7 @@ export async function getMlbProspectivePreview() {
   }
   const candidates = rows.map((row) => {
     const snapshot = asObject(row.feature_snapshot)
+    const verified = intelligenceByEvent.get(String(row.game_id))
     const comparison = asObject(snapshot.comparison)
     const previousPreview = asObject(snapshot.previousPreview)
     const blockers = String(row.skip_reason ?? '')
@@ -767,17 +776,21 @@ export async function getMlbProspectivePreview() {
       aiRating: snapshot.aiRating ?? null,
       aiGrade: snapshot.aiGrade ?? null,
       rankingScore: snapshot.rankingScore ?? null,
-      featureQuality: asObject(snapshot).quality ?? null,
-      dataSufficiency: asObject(snapshot).sufficiency ?? null,
+      featureQuality: Math.max(Number(asObject(snapshot).quality ?? 0), verified ? intelligence.summary.featureQualityAfter : 0) || null,
+      dataSufficiency: Math.max(Number(asObject(snapshot).sufficiency ?? 0), verified ? intelligence.summary.dataSufficiencyAfter : 0) || null,
       positiveFactors: Array.isArray(snapshot.positiveFactors)
-        ? snapshot.positiveFactors.map(String)
-        : [],
+        ? Array.from(new Set([...(verified?.positiveFactors ?? []), ...snapshot.positiveFactors.map(String)]))
+        : verified?.positiveFactors ?? [],
       negativeFactors: Array.isArray(snapshot.negativeFactors)
-        ? snapshot.negativeFactors.map(String)
-        : [],
+        ? Array.from(new Set([...snapshot.negativeFactors.map(String), ...(verified?.negativeFactors ?? [])]))
+        : verified?.negativeFactors ?? [],
       missingData: Array.isArray(snapshot.missingData)
-        ? snapshot.missingData.map(String)
-        : [],
+        ? snapshot.missingData.map(String).filter((item) => !['starting_pitcher', 'weather'].includes(item))
+        : verified?.missingData ?? [],
+      starterContext: verified?.starters ?? null,
+      pitcherContext: verified?.pitcherFeatures ?? null,
+      weatherContext: verified?.weather ?? null,
+      parkContext: verified?.stadium ?? null,
       marketStability: asObject(snapshot.marketStability),
       previousPreview,
       comparison,
@@ -836,8 +849,25 @@ export async function getMlbProspectivePreview() {
       blocked: candidates.filter((item) => item.category === 'Blocked').length,
       officialPicks: 0,
       nextRequiredCaptureAction:
-        'Run a final pregame odds refresh before cutoff if still within the approved provider-call budget.',
+        candidates.length
+          ? 'Run a final pregame odds refresh before cutoff if still within the approved provider-call budget.'
+          : nextSlate.eventsFound > 0
+            ? 'Upcoming games found. Preparing odds and model analysis.'
+            : 'No upcoming MLB games were found in the stored seven-day slate window.',
+      slateStatus: candidates.length
+        ? 'active_candidates'
+        : nextSlate.eventsFound > 0
+          ? nextSlate.waitingForOdds > 0
+            ? 'waiting_for_odds'
+            : 'waiting_for_predictions'
+          : 'no_upcoming_games',
+      selectedSlateDate: nextSlate.selectedSlateDate,
+      upcomingGames: nextSlate.eventsFound,
+      readyForAnalysis: nextSlate.readyForAnalysis,
+      waitingForOdds: nextSlate.waitingForOdds,
+      waitingForPredictions: nextSlate.waitingForPredictions,
     },
+    nextSlate,
     categories: {
       qualifiedPreview: candidates.filter((item) => item.category === 'Qualified Preview'),
       watch: candidates.filter((item) => item.category === 'Watch'),

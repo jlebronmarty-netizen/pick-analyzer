@@ -10,6 +10,74 @@ Provider-dependent modules such as historical reconciliation execution, injuries
 
 ## Completed
 
+### Autonomous Daily Execution, Settlement, and Learning V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/autonomous-daily-operations.service.ts`, `/api/autonomous-daily-operations/execute`, `/api/autonomous-daily-operations/daily-report`, `/api/autonomous-daily-operations/learning-report`, `/api/autonomous-daily-operations/scheduler`, `/api/autonomous-daily-operations/health`, `/api/autonomous-daily-operations/simulation`, `/api/autonomous-daily-operations/demo` and `ProductionTodayPanel`.
+
+Note: The execution layer is protected, idempotent, dry-run by default, confirmation-gated and provider-budget-aware. It reuses the existing Operating Day executor for eligible stages and keeps learning suggestion-only with no automatic model promotion, threshold changes, official-history edits or unnecessary provider calls.
+
+Controlled validation: The first confirmed production attempt intentionally did not execute the quota-consuming `final_refresh` because live readiness returned `UNSAFE_TIMING` after most of the slate had started. The same idempotency key reran as a zero-call, zero-write no-op. End-to-end settlement proof remains pending a temporally valid due stage.
+
+Postgame validation: `sync_results` now returns `WAITING_FOR_FINALS` while any operating-day game remains active pregame or unresolved in stored operating-day status. Results sync, settlement, replay and learning proof remain pending until the cohort is terminal and a safe postgame window exists.
+
+### MLB Bullpen And Pitcher Intelligence V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/mlb-model-platform.service.ts`, `/api/mlb/intelligence/pitcher-bullpen-foundation`, MLB Data Quality integration, AI Coach integration and `docs/mlb-bullpen-pitcher-intelligence-v1.md`.
+
+Note: This is a cache-first intelligence layer. It uses verified starter IDs/names plus cached `sport_player_stats` rows to report starter profile coverage, cached pitcher metrics, relief row coverage and workload signals. It does not claim closer availability, high-leverage roles, injuries or lineups without verified data, and it does not change official recommendation policy.
+
+### MLB Player Metadata Cache V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/mlb-model-platform.service.ts`, `/api/mlb/players/metadata-cache` and `docs/mlb-player-metadata-cache-v1.md`.
+
+Note: This module reports cached player identity, team, provider ID, position, roster, handedness and injury-status coverage with a 7-day TTL policy and zero provider calls. It confirms current identity/position mapping is ready while handedness and injury status remain explicit blockers.
+
+### MLB Prediction Engine V7 And Confidence Engine V2
+
+Status: Completed and build verified.
+
+Evidence: `src/services/sportsdataio-mlb-prospective-preview.service.ts`, `/api/mlb/predictions/v7-regeneration`, V7 comparison support on `/api/mlb/predictions/comparison`, MLB prediction health annotations and `docs/mlb-prediction-engine-v7-confidence-v2.md`.
+
+Note: V7 is challenger by default and shadow-evaluable. Confidence Engine V2 separates model, data, market and recommendation confidence. It uses verified starter/weather/stadium and persisted market evidence, but treats bullpen game workload, lineups, injuries and handedness as missing-data blockers. V7 does not change official recommendation thresholds or auto-promote.
+
+### BSN Integration V1
+
+Status: Architecture/readiness completed and build pending.
+
+Evidence: `src/services/bsn-platform.service.ts`, `/api/bsn/capabilities`, `/api/bsn/data-quality`, `/api/bsn/sync`, `/api/bsn/predictions`, `/api/bsn/ai-coach`, BSN Feature Store registry entries and `docs/bsn-integration-v1.md`.
+
+Note: BSN is registered as the second basketball league blueprint, but production predictions remain blocked. The previous mock-odds prediction path is replaced with a V7-style dry-run preflight, source/capability matrix and Confidence Engine V2 readiness output. Official picks, EV and Best Value are blocked until approved source ingestion and verified BSN odds exist.
+
+### Highest-Probability Outcome V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/market-opportunity-suite.service.ts`, `/api/market-opportunities/most-likely`, `src/components/market-opportunities/MostLikelyTool.tsx`, MLB AI Coach integration and `docs/highest-probability-outcome-v1.md`.
+
+Note: This module is informational only. It displays highest modeled probability, most-likely moneyline and an estimated two-leg moneyline parlay while preserving official recommendation-policy separation and making 0 provider calls.
+
+### MLB Starter + Weather + Stadium Intelligence V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/mlb-starter-weather-stadium-intelligence.service.ts`, Feature Store Core MLB feature definitions, MLB V5 feature-set registry entries, Current Board enrichment, MLB prospective preview enrichment, Data Quality, AI Coach, Prediction Engine preview and `docs/mlb-starter-weather-stadium-intelligence-v1.md`.
+
+Note: The module consumes stored GamesByDate verification evidence only and made 0 provider calls. Starting pitcher IDs/names, weather, wind and StadiumID are ready. Player details, player stats, stadium metadata, lineups, injuries, bullpen and historical calibration remain explicit next-phase blockers.
+
+### MLB Games Payload Field Verification V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/mlb-games-payload-audit.service.ts`, `/api/mlb/games-payload-audit`, updated MLB data-quality and AI Coach evidence, and `docs/mlb-games-payload-field-verification-v1.md`.
+
+Note: The final corrected 2026-07-17 GamesByDate verification verified populated starter IDs/names, weather, wind and `StadiumID` fields. Opener fields were present-null. No further GamesByDate verification call is needed for this audit.
+
 ### Core Dashboard And API Shell
 
 Status: Completed.
@@ -1131,3 +1199,195 @@ Validation: Backtest, calibration, rollback and A/B comparison.
 Build criteria: `npm.cmd run build` exits 0.
 
 Completion criteria: V5 is demonstrably better or safely feature-flagged.
+
+### 19. MLB Operating Day Lifecycle V1
+
+Objective: Run each MLB operating day as a deterministic, auditable lifecycle.
+
+Status: Implemented. Additive persistence, orchestrator routes, result-sync resilience, scoped settlement, replay report scaffolding, provider-call accounting and dashboard status panel are in place.
+
+Backend scope: `operating-day.service.ts`, `/api/operating-day/execute`, `/api/operating-day/status`, `/api/operating-day/[operatingDayId]/settle`, `/api/operating-day/validation`, final-refresh fix in the SportsDataIO MLB prospective preview path and structured `/api/results/sync`.
+
+Frontend scope: Compact dashboard Operating Day panel in Today.
+
+Persistence or migration scope: `202607170001_mlb_operating_day_lifecycle_v1.sql`.
+
+Validation: `npm.cmd run build` exits 0. Deterministic route compiles and exposes local settlement/freeze fixtures with zero provider calls.
+
+Completion criteria: Daily actions can be dry-run with zero provider calls, final refresh no longer depends on schedule rediscovery, quota-blocked result sync is explicit, and settlement can be scoped by operating day without touching the historical backlog.
+
+### 20. MLB Next Slate Rollover V1
+
+Objective: Prevent started or completed MLB slates from remaining on active betting surfaces and prepare the next future slate safely.
+
+Status: Implemented as a focused rollover correction. Shared active-event rules, stored-data next-slate status, Current Board rollover, MLB prospective-preview filtering and a compact dashboard Next Slate panel are in place.
+
+Backend scope: `active-event.service.ts`, `next-slate.service.ts`, `/api/slate/next/status`, operating-day planning actions `resolve_next_slate`, `next_slate_preview`, `prepare_next_slate` and `postgame_rollover`.
+
+Frontend scope: Compact dashboard Next Slate panel and slate-aware MLB prospective preview empty state.
+
+Persistence or migration scope: None. The patch uses stored `sport_events`, `sports_odds_snapshots` and `prediction_history` only.
+
+Validation: `npm.cmd run build` exits 0. Stored validation selected `2026-07-17` as the next MLB slate with 15 scheduled games, 0 active candidates, 0 official picks and 0 provider calls.
+
+Completion criteria: Started/final MLB rows are excluded from active surfaces, next-slate preview is read-only, `prepare_next_slate` returns the exact bounded SportsDataIO endpoint plan without transport, and real provider execution remains blocked until explicit approval.
+
+### 21. MLB Live Data Refresh V1
+
+Objective: Execute approved SportsDataIO MLB preparation calls and refresh supported recommendation surfaces without weakening official-pick policy.
+
+Status: Implemented for the bounded 2026-07-17 slate preparation and repaired by MLB Odds Coverage Reconciliation V1. Real execution is protected by auth, confirmation, budget checks, checkpoints and a local action lock.
+
+Backend scope: `provider-budget.service.ts`, `mlb-market-capability-registry.service.ts`, `operating-day-automation.service.ts`, `/api/providers/budget/status`, `/api/mlb/markets/capabilities`, `/api/operating-day/automation/status`, `/api/cron/operating-day` and `/api/system/version`.
+
+Frontend scope: Existing dashboard panels consume refreshed Current Board and Next Slate state.
+
+Persistence or migration scope: No new migration. Existing operating-day and checkpoint tables are reused.
+
+Validation: `npm.cmd run build` exits 0. The approved preparation and scoped repair linked 15 events, mapped 15/15 odds records, produced 45 prospective predictions, exposed 21 Current Board actionable candidates after price/freshness filtering and left official picks at 0.
+
+Completion criteria: Approved real preparation can run end to end, core full-game markets refresh across Current Board/Most Likely/Best Value/Market Intelligence/AI Bet Finder/Top Picks/Bet Slip/Arbitrage, unsupported markets remain hidden or unavailable, and one consolidated Vercel cron entry drives scheduler-ready automation.
+
+### 22. MLB Odds Coverage Reconciliation and Deployment Recovery V1
+
+Objective: Repair the 2026-07-17 MLB odds/event mapping gap, document verified market coverage and deploy under Vercel Hobby cron limits.
+
+Status: Implemented as a focused corrective patch. The event resolver now scopes the selected date to America/Puerto_Rico UTC boundaries (`04:00Z` to next-day `04:00Z`) and avoids reusing partial odds checkpoints as complete coverage. `/api/mlb/odds/coverage` provides a zero-provider-call diagnostic for schedule records, provider odds records, event mapping, normalized odds, feature snapshots, prediction counts, Current Board actionability and critical missing inputs.
+
+Backend scope: SportsDataIO MLB prospective-preview date scoping, read-only odds coverage diagnostic route, automation status cron metadata and system version route counts.
+
+Frontend scope: No new production betting surface. Existing dashboard surfaces consume the repaired stored state and remain governed by Current Board and official-pick policies.
+
+Persistence or migration scope: None. Existing `sport_events`, `sports_odds_snapshots`, `prediction_history`, operating-day tables and sync checkpoints are reused.
+
+Validation: `npm.cmd run build` exits 0. Zero-call diagnostics report 15 scheduled games, 15 provider odds records, 15 mapped games, 0 unmapped games, 45 predictions, 21 Current Board actionable candidates, 0 official picks and providerCallsMade 0.
+
+Completion criteria: The root cause of 6/15 coverage is documented, all safely mappable games are recovered, unsupported markets remain unavailable rather than fabricated, missing pitcher/lineup/injury/weather/projection inputs are explicit, Vercel cron is daily-compatible and GitHub Actions provides an external scheduler-ready fallback.
+
+### 23. Operating Day Cron Reliability and MLB Data Quality V1
+
+Objective: Make real cron execution safe when the slate is already current and make MLB readiness scores honest when critical inputs are missing.
+
+Status: Implemented as a reliability/data-quality correction. Real cron execution now returns compact `already_current` no-op status for the fresh 2026-07-17 slate, and Current Board/data-quality surfaces report insufficient critical data rather than null or inflated readiness.
+
+Backend scope: `/api/cron/operating-day`, `operating-day-automation.service.ts`, `current-board.service.ts`, `mlb-data-quality.service.ts` and `/api/mlb/data-quality`.
+
+Frontend scope: Existing intelligence surfaces receive corrected Current Board candidate fields. No new official-pick surface was added.
+
+Persistence or migration scope: None. Existing operating-day lifecycle events and sync checkpoints remain the provider-call ledger source.
+
+Validation: Dry-run and real local cron both make 0 provider calls. Real cron returns `already_current`, providerCallsMade 0 and writes 0. Data-quality validation returns featureQuality 35, dataSufficiency 30, criticalDataCompleteness 0 and `INSUFFICIENT` for the current slate.
+
+Completion criteria: Production cron no longer returns a generic 500 for a fresh slate, automation status is not misleading, critical missing MLB inputs reduce readiness, and official picks remain 0 unless strict existing gates are honestly satisfied.
+
+### 24. MLB Provider Capability Audit and AI Coach V1
+
+Objective: Identify which SportsDataIO MLB endpoints can improve model quality under the current subscription and expose deterministic explanations for preview-only candidates.
+
+Status: Implemented as a zero-provider-call audit and explanation layer.
+
+Backend scope: `mlb-provider-capability-audit.service.ts`, `/api/mlb/provider-capabilities/audit`, `mlb-ai-coach.service.ts` and `/api/mlb/ai-coach`.
+
+Frontend scope: No new production betting surface. The coach route is ready for dashboard or AI Bet Finder integration.
+
+Persistence or migration scope: None.
+
+Validation: Capability audit validation passes 5/5 with providerCallsMade 0. MLB Coach validation passes 4/4 with providerCallsMade 0. Current answers explain TEX and MIA positive-EV previews as preview-only because production, quarantine, calibration, confidence and critical-data gates remain blocked.
+
+Completion criteria: Endpoint capability boundaries are explicit, no unavailable market is exposed as supported, coach explanations are grounded in Current Board/data-quality state and official recommendations remain 0.
+
+### 25. Best Bets Today - Official And Informational Selection Engine V1
+
+Objective: Rank the strongest supported current MLB betting options of the day while preserving the official/no-bet boundary.
+
+Status: Implemented as a read-only Current Board scoring layer. If existing official gates produce qualified candidates, the surface returns `BEST BETS TODAY`; otherwise it returns `BEST BETS TODAY - NOT RECOMMENDED` with informational candidates and blockers.
+
+Backend scope: `best-bets-today.service.ts`, `/api/best-bets-today`, Current Board response extension, Top Picks response extension and MLB AI Coach best-bet answers.
+
+Frontend scope: Today dashboard Top Picks panel now includes a prominent Best Bets Today section ahead of legacy official-only Top Picks columns.
+
+Persistence or migration scope: None. The module reads existing Current Board predictions, odds and V5 starter/weather/stadium context only.
+
+Validation: `npm.cmd run build` exits 0. The API contract reports providerCallsMade 0, remoteMutationsMade 0, officialHistoryChanged false and predictionsRegenerated false.
+
+Completion criteria: Official picks remain governed by existing thresholds and production gates, informational fallbacks are clearly labeled not recommended, negative EV and blockers remain visible, and no provider quota or settlement path is touched.
+
+### 26. MLB Prediction Engine V6 Preflight, Feature Injection, And Safe Regeneration V1
+
+Objective: Prove and prepare real starter/weather/stadium calculation injection for current MLB prospective predictions without provider calls or history rewrites.
+
+Status: Implemented through deterministic V6 projection injection and a protected zero-provider preflight route. Write-mode regeneration is intentionally blocked by `prediction_history_unique_pick`, because inserting immutable side-by-side V6 rows would otherwise require overwriting prior event/market/team predictions.
+
+Backend scope: `sportsdataio-mlb-prospective-preview.service.ts`, `/api/mlb/predictions/v6-regeneration`, Current Board probability-origin metadata and Most Likely/Best Bets filtering for fallback/unavailable probabilities.
+
+Frontend scope: None in this phase.
+
+Persistence or migration scope: None applied. A future schema migration is required before immutable V6 prediction rows can be written.
+
+Validation: `npm.cmd run build` exits 0. Local dry-run reports 14 eligible events, 1 excluded event, 42 planned V6 predictions, deterministic validation true and providerCallsMade 0. Confirmed write mode returns `schema_blocked_prediction_history_unique_pick` without overwriting prior rows.
+
+Completion criteria: V6 feature injection path is explicit, deterministic validation passes, write mode is safely guarded, and the next required action is schema support for immutable prediction versions.
+
+### 27. Prediction Versioning Engine V1
+
+Objective: Allow champion, challenger, shadow and rollback prediction rows to coexist without overwriting prior predictions.
+
+Status: Implemented in code and migration. Remote application of `202607170002_prediction_versioning_engine_v1.sql` is required before V6 challenger rows can be persisted.
+
+Backend scope: `prediction_history` versioning migration, `probePredictionVersioningSchemaCapabilities`, Current Board `is_current=true` filtering after migration, and V6 regeneration challenger metadata.
+
+Frontend scope: None in this phase. Current Board behavior is preserved until the migration is applied, then current surfaces continue to read current rows only.
+
+Persistence or migration scope: `202607170002_prediction_versioning_engine_v1.sql` adds versioning columns, lineage indexes and current-row uniqueness by `prediction_group_key`.
+
+Validation: `npm.cmd run build` exits 0. Provider calls remain 0. V6 write mode remains blocked until the migration is applied remotely.
+
+Completion criteria: Version-aware code compiles, migration is ready, legacy runtime remains safe before migration, and the next phase is remote migration application followed by V6 challenger regeneration.
+
+### 28. MLB V6 Model Comparison Report V1
+
+Objective: Compare champion V5/V5-context rows against V6 challenger calculations before promotion.
+
+Status: Implemented as a zero-provider-call report embedded in `/api/mlb/predictions/v6-regeneration`.
+
+Backend scope: V6 regeneration response now includes `modelComparison` with per-prediction champion/challenger values and deltas for probability, confidence, edge, EV, feature quality and data sufficiency.
+
+Frontend scope: None in this phase.
+
+Persistence or migration scope: No new persistence. Corrective migration `202607170003_prediction_versioning_drop_legacy_unique_pick.sql` is required before V6 challenger rows can be persisted.
+
+Validation: `npm.cmd run build` exits 0. Production validation returned `modelComparison.mode=mlb_prediction_v6_model_comparison_v1`, compared 33 predictions, average probability delta `-1.39`, average confidence delta `-1.95`, providerCallsMade 0 and no official-history mutation.
+
+Completion criteria: Comparison report is available even when persistence is blocked, and the platform can quantify V6 changes before any promotion decision.
+
+### 29. Prediction Versioning Corrective Verification And MLB Model Platform Guardrails V1
+
+Objective: Verify the remote legacy unique-pick corrective migration by safely persisting V6 challenger rows, then expose read-only model-operations surfaces without promotion or provider usage.
+
+Status: Implemented. The remote blocker was verified cleared by persisted challenger rows and idempotency reuse. V6 remains challenger-only and default production surfaces remain champion/current.
+
+Backend scope: `mlb-model-platform.service.ts`, `/api/mlb/predictions/comparison`, `/api/mlb/predictions/shadow-evaluation`, `/api/mlb/predictions/promotion-readiness`, `/api/mlb/predictions/rollback-plan`, `/api/mlb/players/metadata-cache`, `/api/mlb/stadiums/metadata-cache`, `/api/mlb/intelligence/pitcher-bullpen-foundation` and opt-in `modelRole` support on `/api/current-board`.
+
+Frontend scope: None in this phase. Existing Current Board behavior is preserved unless an operator explicitly requests `modelRole=challenger` or `modelRole=shadow`.
+
+Persistence or migration scope: Corrective migration `202607170003_prediction_versioning_drop_legacy_unique_pick.sql` was applied remotely by the operator and verified by behavior. No new migration was added in this checkpoint.
+
+Validation: `npm.cmd run build` exits 0. V6 dry-run planned 15 challenger rows with 0 provider calls. Confirmed write inserted 15 challenger rows, reused 0 and wrote checkpoint `ffb2e6eb-cb80-421a-87a6-69b0b345c5e5`; same-key rerun inserted 0, reused 15 and wrote checkpoint `733ccb04-c751-4648-a06f-6685898d738c`. Comparison matched 15 champion/challenger pairs with average probability delta `-1.36` and average confidence delta `-1.93`.
+
+Completion criteria: Legacy unique blocker is cleared, challenger persistence is idempotent, comparison/quality-gate/shadow/promotion/rollback surfaces are available, player/stadium/pitcher-bullpen foundations are zero-call, and no official history, settlement, recommendation thresholds or provider quota are touched.
+
+### 30. Autonomous Daily Operations and Production User Experience V1
+
+Objective: Turn existing Pick Analyzer modules into one daily self-operating prototype and redesign Today so a first-time user can understand the board in under 20 seconds.
+
+Status: Implemented as a zero-provider-call orchestration and UX consolidation pass.
+
+Backend scope: `autonomous-daily-operations.service.ts` and `/api/autonomous-daily-operations/status` compose Operating Day, Provider Budget, Current Board, Best Bets Today, Most Likely, Best Value, AI Coach, MLB data quality, pitcher/bullpen foundation, champion-vs-challenger comparison, shadow evaluation, calibration and promotion readiness into one canonical daily status.
+
+Frontend scope: `ProductionTodayPanel` is now the first Today surface. It shows `Should I Bet Today?`, Official Pick, Best Bet Today, Most Likely, Best Value, Most Likely Moneyline, Most Likely Parlay, bankroll recommendation, compact game cards, Today's Timeline, System Health, Today's Learning and Promotion Readiness. Legacy detailed Today panels remain behind collapsed supporting detail.
+
+Persistence or migration scope: No migration. Read-only status requests do not create rows. Real operating-day execution stages still persist through `operating_day_lifecycle_events` via the existing operating-day executor.
+
+Validation: `npm.cmd run build` exits 0, generates 235 static pages and exposes 238 API routes. The new status route is read-only, reports `providerCallsMade=0`, `remoteMutationsMade=0`, `historyImmutable=true`, `officialHistoryChanged=false` and `modelPromotionPerformed=false`.
+
+Completion criteria: The daily lifecycle has one canonical summary, the user-facing Today screen is simplified and duplicate information is collapsed, learning/promotion readiness are visible without automatic promotion, and provider quota/history remain untouched.

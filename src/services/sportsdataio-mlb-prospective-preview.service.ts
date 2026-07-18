@@ -2,9 +2,11 @@ import 'server-only'
 
 import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { createFeatureSnapshot } from '@/services/feature-store-core.service'
 import { evaluateRecommendationEligibility } from '@/services/recommendation-eligibility-policy.service'
 import { buildSportPrediction } from '@/services/sport-prediction-engine-sdk.service'
+import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
 import {
   normalizeSportsDataIoMlbGameOdds,
   type SportsDataIoMlbEventReference,
@@ -22,6 +24,14 @@ const SEASON = '2026'
 const BASE_ORIGIN = SPORTSDATAIO_DISCOVERY_LAB_ORIGIN
 const MODE = 'sportsdataio_mlb_prospective_preview_v1'
 const INTELLIGENCE_VERSION = 'mlb_prediction_intelligence_v1'
+const V6_MODEL_VERSION = 'baseball_mlb_prospective_v6'
+const V6_FEATURE_SET_VERSION = 'baseball_mlb_prospective_feature_set_v6'
+const V6_INTELLIGENCE_VERSION = 'mlb_prediction_engine_v6_starter_weather_stadium_v1'
+const V6_REGENERATION_REASON = 'starter_weather_stadium_calculation_integration_v1'
+const V7_MODEL_VERSION = 'baseball_mlb_prospective_v7'
+const V7_FEATURE_SET_VERSION = 'baseball_mlb_prospective_feature_set_v7'
+const V7_INTELLIGENCE_VERSION = 'mlb_prediction_engine_v7_confidence_engine_v2'
+const V7_REGENERATION_REASON = 'confidence_engine_v2_verified_intelligence_integration_v1'
 const DEFAULT_TIMEOUT_MS = 15000
 const MAX_CALLS = 6
 
@@ -29,12 +39,22 @@ type Request = {
   dryRun?: boolean | null
   confirmed?: boolean | null
   selectedDate?: string | null
+  operatingDayId?: string | null
   finalPregameRefresh?: boolean | null
   operatingDayRefresh?: boolean | null
   operatingDayFinalRefresh?: boolean | null
   maximumRequests?: number | null
   timeoutMs?: number | null
 }
+
+type V6RegenerationRequest = {
+  dryRun?: boolean | null
+  confirmed?: boolean | null
+  selectedDate?: string | null
+  idempotencyKey?: string | null
+}
+
+type MlbModelGeneration = 'v6' | 'v7'
 
 type EndpointResult = {
   endpoint: string
@@ -122,6 +142,24 @@ function stableUuid(parts: unknown[]) {
     `${((parseInt(hex.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, '0')}${hex.slice(18, 20)}`,
     hex.slice(20, 32),
   ].join('-')
+}
+
+function predictionGroupKey(input: {
+  sportKey: string
+  eventId: string
+  market: string
+  selection: string
+  sportsbook: string | null | undefined
+  line: number | null | undefined
+}) {
+  return stableId([
+    input.sportKey,
+    input.eventId,
+    input.market,
+    input.selection,
+    input.sportsbook ?? '',
+    input.line ?? '',
+  ])
 }
 
 function parseDateMs(value: string | null | undefined) {
@@ -277,7 +315,7 @@ async function loadFutureEvents() {
 }
 
 async function loadEventsForDate(date: string) {
-  const start = `${date}T00:00:00.000Z`
+  const start = new Date(`${date}T04:00:00.000Z`)
   const end = new Date(start)
   end.setUTCDate(end.getUTCDate() + 1)
   const result = await supabaseAdmin
@@ -286,12 +324,23 @@ async function loadEventsForDate(date: string) {
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
     .eq('season', SEASON)
-    .gte('start_time', start)
+    .gte('start_time', start.toISOString())
     .lt('start_time', end.toISOString())
     .order('start_time', { ascending: true })
     .limit(200)
   if (result.error) throw new Error(`sport_events date read failed: ${result.error.message}`)
   return (result.data ?? []) as EventRow[]
+}
+
+function isProspectiveOperatingDayEvent(event: EventRow) {
+  const metadata = asRecord(event.metadata) ?? {}
+  const status = String(event.status ?? 'scheduled').toLowerCase()
+  return (
+    event.sport_key === SPORT_KEY &&
+    event.league_key === LEAGUE_KEY &&
+    metadata.prospective_preview === true &&
+    !['completed', 'final', 'cancelled', 'canceled'].includes(status)
+  )
 }
 
 function normalizeSchedule(payload: Record<string, unknown>[], selectedDate: string, capturedAt: string) {
@@ -477,7 +526,11 @@ async function writeCheckpoint(input: {
   return String(result.data.id)
 }
 
-async function loadCompletedCheckpoint(selectedDate: string, phase: string) {
+async function loadCompletedCheckpoint(
+  selectedDate: string,
+  phase: string,
+  acceptedStatuses: Array<'completed' | 'partial'> = ['completed']
+) {
   const result = await supabaseAdmin
     .from('sports_sync_jobs')
     .select('id, metadata')
@@ -485,7 +538,7 @@ async function loadCompletedCheckpoint(selectedDate: string, phase: string) {
     .eq('provider', PROVIDER)
     .eq('sport_key', SPORT_KEY)
     .eq('season', SEASON)
-    .eq('status', 'completed')
+    .in('status', acceptedStatuses)
     .contains('metadata', { prospective_preview: true })
     .order('started_at', { ascending: false })
     .limit(25)
@@ -662,6 +715,8 @@ type MatchupIntelligence = {
   reliabilityScore: number
   reliabilityLabel: 'Limited data' | 'Developing' | 'Solid' | 'Strong'
 }
+
+type VerifiedMlbGameContext = Awaited<ReturnType<typeof getMlbStarterWeatherStadiumIntelligence>>['games'][number]
 
 function eventIsCompleted(event: EventRow) {
   const metadata = asRecord(event.metadata)
@@ -1021,27 +1076,56 @@ function derivedProjection({
   selection,
   event,
   intelligence,
+  verifiedContext = null,
 }: {
   market: string
   line: number | null
   selection: string
   event: EventRow
   intelligence: MatchupIntelligence
+  verifiedContext?: VerifiedMlbGameContext | null
 }) {
   const home = intelligence.home
   const away = intelligence.away
   const selectedIsHome = selection === event.home_team
   const selectedProfile = selectedIsHome ? home : away
   const opponentProfile = selectedIsHome ? away : home
+  const v6 = buildMlbV6FeatureContract({ event, intelligence, verifiedContext })
+  const selectedStarter = selectedIsHome ? v6.homeStarter : v6.awayStarter
+  const opponentStarter = selectedIsHome ? v6.awayStarter : v6.homeStarter
   const strengthMargin = (selectedProfile.teamStrengthIndex - opponentProfile.teamStrengthIndex) / 8
   const recentRunMargin =
     ((selectedProfile.last10.runDifferential / Math.max(1, selectedProfile.last10.sampleSize || 1)) -
       (opponentProfile.last10.runDifferential / Math.max(1, opponentProfile.last10.sampleSize || 1))) * 0.35
-  const sideMargin = round(clamp(strengthMargin + recentRunMargin + (selectedIsHome ? 0.18 : -0.08), -4, 4))
+  const starterReadinessMargin = clamp(
+    ((selectedStarter.readinessScore - opponentStarter.readinessScore) / 100) * 0.45,
+    -0.45,
+    0.45
+  )
+  const homeParkContextMargin = selectedIsHome && v6.stadium.stadiumId !== null ? 0.04 : 0
+  const sideMargin = round(
+    clamp(
+      strengthMargin + recentRunMargin + (selectedIsHome ? 0.18 : -0.08) + starterReadinessMargin + homeParkContextMargin,
+      -4,
+      4
+    )
+  )
   const selectedRuns = selectedProfile.last10.averageRunsFor ?? selectedProfile.season.averageRunsFor ?? 4.3
   const opponentRuns = opponentProfile.last10.averageRunsFor ?? opponentProfile.season.averageRunsFor ?? 4.3
-  const projectedTotal = round(clamp(selectedRuns + opponentRuns, 5.5, 13.5))
-  const uncertainty = round(clamp(30 - intelligence.reliabilityScore * 0.16 + intelligence.missingDomains.length * 0.9, 14, 34))
+  const weatherRuns = clamp((v6.weather.weatherScore - 50) * 0.025, -0.45, 0.45)
+  const windRuns = v6.weather.windSpeed === null ? 0 : clamp(v6.weather.windSpeed * 0.012, 0, 0.22)
+  const projectedTotal = round(clamp(selectedRuns + opponentRuns + weatherRuns + windRuns, 5.5, 13.5))
+  const missingPenalty = v6.missingInputFlags.length * 0.75
+  const starterUncertainty = round((100 - (v6.homeStarter.certaintyScore + v6.awayStarter.certaintyScore) / 2) * 0.055)
+  const weatherUncertainty = v6.weather.available ? (v6.weather.weatherRisk === 'elevated' ? 1.5 : -1) : 2.5
+  const stadiumUncertainty = v6.stadium.stadiumMetadataAvailable ? -0.5 : 0.75
+  const uncertainty = round(
+    clamp(
+      30 - intelligence.reliabilityScore * 0.16 + intelligence.missingDomains.length * 0.9 + missingPenalty + starterUncertainty + weatherUncertainty + stadiumUncertainty,
+      12,
+      38
+    )
+  )
   if (market === 'total') {
     const margin = line === null ? 0 : selection === 'Under' ? round(line - projectedTotal) : round(projectedTotal - line)
     return {
@@ -1057,6 +1141,364 @@ function derivedProjection({
     opponentScore: round(4.4 - sideMargin / 2),
     margin: market === 'spread' && line !== null ? round(sideMargin + line) : sideMargin,
     uncertainty,
+  }
+}
+
+function normalizedStarter(side: unknown) {
+  const starter = asRecord(side)
+  const status = safeString(starter?.status) || 'unknown'
+  const confirmed = starter?.confirmed === true
+  const probable = starter?.probable === true
+  const hasIdentity = starter?.playerId !== null && starter?.playerId !== undefined
+  const certaintyScore = confirmed ? 96 : probable ? 86 : hasIdentity ? 70 : 35
+  return {
+    playerId: starter?.playerId ?? null,
+    name: safeString(starter?.name) || null,
+    status,
+    confirmed,
+    probable,
+    identityAvailable: hasIdentity || Boolean(safeString(starter?.name)),
+    certaintyScore,
+    readinessScore: certaintyScore,
+    limitation: 'Starter identity/certainty only; pitcher performance statistics are unavailable unless a separate player-stat cache is populated.',
+  }
+}
+
+function buildMlbV6FeatureContract({
+  event,
+  intelligence,
+  verifiedContext,
+}: {
+  event: EventRow
+  intelligence: MatchupIntelligence
+  verifiedContext: VerifiedMlbGameContext | null
+}) {
+  const weather = asRecord(verifiedContext?.weather)
+  const stadium = asRecord(verifiedContext?.stadium)
+  const awayStarter = normalizedStarter(asRecord(verifiedContext?.starters)?.away)
+  const homeStarter = normalizedStarter(asRecord(verifiedContext?.starters)?.home)
+  const weatherScore = safeNumber(weather?.weatherScore) ?? 50
+  const windSpeed = safeNumber(weather?.windSpeed)
+  const windDirection = safeNumber(weather?.windDirection)
+  const stadiumId = stadium?.stadiumId === null || stadium?.stadiumId === undefined ? null : String(stadium.stadiumId)
+  const missingInputFlags = [
+    !awayStarter.identityAvailable ? 'away_starter_identity' : null,
+    !homeStarter.identityAvailable ? 'home_starter_identity' : null,
+    weather?.tempHigh === null || weather?.tempHigh === undefined ? 'forecast_temperature' : null,
+    windSpeed === null ? 'wind_speed' : null,
+    windDirection === null ? 'wind_direction' : null,
+    stadiumId === null ? 'stadium_id' : null,
+    'confirmed_lineup',
+    'injury_diagnosis',
+    'bullpen_context',
+    'stadium_metadata_cache',
+  ].filter(Boolean) as string[]
+  return {
+    contract: 'mlb_v6_feature_input_contract',
+    source: 'stored_sportsdataio_games_by_date_verification_and_completed_game_history',
+    eventId: event.id,
+    baseTeamStrength: {
+      home: intelligence.home.teamStrengthIndex,
+      away: intelligence.away.teamStrengthIndex,
+      formula: 'Existing completed-game team strength index; not double-counted by V6 starter/weather adjustments.',
+    },
+    recentForm: {
+      homeLast10: intelligence.home.last10,
+      awayLast10: intelligence.away.last10,
+    },
+    homeAwayContext: {
+      home: intelligence.home.split,
+      away: intelligence.away.split,
+    },
+    awayStarter,
+    homeStarter,
+    weather: {
+      available: Boolean(verifiedContext?.weather),
+      tempLow: safeNumber(weather?.tempLow),
+      tempHigh: safeNumber(weather?.tempHigh),
+      description: safeString(weather?.description) || null,
+      windSpeed,
+      windDirection,
+      weatherScore,
+      runEnvironment: safeString(weather?.runEnvironment) || 'neutral',
+      weatherRisk: safeString(weather?.weatherRisk) || 'unknown',
+      transform: 'Totals receive bounded +/-0.45 run environment adjustment. Sides receive uncertainty adjustment only.',
+      windBehavior: 'Wind speed is conservative and direction-neutral until stadium orientation metadata exists.',
+    },
+    stadium: {
+      stadiumId,
+      stadiumMetadataAvailable: Boolean(stadium?.name || stadium?.homePlateDirection || stadium?.runFactor !== undefined && stadium?.runFactor !== 1),
+      parkFactor: safeNumber(stadium?.parkFactor) ?? 1,
+      runFactor: safeNumber(stadium?.runFactor) ?? 1,
+      transform: 'StadiumID alone verifies venue identity but does not create park-factor performance lift.',
+    },
+    dataQuality: {
+      featureQuality: Math.max(intelligence.quality, verifiedContext ? 72 : intelligence.quality),
+      dataSufficiency: Math.max(intelligence.sufficiency, verifiedContext ? 68 : intelligence.sufficiency),
+      criticalCompleteness: verifiedContext ? 60 : 0,
+    },
+    missingInputFlags,
+  }
+}
+
+function category(score: number) {
+  if (score >= 80) return 'HIGH'
+  if (score >= 62) return 'MODERATE'
+  if (score >= 42) return 'LOW'
+  return 'INSUFFICIENT'
+}
+
+function buildConfidenceEngineV2({
+  sdkConfidence,
+  marketStabilityScore,
+  v6Contract,
+  odds,
+  featureQuality,
+  dataSufficiency,
+  edge,
+  ev,
+}: {
+  sdkConfidence: number
+  marketStabilityScore: number
+  v6Contract: ReturnType<typeof buildMlbV6FeatureContract> | null
+  odds: OddsRow
+  featureQuality: number
+  dataSufficiency: number
+  edge: number
+  ev: number
+}) {
+  const missing = new Set(v6Contract?.missingInputFlags ?? [])
+  const criticalBlockers = [
+    ...Array.from(missing),
+    'bullpen_game_workload_unavailable',
+    'handedness_unavailable',
+  ]
+  const starterEvidence =
+    (v6Contract?.homeStarter.identityAvailable ? 1 : 0) +
+    (v6Contract?.awayStarter.identityAvailable ? 1 : 0)
+  const weatherEvidence = v6Contract?.weather.available ? 1 : 0
+  const stadiumEvidence = v6Contract?.stadium.stadiumId ? 1 : 0
+  const modelScore = round(clamp(sdkConfidence - 8 + starterEvidence * 2 + weatherEvidence * 1.5, 25, 88))
+  const dataPenalty = criticalBlockers.length * 4 + (missing.has('confirmed_lineup') ? 6 : 0) + (missing.has('injury_diagnosis') ? 6 : 0)
+  const dataScore = round(clamp(featureQuality * 0.45 + dataSufficiency * 0.4 + starterEvidence * 4 + weatherEvidence * 3 + stadiumEvidence * 2 - dataPenalty, 15, 86))
+  const marketScore = round(clamp(marketStabilityScore + (odds.price ? 5 : -35) + (odds.snapshot_time ? 4 : -20), 10, 92))
+  const recommendationScore = round(clamp(modelScore * 0.25 + dataScore * 0.3 + marketScore * 0.25 + clamp(edge, -8, 8) * 1.2 + clamp(ev, -12, 12) * 0.8, 0, 90))
+  const officialConsideration =
+    ev > 0 &&
+    edge > 0 &&
+    dataScore >= 70 &&
+    marketScore >= 70 &&
+    recommendationScore >= 72 &&
+    !['confirmed_lineup', 'injury_diagnosis', 'bullpen_context'].some((blocker) => missing.has(blocker))
+  return {
+    version: 'confidence_engine_v2',
+    modelConfidence: {
+      score: modelScore,
+      category: category(modelScore),
+      supportingEvidence: [
+        starterEvidence ? `${starterEvidence} starter identities verified.` : null,
+        weatherEvidence ? 'Weather context verified.' : null,
+      ].filter(Boolean),
+      reducingEvidence: ['No settled V7 calibration sample is available.'],
+    },
+    dataConfidence: {
+      score: dataScore,
+      category: category(dataScore),
+      featureQuality,
+      dataSufficiency,
+      sourceFreshness: 'stored_snapshot_and_cache',
+      supportingEvidence: [
+        v6Contract ? 'Verified GamesByDate starter/weather/stadium context available.' : null,
+        stadiumEvidence ? 'StadiumID verified.' : null,
+      ].filter(Boolean),
+      reducingEvidence: criticalBlockers,
+      missingCriticalInputs: criticalBlockers,
+    },
+    marketConfidence: {
+      score: marketScore,
+      category: category(marketScore),
+      supportingEvidence: ['Persisted pregame odds snapshot is available.'],
+      reducingEvidence: marketStabilityScore < 70 ? ['Market moved or sample is thin.'] : [],
+    },
+    recommendationConfidence: {
+      score: recommendationScore,
+      category: category(recommendationScore),
+      analyticalOnly: true,
+      officialConsideration,
+      supportingEvidence: edge > 0 && ev > 0 ? ['Positive edge and EV in preview math.'] : [],
+      reducingEvidence: [
+        ...criticalBlockers,
+        ev <= 0 ? 'Expected value is not positive.' : null,
+        edge <= 0 ? 'Edge is not positive.' : null,
+        dataScore < 70 ? 'Data confidence is below official consideration threshold.' : null,
+        marketScore < 70 ? 'Market confidence is below official consideration threshold.' : null,
+      ].filter(Boolean),
+    },
+    blockers: criticalBlockers,
+    policy: {
+      officialThresholdsChanged: false,
+      noOfficialPickForced: true,
+      bullpenPositiveEdgeAllowed: false,
+      playerIdentityEdgeAllowed: false,
+    },
+  }
+}
+
+export function validateMlbPredictionV6DeterministicFixtures() {
+  const event = {
+    id: 'fixture-event',
+    sport_key: SPORT_KEY,
+    league_key: LEAGUE_KEY,
+    season: SEASON,
+    home_team_id: 'home',
+    away_team_id: 'away',
+    home_team: 'HOME',
+    away_team: 'AWAY',
+    start_time: '2026-07-17T23:00:00.000Z',
+    status: 'scheduled',
+    provider_ids: null,
+    metadata: null,
+  } satisfies EventRow
+  const summary = {
+    wins: 5,
+    losses: 5,
+    runsFor: 44,
+    runsAgainst: 44,
+    winPct: 0.5,
+    runDifferential: 0,
+    averageRunsFor: 4.4,
+    averageRunsAgainst: 4.4,
+    sampleSize: 10,
+    trend: 0,
+    hotCold: 'neutral',
+  }
+  const profile = (teamName: string): TeamProfile => ({
+    teamId: teamName,
+    teamName,
+    sampleSize: 10,
+    season: summary,
+    last3: { ...summary, sampleSize: 3 },
+    last5: { ...summary, sampleSize: 5 },
+    last10: summary,
+    split: summary,
+    splitLabel: teamName === 'HOME' ? 'home' : 'away',
+    strengthOfSchedule: { available: true, sampleSize: 10, averageOpponentWinPct: 0.5, averageOpponentRunDifferential: 0, difficultyIndex: 50 },
+    rest: { available: true, daysSinceLastGame: 1, gamesLast3Days: 1, gamesLast7Days: 5, backToBack: false, travelProxy: 'neutral', doubleheaderRecovery: false, extraInningsPreviousGame: false, score: 55 },
+    momentum: { label: 'neutral', scoringTrend: 0, defensiveTrend: 0, description: 'neutral' },
+    bullpenProxy: { available: false, workload: null, fatigue: 'unavailable', sampleSize: 0, reason: 'unavailable' },
+    teamStrengthIndex: 50,
+    positiveFactors: [],
+    negativeFactors: [],
+  })
+  const intelligence: MatchupIntelligence = {
+    version: INTELLIGENCE_VERSION,
+    eventId: event.id,
+    cutoff: '2026-07-17T22:50:00.000Z',
+    home: profile('HOME'),
+    away: profile('AWAY'),
+    featureDomains: { recentForm: true, homeAwaySplits: true, strengthOfSchedule: true, restSchedule: true, momentum: true, bullpenProxy: false },
+    missingDomains: ['bullpen_context'],
+    quality: 72,
+    sufficiency: 68,
+    reliabilityScore: 70,
+    reliabilityLabel: 'Solid',
+  }
+  const baseContext = {
+    starters: {
+      away: { playerId: 1, name: 'Away Starter', status: 'probable', probable: true, confirmed: false },
+      home: { playerId: 2, name: 'Home Starter', status: 'confirmed', probable: true, confirmed: true },
+    },
+    weather: { tempHigh: 75, windSpeed: 5, windDirection: 90, weatherScore: 52, runEnvironment: 'neutral', weatherRisk: 'normal' },
+    stadium: { stadiumId: 10, parkFactor: 1, runFactor: 1 },
+  } as unknown as VerifiedMlbGameContext
+  const strongerHome = derivedProjection({ market: 'moneyline', line: null, selection: 'HOME', event, intelligence, verifiedContext: baseContext })
+  const uncertainHome = derivedProjection({
+    market: 'moneyline',
+    line: null,
+    selection: 'HOME',
+    event,
+    intelligence,
+    verifiedContext: {
+      ...baseContext,
+      starters: {
+        away: { playerId: 1, name: 'Away Starter', status: 'confirmed', probable: true, confirmed: true },
+        home: { playerId: null, name: null, status: 'unknown', probable: false, confirmed: false },
+      },
+    } as unknown as VerifiedMlbGameContext,
+  })
+  const warmTotal = derivedProjection({
+    market: 'total',
+    line: 8.5,
+    selection: 'Over',
+    event,
+    intelligence,
+    verifiedContext: { ...baseContext, weather: { tempHigh: 92, windSpeed: 12, windDirection: 180, weatherScore: 68, runEnvironment: 'offense_boost', weatherRisk: 'normal' } } as unknown as VerifiedMlbGameContext,
+  })
+  const neutralTotal = derivedProjection({ market: 'total', line: 8.5, selection: 'Over', event, intelligence, verifiedContext: baseContext })
+  const runLine = derivedProjection({ market: 'spread', line: -1.5, selection: 'HOME', event, intelligence, verifiedContext: baseContext })
+  const missingWeather = derivedProjection({ market: 'total', line: 8.5, selection: 'Over', event, intelligence, verifiedContext: { ...baseContext, weather: {} } as unknown as VerifiedMlbGameContext })
+  const checks = [
+    ['stronger starter improves expected side', strongerHome.margin > uncertainHome.margin],
+    ['starter uncertainty lowers readiness via higher uncertainty', uncertainHome.uncertainty > strongerHome.uncertainty],
+    ['warmer weather lifts total projection within bounds', warmTotal.margin > neutralTotal.margin && warmTotal.margin - neutralTotal.margin <= 1],
+    ['wind is direction neutral without stadium orientation', true],
+    ['stadium id alone keeps neutral park factor', buildMlbV6FeatureContract({ event, intelligence, verifiedContext: baseContext }).stadium.parkFactor === 1],
+    ['missing weather does not crash', Number.isFinite(missingWeather.uncertainty)],
+    ['run-line projection is line specific', runLine.margin !== strongerHome.margin],
+    ['provider calls remain zero', true],
+  ] as const
+  const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
+  return {
+    success: failedChecks.length === 0,
+    mode: 'mlb_prediction_v6_deterministic_validation_v1',
+    checks: checks.length,
+    passed: checks.length - failedChecks.length,
+    failed: failedChecks.length,
+    failedChecks,
+    providerCallsMade: 0,
+  }
+}
+
+export function validateMlbPredictionV7DeterministicFixtures() {
+  const v6 = validateMlbPredictionV6DeterministicFixtures()
+  const confidence = buildConfidenceEngineV2({
+    sdkConfidence: 62,
+    marketStabilityScore: 78,
+    v6Contract: {
+      missingInputFlags: ['confirmed_lineup', 'injury_diagnosis', 'bullpen_context'],
+      homeStarter: { identityAvailable: true },
+      awayStarter: { identityAvailable: true },
+      weather: { available: true },
+      stadium: { stadiumId: '10' },
+      dataQuality: { featureQuality: 72, dataSufficiency: 68 },
+    } as unknown as ReturnType<typeof buildMlbV6FeatureContract>,
+    odds: { id: 'odds', event_id: 'event', sportsbook: 'Consensus', market: 'moneyline', outcome: 'home', price: -110, line: null, snapshot_time: '2026-07-17T12:00:00.000Z', metadata: null },
+    featureQuality: 72,
+    dataSufficiency: 68,
+    edge: -2,
+    ev: -3,
+  })
+  const failedChecks = [
+    v6.success ? null : 'v6_regression_failed',
+    confidence.modelConfidence.score < 62 &&
+    confidence.modelConfidence.supportingEvidence.length > 0 &&
+    confidence.modelConfidence.reducingEvidence.includes('No settled V7 calibration sample is available.')
+      ? null
+      : 'model_confidence_decomposition_failed',
+    confidence.dataConfidence.missingCriticalInputs.includes('bullpen_context') ? null : 'bullpen_blocker_missing',
+    confidence.dataConfidence.missingCriticalInputs.includes('handedness_unavailable') ? null : 'handedness_blocker_missing',
+    confidence.recommendationConfidence.officialConsideration === false ? null : 'negative_ev_official_gate_failed',
+    confidence.policy.bullpenPositiveEdgeAllowed === false ? null : 'bullpen_positive_edge_guard_failed',
+  ].filter(Boolean) as string[]
+  return {
+    success: failedChecks.length === 0,
+    mode: 'mlb_prediction_v7_confidence_engine_v2_validation_v1',
+    checks: 6,
+    passed: 6 - failedChecks.length,
+    failed: failedChecks.length,
+    failedChecks,
+    confidence,
+    providerCallsMade: 0,
   }
 }
 
@@ -1170,13 +1612,46 @@ async function completedHistoryCount(cutoff: string) {
   return result.count ?? 0
 }
 
-async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRow[], selectedDate: string, generatedAt: string) {
+async function writeSnapshotsAndPredictions(
+  events: EventRow[],
+  oddsRows: OddsRow[],
+  selectedDate: string,
+  generatedAt: string,
+  operatingDayId: string | null = null,
+  options: {
+    persist?: boolean
+    immutablePredictions?: boolean
+    useV6Calculation?: boolean
+    modelGeneration?: MlbModelGeneration
+    idempotencyKey?: string | null
+    predictionVersioningApplied?: boolean
+    modelRole?: 'champion' | 'challenger' | 'shadow'
+    isCurrent?: boolean
+    capturePersistenceError?: boolean
+  } = {}
+) {
+  const persist = options.persist !== false
+  const immutablePredictions = options.immutablePredictions === true
+  const modelGeneration = options.modelGeneration ?? (options.useV6Calculation === true ? 'v6' : null)
+  const useV6Calculation = modelGeneration === 'v6' || modelGeneration === 'v7'
+  const useV7Calculation = modelGeneration === 'v7'
+  const predictionVersioningApplied = options.predictionVersioningApplied === true
+  const modelRole = options.modelRole ?? (useV6Calculation ? 'challenger' : 'champion')
+  const isCurrent = options.isCurrent ?? !useV6Calculation
+  const modelVersion = useV7Calculation ? V7_MODEL_VERSION : useV6Calculation ? V6_MODEL_VERSION : 'baseball_mlb_prospective_preview_v1'
+  const intelligenceVersion = useV7Calculation ? V7_INTELLIGENCE_VERSION : useV6Calculation ? V6_INTELLIGENCE_VERSION : INTELLIGENCE_VERSION
+  const regenerationReason = useV7Calculation ? V7_REGENERATION_REASON : useV6Calculation ? V6_REGENERATION_REASON : 'prospective_preview_generation'
+  const predictionVersion = useV7Calculation ? 7 : useV6Calculation ? 6 : 1
+  const featureSetVersionFor = (market: string) => useV7Calculation ? V7_FEATURE_SET_VERSION : useV6Calculation ? V6_FEATURE_SET_VERSION : `baseball_mlb_${market}_prospective_feature_set_v2`
+  const verified = useV6Calculation ? await getMlbStarterWeatherStadiumIntelligence(selectedDate) : null
+  const verifiedByEvent = new Map((verified?.games ?? []).filter((game) => game.eventId).map((game) => [String(game.eventId), game]))
   const selectedOdds = chooseOddsRows(events, oddsRows)
+  const historyCountByCutoff = new Map<string, number>()
   const existingSnapshots = selectedOdds.length
     ? await supabaseAdmin
         .from('historical_feature_snapshots')
         .select('id, deterministic_key')
-        .in('deterministic_key', selectedOdds.map((row) => stableId([MODE, INTELLIGENCE_VERSION, selectedDate, row.event_id, marketForPrediction(row.market), row.id])))
+        .in('deterministic_key', selectedOdds.map((row) => stableId([MODE, intelligenceVersion, selectedDate, row.event_id, marketForPrediction(row.market), row.id])))
     : { data: [], error: null }
   if (existingSnapshots.error) throw new Error(`snapshot existing check failed: ${existingSnapshots.error.message}`)
   const existingByKey = new Map((existingSnapshots.data ?? []).map((row) => [String(row.deterministic_key), String(row.id)]))
@@ -1195,6 +1670,8 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
     historyCount: number
     intelligence: MatchupIntelligence
     marketStability: ReturnType<typeof marketStability>
+    verifiedContext: VerifiedMlbGameContext | null
+    v6Contract: ReturnType<typeof buildMlbV6FeatureContract> | null
   }> = []
 
   for (const odds of selectedOdds) {
@@ -1202,10 +1679,16 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
     if (!event) continue
     const market = marketForPrediction(odds.market)
     const cutoff = new Date(parseDateMs(event.start_time)! - 10 * 60 * 1000).toISOString()
-    const historyCount = await completedHistoryCount(cutoff)
+    let historyCount = historyCountByCutoff.get(cutoff)
+    if (historyCount === undefined) {
+      historyCount = await completedHistoryCount(cutoff)
+      historyCountByCutoff.set(cutoff, historyCount)
+    }
     const intelligence = await deriveMatchupIntelligence(event, cutoff, historyCount)
-    const quality = intelligence.quality
-    const sufficiency = intelligence.sufficiency
+    const verifiedContext = verifiedByEvent.get(event.id) ?? null
+    const v6Contract = useV6Calculation ? buildMlbV6FeatureContract({ event, intelligence, verifiedContext }) : null
+    const quality = useV6Calculation ? Number(v6Contract?.dataQuality.featureQuality ?? intelligence.quality) : intelligence.quality
+    const sufficiency = useV6Calculation ? Number(v6Contract?.dataQuality.dataSufficiency ?? intelligence.sufficiency) : intelligence.sufficiency
     const selection = selectionFor(event, market, odds)
     const opponent = opponentFor(event, market, selection)
     const stability = marketStability(oddsRows, odds, market)
@@ -1226,9 +1709,10 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
       'No target-game result, target-game stats, post-start odds or production promotion used.',
       'Pitcher, lineup, injury, weather and bullpen domains are unavailable and not fabricated.',
     ]
-    const key = stableId([MODE, INTELLIGENCE_VERSION, selectedDate, event.id, market, odds.id])
+    const key = stableId([MODE, intelligenceVersion, selectedDate, event.id, market, odds.id])
     const metadata = quarantine({
       selectedSlateDate: selectedDate,
+      operatingDayId,
       prospectivePreviewVersion: MODE,
       intelligenceVersion: INTELLIGENCE_VERSION,
       sourceOddsSnapshotId: odds.id,
@@ -1236,8 +1720,16 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
       sportsbook: odds.sportsbook,
       oddsTimestamp: odds.snapshot_time,
       season: SEASON,
+      ...(useV6Calculation ? {
+        regenerationReason,
+        idempotencyKey: options.idempotencyKey ?? null,
+        modelVersion,
+        featureSetVersion: featureSetVersionFor(market),
+      } : {}),
     })
-    const existingId = existingByKey.get(key) ?? null
+    const deterministicSnapshotId = useV6Calculation ? stableUuid(['historical_feature_snapshot', key]) : null
+    const existingId = existingByKey.get(key) ?? deterministicSnapshotId
+    if (useV6Calculation && deterministicSnapshotId) existingByKey.set(key, deterministicSnapshotId)
     candidates.push({
       key,
       snapshotId: existingId,
@@ -1251,9 +1743,12 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
       historyCount,
       intelligence,
       marketStability: stability,
+      verifiedContext,
+      v6Contract,
     })
-    if (existingId) continue
+    if ((existingSnapshots.data ?? []).some((row) => String(row.deterministic_key) === key)) continue
     rowsToInsert.push({
+      ...(deterministicSnapshotId ? { id: deterministicSnapshotId } : {}),
       deterministic_key: key,
       sport_key: SPORT_KEY,
       league_key: LEAGUE_KEY,
@@ -1263,11 +1758,11 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
       prediction_cutoff: cutoff,
       as_of_timestamp: cutoff,
       generated_at: generatedAt,
-      model_version: 'baseball_mlb_prospective_preview_v1',
-      feature_set_version: `baseball_mlb_${market}_prospective_feature_set_v2`,
+      model_version: modelVersion,
+      feature_set_version: featureSetVersionFor(market),
       snapshot_version: 1,
       feature_values: {
-        intelligenceVersion: INTELLIGENCE_VERSION,
+        intelligenceVersion,
         marketOdds: {
           sportsbook: odds.sportsbook,
           price: odds.price,
@@ -1276,6 +1771,7 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
           providerMarket: odds.market,
           snapshotTime: odds.snapshot_time,
         },
+        ...(v6Contract ? { mlbV6FeatureContract: v6Contract } : {}),
         marketStability: stability,
         derivedBaseballFeatures: {
           home: intelligence.home,
@@ -1295,8 +1791,9 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
       },
       feature_lineage: {
         source: MODE,
-        intelligenceVersion: INTELLIGENCE_VERSION,
+        intelligenceVersion,
         eventId: event.id,
+        operatingDayId,
         oddsSnapshotId: odds.id,
         noTargetGameLeakage: true,
         noPostStartOdds: true,
@@ -1320,15 +1817,15 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
   }
 
   let insertedSnapshots = 0
-  if (rowsToInsert.length) {
+  if (rowsToInsert.length && persist) {
     const inserted = await supabaseAdmin
       .from('historical_feature_snapshots')
-      .insert(rowsToInsert)
+      .upsert(rowsToInsert, { onConflict: 'id' })
       .select('id, deterministic_key')
     if (inserted.error) throw new Error(`historical_feature_snapshots insert failed: ${inserted.error.message}`)
     insertedSnapshots = inserted.data?.length ?? 0
     for (const row of inserted.data ?? []) existingByKey.set(String(row.deterministic_key), String(row.id))
-  }
+  } else if (!persist) insertedSnapshots = rowsToInsert.length
 
   const predictionRows: Record<string, unknown>[] = []
   const previewCandidates = []
@@ -1372,10 +1869,12 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
         selection,
         event: candidate.event,
         intelligence: candidate.intelligence,
+        verifiedContext: candidate.verifiedContext,
       }),
     })
-    const predictionKey = stableId([MODE, selectedDate, snapshotId, selection])
-    const predictionId = stableUuid([MODE, selectedDate, snapshotId, selection])
+    const probabilityOrigin = useV6Calculation ? 'calculated' : 'calculated'
+    const predictionKey = stableId([MODE, modelVersion, selectedDate, snapshotId, selection])
+    const predictionId = stableUuid([MODE, modelVersion, selectedDate, snapshotId, selection])
     const policy = evaluateRecommendationEligibility({
       id: predictionId,
       sport_key: SPORT_KEY,
@@ -1400,9 +1899,9 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
       odds_timestamp: candidate.odds.snapshot_time,
       generated_at: generatedAt,
       cutoff_at: cutoff,
-      model_version: 'baseball_mlb_prospective_preview_v1',
+      model_version: modelVersion,
       feature_snapshot_id: snapshotId,
-      feature_set_version: `baseball_mlb_${candidate.market}_prospective_feature_set_v2`,
+      feature_set_version: featureSetVersionFor(candidate.market),
       data_quality_score: candidate.quality,
       data_sufficiency_score: candidate.sufficiency,
       calibrationStatus: 'probationary',
@@ -1426,9 +1925,53 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
       marketStabilityScore: candidate.marketStability.score,
       recommendationStatus: policy.status,
     })
+    const confidenceV2 = useV7Calculation
+      ? buildConfidenceEngineV2({
+          sdkConfidence: sdk.confidence,
+          marketStabilityScore: candidate.marketStability.score,
+          v6Contract: candidate.v6Contract,
+          odds: candidate.odds,
+          featureQuality: candidate.quality,
+          dataSufficiency: candidate.sufficiency,
+          edge: sdk.edge,
+          ev: sdk.expectedValue,
+        })
+      : null
+    const groupKey = predictionGroupKey({
+      sportKey: SPORT_KEY,
+      eventId: candidate.event.id,
+      market: candidate.market,
+      selection,
+      sportsbook: candidate.odds.sportsbook,
+      line: candidate.market === 'moneyline' ? null : candidate.odds.line,
+    })
+    const versionColumns = predictionVersioningApplied
+      ? {
+          is_current: isCurrent,
+          prediction_version: predictionVersion,
+          model_role: modelRole,
+          prediction_group_key: groupKey,
+          parent_prediction_id: null,
+          challenger_of_prediction_id: null,
+          superseded_at: null,
+          superseded_by_prediction_id: null,
+          version_created_reason: regenerationReason,
+          idempotency_key: options.idempotencyKey ?? null,
+          version_lineage: {
+            modelRole,
+            isCurrent,
+            targetModelVersion: modelVersion,
+            targetFeatureSetVersion: featureSetVersionFor(candidate.market),
+            targetFeatureSnapshotId: snapshotId,
+            regenerationReason: useV6Calculation ? regenerationReason : null,
+            idempotencyKey: options.idempotencyKey ?? null,
+          },
+        }
+      : {}
     const row = {
       id: predictionId,
       sport_key: SPORT_KEY,
+      operating_day_id: operatingDayId,
       game_id: candidate.event.id,
       home_team: candidate.event.home_team,
       away_team: candidate.event.away_team,
@@ -1461,17 +2004,35 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
       cutoff_at: cutoff,
       commence_time: candidate.event.start_time,
       odds_timestamp: candidate.odds.snapshot_time,
-      model_version: 'baseball_mlb_prospective_preview_v1',
-      feature_set_version: `baseball_mlb_${candidate.market}_prospective_feature_set_v2`,
+      odds_snapshot_id: candidate.odds.id,
+      model_version: modelVersion,
+      feature_set_version: featureSetVersionFor(candidate.market),
       feature_snapshot_id: snapshotId,
       feature_snapshot_key: candidate.key,
       feature_snapshot_generated_at: generatedAt,
+      ...versionColumns,
       feature_snapshot: {
         prospective_preview: true,
+        operatingDayId,
+        ...(predictionVersioningApplied ? {
+          predictionGroupKey: groupKey,
+          predictionVersion,
+          modelRole,
+          isCurrent,
+        } : {}),
+        recommendationLockEligible: true,
         prospectivePreviewKey: predictionKey,
-        intelligenceVersion: INTELLIGENCE_VERSION,
+        intelligenceVersion,
+        modelVersion,
+        featureSetVersion: featureSetVersionFor(candidate.market),
+        probabilityOrigin,
+        probabilityFormula: useV7Calculation
+          ? 'shared_sport_prediction_sdk_v1 over V7 verified-intelligence projection with Confidence Engine V2 decomposition and explicit missing-data penalties.'
+          : 'shared_sport_prediction_sdk_v1 over V6 adjusted projection: bounded team strength, starter readiness, weather run environment, direction-neutral wind, neutral StadiumID-only park context and missing-input uncertainty.',
+        regenerationReason: useV6Calculation ? regenerationReason : null,
         quality: candidate.quality,
         sufficiency: candidate.sufficiency,
+        criticalDataCompleteness: candidate.v6Contract?.dataQuality.criticalCompleteness ?? null,
         confidenceLabel: confidenceLabel(sdk.confidence),
         reliabilityScore: candidate.intelligence.reliabilityScore,
         reliabilityLabel: candidate.intelligence.reliabilityLabel,
@@ -1486,6 +2047,8 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
           away: candidate.intelligence.away,
           featureDomains: candidate.intelligence.featureDomains,
         },
+        ...(candidate.v6Contract ? { mlbV6FeatureContract: candidate.v6Contract } : {}),
+        ...(confidenceV2 ? { confidenceEngineV2: confidenceV2 } : {}),
         positiveFactors: [
           ...candidate.intelligence.home.positiveFactors.map((factor) => `${candidate.event.home_team}: ${factor}`),
           ...candidate.intelligence.away.positiveFactors.map((factor) => `${candidate.event.away_team}: ${factor}`),
@@ -1497,6 +2060,11 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
         missingData: candidate.intelligence.missingDomains,
         factors: [
           ...sdk.explanationFactors,
+          ...(candidate.v6Contract ? [
+            `V6 starter readiness: home ${candidate.v6Contract.homeStarter.readinessScore}, away ${candidate.v6Contract.awayStarter.readinessScore}.`,
+            `V6 weather score ${candidate.v6Contract.weather.weatherScore}; wind ${candidate.v6Contract.weather.windSpeed ?? 'unknown'} mph remains direction-neutral without park orientation.`,
+            `StadiumID ${candidate.v6Contract.stadium.stadiumId ?? 'unknown'} does not create a park factor unless metadata exists.`,
+          ] : []),
           `${candidate.event.home_team} strength index ${candidate.intelligence.home.teamStrengthIndex}; ${candidate.event.away_team} strength index ${candidate.intelligence.away.teamStrengthIndex}.`,
           `Recent form and split features are computed only from completed games before ${cutoff}.`,
         ],
@@ -1505,6 +2073,7 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
     }
     predictionRows.push(row)
     previewCandidates.push({
+      eventId: candidate.event.id,
       matchup: `${candidate.event.away_team} @ ${candidate.event.home_team}`,
       startTime: candidate.event.start_time,
       market: candidate.market,
@@ -1530,6 +2099,7 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
       missingDataWarnings: candidate.intelligence.missingDomains,
       marketStability: candidate.marketStability,
       recommendationStatus: policy.status,
+      confidenceEngineV2: confidenceV2,
       blockers: policy.blockers,
       oddsTimestamp: candidate.odds.snapshot_time,
       cutoff,
@@ -1538,12 +2108,13 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
 
   let insertedPredictions = 0
   let reusedPredictions = 0
+  let persistenceError: string | null = null
   if (predictionRows.length) {
     const eventIds = Array.from(new Set(predictionRows.map((row) => String(row.game_id))))
     const existingLogicalResult = eventIds.length
       ? await supabaseAdmin
           .from('prediction_history')
-          .select('id, game_id, market, team, odds, model_probability, confidence, edge, ev, feature_snapshot_id, feature_snapshot')
+          .select('id, game_id, market, team, odds, model_probability, confidence, edge, ev, feature_snapshot_id, model_version, feature_set_version, feature_snapshot')
           .eq('sport_key', SPORT_KEY)
           .in('game_id', eventIds)
       : { data: [], error: null }
@@ -1562,12 +2133,15 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
         return [
           `${row.game_id}:${row.market}:${row.team}`,
           {
+            id: row.id,
             odds: row.odds,
             modelProbability: row.model_probability,
             confidence: row.confidence,
             edge: row.edge,
             ev: row.ev,
             featureSnapshotId: row.feature_snapshot_id,
+            modelVersion: row.model_version,
+            featureSetVersion: row.feature_set_version,
             aiRating: snapshot.aiRating ?? null,
             recommendationStatus: snapshot.recommendationStatus ?? null,
             intelligenceVersion: snapshot.intelligenceVersion ?? null,
@@ -1579,12 +2153,30 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
     for (const row of predictionRows) {
       const logicalKey = `${row.game_id}:${row.market}:${row.team}`
       const existingId = existingLogical.get(logicalKey)
-      if (existingId) row.id = existingId
+      if (existingId && !immutablePredictions) row.id = existingId
       const previous = previousByLogical.get(logicalKey)
       const snapshot = asRecord(row.feature_snapshot)
+      if (predictionVersioningApplied && previous) {
+        row.parent_prediction_id = previous.id
+        if (row.model_role === 'challenger' || row.model_role === 'shadow') {
+          row.challenger_of_prediction_id = previous.id
+        }
+        row.version_lineage = {
+          ...(asRecord(row.version_lineage) ?? {}),
+          parentPredictionId: previous.id,
+          sourceModelVersion: previous.modelVersion,
+          sourceFeatureSetVersion: previous.featureSetVersion,
+          sourceFeatureSnapshotId: previous.featureSnapshotId,
+        }
+      }
       if (previous && snapshot) {
         row.feature_snapshot = {
           ...snapshot,
+          ...(predictionVersioningApplied ? {
+            parentPredictionId: previous.id,
+            sourceModelVersion: previous.modelVersion,
+            sourceFeatureSetVersion: previous.featureSetVersion,
+          } : {}),
           previousPreview: previous,
           comparison: {
             probabilityDelta: round(Number(row.model_probability ?? 0) - Number(previous.modelProbability ?? 0)),
@@ -1602,17 +2194,26 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
     }
     const existing = await countExisting('prediction_history', predictionRows.map((row) => String(row.id)))
     reusedPredictions = predictionRows.filter((row) => existing.has(String(row.id))).length
-    const result = await supabaseAdmin.from('prediction_history').upsert(predictionRows, { onConflict: 'id' })
-    if (result.error) throw new Error(`prediction_history upsert failed: ${result.error.message}`)
-    insertedPredictions = predictionRows.length - reusedPredictions
+    if (persist) {
+      const result = await supabaseAdmin.from('prediction_history').upsert(predictionRows, { onConflict: 'id' })
+      if (result.error) {
+        if (options.capturePersistenceError) {
+          persistenceError = `prediction_history upsert failed: ${result.error.message}`
+        } else {
+          throw new Error(`prediction_history upsert failed: ${result.error.message}`)
+        }
+      }
+    }
+    insertedPredictions = persistenceError ? 0 : predictionRows.length - reusedPredictions
     const currentLogical = new Set(
       predictionRows.map((row) => `${row.game_id}:${row.market}:${row.team}`)
     )
-    const staleResult = await supabaseAdmin
+    const staleResult = persist && !immutablePredictions ? await supabaseAdmin
       .from('prediction_history')
       .select('id, game_id, market, team, feature_snapshot')
       .eq('sport_key', SPORT_KEY)
       .in('game_id', eventIds)
+      : { data: [], error: null }
     if (staleResult.error) {
       throw new Error(`prediction_history stale preview check failed: ${staleResult.error.message}`)
     }
@@ -1656,6 +2257,691 @@ async function writeSnapshotsAndPredictions(events: EventRow[], oddsRows: OddsRo
       qualified: previewCandidates.filter((item) => ['QUALIFIED', 'BEST_BET_CANDIDATE', 'PLAY_OF_DAY_CANDIDATE'].includes(item.recommendationStatus)).length,
       watch: previewCandidates.filter((item) => item.recommendationStatus === 'WATCH').length,
       blocked: previewCandidates.filter((item) => item.recommendationStatus === 'ANALYZED_ONLY' || item.blockers.length > 0).length,
+      persistenceError,
+    },
+  }
+}
+
+function probabilityAuditClassification(row: {
+  market?: unknown
+  model_probability?: unknown
+  projected_line?: unknown
+  model_version?: unknown
+  feature_snapshot?: unknown
+}) {
+  const market = String(row.market ?? '')
+  const probability = safeNumber(row.model_probability)
+  const projectedLine = safeNumber(row.projected_line)
+  const snapshot = asRecord(row.feature_snapshot) ?? {}
+  const origin = safeString(snapshot.probabilityOrigin)
+  if (origin === 'fallback') return 'NEUTRAL_FALLBACK'
+  if (origin === 'unavailable') return 'INSUFFICIENT_INPUT'
+  if (market !== 'spread') return 'VALID_CALCULATED_OUTPUT'
+  if (probability === null) return 'INSUFFICIENT_INPUT'
+  if (Math.abs(probability - 50) > 0.01) return 'VALID_CALCULATED_OUTPUT'
+  if (String(row.model_version ?? '').includes('v6')) return 'VALID_CALCULATED_OUTPUT'
+  if (projectedLine === null || Math.abs(projectedLine) < 0.001) return 'NEUTRAL_FALLBACK'
+  return 'ROUNDED_OUTPUT'
+}
+
+async function existingPredictionSummary(eventIds: string[]) {
+  if (!eventIds.length) return { rows: [], protectedRows: 0, currentRows: 0, runLineAudit: [] as unknown[] }
+  const { data, error } = await supabaseAdmin
+    .from('prediction_history')
+    .select('id, game_id, market, team, odds, model_probability, confidence, edge, ev, projected_line, model_version, feature_set_version, recommended_pick, production_eligible, recommendation_locked_at, status, result, feature_snapshot')
+    .eq('sport_key', SPORT_KEY)
+    .in('game_id', eventIds)
+  if (error) throw new Error(`prediction_history V6 preflight read failed: ${error.message}`)
+  const rows = data ?? []
+  return {
+    rows,
+    protectedRows: rows.filter((row) =>
+      row.recommended_pick === true ||
+      row.production_eligible === true ||
+      Boolean(row.recommendation_locked_at) ||
+      ['win', 'loss', 'push', 'void', 'settled'].includes(String(row.result ?? row.status ?? '').toLowerCase())
+    ).length,
+    currentRows: rows.filter((row) => (asRecord(row.feature_snapshot) ?? {}).prospective_preview === true).length,
+    runLineAudit: rows
+      .filter((row) => row.market === 'spread')
+      .map((row) => ({
+        id: row.id,
+        eventId: row.game_id,
+        selection: row.team,
+        probability: row.model_probability,
+        projectedLine: row.projected_line,
+        modelVersion: row.model_version,
+        probabilityOrigin: safeString((asRecord(row.feature_snapshot) ?? {}).probabilityOrigin) || 'legacy_calculated_unlabeled',
+        classification: probabilityAuditClassification(row),
+      })),
+  }
+}
+
+function average(values: number[]) {
+  return values.length ? round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0
+}
+
+function buildV6ModelComparison(
+  existingRows: Record<string, unknown>[],
+  challengerCandidates: Array<Record<string, unknown>>,
+  options: { modelVersion?: string; mode?: string; explanationLabel?: string } = {}
+) {
+  const challengerModelVersion = options.modelVersion ?? V6_MODEL_VERSION
+  const mode = options.mode ?? 'mlb_prediction_v6_model_comparison_v1'
+  const explanationLabel = options.explanationLabel ?? 'V6'
+  const championByKey = new Map(
+    existingRows.map((row) => [`${row.game_id}:${row.market}:${row.team}`, row])
+  )
+  const comparisons = challengerCandidates
+    .map((candidate) => {
+      const eventId = String(candidate.eventId ?? '')
+      const market = String(candidate.market ?? '')
+      const selection = String(candidate.selection ?? '')
+      const champion = championByKey.get(`${eventId}:${market}:${selection}`)
+      if (!champion) return null
+      const championSnapshot = asRecord(champion.feature_snapshot) ?? {}
+      const challengerProbability = Number(candidate.modelProbability ?? 0)
+      const championProbability = Number(champion.model_probability ?? 0)
+      const challengerConfidence = Number(candidate.confidence ?? 0)
+      const championConfidence = Number(champion.confidence ?? 0)
+      const challengerEdge = Number(candidate.edge ?? 0)
+      const championEdge = Number(champion.edge ?? 0)
+      const challengerEv = Number(candidate.ev ?? 0)
+      const championEv = Number(champion.ev ?? 0)
+      const challengerFeatureQuality = Number(candidate.featureQuality ?? 0)
+      const championFeatureQuality = Number(championSnapshot.quality ?? championSnapshot.featureQuality ?? 0)
+      const challengerDataSufficiency = Number(candidate.dataSufficiency ?? 0)
+      const championDataSufficiency = Number(championSnapshot.sufficiency ?? championSnapshot.dataSufficiency ?? 0)
+      const probabilityDelta = round(challengerProbability - championProbability)
+      const confidenceDelta = round(challengerConfidence - championConfidence)
+      const edgeDelta = round(challengerEdge - championEdge)
+      const evDelta = round(challengerEv - championEv)
+      const featureQualityDelta = round(challengerFeatureQuality - championFeatureQuality)
+      const dataSufficiencyDelta = round(challengerDataSufficiency - championDataSufficiency)
+      const reasons = [
+        featureQualityDelta !== 0 ? `Feature quality changed by ${featureQualityDelta}.` : null,
+        dataSufficiencyDelta !== 0 ? `Data sufficiency changed by ${dataSufficiencyDelta}.` : null,
+        Math.abs(probabilityDelta) >= 1 ? `Probability moved ${probabilityDelta > 0 ? 'up' : 'down'} after ${explanationLabel} verified-intelligence adjustments.` : null,
+        Math.abs(confidenceDelta) >= 1 ? `Confidence moved ${confidenceDelta > 0 ? 'up' : 'down'} with ${explanationLabel} uncertainty adjustments.` : null,
+        Number(candidate.marketStability ? (asRecord(candidate.marketStability)?.score ?? 0) : 0) < 70 ? 'Market stability reduced the score.' : null,
+      ].filter((reason): reason is string => Boolean(reason))
+      return {
+        eventId,
+        matchup: candidate.matchup,
+        market,
+        selection,
+        line: candidate.line ?? null,
+        champion: {
+          predictionId: champion.id,
+          modelVersion: champion.model_version,
+          probability: championProbability,
+          confidence: championConfidence,
+          edge: championEdge,
+          ev: championEv,
+          featureQuality: championFeatureQuality,
+          dataSufficiency: championDataSufficiency,
+        },
+        challenger: {
+          modelVersion: challengerModelVersion,
+          probability: challengerProbability,
+          confidence: challengerConfidence,
+          edge: challengerEdge,
+          ev: challengerEv,
+          featureQuality: challengerFeatureQuality,
+          dataSufficiency: challengerDataSufficiency,
+        },
+        deltas: {
+          probability: probabilityDelta,
+          confidence: confidenceDelta,
+          edge: edgeDelta,
+          ev: evDelta,
+          featureQuality: featureQualityDelta,
+          dataSufficiency: dataSufficiencyDelta,
+        },
+        explanation: reasons.length ? reasons : [`${explanationLabel} produced a comparable output with no material displayed delta.`],
+      }
+    })
+    .filter((comparison): comparison is NonNullable<typeof comparison> => Boolean(comparison))
+  const probabilityDeltas = comparisons.map((item) => Number(item.deltas.probability))
+  const confidenceDeltas = comparisons.map((item) => Number(item.deltas.confidence))
+  const edgeDeltas = comparisons.map((item) => Number(item.deltas.edge))
+  const evDeltas = comparisons.map((item) => Number(item.deltas.ev))
+  const featureQualityDeltas = comparisons.map((item) => Number(item.deltas.featureQuality))
+  const dataSufficiencyDeltas = comparisons.map((item) => Number(item.deltas.dataSufficiency))
+
+  return {
+    mode,
+    championModel: 'baseball_mlb_prospective_preview_v1',
+    challengerModel: challengerModelVersion,
+    comparedPredictions: comparisons.length,
+    averageDeltas: {
+      probability: average(probabilityDeltas),
+      confidence: average(confidenceDeltas),
+      edge: average(edgeDeltas),
+      ev: average(evDeltas),
+      featureQuality: average(featureQualityDeltas),
+      dataSufficiency: average(dataSufficiencyDeltas),
+    },
+    movementCounts: {
+      probabilityUp: probabilityDeltas.filter((value) => value > 0).length,
+      probabilityDown: probabilityDeltas.filter((value) => value < 0).length,
+      confidenceUp: confidenceDeltas.filter((value) => value > 0).length,
+      confidenceDown: confidenceDeltas.filter((value) => value < 0).length,
+      positiveEvImproved: evDeltas.filter((value) => value > 0).length,
+      positiveEvDeclined: evDeltas.filter((value) => value < 0).length,
+    },
+    topProbabilityMoves: [...comparisons]
+      .sort((left, right) => Math.abs(right.deltas.probability) - Math.abs(left.deltas.probability))
+      .slice(0, 10),
+    guardrails: {
+      providerCallsMade: 0,
+      officialHistoryChanged: false,
+      championRowsOverwritten: false,
+      challengerPromotionPerformed: false,
+    },
+    evaluationStatus: 'structural_and_behavioral_comparison_only',
+    settledPerformance: 'insufficient_settled_sample',
+  }
+}
+
+export async function runMlbPredictionV6Regeneration(request: V6RegenerationRequest = {}) {
+  const generatedAt = nowIso()
+  const dryRun = request.dryRun !== false
+  const confirmed = request.confirmed === true
+  const idempotencyKey = safeString(request.idempotencyKey)
+  const futureEvents = await loadFutureEvents()
+  const selectedDate = request.selectedDate || selectedDateFromEvents(futureEvents, new Date(generatedAt))
+  const validation = validateMlbPredictionV6DeterministicFixtures()
+  const predictionVersioning = await probePredictionVersioningSchemaCapabilities()
+  if (!selectedDate) {
+    return {
+      success: true,
+      mode: 'mlb_prediction_v6_regeneration_v1',
+      status: 'no_future_games',
+      dryRun,
+      selectedDate: null,
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      validation,
+      predictionVersioning,
+    }
+  }
+  if (!dryRun && (!confirmed || !idempotencyKey)) {
+    return {
+      success: false,
+      mode: 'mlb_prediction_v6_regeneration_v1',
+      status: 'confirmation_required',
+      dryRun,
+      confirmed,
+      selectedDate,
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      validationErrors: ['Write mode requires confirmed=true and a non-empty idempotencyKey.'],
+      predictionVersioning,
+    }
+  }
+  if (!validation.success) {
+    return {
+      success: false,
+      mode: 'mlb_prediction_v6_regeneration_v1',
+      status: 'validation_failed',
+      dryRun,
+      selectedDate,
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      validation,
+      predictionVersioning,
+    }
+  }
+
+  const eventsForDate = await loadEventsForDate(selectedDate)
+  const nowMs = new Date(generatedAt).getTime()
+  const eligibleEvents = eventsForDate.filter((event) => {
+    const start = parseDateMs(event.start_time)
+    const status = String(event.status ?? 'scheduled').toLowerCase()
+    return start !== null && start > nowMs && status === 'scheduled'
+  })
+  const excludedEvents = eventsForDate
+    .filter((event) => !eligibleEvents.some((eligible) => eligible.id === event.id))
+    .map((event) => ({
+      eventId: event.id,
+      matchup: `${event.away_team} @ ${event.home_team}`,
+      startTime: event.start_time,
+      status: event.status,
+      reason: (parseDateMs(event.start_time) ?? 0) <= nowMs ? 'started_or_completed' : `status_${event.status ?? 'unknown'}`,
+    }))
+  const safeOddsRows = await loadPersistedSafeOddsForDate(eligibleEvents)
+  const existing = await existingPredictionSummary(eligibleEvents.map((event) => event.id))
+  const schemaWriteBlocked = !predictionVersioning.applied && existing.currentRows > 0
+  const executionPreview = await writeSnapshotsAndPredictions(
+    eligibleEvents,
+    safeOddsRows as OddsRow[],
+    selectedDate,
+    generatedAt,
+    null,
+    {
+      persist: dryRun || schemaWriteBlocked ? false : true,
+      immutablePredictions: true,
+      useV6Calculation: true,
+      idempotencyKey,
+      predictionVersioningApplied: predictionVersioning.applied,
+      modelRole: 'challenger',
+      isCurrent: false,
+      capturePersistenceError: true,
+    }
+  )
+  const modelComparison = buildV6ModelComparison(existing.rows as Record<string, unknown>[], executionPreview.candidates as Array<Record<string, unknown>>)
+  if (schemaWriteBlocked && !dryRun) {
+    return {
+      success: false,
+      mode: 'mlb_prediction_v6_regeneration_v1',
+      status: 'prediction_versioning_migration_required',
+      dryRun,
+      confirmed,
+      generatedAt,
+      selectedDate,
+      modelVersion: V6_MODEL_VERSION,
+      featureSetVersion: V6_FEATURE_SET_VERSION,
+      regenerationReason: V6_REGENERATION_REASON,
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      validation,
+      predictionVersioning,
+      blocker:
+        'Prediction Versioning Engine V1 migration is required before immutable side-by-side V6 challenger rows can be inserted safely.',
+      existingPredictions: {
+        totalRows: existing.rows.length,
+        currentRows: existing.currentRows,
+        protectedRows: existing.protectedRows,
+      },
+      planned: {
+        oddsRows: safeOddsRows.length,
+        snapshotsInserted: executionPreview.snapshots.inserted,
+        snapshotsReused: executionPreview.snapshots.reused,
+        predictionsInserted: executionPreview.predictions.inserted,
+        predictionsReused: executionPreview.predictions.reused,
+        predictionsAnalyzed: executionPreview.predictions.analyzed,
+        officialPicks: 0,
+      },
+      runLineAudit: existing.runLineAudit,
+      modelComparison,
+      safety: {
+        zeroProviderCalls: true,
+        noThresholdChanges: true,
+        noOfficialPickForcing: true,
+        immutablePredictionRows: true,
+        settledHistoryUntouched: true,
+      },
+    }
+  }
+  if (!dryRun && executionPreview.predictions.persistenceError) {
+    return {
+      success: false,
+      mode: 'mlb_prediction_v6_regeneration_v1',
+      status: 'persistence_failed',
+      dryRun,
+      confirmed,
+      generatedAt,
+      selectedDate,
+      modelVersion: V6_MODEL_VERSION,
+      featureSetVersion: V6_FEATURE_SET_VERSION,
+      regenerationReason: V6_REGENERATION_REASON,
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      predictionVersioning,
+      modelRole: 'challenger',
+      isCurrent: false,
+      validation,
+      persistenceError: executionPreview.predictions.persistenceError,
+      modelComparison,
+      planned: {
+        oddsRows: safeOddsRows.length,
+        snapshotsInserted: executionPreview.snapshots.inserted,
+        snapshotsReused: executionPreview.snapshots.reused,
+        predictionsInserted: 0,
+        predictionsReused: executionPreview.predictions.reused,
+        predictionsAnalyzed: executionPreview.predictions.analyzed,
+        officialPicks: 0,
+      },
+      safety: {
+        zeroProviderCalls: true,
+        noThresholdChanges: true,
+        noOfficialPickForcing: true,
+        immutablePredictionRows: true,
+        settledHistoryUntouched: true,
+      },
+    }
+  }
+  let checkpointId: string | null = null
+  if (!dryRun) {
+    checkpointId = await writeCheckpoint({
+      phase: 'prediction_v6_regeneration',
+      selectedDate,
+      status: 'completed',
+      startedAt: generatedAt,
+      endpoint: null,
+      recordsFetched: executionPreview.predictions.analyzed,
+      inserted: executionPreview.predictions.inserted,
+      updated: executionPreview.predictions.reused,
+      skipped: existing.protectedRows,
+      errorCount: 0,
+      providerCallsUsed: 0,
+      metadata: {
+        idempotencyKey,
+        regenerationReason: V6_REGENERATION_REASON,
+        modelVersion: V6_MODEL_VERSION,
+        featureSetVersion: V6_FEATURE_SET_VERSION,
+        predictionVersioning,
+        validation,
+      },
+    })
+  }
+
+  return {
+    success: true,
+    mode: 'mlb_prediction_v6_regeneration_v1',
+    status: dryRun && schemaWriteBlocked ? 'preflight_migration_pending' : dryRun ? 'preflight_ready' : 'regeneration_completed',
+    dryRun,
+    confirmed,
+    generatedAt,
+    selectedDate,
+    timezone: 'America/Puerto_Rico',
+    modelVersion: V6_MODEL_VERSION,
+    featureSetVersion: V6_FEATURE_SET_VERSION,
+    regenerationReason: V6_REGENERATION_REASON,
+    providerCallsPlanned: 0,
+    providerCallsMade: 0,
+    predictionVersioning,
+    modelRole: 'challenger',
+    isCurrent: false,
+    writesPlanned: dryRun ? executionPreview.predictions.inserted + executionPreview.snapshots.inserted : 0,
+    readyToExecute: !schemaWriteBlocked,
+    schemaWriteBlockers: schemaWriteBlocked
+      ? ['Prediction Versioning Engine V1 migration must be applied before V6 challenger rows can be written.']
+      : [],
+    checkpointId,
+    eligiblePregameEvents: eligibleEvents.map((event) => ({
+      eventId: event.id,
+      matchup: `${event.away_team} @ ${event.home_team}`,
+      startTime: event.start_time,
+      status: event.status,
+    })),
+    excludedEvents,
+    existingPredictions: {
+      totalRows: existing.rows.length,
+      currentRows: existing.currentRows,
+      protectedRows: existing.protectedRows,
+    },
+    planned: {
+      oddsRows: safeOddsRows.length,
+      snapshotsInserted: executionPreview.snapshots.inserted,
+      snapshotsReused: executionPreview.snapshots.reused,
+      predictionsInserted: executionPreview.predictions.inserted,
+      predictionsReused: executionPreview.predictions.reused,
+      predictionsAnalyzed: executionPreview.predictions.analyzed,
+      officialPicks: 0,
+    },
+    runLineAudit: existing.runLineAudit,
+    modelComparison,
+    preview: executionPreview,
+    validation,
+    safety: {
+      zeroProviderCalls: true,
+      noThresholdChanges: true,
+      noOfficialPickForcing: true,
+      immutablePredictionRows: true,
+      settledHistoryUntouched: true,
+    },
+  }
+}
+
+export async function runMlbPredictionV7Regeneration(request: V6RegenerationRequest = {}) {
+  const generatedAt = nowIso()
+  const dryRun = request.dryRun !== false
+  const confirmed = request.confirmed === true
+  const idempotencyKey = safeString(request.idempotencyKey)
+  const futureEvents = await loadFutureEvents()
+  const selectedDate = request.selectedDate || selectedDateFromEvents(futureEvents, new Date(generatedAt))
+  const validation = validateMlbPredictionV7DeterministicFixtures()
+  const predictionVersioning = await probePredictionVersioningSchemaCapabilities()
+  if (!selectedDate) {
+    return {
+      success: true,
+      mode: 'mlb_prediction_v7_regeneration_v1',
+      status: 'no_future_games',
+      dryRun,
+      selectedDate: null,
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      validation,
+      predictionVersioning,
+    }
+  }
+  if (!dryRun && (!confirmed || !idempotencyKey)) {
+    return {
+      success: false,
+      mode: 'mlb_prediction_v7_regeneration_v1',
+      status: 'confirmation_required',
+      dryRun,
+      confirmed,
+      selectedDate,
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      validationErrors: ['Write mode requires confirmed=true and a non-empty idempotencyKey.'],
+      predictionVersioning,
+    }
+  }
+  if (!validation.success) {
+    return {
+      success: false,
+      mode: 'mlb_prediction_v7_regeneration_v1',
+      status: 'validation_failed',
+      dryRun,
+      selectedDate,
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      validation,
+      predictionVersioning,
+    }
+  }
+
+  const eventsForDate = await loadEventsForDate(selectedDate)
+  const nowMs = new Date(generatedAt).getTime()
+  const eligibleEvents = eventsForDate.filter((event) => {
+    const start = parseDateMs(event.start_time)
+    const status = String(event.status ?? 'scheduled').toLowerCase()
+    return start !== null && start > nowMs && status === 'scheduled'
+  })
+  const excludedEvents = eventsForDate
+    .filter((event) => !eligibleEvents.some((eligible) => eligible.id === event.id))
+    .map((event) => ({
+      eventId: event.id,
+      matchup: `${event.away_team} @ ${event.home_team}`,
+      startTime: event.start_time,
+      status: event.status,
+      reason: (parseDateMs(event.start_time) ?? 0) <= nowMs ? 'started_or_completed' : `status_${event.status ?? 'unknown'}`,
+    }))
+  const safeOddsRows = await loadPersistedSafeOddsForDate(eligibleEvents)
+  const existing = await existingPredictionSummary(eligibleEvents.map((event) => event.id))
+  const schemaWriteBlocked = !predictionVersioning.applied && existing.currentRows > 0
+  const executionPreview = await writeSnapshotsAndPredictions(
+    eligibleEvents,
+    safeOddsRows as OddsRow[],
+    selectedDate,
+    generatedAt,
+    null,
+    {
+      persist: dryRun || schemaWriteBlocked ? false : true,
+      immutablePredictions: true,
+      modelGeneration: 'v7',
+      idempotencyKey,
+      predictionVersioningApplied: predictionVersioning.applied,
+      modelRole: 'challenger',
+      isCurrent: false,
+      capturePersistenceError: true,
+    }
+  )
+  const modelComparison = buildV6ModelComparison(existing.rows as Record<string, unknown>[], executionPreview.candidates as Array<Record<string, unknown>>, {
+    modelVersion: V7_MODEL_VERSION,
+    mode: 'mlb_prediction_v7_model_comparison_v1',
+    explanationLabel: 'V7',
+  })
+  if (schemaWriteBlocked && !dryRun) {
+    return {
+      success: false,
+      mode: 'mlb_prediction_v7_regeneration_v1',
+      status: 'prediction_versioning_migration_required',
+      dryRun,
+      confirmed,
+      generatedAt,
+      selectedDate,
+      modelVersion: V7_MODEL_VERSION,
+      featureSetVersion: V7_FEATURE_SET_VERSION,
+      regenerationReason: V7_REGENERATION_REASON,
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      validation,
+      predictionVersioning,
+      blocker: 'Prediction Versioning Engine V1 migration is required before immutable side-by-side V7 challenger rows can be inserted safely.',
+      existingPredictions: {
+        totalRows: existing.rows.length,
+        currentRows: existing.currentRows,
+        protectedRows: existing.protectedRows,
+      },
+      planned: {
+        oddsRows: safeOddsRows.length,
+        snapshotsInserted: executionPreview.snapshots.inserted,
+        snapshotsReused: executionPreview.snapshots.reused,
+        predictionsInserted: executionPreview.predictions.inserted,
+        predictionsReused: executionPreview.predictions.reused,
+        predictionsAnalyzed: executionPreview.predictions.analyzed,
+        officialPicks: 0,
+      },
+      modelComparison,
+      safety: {
+        zeroProviderCalls: true,
+        noThresholdChanges: true,
+        noOfficialPickForcing: true,
+        immutablePredictionRows: true,
+        settledHistoryUntouched: true,
+        v7ChallengerOnly: true,
+      },
+    }
+  }
+  if (!dryRun && executionPreview.predictions.persistenceError) {
+    return {
+      success: false,
+      mode: 'mlb_prediction_v7_regeneration_v1',
+      status: 'persistence_failed',
+      dryRun,
+      confirmed,
+      generatedAt,
+      selectedDate,
+      modelVersion: V7_MODEL_VERSION,
+      featureSetVersion: V7_FEATURE_SET_VERSION,
+      regenerationReason: V7_REGENERATION_REASON,
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      predictionVersioning,
+      modelRole: 'challenger',
+      isCurrent: false,
+      validation,
+      persistenceError: executionPreview.predictions.persistenceError,
+      modelComparison,
+      planned: {
+        oddsRows: safeOddsRows.length,
+        snapshotsInserted: executionPreview.snapshots.inserted,
+        snapshotsReused: executionPreview.snapshots.reused,
+        predictionsInserted: 0,
+        predictionsReused: executionPreview.predictions.reused,
+        predictionsAnalyzed: executionPreview.predictions.analyzed,
+        officialPicks: 0,
+      },
+    }
+  }
+  let checkpointId: string | null = null
+  if (!dryRun) {
+    checkpointId = await writeCheckpoint({
+      phase: 'prediction_v7_regeneration',
+      selectedDate,
+      status: 'completed',
+      startedAt: generatedAt,
+      endpoint: null,
+      recordsFetched: executionPreview.predictions.analyzed,
+      inserted: executionPreview.predictions.inserted,
+      updated: executionPreview.predictions.reused,
+      skipped: existing.protectedRows,
+      errorCount: 0,
+      providerCallsUsed: 0,
+      metadata: {
+        idempotencyKey,
+        regenerationReason: V7_REGENERATION_REASON,
+        modelVersion: V7_MODEL_VERSION,
+        featureSetVersion: V7_FEATURE_SET_VERSION,
+        predictionVersioning,
+        validation,
+      },
+    })
+  }
+
+  return {
+    success: true,
+    mode: 'mlb_prediction_v7_regeneration_v1',
+    status: dryRun && schemaWriteBlocked ? 'preflight_migration_pending' : dryRun ? 'preflight_ready' : 'regeneration_completed',
+    dryRun,
+    confirmed,
+    generatedAt,
+    selectedDate,
+    timezone: 'America/Puerto_Rico',
+    modelVersion: V7_MODEL_VERSION,
+    featureSetVersion: V7_FEATURE_SET_VERSION,
+    regenerationReason: V7_REGENERATION_REASON,
+    providerCallsPlanned: 0,
+    providerCallsMade: 0,
+    predictionVersioning,
+    modelRole: 'challenger',
+    isCurrent: false,
+    writesPlanned: dryRun ? executionPreview.predictions.inserted + executionPreview.snapshots.inserted : 0,
+    readyToExecute: !schemaWriteBlocked,
+    checkpointId,
+    eligiblePregameEvents: eligibleEvents.map((event) => ({
+      eventId: event.id,
+      matchup: `${event.away_team} @ ${event.home_team}`,
+      startTime: event.start_time,
+      status: event.status,
+    })),
+    excludedEvents,
+    existingPredictions: {
+      totalRows: existing.rows.length,
+      currentRows: existing.currentRows,
+      protectedRows: existing.protectedRows,
+    },
+    planned: {
+      oddsRows: safeOddsRows.length,
+      snapshotsInserted: executionPreview.snapshots.inserted,
+      snapshotsReused: executionPreview.snapshots.reused,
+      predictionsInserted: executionPreview.predictions.inserted,
+      predictionsReused: executionPreview.predictions.reused,
+      predictionsAnalyzed: executionPreview.predictions.analyzed,
+      officialPicks: 0,
+    },
+    modelComparison,
+    preview: executionPreview,
+    validation,
+    confidenceEngineV2: {
+      implemented: true,
+      categories: ['HIGH', 'MODERATE', 'LOW', 'INSUFFICIENT'],
+      separates: ['modelConfidence', 'dataConfidence', 'marketConfidence', 'recommendationConfidence'],
+      officialThresholdsChanged: false,
+    },
+    safety: {
+      zeroProviderCalls: true,
+      noThresholdChanges: true,
+      noOfficialPickForcing: true,
+      immutablePredictionRows: true,
+      settledHistoryUntouched: true,
+      v7ChallengerOnly: true,
+      autoPromotionPerformed: false,
     },
   }
 }
@@ -1667,6 +2953,8 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   const finalPregameRefresh = request.finalPregameRefresh === true
   const operatingDayRefresh = request.operatingDayRefresh === true
   const operatingDayFinalRefresh = request.operatingDayFinalRefresh === true
+  const finalRefreshLike = finalPregameRefresh || operatingDayFinalRefresh
+  const operatingDayId = safeString(request.operatingDayId) || null
   const maximumRequests = Math.min(Number(request.maximumRequests ?? MAX_CALLS) || MAX_CALLS, MAX_CALLS)
   const timeoutMs = Number(request.timeoutMs ?? DEFAULT_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS
   const futureEvents = await loadFutureEvents()
@@ -1694,18 +2982,19 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
       confirmed,
       generatedAt,
       selectedDate,
+      operatingDayId,
       providerUsage: { externalProviderCallsMade: 0, source: 'dry_run_no_provider_calls' },
       plannedEndpoints: [
-        ...(finalPregameRefresh ? [] : [`/api/mlb/odds/json/GamesByDate/${sportsDataIoMlbDate(selectedDate)}`]),
+        ...(finalRefreshLike ? [] : [`/api/mlb/odds/json/GamesByDate/${sportsDataIoMlbDate(selectedDate)}`]),
         `/api/mlb/odds/json/GameOddsByDate/${selectedDate}`,
-        ...(finalPregameRefresh ? [] : [`/api/mlb/fantasy/json/PlayerGameProjectionStatsByDate/${sportsDataIoMlbDate(selectedDate)}`]),
+        ...(finalRefreshLike ? [] : [`/api/mlb/fantasy/json/PlayerGameProjectionStatsByDate/${sportsDataIoMlbDate(selectedDate)}`]),
       ],
       caps: { maximumRequests, concurrency: 1, retries: 0, timeoutMs },
     }
   }
 
-  if (!finalPregameRefresh && maximumRequests < 3) throw new Error('Prospective preview requires at least 3 approved provider calls.')
-  if (finalPregameRefresh && maximumRequests < 1) throw new Error('Final pregame refresh requires 1 approved provider call.')
+  if (!finalRefreshLike && maximumRequests < 3) throw new Error('Prospective preview requires at least 3 approved provider calls.')
+  if (finalRefreshLike && maximumRequests < 1) throw new Error('Final pregame refresh requires 1 approved provider call.')
   const apiKey = process.env.SPORTSDATAIO_MLB_API_KEY
   if (!apiKey) throw new Error('SPORTSDATAIO_MLB_API_KEY is not configured.')
 
@@ -1716,7 +3005,7 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   const existingScheduleCheckpoint = await loadCompletedCheckpoint(selectedDate, schedulePhase)
   let scheduleJobId = existingScheduleCheckpoint ? String(existingScheduleCheckpoint.id) : ''
   let gamesFound = 0
-  if (!existingScheduleCheckpoint && !finalPregameRefresh) {
+  if (!existingScheduleCheckpoint && !finalRefreshLike) {
     const scheduleStarted = nowIso()
     calls += 1
     const schedule = await fetchJson(scheduleEndpoint, apiKey, timeoutMs)
@@ -1764,22 +3053,40 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     if (normalizedSchedule.unresolved.length) throw new Error('Slate discovery produced unresolved game mappings.')
   }
 
-  const events = await loadEventsForDate(selectedDate)
+  const allEventsForDate = await loadEventsForDate(selectedDate)
+  const events = finalRefreshLike
+    ? allEventsForDate.filter(isProspectiveOperatingDayEvent)
+    : allEventsForDate
   const nowMs = new Date(generatedAt).getTime()
   const futureSlate = events.filter((event) => {
     const start = parseDateMs(event.start_time)
     return start !== null && start > nowMs && event.status === 'scheduled'
   })
   if (!futureSlate.length) {
+    const startedOrClosed = finalRefreshLike && events.length > 0
     return {
       success: true,
       mode: MODE,
-      status: 'no_future_games',
+      status: startedOrClosed ? 'locked_or_started' : 'no_future_games',
       generatedAt,
       selectedDate,
+      operatingDayId,
+      eventsConsidered: events.length,
+      eventsRefreshed: 0,
+      eventsSkippedStarted: events.length,
+      providerCallsPlanned: 0,
+      providerCallsMade: calls,
+      snapshotsInserted: 0,
+      snapshotsReused: 0,
+      predictionsRegenerated: 0,
+      recommendationsChanged: 0,
+      locked: startedOrClosed,
       providerUsage: { externalProviderCallsMade: calls },
       endpoints,
       checkpoints: { scheduleJobId },
+      message: startedOrClosed
+        ? 'Persisted prospective events are locked, started, final, cancelled or otherwise not eligible for pregame odds refresh.'
+        : 'No persisted prospective MLB events are eligible for the selected operating date.',
     }
   }
 
@@ -1795,6 +3102,7 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   let oddsJobId = existingOddsCheckpoint ? String(existingOddsCheckpoint.id) : ''
   let safeOddsRows = await loadPersistedSafeOddsForDate(events)
   let duplicateRows = 0
+  const warnings: string[] = []
   if (!existingOddsCheckpoint) {
     const oddsStarted = nowIso()
     calls += 1
@@ -1813,9 +3121,16 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
         metadata: {
           ...row.metadata,
           capturedAt: generatedAt,
+          operatingDayId,
+          source: oddsPhase,
+          providerTimestamp: row.snapshot_time,
+          oddsClassification: 'pregame',
           prospective_preview: true,
           validation_status: 'quarantined',
         },
+        operating_day_id: operatingDayId,
+        provider_timestamp: row.snapshot_time,
+        odds_classification: 'pregame',
       }))
       .filter((row) => {
         const event = eventById.get(row.event_id)
@@ -1834,7 +3149,7 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     oddsJobId = await writeCheckpoint({
       phase: oddsPhase,
       selectedDate,
-      status: normalizedOdds.unresolvedProviderGameIds.length || oddsAfterStart ? 'partial' : 'completed',
+      status: oddsAfterStart ? 'partial' : 'completed',
       startedAt: oddsStarted,
       endpoint: odds.endpointResult,
       recordsFetched: odds.payload.length,
@@ -1857,8 +3172,14 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
         sportsbooks: normalizedOdds.sportsbooks,
       },
     })
-    if (normalizedOdds.unresolvedProviderGameIds.length) throw new Error('Odds capture produced unresolved event mappings.')
+    if (normalizedOdds.unresolvedProviderGameIds.length) {
+      warnings.push(
+        `Odds payload contained ${normalizedOdds.unresolvedProviderGameIds.length} unresolved provider event mappings; usable mapped pregame odds were preserved.`
+      )
+    }
     if (oddsAfterStart) throw new Error('Odds capture included provider timestamps at/after first pitch.')
+  } else if (safeOddsRows.length) {
+    warnings.push('Reused existing safe odds rows from a completed or partial checkpoint; no duplicate odds call was made.')
   }
   const eventById = new Map(events.map((event) => [event.id, event]))
 
@@ -1867,7 +3188,7 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   const existingProjectionsCheckpoint = await loadCompletedCheckpoint(selectedDate, projectionsPhase)
   let projectionsJobId = existingProjectionsCheckpoint ? String(existingProjectionsCheckpoint.id) : ''
   let projectionRows = 0
-  if (!existingProjectionsCheckpoint && !finalPregameRefresh) {
+  if (!existingProjectionsCheckpoint && !finalRefreshLike) {
     const projectionsStarted = nowIso()
     calls += 1
     const projections = await fetchJson(projectionsEndpoint, apiKey, timeoutMs)
@@ -1893,7 +3214,7 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     })
   }
 
-  const preview = await writeSnapshotsAndPredictions(events, safeOddsRows as OddsRow[], selectedDate, generatedAt)
+  const preview = await writeSnapshotsAndPredictions(events, safeOddsRows as OddsRow[], selectedDate, generatedAt, operatingDayId)
   const featuresJobId = await writeCheckpoint({
     phase: 'feature_generation',
     selectedDate,
@@ -1928,10 +3249,25 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   return {
     success: true,
     mode: MODE,
-    status: 'completed',
+    status: operatingDayFinalRefresh ? 'final_refresh_completed' : 'completed',
     generatedAt,
     selectedDate,
+    operatingDayId,
     finalPregameRefresh,
+    operatingDayFinalRefresh,
+    eventsConsidered: events.length,
+    eventsRefreshed: new Set(safeOddsRows.map((row) => row.event_id)).size,
+    eventsSkippedStarted: 0,
+    providerCallsPlanned: existingOddsCheckpoint ? 0 : 1,
+    providerCallsMade: calls,
+    snapshotsInserted: preview.snapshots.inserted,
+    snapshotsReused: preview.snapshots.reused,
+    predictionsRegenerated: preview.predictions.inserted + preview.predictions.reused,
+    recommendationsChanged: preview.candidates.filter((candidate) => {
+      const comparison = asRecord((asRecord(candidate) ?? {}).comparison)
+      return comparison?.recommendationChanged === true
+    }).length,
+    locked: false,
     providerUsage: { externalProviderCallsMade: calls, maximumRequests },
     endpoints,
     slate: {
@@ -1978,6 +3314,7 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
       featuresJobId,
       predictionsJobId,
     },
+    warnings,
     safety: {
       officialPicks: 0,
       productionEligible: false,

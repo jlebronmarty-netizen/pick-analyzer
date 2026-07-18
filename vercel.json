@@ -1,20 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/master-sync",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/daily-sync",
-      "schedule": "0 10 * * *"
-    },
-    {
-      "path": "/api/cron/capture-predictions",
+      "path": "/api/cron/operating-day",
       "schedule": "0 12 * * *"
-    },
-    {
-      "path": "/api/nba/sync",
-      "schedule": "0 9,15,21 * * *"
     }
   ]
 }

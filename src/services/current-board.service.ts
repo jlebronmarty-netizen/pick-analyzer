@@ -2,6 +2,9 @@ import 'server-only'
 
 import { cache } from 'react'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
+import { isActiveBettingEvent } from '@/services/active-event.service'
+import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
 
@@ -60,6 +63,10 @@ type PredictionRow = {
   skip_reason: string | null
   trial?: boolean | null
   scrambled?: boolean | null
+  is_current?: boolean | null
+  prediction_version?: number | null
+  model_role?: string | null
+  prediction_group_key?: string | null
 }
 
 type OddsRow = {
@@ -125,6 +132,8 @@ export type CurrentBoardCandidate = {
   reliabilityScore: number
   featureQuality: number | null
   dataSufficiency: number | null
+  criticalDataCompleteness?: number
+  dataCompletenessLabel?: 'COMPLETE' | 'STRONG' | 'MODERATE' | 'LIMITED' | 'INSUFFICIENT'
   aiRating: number
   aiGrade: string
   rankingScore: number
@@ -135,6 +144,7 @@ export type CurrentBoardCandidate = {
   expectedValue: number
   modeledValueStatus: 'MODELED_VALUE' | 'NO_MODELED_VALUE' | 'STALE' | 'UNCALIBRATED'
   semanticLabel: 'MODELED VALUE' | 'NO MODELED VALUE' | 'STALE' | 'UNCALIBRATED'
+  probabilityOrigin: 'calculated' | 'calibrated' | 'fallback' | 'unavailable' | 'unknown'
   recommendationPolicyStatus: string
   officialEligibility: 'OFFICIAL_ELIGIBLE_CANDIDATE' | 'NOT_OFFICIALLY_ELIGIBLE'
   blockers: string[]
@@ -147,6 +157,10 @@ export type CurrentBoardCandidate = {
   positiveFactors: string[]
   negativeFactors: string[]
   missingInformation: string[]
+  starterContext?: Record<string, unknown> | null
+  pitcherContext?: Record<string, unknown> | null
+  weatherContext?: Record<string, unknown> | null
+  parkContext?: Record<string, unknown> | null
   summary: string
   logicalKey: string
 }
@@ -158,6 +172,7 @@ export type CurrentBoardResponse = {
   generatedAt: string
   sportKey: string
   slateDate: string | null
+  operatingDate: string | null
   timezone: string
   games: Array<{
     eventId: string
@@ -341,6 +356,22 @@ function ageMinutes(value: string | null | undefined, now = Date.now()) {
   return Math.max(0, Math.round((now - parsed) / 60000))
 }
 
+function localDateInTimezone(value: string | null | undefined, timezone: string) {
+  if (!value) return null
+  const parsed = new Date(value)
+  if (!Number.isFinite(parsed.getTime())) return null
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(parsed)
+  const year = parts.find((part) => part.type === 'year')?.value
+  const month = parts.find((part) => part.type === 'month')?.value
+  const day = parts.find((part) => part.type === 'day')?.value
+  return year && month && day ? `${year}-${month}-${day}` : null
+}
+
 function americanToDecimal(odds: number) {
   if (!Number.isFinite(odds) || odds === 0) return 1
   return odds > 0 ? 1 + odds / 100 : 1 + 100 / Math.abs(odds)
@@ -402,13 +433,19 @@ function maxAgeFor(sportKey: string, market: string, mode: CurrentBoardMode) {
 }
 
 function isFutureUnstarted(row: PredictionRow, event: EventRow | undefined, nowMs: number) {
-  const startTime = event?.start_time ?? row.commence_time
-  const startMs = startTime ? new Date(startTime).getTime() : Number.NaN
-  const eventStatus = String(event?.status ?? row.status ?? '').toLowerCase()
   const rowResult = String(row.result ?? '').toLowerCase()
   const lifecycle = String(row.lifecycle_status ?? '').toLowerCase()
-  if (!Number.isFinite(startMs) || startMs <= nowMs) return false
-  if (['live', 'in_progress', 'completed', 'final', 'closed', 'cancelled', 'postponed'].includes(eventStatus)) return false
+  const active = isActiveBettingEvent(
+    {
+      sport_key: row.sport_key,
+      league_key: event?.league_key,
+      start_time: event?.start_time ?? row.commence_time,
+      status: event?.status ?? row.status,
+      metadata: row.feature_snapshot,
+    },
+    { sportKey: row.sport_key, leagueKey: event?.league_key, now: new Date(nowMs) }
+  )
+  if (!active) return false
   if (['win', 'loss', 'push', 'void'].includes(rowResult)) return false
   if (['settled', 'void', 'closed'].includes(lifecycle)) return false
   return true
@@ -515,6 +552,61 @@ function qualityLabel(value: number | null) {
   return 'Weak'
 }
 
+const MLB_CRITICAL_INPUTS = [
+  'starting_pitcher',
+  'confirmed_lineup',
+  'injury_diagnosis',
+  'weather',
+  'bullpen_context',
+] as const
+
+function uniqueStrings(values: unknown[]) {
+  return Array.from(new Set(values.flatMap((value) => (Array.isArray(value) ? value : [value])).filter(Boolean).map(String)))
+}
+
+function dataCompletenessLabel(score: number): CurrentBoardCandidate['dataCompletenessLabel'] {
+  if (score >= 95) return 'COMPLETE'
+  if (score >= 80) return 'STRONG'
+  if (score >= 60) return 'MODERATE'
+  if (score >= 35) return 'LIMITED'
+  return 'INSUFFICIENT'
+}
+
+function canonicalMlbDataQuality(snapshot: Record<string, unknown>, baseFeatureQuality: number | null, baseDataSufficiency: number | null) {
+  const projections = asRecord(snapshot.projections)
+  const missing = uniqueStrings([
+    snapshot.missingData,
+    snapshot.missingDataWarnings,
+    snapshot.unavailableDomains,
+    projections.unavailableDomains,
+  ])
+  const criticalMissing = MLB_CRITICAL_INPUTS.filter((input) => missing.includes(input))
+  const criticalDataCompleteness = Math.max(
+    0,
+    Math.round(((MLB_CRITICAL_INPUTS.length - criticalMissing.length) / MLB_CRITICAL_INPUTS.length) * 100)
+  )
+  const featureQuality =
+    baseFeatureQuality === null
+      ? criticalMissing.length
+        ? 35
+        : null
+      : Math.max(35, Math.min(baseFeatureQuality, Math.round(baseFeatureQuality - criticalMissing.length * 9)))
+  const dataSufficiency =
+    baseDataSufficiency === null
+      ? criticalMissing.length
+        ? 30
+        : null
+      : Math.max(30, Math.min(baseDataSufficiency, Math.round(baseDataSufficiency - criticalMissing.length * 10)))
+  return {
+    missing,
+    criticalMissing,
+    criticalDataCompleteness,
+    dataCompletenessLabel: dataCompletenessLabel(criticalDataCompleteness),
+    featureQuality,
+    dataSufficiency,
+  }
+}
+
 function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow | undefined, nowMs: number, mode: CurrentBoardMode): CurrentBoardCandidate {
   const snapshot = asRecord(row.feature_snapshot)
   const market = canonicalPredictionMarket(row.market) as CurrentBoardCandidate['market']
@@ -526,8 +618,13 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
   const confidence = numberValue(row.confidence) ?? 0
   const reliabilityScore = numberValue(snapshot.reliabilityScore) ?? Math.min(100, Math.max(0, confidence))
   const aiRating = numberValue(snapshot.aiRating) ?? round(rawProbability * 0.34 + confidence * 0.22 + reliabilityScore * 0.18)
-  const featureQuality = numberValue(snapshot.featureQualityScore ?? snapshot.dataQualityScore)
-  const dataSufficiency = numberValue(snapshot.dataSufficiencyScore)
+  const quality = canonicalMlbDataQuality(
+    snapshot,
+    numberValue(snapshot.featureQualityScore ?? snapshot.dataQualityScore),
+    numberValue(snapshot.dataSufficiencyScore)
+  )
+  const featureQuality = quality.featureQuality
+  const dataSufficiency = quality.dataSufficiency
   const oddsTimestamp = odds?.snapshot_time ?? row.odds_timestamp
   const oddsAge = ageMinutes(oddsTimestamp, nowMs)
   const reasons = oddsReasons(row, odds, event, nowMs, mode)
@@ -542,7 +639,7 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
         : 'NO_MODELED_VALUE'
   const positiveFactors = Array.isArray(snapshot.positiveFactors) ? snapshot.positiveFactors.map(String) : []
   const negativeFactors = Array.isArray(snapshot.negativeFactors) ? snapshot.negativeFactors.map(String) : []
-  const missingInformation = Array.isArray(snapshot.missingData) ? snapshot.missingData.map(String) : []
+  const missingInformation = quality.missing
   const blockers = String(row.skip_reason ?? '')
     .split(',')
     .map((item) => item.trim())
@@ -555,8 +652,6 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     market,
     marketPeriod(row),
     normalizedSelection(row),
-    modelVersion,
-    featureSetVersion,
   ].join('|')
 
   return {
@@ -595,6 +690,8 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     reliabilityScore,
     featureQuality,
     dataSufficiency,
+    criticalDataCompleteness: quality.criticalDataCompleteness,
+    dataCompletenessLabel: quality.dataCompletenessLabel,
     aiRating: round(aiRating),
     aiGrade: String(snapshot.aiGrade ?? ''),
     rankingScore: numberValue(snapshot.rankingScore) ?? round(rawProbability + confidence + reliabilityScore + aiRating),
@@ -612,6 +709,7 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
           : modeledValueStatus === 'UNCALIBRATED'
             ? 'UNCALIBRATED'
             : 'NO MODELED VALUE',
+    probabilityOrigin: String(snapshot.probabilityOrigin ?? 'unknown') as CurrentBoardCandidate['probabilityOrigin'],
     recommendationPolicyStatus: String(snapshot.recommendationStatus ?? 'ANALYZED_ONLY'),
     officialEligibility: row.production_eligible === true ? 'OFFICIAL_ELIGIBLE_CANDIDATE' : 'NOT_OFFICIALLY_ELIGIBLE',
     blockers,
@@ -633,6 +731,44 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
   }
 }
 
+async function enrichMlbCandidatesWithVerifiedContext(candidates: CurrentBoardCandidate[], slateDate: string | null) {
+  if (!candidates.length || !slateDate) return candidates
+  const intelligence = await getMlbStarterWeatherStadiumIntelligence(slateDate)
+  const byEvent = new Map(intelligence.games.filter((game) => game.eventId).map((game) => [String(game.eventId), game]))
+  return candidates.map((candidate) => {
+    const game = byEvent.get(candidate.eventId)
+    if (!game) return candidate
+    const missing = candidate.missingInformation.filter(
+      (item) => !['starting_pitcher', 'weather'].includes(String(item))
+    )
+    const positiveFactors = Array.from(new Set([...game.positiveFactors, ...candidate.positiveFactors])).slice(0, 8)
+    const negativeFactors = Array.from(new Set([...candidate.negativeFactors, ...game.negativeFactors])).slice(0, 8)
+    const featureQuality = Math.max(candidate.featureQuality ?? 0, intelligence.summary.featureQualityAfter)
+    const dataSufficiency = Math.max(candidate.dataSufficiency ?? 0, intelligence.summary.dataSufficiencyAfter)
+    const criticalDataCompleteness = Math.max(candidate.criticalDataCompleteness ?? 0, intelligence.summary.criticalCompletenessAfter)
+    return {
+      ...candidate,
+      modelVersion: candidate.modelVersion.includes('v5') ? candidate.modelVersion : `${candidate.modelVersion}+mlb_v5_context`,
+      featureSetVersion: candidate.featureSetVersion.includes('v5') ? candidate.featureSetVersion : `${candidate.featureSetVersion}+starter_weather_park_v1`,
+      featureQuality,
+      dataSufficiency,
+      criticalDataCompleteness,
+      dataCompletenessLabel: dataCompletenessLabel(criticalDataCompleteness),
+      reliabilityScore: Math.max(candidate.reliabilityScore, Math.round((game.starters.starterConfidence + featureQuality) / 2)),
+      positiveFactors,
+      negativeFactors,
+      missingInformation: missing,
+      starterContext: game.starters,
+      pitcherContext: game.pitcherFeatures,
+      weatherContext: game.weather,
+      parkContext: game.stadium,
+      summary:
+        positiveFactors[0] ??
+        `Verified starters, weather and StadiumID are available for ${candidate.matchup}.`,
+    }
+  })
+}
+
 function shouldInclude(mode: CurrentBoardMode, reasons: Set<CurrentBoardReasonCode>) {
   if (mode === 'HISTORICAL_EXPLORER' || mode === 'ALL_STORED_ADVANCED') {
     return !reasons.has('UNSUPPORTED_MARKET') && !reasons.has('SUPERSEDED')
@@ -644,27 +780,39 @@ export async function getCurrentBoard({
   sportKey = 'baseball_mlb',
   mode = 'CURRENT',
   limit = 100,
+  modelRole,
 }: {
   sportKey?: string
   mode?: CurrentBoardMode
   limit?: number
+  modelRole?: 'champion' | 'challenger' | 'shadow' | null
 } = {}): Promise<CurrentBoardResponse> {
   const safeLimit = Math.max(1, Math.min(limit, 200))
   const nowMs = Date.now()
-  const predictionsResult = await supabaseAdmin
+  const versioning = await probePredictionVersioningSchemaCapabilities()
+  const versioningColumns = versioning.applied
+    ? ', is_current, prediction_version, model_role, prediction_group_key'
+    : ''
+  let predictionsQuery = supabaseAdmin
     .from('prediction_history')
     .select(
-      'id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, line, odds_timestamp, generated_at, cutoff_at, model_version, feature_snapshot_id, feature_set_version, validation_status, lifecycle_status, status, result, production_eligible, recommended_pick, feature_snapshot, validation_warnings, skip_reason, trial, scrambled'
+      `id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, line, odds_timestamp, generated_at, cutoff_at, model_version, feature_snapshot_id, feature_set_version, validation_status, lifecycle_status, status, result, production_eligible, recommended_pick, feature_snapshot, validation_warnings, skip_reason, trial, scrambled${versioningColumns}`
     )
     .eq('sport_key', sportKey)
     .not('model_probability', 'is', null)
     .not('odds', 'is', null)
+  if (versioning.applied && modelRole) {
+    predictionsQuery = predictionsQuery.eq('model_role', modelRole)
+  } else if (versioning.applied && (mode === 'CURRENT' || mode === 'UPCOMING')) {
+    predictionsQuery = predictionsQuery.eq('is_current', true)
+  }
+  const predictionsResult = await predictionsQuery
     .order('odds_timestamp', { ascending: false })
     .limit(1500)
 
   if (predictionsResult.error) throw new Error(`current board prediction read failed: ${predictionsResult.error.message}`)
 
-  const rows = (predictionsResult.data ?? []) as PredictionRow[]
+  const rows = (predictionsResult.data ?? []) as unknown as PredictionRow[]
   const events = await readEventsById(sportKey, rows.map((row) => row.game_id))
   const eventsById = new Map(events.map((event) => [event.id, event]))
   const oddsEventIds = rows
@@ -733,7 +881,7 @@ export async function getCurrentBoard({
     }
   }
 
-  const candidates = Array.from(latestByKey.values())
+  let candidates = Array.from(latestByKey.values())
     .map((entry) => entry.candidate)
     .sort((left, right) => {
       if (mode === 'CURRENT' || mode === 'UPCOMING') {
@@ -747,6 +895,12 @@ export async function getCurrentBoard({
       return new Date(right.oddsTimestamp ?? 0).getTime() - new Date(left.oddsTimestamp ?? 0).getTime()
     })
     .slice(0, safeLimit)
+
+  const currentSlateDate = earliestSlate?.slice(0, 10) ?? candidates[0]?.scheduledTime?.slice(0, 10) ?? null
+  const operatingDate = localDateInTimezone(earliestSlate ?? candidates[0]?.scheduledTime ?? null, 'America/Puerto_Rico')
+  if (sportKey === 'baseball_mlb') {
+    candidates = await enrichMlbCandidatesWithVerifiedContext(candidates, currentSlateDate)
+  }
 
   const latestOddsTimestamp = candidates.map((candidate) => candidate.oddsTimestamp).filter(Boolean).sort().at(-1) ?? null
   const latestOddsAgeMinutes = latestOddsTimestamp ? ageMinutes(latestOddsTimestamp, nowMs) : null
@@ -781,7 +935,8 @@ export async function getCurrentBoard({
     boardMode: mode,
     generatedAt: new Date().toISOString(),
     sportKey,
-    slateDate: earliestSlate?.slice(0, 10) ?? candidates[0]?.scheduledTime?.slice(0, 10) ?? null,
+    slateDate: currentSlateDate,
+    operatingDate,
     timezone: 'America/Puerto_Rico',
     games: Array.from(gamesById.values()),
     markets: Array.from(new Set(candidates.map((candidate) => candidate.marketLabel))).sort(),

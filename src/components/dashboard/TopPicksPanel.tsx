@@ -71,6 +71,56 @@ type TopPicksResponse = {
   topEv: Pick[]
   topConfidence: Pick[]
   bestBets: Pick[]
+  bestBetsToday?: {
+    displayLabel: string
+    recommendationMode: 'official_recommendations' | 'informational_not_recommended'
+    providerCallsMade: number
+    predictionsRegenerated: boolean
+    predictionRegenerationNote: string
+    summary: {
+      candidatesScanned: number
+      officialCandidateCount: number
+      positiveValueCount: number
+      latestOddsTimestamp: string | null
+      officialPicksRemain: number
+    }
+    topPick: BestBetToday | null
+    bestBets: BestBetToday[]
+    bestValue: BestBetToday | null
+  }
+}
+
+type BestBetToday = {
+  rank: number
+  predictionId: string
+  matchup: string
+  scheduledTime: string | null
+  marketLabel: string
+  selection: string
+  line: number | null
+  sportsbook: string
+  americanOdds: number | null
+  modelProbability: number
+  calibratedProbability: number | null
+  impliedProbability: number
+  fairOdds: number | null
+  edge: number
+  expectedValue: number
+  confidence: number
+  reliabilityScore: number
+  featureQuality: number | null
+  dataSufficiency: number | null
+  criticalDataCompleteness: number
+  starterConfidence: number | null
+  windSpeed: number | null
+  stadiumId: string | null
+  score: number
+  official: boolean
+  recommendationPolicyStatus: string
+  drivers: string[]
+  riskFactors: string[]
+  missingInformation: string[]
+  blockers: string[]
 }
 
 function formatDate(value: string) {
@@ -91,6 +141,15 @@ function formatOdds(value: number) {
 
 function formatPercent(value?: number) {
   return `${Number(value ?? 0).toFixed(2)}%`
+}
+
+function formatMaybePercent(value: number | null | undefined) {
+  return value === null || value === undefined ? 'n/a' : formatPercent(value)
+}
+
+function lineText(value: number | null) {
+  if (value === null) return ''
+  return value > 0 ? ` ${value}` : ` ${value}`
 }
 
 function stars(value?: number) {
@@ -330,6 +389,105 @@ function PicksColumn({
   )
 }
 
+function BestBetsTodayCard({ bet }: { bet: BestBetToday }) {
+  return (
+    <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={bet.official ? 'rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-black text-emerald-300' : 'rounded-full bg-amber-500/15 px-3 py-1 text-xs font-black text-amber-200'}>
+              {bet.official ? 'Officially Recommended' : 'Informational Only'}
+            </span>
+            <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-bold text-slate-300">
+              Score {bet.score.toFixed(2)}
+            </span>
+          </div>
+          <p className="mt-3 text-lg font-black text-white">
+            #{bet.rank} {bet.selection}{lineText(bet.line)} {bet.marketLabel}
+          </p>
+          <p className="mt-1 text-sm text-slate-400">
+            {bet.matchup} · {bet.scheduledTime ? formatDate(bet.scheduledTime) : 'time n/a'}
+          </p>
+        </div>
+
+        <div className="text-left md:text-right">
+          <p className="text-lg font-black text-white">
+            {bet.americanOdds === null ? 'N/A' : formatOdds(bet.americanOdds)}
+          </p>
+          <p className="text-xs text-slate-400">{bet.sportsbook}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
+        <Detail label="Model" value={formatPercent(bet.modelProbability)} />
+        <Detail label="Implied" value={formatPercent(bet.impliedProbability)} />
+        <Detail label="EV" value={formatPercent(bet.expectedValue)} tone={bet.expectedValue >= 0 ? 'good' : 'bad'} />
+        <Detail label="Edge" value={formatPercent(bet.edge)} tone={bet.edge >= 0 ? 'good' : 'bad'} />
+        <Detail label="Confidence" value={formatPercent(bet.confidence)} />
+        <Detail label="Feature Quality" value={formatMaybePercent(bet.featureQuality)} />
+        <Detail label="Critical Inputs" value={formatPercent(bet.criticalDataCompleteness)} />
+        <Detail label="Starter" value={formatMaybePercent(bet.starterConfidence)} />
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
+        <div className="rounded-lg bg-slate-900/70 p-3">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Why it ranks</p>
+          <ul className="mt-2 space-y-1 text-slate-300">
+            {bet.drivers.slice(0, 4).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="rounded-lg bg-slate-900/70 p-3">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Why it is blocked</p>
+          <ul className="mt-2 space-y-1 text-slate-300">
+            {(bet.riskFactors.length ? bet.riskFactors : ['No additional risk note.']).slice(0, 4).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BestBetsTodaySection({ data }: { data: TopPicksResponse }) {
+  const best = data.bestBetsToday
+  if (!best) return null
+  const notRecommended = best.recommendationMode === 'informational_not_recommended'
+  return (
+    <div className={notRecommended ? 'rounded-xl border border-amber-500/30 bg-amber-950/10 p-5' : 'rounded-xl border border-emerald-500/30 bg-emerald-950/10 p-5'}>
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p className={notRecommended ? 'text-sm font-black uppercase tracking-[0.18em] text-amber-200' : 'text-sm font-black uppercase tracking-[0.18em] text-emerald-300'}>
+            {best.displayLabel}
+          </p>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+            {notRecommended
+              ? 'No candidate passed official gates. These are the strongest current informational options with blockers shown.'
+              : 'Official gates passed. These are the strongest bets from the current supported board.'}
+          </p>
+        </div>
+        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+          <Detail label="Scanned" value={String(best.summary.candidatesScanned)} />
+          <Detail label="Official" value={String(best.summary.officialCandidateCount)} />
+          <Detail label="Provider Calls" value={String(best.providerCallsMade)} />
+        </div>
+      </div>
+
+      <p className="mt-3 text-xs text-slate-500">
+        {best.predictionRegenerationNote}
+      </p>
+
+      <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {best.bestBets.slice(0, 4).map((bet) => (
+          <BestBetsTodayCard key={bet.predictionId} bet={bet} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function Detail({
   label,
   value,
@@ -462,6 +620,8 @@ export default function TopPicksPanel() {
         Official picks are still off. Pick Analyzer will only show a bet here
         after the model has enough real, calibrated proof.
       </div>
+
+      <BestBetsTodaySection data={data} />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <PicksColumn

@@ -43,8 +43,9 @@ export async function getBestValueOpportunities({
 } = {}) {
   try {
   const board = await getCurrentBoardCached('baseball_mlb', mapMode(mode), 200)
+  const positiveValue = board.candidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0)
   const ranked = [...board.candidates]
-    .filter((candidate) => includePasses || candidate.expectedValue > 0 || candidate.edge > 0)
+    .filter((candidate) => includePasses || (candidate.expectedValue > 0 && candidate.edge > 0))
     .sort((left, right) => score(right) - score(left))
     .slice(0, Math.max(1, Math.min(limit, 100)))
 
@@ -71,12 +72,14 @@ export async function getBestValueOpportunities({
       officialPickCount: board.officialPickCount,
       latestOddsCapture: board.latestOddsTimestamp,
       dataFreshness: board.dataFreshness,
-      warning: 'MODELED VALUE is not an official pick. Official picks still require production gate and recommendation policy approval.',
+      warning: positiveValue.length
+        ? 'Positive value is informational until official gates qualify it.'
+        : 'No Positive Value Available Today. Passing is currently the highest expected-value decision.',
       scanCompleted: true,
       dataAvailable: true,
       errorCode: null,
       errorMessageSafe: null,
-      positiveValueCount: board.candidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0).length,
+      positiveValueCount: positiveValue.length,
     },
     rankingContract: ['positive expected value', 'positive edge', 'confidence', 'reliability', 'market stability', 'feature quality', 'data sufficiency', 'odds freshness'],
     categories,
@@ -89,9 +92,9 @@ export async function getBestValueOpportunities({
           ? 'OFFICIAL ELIGIBILITY REVIEW'
           : 'NOT OFFICIALLY ELIGIBLE',
       valueDisplay:
-        candidate.modeledValueStatus === 'MODELED_VALUE'
-          ? 'MODELED VALUE DETECTED'
-          : 'NO MODELED VALUE',
+        candidate.expectedValue > 0 && candidate.edge > 0
+          ? 'POSITIVE VALUE'
+          : 'PASS - NO POSITIVE VALUE',
     })),
   }
   } catch {

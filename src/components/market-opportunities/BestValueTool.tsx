@@ -95,7 +95,7 @@ export default function BestValueTool() {
             <p className="mt-5 text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Premium Tool</p>
             <h1 className="mt-2 break-words text-3xl font-black sm:text-4xl">Best Value</h1>
             <p className="mt-3 max-w-[18rem] break-words text-sm leading-6 text-slate-400 sm:max-w-3xl">
-              Value-first scan over the canonical Current Board. Modeled value is not an official pick.
+              Value means positive EV and positive edge. If neither exists, passing is the value decision.
             </p>
           </div>
           <label className="inline-flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm font-bold">
@@ -120,7 +120,7 @@ export default function BestValueTool() {
         </section>
 
         <div className="rounded-2xl border border-amber-500/20 bg-amber-950/10 p-4 text-sm leading-6 text-amber-100">
-          {data?.summary.warning ?? 'MODELED VALUE is not an official pick.'}
+          {data?.summary.warning ?? 'No Positive Value Available Today.'}
         </div>
 
         {data?.summary.dataAvailable === false ? (
@@ -138,8 +138,8 @@ export default function BestValueTool() {
           </section>
         ) : (data?.opportunities ?? []).length === 0 ? (
           <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
-            <h2 className="text-2xl font-black">No positive modeled-value candidate is available.</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-400">The current board can still be analyzed, but the prices are not attractive enough for this value view.</p>
+            <h2 className="text-2xl font-black">No Positive Value Available Today.</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-400">The current board can still be analyzed, but no remaining candidate has both positive EV and positive edge. Passing is currently the highest expected-value decision.</p>
           </section>
         ) : (
           <section className="grid gap-4">

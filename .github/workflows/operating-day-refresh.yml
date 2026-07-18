@@ -1,0 +1,29 @@
+name: Operating Day Refresh
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * *"
+    - cron: "0 16 * * *"
+    - cron: "0 19 * * *"
+    - cron: "30 21 * * *"
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Call consolidated operating-day scheduler
+        env:
+          PICK_ANALYZER_BASE_URL: ${{ secrets.PICK_ANALYZER_BASE_URL }}
+          PICK_ANALYZER_CRON_SECRET: ${{ secrets.PICK_ANALYZER_CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PICK_ANALYZER_BASE_URL:-}" ] || [ -z "${PICK_ANALYZER_CRON_SECRET:-}" ]; then
+            echo "Missing PICK_ANALYZER_BASE_URL or PICK_ANALYZER_CRON_SECRET repository secret."
+            exit 1
+          fi
+          curl --fail-with-body --show-error --silent \
+            --request POST \
+            --header "Authorization: Bearer ${PICK_ANALYZER_CRON_SECRET}" \
+            "${PICK_ANALYZER_BASE_URL%/}/api/cron/operating-day?dryRun=false"

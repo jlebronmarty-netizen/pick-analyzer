@@ -1,4 +1,5 @@
 import { SportDefinition, SportKey } from '@/config/sports.config'
+import { getBsnCapabilityMatrix, getBsnDataQualityStatus } from '@/services/bsn-platform.service'
 import { getBsnGames, getBsnTeams } from '@/services/bsn.service'
 import { getNbaAdapterStatus } from '@/services/nba-adapter.service'
 import {
@@ -385,12 +386,12 @@ class BsnAdapter implements SportAdapter {
 
   async fetchStandings() {
     const startedAt = Date.now()
-    return unavailable(this.id, startedAt, [], 'BSN standings are not stored in the current schema.')
+    return unavailable(this.id, startedAt, [], 'BSN standings require approved source ingestion before adapter-backed production use.')
   }
 
   async fetchStats() {
     const startedAt = Date.now()
-    return unavailable(this.id, startedAt, [], 'BSN stats are consumed through prediction history today.')
+    return unavailable(this.id, startedAt, [], 'BSN game statistics require approved source ingestion before adapter-backed production use.')
   }
 
   async fetchInjuries() {
@@ -416,15 +417,22 @@ class BsnAdapter implements SportAdapter {
     const startedAt = Date.now()
 
     try {
-      await getBsnGames()
+      const [quality, capabilities] = await Promise.all([
+        getBsnDataQualityStatus(),
+        Promise.resolve(getBsnCapabilityMatrix()),
+      ])
+      const degraded = quality.readiness.predictionEngine === 'BLOCKED' || capabilities.summary.productionReady === false
 
       return {
         adapterId: this.id,
         sportKey: this.sportKey,
-        status: 'healthy',
+        status: degraded ? 'degraded' : 'healthy',
         latencyMs: elapsed(startedAt),
         lastSuccess: new Date().toISOString(),
         coverage: this.features,
+        errorMessage: degraded
+          ? 'BSN adapter is registered but production predictions are blocked by missing approved source ingestion and/or odds.'
+          : undefined,
       }
     } catch (error) {
       return {

@@ -27,6 +27,30 @@ type PreviewCandidate = {
   positiveFactors: string[]
   negativeFactors: string[]
   missingData: string[]
+  starterContext?: {
+    away?: { name?: string | null; playerId?: number | null; status?: string | null; confirmed?: boolean | null; probable?: boolean | null }
+    home?: { name?: string | null; playerId?: number | null; status?: string | null; confirmed?: boolean | null; probable?: boolean | null }
+    starterConfidence?: number | null
+  } | null
+  pitcherContext?: {
+    away?: { pitcherQuality?: number | null }
+    home?: { pitcherQuality?: number | null }
+  } | null
+  weatherContext?: {
+    description?: string | null
+    tempHigh?: number | null
+    windSpeed?: number | null
+    windDirection?: number | null
+    windCategory?: string | null
+    runEnvironment?: string | null
+  } | null
+  parkContext?: {
+    stadiumId?: number | null
+    mappingStatus?: string | null
+    parkFactor?: number | null
+    hrFactor?: number | null
+    runFactor?: number | null
+  } | null
   marketStability: {
     initialOdds?: number
     latestOdds?: number
@@ -59,6 +83,12 @@ type PreviewResponse = {
     blocked: number
     officialPicks: number
     nextRequiredCaptureAction: string
+    slateStatus?: string
+    selectedSlateDate?: string | null
+    upcomingGames?: number
+    readyForAnalysis?: number
+    waitingForOdds?: number
+    waitingForPredictions?: number
   }
   categories: {
     qualifiedPreview: PreviewCandidate[]
@@ -213,8 +243,19 @@ function fullTime(value: string | null, timeZone?: string) {
   })
 }
 
+function slateMessage(data: PreviewResponse | null) {
+  const status = data?.summary.slateStatus
+  if (status === 'waiting_for_odds') return 'Upcoming games found. Schedule ready. Refresh odds before recommendations.'
+  if (status === 'waiting_for_predictions') return 'Upcoming games found. Preparing odds and model analysis.'
+  if (status === 'no_upcoming_games') return 'No upcoming MLB games found in the stored slate window.'
+  if (data?.summary.previewCandidates === 0) return 'Upcoming games found. Preparing odds and model analysis.'
+  return 'The model currently believes waiting has the highest expected value. Calibration remains limited.'
+}
+
 function CandidateRow({ candidate }: { candidate: PreviewCandidate }) {
   const summary = recommendationSummary(candidate)
+  const awayStarter = candidate.starterContext?.away
+  const homeStarter = candidate.starterContext?.home
   return (
     <article className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 text-sm">
       <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr_1.1fr]">
@@ -273,6 +314,12 @@ function CandidateRow({ candidate }: { candidate: PreviewCandidate }) {
               Coverage: {qualityLabel(candidate.dataSufficiency)}
             </span>
           </div>
+          <div className="mt-3 grid gap-x-3 gap-y-2 border-t border-slate-800 pt-3 text-xs sm:grid-cols-2">
+            <Fact label="Away Starter" value={`${awayStarter?.name ?? awayStarter?.playerId ?? 'Unknown'} (${awayStarter?.status ?? 'unknown'})`} />
+            <Fact label="Home Starter" value={`${homeStarter?.name ?? homeStarter?.playerId ?? 'Unknown'} (${homeStarter?.status ?? 'unknown'})`} />
+            <Fact label="Weather" value={`${candidate.weatherContext?.description ?? 'n/a'}, ${formatNumber(candidate.weatherContext?.tempHigh)}F`} />
+            <Fact label="Wind / Park" value={`${candidate.weatherContext?.windCategory ?? 'n/a'} ${formatNumber(candidate.weatherContext?.windSpeed)} mph | Stadium ${candidate.parkContext?.stadiumId ?? 'n/a'}`} />
+          </div>
         </div>
       </div>
 
@@ -304,6 +351,10 @@ function CandidateRow({ candidate }: { candidate: PreviewCandidate }) {
           <Mini label="Line Move" value={candidate.marketStability?.direction ?? 'stable'} />
           <Mini label="Data Quality Score" value={formatNumber(candidate.featureQuality)} />
           <Mini label="Coverage Score" value={formatNumber(candidate.dataSufficiency)} />
+          <Mini label="Starter Confidence" value={formatNumber(candidate.starterContext?.starterConfidence, '%')} />
+          <Mini label="Pitcher Quality" value={`${formatNumber(candidate.pitcherContext?.away?.pitcherQuality)} / ${formatNumber(candidate.pitcherContext?.home?.pitcherQuality)}`} />
+          <Mini label="Run Environment" value={candidate.weatherContext?.runEnvironment ?? 'n/a'} />
+          <Mini label="Park Mapping" value={candidate.parkContext?.mappingStatus ?? 'n/a'} />
         </div>
       </details>
     </article>
@@ -342,6 +393,15 @@ function Mini({ label, value }: { label: string; value: string }) {
     <div className="rounded-lg bg-slate-950/70 p-3">
       <p className="text-slate-500">{label}</p>
       <p className="mt-1 font-bold text-white">{value}</p>
+    </div>
+  )
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="text-slate-500">{label}: </span>
+      <span className="font-bold text-slate-100">{value}</span>
     </div>
   )
 }
@@ -389,25 +449,25 @@ export default function MlbProspectivePreviewPanel() {
             </span>
           </div>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-            The model currently believes waiting has the highest expected value. Calibration remains limited.
+            {slateMessage(data)}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           <div>
+            <p className="text-slate-500">Slate</p>
+            <p className="font-bold text-white">{data?.summary.selectedSlateDate ?? 'Next'}</p>
+          </div>
+          <div>
             <p className="text-slate-500">Games</p>
-            <p className="font-bold text-white">{data?.summary.gamesWithOdds ?? 0}</p>
+            <p className="font-bold text-white">{data?.summary.upcomingGames ?? data?.summary.gamesWithOdds ?? 0}</p>
           </div>
           <div>
-            <p className="text-slate-500">Analyzed</p>
-            <p className="font-bold text-white">{data?.summary.previewCandidates ?? 0}</p>
+            <p className="text-slate-500">Ready</p>
+            <p className="font-bold text-emerald-300">{data?.summary.readyForAnalysis ?? data?.summary.qualifiedPreviews ?? 0}</p>
           </div>
           <div>
-            <p className="text-slate-500">Good Bets</p>
-            <p className="font-bold text-emerald-300">{data?.summary.qualifiedPreviews ?? 0}</p>
-          </div>
-          <div>
-            <p className="text-slate-500">Next Game</p>
-            <p className="font-bold text-white">{shortTime(data?.summary.nextGameTime ?? null)}</p>
+            <p className="text-slate-500">Waiting Odds</p>
+            <p className="font-bold text-white">{data?.summary.waitingForOdds ?? 0}</p>
           </div>
         </div>
       </div>
@@ -433,6 +493,11 @@ export default function MlbProspectivePreviewPanel() {
       )}
 
       <div className="mt-5">
+        {data && data.summary.previewCandidates === 0 && (
+          <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4 text-sm text-slate-300">
+            {slateMessage(data)}
+          </div>
+        )}
         {(data?.categories.qualifiedPreview ?? []).map((candidate) => (
           <CandidateRow key={candidate.id} candidate={candidate} />
         ))}
