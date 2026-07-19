@@ -25,6 +25,11 @@ type Opportunity = {
   recommendationStatus: string
   semanticLabel: string
   officialEligibility: string
+  marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  opportunityCategory?: 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+  statusLabel?: string
+  informationalWarning?: string | null
+  reasonNotOfficial?: string | null
   boardLabel: string
   currentHistoricalPreviewLabel: string
   modelVersion: string
@@ -82,6 +87,8 @@ type Response = {
       exclusionReasonCounts: Record<string, number>
     }
     warning: string
+    informationalFallbackUsed?: boolean
+    displayMode?: string
   }
   topPick?: {
     type: 'official_pick' | 'most_likely_outcome' | 'none'
@@ -163,6 +170,13 @@ function recommendationClass(value: string) {
   if (value === 'WATCH' || value === 'NOT OFFICIALLY ELIGIBLE') return 'border-amber-500/40 bg-amber-950/20 text-amber-200'
   if (value === 'STALE' || value === 'QUARANTINED' || value === 'UNCALIBRATED') return 'border-orange-500/40 bg-orange-950/20 text-orange-200'
   return 'border-slate-700 bg-slate-900 text-slate-300'
+}
+
+function opportunityClass(item: Opportunity) {
+  if (item.opportunityCategory === 'Official') return 'border-emerald-500/40 bg-emerald-950/20 text-emerald-200'
+  if (item.opportunityCategory === 'Watchlist') return 'border-sky-500/40 bg-sky-950/20 text-sky-200'
+  if (item.opportunityCategory === 'Avoid') return 'border-red-500/40 bg-red-950/20 text-red-200'
+  return 'border-amber-500/40 bg-amber-950/20 text-amber-200'
 }
 
 function ratingLabel(value: number) {
@@ -267,19 +281,24 @@ export default function MostLikelyTool() {
 
         <div className="rounded-2xl border border-amber-500/20 bg-amber-950/10 p-4 text-sm leading-6 text-amber-100">
           {data?.probabilityEducation?.headline ?? 'High probability does not always mean good betting value. A selection can be very likely and still be a pass because the odds are too expensive.'}
+          {data?.summary.informationalFallbackUsed ? (
+            <p className="mt-2 font-bold">
+              Current Board has no active official candidates, so this page is showing informational stored rankings for review only.
+            </p>
+          ) : null}
         </div>
 
         {data && (
           <section className="grid gap-4 lg:grid-cols-3">
             <Spotlight
               title={data.topPick?.type === 'official_pick' ? 'Official Top Pick' : 'Most Likely Outcome'}
-              subtitle={data.topPick?.type === 'official_pick' ? 'Official recommendation' : 'Informational - not officially recommended'}
+              subtitle={data.topPick?.type === 'official_pick' ? 'Official recommendation' : 'Market intelligence - not a recommendation'}
               candidate={data.topPick?.candidate ?? null}
               footer={data.topPick?.disclaimer ?? 'No current supported outcome is available.'}
             />
             <Spotlight
               title="Most Likely Moneyline"
-              subtitle="Probability-focused"
+              subtitle="Probability-focused market intelligence"
               candidate={data.mostLikelyMoneyline?.candidate ?? null}
               footer={
                 data.mostLikelyMoneyline?.candidate
@@ -296,8 +315,8 @@ export default function MostLikelyTool() {
             <article key={item.id} className="min-w-0 rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
               <div className="grid min-w-0 gap-5 lg:grid-cols-3">
                 <div className="min-w-0">
-                  <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-black ${recommendationClass(item.semanticLabel)}`}>
-                    {item.semanticLabel}
+                  <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-black ${opportunityClass(item)}`}>
+                    {item.statusLabel ?? item.semanticLabel}
                   </span>
                     <h2 className="mt-3 break-words text-2xl font-black">{selectionLabel(item)}</h2>
                   <p className="mt-1 break-words text-sm text-slate-400">{item.marketLabel} | {item.matchup}</p>
@@ -306,6 +325,14 @@ export default function MostLikelyTool() {
                     <span>{item.eventStatus}</span>
                     <span>{item.currentHistoricalPreviewLabel}</span>
                   </div>
+                  {item.informationalWarning ? (
+                    <p className="mt-3 whitespace-pre-line rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 text-xs font-black text-amber-100">
+                      {item.informationalWarning}
+                    </p>
+                  ) : null}
+                  {item.reasonNotOfficial ? (
+                    <p className="mt-3 text-sm leading-6 text-amber-100">Reason not official: {item.reasonNotOfficial}</p>
+                  ) : null}
                   <p className="mt-3 break-words text-sm leading-6 text-slate-300">{marketWhy(item)}</p>
                 </div>
 

@@ -66,110 +66,110 @@ const UfcPredictionEnginePanel = dynamic(() => import('@/components/dashboard/Uf
 const ModelVersionsPanel = dynamic(() => import('@/components/dashboard/ModelVersionsPanel'))
 const ModelRollbackPanel = dynamic(() => import('@/components/dashboard/ModelRollbackPanel'))
 const AutoModelTuningPanel = dynamic(() => import('@/components/dashboard/AutoModelTuningPanel'))
+const BasketballDataCoveragePanel = dynamic(() => import('@/components/dashboard/BasketballDataCoveragePanel'))
+const BsnIntelligencePanel = dynamic(() => import('@/components/dashboard/BsnIntelligencePanel'))
 
 export default function DashboardDeveloperGroups() {
   return (
-    <>
-      <DashboardSection
-        id="overview"
-        eyebrow="Developer Mode"
-        title="Advanced Overview"
-        description="Detailed historical widgets and internal views stay collapsed until opened."
-      >
-        <DeveloperDetails title="Overview diagnostics" description="Raw model, daily report and operating-day diagnostics.">
-          <DashboardQuickStats />
-          <DashboardHeroPanel />
-          <ProductionTodayPanel />
-          <DailyReportPanel />
-          <NextSlateStatusPanel />
-          <MarketIntelligenceSummaryPanel />
-          <RecommendationReadinessPanel />
-          <OperatingDayPanel />
-          <MlbProspectivePreviewPanel />
-          <PlayOfTheDayPanel />
-          <TopPicksPanel />
-          <BetSlipOptimizerPanel />
-          <AICommandCenterPanel />
-        </DeveloperDetails>
-      </DashboardSection>
+    <DashboardSection
+      id="advanced-details"
+      eyebrow="Advanced Details"
+      title="Advanced Details"
+      description="Technical panels are grouped here and only load when opened."
+    >
+      <DeveloperDetails title="Overview" description="Daily briefing, operating day, next slate and recommendation readiness.">
+        <DashboardQuickStats />
+        <DashboardHeroPanel />
+        <ProductionTodayPanel />
+        <DailyReportPanel />
+        <NextSlateStatusPanel />
+        <RecommendationReadinessPanel />
+        <OperatingDayPanel />
+      </DeveloperDetails>
 
-      <DashboardSection id="model-lab" eyebrow="Developer Mode" title="Model Lab" description="Advanced model evidence, contracts and simulations.">
-        <DeveloperDetails title="Historical replay" description="Quarantined completed-game replay for learning only.">
-          <MlbPredictionEnginePanel />
-        </DeveloperDetails>
-        <DeveloperDetails title="Current preview" description="Model context without official-pick promotion.">
-          <PredictionEngineV4Panel />
-          <ModelMetricsFrameworkPanel />
-        </DeveloperDetails>
-        <DeveloperDetails title="Feature store" description="Feature quality and sufficiency checks for MLB model inputs.">
-          <MlbFeatureStoreIntegrationPanel />
-        </DeveloperDetails>
-        <DeveloperDetails title="Contracts" description="Prediction contracts, safety checks and settlement contracts.">
-          <SportPredictionSdkPanel />
-          <PredictionSafetyPanel />
-          <SettlementCorePanel />
-        </DeveloperDetails>
-        <DeveloperDetails title="Advanced tools" description="Risk simulation, portfolios, market intelligence and coaching modules.">
-          <MonteCarloSimulatorPanel />
-          <PortfolioAIV2Panel />
-          <PortfolioElitePanel />
-          <SharpMoneyIntelligencePanel />
-          <ClosingLineIntelligencePanel />
-          <LiveBettingEnginePanel />
-          <AISportsBrainPanel />
-          <AICoachPanel />
-          <PatternDiscoveryPanel />
-          <AdaptiveWeightsPanel />
-        </DeveloperDetails>
-      </DashboardSection>
+      <DeveloperDetails title="Markets" description="Market intelligence, opportunities, ticket state and AI command surfaces.">
+        <MarketIntelligenceSummaryPanel />
+        <MlbProspectivePreviewPanel />
+        <PlayOfTheDayPanel />
+        <TopPicksPanel />
+        <BetSlipOptimizerPanel />
+        <AICommandCenterPanel />
+        <SharpMoneyIntelligencePanel />
+        <ClosingLineIntelligencePanel />
+        <LiveBettingEnginePanel />
+      </DeveloperDetails>
 
-      <DashboardSection id="data-operations" eyebrow="Developer Mode" title="Data & Operations" description="Provider, sync and runtime diagnostics.">
-        <DeveloperDetails title="Engineering details" description="Sync jobs, provider health, runtime checks, data quality and route contracts.">
-          <MlbMissingIntelligencePanel />
-          <HistoricalImportEnginePanel />
-          <RuntimeObservabilityPanel />
-          <SyncReliabilityPanel />
-          <GlobalDataQualityPanel />
-          <ProviderIntelligencePanel />
-          <MultiSportEnginePanel />
-        </DeveloperDetails>
-      </DashboardSection>
+      <DeveloperDetails title="Model" description="Model evidence, feature contracts, prediction safety and simulation tools.">
+        <MlbPredictionEnginePanel />
+        <PredictionEngineV4Panel />
+        <ModelMetricsFrameworkPanel />
+        <MlbFeatureStoreIntegrationPanel />
+        <SportPredictionSdkPanel />
+        <PredictionSafetyPanel />
+        <MonteCarloSimulatorPanel />
+      </DeveloperDetails>
 
-      <DashboardSection id="advanced" eyebrow="Developer Mode" title="Developer & Inactive Domains" description="Detailed contracts, NBA readiness and inactive modules.">
-        <DeveloperDetails title="Provider contracts and registries" description="Static contracts and deterministic validation surfaces.">
-          <ProviderAdapterSdkPanel />
-          <SportsDataIoContractPanel />
-          <FeatureStoreCorePanel />
-          <MultiSportFeatureRegistryPanel />
-        </DeveloperDetails>
-        <DeveloperDetails title="NBA operational readiness" description="NBA evidence remains collapsed outside the MLB Today path.">
-          <NbaAdapterPanel />
-          <NbaDataSyncPanel />
-          <NbaDataQualityPanel />
-          <NbaFeatureStoreIntegrationPanel />
-          <NbaMultiBookComparisonPanel />
-          <NbaSteamMovePanel />
-          <NbaPredictionEnginePanel />
-          <NbaBacktestingCalibrationPanel />
-        </DeveloperDetails>
-        <DeveloperDetails title="Inactive sport engines" description="Other sport modules stay collapsed until real data validation is active.">
-          <NflFeatureStoreIntegrationPanel />
-          <NflPredictionEnginePanel />
-          <SoccerFeatureStoreIntegrationPanel />
-          <SoccerPredictionEnginePanel />
-          <NhlFeatureStoreIntegrationPanel />
-          <NhlPredictionEnginePanel />
-          <TennisFeatureStoreIntegrationPanel />
-          <TennisPredictionEnginePanel />
-          <UfcFeatureStoreIntegrationPanel />
-          <UfcPredictionEnginePanel />
-        </DeveloperDetails>
-        <DeveloperDetails title="Model administration" description="Versioning, rollback and tuning controls.">
-          <ModelVersionsPanel />
-          <ModelRollbackPanel />
-          <AutoModelTuningPanel />
-        </DeveloperDetails>
-      </DashboardSection>
-    </>
+      <DeveloperDetails title="Historical" description="Historical import, replay and multi-sport feature infrastructure.">
+        <HistoricalImportEnginePanel />
+        <FeatureStoreCorePanel />
+        <MultiSportFeatureRegistryPanel />
+      </DeveloperDetails>
+
+      <DeveloperDetails title="Data" description="Data quality, missing intelligence, runtime checks and sync reliability.">
+        <MlbMissingIntelligencePanel />
+        <RuntimeObservabilityPanel />
+        <SyncReliabilityPanel />
+        <GlobalDataQualityPanel />
+        <BasketballDataCoveragePanel />
+        <BsnIntelligencePanel />
+        <MultiSportEnginePanel />
+      </DeveloperDetails>
+
+      <DeveloperDetails title="Provider" description="Provider intelligence, contracts, adapters and SportsDataIO readiness.">
+        <ProviderIntelligencePanel />
+        <ProviderAdapterSdkPanel />
+        <SportsDataIoContractPanel />
+      </DeveloperDetails>
+
+      <DeveloperDetails title="Settlement" description="Settlement, portfolio and bankroll diagnostics.">
+        <SettlementCorePanel />
+        <PortfolioAIV2Panel />
+        <PortfolioElitePanel />
+      </DeveloperDetails>
+
+      <DeveloperDetails title="Learning" description="AI coach, sports brain, pattern discovery and adaptive-weight diagnostics.">
+        <AISportsBrainPanel />
+        <AICoachPanel />
+        <PatternDiscoveryPanel />
+        <AdaptiveWeightsPanel />
+      </DeveloperDetails>
+
+      <DeveloperDetails title="Calibration" description="NBA validation and calibration modules remain collapsed outside User Mode.">
+        <NbaAdapterPanel />
+        <NbaDataSyncPanel />
+        <NbaDataQualityPanel />
+        <NbaFeatureStoreIntegrationPanel />
+        <NbaMultiBookComparisonPanel />
+        <NbaSteamMovePanel />
+        <NbaPredictionEnginePanel />
+        <NbaBacktestingCalibrationPanel />
+      </DeveloperDetails>
+
+      <DeveloperDetails title="Administration" description="Inactive sport engines, model versions, rollback and tuning controls.">
+        <NflFeatureStoreIntegrationPanel />
+        <NflPredictionEnginePanel />
+        <SoccerFeatureStoreIntegrationPanel />
+        <SoccerPredictionEnginePanel />
+        <NhlFeatureStoreIntegrationPanel />
+        <NhlPredictionEnginePanel />
+        <TennisFeatureStoreIntegrationPanel />
+        <TennisPredictionEnginePanel />
+        <UfcFeatureStoreIntegrationPanel />
+        <UfcPredictionEnginePanel />
+        <ModelVersionsPanel />
+        <ModelRollbackPanel />
+        <AutoModelTuningPanel />
+      </DeveloperDetails>
+    </DashboardSection>
   )
 }

@@ -11,6 +11,7 @@ import {
   puertoRicoUtcRange,
 } from '@/services/active-event.service'
 import { getCurrentBoard } from '@/services/current-board.service'
+import { emptyCategoryTrackRecord, summarizeMarketIntelligenceCategories } from '@/services/market-intelligence-category.service'
 import { getNextSlateStatus } from '@/services/next-slate.service'
 import { getOperatingDayStatus } from '@/services/operating-day.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
@@ -50,6 +51,19 @@ export type DashboardTodayContract = {
   predictionCandidates: number
   officialPicks: number
   informationalCandidates: number
+  marketIntelligence: {
+    official: number
+    aiLeans: number
+    watchlist: number
+    avoid: number
+  }
+  categoryTrackRecord: ReturnType<typeof emptyCategoryTrackRecord>
+  categoryStatisticsPolicy: {
+    officialOnlyPerformanceUnchanged: true
+    categoriesNeverCombined: true
+    informationalCategoriesAreNotRecommendations: true
+    persistence: 'read_only_current_board_contract'
+  }
   latestOddsTimestamp: string | null
   freshness: 'fresh' | 'stale' | 'empty'
   nextAction: string
@@ -252,9 +266,20 @@ export async function getDashboardToday({
   const upcomingGames = nextSlateDate ? nextSlate.eventsFound : Math.max(0, currentScheduled)
   const gamesWaitingForOdds = nextSlate.waitingForOdds
   const gamesReadyForAnalysis = Math.max(board.games.length, nextSlate.readyForAnalysis)
-  const predictionCandidates = board.candidates.length || nextSlate.activeCandidates
+  const informationalBoard = board.candidates.length
+    ? board
+    : await getCurrentBoard({ sportKey: SPORT_KEY, mode: 'ALL_STORED_ADVANCED', limit: 200 })
+  const todayStart = puertoRicoUtcRange(operatingDate).utcStart
+  const todayEnd = puertoRicoUtcRange(operatingDate).utcEndExclusive
+  const displayCandidates = informationalBoard.candidates.filter((candidate) => (
+    candidate.scheduledTime &&
+    candidate.scheduledTime >= todayStart &&
+    candidate.scheduledTime < todayEnd
+  ))
+  const marketIntelligence = summarizeMarketIntelligenceCategories(displayCandidates)
+  const predictionCandidates = board.candidates.length || displayCandidates.length || nextSlate.activeCandidates
   const officialPicks = board.officialPickCount || nextSlate.officialPicks
-  const informationalCandidates = Math.max(0, predictionCandidates - officialPicks)
+  const informationalCandidates = Math.max(0, marketIntelligence.aiLeans + marketIntelligence.watchlist + marketIntelligence.avoid)
   const operatingStatus = String(operatingDay.status ?? 'planned')
   const nextAction = userActionLabel(String(operatingDay.nextRequiredAction ?? ''), {
     hour,
@@ -321,6 +346,14 @@ export async function getDashboardToday({
     predictionCandidates,
     officialPicks,
     informationalCandidates,
+    marketIntelligence,
+    categoryTrackRecord: emptyCategoryTrackRecord(),
+    categoryStatisticsPolicy: {
+      officialOnlyPerformanceUnchanged: true,
+      categoriesNeverCombined: true,
+      informationalCategoriesAreNotRecommendations: true,
+      persistence: 'read_only_current_board_contract',
+    },
     latestOddsTimestamp: board.latestOddsTimestamp,
     freshness: board.dataFreshness.status,
     nextAction,

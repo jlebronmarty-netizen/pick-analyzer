@@ -5,6 +5,11 @@ import {
   type CurrentBoardCandidate,
   type CurrentBoardResponse,
 } from '@/services/current-board.service'
+import {
+  classifyMarketIntelligence,
+  type MarketIntelligenceCategory,
+  type MarketIntelligenceStatusLabel,
+} from '@/services/market-intelligence-category.service'
 
 type BestBetsLabel = 'BEST BETS TODAY' | 'BEST BETS TODAY - NOT RECOMMENDED'
 type BestBetsMode = 'official_recommendations' | 'informational_not_recommended'
@@ -50,6 +55,12 @@ export type BestBetsTodayCandidate = {
     penalty: number
   }
   official: boolean
+  marketIntelligenceCategory: MarketIntelligenceCategory
+  productCategory: MarketIntelligenceStatusLabel
+  productStatus: string
+  statusColor: string
+  statusWarning: string | null
+  reasonNotOfficial: string | null
   officialEligibility: CurrentBoardCandidate['officialEligibility']
   recommendationPolicyStatus: string
   mode: BestBetsMode
@@ -268,6 +279,8 @@ function toBestBetCandidate(
   const weather = asRecord(candidate.weatherContext)
   const park = asRecord(candidate.parkContext)
   const pitcher = pitcherMismatch(candidate)
+  const classification = classifyMarketIntelligence(candidate)
+  const official = mode === 'official_recommendations'
   return {
     rank,
     predictionId: candidate.predictionId,
@@ -299,7 +312,13 @@ function toBestBetCandidate(
     stadiumId: park.stadiumId === undefined || park.stadiumId === null ? null : String(park.stadiumId),
     score: scored.score,
     scoreComponents: scored.components,
-    official: mode === 'official_recommendations',
+    official,
+    marketIntelligenceCategory: classification.category,
+    productCategory: classification.label,
+    productStatus: classification.display,
+    statusColor: classification.color,
+    statusWarning: official ? null : classification.warning,
+    reasonNotOfficial: official ? null : classification.reasonNotOfficial,
     officialEligibility: candidate.officialEligibility,
     recommendationPolicyStatus: candidate.recommendationPolicyStatus,
     mode,

@@ -467,7 +467,7 @@ export default function MlbPredictionEnginePanel() {
         {replay ? (
           <>
             <div className="mt-5 grid gap-3 md:grid-cols-3 xl:grid-cols-7">
-              <Stat label="Analyzed" value={replay.summary.predictions} />
+              <Stat label="Reviewed" value={replay.summary.predictions} />
               <Stat label="Wins" value={replay.summary.wins} />
               <Stat label="Losses" value={replay.summary.losses} />
               <Stat label="Win Rate" value={`${replay.summary.winRate}%`} />

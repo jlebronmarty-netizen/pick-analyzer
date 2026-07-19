@@ -24,6 +24,11 @@ type Opportunity = {
   officialDisplay: string
   semanticLabel: string
   boardLabel: string
+  statusLabel?: string
+  marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  opportunityCategory?: 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+  informationalWarning?: string | null
+  reasonNotOfficial?: string | null
 }
 
 type Response = {
@@ -40,6 +45,8 @@ type Response = {
     errorCode: string | null
     errorMessageSafe: string | null
     positiveValueCount: number
+    informationalFallbackUsed?: boolean
+    displayMode?: string
   }
   opportunities: Opportunity[]
 }
@@ -55,6 +62,13 @@ function pct(value: number | null) {
 
 function tone(value: number) {
   return value > 0 ? 'text-emerald-300' : 'text-red-300'
+}
+
+function statusClass(item: Opportunity) {
+  if (item.opportunityCategory === 'Official') return 'border-emerald-500/40 bg-emerald-950/20 text-emerald-200'
+  if (item.opportunityCategory === 'Watchlist') return 'border-sky-500/40 bg-sky-950/20 text-sky-200'
+  if (item.opportunityCategory === 'Avoid') return 'border-red-500/40 bg-red-950/20 text-red-200'
+  return 'border-amber-500/40 bg-amber-950/20 text-amber-100'
 }
 
 function selectionLabel(item: Opportunity) {
@@ -95,7 +109,7 @@ export default function BestValueTool() {
             <p className="mt-5 text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Premium Tool</p>
             <h1 className="mt-2 break-words text-3xl font-black sm:text-4xl">Best Value</h1>
             <p className="mt-3 max-w-[18rem] break-words text-sm leading-6 text-slate-400 sm:max-w-3xl">
-              Value means positive EV and positive edge. If neither exists, passing is the value decision.
+              Value means positive EV and positive edge. Below-policy rows are separated as AI Leans, Watchlist or Avoid.
             </p>
           </div>
           <label className="inline-flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm font-bold">
@@ -113,7 +127,7 @@ export default function BestValueTool() {
         ) : null}
 
         <section className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Summary label="Current Markets Analyzed" value={data?.summary.candidatesScanned ?? 0} />
+          <Summary label="Markets Ranked" value={data?.summary.candidatesReturned ?? 0} />
           <Summary label="Positive Value" value={data?.summary.positiveValueCount ?? data?.summary.positiveValueCandidates ?? 0} />
           <Summary label="Official Picks" value={data?.summary.officialPickCount ?? 0} />
           <Summary label="Provider Calls" value="0" />
@@ -138,8 +152,8 @@ export default function BestValueTool() {
           </section>
         ) : (data?.opportunities ?? []).length === 0 ? (
           <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
-            <h2 className="text-2xl font-black">No Positive Value Available Today.</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-400">The current board can still be analyzed, but no remaining candidate has both positive EV and positive edge. Passing is currently the highest expected-value decision.</p>
+            <h2 className="text-2xl font-black">No opportunities available.</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-400">No eligible games currently have grounded odds and model probabilities. This page is not hiding official picks; there is no ranked input to show.</p>
           </section>
         ) : (
           <section className="grid gap-4">
@@ -147,12 +161,17 @@ export default function BestValueTool() {
               <article key={item.predictionId} className="min-w-0 rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
                 <div className="grid min-w-0 gap-5 lg:grid-cols-3">
                   <div className="min-w-0">
-                    <span className="rounded-full border border-amber-500/40 bg-amber-950/20 px-3 py-1 text-xs font-black text-amber-100">
-                      {item.valueDisplay}
+                    <span className={`rounded-full border px-3 py-1 text-xs font-black ${statusClass(item)}`}>
+                      {item.statusLabel ?? item.valueDisplay}
                     </span>
                     <h2 className="mt-3 break-words text-2xl font-black">{selectionLabel(item)}</h2>
                     <p className="mt-1 break-words text-sm text-slate-400">{item.marketLabel} | {item.matchup}</p>
                     <p className="mt-3 text-sm font-bold text-slate-300">{item.officialDisplay}</p>
+                    {item.informationalWarning ? (
+                      <p className="mt-3 whitespace-pre-line rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 text-xs font-black text-amber-100">
+                        {item.informationalWarning}
+                      </p>
+                    ) : null}
                   </div>
                   <div className="grid min-w-0 grid-cols-1 gap-3 text-center sm:grid-cols-3">
                     <Metric label="EV" value={pct(item.expectedValue)} color={tone(item.expectedValue)} />
@@ -166,6 +185,11 @@ export default function BestValueTool() {
                     <Metric label="Reliability" value={item.reliability} />
                   </div>
                 </div>
+                {item.reasonNotOfficial ? (
+                  <p className="mt-4 text-sm leading-6 text-amber-100">
+                    Reason not official: {item.reasonNotOfficial}
+                  </p>
+                ) : null}
                 <details className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
                   <summary className="cursor-pointer text-sm font-black">Advanced Details</summary>
                   <div className="mt-4 grid gap-3 md:grid-cols-4">

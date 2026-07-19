@@ -18,6 +18,11 @@ type ResultCard = {
   priceLabel: string
   plainAnswer: string
   officialEligibility: string
+  reasonNotOfficial?: string
+  informationalWarning?: string | null
+  strengths?: string[]
+  weaknesses?: string[]
+  missingData?: string[]
   quarantine: string
 }
 
@@ -34,6 +39,7 @@ type Response = {
     officialPickStatus: string
     previewOrQuarantined: boolean
     noValidResult: boolean
+    informationalFallbackUsed?: boolean
   }
   results?: ResultCard[]
   candidates?: ResultCard[]
@@ -89,6 +95,14 @@ function resultLabel(item: ResultCard) {
   if (/run line/i.test(item.market) && !/run line/i.test(title)) return `${title} Run Line`
   if (/total/i.test(item.market) && !/total/i.test(title)) return `${title} Total`
   return title
+}
+
+function statusClass(value: string) {
+  const normalized = value.toLowerCase()
+  if (normalized.includes('official')) return 'border-emerald-500/40 bg-emerald-950/20 text-emerald-200'
+  if (normalized.includes('watchlist')) return 'border-sky-500/40 bg-sky-950/20 text-sky-200'
+  if (normalized.includes('avoid')) return 'border-red-500/40 bg-red-950/20 text-red-200'
+  return 'border-amber-500/40 bg-amber-950/20 text-amber-100'
 }
 
 export default function AiBetFinderTool() {
@@ -164,6 +178,11 @@ export default function AiBetFinderTool() {
             <section className="min-w-0 rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-500">{data.action}{data.intent ? ` | ${data.intent}` : ''}</p>
               <h2 className="mt-2 break-words text-2xl font-black">{data.summary}</h2>
+              {data.meta?.informationalFallbackUsed ? (
+                <p className="mt-3 rounded-xl border border-sky-500/30 bg-sky-950/20 p-3 text-sm text-sky-100">
+                  Current Board has no active official candidates. Showing AI Leans, Watchlist and Avoid market intelligence for personal review only.
+                </p>
+              ) : null}
               <div className="mt-5 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <Meta label="Board" value={data.meta?.boardMode ?? 'n/a'} />
                 <Meta label="Current Markets Analyzed" value={String(data.meta?.candidatesScanned ?? 0)} />
@@ -177,12 +196,17 @@ export default function AiBetFinderTool() {
                 <article key={item.id} className="min-w-0 rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
                   <div className="grid min-w-0 gap-5 lg:grid-cols-3">
                     <div className="min-w-0">
-                      <span className="rounded-full border border-amber-500/40 bg-amber-950/20 px-3 py-1 text-xs font-black text-amber-100">
+                      <span className={`rounded-full border px-3 py-1 text-xs font-black ${statusClass(item.plainAnswer)}`}>
                         {item.plainAnswer}
                       </span>
                       <h3 className="mt-3 break-words text-2xl font-black">{resultLabel(item)}</h3>
                       <p className="mt-1 break-words text-sm text-slate-400">{item.market} | {item.matchup}</p>
                       <p className="mt-3 text-sm font-bold text-slate-300">{item.officialEligibility}</p>
+                      {item.informationalWarning ? (
+                        <p className="mt-3 whitespace-pre-line rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 text-xs font-black text-amber-100">
+                          {item.informationalWarning}
+                        </p>
+                      ) : null}
                     </div>
                     <div className="grid min-w-0 grid-cols-1 gap-3 text-center sm:grid-cols-3">
                       <Meta label="Model" value={pct(item.modelProbability)} />
@@ -195,6 +219,14 @@ export default function AiBetFinderTool() {
                       <Meta label="Confidence" value={pct(item.confidence)} />
                       <Meta label="Reliability" value={item.reliability} />
                     </div>
+                  </div>
+                  {item.reasonNotOfficial ? (
+                    <p className="mt-4 text-sm leading-6 text-amber-100">Reason not official: {item.reasonNotOfficial}</p>
+                  ) : null}
+                  <div className="mt-4 grid gap-3 md:grid-cols-3">
+                    <Info title="Strengths" items={item.strengths ?? []} />
+                    <Info title="Weaknesses" items={item.weaknesses ?? []} />
+                    <Info title="Missing Data" items={item.missingData ?? []} />
                   </div>
                 </article>
               ))}

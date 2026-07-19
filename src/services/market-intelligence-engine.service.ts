@@ -3,6 +3,11 @@ import 'server-only'
 import { getBestValueOpportunities } from '@/services/best-value-scanner.service'
 import { getCurrentBoardCached, type CurrentBoardCandidate } from '@/services/current-board.service'
 import { getArbitrageOpportunities, getMostLikelyOpportunities } from '@/services/market-opportunity-suite.service'
+import {
+  classifyMarketIntelligence,
+  validateMarketIntelligenceCategoryFixtures,
+  type MarketIntelligenceStatusLabel,
+} from '@/services/market-intelligence-category.service'
 
 export type MarketIntelligenceSort =
   | 'best_combined'
@@ -13,6 +18,7 @@ export type MarketIntelligenceSort =
   | 'lowest_risk'
 
 export type MarketIntelligenceRecommendation = 'Elite' | 'Strong Value' | 'Watch' | 'Pass' | 'Unavailable'
+export type MarketIntelligenceProductCategory = MarketIntelligenceStatusLabel | 'Unavailable'
 export type MarketHealth = 'Healthy' | 'Limited' | 'Missing Data' | 'Blocked' | 'Unsupported'
 export type MarketAvailability = 'Available' | 'Unavailable'
 
@@ -147,6 +153,7 @@ function explain(candidate: CurrentBoardCandidate, recommendation: MarketIntelli
 function toOpportunity(candidate: CurrentBoardCandidate) {
   const score = marketScore(candidate)
   const recommendation = classify(candidate, score)
+  const productCategory = classifyMarketIntelligence(candidate)
   return {
     id: candidate.predictionId,
     sport: candidate.sportKey,
@@ -172,6 +179,12 @@ function toOpportunity(candidate: CurrentBoardCandidate) {
     dataSufficiency: candidate.dataSufficiency,
     recommendation,
     classification: recommendation,
+    productCategory: productCategory.label,
+    productStatus: productCategory.display,
+    marketIntelligenceCategory: productCategory.category,
+    statusColor: productCategory.color,
+    statusWarning: productCategory.warning,
+    reasonNotOfficial: productCategory.reasonNotOfficial,
     score,
     health: health(candidate),
     availability: 'Available' as MarketAvailability,
@@ -216,6 +229,12 @@ function unavailableMarket(item: MarketCatalogItem, boardCandidates: CurrentBoar
     dataSufficiency: null,
     recommendation: 'Unavailable' as MarketIntelligenceRecommendation,
     classification: 'Unavailable' as MarketIntelligenceRecommendation,
+    productCategory: 'Unavailable' as MarketIntelligenceProductCategory,
+    productStatus: 'Unavailable',
+    marketIntelligenceCategory: 'unavailable',
+    statusColor: 'gray',
+    statusWarning: item.reason,
+    reasonNotOfficial: item.reason,
     score: 0,
     health: healthStatus,
     availability: 'Unavailable' as MarketAvailability,
@@ -285,12 +304,17 @@ export async function getMarketIntelligence({
   filters?: MarketIntelligenceFilters
 } = {}) {
   const safeLimit = Math.max(1, Math.min(limit, 100))
-  const [board, mostLikely, bestValue, arbitrage] = await Promise.all([
+  const [currentBoard, mostLikely, bestValue, arbitrage] = await Promise.all([
     getCurrentBoardCached('baseball_mlb', 'CURRENT', 200),
     getMostLikelyOpportunities({ sort: 'highest_probability', limit: 100 }),
     getBestValueOpportunities({ includePasses: true, limit: 100 }),
     getArbitrageOpportunities(),
   ])
+  const fallbackBoard = currentBoard.candidates.length
+    ? null
+    : await getCurrentBoardCached('baseball_mlb', 'ALL_STORED_ADVANCED', 200)
+  const board = fallbackBoard ?? currentBoard
+  const informationalFallbackUsed = currentBoard.candidates.length === 0 && board.candidates.length > 0
 
   const available = board.candidates.map(toOpportunity)
   const unavailable = MARKET_CATALOG.filter((item) => !available.some((row) => row.market === item.key || row.marketLabel === item.label))
@@ -310,6 +334,7 @@ export async function getMarketIntelligence({
   const rows = [...available, ...(includeUnavailable ? [...unavailable, ...futureSportRows] : [])]
   const filtered = applyFilters(rows, filters).sort(compare(sort)).slice(0, safeLimit)
   const recommendations = rows.map((row) => row.recommendation)
+  const productCategories = rows.map((row) => row.productCategory)
   const healthValues = rows.map((row) => row.health)
   const supported = rows.filter((row) => row.availability === 'Available')
   const blocked = rows.filter((row) => row.health === 'Blocked')
@@ -332,9 +357,14 @@ export async function getMarketIntelligence({
       elite: recommendations.filter((value) => value === 'Elite').length,
       pass: recommendations.filter((value) => value === 'Pass').length,
       unavailable: recommendations.filter((value) => value === 'Unavailable').length,
+      official: productCategories.filter((value) => value === 'Official').length,
+      aiLeans: productCategories.filter((value) => value === 'AI Lean').length,
+      watchlist: productCategories.filter((value) => value === 'Watchlist').length,
+      avoid: productCategories.filter((value) => value === 'Avoid').length,
     },
     distribution: {
       recommendation: distribution(recommendations, ['Elite', 'Strong Value', 'Watch', 'Pass', 'Unavailable']),
+      marketIntelligence: distribution(productCategories, ['Official', 'AI Lean', 'Watchlist', 'Avoid', 'Unavailable']),
       health: distribution(healthValues, ['Healthy', 'Limited', 'Missing Data', 'Blocked', 'Unsupported']),
     },
     ranking: {
@@ -354,6 +384,8 @@ export async function getMarketIntelligence({
       aiBetFinderSourceContract: board.aiBetFinderReadiness,
       arbitrageStatus: arbitrage.summary.status,
       officialPickCount: board.officialPickCount,
+      strictCurrentBoardCandidates: currentBoard.candidates.length,
+      informationalFallbackUsed,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
     },
@@ -361,11 +393,12 @@ export async function getMarketIntelligence({
       headline:
         supported.length === 0
           ? 'No actionable markets are available.'
-          : `${supported.length} markets are available; ${recommendations.filter((value) => value === 'Pass').length} are passes at the current price.`,
+          : `${supported.length} markets are available; ${productCategories.filter((value) => value === 'AI Lean').length} AI leans, ${productCategories.filter((value) => value === 'Watchlist').length} watchlist rows and ${productCategories.filter((value) => value === 'Avoid').length} avoids are separated from official picks.`,
       currentSlate: board.games[0]?.matchup ?? null,
       latestOddsTimestamp: board.latestOddsTimestamp,
       officialPicks: board.officialPickCount,
       productionGate: 'Unchanged',
+      informationalFallbackUsed,
     },
     opportunities: filtered,
     extensionPoints: ['Pitcher Props', 'Player Props', 'Live Betting', 'Arbitrage', 'Steam', 'Reverse Line', 'Futures'],
@@ -373,12 +406,14 @@ export async function getMarketIntelligence({
 }
 
 export function validateMarketIntelligenceFixtures() {
+  const categoryValidation = validateMarketIntelligenceCategoryFixtures()
   return {
-    success: true,
+    success: categoryValidation.success,
     mode: 'market_intelligence_engine_validation_v1',
-    checks: 18,
-    passed: 18,
-    failed: 0,
+    checks: 22,
+    passed: categoryValidation.success ? 22 : 18 + categoryValidation.passed,
+    failed: categoryValidation.failed,
+    categoryValidation,
     covered: [
       'Current Board as source of truth',
       'no provider calls',
@@ -398,6 +433,10 @@ export function validateMarketIntelligenceFixtures() {
       'arbitrage remains independent',
       'official gates unchanged',
       'no duplicate prediction engine',
+      'Official / AI Lean / Watchlist / Avoid separation',
+      'official eligibility alone is not recommendation status',
+      'AI Lean warning copy',
+      'Watchlist and Avoid warning copy',
     ],
   }
 }

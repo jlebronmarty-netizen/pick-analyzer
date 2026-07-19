@@ -25,6 +25,10 @@ type WorkbenchBet = {
   status: string
   official: boolean
   preview: boolean
+  marketIntelligenceCategory: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  statusLabel: 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+  informationalWarning?: string | null
+  reasonNotOfficial?: string | null
 }
 
 type SavedBet = {
@@ -37,6 +41,9 @@ type DraftMode = 'preview' | 'official'
 type SortMode = 'rating' | 'probability' | 'value' | 'confidence' | 'risk'
 
 const storageKey = 'pick-analyzer-betting-workbench-v1'
+const aiLeanWarning = "AI LEAN\nThe model slightly favors this outcome, but it did not satisfy Pick Analyzer's production recommendation policy.\nReview at your own discretion."
+const watchlistWarning = 'WATCHLIST\nConditions may improve before game time.'
+const avoidWarning = 'AVOID\nThe model recommends staying away.'
 
 function numberValue(value: unknown, fallback = 0) {
   const number = Number(value)
@@ -45,6 +52,12 @@ function numberValue(value: unknown, fallback = 0) {
 
 function stringValue(value: unknown, fallback = 'n/a') {
   return typeof value === 'string' && value.trim() ? value : fallback
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    : []
 }
 
 function formatOdds(value: number | null) {
@@ -100,6 +113,32 @@ function riskLabel(bet: WorkbenchBet) {
   return bet.risk || 'Review'
 }
 
+function displayCategory(input: {
+  official: boolean
+  edge: number
+  expectedValue: number
+  confidence: number
+  probability: number
+  blockers: string[]
+  missingInformation: string[]
+}) {
+  if (input.official) {
+    return {
+      category: 'official' as const,
+      label: 'Official' as const,
+      warning: null,
+    }
+  }
+  const modelSignal = input.edge > 0 || input.expectedValue > 0 || (input.probability >= 45 && input.confidence >= 45)
+  const clearAvoid = input.expectedValue < -20 || input.edge < -15 || input.confidence < 40
+  const contextPath = [...input.blockers, ...input.missingInformation].join(' ').toLowerCase()
+  if (modelSignal && !clearAvoid) return { category: 'ai_lean' as const, label: 'AI Lean' as const, warning: aiLeanWarning }
+  if (/lineup|injur|bullpen|weather|market|odds|calibration|starter/.test(contextPath) && input.confidence >= 40 && input.probability >= 35) {
+    return { category: 'watchlist' as const, label: 'Watchlist' as const, warning: watchlistWarning }
+  }
+  return { category: 'avoid' as const, label: 'Avoid' as const, warning: avoidWarning }
+}
+
 function modelWhy(bet: WorkbenchBet) {
   if (bet.market === 'Total') return 'Limited market-specific evidence is available for this total. Compare the combined scoring trend, run environment, sportsbook total and missing pitcher/weather/lineup context before treating the under as actionable.'
   if (bet.market === 'Run Line') return `${selectionName(bet)} depends on expected margin, run differential, the price required to cover and opponent scoring strength. Current value blockers still matter.`
@@ -112,6 +151,12 @@ function mapBoardCandidate(candidate: Record<string, unknown>): WorkbenchBet {
   const edge = numberValue(candidate.edge)
   const expectedValue = numberValue(candidate.expectedValue ?? candidate.ev)
   const status = stringValue(candidate.recommendationStatus ?? candidate.semanticLabel, 'ANALYZED')
+  const official = status === 'QUALIFIED' || status === 'BEST_BET_CANDIDATE' || status === 'PLAY_OF_DAY_CANDIDATE'
+  const blockers = stringArray(candidate.blockers)
+  const missingInformation = stringArray(candidate.missingInformation)
+  const probability = numberValue(candidate.probability ?? candidate.modelProbability ?? candidate.rawProbability)
+  const confidence = numberValue(candidate.confidence)
+  const category = displayCategory({ official, edge, expectedValue, confidence, probability, blockers, missingInformation })
   return {
     id: stringValue(candidate.id ?? candidate.predictionId, `${selection}-${market}`),
     source: stringValue(candidate.boardLabel ?? candidate.source, 'Current Board'),
@@ -120,14 +165,14 @@ function mapBoardCandidate(candidate: Record<string, unknown>): WorkbenchBet {
     selection,
     odds: candidate.odds === null || candidate.americanOdds === null ? null : numberValue(candidate.odds ?? candidate.americanOdds),
     line: candidate.line === null || candidate.line === undefined ? null : numberValue(candidate.line),
-    probability: numberValue(candidate.probability ?? candidate.modelProbability ?? candidate.rawProbability),
+    probability,
     impliedProbability: numberValue(candidate.sportsbookProbability ?? candidate.impliedProbability),
-    confidence: numberValue(candidate.confidence),
+    confidence,
     aiRating: numberValue(candidate.aiRating ?? candidate.rankingScore ?? candidate.confidence),
     edge,
     expectedValue,
     reliability: stringValue(candidate.reliability ?? candidate.reliabilityLabel, 'Limited'),
-    risk: stringValue(candidate.officialEligibility ?? candidate.riskLabel, 'Not officially eligible'),
+    risk: stringValue(candidate.officialEligibility ?? candidate.riskLabel, 'Informational Only'),
     recommendation: stringValue(candidate.semanticLabel ?? candidate.recommendation ?? status, edge > 0 && expectedValue > 0 ? 'MODELED VALUE' : 'NO MODELED VALUE'),
     why: stringValue(candidate.why ?? candidate.reason ?? candidate.summary, ''),
     startTime: typeof candidate.scheduledTime === 'string'
@@ -137,8 +182,14 @@ function mapBoardCandidate(candidate: Record<string, unknown>): WorkbenchBet {
         : null,
     oddsTimestamp: typeof candidate.oddsTimestamp === 'string' ? candidate.oddsTimestamp : null,
     status,
-    official: status === 'QUALIFIED' || status === 'BEST_BET_CANDIDATE' || status === 'PLAY_OF_DAY_CANDIDATE',
+    official,
     preview: true,
+    marketIntelligenceCategory: category.category,
+    statusLabel: category.label,
+    informationalWarning: category.warning,
+    reasonNotOfficial: official
+      ? null
+      : stringValue(candidate.reasonNotOfficial ?? blockers[0] ?? missingInformation[0], edge <= 0 || expectedValue <= 0 ? 'Low or negative EV.' : 'Did not meet production recommendation policy.'),
   }
 }
 
@@ -169,6 +220,8 @@ function mapTopPick(pick: Record<string, unknown>): WorkbenchBet {
     status,
     official: true,
     preview: false,
+    marketIntelligenceCategory: 'official',
+    statusLabel: 'Official',
   }
 }
 
@@ -224,10 +277,15 @@ export default function BettingWorkbenchTool() {
           fetch('/api/predictions/top', { cache: 'no-store' }),
         ])
 
-        const [board, topPicks] = await Promise.all([
+        let [board, topPicks] = await Promise.all([
           boardResponse.json(),
           topPicksResponse.json(),
         ])
+        if (!safeArray(board.candidates).length) {
+          const fallbackResponse = await fetch('/api/current-board?mode=all_stored_data&limit=100', { cache: 'no-store' })
+          const fallback = await fallbackResponse.json()
+          if (safeArray(fallback.candidates).length) board = fallback
+        }
 
         const rows = uniqueBets([
           ...safeArray(board.candidates).map(mapBoardCandidate),
@@ -308,6 +366,13 @@ export default function BettingWorkbenchTool() {
 
         {error ? <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-red-200">{error}</div> : null}
         {loading ? <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-slate-300">Loading Betting Workbench...</div> : null}
+        {!loading && bets.length ? (
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-950/10 p-4 text-sm leading-6 text-amber-100">
+            {bets.some((bet) => bet.official)
+              ? 'Official recommendations are green. AI Leans, Watchlist and Avoid rows are market intelligence only.'
+              : 'No official ticket today. The following AI Leans, Watchlist and Avoid rows are available for personal review only.'}
+          </div>
+        ) : null}
 
         <nav className="flex gap-2 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/60 p-2">
           {['Compare Bets', 'Build Ticket', 'Market Explorer', 'Favorites', 'Saved Bets', 'Notes'].map((tab) => (
@@ -349,7 +414,11 @@ export default function BettingWorkbenchTool() {
             </div>
             <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
               <h3 className="text-xl font-black">Draft Slip</h3>
-              <p className="mt-2 text-sm text-slate-400">{draftMode === 'official' ? 'Using Top Picks only.' : 'Preview mode can include analyzed candidates and official picks.'}</p>
+              <p className="mt-2 text-sm text-slate-400">
+                {draftMode === 'official'
+                  ? 'Using official Top Picks only.'
+                  : 'No ticket is created automatically. Preview mode is personal review only unless a row is marked official.'}
+              </p>
               <div className="mt-4 space-y-3">
                 {ticket.map((bet) => <TicketLeg key={bet.id} bet={bet} />)}
                 {!ticket.length ? <p className="text-sm text-slate-500">No legs selected.</p> : null}
@@ -461,7 +530,9 @@ function BetHeader({ bet }: { bet: WorkbenchBet }) {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full border border-slate-700 px-3 py-1 text-xs font-black text-slate-200">{bet.recommendation}</span>
+        <span className={bet.statusLabel === 'Official' ? 'rounded-full border border-emerald-500/40 bg-emerald-950/20 px-3 py-1 text-xs font-black text-emerald-200' : bet.statusLabel === 'Watchlist' ? 'rounded-full border border-sky-500/40 bg-sky-950/20 px-3 py-1 text-xs font-black text-sky-200' : bet.statusLabel === 'Avoid' ? 'rounded-full border border-red-500/40 bg-red-950/20 px-3 py-1 text-xs font-black text-red-200' : 'rounded-full border border-amber-500/40 bg-amber-950/20 px-3 py-1 text-xs font-black text-amber-100'}>
+          {bet.statusLabel}
+        </span>
         <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-bold text-slate-300">{bet.source}</span>
       </div>
       <h2 className="mt-3 break-words text-2xl font-black text-white">{selectionName(bet)}</h2>
@@ -486,6 +557,14 @@ function BetCard({ bet, onSave, compact = false }: { bet: WorkbenchBet; onSave: 
         <Metric label="Line" value={bet.line === null ? 'n/a' : String(bet.line)} />
       </div>
       {!compact ? <p className="mt-4 text-sm leading-6 text-slate-300">{modelWhy(bet)}</p> : null}
+      {bet.informationalWarning ? (
+        <p className="mt-4 whitespace-pre-line rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 text-xs font-black tracking-[0.08em] text-amber-100">
+          {bet.informationalWarning}
+        </p>
+      ) : null}
+      {bet.reasonNotOfficial ? (
+        <p className="mt-3 text-sm leading-6 text-amber-100">Reason not official: {bet.reasonNotOfficial}</p>
+      ) : null}
       <details className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
         <summary className="cursor-pointer text-sm font-black">Advanced Details</summary>
         <div className="mt-4 grid gap-3 md:grid-cols-3">

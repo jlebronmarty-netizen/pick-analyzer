@@ -2,6 +2,7 @@ import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getCurrentBoardCached, mapLegacyBoardMode, type CurrentBoardCandidate } from '@/services/current-board.service'
+import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
 
 type PredictionRow = {
   id: string
@@ -377,6 +378,11 @@ function compareCurrentBoardOpportunity(sort: SortMode) {
 }
 
 function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate) {
+  const official = candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
+  const classification = classifyMarketIntelligence(candidate)
+  const reasonNotOfficial = official
+    ? null
+    : classification.reasonNotOfficial
   return {
     id: candidate.predictionId,
     sportKey: candidate.sportKey,
@@ -413,9 +419,18 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     semanticLabel: candidate.semanticLabel,
     probabilityOrigin: candidate.probabilityOrigin,
     officialEligibility:
-      candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
+      official
         ? 'ELIGIBLE_FOR_OFFICIAL_REVIEW'
         : 'NOT OFFICIALLY ELIGIBLE',
+    marketIntelligenceCategory: classification.category,
+    opportunityCategory: classification.label,
+    statusLabel: classification.display,
+    informationalWarning: official
+      ? null
+      : classification.warning,
+    reasonNotOfficial,
+    strengths: classification.strengths,
+    weaknesses: classification.weaknesses,
     calibrationStatus: candidate.calibrationStatus,
     modelVersion: candidate.modelVersion,
     featureSetVersion: candidate.featureSetVersion,
@@ -435,7 +450,7 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     criticalDataCompleteness: candidate.criticalDataCompleteness ?? null,
     fairOdds: fairAmericanFromProbability(candidate.rawProbability),
     actionability:
-      candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
+      official
         ? 'official_review_candidate'
         : candidate.expectedValue > 0
           ? 'preview_value_only_not_official'
@@ -460,6 +475,19 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
 }
 
 type CanonicalProbabilityCard = ReturnType<typeof currentBoardCandidateToMostLikelyCard>
+
+function puertoRicoTodayStartMs() {
+  const localDate = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  return new Date(`${localDate}T04:00:00.000Z`).getTime()
+}
+
+function currentOrFutureInformational(cards: CanonicalProbabilityCard[]) {
+  const todayStart = puertoRicoTodayStartMs()
+  return cards.filter((card) => {
+    const startMs = card.startTime ? new Date(card.startTime).getTime() : Number.NaN
+    return Number.isFinite(startMs) && startMs >= todayStart
+  })
+}
 
 function topPickFrom(rows: CanonicalProbabilityCard[]) {
   const official = rows.find((row) => row.officialEligibility === 'ELIGIBLE_FOR_OFFICIAL_REVIEW')
@@ -673,16 +701,34 @@ export async function getMostLikelyOpportunities({
   mode?: BoardMode
 } = {}) {
   const safeLimit = Math.max(1, Math.min(limit, 100))
-  const board = await getCurrentBoardCached(
+  let board = await getCurrentBoardCached(
     'baseball_mlb',
     mapLegacyBoardMode(mode),
     200
   )
-  const rows = board.candidates
+  let fallbackUsed = false
+  let rows = board.candidates
     .filter((candidate) => !['fallback', 'unavailable'].includes(candidate.probabilityOrigin))
     .map(currentBoardCandidateToMostLikelyCard)
     .sort(compareCurrentBoardOpportunity(sort))
     .slice(0, safeLimit)
+
+  if (rows.length === 0 && mode === 'current_board') {
+    const fallbackBoard = await getCurrentBoardCached('baseball_mlb', 'ALL_STORED_ADVANCED', 200)
+    const fallbackRows = currentOrFutureInformational(
+      fallbackBoard.candidates
+        .filter((candidate) => !['fallback', 'unavailable'].includes(candidate.probabilityOrigin))
+        .map(currentBoardCandidateToMostLikelyCard)
+    )
+      .sort(compareCurrentBoardOpportunity(sort))
+      .slice(0, safeLimit)
+    if (fallbackRows.length) {
+      board = fallbackBoard
+      rows = fallbackRows
+      fallbackUsed = true
+    }
+  }
+
   const probabilityRankedRows = [...rows].sort(compareCurrentBoardOpportunity('highest_probability'))
   const topPick = topPickFrom(probabilityRankedRows)
   const mostLikelyMoneyline = mostLikelyMoneylineFrom(probabilityRankedRows)
@@ -776,6 +822,8 @@ export async function getMostLikelyOpportunities({
           board.excludedRowSummary.exclusionReasonCounts.ALTERNATE_MARKET,
       },
       warning: 'High probability does not always mean good betting value.',
+      informationalFallbackUsed: fallbackUsed,
+      displayMode: fallbackUsed ? 'informational_rankings_after_current_board_empty' : 'current_board_rankings',
     },
     topPick,
     highestProbabilitySupportedOutcome: topPick.candidate,

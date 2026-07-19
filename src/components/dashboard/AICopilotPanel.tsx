@@ -260,7 +260,7 @@ export default function AICopilotPanel() {
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs text-slate-400">Picks Analyzed</p>
+          <p className="text-xs text-slate-400">Picks Reviewed</p>
           <p className="mt-1 text-2xl font-bold text-white">{data.count}</p>
         </div>
 

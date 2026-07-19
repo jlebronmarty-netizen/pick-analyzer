@@ -1,6 +1,6 @@
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import DashboardSection from '@/components/dashboard/DashboardSection'
-import ProductTodayPanel from '@/components/dashboard/ProductTodayPanel'
+import UserTodayPanel from '@/components/dashboard/UserTodayPanel'
 import DashboardDeveloperGroups from '@/components/dashboard/DashboardDeveloperGroups'
 
 export default function DashboardPage() {
@@ -8,11 +8,11 @@ export default function DashboardPage() {
     <DashboardShell>
       <DashboardSection
         id="today"
-        eyebrow="Today"
-        title="Should I Bet Today?"
-        description="A concise AI briefing, current MLB board, daily timeline and system health."
+        eyebrow="User Mode"
+        title="Today"
+        description="A simple betting briefing built for a 10-second read."
       >
-        <ProductTodayPanel />
+        <UserTodayPanel />
       </DashboardSection>
       <DashboardDeveloperGroups />
     </DashboardShell>

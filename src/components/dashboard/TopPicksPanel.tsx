@@ -116,6 +116,11 @@ type BestBetToday = {
   stadiumId: string | null
   score: number
   official: boolean
+  marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  productCategory?: 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+  productStatus?: string
+  statusWarning?: string | null
+  reasonNotOfficial?: string | null
   recommendationPolicyStatus: string
   drivers: string[]
   riskFactors: string[]
@@ -176,6 +181,13 @@ function opportunityLabel(score: number) {
   if (score >= 70) return 'Strong Opportunity'
   if (score >= 55) return 'Worth Watching'
   return 'Needs More Proof'
+}
+
+function categoryClass(category?: BestBetToday['marketIntelligenceCategory']) {
+  if (category === 'official') return 'bg-emerald-500/15 text-emerald-300'
+  if (category === 'watchlist') return 'bg-blue-500/15 text-blue-200'
+  if (category === 'avoid') return 'bg-red-500/15 text-red-200'
+  return 'bg-amber-500/15 text-amber-200'
 }
 
 function scoreClass(value?: number) {
@@ -376,7 +388,7 @@ function PicksColumn({
 
       {picks.length === 0 ? (
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 text-sm text-slate-400">
-          No bets worth recommending right now.
+          No official recommendations in this column. Informational rankings remain available for personal review when grounded candidates exist.
         </div>
       ) : (
         <div className="space-y-3">
@@ -390,13 +402,15 @@ function PicksColumn({
 }
 
 function BestBetsTodayCard({ bet }: { bet: BestBetToday }) {
+  const status = bet.productStatus ?? (bet.official ? 'Official' : 'AI Lean - not a recommendation')
+  const category = bet.productCategory ?? (bet.official ? 'Official' : 'AI Lean')
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className={bet.official ? 'rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-black text-emerald-300' : 'rounded-full bg-amber-500/15 px-3 py-1 text-xs font-black text-amber-200'}>
-              {bet.official ? 'Officially Recommended' : 'Informational Only'}
+            <span className={`rounded-full px-3 py-1 text-xs font-black ${categoryClass(bet.marketIntelligenceCategory)}`}>
+              {status}
             </span>
             <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-bold text-slate-300">
               Score {bet.score.toFixed(2)}
@@ -417,6 +431,12 @@ function BestBetsTodayCard({ bet }: { bet: BestBetToday }) {
           <p className="text-xs text-slate-400">{bet.sportsbook}</p>
         </div>
       </div>
+
+      {bet.statusWarning && (
+        <div className="mt-4 whitespace-pre-line rounded-lg border border-slate-700 bg-slate-900/70 p-3 text-xs font-semibold leading-5 text-slate-200">
+          {bet.statusWarning}
+        </div>
+      )}
 
       <div className="mt-4 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
         <Detail label="Model" value={formatPercent(bet.modelProbability)} />
@@ -439,9 +459,11 @@ function BestBetsTodayCard({ bet }: { bet: BestBetToday }) {
           </ul>
         </div>
         <div className="rounded-lg bg-slate-900/70 p-3">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Why it is blocked</p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+            {category === 'Official' ? 'Risk notes' : 'Why it is not official'}
+          </p>
           <ul className="mt-2 space-y-1 text-slate-300">
-            {(bet.riskFactors.length ? bet.riskFactors : ['No additional risk note.']).slice(0, 4).map((item) => (
+            {(bet.reasonNotOfficial ? [bet.reasonNotOfficial, ...bet.riskFactors] : bet.riskFactors.length ? bet.riskFactors : ['No additional risk note.']).slice(0, 4).map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
@@ -464,7 +486,7 @@ function BestBetsTodaySection({ data }: { data: TopPicksResponse }) {
           </p>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
             {notRecommended
-              ? 'No candidate passed official gates. These are the strongest current informational options with blockers shown.'
+              ? 'No candidate passed official gates. These are the strongest current AI Leans, Watchlist and Avoid market intelligence rows with blockers shown.'
               : 'Official gates passed. These are the strongest bets from the current supported board.'}
           </p>
         </div>

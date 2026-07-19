@@ -6,7 +6,12 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "basketball:history": "node scripts/basketball-cli.js history",
+    "basketball:sync": "node scripts/basketball-cli.js sync",
+    "basketball:validate": "node scripts/basketball-cli.js validate",
+    "basketball:export": "node scripts/basketball-cli.js export",
+    "basketball:import": "node scripts/basketball-cli.js import"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

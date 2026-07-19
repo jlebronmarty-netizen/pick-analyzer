@@ -1,24 +1,13 @@
-import { NextResponse } from 'next/server'
-import {
-  getBsnBasketballKnowledgeEngine,
-  getBsnTeamIntelligenceReadiness,
-} from '@/services/bsn-platform.service'
+import { NextRequest, NextResponse } from 'next/server'
+import { getBsnIntelligenceEngine, validateBsnIntelligenceEngine } from '@/services/bsn-intelligence-engine.service'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const [teamIntelligence, knowledgeEngine] = await Promise.all([
-      getBsnTeamIntelligenceReadiness(),
-      Promise.resolve(getBsnBasketballKnowledgeEngine()),
-    ])
-
-    return NextResponse.json({
-      success: true,
-      mode: 'bsn_intelligence_bundle_v1',
-      generatedAt: new Date().toISOString(),
-      providerCallsMade: 0,
-      teamIntelligence,
-      knowledgeEngine,
-    })
+    const includeValidation = request.nextUrl.searchParams.get('includeValidation') === 'true'
+    const data = await getBsnIntelligenceEngine()
+    if (!includeValidation) return NextResponse.json(data)
+    const fixtureValidation = await validateBsnIntelligenceEngine()
+    return NextResponse.json({ ...data, fixtureValidation })
   } catch (error) {
     return NextResponse.json(
       {

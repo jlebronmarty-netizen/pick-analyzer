@@ -1,7 +1,12 @@
-import 'server-only'
+﻿import 'server-only'
 
 import { SportKey } from '@/config/sports.config'
 import { MarketKey } from '@/types/multi-sport'
+import {
+  OFFICIAL_BSN_HOMEPAGE_CONNECTOR_ID,
+  OFFICIAL_BSN_HOMEPAGE_TTL_SECONDS,
+  OFFICIAL_BSN_HOMEPAGE_URL,
+} from '@/services/basketball/connectors/official-bsn-homepage.connector'
 
 export type BasketballLeagueKey = 'bsn_pr' | 'nba' | 'ncaa_mbb' | 'euroleague' | 'fiba' | 'wnba' | string
 export type BasketballSourceType = 'official' | 'future_api' | 'csv_import' | 'manual_entry' | 'future_provider'
@@ -114,11 +119,53 @@ function connector(
 
 const BSN_SOURCE_CONNECTORS: BasketballSourceConnector[] = [
   connector({
+    id: OFFICIAL_BSN_HOMEPAGE_CONNECTOR_ID,
+    type: 'official',
+    displayName: 'Official BSN homepage standings connector',
+    status: 'ready',
+    priority: 1,
+    approvedForLiveImport: true,
+    approvedForProductionPredictions: false,
+    providerCallsRequired: true,
+    writePathEnabled: true,
+    capabilities: {
+      teams: 'ready',
+      schedule: 'partial',
+      results: 'ready',
+      standings: 'ready',
+      players: 'partial',
+      venues: 'blocked',
+      statistics: 'partial',
+      quarter_scores: 'blocked',
+      first_half: 'blocked',
+      availability: 'blocked',
+      odds: 'blocked',
+      playoffs: 'blocked',
+      series: 'blocked',
+    },
+    ttl: {
+      teams: `${OFFICIAL_BSN_HOMEPAGE_TTL_SECONDS}s`,
+      standings: `${OFFICIAL_BSN_HOMEPAGE_TTL_SECONDS}s`,
+    },
+    cost: 'free_public_surface',
+    reliability: 'official_homepage_snapshot_no_documented_api',
+    legalAccess: 'single_cached_public_homepage_snapshot_only_no_api_bypass',
+    maintenanceBurden: 'medium_without_api_contract',
+    limitations: [
+      'Supports one cached bounded public official snapshot across homepage, team pages and the players page.',
+      'Acquires standings, teams, recent completed result identifiers, a public player-list sample and limited team leaders; boxscores, quarter scores, odds, play-by-play and advanced metrics remain unavailable.',
+      'Not approved for production predictions because verified events, odds and outcome history are still missing.',
+    ],
+    evidence: [
+      `Official BSN homepage exposes current standings and team names at ${OFFICIAL_BSN_HOMEPAGE_URL}.`,
+    ],
+  }),
+  connector({
     id: 'official_bsn',
     type: 'official',
     displayName: 'Official BSN digital properties',
     status: 'partial',
-    priority: 1,
+    priority: 2,
     approvedForLiveImport: false,
     approvedForProductionPredictions: false,
     providerCallsRequired: false,

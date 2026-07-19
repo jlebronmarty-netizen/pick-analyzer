@@ -8,6 +8,9 @@ type Opportunity = {
   marketLabel: string
   selection: string | null
   recommendation: string
+  productCategory?: string
+  productStatus?: string
+  statusWarning?: string | null
   score: number
   health: string
   probability: number | null
@@ -30,6 +33,7 @@ type MarketIntelligenceResponse = {
   }
   distribution: {
     recommendation: Record<string, number>
+    marketIntelligence?: Record<string, number>
     health: Record<string, number>
   }
   summary: {
@@ -106,7 +110,7 @@ export default function MarketIntelligenceSummaryPanel() {
       ) : null}
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Stat label="Current Markets Analyzed" value={supportedMarkets} />
+        <Stat label="Current Market Review" value={supportedMarkets} />
         <Stat label="Additional Market Types Monitored" value={unavailableMarkets} />
         <Stat label="Supported Markets" value={supportedMarkets} />
         <Stat label="Unavailable Market Types" value={unavailableMarkets} />
@@ -123,6 +127,14 @@ export default function MarketIntelligenceSummaryPanel() {
               </div>
             ))}
           </div>
+          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+            {Object.entries(data?.distribution.marketIntelligence ?? {}).map(([label, value]) => (
+              <div key={label} className="flex items-center justify-between rounded-xl bg-slate-900/70 px-3 py-2">
+                <span className="text-slate-300">{label}</span>
+                <span className="font-black text-white">{value}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
@@ -132,12 +144,13 @@ export default function MarketIntelligenceSummaryPanel() {
               <div key={row.id} className="rounded-xl bg-slate-900/70 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-bold text-white">{row.selection ?? row.marketLabel}</p>
-                  <span className="rounded-full bg-slate-800 px-2 py-1 text-xs font-black text-emerald-200">{row.recommendation}</span>
+                  <span className="rounded-full bg-slate-800 px-2 py-1 text-xs font-black text-sky-200">{row.productStatus ?? row.recommendation}</span>
                 </div>
                 <p className="mt-1 text-xs text-slate-400">{row.game ?? row.reason}</p>
                 <p className="mt-2 text-xs text-slate-500">
-                  Market Score {Math.round(row.score)}/100 | Data Status {row.health === 'Missing Data' ? 'Limited' : row.health} | Verdict {row.recommendation}
+                  Market Score {Math.round(row.score)}/100 | Data Status {row.health === 'Missing Data' ? 'Limited' : row.health} | Verdict {row.productCategory ?? row.recommendation}
                 </p>
+                {row.statusWarning ? <p className="mt-2 whitespace-pre-line text-xs text-slate-400">{row.statusWarning}</p> : null}
               </div>
             ))}
             {!loading && !topRows.length ? <p className="text-sm text-slate-400">No markets need attention right now.</p> : null}

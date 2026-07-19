@@ -24,11 +24,11 @@ const navItems = [
 ]
 
 const compactNavItems = [
-  { id: 'today', label: 'Today', icon: '01' },
-  { id: 'overview', label: 'Developer Mode', icon: '02' },
-  { id: 'model-lab', label: 'Model Lab', icon: '03' },
-  { id: 'data-operations', label: 'Data Ops', icon: '04' },
-  { id: 'advanced', label: 'Advanced', icon: '05' },
+  { id: 'today', label: 'User Mode', icon: '01' },
+  { id: 'overview', label: 'Advanced Overview', icon: '02' },
+  { id: 'model-lab', label: 'Model', icon: '03' },
+  { id: 'data-operations', label: 'Data', icon: '04' },
+  { id: 'advanced', label: 'Administration', icon: '05' },
 ]
 
 const toolNavItems = [
@@ -59,7 +59,7 @@ export default function DashboardShell({
               </h1>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                A professional daily answer to whether there is a bet worth making.
+                A clear daily answer to whether there is a bet worth making.
               </p>
             </div>
 
@@ -127,7 +127,7 @@ export default function DashboardShell({
                   </span>
 
                   <span className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 lg:inline-flex">
-                    OFFICIAL PICKS STRICT
+                    OFFICIAL PICKS ONLY
                   </span>
 
                   <a

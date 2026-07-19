@@ -10,6 +10,86 @@ Provider-dependent modules such as historical reconciliation execution, injuries
 
 ## Completed
 
+### BSN Intelligence Engine V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/bsn-intelligence-engine.service.ts`, `/api/bsn/intelligence`, `/api/bsn/team/[id]`, `/api/bsn/compare`, `/api/bsn/power-rankings`, `/api/bsn/momentum`, `/api/bsn/features` and `src/components/dashboard/BsnIntelligencePanel.tsx`.
+
+Note: This module turns stored BSN data into reusable basketball intelligence without enabling betting predictions. It derives team profiles, player profiles, standings context, recent form, momentum, consistency, strength, power rankings, comparison advantages, league knowledge and computed BSN feature records only from validated normalized rows. Missing player game logs, historical baselines, durable feature-store persistence, odds and prediction-ready inputs stay unavailable rather than estimated. It reuses the Basketball Data Platform, Historical Builder, Historical Import Engine contracts, Feature Store Core, Shared Prediction SDK, Provider Registry and validation patterns. No provider calls, writes, Current Board changes, official-pick changes, thresholds, champion rows, V7 promotion, settlement, learning or MLB behavior changed.
+
+### Premium AI Sports Intelligence Product Experience V1
+
+Status: Completed and build verified.
+
+Evidence: `src/components/dashboard/UserTodayPanel.tsx`, `src/components/dashboard/DashboardDeveloperGroups.tsx`, `/dashboard`.
+
+Note: This is a presentation-only dashboard sprint. User Mode now opens with the betting decision first, followed by Market Mood, Updated time, Official Picks, Games Today and a primary View Opportunities action. Category cards, Top AI Opportunity, AI Confidence, Today's Games, Today at a Glance and System Health were simplified into premium, scan-first cards using only existing response fields. Requested explanatory copy and legacy labels were removed from the primary experience. Advanced Details remain grouped under Overview, Markets, Model, Historical, Data, Provider, Settlement, Learning, Calibration and Administration. No models, thresholds, champion rows, V7 promotion, provider behavior, Current Board logic, settlement, learning or database writes changed.
+
+### BSN Data Completion Mission V1
+
+Status: Completed with public-source limitations and build verified.
+
+Evidence: `src/services/basketball/connectors/official-bsn-homepage.connector.ts`, `src/services/basketball/acquisition/bsn-acquisition-engine.ts`, `/api/basketball/bsn/acquisition`, `/api/basketball/bsn/data-coverage`, `src/components/dashboard/BasketballDataCoveragePanel.tsx`.
+
+Note: The existing official BSN connector was deepened in place. It now discovers and acquires all supported data exposed by bounded public official pages: teams, standings, recent completed results, player-list sample and limited team leaders. It adds cache, retry, checkpoint/resume metadata, rate spacing, connector health and typed unavailable responses. Historical reconstruction continues for 2026 while real public data exists and stops for prior seasons without a permissioned archive. Knowledge/Feature Store handoff remains limited to what completed games can support; no fabricated quarter scores, boxscores, play-by-play, odds, officials, attendance or advanced metrics were introduced. No prediction model, provider policy, recommendation threshold, champion/challenger row, V7 promotion, settlement, learning or calibration behavior changed.
+
+### Product Polish and Visual Dashboard V2
+
+Status: Completed and build verified.
+
+Evidence: `src/components/dashboard/UserTodayPanel.tsx`, `src/components/dashboard/DashboardDeveloperGroups.tsx`, `/dashboard`.
+
+Note: User Mode was redesigned around one fast visual read: AI Market Outlook, deterministic market sentiment, four category infographic cards, Top AI Opportunity progress meters, compact game cards, Today at a Glance readiness states and one System Health card. Market sentiment mapping is display-only: Official Picks -> AGGRESSIVE, AI Leans/ready analysis -> SELECTIVE, waiting odds/empty freshness -> WAITING, otherwise DEFENSIVE. Advanced Details are now one dashboard area with collapsible Overview, Markets, Model, Historical Performance, Data, Provider, Settlement, Learning, Calibration and Administration groups. Main User Mode still fetches the existing Today and Most Likely contracts only; advanced panels remain lazy/collapsed. No model, provider, recommendation, settlement, learning, threshold, champion/challenger, V7 or data-mutation behavior changed.
+
+### BSN Acquisition Engine V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/basketball/connectors/official-bsn-homepage.connector.ts`, `src/services/basketball/acquisition/bsn-acquisition-engine.ts`, `/api/basketball/bsn/acquisition`, `sports_teams`, `sport_standings`, `provider_entity_mappings` and `sports_sync_jobs`.
+
+Note: The first real BSN connector uses a single cached official homepage standings snapshot. It supports only teams and standings, imports only a small standings sample when explicitly confirmed, preserves source URL/fetched timestamp/provider IDs/canonical IDs, and keeps schedule, results, game IDs, players, statistics, boxscores, play-by-play, officials, attendance, arena, advanced metrics and odds typed as unavailable. Current Board and official-pick impact remain none because no events, verified odds, feature snapshots, predictions or recommendation-policy outputs are created.
+
+### Professional AI Sports Intelligence Dashboard UX V1
+
+Status: Completed and build verified.
+
+Evidence: `src/components/dashboard/UserTodayPanel.tsx`, `src/app/dashboard/page.tsx`, `src/components/dashboard/DashboardDeveloperGroups.tsx`, `src/components/dashboard/DeveloperDetails.tsx`, `src/components/dashboard/DashboardShell.tsx`.
+
+Note: The default dashboard now separates User Mode from Advanced Details. User Mode emphasizes a 10-second betting decision, Official Picks, AI Leans, Watchlist, Avoid, top AI opportunity, simplified games, progress indicators and a simple system health state. Technical panels remain available behind collapsed Advanced Details sections. This was presentation-only: no prediction models, thresholds, settlement, learning, AI calculations, champion rows or provider behavior were changed.
+
+### BSN Historical Reconstruction V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/basketball/history/bsn-historical-reconstruction.ts`, `/api/basketball/bsn/historical-reconstruction`, `src/services/basketball/history/historical-builder.ts`, `src/services/basketball-source-framework.service.ts`, `src/services/bsn-platform.service.ts`, `scripts/basketball-cli.js`.
+
+Note: This module uses the Basketball Data Platform rather than creating another platform or import engine. It discovers BSN connector capabilities, inventories seasons from existing normalized and legacy storage, composes the Historical Builder workflow, and reports reconstruction, coverage, missing datasets, validation, Feature Store and Prediction SDK compatibility. No provider calls, writes, scraping, fabricated values, official-pick changes, champion mutation, threshold changes, settlement changes or learning changes were introduced.
+
+### Basketball Data Platform V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/basketball/`, `/api/basketball/platform`, `scripts/basketball-cli.js`, `package.json`, `src/services/basketball-source-framework.service.ts`, `src/services/historical-import-engine.service.ts`, `src/services/feature-store-core.service.ts` and `src/services/sport-prediction-engine-sdk.service.ts`.
+
+Note: This is the generic basketball data infrastructure layer for BSN and future basketball leagues, not a scraper and not a one-off importer. It defines connector-first acquisition contracts, typed unsupported capability behavior, canonical basketball entities with stable IDs, normalization, data quality, reconciliation, historical builder checkpoints, knowledge generation plans, Feature Store handoffs, Prediction SDK handoffs, CLI entry points and deterministic validation. Existing Pick Analyzer services remain the system of record for provider registry, historical import, Feature Store and prediction output. No provider calls, writes, official-pick changes, champion mutation, threshold changes, settlement changes or learning changes were introduced.
+
+### AI Market Intelligence Category Expansion V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/market-intelligence-category.service.ts`, `src/services/dashboard-today.service.ts`, `src/services/market-opportunity-suite.service.ts`, `src/services/best-value-scanner.service.ts`, `src/services/ai-bet-finder.service.ts`, `src/services/market-intelligence-engine.service.ts`, `src/services/best-bets-today.service.ts`, `src/components/dashboard/ProductTodayPanel.tsx`, `src/components/dashboard/MarketIntelligenceSummaryPanel.tsx`, `src/components/dashboard/TopPicksPanel.tsx`, `src/components/market-opportunities/MostLikelyTool.tsx`, `src/components/market-opportunities/BestValueTool.tsx`, `src/components/market-opportunities/AiBetFinderTool.tsx` and `src/components/market-opportunities/BettingWorkbenchTool.tsx`.
+
+Note: Stored Current Board candidates now drive four independent product categories: Official, AI Lean, Watchlist and Avoid. Non-official rows are ranked as market intelligence only, include required caution copy and reason-not-official explanations, and remain excluded from official recommendation/performance semantics. Category counters and empty independent track-record contracts are exposed without settlement-policy changes. No prediction model, V7/champion state, threshold, settlement or learning behavior was changed.
+
+### Official Vs Informational Ranking Separation V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/market-opportunity-suite.service.ts`, `src/services/best-value-scanner.service.ts`, `src/services/ai-bet-finder.service.ts`, `src/components/market-opportunities/MostLikelyTool.tsx`, `src/components/market-opportunities/BestValueTool.tsx`, `src/components/market-opportunities/AiBetFinderTool.tsx`, `src/components/market-opportunities/BettingWorkbenchTool.tsx` and `src/components/dashboard/TopPicksPanel.tsx`.
+
+Note: Most Likely, Best Value, AI Bet Finder and Betting Workbench now continue to provide display-only informational rankings when the strict Current Board has no official/current rows but stored current-day candidates exist. Labels are mutually exclusive across Official Recommendation, Informational Only and Avoid, non-official opportunities include the required warning and reason-not-official explanation, and official-pick columns clarify that empty official recommendations are not empty informational analysis. Prediction models, V7, champion rows, official thresholds, settlement, learning and confidence calculations remain unchanged.
+
 ### Dashboard Unification, Performance And Slate Consistency V1
 
 Status: Completed and build verified.

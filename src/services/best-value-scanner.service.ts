@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { getCurrentBoardCached, type CurrentBoardCandidate } from '@/services/current-board.service'
+import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
 
 export type BestValueMode = 'current' | 'upcoming' | 'historical_explorer' | 'all_stored_advanced'
 
@@ -32,6 +33,27 @@ function mapMode(mode: BestValueMode) {
   return 'CURRENT'
 }
 
+function puertoRicoTodayStartMs() {
+  const localDate = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  return new Date(`${localDate}T04:00:00.000Z`).getTime()
+}
+
+function currentOrFuture(candidates: CurrentBoardCandidate[]) {
+  const todayStart = puertoRicoTodayStartMs()
+  return candidates.filter((candidate) => {
+    const startMs = candidate.scheduledTime ? new Date(candidate.scheduledTime).getTime() : Number.NaN
+    return Number.isFinite(startMs) && startMs >= todayStart
+  })
+}
+
+function reasonNotOfficial(candidate: CurrentBoardCandidate) {
+  return classifyMarketIntelligence(candidate).reasonNotOfficial
+}
+
+function opportunityStatus(candidate: CurrentBoardCandidate) {
+  return classifyMarketIntelligence(candidate).display
+}
+
 export async function getBestValueOpportunities({
   mode = 'current',
   includePasses = false,
@@ -42,10 +64,21 @@ export async function getBestValueOpportunities({
   limit?: number
 } = {}) {
   try {
-  const board = await getCurrentBoardCached('baseball_mlb', mapMode(mode), 200)
-  const positiveValue = board.candidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0)
-  const ranked = [...board.candidates]
-    .filter((candidate) => includePasses || (candidate.expectedValue > 0 && candidate.edge > 0))
+  let board = await getCurrentBoardCached('baseball_mlb', mapMode(mode), 200)
+  let sourceCandidates = board.candidates
+  let informationalFallbackUsed = false
+  if (sourceCandidates.length === 0 && mode === 'current') {
+    const fallbackBoard = await getCurrentBoardCached('baseball_mlb', 'ALL_STORED_ADVANCED', 200)
+    const fallbackCandidates = currentOrFuture(fallbackBoard.candidates)
+    if (fallbackCandidates.length) {
+      board = fallbackBoard
+      sourceCandidates = fallbackCandidates
+      informationalFallbackUsed = true
+    }
+  }
+  const positiveValue = sourceCandidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0)
+  const visiblePool = includePasses || positiveValue.length === 0 ? sourceCandidates : positiveValue
+  const ranked = [...visiblePool]
     .sort((left, right) => score(right) - score(left))
     .slice(0, Math.max(1, Math.min(limit, 100)))
 
@@ -65,37 +98,57 @@ export async function getBestValueOpportunities({
     providerCallsMade: 0,
     remoteMutationsMade: 0,
     summary: {
-      candidatesScanned: board.candidates.length,
+      candidatesScanned: sourceCandidates.length,
       candidatesReturned: ranked.length,
-      positiveValueCandidates: board.candidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0).length,
-      noModeledValueCandidates: board.candidates.filter((candidate) => candidate.modeledValueStatus === 'NO_MODELED_VALUE').length,
+      positiveValueCandidates: sourceCandidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0).length,
+      noModeledValueCandidates: sourceCandidates.filter((candidate) => candidate.modeledValueStatus === 'NO_MODELED_VALUE').length,
       officialPickCount: board.officialPickCount,
       latestOddsCapture: board.latestOddsTimestamp,
       dataFreshness: board.dataFreshness,
       warning: positiveValue.length
         ? 'Positive value is informational until official gates qualify it.'
-        : 'No Positive Value Available Today. Passing is currently the highest expected-value decision.',
+        : sourceCandidates.length
+          ? 'No positive EV play qualified. Showing strongest informational rankings for review only.'
+          : 'No opportunities available because no eligible games have grounded odds and probabilities.',
       scanCompleted: true,
       dataAvailable: true,
       errorCode: null,
       errorMessageSafe: null,
       positiveValueCount: positiveValue.length,
+      informationalFallbackUsed,
+      displayMode: informationalFallbackUsed ? 'informational_rankings_after_current_board_empty' : 'current_board_value_rankings',
     },
     rankingContract: ['positive expected value', 'positive edge', 'confidence', 'reliability', 'market stability', 'feature quality', 'data sufficiency', 'odds freshness'],
     categories,
-    opportunities: ranked.map((candidate) => ({
-      ...candidate,
-      valueCategory: category(candidate),
-      valueScore: Number(score(candidate).toFixed(2)),
-      officialDisplay:
-        candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
-          ? 'OFFICIAL ELIGIBILITY REVIEW'
-          : 'NOT OFFICIALLY ELIGIBLE',
-      valueDisplay:
-        candidate.expectedValue > 0 && candidate.edge > 0
-          ? 'POSITIVE VALUE'
-          : 'PASS - NO POSITIVE VALUE',
-    })),
+    opportunities: ranked.map((candidate) => {
+      const classification = classifyMarketIntelligence(candidate)
+      return {
+        ...candidate,
+        valueCategory: category(candidate),
+        valueScore: Number(score(candidate).toFixed(2)),
+        officialDisplay:
+          candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
+            ? 'Official'
+            : `${classification.label} - not a recommendation`,
+        valueDisplay:
+          candidate.expectedValue > 0 && candidate.edge > 0
+            ? 'POSITIVE VALUE'
+            : classification.category === 'avoid'
+              ? 'AVOID - NO POSITIVE VALUE'
+              : 'BELOW OFFICIAL VALUE THRESHOLD',
+        marketIntelligenceCategory: classification.category,
+        opportunityCategory: classification.label,
+        statusLabel: opportunityStatus(candidate),
+        informationalWarning:
+          candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
+            ? null
+            : classification.warning,
+        reasonNotOfficial: reasonNotOfficial(candidate),
+        strengths: classification.strengths,
+        weaknesses: classification.weaknesses,
+        missingData: classification.missingData,
+      }
+    }),
   }
   } catch {
     return {

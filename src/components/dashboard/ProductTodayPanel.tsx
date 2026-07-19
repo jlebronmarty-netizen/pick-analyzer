@@ -21,6 +21,12 @@ type TodayResponse = {
   predictionCandidates: number
   officialPicks: number
   informationalCandidates: number
+  marketIntelligence?: {
+    official: number
+    aiLeans: number
+    watchlist: number
+    avoid: number
+  }
   latestOddsTimestamp: string | null
   freshness: 'fresh' | 'stale' | 'empty'
   nextAction: string
@@ -122,6 +128,12 @@ function displayStatus(value: unknown) {
 function BriefingCard({ data }: { data: TodayResponse }) {
   const shouldBet = data.officialPicks > 0
   const reasons = data.blockers?.length ? data.blockers.slice(0, 3) : ['No official recommendation passed policy.']
+  const categories = data.marketIntelligence ?? {
+    official: data.officialPicks,
+    aiLeans: 0,
+    watchlist: 0,
+    avoid: 0,
+  }
 
   return (
     <section className="rounded-lg border border-slate-800 bg-slate-900 p-5 md:p-6">
@@ -143,12 +155,21 @@ function BriefingCard({ data }: { data: TodayResponse }) {
             <Metric label="Recommendation" value={shouldBet ? 'Bet with official staking' : 'Preserve bankroll'} tone={shouldBet ? 'green' : 'yellow'} />
             <Metric label="Next Safe Action" value={data.nextAction} tone="blue" />
           </div>
+          <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <Metric label="Official Picks" value={data.officialPicks} tone={data.officialPicks ? 'green' : 'gray'} />
+            <Metric label="AI Leans" value={categories.aiLeans} tone={categories.aiLeans ? 'yellow' : 'gray'} />
+            <Metric label="Watchlist" value={categories.watchlist} tone={categories.watchlist ? 'blue' : 'gray'} />
+            <Metric label="Avoid" value={categories.avoid} tone={categories.avoid ? 'red' : 'gray'} />
+          </div>
         </div>
 
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-5">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Recommendation</p>
           <h3 className="mt-3 text-2xl font-black text-white">{data.summary.recommendation}</h3>
           <p className="mt-3 text-sm leading-6 text-slate-300">{data.summary.marketPrices}</p>
+          <p className="mt-3 rounded-lg border border-slate-800 bg-slate-900/70 p-3 text-xs font-bold leading-5 text-slate-300">
+            Official Picks are the only recommendations. AI Leans, Watchlist and Avoid are market intelligence only.
+          </p>
           <div className="mt-5 grid grid-cols-2 gap-3">
             <Metric label="Candidates" value={data.predictionCandidates} tone={data.predictionCandidates ? 'blue' : 'gray'} />
             <Metric label="Official Picks" value={data.officialPicks} tone={data.officialPicks ? 'green' : 'yellow'} />

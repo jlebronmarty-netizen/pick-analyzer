@@ -130,7 +130,7 @@ function getActionRead(dashboard: any, pick: HeroPick | null) {
     return 'Playable with reduced stake. Monitor line movement.'
   }
 
-  return 'Monitor only. Do not force action if the price moves against the model.'
+  return 'Track price movement. Do not force action if the price moves against the model.'
 }
 
 function HeroMetric({

@@ -6,6 +6,7 @@ import { getArbitrageOpportunities, getMostLikelyOpportunities } from '@/service
 import { optimizeBetSlip } from '@/services/bet-slip-optimizer.service'
 import { getTopPicks } from '@/services/top-picks.service'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
 
 export type AiBetFinderAction = 'SEARCH' | 'COMPARE' | 'EXPLAIN' | 'BUILD_TICKET' | 'WHAT_CHANGED'
 
@@ -144,9 +145,32 @@ function responseMeta(board: Awaited<ReturnType<typeof getCurrentBoardCached>>, 
   }
 }
 
+function puertoRicoTodayStartMs() {
+  const localDate = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  return new Date(`${localDate}T04:00:00.000Z`).getTime()
+}
+
+async function boardWithInformationalFallback(limit = 100) {
+  const board = await getCurrentBoardCached('baseball_mlb', 'CURRENT', limit)
+  if (board.candidates.length) return { board, candidates: board.candidates, fallbackUsed: false }
+  const fallbackBoard = await getCurrentBoardCached('baseball_mlb', 'ALL_STORED_ADVANCED', 200)
+  const todayStart = puertoRicoTodayStartMs()
+  const candidates = fallbackBoard.candidates.filter((candidate) => {
+    const startMs = candidate.scheduledTime ? new Date(candidate.scheduledTime).getTime() : Number.NaN
+    return Number.isFinite(startMs) && startMs >= todayStart
+  })
+  return { board: fallbackBoard, candidates, fallbackUsed: candidates.length > 0 }
+}
+
+function reasonNotOfficial(candidate: CurrentBoardCandidate) {
+  return classifyMarketIntelligence(candidate).reasonNotOfficial ?? 'Passed official review gate.'
+}
+
 function summarizeCandidate(candidate: CurrentBoardCandidate) {
   const price = candidate.edge > 0 && candidate.expectedValue > 0 ? 'ATTRACTIVE PRICE' : 'POOR PRICE'
-  const action = candidate.recommendationPolicyStatus === 'WATCH' ? 'WATCH' : candidate.modeledValueStatus === 'MODELED_VALUE' ? 'WATCH' : 'PASS'
+  const official = candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
+  const classification = classifyMarketIntelligence(candidate)
+  const action = official ? 'Official' : classification.display
   return {
     id: candidate.predictionId,
     title: candidateTitle(candidate),
@@ -163,13 +187,19 @@ function summarizeCandidate(candidate: CurrentBoardCandidate) {
     label: candidate.rawProbability >= 45 ? 'HIGH PROBABILITY' : 'ANALYZED',
     priceLabel: price,
     plainAnswer: action,
-    officialEligibility: candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE' ? 'OFFICIAL ELIGIBILITY REVIEW' : 'NOT OFFICIALLY ELIGIBLE',
+    officialEligibility: official ? 'Official' : `${classification.label} - not a recommendation`,
+    marketIntelligenceCategory: classification.category,
+    reasonNotOfficial: reasonNotOfficial(candidate),
+    informationalWarning: official ? null : classification.warning,
     quarantine: candidate.quarantined ? 'QUARANTINED PREVIEW' : 'CURRENT',
+    strengths: classification.strengths,
+    weaknesses: classification.weaknesses,
+    missingData: classification.missingData,
   }
 }
 
 async function search(query: string) {
-  const board = await getCurrentBoardCached('baseball_mlb', 'CURRENT', 100)
+  const { board, candidates, fallbackUsed } = await boardWithInformationalFallback(100)
   const ask = intent(query)
   if (ask === 'PROPS') {
     return {
@@ -177,7 +207,7 @@ async function search(query: string) {
       action: 'SEARCH',
       intent: ask,
       summary: 'Pitcher/player props are not currently available because verified prop odds and the required player-level context are missing.',
-      meta: responseMeta(board, 0, query),
+      meta: { ...responseMeta(board, 0, query), informationalFallbackUsed: fallbackUsed },
       results: [],
     }
   }
@@ -190,7 +220,7 @@ async function search(query: string) {
       summary: arbitrage.summary.status === 'SCANNER_DATA_ERROR'
         ? 'Arbitrage data is temporarily unavailable.'
         : 'Verified multi-book pricing is unavailable.',
-      meta: responseMeta(board, 0, query),
+      meta: { ...responseMeta(board, 0, query), informationalFallbackUsed: fallbackUsed },
       arbitrage: arbitrage.summary,
       results: [],
     }
@@ -202,14 +232,14 @@ async function search(query: string) {
       success: true,
       action: 'SEARCH',
       intent: ask,
-      summary: results.length ? 'Best Value ranked current-board candidates.' : 'No positive modeled-value candidate is available.',
-      meta: responseMeta(board, results.length, query),
+      summary: results.length ? 'Best Value ranked opportunities. Official picks remain separate from informational rankings.' : 'No opportunities available because no eligible games have grounded odds and probabilities.',
+      meta: { ...responseMeta(board, results.length, query), informationalFallbackUsed: fallbackUsed },
       results,
     }
   }
   if (ask === 'MOST_LIKELY') {
     const mostLikely = await getMostLikelyOpportunities({ sort: 'highest_probability', limit: 20 })
-    const results = applyFilters(board.candidates, query).sort((left, right) =>
+    const results = applyFilters(candidates, query).sort((left, right) =>
       right.rawProbability - left.rawProbability ||
       right.confidence - left.confidence ||
       right.reliabilityScore - left.reliabilityScore ||
@@ -220,31 +250,31 @@ async function search(query: string) {
       success: true,
       action: 'SEARCH',
       intent: ask,
-      summary: results.length ? 'Most likely current-board candidates. High probability is not the same as value.' : 'No current candidate matches these filters.',
-      meta: responseMeta(board, results.length, query),
+      summary: results.length ? 'Most likely opportunities. High probability is not the same as an official recommendation.' : 'No opportunities available because no eligible games have grounded odds and probabilities.',
+      meta: { ...responseMeta(board, results.length, query), informationalFallbackUsed: fallbackUsed },
       rankingSource: mostLikely.mode,
       results: results.map(summarizeCandidate),
     }
   }
-  const filtered = applyFilters(board.candidates, query)
+  const filtered = applyFilters(candidates, query)
   return {
     success: true,
     action: 'SEARCH',
     intent: ask,
-    summary: filtered.length ? 'Filtered current-board candidates.' : 'No current candidate matches these filters.',
-    meta: responseMeta(board, filtered.length, query),
+    summary: filtered.length ? 'Filtered opportunities. Official recommendations remain separate.' : 'No opportunities available because no eligible games have grounded odds and probabilities.',
+    meta: { ...responseMeta(board, filtered.length, query), informationalFallbackUsed: fallbackUsed },
     results: filtered.map(summarizeCandidate),
   }
 }
 
 async function compare(input: Input) {
-  const board = await getCurrentBoardCached('baseball_mlb', 'CURRENT', 100)
+  const { board, candidates, fallbackUsed } = await boardWithInformationalFallback(100)
   const q = normalized(input.query)
   const picks = input.candidateIds?.length
-    ? board.candidates.filter((candidate) => input.candidateIds?.includes(candidate.predictionId))
+    ? candidates.filter((candidate) => input.candidateIds?.includes(candidate.predictionId))
     : [
-        findCandidate(board.candidates, q.includes(' with ') ? q.split(' with ')[0] : q),
-        findCandidate(board.candidates, q.includes(' with ') ? q.split(' with ')[1] : 'under'),
+        findCandidate(candidates, q.includes(' with ') ? q.split(' with ')[0] : q),
+        findCandidate(candidates, q.includes(' with ') ? q.split(' with ')[1] : 'under'),
       ].filter((candidate): candidate is CurrentBoardCandidate => Boolean(candidate))
   const unique = Array.from(new Map(picks.map((candidate) => [candidate.predictionId, candidate])).values())
   if (unique.length < 2) {
@@ -252,7 +282,7 @@ async function compare(input: Input) {
       success: true,
       action: 'COMPARE',
       summary: 'Compare needs at least two current-board candidates.',
-      meta: responseMeta(board, unique.length, input.query ?? ''),
+      meta: { ...responseMeta(board, unique.length, input.query ?? ''), informationalFallbackUsed: fallbackUsed },
       candidates: unique.map(summarizeCandidate),
       conclusion: 'Insufficient evidence to prefer one.',
     }
@@ -268,7 +298,7 @@ async function compare(input: Input) {
     success: true,
     action: 'COMPARE',
     summary: 'Compared current-board candidates.',
-    meta: responseMeta(board, unique.length, input.query ?? ''),
+    meta: { ...responseMeta(board, unique.length, input.query ?? ''), informationalFallbackUsed: fallbackUsed },
     candidates: unique.map((candidate) => ({
       ...summarizeCandidate(candidate),
       positiveFactors: candidate.positiveFactors,
@@ -282,34 +312,34 @@ async function compare(input: Input) {
 }
 
 async function explain(input: Input) {
-  const board = await getCurrentBoardCached('baseball_mlb', 'CURRENT', 100)
+  const { board, candidates, fallbackUsed } = await boardWithInformationalFallback(100)
   const q = normalized(input.query)
   if (q.includes('no picks') || q.includes('no official')) {
     return {
       success: true,
       action: 'EXPLAIN',
       summary: 'No official picks today because every current candidate remains preview-only or fails value/policy gates.',
-      meta: responseMeta(board, board.candidates.length, input.query ?? ''),
+      meta: { ...responseMeta(board, candidates.length, input.query ?? ''), informationalFallbackUsed: fallbackUsed },
       explanation: {
         title: 'No official picks today',
         summary: 'The Current Board has analyzed candidates, but Top Picks stays at zero until production eligibility, recommendation policy, calibration, confidence and positive edge/EV gates all pass.',
-        whatSupportsIt: board.candidates.map((candidate) => `${candidateTitle(candidate)} was analyzed from the Current Board.`),
-        whatWorksAgainstIt: board.candidates.map((candidate) => `${candidateTitle(candidate)}: ${candidate.semanticLabel}, ${candidate.officialEligibility.replaceAll('_', ' ').toLowerCase()}.`),
+        whatSupportsIt: candidates.slice(0, 5).map((candidate) => `${candidateTitle(candidate)} was analyzed from stored Current Board data.`),
+        whatWorksAgainstIt: candidates.slice(0, 5).map((candidate) => `${candidateTitle(candidate)}: ${reasonNotOfficial(candidate)}`),
         price: 'Current prices do not create positive modeled value for the official recommendation path.',
-        missingInformation: Array.from(new Set(board.candidates.flatMap((candidate) => candidate.missingInformation))),
-        officialEligibilityBlockers: Array.from(new Set(board.candidates.flatMap((candidate) => candidate.blockers))),
+        missingInformation: Array.from(new Set(candidates.flatMap((candidate) => candidate.missingInformation))),
+        officialEligibilityBlockers: Array.from(new Set(candidates.flatMap((candidate) => [reasonNotOfficial(candidate), ...candidate.blockers]))),
         confidence: 'The model currently believes waiting has the highest expected value. Calibration remains limited.',
         plainAnswer: 'NO OFFICIAL PICKS TODAY',
       },
     }
   }
-  const candidate = findCandidate(board.candidates, input.query ?? '')
+  const candidate = findCandidate(candidates, input.query ?? '')
   if (!candidate) {
     return {
       success: true,
       action: 'EXPLAIN',
       summary: 'No current candidate matches this explanation request.',
-      meta: responseMeta(board, 0, input.query ?? ''),
+      meta: { ...responseMeta(board, 0, input.query ?? ''), informationalFallbackUsed: fallbackUsed },
       explanation: null,
     }
   }
@@ -327,7 +357,7 @@ async function explain(input: Input) {
     success: true,
     action: 'EXPLAIN',
     summary: `${candidateTitle(candidate)} is analyzed, but it is not an official pick.`,
-    meta: responseMeta(board, 1, input.query ?? ''),
+    meta: { ...responseMeta(board, 1, input.query ?? ''), informationalFallbackUsed: fallbackUsed },
     explanation: {
       title: candidateTitle(candidate),
       summary: candidate.summary,
@@ -335,7 +365,7 @@ async function explain(input: Input) {
       whatWorksAgainstIt: candidate.negativeFactors,
       price,
       missingInformation: candidate.missingInformation,
-      officialEligibilityBlockers: candidate.blockers,
+      officialEligibilityBlockers: [reasonNotOfficial(candidate), ...candidate.blockers].filter(Boolean),
       confidence: candidate.confidence < 55 ? 'Confidence is low because current feature sufficiency and model signal are not strong enough.' : 'Confidence is acceptable for analysis.',
       plainAnswer,
     },
@@ -343,7 +373,7 @@ async function explain(input: Input) {
 }
 
 async function buildTicket(input: Input) {
-  const board = await getCurrentBoardCached('baseball_mlb', 'CURRENT', 100)
+  const { board, candidates, fallbackUsed } = await boardWithInformationalFallback(100)
   const mode = input.mode ?? (normalized(input.query).includes('preview') ? 'preview_exploration' : 'official_only')
   if (mode === 'official_only') {
     const optimizer = await optimizeBetSlip({})
@@ -351,15 +381,15 @@ async function buildTicket(input: Input) {
       success: true,
       action: 'BUILD_TICKET',
       summary: optimizer.mode === 'no_ticket' ? 'NO TICKET TODAY' : 'Official ticket available.',
-      meta: responseMeta(board, 0, input.query ?? ''),
+      meta: { ...responseMeta(board, 0, input.query ?? ''), informationalFallbackUsed: fallbackUsed },
       ticketMode: mode,
       ticket: optimizer,
     }
   }
-  const positive = board.candidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0 && !candidate.stale)
+  const positive = candidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0 && !candidate.stale)
   const legs = positive.slice(0, normalized(input.query).includes('parlay') ? 4 : 1)
   const rejectedReasons = [
-    ...(board.candidates.length < 2 ? ['Parlay requires at least two legs.'] : []),
+    ...(candidates.length < 2 ? ['Parlay requires at least two legs.'] : []),
     ...(legs.length < 2 && normalized(input.query).includes('parlay') ? ['Parlay with one leg rejected.'] : []),
     ...(positive.length === 0 ? ['No positive-EV preview legs are available.'] : []),
   ]
@@ -367,7 +397,7 @@ async function buildTicket(input: Input) {
     success: true,
     action: 'BUILD_TICKET',
     summary: legs.length ? 'Preview exploration only. Not a wagering recommendation.' : 'No preview ticket can be built from current-board value rules.',
-    meta: responseMeta(board, legs.length, input.query ?? ''),
+    meta: { ...responseMeta(board, legs.length, input.query ?? ''), informationalFallbackUsed: fallbackUsed },
     ticketMode: mode,
     label: 'QUARANTINED PREVIEW - NOT A WAGERING RECOMMENDATION',
     stakeRecommendation: null,

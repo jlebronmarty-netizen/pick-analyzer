@@ -25,7 +25,7 @@ export default function DeveloperDetails({
             <p className="mt-1 text-sm leading-6 text-slate-400">{description}</p>
           </div>
           <span className="text-xs font-bold uppercase tracking-[0.2em] text-sky-300">
-            Developer Mode
+            Advanced Details
           </span>
         </div>
       </summary>
