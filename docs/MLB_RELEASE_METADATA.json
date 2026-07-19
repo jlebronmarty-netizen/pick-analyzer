@@ -1,0 +1,16 @@
+{
+    "release":  "MLB Production Complete",
+    "version":  "v1.0.0",
+    "dashboardFrozen":  true,
+    "recommendedTag":  "mlb-v1.0.0-production-complete",
+    "freezeDate":  "2026-07-18",
+    "v7Promoted":  false,
+    "championPromoted":  false,
+    "status":  "Production Stable / Maintenance Mode",
+    "automationFrozen":  true,
+    "futurePrimaryPriority":  "BSN",
+    "recommendedCommitMessage":  "docs: certify MLB production complete v1.0.0",
+    "architectureFrozen":  true,
+    "modelsFrozen":  true,
+    "officialThresholdsChanged":  false
+}

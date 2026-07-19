@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { runBsnPredictionEngineV7 } from '@/services/bsn-platform.service'
+import { getBsnShadowPredictionEngine } from '@/services/bsn-shadow-prediction-engine.service'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const data = await runBsnPredictionEngineV7({ dryRun: true, confirmed: false })
+    const includeValidation = request.nextUrl.searchParams.get('includeValidation') === 'true'
+    const data = await getBsnShadowPredictionEngine({ includeValidation })
 
     return NextResponse.json(data)
   } catch (error) {
@@ -20,11 +21,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
-    const data = await runBsnPredictionEngineV7({
-      dryRun: body?.dryRun ?? true,
-      confirmed: body?.confirmed === true,
-      idempotencyKey: body?.idempotencyKey ?? null,
-    })
+    const data = await getBsnShadowPredictionEngine({ includeValidation: body?.includeValidation === true })
 
     return NextResponse.json(data)
   } catch (error) {

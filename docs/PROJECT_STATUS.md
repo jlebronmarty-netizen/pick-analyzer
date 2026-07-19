@@ -1,12 +1,12 @@
 # Project Status
 
-Last updated: 2026-07-18 23:20:00 -04:00
+Last updated: 2026-07-18 23:55:00 -04:00
 
 ## Current Architecture
 
 Pick Analyzer is a Next.js 16 App Router application using React 19, TypeScript, Tailwind CSS and Supabase. The codebase is organized around:
 
-- `src/app`: pages and 245 API route files plus the static Betting Workbench page.
+- `src/app`: pages and 268 generated application/API routes plus the static Betting Workbench page.
 - `src/components/dashboard`: dashboard panels and command-center UI.
 - `src/services`: domain services for sports, predictions, sync jobs, settlement, analytics, portfolio, model learning, AI coach and provider adapters.
 - `src/config/sports.config.ts`: sport registry and production-readiness flags.
@@ -16,7 +16,11 @@ Pick Analyzer is a Next.js 16 App Router application using React 19, TypeScript,
 
 ## Completed Modules Confirmed From Repository
 
+- MLB Production Certification V1: finalized MLB as Production Stable / Maintenance Mode with release version `v1.0.0`. Added final architecture, operations, provider strategy, automation, data flow, features, limitations, known issues, release notes and certification docs. The freeze preserves existing prediction logic, recommendation policy, settlement, learning, provider logic, thresholds, champion rows and V7 challenger state. Production validation confirmed the dashboard Today contract, Current Board, operating-day status, automation status, provider budget, odds coverage, missing intelligence, market capabilities, provider audit, prediction health/model-ops routes, settlement, learning, calibration, Feature Store, Historical Import health and market opportunity routes are live; key status paths report 0 provider calls and 0 remote mutations. Some heavy composite diagnostics remain a maintenance performance issue, not an architecture blocker. MLB future work is limited to bug fixes, provider upgrades, UI polish, performance and security updates; primary development transitions to BSN.
+
 - BSN Intelligence Engine V1: added a read-only reusable BSN basketball knowledge layer over existing validated normalized storage. The engine generates team profiles, player profiles, team comparisons, power rankings, momentum, league knowledge and computed BSN feature records for `basketball_team_intelligence` using only stored `sports_teams`, `sport_standings`, `sport_events` and `sport_players` rows. Unavailable inputs such as player game logs, durable feature snapshot persistence, most-improved history, odds, predictions and participation remain NULL/NOT_AVAILABLE with warnings. Added production APIs for `/api/bsn/intelligence`, `/api/bsn/team/[id]`, `/api/bsn/compare`, `/api/bsn/power-rankings`, `/api/bsn/momentum`, `/api/bsn/features` and validation, plus an Advanced Details BSN Intelligence dashboard panel. Provider calls and remote mutations remain 0; no prediction engine, Current Board, official picks, AI Leans, Watchlist, Avoid, settlement, learning, champion rows, V7, MLB or thresholds changed.
+
+- BSN Prediction Engine V1: added a server-only probability preview engine in shadow mode. The engine builds stored upcoming BSN game features from BSN Intelligence team profiles, completed-game history, Feature Store Core definitions, Shared Prediction SDK compatibility, Basketball Platform contracts and Historical Builder contracts, then returns home win probability, away win probability, confidence, data quality, prediction quality and grounded reasoning only. Added `/api/bsn/predictions`, `/api/bsn/predictions/preview`, `/api/bsn/predictions/validation`, `/api/bsn/game/[id]` and an Advanced Details BSN Prediction Preview panel. EV, value, Official Picks, Current Board activation, Bet Slip, AI Leans, Watchlist, Avoid, severity inference, provider calls, remote mutations, champion mutation, threshold changes, V7 promotion, MLB changes, settlement and learning remain disabled/unchanged. If no stored upcoming BSN games exist, the engine returns a ready empty state instead of fabricated predictions.
 
 - Premium AI Sports Intelligence Product Experience V1: tightened /dashboard User Mode into a five-second decision surface using the existing Today and Most Likely API contracts only. The hero now leads with the decision before Market Mood, Updated, Official Picks, Games Today and View Opportunities. Category cards are compact icon/count/status/action tiles, Top AI Opportunity is a premium field-and-meter card, Today's Games are compact expandable rows without engineering labels, Today at a Glance is reduced to icon-style readiness tiles, System Health uses product states, AI Confidence uses only existing confidence values, and the optional History card stays hidden unless settled history is already present in the response. Removed requested explanatory copy from User Mode and preserved prediction models, thresholds, champion rows, V7, settlement, learning, provider logic, Current Board logic and data writes.
 
@@ -339,9 +343,7 @@ There are 238 `src/app/api/**/route.ts` files.
 
 ## Next Recommended Module
 
-Next executable task: production-verify `/api/autonomous-daily-operations/status` and the redesigned `/dashboard`, then continue with zero-call Bullpen/Pitcher Intelligence hardening only where stored data supports it. Do not promote V6, change official-pick policy or consume provider quota until the read-only quality gates and settled shadow sample support it.
-
-Dependency reasoning: Historical Import Engine Core V1 defines import planning, Provider Adapter SDK V1 defines provider contracts, SportsDataIO Adapter Contract V1 maps SportsDataIO, SportsDataIO Historical Import Execution Readiness V1 adds guarded execution architecture, NBA Pilot Import V1 proved the narrow trial event path, Pilot Import V2 proved standings/team-stat/game-stat persistence under trial isolation, Players Pilot V1 proved roster/player mapping persistence, Injuries Pilot V1 proved injury persistence with unresolved-player warnings, and NBA Injury and Lineup Confidence Integration V1 routes stored injury/lineup availability into feature quality, sufficiency, prediction safety, explanations and model health. The depth-chart and starting-lineup endpoint paths, migration, normalization, persistence, idempotency checks, trial isolation and one-to-many reporting counters are now verified. Player stats now have a persistence/readiness contract but still need exact endpoint confirmation and manual migration application before any live pilot. Player props now have contract/readiness metadata but still need exact market paths, entitlement and settlement before any live pilot. Odds now have NBA-specific zero-call readiness, but live odds and historical odds still need exact endpoint paths, entitlement and capped windows. Broader provider-backed NBA reconciliation Phase B still requires explicit quota/date-window approval because the dry-run data-quality plan estimates hundreds of provider calls.
+Primary project focus is now BSN and basketball intelligence. MLB is in Production Stable / Maintenance Mode; future MLB work should be limited to bug fixes, provider upgrades, UI polish, performance improvements, security updates and documentation refreshes. Do not promote V7, change official-pick thresholds, alter settlement policy or mutate champion rows without a new explicit major project.
 
 ## Handoff Notes
 

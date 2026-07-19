@@ -4,11 +4,17 @@ This roadmap is dependency-aware and based on repository inspection. A module is
 
 ## Dependency Reasoning
 
-The project already has a broad dashboard, core prediction services, multi-sport registry, provider adapters, provider intelligence, global data quality planning, NBA sync, NBA prediction generation, NBA validation/settlement, NBA backtesting/calibration, a read-only NBA data quality planner, stored-odds multi-book comparison, stored-odds steam detection, Feature Store Core, Multi-Sport Feature Registry and a Shared Sport Prediction Engine SDK. The next safest work is provider-independent sport engine architecture, not provider-backed reconciliation or another model rewrite.
-
-Provider-dependent modules such as historical reconciliation execution, injuries, expected lineups and props should wait until reliable provider sources, credentials and quota caps are approved. Sport engines should be built from normalized events, participants, odds and Feature Store snapshots, with real-data validation and historical calibration explicitly pending until actual data exists.
+MLB is now production stable and in maintenance mode. The primary roadmap focus is BSN, basketball intelligence, basketball prediction readiness after data maturity, AI market intelligence expansion and then additional sports. MLB work should remain limited to maintenance unless a future explicit major project authorizes architecture or model changes.
 
 ## Completed
+
+### MLB Production Certification V1
+
+Status: Completed and build verified.
+
+Evidence: `docs/MLB_PRODUCTION_CERTIFICATION.md`, `docs/MLB_ARCHITECTURE.md`, `docs/MLB_OPERATIONS.md`, `docs/MLB_PROVIDER_STRATEGY.md`, `docs/MLB_AUTOMATION.md`, `docs/MLB_DATA_FLOW.md`, `docs/MLB_FEATURES.md`, `docs/MLB_LIMITATIONS.md`, `docs/MLB_KNOWN_ISSUES.md`, `docs/MLB_RELEASE_NOTES.md` and production validation of MLB read/status routes.
+
+Note: MLB is certified as Production Stable and moved to Maintenance Mode for version `v1.0.0`. Architecture, models, dashboard architecture, automation lifecycle, recommendation policy, official-pick thresholds, champion row policy, settlement policy, learning policy and provider-budget strategy are frozen. No code feature changes, model changes, threshold changes, provider logic changes, settlement changes, learning changes, Champion promotion or V7 promotion were introduced. Future MLB work is limited to bug fixes, provider upgrades, UI polish, performance improvements, security updates and documentation refreshes. Primary roadmap priority now transitions to BSN and basketball intelligence.
 
 ### BSN Intelligence Engine V1
 
@@ -17,6 +23,14 @@ Status: Completed and build verified.
 Evidence: `src/services/bsn-intelligence-engine.service.ts`, `/api/bsn/intelligence`, `/api/bsn/team/[id]`, `/api/bsn/compare`, `/api/bsn/power-rankings`, `/api/bsn/momentum`, `/api/bsn/features` and `src/components/dashboard/BsnIntelligencePanel.tsx`.
 
 Note: This module turns stored BSN data into reusable basketball intelligence without enabling betting predictions. It derives team profiles, player profiles, standings context, recent form, momentum, consistency, strength, power rankings, comparison advantages, league knowledge and computed BSN feature records only from validated normalized rows. Missing player game logs, historical baselines, durable feature-store persistence, odds and prediction-ready inputs stay unavailable rather than estimated. It reuses the Basketball Data Platform, Historical Builder, Historical Import Engine contracts, Feature Store Core, Shared Prediction SDK, Provider Registry and validation patterns. No provider calls, writes, Current Board changes, official-pick changes, thresholds, champion rows, V7 promotion, settlement, learning or MLB behavior changed.
+
+### BSN Prediction Engine V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/bsn-shadow-prediction-engine.service.ts`, `/api/bsn/predictions`, `/api/bsn/predictions/preview`, `/api/bsn/predictions/validation`, `/api/bsn/game/[id]`, `src/components/dashboard/BsnPredictionPreviewPanel.tsx` and `docs/bsn-prediction-engine-v1.md`.
+
+Note: This module adds probability-only BSN game predictions in shadow mode. It reuses BSN Intelligence, the Basketball Platform, Historical Builder, Feature Store Core and Shared Prediction SDK compatibility metadata without calling the SDK EV/Kelly recommendation builder. Outputs are limited to home win probability, away win probability, confidence, data quality, prediction quality and reasoning. Missing data remains unavailable, and empty upcoming schedules return typed empty previews. Official Picks, Current Board activation, EV/value, Bet Slip, AI Leans, Watchlist, Avoid, champion rows, thresholds, V7 promotion, settlement, learning, MLB behavior, provider calls and remote mutations are unchanged.
 
 ### Premium AI Sports Intelligence Product Experience V1
 

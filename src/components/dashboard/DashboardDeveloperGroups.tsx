@@ -68,6 +68,7 @@ const ModelRollbackPanel = dynamic(() => import('@/components/dashboard/ModelRol
 const AutoModelTuningPanel = dynamic(() => import('@/components/dashboard/AutoModelTuningPanel'))
 const BasketballDataCoveragePanel = dynamic(() => import('@/components/dashboard/BasketballDataCoveragePanel'))
 const BsnIntelligencePanel = dynamic(() => import('@/components/dashboard/BsnIntelligencePanel'))
+const BsnPredictionPreviewPanel = dynamic(() => import('@/components/dashboard/BsnPredictionPreviewPanel'))
 
 export default function DashboardDeveloperGroups() {
   return (
@@ -122,6 +123,7 @@ export default function DashboardDeveloperGroups() {
         <GlobalDataQualityPanel />
         <BasketballDataCoveragePanel />
         <BsnIntelligencePanel />
+        <BsnPredictionPreviewPanel />
         <MultiSportEnginePanel />
       </DeveloperDetails>
 
