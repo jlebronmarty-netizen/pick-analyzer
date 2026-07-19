@@ -32,6 +32,30 @@ Evidence: `src/services/bsn-shadow-prediction-engine.service.ts`, `/api/bsn/pred
 
 Note: This module adds probability-only BSN game predictions in shadow mode. It reuses BSN Intelligence, the Basketball Platform, Historical Builder, Feature Store Core and Shared Prediction SDK compatibility metadata without calling the SDK EV/Kelly recommendation builder. Outputs are limited to home win probability, away win probability, confidence, data quality, prediction quality and reasoning. Missing data remains unavailable, and empty upcoming schedules return typed empty previews. Official Picks, Current Board activation, EV/value, Bet Slip, AI Leans, Watchlist, Avoid, champion rows, thresholds, V7 promotion, settlement, learning, MLB behavior, provider calls and remote mutations are unchanged.
 
+### BSN Model Maturity Mission V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/bsn-model-maturity.service.ts`, `/api/bsn/model-maturity`, phase-specific maturity API routes, `src/components/dashboard/BsnModelMaturityPanel.tsx` and `docs/bsn-model-maturity-v1.md`.
+
+Note: This module adds BSN backtesting, calibration, a performance center, explanation quality checks, readiness scoring, shadow market intelligence and an activation audit without enabling betting. It reuses the existing BSN Shadow Prediction Engine for replay math and keeps outputs probability/science-only. The current audit recommends Continue Shadow because the sample is not large enough for official activation, verified odds are missing, immutable pregame feature snapshots are not persisted, and player availability/boxscore depth remain unavailable. Provider calls, remote mutations, Official Picks, Current Board, EV/value/Kelly, AI Leans, Watchlist, Bet Slip, champion rows, thresholds, V7 promotion, settlement, learning and MLB behavior are unchanged.
+
+### Universal AI Performance & Evolution Center V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/ai-performance-center.service.ts`, `/api/ai-performance-center`, `/api/ai-performance-center/daily-update`, `src/components/dashboard/AiPerformanceCenterPanel.tsx` and `docs/ai-performance-center-v1.md`.
+
+Note: This module creates one read-only AI performance center for every enabled sport. It uses the existing sport registry for automatic future-sport discovery, stored `prediction_history` for settled/persisted rows, BSN shadow replay for shadow-only maturity evidence, the Feature Store, Prediction SDK, calibration service and Current Board status. It reports universal history, report cards, trend analysis, model evolution, performance timeline, confidence analysis and readiness without creating recommendations or changing any prediction, settlement, learning, threshold, champion, Current Board, Bet Slip, provider or V7 behavior.
+
+### Pick Analyzer AI Brain & Trust System V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/ai-performance-center.service.ts`, `/api/performance`, `/api/performance/sports`, `/api/performance/[sport]`, `/api/performance/history`, `/api/performance/evolution`, `/api/performance/report-card`, `/api/performance/trust`, `/api/performance/goals`, `/api/performance/readiness`, `/api/performance/validation`, `/api/performance/daily-update`, `/performance`, `src/components/performance/PerformanceClient.tsx`, `supabase/migrations/202607190001_ai_performance_snapshots_v1.sql` and AI Brain documentation.
+
+Note: This module extends AIPEC rather than creating parallel metrics infrastructure. It adds AI Brain contracts, AI Trust Score V1, trust-change explanations, AI evolution comparisons, optional idempotent daily snapshots, Daily AI Report Card V1, goals/progress, maturity pipelines, public and internal performance views, universal prediction-history filtering and registry-driven future-sport integration. The snapshot migration is additive and does not rewrite prediction history. Provider calls, external acquisition, prediction model changes, official thresholds, Current Board policy, Official Picks, AI Lean/Watchlist/Avoid policy, Bet Slip/Kelly, settlement, learning mutations, champion/challenger/shadow status and V7 status remain unchanged.
+
 ### Premium AI Sports Intelligence Product Experience V1
 
 Status: Completed and build verified.

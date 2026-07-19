@@ -20,6 +20,7 @@ const AICommandCenterPanel = dynamic(() => import('@/components/dashboard/AIComm
 const MlbPredictionEnginePanel = dynamic(() => import('@/components/dashboard/MlbPredictionEnginePanel'))
 const PredictionEngineV4Panel = dynamic(() => import('@/components/dashboard/PredictionEngineV4Panel'))
 const ModelMetricsFrameworkPanel = dynamic(() => import('@/components/dashboard/ModelMetricsFrameworkPanel'))
+const AiPerformanceCenterPanel = dynamic(() => import('@/components/dashboard/AiPerformanceCenterPanel'))
 const MlbFeatureStoreIntegrationPanel = dynamic(() => import('@/components/dashboard/MlbFeatureStoreIntegrationPanel'))
 const SportPredictionSdkPanel = dynamic(() => import('@/components/dashboard/SportPredictionSdkPanel'))
 const PredictionSafetyPanel = dynamic(() => import('@/components/dashboard/PredictionSafetyPanel'))
@@ -69,6 +70,7 @@ const AutoModelTuningPanel = dynamic(() => import('@/components/dashboard/AutoMo
 const BasketballDataCoveragePanel = dynamic(() => import('@/components/dashboard/BasketballDataCoveragePanel'))
 const BsnIntelligencePanel = dynamic(() => import('@/components/dashboard/BsnIntelligencePanel'))
 const BsnPredictionPreviewPanel = dynamic(() => import('@/components/dashboard/BsnPredictionPreviewPanel'))
+const BsnModelMaturityPanel = dynamic(() => import('@/components/dashboard/BsnModelMaturityPanel'))
 
 export default function DashboardDeveloperGroups() {
   return (
@@ -104,6 +106,7 @@ export default function DashboardDeveloperGroups() {
         <MlbPredictionEnginePanel />
         <PredictionEngineV4Panel />
         <ModelMetricsFrameworkPanel />
+        <AiPerformanceCenterPanel />
         <MlbFeatureStoreIntegrationPanel />
         <SportPredictionSdkPanel />
         <PredictionSafetyPanel />
@@ -124,6 +127,7 @@ export default function DashboardDeveloperGroups() {
         <BasketballDataCoveragePanel />
         <BsnIntelligencePanel />
         <BsnPredictionPreviewPanel />
+        <BsnModelMaturityPanel />
         <MultiSportEnginePanel />
       </DeveloperDetails>
 
