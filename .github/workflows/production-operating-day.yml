@@ -19,7 +19,6 @@ permissions:
 
 jobs:
   refresh:
-    if: github.repository_owner == 'jlebr'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
