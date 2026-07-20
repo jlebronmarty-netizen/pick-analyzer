@@ -530,6 +530,7 @@ function rowArray(value: unknown) {
 }
 
 function intelligenceCategory(row: IntelligenceRow): 'official' | 'ai_lean' | 'watchlist' | 'avoid' {
+  if (row.recommendationExplanation?.category) return row.recommendationExplanation.category
   if (row.marketIntelligenceCategory) return row.marketIntelligenceCategory
   const official =
     row.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE' &&
