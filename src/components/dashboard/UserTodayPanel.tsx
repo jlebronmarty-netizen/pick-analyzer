@@ -115,9 +115,15 @@ type IntelligenceRow = {
   strengths?: string[]
   weaknesses?: string[]
   missingData?: string[]
+  blockers?: string[]
+  missingInformation?: string[]
   warnings?: string[]
   oddsTimestamp?: string | null
   oddsAgeMinutes?: number | null
+  modeledValueStatus?: string
+  probabilityOrigin?: string
+  recommendationPolicyStatus?: string
+  officialEligibility?: string
 }
 
 type IntelligenceResponse = {
@@ -444,6 +450,46 @@ function riskLabel(row: IntelligenceRow) {
   return 'Controlled'
 }
 
+function rowArray(value: unknown) {
+  return Array.isArray(value) ? value.filter(Boolean).map(String) : []
+}
+
+function intelligenceCategory(row: IntelligenceRow): 'official' | 'ai_lean' | 'watchlist' | 'avoid' {
+  if (row.marketIntelligenceCategory) return row.marketIntelligenceCategory
+  const official =
+    row.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE' &&
+    ['QUALIFIED', 'BEST_BET_CANDIDATE', 'PLAY_OF_DAY_CANDIDATE'].includes(String(row.recommendationPolicyStatus ?? ''))
+  if (official) return 'official'
+
+  const rawProbability = candidateDisplayProbability(row) ?? 0
+  const confidence = percentNumber(row.confidence) ?? 0
+  const edge = Number(row.edge ?? 0)
+  const expectedValue = Number(row.expectedValue ?? 0)
+  const probabilityOrigin = String(row.probabilityOrigin ?? '').toLowerCase()
+  const modelSignal =
+    row.modeledValueStatus === 'MODELED_VALUE' ||
+    edge > 0 ||
+    expectedValue > 0 ||
+    (rawProbability >= 45 && confidence >= 45)
+  const clearAvoid =
+    expectedValue < -20 ||
+    edge < -15 ||
+    confidence < 40 ||
+    probabilityOrigin === 'fallback' ||
+    probabilityOrigin === 'unavailable'
+  if (modelSignal && !clearAvoid) return 'ai_lean'
+
+  const marketOrContext = [
+    ...rowArray(row.blockers),
+    ...rowArray(row.missingInformation),
+    ...rowArray(row.missingData),
+  ].join(' ').toLowerCase()
+  if (/lineup|injur|bullpen|weather|market|odds|calibration|starter/.test(marketOrContext) && confidence >= 40 && rawProbability >= 35) {
+    return 'watchlist'
+  }
+  return 'avoid'
+}
+
 function signedNumber(value: unknown, suffix = '') {
   const parsed = Number(value)
   if (!Number.isFinite(parsed)) return 'n/a'
@@ -477,16 +523,18 @@ function formatAmericanOdds(value: unknown) {
   return `${parsed > 0 ? '+' : ''}${Math.round(parsed)}`
 }
 
-function formatMarketLine(value: unknown) {
+function formatMarketLine(value: unknown, game?: Record<string, any>) {
   const parsed = numberField(value)
   if (parsed === null) return null
+  const market = String(game?.marketLabel ?? game?.market ?? '').toLowerCase()
+  if (parsed === 0 && market.includes('moneyline')) return null
   return `${parsed > 0 ? '+' : ''}${Number.isInteger(parsed) ? parsed.toFixed(0) : parsed.toFixed(1)}`
 }
 
 function marketDisplay(game: Record<string, any>) {
   const label = marketField(game.marketLabel ?? game.market) ?? 'Market'
   const selection = marketField(game.selection)
-  const line = formatMarketLine(game.line)
+  const line = formatMarketLine(game.line, game)
   const odds = formatAmericanOdds(game.americanOdds ?? game.odds)
   const sportsbook = marketField(game.sportsbook)
   const selectionText = [selection, line].filter(Boolean).join(' ')
@@ -615,7 +663,8 @@ function IntelligenceSection({
   )
 }
 
-function InsightList({ title, rows, empty }: { title: string; rows: IntelligenceRow[]; empty: string }) {
+function InsightList({ title, rows, empty, count }: { title: string; rows: IntelligenceRow[]; empty: string; count?: number }) {
+  const displayedCount = count ?? rows.length
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-5 ${cardMotion}`}>
       <div className="flex items-start justify-between gap-3">
@@ -623,7 +672,7 @@ function InsightList({ title, rows, empty }: { title: string; rows: Intelligence
           <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">AI Explanation</p>
           <h3 className="mt-1 text-xl font-black text-white">{title}</h3>
         </div>
-        <Badge tone={rows.length ? categoryTone(title === 'AI Leans' ? 'AI Lean' : title) : 'gray'}>{rows.length}</Badge>
+        <Badge tone={displayedCount ? categoryTone(title === 'AI Leans' ? 'AI Lean' : title) : 'gray'}>{displayedCount}</Badge>
       </div>
       <div className="mt-4 grid gap-3">
         {rows.length ? rows.map((row, index) => (
@@ -998,9 +1047,12 @@ export default function UserTodayPanel() {
   }
 
   const counts = data.marketIntelligence ?? { official: data.officialPicks, aiLeans: 0, watchlist: 0, avoid: 0 }
-  const aiLeanRows = aiResults.filter((row) => row.marketIntelligenceCategory === 'ai_lean').slice(0, 3)
-  const watchRows = aiResults.filter((row) => row.marketIntelligenceCategory === 'watchlist').slice(0, 3)
-  const avoidRows = aiResults.filter((row) => row.marketIntelligenceCategory === 'avoid').slice(0, 3)
+  const aiLeanRows = aiResults.filter((row) => intelligenceCategory(row) === 'ai_lean').slice(0, 3)
+  const categorySourceRows = Array.from(
+    new Map([...aiResults, ...mostLikely, ...bestValue].map((row, index) => [opportunityKey(row, index), row])).values()
+  )
+  const watchRows = categorySourceRows.filter((row) => intelligenceCategory(row) === 'watchlist').slice(0, 3)
+  const avoidRows = categorySourceRows.filter((row) => intelligenceCategory(row) === 'avoid').slice(0, 3)
 
   return (
     <section className="space-y-6">
@@ -1040,9 +1092,9 @@ export default function UserTodayPanel() {
         emptyDetail={data.sections?.bestValue?.reason ?? 'The AI did not find a grounded positive-value opportunity that should be highlighted. High probability and good value remain separate.'}
       />
       <section className="grid gap-4 lg:grid-cols-3">
-        <InsightList title="AI Leans" rows={aiLeanRows} empty="No AI Leans are currently grounded by the board." />
-        <InsightList title="Watchlist" rows={watchRows} empty="No watchlist games need monitoring right now." />
-        <InsightList title="Avoid" rows={avoidRows} empty="No avoid explanations are currently attached to visible candidates." />
+        <InsightList title="AI Leans" rows={aiLeanRows} count={counts.aiLeans} empty="No AI Leans are currently grounded by the board." />
+        <InsightList title="Watchlist" rows={watchRows} count={counts.watchlist} empty={counts.watchlist ? 'Watchlist markets are counted on the board; detailed rows are outside the visible top opportunity set.' : 'No watchlist games need monitoring right now.'} />
+        <InsightList title="Avoid" rows={avoidRows} count={counts.avoid} empty={counts.avoid ? 'Avoid markets are counted on the board; detailed rows are outside the visible top opportunity set.' : 'No avoid explanations are currently attached to visible candidates.'} />
       </section>
       <HistoryCard data={data} />
       <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
