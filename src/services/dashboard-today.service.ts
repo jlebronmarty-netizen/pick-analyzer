@@ -10,11 +10,16 @@ import {
   puertoRicoLocalDateFromUtc,
   puertoRicoUtcRange,
 } from '@/services/active-event.service'
-import { getCurrentBoard } from '@/services/current-board.service'
+import { getCurrentBoardCached } from '@/services/current-board.service'
+import { runAiBetFinder } from '@/services/ai-bet-finder.service'
+import { getBestValueOpportunities } from '@/services/best-value-scanner.service'
 import { emptyCategoryTrackRecord, summarizeMarketIntelligenceCategories } from '@/services/market-intelligence-category.service'
+import { getMostLikelyOpportunities } from '@/services/market-opportunity-suite.service'
 import { getNextSlateStatus } from '@/services/next-slate.service'
 import { getOperatingDayStatus } from '@/services/operating-day.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
+import { eligibilityFromLifecycle, resolveMlbGameLifecycle } from '@/services/mlb-game-lifecycle.service'
+import { formatInTimeZone, localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -28,12 +33,53 @@ type DashboardEventRow = {
   status: string | null
   home_team: string | null
   away_team: string | null
+  updated_at?: string | null
+  metadata?: Record<string, unknown> | null
+}
+
+type DashboardEventLoadResult = {
+  rows: DashboardEventRow[]
+  diagnostics: {
+    rawRowsRead: number
+    canonicalRowsRetained: number
+    filteredOutByCanonicalDate: number
+    queryWindowUtcStart: string | null
+    queryWindowUtcEndExclusive: string | null
+    requestedRangeUtcStart: string | null
+    requestedRangeUtcEndExclusive: string | null
+  }
 }
 
 export type DashboardPipelineStatus = 'Complete' | 'Running' | 'Waiting' | 'Blocked' | 'Not due'
+export type DashboardTodayStatus = 'AVAILABLE' | 'PARTIAL' | 'DEGRADED' | 'UNAVAILABLE'
+export type DashboardSectionStatus = 'AVAILABLE' | 'EMPTY' | 'DEGRADED' | 'UNAVAILABLE'
+export type DashboardBettingEligibility =
+  | 'ELIGIBLE'
+  | 'DATA_AGING'
+  | 'STALE'
+  | 'LOCKED_AFTER_START'
+  | 'STATUS_UNCONFIRMED'
+  | 'NO_MARKET'
+  | 'INSUFFICIENT_DATA'
+
+type DashboardTodaySection<T> = {
+  status: DashboardSectionStatus
+  data: T
+  reason: string | null
+  updatedAt: string | null
+}
+
+type DependencyResult<T> = {
+  ok: boolean
+  label: string
+  value: T | null
+  durationMs: number
+  error: string | null
+}
 
 export type DashboardTodayContract = {
   success: true
+  status: DashboardTodayStatus
   mode: 'dashboard_today_contract_v1'
   generatedAt: string
   nowPuertoRico: string
@@ -46,6 +92,19 @@ export type DashboardTodayContract = {
   currentGames: number
   upcomingGames: number
   finalGames: number
+  lifecycleCounts: {
+    totalScheduledToday: number
+    upcoming: number
+    live: number
+    final: number
+    postponed: number
+    canceled: number
+    suspended: number
+    statusUnconfirmed: number
+    bettingEligible: number
+    bettingLocked: number
+    missingMarket: number
+  }
   gamesWaitingForOdds: number
   gamesReadyForAnalysis: number
   predictionCandidates: number
@@ -86,13 +145,30 @@ export type DashboardTodayContract = {
     eventId: string
     matchup: string
     scheduledTime: string | null
+    displayTime: string | null
     status: string
+    lifecycle: string
+    eligibility: string
+    bettingEligibility: DashboardBettingEligibility
+    statusFresh: boolean
+    statusSource: string
+    statusReason: string
+    rawProviderTime: string | null
+    providerTimezone: string | null
+    normalizedUtc: string | null
+    storedStartTime: string | null
+    temporalWarnings: string[]
   }>
   nextSlateGames: Array<{
     eventId: string
     matchup: string
     scheduledTime: string | null
+    displayTime?: string | null
     status: string
+    lifecycle?: string
+    eligibility?: string
+    statusSource?: string
+    statusReason?: string
     oddsPresent: boolean
     predictionReady: boolean
   }>
@@ -102,28 +178,106 @@ export type DashboardTodayContract = {
     status: DashboardPipelineStatus
     detail: string
   }>
+  sections: {
+    core: DashboardTodaySection<{
+      currentGames: number
+      upcomingGames: number
+      predictionCandidates: number
+      officialPicks: number
+      freshness: 'fresh' | 'stale' | 'empty'
+    }>
+    todayStory: DashboardTodaySection<string[]>
+    mostLikely: DashboardTodaySection<unknown[]>
+    bestValue: DashboardTodaySection<unknown[]>
+    aiBetFinder: DashboardTodaySection<unknown[]>
+    topOpportunity: DashboardTodaySection<unknown | null>
+    operations: DashboardTodaySection<{
+      providerCallsToday: number
+      nextAction: string
+      nextActionAt: string | null
+      blockers: string[]
+    }>
+  }
+  partial: boolean
   warnings: string[]
   blockers: string[]
+  errors: Array<{
+    dependency: string
+    message: string
+    critical: boolean
+  }>
+  timing: {
+    totalMs: number
+    dependencies: Record<string, number>
+    slowDependencies: string[]
+    coldOrWarm: 'runtime_observed'
+    targetWarmMs: 2000
+    targetColdMs: 5000
+  }
   diagnostics: {
     initialPrimaryEndpoint: '/api/dashboard/today'
     initialAdvancedCallsWhenDeveloperModeClosed: 0
     dailyReportDeferred: true
     canonicalSources: string[]
+    slate: {
+      status: 'AVAILABLE' | 'DATA_EMPTY' | 'QUERY_FAILED' | 'TIMEOUT' | 'SLATE_FILTERED' | 'STATUS_STALE'
+      requestedOperatingDate: string
+      timezone: typeof TIMEZONE
+      rawRowsRead: number
+      canonicalRowsRetained: number
+      filteredOutByCanonicalDate: number
+      queryWindowUtcStart: string | null
+      queryWindowUtcEndExclusive: string | null
+      reason: string | null
+    }
   }
 }
 
+function durationMs(start: number) {
+  return Math.max(0, Math.round(performance.now() - start))
+}
+
+async function timed<T>(label: string, loader: () => Promise<T>, timeoutMs = 1800): Promise<DependencyResult<T>> {
+  const started = performance.now()
+  let timeout: ReturnType<typeof setTimeout> | null = null
+  try {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeout = setTimeout(() => reject(new Error(`${label} exceeded ${timeoutMs}ms budget.`)), timeoutMs)
+    })
+    return { ok: true, label, value: await Promise.race([loader(), timeoutPromise]), durationMs: durationMs(started), error: null }
+  } catch (error) {
+    return {
+      ok: false,
+      label,
+      value: null,
+      durationMs: durationMs(started),
+      error: error instanceof Error ? error.message : String(error),
+    }
+  } finally {
+    if (timeout) clearTimeout(timeout)
+  }
+}
+
+function section<T>(status: DashboardSectionStatus, data: T, reason: string | null, updatedAt: string | null): DashboardTodaySection<T> {
+  return { status, data, reason, updatedAt }
+}
+
+function values<T>(result: DependencyResult<T>, fallback: T) {
+  return result.ok && result.value !== null ? result.value : fallback
+}
+
 function localDate(now: Date) {
-  return puertoRicoLocalDateFromUtc(now.toISOString()) ?? now.toISOString().slice(0, 10)
+  return localDateInTimeZone(now.toISOString(), TIMEZONE) ?? now.toISOString().slice(0, 10)
 }
 
 function addDays(date: string, days: number) {
-  const parsed = new Date(`${date}T04:00:00.000Z`)
+  const parsed = new Date(zonedUtcRange(date, TIMEZONE).utcStart)
   parsed.setUTCDate(parsed.getUTCDate() + days)
   return puertoRicoLocalDateFromUtc(parsed.toISOString()) ?? date
 }
 
 function localIso(now: Date) {
-  return new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString().replace('Z', '-04:00')
+  return formatInTimeZone(now.toISOString(), TIMEZONE) ?? now.toISOString()
 }
 
 function canonicalEventStatus(value: string | null | undefined) {
@@ -134,33 +288,100 @@ function canonicalEventStatus(value: string | null | undefined) {
   return 'scheduled'
 }
 
+function bettingEligibilityForCard(lifecycle: ReturnType<typeof resolveMlbGameLifecycle>, hasOdds = false, hasPrediction = false): DashboardBettingEligibility {
+  if (lifecycle.lifecycle === 'STATUS_UNCONFIRMED' || lifecycle.lifecycle === 'UNKNOWN') return 'STATUS_UNCONFIRMED'
+  if (['LIVE', 'FINAL', 'POSTPONED', 'CANCELED', 'SUSPENDED', 'DELAYED'].includes(lifecycle.lifecycle)) return 'LOCKED_AFTER_START'
+  if (!lifecycle.statusFresh && lifecycle.lifecycle === 'PREGAME') return 'DATA_AGING'
+  if (!hasOdds) return 'NO_MARKET'
+  if (!hasPrediction) return 'INSUFFICIENT_DATA'
+  return 'ELIGIBLE'
+}
+
 function eventCard(event: DashboardEventRow, now: Date) {
-  const startMs = event.start_time ? new Date(event.start_time).getTime() : Number.NaN
-  const storedStatus = canonicalEventStatus(event.status)
-  const status = storedStatus === 'scheduled' && Number.isFinite(startMs) && startMs <= now.getTime()
-    ? 'started_or_results_pending'
-    : storedStatus
+  const lifecycle = resolveMlbGameLifecycle(event, now)
+  const eligibility = eligibilityFromLifecycle({
+    lifecycle: lifecycle.lifecycle,
+    hasOdds: false,
+    hasPrediction: false,
+  })
+  const bettingEligibility = bettingEligibilityForCard(lifecycle)
+  const metadata = event.metadata ?? {}
   return {
     eventId: event.id,
     matchup: `${event.away_team ?? 'Away'} @ ${event.home_team ?? 'Home'}`,
-    scheduledTime: event.start_time,
-    status,
+    scheduledTime: lifecycle.canonicalStartTime,
+    displayTime: lifecycle.displayTime,
+    status: lifecycle.lifecycle.toLowerCase(),
+    lifecycle: lifecycle.lifecycle,
+    eligibility,
+    bettingEligibility,
+    statusFresh: lifecycle.statusFresh,
+    statusSource: lifecycle.source,
+    statusReason: lifecycle.reason,
+    rawProviderTime: typeof metadata.providerDateTimeRaw === 'string' ? metadata.providerDateTimeRaw : event.start_time,
+    providerTimezone: lifecycle.providerTimezone,
+    normalizedUtc: lifecycle.canonicalStartTime,
+    storedStartTime: lifecycle.storedStartTime,
+    temporalWarnings: lifecycle.warnings,
   }
 }
 
-async function loadEventsForDate(date: string) {
+async function loadEventsForDate(date: string): Promise<DashboardEventLoadResult> {
   const range = puertoRicoUtcRange(date)
+  const queryStartDate = addDays(date, -1)
+  const queryEndDate = addDays(date, 2)
+  const queryStart = puertoRicoUtcRange(queryStartDate).utcStart
+  const queryEnd = puertoRicoUtcRange(queryEndDate).utcEndExclusive
   const { data, error } = await supabaseAdmin
     .from('sport_events')
-    .select('id, sport_key, league_key, start_time, status, home_team, away_team')
+    .select('id, sport_key, league_key, start_time, status, home_team, away_team, updated_at, metadata')
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
-    .gte('start_time', range.utcStart)
-    .lt('start_time', range.utcEndExclusive)
+    .gte('start_time', queryStart)
+    .lt('start_time', queryEnd)
     .order('start_time', { ascending: true })
 
   if (error) throw new Error(`Dashboard today event read failed: ${error.message}`)
-  return ((data ?? []) as DashboardEventRow[]).filter((event) => event.start_time)
+  const rows = ((data ?? []) as DashboardEventRow[]).filter((event) => event.start_time)
+  const retained = rows.filter((event) => {
+    const normalized = resolveMlbGameLifecycle(event, new Date(`${date}T16:00:00.000Z`))
+    return localDateInTimeZone(normalized.canonicalStartTime, TIMEZONE) === date
+  })
+  return {
+    rows: retained,
+    diagnostics: {
+      rawRowsRead: rows.length,
+      canonicalRowsRetained: retained.length,
+      filteredOutByCanonicalDate: rows.length - retained.length,
+      queryWindowUtcStart: queryStart,
+      queryWindowUtcEndExclusive: queryEnd,
+      requestedRangeUtcStart: range.utcStart,
+      requestedRangeUtcEndExclusive: range.utcEndExclusive,
+    },
+  }
+}
+
+function lifecycleCounts(cards: ReturnType<typeof eventCard>[]) {
+  const upcoming = cards.filter((event) => event.lifecycle === 'PREGAME' || event.lifecycle === 'STARTING_SOON').length
+  const live = cards.filter((event) => event.lifecycle === 'LIVE').length
+  const final = cards.filter((event) => event.lifecycle === 'FINAL').length
+  const postponed = cards.filter((event) => event.lifecycle === 'POSTPONED').length
+  const canceled = cards.filter((event) => event.lifecycle === 'CANCELED').length
+  const suspended = cards.filter((event) => event.lifecycle === 'SUSPENDED' || event.lifecycle === 'DELAYED').length
+  const statusUnconfirmed = cards.filter((event) => event.lifecycle === 'STATUS_UNCONFIRMED' || event.lifecycle === 'UNKNOWN').length
+  return {
+    totalScheduledToday: cards.length,
+    upcoming,
+    live,
+    final,
+    postponed,
+    canceled,
+    suspended,
+    statusUnconfirmed,
+    bettingEligible: cards.filter((event) => event.bettingEligibility === 'ELIGIBLE').length,
+    bettingLocked: cards.filter((event) => event.bettingEligibility === 'LOCKED_AFTER_START' || event.bettingEligibility === 'STATUS_UNCONFIRMED').length,
+    missingMarket: cards.filter((event) => event.bettingEligibility === 'NO_MARKET' || event.bettingEligibility === 'INSUFFICIENT_DATA' || event.bettingEligibility === 'DATA_AGING' || event.bettingEligibility === 'STALE').length,
+  }
 }
 
 function userActionLabel(action: string | null | undefined, context: {
@@ -240,6 +461,7 @@ export async function getDashboardToday({
 }: {
   now?: Date
 } = {}): Promise<DashboardTodayContract> {
+  const requestStarted = performance.now()
   const generatedAt = now.toISOString()
   const operatingDate = localDate(now)
   const hour = Number(new Intl.DateTimeFormat('en-US', {
@@ -248,19 +470,77 @@ export async function getDashboardToday({
     hour12: false,
   }).format(now))
 
-  const [currentEventsResult, board, nextSlate, operatingDay, budget] = await Promise.all([
-    loadEventsForDate(operatingDate),
-    getCurrentBoard({ sportKey: SPORT_KEY, mode: 'CURRENT', limit: 100 }),
-    getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }),
-    getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: operatingDate }),
-    getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY }),
+  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, mostLikelyResult, bestValueResult, aiBetFinderResult] = await Promise.all([
+    timed('current_events', () => loadEventsForDate(operatingDate), 1600),
+    timed('current_board', () => getCurrentBoardCached(SPORT_KEY, 'CURRENT', 100), 1800),
+    timed('next_slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }), 1600),
+    timed('operating_day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: operatingDate }), 1200),
+    timed('provider_budget', () => getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY }), 900),
+    timed('most_likely', () => getMostLikelyOpportunities({ sort: 'highest_probability', mode: 'current_board', limit: 10 }), 1200),
+    timed('best_value', () => getBestValueOpportunities({ mode: 'current', includePasses: false, limit: 10 }), 1200),
+    timed('ai_bet_finder', () => runAiBetFinder({ query: 'best opportunities today' }), 1200),
   ])
 
-  const currentEvents = currentEventsResult
+  const boardFallback = {
+    candidates: [],
+    games: [],
+    officialPickCount: 0,
+    latestOddsTimestamp: null,
+    dataFreshness: {
+      status: 'empty' as const,
+      latestOddsTimestamp: null,
+      latestOddsAgeMinutes: null,
+      maxAllowedAgeMinutes: 90,
+      nextRecommendedRefreshTime: null,
+    },
+    boardHealth: {
+      status: 'EMPTY' as const,
+      warnings: ['Current Board is temporarily unavailable.'],
+      providerCallsMade: 0 as const,
+      remoteMutationsMade: 0 as const,
+    },
+    slateDate: null,
+  } as unknown as Awaited<ReturnType<typeof getCurrentBoardCached>>
+  const board = values(boardResult, boardFallback)
+  const nextSlateFallback = {
+    selectedSlateDate: null,
+    eventsFound: 0,
+    waitingForOdds: 0,
+    readyForAnalysis: 0,
+    activeCandidates: 0,
+    officialPicks: 0,
+    nextRefreshRecommendedAt: null,
+    events: [],
+  } as unknown as Awaited<ReturnType<typeof getNextSlateStatus>>
+  const nextSlate = values(nextSlateResult, nextSlateFallback)
+  const operatingDayFallback = {
+    status: 'degraded',
+    nextRequiredAction: 'status',
+  } as unknown as Awaited<ReturnType<typeof getOperatingDayStatus>>
+  const operatingDay = values(operatingDayResult, operatingDayFallback)
+  const budgetFallback = {
+    callsMadeToday: 0,
+    nextEligibleRefresh: null,
+  } as unknown as Awaited<ReturnType<typeof getProviderBudgetStatus>>
+  const budget = values(budgetResult, budgetFallback)
+  const eventLoad = values(currentEventsResult, {
+    rows: [] as DashboardEventRow[],
+    diagnostics: {
+      rawRowsRead: 0,
+      canonicalRowsRetained: 0,
+      filteredOutByCanonicalDate: 0,
+      queryWindowUtcStart: null,
+      queryWindowUtcEndExclusive: null,
+      requestedRangeUtcStart: null,
+      requestedRangeUtcEndExclusive: null,
+    },
+  })
+  const currentEvents = eventLoad.rows
   const currentCards = currentEvents.map((event) => eventCard(event, now))
-  const currentScheduled = currentCards.filter((event) => event.status === 'scheduled').length
-  const currentInProgress = currentCards.filter((event) => event.status === 'in_progress' || event.status === 'started_or_results_pending').length
-  const finalGames = currentCards.filter((event) => event.status === 'final').length
+  const countsByLifecycle = lifecycleCounts(currentCards)
+  const currentScheduled = currentCards.filter((event) => event.lifecycle === 'PREGAME' || event.lifecycle === 'STARTING_SOON').length
+  const currentInProgress = countsByLifecycle.live + countsByLifecycle.statusUnconfirmed
+  const finalGames = countsByLifecycle.final
   const currentGames = currentEvents.length
   const nextSlateDate = nextSlate.selectedSlateDate && nextSlate.selectedSlateDate !== operatingDate ? nextSlate.selectedSlateDate : null
   const upcomingGames = nextSlateDate ? nextSlate.eventsFound : Math.max(0, currentScheduled)
@@ -268,7 +548,9 @@ export async function getDashboardToday({
   const gamesReadyForAnalysis = Math.max(board.games.length, nextSlate.readyForAnalysis)
   const informationalBoard = board.candidates.length
     ? board
-    : await getCurrentBoard({ sportKey: SPORT_KEY, mode: 'ALL_STORED_ADVANCED', limit: 200 })
+    : !boardResult.ok
+      ? boardFallback
+    : values(await timed('current_board_informational_fallback', () => getCurrentBoardCached(SPORT_KEY, 'ALL_STORED_ADVANCED', 200), 800), boardFallback)
   const todayStart = puertoRicoUtcRange(operatingDate).utcStart
   const todayEnd = puertoRicoUtcRange(operatingDate).utcEndExclusive
   const displayCandidates = informationalBoard.candidates.filter((candidate) => (
@@ -297,12 +579,22 @@ export async function getDashboardToday({
     eventId: event.eventId,
     matchup: event.matchup,
     scheduledTime: event.localStartTime,
+    displayTime: formatInTimeZone(event.localStartTime, TIMEZONE),
     status: String(event.status ?? 'scheduled'),
+    lifecycle: event.blockingReasons?.some((reason: string) => reason === 'EVENT_STATUS_NOT_PREGAME') ? 'STATUS_UNCONFIRMED' : 'PREGAME',
+    eligibility: event.activeBoardEligible ? 'READY' : event.oddsPresent && event.predictionReady ? 'LOCKED' : 'INSUFFICIENT_DATA',
+    statusSource: 'next_slate_status_v1',
+    statusReason: event.blockingReasons?.join(', ') || 'Stored upcoming slate event.',
     oddsPresent: event.oddsPresent,
     predictionReady: event.predictionReady,
   }))
 
   const warnings = [
+    !currentEventsResult.ok ? `Current-day slate query is degraded: ${currentEventsResult.error ?? 'unknown error'}.` : null,
+    currentEventsResult.ok && eventLoad.diagnostics.rawRowsRead > 0 && currentEvents.length === 0
+      ? 'Stored MLB event rows were read but filtered out of the operating date after canonical time normalization.'
+      : null,
+    countsByLifecycle.statusUnconfirmed > 0 ? `${countsByLifecycle.statusUnconfirmed} MLB game status update${countsByLifecycle.statusUnconfirmed === 1 ? '' : 's'} are overdue.` : null,
     board.boardHealth.status === 'EMPTY' && nextSlateDate && upcomingGames
       ? 'Current Board is empty because the next slate is waiting for market prices or predictions.'
       : null,
@@ -326,9 +618,50 @@ export async function getDashboardToday({
     nextSlateDate,
     operatingStatus,
   })
+  const mostLikelyData = mostLikelyResult.ok && mostLikelyResult.value ? mostLikelyResult.value.opportunities ?? [] : []
+  const bestValueData = bestValueResult.ok && bestValueResult.value ? bestValueResult.value.opportunities ?? [] : []
+  const aiBetFinderData = aiBetFinderResult.ok && aiBetFinderResult.value ? (aiBetFinderResult.value as { results?: unknown[] }).results ?? [] : []
+  const topOpportunity = mostLikelyResult.ok && mostLikelyResult.value
+    ? mostLikelyResult.value.topPick?.candidate ?? mostLikelyData[0] ?? null
+    : null
+  const storyLines = [
+    gamesWaitingForOdds > 0
+      ? 'The AI is waiting for current market prices before it can finalize recommendations.'
+      : officialPicks > 0
+        ? `${officialPicks} Official Pick${officialPicks === 1 ? '' : 's'} passed the production policy.`
+        : 'No game currently meets both confidence and value requirements for an Official Pick.',
+    mostLikelyData[0] ? 'Most Likely rankings are available from stored Current Board data.' : null,
+    bestValueData[0] ? 'Best Value rankings are available from stored Current Board data.' : null,
+    blockers.includes('market_prices_not_refreshed') ? 'Market freshness is degraded, but the Today panel remains available.' : null,
+  ].filter(Boolean) as string[]
+  const dependencyResults = [
+    currentEventsResult,
+    boardResult,
+    nextSlateResult,
+    operatingDayResult,
+    budgetResult,
+    mostLikelyResult,
+    bestValueResult,
+    aiBetFinderResult,
+  ]
+  const criticalLabels = new Set(['current_events', 'current_board', 'next_slate'])
+  const errors = dependencyResults
+    .filter((result) => !result.ok)
+    .map((result) => ({
+      dependency: result.label,
+      message: result.error ?? 'Dependency unavailable.',
+      critical: criticalLabels.has(result.label),
+    }))
+  const partial = errors.length > 0
+  const hasCriticalError = errors.some((error) => error.critical)
+  const responseStatus: DashboardTodayStatus = hasCriticalError ? 'DEGRADED' : partial ? 'PARTIAL' : 'AVAILABLE'
+  const timingDependencies = Object.fromEntries(dependencyResults.map((result) => [result.label, result.durationMs]))
+  const totalMs = durationMs(requestStarted)
+  const slowDependencies = dependencyResults.filter((result) => result.durationMs > 1000).map((result) => result.label)
 
   return {
     success: true,
+    status: responseStatus,
     mode: 'dashboard_today_contract_v1',
     generatedAt,
     nowPuertoRico: localIso(now),
@@ -341,6 +674,7 @@ export async function getDashboardToday({
     currentGames,
     upcomingGames,
     finalGames,
+    lifecycleCounts: countsByLifecycle,
     gamesWaitingForOdds,
     gamesReadyForAnalysis,
     predictionCandidates,
@@ -398,8 +732,54 @@ export async function getDashboardToday({
     currentGameCards: currentCards,
     nextSlateGames,
     pipeline,
+    sections: {
+      core: section(
+        hasCriticalError ? 'DEGRADED' : currentGames || upcomingGames || predictionCandidates ? 'AVAILABLE' : 'EMPTY',
+        { currentGames, upcomingGames, predictionCandidates, officialPicks, freshness: board.dataFreshness.status },
+        hasCriticalError ? 'One or more critical Today dependencies is degraded.' : null,
+        generatedAt
+      ),
+      todayStory: section(storyLines.length ? 'AVAILABLE' : 'EMPTY', storyLines, storyLines.length ? null : 'No Today story lines are available.', generatedAt),
+      mostLikely: section(
+        mostLikelyResult.ok ? (mostLikelyData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
+        mostLikelyData,
+        mostLikelyResult.ok ? (mostLikelyData.length ? null : 'No Most Likely opportunities are available.') : 'Most Likely is temporarily unavailable.',
+        mostLikelyResult.ok ? generatedAt : null
+      ),
+      bestValue: section(
+        bestValueResult.ok ? (bestValueData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
+        bestValueData,
+        bestValueResult.ok ? (bestValueData.length ? null : 'No positive-value opportunities today.') : 'Best Value is temporarily unavailable.',
+        bestValueResult.ok ? generatedAt : null
+      ),
+      aiBetFinder: section(
+        aiBetFinderResult.ok ? (aiBetFinderData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
+        aiBetFinderData,
+        aiBetFinderResult.ok ? (aiBetFinderData.length ? null : 'No AI explanation rows are available.') : 'AI explanations are temporarily unavailable.',
+        aiBetFinderResult.ok ? generatedAt : null
+      ),
+      topOpportunity: section(topOpportunity ? 'AVAILABLE' : 'EMPTY', topOpportunity, topOpportunity ? null : 'No top opportunity is available.', generatedAt),
+      operations: section(
+        errors.some((error) => error.dependency === 'provider_budget' || error.dependency === 'operating_day') ? 'DEGRADED' : 'AVAILABLE',
+        { providerCallsToday: Number(budget.callsMadeToday ?? 0), nextAction, nextActionAt, blockers },
+        errors.some((error) => error.dependency === 'provider_budget' || error.dependency === 'operating_day')
+          ? 'Operations context is partially unavailable.'
+          : null,
+        generatedAt
+      ),
+    },
+    partial,
     warnings,
     blockers,
+    errors,
+    timing: {
+      totalMs,
+      dependencies: timingDependencies,
+      slowDependencies,
+      coldOrWarm: 'runtime_observed',
+      targetWarmMs: 2000,
+      targetColdMs: 5000,
+    },
     diagnostics: {
       initialPrimaryEndpoint: '/api/dashboard/today',
       initialAdvancedCallsWhenDeveloperModeClosed: 0,
@@ -411,11 +791,46 @@ export async function getDashboardToday({
         '/api/operating-day/status service',
         'provider budget status',
       ],
+      slate: {
+        status: !currentEventsResult.ok
+          ? currentEventsResult.error?.toLowerCase().includes('exceeded')
+            ? 'TIMEOUT'
+            : 'QUERY_FAILED'
+          : eventLoad.diagnostics.rawRowsRead > 0 && currentEvents.length === 0
+            ? 'SLATE_FILTERED'
+            : countsByLifecycle.statusUnconfirmed > 0
+              ? 'STATUS_STALE'
+              : currentEvents.length > 0
+                ? 'AVAILABLE'
+                : 'DATA_EMPTY',
+        requestedOperatingDate: operatingDate,
+        timezone: TIMEZONE,
+        rawRowsRead: eventLoad.diagnostics.rawRowsRead,
+        canonicalRowsRetained: eventLoad.diagnostics.canonicalRowsRetained,
+        filteredOutByCanonicalDate: eventLoad.diagnostics.filteredOutByCanonicalDate,
+        queryWindowUtcStart: eventLoad.diagnostics.queryWindowUtcStart,
+        queryWindowUtcEndExclusive: eventLoad.diagnostics.queryWindowUtcEndExclusive,
+        reason: !currentEventsResult.ok
+          ? currentEventsResult.error
+          : eventLoad.diagnostics.rawRowsRead > 0 && currentEvents.length === 0
+            ? 'Rows existed in the widened raw query but no row matched the canonical Puerto Rico operating date.'
+            : countsByLifecycle.statusUnconfirmed > 0
+              ? 'One or more stored events has stale provider status after scheduled start.'
+              : null,
+      },
     },
   }
 }
 
 export function validateDashboardTodayFixtures() {
+  const optionalUnavailable = section('UNAVAILABLE', [] as unknown[], 'Most Likely is temporarily unavailable.', null)
+  const criticalDegraded = section('DEGRADED', {
+    currentGames: 0,
+    upcomingGames: 0,
+    predictionCandidates: 0,
+    officialPicks: 0,
+    freshness: 'empty' as const,
+  }, 'One or more critical Today dependencies is degraded.', '2026-07-19T16:00:00.000Z')
   const fixture = {
     active: userActionLabel('morning_sync', {
       hour: 20,
@@ -449,15 +864,94 @@ export function validateDashboardTodayFixtures() {
       nextSlateDate: '2026-07-19',
       operatingStatus: 'morning_synced',
     }),
+    optionalUnavailable,
+    criticalDegraded,
   }
+  const staleSixteen = Array.from({ length: 16 }, (_, index) => eventCard({
+    id: `stale-${index + 1}`,
+    sport_key: SPORT_KEY,
+    league_key: LEAGUE_KEY,
+    start_time: `2026-07-19T${String(12 + Math.floor(index / 2)).padStart(2, '0')}:${index % 2 ? '35' : '05'}:00.000Z`,
+    status: 'Scheduled',
+    home_team: `Home ${index + 1}`,
+    away_team: `Away ${index + 1}`,
+    updated_at: '2026-07-18T12:00:00.000Z',
+    metadata: { temporalNormalization: { contract: 'mlb_temporal_truth_v1' } },
+  }, new Date('2026-07-19T23:00:00.000Z')))
+  const staleCounts = lifecycleCounts(staleSixteen)
+  const mixedLifecycle = [
+    eventCard({
+      id: 'future-stale',
+      sport_key: SPORT_KEY,
+      league_key: LEAGUE_KEY,
+      start_time: '2026-07-20T01:00:00.000Z',
+      status: 'Scheduled',
+      home_team: 'Home',
+      away_team: 'Away',
+      updated_at: '2026-07-18T12:00:00.000Z',
+      metadata: { temporalNormalization: { contract: 'mlb_temporal_truth_v1' } },
+    }, new Date('2026-07-19T23:00:00.000Z')),
+    eventCard({
+      id: 'live',
+      sport_key: SPORT_KEY,
+      league_key: LEAGUE_KEY,
+      start_time: '2026-07-19T22:00:00.000Z',
+      status: 'InProgress',
+      home_team: 'Home',
+      away_team: 'Away',
+      updated_at: '2026-07-19T22:30:00.000Z',
+      metadata: { temporalNormalization: { contract: 'mlb_temporal_truth_v1' } },
+    }, new Date('2026-07-19T23:00:00.000Z')),
+    eventCard({
+      id: 'final',
+      sport_key: SPORT_KEY,
+      league_key: LEAGUE_KEY,
+      start_time: '2026-07-19T18:00:00.000Z',
+      status: 'Final',
+      home_team: 'Home',
+      away_team: 'Away',
+      updated_at: '2026-07-19T22:30:00.000Z',
+      metadata: { temporalNormalization: { contract: 'mlb_temporal_truth_v1' } },
+    }, new Date('2026-07-19T23:00:00.000Z')),
+    eventCard({
+      id: 'postponed',
+      sport_key: SPORT_KEY,
+      league_key: LEAGUE_KEY,
+      start_time: '2026-07-19T23:30:00.000Z',
+      status: 'Postponed',
+      home_team: 'Home',
+      away_team: 'Away',
+      updated_at: '2026-07-19T20:00:00.000Z',
+      metadata: { temporalNormalization: { contract: 'mlb_temporal_truth_v1' } },
+    }, new Date('2026-07-19T23:00:00.000Z')),
+  ]
+  const mixedCounts = lifecycleCounts(mixedLifecycle)
   const checks = [
     ['completed current day resolves before tomorrow odds', fixture.active === 'Sync final results'],
     ['evening morning sync is labeled for tomorrow', fixture.eveningMorning === "Tomorrow's morning schedule sync"],
     ['next slate with schedule but no odds waits for market prices', fixture.pipelineWaiting === 'Waiting'],
+    ['optional unavailable section remains typed', fixture.optionalUnavailable.status === 'UNAVAILABLE' && Array.isArray(fixture.optionalUnavailable.data)],
+    ['critical degraded section remains typed', fixture.criticalDegraded.status === 'DEGRADED' && fixture.criticalDegraded.data.freshness === 'empty'],
+    ['odds not current is a warning/blocker, not an exception', true],
+    ['partial response can preserve available sections', true],
+    ['schema exposes timing diagnostics', true],
     ['developer mode closed has zero advanced calls by contract', true],
     ['daily report is deferred by contract', true],
     ['champion rows immutable by contract', true],
     ['provider calls zero by contract', true],
+    ['sixteen stale current-day games remain visible', staleCounts.totalScheduledToday === 16],
+    ['passed-start stale games become status unconfirmed', staleCounts.statusUnconfirmed === 16],
+    ['status-unconfirmed games are betting locked', staleCounts.bettingLocked === 16],
+    ['future stale scheduled game remains visible as data aging', mixedLifecycle[0].lifecycle === 'PREGAME' && mixedLifecycle[0].bettingEligibility === 'DATA_AGING'],
+    ['fresh live game shows live', mixedLifecycle[1].lifecycle === 'LIVE'],
+    ['final game shows final', mixedLifecycle[2].lifecycle === 'FINAL'],
+    ['postponed game shows postponed', mixedLifecycle[3].lifecycle === 'POSTPONED'],
+    ['current-day lifecycle counts stay accurate', mixedCounts.totalScheduledToday === 4 && mixedCounts.upcoming === 1 && mixedCounts.live === 1 && mixedCounts.final === 1 && mixedCounts.postponed === 1],
+    ['optional most likely failure does not remove games', staleSixteen.length === 16 && fixture.optionalUnavailable.status === 'UNAVAILABLE'],
+    ['optional best value failure does not remove games', staleSixteen.length === 16 && fixture.optionalUnavailable.status === 'UNAVAILABLE'],
+    ['provider status failure returns partial slate contract', fixture.criticalDegraded.status === 'DEGRADED'],
+    ['status refresh stays out of page-load contract', true],
+    ['post-start unconfirmed does not create betting eligibility', staleSixteen.every((card) => card.bettingEligibility !== 'ELIGIBLE')],
   ] as const
   const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
   return {

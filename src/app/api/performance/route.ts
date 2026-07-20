@@ -13,6 +13,11 @@ export async function GET(request: NextRequest) {
       publicView: data.aiBrain.publicView,
       internalView: data.aiBrain.internalView,
       aiBrain: data.aiBrain,
+      sports: data.sports,
+      reportCards: data.reportCards,
+      trendAnalysis: data.trendAnalysis,
+      evolutionSnapshots: data.evolutionSnapshots,
+      performanceTimeline: data.performanceTimeline,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
     })

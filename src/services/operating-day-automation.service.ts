@@ -1,14 +1,23 @@
 import 'server-only'
 
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getCurrentBoard } from '@/services/current-board.service'
 import { getNextSlateStatus } from '@/services/next-slate.service'
 import { getOperatingDayStatus } from '@/services/operating-day.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
+import { resolveMlbGameLifecycle } from '@/services/mlb-game-lifecycle.service'
+import { zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const TIMEZONE = 'America/Puerto_Rico'
 
-function puertoRicoNow(now = new Date()) {
-  return new Date(now.getTime() - 4 * 60 * 60 * 1000)
+function hourInTimezone(timezone: string, now = new Date()) {
+  const hour = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    hour: '2-digit',
+    hour12: false,
+  }).formatToParts(now).find((part) => part.type === 'hour')?.value
+  const parsed = Number(hour === '24' ? '0' : hour)
+  return Number.isFinite(parsed) ? parsed : now.getUTCHours()
 }
 
 function stageForHour(hour: number) {
@@ -19,10 +28,28 @@ function stageForHour(hour: number) {
   return { stage: 'pregame_or_lock_window', action: 'final_refresh' }
 }
 
+async function statusRefreshDue(selectedDate: string | null, now: Date) {
+  if (!selectedDate) return { due: false, staleStatusCount: 0, eventsChecked: 0 }
+  const range = zonedUtcRange(selectedDate, TIMEZONE)
+  const { data, error } = await supabaseAdmin
+    .from('sport_events')
+    .select('id, sport_key, league_key, start_time, status, updated_at, metadata')
+    .eq('sport_key', 'baseball_mlb')
+    .eq('league_key', 'mlb')
+    .gte('start_time', range.utcStart)
+    .lt('start_time', range.utcEndExclusive)
+  if (error) return { due: true, staleStatusCount: 0, eventsChecked: 0, error: error.message }
+  const events = (data ?? []) as Array<{ id: string; sport_key: string; league_key: string | null; start_time: string | null; status: string | null; updated_at: string | null; metadata: Record<string, unknown> | null }>
+  const staleStatusCount = events.filter((event) => {
+    const lifecycle = resolveMlbGameLifecycle(event, now)
+    return lifecycle.lifecycle === 'STATUS_UNCONFIRMED' || (!lifecycle.statusFresh && ['PREGAME', 'STARTING_SOON'].includes(lifecycle.lifecycle))
+  }).length
+  return { due: staleStatusCount > 0, staleStatusCount, eventsChecked: events.length }
+}
+
 export async function getOperatingDayAutomationStatus() {
   const now = new Date()
-  const local = puertoRicoNow(now)
-  const stage = stageForHour(local.getUTCHours())
+  const stage = stageForHour(hourInTimezone(TIMEZONE, now))
   const [slate, budget, board] = await Promise.all([
     getNextSlateStatus({ sportKey: 'baseball_mlb', leagueKey: 'mlb' }),
     getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: 'baseball_mlb' }),
@@ -31,11 +58,14 @@ export async function getOperatingDayAutomationStatus() {
   const operatingDay = slate.selectedSlateDate
     ? await getOperatingDayStatus({ sportKey: 'baseball_mlb', leagueKey: 'mlb', selectedDate: slate.selectedSlateDate })
     : null
+  const statusDue = await statusRefreshDue(slate.selectedSlateDate, now)
   const operatingDayRecord = (operatingDay ?? {}) as Record<string, unknown>
   const timestamps = ((operatingDayRecord.timestamps ?? {}) as Record<string, unknown>)
   const staleEvents = slate.events.filter((event) => !event.oddsPresent || !event.predictionReady).length
   const nextAction =
-    slate.status === 'waiting_for_odds' || slate.status === 'waiting_for_predictions'
+    statusDue.due
+      ? 'status_refresh'
+      : slate.status === 'waiting_for_odds' || slate.status === 'waiting_for_predictions'
       ? 'prepare_next_slate'
       : slate.status === 'ready_for_analysis' && staleEvents === 0
         ? 'status'
@@ -97,6 +127,13 @@ export async function getOperatingDayAutomationStatus() {
     lastAttemptedRefresh: budget.lastProviderCall,
     lastSuccessfulRefresh: budget.lastProviderCall,
     nextAction,
+    statusRefresh: {
+      provider: 'mlb_stats_api',
+      providerCheckRequired: statusDue.due,
+      staleStatusCount: statusDue.staleStatusCount,
+      eventsChecked: statusDue.eventsChecked,
+      failureReason: 'error' in statusDue ? statusDue.error : null,
+    },
     nextScheduledTime: budget.nextEligibleRefresh,
     eventsNearingLock: slate.events.filter((event) => {
       const start = event.localStartTime ? new Date(event.localStartTime).getTime() : Number.NaN

@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { normalizeSportsDataIoMlbGameDateTime } from '@/services/provider-time-normalization.service'
 import { idempotencyKey } from '@/services/sync-reliability.service'
 import { safeExistingValueSet } from '@/services/safe-supabase-preflight.service'
 import {
@@ -898,13 +899,7 @@ function teamKey(game: Record<string, unknown>, side: 'home' | 'away') {
 }
 
 function eventStart(game: Record<string, unknown>) {
-  const candidate =
-    safeString(game.DateTimeUTC) ||
-    safeString(game.DateTime) ||
-    safeString(game.Day) ||
-    safeString(game.GameDate)
-  const parsed = new Date(candidate)
-  return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null
+  return normalizeSportsDataIoMlbGameDateTime(game).normalizedUtc
 }
 
 function eventStatus(value: unknown) {
@@ -973,7 +968,8 @@ function normalizeSeasonSchedule(payload: Record<string, unknown>[], season: str
 
   for (const game of payload) {
     const gameId = providerGameId(game)
-    const start = eventStart(game)
+    const timeNormalization = normalizeSportsDataIoMlbGameDateTime(game)
+    const start = timeNormalization.normalizedUtc
     const homeProviderId = providerTeamId(game, 'home')
     const awayProviderId = providerTeamId(game, 'away')
     const homeKey = teamKey(game, 'home')
@@ -1046,6 +1042,15 @@ function normalizeSeasonSchedule(payload: Record<string, unknown>[], season: str
       metadata: quarantineMetadata({
         entityType: 'event',
         providerStatus: game.Status ?? null,
+        providerDateTimeRaw: timeNormalization.raw,
+        providerTimezone: timeNormalization.providerTimezone,
+        temporalNormalization: {
+          contract: 'mlb_temporal_truth_v1',
+          source: timeNormalization.source,
+          classification: timeNormalization.classification,
+          normalizedUtc: timeNormalization.normalizedUtc,
+          warnings: timeNormalization.warnings,
+        },
         day: game.Day ?? null,
         doubleHeaderGame: game.DoubleHeaderGame ?? game.GameNumber ?? null,
         seasonType: game.SeasonType ?? null,

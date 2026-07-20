@@ -1,7 +1,7 @@
-import PerformanceClient from '@/components/performance/PerformanceClient'
+import PerformanceProductClient from '@/components/performance/PerformanceProductClient'
 
 export const dynamic = 'force-dynamic'
 
 export default function PerformancePage() {
-  return <PerformanceClient />
+  return <PerformanceProductClient />
 }

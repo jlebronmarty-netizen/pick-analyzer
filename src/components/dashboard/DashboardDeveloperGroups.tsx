@@ -44,6 +44,7 @@ const ProviderIntelligencePanel = dynamic(() => import('@/components/dashboard/P
 const MultiSportEnginePanel = dynamic(() => import('@/components/dashboard/MultiSportEnginePanel'))
 const ProviderAdapterSdkPanel = dynamic(() => import('@/components/dashboard/ProviderAdapterSdkPanel'))
 const SportsDataIoContractPanel = dynamic(() => import('@/components/dashboard/SportsDataIoContractPanel'))
+const SportsDataIoDiscoveryLabPanel = dynamic(() => import('@/components/dashboard/SportsDataIoDiscoveryLabPanel'))
 const FeatureStoreCorePanel = dynamic(() => import('@/components/dashboard/FeatureStoreCorePanel'))
 const MultiSportFeatureRegistryPanel = dynamic(() => import('@/components/dashboard/MultiSportFeatureRegistryPanel'))
 const NbaAdapterPanel = dynamic(() => import('@/components/dashboard/NbaAdapterPanel'))
@@ -71,6 +72,12 @@ const BasketballDataCoveragePanel = dynamic(() => import('@/components/dashboard
 const BsnIntelligencePanel = dynamic(() => import('@/components/dashboard/BsnIntelligencePanel'))
 const BsnPredictionPreviewPanel = dynamic(() => import('@/components/dashboard/BsnPredictionPreviewPanel'))
 const BsnModelMaturityPanel = dynamic(() => import('@/components/dashboard/BsnModelMaturityPanel'))
+const AdaptiveOperationsPanel = dynamic(() => import('@/components/dashboard/AdaptiveOperationsPanel'))
+const OperationsHealthPanel = dynamic(() => import('@/components/dashboard/OperationsHealthPanel'))
+const ProductionReadinessAuditPanel = dynamic(() => import('@/components/dashboard/ProductionReadinessAuditPanel'))
+const MlbMarketExpansionRoadmapPanel = dynamic(() => import('@/components/dashboard/MlbMarketExpansionRoadmapPanel'))
+const UniversalProjectionEnginePanel = dynamic(() => import('@/components/dashboard/UniversalProjectionEnginePanel'))
+const MlbTemporalHealthPanel = dynamic(() => import('@/components/dashboard/MlbTemporalHealthPanel'))
 
 export default function DashboardDeveloperGroups() {
   return (
@@ -81,6 +88,7 @@ export default function DashboardDeveloperGroups() {
       description="Technical panels are grouped here and only load when opened."
     >
       <DeveloperDetails title="Overview" description="Daily briefing, operating day, next slate and recommendation readiness.">
+        <ProductionReadinessAuditPanel />
         <DashboardQuickStats />
         <DashboardHeroPanel />
         <ProductionTodayPanel />
@@ -91,6 +99,7 @@ export default function DashboardDeveloperGroups() {
       </DeveloperDetails>
 
       <DeveloperDetails title="Markets" description="Market intelligence, opportunities, ticket state and AI command surfaces.">
+        <MlbMarketExpansionRoadmapPanel />
         <MarketIntelligenceSummaryPanel />
         <MlbProspectivePreviewPanel />
         <PlayOfTheDayPanel />
@@ -103,6 +112,7 @@ export default function DashboardDeveloperGroups() {
       </DeveloperDetails>
 
       <DeveloperDetails title="Model" description="Model evidence, feature contracts, prediction safety and simulation tools.">
+        <UniversalProjectionEnginePanel />
         <MlbPredictionEnginePanel />
         <PredictionEngineV4Panel />
         <ModelMetricsFrameworkPanel />
@@ -120,6 +130,9 @@ export default function DashboardDeveloperGroups() {
       </DeveloperDetails>
 
       <DeveloperDetails title="Data" description="Data quality, missing intelligence, runtime checks and sync reliability.">
+        <OperationsHealthPanel />
+        <MlbTemporalHealthPanel />
+        <AdaptiveOperationsPanel />
         <MlbMissingIntelligencePanel />
         <RuntimeObservabilityPanel />
         <SyncReliabilityPanel />
@@ -135,6 +148,7 @@ export default function DashboardDeveloperGroups() {
         <ProviderIntelligencePanel />
         <ProviderAdapterSdkPanel />
         <SportsDataIoContractPanel />
+        <SportsDataIoDiscoveryLabPanel />
       </DeveloperDetails>
 
       <DeveloperDetails title="Settlement" description="Settlement, portfolio and bankroll diagnostics.">

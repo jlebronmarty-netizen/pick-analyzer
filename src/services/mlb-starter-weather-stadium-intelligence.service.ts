@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -47,10 +48,7 @@ function sportsDataIoDate(date: string) {
 }
 
 function rangeForPuertoRicoDate(date: string) {
-  const start = new Date(`${date}T04:00:00.000Z`)
-  const end = new Date(start)
-  end.setUTCDate(end.getUTCDate() + 1)
-  return { utcStart: start.toISOString(), utcEndExclusive: end.toISOString() }
+  return zonedUtcRange(date, 'America/Puerto_Rico')
 }
 
 function providerGameId(event: EventRow) {

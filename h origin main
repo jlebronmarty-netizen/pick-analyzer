@@ -1,0 +1,69 @@
+warning: in the working copy of 'docs/MASTER_ROADMAP.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/MLB_AUTOMATION.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/MLB_DATA_FLOW.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/MLB_OPERATIONS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/PROJECT_STATUS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'docs/best-value-scanner-v1.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/api/cron/operating-day/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/api/dashboard/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/api/performance/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/app/performance/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/dashboard/DashboardDeveloperGroups.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/dashboard/DashboardShell.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/dashboard/UserTodayPanel.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/market-opportunities/BestValueTool.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/active-event.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/ai-bet-finder.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/ai-performance-center.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/autonomous-daily-operations.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/best-value-scanner.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/current-board.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/dashboard-today.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/market-intelligence-engine.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/market-opportunity-suite.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/mlb-games-payload-audit.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/mlb-model-platform.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/mlb-odds-coverage.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/mlb-starter-weather-stadium-intelligence.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/next-slate.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/operating-day-automation.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/operating-day.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/provider-budget.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/results-sync.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/sportsdataio-mlb-historical-import-executor.service.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/services/sportsdataio-mlb-prospective-preview.service.ts', LF will be replaced by CRLF the next time Git touches it
+ docs/MASTER_ROADMAP.md                             | 166 [32m+++++++[m
+ docs/MLB_AUTOMATION.md                             |  24 [32m+[m[31m-[m
+ docs/MLB_DATA_FLOW.md                              |  17 [32m+[m[31m-[m
+ docs/MLB_OPERATIONS.md                             |  37 [32m+[m[31m-[m
+ docs/PROJECT_STATUS.md                             |  38 [32m+[m[31m-[m
+ docs/best-value-scanner-v1.md                      |   2 [32m+[m[31m-[m
+ src/app/api/cron/operating-day/route.ts            |  19 [32m+[m[31m-[m
+ src/app/api/dashboard/route.ts                     |  95 [32m+++[m[31m-[m
+ src/app/api/performance/route.ts                   |   5 [32m+[m
+ src/app/performance/page.tsx                       |   4 [32m+[m[31m-[m
+ .../dashboard/DashboardDeveloperGroups.tsx         |  14 [32m+[m
+ src/components/dashboard/DashboardShell.tsx        |  19 [32m+[m[31m-[m
+ src/components/dashboard/UserTodayPanel.tsx        | 471 [32m++++++++++++++++[m[31m--[m
+ .../market-opportunities/BestValueTool.tsx         |  13 [32m+[m[31m-[m
+ src/services/active-event.service.ts               |  54 [32m+[m[31m-[m
+ src/services/ai-bet-finder.service.ts              |   9 [32m+[m[31m-[m
+ src/services/ai-performance-center.service.ts      | 113 [32m++++[m[31m-[m
+ .../autonomous-daily-operations.service.ts         |  20 [32m+[m[31m-[m
+ src/services/best-value-scanner.service.ts         |   9 [32m+[m[31m-[m
+ src/services/current-board.service.ts              |  23 [32m+[m[31m-[m
+ src/services/dashboard-today.service.ts            | 548 [32m++++++++++++++++++++[m[31m-[m
+ src/services/market-intelligence-engine.service.ts |   2 [32m+[m[31m-[m
+ src/services/market-opportunity-suite.service.ts   |   5 [32m+[m[31m-[m
+ src/services/mlb-games-payload-audit.service.ts    |   6 [32m+[m[31m-[m
+ src/services/mlb-model-platform.service.ts         |   6 [32m+[m[31m-[m
+ src/services/mlb-odds-coverage.service.ts          |   6 [32m+[m[31m-[m
+ ...starter-weather-stadium-intelligence.service.ts |   6 [32m+[m[31m-[m
+ src/services/next-slate.service.ts                 |  18 [32m+[m[31m-[m
+ src/services/operating-day-automation.service.ts   |  47 [32m+[m[31m-[m
+ src/services/operating-day.service.ts              | 305 [32m+++++++++++[m[31m-[m
+ src/services/provider-budget.service.ts            |   9 [32m+[m[31m-[m
+ src/services/results-sync.service.ts               | 500 [32m+++++++++++++++++++[m
+ ...ataio-mlb-historical-import-executor.service.ts |  21 [32m+[m[31m-[m
+ ...sportsdataio-mlb-prospective-preview.service.ts | 211 [32m+++++++[m[31m-[m
+ 34 files changed, 2624 insertions(+), 218 deletions(-)

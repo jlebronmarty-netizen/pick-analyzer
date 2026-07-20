@@ -81,7 +81,6 @@ function selectionLabel(item: Opportunity) {
 }
 
 export default function BestValueTool() {
-  const [includePasses, setIncludePasses] = useState(false)
   const [data, setData] = useState<Response | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -89,7 +88,7 @@ export default function BestValueTool() {
     async function load() {
       try {
         setError(null)
-        const response = await fetch(`/api/market-opportunities/best-value?includePasses=${includePasses}`, { cache: 'no-store' })
+        const response = await fetch('/api/market-opportunities/best-value', { cache: 'no-store' })
         const json = await response.json()
         if (!response.ok || !json.success) throw new Error(json.error?.message ?? 'Unable to load Best Value')
         setData(json)
@@ -98,7 +97,7 @@ export default function BestValueTool() {
       }
     }
     load()
-  }, [includePasses])
+  }, [])
 
   return (
     <main className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-slate-950 text-white">
@@ -112,10 +111,6 @@ export default function BestValueTool() {
               Value means positive EV and positive edge. Below-policy rows are separated as AI Leans, Watchlist or Avoid.
             </p>
           </div>
-          <label className="inline-flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm font-bold">
-            <input type="checkbox" checked={includePasses} onChange={(event) => setIncludePasses(event.target.checked)} />
-            Show passes
-          </label>
         </header>
 
         {error ? <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-red-200">DATA TEMPORARILY UNAVAILABLE</div> : null}
@@ -152,8 +147,8 @@ export default function BestValueTool() {
           </section>
         ) : (data?.opportunities ?? []).length === 0 ? (
           <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
-            <h2 className="text-2xl font-black">No opportunities available.</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-400">No eligible games currently have grounded odds and model probabilities. This page is not hiding official picks; there is no ranked input to show.</p>
+            <h2 className="text-2xl font-black">No positive-value opportunities today.</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-400">No current candidate has both positive EV and positive edge. High probability and good value remain separate.</p>
           </section>
         ) : (
           <section className="grid gap-4">

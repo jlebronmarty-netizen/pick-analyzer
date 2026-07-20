@@ -7,6 +7,7 @@ import {
   SPORTSDATAIO_MLB_DOCUMENTED_WEATHER_FIELDS,
   SPORTSDATAIO_MLB_PREVIOUSLY_AUDITED_WRONG_STARTER_FIELDS,
 } from '@/types/sportsdataio-mlb'
+import { zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -75,10 +76,7 @@ function safeString(value: unknown) {
 }
 
 function rangeForPuertoRicoDate(date: string) {
-  const start = new Date(`${date}T04:00:00.000Z`)
-  const end = new Date(start)
-  end.setUTCDate(end.getUTCDate() + 1)
-  return { utcStart: start.toISOString(), utcEndExclusive: end.toISOString() }
+  return zonedUtcRange(date, TIMEZONE)
 }
 
 function providerGameId(event: EventRow) {

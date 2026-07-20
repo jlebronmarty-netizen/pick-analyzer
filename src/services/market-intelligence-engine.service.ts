@@ -307,7 +307,7 @@ export async function getMarketIntelligence({
   const [currentBoard, mostLikely, bestValue, arbitrage] = await Promise.all([
     getCurrentBoardCached('baseball_mlb', 'CURRENT', 200),
     getMostLikelyOpportunities({ sort: 'highest_probability', limit: 100 }),
-    getBestValueOpportunities({ includePasses: true, limit: 100 }),
+    getBestValueOpportunities({ includePasses: false, limit: 100 }),
     getArbitrageOpportunities(),
   ])
   const fallbackBoard = currentBoard.candidates.length

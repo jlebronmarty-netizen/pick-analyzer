@@ -22,6 +22,7 @@ import {
   getProviderBudgetStatus,
   releaseProviderActionLock,
 } from '@/services/provider-budget.service'
+import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 type SafeResult<T> = { ok: true; value: T } | { ok: false; error: string }
 
@@ -403,7 +404,7 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
     safe('Current Board', () => getCurrentBoard({ sportKey: SPORT_KEY, mode: 'CURRENT', limit: 200 })),
     safe('Best Bets Today', () => getBestBetsToday({ sportKey: SPORT_KEY, limit: 100 })),
     safe('Most Likely', () => getMostLikelyOpportunities({ sort: 'highest_probability', limit: 100 })),
-    safe('Best Value', () => getBestValueOpportunities({ mode: 'current', includePasses: true, limit: 100 })),
+    safe('Best Value', () => getBestValueOpportunities({ mode: 'current', includePasses: false, limit: 100 })),
     safe('Operating Day Automation', () => getOperatingDayAutomationStatus()),
     safe('Provider Budget', () => getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY })),
     safe('Model Comparison', () => getMlbPredictionComparison({ selectedDate: requestedDate ?? '2026-07-17' })),
@@ -762,23 +763,12 @@ function selectedDateOrToday(value?: string | null) {
 }
 
 function localDateInTimezone(timezone: string, now = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(now)
-  const year = parts.find((part) => part.type === 'year')?.value
-  const month = parts.find((part) => part.type === 'month')?.value
-  const day = parts.find((part) => part.type === 'day')?.value
-  return year && month && day ? `${year}-${month}-${day}` : now.toISOString().slice(0, 10)
+  return localDateInTimeZone(now.toISOString(), timezone) ?? now.toISOString().slice(0, 10)
 }
 
 function utcRangeForPuertoRicoDate(date: string) {
-  const start = new Date(`${date}T04:00:00.000Z`)
-  const end = new Date(start)
-  end.setUTCDate(end.getUTCDate() + 1)
-  return { start: start.toISOString(), end: end.toISOString() }
+  const range = zonedUtcRange(date, TIMEZONE)
+  return { start: range.utcStart, end: range.utcEndExclusive }
 }
 
 function stageFromStatus(status: Awaited<ReturnType<typeof getAutonomousDailyOperationsStatus>>): AutonomousStage {

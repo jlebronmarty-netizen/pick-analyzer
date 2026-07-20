@@ -7,6 +7,7 @@ import { getFeatureStoreStatus } from '@/services/feature-store-core.service'
 import { getSharedSportPredictionEngineSdk } from '@/services/sport-prediction-engine-sdk.service'
 import { getModelCalibration } from '@/services/model-calibration.service'
 import { getCurrentBoard } from '@/services/current-board.service'
+import { getUniversalProjectionEngine } from '@/services/universal-projection-engine.service'
 
 const AIPEC_VERSION = 'universal_ai_performance_center_v1'
 
@@ -1045,9 +1046,11 @@ function maturityPipeline(rows: UniversalHistoryRow[], sport: { productionReady:
   }
 }
 
-function engineeringAdvisor(rows: UniversalHistoryRow[], providerReady: boolean) {
+function engineeringAdvisor(rows: UniversalHistoryRow[], providerReady: boolean, sportKey?: string | null) {
   const current = metrics(rows)
   const settled = rows.filter(isSettled).length
+  const includesMlb = sportKey === 'baseball_mlb' || (!sportKey && rows.some((row) => row.sportKey === 'baseball_mlb'))
+  const mlbMarketExpansionTask = 'Implement MLB Team Totals V1 as the next shadow-only market expansion after provider odds verification.'
   const weaknesses = [
     ...(settled < 30 ? ['Low settled sample'] : []),
     ...(current.dataSufficiency > 0 && current.dataSufficiency < 70 ? ['Insufficient data sufficiency'] : []),
@@ -1061,6 +1064,11 @@ function engineeringAdvisor(rows: UniversalHistoryRow[], providerReady: boolean)
     ...(current.featureQuality > 0 && current.featureQuality < 70 ? ['Improve feature coverage before production activation reviews.'] : []),
     ...(Math.abs(current.calibrationError) > 8 && settled >= 10 ? ['Review confidence calibration after additional settled samples.'] : []),
     ...(!providerReady ? ['Resolve registry/provider readiness blockers without adding AI Brain provider calls.'] : []),
+    ...(includesMlb ? [mlbMarketExpansionTask] : []),
+  ]
+  const highestImpactTasks = [
+    ...(includesMlb ? [mlbMarketExpansionTask] : []),
+    ...tasks.filter((task) => task !== mlbMarketExpansionTask),
   ]
   return {
     currentStrengths: [
@@ -1072,7 +1080,15 @@ function engineeringAdvisor(rows: UniversalHistoryRow[], providerReady: boolean)
     currentBlockers: weaknesses.map((item) => item.toLowerCase().replaceAll(' ', '_')),
     estimatedReadiness: trustLabel(trustScore(rows, providerReady).trustScore, settled),
     nextRecommendedImprovements: tasks,
-    highestImpactTasks: tasks.slice(0, 3),
+    highestImpactTasks: highestImpactTasks.slice(0, 3),
+    marketExpansionProgram: includesMlb ? {
+      highestPriorityTask: 'Implement Team Totals V1',
+      expectedProductValue: 'High',
+      estimatedEngineeringCost: 'Medium',
+      expectedOpportunityGrowth: 'About 30-32 additional shadow candidates on a 16-game slate after verified odds and gates; not a guarantee of official picks.',
+      requiredBeforeBuild: ['verified team-total odds', 'team-score settlement', 'historical team-total line snapshots', 'shadow-only readiness gate'],
+      guardrail: 'Does not lower official-pick standards or activate betting recommendations.',
+    } : null,
     evidencePolicy: 'Recommendations are derived only from measured samples, stored feature quality, settlement coverage, calibration error and registry/provider readiness.',
   }
 }
@@ -1315,6 +1331,19 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
   ])
   const allRows = [...stored.rows, ...bsn.rows]
   const sportFilter = options.sportKey && options.sportKey !== 'all' ? options.sportKey : null
+  const projectionEngine = await getUniversalProjectionEngine({ sportKey: sportFilter ?? 'baseball_mlb', dryRun: true }).catch((error) => ({
+    success: false,
+    apiStatus: 'ERROR',
+    mode: 'universal_projection_engine_v1',
+    generatedAt,
+    sportKey: sportFilter ?? 'baseball_mlb',
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    sportsbookDependency: false,
+    summary: { games: 0, projections: 0, team: 0, game: 0, pitcher: 0, batter: 0, ready: 0, limited: 0, blocked: 0, averageConfidence: null, averageFeatureQuality: null, averageDataSufficiency: null },
+    validation: { historyMetrics: { sampleSize: 0, mae: null, rmse: null, mape: null, bias: null }, shadowValidationStatus: 'ERROR' },
+    warnings: [error instanceof Error ? error.message : 'Projection engine unavailable'],
+  }))
   const rows = sportFilter ? allRows.filter((row) => row.sportKey === sportFilter) : allRows
   const enabledSports = getEnabledSports()
   const sportDashboards = enabledSports.map((sport) => {
@@ -1333,7 +1362,7 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
       trust: trustScore(sportRows, sport.productionReady || sport.key === 'basketball_bsn'),
       goals: goals(sportRows, sport.productionReady || sport.key === 'basketball_bsn', bsnReadiness),
       maturityPipeline: maturityPipeline(sportRows, sport, sport.productionReady || sport.key === 'basketball_bsn', bsnReadiness),
-      engineeringAdvisor: engineeringAdvisor(sportRows, sport.productionReady || sport.key === 'basketball_bsn'),
+      engineeringAdvisor: engineeringAdvisor(sportRows, sport.productionReady || sport.key === 'basketball_bsn', sport.key),
       readiness: {
         predictionReady: sportRows.length > 0 || sport.key === 'basketball_bsn',
         calibrationReady: Math.abs(sportMetrics.calibrationError) <= 10 && sportMetrics.settled >= 30,
@@ -1458,8 +1487,33 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
   const selectedMaturity = sportFilter
     ? sportDashboards.find((sport) => sport.sportKey === sportFilter)?.maturityPipeline ?? null
     : maturityPipeline(rows, { productionReady: true }, true, readinessScore)
-  const selectedAdvisor = engineeringAdvisor(rows, selectedProviderReady)
+  const selectedAdvisor = engineeringAdvisor(rows, selectedProviderReady, sportFilter)
   const selectedTrendAnalysis = buildTrendAnalysis(rows, existingSnapshots.rows, sportFilter)
+  const projectionSummary = projectionEngine.summary ?? {
+    games: 0,
+    projections: 0,
+    team: 0,
+    game: 0,
+    pitcher: 0,
+    batter: 0,
+    ready: 0,
+    limited: 0,
+    blocked: 0,
+    averageConfidence: null,
+    averageFeatureQuality: null,
+    averageDataSufficiency: null,
+  }
+  const projectionHistoryMetrics = projectionEngine.validation?.historyMetrics ?? {
+    sampleSize: 0,
+    mae: null,
+    rmse: null,
+    mape: null,
+    bias: null,
+  }
+  const projectionShadowStatus = projectionEngine.validation?.shadowValidationStatus ?? 'ERROR'
+  const projectionWarnings = Array.isArray(projectionEngine.warnings) ? projectionEngine.warnings : []
+  const projectionRecord = projectionEngine as Record<string, any>
+  const projectionIntegrity = projectionRecord.projectionHealth ?? {}
 
   return {
     success: true,
@@ -1543,9 +1597,53 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
           status: statusFromSamples(rows),
           historyPagination: stored.pagination,
           snapshotStore: existingSnapshots,
+          projectionEngine,
           providerCallsAdded: 0,
           externalDataAcquisitionAdded: 0,
         },
+      },
+      projectionHealth: {
+        mode: 'projection_health_v1',
+        status: projectionEngine.success ? projectionEngine.apiStatus : 'ERROR',
+        sportsbookIndependent: projectionEngine.sportsbookDependency === false,
+        projections: projectionSummary.projections,
+        validProjectionRate: projectionSummary.projections ? Math.round(((projectionIntegrity.validProjections ?? 0) / projectionSummary.projections) * 100) : null,
+        readyProjectionRate: projectionSummary.projections ? Math.round(((projectionSummary.ready ?? 0) / projectionSummary.projections) * 100) : null,
+        limitedProjectionRate: projectionSummary.projections ? Math.round(((projectionSummary.limited ?? 0) / projectionSummary.projections) * 100) : null,
+        blockedProjectionRate: projectionSummary.projections ? Math.round(((projectionSummary.blocked ?? 0) / projectionSummary.projections) * 100) : null,
+        identityResolutionRate: projectionIntegrity.identityResolutionRate ?? null,
+        starterResolutionRate: projectionIntegrity.starterResolutionRate ?? null,
+        duplicateIdCount: projectionIntegrity.duplicateIds ?? null,
+        plausibilityFailureCount: projectionIntegrity.plausibilityFailures ?? null,
+        teamDifferentiationRate: projectionIntegrity.teamDifferentiationRate ?? null,
+        projectionHistoryAvailability: projectionIntegrity.projectionHistoryAvailability ?? 'UNKNOWN',
+        settlementCoverage: projectionHistoryMetrics.sampleSize,
+        rankDistribution: Array.isArray(projectionRecord.projections)
+          ? ['ELITE', 'STRONG', 'MODERATE', 'LIMITED', 'BLOCKED'].map((tier) => ({
+              tier,
+              count: projectionRecord.projections.filter((item: Record<string, unknown>) => item.rankTier === tier).length,
+            }))
+          : [],
+        projectionFamilies: {
+          team: projectionSummary.team,
+          game: projectionSummary.game,
+          pitcher: projectionSummary.pitcher,
+          batter: projectionSummary.batter,
+        },
+        averageConfidence: projectionSummary.averageConfidence,
+        featureQuality: projectionSummary.averageFeatureQuality,
+        dataSufficiency: projectionSummary.averageDataSufficiency,
+        projectionAccuracy: {
+          sampleSize: projectionHistoryMetrics.sampleSize,
+          mae: projectionHistoryMetrics.mae,
+          rmse: projectionHistoryMetrics.rmse,
+          mape: projectionHistoryMetrics.mape,
+          bias: projectionHistoryMetrics.bias,
+        },
+        projectionDrift: 'Stored projection drift activates after projection history contains settled samples.',
+        projectionReadiness: projectionShadowStatus,
+        projectionEvolution: projectionHistoryMetrics.sampleSize >= 30 ? 'VALIDATING' : 'INSUFFICIENT_HISTORY',
+        warnings: projectionWarnings,
       },
       longTermEvolution: {
         registryDriven: true,
@@ -1675,6 +1773,13 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
       learning: 'read_only_learning_progress_metrics',
       calibration: 'success' in calibration && calibration.success === false ? calibration : (calibration as Awaited<ReturnType<typeof getModelCalibration>>).overall,
       currentBoard: board,
+      projectionEngine: {
+        mode: projectionEngine.mode,
+        sportsbookIndependent: projectionEngine.sportsbookDependency === false,
+        projections: projectionSummary.projections,
+        providerCallsMade: projectionEngine.providerCallsMade,
+        remoteMutationsMade: projectionEngine.remoteMutationsMade ?? 0,
+      },
       basketballPlatform: bsn.maturity?.integrations.basketballPlatform ?? null,
       mlbPlatform: 'read_only_prediction_history_and_current_board',
       multiSportEngine: 'sport_registry_driven',

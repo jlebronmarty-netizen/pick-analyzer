@@ -1,6 +1,8 @@
 'use client'
 
 import { ReactNode, useEffect, useMemo, useState } from 'react'
+import AiPerformancePreviewCard from '@/components/dashboard/AiPerformancePreviewCard'
+import DataFreshnessPreviewCard from '@/components/dashboard/DataFreshnessPreviewCard'
 
 type CategoryCounts = {
   official: number
@@ -11,12 +13,26 @@ type CategoryCounts = {
 
 type TodayResponse = {
   success: boolean
+  status?: 'AVAILABLE' | 'PARTIAL' | 'DEGRADED' | 'UNAVAILABLE'
   generatedAt: string
   operatingDate: string
   nextSlateDate: string | null
   currentGames: number
   upcomingGames: number
   finalGames: number
+  lifecycleCounts?: {
+    totalScheduledToday: number
+    upcoming: number
+    live: number
+    final: number
+    postponed: number
+    canceled: number
+    suspended: number
+    statusUnconfirmed: number
+    bettingEligible: number
+    bettingLocked: number
+    missingMarket: number
+  }
   gamesWaitingForOdds: number
   gamesReadyForAnalysis: number
   predictionCandidates: number
@@ -33,6 +49,16 @@ type TodayResponse = {
   }
   currentGameCards: Array<Record<string, any>>
   nextSlateGames: Array<Record<string, any>>
+  partial?: boolean
+  warnings?: string[]
+  errors?: Array<{ dependency: string; message: string; critical: boolean }>
+  timing?: { totalMs?: number; dependencies?: Record<string, number>; slowDependencies?: string[] }
+  sections?: {
+    mostLikely?: { status: string; data: IntelligenceRow[]; reason: string | null }
+    bestValue?: { status: string; data: IntelligenceRow[]; reason: string | null }
+    aiBetFinder?: { status: string; data: IntelligenceRow[]; reason: string | null }
+    topOpportunity?: { status: string; data: TopOpportunity | null; reason: string | null }
+  }
 }
 
 type TopOpportunity = {
@@ -55,6 +81,45 @@ type TopOpportunityResponse = {
   opportunities?: TopOpportunity[]
 }
 
+type IntelligenceRow = {
+  id?: string
+  predictionId?: string
+  eventId?: string
+  matchup?: string
+  market?: string
+  marketLabel?: string
+  selection?: string
+  probability?: number
+  rawProbability?: number
+  confidence?: number
+  edge?: number
+  expectedValue?: number
+  valueScore?: number
+  odds?: number
+  americanOdds?: number
+  statusLabel?: string
+  opportunityCategory?: string
+  marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  semanticLabel?: string
+  recommendation?: string
+  why?: string
+  reasonNotOfficial?: string
+  strengths?: string[]
+  weaknesses?: string[]
+  missingData?: string[]
+  warnings?: string[]
+  oddsTimestamp?: string | null
+  oddsAgeMinutes?: number | null
+}
+
+type IntelligenceResponse = {
+  success: boolean
+  summary?: Record<string, any>
+  topPick?: { candidate?: IntelligenceRow }
+  opportunities?: IntelligenceRow[]
+  results?: IntelligenceRow[]
+}
+
 const cardMotion = 'transition duration-200 hover:-translate-y-0.5 hover:border-white/20 hover:shadow-xl hover:shadow-black/20'
 
 function dateText(value: string | null) {
@@ -75,14 +140,21 @@ function timeText(value: unknown) {
     hour: 'numeric',
     minute: '2-digit',
     timeZone: 'America/Puerto_Rico',
+    timeZoneName: 'short',
   })
 }
 
 function humanStatus(value: unknown) {
   const raw = String(value ?? '').toLowerCase()
-  if (raw.includes('in_progress') || raw.includes('started') || raw.includes('live')) return 'Live'
+  if (raw.includes('unconfirmed')) return 'Status Unconfirmed'
+  if (raw.includes('starting_soon')) return 'Starting Soon'
+  if (raw.includes('in_progress') || raw.includes('live')) return 'Live'
   if (raw.includes('final') || raw.includes('complete')) return 'Final'
-  if (raw.includes('scheduled')) return 'Scheduled'
+  if (raw.includes('pregame') || raw.includes('scheduled')) return 'Pregame'
+  if (raw.includes('postponed')) return 'Postponed'
+  if (raw.includes('suspended')) return 'Suspended'
+  if (raw.includes('delayed')) return 'Delayed'
+  if (raw.includes('canceled') || raw.includes('cancelled')) return 'Canceled'
   if (raw.includes('waiting')) return 'Waiting'
   return 'Tracking'
 }
@@ -298,10 +370,182 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
 
 function confidenceLabel(value: number | null) {
   if (value === null) return 'Unavailable'
+  if (value >= 96) return 'Elite'
   if (value >= 85) return 'Very High'
   if (value >= 70) return 'High'
-  if (value >= 50) return 'Moderate'
+  if (value >= 66) return 'Moderate'
+  if (value >= 58) return 'Limited'
   return 'Low'
+}
+
+function probabilityCategory(value: unknown) {
+  const probability = percentNumber(value)
+  if (probability === null) return 'Limited'
+  if (probability >= 75) return 'Elite Probability'
+  if (probability >= 65) return 'High Probability'
+  if (probability >= 55) return 'Solid Probability'
+  return 'Limited'
+}
+
+function riskLabel(row: IntelligenceRow) {
+  const confidence = percentNumber(row.confidence)
+  const warnings = (row.warnings?.length ?? 0) + (row.weaknesses?.length ?? 0) + (row.missingData?.length ?? 0)
+  if (warnings >= 3 || (confidence !== null && confidence < 55)) return 'Elevated'
+  if (warnings || (confidence !== null && confidence < 68)) return 'Moderate'
+  return 'Controlled'
+}
+
+function signedNumber(value: unknown, suffix = '') {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return 'n/a'
+  return `${parsed > 0 ? '+' : ''}${parsed.toFixed(2)}${suffix}`
+}
+
+function reasonSummary(row: IntelligenceRow) {
+  const positives = row.strengths?.filter(Boolean) ?? []
+  const why = String(row.why ?? row.reasonNotOfficial ?? row.recommendation ?? row.semanticLabel ?? '').trim()
+  if (positives.length) return positives.slice(0, 2).join(' + ')
+  if (why) return why
+  if (row.missingData?.length) return `Waiting on ${row.missingData.slice(0, 2).join(' and ')}.`
+  if (row.weaknesses?.length) return row.weaknesses[0]
+  return 'Ranked from stored AI output.'
+}
+
+function opportunityKey(row: IntelligenceRow, index: number) {
+  return row.id ?? row.predictionId ?? `${row.eventId ?? row.matchup ?? 'row'}-${row.market ?? row.marketLabel ?? 'market'}-${index}`
+}
+
+function formatFreshness(row: IntelligenceRow) {
+  if (typeof row.oddsAgeMinutes === 'number' && Number.isFinite(row.oddsAgeMinutes)) {
+    if (row.oddsAgeMinutes < 60) return `${Math.round(row.oddsAgeMinutes)} min old`
+    return `${Math.round(row.oddsAgeMinutes / 60)} hr old`
+  }
+  if (row.oddsTimestamp) return `Updated ${timeText(row.oddsTimestamp)}`
+  return 'Freshness pending'
+}
+
+function TodayStory({ data, mostLikely, bestValue, counts }: { data: TodayResponse; mostLikely: IntelligenceRow[]; bestValue: IntelligenceRow[]; counts: CategoryCounts }) {
+  const topProbability = mostLikely[0]
+  const topValue = bestValue[0]
+  const lines = [
+    data.gamesWaitingForOdds > 0
+      ? 'The AI is waiting for current market prices before it can finalize recommendations.'
+      : counts.official > 0
+        ? `${counts.official} Official Pick${counts.official === 1 ? '' : 's'} passed the production policy.`
+        : 'No game currently meets both confidence and value requirements for an Official Pick.',
+    topProbability
+      ? `The most likely outcome is ${fieldValue(topProbability.selection)} in ${fieldValue(topProbability.matchup)} at ${formatPercent(topProbability.probability ?? topProbability.rawProbability)}.`
+      : null,
+    topValue && Number(topValue.edge ?? 0) > 0
+      ? `The largest value signal is ${fieldValue(topValue.selection)} with ${signedNumber(topValue.edge, ' edge')}.`
+      : topValue
+        ? 'The strongest value candidates remain below official value standards.'
+        : null,
+    counts.watchlist > 0 ? `${counts.watchlist} market${counts.watchlist === 1 ? '' : 's'} are on the Watchlist because the AI needs more confirmation.` : null,
+  ].filter(Boolean)
+
+  return (
+    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Today's Story</p>
+      <div className="mt-4 grid gap-3">
+        {lines.map((line, index) => (
+          <p key={index} className="text-base font-semibold leading-7 text-slate-200">{line}</p>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function OpportunityRow({ row, rank, mode }: { row: IntelligenceRow; rank: number; mode: 'likely' | 'value' }) {
+  const probability = row.probability ?? row.rawProbability
+  const category = mode === 'likely' ? probabilityCategory(probability) : fieldValue(row.opportunityCategory ?? row.statusLabel ?? 'Value Candidate')
+  const tone = mode === 'likely'
+    ? percentNumber(probability) !== null && percentNumber(probability)! >= 65 ? 'green' : 'blue'
+    : Number(row.expectedValue ?? 0) > 0 && Number(row.edge ?? 0) > 0 ? 'green' : 'yellow'
+  return (
+    <article className={`rounded-lg border border-slate-800 bg-slate-950/70 p-4 ${cardMotion}`}>
+      <div className="grid gap-4 lg:grid-cols-[auto_1fr_auto] lg:items-start">
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-sm font-black text-white">{rank}</span>
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-base font-black text-white">{fieldValue(row.selection, 'Selection pending')}</p>
+            <Badge tone={tone}>{category}</Badge>
+            <Badge tone="gray">{fieldValue(row.marketLabel ?? row.market, 'Market')}</Badge>
+          </div>
+          <p className="mt-1 text-sm text-slate-400">{fieldValue(row.matchup, 'Game pending')}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-300">{reasonSummary(row)}</p>
+          {mode === 'likely' ? (
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Risk: {riskLabel(row)} · {formatFreshness(row)}</p>
+          ) : (
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Edge {signedNumber(row.edge, '%')} · EV {signedNumber(row.expectedValue, '%')} · {formatFreshness(row)}</p>
+          )}
+        </div>
+        <div className="grid min-w-40 gap-3">
+          <Meter label="Probability" value={probability} tone="blue" />
+          <Meter label="Confidence" value={row.confidence} tone="green" />
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function IntelligenceSection({
+  title,
+  eyebrow,
+  rows,
+  emptyTitle,
+  emptyDetail,
+  mode,
+}: {
+  title: string
+  eyebrow: string
+  rows: IntelligenceRow[]
+  emptyTitle: string
+  emptyDetail: string
+  mode: 'likely' | 'value'
+}) {
+  return (
+    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">{eyebrow}</p>
+          <h3 className="mt-2 text-3xl font-black text-white">{title}</h3>
+        </div>
+        <Badge tone={rows.length ? 'blue' : 'yellow'}>{rows.length ? `${rows.length} shown` : 'Waiting'}</Badge>
+      </div>
+      <div className="mt-5 grid gap-3">
+        {rows.length ? rows.slice(0, 10).map((row, index) => <OpportunityRow key={opportunityKey(row, index)} row={row} rank={index + 1} mode={mode} />) : (
+          <EmptyState title={emptyTitle} detail={emptyDetail} />
+        )}
+      </div>
+    </section>
+  )
+}
+
+function InsightList({ title, rows, empty }: { title: string; rows: IntelligenceRow[]; empty: string }) {
+  return (
+    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-5 ${cardMotion}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">AI Explanation</p>
+          <h3 className="mt-1 text-xl font-black text-white">{title}</h3>
+        </div>
+        <Badge tone={rows.length ? categoryTone(title === 'AI Leans' ? 'AI Lean' : title) : 'gray'}>{rows.length}</Badge>
+      </div>
+      <div className="mt-4 grid gap-3">
+        {rows.length ? rows.map((row, index) => (
+          <article key={opportunityKey(row, index)} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+            <p className="text-sm font-black text-white">{fieldValue(row.selection)} · {fieldValue(row.marketLabel ?? row.market)}</p>
+            <p className="mt-1 text-xs font-bold text-slate-500">{fieldValue(row.matchup)}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-300">{reasonSummary(row)}</p>
+            {row.missingData?.length ? <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-200">Waiting on {row.missingData.slice(0, 2).join(' + ')}</p> : null}
+          </article>
+        )) : (
+          <p className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-sm leading-6 text-slate-400">{empty}</p>
+        )}
+      </div>
+    </section>
+  )
 }
 
 function AIConfidenceCard({ opportunity }: { opportunity: TopOpportunity | null }) {
@@ -335,47 +579,93 @@ function categoryLabel(value: unknown) {
 }
 
 function gameCategory(game: Record<string, any>) {
+  const bettingEligibility = String(game.bettingEligibility ?? '').toUpperCase()
+  if (bettingEligibility === 'LOCKED_AFTER_START') return 'Betting Locked'
+  if (bettingEligibility === 'STATUS_UNCONFIRMED') return 'Betting Locked'
+  if (bettingEligibility === 'DATA_AGING' || bettingEligibility === 'STALE') return 'Data Aging'
+  if (bettingEligibility === 'NO_MARKET') return 'No Market'
+  if (bettingEligibility === 'INSUFFICIENT_DATA') return 'Insufficient Data'
+  if (bettingEligibility === 'ELIGIBLE') return 'Operational'
+  const eligibility = String(game.eligibility ?? '').toUpperCase()
+  if (eligibility === 'LOCKED') return 'Locked'
+  if (eligibility === 'STATUS_UNCONFIRMED') return 'Status Unconfirmed'
+  if (eligibility === 'STALE') return 'Stale'
+  if (eligibility === 'READY') return 'Operational'
   const grounded = categoryLabel(game.marketIntelligenceCategory ?? game.opportunityCategory ?? game.recommendationCategory)
   if (grounded) return grounded
   if (game.oddsPresent === false) return 'Waiting'
   if (game.predictionReady === false) return 'Tracking'
-  return 'Ready'
+  return 'Operational'
+}
+
+function gameStatusLabel(game: Record<string, any>) {
+  const lifecycle = String(game.lifecycle ?? game.status ?? '').toUpperCase()
+  const bettingEligibility = String(game.bettingEligibility ?? '').toUpperCase()
+  if (lifecycle === 'STATUS_UNCONFIRMED') return 'Status update overdue'
+  if ((lifecycle === 'PREGAME' || lifecycle === 'STARTING_SOON') && (bettingEligibility === 'DATA_AGING' || game.statusFresh === false)) return 'Scheduled'
+  return humanStatus(game.lifecycle ?? game.status)
 }
 
 function GameCard({ game }: { game: Record<string, any> }) {
-  const status = humanStatus(game.status)
+  const status = gameStatusLabel(game)
   const aiCategory = gameCategory(game)
   const probability = percentNumber(game.probability)
-  const statusTone = status === 'Final' ? 'gray' : status === 'Live' ? 'yellow' : 'blue'
+  const statusTone = status === 'Final' ? 'gray' : status === 'Live' || status === 'Status update overdue' || status === 'Status Unconfirmed' ? 'yellow' : 'blue'
   const categoryCardTone = categoryTone(aiCategory)
-  const categoryBadgeTone = aiCategory === 'Waiting' ? 'yellow' : aiCategory === 'Tracking' || aiCategory === 'Ready' ? 'blue' : categoryCardTone
+  const categoryBadgeTone = aiCategory === 'Waiting' || aiCategory === 'Data Aging' ? 'yellow' : aiCategory === 'Tracking' || aiCategory === 'Operational' || aiCategory === 'No Market' || aiCategory === 'Insufficient Data' ? 'blue' : aiCategory === 'Betting Locked' ? 'red' : categoryCardTone
 
   return (
     <details className={`group rounded-lg border border-slate-800 bg-slate-950/70 p-4 ${cardMotion}`}>
       <summary className="list-none cursor-pointer">
         <div className="grid gap-4 md:grid-cols-[1.2fr_0.55fr_0.7fr_0.55fr_auto] md:items-center">
           <div>
-            <p className="text-xs font-bold text-slate-500">{timeText(game.scheduledTime)}</p>
+            <p className="text-xs font-bold text-slate-500">{game.displayTime ?? timeText(game.scheduledTime)}</p>
             <p className="mt-1 text-lg font-black text-white">{fieldValue(game.matchup, 'Matchup pending')}</p>
           </div>
           <Badge tone={statusTone}>{status}</Badge>
           <Badge tone={categoryBadgeTone}>{aiCategory}</Badge>
-          <p className="text-sm font-black text-white">{probability === null ? '--' : `${probability.toFixed(1)}%`}</p>
+          <div>
+            <p className="text-xs font-bold text-slate-500">{fieldValue(game.marketLabel, 'Market')}</p>
+            <p className="text-sm font-black text-white">{probability === null ? '--' : `${probability.toFixed(1)}%`}</p>
+          </div>
           <span className="text-sm font-bold text-sky-300">Details</span>
         </div>
       </summary>
       <div className="mt-5 grid gap-4 border-t border-slate-800 pt-5 md:grid-cols-2">
         <Meter label="Probability" value={game.probability} tone="blue" />
         <Meter label="Confidence" value={game.confidence} tone="green" />
+        <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Primary Prediction</p>
+          <p className="mt-2 text-lg font-black text-white">{fieldValue(game.selection, game.marketLabel ?? 'Prediction pending')}</p>
+          <p className="mt-1 text-sm text-slate-400">{fieldValue(game.marketLabel, 'Market pending')}</p>
+        </div>
+        <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Data Quality</p>
+          <p className="mt-2 text-lg font-black text-white">{fieldValue(game.dataQuality, 'Limited')}</p>
+          <p className="mt-1 text-sm text-slate-400">{fieldValue(game.freshnessSummary, 'Freshness pending')}</p>
+        </div>
         <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4 md:col-span-2">
           <p className="text-sm font-black text-white">AI Decision</p>
           <p className="mt-2 text-sm leading-6 text-slate-400">
             {game.oddsPresent === false
               ? 'Waiting for updated odds.'
-              : game.predictionReady === false
+              : game.bettingEligibility === 'LOCKED_AFTER_START' || game.bettingEligibility === 'STATUS_UNCONFIRMED'
+                ? fieldValue(game.statusReason, 'Awaiting provider confirmation. Betting is locked until game status is verified.')
+              : game.bettingEligibility === 'DATA_AGING' || game.bettingEligibility === 'STALE'
+                ? 'Status awaiting refresh. Betting analysis remains gated until market and provider state are current.'
+              : game.eligibility === 'LOCKED'
+                ? 'Analysis is locked because this game is no longer pregame.'
+                : game.eligibility === 'STATUS_UNCONFIRMED'
+                  ? fieldValue(game.statusReason, 'Game status is unconfirmed.')
+                  : game.predictionReady === false
                 ? 'Tracking current market state.'
-                : `${aiCategory} status from the current board.`}
+                : fieldValue(game.reasonSummary, `${aiCategory} status from the current board.`)}
           </p>
+          {game.statusSource && (
+            <p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+              {fieldValue(game.statusSource)} · {fieldValue(game.normalizedUtc ?? game.scheduledTime, 'Time pending')}
+            </p>
+          )}
         </div>
       </div>
     </details>
@@ -418,20 +708,20 @@ function ProgressPipeline({ data }: { data: TodayResponse }) {
 
 function HealthCard({ data }: { data: TodayResponse }) {
   const status = data.gamesWaitingForOdds > 0
-    ? 'Waiting for Markets'
+      ? 'Waiting for Provider'
     : data.freshness === 'stale'
-      ? 'Updating'
+      ? 'Data Aging'
       : data.freshness === 'empty'
-        ? 'Waiting for Markets'
+        ? 'Waiting for Provider'
         : data.success
-          ? 'Ready'
-          : 'Issue Detected'
-  const tone = status === 'Ready' ? 'green' : status === 'Issue Detected' ? 'red' : status === 'Waiting for Markets' ? 'yellow' : 'blue'
-  const detail = status === 'Waiting for Markets'
+          ? 'Healthy'
+          : 'Operational Blocker'
+  const tone = status === 'Healthy' ? 'green' : status === 'Operational Blocker' ? 'red' : status === 'Waiting for Provider' ? 'yellow' : 'blue'
+  const detail = status === 'Waiting for Provider'
     ? 'Market prices are needed before recommendations can be finalized.'
-    : status === 'Updating'
+    : status === 'Data Aging'
       ? simpleAction(data.nextAction)
-      : status === 'Issue Detected'
+      : status === 'Operational Blocker'
         ? 'The dashboard needs attention before recommendations are reviewed.'
         : 'The main board is ready for review.'
   return (
@@ -476,38 +766,112 @@ function HistoryCard({ data }: { data: TodayResponse }) {
 export default function UserTodayPanel() {
   const [data, setData] = useState<TodayResponse | null>(null)
   const [topOpportunity, setTopOpportunity] = useState<TopOpportunity | null>(null)
+  const [mostLikely, setMostLikely] = useState<IntelligenceRow[]>([])
+  const [bestValue, setBestValue] = useState<IntelligenceRow[]>([])
+  const [aiResults, setAiResults] = useState<IntelligenceRow[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [sectionWarnings, setSectionWarnings] = useState<string[]>([])
+  const [slowLoading, setSlowLoading] = useState(false)
 
   useEffect(() => {
+    let active = true
+    const slowTimer = window.setTimeout(() => {
+      if (active) setSlowLoading(true)
+    }, 2500)
+    async function optionalJson<T>(url: string): Promise<T | null> {
+      try {
+        const response = await fetch(url, { cache: 'no-store' })
+        if (!response.ok) return null
+        return await response.json() as T
+      } catch {
+        return null
+      }
+    }
     async function load() {
       try {
-        const [todayResponse, opportunityResponse] = await Promise.all([
-          fetch('/api/dashboard?mode=today', { cache: 'no-store' }),
-          fetch('/api/market-opportunities/most-likely?sort=highest_probability&mode=current_board&limit=1', { cache: 'no-store' }),
-        ])
+        setError(null)
+        setSectionWarnings([])
+        const todayResponse = await fetch('/api/dashboard?mode=today', { cache: 'no-store' })
         const todayJson = await todayResponse.json()
-        if (!todayResponse.ok || !todayJson.success) throw new Error(todayJson.error?.message ?? 'Unable to load today.')
+        if (!todayResponse.ok || todayJson.success === false) throw new Error(todayJson.error?.message ?? todayJson.error ?? 'Unable to load today.')
+        if (!active) return
         setData(todayJson)
-        if (opportunityResponse.ok) {
-          const opportunityJson = await opportunityResponse.json() as TopOpportunityResponse
-          setTopOpportunity(opportunityJson.topPick?.candidate ?? opportunityJson.opportunities?.[0] ?? null)
+
+        const embeddedMostLikely = todayJson.sections?.mostLikely?.data
+        const embeddedBestValue = todayJson.sections?.bestValue?.data
+        const embeddedAi = todayJson.sections?.aiBetFinder?.data
+        const embeddedTop = todayJson.sections?.topOpportunity?.data
+        const embeddedWarnings = [
+          ...(todayJson.partial ? ['Some insights are temporarily unavailable.'] : []),
+          ...(todayJson.sections?.mostLikely?.status === 'UNAVAILABLE' ? [todayJson.sections.mostLikely.reason ?? 'Most Likely is temporarily unavailable.'] : []),
+          ...(todayJson.sections?.bestValue?.status === 'UNAVAILABLE' ? [todayJson.sections.bestValue.reason ?? 'Best Value is temporarily unavailable.'] : []),
+          ...(todayJson.sections?.aiBetFinder?.status === 'UNAVAILABLE' ? [todayJson.sections.aiBetFinder.reason ?? 'AI explanations are temporarily unavailable.'] : []),
+        ]
+
+        if (Array.isArray(embeddedMostLikely) || Array.isArray(embeddedBestValue) || Array.isArray(embeddedAi)) {
+          setMostLikely(Array.isArray(embeddedMostLikely) ? embeddedMostLikely : [])
+          setBestValue(Array.isArray(embeddedBestValue) ? embeddedBestValue : [])
+          setAiResults(Array.isArray(embeddedAi) ? embeddedAi : [])
+          setTopOpportunity(embeddedTop ?? (Array.isArray(embeddedMostLikely) ? embeddedMostLikely[0] : null) ?? null)
+          setSectionWarnings(Array.from(new Set(embeddedWarnings)))
+          return
         }
+
+        const [opportunityJson, mostLikelyJson, bestValueJson, aiJson] = await Promise.all([
+          optionalJson<TopOpportunityResponse>('/api/market-opportunities/most-likely?sort=highest_probability&mode=current_board&limit=1'),
+          optionalJson<IntelligenceResponse>('/api/market-opportunities/most-likely?sort=highest_probability&mode=current_board&limit=10'),
+          optionalJson<IntelligenceResponse>('/api/market-opportunities/best-value?mode=current&includePasses=true&limit=10'),
+          optionalJson<IntelligenceResponse>('/api/ai-bet-finder?q=best%20opportunities%20today'),
+        ])
+        if (!active) return
+        setTopOpportunity(opportunityJson?.topPick?.candidate ?? opportunityJson?.opportunities?.[0] ?? null)
+        setMostLikely(mostLikelyJson?.opportunities ?? [])
+        setBestValue(bestValueJson?.opportunities ?? [])
+        setAiResults(aiJson?.results ?? [])
+        setSectionWarnings([
+          ...(!mostLikelyJson ? ['Most Likely is temporarily unavailable.'] : []),
+          ...(!bestValueJson ? ['Best Value is temporarily unavailable.'] : []),
+          ...(!aiJson ? ['AI explanations are temporarily unavailable.'] : []),
+        ])
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load today.')
+        if (active) setError(loadError instanceof Error ? loadError.message : 'Unable to load today.')
+      } finally {
+        if (active) setSlowLoading(false)
       }
     }
     load()
+    return () => {
+      active = false
+      window.clearTimeout(slowTimer)
+    }
   }, [])
 
   const games = useMemo(() => {
-    if (data?.currentGameCards?.length) return data.currentGameCards
-    return data?.nextSlateGames ?? []
-  }, [data])
+    const sourceGames = data?.currentGameCards?.length ? data.currentGameCards : data?.nextSlateGames ?? []
+    return sourceGames.map((game) => {
+      const eventId = String(game.eventId ?? game.id ?? '')
+      const candidate = mostLikely.find((row) => row.eventId === eventId) ?? bestValue.find((row) => row.eventId === eventId) ?? null
+      if (!candidate) return game
+      return {
+        ...game,
+        probability: game.probability ?? candidate.probability ?? candidate.rawProbability,
+        confidence: game.confidence ?? candidate.confidence,
+        marketLabel: game.marketLabel ?? candidate.marketLabel,
+        selection: game.selection ?? candidate.selection,
+        marketIntelligenceCategory: game.marketIntelligenceCategory ?? candidate.marketIntelligenceCategory,
+        opportunityCategory: game.opportunityCategory ?? candidate.opportunityCategory,
+        reasonSummary: game.reasonSummary ?? reasonSummary(candidate),
+        dataQuality: game.dataQuality ?? riskLabel(candidate),
+        freshnessSummary: game.freshnessSummary ?? formatFreshness(candidate),
+      }
+    })
+  }, [data, mostLikely, bestValue])
 
   if (error) return <EmptyState title="Today is temporarily unavailable" detail={error} />
   if (!data) {
     return (
       <section className="space-y-5">
+        {slowLoading ? <p className="rounded-lg border border-sky-500/30 bg-sky-500/10 p-3 text-sm font-bold text-sky-100">Still loading today's board...</p> : null}
         <div className="h-80 animate-pulse rounded-lg bg-slate-900" />
         <div className="grid gap-4 md:grid-cols-4">
           <div className="h-36 animate-pulse rounded-lg bg-slate-900" />
@@ -520,12 +884,23 @@ export default function UserTodayPanel() {
   }
 
   const counts = data.marketIntelligence ?? { official: data.officialPicks, aiLeans: 0, watchlist: 0, avoid: 0 }
+  const aiLeanRows = aiResults.filter((row) => row.marketIntelligenceCategory === 'ai_lean').slice(0, 3)
+  const watchRows = aiResults.filter((row) => row.marketIntelligenceCategory === 'watchlist').slice(0, 3)
+  const avoidRows = aiResults.filter((row) => row.marketIntelligenceCategory === 'avoid').slice(0, 3)
 
   return (
     <section className="space-y-6">
+      {sectionWarnings.length ? (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm font-bold text-amber-100">
+          {sectionWarnings[0]}
+        </div>
+      ) : null}
       <DecisionHero data={data} counts={counts} />
+      <TodayStory data={data} counts={counts} mostLikely={mostLikely} bestValue={bestValue} />
+      <AiPerformancePreviewCard />
+      <DataFreshnessPreviewCard />
       <section className="grid gap-4 lg:grid-cols-4">
-        <CategoryCard title="Official Picks" value={counts.official} tone="green" icon="OP" href="/dashboard" status={counts.official ? 'Ready' : 'None'} tooltip="Recommendation-policy picks only." />
+        <CategoryCard title="Official Picks" value={counts.official} tone="green" icon="OP" href="/dashboard" status={counts.official ? 'Operational' : 'None'} tooltip="Recommendation-policy picks only." />
         <CategoryCard title="AI Leans" value={counts.aiLeans} tone="yellow" icon="AL" href="/most-likely" status={counts.aiLeans ? 'Available' : 'None'} tooltip="Grounded informational opportunities." />
         <CategoryCard title="Watchlist" value={counts.watchlist} tone="blue" icon="WL" href="/best-value" status={counts.watchlist ? 'Tracking' : 'Clear'} tooltip="Markets to watch without official recommendation status." />
         <CategoryCard title="Avoid" value={counts.avoid} tone="red" icon="AV" href="/ai-bet-finder" status={counts.avoid ? 'Avoid' : 'Clear'} tooltip="Markets blocked by policy or weak value." />
@@ -534,18 +909,44 @@ export default function UserTodayPanel() {
         <TopOpportunityCard opportunity={topOpportunity} />
         <AIConfidenceCard opportunity={topOpportunity} />
       </section>
+      <IntelligenceSection
+        eyebrow="Probability Rankings"
+        title="Most Likely"
+        rows={mostLikely}
+        mode="likely"
+        emptyTitle="Most Likely is waiting for grounded probabilities"
+        emptyDetail="No current probability-ranked opportunities are visible because current odds or eligible prediction rows are unavailable. This does not create an Official Pick."
+      />
+      <IntelligenceSection
+        eyebrow="Value Rankings"
+        title="Best Value"
+        rows={bestValue}
+        mode="value"
+        emptyTitle="No positive-value opportunities today."
+        emptyDetail={data.sections?.bestValue?.reason ?? 'The AI did not find a grounded positive-value opportunity that should be highlighted. High probability and good value remain separate.'}
+      />
+      <section className="grid gap-4 lg:grid-cols-3">
+        <InsightList title="AI Leans" rows={aiLeanRows} empty="No AI Leans are currently grounded by the board." />
+        <InsightList title="Watchlist" rows={watchRows} empty="No watchlist games need monitoring right now." />
+        <InsightList title="Avoid" rows={avoidRows} empty="No avoid explanations are currently attached to visible candidates." />
+      </section>
       <HistoryCard data={data} />
       <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Today's Games</p>
             <h3 className="mt-2 text-3xl font-black text-white">{games.length} game{games.length === 1 ? '' : 's'}</h3>
+            {data.lifecycleCounts ? (
+              <p className="mt-2 text-sm font-semibold leading-6 text-slate-400">
+                Upcoming {data.lifecycleCounts.upcoming} · Live {data.lifecycleCounts.live} · Final {data.lifecycleCounts.final} · Status awaiting update {data.lifecycleCounts.statusUnconfirmed} · Betting locked {data.lifecycleCounts.bettingLocked}
+              </p>
+            ) : null}
           </div>
           <Badge tone={games.length ? 'blue' : 'yellow'}>{games.length ? 'AI Tracking' : 'Waiting'}</Badge>
         </div>
         <div className="mt-5 grid gap-3">
           {games.length ? games.map((game, index) => <GameCard key={game.eventId ?? game.id ?? `${game.matchup}-${index}`} game={game} />) : (
-            <EmptyState title="No games to show" detail="The next slate has not been resolved yet." />
+            <EmptyState title="No visible slate" detail={data.warnings?.[0] ?? 'The current-day slate is unavailable or still being resolved. This is not treated as proof that no MLB games exist today.'} />
           )}
         </div>
       </section>

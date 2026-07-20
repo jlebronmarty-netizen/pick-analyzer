@@ -2,6 +2,7 @@ import 'server-only'
 
 import { getCurrentBoardCached, type CurrentBoardCandidate } from '@/services/current-board.service'
 import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
+import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 export type BestValueMode = 'current' | 'upcoming' | 'historical_explorer' | 'all_stored_advanced'
 
@@ -34,8 +35,8 @@ function mapMode(mode: BestValueMode) {
 }
 
 function puertoRicoTodayStartMs() {
-  const localDate = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString().slice(0, 10)
-  return new Date(`${localDate}T04:00:00.000Z`).getTime()
+  const localDate = localDateInTimeZone(new Date().toISOString(), 'America/Puerto_Rico') ?? new Date().toISOString().slice(0, 10)
+  return new Date(zonedUtcRange(localDate, 'America/Puerto_Rico').utcStart).getTime()
 }
 
 function currentOrFuture(candidates: CurrentBoardCandidate[]) {
@@ -77,7 +78,7 @@ export async function getBestValueOpportunities({
     }
   }
   const positiveValue = sourceCandidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0)
-  const visiblePool = includePasses || positiveValue.length === 0 ? sourceCandidates : positiveValue
+  const visiblePool = includePasses ? sourceCandidates : positiveValue
   const ranked = [...visiblePool]
     .sort((left, right) => score(right) - score(left))
     .slice(0, Math.max(1, Math.min(limit, 100)))
@@ -108,7 +109,7 @@ export async function getBestValueOpportunities({
       warning: positiveValue.length
         ? 'Positive value is informational until official gates qualify it.'
         : sourceCandidates.length
-          ? 'No positive EV play qualified. Showing strongest informational rankings for review only.'
+          ? 'No positive-value opportunities today.'
           : 'No opportunities available because no eligible games have grounded odds and probabilities.',
       scanCompleted: true,
       dataAvailable: true,
