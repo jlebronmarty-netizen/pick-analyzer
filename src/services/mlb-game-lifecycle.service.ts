@@ -38,6 +38,8 @@ export type MlbLifecycleInput = {
   startTime?: string | null
   status?: string | null
   updated_at?: string | null
+  provider_ids?: Record<string, unknown> | null
+  providerIds?: Record<string, unknown> | null
   metadata?: Record<string, unknown> | null
 }
 
@@ -69,6 +71,7 @@ export function resolveMlbGameLifecycle(event: MlbLifecycleInput, now = new Date
   const start = normalizeStoredSportsDataIoMlbStart({
     startTime: event.start_time ?? event.startTime,
     metadata: event.metadata,
+    providerIds: event.provider_ids ?? event.providerIds,
   })
   const startMs = start.canonicalUtc ? Date.parse(start.canonicalUtc) : Number.NaN
   const official = statusToLifecycle(event.status)
@@ -90,6 +93,9 @@ export function resolveMlbGameLifecycle(event: MlbLifecycleInput, now = new Date
       storedStartTime: start.storedUtc,
       providerTimezone: start.providerTimezone,
       displayTime: start.displayTime,
+      displayTimezone: start.displayTimezone,
+      interpretationMode: start.interpretationMode,
+      temporalConfidence: start.temporalConfidence,
       legacyRepairApplied: start.legacyRepairApplied,
       warnings: start.warnings,
       reason: `Provider status ${event.status ?? 'unknown'} is authoritative.`,
@@ -105,6 +111,9 @@ export function resolveMlbGameLifecycle(event: MlbLifecycleInput, now = new Date
       storedStartTime: start.storedUtc,
       providerTimezone: start.providerTimezone,
       displayTime: start.displayTime,
+      displayTimezone: start.displayTimezone,
+      interpretationMode: start.interpretationMode,
+      temporalConfidence: start.temporalConfidence,
       legacyRepairApplied: start.legacyRepairApplied,
       warnings: start.warnings,
       reason: 'Game start time is missing or invalid.',
@@ -121,6 +130,9 @@ export function resolveMlbGameLifecycle(event: MlbLifecycleInput, now = new Date
       storedStartTime: start.storedUtc,
       providerTimezone: start.providerTimezone,
       displayTime: start.displayTime,
+      displayTimezone: start.displayTimezone,
+      interpretationMode: start.interpretationMode,
+      temporalConfidence: start.temporalConfidence,
       legacyRepairApplied: start.legacyRepairApplied,
       warnings: start.warnings,
       reason: 'Game has not reached the starting-soon window.',
@@ -135,6 +147,9 @@ export function resolveMlbGameLifecycle(event: MlbLifecycleInput, now = new Date
       storedStartTime: start.storedUtc,
       providerTimezone: start.providerTimezone,
       displayTime: start.displayTime,
+      displayTimezone: start.displayTimezone,
+      interpretationMode: start.interpretationMode,
+      temporalConfidence: start.temporalConfidence,
       legacyRepairApplied: start.legacyRepairApplied,
       warnings: start.warnings,
       reason: 'Game is within the starting-soon window.',
@@ -149,6 +164,9 @@ export function resolveMlbGameLifecycle(event: MlbLifecycleInput, now = new Date
       storedStartTime: start.storedUtc,
       providerTimezone: start.providerTimezone,
       displayTime: start.displayTime,
+      displayTimezone: start.displayTimezone,
+      interpretationMode: start.interpretationMode,
+      temporalConfidence: start.temporalConfidence,
       legacyRepairApplied: start.legacyRepairApplied,
       warnings: start.warnings,
       reason: `Game start time passed, but provider status is not fresh; time-only live inference is capped at ${MLB_TIME_BASED_LIVE_INFERENCE_MAX_MINUTES} minutes.`,
@@ -162,6 +180,9 @@ export function resolveMlbGameLifecycle(event: MlbLifecycleInput, now = new Date
     storedStartTime: start.storedUtc,
     providerTimezone: start.providerTimezone,
     displayTime: start.displayTime,
+    displayTimezone: start.displayTimezone,
+    interpretationMode: start.interpretationMode,
+    temporalConfidence: start.temporalConfidence,
     legacyRepairApplied: start.legacyRepairApplied,
     warnings: start.warnings,
     reason: 'Game start time has passed, but final/live state is not inferred from elapsed time.',

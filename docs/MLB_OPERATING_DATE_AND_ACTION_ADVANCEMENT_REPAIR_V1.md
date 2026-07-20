@@ -16,7 +16,8 @@ This repair fixes four runtime consistency defects without changing dashboard de
 ## Repairs
 
 - Added `resolveMlbOperatingDate` to separate `localCalendarDate`, `activeOperatingDate`, `activeSlateDate`, `providerQueryDate`, `nextSlateDate` and `dateSelectionReason`.
-- `status_refresh` and `sync_results` use an active unresolved prior slate before any next slate.
+- `status_refresh` and `sync_results` use an active unresolved prior slate before any next slate only inside the bounded recovery window.
+- Older unresolved slates are classified as `STALE_ORPHAN_EXCLUDED` and surfaced through `excludedStaleOrphanCount`, `oldestUnresolvedDate` and `unresolvedEventsByDate`.
 - `prepare_next_slate` may use the next slate.
 - Automation reads latest `status_refresh` lifecycle evidence and sets `nextEligibleStatusRefreshAt`.
 - `SUCCESS_CHANGED` and `SUCCESS_NO_CHANGE` both satisfy provider-check freshness.
@@ -35,6 +36,12 @@ For late-night unresolved prior-day games:
 3. Until that time, scheduler advances to odds/results work rather than looping status refresh.
 4. `sync_results` continues targeting the unresolved active slate date.
 5. `prepare_next_slate` may target the next slate separately.
+
+For stale orphan residual rows outside the recovery window:
+
+1. Puerto Rico `localCalendarDate` remains the operational primary date.
+2. Older residual rows are diagnostics, not provider-query targets.
+3. The scheduler can continue to current-day status, odds, results and downstream work.
 
 ## Migration
 

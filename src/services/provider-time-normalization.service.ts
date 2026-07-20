@@ -227,9 +227,11 @@ export function zonedUtcRange(localDate: string, timeZone = MLB_DISPLAY_TIMEZONE
 export function normalizeStoredSportsDataIoMlbStart({
   startTime,
   metadata,
+  providerIds,
 }: {
   startTime: string | null | undefined
   metadata?: Record<string, unknown> | null
+  providerIds?: Record<string, unknown> | null
 }) {
   const parsed = normalizeProviderTimestamp({
     value: startTime,
@@ -244,9 +246,13 @@ export function normalizeStoredSportsDataIoMlbStart({
   const provider = String(meta.provider ?? '').toLowerCase()
   const variant = String(meta.provider_variant ?? '').toLowerCase()
   const rawFields = Array.isArray(meta.rawFieldNames) ? meta.rawFieldNames.map(String) : []
-  const sportsDataIoMlb = provider === 'sportsdataio' && variant.includes('sportsdataio')
+  const ids = providerIds && typeof providerIds === 'object' ? providerIds : {}
+  const providerIdKeys = Object.keys(ids).map((key) => key.toLowerCase())
+  const hasSportsDataIoProviderId = providerIdKeys.some((key) => key.includes('sportsdataio') || key.includes('sports_data_io'))
+  const sportsDataIoMlb = provider === 'sportsdataio' || variant.includes('sportsdataio') || hasSportsDataIoProviderId
   const hasDateTimeUtc = rawFields.some((field) => field.toLowerCase() === 'datetimeutc')
   const alreadyNormalized = temporal?.contract === 'mlb_temporal_truth_v1'
+  const displayTimezone = MLB_DISPLAY_TIMEZONE
 
   if (!parsed.normalizedUtc || !sportsDataIoMlb || hasDateTimeUtc || alreadyNormalized) {
     return {
@@ -254,7 +260,10 @@ export function normalizeStoredSportsDataIoMlbStart({
       storedUtc: parsed.normalizedUtc,
       canonicalUtc: parsed.normalizedUtc,
       legacyRepairApplied: false,
-      displayTime: formatInTimeZone(parsed.normalizedUtc),
+      interpretationMode: alreadyNormalized ? 'stored_temporal_contract' : 'stored_utc_instant',
+      displayTimezone,
+      temporalConfidence: parsed.normalizedUtc ? 'HIGH' : 'LOW',
+      displayTime: formatInTimeZone(parsed.normalizedUtc, displayTimezone),
     }
   }
 
@@ -268,7 +277,10 @@ export function normalizeStoredSportsDataIoMlbStart({
     storedUtc: parsed.normalizedUtc,
     canonicalUtc: repairedUtc,
     legacyRepairApplied: Boolean(repairedUtc),
-    displayTime: formatInTimeZone(repairedUtc),
+    interpretationMode: 'legacy_sportsdataio_eastern_repair',
+    displayTimezone,
+    temporalConfidence: repairedUtc ? 'MEDIUM' : 'LOW',
+    displayTime: formatInTimeZone(repairedUtc, displayTimezone),
     source: 'sport_events.start_time legacy SportsDataIO DateTime repair',
     warnings: repairedUtc
       ? ['Legacy SportsDataIO MLB start_time was reinterpreted as America/New_York local time at read time.']
@@ -299,6 +311,11 @@ export function validateProviderTimeNormalizationFixtures() {
       rawFieldNames: ['DateTime'],
     },
   })
+  const repairedFromProviderIds = normalizeStoredSportsDataIoMlbStart({
+    startTime: '2026-07-19T12:15:00.000Z',
+    metadata: null,
+    providerIds: { sportsdataio: '1001' },
+  })
   const invalid = normalizeProviderTimestamp({
     value: 'not-a-date',
     source: 'fixture',
@@ -311,6 +328,7 @@ export function validateProviderTimeNormalizationFixtures() {
     ['UTC instant remains stable', utc.normalizedUtc === '2026-07-19T16:15:00.000Z'],
     ['explicit offset remains stable', offset.normalizedUtc === '2026-07-19T16:15:00.000Z'],
     ['legacy SportsDataIO repair applies DST', repaired.canonicalUtc === '2026-07-19T16:15:00.000Z'],
+    ['legacy SportsDataIO provider_ids repair applies DST', repairedFromProviderIds.canonicalUtc === '2026-07-19T16:15:00.000Z'],
     ['invalid timestamp is explicit', invalid.classification === 'INVALID'],
     ['Puerto Rico display date stable', localDateInTimeZone('2026-07-19T16:15:00.000Z') === '2026-07-19'],
     ['server timezone independent by construction', parseLocalTimeInZone('2026-07-19T12:15:00', MLB_PROVIDER_TIMEZONE) === '2026-07-19T16:15:00.000Z'],
@@ -323,7 +341,7 @@ export function validateProviderTimeNormalizationFixtures() {
     passed: checks.length - failedChecks.length,
     failed: failedChecks.length,
     failedChecks,
-    examples: { edt, est, utc, offset, repaired, invalid },
+    examples: { edt, est, utc, offset, repaired, repairedFromProviderIds, invalid },
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }

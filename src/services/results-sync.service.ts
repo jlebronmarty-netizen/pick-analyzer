@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { mapMlbStatsGameToSportEventStatus } from '@/services/mlb-event-status-mapper.service'
 import { checkProviderBudget, claimProviderActionLock, releaseProviderActionLock } from '@/services/provider-budget.service'
 import { zonedUtcRange, localDateInTimeZone } from '@/services/provider-time-normalization.service'
 
@@ -180,16 +181,8 @@ function dateRangeForResults(daysFrom: number) {
 }
 
 function canonicalMlbStatsStatus(game: MlbStatsGame) {
-  const detailed = String(game.status?.detailedState ?? '').toLowerCase()
-  const abstract = String(game.status?.abstractGameState ?? '').toLowerCase()
-  const coded = String(game.status?.codedGameState ?? game.status?.statusCode ?? '').toLowerCase()
-  if (detailed.includes('postponed')) return 'postponed'
-  if (detailed.includes('cancel')) return 'canceled'
-  if (detailed.includes('suspend') || detailed.includes('delay')) return 'postponed'
-  if (abstract === 'final' || detailed.includes('final') || coded === 'f') return 'final'
-  if (abstract === 'live' || detailed.includes('in progress') || detailed.includes('warmup')) return 'in_progress'
-  if (abstract === 'preview' || detailed.includes('scheduled') || detailed.includes('pre-game')) return 'scheduled'
-  return detailed || abstract || 'unresolved'
+  const mapped = mapMlbStatsGameToSportEventStatus(game)
+  return mapped.lifecycle === 'FINAL' ? 'final' : mapped.status ?? 'scheduled'
 }
 
 function isMlbStatsFinal(game: MlbStatsGame) {
@@ -438,7 +431,7 @@ async function fetchMlbStatsResults(daysFrom = 3, timeoutMs = 12000) {
       eventPatches.push({
         id: event.id,
         patch: {
-          status: 'final',
+          status: 'completed',
           home_score: homeScore,
           away_score: awayScore,
           updated_at: started,
@@ -453,6 +446,7 @@ async function fetchMlbStatsResults(daysFrom = 3, timeoutMs = 12000) {
               provider,
               endpoint,
               gamePk: game.gamePk ?? null,
+              mappedSportEventStatus: 'completed',
               detailedState: game.status?.detailedState ?? null,
               abstractGameState: game.status?.abstractGameState ?? null,
               latestSourceTimestamp: game.gameDate ?? null,

@@ -34,6 +34,7 @@ type DashboardEventRow = {
   home_team: string | null
   away_team: string | null
   updated_at?: string | null
+  provider_ids?: Record<string, unknown> | null
   metadata?: Record<string, unknown> | null
 }
 
@@ -325,9 +326,13 @@ function eventCard(event: DashboardEventRow, now: Date) {
     statusSource: lifecycle.source,
     statusReason: lifecycle.reason,
     rawProviderTime: typeof metadata.providerDateTimeRaw === 'string' ? metadata.providerDateTimeRaw : event.start_time,
+    provider: metadata.provider ?? metadata.providerName ?? (event.provider_ids?.sportsdataio || event.provider_ids?.sportsdataio_game_id ? 'sportsdataio' : null),
     providerTimezone: lifecycle.providerTimezone,
+    interpretationMode: lifecycle.interpretationMode,
     normalizedUtc: lifecycle.canonicalStartTime,
     storedStartTime: lifecycle.storedStartTime,
+    displayTimezone: lifecycle.displayTimezone,
+    temporalConfidence: lifecycle.temporalConfidence,
     temporalWarnings: lifecycle.warnings,
   }
 }
@@ -340,7 +345,7 @@ async function loadEventsForDate(date: string): Promise<DashboardEventLoadResult
   const queryEnd = puertoRicoUtcRange(queryEndDate).utcEndExclusive
   const { data, error } = await supabaseAdmin
     .from('sport_events')
-    .select('id, sport_key, league_key, start_time, status, home_team, away_team, updated_at, metadata')
+    .select('id, sport_key, league_key, start_time, status, home_team, away_team, updated_at, provider_ids, metadata')
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
     .gte('start_time', queryStart)
@@ -371,7 +376,7 @@ async function loadLastKnownGroundedSlate(date: string): Promise<DashboardEventL
   const range = puertoRicoUtcRange(date)
   const { data, error } = await supabaseAdmin
     .from('sport_events')
-    .select('id, sport_key, league_key, start_time, status, home_team, away_team, updated_at')
+    .select('id, sport_key, league_key, start_time, status, home_team, away_team, updated_at, provider_ids, metadata')
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
     .gte('start_time', range.utcStart)

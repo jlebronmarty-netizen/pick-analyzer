@@ -16,6 +16,9 @@ MLB Runtime Activation, Scheduler & Canonical Results Completion V1 is code-comp
 | Market due logic | PASS | Adaptive freshness now separates accepted market availability from provider-check evidence and reports `CURRENT`, `CHECK_DUE`, `CHECK_OVERDUE`, `PROVIDER_CHECK_FAILED`, `PROVIDER_DELAYED`, `NO_MARKETS_RETURNED`, `NO_RELEVANT_GAMES`, `BUDGET_BLOCKED` or `NOT_APPLICABLE`. |
 | Scheduler template | PASS | `.github/workflows/production-operating-day.yml` calls the protected production cron every 15 minutes with `CRON_SECRET`, concurrency protection, timeout and manual dispatch support. |
 | Protected cron evidence | PASS | `/api/cron/operating-day` response now surfaces provider, endpoint, provider-check flags, status rows, result rows and failure reason evidence. |
+| Canonical status persistence | PASS_LOCAL | MLB Stats API statuses now map to DB-safe `sport_events.status` values before persistence; invalid provider strings skip per row with partial evidence. |
+| Stale slate recovery | PASS_LOCAL | Prior unresolved slates can preempt only inside the 2-day recovery window; older residual rows are stale orphans. |
+| Temporal diagnostics | PASS_LOCAL | Today game cards expose provider/time normalization diagnostics and repair legacy SportsDataIO naive times when provider identity is present. |
 
 ## Production Activation
 
@@ -66,6 +69,7 @@ Invoke-RestMethod -Method Post -Uri "https://pick-analyzer.vercel.app/api/cron/o
 3. Configure repository secret `CRON_SECRET` to match the production Vercel environment secret.
 4. Trigger `Production Operating Day Runtime` once with `workflow_dispatch`.
 5. Verify one `operating_day_lifecycle_events` record with provider-check evidence.
+6. Confirm production no longer returns the prior `sport_events_status_check` failure during MLB Stats API status refresh.
 
 ## Final Status
 

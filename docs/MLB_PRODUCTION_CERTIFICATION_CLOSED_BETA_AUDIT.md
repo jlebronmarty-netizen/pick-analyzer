@@ -15,6 +15,9 @@ No prediction formulas, projection formulas, Official Pick thresholds, champion 
 - The standalone Best Value page no longer exposes a user-facing `Show passes` toggle under the Best Value label.
 - AI Bet Finder, Market Intelligence and Autonomous Daily Operations now consume positive-only Best Value results for user-facing Best Value summaries.
 - `/api/dashboard` now preserves the legacy non-Today error contract while `/api/dashboard?mode=today` keeps the typed degraded Today fallback.
+- MLB Stats API status/result writes now pass through a canonical DB-safe mapper before touching `sport_events.status`; raw provider status is preserved in metadata.
+- Operating-date selection now treats Puerto Rico local date as primary and excludes unresolved stale-orphan slates outside the 2-day recovery window.
+- Today game cards expose temporal diagnostics and repair legacy SportsDataIO naive start times when provider identity is available.
 
 ## Audit Ledger
 
@@ -33,6 +36,9 @@ No prediction formulas, projection formulas, Official Pick thresholds, champion 
 | Today's Story | PASS | Existing story output remains grounded in current section data and provider/freshness blockers. |
 | Health | PASS | Existing health panels remain read-only; production verification still required after deploy. |
 | Today's Games | PASS | Lifecycle display is repaired for stale Pregame/Scheduled after start. |
+| Canonical Event Status | PASS_LOCAL | MLB Stats API no longer writes `final`, `in_progress` or `canceled` into the constrained `sport_events.status` column. |
+| Stale Slate Recovery | PASS_LOCAL | Older residual unresolved slates are diagnostics, not operating-day blockers. |
+| Temporal Truth | PASS_LOCAL | SportsDataIO local-naive times and MLB Stats UTC instants are separated in the read model. |
 | Recommendation Pipeline | PASS | No recommendation-policy mutation; Official Picks stay separated from informational rankings. |
 | Projection Visibility | NOT APPLICABLE | Projection integrity remains blocked by missing required inputs; standards were not relaxed. |
 | Public Production Runtime | FAIL | Deployment was authorized but rejected by the execution environment before smoke validation. |

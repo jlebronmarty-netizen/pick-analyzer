@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### MLB Canonical Event Status, Stale Slate Recovery & Temporal Truth Repair V1
+
+Status: Implemented locally. Production deployment and protected smoke validation remain required.
+
+Evidence: `src/services/mlb-event-status-mapper.service.ts`, `src/services/operating-day.service.ts`, `src/services/results-sync.service.ts`, `src/services/mlb-operating-date-resolution.service.ts`, `src/services/provider-time-normalization.service.ts`, `src/services/mlb-game-lifecycle.service.ts`, `src/services/dashboard-today.service.ts` and `docs/MLB_CANONICAL_EVENT_STATUS_STALE_SLATE_TEMPORAL_REPAIR_V1.md`.
+
+Note: Repairs the production HTTP 207 status-refresh blocker by ensuring MLB Stats API provider statuses are mapped to the existing `sport_events.status` constraint before persistence. Prior unresolved slates are only actionable inside a 2-day recovery window; older residual rows are stale-orphan diagnostics. Legacy SportsDataIO MLB start times can be repaired using metadata or `provider_ids`, and game cards expose temporal diagnostics. No scheduler redesign, dashboard redesign, prediction formula, Official policy, Champion/V7, settlement or learning changes were made.
+
 ### MLB Operating Day Runtime Certification V1
 
 Status: Implemented with blockers. Runtime certification remains FAIL until production deployment/smoke, external scheduler activation verification and MLB Stats API results sync are completed.

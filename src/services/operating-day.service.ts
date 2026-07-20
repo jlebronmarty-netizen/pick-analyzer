@@ -14,6 +14,7 @@ import { getArbitrageOpportunities, getMostLikelyOpportunities } from '@/service
 import { getTopPicks } from '@/services/top-picks.service'
 import { optimizeBetSlip } from '@/services/bet-slip-optimizer.service'
 import { getDay1RecommendationReadiness } from '@/services/day1-recommendation-readiness.service'
+import { isSportEventCanonicalStatus, mapMlbStatsGameToSportEventStatus } from '@/services/mlb-event-status-mapper.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
@@ -201,16 +202,7 @@ function canonicalEventStatus(value: string | null | undefined) {
 }
 
 function canonicalMlbStatsStatus(game: MlbStatsGame) {
-  const detailed = normalize(game.status?.detailedState)
-  const abstract = normalize(game.status?.abstractGameState)
-  const coded = normalize(game.status?.codedGameState ?? game.status?.statusCode)
-  if (detailed.includes('postponed')) return 'postponed'
-  if (detailed.includes('cancel')) return 'canceled'
-  if (detailed.includes('suspend') || detailed.includes('delay')) return 'postponed'
-  if (abstract === 'final' || detailed.includes('final') || coded === 'f') return 'final'
-  if (abstract === 'live' || detailed.includes('in progress') || detailed.includes('warmup')) return 'in_progress'
-  if (abstract === 'preview' || detailed.includes('scheduled') || detailed.includes('pre-game')) return 'scheduled'
-  return detailed || abstract || 'unresolved'
+  return mapMlbStatsGameToSportEventStatus(game).status ?? 'scheduled'
 }
 
 function compactTeam(value: unknown) {
@@ -581,8 +573,12 @@ async function refreshMlbGameStatuses({
     let statusesChanged = 0
     let rowsUpdated = 0
     let rowsSkipped = 0
+    let validRowsEvaluated = 0
+    let mappingFailures = 0
+    let updateFailures = 0
     let lastStatusChangeAt: string | null = null
     let latestSourceTimestamp: string | null = null
+    const rowFailures: Array<{ gamePk: string | number | null; eventId: string | null; reason: string }> = []
     for (const game of games) {
       if (game.gameDate && (!latestSourceTimestamp || game.gameDate > latestSourceTimestamp)) latestSourceTimestamp = game.gameDate
       const event = matchStatsGameToEvent(game, events)
@@ -590,7 +586,15 @@ async function refreshMlbGameStatuses({
         rowsSkipped += 1
         continue
       }
-      const nextStatus = canonicalMlbStatsStatus(game)
+      const mapping = mapMlbStatsGameToSportEventStatus(game)
+      if (!mapping.ok || !mapping.status || !isSportEventCanonicalStatus(mapping.status)) {
+        rowsSkipped += 1
+        mappingFailures += 1
+        rowFailures.push({ gamePk: game.gamePk ?? null, eventId: event.id, reason: mapping.reason })
+        continue
+      }
+      validRowsEvaluated += 1
+      const nextStatus = mapping.status
       const metadata = asRecord(event.metadata)
       const previousStatusEvidence = asRecord(metadata.mlbStatsStatus)
       const previousFetchedAt = String(previousStatusEvidence.fetchedAt ?? '')
@@ -616,15 +620,26 @@ async function refreshMlbGameStatuses({
             gamePk: game.gamePk ?? null,
             detailedState: game.status?.detailedState ?? null,
             abstractGameState: game.status?.abstractGameState ?? null,
+            codedGameState: game.status?.codedGameState ?? null,
+            statusCode: game.status?.statusCode ?? null,
+            mappedSportEventStatus: nextStatus,
+            mappedLifecycle: mapping.lifecycle,
+            mappingReason: mapping.reason,
             latestSourceTimestamp: game.gameDate ?? null,
             fetchedAt: started,
           },
-          providerStatus: nextStatus,
+          providerStatus: mapping.rawStatus,
+          providerStatusMapped: nextStatus,
         },
       }
       const changed = normalize(event.status) !== normalize(nextStatus)
       const { error } = await supabaseAdmin.from('sport_events').update(patch).eq('id', event.id)
-      if (error) throw new Error(`MLB Stats API status update failed: ${error.message}`)
+      if (error) {
+        rowsSkipped += 1
+        updateFailures += 1
+        rowFailures.push({ gamePk: game.gamePk ?? null, eventId: event.id, reason: `MLB Stats API status update failed: ${error.message}` })
+        continue
+      }
       rowsUpdated += 1
       if (changed) {
         statusesChanged += 1
@@ -633,7 +648,7 @@ async function refreshMlbGameStatuses({
     }
     return {
       success: true,
-      status: statusesChanged > 0 ? 'SUCCESS_CHANGED' : 'SUCCESS_NO_CHANGE',
+      status: updateFailures || mappingFailures ? 'PARTIAL_MAPPING_FAILURE' : statusesChanged > 0 ? 'SUCCESS_CHANGED' : 'SUCCESS_NO_CHANGE',
       provider,
       endpoint,
       providerCheckRequired: true,
@@ -644,10 +659,14 @@ async function refreshMlbGameStatuses({
       statusesChanged,
       rowsUpdated,
       rowsSkipped,
+      validRowsEvaluated,
+      mappingFailures,
+      updateFailures,
+      rowFailures: rowFailures.slice(0, 25),
       latestSourceTimestamp,
       lastProviderCheckAt: started,
       lastStatusChangeAt,
-      failureReason: null,
+      failureReason: updateFailures || mappingFailures ? 'One or more provider rows could not be safely mapped or updated; valid rows were still processed.' : null,
       providerBudget: budget.status,
       operatingDayId,
     }
@@ -1647,6 +1666,9 @@ export function validateOperatingDayDeterministicFixtures() {
   const checks = [
     ['status refresh preserves constrained lifecycle status', statusForAction('status_refresh') === 'planned'],
     ['status refresh status is constraint-valid', OPERATING_DAY_ALLOWED_STATUSES.includes(statusForAction('status_refresh') as OperatingDayPersistedStatus)],
+    ['MLB Stats final maps to sport_events completed', canonicalMlbStatsStatus({ status: { abstractGameState: 'Final', detailedState: 'Final', codedGameState: 'F' } }) === 'completed'],
+    ['MLB Stats live maps to sport_events live', canonicalMlbStatsStatus({ status: { abstractGameState: 'Live', detailedState: 'In Progress', codedGameState: 'I' } }) === 'live'],
+    ['MLB Stats canceled maps to sport_events cancelled', canonicalMlbStatsStatus({ status: { detailedState: 'Canceled' } }) === 'cancelled'],
     ['stage value is not an operating day status', !OPERATING_DAY_ALLOWED_STATUSES.includes('pregame_or_lock_window' as OperatingDayPersistedStatus)],
     ['legacy invalid status is blocked', !OPERATING_DAY_ALLOWED_STATUSES.includes('status_ready' as OperatingDayPersistedStatus)],
     ['planned lifecycle can still advance to market refresh path', nextAction('planned') === 'morning_sync'],

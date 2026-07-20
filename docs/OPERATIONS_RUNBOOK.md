@@ -35,7 +35,10 @@ Expected status refresh evidence:
 
 - Changed states: `status=SUCCESS_CHANGED`, `provider=mlb_stats_api`, `providerCheckCompleted=true`, `providerCallsMade=1`, `statusesChanged>0`.
 - Checked unchanged states: `status=SUCCESS_NO_CHANGE`, `providerCheckCompleted=true`, `providerCallsMade=1`, `statusesChanged=0`.
+- Partial row failure: `status=PARTIAL_MAPPING_FAILURE`, `providerCheckCompleted=true`, `mappingFailures` or `updateFailures` greater than 0, and valid rows still processed.
 - Skipped due status work: `MISSED_REFRESH` or failed execution with `providerCheckCompleted=false` and exact `failureReason`.
+
+`sport_events.status` accepts only `scheduled`, `live`, `completed`, `postponed` and `cancelled`. MLB Stats API statuses must pass through the canonical mapper; raw provider states belong in metadata, not the constrained status column.
 
 Expected successful odds refresh evidence:
 
@@ -55,13 +58,20 @@ Expected MLB results sync evidence:
 Protected operating-day responses expose:
 
 - `localCalendarDate`
+- `operationalPrimaryDate`
+- `recoveryCandidateDate`
+- `recoveryWindowDays`
+- `recoveryClassification`
 - `activeOperatingDate`
 - `activeSlateDate`
 - `providerQueryDate`
 - `nextSlateDate`
 - `dateSelectionReason`
+- `excludedStaleOrphanCount`
+- `oldestUnresolvedDate`
+- `unresolvedEventsByDate`
 
-For `status_refresh` and `sync_results`, `providerQueryDate` must remain on an unresolved prior slate until all games are terminal. `prepare_next_slate` may use `nextSlateDate`.
+For `status_refresh` and `sync_results`, `providerQueryDate` may remain on an unresolved prior slate only inside the bounded recovery window. Older unresolved rows are classified as stale orphans and must not block the Puerto Rico local operating date. `prepare_next_slate` may use `nextSlateDate`.
 
 ## Runtime Blockers
 

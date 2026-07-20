@@ -28,9 +28,11 @@ Date: 2026-07-19
 | Health | PASS | Health remains evidence-based, not HTTP-200-based. |
 | Page performance | PASS_LOCAL | Dashboard read path unchanged; no provider calls added to page load. |
 | Observability | PASS | Existing lifecycle/provider ledgers reused. |
-| Operating date selection | PASS_LOCAL | Stored unresolved prior slates are preferred for status/results; next slate is reserved for preparation actions. |
+| Canonical event status | PASS_LOCAL | MLB Stats API status/result writes now map to `scheduled`, `live`, `completed`, `postponed`, `cancelled`; raw provider status remains metadata. |
+| Operating date selection | PASS_LOCAL | Puerto Rico local date is primary; unresolved prior slates preempt only inside the 2-day recovery window, with older rows classified as stale orphans. |
 | Action advancement | PASS_LOCAL | Successful no-change status checks satisfy status freshness for the refresh window. |
 | Dashboard false-empty protection | PASS_LOCAL | Today distinguishes timeout/failure/fallback/confirmed-empty states. |
+| Temporal display diagnostics | PASS_LOCAL | Today game cards expose provider, stored start, normalized UTC, display timezone, interpretation mode, confidence and warnings. |
 
 ## Core Decision
 

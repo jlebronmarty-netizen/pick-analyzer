@@ -75,13 +75,15 @@ async function loadEvents(now: Date, searchBackDays: number, searchForwardDays: 
 export async function resolveMlbOperatingDate({
   action = 'status',
   now = new Date(),
-  searchBackDays = 3,
+  searchBackDays = 7,
   searchForwardDays = 7,
+  recoveryWindowDays = 2,
 }: {
   action?: DateResolutionAction | null
   now?: Date
   searchBackDays?: number
   searchForwardDays?: number
+  recoveryWindowDays?: number
 } = {}) {
   const localCalendarDate = localDate(now)
   const rows = await loadEvents(now, searchBackDays, searchForwardDays)
@@ -97,7 +99,11 @@ export async function resolveMlbOperatingDate({
     .filter((date) => date <= localCalendarDate)
     .map((date) => ({ date, events: byDate.get(date) ?? [] }))
     .filter((entry) => entry.events.some((event) => unresolvedEvent(event, now)))
-  const activeUnresolved = unresolvedDates[0]?.date ?? null
+  const recoveryBoundaryDate = addDays(localCalendarDate, -Math.max(0, recoveryWindowDays))
+  const staleOrphanDates = unresolvedDates.filter((entry) => entry.date < recoveryBoundaryDate)
+  const recoveryEligibleDates = unresolvedDates.filter((entry) => entry.date >= recoveryBoundaryDate && entry.date < localCalendarDate)
+  const activeUnresolved = recoveryEligibleDates[0]?.date ?? null
+  const oldestUnresolvedDate = unresolvedDates[0]?.date ?? null
   const currentDateHasEvents = (byDate.get(localCalendarDate)?.length ?? 0) > 0
   const activeOperatingDate = activeUnresolved ?? (currentDateHasEvents ? localCalendarDate : null)
   const nextSlateDate = dates.find((date) => date > (activeOperatingDate ?? localCalendarDate)) ?? null
@@ -106,7 +112,7 @@ export async function resolveMlbOperatingDate({
     ? nextSlateDate ?? localCalendarDate
     : activeOperatingDate ?? (currentDateHasEvents ? localCalendarDate : nextSlateDate ?? localCalendarDate)
   const dateSelectionReason = activeUnresolved && !actionUsesNextSlate(selectedAction)
-    ? 'active_unresolved_slate_precedes_next_slate'
+    ? 'bounded_recovery_slate_precedes_current_or_next_slate'
     : actionUsesNextSlate(selectedAction) && nextSlateDate
       ? 'next_slate_allowed_for_preparation_action'
       : currentDateHasEvents
@@ -114,6 +120,16 @@ export async function resolveMlbOperatingDate({
         : nextSlateDate
           ? 'no_current_events_using_next_slate'
           : 'fallback_local_calendar_date'
+  const unresolvedEventsByDate = Object.fromEntries(dates.map((date) => [date, (byDate.get(date) ?? []).filter((event) => unresolvedEvent(event, now)).length]))
+  const recoveryClassification = activeUnresolved
+    ? 'RECOVERY_ELIGIBLE'
+    : staleOrphanDates.length
+      ? 'STALE_ORPHAN_EXCLUDED'
+      : currentDateHasEvents
+        ? 'CURRENT_LOCAL_DATE_PRIMARY'
+        : nextSlateDate
+          ? 'NO_CURRENT_EVENTS_NEXT_SLATE_AVAILABLE'
+          : 'NO_STORED_SLATE'
 
   return {
     success: true,
@@ -121,18 +137,27 @@ export async function resolveMlbOperatingDate({
     timezone: TIMEZONE,
     action: selectedAction,
     localCalendarDate,
+    operationalPrimaryDate: localCalendarDate,
+    recoveryCandidateDate: activeUnresolved,
+    recoveryWindowDays,
+    recoveryClassification,
     activeOperatingDate,
     activeSlateDate: activeOperatingDate,
     providerQueryDate,
     selectedDate: providerQueryDate,
     nextSlateDate,
     dateSelectionReason,
+    excludedStaleOrphanCount: staleOrphanDates.reduce((sum, entry) => sum + entry.events.filter((event) => unresolvedEvent(event, now)).length, 0),
+    oldestUnresolvedDate,
+    unresolvedEventsByDate,
     diagnostics: {
       dates,
       currentDateHasEvents,
       activeUnresolvedDate: activeUnresolved,
+      recoveryBoundaryDate,
+      staleOrphanDates: staleOrphanDates.map((entry) => entry.date),
       eventCountsByDate: Object.fromEntries(dates.map((date) => [date, byDate.get(date)?.length ?? 0])),
-      unresolvedCountsByDate: Object.fromEntries(dates.map((date) => [date, (byDate.get(date) ?? []).filter((event) => unresolvedEvent(event, now)).length])),
+      unresolvedCountsByDate: unresolvedEventsByDate,
     },
   }
 }
