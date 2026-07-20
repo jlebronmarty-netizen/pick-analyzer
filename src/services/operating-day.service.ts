@@ -20,6 +20,24 @@ const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
 const TIMEZONE = 'America/Puerto_Rico'
 const POLICY_VERSION = 'operating_day_lifecycle_v1'
+const OPERATING_DAY_ALLOWED_STATUSES = [
+  'planned',
+  'morning_synced',
+  'midday_refreshed',
+  'final_refreshed',
+  'locked',
+  'games_in_progress',
+  'results_pending',
+  'results_synced',
+  'settled',
+  'replayed',
+  'calibrated',
+  'completed',
+  'completed_with_warnings',
+  'failed',
+] as const
+
+type OperatingDayPersistedStatus = (typeof OPERATING_DAY_ALLOWED_STATUSES)[number]
 
 type OperatingDayAction =
   | 'status_refresh'
@@ -276,7 +294,7 @@ function isOfficialPickRow(row: PredictionRow) {
 
 function statusForAction(action: OperatingDayAction) {
   return {
-    status_refresh: 'status_ready',
+    status_refresh: 'planned',
     morning_sync: 'morning_synced',
     midday_refresh: 'midday_refreshed',
     final_refresh: 'final_refreshed',
@@ -294,6 +312,12 @@ function statusForAction(action: OperatingDayAction) {
     postgame_rollover: 'planned',
     status: 'planned',
   }[action]
+}
+
+function assertOperatingDayStatus(value: unknown): asserts value is OperatingDayPersistedStatus {
+  if (!OPERATING_DAY_ALLOWED_STATUSES.includes(value as OperatingDayPersistedStatus)) {
+    throw new Error(`Invalid operating_days.status value "${String(value)}"; stage/action values must be stored in metadata, not status.`)
+  }
 }
 
 function timestampColumnForAction(action: OperatingDayAction) {
@@ -687,10 +711,31 @@ async function writeLifecycleEvent(input: {
 
 async function updateOperatingDay(operatingDayId: string, action: OperatingDayAction, patch: Record<string, unknown> = {}) {
   const timestampColumn = timestampColumnForAction(action)
+  const current = await supabaseAdmin
+    .from('operating_days')
+    .select('metadata')
+    .eq('id', operatingDayId)
+    .maybeSingle()
+  if (current.error) throw new Error(`Operating day metadata read failed: ${current.error.message}`)
+  const nextStatus = patch.status ?? statusForAction(action)
+  assertOperatingDayStatus(nextStatus)
+  const existingMetadata = asRecord(current.data?.metadata)
+  const patchMetadata = asRecord(patch.metadata)
   const update: Record<string, unknown> = {
-    status: patch.status ?? statusForAction(action),
+    status: nextStatus,
     updated_at: nowIso(),
     ...patch,
+    metadata: {
+      ...existingMetadata,
+      ...patchMetadata,
+      currentStage: action,
+      lastAction: action,
+      lastActionAt: nowIso(),
+      statusContract: {
+        allowedValues: OPERATING_DAY_ALLOWED_STATUSES,
+        stageStoredIn: 'metadata.currentStage',
+      },
+    },
   }
   if (timestampColumn) update[timestampColumn] = nowIso()
   const { error } = await supabaseAdmin.from('operating_days').update(update).eq('id', operatingDayId)
@@ -1128,6 +1173,8 @@ export async function getOperatingDayStatus(input: { sportKey?: string | null; l
       sourceColumn: 'sport_events.start_time',
     },
     status: day?.status ?? 'planned',
+    currentStage: String(asRecord(day?.metadata).currentStage ?? day?.status ?? 'planned'),
+    currentStageStatus: String(asRecord(day?.metadata).currentStageStatus ?? day?.status ?? 'planned'),
     stages: {
       morningSync: day?.morning_sync_at ?? null,
       middayRefresh: day?.midday_refresh_at ?? null,
@@ -1157,7 +1204,6 @@ export async function getOperatingDayStatus(input: { sportKey?: string | null; l
 function nextAction(status: string) {
   return {
     planned: 'morning_sync',
-    status_ready: 'midday_refresh',
     morning_synced: 'midday_refresh',
     midday_refreshed: 'final_refresh',
     final_refreshed: 'lock',
@@ -1449,7 +1495,7 @@ export async function executeOperatingDay(request: ExecuteRequest) {
       blockingReason = refreshed.failureReason
       warnings = [refreshed.failureReason].filter(Boolean) as string[]
     } else {
-      status = 'status_ready'
+      status = 'planned'
     }
   } else if (action === 'morning_sync' || action === 'midday_refresh' || action === 'final_refresh') {
     const preview = await runSportsDataIoMlbProspectivePreview({
@@ -1500,6 +1546,14 @@ export async function executeOperatingDay(request: ExecuteRequest) {
     status,
     provider_calls_used: Number(day?.provider_calls_used ?? 0) + providerCallsMade,
     last_error: blockingReason,
+    metadata: {
+      currentStage: action,
+      currentStageStatus: String(asRecord(result).status ?? status),
+      selectedDate: date,
+      providerCheckAttempted: Boolean(asRecord(result).providerCheckAttempted),
+      providerCheckCompleted: Boolean(asRecord(result).providerCheckCompleted),
+      providerCallsMade,
+    },
   })
   await writeLifecycleEvent({
     operatingDayId,
@@ -1591,8 +1645,11 @@ export function validateOperatingDayDeterministicFixtures() {
     away_score: 3,
   }
   const checks = [
-    ['status refresh maps to status ready', statusForAction('status_refresh') === 'status_ready'],
-    ['status ready advances to market refresh', nextAction('status_ready') === 'midday_refresh'],
+    ['status refresh preserves constrained lifecycle status', statusForAction('status_refresh') === 'planned'],
+    ['status refresh status is constraint-valid', OPERATING_DAY_ALLOWED_STATUSES.includes(statusForAction('status_refresh') as OperatingDayPersistedStatus)],
+    ['stage value is not an operating day status', !OPERATING_DAY_ALLOWED_STATUSES.includes('pregame_or_lock_window' as OperatingDayPersistedStatus)],
+    ['legacy invalid status is blocked', !OPERATING_DAY_ALLOWED_STATUSES.includes('status_ready' as OperatingDayPersistedStatus)],
+    ['planned lifecycle can still advance to market refresh path', nextAction('planned') === 'morning_sync'],
     ['moneyline win', gradePrediction(ml, result) === 'win'],
     ['run line push', gradePrediction({ ...ml, market: 'spread', line: -1 }, result) === 'push'],
     ['total under win', gradePrediction({ ...ml, market: 'total', team: 'under', line: 6 }, result) === 'win'],
