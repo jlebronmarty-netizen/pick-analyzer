@@ -5,11 +5,16 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { isActiveBettingEvent } from '@/services/active-event.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
+import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
 import {
   buildMarketAlignment,
   marketImpliedProbabilityFromAmerican,
   type MarketAlignmentContract,
 } from '@/services/market-alignment.service'
+import {
+  buildRecommendationExplanation,
+  type RecommendationExplanation,
+} from '@/services/recommendation-explanation.service'
 import { normalizeStoredSportsDataIoMlbStart, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
@@ -139,6 +144,7 @@ export type CurrentBoardCandidate = {
   oddsIngestedAt: string | null
   oddsSnapshotCreatedAt: string | null
   marketAlignment: MarketAlignmentContract
+  recommendationExplanation?: RecommendationExplanation
   maxAllowedAgeMinutes: number
   cutoff: string | null
   pregameSafe: boolean
@@ -887,6 +893,28 @@ async function enrichMlbCandidatesWithVerifiedContext(candidates: CurrentBoardCa
   })
 }
 
+function attachRecommendationExplanations(candidates: CurrentBoardCandidate[]) {
+  return candidates.map((candidate) => {
+    const classification = classifyMarketIntelligence(candidate)
+    return {
+      ...candidate,
+      recommendationExplanation: buildRecommendationExplanation({
+        category: classification.category,
+        recommendationLabel: classification.label,
+        marketAlignment: candidate.marketAlignment,
+        confidence: candidate.confidence,
+        featureQuality: candidate.featureQuality,
+        dataSufficiency: candidate.dataSufficiency,
+        blockers: candidate.blockers,
+        missingInformation: candidate.missingInformation,
+        sportsbook: candidate.sportsbook,
+        marketLabel: candidate.marketLabel,
+        selection: candidate.selection,
+      }),
+    }
+  })
+}
+
 function shouldInclude(mode: CurrentBoardMode, reasons: Set<CurrentBoardReasonCode>) {
   if (mode === 'HISTORICAL_EXPLORER' || mode === 'ALL_STORED_ADVANCED') {
     return !reasons.has('UNSUPPORTED_MARKET') && !reasons.has('SUPERSEDED')
@@ -1027,6 +1055,7 @@ export async function getCurrentBoard({
   if (sportKey === 'baseball_mlb' && includeMlbContext) {
     candidates = await enrichMlbCandidatesWithVerifiedContext(candidates, currentSlateDate)
   }
+  candidates = attachRecommendationExplanations(candidates)
 
   const visibleMarketTimestamps = candidates.map((candidate) => candidate.marketFreshnessTimestamp ?? candidate.oddsTimestamp).filter(Boolean) as string[]
   const sourceMarketTimestamps = candidates.map((candidate) => candidate.marketSourceTimestamp).filter(Boolean) as string[]

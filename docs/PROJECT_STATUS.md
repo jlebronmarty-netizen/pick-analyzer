@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-20 18:53:00 -04:00
+Last updated: 2026-07-20 19:33:40 -04:00
 
 ## Current Architecture
 
@@ -15,6 +15,8 @@ Pick Analyzer is a Next.js 16 App Router application using React 19, TypeScript,
 - `supabase/migrations`: additive migrations for NBA data sync and NBA prediction validation/settlement metadata.
 
 ## Completed Modules Confirmed From Repository
+
+- Phase 3 Actionable Recommendation Explanations V1: implemented and validated locally. Added a shared deterministic `recommendation_explanation_v1` contract for Official Pick, AI Lean, Watchlist and Avoid explanations using existing structured evidence only: market alignment, model probability, market implied probability, edge, EV, selected market freshness, confidence, feature quality, data sufficiency, blockers, risk and price lineage. Current Board candidates now carry the explanation contract, Today/Top AI Opportunity and insight rows render the same explanation object, and Operations Validation includes 21/21 explanation checks for value polarity, stale/fresh inputs, missing probability/price, line/selection mismatch, unaligned markets, Official threshold blockers, duplicate reasons, reason priority and fair-odds conversion. Local read-only smoke confirmed provider calls 0 and remote mutations 0. Prediction formulas, category assignments, Official Pick thresholds, recommendation policy, Current Board ranking, market alignment formulas, provider integrations, settlement and learning remain unchanged.
 
 - Phase 2 Market Intelligence: Aligned Edge And Expected Value V1: implemented and validated locally. Added a reusable `market_alignment_v1` service contract for structural alignment, American odds conversion, market implied probability, model edge in percentage points, one-unit EV percent, selected market freshness, provider/source age, snapshot-ingestion age and risk. Current Board candidates now carry `marketAlignment` and derive displayed edge/EV from aligned selected visible odds snapshots only. Best Value now requires aligned, positive edge, positive EV and non-stale selected market input; stale aligned calculations remain visible for transparency but are not value-ranked. User Mode Top AI Opportunity and Most Likely/Best Value cards now show model probability, market implied probability, model edge, EV, confidence, risk and market age from the shared contract. Validation passed 23/23 fixture checks and local read-only runtime smoke returned provider calls 0 and remote mutations 0. Prediction formulas, recommendation categories, Official thresholds, Current Board generation policy, settlement, learning and unsupported markets remain unchanged.
 

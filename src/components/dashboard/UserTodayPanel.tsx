@@ -83,6 +83,7 @@ type TopOpportunity = {
   line?: number | null
   oddsAgeMinutes?: number | null
   marketAlignment?: MarketAlignment
+  recommendationExplanation?: RecommendationExplanation
 }
 
 type MarketAlignment = {
@@ -101,6 +102,35 @@ type MarketAlignment = {
   risk?: string
   recommendationCategory?: string | null
   calculationVersion?: string
+}
+
+type RecommendationEvidenceItem = {
+  code?: string
+  label?: string
+  value?: string | number | null
+  severity?: 'positive' | 'neutral' | 'warning' | 'negative'
+  sourceField?: string
+  text?: string
+}
+
+type RecommendationExplanation = {
+  explanationVersion?: string
+  category?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  headline?: string
+  summary?: string
+  primaryReasons?: RecommendationEvidenceItem[]
+  secondaryReasons?: RecommendationEvidenceItem[]
+  blockers?: RecommendationEvidenceItem[]
+  promotionConditions?: string[]
+  riskWarnings?: RecommendationEvidenceItem[]
+  evidence?: RecommendationEvidenceItem[]
+  alignmentStatus?: string
+  freshnessStatus?: string
+  confidenceStatus?: string
+  valueStatus?: string
+  actionLabel?: string
+  fairOdds?: number | null
+  fairOddsLabel?: string | null
 }
 
 type TopOpportunityResponse = {
@@ -145,6 +175,7 @@ type IntelligenceRow = {
   oddsTimestamp?: string | null
   oddsAgeMinutes?: number | null
   marketAlignment?: MarketAlignment
+  recommendationExplanation?: RecommendationExplanation
   modeledValueStatus?: string
   probabilityOrigin?: string
   recommendationPolicyStatus?: string
@@ -411,6 +442,7 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
   const probability = topOpportunityProbability(opportunity)
   const displayMarket = marketDisplay(opportunity)
   const alignment = opportunity.marketAlignment
+  const explanation = opportunity.recommendationExplanation
   const aligned = alignment?.alignmentStatus === 'ALIGNED'
 
   return (
@@ -452,6 +484,13 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
       <p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
         Alignment {fieldValue(alignment?.alignmentStatus, 'Pending')} | Risk {fieldValue(alignment?.risk, riskLabel(opportunity as IntelligenceRow))}
       </p>
+      {explanation?.summary ? (
+        <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+          <p className="text-sm font-black text-white">{fieldValue(explanation.headline, category)}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-300">{explanation.summary}</p>
+          {explanation.promotionConditions?.[0] ? <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">{explanation.promotionConditions[0]}</p> : null}
+        </div>
+      ) : null}
       <div className="mt-5">
         <a href="/most-likely" className="inline-flex rounded-full bg-white px-5 py-2 text-sm font-black text-slate-950 outline-none transition hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-white">View Details</a>
       </div>
@@ -579,6 +618,8 @@ function marketDisplay(game: Record<string, any>) {
 }
 
 function reasonSummary(row: IntelligenceRow) {
+  const explanation = row.recommendationExplanation
+  if (explanation?.headline) return explanation.headline
   const positives = row.strengths?.filter(Boolean) ?? []
   const why = String(row.why ?? row.reasonNotOfficial ?? row.recommendation ?? row.semanticLabel ?? '').trim()
   if (positives.length) return positives.slice(0, 2).join(' + ')
@@ -599,6 +640,21 @@ function formatFreshness(row: IntelligenceRow) {
   }
   if (row.oddsTimestamp) return `Updated ${timeText(row.oddsTimestamp)}`
   return 'Freshness pending'
+}
+
+function evidenceText(item: RecommendationEvidenceItem | undefined) {
+  if (!item) return null
+  const value = item.value === null || item.value === undefined || item.value === '' ? '' : `: ${item.value}`
+  return `${fieldValue(item.label, 'Evidence')}${value}`
+}
+
+function topBlocker(row: IntelligenceRow) {
+  const explanation = row.recommendationExplanation
+  return evidenceText(explanation?.blockers?.[0]) ?? evidenceText(explanation?.secondaryReasons?.[0]) ?? evidenceText(explanation?.primaryReasons?.[0])
+}
+
+function promotionCondition(row: IntelligenceRow) {
+  return row.recommendationExplanation?.promotionConditions?.[0] ?? null
 }
 
 function marketMetric(row: IntelligenceRow | TopOpportunity, key: keyof MarketAlignment, fallback?: unknown) {
@@ -732,7 +788,14 @@ function InsightList({ title, rows, empty, count }: { title: string; rows: Intel
             <p className="text-sm font-black text-white">{fieldValue(row.selection)} · {fieldValue(row.marketLabel ?? row.market)}</p>
             <p className="mt-1 text-xs font-bold text-slate-500">{fieldValue(row.matchup)}</p>
             <p className="mt-3 text-sm leading-6 text-slate-300">{reasonSummary(row)}</p>
-            {row.missingData?.length ? <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-200">Waiting on {row.missingData.slice(0, 2).join(' + ')}</p> : null}
+            <div className="mt-3 grid gap-2 sm:grid-cols-4">
+              <p className="text-xs font-bold text-slate-400">Edge {signedNumber(row.marketAlignment?.edgePercentagePoints ?? row.edge, ' pts')}</p>
+              <p className="text-xs font-bold text-slate-400">EV {signedNumber(row.marketAlignment?.expectedValuePercent ?? row.expectedValue, '%')}</p>
+              <p className="text-xs font-bold text-slate-400">Price {formatAmericanOdds(row.americanOdds ?? row.odds) ?? 'n/a'}</p>
+              <p className="text-xs font-bold text-slate-400">{compactMarketAge(row)}</p>
+            </div>
+            {topBlocker(row) ? <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-200">{topBlocker(row)}</p> : null}
+            {promotionCondition(row) ? <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">{promotionCondition(row)}</p> : null}
           </article>
         )) : (
           <p className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-sm leading-6 text-slate-400">{empty}</p>

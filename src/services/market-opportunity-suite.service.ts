@@ -478,6 +478,7 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     oddsIngestedAt: candidate.oddsIngestedAt,
     oddsSnapshotCreatedAt: candidate.oddsSnapshotCreatedAt,
     marketAlignment: candidate.marketAlignment,
+    recommendationExplanation: candidate.recommendationExplanation,
     selectedOddsSnapshotId: candidate.oddsSnapshotId,
     selectedOddsSource: candidate.oddsSnapshotId ? 'sports_odds_snapshots' : 'prediction_history_offered_price',
     anomalies: candidate.anomalyReasons,

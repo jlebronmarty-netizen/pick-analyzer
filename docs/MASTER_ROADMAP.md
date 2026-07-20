@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Phase 3 Actionable Recommendation Explanations V1
+
+Status: Implemented and validated locally. Production deployment remains pending explicit authorization.
+
+Evidence: `src/services/recommendation-explanation.service.ts`, `src/services/current-board.service.ts`, `src/services/market-opportunity-suite.service.ts`, `src/app/api/operations/validation/route.ts` and `src/components/dashboard/UserTodayPanel.tsx`.
+
+Note: Phase 3 adds a deterministic `recommendation_explanation_v1` contract shared by Current Board, Today/Top AI Opportunity and market insight rows. Explanations are grounded only in existing market alignment, probability, edge, EV, freshness, confidence, risk, feature/data sufficiency and blocker evidence. Operations Validation now includes 21 explanation fixture checks including stale/fresh, positive/negative/zero value, missing price/probability, line/selection mismatch, unaligned markets, Official threshold blockers, reason deduplication, reason priority and fair-odds conversion. This phase does not change prediction formulas, category assignment, Official Pick thresholds, recommendation policy, Current Board ranking, market alignment formulas, provider integrations, settlement, learning or unsupported markets. Phase 4 has not started.
+
 ### Phase 2 Market Intelligence: Aligned Edge And Expected Value V1
 
 Status: Implemented and validated locally. Production deployment remains pending explicit authorization.
