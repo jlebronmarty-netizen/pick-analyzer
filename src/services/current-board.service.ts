@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { isActiveBettingEvent } from '@/services/active-event.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
-import { normalizeStoredSportsDataIoMlbStart } from '@/services/provider-time-normalization.service'
+import { normalizeStoredSportsDataIoMlbStart, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
 
@@ -790,11 +790,15 @@ export async function getCurrentBoard({
   mode = 'CURRENT',
   limit = 100,
   modelRole,
+  includeMlbContext = true,
+  slateDate,
 }: {
   sportKey?: string
   mode?: CurrentBoardMode
   limit?: number
   modelRole?: 'champion' | 'challenger' | 'shadow' | null
+  includeMlbContext?: boolean
+  slateDate?: string | null
 } = {}): Promise<CurrentBoardResponse> {
   const safeLimit = Math.max(1, Math.min(limit, 200))
   const nowMs = Date.now()
@@ -814,6 +818,10 @@ export async function getCurrentBoard({
     predictionsQuery = predictionsQuery.eq('model_role', modelRole)
   } else if (versioning.applied && (mode === 'CURRENT' || mode === 'UPCOMING')) {
     predictionsQuery = predictionsQuery.eq('is_current', true)
+  }
+  if (slateDate && sportKey === 'baseball_mlb' && (mode === 'CURRENT' || mode === 'UPCOMING')) {
+    const range = zonedUtcRange(slateDate, 'America/Puerto_Rico')
+    predictionsQuery = predictionsQuery.gte('commence_time', range.utcStart).lt('commence_time', range.utcEndExclusive)
   }
   const predictionsResult = await predictionsQuery
     .order('odds_timestamp', { ascending: false })
@@ -907,7 +915,7 @@ export async function getCurrentBoard({
 
   const currentSlateDate = earliestSlate?.slice(0, 10) ?? candidates[0]?.scheduledTime?.slice(0, 10) ?? null
   const operatingDate = localDateInTimezone(earliestSlate ?? candidates[0]?.scheduledTime ?? null, 'America/Puerto_Rico')
-  if (sportKey === 'baseball_mlb') {
+  if (sportKey === 'baseball_mlb' && includeMlbContext) {
     candidates = await enrichMlbCandidatesWithVerifiedContext(candidates, currentSlateDate)
   }
 
@@ -1014,8 +1022,8 @@ export async function getCurrentBoard({
 }
 
 export const getCurrentBoardCached = cache(
-  async (sportKey: string = 'baseball_mlb', mode: CurrentBoardMode = 'CURRENT', limit: number = 100) =>
-    getCurrentBoard({ sportKey, mode, limit })
+  async (sportKey: string = 'baseball_mlb', mode: CurrentBoardMode = 'CURRENT', limit: number = 100, includeMlbContext = true, slateDate?: string | null) =>
+    getCurrentBoard({ sportKey, mode, limit, includeMlbContext, slateDate })
 )
 
 export function mapLegacyBoardMode(mode: string | null | undefined): CurrentBoardMode {

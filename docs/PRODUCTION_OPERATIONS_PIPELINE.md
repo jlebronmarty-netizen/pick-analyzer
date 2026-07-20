@@ -39,3 +39,13 @@ Adaptive Refresh now delegates due, supported work to the existing operating-day
 ## Remaining Runtime Blocker
 
 `executeOperatingDay(sync_results)` now uses MLB Stats API schedule/game results for MLB, maps provider games to canonical events, writes `game_results`, updates final event scores and exposes provider-check evidence. The Odds API remains supplemental only for already-approved non-primary uses.
+
+## 2026-07-20 Local Runtime Smoke
+
+| Stage | Result | Evidence |
+| --- | --- | --- |
+| MLB_GAME_STATUS_SYNC | PASS_LOCAL | `status_refresh` selected `2026-07-20`, completed MLB Stats API provider check, received 15 rows and returned `SUCCESS_NO_CHANGE`. |
+| MLB_ODDS_SYNC | PASS_LOCAL | `midday_refresh` selected `2026-07-20`, completed SportsDataIO `GameOddsByDate/2026-07-20`, received 15 rows and inserted 90 odds snapshots. |
+| MLB_CURRENT_BOARD_REFRESH | PASS_LOCAL | Stored Current Board returned 24 candidates and 0 official picks. |
+| MLB_AI_BRIEFING_REFRESH | PASS_LOCAL | Today read composes user-mode sections directly from stored Current Board data; standalone scanner routes are not required for page load. |
+| Page-load safety | PASS_LOCAL | `/api/dashboard/today?includeValidation=true` made 0 provider calls and 0 remote mutations. |

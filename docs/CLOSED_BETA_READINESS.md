@@ -2,7 +2,7 @@
 
 Status: Limited
 Version: V1
-Last updated: 2026-07-19
+Last updated: 2026-07-20
 
 ## Objective
 
@@ -15,13 +15,13 @@ It does not change prediction formulas, projection formulas, Official Pick thres
 | Blocker | Status | Evidence | Required resolution |
 | --- | --- | --- | --- |
 | `odds_not_current` | Repair implemented; production validation pending | `/api/operations/health` reports degraded operations until a protected provider-backed check succeeds or reports an exact provider/scheduler blocker. | Run one controlled protected adaptive refresh when market work is legitimately due. |
-| Today dashboard temporary unavailable | Repair implemented; production validation pending | User Mode can now render typed partial data when optional insights or degraded operations are unavailable. | Deploy and validate repeated `/dashboard` and `/api/dashboard?mode=today` loads. |
+| Today dashboard temporary unavailable | Locally certified; production deployment pending | User Mode rendered 15 current MLB cards, Most Likely data, positive-only Best Value empty state and AI Bet Finder fallback from stored Current Board rows with 0 provider calls and 0 mutations. | Deploy and validate repeated `/dashboard` and `/api/dashboard?mode=today` loads. |
 | User-visible projections `0` | Active but correct | Projection Integrity blocks unsafe rows; `/api/mlb/projections/health` reports blocked projections and zero user-visible rows. | Activate automatically only when identity, starter/participation, feature quality, data sufficiency, unit and plausibility gates pass. |
 | Intraday scheduler cadence | Limited | `vercel.json` contains the consolidated daily operating-day cron; protected adaptive execution is available for manual/external scheduler use. | Add a monitored external cadence or Vercel plan/cadence that supports intraday refreshes. |
 | MLB runtime results provider | Code-ready / production validation pending | Status refresh and MLB `sync_results` now use MLB Stats API in local code. | Deploy and smoke-test canonical final-result ingestion in production before unattended runtime certification. |
 | MLB canonical event status | Repair implemented; production validation pending | MLB Stats API status/result writes map to existing DB-safe `sport_events.status` values and preserve raw provider status in metadata. | Deploy and confirm protected status refresh no longer returns `sport_events_status_check`. |
 | Stale slate recovery | Repair implemented; production validation pending | Puerto Rico local date is primary; unresolved prior slates can preempt only inside the 2-day recovery window. | Confirm July 16-style residual rows are reported as stale orphans instead of selected for current work. |
-| Temporal display | Repair implemented; production validation pending | SportsDataIO MLB legacy naive times can be repaired using metadata or `provider_ids`; game cards expose temporal diagnostics. | Smoke-test Today cards with production stored events. |
+| Temporal display | Locally certified; production deployment pending | Current-day temporal health returned 15 games and legacy repair count 0. Schema-only `rawFieldNames` no longer shifts MLB Stats-backed UTC instants. | Smoke-test Today cards with production stored events. |
 | Confirmed lineups | External limitation | No verified lineup provider is enabled. | Keep unavailable; do not infer lineup absence. |
 | Detailed injuries | Provider-plan limitation | Roster status is available, detailed injury diagnosis/return is not. | Keep subscription-blocked until provider plan changes. |
 
@@ -50,7 +50,7 @@ Production Readiness Score: 65 / 100.
 
 ## Decision
 
-Closed Beta is not fully ready for unattended operation while production still lacks a deployed runtime activation build, verified intraday scheduler activation and production smoke evidence. Status refresh and MLB final-result sync are now MLB Stats API-backed in local code, but external users should not be told the operating-day runtime is fully automatic until scheduler, odds, results, settlement and performance evidence all pass in production.
+Closed Beta is locally ready for a controlled deployment validation pass, but not fully ready for unattended operation while production still lacks this deployed runtime build, verified intraday scheduler activation and production smoke evidence. Status refresh and MLB final-result sync are MLB Stats API-backed in local code; odds refresh has current-day SportsDataIO evidence. External users should not be told the operating-day runtime is fully automatic until scheduler, results, settlement and performance evidence all pass in production.
 
 ## Regression Guardrails
 

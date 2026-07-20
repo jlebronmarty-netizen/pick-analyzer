@@ -106,8 +106,9 @@ export async function getOperatingDayAutomationStatus() {
   const operatingDay = slate.selectedSlateDate
     ? await getOperatingDayStatus({ sportKey: 'baseball_mlb', leagueKey: 'mlb', selectedDate: slate.selectedSlateDate })
     : null
-  const dateResolution = await resolveMlbOperatingDate({ action: 'status_refresh', now })
-  const selectedDateForAction = String(dateResolution.providerQueryDate ?? slate.selectedSlateDate ?? dateResolution.localCalendarDate)
+  const dateResolution = await resolveMlbOperatingDate({ action: stage.action, now })
+  const statusRecoveryDateResolution = await resolveMlbOperatingDate({ action: 'status_refresh', now })
+  const selectedDateForAction = String(slate.selectedSlateDate ?? dateResolution.providerQueryDate ?? dateResolution.localCalendarDate)
   const operatingDayForAction = selectedDateForAction
     ? await getOperatingDayStatus({ sportKey: 'baseball_mlb', leagueKey: 'mlb', selectedDate: selectedDateForAction })
     : operatingDay
@@ -130,7 +131,14 @@ export async function getOperatingDayAutomationStatus() {
         ? 'status'
         : stage.action
   const actionDateResolution = await resolveMlbOperatingDate({ action: nextAction, now })
-  const selectedDateForActionFinal = String(actionDateResolution.providerQueryDate ?? selectedDateForAction)
+  const selectedDateForActionFinal = String(
+    nextAction === 'status_refresh'
+      ? selectedDateForAction
+      : actionDateResolution.providerQueryDate ?? selectedDateForAction
+  )
+  const finalDateSelectionReason = nextAction === 'status_refresh' && selectedDateForActionFinal !== actionDateResolution.providerQueryDate
+    ? 'current_actionable_slate_status_refresh_preempts_stale_recovery_selection'
+    : actionDateResolution.dateSelectionReason
   const finalOperatingDay = selectedDateForActionFinal !== selectedDateForAction
     ? await getOperatingDayStatus({ sportKey: 'baseball_mlb', leagueKey: 'mlb', selectedDate: selectedDateForActionFinal })
     : operatingDayForAction
@@ -166,11 +174,18 @@ export async function getOperatingDayAutomationStatus() {
     },
     operatingDayId: finalOperatingDayRecord.operatingDayId ?? null,
     localCalendarDate: actionDateResolution.localCalendarDate,
-    activeOperatingDate: actionDateResolution.activeOperatingDate,
-    activeSlateDate: actionDateResolution.activeSlateDate,
-    providerQueryDate: actionDateResolution.providerQueryDate,
+    activeOperatingDate: selectedDateForActionFinal,
+    activeSlateDate: selectedDateForActionFinal,
+    providerQueryDate: selectedDateForActionFinal,
     nextSlateDate: actionDateResolution.nextSlateDate,
-    dateSelectionReason: actionDateResolution.dateSelectionReason,
+    dateSelectionReason: finalDateSelectionReason,
+    statusRecoveryDateSelection: {
+      activeSlateDate: statusRecoveryDateResolution.activeSlateDate,
+      providerQueryDate: statusRecoveryDateResolution.providerQueryDate,
+      recoveryCandidateDate: statusRecoveryDateResolution.recoveryCandidateDate,
+      dateSelectionReason: statusRecoveryDateResolution.dateSelectionReason,
+      note: 'Recovery is diagnostic here; current operating-day automation uses the actionable slate date for status, odds and downstream work.',
+    },
     currentOperatingDayStage: stage.stage,
     currentLifecycleState,
     currentStage: stage.stage,

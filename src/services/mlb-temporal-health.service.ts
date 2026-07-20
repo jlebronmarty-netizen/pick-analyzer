@@ -28,6 +28,7 @@ type EventRow = {
   away_team: string | null
   updated_at: string | null
   metadata: Record<string, unknown> | null
+  provider_ids?: Record<string, unknown> | null
 }
 
 function countBy<T extends string>(values: T[]) {
@@ -41,7 +42,7 @@ async function loadEvents(date: string) {
   const range = puertoRicoUtcRange(date)
   const { data, error } = await supabaseAdmin
     .from('sport_events')
-    .select('id, sport_key, league_key, start_time, status, home_team, away_team, updated_at, metadata')
+    .select('id, sport_key, league_key, start_time, status, home_team, away_team, updated_at, metadata, provider_ids')
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
     .gte('start_time', range.utcStart)
@@ -98,7 +99,7 @@ export async function getMlbTemporalHealth({ date, now = new Date() }: { date?: 
   const projectionIntegrity = await projectionTemporalIntegrity(selectedDate, now)
 
   const games = events.map((event) => {
-    const temporal = normalizeStoredSportsDataIoMlbStart({ startTime: event.start_time, metadata: event.metadata })
+    const temporal = normalizeStoredSportsDataIoMlbStart({ startTime: event.start_time, metadata: event.metadata, providerIds: event.provider_ids })
     const lifecycle = resolveMlbGameLifecycle(event, now)
     const eligibility = eligibilityFromLifecycle({
       lifecycle: lifecycle.lifecycle,

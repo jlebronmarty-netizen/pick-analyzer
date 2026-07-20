@@ -85,9 +85,15 @@ For `status_refresh` and `sync_results`, `providerQueryDate` may remain on an un
 
 ## Runtime Blockers
 
-- Full automatic runtime certification remains blocked until production deployment/smoke validation is completed. The authorized Vercel deploy was rejected by the execution environment during the activation mission.
+- Full unattended production runtime certification remains blocked until this local commit is deployed and production smoke validation is completed. The latest no-deploy continuation certified the protected local runtime chain against real providers but did not deploy.
 - External intraday scheduler secrets and activation must be verified; the once-daily Vercel cron is not enough for MLB status/odds freshness.
-- MLB `sync_results` is repaired locally to use MLB Stats API final result ingestion; production evidence is pending deployment.
+- MLB `sync_results` is repaired locally to use MLB Stats API final result ingestion; final-game production evidence is pending a completed slate after deployment.
+
+## 2026-07-20 Local Runtime Evidence
+
+- Protected `status_refresh`: `SUCCESS_NO_CHANGE`, provider calls 1, remote mutations 28, rows received 15, rows updated 13, rows skipped 2.
+- Protected `midday_refresh`: `SUCCESS_CHANGED`, provider calls 3, remote mutations 195, SportsDataIO `GameOddsByDate/2026-07-20`, rows inserted 90.
+- Today read: `AVAILABLE`, 15 current cards, 24 candidates, 10 Most Likely rows, Best Value `EMPTY`, 0 provider calls, 0 mutations, 1996ms, errors none.
 
 ## Guardrails
 

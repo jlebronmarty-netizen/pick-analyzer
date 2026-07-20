@@ -218,7 +218,7 @@ export function validateMlbLifecycleFixtures() {
     sport_key: 'baseball_mlb',
     league_key: 'mlb',
     start_time: '2026-07-19T12:15:00.000Z',
-    metadata: { provider: 'sportsdataio', provider_variant: 'sportsdataio_discovery_lab', rawFieldNames: ['DateTime'] },
+    metadata: { provider: 'sportsdataio', provider_variant: 'sportsdataio_discovery_lab', providerDateTimeRaw: '2026-07-19T12:15:00', rawFieldNames: ['DateTime'] },
   }
   const now = new Date('2026-07-19T15:00:00.000Z')
   const checks = [

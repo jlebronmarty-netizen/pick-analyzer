@@ -3,18 +3,11 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import {
   ACTIVE_EVENT_TIMEZONE,
-  isCanceledEventStatus,
-  isFinalEventStatus,
-  isLiveEventStatus,
-  isPostponedEventStatus,
   puertoRicoLocalDateFromUtc,
   puertoRicoUtcRange,
 } from '@/services/active-event.service'
 import { getCurrentBoardCached } from '@/services/current-board.service'
-import { runAiBetFinder } from '@/services/ai-bet-finder.service'
-import { getBestValueOpportunities } from '@/services/best-value-scanner.service'
 import { emptyCategoryTrackRecord, summarizeMarketIntelligenceCategories } from '@/services/market-intelligence-category.service'
-import { getMostLikelyOpportunities } from '@/services/market-opportunity-suite.service'
 import { getNextSlateStatus } from '@/services/next-slate.service'
 import { getOperatingDayStatus } from '@/services/operating-day.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
@@ -288,14 +281,6 @@ function localIso(now: Date) {
   return formatInTimeZone(now.toISOString(), TIMEZONE) ?? now.toISOString()
 }
 
-function canonicalEventStatus(value: string | null | undefined) {
-  if (isFinalEventStatus(value)) return 'final'
-  if (isLiveEventStatus(value)) return 'in_progress'
-  if (isPostponedEventStatus(value)) return 'postponed'
-  if (isCanceledEventStatus(value)) return 'canceled'
-  return 'scheduled'
-}
-
 function bettingEligibilityForCard(lifecycle: ReturnType<typeof resolveMlbGameLifecycle>, hasOdds = false, hasPrediction = false): DashboardBettingEligibility {
   if (lifecycle.lifecycle === 'STATUS_UNCONFIRMED' || lifecycle.lifecycle === 'UNKNOWN') return 'STATUS_UNCONFIRMED'
   if (['LIVE', 'FINAL', 'POSTPONED', 'CANCELED', 'SUSPENDED', 'DELAYED'].includes(lifecycle.lifecycle)) return 'LOCKED_AFTER_START'
@@ -520,15 +505,12 @@ export async function getDashboardToday({
     hour12: false,
   }).format(now))
 
-  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, mostLikelyResult, bestValueResult, aiBetFinderResult] = await Promise.all([
+  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult] = await Promise.all([
     timed('current_events', () => loadEventsForDate(operatingDate), 4200),
-    timed('current_board', () => getCurrentBoardCached(SPORT_KEY, 'CURRENT', 100), 2200),
-    timed('next_slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }), 2200),
-    timed('operating_day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: operatingDate }), 2000),
+    timed('current_board', () => getCurrentBoardCached(SPORT_KEY, 'CURRENT', 100, false, operatingDate), 5000),
+    timed('next_slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }), 3500),
+    timed('operating_day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: operatingDate }), 4000),
     timed('provider_budget', () => getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY }), 1600),
-    timed('most_likely', () => getMostLikelyOpportunities({ sort: 'highest_probability', mode: 'current_board', limit: 10 }), 1600),
-    timed('best_value', () => getBestValueOpportunities({ mode: 'current', includePasses: false, limit: 10 }), 1600),
-    timed('ai_bet_finder', () => runAiBetFinder({ query: 'best opportunities today' }), 1600),
   ])
   const currentEventsTimedOut = currentEventsResult.error?.toLowerCase().includes('exceeded') === true
   const currentEventsFallbackResult = !currentEventsResult.ok && !currentEventsTimedOut
@@ -633,7 +615,7 @@ export async function getDashboardToday({
     ? board
     : !boardResult.ok
       ? boardFallback
-    : values(await timed('current_board_informational_fallback', () => getCurrentBoardCached(SPORT_KEY, 'ALL_STORED_ADVANCED', 200), 800), boardFallback)
+    : values(await timed('current_board_informational_fallback', () => getCurrentBoardCached(SPORT_KEY, 'ALL_STORED_ADVANCED', 200, false, operatingDate), 800), boardFallback)
   const todayStart = puertoRicoUtcRange(operatingDate).utcStart
   const todayEnd = puertoRicoUtcRange(operatingDate).utcEndExclusive
   const displayCandidates = informationalBoard.candidates.filter((candidate) => (
@@ -704,12 +686,18 @@ export async function getDashboardToday({
     nextSlateDate,
     operatingStatus,
   })
-  const mostLikelyData = mostLikelyResult.ok && mostLikelyResult.value ? mostLikelyResult.value.opportunities ?? [] : []
-  const bestValueData = bestValueResult.ok && bestValueResult.value ? bestValueResult.value.opportunities ?? [] : []
-  const aiBetFinderData = aiBetFinderResult.ok && aiBetFinderResult.value ? (aiBetFinderResult.value as { results?: unknown[] }).results ?? [] : []
-  const topOpportunity = mostLikelyResult.ok && mostLikelyResult.value
-    ? mostLikelyResult.value.topPick?.candidate ?? mostLikelyData[0] ?? null
-    : null
+  const boardMostLikelyData = displayCandidates
+    .slice()
+    .sort((left, right) => Number(right.rawProbability ?? 0) - Number(left.rawProbability ?? 0))
+    .slice(0, 10)
+  const boardBestValueData = displayCandidates
+    .filter((candidate) => Number(candidate.edge ?? 0) > 0 && Number(candidate.expectedValue ?? 0) > 0)
+    .sort((left, right) => Number(right.expectedValue ?? 0) - Number(left.expectedValue ?? 0))
+    .slice(0, 10)
+  const mostLikelyData = boardMostLikelyData
+  const bestValueData = boardBestValueData
+  const aiBetFinderData = mostLikelyData.slice(0, 5)
+  const topOpportunity = mostLikelyData[0] ?? null
   const storyLines = [
     gamesWaitingForOdds > 0
       ? 'The AI is waiting for current market prices before it can finalize recommendations.'
@@ -726,9 +714,6 @@ export async function getDashboardToday({
     nextSlateResult,
     operatingDayResult,
     budgetResult,
-    mostLikelyResult,
-    bestValueResult,
-    aiBetFinderResult,
   ]
   const criticalLabels = new Set(['current_events'])
   const errors = dependencyResults
@@ -827,22 +812,22 @@ export async function getDashboardToday({
       ),
       todayStory: section(storyLines.length ? 'AVAILABLE' : 'EMPTY', storyLines, storyLines.length ? null : 'No Today story lines are available.', generatedAt),
       mostLikely: section(
-        mostLikelyResult.ok ? (mostLikelyData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
+        boardResult.ok || mostLikelyData.length ? (mostLikelyData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
         mostLikelyData,
-        mostLikelyResult.ok ? (mostLikelyData.length ? null : 'No Most Likely opportunities are available.') : 'Most Likely is temporarily unavailable.',
-        mostLikelyResult.ok ? generatedAt : null
+        boardResult.ok || mostLikelyData.length ? (mostLikelyData.length ? null : 'No Most Likely opportunities are available.') : 'Most Likely is temporarily unavailable.',
+        boardResult.ok || mostLikelyData.length ? generatedAt : null
       ),
       bestValue: section(
-        bestValueResult.ok ? (bestValueData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
+        boardResult.ok ? (bestValueData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
         bestValueData,
-        bestValueResult.ok ? (bestValueData.length ? null : 'No positive-value opportunities today.') : 'Best Value is temporarily unavailable.',
-        bestValueResult.ok ? generatedAt : null
+        boardResult.ok ? (bestValueData.length ? null : 'No positive-value opportunities today.') : 'Best Value is temporarily unavailable.',
+        boardResult.ok ? generatedAt : null
       ),
       aiBetFinder: section(
-        aiBetFinderResult.ok ? (aiBetFinderData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
+        boardResult.ok || aiBetFinderData.length ? (aiBetFinderData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
         aiBetFinderData,
-        aiBetFinderResult.ok ? (aiBetFinderData.length ? null : 'No AI explanation rows are available.') : 'AI explanations are temporarily unavailable.',
-        aiBetFinderResult.ok ? generatedAt : null
+        boardResult.ok || aiBetFinderData.length ? (aiBetFinderData.length ? null : 'No AI explanation rows are available.') : 'AI explanations are temporarily unavailable.',
+        boardResult.ok || aiBetFinderData.length ? generatedAt : null
       ),
       topOpportunity: section(topOpportunity ? 'AVAILABLE' : 'EMPTY', topOpportunity, topOpportunity ? null : 'No top opportunity is available.', generatedAt),
       operations: section(

@@ -58,4 +58,10 @@ The production GitHub Actions workflow `.github/workflows/production-operating-d
 
 Recommended UTC cadence: `*/15 * * * *`. The adaptive planner decides whether status, odds, results, settlement or no work is actually due, and provider locks prevent overlapping equivalent work.
 
-Certification status: FAIL until the workflow is enabled in production, `CRON_SECRET` is verified, and at least one scheduled or manual invocation records lifecycle evidence.
+Latest protected local evidence on 2026-07-20:
+
+- `status_refresh` executed for `2026-07-20` with 1 MLB Stats API provider call and completed provider-check evidence.
+- `midday_refresh` executed for `2026-07-20` with 3 provider calls, including SportsDataIO `GameOddsByDate/2026-07-20`, and inserted 90 odds snapshots.
+- User-mode Today reads after execution made 0 provider calls and 0 remote mutations.
+
+Certification status: PASS_LOCAL for protected execution. FAIL for unattended production scheduling until the workflow is enabled in production, `CRON_SECRET` is verified, and at least one scheduled invocation records lifecycle evidence.

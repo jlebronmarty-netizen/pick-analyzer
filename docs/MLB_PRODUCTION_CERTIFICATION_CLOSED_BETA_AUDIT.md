@@ -1,6 +1,6 @@
 # MLB Production Certification & Closed Beta Audit V1
 
-Date: 2026-07-19
+Date: 2026-07-20
 
 ## Certification Summary
 
@@ -18,6 +18,8 @@ No prediction formulas, projection formulas, Official Pick thresholds, champion 
 - MLB Stats API status/result writes now pass through a canonical DB-safe mapper before touching `sport_events.status`; raw provider status is preserved in metadata.
 - Operating-date selection now treats Puerto Rico local date as primary and excludes unresolved stale-orphan slates outside the 2-day recovery window.
 - Today game cards expose temporal diagnostics and repair legacy SportsDataIO naive start times when provider identity is available.
+- Today runtime now returns all 15 current-day MLB games for `2026-07-20` after provider-backed status and odds refreshes, with page-load provider calls 0 and remote mutations 0.
+- SportsDataIO schema-only `rawFieldNames` no longer causes already-correct MLB Stats-backed UTC starts to shift into the next Puerto Rico operating date.
 
 ## Audit Ledger
 
@@ -43,6 +45,7 @@ No prediction formulas, projection formulas, Official Pick thresholds, champion 
 | Projection Visibility | NOT APPLICABLE | Projection integrity remains blocked by missing required inputs; standards were not relaxed. |
 | Public Production Runtime | FAIL | Deployment was authorized but rejected by the execution environment before smoke validation. |
 | Operating-Day Runtime | FAIL | `status_refresh` and MLB Stats API `sync_results` are implemented locally, but full runtime certification remains blocked by unverified external scheduler activation and missing production smoke evidence. |
+| 2026-07-20 Local Runtime Smoke | PASS_LOCAL | Protected `status_refresh` used 1 provider call; protected `midday_refresh` used 3 provider calls and inserted 90 odds snapshots; Today read returned 15 cards with 0 provider calls and 0 mutations. |
 
 ## Validation Contract
 

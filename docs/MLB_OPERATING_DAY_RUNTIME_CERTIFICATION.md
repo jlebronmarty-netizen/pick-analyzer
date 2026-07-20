@@ -1,10 +1,10 @@
 # MLB Operating Day Runtime Certification V1
 
-Date: 2026-07-19
+Date: 2026-07-20
 
 ## Summary
 
-MLB runtime certification is **FAIL** for full unattended production operation. The local codebase now supports protected MLB Stats API `status_refresh`, canonical MLB Stats API `sync_results`, SportsDataIO odds freshness evidence, and a production GitHub Actions scheduler workflow. However, full certification remains blocked because the authorized Vercel production deployment was rejected by the execution environment before a deployment ID or production smoke evidence could be created.
+MLB runtime certification is **PASS_LOCAL** for the protected operating-day chain through status refresh, odds refresh, prediction/current-board read model and user-mode visibility. Full unattended production certification remains pending deployment of this local commit and verification that an external intraday scheduler is active.
 
 No dashboard redesign, prediction formula, projection formula, Official Pick threshold, Best Value policy, champion state, V7 state, settlement formula, learning formula, projection integrity rule or unsupported market gate was changed.
 
@@ -17,7 +17,7 @@ No dashboard redesign, prediction formula, projection formula, Official Pick thr
 | STATUS_READY | Protected `status_refresh` calls MLB Stats API schedule and records provider-check evidence. | PASS |
 | MARKETS_PENDING | Missing/stale odds are explicit blockers. | PASS |
 | MARKETS_READY | SportsDataIO odds refresh path requires provider-check evidence before success-no-change. | PASS |
-| CONTEXT_READY | Starters/context remain partial; confirmed lineups and detailed injuries are unavailable. | FAIL |
+| CONTEXT_READY | Starters/context remain partial; confirmed lineups and detailed injuries are unavailable. | NOT_APPLICABLE |
 | PREDICTIONS_READY | Existing SportsDataIO preview path generates/reuses snapshots and predictions after valid inputs. | PASS |
 | RECOMMENDATIONS_READY | Existing Current Board/recommendation policy gates remain intact. | PASS |
 | PREGAME_COMPLETE | Pregame recommendations lock after start/status uncertainty. | PASS |
@@ -27,7 +27,7 @@ No dashboard redesign, prediction formula, projection formula, Official Pick thr
 | SETTLED | Existing scoped settlement can grade supported MLB markets. | PASS |
 | PERFORMANCE_UPDATED | Performance surfaces read settled evidence. | PASS |
 | LEARNING_UPDATED | Learning is sample-gated and may validly no-op. | PASS |
-| COMPLETE | Complete requires results, settlement, performance and learning evidence. | FAIL |
+| COMPLETE | Complete requires results, settlement, performance and learning evidence after games finish. | NOT_APPLICABLE |
 
 ## Provider Ownership
 
@@ -119,15 +119,27 @@ Recommended external cadence:
 | Caching | PASS | Operational routes remain no-store/dynamic. |
 | Observability | PASS | Existing lifecycle ledger reused. |
 | Production smoke | FAIL | Deployment was authorized but rejected by the execution environment before production smoke could run. |
+| Local protected runtime smoke | PASS | `status_refresh` and `midday_refresh` executed against real providers for `2026-07-20`; page reads then made 0 provider calls and 0 mutations. |
+
+## 2026-07-20 Protected Runtime Evidence
+
+| Stage | Result | Evidence |
+| --- | --- | --- |
+| Status refresh | PASS | `SUCCESS_NO_CHANGE`, provider calls 1, remote mutations 28, rows received 15, rows updated 13, rows skipped 2, provider check attempted/completed true. |
+| Odds refresh | PASS | `SUCCESS_CHANGED`, provider calls 3, remote mutations 195, SportsDataIO `GameOddsByDate/2026-07-20`, rows received 15, changes detected 90, rows inserted 90. |
+| Slate readiness | PASS | `/api/slate/next/status`: selected slate `2026-07-20`, events found 15, ready for analysis 15, waiting for odds 0, active candidates 45. |
+| Current Board | PASS | `/api/current-board`: candidate count 24, games 8, official picks 0, latest odds `2026-07-20T12:35:09+00:00`. |
+| Today read | PASS | `/api/dashboard/today?includeValidation=true`: `AVAILABLE`, 15 cards, 0 provider calls, 0 remote mutations, total 1996ms, validation 27/27, errors none. |
+| Temporal health | PASS | 15 games, legacy repair count 0, lifecycle distribution PREGAME 15, provider calls 0, remote mutations 0. |
 
 ## Runtime Blockers
 
-1. Production deployment and smoke validation are not complete because the execution environment blocked the authorized Vercel deploy.
+1. Production deployment and smoke validation are not complete for this local commit because this continuation was explicitly no-deploy.
 2. External intraday scheduler activation/secrets cannot be verified from the local workspace.
 3. Confirmed lineups, detailed injuries and live line movement remain unsupported or unverified and must not be treated as available.
 
 ## Final Status
 
-- MLB Runtime Certification: **FAIL**
-- Closed Beta Ready: **NO** for unattended runtime automation
-- Core Freeze Eligible: **NO**
+- MLB Runtime Certification: **PASS_LOCAL**
+- Closed Beta Ready: **PENDING_DEPLOYMENT**
+- Core Freeze Eligible: **PENDING_DEPLOYMENT_AND_SCHEDULER_VERIFICATION**

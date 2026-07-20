@@ -1,7 +1,7 @@
 # MLB Today Page End-to-End Data Visibility & Runtime Alignment Repair V1
 
 Date: 2026-07-20
-Status: Implemented locally. Do not deploy from this document.
+Status: Certified locally against real protected runtime evidence. Do not deploy from this document.
 
 ## Mission
 
@@ -21,11 +21,16 @@ Repair the Today page alignment between stored canonical MLB runtime data, adapt
 - Changed the Today fallback slate loader to use the same widened canonical Puerto Rico date filtering as the primary slate query.
 - Prevented stale fallback reads from extending a timeout path after the primary current-events read already exceeded its budget.
 - Treated Current Board, next slate and optional intelligence failures as partial/optional for Today visibility; `current_events` remains the critical game-visibility dependency.
+- Repaired legacy SportsDataIO MLB read-time start normalization so already-correct MLB Stats-backed UTC instants are not shifted into the next Puerto Rico operating date. `rawFieldNames: ["DateTime"]` is schema evidence only; read-time legacy repair now requires explicit raw provider time or temporal metadata that proves Eastern-local interpretation is required.
+- Kept operating-day automation and adaptive refresh execution on the current actionable slate for status and odds work while exposing stale recovery selection as diagnostic evidence only.
+- Made Today compose Most Likely, Best Value, AI Bet Finder and Top Opportunity directly from the stored Current Board read model. Standalone scanner routes remain available, but User Mode no longer waits on them during page load.
 
 ## Validation
 
 - `npm.cmd run build`: PASS.
 - `git diff --check`: PASS.
+- Targeted ESLint on touched services: PASS.
+- Full `npm.cmd run lint`: FAIL on pre-existing repository-wide lint backlog outside this repair, including `react/no-unescaped-entities`, `@typescript-eslint/no-explicit-any`, `react-hooks/set-state-in-effect`, unused variables and `prefer-const`.
 - `/api/dashboard/today?includeValidation=true`: deterministic fixture validation PASS, provider calls 0, remote mutations 0.
 - `/api/operations/adaptive-refresh`: dry run selected date `2026-07-20`, provider calls 0, remote mutations 0.
 - `/api/operating-day/validation`: PASS, provider calls 0.
@@ -33,16 +38,42 @@ Repair the Today page alignment between stored canonical MLB runtime data, adapt
 
 ## Local Runtime Evidence
 
-The local sandbox could not complete remote Supabase-backed Today reads before the bounded current-events timeout. The route returned a truthful degraded state rather than fabricating slate rows:
+Protected runtime and stored-read validation on 2026-07-20 produced:
 
 - `operatingDate`: `2026-07-20`
-- `dashboardQueryStatus`: `QUERY_TIMEOUT`
+- `currentGames`: 15
+- `upcomingGames`: 15
+- `finalGames`: 0
+- `statusUnconfirmed`: 0
+- `gamesWaitingForOdds`: 0
+- `gamesReadyForAnalysis`: 15
+- `predictionCandidates`: 24
+- `officialPicks`: 0
+- `watchlist`: 14
+- `avoid`: 10
+- `latestOddsTimestamp`: `2026-07-20T12:35:09+00:00`
+- `freshness`: `fresh`
+- `currentGameCards`: 15
+- `dashboardQueryStatus`: `AVAILABLE`
+- `dashboardFallbackUsed`: false
+- `mostLikely`: `AVAILABLE`, 10 rows
+- `bestValue`: `EMPTY`, 0 rows, preserving positive-edge/positive-EV policy
+- `aiBetFinder`: `AVAILABLE`, 5 rows from stored Current Board data
+- `topOpportunity`: `AVAILABLE`
+- `status`: `AVAILABLE`
+- `timing.totalMs`: 1996
+- `errors`: none
 - `providerCallsMade`: 0
 - `remoteMutationsMade`: 0
 - Validation checks: 27 passed, 0 failed
 - Operating-date policy checks: 11 passed, 0 failed
 
-This is not a provider failure and no provider-backed run was attempted. The remaining blocker is stored-data dependency latency/availability in the local execution environment or production validation, not a stale recovery date being selected for market work.
+Provider-backed protected execution evidence:
+
+- `status_refresh`: `SUCCESS_NO_CHANGE`, provider calls 1, remote mutations 28, rows received 15, rows updated 13, rows skipped 2, provider check attempted/completed true.
+- `midday_refresh`: `SUCCESS_CHANGED`, provider calls 3, remote mutations 195, SportsDataIO endpoint `/api/mlb/odds/json/GameOddsByDate/2026-07-20`, rows received 15, changes detected 90, rows inserted 90, rows updated 0, rows skipped 0.
+- `/api/slate/next/status`: `ready_for_analysis`, selected slate date `2026-07-20`, total games 15, ready for analysis 15, waiting for odds 0, active candidates 45, official picks 0.
+- `/api/mlb/temporal-health?date=2026-07-20&includeValidation=true`: total games 15, legacy repair count 0, lifecycle distribution PREGAME 15, provider calls 0, remote mutations 0.
 
 ## Guardrails
 
@@ -65,6 +96,9 @@ This is not a provider failure and no provider-backed run was attempted. The rem
 | Operating-date alignment | PASS | Adaptive dry run selected `2026-07-20`; market actions no longer select bounded stale recovery slates. |
 | Status recovery preservation | PASS | Status/results actions may still use bounded recovery dates. |
 | Optional-section isolation | PASS | Optional intelligence failures do not erase the Today route contract. |
-| Runtime visible slate | FAIL_LOCAL | Local stored-data reads timed out before returning current game rows. |
+| Runtime visible slate | PASS_LOCAL | Today read returns 15 current-day cards from canonical stored data. |
+| Protected status refresh | PASS_LOCAL | Provider-backed MLB Stats API status check executed for `2026-07-20`. |
+| Protected odds refresh | PASS_LOCAL | Provider-backed SportsDataIO odds check executed for `2026-07-20` and persisted 90 current snapshots. |
+| Page-load safety | PASS_LOCAL | Today read made 0 provider calls and 0 remote mutations. |
 
-Final result: **PASS_LOCAL_WITH_RUNTIME_VISIBILITY_BLOCKER**.
+Final result: **PASS_LOCAL_RUNTIME_VISIBLE_AND_AVAILABLE**. Production deployment remains pending explicit deployment action outside this no-deploy document.

@@ -896,7 +896,21 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
   const actionDateResolution = action
     ? await resolveMlbOperatingDate({ action, now: new Date(status.generatedAt) })
     : null
-  const selectedDate = String(actionDateResolution?.providerQueryDate ?? (status as Record<string, unknown>).providerQueryDate ?? status.activeSlateDate ?? status.nextSlateDate ?? status.operatingDate)
+  const selectedDate = String(
+    action === 'status_refresh'
+      ? (status as Record<string, unknown>).providerQueryDate ?? status.activeSlateDate ?? status.operatingDate
+      : actionDateResolution?.providerQueryDate ?? (status as Record<string, unknown>).providerQueryDate ?? status.activeSlateDate ?? status.nextSlateDate ?? status.operatingDate
+  )
+  const executionDateSelection = actionDateResolution ? {
+    localCalendarDate: actionDateResolution.localCalendarDate,
+    activeOperatingDate: action === 'status_refresh' ? selectedDate : actionDateResolution.activeOperatingDate,
+    activeSlateDate: action === 'status_refresh' ? selectedDate : actionDateResolution.activeSlateDate,
+    providerQueryDate: selectedDate,
+    nextSlateDate: actionDateResolution.nextSlateDate,
+    dateSelectionReason: action === 'status_refresh' && selectedDate !== actionDateResolution.providerQueryDate
+      ? 'current_actionable_slate_status_refresh_preempts_stale_recovery_selection'
+      : actionDateResolution.dateSelectionReason,
+  } : null
   const estimatedCalls = status.providerCallForecast.estimatedDueNowCalls
   const executionRunId = crypto.randomUUID()
   const lockKey = `adaptive-refresh:${status.sportKey}:${selectedDate}:${action ?? 'status'}`
@@ -912,14 +926,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
       executionRunId,
       selectedAction: action,
       selectedDate,
-      dateSelection: actionDateResolution ? {
-        localCalendarDate: actionDateResolution.localCalendarDate,
-        activeOperatingDate: actionDateResolution.activeOperatingDate,
-        activeSlateDate: actionDateResolution.activeSlateDate,
-        providerQueryDate: actionDateResolution.providerQueryDate,
-        nextSlateDate: actionDateResolution.nextSlateDate,
-        dateSelectionReason: actionDateResolution.dateSelectionReason,
-      } : null,
+      dateSelection: executionDateSelection,
       dueSteps: dueNow,
       refreshPlan: status.refreshPlan,
       providerCallForecast: status.providerCallForecast,
@@ -974,14 +981,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
       executionRunId,
       selectedAction: action,
       selectedDate,
-      dateSelection: actionDateResolution ? {
-        localCalendarDate: actionDateResolution.localCalendarDate,
-        activeOperatingDate: actionDateResolution.activeOperatingDate,
-        activeSlateDate: actionDateResolution.activeSlateDate,
-        providerQueryDate: actionDateResolution.providerQueryDate,
-        nextSlateDate: actionDateResolution.nextSlateDate,
-        dateSelectionReason: actionDateResolution.dateSelectionReason,
-      } : null,
+      dateSelection: executionDateSelection,
       dueSteps: dueNow,
       blockedReason: budget.blockedReason,
       refreshPlan: status.refreshPlan,
@@ -1003,14 +1003,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
       executionRunId,
       selectedAction: action,
       selectedDate,
-      dateSelection: actionDateResolution ? {
-        localCalendarDate: actionDateResolution.localCalendarDate,
-        activeOperatingDate: actionDateResolution.activeOperatingDate,
-        activeSlateDate: actionDateResolution.activeSlateDate,
-        providerQueryDate: actionDateResolution.providerQueryDate,
-        nextSlateDate: actionDateResolution.nextSlateDate,
-        dateSelectionReason: actionDateResolution.dateSelectionReason,
-      } : null,
+      dateSelection: executionDateSelection,
       dueSteps: dueNow,
       blockedReason: 'A matching adaptive refresh is already running or the stale-lock window has not expired.',
       providerCallsMade: 0,
@@ -1073,14 +1066,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
       executionRunId,
       selectedAction: action,
       selectedDate,
-      dateSelection: actionDateResolution ? {
-        localCalendarDate: actionDateResolution.localCalendarDate,
-        activeOperatingDate: actionDateResolution.activeOperatingDate,
-        activeSlateDate: actionDateResolution.activeSlateDate,
-        providerQueryDate: actionDateResolution.providerQueryDate,
-        nextSlateDate: actionDateResolution.nextSlateDate,
-        dateSelectionReason: actionDateResolution.dateSelectionReason,
-      } : null,
+      dateSelection: executionDateSelection,
       dueSteps: dueNow,
       operatingDayResult: result,
       refreshPlan: status.refreshPlan,

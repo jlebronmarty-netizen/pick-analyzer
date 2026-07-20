@@ -24,7 +24,7 @@ SportsDataIO MLB `Game.DateTime` and `GameInfo.DateTime` are documented as US Ea
 - `zonedUtcRange`
 - `localDateInTimeZone`
 
-Legacy SportsDataIO rows without `temporalNormalization.contract = mlb_temporal_truth_v1` are repaired at read time when metadata proves SportsDataIO MLB provenance and `DateTimeUTC` was not present. The repair reinterprets the stored UTC-looking components as Eastern local time and converts them to canonical UTC without rewriting historical rows.
+Legacy SportsDataIO rows without `temporalNormalization.contract = mlb_temporal_truth_v1` are repaired at read time only when value-level evidence proves the stored UTC-looking components came from an Eastern-local provider `DateTime` value. `rawFieldNames` is schema evidence, not value evidence. SportsDataIO provider IDs alone are not enough to shift an already-correct instant. Rows backed by MLB Stats API status timestamps keep the authoritative UTC instant from `metadata.mlbStatsStatus.latestSourceTimestamp`.
 
 ## Timestamp Audit
 
@@ -43,4 +43,4 @@ Legacy SportsDataIO rows without `temporalNormalization.contract = mlb_temporal_
 
 ## Validation
 
-Deterministic fixtures cover Eastern Standard Time, Eastern Daylight Time, explicit UTC, explicit offset, invalid timestamps, legacy read-time repair and Puerto Rico display date stability.
+Deterministic fixtures cover Eastern Standard Time, Eastern Daylight Time, explicit UTC, explicit offset, invalid timestamps, value-evidenced legacy read-time repair, schema-only `rawFieldNames` preservation, MLB Stats-backed UTC preservation and Puerto Rico display date stability.

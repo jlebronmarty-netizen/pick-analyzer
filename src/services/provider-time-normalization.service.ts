@@ -246,15 +246,46 @@ export function normalizeStoredSportsDataIoMlbStart({
   const provider = String(meta.provider ?? '').toLowerCase()
   const variant = String(meta.provider_variant ?? '').toLowerCase()
   const rawFields = Array.isArray(meta.rawFieldNames) ? meta.rawFieldNames.map(String) : []
+  const providerDateTimeRaw = typeof meta.providerDateTimeRaw === 'string' ? meta.providerDateTimeRaw : null
+  const mlbStatsStatus = meta.mlbStatsStatus && typeof meta.mlbStatsStatus === 'object'
+    ? meta.mlbStatsStatus as Record<string, unknown>
+    : null
+  const mlbStatsLatestSourceTimestamp = typeof mlbStatsStatus?.latestSourceTimestamp === 'string'
+    ? mlbStatsStatus.latestSourceTimestamp
+    : null
   const ids = providerIds && typeof providerIds === 'object' ? providerIds : {}
   const providerIdKeys = Object.keys(ids).map((key) => key.toLowerCase())
   const hasSportsDataIoProviderId = providerIdKeys.some((key) => key.includes('sportsdataio') || key.includes('sports_data_io'))
+  const hasMlbStatsApiProviderId = providerIdKeys.some((key) => key.includes('mlb_stats'))
   const sportsDataIoMlb = provider === 'sportsdataio' || variant.includes('sportsdataio') || hasSportsDataIoProviderId
   const hasDateTimeUtc = rawFields.some((field) => field.toLowerCase() === 'datetimeutc')
+  const temporalRequiresLegacyRepair = temporal?.legacyRepairRequired === true || temporal?.classification === 'EASTERN_LOCAL_TIME'
+  const hasExplicitLegacyDateTime = temporalRequiresLegacyRepair
+    || Boolean(providerDateTimeRaw && !/[zZ]|[+-]\d\d:?\d\d$/.test(providerDateTimeRaw))
   const alreadyNormalized = temporal?.contract === 'mlb_temporal_truth_v1'
   const displayTimezone = MLB_DISPLAY_TIMEZONE
+  const mlbStatsUtc = normalizeProviderTimestamp({
+    value: mlbStatsLatestSourceTimestamp,
+    source: 'metadata.mlbStatsStatus.latestSourceTimestamp',
+    providerTimezone: 'UTC',
+    documentedClassification: 'UTC_INSTANT',
+  })
 
-  if (!parsed.normalizedUtc || !sportsDataIoMlb || hasDateTimeUtc || alreadyNormalized) {
+  if (mlbStatsUtc.normalizedUtc && hasMlbStatsApiProviderId) {
+    return {
+      ...mlbStatsUtc,
+      storedUtc: parsed.normalizedUtc,
+      canonicalUtc: mlbStatsUtc.normalizedUtc,
+      legacyRepairApplied: false,
+      interpretationMode: 'mlb_stats_api_status_timestamp',
+      displayTimezone,
+      temporalConfidence: 'HIGH',
+      displayTime: formatInTimeZone(mlbStatsUtc.normalizedUtc, displayTimezone),
+      warnings: [],
+    }
+  }
+
+  if (!parsed.normalizedUtc || !sportsDataIoMlb || hasDateTimeUtc || alreadyNormalized || !hasExplicitLegacyDateTime) {
     return {
       ...parsed,
       storedUtc: parsed.normalizedUtc,
@@ -308,13 +339,33 @@ export function validateProviderTimeNormalizationFixtures() {
     metadata: {
       provider: 'sportsdataio',
       provider_variant: 'sportsdataio_discovery_lab',
+      providerDateTimeRaw: '2026-07-19T12:15:00',
       rawFieldNames: ['DateTime'],
     },
+  })
+  const rawFieldOnly = normalizeStoredSportsDataIoMlbStart({
+    startTime: '2026-07-21T00:05:00.000Z',
+    metadata: {
+      provider: 'sportsdataio',
+      provider_variant: 'sportsdataio_discovery_lab',
+      rawFieldNames: ['DateTime'],
+    },
+    providerIds: { sportsdataio: '78795' },
   })
   const repairedFromProviderIds = normalizeStoredSportsDataIoMlbStart({
     startTime: '2026-07-19T12:15:00.000Z',
     metadata: null,
     providerIds: { sportsdataio: '1001' },
+  })
+  const mlbStatsBacked = normalizeStoredSportsDataIoMlbStart({
+    startTime: '2026-07-21T00:05:00.000Z',
+    metadata: {
+      provider: 'sportsdataio',
+      mlbStatsStatus: {
+        latestSourceTimestamp: '2026-07-21T00:05:00Z',
+      },
+    },
+    providerIds: { sportsdataio_game_id: '78787', mlb_stats_api: 824654 },
   })
   const invalid = normalizeProviderTimestamp({
     value: 'not-a-date',
@@ -328,7 +379,9 @@ export function validateProviderTimeNormalizationFixtures() {
     ['UTC instant remains stable', utc.normalizedUtc === '2026-07-19T16:15:00.000Z'],
     ['explicit offset remains stable', offset.normalizedUtc === '2026-07-19T16:15:00.000Z'],
     ['legacy SportsDataIO repair applies DST', repaired.canonicalUtc === '2026-07-19T16:15:00.000Z'],
-    ['legacy SportsDataIO provider_ids repair applies DST', repairedFromProviderIds.canonicalUtc === '2026-07-19T16:15:00.000Z'],
+    ['rawFieldNames DateTime alone is schema evidence only', rawFieldOnly.canonicalUtc === '2026-07-21T00:05:00.000Z'],
+    ['SportsDataIO provider id alone remains stored UTC', repairedFromProviderIds.canonicalUtc === '2026-07-19T12:15:00.000Z'],
+    ['MLB Stats-backed SportsDataIO row keeps authoritative UTC', mlbStatsBacked.canonicalUtc === '2026-07-21T00:05:00.000Z'],
     ['invalid timestamp is explicit', invalid.classification === 'INVALID'],
     ['Puerto Rico display date stable', localDateInTimeZone('2026-07-19T16:15:00.000Z') === '2026-07-19'],
     ['server timezone independent by construction', parseLocalTimeInZone('2026-07-19T12:15:00', MLB_PROVIDER_TIMEZONE) === '2026-07-19T16:15:00.000Z'],

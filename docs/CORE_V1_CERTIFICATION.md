@@ -1,6 +1,6 @@
 # Core V1 Certification
 
-Date: 2026-07-19
+Date: 2026-07-20
 
 ## Certification Matrix
 
@@ -33,14 +33,18 @@ Date: 2026-07-19
 | Action advancement | PASS_LOCAL | Successful no-change status checks satisfy status freshness for the refresh window. |
 | Dashboard false-empty protection | PASS_LOCAL | Today distinguishes timeout/failure/fallback/confirmed-empty states. |
 | Temporal display diagnostics | PASS_LOCAL | Today game cards expose provider, stored start, normalized UTC, display timezone, interpretation mode, confidence and warnings. |
-| Today runtime alignment | PASS_LOCAL_WITH_BLOCKER | Canonical `/api/dashboard/today`, dynamic/no-store dashboard reads and action-aware operating-date selection are implemented. Local stored-data reads timed out before current game rows returned, so visible-slate recovery requires production/stored-data validation. |
+| Today runtime alignment | PASS_LOCAL | Canonical `/api/dashboard/today`, dynamic/no-store dashboard reads and action-aware operating-date selection are implemented. Local runtime read returned 15 current-day game cards, 24 Current Board candidates, 10 Most Likely rows, positive-only Best Value empty state, 0 provider calls and 0 remote mutations. |
+| Protected runtime chain | PASS_LOCAL | `status_refresh` executed for `2026-07-20` with MLB Stats API provider evidence; `midday_refresh` executed for `2026-07-20` with SportsDataIO odds evidence and 90 inserted odds snapshots. |
+| Build | PASS | `npm.cmd run build` completed after the repair. |
+| Touched-file lint | PASS | ESLint passed for the modified service files. |
+| Full repository lint | FAIL_EXISTING | `npm.cmd run lint` fails on pre-existing repo-wide lint debt unrelated to this repair. |
 
 ## Core Decision
 
-MLB Core v1.0 is **not certified** because production deployment and production runtime smoke evidence are blocked externally. The local codebase is ready for deployment and verification.
+MLB Core v1.0 is **locally certified** for the current-day runtime chain. Production certification still requires deployment of this local commit, production smoke validation and external scheduler verification.
 
 ## Final Status
 
-- MLB Runtime Certification: **FAIL**
-- Closed Beta Ready: **NO**
-- Core Freeze Eligible: **NO**
+- MLB Runtime Certification: **PASS_LOCAL**
+- Closed Beta Ready: **PENDING_DEPLOYMENT**
+- Core Freeze Eligible: **PENDING_DEPLOYMENT_AND_SCHEDULER_VERIFICATION**
