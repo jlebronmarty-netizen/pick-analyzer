@@ -171,6 +171,14 @@ function overallStatus(input: {
   return candidates.sort((a, b) => statusRank(b) - statusRank(a))[0]
 }
 
+function latestAction(rows: Array<Record<string, unknown>>, actions: string[]) {
+  return rows.find((row) => actions.includes(String(row.action ?? ''))) ?? null
+}
+
+function freshnessByDomain(adaptive: Awaited<ReturnType<typeof getAdaptiveRefreshStatus>>, domain: string) {
+  return adaptive.freshness.find((item) => item.domain === domain) ?? null
+}
+
 export async function getOperationsHealth() {
   const generatedAt = new Date().toISOString()
   const [adaptive, budget, lifecycle, backlog, migrations, projections, board] = await Promise.all([
@@ -190,6 +198,15 @@ export async function getOperationsHealth() {
     getCurrentBoard({ sportKey: SPORT_KEY, mode: 'CURRENT', limit: 100 }),
   ])
   const statusRefresh = await statusRefreshEvidence(lifecycle.rows as Array<Record<string, unknown>>)
+  const lifecycleRows = lifecycle.rows as Array<Record<string, unknown>>
+  const latestOddsRefresh = latestAction(lifecycleRows, ['midday_refresh', 'morning_sync', 'final_refresh', 'prepare_next_slate'])
+  const latestResultsRefresh = latestAction(lifecycleRows, ['sync_results'])
+  const latestPredictionRefresh = latestAction(lifecycleRows, ['midday_refresh', 'morning_sync', 'final_refresh', 'prepare_next_slate'])
+  const latestRecommendationRefresh = latestPredictionRefresh
+  const oddsFreshness = freshnessByDomain(adaptive, 'odds')
+  const predictionFreshness = freshnessByDomain(adaptive, 'prediction')
+  const recommendationFreshness = freshnessByDomain(adaptive, 'recommendation')
+  const resultsFreshness = freshnessByDomain(adaptive, 'results')
   const latestSuccessfulProtected = (lifecycle.rows as Array<Record<string, unknown>>).find((row) => {
     const status = String(row.status ?? '')
     return ['SUCCESS_CHANGED', 'SUCCESS_NO_CHANGE', 'completed', 'morning_synced', 'midday_refreshed', 'results_synced'].some((needle) => status.includes(needle))
@@ -240,6 +257,20 @@ export async function getOperationsHealth() {
     staleCritical: staleFreshness.some((item) => ['odds', 'prediction', 'recommendation'].includes(item.domain)),
     failedSteps: failedSteps.length,
   })
+  const skippedCalls = adaptive.refreshPlan
+    .filter((item) => item.estimatedProviderCalls > 0 && item.decision !== 'DUE_NOW')
+    .reduce((sum, item) => sum + item.estimatedProviderCalls, 0)
+  const skipReason = adaptive.providerBudget.mode === 'EXHAUSTED'
+    ? 'provider_budget_exhausted'
+    : adaptive.refreshPlan.find((item) => item.estimatedProviderCalls > 0 && item.decision === 'NOT_DUE')?.reason ?? null
+  const refreshWindow = asRecord((adaptive as unknown as Record<string, unknown>).freshnessPolicy)
+  const currentRefreshWindow = String(refreshWindow.window ?? 'UNKNOWN')
+  const operationalSeverity =
+    adaptive.providerBudget.mode === 'EXHAUSTED' || adaptive.providerBudget.stopThresholdReached
+      ? 'CRITICAL'
+      : adaptive.blockers.length || !automaticMultiRefreshActive
+        ? 'WARNING'
+        : 'HEALTHY'
   return {
     success: true,
     status,
@@ -264,6 +295,31 @@ export async function getOperationsHealth() {
       externalSchedulerVerified,
       automaticMultiRefreshActive,
       evidenceAgeMinutes: evidenceAge,
+      schedulerRunning: automaticMultiRefreshActive,
+      lastSchedulerRun: lifecycleRows[0]?.created_at ?? null,
+      lastSchedulerSuccess: lastSuccessfulProtectedInvocationAt,
+      lastSchedulerFailure: failedSteps[0]?.created_at ?? null,
+      lastSchedulerFailureReason: failedSteps[0]?.blocking_reason ?? null,
+    },
+    refreshOperations: {
+      providerStatus: providerHealth,
+      currentRefreshWindow,
+      health: operationalSeverity,
+      lastOddsRefresh: String(latestOddsRefresh?.completed_at ?? latestOddsRefresh?.created_at ?? '') || null,
+      lastPredictionRefresh: (predictionFreshness?.lastUpdated ?? String(latestPredictionRefresh?.completed_at ?? latestPredictionRefresh?.created_at ?? '')) || null,
+      lastRecommendationRefresh: (recommendationFreshness?.lastUpdated ?? String(latestRecommendationRefresh?.completed_at ?? latestRecommendationRefresh?.created_at ?? '')) || null,
+      lastResultsRefresh: String(latestResultsRefresh?.completed_at ?? latestResultsRefresh?.created_at ?? resultsFreshness?.lastUpdated ?? '') || null,
+      nextRefreshDue: adaptive.refreshPlan
+        .filter((item) => item.decision === 'DUE_NOW' || item.decision === 'DUE_SOON')
+        .map((item) => ({ domain: item.domain, decision: item.decision, reason: item.reason }))
+        .at(0) ?? null,
+      nextRefreshDueAt: oddsFreshness?.nextRecommendedRefreshAt ?? adaptive.nextActionAt,
+      skippedCalls,
+      skipReason,
+      activeDueSteps: adaptive.refreshPlan.filter((item) => item.decision === 'DUE_NOW'),
+      eventRefreshWindows: Array.isArray((adaptive as unknown as Record<string, unknown>).eventRefreshWindows)
+        ? (adaptive as unknown as Record<string, unknown>).eventRefreshWindows
+        : [],
     },
     adaptiveExecution: {
       mode: 'protected_existing_operating_day_bridge',
@@ -279,10 +335,21 @@ export async function getOperationsHealth() {
       sportsdataio: {
         status: adaptive.providerBudget.mode,
         callsMadeToday: budget.callsMadeToday,
+        callsMadeLastHour: budget.callsMadeLastHour,
         callsPlannedToday: budget.callsPlannedToday,
         hardRemaining: budget.hardRemaining,
         estimatedCallsRemaining: budget.estimatedCallsRemaining,
+        hourlyRemaining: budget.hourlyRemaining,
         dailyBudget: budget.config.dailyCallBudget,
+        softReserve: budget.config.softReserve,
+        maxCallsPerAction: budget.config.maxCallsPerAction,
+        maxRefreshCallsPerHour: budget.config.maxRefreshCallsPerHour,
+        warningThresholdPercent: budget.config.warningThresholdPercent,
+        stopThresholdPercent: budget.config.stopThresholdPercent,
+        usagePercent: budget.usagePercent,
+        warningThresholdReached: budget.warningThresholdReached,
+        stopThresholdReached: budget.stopThresholdReached,
+        budgetWarnings: budget.budgetWarnings,
         monthlyEstimateAtCurrentDailyBudget: budget.config.dailyCallBudget * 30,
         lastProviderCall: budget.lastProviderCall,
       },

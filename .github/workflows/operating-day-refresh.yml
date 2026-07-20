@@ -2,13 +2,6 @@ name: Operating Day Refresh
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 12 * * *"
-    - cron: "0 16 * * *"
-    - cron: "0 19 * * *"
-    - cron: "30 21 * * *"
-    - cron: "30 3 * * *"
-    - cron: "0 5 * * *"
 
 jobs:
   refresh:

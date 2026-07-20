@@ -2,8 +2,18 @@ import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import { getOperatingDayAutomationStatus } from '@/services/operating-day-automation.service'
 import { executeOperatingDay } from '@/services/operating-day.service'
+import { runAdaptiveRefresh } from '@/services/adaptive-refresh-orchestrator.service'
 
 const CRON_STATUS_HTTP: Record<string, number> = {
+  SUCCESS: 200,
+  SUCCESS_CHANGED: 200,
+  SUCCESS_NO_CHANGE: 200,
+  NOT_DUE: 200,
+  PLANNED: 200,
+  BUDGET_BLOCKED: 409,
+  BLOCKED: 423,
+  MISSED_REFRESH: 207,
+  FAILED_RETRYABLE: 502,
   completed: 200,
   no_op: 200,
   already_current: 200,
@@ -28,9 +38,38 @@ async function handle(request: NextRequest) {
     return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized operating-day cron request.', status: 401 })
   }
   const dryRun = request.nextUrl.searchParams.get('dryRun') !== 'false'
-  let status: Awaited<ReturnType<typeof getOperatingDayAutomationStatus>> | null = null
+  let status = {} as Awaited<ReturnType<typeof getOperatingDayAutomationStatus>>
   try {
+    const adaptive = await runAdaptiveRefresh({
+      dryRun,
+      source: request.method === 'POST' ? 'PRODUCTION_CRON' : 'VERCEL_CRON',
+    })
+    const adaptiveRecord = adaptive as Record<string, unknown>
+    const adaptiveStatus = String(adaptiveRecord.status ?? (adaptive.success ? 'SUCCESS' : 'FAILED_RETRYABLE'))
+    return apiOk(
+      {
+        ...adaptive,
+        mode: 'operating_day_consolidated_cron_execution_v2',
+        delegatedMode: adaptive.mode,
+        status: adaptiveStatus,
+        retryable: ['FAILED_RETRYABLE', 'MISSED_REFRESH', 'BUDGET_BLOCKED', 'BLOCKED'].includes(adaptiveStatus),
+        writes: Number(adaptiveRecord.remoteMutationsMade ?? 0),
+        schedulerContract: {
+          route: '/api/cron/operating-day',
+          executionEngine: 'adaptive_refresh_execution_bridge_v2',
+          overlapProtection: 'provider_action_lock',
+          providerBudgetGuarded: true,
+          refreshWindowGuarded: true,
+          providerCallsMadeByDryRun: dryRun ? 0 : undefined,
+          legacyAutomationShortCircuitBypassed: true,
+        },
+      },
+      id,
+      { status: CRON_STATUS_HTTP[adaptiveStatus] ?? (adaptive.success ? 200 : 409) }
+    )
+
     status = await getOperatingDayAutomationStatus()
+    if (!status) throw new Error('Operating-day automation status unavailable.')
     if (dryRun) {
       return apiOk({ ...status, mode: 'operating_day_consolidated_cron_dry_run_v1', dryRun: true }, id)
     }

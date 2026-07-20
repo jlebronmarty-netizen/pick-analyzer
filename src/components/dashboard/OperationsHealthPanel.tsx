@@ -12,6 +12,24 @@ type OperationsHealth = {
     lastCronInvocation: string | null
     nextScheduledRun: string | null
     limitation: string
+    schedulerRunning?: boolean
+    lastSchedulerRun?: string | null
+    lastSchedulerSuccess?: string | null
+    lastSchedulerFailure?: string | null
+    lastSchedulerFailureReason?: string | null
+  }
+  refreshOperations?: {
+    providerStatus: string
+    currentRefreshWindow: string
+    health: string
+    lastOddsRefresh: string | null
+    lastPredictionRefresh: string | null
+    lastRecommendationRefresh: string | null
+    lastResultsRefresh: string | null
+    nextRefreshDue: { domain: string; decision: string; reason: string } | null
+    nextRefreshDueAt: string | null
+    skippedCalls: number
+    skipReason: string | null
   }
   adaptiveExecution: {
     mode: string
@@ -25,8 +43,11 @@ type OperationsHealth = {
     sportsdataio: {
       status: string
       callsMadeToday: number
+      callsMadeLastHour?: number
       estimatedCallsRemaining: number
+      hourlyRemaining?: number
       dailyBudget: number
+      usagePercent?: number
     }
   }
   projections: {
@@ -81,6 +102,15 @@ function Stat({ label, value }: { label: string; value: string | number }) {
     <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
       <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</p>
       <p className="mt-2 text-2xl font-black text-white">{value}</p>
+    </div>
+  )
+}
+
+function Detail({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="min-w-0">
+      <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</p>
+      <p className="mt-1 truncate text-sm font-bold text-slate-200" title={String(value)}>{value}</p>
     </div>
   )
 }
@@ -146,6 +176,7 @@ export default function OperationsHealthPanel() {
           <p className="text-sm font-black text-white">Scheduler</p>
           <p className="mt-3 text-sm text-slate-300">Configured: {String(data.scheduler.configured)}</p>
           <p className="mt-2 text-sm text-slate-300">Last cron: {timeText(data.scheduler.lastCronInvocation)}</p>
+          <p className="mt-2 text-sm text-slate-300">Running: {String(data.scheduler.schedulerRunning ?? false)}</p>
           <p className="mt-2 text-xs leading-5 text-slate-500">{data.scheduler.limitation}</p>
         </div>
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
@@ -160,8 +191,42 @@ export default function OperationsHealthPanel() {
           <p className="mt-2 text-sm text-slate-300">
             Remaining: {data.providerBudgets.sportsdataio.estimatedCallsRemaining} / {data.providerBudgets.sportsdataio.dailyBudget}
           </p>
+          <p className="mt-2 text-sm text-slate-300">
+            Hourly: {data.providerBudgets.sportsdataio.callsMadeLastHour ?? 0} used, {data.providerBudgets.sportsdataio.hourlyRemaining ?? 'unknown'} left
+          </p>
         </div>
       </div>
+
+      {data.refreshOperations ? (
+        <div className="mt-5 rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-black text-white">Provider Status</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">Adaptive refresh evidence from stored operations health.</p>
+            </div>
+            <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-black uppercase ${badgeClass(data.refreshOperations.health)}`}>
+              {data.refreshOperations.health}
+            </span>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Detail label="Provider" value={data.refreshOperations.providerStatus} />
+            <Detail label="Window" value={data.refreshOperations.currentRefreshWindow} />
+            <Detail label="Last Odds" value={timeText(data.refreshOperations.lastOddsRefresh)} />
+            <Detail label="Last Prediction" value={timeText(data.refreshOperations.lastPredictionRefresh)} />
+            <Detail label="Last Recommendation" value={timeText(data.refreshOperations.lastRecommendationRefresh)} />
+            <Detail label="Last Results" value={timeText(data.refreshOperations.lastResultsRefresh)} />
+            <Detail label="Next Due" value={data.refreshOperations.nextRefreshDue ? `${data.refreshOperations.nextRefreshDue.domain} ${data.refreshOperations.nextRefreshDue.decision}` : timeText(data.refreshOperations.nextRefreshDueAt)} />
+            <Detail label="Credits Today" value={`${data.providerBudgets.sportsdataio.callsMadeToday} / ${data.providerBudgets.sportsdataio.dailyBudget}`} />
+            <Detail label="Hourly Usage" value={`${data.providerBudgets.sportsdataio.callsMadeLastHour ?? 0} used`} />
+            <Detail label="Scheduler" value={data.scheduler.schedulerRunning ? 'Active' : 'Not active'} />
+            <Detail label="Last Success" value={timeText(data.scheduler.lastSchedulerSuccess ?? null)} />
+            <Detail label="Last Failure" value={data.scheduler.lastSchedulerFailure ? timeText(data.scheduler.lastSchedulerFailure) : 'None'} />
+          </div>
+          <p className="mt-4 text-xs leading-5 text-slate-500">
+            Skip reason: {data.refreshOperations.skipReason ?? 'None'}; skipped calls: {data.refreshOperations.skippedCalls}
+          </p>
+        </div>
+      ) : null}
 
       {data.exactBlockers.length ? (
         <div className="mt-5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">

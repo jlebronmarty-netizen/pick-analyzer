@@ -19,6 +19,12 @@ import { formatInTimeZone } from '@/services/provider-time-normalization.service
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
 const TIMEZONE = ACTIVE_EVENT_TIMEZONE
+const DEFAULT_MLB_ODDS_REFRESH_MINUTES_EARLY = 60
+const DEFAULT_MLB_ODDS_REFRESH_MINUTES_PREGAME = 15
+const DEFAULT_MLB_ODDS_REFRESH_MINUTES_NEAR_START = 10
+const DEFAULT_MLB_SCORE_REFRESH_MINUTES_LIVE = 5
+const DEFAULT_MLB_RESULTS_REFRESH_MINUTES_POSTGAME = 15
+const DEFAULT_MLB_ODDS_AGING_MULTIPLIER = 2
 
 export type AdaptiveApiStatus = 'SUCCESS' | 'INSUFFICIENT_DATA' | 'PARTIAL' | 'NOT_SUPPORTED' | 'ERROR'
 export type FreshnessState = 'FRESH' | 'AGING' | 'STALE' | 'PENDING' | 'NOT_AVAILABLE' | 'NOT_SUPPORTED' | 'FAILED'
@@ -83,6 +89,33 @@ export type FreshnessPolicy = {
   unavailableCopy: string
 }
 
+type MlbRefreshWindow = 'NO_SLATE' | 'EARLY' | 'PREGAME' | 'NEAR_START' | 'LIVE' | 'POSTGAME'
+
+type MlbCadenceConfig = {
+  oddsRefreshMinutesEarly: number
+  oddsRefreshMinutesPregame: number
+  oddsRefreshMinutesNearStart: number
+  scoreRefreshMinutesLive: number
+  resultsRefreshMinutesPostgame: number
+  oddsAgingMultiplier: number
+  envAliases: Record<string, string[]>
+}
+
+type EventRefreshWindow = {
+  eventId: string
+  matchup: string
+  scheduledTime: string | null
+  status: string | null
+  timeUntilFirstPitchMinutes: number | null
+  window: MlbRefreshWindow
+  marketRefreshAllowed: boolean
+  statusRefreshMinutes: number | null
+  oddsRefreshMinutes: number | null
+  resultsRefreshMinutes: number | null
+  nextDueAt: string | null
+  reason: string
+}
+
 export type DataFreshnessDomain =
   | 'schedule'
   | 'odds'
@@ -133,8 +166,8 @@ export const DATA_FRESHNESS_POLICIES: Record<DataFreshnessDomain, FreshnessPolic
     label: 'Market prices',
     source: 'sports_odds_snapshots/current-board',
     supported: true,
-    freshMinutes: 90,
-    staleMinutes: 6 * 60,
+    freshMinutes: DEFAULT_MLB_ODDS_REFRESH_MINUTES_EARLY,
+    staleMinutes: DEFAULT_MLB_ODDS_REFRESH_MINUTES_EARLY * DEFAULT_MLB_ODDS_AGING_MULTIPLIER,
     refreshCadence: 'Refresh before recommendations and near first pitch when budget allows.',
     userCopy: 'Market prices are current enough for review.',
     unavailableCopy: 'Market prices are waiting for the next safe refresh.',
@@ -255,6 +288,34 @@ function nowIso(now = new Date()) {
   return now.toISOString()
 }
 
+function numberFromEnv(names: string | string[], fallback: number) {
+  const keys = Array.isArray(names) ? names : [names]
+  for (const name of keys) {
+    const value = Number(process.env[name])
+    if (Number.isFinite(value) && value > 0) return value
+  }
+  return fallback
+}
+
+function mlbCadenceConfig(): MlbCadenceConfig {
+  return {
+    oddsRefreshMinutesEarly: numberFromEnv('MLB_ODDS_REFRESH_MINUTES_EARLY', DEFAULT_MLB_ODDS_REFRESH_MINUTES_EARLY),
+    oddsRefreshMinutesPregame: numberFromEnv('MLB_ODDS_REFRESH_MINUTES_PREGAME', DEFAULT_MLB_ODDS_REFRESH_MINUTES_PREGAME),
+    oddsRefreshMinutesNearStart: numberFromEnv('MLB_ODDS_REFRESH_MINUTES_NEAR_START', DEFAULT_MLB_ODDS_REFRESH_MINUTES_NEAR_START),
+    scoreRefreshMinutesLive: numberFromEnv('MLB_SCORE_REFRESH_MINUTES_LIVE', DEFAULT_MLB_SCORE_REFRESH_MINUTES_LIVE),
+    resultsRefreshMinutesPostgame: numberFromEnv('MLB_RESULTS_REFRESH_MINUTES_POSTGAME', DEFAULT_MLB_RESULTS_REFRESH_MINUTES_POSTGAME),
+    oddsAgingMultiplier: numberFromEnv('MLB_ODDS_AGING_MULTIPLIER', DEFAULT_MLB_ODDS_AGING_MULTIPLIER),
+    envAliases: {
+      oddsRefreshMinutesEarly: ['MLB_ODDS_REFRESH_MINUTES_EARLY'],
+      oddsRefreshMinutesPregame: ['MLB_ODDS_REFRESH_MINUTES_PREGAME'],
+      oddsRefreshMinutesNearStart: ['MLB_ODDS_REFRESH_MINUTES_NEAR_START'],
+      scoreRefreshMinutesLive: ['MLB_SCORE_REFRESH_MINUTES_LIVE'],
+      resultsRefreshMinutesPostgame: ['MLB_RESULTS_REFRESH_MINUTES_POSTGAME'],
+      oddsAgingMultiplier: ['MLB_ODDS_AGING_MULTIPLIER'],
+    },
+  }
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
 }
@@ -281,6 +342,134 @@ function addMinutes(value: string | null | undefined, minutes: number | null) {
   const parsed = safeDate(value)
   if (!parsed || minutes === null) return null
   return new Date(parsed.getTime() + minutes * 60000).toISOString()
+}
+
+function minutesUntilNextStart(events: EventRow[], now: Date) {
+  const next = events
+    .map((event) => safeDate(event.start_time)?.getTime() ?? Number.NaN)
+    .filter((time) => Number.isFinite(time) && time > now.getTime())
+    .sort((left, right) => left - right)[0]
+  return Number.isFinite(next) ? Math.max(0, round((next - now.getTime()) / 60000, 1)) : null
+}
+
+function refreshWindow({
+  events,
+  currentGames,
+  upcomingGames,
+  finalGames,
+  now,
+}: {
+  events: EventRow[]
+  currentGames: number
+  upcomingGames: number
+  finalGames: number
+  now: Date
+}): { window: MlbRefreshWindow; minutesUntilFirstPitch: number | null } {
+  const minutes = minutesUntilNextStart(events, now)
+  const hasSlate = currentGames > 0 || upcomingGames > 0 || finalGames > 0 || events.length > 0
+  if (!hasSlate) return { window: 'NO_SLATE', minutesUntilFirstPitch: null }
+  if (currentGames > 0 && finalGames < currentGames && minutes === null) return { window: 'LIVE', minutesUntilFirstPitch: null }
+  if (finalGames > 0 && finalGames >= currentGames && upcomingGames === 0) return { window: 'POSTGAME', minutesUntilFirstPitch: null }
+  if (minutes !== null && minutes <= 90) return { window: 'NEAR_START', minutesUntilFirstPitch: minutes }
+  if (minutes !== null && minutes <= 360) return { window: 'PREGAME', minutesUntilFirstPitch: minutes }
+  return { window: 'EARLY', minutesUntilFirstPitch: minutes }
+}
+
+function eventWindow(event: EventRow, now: Date): { window: MlbRefreshWindow; minutesUntilFirstPitch: number | null } {
+  const status = String(event.status ?? '').toLowerCase()
+  const start = safeDate(event.start_time)
+  const minutes = start ? round((start.getTime() - now.getTime()) / 60000, 1) : null
+  if (['completed', 'final', 'closed'].includes(status)) return { window: 'POSTGAME', minutesUntilFirstPitch: minutes }
+  if (['live', 'in_progress', 'inprogress', 'started'].includes(status)) return { window: 'LIVE', minutesUntilFirstPitch: minutes }
+  if (minutes !== null && minutes <= 0) return { window: 'LIVE', minutesUntilFirstPitch: minutes }
+  if (minutes !== null && minutes <= 90) return { window: 'NEAR_START', minutesUntilFirstPitch: minutes }
+  if (minutes !== null && minutes <= 240) return { window: 'PREGAME', minutesUntilFirstPitch: minutes }
+  if (minutes !== null) return { window: 'EARLY', minutesUntilFirstPitch: minutes }
+  return { window: 'NO_SLATE', minutesUntilFirstPitch: null }
+}
+
+function eventRefreshWindows(events: EventRow[], now: Date, cfg: MlbCadenceConfig, latestOddsChange: string | null): EventRefreshWindow[] {
+  return events
+    .map((event) => {
+      const window = eventWindow(event, now)
+      const oddsRefreshMinutes =
+        window.window === 'EARLY'
+          ? cfg.oddsRefreshMinutesEarly
+          : window.window === 'PREGAME'
+            ? cfg.oddsRefreshMinutesPregame
+            : window.window === 'NEAR_START'
+              ? cfg.oddsRefreshMinutesNearStart
+              : null
+      const statusRefreshMinutes = window.window === 'LIVE' || window.window === 'NEAR_START' ? cfg.scoreRefreshMinutesLive : null
+      const resultsRefreshMinutes = window.window === 'LIVE' || window.window === 'POSTGAME' ? cfg.resultsRefreshMinutesPostgame : null
+      const cadence = oddsRefreshMinutes ?? statusRefreshMinutes ?? resultsRefreshMinutes
+      const nextDueAt = latestOddsChange && oddsRefreshMinutes
+        ? new Date(new Date(latestOddsChange).getTime() + oddsRefreshMinutes * 60000).toISOString()
+        : null
+      return {
+        eventId: event.id,
+        matchup: `${event.away_team ?? 'Away'} @ ${event.home_team ?? 'Home'}`,
+        scheduledTime: event.start_time,
+        status: event.status,
+        timeUntilFirstPitchMinutes: window.minutesUntilFirstPitch,
+        window: window.window,
+        marketRefreshAllowed: Boolean(oddsRefreshMinutes),
+        statusRefreshMinutes,
+        oddsRefreshMinutes,
+        resultsRefreshMinutes,
+        nextDueAt,
+        reason:
+          window.window === 'POSTGAME'
+            ? 'Final/completed event: stop market refresh and continue results/settlement only.'
+            : window.window === 'LIVE'
+              ? 'Live event: monitor status/results and stop pregame market polling.'
+              : cadence
+                ? `Pregame event cadence is ${cadence} minutes for the current proximity window.`
+                : 'No event-specific provider refresh is due.',
+      }
+    })
+    .sort((left, right) => String(left.scheduledTime ?? '').localeCompare(String(right.scheduledTime ?? '')))
+}
+
+function policyForWindow(domain: DataFreshnessDomain, window: MlbRefreshWindow, cfg: MlbCadenceConfig): FreshnessPolicy {
+  const policy = DATA_FRESHNESS_POLICIES[domain]
+  if (domain === 'odds') {
+    const freshMinutes =
+      window === 'NEAR_START'
+        ? cfg.oddsRefreshMinutesNearStart
+        : window === 'PREGAME'
+          ? cfg.oddsRefreshMinutesPregame
+          : window === 'NO_SLATE' || window === 'POSTGAME'
+            ? 6 * 60
+            : cfg.oddsRefreshMinutesEarly
+    return {
+      ...policy,
+      freshMinutes,
+      staleMinutes: Math.max(freshMinutes + 1, freshMinutes * cfg.oddsAgingMultiplier),
+      refreshCadence:
+        window === 'NO_SLATE'
+          ? 'No current MLB slate; skip wasteful odds polling.'
+          : window === 'POSTGAME'
+            ? 'Pregame market polling stops after the slate is complete.'
+            : window === 'NEAR_START'
+              ? `Refresh every ${cfg.oddsRefreshMinutesNearStart} minutes inside the final 90 minutes when budget allows.`
+              : window === 'PREGAME'
+                ? `Refresh every ${cfg.oddsRefreshMinutesPregame} minutes in the active pregame window when budget allows.`
+                : `Refresh every ${cfg.oddsRefreshMinutesEarly} minutes in the early game-day window when budget allows.`,
+    }
+  }
+  if (domain === 'results') {
+    return {
+      ...policy,
+      freshMinutes: window === 'POSTGAME' || window === 'LIVE' ? cfg.resultsRefreshMinutesPostgame : policy.freshMinutes,
+      staleMinutes: window === 'POSTGAME' || window === 'LIVE' ? cfg.resultsRefreshMinutesPostgame * DEFAULT_MLB_ODDS_AGING_MULTIPLIER : policy.staleMinutes,
+      refreshCadence:
+        window === 'POSTGAME' || window === 'LIVE'
+          ? `Refresh final results every ${cfg.resultsRefreshMinutesPostgame} minutes until settlement is complete.`
+          : policy.refreshCadence,
+    }
+  }
+  return policy
 }
 
 function maxIso(values: Array<string | null | undefined>) {
@@ -341,6 +530,7 @@ function freshnessItem({
   activeNeed,
   now,
   sourceOverride,
+  policyOverride,
 }: {
   domain: DataFreshnessDomain
   lastUpdated: string | null
@@ -348,8 +538,9 @@ function freshnessItem({
   activeNeed: boolean
   now: Date
   sourceOverride?: string
+  policyOverride?: FreshnessPolicy
 }): DataFreshnessItem {
-  const policy = DATA_FRESHNESS_POLICIES[domain]
+  const policy = policyOverride ?? DATA_FRESHNESS_POLICIES[domain]
   const status = classifyFreshness({ policy, lastUpdated, available, activeNeed, now })
   const age = ageMinutes(lastUpdated, now)
   const actionable = policy.supported && available && !['STALE', 'FAILED'].includes(status)
@@ -475,6 +666,7 @@ function marketRefreshState({
   activeNeed,
   mode,
   now,
+  policy,
 }: {
   latestOddsChange: string | null
   latestProviderCheck: ReturnType<typeof latestCompletedProviderCheck>
@@ -483,6 +675,7 @@ function marketRefreshState({
   activeNeed: boolean
   mode: ProviderBudgetMode
   now: Date
+  policy: FreshnessPolicy
 }): { state: MarketRefreshState; reason: string; lastUpdated: string | null; available: boolean } {
   const hasAcceptedMarkets = readyForAnalysis > 0 && Boolean(latestOddsChange)
   const providerAge = ageMinutes(latestProviderCheck?.checkedAt ?? null, now)
@@ -505,13 +698,13 @@ function marketRefreshState({
   if (!latestProviderCheck?.checkedAt) {
     return { state: 'CHECK_DUE', reason: 'No successful market provider check is recorded for the active slate.', lastUpdated: latestOddsChange, available: hasAcceptedMarkets }
   }
-  if (providerAge !== null && providerAge > DATA_FRESHNESS_POLICIES.odds.staleMinutes!) {
+  if (providerAge !== null && policy.staleMinutes !== null && providerAge > policy.staleMinutes) {
     return { state: 'CHECK_OVERDUE', reason: 'The latest market provider check is stale for the active slate.', lastUpdated: latestOddsChange, available: hasAcceptedMarkets }
   }
-  if (marketAge !== null && marketAge > DATA_FRESHNESS_POLICIES.odds.staleMinutes!) {
+  if (marketAge !== null && policy.staleMinutes !== null && marketAge > policy.staleMinutes) {
     return { state: 'CHECK_OVERDUE', reason: 'The latest accepted market timestamp is stale for the active slate.', lastUpdated: latestOddsChange, available: hasAcceptedMarkets }
   }
-  if (marketAge !== null && marketAge > DATA_FRESHNESS_POLICIES.odds.freshMinutes!) {
+  if (marketAge !== null && policy.freshMinutes !== null && marketAge > policy.freshMinutes) {
     return { state: 'CHECK_DUE', reason: 'Accepted markets exist but are aging; refresh should run when budget permits.', lastUpdated: latestOddsChange, available: hasAcceptedMarkets }
   }
   if (hasAcceptedMarkets) {
@@ -613,6 +806,22 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
   const activeNeed = currentGames > 0 || upcomingGames > 0 || waitingForOdds > 0
   const featureAvailable = predictions.some((row) => row.feature_snapshot && Object.keys(row.feature_snapshot).length > 0)
   const mode = budgetMode(budget)
+  const cadenceConfig = mlbCadenceConfig()
+  const uniqueRefreshEvents = Array.from(new Map([...currentEvents, ...activeEvents].map((event) => [event.id, event])).values())
+  const window = refreshWindow({
+    events: uniqueRefreshEvents,
+    currentGames,
+    upcomingGames,
+    finalGames,
+    now,
+  })
+  const eventWindows = eventRefreshWindows(uniqueRefreshEvents, now, cadenceConfig, latestOddsChange)
+  const policyOverrides = Object.fromEntries(
+    (Object.keys(DATA_FRESHNESS_POLICIES) as DataFreshnessDomain[]).map((domain) => [
+      domain,
+      policyForWindow(domain, window.window, cadenceConfig),
+    ])
+  ) as Record<DataFreshnessDomain, FreshnessPolicy>
   const marketState = marketRefreshState({
     latestOddsChange,
     latestProviderCheck,
@@ -621,10 +830,11 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     activeNeed,
     mode,
     now,
+    policy: policyOverrides.odds,
   })
 
   const freshness: DataFreshnessItem[] = [
-    freshnessItem({ domain: 'schedule', lastUpdated: latestSchedule, available: currentGames + upcomingGames > 0, activeNeed, now }),
+    freshnessItem({ domain: 'schedule', lastUpdated: latestSchedule, available: currentGames + upcomingGames > 0, activeNeed, now, policyOverride: policyOverrides.schedule }),
     freshnessItem({
       domain: 'odds',
       lastUpdated: marketState.lastUpdated,
@@ -632,17 +842,18 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       activeNeed: activeNeed || waitingForOdds > 0,
       now,
       sourceOverride: 'sports_odds_snapshots/provider-check-ledger/current-board',
+      policyOverride: policyOverrides.odds,
     }),
-    freshnessItem({ domain: 'results', lastUpdated: latestResults, available: Boolean(latestResults || finalGames > 0), activeNeed: finalGames > 0, now }),
-    freshnessItem({ domain: 'starters', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now }),
-    freshnessItem({ domain: 'lineups', lastUpdated: null, available: false, activeNeed: readyForAnalysis > 0, now }),
-    freshnessItem({ domain: 'injuries_availability', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now }),
-    freshnessItem({ domain: 'weather', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now }),
-    freshnessItem({ domain: 'bullpen', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now }),
-    freshnessItem({ domain: 'feature_snapshot', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now }),
-    freshnessItem({ domain: 'prediction', lastUpdated: latestPrediction, available: predictions.length > 0, activeNeed: readyForAnalysis > 0 || waitingForOdds === 0, now }),
-    freshnessItem({ domain: 'recommendation', lastUpdated: latestPrediction, available: Boolean(board && board.candidates.length > 0), activeNeed: readyForAnalysis > 0, now }),
-    freshnessItem({ domain: 'settlement', lastUpdated: latestSettlement, available: Boolean(latestSettlement), activeNeed: finalGames > 0, now }),
+    freshnessItem({ domain: 'results', lastUpdated: latestResults, available: Boolean(latestResults || finalGames > 0), activeNeed: finalGames > 0, now, policyOverride: policyOverrides.results }),
+    freshnessItem({ domain: 'starters', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.starters }),
+    freshnessItem({ domain: 'lineups', lastUpdated: null, available: false, activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.lineups }),
+    freshnessItem({ domain: 'injuries_availability', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.injuries_availability }),
+    freshnessItem({ domain: 'weather', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.weather }),
+    freshnessItem({ domain: 'bullpen', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.bullpen }),
+    freshnessItem({ domain: 'feature_snapshot', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.feature_snapshot }),
+    freshnessItem({ domain: 'prediction', lastUpdated: latestPrediction, available: predictions.length > 0, activeNeed: readyForAnalysis > 0 || waitingForOdds === 0, now, policyOverride: policyOverrides.prediction }),
+    freshnessItem({ domain: 'recommendation', lastUpdated: latestPrediction, available: Boolean(board && board.candidates.length > 0), activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.recommendation }),
+    freshnessItem({ domain: 'settlement', lastUpdated: latestSettlement, available: Boolean(latestSettlement), activeNeed: finalGames > 0, now, policyOverride: policyOverrides.settlement }),
   ]
 
   const refreshPlan = freshness.map((item) => ({
@@ -723,6 +934,23 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     officialPicks: Number(dashboard?.officialPicks ?? board?.officialPickCount ?? 0),
     informationalCandidates: Number(dashboard?.informationalCandidates ?? Math.max(0, (board?.candidates.length ?? 0) - (board?.officialPickCount ?? 0))),
     latestOddsTimestamp: latestOddsChange,
+    freshnessPolicy: {
+      scope: 'mlb_operating_day_runtime_phase_1',
+      window: window.window,
+      minutesUntilFirstPitch: window.minutesUntilFirstPitch,
+      cadenceConfig,
+      applied: {
+        oddsFreshMinutes: policyOverrides.odds.freshMinutes,
+        oddsStaleMinutes: policyOverrides.odds.staleMinutes,
+        resultsFreshMinutes: policyOverrides.results.freshMinutes,
+        resultsStaleMinutes: policyOverrides.results.staleMinutes,
+      },
+      unsupportedResources: {
+        confirmedLineups: 'NOT_SUPPORTED',
+        repeatedLineupPolling: false,
+      },
+    },
+    eventRefreshWindows: eventWindows,
     oddsFreshnessEvidence: {
       marketState: marketState.state,
       marketStateReason: marketState.reason,
@@ -744,10 +972,19 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       provider: budget?.provider ?? 'sportsdataio',
       callsMadeToday: Number(budget?.callsMadeToday ?? 0),
       callsPlannedToday: Number(budget?.callsPlannedToday ?? 0),
+      callsMadeLastHour: Number(budget?.callsMadeLastHour ?? 0),
       hardRemaining: Number(budget?.hardRemaining ?? 0),
       estimatedCallsRemaining: Number(budget?.estimatedCallsRemaining ?? 0),
+      hourlyRemaining: Number(budget?.hourlyRemaining ?? 0),
       softReserve: Number(budget?.config?.softReserve ?? 0),
       maxCallsPerAction: Number(budget?.config?.maxCallsPerAction ?? 0),
+      maxRefreshCallsPerHour: Number(budget?.config?.maxRefreshCallsPerHour ?? 0),
+      usagePercent: Number(budget?.usagePercent ?? 0),
+      warningThresholdPercent: Number(budget?.config?.warningThresholdPercent ?? 0),
+      stopThresholdPercent: Number(budget?.config?.stopThresholdPercent ?? 0),
+      warningThresholdReached: budget?.warningThresholdReached ?? false,
+      stopThresholdReached: budget?.stopThresholdReached ?? false,
+      budgetWarnings: budget?.budgetWarnings ?? [],
       nextEligibleRefresh: budget?.nextEligibleRefresh ?? null,
     },
     schedulerAudit: {
@@ -766,6 +1003,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       notes: [
         'Forecast only. This endpoint does not call external providers.',
         'Execution remains delegated to the existing operating-day pipeline.',
+        `Active MLB freshness window is ${window.window}; odds are fresh for ${policyOverrides.odds.freshMinutes} minutes and stale after ${policyOverrides.odds.staleMinutes} minutes.`,
       ],
     },
     changeEvents: {
@@ -1114,12 +1352,18 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
 export function validateAdaptiveRefreshFixtures() {
   const now = new Date('2026-07-19T16:00:00.000Z')
   const fresh = freshnessItem({ domain: 'odds', lastUpdated: '2026-07-19T15:15:00.000Z', available: true, activeNeed: true, now })
-  const aging = freshnessItem({ domain: 'odds', lastUpdated: '2026-07-19T13:00:00.000Z', available: true, activeNeed: true, now })
+  const aging = freshnessItem({ domain: 'odds', lastUpdated: '2026-07-19T14:30:00.000Z', available: true, activeNeed: true, now })
   const stale = freshnessItem({ domain: 'odds', lastUpdated: '2026-07-19T05:00:00.000Z', available: true, activeNeed: true, now })
   const pending = freshnessItem({ domain: 'odds', lastUpdated: null, available: false, activeNeed: true, now })
   const unsupported = freshnessItem({ domain: 'lineups', lastUpdated: null, available: false, activeNeed: true, now })
   const exhaustedDecision = domainDecision(stale, 'EXHAUSTED')
   const normalDecision = domainDecision(stale, 'NORMAL')
+  const previousPregame = process.env.MLB_ODDS_REFRESH_MINUTES_PREGAME
+  process.env.MLB_ODDS_REFRESH_MINUTES_PREGAME = '12'
+  const cfg = mlbCadenceConfig()
+  if (previousPregame === undefined) delete process.env.MLB_ODDS_REFRESH_MINUTES_PREGAME
+  else process.env.MLB_ODDS_REFRESH_MINUTES_PREGAME = previousPregame
+  const windowPolicy = policyForWindow('odds', 'PREGAME', cfg)
   const checks = [
     ['fresh odds classify fresh', fresh.status === 'FRESH'],
     ['aging odds classify aging', aging.status === 'AGING'],
@@ -1128,6 +1372,7 @@ export function validateAdaptiveRefreshFixtures() {
     ['unsupported lineups classify not supported', unsupported.status === 'NOT_SUPPORTED'],
     ['exhausted budget blocks provider-backed stale refresh', exhaustedDecision === 'BLOCKED'],
     ['normal budget marks stale odds due now', normalDecision === 'DUE_NOW'],
+    ['MLB pregame cadence config is applied', windowPolicy.freshMinutes === 12 && windowPolicy.staleMinutes === 24],
     ['status reads make no provider calls', true],
     ['prediction mutations remain zero', true],
   ] as const

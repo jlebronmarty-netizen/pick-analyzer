@@ -3,9 +3,12 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
-const DEFAULT_DAILY_CALL_BUDGET = 1000
-const DEFAULT_SOFT_RESERVE = 25
+const DEFAULT_DAILY_CALL_BUDGET = 1500
+const DEFAULT_SOFT_RESERVE = 150
 const DEFAULT_MAX_CALLS_PER_ACTION = 3
+const DEFAULT_MAX_REFRESH_CALLS_PER_HOUR = 12
+const DEFAULT_WARNING_PERCENT = 80
+const DEFAULT_STOP_PERCENT = 95
 const TIMEZONE = 'America/Puerto_Rico'
 
 type BudgetCheckInput = {
@@ -24,9 +27,17 @@ type BudgetStatusInput = {
 
 const localLocks = new Map<string, number>()
 
-function numberFromEnv(name: string, fallback: number) {
-  const value = Number(process.env[name])
-  return Number.isFinite(value) && value >= 0 ? value : fallback
+function numberFromEnv(names: string | string[], fallback: number) {
+  const keys = Array.isArray(names) ? names : [names]
+  for (const name of keys) {
+    const value = Number(process.env[name])
+    if (Number.isFinite(value) && value >= 0) return value
+  }
+  return fallback
+}
+
+function percentFromEnv(names: string | string[], fallback: number) {
+  return Math.max(0, Math.min(100, numberFromEnv(names, fallback)))
 }
 
 function localDate(now = new Date()) {
@@ -39,10 +50,36 @@ function utcRangeForLocalDate(date: string) {
 }
 
 function config() {
+  const dailyCallBudget = numberFromEnv(
+    ['MLB_DAILY_CREDIT_BUDGET', 'PROVIDER_DAILY_CREDIT_BUDGET', 'SPORTSDATAIO_DAILY_CALL_BUDGET'],
+    DEFAULT_DAILY_CALL_BUDGET
+  )
+  const warningThresholdPercent = percentFromEnv('PROVIDER_BUDGET_WARNING_PERCENT', DEFAULT_WARNING_PERCENT)
+  const stopThresholdPercent = Math.max(
+    warningThresholdPercent,
+    percentFromEnv('PROVIDER_BUDGET_STOP_PERCENT', DEFAULT_STOP_PERCENT)
+  )
   return {
-    dailyCallBudget: numberFromEnv('SPORTSDATAIO_DAILY_CALL_BUDGET', DEFAULT_DAILY_CALL_BUDGET),
-    softReserve: numberFromEnv('SPORTSDATAIO_SOFT_RESERVE', DEFAULT_SOFT_RESERVE),
-    maxCallsPerAction: numberFromEnv('SPORTSDATAIO_MAX_CALLS_PER_ACTION', DEFAULT_MAX_CALLS_PER_ACTION),
+    dailyCallBudget,
+    softReserve: Math.min(
+      dailyCallBudget,
+      numberFromEnv(['MLB_DAILY_CREDIT_RESERVE', 'PROVIDER_DAILY_CREDIT_RESERVE', 'SPORTSDATAIO_SOFT_RESERVE'], DEFAULT_SOFT_RESERVE)
+    ),
+    maxCallsPerAction: numberFromEnv(['MLB_MAX_CALLS_PER_ACTION', 'SPORTSDATAIO_MAX_CALLS_PER_ACTION'], DEFAULT_MAX_CALLS_PER_ACTION),
+    maxRefreshCallsPerHour: numberFromEnv(
+      ['MLB_MAX_REFRESH_CALLS_PER_HOUR', 'PROVIDER_MAX_REFRESH_CALLS_PER_HOUR'],
+      DEFAULT_MAX_REFRESH_CALLS_PER_HOUR
+    ),
+    warningThresholdPercent,
+    stopThresholdPercent,
+    envAliases: {
+      dailyCallBudget: ['MLB_DAILY_CREDIT_BUDGET', 'PROVIDER_DAILY_CREDIT_BUDGET', 'SPORTSDATAIO_DAILY_CALL_BUDGET'],
+      softReserve: ['MLB_DAILY_CREDIT_RESERVE', 'PROVIDER_DAILY_CREDIT_RESERVE', 'SPORTSDATAIO_SOFT_RESERVE'],
+      maxCallsPerAction: ['MLB_MAX_CALLS_PER_ACTION', 'SPORTSDATAIO_MAX_CALLS_PER_ACTION'],
+      maxRefreshCallsPerHour: ['MLB_MAX_REFRESH_CALLS_PER_HOUR', 'PROVIDER_MAX_REFRESH_CALLS_PER_HOUR'],
+      warningThresholdPercent: ['PROVIDER_BUDGET_WARNING_PERCENT'],
+      stopThresholdPercent: ['PROVIDER_BUDGET_STOP_PERCENT'],
+    },
   }
 }
 
@@ -97,15 +134,29 @@ export async function getProviderBudgetStatus(input: BudgetStatusInput = {}) {
   const sportKey = input.sportKey ?? 'baseball_mlb'
   const today = localDate()
   const range = utcRangeForLocalDate(today)
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
   const cfg = config()
-  const [operatingDay, syncJobs] = await Promise.all([
+  const [operatingDay, syncJobs, operatingDayLastHour, syncJobsLastHour] = await Promise.all([
     operatingDayCalls(provider, sportKey, range.utcStart, range.utcEndExclusive),
     syncJobCalls(provider, sportKey, range.utcStart, range.utcEndExclusive),
+    operatingDayCalls(provider, sportKey, oneHourAgo, new Date().toISOString()),
+    syncJobCalls(provider, sportKey, oneHourAgo, new Date().toISOString()),
   ])
   const callsMadeToday = Math.max(operatingDay.callsMade, syncJobs.callsMade)
+  const callsMadeLastHour = Math.max(operatingDayLastHour.callsMade, syncJobsLastHour.callsMade)
   const hardRemaining = Math.max(0, cfg.dailyCallBudget - callsMadeToday)
   const estimatedCallsRemaining = Math.max(0, cfg.dailyCallBudget - cfg.softReserve - callsMadeToday)
+  const hourlyRemaining = Math.max(0, cfg.maxRefreshCallsPerHour - callsMadeLastHour)
+  const usagePercent = cfg.dailyCallBudget > 0 ? Math.round((callsMadeToday / cfg.dailyCallBudget) * 1000) / 10 : 100
+  const warningThresholdReached = usagePercent >= cfg.warningThresholdPercent
+  const stopThresholdReached = usagePercent >= cfg.stopThresholdPercent
   const latest = operatingDay.latest ?? syncJobs.latest
+  const budgetWarnings = [
+    warningThresholdReached ? `Provider usage has reached ${usagePercent}% of the configured daily budget.` : null,
+    hourlyRemaining <= 0 ? 'Provider hourly refresh budget is exhausted for the current rolling hour.' : null,
+    stopThresholdReached ? `Provider usage has reached the ${cfg.stopThresholdPercent}% hard-stop threshold.` : null,
+    syncJobs.warning,
+  ].filter(Boolean) as string[]
   return {
     success: true,
     mode: 'provider_budget_status_v1',
@@ -115,12 +166,18 @@ export async function getProviderBudgetStatus(input: BudgetStatusInput = {}) {
     timezone: TIMEZONE,
     config: cfg,
     callsMadeToday,
+    callsMadeLastHour,
     callsPlannedToday: operatingDay.callsPlanned,
     hardRemaining,
     estimatedCallsRemaining,
+    hourlyRemaining,
     softReserveRemaining: Math.max(0, cfg.softReserve - Math.max(0, cfg.dailyCallBudget - callsMadeToday - estimatedCallsRemaining)),
+    usagePercent,
+    warningThresholdReached,
+    stopThresholdReached,
+    budgetWarnings,
     lastProviderCall: latest ? String((latest as Record<string, unknown>).created_at ?? (latest as Record<string, unknown>).completed_at ?? '') : null,
-    nextEligibleRefresh: hardRemaining > 0 && estimatedCallsRemaining > 0 ? 'now' : 'next_provider_day',
+    nextEligibleRefresh: hardRemaining > 0 && estimatedCallsRemaining > 0 && hourlyRemaining > 0 && !stopThresholdReached ? 'now' : hourlyRemaining <= 0 ? 'next_hour' : 'next_provider_day',
     warning: syncJobs.warning,
     providerCallsMade: 0,
   }
@@ -137,6 +194,25 @@ export async function checkProviderBudget(input: BudgetCheckInput) {
       allowed: false,
       approvedCalls: 0,
       blockedReason: `Requested ${requestedCalls} calls exceeds SPORTSDATAIO_MAX_CALLS_PER_ACTION ${status.config.maxCallsPerAction}.`,
+      status,
+    }
+  }
+  if (requestedCalls > status.hourlyRemaining) {
+    return {
+      allowed: false,
+      approvedCalls: 0,
+      blockedReason: `Requested ${requestedCalls} calls exceeds MLB_MAX_REFRESH_CALLS_PER_HOUR remaining allowance ${status.hourlyRemaining}.`,
+      status,
+    }
+  }
+  const projectedUsagePercent = status.config.dailyCallBudget > 0
+    ? ((status.callsMadeToday + requestedCalls) / status.config.dailyCallBudget) * 100
+    : 100
+  if (projectedUsagePercent > status.config.stopThresholdPercent) {
+    return {
+      allowed: false,
+      approvedCalls: 0,
+      blockedReason: `Requested ${requestedCalls} calls would exceed PROVIDER_BUDGET_STOP_PERCENT ${status.config.stopThresholdPercent}.`,
       status,
     }
   }
@@ -165,24 +241,48 @@ export function releaseProviderActionLock(key: string) {
 
 export function validateProviderBudgetDeterministicFixtures() {
   const previousBudget = process.env.SPORTSDATAIO_DAILY_CALL_BUDGET
+  const previousMlbBudget = process.env.MLB_DAILY_CREDIT_BUDGET
+  const previousProviderBudget = process.env.PROVIDER_DAILY_CREDIT_BUDGET
   const previousReserve = process.env.SPORTSDATAIO_SOFT_RESERVE
   const previousMax = process.env.SPORTSDATAIO_MAX_CALLS_PER_ACTION
+  const previousHourly = process.env.MLB_MAX_REFRESH_CALLS_PER_HOUR
+  const previousWarning = process.env.PROVIDER_BUDGET_WARNING_PERCENT
+  const previousStop = process.env.PROVIDER_BUDGET_STOP_PERCENT
   process.env.SPORTSDATAIO_DAILY_CALL_BUDGET = '10'
   process.env.SPORTSDATAIO_SOFT_RESERVE = '2'
   process.env.SPORTSDATAIO_MAX_CALLS_PER_ACTION = '3'
+  process.env.MLB_MAX_REFRESH_CALLS_PER_HOUR = '4'
+  process.env.PROVIDER_BUDGET_WARNING_PERCENT = '70'
+  process.env.PROVIDER_BUDGET_STOP_PERCENT = '90'
   const cfg = config()
+  const mlbOverrideCfg = (() => {
+    process.env.MLB_DAILY_CREDIT_BUDGET = '25'
+    return config()
+  })()
   if (previousBudget === undefined) delete process.env.SPORTSDATAIO_DAILY_CALL_BUDGET
   else process.env.SPORTSDATAIO_DAILY_CALL_BUDGET = previousBudget
+  if (previousMlbBudget === undefined) delete process.env.MLB_DAILY_CREDIT_BUDGET
+  else process.env.MLB_DAILY_CREDIT_BUDGET = previousMlbBudget
+  if (previousProviderBudget === undefined) delete process.env.PROVIDER_DAILY_CREDIT_BUDGET
+  else process.env.PROVIDER_DAILY_CREDIT_BUDGET = previousProviderBudget
   if (previousReserve === undefined) delete process.env.SPORTSDATAIO_SOFT_RESERVE
   else process.env.SPORTSDATAIO_SOFT_RESERVE = previousReserve
   if (previousMax === undefined) delete process.env.SPORTSDATAIO_MAX_CALLS_PER_ACTION
   else process.env.SPORTSDATAIO_MAX_CALLS_PER_ACTION = previousMax
+  if (previousHourly === undefined) delete process.env.MLB_MAX_REFRESH_CALLS_PER_HOUR
+  else process.env.MLB_MAX_REFRESH_CALLS_PER_HOUR = previousHourly
+  if (previousWarning === undefined) delete process.env.PROVIDER_BUDGET_WARNING_PERCENT
+  else process.env.PROVIDER_BUDGET_WARNING_PERCENT = previousWarning
+  if (previousStop === undefined) delete process.env.PROVIDER_BUDGET_STOP_PERCENT
+  else process.env.PROVIDER_BUDGET_STOP_PERCENT = previousStop
   const lockKey = 'fixture:sportsdataio:baseball_mlb'
   const firstClaim = claimProviderActionLock(lockKey, 1000)
   const secondClaim = claimProviderActionLock(lockKey, 1000)
   releaseProviderActionLock(lockKey)
   const checks = [
     ['env config parsed', cfg.dailyCallBudget === 10 && cfg.softReserve === 2 && cfg.maxCallsPerAction === 3],
+    ['MLB daily budget override wins', mlbOverrideCfg.dailyCallBudget === 25],
+    ['hourly and threshold config parsed', cfg.maxRefreshCallsPerHour === 4 && cfg.warningThresholdPercent === 70 && cfg.stopThresholdPercent === 90],
     ['local date uses puerto rico offset', localDate(new Date('2026-07-17T03:30:00.000Z')) === '2026-07-16'],
     ['concurrent lock rejects second claim', firstClaim && !secondClaim],
     ['deterministic validation made zero calls', true],

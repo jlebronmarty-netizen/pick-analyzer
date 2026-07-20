@@ -8,6 +8,22 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Production Refresh Infrastructure V1
+
+Status: Implemented locally before Phase 2. Production deployment and scheduler proof remain required.
+
+Evidence: `src/app/api/cron/operating-day/route.ts`, `src/services/adaptive-refresh-orchestrator.service.ts`, `src/services/operations-health.service.ts`, `src/components/dashboard/OperationsHealthPanel.tsx`, `.github/workflows/production-operating-day.yml`, `.github/workflows/operating-day-refresh.yml`, `docs/PRODUCTION_REFRESH_INFRASTRUCTURE.md` and `docs/SCHEDULER_RELIABILITY.md`.
+
+Note: The production cron entrypoint now delegates to the existing Adaptive Refresh bridge before any legacy automation short-circuit. This lets stale market prices select budget-guarded `midday_refresh` instead of returning `already_current` while the dashboard stays stale. Adaptive Refresh exposes event-level refresh windows and Operations Health exposes scheduler, provider budget, last refresh, next due, skipped-call and refresh-window evidence. Advanced Status renders the provider/scheduler fields from the existing health API, and the legacy operating-day workflow is manual-only so unattended execution has one scheduler of record. Prediction logic, recommendation logic, Current Board generation and settlement logic remain unchanged.
+
+### MLB User Mode Freshness And Provider Budget Phase 1
+
+Status: Implemented locally. Phase 2 has not started.
+
+Evidence: `src/services/provider-budget.service.ts`, `src/services/adaptive-refresh-orchestrator.service.ts`, `src/services/operations-health.service.ts`, `docs/MLB_USER_MODE_FRESHNESS_PROVIDER_BUDGET_PHASE_1.md`, `docs/PROVIDER_BUDGET_POLICY.md`, `docs/PROVIDER_BUDGET_REFRESH_STRATEGY.md` and `docs/SCHEDULER_RELIABILITY.md`.
+
+Note: This phase fixes freshness and budget truth without changing prediction formulas, Current Board generation, recommendation policy, settlement, learning or supported markets. The adaptive orchestrator now applies configurable MLB operating-window freshness thresholds and exposes the active policy. Provider Budget now supports MLB/global budget aliases, a bounded 1500-call default, soft reserve, per-action cap, rolling-hour cap, warning threshold and hard-stop threshold. The observed 267-minute market/prediction/recommendation freshness was caused by loose adaptive odds thresholds plus once-daily Vercel cron without proven intraday external scheduler activation. Confirmed lineups remain unsupported and are not polled.
+
 ### MLB Core V1 Runtime Certification Until Pass
 
 Status: Certified locally. Production deployment and unattended external scheduler verification remain pending.

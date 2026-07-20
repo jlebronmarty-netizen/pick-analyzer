@@ -276,6 +276,8 @@ export const CURRENT_BOARD_FRESHNESS_POLICY = {
   },
 } as const
 
+const DEFAULT_CURRENT_BOARD_DISPLAY_ODDS_STALE_MINUTES = 30
+
 function emptyReasonCounts() {
   return Object.fromEntries(ALL_REASON_CODES.map((code) => [code, 0])) as Record<CurrentBoardReasonCode, number>
 }
@@ -351,6 +353,22 @@ function numberValue(value: unknown) {
   if (value === null || value === undefined || value === '') return null
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : null
+}
+
+function positiveNumberFromEnv(names: string | string[], fallback: number) {
+  const keys = Array.isArray(names) ? names : [names]
+  for (const name of keys) {
+    const parsed = Number(process.env[name])
+    if (Number.isFinite(parsed) && parsed > 0) return parsed
+  }
+  return fallback
+}
+
+function displayMaxOddsAgeMinutes() {
+  return positiveNumberFromEnv(
+    ['MLB_CURRENT_BOARD_DISPLAY_ODDS_STALE_MINUTES', 'MLB_ODDS_DISPLAY_STALE_MINUTES'],
+    DEFAULT_CURRENT_BOARD_DISPLAY_ODDS_STALE_MINUTES
+  )
 }
 
 function round(value: number, digits = 2) {
@@ -921,7 +939,7 @@ export async function getCurrentBoard({
 
   const latestOddsTimestamp = candidates.map((candidate) => candidate.oddsTimestamp).filter(Boolean).sort().at(-1) ?? null
   const latestOddsAgeMinutes = latestOddsTimestamp ? ageMinutes(latestOddsTimestamp, nowMs) : null
-  const maxAllowedAgeMinutes = CURRENT_BOARD_FRESHNESS_POLICY.baseball_mlb.defaultMaxOddsAgeMinutes
+  const maxAllowedAgeMinutes = displayMaxOddsAgeMinutes()
   const nextRecommendedRefreshTime = latestOddsTimestamp
     ? new Date(new Date(latestOddsTimestamp).getTime() + maxAllowedAgeMinutes * 60000).toISOString()
     : null
@@ -944,7 +962,7 @@ export async function getCurrentBoard({
 
   const warnings: string[] = []
   if (!candidates.length) warnings.push('No valid current-board candidates in selected mode.')
-  if (latestOddsAgeMinutes !== null && latestOddsAgeMinutes > maxAllowedAgeMinutes) warnings.push('Latest selected odds are stale.')
+  if (latestOddsAgeMinutes !== null && latestOddsAgeMinutes > maxAllowedAgeMinutes) warnings.push('Latest selected odds are stale for display freshness; candidate selection still uses the immutable Current Board generation policy.')
 
   return {
     success: true,

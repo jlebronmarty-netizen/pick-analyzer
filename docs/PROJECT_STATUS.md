@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-20 08:47:00 -04:00
+Last updated: 2026-07-20 10:40:00 -04:00
 
 ## Current Architecture
 
@@ -15,6 +15,10 @@ Pick Analyzer is a Next.js 16 App Router application using React 19, TypeScript,
 - `supabase/migrations`: additive migrations for NBA data sync and NBA prediction validation/settlement metadata.
 
 ## Completed Modules Confirmed From Repository
+
+- Production Refresh Infrastructure V1: implemented locally before Phase 2. Root cause was production scheduling, not prediction or recommendation logic: Vercel cron runs once daily, and `/api/cron/operating-day` could short-circuit as `already_current` from `ready_for_analysis` before Adaptive Refresh selected stale odds work. The cron route now delegates first to `runAdaptiveRefresh`, preserving CRON_SECRET auth, provider budgets, refresh windows and provider action locks. Adaptive Refresh exposes event-level refresh windows, and Operations Health exposes provider status, last refreshes, next due work, budget/hourly usage, scheduler state, skipped calls, skip reason and current refresh window. Advanced Status now shows those provider/scheduler fields from the existing health API, and the older GitHub Actions operating-day workflow is manual-only so the 15-minute production workflow is the single unattended scheduler. No prediction, recommendation, Current Board generation or settlement logic changed.
+
+- MLB User Mode Freshness And Provider Budget Phase 1: implemented local Phase 1 controls only. Adaptive Refresh now applies configurable MLB operating-window freshness (`MLB_ODDS_REFRESH_MINUTES_EARLY`, `MLB_ODDS_REFRESH_MINUTES_PREGAME`, `MLB_ODDS_REFRESH_MINUTES_NEAR_START`, `MLB_SCORE_REFRESH_MINUTES_LIVE`, `MLB_RESULTS_REFRESH_MINUTES_POSTGAME`) and exposes the active window plus applied thresholds in operations status. Provider Budget now supports MLB/global daily budget aliases, a larger bounded default of 1500 calls/day with 150 reserve, 3 calls/action, 12 calls/hour, 80% warning and 95% hard-stop controls. Operations Health exposes calls last hour, hourly remaining, usage percent and budget warnings. Root cause of the observed 267-minute freshness was loose adaptive odds thresholds plus once-daily Vercel cron without proven intraday external scheduler activation. Confirmed lineups remain unsupported and are not polled. Phase 2 was not started.
 
 - MLB Core V1 Runtime Certification Until Pass: locally certified the current-day MLB operating runtime against protected provider-backed execution. `status_refresh` selected `2026-07-20` instead of stale recovery date `2026-07-18`, completed an MLB Stats API provider check with 15 rows, and reported `SUCCESS_NO_CHANGE` only after provider evidence. `midday_refresh` selected `2026-07-20`, completed SportsDataIO `GameOddsByDate/2026-07-20`, inserted 90 odds snapshots and advanced Today/Current Board stored reads. `/api/dashboard/today?includeValidation=true` then returned `AVAILABLE` with 15 current-day cards, 24 candidates, 10 Most Likely rows, Best Value `EMPTY` under the positive-only policy, 0 provider calls, 0 remote mutations, no errors and 1996ms total timing. Temporal health showed 15 games and legacy repair count 0. Production deployment and unattended scheduler activation remain pending; no prediction formulas, projection formulas, Official Pick thresholds, champion/V7 state, settlement, learning or unsupported-market gates changed.
 
