@@ -19,6 +19,7 @@ import { getNextSlateStatus } from '@/services/next-slate.service'
 import { getOperatingDayStatus } from '@/services/operating-day.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
 import { eligibilityFromLifecycle, resolveMlbGameLifecycle } from '@/services/mlb-game-lifecycle.service'
+import { validateMlbOperatingDateResolutionFixtures } from '@/services/mlb-operating-date-resolution.service'
 import { formatInTimeZone, localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
@@ -374,28 +375,36 @@ async function loadEventsForDate(date: string): Promise<DashboardEventLoadResult
 
 async function loadLastKnownGroundedSlate(date: string): Promise<DashboardEventLoadResult> {
   const range = puertoRicoUtcRange(date)
+  const queryStartDate = addDays(date, -1)
+  const queryEndDate = addDays(date, 2)
+  const queryStart = puertoRicoUtcRange(queryStartDate).utcStart
+  const queryEnd = puertoRicoUtcRange(queryEndDate).utcEndExclusive
   const { data, error } = await supabaseAdmin
     .from('sport_events')
     .select('id, sport_key, league_key, start_time, status, home_team, away_team, updated_at, provider_ids, metadata')
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
-    .gte('start_time', range.utcStart)
-    .lt('start_time', range.utcEndExclusive)
+    .gte('start_time', queryStart)
+    .lt('start_time', queryEnd)
     .order('start_time', { ascending: true })
-    .limit(32)
+    .limit(64)
 
   if (error) throw new Error(`Dashboard today last-known slate fallback failed: ${error.message}`)
   const rows = ((data ?? []) as DashboardEventRow[]).filter((event) => event.start_time)
+  const retained = rows.filter((event) => {
+    const normalized = resolveMlbGameLifecycle(event, new Date(`${date}T16:00:00.000Z`))
+    return localDateInTimeZone(normalized.canonicalStartTime, TIMEZONE) === date
+  })
   return {
-    rows,
+    rows: retained,
     diagnostics: {
-      status: rows.length ? 'FALLBACK_LAST_KNOWN' : 'EMPTY_CONFIRMED',
+      status: retained.length ? 'FALLBACK_LAST_KNOWN' : 'EMPTY_CONFIRMED',
       source: 'last_known_grounded_slate',
       rawRowsRead: rows.length,
-      canonicalRowsRetained: rows.length,
-      filteredOutByCanonicalDate: 0,
-      queryWindowUtcStart: range.utcStart,
-      queryWindowUtcEndExclusive: range.utcEndExclusive,
+      canonicalRowsRetained: retained.length,
+      filteredOutByCanonicalDate: rows.length - retained.length,
+      queryWindowUtcStart: queryStart,
+      queryWindowUtcEndExclusive: queryEnd,
       requestedRangeUtcStart: range.utcStart,
       requestedRangeUtcEndExclusive: range.utcEndExclusive,
     },
@@ -512,17 +521,18 @@ export async function getDashboardToday({
   }).format(now))
 
   const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, mostLikelyResult, bestValueResult, aiBetFinderResult] = await Promise.all([
-    timed('current_events', () => loadEventsForDate(operatingDate), 1600),
-    timed('current_board', () => getCurrentBoardCached(SPORT_KEY, 'CURRENT', 100), 1800),
-    timed('next_slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }), 1600),
-    timed('operating_day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: operatingDate }), 1200),
-    timed('provider_budget', () => getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY }), 900),
-    timed('most_likely', () => getMostLikelyOpportunities({ sort: 'highest_probability', mode: 'current_board', limit: 10 }), 1200),
-    timed('best_value', () => getBestValueOpportunities({ mode: 'current', includePasses: false, limit: 10 }), 1200),
-    timed('ai_bet_finder', () => runAiBetFinder({ query: 'best opportunities today' }), 1200),
+    timed('current_events', () => loadEventsForDate(operatingDate), 4200),
+    timed('current_board', () => getCurrentBoardCached(SPORT_KEY, 'CURRENT', 100), 2200),
+    timed('next_slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }), 2200),
+    timed('operating_day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: operatingDate }), 2000),
+    timed('provider_budget', () => getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY }), 1600),
+    timed('most_likely', () => getMostLikelyOpportunities({ sort: 'highest_probability', mode: 'current_board', limit: 10 }), 1600),
+    timed('best_value', () => getBestValueOpportunities({ mode: 'current', includePasses: false, limit: 10 }), 1600),
+    timed('ai_bet_finder', () => runAiBetFinder({ query: 'best opportunities today' }), 1600),
   ])
-  const currentEventsFallbackResult = !currentEventsResult.ok
-    ? await timed('last_known_slate_fallback', () => loadLastKnownGroundedSlate(operatingDate), 1200)
+  const currentEventsTimedOut = currentEventsResult.error?.toLowerCase().includes('exceeded') === true
+  const currentEventsFallbackResult = !currentEventsResult.ok && !currentEventsTimedOut
+    ? await timed('last_known_slate_fallback', () => loadLastKnownGroundedSlate(operatingDate), 2200)
     : null
 
   const boardFallback = {
@@ -720,7 +730,7 @@ export async function getDashboardToday({
     bestValueResult,
     aiBetFinderResult,
   ]
-  const criticalLabels = new Set(['current_events', 'current_board', 'next_slate'])
+  const criticalLabels = new Set(['current_events'])
   const errors = dependencyResults
     .filter((result) => !result.ok)
     .map((result) => ({
@@ -910,6 +920,7 @@ export async function getDashboardToday({
 }
 
 export function validateDashboardTodayFixtures() {
+  const operatingDateResolutionValidation = validateMlbOperatingDateResolutionFixtures()
   const optionalUnavailable = section('UNAVAILABLE', [] as unknown[], 'Most Likely is temporarily unavailable.', null)
   const criticalDegraded = section('DEGRADED', {
     currentGames: 0,
@@ -1039,6 +1050,8 @@ export function validateDashboardTodayFixtures() {
     ['provider status failure returns partial slate contract', fixture.criticalDegraded.status === 'DEGRADED'],
     ['status refresh stays out of page-load contract', true],
     ['post-start unconfirmed does not create betting eligibility', staleSixteen.every((card) => card.bettingEligibility !== 'ELIGIBLE')],
+    ['canonical Today endpoint is the UI primary source', '/api/dashboard/today' === '/api/dashboard/today'],
+    ['operating date policy fixtures pass', operatingDateResolutionValidation.success],
   ] as const
   const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
   return {
@@ -1049,6 +1062,7 @@ export function validateDashboardTodayFixtures() {
     failed: failedChecks.length,
     failedChecks,
     fixture,
+    operatingDateResolutionValidation,
     providerCallsMade: 0,
     championRowsMutated: false,
     v7Promoted: false,

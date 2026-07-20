@@ -261,7 +261,7 @@ export default function ProductTodayPanel() {
   useEffect(() => {
     async function load() {
       try {
-        const response = await fetch('/api/dashboard?mode=today', { cache: 'no-store' })
+        const response = await fetch('/api/dashboard/today', { cache: 'no-store' })
         const json = await response.json()
         if (!response.ok || !json.success) throw new Error(json.error?.message ?? 'Unable to load today.')
         setData(json)

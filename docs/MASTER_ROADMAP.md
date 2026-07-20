@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### MLB Today Page End-to-End Data Visibility & Runtime Alignment Repair V1
+
+Status: Implemented locally. Deployment was explicitly not authorized for this mission.
+
+Evidence: `src/app/api/dashboard/today/route.ts`, `src/app/api/dashboard/route.ts`, `src/app/dashboard/page.tsx`, `src/components/dashboard/UserTodayPanel.tsx`, `src/components/dashboard/ProductTodayPanel.tsx`, `src/services/dashboard-today.service.ts`, `src/services/mlb-operating-date-resolution.service.ts`, `src/services/adaptive-refresh-orchestrator.service.ts` and `docs/MLB_TODAY_PAGE_END_TO_END_DATA_VISIBILITY_RUNTIME_ALIGNMENT_REPAIR_V1.md`.
+
+Note: The Today UI now uses the canonical no-store `/api/dashboard/today` route and refreshes from stored state without provider calls or mutations. Market-facing adaptive actions select the current or next actionable slate instead of bounded stale recovery dates; status/results recovery remains preserved. Local deterministic validation passed; local live stored-data reads still timed out before returning slate rows, so runtime visible-slate recovery remains blocked pending stored-data latency/production validation.
+
 ### MLB sport_events.status Constraint Root Cause Trace V1
 
 Status: Implemented locally. Production deployment and protected smoke validation remain required.

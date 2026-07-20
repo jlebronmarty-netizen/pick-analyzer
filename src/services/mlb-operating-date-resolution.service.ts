@@ -54,6 +54,22 @@ function actionUsesNextSlate(action: DateResolutionAction) {
   return ['prepare_next_slate', 'next_slate_preview', 'resolve_next_slate'].includes(action)
 }
 
+function actionUsesRecoverySlate(action: DateResolutionAction) {
+  return ['status_refresh', 'sync_results'].includes(action)
+}
+
+function actionUsesCurrentActionableSlate(action: DateResolutionAction) {
+  return [
+    'morning_sync',
+    'midday_refresh',
+    'final_refresh',
+    'odds_refresh',
+    'prediction_refresh',
+    'recommendation_refresh',
+    'current_board_refresh',
+  ].includes(action)
+}
+
 async function loadEvents(now: Date, searchBackDays: number, searchForwardDays: number) {
   const today = localDate(now)
   const startDate = addDays(today, -Math.max(0, searchBackDays))
@@ -102,17 +118,28 @@ export async function resolveMlbOperatingDate({
   const recoveryBoundaryDate = addDays(localCalendarDate, -Math.max(0, recoveryWindowDays))
   const staleOrphanDates = unresolvedDates.filter((entry) => entry.date < recoveryBoundaryDate)
   const recoveryEligibleDates = unresolvedDates.filter((entry) => entry.date >= recoveryBoundaryDate && entry.date < localCalendarDate)
-  const activeUnresolved = recoveryEligibleDates[0]?.date ?? null
+  const recoveryCandidateDate = recoveryEligibleDates[0]?.date ?? null
   const oldestUnresolvedDate = unresolvedDates[0]?.date ?? null
   const currentDateHasEvents = (byDate.get(localCalendarDate)?.length ?? 0) > 0
-  const activeOperatingDate = activeUnresolved ?? (currentDateHasEvents ? localCalendarDate : null)
-  const nextSlateDate = dates.find((date) => date > (activeOperatingDate ?? localCalendarDate)) ?? null
   const selectedAction = String(action ?? 'status')
+  const recoveryAllowed = actionUsesRecoverySlate(selectedAction)
+  const activeOperatingDate = recoveryAllowed && recoveryCandidateDate
+    ? recoveryCandidateDate
+    : currentDateHasEvents
+      ? localCalendarDate
+      : null
+  const nextSlateDate = dates.find((date) => date > (activeOperatingDate ?? localCalendarDate)) ?? null
   const providerQueryDate = actionUsesNextSlate(selectedAction)
     ? nextSlateDate ?? localCalendarDate
+    : actionUsesCurrentActionableSlate(selectedAction)
+      ? currentDateHasEvents
+        ? localCalendarDate
+        : nextSlateDate ?? localCalendarDate
     : activeOperatingDate ?? (currentDateHasEvents ? localCalendarDate : nextSlateDate ?? localCalendarDate)
-  const dateSelectionReason = activeUnresolved && !actionUsesNextSlate(selectedAction)
+  const dateSelectionReason = recoveryCandidateDate && recoveryAllowed
     ? 'bounded_recovery_slate_precedes_current_or_next_slate'
+    : recoveryCandidateDate && actionUsesCurrentActionableSlate(selectedAction)
+      ? 'current_action_ignores_stale_recovery_slate'
     : actionUsesNextSlate(selectedAction) && nextSlateDate
       ? 'next_slate_allowed_for_preparation_action'
       : currentDateHasEvents
@@ -121,8 +148,10 @@ export async function resolveMlbOperatingDate({
           ? 'no_current_events_using_next_slate'
           : 'fallback_local_calendar_date'
   const unresolvedEventsByDate = Object.fromEntries(dates.map((date) => [date, (byDate.get(date) ?? []).filter((event) => unresolvedEvent(event, now)).length]))
-  const recoveryClassification = activeUnresolved
+  const recoveryClassification = recoveryCandidateDate && recoveryAllowed
     ? 'RECOVERY_ELIGIBLE'
+    : recoveryCandidateDate
+      ? 'RECOVERY_AVAILABLE_NOT_SELECTED_FOR_ACTION'
     : staleOrphanDates.length
       ? 'STALE_ORPHAN_EXCLUDED'
       : currentDateHasEvents
@@ -138,7 +167,7 @@ export async function resolveMlbOperatingDate({
     action: selectedAction,
     localCalendarDate,
     operationalPrimaryDate: localCalendarDate,
-    recoveryCandidateDate: activeUnresolved,
+    recoveryCandidateDate,
     recoveryWindowDays,
     recoveryClassification,
     activeOperatingDate,
@@ -153,7 +182,9 @@ export async function resolveMlbOperatingDate({
     diagnostics: {
       dates,
       currentDateHasEvents,
-      activeUnresolvedDate: activeUnresolved,
+      activeUnresolvedDate: recoveryCandidateDate,
+      recoveryAllowedForAction: recoveryAllowed,
+      currentActionableSlateAction: actionUsesCurrentActionableSlate(selectedAction),
       recoveryBoundaryDate,
       staleOrphanDates: staleOrphanDates.map((entry) => entry.date),
       eventCountsByDate: Object.fromEntries(dates.map((date) => [date, byDate.get(date)?.length ?? 0])),
@@ -167,6 +198,11 @@ export function validateMlbOperatingDateResolutionFixtures() {
     ['status refresh never uses next slate by rule', !actionUsesNextSlate('status_refresh')],
     ['sync results never uses next slate by rule', !actionUsesNextSlate('sync_results')],
     ['prepare next slate may use next slate by rule', actionUsesNextSlate('prepare_next_slate')],
+    ['status refresh may select bounded recovery slate', actionUsesRecoverySlate('status_refresh')],
+    ['sync results may select bounded recovery slate', actionUsesRecoverySlate('sync_results')],
+    ['midday refresh never selects bounded recovery slate', !actionUsesRecoverySlate('midday_refresh') && actionUsesCurrentActionableSlate('midday_refresh')],
+    ['odds refresh never selects bounded recovery slate', !actionUsesRecoverySlate('odds_refresh') && actionUsesCurrentActionableSlate('odds_refresh')],
+    ['prediction refresh never selects bounded recovery slate', !actionUsesRecoverySlate('prediction_refresh') && actionUsesCurrentActionableSlate('prediction_refresh')],
     ['final statuses are terminal', terminalStatus('Final')],
     ['postponed statuses are terminal', terminalStatus('Postponed')],
     ['status unconfirmed is nonterminal', !terminalStatus('STATUS_UNCONFIRMED')],

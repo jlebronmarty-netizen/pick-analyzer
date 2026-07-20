@@ -3,6 +3,9 @@ import DashboardSection from '@/components/dashboard/DashboardSection'
 import UserTodayPanel from '@/components/dashboard/UserTodayPanel'
 import DashboardDeveloperGroups from '@/components/dashboard/DashboardDeveloperGroups'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default function DashboardPage() {
   return (
     <DashboardShell>

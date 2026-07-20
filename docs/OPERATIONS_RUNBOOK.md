@@ -15,6 +15,16 @@ GET https://pick-analyzer.vercel.app/api/operations/health
 GET https://pick-analyzer.vercel.app/api/operations/adaptive-refresh
 ```
 
+Read-only Adaptive Refresh status should report `providerQueryDate` for the current or next actionable MLB slate. If `statusRecoveryDateSelection` is present, it is diagnostic only for `status_refresh`/`sync_results`; it must not drive market, prediction, recommendation or Current Board refresh dates.
+
+## Read Today
+
+```bash
+GET https://pick-analyzer.vercel.app/api/dashboard/today
+```
+
+The dashboard Today page reads this canonical endpoint. It is dynamic/no-store and must report `providerCallsMade: 0` and `remoteMutationsMade: 0`. Query timeouts must be returned as degraded state; do not treat zero visible games as success when the primary current-events read timed out.
+
 ## Execute Due Refreshes
 
 ```bash
@@ -71,7 +81,7 @@ Protected operating-day responses expose:
 - `oldestUnresolvedDate`
 - `unresolvedEventsByDate`
 
-For `status_refresh` and `sync_results`, `providerQueryDate` may remain on an unresolved prior slate only inside the bounded recovery window. Older unresolved rows are classified as stale orphans and must not block the Puerto Rico local operating date. `prepare_next_slate` may use `nextSlateDate`.
+For `status_refresh` and `sync_results`, `providerQueryDate` may remain on an unresolved prior slate only inside the bounded recovery window. Older unresolved rows are classified as stale orphans and must not block the Puerto Rico local operating date. `prepare_next_slate` may use `nextSlateDate`. `morning_sync`, `midday_refresh`, `final_refresh`, odds, prediction, recommendation and Current Board refresh actions must use the current or next actionable slate and must not be redirected to a prior recovery slate.
 
 ## Runtime Blockers
 

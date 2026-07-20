@@ -33,6 +33,7 @@ Date: 2026-07-19
 | Action advancement | PASS_LOCAL | Successful no-change status checks satisfy status freshness for the refresh window. |
 | Dashboard false-empty protection | PASS_LOCAL | Today distinguishes timeout/failure/fallback/confirmed-empty states. |
 | Temporal display diagnostics | PASS_LOCAL | Today game cards expose provider, stored start, normalized UTC, display timezone, interpretation mode, confidence and warnings. |
+| Today runtime alignment | PASS_LOCAL_WITH_BLOCKER | Canonical `/api/dashboard/today`, dynamic/no-store dashboard reads and action-aware operating-date selection are implemented. Local stored-data reads timed out before current game rows returned, so visible-slate recovery requires production/stored-data validation. |
 
 ## Core Decision
 

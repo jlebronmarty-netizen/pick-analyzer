@@ -791,7 +791,7 @@ export default function UserTodayPanel() {
       try {
         setError(null)
         setSectionWarnings([])
-        const todayResponse = await fetch('/api/dashboard?mode=today', { cache: 'no-store' })
+        const todayResponse = await fetch('/api/dashboard/today', { cache: 'no-store' })
         const todayJson = await todayResponse.json()
         if (!todayResponse.ok || todayJson.success === false) throw new Error(todayJson.error?.message ?? todayJson.error ?? 'Unable to load today.')
         if (!active) return
@@ -840,9 +840,20 @@ export default function UserTodayPanel() {
       }
     }
     load()
+    const refreshInterval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void load()
+    }, 60000)
+    const refreshOnFocus = () => {
+      if (document.visibilityState === 'visible') void load()
+    }
+    window.addEventListener('focus', refreshOnFocus)
+    document.addEventListener('visibilitychange', refreshOnFocus)
     return () => {
       active = false
       window.clearTimeout(slowTimer)
+      window.clearInterval(refreshInterval)
+      window.removeEventListener('focus', refreshOnFocus)
+      document.removeEventListener('visibilitychange', refreshOnFocus)
     }
   }, [])
 
