@@ -28,7 +28,7 @@ type TodayResponse = {
     avoid: number
   }
   latestOddsTimestamp: string | null
-  freshness: 'fresh' | 'stale' | 'empty'
+  freshness: 'fresh' | 'partial' | 'stale' | 'empty'
   nextAction: string
   nextActionAt: string | null
   automationStatus: string

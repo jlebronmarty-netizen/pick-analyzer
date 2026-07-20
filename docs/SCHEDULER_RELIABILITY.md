@@ -52,9 +52,26 @@ The production GitHub Actions workflow `.github/workflows/production-operating-d
 
 - `CRON_SECRET`
 
-Recommended UTC cadence: `*/15 * * * *`. The adaptive planner decides whether status, odds, results, settlement or no work is actually due, and provider locks prevent overlapping equivalent work. GitHub Actions workflow concurrency uses one production group with `cancel-in-progress: false`.
+Recommended UTC cadence: `7,22,37,52 * * * *`. This preserves four primary attempts per hour while avoiding the common `:00`, `:15`, `:30` and `:45` GitHub Actions congestion boundaries. GitHub scheduled workflows are best-effort, so exact start time is not guaranteed.
+
+The adaptive planner decides whether status, odds, results, settlement or no work is actually due, and provider locks prevent overlapping equivalent work. GitHub Actions workflow concurrency uses one production group with `cancel-in-progress: false`.
+
+Secondary safe invocation path: `.github/workflows/production-operating-day-heartbeat.yml` calls the same protected endpoint at `14,44 * * * *` with the same `CRON_SECRET`, production URL and concurrency group. This is not a second refresh engine. It is a bounded heartbeat caller into the same Adaptive Refresh, provider budget and action-lock controls.
 
 The older `.github/workflows/operating-day-refresh.yml` workflow is retained for manual fallback only. It has no scheduled triggers, avoiding duplicate unattended scheduler invocations.
+
+Operations Health scheduler cadence fields:
+
+- `expectedSchedulerIntervalMinutes`: `15`
+- `schedulerGraceMinutes`: `10`
+- `lastSchedulerRunAgeMinutes`: age of the latest successful protected scheduler evidence
+- `missedSchedulerIntervals`: expected windows missed after interval plus grace
+- `schedulerCadenceStatus`: `HEALTHY`, `LATE`, `CRITICAL`, `IDLE` or `NO_EVIDENCE`
+- `nextExpectedSchedulerWindow`: next expected successful-run window from the last evidence
+- `schedulerLate`
+- `schedulerCritical`
+
+Late scheduler catch-up policy: when a delayed invocation eventually arrives, it runs one current-state Adaptive Refresh plan. It must not replay every missed interval or multiply provider calls based on missed-run count.
 
 Latest protected local evidence on 2026-07-20:
 

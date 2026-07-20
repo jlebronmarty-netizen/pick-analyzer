@@ -19,6 +19,7 @@ const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
 const TIMEZONE = ACTIVE_EVENT_TIMEZONE
 const EXTERNAL_SCHEDULER_EXPECTED_CADENCE_MINUTES = 15
+const EXTERNAL_SCHEDULER_GRACE_MINUTES = 10
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
@@ -28,6 +29,13 @@ function ageMinutes(value: string | null | undefined, now = new Date()) {
   if (!value) return null
   const ms = now.getTime() - new Date(value).getTime()
   return Number.isFinite(ms) ? Math.max(0, Math.round(ms / 60000)) : null
+}
+
+function addMinutes(value: string | null | undefined, minutes: number) {
+  if (!value) return null
+  const date = new Date(value)
+  if (!Number.isFinite(date.getTime())) return null
+  return new Date(date.getTime() + minutes * 60000).toISOString()
 }
 
 async function tableExists(table: string): Promise<MigrationCheck> {
@@ -265,10 +273,30 @@ export async function getOperationsHealth() {
     : adaptive.refreshPlan.find((item) => item.estimatedProviderCalls > 0 && item.decision === 'NOT_DUE')?.reason ?? null
   const refreshWindow = asRecord((adaptive as unknown as Record<string, unknown>).freshnessPolicy)
   const currentRefreshWindow = String(refreshWindow.window ?? 'UNKNOWN')
+  const schedulerWindowMinutes = EXTERNAL_SCHEDULER_EXPECTED_CADENCE_MINUTES + EXTERNAL_SCHEDULER_GRACE_MINUTES
+  const missedSchedulerIntervals = evidenceAge === null
+    ? null
+    : Math.max(0, Math.floor(Math.max(0, evidenceAge - schedulerWindowMinutes) / EXTERNAL_SCHEDULER_EXPECTED_CADENCE_MINUTES) + (evidenceAge > schedulerWindowMinutes ? 1 : 0))
+  const activeSchedulerWindow = ['EARLY', 'PREGAME', 'NEAR_START', 'LIVE'].includes(currentRefreshWindow) ||
+    adaptive.refreshPlan.some((item) => item.decision === 'DUE_NOW' || item.decision === 'DUE_SOON')
+  const schedulerCadenceStatus =
+    !externalSchedulerVerified ? 'NO_EVIDENCE'
+      : !activeSchedulerWindow ? 'IDLE'
+        : (missedSchedulerIntervals ?? 0) >= 2 ? 'CRITICAL'
+          : (missedSchedulerIntervals ?? 0) >= 1 ? 'LATE'
+            : 'HEALTHY'
+  const schedulerLate = schedulerCadenceStatus === 'LATE' || schedulerCadenceStatus === 'CRITICAL'
+  const schedulerCritical = schedulerCadenceStatus === 'CRITICAL'
+  const nextExpectedSchedulerWindow = addMinutes(
+    lastSuccessfulProtectedInvocationAt,
+    EXTERNAL_SCHEDULER_EXPECTED_CADENCE_MINUTES
+  )
   const operationalSeverity =
     adaptive.providerBudget.mode === 'EXHAUSTED' || adaptive.providerBudget.stopThresholdReached
       ? 'CRITICAL'
-      : adaptive.blockers.length || !automaticMultiRefreshActive
+      : schedulerCritical
+        ? 'CRITICAL'
+        : adaptive.blockers.length || !automaticMultiRefreshActive || schedulerLate
         ? 'WARNING'
         : 'HEALTHY'
   return {
@@ -300,6 +328,14 @@ export async function getOperationsHealth() {
       lastSchedulerSuccess: lastSuccessfulProtectedInvocationAt,
       lastSchedulerFailure: failedSteps[0]?.created_at ?? null,
       lastSchedulerFailureReason: failedSteps[0]?.blocking_reason ?? null,
+      expectedSchedulerIntervalMinutes: EXTERNAL_SCHEDULER_EXPECTED_CADENCE_MINUTES,
+      schedulerGraceMinutes: EXTERNAL_SCHEDULER_GRACE_MINUTES,
+      lastSchedulerRunAgeMinutes: evidenceAge,
+      missedSchedulerIntervals,
+      schedulerCadenceStatus,
+      nextExpectedSchedulerWindow,
+      schedulerLate,
+      schedulerCritical,
     },
     refreshOperations: {
       providerStatus: providerHealth,
@@ -406,6 +442,14 @@ export async function getOperationsHealth() {
       candidates: board.candidates.length,
       officialPicks: board.officialPickCount,
       latestOddsTimestamp: board.latestOddsTimestamp,
+      latestOddsSourceTimestamp: board.latestOddsSourceTimestamp,
+      latestVisibleMarketSnapshotTimestamp: board.latestVisibleMarketSnapshotTimestamp,
+      oldestVisibleMarketSnapshotTimestamp: board.oldestVisibleMarketSnapshotTimestamp,
+      visibleMarketCount: board.dataFreshness.visibleMarketCount,
+      freshVisibleMarketCount: board.dataFreshness.freshVisibleMarketCount,
+      staleVisibleMarketCount: board.dataFreshness.staleVisibleMarketCount,
+      freshnessTimestampSource: board.dataFreshness.freshnessTimestampSource,
+      timestampSemantics: board.dataFreshness.timestampSemantics,
       status: board.boardHealth.status,
       warnings: board.boardHealth.warnings,
     },

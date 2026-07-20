@@ -38,7 +38,7 @@ type TodayResponse = {
   predictionCandidates: number
   officialPicks: number
   marketIntelligence?: CategoryCounts
-  freshness: 'fresh' | 'stale' | 'empty'
+  freshness: 'fresh' | 'partial' | 'stale' | 'empty'
   nextAction: string
   summary: {
     recommendation: string
@@ -77,6 +77,30 @@ type TopOpportunity = {
   marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
   scheduledTime?: string
   gameTime?: string
+  odds?: number | null
+  americanOdds?: number | null
+  sportsbook?: string | null
+  line?: number | null
+  oddsAgeMinutes?: number | null
+  marketAlignment?: MarketAlignment
+}
+
+type MarketAlignment = {
+  alignmentStatus?: string
+  freshnessStatus?: string
+  americanOdds?: number | null
+  decimalOdds?: number | null
+  sportsbook?: string | null
+  modelProbability?: number | null
+  marketImpliedProbability?: number | null
+  edgePercentagePoints?: number | null
+  expectedValuePercent?: number | null
+  marketAgeMinutes?: number | null
+  providerSourceAgeMinutes?: number | null
+  snapshotIngestionAgeMinutes?: number | null
+  risk?: string
+  recommendationCategory?: string | null
+  calculationVersion?: string
 }
 
 type TopOpportunityResponse = {
@@ -120,6 +144,7 @@ type IntelligenceRow = {
   warnings?: string[]
   oddsTimestamp?: string | null
   oddsAgeMinutes?: number | null
+  marketAlignment?: MarketAlignment
   modeledValueStatus?: string
   probabilityOrigin?: string
   recommendationPolicyStatus?: string
@@ -384,6 +409,9 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
   const category = opportunity.opportunityCategory ?? opportunity.statusLabel ?? 'Tracking'
   const tone = categoryTone(opportunity.marketIntelligenceCategory ?? category)
   const probability = topOpportunityProbability(opportunity)
+  const displayMarket = marketDisplay(opportunity)
+  const alignment = opportunity.marketAlignment
+  const aligned = alignment?.alignmentStatus === 'ALIGNED'
 
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
@@ -397,25 +425,33 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
           <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Market</p>
-          <p className="mt-2 text-base font-black text-white">{fieldValue(opportunity.marketLabel)}</p>
+          <p className="mt-2 text-base font-black text-white">{displayMarket.priceText}</p>
+          <p className="mt-1 text-xs font-bold text-slate-500">{fieldValue(opportunity.marketLabel)}</p>
         </div>
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Selection</p>
-          <p className="mt-2 text-base font-black text-white">{fieldValue(opportunity.selection, opportunity.title ?? 'Pending')}</p>
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Sportsbook</p>
+          <p className="mt-2 text-base font-black text-white">{fieldValue(displayMarket.sportsbook, 'Consensus')}</p>
         </div>
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Category</p>
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Recommendation</p>
           <p className="mt-2 text-base font-black text-white">{category}</p>
         </div>
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Game Time</p>
-          <p className="mt-2 text-base font-black text-white">{timeText(opportunity.scheduledTime ?? opportunity.gameTime)}</p>
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Market Age</p>
+          <p className="mt-2 text-base font-black text-white">{compactMarketAge(opportunity)}</p>
+          <p className="mt-1 text-xs font-bold text-slate-500">{fieldValue(alignment?.freshnessStatus, 'Pending')}</p>
         </div>
       </div>
-      <div className="mt-6 grid gap-5 md:grid-cols-2">
+      <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
         <Meter label="Probability" value={probability} tone="blue" />
+        <Meter label="Market Implied" value={aligned ? alignment?.marketImpliedProbability : null} tone="yellow" />
+        <Meter label="Model Edge" value={aligned ? alignment?.edgePercentagePoints : null} tone="blue" />
+        <Meter label="Expected Value" value={aligned ? alignment?.expectedValuePercent : null} tone={Number(alignment?.expectedValuePercent ?? 0) > 0 ? 'green' : 'red'} />
         <Meter label="Confidence" value={opportunity.confidence} tone={tone} />
       </div>
+      <p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+        Alignment {fieldValue(alignment?.alignmentStatus, 'Pending')} | Risk {fieldValue(alignment?.risk, riskLabel(opportunity as IntelligenceRow))}
+      </p>
       <div className="mt-5">
         <a href="/most-likely" className="inline-flex rounded-full bg-white px-5 py-2 text-sm font-black text-slate-950 outline-none transition hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-white">View Details</a>
       </div>
@@ -565,6 +601,17 @@ function formatFreshness(row: IntelligenceRow) {
   return 'Freshness pending'
 }
 
+function marketMetric(row: IntelligenceRow | TopOpportunity, key: keyof MarketAlignment, fallback?: unknown) {
+  return row.marketAlignment?.[key] ?? fallback
+}
+
+function compactMarketAge(row: IntelligenceRow | TopOpportunity) {
+  const age = numberField(marketMetric(row, 'marketAgeMinutes', row.oddsAgeMinutes))
+  if (age === null) return 'n/a'
+  if (age < 60) return `${Math.round(age)} min`
+  return `${Math.round(age / 60)} hr`
+}
+
 function TodayStory({ data, mostLikely, bestValue, counts }: { data: TodayResponse; mostLikely: IntelligenceRow[]; bestValue: IntelligenceRow[]; counts: CategoryCounts }) {
   const topProbability = mostLikely[0]
   const topValue = bestValue[0]
@@ -599,6 +646,8 @@ function TodayStory({ data, mostLikely, bestValue, counts }: { data: TodayRespon
 
 function OpportunityRow({ row, rank, mode }: { row: IntelligenceRow; rank: number; mode: 'likely' | 'value' }) {
   const probability = candidateDisplayProbability(row)
+  const alignment = row.marketAlignment
+  const aligned = alignment?.alignmentStatus === 'ALIGNED'
   const category = mode === 'likely' ? probabilityCategory(probability) : fieldValue(row.opportunityCategory ?? row.statusLabel ?? 'Value Candidate')
   const tone = mode === 'likely'
     ? percentNumber(probability) !== null && percentNumber(probability)! >= 65 ? 'green' : 'blue'
@@ -623,6 +672,9 @@ function OpportunityRow({ row, rank, mode }: { row: IntelligenceRow; rank: numbe
         </div>
         <div className="grid min-w-40 gap-3">
           <Meter label="Probability" value={probability} tone="blue" />
+          <Meter label="Implied" value={aligned ? alignment?.marketImpliedProbability : null} tone="yellow" />
+          <Meter label="Edge" value={aligned ? alignment?.edgePercentagePoints : null} tone="blue" />
+          <Meter label="EV" value={aligned ? alignment?.expectedValuePercent : null} tone={Number(alignment?.expectedValuePercent ?? 0) > 0 ? 'green' : 'red'} />
           <Meter label="Confidence" value={row.confidence} tone="green" />
         </div>
       </div>

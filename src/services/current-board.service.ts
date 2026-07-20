@@ -5,6 +5,11 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { isActiveBettingEvent } from '@/services/active-event.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
+import {
+  buildMarketAlignment,
+  marketImpliedProbabilityFromAmerican,
+  type MarketAlignmentContract,
+} from '@/services/market-alignment.service'
 import { normalizeStoredSportsDataIoMlbStart, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
@@ -83,6 +88,9 @@ type OddsRow = {
   price: number | null
   line: number | null
   snapshot_time: string | null
+  provider_timestamp?: string | null
+  created_at?: string | null
+  updated_at?: string | null
   metadata: Record<string, unknown> | null
 }
 
@@ -120,6 +128,17 @@ export type CurrentBoardCandidate = {
   impliedProbability: number
   oddsTimestamp: string | null
   oddsAgeMinutes: number
+  marketInputTimestamp: string | null
+  marketInputAgeMinutes: number
+  marketFreshnessTimestamp: string | null
+  marketFreshnessSource: 'snapshot_ingested_at' | 'snapshot_created_at' | 'snapshot_updated_at' | 'provider_source_timestamp' | 'prediction_odds_timestamp' | 'unavailable'
+  marketSourceTimestamp: string | null
+  marketSourceAgeMinutes: number
+  providerSourceUpdatedAt: string | null
+  providerFetchedAt: string | null
+  oddsIngestedAt: string | null
+  oddsSnapshotCreatedAt: string | null
+  marketAlignment: MarketAlignmentContract
   maxAllowedAgeMinutes: number
   cutoff: string | null
   pregameSafe: boolean
@@ -189,12 +208,23 @@ export type CurrentBoardResponse = {
   markets: string[]
   candidates: CurrentBoardCandidate[]
   latestOddsTimestamp: string | null
+  latestOddsSourceTimestamp: string | null
+  latestVisibleMarketSnapshotTimestamp: string | null
+  oldestVisibleMarketSnapshotTimestamp: string | null
   dataFreshness: {
-    status: 'fresh' | 'stale' | 'empty'
+    status: 'fresh' | 'partial' | 'stale' | 'empty'
     latestOddsTimestamp: string | null
     latestOddsAgeMinutes: number | null
     maxAllowedAgeMinutes: number
     nextRecommendedRefreshTime: string | null
+    timestampSemantics: 'selected_visible_market_snapshot'
+    latestSourceTimestamp: string | null
+    latestVisibleMarketSnapshotTimestamp: string | null
+    oldestVisibleMarketSnapshotTimestamp: string | null
+    visibleMarketCount: number
+    freshVisibleMarketCount: number
+    staleVisibleMarketCount: number
+    freshnessTimestampSource: CurrentBoardCandidate['marketFreshnessSource'] | null
   }
   officialPickCount: number
   previewCount: number
@@ -331,7 +361,7 @@ async function readOddsForEvents({
     if (!chunk.length) continue
     let query = supabaseAdmin
       .from('sports_odds_snapshots')
-      .select('id, sport_key, league_key, season, event_id, provider, sportsbook, market, outcome, price, line, snapshot_time, metadata')
+      .select('id, sport_key, league_key, season, event_id, provider, sportsbook, market, outcome, price, line, snapshot_time, provider_timestamp, created_at, updated_at, metadata')
       .eq('sport_key', sportKey)
       .in('event_id', chunk)
       .in('market', ['moneyline', 'run_line', 'total'])
@@ -382,6 +412,36 @@ function ageMinutes(value: string | null | undefined, now = Date.now()) {
   return Math.max(0, Math.round((now - parsed) / 60000))
 }
 
+function validTimestamp(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return null
+  const parsed = new Date(value).getTime()
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null
+}
+
+function oddsSourceTimestamp(odds: OddsRow | null | undefined, row?: PredictionRow | null) {
+  return validTimestamp(odds?.provider_timestamp) ?? validTimestamp(odds?.snapshot_time) ?? validTimestamp(row?.odds_timestamp)
+}
+
+function oddsFetchedAt(odds: OddsRow | null | undefined) {
+  const metadata = asRecord(odds?.metadata)
+  return validTimestamp(metadata.capturedAt) ?? validTimestamp(metadata.fetchedAt) ?? validTimestamp(metadata.ingestedAt)
+}
+
+function selectedMarketFreshness(odds: OddsRow | null | undefined, row?: PredictionRow | null): {
+  timestamp: string | null
+  source: CurrentBoardCandidate['marketFreshnessSource']
+} {
+  const fetchedAt = oddsFetchedAt(odds)
+  if (fetchedAt) return { timestamp: fetchedAt, source: 'snapshot_ingested_at' }
+  const createdAt = validTimestamp(odds?.created_at)
+  if (createdAt) return { timestamp: createdAt, source: 'snapshot_created_at' }
+  const updatedAt = validTimestamp(odds?.updated_at)
+  if (updatedAt) return { timestamp: updatedAt, source: 'snapshot_updated_at' }
+  const sourceTimestamp = oddsSourceTimestamp(odds, row)
+  if (sourceTimestamp) return { timestamp: sourceTimestamp, source: odds ? 'provider_source_timestamp' : 'prediction_odds_timestamp' }
+  return { timestamp: null, source: 'unavailable' }
+}
+
 function localDateInTimezone(value: string | null | undefined, timezone: string) {
   if (!value) return null
   const parsed = new Date(value)
@@ -396,22 +456,6 @@ function localDateInTimezone(value: string | null | undefined, timezone: string)
   const month = parts.find((part) => part.type === 'month')?.value
   const day = parts.find((part) => part.type === 'day')?.value
   return year && month && day ? `${year}-${month}-${day}` : null
-}
-
-function americanToDecimal(odds: number) {
-  if (!Number.isFinite(odds) || odds === 0) return 1
-  return odds > 0 ? 1 + odds / 100 : 1 + 100 / Math.abs(odds)
-}
-
-function impliedFromAmerican(odds: number) {
-  if (odds > 0) return 100 / (odds + 100)
-  return Math.abs(odds) / (Math.abs(odds) + 100)
-}
-
-function displayEv(modelProbability: number, americanOdds: number) {
-  const probability = modelProbability / 100
-  const decimal = americanToDecimal(americanOdds)
-  return round((probability * (decimal - 1) - (1 - probability)) * 100)
 }
 
 function marketLabel(value: string | null) {
@@ -567,7 +611,11 @@ function latestSafeOdds(row: PredictionRow, oddsRows: OddsRow[], event: EventRow
     .filter((odds) => oddsMatchesPrediction(odds, row))
     .map((odds) => ({ odds, reasons: oddsReasons(row, odds, event, nowMs, mode) }))
     .filter(({ reasons }) => reasons.size === 0)
-    .sort((left, right) => new Date(String(right.odds.snapshot_time)).getTime() - new Date(String(left.odds.snapshot_time)).getTime())
+    .sort((left, right) => {
+      const rightFreshness = selectedMarketFreshness(right.odds, row).timestamp ?? right.odds.snapshot_time ?? ''
+      const leftFreshness = selectedMarketFreshness(left.odds, row).timestamp ?? left.odds.snapshot_time ?? ''
+      return new Date(rightFreshness).getTime() - new Date(leftFreshness).getTime()
+    })
   return candidates[0] ?? null
 }
 
@@ -638,10 +686,8 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
   const snapshot = asRecord(row.feature_snapshot)
   const market = canonicalPredictionMarket(row.market) as CurrentBoardCandidate['market']
   const selectedOdds = numberValue(odds?.price) ?? numberValue(row.odds)
-  const implied = selectedOdds ? round(impliedFromAmerican(selectedOdds) * 100) : numberValue(row.implied_probability) ?? 0
+  const implied = selectedOdds ? round(marketImpliedProbabilityFromAmerican(selectedOdds) ?? 0) : numberValue(row.implied_probability) ?? 0
   const rawProbability = numberValue(row.model_probability) ?? 0
-  const edge = round(rawProbability - implied)
-  const expectedValue = selectedOdds ? displayEv(rawProbability, selectedOdds) : numberValue(row.ev) ?? 0
   const confidence = numberValue(row.confidence) ?? 0
   const reliabilityScore = numberValue(snapshot.reliabilityScore) ?? Math.min(100, Math.max(0, confidence))
   const aiRating = numberValue(snapshot.aiRating) ?? round(rawProbability * 0.34 + confidence * 0.22 + reliabilityScore * 0.18)
@@ -652,10 +698,44 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
   )
   const featureQuality = quality.featureQuality
   const dataSufficiency = quality.dataSufficiency
-  const oddsTimestamp = odds?.snapshot_time ?? row.odds_timestamp
+  const marketFreshness = selectedMarketFreshness(odds, row)
+  const marketSourceTimestamp = oddsSourceTimestamp(odds, row)
+  const providerFetchedAt = oddsFetchedAt(odds)
+  const oddsIngestedAt = validTimestamp(odds?.created_at) ?? validTimestamp(odds?.updated_at) ?? providerFetchedAt
+  const oddsSnapshotCreatedAt = validTimestamp(odds?.created_at)
+  const oddsTimestamp = marketFreshness.timestamp
   const oddsAge = ageMinutes(oddsTimestamp, nowMs)
+  const sourceOddsAge = ageMinutes(marketSourceTimestamp, nowMs)
   const reasons = oddsReasons(row, odds, event, nowMs, mode)
   const stale = reasons.has('STALE_ODDS')
+  const marketAlignment = buildMarketAlignment({
+    eventId: row.game_id,
+    predictionId: row.id,
+    oddsSnapshotId: odds?.id ?? null,
+    marketType: market,
+    period: marketPeriod(row),
+    selection: selectionLabel(row),
+    normalizedSelection: normalizedSelection(row),
+    oddsOutcome: odds?.outcome ?? normalizedSelection(row),
+    line: row.line,
+    oddsLine: odds?.line ?? row.line,
+    americanOdds: selectedOdds,
+    sportsbook: odds?.sportsbook ?? row.sportsbook ?? 'Unknown',
+    modelProbability: rawProbability,
+    calibratedProbability: numberValue(snapshot.calibratedProbability),
+    marketInputTimestamp: oddsTimestamp,
+    providerSourceTimestamp: marketSourceTimestamp,
+    oddsIngestedAt,
+    marketAgeMinutes: oddsAge,
+    providerSourceAgeMinutes: sourceOddsAge,
+    snapshotIngestionAgeMinutes: ageMinutes(oddsIngestedAt, nowMs),
+    maxAllowedAgeMinutes: displayMaxOddsAgeMinutes(),
+    confidence,
+    recommendationCategory: String(snapshot.recommendationStatus ?? 'ANALYZED_ONLY'),
+    reasonCodes: [...Array.from(reasons), ...String(row.skip_reason ?? '').split(',').map((item) => item.trim()).filter(Boolean)],
+  })
+  const edge = marketAlignment.edgePercentagePoints ?? 0
+  const expectedValue = marketAlignment.expectedValuePercent ?? 0
   const calibrationStatus = String(snapshot.calibrationStatus ?? snapshot.calibration_status ?? row.validation_status ?? 'probationary')
   const modeledValueStatus = stale
     ? 'STALE'
@@ -702,6 +782,17 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     impliedProbability: implied,
     oddsTimestamp,
     oddsAgeMinutes: oddsAge,
+    marketInputTimestamp: oddsTimestamp,
+    marketInputAgeMinutes: oddsAge,
+    marketFreshnessTimestamp: oddsTimestamp,
+    marketFreshnessSource: marketFreshness.source,
+    marketSourceTimestamp,
+    marketSourceAgeMinutes: sourceOddsAge,
+    providerSourceUpdatedAt: marketSourceTimestamp,
+    providerFetchedAt,
+    oddsIngestedAt,
+    oddsSnapshotCreatedAt,
+    marketAlignment,
     maxAllowedAgeMinutes: maxAgeFor(row.sport_key, market, mode),
     cutoff: row.cutoff_at,
     pregameSafe: !reasons.has('EVENT_STARTED') && !reasons.has('POST_CUTOFF_ODDS') && !reasons.has('LIVE_ODDS'),
@@ -937,9 +1028,27 @@ export async function getCurrentBoard({
     candidates = await enrichMlbCandidatesWithVerifiedContext(candidates, currentSlateDate)
   }
 
-  const latestOddsTimestamp = candidates.map((candidate) => candidate.oddsTimestamp).filter(Boolean).sort().at(-1) ?? null
+  const visibleMarketTimestamps = candidates.map((candidate) => candidate.marketFreshnessTimestamp ?? candidate.oddsTimestamp).filter(Boolean) as string[]
+  const sourceMarketTimestamps = candidates.map((candidate) => candidate.marketSourceTimestamp).filter(Boolean) as string[]
+  const latestOddsTimestamp = visibleMarketTimestamps.slice().sort().at(-1) ?? null
+  const oldestVisibleMarketSnapshotTimestamp = visibleMarketTimestamps.slice().sort()[0] ?? null
+  const latestOddsSourceTimestamp = sourceMarketTimestamps.slice().sort().at(-1) ?? null
+  const latestFreshnessSource =
+    candidates
+      .filter((candidate) => (candidate.marketFreshnessTimestamp ?? candidate.oddsTimestamp) === latestOddsTimestamp)
+      .map((candidate) => candidate.marketFreshnessSource)[0] ?? null
   const latestOddsAgeMinutes = latestOddsTimestamp ? ageMinutes(latestOddsTimestamp, nowMs) : null
   const maxAllowedAgeMinutes = displayMaxOddsAgeMinutes()
+  const freshVisibleMarketCount = candidates.filter((candidate) => ageMinutes(candidate.marketFreshnessTimestamp ?? candidate.oddsTimestamp, nowMs) <= maxAllowedAgeMinutes).length
+  const staleVisibleMarketCount = Math.max(0, candidates.length - freshVisibleMarketCount)
+  const freshnessStatus =
+    candidates.length === 0
+      ? 'empty'
+      : staleVisibleMarketCount === 0
+        ? 'fresh'
+        : freshVisibleMarketCount > 0
+          ? 'partial'
+          : 'stale'
   const nextRecommendedRefreshTime = latestOddsTimestamp
     ? new Date(new Date(latestOddsTimestamp).getTime() + maxAllowedAgeMinutes * 60000).toISOString()
     : null
@@ -956,13 +1065,14 @@ export async function getCurrentBoard({
     }
     current.candidates += 1
     current.markets = Array.from(new Set([...current.markets, candidate.marketLabel])).sort()
-    current.latestOddsTimestamp = [current.latestOddsTimestamp, candidate.oddsTimestamp].filter(Boolean).sort().at(-1) ?? null
+    current.latestOddsTimestamp = [current.latestOddsTimestamp, candidate.marketFreshnessTimestamp ?? candidate.oddsTimestamp].filter(Boolean).sort().at(-1) ?? null
     gamesById.set(candidate.eventId, current)
   }
 
   const warnings: string[] = []
   if (!candidates.length) warnings.push('No valid current-board candidates in selected mode.')
   if (latestOddsAgeMinutes !== null && latestOddsAgeMinutes > maxAllowedAgeMinutes) warnings.push('Latest selected odds are stale for display freshness; candidate selection still uses the immutable Current Board generation policy.')
+  if (staleVisibleMarketCount > 0 && freshVisibleMarketCount > 0) warnings.push(`${staleVisibleMarketCount} visible market${staleVisibleMarketCount === 1 ? '' : 's'} are stale while ${freshVisibleMarketCount} remain fresh.`)
 
   return {
     success: true,
@@ -977,12 +1087,23 @@ export async function getCurrentBoard({
     markets: Array.from(new Set(candidates.map((candidate) => candidate.marketLabel))).sort(),
     candidates,
     latestOddsTimestamp,
+    latestOddsSourceTimestamp,
+    latestVisibleMarketSnapshotTimestamp: latestOddsTimestamp,
+    oldestVisibleMarketSnapshotTimestamp,
     dataFreshness: {
-      status: candidates.length === 0 ? 'empty' : latestOddsAgeMinutes !== null && latestOddsAgeMinutes <= maxAllowedAgeMinutes ? 'fresh' : 'stale',
+      status: freshnessStatus,
       latestOddsTimestamp,
       latestOddsAgeMinutes,
       maxAllowedAgeMinutes,
       nextRecommendedRefreshTime,
+      timestampSemantics: 'selected_visible_market_snapshot',
+      latestSourceTimestamp: latestOddsSourceTimestamp,
+      latestVisibleMarketSnapshotTimestamp: latestOddsTimestamp,
+      oldestVisibleMarketSnapshotTimestamp,
+      visibleMarketCount: candidates.length,
+      freshVisibleMarketCount,
+      staleVisibleMarketCount,
+      freshnessTimestampSource: latestFreshnessSource,
     },
     officialPickCount: candidates.filter((candidate) => candidate.recommendationPolicyStatus === 'QUALIFIED' || candidate.recommendationPolicyStatus === 'BEST_BET_CANDIDATE' || candidate.recommendationPolicyStatus === 'PLAY_OF_DAY_CANDIDATE').length,
     previewCount: candidates.filter((candidate) => candidate.boardLabel === 'PREVIEW').length,

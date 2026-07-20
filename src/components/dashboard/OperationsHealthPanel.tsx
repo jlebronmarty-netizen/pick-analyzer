@@ -17,6 +17,14 @@ type OperationsHealth = {
     lastSchedulerSuccess?: string | null
     lastSchedulerFailure?: string | null
     lastSchedulerFailureReason?: string | null
+    expectedSchedulerIntervalMinutes?: number
+    schedulerGraceMinutes?: number
+    lastSchedulerRunAgeMinutes?: number | null
+    missedSchedulerIntervals?: number | null
+    schedulerCadenceStatus?: string
+    nextExpectedSchedulerWindow?: string | null
+    schedulerLate?: boolean
+    schedulerCritical?: boolean
   }
   refreshOperations?: {
     providerStatus: string
@@ -177,6 +185,7 @@ export default function OperationsHealthPanel() {
           <p className="mt-3 text-sm text-slate-300">Configured: {String(data.scheduler.configured)}</p>
           <p className="mt-2 text-sm text-slate-300">Last cron: {timeText(data.scheduler.lastCronInvocation)}</p>
           <p className="mt-2 text-sm text-slate-300">Running: {String(data.scheduler.schedulerRunning ?? false)}</p>
+          <p className="mt-2 text-sm text-slate-300">Cadence: {data.scheduler.schedulerCadenceStatus ?? 'Unknown'}</p>
           <p className="mt-2 text-xs leading-5 text-slate-500">{data.scheduler.limitation}</p>
         </div>
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
@@ -219,8 +228,12 @@ export default function OperationsHealthPanel() {
             <Detail label="Credits Today" value={`${data.providerBudgets.sportsdataio.callsMadeToday} / ${data.providerBudgets.sportsdataio.dailyBudget}`} />
             <Detail label="Hourly Usage" value={`${data.providerBudgets.sportsdataio.callsMadeLastHour ?? 0} used`} />
             <Detail label="Scheduler" value={data.scheduler.schedulerRunning ? 'Active' : 'Not active'} />
+            <Detail label="Cadence" value={data.scheduler.schedulerCadenceStatus ?? 'Unknown'} />
+            <Detail label="Run Age" value={data.scheduler.lastSchedulerRunAgeMinutes === null || data.scheduler.lastSchedulerRunAgeMinutes === undefined ? 'Unknown' : `${data.scheduler.lastSchedulerRunAgeMinutes} min`} />
+            <Detail label="Missed Intervals" value={data.scheduler.missedSchedulerIntervals ?? 'Unknown'} />
             <Detail label="Last Success" value={timeText(data.scheduler.lastSchedulerSuccess ?? null)} />
             <Detail label="Last Failure" value={data.scheduler.lastSchedulerFailure ? timeText(data.scheduler.lastSchedulerFailure) : 'None'} />
+            <Detail label="Next Window" value={timeText(data.scheduler.nextExpectedSchedulerWindow ?? null)} />
           </div>
           <p className="mt-4 text-xs leading-5 text-slate-500">
             Skip reason: {data.refreshOperations.skipReason ?? 'None'}; skipped calls: {data.refreshOperations.skippedCalls}

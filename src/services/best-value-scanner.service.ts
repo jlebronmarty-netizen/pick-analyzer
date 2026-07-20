@@ -20,6 +20,17 @@ function score(candidate: CurrentBoardCandidate) {
   )
 }
 
+function isAlignedFreshPositiveValue(candidate: CurrentBoardCandidate) {
+  return (
+    candidate.marketAlignment?.alignmentStatus === 'ALIGNED' &&
+    candidate.marketAlignment.freshnessStatus !== 'STALE' &&
+    Number.isFinite(candidate.marketAlignment.expectedValuePercent) &&
+    Number.isFinite(candidate.marketAlignment.edgePercentagePoints) &&
+    Number(candidate.marketAlignment.expectedValuePercent) > 0 &&
+    Number(candidate.marketAlignment.edgePercentagePoints) > 0
+  )
+}
+
 function category(candidate: CurrentBoardCandidate) {
   if (candidate.modeledValueStatus !== 'MODELED_VALUE') return 'No Modeled Value'
   if (candidate.expectedValue >= 8 && candidate.edge >= 5 && candidate.confidence >= 60) return 'Strong Modeled Value'
@@ -77,7 +88,7 @@ export async function getBestValueOpportunities({
       informationalFallbackUsed = true
     }
   }
-  const positiveValue = sourceCandidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0)
+  const positiveValue = sourceCandidates.filter(isAlignedFreshPositiveValue)
   const visiblePool = includePasses ? sourceCandidates : positiveValue
   const ranked = [...visiblePool]
     .sort((left, right) => score(right) - score(left))
@@ -101,15 +112,15 @@ export async function getBestValueOpportunities({
     summary: {
       candidatesScanned: sourceCandidates.length,
       candidatesReturned: ranked.length,
-      positiveValueCandidates: sourceCandidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0).length,
+      positiveValueCandidates: sourceCandidates.filter(isAlignedFreshPositiveValue).length,
       noModeledValueCandidates: sourceCandidates.filter((candidate) => candidate.modeledValueStatus === 'NO_MODELED_VALUE').length,
       officialPickCount: board.officialPickCount,
       latestOddsCapture: board.latestOddsTimestamp,
       dataFreshness: board.dataFreshness,
       warning: positiveValue.length
-        ? 'Positive value is informational until official gates qualify it.'
+        ? 'Positive value is aligned to fresh selected market data and remains informational until official gates qualify it.'
         : sourceCandidates.length
-          ? 'No positive-value opportunities today.'
+          ? 'No positive-value opportunities with aligned fresh market data.'
           : 'No opportunities available because no eligible games have grounded odds and probabilities.',
       scanCompleted: true,
       dataAvailable: true,
@@ -119,7 +130,7 @@ export async function getBestValueOpportunities({
       informationalFallbackUsed,
       displayMode: informationalFallbackUsed ? 'informational_rankings_after_current_board_empty' : 'current_board_value_rankings',
     },
-    rankingContract: ['positive expected value', 'positive edge', 'confidence', 'reliability', 'market stability', 'feature quality', 'data sufficiency', 'odds freshness'],
+    rankingContract: ['aligned prediction and selected odds snapshot', 'positive expected value', 'positive edge', 'fresh market input', 'confidence', 'reliability', 'market stability', 'feature quality', 'data sufficiency'],
     categories,
     opportunities: ranked.map((candidate) => {
       const classification = classifyMarketIntelligence(candidate)
@@ -132,11 +143,15 @@ export async function getBestValueOpportunities({
             ? 'Official'
             : `${classification.label} - not a recommendation`,
         valueDisplay:
-          candidate.expectedValue > 0 && candidate.edge > 0
+          isAlignedFreshPositiveValue(candidate)
             ? 'POSITIVE VALUE'
             : classification.category === 'avoid'
               ? 'AVOID - NO POSITIVE VALUE'
-              : 'BELOW OFFICIAL VALUE THRESHOLD',
+              : candidate.marketAlignment?.alignmentStatus !== 'ALIGNED'
+                ? `NOT VALUE RANKED - ${candidate.marketAlignment?.alignmentStatus ?? 'UNALIGNED'}`
+                : candidate.marketAlignment?.freshnessStatus === 'STALE'
+                  ? 'NOT VALUE RANKED - STALE MARKET INPUT'
+                  : 'BELOW OFFICIAL VALUE THRESHOLD',
         marketIntelligenceCategory: classification.category,
         opportunityCategory: classification.label,
         statusLabel: opportunityStatus(candidate),
@@ -174,7 +189,7 @@ export async function getBestValueOpportunities({
         errorMessageSafe: 'DATA TEMPORARILY UNAVAILABLE',
         positiveValueCount: 0,
       },
-      rankingContract: ['positive expected value', 'positive edge', 'confidence', 'reliability', 'market stability', 'feature quality', 'data sufficiency', 'odds freshness'],
+      rankingContract: ['aligned prediction and selected odds snapshot', 'positive expected value', 'positive edge', 'fresh market input', 'confidence', 'reliability', 'market stability', 'feature quality', 'data sufficiency'],
       categories: {
         strongModeledValue: [],
         developingValue: [],

@@ -17,7 +17,7 @@ The adaptive architecture was present, but the scheduled production entrypoint w
 Production scheduler:
 
 1. GitHub Actions `.github/workflows/production-operating-day.yml`
-2. Runs every 15 minutes.
+2. Runs four times per hour at `7,22,37,52 * * * *`.
 3. Calls `POST https://pick-analyzer.vercel.app/api/cron/operating-day?dryRun=false`
 4. Sends `Authorization: Bearer <CRON_SECRET>`.
 5. `/api/cron/operating-day` delegates to `runAdaptiveRefresh`.
@@ -30,6 +30,8 @@ Production scheduler:
 Vercel cron remains a daily safety net. It is not sufficient for active MLB betting freshness by itself.
 
 The legacy `.github/workflows/operating-day-refresh.yml` workflow is manual-only. Its scheduled triggers were removed so production has one unattended intraday scheduler of record.
+
+GitHub scheduled workflows are best-effort and can be delayed or skipped during platform load. A secondary heartbeat workflow, `.github/workflows/production-operating-day-heartbeat.yml`, calls the same protected endpoint at `14,44 * * * *` with the same concurrency group. The server-side Adaptive Refresh planner remains the only authority for whether provider work is due.
 
 ## Scheduler Contract
 
@@ -81,6 +83,11 @@ SportsDataIO's verified MLB odds endpoint is date based, so execution remains on
 - last scheduler run
 - last scheduler success
 - last scheduler failure
+- expected scheduler interval
+- scheduler grace
+- missed scheduler intervals
+- scheduler cadence status
+- next expected scheduler window
 - skipped calls
 - skip reason
 - current refresh window

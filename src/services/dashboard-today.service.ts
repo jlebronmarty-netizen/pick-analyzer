@@ -121,7 +121,7 @@ export type DashboardTodayContract = {
     persistence: 'read_only_current_board_contract'
   }
   latestOddsTimestamp: string | null
-  freshness: 'fresh' | 'stale' | 'empty'
+  freshness: 'fresh' | 'partial' | 'stale' | 'empty'
   nextAction: string
   nextActionAt: string | null
   automationStatus: string
@@ -181,7 +181,7 @@ export type DashboardTodayContract = {
       upcomingGames: number
       predictionCandidates: number
       officialPicks: number
-      freshness: 'fresh' | 'stale' | 'empty'
+      freshness: 'fresh' | 'partial' | 'stale' | 'empty'
     }>
     todayStory: DashboardTodaySection<string[]>
     mostLikely: DashboardTodaySection<unknown[]>
@@ -691,7 +691,12 @@ export async function getDashboardToday({
     .sort((left, right) => Number(right.rawProbability ?? 0) - Number(left.rawProbability ?? 0))
     .slice(0, 10)
   const boardBestValueData = displayCandidates
-    .filter((candidate) => Number(candidate.edge ?? 0) > 0 && Number(candidate.expectedValue ?? 0) > 0)
+    .filter((candidate) => (
+      candidate.marketAlignment?.alignmentStatus === 'ALIGNED' &&
+      candidate.marketAlignment?.freshnessStatus !== 'STALE' &&
+      Number(candidate.marketAlignment?.edgePercentagePoints ?? candidate.edge ?? 0) > 0 &&
+      Number(candidate.marketAlignment?.expectedValuePercent ?? candidate.expectedValue ?? 0) > 0
+    ))
     .sort((left, right) => Number(right.expectedValue ?? 0) - Number(left.expectedValue ?? 0))
     .slice(0, 10)
   const mostLikelyData = boardMostLikelyData
@@ -820,7 +825,7 @@ export async function getDashboardToday({
       bestValue: section(
         boardResult.ok ? (bestValueData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
         bestValueData,
-        boardResult.ok ? (bestValueData.length ? null : 'No positive-value opportunities today.') : 'Best Value is temporarily unavailable.',
+        boardResult.ok ? (bestValueData.length ? null : 'No positive-value opportunities with aligned fresh market data.') : 'Best Value is temporarily unavailable.',
         boardResult.ok ? generatedAt : null
       ),
       aiBetFinder: section(

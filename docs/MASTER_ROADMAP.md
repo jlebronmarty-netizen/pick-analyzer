@@ -8,6 +8,30 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Phase 2 Market Intelligence: Aligned Edge And Expected Value V1
+
+Status: Implemented and validated locally. Production deployment remains pending explicit authorization.
+
+Evidence: `src/services/market-alignment.service.ts`, `src/services/current-board.service.ts`, `src/services/market-opportunity-suite.service.ts`, `src/services/best-value-scanner.service.ts`, `src/services/dashboard-today.service.ts`, `src/components/dashboard/UserTodayPanel.tsx` and `/api/operations/validation`.
+
+Note: Phase 2 adds an auditable `market_alignment_v1` contract for exact model-versus-market comparison. Current Board candidates now expose alignment status, selected odds snapshot ID, sportsbook, model probability, implied probability, edge in percentage points, expected value percent, selected market freshness, provider/source timestamp, ingestion timestamp and risk. Best Value excludes unaligned, missing-price, missing-probability and stale market inputs. User Mode displays aligned probability, implied probability, edge, EV, confidence, risk and market age without changing prediction formulas, recommendation categories, Official Pick thresholds, Current Board generation policy, settlement, learning or supported markets. Phase 3 has not started.
+
+### MLB Odds Freshness Timestamp Certification V1
+
+Status: Implemented locally before Phase 2. Production deployment and post-deploy read-only smoke remain required.
+
+Evidence: `src/services/current-board.service.ts`, `src/services/market-opportunity-suite.service.ts`, `src/services/operations-health.service.ts`, `src/services/dashboard-today.service.ts`, `src/components/dashboard/UserTodayPanel.tsx` and `src/components/dashboard/ProductTodayPanel.tsx`.
+
+Note: The real 2026-07-20 21:45Z production refresh inserted the visible odds rows, but Market Prices freshness used provider/source `snapshot_time` instead of the exact persisted visible snapshot lineage. Current Board now separates provider source timestamp from selected market input freshness, uses the persisted selected snapshot ingestion timestamp for user-facing freshness when source time is not reliable, and reports visible fresh/stale counts for mixed coverage. Prediction formulas, recommendation thresholds, candidate ordering, Current Board generation policy, settlement, learning and unsupported markets remain unchanged. Phase 2 has not started.
+
+### Scheduler Reliability Hardening V1
+
+Status: Implemented locally before Phase 2. Production deployment and natural scheduled-run validation remain required.
+
+Evidence: `.github/workflows/production-operating-day.yml`, `.github/workflows/production-operating-day-heartbeat.yml`, `src/services/operations-health.service.ts`, `src/components/dashboard/OperationsHealthPanel.tsx` and `docs/SCHEDULER_RELIABILITY.md`.
+
+Note: The primary GitHub Actions scheduler avoids common quarter-hour congestion by running at `7,22,37,52 * * * *`. A heartbeat workflow runs at `14,44 * * * *` and calls the same protected operating-day endpoint with the same concurrency group; Adaptive Refresh, provider budget and execution locks remain the single control plane. Operations Health now reports missed scheduler intervals and late/critical cadence state. No prediction logic, recommendation logic, odds freshness semantics, Current Board generation, settlement logic or provider clients changed.
+
 ### Production Refresh Infrastructure V1
 
 Status: Implemented locally before Phase 2. Production deployment and scheduler proof remain required.
