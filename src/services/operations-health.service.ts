@@ -18,6 +18,17 @@ type MigrationCheck = {
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
 const TIMEZONE = ACTIVE_EVENT_TIMEZONE
+const EXTERNAL_SCHEDULER_EXPECTED_CADENCE_MINUTES = 15
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+}
+
+function ageMinutes(value: string | null | undefined, now = new Date()) {
+  if (!value) return null
+  const ms = now.getTime() - new Date(value).getTime()
+  return Number.isFinite(ms) ? Math.max(0, Math.round(ms / 60000)) : null
+}
 
 async function tableExists(table: string): Promise<MigrationCheck> {
   try {
@@ -61,7 +72,32 @@ async function settlementBacklog() {
   }
 }
 
-async function statusRefreshEvidence(now = new Date()) {
+async function statusRefreshEvidence(lifecycleRows: Array<Record<string, unknown>>, now = new Date()) {
+  const latestLedger = lifecycleRows.find((row) => String(row.action) === 'status_refresh')
+  const latestMetadata = asRecord(latestLedger?.metadata)
+  const ledgerCheckCompleted =
+    latestMetadata.providerCheckCompleted === true ||
+    ['SUCCESS_CHANGED', 'SUCCESS_NO_CHANGE'].includes(String(latestLedger?.status ?? ''))
+  if (latestLedger && ledgerCheckCompleted) {
+    const checkedAt = String(latestMetadata.lastProviderCheckAt ?? latestLedger.completed_at ?? latestLedger.created_at ?? '') || null
+    return {
+      status: String(latestLedger.status ?? 'SUCCESS_NO_CHANGE'),
+      provider: String(latestMetadata.provider ?? 'mlb_stats_api'),
+      endpoint: latestMetadata.endpoint ?? null,
+      providerCheckRequired: true,
+      providerCheckAttempted: latestMetadata.providerCheckAttempted === true || Number(latestLedger.provider_calls_made ?? 0) > 0,
+      providerCheckCompleted: true,
+      providerCallsMade: Number(latestLedger.provider_calls_made ?? latestMetadata.providerCallsMade ?? 0),
+      rowsReceived: Number(latestMetadata.rowsReceived ?? 0),
+      statusesChanged: Number(latestMetadata.statusesChanged ?? 0),
+      rowsUpdated: Number(latestMetadata.rowsUpdated ?? 0),
+      lastProviderCheckAt: checkedAt,
+      lastStatusChangeAt: latestMetadata.lastStatusChangeAt ?? null,
+      latestSourceTimestamp: latestMetadata.latestSourceTimestamp ?? null,
+      failureReason: null,
+      evidenceSource: 'operating_day_lifecycle_events',
+    }
+  }
   const operatingDate = localDateInTimeZone(now.toISOString(), TIMEZONE) ?? now.toISOString().slice(0, 10)
   const range = puertoRicoUtcRange(operatingDate)
   const { data, error } = await supabaseAdmin
@@ -85,6 +121,7 @@ async function statusRefreshEvidence(now = new Date()) {
       lastProviderCheckAt: null,
       lastStatusChangeAt: null,
       failureReason: error.message,
+      evidenceSource: 'sport_events_read_fallback',
     }
   }
   const rows = (data ?? []) as Array<{ id: string; start_time: string | null; status: string | null; updated_at: string | null; metadata: Record<string, unknown> | null; sport_key: string; league_key: string | null }>
@@ -107,6 +144,7 @@ async function statusRefreshEvidence(now = new Date()) {
     lastProviderCheckAt: null,
     lastStatusChangeAt,
     failureReason: staleStatusCount > 0 ? 'MLB Stats API status refresh is due but was not executed by this read-only health request.' : null,
+    evidenceSource: 'sport_events_read_fallback',
   }
 }
 
@@ -151,7 +189,15 @@ export async function getOperationsHealth() {
     getUniversalProjectionEngine({ sportKey: SPORT_KEY, date: undefined, dryRun: true }),
     getCurrentBoard({ sportKey: SPORT_KEY, mode: 'CURRENT', limit: 100 }),
   ])
-  const statusRefresh = await statusRefreshEvidence()
+  const statusRefresh = await statusRefreshEvidence(lifecycle.rows as Array<Record<string, unknown>>)
+  const latestSuccessfulProtected = (lifecycle.rows as Array<Record<string, unknown>>).find((row) => {
+    const status = String(row.status ?? '')
+    return ['SUCCESS_CHANGED', 'SUCCESS_NO_CHANGE', 'completed', 'morning_synced', 'midday_refreshed', 'results_synced'].some((needle) => status.includes(needle))
+  })
+  const lastSuccessfulProtectedInvocationAt = String(latestSuccessfulProtected?.completed_at ?? latestSuccessfulProtected?.created_at ?? '') || null
+  const evidenceAge = ageMinutes(lastSuccessfulProtectedInvocationAt)
+  const externalSchedulerVerified = Boolean(lastSuccessfulProtectedInvocationAt)
+  const automaticMultiRefreshActive = externalSchedulerVerified && evidenceAge !== null && evidenceAge <= EXTERNAL_SCHEDULER_EXPECTED_CADENCE_MINUTES * 3
   const failedSteps = lifecycle.rows.filter((row: Record<string, unknown>) => {
     const status = String(row.status ?? '').toLowerCase()
     return status.includes('failed') || status.includes('error')
@@ -212,6 +258,12 @@ export async function getOperationsHealth() {
       lastCronInvocation: adaptive.schedulerAudit.jobs[0]?.lastRunAt ?? null,
       nextScheduledRun: adaptive.schedulerAudit.jobs[0]?.nextRunAt ?? null,
       limitation: 'vercel.json currently defines one daily Hobby-compatible cron; intraday cadence requires external scheduler or manual protected execution.',
+      schedulerEvidenceSource: lastSuccessfulProtectedInvocationAt ? 'operating_day_lifecycle_events' : 'none',
+      lastExternalSchedulerInvocationAt: lastSuccessfulProtectedInvocationAt,
+      lastSuccessfulProtectedInvocationAt,
+      externalSchedulerVerified,
+      automaticMultiRefreshActive,
+      evidenceAgeMinutes: evidenceAge,
     },
     adaptiveExecution: {
       mode: 'protected_existing_operating_day_bridge',

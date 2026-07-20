@@ -40,6 +40,8 @@ type DashboardEventRow = {
 type DashboardEventLoadResult = {
   rows: DashboardEventRow[]
   diagnostics: {
+    status?: 'AVAILABLE' | 'EMPTY_CONFIRMED' | 'QUERY_TIMEOUT' | 'QUERY_FAILED' | 'FALLBACK_LAST_KNOWN'
+    source?: 'primary_current_events' | 'last_known_grounded_slate'
     rawRowsRead: number
     canonicalRowsRetained: number
     filteredOutByCanonicalDate: number
@@ -230,6 +232,10 @@ export type DashboardTodayContract = {
       queryWindowUtcEndExclusive: string | null
       reason: string | null
     }
+    dashboardSlateSource: 'primary_current_events' | 'last_known_grounded_slate'
+    dashboardFallbackUsed: boolean
+    dashboardQueryStatus: 'EMPTY_CONFIRMED' | 'QUERY_TIMEOUT' | 'QUERY_FAILED' | 'FALLBACK_LAST_KNOWN' | 'AVAILABLE'
+    queryTimings: Record<string, number>
   }
 }
 
@@ -361,6 +367,36 @@ async function loadEventsForDate(date: string): Promise<DashboardEventLoadResult
   }
 }
 
+async function loadLastKnownGroundedSlate(date: string): Promise<DashboardEventLoadResult> {
+  const range = puertoRicoUtcRange(date)
+  const { data, error } = await supabaseAdmin
+    .from('sport_events')
+    .select('id, sport_key, league_key, start_time, status, home_team, away_team, updated_at')
+    .eq('sport_key', SPORT_KEY)
+    .eq('league_key', LEAGUE_KEY)
+    .gte('start_time', range.utcStart)
+    .lt('start_time', range.utcEndExclusive)
+    .order('start_time', { ascending: true })
+    .limit(32)
+
+  if (error) throw new Error(`Dashboard today last-known slate fallback failed: ${error.message}`)
+  const rows = ((data ?? []) as DashboardEventRow[]).filter((event) => event.start_time)
+  return {
+    rows,
+    diagnostics: {
+      status: rows.length ? 'FALLBACK_LAST_KNOWN' : 'EMPTY_CONFIRMED',
+      source: 'last_known_grounded_slate',
+      rawRowsRead: rows.length,
+      canonicalRowsRetained: rows.length,
+      filteredOutByCanonicalDate: 0,
+      queryWindowUtcStart: range.utcStart,
+      queryWindowUtcEndExclusive: range.utcEndExclusive,
+      requestedRangeUtcStart: range.utcStart,
+      requestedRangeUtcEndExclusive: range.utcEndExclusive,
+    },
+  }
+}
+
 function lifecycleCounts(cards: ReturnType<typeof eventCard>[]) {
   const upcoming = cards.filter((event) => event.lifecycle === 'PREGAME' || event.lifecycle === 'STARTING_SOON').length
   const live = cards.filter((event) => event.lifecycle === 'LIVE').length
@@ -480,6 +516,9 @@ export async function getDashboardToday({
     timed('best_value', () => getBestValueOpportunities({ mode: 'current', includePasses: false, limit: 10 }), 1200),
     timed('ai_bet_finder', () => runAiBetFinder({ query: 'best opportunities today' }), 1200),
   ])
+  const currentEventsFallbackResult = !currentEventsResult.ok
+    ? await timed('last_known_slate_fallback', () => loadLastKnownGroundedSlate(operatingDate), 1200)
+    : null
 
   const boardFallback = {
     candidates: [],
@@ -523,9 +562,28 @@ export async function getDashboardToday({
     nextEligibleRefresh: null,
   } as unknown as Awaited<ReturnType<typeof getProviderBudgetStatus>>
   const budget = values(budgetResult, budgetFallback)
-  const eventLoad = values(currentEventsResult, {
+  const eventLoad = currentEventsResult.ok
+    ? values(currentEventsResult, {
+      rows: [] as DashboardEventRow[],
+      diagnostics: {
+        status: 'EMPTY_CONFIRMED' as const,
+        source: 'primary_current_events' as const,
+        rawRowsRead: 0,
+        canonicalRowsRetained: 0,
+        filteredOutByCanonicalDate: 0,
+        queryWindowUtcStart: null,
+        queryWindowUtcEndExclusive: null,
+        requestedRangeUtcStart: null,
+        requestedRangeUtcEndExclusive: null,
+      },
+    })
+    : currentEventsFallbackResult?.ok && currentEventsFallbackResult.value
+      ? currentEventsFallbackResult.value
+      : {
     rows: [] as DashboardEventRow[],
     diagnostics: {
+      status: currentEventsResult.error?.toLowerCase().includes('exceeded') ? 'QUERY_TIMEOUT' as const : 'QUERY_FAILED' as const,
+      source: 'primary_current_events' as const,
       rawRowsRead: 0,
       canonicalRowsRetained: 0,
       filteredOutByCanonicalDate: 0,
@@ -534,8 +592,18 @@ export async function getDashboardToday({
       requestedRangeUtcStart: null,
       requestedRangeUtcEndExclusive: null,
     },
-  })
+  }
   const currentEvents = eventLoad.rows
+  const dashboardFallbackUsed = !currentEventsResult.ok && currentEventsFallbackResult?.ok === true && (currentEventsFallbackResult.value?.rows.length ?? 0) > 0
+  const dashboardQueryStatus = currentEventsResult.ok
+    ? currentEvents.length > 0
+      ? 'AVAILABLE'
+      : 'EMPTY_CONFIRMED'
+    : dashboardFallbackUsed
+      ? 'FALLBACK_LAST_KNOWN'
+      : currentEventsResult.error?.toLowerCase().includes('exceeded')
+        ? 'QUERY_TIMEOUT'
+        : 'QUERY_FAILED'
   const currentCards = currentEvents.map((event) => eventCard(event, now))
   const countsByLifecycle = lifecycleCounts(currentCards)
   const currentScheduled = currentCards.filter((event) => event.lifecycle === 'PREGAME' || event.lifecycle === 'STARTING_SOON').length
@@ -563,7 +631,9 @@ export async function getDashboardToday({
   const officialPicks = board.officialPickCount || nextSlate.officialPicks
   const informationalCandidates = Math.max(0, marketIntelligence.aiLeans + marketIntelligence.watchlist + marketIntelligence.avoid)
   const operatingStatus = String(operatingDay.status ?? 'planned')
-  const nextAction = userActionLabel(String(operatingDay.nextRequiredAction ?? ''), {
+  const nextAction = !currentEventsResult.ok && !dashboardFallbackUsed
+    ? 'Refresh stored slate status'
+    : userActionLabel(String(operatingDay.nextRequiredAction ?? ''), {
     hour,
     nextSlateDate,
     gamesWaitingForOdds,
@@ -591,6 +661,7 @@ export async function getDashboardToday({
 
   const warnings = [
     !currentEventsResult.ok ? `Current-day slate query is degraded: ${currentEventsResult.error ?? 'unknown error'}.` : null,
+    dashboardFallbackUsed ? 'Using last-known grounded stored slate because the primary current-events query was unavailable.' : null,
     currentEventsResult.ok && eventLoad.diagnostics.rawRowsRead > 0 && currentEvents.length === 0
       ? 'Stored MLB event rows were read but filtered out of the operating date after canonical time normalization.'
       : null,
@@ -652,7 +723,7 @@ export async function getDashboardToday({
       message: result.error ?? 'Dependency unavailable.',
       critical: criticalLabels.has(result.label),
     }))
-  const partial = errors.length > 0
+  const partial = errors.length > 0 || dashboardFallbackUsed
   const hasCriticalError = errors.some((error) => error.critical)
   const responseStatus: DashboardTodayStatus = hasCriticalError ? 'DEGRADED' : partial ? 'PARTIAL' : 'AVAILABLE'
   const timingDependencies = Object.fromEntries(dependencyResults.map((result) => [result.label, result.durationMs]))
@@ -711,7 +782,7 @@ export async function getDashboardToday({
             ? "Today's games are awaiting results or settlement."
             : currentGames > 0
               ? `${currentGames} MLB games are on today's operating day.`
-              : 'No actionable games remain for today.',
+              : dashboardQueryStatus === 'EMPTY_CONFIRMED' ? 'No actionable games remain for today.' : 'Today slate is temporarily unavailable.',
       currentOperatingDay:
         currentInProgress > 0
           ? "Today's games are in progress. Recommendations are locked."
@@ -719,7 +790,7 @@ export async function getDashboardToday({
             ? "Today's games are complete or awaiting settlement."
             : currentGames > 0
               ? `${currentGames} current-day games are being tracked separately from the next slate.`
-              : 'No actionable games remain for today.',
+              : dashboardQueryStatus === 'EMPTY_CONFIRMED' ? 'No actionable games remain for today.' : 'Today slate is temporarily unavailable.',
       nextSlate: nextSlateDate && upcomingGames
         ? `${upcomingGames} games are scheduled for tomorrow. Market prices have not been refreshed yet.`
         : 'No separate next slate is resolved yet.',
@@ -792,7 +863,9 @@ export async function getDashboardToday({
         'provider budget status',
       ],
       slate: {
-        status: !currentEventsResult.ok
+        status: dashboardFallbackUsed
+          ? 'AVAILABLE'
+          : !currentEventsResult.ok
           ? currentEventsResult.error?.toLowerCase().includes('exceeded')
             ? 'TIMEOUT'
             : 'QUERY_FAILED'
@@ -811,12 +884,21 @@ export async function getDashboardToday({
         queryWindowUtcStart: eventLoad.diagnostics.queryWindowUtcStart,
         queryWindowUtcEndExclusive: eventLoad.diagnostics.queryWindowUtcEndExclusive,
         reason: !currentEventsResult.ok
-          ? currentEventsResult.error
+          ? dashboardFallbackUsed
+            ? `Primary current-events query failed (${currentEventsResult.error}); fallback returned stored slate rows.`
+            : currentEventsResult.error
           : eventLoad.diagnostics.rawRowsRead > 0 && currentEvents.length === 0
             ? 'Rows existed in the widened raw query but no row matched the canonical Puerto Rico operating date.'
             : countsByLifecycle.statusUnconfirmed > 0
               ? 'One or more stored events has stale provider status after scheduled start.'
               : null,
+      },
+      dashboardSlateSource: dashboardFallbackUsed ? 'last_known_grounded_slate' : 'primary_current_events',
+      dashboardFallbackUsed,
+      dashboardQueryStatus,
+      queryTimings: {
+        ...timingDependencies,
+        ...(currentEventsFallbackResult ? { last_known_slate_fallback: currentEventsFallbackResult.durationMs } : {}),
       },
     },
   }

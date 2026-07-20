@@ -7,6 +7,7 @@ import { getDashboardToday } from '@/services/dashboard-today.service'
 import { getNextSlateStatus } from '@/services/next-slate.service'
 import { getOperatingDayAutomationStatus } from '@/services/operating-day-automation.service'
 import { executeOperatingDay, getOperatingDayStatus } from '@/services/operating-day.service'
+import { resolveMlbOperatingDate } from '@/services/mlb-operating-date-resolution.service'
 import {
   checkProviderBudget,
   claimProviderActionLock,
@@ -559,17 +560,20 @@ function schedulerJobs(lifecycle: LifecycleEventRow[], budget: Awaited<ReturnTyp
 export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Date } = {}) {
   const generatedAt = nowIso(now)
   const today = localDate(now)
+  const dateResolutionResult = await safe('Operating Date Resolution', () => resolveMlbOperatingDate({ action: 'status_refresh', now }))
+  const dateResolution = dateResolutionResult.ok ? dateResolutionResult.value : null
   const dashboardResult = await safe('Dashboard Today', () => getDashboardToday({ now }))
   const dashboard = dashboardResult.ok ? dashboardResult.value : null
-  const operatingDate = dashboard?.operatingDate ?? today
-  const nextSlateDate = dashboard?.nextSlateDate ?? null
-  const activeSlateDate = dashboard?.activeSlateDate ?? nextSlateDate ?? operatingDate
+  const operatingDate = dateResolution?.localCalendarDate ?? dashboard?.operatingDate ?? today
+  const nextSlateDate = dateResolution?.nextSlateDate ?? dashboard?.nextSlateDate ?? null
+  const activeSlateDate = dateResolution?.activeSlateDate ?? dashboard?.activeSlateDate ?? operatingDate
+  const providerQueryDate = dateResolution?.providerQueryDate ?? activeSlateDate
 
   const [boardResult, nextSlateResult, operatingResult, automationResult, budgetResult, lifecycleResult, currentEventsResult, activeEventsResult] =
     await Promise.all([
       safe('Current Board', () => getCurrentBoard({ sportKey: SPORT_KEY, mode: 'CURRENT', limit: 200 })),
       safe('Next Slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now })),
-      safe('Operating Day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: operatingDate })),
+      safe('Operating Day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: providerQueryDate })),
       safe('Operating Automation', () => getOperatingDayAutomationStatus()),
       safe('Provider Budget', () => getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY })),
       safe('Lifecycle Events', () => loadLifecycleEvents(now)),
@@ -671,6 +675,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     nextSlateResult.ok ? null : nextSlateResult.error,
     operatingResult.ok ? null : operatingResult.error,
     automationResult.ok ? null : automationResult.error,
+    dateResolutionResult.ok ? null : dateResolutionResult.error,
     budgetResult.ok ? null : budgetResult.error,
     predictionsResult.ok ? null : predictionsResult.error,
     mode === 'EXHAUSTED' ? 'Provider budget is exhausted; provider-backed refreshes are blocked.' : null,
@@ -695,6 +700,8 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     leagueKey: LEAGUE_KEY,
     operatingDate,
     activeSlateDate,
+    providerQueryDate,
+    dateSelectionReason: dateResolution?.dateSelectionReason ?? 'dashboard_or_local_fallback',
     nextSlateDate,
     activeOperatingDayStatus: String(operatingDay?.status ?? dashboard?.activeOperatingDayStatus ?? 'unknown'),
     currentGames,
@@ -876,7 +883,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
   const status = await getAdaptiveRefreshStatus()
   const dueNow = status.refreshPlan.filter((item) => item.decision === 'DUE_NOW')
   const action = executableActionFromStatus(status)
-  const selectedDate = status.activeSlateDate ?? status.nextSlateDate ?? status.operatingDate
+  const selectedDate = String((status as Record<string, unknown>).providerQueryDate ?? status.activeSlateDate ?? status.nextSlateDate ?? status.operatingDate)
   const estimatedCalls = status.providerCallForecast.estimatedDueNowCalls
   const executionRunId = crypto.randomUUID()
   const lockKey = `adaptive-refresh:${status.sportKey}:${selectedDate}:${action ?? 'status'}`

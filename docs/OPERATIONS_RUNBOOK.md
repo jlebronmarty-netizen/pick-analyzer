@@ -50,6 +50,19 @@ Expected MLB results sync evidence:
 - Provider check: `providerCheckRequired=true`, `providerCheckAttempted=true`, `providerCheckCompleted=true`.
 - Result rows: `rowsReceived`, `gamesMatched`, `finalGamesDetected`, `scoreRowsInserted`, `scoreRowsUpdated`, `nonFinalRowsSkipped`, `staleRowsSkipped`, `unmatchedEvents`.
 
+## Date Selection Evidence
+
+Protected operating-day responses expose:
+
+- `localCalendarDate`
+- `activeOperatingDate`
+- `activeSlateDate`
+- `providerQueryDate`
+- `nextSlateDate`
+- `dateSelectionReason`
+
+For `status_refresh` and `sync_results`, `providerQueryDate` must remain on an unresolved prior slate until all games are terminal. `prepare_next_slate` may use `nextSlateDate`.
+
 ## Runtime Blockers
 
 - Full automatic runtime certification remains blocked until production deployment/smoke validation is completed. The authorized Vercel deploy was rejected by the execution environment during the activation mission.

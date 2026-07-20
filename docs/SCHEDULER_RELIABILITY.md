@@ -30,6 +30,8 @@ Authorization: Bearer <CRON_SECRET>
 
 `status_refresh` now uses MLB Stats API and is selected ahead of odds/prediction work when current slate lifecycle status is stale or unconfirmed.
 
+After a successful `status_refresh`, `SUCCESS_CHANGED` and `SUCCESS_NO_CHANGE` both satisfy the provider-check requirement until `nextEligibleStatusRefreshAt`. The scheduler should then advance to due odds/results work unless a new status refresh window opens.
+
 Expected SportsDataIO usage for a due odds-only refresh is one odds call when schedule/projection checkpoints are reusable; full operating-day preparation can use up to three capped calls.
 
 Expected MLB Stats API usage for a due status refresh is one schedule/status call for the selected operating date.

@@ -16,6 +16,12 @@ Evidence: `src/services/operating-day.service.ts`, `src/services/operating-day-a
 
 Note: This mission does not redesign User Mode or change model/recommendation standards. It adds protected MLB Stats API status refresh, MLB Stats API canonical results sync, corrected market-due logic and a production scheduler workflow through the existing operating-day/adaptive execution bridge. Full runtime certification remains blocked because the authorized production Vercel deploy was rejected by the execution environment before deployment ID or smoke evidence could be produced.
 
+## MLB Operating Date Consistency, Action Advancement & Dashboard Query Reliability V1
+
+Status: Implemented locally
+
+Note: Adds a canonical MLB operating-date resolver, action advancement after successful `SUCCESS_NO_CHANGE` status provider checks, lifecycle-ledger-backed health evidence and Today fallback states for query timeout/failure. It does not change dashboard design, prediction formulas, Official policy, settlement, learning, Champion/V7 or unsupported-market gates.
+
 ### MLB Slate Recovery & Lifecycle Truth Repair V1
 
 Status: Implemented locally. Deployment and production smoke validation remain required.

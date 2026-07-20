@@ -7,8 +7,10 @@ import { getOperatingDayStatus } from '@/services/operating-day.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
 import { resolveMlbGameLifecycle } from '@/services/mlb-game-lifecycle.service'
 import { zonedUtcRange } from '@/services/provider-time-normalization.service'
+import { resolveMlbOperatingDate } from '@/services/mlb-operating-date-resolution.service'
 
 const TIMEZONE = 'America/Puerto_Rico'
+const STATUS_REFRESH_INTERVAL_MS = 10 * 60 * 1000
 
 function hourInTimezone(timezone: string, now = new Date()) {
   const hour = new Intl.DateTimeFormat('en-US', {
@@ -47,6 +49,52 @@ async function statusRefreshDue(selectedDate: string | null, now: Date) {
   return { due: staleStatusCount > 0, staleStatusCount, eventsChecked: events.length }
 }
 
+async function latestStatusRefreshEvidence(operatingDayId: unknown, now: Date) {
+  if (!operatingDayId) return {
+    satisfied: false,
+    lastProviderCheckAt: null as string | null,
+    nextEligibleStatusRefreshAt: null as string | null,
+    providerCallsMade: 0,
+    status: null as string | null,
+    consecutiveSameActionCount: 0,
+    actionStuck: false,
+  }
+  const { data, error } = await supabaseAdmin
+    .from('operating_day_lifecycle_events')
+    .select('action,status,completed_at,provider_calls_made,metadata,created_at')
+    .eq('operating_day_id', String(operatingDayId))
+    .order('created_at', { ascending: false })
+    .limit(10)
+  if (error) return {
+    satisfied: false,
+    lastProviderCheckAt: null,
+    nextEligibleStatusRefreshAt: null,
+    providerCallsMade: 0,
+    status: 'LEDGER_READ_FAILED',
+    consecutiveSameActionCount: 0,
+    actionStuck: false,
+  }
+  const rows = (data ?? []) as Array<Record<string, unknown>>
+  const latest = rows.find((row) => String(row.action) === 'status_refresh')
+  const metadata = latest && typeof latest.metadata === 'object' && latest.metadata !== null ? latest.metadata as Record<string, unknown> : {}
+  const completed = metadata.providerCheckCompleted === true || ['SUCCESS_NO_CHANGE', 'SUCCESS_CHANGED'].includes(String(latest?.status ?? ''))
+  const checkedAt = String(metadata.lastProviderCheckAt ?? latest?.completed_at ?? latest?.created_at ?? '') || null
+  const checkedMs = checkedAt ? new Date(checkedAt).getTime() : Number.NaN
+  const nextEligibleStatusRefreshAt = Number.isFinite(checkedMs) ? new Date(checkedMs + STATUS_REFRESH_INTERVAL_MS).toISOString() : null
+  const satisfied = Boolean(completed && checkedAt && now.getTime() < (Number.isFinite(checkedMs) ? checkedMs + STATUS_REFRESH_INTERVAL_MS : 0))
+  const consecutiveSameActionCount = rows.findIndex((row) => String(row.action) !== 'status_refresh')
+  const normalizedConsecutive = consecutiveSameActionCount === -1 ? rows.length : consecutiveSameActionCount
+  return {
+    satisfied,
+    lastProviderCheckAt: checkedAt,
+    nextEligibleStatusRefreshAt,
+    providerCallsMade: Number(latest?.provider_calls_made ?? metadata.providerCallsMade ?? 0),
+    status: String(latest?.status ?? '') || null,
+    consecutiveSameActionCount: normalizedConsecutive,
+    actionStuck: normalizedConsecutive >= 3 && satisfied,
+  }
+}
+
 export async function getOperatingDayAutomationStatus() {
   const now = new Date()
   const stage = stageForHour(hourInTimezone(TIMEZONE, now))
@@ -58,22 +106,39 @@ export async function getOperatingDayAutomationStatus() {
   const operatingDay = slate.selectedSlateDate
     ? await getOperatingDayStatus({ sportKey: 'baseball_mlb', leagueKey: 'mlb', selectedDate: slate.selectedSlateDate })
     : null
-  const statusDue = await statusRefreshDue(slate.selectedSlateDate, now)
-  const operatingDayRecord = (operatingDay ?? {}) as Record<string, unknown>
+  const dateResolution = await resolveMlbOperatingDate({ action: 'status_refresh', now })
+  const selectedDateForAction = String(dateResolution.providerQueryDate ?? slate.selectedSlateDate ?? dateResolution.localCalendarDate)
+  const operatingDayForAction = selectedDateForAction
+    ? await getOperatingDayStatus({ sportKey: 'baseball_mlb', leagueKey: 'mlb', selectedDate: selectedDateForAction })
+    : operatingDay
+  const statusDue = await statusRefreshDue(selectedDateForAction, now)
+  const preliminaryOperatingDayRecord = (operatingDayForAction ?? operatingDay ?? {}) as Record<string, unknown>
+  const statusEvidence = await latestStatusRefreshEvidence(preliminaryOperatingDayRecord.operatingDayId, now)
+  const operatingDayRecord = (operatingDayForAction ?? operatingDay ?? {}) as Record<string, unknown>
   const timestamps = ((operatingDayRecord.timestamps ?? {}) as Record<string, unknown>)
   const staleEvents = slate.events.filter((event) => !event.oddsPresent || !event.predictionReady).length
   const nextAction =
-    statusDue.due
+    statusEvidence.actionStuck
+      ? 'midday_refresh'
+      : statusDue.due && !statusEvidence.satisfied
       ? 'status_refresh'
-      : slate.status === 'waiting_for_odds' || slate.status === 'waiting_for_predictions'
-      ? 'prepare_next_slate'
+    : slate.status === 'waiting_for_odds' || slate.status === 'waiting_for_predictions'
+      ? statusEvidence.satisfied
+        ? 'midday_refresh'
+        : 'prepare_next_slate'
       : slate.status === 'ready_for_analysis' && staleEvents === 0
         ? 'status'
         : stage.action
+  const actionDateResolution = await resolveMlbOperatingDate({ action: nextAction, now })
+  const selectedDateForActionFinal = String(actionDateResolution.providerQueryDate ?? selectedDateForAction)
+  const finalOperatingDay = selectedDateForActionFinal !== selectedDateForAction
+    ? await getOperatingDayStatus({ sportKey: 'baseball_mlb', leagueKey: 'mlb', selectedDate: selectedDateForActionFinal })
+    : operatingDayForAction
   const currentLifecycleState =
     slate.status === 'ready_for_analysis' && staleEvents === 0
       ? 'ready_for_analysis'
-      : String(operatingDayRecord.status ?? slate.status ?? 'unknown')
+      : String(((finalOperatingDay ?? operatingDayRecord) as Record<string, unknown>).status ?? slate.status ?? 'unknown')
+  const finalOperatingDayRecord = (finalOperatingDay ?? operatingDayRecord) as Record<string, unknown>
   const lifecycleEvents = Array.isArray(operatingDayRecord.lifecycleEvents)
     ? (operatingDayRecord.lifecycleEvents as Array<Record<string, unknown>>)
     : []
@@ -99,7 +164,13 @@ export async function getOperatingDayAutomationStatus() {
       enabledByThisPatch: true,
       note: 'Vercel Hobby supports one daily cron here. Multiple daily refreshes are provided by the GitHub Actions external scheduler workflow when repository secrets are configured.',
     },
-    operatingDayId: operatingDayRecord.operatingDayId ?? null,
+    operatingDayId: finalOperatingDayRecord.operatingDayId ?? null,
+    localCalendarDate: actionDateResolution.localCalendarDate,
+    activeOperatingDate: actionDateResolution.activeOperatingDate,
+    activeSlateDate: actionDateResolution.activeSlateDate,
+    providerQueryDate: actionDateResolution.providerQueryDate,
+    nextSlateDate: actionDateResolution.nextSlateDate,
+    dateSelectionReason: actionDateResolution.dateSelectionReason,
     currentOperatingDayStage: stage.stage,
     currentLifecycleState,
     currentStage: stage.stage,
@@ -116,7 +187,7 @@ export async function getOperatingDayAutomationStatus() {
     lastSuccessfulAt: budget.lastProviderCall,
     lastFailureAt: lastFailureEvent?.created_at ?? null,
     lastFailureReason: lastFailureEvent?.blocking_reason ?? null,
-    selectedSlateDate: slate.selectedSlateDate,
+    selectedSlateDate: selectedDateForActionFinal,
     eventsFound: slate.eventsFound,
     activeCandidates: slate.activeCandidates,
     officialPicks: slate.officialPicks,
@@ -130,10 +201,25 @@ export async function getOperatingDayAutomationStatus() {
     statusRefresh: {
       provider: 'mlb_stats_api',
       providerCheckRequired: statusDue.due,
+      providerCheckSatisfied: statusEvidence.satisfied,
       staleStatusCount: statusDue.staleStatusCount,
       eventsChecked: statusDue.eventsChecked,
+      lastProviderCheckAt: statusEvidence.lastProviderCheckAt,
+      nextEligibleStatusRefreshAt: statusEvidence.nextEligibleStatusRefreshAt,
+      providerCallsMade: statusEvidence.providerCallsMade,
       failureReason: 'error' in statusDue ? statusDue.error : null,
     },
+    lastSuccessfulAction: statusEvidence.lastProviderCheckAt ? 'status_refresh' : null,
+    lastSuccessfulActionAt: statusEvidence.lastProviderCheckAt,
+    nextActionReason: statusEvidence.actionStuck
+      ? 'ACTION_STUCK: status_refresh satisfied but repeatedly selected; advancing to market refresh.'
+      : statusDue.due && !statusEvidence.satisfied
+        ? 'Status provider evidence is due for the selected unresolved slate.'
+        : statusEvidence.satisfied
+          ? 'Status provider evidence is satisfied for the current refresh window.'
+          : 'Scheduler stage policy selected the next safe action.',
+    consecutiveSameActionCount: statusEvidence.consecutiveSameActionCount,
+    actionStuck: statusEvidence.actionStuck,
     nextScheduledTime: budget.nextEligibleRefresh,
     eventsNearingLock: slate.events.filter((event) => {
       const start = event.localStartTime ? new Date(event.localStartTime).getTime() : Number.NaN
