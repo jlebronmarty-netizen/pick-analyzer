@@ -13,6 +13,7 @@ import {
   SportsDataIoMlbEventReference,
   normalizeSportsDataIoMlbGameOdds,
 } from '@/services/sportsdataio-mlb-normalization.service'
+import { assertSportEventStatusWrite } from '@/services/mlb-event-status-mapper.service'
 
 export type SportsDataIoMlbExecutionRequest = {
   provider?: string | null
@@ -1015,6 +1016,17 @@ function normalizeSeasonSchedule(payload: Record<string, unknown>[], season: str
     if (seenEvents.has(id)) continue
     seenEvents.add(id)
     const status = eventStatus(game.Status)
+    const dbStatus = assertSportEventStatusWrite({
+      provider: PROVIDER,
+      functionName: 'normalizeSeasonSchedule',
+      file: 'src/services/sportsdataio-mlb-historical-import-executor.service.ts',
+      line: 2229,
+      eventId: id,
+      providerEventId: gameId,
+      rawProviderStatus: game.Status ?? null,
+      mappedStatus: status,
+      dbStatus: status,
+    })
     events.push({
       id,
       sport_key: SPORT_KEY,
@@ -1027,7 +1039,7 @@ function normalizeSeasonSchedule(payload: Record<string, unknown>[], season: str
       away_team: awayKey || `SportsDataIO MLB Team ${awayProviderId}`,
       start_time: start,
       venue: safeString(game.Stadium) || safeString(game.StadiumDetails) || null,
-      status,
+      status: dbStatus,
       home_score: status === 'completed' ? safeInteger(game.HomeTeamRuns ?? game.HomeTeamScore) : null,
       away_score: status === 'completed' ? safeInteger(game.AwayTeamRuns ?? game.AwayTeamScore) : null,
       period_scores: {},

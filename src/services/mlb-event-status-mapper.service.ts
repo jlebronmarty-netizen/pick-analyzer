@@ -33,12 +33,81 @@ export type MlbStatsStatusMapping = {
   reason: string
 }
 
+export type SportEventStatusWriteTrace = {
+  provider: string
+  functionName: string
+  file: string
+  line: number | null
+  eventId: string | null
+  providerEventId: string | number | null
+  rawProviderStatus: unknown
+  mappedStatus: unknown
+  attemptedDbStatus: unknown
+  attemptedAllowed: boolean
+  finalDbStatus: SportEventCanonicalStatus | null
+  allowed: boolean
+  reason: string | null
+}
+
 function normalize(value: string | null | undefined) {
   return String(value ?? '').trim().toLowerCase().replace(/[_-]+/g, ' ')
 }
 
 export function isSportEventCanonicalStatus(value: unknown): value is SportEventCanonicalStatus {
   return SPORT_EVENT_ALLOWED_STATUSES.includes(value as SportEventCanonicalStatus)
+}
+
+export function mapSportEventStatusToDbStatus(value: unknown): SportEventCanonicalStatus | null {
+  const status = normalize(typeof value === 'string' ? value : value === null || value === undefined ? null : String(value))
+  if (isSportEventCanonicalStatus(status)) return status
+  if (['final', 'complete', 'closed', 'finished', 'game over', 'game complete', 'f'].includes(status)) return 'completed'
+  if (['in progress', 'inprogress', 'started', 'i'].includes(status)) return 'live'
+  if (['cancelled', 'canceled'].includes(status)) return 'cancelled'
+  if (['postponed', 'delayed', 'suspended'].includes(status)) return 'postponed'
+  if (['scheduled', 'pregame', 'pre game', 'pre-game', 'warmup', 'pending', 'planned', 'preview', 'p', 's', ''].includes(status)) return 'scheduled'
+  return null
+}
+
+export function traceSportEventStatusWrite(input: {
+  provider: string
+  functionName: string
+  file: string
+  line?: number | null
+  eventId?: string | null
+  providerEventId?: string | number | null
+  rawProviderStatus?: unknown
+  mappedStatus?: unknown
+  dbStatus: unknown
+}): SportEventStatusWriteTrace {
+  const attemptedAllowed = isSportEventCanonicalStatus(normalize(typeof input.dbStatus === 'string' ? input.dbStatus : String(input.dbStatus ?? '')))
+  const finalDbStatus = mapSportEventStatusToDbStatus(input.dbStatus)
+  const trace: SportEventStatusWriteTrace = {
+    provider: input.provider,
+    functionName: input.functionName,
+    file: input.file,
+    line: input.line ?? null,
+    eventId: input.eventId ?? null,
+    providerEventId: input.providerEventId ?? null,
+    rawProviderStatus: input.rawProviderStatus ?? null,
+    mappedStatus: input.mappedStatus ?? null,
+    attemptedDbStatus: input.dbStatus,
+    attemptedAllowed,
+    finalDbStatus,
+    allowed: finalDbStatus !== null,
+    reason: finalDbStatus ? null : `Invalid sport_events.status "${String(input.dbStatus)}".`,
+  }
+  if (process.env.SPORT_EVENT_STATUS_DEBUG === 'true') {
+    console.info('[sport_events.status.write]', JSON.stringify(trace))
+  }
+  return trace
+}
+
+export function assertSportEventStatusWrite(input: Parameters<typeof traceSportEventStatusWrite>[0]): SportEventCanonicalStatus {
+  const trace = traceSportEventStatusWrite(input)
+  if (!trace.allowed || !trace.finalDbStatus) {
+    throw new Error(trace.reason ?? 'Invalid sport_events.status write.')
+  }
+  return trace.finalDbStatus
 }
 
 export function mapMlbStatsStatusToSportEventStatus(input: MlbStatsStatusInput | null | undefined): MlbStatsStatusMapping {
@@ -86,4 +155,60 @@ export function mapMlbStatsStatusToSportEventStatus(input: MlbStatsStatusInput |
 
 export function mapMlbStatsGameToSportEventStatus(game: { status?: MlbStatsStatusInput | null } | null | undefined) {
   return mapMlbStatsStatusToSportEventStatus(game?.status)
+}
+
+export function validateSportEventStatusWriteTracingFixtures() {
+  const traces = [
+    traceSportEventStatusWrite({
+      provider: 'MLB Stats API',
+      functionName: 'refreshMlbGameStatuses',
+      file: 'src/services/operating-day.service.ts',
+      line: 636,
+      eventId: 'fixture-event',
+      providerEventId: 1,
+      rawProviderStatus: 'Final',
+      mappedStatus: 'completed',
+      dbStatus: 'final',
+    }),
+    traceSportEventStatusWrite({
+      provider: 'MLB Stats API',
+      functionName: 'refreshMlbGameStatuses',
+      file: 'src/services/operating-day.service.ts',
+      line: 636,
+      eventId: 'fixture-event',
+      providerEventId: 1,
+      rawProviderStatus: 'Final',
+      mappedStatus: 'completed',
+      dbStatus: 'completed',
+    }),
+    traceSportEventStatusWrite({
+      provider: 'MLB Stats API',
+      functionName: 'syncRecentResults',
+      file: 'src/services/results-sync.service.ts',
+      line: 630,
+      eventId: 'fixture-event',
+      providerEventId: 1,
+      rawProviderStatus: 'In Progress',
+      mappedStatus: 'live',
+      dbStatus: 'in_progress',
+    }),
+  ]
+  const checks = [
+    ['legacy final write is traced as invalid before canonical conversion', traces[0].attemptedAllowed === false && traces[0].finalDbStatus === 'completed'],
+    ['canonical completed write is allowed', traces[1].allowed && traces[1].finalDbStatus === 'completed'],
+    ['legacy in_progress write is invalid before canonical conversion', traces[2].attemptedAllowed === false && traces[2].finalDbStatus === 'live'],
+  ] as const
+  const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
+  return {
+    success: failedChecks.length === 0,
+    mode: 'sport_event_status_write_tracing_fixtures_v1',
+    allowedValues: SPORT_EVENT_ALLOWED_STATUSES,
+    traces,
+    checks: checks.length,
+    passed: checks.length - failedChecks.length,
+    failed: failedChecks.length,
+    failedChecks,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  }
 }

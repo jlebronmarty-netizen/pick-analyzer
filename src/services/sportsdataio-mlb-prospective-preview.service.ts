@@ -16,6 +16,7 @@ import {
   SPORTSDATAIO_DISCOVERY_LAB_ORIGIN,
   resolveSportsDataIoDiscoveryLabUrl,
 } from '@/services/sportsdataio-discovery-lab-url.service'
+import { assertSportEventStatusWrite } from '@/services/mlb-event-status-mapper.service'
 import { normalizeSportsDataIoMlbGameDateTime, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const PROVIDER = 'sportsdataio'
@@ -466,6 +467,17 @@ function normalizeSchedule(payload: Record<string, unknown>[], selectedDate: str
     if (seenEvents.has(id)) continue
     seenEvents.add(id)
     const status = eventStatus(game.Status)
+    const dbStatus = assertSportEventStatusWrite({
+      provider: PROVIDER,
+      functionName: 'normalizeSportsDataIoMlbSchedule',
+      file: 'src/services/sportsdataio-mlb-prospective-preview.service.ts',
+      line: 3201,
+      eventId: id,
+      providerEventId: gameId,
+      rawProviderStatus: game.Status ?? null,
+      mappedStatus: status,
+      dbStatus: status,
+    })
     events.push({
       id,
       sport_key: SPORT_KEY,
@@ -478,7 +490,7 @@ function normalizeSchedule(payload: Record<string, unknown>[], selectedDate: str
       away_team: awayKey || `SportsDataIO MLB Team ${awayProviderId}`,
       start_time: start,
       venue: safeString(game.Stadium) || safeString(game.StadiumDetails) || null,
-      status,
+      status: dbStatus,
       home_score: status === 'completed' ? safeInteger(game.HomeTeamRuns ?? game.HomeTeamScore) : null,
       away_score: status === 'completed' ? safeInteger(game.AwayTeamRuns ?? game.AwayTeamScore) : null,
       period_scores: {},

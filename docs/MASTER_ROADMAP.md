@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### MLB sport_events.status Constraint Root Cause Trace V1
+
+Status: Implemented locally. Production deployment and protected smoke validation remain required.
+
+Evidence: `src/services/mlb-event-status-mapper.service.ts`, `src/services/operating-day.service.ts`, `src/services/results-sync.service.ts`, `src/services/sportsdataio-mlb-prospective-preview.service.ts`, `src/services/sportsdataio-mlb-historical-import-executor.service.ts`, `src/services/sportsdataio-historical-import-readiness.service.ts`, `src/services/nba-data-sync.service.ts`, `src/services/basketball/acquisition/bsn-acquisition-engine.ts` and `docs/MLB_SPORT_EVENTS_STATUS_CONSTRAINT_ROOT_CAUSE_TRACE_V1.md`.
+
+Note: Local runtime validation proved the exact invalid legacy attempted DB value as `final` from MLB Stats API `Final` in `refreshMlbGameStatuses`; `final` is not allowed by `sport_events_status_check`, and canonical DB status is `completed`. Every discovered `sport_events.status` writer now calls the shared status write guard before persistence. No prediction, recommendation, EV, Kelly, confidence, scheduler, provider-budget, dashboard or temporal architecture changes were made.
+
 ### MLB Canonical Event Status, Stale Slate Recovery & Temporal Truth Repair V1
 
 Status: Implemented locally. Production deployment and protected smoke validation remain required.

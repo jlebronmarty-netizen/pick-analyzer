@@ -14,7 +14,7 @@ import { getArbitrageOpportunities, getMostLikelyOpportunities } from '@/service
 import { getTopPicks } from '@/services/top-picks.service'
 import { optimizeBetSlip } from '@/services/bet-slip-optimizer.service'
 import { getDay1RecommendationReadiness } from '@/services/day1-recommendation-readiness.service'
-import { isSportEventCanonicalStatus, mapMlbStatsGameToSportEventStatus } from '@/services/mlb-event-status-mapper.service'
+import { assertSportEventStatusWrite, isSportEventCanonicalStatus, mapMlbStatsGameToSportEventStatus, validateSportEventStatusWriteTracingFixtures } from '@/services/mlb-event-status-mapper.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
@@ -603,7 +603,17 @@ async function refreshMlbGameStatuses({
         continue
       }
       const patch = {
-        status: nextStatus,
+        status: assertSportEventStatusWrite({
+          provider,
+          functionName: 'refreshMlbGameStatuses',
+          file: 'src/services/operating-day.service.ts',
+          line: 636,
+          eventId: event.id,
+          providerEventId: game.gamePk ?? null,
+          rawProviderStatus: mapping.rawStatus,
+          mappedStatus: nextStatus,
+          dbStatus: nextStatus,
+        }),
         home_score: Number.isFinite(Number(game.teams?.home?.score)) ? Number(game.teams?.home?.score) : null,
         away_score: Number.isFinite(Number(game.teams?.away?.score)) ? Number(game.teams?.away?.score) : null,
         updated_at: started,
@@ -1687,5 +1697,6 @@ export function validateOperatingDayDeterministicFixtures() {
     failed: failed.length,
     failedChecks: failed,
     providerCallsMade: 0,
+    statusWriteTracing: validateSportEventStatusWriteTracingFixtures(),
   }
 }

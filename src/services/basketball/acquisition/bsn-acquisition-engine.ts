@@ -16,6 +16,7 @@ import {
   validateOfficialBsnHomepageConnectorFixtures,
   type OfficialBsnHomepageSnapshot,
 } from '@/services/basketball/connectors/official-bsn-homepage.connector'
+import { assertSportEventStatusWrite } from '@/services/mlb-event-status-mapper.service'
 
 const BSN_SPORT_KEY = 'basketball_bsn' as const
 const BSN_LEAGUE_KEY = 'bsn_pr' as const
@@ -340,7 +341,21 @@ async function storeSnapshot(snapshot: OfficialBsnHomepageSnapshot, execute: boo
     const standingsResult = await supabaseAdmin.from('sport_standings').upsert(standings, { onConflict: 'id' })
     if (standingsResult.error) throw new Error(`sport_standings upsert failed: ${standingsResult.error.message}`)
     if (events.length) {
-      const eventsResult = await supabaseAdmin.from('sport_events').upsert(events, { onConflict: 'id' })
+      const safeEvents = events.map((event) => ({
+        ...event,
+        status: assertSportEventStatusWrite({
+          provider: PROVIDER,
+          functionName: 'storeSnapshot',
+          file: 'src/services/basketball/acquisition/bsn-acquisition-engine.ts',
+          line: 343,
+          eventId: event.id,
+          providerEventId: event.provider_ids?.[PROVIDER] ?? null,
+          rawProviderStatus: event.status,
+          mappedStatus: event.status,
+          dbStatus: event.status,
+        }),
+      }))
+      const eventsResult = await supabaseAdmin.from('sport_events').upsert(safeEvents, { onConflict: 'id' })
       if (eventsResult.error) throw new Error(`sport_events upsert failed: ${eventsResult.error.message}`)
     }
     if (players.length) {

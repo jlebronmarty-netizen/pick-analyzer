@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { mapMlbStatsGameToSportEventStatus } from '@/services/mlb-event-status-mapper.service'
+import { assertSportEventStatusWrite, mapMlbStatsGameToSportEventStatus } from '@/services/mlb-event-status-mapper.service'
 import { checkProviderBudget, claimProviderActionLock, releaseProviderActionLock } from '@/services/provider-budget.service'
 import { zonedUtcRange, localDateInTimeZone } from '@/services/provider-time-normalization.service'
 
@@ -431,7 +431,17 @@ async function fetchMlbStatsResults(daysFrom = 3, timeoutMs = 12000) {
       eventPatches.push({
         id: event.id,
         patch: {
-          status: 'completed',
+          status: assertSportEventStatusWrite({
+            provider,
+            functionName: 'fetchMlbStatsResults',
+            file: 'src/services/results-sync.service.ts',
+            line: 630,
+            eventId: event.id,
+            providerEventId: game.gamePk ?? null,
+            rawProviderStatus: game.status ?? null,
+            mappedStatus: 'completed',
+            dbStatus: 'completed',
+          }),
           home_score: homeScore,
           away_score: awayScore,
           updated_at: started,

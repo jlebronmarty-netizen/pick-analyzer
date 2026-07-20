@@ -19,6 +19,7 @@ import {
   classifySportsDataIoBettingPayload,
   runSportsDataIoBettingNormalizerValidation,
 } from '@/services/sportsdataio-betting-normalizer.service'
+import { assertSportEventStatusWrite } from '@/services/mlb-event-status-mapper.service'
 import {
   SportsDataIoRuntimeDomain,
   getSportsDataIoEnvironmentStatus,
@@ -3476,8 +3477,26 @@ async function executeSportsDataIoNbaPilotImportV2(
         ),
       ])
 
-    const eventsResult = eventRows.length
-      ? await supabaseAdmin.from('sport_events').upsert(eventRows, { onConflict: 'id' })
+    const safeEventRows = eventRows.map((row) => ({
+      ...row,
+      status: assertSportEventStatusWrite({
+        provider: 'sportsdataio',
+        functionName: 'runSportsDataIoPilotV2',
+        file: 'src/services/sportsdataio-historical-import-readiness.service.ts',
+        line: 3480,
+        eventId: String(row.id ?? ''),
+        providerEventId: row.provider_ids && typeof row.provider_ids === 'object'
+          ? (row.provider_ids as Record<string, unknown>).sportsdataio as string | number | null
+          : null,
+        rawProviderStatus: row.metadata && typeof row.metadata === 'object'
+          ? (row.metadata as Record<string, unknown>).providerStatus ?? row.status
+          : row.status,
+        mappedStatus: row.status,
+        dbStatus: row.status,
+      }),
+    }))
+    const eventsResult = safeEventRows.length
+      ? await supabaseAdmin.from('sport_events').upsert(safeEventRows, { onConflict: 'id' })
       : { error: null }
     if (eventsResult.error) throw new Error(`sport_events persistence failed: ${eventsResult.error.message}`)
 
@@ -3894,9 +3913,27 @@ export async function executeSportsDataIoNbaPilotImport(
       throw new Error(`provider_entity_mappings persistence failed: ${mappingsResult.error.message}`)
     }
 
+    const safeEventRows = eventRows.map((row) => ({
+      ...row,
+      status: assertSportEventStatusWrite({
+        provider: 'sportsdataio',
+        functionName: 'runSportsDataIoPilot',
+        file: 'src/services/sportsdataio-historical-import-readiness.service.ts',
+        line: 3899,
+        eventId: String(row.id ?? ''),
+        providerEventId: row.provider_ids && typeof row.provider_ids === 'object'
+          ? (row.provider_ids as Record<string, unknown>).sportsdataio as string | number | null
+          : null,
+        rawProviderStatus: row.metadata && typeof row.metadata === 'object'
+          ? (row.metadata as Record<string, unknown>).providerStatus ?? row.status
+          : row.status,
+        mappedStatus: row.status,
+        dbStatus: row.status,
+      }),
+    }))
     const eventsResult =
-      eventRows.length > 0
-        ? await supabaseAdmin.from('sport_events').upsert(eventRows, {
+      safeEventRows.length > 0
+        ? await supabaseAdmin.from('sport_events').upsert(safeEventRows, {
             onConflict: 'id',
           })
         : { error: null }

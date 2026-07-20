@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { planHistoricalFeatureGeneration } from '@/services/historical-feature-generation.service'
 import { getMultiSportHealth } from '@/services/multi-sport-health.service'
+import { assertSportEventStatusWrite } from '@/services/mlb-event-status-mapper.service'
 import {
   getMultiSportEvents,
   getMultiSportOdds,
@@ -323,10 +324,26 @@ async function upsertRows(
   counters: SyncCounters
 ) {
   if (rows.length === 0) return
+  const rowsToWrite = table === 'sport_events'
+    ? rows.map((row) => ({
+        ...row,
+        status: assertSportEventStatusWrite({
+          provider: ODDS_PROVIDER,
+          functionName: 'upsertRows',
+          file: 'src/services/nba-data-sync.service.ts',
+          line: 330,
+          eventId: typeof row.id === 'string' ? row.id : null,
+          providerEventId: typeof row.id === 'string' ? row.id : null,
+          rawProviderStatus: row.status ?? null,
+          mappedStatus: row.status ?? null,
+          dbStatus: row.status,
+        }),
+      }))
+    : rows
 
   const { error } = await supabaseAdmin
     .from(table)
-    .upsert(rows, { onConflict })
+    .upsert(rowsToWrite, { onConflict })
 
   if (error) {
     counters.errors.push(`${table}: ${error.message}`)
