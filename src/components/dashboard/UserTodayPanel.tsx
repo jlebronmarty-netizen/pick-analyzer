@@ -62,11 +62,15 @@ type TodayResponse = {
 }
 
 type TopOpportunity = {
+  predictionId?: string
   title?: string
   matchup?: string
   marketLabel?: string
   selection?: string
   probability?: number
+  calibratedProbability?: number | null
+  rawProbability?: number | null
+  modelProbability?: number | null
   confidence?: number
   statusLabel?: string
   opportunityCategory?: string
@@ -92,7 +96,9 @@ type IntelligenceRow = {
   sportsbook?: string
   line?: number | null
   probability?: number
+  calibratedProbability?: number | null
   rawProbability?: number
+  modelProbability?: number | null
   confidence?: number
   edge?: number
   expectedValue?: number
@@ -206,6 +212,41 @@ function percentNumber(value: unknown) {
   const percent = parsed > 0 && parsed <= 1 ? parsed * 100 : parsed
   if (percent < 0) return null
   return Math.min(100, percent)
+}
+
+function finiteNumber(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function candidateDisplayProbability(candidate: {
+  calibratedProbability?: unknown
+  rawProbability?: unknown
+  modelProbability?: unknown
+}) {
+  const calibrated = finiteNumber(candidate.calibratedProbability)
+  if (calibrated !== null) return calibrated
+  const raw = finiteNumber(candidate.rawProbability)
+  if (raw !== null) return raw
+  const model = finiteNumber(candidate.modelProbability)
+  if (model !== null) return model
+  return null
+}
+
+function topOpportunityProbability(opportunity: TopOpportunity | null) {
+  return opportunity ? candidateDisplayProbability(opportunity) : null
+}
+
+function mergeTopOpportunityProbability(opportunity: TopOpportunity | null, rows: IntelligenceRow[]) {
+  if (!opportunity) return null
+  const match = rows.find((row) => row.predictionId && row.predictionId === opportunity.predictionId)
+  if (!match) return opportunity
+  return {
+    ...opportunity,
+    calibratedProbability: opportunity.calibratedProbability ?? match.calibratedProbability,
+    rawProbability: opportunity.rawProbability ?? match.rawProbability,
+    modelProbability: opportunity.modelProbability ?? match.modelProbability,
+  }
 }
 
 function meterColor(tone: 'green' | 'yellow' | 'blue' | 'red' | 'gray') {
@@ -331,6 +372,7 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
   if (!opportunity) return <EmptyState title="Top AI Opportunity" detail="No opportunity is ready to display yet." />
   const category = opportunity.opportunityCategory ?? opportunity.statusLabel ?? 'Tracking'
   const tone = categoryTone(opportunity.marketIntelligenceCategory ?? category)
+  const probability = topOpportunityProbability(opportunity)
 
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
@@ -360,7 +402,7 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
         </div>
       </div>
       <div className="mt-6 grid gap-5 md:grid-cols-2">
-        <Meter label="Probability" value={opportunity.probability} tone="blue" />
+        <Meter label="Probability" value={probability} tone="blue" />
         <Meter label="Confidence" value={opportunity.confidence} tone={tone} />
       </div>
       <div className="mt-5">
@@ -480,7 +522,7 @@ function TodayStory({ data, mostLikely, bestValue, counts }: { data: TodayRespon
         ? `${counts.official} Official Pick${counts.official === 1 ? '' : 's'} passed the production policy.`
         : 'No game currently meets both confidence and value requirements for an Official Pick.',
     topProbability
-      ? `The most likely outcome is ${fieldValue(topProbability.selection)} in ${fieldValue(topProbability.matchup)} at ${formatPercent(topProbability.probability ?? topProbability.rawProbability)}.`
+      ? `The most likely outcome is ${fieldValue(topProbability.selection)} in ${fieldValue(topProbability.matchup)} at ${formatPercent(candidateDisplayProbability(topProbability))}.`
       : null,
     topValue && Number(topValue.edge ?? 0) > 0
       ? `The largest value signal is ${fieldValue(topValue.selection)} with ${signedNumber(topValue.edge, ' edge')}.`
@@ -503,7 +545,7 @@ function TodayStory({ data, mostLikely, bestValue, counts }: { data: TodayRespon
 }
 
 function OpportunityRow({ row, rank, mode }: { row: IntelligenceRow; rank: number; mode: 'likely' | 'value' }) {
-  const probability = row.probability ?? row.rawProbability
+  const probability = candidateDisplayProbability(row)
   const category = mode === 'likely' ? probabilityCategory(probability) : fieldValue(row.opportunityCategory ?? row.statusLabel ?? 'Value Candidate')
   const tone = mode === 'likely'
     ? percentNumber(probability) !== null && percentNumber(probability)! >= 65 ? 'green' : 'blue'
@@ -862,7 +904,7 @@ export default function UserTodayPanel() {
           setMostLikely(Array.isArray(embeddedMostLikely) ? embeddedMostLikely : [])
           setBestValue(Array.isArray(embeddedBestValue) ? embeddedBestValue : [])
           setAiResults(Array.isArray(embeddedAi) ? embeddedAi : [])
-          setTopOpportunity(embeddedTop ?? (Array.isArray(embeddedMostLikely) ? embeddedMostLikely[0] : null) ?? null)
+          setTopOpportunity(mergeTopOpportunityProbability(embeddedTop ?? (Array.isArray(embeddedMostLikely) ? embeddedMostLikely[0] : null) ?? null, Array.isArray(embeddedMostLikely) ? embeddedMostLikely : []))
           setSectionWarnings(Array.from(new Set(embeddedWarnings)))
           return
         }
@@ -874,8 +916,9 @@ export default function UserTodayPanel() {
           optionalJson<IntelligenceResponse>('/api/ai-bet-finder?q=best%20opportunities%20today'),
         ])
         if (!active) return
-        setTopOpportunity(opportunityJson?.topPick?.candidate ?? opportunityJson?.opportunities?.[0] ?? null)
-        setMostLikely(mostLikelyJson?.opportunities ?? [])
+        const loadedMostLikely = mostLikelyJson?.opportunities ?? []
+        setTopOpportunity(mergeTopOpportunityProbability(opportunityJson?.topPick?.candidate ?? opportunityJson?.opportunities?.[0] ?? null, loadedMostLikely))
+        setMostLikely(loadedMostLikely)
         setBestValue(bestValueJson?.opportunities ?? [])
         setAiResults(aiJson?.results ?? [])
         setSectionWarnings([
