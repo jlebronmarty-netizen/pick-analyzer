@@ -219,16 +219,21 @@ function finiteNumber(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function positiveFiniteNumber(value: unknown) {
+  const parsed = finiteNumber(value)
+  return parsed !== null && parsed > 0 ? parsed : null
+}
+
 function candidateDisplayProbability(candidate: {
   calibratedProbability?: unknown
   rawProbability?: unknown
   modelProbability?: unknown
 }) {
-  const calibrated = finiteNumber(candidate.calibratedProbability)
+  const calibrated = positiveFiniteNumber(candidate.calibratedProbability)
   if (calibrated !== null) return calibrated
-  const raw = finiteNumber(candidate.rawProbability)
+  const raw = positiveFiniteNumber(candidate.rawProbability)
   if (raw !== null) return raw
-  const model = finiteNumber(candidate.modelProbability)
+  const model = positiveFiniteNumber(candidate.modelProbability)
   if (model !== null) return model
   return null
 }
