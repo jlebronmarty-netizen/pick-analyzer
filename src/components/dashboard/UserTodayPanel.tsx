@@ -89,6 +89,8 @@ type IntelligenceRow = {
   market?: string
   marketLabel?: string
   selection?: string
+  sportsbook?: string
+  line?: number | null
   probability?: number
   rawProbability?: number
   confidence?: number
@@ -401,6 +403,50 @@ function signedNumber(value: unknown, suffix = '') {
   return `${parsed > 0 ? '+' : ''}${parsed.toFixed(2)}${suffix}`
 }
 
+function marketField(value: unknown) {
+  const text = String(value ?? '').trim()
+  return text.length ? text : null
+}
+
+function numberField(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function hasDisplayMarket(game: Record<string, any>) {
+  return Boolean(
+    marketField(game.marketLabel) ||
+    marketField(game.market) ||
+    marketField(game.selection) ||
+    marketField(game.sportsbook) ||
+    numberField(game.americanOdds ?? game.odds) !== null ||
+    numberField(game.line) !== null
+  )
+}
+
+function formatAmericanOdds(value: unknown) {
+  const parsed = numberField(value)
+  if (parsed === null) return null
+  return `${parsed > 0 ? '+' : ''}${Math.round(parsed)}`
+}
+
+function formatMarketLine(value: unknown) {
+  const parsed = numberField(value)
+  if (parsed === null) return null
+  return `${parsed > 0 ? '+' : ''}${Number.isInteger(parsed) ? parsed.toFixed(0) : parsed.toFixed(1)}`
+}
+
+function marketDisplay(game: Record<string, any>) {
+  const label = marketField(game.marketLabel ?? game.market) ?? 'Market'
+  const selection = marketField(game.selection)
+  const line = formatMarketLine(game.line)
+  const odds = formatAmericanOdds(game.americanOdds ?? game.odds)
+  const sportsbook = marketField(game.sportsbook)
+  const selectionText = [selection, line].filter(Boolean).join(' ')
+  const priceText = odds ? `${selectionText || 'Selection'} (${odds})` : selectionText || 'Selection pending'
+  return { label, priceText, sportsbook }
+}
+
 function reasonSummary(row: IntelligenceRow) {
   const positives = row.strengths?.filter(Boolean) ?? []
   const why = String(row.why ?? row.reasonNotOfficial ?? row.recommendation ?? row.semanticLabel ?? '').trim()
@@ -580,10 +626,11 @@ function categoryLabel(value: unknown) {
 
 function gameCategory(game: Record<string, any>) {
   const bettingEligibility = String(game.bettingEligibility ?? '').toUpperCase()
+  const hasMarket = hasDisplayMarket(game)
   if (bettingEligibility === 'LOCKED_AFTER_START') return 'Betting Locked'
   if (bettingEligibility === 'STATUS_UNCONFIRMED') return 'Betting Locked'
   if (bettingEligibility === 'DATA_AGING' || bettingEligibility === 'STALE') return 'Data Aging'
-  if (bettingEligibility === 'NO_MARKET') return 'No Market'
+  if (bettingEligibility === 'NO_MARKET' && !hasMarket) return 'No Market'
   if (bettingEligibility === 'INSUFFICIENT_DATA') return 'Insufficient Data'
   if (bettingEligibility === 'ELIGIBLE') return 'Operational'
   const eligibility = String(game.eligibility ?? '').toUpperCase()
@@ -609,7 +656,8 @@ function gameStatusLabel(game: Record<string, any>) {
 function GameCard({ game }: { game: Record<string, any> }) {
   const status = gameStatusLabel(game)
   const aiCategory = gameCategory(game)
-  const probability = percentNumber(game.probability)
+  const hasMarket = hasDisplayMarket(game)
+  const displayMarket = marketDisplay(game)
   const statusTone = status === 'Final' ? 'gray' : status === 'Live' || status === 'Status update overdue' || status === 'Status Unconfirmed' ? 'yellow' : 'blue'
   const categoryCardTone = categoryTone(aiCategory)
   const categoryBadgeTone = aiCategory === 'Waiting' || aiCategory === 'Data Aging' ? 'yellow' : aiCategory === 'Tracking' || aiCategory === 'Operational' || aiCategory === 'No Market' || aiCategory === 'Insufficient Data' ? 'blue' : aiCategory === 'Betting Locked' ? 'red' : categoryCardTone
@@ -625,8 +673,9 @@ function GameCard({ game }: { game: Record<string, any> }) {
           <Badge tone={statusTone}>{status}</Badge>
           <Badge tone={categoryBadgeTone}>{aiCategory}</Badge>
           <div>
-            <p className="text-xs font-bold text-slate-500">{fieldValue(game.marketLabel, 'Market')}</p>
-            <p className="text-sm font-black text-white">{probability === null ? '--' : `${probability.toFixed(1)}%`}</p>
+            <p className="text-xs font-bold text-slate-500">{hasMarket ? displayMarket.label : 'Market'}</p>
+            <p className="text-sm font-black text-white">{hasMarket ? displayMarket.priceText : 'No Market'}</p>
+            {displayMarket.sportsbook ? <p className="mt-0.5 text-xs font-bold text-slate-500">{displayMarket.sportsbook}</p> : null}
           </div>
           <span className="text-sm font-bold text-sky-300">Details</span>
         </div>
@@ -636,8 +685,9 @@ function GameCard({ game }: { game: Record<string, any> }) {
         <Meter label="Confidence" value={game.confidence} tone="green" />
         <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
           <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Primary Prediction</p>
-          <p className="mt-2 text-lg font-black text-white">{fieldValue(game.selection, game.marketLabel ?? 'Prediction pending')}</p>
-          <p className="mt-1 text-sm text-slate-400">{fieldValue(game.marketLabel, 'Market pending')}</p>
+          <p className="mt-2 text-lg font-black text-white">{hasMarket ? displayMarket.priceText : fieldValue(game.selection, game.marketLabel ?? 'Prediction pending')}</p>
+          <p className="mt-1 text-sm text-slate-400">{hasMarket ? displayMarket.label : fieldValue(game.marketLabel, 'Market pending')}</p>
+          {displayMarket.sportsbook ? <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">{displayMarket.sportsbook}</p> : null}
         </div>
         <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
           <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Data Quality</p>
@@ -647,7 +697,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
         <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4 md:col-span-2">
           <p className="text-sm font-black text-white">AI Decision</p>
           <p className="mt-2 text-sm leading-6 text-slate-400">
-            {game.oddsPresent === false
+            {!hasMarket && game.oddsPresent === false
               ? 'Waiting for updated odds.'
               : game.bettingEligibility === 'LOCKED_AFTER_START' || game.bettingEligibility === 'STATUS_UNCONFIRMED'
                 ? fieldValue(game.statusReason, 'Awaiting provider confirmation. Betting is locked until game status is verified.')
@@ -657,7 +707,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
                 ? 'Analysis is locked because this game is no longer pregame.'
                 : game.eligibility === 'STATUS_UNCONFIRMED'
                   ? fieldValue(game.statusReason, 'Game status is unconfirmed.')
-                  : game.predictionReady === false
+                  : !hasMarket && game.predictionReady === false
                 ? 'Tracking current market state.'
                 : fieldValue(game.reasonSummary, `${aiCategory} status from the current board.`)}
           </p>
@@ -868,7 +918,12 @@ export default function UserTodayPanel() {
         probability: game.probability ?? candidate.probability ?? candidate.rawProbability,
         confidence: game.confidence ?? candidate.confidence,
         marketLabel: game.marketLabel ?? candidate.marketLabel,
+        market: game.market ?? candidate.market,
         selection: game.selection ?? candidate.selection,
+        line: game.line ?? candidate.line,
+        americanOdds: game.americanOdds ?? candidate.americanOdds ?? candidate.odds,
+        odds: game.odds ?? candidate.odds ?? candidate.americanOdds,
+        sportsbook: game.sportsbook ?? candidate.sportsbook,
         marketIntelligenceCategory: game.marketIntelligenceCategory ?? candidate.marketIntelligenceCategory,
         opportunityCategory: game.opportunityCategory ?? candidate.opportunityCategory,
         reasonSummary: game.reasonSummary ?? reasonSummary(candidate),
