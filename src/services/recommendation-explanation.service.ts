@@ -99,6 +99,22 @@ function uniqueItems(items: RecommendationEvidenceItem[]) {
   })
 }
 
+const BLOCKER_PRIORITY: Record<string, number> = {
+  FRESHNESS_BLOCKER: 1,
+  MISSING_ALIGNED_PRICE: 2,
+  LINE_MISMATCH: 3,
+  SELECTION_MISMATCH: 4,
+  NON_POSITIVE_EV: 5,
+  NON_POSITIVE_EDGE: 6,
+  LOW_CONFIDENCE: 7,
+  UNSUPPORTED_MARKET: 8,
+  PRODUCTION_GATE_BLOCKED: 20,
+}
+
+function priorityItems(items: RecommendationEvidenceItem[]) {
+  return [...items].sort((a, b) => (BLOCKER_PRIORITY[a.code] ?? 10) - (BLOCKER_PRIORITY[b.code] ?? 10))
+}
+
 function confidenceStatus(confidence: number | null) {
   if (confidence === null) return 'UNAVAILABLE' as const
   return confidence >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialConfidence
@@ -130,7 +146,7 @@ function summary(category: RecommendationExplanationCategory, input: Explanation
   const base = `Model ${model} vs market ${implied}; edge ${edge}; EV ${ev}.`
   if (category === 'official') return `${base} This is the current stored recommendation category and uses the existing eligibility policy.`
   if (category === 'ai_lean') return `${base} It remains below Official Pick requirements or has a blocker.`
-  if (category === 'watchlist') return `${base} Monitor for fresher market input, better price, or stronger model/data support.${fairOdds !== null ? ` Fair odds are ${fairOdds > 0 ? '+' : ''}${fairOdds}.` : ''}`
+  if (category === 'watchlist') return `${base} Monitor for fresher market input, better price, or stronger model/data support.${fairOdds !== null ? ` Model fair odds are ${fairOdds > 0 ? '+' : ''}${fairOdds}.` : ''}`
   return `${base} The evidence points away from a play at the current stored price.`
 }
 
@@ -188,7 +204,7 @@ function secondaryReasonItems(input: ExplanationInput) {
 
 function blockerItems(input: ExplanationInput) {
   const blockers = [...(input.blockers ?? []), ...(input.marketAlignment?.reasonCodes ?? [])]
-  return uniqueItems(blockers.filter(Boolean).map((code) => {
+  return priorityItems(uniqueItems(blockers.filter(Boolean).map((code) => {
     if (code === 'STALE_INPUT' || code === 'STALE_ODDS') return evidence('FRESHNESS_BLOCKER', 'Freshness Blocker', code, 'warning', 'blockers,marketAlignment.reasonCodes', 'A fresher selected market input is required before this can be treated as actionable.')
     if (code === 'NON_POSITIVE_EV') return evidence('NON_POSITIVE_EV', 'Value Blocker', code, 'negative', 'blockers', 'Expected value is not positive.')
     if (code === 'NON_POSITIVE_EDGE') return evidence('NON_POSITIVE_EDGE', 'Edge Blocker', code, 'negative', 'blockers', 'Model edge is not positive.')
@@ -197,12 +213,15 @@ function blockerItems(input: ExplanationInput) {
     if (code === 'LINE_MISMATCH') return evidence('LINE_MISMATCH', 'Line Blocker', code, 'negative', 'marketAlignment.alignmentStatus', 'Prediction line and selected market line do not match.')
     if (code === 'SELECTION_MISMATCH') return evidence('SELECTION_MISMATCH', 'Selection Blocker', code, 'negative', 'marketAlignment.alignmentStatus', 'Prediction selection and selected market side do not match.')
     return evidence(code, 'Policy Blocker', code, 'warning', 'blockers', code.replaceAll('_', ' ').toLowerCase())
-  }))
+  })))
 }
 
 function promotionConditions(input: ExplanationInput, fairOdds: number | null) {
   const alignment = input.marketAlignment
   const conditions: string[] = []
+  if (alignment?.freshnessStatus === 'STALE' && ((alignment?.expectedValuePercent ?? 0) <= 0 || (alignment?.edgePercentagePoints ?? 0) <= 0)) {
+    conditions.push('Could improve if a fresh aligned price becomes available at a better market price.')
+  }
   if (!alignment || alignment.alignmentStatus !== 'ALIGNED') conditions.push('Could become easier to evaluate if an exact aligned price is available.')
   if (alignment?.freshnessStatus === 'STALE') conditions.push('Could become eligible if market input refreshes before game start.')
   if ((alignment?.expectedValuePercent ?? 0) <= 0 || (alignment?.edgePercentagePoints ?? 0) <= 0) {
@@ -212,7 +231,7 @@ function promotionConditions(input: ExplanationInput, fairOdds: number | null) {
   if (confidence !== null && confidence < RECOMMENDATION_THRESHOLDS_V1.minimumOfficialConfidence) {
     conditions.push(`Could improve if confidence reaches the existing ${RECOMMENDATION_THRESHOLDS_V1.minimumOfficialConfidence}% Official threshold.`)
   }
-  if (fairOdds !== null) conditions.push(`Fair odds from model probability are ${fairOdds > 0 ? '+' : ''}${fairOdds}; this is not an Official threshold.`)
+  if (fairOdds !== null) conditions.push(`Model fair odds are ${fairOdds > 0 ? '+' : ''}${fairOdds}; this is not an Official threshold.`)
   return Array.from(new Set(conditions)).slice(0, 4)
 }
 
@@ -257,7 +276,7 @@ export function buildRecommendationExplanation(input: ExplanationInput): Recomme
     valueStatus: valueStatus(finite(alignment?.expectedValuePercent)),
     actionLabel,
     fairOdds,
-    fairOddsLabel: fairOdds === null ? null : `${fairOdds > 0 ? '+' : ''}${fairOdds}`,
+    fairOddsLabel: fairOdds === null ? null : `Model fair odds ${fairOdds > 0 ? '+' : ''}${fairOdds}`,
     calculationVersion: 'recommendation_explanation_v1',
   }
 }
@@ -312,6 +331,9 @@ export function validateRecommendationExplanationFixtures() {
     ['multiple blockers', buildRecommendationExplanation({ category: 'watchlist', marketAlignment: baseAlignment, confidence: 40, blockers: ['LOW_CONFIDENCE', 'NON_POSITIVE_EV'] }).blockers.length >= 2],
     ['no duplicated reasons', new Set(buildRecommendationExplanation({ category: 'watchlist', marketAlignment: baseAlignment, blockers: ['STALE_INPUT', 'STALE_INPUT'] }).blockers.map((item) => item.code)).size === buildRecommendationExplanation({ category: 'watchlist', marketAlignment: baseAlignment, blockers: ['STALE_INPUT', 'STALE_INPUT'] }).blockers.length],
     ['reason priority', buildRecommendationExplanation({ category: 'avoid', marketAlignment: baseAlignment }).primaryReasons[0]?.code === 'MARKET_PRICE_OVERVALUED'],
+    ['stale blocker priority', buildRecommendationExplanation({ category: 'watchlist', marketAlignment: baseAlignment, blockers: ['PRODUCTION_GATE_BLOCKED'] }).blockers[0]?.code === 'FRESHNESS_BLOCKER'],
+    ['fresh aligned better price promotion', buildRecommendationExplanation({ category: 'watchlist', marketAlignment: baseAlignment }).promotionConditions[0]?.includes('fresh aligned price')],
+    ['model fair odds label', buildRecommendationExplanation({ category: 'watchlist', marketAlignment: baseAlignment }).fairOddsLabel?.startsWith('Model fair odds') === true],
     ['fair odds above 50', fairAmericanOddsFromProbability(60) === -150],
     ['fair odds below 50', fairAmericanOddsFromProbability(40) === 150],
     ['fair odds exact 50', fairAmericanOddsFromProbability(50) === 100],
