@@ -7,6 +7,7 @@ import { optimizeBetSlip } from '@/services/bet-slip-optimizer.service'
 import { getTopPicks } from '@/services/top-picks.service'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
+import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 export type AiBetFinderAction = 'SEARCH' | 'COMPARE' | 'EXPLAIN' | 'BUILD_TICKET' | 'WHAT_CHANGED'
 
@@ -146,8 +147,8 @@ function responseMeta(board: Awaited<ReturnType<typeof getCurrentBoardCached>>, 
 }
 
 function puertoRicoTodayStartMs() {
-  const localDate = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString().slice(0, 10)
-  return new Date(`${localDate}T04:00:00.000Z`).getTime()
+  const localDate = localDateInTimeZone(new Date().toISOString(), 'America/Puerto_Rico') ?? new Date().toISOString().slice(0, 10)
+  return new Date(zonedUtcRange(localDate, 'America/Puerto_Rico').utcStart).getTime()
 }
 
 async function boardWithInformationalFallback(limit = 100) {
@@ -226,13 +227,13 @@ async function search(query: string) {
     }
   }
   if (ask === 'BEST_VALUE') {
-    const bestValue = await getBestValueOpportunities({ includePasses: queryFilters(query).includePasses })
+    const bestValue = await getBestValueOpportunities({ includePasses: false })
     const results = bestValue.opportunities.map((candidate) => summarizeCandidate(candidate))
     return {
       success: true,
       action: 'SEARCH',
       intent: ask,
-      summary: results.length ? 'Best Value ranked opportunities. Official picks remain separate from informational rankings.' : 'No opportunities available because no eligible games have grounded odds and probabilities.',
+      summary: results.length ? 'Best Value ranked positive-value opportunities. Official picks remain separate from informational rankings.' : 'No positive-value opportunities today.',
       meta: { ...responseMeta(board, results.length, query), informationalFallbackUsed: fallbackUsed },
       results,
     }

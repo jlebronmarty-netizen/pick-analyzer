@@ -8,6 +8,7 @@ import {
   puertoRicoLocalDateFromUtc,
   puertoRicoUtcRange,
 } from '@/services/active-event.service'
+import { normalizeStoredSportsDataIoMlbStart, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const DEFAULT_SPORT_KEY = 'baseball_mlb'
 const DEFAULT_LEAGUE_KEY = 'mlb'
@@ -53,7 +54,7 @@ function selectedLocalDate(now = nowDate()) {
 }
 
 function addDays(localDate: string, days: number) {
-  const date = new Date(`${localDate}T04:00:00.000Z`)
+  const date = new Date(zonedUtcRange(localDate, ACTIVE_EVENT_TIMEZONE).utcStart)
   date.setUTCDate(date.getUTCDate() + days)
   return puertoRicoLocalDateFromUtc(date.toISOString()) ?? localDate
 }
@@ -68,9 +69,14 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
 }
 
+function canonicalStart(event: EventRow) {
+  return normalizeStoredSportsDataIoMlbStart({ startTime: event.start_time, metadata: event.metadata }).canonicalUtc
+}
+
 function isPregameOdds(row: OddsRow, event: EventRow) {
   const snapshotMs = row.snapshot_time ? new Date(row.snapshot_time).getTime() : Number.NaN
-  const startMs = event.start_time ? new Date(event.start_time).getTime() : Number.NaN
+  const startTime = canonicalStart(event)
+  const startMs = startTime ? new Date(startTime).getTime() : Number.NaN
   const metadata = asRecord(row.metadata)
   return (
     Number.isFinite(snapshotMs) &&
@@ -180,11 +186,11 @@ export async function getNextSlateStatus({
     isActiveBettingEvent(event, { sportKey: safeSportKey, leagueKey: safeLeagueKey, now })
   )
   const dates = Array.from(
-    new Set(activeEvents.map((event) => puertoRicoLocalDateFromUtc(event.start_time)).filter(Boolean) as string[])
+    new Set(activeEvents.map((event) => puertoRicoLocalDateFromUtc(canonicalStart(event))).filter(Boolean) as string[])
   ).sort()
   const selectedSlateDate = dates[0] ?? null
   const slateEvents = selectedSlateDate
-    ? activeEvents.filter((event) => puertoRicoLocalDateFromUtc(event.start_time) === selectedSlateDate)
+    ? activeEvents.filter((event) => puertoRicoLocalDateFromUtc(canonicalStart(event)) === selectedSlateDate)
     : []
   const eventIds = slateEvents.map((event) => event.id)
   const [oddsRows, predictionRows] = await Promise.all([loadOdds(safeSportKey, eventIds), loadPredictions(safeSportKey, eventIds)])
@@ -211,8 +217,8 @@ export async function getNextSlateStatus({
     return {
       eventId: event.id,
       matchup: `${event.away_team ?? 'Away'} @ ${event.home_team ?? 'Home'}`,
-      localStartTime: event.start_time,
-      localDate: puertoRicoLocalDateFromUtc(event.start_time),
+      localStartTime: canonicalStart(event),
+      localDate: puertoRicoLocalDateFromUtc(canonicalStart(event)),
       status: event.status,
       schedulePresent: true,
       oddsPresent: eventOdds.length > 0,

@@ -3,6 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getCurrentBoardCached, mapLegacyBoardMode, type CurrentBoardCandidate } from '@/services/current-board.service'
 import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
+import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 type PredictionRow = {
   id: string
@@ -477,8 +478,8 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
 type CanonicalProbabilityCard = ReturnType<typeof currentBoardCandidateToMostLikelyCard>
 
 function puertoRicoTodayStartMs() {
-  const localDate = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString().slice(0, 10)
-  return new Date(`${localDate}T04:00:00.000Z`).getTime()
+  const localDate = localDateInTimeZone(new Date().toISOString(), 'America/Puerto_Rico') ?? new Date().toISOString().slice(0, 10)
+  return new Date(zonedUtcRange(localDate, 'America/Puerto_Rico').utcStart).getTime()
 }
 
 function currentOrFutureInformational(cards: CanonicalProbabilityCard[]) {

@@ -3,6 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
+import { zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -336,9 +337,10 @@ function fairAmericanFromProbability(probability: number | null) {
 }
 
 function dateBoundsPuertoRico(selectedDate: string) {
+  const range = zonedUtcRange(selectedDate, 'America/Puerto_Rico')
   return {
-    startUtc: `${selectedDate}T04:00:00.000Z`,
-    endUtc: new Date(`${selectedDate}T04:00:00.000Z`).getTime() + 24 * 60 * 60 * 1000,
+    startUtc: range.utcStart,
+    endUtc: Date.parse(range.utcEndExclusive),
   }
 }
 

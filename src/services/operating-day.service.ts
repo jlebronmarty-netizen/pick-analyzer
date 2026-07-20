@@ -14,6 +14,7 @@ import { getArbitrageOpportunities, getMostLikelyOpportunities } from '@/service
 import { getTopPicks } from '@/services/top-picks.service'
 import { optimizeBetSlip } from '@/services/bet-slip-optimizer.service'
 import { getDay1RecommendationReadiness } from '@/services/day1-recommendation-readiness.service'
+import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -21,6 +22,7 @@ const TIMEZONE = 'America/Puerto_Rico'
 const POLICY_VERSION = 'operating_day_lifecycle_v1'
 
 type OperatingDayAction =
+  | 'status_refresh'
   | 'morning_sync'
   | 'midday_refresh'
   | 'final_refresh'
@@ -108,6 +110,22 @@ type SportEventRow = {
   metadata: Record<string, unknown> | null
 }
 
+type MlbStatsGame = {
+  gamePk?: number | string
+  gameDate?: string
+  officialDate?: string
+  status?: {
+    abstractGameState?: string
+    detailedState?: string
+    codedGameState?: string
+    statusCode?: string
+  }
+  teams?: {
+    away?: { team?: { name?: string; abbreviation?: string }; score?: number }
+    home?: { team?: { name?: string; abbreviation?: string }; score?: number }
+  }
+}
+
 function nowIso() {
   return new Date().toISOString()
 }
@@ -139,10 +157,8 @@ function normalize(value: string | null | undefined) {
 
 function operatingDayUtcRange(date: string, timezone = TIMEZONE) {
   if (timezone !== TIMEZONE) throw new Error(`Unsupported operating-day timezone: ${timezone}`)
-  const start = new Date(`${date}T04:00:00.000Z`)
-  const endDate = new Date(start)
-  endDate.setUTCDate(endDate.getUTCDate() + 1)
-  return { start: start.toISOString(), end: endDate.toISOString(), timezone }
+  const range = zonedUtcRange(date, timezone)
+  return { start: range.utcStart, end: range.utcEndExclusive, timezone }
 }
 
 function dateRange(date: string) {
@@ -153,9 +169,7 @@ function dateRange(date: string) {
 function localDateFromUtc(value: string | null | undefined, timezone = TIMEZONE) {
   if (!value) return null
   if (timezone !== TIMEZONE) throw new Error(`Unsupported operating-day timezone: ${timezone}`)
-  const parsed = new Date(value)
-  if (!Number.isFinite(parsed.getTime())) return null
-  return new Date(parsed.getTime() - 4 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  return localDateInTimeZone(value, timezone)
 }
 
 function canonicalEventStatus(value: string | null | undefined) {
@@ -166,6 +180,51 @@ function canonicalEventStatus(value: string | null | undefined) {
   if (['cancelled', 'canceled'].includes(status)) return 'canceled'
   if (['scheduled', 'pending', 'planned', ''].includes(status)) return 'scheduled'
   return 'unresolved'
+}
+
+function canonicalMlbStatsStatus(game: MlbStatsGame) {
+  const detailed = normalize(game.status?.detailedState)
+  const abstract = normalize(game.status?.abstractGameState)
+  const coded = normalize(game.status?.codedGameState ?? game.status?.statusCode)
+  if (detailed.includes('postponed')) return 'postponed'
+  if (detailed.includes('cancel')) return 'canceled'
+  if (detailed.includes('suspend') || detailed.includes('delay')) return 'postponed'
+  if (abstract === 'final' || detailed.includes('final') || coded === 'f') return 'final'
+  if (abstract === 'live' || detailed.includes('in progress') || detailed.includes('warmup')) return 'in_progress'
+  if (abstract === 'preview' || detailed.includes('scheduled') || detailed.includes('pre-game')) return 'scheduled'
+  return detailed || abstract || 'unresolved'
+}
+
+function compactTeam(value: unknown) {
+  return String(value ?? '').toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+function providerIdValues(event: SportEventRow) {
+  const ids = asRecord(event.provider_ids)
+  return new Set(Object.values(ids).map((value) => String(value ?? '')).filter(Boolean))
+}
+
+function gameTeamValues(game: MlbStatsGame) {
+  return {
+    home: [game.teams?.home?.team?.name, game.teams?.home?.team?.abbreviation].map(compactTeam).filter(Boolean),
+    away: [game.teams?.away?.team?.name, game.teams?.away?.team?.abbreviation].map(compactTeam).filter(Boolean),
+  }
+}
+
+function matchStatsGameToEvent(game: MlbStatsGame, events: SportEventRow[]) {
+  const gamePk = String(game.gamePk ?? '')
+  if (gamePk) {
+    const byId = events.find((event) => providerIdValues(event).has(gamePk))
+    if (byId) return byId
+  }
+  const gameDate = localDateFromUtc(game.gameDate) ?? game.officialDate ?? null
+  const teams = gameTeamValues(game)
+  return events.find((event) => {
+    if (gameDate && localDateFromUtc(event.start_time) !== gameDate) return false
+    const home = compactTeam(event.home_team)
+    const away = compactTeam(event.away_team)
+    return teams.home.includes(home) && teams.away.includes(away)
+  }) ?? null
 }
 
 function emptyGameCounts() {
@@ -217,6 +276,7 @@ function isOfficialPickRow(row: PredictionRow) {
 
 function statusForAction(action: OperatingDayAction) {
   return {
+    status_refresh: 'status_ready',
     morning_sync: 'morning_synced',
     midday_refresh: 'midday_refreshed',
     final_refresh: 'final_refreshed',
@@ -238,6 +298,7 @@ function statusForAction(action: OperatingDayAction) {
 
 function timestampColumnForAction(action: OperatingDayAction) {
   return {
+    status_refresh: null,
     morning_sync: 'morning_sync_at',
     midday_refresh: 'midday_refresh_at',
     final_refresh: 'final_refresh_at',
@@ -400,6 +461,194 @@ async function linkEvents(operatingDayId: string, sportKey: string, leagueKey: s
     if (error) throw new Error(`Operating day event link failed: ${error.message}`)
   }
   return rows.length
+}
+
+async function refreshMlbGameStatuses({
+  operatingDayId,
+  sportKey,
+  leagueKey,
+  date,
+  timeoutMs,
+}: {
+  operatingDayId: string
+  sportKey: string
+  leagueKey: string
+  date: string
+  timeoutMs?: number | null
+}) {
+  const provider = 'mlb_stats_api'
+  const endpoint = `/api/v1/schedule?sportId=1&date=${date}&hydrate=probablePitcher,team,venue`
+  const started = nowIso()
+  const budget = await checkProviderBudget({
+    provider,
+    sportKey,
+    action: 'status_refresh',
+    requestedCalls: 1,
+    dryRun: false,
+  })
+  if (!budget.allowed) {
+    return {
+      success: false,
+      status: 'budget_blocked',
+      provider,
+      endpoint,
+      providerCheckRequired: true,
+      providerCheckAttempted: false,
+      providerCheckCompleted: false,
+      providerCallsMade: 0,
+      rowsReceived: 0,
+      statusesChanged: 0,
+      latestSourceTimestamp: null,
+      lastProviderCheckAt: null,
+      lastStatusChangeAt: null,
+      failureReason: budget.blockedReason,
+      providerBudget: budget.status,
+    }
+  }
+  const lockKey = `${provider}:${sportKey}:${leagueKey}:${date}:status_refresh`
+  if (!claimProviderActionLock(lockKey)) {
+    return {
+      success: false,
+      status: 'refresh_already_in_progress',
+      provider,
+      endpoint,
+      providerCheckRequired: true,
+      providerCheckAttempted: false,
+      providerCheckCompleted: false,
+      providerCallsMade: 0,
+      rowsReceived: 0,
+      statusesChanged: 0,
+      latestSourceTimestamp: null,
+      lastProviderCheckAt: null,
+      lastStatusChangeAt: null,
+      failureReason: 'A matching MLB Stats API status refresh is already running.',
+      providerBudget: budget.status,
+    }
+  }
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), Math.max(2000, Number(timeoutMs ?? 12000)))
+    const response = await fetch(`https://statsapi.mlb.com${endpoint}`, { cache: 'no-store', signal: controller.signal })
+    clearTimeout(timeout)
+    const payload = await response.json().catch(() => null) as Record<string, unknown> | null
+    if (!response.ok) {
+      return {
+        success: false,
+        status: response.status === 429 ? 'quota_blocked' : 'provider_error',
+        provider,
+        endpoint,
+        providerCheckRequired: true,
+        providerCheckAttempted: true,
+        providerCheckCompleted: false,
+        providerCallsMade: 1,
+        rowsReceived: 0,
+        statusesChanged: 0,
+        latestSourceTimestamp: null,
+        lastProviderCheckAt: started,
+        lastStatusChangeAt: null,
+        failureReason: `MLB Stats API returned HTTP ${response.status}.`,
+        providerBudget: budget.status,
+      }
+    }
+    const games = (Array.isArray(payload?.dates)
+      ? (payload?.dates as Array<Record<string, unknown>>).flatMap((day) => Array.isArray(day.games) ? day.games : [])
+      : []) as MlbStatsGame[]
+    const events = await loadEventsForDay(sportKey, leagueKey, date)
+    let statusesChanged = 0
+    let rowsUpdated = 0
+    let rowsSkipped = 0
+    let lastStatusChangeAt: string | null = null
+    let latestSourceTimestamp: string | null = null
+    for (const game of games) {
+      if (game.gameDate && (!latestSourceTimestamp || game.gameDate > latestSourceTimestamp)) latestSourceTimestamp = game.gameDate
+      const event = matchStatsGameToEvent(game, events)
+      if (!event) {
+        rowsSkipped += 1
+        continue
+      }
+      const nextStatus = canonicalMlbStatsStatus(game)
+      const metadata = asRecord(event.metadata)
+      const previousStatusEvidence = asRecord(metadata.mlbStatsStatus)
+      const previousFetchedAt = String(previousStatusEvidence.fetchedAt ?? '')
+      if (previousFetchedAt && previousFetchedAt > started) {
+        rowsSkipped += 1
+        continue
+      }
+      const patch = {
+        status: nextStatus,
+        home_score: Number.isFinite(Number(game.teams?.home?.score)) ? Number(game.teams?.home?.score) : null,
+        away_score: Number.isFinite(Number(game.teams?.away?.score)) ? Number(game.teams?.away?.score) : null,
+        updated_at: started,
+        provider_ids: {
+          ...asRecord(event.provider_ids),
+          mlb_stats_api: game.gamePk ?? null,
+          mlb_stats_game_pk: game.gamePk ?? null,
+        },
+        metadata: {
+          ...metadata,
+          mlbStatsStatus: {
+            provider,
+            endpoint,
+            gamePk: game.gamePk ?? null,
+            detailedState: game.status?.detailedState ?? null,
+            abstractGameState: game.status?.abstractGameState ?? null,
+            latestSourceTimestamp: game.gameDate ?? null,
+            fetchedAt: started,
+          },
+          providerStatus: nextStatus,
+        },
+      }
+      const changed = normalize(event.status) !== normalize(nextStatus)
+      const { error } = await supabaseAdmin.from('sport_events').update(patch).eq('id', event.id)
+      if (error) throw new Error(`MLB Stats API status update failed: ${error.message}`)
+      rowsUpdated += 1
+      if (changed) {
+        statusesChanged += 1
+        lastStatusChangeAt = started
+      }
+    }
+    return {
+      success: true,
+      status: statusesChanged > 0 ? 'SUCCESS_CHANGED' : 'SUCCESS_NO_CHANGE',
+      provider,
+      endpoint,
+      providerCheckRequired: true,
+      providerCheckAttempted: true,
+      providerCheckCompleted: true,
+      providerCallsMade: 1,
+      rowsReceived: games.length,
+      statusesChanged,
+      rowsUpdated,
+      rowsSkipped,
+      latestSourceTimestamp,
+      lastProviderCheckAt: started,
+      lastStatusChangeAt,
+      failureReason: null,
+      providerBudget: budget.status,
+      operatingDayId,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      status: error instanceof Error && error.name === 'AbortError' ? 'provider_timeout' : 'provider_error',
+      provider,
+      endpoint,
+      providerCheckRequired: true,
+      providerCheckAttempted: true,
+      providerCheckCompleted: false,
+      providerCallsMade: 1,
+      rowsReceived: 0,
+      statusesChanged: 0,
+      latestSourceTimestamp: null,
+      lastProviderCheckAt: started,
+      lastStatusChangeAt: null,
+      failureReason: error instanceof Error ? error.message : String(error),
+      providerBudget: budget.status,
+      operatingDayId,
+    }
+  } finally {
+    releaseProviderActionLock(lockKey)
+  }
 }
 
 async function writeLifecycleEvent(input: {
@@ -908,6 +1157,7 @@ export async function getOperatingDayStatus(input: { sportKey?: string | null; l
 function nextAction(status: string) {
   return {
     planned: 'morning_sync',
+    status_ready: 'midday_refresh',
     morning_synced: 'midday_refresh',
     midday_refreshed: 'final_refresh',
     final_refreshed: 'lock',
@@ -1176,7 +1426,7 @@ export async function executeOperatingDay(request: ExecuteRequest) {
       action,
       ...base,
       status: 'dry_run',
-      providerCallsPlanned: ['morning_sync', 'midday_refresh'].includes(action) ? 3 : action === 'final_refresh' ? 1 : action === 'sync_results' ? 1 : 0,
+      providerCallsPlanned: action === 'status_refresh' ? 1 : ['morning_sync', 'midday_refresh'].includes(action) ? 3 : action === 'final_refresh' ? 1 : action === 'sync_results' ? 1 : 0,
       providerCallsMade: 0,
       message: 'Dry-run completed without provider calls or database mutations.',
     }
@@ -1190,7 +1440,18 @@ export async function executeOperatingDay(request: ExecuteRequest) {
   let warnings: string[] = []
   let blockingReason: string | null = null
 
-  if (action === 'morning_sync' || action === 'midday_refresh' || action === 'final_refresh') {
+  if (action === 'status_refresh') {
+    const refreshed = await refreshMlbGameStatuses({ operatingDayId, sportKey, leagueKey, date, timeoutMs: request.timeoutMs })
+    providerCallsMade = Number(refreshed.providerCallsMade ?? 0)
+    result = refreshed
+    if (!refreshed.success) {
+      status = String(refreshed.status) === 'budget_blocked' ? 'results_pending' : 'failed'
+      blockingReason = refreshed.failureReason
+      warnings = [refreshed.failureReason].filter(Boolean) as string[]
+    } else {
+      status = 'status_ready'
+    }
+  } else if (action === 'morning_sync' || action === 'midday_refresh' || action === 'final_refresh') {
     const preview = await runSportsDataIoMlbProspectivePreview({
       dryRun: false,
       confirmed: true,
@@ -1198,6 +1459,7 @@ export async function executeOperatingDay(request: ExecuteRequest) {
       operatingDayId,
       operatingDayRefresh: action !== 'final_refresh',
       operatingDayFinalRefresh: action === 'final_refresh',
+      forceRefresh: request.forceRefresh === true,
       maximumRequests: request.maximumRequests ?? (action === 'final_refresh' ? 1 : 3),
       timeoutMs: request.timeoutMs,
     })
@@ -1260,6 +1522,29 @@ export async function executeOperatingDay(request: ExecuteRequest) {
     ...base,
     status,
     providerCallsMade,
+    providerCheckRequired: Boolean(asRecord(result).providerCheckRequired),
+    providerCheckAttempted: Boolean(asRecord(result).providerCheckAttempted),
+    providerCheckCompleted: Boolean(asRecord(result).providerCheckCompleted),
+    providerCheck: asRecord(result).providerCheck ?? null,
+    refreshStatus: asRecord(result).refreshStatus ?? null,
+    oddsChangesDetected: Number(asRecord(result).oddsChangesDetected ?? 0),
+    rowsReceived: Number(asRecord(result).rowsReceived ?? 0),
+    rowsInserted: Number(asRecord(result).rowsInserted ?? 0),
+    rowsUpdated: Number(asRecord(result).rowsUpdated ?? 0),
+    rowsSkipped: Number(asRecord(result).rowsSkipped ?? 0),
+    statusesChanged: Number(asRecord(result).statusesChanged ?? 0),
+    latestSourceTimestamp: asRecord(result).latestSourceTimestamp ?? null,
+    lastProviderCheckAt: asRecord(result).lastProviderCheckAt ?? null,
+    lastStatusChangeAt: asRecord(result).lastStatusChangeAt ?? null,
+    snapshotsInserted: Number(asRecord(result).snapshotsInserted ?? 0),
+    snapshotsReused: Number(asRecord(result).snapshotsReused ?? 0),
+    predictionsRegenerated: Number(asRecord(result).predictionsRegenerated ?? 0),
+    remoteMutationsMade:
+      linkedEvents +
+      Number(asRecord(result).rowsInserted ?? 0) +
+      Number(asRecord(result).rowsUpdated ?? 0) +
+      Number(asRecord(result).snapshotsInserted ?? 0) +
+      Number(asRecord(result).predictionsRegenerated ?? 0),
     warnings,
     blockingReason,
     result,
@@ -1306,6 +1591,8 @@ export function validateOperatingDayDeterministicFixtures() {
     away_score: 3,
   }
   const checks = [
+    ['status refresh maps to status ready', statusForAction('status_refresh') === 'status_ready'],
+    ['status ready advances to market refresh', nextAction('status_ready') === 'midday_refresh'],
     ['moneyline win', gradePrediction(ml, result) === 'win'],
     ['run line push', gradePrediction({ ...ml, market: 'spread', line: -1 }, result) === 'push'],
     ['total under win', gradePrediction({ ...ml, market: 'total', team: 'under', line: 6 }, result) === 'win'],

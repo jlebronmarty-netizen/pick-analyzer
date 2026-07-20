@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { isActiveBettingEvent } from '@/services/active-event.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
+import { normalizeStoredSportsDataIoMlbStart } from '@/services/provider-time-normalization.service'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
 
@@ -94,6 +95,8 @@ type EventRow = {
   away_team: string | null
   start_time: string | null
   status: string | null
+  updated_at?: string | null
+  metadata?: Record<string, unknown> | null
 }
 
 export type CurrentBoardCandidate = {
@@ -291,13 +294,18 @@ async function readEventsById(sportKey: string, ids: string[]) {
     if (!chunk.length) continue
     const result = await supabaseAdmin
       .from('sport_events')
-      .select('id, sport_key, league_key, season, home_team, away_team, start_time, status')
+      .select('id, sport_key, league_key, season, home_team, away_team, start_time, status, updated_at, metadata')
       .eq('sport_key', sportKey)
       .in('id', chunk)
     if (result.error) throw new Error(`current board event read failed: ${result.error.message}`)
     rows.push(...((result.data ?? []) as EventRow[]))
   }
   return rows
+}
+
+function canonicalEventStart(event: EventRow | undefined, fallback: string | null | undefined) {
+  if (!event) return fallback ?? null
+  return normalizeStoredSportsDataIoMlbStart({ startTime: event.start_time ?? fallback, metadata: event.metadata }).canonicalUtc
 }
 
 async function readOddsForEvents({
@@ -441,7 +449,8 @@ function isFutureUnstarted(row: PredictionRow, event: EventRow | undefined, nowM
       league_key: event?.league_key,
       start_time: event?.start_time ?? row.commence_time,
       status: event?.status ?? row.status,
-      metadata: row.feature_snapshot,
+      updated_at: event?.updated_at,
+      metadata: event?.metadata ?? row.feature_snapshot,
     },
     { sportKey: row.sport_key, leagueKey: event?.league_key, now: new Date(nowMs) }
   )
@@ -455,7 +464,7 @@ function baseReasons(row: PredictionRow, event: EventRow | undefined, nowMs: num
   const reasons = new Set<CurrentBoardReasonCode>()
   const snapshot = asRecord(row.feature_snapshot)
   const market = canonicalPredictionMarket(row.market)
-  const startTime = event?.start_time ?? row.commence_time
+  const startTime = canonicalEventStart(event, row.commence_time)
   const startMs = startTime ? new Date(startTime).getTime() : Number.NaN
   const eventStatus = String(event?.status ?? row.status ?? '').toLowerCase()
   const rowResult = String(row.result ?? '').toLowerCase()
@@ -505,7 +514,7 @@ function oddsReasons(
   const line = numberValue(odds?.line ?? row.line)
   const timestamp = odds?.snapshot_time ?? row.odds_timestamp
   const snapshotMs = timestamp ? new Date(timestamp).getTime() : Number.NaN
-  const startTime = event?.start_time ?? row.commence_time
+  const startTime = canonicalEventStart(event, row.commence_time)
   const startMs = startTime ? new Date(startTime).getTime() : Number.NaN
   const cutoffMs = row.cutoff_at ? new Date(row.cutoff_at).getTime() : Number.POSITIVE_INFINITY
 
@@ -662,7 +671,7 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     sportKey: row.sport_key,
     leagueKey: event?.league_key ?? null,
     matchup: `${event?.away_team ?? row.away_team ?? 'Away'} @ ${event?.home_team ?? row.home_team ?? 'Home'}`,
-    scheduledTime: event?.start_time ?? row.commence_time,
+    scheduledTime: canonicalEventStart(event, row.commence_time),
     eventStatus: event?.status ?? row.status ?? 'unknown',
     market,
     marketLabel: marketLabel(market),
@@ -855,12 +864,12 @@ export async function getCurrentBoard({
   const earliestSlate =
     mode === 'CURRENT'
       ? included
-          .map((item) => item.event?.start_time ?? item.row.commence_time)
+          .map((item) => canonicalEventStart(item.event, item.row.commence_time))
           .filter((value): value is string => Boolean(value))
           .sort()[0] ?? null
       : null
   const slateScoped = earliestSlate
-    ? included.filter((item) => (item.event?.start_time ?? item.row.commence_time ?? '').slice(0, 10) === earliestSlate.slice(0, 10))
+    ? included.filter((item) => (canonicalEventStart(item.event, item.row.commence_time) ?? '').slice(0, 10) === earliestSlate.slice(0, 10))
     : included
 
   const latestByKey = new Map<string, { item: (typeof included)[number]; candidate: CurrentBoardCandidate }>()

@@ -8,6 +8,118 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### MLB Operating Day Runtime Certification V1
+
+Status: Implemented with blockers. Runtime certification remains FAIL until production deployment/smoke, external scheduler activation verification and MLB Stats API results sync are completed.
+
+Evidence: `src/services/operating-day.service.ts`, `src/services/operating-day-automation.service.ts`, `src/services/adaptive-refresh-orchestrator.service.ts`, `src/app/api/cron/operating-day/route.ts`, `docs/MLB_OPERATING_DAY_RUNTIME_CERTIFICATION.md`, `docs/OPERATIONS_RUNBOOK.md`, `docs/SCHEDULER_RELIABILITY.md` and `docs/PRODUCTION_OPERATIONS_PIPELINE.md`.
+
+Note: This mission does not redesign User Mode or change model/recommendation standards. It adds protected MLB Stats API status refresh, MLB Stats API canonical results sync, corrected market-due logic and a production scheduler workflow through the existing operating-day/adaptive execution bridge. Full runtime certification remains blocked because the authorized production Vercel deploy was rejected by the execution environment before deployment ID or smoke evidence could be produced.
+
+### MLB Slate Recovery & Lifecycle Truth Repair V1
+
+Status: Implemented locally. Deployment and production smoke validation remain required.
+
+Evidence: `src/services/dashboard-today.service.ts`, `src/services/mlb-game-lifecycle.service.ts`, `src/services/operations-health.service.ts`, `src/components/dashboard/UserTodayPanel.tsx`, `src/app/api/dashboard/route.ts` and `docs/MLB_SLATE_RECOVERY_LIFECYCLE_TRUTH_REPAIR.md`.
+
+Note: This focused production regression repair separates slate membership from lifecycle certainty and betting eligibility. The Today aggregator now uses a widened stored-event query and canonical Puerto Rico operating-date filtering after MLB time normalization, keeps stale-status games visible, returns lifecycle/betting counts and slate diagnostics, and preserves User Mode cards when optional intelligence sections fail. Passed-start stale games are visible as status-update-overdue and betting locked; future stale games are scheduled/data-aging. Operations health now exposes status-refresh evidence and reports `MISSED_REFRESH` when a protected MLB Stats API status check is due but not executed. Prediction formulas, projection formulas, Official Pick thresholds, champion rows, V7, settlement, learning and unsupported market gates are unchanged.
+
+### MLB Production Certification & Closed Beta Audit V1
+
+Status: Implemented locally. Public production certification remains blocked until deployment and production smoke validation are completed.
+
+Evidence: `src/services/mlb-game-lifecycle.service.ts`, `src/services/best-value-scanner.service.ts`, `src/services/dashboard-today.service.ts`, `src/services/ai-bet-finder.service.ts`, `src/services/market-intelligence-engine.service.ts`, `src/services/autonomous-daily-operations.service.ts`, `src/components/dashboard/UserTodayPanel.tsx`, `src/components/market-opportunities/BestValueTool.tsx`, `src/app/api/dashboard/route.ts` and `docs/MLB_PRODUCTION_CERTIFICATION_CLOSED_BETA_AUDIT.md`.
+
+Note: This is a certification repair pass, not a feature or architecture sprint. Stale `Scheduled`/`Pregame` MLB provider statuses after first pitch now resolve to status-unconfirmed instead of rendering as Pregame, user-facing Best Value surfaces now return only positive EV plus positive edge candidates and show `No positive-value opportunities today.` when empty, the standalone Best Value page no longer exposes pass rows under the Best Value label, and the dashboard route preserves separate Today and legacy error contracts. Prediction formulas, projection integrity, Official Pick thresholds, champion rows, V7, settlement, learning, provider adapters and unsupported market gates are unchanged.
+
+### Today Dashboard Load Reliability Repair V1
+
+Status: Implemented pending deployment and production validation.
+
+Evidence: `src/services/dashboard-today.service.ts`, `src/app/api/dashboard/route.ts`, `src/components/dashboard/UserTodayPanel.tsx`, `docs/TODAY_DASHBOARD_RELIABILITY.md`, `docs/AI_EXPERIENCE_CLOSED_BETA_UX.md` and `docs/CLOSED_BETA_READINESS.md`.
+
+Note: This is a focused reliability repair. It does not add product features or change prediction/projection logic. The Today endpoint now has a stable typed envelope, bounded parallel dependency reads, independent optional sections, timing diagnostics and zero provider-call/zero-mutation page-load behavior. The client no longer blanks User Mode because Most Likely, Best Value or AI Bet Finder is temporarily unavailable. Local degraded validation improved from about 42.8s before the repair to about 1.8s server timing after the repair.
+
+### MLB Odds Refresh Execution Repair V1
+
+Status: Implemented pending build and controlled production validation.
+
+Evidence: `src/services/adaptive-refresh-orchestrator.service.ts`, `src/services/operating-day.service.ts`, `src/services/sportsdataio-mlb-prospective-preview.service.ts`, `/api/operations/adaptive-refresh`, `docs/MLB_ODDS_REFRESH_EXECUTION.md`, `docs/ADAPTIVE_REFRESH_EXECUTION.md`, `docs/PRODUCTION_OPERATIONS_PIPELINE.md`, `docs/SCHEDULER_RELIABILITY.md` and `docs/OPERATIONS_RUNBOOK.md`.
+
+Note: This is a focused production defect repair, not new architecture. Due provider-backed `midday_refresh` work now remains provider-backed through Adaptive Refresh, Operating Day and SportsDataIO MLB odds capture. The existing preview service bypasses only the stale odds checkpoint when forced by legitimate due work, performs the canonical SportsDataIO `GameOddsByDate` check, persists accepted snapshots, blocks older provider responses from superseding newer odds and reports explicit provider-check evidence. `SUCCESS_NO_CHANGE` requires `providerCheckCompleted=true`; skipped provider work remains `MISSED_REFRESH`. Prediction formulas, official thresholds, Current Board policy, champion rows, V7, Projection Integrity, settlement and learning are unchanged.
+
+### AI Experience & Closed Beta User Experience V1
+
+Status: Completed pending production smoke validation.
+
+Evidence: `src/components/dashboard/UserTodayPanel.tsx`, `src/components/dashboard/MlbProjectionBoardClient.tsx`, `/api/market-opportunities/most-likely`, `/api/market-opportunities/best-value`, `/api/ai-bet-finder`, `docs/AI_EXPERIENCE_CLOSED_BETA_UX.md`.
+
+Note: This sprint surfaces existing intelligence rather than adding engines. User Mode now shows Today's Story, Most Likely probability rankings, Best Value rankings, AI Lean/Watchlist/Avoid explanations, richer game cards, truthful freshness/system-health language and educational empty states. Most Likely remains probability-only and informational. Best Value remains value-ranked and informational unless Official Pick policy qualifies it. Projection Board explains blocked state without relaxing Projection Integrity. Prediction formulas, projection formulas, Official Pick thresholds, champion rows, V7, settlement, learning, Temporal Truth, provider integrations and Current Board policy remain unchanged.
+
+### Production Stabilization & Closed Beta Readiness V1
+
+Status: Completed pending production smoke validation.
+
+Evidence: `src/services/adaptive-refresh-orchestrator.service.ts`, `src/services/operations-health.service.ts`, `src/services/universal-projection-engine.service.ts`, `src/components/dashboard/UserTodayPanel.tsx`, `/api/operations/health`, `/api/operations/adaptive-refresh`, `docs/CLOSED_BETA_READINESS.md`.
+
+Note: This stabilization pass does not add a new architecture. It tightens the existing adaptive refresh, operations health, projection integrity diagnostics and User Mode truthfulness. Provider-backed due refreshes can no longer be hidden behind `SUCCESS_NO_CHANGE` when no provider check occurred; those executions return `MISSED_REFRESH`. Operations Health now separates platform, provider, projection and prediction health. Projection Health explains why rows remain blocked without relaxing integrity gates. User Mode replaces vague `Ready` wording with `Healthy`, `Limited`, `Data Aging`, `Waiting for Provider` and `Operational Blocker` states. Prediction formulas, projection formulas, Official Pick thresholds, Current Board policy, champion rows, V7, settlement, learning, Temporal Truth and provider integrations remain unchanged.
+
+### MLB Projection Integrity, Player Resolution, Historical Activation & User Projection Board V1
+
+Status: Completed pending final deployment validation.
+
+Evidence: `src/services/mlb-projection-integrity.service.ts`, `src/services/universal-projection-engine.service.ts`, `/api/mlb/projections/health`, `/projections`, additive projection-history migration updates and projection integrity docs.
+
+Note: This module keeps projections shadow-only and sportsbook-independent while correcting integrity defects. Projection IDs now include model/version/entity/event context, pitcher projections require event starter resolution, league-baseline team rows are blocked from user ranking, missing values remain missing, unit/plausibility checks gate output, and the Projection Board sorts by rank score rather than projected quantity. Provider calls, betting formulas, official thresholds, Current Board policy, champion/V7 state, betting settlement, learning and provider-budget policy remain unchanged.
+
+### MLB Temporal Truth, Game Status & Freshness Reliability V1
+
+Status: Completed pending final build/deployment verification.
+
+Evidence: `src/services/provider-time-normalization.service.ts`, `src/services/mlb-game-lifecycle.service.ts`, `src/services/mlb-freshness-policy.service.ts`, `src/services/mlb-temporal-health.service.ts`, `/api/mlb/temporal-health`, `src/components/dashboard/MlbTemporalHealthPanel.tsx`, Current Board/next-slate/dashboard/projection integration and temporal docs.
+
+Note: This module fixes the production class of defects where SportsDataIO MLB Eastern-local start times were treated as UTC and displayed hours early. SportsDataIO MLB naive `DateTime` fields now normalize through `America/New_York`, API timestamps remain explicit UTC instants, UI rendering is display-only, and legacy SportsDataIO rows are repaired on read without rewriting history. Lifecycle and betting eligibility are separated; time-only fallback cannot claim `LIVE`, `FINAL`, `POSTPONED` or `CANCELED`. Provider calls, prediction mutations, remote mutations, formulas, model weights, official thresholds, Current Board policy, champion/V7 state, settlement, learning and provider quota policy remain unchanged.
+
+### MLB Universal Projection Engine V1
+
+Status: Completed pending build/deployment verification.
+
+Evidence: `src/services/universal-projection-engine.service.ts`, `/api/projections`, `/api/mlb/projections`, `src/components/dashboard/UniversalProjectionEnginePanel.tsx`, `supabase/migrations/202607190002_universal_projection_history_v1.sql`, AI Brain projection-health integration and projection docs.
+
+Note: This module creates the sportsbook-independent projection foundation for future market expansion. It produces statistical projections only and does not generate betting recommendations, Official Picks, EV, Kelly or sportsbook-line comparisons. Projection history is separate from betting prediction history. Existing prediction formulas, Current Board, official thresholds, champion/V7 state, settlement, learning and provider logic are unchanged.
+
+### MLB Market Expansion Program V1
+
+Status: Completed pending build/deployment verification.
+
+Evidence: `docs/MLB_MARKET_EXPANSION_PROGRAM.md`, `src/services/mlb-market-expansion-roadmap.service.ts`, `/api/mlb/markets/expansion-roadmap`, and the AI Brain engineering advisor in `src/services/ai-performance-center.service.ts`.
+
+Note: This module makes Team Totals V1 the official Wave 1 MLB market expansion target using a weighted per-market readiness matrix and implementation-wave plan. It is an advisory/program layer only. No market was implemented, no provider data was acquired, and prediction formulas, official thresholds, Current Board, champion/V7 status, settlement, learning, provider logic and historical rows remain unchanged.
+
+### MLB Market Expansion Roadmap & Implementation Plan V1
+
+Status: Completed pending build/deployment verification.
+
+Evidence: `src/services/mlb-market-expansion-roadmap.service.ts`, `/api/mlb/markets/expansion-roadmap`, `src/components/dashboard/MlbMarketExpansionRoadmapPanel.tsx`, `docs/MLB_MARKET_EXPANSION_ROADMAP.md`, `docs/MLB_MARKET_TAXONOMY.md`, `docs/MLB_MARKET_PROVIDER_MATRIX.md`, `docs/MLB_MARKET_DATA_REQUIREMENTS.md`, `docs/MLB_MARKET_MODEL_REQUIREMENTS.md`, `docs/MLB_MARKET_SETTLEMENT_REQUIREMENTS.md`, `docs/MLB_MARKET_ACTIVATION_GATES.md` and `docs/MLB_MARKET_RISK_ANALYSIS.md`.
+
+Note: This module is roadmap and planning only. It verifies the current MLB market baseline from existing production contracts, defines a canonical expansion taxonomy, provider/data/model/settlement/historical matrices, user-value ranking, opportunity estimates, risk grades, weighted prioritization, implementation waves and activation gates. The recommended first implementation epic is Team Totals V1 as shadow-only, not official-pick eligible, pending verified team-total odds, historical line snapshots and deterministic settlement. No provider acquisition, prediction formula, model weight, threshold, champion/challenger/V7, Current Board, settlement, learning, historical-row or betting-activation behavior changed.
+
+### Production Readiness Audit V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/production-readiness-audit.service.ts`, `/api/production-readiness/audit`, `src/components/dashboard/ProductionReadinessAuditPanel.tsx`, `docs/PRODUCTION_READINESS_AUDIT.md`.
+
+Note: This module creates the final read-only certification layer for Beta readiness. It does not introduce new scoring engines or parallel architecture; it composes existing AIPEC/AI Brain, Current Board, Adaptive Operations, Top Picks and MLB market capability contracts. It reports platform scores, Current Board universe vs candidates, market support, official-pick blockers in plain English, data availability, freshness, scheduler/provider state and guardrails. Certification is public production `NO`, closed beta `YES` with remaining blockers for mature calibration/historical odds, player availability/lineup depth and high-frequency fresh odds cadence. No prediction, threshold, champion, V7, provider, settlement, learning or historical-row behavior changed.
+
+### Live Data Freshness & Adaptive Operations V1
+
+Status: Completed pending build/deployment verification.
+
+Evidence: `src/services/adaptive-refresh-orchestrator.service.ts`, `/api/operations/status`, `/api/operations/adaptive-refresh`, `/api/operations/adaptive-refresh/status`, `/api/operations/data-freshness`, `/api/operations/change-events`, `/api/operations/refresh-plan`, `/api/operations/provider-budget-forecast`, `/api/operations/validation`, `src/components/dashboard/AdaptiveOperationsPanel.tsx`, `src/components/dashboard/DataFreshnessPreviewCard.tsx` and adaptive operations docs.
+
+Note: This module adds a decision/reporting layer over existing operations rather than a second scheduler. It audits the configured Vercel cron, normalizes freshness domains, forecasts provider-budget mode and refresh work, exposes plan-only dry runs, and keeps stale odds from being treated as actionable. Recommendation-change events are typed empty until persistent event storage is introduced. Provider calls, prediction mutations, remote mutations from status reads, thresholds, champion/challenger/V7 state, Current Board policy, settlement, learning and historical records remain unchanged.
+
 ### MLB Production Certification V1
 
 Status: Completed and build verified.
@@ -31,6 +143,38 @@ Status: Completed and build verified.
 Evidence: `src/services/bsn-shadow-prediction-engine.service.ts`, `/api/bsn/predictions`, `/api/bsn/predictions/preview`, `/api/bsn/predictions/validation`, `/api/bsn/game/[id]`, `src/components/dashboard/BsnPredictionPreviewPanel.tsx` and `docs/bsn-prediction-engine-v1.md`.
 
 Note: This module adds probability-only BSN game predictions in shadow mode. It reuses BSN Intelligence, the Basketball Platform, Historical Builder, Feature Store Core and Shared Prediction SDK compatibility metadata without calling the SDK EV/Kelly recommendation builder. Outputs are limited to home win probability, away win probability, confidence, data quality, prediction quality and reasoning. Missing data remains unavailable, and empty upcoming schedules return typed empty previews. Official Picks, Current Board activation, EV/value, Bet Slip, AI Leans, Watchlist, Avoid, champion rows, thresholds, V7 promotion, settlement, learning, MLB behavior, provider calls and remote mutations are unchanged.
+
+### BSN Model Maturity Mission V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/bsn-model-maturity.service.ts`, `/api/bsn/model-maturity`, phase-specific maturity API routes, `src/components/dashboard/BsnModelMaturityPanel.tsx` and `docs/bsn-model-maturity-v1.md`.
+
+Note: This module adds BSN backtesting, calibration, a performance center, explanation quality checks, readiness scoring, shadow market intelligence and an activation audit without enabling betting. It reuses the existing BSN Shadow Prediction Engine for replay math and keeps outputs probability/science-only. The current audit recommends Continue Shadow because the sample is not large enough for official activation, verified odds are missing, immutable pregame feature snapshots are not persisted, and player availability/boxscore depth remain unavailable. Provider calls, remote mutations, Official Picks, Current Board, EV/value/Kelly, AI Leans, Watchlist, Bet Slip, champion rows, thresholds, V7 promotion, settlement, learning and MLB behavior are unchanged.
+
+### Universal AI Performance & Evolution Center V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/ai-performance-center.service.ts`, `/api/ai-performance-center`, `/api/ai-performance-center/daily-update`, `src/components/dashboard/AiPerformanceCenterPanel.tsx` and `docs/ai-performance-center-v1.md`.
+
+Note: This module creates one read-only AI performance center for every enabled sport. It uses the existing sport registry for automatic future-sport discovery, stored `prediction_history` for settled/persisted rows, BSN shadow replay for shadow-only maturity evidence, the Feature Store, Prediction SDK, calibration service and Current Board status. It reports universal history, report cards, trend analysis, model evolution, performance timeline, confidence analysis and readiness without creating recommendations or changing any prediction, settlement, learning, threshold, champion, Current Board, Bet Slip, provider or V7 behavior.
+
+### Pick Analyzer AI Brain & Trust System V1
+
+Status: Completed and build verified.
+
+Evidence: `src/services/ai-performance-center.service.ts`, `/api/performance`, `/api/performance/sports`, `/api/performance/[sport]`, `/api/performance/history`, `/api/performance/evolution`, `/api/performance/report-card`, `/api/performance/trust`, `/api/performance/goals`, `/api/performance/readiness`, `/api/performance/validation`, `/api/performance/daily-update`, `/performance`, `src/components/performance/PerformanceClient.tsx`, `supabase/migrations/202607190001_ai_performance_snapshots_v1.sql` and AI Brain documentation.
+
+Note: This module extends AIPEC rather than creating parallel metrics infrastructure. It adds AI Brain contracts, AI Trust Score V1, trust-change explanations, AI evolution comparisons, optional idempotent daily snapshots, Daily AI Report Card V1, goals/progress, maturity pipelines, public and internal performance views, universal prediction-history filtering and registry-driven future-sport integration. The snapshot migration is additive and does not rewrite prediction history. Provider calls, external acquisition, prediction model changes, official thresholds, Current Board policy, Official Picks, AI Lean/Watchlist/Avoid policy, Bet Slip/Kelly, settlement, learning mutations, champion/challenger/shadow status and V7 status remain unchanged.
+
+### AI Performance Center Product UI V1
+
+Status: Completed and build verified.
+
+Evidence: `/performance`, `src/components/performance/PerformanceProductClient.tsx`, `src/components/dashboard/AiPerformancePreviewCard.tsx`, dashboard navigation updates, `/api/performance` contract exposure and UI docs.
+
+Note: This is a product UI and contract-integration sprint on top of the existing AI Brain. It adds first-class navigation, dashboard discoverability, sport filtering, All Sports and sport-specific summaries, Trust Score and component display, Daily Report Card, stored-snapshot evolution state, model maturity, goals, prediction-history filtering and detail inspection, timeline summaries, engineering recommendations and collapsed internal diagnostics. It reuses existing metrics and APIs, does not duplicate engines, and does not modify prediction formulas, trust formulas, report-card formulas, readiness formulas, thresholds, champion/challenger/shadow state, V7, Current Board, Official Picks, settlement, learning, provider acquisition or historical rows.
 
 ### Premium AI Sports Intelligence Product Experience V1
 
@@ -1543,3 +1687,49 @@ Persistence or migration scope: No migration. Read-only status requests do not c
 Validation: `npm.cmd run build` exits 0, generates 235 static pages and exposes 238 API routes. The new status route is read-only, reports `providerCallsMade=0`, `remoteMutationsMade=0`, `historyImmutable=true`, `officialHistoryChanged=false` and `modelPromotionPerformed=false`.
 
 Completion criteria: The daily lifecycle has one canonical summary, the user-facing Today screen is simplified and duplicate information is collapsed, learning/promotion readiness are visible without automatic promotion, and provider quota/history remain untouched.
+
+### 31. SportsDataIO Discovery Integration V1
+
+Objective: Turn existing SportsDataIO MLB endpoint catalog, provider audit and stored import evidence into one official discovery contract without spending provider quota or activating unsupported markets.
+
+Status: Implemented as a read-only provider capability layer.
+
+Backend scope: `sportsdataio-mlb-discovery.service.ts` and `/api/providers/sportsdataio/discovery` classify Discovery Lab versus enterprise endpoints, endpoint runtime status, field quality, identity mapping, storage integration, projection reactivation blockers, provider quota posture and capability-matrix evidence.
+
+Frontend scope: Advanced Details > Provider now includes a compact SportsDataIO Discovery Lab panel.
+
+Persistence or migration scope: None. The module reads existing catalog code, `sports_sync_jobs` metadata and normalized tables only.
+
+Validation: `npm.cmd run build` exits 0. The discovery contract reports `providerCallsMade=0`, `remoteMutationsMade=0`, no prediction mutation, no official-pick changes and no model promotion.
+
+Completion criteria: Pick Analyzer can answer which SportsDataIO MLB endpoint should be trusted, blocked, retried or left catalog-only before spending quota; unsupported market and projection families remain blocked until full end-to-end support exists.
+
+### 32. Live Provider Verification and Data Acquisition V1
+
+Objective: Replace provider assumptions with controlled live runtime evidence across all connected providers while preserving all prediction, settlement and recommendation guardrails.
+
+Status: Implemented as a protected live verification route. Dry-run is public/read-only; live mode requires `CRON_SECRET`.
+
+Backend scope: `live-provider-verification.service.ts` and `/api/providers/live-verification` verify SportsDataIO, The Odds API, MLB Stats API and the existing BSN homepage connector. The service profiles fields, endpoint rows, usable/empty/identity fields, provider health, canonical ownership, acquisition scores, before/after entity mapping counts, before/after team-game-stat counts and before/after projection counts.
+
+Persistence or migration scope: No migration. Live mode writes one sanitized `sports_sync_jobs` checkpoint. Durable data acquisition still uses existing provider importers.
+
+Validation: Local `npm.cmd run build` exits 0. Live execution remains protected and budget capped.
+
+Completion criteria: Runtime evidence can be gathered under strict provider budgets without exposing secrets, duplicating importers, changing model behavior or fabricating data.
+
+### 33. Production Operations Completion and End-to-End Reliability V1
+
+Objective: Make existing production operations truthful and executable without duplicating schedulers, provider adapters, feature builders, prediction engines or projection engines.
+
+Status: Implemented as an operations reliability layer.
+
+Backend scope: `/api/operations/health`, upgraded `/api/operations/adaptive-refresh`, `operations-health.service.ts` and Adaptive Refresh protected execution through the existing operating-day executor.
+
+Frontend scope: Advanced Details > Data includes a compact Operations Control Center.
+
+Persistence or migration scope: No migration. Existing `operating_day_lifecycle_events` and `sports_sync_jobs` remain the execution ledgers.
+
+Validation: `npm.cmd run build` exits 0. Live execution requires `CRON_SECRET`, provider budget approval and an action lock.
+
+Completion criteria: Adaptive Refresh no longer claims live execution when it only planned; due supported work can execute through the protected existing operating-day pipeline, and `/api/operations/health` reports real readiness, blockers and freshness.

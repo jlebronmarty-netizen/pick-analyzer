@@ -16,6 +16,7 @@ import {
   SPORTSDATAIO_DISCOVERY_LAB_ORIGIN,
   resolveSportsDataIoDiscoveryLabUrl,
 } from '@/services/sportsdataio-discovery-lab-url.service'
+import { normalizeSportsDataIoMlbGameDateTime, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const PROVIDER = 'sportsdataio'
 const PROVIDER_VARIANT = 'sportsdataio_discovery_lab'
@@ -44,6 +45,7 @@ type Request = {
   finalPregameRefresh?: boolean | null
   operatingDayRefresh?: boolean | null
   operatingDayFinalRefresh?: boolean | null
+  forceRefresh?: boolean | null
   maximumRequests?: number | null
   timeoutMs?: number | null
 }
@@ -94,6 +96,26 @@ type OddsRow = {
   line: number | null
   snapshot_time: string
   metadata: Record<string, unknown> | null
+}
+
+type ProviderCheckEvidence = {
+  providerCheckRequired: boolean
+  providerCheckAttempted: boolean
+  providerCheckCompleted: boolean
+  provider: typeof PROVIDER
+  endpoint: string | null
+  category: 'mlb_current_game_odds'
+  callsMade: number
+  responseTimestamp: string | null
+  sourceLatestTimestamp: string | null
+  rowsReceived: number
+  snapshotsCompared: number
+  changesDetected: number
+  rowsInserted: number
+  rowsUpdated: number
+  rowsSkipped: number
+  downstreamRebuildRequired: boolean
+  failureReason: string | null
 }
 
 function nowIso() {
@@ -169,6 +191,36 @@ function parseDateMs(value: string | null | undefined) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function maxIso(values: Array<string | null | undefined>) {
+  return values.filter(Boolean).sort().at(-1) ?? null
+}
+
+function oddsComparisonKey(row: Pick<OddsRow, 'event_id' | 'sportsbook' | 'market' | 'outcome' | 'line'>) {
+  return stableId([row.event_id, row.sportsbook, row.market, row.outcome, row.line ?? 'null'])
+}
+
+function providerCheckEvidence(input: Partial<ProviderCheckEvidence> = {}): ProviderCheckEvidence {
+  return {
+    providerCheckRequired: input.providerCheckRequired ?? false,
+    providerCheckAttempted: input.providerCheckAttempted ?? false,
+    providerCheckCompleted: input.providerCheckCompleted ?? false,
+    provider: PROVIDER,
+    endpoint: input.endpoint ?? null,
+    category: 'mlb_current_game_odds',
+    callsMade: input.callsMade ?? 0,
+    responseTimestamp: input.responseTimestamp ?? null,
+    sourceLatestTimestamp: input.sourceLatestTimestamp ?? null,
+    rowsReceived: input.rowsReceived ?? 0,
+    snapshotsCompared: input.snapshotsCompared ?? 0,
+    changesDetected: input.changesDetected ?? 0,
+    rowsInserted: input.rowsInserted ?? 0,
+    rowsUpdated: input.rowsUpdated ?? 0,
+    rowsSkipped: input.rowsSkipped ?? 0,
+    downstreamRebuildRequired: input.downstreamRebuildRequired ?? false,
+    failureReason: input.failureReason ?? null,
+  }
+}
+
 function selectedDateFromEvents(events: EventRow[], now: Date) {
   const future = events
     .filter((event) => {
@@ -200,9 +252,7 @@ function teamKey(row: Record<string, unknown>, side: 'home' | 'away') {
 }
 
 function eventStart(row: Record<string, unknown>) {
-  const candidate = safeString(row.DateTimeUTC) || safeString(row.DateTime) || safeString(row.Day) || safeString(row.GameDate)
-  const parsed = new Date(candidate)
-  return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null
+  return normalizeSportsDataIoMlbGameDateTime(row).normalizedUtc
 }
 
 function eventStatus(value: unknown) {
@@ -288,6 +338,34 @@ async function countExisting(table: string, ids: string[]) {
   return existing
 }
 
+async function loadExistingOddsByIds(ids: string[]) {
+  if (!ids.length) return new Map<string, OddsRow>()
+  const existing = new Map<string, OddsRow>()
+  for (let index = 0; index < ids.length; index += 200) {
+    const slice = ids.slice(index, index + 200)
+    const result = await supabaseAdmin
+      .from('sports_odds_snapshots')
+      .select('id, event_id, sportsbook, market, outcome, price, line, snapshot_time, metadata')
+      .in('id', slice)
+    if (result.error) throw new Error(`sports_odds_snapshots existing-row detail check failed: ${result.error.message}`)
+    for (const row of result.data ?? []) existing.set(String(row.id), row as OddsRow)
+  }
+  return existing
+}
+
+function oddsMateriallyChanged(row: OddsRow, existing: OddsRow | undefined) {
+  if (!existing) return true
+  return (
+    String(row.event_id) !== String(existing.event_id) ||
+    String(row.sportsbook) !== String(existing.sportsbook) ||
+    String(row.market) !== String(existing.market) ||
+    String(row.outcome) !== String(existing.outcome) ||
+    Number(row.price) !== Number(existing.price) ||
+    String(row.line ?? 'null') !== String(existing.line ?? 'null') ||
+    String(row.snapshot_time) !== String(existing.snapshot_time)
+  )
+}
+
 async function countExistingMappings(rows: Array<Record<string, unknown>>) {
   if (!rows.length) return new Set<string>()
   const ids = rows.map((row) => String(row.provider_id))
@@ -316,17 +394,15 @@ async function loadFutureEvents() {
 }
 
 async function loadEventsForDate(date: string) {
-  const start = new Date(`${date}T04:00:00.000Z`)
-  const end = new Date(start)
-  end.setUTCDate(end.getUTCDate() + 1)
+  const range = zonedUtcRange(date, 'America/Puerto_Rico')
   const result = await supabaseAdmin
     .from('sport_events')
     .select('id, sport_key, league_key, season, home_team_id, away_team_id, home_team, away_team, start_time, status, home_score, away_score, provider_ids, metadata')
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
     .eq('season', SEASON)
-    .gte('start_time', start.toISOString())
-    .lt('start_time', end.toISOString())
+    .gte('start_time', range.utcStart)
+    .lt('start_time', range.utcEndExclusive)
     .order('start_time', { ascending: true })
     .limit(200)
   if (result.error) throw new Error(`sport_events date read failed: ${result.error.message}`)
@@ -353,7 +429,8 @@ function normalizeSchedule(payload: Record<string, unknown>[], selectedDate: str
 
   for (const game of payload) {
     const gameId = providerGameId(game)
-    const start = eventStart(game)
+    const timeNormalization = normalizeSportsDataIoMlbGameDateTime(game)
+    const start = timeNormalization.normalizedUtc
     const homeProviderId = providerTeamId(game, 'home')
     const awayProviderId = providerTeamId(game, 'away')
     const homeKey = teamKey(game, 'home')
@@ -416,6 +493,15 @@ function normalizeSchedule(payload: Record<string, unknown>[], selectedDate: str
       metadata: quarantine({
         entityType: 'event',
         providerStatus: game.Status ?? null,
+        providerDateTimeRaw: timeNormalization.raw,
+        providerTimezone: timeNormalization.providerTimezone,
+        temporalNormalization: {
+          contract: 'mlb_temporal_truth_v1',
+          source: timeNormalization.source,
+          classification: timeNormalization.classification,
+          normalizedUtc: timeNormalization.normalizedUtc,
+          warnings: timeNormalization.warnings,
+        },
         selectedSlateDate: selectedDate,
         day: game.Day ?? null,
         doubleHeaderGame: game.DoubleHeaderGame ?? game.GameNumber ?? null,
@@ -3033,6 +3119,7 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   const finalPregameRefresh = request.finalPregameRefresh === true
   const operatingDayRefresh = request.operatingDayRefresh === true
   const operatingDayFinalRefresh = request.operatingDayFinalRefresh === true
+  const forceRefresh = request.forceRefresh === true
   const finalRefreshLike = finalPregameRefresh || operatingDayFinalRefresh
   const operatingDayId = safeString(request.operatingDayId) || null
   const maximumRequests = Math.min(Number(request.maximumRequests ?? MAX_CALLS) || MAX_CALLS, MAX_CALLS)
@@ -3048,6 +3135,10 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
       dryRun,
       generatedAt,
       providerUsage: { externalProviderCallsMade: 0, source: 'persisted_future_event_audit' },
+      providerCheck: providerCheckEvidence({
+        providerCheckRequired: forceRefresh,
+        failureReason: forceRefresh ? 'no_future_games' : null,
+      }),
       selectedDate: null,
       message: 'No future MLB slate exists in persisted event state.',
     }
@@ -3064,6 +3155,11 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
       selectedDate,
       operatingDayId,
       providerUsage: { externalProviderCallsMade: 0, source: 'dry_run_no_provider_calls' },
+      providerCheck: providerCheckEvidence({
+        providerCheckRequired: forceRefresh,
+        endpoint: `/api/mlb/odds/json/GameOddsByDate/${selectedDate}`,
+        failureReason: dryRun ? 'dry_run_no_provider_calls' : 'unconfirmed_no_provider_calls',
+      }),
       plannedEndpoints: [
         ...(finalRefreshLike ? [] : [`/api/mlb/odds/json/GamesByDate/${sportsDataIoMlbDate(selectedDate)}`]),
         `/api/mlb/odds/json/GameOddsByDate/${selectedDate}`,
@@ -3142,6 +3238,8 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     const start = parseDateMs(event.start_time)
     return start !== null && start > nowMs && event.status === 'scheduled'
   })
+  const oddsEndpoint = `/api/mlb/odds/json/GameOddsByDate/${selectedDate}`
+  const providerBackedOddsRefresh = forceRefresh || finalRefreshLike
   if (!futureSlate.length) {
     const startedOrClosed = finalRefreshLike && events.length > 0
     return {
@@ -3162,6 +3260,15 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
       recommendationsChanged: 0,
       locked: startedOrClosed,
       providerUsage: { externalProviderCallsMade: calls },
+      providerCheck: providerCheckEvidence({
+        providerCheckRequired: providerBackedOddsRefresh,
+        providerCheckAttempted: calls > 0,
+        providerCheckCompleted: calls > 0,
+        endpoint: oddsEndpoint,
+        callsMade: calls,
+        responseTimestamp: calls > 0 ? generatedAt : null,
+        failureReason: startedOrClosed ? 'locked_or_started' : 'no_future_games',
+      }),
       endpoints,
       checkpoints: { scheduleJobId },
       message: startedOrClosed
@@ -3170,7 +3277,6 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     }
   }
 
-  const oddsEndpoint = `/api/mlb/odds/json/GameOddsByDate/${selectedDate}`
   const oddsPhase = operatingDayRefresh
     ? 'operating_day_odds_capture'
     : operatingDayFinalRefresh
@@ -3178,16 +3284,30 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     : finalPregameRefresh
       ? 'final_pregame_odds_capture'
       : 'odds_capture'
-  const existingOddsCheckpoint = await loadCompletedCheckpoint(selectedDate, oddsPhase)
+  const existingOddsCheckpoint = providerBackedOddsRefresh ? null : await loadCompletedCheckpoint(selectedDate, oddsPhase)
   let oddsJobId = existingOddsCheckpoint ? String(existingOddsCheckpoint.id) : ''
   let safeOddsRows = await loadPersistedSafeOddsForDate(events)
+  const persistedBeforeProviderCheck = safeOddsRows
   let duplicateRows = 0
+  let oddsInserted = 0
+  let oddsUpdated = 0
+  let rowsSkippedByOlderSnapshot = 0
+  let oddsRowsReceived = 0
+  let oddsResponseTimestamp: string | null = null
+  let oddsProviderCheck = providerCheckEvidence({
+    providerCheckRequired: providerBackedOddsRefresh,
+    endpoint: oddsEndpoint,
+    snapshotsCompared: persistedBeforeProviderCheck.length,
+    sourceLatestTimestamp: maxIso(persistedBeforeProviderCheck.map((row) => row.snapshot_time)),
+  })
   const warnings: string[] = []
   if (!existingOddsCheckpoint) {
     const oddsStarted = nowIso()
     calls += 1
     const odds = await fetchJson(oddsEndpoint, apiKey, timeoutMs)
     endpoints.push(odds.endpointResult)
+    oddsRowsReceived = odds.payload.length
+    oddsResponseTimestamp = nowIso()
     const normalizedOdds = normalizeSportsDataIoMlbGameOdds({
       payload: odds.payload,
       existingEvents: eventReferences(events),
@@ -3195,7 +3315,13 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     })
     duplicateRows = normalizedOdds.counts.duplicateRows
     const eventById = new Map(events.map((event) => [event.id, event]))
-    safeOddsRows = normalizedOdds.rows
+    const latestPersistedByKey = new Map<string, string>()
+    for (const row of persistedBeforeProviderCheck) {
+      const key = oddsComparisonKey(row)
+      const existing = latestPersistedByKey.get(key)
+      if (!existing || String(row.snapshot_time) > existing) latestPersistedByKey.set(key, String(row.snapshot_time))
+    }
+    const pregameRows = normalizedOdds.rows
       .map((row) => ({
         ...row,
         metadata: {
@@ -3218,14 +3344,43 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
         const timestamp = parseDateMs(row.snapshot_time)
         return eventStart !== null && timestamp !== null && timestamp < eventStart
       })
-    const oddsAfterStart = normalizedOdds.rows.length - safeOddsRows.length
-    const existingOdds = await countExisting('sports_odds_snapshots', safeOddsRows.map((row) => row.id))
+    safeOddsRows = pregameRows
+      .filter((row) => {
+        const latestPersisted = latestPersistedByKey.get(oddsComparisonKey(row))
+        if (!latestPersisted || String(row.snapshot_time) >= latestPersisted) return true
+        rowsSkippedByOlderSnapshot += 1
+        return false
+      })
+    const oddsAfterStart = normalizedOdds.rows.length - pregameRows.length
+    const existingOddsById = await loadExistingOddsByIds(safeOddsRows.map((row) => row.id))
     if (safeOddsRows.length) {
       const result = await supabaseAdmin.from('sports_odds_snapshots').upsert(safeOddsRows, { onConflict: 'id' })
       if (result.error) throw new Error(`sports_odds_snapshots upsert failed: ${result.error.message}`)
     }
-    const oddsInserted = safeOddsRows.filter((row) => !existingOdds.has(row.id)).length
-    const oddsUpdated = safeOddsRows.length - oddsInserted
+    oddsInserted = safeOddsRows.filter((row) => !existingOddsById.has(row.id)).length
+    oddsUpdated = safeOddsRows.filter((row) => {
+      const existing = existingOddsById.get(row.id)
+      return Boolean(existing && oddsMateriallyChanged(row as OddsRow, existing))
+    }).length
+    const rowsSkipped = normalizedOdds.counts.recordsSkipped + oddsAfterStart + rowsSkippedByOlderSnapshot
+    const sourceLatestTimestamp = maxIso(normalizedOdds.rows.map((row) => row.snapshot_time))
+    oddsProviderCheck = providerCheckEvidence({
+      providerCheckRequired: providerBackedOddsRefresh,
+      providerCheckAttempted: true,
+      providerCheckCompleted: true,
+      endpoint: oddsEndpoint,
+      callsMade: 1,
+      responseTimestamp: oddsResponseTimestamp,
+      sourceLatestTimestamp,
+      rowsReceived: oddsRowsReceived,
+      snapshotsCompared: persistedBeforeProviderCheck.length,
+      changesDetected: oddsInserted + oddsUpdated,
+      rowsInserted: oddsInserted,
+      rowsUpdated: oddsUpdated,
+      rowsSkipped,
+      downstreamRebuildRequired: oddsInserted + oddsUpdated > 0,
+      failureReason: safeOddsRows.length ? null : rowsSkippedByOlderSnapshot > 0 ? 'provider_response_older_than_stored_odds' : 'provider_returned_no_current_markets',
+    })
     oddsJobId = await writeCheckpoint({
       phase: oddsPhase,
       selectedDate,
@@ -3235,13 +3390,15 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
       recordsFetched: odds.payload.length,
       inserted: oddsInserted,
       updated: oddsUpdated,
-      skipped: normalizedOdds.counts.recordsSkipped + oddsAfterStart,
+      skipped: rowsSkipped,
       errorCount: normalizedOdds.unresolvedProviderGameIds.length || oddsAfterStart ? 1 : 0,
       providerCallsUsed: 1,
       metadata: {
+        providerCheck: oddsProviderCheck,
         validation: {
           unresolvedEvents: normalizedOdds.unresolvedProviderGameIds,
           oddsAfterStart,
+          olderSnapshotsSkipped: rowsSkippedByOlderSnapshot,
           duplicateRows: normalizedOdds.counts.duplicateRows,
         },
         marketCounts: {
@@ -3330,6 +3487,17 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     success: true,
     mode: MODE,
     status: operatingDayFinalRefresh ? 'final_refresh_completed' : 'completed',
+    refreshStatus: oddsProviderCheck.providerCheckCompleted
+      ? oddsProviderCheck.rowsInserted + oddsProviderCheck.rowsUpdated > 0
+        ? 'SUCCESS_CHANGED'
+        : oddsProviderCheck.rowsReceived > 0 && safeOddsRows.length === 0
+          ? 'PROVIDER_DELAYED'
+          : oddsProviderCheck.rowsReceived === 0
+            ? 'PROVIDER_NO_CURRENT_MARKETS'
+            : 'SUCCESS_NO_CHANGE'
+      : providerBackedOddsRefresh
+        ? 'MISSED_REFRESH'
+        : 'SUCCESS_NO_CHANGE',
     generatedAt,
     selectedDate,
     operatingDayId,
@@ -3340,6 +3508,15 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     eventsSkippedStarted: 0,
     providerCallsPlanned: existingOddsCheckpoint ? 0 : 1,
     providerCallsMade: calls,
+    providerCheckRequired: oddsProviderCheck.providerCheckRequired,
+    providerCheckAttempted: oddsProviderCheck.providerCheckAttempted,
+    providerCheckCompleted: oddsProviderCheck.providerCheckCompleted,
+    providerCheck: oddsProviderCheck,
+    oddsChangesDetected: oddsProviderCheck.changesDetected,
+    rowsReceived: oddsProviderCheck.rowsReceived,
+    rowsInserted: oddsProviderCheck.rowsInserted,
+    rowsUpdated: oddsProviderCheck.rowsUpdated,
+    rowsSkipped: oddsProviderCheck.rowsSkipped,
     snapshotsInserted: preview.snapshots.inserted,
     snapshotsReused: preview.snapshots.reused,
     predictionsRegenerated: preview.predictions.inserted + preview.predictions.reused,

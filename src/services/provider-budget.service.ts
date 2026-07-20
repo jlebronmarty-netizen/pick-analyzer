@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const DEFAULT_DAILY_CALL_BUDGET = 1000
 const DEFAULT_SOFT_RESERVE = 25
@@ -29,14 +30,12 @@ function numberFromEnv(name: string, fallback: number) {
 }
 
 function localDate(now = new Date()) {
-  return new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  return localDateInTimeZone(now.toISOString(), TIMEZONE) ?? now.toISOString().slice(0, 10)
 }
 
 function utcRangeForLocalDate(date: string) {
-  const start = new Date(`${date}T04:00:00.000Z`)
-  const end = new Date(start)
-  end.setUTCDate(end.getUTCDate() + 1)
-  return { utcStart: start.toISOString(), utcEndExclusive: end.toISOString() }
+  const range = zonedUtcRange(date, TIMEZONE)
+  return { utcStart: range.utcStart, utcEndExclusive: range.utcEndExclusive }
 }
 
 function config() {

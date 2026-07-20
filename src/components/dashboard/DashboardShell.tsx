@@ -25,13 +25,15 @@ const navItems = [
 
 const compactNavItems = [
   { id: 'today', label: 'User Mode', icon: '01' },
-  { id: 'overview', label: 'Advanced Overview', icon: '02' },
-  { id: 'model-lab', label: 'Model', icon: '03' },
-  { id: 'data-operations', label: 'Data', icon: '04' },
-  { id: 'advanced', label: 'Administration', icon: '05' },
+  { id: 'performance', label: 'Performance', icon: '02', href: '/performance' },
+  { id: 'overview', label: 'Advanced Overview', icon: '03' },
+  { id: 'model-lab', label: 'Model', icon: '04' },
+  { id: 'data-operations', label: 'Data', icon: '05' },
+  { id: 'advanced', label: 'Administration', icon: '06' },
 ]
 
 const toolNavItems = [
+  { href: '/projections', label: 'Projections', icon: 'PR' },
   { href: '/betting-workbench', label: 'Betting Workbench', icon: 'BW' },
   { href: '/most-likely', label: 'Most Likely', icon: 'ML' },
   { href: '/best-value', label: 'Best Value', icon: 'BV' },
@@ -67,7 +69,7 @@ export default function DashboardShell({
               {compactNavItems.map((item) => (
                 <a
                   key={item.id}
-                  href={`#${item.id}`}
+                  href={'href' in item ? item.href : `#${item.id}`}
                   className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
@@ -129,6 +131,13 @@ export default function DashboardShell({
                   <span className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 lg:inline-flex">
                     OFFICIAL PICKS ONLY
                   </span>
+
+                  <a
+                    href="/performance"
+                    className="hidden rounded-full border border-emerald-500/30 bg-emerald-950/20 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-900/30 lg:inline-flex"
+                  >
+                    Performance
+                  </a>
 
                   <a
                     href="/betting-workbench"

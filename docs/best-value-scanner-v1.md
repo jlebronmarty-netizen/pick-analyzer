@@ -45,7 +45,7 @@ The categories are display-only:
 For the current `NYM @ PHI` prospective slate:
 
 - Default Best Value view: 0 returned candidates, because no current candidate has positive edge/EV.
-- Show passes enabled: 3 returned candidates, all `No Modeled Value`.
+- User-facing Best Value view does not show pass rows. Completed scans with zero positive EV plus positive edge rows display `No positive-value opportunities today.`
 - Official picks: 0.
 - Provider calls: 0.
 - Remote mutations: 0.

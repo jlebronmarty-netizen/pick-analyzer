@@ -28,6 +28,8 @@ type StoredEvent = {
   updated_at: string | null
 }
 
+export type BsnStoredEvent = StoredEvent
+
 type LoadResult<T> = {
   rows: T[]
   error: string | null
@@ -126,7 +128,7 @@ async function loadRows<T>(table: string, select: string, limit = 5000): Promise
   }
 }
 
-async function loadStoredGames() {
+export async function loadBsnStoredGamesForPrediction() {
   const [events, games] = await Promise.all([
     loadRows<{
       id: string
@@ -390,7 +392,7 @@ function probabilityModel(homeName: string, awayName: string, features: ReturnTy
   }
 }
 
-function buildPrediction(event: StoredEvent, profiles: BsnTeamProfile[], completedGames: StoredEvent[]): BsnShadowPrediction {
+export function buildBsnShadowPredictionForEvent(event: StoredEvent, profiles: BsnTeamProfile[], completedGames: StoredEvent[]): BsnShadowPrediction {
   const home = resolveTeam(profiles, event.home_team_id, event.home_team)
   const away = resolveTeam(profiles, event.away_team_id, event.away_team)
   const homeName = teamName(home, event.home_team)
@@ -458,14 +460,14 @@ function validationFromPredictions(predictions: BsnShadowPrediction[]) {
 export async function getBsnShadowPredictionEngine(options: { includeValidation?: boolean } = {}) {
   const generatedAt = nowIso()
   const [games, intelligence] = await Promise.all([
-    loadStoredGames(),
+    loadBsnStoredGamesForPrediction(),
     getBsnIntelligenceEngine(),
   ])
   const completedGames = games.rows.filter(isCompleted)
   const upcomingGames = games.rows
     .filter((event) => isUpcoming(event))
     .sort((left, right) => new Date(left.start_time ?? 0).getTime() - new Date(right.start_time ?? 0).getTime())
-  const predictions = upcomingGames.map((event) => buildPrediction(event, intelligence.teamProfiles, completedGames))
+  const predictions = upcomingGames.map((event) => buildBsnShadowPredictionForEvent(event, intelligence.teamProfiles, completedGames))
   const validation = validationFromPredictions(predictions)
   const featureDefinitions = getFeatureDefinitions({ sportKey: BSN_SPORT_KEY, market: 'moneyline' })
   const featureStore = getFeatureStoreStatus()
@@ -657,7 +659,7 @@ export async function validateBsnShadowPredictionEngine() {
     metadata: null,
     updated_at: generatedAt,
   }
-  const fixturePrediction = buildPrediction(fixtureEvent, [fixtureHome, fixtureAway], [])
+  const fixturePrediction = buildBsnShadowPredictionForEvent(fixtureEvent, [fixtureHome, fixtureAway], [])
   const intelligenceValidation = await validateBsnIntelligenceEngine()
   const featureStore = getFeatureStoreStatus()
   const featureDefinitions = getFeatureDefinitions({ sportKey: BSN_SPORT_KEY, market: 'moneyline' })
