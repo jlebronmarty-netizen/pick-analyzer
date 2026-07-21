@@ -1159,7 +1159,62 @@ async function loadMlbTeams() {
   return { teams, byProviderId, byAbbreviation }
 }
 
-async function loadMlbPlayers() {
+async function loadMlbPlayerMappings(season: string) {
+  const mappings: Array<{
+    internal_id: string
+    provider_id: string
+    season: string
+  }> = []
+  const pageSize = 1000
+
+  for (let from = 0; ; from += pageSize) {
+    const result = await supabaseAdmin
+      .from('provider_entity_mappings')
+      .select('internal_id, provider_id, season')
+      .eq('sport_key', SPORT_KEY)
+      .eq('provider', PROVIDER)
+      .eq('entity_type', 'player')
+      .in('season', [season, ''])
+      .range(from, from + pageSize - 1)
+    if (result.error) throw new Error(`provider_entity_mappings player lookup failed: ${result.error.message}`)
+    const page = result.data ?? []
+    mappings.push(...page)
+    if (page.length < pageSize) break
+  }
+
+  return mappings
+}
+
+function addMappedMlbPlayerProviderIds<T extends { id: string }>(
+  byProviderId: Map<string, T>,
+  playerById: Map<string, T>,
+  mappings: Array<{ internal_id: string; provider_id: unknown }>
+) {
+  let added = 0
+  let conflicts = 0
+  let missingPlayers = 0
+
+  for (const mapping of mappings) {
+    const player = playerById.get(mapping.internal_id)
+    if (!player) {
+      missingPlayers += 1
+      continue
+    }
+    const providerId = safeString(mapping.provider_id)
+    if (!providerId) continue
+    const existing = byProviderId.get(providerId)
+    if (existing && existing.id !== player.id) {
+      conflicts += 1
+      continue
+    }
+    if (!existing) added += 1
+    byProviderId.set(providerId, player)
+  }
+
+  return { added, conflicts, missingPlayers }
+}
+
+async function loadMlbPlayers(season: string) {
   const result = await supabaseAdmin
     .from('sport_players')
     .select('id, team_id, display_name, provider_ids')
@@ -1168,6 +1223,7 @@ async function loadMlbPlayers() {
     .limit(10000)
   if (result.error) throw new Error(`sport_players lookup failed: ${result.error.message}`)
   const players = result.data ?? []
+  const playerById = new Map(players.map((player) => [player.id, player]))
   const byProviderId = new Map<string, (typeof players)[number]>()
   for (const player of players) {
     const providerIds = (player.provider_ids as Record<string, unknown> | null) ?? {}
@@ -1175,6 +1231,9 @@ async function loadMlbPlayers() {
       if (value !== null && value !== undefined) byProviderId.set(String(value), player)
     }
   }
+
+  addMappedMlbPlayerProviderIds(byProviderId, playerById, await loadMlbPlayerMappings(season))
+
   return { players, byProviderId }
 }
 
@@ -2646,7 +2705,7 @@ async function executeSeasonWideUnit({
     }
 
     const teams = await loadMlbTeams()
-    const players = unit.domain === 'player_season_stats' ? await loadMlbPlayers() : null
+    const players = unit.domain === 'player_season_stats' ? await loadMlbPlayers(request.season) : null
     let rows: Array<Record<string, unknown>> = []
     let mappings: Array<Record<string, unknown>> = []
     let unresolvedTeams: string[] = []
@@ -2878,7 +2937,7 @@ async function executeDateUnit({
 
     const teams = await loadMlbTeams()
     const events = await loadMlbEvents(request.season)
-    const players = unit.domain === 'player_game_stats_by_date' ? await loadMlbPlayers() : null
+    const players = unit.domain === 'player_game_stats_by_date' ? await loadMlbPlayers(request.season) : null
     let rows: Array<Record<string, unknown>> = []
     let mappings: Array<Record<string, unknown>> = []
     let unresolvedTeams: string[] = []
@@ -3455,6 +3514,19 @@ export function validateSportsDataIoMlbImportDurabilityFixtures() {
     ageMs: DEFAULT_TIMEOUT_MS + JOB_STUCK_GRACE_MS + 1000,
     providerCallState: 'ATTEMPTED' satisfies ProviderCallState,
   }
+  const playerA = { id: 'baseball_mlb:mlb:sportsdataio:player:1001' }
+  const playerB = { id: 'baseball_mlb:mlb:sportsdataio:player:1002' }
+  const playerLookup = new Map<string, typeof playerA | typeof playerB>([['7', playerB]])
+  const playerById = new Map<string, typeof playerA | typeof playerB>([
+    [playerA.id, playerA],
+    [playerB.id, playerB],
+  ])
+  const mappedPlayerLookup = addMappedMlbPlayerProviderIds(playerLookup, playerById, [
+    { internal_id: playerA.id, provider_id: 1001 },
+    { internal_id: playerB.id, provider_id: '7' },
+    { internal_id: 'missing-player', provider_id: '1003' },
+    { internal_id: playerA.id, provider_id: '7' },
+  ])
   const checks = [
     ['running job metadata exists before provider call', runningMetadata.checkpoint.status === 'running'],
     ['provider call starts as not attempted', runningMetadata.providerCallAccounting.state === 'NOT_ATTEMPTED'],
@@ -3471,6 +3543,11 @@ export function validateSportsDataIoMlbImportDurabilityFixtures() {
     ['recent failed checkpoint blocks immediate retry', recentFailed === true],
     ['stale failed checkpoint can become retry eligible after cooldown', staleFailed === false],
     ['route provider timeout leaves platform margin', DEFAULT_TIMEOUT_MS === 60000 && 300000 - DEFAULT_TIMEOUT_MS >= 30000],
+    ['exact player provider mapping resolves canonical player', playerLookup.get('1001')?.id === playerA.id],
+    ['player provider mapping normalizes numeric ids', playerLookup.has('1001')],
+    ['conflicting player provider mapping is not overwritten', playerLookup.get('7')?.id === playerB.id],
+    ['missing canonical player mapping is ignored', !playerLookup.has('1003')],
+    ['player mapping merge reports conflicts and missing players', mappedPlayerLookup.conflicts === 1 && mappedPlayerLookup.missingPlayers === 1],
     ['durability fixture uses zero provider calls', true],
   ] as const
   const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)

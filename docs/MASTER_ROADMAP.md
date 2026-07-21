@@ -1905,3 +1905,17 @@ Persistence or migration scope: Additive migration `202607210001_sports_sync_job
 Validation: `npm.cmd run build` exits 0. Durability fixture validation passes 11/11 with `providerCallsMade=0` and `remoteMutationsMade=0`. Jobs smoke is read-only and reports 0 running, 0 stuck and 0 reconciliation required.
 
 Completion criteria: Every live MLB historical import branch creates a `sports_sync_jobs` running checkpoint before provider transport, records provider call accounting states, converges to a terminal logical state when control returns, and exposes stuck-job reconciliation evidence without automatic retry.
+
+### 35. MLB Player Identity Resolution V1
+
+Objective: Resolve SportsDataIO MLB provider player identities deterministically before any multi-date player-game-stat backfill.
+
+Status: Implemented and reconciled for the controlled 2026-07-17 PlayerGameStatsByDate import.
+
+Backend scope: `sportsdataio-mlb-historical-import-executor.service.ts` now loads exact SportsDataIO MLB `provider_entity_mappings` with `entity_type='player'` and merges them into canonical player lookups only when the mapped `sport_players.id` exists. Conflicting provider IDs are not overwritten, missing canonical players are ignored, and no fuzzy name matching is used.
+
+Persistence or migration scope: No migration. The existing 2026-07-17 stat rows were reconciled using stored data only by updating `sport_player_stats.player_id` and resolution metadata. Statistical values, event IDs, team IDs, predictions, recommendations, Current Board, settlement and dashboard logic were not changed.
+
+Validation: The 2026-07-17 imported stat rows improved from 82/418 player_id coverage to 418/418. Reconciliation updated 336 rows, found 0 conflicts, 0 unknown provider IDs, 0 duplicate stat IDs and 0 unresolved player flags after completion. Idempotency verification would make 0 additional updates. The durability fixture validation includes exact mapping, numeric/string provider ID normalization, conflict preservation and missing-canonical-player checks.
+
+Completion criteria: Exact player identity resolution is available to future MLB historical imports, the controlled single-date import is fully reconciled, unresolved classifications are empty for that date, and a 3-date pilot can be considered only under a separate explicit authorization.
