@@ -22,6 +22,7 @@ import { validateMlbPlayerDataExcellenceFixtures } from '@/services/mlb-player-d
 import { validateSettlementReconciliationFixtures } from '@/services/settlement-reconciliation.service'
 import { validateSportsAnalystFixtures } from '@/services/sports-analyst.service'
 import { validatePlayerIntelligenceFixtures } from '@/services/player-intelligence.service'
+import { validateUniversalEventIdentityFixtures } from '@/services/universal-event-identity.service'
 
 export async function GET(request: NextRequest) {
   const adaptive = validateAdaptiveRefreshFixtures()
@@ -46,6 +47,7 @@ export async function GET(request: NextRequest) {
   const settlementReconciliation = validateSettlementReconciliationFixtures()
   const sportsAnalyst = validateSportsAnalystFixtures()
   const playerIntelligence = validatePlayerIntelligenceFixtures()
+  const universalEventIdentity = validateUniversalEventIdentityFixtures()
   return apiOk({
     ...adaptive,
     success:
@@ -70,7 +72,8 @@ export async function GET(request: NextRequest) {
       mlbPlayerDataExcellence.success &&
       settlementReconciliation.success &&
       sportsAnalyst.success &&
-      playerIntelligence.success,
+      playerIntelligence.success &&
+      universalEventIdentity.success,
     marketAlignment,
     marketClassification,
     aiBetFinder,
@@ -92,6 +95,7 @@ export async function GET(request: NextRequest) {
     settlementReconciliation,
     sportsAnalyst,
     playerIntelligence,
+    universalEventIdentity,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }, requestId(request))

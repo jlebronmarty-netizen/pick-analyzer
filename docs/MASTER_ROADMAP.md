@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Universal Event Identity V1
+
+Status: Locally implemented and production-audited. Certification: `UNIVERSAL_EVENT_IDENTITY_V1_PARTIAL`.
+
+Evidence: `src/services/universal-event-identity.service.ts`, `/api/events/identity/audit`, `/api/events/identity/unresolved`, `/api/events/identity/conflicts`, `/api/events/[eventId]/identity`, Operations Validation and event-identity docs.
+
+Note: The resolver keeps `sport_events.id` as canonical and audits exact provider mappings, canonical provider IDs, odds event IDs, result event IDs, stat event IDs and stable multi-field evidence without provider calls. Production audit classified all 342 settlement missing-link rows as `EVENT_NOT_IMPORTED`; no deterministic event links or provider mappings were safe to repair, so settlement and performance remained unchanged. Remaining rows require imported canonical events or exact source mappings before settlement can advance.
+
 ### Settlement Reconciliation + AI Sports Analyst V2
 
 Status: Implemented locally. Certification: `PICK_ANALYZER_SETTLEMENT_ANALYST_PARTIAL` pending production deployment and live smoke.

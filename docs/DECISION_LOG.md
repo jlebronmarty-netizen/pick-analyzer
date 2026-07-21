@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-21 - Add Universal Event Identity V1
+
+Context: Settlement reconciliation found 342 pending-like predictions blocked by `EXACT_EVENT_MAPPING_MISSING`. Before any repair or settlement, the platform needed a reusable event identity contract that could prove exact links across predictions, odds, results and stats without guessing.
+
+Decision: Add `universal_event_identity_v1` as a stored-data-only resolver and diagnostics layer. Keep `sport_events.id` as canonical, audit exact provider mappings, provider IDs, odds/result/stat event IDs and stable multi-field evidence, and treat team-name/date-only matches as insufficient. Expose read-only audit, unresolved, conflict and event-detail routes and include fixture validation in Operations Validation.
+
+Consequences: Production audit classified all 342 missing links as `EVENT_NOT_IMPORTED`; no safe repair, provider mapping creation, settlement or performance mutation was made. Remaining rows require imported canonical events or exact source mappings before settlement can advance.
+
+Affected modules: Universal event identity service, event identity API routes, Operations Validation and docs.
+
 ## 2026-07-21 - Unify Sports Intelligence UI Semantics
 
 Context: User-facing betting intelligence surfaces showed inconsistent Watchlist/Avoid semantics, stale EV labeling, wrong-team fallback explanations and unclear capability labels for projection and arbitrage diagnostics.
