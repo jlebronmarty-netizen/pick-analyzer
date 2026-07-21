@@ -343,8 +343,21 @@ export function validateMarketIntelligenceCategoryFixtures() {
     ['ai lean has yellow category', classifyMarketIntelligence({ ...base, edge: 1, expectedValue: 1 }).category === 'ai_lean'],
     ['watchlist has blue category', classifyMarketIntelligence({ ...base, rawProbability: 41, confidence: 42, edge: -5, expectedValue: -8 }).category === 'watchlist'],
     ['avoid has red category', classifyMarketIntelligence({ ...base, rawProbability: 25, confidence: 35, edge: -20, expectedValue: -30 }).category === 'avoid'],
-    ['material negative EV cannot be watchlist', classifyMarketIntelligence({ ...base, rawProbability: 55, confidence: 65, edge: -20, expectedValue: -30 }).canonicalState === 'AVOID'],
-    ['production gate cannot hide negative value', classifyMarketIntelligence({ ...base, blockers: ['PRODUCTION_GATE_BLOCKED'], edge: -20, expectedValue: -30 }).canonicalState === 'AVOID'],
+    ['material negative EV cannot be watchlist', classifyMarketIntelligence({
+      ...base,
+      rawProbability: 55,
+      confidence: 65,
+      edge: -20,
+      expectedValue: -30,
+      marketAlignment: { ...base.marketAlignment, snapshotExpectedValuePercent: -30, snapshotEdgePercentagePoints: -20 } as CurrentBoardCandidate['marketAlignment'],
+    }).canonicalState === 'AVOID'],
+    ['production gate cannot hide negative value', classifyMarketIntelligence({
+      ...base,
+      blockers: ['PRODUCTION_GATE_BLOCKED'],
+      edge: -20,
+      expectedValue: -30,
+      marketAlignment: { ...base.marketAlignment, snapshotExpectedValuePercent: -30, snapshotEdgePercentagePoints: -20 } as CurrentBoardCandidate['marketAlignment'],
+    }).canonicalState === 'AVOID'],
     ['stale row is stale not watchlist', classifyMarketIntelligence({ ...base, marketAlignment: { freshnessStatus: 'STALE', alignmentStatus: 'ALIGNED', snapshotExpectedValuePercent: -2, snapshotEdgePercentagePoints: -1 } as CurrentBoardCandidate['marketAlignment'] }).canonicalState === 'STALE'],
     ['watchlist has improvement path', Boolean(classifyMarketIntelligence({ ...base, rawProbability: 41, confidence: 42, edge: 0, expectedValue: 0 }).improvementPath)],
   ] as const
