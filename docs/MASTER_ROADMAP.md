@@ -26,11 +26,11 @@ Note: The orchestrator reuses the existing SportsDataIO MLB historical import ex
 
 ### MLB Current-Season Data Quality Audit V1
 
-Status: Implemented locally. Certification: pending production deployment and smoke.
+Status: Production certified. Certification: `MLB_CURRENT_SEASON_DATA_QUALITY_PASS`.
 
 Evidence: `src/services/mlb-current-season-data-quality-audit.service.ts`, `src/app/api/mlb/current-season/data-quality/route.ts`, `src/app/api/operations/validation/route.ts` and `docs/mlb-data-quality-certification.md`.
 
-Note: The audit reads stored 2026 MLB data only and reports transparent season-level quality metrics for teams, players, events, results, standings, team stats, player game stats, odds snapshots, predictions, settlements, feature snapshots, provider mappings, historical jobs and checkpoint coverage. It makes 0 provider calls, performs 0 writes, does not guess player identities and does not claim CLV readiness without genuine opening and closing odds history.
+Note: The audit reads stored 2026 MLB data only and reports transparent season-level quality metrics for teams, players, events, results, standings, team stats, player game stats, odds snapshots, predictions, settlements, feature snapshots, provider mappings, historical jobs and checkpoint coverage. Production commit `cf7075126f656f723b6f73bda6553966efb8fa0e` passed read-only smoke with providerCallsMade 0, remoteMutationsMade 0, validation 8/8, backfill complete, 44,459 player game stat rows, 0 missing dates, 0 duplicate stat row IDs, 100% event/team mapping, 46,002 odds rows and overall readiness 79.64/GOOD. Caveats remain for no genuine opening/closing odds rows, unresolved reviewable player identities and 244 natural-key collision candidates before high-confidence player-level production features.
 
 ### SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1
 
