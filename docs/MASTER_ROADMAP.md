@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Settlement Reconciliation + AI Sports Analyst V2
+
+Status: Implemented locally. Certification: `PICK_ANALYZER_SETTLEMENT_ANALYST_PARTIAL` pending production deployment and live smoke.
+
+Evidence: `src/services/settlement-reconciliation.service.ts`, `src/app/api/settlement/reconciliation/route.ts`, `src/services/sports-analyst.service.ts`, `src/app/api/sports-analyst/game/[eventId]/route.ts`, `src/services/player-intelligence.service.ts`, `src/app/api/players/[playerId]/intelligence/route.ts`, Operations Validation and docs.
+
+Note: The settlement audit is deterministic and dry-run first. Current production evidence found no safe settlement writes: pending-like rows are non-production/test-like, missing exact event mapping or post-start. Analyst V2 is a grounded explanation layer over existing stored evidence and does not change prediction probabilities, recommendation policy, Current Board generation, provider calls, settlement engines or official-pick activation.
+
 ### Sports Intelligence UI Integrity Refactor V1
 
 Status: Implemented locally. Certification: `SPORTS_INTELLIGENCE_UI_REFACTOR_PARTIAL` pending production deployment and live smoke.

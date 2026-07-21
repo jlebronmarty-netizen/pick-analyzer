@@ -59,6 +59,7 @@ Stop only for:
 - For MLB current-season data-quality work, run `GET /api/mlb/current-season/data-quality?season=YYYY&includeValidation=true`. This audit must remain stored-data-only, report providerCallsMade 0 and remoteMutationsMade 0, preserve low scores honestly and avoid fuzzy identity resolution.
 - For MLB feature/model readiness work, run `GET /api/mlb/features/model-readiness?season=YYYY&includeValidation=true`. This route must remain read-only and must not promote weather, lineup, injury, pitch-tracking, prop, CLV or line-movement features unless real stored cutoff-safe data supports them.
 - Do not run broad `/api/predictions/settle` for a daily operating-day workflow. Use `/api/operating-day/[operatingDayId]/settle` so settlement remains scoped and idempotent.
+- For stale pending reconciliation, run `GET /api/settlement/reconciliation` first. Proceed to protected execution only when the dry-run proves exact event identity, final result, market identity, pre-start timing and expected mutation counts. If the plan reports non-zero mutations but the bounded executor is not explicitly implemented for that set, stop rather than guessing.
 - If result sync returns `quota_blocked`, leave the day pending and do not settle unresolved events.
 
 ## Progress Reporting

@@ -1760,6 +1760,16 @@ Consequences: The repository remains safe and buildable. BSN can resume when a p
 
 Affected modules: BSN Foundation docs, Project Status and Master Roadmap.
 
+## 2026-07-21 - Add Settlement Reconciliation And AI Sports Analyst V2
+
+Context: The prior UI integrity pass intentionally did not mutate settlement rows. Production still needed a deterministic stale-pending audit and a grounded analyst layer that could explain games without creating a new prediction or recommendation engine.
+
+Decision: Add a read-only settlement reconciliation service and `/api/settlement/reconciliation`, plus AI Sports Analyst V2 and Player Intelligence Foundation APIs. Settlement execution remains protected and currently permits only the proven zero-mutation idempotency path because the audit found no row with exact-event, pre-start, market-complete final-result proof.
+
+Consequences: Current audit classifies pending-like rows as non-production/test-like, exact-event-mapping missing or post-start. No provider calls, settlement writes, event-link repairs, prediction probability changes or Official Pick policy changes are made. Analyst output uses stored evidence and returns UNKNOWN/NO_MARKET for unsupported data.
+
+Affected modules: Settlement reconciliation, Operations Validation, AI Sports Analyst V2, Game Story Engine, Player Intelligence Foundation and docs.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.

@@ -19,6 +19,9 @@ import { validateMlbCurrentSeasonDataQualityAuditFixtures } from '@/services/mlb
 import { validateMlbFeatureModelReadinessFixtures } from '@/services/mlb-feature-model-readiness.service'
 import { validateMlbModelAuditFixtures } from '@/services/mlb-model-audit.service'
 import { validateMlbPlayerDataExcellenceFixtures } from '@/services/mlb-player-data-excellence.service'
+import { validateSettlementReconciliationFixtures } from '@/services/settlement-reconciliation.service'
+import { validateSportsAnalystFixtures } from '@/services/sports-analyst.service'
+import { validatePlayerIntelligenceFixtures } from '@/services/player-intelligence.service'
 
 export async function GET(request: NextRequest) {
   const adaptive = validateAdaptiveRefreshFixtures()
@@ -40,6 +43,9 @@ export async function GET(request: NextRequest) {
   const mlbFeatureModelReadiness = validateMlbFeatureModelReadinessFixtures()
   const mlbModelAudit = validateMlbModelAuditFixtures()
   const mlbPlayerDataExcellence = validateMlbPlayerDataExcellenceFixtures()
+  const settlementReconciliation = validateSettlementReconciliationFixtures()
+  const sportsAnalyst = validateSportsAnalystFixtures()
+  const playerIntelligence = validatePlayerIntelligenceFixtures()
   return apiOk({
     ...adaptive,
     success:
@@ -61,7 +67,10 @@ export async function GET(request: NextRequest) {
       mlbCurrentSeasonDataQualityAudit.success &&
       mlbFeatureModelReadiness.success &&
       mlbModelAudit.success &&
-      mlbPlayerDataExcellence.success,
+      mlbPlayerDataExcellence.success &&
+      settlementReconciliation.success &&
+      sportsAnalyst.success &&
+      playerIntelligence.success,
     marketAlignment,
     marketClassification,
     aiBetFinder,
@@ -80,6 +89,9 @@ export async function GET(request: NextRequest) {
     mlbFeatureModelReadiness,
     mlbModelAudit,
     mlbPlayerDataExcellence,
+    settlementReconciliation,
+    sportsAnalyst,
+    playerIntelligence,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }, requestId(request))
