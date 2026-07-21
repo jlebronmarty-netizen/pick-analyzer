@@ -74,9 +74,15 @@ type TopOpportunity = {
   rawProbability?: number | null
   modelProbability?: number | null
   confidence?: number
+  edge?: number | null
+  expectedValue?: number | null
   statusLabel?: string
   opportunityCategory?: string
   marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  canonicalMarketState?: string
+  marketValueQuality?: string
+  marketFreshnessState?: string
+  improvementPath?: string | null
   scheduledTime?: string
   gameTime?: string
   odds?: number | null
@@ -98,6 +104,11 @@ type MarketAlignment = {
   marketImpliedProbability?: number | null
   edgePercentagePoints?: number | null
   expectedValuePercent?: number | null
+  snapshotEdgePercentagePoints?: number | null
+  snapshotExpectedValuePercent?: number | null
+  actionableEdgePercentagePoints?: number | null
+  actionableExpectedValuePercent?: number | null
+  actionableUnavailableReason?: string | null
   marketAgeMinutes?: number | null
   providerSourceAgeMinutes?: number | null
   snapshotIngestionAgeMinutes?: number | null
@@ -579,14 +590,14 @@ function OfficialPickExperienceCard({ picks, reason, topOpportunity }: { picks: 
             <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200">Official Pick</p>
             <h3 className="mt-3 text-3xl font-black text-white">No Official Pick today.</h3>
             <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-slate-300">
-              {reason ?? 'No current candidate meets the existing Official Pick policy. Top AI Opportunity remains informational and is not being promoted.'}
+              {reason ?? 'No current candidate meets the existing Official Pick policy. The top tracked market remains informational and is not being promoted.'}
             </p>
           </div>
           <Badge tone="green">Policy Preserved</Badge>
         </div>
         {topOpportunity ? (
           <p className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-sm font-bold text-slate-300">
-            Top AI Opportunity is still shown below as informational: {fieldValue(topOpportunity.matchup)} · {fieldValue(topOpportunity.selection)} {fieldValue(topOpportunity.marketLabel)}.
+            Top tracked market is still shown below as informational: {fieldValue(topOpportunity.matchup)} · {fieldValue(topOpportunity.selection)} {fieldValue(topOpportunity.marketLabel)}.
           </p>
         ) : null}
       </section>
@@ -748,7 +759,7 @@ function AiPicksFeedPanel({ feed, reason }: { feed: AiPicksFeed | null | undefin
 }
 
 function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | null }) {
-  if (!opportunity) return <EmptyState title="Top AI Opportunity" detail="No opportunity is ready to display yet." />
+  if (!opportunity) return <EmptyState title="Top Tracked Market" detail="No opportunity is ready to display yet." />
   const category = opportunity.opportunityCategory ?? opportunity.statusLabel ?? 'Tracking'
   const tone = categoryTone(opportunity.marketIntelligenceCategory ?? category)
   const probability = topOpportunityProbability(opportunity)
@@ -756,12 +767,16 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
   const alignment = opportunity.marketAlignment
   const explanation = opportunity.recommendationExplanation
   const aligned = alignment?.alignmentStatus === 'ALIGNED'
+  const actionabilityBlocked = Boolean(alignment?.actionableUnavailableReason)
+  const title = Number(alignment?.actionableExpectedValuePercent ?? opportunity.expectedValue ?? 0) > 0 && !actionabilityBlocked
+    ? 'Top Tracked Market'
+    : 'Highest-Ranked Market Under Review'
 
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Top AI Opportunity</p>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">{title}</p>
           <h3 className="mt-3 text-3xl font-black text-white">{fieldValue(opportunity.matchup, 'Teams pending')}</h3>
         </div>
         <Badge tone={tone}>{category}</Badge>
@@ -789,12 +804,13 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
       <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
         <Meter label="Probability" value={probability} tone="blue" />
         <Meter label="Market Implied" value={aligned ? alignment?.marketImpliedProbability : null} tone="yellow" />
-        <Meter label="Model Edge" value={aligned ? alignment?.edgePercentagePoints : null} tone="blue" />
-        <Meter label="Expected Value" value={aligned ? alignment?.expectedValuePercent : null} tone={Number(alignment?.expectedValuePercent ?? 0) > 0 ? 'green' : 'red'} />
+        <Meter label="Snapshot Edge" value={aligned ? alignment?.snapshotEdgePercentagePoints ?? alignment?.edgePercentagePoints : null} tone="blue" />
+        <Meter label={actionabilityBlocked ? 'Actionable EV' : 'Expected Value'} value={actionabilityBlocked ? null : aligned ? alignment?.actionableExpectedValuePercent ?? alignment?.expectedValuePercent : null} tone={Number(alignment?.actionableExpectedValuePercent ?? alignment?.expectedValuePercent ?? 0) > 0 && !actionabilityBlocked ? 'green' : 'red'} />
         <Meter label="Confidence" value={opportunity.confidence} tone={tone} />
       </div>
       <p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
         Alignment {fieldValue(alignment?.alignmentStatus, 'Pending')} | Risk {fieldValue(alignment?.risk, riskLabel(opportunity as IntelligenceRow))}
+        {actionabilityBlocked ? ` | Actionable value unavailable: ${fieldValue(alignment?.actionableUnavailableReason, 'market input unavailable')}` : ''}
       </p>
       {explanation?.summary ? (
         <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-4">

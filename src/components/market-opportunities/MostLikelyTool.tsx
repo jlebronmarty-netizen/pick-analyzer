@@ -17,6 +17,11 @@ type Opportunity = {
   sportsbookProbability: number
   edge: number
   expectedValue: number
+  snapshotEdge?: number | null
+  snapshotExpectedValue?: number | null
+  actionableEdge?: number | null
+  actionableExpectedValue?: number | null
+  actionableUnavailableReason?: string | null
   confidenceLabel: string
   reliability: string
   reliabilityScore: number
@@ -26,6 +31,10 @@ type Opportunity = {
   semanticLabel: string
   officialEligibility: string
   marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  canonicalMarketState?: string
+  marketValueQuality?: string
+  marketFreshnessState?: string
+  improvementPath?: string | null
   opportunityCategory?: 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
   statusLabel?: string
   informationalWarning?: string | null
@@ -207,7 +216,16 @@ function marketWhy(item: Opportunity) {
   if (item.marketLabel === 'Run Line') {
     return `${selectionLabel(item)} is a margin question: expected margin, run differential, cover price and opponent scoring strength matter more than a generic team split.`
   }
-  return `${selectionLabel(item)} is a team-side price question: NYM strengths, PHI weaknesses and the current moneyline price decide whether probability becomes value.`
+  return `${selectionLabel(item)} is a team-side price question for ${item.matchup}. Use the stored model probability, current price, market freshness and listed blockers to decide whether probability becomes value.`
+}
+
+function evLabel(item: Opportunity) {
+  return item.actionableUnavailableReason ? 'Actionable EV unavailable' : 'Actionable EV'
+}
+
+function evValue(item: Opportunity) {
+  if (item.actionableUnavailableReason) return `Snapshot ${pct(item.snapshotExpectedValue ?? item.expectedValue)}`
+  return pct(item.actionableExpectedValue ?? item.expectedValue)
 }
 
 export default function MostLikelyTool() {
@@ -291,7 +309,7 @@ export default function MostLikelyTool() {
         {data && (
           <section className="grid gap-4 lg:grid-cols-3">
             <Spotlight
-              title={data.topPick?.type === 'official_pick' ? 'Official Top Pick' : 'Most Likely Outcome'}
+              title={data.topPick?.type === 'official_pick' ? 'Official Top Pick' : ((data.topPick?.candidate?.probability ?? 0) >= 50 ? 'Most Likely Outcome' : 'Highest-Ranked Available Outcome')}
               subtitle={data.topPick?.type === 'official_pick' ? 'Official recommendation' : 'Market intelligence - not a recommendation'}
               candidate={data.topPick?.candidate ?? null}
               footer={data.topPick?.disclaimer ?? 'No current supported outcome is available.'}
@@ -438,12 +456,12 @@ function Spotlight({
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Metric label="Model Probability" value={pct(candidate.probability)} />
             <Metric label="Market Odds" value={odds(candidate.odds)} />
-            <Metric label="EV" value={pct(candidate.expectedValue)} tone={candidate.expectedValue > 0 ? 'good' : 'bad'} />
+            <Metric label={evLabel(candidate)} value={evValue(candidate)} tone={(candidate.actionableExpectedValue ?? candidate.expectedValue) > 0 && !candidate.actionableUnavailableReason ? 'good' : 'bad'} />
             <Metric label="Official Status" value={candidate.officialEligibility} />
           </div>
           {candidate.probability < 50 ? (
             <p className="mt-3 rounded-xl border border-amber-500/20 bg-amber-950/20 p-3 text-xs leading-5 text-amber-100">
-              This is the highest probability among remaining eligible markets, not a claim that the outcome is likely in plain English.
+              LOW ABSOLUTE PROBABILITY. This is only the highest-ranked available outcome; the model still estimates it is less likely than not to occur.
             </p>
           ) : null}
           <p className="mt-3 text-sm leading-6 text-slate-300">{footer}</p>

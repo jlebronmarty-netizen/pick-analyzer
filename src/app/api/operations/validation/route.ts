@@ -2,6 +2,10 @@ import { NextRequest } from 'next/server'
 import { apiOk, requestId } from '@/lib/api-contract'
 import { validateAdaptiveRefreshFixtures } from '@/services/adaptive-refresh-orchestrator.service'
 import { validateMarketAlignmentFixtures } from '@/services/market-alignment.service'
+import { validateMarketIntelligenceCategoryFixtures } from '@/services/market-intelligence-category.service'
+import { validateAiBetFinderDeterministicFixtures } from '@/services/ai-bet-finder.service'
+import { validateUniversalProjectionEngineFixtures } from '@/services/universal-projection-engine.service'
+import { validateGameIntelligenceFixtures } from '@/services/game-intelligence.service'
 import { validateOfficialPickExperienceFixtures } from '@/services/official-pick-experience.service'
 import { validateMlbAiPicksFeedFixtures } from '@/services/mlb-ai-picks-feed.service'
 import { validateMlbPlayerPropsFoundationFixtures } from '@/services/mlb-player-props-foundation.service'
@@ -19,6 +23,10 @@ import { validateMlbPlayerDataExcellenceFixtures } from '@/services/mlb-player-d
 export async function GET(request: NextRequest) {
   const adaptive = validateAdaptiveRefreshFixtures()
   const marketAlignment = validateMarketAlignmentFixtures()
+  const marketClassification = validateMarketIntelligenceCategoryFixtures()
+  const aiBetFinder = validateAiBetFinderDeterministicFixtures()
+  const universalProjectionEngine = validateUniversalProjectionEngineFixtures()
+  const gameIntelligence = validateGameIntelligenceFixtures()
   const recommendationExplanation = validateRecommendationExplanationFixtures()
   const officialPickExperience = validateOfficialPickExperienceFixtures()
   const aiPicksFeed = validateMlbAiPicksFeedFixtures()
@@ -37,6 +45,10 @@ export async function GET(request: NextRequest) {
     success:
       adaptive.success &&
       marketAlignment.success &&
+      marketClassification.success &&
+      aiBetFinder.success &&
+      universalProjectionEngine.success &&
+      gameIntelligence.success &&
       recommendationExplanation.success &&
       officialPickExperience.success &&
       aiPicksFeed.success &&
@@ -51,6 +63,10 @@ export async function GET(request: NextRequest) {
       mlbModelAudit.success &&
       mlbPlayerDataExcellence.success,
     marketAlignment,
+    marketClassification,
+    aiBetFinder,
+    universalProjectionEngine,
+    gameIntelligence,
     recommendationExplanation,
     officialPickExperience,
     aiPicksFeed,

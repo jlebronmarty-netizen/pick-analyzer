@@ -4,9 +4,21 @@ import type { CurrentBoardCandidate } from '@/services/current-board.service'
 
 export type MarketIntelligenceCategory = 'official' | 'ai_lean' | 'watchlist' | 'avoid'
 export type MarketIntelligenceStatusLabel = 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+export type CanonicalMarketState =
+  | 'OFFICIAL'
+  | 'AI_LEAN'
+  | 'WATCHLIST'
+  | 'AVOID'
+  | 'NO_MARKET'
+  | 'STALE'
+  | 'INVALID'
+  | 'QUARANTINED'
+  | 'INSUFFICIENT_DATA'
+  | 'SHADOW'
 
 export type MarketIntelligenceClassification = {
   category: MarketIntelligenceCategory
+  canonicalState: CanonicalMarketState
   label: MarketIntelligenceStatusLabel
   display: string
   color: 'green' | 'yellow' | 'blue' | 'red'
@@ -15,11 +27,17 @@ export type MarketIntelligenceClassification = {
   strengths: string[]
   weaknesses: string[]
   missingData: string[]
+  primaryBlocker: string | null
+  improvementPath: string | null
+  valueQuality: 'POSITIVE' | 'THIN' | 'NEUTRAL' | 'NEGATIVE' | 'MATERIAL_NEGATIVE' | 'UNAVAILABLE'
+  freshnessState: string
 }
 
 export const AI_LEAN_WARNING = "AI LEAN\nThe model slightly favors this outcome, but it did not satisfy Pick Analyzer's production recommendation policy.\nReview at your own discretion."
 export const WATCHLIST_WARNING = 'WATCHLIST\nConditions may improve before game time.'
 export const AVOID_WARNING = 'AVOID\nThe model recommends staying away.'
+export const MATERIAL_NEGATIVE_EV_THRESHOLD = -20
+export const MATERIAL_NEGATIVE_EDGE_THRESHOLD = -15
 
 function firstReason(candidate: CurrentBoardCandidate) {
   return candidate.blockers[0] ??
@@ -35,6 +53,37 @@ function hasMarketOrContextPath(candidate: CurrentBoardCandidate) {
   return /lineup|injur|bullpen|weather|market|odds|calibration|starter/.test(values)
 }
 
+function valueQuality(candidate: CurrentBoardCandidate): MarketIntelligenceClassification['valueQuality'] {
+  const ev = candidate.marketAlignment?.snapshotExpectedValuePercent ?? candidate.expectedValue
+  const edge = candidate.marketAlignment?.snapshotEdgePercentagePoints ?? candidate.edge
+  if (!Number.isFinite(ev) || !Number.isFinite(edge)) return 'UNAVAILABLE'
+  if (ev <= MATERIAL_NEGATIVE_EV_THRESHOLD || edge <= MATERIAL_NEGATIVE_EDGE_THRESHOLD) return 'MATERIAL_NEGATIVE'
+  if (ev < 0 || edge < 0) return 'NEGATIVE'
+  if (ev === 0 || edge === 0) return 'NEUTRAL'
+  if (ev < 3 || edge < 2) return 'THIN'
+  return 'POSITIVE'
+}
+
+function improvementPath(candidate: CurrentBoardCandidate) {
+  const alignment = candidate.marketAlignment
+  if (!alignment || alignment.alignmentStatus !== 'ALIGNED') return 'needs exact aligned market price'
+  if (alignment.actionableUnavailableReason) return 'needs fresher market input'
+  if ((alignment.snapshotExpectedValuePercent ?? candidate.expectedValue) <= 0 || (alignment.snapshotEdgePercentagePoints ?? candidate.edge) <= 0) return 'needs better price or stronger model probability'
+  if (candidate.confidence < 60) return 'needs confidence closer to policy threshold'
+  if (candidate.missingInformation[0]) return `needs ${candidate.missingInformation[0].replaceAll('_', ' ')}`
+  return null
+}
+
+function pack(input: Omit<MarketIntelligenceClassification, 'primaryBlocker' | 'improvementPath' | 'valueQuality' | 'freshnessState'>, candidate: CurrentBoardCandidate): MarketIntelligenceClassification {
+  return {
+    ...input,
+    primaryBlocker: input.reasonNotOfficial,
+    improvementPath: input.category === 'watchlist' || input.category === 'ai_lean' ? improvementPath(candidate) : null,
+    valueQuality: valueQuality(candidate),
+    freshnessState: candidate.marketAlignment?.freshnessStatus ?? 'UNKNOWN',
+  }
+}
+
 export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): MarketIntelligenceClassification {
   const official =
     candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE' &&
@@ -46,9 +95,24 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
   ].slice(0, 4)
   const missingData = candidate.missingInformation.slice(0, 4)
 
-  if (official) {
-    return {
+  const quality = valueQuality(candidate)
+  const freshness = candidate.marketAlignment?.freshnessStatus ?? 'UNKNOWN'
+  const invalid =
+    candidate.probabilityOrigin === 'fallback' ||
+    candidate.probabilityOrigin === 'unavailable' ||
+    candidate.leakageStatus === 'blocked' ||
+    candidate.blockers.some((item) => /IDENTITY_CONFLICT|INVALID|POST_START|POST_CUTOFF|LIVE_ODDS/.test(item))
+  const noMarket =
+    !candidate.marketAlignment ||
+    ['MISSING_PRICE', 'MISSING_PROBABILITY', 'UNSUPPORTED_MARKET', 'LINE_MISMATCH', 'SELECTION_MISMATCH'].includes(candidate.marketAlignment.alignmentStatus)
+  const shadow = candidate.trial || candidate.scrambled || candidate.boardLabel === 'HISTORICAL'
+  const quarantined = candidate.quarantined && !shadow
+  const insufficient = candidate.confidence < 40 || (candidate.featureQuality ?? 100) < 40 || (candidate.dataSufficiency ?? 100) < 40
+
+  if (!invalid && !noMarket && !quarantined && !shadow && freshness !== 'STALE' && freshness !== 'EXPIRED' && quality !== 'MATERIAL_NEGATIVE' && official) {
+    return pack({
       category: 'official',
+      canonicalState: 'OFFICIAL',
       label: 'Official',
       display: 'Official',
       color: 'green',
@@ -57,7 +121,112 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
       strengths,
       weaknesses,
       missingData,
-    }
+    }, candidate)
+  }
+
+  if (invalid) {
+    return pack({
+      category: 'avoid',
+      canonicalState: 'INVALID',
+      label: 'Avoid',
+      display: 'INVALID',
+      color: 'red',
+      warning: AVOID_WARNING,
+      reasonNotOfficial: firstReason(candidate),
+      strengths,
+      weaknesses,
+      missingData,
+    }, candidate)
+  }
+
+  if (noMarket) {
+    return pack({
+      category: 'avoid',
+      canonicalState: 'NO_MARKET',
+      label: 'Avoid',
+      display: 'NO MARKET',
+      color: 'red',
+      warning: AVOID_WARNING,
+      reasonNotOfficial: firstReason(candidate),
+      strengths,
+      weaknesses,
+      missingData,
+    }, candidate)
+  }
+
+  if (shadow) {
+    return pack({
+      category: 'avoid',
+      canonicalState: 'SHADOW',
+      label: 'Avoid',
+      display: 'SHADOW',
+      color: 'red',
+      warning: AVOID_WARNING,
+      reasonNotOfficial: firstReason(candidate),
+      strengths,
+      weaknesses,
+      missingData,
+    }, candidate)
+  }
+
+  if (quarantined) {
+    return pack({
+      category: 'avoid',
+      canonicalState: 'QUARANTINED',
+      label: 'Avoid',
+      display: 'QUARANTINED',
+      color: 'red',
+      warning: AVOID_WARNING,
+      reasonNotOfficial: firstReason(candidate),
+      strengths,
+      weaknesses,
+      missingData,
+    }, candidate)
+  }
+
+  if (freshness === 'STALE' || freshness === 'EXPIRED') {
+    return pack({
+      category: 'avoid',
+      canonicalState: 'STALE',
+      label: 'Avoid',
+      display: freshness,
+      color: 'red',
+      warning: AVOID_WARNING,
+      reasonNotOfficial: 'Market input is stale, so snapshot value is not actionable.',
+      strengths,
+      weaknesses,
+      missingData,
+    }, candidate)
+  }
+
+  if (quality === 'MATERIAL_NEGATIVE') {
+    return pack({
+      category: 'avoid',
+      canonicalState: 'AVOID',
+      label: 'Avoid',
+      display: 'AVOID',
+      color: 'red',
+      warning: AVOID_WARNING,
+      reasonNotOfficial: 'Materially negative EV or edge at the stored price.',
+      strengths,
+      weaknesses,
+      missingData,
+    }, candidate)
+  }
+
+  if (insufficient) {
+    return pack({
+      category: 'avoid',
+      canonicalState: 'INSUFFICIENT_DATA',
+      label: 'Avoid',
+      display: 'INSUFFICIENT DATA',
+      color: 'red',
+      warning: AVOID_WARNING,
+      reasonNotOfficial: firstReason(candidate),
+      strengths,
+      weaknesses,
+      missingData,
+    }, candidate)
   }
 
   const modelSignal =
@@ -66,16 +235,12 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
     candidate.expectedValue > 0 ||
     (candidate.rawProbability >= 45 && candidate.confidence >= 45)
 
-  const clearAvoid =
-    candidate.expectedValue < -20 ||
-    candidate.edge < -15 ||
-    candidate.confidence < 40 ||
-    candidate.probabilityOrigin === 'fallback' ||
-    candidate.probabilityOrigin === 'unavailable'
+  const clearAvoid = candidate.confidence < 40
 
   if (modelSignal && !clearAvoid) {
-    return {
+    return pack({
       category: 'ai_lean',
+      canonicalState: 'AI_LEAN',
       label: 'AI Lean',
       display: 'AI LEAN',
       color: 'yellow',
@@ -84,12 +249,13 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
       strengths,
       weaknesses,
       missingData,
-    }
+    }, candidate)
   }
 
-  if (hasMarketOrContextPath(candidate) && candidate.confidence >= 40 && candidate.rawProbability >= 35) {
-    return {
+  if (hasMarketOrContextPath(candidate) && candidate.confidence >= 40 && candidate.rawProbability >= 35 && quality !== 'NEGATIVE') {
+    return pack({
       category: 'watchlist',
+      canonicalState: 'WATCHLIST',
       label: 'Watchlist',
       display: 'WATCHLIST',
       color: 'blue',
@@ -98,11 +264,12 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
       strengths,
       weaknesses,
       missingData,
-    }
+    }, candidate)
   }
 
-  return {
+  return pack({
     category: 'avoid',
+    canonicalState: 'AVOID',
     label: 'Avoid',
     display: 'AVOID',
     color: 'red',
@@ -111,7 +278,7 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
     strengths,
     weaknesses,
     missingData,
-  }
+  }, candidate)
 }
 
 export function summarizeMarketIntelligenceCategories(candidates: CurrentBoardCandidate[]) {
@@ -154,6 +321,21 @@ export function validateMarketIntelligenceCategoryFixtures() {
     confidence: 50,
     probabilityOrigin: 'calculated',
     recommendationPolicyStatus: 'ANALYZED_ONLY',
+    marketAlignment: {
+      alignmentStatus: 'ALIGNED',
+      freshnessStatus: 'FRESH',
+      snapshotExpectedValuePercent: 0,
+      snapshotEdgePercentagePoints: 0,
+      actionableExpectedValuePercent: 0,
+      actionableEdgePercentagePoints: 0,
+    },
+    leakageStatus: 'passed',
+    quarantined: false,
+    trial: false,
+    scrambled: false,
+    boardLabel: 'CURRENT',
+    featureQuality: 65,
+    dataSufficiency: 65,
   } as unknown as CurrentBoardCandidate
   const checks = [
     ['official is green', classifyMarketIntelligence({ ...base, officialEligibility: 'OFFICIAL_ELIGIBLE_CANDIDATE', recommendationPolicyStatus: 'QUALIFIED' }).category === 'official'],
@@ -161,6 +343,10 @@ export function validateMarketIntelligenceCategoryFixtures() {
     ['ai lean has yellow category', classifyMarketIntelligence({ ...base, edge: 1, expectedValue: 1 }).category === 'ai_lean'],
     ['watchlist has blue category', classifyMarketIntelligence({ ...base, rawProbability: 41, confidence: 42, edge: -5, expectedValue: -8 }).category === 'watchlist'],
     ['avoid has red category', classifyMarketIntelligence({ ...base, rawProbability: 25, confidence: 35, edge: -20, expectedValue: -30 }).category === 'avoid'],
+    ['material negative EV cannot be watchlist', classifyMarketIntelligence({ ...base, rawProbability: 55, confidence: 65, edge: -20, expectedValue: -30 }).canonicalState === 'AVOID'],
+    ['production gate cannot hide negative value', classifyMarketIntelligence({ ...base, blockers: ['PRODUCTION_GATE_BLOCKED'], edge: -20, expectedValue: -30 }).canonicalState === 'AVOID'],
+    ['stale row is stale not watchlist', classifyMarketIntelligence({ ...base, marketAlignment: { freshnessStatus: 'STALE', alignmentStatus: 'ALIGNED', snapshotExpectedValuePercent: -2, snapshotEdgePercentagePoints: -1 } as CurrentBoardCandidate['marketAlignment'] }).canonicalState === 'STALE'],
+    ['watchlist has improvement path', Boolean(classifyMarketIntelligence({ ...base, rawProbability: 41, confidence: 42, edge: 0, expectedValue: 0 }).improvementPath)],
   ] as const
   const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
   return {

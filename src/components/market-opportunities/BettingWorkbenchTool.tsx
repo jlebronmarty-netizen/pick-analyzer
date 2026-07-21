@@ -16,6 +16,11 @@ type WorkbenchBet = {
   aiRating: number
   edge: number
   expectedValue: number
+  snapshotEdge?: number | null
+  snapshotExpectedValue?: number | null
+  actionableEdge?: number | null
+  actionableExpectedValue?: number | null
+  actionableUnavailableReason?: string | null
   reliability: string
   risk: string
   recommendation: string
@@ -27,6 +32,10 @@ type WorkbenchBet = {
   preview: boolean
   marketIntelligenceCategory: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
   statusLabel: 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+  canonicalMarketState?: string
+  marketValueQuality?: string
+  marketFreshnessState?: string
+  improvementPath?: string | null
   informationalWarning?: string | null
   reasonNotOfficial?: string | null
 }
@@ -41,10 +50,6 @@ type DraftMode = 'preview' | 'official'
 type SortMode = 'rating' | 'probability' | 'value' | 'confidence' | 'risk'
 
 const storageKey = 'pick-analyzer-betting-workbench-v1'
-const aiLeanWarning = "AI LEAN\nThe model slightly favors this outcome, but it did not satisfy Pick Analyzer's production recommendation policy.\nReview at your own discretion."
-const watchlistWarning = 'WATCHLIST\nConditions may improve before game time.'
-const avoidWarning = 'AVOID\nThe model recommends staying away.'
-
 function numberValue(value: unknown, fallback = 0) {
   const number = Number(value)
   return Number.isFinite(number) ? number : fallback
@@ -113,36 +118,10 @@ function riskLabel(bet: WorkbenchBet) {
   return bet.risk || 'Review'
 }
 
-function displayCategory(input: {
-  official: boolean
-  edge: number
-  expectedValue: number
-  confidence: number
-  probability: number
-  blockers: string[]
-  missingInformation: string[]
-}) {
-  if (input.official) {
-    return {
-      category: 'official' as const,
-      label: 'Official' as const,
-      warning: null,
-    }
-  }
-  const modelSignal = input.edge > 0 || input.expectedValue > 0 || (input.probability >= 45 && input.confidence >= 45)
-  const clearAvoid = input.expectedValue < -20 || input.edge < -15 || input.confidence < 40
-  const contextPath = [...input.blockers, ...input.missingInformation].join(' ').toLowerCase()
-  if (modelSignal && !clearAvoid) return { category: 'ai_lean' as const, label: 'AI Lean' as const, warning: aiLeanWarning }
-  if (/lineup|injur|bullpen|weather|market|odds|calibration|starter/.test(contextPath) && input.confidence >= 40 && input.probability >= 35) {
-    return { category: 'watchlist' as const, label: 'Watchlist' as const, warning: watchlistWarning }
-  }
-  return { category: 'avoid' as const, label: 'Avoid' as const, warning: avoidWarning }
-}
-
 function modelWhy(bet: WorkbenchBet) {
   if (bet.market === 'Total') return 'Limited market-specific evidence is available for this total. Compare the combined scoring trend, run environment, sportsbook total and missing pitcher/weather/lineup context before treating the under as actionable.'
   if (bet.market === 'Run Line') return `${selectionName(bet)} depends on expected margin, run differential, the price required to cover and opponent scoring strength. Current value blockers still matter.`
-  return `${selectionName(bet)} should be judged on NYM-side strength, PHI weaknesses and whether the moneyline price is better than the model probability.`
+  return `${selectionName(bet)} should be judged in the context of ${bet.matchup}: stored model probability, market implied probability, freshness, value quality and current blockers.`
 }
 
 function mapBoardCandidate(candidate: Record<string, unknown>): WorkbenchBet {
@@ -156,7 +135,8 @@ function mapBoardCandidate(candidate: Record<string, unknown>): WorkbenchBet {
   const missingInformation = stringArray(candidate.missingInformation)
   const probability = numberValue(candidate.probability ?? candidate.modelProbability ?? candidate.rawProbability)
   const confidence = numberValue(candidate.confidence)
-  const category = displayCategory({ official, edge, expectedValue, confidence, probability, blockers, missingInformation })
+  const category = stringValue(candidate.marketIntelligenceCategory, official ? 'official' : 'avoid') as WorkbenchBet['marketIntelligenceCategory']
+  const statusLabel = stringValue(candidate.opportunityCategory ?? candidate.statusLabel, official ? 'Official' : 'Avoid') as WorkbenchBet['statusLabel']
   return {
     id: stringValue(candidate.id ?? candidate.predictionId, `${selection}-${market}`),
     source: stringValue(candidate.boardLabel ?? candidate.source, 'Current Board'),
@@ -171,6 +151,11 @@ function mapBoardCandidate(candidate: Record<string, unknown>): WorkbenchBet {
     aiRating: numberValue(candidate.aiRating ?? candidate.rankingScore ?? candidate.confidence),
     edge,
     expectedValue,
+    snapshotEdge: candidate.snapshotEdge === null || candidate.snapshotEdge === undefined ? null : numberValue(candidate.snapshotEdge),
+    snapshotExpectedValue: candidate.snapshotExpectedValue === null || candidate.snapshotExpectedValue === undefined ? null : numberValue(candidate.snapshotExpectedValue),
+    actionableEdge: candidate.actionableEdge === null || candidate.actionableEdge === undefined ? null : numberValue(candidate.actionableEdge),
+    actionableExpectedValue: candidate.actionableExpectedValue === null || candidate.actionableExpectedValue === undefined ? null : numberValue(candidate.actionableExpectedValue),
+    actionableUnavailableReason: typeof candidate.actionableUnavailableReason === 'string' ? candidate.actionableUnavailableReason : null,
     reliability: stringValue(candidate.reliability ?? candidate.reliabilityLabel, 'Limited'),
     risk: stringValue(candidate.officialEligibility ?? candidate.riskLabel, 'Informational Only'),
     recommendation: stringValue(candidate.semanticLabel ?? candidate.recommendation ?? status, edge > 0 && expectedValue > 0 ? 'MODELED VALUE' : 'NO MODELED VALUE'),
@@ -184,9 +169,13 @@ function mapBoardCandidate(candidate: Record<string, unknown>): WorkbenchBet {
     status,
     official,
     preview: true,
-    marketIntelligenceCategory: category.category,
-    statusLabel: category.label,
-    informationalWarning: category.warning,
+    marketIntelligenceCategory: category,
+    statusLabel,
+    canonicalMarketState: typeof candidate.canonicalMarketState === 'string' ? candidate.canonicalMarketState : undefined,
+    marketValueQuality: typeof candidate.marketValueQuality === 'string' ? candidate.marketValueQuality : undefined,
+    marketFreshnessState: typeof candidate.marketFreshnessState === 'string' ? candidate.marketFreshnessState : undefined,
+    improvementPath: typeof candidate.improvementPath === 'string' ? candidate.improvementPath : null,
+    informationalWarning: typeof candidate.informationalWarning === 'string' ? candidate.informationalWarning : null,
     reasonNotOfficial: official
       ? null
       : stringValue(candidate.reasonNotOfficial ?? blockers[0] ?? missingInformation[0], edge <= 0 || expectedValue <= 0 ? 'Low or negative EV.' : 'Did not meet production recommendation policy.'),
@@ -222,6 +211,7 @@ function mapTopPick(pick: Record<string, unknown>): WorkbenchBet {
     preview: false,
     marketIntelligenceCategory: 'official',
     statusLabel: 'Official',
+    canonicalMarketState: 'OFFICIAL',
   }
 }
 
@@ -550,7 +540,11 @@ function BetCard({ bet, onSave, compact = false }: { bet: WorkbenchBet; onSave: 
         <Metric label="Sportsbook Probability" value={pct(bet.impliedProbability)} />
         <Metric label="Confidence" value={pct(bet.confidence)} />
         <Metric label="AI Rating" value={ratingLabel(bet.aiRating)} />
-        <Metric label="Value" value={`${pct(bet.expectedValue)} EV`} tone={bet.expectedValue > 0 ? 'good' : 'bad'} />
+        <Metric
+          label={bet.actionableUnavailableReason ? 'Snapshot EV' : 'Actionable EV'}
+          value={bet.actionableUnavailableReason ? pct(bet.snapshotExpectedValue ?? bet.expectedValue) : pct(bet.actionableExpectedValue ?? bet.expectedValue)}
+          tone={!bet.actionableUnavailableReason && (bet.actionableExpectedValue ?? bet.expectedValue) > 0 ? 'good' : 'bad'}
+        />
         <Metric label="Risk" value={riskLabel(bet)} />
         <Metric label="Odds" value={formatOdds(bet.odds)} />
         <Metric label="Market" value={bet.market} />
@@ -564,6 +558,9 @@ function BetCard({ bet, onSave, compact = false }: { bet: WorkbenchBet; onSave: 
       ) : null}
       {bet.reasonNotOfficial ? (
         <p className="mt-3 text-sm leading-6 text-amber-100">Reason not official: {bet.reasonNotOfficial}</p>
+      ) : null}
+      {bet.improvementPath ? (
+        <p className="mt-2 text-sm leading-6 text-slate-400">Path: {bet.improvementPath}</p>
       ) : null}
       <details className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
         <summary className="cursor-pointer text-sm font-black">Advanced Details</summary>

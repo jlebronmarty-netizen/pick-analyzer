@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-21 14:30:00Z
+Last updated: 2026-07-21 16:15:00Z
 
 ## Current Architecture
 
@@ -15,6 +15,8 @@ Pick Analyzer is a Next.js 16 App Router application using React 19, TypeScript,
 - `supabase/migrations`: additive migrations for NBA data sync and NBA prediction validation/settlement metadata.
 
 ## Completed Modules Confirmed From Repository
+
+- Sports Intelligence UI Integrity Refactor V1: added shared snapshot-vs-actionable market alignment semantics, canonical market-state metadata, stricter Watchlist/Avoid priority, deterministic AI Bet Finder top-3 focused responses, projection blocker diagnostics, clearer arbitrage alert capability labels and a stored-data-only Game Intelligence API foundation at `/api/games/[eventId]/intelligence`. The pass removed hardcoded NYM/PHI fallback explanation text from Most Likely and Betting Workbench and aligned Dashboard wording around tracked markets rather than promoting blocked rows as opportunities. Operations Validation now includes classification, AI Bet Finder, Universal Projection and Game Intelligence fixture checks. Provider calls 0, remote mutations 0, no migrations, no prediction formula, Official Pick threshold, Current Board generation, scheduler, settlement, provider adapter or unsupported-market activation changes.
 
 - SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1: diagnosed the MLB `PlayerGameStatsByDate/2026-JUL-17` timeout without continuing import, backfill or extraction. A single direct read-only provider request returned HTTP 200 with 418 rows, 646,490 decoded bytes, 1093 ms to headers, 1121 ms to first byte, 13,945 ms body download, 15,041 ms total response time, 142 ms JSON parse time and about 46 MB diagnostic memory delta. The endpoint had no `Content-Length`, `Content-Encoding`, rate-limit or retry-after headers. Root cause is client-side timeout margin: the endpoint is entitled and returns valid data, but the previous 15-second default and 20-second pilot override were too tight for the full response body under runtime variability. The only code optimization was raising the MLB Discovery historical transport default timeout to 60 seconds. No import logic, scheduler, prediction formulas, recommendation policy, Current Board ranking, Official thresholds, dashboard logic, settlement, learning or BSN acquisition changed.
 

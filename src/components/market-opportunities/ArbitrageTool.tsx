@@ -207,7 +207,7 @@ export default function ArbitrageTool() {
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Notification Settings</p>
           <h2 className="mt-2 text-2xl font-black">Alerts Architecture</h2>
           <p className="mt-2 text-sm leading-6 text-slate-400">
-            UI only. No push, email, mobile or backend notification service is enabled yet.
+            Coming later - requires verified multi-book data and notification infrastructure.
           </p>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             <Setting label="Guaranteed arbitrage found" value="On" />
@@ -216,9 +216,9 @@ export default function ArbitrageTool() {
             <Setting label="Maximum stake" value={money(investment)} />
             <Setting label="Preferred sportsbooks" value={data?.summary.verifiedSportsbooks.join(', ') || 'Not verified'} />
             <Setting label="Odds age" value={`${staleMinutes} minutes`} />
-            <Setting label="Browser notification" value="Placeholder" />
-            <Setting label="Email" value="Placeholder" />
-            <Setting label="Mobile" value="Future placeholder" />
+            <Setting label="Browser notification" value="Disabled - backend not enabled" />
+            <Setting label="Email" value="Disabled - backend not enabled" />
+            <Setting label="Mobile" value="Disabled - future capability" />
           </div>
         </section>
       </div>

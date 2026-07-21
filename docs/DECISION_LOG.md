@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-21 - Unify Sports Intelligence UI Semantics
+
+Context: User-facing betting intelligence surfaces showed inconsistent Watchlist/Avoid semantics, stale EV labeling, wrong-team fallback explanations and unclear capability labels for projection and arbitrage diagnostics.
+
+Decision: Extend the existing market alignment and market intelligence category services instead of creating new engines. Preserve snapshot EV/edge, add actionable EV/edge only when market input is fresh and aligned, add canonical state metadata, tighten material negative-value priority, make client workspaces consume server-provided categories, remove hardcoded NYM/PHI fallback prose and add a stored-data-only Game Intelligence API foundation.
+
+Consequences: Pages can format differently while sharing the same market state and actionability semantics. Best Value remains positive-only, Arbitrage remains unavailable without verified multi-book data, Projections keep strict visibility gates, and Official Pick policy is unchanged. No provider calls, remote mutations, migrations, settlement writes, prediction formula changes or unsupported-market activation were made.
+
+Affected modules: Market alignment, market classification, Current Board consumers, Most Likely, Betting Workbench, AI Bet Finder, Best Value, Dashboard Today, Projection panel, Arbitrage panel, Game Intelligence route, Operations Validation and docs.
+
 ## 2026-07-21 - Add MLB Player Data Excellence And Pitcher Outs Readiness
 
 Context: Full-season MLB player-game-stat import exposed 12,806 unresolved rows across 656 provider player IDs, blocking high-confidence player-level features and pitcher recorded-outs readiness.

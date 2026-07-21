@@ -187,7 +187,7 @@ export default function PerformanceClient() {
               <div className="rounded-md bg-slate-950/70 p-3 text-sm text-slate-300">
                 <p>Brier Score: {data.aiBrain.internalView.brierScore}</p>
                 <p>Log Loss: {data.aiBrain.internalView.logLoss}</p>
-                <p>Calibration Error: {data.aiBrain.internalView.calibrationError}</p>
+                <p>Absolute Calibration Error: {data.aiBrain.internalView.calibrationError}</p>
                 <p>Model Drift: {data.aiBrain.internalView.modelDrift}</p>
                 <p>Confidence Drift: {data.aiBrain.internalView.confidenceDrift}</p>
                 <p>Feature Drift: {data.aiBrain.internalView.featureDrift}</p>

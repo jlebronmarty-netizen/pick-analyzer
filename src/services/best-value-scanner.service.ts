@@ -153,6 +153,11 @@ export async function getBestValueOpportunities({
                   ? 'NOT VALUE RANKED - STALE MARKET INPUT'
                   : 'BELOW OFFICIAL VALUE THRESHOLD',
         marketIntelligenceCategory: classification.category,
+        canonicalMarketState: classification.canonicalState,
+        marketValueQuality: classification.valueQuality,
+        marketFreshnessState: classification.freshnessState,
+        primaryBlocker: classification.primaryBlocker,
+        improvementPath: classification.improvementPath,
         opportunityCategory: classification.label,
         statusLabel: opportunityStatus(candidate),
         informationalWarning:

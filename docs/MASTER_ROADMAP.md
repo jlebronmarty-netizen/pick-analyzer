@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Sports Intelligence UI Integrity Refactor V1
+
+Status: Implemented locally. Certification: `SPORTS_INTELLIGENCE_UI_REFACTOR_PARTIAL` pending production deployment and live smoke.
+
+Evidence: `src/services/market-alignment.service.ts`, `src/services/market-intelligence-category.service.ts`, `src/services/game-intelligence.service.ts`, `src/app/api/games/[eventId]/intelligence/route.ts`, market-opportunity UI clients, Performance clients, Operations Validation and docs.
+
+Note: This pass unifies user-facing market state metadata, separates snapshot EV from actionable EV, prevents material negative-value rows from becoming Watchlist, removes hardcoded wrong-team explanation fallbacks, makes AI Bet Finder focused queries return top 3 deterministic answers, exposes projection safety blockers, clarifies Arbitrage alerts as future infrastructure and adds a stored-data-only Game Intelligence API foundation. No provider calls, remote mutations, migrations, Official Pick policy changes, prediction formula changes, Current Board generation changes, scheduler changes, settlement changes or unsupported-market activation were made. Stale pending settlement reconciliation remains a separate deterministic data-operation phase.
+
 ### MLB Player Data Excellence And Pitcher Outs Readiness V1
 
 Status: Partially complete with provider/data caveats. Certification: `MLB_DATA_EXCELLENCE_PITCHER_OUTS_PARTIAL`.

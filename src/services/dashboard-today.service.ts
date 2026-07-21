@@ -531,7 +531,7 @@ export async function getDashboardToday({
       picks: [],
       emptyState: {
         headline: 'No Official Pick today.',
-        summary: 'No current candidate meets the existing Official Pick policy. Top AI Opportunity remains informational and is not being promoted.',
+        summary: 'No current candidate meets the existing Official Pick policy. The top tracked market remains informational and is not being promoted.',
         topOpportunityRetained: true,
       },
       providerCallsMade: 0,
@@ -869,7 +869,7 @@ export async function getDashboardToday({
       officialPicks: section(
         boardResult.ok ? (officialPickData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
         officialPickData,
-        boardResult.ok ? (officialPickData.length ? null : board.officialPickExperience?.emptyState.summary ?? 'No current candidate meets the existing Official Pick policy. Top AI Opportunity remains informational and is not being promoted.') : 'Official Picks are temporarily unavailable.',
+        boardResult.ok ? (officialPickData.length ? null : board.officialPickExperience?.emptyState.summary ?? 'No current candidate meets the existing Official Pick policy. The top tracked market remains informational and is not being promoted.') : 'Official Picks are temporarily unavailable.',
         boardResult.ok ? generatedAt : null
       ),
       aiPicksFeed: section(

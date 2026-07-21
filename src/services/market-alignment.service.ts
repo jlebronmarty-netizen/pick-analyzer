@@ -10,7 +10,7 @@ export type MarketAlignmentStatus =
   | 'STALE_INPUT'
   | 'UNSUPPORTED_MARKET'
 
-export type MarketFreshnessStatus = 'FRESH' | 'AGING' | 'STALE' | 'UNKNOWN'
+export type MarketFreshnessStatus = 'FRESH' | 'AGING' | 'STALE' | 'EXPIRED' | 'UNKNOWN'
 
 export type MarketAlignmentContract = {
   alignmentStatus: MarketAlignmentStatus
@@ -32,6 +32,11 @@ export type MarketAlignmentContract = {
   noVigProbability: number | null
   edgePercentagePoints: number | null
   expectedValuePercent: number | null
+  snapshotEdgePercentagePoints: number | null
+  snapshotExpectedValuePercent: number | null
+  actionableEdgePercentagePoints: number | null
+  actionableExpectedValuePercent: number | null
+  actionableUnavailableReason: string | null
   marketInputTimestamp: string | null
   providerSourceTimestamp: string | null
   oddsIngestedAt: string | null
@@ -98,6 +103,7 @@ function freshnessStatus(age: number | null, maxAllowedAgeMinutes: number | null
   const threshold = finite(maxAllowedAgeMinutes) ?? 30
   if (age <= Math.max(5, threshold / 2)) return 'FRESH'
   if (age <= threshold) return 'AGING'
+  if (age > Math.max(threshold * 2, threshold + 60)) return 'EXPIRED'
   return 'STALE'
 }
 
@@ -115,7 +121,7 @@ function riskStatus({
   ev: number | null
 }): MarketAlignmentContract['risk'] {
   if (!aligned) return 'UNAVAILABLE'
-  if (freshness === 'STALE') return 'STALE_MARKET_INPUT'
+  if (freshness === 'STALE' || freshness === 'EXPIRED') return 'STALE_MARKET_INPUT'
   if ((confidence ?? 0) < 45 || (edge ?? 0) < -10 || (ev ?? 0) < -15) return 'ELEVATED'
   if ((confidence ?? 0) < 60 || (edge ?? 0) < 0 || (ev ?? 0) < 0 || freshness === 'AGING') return 'MODERATE'
   return 'CONTROLLED'
@@ -166,11 +172,21 @@ export function buildMarketAlignment(input: MarketAlignmentInput): MarketAlignme
   else if (marketType === 'moneyline' && oddsLine !== null) alignmentStatus = 'LINE_MISMATCH'
 
   if (freshness === 'STALE') reasonCodes.push('STALE_INPUT')
+  if (freshness === 'EXPIRED') reasonCodes.push('EXPIRED_INPUT')
   const aligned = alignmentStatus === 'ALIGNED'
   const decimalOdds = aligned ? americanToDecimalOdds(americanOdds) : null
   const marketImpliedProbability = aligned ? marketImpliedProbabilityFromAmerican(americanOdds) : null
   const edge = aligned && modelProbability !== null && marketImpliedProbability !== null ? modelProbability - marketImpliedProbability : null
   const ev = aligned ? expectedValuePercentFromAmerican(modelProbability, americanOdds) : null
+  const actionableUnavailableReason = !aligned
+    ? alignmentStatus
+    : freshness === 'STALE' || freshness === 'EXPIRED'
+      ? 'STALE_MARKET_INPUT'
+      : freshness === 'UNKNOWN'
+        ? 'UNKNOWN_MARKET_TIMESTAMP'
+        : null
+  const actionableEdge = actionableUnavailableReason ? null : edge
+  const actionableEv = actionableUnavailableReason ? null : ev
 
   return {
     alignmentStatus,
@@ -192,6 +208,11 @@ export function buildMarketAlignment(input: MarketAlignmentInput): MarketAlignme
     noVigProbability: finite(input.noVigProbability),
     edgePercentagePoints: edge === null ? null : round(edge, 2),
     expectedValuePercent: ev === null ? null : round(ev, 2),
+    snapshotEdgePercentagePoints: edge === null ? null : round(edge, 2),
+    snapshotExpectedValuePercent: ev === null ? null : round(ev, 2),
+    actionableEdgePercentagePoints: actionableEdge === null ? null : round(actionableEdge, 2),
+    actionableExpectedValuePercent: actionableEv === null ? null : round(actionableEv, 2),
+    actionableUnavailableReason,
     marketInputTimestamp: input.marketInputTimestamp ?? null,
     providerSourceTimestamp: input.providerSourceTimestamp ?? null,
     oddsIngestedAt: input.oddsIngestedAt ?? null,
@@ -251,6 +272,9 @@ export function validateMarketAlignmentFixtures() {
     ['placeholder zero probability blocked', buildMarketAlignment({ ...alignedBase, modelProbability: 0 }).alignmentStatus === 'MISSING_PROBABILITY'],
     ['missing odds', buildMarketAlignment({ ...alignedBase, americanOdds: null }).alignmentStatus === 'MISSING_PRICE'],
     ['stale snapshot marked stale but structurally aligned', buildMarketAlignment({ ...alignedBase, marketInputTimestamp: staleTimestamp, marketAgeMinutes: 60 }).freshnessStatus === 'STALE'],
+    ['stale hides actionable EV', buildMarketAlignment({ ...alignedBase, marketInputTimestamp: staleTimestamp, marketAgeMinutes: 60 }).actionableExpectedValuePercent === null],
+    ['fresh exposes actionable EV', buildMarketAlignment(alignedBase).actionableExpectedValuePercent !== null],
+    ['unknown timestamp is unknown', buildMarketAlignment({ ...alignedBase, marketInputTimestamp: null, marketAgeMinutes: null }).freshnessStatus === 'UNKNOWN'],
     ['positive EV', (buildMarketAlignment(alignedBase).expectedValuePercent ?? 0) > 0],
     ['negative EV', (buildMarketAlignment({ ...alignedBase, americanOdds: -200, modelProbability: 60 }).expectedValuePercent ?? 0) < 0],
     ['zero EV', expectedValuePercentFromAmerican(50, 100)?.toFixed(1) === '0.0'],

@@ -190,6 +190,11 @@ function summarizeCandidate(candidate: CurrentBoardCandidate) {
     plainAnswer: action,
     officialEligibility: official ? 'Official' : `${classification.label} - not a recommendation`,
     marketIntelligenceCategory: classification.category,
+    canonicalMarketState: classification.canonicalState,
+    marketValueQuality: classification.valueQuality,
+    marketFreshnessState: classification.freshnessState,
+    primaryBlocker: classification.primaryBlocker,
+    improvementPath: classification.improvementPath,
     reasonNotOfficial: reasonNotOfficial(candidate),
     informationalWarning: official ? null : classification.warning,
     quarantine: candidate.quarantined ? 'QUARANTINED PREVIEW' : 'CURRENT',
@@ -228,7 +233,7 @@ async function search(query: string) {
   }
   if (ask === 'BEST_VALUE') {
     const bestValue = await getBestValueOpportunities({ includePasses: false })
-    const results = bestValue.opportunities.map((candidate) => summarizeCandidate(candidate))
+    const results = bestValue.opportunities.slice(0, 3).map((candidate) => summarizeCandidate(candidate))
     return {
       success: true,
       action: 'SEARCH',
@@ -246,25 +251,26 @@ async function search(query: string) {
       right.reliabilityScore - left.reliabilityScore ||
       right.aiRating - left.aiRating ||
       left.oddsAgeMinutes - right.oddsAgeMinutes
-    )
+    ).slice(0, 3)
     return {
       success: true,
       action: 'SEARCH',
       intent: ask,
-      summary: results.length ? 'Most likely opportunities. High probability is not the same as an official recommendation.' : 'No opportunities available because no eligible games have grounded odds and probabilities.',
+      summary: results.length ? 'Top 3 highest-ranked available outcomes. High probability is not the same as an official recommendation.' : 'No opportunities available because no eligible games have grounded odds and probabilities.',
       meta: { ...responseMeta(board, results.length, query), informationalFallbackUsed: fallbackUsed },
       rankingSource: mostLikely.mode,
       results: results.map(summarizeCandidate),
     }
   }
   const filtered = applyFilters(candidates, query)
+  const limited = filtered.slice(0, 3)
   return {
     success: true,
     action: 'SEARCH',
     intent: ask,
-    summary: filtered.length ? 'Filtered opportunities. Official recommendations remain separate.' : 'No opportunities available because no eligible games have grounded odds and probabilities.',
-    meta: { ...responseMeta(board, filtered.length, query), informationalFallbackUsed: fallbackUsed },
-    results: filtered.map(summarizeCandidate),
+    summary: limited.length ? 'Top 3 filtered opportunities. Official recommendations remain separate.' : 'No opportunities available because no eligible games have grounded odds and probabilities.',
+    meta: { ...responseMeta(board, limited.length, query), informationalFallbackUsed: fallbackUsed, totalFiltered: filtered.length },
+    results: limited.map(summarizeCandidate),
   }
 }
 

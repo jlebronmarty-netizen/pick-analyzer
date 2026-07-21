@@ -8,6 +8,7 @@ type ProjectionResponse = {
   summary: {
     games: number
     projections: number
+    userVisible?: number
     team: number
     game: number
     pitcher: number
@@ -18,6 +19,20 @@ type ProjectionResponse = {
     averageConfidence: number | null
     averageFeatureQuality: number | null
     averageDataSufficiency: number | null
+  }
+  selectedDate?: string
+  projectionHealth?: {
+    validProjections?: number
+    userVisibleProjections?: number
+    blockerSummary?: Record<string, number>
+    blockerExplanations?: string[]
+    persistenceStatus?: string
+    settlementStatus?: string
+  }
+  temporalSafety?: {
+    totalGamesDiscovered?: number
+    projectionEligibleGames?: number
+    excludedGames?: Array<{ eventId: string; matchup: string; lifecycle: string; reason: string }>
   }
   prohibitedOutputs: {
     bettingRecommendations: boolean
@@ -97,11 +112,27 @@ export default function UniversalProjectionEnginePanel() {
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
         <Stat label="Games" value={data.summary.games} />
         <Stat label="Projections" value={data.summary.projections} />
+        <Stat label="Visible" value={data.summary.userVisible ?? data.projectionHealth?.userVisibleProjections ?? 0} />
         <Stat label="Team" value={data.summary.team} />
         <Stat label="Pitcher" value={data.summary.pitcher} />
         <Stat label="Batter" value={data.summary.batter} />
-        <Stat label="Confidence" value={data.summary.averageConfidence} />
       </div>
+
+      {(data.summary.userVisible ?? data.projectionHealth?.userVisibleProjections ?? 0) === 0 ? (
+        <div className="mt-5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+          <p className="text-sm font-black text-amber-100">Projection visibility is blocked by safety gates.</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            {Object.entries(data.projectionHealth?.blockerSummary ?? {}).filter(([, value]) => Number(value) > 0).map(([key, value]) => (
+              <Stat key={key} label={key.replaceAll(/([A-Z])/g, ' $1').trim()} value={String(value)} />
+            ))}
+          </div>
+          <div className="mt-3 space-y-1 text-sm text-amber-100">
+            {(data.projectionHealth?.blockerExplanations ?? ['No projection is visible until identity, participation, feature quality, data sufficiency, unit and plausibility gates pass.']).slice(0, 5).map((item) => (
+              <p key={item}>{item}</p>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">

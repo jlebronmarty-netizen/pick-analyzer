@@ -402,6 +402,11 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     sportsbookProbability: candidate.impliedProbability,
     edge: candidate.edge,
     expectedValue: candidate.expectedValue,
+    snapshotEdge: candidate.marketAlignment.snapshotEdgePercentagePoints,
+    snapshotExpectedValue: candidate.marketAlignment.snapshotExpectedValuePercent,
+    actionableEdge: candidate.marketAlignment.actionableEdgePercentagePoints,
+    actionableExpectedValue: candidate.marketAlignment.actionableExpectedValuePercent,
+    actionableUnavailableReason: candidate.marketAlignment.actionableUnavailableReason,
     confidence: candidate.confidence,
     confidenceLabel: candidate.confidenceLabel,
     reliability: candidate.reliability,
@@ -424,6 +429,11 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
         ? 'ELIGIBLE_FOR_OFFICIAL_REVIEW'
         : 'NOT OFFICIALLY ELIGIBLE',
     marketIntelligenceCategory: classification.category,
+    canonicalMarketState: classification.canonicalState,
+    marketValueQuality: classification.valueQuality,
+    marketFreshnessState: classification.freshnessState,
+    primaryBlocker: classification.primaryBlocker,
+    improvementPath: classification.improvementPath,
     opportunityCategory: classification.label,
     statusLabel: classification.display,
     informationalWarning: official
