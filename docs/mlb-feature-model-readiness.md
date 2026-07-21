@@ -1,6 +1,6 @@
 # MLB Feature Store And Model Input Readiness
 
-Certification: pending production smoke
+Certification: `MLB_FEATURE_MODEL_READINESS_PASS`
 
 Date: 2026-07-21
 
@@ -39,3 +39,30 @@ The audit intentionally keeps these blocked unless real stored data supports the
 ## Validation
 
 Operations Validation includes fixture checks for zero provider calls, line-movement blocking without open/close odds, settlement exclusion from pregame features, post-start cohort exclusion, no fuzzy identity matching, deterministic classifications, shared Feature Store validation composition and additive API behavior.
+
+## Production Certification
+
+Production commit `38ba24e8861414cbd3e433ac0f3bdcfbae3e31bd` passed read-only smoke on 2026-07-21:
+
+- Route status: `PASS_WITH_CAVEATS`.
+- Provider calls: 0.
+- Remote mutations: 0.
+- Validation: 10/10 fixture checks passed.
+- Feature Store status: ready.
+- Feature Store validation: true.
+- Backfill complete: true.
+- Data-quality score: 79.64 / GOOD.
+- Feature quality: 72.
+- Data sufficiency: 68.
+- Critical completeness: 60.
+- Compatible prediction snapshots inspected: 50.
+- Duplicate stat row IDs: 0.
+- Event mapping rate: 100%.
+- Team mapping rate: 100%.
+
+Caveats preserved as explicit blockers:
+
+- 612 historical prediction rows were generated after game start and must be excluded from backtesting/model-audit cohorts.
+- CLV and line movement remain blocked because opening odds rows and closing odds rows are both 0.
+- Player-level features must exclude unresolved player rows or keep them low-confidence.
+- 244 natural-key collision candidates require review before high-confidence player-level production features.

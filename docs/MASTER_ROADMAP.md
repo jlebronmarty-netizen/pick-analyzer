@@ -34,11 +34,11 @@ Note: The audit reads stored 2026 MLB data only and reports transparent season-l
 
 ### MLB Feature Store And Model Input Readiness V1
 
-Status: Implemented locally. Certification: pending production deployment and smoke.
+Status: Production certified. Certification: `MLB_FEATURE_MODEL_READINESS_PASS`.
 
 Evidence: `src/services/mlb-feature-model-readiness.service.ts`, `src/app/api/mlb/features/model-readiness/route.ts`, `src/app/api/operations/validation/route.ts` and `docs/mlb-feature-model-readiness.md`.
 
-Note: The readiness audit composes existing MLB Feature Store integration with current-season data-quality evidence and classifies active, partial, blocked and unsafe model inputs without changing prediction generation. It proves leakage guardrails, reports feature snapshot readiness, blocks CLV/line movement without genuine open/close odds and keeps confirmed lineups, injuries, weather, advanced pitch tracking and props unavailable unless supported by real stored data.
+Note: The readiness audit composes existing MLB Feature Store integration with current-season data-quality evidence and classifies active, partial, blocked and unsafe model inputs without changing prediction generation. Production commit `38ba24e8861414cbd3e433ac0f3bdcfbae3e31bd` passed read-only smoke with status `PASS_WITH_CAVEATS`, validation 10/10, providerCallsMade 0, remoteMutationsMade 0, Feature Store ready, 50 compatible prediction snapshots, 0 duplicate stat row IDs and 100% event/team mapping. It blocks CLV/line movement without genuine open/close odds and keeps confirmed lineups, injuries, weather, advanced pitch tracking and props unavailable unless supported by real stored data.
 
 ### SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1
 
