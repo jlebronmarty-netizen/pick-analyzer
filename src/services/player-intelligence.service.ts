@@ -6,8 +6,7 @@ type PlayerRow = {
   id: string
   sport_key: string
   team_id: string | null
-  full_name: string | null
-  display_name?: string | null
+  display_name: string | null
   position: string | null
   metadata: Record<string, unknown> | null
   updated_at: string | null
@@ -51,7 +50,7 @@ function pitcherOuts(row: StatRow) {
 export async function getPlayerIntelligence(playerId: string) {
   const { data: player, error: playerError } = await supabaseAdmin
     .from('sport_players')
-    .select('id, sport_key, team_id, full_name, display_name, position, metadata, updated_at')
+    .select('id, sport_key, team_id, display_name, position, metadata, updated_at')
     .eq('id', playerId)
     .maybeSingle()
   if (playerError) throw new Error(`sport_players read failed: ${playerError.message}`)
@@ -88,7 +87,7 @@ export async function getPlayerIntelligence(playerId: string) {
     player: {
       id: typedPlayer.id,
       sportKey: typedPlayer.sport_key,
-      name: typedPlayer.full_name ?? typedPlayer.display_name ?? typedPlayer.id,
+      name: typedPlayer.display_name ?? typedPlayer.id,
       teamId: typedPlayer.team_id,
       position: typedPlayer.position,
       identityQuality: typedPlayer.metadata?.reviewRequired ? 'REVIEW_REQUIRED' : 'STORED_CANONICAL_OR_PROVIDER_MAPPED',
