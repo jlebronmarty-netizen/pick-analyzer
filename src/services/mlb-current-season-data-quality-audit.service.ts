@@ -78,11 +78,13 @@ function minMaxDates(rows: Row[], getValue: (row: Row) => unknown) {
   }
 }
 
-async function page(table: string, select: string, configure: (query: any) => any) {
+async function page(table: string, select: string, configure: (query: any) => any, orderColumn = 'id') {
   const rows: Row[] = []
   for (let from = 0; from < MAX_ROWS; from += PAGE_SIZE) {
     const to = from + PAGE_SIZE - 1
-    const result = await configure(supabaseAdmin.from(table).select(select)).range(from, to)
+    const result = await configure(supabaseAdmin.from(table).select(select))
+      .order(orderColumn, { ascending: true })
+      .range(from, to)
     if (result.error) throw new Error(`${table} read failed: ${result.error.message}`)
     rows.push(...((result.data ?? []) as Row[]))
     if ((result.data ?? []).length < PAGE_SIZE) break
@@ -90,9 +92,9 @@ async function page(table: string, select: string, configure: (query: any) => an
   return rows
 }
 
-async function safePage(table: string, select: string, configure: (query: any) => any) {
+async function safePage(table: string, select: string, configure: (query: any) => any, orderColumn = 'id') {
   try {
-    return { rows: await page(table, select, configure), warning: null as string | null }
+    return { rows: await page(table, select, configure, orderColumn), warning: null as string | null }
   } catch (error) {
     return {
       rows: [] as Row[],
@@ -121,7 +123,7 @@ async function loadRows(season: string) {
     safePage('team_stats', 'id, team_name, season, wins, losses, updated_at', (q) => q.eq('sport_key', SPORT_KEY).eq('season', Number(season))),
     safePage('sport_player_stats', 'id, season, stat_type, event_id, team_id, player_id, player_name, provider, source_timestamp, provider_ids, stats, metadata, created_at, updated_at', (q) => q.eq('sport_key', SPORT_KEY).eq('league_key', LEAGUE_KEY).eq('season', season)),
     safePage('prediction_history', 'id, game_id, commence_time, market, sportsbook, recommended_pick, production_eligible, result, status, lifecycle_status, settled_at, generated_at, model_version, feature_snapshot, cutoff_at', (q) => q.eq('sport_key', SPORT_KEY)),
-    safePage('game_results', 'game_id, commence_time, home_team, away_team, home_score, away_score', (q) => q.eq('sport_key', SPORT_KEY)),
+    safePage('game_results', 'game_id, commence_time, home_team, away_team, home_score, away_score', (q) => q.eq('sport_key', SPORT_KEY), 'game_id'),
     safePage('provider_entity_mappings', 'id, entity_type, internal_id, provider, provider_id, season, metadata, updated_at', (q) => q.eq('sport_key', SPORT_KEY)),
     safePage('sports_sync_jobs', 'id, job_type, status, season, records_fetched, records_inserted, records_updated, records_skipped, error_count, last_error, started_at, completed_at, metadata', (q) => q.eq('sport_key', SPORT_KEY).eq('league_key', LEAGUE_KEY).eq('provider', 'sportsdataio').order('started_at', { ascending: false })),
   ])
