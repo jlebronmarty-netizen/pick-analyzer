@@ -1680,6 +1680,16 @@ Consequences: Provider-touching work still uses the existing budget guard, dedup
 
 Affected modules: MLB current-season backfill orchestrator, protected MLB historical-backfill route, Operations Validation and docs.
 
+## 2026-07-21 - Add Stored-Data MLB Current-Season Data Quality Audit V1
+
+Context: Current-season `PlayerGameStatsByDate` backfill reached a complete dry-run state, so the next roadmap phase needed season-level evidence about stored MLB completeness, identity coverage, mapping integrity, odds coverage, prediction/settlement readiness and checkpoint health without spending provider quota.
+
+Decision: Add `mlb_current_season_data_quality_audit_v1` and `/api/mlb/current-season/data-quality` as read-only audit surfaces. The audit reports transparent scores and caveats for MLB 2026 teams, players, events, results, standings, team stats, player game stats, odds snapshots, predictions, settlements, feature snapshots, provider mappings, historical import jobs and checkpoint coverage.
+
+Consequences: Operators can inspect actual MLB data readiness and low-score areas without provider calls, writes, prediction regeneration, recommendation changes or fuzzy identity matching. CLV readiness remains blocked unless genuine opening and closing odds rows exist.
+
+Affected modules: MLB current-season data-quality audit service, MLB current-season data-quality route, Operations Validation and docs.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.

@@ -1,6 +1,6 @@
 # MLB Current-Season Player Game Stats Backfill
 
-Certification: pending production execution
+Certification: `MLB_CURRENT_SEASON_BACKFILL_PASS`
 
 Date: 2026-07-21
 
@@ -68,3 +68,16 @@ Operations Validation includes deterministic fixture checks for:
 - deterministic checkpoint key;
 - stored eligible completed-event planning;
 - provider calls equal imported dates only.
+
+## Production Certification
+
+Production commit `0c7fa3d3fb6d6701dac7dfe307d72208c1a8d623` exposed the orchestrator route and fixture validation.
+
+Read-only production smoke on 2026-07-21 reported:
+
+- Operations Validation: PASS, current-season backfill fixtures 10/10, providerCallsMade 0, remoteMutationsMade 0.
+- Provider budget: AVAILABLE and VALID, callsMadeToday 8, callsMadeLastHour 0, hourlyRemaining 12, hardRemaining 1492, maxCallsPerAction 3.
+- Historical jobs: 0 running, 0 pending, 0 stuck, 0 reconciliationRequired.
+- Backfill plan: 110 eligible dates, 113 completed checkpoints, 0 remaining dates, 0 active jobs, 0 ambiguous checkpoints.
+
+No live backfill batch was executed because the production dry-run planner determined the current-season `PlayerGameStatsByDate` backfill is already complete.

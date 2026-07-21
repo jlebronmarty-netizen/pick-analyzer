@@ -18,11 +18,19 @@ Note: SportsDataIO MLB player-stat imports now create or reuse provisional unres
 
 ### MLB Current-Season Player Game Stats Backfill Orchestrator V1
 
-Status: Implemented locally. Certification: pending production deployment and execution.
+Status: Production certified. Certification: `MLB_CURRENT_SEASON_BACKFILL_PASS`.
 
 Evidence: `src/services/mlb-current-season-backfill-orchestrator.service.ts`, `src/app/api/mlb/historical-backfill/player-game-stats/route.ts`, `src/app/api/operations/validation/route.ts` and `docs/mlb-current-season-backfill.md`.
 
-Note: The orchestrator reuses the existing SportsDataIO MLB historical import executor for each `PlayerGameStatsByDate` child unit, preserving durable running checkpoints, provider-call accounting, one-call-per-date execution, 60-second timeout, idempotency keys and terminal checkpoint handling. It plans from stored eligible completed 2026 MLB events, skips completed checkpoints, refuses active/ambiguous jobs, caps batch size by provider budget configuration and records a parent `sports_sync_jobs` invocation. Production currently limits this action to 3 dates per invocation through `maxCallsPerAction`.
+Note: The orchestrator reuses the existing SportsDataIO MLB historical import executor for each `PlayerGameStatsByDate` child unit, preserving durable running checkpoints, provider-call accounting, one-call-per-date execution, 60-second timeout, idempotency keys and terminal checkpoint handling. It plans from stored eligible completed 2026 MLB events, skips completed checkpoints, refuses active/ambiguous jobs, caps batch size by provider budget configuration and records a parent `sports_sync_jobs` invocation. Production commit `0c7fa3d3fb6d6701dac7dfe307d72208c1a8d623` passed read-only smoke with 110 eligible dates, 113 completed checkpoints, 0 remaining dates, 0 active jobs, 0 ambiguous checkpoints, budget AVAILABLE/VALID and providerCallsMade 0. No live batch was executed because the season backfill planner reported complete.
+
+### MLB Current-Season Data Quality Audit V1
+
+Status: Implemented locally. Certification: pending production deployment and smoke.
+
+Evidence: `src/services/mlb-current-season-data-quality-audit.service.ts`, `src/app/api/mlb/current-season/data-quality/route.ts`, `src/app/api/operations/validation/route.ts` and `docs/mlb-data-quality-certification.md`.
+
+Note: The audit reads stored 2026 MLB data only and reports transparent season-level quality metrics for teams, players, events, results, standings, team stats, player game stats, odds snapshots, predictions, settlements, feature snapshots, provider mappings, historical jobs and checkpoint coverage. It makes 0 provider calls, performs 0 writes, does not guess player identities and does not claim CLV readiness without genuine opening and closing odds history.
 
 ### SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1
 
