@@ -104,7 +104,12 @@ function isFeatureStoreCompatible(snapshot: Record<string, unknown> | null) {
     'featureQualityScore' in snapshot ||
     'dataSufficiencyScore' in snapshot ||
     'values' in snapshot ||
-    'storeVersion' in snapshot
+    'storeVersion' in snapshot ||
+    'featureSetVersion' in snapshot ||
+    'modelVersion' in snapshot ||
+    'quality' in snapshot ||
+    'sufficiency' in snapshot ||
+    'prospective_preview' in snapshot
   )
 }
 
