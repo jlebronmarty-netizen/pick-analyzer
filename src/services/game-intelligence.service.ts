@@ -15,7 +15,7 @@ type EventRow = {
   away_team_id: string | null
   start_time: string | null
   status: string | null
-  venue_name?: string | null
+  venue?: string | null
   metadata: Record<string, unknown> | null
   updated_at: string | null
 }
@@ -48,7 +48,7 @@ function missingInputs() {
 export async function getGameIntelligence(eventId: string) {
   const { data, error } = await supabaseAdmin
     .from('sport_events')
-    .select('id, sport_key, league_key, season, home_team, away_team, home_team_id, away_team_id, start_time, status, venue_name, metadata, updated_at')
+    .select('id, sport_key, league_key, season, home_team, away_team, home_team_id, away_team_id, start_time, status, venue, metadata, updated_at')
     .eq('id', eventId)
     .maybeSingle()
 
@@ -85,7 +85,7 @@ export async function getGameIntelligence(eventId: string) {
       awayTeam: event.away_team,
       startTime: event.start_time,
       status: event.status,
-      venue: event.venue_name ?? (event.metadata?.venue as string | undefined) ?? null,
+      venue: event.venue ?? (event.metadata?.venue as string | undefined) ?? null,
       timezone: 'America/Puerto_Rico',
       dataFreshness,
     },
