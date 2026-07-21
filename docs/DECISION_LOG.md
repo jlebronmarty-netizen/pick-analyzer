@@ -1710,6 +1710,16 @@ Consequences: Model reliability can be reviewed without provider calls, writes, 
 
 Affected modules: MLB model audit service, MLB model-audit route, Operations Validation and docs.
 
+## 2026-07-21 - Certify MLB Core Production Readiness
+
+Context: MLB import durability, single-date import, player identity, automatic player discovery, current-season backfill, data quality, feature/model readiness and model audit phases all reached production-certified states, with premium provider-dependent capabilities explicitly not part of core readiness.
+
+Decision: Create `docs/mlb-core-final-certification.md` and certify MLB Core as `MLB_CORE_PRODUCTION_PASS`, while classifying player props, live betting, advanced pitch tracking, verified injuries, expected lineups, advanced weather, robust CLV, steam moves, arbitrage and multi-book premium market intelligence as `MLB_PREMIUM_PROVIDER_BLOCKED`.
+
+Consequences: MLB Core is formally closed as production ready under the documented caveats. No runtime code, provider calls, prediction thresholds, recommendation policy, Current Board behavior, settlement behavior or scheduler behavior changed during final certification.
+
+Affected modules: MLB certification docs, Project Status and Master Roadmap.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.

@@ -48,6 +48,16 @@ Evidence: `src/services/mlb-model-audit.service.ts`, `src/app/api/mlb/model-audi
 
 Note: The audit reads stored MLB prediction history only, excludes post-start predictions and rows without immutable feature snapshots, reports backtest/calibration metrics and keeps threshold, Official Pick, Current Board, settlement and scheduler behavior unchanged. Production commit `c9534afa275743a071bff0f9a2f92e12326a7c01` passed read-only smoke with 909 prediction rows, 593 settled rows, 0 leakage-safe immutable-snapshot eligible rows, 561 post-start settled rows excluded, 548 settled rows missing immutable feature snapshots excluded and validation 8/8. It reports insufficient sample honestly rather than forcing recalibration or historical threshold tuning.
 
+### MLB Core Final Certification V1
+
+Status: Complete. Certification: `MLB_CORE_PRODUCTION_PASS`.
+
+Premium classification: `MLB_PREMIUM_PROVIDER_BLOCKED`.
+
+Evidence: `docs/mlb-core-final-certification.md`, production `/api/operations/validation`, `/api/providers/budget/status`, `/api/historical-import/jobs` and the MLB Phase 1-5 certification routes.
+
+Note: MLB Core is formally closed as production ready with premium/provider-dependent features separated rather than counted as core gaps. Final production smoke reported Operations Validation PASS, provider budget AVAILABLE/VALID, accounting uncertainty false, providerCallsMade 0, remoteMutationsMade 0 and historical jobs 0 running/0 pending/0 stuck/0 reconciliationRequired. Next roadmap phase is BSN Source Inventory and Contract.
+
 ### SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1
 
 Status: Endpoint timeout root cause diagnosed locally. Certification: OPTIMIZED. Historical import remains stopped until explicitly resumed.
