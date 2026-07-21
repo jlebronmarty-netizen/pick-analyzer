@@ -106,6 +106,14 @@ Evidence: `docs/bsn-data-source-inventory.md`, `src/services/basketball-source-f
 
 Note: The source inventory classifies official BSN web/app evidence, bounded homepage discovery, permissioned API/feed, operator-owned CSV, audited manual entry, future licensed providers and third-party public score sites. Production smoke confirmed source/capability/readiness routes are live with providerCallsMade 0. Odds, box scores, quarter scores and availability remain blocked or unavailable until legitimate approved sources exist.
 
+### BSN Foundation Phase 8
+
+Status: Blocked. Certification: `BSN_FOUNDATION_BLOCKED_SOURCE_APPROVAL_REQUIRED`.
+
+Evidence: `docs/bsn-foundation.md`, `docs/bsn-data-source-inventory.md`, `/api/bsn/sources`, `/api/bsn/capabilities`, `/api/bsn/operations/readiness` and `/api/bsn/sources/validate`.
+
+Note: The reusable BSN foundation architecture exists, but production ingestion expansion cannot proceed without a permissioned BSN API/feed, approved official automation agreement, attested operator-owned CSV/manual source with write audit approval, or licensed provider with verified BSN coverage. Source routes correctly report `source_approval_required` and `prepared_provider_blocked` with providerCallsMade 0.
+
 ### BSN Wave 2 Core Certification V1
 
 Status: Implemented locally. Certification: PARTIAL. Stop gate reached at Phase 2; BSN Core completion cannot continue until verified BSN odds/stat/source gaps are resolved.

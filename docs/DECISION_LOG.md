@@ -1730,6 +1730,16 @@ Consequences: BSN can proceed to Foundation using only legitimate/verifiable inp
 
 Affected modules: BSN source inventory docs, Project Status and Master Roadmap.
 
+## 2026-07-21 - Stop BSN Foundation On Source Approval Blocker
+
+Context: BSN Source Inventory passed, but Phase 8 requires production ingestion expansion from legitimate/verifiable sources. Production source routes report `source_approval_required` and operations readiness reports `prepared_provider_blocked`.
+
+Decision: Stop Phase 8 as `BSN_FOUNDATION_BLOCKED_SOURCE_APPROVAL_REQUIRED` and document the existing reusable foundation plus the required approved-source inputs. Do not convert public HTML discovery into a production feed, do not scrape disallowed resources, do not reverse engineer app traffic and do not fabricate unavailable datasets.
+
+Consequences: The repository remains safe and buildable. BSN can resume when a permissioned BSN API/feed, approved official automation agreement, attested CSV/manual source with write audit approval, or licensed provider with verified BSN coverage is supplied.
+
+Affected modules: BSN Foundation docs, Project Status and Master Roadmap.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.
