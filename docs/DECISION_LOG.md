@@ -1700,6 +1700,16 @@ Consequences: MLB model input readiness can be certified without replacing Predi
 
 Affected modules: MLB feature/model readiness service, MLB feature model-readiness route, Operations Validation and docs.
 
+## 2026-07-21 - Add MLB Backtesting, Calibration And Model Audit V1
+
+Context: Feature/model readiness passed with caveats and identified post-start historical prediction rows, no open/close odds history and player-level caveats. The next phase needed a model audit that measures only leakage-safe stored prediction cohorts without optimizing thresholds against historical results.
+
+Decision: Add `mlb_model_audit_v1` and `/api/mlb/model-audit` as read-only additive surfaces. The audit includes only settled rows generated at or before game start with retained feature snapshots, reports excluded cohorts, backtest metrics, calibration buckets and performance bands, and keeps threshold changes disabled.
+
+Consequences: Model reliability can be reviewed without provider calls, writes, calibration mutation, threshold changes, Current Board changes, Official Pick changes, settlement changes or scheduler changes. If sample is insufficient, the audit certifies that honestly rather than forcing recalibration.
+
+Affected modules: MLB model audit service, MLB model-audit route, Operations Validation and docs.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.

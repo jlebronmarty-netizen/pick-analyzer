@@ -13,6 +13,7 @@ import { validateMlbUnresolvedPlayerIdentityFixtures } from '@/services/mlb-unre
 import { validateMlbCurrentSeasonBackfillOrchestratorFixtures } from '@/services/mlb-current-season-backfill-orchestrator.service'
 import { validateMlbCurrentSeasonDataQualityAuditFixtures } from '@/services/mlb-current-season-data-quality-audit.service'
 import { validateMlbFeatureModelReadinessFixtures } from '@/services/mlb-feature-model-readiness.service'
+import { validateMlbModelAuditFixtures } from '@/services/mlb-model-audit.service'
 
 export async function GET(request: NextRequest) {
   const adaptive = validateAdaptiveRefreshFixtures()
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
   const mlbCurrentSeasonBackfillOrchestrator = validateMlbCurrentSeasonBackfillOrchestratorFixtures()
   const mlbCurrentSeasonDataQualityAudit = validateMlbCurrentSeasonDataQualityAuditFixtures()
   const mlbFeatureModelReadiness = validateMlbFeatureModelReadinessFixtures()
+  const mlbModelAudit = validateMlbModelAuditFixtures()
   return apiOk({
     ...adaptive,
     success:
@@ -43,7 +45,8 @@ export async function GET(request: NextRequest) {
       mlbUnresolvedPlayerIdentity.success &&
       mlbCurrentSeasonBackfillOrchestrator.success &&
       mlbCurrentSeasonDataQualityAudit.success &&
-      mlbFeatureModelReadiness.success,
+      mlbFeatureModelReadiness.success &&
+      mlbModelAudit.success,
     marketAlignment,
     recommendationExplanation,
     officialPickExperience,
@@ -56,6 +59,7 @@ export async function GET(request: NextRequest) {
     mlbCurrentSeasonBackfillOrchestrator,
     mlbCurrentSeasonDataQualityAudit,
     mlbFeatureModelReadiness,
+    mlbModelAudit,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }, requestId(request))

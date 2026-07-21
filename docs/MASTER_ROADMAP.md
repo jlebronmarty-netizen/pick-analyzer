@@ -40,6 +40,14 @@ Evidence: `src/services/mlb-feature-model-readiness.service.ts`, `src/app/api/ml
 
 Note: The readiness audit composes existing MLB Feature Store integration with current-season data-quality evidence and classifies active, partial, blocked and unsafe model inputs without changing prediction generation. Production commit `38ba24e8861414cbd3e433ac0f3bdcfbae3e31bd` passed read-only smoke with status `PASS_WITH_CAVEATS`, validation 10/10, providerCallsMade 0, remoteMutationsMade 0, Feature Store ready, 50 compatible prediction snapshots, 0 duplicate stat row IDs and 100% event/team mapping. It blocks CLV/line movement without genuine open/close odds and keeps confirmed lineups, injuries, weather, advanced pitch tracking and props unavailable unless supported by real stored data.
 
+### MLB Backtesting, Calibration And Model Audit V1
+
+Status: Implemented locally. Certification: pending production deployment and smoke.
+
+Evidence: `src/services/mlb-model-audit.service.ts`, `src/app/api/mlb/model-audit/route.ts`, `src/app/api/operations/validation/route.ts` and `docs/mlb-model-audit.md`.
+
+Note: The audit reads stored MLB prediction history only, excludes post-start predictions and rows without immutable feature snapshots, reports backtest/calibration metrics and keeps threshold, Official Pick, Current Board, settlement and scheduler behavior unchanged. It reports insufficient sample honestly rather than forcing recalibration or historical threshold tuning.
+
 ### SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1
 
 Status: Endpoint timeout root cause diagnosed locally. Certification: OPTIMIZED. Historical import remains stopped until explicitly resumed.
