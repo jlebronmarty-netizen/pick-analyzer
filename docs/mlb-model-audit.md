@@ -1,6 +1,6 @@
 # MLB Backtesting, Calibration And Model Audit
 
-Certification: pending production smoke
+Certification: `MLB_MODEL_AUDIT_PASS_INSUFFICIENT_SAMPLE`
 
 Date: 2026-07-21
 
@@ -32,3 +32,23 @@ Closing-line comparison remains unavailable unless genuine opening and closing o
 ## Threshold Policy
 
 Recommendation thresholds, official-pick eligibility, minimum feature quality, market quality, EV, edge and risk policy are preserved. The audit may certify the framework with insufficient sample rather than forcing recalibration.
+
+## Production Certification
+
+Production commit `c9534afa275743a071bff0f9a2f92e12326a7c01` passed read-only smoke on 2026-07-21:
+
+- Route success: true.
+- Certification: `MLB_MODEL_AUDIT_PASS_INSUFFICIENT_SAMPLE`.
+- Provider calls: 0.
+- Remote mutations: 0.
+- Validation: 8/8 fixture checks passed.
+- Prediction rows: 909.
+- Settled rows: 593.
+- Eligible no-leakage immutable-snapshot cohort: 0.
+- Official eligible audit cohort: 0.
+- Post-start settled rows excluded: 561.
+- Settled rows missing immutable feature snapshots excluded: 548.
+- Duplicate prediction key review candidates: 282.
+- Calibration status: `INSUFFICIENT_SAMPLE_FOR_THRESHOLD_CHANGE`.
+
+No threshold, recommendation, calibration, Current Board, Official Pick, settlement or scheduler change was made.

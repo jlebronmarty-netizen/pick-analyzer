@@ -42,11 +42,11 @@ Note: The readiness audit composes existing MLB Feature Store integration with c
 
 ### MLB Backtesting, Calibration And Model Audit V1
 
-Status: Implemented locally. Certification: pending production deployment and smoke.
+Status: Production certified. Certification: `MLB_MODEL_AUDIT_PASS_INSUFFICIENT_SAMPLE`.
 
 Evidence: `src/services/mlb-model-audit.service.ts`, `src/app/api/mlb/model-audit/route.ts`, `src/app/api/operations/validation/route.ts` and `docs/mlb-model-audit.md`.
 
-Note: The audit reads stored MLB prediction history only, excludes post-start predictions and rows without immutable feature snapshots, reports backtest/calibration metrics and keeps threshold, Official Pick, Current Board, settlement and scheduler behavior unchanged. It reports insufficient sample honestly rather than forcing recalibration or historical threshold tuning.
+Note: The audit reads stored MLB prediction history only, excludes post-start predictions and rows without immutable feature snapshots, reports backtest/calibration metrics and keeps threshold, Official Pick, Current Board, settlement and scheduler behavior unchanged. Production commit `c9534afa275743a071bff0f9a2f92e12326a7c01` passed read-only smoke with 909 prediction rows, 593 settled rows, 0 leakage-safe immutable-snapshot eligible rows, 561 post-start settled rows excluded, 548 settled rows missing immutable feature snapshots excluded and validation 8/8. It reports insufficient sample honestly rather than forcing recalibration or historical threshold tuning.
 
 ### SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1
 
