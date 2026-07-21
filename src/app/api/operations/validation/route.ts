@@ -9,6 +9,7 @@ import { validateRecommendationExplanationFixtures } from '@/services/recommenda
 import { validateBsnCoreCertificationFixtures } from '@/services/bsn-core-certification.service'
 import { validateSportsDataIoSubscriptionMaximizationAuditFixtures } from '@/services/sportsdataio-subscription-maximization-audit.service'
 import { validateSportsDataIoMlbImportDurabilityFixtures } from '@/services/sportsdataio-mlb-historical-import-executor.service'
+import { validateMlbUnresolvedPlayerIdentityFixtures } from '@/services/mlb-unresolved-player-identity.service'
 
 export async function GET(request: NextRequest) {
   const adaptive = validateAdaptiveRefreshFixtures()
@@ -20,6 +21,7 @@ export async function GET(request: NextRequest) {
   const bsnCoreCertification = await validateBsnCoreCertificationFixtures()
   const sportsDataIoSubscriptionMaximization = validateSportsDataIoSubscriptionMaximizationAuditFixtures()
   const sportsDataIoMlbImportDurability = validateSportsDataIoMlbImportDurabilityFixtures()
+  const mlbUnresolvedPlayerIdentity = validateMlbUnresolvedPlayerIdentityFixtures()
   return apiOk({
     ...adaptive,
     success:
@@ -31,7 +33,8 @@ export async function GET(request: NextRequest) {
       mlbPlayerPropsFoundation.success &&
       bsnCoreCertification.success &&
       sportsDataIoSubscriptionMaximization.success &&
-      sportsDataIoMlbImportDurability.success,
+      sportsDataIoMlbImportDurability.success &&
+      mlbUnresolvedPlayerIdentity.success,
     marketAlignment,
     recommendationExplanation,
     officialPickExperience,
@@ -40,6 +43,7 @@ export async function GET(request: NextRequest) {
     bsnCoreCertification,
     sportsDataIoSubscriptionMaximization,
     sportsDataIoMlbImportDurability,
+    mlbUnresolvedPlayerIdentity,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }, requestId(request))

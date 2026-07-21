@@ -55,6 +55,7 @@ Stop only for:
 - For MLB operating-day work, run `/api/operating-day/execute` with `dryRun=true` first. Dry-runs must make zero provider calls.
 - For MLB next-slate rollover, use `GET /api/slate/next/status` or `action=next_slate_preview` first. `prepare_next_slate` may call SportsDataIO only when authenticated, `confirmed=true`, `dryRun=false`, budget permits the call count and the action is explicitly approved.
 - For MLB odds coverage reconciliation, run `GET /api/mlb/odds/coverage?date=YYYY-MM-DD&includeValidation=true` first. This diagnostic must remain read-only and report providerCallsMade 0.
+- For MLB unresolved player identities, run `GET /api/mlb/players/unresolved-identities?season=YYYY` first. The route is read-only by default, must report providerCallsMade 0, and write mode may only create provisional `unresolved_player` mappings or apply exact trusted player mappings.
 - Do not run broad `/api/predictions/settle` for a daily operating-day workflow. Use `/api/operating-day/[operatingDayId]/settle` so settlement remains scoped and idempotent.
 - If result sync returns `quota_blocked`, leave the day pending and do not settle unresolved events.
 

@@ -1660,6 +1660,16 @@ Consequences: The first confirmed write inserted 15 challenger rows with 0 provi
 
 Affected modules: V6 regeneration, Current Board, MLB model platform service, comparison/shadow/promotion/rollback routes, player/stadium metadata-cache routes, pitcher-bullpen foundation route and docs.
 
+## 2026-07-21 - Add MLB Automatic Player Discovery V1
+
+Context: The controlled MLB three-date pilot passed durability and idempotency, but provider player `10003762` (`Eliezer Alfonzo`) appeared without an exact trusted player mapping or canonical `sport_players.provider_ids` match. The row was safely preserved with `player_id=null`, but the provider identity needed an observable reviewable record before broader backfill.
+
+Decision: Reuse `provider_entity_mappings` for provisional unresolved player identities with `entity_type='unresolved_player'` instead of creating a new table. Future MLB player-stat imports create or reuse one provisional identity per provider player ID and season, preserve provider ID/name/team/source lineage, keep it non-production/review-required and never assign a trusted canonical player through fuzzy matching. Add a stored-data reconciliation service and protected `/api/mlb/players/unresolved-identities` route that defaults to dry-run and only writes provisional mappings or exact trusted identity updates.
+
+Consequences: Isolated unresolved player IDs no longer block unrelated valid rows, and broad backfill can preserve/reconcile identity gaps without fabricating players. Trusted player identity remains limited to exact `provider_entity_mappings`, exact `sport_players.provider_ids` or manual/admin-approved mapping. No provider calls, prediction logic, recommendations, Current Board, scheduler, settlement or dashboard behavior changed.
+
+Affected modules: SportsDataIO MLB historical import executor, MLB unresolved player identity service, Operations Validation, MLB players operational route and docs.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.

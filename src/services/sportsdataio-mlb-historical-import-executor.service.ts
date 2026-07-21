@@ -954,6 +954,10 @@ function playerStatId(statType: 'season' | 'game', season: string, providerId: s
   return `${SPORT_KEY}:${LEAGUE_KEY}:${PROVIDER}:player_stats:${statType}:${keyPart(season)}:${keyPart(providerId)}`
 }
 
+function unresolvedPlayerIdentityId(season: string, providerPlayerId: string) {
+  return `${SPORT_KEY}:${LEAGUE_KEY}:${PROVIDER}:unresolved_player:${keyPart(season)}:${keyPart(providerPlayerId)}`
+}
+
 function gameStatId(eventIdValue: string, teamIdValue: string) {
   return `${eventIdValue}_${teamIdValue}`
 }
@@ -1348,6 +1352,11 @@ function providerTimestamp(row: Record<string, unknown>) {
   return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null
 }
 
+function unitDateFromProviderRow(row: Record<string, unknown>) {
+  const timestamp = providerTimestamp(row)
+  return timestamp ? timestamp.slice(0, 10) : null
+}
+
 function statsJson(row: Record<string, unknown>) {
   const result: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(row)) {
@@ -1509,6 +1518,7 @@ function normalizePlayerSeasonStatRows({
 }) {
   const rows: Array<Record<string, unknown>> = []
   const mappings: Array<Record<string, unknown>> = []
+  const provisionalPlayerMappings = new Map<string, Record<string, unknown>>()
   const unresolvedTeams = new Set<string>()
   const unresolvedPlayers = new Set<string>()
   const seen = new Set<string>()
@@ -1521,8 +1531,26 @@ function normalizePlayerSeasonStatRows({
       continue
     }
     const player = players.byProviderId.get(pId) ?? null
-    if (!player) unresolvedPlayers.add(pId)
     const resolvedTeam = resolveTeam(item, teams)
+    const name =
+      safeString(item.Name) ||
+      `${safeString(item.FirstName)} ${safeString(item.LastName)}`.trim() ||
+      player?.display_name ||
+      `SportsDataIO MLB Player ${pId}`
+    if (!player) {
+      unresolvedPlayers.add(pId)
+      if (!provisionalPlayerMappings.has(pId)) {
+        provisionalPlayerMappings.set(pId, unresolvedPlayerIdentityMapping({
+          season,
+          providerPlayerId: pId,
+          providerName: name,
+          providerTeamId: resolvedTeam.providerId || null,
+          sourceDate: safeString(item.Day) || null,
+          sourceRecordId: safeString(item.StatID) || safeString(item.StatId) || null,
+          sourceDomain: 'player_season_stats',
+        }))
+      }
+    }
     if (resolvedTeam.providerId && !resolvedTeam.team) unresolvedTeams.add(resolvedTeam.providerId)
     const natural = safeString(item.StatID) || safeString(item.StatId) || pId
     const id = playerStatId('season', season, natural)
@@ -1531,11 +1559,6 @@ function normalizePlayerSeasonStatRows({
       continue
     }
     seen.add(id)
-    const name =
-      safeString(item.Name) ||
-      `${safeString(item.FirstName)} ${safeString(item.LastName)}`.trim() ||
-      player?.display_name ||
-      `SportsDataIO MLB Player ${pId}`
     rows.push({
       id,
       sport_key: SPORT_KEY,
@@ -1600,7 +1623,7 @@ function normalizePlayerSeasonStatRows({
 
   return {
     rows,
-    mappings,
+    mappings: [...mappings, ...provisionalPlayerMappings.values()],
     unresolvedTeams: Array.from(unresolvedTeams),
     unresolvedPlayers: Array.from(unresolvedPlayers),
     duplicateInputs,
@@ -1694,6 +1717,7 @@ function normalizePlayerGameStatRows({
 }) {
   const rows: Array<Record<string, unknown>> = []
   const mappings: Array<Record<string, unknown>> = []
+  const provisionalPlayerMappings = new Map<string, Record<string, unknown>>()
   const unresolvedTeams = new Set<string>()
   const unresolvedPlayers = new Set<string>()
   const unresolvedEvents = new Set<string>()
@@ -1710,7 +1734,25 @@ function normalizePlayerGameStatRows({
       unresolvedEvents.add(gameId || `row:${unresolvedEvents.size}`)
       continue
     }
-    if (!pId || !player) unresolvedPlayers.add(pId || `row:${unresolvedPlayers.size}`)
+    const name =
+      safeString(item.Name) ||
+      `${safeString(item.FirstName)} ${safeString(item.LastName)}`.trim() ||
+      player?.display_name ||
+      `SportsDataIO MLB Player ${pId}`
+    if (!pId || !player) {
+      unresolvedPlayers.add(pId || `row:${unresolvedPlayers.size}`)
+      if (pId && !provisionalPlayerMappings.has(pId)) {
+        provisionalPlayerMappings.set(pId, unresolvedPlayerIdentityMapping({
+          season,
+          providerPlayerId: pId,
+          providerName: name,
+          providerTeamId: resolvedTeam.providerId || null,
+          sourceDate: safeString(item.Day) || unitDateFromProviderRow(item),
+          sourceRecordId: safeString(item.StatID) || safeString(item.StatId) || safeString(item.PlayerGameID) || null,
+          sourceDomain: 'player_game_stats_by_date',
+        }))
+      }
+    }
     if (resolvedTeam.providerId && !resolvedTeam.team) unresolvedTeams.add(resolvedTeam.providerId)
     const natural = safeString(item.StatID) || safeString(item.StatId) || safeString(item.PlayerGameID) || [gameId, resolvedTeam.providerId, pId].filter(Boolean).join(':')
     if (!natural) continue
@@ -1720,11 +1762,6 @@ function normalizePlayerGameStatRows({
       continue
     }
     seen.add(id)
-    const name =
-      safeString(item.Name) ||
-      `${safeString(item.FirstName)} ${safeString(item.LastName)}`.trim() ||
-      player?.display_name ||
-      `SportsDataIO MLB Player ${pId}`
     rows.push({
       id,
       sport_key: SPORT_KEY,
@@ -1784,7 +1821,7 @@ function normalizePlayerGameStatRows({
 
   return {
     rows,
-    mappings,
+    mappings: [...mappings, ...provisionalPlayerMappings.values()],
     unresolvedTeams: Array.from(unresolvedTeams),
     unresolvedPlayers: Array.from(unresolvedPlayers),
     unresolvedEvents: Array.from(unresolvedEvents),
@@ -3449,6 +3486,51 @@ export function runSportsDataIoMlbDiscoveryExecutorFixtures() {
       unresolved: normalized.unresolved.length,
       duplicateInputs: normalized.duplicateInputs,
     },
+  }
+}
+
+function unresolvedPlayerIdentityMapping({
+  season,
+  providerPlayerId,
+  providerName,
+  providerTeamId,
+  sourceDate,
+  sourceRecordId,
+  sourceDomain,
+}: {
+  season: string
+  providerPlayerId: string
+  providerName: string
+  providerTeamId: string | null
+  sourceDate: string | null
+  sourceRecordId: string | null
+  sourceDomain: MlbDomain
+}) {
+  return {
+    sport_key: SPORT_KEY,
+    entity_type: 'unresolved_player',
+    internal_id: unresolvedPlayerIdentityId(season, providerPlayerId),
+    provider: PROVIDER,
+    provider_id: providerPlayerId,
+    season,
+    metadata: quarantineMetadata({
+      entityType: 'unresolved_player',
+      identityStatus: 'UNRESOLVED_PROVIDER_ID',
+      reviewStatus: 'REVIEW_REQUIRED',
+      productionIdentityStatus: 'PENDING_METADATA',
+      trustedCanonicalPlayerId: null,
+      providerPlayerId,
+      providerName,
+      providerTeamId,
+      sourceDate,
+      sourceRecordId,
+      sourceDomain,
+      firstSeenAt: generatedAt(),
+      resolutionPolicy: 'exact_mapping_or_manual_admin_approval_only',
+      fuzzyMatchingUsed: false,
+      canResolveProductionIdentity: false,
+    }),
+    updated_at: generatedAt(),
   }
 }
 
