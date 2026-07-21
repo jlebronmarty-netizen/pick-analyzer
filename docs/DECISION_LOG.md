@@ -1690,6 +1690,16 @@ Consequences: Operators can inspect actual MLB data readiness and low-score area
 
 Affected modules: MLB current-season data-quality audit service, MLB current-season data-quality route, Operations Validation and docs.
 
+## 2026-07-21 - Add MLB Feature Store And Model Input Readiness Audit V1
+
+Context: The stored-data data-quality audit passed with caveats, so the next roadmap phase needed to verify whether existing MLB feature/model paths can safely consume available current-season data without future leakage or unsupported feature promotion.
+
+Decision: Add `mlb_feature_model_readiness_v1` and `/api/mlb/features/model-readiness` as read-only additive surfaces. The audit composes existing MLB Feature Store integration with current-season data-quality evidence, classifies feature inputs and records leakage guardrails and blocked features.
+
+Consequences: MLB model input readiness can be certified without replacing Prediction Engine V4, MLB Prediction Engine V1, the shared Sport Prediction Engine SDK, Current Board, recommendation policy or settlement. CLV/line movement, confirmed lineup, injury, weather, advanced pitch-tracking and prop features remain blocked unless real stored cutoff-safe data exists.
+
+Affected modules: MLB feature/model readiness service, MLB feature model-readiness route, Operations Validation and docs.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.

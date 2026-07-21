@@ -32,6 +32,14 @@ Evidence: `src/services/mlb-current-season-data-quality-audit.service.ts`, `src/
 
 Note: The audit reads stored 2026 MLB data only and reports transparent season-level quality metrics for teams, players, events, results, standings, team stats, player game stats, odds snapshots, predictions, settlements, feature snapshots, provider mappings, historical jobs and checkpoint coverage. Production commit `cf7075126f656f723b6f73bda6553966efb8fa0e` passed read-only smoke with providerCallsMade 0, remoteMutationsMade 0, validation 8/8, backfill complete, 44,459 player game stat rows, 0 missing dates, 0 duplicate stat row IDs, 100% event/team mapping, 46,002 odds rows and overall readiness 79.64/GOOD. Caveats remain for no genuine opening/closing odds rows, unresolved reviewable player identities and 244 natural-key collision candidates before high-confidence player-level production features.
 
+### MLB Feature Store And Model Input Readiness V1
+
+Status: Implemented locally. Certification: pending production deployment and smoke.
+
+Evidence: `src/services/mlb-feature-model-readiness.service.ts`, `src/app/api/mlb/features/model-readiness/route.ts`, `src/app/api/operations/validation/route.ts` and `docs/mlb-feature-model-readiness.md`.
+
+Note: The readiness audit composes existing MLB Feature Store integration with current-season data-quality evidence and classifies active, partial, blocked and unsafe model inputs without changing prediction generation. It proves leakage guardrails, reports feature snapshot readiness, blocks CLV/line movement without genuine open/close odds and keeps confirmed lineups, injuries, weather, advanced pitch tracking and props unavailable unless supported by real stored data.
+
 ### SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1
 
 Status: Endpoint timeout root cause diagnosed locally. Certification: OPTIMIZED. Historical import remains stopped until explicitly resumed.
