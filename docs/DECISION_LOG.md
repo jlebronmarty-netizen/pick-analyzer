@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-21 - Add MLB Player Data Excellence And Pitcher Outs Readiness
+
+Context: Full-season MLB player-game-stat import exposed 12,806 unresolved rows across 656 provider player IDs, blocking high-confidence player-level features and pitcher recorded-outs readiness.
+
+Decision: Add a read-only MLB player-data excellence route and strict recorded-outs conversion utilities, then reconcile exact local SportsDataIO mappings through the existing protected unresolved-identity workflow. Repair the reconciler to batch idempotent updates safely after the original sequential path timed out mid-run.
+
+Consequences: Exact identity coverage improved to 99.44% with 0 provider calls. The remaining 25 provider IDs are preserved for review as provider metadata gaps. Pitcher outs projections remain SHADOW / NO_MARKET with no edge, EV, Kelly, Official Pick or prop recommendation until verified prop odds and leakage-safe pregame starter samples exist.
+
+Affected modules: MLB unresolved player identity, MLB projection integrity, MLB player data excellence route, Operations Validation and docs.
+
 ## 2026-07-17 - Block Postgame Results Sync Until Finals Are Safe
 
 Context: Postgame lifecycle proof found that `sync_results` dry-run could report safe while the operating-day board still had unresolved games. Running a real results sync at that point could spend provider quota before the slate was ready for end-to-end results, settlement and learning validation.

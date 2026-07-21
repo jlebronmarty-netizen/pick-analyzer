@@ -10,15 +10,38 @@ const SERVICE_VERSION = 'mlb_unresolved_player_identity_v1'
 
 type PlayerStatRow = {
   id: string
+  sport_key: string
+  league_key: string
   season: string
+  stat_type: string
   event_id: string | null
   team_id: string | null
   player_id: string | null
   player_name: string | null
+  provider: string
   provider_ids: Record<string, unknown> | null
+  stats: Record<string, unknown> | null
   metadata: Record<string, unknown> | null
   source_timestamp: string | null
   updated_at: string | null
+}
+
+type PlayerStatIdentityUpdate = {
+  id: string
+  sport_key: string
+  league_key: string
+  season: string
+  stat_type: string
+  event_id: string | null
+  team_id: string | null
+  player_id: string
+  player_name: string | null
+  provider: string
+  provider_ids: Record<string, unknown>
+  stats: Record<string, unknown>
+  metadata: Record<string, unknown>
+  source_timestamp: string | null
+  updated_at: string
 }
 
 function generatedAt() {
@@ -106,7 +129,7 @@ async function loadUnresolvedRows(season = '2026') {
   for (let from = 0; ; from += pageSize) {
     const result = await supabaseAdmin
       .from('sport_player_stats')
-      .select('id, season, event_id, team_id, player_id, player_name, provider_ids, metadata, source_timestamp, updated_at')
+      .select('id, sport_key, league_key, season, stat_type, event_id, team_id, player_id, player_name, provider, provider_ids, stats, metadata, source_timestamp, updated_at')
       .eq('sport_key', SPORT_KEY)
       .eq('league_key', LEAGUE_KEY)
       .eq('season', season)
@@ -176,6 +199,7 @@ export async function reconcileMlbUnresolvedPlayerIdentities({
   }
 
   if (!dryRun) {
+    const updates: PlayerStatIdentityUpdate[] = []
     for (const row of resolvableRows) {
       const providerId = providerPlayerId(row)
       const playerId = trustedMappings.get(providerId)
@@ -187,13 +211,32 @@ export async function reconcileMlbUnresolvedPlayerIdentities({
         resolvedAt: generatedAt(),
         resolutionPolicy: 'exact_provider_entity_mapping',
       }
+      updates.push({
+        id: row.id,
+        sport_key: row.sport_key,
+        league_key: row.league_key,
+        season: row.season,
+        stat_type: row.stat_type,
+        event_id: row.event_id,
+        team_id: row.team_id,
+        player_id: playerId,
+        player_name: row.player_name,
+        provider: row.provider,
+        provider_ids: row.provider_ids ?? {},
+        stats: row.stats ?? {},
+        metadata,
+        source_timestamp: row.source_timestamp,
+        updated_at: generatedAt(),
+      })
+    }
+
+    for (let index = 0; index < updates.length; index += 500) {
+      const chunk = updates.slice(index, index + 500)
       const result = await supabaseAdmin
         .from('sport_player_stats')
-        .update({ player_id: playerId, metadata, updated_at: generatedAt() })
-        .eq('id', row.id)
-        .is('player_id', null)
+        .upsert(chunk, { onConflict: 'id' })
       if (result.error) throw new Error(`sport_player_stats exact identity update failed: ${result.error.message}`)
-      statRowsUpdated += 1
+      statRowsUpdated += chunk.length
     }
   }
 
@@ -232,24 +275,34 @@ export function validateMlbUnresolvedPlayerIdentityFixtures() {
   const duplicateRows: PlayerStatRow[] = [
     {
       id: 'stat-a',
+      sport_key: SPORT_KEY,
+      league_key: LEAGUE_KEY,
       season: '2026',
+      stat_type: 'game',
       event_id: 'event-a',
       team_id: 'team-a',
       player_id: null,
       player_name: 'Same Name',
+      provider: PROVIDER,
       provider_ids: { player: '10003762', sportsdataio: '9169849', team: '1' },
+      stats: {},
       metadata: { providerPlayerId: '10003762', hasUnresolvedPlayer: true },
       source_timestamp: '2026-07-19T19:20:00Z',
       updated_at: '2026-07-21T14:10:07Z',
     },
     {
       id: 'stat-b',
+      sport_key: SPORT_KEY,
+      league_key: LEAGUE_KEY,
       season: '2026',
+      stat_type: 'game',
       event_id: 'event-b',
       team_id: 'team-a',
       player_id: null,
       player_name: 'Same Name',
+      provider: PROVIDER,
       provider_ids: { player: '10003762', sportsdataio: '9169850', team: '1' },
+      stats: {},
       metadata: { providerPlayerId: '10003762', hasUnresolvedPlayer: true },
       source_timestamp: '2026-07-19T20:20:00Z',
       updated_at: '2026-07-21T14:10:08Z',

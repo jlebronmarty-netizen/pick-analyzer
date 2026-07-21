@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### MLB Player Data Excellence And Pitcher Outs Readiness V1
+
+Status: Partially complete with provider/data caveats. Certification: `MLB_DATA_EXCELLENCE_PITCHER_OUTS_PARTIAL`.
+
+Evidence: `src/services/mlb-player-data-excellence.service.ts`, `src/app/api/mlb/player-data-excellence/route.ts`, `src/services/mlb-projection-integrity.service.ts`, `src/services/mlb-unresolved-player-identity.service.ts`, `src/app/api/operations/validation/route.ts`, `docs/mlb-player-catalog-completion.md`, `docs/mlb-pitcher-recorded-outs-model.md` and `docs/mlb-player-prop-readiness.md`.
+
+Note: Exact provider-scoped identity reconciliation improved MLB 2026 player-game-stat identity coverage from 71.20% to 99.44%, leaving 250 rows across 25 provider IDs classified as `PROVIDER_METADATA_NOT_IMPORTED`. Pitcher recorded-outs conversion now treats baseball innings notation correctly and prefers direct outs when supplied. The pitcher-outs model contract remains SHADOW / NO_MARKET with 0 eligible leakage-safe pregame projection sample and no player-prop odds.
+
 ### MLB Automatic Player Discovery V1
 
 Status: Production certified. Certification: `MLB_AUTO_PLAYER_DISCOVERY_PASS`.

@@ -14,6 +14,7 @@ import { validateMlbCurrentSeasonBackfillOrchestratorFixtures } from '@/services
 import { validateMlbCurrentSeasonDataQualityAuditFixtures } from '@/services/mlb-current-season-data-quality-audit.service'
 import { validateMlbFeatureModelReadinessFixtures } from '@/services/mlb-feature-model-readiness.service'
 import { validateMlbModelAuditFixtures } from '@/services/mlb-model-audit.service'
+import { validateMlbPlayerDataExcellenceFixtures } from '@/services/mlb-player-data-excellence.service'
 
 export async function GET(request: NextRequest) {
   const adaptive = validateAdaptiveRefreshFixtures()
@@ -30,6 +31,7 @@ export async function GET(request: NextRequest) {
   const mlbCurrentSeasonDataQualityAudit = validateMlbCurrentSeasonDataQualityAuditFixtures()
   const mlbFeatureModelReadiness = validateMlbFeatureModelReadinessFixtures()
   const mlbModelAudit = validateMlbModelAuditFixtures()
+  const mlbPlayerDataExcellence = validateMlbPlayerDataExcellenceFixtures()
   return apiOk({
     ...adaptive,
     success:
@@ -46,7 +48,8 @@ export async function GET(request: NextRequest) {
       mlbCurrentSeasonBackfillOrchestrator.success &&
       mlbCurrentSeasonDataQualityAudit.success &&
       mlbFeatureModelReadiness.success &&
-      mlbModelAudit.success,
+      mlbModelAudit.success &&
+      mlbPlayerDataExcellence.success,
     marketAlignment,
     recommendationExplanation,
     officialPickExperience,
@@ -60,6 +63,7 @@ export async function GET(request: NextRequest) {
     mlbCurrentSeasonDataQualityAudit,
     mlbFeatureModelReadiness,
     mlbModelAudit,
+    mlbPlayerDataExcellence,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }, requestId(request))

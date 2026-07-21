@@ -55,9 +55,10 @@ export function roundProjection(value: number | null, unit: ProjectionUnit) {
 export function baseballInningsNotationToOuts(value: number | string | null | undefined) {
   if (value === null || value === undefined || value === '') return { outs: null, valid: false, warning: 'missing_innings' }
   const text = String(value).trim()
+  if (!/^\d+(\.[0-2])?$/.test(text)) return { outs: null, valid: false, warning: 'invalid_baseball_innings_notation' }
   const [wholeRaw, fracRaw = '0'] = text.split('.')
   const whole = Number(wholeRaw)
-  const frac = Number(fracRaw.slice(0, 1))
+  const frac = Number(fracRaw)
   if (!Number.isInteger(whole) || !Number.isInteger(frac) || frac < 0 || frac > 2) {
     return { outs: null, valid: false, warning: 'invalid_baseball_innings_notation' }
   }
@@ -65,8 +66,20 @@ export function baseballInningsNotationToOuts(value: number | string | null | un
 }
 
 export function decimalInningsToOuts(value: number | null | undefined) {
-  if (value === null || value === undefined || !Number.isFinite(value)) return null
-  return value * 3
+  return baseballInningsNotationToOuts(value).outs
+}
+
+export function recordedOutsFromPitchingValue(input: {
+  directOuts?: number | string | null
+  innings?: number | string | null
+}) {
+  if (input.directOuts !== null && input.directOuts !== undefined && input.directOuts !== '') {
+    const outs = Number(input.directOuts)
+    if (Number.isInteger(outs) && outs >= 0) return { outs, source: 'direct_outs' as const, valid: true, warning: null }
+    return { outs: null, source: 'direct_outs' as const, valid: false, warning: 'invalid_direct_outs' }
+  }
+  const converted = baseballInningsNotationToOuts(input.innings)
+  return { ...converted, source: 'baseball_innings_notation' as const }
 }
 
 export function perNineToGameCount(ratePer9: number | null, projectedOuts: number | null) {
@@ -183,6 +196,8 @@ export function rankProjection(input: ProjectionIntegrityInput & { validityStatu
 
 export function validateMlbProjectionIntegrityFixtures() {
   const innings = baseballInningsNotationToOuts(5.2)
+  const malformed = baseballInningsNotationToOuts('5.3')
+  const direct = recordedOutsFromPitchingValue({ directOuts: 18, innings: 5.2 })
   const badOuts = validateProjectionValue({
     projectionKey: 'pitcher_outs_recorded',
     projectionFamily: 'mlb_pitcher_projection',
@@ -215,6 +230,8 @@ export function validateMlbProjectionIntegrityFixtures() {
   })
   const checks = [
     ['5.2 innings equals 17 outs', innings.outs === 17],
+    ['5.3 innings notation is rejected', malformed.valid === false],
+    ['direct outs preferred over innings notation', direct.outs === 18 && direct.source === 'direct_outs'],
     ['outs above 27 invalid', badOuts.status === 'OUT_OF_RANGE'],
     ['missing strikeouts do not become zero', missingK === null],
     ['league baseline cannot rank strongly', baselineRank.rankScore <= 24 && baselineRank.rankTier === 'LIMITED'],
