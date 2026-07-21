@@ -17,7 +17,7 @@ type StatRow = {
   player_id: string | null
   team_id: string | null
   event_id: string | null
-  game_date: string | null
+  source_timestamp: string | null
   stats: Record<string, unknown> | null
   metadata: Record<string, unknown> | null
   updated_at: string | null
@@ -69,15 +69,15 @@ export async function getPlayerIntelligence(playerId: string) {
   const typedPlayer = player as PlayerRow
   const { data: stats, error: statsError } = await supabaseAdmin
     .from('sport_player_stats')
-    .select('id, player_id, team_id, event_id, game_date, stats, metadata, updated_at')
+    .select('id, player_id, team_id, event_id, source_timestamp, stats, metadata, updated_at')
     .eq('player_id', playerId)
-    .order('game_date', { ascending: false })
+    .order('source_timestamp', { ascending: false })
     .limit(25)
   if (statsError) throw new Error(`sport_player_stats read failed: ${statsError.message}`)
 
   const rows = (stats ?? []) as StatRow[]
   const outsRows = rows
-    .map((row) => ({ date: row.game_date, eventId: row.event_id, outs: pitcherOuts(row) }))
+    .map((row) => ({ date: row.source_timestamp, eventId: row.event_id, outs: pitcherOuts(row) }))
     .filter((row) => row.outs !== null)
 
   return {
@@ -95,15 +95,15 @@ export async function getPlayerIntelligence(playerId: string) {
     },
     recentGames: rows.slice(0, 10).map((row) => ({
       eventId: row.event_id,
-      gameDate: row.game_date,
+      gameDate: row.source_timestamp,
       teamId: row.team_id,
       statsAvailable: Boolean(row.stats && Object.keys(row.stats).length),
       updatedAt: row.updated_at,
     })),
     seasonSample: {
       storedGameRows: rows.length,
-      latestGameDate: rows[0]?.game_date ?? null,
-      oldestLoadedGameDate: rows[rows.length - 1]?.game_date ?? null,
+      latestGameDate: rows[0]?.source_timestamp ?? null,
+      oldestLoadedGameDate: rows[rows.length - 1]?.source_timestamp ?? null,
     },
     pitcherRecordedOuts: {
       status: outsRows.length ? 'STORED_HISTORY_AVAILABLE' : 'UNAVAILABLE',
@@ -131,8 +131,8 @@ export async function getPlayerIntelligence(playerId: string) {
 
 export function validatePlayerIntelligenceFixtures() {
   const checks = [
-    ['recorded outs baseball notation', pitcherOuts({ id: 's', player_id: 'p', team_id: null, event_id: null, game_date: null, stats: { innings_pitched: 5.2 }, metadata: null, updated_at: null }) === 17],
-    ['direct outs preferred', pitcherOuts({ id: 's', player_id: 'p', team_id: null, event_id: null, game_date: null, stats: { outs: 16, innings_pitched: 5.2 }, metadata: null, updated_at: null }) === 16],
+    ['recorded outs baseball notation', pitcherOuts({ id: 's', player_id: 'p', team_id: null, event_id: null, source_timestamp: null, stats: { innings_pitched: 5.2 }, metadata: null, updated_at: null }) === 17],
+    ['direct outs preferred', pitcherOuts({ id: 's', player_id: 'p', team_id: null, event_id: null, source_timestamp: null, stats: { outs: 16, innings_pitched: 5.2 }, metadata: null, updated_at: null }) === 16],
     ['no prop market activation', true],
     ['no provider calls', true],
     ['no remote mutations', true],
