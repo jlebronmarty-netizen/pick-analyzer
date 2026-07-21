@@ -1720,6 +1720,16 @@ Consequences: MLB Core is formally closed as production ready under the document
 
 Affected modules: MLB certification docs, Project Status and Master Roadmap.
 
+## 2026-07-21 - Certify BSN Source Inventory And Contract
+
+Context: The autonomous roadmap moved from MLB Core into BSN. Existing BSN source-framework and platform routes already model legitimate source options, but the roadmap required a current inventory and contract that separates supported, partial, derivable, blocked and unavailable datasets.
+
+Decision: Create `docs/bsn-data-source-inventory.md` and certify Phase 7 as `BSN_SOURCE_INVENTORY_PASS`. The inventory keeps official web/app evidence, permissioned feeds, CSV/manual paths, future providers and third-party public score sites separate, and forbids hidden API probing, disallowed path scraping, anti-bot bypass and unverifiable sources.
+
+Consequences: BSN can proceed to Foundation using only legitimate/verifiable inputs. Production readiness remains blocked by source approval, verified odds and verified boxscore/player-stat coverage; those are later-phase blockers, not source-inventory failures.
+
+Affected modules: BSN source inventory docs, Project Status and Master Roadmap.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.

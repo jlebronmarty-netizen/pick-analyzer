@@ -98,6 +98,14 @@ Evidence: `docs/BSN_FOUNDATION_V1_CERTIFICATION.md`, `src/services/basketball-so
 
 Note: The audit confirmed the current BSN stack has a reusable foundation, but no permissioned production BSN API/feed is configured. Official public HTML remains suitable only for discovery and limited foundation snapshots unless written authorization is obtained. CSV/manual paths are validation-first and write/audit blocked. Verified BSN odds and approved boxscore/game-stat coverage remain unavailable. Provider calls 0, remote mutations 0, and no prediction, recommendation, Current Board, settlement, scheduler or provider logic changed. NBA has not started.
 
+### BSN Source Inventory And Contract V1
+
+Status: Complete. Certification: `BSN_SOURCE_INVENTORY_PASS`.
+
+Evidence: `docs/bsn-data-source-inventory.md`, `src/services/basketball-source-framework.service.ts`, `src/services/bsn-platform.service.ts`, `/api/bsn/sources`, `/api/bsn/source-quality`, `/api/bsn/sources/validate`, `/api/bsn/capabilities` and `/api/bsn/operations/readiness`.
+
+Note: The source inventory classifies official BSN web/app evidence, bounded homepage discovery, permissioned API/feed, operator-owned CSV, audited manual entry, future licensed providers and third-party public score sites. Production smoke confirmed source/capability/readiness routes are live with providerCallsMade 0. Odds, box scores, quarter scores and availability remain blocked or unavailable until legitimate approved sources exist.
+
 ### BSN Wave 2 Core Certification V1
 
 Status: Implemented locally. Certification: PARTIAL. Stop gate reached at Phase 2; BSN Core completion cannot continue until verified BSN odds/stat/source gaps are resolved.
