@@ -152,6 +152,8 @@ type IdentityContext = {
   stats: StatIdentityRow[]
 }
 
+type BaseIdentityContext = Pick<IdentityContext, 'predictions' | 'events'>
+
 export type UniversalEventIdentity = {
   canonicalEventId: string | null
   sport: string | null
@@ -399,7 +401,30 @@ function buildIdentity(event: EventRow | undefined, identityConfidence: EventIde
 }
 
 async function loadIdentityContext(): Promise<IdentityContext> {
-  const [predictions, events, mappings, odds, results, gameStats, playerStats] = await Promise.all([
+  const { predictions, events } = await loadBaseIdentityContext()
+  const eventsById = new Map(events.map((event) => [event.id, event]))
+  const missingRows = predictions
+    .filter(isPendingLike)
+    .filter((row) => !isTestOrFixture(row) && !isPostStart(row, eventsById.get(row.game_id)) && !eventsById.has(row.game_id))
+  const missingEventIds = Array.from(new Set(missingRows.map((row) => row.game_id).filter(Boolean)))
+  const [mappings, odds, results, gameStats, playerStats] = await Promise.all([
+    safePageIn<MappingRow>(
+      'provider_entity_mappings',
+      'sport_key, entity_type, internal_id, provider, provider_id, season, metadata, updated_at',
+      'provider_id',
+      missingEventIds,
+      (query) => query.in('entity_type', Array.from(EVENT_MAPPING_TYPES))
+    ),
+    safePageIn<OddsRow>('sports_odds_snapshots', 'sport_key, league_key, season, event_id, provider, sportsbook, market, snapshot_time, metadata', 'event_id', missingEventIds),
+    safePageIn<ResultRow>('game_results', 'sport_key, game_id, home_team, away_team, home_score, away_score, winner, commence_time', 'game_id', missingEventIds, (query) => query, 'game_id'),
+    safePageIn<StatIdentityRow>('sport_game_stats', 'sport_key, league_key, season, event_id', 'event_id', missingEventIds),
+    safePageIn<StatIdentityRow>('sport_player_stats', 'sport_key, league_key, season, event_id', 'event_id', missingEventIds),
+  ])
+  return { predictions, events, mappings, odds, results, stats: [...gameStats, ...playerStats] }
+}
+
+async function loadBaseIdentityContext(): Promise<BaseIdentityContext> {
+  const [predictions, events] = await Promise.all([
     safePage<PredictionRow>(
       'prediction_history',
       'id, sport_key, game_id, commence_time, home_team, away_team, team, market, sportsbook, result, status, lifecycle_status, model_role, model_version, generated_at, cutoff_at, production_eligible, trial, scrambled, validation_status, validation_warnings, settlement_details, created_at'
@@ -408,17 +433,25 @@ async function loadIdentityContext(): Promise<IdentityContext> {
       'sport_events',
       'id, sport_key, league_key, season, home_team, away_team, home_team_id, away_team_id, start_time, status, home_score, away_score, provider_ids, metadata, created_at, updated_at'
     ),
-    safePage<MappingRow>(
-      'provider_entity_mappings',
-      'sport_key, entity_type, internal_id, provider, provider_id, season, metadata, updated_at',
-      (query) => query.in('entity_type', Array.from(EVENT_MAPPING_TYPES))
-    ),
-    safePage<OddsRow>('sports_odds_snapshots', 'sport_key, league_key, season, event_id, provider, sportsbook, market, snapshot_time, metadata'),
-    safePage<ResultRow>('game_results', 'sport_key, game_id, home_team, away_team, home_score, away_score, winner, commence_time', (query) => query, 'game_id'),
-    safePage<StatIdentityRow>('sport_game_stats', 'sport_key, league_key, season, event_id'),
-    safePage<StatIdentityRow>('sport_player_stats', 'sport_key, league_key, season, event_id'),
   ])
-  return { predictions, events, mappings, odds, results, stats: [...gameStats, ...playerStats] }
+  return { predictions, events }
+}
+
+async function safePageIn<T>(
+  table: string,
+  select: string,
+  column: string,
+  values: string[],
+  configure: (query: any) => any = (query) => query,
+  orderColumn = 'id'
+) {
+  if (values.length === 0) return []
+  const rows: T[] = []
+  for (let index = 0; index < values.length; index += 100) {
+    const chunk = values.slice(index, index + 100)
+    rows.push(...(await safePage<T>(table, select, (query) => configure(query.in(column, chunk)), orderColumn)))
+  }
+  return rows
 }
 
 function classifyMissingEventLink(row: PredictionRow, context: IdentityContext): LinkAuditItem {
