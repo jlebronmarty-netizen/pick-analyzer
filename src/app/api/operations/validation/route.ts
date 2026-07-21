@@ -23,6 +23,7 @@ import { validateSettlementReconciliationFixtures } from '@/services/settlement-
 import { validateSportsAnalystFixtures } from '@/services/sports-analyst.service'
 import { validatePlayerIntelligenceFixtures } from '@/services/player-intelligence.service'
 import { validateUniversalEventIdentityFixtures } from '@/services/universal-event-identity.service'
+import { validateMissingCanonicalEventsRecoveryFixtures } from '@/services/missing-canonical-events-recovery.service'
 
 export async function GET(request: NextRequest) {
   const adaptive = validateAdaptiveRefreshFixtures()
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
   const sportsAnalyst = validateSportsAnalystFixtures()
   const playerIntelligence = validatePlayerIntelligenceFixtures()
   const universalEventIdentity = validateUniversalEventIdentityFixtures()
+  const missingCanonicalEventsRecovery = validateMissingCanonicalEventsRecoveryFixtures()
   return apiOk({
     ...adaptive,
     success:
@@ -73,7 +75,8 @@ export async function GET(request: NextRequest) {
       settlementReconciliation.success &&
       sportsAnalyst.success &&
       playerIntelligence.success &&
-      universalEventIdentity.success,
+      universalEventIdentity.success &&
+      missingCanonicalEventsRecovery.success,
     marketAlignment,
     marketClassification,
     aiBetFinder,
@@ -96,6 +99,7 @@ export async function GET(request: NextRequest) {
     sportsAnalyst,
     playerIntelligence,
     universalEventIdentity,
+    missingCanonicalEventsRecovery,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }, requestId(request))

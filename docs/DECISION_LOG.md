@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-21 - Block Missing Canonical Event Recovery Without Exact Source Evidence
+
+Context: Universal Event Identity V1 classified 342 stale pending rows as `EVENT_NOT_IMPORTED`. The next step was to determine whether canonical events could be recovered, imported and used for settlement.
+
+Decision: Add a missing-canonical recovery diagnostic and a future prevention gate. The diagnostic audits stored prediction lineage, odds snapshots, results, teams and distribution data without provider calls. Prediction persistence now downgrades requested production-eligible rows when their `game_id` is absent from `sport_events`.
+
+Consequences: Current production rows remain unresolved because stored evidence is insufficient: no linked odds snapshots, no stored odds/result source rows, no usable source lineage and no exact team identity coverage for affected teams. No event import, mapping, prediction-link repair, settlement or performance mutation was performed.
+
+Affected modules: Missing canonical event recovery service, event recovery route, prediction history persistence, Operations Validation and docs.
+
 ## 2026-07-21 - Add Universal Event Identity V1
 
 Context: Settlement reconciliation found 342 pending-like predictions blocked by `EXACT_EVENT_MAPPING_MISSING`. Before any repair or settlement, the platform needed a reusable event identity contract that could prove exact links across predictions, odds, results and stats without guessing.

@@ -338,10 +338,30 @@ export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
     }
   }
 
+  const requestedProductionEventIds = Array.from(
+    new Set(rows.filter((row) => row.production_eligible === true).map((row) => row.game_id).filter(Boolean))
+  )
+  const canonicalEventIds = new Set<string>()
+  if (requestedProductionEventIds.length > 0) {
+    for (let index = 0; index < requestedProductionEventIds.length; index += 100) {
+      const chunk = requestedProductionEventIds.slice(index, index + 100)
+      const { data, error } = await supabaseAdmin
+        .from('sport_events')
+        .select('id')
+        .in('id', chunk)
+      if (error) throw new Error(`production event identity gate failed: ${error.message}`)
+      for (const event of data ?? []) canonicalEventIds.add(String(event.id))
+    }
+  }
+
   const gatedRows = rows.map((row) => {
+    const eventIdentityBlocked = row.production_eligible === true && !canonicalEventIds.has(row.game_id)
     const gate = evaluateProductionDataGate(row, 'prediction_persistence')
     const validationWarnings = [
       ...(row.validation_warnings ?? []),
+      ...(eventIdentityBlocked
+        ? ['EVENT_IDENTITY_REQUIRED: production prediction references an unimported canonical event']
+        : []),
       ...(row.production_eligible === true && !gate.eligible
         ? [`Production Data Gate blocked production eligibility: ${gate.blockedReasons.join('; ')}`]
         : []),
@@ -349,10 +369,12 @@ export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
 
     return {
       ...row,
-      production_eligible: gate.eligible,
+      production_eligible: gate.eligible && !eventIdentityBlocked,
       validation_warnings: validationWarnings,
       validation_status:
-        row.production_eligible === true && !gate.eligible
+        eventIdentityBlocked
+          ? 'blocked_by_event_identity_required'
+          : row.production_eligible === true && !gate.eligible
           ? 'blocked_by_production_data_gate_v1'
           : row.validation_status,
     }

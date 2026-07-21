@@ -61,6 +61,7 @@ Stop only for:
 - Do not run broad `/api/predictions/settle` for a daily operating-day workflow. Use `/api/operating-day/[operatingDayId]/settle` so settlement remains scoped and idempotent.
 - For stale pending reconciliation, run `GET /api/settlement/reconciliation` first. Proceed to protected execution only when the dry-run proves exact event identity, final result, market identity, pre-start timing and expected mutation counts. If the plan reports non-zero mutations but the bounded executor is not explicitly implemented for that set, stop rather than guessing.
 - For event identity reconciliation, run `GET /api/events/identity/audit` first. Event-link repair may proceed only when the audit reports exact provider/source/legacy evidence, one unique canonical event, no home/away conflict, no doubleheader or reschedule ambiguity and reviewed mutation counts. Team display names and date alone are never enough for automatic repair.
+- For missing canonical event recovery, run `GET /api/events/recovery/missing-canonical` first. Do not import events or call providers when stored source lineage, provider entitlement or exact team identity is missing. Future production prediction writes must require canonical `sport_events` identity; eventless rows are downgraded rather than promoted.
 - If result sync returns `quota_blocked`, leave the day pending and do not settle unresolved events.
 
 ## Progress Reporting

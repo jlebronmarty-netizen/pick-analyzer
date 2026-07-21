@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Missing Canonical Events Recovery V1
+
+Status: Blocked after production-safe implementation and audit. Certification: `MISSING_CANONICAL_EVENTS_RECOVERY_BLOCKED`.
+
+Evidence: `src/services/missing-canonical-events-recovery.service.ts`, `/api/events/recovery/missing-canonical`, `savePredictionHistory` event identity prevention gate, Operations Validation and recovery docs.
+
+Note: The recovery audit proved the 342 eventless predictions cannot be repaired from stored evidence: 0 linked odds snapshots, 0 matching stored odds event rows, 0 result rows, 0 source lineage rows and 0/342 exact canonical team coverage. No provider calls or mutations were made. Future production-eligible prediction persistence now requires canonical `sport_events` identity and downgrades eventless rows with `EVENT_IDENTITY_REQUIRED`.
+
 ### Universal Event Identity V1
 
 Status: Locally implemented and production-audited. Certification: `UNIVERSAL_EVENT_IDENTITY_V1_PARTIAL`.
