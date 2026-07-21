@@ -16,6 +16,14 @@ Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts`,
 
 Note: SportsDataIO MLB player-stat imports now create or reuse provisional unresolved identities through existing `provider_entity_mappings` with `entity_type='unresolved_player'`, keeping trusted canonical mappings isolated under `entity_type='player'`. The workflow preserves provider player ID, provider name, team ID, source date, source stat ID and review status, marks records non-production/review-required, and never assigns a trusted `sport_players.id` from fuzzy name matching. Production smoke on commit `7f4969976785f3e5d9a2ad9f39a0b9b067d65672` passed Operations Validation with unresolved-identity fixtures 16/16, providerCallsMade 0 and remoteMutationsMade 0. Protected stored-data reconciliation created/reused provisional records including provider player `10003762` and applied exact existing mappings only; budget remained 8 calls today.
 
+### MLB Current-Season Player Game Stats Backfill Orchestrator V1
+
+Status: Implemented locally. Certification: pending production deployment and execution.
+
+Evidence: `src/services/mlb-current-season-backfill-orchestrator.service.ts`, `src/app/api/mlb/historical-backfill/player-game-stats/route.ts`, `src/app/api/operations/validation/route.ts` and `docs/mlb-current-season-backfill.md`.
+
+Note: The orchestrator reuses the existing SportsDataIO MLB historical import executor for each `PlayerGameStatsByDate` child unit, preserving durable running checkpoints, provider-call accounting, one-call-per-date execution, 60-second timeout, idempotency keys and terminal checkpoint handling. It plans from stored eligible completed 2026 MLB events, skips completed checkpoints, refuses active/ambiguous jobs, caps batch size by provider budget configuration and records a parent `sports_sync_jobs` invocation. Production currently limits this action to 3 dates per invocation through `maxCallsPerAction`.
+
 ### SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1
 
 Status: Endpoint timeout root cause diagnosed locally. Certification: OPTIMIZED. Historical import remains stopped until explicitly resumed.

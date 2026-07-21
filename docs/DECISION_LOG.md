@@ -1670,6 +1670,16 @@ Consequences: Isolated unresolved player IDs no longer block unrelated valid row
 
 Affected modules: SportsDataIO MLB historical import executor, MLB unresolved player identity service, Operations Validation, MLB players operational route and docs.
 
+## 2026-07-21 - Add MLB Current-Season Player Game Stats Backfill Orchestrator V1
+
+Context: After the successful four-date PlayerGameStatsByDate pilot, current-season backfill needed a resumable bounded worker rather than one large HTTP request or a duplicate queue.
+
+Decision: Add a small orchestrator over the existing SportsDataIO MLB historical import executor. It plans eligible 2026 dates from stored completed MLB events, skips completed checkpoints, refuses active or ambiguous jobs, caps batch size from provider budget configuration, records a parent `sports_sync_jobs` invocation and executes one child date at a time through the existing durable executor.
+
+Consequences: Provider-touching work still uses the existing budget guard, dedupe key, running checkpoint, provider-call state accounting, 60-second timeout and terminal child checkpoint. Production's current `maxCallsPerAction=3` limits a single invocation to at most three date imports. Batch-boundary completion is resumable partial progress, not failure.
+
+Affected modules: MLB current-season backfill orchestrator, protected MLB historical-backfill route, Operations Validation and docs.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.
