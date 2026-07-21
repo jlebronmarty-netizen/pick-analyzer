@@ -54,6 +54,8 @@ type TodayResponse = {
   errors?: Array<{ dependency: string; message: string; critical: boolean }>
   timing?: { totalMs?: number; dependencies?: Record<string, number>; slowDependencies?: string[] }
   sections?: {
+    officialPicks?: { status: string; data: OfficialPick[]; reason: string | null }
+    aiPicksFeed?: { status: string; data: AiPicksFeed | null; reason: string | null }
     mostLikely?: { status: string; data: IntelligenceRow[]; reason: string | null }
     bestValue?: { status: string; data: IntelligenceRow[]; reason: string | null }
     aiBetFinder?: { status: string; data: IntelligenceRow[]; reason: string | null }
@@ -131,6 +133,138 @@ type RecommendationExplanation = {
   actionLabel?: string
   fairOdds?: number | null
   fairOddsLabel?: string | null
+}
+
+type OfficialPick = {
+  contractVersion?: string
+  status?: string
+  predictionId?: string
+  eventId?: string
+  matchup?: string
+  scheduledTime?: string | null
+  market?: string
+  marketLabel?: string
+  period?: string
+  selection?: string
+  normalizedSelection?: string
+  line?: number | null
+  americanOdds?: number | null
+  sportsbook?: string
+  modelProbability?: number | null
+  calibratedProbability?: number | null
+  impliedProbability?: number | null
+  marketImpliedProbability?: number | null
+  edgePercentagePoints?: number | null
+  expectedValuePercent?: number | null
+  confidence?: number | null
+  confidenceLabel?: string
+  risk?: string
+  freshnessStatus?: string
+  marketAgeMinutes?: number | null
+  maxAllowedAgeMinutes?: number
+  oddsSnapshotId?: string | null
+  featureSnapshotId?: string | null
+  selectedOddsSource?: string
+  selectedOddsLineage?: {
+    oddsSnapshotId?: string | null
+    marketInputTimestamp?: string | null
+    marketFreshnessTimestamp?: string | null
+    marketFreshnessSource?: string
+    providerSourceUpdatedAt?: string | null
+    providerFetchedAt?: string | null
+    oddsIngestedAt?: string | null
+    oddsSnapshotCreatedAt?: string | null
+  }
+  marketAlignment?: MarketAlignment
+  recommendationExplanation?: RecommendationExplanation
+  modelFairOdds?: number | null
+  modelFairOddsLabel?: string | null
+  eligibility?: {
+    eligibilityVersion?: string
+    thresholdsVersion?: string
+    recommendationPolicyStatus?: string
+    officialEligibility?: string
+    blockers?: string[]
+  }
+  timestamps?: {
+    predictionGeneratedAt?: string | null
+    recommendationGeneratedAt?: string | null
+    recommendationTimestampSource?: string
+    cutoffAt?: string | null
+  }
+  stakeRecommendation?: {
+    status?: string
+    reason?: string
+    units?: number | null
+    kellyFraction?: number | null
+  }
+  actionLabel?: string
+}
+
+type AiPicksFeedItem = {
+  id?: string
+  contractVersion?: string
+  itemType?: 'OFFICIAL_PICK' | 'BEST_BET_TODAY' | 'BEST_VALUE' | 'MOST_LIKELY' | 'WATCH_CLOSELY' | 'HIDDEN_VALUE' | 'AVOID' | 'DATA_RISK' | 'MARKET_UPDATE'
+  priority?: number
+  actionLabel?: string
+  predictionId?: string
+  eventId?: string
+  matchup?: string
+  scheduledTime?: string | null
+  market?: string
+  marketLabel?: string
+  selection?: string
+  line?: number | null
+  americanOdds?: number | null
+  sportsbook?: string
+  modelProbability?: number | null
+  calibratedProbability?: number | null
+  impliedProbability?: number | null
+  marketImpliedProbability?: number | null
+  edgePercentagePoints?: number | null
+  expectedValuePercent?: number | null
+  confidence?: number | null
+  risk?: string
+  freshnessStatus?: string
+  marketAgeMinutes?: number | null
+  oddsSnapshotId?: string | null
+  featureSnapshotId?: string | null
+  predictionGeneratedAt?: string | null
+  recommendationGeneratedAt?: string | null
+  marketInputTimestamp?: string | null
+  marketFreshnessTimestamp?: string | null
+  marketFreshnessSource?: string
+  marketAlignment?: MarketAlignment
+  recommendationExplanation?: RecommendationExplanation
+  officialPick?: OfficialPick | null
+  evidence?: string[]
+  warnings?: string[]
+  blocker?: string | null
+  promotionCondition?: string | null
+}
+
+type AiPicksFeed = {
+  contractVersion?: string
+  status?: string
+  generatedAt?: string
+  sportKey?: string
+  itemCount?: number
+  items?: AiPicksFeedItem[]
+  emptyState?: {
+    headline?: string
+    summary?: string
+    topOpportunityRetained?: boolean
+  } | null
+  summary?: Record<string, number>
+  guardrails?: {
+    providerCallsMade?: number
+    remoteMutationsMade?: number
+    officialPolicyChanged?: boolean
+    recommendationThresholdsChanged?: boolean
+    categoryAssignmentsChanged?: boolean
+    rankingsChanged?: boolean
+    fabricatedMarketMovement?: boolean
+  }
 }
 
 type TopOpportunityResponse = {
@@ -435,6 +569,184 @@ function fieldValue(value: unknown, fallback = 'Pending') {
   return text || fallback
 }
 
+function OfficialPickExperienceCard({ picks, reason, topOpportunity }: { picks: OfficialPick[]; reason?: string | null; topOpportunity: TopOpportunity | null }) {
+  const pick = picks[0] ?? null
+  if (!pick) {
+    return (
+      <section className={`rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-6 ${cardMotion}`}>
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200">Official Pick</p>
+            <h3 className="mt-3 text-3xl font-black text-white">No Official Pick today.</h3>
+            <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-slate-300">
+              {reason ?? 'No current candidate meets the existing Official Pick policy. Top AI Opportunity remains informational and is not being promoted.'}
+            </p>
+          </div>
+          <Badge tone="green">Policy Preserved</Badge>
+        </div>
+        {topOpportunity ? (
+          <p className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-sm font-bold text-slate-300">
+            Top AI Opportunity is still shown below as informational: {fieldValue(topOpportunity.matchup)} · {fieldValue(topOpportunity.selection)} {fieldValue(topOpportunity.marketLabel)}.
+          </p>
+        ) : null}
+      </section>
+    )
+  }
+
+  const explanation = pick.recommendationExplanation
+  return (
+    <section className={`rounded-lg border border-emerald-400/40 bg-emerald-500/10 p-6 ${cardMotion}`}>
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200">Official Pick</p>
+          <h3 className="mt-3 text-3xl font-black text-white">{fieldValue(pick.matchup, 'Teams pending')}</h3>
+          <p className="mt-2 text-sm font-bold text-emerald-100">{fieldValue(pick.selection)} · {fieldValue(pick.marketLabel)}</p>
+        </div>
+        <Badge tone="green">{fieldValue(pick.actionLabel, 'Official Pick')}</Badge>
+      </div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-lg border border-white/10 bg-slate-950/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Price</p>
+          <p className="mt-2 text-base font-black text-white">{fieldValue(pick.selection)} {formatAmericanOdds(pick.americanOdds) ?? 'n/a'}</p>
+          <p className="mt-1 text-xs font-bold text-slate-500">{fieldValue(pick.sportsbook, 'Consensus')}</p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-slate-950/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Model Fair Odds</p>
+          <p className="mt-2 text-base font-black text-white">{fieldValue(pick.modelFairOddsLabel, 'Unavailable')}</p>
+          <p className="mt-1 text-xs font-bold text-slate-500">Not an Official threshold</p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-slate-950/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Freshness</p>
+          <p className="mt-2 text-base font-black text-white">{pick.marketAgeMinutes === null || pick.marketAgeMinutes === undefined ? 'Age pending' : `${Math.round(pick.marketAgeMinutes)} min old`}</p>
+          <p className="mt-1 text-xs font-bold text-slate-500">{fieldValue(pick.freshnessStatus, 'Pending')}</p>
+        </div>
+        <div className="rounded-lg border border-white/10 bg-slate-950/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Risk</p>
+          <p className="mt-2 text-base font-black text-white">{fieldValue(pick.risk, 'Pending')}</p>
+          <p className="mt-1 text-xs font-bold text-slate-500">{fieldValue(pick.eligibility?.recommendationPolicyStatus, 'Policy pending')}</p>
+        </div>
+      </div>
+      <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
+        <Meter label="Model Probability" value={pick.modelProbability} tone="blue" />
+        <Meter label="Market Implied" value={pick.marketImpliedProbability ?? pick.impliedProbability} tone="yellow" />
+        <Meter label="Model Edge" value={pick.edgePercentagePoints} tone="blue" />
+        <Meter label="Expected Value" value={pick.expectedValuePercent} tone="green" />
+        <Meter label="Confidence" value={pick.confidence} tone="green" />
+      </div>
+      {explanation?.summary ? (
+        <div className="mt-4 rounded-lg border border-white/10 bg-slate-950/70 p-4">
+          <p className="text-sm font-black text-white">{fieldValue(explanation.headline, 'Official Pick evidence')}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-300">{explanation.summary}</p>
+        </div>
+      ) : null}
+      <div className="mt-4 grid gap-3 text-xs font-bold text-slate-500 md:grid-cols-3">
+        <p>Odds snapshot: {fieldValue(pick.oddsSnapshotId, 'prediction price')}</p>
+        <p>Prediction: {timeText(pick.timestamps?.predictionGeneratedAt)}</p>
+        <p>Stake: {pick.stakeRecommendation?.status === 'UNAVAILABLE' ? 'Not attached' : fieldValue(pick.stakeRecommendation?.units)}</p>
+      </div>
+    </section>
+  )
+}
+
+function feedTone(item: AiPicksFeedItem) {
+  const type = String(item.itemType ?? '').toLowerCase()
+  if (type.includes('official') || type.includes('best_bet') || type.includes('best_value')) return 'green'
+  if (type.includes('avoid') || type.includes('risk')) return 'red'
+  if (type.includes('watch') || type.includes('update')) return 'blue'
+  return 'yellow'
+}
+
+function feedProbability(item: AiPicksFeedItem) {
+  return candidateDisplayProbability({
+    calibratedProbability: item.calibratedProbability,
+    rawProbability: item.modelProbability,
+    modelProbability: item.modelProbability,
+  })
+}
+
+function feedItemTitle(item: AiPicksFeedItem) {
+  const label = fieldValue(item.actionLabel, 'AI Pick')
+  return `${label}: ${fieldValue(item.selection, 'Selection pending')}`
+}
+
+function AiPicksFeedPanel({ feed, reason }: { feed: AiPicksFeed | null | undefined; reason?: string | null }) {
+  const items = Array.isArray(feed?.items) ? feed.items : []
+  if (!items.length) {
+    return (
+      <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">AI Picks Feed</p>
+            <h3 className="mt-2 text-3xl font-black text-white">{fieldValue(feed?.emptyState?.headline, 'No AI picks feed items')}</h3>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+              {reason ?? feed?.emptyState?.summary ?? 'No current-board candidate produced a feed item. No pick is promoted from an empty feed.'}
+            </p>
+          </div>
+          <Badge tone="yellow">{fieldValue(feed?.status, 'EMPTY_VALID')}</Badge>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">AI Picks Feed</p>
+          <h3 className="mt-2 text-3xl font-black text-white">{items.length} grounded update{items.length === 1 ? '' : 's'}</h3>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge tone="blue">{fieldValue(feed?.contractVersion, 'mlb_ai_picks_feed_v1')}</Badge>
+          <Badge tone={feed?.guardrails?.providerCallsMade === 0 && feed?.guardrails?.remoteMutationsMade === 0 ? 'green' : 'red'}>Read only</Badge>
+        </div>
+      </div>
+      <div className="mt-5 grid gap-3">
+        {items.slice(0, 8).map((item, index) => {
+          const alignment = item.marketAlignment
+          const explanation = item.recommendationExplanation
+          return (
+            <article key={item.id ?? `${item.predictionId}-${index}`} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone={feedTone(item)}>{fieldValue(item.actionLabel, item.itemType)}</Badge>
+                    <Badge tone="gray">{fieldValue(item.marketLabel ?? item.market, 'Market')}</Badge>
+                    <Badge tone={item.freshnessStatus === 'STALE' ? 'red' : item.freshnessStatus === 'FRESH' ? 'green' : 'yellow'}>{fieldValue(item.freshnessStatus, 'Freshness pending')}</Badge>
+                  </div>
+                  <h4 className="mt-3 text-xl font-black text-white">{feedItemTitle(item)}</h4>
+                  <p className="mt-1 text-sm text-slate-400">{fieldValue(item.matchup, 'Game pending')} · {timeText(item.scheduledTime)}</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">{fieldValue(explanation?.headline ?? item.evidence?.[0], 'Stored Current Board evidence.')}</p>
+                  {item.blocker || item.promotionCondition ? (
+                    <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                      {item.blocker ? `Blocker: ${item.blocker}` : 'No blocker'} · {item.promotionCondition ?? 'No promotion condition attached'}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="grid min-w-44 gap-3">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Price</p>
+                    <p className="mt-1 text-base font-black text-white">{marketDisplay(item as Record<string, any>).priceText}</p>
+                    <p className="text-xs font-bold text-slate-500">{fieldValue(item.sportsbook, 'Consensus')}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Meter label="Model" value={feedProbability(item)} tone="blue" />
+                    <Meter label="Implied" value={alignment?.marketImpliedProbability ?? item.marketImpliedProbability} tone="yellow" />
+                    <Meter label="Edge" value={alignment?.edgePercentagePoints ?? item.edgePercentagePoints} tone="blue" />
+                    <Meter label="EV" value={alignment?.expectedValuePercent ?? item.expectedValuePercent} tone={Number(alignment?.expectedValuePercent ?? item.expectedValuePercent ?? 0) > 0 ? 'green' : 'red'} />
+                  </div>
+                </div>
+              </div>
+              <p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                Risk {fieldValue(item.risk, 'Pending')} · Market age {compactMarketAge(item)} · Odds snapshot {fieldValue(item.oddsSnapshotId, 'n/a')}
+              </p>
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | null }) {
   if (!opportunity) return <EmptyState title="Top AI Opportunity" detail="No opportunity is ready to display yet." />
   const category = opportunity.opportunityCategory ?? opportunity.statusLabel ?? 'Tracking'
@@ -658,12 +970,14 @@ function promotionCondition(row: IntelligenceRow) {
   return row.recommendationExplanation?.promotionConditions?.[0] ?? null
 }
 
-function marketMetric(row: IntelligenceRow | TopOpportunity, key: keyof MarketAlignment, fallback?: unknown) {
+function marketMetric(row: { marketAlignment?: MarketAlignment }, key: keyof MarketAlignment, fallback?: unknown) {
   return row.marketAlignment?.[key] ?? fallback
 }
 
-function compactMarketAge(row: IntelligenceRow | TopOpportunity) {
-  const age = numberField(marketMetric(row, 'marketAgeMinutes', row.oddsAgeMinutes))
+function compactMarketAge(row: IntelligenceRow | TopOpportunity | AiPicksFeedItem) {
+  const ageFields = row as { oddsAgeMinutes?: unknown; marketAgeMinutes?: unknown }
+  const fallbackAge = ageFields.oddsAgeMinutes ?? ageFields.marketAgeMinutes
+  const age = numberField(marketMetric(row, 'marketAgeMinutes', fallbackAge))
   if (age === null) return 'n/a'
   if (age < 60) return `${Math.round(age)} min`
   return `${Math.round(age / 60)} hr`
@@ -1163,6 +1477,8 @@ export default function UserTodayPanel() {
   }
 
   const counts = data.marketIntelligence ?? { official: data.officialPicks, aiLeans: 0, watchlist: 0, avoid: 0 }
+  const officialPickRows = data.sections?.officialPicks?.data ?? []
+  const aiPicksFeed = data.sections?.aiPicksFeed?.data ?? null
   const aiLeanRows = aiResults.filter((row) => intelligenceCategory(row) === 'ai_lean').slice(0, 3)
   const categorySourceRows = Array.from(
     new Map([...aiResults, ...mostLikely, ...bestValue].map((row, index) => [opportunityKey(row, index), row])).values()
@@ -1187,6 +1503,8 @@ export default function UserTodayPanel() {
         <CategoryCard title="Watchlist" value={counts.watchlist} tone="blue" icon="WL" href="/best-value" status={counts.watchlist ? 'Tracking' : 'Clear'} tooltip="Markets to watch without official recommendation status." />
         <CategoryCard title="Avoid" value={counts.avoid} tone="red" icon="AV" href="/ai-bet-finder" status={counts.avoid ? 'Avoid' : 'Clear'} tooltip="Markets blocked by policy or weak value." />
       </section>
+      <OfficialPickExperienceCard picks={officialPickRows} reason={data.sections?.officialPicks?.reason} topOpportunity={topOpportunity} />
+      <AiPicksFeedPanel feed={aiPicksFeed} reason={data.sections?.aiPicksFeed?.reason} />
       <section className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
         <TopOpportunityCard opportunity={topOpportunity} />
         <AIConfidenceCard opportunity={topOpportunity} />

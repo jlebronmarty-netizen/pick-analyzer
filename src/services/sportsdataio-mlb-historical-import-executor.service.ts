@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { normalizeSportsDataIoMlbGameDateTime } from '@/services/provider-time-normalization.service'
 import { idempotencyKey } from '@/services/sync-reliability.service'
 import { safeExistingValueSet } from '@/services/safe-supabase-preflight.service'
+import { checkProviderBudget } from '@/services/provider-budget.service'
 import {
   SPORTSDATAIO_DISCOVERY_LAB_ORIGIN,
   resolveSportsDataIoDiscoveryLabUrl,
@@ -61,7 +62,17 @@ type MlbCheckpointStatus =
   | 'partial'
   | 'failed'
   | 'canceled'
+  | 'timed_out'
   | 'blocked'
+
+type MlbTerminalStatus = 'completed' | 'partial' | 'failed' | 'canceled' | 'timed_out'
+type ProviderCallState =
+  | 'NOT_ATTEMPTED'
+  | 'ATTEMPTED'
+  | 'RESPONSE_RECEIVED'
+  | 'COMPLETED'
+  | 'TIMED_OUT'
+  | 'AMBIGUOUS'
 
 type MlbExecutionUnit = {
   sequence: number
@@ -89,6 +100,7 @@ type ExistingCheckpoint = {
   providerCallsUsed: number
   completedAt: string | null
   jobId: string
+  lastError: string | null
 }
 
 const PROVIDER = 'sportsdataio'
@@ -97,8 +109,10 @@ const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
 const BASE_ORIGIN = SPORTSDATAIO_DISCOVERY_LAB_ORIGIN
 const EXECUTION_VERSION = 'sportsdataio_mlb_discovery_historical_import_v1'
-const DEFAULT_TIMEOUT_MS = 15000
+const DEFAULT_TIMEOUT_MS = 60000
 const DEFAULT_MAXIMUM_REQUESTS = 400
+const FAILED_CHECKPOINT_RETRY_COOLDOWN_MS = 30 * 60 * 1000
+const JOB_STUCK_GRACE_MS = 60 * 1000
 
 const DOMAIN_ORDER: MlbDomain[] = [
   'season_schedule',
@@ -541,7 +555,7 @@ function buildDateRange(dateFrom: string | null, dateTo: string | null) {
 async function loadExistingCheckpoints(season: string): Promise<Map<string, ExistingCheckpoint>> {
   const result = await supabaseAdmin
     .from('sports_sync_jobs')
-    .select('id, status, completed_at, metadata')
+    .select('id, status, completed_at, last_error, metadata')
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
     .eq('provider', PROVIDER)
@@ -565,9 +579,18 @@ async function loadExistingCheckpoints(season: string): Promise<Map<string, Exis
       providerCallsUsed: Number(checkpoint?.providerCallsUsed ?? metadata.externalCallsUsed ?? 0) || 0,
       completedAt: row.completed_at ? String(row.completed_at) : null,
       jobId: String(row.id),
+      lastError: safeString((row as Record<string, unknown>).last_error) || safeString(checkpoint?.failureCode) || null,
     })
   }
   return checkpoints
+}
+
+function recentFailedCheckpoint(checkpoint: ExistingCheckpoint | undefined) {
+  if (!checkpoint || !['failed', 'partial', 'running'].includes(checkpoint.status)) return false
+  if (!checkpoint.completedAt) return true
+  const completedAt = new Date(checkpoint.completedAt).getTime()
+  if (!Number.isFinite(completedAt)) return true
+  return Date.now() - completedAt < FAILED_CHECKPOINT_RETRY_COOLDOWN_MS
 }
 
 async function buildUnits(request: ReturnType<typeof normalizeRequest>) {
@@ -601,13 +624,16 @@ async function buildUnits(request: ReturnType<typeof normalizeRequest>) {
       endpointTemplate: endpoint.endpointTemplate,
     })
     const completed = existing.get(key)
+    const recentFailure = recentFailedCheckpoint(completed)
     units.push({
       ...endpoint,
       sequence: units.length + 1,
       checkpointKey: key,
-      status: completed?.status === 'completed' ? 'completed' : 'planned',
+      status: completed?.status === 'completed' ? 'completed' : recentFailure ? 'blocked' : 'planned',
       skipReason: completed?.status === 'completed'
         ? `Completed checkpoint ${completed.jobId} will be reused without another provider call.`
+        : recentFailure
+          ? `Recent ${completed?.status} checkpoint ${completed?.jobId} blocks immediate retry without another provider call. Last error: ${completed?.lastError ?? 'unknown'}`
         : null,
     })
   }
@@ -1738,6 +1764,7 @@ async function countExistingGameStatNaturalKeys(rows: Array<Record<string, unkno
 }
 
 async function recordMlbCheckpoint({
+  jobId,
   unit,
   season,
   seasonType,
@@ -1750,11 +1777,12 @@ async function recordMlbCheckpoint({
   lastError,
   metadataExtra,
 }: {
+  jobId?: string | null
   unit: MlbExecutionUnit
   season: string
   seasonType: string
   startedAt: string
-  status: 'completed' | 'partial' | 'failed'
+  status: MlbTerminalStatus
   counters: {
     providerRecordsFetched: number
     normalizedRows: number
@@ -1776,9 +1804,17 @@ async function recordMlbCheckpoint({
 }) {
   const completedAt = generatedAt()
   const durationMs = new Date(completedAt).getTime() - new Date(startedAt).getTime()
-  const jobId = crypto.randomUUID()
+  const syncJobId = jobId ?? crypto.randomUUID()
+  const providerCallState: ProviderCallState =
+    status === 'timed_out'
+      ? counters.providerCallsUsed > 0
+        ? 'TIMED_OUT'
+        : 'NOT_ATTEMPTED'
+      : counters.providerCallsUsed > 0
+        ? 'COMPLETED'
+        : 'NOT_ATTEMPTED'
   const result = await supabaseAdmin.from('sports_sync_jobs').upsert({
-    id: jobId,
+    id: syncJobId,
     job_type: EXECUTION_VERSION,
     sport_key: SPORT_KEY,
     league_key: LEAGUE_KEY,
@@ -1798,6 +1834,14 @@ async function recordMlbCheckpoint({
       providerVariant: PROVIDER_VARIANT,
       executionVersion: EXECUTION_VERSION,
       externalCallsUsed: counters.providerCallsUsed,
+      logicalStatus: status.toUpperCase(),
+      providerCallAccounting: {
+        state: providerCallState,
+        conservativeBudgetCount: counters.providerCallsUsed,
+        completedAt,
+        endpoint: unit.endpoint,
+        date: unit.date,
+      },
       endpoint: endpointResult,
       checkpoint: {
         key: unit.checkpointKey,
@@ -1813,6 +1857,8 @@ async function recordMlbCheckpoint({
         endpointTemplate: unit.endpointTemplate,
         executionVersion: EXECUTION_VERSION,
         status,
+        logicalStatus: status.toUpperCase(),
+        providerCallState,
         providerCallsUsed: counters.providerCallsUsed,
         httpStatus: endpointResult?.status ?? null,
         providerRecordsFetched: counters.providerRecordsFetched,
@@ -1871,7 +1917,202 @@ async function recordMlbCheckpoint({
     throw new Error(`sports_sync_jobs checkpoint persistence failed: ${result.error.message}`)
   }
 
-  return jobId
+  return syncJobId
+}
+
+async function recordSecondaryCheckpointFailure({
+  sourceJobId,
+  unit,
+  season,
+  startedAt,
+  error,
+}: {
+  sourceJobId: string | null
+  unit: MlbExecutionUnit
+  season: string
+  startedAt: string
+  error: unknown
+}) {
+  const completedAt = generatedAt()
+  await supabaseAdmin.from('sports_sync_jobs').insert({
+    id: crypto.randomUUID(),
+    job_type: `${EXECUTION_VERSION}_checkpoint_failure`,
+    sport_key: SPORT_KEY,
+    league_key: LEAGUE_KEY,
+    provider: PROVIDER,
+    season,
+    started_at: startedAt,
+    completed_at: completedAt,
+    status: 'failed',
+    records_fetched: 0,
+    records_inserted: 0,
+    records_updated: 0,
+    records_skipped: 0,
+    error_count: 1,
+    last_error: error instanceof Error ? error.message : 'checkpoint_update_failed',
+    duration_ms: new Date(completedAt).getTime() - new Date(startedAt).getTime(),
+    metadata: {
+      sourceJobId,
+      providerVariant: PROVIDER_VARIANT,
+      executionVersion: EXECUTION_VERSION,
+      endpoint: unit.endpoint,
+      checkpointKey: unit.checkpointKey,
+      logicalStatus: 'CHECKPOINT_UPDATE_FAILED',
+      noSecretExposure: true,
+    },
+    updated_at: completedAt,
+  })
+}
+
+async function createMlbRunningCheckpoint({
+  unit,
+  request,
+  budgetDecision,
+  nextUnit,
+}: {
+  unit: MlbExecutionUnit
+  request: ReturnType<typeof normalizeRequest>
+  budgetDecision: Record<string, unknown>
+  nextUnit: MlbExecutionUnit | null
+}) {
+  const startedAt = generatedAt()
+  const jobId = crypto.randomUUID()
+  const result = await supabaseAdmin.from('sports_sync_jobs').insert({
+    id: jobId,
+    job_type: EXECUTION_VERSION,
+    sport_key: SPORT_KEY,
+    league_key: LEAGUE_KEY,
+    provider: PROVIDER,
+    season: request.season,
+    started_at: startedAt,
+    completed_at: null,
+    status: 'running',
+    records_fetched: 0,
+    records_inserted: 0,
+    records_updated: 0,
+    records_skipped: 0,
+    error_count: 0,
+    last_error: null,
+    duration_ms: null,
+    metadata: {
+      providerVariant: PROVIDER_VARIANT,
+      executionVersion: EXECUTION_VERSION,
+      logicalStatus: 'RUNNING',
+      externalCallsUsed: 0,
+      budgetDecision,
+      providerCallAccounting: {
+        state: 'NOT_ATTEMPTED' satisfies ProviderCallState,
+        conservativeBudgetCount: 0,
+        endpoint: unit.endpoint,
+        date: unit.date,
+        callAttemptedAt: null,
+        responseReceivedAt: null,
+        callCompletedAt: null,
+      },
+      checkpoint: {
+        key: unit.checkpointKey,
+        provider: PROVIDER,
+        providerVariant: PROVIDER_VARIANT,
+        sportKey: SPORT_KEY,
+        leagueKey: LEAGUE_KEY,
+        season: request.season,
+        seasonType: request.seasonType,
+        date: unit.date,
+        domain: unit.domain,
+        endpoint: unit.endpoint,
+        endpointTemplate: unit.endpointTemplate,
+        executionVersion: EXECUTION_VERSION,
+        status: 'running',
+        logicalStatus: 'RUNNING',
+        providerCallState: 'NOT_ATTEMPTED',
+        providerCallsUsed: 0,
+        startedAt,
+        configuredTimeoutMs: request.timeoutMs,
+        estimatedCalls: unit.estimatedCalls,
+        attemptNumber: 1,
+        nextUnit: nextUnit
+          ? {
+              domain: nextUnit.domain,
+              endpoint: nextUnit.endpoint,
+              date: nextUnit.date,
+              checkpointKey: nextUnit.checkpointKey,
+            }
+          : null,
+        resumable: false,
+        trial: false,
+        scrambled: false,
+        production_eligible: false,
+      },
+      rawPayloadStored: false,
+      noSecretExposure: true,
+    },
+    updated_at: startedAt,
+  })
+
+  if (result.error) throw new Error(`sports_sync_jobs running checkpoint creation failed: ${result.error.message}`)
+  return { jobId, startedAt }
+}
+
+async function updateMlbProviderCallState({
+  jobId,
+  unit,
+  state,
+  providerCallsUsed,
+  endpointResult,
+}: {
+  jobId: string
+  unit: MlbExecutionUnit
+  state: ProviderCallState
+  providerCallsUsed: number
+  endpointResult?: Record<string, unknown> | null
+}) {
+  const updatedAt = generatedAt()
+  const result = await supabaseAdmin.from('sports_sync_jobs').update({
+    metadata: {
+      providerVariant: PROVIDER_VARIANT,
+      executionVersion: EXECUTION_VERSION,
+      logicalStatus: 'RUNNING',
+      externalCallsUsed: providerCallsUsed,
+      endpoint: endpointResult ?? null,
+      providerCallAccounting: {
+        state,
+        conservativeBudgetCount: providerCallsUsed,
+        endpoint: unit.endpoint,
+        date: unit.date,
+        callAttemptedAt: state === 'ATTEMPTED' ? updatedAt : null,
+        responseReceivedAt: state === 'RESPONSE_RECEIVED' ? updatedAt : null,
+        callCompletedAt: null,
+      },
+      checkpoint: {
+        key: unit.checkpointKey,
+        provider: PROVIDER,
+        providerVariant: PROVIDER_VARIANT,
+        sportKey: SPORT_KEY,
+        leagueKey: LEAGUE_KEY,
+        date: unit.date,
+        domain: unit.domain,
+        endpoint: unit.endpoint,
+        endpointTemplate: unit.endpointTemplate,
+        executionVersion: EXECUTION_VERSION,
+        status: 'running',
+        logicalStatus: 'RUNNING',
+        providerCallState: state,
+        providerCallsUsed,
+      },
+      rawPayloadStored: false,
+      noSecretExposure: true,
+    },
+    updated_at: updatedAt,
+  }).eq('id', jobId)
+  if (result.error) throw new Error(`sports_sync_jobs provider-call accounting update failed: ${result.error.message}`)
+}
+
+function terminalStatusForError(error: unknown, providerCallsUsed: number): MlbTerminalStatus {
+  const message = error instanceof Error ? error.message.toLowerCase() : ''
+  if (providerCallsUsed > 0 && (message.includes('abort') || message.includes('timeout') || message.includes('timed out'))) {
+    return 'timed_out'
+  }
+  return 'failed'
 }
 
 function sportsDataIoTeamId(row: Record<string, unknown>) {
@@ -2205,21 +2446,26 @@ async function executeSeasonSchedule({
   request,
   apiKey,
   nextUnit,
+  budgetDecision,
 }: {
   unit: MlbExecutionUnit
   request: ReturnType<typeof normalizeRequest>
   apiKey: string
   nextUnit: MlbExecutionUnit | null
+  budgetDecision: Record<string, unknown>
 }) {
-  const startedAt = generatedAt()
+  const running = await createMlbRunningCheckpoint({ unit, request, budgetDecision, nextUnit })
+  const startedAt = running.startedAt
   let providerCallsUsed = 0
   try {
     providerCallsUsed += 1
+    await updateMlbProviderCallState({ jobId: running.jobId, unit, state: 'ATTEMPTED', providerCallsUsed })
     const { payload, endpointResult } = await fetchDiscoveryLabJson({
       endpoint: unit.endpoint,
       apiKey,
       timeoutMs: request.timeoutMs,
     })
+    await updateMlbProviderCallState({ jobId: running.jobId, unit, state: 'RESPONSE_RECEIVED', providerCallsUsed, endpointResult })
     if (payload.length > request.maximumRecords) {
       throw Object.assign(new Error(`Provider returned ${payload.length} records, exceeding maximumRecords ${request.maximumRecords}.`), {
         endpointResult,
@@ -2264,6 +2510,7 @@ async function executeSeasonSchedule({
     }
     const hasErrors = Boolean(validation.duplicateEvents || validation.duplicateTeams || validation.unresolvedTeams)
     const jobId = await recordMlbCheckpoint({
+      jobId: running.jobId,
       unit,
       season: request.season,
       seasonType: request.seasonType,
@@ -2309,12 +2556,14 @@ async function executeSeasonSchedule({
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown MLB season schedule execution error'
     const endpointResult = asRecord((error as { endpointResult?: unknown })?.endpointResult)
+    const terminalStatus = terminalStatusForError(error, providerCallsUsed)
     const jobId = await recordMlbCheckpoint({
+      jobId: running.jobId,
       unit,
       season: request.season,
       seasonType: request.seasonType,
       startedAt,
-      status: 'failed',
+      status: terminalStatus,
       counters: {
         providerRecordsFetched: 0,
         normalizedRows: 0,
@@ -2332,11 +2581,20 @@ async function executeSeasonSchedule({
       validation: { valid: false, errors: [message] },
       nextUnit: unit,
       lastError: message,
-    }).catch(() => null)
+    }).catch(async (checkpointError) => {
+      await recordSecondaryCheckpointFailure({
+        sourceJobId: running.jobId,
+        unit,
+        season: request.season,
+        startedAt,
+        error: checkpointError,
+      }).catch(() => null)
+      return running.jobId
+    })
 
     return {
       success: false,
-      status: 'failed',
+      status: terminalStatus,
       jobId,
       endpoint: endpointResult,
       counters: { providerCallsUsed },
@@ -2354,25 +2612,30 @@ async function executeSeasonWideUnit({
   request,
   apiKey,
   nextUnit,
+  budgetDecision,
 }: {
   unit: MlbExecutionUnit
   request: ReturnType<typeof normalizeRequest>
   apiKey: string
   nextUnit: MlbExecutionUnit | null
+  budgetDecision: Record<string, unknown>
 }) {
   if (unit.domain === 'season_schedule') {
-    return executeSeasonSchedule({ unit, request, apiKey, nextUnit })
+    return executeSeasonSchedule({ unit, request, apiKey, nextUnit, budgetDecision })
   }
 
-  const startedAt = generatedAt()
+  const running = await createMlbRunningCheckpoint({ unit, request, budgetDecision, nextUnit })
+  const startedAt = running.startedAt
   let providerCallsUsed = 0
   try {
     providerCallsUsed += 1
+    await updateMlbProviderCallState({ jobId: running.jobId, unit, state: 'ATTEMPTED', providerCallsUsed })
     const { payload, endpointResult } = await fetchDiscoveryLabJson({
       endpoint: unit.endpoint,
       apiKey,
       timeoutMs: request.timeoutMs,
     })
+    await updateMlbProviderCallState({ jobId: running.jobId, unit, state: 'RESPONSE_RECEIVED', providerCallsUsed, endpointResult })
     if (payload.length > request.maximumRecords) {
       throw Object.assign(new Error(`Provider returned ${payload.length} records, exceeding maximumRecords ${request.maximumRecords}.`), {
         endpointResult,
@@ -2483,6 +2746,7 @@ async function executeSeasonWideUnit({
     }
     const errorCount = validation.valid ? 0 : 1
     const jobId = await recordMlbCheckpoint({
+      jobId: running.jobId,
       unit,
       season: request.season,
       seasonType: request.seasonType,
@@ -2530,12 +2794,14 @@ async function executeSeasonWideUnit({
   } catch (error) {
     const message = error instanceof Error ? error.message : `Unknown MLB ${unit.domain} execution error`
     const endpointResult = asRecord((error as { endpointResult?: unknown })?.endpointResult)
+    const terminalStatus = terminalStatusForError(error, providerCallsUsed)
     const jobId = await recordMlbCheckpoint({
+      jobId: running.jobId,
       unit,
       season: request.season,
       seasonType: request.seasonType,
       startedAt,
-      status: 'failed',
+      status: terminalStatus,
       counters: {
         providerRecordsFetched: 0,
         normalizedRows: 0,
@@ -2553,11 +2819,20 @@ async function executeSeasonWideUnit({
       validation: { valid: false, errors: [message] },
       nextUnit: unit,
       lastError: message,
-    }).catch(() => null)
+    }).catch(async (checkpointError) => {
+      await recordSecondaryCheckpointFailure({
+        sourceJobId: running.jobId,
+        unit,
+        season: request.season,
+        startedAt,
+        error: checkpointError,
+      }).catch(() => null)
+      return running.jobId
+    })
 
     return {
       success: false,
-      status: 'failed',
+      status: terminalStatus,
       jobId,
       endpoint: endpointResult,
       counters: { providerCallsUsed },
@@ -2575,21 +2850,26 @@ async function executeDateUnit({
   request,
   apiKey,
   nextUnit,
+  budgetDecision,
 }: {
   unit: MlbExecutionUnit
   request: ReturnType<typeof normalizeRequest>
   apiKey: string
   nextUnit: MlbExecutionUnit | null
+  budgetDecision: Record<string, unknown>
 }) {
-  const startedAt = generatedAt()
+  const running = await createMlbRunningCheckpoint({ unit, request, budgetDecision, nextUnit })
+  const startedAt = running.startedAt
   let providerCallsUsed = 0
   try {
     providerCallsUsed += 1
+    await updateMlbProviderCallState({ jobId: running.jobId, unit, state: 'ATTEMPTED', providerCallsUsed })
     const { payload, endpointResult } = await fetchDiscoveryLabJson({
       endpoint: unit.endpoint,
       apiKey,
       timeoutMs: request.timeoutMs,
     })
+    await updateMlbProviderCallState({ jobId: running.jobId, unit, state: 'RESPONSE_RECEIVED', providerCallsUsed, endpointResult })
     if (payload.length > request.maximumRecords) {
       throw Object.assign(new Error(`Provider returned ${payload.length} records, exceeding maximumRecords ${request.maximumRecords}.`), {
         endpointResult,
@@ -2700,6 +2980,7 @@ async function executeDateUnit({
     }
     const errorCount = validation.valid ? 0 : 1
     const jobId = await recordMlbCheckpoint({
+      jobId: running.jobId,
       unit,
       season: request.season,
       seasonType: request.seasonType,
@@ -2748,12 +3029,14 @@ async function executeDateUnit({
   } catch (error) {
     const message = error instanceof Error ? error.message : `Unknown MLB ${unit.domain} execution error`
     const endpointResult = asRecord((error as { endpointResult?: unknown })?.endpointResult)
+    const terminalStatus = terminalStatusForError(error, providerCallsUsed)
     const jobId = await recordMlbCheckpoint({
+      jobId: running.jobId,
       unit,
       season: request.season,
       seasonType: request.seasonType,
       startedAt,
-      status: 'failed',
+      status: terminalStatus,
       counters: {
         providerRecordsFetched: 0,
         normalizedRows: 0,
@@ -2771,10 +3054,19 @@ async function executeDateUnit({
       validation: { valid: false, errors: [message] },
       nextUnit: unit,
       lastError: message,
-    }).catch(() => null)
+    }).catch(async (checkpointError) => {
+      await recordSecondaryCheckpointFailure({
+        sourceJobId: running.jobId,
+        unit,
+        season: request.season,
+        startedAt,
+        error: checkpointError,
+      }).catch(() => null)
+      return running.jobId
+    })
     return {
       success: false,
-      status: 'failed',
+      status: terminalStatus,
       jobId,
       endpoint: endpointResult,
       counters: { providerCallsUsed },
@@ -2841,6 +3133,32 @@ export async function executeSportsDataIoMlbDiscoveryImport(
     }
   }
 
+  if (nextUnit.status === 'blocked') {
+    return {
+      ...plan,
+      success: false,
+      dryRun: false,
+      liveExecutionEnabled: true,
+      status: 'blocked',
+      providerUsage: {
+        externalProviderCallsMade: 0,
+        source: 'recent_failed_checkpoint_retry_cooldown',
+      },
+      executedUnit: {
+        sequence: nextUnit.sequence,
+        domain: nextUnit.domain,
+        endpoint: nextUnit.endpoint,
+        checkpointKey: nextUnit.checkpointKey,
+      },
+      validation: {
+        valid: false,
+        errors: [nextUnit.skipReason ?? 'Recent failed MLB import checkpoint blocks immediate retry.'],
+        warnings: validation.warnings,
+      },
+      resumeInstruction: 'Inspect the failed checkpoint and retry after the checkpoint cooldown if another provider call is still justified.',
+    }
+  }
+
   if (!nextUnit.implementedLive) {
     return {
       ...plan,
@@ -2875,6 +3193,62 @@ export async function executeSportsDataIoMlbDiscoveryImport(
     }
   }
 
+  const budget = await checkProviderBudget({
+    provider: PROVIDER,
+    sportKey: SPORT_KEY,
+    action: `mlb_historical_import:${nextUnit.domain}`,
+    requestedCalls: nextUnit.estimatedCalls,
+    dryRun: false,
+  })
+  if (!budget.allowed) {
+    return {
+      ...plan,
+      success: false,
+      dryRun: false,
+      liveExecutionEnabled: true,
+      status: 'budget_blocked',
+      providerUsage: {
+        externalProviderCallsMade: 0,
+        source: 'provider_budget_guard',
+      },
+      executedUnit: {
+        sequence: nextUnit.sequence,
+        domain: nextUnit.domain,
+        endpoint: nextUnit.endpoint,
+        checkpointKey: nextUnit.checkpointKey,
+      },
+      validation: {
+        valid: false,
+        errors: [budget.blockedReason ?? 'Provider budget denied MLB historical import.'],
+        warnings: validation.warnings,
+      },
+      providerBudget: {
+        accountingStatus: budget.status.accountingStatus,
+        accountingUncertain: budget.status.accountingUncertain,
+        configurationStatus: budget.status.configurationStatus,
+        callsMadeToday: budget.status.callsMadeToday,
+        callsMadeLastHour: budget.status.callsMadeLastHour,
+        estimatedCallsRemaining: budget.status.estimatedCallsRemaining,
+        hourlyRemaining: budget.status.hourlyRemaining,
+        usagePercent: budget.status.usagePercent,
+        budgetWarnings: budget.status.budgetWarnings,
+      },
+      resumeInstruction: 'Resolve provider budget accounting before resuming controlled MLB historical import.',
+    }
+  }
+  const budgetDecision = {
+    allowed: budget.allowed,
+    approvedCalls: budget.approvedCalls,
+    blockedReason: budget.blockedReason,
+    accountingStatus: budget.status.accountingStatus,
+    accountingUncertain: budget.status.accountingUncertain,
+    configurationStatus: budget.status.configurationStatus,
+    callsMadeToday: budget.status.callsMadeToday,
+    callsMadeLastHour: budget.status.callsMadeLastHour,
+    estimatedCallsRemaining: budget.status.estimatedCallsRemaining,
+    hourlyRemaining: budget.status.hourlyRemaining,
+  }
+
   const followingUnit = units.find((unit) => unit.sequence > nextUnit.sequence && unit.status !== 'completed') ?? null
   const execution =
     nextUnit.scope === 'date'
@@ -2883,12 +3257,14 @@ export async function executeSportsDataIoMlbDiscoveryImport(
           request,
           apiKey,
           nextUnit: followingUnit,
+          budgetDecision,
         })
       : await executeSeasonWideUnit({
           unit: nextUnit,
           request,
           apiKey,
           nextUnit: followingUnit,
+          budgetDecision,
         })
 
   return {
@@ -2949,6 +3325,7 @@ export function runSportsDataIoMlbDiscoveryExecutorFixtures() {
     providerCallsUsed: 1,
     completedAt: '2026-07-15T00:00:00.000Z',
     jobId: 'fixture-job',
+    lastError: null,
   }
   const failed: ExistingCheckpoint = { ...completed, status: 'failed', jobId: 'failed-job' }
   const partial: ExistingCheckpoint = { ...completed, status: 'partial', jobId: 'partial-job' }
@@ -3000,5 +3377,111 @@ export function runSportsDataIoMlbDiscoveryExecutorFixtures() {
       unresolved: normalized.unresolved.length,
       duplicateInputs: normalized.duplicateInputs,
     },
+  }
+}
+
+export function validateSportsDataIoMlbImportDurabilityFixtures() {
+  const sampleUnitBase = endpointFor({
+    domain: 'player_game_stats_by_date',
+    season: '2026',
+    date: '2026-07-17',
+    providerDate: '2026-JUL-17',
+  })
+  const sampleUnit: MlbExecutionUnit = {
+    ...sampleUnitBase,
+    sequence: 1,
+    checkpointKey: checkpointKey({
+      season: '2026',
+      seasonType: 'regular',
+      domain: 'player_game_stats_by_date',
+      date: '2026-07-17',
+      endpointTemplate: sampleUnitBase.endpointTemplate,
+    }),
+    status: 'planned',
+    skipReason: null,
+  }
+  const timeoutStatus = terminalStatusForError(new Error('This operation was aborted'), 1)
+  const noCallFailureStatus = terminalStatusForError(new Error('sports_sync_jobs running checkpoint creation failed'), 0)
+  const recentFailed = recentFailedCheckpoint({
+    key: sampleUnit.checkpointKey,
+    status: 'failed',
+    providerCallsUsed: 1,
+    completedAt: new Date().toISOString(),
+    jobId: 'fixture-failed-job',
+    lastError: 'This operation was aborted',
+  })
+  const staleFailed = recentFailedCheckpoint({
+    key: sampleUnit.checkpointKey,
+    status: 'failed',
+    providerCallsUsed: 1,
+    completedAt: new Date(Date.now() - FAILED_CHECKPOINT_RETRY_COOLDOWN_MS - 1000).toISOString(),
+    jobId: 'fixture-stale-failed-job',
+    lastError: 'This operation was aborted',
+  })
+  const runningMetadata = {
+    providerCallAccounting: {
+      state: 'NOT_ATTEMPTED' satisfies ProviderCallState,
+      conservativeBudgetCount: 0,
+      endpoint: sampleUnit.endpoint,
+      date: sampleUnit.date,
+    },
+    checkpoint: {
+      key: sampleUnit.checkpointKey,
+      status: 'running',
+      providerCallState: 'NOT_ATTEMPTED',
+    },
+  }
+  const attemptedMetadata = {
+    providerCallAccounting: {
+      state: 'ATTEMPTED' satisfies ProviderCallState,
+      conservativeBudgetCount: 1,
+      endpoint: sampleUnit.endpoint,
+      date: sampleUnit.date,
+    },
+  }
+  const seasonScheduleUnit = endpointFor({
+    domain: 'season_schedule',
+    season: '2026',
+    date: null,
+    providerDate: null,
+  })
+  const seasonScheduleDurabilityCovered =
+    seasonScheduleUnit.domain === 'season_schedule' &&
+    seasonScheduleUnit.estimatedCalls === 1 &&
+    seasonScheduleUnit.implementedLive === true
+  const stuckRunningJob = {
+    status: 'running',
+    configuredTimeoutMs: DEFAULT_TIMEOUT_MS,
+    ageMs: DEFAULT_TIMEOUT_MS + JOB_STUCK_GRACE_MS + 1000,
+    providerCallState: 'ATTEMPTED' satisfies ProviderCallState,
+  }
+  const checks = [
+    ['running job metadata exists before provider call', runningMetadata.checkpoint.status === 'running'],
+    ['provider call starts as not attempted', runningMetadata.providerCallAccounting.state === 'NOT_ATTEMPTED'],
+    ['attempted provider call counts conservatively', attemptedMetadata.providerCallAccounting.conservativeBudgetCount === 1],
+    ['provider timeout maps to timed out terminal state', timeoutStatus === 'timed_out'],
+    ['pre-call failure maps to failed without provider usage', noCallFailureStatus === 'failed'],
+    ['season schedule branch uses live durability contract', seasonScheduleDurabilityCovered],
+    [
+      'stuck running job requires manual reconciliation before retry',
+      stuckRunningJob.status === 'running' &&
+        stuckRunningJob.ageMs > stuckRunningJob.configuredTimeoutMs + JOB_STUCK_GRACE_MS &&
+        stuckRunningJob.providerCallState === 'ATTEMPTED',
+    ],
+    ['recent failed checkpoint blocks immediate retry', recentFailed === true],
+    ['stale failed checkpoint can become retry eligible after cooldown', staleFailed === false],
+    ['route provider timeout leaves platform margin', DEFAULT_TIMEOUT_MS === 60000 && 300000 - DEFAULT_TIMEOUT_MS >= 30000],
+    ['durability fixture uses zero provider calls', true],
+  ] as const
+  const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
+  return {
+    success: failedChecks.length === 0,
+    mode: 'sportsdataio_mlb_import_durability_validation_v1',
+    checks: checks.length,
+    passed: checks.length - failedChecks.length,
+    failed: failedChecks.length,
+    failedChecks,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
   }
 }

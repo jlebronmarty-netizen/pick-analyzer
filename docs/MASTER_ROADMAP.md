@@ -8,6 +8,78 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1
+
+Status: Endpoint timeout root cause diagnosed locally. Certification: OPTIMIZED. Historical import remains stopped until explicitly resumed.
+
+Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts` and `docs/SPORTSDATAIO_PLAYER_GAME_STATS_ENDPOINT_OPTIMIZATION.md`.
+
+Note: One direct read-only diagnostic call to `PlayerGameStatsByDate/2026-JUL-17` returned HTTP 200 with 418 rows, 646,490 decoded bytes, 1093 ms to headers, 1121 ms to first byte, 13,945 ms body download, 15,041 ms total response and 142 ms JSON parse time. No rate-limit or retry-after header was present. Root cause is client-side timeout margin, not entitlement, server failure, rate limiting or JSON parsing. The only code change was raising the MLB Discovery historical transport default timeout from 15 seconds to 60 seconds. No import/backfill retry was run.
+
+### SportsDataIO MLB Data Maximization Budget Fix And Controlled Extraction V1
+
+Status: Budget fix implemented and validated locally. Certification: BLOCKED. Full extraction is stopped by a real pilot timeout.
+
+Evidence: `src/services/provider-budget.service.ts`, `src/services/sportsdataio-mlb-historical-import-executor.service.ts`, `docs/SPORTSDATAIO_MLB_DATA_MAXIMIZATION_BUDGET_FIX_AND_CONTROLLED_EXTRACTION.md` and `sports_sync_jobs` pilot evidence.
+
+Note: Read-only provider budget status no longer returns HTTP 500 when lifecycle accounting is unavailable; it degrades with typed warnings, uses safe defaults, reports malformed numeric config, treats missing usage as zero, and makes zero provider calls. Live MLB historical import now checks the shared budget guard and blocks immediate retry after recent failed/partial/running checkpoints. Network-enabled local validation returned accounting `AVAILABLE`, configuration `VALID`, 5 calls today, 0 last hour and validation 14/14. The controlled pilot for `PlayerGameStatsByDate/2026-JUL-17` consumed 1 call and timed out with 0 rows. The immediate rerun consumed 1 more call under old behavior, so retry-cooldown hardening was added; post-fix retry verification did not increase provider usage. Do not run full current-season backfill until the timeout is resolved.
+
+### SportsDataIO Entitlement Discovery And Safe Extraction V1
+
+Status: Read-only entitlement discovery completed locally. Certification: PARTIAL. New extraction remains deferred until exact full entitlement and historical budget scope are approved.
+
+Evidence: `src/services/sportsdataio-subscription-maximization-audit.service.ts`, `src/app/api/providers/sportsdataio/maximization-audit/route.ts`, `src/app/api/operations/validation/route.ts` and `docs/SPORTSDATAIO_ENTITLEMENT_DISCOVERY_AND_SAFE_EXTRACTION.md`.
+
+Note: The safe discovery pass made exactly 10 external SportsDataIO calls and 0 remote mutations, with no secret exposure. Representative entitlement was verified for MLB metadata/current season, teams, GamesByDate schedule/results/starters/weather, standings, players, player game stats endpoint access, team season stats, GameOddsByDate odds, NBA teams and NBA injuries. The audit now adds entitlement status, probe evidence and historical extraction policy to each cataloged endpoint. Extraction did not run because 117 cataloged endpoints remain unprobed under the approved cap, no account entitlement export is available, local provider budget precheck returned HTTP 500, and historical depth was not proven beyond current-season/single-date probes. Utilization remains 14.2%. BSN was not started.
+
+### SportsDataIO Subscription Maximization Audit V1
+
+Status: Read-only audit implemented locally. Certification: PARTIAL. New ingestion is deferred until exact subscription entitlement and rate-limit evidence are available.
+
+Evidence: `src/services/sportsdataio-subscription-maximization-audit.service.ts`, `src/app/api/providers/sportsdataio/maximization-audit/route.ts`, `src/app/api/operations/validation/route.ts`, `src/config/sportsdataio-endpoint-catalog.ts` and `docs/SPORTSDATAIO_SUBSCRIPTION_MAXIMIZATION_AUDIT.md`.
+
+Note: The audit composes the current endpoint catalog, runtime adapter evidence, server-only env key-name checks, provider budget summary and stored table counts. Local smoke reports 127 cataloged endpoints, 7 USED, 22 PARTIALLY_USED, 98 NOT_USED and estimated weighted utilization of 14.2%. It identifies Critical/High ROI domains but does not start new ingestion because repository evidence cannot prove the exact purchased SportsDataIO plan, full endpoint entitlement matrix or per-key rate limits. Provider calls 0, remote mutations 0, build passed, and no prediction, recommendation, Current Board, settlement, scheduler, dashboard or provider-refresh behavior changed.
+
+### BSN Foundation V1 Continuation
+
+Status: Phase A source audit completed locally. Certification: PARTIAL. Stop gate reached before data-lake, scheduler, shadow-governance, settlement-foundation or UI expansion.
+
+Evidence: `docs/BSN_FOUNDATION_V1_CERTIFICATION.md`, `src/services/basketball-source-framework.service.ts`, `src/services/basketball/connectors/official-bsn-homepage.connector.ts`, `src/services/basketball/acquisition/bsn-acquisition-engine.ts`, `src/services/bsn-platform.service.ts`, `docs/bsn-integration-v1.md`, `docs/bsn-source-framework-v1.md` and `docs/bsn-data-acquisition-strategy.md`.
+
+Note: The audit confirmed the current BSN stack has a reusable foundation, but no permissioned production BSN API/feed is configured. Official public HTML remains suitable only for discovery and limited foundation snapshots unless written authorization is obtained. CSV/manual paths are validation-first and write/audit blocked. Verified BSN odds and approved boxscore/game-stat coverage remain unavailable. Provider calls 0, remote mutations 0, and no prediction, recommendation, Current Board, settlement, scheduler or provider logic changed. NBA has not started.
+
+### BSN Wave 2 Core Certification V1
+
+Status: Implemented locally. Certification: PARTIAL. Stop gate reached at Phase 2; BSN Core completion cannot continue until verified BSN odds/stat/source gaps are resolved.
+
+Evidence: `src/services/bsn-core-certification.service.ts`, `src/app/api/bsn/core-certification/route.ts`, `src/app/api/operations/validation/route.ts`, existing BSN data quality, Current Board readiness, operations readiness, intelligence validation, shadow prediction validation, model maturity, backtesting and calibration routes.
+
+Note: Wave 2 reused the existing Sports Brain instead of recreating MLB. Phase 1 reuse certification passed for Prediction SDK, market alignment, recommendation explanations, Official Pick Experience and AI Feed. Local smoke confirmed `/api/bsn/core-certification?includeValidation=true` returns `BSN_CORE_PARTIAL`, `stop=true`, provider calls 0 and remote mutations 0. The required Phase 2 stop gate is caused by missing verified BSN odds, missing BSN game statistics, required approved BSN source ingestion, insufficient V7 shadow/calibration samples for production activation, and moneyline/spread/totals blocked by no verified odds. Existing BSN shadow backtesting remains available with 38 graded games, 28 correct, 10 incorrect, 73.68% accuracy and 0.21 Brier score. No prediction engine, Current Board, dashboard, recommendation, explanation, settlement, scheduler, provider budget, health, backtesting, calibration, risk or Kelly service was duplicated. NBA has not started.
+
+### MLB Phase 6 Player Props Data Foundation V1
+
+Status: Foundation implemented locally. Certification: BLOCKED. Phase 7 must not start.
+
+Evidence: `src/services/mlb-player-props-foundation.service.ts`, `src/app/api/mlb/player-props/foundation/route.ts`, `src/app/api/operations/validation/route.ts`, `src/services/sportsdataio-runtime-adapter.service.ts`, `src/config/sportsdataio-endpoint-catalog.ts` and `supabase/migrations/202607130002_sport_player_stats_v1.sql`.
+
+Note: Phase 6 adds a provider-independent `mlb_player_props_foundation_v1` readiness contract and read-only API. It catalogs pitcher strikeouts, outs recorded, earned runs, hits allowed, walks allowed, pitches thrown, batter hits, total bases, runs, RBI, home runs, walks and strikeouts. It defines canonical player, provider mapping, participation, historical player game log, prop odds, result/settlement, feature, data-quality, lineage and import-checkpoint contracts using existing storage where possible. Local audit found stored MLB player identity and stats coverage but zero stored player prop odds. Phase 7 is blocked by unconfirmed MLB player prop odds endpoint entitlement, no stored player prop odds snapshots and missing player-prop settlement rules. Local validation passed 11/11, provider calls 0, remote mutations 0 and build passed. No migration was applied. Prediction formulas, recommendation policy, categories, ranking, Official thresholds, provider integrations, settlement and learning remain unchanged.
+
+### MLB Phase 5 AI Picks Feed V1
+
+Status: Implemented and validated locally. Production deployment remains pending explicit authorization.
+
+Evidence: `src/services/mlb-ai-picks-feed.service.ts`, `src/services/current-board.service.ts`, `src/services/dashboard-today.service.ts`, `src/app/api/operations/validation/route.ts` and `src/components/dashboard/UserTodayPanel.tsx`.
+
+Note: Phase 5 adds an additive read-only `mlb_ai_picks_feed_v1` contract that derives feed items from existing Current Board candidates and preserves `official_pick_v1`, `market_alignment_v1`, `recommendation_explanation_v1` and selected odds lineage. Official Pick and Best Bet Today labels require an existing official contract; informational feed items remain labeled Most Likely, Best Value, Watch Closely, Hidden Value, Avoid, Data Risk or Market Update. Local validation passed 13 AI Picks Feed checks, `/api/current-board?includeValidation=true` returned 23 feed items from 12 candidates, and `/api/dashboard/today?includeValidation=true` exposed the feed section with provider calls 0 and remote mutations 0. Prediction formulas, category assignment, ranking, Official thresholds, recommendation policy, provider integrations, settlement, learning and unsupported markets remain unchanged. Phase 6 has not started.
+
+### MLB Phase 4 Official Pick Experience V1
+
+Status: Implemented and validated locally. Production deployment remains pending explicit authorization.
+
+Evidence: `src/services/official-pick-experience.service.ts`, `src/services/current-board.service.ts`, `src/services/dashboard-today.service.ts`, `src/app/api/operations/validation/route.ts` and `src/components/dashboard/UserTodayPanel.tsx`.
+
+Note: Phase 4 adds an additive `official_pick_v1` presentation contract and `official_pick_experience_v1` Today/Current Board section using only existing Current Board, odds lineage, market alignment, recommendation explanation and recommendation-policy evidence. The dashboard now shows a premium Official Pick card when policy-qualified picks exist and a truthful empty state when zero Official Picks exist, while keeping Top AI Opportunity informational. Local validation passed 14 official-pick checks plus read-only Current Board/Today smoke with provider calls 0 and remote mutations 0. Official thresholds, category assignment, ranking, model formulas, recommendation policy, provider integrations, settlement and learning remain unchanged.
+
 ### Phase 3 Actionable Recommendation Explanations V1
 
 Status: Implemented and validated locally. Production deployment remains pending explicit authorization.
@@ -1819,3 +1891,17 @@ Persistence or migration scope: No migration. Existing `operating_day_lifecycle_
 Validation: `npm.cmd run build` exits 0. Live execution requires `CRON_SECRET`, provider budget approval and an action lock.
 
 Completion criteria: Adaptive Refresh no longer claims live execution when it only planned; due supported work can execute through the protected existing operating-day pipeline, and `/api/operations/health` reports real readiness, blockers and freshness.
+
+### 34. MLB Historical Import Job Durability and Observability V1
+
+Objective: Make MLB SportsDataIO historical import attempts durable, observable and safely resumable before any additional historical provider retry.
+
+Status: Implemented locally. Production retry remains gated on applying the additive sync-job terminal-status migration and receiving explicit retry authorization.
+
+Backend scope: `sportsdataio-mlb-historical-import-executor.service.ts`, `/api/historical-import/execute`, `/api/historical-import/jobs` via `historical-import-engine.service.ts`, and `/api/operations/validation`.
+
+Persistence or migration scope: Additive migration `202607210001_sports_sync_jobs_terminal_statuses.sql` extends `sports_sync_jobs.status` with `canceled` and `timed_out`. No destructive migration and no historical payload overwrite.
+
+Validation: `npm.cmd run build` exits 0. Durability fixture validation passes 11/11 with `providerCallsMade=0` and `remoteMutationsMade=0`. Jobs smoke is read-only and reports 0 running, 0 stuck and 0 reconciliation required.
+
+Completion criteria: Every live MLB historical import branch creates a `sports_sync_jobs` running checkpoint before provider transport, records provider call accounting states, converges to a terminal logical state when control returns, and exposes stuck-job reconciliation evidence without automatic retry.

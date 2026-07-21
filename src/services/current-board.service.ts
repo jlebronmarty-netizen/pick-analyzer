@@ -15,6 +15,16 @@ import {
   buildRecommendationExplanation,
   type RecommendationExplanation,
 } from '@/services/recommendation-explanation.service'
+import {
+  buildOfficialPickContract,
+  buildOfficialPickExperience,
+  type OfficialPickContract,
+  type OfficialPickExperience,
+} from '@/services/official-pick-experience.service'
+import {
+  buildMlbAiPicksFeed,
+  type MlbAiPicksFeed,
+} from '@/services/mlb-ai-picks-feed.service'
 import { normalizeStoredSportsDataIoMlbStart, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
@@ -145,8 +155,11 @@ export type CurrentBoardCandidate = {
   oddsSnapshotCreatedAt: string | null
   marketAlignment: MarketAlignmentContract
   recommendationExplanation?: RecommendationExplanation
+  officialPick?: OfficialPickContract | null
   maxAllowedAgeMinutes: number
   cutoff: string | null
+  predictionGeneratedAt?: string | null
+  recommendationGeneratedAt?: string | null
   pregameSafe: boolean
   stale: boolean
   anomalous: boolean
@@ -232,6 +245,8 @@ export type CurrentBoardResponse = {
     staleVisibleMarketCount: number
     freshnessTimestampSource: CurrentBoardCandidate['marketFreshnessSource'] | null
   }
+  officialPickExperience?: OfficialPickExperience
+  aiPicksFeed?: MlbAiPicksFeed
   officialPickCount: number
   previewCount: number
   modeledValueCount: number
@@ -801,6 +816,8 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     marketAlignment,
     maxAllowedAgeMinutes: maxAgeFor(row.sport_key, market, mode),
     cutoff: row.cutoff_at,
+    predictionGeneratedAt: row.generated_at,
+    recommendationGeneratedAt: validTimestamp(snapshot.recommendationGeneratedAt) ?? validTimestamp(snapshot.recommendation_generated_at),
     pregameSafe: !reasons.has('EVENT_STARTED') && !reasons.has('POST_CUTOFF_ODDS') && !reasons.has('LIVE_ODDS'),
     stale,
     anomalous: reasons.has('INVALID_PRICE') || reasons.has('INVALID_LINE') || Math.abs(selectedOdds ?? 0) > CURRENT_BOARD_FRESHNESS_POLICY.baseball_mlb.extremeAmericanOdds,
@@ -913,6 +930,13 @@ function attachRecommendationExplanations(candidates: CurrentBoardCandidate[]) {
       }),
     }
   })
+}
+
+function attachOfficialPickContracts(candidates: CurrentBoardCandidate[]) {
+  return candidates.map((candidate) => ({
+    ...candidate,
+    officialPick: buildOfficialPickContract(candidate),
+  }))
 }
 
 function shouldInclude(mode: CurrentBoardMode, reasons: Set<CurrentBoardReasonCode>) {
@@ -1056,6 +1080,10 @@ export async function getCurrentBoard({
     candidates = await enrichMlbCandidatesWithVerifiedContext(candidates, currentSlateDate)
   }
   candidates = attachRecommendationExplanations(candidates)
+  candidates = attachOfficialPickContracts(candidates)
+  const responseGeneratedAt = new Date().toISOString()
+  const officialPickExperience = buildOfficialPickExperience(candidates, responseGeneratedAt)
+  const aiPicksFeed = buildMlbAiPicksFeed(candidates, responseGeneratedAt)
 
   const visibleMarketTimestamps = candidates.map((candidate) => candidate.marketFreshnessTimestamp ?? candidate.oddsTimestamp).filter(Boolean) as string[]
   const sourceMarketTimestamps = candidates.map((candidate) => candidate.marketSourceTimestamp).filter(Boolean) as string[]
@@ -1107,7 +1135,7 @@ export async function getCurrentBoard({
     success: true,
     mode: 'current_board_intelligence_engine_v1',
     boardMode: mode,
-    generatedAt: new Date().toISOString(),
+    generatedAt: responseGeneratedAt,
     sportKey,
     slateDate: currentSlateDate,
     operatingDate,
@@ -1134,7 +1162,9 @@ export async function getCurrentBoard({
       staleVisibleMarketCount,
       freshnessTimestampSource: latestFreshnessSource,
     },
-    officialPickCount: candidates.filter((candidate) => candidate.recommendationPolicyStatus === 'QUALIFIED' || candidate.recommendationPolicyStatus === 'BEST_BET_CANDIDATE' || candidate.recommendationPolicyStatus === 'PLAY_OF_DAY_CANDIDATE').length,
+    officialPickExperience,
+    aiPicksFeed,
+    officialPickCount: officialPickExperience.picks.length,
     previewCount: candidates.filter((candidate) => candidate.boardLabel === 'PREVIEW').length,
     modeledValueCount: candidates.filter((candidate) => candidate.modeledValueStatus === 'MODELED_VALUE').length,
     watchCount: candidates.filter((candidate) => candidate.recommendationPolicyStatus === 'WATCH').length,

@@ -7,6 +7,8 @@ import {
   puertoRicoUtcRange,
 } from '@/services/active-event.service'
 import { getCurrentBoardCached } from '@/services/current-board.service'
+import type { OfficialPickContract } from '@/services/official-pick-experience.service'
+import type { MlbAiPicksFeed } from '@/services/mlb-ai-picks-feed.service'
 import { emptyCategoryTrackRecord, summarizeMarketIntelligenceCategories } from '@/services/market-intelligence-category.service'
 import { getNextSlateStatus } from '@/services/next-slate.service'
 import { getOperatingDayStatus } from '@/services/operating-day.service'
@@ -183,6 +185,8 @@ export type DashboardTodayContract = {
       officialPicks: number
       freshness: 'fresh' | 'partial' | 'stale' | 'empty'
     }>
+    officialPicks: DashboardTodaySection<OfficialPickContract[]>
+    aiPicksFeed: DashboardTodaySection<MlbAiPicksFeed>
     todayStory: DashboardTodaySection<string[]>
     mostLikely: DashboardTodaySection<unknown[]>
     bestValue: DashboardTodaySection<unknown[]>
@@ -520,6 +524,51 @@ export async function getDashboardToday({
   const boardFallback = {
     candidates: [],
     games: [],
+    officialPickExperience: {
+      contractVersion: 'official_pick_experience_v1',
+      status: 'EMPTY_VALID',
+      generatedAt,
+      picks: [],
+      emptyState: {
+        headline: 'No Official Pick today.',
+        summary: 'No current candidate meets the existing Official Pick policy. Top AI Opportunity remains informational and is not being promoted.',
+        topOpportunityRetained: true,
+      },
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+    },
+    aiPicksFeed: {
+      contractVersion: 'mlb_ai_picks_feed_v1',
+      status: 'EMPTY_VALID',
+      generatedAt,
+      sportKey: 'baseball_mlb',
+      itemCount: 0,
+      items: [],
+      emptyState: {
+        headline: 'No AI picks feed items are actionable right now.',
+        summary: 'Current Board is temporarily unavailable, so the AI Picks Feed remains empty without promoting a pick.',
+        topOpportunityRetained: true,
+      },
+      summary: {
+        candidatesScanned: 0,
+        officialPickItems: 0,
+        bestValueItems: 0,
+        mostLikelyItems: 0,
+        watchCloselyItems: 0,
+        avoidItems: 0,
+        dataRiskItems: 0,
+        marketUpdateItems: 0,
+      },
+      guardrails: {
+        providerCallsMade: 0,
+        remoteMutationsMade: 0,
+        officialPolicyChanged: false,
+        recommendationThresholdsChanged: false,
+        categoryAssignmentsChanged: false,
+        rankingsChanged: false,
+        fabricatedMarketMovement: false,
+      },
+    },
     officialPickCount: 0,
     latestOddsTimestamp: null,
     dataFreshness: {
@@ -624,8 +673,10 @@ export async function getDashboardToday({
     candidate.scheduledTime < todayEnd
   ))
   const marketIntelligence = summarizeMarketIntelligenceCategories(displayCandidates)
+  const officialPickData = board.officialPickExperience?.picks ?? []
+  const aiPicksFeed = board.aiPicksFeed ?? boardFallback.aiPicksFeed!
   const predictionCandidates = board.candidates.length || displayCandidates.length || nextSlate.activeCandidates
-  const officialPicks = board.officialPickCount || nextSlate.officialPicks
+  const officialPicks = officialPickData.length || board.officialPickCount || nextSlate.officialPicks
   const informationalCandidates = Math.max(0, marketIntelligence.aiLeans + marketIntelligence.watchlist + marketIntelligence.avoid)
   const operatingStatus = String(operatingDay.status ?? 'planned')
   const nextAction = !currentEventsResult.ok && !dashboardFallbackUsed
@@ -814,6 +865,18 @@ export async function getDashboardToday({
         { currentGames, upcomingGames, predictionCandidates, officialPicks, freshness: board.dataFreshness.status },
         hasCriticalError ? 'One or more critical Today dependencies is degraded.' : null,
         generatedAt
+      ),
+      officialPicks: section(
+        boardResult.ok ? (officialPickData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
+        officialPickData,
+        boardResult.ok ? (officialPickData.length ? null : board.officialPickExperience?.emptyState.summary ?? 'No current candidate meets the existing Official Pick policy. Top AI Opportunity remains informational and is not being promoted.') : 'Official Picks are temporarily unavailable.',
+        boardResult.ok ? generatedAt : null
+      ),
+      aiPicksFeed: section(
+        boardResult.ok ? (aiPicksFeed?.itemCount ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
+        aiPicksFeed,
+        boardResult.ok ? (aiPicksFeed?.itemCount ? null : aiPicksFeed?.emptyState?.summary ?? 'No AI Picks Feed items are available from the current board.') : 'AI Picks Feed is temporarily unavailable.',
+        boardResult.ok ? generatedAt : null
       ),
       todayStory: section(storyLines.length ? 'AVAILABLE' : 'EMPTY', storyLines, storyLines.length ? null : 'No Today story lines are available.', generatedAt),
       mostLikely: section(

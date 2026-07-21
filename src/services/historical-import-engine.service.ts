@@ -319,6 +319,8 @@ const DEFAULT_DATA_TYPES: ProviderDataType[] = [
   'odds',
 ]
 
+const HISTORICAL_IMPORT_STUCK_GRACE_MS = 60 * 1000
+
 const DATA_TYPE_ORDER: ProviderDataType[] = [
   'schedules',
   'scores',
@@ -342,6 +344,14 @@ function generatedAt() {
 
 function numberFromMetadata(value: unknown, fallback: number) {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
+function recordFromMetadata(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+}
+
+function stringFromMetadata(value: unknown, fallback: string | null = null) {
+  return typeof value === 'string' && value.trim().length > 0 ? value : fallback
 }
 
 function recordCountersFromMetadata(
@@ -1927,10 +1937,30 @@ export async function listHistoricalImportJobs() {
 
   const data =
     result.status === 'fulfilled' && !result.value.error ? result.value.data : []
+  const nowMs = Date.now()
   const jobs = ((data ?? []) as SyncJobRow[]).map((job) => {
     const fetched = job.records_fetched ?? 0
     const skipped = Math.max(0, job.records_skipped ?? 0)
     const recordCounters = recordCountersFromMetadata(job.metadata, { fetched, skipped })
+    const metadata = job.metadata ?? {}
+    const checkpoint = recordFromMetadata(metadata.checkpoint)
+    const providerCallAccounting = recordFromMetadata(metadata.providerCallAccounting)
+    const configuredTimeoutMs = numberFromMetadata(checkpoint.configuredTimeoutMs, 60_000)
+    const startedAtMs = job.started_at ? new Date(job.started_at).getTime() : Number.NaN
+    const runningAgeMs =
+      job.status === 'running' && Number.isFinite(startedAtMs) ? Math.max(0, nowMs - startedAtMs) : 0
+    const providerCallState = stringFromMetadata(
+      providerCallAccounting.state,
+      stringFromMetadata(checkpoint.providerCallState, 'AMBIGUOUS')
+    )
+    const conservativeBudgetCount = numberFromMetadata(
+      providerCallAccounting.conservativeBudgetCount,
+      numberFromMetadata(metadata.externalCallsUsed, providerCallState === 'NOT_ATTEMPTED' ? 0 : 1)
+    )
+    const stuck =
+      job.status === 'running' &&
+      Number.isFinite(startedAtMs) &&
+      runningAgeMs > configuredTimeoutMs + HISTORICAL_IMPORT_STUCK_GRACE_MS
 
     return {
       id: job.id,
@@ -1958,9 +1988,32 @@ export async function listHistoricalImportJobs() {
         errors: job.error_count ?? 0,
       },
       lastError: job.last_error,
-      metadata: job.metadata ?? {},
+      reconciliation: {
+        readOnly: true,
+        stuck,
+        ageMs: runningAgeMs,
+        configuredTimeoutMs,
+        graceMs: HISTORICAL_IMPORT_STUCK_GRACE_MS,
+        providerCallState,
+        conservativeBudgetCount,
+        recommendedTerminalStatus: stuck
+          ? providerCallState === 'NOT_ATTEMPTED'
+            ? 'failed'
+            : providerCallState === 'RESPONSE_RECEIVED' || providerCallState === 'COMPLETED'
+              ? 'ambiguous'
+              : 'timed_out'
+          : null,
+        retryEligible: false,
+        action: stuck
+          ? 'manual_reconciliation_required_before_retry'
+          : job.status === 'running'
+            ? 'wait_for_timeout_window'
+            : 'none',
+      },
+      metadata,
     }
   })
+  const stuckJobs = jobs.filter((job) => job.reconciliation.stuck)
 
   return {
     success: true,
@@ -1977,9 +2030,16 @@ export async function listHistoricalImportJobs() {
       running: jobs.filter((job) => job.status === 'running').length,
       completed: jobs.filter((job) => job.status === 'completed').length,
       partial: jobs.filter((job) => job.status === 'partial').length,
+      timedOut: jobs.filter((job) => job.status === 'timed_out').length,
+      canceled: jobs.filter((job) => job.status === 'canceled').length,
+      stuck: stuckJobs.length,
+      reconciliationRequired: stuckJobs.length,
     },
     warnings: [
       ...(warning ? [warning] : []),
+      ...(stuckJobs.length
+        ? [`${stuckJobs.length} historical import job(s) are past timeout plus grace and require manual reconciliation before retry.`]
+        : []),
       'Core V1 jobs endpoint is read-only and returns an empty typed response when Supabase metadata is unavailable.',
     ],
     jobs,

@@ -11,6 +11,8 @@ import {
 } from '@/services/sportsdataio-mlb-historical-import-executor.service'
 import { runSportsDataIoMlbProspectivePreview } from '@/services/sportsdataio-mlb-prospective-preview.service'
 
+export const maxDuration = 300
+
 function authorized(request: NextRequest) {
   const secret = process.env.CRON_SECRET
   if (!secret) return true
