@@ -1215,14 +1215,27 @@ function addMappedMlbPlayerProviderIds<T extends { id: string }>(
 }
 
 async function loadMlbPlayers(season: string) {
-  const result = await supabaseAdmin
-    .from('sport_players')
-    .select('id, team_id, display_name, provider_ids')
-    .eq('sport_key', SPORT_KEY)
-    .eq('league_key', LEAGUE_KEY)
-    .limit(10000)
-  if (result.error) throw new Error(`sport_players lookup failed: ${result.error.message}`)
-  const players = result.data ?? []
+  const players: Array<{
+    id: string
+    team_id: string | null
+    display_name: string
+    provider_ids: Record<string, unknown> | null
+  }> = []
+  const pageSize = 1000
+
+  for (let from = 0; ; from += pageSize) {
+    const result = await supabaseAdmin
+      .from('sport_players')
+      .select('id, team_id, display_name, provider_ids')
+      .eq('sport_key', SPORT_KEY)
+      .eq('league_key', LEAGUE_KEY)
+      .range(from, from + pageSize - 1)
+    if (result.error) throw new Error(`sport_players lookup failed: ${result.error.message}`)
+    const page = result.data ?? []
+    players.push(...page)
+    if (page.length < pageSize) break
+  }
+
   const playerById = new Map(players.map((player) => [player.id, player]))
   const byProviderId = new Map<string, (typeof players)[number]>()
   for (const player of players) {
