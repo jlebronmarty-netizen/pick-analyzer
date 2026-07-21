@@ -109,7 +109,6 @@ async function loadRows(season: string) {
     standings,
     teamStats,
     playerStats,
-    odds,
     predictions,
     results,
     mappings,
@@ -121,14 +120,23 @@ async function loadRows(season: string) {
     safePage('sport_standings', 'id, season, team_id, team_name, wins, losses, provider_ids, updated_at', (q) => q.eq('sport_key', SPORT_KEY).eq('league_key', LEAGUE_KEY).eq('season', season)),
     safePage('team_stats', 'id, team_name, season, wins, losses, updated_at', (q) => q.eq('sport_key', SPORT_KEY).eq('season', Number(season))),
     safePage('sport_player_stats', 'id, season, stat_type, event_id, team_id, player_id, player_name, provider, source_timestamp, provider_ids, stats, metadata, created_at, updated_at', (q) => q.eq('sport_key', SPORT_KEY).eq('league_key', LEAGUE_KEY).eq('season', season)),
-    safePage('sports_odds_snapshots', 'id, season, event_id, sportsbook, market, outcome, price, line, snapshot_time, is_opening, is_closing, updated_at', (q) => q.eq('sport_key', SPORT_KEY).eq('league_key', LEAGUE_KEY)),
     safePage('prediction_history', 'id, game_id, commence_time, market, sportsbook, recommended_pick, production_eligible, result, status, lifecycle_status, settled_at, generated_at, model_version, feature_snapshot, cutoff_at', (q) => q.eq('sport_key', SPORT_KEY)),
     safePage('game_results', 'game_id, commence_time, home_team, away_team, home_score, away_score', (q) => q.eq('sport_key', SPORT_KEY)),
     safePage('provider_entity_mappings', 'id, entity_type, internal_id, provider, provider_id, season, metadata, updated_at', (q) => q.eq('sport_key', SPORT_KEY)),
     safePage('sports_sync_jobs', 'id, job_type, status, season, records_fetched, records_inserted, records_updated, records_skipped, error_count, last_error, started_at, completed_at, metadata', (q) => q.eq('sport_key', SPORT_KEY).eq('league_key', LEAGUE_KEY).eq('provider', 'sportsdataio').order('started_at', { ascending: false })),
   ])
+  const oddsRows: Row[] = []
+  let oddsWarning: string | null = null
+  const eventIds = events.rows.map((row) => String(row.id)).filter(Boolean)
+  for (let index = 0; index < eventIds.length; index += 100) {
+    const chunk = eventIds.slice(index, index + 100)
+    const odds = await safePage('sports_odds_snapshots', 'id, season, event_id, sportsbook, market, outcome, price, line, snapshot_time, is_opening, is_closing, updated_at', (q) => q.eq('sport_key', SPORT_KEY).eq('league_key', LEAGUE_KEY).in('event_id', chunk))
+    oddsRows.push(...odds.rows)
+    oddsWarning = oddsWarning ?? odds.warning
+    if (odds.warning) break
+  }
 
-  return { teams, players, events, standings, teamStats, playerStats, odds, predictions, results, mappings, jobs }
+  return { teams, players, events, standings, teamStats, playerStats, odds: { rows: oddsRows, warning: oddsWarning }, predictions, results, mappings, jobs }
 }
 
 function scoreLabel(score: number) {
@@ -160,7 +168,8 @@ export async function getMlbCurrentSeasonDataQualityAudit(input: { season?: stri
   const provisionalMappings = rows.mappings.rows.filter((row) => row.entity_type === 'unresolved_player')
   const provisionalProviderIds = new Set(provisionalMappings.map((row) => String(row.provider_id)))
   const provisionalStatRows = unresolvedStats.filter((row) => provisionalProviderIds.has(providerId(row, 'player', 'player_id', 'PlayerID'))).length
-  const duplicateStatRows = duplicateCount(gameStats, (row) => [
+  const duplicateStatRows = duplicateCount(gameStats, (row) => String(row.id))
+  const naturalKeyCollisionRows = duplicateCount(gameStats, (row) => [
     row.event_id,
     row.team_id,
     row.player_id ?? providerId(row, 'player', 'player_id', 'PlayerID') ?? row.player_name,
@@ -233,7 +242,7 @@ export async function getMlbCurrentSeasonDataQualityAudit(input: { season?: stri
       teams: { expectedScope: EXPECTED_MLB_TEAMS, actualRows: rows.teams.rows.length, teamCoverage: pct(rows.teams.rows.length, EXPECTED_MLB_TEAMS), missingIdentifiers: rows.teams.rows.filter((row) => !providerId(row, 'sportsdataio', 'team')).length, duplicateIdentifiers: duplicateCount(rows.teams.rows, (row) => providerId(row, 'sportsdataio', 'team') || String(row.id)), dateRange: minMaxDates(rows.teams.rows, (row) => row.updated_at) },
       players: { actualRows: rows.players.rows.length, playerCoverage: rows.players.rows.length, missingIdentifiers: rows.players.rows.filter((row) => !providerId(row, 'sportsdataio', 'player')).length, duplicateIdentifiers: duplicateCount(rows.players.rows, (row) => providerId(row, 'sportsdataio', 'player') || String(row.id)), dateRange: minMaxDates(rows.players.rows, (row) => row.updated_at) },
       schedulesAndEvents: { actualRows: rows.events.rows.length, completedEvents: completedEvents.length, dateRange: minMaxDates(rows.events.rows, (row) => row.start_time), missingTeamIdentifiers: rows.events.rows.filter((row) => !row.home_team_id || !row.away_team_id).length, orphanTeamLinks: rows.events.rows.filter((row) => (row.home_team_id && !teamIds.has(String(row.home_team_id))) || (row.away_team_id && !teamIds.has(String(row.away_team_id)))).length, duplicateIdentifiers: duplicateCount(rows.events.rows, (row) => providerId(row, 'sportsdataio', 'game', 'GameID') || String(row.id)) },
-      results: { actualRows: rows.results.rows.length, completedEvents, completedEventsMissingScores: completedEvents.filter((row) => row.home_score === null || row.away_score === null).length, missingResultLinkage: rows.results.rows.filter((row) => !eventIds.has(String(row.game_id))).length },
+      results: { actualRows: rows.results.rows.length, completedEvents: completedEvents.length, completedEventsMissingScores: completedEvents.filter((row) => row.home_score === null || row.away_score === null).length, missingResultLinkage: rows.results.rows.filter((row) => !eventIds.has(String(row.game_id))).length },
       standings: { actualRows: rows.standings.rows.length, teamCoverage: pct(rows.standings.rows.length, EXPECTED_MLB_TEAMS), orphanTeamLinks: rows.standings.rows.filter((row) => !teamIds.has(String(row.team_id))).length },
       teamStatistics: { actualRows: rows.teamStats.rows.length, teamCoverage: pct(rows.teamStats.rows.length, EXPECTED_MLB_TEAMS), duplicateIdentifiers: duplicateCount(rows.teamStats.rows, (row) => String(row.team_name ?? row.id)) },
       providerMappings: { actualRows: rows.mappings.rows.length, playerMappings: rows.mappings.rows.filter((row) => row.entity_type === 'player').length, unresolvedPlayerMappings: provisionalMappings.length, conflictingMappings: mappingConflicts, dateRange: minMaxDates(rows.mappings.rows, (row) => row.updated_at) },
@@ -264,6 +273,7 @@ export async function getMlbCurrentSeasonDataQualityAudit(input: { season?: stri
       unresolvedProviderPlayerIds: unresolvedPlayerProviderIds.size,
       duplicateStatRate: pct(duplicateStatRows, gameStats.length),
       duplicateStatRows,
+      naturalKeyCollisionRows,
       eventMappingRate: eventMapping,
       teamMappingRate: teamMapping,
       rowsExcludedFromProductionFeatures: unresolvedStats.length + gameStats.filter((row) => !row.event_id || !completedEventIds.has(String(row.event_id))).length,
