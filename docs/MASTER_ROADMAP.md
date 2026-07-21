@@ -10,11 +10,11 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ### MLB Automatic Player Discovery V1
 
-Status: Implemented locally. Certification: `MLB_AUTO_PLAYER_DISCOVERY_PASS`. Production deployment and smoke validation are required before starting the current-season backfill orchestrator.
+Status: Production certified. Certification: `MLB_AUTO_PLAYER_DISCOVERY_PASS`.
 
 Evidence: `src/services/sportsdataio-mlb-historical-import-executor.service.ts`, `src/services/mlb-unresolved-player-identity.service.ts`, `src/app/api/mlb/players/unresolved-identities/route.ts`, `src/app/api/operations/validation/route.ts` and `docs/mlb-auto-player-discovery.md`.
 
-Note: SportsDataIO MLB player-stat imports now create or reuse provisional unresolved identities through existing `provider_entity_mappings` with `entity_type='unresolved_player'`, keeping trusted canonical mappings isolated under `entity_type='player'`. The workflow preserves provider player ID, provider name, team ID, source date, source stat ID and review status, marks records non-production/review-required, and never assigns a trusted `sport_players.id` from fuzzy name matching. The stored-data reconciliation route defaults to dry-run and writes only provisional identity rows or exact trusted identity links when protected and confirmed. Build passed with 0 provider calls.
+Note: SportsDataIO MLB player-stat imports now create or reuse provisional unresolved identities through existing `provider_entity_mappings` with `entity_type='unresolved_player'`, keeping trusted canonical mappings isolated under `entity_type='player'`. The workflow preserves provider player ID, provider name, team ID, source date, source stat ID and review status, marks records non-production/review-required, and never assigns a trusted `sport_players.id` from fuzzy name matching. Production smoke on commit `7f4969976785f3e5d9a2ad9f39a0b9b067d65672` passed Operations Validation with unresolved-identity fixtures 16/16, providerCallsMade 0 and remoteMutationsMade 0. Protected stored-data reconciliation created/reused provisional records including provider player `10003762` and applied exact existing mappings only; budget remained 8 calls today.
 
 ### SportsDataIO PlayerGameStatsByDate Endpoint Optimization V1
 

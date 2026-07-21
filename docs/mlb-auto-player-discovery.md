@@ -4,6 +4,14 @@ Certification: `MLB_AUTO_PLAYER_DISCOVERY_PASS`
 
 Date: 2026-07-21
 
+## Production Evidence
+
+- Commit: `7f4969976785f3e5d9a2ad9f39a0b9b067d65672`
+- `/api/system/version`: production served the commit with providerCallsMade 0.
+- `/api/operations/validation`: success true, unresolved identity fixture checks 16/16, providerCallsMade 0, remoteMutationsMade 0.
+- `/api/mlb/players/unresolved-identities?season=2026`: dry-run reports providerCallsMade 0.
+- Provider budget after smoke: callsMadeToday 8, callsMadeLastHour 0, hourlyRemaining 12, hardRemaining 1492.
+
 ## Summary
 
 SportsDataIO MLB player-stat imports now preserve unresolved provider player identities as explicit reviewable provisional records without assigning a trusted canonical `sport_players.id`.
