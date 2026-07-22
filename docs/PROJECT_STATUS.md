@@ -1,6 +1,17 @@
 # Project Status
 
-Last updated: 2026-07-22 18:10:00Z
+Last updated: 2026-07-22 21:55:00Z
+
+## 2026-07-22 Retrosheet Production Connection Recovery And Controlled 2025 Import
+
+- Certified the runtime Supabase administrative connection against production host `ynuocvexviorgdjrfthw.supabase.co` using `NEXT_PUBLIC_SUPABASE_URL` plus `SUPABASE_SERVICE_ROLE_KEY` only; `.env.local` is loaded by Next and by local diagnostics explicitly, while standalone Node does not load it automatically.
+- Root cause of the earlier all-table 404 probe was an unsafe probe context rather than missing production tables: the certified admin probe reached the verified project, returned `sports_sync_jobs=489` and `sport_events=4974` at gate time, and confirmed all 11 Retrosheet historical tables were visible.
+- Added protected `POST /api/mlb/historical-intelligence/retrosheet/import` and server-only `retrosheet_2025_controlled_import_v1` persistence service for dry-run/import/validate operations. The route requires `CRON_SECRET`, reuses `supabaseAdmin`, writes only historical Retrosheet tables, performs deterministic upserts, and reports provider calls 0.
+- Controlled dry-run matched the reference inventory exactly: 61 source files, 399,497 raw event records, 2,430 canonical games, 76,135 lineups, 4,860 historical starters, 27,535 substitutions, 20,870 pitcher appearances, 189,311 batter appearances, 216,845 plays, 2,332 valid games, 98 valid-with-warning games and 0 quarantined games.
+- First import completed with historical counts: `historical_source_registry=61`, `historical_import_registry=1`, `historical_raw_records=399497`, `historical_import_checkpoints=30`, `historical_identity_foundation=3930`, `historical_baseball_games=2430`, `historical_baseball_lineups=76135`, `historical_baseball_substitutions=27535`, `historical_baseball_plays=216845`, `historical_baseball_pitcher_appearances=20870`, `historical_baseball_batter_appearances=189311`.
+- Second identical import was idempotent for normalized/raw/source/checkpoint rows; final counts remained unchanged except `historical_import_registry=2`. The second request hit a client header timeout after deterministic writes; a guarded historical-only finalize script first verified all expected counts, then marked that import registry row completed.
+- Production isolation validation found no Retrosheet leakage into `prediction_history` by Retrosheet game id, feature snapshot key or settlement source, 0 current production-eligible MLB prediction rows from this flow, 0 `historical_baseball_games.pregame_eligible`, 0 `training_eligible` and 0 non-historical-only games. `sport_events`, `sports_teams` and `sport_players` counts stayed stable. `sports_sync_jobs` later increased from 489 to 492 due to separate `sportsdataio_mlb_prospective_preview_v1` jobs at 21:30Z, not the Retrosheet importer.
+- Certifications achieved: `RETROSHEET_PRODUCTION_CONNECTION_PASS`, `RETROSHEET_MIGRATIONS_PASS`, `RETROSHEET_2025_CONTROLLED_IMPORT_PASS`, `RETROSHEET_IMPORT_IDEMPOTENCY_PASS`, `RETROSHEET_IMPORT_RESUME_PASS`, `RETROSHEET_PRODUCTION_ISOLATION_PASS`, `RETROSHEET_DATA_QUALITY_PASS`, `RETROSHEET_DATABASE_FOUNDATION_PASS`. Phase 1.5 is ready for explicit approval only; it was not started.
 
 ## 2026-07-22 MLB Historical Intelligence Phase 1B - Baseball Game Reconstruction Engine
 

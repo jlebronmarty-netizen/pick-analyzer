@@ -8,9 +8,17 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Retrosheet Production Connection Recovery And Controlled 2025 Import
+
+Status: Production historical import certified complete. Certifications: `RETROSHEET_PRODUCTION_CONNECTION_PASS`, `RETROSHEET_MIGRATIONS_PASS`, `RETROSHEET_2025_CONTROLLED_IMPORT_PASS`, `RETROSHEET_IMPORT_IDEMPOTENCY_PASS`, `RETROSHEET_IMPORT_RESUME_PASS`, `RETROSHEET_PRODUCTION_ISOLATION_PASS`, `RETROSHEET_DATA_QUALITY_PASS`, `RETROSHEET_DATABASE_FOUNDATION_PASS`.
+
+Evidence: `src/services/retrosheet-controlled-import.service.ts`, protected `/api/mlb/historical-intelligence/retrosheet/import`, Retrosheet diagnostics services, `historical_*` production table counts, local sanitized connection/isolation probes and `docs/PROJECT_STATUS.md`.
+
+Note: The production admin connection was certified against `ynuocvexviorgdjrfthw.supabase.co` with service-role credentials before any import writes. The 2025 Retrosheet import persisted only historical tables and remained isolated from live performance, Current Board, Official Picks, Learning Brain and market-pipeline paths. First and second imports produced stable deterministic counts: 399,497 raw records, 2,430 games, 76,135 lineups, 27,535 substitutions, 216,845 plays, 20,870 pitcher appearances and 189,311 batter appearances. Phase 1.5 requires explicit approval and should not begin automatically.
+
 ### MLB Historical Intelligence Phase 1B - Baseball Game Reconstruction Engine
 
-Status: Implemented locally; production code deployed after build, while persistence migration/application and import writes require explicit future approval.
+Status: Implemented and used by the certified Retrosheet controlled import.
 
 Evidence: `src/services/retrosheet-game-reconstruction.service.ts`, `/api/mlb/historical-intelligence/retrosheet/game-engine`, `/admin/historical-diagnostics`, additive migration `202607220003_retrosheet_game_engine_v1.sql`, Operations Validation and game-engine documentation.
 

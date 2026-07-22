@@ -57,7 +57,7 @@ type BaseState = {
   third: string | null
 }
 
-type LineupEntry = {
+export type RetrosheetLineupEntry = {
   playerId: string
   canonicalPlayerId: string
   playerName: string
@@ -72,7 +72,7 @@ type LineupEntry = {
   exitHalf: Half | null
 }
 
-type CanonicalPlay = {
+export type RetrosheetCanonicalPlay = {
   id: string
   gameId: string
   inning: number
@@ -105,7 +105,7 @@ type CanonicalPlay = {
   }
 }
 
-type PitcherAppearance = {
+export type RetrosheetPitcherAppearance = {
   pitcherId: string
   canonicalPitcherId: string
   pitcherName: string | null
@@ -127,7 +127,7 @@ type PitcherAppearance = {
   sourceLine: number
 }
 
-type BatterAppearance = {
+export type RetrosheetBatterAppearance = {
   id: string
   batterId: string
   canonicalBatterId: string
@@ -151,7 +151,7 @@ type BatterAppearance = {
   sourceLine: number
 }
 
-type CanonicalGame = {
+export type RetrosheetCanonicalGame = {
   id: string
   canonicalGameId: string
   sourceGameId: string
@@ -189,7 +189,7 @@ type CanonicalGame = {
     trainingEligible: false
     pregameEligible: false
   }
-  lineups: { away: LineupEntry[]; home: LineupEntry[] }
+  lineups: { away: RetrosheetLineupEntry[]; home: RetrosheetLineupEntry[] }
   starters: Array<{
     pitcherId: string
     canonicalPitcherId: string
@@ -214,9 +214,9 @@ type CanonicalGame = {
     entryHalf: Half
     sourceLine: number
   }>
-  plays: CanonicalPlay[]
-  pitcherAppearances: PitcherAppearance[]
-  batterAppearances: BatterAppearance[]
+  plays: RetrosheetCanonicalPlay[]
+  pitcherAppearances: RetrosheetPitcherAppearance[]
+  batterAppearances: RetrosheetBatterAppearance[]
   validation: {
     status: ValidationStatus
     warnings: string[]
@@ -239,15 +239,15 @@ type GameBuilder = {
   lastLine: number
   rawLines: string[]
   info: Record<string, string>
-  lineups: { away: LineupEntry[]; home: LineupEntry[] }
-  currentLineup: { away: Map<number, LineupEntry>; home: Map<number, LineupEntry> }
+  lineups: { away: RetrosheetLineupEntry[]; home: RetrosheetLineupEntry[] }
+  currentLineup: { away: Map<number, RetrosheetLineupEntry>; home: Map<number, RetrosheetLineupEntry> }
   currentPitcher: { away: string | null; home: string | null }
   playerNames: Map<string, string>
-  starters: CanonicalGame['starters']
-  substitutions: CanonicalGame['substitutions']
-  plays: CanonicalPlay[]
-  pitcherAppearances: Map<string, PitcherAppearance>
-  batterAppearances: BatterAppearance[]
+  starters: RetrosheetCanonicalGame['starters']
+  substitutions: RetrosheetCanonicalGame['substitutions']
+  plays: RetrosheetCanonicalPlay[]
+  pitcherAppearances: Map<string, RetrosheetPitcherAppearance>
+  batterAppearances: RetrosheetBatterAppearance[]
   score: { away: number; home: number }
   bases: BaseState
   outs: number
@@ -407,7 +407,7 @@ function ensurePitcherAppearance(builder: GameBuilder, pitcherId: string, teamSi
   const key = `${teamSide}:${pitcherId}`
   const existing = builder.pitcherAppearances.get(key)
   if (existing) return existing
-  const appearance: PitcherAppearance = {
+  const appearance: RetrosheetPitcherAppearance = {
     pitcherId,
     canonicalPitcherId: canonicalPlayerId(pitcherId),
     pitcherName: builder.playerNames.get(pitcherId) ?? null,
@@ -479,7 +479,7 @@ function applyLineupRecord(builder: GameBuilder, record: RetrosheetParsedRecord,
     previous.exitHalf = builder.half
   }
 
-  const entry: LineupEntry = {
+  const entry: RetrosheetLineupEntry = {
     playerId,
     canonicalPlayerId: canonicalPlayerId(playerId),
     playerName,
@@ -564,7 +564,7 @@ function applyPlayRecord(builder: GameBuilder, record: RetrosheetParsedRecord) {
     builder.outs = 3
   }
 
-  const play: CanonicalPlay = {
+  const play: RetrosheetCanonicalPlay = {
     id: `${builder.gameId}:play:${record.lineNumber}`,
     gameId: builder.gameId,
     inning,
@@ -638,7 +638,7 @@ function applyPlayRecord(builder: GameBuilder, record: RetrosheetParsedRecord) {
   }
 }
 
-function finishGame(builder: GameBuilder): CanonicalGame {
+function finishGame(builder: GameBuilder): RetrosheetCanonicalGame {
   const checksum = createHash('sha256').update(builder.rawLines.join('\n')).digest('hex')
   applyDecision(builder, builder.info.wp ?? null, 'win')
   applyDecision(builder, builder.info.lp ?? null, 'loss')
@@ -747,9 +747,9 @@ function applyRecord(builder: GameBuilder, record: RetrosheetParsedRecord) {
   }
 }
 
-async function reconstructEventFile(filePath: string) {
+export async function reconstructRetrosheetEventFile(filePath: string) {
   const filename = path.basename(filePath)
-  const games: CanonicalGame[] = []
+  const games: RetrosheetCanonicalGame[] = []
   let builder: GameBuilder | null = null
   let currentGameReference: string | null = null
   let lineNumber = 0
@@ -770,7 +770,7 @@ async function reconstructEventFile(filePath: string) {
   return games
 }
 
-function summarizeGame(game: CanonicalGame) {
+function summarizeGame(game: RetrosheetCanonicalGame) {
   return {
     id: game.id,
     canonicalGameId: game.canonicalGameId,
@@ -800,7 +800,7 @@ function summarizeGame(game: CanonicalGame) {
   }
 }
 
-async function eventFiles() {
+export async function listRetrosheetEventFiles() {
   const entries = await readdir(RAW_DIR, { withFileTypes: true })
   return entries
     .filter((entry) => entry.isFile() && /\.(EVA|EVN)$/i.test(entry.name))
@@ -812,7 +812,7 @@ export async function getRetrosheetGameEngineDiagnostics({ gameId, limit = 50 }:
   const startedAt = Date.now()
   let files: string[]
   try {
-    files = await eventFiles()
+    files = await listRetrosheetEventFiles()
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown Retrosheet source directory error'
     return {
@@ -838,11 +838,11 @@ export async function getRetrosheetGameEngineDiagnostics({ gameId, limit = 50 }:
   }
 
   const summaries = []
-  let selectedGame: CanonicalGame | null = null
+  let selectedGame: RetrosheetCanonicalGame | null = null
   const aggregate = emptyCoverage()
 
   for (const file of files) {
-    const reconstructed = await reconstructEventFile(file)
+    const reconstructed = await reconstructRetrosheetEventFile(file)
     for (const game of reconstructed) {
       aggregate.games += 1
       aggregate.valid += game.validation.status === 'VALID' ? 1 : 0
