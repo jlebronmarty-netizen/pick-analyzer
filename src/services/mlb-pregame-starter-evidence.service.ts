@@ -13,7 +13,7 @@ const PROVIDER = 'sportsdataio'
 const SOURCE_JOB_TYPE = 'sportsdataio_mlb_games_by_date_verification_v1'
 const MODE = 'mlb_pregame_starter_evidence_v1'
 const FRESH_PROBABLE_HOURS = 36
-const FRESH_CONFIRMED_HOURS = 12
+const FRESH_CONFIRMED_HOURS = 36
 
 type Row = Record<string, unknown>
 

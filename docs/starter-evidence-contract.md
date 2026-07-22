@@ -37,7 +37,7 @@ Canonical MLB starter evidence is event-scoped, team-scoped, player-scoped and t
 
 ## Freshness
 
-- Confirmed starter evidence: fresh for 12 hours before game start
+- Confirmed starter evidence: fresh for 36 hours before game start
 - Probable starter evidence: fresh for 36 hours before game start
 - Source timestamps after event start are ineligible
 - Stale evidence is retained but blocked from live projection generation
