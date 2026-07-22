@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-07-22 17:40:00Z
+Last updated: 2026-07-22 18:10:00Z
+
+## 2026-07-22 MLB Historical Intelligence Phase 1B - Baseball Game Reconstruction Engine
+
+- Added a deterministic Retrosheet Baseball Game Engine that reconstructs canonical game objects from Phase 1A raw event records without provider calls or production mutations.
+- Reconstructed game objects include identity, date, teams, venue, day/night, DH, attendance, weather, umpires, decisions, final score, duration, innings, source lineage, lineups, substitutions, plays, starters and pitcher/batter appearance foundations.
+- Added read-only `/api/mlb/historical-intelligence/retrosheet/game-engine` and internal `/admin/historical-diagnostics` for health, coverage, games, game details, game state, lineups, starters, pitchers, batters, validation and diagnostics.
+- Added additive persistence migration `202607220003_retrosheet_game_engine_v1.sql` for future game, lineup, substitution, play, pitcher appearance and batter appearance writes; migration was not applied and no import writes were executed.
+- Local 2025 reconstruction parsed 30 event files into 2,430 games, 216,845 plays, 76,135 lineup entries, 4,860 historical starters, 27,535 substitutions, 20,870 pitcher appearances and 189,311 batter appearances with 0 quarantined games, 99 warnings and 0 errors.
 
 ## 2026-07-22 MLB Historical Intelligence Phase 1A - Historical Data Lake Core
 

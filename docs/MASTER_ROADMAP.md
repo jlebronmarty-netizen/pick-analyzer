@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### MLB Historical Intelligence Phase 1B - Baseball Game Reconstruction Engine
+
+Status: Implemented locally; production code deployed after build, while persistence migration/application and import writes require explicit future approval.
+
+Evidence: `src/services/retrosheet-game-reconstruction.service.ts`, `/api/mlb/historical-intelligence/retrosheet/game-engine`, `/admin/historical-diagnostics`, additive migration `202607220003_retrosheet_game_engine_v1.sql`, Operations Validation and game-engine documentation.
+
+Note: This phase turns Retrosheet event records into canonical baseball game objects with lineups, substitutions, game state, plays, historical starters, pitcher appearances, batter appearances, validation and source lineage. It intentionally does not create historical features, Learning Brain inputs, predictions, backtests, player props, bullpen/matchup intelligence or Statcast integration.
+
 ### MLB Historical Intelligence Phase 1A - Historical Data Lake Core
 
 Status: Implemented locally; production migration/application and real import writes require explicit future approval.
