@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-22 - Separate Model Intelligence From Market Recommendations
+
+Context: User-facing views appeared empty when market odds were unavailable, while stored model probabilities and pitcher-outs shadows existed. Most Likely returned a server error in the empty Current Board case, and Dashboard Today showed no useful model intelligence despite 15 MLB games.
+
+Decision: Add a stored-data-only model intelligence service and wire it into Most Likely, Dashboard Today and informational parlays. Keep Best Value market-odds gated and keep Official Picks controlled by existing policy. Add an additive projection-history schema alignment migration for optional columns expected by richer read paths.
+
+Consequences: Model-only probabilities, probable moneyline and pitcher-outs shadows can be visible as `MODEL ONLY`, `INFORMATIONAL`, `SHADOW`, `NO MARKET` and `NOT AN OFFICIAL PICK`. No EV, Kelly, stake or Official Pick is produced from model-only rows.
+
+Affected modules: Model-only intelligence service, Most Likely, Dashboard Today, parlays, Operations Validation, projection-history migration and docs.
+
 ## 2026-07-21 - Block Missing Canonical Event Recovery Without Exact Source Evidence
 
 Context: Universal Event Identity V1 classified 342 stale pending rows as `EVENT_NOT_IMPORTED`. The next step was to determine whether canonical events could be recovered, imported and used for settlement.

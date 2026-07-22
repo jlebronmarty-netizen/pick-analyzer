@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-07-21 16:15:00Z
+Last updated: 2026-07-22 13:55:00Z
+
+## 2026-07-22 End-to-End Prediction Lifecycle Recovery V1
+
+- Added stored-data-only Model Intelligence V1 to restore Most Likely, probable moneyline, informational parlay and pitcher-outs shadow visibility without changing Official Pick, EV, Kelly or stake policy.
+- Added additive projection-history schema alignment migration `202607220001_universal_projection_history_schema_alignment.sql` for nullable optional columns expected by richer projection read/settlement paths.
+- Dashboard Today now exposes model intelligence, pitcher shadows and informational parlays separately from Best Value and Official Picks, and shows market refresh as the next relevant action when today has games waiting for odds.
+- Production audit found recent MLB pending rows are non-production/test-like preview scope or legacy/post-start blocked, with no deterministic production-scoped settlement writes currently eligible.
+- New docs: end-to-end pipeline, refresh contract, prediction family/deduplication, settlement recovery, performance scope/timeline, model-only ranking/parlay and User Mode intelligence.
 
 ## Current Architecture
 

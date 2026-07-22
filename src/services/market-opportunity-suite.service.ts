@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getCurrentBoardCached, mapLegacyBoardMode, type CurrentBoardCandidate } from '@/services/current-board.service'
 import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
+import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.service'
 
 type PredictionRow = {
   id: string
@@ -756,6 +757,7 @@ export async function getMostLikelyOpportunities({
   const topPick = topPickFrom(probabilityRankedRows)
   const mostLikelyMoneyline = mostLikelyMoneylineFrom(probabilityRankedRows)
   const mostLikelyMoneylineParlay = parlayFrom(probabilityRankedRows)
+  const modelOnly = rows.length === 0 ? await getModelOnlyIntelligence() : null
 
   const shownMarkets = new Set(rows.map((row) => row.marketLabel))
   const unavailableMarkets = [
@@ -847,11 +849,44 @@ export async function getMostLikelyOpportunities({
       warning: 'High probability does not always mean good betting value.',
       informationalFallbackUsed: fallbackUsed,
       displayMode: fallbackUsed ? 'informational_rankings_after_current_board_empty' : 'current_board_rankings',
+      modelOnlyFallbackUsed: rows.length === 0 && Boolean(modelOnly),
     },
-    topPick,
-    highestProbabilitySupportedOutcome: topPick.candidate,
-    mostLikelyMoneyline,
-    mostLikelyMoneylineParlay,
+    topPick: rows.length ? topPick : {
+      type: modelOnly?.categories.allModelOutcomes[0] ? 'model_only_outcome' : modelOnly?.categories.allPitcherShadows[0] ? 'pitcher_outs_shadow' : 'none',
+      candidate: modelOnly?.categories.allModelOutcomes[0] ?? modelOnly?.categories.allPitcherShadows[0] ?? null,
+      disclaimer: modelOnly?.categories.allModelOutcomes[0] || modelOnly?.categories.allPitcherShadows[0]
+        ? 'This is model-only or shadow intelligence. It is not an Official Pick and has no EV, Kelly or stake.'
+        : 'No valid current supported model-only outcome is available.',
+    },
+    highestProbabilitySupportedOutcome: rows.length ? topPick.candidate : modelOnly?.categories.allModelOutcomes[0] ?? null,
+    mostLikelyMoneyline: rows.length ? mostLikelyMoneyline : {
+      candidate: modelOnly?.categories.highestMoneylineProbability[0] ?? null,
+      probability: modelOnly?.categories.highestMoneylineProbability[0]?.modelProbability ?? null,
+      fairOdds: null,
+      marketOdds: modelOnly?.categories.highestMoneylineProbability[0]?.sportsbookOdds ?? null,
+      ev: null,
+      confidence: modelOnly?.categories.highestMoneylineProbability[0]?.confidence ?? null,
+      officialStatus: 'model_only_not_official',
+      blockers: modelOnly?.categories.highestMoneylineProbability[0] ? ['NO_OFFICIAL_PICK', 'EV_NOT_AVAILABLE_ON_MODEL_ONLY_SURFACE'] : ['NO_VALID_CURRENT_MONEYLINE'],
+      explanation: modelOnly?.categories.highestMoneylineProbability[0]
+        ? 'Highest current pregame model moneyline probability from stored prediction history. Odds are not required for this informational surface.'
+        : 'No valid current moneyline candidate is available.',
+    },
+    mostLikelyMoneylineParlay: rows.length ? mostLikelyMoneylineParlay : modelOnly?.informationalParlays.twoLegHighestProbability ?? {
+      legs: [],
+      rawJointProbability: null,
+      adjustedJointProbability: null,
+      impliedProbability: null,
+      combinedOdds: null,
+      ev: null,
+      confidence: null,
+      independenceAssumed: true,
+      correlationAdjustment: 'not_enough_eligible_legs',
+      officialStatus: 'informational_only',
+      blockers: ['NEEDS_TWO_DISTINCT_VALID_MONEYLINES'],
+      disclaimer: 'No informational two-leg moneyline parlay is available.',
+    },
+    modelOnlyIntelligence: modelOnly,
     probabilityEducation: {
       headline: 'Higher probability does not necessarily mean a bet is profitable at the available price.',
       labels: [

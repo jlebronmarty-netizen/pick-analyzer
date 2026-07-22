@@ -16,6 +16,7 @@ import { getProviderBudgetStatus } from '@/services/provider-budget.service'
 import { eligibilityFromLifecycle, resolveMlbGameLifecycle } from '@/services/mlb-game-lifecycle.service'
 import { validateMlbOperatingDateResolutionFixtures } from '@/services/mlb-operating-date-resolution.service'
 import { formatInTimeZone, localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
+import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -190,6 +191,9 @@ export type DashboardTodayContract = {
     todayStory: DashboardTodaySection<string[]>
     mostLikely: DashboardTodaySection<unknown[]>
     bestValue: DashboardTodaySection<unknown[]>
+    modelIntelligence: DashboardTodaySection<unknown>
+    pitcherShadows: DashboardTodaySection<unknown[]>
+    informationalParlays: DashboardTodaySection<unknown>
     aiBetFinder: DashboardTodaySection<unknown[]>
     topOpportunity: DashboardTodaySection<unknown | null>
     operations: DashboardTodaySection<{
@@ -509,12 +513,13 @@ export async function getDashboardToday({
     hour12: false,
   }).format(now))
 
-  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult] = await Promise.all([
+  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, modelOnlyResult] = await Promise.all([
     timed('current_events', () => loadEventsForDate(operatingDate), 4200),
     timed('current_board', () => getCurrentBoardCached(SPORT_KEY, 'CURRENT', 100, false, operatingDate), 5000),
     timed('next_slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }), 3500),
     timed('operating_day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: operatingDate }), 4000),
     timed('provider_budget', () => getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY }), 1600),
+    timed('model_only_intelligence', () => getModelOnlyIntelligence({ date: operatingDate }), 5000),
   ])
   const currentEventsTimedOut = currentEventsResult.error?.toLowerCase().includes('exceeded') === true
   const currentEventsFallbackResult = !currentEventsResult.ok && !currentEventsTimedOut
@@ -608,6 +613,28 @@ export async function getDashboardToday({
     nextEligibleRefresh: null,
   } as unknown as Awaited<ReturnType<typeof getProviderBudgetStatus>>
   const budget = values(budgetResult, budgetFallback)
+  const modelOnly = values(modelOnlyResult, {
+    success: true,
+    mode: 'model_only_intelligence_v1',
+    generatedAt,
+    selectedDate: operatingDate,
+    timezone: TIMEZONE,
+    slate: { events: 0, futurePregameEvents: 0 },
+    summary: { modelOutcomes: 0, moneyline: 0, totals: 0, runLine: 0, pitcherShadowProjections: 0, marketAvailable: 0, noMarket: 0 },
+    categories: {
+      highestMoneylineProbability: [],
+      highestTotalOutcomeProbability: [],
+      highestRunLineProbability: [],
+      highestPitcherOutsShadowProbability: [],
+      allModelOutcomes: [],
+      allPitcherShadows: [],
+    },
+    informationalParlays: { twoLegHighestProbability: null, threeLegHighestProbability: null, blocker: 'Model-only intelligence temporarily unavailable.' },
+    userModeSummary: { pitcherIntelligence: '0 shadow projections ready', probableStarters: 0, marketAvailability: 'No verified pitcher prop odds' },
+    labels: ['MODEL ONLY', 'INFORMATIONAL', 'NOT AN OFFICIAL PICK'],
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  } as Awaited<ReturnType<typeof getModelOnlyIntelligence>>)
   const eventLoad = currentEventsResult.ok
     ? values(currentEventsResult, {
       rows: [] as DashboardEventRow[],
@@ -681,6 +708,10 @@ export async function getDashboardToday({
   const operatingStatus = String(operatingDay.status ?? 'planned')
   const nextAction = !currentEventsResult.ok && !dashboardFallbackUsed
     ? 'Refresh stored slate status'
+    : gamesWaitingForOdds > 0 && currentGames > 0
+      ? 'Refresh market prices'
+    : predictionCandidates === 0 && modelOnly.summary.pitcherShadowProjections > 0
+      ? 'Review model-only intelligence'
     : userActionLabel(String(operatingDay.nextRequiredAction ?? ''), {
     hour,
     nextSlateDate,
@@ -751,16 +782,18 @@ export async function getDashboardToday({
     .sort((left, right) => Number(right.expectedValue ?? 0) - Number(left.expectedValue ?? 0))
     .slice(0, 10)
   const mostLikelyData = boardMostLikelyData
+  const modelMostLikelyData = mostLikelyData.length ? mostLikelyData : modelOnly.categories.allModelOutcomes.slice(0, 10)
   const bestValueData = boardBestValueData
-  const aiBetFinderData = mostLikelyData.slice(0, 5)
-  const topOpportunity = mostLikelyData[0] ?? null
+  const aiBetFinderData = modelMostLikelyData.slice(0, 5)
+  const topOpportunity = modelMostLikelyData[0] ?? null
   const storyLines = [
     gamesWaitingForOdds > 0
       ? 'The AI is waiting for current market prices before it can finalize recommendations.'
       : officialPicks > 0
         ? `${officialPicks} Official Pick${officialPicks === 1 ? '' : 's'} passed the production policy.`
         : 'No game currently meets both confidence and value requirements for an Official Pick.',
-    mostLikelyData[0] ? 'Most Likely rankings are available from stored Current Board data.' : null,
+    modelMostLikelyData[0] ? 'Most Likely model rankings are available from stored prediction output.' : null,
+    modelOnly.summary.pitcherShadowProjections > 0 ? `${modelOnly.summary.pitcherShadowProjections} pitcher shadow projections are ready as SHADOW / NO MARKET.` : null,
     bestValueData[0] ? 'Best Value rankings are available from stored Current Board data.' : null,
     blockers.includes('market_prices_not_refreshed') ? 'Market freshness is degraded, but the Today panel remains available.' : null,
   ].filter(Boolean) as string[]
@@ -770,6 +803,7 @@ export async function getDashboardToday({
     nextSlateResult,
     operatingDayResult,
     budgetResult,
+    modelOnlyResult,
   ]
   const criticalLabels = new Set(['current_events'])
   const errors = dependencyResults
@@ -880,16 +914,34 @@ export async function getDashboardToday({
       ),
       todayStory: section(storyLines.length ? 'AVAILABLE' : 'EMPTY', storyLines, storyLines.length ? null : 'No Today story lines are available.', generatedAt),
       mostLikely: section(
-        boardResult.ok || mostLikelyData.length ? (mostLikelyData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
-        mostLikelyData,
-        boardResult.ok || mostLikelyData.length ? (mostLikelyData.length ? null : 'No Most Likely opportunities are available.') : 'Most Likely is temporarily unavailable.',
-        boardResult.ok || mostLikelyData.length ? generatedAt : null
+        boardResult.ok || modelMostLikelyData.length ? (modelMostLikelyData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
+        modelMostLikelyData,
+        boardResult.ok || modelMostLikelyData.length ? (modelMostLikelyData.length ? null : 'No Most Likely model probabilities are available for current pregame events.') : 'Most Likely is temporarily unavailable.',
+        boardResult.ok || modelMostLikelyData.length ? generatedAt : null
       ),
       bestValue: section(
         boardResult.ok ? (bestValueData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
         bestValueData,
-        boardResult.ok ? (bestValueData.length ? null : 'No positive-value opportunities with aligned fresh market data.') : 'Best Value is temporarily unavailable.',
+        boardResult.ok ? (bestValueData.length ? null : 'Best Value requires current market odds and positive EV. Model-only probabilities remain visible separately.') : 'Best Value is temporarily unavailable.',
         boardResult.ok ? generatedAt : null
+      ),
+      modelIntelligence: section(
+        modelOnly.summary.modelOutcomes || modelOnly.summary.pitcherShadowProjections ? 'AVAILABLE' : 'EMPTY',
+        modelOnly,
+        modelOnly.summary.modelOutcomes || modelOnly.summary.pitcherShadowProjections ? null : 'No current model-only intelligence is available for pregame events.',
+        modelOnly.generatedAt
+      ),
+      pitcherShadows: section(
+        modelOnly.categories.allPitcherShadows.length ? 'AVAILABLE' : 'EMPTY',
+        modelOnly.categories.allPitcherShadows,
+        modelOnly.categories.allPitcherShadows.length ? null : 'No pitcher-outs shadow projections are currently stored for pregame events.',
+        modelOnly.generatedAt
+      ),
+      informationalParlays: section(
+        modelOnly.informationalParlays.twoLegHighestProbability || modelOnly.informationalParlays.threeLegHighestProbability ? 'AVAILABLE' : 'EMPTY',
+        modelOnly.informationalParlays,
+        modelOnly.informationalParlays.blocker,
+        modelOnly.generatedAt
       ),
       aiBetFinder: section(
         boardResult.ok || aiBetFinderData.length ? (aiBetFinderData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
