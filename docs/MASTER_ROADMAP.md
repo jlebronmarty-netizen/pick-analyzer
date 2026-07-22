@@ -12,9 +12,9 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 Status: Locally implemented; production deployment and live one-call certification pending.
 
-Evidence: `src/services/sportsdataio-mlb-prospective-preview.service.ts`, `src/services/operating-day.service.ts`, `src/services/mlb-market-pipeline-diagnostics.service.ts`, `/api/mlb/market-pipeline/diagnostics`, Operations Validation and local production build.
+Evidence: `src/services/sportsdataio-mlb-prospective-preview.service.ts`, `src/services/operating-day.service.ts`, `src/services/current-board.service.ts`, `src/services/mlb-market-pipeline-diagnostics.service.ts`, `/api/mlb/market-pipeline/diagnostics`, Operations Validation and local production build.
 
-Note: The repair restores the MLB odds -> snapshots -> predictions path when a valid stored slate lacks prospective-preview metadata, while keeping final refresh pregame-gated and capped to one SportsDataIO odds call. Real operating-day odds refresh actions now check provider budget accounting and action locks before external execution. No recommendation policy, Official Pick thresholds, unsupported-market activation, settlement or prediction-promotion behavior was loosened.
+Note: The repair restores the MLB odds -> snapshots -> predictions path when a valid stored slate lacks prospective-preview metadata, while keeping final refresh pregame-gated and capped to one SportsDataIO odds call. Current Board slate scoping now uses the Puerto Rico MLB operating date so late-night same-slate games remain visible. Real operating-day odds refresh actions now check provider budget accounting and action locks before external execution. No recommendation policy, Official Pick thresholds, unsupported-market activation, settlement or prediction-promotion behavior was loosened.
 
 ### End-to-End Prediction Lifecycle Recovery V1
 

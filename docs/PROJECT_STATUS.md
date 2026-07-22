@@ -7,6 +7,7 @@ Last updated: 2026-07-22 15:35:00Z
 - Repaired the MLB one-call final odds refresh path so stored future scheduled slate events can be used when prior schedule discovery did not stamp `metadata.prospective_preview=true`.
 - Added a fail-closed SportsDataIO budget check and in-process provider action lock around real operating-day MLB odds refresh actions before external provider execution.
 - Added read-only `/api/mlb/market-pipeline/diagnostics` for slate events, odds snapshots, prediction rows, Current Board visibility, exclusion counts and zero-call validation.
+- Aligned Current Board current-slate filtering to the Puerto Rico MLB operating date instead of a raw UTC date slice, preserving late-night same-slate games.
 - Local production build passes. No betting policy, Official Pick thresholds, EV/Kelly rules, unsupported markets, settlement logic or fabricated odds were changed.
 
 ## 2026-07-22 End-to-End Prediction Lifecycle Recovery V1

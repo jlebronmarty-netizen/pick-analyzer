@@ -1037,8 +1037,11 @@ export async function getCurrentBoard({
           .filter((value): value is string => Boolean(value))
           .sort()[0] ?? null
       : null
-  const slateScoped = earliestSlate
-    ? included.filter((item) => (canonicalEventStart(item.event, item.row.commence_time) ?? '').slice(0, 10) === earliestSlate.slice(0, 10))
+  const earliestOperatingDate = localDateInTimezone(earliestSlate, 'America/Puerto_Rico')
+  const slateScoped = earliestOperatingDate
+    ? included.filter((item) =>
+        localDateInTimezone(canonicalEventStart(item.event, item.row.commence_time), 'America/Puerto_Rico') === earliestOperatingDate
+      )
     : included
 
   const latestByKey = new Map<string, { item: (typeof included)[number]; candidate: CurrentBoardCandidate }>()
