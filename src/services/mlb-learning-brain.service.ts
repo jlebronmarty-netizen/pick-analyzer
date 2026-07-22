@@ -73,6 +73,20 @@ type ProjectionHistoryRow = {
   settled_at: string | null
 }
 
+type StarterEvidenceRow = {
+  id: string
+  event_id: string | null
+  team_id: string | null
+  player_id: string | null
+  player_name: string | null
+  lineup_status: string | null
+  confirmation_level: string | null
+  source_timestamp: string | null
+  provider_ids: Row | null
+  metadata: Row | null
+  updated_at: string | null
+}
+
 type CandidateProjection = {
   id: string
   eventId: string
@@ -228,7 +242,7 @@ async function safePage<T>(table: string, select: string, configure: (query: any
 }
 
 async function loadRows(season: string) {
-  const [stats, events, projections] = await Promise.all([
+  const [stats, events, projections, starterEvidenceRows] = await Promise.all([
     safePage<PlayerStatRow>(
       'sport_player_stats',
       'id, season, stat_type, event_id, team_id, player_id, player_name, provider, games, starts, starter, source_timestamp, provider_ids, stats, metadata, created_at, updated_at',
@@ -247,8 +261,14 @@ async function loadRows(season: string) {
       (q) => q.eq('sport_key', SPORT_KEY).eq('projection_key', 'pitcher_outs_recorded'),
       'generated_at'
     ),
+    safePage<StarterEvidenceRow>(
+      'sport_lineups',
+      'id, event_id, team_id, player_id, player_name, lineup_status, confirmation_level, source_timestamp, provider_ids, metadata, updated_at',
+      (q) => q.eq('sport_key', SPORT_KEY).eq('league_key', LEAGUE_KEY).eq('lineup_type', 'starting_lineup').eq('role', 'starting_pitcher').eq('season', season),
+      'source_timestamp'
+    ),
   ])
-  return { stats, events, projections }
+  return { stats, events, projections, starterEvidenceRows }
 }
 
 function groupBy<T>(rows: T[], getKey: (row: T) => string) {
@@ -279,7 +299,40 @@ function eventTeam(event: EventRow, teamId: string | null) {
   return { teamName: null, opponentTeamId: null, opponentTeamName: null }
 }
 
-function starterEvidence(event: EventRow, teamId: string | null) {
+function starterEvidenceFromLineups(event: EventRow, teamId: string | null, lineups: StarterEvidenceRow[]) {
+  const candidates = lineups
+    .filter((row) => row.event_id === event.id && row.team_id === teamId)
+    .sort((a, b) => Date.parse(b.source_timestamp ?? b.updated_at ?? '') - Date.parse(a.source_timestamp ?? a.updated_at ?? ''))
+  const row = candidates[0]
+  if (!row) return null
+  const metadata = asRecord(row.metadata)
+  const status = text(metadata.exactStarterStatus).toUpperCase() || text(row.lineup_status).toUpperCase()
+  const sourceTimestamp = text(row.source_timestamp)
+  const providerIds = asRecord(row.provider_ids)
+  const providerId = text(providerIds.sportsdataio)
+  const start = Date.parse(event.start_time ?? '')
+  const observed = Date.parse(sourceTimestamp)
+  const pregame = Number.isFinite(start) && Number.isFinite(observed) && observed < start
+  const eligible = metadata.eligibility === 'ELIGIBLE' && ['CONFIRMED', 'PROBABLE'].includes(status) && pregame
+  return {
+    status: status === 'CONFIRMED' ? 'CONFIRMED' : status === 'PROBABLE' ? 'PROBABLE' : 'UNKNOWN',
+    source: text(metadata.source) || 'sport_lineups',
+    sourceTimestamp: sourceTimestamp || null,
+    providerId: providerId || null,
+    playerId: row.player_id,
+    playerName: row.player_name,
+    evidenceId: row.id,
+    homeAway: text(metadata.homeAway) || null,
+    evidenceAgeMinutes: asNumber(metadata.evidenceAgeMinutes),
+    pregame,
+    eligible,
+    rejectionReason: text(metadata.rejectionReason) || null,
+  }
+}
+
+function starterEvidence(event: EventRow, teamId: string | null, lineups: StarterEvidenceRow[] = []) {
+  const stored = starterEvidenceFromLineups(event, teamId, lineups)
+  if (stored) return stored
   const metadata = asRecord(event.metadata)
   const starters = asRecord(metadata.starters ?? metadata.probableStarters ?? metadata.pitchers)
   const side = teamId === event.home_team_id ? 'home' : teamId === event.away_team_id ? 'away' : ''
@@ -291,7 +344,7 @@ function starterEvidence(event: EventRow, teamId: string | null) {
   const start = Date.parse(event.start_time ?? '')
   const observed = Date.parse(sourceTimestamp)
   const pregame = Number.isFinite(start) && Number.isFinite(observed) && observed < start
-  return { status, source: source || null, sourceTimestamp: sourceTimestamp || null, providerId: providerId || null, pregame }
+  return { status, source: source || null, sourceTimestamp: sourceTimestamp || null, providerId: providerId || null, playerId: null, playerName: null, evidenceId: null, homeAway: side || null, evidenceAgeMinutes: null, pregame, eligible: ['CONFIRMED', 'PROBABLE'].includes(status) && pregame, rejectionReason: null }
 }
 
 function currentDate() {
@@ -302,15 +355,15 @@ function dateRangeForEvent(row: PlayerStatRow, event: EventRow | undefined) {
   return (event?.start_time ?? row.source_timestamp ?? row.created_at ?? row.updated_at ?? '').slice(0, 10)
 }
 
-function makeCandidate(event: EventRow, pitcher: PlayerStatRow, history: PlayerStatRow[], generatedAt: string): CandidateProjection | null {
+function makeCandidate(event: EventRow, pitcher: PlayerStatRow, history: PlayerStatRow[], generatedAt: string, evidenceOverride?: ReturnType<typeof starterEvidence>): CandidateProjection | null {
   const validHistory = history
     .filter((row) => row.event_id !== event.id)
     .map(recordedOuts)
     .filter((item) => item.valid && item.outs !== null)
     .map((item) => Number(item.outs))
   if (validHistory.length < 5 || !pitcher.player_id) return null
-  const evidence = starterEvidence(event, pitcher.team_id)
-  if (!['CONFIRMED', 'PROBABLE'].includes(evidence.status) || !evidence.pregame) return null
+  const evidence = evidenceOverride ?? starterEvidence(event, pitcher.team_id)
+  if (!evidence || !['CONFIRMED', 'PROBABLE'].includes(evidence.status) || !evidence.pregame || evidence.eligible === false) return null
   const avg = mean(validHistory) ?? 15
   const med = median(validHistory) ?? avg
   const sd = stddev(validHistory) ?? 3
@@ -354,6 +407,7 @@ function makeCandidate(event: EventRow, pitcher: PlayerStatRow, history: PlayerS
       standardDeviation: round(sd),
       thresholdRates: probs,
       starterEvidence: evidence,
+      starterEvidenceId: evidence.evidenceId,
       featureVersion: FEATURE_VERSION,
       noMarket: true,
     },
@@ -458,6 +512,7 @@ async function buildContext(season: string) {
   const rows = await loadRows(season)
   const stats = rows.stats.rows
   const events = rows.events.rows
+  const starterEvidenceRows = rows.starterEvidenceRows.rows
   const eventById = new Map(events.map((event) => [event.id, event]))
   const pitcherRows = stats.filter(isPitcherRow)
   const outcomeRows = pitcherRows.filter((row) => row.stat_type === 'game')
@@ -488,12 +543,18 @@ async function buildContext(season: string) {
     return Number.isFinite(parsed) && parsed > Date.now()
   })
   const candidates = upcomingEvents.flatMap((event) => {
-    const eventPitchers = stats.filter((row) => row.stat_type === 'season' && row.team_id && [event.home_team_id, event.away_team_id].includes(row.team_id) && isPitcherRow(row))
-    return eventPitchers
-      .map((pitcher) => makeCandidate(event, pitcher, (byPitcher.get(pitcher.player_id ?? '') ?? []).map((item) => item.row), generatedAt))
+    const starters = [starterEvidence(event, event.away_team_id, starterEvidenceRows), starterEvidence(event, event.home_team_id, starterEvidenceRows)]
+      .filter((item): item is NonNullable<typeof item> => Boolean(item?.playerId))
+    return starters
+      .map((evidence) => {
+        const pitcher =
+          stats.find((row) => row.stat_type === 'season' && row.player_id === evidence.playerId && isPitcherRow(row)) ??
+          stats.find((row) => row.player_id === evidence.playerId && isPitcherRow(row))
+        return pitcher ? makeCandidate(event, pitcher, (byPitcher.get(pitcher.player_id ?? '') ?? []).map((item) => item.row), generatedAt, evidence) : null
+      })
       .filter((item): item is CandidateProjection => item !== null)
   })
-  return { rows, stats, events, pitcherRows, outcomeRows, classified, validStarterOutcomes, byPitcher, candidates, projectionMetrics: metrics(rows.projections.rows) }
+  return { rows, stats, events, starterEvidenceRows, pitcherRows, outcomeRows, classified, validStarterOutcomes, byPitcher, candidates, projectionMetrics: metrics(rows.projections.rows) }
 }
 
 export async function getMlbLearningBrain(input: { season?: string | null; date?: string | null } = {}) {
@@ -502,13 +563,14 @@ export async function getMlbLearningBrain(input: { season?: string | null; date?
   const eventDates = context.events.map((event) => event.start_time?.slice(0, 10)).filter(Boolean).sort() as string[]
   const validDates = context.validStarterOutcomes.map((item) => item.date).filter(Boolean).sort()
   const hiddenUnknownStarter = context.events.filter((event) => {
-    const home = starterEvidence(event, event.home_team_id)
-    const away = starterEvidence(event, event.away_team_id)
+    const home = starterEvidence(event, event.home_team_id, context.starterEvidenceRows)
+    const away = starterEvidence(event, event.away_team_id, context.starterEvidenceRows)
     return home.status === 'UNKNOWN' || away.status === 'UNKNOWN'
   }).length
-  const confirmed = context.events.flatMap((event) => [starterEvidence(event, event.home_team_id), starterEvidence(event, event.away_team_id)]).filter((item) => item.status === 'CONFIRMED').length
-  const probable = context.events.flatMap((event) => [starterEvidence(event, event.home_team_id), starterEvidence(event, event.away_team_id)]).filter((item) => item.status === 'PROBABLE').length
-  const expected = context.events.flatMap((event) => [starterEvidence(event, event.home_team_id), starterEvidence(event, event.away_team_id)]).filter((item) => item.status === 'EXPECTED').length
+  const evidenceItems = context.events.flatMap((event) => [starterEvidence(event, event.home_team_id, context.starterEvidenceRows), starterEvidence(event, event.away_team_id, context.starterEvidenceRows)])
+  const confirmed = evidenceItems.filter((item) => item.status === 'CONFIRMED').length
+  const probable = evidenceItems.filter((item) => item.status === 'PROBABLE').length
+  const expected = evidenceItems.filter((item) => item.status === 'EXPECTED').length
   const projectionRows = context.rows.projections.rows
   const settled = context.projectionMetrics
   const trainingEligible = projectionRows.filter((row) => row.settled_at && row.model_version && asRecord(row.feature_snapshot).featureVersion === FEATURE_VERSION)
@@ -547,6 +609,8 @@ export async function getMlbLearningBrain(input: { season?: string | null; date?
       probable,
       expected,
       unknownTeamSlots: hiddenUnknownStarter,
+      storedEvidenceRows: context.starterEvidenceRows.length,
+      eligibleStoredEvidenceRows: context.starterEvidenceRows.filter((row) => asRecord(row.metadata).eligibility === 'ELIGIBLE').length,
       finalOnlyOutcomeRows: context.validStarterOutcomes.length,
       rule: 'Final box-score starter identity is retained for outcome classification but is not valid pregame starter evidence.',
     },

@@ -1810,6 +1810,16 @@ Consequences: Legacy rows remain in audit/history/replay surfaces but are exclud
 
 Affected modules: Prediction provenance API, settlement reconciliation, operations validation and docs.
 
+## 2026-07-21 - Add MLB Pregame Starter Evidence Pipeline
+
+Context: The MLB Learning Brain could audit pitcher recorded-outs outcomes but had zero timestamp-safe pregame starter rows, so it could not generate live pitcher-outs shadow projections honestly.
+
+Decision: Reuse SportsDataIO Discovery Lab `GamesByDate` as the selected starter source and reuse existing `sport_lineups` for persistence instead of creating a new table. The new protected starter-evidence route stores confirmed/probable starters only when event identity, player identity, source timestamp, freshness and team assignment gates pass. The Learning Brain now consumes these rows before event metadata and keeps all outputs `SHADOW / NO_MARKET`.
+
+Consequences: The system can run a one-call date-wide starter refresh under existing budget/auth guardrails and can persist immutable starter evidence without destructive migration. Stale, post-start, unresolved, final-only or team-conflicted evidence remains blocked. No Official Pick, EV, edge, Kelly, stake, Current Board policy or prop-market activation changed.
+
+Affected modules: MLB Pregame Starter Evidence, MLB Learning Brain, Game Intelligence, Player Intelligence, Projections Board, Operations Validation and docs.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.

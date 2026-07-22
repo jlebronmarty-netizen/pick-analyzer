@@ -38,6 +38,16 @@ type ProjectionRow = {
   explanation: string | null
 }
 
+type StarterEvidenceRow = {
+  id: string
+  team_id: string | null
+  player_id: string | null
+  player_name: string | null
+  lineup_status: string | null
+  source_timestamp: string | null
+  metadata: Record<string, unknown> | null
+}
+
 function first<T>(items: T[]) {
   return items[0] ?? null
 }
@@ -94,6 +104,18 @@ export async function getGameIntelligence(eventId: string) {
     .limit(10)
   if (pitcherProjectionError) throw new Error(`universal_projection_history read failed: ${pitcherProjectionError.message}`)
   const pitcherProjections = (pitcherProjectionData ?? []) as ProjectionRow[]
+  const { data: starterEvidenceData, error: starterEvidenceError } = await supabaseAdmin
+    .from('sport_lineups')
+    .select('id, team_id, player_id, player_name, lineup_status, source_timestamp, metadata')
+    .eq('sport_key', event.sport_key ?? 'baseball_mlb')
+    .eq('league_key', event.league_key ?? 'mlb')
+    .eq('event_id', event.id)
+    .eq('lineup_type', 'starting_lineup')
+    .eq('role', 'starting_pitcher')
+    .order('source_timestamp', { ascending: false })
+    .limit(4)
+  if (starterEvidenceError) throw new Error(`sport_lineups starter evidence read failed: ${starterEvidenceError.message}`)
+  const starterEvidenceRows = (starterEvidenceData ?? []) as StarterEvidenceRow[]
   const candidates = board.candidates.filter((candidate) => candidate.eventId === event.id)
   const topCandidate = first(candidates)
   const classification = topCandidate ? classifyMarketIntelligence(topCandidate) : null
@@ -157,6 +179,17 @@ export async function getGameIntelligence(eventId: string) {
     pitching: {
       status: pitcherProjections.length ? 'PITCHER_OUTS_SHADOW_AVAILABLE' : 'STORED_CONTEXT_ONLY',
       probableStarter: topCandidate?.starterContext ?? null,
+      pregameStarterEvidence: starterEvidenceRows.map((row) => ({
+        evidenceId: row.id,
+        teamId: row.team_id,
+        pitcherId: row.player_id,
+        pitcherName: row.player_name,
+        status: row.metadata?.exactStarterStatus ?? row.lineup_status,
+        source: row.metadata?.source ?? 'sport_lineups',
+        sourceTimestamp: row.source_timestamp,
+        eligibility: row.metadata?.eligibility ?? null,
+        evidenceAgeMinutes: row.metadata?.evidenceAgeMinutes ?? null,
+      })),
       pitcherIdentityQuality: topCandidate?.pitcherContext ? 'STORED_CONTEXT_AVAILABLE' : 'UNAVAILABLE',
       recentStarts: null,
       recordedOutsHistory: null,

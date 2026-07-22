@@ -48,6 +48,8 @@ type LearningBrain = {
     probable: number
     expected: number
     unknownTeamSlots: number
+    storedEvidenceRows?: number
+    eligibleStoredEvidenceRows?: number
   }
   shadowModel: {
     initialModelVersion: string
@@ -218,9 +220,9 @@ export default function MlbProjectionBoardClient() {
               <p className="text-xs text-slate-400">MAE {learning.settlement.metrics.mae ?? 'N/A'} · RMSE {learning.settlement.metrics.rmse ?? 'N/A'}</p>
             </div>
             <div>
-              <p className="text-xs font-black uppercase text-slate-500">Market</p>
-              <p className="mt-1 text-sm font-black text-white">{learning.playerPropContract.status}</p>
-              <p className="text-xs text-slate-400">Shadow only, no EV or stake</p>
+              <p className="text-xs font-black uppercase text-slate-500">Starters</p>
+              <p className="mt-1 text-sm font-black text-white">{learning.starterEvidence.confirmed} confirmed / {learning.starterEvidence.probable} probable</p>
+              <p className="text-xs text-slate-400">{learning.starterEvidence.eligibleStoredEvidenceRows ?? 0} eligible evidence rows</p>
             </div>
           </section>
         ) : null}

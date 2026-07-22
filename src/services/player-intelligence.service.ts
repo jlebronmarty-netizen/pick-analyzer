@@ -39,6 +39,17 @@ type ProjectionRow = {
   settled_at: string | null
 }
 
+type StarterEvidenceRow = {
+  id: string
+  event_id: string | null
+  team_id: string | null
+  player_name: string | null
+  lineup_status: string | null
+  source_timestamp: string | null
+  metadata: Record<string, unknown> | null
+  updated_at: string | null
+}
+
 function asNumber(value: unknown) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : null
@@ -99,6 +110,17 @@ export async function getPlayerIntelligence(playerId: string) {
     .limit(10)
   if (projectionError) throw new Error(`universal_projection_history read failed: ${projectionError.message}`)
   const projectionRows = (projections ?? []) as ProjectionRow[]
+  const { data: starterEvidence, error: starterEvidenceError } = await supabaseAdmin
+    .from('sport_lineups')
+    .select('id, event_id, team_id, player_name, lineup_status, source_timestamp, metadata, updated_at')
+    .eq('sport_key', typedPlayer.sport_key)
+    .eq('player_id', playerId)
+    .eq('lineup_type', 'starting_lineup')
+    .eq('role', 'starting_pitcher')
+    .order('source_timestamp', { ascending: false })
+    .limit(5)
+  if (starterEvidenceError) throw new Error(`sport_lineups starter evidence read failed: ${starterEvidenceError.message}`)
+  const starterEvidenceRows = (starterEvidence ?? []) as StarterEvidenceRow[]
   const outsRows = rows
     .map((row) => ({ date: row.source_timestamp, eventId: row.event_id, outs: pitcherOuts(row) }))
     .filter((row) => row.outs !== null)
@@ -156,6 +178,23 @@ export async function getPlayerIntelligence(playerId: string) {
       historicalProjectionCount: projectionRows.length,
       marketStatus: 'NO_MARKET',
       recommendationStatus: 'SHADOW',
+    },
+    pregameStarterEvidence: {
+      status: starterEvidenceRows.length ? 'STARTER_EVIDENCE_AVAILABLE' : 'NO_PREGAME_STARTER_EVIDENCE',
+      latest: starterEvidenceRows[0]
+        ? {
+            evidenceId: starterEvidenceRows[0].id,
+            eventId: starterEvidenceRows[0].event_id,
+            teamId: starterEvidenceRows[0].team_id,
+            playerName: starterEvidenceRows[0].player_name,
+            starterStatus: starterEvidenceRows[0].metadata?.exactStarterStatus ?? starterEvidenceRows[0].lineup_status,
+            source: starterEvidenceRows[0].metadata?.source ?? 'sport_lineups',
+            sourceTimestamp: starterEvidenceRows[0].source_timestamp,
+            eligibility: starterEvidenceRows[0].metadata?.eligibility ?? null,
+            evidenceAgeMinutes: starterEvidenceRows[0].metadata?.evidenceAgeMinutes ?? null,
+          }
+        : null,
+      recent: starterEvidenceRows,
     },
     supportedSplits: {
       homeAway: 'UNAVAILABLE_UNTIL_VALIDATED_SPLIT_SOURCE',

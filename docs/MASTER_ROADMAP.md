@@ -2055,3 +2055,19 @@ Persistence or migration scope: No new migration. `universal_projection_history`
 Validation: `npm.cmd run build` exits 0. Fixture validation covers recorded-outs conversion, direct/innings conflict quarantine, monotonic threshold probabilities, NO_MARKET behavior, no auto-promotion, rollback preservation, zero provider calls and read-only validation.
 
 Completion criteria: Pitcher-outs data, feature, model, settlement, learning, challenger policy, rollback policy, scheduler contract, player/game intelligence and projection-board surfaces are available without activating prop betting or Official Picks.
+
+### 38. MLB Pregame Starter Evidence And First Live Shadow Projection V1
+
+Objective: Acquire and persist timestamp-safe MLB pregame starting-pitcher evidence so the Learning Brain can generate live pitcher-outs shadow projections when eligible.
+
+Status: Implemented locally using the existing SportsDataIO GamesByDate verification path and existing `sport_lineups` persistence.
+
+Backend scope: `mlb-pregame-starter-evidence.service.ts`, `/api/mlb/pregame-starter-evidence`, MLB Learning Brain starter-evidence handoff, Operations Validation, Player Intelligence and Game Intelligence.
+
+Frontend scope: Projections page Learning Center now reports starter evidence coverage.
+
+Persistence or migration scope: No migration. Starter evidence is stored in `sport_lineups` with `lineup_type='starting_lineup'`, `role='starting_pitcher'` and precise status/freshness/eligibility metadata.
+
+Validation: `npm.cmd run build` exits 0. Fixture validation covers pregame timestamp acceptance, post-start rejection, stale labeling, schema-safe probable storage, NO_MARKET behavior and zero-provider-call validation.
+
+Completion criteria: Confirmed/probable starters can be refreshed through one protected date-wide GamesByDate call, exact identities are required, stale or final-only evidence is blocked, and eligible starters feed the pitcher-outs shadow generator without creating props, EV, edge, Kelly, stake or Official Picks.
