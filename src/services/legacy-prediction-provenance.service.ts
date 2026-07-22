@@ -71,6 +71,8 @@ const THE_ODDS_API_SPORT_KEYS = new Set([
   'baseball_mlb',
   'soccer_epl',
 ])
+const FINAL_RESULTS = new Set(['win', 'loss', 'push', 'void'])
+const TERMINAL_LIFECYCLE = new Set(['settled', 'void', 'skipped', 'closed'])
 
 function normalize(value: unknown) {
   return String(value ?? '').trim().toLowerCase()
@@ -92,6 +94,13 @@ function isSyntheticOrFixture(row: PredictionProvenanceInput) {
     normalize(row.validation_status) === 'skipped' ||
     warnings(row).some((warning) => /trial|scrambled|fixture|synthetic|quarantine/i.test(warning))
   )
+}
+
+function isPendingLike(row: PredictionProvenanceRow) {
+  const result = normalize(row.result)
+  const status = normalize(row.status)
+  const lifecycle = normalize(row.lifecycle_status)
+  return !FINAL_RESULTS.has(result) && !FINAL_RESULTS.has(status) && !TERMINAL_LIFECYCLE.has(lifecycle)
 }
 
 function hasTheOddsApiLegacyShape(row: PredictionProvenanceInput) {
@@ -225,8 +234,9 @@ export async function getLegacyPredictionProvenanceReport() {
       evidenceCodes: provenance.evidenceCodes,
     }
   })
-  const legacy = classified.filter((item) => item.classification === 'LEGACY')
-  const unresolvedLegacy = legacy.filter((item) => !item.canonicalEventExists)
+  const allLegacy = classified.filter((item) => item.classification === 'LEGACY')
+  const unresolvedPending = classified.filter((item) => !item.canonicalEventExists && isPendingLike(item.row))
+  const legacy = unresolvedPending.filter((item) => item.classification === 'LEGACY')
   const legacyRows = legacy.map((item) => item.row)
   const createdBeforeSportEvents = legacyRows.filter((row) => Date.parse(row.created_at ?? '') < Date.parse('2026-07-11T00:00:00Z'))
   const recommendedLegacy = legacyRows.filter((row) => row.recommended_pick === true)
@@ -239,9 +249,12 @@ export async function getLegacyPredictionProvenanceReport() {
     writerEvidence: LEGACY_WRITER_COMMIT,
     canonicalEventEvidence: SPORT_EVENTS_MIGRATION,
     totalPredictionRowsExamined: rows.length,
-    unresolvedLegacyRows: unresolvedLegacy.length,
-    unresolvedLegacyUniqueEvents: new Set(unresolvedLegacy.map((item) => item.row.game_id)).size,
-    provenanceCounts: groupCount(classified, (item) => item.classification),
+    totalLegacyRowsAllHistory: allLegacy.length,
+    unresolvedRowsExamined: unresolvedPending.length,
+    unresolvedLegacyRows: legacy.length,
+    unresolvedLegacyUniqueEvents: new Set(legacy.map((item) => item.row.game_id)).size,
+    provenanceCounts: groupCount(unresolvedPending, (item) => item.classification),
+    allStoredProvenanceCounts: groupCount(classified, (item) => item.classification),
     productionScope: {
       productionQualifiedLegacyRows: legacyRows.filter((row) => row.production_eligible === true).length,
       legacyRowsExcludedFromProductionMetrics: legacyRows.filter((row) => row.production_eligible !== true).length,
@@ -284,7 +297,7 @@ export async function getLegacyPredictionProvenanceReport() {
       providerOriginEvidence: 'The Odds API odds response shape: 32-character provider game IDs, sport_key values, h2h moneyline market and sportsbook labels DraftKings/FanDuel/MyBookie.ag.',
       notCertifiedProductionReason:
         'Rows lack canonical sport_events linkage, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key and model_version, and are explicitly production_eligible=false.',
-      unknownRows: classified.filter((item) => item.classification === 'UNKNOWN').length,
+      unknownRows: unresolvedPending.filter((item) => item.classification === 'UNKNOWN').length,
     },
     sampleLegacyRows: legacy.slice(0, 10).map((item) => ({
       id: item.row.id,
