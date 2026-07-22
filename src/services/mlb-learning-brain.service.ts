@@ -477,6 +477,24 @@ function projectionRow(candidate: CandidateProjection) {
   }
 }
 
+async function upsertProjectionRows(rows: Row[]) {
+  const omittedColumns: string[] = []
+  let attemptRows = rows
+  for (let attempt = 0; attempt < 16; attempt += 1) {
+    const { error } = await supabaseAdmin.from('universal_projection_history').upsert(attemptRows, { onConflict: 'id' })
+    if (!error) return { error: null as string | null, omittedColumns }
+    const missingColumn = error.message.match(/Could not find the '([^']+)' column/)?.[1]
+    if (!missingColumn) return { error: error.message, omittedColumns }
+    omittedColumns.push(missingColumn)
+    attemptRows = attemptRows.map((row) => {
+      const next = { ...row }
+      delete next[missingColumn]
+      return next
+    })
+  }
+  return { error: 'Projection persistence compatibility retry limit reached.', omittedColumns }
+}
+
 function hashDataset(rows: Row[]) {
   return createHash('sha256').update(JSON.stringify(rows)).digest('hex').slice(0, 24)
 }
@@ -702,8 +720,8 @@ export async function executeMlbLearningBrain(input: { season?: string | null; d
       remoteMutationsMade: 0,
     }
   }
-  const { error } = await supabaseAdmin.from('universal_projection_history').upsert(rows, { onConflict: 'id' })
-  if (error) {
+  const persistence = await upsertProjectionRows(rows)
+  if (persistence.error) {
     return {
       success: false,
       mode: 'mlb_learning_brain_execution_v1',
@@ -714,7 +732,8 @@ export async function executeMlbLearningBrain(input: { season?: string | null; d
       snapshotsPersisted: 0,
       shadowProjectionsPersisted: 0,
       status: 'PERSISTENCE_BLOCKED',
-      error: error.message,
+      error: persistence.error,
+      omittedColumns: persistence.omittedColumns,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
     }
@@ -729,6 +748,7 @@ export async function executeMlbLearningBrain(input: { season?: string | null; d
     snapshotsPersisted: rows.length,
     shadowProjectionsPersisted: rows.length,
     status: 'SHADOW_PROJECTIONS_PERSISTED',
+    omittedColumns: persistence.omittedColumns,
     providerCallsMade: 0,
     remoteMutationsMade: rows.length,
   }
