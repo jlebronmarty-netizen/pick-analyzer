@@ -256,16 +256,6 @@ async function readProviderPayload(response: Response) {
   }
 }
 
-async function existingResultIds(rows: GameResultRow[]) {
-  if (!rows.length) return new Set<string>()
-  const { data, error } = await supabaseAdmin
-    .from('game_results')
-    .select('game_id')
-    .in('game_id', rows.map((row) => row.game_id))
-  if (error) throw new Error(`Existing result lookup failed: ${error.message}`)
-  return new Set((data ?? []).map((row) => String(row.game_id)))
-}
-
 async function existingResultRows(rows: GameResultRow[]) {
   if (!rows.length) return new Map<string, GameResultRow>()
   const { data, error } = await supabaseAdmin
@@ -274,6 +264,51 @@ async function existingResultRows(rows: GameResultRow[]) {
     .in('game_id', rows.map((row) => row.game_id))
   if (error) throw new Error(`Existing result lookup failed: ${error.message}`)
   return new Map(((data ?? []) as GameResultRow[]).map((row) => [`${row.sport_key}:${row.game_id}`, row]))
+}
+
+async function persistResultRows(rows: GameResultRow[]) {
+  if (!rows.length) {
+    return { inserted: 0, updated: 0, reused: 0 }
+  }
+
+  const existing = await existingResultRows(rows)
+  const inserts: GameResultRow[] = []
+  const updates: GameResultRow[] = []
+  let reused = 0
+
+  for (const row of rows) {
+    const existingRow = existing.get(`${row.sport_key}:${row.game_id}`)
+    if (!existingRow) {
+      inserts.push(row)
+    } else if (!sameResultRow(row, existingRow)) {
+      updates.push(row)
+    } else {
+      reused += 1
+    }
+  }
+
+  if (inserts.length) {
+    const { error } = await supabaseAdmin.from('game_results').insert(inserts)
+    if (error) throw new Error(`Game result insert failed: ${error.message}`)
+  }
+
+  for (const row of updates) {
+    const { error } = await supabaseAdmin
+      .from('game_results')
+      .update({
+        home_team: row.home_team,
+        away_team: row.away_team,
+        home_score: row.home_score,
+        away_score: row.away_score,
+        winner: row.winner,
+        commence_time: row.commence_time,
+      })
+      .eq('sport_key', row.sport_key)
+      .eq('game_id', row.game_id)
+    if (error) throw new Error(`Game result update failed for ${row.sport_key}:${row.game_id}: ${error.message}`)
+  }
+
+  return { inserted: inserts.length, updated: updates.length, reused }
 }
 
 function sameResultRow(a: GameResultRow, b: GameResultRow | undefined) {
@@ -630,12 +665,7 @@ export async function syncRecentResults(sportKey = 'baseball_mlb', daysFrom = 3)
       }
     }
 
-    if (fetched.rows.length) {
-      const { error } = await supabaseAdmin.from('game_results').upsert(fetched.rows, {
-        onConflict: 'game_id,sport_key',
-      })
-      if (error) throw new Error(error.message)
-    }
+    const persisted = await persistResultRows(fetched.rows)
     for (const eventPatch of fetched.eventPatches ?? []) {
       const { error } = await supabaseAdmin.from('sport_events').update(eventPatch.patch).eq('id', eventPatch.id)
       if (error) throw new Error(`MLB Stats API final event update failed: ${error.message}`)
@@ -664,8 +694,9 @@ export async function syncRecentResults(sportKey = 'baseball_mlb', daysFrom = 3)
       staleRowsSkipped: fetched.staleRowsSkipped,
       unmatchedEvents: fetched.unmatchedEvents,
       synced: fetched.rows.length,
-      inserted: fetched.scoreRowsInserted,
-      reused: Math.max(0, fetched.rows.length - fetched.scoreRowsInserted - fetched.scoreRowsUpdated),
+      inserted: persisted.inserted,
+      reused: persisted.reused,
+      updated: persisted.updated,
       retryable: false,
       retryAfter: null,
       failureReason: null,
@@ -694,18 +725,12 @@ export async function syncRecentResults(sportKey = 'baseball_mlb', daysFrom = 3)
     }
   }
 
-  const existing = await existingResultIds(fetched.rows)
-  const { error } = await supabaseAdmin.from('game_results').upsert(fetched.rows, {
-    onConflict: 'game_id,sport_key',
-  })
-  if (error) throw new Error(error.message)
-
-  const inserted = fetched.rows.filter((row) => !existing.has(row.game_id)).length
+  const persisted = await persistResultRows(fetched.rows)
   return {
     success: true,
     sportKey,
     daysFrom,
-    status: inserted === 0 ? ('already_synced' as const) : ('synced' as const),
+    status: persisted.inserted === 0 && persisted.updated === 0 ? ('already_synced' as const) : ('synced' as const),
     provider: fetched.provider,
     providerCallsMade: fetched.providerCallsMade,
     gamesRequested: fetched.gamesRequested,
@@ -714,8 +739,9 @@ export async function syncRecentResults(sportKey = 'baseball_mlb', daysFrom = 3)
     retryable: false,
     retryAfter: null,
     synced: fetched.rows.length,
-    inserted,
-    reused: fetched.rows.length - inserted,
-    message: inserted === 0 ? 'Completed results were already synchronized.' : 'Completed results synchronized.',
+    inserted: persisted.inserted,
+    updated: persisted.updated,
+    reused: persisted.reused,
+    message: persisted.inserted === 0 && persisted.updated === 0 ? 'Completed results were already synchronized.' : 'Completed results synchronized.',
   }
 }
