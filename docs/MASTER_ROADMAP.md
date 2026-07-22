@@ -2039,3 +2039,19 @@ Persistence or migration scope: None. Existing rows remain untouched.
 Validation: `npm.cmd run build` exits 0. Local fixture validation proves legacy rows classify as non-production, production-lineage rows classify as production, legacy `recommended_pick` flags do not imply official picks, and the module makes 0 provider calls and 0 remote mutations.
 
 Completion criteria: Legacy rows are explainable by stored data plus git/migration provenance, remain available to audit/history, and are excluded from production-scoped settlement backlog and metrics.
+
+### 37. MLB Learning Brain And Pitcher Outs End-to-End V1
+
+Objective: Establish the first controlled daily learning loop for MLB starting-pitcher recorded-outs projections.
+
+Status: Implemented as a stored-data-only shadow framework.
+
+Backend scope: `mlb-learning-brain.service.ts`, `/api/mlb/learning-brain`, Operations Validation, Player Intelligence and Game Intelligence pitcher-outs integration.
+
+Frontend scope: Projections page includes a compact Learning Center summary from the learning-brain API.
+
+Persistence or migration scope: No new migration. `universal_projection_history` stores immutable feature snapshots, shadow projection rows, threshold probabilities, settlement actuals/errors, calibration and drift metadata.
+
+Validation: `npm.cmd run build` exits 0. Fixture validation covers recorded-outs conversion, direct/innings conflict quarantine, monotonic threshold probabilities, NO_MARKET behavior, no auto-promotion, rollback preservation, zero provider calls and read-only validation.
+
+Completion criteria: Pitcher-outs data, feature, model, settlement, learning, challenger policy, rollback policy, scheduler contract, player/game intelligence and projection-board surfaces are available without activating prop betting or Official Picks.

@@ -25,6 +25,7 @@ import { validatePlayerIntelligenceFixtures } from '@/services/player-intelligen
 import { validateUniversalEventIdentityFixtures } from '@/services/universal-event-identity.service'
 import { validateMissingCanonicalEventsRecoveryFixtures } from '@/services/missing-canonical-events-recovery.service'
 import { validateLegacyPredictionProvenanceFixtures } from '@/services/legacy-prediction-provenance.service'
+import { validateMlbLearningBrainFixtures } from '@/services/mlb-learning-brain.service'
 
 export async function GET(request: NextRequest) {
   const adaptive = validateAdaptiveRefreshFixtures()
@@ -52,6 +53,7 @@ export async function GET(request: NextRequest) {
   const universalEventIdentity = validateUniversalEventIdentityFixtures()
   const missingCanonicalEventsRecovery = validateMissingCanonicalEventsRecoveryFixtures()
   const legacyPredictionProvenance = validateLegacyPredictionProvenanceFixtures()
+  const mlbLearningBrain = validateMlbLearningBrainFixtures()
   return apiOk({
     ...adaptive,
     success:
@@ -79,7 +81,8 @@ export async function GET(request: NextRequest) {
       playerIntelligence.success &&
       universalEventIdentity.success &&
       missingCanonicalEventsRecovery.success &&
-      legacyPredictionProvenance.success,
+      legacyPredictionProvenance.success &&
+      mlbLearningBrain.success,
     marketAlignment,
     marketClassification,
     aiBetFinder,
@@ -104,6 +107,7 @@ export async function GET(request: NextRequest) {
     universalEventIdentity,
     missingCanonicalEventsRecovery,
     legacyPredictionProvenance,
+    mlbLearningBrain,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }, requestId(request))

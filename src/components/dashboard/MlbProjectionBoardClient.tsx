@@ -34,6 +34,38 @@ type ApiData = {
   warnings: string[]
 }
 
+type LearningBrain = {
+  success: boolean
+  dataset: {
+    pitcherOutcomeRowsAudited: number
+    validOutcomeRows: number
+    validStarterOutcomeRows: number
+    trainingEligibleRows: number
+  }
+  starterEvidence: {
+    status: string
+    confirmed: number
+    probable: number
+    expected: number
+    unknownTeamSlots: number
+  }
+  shadowModel: {
+    initialModelVersion: string
+    currentVisibleCandidates: number
+  }
+  settlement: {
+    settledProjectionCount: number
+    metrics: { mae: number | null; rmse: number | null; bias: number | null }
+  }
+  learning: {
+    challengerModel: string
+    championModel: string
+    promotionDecision: string
+    driftStatus: string
+  }
+  playerPropContract: { status: string }
+}
+
 const tabs = [
   ['topProjections', 'Top'],
   ['pitchers', 'Pitchers'],
@@ -108,6 +140,7 @@ function ProjectionCard({ item }: { item: Projection }) {
 
 export default function MlbProjectionBoardClient() {
   const [data, setData] = useState<ApiData | null>(null)
+  const [learning, setLearning] = useState<LearningBrain | null>(null)
   const [active, setActive] = useState<(typeof tabs)[number][0]>('topProjections')
   const [search, setSearch] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -121,6 +154,10 @@ export default function MlbProjectionBoardClient() {
       })
       .then((json) => alive && setData(json))
       .catch((loadError) => alive && setError(loadError instanceof Error ? loadError.message : 'Unable to load projections.'))
+    fetch('/api/mlb/learning-brain', { cache: 'no-store' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((json) => alive && json && setLearning(json))
+      .catch(() => undefined)
     return () => {
       alive = false
     }
@@ -162,6 +199,31 @@ export default function MlbProjectionBoardClient() {
           </div>
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search player, team or game" className="w-full rounded-lg border border-slate-800 bg-slate-900 px-4 py-2 text-sm font-bold text-white outline-none focus:border-emerald-400 lg:w-80" />
         </div>
+
+        {learning ? (
+          <section className="mt-5 grid gap-3 rounded-lg border border-slate-800 bg-slate-900/70 p-4 md:grid-cols-4">
+            <div>
+              <p className="text-xs font-black uppercase text-slate-500">Learning Center</p>
+              <p className="mt-1 text-sm font-black text-white">{learning.learning.championModel}</p>
+              <p className="text-xs text-slate-400">{labelize(learning.learning.promotionDecision)}</p>
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase text-slate-500">Outcomes</p>
+              <p className="mt-1 text-sm font-black text-white">{learning.dataset.validOutcomeRows} valid</p>
+              <p className="text-xs text-slate-400">{learning.dataset.pitcherOutcomeRowsAudited} audited</p>
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase text-slate-500">Settlement</p>
+              <p className="mt-1 text-sm font-black text-white">{learning.settlement.settledProjectionCount} settled</p>
+              <p className="text-xs text-slate-400">MAE {learning.settlement.metrics.mae ?? 'N/A'} · RMSE {learning.settlement.metrics.rmse ?? 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-xs font-black uppercase text-slate-500">Market</p>
+              <p className="mt-1 text-sm font-black text-white">{learning.playerPropContract.status}</p>
+              <p className="text-xs text-slate-400">Shadow only, no EV or stake</p>
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-5 grid gap-4 lg:grid-cols-2">
           {rows.length ? rows.map((item) => <ProjectionCard key={item.id} item={item} />) : (

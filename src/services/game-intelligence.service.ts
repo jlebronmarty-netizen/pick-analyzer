@@ -20,6 +20,24 @@ type EventRow = {
   updated_at: string | null
 }
 
+type ProjectionRow = {
+  id: string
+  entity_id: string | null
+  entity_name: string | null
+  projected_value: number | null
+  confidence: number | null
+  feature_quality: number | null
+  data_sufficiency: number | null
+  prediction_interval_low: number | null
+  prediction_interval_high: number | null
+  model_version: string | null
+  starter_status: string | null
+  calibration: Record<string, unknown> | null
+  metadata: Record<string, unknown> | null
+  generated_at: string | null
+  explanation: string | null
+}
+
 function first<T>(items: T[]) {
   return items[0] ?? null
 }
@@ -66,6 +84,16 @@ export async function getGameIntelligence(eventId: string) {
   }
 
   const board = await getCurrentBoardCached(event.sport_key ?? 'baseball_mlb', 'ALL_STORED_ADVANCED', 200)
+  const { data: pitcherProjectionData, error: pitcherProjectionError } = await supabaseAdmin
+    .from('universal_projection_history')
+    .select('id, entity_id, entity_name, projected_value, confidence, feature_quality, data_sufficiency, prediction_interval_low, prediction_interval_high, model_version, starter_status, calibration, metadata, generated_at, explanation')
+    .eq('sport_key', event.sport_key ?? 'baseball_mlb')
+    .eq('event_id', event.id)
+    .eq('projection_key', 'pitcher_outs_recorded')
+    .order('generated_at', { ascending: false })
+    .limit(10)
+  if (pitcherProjectionError) throw new Error(`universal_projection_history read failed: ${pitcherProjectionError.message}`)
+  const pitcherProjections = (pitcherProjectionData ?? []) as ProjectionRow[]
   const candidates = board.candidates.filter((candidate) => candidate.eventId === event.id)
   const topCandidate = first(candidates)
   const classification = topCandidate ? classifyMarketIntelligence(topCandidate) : null
@@ -127,13 +155,36 @@ export async function getGameIntelligence(eventId: string) {
       away: { team: event.away_team, recentForm: null, runsFor: null, runsAllowed: null, differential: null },
     },
     pitching: {
-      status: 'STORED_CONTEXT_ONLY',
+      status: pitcherProjections.length ? 'PITCHER_OUTS_SHADOW_AVAILABLE' : 'STORED_CONTEXT_ONLY',
       probableStarter: topCandidate?.starterContext ?? null,
       pitcherIdentityQuality: topCandidate?.pitcherContext ? 'STORED_CONTEXT_AVAILABLE' : 'UNAVAILABLE',
       recentStarts: null,
       recordedOutsHistory: null,
       bullpenWorkload: null,
       warnings: ['No final-game starter identity is used as pregame evidence by this route.'],
+    },
+    pitcherOutsShadow: {
+      marketStatus: 'NO_MARKET',
+      recommendationStatus: 'SHADOW',
+      edge: null,
+      ev: null,
+      kelly: null,
+      officialPick: false,
+      projections: pitcherProjections.map((row) => ({
+        projectionId: row.id,
+        pitcherId: row.entity_id,
+        pitcherName: row.entity_name,
+        expectedOuts: row.projected_value,
+        interval: { low: row.prediction_interval_low, high: row.prediction_interval_high },
+        confidence: row.confidence,
+        featureQuality: row.feature_quality,
+        dataSufficiency: row.data_sufficiency,
+        starterStatus: row.starter_status,
+        modelVersion: row.model_version,
+        probabilities: row.metadata?.thresholdProbabilities ?? row.calibration?.thresholds ?? null,
+        generatedAt: row.generated_at,
+        explanation: row.explanation,
+      })),
     },
     missingData: missingInputs(),
     explanation: topCandidate?.recommendationExplanation ?? null,
@@ -154,6 +205,7 @@ export function validateGameIntelligenceFixtures() {
     ['unsupported inputs explicit', missing.every((item) => item.status !== 'AVAILABLE')],
     ['no fabricated lineup', missing.some((item) => item.input === 'confirmed_lineup' && item.status === 'UNAVAILABLE')],
     ['no fabricated props', missing.some((item) => item.input === 'verified_props' && item.status === 'NO_MARKET')],
+    ['pitcher outs shadow remains no market', true],
     ['read only', true],
   ] as const
   const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)

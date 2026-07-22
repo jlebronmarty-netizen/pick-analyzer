@@ -1790,6 +1790,16 @@ Consequences: Current audit classifies pending-like rows as non-production/test-
 
 Affected modules: Settlement reconciliation, Operations Validation, AI Sports Analyst V2, Game Story Engine, Player Intelligence Foundation and docs.
 
+## 2026-07-22 - Add MLB Learning Brain Pitcher Outs Shadow Framework
+
+Context: Pick Analyzer needed a controlled end-to-end learning loop whose first production-safe use case is MLB starting-pitcher recorded-outs projections. Existing normalized player stats, universal projection history, player/game intelligence and operations validation already provided most of the platform primitives.
+
+Decision: Reuse `universal_projection_history` rather than create a parallel learning store. Add `mlb-learning-brain.service.ts` and `/api/mlb/learning-brain` for stored-data audits, feature contracts, shadow model candidates, settlement metrics, challenger/promotion policy and protected stored-data execution. Extend Player Intelligence, Game Intelligence and the Projections page to surface pitcher-outs shadow context as `NO_MARKET`.
+
+Consequences: The learning framework can advance without provider calls or betting activation. Direct-outs/innings conflicts are quarantined. No Official Picks, EV, edge, Kelly, stake, unsupported prop lines or model auto-promotion are enabled.
+
+Affected modules: MLB Learning Brain, Player Intelligence, Game Intelligence, Projections page, Operations Validation and docs.
+
 ## 2026-07-21 - Classify Legacy Prediction Provenance Without Data Deletion
 
 Context: 342 unresolved `prediction_history` rows remained exact-event-unlinked after event identity and recovery diagnostics. They carried legacy The Odds API row shape, no canonical lineage and `production_eligible=false`, but still appeared in settlement repair backlog accounting.
