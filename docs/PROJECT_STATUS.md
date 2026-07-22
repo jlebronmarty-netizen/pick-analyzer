@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-07-22 17:15:00Z
+Last updated: 2026-07-22 17:40:00Z
+
+## 2026-07-22 MLB Historical Intelligence Phase 1A - Historical Data Lake Core
+
+- Added an additive Historical Data Lake Core schema migration for source registry, import registry, raw records, checkpoints and identity-foundation rows.
+- Added Retrosheet source inventory and streaming parser diagnostics for local raw files under `data/imports/retrosheet/2025/raw`, preserving source filename, line number, parser version, checksum and raw semantics.
+- Parser foundation supports Retrosheet `id`, `version`, `info`, `start`, `sub`, `play`, `data`, `com`, `badj`, `padj`, `ladj`, `radj` and `presadj` records, preserves unknown records and quarantines structural failures.
+- Added read-only `/api/mlb/historical-intelligence/retrosheet` diagnostics and Operations Validation fixture coverage with zero provider calls and zero remote mutations.
+- Raw Retrosheet payloads are explicitly ignored via `.gitignore`; this phase does not calculate historical features, Learning Brain inputs, projections, replay, matchup intelligence or model training data.
 
 ## 2026-07-22 Prediction Quality, Calibration & UX Audit V1
 

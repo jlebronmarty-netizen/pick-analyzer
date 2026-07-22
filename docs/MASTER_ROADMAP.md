@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### MLB Historical Intelligence Phase 1A - Historical Data Lake Core
+
+Status: Implemented locally; production migration/application and real import writes require explicit future approval.
+
+Evidence: `src/services/retrosheet-historical-data-lake.service.ts`, `/api/mlb/historical-intelligence/retrosheet`, additive migration `202607220002_historical_data_lake_core_v1.sql`, Operations Validation and `.gitignore` raw-data safety.
+
+Note: This phase creates the Retrosheet ingestion foundation only: source inventory, import registry contract, raw data lake contract, streaming parser, canonical team mapping foundation, player/event identity foundations, checkpoints, idempotency and diagnostics. It intentionally does not calculate baseball intelligence, historical features, Learning Brain inputs, projections, replay or model-training datasets.
+
 ### Prediction Quality, Calibration & UX Audit V1
 
 Status: Locally implemented; production deployment and read-only smoke pending.

@@ -31,6 +31,7 @@ import { validateModelOnlyIntelligenceFixtures } from '@/services/model-only-int
 import { validatePerformanceScopeV2Fixtures } from '@/services/performance-scope-v2.service'
 import { validateMlbMarketPipelineDiagnosticsFixtures } from '@/services/mlb-market-pipeline-diagnostics.service'
 import { validateMlbProjectedScoreFixtures } from '@/services/mlb-projected-score.service'
+import { validateRetrosheetHistoricalDataLakeFixtures } from '@/services/retrosheet-historical-data-lake.service'
 
 export async function GET(request: NextRequest) {
   const adaptive = validateAdaptiveRefreshFixtures()
@@ -64,6 +65,7 @@ export async function GET(request: NextRequest) {
   const performanceScopeV2 = validatePerformanceScopeV2Fixtures()
   const mlbMarketPipelineDiagnostics = validateMlbMarketPipelineDiagnosticsFixtures()
   const mlbProjectedScore = validateMlbProjectedScoreFixtures()
+  const retrosheetHistoricalDataLake = validateRetrosheetHistoricalDataLakeFixtures()
   return apiOk({
     ...adaptive,
     success:
@@ -97,7 +99,8 @@ export async function GET(request: NextRequest) {
       modelOnlyIntelligence.success &&
       performanceScopeV2.success &&
       mlbMarketPipelineDiagnostics.success &&
-      mlbProjectedScore.success,
+      mlbProjectedScore.success &&
+      retrosheetHistoricalDataLake.success,
     marketAlignment,
     marketClassification,
     aiBetFinder,
@@ -128,6 +131,7 @@ export async function GET(request: NextRequest) {
     performanceScopeV2,
     mlbMarketPipelineDiagnostics,
     mlbProjectedScore,
+    retrosheetHistoricalDataLake,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }, requestId(request))

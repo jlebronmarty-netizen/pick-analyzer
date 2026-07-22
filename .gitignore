@@ -43,3 +43,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# local historical source payloads
+/data/imports/
