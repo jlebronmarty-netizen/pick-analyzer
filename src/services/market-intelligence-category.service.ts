@@ -2,12 +2,14 @@ import 'server-only'
 
 import type { CurrentBoardCandidate } from '@/services/current-board.service'
 
-export type MarketIntelligenceCategory = 'official' | 'ai_lean' | 'watchlist' | 'avoid'
-export type MarketIntelligenceStatusLabel = 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+export type MarketIntelligenceCategory = 'official' | 'ai_lean' | 'watchlist' | 'model_only' | 'pass' | 'avoid'
+export type MarketIntelligenceStatusLabel = 'Official' | 'AI Lean' | 'Watchlist' | 'Model Only' | 'Pass' | 'Avoid'
 export type CanonicalMarketState =
   | 'OFFICIAL'
   | 'AI_LEAN'
   | 'WATCHLIST'
+  | 'MODEL_ONLY'
+  | 'PASS'
   | 'AVOID'
   | 'NO_MARKET'
   | 'STALE'
@@ -35,7 +37,9 @@ export type MarketIntelligenceClassification = {
 
 export const AI_LEAN_WARNING = "AI LEAN\nThe model slightly favors this outcome, but it did not satisfy Pick Analyzer's production recommendation policy.\nReview at your own discretion."
 export const WATCHLIST_WARNING = 'WATCHLIST\nConditions may improve before game time.'
-export const AVOID_WARNING = 'AVOID\nThe model recommends staying away.'
+export const MODEL_ONLY_WARNING = 'MODEL ONLY\nUseful for probability review, but not eligible as a betting recommendation.'
+export const PASS_WARNING = 'PASS\nNot bettable under current price, freshness, data or policy conditions.'
+export const AVOID_WARNING = 'AVOID\nMaterially negative, invalid or unsafe market. Stay away.'
 export const MATERIAL_NEGATIVE_EV_THRESHOLD = -20
 export const MATERIAL_NEGATIVE_EDGE_THRESHOLD = -15
 
@@ -141,12 +145,12 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
 
   if (noMarket) {
     return pack({
-      category: 'avoid',
+      category: 'pass',
       canonicalState: 'NO_MARKET',
-      label: 'Avoid',
+      label: 'Pass',
       display: 'NO MARKET',
-      color: 'red',
-      warning: AVOID_WARNING,
+      color: 'blue',
+      warning: PASS_WARNING,
       reasonNotOfficial: firstReason(candidate),
       strengths,
       weaknesses,
@@ -156,12 +160,12 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
 
   if (shadow) {
     return pack({
-      category: 'avoid',
+      category: 'model_only',
       canonicalState: 'SHADOW',
-      label: 'Avoid',
+      label: 'Model Only',
       display: 'SHADOW',
-      color: 'red',
-      warning: AVOID_WARNING,
+      color: 'blue',
+      warning: MODEL_ONLY_WARNING,
       reasonNotOfficial: firstReason(candidate),
       strengths,
       weaknesses,
@@ -171,12 +175,12 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
 
   if (quarantined) {
     return pack({
-      category: 'avoid',
-      canonicalState: 'QUARANTINED',
-      label: 'Avoid',
-      display: 'QUARANTINED',
-      color: 'red',
-      warning: AVOID_WARNING,
+      category: 'model_only',
+      canonicalState: 'MODEL_ONLY',
+      label: 'Model Only',
+      display: 'MODEL ONLY',
+      color: 'blue',
+      warning: MODEL_ONLY_WARNING,
       reasonNotOfficial: firstReason(candidate),
       strengths,
       weaknesses,
@@ -186,12 +190,12 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
 
   if (freshness === 'STALE' || freshness === 'EXPIRED') {
     return pack({
-      category: 'avoid',
+      category: 'pass',
       canonicalState: 'STALE',
-      label: 'Avoid',
+      label: 'Pass',
       display: freshness,
-      color: 'red',
-      warning: AVOID_WARNING,
+      color: 'blue',
+      warning: PASS_WARNING,
       reasonNotOfficial: 'Market input is stale, so snapshot value is not actionable.',
       strengths,
       weaknesses,
@@ -216,12 +220,12 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
 
   if (insufficient) {
     return pack({
-      category: 'avoid',
+      category: 'pass',
       canonicalState: 'INSUFFICIENT_DATA',
-      label: 'Avoid',
+      label: 'Pass',
       display: 'INSUFFICIENT DATA',
-      color: 'red',
-      warning: AVOID_WARNING,
+      color: 'blue',
+      warning: PASS_WARNING,
       reasonNotOfficial: firstReason(candidate),
       strengths,
       weaknesses,
@@ -268,12 +272,12 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
   }
 
   return pack({
-    category: 'avoid',
-    canonicalState: 'AVOID',
-    label: 'Avoid',
-    display: 'AVOID',
-    color: 'red',
-    warning: AVOID_WARNING,
+    category: 'pass',
+    canonicalState: 'PASS',
+    label: 'Pass',
+    display: 'PASS',
+    color: 'blue',
+    warning: PASS_WARNING,
     reasonNotOfficial: firstReason(candidate),
     strengths,
     weaknesses,
@@ -286,6 +290,8 @@ export function summarizeMarketIntelligenceCategories(candidates: CurrentBoardCa
     official: 0,
     aiLeans: 0,
     watchlist: 0,
+    modelOnly: 0,
+    pass: 0,
     avoid: 0,
   }
   for (const candidate of candidates) {
@@ -293,6 +299,8 @@ export function summarizeMarketIntelligenceCategories(candidates: CurrentBoardCa
     if (classification.category === 'official') counts.official += 1
     if (classification.category === 'ai_lean') counts.aiLeans += 1
     if (classification.category === 'watchlist') counts.watchlist += 1
+    if (classification.category === 'model_only') counts.modelOnly += 1
+    if (classification.category === 'pass') counts.pass += 1
     if (classification.category === 'avoid') counts.avoid += 1
   }
   return counts
@@ -342,7 +350,15 @@ export function validateMarketIntelligenceCategoryFixtures() {
     ['official eligibility alone is not official', classifyMarketIntelligence({ ...base, officialEligibility: 'OFFICIAL_ELIGIBLE_CANDIDATE', recommendationPolicyStatus: 'ANALYZED_ONLY' }).category !== 'official'],
     ['ai lean has yellow category', classifyMarketIntelligence({ ...base, edge: 1, expectedValue: 1 }).category === 'ai_lean'],
     ['watchlist has blue category', classifyMarketIntelligence({ ...base, rawProbability: 41, confidence: 42, edge: -5, expectedValue: -8 }).category === 'watchlist'],
-    ['avoid has red category', classifyMarketIntelligence({ ...base, rawProbability: 25, confidence: 35, edge: -20, expectedValue: -30 }).category === 'avoid'],
+    ['low confidence pass is not avoid', classifyMarketIntelligence({ ...base, rawProbability: 25, confidence: 35, edge: -5, expectedValue: -8 }).category === 'pass'],
+    ['material negative avoid has red category', classifyMarketIntelligence({
+      ...base,
+      rawProbability: 25,
+      confidence: 45,
+      edge: -20,
+      expectedValue: -30,
+      marketAlignment: { ...base.marketAlignment, snapshotExpectedValuePercent: -30, snapshotEdgePercentagePoints: -20 } as CurrentBoardCandidate['marketAlignment'],
+    }).category === 'avoid'],
     ['material negative EV cannot be watchlist', classifyMarketIntelligence({
       ...base,
       rawProbability: 55,

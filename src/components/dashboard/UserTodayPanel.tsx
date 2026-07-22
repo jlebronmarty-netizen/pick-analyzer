@@ -8,6 +8,8 @@ type CategoryCounts = {
   official: number
   aiLeans: number
   watchlist: number
+  modelOnly?: number
+  pass?: number
   avoid: number
 }
 
@@ -78,7 +80,7 @@ type TopOpportunity = {
   expectedValue?: number | null
   statusLabel?: string
   opportunityCategory?: string
-  marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  marketIntelligenceCategory?: string
   canonicalMarketState?: string
   marketValueQuality?: string
   marketFreshnessState?: string
@@ -128,7 +130,7 @@ type RecommendationEvidenceItem = {
 
 type RecommendationExplanation = {
   explanationVersion?: string
-  category?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  category?: string
   headline?: string
   summary?: string
   primaryReasons?: RecommendationEvidenceItem[]
@@ -306,7 +308,7 @@ type IntelligenceRow = {
   americanOdds?: number
   statusLabel?: string
   opportunityCategory?: string
-  marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  marketIntelligenceCategory?: string
   semanticLabel?: string
   recommendation?: string
   why?: string
@@ -377,7 +379,7 @@ function humanStatus(value: unknown) {
 function simpleAction(text: string) {
   const lower = text.toLowerCase()
   if (lower.includes('sync final')) return 'Waiting for final scores.'
-  if (lower.includes('morning')) return 'Next check is tomorrow morning.'
+  if (lower.includes('morning')) return 'Schedule sync is the next lifecycle step.'
   if (lower.includes('odds')) return 'Waiting for updated betting odds.'
   if (lower.includes('refresh')) return 'The AI will refresh when odds update.'
   return text.replaceAll('_', ' ')
@@ -386,7 +388,7 @@ function simpleAction(text: string) {
 function categoryTone(category?: string): 'green' | 'yellow' | 'blue' | 'red' | 'gray' {
   if (category === 'official' || category === 'Official') return 'green'
   if (category === 'ai_lean' || category === 'AI Lean') return 'yellow'
-  if (category === 'watchlist' || category === 'Watchlist') return 'blue'
+  if (category === 'watchlist' || category === 'Watchlist' || category === 'model_only' || category === 'Model Only' || category === 'pass' || category === 'Pass') return 'blue'
   if (category === 'avoid' || category === 'Avoid') return 'red'
   return 'gray'
 }
@@ -857,7 +859,7 @@ function rowArray(value: unknown) {
   return Array.isArray(value) ? value.filter(Boolean).map(String) : []
 }
 
-function intelligenceCategory(row: IntelligenceRow): 'official' | 'ai_lean' | 'watchlist' | 'avoid' {
+function intelligenceCategory(row: IntelligenceRow): string {
   if (row.recommendationExplanation?.category) return row.recommendationExplanation.category
   if (row.marketIntelligenceCategory) return row.marketIntelligenceCategory
   const official =
@@ -891,7 +893,7 @@ function intelligenceCategory(row: IntelligenceRow): 'official' | 'ai_lean' | 'w
   if (/lineup|injur|bullpen|weather|market|odds|calibration|starter/.test(marketOrContext) && confidence >= 40 && rawProbability >= 35) {
     return 'watchlist'
   }
-  return 'avoid'
+  return 'pass'
 }
 
 function signedNumber(value: unknown, suffix = '') {
@@ -1492,7 +1494,7 @@ export default function UserTodayPanel() {
     )
   }
 
-  const counts = data.marketIntelligence ?? { official: data.officialPicks, aiLeans: 0, watchlist: 0, avoid: 0 }
+  const counts = data.marketIntelligence ?? { official: data.officialPicks, aiLeans: 0, watchlist: 0, modelOnly: 0, pass: 0, avoid: 0 }
   const officialPickRows = data.sections?.officialPicks?.data ?? []
   const aiPicksFeed = data.sections?.aiPicksFeed?.data ?? null
   const aiLeanRows = aiResults.filter((row) => intelligenceCategory(row) === 'ai_lean').slice(0, 3)
@@ -1500,6 +1502,7 @@ export default function UserTodayPanel() {
     new Map([...aiResults, ...mostLikely, ...bestValue].map((row, index) => [opportunityKey(row, index), row])).values()
   )
   const watchRows = categorySourceRows.filter((row) => intelligenceCategory(row) === 'watchlist').slice(0, 3)
+  const modelOnlyRows = categorySourceRows.filter((row) => intelligenceCategory(row) === 'model_only').slice(0, 3)
   const avoidRows = categorySourceRows.filter((row) => intelligenceCategory(row) === 'avoid').slice(0, 3)
 
   return (
@@ -1513,11 +1516,13 @@ export default function UserTodayPanel() {
       <TodayStory data={data} counts={counts} mostLikely={mostLikely} bestValue={bestValue} />
       <AiPerformancePreviewCard />
       <DataFreshnessPreviewCard />
-      <section className="grid gap-4 lg:grid-cols-4">
+      <section className="grid gap-4 lg:grid-cols-6">
         <CategoryCard title="Official Picks" value={counts.official} tone="green" icon="OP" href="/dashboard" status={counts.official ? 'Operational' : 'None'} tooltip="Recommendation-policy picks only." />
         <CategoryCard title="AI Leans" value={counts.aiLeans} tone="yellow" icon="AL" href="/most-likely" status={counts.aiLeans ? 'Available' : 'None'} tooltip="Grounded informational opportunities." />
         <CategoryCard title="Watchlist" value={counts.watchlist} tone="blue" icon="WL" href="/best-value" status={counts.watchlist ? 'Tracking' : 'Clear'} tooltip="Markets to watch without official recommendation status." />
-        <CategoryCard title="Avoid" value={counts.avoid} tone="red" icon="AV" href="/ai-bet-finder" status={counts.avoid ? 'Avoid' : 'Clear'} tooltip="Markets blocked by policy or weak value." />
+        <CategoryCard title="Model Only" value={counts.modelOnly ?? 0} tone="blue" icon="MO" href="/most-likely" status={counts.modelOnly ? 'Informational' : 'None'} tooltip="Probability views that are not betting recommendations." />
+        <CategoryCard title="Pass" value={counts.pass ?? 0} tone="blue" icon="PS" href="/best-value" status={counts.pass ? 'No bet' : 'None'} tooltip="Markets without enough price, freshness, data or policy support." />
+        <CategoryCard title="Avoid" value={counts.avoid} tone="red" icon="AV" href="/ai-bet-finder" status={counts.avoid ? 'Avoid' : 'Clear'} tooltip="Materially negative, invalid or unsafe markets only." />
       </section>
       <OfficialPickExperienceCard picks={officialPickRows} reason={data.sections?.officialPicks?.reason} topOpportunity={topOpportunity} />
       <AiPicksFeedPanel feed={aiPicksFeed} reason={data.sections?.aiPicksFeed?.reason} />
@@ -1541,10 +1546,11 @@ export default function UserTodayPanel() {
         emptyTitle="No positive-value opportunities today."
         emptyDetail={data.sections?.bestValue?.reason ?? 'The AI did not find a grounded positive-value opportunity that should be highlighted. High probability and good value remain separate.'}
       />
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="grid gap-4 lg:grid-cols-4">
         <InsightList title="AI Leans" rows={aiLeanRows} count={counts.aiLeans} empty="No AI Leans are currently grounded by the board." />
         <InsightList title="Watchlist" rows={watchRows} count={counts.watchlist} empty={counts.watchlist ? 'Watchlist markets are counted on the board; detailed rows are outside the visible top opportunity set.' : 'No watchlist games need monitoring right now.'} />
-        <InsightList title="Avoid" rows={avoidRows} count={counts.avoid} empty={counts.avoid ? 'Avoid markets are counted on the board; detailed rows are outside the visible top opportunity set.' : 'No avoid explanations are currently attached to visible candidates.'} />
+        <InsightList title="Model Only" rows={modelOnlyRows} count={counts.modelOnly ?? 0} empty={counts.modelOnly ? 'Model-only rows are counted on the board; detailed rows are outside the visible top set.' : 'No model-only rows are currently attached to visible candidates.'} />
+        <InsightList title="Avoid" rows={avoidRows} count={counts.avoid} empty={counts.avoid ? 'Avoid markets are counted on the board; detailed rows are outside the visible top opportunity set.' : 'No true avoid markets are currently attached to visible candidates.'} />
       </section>
       <HistoryCard data={data} />
       <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>

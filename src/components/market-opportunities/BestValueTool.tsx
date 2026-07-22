@@ -25,8 +25,8 @@ type Opportunity = {
   semanticLabel: string
   boardLabel: string
   statusLabel?: string
-  marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
-  opportunityCategory?: 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+  marketIntelligenceCategory?: string
+  opportunityCategory?: string
   informationalWarning?: string | null
   reasonNotOfficial?: string | null
 }
@@ -67,6 +67,7 @@ function tone(value: number) {
 function statusClass(item: Opportunity) {
   if (item.opportunityCategory === 'Official') return 'border-emerald-500/40 bg-emerald-950/20 text-emerald-200'
   if (item.opportunityCategory === 'Watchlist') return 'border-sky-500/40 bg-sky-950/20 text-sky-200'
+  if (item.opportunityCategory === 'Model Only' || item.opportunityCategory === 'Pass') return 'border-blue-500/40 bg-blue-950/20 text-blue-200'
   if (item.opportunityCategory === 'Avoid') return 'border-red-500/40 bg-red-950/20 text-red-200'
   return 'border-amber-500/40 bg-amber-950/20 text-amber-100'
 }

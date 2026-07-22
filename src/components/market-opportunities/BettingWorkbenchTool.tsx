@@ -30,8 +30,8 @@ type WorkbenchBet = {
   status: string
   official: boolean
   preview: boolean
-  marketIntelligenceCategory: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
-  statusLabel: 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+  marketIntelligenceCategory: string
+  statusLabel: string
   canonicalMarketState?: string
   marketValueQuality?: string
   marketFreshnessState?: string
@@ -135,8 +135,8 @@ function mapBoardCandidate(candidate: Record<string, unknown>): WorkbenchBet {
   const missingInformation = stringArray(candidate.missingInformation)
   const probability = numberValue(candidate.probability ?? candidate.modelProbability ?? candidate.rawProbability)
   const confidence = numberValue(candidate.confidence)
-  const category = stringValue(candidate.marketIntelligenceCategory, official ? 'official' : 'avoid') as WorkbenchBet['marketIntelligenceCategory']
-  const statusLabel = stringValue(candidate.opportunityCategory ?? candidate.statusLabel, official ? 'Official' : 'Avoid') as WorkbenchBet['statusLabel']
+  const category = stringValue(candidate.marketIntelligenceCategory, official ? 'official' : 'pass')
+  const statusLabel = stringValue(candidate.opportunityCategory ?? candidate.statusLabel, official ? 'Official' : 'Pass')
   return {
     id: stringValue(candidate.id ?? candidate.predictionId, `${selection}-${market}`),
     source: stringValue(candidate.boardLabel ?? candidate.source, 'Current Board'),

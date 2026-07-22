@@ -30,12 +30,12 @@ type Opportunity = {
   recommendationStatus: string
   semanticLabel: string
   officialEligibility: string
-  marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+  marketIntelligenceCategory?: string
   canonicalMarketState?: string
   marketValueQuality?: string
   marketFreshnessState?: string
   improvementPath?: string | null
-  opportunityCategory?: 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+  opportunityCategory?: string
   statusLabel?: string
   informationalWarning?: string | null
   reasonNotOfficial?: string | null

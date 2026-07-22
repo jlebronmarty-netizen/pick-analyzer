@@ -3,7 +3,7 @@ import 'server-only'
 import type { MarketAlignmentContract } from '@/services/market-alignment.service'
 import { RECOMMENDATION_THRESHOLDS_V1 } from '@/services/recommendation-eligibility-policy.service'
 
-export type RecommendationExplanationCategory = 'official' | 'ai_lean' | 'watchlist' | 'avoid'
+export type RecommendationExplanationCategory = 'official' | 'ai_lean' | 'watchlist' | 'model_only' | 'pass' | 'avoid'
 export type RecommendationEvidenceSeverity = 'positive' | 'neutral' | 'warning' | 'negative'
 
 export type RecommendationEvidenceItem = {
@@ -30,7 +30,7 @@ export type RecommendationExplanation = {
   freshnessStatus: string
   confidenceStatus: 'MEETS_OFFICIAL_THRESHOLD' | 'BELOW_OFFICIAL_THRESHOLD' | 'UNAVAILABLE'
   valueStatus: 'POSITIVE_VALUE' | 'NEGATIVE_VALUE' | 'ZERO_VALUE' | 'UNAVAILABLE'
-  actionLabel: 'Official Pick' | 'AI Lean' | 'Watchlist' | 'Avoid'
+  actionLabel: 'Official Pick' | 'AI Lean' | 'Watchlist' | 'Model Only' | 'Pass' | 'Avoid'
   fairOdds: number | null
   fairOddsLabel: string | null
   calculationVersion: 'recommendation_explanation_v1'
@@ -131,6 +131,8 @@ function valueStatus(ev: number | null) {
 
 function headline(category: RecommendationExplanationCategory, ev: number | null, edge: number | null, freshness: string) {
   if (category === 'official') return 'Qualified by current recommendation policy.'
+  if (category === 'model_only') return 'Model-only probability view; not a betting recommendation.'
+  if (category === 'pass') return 'Pass under the current price, freshness, data and policy conditions.'
   if (freshness === 'STALE') return 'Market input is stale, so this is not actionable right now.'
   if ((ev ?? 0) > 0 && (edge ?? 0) > 0) return category === 'ai_lean' ? 'The model sees value, but official gates are not fully met.' : 'The model sees value, but this still needs monitoring.'
   if ((ev ?? 0) < 0 || (edge ?? 0) < 0) return 'The current market price is more expensive than the model supports.'
@@ -147,6 +149,8 @@ function summary(category: RecommendationExplanationCategory, input: Explanation
   if (category === 'official') return `${base} This is the current stored recommendation category and uses the existing eligibility policy.`
   if (category === 'ai_lean') return `${base} It remains below Official Pick requirements or has a blocker.`
   if (category === 'watchlist') return `${base} Monitor for fresher market input, better price, or stronger model/data support.${fairOdds !== null ? ` Model fair odds are ${fairOdds > 0 ? '+' : ''}${fairOdds}.` : ''}`
+  if (category === 'model_only') return `${base} This is model intelligence only; it is not eligible as an Official Pick and should not be treated as a play.`
+  if (category === 'pass') return `${base} The correct user action is pass unless the market price, freshness or data quality changes.`
   return `${base} The evidence points away from a play at the current stored price.`
 }
 
@@ -257,7 +261,10 @@ export function buildRecommendationExplanation(input: ExplanationInput): Recomme
   const actionLabel =
     input.category === 'official' ? 'Official Pick' :
     input.category === 'ai_lean' ? 'AI Lean' :
-    input.category === 'watchlist' ? 'Watchlist' : 'Avoid'
+    input.category === 'watchlist' ? 'Watchlist' :
+    input.category === 'model_only' ? 'Model Only' :
+    input.category === 'pass' ? 'Pass' :
+    'Avoid'
 
   return {
     explanationVersion: 'recommendation_explanation_v1',
@@ -267,7 +274,7 @@ export function buildRecommendationExplanation(input: ExplanationInput): Recomme
     primaryReasons,
     secondaryReasons,
     blockers,
-    promotionConditions: input.category === 'official' || input.category === 'avoid' ? [] : promotionConditions(input, fairOdds),
+    promotionConditions: input.category === 'official' || input.category === 'avoid' || input.category === 'pass' ? [] : promotionConditions(input, fairOdds),
     riskWarnings,
     evidence: evidenceItems,
     alignmentStatus: alignment?.alignmentStatus ?? 'MISSING_PRICE',

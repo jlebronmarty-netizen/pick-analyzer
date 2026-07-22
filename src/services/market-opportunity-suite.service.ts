@@ -379,12 +379,41 @@ function compareCurrentBoardOpportunity(sort: SortMode) {
   }
 }
 
+function complementSelection(candidate: CurrentBoardCandidate) {
+  if (candidate.market === 'total') {
+    return candidate.selection.toLowerCase().includes('under') ? 'Over' : 'Under'
+  }
+  const [away = 'Away', home = 'Home'] = candidate.matchup.split(' @ ')
+  const selection = candidate.selection.toLowerCase()
+  if (selection === away.toLowerCase() || selection === 'away') return home
+  if (selection === home.toLowerCase() || selection === 'home') return away
+  return `Not ${candidate.selection}`
+}
+
+function mostLikelyOutcome(candidate: CurrentBoardCandidate) {
+  const selectedProbability = Math.max(0, Math.min(100, Number(candidate.rawProbability ?? 0)))
+  const complementProbability = Math.max(0, Math.min(100, 100 - selectedProbability))
+  const complementIsMoreLikely = complementProbability > selectedProbability
+  return {
+    selectedProbability: round(selectedProbability),
+    complementProbability: round(complementProbability),
+    displayedProbability: round(Math.max(selectedProbability, complementProbability)),
+    displayedSelection: complementIsMoreLikely ? complementSelection(candidate) : candidate.selection,
+    displayedLine: complementIsMoreLikely && candidate.line !== null ? -candidate.line : candidate.line,
+    complementDerived: complementIsMoreLikely,
+    probabilitySemantic: complementIsMoreLikely
+      ? 'Derived complement probability from the stored binary selected-side probability.'
+      : 'Stored selected-side probability.',
+  }
+}
+
 function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate) {
   const official = candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
   const classification = classifyMarketIntelligence(candidate)
   const reasonNotOfficial = official
     ? null
     : classification.reasonNotOfficial
+  const likely = mostLikelyOutcome(candidate)
   return {
     id: candidate.predictionId,
     sportKey: candidate.sportKey,
@@ -395,11 +424,18 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     market: candidate.market,
     marketLabel: candidate.marketLabel,
     period: candidate.period,
-    selection: candidate.selection,
-    line: candidate.line,
-    odds: candidate.americanOdds,
+    selection: likely.displayedSelection,
+    sourceSelection: candidate.selection,
+    line: likely.displayedLine,
+    sourceLine: candidate.line,
+    odds: likely.complementDerived ? null : candidate.americanOdds,
+    sourceOdds: candidate.americanOdds,
     sportsbook: candidate.sportsbook,
-    probability: candidate.rawProbability,
+    probability: likely.displayedProbability,
+    selectedSideProbability: likely.selectedProbability,
+    complementProbability: likely.complementProbability,
+    complementDerived: likely.complementDerived,
+    probabilitySemantic: likely.probabilitySemantic,
     sportsbookProbability: candidate.impliedProbability,
     edge: candidate.edge,
     expectedValue: candidate.expectedValue,
@@ -415,7 +451,7 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     aiRating: candidate.aiRating,
     aiGrade: candidate.aiGrade,
     combinedScore: round(
-      candidate.rawProbability * 0.34 +
+      likely.displayedProbability * 0.34 +
         candidate.confidence * 0.22 +
         candidate.reliabilityScore * 0.18 +
         candidate.aiRating * 0.16 +
@@ -460,7 +496,7 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     featureQuality: candidate.featureQuality,
     dataSufficiency: candidate.dataSufficiency,
     criticalDataCompleteness: candidate.criticalDataCompleteness ?? null,
-    fairOdds: fairAmericanFromProbability(candidate.rawProbability),
+    fairOdds: fairAmericanFromProbability(likely.displayedProbability),
     actionability:
       official
         ? 'official_review_candidate'
@@ -473,7 +509,7 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
       missingData: candidate.missingInformation,
       recommendationBlockers: candidate.blockers,
       probabilityVsValue:
-        'Higher probability does not necessarily mean a bet is profitable at the available price.',
+        'Most Likely ranks binary outcome probability. Betting value still requires aligned odds, positive edge and positive EV.',
     },
     oddsTimestamp: candidate.oddsTimestamp,
     oddsAgeMinutes: candidate.oddsAgeMinutes,

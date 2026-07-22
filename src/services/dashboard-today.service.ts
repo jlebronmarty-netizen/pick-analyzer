@@ -17,6 +17,7 @@ import { eligibilityFromLifecycle, resolveMlbGameLifecycle } from '@/services/ml
 import { validateMlbOperatingDateResolutionFixtures } from '@/services/mlb-operating-date-resolution.service'
 import { formatInTimeZone, localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.service'
+import { getMlbProjectedScores } from '@/services/mlb-projected-score.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -114,6 +115,8 @@ export type DashboardTodayContract = {
     official: number
     aiLeans: number
     watchlist: number
+    modelOnly: number
+    pass: number
     avoid: number
   }
   categoryTrackRecord: ReturnType<typeof emptyCategoryTrackRecord>
@@ -192,6 +195,7 @@ export type DashboardTodayContract = {
     mostLikely: DashboardTodaySection<unknown[]>
     bestValue: DashboardTodaySection<unknown[]>
     modelIntelligence: DashboardTodaySection<unknown>
+    projectedScores: DashboardTodaySection<unknown[]>
     pitcherShadows: DashboardTodaySection<unknown[]>
     informationalParlays: DashboardTodaySection<unknown>
     aiBetFinder: DashboardTodaySection<unknown[]>
@@ -513,13 +517,14 @@ export async function getDashboardToday({
     hour12: false,
   }).format(now))
 
-  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, modelOnlyResult] = await Promise.all([
+  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, modelOnlyResult, projectedScoresResult] = await Promise.all([
     timed('current_events', () => loadEventsForDate(operatingDate), 4200),
     timed('current_board', () => getCurrentBoardCached(SPORT_KEY, 'CURRENT', 100, false, operatingDate), 5000),
     timed('next_slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }), 3500),
     timed('operating_day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: operatingDate }), 4000),
     timed('provider_budget', () => getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY }), 1600),
     timed('model_only_intelligence', () => getModelOnlyIntelligence({ date: operatingDate }), 5000),
+    timed('projected_scores', () => getMlbProjectedScores(), 5000),
   ])
   const currentEventsTimedOut = currentEventsResult.error?.toLowerCase().includes('exceeded') === true
   const currentEventsFallbackResult = !currentEventsResult.ok && !currentEventsTimedOut
@@ -635,6 +640,17 @@ export async function getDashboardToday({
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   } as Awaited<ReturnType<typeof getModelOnlyIntelligence>>)
+  const projectedScores = values(projectedScoresResult, {
+    success: true,
+    mode: 'mlb_projected_score_engine_v1',
+    generatedAt,
+    slateDate: operatingDate,
+    games: [],
+    summary: { gamesProjected: 0, sourceCandidates: 0, currentBoardFreshness: 'empty', officialPickCount: 0 },
+    guardrails: { providerCallsMade: 0, remoteMutationsMade: 0, predictionRowsMutated: false, officialPolicyChanged: false, fabricatedInputs: false },
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  } as Awaited<ReturnType<typeof getMlbProjectedScores>>)
   const eventLoad = currentEventsResult.ok
     ? values(currentEventsResult, {
       rows: [] as DashboardEventRow[],
@@ -704,7 +720,14 @@ export async function getDashboardToday({
   const aiPicksFeed = board.aiPicksFeed ?? boardFallback.aiPicksFeed!
   const predictionCandidates = board.candidates.length || displayCandidates.length || nextSlate.activeCandidates
   const officialPicks = officialPickData.length || board.officialPickCount || nextSlate.officialPicks
-  const informationalCandidates = Math.max(0, marketIntelligence.aiLeans + marketIntelligence.watchlist + marketIntelligence.avoid)
+  const informationalCandidates = Math.max(
+    0,
+    marketIntelligence.aiLeans +
+      marketIntelligence.watchlist +
+      (marketIntelligence.modelOnly ?? 0) +
+      (marketIntelligence.pass ?? 0) +
+      marketIntelligence.avoid
+  )
   const operatingStatus = String(operatingDay.status ?? 'planned')
   const nextAction = !currentEventsResult.ok && !dashboardFallbackUsed
     ? 'Refresh stored slate status'
@@ -794,6 +817,7 @@ export async function getDashboardToday({
         : 'No game currently meets both confidence and value requirements for an Official Pick.',
     modelMostLikelyData[0] ? 'Most Likely model rankings are available from stored prediction output.' : null,
     modelOnly.summary.pitcherShadowProjections > 0 ? `${modelOnly.summary.pitcherShadowProjections} pitcher shadow projections are ready as SHADOW / NO MARKET.` : null,
+    projectedScores.games.length ? `${projectedScores.games.length} projected scores are available from stored model and market context.` : null,
     bestValueData[0] ? 'Best Value rankings are available from stored Current Board data.' : null,
     blockers.includes('market_prices_not_refreshed') ? 'Market freshness is degraded, but the Today panel remains available.' : null,
   ].filter(Boolean) as string[]
@@ -804,6 +828,7 @@ export async function getDashboardToday({
     operatingDayResult,
     budgetResult,
     modelOnlyResult,
+    projectedScoresResult,
   ]
   const criticalLabels = new Set(['current_events'])
   const errors = dependencyResults
@@ -930,6 +955,12 @@ export async function getDashboardToday({
         modelOnly,
         modelOnly.summary.modelOutcomes || modelOnly.summary.pitcherShadowProjections ? null : 'No current model-only intelligence is available for pregame events.',
         modelOnly.generatedAt
+      ),
+      projectedScores: section(
+        projectedScores.games.length ? 'AVAILABLE' : 'EMPTY',
+        projectedScores.games,
+        projectedScores.games.length ? null : 'No projected scores are available from current stored candidates.',
+        projectedScores.generatedAt
       ),
       pitcherShadows: section(
         modelOnly.categories.allPitcherShadows.length ? 'AVAILABLE' : 'EMPTY',

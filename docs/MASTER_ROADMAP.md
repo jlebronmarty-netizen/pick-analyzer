@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Prediction Quality, Calibration & UX Audit V1
+
+Status: Locally implemented; production deployment and read-only smoke pending.
+
+Evidence: `src/services/market-opportunity-suite.service.ts`, `src/services/market-intelligence-category.service.ts`, `src/services/recommendation-explanation.service.ts`, `src/services/mlb-projected-score.service.ts`, `/api/mlb/projected-scores`, Today dashboard panels, market-opportunity tools, Operations Validation and local production build.
+
+Note: This pass fixes user-facing semantics without changing the predictive model. Most Likely now ranks binary outcome probability and explicitly labels complement-derived outcomes. Recommendation categories now separate Model Only and Pass from true Avoid, preserving Official Pick, EV, Kelly and edge policy. Projected scores are approximate stored-data orientation only and do not create recommendations or mutate prediction history.
+
 ### Market Intelligence Recovery V1
 
 Status: Locally implemented; production deployment and live one-call certification pending.

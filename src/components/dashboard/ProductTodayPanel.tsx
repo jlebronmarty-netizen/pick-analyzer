@@ -25,6 +25,8 @@ type TodayResponse = {
     official: number
     aiLeans: number
     watchlist: number
+    modelOnly?: number
+    pass?: number
     avoid: number
   }
   latestOddsTimestamp: string | null
@@ -132,6 +134,8 @@ function BriefingCard({ data }: { data: TodayResponse }) {
     official: data.officialPicks,
     aiLeans: 0,
     watchlist: 0,
+    modelOnly: 0,
+    pass: 0,
     avoid: 0,
   }
 
@@ -155,10 +159,12 @@ function BriefingCard({ data }: { data: TodayResponse }) {
             <Metric label="Recommendation" value={shouldBet ? 'Bet with official staking' : 'Preserve bankroll'} tone={shouldBet ? 'green' : 'yellow'} />
             <Metric label="Next Safe Action" value={data.nextAction} tone="blue" />
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-6">
             <Metric label="Official Picks" value={data.officialPicks} tone={data.officialPicks ? 'green' : 'gray'} />
             <Metric label="AI Leans" value={categories.aiLeans} tone={categories.aiLeans ? 'yellow' : 'gray'} />
             <Metric label="Watchlist" value={categories.watchlist} tone={categories.watchlist ? 'blue' : 'gray'} />
+            <Metric label="Model Only" value={categories.modelOnly ?? 0} tone={categories.modelOnly ? 'blue' : 'gray'} />
+            <Metric label="Pass" value={categories.pass ?? 0} tone={categories.pass ? 'blue' : 'gray'} />
             <Metric label="Avoid" value={categories.avoid} tone={categories.avoid ? 'red' : 'gray'} />
           </div>
         </div>
@@ -168,7 +174,7 @@ function BriefingCard({ data }: { data: TodayResponse }) {
           <h3 className="mt-3 text-2xl font-black text-white">{data.summary.recommendation}</h3>
           <p className="mt-3 text-sm leading-6 text-slate-300">{data.summary.marketPrices}</p>
           <p className="mt-3 rounded-lg border border-slate-800 bg-slate-900/70 p-3 text-xs font-bold leading-5 text-slate-300">
-            Official Picks are the only recommendations. AI Leans, Watchlist and Avoid are market intelligence only.
+            Official Picks are the only recommendations. AI Leans, Watchlist, Model Only, Pass and Avoid are separated from betting recommendations.
           </p>
           <div className="mt-5 grid grid-cols-2 gap-3">
             <Metric label="Candidates" value={data.predictionCandidates} tone={data.predictionCandidates ? 'blue' : 'gray'} />

@@ -116,8 +116,8 @@ type BestBetToday = {
   stadiumId: string | null
   score: number
   official: boolean
-  marketIntelligenceCategory?: 'official' | 'ai_lean' | 'watchlist' | 'avoid'
-  productCategory?: 'Official' | 'AI Lean' | 'Watchlist' | 'Avoid'
+  marketIntelligenceCategory?: string
+  productCategory?: string
   productStatus?: string
   statusWarning?: string | null
   reasonNotOfficial?: string | null
@@ -185,7 +185,7 @@ function opportunityLabel(score: number) {
 
 function categoryClass(category?: BestBetToday['marketIntelligenceCategory']) {
   if (category === 'official') return 'bg-emerald-500/15 text-emerald-300'
-  if (category === 'watchlist') return 'bg-blue-500/15 text-blue-200'
+  if (category === 'watchlist' || category === 'model_only' || category === 'pass') return 'bg-blue-500/15 text-blue-200'
   if (category === 'avoid') return 'bg-red-500/15 text-red-200'
   return 'bg-amber-500/15 text-amber-200'
 }

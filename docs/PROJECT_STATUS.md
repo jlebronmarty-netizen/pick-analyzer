@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-07-22 15:35:00Z
+Last updated: 2026-07-22 17:15:00Z
+
+## 2026-07-22 Prediction Quality, Calibration & UX Audit V1
+
+- Corrected Most Likely semantics so binary markets rank the most likely outcome, deriving and labeling the complement when the stored selected side is below 50%.
+- Split product categories into Official, AI Lean, Watchlist, Model Only, Pass and Avoid; Avoid is now reserved for materially negative, invalid or unsafe markets rather than quarantine, stale or no-market rows.
+- Added read-only MLB projected scores at `/api/mlb/projected-scores`, derived from stored Current Board moneyline, total and run-line candidates with explicit approximate-model warnings.
+- Today dashboard now exposes Model Only and Pass counts, projected scores and clearer next-action copy without changing Official Pick, EV, Kelly, edge, settlement or Learning Brain policy.
+- Local production build passes. No provider calls, prediction row rewrites, recommendation threshold changes, official-pick promotion or fabricated market data were introduced.
 
 ## 2026-07-22 Market Intelligence Recovery V1
 
