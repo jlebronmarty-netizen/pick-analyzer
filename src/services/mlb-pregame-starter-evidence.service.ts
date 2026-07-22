@@ -100,6 +100,11 @@ function num(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function providerId(value: unknown) {
+  const parsed = num(value)
+  return parsed !== null && parsed > 0 ? parsed : null
+}
+
 function nowIso() {
   return new Date().toISOString()
 }
@@ -259,8 +264,8 @@ function classifyFreshness(status: 'CONFIRMED' | 'PROBABLE', sourceTimestamp: st
 
 function sideCandidate(game: RawGame, event: EventRow, side: 'away' | 'home', sourceTimestamp: string, observedAt: string, identity: Awaited<ReturnType<typeof loadIdentityMaps>>): StarterEvidenceCandidate | null {
   const prefix = side === 'away' ? 'Away' : 'Home'
-  const probableId = num(game[`${prefix}TeamProbablePitcherID`])
-  const startingId = num(game[`${prefix}TeamStartingPitcherID`])
+  const probableId = providerId(game[`${prefix}TeamProbablePitcherID`])
+  const startingId = providerId(game[`${prefix}TeamStartingPitcherID`])
   const providerPitcherId = String(startingId ?? probableId ?? '')
   if (!providerPitcherId) return null
 
@@ -550,6 +555,7 @@ export function validateMlbPregameStarterEvidenceFixtures() {
     ['pregame probable accepted by timestamp', beforeStart.pregame === true && beforeStart.stale === false],
     ['post-start source rejected', afterStart.pregame === false],
     ['stale evidence labeled', stale.stale === true],
+    ['zero provider id is missing', providerId(0) === null],
     ['probable maps to schema-safe expected confirmation', lineupRow({
       id: 'fixture',
       eventId: 'event',
