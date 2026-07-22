@@ -1,6 +1,13 @@
 # Project Status
 
-Last updated: 2026-07-22 14:45:00Z
+Last updated: 2026-07-22 15:35:00Z
+
+## 2026-07-22 Market Intelligence Recovery V1
+
+- Repaired the MLB one-call final odds refresh path so stored future scheduled slate events can be used when prior schedule discovery did not stamp `metadata.prospective_preview=true`.
+- Added a fail-closed SportsDataIO budget check and in-process provider action lock around real operating-day MLB odds refresh actions before external provider execution.
+- Added read-only `/api/mlb/market-pipeline/diagnostics` for slate events, odds snapshots, prediction rows, Current Board visibility, exclusion counts and zero-call validation.
+- Local production build passes. No betting policy, Official Pick thresholds, EV/Kelly rules, unsupported markets, settlement logic or fabricated odds were changed.
 
 ## 2026-07-22 End-to-End Prediction Lifecycle Recovery V1
 

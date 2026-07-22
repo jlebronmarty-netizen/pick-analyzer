@@ -3242,8 +3242,11 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   }
 
   const allEventsForDate = await loadEventsForDate(selectedDate)
+  const prospectiveEventsForDate = allEventsForDate.filter(isProspectiveOperatingDayEvent)
   const events = finalRefreshLike
-    ? allEventsForDate.filter(isProspectiveOperatingDayEvent)
+    ? prospectiveEventsForDate.length
+      ? prospectiveEventsForDate
+      : allEventsForDate
     : allEventsForDate
   const nowMs = new Date(generatedAt).getTime()
   const futureSlate = events.filter((event) => {
@@ -3312,7 +3315,9 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
     snapshotsCompared: persistedBeforeProviderCheck.length,
     sourceLatestTimestamp: maxIso(persistedBeforeProviderCheck.map((row) => row.snapshot_time)),
   })
-  const warnings: string[] = []
+  const warnings: string[] = prospectiveEventsForDate.length === 0 && finalRefreshLike && allEventsForDate.length > 0
+    ? ['Final refresh used stored scheduled events because no prospective-preview event metadata was present for the selected date.']
+    : []
   if (!existingOddsCheckpoint) {
     const oddsStarted = nowIso()
     calls += 1

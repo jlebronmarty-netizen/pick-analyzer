@@ -1527,22 +1527,67 @@ export async function executeOperatingDay(request: ExecuteRequest) {
       status = 'planned'
     }
   } else if (action === 'morning_sync' || action === 'midday_refresh' || action === 'final_refresh') {
-    const preview = await runSportsDataIoMlbProspectivePreview({
+    const requestedCalls = action === 'final_refresh' ? 1 : 3
+    const budget = await checkProviderBudget({
+      provider: 'sportsdataio',
+      sportKey,
+      action,
+      requestedCalls,
       dryRun: false,
-      confirmed: true,
-      selectedDate: date,
-      operatingDayId,
-      operatingDayRefresh: action !== 'final_refresh',
-      operatingDayFinalRefresh: action === 'final_refresh',
-      forceRefresh: request.forceRefresh === true,
-      maximumRequests: request.maximumRequests ?? (action === 'final_refresh' ? 1 : 3),
-      timeoutMs: request.timeoutMs,
+      forceRefresh: request.forceRefresh,
     })
-    providerCallsMade = Number(asRecord(preview.providerUsage).externalProviderCallsMade ?? preview.providerCallsMade ?? 0)
-    result = preview as Record<string, unknown>
-    if (String(preview.status) === 'locked_or_started') {
-      status = 'games_in_progress'
-      blockingReason = 'Final pregame refresh skipped because persisted events are locked or started.'
+    if (!budget.allowed) {
+      providerCallsMade = 0
+      status = 'planned'
+      blockingReason = budget.blockedReason
+      warnings = [budget.blockedReason].filter(Boolean) as string[]
+      result = {
+        success: false,
+        status: 'provider_budget_blocked',
+        providerCallsMade: 0,
+        providerBudget: budget.status,
+        failureReason: budget.blockedReason,
+      }
+    } else {
+      const lockKey = `sportsdataio:${sportKey}:${leagueKey}:${date}:${action}`
+      if (!claimProviderActionLock(lockKey)) {
+        providerCallsMade = 0
+        status = 'planned'
+        blockingReason = 'A SportsDataIO refresh is already in progress for this slate/action.'
+        warnings = [blockingReason]
+        result = {
+          success: false,
+          status: 'refresh_already_in_progress',
+          providerCallsMade: 0,
+          providerBudget: budget.status,
+          failureReason: blockingReason,
+        }
+      } else {
+        try {
+          const preview = await runSportsDataIoMlbProspectivePreview({
+            dryRun: false,
+            confirmed: true,
+            selectedDate: date,
+            operatingDayId,
+            operatingDayRefresh: action !== 'final_refresh',
+            operatingDayFinalRefresh: action === 'final_refresh',
+            forceRefresh: request.forceRefresh === true,
+            maximumRequests: request.maximumRequests ?? (action === 'final_refresh' ? 1 : 3),
+            timeoutMs: request.timeoutMs,
+          })
+          providerCallsMade = Number(asRecord(preview.providerUsage).externalProviderCallsMade ?? preview.providerCallsMade ?? 0)
+          result = {
+            ...(preview as Record<string, unknown>),
+            providerBudget: budget.status,
+          }
+          if (String(preview.status) === 'locked_or_started') {
+            status = 'games_in_progress'
+            blockingReason = 'Final pregame refresh skipped because persisted events are locked or started.'
+          }
+        } finally {
+          releaseProviderActionLock(lockKey)
+        }
+      }
     }
   } else if (action === 'lock') {
     result = await lockRecommendations(operatingDayId, sportKey, date, false)
