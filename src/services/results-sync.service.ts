@@ -263,7 +263,7 @@ async function existingResultRows(rows: GameResultRow[]) {
     .select('game_id, sport_key, home_team, away_team, home_score, away_score, winner, commence_time')
     .in('game_id', rows.map((row) => row.game_id))
   if (error) throw new Error(`Existing result lookup failed: ${error.message}`)
-  return new Map(((data ?? []) as GameResultRow[]).map((row) => [`${row.sport_key}:${row.game_id}`, row]))
+  return new Map(((data ?? []) as GameResultRow[]).map((row) => [row.game_id, row]))
 }
 
 async function persistResultRows(rows: GameResultRow[]) {
@@ -271,13 +271,19 @@ async function persistResultRows(rows: GameResultRow[]) {
     return { inserted: 0, updated: 0, reused: 0 }
   }
 
-  const existing = await existingResultRows(rows)
+  const uniqueRows = Array.from(
+    rows.reduce((map, row) => {
+      map.set(row.game_id, row)
+      return map
+    }, new Map<string, GameResultRow>()).values()
+  )
+  const existing = await existingResultRows(uniqueRows)
   const inserts: GameResultRow[] = []
   const updates: GameResultRow[] = []
   let reused = 0
 
-  for (const row of rows) {
-    const existingRow = existing.get(`${row.sport_key}:${row.game_id}`)
+  for (const row of uniqueRows) {
+    const existingRow = existing.get(row.game_id)
     if (!existingRow) {
       inserts.push(row)
     } else if (!sameResultRow(row, existingRow)) {
@@ -303,9 +309,8 @@ async function persistResultRows(rows: GameResultRow[]) {
         winner: row.winner,
         commence_time: row.commence_time,
       })
-      .eq('sport_key', row.sport_key)
       .eq('game_id', row.game_id)
-    if (error) throw new Error(`Game result update failed for ${row.sport_key}:${row.game_id}: ${error.message}`)
+    if (error) throw new Error(`Game result update failed for ${row.game_id}: ${error.message}`)
   }
 
   return { inserted: inserts.length, updated: updates.length, reused }
