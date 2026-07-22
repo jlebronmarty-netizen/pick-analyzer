@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { isLegacyPredictionProvenanceRow } from '@/services/legacy-prediction-provenance.service'
 import { settleMarket, type SettlementMarket, type SettlementOutcome } from '@/services/settlement-core.service'
 
 type StalePendingCategory =
@@ -15,6 +16,7 @@ type StalePendingCategory =
   | 'VOID_MARKET'
   | 'POST_START_PREDICTION'
   | 'TEST_OR_FIXTURE_DATA'
+  | 'LEGACY_PROVENANCE_NON_PRODUCTION'
   | 'DUPLICATE_PREDICTION'
   | 'DUPLICATE_MARKET_VERSION'
   | 'MANUAL_REVIEW'
@@ -41,7 +43,12 @@ type PredictionRow = {
   manual_adjustment: boolean | null
   model_version: string | null
   model_role: string | null
+  feature_snapshot_id?: string | null
+  odds_snapshot_id?: string | null
+  operating_day_id?: string | null
+  idempotency_key?: string | null
   generated_at: string | null
+  created_at?: string | null
   cutoff_at: string | null
   production_eligible: boolean | null
   trial: boolean | null
@@ -176,6 +183,7 @@ function classify(row: PredictionRow, event: EventRow | undefined, duplicateKeys
   if (duplicateKeys.has(key)) return 'DUPLICATE_PREDICTION'
   if (isTestOrFixture(row)) return 'TEST_OR_FIXTURE_DATA'
   if (isPostStart(row, event)) return 'POST_START_PREDICTION'
+  if (!event && isLegacyPredictionProvenanceRow(row)) return 'LEGACY_PROVENANCE_NON_PRODUCTION'
   if (!event) return 'EXACT_EVENT_MAPPING_MISSING'
   const eventStatus = normalize(event.status)
   if (VOID_EVENT_STATUSES.has(eventStatus)) return 'CANCELED'
@@ -192,7 +200,7 @@ async function loadPredictions() {
   for (let from = 0; ; from += 1000) {
     const { data, error } = await supabaseAdmin
       .from('prediction_history')
-      .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, line, model_probability, recommended_pick, status, result, lifecycle_status, manual_adjustment, model_version, model_role, generated_at, cutoff_at, production_eligible, trial, scrambled, validation_status, validation_warnings, settlement_details, settled_at')
+      .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, line, model_probability, recommended_pick, status, result, lifecycle_status, manual_adjustment, model_version, model_role, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key, generated_at, created_at, cutoff_at, production_eligible, trial, scrambled, validation_status, validation_warnings, settlement_details, settled_at')
       .order('created_at', { ascending: false })
       .range(from, from + 999)
     if (error) throw new Error(`prediction_history audit read failed: ${error.message}`)
@@ -329,6 +337,12 @@ export async function getSettlementReconciliationPlan() {
     rowsRequiringExactEventLinkRepair: classified.filter((item) => item.category === 'EXACT_EVENT_MAPPING_MISSING').length,
     rowsExcludedAsPostStart: classified.filter((item) => item.category === 'POST_START_PREDICTION').length,
     rowsExcludedAsTestFixture: classified.filter((item) => item.category === 'TEST_OR_FIXTURE_DATA').length,
+    rowsExcludedByLegacyProvenance: classified.filter((item) => item.category === 'LEGACY_PROVENANCE_NON_PRODUCTION').length,
+    productionScopedPendingRows:
+      pendingRows.length -
+      classified.filter((item) =>
+        ['POST_START_PREDICTION', 'TEST_OR_FIXTURE_DATA', 'LEGACY_PROVENANCE_NON_PRODUCTION'].includes(item.category)
+      ).length,
     rowsRequiringManualReview: classified.filter((item) => item.category === 'MANUAL_REVIEW' || item.category === 'EVENT_MAPPING_CONFLICT').length,
     expectedWins: expected.win ?? 0,
     expectedLosses: expected.loss ?? 0,

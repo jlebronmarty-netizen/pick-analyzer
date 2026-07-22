@@ -24,6 +24,7 @@ import { validateSportsAnalystFixtures } from '@/services/sports-analyst.service
 import { validatePlayerIntelligenceFixtures } from '@/services/player-intelligence.service'
 import { validateUniversalEventIdentityFixtures } from '@/services/universal-event-identity.service'
 import { validateMissingCanonicalEventsRecoveryFixtures } from '@/services/missing-canonical-events-recovery.service'
+import { validateLegacyPredictionProvenanceFixtures } from '@/services/legacy-prediction-provenance.service'
 
 export async function GET(request: NextRequest) {
   const adaptive = validateAdaptiveRefreshFixtures()
@@ -50,6 +51,7 @@ export async function GET(request: NextRequest) {
   const playerIntelligence = validatePlayerIntelligenceFixtures()
   const universalEventIdentity = validateUniversalEventIdentityFixtures()
   const missingCanonicalEventsRecovery = validateMissingCanonicalEventsRecoveryFixtures()
+  const legacyPredictionProvenance = validateLegacyPredictionProvenanceFixtures()
   return apiOk({
     ...adaptive,
     success:
@@ -76,7 +78,8 @@ export async function GET(request: NextRequest) {
       sportsAnalyst.success &&
       playerIntelligence.success &&
       universalEventIdentity.success &&
-      missingCanonicalEventsRecovery.success,
+      missingCanonicalEventsRecovery.success &&
+      legacyPredictionProvenance.success,
     marketAlignment,
     marketClassification,
     aiBetFinder,
@@ -100,6 +103,7 @@ export async function GET(request: NextRequest) {
     playerIntelligence,
     universalEventIdentity,
     missingCanonicalEventsRecovery,
+    legacyPredictionProvenance,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }, requestId(request))

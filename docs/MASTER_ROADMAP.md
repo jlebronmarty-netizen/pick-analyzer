@@ -2025,3 +2025,17 @@ Persistence or migration scope: No migration. The existing 2026-07-17 stat rows 
 Validation: The 2026-07-17 imported stat rows improved from 82/418 player_id coverage to 418/418. Reconciliation updated 336 rows, found 0 conflicts, 0 unknown provider IDs, 0 duplicate stat IDs and 0 unresolved player flags after completion. The 2026-07-16 first pilot date initially resolved 8/27 rows because the deployed lookup still read only the first canonical player page; the pilot stopped before dates 2 and 3, the lookup was corrected to page `sport_players`, and 19 rows were reconciled from stored exact mappings only. Idempotency verification would make 0 additional updates. The durability fixture validation includes exact mapping, numeric/string provider ID normalization, conflict preservation and missing-canonical-player checks.
 
 Completion criteria: Exact player identity resolution is available to future MLB historical imports, the controlled single-date import is fully reconciled, unresolved classifications are empty for that date, and a 3-date pilot can be considered only under a separate explicit authorization.
+
+### 36. Legacy Prediction Provenance And Production Data Cleanup V1
+
+Objective: Prove the origin of unresolved legacy `prediction_history` rows and isolate them from production-qualified metrics without deleting data.
+
+Status: Implemented as a read-only provenance and scope-isolation layer.
+
+Backend scope: `legacy-prediction-provenance.service.ts`, `/api/predictions/provenance`, `/api/operations/validation` and Settlement Reconciliation category accounting.
+
+Persistence or migration scope: None. Existing rows remain untouched.
+
+Validation: `npm.cmd run build` exits 0. Local fixture validation proves legacy rows classify as non-production, production-lineage rows classify as production, legacy `recommended_pick` flags do not imply official picks, and the module makes 0 provider calls and 0 remote mutations.
+
+Completion criteria: Legacy rows are explainable by stored data plus git/migration provenance, remain available to audit/history, and are excluded from production-scoped settlement backlog and metrics.

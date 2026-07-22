@@ -340,6 +340,8 @@ Market Intelligence Engine V1 (`src/services/market-intelligence-engine.service.
 
 Day 1 Recommendation Readiness V1 (`src/services/day1-recommendation-readiness.service.ts`, `/api/recommendation-readiness`) audits the complete recommendation path without provider calls or mutations. It reuses one Current Board snapshot, evaluates each candidate through Recommendation Eligibility Policy V1, checks Top Picks and Bet Slip official-only behavior, summarizes AI Bet Finder prompt expectations and runs an in-memory excellent-value production scenario to prove automatic activation would work when all gates are honestly satisfied.
 
+Legacy Prediction Provenance V1 (`src/services/legacy-prediction-provenance.service.ts`, `/api/predictions/provenance`) is the read-only origin classifier for old `prediction_history` rows. It combines stored row fields, The Odds API legacy shape, git writer lineage and migration timeline evidence to classify legacy non-production rows without deleting data or manufacturing event links. Settlement Reconciliation consumes the same classifier and reports those rows as `LEGACY_PROVENANCE_NON_PRODUCTION`; production metrics continue to require explicit production eligibility and canonical lineage.
+
 ### Feature Sets
 
 Start with Feature Store Core definitions and add sport-specific registries before changing prediction engines. New feature sets must declare required and optional features, freshness policies, no-leakage rules and fallback behavior for unavailable provider data.

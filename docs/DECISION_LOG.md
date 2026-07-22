@@ -1790,6 +1790,16 @@ Consequences: Current audit classifies pending-like rows as non-production/test-
 
 Affected modules: Settlement reconciliation, Operations Validation, AI Sports Analyst V2, Game Story Engine, Player Intelligence Foundation and docs.
 
+## 2026-07-21 - Classify Legacy Prediction Provenance Without Data Deletion
+
+Context: 342 unresolved `prediction_history` rows remained exact-event-unlinked after event identity and recovery diagnostics. They carried legacy The Odds API row shape, no canonical lineage and `production_eligible=false`, but still appeared in settlement repair backlog accounting.
+
+Decision: Add a read-only provenance service and route that classifies legacy rows by evidence, documents the original writer commit and canonical-event migration timeline, and reuses that classifier inside Settlement Reconciliation as `LEGACY_PROVENANCE_NON_PRODUCTION`.
+
+Consequences: Legacy rows remain in audit/history/replay surfaces but are excluded from production-scoped settlement backlog and metrics. No rows are deleted, no event links are manufactured, no provider calls are made and no prediction/recommendation logic changes.
+
+Affected modules: Prediction provenance API, settlement reconciliation, operations validation and docs.
+
 ## 2026-07-17 - Add MLB Next Slate Rollover V1
 
 Context: After the first live MLB operating day, the completed/started `NYM @ PHI` slate could still leak into active betting surfaces through stored prospective preview paths, while the next real task was to identify tomorrow's slate without consuming provider quota.
