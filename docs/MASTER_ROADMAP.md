@@ -10,11 +10,11 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ### End-to-End Prediction Lifecycle Recovery V1
 
-Status: Locally implemented, build passing, pending production migration/deploy certification.
+Status: Production partial recovery implemented and deployed.
 
-Evidence: `src/services/model-only-intelligence.service.ts`, Most Likely fallback, Dashboard Today model-intelligence sections, informational model-only parlays, Operations Validation, additive projection-history schema migration and recovery docs.
+Evidence: `src/services/model-only-intelligence.service.ts`, `src/services/performance-scope-v2.service.ts`, Most Likely fallback, Dashboard Today model-intelligence sections, informational model-only parlays, result-sync persistence repair, Operations Validation, additive projection-history schema migration and recovery docs.
 
-Note: This recovery restores model probability visibility without loosening betting safety. Best Value still requires market odds, Official Picks still require policy eligibility, and pitcher-outs remain SHADOW / NO_MARKET. Settlement audit found no production-scoped deterministic pending rows eligible for write settlement in the current stored dataset.
+Note: This recovery restores model probability visibility without loosening betting safety. Best Value still requires market odds, Official Picks still require policy eligibility, and pitcher-outs remain SHADOW / NO_MARKET. Production schema alignment is verified. A controlled MLB Stats API result sync repaired recent stale final event scores, then settlement reconciliation executed with zero prediction mutations because pending rows remain legacy, test/fixture or post-start excluded rather than deterministic production-scoped candidates.
 
 ### Missing Canonical Events Recovery V1
 

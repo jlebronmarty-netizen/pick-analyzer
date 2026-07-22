@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-22 13:55:00Z
+Last updated: 2026-07-22 14:45:00Z
 
 ## 2026-07-22 End-to-End Prediction Lifecycle Recovery V1
 
@@ -8,6 +8,9 @@ Last updated: 2026-07-22 13:55:00Z
 - Added additive projection-history schema alignment migration `202607220001_universal_projection_history_schema_alignment.sql` for nullable optional columns expected by richer projection read/settlement paths.
 - Dashboard Today now exposes model intelligence, pitcher shadows and informational parlays separately from Best Value and Official Picks, and shows market refresh as the next relevant action when today has games waiting for odds.
 - Production audit found recent MLB pending rows are non-production/test-like preview scope or legacy/post-start blocked, with no deterministic production-scoped settlement writes currently eligible.
+- Production schema alignment for `universal_projection_history` is verified after manual migration application; Learning Brain no longer hits the prior `squared_error` missing-column read failure.
+- Results sync now persists `game_results` by the production `game_id` uniqueness contract instead of requiring a composite conflict target. A controlled MLB Stats API results sync repaired recent stale completed MLB event scores before zero-mutation settlement reconciliation.
+- Added Performance Scope/Timeline V2 as a read-only API surface that separates market, model-only, shadow and Official Pick contexts, reports exact pending reasons and avoids presenting 0% accuracy without settled sample context.
 - New docs: end-to-end pipeline, refresh contract, prediction family/deduplication, settlement recovery, performance scope/timeline, model-only ranking/parlay and User Mode intelligence.
 
 ## Current Architecture

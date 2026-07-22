@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAiPerformanceCenter } from '@/services/ai-performance-center.service'
+import { getPerformanceScopeV2 } from '@/services/performance-scope-v2.service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +11,10 @@ export async function GET(request: NextRequest) {
     const mode = request.nextUrl.searchParams.get('mode')
     const minConfidence = Number(request.nextUrl.searchParams.get('minConfidence') ?? Number.NaN)
     const maxConfidence = Number(request.nextUrl.searchParams.get('maxConfidence') ?? Number.NaN)
-    const data = await getAiPerformanceCenter({ sportKey, dryRun: true })
+    const [data, performanceScopeV2] = await Promise.all([
+      getAiPerformanceCenter({ sportKey, dryRun: true }),
+      getPerformanceScopeV2({ sportKey }),
+    ])
     const rows = data.predictionHistory.rows.filter((row) => {
       if (category && row.category !== category) return false
       if (modelVersion && row.modelVersion !== modelVersion) return false
@@ -28,6 +32,9 @@ export async function GET(request: NextRequest) {
       generatedAt: data.generatedAt,
       filters: { sportKey, category, modelVersion, status, mode, minConfidence: Number.isFinite(minConfidence) ? minConfidence : null, maxConfidence: Number.isFinite(maxConfidence) ? maxConfidence : null },
       rows,
+      rowsV2: performanceScopeV2.historyPreview,
+      pendingReasons: performanceScopeV2.pending.byReason,
+      timelineV2: performanceScopeV2.timeline,
       totalRows: rows.length,
       immutableHistory: true,
       providerCallsMade: 0,
