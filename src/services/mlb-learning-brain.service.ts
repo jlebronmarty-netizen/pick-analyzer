@@ -703,7 +703,22 @@ export async function executeMlbLearningBrain(input: { season?: string | null; d
     }
   }
   const { error } = await supabaseAdmin.from('universal_projection_history').upsert(rows, { onConflict: 'id' })
-  if (error) throw new Error(`pitcher-outs shadow projection persistence failed: ${error.message}`)
+  if (error) {
+    return {
+      success: false,
+      mode: 'mlb_learning_brain_execution_v1',
+      dryRun: false,
+      season,
+      plannedSnapshots: rows.length,
+      plannedShadowProjections: rows.length,
+      snapshotsPersisted: 0,
+      shadowProjectionsPersisted: 0,
+      status: 'PERSISTENCE_BLOCKED',
+      error: error.message,
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+    }
+  }
   return {
     success: true,
     mode: 'mlb_learning_brain_execution_v1',
