@@ -702,7 +702,7 @@ export async function executeMlbLearningBrain(input: { season?: string | null; d
       remoteMutationsMade: 0,
     }
   }
-  const { error } = await supabaseAdmin.from('universal_projection_history').upsert(rows, { onConflict: 'idempotency_key' })
+  const { error } = await supabaseAdmin.from('universal_projection_history').upsert(rows, { onConflict: 'id' })
   if (error) throw new Error(`pitcher-outs shadow projection persistence failed: ${error.message}`)
   return {
     success: true,
