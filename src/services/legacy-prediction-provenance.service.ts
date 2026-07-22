@@ -103,6 +103,12 @@ function isPendingLike(row: PredictionProvenanceRow) {
   return !FINAL_RESULTS.has(result) && !FINAL_RESULTS.has(status) && !TERMINAL_LIFECYCLE.has(lifecycle)
 }
 
+function isPostStart(row: PredictionProvenanceRow) {
+  const start = Date.parse(row.commence_time ?? '')
+  const generated = Date.parse(row.generated_at ?? '')
+  return Number.isFinite(start) && Number.isFinite(generated) && generated >= start
+}
+
 function hasTheOddsApiLegacyShape(row: PredictionProvenanceInput) {
   return (
     isHexProviderGameId(row.game_id) &&
@@ -236,7 +242,10 @@ export async function getLegacyPredictionProvenanceReport() {
   })
   const allLegacy = classified.filter((item) => item.classification === 'LEGACY')
   const unresolvedPending = classified.filter((item) => !item.canonicalEventExists && isPendingLike(item.row))
-  const legacy = unresolvedPending.filter((item) => item.classification === 'LEGACY')
+  const unresolvedProductionScope = unresolvedPending.filter(
+    (item) => item.classification !== 'SYNTHETIC_TEST' && !isPostStart(item.row)
+  )
+  const legacy = unresolvedProductionScope.filter((item) => item.classification === 'LEGACY')
   const legacyRows = legacy.map((item) => item.row)
   const createdBeforeSportEvents = legacyRows.filter((row) => Date.parse(row.created_at ?? '') < Date.parse('2026-07-11T00:00:00Z'))
   const recommendedLegacy = legacyRows.filter((row) => row.recommended_pick === true)
@@ -251,9 +260,12 @@ export async function getLegacyPredictionProvenanceReport() {
     totalPredictionRowsExamined: rows.length,
     totalLegacyRowsAllHistory: allLegacy.length,
     unresolvedRowsExamined: unresolvedPending.length,
+    unresolvedRowsExcludedAsPostStart: unresolvedPending.filter((item) => isPostStart(item.row)).length,
+    unresolvedRowsExcludedAsSyntheticTest: unresolvedPending.filter((item) => item.classification === 'SYNTHETIC_TEST').length,
+    unresolvedProductionScopeRows: unresolvedProductionScope.length,
     unresolvedLegacyRows: legacy.length,
     unresolvedLegacyUniqueEvents: new Set(legacy.map((item) => item.row.game_id)).size,
-    provenanceCounts: groupCount(unresolvedPending, (item) => item.classification),
+    provenanceCounts: groupCount(unresolvedProductionScope, (item) => item.classification),
     allStoredProvenanceCounts: groupCount(classified, (item) => item.classification),
     productionScope: {
       productionQualifiedLegacyRows: legacyRows.filter((row) => row.production_eligible === true).length,
@@ -297,7 +309,7 @@ export async function getLegacyPredictionProvenanceReport() {
       providerOriginEvidence: 'The Odds API odds response shape: 32-character provider game IDs, sport_key values, h2h moneyline market and sportsbook labels DraftKings/FanDuel/MyBookie.ag.',
       notCertifiedProductionReason:
         'Rows lack canonical sport_events linkage, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key and model_version, and are explicitly production_eligible=false.',
-      unknownRows: unresolvedPending.filter((item) => item.classification === 'UNKNOWN').length,
+      unknownRows: unresolvedProductionScope.filter((item) => item.classification === 'UNKNOWN').length,
     },
     sampleLegacyRows: legacy.slice(0, 10).map((item) => ({
       id: item.row.id,
