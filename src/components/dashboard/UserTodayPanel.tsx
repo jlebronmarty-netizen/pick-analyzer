@@ -372,7 +372,7 @@ function humanStatus(value: unknown) {
   if (raw.includes('suspended')) return 'Suspended'
   if (raw.includes('delayed')) return 'Delayed'
   if (raw.includes('canceled') || raw.includes('cancelled')) return 'Canceled'
-  if (raw.includes('waiting')) return 'Waiting'
+  if (raw.includes('waiting')) return 'Waiting for Update'
   return 'Tracking'
 }
 
@@ -515,7 +515,7 @@ function QuickNumber({ label, value, tone }: { label: string; value: number; ton
 function marketSentiment(data: TodayResponse, counts: CategoryCounts) {
   if (counts.official > 0) return { label: 'AGGRESSIVE', tone: 'green' as const }
   if (counts.aiLeans > 0 || data.gamesReadyForAnalysis > 0 || data.predictionCandidates > 0) return { label: 'SELECTIVE', tone: 'yellow' as const }
-  if (data.gamesWaitingForOdds > 0 || data.freshness === 'empty') return { label: 'WAITING', tone: 'blue' as const }
+  if (data.gamesWaitingForOdds > 0 || data.freshness === 'empty') return { label: 'ODDS PENDING', tone: 'blue' as const }
   return { label: 'DEFENSIVE', tone: 'red' as const }
 }
 
@@ -523,7 +523,7 @@ function DecisionHero({ data, counts }: { data: TodayResponse; counts: CategoryC
   const decision = data.officialPicks > 0
     ? 'BET TODAY'
     : counts.aiLeans > 0 || counts.watchlist > 0 || data.gamesWaitingForOdds > 0 || data.upcomingGames > 0
-      ? 'WAIT TODAY'
+      ? 'WAIT FOR ODDS'
       : 'STAY OUT'
   const tone = data.officialPicks > 0 ? 'green' : counts.aiLeans > 0 ? 'yellow' : data.gamesWaitingForOdds > 0 || data.upcomingGames > 0 ? 'blue' : 'gray'
   const sentiment = marketSentiment(data, counts)
@@ -533,7 +533,7 @@ function DecisionHero({ data, counts }: { data: TodayResponse; counts: CategoryC
     : counts.aiLeans > 0
       ? `${counts.aiLeans} AI Lean${counts.aiLeans === 1 ? '' : 's'} are available, but no Official Pick.`
       : data.gamesWaitingForOdds > 0
-        ? 'New odds are needed before picks can be finalized.'
+        ? 'Sportsbook odds are needed before picks can be finalized.'
         : 'No play meets the Official standard right now.'
 
   return (
@@ -579,7 +579,13 @@ function CategoryCard({ title, value, tone, icon, href, status, tooltip }: { tit
 
 function fieldValue(value: unknown, fallback = 'Pending') {
   const text = String(value ?? '').trim()
-  return text || fallback
+  const normalized = text.toLowerCase().replaceAll('_', ' ')
+  if (!text) return fallback === 'Pending' ? 'Awaiting update' : fallback
+  if (normalized === 'no market') return 'Waiting for sportsbook odds'
+  if (normalized === 'not available' || normalized === 'n/a' || normalized === 'unavailable') return 'Not available yet'
+  if (normalized === 'pending') return 'Awaiting update'
+  if (normalized === 'waiting') return 'Waiting for update'
+  return text.replaceAll('_', ' ')
 }
 
 function OfficialPickExperienceCard({ picks, reason, topOpportunity }: { picks: OfficialPick[]; reason?: string | null; topOpportunity: TopOpportunity | null }) {
@@ -1006,7 +1012,7 @@ function TodayStory({ data, mostLikely, bestValue, counts }: { data: TodayRespon
   const topValue = bestValue[0]
   const lines = [
     data.gamesWaitingForOdds > 0
-      ? 'The AI is waiting for current market prices before it can finalize recommendations.'
+      ? 'Sportsbook odds are still pending, so recommendations stay locked until the board has current prices.'
       : counts.official > 0
         ? `${counts.official} Official Pick${counts.official === 1 ? '' : 's'} passed the production policy.`
         : 'No game currently meets both confidence and value requirements for an Official Pick.',
@@ -1093,7 +1099,7 @@ function IntelligenceSection({
           <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">{eyebrow}</p>
           <h3 className="mt-2 text-3xl font-black text-white">{title}</h3>
         </div>
-        <Badge tone={rows.length ? 'blue' : 'yellow'}>{rows.length ? `${rows.length} shown` : 'Waiting'}</Badge>
+        <Badge tone={rows.length ? 'blue' : 'yellow'}>{rows.length ? `${rows.length} shown` : 'Odds pending'}</Badge>
       </div>
       <div className="mt-5 grid gap-3">
         {rows.length ? rows.slice(0, 10).map((row, index) => <OpportunityRow key={opportunityKey(row, index)} row={row} rank={index + 1} mode={mode} />) : (
@@ -1174,7 +1180,7 @@ function gameCategory(game: Record<string, any>) {
   if (bettingEligibility === 'LOCKED_AFTER_START') return 'Betting Locked'
   if (bettingEligibility === 'STATUS_UNCONFIRMED') return 'Betting Locked'
   if (bettingEligibility === 'DATA_AGING' || bettingEligibility === 'STALE') return 'Data Aging'
-  if (bettingEligibility === 'NO_MARKET' && !hasMarket) return 'No Market'
+  if (bettingEligibility === 'NO_MARKET' && !hasMarket) return 'Waiting for Odds'
   if (bettingEligibility === 'INSUFFICIENT_DATA') return 'Insufficient Data'
   if (bettingEligibility === 'ELIGIBLE') return 'Operational'
   const eligibility = String(game.eligibility ?? '').toUpperCase()
@@ -1184,7 +1190,7 @@ function gameCategory(game: Record<string, any>) {
   if (eligibility === 'READY') return 'Operational'
   const grounded = categoryLabel(game.marketIntelligenceCategory ?? game.opportunityCategory ?? game.recommendationCategory)
   if (grounded) return grounded
-  if (game.oddsPresent === false) return 'Waiting'
+  if (game.oddsPresent === false) return 'Waiting for Odds'
   if (game.predictionReady === false) return 'Tracking'
   return 'Operational'
 }
@@ -1204,7 +1210,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
   const displayMarket = marketDisplay(game)
   const statusTone = status === 'Final' ? 'gray' : status === 'Live' || status === 'Status update overdue' || status === 'Status Unconfirmed' ? 'yellow' : 'blue'
   const categoryCardTone = categoryTone(aiCategory)
-  const categoryBadgeTone = aiCategory === 'Waiting' || aiCategory === 'Data Aging' ? 'yellow' : aiCategory === 'Tracking' || aiCategory === 'Operational' || aiCategory === 'No Market' || aiCategory === 'Insufficient Data' ? 'blue' : aiCategory === 'Betting Locked' ? 'red' : categoryCardTone
+  const categoryBadgeTone = aiCategory === 'Waiting for Odds' || aiCategory === 'Data Aging' ? 'yellow' : aiCategory === 'Tracking' || aiCategory === 'Operational' || aiCategory === 'Insufficient Data' ? 'blue' : aiCategory === 'Betting Locked' ? 'red' : categoryCardTone
 
   return (
     <details className={`group rounded-lg border border-slate-800 bg-slate-950/70 p-4 ${cardMotion}`}>
@@ -1218,7 +1224,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
           <Badge tone={categoryBadgeTone}>{aiCategory}</Badge>
           <div>
             <p className="text-xs font-bold text-slate-500">{hasMarket ? displayMarket.label : 'Market'}</p>
-            <p className="text-sm font-black text-white">{hasMarket ? displayMarket.priceText : 'No Market'}</p>
+            <p className="text-sm font-black text-white">{hasMarket ? displayMarket.priceText : 'Waiting for odds'}</p>
             {displayMarket.sportsbook ? <p className="mt-0.5 text-xs font-bold text-slate-500">{displayMarket.sportsbook}</p> : null}
           </div>
           <span className="text-sm font-bold text-sky-300">Details</span>
@@ -1242,7 +1248,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
           <p className="text-sm font-black text-white">AI Decision</p>
           <p className="mt-2 text-sm leading-6 text-slate-400">
             {!hasMarket && game.oddsPresent === false
-              ? 'Waiting for updated odds.'
+              ? 'Waiting for sportsbook odds.'
               : game.bettingEligibility === 'LOCKED_AFTER_START' || game.bettingEligibility === 'STATUS_UNCONFIRMED'
                 ? fieldValue(game.statusReason, 'Awaiting provider confirmation. Betting is locked until game status is verified.')
               : game.bettingEligibility === 'DATA_AGING' || game.bettingEligibility === 'STALE'
@@ -1268,11 +1274,11 @@ function GameCard({ game }: { game: Record<string, any> }) {
 
 function ProgressPipeline({ data }: { data: TodayResponse }) {
   const steps = [
-    { label: 'Schedule', mark: 'S', state: data.currentGames > 0 || data.upcomingGames > 0 ? 'Complete' : 'Waiting' },
-    { label: 'Odds', mark: 'O', state: data.gamesWaitingForOdds > 0 || data.freshness === 'empty' ? 'Waiting' : 'Complete' },
-    { label: 'Predictions', mark: 'P', state: data.predictionCandidates > 0 ? 'Complete' : data.gamesWaitingForOdds > 0 ? 'Waiting' : 'Updating' },
-    { label: 'Picks', mark: 'R', state: data.officialPicks > 0 ? 'Complete' : data.predictionCandidates > 0 ? 'Not Due' : 'Waiting' },
-    { label: 'Results', mark: 'F', state: data.finalGames > 0 ? 'Complete' : data.currentGames > 0 ? 'Not Due' : 'Waiting' },
+    { label: 'Schedule', mark: 'S', state: data.currentGames > 0 || data.upcomingGames > 0 ? 'Complete' : 'Awaiting update' },
+    { label: 'Odds', mark: 'O', state: data.gamesWaitingForOdds > 0 || data.freshness === 'empty' ? 'Waiting for odds' : 'Complete' },
+    { label: 'Predictions', mark: 'P', state: data.predictionCandidates > 0 ? 'Complete' : data.gamesWaitingForOdds > 0 ? 'Waiting for odds' : 'Updating' },
+    { label: 'Picks', mark: 'R', state: data.officialPicks > 0 ? 'Complete' : data.predictionCandidates > 0 ? 'Not due' : 'Awaiting board' },
+    { label: 'Results', mark: 'F', state: data.finalGames > 0 ? 'Complete' : data.currentGames > 0 ? 'Not due' : 'Awaiting games' },
   ]
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-5 ${cardMotion}`}>
@@ -1302,16 +1308,16 @@ function ProgressPipeline({ data }: { data: TodayResponse }) {
 
 function HealthCard({ data }: { data: TodayResponse }) {
   const status = data.gamesWaitingForOdds > 0
-      ? 'Waiting for Provider'
+      ? 'Waiting for Odds'
     : data.freshness === 'stale'
       ? 'Data Aging'
       : data.freshness === 'empty'
-        ? 'Waiting for Provider'
+        ? 'Waiting for Odds'
         : data.success
           ? 'Healthy'
           : 'Operational Blocker'
-  const tone = status === 'Healthy' ? 'green' : status === 'Operational Blocker' ? 'red' : status === 'Waiting for Provider' ? 'yellow' : 'blue'
-  const detail = status === 'Waiting for Provider'
+  const tone = status === 'Healthy' ? 'green' : status === 'Operational Blocker' ? 'red' : status === 'Waiting for Odds' ? 'yellow' : 'blue'
+  const detail = status === 'Waiting for Odds'
     ? 'Market prices are needed before recommendations can be finalized.'
     : status === 'Data Aging'
       ? simpleAction(data.nextAction)
@@ -1564,7 +1570,7 @@ export default function UserTodayPanel() {
               </p>
             ) : null}
           </div>
-          <Badge tone={games.length ? 'blue' : 'yellow'}>{games.length ? 'AI Tracking' : 'Waiting'}</Badge>
+          <Badge tone={games.length ? 'blue' : 'yellow'}>{games.length ? 'AI Tracking' : 'Awaiting slate'}</Badge>
         </div>
         <div className="mt-5 grid gap-3">
           {games.length ? games.map((game, index) => <GameCard key={game.eventId ?? game.id ?? `${game.matchup}-${index}`} game={game} />) : (

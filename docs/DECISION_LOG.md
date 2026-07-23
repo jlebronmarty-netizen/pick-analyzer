@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-23 - Keep Production UX Recovery Read-Only And Policy Preserving
+
+Context: Historical Intelligence, Feature Store Phase 2A and Settlement V2 expanded backend data quality and lifecycle metadata. Production UX then appeared regressed because legacy compatibility fields still carried `status = pending`, and some user surfaces showed empty or technical waiting states even when stored model probabilities existed.
+
+Decision: Treat Settlement V2 metadata as authoritative for performance families, exclude Legacy/Ignored/Historical/Replay/Shadow rows from production trust calculations, and recover Most Likely with stored model-only informational rows when Current Board has no safe market rows. Keep Best Value, Current Board eligibility, Official Pick policy, Prediction Engine probabilities, Learning Brain and provider behavior unchanged.
+
+Consequences: Users can see available model probability intelligence without it becoming a recommendation. Production trust is no longer lowered by intentionally classified legacy/ignored rows. Historical and settlement architecture remain intact and audit-visible.
+
+Affected modules: Market Opportunity Suite, User Today Panel, AI Performance Center, production regression docs and roadmap/status docs.
+
 ## 2026-07-23 - Keep Phase 2A Historical Feature Import Behind Protected Write Approval
 
 Context: Phase 2A completion control verified the Retrosheet historical feature-store contract, production Supabase connection, schema access, full-season dry-run and representative single-game previews. The full-season import would write 70,470 historical feature snapshots plus job/checkpoint rows.

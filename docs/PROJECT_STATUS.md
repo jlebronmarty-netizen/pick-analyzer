@@ -2,6 +2,16 @@
 
 Last updated: 2026-07-23 00:00:00Z
 
+## 2026-07-23 Production Regression Audit & UX Recovery V1
+
+- Audited production-facing UX after Settlement V2 and Historical Feature Store Phase 2A using existing persisted `prediction_history` and `sport_events` data only. Provider calls remained 0 and no sports API calls were made.
+- Read-only diagnostics found 1,327 prediction rows, 304 wins, 316 losses, 0 pushes, 342 V2 Legacy rows, 365 V2 Ignored rows, 548 V2 Generated rows, 72 V2 Settled rows, 897 current MLB model rows and 897 future MLB events. Compatibility `status` still shows 707 `pending` rows, but V2 lifecycle metadata is authoritative.
+- Recovered Most Likely list visibility when Current Board has no safe current market rows by mapping stored model-only outcomes into informational rows. These rows remain `Model Only`, have no actionable EV, no stake and no Official Pick eligibility.
+- Preserved Best Value, Current Board and Official Pick policy. Best Value remains gated by current market odds and positive EV.
+- Updated User Mode language so primary surfaces explain dependencies (`Waiting for sportsbook odds`, `Awaiting update`, `Odds pending`) instead of exposing plain `No Market`, `Pending` or generic waiting labels.
+- Separated production performance trust from V2 Legacy, Ignored, Historical, Replay and Shadow lifecycle families. Those rows remain visible in history/timeline but do not lower production trust, Brier, log loss, calibration or report-card metrics.
+- Added `docs/PRODUCTION_REGRESSION_AUDIT_V1.md` and `docs/UX_RECOVERY_V1.md`; updated architecture, roadmap and decision log.
+
 ## 2026-07-23 Settlement & Historical Reconciliation Engine V2
 
 - Added Settlement Reconciliation Engine V2 over existing persisted `prediction_history` and `sport_events` data, reusing `settlement-core.service.ts` for moneyline, spread/run-line and total grading.

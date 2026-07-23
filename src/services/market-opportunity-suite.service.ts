@@ -536,6 +536,121 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
 
 type CanonicalProbabilityCard = ReturnType<typeof currentBoardCandidateToMostLikelyCard>
 
+function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCard {
+  const probability = round(Number(outcome.modelProbability ?? outcome.probability ?? 0))
+  const confidence = round(Number(outcome.confidence ?? 0))
+  const market = String(outcome.market ?? 'unknown')
+  const marketLabelValue = String(outcome.marketLabel ?? marketLabel(market))
+  return ({
+    id: String(outcome.id ?? `${outcome.eventId ?? 'model'}:${market}:${outcome.selection ?? 'selection'}`),
+    sportKey: String(outcome.sportKey ?? 'baseball_mlb'),
+    matchup: String(outcome.matchup ?? 'Matchup pending'),
+    eventId: String(outcome.eventId ?? ''),
+    startTime: outcome.startTime ?? null,
+    eventStatus: String(outcome.eventStatus ?? 'scheduled'),
+    market,
+    marketLabel: marketLabelValue,
+    period: 'full_game',
+    selection: String(outcome.selection ?? 'Selection pending'),
+    sourceSelection: String(outcome.selection ?? 'Selection pending'),
+    line: outcome.line ?? null,
+    sourceLine: outcome.line ?? null,
+    odds: outcome.sportsbookOdds ?? outcome.odds ?? null,
+    sourceOdds: outcome.sportsbookOdds ?? outcome.odds ?? null,
+    sportsbook: String(outcome.sportsbook ?? 'Stored model output'),
+    probability,
+    selectedSideProbability: probability,
+    complementProbability: round(100 - probability),
+    complementDerived: false,
+    probabilitySemantic: 'Stored model-only pregame probability. Betting value still requires current market odds.',
+    sportsbookProbability: Number(outcome.impliedProbability ?? outcome.sportsbookProbability ?? 0) || 0,
+    edge: 0,
+    expectedValue: 0,
+    snapshotEdge: null,
+    snapshotExpectedValue: null,
+    actionableEdge: null,
+    actionableExpectedValue: null,
+    actionableUnavailableReason: 'Current market odds are required before EV can be treated as actionable.',
+    confidence,
+    confidenceLabel: confidence >= 70 ? 'High' : confidence >= 50 ? 'Moderate' : 'Limited',
+    reliability: 'Informational',
+    reliabilityScore: Math.max(0, Math.min(100, confidence)),
+    aiRating: Math.max(0, Math.min(100, round((probability * 0.65) + (confidence * 0.35)))),
+    aiGrade: 'INFO',
+    combinedScore: round((probability * 0.7) + (confidence * 0.3)),
+    recommendation: 'NO MODELED VALUE',
+    recommendationStatus: 'MODEL_ONLY',
+    semanticLabel: 'Model Only',
+    probabilityOrigin: 'model_only',
+    officialEligibility: 'NOT OFFICIALLY ELIGIBLE',
+    marketIntelligenceCategory: 'model_only',
+    canonicalMarketState: 'model_only',
+    marketValueQuality: 'EV unavailable',
+    marketFreshnessState: outcome.marketAvailable ? 'stored odds attached' : 'waiting for sportsbook odds',
+    primaryBlocker: outcome.marketAvailable ? 'No Official Pick from this informational surface.' : 'Waiting for sportsbook odds.',
+    improvementPath: 'Refresh market odds, then re-run Current Board value gates.',
+    opportunityCategory: 'Model Only',
+    statusLabel: outcome.marketAvailable ? 'Model Probability' : 'Waiting for Sportsbook Odds',
+    informationalWarning: 'Informational probability only. This is not an Official Pick and has no stake.',
+    reasonNotOfficial: 'Model-only rows do not pass through the Official Pick value and market freshness gates.',
+    strengths: ['Stored model probability is available.'],
+    weaknesses: outcome.marketAvailable ? ['EV is not computed on the model-only surface.'] : ['Current sportsbook odds are not attached yet.'],
+    calibrationStatus: 'model_only',
+    modelVersion: String(outcome.modelVersion ?? 'unknown'),
+    featureSetVersion: 'model_only',
+    boardLabel: 'MODEL ONLY',
+    currentHistoricalPreviewLabel: 'Model Only',
+    why: 'Stored model probability is available while Current Board waits for safe current market data.',
+    warnings: ['Model-only probability is not a betting recommendation.'],
+    blockers: outcome.blockers ?? ['NO_OFFICIAL_PICK', 'CURRENT_MARKET_REQUIRED_FOR_EV'],
+    missingData: outcome.marketAvailable ? [] : ['Current sportsbook odds'],
+    featureQuality: outcome.featureQuality ?? null,
+    dataSufficiency: outcome.dataSufficiency ?? null,
+    criticalDataCompleteness: null,
+    fairOdds: fairAmericanFromProbability(probability),
+    actionability: 'informational_probability_only',
+    explanation: {
+      primaryDrivers: ['Stored model probability'],
+      secondaryContext: ['Current Board value gates remain unchanged.'],
+      missingData: outcome.marketAvailable ? [] : ['Current sportsbook odds'],
+      recommendationBlockers: outcome.blockers ?? ['NO_OFFICIAL_PICK'],
+      probabilityVsValue: 'Most Likely can show probability before value is actionable.',
+    },
+    oddsTimestamp: null,
+    oddsAgeMinutes: Number.POSITIVE_INFINITY,
+    storedOddsTimestamp: null,
+    marketInputTimestamp: null,
+    marketInputAgeMinutes: null,
+    marketFreshnessTimestamp: null,
+    marketFreshnessSource: 'model_only',
+    marketSourceTimestamp: null,
+    marketSourceAgeMinutes: null,
+    providerSourceUpdatedAt: null,
+    providerFetchedAt: null,
+    oddsIngestedAt: null,
+    oddsSnapshotCreatedAt: null,
+    marketAlignment: {
+      alignmentStatus: 'MODEL_ONLY',
+      freshnessStatus: outcome.marketAvailable ? 'AVAILABLE' : 'NO_MARKET',
+      marketAgeMinutes: null,
+      edgePercentagePoints: null,
+      expectedValuePercent: null,
+      snapshotEdgePercentagePoints: null,
+      snapshotExpectedValuePercent: null,
+      actionableEdgePercentagePoints: null,
+      actionableExpectedValuePercent: null,
+      actionableUnavailableReason: 'Current market odds are required before EV can be treated as actionable.',
+      marketImpliedProbability: null,
+    },
+    recommendationExplanation: null,
+    selectedOddsSnapshotId: null,
+    selectedOddsSource: 'model_only',
+    anomalies: [],
+    productionEligible: false,
+    independentTool: true,
+  } as unknown) as CanonicalProbabilityCard
+}
+
 function puertoRicoTodayStartMs() {
   const localDate = localDateInTimeZone(new Date().toISOString(), 'America/Puerto_Rico') ?? new Date().toISOString().slice(0, 10)
   return new Date(zonedUtcRange(localDate, 'America/Puerto_Rico').utcStart).getTime()
@@ -789,13 +904,20 @@ export async function getMostLikelyOpportunities({
     }
   }
 
-  const probabilityRankedRows = [...rows].sort(compareCurrentBoardOpportunity('highest_probability'))
+  const modelOnly = rows.length === 0 ? await getModelOnlyIntelligence({ date: board.slateDate }) : null
+  const modelOnlyRows = rows.length
+    ? []
+    : (modelOnly?.categories.allModelOutcomes ?? [])
+        .map(modelOnlyOutcomeToMostLikelyCard)
+        .sort(compareCurrentBoardOpportunity(sort))
+        .slice(0, safeLimit)
+  const displayRows = rows.length ? rows : modelOnlyRows
+  const probabilityRankedRows = [...displayRows].sort(compareCurrentBoardOpportunity('highest_probability'))
   const topPick = topPickFrom(probabilityRankedRows)
   const mostLikelyMoneyline = mostLikelyMoneylineFrom(probabilityRankedRows)
   const mostLikelyMoneylineParlay = parlayFrom(probabilityRankedRows)
-  const modelOnly = rows.length === 0 ? await getModelOnlyIntelligence() : null
 
-  const shownMarkets = new Set(rows.map((row) => row.marketLabel))
+  const shownMarkets = new Set(displayRows.map((row) => row.marketLabel))
   const unavailableMarkets = [
     ...SUPPORTED_MOST_LIKELY_MARKETS
       .map((market) => marketLabel(market))
@@ -824,13 +946,13 @@ export async function getMostLikelyOpportunities({
       mutatesRemoteState: false,
     },
     summary: {
-      opportunities: rows.length,
-      supportedMarkets: Array.from(new Set(rows.map((row) => row.marketLabel))).sort(),
+      opportunities: displayRows.length,
+      supportedMarkets: Array.from(new Set(displayRows.map((row) => row.marketLabel))).sort(),
       unavailableMarkets,
       sort,
       currentSlateStart: board.games[0]?.scheduledTime ?? null,
       rowsBeforeFiltering: board.excludedRowSummary.rowsBeforeFiltering,
-      rowsAfterFiltering: rows.length,
+      rowsAfterFiltering: displayRows.length,
       staleHistoricalLegacyExcluded:
         board.excludedRowSummary.exclusionReasonCounts.STALE_ODDS +
         board.excludedRowSummary.exclusionReasonCounts.HISTORICAL +
@@ -885,17 +1007,17 @@ export async function getMostLikelyOpportunities({
       warning: 'High probability does not always mean good betting value.',
       informationalFallbackUsed: fallbackUsed,
       displayMode: fallbackUsed ? 'informational_rankings_after_current_board_empty' : 'current_board_rankings',
-      modelOnlyFallbackUsed: rows.length === 0 && Boolean(modelOnly),
+      modelOnlyFallbackUsed: rows.length === 0 && modelOnlyRows.length > 0,
     },
-    topPick: rows.length ? topPick : {
+    topPick: displayRows.length ? topPick : {
       type: modelOnly?.categories.allModelOutcomes[0] ? 'model_only_outcome' : modelOnly?.categories.allPitcherShadows[0] ? 'pitcher_outs_shadow' : 'none',
       candidate: modelOnly?.categories.allModelOutcomes[0] ?? modelOnly?.categories.allPitcherShadows[0] ?? null,
       disclaimer: modelOnly?.categories.allModelOutcomes[0] || modelOnly?.categories.allPitcherShadows[0]
         ? 'This is model-only or shadow intelligence. It is not an Official Pick and has no EV, Kelly or stake.'
         : 'No valid current supported model-only outcome is available.',
     },
-    highestProbabilitySupportedOutcome: rows.length ? topPick.candidate : modelOnly?.categories.allModelOutcomes[0] ?? null,
-    mostLikelyMoneyline: rows.length ? mostLikelyMoneyline : {
+    highestProbabilitySupportedOutcome: displayRows.length ? topPick.candidate : modelOnly?.categories.allModelOutcomes[0] ?? null,
+    mostLikelyMoneyline: displayRows.length ? mostLikelyMoneyline : {
       candidate: modelOnly?.categories.highestMoneylineProbability[0] ?? null,
       probability: modelOnly?.categories.highestMoneylineProbability[0]?.modelProbability ?? null,
       fairOdds: null,
@@ -908,7 +1030,7 @@ export async function getMostLikelyOpportunities({
         ? 'Highest current pregame model moneyline probability from stored prediction history. Odds are not required for this informational surface.'
         : 'No valid current moneyline candidate is available.',
     },
-    mostLikelyMoneylineParlay: rows.length ? mostLikelyMoneylineParlay : modelOnly?.informationalParlays.twoLegHighestProbability ?? {
+    mostLikelyMoneylineParlay: displayRows.length ? mostLikelyMoneylineParlay : modelOnly?.informationalParlays.twoLegHighestProbability ?? {
       legs: [],
       rawJointProbability: null,
       adjustedJointProbability: null,
@@ -933,7 +1055,7 @@ export async function getMostLikelyOpportunities({
       officialSeparation:
         'Official picks remain controlled by recommendation policy. This scanner never promotes an informational candidate.',
     },
-    opportunities: rows,
+    opportunities: displayRows,
   }
 }
 

@@ -213,6 +213,14 @@ Performance Scope V2 and AI Performance Center read the V2 lifecycle metadata so
 
 Settlement and performance event joins use bounded 100-ID batches for `sport_events` lookups to avoid Supabase/PostgREST request header overflow during full-history reconciliation.
 
+## Production UX Recovery Boundary
+
+Production Regression Audit & UX Recovery V1 is a presentation and read-aggregation recovery layer. It does not alter Prediction Engine probabilities, Learning Brain behavior, Current Board eligibility, Official Pick policy, market pipelines, provider access or historical feature-store data.
+
+Most Likely can render stored model-only prediction rows as informational probability rows when safe Current Board market rows are unavailable. These rows are explicitly non-official, carry no actionable EV or stake, and remain separate from Best Value and Official Picks.
+
+AI Performance Center treats Settlement V2 metadata as authoritative for production performance families. `Legacy`, `Ignored`, `Historical`, `Replay` and `Shadow` rows remain audit-visible in history and timeline views, but production trust, Brier, log loss, calibration and report-card metrics are calculated from production rows only.
+
 NBA-specific settlement exists in `nba-prediction-settlement.service.ts`:
 
 - full-game final scores come from `sport_events`

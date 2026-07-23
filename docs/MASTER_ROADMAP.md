@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Production Regression Audit & UX Recovery V1
+
+Status: Locally implemented; build verification pending in this task.
+
+Evidence: `src/services/market-opportunity-suite.service.ts`, `src/components/dashboard/UserTodayPanel.tsx`, `src/services/ai-performance-center.service.ts`, `docs/PRODUCTION_REGRESSION_AUDIT_V1.md`, `docs/UX_RECOVERY_V1.md`.
+
+Note: This pass restores production-facing clarity after Settlement V2 without changing Prediction Engine probabilities, Learning Brain logic, Official Pick policy, Current Board eligibility, market pipelines or provider behavior. Most Likely now shows stored model-only probabilities as informational rows when safe current market rows are unavailable. Best Value remains odds/positive-EV gated. Production trust now excludes V2 Legacy, Ignored, Historical, Replay and Shadow rows while keeping them audit-visible.
+
 ### Settlement & Historical Reconciliation Engine V2
 
 Status: Implemented, production-executed and build-verified; deployment/push verification pending this controlled execution commit.

@@ -530,6 +530,22 @@ function metricsBase(rows: UniversalHistoryRow[]) {
   }
 }
 
+function performanceFamily(row: UniversalHistoryRow) {
+  const badge = row.lifecycleBadge.toLowerCase()
+  const role = String(row.modelRole ?? '').toLowerCase()
+  if (badge.includes('legacy')) return 'legacy'
+  if (badge.includes('ignored')) return 'ignored'
+  if (badge.includes('historical')) return 'historical'
+  if (badge.includes('replay')) return 'replay'
+  if (badge.includes('shadow') || row.category === 'shadow' || role.includes('shadow')) return 'shadow'
+  if (badge.includes('unknown')) return 'unknown'
+  return 'production'
+}
+
+function productionPerformanceRows(rows: UniversalHistoryRow[]) {
+  return rows.filter((row) => performanceFamily(row) === 'production')
+}
+
 function groupBy<T>(items: T[], getKey: (item: T) => string) {
   const groups = new Map<string, T[]>()
   for (const item of items) {
@@ -607,6 +623,8 @@ function timeline(rows: UniversalHistoryRow[]) {
     ['Cancelled', rows.filter((row) => row.result === 'void' || /cancelled|voided/i.test(row.lifecycleBadge))],
     ['Push', rows.filter((row) => row.result === 'push')],
     ['Historical / Replay', rows.filter((row) => /historical|replay/i.test(row.lifecycleBadge))],
+    ['Legacy', rows.filter((row) => performanceFamily(row) === 'legacy')],
+    ['Ignored', rows.filter((row) => performanceFamily(row) === 'ignored')],
   ] as const
   return groups.map(([label, scoped]) => {
     const m = metrics(scoped)
@@ -1366,9 +1384,11 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
     warnings: [error instanceof Error ? error.message : 'Projection engine unavailable'],
   }))
   const rows = sportFilter ? allRows.filter((row) => row.sportKey === sportFilter) : allRows
+  const productionAllRows = productionPerformanceRows(allRows)
+  const productionRows = sportFilter ? productionAllRows.filter((row) => row.sportKey === sportFilter) : productionAllRows
   const enabledSports = getEnabledSports()
   const sportDashboards = enabledSports.map((sport) => {
-    const sportRows = allRows.filter((row) => row.sportKey === sport.key)
+    const sportRows = productionAllRows.filter((row) => row.sportKey === sport.key)
     const sportMetrics = metrics(sportRows)
     const bsnReadiness = sport.key === 'basketball_bsn' ? bsn.maturity?.readiness.readinessScore ?? 0 : sport.productionReady ? 80 : sportRows.length ? 50 : 20
     return {
@@ -1397,43 +1417,43 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
     }
   })
   const readinessScore = average(sportDashboards.map((sport) => sport.readiness.readinessScore))
-  const centerMetrics = metrics(rows)
+  const centerMetrics = metrics(productionRows)
   const selectedProviderReady = sportFilter
     ? sportDashboards.find((sport) => sport.sportKey === sportFilter)?.readiness.providerReady ?? false
     : sportDashboards.some((sport) => sport.readiness.providerReady)
-  const allSportsTrust = trustScore(allRows, true)
-  const selectedTrust = trustScore(rows, selectedProviderReady)
-  const allSportsReportCard = dailyReportCardV1(allRows, true, readinessScore)
-  const selectedReportCard = dailyReportCardV1(rows, selectedProviderReady, readinessScore)
-  const allSportsNode = buildBrainNode('ALL_SPORTS', allRows, generatedAt, true, readinessScore)
+  const allSportsTrust = trustScore(productionAllRows, true)
+  const selectedTrust = trustScore(productionRows, selectedProviderReady)
+  const allSportsReportCard = dailyReportCardV1(productionAllRows, true, readinessScore)
+  const selectedReportCard = dailyReportCardV1(productionRows, selectedProviderReady, readinessScore)
+  const allSportsNode = buildBrainNode('ALL_SPORTS', productionAllRows, generatedAt, true, readinessScore)
   const sportNodes = sportDashboards.map((sport) =>
     buildBrainNode(
       'SPORT',
-      allRows.filter((row) => row.sportKey === sport.sportKey),
+      productionAllRows.filter((row) => row.sportKey === sport.sportKey),
       generatedAt,
       sport.readiness.providerReady,
       sport.readiness.readinessScore,
       { sportKey: sport.sportKey }
     )
   )
-  const leagueNodes = groupBy(allRows, (row) => `${row.sportKey}:${row.leagueKey ?? 'unknown'}`).map(([key, scopedRows]) => {
+  const leagueNodes = groupBy(productionAllRows, (row) => `${row.sportKey}:${row.leagueKey ?? 'unknown'}`).map(([key, scopedRows]) => {
     const [sportKey, leagueKey] = key.split(':')
     const sportReady = sportDashboards.find((sport) => sport.sportKey === sportKey)?.readiness.providerReady ?? false
     return buildBrainNode('LEAGUE', scopedRows, generatedAt, sportReady, sportReady ? 70 : 30, { sportKey, leagueKey })
   })
-  const modelNodes = groupBy(allRows, (row) => `${row.sportKey}:${row.modelVersion ?? 'unknown'}`).map(([key, scopedRows]) => {
+  const modelNodes = groupBy(productionAllRows, (row) => `${row.sportKey}:${row.modelVersion ?? 'unknown'}`).map(([key, scopedRows]) => {
     const [sportKey, modelVersion] = key.split(':')
     const sportReady = sportDashboards.find((sport) => sport.sportKey === sportKey)?.readiness.providerReady ?? false
     return buildBrainNode('MODEL_VERSION', scopedRows, generatedAt, sportReady, sportReady ? 70 : 30, { sportKey, modelVersion })
   })
-  const categoryNodes = groupBy(allRows, (row) => `${row.sportKey}:${row.category}`).map(([key, scopedRows]) => {
+  const categoryNodes = groupBy(productionAllRows, (row) => `${row.sportKey}:${row.category}`).map(([key, scopedRows]) => {
     const [sportKey, categoryKey] = key.split(':')
     const sportReady = sportDashboards.find((sport) => sport.sportKey === sportKey)?.readiness.providerReady ?? false
     return buildBrainNode('CATEGORY', scopedRows, generatedAt, sportReady, sportReady ? 70 : 30, { sportKey, category: categoryKey })
   })
   const periodNode = buildBrainNode(
     'TIME_PERIOD',
-    rows.filter((row) => rowTime(row) >= daysAgo(30)),
+    productionRows.filter((row) => rowTime(row) >= daysAgo(30)),
     generatedAt,
     selectedProviderReady,
     readinessScore,
@@ -1443,8 +1463,8 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
   const snapshotRows = snapshotNodes.map((node) => snapshotFromNode(
     node,
     node.scope === 'ALL_SPORTS'
-      ? allRows
-      : allRows.filter((row) =>
+      ? productionAllRows
+      : productionAllRows.filter((row) =>
           (!node.sport || row.sportKey === node.sport) &&
           (!node.modelVersion || (row.modelVersion ?? 'unknown') === node.modelVersion) &&
           (!node.category || row.category === node.category)
@@ -1490,7 +1510,7 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
         ? 'Outcome can be reviewed against the stored pre-game feature snapshot and final settlement details.'
         : 'Outcome is graded, but a detailed stored feature snapshot was not available for this row.',
   }))
-  const reliabilityBuckets = groupBy(rows, (row) => {
+  const reliabilityBuckets = groupBy(productionRows, (row) => {
     const p = row.probability ?? 0
     if (p >= 70) return '70+'
     if (p >= 60) return '60-69'
@@ -1503,14 +1523,14 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
     predictions: bucketRows.length,
     settled: bucketRows.filter(isSettled).length,
   }))
-  const selectedEvolution = evolution(rows, selectedProviderReady)
-  const selectedGoals = goals(rows, selectedProviderReady, readinessScore)
-  const selectedTrustChange = trustChange(rows, selectedProviderReady)
+  const selectedEvolution = evolution(productionRows, selectedProviderReady)
+  const selectedGoals = goals(productionRows, selectedProviderReady, readinessScore)
+  const selectedTrustChange = trustChange(productionRows, selectedProviderReady)
   const selectedMaturity = sportFilter
     ? sportDashboards.find((sport) => sport.sportKey === sportFilter)?.maturityPipeline ?? null
-    : maturityPipeline(rows, { productionReady: true }, true, readinessScore)
-  const selectedAdvisor = engineeringAdvisor(rows, selectedProviderReady, sportFilter)
-  const selectedTrendAnalysis = buildTrendAnalysis(rows, existingSnapshots.rows, sportFilter)
+    : maturityPipeline(productionRows, { productionReady: true }, true, readinessScore)
+  const selectedAdvisor = engineeringAdvisor(productionRows, selectedProviderReady, sportFilter)
+  const selectedTrendAnalysis = buildTrendAnalysis(productionRows, existingSnapshots.rows, sportFilter)
   const projectionSummary = projectionEngine.summary ?? {
     games: 0,
     projections: 0,
@@ -1540,7 +1560,7 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
   return {
     success: true,
     mode: AIPEC_VERSION,
-    apiStatus: statusFromSamples(rows),
+    apiStatus: statusFromSamples(productionRows),
     generatedAt,
     filters: { sportKey: options.sportKey ?? 'all' },
     aiBrain: {
@@ -1566,8 +1586,8 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
       publicView: {
         overallAiGrade: allSportsReportCard.overallGrade,
         trustLabel: allSportsTrust.trustLabel,
-        settledSample: metrics(allRows).settled,
-        accuracy: metrics(allRows).settled >= 10 ? metrics(allRows).accuracy : null,
+        settledSample: metrics(productionAllRows).settled,
+        accuracy: metrics(productionAllRows).settled >= 10 ? metrics(productionAllRows).accuracy : null,
         recentTrend: selectedTrustChange.previous7DayWindow.direction,
         modelStatus: allSportsNode.readiness.status,
         lastUpdate: generatedAt,
@@ -1591,9 +1611,9 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
           result: row.result,
           lifecycleBadge: row.lifecycleBadge,
         })),
-        disclaimer: metrics(allRows).settled < 30
-          ? 'Performance metrics are provisional because the settled sample is still small.'
-          : 'Performance metrics summarize historical outcomes and are not betting probabilities.',
+        disclaimer: metrics(productionAllRows).settled < 30
+          ? 'Production trust excludes Legacy, Ignored, Historical, Replay and Shadow rows; metrics are provisional while the production sample is small.'
+          : 'Production trust excludes Legacy, Ignored, Historical, Replay and Shadow rows. Historical outcomes are not betting probabilities.',
       },
       internalView: {
         brierScore: centerMetrics.brierScore,
@@ -1617,7 +1637,7 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
         trustComponents: selectedTrust.components,
         blockers: selectedTrust.blockers,
         rawDiagnostics: {
-          status: statusFromSamples(rows),
+          status: statusFromSamples(productionRows),
           historyPagination: stored.pagination,
           snapshotStore: existingSnapshots,
           projectionEngine,
@@ -1676,7 +1696,7 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
       },
     },
     performanceCenter: {
-      allSports: metrics(allRows),
+      allSports: metrics(productionAllRows),
       selected: centerMetrics,
       sportsIntegrated: sportDashboards.length,
       automaticFutureSportRegistration: true,
@@ -1702,8 +1722,8 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
       data: {
         overallAiGrade: allSportsReportCard.overallGrade,
         trustLabel: allSportsTrust.trustLabel,
-        settledSample: metrics(allRows).settled,
-        accuracy: metrics(allRows).settled >= 10 ? metrics(allRows).accuracy : null,
+        settledSample: metrics(productionAllRows).settled,
+        accuracy: metrics(productionAllRows).settled >= 10 ? metrics(productionAllRows).accuracy : null,
         recentTrend: selectedTrustChange.previous7DayWindow.direction,
         modelStatus: allSportsNode.readiness.status,
         lastUpdate: generatedAt,
@@ -1714,7 +1734,7 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
       exposedDiagnostics: ['Brier Score', 'Log Loss', 'Calibration Error', 'Reliability Buckets', 'Drift', 'Data Quality', 'Provider Health', 'Version Comparisons', 'Readiness Gates', 'Trust Components', 'Blockers'],
     },
     reportCards: {
-      allSports: reportCard(allRows, readinessScore),
+      allSports: reportCard(productionAllRows, readinessScore),
       aiBrain: allSportsReportCard,
       selected: selectedReportCard,
       bySport: sportDashboards.map((sport) => ({
@@ -1735,19 +1755,19 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
       fallbackPolicy: selectedTrendAnalysis.fallbackPolicy,
     },
     modelEvolution: {
-      versions: modelEvolution(rows),
-      champion: modelEvolution(rows).filter((entry) => entry.champion),
-      challenger: modelEvolution(rows).filter((entry) => entry.challenger),
+      versions: modelEvolution(productionRows),
+      champion: modelEvolution(productionRows).filter((entry) => entry.champion),
+      challenger: modelEvolution(productionRows).filter((entry) => entry.challenger),
       shadow: modelEvolution(rows).filter((entry) => entry.shadow),
-      rollback: modelEvolution(rows).filter((entry) => entry.rollbackCandidate),
-      promotionReadiness: modelEvolution(rows).filter((entry) => entry.promotionReadiness === 'review_ready'),
+      rollback: modelEvolution(productionRows).filter((entry) => entry.rollbackCandidate),
+      promotionReadiness: modelEvolution(productionRows).filter((entry) => entry.promotionReadiness === 'review_ready'),
     },
     performanceTimeline: timeline(rows),
     confidenceAnalysis: {
       expectedConfidence: centerMetrics.predictionConfidence,
       actualConfidence: centerMetrics.accuracy,
       confidenceError: centerMetrics.calibrationError,
-      calibrationCurve: trend(rows, 'lifetime').map((entry) => ({ period: entry.period, expected: entry.confidenceTrend, actual: entry.accuracyTrend })),
+      calibrationCurve: trend(productionRows, 'lifetime').map((entry) => ({ period: entry.period, expected: entry.confidenceTrend, actual: entry.accuracyTrend })),
       reliabilityCurve: groupBy(rows, (row) => {
         const p = row.probability ?? 0
         if (p >= 70) return '70+'
