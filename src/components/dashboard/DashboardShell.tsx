@@ -26,10 +26,11 @@ const navItems = [
 const compactNavItems = [
   { id: 'today', label: 'User Mode', icon: '01' },
   { id: 'performance', label: 'Performance', icon: '02', href: '/performance' },
-  { id: 'overview', label: 'Advanced Overview', icon: '03' },
-  { id: 'model-lab', label: 'Model', icon: '04' },
-  { id: 'data-operations', label: 'Data', icon: '05' },
-  { id: 'advanced', label: 'Administration', icon: '06' },
+  { id: 'ai-operations', label: 'AI Operations', icon: '03', href: '/ai-operations' },
+  { id: 'overview', label: 'Advanced Overview', icon: '04' },
+  { id: 'model-lab', label: 'Model', icon: '05' },
+  { id: 'data-operations', label: 'Data', icon: '06' },
+  { id: 'advanced', label: 'Administration', icon: '07' },
 ]
 
 const toolNavItems = [

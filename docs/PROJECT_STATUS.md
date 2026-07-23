@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-23 00:00:00Z
 
+## 2026-07-23 AI Learning Pipeline Validation & Autonomous Daily Lifecycle V1
+
+- Added read-only AI lifecycle evidence service and `/api/ai-operations/lifecycle` to validate the chain from scheduled games through odds, predictions, settlement, replay snapshots, deterministic labels, derived learning queue, persisted weight updates, calibration and future-prediction readiness.
+- Added `/ai-operations` as an AI Operations Center with panels for Prediction Pipeline, Current Board, Settlement Queue, Replay Queue, Learning Queue, Weight Updates, Calibration, Provider Health, Scheduler Health, Historical Imports and Feature Store. Each panel reports `Healthy`, `Waiting`, `Blocked`, `Running`, `Completed` or `Error`.
+- Implemented a derived read-only learning queue over production-settled `prediction_history` rows. Rows are `QUEUED`, `ACCEPTED` or `REJECTED` based on deterministic labels, snapshot evidence and persisted `model_weight_history`; no Learning Brain weight update is executed by the diagnostic.
+- Added daily AI story and refresh timeline for Today, Yesterday and Last 7 Days using stored timestamps only. Missing next-run evidence is shown as `Waiting for next scheduler execution`.
+- Validated historical replay evidence from `universal_projection_history` and `historical_feature_snapshots` without starting Historical Replay, recalculating historical features or promoting any projection into a recommendation.
+- Prediction Engine probabilities, Official Pick policy, Current Board mutation, settlement outcomes, Learning Brain weights, provider refreshes and external sports API calls remain unchanged. Build passed with `npm.cmd run build`.
+
 ## 2026-07-23 Performance Product Mode & Recommendation Pipeline Verification V1
 
 - Repaired the default Performance contract so product metrics and Prediction History use only production-evaluable Win/Loss/Push rows. Legacy, Ignored, Historical, Replay, Shadow, Cancelled, Voided, test-like and unresolved rows remain available only through Advanced Settlement/Audit diagnostics.

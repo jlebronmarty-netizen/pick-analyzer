@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### AI Learning Pipeline Validation & Autonomous Daily Lifecycle V1
+
+Status: Locally implemented and build-verified; production push/deployment verification pending.
+
+Evidence: `src/services/ai-learning-lifecycle.service.ts`, `/api/ai-operations/lifecycle`, `/ai-operations`, `docs/AI_OPERATIONS_CENTER.md`, `docs/AI_LEARNING_PIPELINE.md`, `docs/AUTONOMOUS_DAILY_LIFECYCLE.md` and local production build.
+
+Note: V1 proves the autonomous AI lifecycle from persisted data only. It exposes Today, Yesterday and Last 7 Days lifecycle counts, deterministic label readiness, a derived learning queue, replay/projection evidence, calibration evidence, persisted weight-update evidence, provider budget health and scheduler metadata. It does not execute provider calls, settlement, replay, Learning Brain updates, Prediction Engine changes, Official Pick policy changes or Current Board mutations.
+
 ### Performance Product Mode & Recommendation Pipeline Verification V1
 
 Status: Locally implemented and build-verified; production push/deployment verification pending.

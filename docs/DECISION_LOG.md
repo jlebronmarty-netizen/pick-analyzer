@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-23 - Validate AI Learning With Persisted Evidence Only
+
+Context: The platform needed proof that completed games flow into settlement, replay, labels, learning, calibration and future model readiness, but invoking Learning Brain, replay, settlement or provider refresh would mutate production behavior.
+
+Decision: Add an AI Operations Center and `/api/ai-operations/lifecycle` backed by a read-only lifecycle service. The service derives queue readiness from deterministic settled rows and existing feature/replay evidence, and claims accepted learning or weight updates only when persisted `model_weight_history` evidence exists.
+
+Consequences: Operators can see Today, Yesterday and Last 7 Days pipeline counts, blockers and scheduler/provider health without provider calls or writes. Prediction probabilities, Official Pick policy, settlement outcomes, Current Board, replay generation, historical features and Learning Brain weights remain unchanged.
+
+Affected modules: AI learning lifecycle service/API, AI Operations Center, lifecycle/learning documentation, roadmap/status/architecture docs.
+
 ## 2026-07-23 - Split Product Performance From Settlement Audit Lifecycles
 
 Context: Settlement V2 correctly classified historical predictions, but the default Performance experience still mixed product outcomes with audit-only lifecycles. Timeline showed 658 settled by combining 620 production settled rows with 38 Historical/Replay rows, and zero-sample periods displayed misleading `0%`.
