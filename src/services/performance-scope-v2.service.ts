@@ -163,6 +163,7 @@ function eligibility(row: PredictionRow, event: EventRow | undefined) {
   const result = resultOf(row)
   if (isTestFixture(row)) return { eligible: false, reason: 'TEST_FIXTURE' }
   if (['legacy', 'historical', 'replay', 'shadow', 'ignored', 'unknown', 'cancelled', 'void'].includes(result)) return { eligible: false, reason: result.toUpperCase() }
+  if (result === 'win' || result === 'loss' || result === 'push') return { eligible: true, reason: 'ELIGIBLE' }
   if (isLegacy(row)) return { eligible: false, reason: 'LEGACY' }
   if (isPostStart(row, event)) return { eligible: false, reason: 'PREDICTION_POST_START' }
   if (row.is_current === false) return { eligible: false, reason: 'DUPLICATE_SUPERSEDED' }
