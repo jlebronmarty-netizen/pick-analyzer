@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getNbaModelHealthV2 } from '@/services/nba-prediction-settlement.service'
+import { loadNbaPredictionSettlement } from '@/lib/server-lazy-diagnostics'
 
 export async function GET() {
   try {
+    const { getNbaModelHealthV2 } = await loadNbaPredictionSettlement()
     const result = await getNbaModelHealthV2()
     return NextResponse.json(result)
   } catch (error) {

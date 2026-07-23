@@ -1,11 +1,12 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { runSportsDataIoExecutionReadinessValidation } from '@/services/sportsdataio-historical-import-readiness.service'
+import { loadSportsDataIoHistoricalImportReadiness } from '@/lib/server-lazy-diagnostics'
 
 export async function GET(request: NextRequest) {
   const id = requestId(request)
 
   try {
+    const { runSportsDataIoExecutionReadinessValidation } = await loadSportsDataIoHistoricalImportReadiness()
     return apiOk(runSportsDataIoExecutionReadinessValidation(), id)
   } catch (error) {
     console.error('SportsDataIO execution readiness validation error:', {

@@ -1,12 +1,13 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { buildSportsDataIoPilotPlan } from '@/services/sportsdataio-historical-import-readiness.service'
+import { loadSportsDataIoHistoricalImportReadiness } from '@/lib/server-lazy-diagnostics'
 
 export async function POST(request: NextRequest) {
   const id = requestId(request)
 
   try {
     const body = await request.json().catch(() => ({}))
+    const { buildSportsDataIoPilotPlan } = await loadSportsDataIoHistoricalImportReadiness()
     return apiOk(
       buildSportsDataIoPilotPlan({
         sportKey: body?.sportKey ?? body?.sport ?? null,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDashboardToday, validateDashboardTodayFixtures } from '@/services/dashboard-today.service'
+import { loadDashboardTodayService } from '@/lib/server-lazy-diagnostics'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
   const generatedAt = new Date().toISOString()
   const { searchParams } = new URL(request.url)
   try {
+    const { getDashboardToday, validateDashboardTodayFixtures } = await loadDashboardTodayService()
     const today = await getDashboardToday()
     return NextResponse.json({
       ...today,

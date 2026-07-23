@@ -1,14 +1,12 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import {
-  getBsnCoreCertification,
-  validateBsnCoreCertificationFixtures,
-} from '@/services/bsn-core-certification.service'
+import { loadBsnCoreCertification } from '@/lib/server-lazy-diagnostics'
 
 export async function GET(request: NextRequest) {
   const id = requestId(request)
   try {
     const includeValidation = request.nextUrl.searchParams.get('includeValidation') === 'true'
+    const { getBsnCoreCertification, validateBsnCoreCertificationFixtures } = await loadBsnCoreCertification()
     const certification = await getBsnCoreCertification()
     return apiOk({
       ...certification,

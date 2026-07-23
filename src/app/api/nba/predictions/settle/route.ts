@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { settleNbaPredictions } from '@/services/nba-prediction-settlement.service'
+import { loadNbaPredictionSettlement } from '@/lib/server-lazy-diagnostics'
 
 function isAuthorized(request: Request) {
   const cronSecret = process.env.CRON_SECRET
@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const { settleNbaPredictions } = await loadNbaPredictionSettlement()
     const result = await settleNbaPredictions()
     return NextResponse.json(result)
   } catch (error) {

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDashboard } from '@/services/dashboard.service'
-import { getDashboardToday, validateDashboardTodayFixtures } from '@/services/dashboard-today.service'
+import { loadDashboardService, loadDashboardTodayService } from '@/lib/server-lazy-diagnostics'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -11,6 +10,7 @@ export async function GET(request: NextRequest) {
   const mode = searchParams.get('mode')
   try {
     if (mode === 'today') {
+      const { getDashboardToday, validateDashboardTodayFixtures } = await loadDashboardTodayService()
       const today = await getDashboardToday()
       return NextResponse.json({
         ...today,
@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     }
 
     const bankroll = Number(searchParams.get('bankroll') ?? 1000)
+    const { getDashboard } = await loadDashboardService()
 
     const dashboard = await getDashboard(
       Number.isFinite(bankroll) ? bankroll : 1000

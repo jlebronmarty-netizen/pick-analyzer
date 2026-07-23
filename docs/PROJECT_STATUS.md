@@ -2,6 +2,18 @@
 
 Last updated: 2026-07-23 00:00:00Z
 
+## 2026-07-23 Webpack Dependency Graph Audit & Build OOM Recovery V2
+
+- Audited the Next.js webpack route dependency graph after Build Memory Optimization V1. Local static scan covered 721 TS/TSX files and 353 app route/page entry candidates.
+- Root cause was repeated top-level imports of large diagnostic/readiness services across many API route compilation boundaries, not static generation or missing heap flags. The largest pre-change entry graph was `/api/mlb/markets/expansion-roadmap` at about 1.95 MB reachable source across 94 files.
+- Added server-only lazy diagnostic loaders in `src/lib/server-lazy-diagnostics.ts` and moved repeated SportsDataIO NBA readiness, AI Performance Center, historical import readiness, autonomous operations, adaptive refresh, runtime observability, production readiness and MLB operations diagnostics behind request-time dynamic imports.
+- Replaced broad `@/services/basketball` barrel imports in API/BSN paths with direct concrete module imports while preserving the barrel for compatibility.
+- Client/server boundary audit found 0 server-only/admin imports from client files, 2 legacy browser-safe public Supabase service imports in hooks and 1 erased type-only service import. Existing service cycles were documented but not changed because they touch protected Current Board, Official Pick and Learning Brain-adjacent paths.
+- Clean local production build passed with `npm.cmd run build`: webpack compile 23.1s, TypeScript 24.5s, static generation 323 entries in 6.1s, total 71.3s after the second V2 graph pass, disabling `webpackBuildWorker` and disabling server-side webpack minification.
+- First pushed V2 deployment `dpl_E58qFWRwXqYxMtMEZgtYVdhD1qgw` and second deployment `dpl_C9acYtoZeNVnx2ftJZjNWV7wjYds` failed on Vercel during webpack optimization with SIGKILL/OOM. A third deployment with worker disabled still failed in the same phase. The deployment with graph reductions, worker disabled and server-side webpack minification disabled reached Vercel success, and `/api/system/version` reported commit `bcf970a3ab3a79ce8fced345f4948b55e4e1421f`.
+- No routes/features/diagnostics were removed. Historical Intelligence, Feature Store, Settlement V2, Operations Validation, Prediction Engine, Learning Brain, Current Board, Official Picks, market pipelines and replay remained unchanged. Provider calls, external sports API calls and remote mutations added: 0.
+- Added `docs/WEBPACK_DEPENDENCY_GRAPH_AUDIT_V2.md` and `docs/BUILD_OOM_ROOT_CAUSE_V2.md`. `DEPLOYMENT_RECOVERY_PASS` is certified by Vercel success plus production `/api/system/version` verification.
+
 ## 2026-07-23 Build Memory Optimization & Deployment Recovery V1
 
 - Audited build memory pressure after Production Regression Audit & UX Recovery V1. Largest source modules are historical import readiness/executor, MLB prospective preview, historical feature generation, AI Performance Center, operating-day and adaptive refresh services. Largest client components remain Historical Import Engine, User Today, Runtime Observability and Performance.

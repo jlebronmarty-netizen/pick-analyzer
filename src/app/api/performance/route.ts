@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAiPerformanceCenter } from '@/services/ai-performance-center.service'
+import { getAiPerformanceCenterLazy } from '@/lib/server-lazy-diagnostics'
 import { getPerformanceScopeV2 } from '@/services/performance-scope-v2.service'
 
 export async function GET(request: NextRequest) {
   try {
     const sportKey = request.nextUrl.searchParams.get('sportKey')
     const [data, performanceScopeV2] = await Promise.all([
-      getAiPerformanceCenter({ sportKey, dryRun: true }),
+      getAiPerformanceCenterLazy({ sportKey, dryRun: true }),
       getPerformanceScopeV2({ sportKey }),
     ])
     return NextResponse.json({

@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { getSportsDataIoNbaIntegrationReadiness } from '@/services/sportsdataio-nba-integration-readiness.service'
+import { getSportsDataIoNbaIntegrationReadinessLazy } from '@/lib/server-lazy-diagnostics'
 
 export async function GET(request: NextRequest) {
   const id = requestId(request)
 
   try {
-    return apiOk(getSportsDataIoNbaIntegrationReadiness(), id)
+    return apiOk(await getSportsDataIoNbaIntegrationReadinessLazy(), id)
   } catch (error) {
     console.error('SportsDataIO NBA integration readiness error:', { requestId: id, error })
 

@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Webpack Dependency Graph Audit & Build OOM Recovery V2
+
+Status: Locally implemented and build-verified; Vercel deployment readiness pending push/deployment observation.
+
+Evidence: `src/lib/server-lazy-diagnostics.ts`, direct basketball service imports in API/BSN paths, lazy diagnostic route boundaries across SportsDataIO NBA readiness, AI Performance Center, historical import readiness, autonomous operations, adaptive refresh, runtime observability and MLB operations routes, `docs/WEBPACK_DEPENDENCY_GRAPH_AUDIT_V2.md`, `docs/BUILD_OOM_ROOT_CAUSE_V2.md` and local production build.
+
+Note: V2 addresses the webpack compilation graph directly rather than relying only on heap. It preserves all routes and diagnostics while reducing repeated top-level imports of large server services. After Vercel reported repeated webpack optimization OOM failures, `webpackBuildWorker` and server-side webpack minimization were disabled while client optimization and the other memory controls remain enabled. No Prediction Engine, Learning Brain, Current Board, Official Pick, market, replay, settlement or historical feature-store behavior was changed.
+
 ### Build Memory Optimization & Deployment Recovery V1
 
 Status: Locally implemented and build-verified; production push/deployment validation pending approval.

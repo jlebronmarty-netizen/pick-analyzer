@@ -1,11 +1,12 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { getMlbOperationsCenter } from '@/services/mlb-operations-center.service'
+import { loadMlbOperationsCenter } from '@/lib/server-lazy-diagnostics'
 
 export async function GET(request: NextRequest) {
   const id = requestId(request)
   try {
     const selectedDate = request.nextUrl.searchParams.get('selectedDate') ?? request.nextUrl.searchParams.get('date')
+    const { getMlbOperationsCenter } = await loadMlbOperationsCenter()
     return apiOk(await getMlbOperationsCenter({ selectedDate }), id)
   } catch (error) {
     return apiError({

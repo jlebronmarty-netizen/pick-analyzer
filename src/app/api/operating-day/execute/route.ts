@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { executeOperatingDay } from '@/services/operating-day.service'
+import { loadOperatingDayService } from '@/lib/server-lazy-diagnostics'
 
 function authorized(request: NextRequest) {
   const secret = process.env.CRON_SECRET
@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json().catch(() => ({}))
+    const { executeOperatingDay } = await loadOperatingDayService()
     const result = await executeOperatingDay({
       action: body?.action ?? 'status',
       sportKey: body?.sportKey ?? body?.sport ?? null,

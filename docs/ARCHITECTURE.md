@@ -8,6 +8,7 @@ Pick Analyzer is a Next.js 16 App Router application with a service-heavy backen
 - `src/app/api/**/route.ts` contains 245 API route files.
 - `src/app/dashboard/page.tsx` composes dashboard sections from `src/components/dashboard`.
 - Protected operational routes commonly use `CRON_SECRET` with `Authorization: Bearer <secret>` or a `secret` query parameter.
+- Heavy diagnostic/readiness API routes use server-only runtime import boundaries through `src/lib/server-lazy-diagnostics.ts` so webpack does not pull large operational service graphs into every route entry at top level.
 
 ## Services
 

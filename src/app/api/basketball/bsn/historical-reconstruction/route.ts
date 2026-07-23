@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, parseBooleanParam, requestId } from '@/lib/api-contract'
-import { getBsnHistoricalReconstruction, validateBsnHistoricalReconstructionFixtures } from '@/services/basketball'
+import {
+  getBsnHistoricalReconstruction,
+  validateBsnHistoricalReconstructionFixtures,
+} from '@/services/basketball/history/bsn-historical-reconstruction'
 
 export async function GET(request: NextRequest) {
   const id = requestId(request)

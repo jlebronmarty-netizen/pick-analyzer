@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, parseBooleanParam, requestId } from '@/lib/api-contract'
-import { runAdaptiveRefresh } from '@/services/adaptive-refresh-orchestrator.service'
+import { loadAdaptiveRefreshOrchestrator } from '@/lib/server-lazy-diagnostics'
 
 function authorized(request: NextRequest) {
   const secret = process.env.CRON_SECRET
@@ -20,6 +20,7 @@ async function handle(request: NextRequest) {
         status: 401,
       })
     }
+    const { runAdaptiveRefresh } = await loadAdaptiveRefreshOrchestrator()
     return apiOk(await runAdaptiveRefresh({ dryRun, source: request.method === 'POST' ? 'MANUAL_PROTECTED' : 'SYSTEM' }), id)
   } catch (error) {
     return apiError({ id, code: 'INTERNAL_ERROR', message: errorMessage(error, 'Unknown adaptive refresh error') })

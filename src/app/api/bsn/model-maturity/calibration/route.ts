@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getBsnCalibrationEngine } from '@/services/bsn-model-maturity.service'
+import { loadBsnModelMaturity } from '@/lib/server-lazy-diagnostics'
 
 export async function GET() {
   try {
+    const { getBsnCalibrationEngine } = await loadBsnModelMaturity()
     const data = await getBsnCalibrationEngine()
     return NextResponse.json(data)
   } catch (error) {

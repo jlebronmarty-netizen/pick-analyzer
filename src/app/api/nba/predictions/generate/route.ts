@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateNbaPredictions } from '@/services/nba-prediction-engine.service'
+import { loadNbaPredictionEngine } from '@/lib/server-lazy-diagnostics'
 
 function isAuthorized(request: Request) {
   const cronSecret = process.env.CRON_SECRET
@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const limit = Number(request.nextUrl.searchParams.get('limit') ?? 20)
+    const { generateNbaPredictions } = await loadNbaPredictionEngine()
     const result = await generateNbaPredictions({
       persist: true,
       limit: Number.isFinite(limit) ? limit : 20,

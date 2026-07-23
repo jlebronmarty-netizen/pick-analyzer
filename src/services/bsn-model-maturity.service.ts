@@ -11,7 +11,8 @@ import {
 } from '@/services/bsn-shadow-prediction-engine.service'
 import { getFeatureStoreStatus } from '@/services/feature-store-core.service'
 import { getSharedSportPredictionEngineSdk } from '@/services/sport-prediction-engine-sdk.service'
-import { getBasketballDataPlatform, buildBasketballHistoricalSeasonPlan } from '@/services/basketball'
+import { getBasketballDataPlatform } from '@/services/basketball/builders/platform.service'
+import { buildBasketballHistoricalSeasonPlan } from '@/services/basketball/history/historical-builder'
 
 const BSN_SPORT_KEY = 'basketball_bsn' as const
 const BSN_LEAGUE_KEY = 'bsn_pr' as const

@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-23 - Fix Vercel Build OOM By Reducing Route Entry Graphs
+
+Context: Local production builds passed, but Vercel builds failed during webpack optimization before `Compiled successfully`. V1 build-worker and memory settings reduced worker pressure but did not change the dependency graph.
+
+Decision: Keep every route and diagnostic endpoint, but move large diagnostic/readiness service imports behind server-only request-time dynamic loaders. Replace broad basketball barrel imports in API/BSN paths with direct concrete imports. Disable `webpackBuildWorker` after Vercel twice reported the Next build worker process being SIGKILLed during webpack optimization, then disable production server-side webpack minimization after Vercel still killed the main build during the same optimization phase.
+
+Consequences: Route entry graphs no longer statically pull the largest diagnostic services into many compilation boundaries. The build still includes all features, and runtime endpoints keep their existing response contracts. Current Board, Official Pick, Prediction Engine, Learning Brain, settlement, replay, market and historical feature-store behavior remain unchanged.
+
+Affected modules: Server lazy diagnostic loader, basketball API routes, BSN services, SportsDataIO NBA readiness routes, AI Performance Center routes, historical import routes, autonomous operations routes, adaptive refresh routes, production readiness/runtime observability/MLB operations routes and build OOM documentation.
+
 ## 2026-07-23 - Optimize Build Memory With Dynamic Boundaries Instead Of Feature Removal
 
 Context: Local builds passed, but Vercel production deployment failed out of memory after several backend-heavy historical, settlement and feature-store phases expanded the route/service graph.

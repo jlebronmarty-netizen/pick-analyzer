@@ -1,7 +1,8 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { getBasketballDataPlatform, buildBasketballHistoricalSeasonPlan } from '@/services/basketball'
+import { getBasketballDataPlatform } from '@/services/basketball/builders/platform.service'
+import { buildBasketballHistoricalSeasonPlan } from '@/services/basketball/history/historical-builder'
 import { getBsnIntelligenceEngine, validateBsnIntelligenceEngine, BsnTeamProfile } from '@/services/bsn-intelligence-engine.service'
 import { getFeatureDefinitions, getFeatureStoreStatus } from '@/services/feature-store-core.service'
 import { getSharedSportPredictionEngineSdk } from '@/services/sport-prediction-engine-sdk.service'

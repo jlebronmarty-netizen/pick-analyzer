@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { resumeSportsDataIoHistoricalImport } from '@/services/sportsdataio-historical-import-readiness.service'
+import { loadSportsDataIoHistoricalImportReadiness } from '@/lib/server-lazy-diagnostics'
 
 function authorized(request: NextRequest) {
   const secret = process.env.CRON_SECRET
@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json().catch(() => ({}))
+    const { resumeSportsDataIoHistoricalImport } = await loadSportsDataIoHistoricalImportReadiness()
     const result = resumeSportsDataIoHistoricalImport({
       jobId: body?.jobId ?? null,
     })

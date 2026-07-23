@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { validateSportsDataIoHistoricalImportJob } from '@/services/sportsdataio-historical-import-readiness.service'
+import { loadSportsDataIoHistoricalImportReadiness } from '@/lib/server-lazy-diagnostics'
 
 export async function POST(
   request: NextRequest,
@@ -10,6 +10,7 @@ export async function POST(
 
   try {
     const { jobId } = await context.params
+    const { validateSportsDataIoHistoricalImportJob } = await loadSportsDataIoHistoricalImportReadiness()
     const result = validateSportsDataIoHistoricalImportJob(jobId)
 
     if (!result.success) {

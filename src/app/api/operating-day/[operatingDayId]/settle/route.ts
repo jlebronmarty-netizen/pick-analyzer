@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, parseBooleanParam, requestId } from '@/lib/api-contract'
-import { settleOperatingDay } from '@/services/operating-day.service'
+import { loadOperatingDayService } from '@/lib/server-lazy-diagnostics'
 
 function authorized(request: NextRequest) {
   const secret = process.env.CRON_SECRET
@@ -28,6 +28,7 @@ export async function POST(
   try {
     const { operatingDayId } = await context.params
     const body = await request.json().catch(() => ({}))
+    const { settleOperatingDay } = await loadOperatingDayService()
     const result = await settleOperatingDay({
       operatingDayId,
       sportKey: body?.sportKey ?? body?.sport ?? 'baseball_mlb',

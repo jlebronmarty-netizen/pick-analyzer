@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getBsnShadowMarketIntelligence } from '@/services/bsn-model-maturity.service'
+import { loadBsnModelMaturity } from '@/lib/server-lazy-diagnostics'
 
 export async function GET() {
   try {
+    const { getBsnShadowMarketIntelligence } = await loadBsnModelMaturity()
     const data = await getBsnShadowMarketIntelligence()
     return NextResponse.json(data)
   } catch (error) {

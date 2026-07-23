@@ -4,7 +4,7 @@ import {
   getBsnAcquisitionDiscovery,
   runBsnAcquisitionEngine,
   validateBsnAcquisitionEngineFixtures,
-} from '@/services/basketball'
+} from '@/services/basketball/acquisition/bsn-acquisition-engine'
 
 export async function GET(request: NextRequest) {
   const id = requestId(request)

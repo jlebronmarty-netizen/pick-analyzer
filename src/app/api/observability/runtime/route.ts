@@ -1,11 +1,11 @@
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { getRuntimeObservability } from '@/services/runtime-observability.service'
+import { getRuntimeObservabilityLazy } from '@/lib/server-lazy-diagnostics'
 
 export async function GET(request: Request) {
   const id = requestId(request)
 
   try {
-    return apiOk(await getRuntimeObservability(), id)
+    return apiOk(await getRuntimeObservabilityLazy(), id)
   } catch (error) {
     console.error('Runtime observability error:', { requestId: id, error })
 

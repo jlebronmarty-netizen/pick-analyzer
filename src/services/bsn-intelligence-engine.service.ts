@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { getBasketballDataPlatform } from '@/services/basketball'
+import { getBasketballDataPlatform } from '@/services/basketball/builders/platform.service'
 import { buildBasketballHistoricalSeasonPlan } from '@/services/basketball/history/historical-builder'
 import { planBasketballKnowledgeGeneration } from '@/services/basketball/knowledge/knowledge-layer'
 import { getFeatureDefinitions, getFeatureStoreStatus } from '@/services/feature-store-core.service'

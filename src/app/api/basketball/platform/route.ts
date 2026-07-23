@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, parseBooleanParam, requestId } from '@/lib/api-contract'
-import { getBasketballDataPlatform, validateBasketballDataPlatformFixtures } from '@/services/basketball'
+import { getBasketballDataPlatform, validateBasketballDataPlatformFixtures } from '@/services/basketball/builders/platform.service'
 import type { SportKey } from '@/config/sports.config'
 
 export async function GET(request: NextRequest) {

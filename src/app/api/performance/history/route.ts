@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAiPerformanceCenter } from '@/services/ai-performance-center.service'
+import { getAiPerformanceCenterLazy } from '@/lib/server-lazy-diagnostics'
 import { getPerformanceScopeV2 } from '@/services/performance-scope-v2.service'
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     const minConfidence = Number(request.nextUrl.searchParams.get('minConfidence') ?? Number.NaN)
     const maxConfidence = Number(request.nextUrl.searchParams.get('maxConfidence') ?? Number.NaN)
     const [data, performanceScopeV2] = await Promise.all([
-      getAiPerformanceCenter({ sportKey, dryRun: true }),
+      getAiPerformanceCenterLazy({ sportKey, dryRun: true }),
       getPerformanceScopeV2({ sportKey }),
     ])
     const rows = data.predictionHistory.rows.filter((row) => {

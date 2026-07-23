@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { getSportsDataIoHistoricalImportJob } from '@/services/sportsdataio-historical-import-readiness.service'
+import { loadSportsDataIoHistoricalImportReadiness } from '@/lib/server-lazy-diagnostics'
 
 export async function GET(
   request: NextRequest,
@@ -20,6 +20,7 @@ export async function GET(
       })
     }
 
+    const { getSportsDataIoHistoricalImportJob } = await loadSportsDataIoHistoricalImportReadiness()
     return apiOk(getSportsDataIoHistoricalImportJob(jobId), id)
   } catch (error) {
     console.error('SportsDataIO historical import job error:', {
