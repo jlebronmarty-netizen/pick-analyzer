@@ -8,6 +8,22 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### MLB Historical Intelligence Phase 2A - Retrosheet Historical Feature Store Core V1
+
+Status: Implemented, build-verified and full-season DRY_RUN verified; full-season historical feature import remains blocked until the protected production write receives explicit approval that passes review.
+
+Evidence: `src/services/retrosheet-historical-feature-store.service.ts`, `/api/mlb/historical-intelligence/retrosheet/features`, `/admin/historical-diagnostics`, Operations Validation, `docs/RETROSHEET_HISTORICAL_FEATURE_STORE_PHASE_2A.md` and local production build.
+
+Note: Phase 2A creates the durable point-in-time historical feature-store contract over persisted 2025 Retrosheet tables. It defines 80 READY features across Teams, Pitchers, Bullpen, Batters, Lineups, Park Factors, Umpires and Game State; stores deterministic historical-only snapshots in `historical_feature_snapshots`; and marks all rows non-production, non-training and non-live-prediction eligible. Completion-control DRY_RUN verified 2,430 games, 70,470 planned snapshots, duplicate deterministic keys 0 and provider calls 0. Prediction Engine, Learning Brain, Current Board, Official Picks, markets, settlement and live Performance remain untouched. The cron-secret full import/idempotency execution was blocked by approval review and was not worked around.
+
+### MLB Historical Intelligence Phase 1.5 - Historical Coverage Intelligence Audit
+
+Status: Complete as read-only documentation audit.
+
+Evidence: `docs/RETROSHEET_HISTORICAL_COVERAGE_INTELLIGENCE_PHASE_1_5.md`, production aggregate coverage checks against the 11 historical tables, `docs/PROJECT_STATUS.md`.
+
+Note: Phase 1.5 catalogs 93 candidate analytical features from the imported 2025 Retrosheet historical database: 57 READY, 24 PARTIAL, 7 BLOCKED and 5 FUTURE. The audit prioritizes pitcher workload/form, bullpen workload/effectiveness, team rolling offense/pitching, park factors, umpire K/BB tendency, base-out/game-state context and lineup continuity. It intentionally does not implement prediction features, Learning Brain inputs, model training datasets, historical replay, player props, bullpen engine, matchup engine or production behavior changes.
+
 ### Retrosheet Production Connection Recovery And Controlled 2025 Import
 
 Status: Production historical import certified complete. Certifications: `RETROSHEET_PRODUCTION_CONNECTION_PASS`, `RETROSHEET_MIGRATIONS_PASS`, `RETROSHEET_2025_CONTROLLED_IMPORT_PASS`, `RETROSHEET_IMPORT_IDEMPOTENCY_PASS`, `RETROSHEET_IMPORT_RESUME_PASS`, `RETROSHEET_PRODUCTION_ISOLATION_PASS`, `RETROSHEET_DATA_QUALITY_PASS`, `RETROSHEET_DATABASE_FOUNDATION_PASS`.

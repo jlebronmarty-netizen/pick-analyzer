@@ -1,6 +1,28 @@
 # Project Status
 
-Last updated: 2026-07-22 21:55:00Z
+Last updated: 2026-07-23 00:00:00Z
+
+## 2026-07-22 MLB Historical Intelligence Phase 2A - Retrosheet Historical Feature Store Core V1
+
+- Added server-only Retrosheet Historical Feature Store Core V1 over the persisted 2025 Retrosheet historical database, reusing `historical_feature_snapshots` with deterministic key prefix `retrosheet_mlb_feature_store_v1` and market partition `historical_mlb_feature_store`.
+- Added 80 READY point-in-time historical feature definitions across Teams, Pitchers, Bullpen, Batters, Lineups, Park Factors, Umpires and Game State. Each snapshot stores feature values, lineage, cutoff/as-of timestamp, sample size, quality/sufficiency score, leakage warnings and production-isolation metadata.
+- Added modes `DRY_RUN`, `SINGLE_GAME_PREVIEW`, `RANGE_IMPORT`, `FULL_SEASON_IMPORT` and `VALIDATE_ONLY` through protected `/api/mlb/historical-intelligence/retrosheet/features`; read-only diagnostics and contract are available by GET.
+- Extended `/admin/historical-diagnostics` with historical feature-store status and added Operations Validation fixtures for deterministic IDs, point-in-time cutoff, missing-sample behavior and production isolation.
+- Added `docs/RETROSHEET_HISTORICAL_FEATURE_STORE_PHASE_2A.md` with the feature capability matrix, coverage report, top 25 highest-value features, estimated prediction impact and recommended implementation order.
+- Completion-control hardening added full-range DRY_RUN support, stable primary-key pagination, durable historical job/checkpoint write paths for approved imports, insert-only deterministic snapshot persistence, duplicate-key diagnostics and lineup-slot-specific batter snapshot keys.
+- Production connection/schema verification passed against `ynuocvexviorgdjrfthw.supabase.co`: 2,430 games, 76,135 lineups, 27,535 substitutions, 216,845 plays, 20,870 pitcher appearances and 189,311 batter appearances were readable; Phase 2A prefixed historical feature snapshots were 0 before import.
+- Full-season DRY_RUN passed with 2,430 games, 70,470 planned snapshots, duplicate deterministic keys 0, HIGH 55,311, MEDIUM 4,430, LOW 8,601, INSUFFICIENT 2,128, provider calls 0 and remote mutations 0.
+- Representative `SINGLE_GAME_PREVIEW` checks passed for opener `CHN202503180`, ordinary game `CHN202506150` and doubleheader `CHN202508191`, each with 29 snapshots, unique keys, provider calls 0 and remote mutations 0. No persisted game had `innings > 9`, so extra-inning preview could not be honestly selected from the imported field.
+- Build passed with `npm.cmd run build`. Contract route verification returned 80 candidate features, READY 80, provider calls 0 and remote mutations 0.
+- Full-season import and second-run idempotency were not executed because the protected cron-secret write command was blocked again by approval review before database mutation. No workaround was attempted. Prediction Engine, Learning Brain, Current Board, Official Picks, markets, settlement and live Performance behavior were not changed.
+
+## 2026-07-22 MLB Historical Intelligence Phase 1.5 - Historical Coverage Intelligence Audit
+
+- Completed a read-only documentation audit of all persisted Retrosheet historical tables after `RETROSHEET_DATABASE_FOUNDATION_PASS`.
+- Added `docs/RETROSHEET_HISTORICAL_COVERAGE_INTELLIGENCE_PHASE_1_5.md` with measured production coverage, a 93-feature capability matrix, status classifications, missing dependencies, predictive-value estimates, implementation complexity, P1-P4 priorities, a dependency graph and implementation recommendations for Prediction Engine V5, Learning Brain, Historical Replay, Player Props, Bullpen Engine and Matchup Engine.
+- Coverage evidence: 61 source files, 399,497 raw records, 2,430 games, 76,135 lineup entries, 27,535 substitutions, 216,845 plays, 20,870 pitcher appearances and 189,311 batter appearances. Game date, venue, start time, day/night, DH, attendance, duration, innings, canonical teams, weather object and umpire object are 100% populated for the imported games; pitch count is present on 20,864 of 20,870 pitcher appearances.
+- Feature capability totals: 93 candidate features; READY 57, PARTIAL 24, BLOCKED 7, FUTURE 5. Highest-value near-term bundles are pitcher workload/form, bullpen workload/effectiveness, team rolling offense/pitching, park factors, umpire K/BB tendency, base-out/game-state context and lineup continuity.
+- This phase made no prediction features, no Prediction Engine changes, no Learning Brain changes, no model/training dataset generation, no production behavior changes, no provider calls and no Supabase mutations.
 
 ## 2026-07-22 Retrosheet Production Connection Recovery And Controlled 2025 Import
 

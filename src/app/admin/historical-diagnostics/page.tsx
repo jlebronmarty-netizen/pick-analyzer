@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { getRetrosheetGameEngineDiagnostics } from '@/services/retrosheet-game-reconstruction.service'
+import { getRetrosheetHistoricalFeatureStoreDiagnostics } from '@/services/retrosheet-historical-feature-store.service'
 
 export const metadata: Metadata = {
   title: 'Historical Diagnostics | Pick Analyzer',
@@ -7,6 +8,7 @@ export const metadata: Metadata = {
 }
 
 type Data = Awaited<ReturnType<typeof getRetrosheetGameEngineDiagnostics>>
+type FeatureData = Awaited<ReturnType<typeof getRetrosheetHistoricalFeatureStoreDiagnostics>>
 
 function fmt(value: unknown, fallback = 'n/a') {
   if (value === null || value === undefined || value === '') return fallback
@@ -39,6 +41,7 @@ export default async function HistoricalDiagnosticsPage({
 }) {
   const params = searchParams ? await searchParams : {}
   const data: Data = await getRetrosheetGameEngineDiagnostics({ gameId: params.gameId, limit: 25 })
+  const featureData: FeatureData = await getRetrosheetHistoricalFeatureStoreDiagnostics({ gameId: params.gameId, limit: 1 })
   const coverage = data.coverage
 
   return (
@@ -75,6 +78,15 @@ export default async function HistoricalDiagnosticsPage({
             <Metric label="Plays" value={coverage.plays} />
             <Metric label="Conflicts" value={coverage.errors} />
             <Metric label="Warnings" value={coverage.warnings} />
+          </div>
+        </Panel>
+
+        <Panel title="Historical Feature Store">
+          <div className="grid gap-2 md:grid-cols-4">
+            <Metric label="Status" value={featureData.status} />
+            <Metric label="Stored Snapshots" value={featureData.summary.storedSnapshots} />
+            <Metric label="Feature Definitions" value={featureData.summary.featureDefinitions} />
+            <Metric label="Provider Calls" value={featureData.providerCallsMade} />
           </div>
         </Panel>
 

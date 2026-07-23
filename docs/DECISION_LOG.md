@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-23 - Keep Phase 2A Historical Feature Import Behind Protected Write Approval
+
+Context: Phase 2A completion control verified the Retrosheet historical feature-store contract, production Supabase connection, schema access, full-season dry-run and representative single-game previews. The full-season import would write 70,470 historical feature snapshots plus job/checkpoint rows.
+
+Decision: Harden the existing Phase 2A implementation for stable pagination, deterministic key uniqueness, insert-only idempotent snapshot persistence and durable job/checkpoint metadata, but do not bypass approval review when the protected full-season import command is rejected.
+
+Consequences: The repository is ready for an approved protected import, but `RETROSHEET_HISTORICAL_FEATURE_IMPORT_PASS`, idempotency and resume certifications are not claimed until the write is actually executed and reconciled. Prediction Engine, Learning Brain, Current Board, Official Picks, markets, settlement and live Performance remain untouched.
+
+Affected modules: Retrosheet historical feature-store service, protected Retrosheet feature route, historical diagnostics, Operations Validation and Phase 2A docs.
+
 ## 2026-07-22 - Separate Model Intelligence From Market Recommendations
 
 Context: User-facing views appeared empty when market odds were unavailable, while stored model probabilities and pitcher-outs shadows existed. Most Likely returned a server error in the empty Current Board case, and Dashboard Today showed no useful model intelligence despite 15 MLB games.
