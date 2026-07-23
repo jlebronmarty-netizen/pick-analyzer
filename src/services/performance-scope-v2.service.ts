@@ -122,7 +122,6 @@ function isTestFixture(row: PredictionRow) {
     row.trial === true ||
     row.scrambled === true ||
     normalize(row.model_role) === 'shadow' ||
-    normalize(row.validation_status) === 'skipped' ||
     warnings.some((warning) => /trial|scrambled|fixture|quarantine/i.test(warning))
   )
 }
