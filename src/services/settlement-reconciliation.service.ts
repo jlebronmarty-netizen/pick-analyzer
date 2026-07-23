@@ -188,11 +188,22 @@ function warnings(row: PredictionRow) {
 }
 
 function isTestOrFixture(row: PredictionRow) {
+  const rowWarnings = warnings(row)
   return (
     row.trial === true ||
     row.scrambled === true ||
-    normalize(row.validation_status) === 'skipped' ||
-    warnings(row).some((warning) => /trial|scrambled|fixture|quarantine|synthetic/i.test(warning))
+    rowWarnings.some((warning) => /trial|scrambled|fixture|quarantine|synthetic/i.test(warning))
+  )
+}
+
+function canReopenMisclassifiedIgnored(row: PredictionRow) {
+  const lifecycle = normalize(row.lifecycle_status)
+  if (lifecycle !== 'skipped') return false
+  const v2 = v2Details(row)
+  return (
+    v2.lifecycle === 'Ignored' &&
+    v2.reason === 'test_or_fixture_data' &&
+    !isTestOrFixture(row)
   )
 }
 
@@ -286,7 +297,7 @@ function duplicateKey(row: PredictionRow) {
 function baseClassification(row: PredictionRow, event: EventRow | undefined, duplicateSet: Set<string>, now = Date.now()): Classification {
   const settledResult = resultValue(row)
   const eventStatus = normalize(event?.status)
-  const finalScoresAvailable = eventStatus === 'completed' && event?.home_score !== null && event?.away_score !== null
+  const finalScoresAvailable = ['completed', 'final', 'closed', 'complete'].includes(eventStatus) && event?.home_score !== null && event?.away_score !== null
   const gameIdentifier = row.game_id
   const eventIdentifier = event?.id ?? row.game_id
 
@@ -317,7 +328,7 @@ function baseClassification(row: PredictionRow, event: EventRow | undefined, dup
     dbLifecycle,
     marketRuleVersion: MARKET_RULE_VERSION,
     explanation,
-    mutationEligible: isPendingLike(row),
+    mutationEligible: isPendingLike(row) || canReopenMisclassifiedIgnored(row),
     performanceEligible: lifecycle === 'Settled' || lifecycle === 'Push',
     settlementDelayHours: settlementDelay(row, event),
   })
@@ -569,7 +580,7 @@ async function applyPatches(rows: PredictionRow[], classifications: Classificati
       .from('prediction_history')
       .update(patch)
       .eq('id', row.id)
-      .or('lifecycle_status.is.null,lifecycle_status.not.in.(settled,void,skipped,closed)')
+      .or('lifecycle_status.is.null,lifecycle_status.not.in.(settled,void,closed)')
     if (error) {
       failures.push({ predictionId: row.id, reason: error.message })
       continue

@@ -23,6 +23,21 @@ The AI Operations Center shows whether the daily AI lifecycle has persisted evid
 
 Each panel reports one operational status: `Healthy`, `Waiting`, `Blocked`, `Running`, `Completed` or `Error`.
 
+V2 adds daily evidence stages for Today, Yesterday and Last 7 Days:
+
+- games
+- odds
+- predictions
+- board candidates
+- official picks
+- completed games
+- settlements
+- labels
+- accepted learning samples
+- rejected samples
+- shadow learning
+- weight updates
+
 ## Isolation
 
 The center is read-only. It does not run prediction generation, settlement, replay, model learning, weight updates, provider refreshes or Official Pick promotion. Provider calls remain `0`; provider health comes from stored budget accounting.
@@ -42,6 +57,6 @@ The center is read-only. It does not run prediction generation, settlement, repl
 
 ## Product Semantics
 
-Learning is never claimed unless persisted evidence exists. Deterministic settled rows can be shown as queue candidates, but they are not treated as accepted learning samples unless a persisted model-weight history row exists after settlement.
+Learning is never claimed unless persisted evidence exists. Deterministic settled rows can be shown as candidates. They are accepted for shadow validation only when point-in-time feature evidence exists. They are treated as trained/applied only when persisted model-weight history proves it.
 
 Missing next scheduler times are displayed as `Waiting for next scheduler execution`.

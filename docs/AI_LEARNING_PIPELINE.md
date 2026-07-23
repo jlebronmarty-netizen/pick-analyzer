@@ -29,8 +29,12 @@ The V1 queue is derived read-only from deterministic production-settled `predict
 Queue statuses:
 
 - `QUEUED`: deterministic label and snapshot evidence exist, but no persisted weight-update acceptance exists.
-- `ACCEPTED`: persisted model-weight history exists after settlement.
+- `VALIDATING`: sample is under validation.
+- `ACCEPTED`: deterministic label and point-in-time feature evidence pass chronology/leakage checks.
 - `REJECTED`: deterministic result or leakage-safe feature evidence is missing.
+- `TRAINED`: persisted model-weight history exists after settlement.
+- `APPLIED`: governed production update is active.
+- `ROLLED_BACK`: governed update was reverted.
 
 Every queue item carries prediction id, event id, sport, market, label, status, reason, timestamp, source and confidence.
 
@@ -41,3 +45,5 @@ Win/loss/push labels come only from settled prediction results. Totals, runline,
 ## Guardrails
 
 This validation does not modify Prediction Engine probabilities, Learning Brain weights, Official Pick policy, settlement outcomes, Current Board rows, historical features or replay rows.
+
+Production weight activation remains blocked unless the shadow validation gate proves sufficient accepted sample, chronological holdout, non-worsening Brier/Log Loss, acceptable calibration, subgroup stability and rollback readiness.

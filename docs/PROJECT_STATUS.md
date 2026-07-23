@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-23 00:00:00Z
 
+## 2026-07-23 Daily Settlement Closure & Learning Evidence Activation V1
+
+- Repaired Settlement V2 classification so `validation_status='skipped'` is not automatically treated as test/fixture data. Explicit trial, scrambled, fixture, quarantine or synthetic evidence is still excluded. Misclassified `Ignored/test_or_fixture_data` rows can be reopened only when they are not actual test fixtures; settled/void/closed rows remain protected.
+- Expanded persisted final-status grading to accept `completed`, `final`, `closed` and `complete` event statuses when home and away scores are present.
+- Hardened Retrosheet Phase 2A feature-store loading so large historical tables fall back to bounded pagination when exact count probes fail.
+- Extended AI Operations Center V2 with daily evidence stages for odds, predictions, settlements, labels, accepted/rejected samples, shadow learning and weight updates.
+- Learning evidence now distinguishes accepted feature/label samples from trained/applied weight updates. Current accepted evidence is shadow-ready only; production weight activation remains blocked unless validation gates pass.
+- Added documentation for daily settlement closure, feature/label evidence, learning evidence activation, shadow validation and scheduler status.
+
 ## 2026-07-23 AI Learning Pipeline Validation & Autonomous Daily Lifecycle V1
 
 - Added read-only AI lifecycle evidence service and `/api/ai-operations/lifecycle` to validate the chain from scheduled games through odds, predictions, settlement, replay snapshots, deterministic labels, derived learning queue, persisted weight updates, calibration and future-prediction readiness.

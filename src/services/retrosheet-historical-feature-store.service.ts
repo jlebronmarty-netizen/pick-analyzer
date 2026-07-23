@@ -289,7 +289,18 @@ function nowIso() {
 async function fetchAll<T>(table: string, select: string, order?: string) {
   const pageSize = 1000
   const countResult = await supabaseAdmin.from(table).select('*', { count: 'exact', head: true })
-  if (countResult.error) throw new Error(`${table} count failed: ${countResult.error.message}`)
+  if (countResult.error) {
+    const rows: T[] = []
+    for (let from = 0; ; from += pageSize) {
+      let query = supabaseAdmin.from(table).select(select).range(from, from + pageSize - 1)
+      if (order) query = query.order(order)
+      const { data, error } = await query
+      if (error) throw new Error(`${table} read failed: ${error.message}`)
+      rows.push(...((data ?? []) as T[]))
+      if (!data || data.length < pageSize) break
+    }
+    return rows
+  }
   const total = countResult.count ?? 0
   const ranges = Array.from({ length: Math.ceil(total / pageSize) }, (_, index) => ({
     from: index * pageSize,

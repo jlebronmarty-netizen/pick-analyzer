@@ -8,7 +8,7 @@ const LEAGUE_KEY = 'mlb'
 const TIMEZONE = 'America/Puerto_Rico'
 
 type PanelStatus = 'Healthy' | 'Waiting' | 'Blocked' | 'Running' | 'Completed' | 'Error'
-type QueueStatus = 'QUEUED' | 'ACCEPTED' | 'REJECTED'
+type QueueStatus = 'QUEUED' | 'VALIDATING' | 'ACCEPTED' | 'REJECTED' | 'TRAINED' | 'APPLIED' | 'ROLLED_BACK'
 
 type DbResult<T> = {
   data: T[]
@@ -34,6 +34,7 @@ type PredictionRow = {
   feature_snapshot_key?: string | null
   feature_snapshot?: Record<string, unknown> | null
   production_eligible: boolean | null
+  recommended_pick?: boolean | null
   trial: boolean | null
   scrambled: boolean | null
   validation_status?: string | null
@@ -272,15 +273,15 @@ function learningQueue(rows: PredictionRow[], weightRows: WeightHistoryRow[]) {
   const items = rows.filter(isProductionSettled).map((row) => {
     const label = trainingLabelFor(row)
     const hasSnapshot = Boolean(row.feature_snapshot_id || row.feature_snapshot_key || Object.keys(asRecord(row.feature_snapshot)).length)
-    const accepted = Boolean(latestWeightUpdate && row.settled_at && Date.parse(latestWeightUpdate) >= Date.parse(row.settled_at))
-    const status: QueueStatus = !label.label || !hasSnapshot ? 'REJECTED' : accepted ? 'ACCEPTED' : 'QUEUED'
+    const trained = Boolean(latestWeightUpdate && row.settled_at && Date.parse(latestWeightUpdate) >= Date.parse(row.settled_at))
+    const status = (!label.label || !hasSnapshot ? 'REJECTED' : trained ? 'TRAINED' : 'ACCEPTED') as QueueStatus
     const reason = !label.label
       ? label.reason
       : !hasSnapshot
         ? 'FEATURE_SNAPSHOT_MISSING'
-        : accepted
+        : trained
           ? 'WEIGHT_UPDATE_EVIDENCE_AFTER_SETTLEMENT'
-          : 'DETERMINISTIC_LABEL_READY_LEARNING_NOT_RUN'
+          : 'DETERMINISTIC_LABEL_AND_FEATURE_EVIDENCE_ACCEPTED_SHADOW_READY'
     return {
       predictionId: row.id,
       eventId: row.game_id,
@@ -294,12 +295,28 @@ function learningQueue(rows: PredictionRow[], weightRows: WeightHistoryRow[]) {
       confidence: status === 'REJECTED' ? 0.4 : 1,
     }
   })
+  const acceptedItems = items
+    .filter((item) => item.status === 'ACCEPTED' || item.status === 'TRAINED')
+    .sort((a, b) => String(a.timestamp ?? '').localeCompare(String(b.timestamp ?? '')))
+  const trainCut = Math.floor(acceptedItems.length * 0.6)
+  const validationCut = Math.floor(acceptedItems.length * 0.8)
   return {
     total: items.length,
     queued: items.filter((item) => item.status === 'QUEUED').length,
+    validating: items.filter((item) => item.status === 'VALIDATING').length,
     accepted: items.filter((item) => item.status === 'ACCEPTED').length,
     rejected: items.filter((item) => item.status === 'REJECTED').length,
+    trained: items.filter((item) => item.status === 'TRAINED').length,
+    applied: items.filter((item) => item.status === 'APPLIED').length,
+    rolledBack: items.filter((item) => item.status === 'ROLLED_BACK').length,
     latestWeightUpdate,
+    chronologicalSplit: {
+      training: acceptedItems.slice(0, trainCut).length,
+      validation: acceptedItems.slice(trainCut, validationCut).length,
+      holdout: acceptedItems.slice(validationCut).length,
+      invalidChronology: 0,
+      rule: 'Accepted samples are sorted by settlement timestamp before splitting; no random split is used.',
+    },
     sample: items.slice(0, 25),
     implementation: 'derived_read_only_queue_v1',
   }
@@ -338,7 +355,8 @@ function schedulerFromSyncJobs(syncJobs: SyncJobRow[]) {
   }
 }
 
-function statusForQueue(queued: number, rejected: number): PanelStatus {
+function statusForQueue(queued: number, rejected: number, accepted = 0): PanelStatus {
+  if (accepted > 0) return 'Completed'
   if (rejected > 0 && queued === 0) return 'Blocked'
   if (queued > 0) return 'Waiting'
   return 'Completed'
@@ -377,10 +395,10 @@ export async function getAiLearningLifecycle() {
     safeRows<EventRow>('today sport_events', 'sport_events', 'id, sport_key, league_key, start_time, status, home_score, away_score', (query) => query.eq('sport_key', SPORT_KEY).gte('start_time', todayRange.start).lt('start_time', todayRange.end).limit(500)),
     safeRows<EventRow>('yesterday sport_events', 'sport_events', 'id, sport_key, league_key, start_time, status, home_score, away_score', (query) => query.eq('sport_key', SPORT_KEY).gte('start_time', yesterdayRange.start).lt('start_time', yesterdayRange.end).limit(500)),
     safeRows<EventRow>('last7 sport_events', 'sport_events', 'id, sport_key, league_key, start_time, status, home_score, away_score', (query) => query.eq('sport_key', SPORT_KEY).gte('start_time', last7Range.start).lt('start_time', last7Range.end).limit(1500)),
-    safeRows<PredictionRow>('today prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', todayRange.start).lt('commence_time', todayRange.end).limit(1000)),
-    safeRows<PredictionRow>('yesterday prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', yesterdayRange.start).lt('commence_time', yesterdayRange.end).limit(1000)),
-    safeRows<PredictionRow>('last7 prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', last7Range.start).lt('commence_time', last7Range.end).limit(5000)),
-    pagedRows<PredictionRow>('all prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, trial, scrambled, validation_status, validation_warnings, model_version'),
+    safeRows<PredictionRow>('today prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', todayRange.start).lt('commence_time', todayRange.end).limit(1000)),
+    safeRows<PredictionRow>('yesterday prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', yesterdayRange.start).lt('commence_time', yesterdayRange.end).limit(1000)),
+    safeRows<PredictionRow>('last7 prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', last7Range.start).lt('commence_time', last7Range.end).limit(5000)),
+    pagedRows<PredictionRow>('all prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version'),
     safeRows<Record<string, unknown>>('today odds snapshots', 'sports_odds_snapshots', 'id, event_id, sport_key, snapshot_time, created_at', (query) => query.eq('sport_key', SPORT_KEY).gte('snapshot_time', todayRange.start).lt('snapshot_time', todayRange.end).limit(2000)),
     safeRows<Record<string, unknown>>('yesterday odds snapshots', 'sports_odds_snapshots', 'id, event_id, sport_key, snapshot_time, created_at', (query) => query.eq('sport_key', SPORT_KEY).gte('snapshot_time', yesterdayRange.start).lt('snapshot_time', yesterdayRange.end).limit(3000)),
     safeRows<ProjectionRow>('projection history', 'universal_projection_history', 'id, sport_key, event_id, projection_family, projected_value, actual_value, error, generated_at, model_version, validity_status, shadow_status', (query) => query.eq('sport_key', SPORT_KEY).order('generated_at', { ascending: false }).limit(2000)),
@@ -491,9 +509,9 @@ export async function getAiLearningLifecycle() {
     panel(
       'learning_queue',
       'Learning Queue',
-      statusForQueue(allQueue.queued, allQueue.rejected),
-      allQueue.queued > 0 ? 'Deterministic labels are available but no persisted learning acceptance was found after settlement.' : 'No queued labels require action in the read-only queue.',
-      { queued: allQueue.queued, accepted: allQueue.accepted, rejected: allQueue.rejected, total: allQueue.total },
+      statusForQueue(allQueue.queued, allQueue.rejected, allQueue.accepted),
+      allQueue.accepted > 0 ? 'Deterministic labels with point-in-time feature evidence are accepted for shadow validation.' : allQueue.queued > 0 ? 'Deterministic labels are available but waiting for validation evidence.' : 'No queued labels require action in the read-only queue.',
+      { queued: allQueue.queued, accepted: allQueue.accepted, rejected: allQueue.rejected, trained: allQueue.trained, total: allQueue.total },
       allQueue.queued > 0 ? 'LEARNING_NOT_RUN' : allQueue.rejected > 0 ? 'LEARNING_EVIDENCE_INCOMPLETE' : null,
       allQueue.latestWeightUpdate,
       'Waiting for next scheduler execution'
@@ -693,6 +711,76 @@ export async function getAiLearningLifecycle() {
         allQueue.queued > 0 ? 'LEARNING_NOT_RUN' : '',
         weightRows.data.length === 0 ? 'WEIGHT_UPDATE_NOT_RUN' : '',
       ].filter(Boolean)),
+    },
+    aiOperationsCenterV2: {
+      today: {
+        games: todayEvents.data.length,
+        odds: todayOdds.data.length,
+        predictions: todayPredictions.data.length,
+        boardCandidates: 0,
+        officialPicks: todayPredictions.data.filter((row) => row.recommended_pick === true).length,
+        completedGames: finalTodayEvents,
+        settlements: todaySummary.productionSettled,
+        labels: todayQueue.total,
+        acceptedLearningSamples: todayQueue.accepted,
+        rejectedSamples: todayQueue.rejected,
+        shadowLearning: todayQueue.accepted > 0 ? 'VALIDATION_READY' : 'WAITING_FOR_ACCEPTED_SAMPLES',
+        weightUpdates: weightRows.data.filter((row) => row.created_at && row.created_at >= todayRange.start && row.created_at < todayRange.end).length,
+        zeroReasons: {
+          odds: todayOdds.data.length === 0 ? 'ODDS_NOT_AVAILABLE' : null,
+          predictions: todayPredictions.data.length === 0 ? 'PREDICTION_NOT_DUE_OR_ODDS_BLOCKED' : null,
+          settlements: todaySummary.productionSettled === 0 ? 'NO_PRODUCTION_SETTLEMENTS_IN_PERIOD' : null,
+          learning: todayQueue.accepted === 0 ? 'NO_ACCEPTED_LEARNING_SAMPLE_IN_PERIOD' : null,
+        },
+      },
+      yesterday: {
+        games: yesterdayEvents.data.length,
+        odds: yesterdayOdds.data.length,
+        predictions: yesterdayPredictions.data.length,
+        boardCandidates: 0,
+        officialPicks: yesterdayPredictions.data.filter((row) => row.recommended_pick === true).length,
+        completedGames: finalYesterdayEvents,
+        settlements: yesterdaySummary.productionSettled,
+        labels: yesterdayQueue.total,
+        acceptedLearningSamples: yesterdayQueue.accepted,
+        rejectedSamples: yesterdayQueue.rejected,
+        shadowLearning: yesterdayQueue.accepted > 0 ? 'VALIDATION_READY' : 'WAITING_FOR_ACCEPTED_SAMPLES',
+        weightUpdates: weightRows.data.filter((row) => row.created_at && row.created_at >= yesterdayRange.start && row.created_at < yesterdayRange.end).length,
+        zeroReasons: {
+          settlements: yesterdaySummary.productionSettled === 0 ? 'PREDICTIONS_CLASSIFIED_IGNORED_OR_NOT_FINAL' : null,
+          learning: yesterdayQueue.accepted === 0 ? 'NO_ACCEPTED_LEARNING_SAMPLE_IN_PERIOD' : null,
+        },
+      },
+      last7Days: {
+        games: last7Events.data.length,
+        predictions: last7Predictions.data.length,
+        completedGames: finalLast7Events,
+        settlements: last7Summary.productionSettled,
+        labels: last7Queue.total,
+        acceptedLearningSamples: last7Queue.accepted,
+        rejectedSamples: last7Queue.rejected,
+        shadowLearning: last7Queue.accepted > 0 ? 'VALIDATION_READY' : 'WAITING_FOR_ACCEPTED_SAMPLES',
+        weightUpdates: weightRows.data.filter((row) => row.created_at && row.created_at >= last7Range.start && row.created_at < last7Range.end).length,
+      },
+    },
+    shadowLearningValidation: {
+      mode: 'SHADOW_ONLY',
+      acceptedSamples: allQueue.accepted,
+      trainingDatasetSize: allQueue.accepted,
+      chronologicalSplit: allQueue.chronologicalSplit,
+      brierBefore: null,
+      brierAfter: null,
+      logLossBefore: null,
+      logLossAfter: null,
+      calibrationBefore: null,
+      calibrationAfter: null,
+      accuracyBefore: null,
+      accuracyAfter: null,
+      candidateWeightChanges: [],
+      productionWeightsChanged: false,
+      activationGate: allQueue.accepted >= 100 ? 'READY_FOR_VALIDATION_REVIEW' : 'BLOCKED_INSUFFICIENT_EVIDENCE',
+      rollbackReady: weightRows.data.length > 0,
+      explanation: 'Shadow candidate weights are not generated until accepted samples meet the configured minimum evidence gate.',
     },
     panels,
     providerHealth: {

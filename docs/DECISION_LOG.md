@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-23 - Repair Policy-Skipped Settlement Classification
+
+Context: Daily lifecycle validation showed July 22 predictions with exact event mappings and final stored scores, but production settlements stayed at zero. Settlement V2 had classified all `validation_status='skipped'` rows as `test_or_fixture_data`, even when warnings showed policy skip reasons such as immature calibration or non-positive EV.
+
+Decision: Treat only explicit trial, scrambled, fixture, quarantine or synthetic evidence as test-like. Allow previously misclassified `Ignored/test_or_fixture_data` rows to be reopened only when exact persisted final scores and pregame timestamps prove deterministic settlement. Keep post-start, duplicate, settled, void and closed protections intact.
+
+Consequences: Policy-skipped model rows can be settled for evidence when safe, without loosening Official Pick policy or converting model-only/negative-EV rows into recommendations. Learning acceptance still requires point-in-time feature evidence and remains separate from production weight activation.
+
+Affected modules: Settlement V2, AI lifecycle/Operations Center, Retrosheet Phase 2A fetch helper and evidence activation documentation.
+
 ## 2026-07-23 - Validate AI Learning With Persisted Evidence Only
 
 Context: The platform needed proof that completed games flow into settlement, replay, labels, learning, calibration and future model readiness, but invoking Learning Brain, replay, settlement or provider refresh would mutate production behavior.

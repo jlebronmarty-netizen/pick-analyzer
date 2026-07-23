@@ -85,6 +85,50 @@ export default async function AiOperationsPage() {
       </DashboardSection>
 
       <DashboardSection
+        id="operations-v2"
+        eyebrow="AI Operations V2"
+        title="Daily Evidence Stages"
+        description="Daily settlement, label, shadow learning and weight evidence with explicit zero reasons."
+      >
+        <div className="grid gap-4 lg:grid-cols-3">
+          {Object.entries(data.aiOperationsCenterV2).map(([period, stage]: [string, any]) => (
+            <article key={period} className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-sm font-black uppercase tracking-[0.18em] text-emerald-200">{period}</h3>
+                <span className={`rounded-full border px-3 py-1 text-xs font-bold ${statusTone(stage.acceptedLearningSamples > 0 ? 'Completed' : 'Waiting')}`}>
+                  {stage.shadowLearning}
+                </span>
+              </div>
+              <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
+                {[
+                  ['Games', stage.games],
+                  ['Odds', stage.odds ?? 'N/A'],
+                  ['Predictions', stage.predictions],
+                  ['Settlements', stage.settlements],
+                  ['Labels', stage.labels],
+                  ['Accepted', stage.acceptedLearningSamples],
+                  ['Rejected', stage.rejectedSamples],
+                  ['Weights', stage.weightUpdates],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-lg bg-slate-950/70 p-3">
+                    <dt className="text-xs uppercase tracking-[0.16em] text-slate-500">{label}</dt>
+                    <dd className="mt-1 font-bold text-slate-100">{String(value)}</dd>
+                  </div>
+                ))}
+              </dl>
+              {stage.zeroReasons ? (
+                <div className="mt-4 space-y-1 text-xs text-amber-200">
+                  {Object.entries(stage.zeroReasons).filter(([, value]) => Boolean(value)).map(([key, value]) => (
+                    <p key={key}>{key}: {String(value)}</p>
+                  ))}
+                </div>
+              ) : null}
+            </article>
+          ))}
+        </div>
+      </DashboardSection>
+
+      <DashboardSection
         id="panels"
         eyebrow="Operations Center"
         title="Pipeline Health"

@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Daily Settlement Closure & Learning Evidence Activation V1
+
+Status: Implemented locally; protected production execution and deployment validation pending in this phase.
+
+Evidence: `src/services/settlement-reconciliation.service.ts`, `src/services/retrosheet-historical-feature-store.service.ts`, `src/services/ai-learning-lifecycle.service.ts`, `/api/ai-operations/lifecycle`, `/ai-operations`, and docs for daily closure, evidence activation, feature-label contract, shadow validation and scheduler status.
+
+Note: V1 repairs the proven settlement root cause where policy-skipped model rows were misclassified as test/fixture data. It keeps post-start rows ignored, protects settled/void/closed rows, and accepts feature/label samples only when point-in-time feature evidence exists. Production weight activation is blocked until accepted sample size and shadow validation gates pass.
+
 ### AI Learning Pipeline Validation & Autonomous Daily Lifecycle V1
 
 Status: Locally implemented and build-verified; production push/deployment verification pending.
