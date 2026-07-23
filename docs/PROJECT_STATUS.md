@@ -2,6 +2,17 @@
 
 Last updated: 2026-07-23 00:00:00Z
 
+## 2026-07-23 Settlement & Historical Reconciliation Engine V2
+
+- Added Settlement Reconciliation Engine V2 over existing persisted `prediction_history` and `sport_events` data, reusing `settlement-core.service.ts` for moneyline, spread/run-line and total grading.
+- Added protected reconciliation modes `DRY_RUN`, `VALIDATE_ONLY`, `SINGLE_GAME`, `RANGE` and `FULL_RECONCILIATION` to `/api/settlement/reconciliation`; write modes are idempotent and include a second-run duplicate-prevention check.
+- Added deterministic lifecycle classification for `Scheduled`, `AwaitingResult`, `Settled`, `Push`, `Cancelled`, `Voided`, `Historical`, `Replay`, `Shadow`, `Ignored`, `Legacy` and `Unknown`. Exact V2 state is stored in settlement metadata while preserving the existing database lifecycle constraint.
+- Updated performance scope, AI Performance Center timeline and Prediction History presentation to use explicit lifecycle badges such as `Settled Win`, `Settled Loss`, `Awaiting Result`, `Legacy`, `Replay`, `Shadow` and `Unknown`.
+- Added `docs/SETTLEMENT_RECONCILIATION_ENGINE_V2.md` and `docs/PREDICTION_LIFECYCLE_V2.md`; updated architecture and roadmap documentation.
+- Read-only production audit found 1,327 prediction rows, 356 pending-like before protected V2 execution, 311 wins, 309 losses, 0 pushes, 0 cancelled/voided, 351 ignored/test-like rows, average stored settlement delay 295.31 hours and oldest unresolved prediction `2026-06-22T23:00:00+00:00`.
+- Protected write reconciliation was not executed in this task. Provider calls remained 0, sports API calls remained 0 and remote mutations during audit remained 0. Phase 2A historical feature-store code/data, Prediction Engine, Learning Brain, Current Board, Official Picks, market pipelines and replay generation were not modified.
+- Build passed with `npm.cmd run build`.
+
 ## 2026-07-22 MLB Historical Intelligence Phase 2A - Retrosheet Historical Feature Store Core V1
 
 - Added server-only Retrosheet Historical Feature Store Core V1 over the persisted 2025 Retrosheet historical database, reusing `historical_feature_snapshots` with deterministic key prefix `retrosheet_mlb_feature_store_v1` and market partition `historical_mlb_feature_store`.

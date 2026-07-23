@@ -207,6 +207,10 @@ General settlement exists in `prediction-settlement.service.ts` and `prediction-
 
 Settlement Core V2 provides shared moneyline, spread and total primitives plus deterministic fixture coverage for NBA, MLB, NFL, NHL and Soccer. It treats unsupported or metadata-dependent markets such as soccer double chance, two-leg aggregate, extra-time/penalty handling and props as contract-only until result-type and grading feeds are proven.
 
+Settlement Reconciliation Engine V2 (`settlement-reconciliation.service.ts`, `/api/settlement/reconciliation`) is the stored-data-only lifecycle authority for historical prediction outcomes. It supports `DRY_RUN`, `VALIDATE_ONLY`, `SINGLE_GAME`, `RANGE` and `FULL_RECONCILIATION`, classifies rows as Scheduled, AwaitingResult, Settled, Push, Cancelled, Voided, Historical, Replay, Shadow, Ignored, Legacy or Unknown, and records reason/source/timestamp/game/event/version/confidence metadata in `prediction_history.settlement_details.settlement_reconciliation_v2`. The exact V2 lifecycle is stored in JSON metadata while `lifecycle_status` remains compatible with the existing generated/active/skipped/closed/settled/void database constraint.
+
+Performance Scope V2 and AI Performance Center read the V2 lifecycle metadata so timeline and Prediction History surfaces display explicit settlement states instead of ambiguous Pending labels. Reconciliation uses persisted `prediction_history` and `sport_events` only; provider calls, odds fetches, Current Board mutations, Learning Brain changes, replay generation and historical feature recalculation are outside this engine.
+
 NBA-specific settlement exists in `nba-prediction-settlement.service.ts`:
 
 - full-game final scores come from `sport_events`

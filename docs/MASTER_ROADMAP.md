@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Settlement & Historical Reconciliation Engine V2
+
+Status: Implemented and build-verified; protected production write execution remains approval-gated.
+
+Evidence: `src/services/settlement-reconciliation.service.ts`, `/api/settlement/reconciliation`, `src/services/performance-scope-v2.service.ts`, `src/services/ai-performance-center.service.ts`, `src/components/performance/PerformanceProductClient.tsx`, `docs/SETTLEMENT_RECONCILIATION_ENGINE_V2.md`, `docs/PREDICTION_LIFECYCLE_V2.md` and local production build.
+
+Note: V2 replaces ambiguous Pending handling with deterministic lifecycle classification and protected idempotent execution modes. It uses only existing persisted prediction and event/result data, reuses Settlement Core V2 for grading, records reason/source/timestamp/game/event/version/confidence metadata, updates performance/timeline/history display semantics, and keeps provider calls at 0. Read-only production audit found 1,327 prediction rows and 356 pending-like rows before protected execution. Phase 2A feature snapshots, Prediction Engine, Learning Brain, Current Board, Official Picks, market pipelines and replay generation were not modified.
+
 ### MLB Historical Intelligence Phase 2A - Retrosheet Historical Feature Store Core V1
 
 Status: Implemented, build-verified and full-season DRY_RUN verified; full-season historical feature import remains blocked until the protected production write receives explicit approval that passes review.

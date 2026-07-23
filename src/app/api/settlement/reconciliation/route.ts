@@ -3,6 +3,7 @@ import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import {
   executeSettlementReconciliation,
   getSettlementReconciliationPlan,
+  type SettlementReconciliationMode,
   validateSettlementReconciliationFixtures,
 } from '@/services/settlement-reconciliation.service'
 
@@ -21,7 +22,13 @@ export async function GET(request: NextRequest) {
     if (searchParams.get('validate') === 'true') {
       return apiOk(validateSettlementReconciliationFixtures(), id)
     }
-    return apiOk(await getSettlementReconciliationPlan(), id)
+    return apiOk(await getSettlementReconciliationPlan({
+      mode: (searchParams.get('mode') as SettlementReconciliationMode | null) ?? 'DRY_RUN',
+      gameId: searchParams.get('gameId'),
+      startDate: searchParams.get('startDate'),
+      endDate: searchParams.get('endDate'),
+      limit: searchParams.get('limit') ? Number(searchParams.get('limit')) : null,
+    }), id)
   } catch (error) {
     return apiError({
       id,
@@ -43,7 +50,20 @@ export async function POST(request: NextRequest) {
         status: 401,
       })
     }
-    return apiOk(await executeSettlementReconciliation(), id)
+    const body = await request.json().catch(() => ({})) as {
+      mode?: SettlementReconciliationMode
+      gameId?: string | null
+      startDate?: string | null
+      endDate?: string | null
+      limit?: number | null
+    }
+    return apiOk(await executeSettlementReconciliation({
+      mode: body.mode ?? 'DRY_RUN',
+      gameId: body.gameId ?? null,
+      startDate: body.startDate ?? null,
+      endDate: body.endDate ?? null,
+      limit: body.limit ?? null,
+    }), id)
   } catch (error) {
     return apiError({
       id,

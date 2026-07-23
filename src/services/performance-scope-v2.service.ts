@@ -5,6 +5,7 @@ import { localDateInTimeZone } from '@/services/provider-time-normalization.serv
 
 const TIMEZONE = 'America/Puerto_Rico'
 const FINAL_RESULTS = new Set(['win', 'loss', 'push', 'void'])
+const TERMINAL_LIFECYCLE_V2 = new Set(['Legacy', 'Historical', 'Replay', 'Shadow', 'Ignored', 'Unknown', 'Cancelled', 'Voided'])
 
 type PredictionRow = {
   id: string
@@ -80,7 +81,39 @@ function resultOf(row: PredictionRow) {
   if (FINAL_RESULTS.has(result)) return result
   const status = normalize(row.status)
   if (FINAL_RESULTS.has(status)) return status
+  const v2 = asObject(asObject(row.settlement_details).settlement_reconciliation_v2)
+  if (v2.lifecycle === 'Legacy') return 'legacy'
+  if (v2.lifecycle === 'Historical') return 'historical'
+  if (v2.lifecycle === 'Replay') return 'replay'
+  if (v2.lifecycle === 'Shadow') return 'shadow'
+  if (v2.lifecycle === 'Ignored') return 'ignored'
+  if (v2.lifecycle === 'Unknown') return 'unknown'
+  if (v2.lifecycle === 'Cancelled') return 'cancelled'
+  if (v2.lifecycle === 'Voided') return 'void'
+  if (normalize(row.lifecycle_status) === 'closed') return 'unknown'
   return 'pending'
+}
+
+function asObject(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {}
+}
+
+function lifecycleBadge(row: PredictionRow, event: EventRow | undefined) {
+  const v2 = asObject(asObject(row.settlement_details).settlement_reconciliation_v2)
+  if (typeof v2.badge === 'string' && v2.badge) return v2.badge
+  const result = resultOf(row)
+  if (result === 'win') return 'Settled Win'
+  if (result === 'loss') return 'Settled Loss'
+  if (result === 'push') return 'Push'
+  if (result === 'void') return 'Voided'
+  if (TERMINAL_LIFECYCLE_V2.has(String(v2.lifecycle))) return String(v2.lifecycle)
+  const reason = pendingReason(row, event)
+  if (reason === 'EVENT_NOT_FINAL' || reason === 'RESULT_NOT_IMPORTED') return 'Awaiting Result'
+  if (reason === 'LEGACY') return 'Legacy'
+  if (reason === 'EXACT_EVENT_MAPPING_MISSING') return 'Unknown'
+  return 'Scheduled'
 }
 
 function isTestFixture(row: PredictionRow) {
@@ -260,7 +293,8 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
       modelProbability: item.row.model_probability,
       impliedProbability: item.row.implied_probability,
       result: resultOf(item.row),
-      status: resultOf(item.row) === 'pending' ? 'Pending' : 'Settled',
+      status: lifecycleBadge(item.row, item.event),
+      lifecycleBadge: lifecycleBadge(item.row, item.event),
       pendingReason: pendingReason(item.row, item.event),
       currentState: item.row.is_current === false ? 'Superseded' : 'Current',
       modelVersion: item.row.model_version,

@@ -71,6 +71,7 @@ type UniversalHistoryRow = {
   probability: number | null
   confidence: number | null
   result: 'win' | 'loss' | 'push' | 'void' | 'pending' | 'unknown'
+  lifecycleBadge: string
   correct: boolean | null
   category: HistoryCategory
   predictionVersion: number | null
@@ -214,6 +215,13 @@ function getResult(row: PredictionHistoryRow): UniversalHistoryRow['result'] {
   if (['loss', 'lost'].includes(value)) return 'loss'
   if (['push'].includes(value)) return 'push'
   if (['void', 'cancelled', 'canceled'].includes(value)) return 'void'
+  const v2 = row.settlement_details?.settlement_reconciliation_v2
+  if (v2 && typeof v2 === 'object') {
+    const lifecycle = String((v2 as Record<string, unknown>).lifecycle ?? '').toLowerCase()
+    if (['legacy', 'historical', 'replay', 'shadow', 'ignored', 'unknown'].includes(lifecycle)) return 'unknown'
+    if (['cancelled', 'voided'].includes(lifecycle)) return 'void'
+  }
+  if (String(row.lifecycle_status ?? '').toLowerCase() === 'closed') return 'unknown'
   if (['pending', 'open', 'scheduled'].includes(value)) return 'pending'
   return 'unknown'
 }
@@ -257,6 +265,22 @@ function normalizePredictionRow(row: PredictionHistoryRow): UniversalHistoryRow 
   const stake = safeNumber(row.stake)
   const profit = safeNumber(row.profit)
   const snapshot = row.feature_snapshot ?? {}
+  const v2 = row.settlement_details?.settlement_reconciliation_v2
+  const v2Record = v2 && typeof v2 === 'object' ? (v2 as Record<string, unknown>) : {}
+  const lifecycleBadge =
+    typeof v2Record.badge === 'string' && v2Record.badge
+      ? v2Record.badge
+      : result === 'win'
+        ? 'Settled Win'
+        : result === 'loss'
+          ? 'Settled Loss'
+          : result === 'push'
+            ? 'Push'
+            : result === 'void'
+              ? 'Voided'
+              : result === 'pending'
+                ? 'Awaiting Result'
+                : 'Unknown'
 
   return {
     id: String(row.id),
@@ -275,6 +299,7 @@ function normalizePredictionRow(row: PredictionHistoryRow): UniversalHistoryRow 
     probability,
     confidence: safeNumber(row.confidence),
     result,
+    lifecycleBadge,
     correct,
     category: category(row),
     predictionVersion: safeNumber(row.prediction_version),
@@ -370,6 +395,7 @@ async function loadBsnShadowHistory() {
       probability: row.predictedProbability,
       confidence: row.confidence,
       result: row.correct === true ? 'win' : row.correct === false ? 'loss' : 'unknown',
+      lifecycleBadge: 'Replay',
       correct: row.correct,
       category: 'shadow',
       predictionVersion: null,
@@ -574,20 +600,15 @@ function reportCard(rows: UniversalHistoryRow[], readinessScore: number) {
 }
 
 function timeline(rows: UniversalHistoryRow[]) {
-  const now = Date.now()
-  const ranges = [
-    ['Yesterday', 1, 2],
-    ['Last 7 Days', 0, 7],
-    ['Last 30 Days', 0, 30],
-    ['Season', 0, 365],
-    ['Lifetime', 0, 36500],
+  const groups = [
+    ['Generated', rows],
+    ['Settled', rows.filter((row) => row.result === 'win' || row.result === 'loss')],
+    ['Awaiting Settlement', rows.filter((row) => row.result === 'pending')],
+    ['Cancelled', rows.filter((row) => row.result === 'void' || /cancelled|voided/i.test(row.lifecycleBadge))],
+    ['Push', rows.filter((row) => row.result === 'push')],
+    ['Historical / Replay', rows.filter((row) => /historical|replay/i.test(row.lifecycleBadge))],
   ] as const
-  return ranges.map(([label, minDays, maxDays]) => {
-    const scoped = rows.filter((row) => {
-      const ts = row.timestamp ? new Date(row.timestamp).getTime() : 0
-      const age = (now - ts) / 86400000
-      return age >= minDays && age <= maxDays
-    })
+  return groups.map(([label, scoped]) => {
     const m = metrics(scoped)
     return {
       label,
@@ -1440,6 +1461,7 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
     probability: row.probability,
     confidence: row.confidence,
     result: row.result,
+    lifecycleBadge: row.lifecycleBadge,
     actualResult: row.result,
     correct: row.correct,
     incorrect: row.correct === false,
@@ -1567,6 +1589,7 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
           modelVersion: row.modelVersion,
           actualResult: row.actualResult,
           result: row.result,
+          lifecycleBadge: row.lifecycleBadge,
         })),
         disclaimer: metrics(allRows).settled < 30
           ? 'Performance metrics are provisional because the settled sample is still small.'
