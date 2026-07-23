@@ -237,6 +237,7 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
   const rows = await loadRows(sportKey)
   const events = await loadEvents(Array.from(new Set(rows.map((row) => row.game_id).filter(Boolean))) as string[])
   const joined = rows.map((row) => ({ row, event: row.game_id ? events.get(row.game_id) : undefined }))
+  const productHistory = joined.filter((item) => eligibility(item.row, item.event).eligible)
   const pending = joined.filter((item) => resultOf(item.row) === 'pending')
   const pendingClassified = pending.map((item) => ({ ...item, reason: pendingReason(item.row, item.event) ?? 'EVENT_NOT_FINAL' }))
   const now = new Date()
@@ -284,7 +285,8 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
       modelOnlyPredictions: joined.filter((item) => !Number.isFinite(Number(item.row.odds))).length,
     },
     timeline: Object.fromEntries(periods.map((period) => [period.key, { label: period.label, ...metrics(period.rows) }])),
-    historyPreview: joined.slice(0, 200).map((item) => ({
+    historyEligibleIds: productHistory.map((item) => item.row.id),
+    historyPreview: productHistory.slice(0, 200).map((item) => ({
       id: item.row.id,
       eventDate: astDate(item.row.commence_time ?? item.event?.start_time ?? item.row.generated_at),
       matchup: `${item.event?.away_team ?? item.row.away_team ?? 'Away'} @ ${item.event?.home_team ?? item.row.home_team ?? 'Home'}`,

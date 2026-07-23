@@ -16,7 +16,9 @@ export async function GET(request: NextRequest) {
       getPerformanceScopeV2({ sportKey }),
     ])
     const active = (value: string | null) => value && value !== 'all'
+    const productHistoryIds = new Set(performanceScopeV2.historyEligibleIds)
     const rows = data.predictionHistory.rows.filter((row) => {
+      if (!productHistoryIds.has(row.id)) return false
       if (active(category) && row.category !== category) return false
       if (modelVersion && row.modelVersion !== modelVersion) return false
       if (active(status) && row.result !== status) return false
