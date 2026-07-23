@@ -77,10 +77,6 @@ function astDate(value: string | null | undefined) {
 }
 
 function resultOf(row: PredictionRow) {
-  const result = normalize(row.result)
-  if (FINAL_RESULTS.has(result)) return result
-  const status = normalize(row.status)
-  if (FINAL_RESULTS.has(status)) return status
   const v2 = asObject(asObject(row.settlement_details).settlement_reconciliation_v2)
   if (v2.lifecycle === 'Legacy') return 'legacy'
   if (v2.lifecycle === 'Historical') return 'historical'
@@ -90,6 +86,10 @@ function resultOf(row: PredictionRow) {
   if (v2.lifecycle === 'Unknown') return 'unknown'
   if (v2.lifecycle === 'Cancelled') return 'cancelled'
   if (v2.lifecycle === 'Voided') return 'void'
+  const result = normalize(row.result)
+  if (FINAL_RESULTS.has(result)) return result
+  const status = normalize(row.status)
+  if (FINAL_RESULTS.has(status)) return status
   if (normalize(row.lifecycle_status) === 'closed') return 'unknown'
   return 'pending'
 }
@@ -163,6 +163,7 @@ function pendingReason(row: PredictionRow, event: EventRow | undefined) {
 function eligibility(row: PredictionRow, event: EventRow | undefined) {
   const result = resultOf(row)
   if (isTestFixture(row)) return { eligible: false, reason: 'TEST_FIXTURE' }
+  if (['legacy', 'historical', 'replay', 'shadow', 'ignored', 'unknown', 'cancelled', 'void'].includes(result)) return { eligible: false, reason: result.toUpperCase() }
   if (isLegacy(row)) return { eligible: false, reason: 'LEGACY' }
   if (isPostStart(row, event)) return { eligible: false, reason: 'PREDICTION_POST_START' }
   if (row.is_current === false) return { eligible: false, reason: 'DUPLICATE_SUPERSEDED' }

@@ -2,6 +2,17 @@
 
 Last updated: 2026-07-23 00:00:00Z
 
+## 2026-07-23 Performance Product Mode & Recommendation Pipeline Verification V1
+
+- Repaired the default Performance contract so product metrics and Prediction History use only production-evaluable Win/Loss/Push rows. Legacy, Ignored, Historical, Replay, Shadow, Cancelled, Voided, test-like and unresolved rows remain available only through Advanced Settlement/Audit diagnostics.
+- Corrected zero-sample semantics across Performance calculations: accuracy is now nullable and user-facing views display `N/A` with “No eligible predictions settled in this period.” rather than false `0%` when no eligible rows settled.
+- Replaced the default lifecycle-audit timeline with product time windows: Today, Yesterday, Last 7 Days, Last 30 Days, Season and Lifetime. Generated counts no longer display Win/Loss records; Production Settled equals Win + Loss + Push.
+- Fixed product scope leakage in `performance-scope-v2.service.ts` by honoring Settlement V2 lifecycle metadata before raw result fields, preventing Historical/Replay rows from inflating production settled totals.
+- Added read-only `/api/recommendation-pipeline/trace` for Today/Yesterday pipeline evidence and zero reason codes across schedule, odds, predictions, Current Board, Model Only, AI Leans, Watchlist, Best Value, Official Picks, settlement labels and learning evidence.
+- Adjusted Most Likely model-only fallback to use the next stored pregame slate when Today has no future pregame slate, while preserving Best Value odds/positive-EV gates and Official Pick policy.
+- Improved Today dashboard operational wording for odds, predictions, Current Board, Official Picks, settlement, replay and learning without adding provider calls or claiming fabricated readiness.
+- Build passed with `npm.cmd run build`. Provider calls, external sports API calls, remote mutations, Prediction Engine changes, Learning Brain weight changes, Current Board mutations, Official Pick policy changes, settlement outcome changes and Historical Replay work: 0.
+
 ## 2026-07-23 Webpack Dependency Graph Audit & Build OOM Recovery V2
 
 - Audited the Next.js webpack route dependency graph after Build Memory Optimization V1. Local static scan covered 721 TS/TSX files and 353 app route/page entry candidates.

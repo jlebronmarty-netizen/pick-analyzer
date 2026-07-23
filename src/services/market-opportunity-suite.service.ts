@@ -904,7 +904,7 @@ export async function getMostLikelyOpportunities({
     }
   }
 
-  const modelOnly = rows.length === 0 ? await getModelOnlyIntelligence({ date: board.slateDate }) : null
+  const modelOnly = rows.length === 0 ? await getModelOnlyIntelligence() : null
   const modelOnlyRows = rows.length
     ? []
     : (modelOnly?.categories.allModelOutcomes ?? [])

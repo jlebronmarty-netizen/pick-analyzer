@@ -1,5 +1,25 @@
 # Decision Log
 
+## 2026-07-23 - Split Product Performance From Settlement Audit Lifecycles
+
+Context: Settlement V2 correctly classified historical predictions, but the default Performance experience still mixed product outcomes with audit-only lifecycles. Timeline showed 658 settled by combining 620 production settled rows with 38 Historical/Replay rows, and zero-sample periods displayed misleading `0%`.
+
+Decision: Make production-evaluable Win/Loss/Push rows the default Performance and Prediction History scope. Move Legacy, Ignored, Historical/Replay, Shadow, Cancelled, Voided and unresolved lifecycle counts to Advanced diagnostics. Represent empty settled samples as nullable accuracy and render `N/A`.
+
+Consequences: Production accuracy, trust, Brier, calibration, log loss, readiness and timeline now share the same product scope. Users no longer see false failures for periods with no settled predictions. Settlement audit evidence remains available without polluting product performance.
+
+Affected modules: AI Performance Center, Performance Scope V2, Performance History API, Performance Product UI and performance product documentation.
+
+## 2026-07-23 - Keep Recommendation Pipeline Trace Read-Only
+
+Context: The dashboard needed proof of whether daily recommendations are generated, settled and consumed by learning, but running settlement, replay, learning or provider refresh would violate production-isolation requirements.
+
+Decision: Add `/api/recommendation-pipeline/trace` as a read-only persisted-evidence report for Today and Yesterday. The trace reports schedule, odds, prediction, Current Board, Model Only, recommendation bucket, settlement and learning evidence with reason codes for zeros.
+
+Consequences: Operators can distinguish `ODDS_NOT_AVAILABLE`, `PREDICTION_NOT_DUE`, `NO_POSITIVE_EV`, `OFFICIAL_POLICY_NOT_MET`, `RESULT_NOT_FINAL`, `NO_LEARNING_LABEL` and `LEARNING_NOT_RUN` without triggering provider calls, recommendations, settlement writes, replay generation or Learning Brain weight updates.
+
+Affected modules: Recommendation Pipeline Trace service/API, model-only fallback, Today dashboard wording and recommendation pipeline trace documentation.
+
 ## 2026-07-23 - Fix Vercel Build OOM By Reducing Route Entry Graphs
 
 Context: Local production builds passed, but Vercel builds failed during webpack optimization before `Compiled successfully`. V1 build-worker and memory settings reduced worker pressure but did not change the dependency graph.

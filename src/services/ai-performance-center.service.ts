@@ -443,7 +443,7 @@ function metrics(rows: UniversalHistoryRow[]) {
   const pushes = rows.filter((row) => row.result === 'push').length
   const roiRows = rows.filter((row) => row.roi !== null)
   const confidence = average(rows.map((row) => row.confidence))
-  const accuracy = graded.length ? round((correct / graded.length) * 100) : 0
+  const accuracy = graded.length ? round((correct / graded.length) * 100) : null
 
   return {
     predictions: rows.length,
@@ -455,14 +455,14 @@ function metrics(rows: UniversalHistoryRow[]) {
     rollingAccuracy: rollingAccuracy(rows).slice(-1)[0]?.rollingAccuracy ?? accuracy,
     roi: roiRows.length ? average(roiRows.map((row) => row.roi)) : null,
     yield: roiRows.length ? average(roiRows.map((row) => row.yield)) : null,
-    brierScore: average(rows.map((row) => row.brier)),
-    logLoss: average(rows.map((row) => row.logLoss)),
-    calibrationError: round(confidence - accuracy),
+    brierScore: nullableAverage(rows.map((row) => row.brier)),
+    logLoss: nullableAverage(rows.map((row) => row.logLoss)),
+    calibrationError: accuracy === null ? null : round(confidence - accuracy),
     predictionConfidence: confidence,
     predictionQuality: average(rows.map((row) => row.predictionQuality)),
     featureQuality: average(rows.map((row) => row.featureQuality)),
     dataSufficiency: average(rows.map((row) => row.dataSufficiency)),
-    coverage: rows.length ? round((graded.length / rows.length) * 100) : 0,
+    coverage: rows.length ? round((settled.length / rows.length) * 100) : 0,
     shadowAccuracy: categoryAccuracy(rows, 'shadow'),
     officialAccuracy: categoryAccuracy(rows, 'official'),
     aiLeanAccuracy: categoryAccuracy(rows, 'ai_lean'),
@@ -511,7 +511,7 @@ function learningProgress(rows: UniversalHistoryRow[]) {
   const midpoint = Math.floor(ordered.length / 2)
   const early = metricsBase(ordered.slice(0, midpoint)).accuracy
   const late = metricsBase(ordered.slice(midpoint)).accuracy
-  return round(late - early)
+  return early === null || late === null ? 0 : round(late - early)
 }
 
 function predictionStability(rows: UniversalHistoryRow[]) {
@@ -526,7 +526,7 @@ function metricsBase(rows: UniversalHistoryRow[]) {
   const graded = rows.filter(isGraded)
   const correct = graded.filter((row) => row.correct).length
   return {
-    accuracy: graded.length ? round((correct / graded.length) * 100) : 0,
+    accuracy: graded.length ? round((correct / graded.length) * 100) : null,
   }
 }
 
@@ -544,6 +544,10 @@ function performanceFamily(row: UniversalHistoryRow) {
 
 function productionPerformanceRows(rows: UniversalHistoryRow[]) {
   return rows.filter((row) => performanceFamily(row) === 'production')
+}
+
+function productionEvaluableRows(rows: UniversalHistoryRow[]) {
+  return productionPerformanceRows(rows).filter(isSettled)
 }
 
 function groupBy<T>(items: T[], getKey: (item: T) => string) {
@@ -595,18 +599,22 @@ function grade(score: number) {
 
 function reportCard(rows: UniversalHistoryRow[], readinessScore: number) {
   const current = metrics(rows)
+  const accuracyScore = current.accuracy ?? 0
+  const calibrationScore = current.calibrationError === null
+    ? 0
+    : Math.max(0, 100 - Math.abs(current.calibrationError))
   const score = round(
-    current.accuracy * 0.35 +
-      Math.max(0, 100 - Math.abs(current.calibrationError)) * 0.25 +
+    accuracyScore * 0.35 +
+      calibrationScore * 0.25 +
       current.coverage * 0.15 +
       readinessScore * 0.15 +
       current.predictionStability * 0.1
   )
   return {
-    todayGrade: grade(metrics(rows.filter((row) => periodKey(row, 'daily') === new Date().toISOString().slice(0, 10))).accuracy),
+    todayGrade: grade(metrics(rows.filter((row) => periodKey(row, 'daily') === new Date().toISOString().slice(0, 10))).accuracy ?? 0),
     overallGrade: grade(score),
     predictionHealth: score >= 85 ? 'Excellent' : score >= 75 ? 'Good' : score >= 60 ? 'Developing' : 'Insufficient',
-    calibration: Math.abs(current.calibrationError) <= 6 ? 'Good' : Math.abs(current.calibrationError) <= 12 ? 'Watch' : 'Needs Work',
+    calibration: current.calibrationError === null ? 'Insufficient' : Math.abs(current.calibrationError) <= 6 ? 'Good' : Math.abs(current.calibrationError) <= 12 ? 'Watch' : 'Needs Work',
     learning: current.learningProgress > 3 ? 'Improving' : current.learningProgress < -3 ? 'Declining' : 'Stable',
     confidence: current.predictionConfidence >= 70 ? 'High' : current.predictionConfidence >= 55 ? 'Moderate' : 'Low',
     dataQuality: current.dataSufficiency >= 80 ? 'Excellent' : current.dataSufficiency >= 60 ? 'Good' : 'Limited',
@@ -615,26 +623,54 @@ function reportCard(rows: UniversalHistoryRow[], readinessScore: number) {
   }
 }
 
-function timeline(rows: UniversalHistoryRow[]) {
-  const groups = [
-    ['Generated', rows],
-    ['Settled', rows.filter((row) => row.result === 'win' || row.result === 'loss')],
-    ['Awaiting Settlement', rows.filter((row) => row.result === 'pending')],
-    ['Cancelled', rows.filter((row) => row.result === 'void' || /cancelled|voided/i.test(row.lifecycleBadge))],
-    ['Push', rows.filter((row) => row.result === 'push')],
-    ['Historical / Replay', rows.filter((row) => /historical|replay/i.test(row.lifecycleBadge))],
-    ['Legacy', rows.filter((row) => performanceFamily(row) === 'legacy')],
-    ['Ignored', rows.filter((row) => performanceFamily(row) === 'ignored')],
+function productTimeline(rows: UniversalHistoryRow[]) {
+  const productRows = productionPerformanceRows(rows)
+  const now = Date.now()
+  const todayKey = new Date(now).toISOString().slice(0, 10)
+  const yesterdayKey = new Date(now - 86400000).toISOString().slice(0, 10)
+  const periods = [
+    ['Today', productRows.filter((row) => row.timestamp?.slice(0, 10) === todayKey)],
+    ['Yesterday', productRows.filter((row) => row.timestamp?.slice(0, 10) === yesterdayKey)],
+    ['Last 7 Days', productRows.filter((row) => rowTime(row) >= daysAgo(7))],
+    ['Last 30 Days', productRows.filter((row) => rowTime(row) >= daysAgo(30))],
+    ['Season', productRows.filter((row) => row.timestamp?.slice(0, 4) === todayKey.slice(0, 4))],
+    ['Lifetime', productRows],
   ] as const
-  return groups.map(([label, scoped]) => {
-    const m = metrics(scoped)
+
+  return periods.map(([label, scoped]) => {
+    const settled = scoped.filter(isSettled)
+    const m = metrics(settled)
     return {
       label,
-      record: `${m.correct}-${m.incorrect}`,
+      generated: scoped.length,
+      productionSettled: settled.length,
+      wins: m.correct,
+      losses: m.incorrect,
+      pushes: m.pushes,
+      record: settled.length ? `${m.correct}-${m.incorrect}${m.pushes ? `-${m.pushes}` : ''}` : 'N/A',
       accuracy: m.accuracy,
+      displayAccuracy: m.accuracy === null ? 'N/A' : `${m.accuracy}%`,
       predictions: scoped.length,
+      zeroSampleMessage: settled.length ? null : 'No eligible predictions settled in this period.',
     }
   })
+}
+
+function advancedSettlementAudit(rows: UniversalHistoryRow[]) {
+  const count = (predicate: (row: UniversalHistoryRow) => boolean) => rows.filter(predicate).length
+  return {
+    mode: 'advanced_settlement_audit_only',
+    productModeExclusions: ['Legacy', 'Ignored', 'Historical', 'Replay', 'Shadow', 'Cancelled', 'Voided', 'Unknown'],
+    productionSettled: productionEvaluableRows(rows).length,
+    legacy: count((row) => performanceFamily(row) === 'legacy'),
+    ignored: count((row) => performanceFamily(row) === 'ignored'),
+    historicalReplay: count((row) => ['historical', 'replay'].includes(performanceFamily(row))),
+    shadow: count((row) => performanceFamily(row) === 'shadow'),
+    cancelledVoided: count((row) => row.result === 'void' || /cancelled|voided/i.test(row.lifecycleBadge)),
+    unknown: count((row) => performanceFamily(row) === 'unknown' || row.result === 'unknown'),
+    awaitingSettlement: count((row) => row.result === 'pending'),
+    reconciliationFailures: count((row) => /unknown|failed|failure/i.test(JSON.stringify(row.settlementDetails ?? {}))),
+  }
 }
 
 function modelEvolution(rows: UniversalHistoryRow[]) {
@@ -650,8 +686,8 @@ function modelEvolution(rows: UniversalHistoryRow[]) {
         champion: modelRole === 'champion' || groupRows.some((row) => row.modelRole === 'champion'),
         challenger: modelRole === 'challenger',
         shadow: modelRole === 'shadow' || groupRows.some((row) => row.category === 'shadow'),
-        rollbackCandidate: metrics(groupRows).accuracy < 45 && groupRows.length >= 30,
-        promotionReadiness: metrics(groupRows).accuracy >= 55 && metrics(groupRows).coverage >= 70 ? 'review_ready' : 'not_ready',
+        rollbackCandidate: (metrics(groupRows).accuracy ?? 100) < 45 && groupRows.length >= 30,
+        promotionReadiness: (metrics(groupRows).accuracy ?? 0) >= 55 && metrics(groupRows).coverage >= 70 ? 'review_ready' : 'not_ready',
       }
     })
 }
@@ -765,7 +801,7 @@ function trustScore(rows: UniversalHistoryRow[], providerReady: boolean) {
       'calibration_error',
       'Calibration error',
       current.calibrationError,
-      graded >= 10 ? 100 - Math.abs(current.calibrationError) * 4 : null,
+      graded >= 10 && current.calibrationError !== null ? 100 - Math.abs(current.calibrationError) * 4 : null,
       15,
       'Compares average model confidence with actual settled accuracy.'
     ),
@@ -821,7 +857,7 @@ function trustScore(rows: UniversalHistoryRow[], providerReady: boolean) {
   const blockers = [
     ...(settled < 30 ? ['settled_sample_below_30'] : []),
     ...(current.dataSufficiency > 0 && current.dataSufficiency < 55 ? ['data_sufficiency_limited'] : []),
-    ...(Math.abs(current.calibrationError) > 15 && graded >= 10 ? ['calibration_error_high'] : []),
+    ...(current.calibrationError !== null && Math.abs(current.calibrationError) > 15 && graded >= 10 ? ['calibration_error_high'] : []),
     ...(!providerReady ? ['provider_readiness_limited'] : []),
   ]
 
@@ -877,10 +913,10 @@ function dailyReportCardV1(rows: UniversalHistoryRow[], providerReady: boolean, 
   const current = metrics(rows)
   const trust = trustScore(rows, providerReady)
   const settled = rows.filter(isSettled).length
-  const calibrationScore = settled >= 10 ? clamp(100 - Math.abs(current.calibrationError) * 4) : null
+  const calibrationScore = settled >= 10 && current.calibrationError !== null ? clamp(100 - Math.abs(current.calibrationError) * 4) : null
   const confidenceQuality = trust.components.find((item) => item.key === 'calibration_error')?.normalizedScore ?? null
   const dimensions = {
-    predictionQuality: reportDimension('Prediction Quality', current.accuracy || null, settled, 'Settled win/loss accuracy from stored prediction outcomes.'),
+    predictionQuality: reportDimension('Prediction Quality', current.accuracy, settled, 'Settled win/loss accuracy from stored prediction outcomes.'),
     calibration: reportDimension('Calibration', calibrationScore, settled, 'Confidence compared with actual results.', calibrationScore !== null && calibrationScore < 55 ? ['calibration_error_high'] : []),
     confidence: reportDimension('Confidence', confidenceQuality, settled, 'Reliability of confidence signals against outcomes.'),
     dataQuality: reportDimension('Data Quality', current.dataSufficiency || null, rows.length, 'Stored feature sufficiency available at prediction time.'),
@@ -990,14 +1026,17 @@ function evolutionComparison(label: string, rows: UniversalHistoryRow[], previou
     trustScore: change(trust.trustScore, previousTrust.trustScore),
     dataQuality: change(current.dataSufficiency, previous.dataSufficiency),
     featureQuality: change(current.featureQuality, previous.featureQuality),
-    confidenceQuality: change(clamp(100 - Math.abs(current.calibrationError) * 4), clamp(100 - Math.abs(previous.calibrationError) * 4)),
+    confidenceQuality: change(
+      current.calibrationError === null ? null : clamp(100 - Math.abs(current.calibrationError) * 4),
+      previous.calibrationError === null ? null : clamp(100 - Math.abs(previous.calibrationError) * 4)
+    ),
     readiness: change(trust.trustScore, previousTrust.trustScore),
     roi: current.roi !== null && previous.roi !== null ? change(current.roi, previous.roi) : null,
     yield: current.yield !== null && previous.yield !== null ? change(current.yield, previous.yield) : null,
     trendDirection: accuracy.absoluteChange === null ? 'UNKNOWN' : accuracy.absoluteChange > 1 ? 'UP' : accuracy.absoluteChange < -1 ? 'DOWN' : 'FLAT',
     stability: current.predictionStability,
-    bestPeriod: trend(rows, 'daily').sort((a, b) => b.accuracyTrend - a.accuracyTrend)[0] ?? null,
-    worstPeriod: trend(rows, 'daily').sort((a, b) => a.accuracyTrend - b.accuracyTrend)[0] ?? null,
+    bestPeriod: trend(rows, 'daily').sort((a, b) => (b.accuracyTrend ?? -1) - (a.accuracyTrend ?? -1))[0] ?? null,
+    worstPeriod: trend(rows, 'daily').sort((a, b) => (a.accuracyTrend ?? 101) - (b.accuracyTrend ?? 101))[0] ?? null,
     sampleCounts: { current: rows.length, previous: previousRows.length },
   }
 }
@@ -1029,7 +1068,7 @@ function goals(rows: UniversalHistoryRow[], providerReady: boolean, readinessSco
   const definitions = [
     { key: 'minimum_settled_sample', label: 'Minimum settled sample', currentValue: settled, target: 100, higherIsBetter: true },
     { key: 'maximum_brier_score', label: 'Maximum Brier Score', currentValue: current.brierScore || null, target: 0.22, higherIsBetter: false },
-    { key: 'maximum_calibration_error', label: 'Maximum calibration error', currentValue: Math.abs(current.calibrationError), target: 8, higherIsBetter: false },
+    { key: 'maximum_calibration_error', label: 'Maximum calibration error', currentValue: current.calibrationError === null ? null : Math.abs(current.calibrationError), target: 8, higherIsBetter: false },
     { key: 'minimum_data_sufficiency', label: 'Minimum data sufficiency', currentValue: current.dataSufficiency || null, target: 70, higherIsBetter: true },
     { key: 'minimum_feature_quality', label: 'Minimum feature quality', currentValue: current.featureQuality || null, target: 70, higherIsBetter: true },
     { key: 'minimum_confidence_reliability', label: 'Minimum confidence reliability', currentValue: trust.trustScore, target: 75, higherIsBetter: true },
@@ -1066,19 +1105,22 @@ function goals(rows: UniversalHistoryRow[], providerReady: boolean, readinessSco
   }
 }
 
-function stage(status: 'COMPLETE' | 'ACTIVE' | 'LIMITED' | 'BLOCKED' | 'NOT STARTED', score: number, evidence: string[], blockers: string[], nextAction: string) {
+function stage(status: 'COMPLETE' | 'ACTIVE' | 'LIMITED' | 'BLOCKED' | 'NOT STARTED' | 'INSUFFICIENT DATA' | 'PROVISIONAL', score: number, evidence: string[], blockers: string[], nextAction: string) {
   return { status, score: round(score), evidence, blockers, nextAction }
 }
 
 function maturityPipeline(rows: UniversalHistoryRow[], sport: { productionReady: boolean }, providerReady: boolean, readinessScore: number) {
   const current = metrics(rows)
   const settled = rows.filter(isSettled).length
+  const shadowRows = rows.filter((row) => performanceFamily(row) === 'shadow')
+  const shadowSettled = shadowRows.filter(isSettled).length
+  const calibrationScore = current.calibrationError === null ? 0 : clamp(100 - Math.abs(current.calibrationError) * 4)
   return {
     DATA: stage(current.dataSufficiency >= 70 ? 'COMPLETE' : rows.length ? 'LIMITED' : 'NOT STARTED', current.dataSufficiency, [`${rows.length} prediction rows`], current.dataSufficiency < 70 ? ['data_sufficiency_below_target'] : [], 'Improve stored data coverage.'),
     INTELLIGENCE: stage(current.featureQuality >= 70 ? 'COMPLETE' : rows.length ? 'ACTIVE' : 'NOT STARTED', current.featureQuality, [`Feature quality ${current.featureQuality}`], current.featureQuality < 70 ? ['feature_quality_below_target'] : [], 'Expand validated feature coverage.'),
-    SHADOW_PREDICTIONS: stage(rows.some((row) => row.category === 'shadow') ? 'ACTIVE' : rows.length ? 'LIMITED' : 'NOT STARTED', rows.some((row) => row.category === 'shadow') ? 75 : 35, [`${current.shadowAccuracy ?? 0}% shadow accuracy where available`], [], 'Continue shadow evaluation until samples qualify.'),
+    SHADOW_PREDICTIONS: stage(shadowSettled ? 'PROVISIONAL' : 'INSUFFICIENT DATA', shadowSettled ? current.shadowAccuracy ?? 0 : 0, [shadowSettled ? `${current.shadowAccuracy}% shadow accuracy on ${shadowSettled} settled shadow outcomes.` : 'No shadow outcomes have settled.'], shadowSettled ? [] : ['shadow_settled_sample_zero'], 'Continue shadow evaluation until measurable outcomes settle.'),
     BACKTESTING: stage(settled >= 100 ? 'COMPLETE' : settled > 0 ? 'ACTIVE' : 'NOT STARTED', Math.min(100, settled), [`${settled} settled predictions`], settled < 100 ? ['settled_sample_below_100'] : [], 'Accumulate settled samples.'),
-    CALIBRATION: stage(settled >= 30 && Math.abs(current.calibrationError) <= 8 ? 'COMPLETE' : settled >= 10 ? 'LIMITED' : 'BLOCKED', clamp(100 - Math.abs(current.calibrationError) * 4), [`Calibration error ${current.calibrationError}`], settled < 30 ? ['calibration_sample_below_30'] : [], 'Review confidence reliability after more settlement.'),
+    CALIBRATION: stage(settled >= 30 && current.calibrationError !== null && Math.abs(current.calibrationError) <= 8 ? 'COMPLETE' : settled >= 10 ? 'LIMITED' : 'BLOCKED', calibrationScore, [`Calibration error ${current.calibrationError ?? 'N/A'}`], settled < 30 ? ['calibration_sample_below_30'] : [], 'Review confidence reliability after more settlement.'),
     MARKET_INTELLIGENCE: stage(sport.productionReady && providerReady ? 'COMPLETE' : providerReady ? 'LIMITED' : 'BLOCKED', providerReady ? 70 : 25, ['Uses existing readiness; no provider calls.'], providerReady ? [] : ['provider_readiness_limited'], 'Verify market intelligence prerequisites.'),
     OFFICIAL_ELIGIBILITY: stage(sport.productionReady && current.officialAccuracy !== null ? 'ACTIVE' : 'BLOCKED', readinessScore, [`Readiness score ${readinessScore}`], sport.productionReady ? [] : ['sport_not_production_ready'], 'Do not activate automatically; review policy gates separately.'),
     PRODUCTION: stage(sport.productionReady ? 'ACTIVE' : 'NOT STARTED', sport.productionReady ? 80 : 20, [sport.productionReady ? 'Registry marks sport production ready.' : 'Registry marks sport not production ready.'], sport.productionReady ? [] : ['production_not_enabled'], 'Maintain read-only monitoring.'),
@@ -1094,14 +1136,14 @@ function engineeringAdvisor(rows: UniversalHistoryRow[], providerReady: boolean,
     ...(settled < 30 ? ['Low settled sample'] : []),
     ...(current.dataSufficiency > 0 && current.dataSufficiency < 70 ? ['Insufficient data sufficiency'] : []),
     ...(current.featureQuality > 0 && current.featureQuality < 70 ? ['Feature quality below target'] : []),
-    ...(Math.abs(current.calibrationError) > 8 && settled >= 10 ? ['Weak calibration'] : []),
+    ...(current.calibrationError !== null && Math.abs(current.calibrationError) > 8 && settled >= 10 ? ['Weak calibration'] : []),
     ...(!providerReady ? ['Provider readiness limited'] : []),
   ]
   const tasks = [
     ...(settled < 30 ? ['Accumulate settled prediction samples before making trust claims.'] : []),
     ...(current.dataSufficiency > 0 && current.dataSufficiency < 70 ? ['Prioritize missing historical inputs visible in feature snapshots.'] : []),
     ...(current.featureQuality > 0 && current.featureQuality < 70 ? ['Improve feature coverage before production activation reviews.'] : []),
-    ...(Math.abs(current.calibrationError) > 8 && settled >= 10 ? ['Review confidence calibration after additional settled samples.'] : []),
+    ...(current.calibrationError !== null && Math.abs(current.calibrationError) > 8 && settled >= 10 ? ['Review confidence calibration after additional settled samples.'] : []),
     ...(!providerReady ? ['Resolve registry/provider readiness blockers without adding AI Brain provider calls.'] : []),
     ...(includesMlb ? [mlbMarketExpansionTask] : []),
   ]
@@ -1211,7 +1253,7 @@ function snapshotFromNode(node: ReturnType<typeof buildBrainNode>, rows: Univers
     trust_score: trust,
     data_quality: current.dataSufficiency || null,
     feature_quality: current.featureQuality || null,
-    confidence_quality: rows.filter(isGraded).length ? clamp(100 - Math.abs(current.calibrationError) * 4) : null,
+    confidence_quality: rows.filter(isGraded).length && current.calibrationError !== null ? clamp(100 - Math.abs(current.calibrationError) * 4) : null,
     readiness_score: node.readiness.score,
     health: node.overallHealth,
     blockers: node.blockers,
@@ -1406,7 +1448,7 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
       engineeringAdvisor: engineeringAdvisor(sportRows, sport.productionReady || sport.key === 'basketball_bsn', sport.key),
       readiness: {
         predictionReady: sportRows.length > 0 || sport.key === 'basketball_bsn',
-        calibrationReady: Math.abs(sportMetrics.calibrationError) <= 10 && sportMetrics.settled >= 30,
+        calibrationReady: sportMetrics.calibrationError !== null && Math.abs(sportMetrics.calibrationError) <= 10 && sportMetrics.settled >= 30,
         marketReady: sport.productionReady && board.currentBoardAvailable,
         officialReady: sport.productionReady && sportMetrics.officialAccuracy !== null,
         learningReady: sportMetrics.settled >= 30,
@@ -1471,7 +1513,9 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
         )
   ))
   const snapshotWriteResult = await persistEvolutionSnapshots(snapshotRows, options.writeSnapshots !== true || options.dryRun !== false)
-  const history = rows.map((row) => ({
+  const productHistorySource = productionEvaluableRows(rows)
+  const audit = advancedSettlementAudit(rows)
+  const history = productHistorySource.map((row) => ({
     id: row.id,
     prediction: row.prediction,
     matchup: row.awayTeam && row.homeTeam ? `${row.awayTeam} @ ${row.homeTeam}` : row.eventId,
@@ -1639,6 +1683,7 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
         rawDiagnostics: {
           status: statusFromSamples(productionRows),
           historyPagination: stored.pagination,
+          advancedSettlementAudit: audit,
           snapshotStore: existingSnapshots,
           projectionEngine,
           providerCallsAdded: 0,
@@ -1707,6 +1752,8 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
       totalRows: history.length,
       storedRows: stored.rows.length,
       shadowRows: bsn.rows.length,
+      productScope: 'Win/Loss/Push production-evaluable rows only. Legacy, Ignored, Historical, Replay, Shadow, Cancelled, Voided, test-like and unresolved rows are audit-only.',
+      advancedSettlementAudit: audit,
       pagination: stored.pagination,
       neverLoseHistoryPolicy: 'Read-only aggregation preserves existing prediction_history and shadow replay lineage without destructive writes.',
     },
@@ -1762,13 +1809,13 @@ export async function getAiPerformanceCenter(options: { sportKey?: string | null
       rollback: modelEvolution(productionRows).filter((entry) => entry.rollbackCandidate),
       promotionReadiness: modelEvolution(productionRows).filter((entry) => entry.promotionReadiness === 'review_ready'),
     },
-    performanceTimeline: timeline(rows),
+    performanceTimeline: productTimeline(rows),
     confidenceAnalysis: {
       expectedConfidence: centerMetrics.predictionConfidence,
       actualConfidence: centerMetrics.accuracy,
       confidenceError: centerMetrics.calibrationError,
       calibrationCurve: trend(productionRows, 'lifetime').map((entry) => ({ period: entry.period, expected: entry.confidenceTrend, actual: entry.accuracyTrend })),
-      reliabilityCurve: groupBy(rows, (row) => {
+      reliabilityCurve: groupBy(productionRows, (row) => {
         const p = row.probability ?? 0
         if (p >= 70) return '70+'
         if (p >= 60) return '60-69'

@@ -244,9 +244,10 @@ function toShadow(row: ShadowRow, event: EventRow | undefined) {
 export async function getModelOnlyIntelligence({ date }: { date?: string | null } = {}) {
   const nowMs = Date.now()
   const today = localDate(new Date().toISOString()) ?? new Date().toISOString().slice(0, 10)
-  const selectedDate = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : today
-  const range = eventDateRange(selectedDate)
-  const { data: eventsData, error: eventError } = await supabaseAdmin
+  let selectedDate = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : today
+  let dateSelectionReason = selectedDate === today ? 'TODAY' : 'REQUESTED_DATE'
+  let range = eventDateRange(selectedDate)
+  let { data: eventsData, error: eventError } = await supabaseAdmin
     .from('sport_events')
     .select('id, sport_key, league_key, start_time, status, home_team, away_team')
     .eq('sport_key', SPORT_KEY)
@@ -254,7 +255,30 @@ export async function getModelOnlyIntelligence({ date }: { date?: string | null 
     .gte('start_time', range.start)
     .lt('start_time', range.end)
   if (eventError) throw new Error(`model-only slate read failed: ${eventError.message}`)
-  const slateEvents = ((eventsData ?? []) as EventRow[]).filter((event) => localDate(event.start_time) === selectedDate)
+  let slateEvents = ((eventsData ?? []) as EventRow[]).filter((event) => localDate(event.start_time) === selectedDate)
+  if (!date && slateEvents.filter((event) => eventIsFuturePregame(event, event.start_time, nowMs)).length === 0) {
+    const futureEnd = new Date(nowMs)
+    futureEnd.setUTCDate(futureEnd.getUTCDate() + 7)
+    const futureResult = await supabaseAdmin
+      .from('sport_events')
+      .select('id, sport_key, league_key, start_time, status, home_team, away_team')
+      .eq('sport_key', SPORT_KEY)
+      .eq('league_key', LEAGUE_KEY)
+      .gt('start_time', new Date(nowMs).toISOString())
+      .lt('start_time', futureEnd.toISOString())
+      .order('start_time', { ascending: true })
+      .limit(100)
+    if (futureResult.error) throw new Error(`model-only future slate read failed: ${futureResult.error.message}`)
+    const futureEvents = ((futureResult.data ?? []) as EventRow[]).filter((event) => eventIsFuturePregame(event, event.start_time, nowMs))
+    const nextDate = localDate(futureEvents[0]?.start_time)
+    if (nextDate) {
+      selectedDate = nextDate
+      dateSelectionReason = 'NEXT_STORED_PREGAME_SLATE'
+      range = eventDateRange(selectedDate)
+      eventsData = futureEvents
+      slateEvents = futureEvents.filter((event) => localDate(event.start_time) === selectedDate)
+    }
+  }
   const slateIds = slateEvents.map((event) => event.id)
   const eventsById = new Map(slateEvents.map((event) => [event.id, event]))
 
@@ -339,11 +363,18 @@ export async function getModelOnlyIntelligence({ date }: { date?: string | null 
     mode: 'model_only_intelligence_v1',
     generatedAt: new Date().toISOString(),
     selectedDate,
+    dateSelectionReason,
     timezone: TIMEZONE,
     slate: {
       events: slateEvents.length,
       futurePregameEvents: slateEvents.filter((event) => eventIsFuturePregame(event, event.start_time, nowMs)).length,
     },
+    zeroReasons: [
+      ...(slateEvents.length ? [] : ['NO_SCHEDULED_GAMES']),
+      ...(slateEvents.length && slateEvents.filter((event) => eventIsFuturePregame(event, event.start_time, nowMs)).length === 0 ? ['EVENT_ALREADY_STARTED'] : []),
+      ...(predictionRows.length ? [] : ['NO_STORED_MODEL_PROBABILITIES']),
+      ...(outcomes.length ? [] : ['NO_ELIGIBLE_MARKET']),
+    ],
     summary: {
       modelOutcomes: outcomes.length,
       moneyline: moneyline.length,

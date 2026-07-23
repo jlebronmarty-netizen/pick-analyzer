@@ -475,26 +475,30 @@ function pipelineStatus(input: {
   if (input.id === 'weather') return 'Complete'
   if (input.id === 'features') return input.predictionCandidates ? 'Complete' : input.gamesWaitingForOdds ? 'Waiting' : 'Not due'
   if (input.id === 'predictions') return input.gamesReadyForAnalysis ? 'Complete' : input.gamesWaitingForOdds ? 'Waiting' : 'Not due'
+  if (input.id === 'current_board') return input.predictionCandidates ? 'Complete' : input.gamesWaitingForOdds ? 'Waiting' : 'Not due'
   if (input.id === 'recommendations') return input.officialPicks ? 'Complete' : input.predictionCandidates ? 'Waiting' : 'Not due'
   if (input.id === 'results') return input.finalGames ? 'Running' : input.currentGames ? 'Waiting' : 'Not due'
   if (input.id === 'settlement') return ['settled', 'replayed', 'calibrated', 'completed'].includes(input.operatingStatus) ? 'Complete' : input.finalGames ? 'Waiting' : 'Not due'
   if (input.id === 'learning') return ['calibrated', 'completed'].includes(input.operatingStatus) ? 'Complete' : 'Not due'
+  if (input.id === 'replay') return 'Complete'
   return 'Waiting'
 }
 
 function buildPipeline(input: Parameters<typeof pipelineStatus>[0]) {
   return [
     ['schedule', 'Schedule', input.currentGames ? `${input.currentGames} current-day games tracked.` : input.nextSlateDate ? 'Next slate is known.' : 'No slate found.'],
-    ['market_prices', 'Market prices', input.latestOddsTimestamp ? 'Stored odds are available.' : input.gamesWaitingForOdds ? 'Waiting for the next safe odds refresh.' : 'No market refresh is due.'],
+    ['market_prices', 'Odds', input.latestOddsTimestamp ? 'Stored sportsbook refresh is available.' : input.gamesWaitingForOdds ? 'Waiting for sportsbook refresh.' : 'Waiting for next scheduler execution.'],
     ['player_context', 'Player context', 'Roster and metadata checks are available when source data exists.'],
     ['pitching_context', 'Pitching context', 'Starter and pitcher context remains separated from lineup confirmation.'],
     ['weather', 'Weather', 'Weather context is read from stored verified inputs when present.'],
     ['features', 'Feature generation', input.predictionCandidates ? 'Feature snapshots are attached to candidates.' : 'Waiting for odds and eligible games.'],
-    ['predictions', 'Predictions', input.gamesReadyForAnalysis ? 'Predictions are available for eligible games.' : 'No eligible prediction slate right now.'],
-    ['recommendations', 'Recommendations', input.officialPicks ? 'Official picks passed policy.' : 'No official pick passed policy.'],
+    ['predictions', 'Predictions', input.gamesReadyForAnalysis ? 'Predictions are available for eligible games.' : input.latestOddsTimestamp ? 'Waiting for eligible games.' : 'Waiting for odds.'],
+    ['current_board', 'Current Board', input.predictionCandidates ? 'Candidates are available.' : 'Waiting.'],
+    ['recommendations', 'Official Picks', input.officialPicks ? 'Official picks passed policy.' : 'Waiting for prediction and market comparison.'],
     ['results', 'Results', input.finalGames ? `${input.finalGames} final games tracked.` : 'Waiting for games to finish.'],
-    ['settlement', 'Settlement', 'Settlement follows official final results.'],
-    ['learning', 'Learning', 'Learning remains sample-gated and does not auto-promote models.'],
+    ['settlement', 'Settlement', input.finalGames ? 'Final games are ready for stored settlement checks.' : 'Healthy.'],
+    ['replay', 'Replay', 'Ready.'],
+    ['learning', 'Learning', 'Ready when settled production labels exist; no auto-promotion.'],
   ].map(([id, label, detail]) => ({
     id,
     label,
@@ -623,8 +627,10 @@ export async function getDashboardToday({
     mode: 'model_only_intelligence_v1',
     generatedAt,
     selectedDate: operatingDate,
+    dateSelectionReason: 'FALLBACK_EMPTY',
     timezone: TIMEZONE,
     slate: { events: 0, futurePregameEvents: 0 },
+    zeroReasons: ['NO_SCHEDULED_GAMES', 'NO_STORED_MODEL_PROBABILITIES'],
     summary: { modelOutcomes: 0, moneyline: 0, totals: 0, runLine: 0, pitcherShadowProjections: 0, marketAvailable: 0, noMarket: 0 },
     categories: {
       highestMoneylineProbability: [],
@@ -910,10 +916,10 @@ export async function getDashboardToday({
         ? `${upcomingGames} games are scheduled for tomorrow. Market prices have not been refreshed yet.`
         : 'No separate next slate is resolved yet.',
       marketPrices: gamesWaitingForOdds > 0
-        ? 'Market prices have not been refreshed yet.'
+        ? 'Waiting for sportsbook refresh.'
         : board.latestOddsTimestamp
           ? 'Market prices are available from stored odds.'
-          : 'Market prices are not due or not available.',
+          : 'Waiting for next scheduler execution.',
     },
     currentGameCards: currentCards,
     nextSlateGames,
@@ -947,7 +953,7 @@ export async function getDashboardToday({
       bestValue: section(
         boardResult.ok ? (bestValueData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
         bestValueData,
-        boardResult.ok ? (bestValueData.length ? null : 'Best Value requires current market odds and positive EV. Model-only probabilities remain visible separately.') : 'Best Value is temporarily unavailable.',
+        boardResult.ok ? (bestValueData.length ? null : modelOnly.summary.modelOutcomes ? 'Best Value requires current market odds and positive EV. Model probabilities are available separately.' : 'Best Value requires current market odds and positive EV. No model-only rows are currently visible.') : 'Best Value is temporarily unavailable.',
         boardResult.ok ? generatedAt : null
       ),
       modelIntelligence: section(

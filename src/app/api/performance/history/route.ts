@@ -15,12 +15,12 @@ export async function GET(request: NextRequest) {
       getAiPerformanceCenterLazy({ sportKey, dryRun: true }),
       getPerformanceScopeV2({ sportKey }),
     ])
+    const active = (value: string | null) => value && value !== 'all'
     const rows = data.predictionHistory.rows.filter((row) => {
-      if (category && row.category !== category) return false
+      if (active(category) && row.category !== category) return false
       if (modelVersion && row.modelVersion !== modelVersion) return false
-      if (status && row.result !== status) return false
+      if (active(status) && row.result !== status) return false
       if (mode === 'official' && !row.official) return false
-      if (mode === 'shadow' && !row.shadow) return false
       if (Number.isFinite(minConfidence) && Number(row.confidence ?? 0) < minConfidence) return false
       if (Number.isFinite(maxConfidence) && Number(row.confidence ?? 0) > maxConfidence) return false
       return true

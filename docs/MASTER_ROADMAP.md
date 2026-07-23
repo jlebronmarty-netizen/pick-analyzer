@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Performance Product Mode & Recommendation Pipeline Verification V1
+
+Status: Locally implemented and build-verified; production push/deployment verification pending.
+
+Evidence: `src/services/ai-performance-center.service.ts`, `src/services/performance-scope-v2.service.ts`, `/api/performance/history`, `src/components/performance/PerformanceProductClient.tsx`, `src/services/model-only-intelligence.service.ts`, `src/services/market-opportunity-suite.service.ts`, `/api/recommendation-pipeline/trace`, `docs/PERFORMANCE_PRODUCT_MODE_V1.md`, `docs/RECOMMENDATION_PIPELINE_TRACE_V1.md` and local production build.
+
+Note: Product Performance now defaults to production-evaluable Win/Loss/Push rows only and moves Legacy, Ignored, Historical/Replay, Shadow and other lifecycle-audit counts into Advanced diagnostics. Zero settled samples display `N/A`, not false `0%`. Most Likely remains informational when using model-only fallback; Best Value and Official Picks keep all existing safety gates. No Prediction Engine, Learning Brain, settlement outcome, Current Board policy, market-pipeline or Historical Replay behavior was changed.
+
 ### Webpack Dependency Graph Audit & Build OOM Recovery V2
 
 Status: Locally implemented and build-verified; Vercel deployment readiness pending push/deployment observation.
