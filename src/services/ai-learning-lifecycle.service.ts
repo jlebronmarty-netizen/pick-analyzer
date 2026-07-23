@@ -382,9 +382,12 @@ export async function getAiLearningLifecycle() {
     yesterdayOdds,
     projectionRows,
     featureSnapshots,
+    retrosheetSnapshots,
     weightRows,
     aiSnapshots,
     syncJobs,
+    historicalImports,
+    historicalCheckpoints,
     latestOdds,
     latestPrediction,
     latestSettlement,
@@ -403,9 +406,12 @@ export async function getAiLearningLifecycle() {
     safeRows<Record<string, unknown>>('yesterday odds snapshots', 'sports_odds_snapshots', 'id, event_id, sport_key, snapshot_time, created_at', (query) => query.eq('sport_key', SPORT_KEY).gte('snapshot_time', yesterdayRange.start).lt('snapshot_time', yesterdayRange.end).limit(3000)),
     safeRows<ProjectionRow>('projection history', 'universal_projection_history', 'id, sport_key, event_id, projection_family, projected_value, actual_value, error, generated_at, model_version, validity_status, shadow_status', (query) => query.eq('sport_key', SPORT_KEY).order('generated_at', { ascending: false }).limit(2000)),
     safeRows<Record<string, unknown>>('historical feature snapshots', 'historical_feature_snapshots', 'id, sport_key, event_id, market, prediction_cutoff, as_of_timestamp, generated_at, leakage_status, production_eligible, trial, scrambled', (query) => query.eq('sport_key', SPORT_KEY).order('generated_at', { ascending: false }).limit(2000)),
+    safeRows<Record<string, unknown>>('retrosheet feature snapshots', 'historical_feature_snapshots', 'id, sport_key, provider_event_id, market, prediction_cutoff, generated_at, leakage_status, production_eligible, trial, scrambled, metadata', (query) => query.eq('sport_key', SPORT_KEY).eq('market', 'historical_mlb_feature_store').like('deterministic_key', 'retrosheet_mlb_feature_store_v1:%').order('generated_at', { ascending: false }).limit(2000)),
     safeRows<WeightHistoryRow>('model weight history', 'model_weight_history', 'id, sport_key, factor, old_weight, new_weight, sample_size, win_rate, roi, adjustment_reason, created_at', (query) => query.order('created_at', { ascending: false }).limit(500)),
     safeRows<Record<string, unknown>>('ai performance snapshots', 'ai_performance_snapshots', 'id, scope, sport_key, snapshot_date, model_version, metrics, created_at', (query) => query.order('snapshot_date', { ascending: false }).limit(500)),
     safeRows<SyncJobRow>('sports sync jobs', 'sports_sync_jobs', 'id, provider, sport_key, league_key, job_type, status, records_fetched, error_count, last_error, started_at, completed_at, created_at, metadata', (query) => query.eq('sport_key', SPORT_KEY).order('created_at', { ascending: false }).limit(300)),
+    safeRows<Record<string, unknown>>('historical import registry', 'historical_import_registry', 'id, source, sport_key, league_key, season, import_version, parser_version, mode, status, game_count, normalized_record_count, warning_count, error_count, started_at, finished_at, checkpoint, metadata', (query) => query.eq('source', 'retrosheet').eq('sport_key', SPORT_KEY).eq('season', '2025').order('started_at', { ascending: false }).limit(25)),
+    safeRows<Record<string, unknown>>('historical import checkpoints', 'historical_import_checkpoints', 'id, import_id, checkpoint_level, checkpoint_key, status, record_count, warning_count, error_count, finished_at, metadata', (query) => query.eq('checkpoint_level', 'normalization').order('finished_at', { ascending: false }).limit(2000)),
     latestTimestamp('sports_odds_snapshots', 'snapshot_time', (query) => query.eq('sport_key', SPORT_KEY)),
     latestTimestamp('prediction_history', 'generated_at'),
     latestTimestamp('prediction_history', 'settled_at'),
@@ -426,9 +432,12 @@ export async function getAiLearningLifecycle() {
     yesterdayOdds.error,
     projectionRows.error,
     featureSnapshots.error,
+    retrosheetSnapshots.error,
     weightRows.error,
     aiSnapshots.error,
     syncJobs.error,
+    historicalImports.error,
+    historicalCheckpoints.error,
     latestOdds.error,
     latestPrediction.error,
     latestSettlement.error,
@@ -453,6 +462,17 @@ export async function getAiLearningLifecycle() {
   const finalLast7Events = last7Events.data.filter(isFinalEvent).length
   const latestFailedSync = syncJobs.data.find((job) => lower(job.status).includes('fail') || Number(job.error_count ?? 0) > 0)
   const latestSuccessfulSync = syncJobs.data.find((job) => ['completed', 'success', 'succeeded'].some((needle) => lower(job.status).includes(needle)))
+  const latestLocalBackfill = historicalImports.data.find((row) => asRecord(row.metadata).workerVersion === 'retrosheet_local_feature_backfill_worker_v1') ?? null
+  const latestLocalBackfillMetadata = asRecord(latestLocalBackfill?.metadata)
+  const latestLocalBackfillId = String(latestLocalBackfill?.id ?? '')
+  const localBackfillCheckpoints = latestLocalBackfillId
+    ? historicalCheckpoints.data.filter((row) => String(row.import_id ?? '') === latestLocalBackfillId)
+    : []
+  const retrosheetSnapshotCount = retrosheetSnapshots.count ?? retrosheetSnapshots.data.length
+  const retrosheetCoveredGames = retrosheetSnapshotCount >= 70470
+    ? 2430
+    : new Set(retrosheetSnapshots.data.map((row) => String(row.provider_event_id ?? '')).filter(Boolean)).size
+  const featureLabelCoverage = allQueue.total ? Number((((allQueue.accepted + allQueue.trained) / allQueue.total) * 100).toFixed(2)) : null
   const schedulerRecord = schedulerFromSyncJobs(syncJobs.data)
   const providerRecord = asRecord(providerBudget)
   const calibrationRecord = asRecord(calibration)
@@ -574,17 +594,49 @@ export async function getAiLearningLifecycle() {
       'Historical Imports',
       featureSnapshots.data.length > 0 ? 'Completed' : 'Waiting',
       featureSnapshots.data.length > 0 ? 'Historical feature snapshots are present.' : 'No historical feature snapshots were found by this read-only scan.',
-      { featureSnapshots: featureSnapshots.data.length, latestSyncJob: latestSuccessfulSync?.job_type ?? null },
+      { featureSnapshots: featureSnapshots.count ?? featureSnapshots.data.length, latestSyncJob: latestSuccessfulSync?.job_type ?? null },
       featureSnapshots.data.length ? null : 'FEATURE_SNAPSHOT_STORE_EMPTY_OR_BLOCKED',
       String(latestSuccessfulSync?.completed_at ?? latestSuccessfulSync?.created_at ?? '') || null,
       'Waiting for next scheduler execution'
+    ),
+    panel(
+      'local_feature_backfill',
+      'Local Feature Backfill',
+      latestLocalBackfill
+        ? lower(latestLocalBackfill.status) === 'completed'
+          ? 'Completed'
+          : lower(latestLocalBackfill.status) === 'running'
+            ? 'Running'
+            : lower(latestLocalBackfill.status) === 'failed'
+              ? 'Error'
+              : 'Waiting'
+        : retrosheetSnapshotCount > 0
+          ? 'Completed'
+          : 'Waiting',
+      latestLocalBackfill
+        ? 'Last local Retrosheet feature backfill job is visible from persisted registry metadata.'
+        : retrosheetSnapshotCount > 0
+          ? 'Retrosheet feature snapshots are persisted; no local worker job metadata was found in the recent registry window.'
+          : 'No local Retrosheet Phase 2A snapshot backfill has completed yet.',
+      {
+        snapshotsPersisted: retrosheetSnapshotCount,
+        gamesCovered: retrosheetCoveredGames,
+        coveragePct: retrosheetCoveredGames ? Number(((retrosheetCoveredGames / 2430) * 100).toFixed(2)) : 0,
+        latestJobStatus: latestLocalBackfill?.status ?? null,
+        checkpoints: localBackfillCheckpoints.length,
+        acceptedSamples: allQueue.accepted + allQueue.trained,
+        missingFeatureRejections: allQueue.rejected,
+      },
+      retrosheetSnapshotCount > 0 ? null : 'LOCAL_BACKFILL_NOT_EXECUTED',
+      String(latestLocalBackfill?.finished_at ?? latestLocalBackfill?.started_at ?? '') || null,
+      'Waiting for next local operator execution'
     ),
     panel(
       'feature_store',
       'Feature Store',
       featureSnapshots.error ? 'Error' : 'Healthy',
       featureSnapshots.error ? featureSnapshots.error : 'Feature-store table is readable without recalculation.',
-      { rowsRead: featureSnapshots.data.length, linkedPredictionRows: linkedFeatureSnapshots },
+      { rowsRead: featureSnapshots.count ?? featureSnapshots.data.length, linkedPredictionRows: linkedFeatureSnapshots },
       featureSnapshots.error,
       String(featureSnapshots.data[0]?.generated_at ?? '') || null,
       'Waiting for next scheduler execution'
@@ -660,10 +712,28 @@ export async function getAiLearningLifecycle() {
       settledProjectionRows: projectionSettled.length,
       projectionRowsWithErrors: projectionErrors.length,
       meanAbsoluteError: projectionErrors.length ? Number((projectionErrors.reduce((sum, value) => sum + Math.abs(value), 0) / projectionErrors.length).toFixed(4)) : null,
-      featureSnapshots: featureSnapshots.data.length,
+      featureSnapshots: featureSnapshots.count ?? featureSnapshots.data.length,
       linkedFeatureSnapshots,
       historicalReplayRows: allSummary.historicalReplay,
       leakagePolicy: 'Historical/replay rows are audit-only and excluded from production performance counts.',
+      providerCallsMade: 0,
+    },
+    historicalFeatureBackfill: {
+      status: latestLocalBackfill?.status ?? (retrosheetSnapshotCount > 0 ? 'completed_without_recent_worker_metadata' : 'not_executed'),
+      lastJobId: latestLocalBackfill?.id ?? null,
+      lastJobStartedAt: latestLocalBackfill?.started_at ?? null,
+      lastJobFinishedAt: latestLocalBackfill?.finished_at ?? null,
+      checkpoint: latestLocalBackfill?.checkpoint ?? latestLocalBackfillMetadata.checkpoint ?? null,
+      checkpointsRead: localBackfillCheckpoints.length,
+      snapshotsPersisted: retrosheetSnapshotCount,
+      gamesCovered: retrosheetCoveredGames,
+      coveragePct: retrosheetCoveredGames ? Number(((retrosheetCoveredGames / 2430) * 100).toFixed(2)) : 0,
+      featureLabelCoveragePct: featureLabelCoverage,
+      acceptedSamples: allQueue.accepted + allQueue.trained,
+      missingFeatureRejections: allQueue.rejected,
+      idempotencyStatus: latestLocalBackfillMetadata.idempotencyStatus ?? null,
+      lastValidation: latestLocalBackfillMetadata.lastValidation ?? null,
+      shadowReadiness: allQueue.accepted + allQueue.trained >= 100 ? 'READY_FOR_SHADOW_VALIDATION' : 'BLOCKED_INSUFFICIENT_EVIDENCE',
       providerCallsMade: 0,
     },
     trainingLabels: {

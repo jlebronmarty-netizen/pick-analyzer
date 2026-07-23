@@ -129,6 +129,24 @@ export default async function AiOperationsPage() {
       </DashboardSection>
 
       <DashboardSection
+        id="local-backfill"
+        eyebrow="Historical Features"
+        title="Local Backfill Status"
+        description="Read-only status for the operator-controlled Retrosheet feature backfill worker."
+      >
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Metric label="Snapshots Persisted" value={data.historicalFeatureBackfill.snapshotsPersisted} />
+          <Metric label="Games Covered" value={data.historicalFeatureBackfill.gamesCovered} />
+          <Metric label="Coverage" value={`${data.historicalFeatureBackfill.coveragePct}%`} />
+          <Metric label="Feature Label Coverage" value={`${data.historicalFeatureBackfill.featureLabelCoveragePct ?? 0}%`} />
+          <Metric label="Checkpoints" value={data.historicalFeatureBackfill.checkpointsRead} />
+          <Metric label="Missing Feature Labels" value={data.historicalFeatureBackfill.missingFeatureRejections} />
+          <Metric label="Idempotency" value={data.historicalFeatureBackfill.idempotencyStatus ?? 'N/A'} />
+          <Metric label="Shadow Readiness" value={data.historicalFeatureBackfill.shadowReadiness} />
+        </div>
+      </DashboardSection>
+
+      <DashboardSection
         id="panels"
         eyebrow="Operations Center"
         title="Pipeline Health"

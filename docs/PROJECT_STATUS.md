@@ -2,6 +2,16 @@
 
 Last updated: 2026-07-23 00:00:00Z
 
+## 2026-07-23 Local Historical Feature Backfill Worker V1
+
+- Added local operator-controlled Retrosheet feature backfill worker at `scripts/retrosheet-feature-backfill.mjs` plus `scripts/local-ts-loader.mjs` so Phase 2A historical feature generation can run outside Vercel serverless limits while reusing `src/services/retrosheet-historical-feature-store.service.ts` and `src/lib/supabase-admin.ts`.
+- Added npm scripts for dry-run, backfill, resume, validate, idempotency and single-game modes. The worker explicitly loads `.env.local`, certifies the sanitized Supabase host `ynuocvexviorgdjrfthw.supabase.co`, prints only sanitized environment presence and progress metadata, and checkpoints confirmed game batches in `historical_import_checkpoints`.
+- Hardened Phase 2A historical table reads with bounded concurrency and retry handling after a transient Supabase/Cloudflare 522 occurred while loading the large batter-appearance table.
+- Full local dry-run completed for 2,430 games and 70,470 planned snapshots with 0 leakage failures and 0 duplicate deterministic keys: Teams 4,860, Pitchers 4,860, Bullpen 4,860, Lineups 4,860, Batters 43,740, Park Factors 2,430, Umpires 2,430 and Game State 2,430.
+- Representative previews passed for season opener, midseason, doubleheader, limited-prior-sample, lineup-continuity and umpire-identity cases. No extra-inning case exists in the persisted `innings` field.
+- Full production write execution was requested but rejected by protected approval review because it is a large persistent historical feature-store mutation. No workaround was attempted. Phase 2A persistence, idempotency and resume certifications remain blocked until explicit write approval is available.
+- AI Operations Center now exposes read-only local backfill status, snapshot count, game coverage, checkpoints, feature-label coverage, missing-feature rejections, idempotency status and shadow readiness without exposing local paths or credentials.
+
 ## 2026-07-23 Daily Settlement Closure & Learning Evidence Activation V1
 
 - Repaired Settlement V2 classification so `validation_status='skipped'` is not automatically treated as test/fixture data. Explicit trial, scrambled, fixture, quarantine or synthetic evidence is still excluded. Misclassified `Ignored/test_or_fixture_data` rows can be reopened only when they are not actual test fixtures; settled/void/closed rows remain protected.

@@ -4,6 +4,8 @@ Date: 2026-07-23
 
 Status: Implemented, build-verified and full-season DRY_RUN verified. Full production import execution remains blocked by approval review because it writes historical feature rows, generation jobs and checkpoints through the protected cron route.
 
+Local worker update: `scripts/retrosheet-feature-backfill.mjs` now provides an operator-controlled local execution path that avoids Vercel serverless runtime limits while reusing this Phase 2A engine. It supports dry-run, full, resume, validate, idempotency and single-game modes through npm `historical:features:*` scripts.
+
 ## Certifications
 
 - `RETROSHEET_HISTORICAL_FEATURE_CONTRACT_PASS`
@@ -120,6 +122,31 @@ Full-season DRY_RUN on 2026-07-23:
 - provider calls: 0
 - external sports API calls: 0
 - remote mutations: 0
+
+Local full dry-run on 2026-07-23:
+
+- worker: `retrosheet_local_feature_backfill_worker_v1`
+- games examined: 2,430
+- estimated snapshots: 70,470
+- team snapshots: 4,860
+- starter snapshots: 4,860
+- bullpen snapshots: 4,860
+- batter snapshots: 43,740
+- lineup snapshots: 4,860
+- venue snapshots: 2,430
+- umpire snapshots: 2,430
+- game-state snapshots: 2,430
+- HIGH: 55,311
+- MEDIUM: 4,430
+- LOW: 8,601
+- INSUFFICIENT: 2,128
+- leakage warnings: 1,103
+- leakage failures: 0
+- duplicate deterministic keys: 0
+- provider calls: 0
+- remote mutations: 0
+
+The attempted first full local write was rejected by protected approval review because it is a large persistent historical feature-store mutation. No workaround was attempted.
 
 Representative SINGLE_GAME_PREVIEW validation:
 

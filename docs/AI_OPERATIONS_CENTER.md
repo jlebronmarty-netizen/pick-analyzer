@@ -52,8 +52,16 @@ The center is read-only. It does not run prediction generation, settlement, repl
 - `model_weight_history`
 - `ai_performance_snapshots`
 - `sports_sync_jobs`
+- `historical_import_registry`
+- `historical_import_checkpoints`
 - existing calibration read model
 - existing provider budget read model
+
+## Local Backfill Visibility
+
+AI Operations Center V2 includes a Local Feature Backfill panel and top-level `historicalFeatureBackfill` response block. The panel reports the latest local Retrosheet backfill job, job progress, checkpoint count, persisted Phase 2A snapshots, game coverage, feature-label coverage, accepted samples, missing-feature rejections, idempotency status, last validation and shadow readiness.
+
+The panel is read-only and does not expose local filesystem paths, Supabase credentials or service-role details. If no local worker is running, it shows the last persisted job state or `LOCAL_BACKFILL_NOT_EXECUTED`.
 
 ## Product Semantics
 

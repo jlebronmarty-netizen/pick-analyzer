@@ -1,5 +1,13 @@
 # Decision Log
 
+## 2026-07-23 - Use Local Worker For Retrosheet Phase 2A Backfill
+
+Context: Retrosheet Phase 2A full-season feature persistence needs about 70,470 historical snapshots. Serverless execution exceeded safe runtime, and the protected route write path was blocked. The next safe architecture is an operator-controlled local worker that avoids Vercel limits while preserving the certified Phase 2A engine.
+
+Decision: Add `scripts/retrosheet-feature-backfill.mjs` and npm `historical:features:*` commands. The worker loads `.env.local`, certifies the sanitized Supabase host, reuses `supabaseAdmin` plus `retrosheet-historical-feature-store.service.ts`, generates bounded game batches, writes bounded snapshot chunks, and checkpoints confirmed batches in `historical_import_checkpoints`.
+
+Consequences: Full dry-run passed with 2,430 games, 70,470 planned snapshots, 0 leakage failures and 0 deterministic key collisions. The large production write remains blocked by protected approval review, so persistence/idempotency/resume certifications are withheld and no workaround is allowed.
+
 ## 2026-07-23 - Repair Policy-Skipped Settlement Classification
 
 Context: Daily lifecycle validation showed July 22 predictions with exact event mappings and final stored scores, but production settlements stayed at zero. Settlement V2 had classified all `validation_status='skipped'` rows as `test_or_fixture_data`, even when warnings showed policy skip reasons such as immature calibration or non-positive EV.

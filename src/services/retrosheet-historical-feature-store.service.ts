@@ -120,6 +120,18 @@ const LEAGUE_KEY = 'mlb'
 const SEASON = '2025'
 const BATCH_SIZE = 500
 
+export const RETROSHEET_HISTORICAL_FEATURE_STORE_LOCAL_CONTRACT = {
+  storeVersion: STORE_VERSION,
+  featureSetVersion: FEATURE_SET_VERSION,
+  deterministicKeyPrefix: KEY_PREFIX,
+  market: MARKET,
+  source: SOURCE,
+  sportKey: SPORT_KEY,
+  leagueKey: LEAGUE_KEY,
+  season: SEASON,
+  defaultWriteBatchSize: BATCH_SIZE,
+} as const
+
 const FEATURE_GROUPS = [
   {
     category: 'Teams',
@@ -288,16 +300,26 @@ function nowIso() {
 
 async function fetchAll<T>(table: string, select: string, order?: string) {
   const pageSize = 1000
+  const readPage = async (from: number, to: number, attempt = 1): Promise<T[]> => {
+    let query = supabaseAdmin.from(table).select(select).range(from, to)
+    if (order) query = query.order(order)
+    const { data, error } = await query
+    if (error) {
+      if (attempt < 4) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000))
+        return readPage(from, to, attempt + 1)
+      }
+      throw new Error(`${table} read failed: ${error.message}`)
+    }
+    return (data ?? []) as T[]
+  }
   const countResult = await supabaseAdmin.from(table).select('*', { count: 'exact', head: true })
   if (countResult.error) {
     const rows: T[] = []
     for (let from = 0; ; from += pageSize) {
-      let query = supabaseAdmin.from(table).select(select).range(from, from + pageSize - 1)
-      if (order) query = query.order(order)
-      const { data, error } = await query
-      if (error) throw new Error(`${table} read failed: ${error.message}`)
-      rows.push(...((data ?? []) as T[]))
-      if (!data || data.length < pageSize) break
+      const data = await readPage(from, from + pageSize - 1)
+      rows.push(...data)
+      if (data.length < pageSize) break
     }
     return rows
   }
@@ -307,16 +329,10 @@ async function fetchAll<T>(table: string, select: string, order?: string) {
     to: Math.min(total - 1, index * pageSize + pageSize - 1),
   }))
   const pages: T[][] = []
-  const concurrency = 8
+  const concurrency = 2
   for (let index = 0; index < ranges.length; index += concurrency) {
     const chunk = ranges.slice(index, index + concurrency)
-    pages.push(...await Promise.all(chunk.map(async ({ from, to }) => {
-      let query = supabaseAdmin.from(table).select(select).range(from, to)
-      if (order) query = query.order(order)
-      const { data, error } = await query
-      if (error) throw new Error(`${table} read failed: ${error.message}`)
-      return (data ?? []) as T[]
-    })))
+    pages.push(...await Promise.all(chunk.map(({ from, to }) => readPage(from, to))))
   }
   return pages.flat()
 }
@@ -976,6 +992,35 @@ async function countStoredSnapshots() {
     .like('deterministic_key', `${KEY_PREFIX}:%`)
   if (error) throw new Error(`historical feature count failed: ${error.message}`)
   return count ?? 0
+}
+
+export async function countRetrosheetHistoricalFeatureSnapshots() {
+  return countStoredSnapshots()
+}
+
+export async function loadRetrosheetHistoricalFeatureBackfillData() {
+  return loadHistoricalData()
+}
+
+export function selectRetrosheetHistoricalFeatureBackfillGames(
+  data: PreparedData,
+  options: { gameId?: string | null; dateFrom?: string | null; dateTo?: string | null; limit?: number | null } = {}
+) {
+  let games = data.games
+  if (options.gameId) {
+    games = games.filter((game) => game.canonical_game_id === options.gameId || game.source_game_id === options.gameId)
+  }
+  if (options.dateFrom) games = games.filter((game) => String(game.game_date) >= options.dateFrom!)
+  if (options.dateTo) games = games.filter((game) => String(game.game_date) <= options.dateTo!)
+  if (options.limit) games = games.slice(0, options.limit)
+  return games
+}
+
+export function generateRetrosheetHistoricalFeatureSnapshotsForGames(
+  data: PreparedData,
+  games: HistoricalGameRow[]
+) {
+  return games.flatMap((game) => snapshotsForGame(game, data))
 }
 
 async function createGenerationJob({

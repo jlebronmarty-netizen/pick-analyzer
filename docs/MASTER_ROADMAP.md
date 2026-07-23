@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Local Historical Feature Backfill Worker V1
+
+Status: Worker implemented, dry-run verified and production write blocked by protected review.
+
+Evidence: `scripts/retrosheet-feature-backfill.mjs`, `scripts/local-ts-loader.mjs`, npm `historical:features:*` scripts, exported batch-generation hooks in `src/services/retrosheet-historical-feature-store.service.ts`, AI Operations local backfill diagnostics, `docs/LOCAL_HISTORICAL_FEATURE_BACKFILL_V1.md`, `docs/HISTORICAL_FEATURE_BACKFILL_OPERATIONS.md`, `docs/HISTORICAL_FEATURE_BACKFILL_IDEMPOTENCY.md`, `docs/FEATURE_LABEL_COVERAGE_RECOVERY_V1.md` and full local dry-run output.
+
+Note: The worker runs locally, loads `.env.local`, certifies the production Supabase hostname, reuses the existing Phase 2A engine, writes historical-only/non-training/non-live snapshots when approved, checkpoints each confirmed game batch and supports resume/idempotency modes. Full dry-run verified 2,430 games, 70,470 planned snapshots, 0 leakage failures and 0 deterministic key collisions. The first full write was rejected by protected approval review, so persistence/idempotency/resume execution remains blocked and was not worked around.
+
 ### Daily Settlement Closure & Learning Evidence Activation V1
 
 Status: Implemented locally; protected production execution and deployment validation pending in this phase.

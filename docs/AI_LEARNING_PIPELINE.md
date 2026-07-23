@@ -47,3 +47,16 @@ Win/loss/push labels come only from settled prediction results. Totals, runline,
 This validation does not modify Prediction Engine probabilities, Learning Brain weights, Official Pick policy, settlement outcomes, Current Board rows, historical features or replay rows.
 
 Production weight activation remains blocked unless the shadow validation gate proves sufficient accepted sample, chronological holdout, non-worsening Brier/Log Loss, acceptable calibration, subgroup stability and rollback readiness.
+
+## Historical Feature Backfill Boundary
+
+The local Retrosheet feature backfill worker can persist 2025 historical-only Phase 2A snapshots after explicit write approval. Those snapshots do not automatically make existing production `prediction_history` labels acceptable. The learning queue still requires deterministic feature evidence linked to the prediction label through existing lineage fields or approved evidence metadata.
+
+Current baseline before the full local write remains:
+
+- deterministic labels: 776
+- accepted with feature evidence: 228
+- rejected `FEATURE_SNAPSHOT_MISSING`: 548
+- coverage: 29.38%
+
+The full dry-run proves the 2025 Retrosheet feature set can be generated leakage-safely, but production weight activation remains blocked until real chronological validation is executed.
