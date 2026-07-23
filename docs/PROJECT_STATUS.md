@@ -13,6 +13,16 @@ Last updated: 2026-07-23 00:00:00Z
 - Protected write reconciliation was not executed in this task. Provider calls remained 0, sports API calls remained 0 and remote mutations during audit remained 0. Phase 2A historical feature-store code/data, Prediction Engine, Learning Brain, Current Board, Official Picks, market pipelines and replay generation were not modified.
 - Build passed with `npm.cmd run build`.
 
+## 2026-07-23 Settlement V2 Controlled Production Reconciliation Execution
+
+- Executed controlled Settlement V2 reconciliation against existing persisted production prediction/event data only. External sports API calls remained 0 and provider calls remained 0.
+- Dry-run exposed a production defect in event lookups: 500-ID `.in()` batches could exceed Supabase/PostgREST header limits. Reduced settlement and performance event lookup batches to 100 IDs before write execution.
+- Reconciliation dry-run found 707 non-terminal rows under the V2 definition: 342 Legacy rows without canonical event lineage and 365 Ignored rows (288 test/fixture, 63 duplicate prediction, 14 post-start). No unresolved row had deterministic persisted-score Win/Loss/Push eligibility, so no final score was guessed or inferred.
+- First controlled write updated 707 rows and failed 0: 342 rows received V2 Legacy metadata and compatible `closed` lifecycle; 365 rows received V2 Ignored metadata and compatible `skipped` lifecycle. Pending-like rows after execution: 0.
+- Identical second run examined 0 eligible rows, updated 0 rows, failed 0 and confirmed no duplicate settlements, no state oscillation and no reverted settled rows.
+- Post-write metrics: 1,327 total prediction rows, 620 settled win/loss sample, 304 wins, 316 losses, 0 pushes, 342 legacy, 365 ignored, 0 awaiting settlement, oldest unresolved null, average stored settlement delay 224.58 hours, accuracy 49.03%, Brier 0.2631, log loss 0.7244, calibration 0.42 and settlement coverage 100%.
+- Local route validation passed 7/7 for lifecycle transitions, cancellation, post-start exclusion, shadow handling, idempotent closed rows and provider calls 0. Build passed with `npm.cmd run build`.
+
 ## 2026-07-22 MLB Historical Intelligence Phase 2A - Retrosheet Historical Feature Store Core V1
 
 - Added server-only Retrosheet Historical Feature Store Core V1 over the persisted 2025 Retrosheet historical database, reusing `historical_feature_snapshots` with deterministic key prefix `retrosheet_mlb_feature_store_v1` and market partition `historical_mlb_feature_store`.

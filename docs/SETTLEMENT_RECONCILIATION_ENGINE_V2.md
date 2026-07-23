@@ -105,6 +105,25 @@ Read-only production audit on 2026-07-23:
 
 Protected write execution was not run in this task. A future approved `FULL_RECONCILIATION`, `RANGE` or `SINGLE_GAME` run should report first-run mutations and a second-run zero-mutation idempotency result.
 
+## Controlled Production Execution
+
+Execution on 2026-07-23 completed the protected reconciliation using only persisted `prediction_history` and `sport_events` data.
+
+- Dry-run pending under V2 definition: 707
+- Planned deterministic score settlements: 0
+- Planned Legacy classifications: 342
+- Planned Ignored classifications: 365
+- First write updated: 707
+- First write failures: 0
+- Second identical write updated: 0
+- Pending-like rows after execution: 0
+- Provider calls: 0
+- External sports API calls: 0
+
+The 707 V2 pending-like rows differ from the earlier 356 generic pending count because V2 includes 351 previously separated active/test-like rows that also required explicit terminal classification.
+
+During execution, 500-ID event lookup batches exceeded Supabase/PostgREST request header limits in local validation. The production service now uses 100-ID event batches for settlement and performance event joins.
+
 ## Performance Recalculation
 
 The engine returns recalculated read-side summaries for:

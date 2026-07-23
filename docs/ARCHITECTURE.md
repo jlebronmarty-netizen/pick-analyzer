@@ -211,6 +211,8 @@ Settlement Reconciliation Engine V2 (`settlement-reconciliation.service.ts`, `/a
 
 Performance Scope V2 and AI Performance Center read the V2 lifecycle metadata so timeline and Prediction History surfaces display explicit settlement states instead of ambiguous Pending labels. Reconciliation uses persisted `prediction_history` and `sport_events` only; provider calls, odds fetches, Current Board mutations, Learning Brain changes, replay generation and historical feature recalculation are outside this engine.
 
+Settlement and performance event joins use bounded 100-ID batches for `sport_events` lookups to avoid Supabase/PostgREST request header overflow during full-history reconciliation.
+
 NBA-specific settlement exists in `nba-prediction-settlement.service.ts`:
 
 - full-game final scores come from `sport_events`

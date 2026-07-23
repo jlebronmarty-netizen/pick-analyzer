@@ -221,11 +221,11 @@ async function loadRows(sportKey?: string | null) {
 
 async function loadEvents(eventIds: string[]) {
   const rows: EventRow[] = []
-  for (let index = 0; index < eventIds.length; index += 500) {
+  for (let index = 0; index < eventIds.length; index += 100) {
     const { data, error } = await supabaseAdmin
       .from('sport_events')
       .select('id, start_time, status, home_team, away_team, home_score, away_score')
-      .in('id', eventIds.slice(index, index + 500))
+      .in('id', eventIds.slice(index, index + 100))
     if (error) throw new Error(`performance scope v2 event read failed: ${error.message}`)
     rows.push(...((data ?? []) as EventRow[]))
   }

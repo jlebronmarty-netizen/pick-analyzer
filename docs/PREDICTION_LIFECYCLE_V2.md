@@ -54,3 +54,16 @@ Performance timeline now groups by lifecycle:
 - Historical / Replay
 
 Prediction History displays lifecycle badges instead of plain Pending/Correct/Incorrect labels.
+
+## Production Execution Result
+
+The 2026-07-23 controlled reconciliation classified all previously non-terminal prediction rows into explicit V2 states:
+
+- Legacy: 342
+- Ignored: 365
+- Awaiting Settlement: 0
+- Unknown: 0
+- Cancelled: 0
+- Push: 0
+
+Rows that lacked persisted final-score evidence were not graded as wins or losses. They received explicit Legacy or Ignored metadata according to the V2 contract.

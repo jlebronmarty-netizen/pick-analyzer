@@ -419,11 +419,11 @@ async function loadPredictions(options: ReconciliationOptions = {}) {
 
 async function loadEvents(eventIds: string[]) {
   const rows: EventRow[] = []
-  for (let index = 0; index < eventIds.length; index += 500) {
+  for (let index = 0; index < eventIds.length; index += 100) {
     const { data, error } = await supabaseAdmin
       .from('sport_events')
       .select('id, sport_key, league_key, season, home_team, away_team, home_team_id, away_team_id, start_time, status, home_score, away_score, metadata')
-      .in('id', eventIds.slice(index, index + 500))
+      .in('id', eventIds.slice(index, index + 100))
     if (error) throw new Error(`sport_events reconciliation read failed: ${error.message}`)
     rows.push(...((data ?? []) as EventRow[]))
   }
