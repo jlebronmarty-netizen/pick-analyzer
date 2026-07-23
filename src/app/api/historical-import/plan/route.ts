@@ -1,11 +1,21 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import { probeHistoricalFeatureSchemaCapabilities } from '@/lib/server-schema-capabilities'
-import { planHistoricalImport } from '@/services/historical-import-engine.service'
-import {
-  runHistoricalFeatureSnapshotWritePilot,
-  runHistoricalPredictionLineagePilot,
-} from '@/services/historical-feature-generation.service'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+async function loadHistoricalPlanningServices() {
+  const [{ planHistoricalImport }, featureGeneration] = await Promise.all([
+    import('@/services/historical-import-engine.service'),
+    import('@/services/historical-feature-generation.service'),
+  ])
+  return {
+    planHistoricalImport,
+    runHistoricalFeatureSnapshotWritePilot: featureGeneration.runHistoricalFeatureSnapshotWritePilot,
+    runHistoricalPredictionLineagePilot: featureGeneration.runHistoricalPredictionLineagePilot,
+  }
+}
 
 export async function POST(request: NextRequest) {
   const id = requestId(request)
@@ -13,6 +23,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
     const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
+    const {
+      planHistoricalImport,
+      runHistoricalFeatureSnapshotWritePilot,
+      runHistoricalPredictionLineagePilot,
+    } = await loadHistoricalPlanningServices()
     const result = planHistoricalImport({
       sportKey: body?.sportKey ?? body?.sport ?? null,
       leagueKey: body?.leagueKey ?? body?.league ?? null,
@@ -72,6 +87,11 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const dataTypes = searchParams.get('dataTypes')
     const schemaCapabilities = await probeHistoricalFeatureSchemaCapabilities()
+    const {
+      planHistoricalImport,
+      runHistoricalFeatureSnapshotWritePilot,
+      runHistoricalPredictionLineagePilot,
+    } = await loadHistoricalPlanningServices()
     const result = planHistoricalImport({
       sportKey: searchParams.get('sport') ?? searchParams.get('sportKey'),
       leagueKey: searchParams.get('league') ?? searchParams.get('leagueKey'),

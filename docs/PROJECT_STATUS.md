@@ -2,6 +2,17 @@
 
 Last updated: 2026-07-23 00:00:00Z
 
+## 2026-07-23 Build Memory Optimization & Deployment Recovery V1
+
+- Audited build memory pressure after Production Regression Audit & UX Recovery V1. Largest source modules are historical import readiness/executor, MLB prospective preview, historical feature generation, AI Performance Center, operating-day and adaptive refresh services. Largest client components remain Historical Import Engine, User Today, Runtime Observability and Performance.
+- Added Next build memory controls in `next.config.ts`: Webpack build worker, Webpack memory optimizations, disabled parallel server compiles/traces, static generation concurrency 1, static generation worker chunking 50 pages and memory-based worker count.
+- Converted `/admin/historical-diagnostics` and `/mlb-operations` to request-time dynamic pages and moved their heavy historical/operations service imports behind runtime `import()` calls.
+- Converted historical import execution/planning, operations validation and consolidated operating-day cron routes to lazy-load heavy service graphs only when their request branch executes.
+- Local optimized build passed with `npm.cmd run build`. Static generation work dropped from 329 to 323 app entries; build still preserves all routes and features.
+- No features, routes, diagnostics, Historical Intelligence, Settlement V2, Feature Store, replay preparation, Prediction Engine, Learning Brain, Current Board or Official Pick policy were removed or disabled. Provider calls and remote mutations added by this phase: 0.
+- Production deployment was not attempted because push/deploy requires explicit approval. `DEPLOYMENT_RECOVERY_PASS` remains pending an approved Vercel build.
+- Added `docs/BUILD_MEMORY_OPTIMIZATION_DEPLOYMENT_RECOVERY_V1.md`.
+
 ## 2026-07-23 Production Regression Audit & UX Recovery V1
 
 - Audited production-facing UX after Settlement V2 and Historical Feature Store Phase 2A using existing persisted `prediction_history` and `sport_events` data only. Provider calls remained 0 and no sports API calls were made.

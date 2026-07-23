@@ -8,9 +8,17 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Build Memory Optimization & Deployment Recovery V1
+
+Status: Locally implemented and build-verified; production push/deployment validation pending approval.
+
+Evidence: `next.config.ts`, dynamic/lazy server boundaries in `/admin/historical-diagnostics`, `/mlb-operations`, `/api/historical-import/execute`, `/api/historical-import/plan`, `/api/operations/validation`, `/api/cron/operating-day`, `docs/BUILD_MEMORY_OPTIMIZATION_DEPLOYMENT_RECOVERY_V1.md` and local production build.
+
+Note: This pass targets Vercel out-of-memory failures without removing features. It lowers build peak memory through Next Webpack memory controls, reduced static-generation concurrency, request-time rendering for heavy admin pages and branch-specific runtime imports for historical/operations service graphs. Historical Intelligence, Settlement V2, Feature Store, replay preparation, Prediction Engine, Learning Brain, Current Board and Official Pick policy remain available and unchanged.
+
 ### Production Regression Audit & UX Recovery V1
 
-Status: Locally implemented; build verification pending in this task.
+Status: Locally implemented and build-verified; production deployment pending approval.
 
 Evidence: `src/services/market-opportunity-suite.service.ts`, `src/components/dashboard/UserTodayPanel.tsx`, `src/services/ai-performance-center.service.ts`, `docs/PRODUCTION_REGRESSION_AUDIT_V1.md`, `docs/UX_RECOVERY_V1.md`.
 

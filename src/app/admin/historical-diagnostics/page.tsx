@@ -1,14 +1,12 @@
 import type { Metadata } from 'next'
-import { getRetrosheetGameEngineDiagnostics } from '@/services/retrosheet-game-reconstruction.service'
-import { getRetrosheetHistoricalFeatureStoreDiagnostics } from '@/services/retrosheet-historical-feature-store.service'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'Historical Diagnostics | Pick Analyzer',
   description: 'Read-only historical baseball reconstruction diagnostics.',
 }
-
-type Data = Awaited<ReturnType<typeof getRetrosheetGameEngineDiagnostics>>
-type FeatureData = Awaited<ReturnType<typeof getRetrosheetHistoricalFeatureStoreDiagnostics>>
 
 function fmt(value: unknown, fallback = 'n/a') {
   if (value === null || value === undefined || value === '') return fallback
@@ -40,8 +38,12 @@ export default async function HistoricalDiagnosticsPage({
   searchParams?: Promise<{ gameId?: string }>
 }) {
   const params = searchParams ? await searchParams : {}
-  const data: Data = await getRetrosheetGameEngineDiagnostics({ gameId: params.gameId, limit: 25 })
-  const featureData: FeatureData = await getRetrosheetHistoricalFeatureStoreDiagnostics({ gameId: params.gameId, limit: 1 })
+  const [{ getRetrosheetGameEngineDiagnostics }, { getRetrosheetHistoricalFeatureStoreDiagnostics }] = await Promise.all([
+    import('@/services/retrosheet-game-reconstruction.service'),
+    import('@/services/retrosheet-historical-feature-store.service'),
+  ])
+  const data = await getRetrosheetGameEngineDiagnostics({ gameId: params.gameId, limit: 25 })
+  const featureData = await getRetrosheetHistoricalFeatureStoreDiagnostics({ gameId: params.gameId, limit: 1 })
   const coverage = data.coverage
 
   return (

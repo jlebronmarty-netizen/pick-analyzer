@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
-import { getMlbOperationsCenter } from '@/services/mlb-operations-center.service'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'MLB Operations Center | Pick Analyzer',
   description: 'Internal MLB platform operations monitor.',
 }
 
-type OperationsData = Awaited<ReturnType<typeof getMlbOperationsCenter>>
+type OperationsData = Awaited<ReturnType<typeof import('@/services/mlb-operations-center.service')['getMlbOperationsCenter']>>
 type Tone = 'ready' | 'partial' | 'blocked' | 'waiting' | 'degraded'
 
 const toneStyles: Record<Tone, string> = {
@@ -173,6 +175,7 @@ export default async function MlbOperationsPage({
   searchParams?: Promise<{ selectedDate?: string; date?: string }>
 }) {
   const params = searchParams ? await searchParams : {}
+  const { getMlbOperationsCenter } = await import('@/services/mlb-operations-center.service')
   const data = await getMlbOperationsCenter({ selectedDate: params.selectedDate ?? params.date })
   const current = data.currentBoard
   const provider = data.providerHealth

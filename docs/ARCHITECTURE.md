@@ -221,6 +221,14 @@ Most Likely can render stored model-only prediction rows as informational probab
 
 AI Performance Center treats Settlement V2 metadata as authoritative for production performance families. `Legacy`, `Ignored`, `Historical`, `Replay` and `Shadow` rows remain audit-visible in history and timeline views, but production trust, Brier, log loss, calibration and report-card metrics are calculated from production rows only.
 
+## Build Memory Boundaries
+
+Build Memory Optimization & Deployment Recovery V1 keeps backend capabilities intact while lowering peak build memory. `next.config.ts` enables Webpack memory optimizations, runs Webpack in a worker, disables parallel server compiles/traces and limits static generation concurrency.
+
+Heavy admin pages such as `/admin/historical-diagnostics` and `/mlb-operations` are dynamic request-time pages. They load Retrosheet, historical feature-store and operations-center services through runtime `import()` calls instead of eager page-module imports.
+
+Heavy operational routes keep their public contracts but lazy-load large service graphs inside request handlers. Historical import execution/planning, operations validation and operating-day cron routes import historical, feature, settlement, replay-prep and adaptive execution modules only when the matching runtime branch executes.
+
 NBA-specific settlement exists in `nba-prediction-settlement.service.ts`:
 
 - full-game final scores come from `sport_events`

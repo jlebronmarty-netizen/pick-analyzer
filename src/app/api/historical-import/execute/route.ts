@@ -1,16 +1,8 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import {
-  executeSportsDataIoNbaPilotImport,
-  planSportsDataIoHistoricalExecution,
-} from '@/services/sportsdataio-historical-import-readiness.service'
-import {
-  executeSportsDataIoMlbDiscoveryImport,
-  planSportsDataIoMlbDiscoveryExecution,
-  verifySportsDataIoMlbTeamsForStandings2025,
-} from '@/services/sportsdataio-mlb-historical-import-executor.service'
-import { runSportsDataIoMlbProspectivePreview } from '@/services/sportsdataio-mlb-prospective-preview.service'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 export const maxDuration = 300
 
 function authorized(request: NextRequest) {
@@ -70,6 +62,7 @@ export async function POST(request: NextRequest) {
       requestPayload.mode === 'mlb_prospective_preview' ||
       requestPayload.mode === 'sportsdataio_mlb_prospective_preview_v1'
     ) {
+      const { runSportsDataIoMlbProspectivePreview } = await import('@/services/sportsdataio-mlb-prospective-preview.service')
       const result = await runSportsDataIoMlbProspectivePreview({
         dryRun: requestPayload.dryRun,
         confirmed: requestPayload.confirmed,
@@ -89,6 +82,7 @@ export async function POST(request: NextRequest) {
       requestPayload.mode === 'sportsdataio_mlb_teams_verification_v1' ||
       requestPayload.mode === 'mlb_teams_verification'
     ) {
+      const { verifySportsDataIoMlbTeamsForStandings2025 } = await import('@/services/sportsdataio-mlb-historical-import-executor.service')
       const result = await verifySportsDataIoMlbTeamsForStandings2025({
         confirmed: requestPayload.confirmed,
         timeoutMs: requestPayload.timeoutMs,
@@ -101,12 +95,24 @@ export async function POST(request: NextRequest) {
       requestPayload.provider === 'sportsdataio' &&
       requestPayload.sportKey === 'baseball_mlb'
     const result = isMlbDiscoveryLab
-      ? requestPayload.dryRun === false
-        ? await executeSportsDataIoMlbDiscoveryImport(requestPayload)
-        : await planSportsDataIoMlbDiscoveryExecution(requestPayload)
-      : requestPayload.dryRun === false
-        ? await executeSportsDataIoNbaPilotImport(requestPayload)
-        : planSportsDataIoHistoricalExecution(requestPayload)
+      ? await (async () => {
+          const {
+            executeSportsDataIoMlbDiscoveryImport,
+            planSportsDataIoMlbDiscoveryExecution,
+          } = await import('@/services/sportsdataio-mlb-historical-import-executor.service')
+          return requestPayload.dryRun === false
+            ? executeSportsDataIoMlbDiscoveryImport(requestPayload)
+            : planSportsDataIoMlbDiscoveryExecution(requestPayload)
+        })()
+      : await (async () => {
+          const {
+            executeSportsDataIoNbaPilotImport,
+            planSportsDataIoHistoricalExecution,
+          } = await import('@/services/sportsdataio-historical-import-readiness.service')
+          return requestPayload.dryRun === false
+            ? executeSportsDataIoNbaPilotImport(requestPayload)
+            : planSportsDataIoHistoricalExecution(requestPayload)
+        })()
 
     if (!result.success) {
       const validation =

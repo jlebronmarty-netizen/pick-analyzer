@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-23 - Optimize Build Memory With Dynamic Boundaries Instead Of Feature Removal
+
+Context: Local builds passed, but Vercel production deployment failed out of memory after several backend-heavy historical, settlement and feature-store phases expanded the route/service graph.
+
+Decision: Preserve all features and reduce peak build memory through Next build memory settings, request-time rendering for heavy admin pages and runtime `import()` boundaries for historical import, operations validation and operating-day cron service graphs.
+
+Consequences: Build architecture trades some build speed for lower peak RAM. Historical Intelligence, Settlement V2, Feature Store, replay preparation, diagnostics and production UX stay available. Deployment recovery certification still requires an approved push and successful Vercel build.
+
+Affected modules: Next config, historical diagnostics page, MLB operations page, historical import routes, operations validation route, operating-day cron route and build-memory documentation.
+
 ## 2026-07-23 - Keep Production UX Recovery Read-Only And Policy Preserving
 
 Context: Historical Intelligence, Feature Store Phase 2A and Settlement V2 expanded backend data quality and lifecycle metadata. Production UX then appeared regressed because legacy compatibility fields still carried `status = pending`, and some user surfaces showed empty or technical waiting states even when stored model probabilities existed.

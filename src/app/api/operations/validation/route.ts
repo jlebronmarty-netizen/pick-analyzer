@@ -1,41 +1,157 @@
 import { NextRequest } from 'next/server'
 import { apiOk, requestId } from '@/lib/api-contract'
-import { validateAdaptiveRefreshFixtures } from '@/services/adaptive-refresh-orchestrator.service'
-import { validateMarketAlignmentFixtures } from '@/services/market-alignment.service'
-import { validateMarketIntelligenceCategoryFixtures } from '@/services/market-intelligence-category.service'
-import { validateAiBetFinderDeterministicFixtures } from '@/services/ai-bet-finder.service'
-import { validateUniversalProjectionEngineFixtures } from '@/services/universal-projection-engine.service'
-import { validateGameIntelligenceFixtures } from '@/services/game-intelligence.service'
-import { validateOfficialPickExperienceFixtures } from '@/services/official-pick-experience.service'
-import { validateMlbAiPicksFeedFixtures } from '@/services/mlb-ai-picks-feed.service'
-import { validateMlbPlayerPropsFoundationFixtures } from '@/services/mlb-player-props-foundation.service'
-import { validateRecommendationExplanationFixtures } from '@/services/recommendation-explanation.service'
-import { validateBsnCoreCertificationFixtures } from '@/services/bsn-core-certification.service'
-import { validateSportsDataIoSubscriptionMaximizationAuditFixtures } from '@/services/sportsdataio-subscription-maximization-audit.service'
-import { validateSportsDataIoMlbImportDurabilityFixtures } from '@/services/sportsdataio-mlb-historical-import-executor.service'
-import { validateMlbUnresolvedPlayerIdentityFixtures } from '@/services/mlb-unresolved-player-identity.service'
-import { validateMlbCurrentSeasonBackfillOrchestratorFixtures } from '@/services/mlb-current-season-backfill-orchestrator.service'
-import { validateMlbCurrentSeasonDataQualityAuditFixtures } from '@/services/mlb-current-season-data-quality-audit.service'
-import { validateMlbFeatureModelReadinessFixtures } from '@/services/mlb-feature-model-readiness.service'
-import { validateMlbModelAuditFixtures } from '@/services/mlb-model-audit.service'
-import { validateMlbPlayerDataExcellenceFixtures } from '@/services/mlb-player-data-excellence.service'
-import { validateSettlementReconciliationFixtures } from '@/services/settlement-reconciliation.service'
-import { validateSportsAnalystFixtures } from '@/services/sports-analyst.service'
-import { validatePlayerIntelligenceFixtures } from '@/services/player-intelligence.service'
-import { validateUniversalEventIdentityFixtures } from '@/services/universal-event-identity.service'
-import { validateMissingCanonicalEventsRecoveryFixtures } from '@/services/missing-canonical-events-recovery.service'
-import { validateLegacyPredictionProvenanceFixtures } from '@/services/legacy-prediction-provenance.service'
-import { validateMlbLearningBrainFixtures } from '@/services/mlb-learning-brain.service'
-import { validateMlbPregameStarterEvidenceFixtures } from '@/services/mlb-pregame-starter-evidence.service'
-import { validateModelOnlyIntelligenceFixtures } from '@/services/model-only-intelligence.service'
-import { validatePerformanceScopeV2Fixtures } from '@/services/performance-scope-v2.service'
-import { validateMlbMarketPipelineDiagnosticsFixtures } from '@/services/mlb-market-pipeline-diagnostics.service'
-import { validateMlbProjectedScoreFixtures } from '@/services/mlb-projected-score.service'
-import { validateRetrosheetHistoricalDataLakeFixtures } from '@/services/retrosheet-historical-data-lake.service'
-import { validateRetrosheetGameEngineFixtures } from '@/services/retrosheet-game-reconstruction.service'
-import { validateRetrosheetHistoricalFeatureStoreFixtures } from '@/services/retrosheet-historical-feature-store.service'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+async function loadValidationFixtures() {
+  const [
+    adaptive,
+    marketAlignment,
+    marketClassification,
+    aiBetFinder,
+    universalProjectionEngine,
+    gameIntelligence,
+    officialPickExperience,
+    aiPicksFeed,
+    mlbPlayerPropsFoundation,
+    recommendationExplanation,
+    bsnCoreCertification,
+    sportsDataIoSubscriptionMaximization,
+    sportsDataIoMlbImportDurability,
+    mlbUnresolvedPlayerIdentity,
+    mlbCurrentSeasonBackfillOrchestrator,
+    mlbCurrentSeasonDataQualityAudit,
+    mlbFeatureModelReadiness,
+    mlbModelAudit,
+    mlbPlayerDataExcellence,
+    settlementReconciliation,
+    sportsAnalyst,
+    playerIntelligence,
+    universalEventIdentity,
+    missingCanonicalEventsRecovery,
+    legacyPredictionProvenance,
+    mlbLearningBrain,
+    mlbPregameStarterEvidence,
+    modelOnlyIntelligence,
+    performanceScopeV2,
+    mlbMarketPipelineDiagnostics,
+    mlbProjectedScore,
+    retrosheetHistoricalDataLake,
+    retrosheetGameEngine,
+    retrosheetHistoricalFeatureStore,
+  ] = await Promise.all([
+    import('@/services/adaptive-refresh-orchestrator.service'),
+    import('@/services/market-alignment.service'),
+    import('@/services/market-intelligence-category.service'),
+    import('@/services/ai-bet-finder.service'),
+    import('@/services/universal-projection-engine.service'),
+    import('@/services/game-intelligence.service'),
+    import('@/services/official-pick-experience.service'),
+    import('@/services/mlb-ai-picks-feed.service'),
+    import('@/services/mlb-player-props-foundation.service'),
+    import('@/services/recommendation-explanation.service'),
+    import('@/services/bsn-core-certification.service'),
+    import('@/services/sportsdataio-subscription-maximization-audit.service'),
+    import('@/services/sportsdataio-mlb-historical-import-executor.service'),
+    import('@/services/mlb-unresolved-player-identity.service'),
+    import('@/services/mlb-current-season-backfill-orchestrator.service'),
+    import('@/services/mlb-current-season-data-quality-audit.service'),
+    import('@/services/mlb-feature-model-readiness.service'),
+    import('@/services/mlb-model-audit.service'),
+    import('@/services/mlb-player-data-excellence.service'),
+    import('@/services/settlement-reconciliation.service'),
+    import('@/services/sports-analyst.service'),
+    import('@/services/player-intelligence.service'),
+    import('@/services/universal-event-identity.service'),
+    import('@/services/missing-canonical-events-recovery.service'),
+    import('@/services/legacy-prediction-provenance.service'),
+    import('@/services/mlb-learning-brain.service'),
+    import('@/services/mlb-pregame-starter-evidence.service'),
+    import('@/services/model-only-intelligence.service'),
+    import('@/services/performance-scope-v2.service'),
+    import('@/services/mlb-market-pipeline-diagnostics.service'),
+    import('@/services/mlb-projected-score.service'),
+    import('@/services/retrosheet-historical-data-lake.service'),
+    import('@/services/retrosheet-game-reconstruction.service'),
+    import('@/services/retrosheet-historical-feature-store.service'),
+  ])
+
+  return {
+    validateAdaptiveRefreshFixtures: adaptive.validateAdaptiveRefreshFixtures,
+    validateMarketAlignmentFixtures: marketAlignment.validateMarketAlignmentFixtures,
+    validateMarketIntelligenceCategoryFixtures: marketClassification.validateMarketIntelligenceCategoryFixtures,
+    validateAiBetFinderDeterministicFixtures: aiBetFinder.validateAiBetFinderDeterministicFixtures,
+    validateUniversalProjectionEngineFixtures: universalProjectionEngine.validateUniversalProjectionEngineFixtures,
+    validateGameIntelligenceFixtures: gameIntelligence.validateGameIntelligenceFixtures,
+    validateOfficialPickExperienceFixtures: officialPickExperience.validateOfficialPickExperienceFixtures,
+    validateMlbAiPicksFeedFixtures: aiPicksFeed.validateMlbAiPicksFeedFixtures,
+    validateMlbPlayerPropsFoundationFixtures: mlbPlayerPropsFoundation.validateMlbPlayerPropsFoundationFixtures,
+    validateRecommendationExplanationFixtures: recommendationExplanation.validateRecommendationExplanationFixtures,
+    validateBsnCoreCertificationFixtures: bsnCoreCertification.validateBsnCoreCertificationFixtures,
+    validateSportsDataIoSubscriptionMaximizationAuditFixtures: sportsDataIoSubscriptionMaximization.validateSportsDataIoSubscriptionMaximizationAuditFixtures,
+    validateSportsDataIoMlbImportDurabilityFixtures: sportsDataIoMlbImportDurability.validateSportsDataIoMlbImportDurabilityFixtures,
+    validateMlbUnresolvedPlayerIdentityFixtures: mlbUnresolvedPlayerIdentity.validateMlbUnresolvedPlayerIdentityFixtures,
+    validateMlbCurrentSeasonBackfillOrchestratorFixtures: mlbCurrentSeasonBackfillOrchestrator.validateMlbCurrentSeasonBackfillOrchestratorFixtures,
+    validateMlbCurrentSeasonDataQualityAuditFixtures: mlbCurrentSeasonDataQualityAudit.validateMlbCurrentSeasonDataQualityAuditFixtures,
+    validateMlbFeatureModelReadinessFixtures: mlbFeatureModelReadiness.validateMlbFeatureModelReadinessFixtures,
+    validateMlbModelAuditFixtures: mlbModelAudit.validateMlbModelAuditFixtures,
+    validateMlbPlayerDataExcellenceFixtures: mlbPlayerDataExcellence.validateMlbPlayerDataExcellenceFixtures,
+    validateSettlementReconciliationFixtures: settlementReconciliation.validateSettlementReconciliationFixtures,
+    validateSportsAnalystFixtures: sportsAnalyst.validateSportsAnalystFixtures,
+    validatePlayerIntelligenceFixtures: playerIntelligence.validatePlayerIntelligenceFixtures,
+    validateUniversalEventIdentityFixtures: universalEventIdentity.validateUniversalEventIdentityFixtures,
+    validateMissingCanonicalEventsRecoveryFixtures: missingCanonicalEventsRecovery.validateMissingCanonicalEventsRecoveryFixtures,
+    validateLegacyPredictionProvenanceFixtures: legacyPredictionProvenance.validateLegacyPredictionProvenanceFixtures,
+    validateMlbLearningBrainFixtures: mlbLearningBrain.validateMlbLearningBrainFixtures,
+    validateMlbPregameStarterEvidenceFixtures: mlbPregameStarterEvidence.validateMlbPregameStarterEvidenceFixtures,
+    validateModelOnlyIntelligenceFixtures: modelOnlyIntelligence.validateModelOnlyIntelligenceFixtures,
+    validatePerformanceScopeV2Fixtures: performanceScopeV2.validatePerformanceScopeV2Fixtures,
+    validateMlbMarketPipelineDiagnosticsFixtures: mlbMarketPipelineDiagnostics.validateMlbMarketPipelineDiagnosticsFixtures,
+    validateMlbProjectedScoreFixtures: mlbProjectedScore.validateMlbProjectedScoreFixtures,
+    validateRetrosheetHistoricalDataLakeFixtures: retrosheetHistoricalDataLake.validateRetrosheetHistoricalDataLakeFixtures,
+    validateRetrosheetGameEngineFixtures: retrosheetGameEngine.validateRetrosheetGameEngineFixtures,
+    validateRetrosheetHistoricalFeatureStoreFixtures: retrosheetHistoricalFeatureStore.validateRetrosheetHistoricalFeatureStoreFixtures,
+  }
+}
 
 export async function GET(request: NextRequest) {
+  const {
+    validateAdaptiveRefreshFixtures,
+    validateMarketAlignmentFixtures,
+    validateMarketIntelligenceCategoryFixtures,
+    validateAiBetFinderDeterministicFixtures,
+    validateUniversalProjectionEngineFixtures,
+    validateGameIntelligenceFixtures,
+    validateOfficialPickExperienceFixtures,
+    validateMlbAiPicksFeedFixtures,
+    validateMlbPlayerPropsFoundationFixtures,
+    validateRecommendationExplanationFixtures,
+    validateBsnCoreCertificationFixtures,
+    validateSportsDataIoSubscriptionMaximizationAuditFixtures,
+    validateSportsDataIoMlbImportDurabilityFixtures,
+    validateMlbUnresolvedPlayerIdentityFixtures,
+    validateMlbCurrentSeasonBackfillOrchestratorFixtures,
+    validateMlbCurrentSeasonDataQualityAuditFixtures,
+    validateMlbFeatureModelReadinessFixtures,
+    validateMlbModelAuditFixtures,
+    validateMlbPlayerDataExcellenceFixtures,
+    validateSettlementReconciliationFixtures,
+    validateSportsAnalystFixtures,
+    validatePlayerIntelligenceFixtures,
+    validateUniversalEventIdentityFixtures,
+    validateMissingCanonicalEventsRecoveryFixtures,
+    validateLegacyPredictionProvenanceFixtures,
+    validateMlbLearningBrainFixtures,
+    validateMlbPregameStarterEvidenceFixtures,
+    validateModelOnlyIntelligenceFixtures,
+    validatePerformanceScopeV2Fixtures,
+    validateMlbMarketPipelineDiagnosticsFixtures,
+    validateMlbProjectedScoreFixtures,
+    validateRetrosheetHistoricalDataLakeFixtures,
+    validateRetrosheetGameEngineFixtures,
+    validateRetrosheetHistoricalFeatureStoreFixtures,
+  } = await loadValidationFixtures()
   const adaptive = validateAdaptiveRefreshFixtures()
   const marketAlignment = validateMarketAlignmentFixtures()
   const marketClassification = validateMarketIntelligenceCategoryFixtures()

@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { getOperatingDayAutomationStatus } from '@/services/operating-day-automation.service'
-import { executeOperatingDay } from '@/services/operating-day.service'
-import { runAdaptiveRefresh } from '@/services/adaptive-refresh-orchestrator.service'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 const CRON_STATUS_HTTP: Record<string, number> = {
   SUCCESS: 200,
@@ -38,8 +38,9 @@ async function handle(request: NextRequest) {
     return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized operating-day cron request.', status: 401 })
   }
   const dryRun = request.nextUrl.searchParams.get('dryRun') !== 'false'
-  let status = {} as Awaited<ReturnType<typeof getOperatingDayAutomationStatus>>
+  let status: any = {}
   try {
+    const { runAdaptiveRefresh } = await import('@/services/adaptive-refresh-orchestrator.service')
     const adaptive = await runAdaptiveRefresh({
       dryRun,
       source: request.method === 'POST' ? 'PRODUCTION_CRON' : 'VERCEL_CRON',
@@ -68,6 +69,7 @@ async function handle(request: NextRequest) {
       { status: CRON_STATUS_HTTP[adaptiveStatus] ?? (adaptive.success ? 200 : 409) }
     )
 
+    const { getOperatingDayAutomationStatus } = await import('@/services/operating-day-automation.service')
     status = await getOperatingDayAutomationStatus()
     if (!status) throw new Error('Operating-day automation status unavailable.')
     if (dryRun) {
@@ -143,7 +145,8 @@ async function handle(request: NextRequest) {
         id
       )
     }
-    const action = status.nextAction as Parameters<typeof executeOperatingDay>[0]['action']
+    const { executeOperatingDay } = await import('@/services/operating-day.service')
+    const action = status.nextAction
     const result = await executeOperatingDay({
       action,
       sportKey: 'baseball_mlb',
