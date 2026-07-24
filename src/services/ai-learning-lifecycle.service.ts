@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getModelCalibration } from '@/services/model-calibration.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
 import { zonedUtcRange } from '@/services/provider-time-normalization.service'
+import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -30,6 +31,8 @@ type PredictionRow = {
   settlement_details: Record<string, unknown> | null
   settled_at: string | null
   generated_at: string | null
+  created_at?: string | null
+  cutoff_at?: string | null
   feature_snapshot_id?: string | null
   feature_snapshot_key?: string | null
   feature_snapshot?: Record<string, unknown> | null
@@ -167,7 +170,7 @@ function isAuditLifecycle(row: PredictionRow) {
 }
 
 function isProductionSettled(row: PredictionRow) {
-  return Boolean(resultLabel(row)) && !row.trial && !row.scrambled && !isAuditLifecycle(row)
+  return Boolean(resultLabel(row)) && !row.trial && !row.scrambled && !isAuditLifecycle(row) && classifyPredictionCutoff(row).eligible
 }
 
 function isFinalEvent(row: EventRow) {
@@ -398,10 +401,10 @@ export async function getAiLearningLifecycle() {
     safeRows<EventRow>('today sport_events', 'sport_events', 'id, sport_key, league_key, start_time, status, home_score, away_score', (query) => query.eq('sport_key', SPORT_KEY).gte('start_time', todayRange.start).lt('start_time', todayRange.end).limit(500)),
     safeRows<EventRow>('yesterday sport_events', 'sport_events', 'id, sport_key, league_key, start_time, status, home_score, away_score', (query) => query.eq('sport_key', SPORT_KEY).gte('start_time', yesterdayRange.start).lt('start_time', yesterdayRange.end).limit(500)),
     safeRows<EventRow>('last7 sport_events', 'sport_events', 'id, sport_key, league_key, start_time, status, home_score, away_score', (query) => query.eq('sport_key', SPORT_KEY).gte('start_time', last7Range.start).lt('start_time', last7Range.end).limit(1500)),
-    safeRows<PredictionRow>('today prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', todayRange.start).lt('commence_time', todayRange.end).limit(1000)),
-    safeRows<PredictionRow>('yesterday prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', yesterdayRange.start).lt('commence_time', yesterdayRange.end).limit(1000)),
-    safeRows<PredictionRow>('last7 prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', last7Range.start).lt('commence_time', last7Range.end).limit(5000)),
-    pagedRows<PredictionRow>('all prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version'),
+    safeRows<PredictionRow>('today prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, created_at, cutoff_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', todayRange.start).lt('commence_time', todayRange.end).limit(1000)),
+    safeRows<PredictionRow>('yesterday prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, created_at, cutoff_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', yesterdayRange.start).lt('commence_time', yesterdayRange.end).limit(1000)),
+    safeRows<PredictionRow>('last7 prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, created_at, cutoff_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version', (query) => query.gte('commence_time', last7Range.start).lt('commence_time', last7Range.end).limit(5000)),
+    pagedRows<PredictionRow>('all prediction_history', 'prediction_history', 'id, sport_key, game_id, commence_time, market, selection, team, result, status, lifecycle_status, settlement_details, settled_at, generated_at, created_at, cutoff_at, feature_snapshot_id, feature_snapshot_key, feature_snapshot, production_eligible, recommended_pick, trial, scrambled, validation_status, validation_warnings, model_version'),
     safeRows<Record<string, unknown>>('today odds snapshots', 'sports_odds_snapshots', 'id, event_id, sport_key, snapshot_time, created_at', (query) => query.eq('sport_key', SPORT_KEY).gte('snapshot_time', todayRange.start).lt('snapshot_time', todayRange.end).limit(2000)),
     safeRows<Record<string, unknown>>('yesterday odds snapshots', 'sports_odds_snapshots', 'id, event_id, sport_key, snapshot_time, created_at', (query) => query.eq('sport_key', SPORT_KEY).gte('snapshot_time', yesterdayRange.start).lt('snapshot_time', yesterdayRange.end).limit(3000)),
     safeRows<ProjectionRow>('projection history', 'universal_projection_history', 'id, sport_key, event_id, projection_family, projected_value, actual_value, error, generated_at, model_version, validity_status, shadow_status', (query) => query.eq('sport_key', SPORT_KEY).order('generated_at', { ascending: false }).limit(2000)),

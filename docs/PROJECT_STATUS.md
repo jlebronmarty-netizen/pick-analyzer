@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Prediction Cutoff Enforcement & Leakage Recovery V1
+
+- Added shared cutoff enforcement in `prediction-cutoff-enforcement.service.ts`. The classifier records `PREGAME`, `POST_START`, `POST_FINAL` and `INVALID_CUTOFF` using persisted prediction timestamps, cutoff timestamps, canonical event start and final-observed timestamps when available.
+- Root cause: MLB prospective preview persistence reused persisted pregame odds for the selected operating date, but prediction writing was called with the broader event set and checked odds snapshot time only. It did not verify the prediction generation timestamp against each event cutoff before creating feature snapshots and prediction rows. Late scheduler runs could therefore persist predictions after cutoff.
+- Shared `savePredictionHistory` now rejects production-eligible rows whose prediction timestamp is not before cutoff. The MLB direct prospective-preview upsert path now rejects post-cutoff candidates before snapshot/prediction persistence and reports `rejectedByCutoff`.
+- Settlement, Learning, Performance and Recommendation Pipeline Trace now use the same cutoff classifier. Post-start, post-final and invalid-cutoff rows remain diagnostic-only and are excluded from production settlement, learning and product metrics.
+- Dashboard Today and AI Picks Feed now distinguish generated rows from valid pregame rows and excluded-after-cutoff rows.
+- Dry-run classification of existing `prediction_history` rows audited 1,342 rows: 638 pregame eligible, 331 `POST_START`, 3 `INVALID_CUTOFF` and 370 `POST_FINAL`. A protected review rejected bulk mutation of 704 existing rows, so persisted historical reclassification remains approval-required. Read models classify them without rewriting history.
+
 ## 2026-07-24 Daily Prediction Continuity & Learning Closure V1
 
 - Repaired product-day Performance grouping so Today, Yesterday, Last 7 Days and Last 30 Days derive generated counts from the canonical event start date before falling back to prediction `commence_time`. This fixes false `Generated 0` displays when predictions are linked to today's `sport_events` but have missing or mismatched prediction commence dates.

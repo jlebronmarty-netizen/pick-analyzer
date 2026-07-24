@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-24 - Enforce Prediction Cutoff Before Production Use
+
+Context: Daily continuity diagnostics exposed prediction rows generated after event start or after final-observed timestamps. The rows came from existing production history and were not modified in the prior phase.
+
+Decision: Add a shared cutoff classifier and use it across persistence, settlement, learning, performance and trace diagnostics. Reject future production-eligible rows before shared persistence when `generated_at` is not before cutoff. Reject MLB prospective-preview candidates before direct snapshot/prediction upsert when the scheduler runs late. Keep contaminated existing rows visible diagnostically and excluded in read models.
+
+Consequences: Future late production predictions cannot be persisted through the guarded paths, and existing post-cutoff rows no longer contaminate product metrics or derived learning in read models. A dry-run identified 704 existing excluded rows, but protected review rejected the bulk metadata update, so persisted reclassification requires explicit approval.
+
+Affected modules: Prediction cutoff enforcement, Prediction History persistence, MLB prospective preview, Settlement V2, AI learning lifecycle, Performance Scope V2, Recommendation Pipeline Trace, Dashboard Today and project documentation.
+
 ## 2026-07-24 - Use Event-Linked Daily Scope For Prediction Continuity
 
 Context: Daily pipeline trace showed same-day scheduled games and persisted predictions, while product Performance and AI Operations could still display `Today Generated 0`. The mismatch came from direct prediction `commence_time` grouping even when canonical event-linked predictions existed for the operating date.

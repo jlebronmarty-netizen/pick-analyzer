@@ -82,6 +82,8 @@ type PipelineTraceDay = {
     gamesEligibleBeforeStart: number
     oddsSnapshotsAvailable: number
     predictionsGenerated: number
+    predictionsValidPregame?: number
+    predictionsExcludedAfterCutoff?: number
     currentBoardCandidates: number
     modelOnlyRows: number
     aiLeans: number
@@ -101,6 +103,8 @@ type PipelineTraceDay = {
     gamesSettled: number
     gamesLearned: number
     gamesMissed: number
+    predictionsValidPregame?: number
+    predictionsExcludedAfterCutoff?: number
     missReasons: Record<string, number>
     predictionCoveragePct: number | null
     settlementCoveragePct: number | null
@@ -768,7 +772,7 @@ function AiPicksFeedPanel({ feed, reason, pipelineToday }: { feed: AiPicksFeed |
   const traceCounts = pipelineToday?.counts
   const traceReason = traceReasonSummary(pipelineToday)
   const emptyDetail = traceCounts
-    ? `${traceCounts.predictionsGenerated} stored prediction${traceCounts.predictionsGenerated === 1 ? '' : 's'} were generated for ${traceCounts.gamesScheduled} scheduled game${traceCounts.gamesScheduled === 1 ? '' : 's'}. ${traceCounts.bestValue} Best Value candidate${traceCounts.bestValue === 1 ? '' : 's'} and ${traceCounts.officialPicks} Official Pick${traceCounts.officialPicks === 1 ? '' : 's'} passed current gates. ${traceReason ? `Reason codes: ${traceReason}.` : 'No additional miss reason was recorded.'}`
+    ? `${traceCounts.predictionsGenerated} stored prediction${traceCounts.predictionsGenerated === 1 ? '' : 's'} were generated for ${traceCounts.gamesScheduled} scheduled game${traceCounts.gamesScheduled === 1 ? '' : 's'}; ${traceCounts.predictionsValidPregame ?? traceCounts.predictionsGenerated} valid pregame and ${traceCounts.predictionsExcludedAfterCutoff ?? 0} excluded after cutoff. ${traceCounts.bestValue} Best Value candidate${traceCounts.bestValue === 1 ? '' : 's'} and ${traceCounts.officialPicks} Official Pick${traceCounts.officialPicks === 1 ? '' : 's'} passed current gates. ${traceReason ? `Reason codes: ${traceReason}.` : 'No additional miss reason was recorded.'}`
     : reason ?? feed?.emptyState?.summary ?? 'No current-board candidate produced a feed item. No pick is promoted from an empty feed.'
   if (!items.length) {
     return (
@@ -1110,7 +1114,7 @@ function TodayStory({ data, mostLikely, bestValue, counts, pipelineToday }: { da
         ? `${counts.official} Official Pick${counts.official === 1 ? '' : 's'} passed the production policy.`
         : 'No game currently meets both confidence and value requirements for an Official Pick.'),
     traceCounts
-      ? `Pipeline trace found ${traceCounts.gamesScheduled} scheduled game${traceCounts.gamesScheduled === 1 ? '' : 's'}, ${traceCounts.predictionsGenerated} stored prediction${traceCounts.predictionsGenerated === 1 ? '' : 's'}, ${traceCounts.currentBoardCandidates} Current Board candidate${traceCounts.currentBoardCandidates === 1 ? '' : 's'} and ${traceCounts.productionPredictionsSettled} production settlement${traceCounts.productionPredictionsSettled === 1 ? '' : 's'} for the operating day.`
+      ? `Pipeline trace found ${traceCounts.gamesScheduled} scheduled game${traceCounts.gamesScheduled === 1 ? '' : 's'}, ${traceCounts.predictionsGenerated} stored prediction${traceCounts.predictionsGenerated === 1 ? '' : 's'} (${traceCounts.predictionsValidPregame ?? traceCounts.predictionsGenerated} valid pregame, ${traceCounts.predictionsExcludedAfterCutoff ?? 0} excluded after cutoff), ${traceCounts.currentBoardCandidates} Current Board candidate${traceCounts.currentBoardCandidates === 1 ? '' : 's'} and ${traceCounts.productionPredictionsSettled} production settlement${traceCounts.productionPredictionsSettled === 1 ? '' : 's'} for the operating day.`
       : null,
     predictionCoverage !== undefined && predictionCoverage !== null
       ? `Prediction coverage is ${predictionCoverage}% by scheduled game; missed-game reasons: ${traceReason || 'none recorded'}.`
@@ -1146,7 +1150,7 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
   const traceCounts = pipelineToday?.counts
   const rows: Array<[string, { status: string; detail: string }]> = [
     ['Odds', byId.get('market_prices') ?? { status: data.latestOddsTimestamp ? 'Complete' : 'Waiting', detail: data.summary.marketPrices }],
-    ['Predictions', traceCounts ? { status: traceCounts.predictionsGenerated ? 'Complete' : 'Waiting', detail: traceCounts.predictionsGenerated ? `${traceCounts.predictionsGenerated} stored prediction rows found for ${traceCounts.gamesScheduled} scheduled games.` : 'Waiting for eligible pregame prediction rows.' } : byId.get('predictions') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? `${data.predictionCandidates} candidates available.` : 'Waiting for odds.' }],
+    ['Predictions', traceCounts ? { status: traceCounts.predictionsGenerated ? 'Complete' : 'Waiting', detail: traceCounts.predictionsGenerated ? `${traceCounts.predictionsGenerated} stored prediction rows found; ${traceCounts.predictionsValidPregame ?? traceCounts.predictionsGenerated} valid pregame and ${traceCounts.predictionsExcludedAfterCutoff ?? 0} excluded after cutoff.` : 'Waiting for eligible pregame prediction rows.' } : byId.get('predictions') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? `${data.predictionCandidates} candidates available.` : 'Waiting for odds.' }],
     ['Current Board', traceCounts ? { status: traceCounts.currentBoardCandidates ? 'Complete' : 'Waiting', detail: traceCounts.currentBoardCandidates ? `${traceCounts.currentBoardCandidates} candidates are visible after board gates.` : 'Stored predictions exist, but no candidate passed Current Board gates.' } : byId.get('current_board') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? 'Candidates are available.' : 'Waiting.' }],
     ['Official Picks', traceCounts ? { status: traceCounts.officialPicks ? 'Complete' : 'Waiting', detail: traceCounts.officialPicks ? `${traceCounts.officialPicks} Official Picks passed policy.` : 'No stored candidate passed Official Pick policy gates.' } : byId.get('recommendations') ?? { status: counts.official ? 'Complete' : 'Waiting', detail: counts.official ? 'Official picks passed policy.' : 'Waiting for prediction and market comparison.' }],
     ['Settlement', traceCounts ? { status: traceCounts.productionPredictionsSettled ? 'Complete' : traceCounts.gamesCompleted ? 'Waiting' : 'Not due', detail: traceCounts.productionPredictionsSettled ? `${traceCounts.productionPredictionsSettled} production predictions settled.` : traceCounts.gamesCompleted ? `${traceCounts.gamesCompleted} completed games are waiting for eligible production settlement evidence.` : 'No completed games require settlement yet.' } : byId.get('settlement') ?? { status: data.finalGames ? 'Waiting' : 'Complete', detail: data.finalGames ? 'Final games are ready for stored settlement checks.' : 'Healthy.' }],

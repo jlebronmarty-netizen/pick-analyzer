@@ -18,6 +18,7 @@ import {
 } from '@/services/sportsdataio-discovery-lab-url.service'
 import { assertSportEventStatusWrite } from '@/services/mlb-event-status-mapper.service'
 import { normalizeSportsDataIoMlbGameDateTime, zonedUtcRange } from '@/services/provider-time-normalization.service'
+import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 
 const PROVIDER = 'sportsdataio'
 const PROVIDER_VARIANT = 'sportsdataio_discovery_lab'
@@ -1816,6 +1817,7 @@ async function writeSnapshotsAndPredictions(
   const existingByKey = new Map((existingSnapshots.data ?? []).map((row) => [String(row.deterministic_key), String(row.id)]))
   const eventsById = new Map(events.map((event) => [event.id, event]))
   const rowsToInsert: Record<string, unknown>[] = []
+  const rejectedByCutoff: Array<Record<string, unknown>> = []
   const candidates: Array<{
     key: string
     snapshotId: string | null
@@ -1838,6 +1840,31 @@ async function writeSnapshotsAndPredictions(
     if (!event) continue
     const market = marketForPrediction(odds.market)
     const cutoff = new Date(parseDateMs(event.start_time)! - 10 * 60 * 1000).toISOString()
+    const cutoffClassification = classifyPredictionCutoff({
+      sport_key: SPORT_KEY,
+      game_id: event.id,
+      commence_time: event.start_time,
+      generated_at: generatedAt,
+      cutoff_at: cutoff,
+    }, {
+      id: event.id,
+      start_time: event.start_time,
+      status: event.status,
+    })
+    if (!cutoffClassification.eligible) {
+      rejectedByCutoff.push({
+        eventId: event.id,
+        matchup: `${event.away_team} @ ${event.home_team}`,
+        market,
+        oddsSnapshotId: odds.id,
+        state: cutoffClassification.state,
+        reason: cutoffClassification.reason,
+        predictionTimestamp: cutoffClassification.predictionTimestamp,
+        cutoffTimestamp: cutoffClassification.cutoffTimestamp,
+        canonicalEventStart: cutoffClassification.canonicalEventStart,
+      })
+      continue
+    }
     let historyCount = historyCountByCutoff.get(cutoff)
     if (historyCount === undefined) {
       historyCount = await completedHistoryCount(cutoff)
@@ -2432,10 +2459,16 @@ async function writeSnapshotsAndPredictions(
       analyzed: previewCandidates.length,
       inserted: insertedPredictions,
       reused: reusedPredictions,
+      rejectedByCutoff: rejectedByCutoff.length,
       qualified: previewCandidates.filter((item) => ['QUALIFIED', 'BEST_BET_CANDIDATE', 'PLAY_OF_DAY_CANDIDATE'].includes(item.recommendationStatus)).length,
       watch: previewCandidates.filter((item) => item.recommendationStatus === 'WATCH').length,
       blocked: previewCandidates.filter((item) => item.recommendationStatus === 'ANALYZED_ONLY' || item.blockers.length > 0).length,
       persistenceError,
+    },
+    cutoffEnforcement: {
+      version: 'prediction_cutoff_enforcement_v1',
+      rejected: rejectedByCutoff.length,
+      sample: rejectedByCutoff.slice(0, 20),
     },
   }
 }

@@ -6,6 +6,7 @@ import {
 import { evaluateRecommendationEligibility } from '@/services/recommendation-eligibility-policy.service'
 import { getNextSlateStatus } from '@/services/next-slate.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
+import { classifyPredictionCutoff, type CutoffEventLike } from '@/services/prediction-cutoff-enforcement.service'
 
 export type PredictionHistoryInput = {
   sport_key: string
@@ -342,43 +343,62 @@ export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
     new Set(rows.filter((row) => row.production_eligible === true).map((row) => row.game_id).filter(Boolean))
   )
   const canonicalEventIds = new Set<string>()
+  const canonicalEvents = new Map<string, CutoffEventLike>()
   if (requestedProductionEventIds.length > 0) {
     for (let index = 0; index < requestedProductionEventIds.length; index += 100) {
       const chunk = requestedProductionEventIds.slice(index, index + 100)
       const { data, error } = await supabaseAdmin
         .from('sport_events')
-        .select('id')
+        .select('id, start_time, status, updated_at, home_score, away_score')
         .in('id', chunk)
       if (error) throw new Error(`production event identity gate failed: ${error.message}`)
-      for (const event of data ?? []) canonicalEventIds.add(String(event.id))
+      for (const event of data ?? []) {
+        canonicalEventIds.add(String(event.id))
+        canonicalEvents.set(String(event.id), event as CutoffEventLike)
+      }
     }
   }
 
+  let rejectedByCutoff = 0
   const gatedRows = rows.map((row) => {
     const eventIdentityBlocked = row.production_eligible === true && !canonicalEventIds.has(row.game_id)
+    const cutoffClassification = row.production_eligible === true
+      ? classifyPredictionCutoff(row, canonicalEvents.get(row.game_id))
+      : { eligible: true, state: 'PREGAME', reason: 'NOT_PRODUCTION_ELIGIBLE' }
+    const cutoffBlocked = row.production_eligible === true && !cutoffClassification.eligible
     const gate = evaluateProductionDataGate(row, 'prediction_persistence')
     const validationWarnings = [
       ...(row.validation_warnings ?? []),
       ...(eventIdentityBlocked
         ? ['EVENT_IDENTITY_REQUIRED: production prediction references an unimported canonical event']
         : []),
+      ...(cutoffBlocked
+        ? [`${cutoffClassification.state}: ${cutoffClassification.reason}`]
+        : []),
       ...(row.production_eligible === true && !gate.eligible
         ? [`Production Data Gate blocked production eligibility: ${gate.blockedReasons.join('; ')}`]
         : []),
     ]
 
+    if (cutoffBlocked) {
+      rejectedByCutoff += 1
+      return null
+    }
     return {
       ...row,
-      production_eligible: gate.eligible && !eventIdentityBlocked,
+      production_eligible: gate.eligible && !eventIdentityBlocked && !cutoffBlocked,
+      recommended_pick: cutoffBlocked ? false : row.recommended_pick,
       validation_warnings: validationWarnings,
       validation_status:
         eventIdentityBlocked
           ? 'blocked_by_event_identity_required'
+          : cutoffBlocked
+          ? 'skipped'
           : row.production_eligible === true && !gate.eligible
           ? 'blocked_by_production_data_gate_v1'
           : row.validation_status,
     }
-  })
+  }).filter(Boolean) as PredictionHistoryInput[]
 
   const { error } = await supabaseAdmin
     .from('prediction_history')
@@ -393,6 +413,7 @@ export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
   return {
     success: true,
     saved: gatedRows.length,
+    rejectedByCutoff,
   }
 }
 

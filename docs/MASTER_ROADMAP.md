@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Prediction Cutoff Enforcement & Leakage Recovery V1
+
+Status: Code-level enforcement implemented; persisted bulk classification of existing contaminated rows blocked by protected write review.
+
+Evidence: `src/services/prediction-cutoff-enforcement.service.ts`, shared `savePredictionHistory` cutoff rejection, MLB prospective-preview cutoff rejection, Settlement/Learning/Performance/Trace read-model guards, Dashboard Today copy and local production build.
+
+Note: The exact root cause was a missing prediction-generation-time cutoff check in the MLB prospective-preview persistence path. Existing odds snapshots were filtered as pregame, but late scheduler retries could reuse those snapshots and persist predictions after each game's cutoff. Future production-eligible rows are rejected before persistence; direct MLB preview rows are rejected before snapshot/prediction upsert. Existing rows are classified in read models, but a bulk write to stamp 704 historical rows as diagnostic-only was rejected by protected review and requires explicit approval.
+
 ### Daily Prediction Continuity & Learning Closure V1
 
 Status: Locally implemented; build, push and production deployment verification pending.

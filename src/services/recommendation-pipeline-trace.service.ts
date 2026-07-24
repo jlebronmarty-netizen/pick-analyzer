@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getCurrentBoardCached } from '@/services/current-board.service'
 import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
+import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 
 const TIMEZONE = 'America/Puerto_Rico'
 const SPORT_KEY = 'baseball_mlb'
@@ -16,6 +17,7 @@ type EventRow = {
   away_team?: string | null
   home_score?: number | null
   away_score?: number | null
+  updated_at?: string | null
 }
 
 type PredictionRow = {
@@ -23,6 +25,7 @@ type PredictionRow = {
   game_id: string | null
   commence_time?: string | null
   generated_at: string | null
+  created_at?: string | null
   cutoff_at?: string | null
   market?: string | null
   odds_snapshot_id?: string | null
@@ -71,6 +74,7 @@ function isProductionSettled(row: PredictionRow) {
   const lifecycle = lower((row.settlement_details?.settlement_reconciliation_v2 as Record<string, unknown> | undefined)?.lifecycle)
   if (row.trial || row.scrambled || lower(row.model_role).includes('shadow')) return false
   if (['legacy', 'ignored', 'historical', 'replay', 'shadow', 'cancelled', 'voided', 'unknown'].includes(lifecycle)) return false
+  if (!classifyPredictionCutoff(row).eligible) return false
   return ['win', 'loss', 'push'].includes(result)
 }
 
@@ -129,7 +133,7 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
   const range = zonedUtcRange(date, TIMEZONE)
   const { data: eventsData, error: eventsError } = await supabaseAdmin
     .from('sport_events')
-    .select('id, start_time, status, home_team, away_team, home_score, away_score')
+    .select('id, start_time, status, home_team, away_team, home_score, away_score, updated_at')
     .eq('sport_key', SPORT_KEY)
     .gte('start_time', range.utcStart)
     .lt('start_time', range.utcEndExclusive)
@@ -149,7 +153,7 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
   const predictionsResult = eventIds.length
     ? await supabaseAdmin
         .from('prediction_history')
-        .select('id, game_id, commence_time, generated_at, cutoff_at, market, odds_snapshot_id, feature_snapshot_id, feature_snapshot_key, feature_snapshot, result, status, recommended_pick, model_role, production_eligible, trial, scrambled, settlement_details, settled_at')
+        .select('id, game_id, commence_time, generated_at, created_at, cutoff_at, market, odds_snapshot_id, feature_snapshot_id, feature_snapshot_key, feature_snapshot, result, status, recommended_pick, model_role, production_eligible, trial, scrambled, settlement_details, settled_at')
         .in('game_id', eventIds)
     : { data: [], error: null }
   const predictions = ((predictionsResult.data ?? []) as PredictionRow[])
@@ -193,6 +197,9 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
     const eventPredictions = predictionsByEvent.get(event.id) ?? []
     const eventBoard = boardByEvent.get(event.id) ?? []
     const settled = eventPredictions.filter(isProductionSettled)
+    const cutoffClassifications = eventPredictions.map((row) => classifyPredictionCutoff(row, event))
+    const validPregame = cutoffClassifications.filter((item) => item.eligible).length
+    const excludedAfterCutoff = cutoffClassifications.length - validPregame
     const learningAccepted = settled.filter(hasFeatureEvidence)
     const learningRejected = settled.filter((row) => !hasFeatureEvidence(row))
     const beforeStart = eventPredictions.filter((row) => predictionBeforeStart(row, event)).length
@@ -209,6 +216,12 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
       oddsSnapshots: odds,
       predictionGenerated: eventPredictions.length > 0,
       predictionsPersisted: eventPredictions.length,
+      predictionsValidPregame: validPregame,
+      predictionsExcludedAfterCutoff: excludedAfterCutoff,
+      cutoffStates: cutoffClassifications.reduce<Record<string, number>>((acc, item) => {
+        acc[item.state] = (acc[item.state] ?? 0) + 1
+        return acc
+      }, {}),
       predictionTimestamp: eventPredictions.map((row) => row.generated_at).filter(Boolean).sort()[0] ?? null,
       predictionBeforeStart: eventPredictions.length ? beforeStart === eventPredictions.length : null,
       predictionBeforeCutoff: eventPredictions.length ? beforeCutoff === eventPredictions.length : null,
@@ -233,6 +246,8 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
     }
   })
   const gamesPredicted = gameLifecycles.filter((game) => game.predictionGenerated).length
+  const predictionsValidPregame = gameLifecycles.reduce((sum, game) => sum + game.predictionsValidPregame, 0)
+  const predictionsExcludedAfterCutoff = gameLifecycles.reduce((sum, game) => sum + game.predictionsExcludedAfterCutoff, 0)
   const gamesSettled = gameLifecycles.filter((game) => game.settlementCompleted > 0).length
   const gamesLearned = gameLifecycles.filter((game) => game.learningAccepted + game.learningRejected + game.learningSkipped > 0).length
   const gamesMissed = gameLifecycles.filter((game) => !game.predictionGenerated).length
@@ -245,6 +260,8 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
     gamesEligibleBeforeStart,
     oddsSnapshotsAvailable: oddsSnapshots.count,
     predictionsGenerated: predictions.length,
+    predictionsValidPregame,
+    predictionsExcludedAfterCutoff,
     currentBoardCandidates: board?.candidates?.length ?? 0,
     modelOnlyRows: modelOnly?.summary?.modelOutcomes ?? 0,
     aiLeans: boardCandidates.filter((candidate: any) => /LEAN|QUALIFIED|PREVIEW/i.test(String(candidate.recommendationPolicyStatus ?? candidate.semanticLabel ?? ''))).length,
@@ -264,6 +281,8 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
     gamesSettled,
     gamesLearned,
     gamesMissed,
+    predictionsValidPregame,
+    predictionsExcludedAfterCutoff,
     missReasons,
     predictionCoveragePct: events.length ? Number(((gamesPredicted / events.length) * 100).toFixed(2)) : null,
     settlementCoveragePct: events.length ? Number(((gamesSettled / events.length) * 100).toFixed(2)) : null,

@@ -2,6 +2,7 @@ import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { localDateInTimeZone } from '@/services/provider-time-normalization.service'
+import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 
 const TIMEZONE = 'America/Puerto_Rico'
 const FINAL_RESULTS = new Set(['win', 'loss', 'push', 'void'])
@@ -40,6 +41,7 @@ type PredictionRow = {
   idempotency_key: string | null
   generated_at: string | null
   cutoff_at: string | null
+  created_at?: string | null
   settled_at: string | null
   settlement_details: Record<string, unknown> | null
   is_current?: boolean | null
@@ -53,6 +55,7 @@ type EventRow = {
   away_team: string | null
   home_score: number | null
   away_score: number | null
+  updated_at?: string | null
 }
 
 function normalize(value: unknown) {
@@ -101,6 +104,10 @@ function asObject(value: unknown): Record<string, unknown> {
 }
 
 function lifecycleBadge(row: PredictionRow, event: EventRow | undefined) {
+  const cutoff = classifyPredictionCutoff(row, event)
+  if (cutoff.state === 'POST_START') return 'Post-start'
+  if (cutoff.state === 'POST_FINAL') return 'Post-final'
+  if (cutoff.state === 'INVALID_CUTOFF') return 'Invalid cutoff'
   const v2 = asObject(asObject(row.settlement_details).settlement_reconciliation_v2)
   if (typeof v2.badge === 'string' && v2.badge) return v2.badge
   const result = resultOf(row)
@@ -138,9 +145,13 @@ function isLegacy(row: PredictionRow) {
 }
 
 function isPostStart(row: PredictionRow, event: EventRow | undefined) {
-  const start = Date.parse(row.commence_time ?? event?.start_time ?? '')
-  const generated = Date.parse(row.generated_at ?? row.cutoff_at ?? '')
-  return Number.isFinite(start) && Number.isFinite(generated) && generated >= start
+  const cutoff = classifyPredictionCutoff(row, event)
+  return cutoff.state === 'POST_START' || cutoff.state === 'POST_FINAL'
+}
+
+function cutoffExclusion(row: PredictionRow, event: EventRow | undefined) {
+  const cutoff = classifyPredictionCutoff(row, event)
+  return cutoff.eligible ? null : cutoff.state
 }
 
 function pendingReason(row: PredictionRow, event: EventRow | undefined) {
@@ -162,10 +173,11 @@ function pendingReason(row: PredictionRow, event: EventRow | undefined) {
 function eligibility(row: PredictionRow, event: EventRow | undefined) {
   const result = resultOf(row)
   if (isTestFixture(row)) return { eligible: false, reason: 'TEST_FIXTURE' }
+  const cutoffReason = cutoffExclusion(row, event)
+  if (cutoffReason) return { eligible: false, reason: cutoffReason }
   if (['legacy', 'historical', 'replay', 'shadow', 'ignored', 'unknown', 'cancelled', 'void'].includes(result)) return { eligible: false, reason: result.toUpperCase() }
   if (result === 'win' || result === 'loss' || result === 'push') return { eligible: true, reason: 'ELIGIBLE' }
   if (isLegacy(row)) return { eligible: false, reason: 'LEGACY' }
-  if (isPostStart(row, event)) return { eligible: false, reason: 'PREDICTION_POST_START' }
   if (row.is_current === false) return { eligible: false, reason: 'DUPLICATE_SUPERSEDED' }
   if (result === 'pending') return { eligible: false, reason: pendingReason(row, event) ?? 'EVENT_NOT_FINAL' }
   return { eligible: true, reason: 'ELIGIBLE' }
@@ -208,7 +220,7 @@ async function loadRows(sportKey?: string | null) {
   for (let from = 0; ; from += 1000) {
     let query = supabaseAdmin
       .from('prediction_history')
-      .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, line, result, status, lifecycle_status, recommended_pick, production_eligible, trial, scrambled, validation_status, validation_warnings, model_role, model_version, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key, generated_at, cutoff_at, settled_at, settlement_details, is_current')
+      .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, line, result, status, lifecycle_status, recommended_pick, production_eligible, trial, scrambled, validation_status, validation_warnings, model_role, model_version, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key, generated_at, created_at, cutoff_at, settled_at, settlement_details, is_current')
       .order('created_at', { ascending: false })
       .range(from, from + 999)
     if (sportKey) query = query.eq('sport_key', sportKey)
@@ -225,7 +237,7 @@ async function loadEvents(eventIds: string[]) {
   for (let index = 0; index < eventIds.length; index += 100) {
     const { data, error } = await supabaseAdmin
       .from('sport_events')
-      .select('id, start_time, status, home_team, away_team, home_score, away_score')
+      .select('id, start_time, status, updated_at, home_team, away_team, home_score, away_score')
       .in('id', eventIds.slice(index, index + 100))
     if (error) throw new Error(`performance scope v2 event read failed: ${error.message}`)
     rows.push(...((data ?? []) as EventRow[]))
@@ -271,6 +283,10 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
     },
     totals: metrics(joined),
     exclusions: groupCount(joined, (item) => eligibility(item.row, item.event).reason),
+    cutoffExclusions: {
+      byState: groupCount(joined.filter((item) => cutoffExclusion(item.row, item.event)), (item) => cutoffExclusion(item.row, item.event)),
+      rows: joined.filter((item) => cutoffExclusion(item.row, item.event)).length,
+    },
     pending: {
       rows: pending.length,
       byReason: groupCount(pendingClassified, (item) => item.reason),
@@ -320,6 +336,7 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
           },
         } : undefined,
         outcomeExplanation: badge,
+        cutoff: classifyPredictionCutoff(item.row, item.event),
       }
     }),
     historyPreview: productHistory.slice(0, 200).map((item) => ({

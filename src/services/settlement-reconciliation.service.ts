@@ -3,6 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { isLegacyPredictionProvenanceRow } from '@/services/legacy-prediction-provenance.service'
 import { settleMarket, type SettlementMarket, type SettlementOutcome } from '@/services/settlement-core.service'
+import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 
 const SETTLEMENT_VERSION = 'settlement_reconciliation_engine_v2'
 const MARKET_RULE_VERSION = 'settlement_core_v2'
@@ -106,6 +107,7 @@ type EventRow = {
   status: string | null
   home_score: number | null
   away_score: number | null
+  updated_at?: string | null
   metadata: Record<string, unknown> | null
 }
 
@@ -232,9 +234,8 @@ function isReplay(row: PredictionRow) {
 }
 
 function isPostStart(row: PredictionRow, event: EventRow | undefined) {
-  const start = Date.parse(row.commence_time ?? event?.start_time ?? '')
-  const generated = Date.parse(row.generated_at ?? row.cutoff_at ?? '')
-  return Number.isFinite(start) && Number.isFinite(generated) && generated >= start
+  const cutoff = classifyPredictionCutoff(row, event)
+  return cutoff.state === 'POST_START' || cutoff.state === 'POST_FINAL' || cutoff.state === 'INVALID_CUTOFF'
 }
 
 function isOld(row: PredictionRow, event: EventRow | undefined, now = Date.now()) {
@@ -433,7 +434,7 @@ async function loadEvents(eventIds: string[]) {
   for (let index = 0; index < eventIds.length; index += 100) {
     const { data, error } = await supabaseAdmin
       .from('sport_events')
-      .select('id, sport_key, league_key, season, home_team, away_team, home_team_id, away_team_id, start_time, status, home_score, away_score, metadata')
+      .select('id, sport_key, league_key, season, home_team, away_team, home_team_id, away_team_id, start_time, status, home_score, away_score, updated_at, metadata')
       .in('id', eventIds.slice(index, index + 100))
     if (error) throw new Error(`sport_events reconciliation read failed: ${error.message}`)
     rows.push(...((data ?? []) as EventRow[]))
