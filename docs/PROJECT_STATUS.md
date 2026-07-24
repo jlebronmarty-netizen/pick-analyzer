@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Historical Replay IO Readiness & Controlled Pilot V1
+
+- Added a bounded Retrosheet replay pilot runner that consumes only stored `historical_feature_snapshots` and writes replay-only artifacts to `universal_projection_history` under projection family `retrosheet_replay_pilot_v1`.
+- Executed the pilot over 12 historical games covering Moneyline, Run Line/spread and Total replay outputs: 36 replay predictions, 36 replay settlements, 36 replay-only labels and 1,044 historical snapshot lookups.
+- Reran the exact pilot scope for idempotency: 0 replay projections inserted, 36 existing replay artifacts reused and duplicate replay IDs remained 0.
+- Persisted a validation checkpoint at `historical_import_checkpoints.checkpoint_key=retrosheet_replay_pilot_v1:bounded_sample`; AI Operations now displays Replay Pilot games, predictions, settlements, labels, duration, snapshot lookups and idempotency status.
+- Production isolation passed: `prediction_history`, current production predictions and `model_weight_history` counts remained unchanged; Current Board, Official Picks, scheduler, production settlement, Historical Feature Store rows, retraining and recalibration were not modified.
+- Full Historical Replay Phase 2B was not started.
+
 ## 2026-07-24 Push-Aware Outcome Distribution & Market Semantics V1
 
 - Added canonical market semantics for Moneyline, Run Line/spread and Totals without changing prediction probabilities, Learning Brain, Official Pick policy, settlement, scheduler, Historical Replay or Historical Feature Store Phase 2A.

@@ -184,6 +184,24 @@ export default async function AiOperationsPage() {
       </DashboardSection>
 
       <DashboardSection
+        id="replay-pilot"
+        eyebrow="Historical Replay"
+        title="Replay Pilot"
+        description="Controlled replay pilot evidence only. Full Historical Replay remains approval-gated."
+      >
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Metric label="Status" value={data.replayPilot?.status ?? 'not_started'} />
+          <Metric label="Games Completed" value={data.replayPilot?.gamesCompleted ?? 0} />
+          <Metric label="Replay Predictions" value={data.replayPilot?.replayPredictions ?? 0} />
+          <Metric label="Replay Settlements" value={data.replayPilot?.replaySettlements ?? 0} />
+          <Metric label="Replay Labels" value={data.replayPilot?.replayLabels ?? 0} />
+          <Metric label="Replay Duration" value={data.replayPilot?.replayDurationMs === null || data.replayPilot?.replayDurationMs === undefined ? 'N/A' : `${data.replayPilot.replayDurationMs} ms`} />
+          <Metric label="Snapshot Lookups" value={data.replayPilot?.snapshotLookups ?? 'N/A'} />
+          <Metric label="Idempotency" value={data.replayPilot?.idempotencyStatus ?? 'N/A'} />
+        </div>
+      </DashboardSection>
+
+      <DashboardSection
         id="panels"
         eyebrow="Operations Center"
         title="Pipeline Health"

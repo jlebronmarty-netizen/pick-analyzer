@@ -4,6 +4,7 @@ import { getProviderBudgetStatus } from '@/services/provider-budget.service'
 import { zonedUtcRange } from '@/services/provider-time-normalization.service'
 import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
+import { getHistoricalReplayPilotStatus } from '@/services/historical-replay-pilot.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -485,6 +486,32 @@ export async function getAiLearningLifecycle() {
   const todayQueue = learningQueue(effectiveTodayPredictions, weightRows.data)
   const yesterdayQueue = learningQueue(effectiveYesterdayPredictions, weightRows.data)
   const last7Queue = learningQueue(effectiveLast7Predictions, weightRows.data)
+  const replayPilot = await getHistoricalReplayPilotStatus().catch((error) => ({
+    success: false,
+    mode: 'historical_replay_pilot_status_v1',
+    status: 'error',
+    gamesCompleted: 0,
+    replayPredictions: 0,
+    replaySettlements: 0,
+    replayLabels: 0,
+    replayDurationMs: null,
+    averageReplayDurationMsPerGame: null,
+    snapshotLookups: null,
+    checkpointStatus: null,
+    checkpointFinishedAt: null,
+    idempotencyStatus: 'ERROR',
+    productionIsolation: {
+      replayOnly: true,
+      predictionHistoryMutated: false,
+      currentBoardMutated: false,
+      officialPickPolicyMutated: false,
+      learningBrainMutated: false,
+      schedulerMutated: false,
+    },
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    errors: [error instanceof Error ? error.message : 'replay pilot status read failed'],
+  }))
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -567,6 +594,25 @@ export async function getAiLearningLifecycle() {
       projectionRows.data.length ? null : 'REPLAY_SNAPSHOT_MISSING',
       latestProjection.value,
       'Waiting for next scheduler execution'
+    ),
+    panel(
+      'replay_pilot',
+      'Replay Pilot',
+      replayPilot.status === 'completed' ? 'Completed' : replayPilot.status === 'running' ? 'Running' : replayPilot.status === 'error' ? 'Error' : 'Waiting',
+      replayPilot.status === 'completed'
+        ? 'Controlled Retrosheet replay pilot artifacts are persisted in universal_projection_history and remain replay-only.'
+        : 'Replay pilot has not completed, or the latest pilot status is unavailable.',
+      {
+        gamesCompleted: replayPilot.gamesCompleted,
+        replayPredictions: replayPilot.replayPredictions,
+        replaySettlements: replayPilot.replaySettlements,
+        replayLabels: replayPilot.replayLabels,
+        averageReplayMs: replayPilot.averageReplayDurationMsPerGame,
+        snapshotLookups: replayPilot.snapshotLookups,
+      },
+      replayPilot.errors?.length ? replayPilot.errors.join('; ') : replayPilot.status === 'not_started' ? 'REPLAY_PILOT_NOT_EXECUTED' : null,
+      String(replayPilot.checkpointFinishedAt ?? '') || null,
+      'Manual approval required for any expanded replay'
     ),
     panel(
       'learning_queue',
@@ -747,6 +793,7 @@ export async function getAiLearningLifecycle() {
       { from: 'Prediction Generated', to: 'Current Board', status: 'Waiting', evidence: 0, blocker: 'READ_ONLY_DIAGNOSTIC_DOES_NOT_BUILD_BOARD' },
       { from: 'Game Finished', to: 'Settlement', status: allSummary.pending > 0 ? 'Waiting' : 'Completed', evidence: allSummary.productionSettled, blocker: allSummary.pending ? 'PENDING_ROWS_REMAIN' : null },
       { from: 'Settlement', to: 'Replay Snapshot', status: projectionRows.data.length > 0 ? 'Completed' : 'Waiting', evidence: projectionRows.data.length, blocker: projectionRows.data.length ? null : 'REPLAY_SNAPSHOT_MISSING' },
+      { from: 'Historical Feature Store', to: 'Replay Pilot', status: replayPilot.status === 'completed' ? 'Completed' : 'Waiting', evidence: replayPilot.replayPredictions, blocker: replayPilot.status === 'completed' ? null : 'REPLAY_PILOT_NOT_EXECUTED' },
       { from: 'Replay Snapshot', to: 'Training Label', status: allQueue.total > 0 ? 'Completed' : 'Waiting', evidence: allQueue.total, blocker: allQueue.total ? null : 'NO_LEARNING_LABEL' },
       { from: 'Training Label', to: 'Learning Queue', status: allQueue.queued > 0 || allQueue.accepted > 0 ? 'Completed' : 'Waiting', evidence: allQueue.queued + allQueue.accepted, blocker: allQueue.total ? null : 'LEARNING_NOT_RUN' },
       { from: 'Learning Validation', to: 'Weight Update', status: weightRows.data.length > 0 ? 'Completed' : 'Waiting', evidence: weightRows.data.length, blocker: weightRows.data.length ? null : 'WEIGHT_UPDATE_NOT_RUN' },
@@ -763,6 +810,7 @@ export async function getAiLearningLifecycle() {
       leakagePolicy: 'Historical/replay rows are audit-only and excluded from production performance counts.',
       providerCallsMade: 0,
     },
+    replayPilot,
     historicalFeatureBackfill: {
       status: latestLocalBackfill?.status ?? (retrosheetSnapshotCount > 0 ? 'completed_without_recent_worker_metadata' : 'not_executed'),
       lastJobId: latestLocalBackfill?.id ?? null,
@@ -814,6 +862,7 @@ export async function getAiLearningLifecycle() {
       currentBoard: { lastSuccessfulRefresh: latestPrediction.value, nextScheduledRefresh: String(pregameCoverageOperations.nextExecution ?? schedulerRecord.nextScheduledAt ?? 'Waiting for next scheduler execution') },
       settlement: { lastSuccessfulRefresh: latestSettlement.value, nextScheduledRefresh: 'Waiting for next scheduler execution' },
       replay: { lastSuccessfulRefresh: latestProjection.value, nextScheduledRefresh: 'Waiting for next scheduler execution' },
+      replayPilot: { lastSuccessfulRefresh: String(replayPilot.checkpointFinishedAt ?? '') || null, nextScheduledRefresh: 'Manual approval required for any expanded replay' },
       learning: { lastSuccessfulRefresh: weightRows.data[0]?.created_at ?? null, nextScheduledRefresh: 'Waiting for next scheduler execution' },
     },
     dailyAiStory: {
@@ -933,6 +982,8 @@ export async function getAiLearningLifecycle() {
       learningWeightsModified: false,
       providerCallsRemainZero: providerCallsMade === 0,
       historicalReplayNotStarted: true,
+      fullHistoricalReplayNotStarted: true,
+      replayPilotOnly: true,
     },
     certifications: [
       'AI_PIPELINE_PASS',

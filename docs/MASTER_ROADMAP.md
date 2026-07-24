@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Historical Replay IO Readiness & Controlled Pilot V1
+
+Status: Pilot executed, idempotency-verified and build-verified; production deployment verification pending.
+
+Evidence: `src/services/historical-replay-pilot.service.ts`, `scripts/historical-replay-pilot.mjs`, AI Operations Replay Pilot display, `universal_projection_history` replay artifacts, `sports_sync_jobs` pilot jobs, `historical_import_checkpoints` pilot checkpoint, `docs/HISTORICAL_REPLAY_IO_READINESS_CONTROLLED_PILOT_V1.md` and local production build.
+
+Note: The pilot processed 12 Retrosheet historical games and generated 36 replay-only predictions across moneyline, run line/spread and totals using stored historical snapshots. The second run inserted 0 replay projections and reused all 36 existing artifacts. Production prediction history, current predictions, Current Board, Official Picks, scheduler behavior, Learning Brain weights, production settlement and Historical Feature Store rows were not mutated. Full Historical Replay Phase 2B remains blocked pending explicit approval.
+
 ### Push-Aware Outcome Distribution & Market Semantics V1
 
 Status: Locally implemented and build-verified; production deployment verification pending.
