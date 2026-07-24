@@ -537,32 +537,41 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
 type CanonicalProbabilityCard = ReturnType<typeof currentBoardCandidateToMostLikelyCard>
 
 function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCard {
-  const probability = round(Number(outcome.modelProbability ?? outcome.probability ?? 0))
+  const sourceProbability = Math.max(0, Math.min(100, round(Number(outcome.modelProbability ?? outcome.probability ?? 0))))
+  const complementProbability = round(100 - sourceProbability)
+  const complementDerived = complementProbability > sourceProbability
   const confidence = round(Number(outcome.confidence ?? 0))
   const market = String(outcome.market ?? 'unknown')
   const marketLabelValue = String(outcome.marketLabel ?? marketLabel(market))
+  const matchup = String(outcome.matchup ?? 'Matchup pending')
+  const sourceSelection = String(outcome.selection ?? 'Selection pending')
+  const probability = complementDerived ? complementProbability : sourceProbability
+  const selection = complementDerived ? complementForOutcome({ market, selection: sourceSelection, matchup }) : sourceSelection
+  const displayedLine = complementDerived && outcome.line !== null && outcome.line !== undefined ? -Number(outcome.line) : outcome.line ?? null
   return ({
     id: String(outcome.id ?? `${outcome.eventId ?? 'model'}:${market}:${outcome.selection ?? 'selection'}`),
     sportKey: String(outcome.sportKey ?? 'baseball_mlb'),
-    matchup: String(outcome.matchup ?? 'Matchup pending'),
+    matchup,
     eventId: String(outcome.eventId ?? ''),
     startTime: outcome.startTime ?? null,
     eventStatus: String(outcome.eventStatus ?? 'scheduled'),
     market,
     marketLabel: marketLabelValue,
     period: 'full_game',
-    selection: String(outcome.selection ?? 'Selection pending'),
-    sourceSelection: String(outcome.selection ?? 'Selection pending'),
-    line: outcome.line ?? null,
+    selection,
+    sourceSelection,
+    line: displayedLine,
     sourceLine: outcome.line ?? null,
-    odds: outcome.sportsbookOdds ?? outcome.odds ?? null,
+    odds: complementDerived ? null : outcome.sportsbookOdds ?? outcome.odds ?? null,
     sourceOdds: outcome.sportsbookOdds ?? outcome.odds ?? null,
     sportsbook: String(outcome.sportsbook ?? 'Stored model output'),
     probability,
-    selectedSideProbability: probability,
-    complementProbability: round(100 - probability),
-    complementDerived: false,
-    probabilitySemantic: 'Stored model-only pregame probability. Betting value still requires current market odds.',
+    selectedSideProbability: sourceProbability,
+    complementProbability,
+    complementDerived,
+    probabilitySemantic: complementDerived
+      ? 'Derived complement probability from the stored binary selected-side model-only probability. Betting value still requires current market odds.'
+      : 'Stored model-only pregame probability. Betting value still requires current market odds.',
     sportsbookProbability: Number(outcome.impliedProbability ?? outcome.sportsbookProbability ?? 0) || 0,
     edge: 0,
     expectedValue: 0,
@@ -665,8 +674,8 @@ function currentOrFutureInformational(cards: CanonicalProbabilityCard[]) {
 }
 
 function topPickFrom(rows: CanonicalProbabilityCard[]) {
-  const official = rows.find((row) => row.officialEligibility === 'ELIGIBLE_FOR_OFFICIAL_REVIEW')
-  const candidate = official ?? rows[0] ?? null
+  const candidate = rows[0] ?? null
+  const official = candidate?.officialEligibility === 'ELIGIBLE_FOR_OFFICIAL_REVIEW'
   return {
     type: official ? 'official_pick' : candidate ? 'most_likely_outcome' : 'none',
     candidate,
@@ -676,6 +685,23 @@ function topPickFrom(rows: CanonicalProbabilityCard[]) {
         ? 'No official pick is being forced. This is informational and probability-focused.'
         : 'No valid current supported outcome is available.',
   }
+}
+
+function complementForOutcome({
+  market,
+  selection,
+  matchup,
+}: {
+  market: string
+  selection: string
+  matchup: string
+}) {
+  if (market === 'total') return selection.toLowerCase().includes('under') ? 'Over' : 'Under'
+  const [away = 'Away', home = 'Home'] = matchup.split(' @ ')
+  const normalized = selection.toLowerCase()
+  if (normalized === away.toLowerCase() || normalized === 'away') return home
+  if (normalized === home.toLowerCase() || normalized === 'home') return away
+  return `Not ${selection}`
 }
 
 function moneylineRank(rows: CanonicalProbabilityCard[]) {

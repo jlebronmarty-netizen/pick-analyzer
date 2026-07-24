@@ -166,6 +166,17 @@ export type CurrentBoardCandidate = {
   anomalyReasons: CurrentBoardReasonCode[]
   currentLatest: boolean
   rawProbability: number
+  outcomeCompleteness?: {
+    storedSelectionProbability: number
+    oppositeSelection: string
+    oppositeSelectionProbability: number
+    pushProbability: number | null
+    totalProbability: number
+    highestProbabilitySelection: string
+    highestProbabilityLine: number | null
+    highestProbability: number
+    probabilityBasis: 'stored_binary_selection_with_complement'
+  }
   calibratedProbability: number | null
   confidence: number
   confidenceLabel: string
@@ -517,6 +528,17 @@ function normalizedSelection(row: PredictionRow) {
   return selection
 }
 
+function oppositeSelection(row: PredictionRow) {
+  const market = canonicalPredictionMarket(row.market)
+  const selection = selectionLabel(row)
+  if (market === 'total') return selection.toLowerCase().includes('under') ? 'Over' : 'Under'
+  if (row.home_team && selection.toLowerCase() === row.home_team.toLowerCase()) return row.away_team ?? 'Away'
+  if (row.away_team && selection.toLowerCase() === row.away_team.toLowerCase()) return row.home_team ?? 'Home'
+  if (selection.toLowerCase() === 'home') return row.away_team ?? 'Away'
+  if (selection.toLowerCase() === 'away') return row.home_team ?? 'Home'
+  return `Not ${selection}`
+}
+
 function maxAgeFor(sportKey: string, market: string, mode: CurrentBoardMode) {
   const policy = CURRENT_BOARD_FRESHNESS_POLICY.baseball_mlb
   if (mode === 'HISTORICAL_EXPLORER' || mode === 'ALL_STORED_ADVANCED') return policy.historicalMaxOddsAgeMinutes
@@ -595,21 +617,22 @@ function oddsReasons(
   const market = canonicalPredictionMarket(row.market)
   const price = numberValue(odds?.price ?? row.odds)
   const line = numberValue(odds?.line ?? row.line)
-  const timestamp = odds?.snapshot_time ?? row.odds_timestamp
-  const snapshotMs = timestamp ? new Date(timestamp).getTime() : Number.NaN
+  const sourceTimestamp = odds?.snapshot_time ?? row.odds_timestamp
+  const freshnessTimestamp = selectedMarketFreshness(odds, row).timestamp ?? sourceTimestamp
+  const snapshotMs = sourceTimestamp ? new Date(sourceTimestamp).getTime() : Number.NaN
   const startTime = canonicalEventStart(event, row.commence_time)
   const startMs = startTime ? new Date(startTime).getTime() : Number.NaN
   const cutoffMs = row.cutoff_at ? new Date(row.cutoff_at).getTime() : Number.POSITIVE_INFINITY
 
   validateMarketLine(row, price, line).forEach((reason) => reasons.add(reason))
-  if (!timestamp || !Number.isFinite(snapshotMs)) reasons.add('STALE_ODDS')
+  if (!freshnessTimestamp || !Number.isFinite(new Date(freshnessTimestamp).getTime())) reasons.add('STALE_ODDS')
   if (Number.isFinite(startMs) && Number.isFinite(snapshotMs) && snapshotMs >= startMs) reasons.add('EVENT_STARTED')
   if (Number.isFinite(cutoffMs) && Number.isFinite(snapshotMs) && snapshotMs > cutoffMs) reasons.add('POST_CUTOFF_ODDS')
   if (metadata.isLive === true || metadata.live === true || String(metadata.marketType ?? '').toLowerCase() === 'live') reasons.add('LIVE_ODDS')
   if (metadata.isAlternate === true || metadata.alternate === true || String(metadata.marketType ?? '').toLowerCase().includes('alternate')) {
     reasons.add('ALTERNATE_MARKET')
   }
-  if (ageMinutes(timestamp, nowMs) > maxAgeFor(row.sport_key, market, mode)) reasons.add('STALE_ODDS')
+  if (ageMinutes(freshnessTimestamp, nowMs) > maxAgeFor(row.sport_key, market, mode)) reasons.add('STALE_ODDS')
   return reasons
 }
 
@@ -709,6 +732,10 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
   const selectedOdds = numberValue(odds?.price) ?? numberValue(row.odds)
   const implied = selectedOdds ? round(marketImpliedProbabilityFromAmerican(selectedOdds) ?? 0) : numberValue(row.implied_probability) ?? 0
   const rawProbability = numberValue(row.model_probability) ?? 0
+  const boundedProbability = Math.max(0, Math.min(100, rawProbability))
+  const opposite = oppositeSelection(row)
+  const oppositeProbability = round(100 - boundedProbability)
+  const oppositeMoreLikely = oppositeProbability > boundedProbability
   const confidence = numberValue(row.confidence) ?? 0
   const reliabilityScore = numberValue(snapshot.reliabilityScore) ?? Math.min(100, Math.max(0, confidence))
   const aiRating = numberValue(snapshot.aiRating) ?? round(rawProbability * 0.34 + confidence * 0.22 + reliabilityScore * 0.18)
@@ -824,6 +851,17 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     anomalyReasons: Array.from(reasons).filter((reason) => ['INVALID_PRICE', 'INVALID_LINE', 'LIVE_ODDS', 'ALTERNATE_MARKET', 'POST_CUTOFF_ODDS'].includes(reason)),
     currentLatest: true,
     rawProbability,
+    outcomeCompleteness: {
+      storedSelectionProbability: round(boundedProbability),
+      oppositeSelection: opposite,
+      oppositeSelectionProbability: oppositeProbability,
+      pushProbability: null,
+      totalProbability: 100,
+      highestProbabilitySelection: oppositeMoreLikely ? opposite : selectionLabel(row),
+      highestProbabilityLine: oppositeMoreLikely && row.line !== null ? -row.line : row.line,
+      highestProbability: round(Math.max(boundedProbability, oppositeProbability)),
+      probabilityBasis: 'stored_binary_selection_with_complement',
+    },
     calibratedProbability: numberValue(snapshot.calibratedProbability),
     confidence,
     confidenceLabel: String(snapshot.confidenceLabel ?? (confidence >= 70 ? 'High' : confidence >= 60 ? 'Medium' : 'Low')),

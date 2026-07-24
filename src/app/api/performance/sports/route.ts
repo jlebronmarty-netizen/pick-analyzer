@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getAiPerformanceCenterLazy } from '@/lib/server-lazy-diagnostics'
+import { getPerformanceProductContract } from '@/services/performance-product-contract.service'
 
 export async function GET() {
   try {
-    const data = await getAiPerformanceCenterLazy({ dryRun: true })
+    const data = await getPerformanceProductContract()
     return NextResponse.json({
       success: true,
       apiStatus: data.apiStatus,

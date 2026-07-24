@@ -1,22 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAiPerformanceCenterLazy } from '@/lib/server-lazy-diagnostics'
+import { getPerformanceProductContract } from '@/services/performance-product-contract.service'
 
 export async function GET(_request: NextRequest, context: { params: Promise<{ sport: string }> }) {
   try {
     const { sport } = await context.params
-    const data = await getAiPerformanceCenterLazy({ sportKey: sport, dryRun: true })
+    const [data, product] = await Promise.all([
+      getAiPerformanceCenterLazy({ sportKey: sport, dryRun: true }),
+      getPerformanceProductContract({ sportKey: sport }),
+    ])
     return NextResponse.json({
       success: true,
-      apiStatus: data.apiStatus,
+      apiStatus: product.apiStatus,
       mode: 'performance_sport_api_v1',
-      generatedAt: data.generatedAt,
+      generatedAt: product.generatedAt,
       sport,
-      aiBrain: data.aiBrain.selected,
-      trust: data.trustScore,
-      reportCard: data.reportCards.selected,
+      aiBrain: {
+        ...data.aiBrain.selected,
+        trustScore: product.trustScore,
+        sampleSize: product.reportCards.selected.metrics.settled,
+      },
+      trust: product.trustScore,
+      reportCard: product.reportCards.selected,
       goals: data.goals,
       maturityPipeline: data.maturityPipeline,
-      predictionHistory: data.predictionHistory,
+      predictionHistory: product.performanceScopeV2.historyPreview,
+      scopePolicy: product.scopePolicy,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
     })

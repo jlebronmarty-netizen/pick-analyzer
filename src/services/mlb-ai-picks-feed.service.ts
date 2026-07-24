@@ -122,6 +122,7 @@ function baseItem(
   const explanation = candidate.recommendationExplanation
   if (!explanation) return null
   const alignment = candidate.marketAlignment
+  const mostLikely = itemType === 'MOST_LIKELY' ? candidate.outcomeCompleteness ?? null : null
   const evidence = [
     explanation.headline,
     explanation.summary,
@@ -146,11 +147,11 @@ function baseItem(
     scheduledTime: candidate.scheduledTime,
     market: candidate.market,
     marketLabel: candidate.marketLabel,
-    selection: candidate.selection,
-    line: candidate.line,
-    americanOdds: candidate.americanOdds,
+    selection: mostLikely?.highestProbabilitySelection ?? candidate.selection,
+    line: mostLikely?.highestProbabilityLine ?? candidate.line,
+    americanOdds: mostLikely && mostLikely.highestProbabilitySelection !== candidate.selection ? null : candidate.americanOdds,
     sportsbook: candidate.sportsbook,
-    modelProbability: candidate.rawProbability,
+    modelProbability: mostLikely?.highestProbability ?? candidate.rawProbability,
     calibratedProbability: candidate.calibratedProbability,
     impliedProbability: candidate.impliedProbability,
     marketImpliedProbability: round(alignment.marketImpliedProbability),
@@ -179,7 +180,7 @@ function baseItem(
 
 function probabilityRank(candidates: CurrentBoardCandidate[]) {
   return [...candidates].sort((left, right) =>
-    right.rawProbability - left.rawProbability ||
+    (right.outcomeCompleteness?.highestProbability ?? right.rawProbability) - (left.outcomeCompleteness?.highestProbability ?? left.rawProbability) ||
     right.confidence - left.confidence ||
     right.reliabilityScore - left.reliabilityScore ||
     left.marketInputAgeMinutes - right.marketInputAgeMinutes

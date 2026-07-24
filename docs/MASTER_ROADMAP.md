@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Market Outcome Completeness & Performance Consistency V1
+
+Status: Locally implemented and build-verified; production deployment verification pending.
+
+Evidence: `src/services/current-board.service.ts`, `src/services/market-opportunity-suite.service.ts`, `src/services/best-value-scanner.service.ts`, `src/services/mlb-ai-picks-feed.service.ts`, `src/services/performance-scope-v2.service.ts`, `src/services/performance-product-contract.service.ts`, performance API routes, `docs/MARKET_OUTCOME_COMPLETENESS_PERFORMANCE_CONSISTENCY_V1.md` and local production build.
+
+Note: This pass fixes product semantics only. Moneyline, Run Line and Totals expose derived binary outcome completeness from stored selected-side probabilities without changing any model probability. Most Likely ranks the highest-probability outcome, Best Value ranks actionable aligned fresh positive EV/edge, Current Board/AI Feed share the same canonical market/outcome semantics, and Performance surfaces use the same cutoff-safe production scope as Prediction History. Official Pick policy, Learning Brain, settlement, cutoff enforcement, Phase 2A and Historical Replay were not changed.
+
 ### Supabase Disk IO Recovery Audit V1
 
 Status: Locally implemented and build-verified; production deployment verification pending.

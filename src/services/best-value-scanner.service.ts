@@ -7,11 +7,15 @@ import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-nor
 export type BestValueMode = 'current' | 'upcoming' | 'historical_explorer' | 'all_stored_advanced'
 
 function score(candidate: CurrentBoardCandidate) {
+  const actionableEv = candidate.marketAlignment?.actionableExpectedValuePercent ?? null
+  const actionableEdge = candidate.marketAlignment?.actionableEdgePercentagePoints ?? null
+  const ev = Number.isFinite(actionableEv) ? Number(actionableEv) : candidate.expectedValue
+  const edge = Number.isFinite(actionableEdge) ? Number(actionableEdge) : candidate.edge
   return (
-    Number(candidate.expectedValue > 0) * 10000 +
-    Number(candidate.edge > 0) * 5000 +
-    candidate.expectedValue * 100 +
-    candidate.edge * 60 +
+    Number(ev > 0) * 10000 +
+    Number(edge > 0) * 5000 +
+    ev * 100 +
+    edge * 60 +
     candidate.confidence * 20 +
     candidate.reliabilityScore * 12 +
     (candidate.featureQuality ?? 0) * 8 +
@@ -24,10 +28,11 @@ function isAlignedFreshPositiveValue(candidate: CurrentBoardCandidate) {
   return (
     candidate.marketAlignment?.alignmentStatus === 'ALIGNED' &&
     candidate.marketAlignment.freshnessStatus !== 'STALE' &&
-    Number.isFinite(candidate.marketAlignment.expectedValuePercent) &&
-    Number.isFinite(candidate.marketAlignment.edgePercentagePoints) &&
-    Number(candidate.marketAlignment.expectedValuePercent) > 0 &&
-    Number(candidate.marketAlignment.edgePercentagePoints) > 0
+    candidate.marketAlignment.freshnessStatus !== 'EXPIRED' &&
+    Number.isFinite(candidate.marketAlignment.actionableExpectedValuePercent) &&
+    Number.isFinite(candidate.marketAlignment.actionableEdgePercentagePoints) &&
+    Number(candidate.marketAlignment.actionableExpectedValuePercent) > 0 &&
+    Number(candidate.marketAlignment.actionableEdgePercentagePoints) > 0
   )
 }
 
@@ -64,6 +69,26 @@ function reasonNotOfficial(candidate: CurrentBoardCandidate) {
 
 function opportunityStatus(candidate: CurrentBoardCandidate) {
   return classifyMarketIntelligence(candidate).display
+}
+
+function noPositiveValueWarning(sourceCandidates: CurrentBoardCandidate[]) {
+  if (!sourceCandidates.length) return 'No opportunities available because no eligible games have grounded odds and probabilities.'
+  const aligned = sourceCandidates.filter((candidate) => candidate.marketAlignment?.alignmentStatus === 'ALIGNED')
+  if (!aligned.length) {
+    return 'Odds or probabilities exist, but no candidate has an exact aligned event, market, selection, line, sportsbook and snapshot for EV ranking.'
+  }
+  const stale = aligned.filter((candidate) => ['STALE', 'EXPIRED', 'UNKNOWN'].includes(candidate.marketAlignment.freshnessStatus))
+  if (stale.length === aligned.length) {
+    return 'Aligned odds exist, but EV is not actionable because market freshness is stale, expired or timestamp-unknown.'
+  }
+  const priced = aligned.filter((candidate) =>
+    Number.isFinite(candidate.marketAlignment.expectedValuePercent) &&
+    Number.isFinite(candidate.marketAlignment.edgePercentagePoints)
+  )
+  if (priced.length) {
+    return 'Aligned fresh odds exist, but model probability does not clear both positive EV and positive edge at the current price.'
+  }
+  return 'Model probability and current odds exist, but EV could not be computed for the aligned market.'
 }
 
 export async function getBestValueOpportunities({
@@ -119,9 +144,7 @@ export async function getBestValueOpportunities({
       dataFreshness: board.dataFreshness,
       warning: positiveValue.length
         ? 'Positive value is aligned to fresh selected market data and remains informational until official gates qualify it.'
-        : sourceCandidates.length
-          ? 'No positive-value opportunities with aligned fresh market data.'
-          : 'No opportunities available because no eligible games have grounded odds and probabilities.',
+        : noPositiveValueWarning(sourceCandidates),
       scanCompleted: true,
       dataAvailable: true,
       errorCode: null,
@@ -149,9 +172,13 @@ export async function getBestValueOpportunities({
               ? 'AVOID - NO POSITIVE VALUE'
               : candidate.marketAlignment?.alignmentStatus !== 'ALIGNED'
                 ? `NOT VALUE RANKED - ${candidate.marketAlignment?.alignmentStatus ?? 'UNALIGNED'}`
-                : candidate.marketAlignment?.freshnessStatus === 'STALE'
-                  ? 'NOT VALUE RANKED - STALE MARKET INPUT'
-                  : 'BELOW OFFICIAL VALUE THRESHOLD',
+                : ['STALE', 'EXPIRED', 'UNKNOWN'].includes(candidate.marketAlignment?.freshnessStatus ?? 'UNKNOWN')
+                  ? `NOT VALUE RANKED - ${candidate.marketAlignment?.freshnessStatus ?? 'UNKNOWN'} MARKET INPUT`
+                  : Number(candidate.marketAlignment?.expectedValuePercent ?? Number.NaN) <= 0
+                    ? 'NOT VALUE RANKED - NEGATIVE EV AT CURRENT ODDS'
+                    : Number(candidate.marketAlignment?.edgePercentagePoints ?? Number.NaN) <= 0
+                      ? 'NOT VALUE RANKED - MODEL PROBABILITY BELOW SPORTSBOOK IMPLIED PROBABILITY'
+                      : 'NOT VALUE RANKED - EV UNAVAILABLE',
         marketIntelligenceCategory: classification.category,
         canonicalMarketState: classification.canonicalState,
         marketValueQuality: classification.valueQuality,

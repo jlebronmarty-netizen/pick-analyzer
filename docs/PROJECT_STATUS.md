@@ -2,6 +2,16 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Market Outcome Completeness & Performance Consistency V1
+
+- Corrected product market semantics without changing prediction probabilities, Learning Brain, Official Pick policy, settlement, Historical Replay, Historical Feature Store or cutoff enforcement.
+- Current Board now exposes derived binary outcome-completeness metadata for Moneyline, Run Line and Totals: stored selected-side probability, opposite-side complement probability, push probability `null`, total probability 100 and highest-probability outcome.
+- Most Likely now ranks the highest-probability outcome rather than preferring an Official Pick or blindly displaying the stored selected-side row; model-only fallback uses the same binary complement rule.
+- Best Value now ranks only actionable positive EV/edge from aligned fresh odds and explains aligned-but-negative EV separately from stale, unknown or missing market inputs.
+- Freshness classification now uses the canonical market freshness timestamp shared by display and market alignment, avoiding contradictory fresh-age plus `STALE_ODDS` states.
+- Performance Trust, Sports, Report Card, Evolution, sport detail and page headline metrics now derive from the same cutoff-safe production scope used by Prediction History. Calibration Error is absolute, Calibration Bias is signed, Brier Score remains probability squared error and no-sample Today metrics remain `N/A`.
+- Build passed with `npm.cmd run build`. Provider calls and remote mutations remained 0.
+
 ## 2026-07-24 Supabase Disk IO Recovery Audit V1
 
 - Completed a read-only Supabase Disk IO recovery audit after the Phase 2A backfill window. The audit made 0 provider calls, 0 remote mutations, did not rerun Historical Feature Backfill Phase 2A, did not start Historical Replay Phase 2B and did not execute AI retraining or recalibration.

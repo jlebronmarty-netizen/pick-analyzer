@@ -198,6 +198,9 @@ function metrics(rows: Array<{ row: PredictionRow; event?: EventRow }>) {
       return { probability, outcome }
     })
     .filter((item) => item.outcome !== null && Number.isFinite(item.probability))
+  const confidences = settled
+    .map((item) => Number(item.row.confidence))
+    .filter((value) => Number.isFinite(value))
   return {
     generated: rows.length,
     eligible: eligibleRows.length,
@@ -212,6 +215,7 @@ function metrics(rows: Array<{ row: PredictionRow; event?: EventRow }>) {
     voids,
     accuracy: wins + losses ? round((wins / (wins + losses)) * 100) : null,
     brier: scored.length ? round(scored.reduce((sum, item) => sum + (item.probability - Number(item.outcome)) ** 2, 0) / scored.length, 4) : null,
+    averageConfidence: confidences.length ? round(confidences.reduce((sum, value) => sum + value, 0) / confidences.length) : null,
     settlementCoverage: eligibleRows.length ? round((settled.length / eligibleRows.length) * 100) : null,
   }
 }
