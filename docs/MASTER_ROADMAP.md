@@ -2389,3 +2389,19 @@ Persistence scope: None. The module reads stored `sport_events`, `sport_lineups`
 Validation: Read-only diagnostics for 2026-07-24 report 15 MLB games, 0 confirmed/probable/expected starters, 30 unavailable starter slots, 0 confirmed lineups, 26 expected lineups and 257 eligible batter contexts. Cutoff-safe player projection generation excludes the live COL @ MIL game and produces 1,836 informational batter projections across 14 eligible games. Pitcher projections remain blocked by missing starter context. Provider calls and remote mutations remain 0.
 
 Completion criteria: `CURRENT_MLB_LINEUP_CONTEXT_PASS`, `MLB_GAME_INTELLIGENCE_EXPERIENCE_PASS`, `PLAYER_PROJECTION_CONTEXT_PASS`, `NO_PROP_BETTING_ACTIVATION_PASS`, `NO_OFFICIAL_PICK_PROMOTION_PASS`, `PROVIDER_CALL_DISCIPLINE_PASS` and `PREGAME_CUTOFF_CONTEXT_PASS` are certified for the stored-data experience. Live provider activation remains blocked until real current starter and confirmed lineup coverage are available under explicit approval.
+
+### 43. MLB Starter Intelligence And Probable Pitcher Recovery V1
+
+Objective: Build a canonical current MLB starter resolver that can recover confirmed/probable/expected starters from stored evidence and feed Game Intelligence, First Five readiness and pitcher projections without activating props.
+
+Status: Implemented locally in read-only provider-independent mode. Live probable-starter coverage for the current slate remains blocked because no current stored starter evidence exists.
+
+Backend scope: `mlb-starter-intelligence.service.ts`, Universal Projection Engine starter handoff, Current Lineup Context starter handoff, Game Intelligence pitcher matchup enrichment, First Five readiness starter-rule handoff, AI Operations starter panel, `/api/mlb/starter-intelligence`, `/api/mlb/probable-starters`, `/api/mlb/starter-diagnostics` and `/api/mlb/starter-history`.
+
+Frontend scope: Dashboard Advanced Details > Model includes MLB Starter Intelligence. Player Projection detail now displays starter status, last update and historical starts when available.
+
+Persistence scope: None. The module reads stored `sport_events`, `sport_lineups`, `sport_players`, `provider_entity_mappings`, historical Retrosheet starter tables and existing starter/weather intelligence only.
+
+Validation: `npm.cmd run mlb:starter-intelligence -- --date=2026-07-24 --summary` reports 15 games, 0 confirmed starters, 0 probable starters, 0 expected starters, 30 unavailable starter slots, 0 projection-eligible starters, 30 blocked pitcher-projection slots, 1,000 bounded player rows, 1,000 bounded SportsDataIO mappings, 0 duplicate provider IDs, 0 provider calls and 0 remote mutations. Player projections remain batter-only for the current slate until real current starter evidence appears.
+
+Completion criteria: `STARTER_INTELLIGENCE_PASS`, `STARTER_MAPPING_PASS`, `GAME_INTELLIGENCE_STARTER_PASS` and conditional `PITCHER_PROJECTION_ACTIVATION_PASS` are certified for the resolver and integration. `PROBABLE_STARTER_PASS` is withheld for the current slate until confirmed/probable stored starter evidence is available.

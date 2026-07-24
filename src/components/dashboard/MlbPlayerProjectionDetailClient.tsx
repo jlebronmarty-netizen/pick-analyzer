@@ -20,6 +20,8 @@ type Projection = {
   lineupStatus?: string | null
   lineupSource?: string | null
   battingOrder?: number | null
+  historicalStarts?: number | null
+  asOfTimestamp?: string | null
   probabilityDistribution: { method: string; buckets: Array<{ label: string; probability: number }> }
   thresholdProbabilities: Array<{ threshold: number; probabilityAtLeast: number | null }>
   exactBlockerReasons: string[]
@@ -74,8 +76,10 @@ export default function MlbPlayerProjectionDetailClient({ projectionId }: { proj
           <Stat label="Confidence" value={`${Math.round(projection.confidence)}%`} />
           <Stat label="Feature Quality" value={Math.round(projection.featureQuality)} />
           <Stat label="Data Sufficiency" value={Math.round(projection.dataSufficiency)} />
-          <Stat label="Lineup Status" value={projection.lineupStatus ?? projection.lineupOrStarterStatus} />
+          <Stat label="Starter Status" value={projection.lineupOrStarterStatus} />
           <Stat label="Batting Order" value={projection.battingOrder ?? 'N/A'} />
+          <Stat label="Historical Starts" value={projection.historicalStarts ?? 'N/A'} />
+          <Stat label="Last Update" value={projection.asOfTimestamp ? new Date(projection.asOfTimestamp).toLocaleString() : 'N/A'} />
         </div>
 
         <section className="mt-5 rounded-lg border border-slate-800 bg-slate-900/75 p-5">

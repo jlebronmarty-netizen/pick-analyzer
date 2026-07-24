@@ -2,6 +2,7 @@ import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { classifyMarketSemantics } from '@/services/market-semantics.service'
+import { getMlbStarterIntelligence } from '@/services/mlb-starter-intelligence.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -150,6 +151,7 @@ export async function getMlbFirstFiveReadiness() {
     historicalGames,
     historicalFeatureEvidence,
     sampleOdds,
+    starterIntelligence,
   ] = await Promise.all([
     safeCount('stored first-five odds', 'sports_odds_snapshots', firstFiveMarketFilter),
     safeCount('priced first-five odds', 'sports_odds_snapshots', (query) => firstFiveMarketFilter(query).not('price', 'is', null)),
@@ -159,10 +161,29 @@ export async function getMlbFirstFiveReadiness() {
     safeCount('historical baseball games', 'historical_baseball_games', (query) => query.eq('sport_key', SPORT_KEY)),
     safeExists('historical MLB feature snapshots', 'historical_feature_snapshots', 'id', (query) => query.eq('sport_key', SPORT_KEY)),
     safeRows<Record<string, unknown>>('first-five odds samples', 'sports_odds_snapshots', 'id, event_id, sportsbook, market, outcome, price, line, snapshot_time, metadata', firstFiveMarketFilter, 20),
+    getMlbStarterIntelligence().catch((error) => ({
+      success: false,
+      summary: {
+        confirmedStarters: 0,
+        probableStarters: 0,
+        expectedStarters: 0,
+        questionableStarters: 0,
+        scratchedStarters: 0,
+        unavailableStarters: 0,
+        projectionEligibleStarters: 0,
+        blockedPitcherProjectionSlots: 0,
+      },
+      diagnostics: { starterChanges: { scratches: 0, openers: 0, bullpenGames: 0 } },
+      error: error instanceof Error ? error.message : 'starter intelligence read failed',
+    })),
   ])
 
   const validation = validateMlbFirstFiveFixtures()
   const hasRealCoverage = storedFirstFiveOdds.count > 0 && pricedFirstFiveOdds.count > 0
+  const starterSummary = starterIntelligence.summary
+  const starterRulesReady = Number(starterSummary.confirmedStarters ?? 0) + Number(starterSummary.probableStarters ?? 0) > 0 &&
+    Number(starterSummary.scratchedStarters ?? 0) === 0 &&
+    Number(starterSummary.questionableStarters ?? 0) === 0
   const errors = [
     storedFirstFiveOdds.error,
     pricedFirstFiveOdds.error,
@@ -177,7 +198,7 @@ export async function getMlbFirstFiveReadiness() {
     hasRealCoverage ? '' : 'FIRST_FIVE_ODDS_NOT_AVAILABLE_FROM_STORED_PROVIDER_ROWS',
     pricedFirstFiveOdds.count > 0 ? '' : 'FIRST_FIVE_LINE_OR_PRICE_MISSING',
     historicalFirstFivePlayEvidence.exists ? '' : 'FIRST_FIVE_HISTORICAL_INNING_SCORE_BASIS_MISSING',
-    'FIRST_FIVE_LISTED_STARTER_CHANGE_RULES_REQUIRE_APPROVAL',
+    starterRulesReady ? '' : 'FIRST_FIVE_LISTED_STARTER_CHANGE_RULES_REQUIRE_APPROVAL',
     errors.length ? 'READINESS_QUERY_ERROR' : '',
   ].filter(Boolean)
 
@@ -216,7 +237,7 @@ export async function getMlbFirstFiveReadiness() {
       historicalOutcomeAvailability: historicalFirstFivePlayEvidence.exists && historicalGames.count > 0,
       featureReadiness: historicalFeatureEvidence.exists,
       pushAwareSemantics: validation.success,
-      starterChangeRulesReady: false,
+      starterChangeRulesReady: starterRulesReady,
       predictionLearningCalibrationPerformanceCompatibility: true,
     },
     canonicalContract: {
@@ -232,7 +253,9 @@ export async function getMlbFirstFiveReadiness() {
       sportsbookPriceRequired: true,
       timestampRequired: true,
       cutoffRule: 'Snapshot and prediction generation must be strictly before event start/cutoff.',
-      starterChangeRule: 'blocked pending explicit listed-starter/opener/no-action policy approval',
+      starterChangeRule: starterRulesReady
+        ? 'Starter Intelligence has confirmed/probable starters and no current scratch/questionable markers; explicit production listed-starter policy is still required before activation.'
+        : 'blocked pending confirmed/probable Starter Intelligence and explicit listed-starter/opener/no-action policy approval',
       pushRules: {
         first_five_moneyline: 'Push when tied after five innings for two-way F5 moneyline contract.',
         first_five_run_line: 'Push when selected first-five adjusted score equals opponent score.',
@@ -250,6 +273,16 @@ export async function getMlbFirstFiveReadiness() {
       learning: 'shadow labels only; no production weight mutation or auto-promotion',
       calibration: 'shadow calibration only after chronological settled First Five labels exist',
     },
+    starterIntelligence: {
+      source: 'mlb_starter_intelligence_v1',
+      confirmedStarters: starterSummary.confirmedStarters ?? 0,
+      probableStarters: starterSummary.probableStarters ?? 0,
+      expectedStarters: starterSummary.expectedStarters ?? 0,
+      scratches: starterSummary.scratchedStarters ?? 0,
+      unavailableStarters: starterSummary.unavailableStarters ?? 0,
+      blockedPitcherProjectionSlots: starterSummary.blockedPitcherProjectionSlots ?? 0,
+      providerCallsMade: 0,
+    },
     settlementValidation: validation,
     blockers,
     certifications: {
@@ -258,7 +291,7 @@ export async function getMlbFirstFiveReadiness() {
       MLB_FIRST_FIVE_SHADOW_PASS: true,
       MLB_FIRST_FIVE_MARKET_SEMANTICS_PASS: validation.success,
       FIRST_FIVE_PROVIDER_READINESS_PASS: hasRealCoverage,
-      FIRST_FIVE_STARTER_RULES_PASS: false,
+      FIRST_FIVE_STARTER_RULES_PASS: starterRulesReady,
     },
   }
 }

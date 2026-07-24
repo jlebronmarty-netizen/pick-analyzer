@@ -5,6 +5,7 @@ import { getCurrentBoardCached } from '@/services/current-board.service'
 import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
 import { getMlbCurrentLineupContext } from '@/services/mlb-current-lineup-context.service'
 import { getMlbPlayerProjectionEngine } from '@/services/mlb-player-projection-engine.service'
+import { getMlbStarterIntelligence } from '@/services/mlb-starter-intelligence.service'
 
 type EventRow = {
   id: string
@@ -101,9 +102,10 @@ export async function getGameIntelligence(eventId: string) {
     month: '2-digit',
     day: '2-digit',
   }).format(new Date(event.start_time)) : null
-  const [board, lineupContext, playerProjectionEngine] = await Promise.all([
+  const [board, lineupContext, starterIntelligence, playerProjectionEngine] = await Promise.all([
     getCurrentBoardCached(event.sport_key ?? 'baseball_mlb', 'ALL_STORED_ADVANCED', 200),
     getMlbCurrentLineupContext({ date: eventDate, eventId: event.id }),
+    getMlbStarterIntelligence({ date: eventDate, eventId: event.id }),
     getMlbPlayerProjectionEngine({ date: eventDate, limit: 200 }),
   ])
   const { data: pitcherProjectionData, error: pitcherProjectionError } = await supabaseAdmin
@@ -130,9 +132,23 @@ export async function getGameIntelligence(eventId: string) {
   const starterEvidenceRows = (starterEvidenceData ?? []) as StarterEvidenceRow[]
   const candidates = board.candidates.filter((candidate) => candidate.eventId === event.id)
   const gameLineupContext = lineupContext.games[0] ?? null
+  const gameStarterIntelligence = starterIntelligence.games[0] ?? null
   const playerProjections = playerProjectionEngine.projections.filter((projection) => projection.eventId === event.id)
   const pitcherStatProjections = playerProjections.filter((projection) => projection.projectionType.startsWith('pitcher_'))
   const batterStatProjections = playerProjections.filter((projection) => projection.projectionType.startsWith('batter_'))
+  const pitcherProjectionSummary = (side: 'home' | 'away') => {
+    const scoped = pitcherStatProjections.filter((projection) => projection.homeOrAway === side)
+    const byType = (type: string) => scoped.find((projection) => projection.projectionType === type)?.expectedValue ?? null
+    return {
+      projections: scoped.length,
+      expectedInnings: byType('pitcher_projected_innings'),
+      expectedStrikeouts: byType('pitcher_strikeouts'),
+      expectedOuts: byType('pitcher_outs_recorded'),
+      expectedHitsAllowed: byType('pitcher_hits_allowed'),
+      expectedWalks: byType('pitcher_walks_allowed'),
+      expectedEarnedRuns: byType('pitcher_earned_runs'),
+    }
+  }
   const topCandidate = first(candidates)
   const classification = topCandidate ? classifyMarketIntelligence(topCandidate) : null
   const alignment = topCandidate?.marketAlignment ?? null
@@ -222,7 +238,20 @@ export async function getGameIntelligence(eventId: string) {
         },
         confidence: topCandidate?.confidence ?? null,
       },
-      startingPitchers: gameLineupContext?.starters ?? null,
+      startingPitchers: gameStarterIntelligence?.starters ?? gameLineupContext?.starters ?? null,
+      pitcherMatchup: {
+        home: {
+          starter: gameStarterIntelligence?.starters.home ?? gameLineupContext?.starters.home ?? null,
+          projection: pitcherProjectionSummary('home'),
+        },
+        away: {
+          starter: gameStarterIntelligence?.starters.away ?? gameLineupContext?.starters.away ?? null,
+          projection: pitcherProjectionSummary('away'),
+        },
+        explanation: pitcherStatProjections.length
+          ? 'Pitcher projections use Starter Intelligence plus stored pitcher season stats. They remain sportsbook-independent.'
+          : 'Pitcher projections are blocked until confirmed, probable or expected starter identity exists with stored pitcher stats.',
+      },
       expectedLineups: gameLineupContext?.lineups ?? null,
       playerProjections: {
         total: playerProjections.length,
@@ -235,15 +264,16 @@ export async function getGameIntelligence(eventId: string) {
         positiveFactors: [
           ...(topCandidate?.positiveFactors ?? []),
           ...(playerProjections.length ? ['Player projection context is available from stored lineup/player-stat evidence.'] : []),
+          ...(pitcherStatProjections.length ? ['Starter Intelligence enabled pitcher projection context for this game.'] : []),
         ],
         negativeFactors: [
           ...(topCandidate?.negativeFactors ?? []),
           ...(gameLineupContext?.coverage.confirmedLineups ? [] : ['Confirmed MLB lineup feed remains unavailable; expected lineups are labelled expected.']),
-          ...(gameLineupContext?.coverage.unavailableStarters ? ['One or more starter slots remain unavailable.'] : []),
+          ...(gameStarterIntelligence?.coverage.blockedPitcherProjectionSlots ? ['One or more starter slots remain unavailable or projection-blocked.'] : []),
         ],
         dataQuality: {
           lineupConfidence: gameLineupContext ? Math.round((gameLineupContext.coverage.eligibleBatters / Math.max(1, 18)) * 100) : 0,
-          starterConfidence: gameLineupContext ? Math.round(((gameLineupContext.starters.home.confidence + gameLineupContext.starters.away.confidence) / 2)) : 0,
+          starterConfidence: gameStarterIntelligence ? Math.round(((gameStarterIntelligence.starters.home.confidence + gameStarterIntelligence.starters.away.confidence) / 2)) : gameLineupContext ? Math.round(((gameLineupContext.starters.home.confidence + gameLineupContext.starters.away.confidence) / 2)) : 0,
           providerCallsMade: 0,
         },
         unavailableInputs: ['bullpen', 'handedness', 'travel', 'rest', 'confirmed injury status'].filter(Boolean),

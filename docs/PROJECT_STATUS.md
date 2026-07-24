@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 MLB Starter Intelligence & Probable Pitcher Recovery V1
+
+- Added a provider-independent MLB Starter Intelligence resolver over stored `sport_lineups`, existing GamesByDate starter/weather evidence, current event metadata, player mappings and historical starter evidence.
+- New APIs: `/api/mlb/starter-intelligence`, `/api/mlb/probable-starters`, `/api/mlb/starter-diagnostics` and `/api/mlb/starter-history`; API route inventory is now 365 routes and the app build currently emits 347 static pages.
+- Starter states now normalize to `CONFIRMED`, `PROBABLE`, `EXPECTED`, `QUESTIONABLE`, `SCRATCHED` and `UNAVAILABLE`, with confidence, source timestamp, reason, mapping diagnostics, freshness, opener/bullpen/scratch markers and affected-game-only recalculation policy.
+- Universal Projection Engine pitcher rows now consume Starter Intelligence for participation context. Confirmed/probable starters activate pitcher projections when stored pitcher stats exist, expected starters remain informational with lower confidence and unknown/questionable/scratched starters remain projection-blocked.
+- Game Intelligence now exposes starter status/confidence plus pitcher matchup summaries for expected innings, strikeouts, outs, hits allowed, walks and earned runs when pitcher projections exist. AI Operations and Dashboard Advanced Details now include Starter Intelligence coverage and blockers.
+- Current stored data for 2026-07-24 has 15 MLB games, 0 confirmed starters, 0 probable starters, 0 expected starters, 30 unavailable starter slots and 30 blocked pitcher-projection slots. Provider calls and remote mutations remained 0; no pitcher props, EV, Kelly, Official Picks, Learning Brain changes or production weight changes were activated.
+
 ## 2026-07-24 Current MLB Lineup Context & Game Intelligence Experience V1
 
 - Added a provider-independent current MLB lineup context layer that reads stored games, stored lineup evidence, stored season player stats and existing starter/weather/stadium intelligence without making provider calls or remote mutations.

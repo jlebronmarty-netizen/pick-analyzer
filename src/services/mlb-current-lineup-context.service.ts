@@ -2,7 +2,8 @@ import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { puertoRicoUtcRange } from '@/services/active-event.service'
-import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
+import { getMlbStarterIntelligence } from '@/services/mlb-starter-intelligence.service'
+import type { MlbStarterIntelligenceSide } from '@/services/mlb-starter-intelligence.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -90,7 +91,7 @@ export type MlbStarterContext = {
   playerId: string | null
   providerPlayerId: string | null
   playerName: string | null
-  status: 'CONFIRMED' | 'PROBABLE' | 'EXPECTED' | 'LATE_SCRATCH' | 'UNAVAILABLE'
+  status: 'CONFIRMED' | 'PROBABLE' | 'EXPECTED' | 'QUESTIONABLE' | 'LATE_SCRATCH' | 'SCRATCHED' | 'UNAVAILABLE'
   confidence: number
   source: string
   sourceTimestamp: string | null
@@ -296,6 +297,27 @@ function expectedLineupPlayers(event: EventRow, side: 'home' | 'away', playerSta
     })
 }
 
+function starterFromIntelligence(event: EventRow, side: 'home' | 'away', starterIntelligence: Row) {
+  const games = Array.isArray(starterIntelligence.games) ? (starterIntelligence.games as Array<{ eventId?: string; starters?: { home?: MlbStarterIntelligenceSide; away?: MlbStarterIntelligenceSide } }>) : []
+  const game = games.find((item) => item.eventId === event.id)
+  const starter = game?.starters?.[side]
+  if (!starter) return null
+  return {
+    eventId: event.id,
+    teamId: starter.teamId,
+    teamName: starter.teamName,
+    side,
+    playerId: starter.canonicalPlayerId,
+    providerPlayerId: starter.providerPlayerId,
+    playerName: starter.playerName,
+    status: starter.status === 'SCRATCHED' ? 'LATE_SCRATCH' : starter.status,
+    confidence: starter.confidence,
+    source: starter.source,
+    sourceTimestamp: starter.sourceTimestamp,
+    blockerReasons: starter.blockers,
+  } as MlbStarterContext
+}
+
 function starterFromStored(event: EventRow, side: 'home' | 'away', storedRows: LineupRow[]) {
   const teamId = side === 'home' ? event.home_team_id : event.away_team_id
   const teamName = side === 'home' ? event.home_team : event.away_team
@@ -358,13 +380,13 @@ function starterFromWeather(event: EventRow, side: 'home' | 'away', starterWeath
   } as MlbStarterContext
 }
 
-function eventContext(event: EventRow, storedRows: LineupRow[], playerStats: PlayerStatRow[], players: PlayerRow[], starterWeather: Row): MlbGameLineupContext {
+function eventContext(event: EventRow, storedRows: LineupRow[], playerStats: PlayerStatRow[], players: PlayerRow[], starterIntelligence: Row): MlbGameLineupContext {
   const homeConfirmed = confirmedLineupPlayers(event, 'home', storedRows)
   const awayConfirmed = confirmedLineupPlayers(event, 'away', storedRows)
   const homeLineup = homeConfirmed.length >= 8 ? homeConfirmed : expectedLineupPlayers(event, 'home', playerStats, players)
   const awayLineup = awayConfirmed.length >= 8 ? awayConfirmed : expectedLineupPlayers(event, 'away', playerStats, players)
-  const homeStarter = starterFromStored(event, 'home', storedRows) ?? starterFromWeather(event, 'home', starterWeather)
-  const awayStarter = starterFromStored(event, 'away', storedRows) ?? starterFromWeather(event, 'away', starterWeather)
+  const homeStarter = starterFromIntelligence(event, 'home', starterIntelligence) ?? starterFromStored(event, 'home', storedRows) ?? starterFromWeather(event, 'home', { games: [] })
+  const awayStarter = starterFromIntelligence(event, 'away', starterIntelligence) ?? starterFromStored(event, 'away', storedRows) ?? starterFromWeather(event, 'away', { games: [] })
   const lineups = { home: homeLineup, away: awayLineup }
   const starters = { home: homeStarter, away: awayStarter }
   return {
@@ -379,7 +401,7 @@ function eventContext(event: EventRow, storedRows: LineupRow[], playerStats: Pla
       confirmedStarters: [homeStarter, awayStarter].filter((starter) => starter.status === 'CONFIRMED').length,
       probableStarters: [homeStarter, awayStarter].filter((starter) => starter.status === 'PROBABLE').length,
       expectedStarters: [homeStarter, awayStarter].filter((starter) => starter.status === 'EXPECTED').length,
-      unavailableStarters: [homeStarter, awayStarter].filter((starter) => starter.status === 'UNAVAILABLE').length,
+      unavailableStarters: [homeStarter, awayStarter].filter((starter) => starter.status === 'UNAVAILABLE' || starter.status === 'QUESTIONABLE' || starter.status === 'SCRATCHED' || starter.status === 'LATE_SCRATCH').length,
       confirmedLineups: [homeLineup, awayLineup].filter((lineup) => lineup.length >= 8 && lineup.every((player) => player.status === 'CONFIRMED')).length,
       expectedLineups: [homeLineup, awayLineup].filter((lineup) => lineup.length >= 8 && lineup.some((player) => player.status === 'EXPECTED')).length,
       eligiblePitchers: [homeStarter, awayStarter].filter((starter) => starter.confidence >= 65 && starter.status !== 'UNAVAILABLE').length,
@@ -396,7 +418,7 @@ export async function getMlbCurrentLineupContext(options: { date?: string | null
     loadStoredLineups(scopedEvents.map((event) => event.id)),
     loadPlayerStats(),
     loadPlayers(),
-    getMlbStarterWeatherStadiumIntelligence(selectedDate).catch(() => ({ games: [], providerCallsMade: 0 })),
+    getMlbStarterIntelligence({ date: selectedDate }).catch(() => ({ games: [], providerCallsMade: 0, sourceAudit: {} })),
   ])
   const games = scopedEvents.map((event) => eventContext(event, storedRows, playerStats, players, starterWeather as Row))
   const summary = games.reduce((acc, game) => {
@@ -435,7 +457,8 @@ export async function getMlbCurrentLineupContext(options: { date?: string | null
       storedLineupRows: storedRows.length,
       storedPlayerStatRows: playerStats.length,
       storedPlayerRows: players.length,
-      starterWeatherGames: Array.isArray((starterWeather as Row).games) ? ((starterWeather as Row).games as unknown[]).length : 0,
+      starterIntelligenceGames: Array.isArray((starterWeather as Row).games) ? ((starterWeather as Row).games as unknown[]).length : 0,
+      starterSourceAudit: asRecord((starterWeather as Row).sourceAudit),
     },
     summary,
     games,

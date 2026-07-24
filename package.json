@@ -26,7 +26,8 @@
     "markets:diagnostics": "node --loader ./scripts/local-ts-loader.mjs scripts/universal-market-intelligence.mjs",
     "mlb:player-props:readiness": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-player-props-readiness.mjs",
     "mlb:player-projections": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-player-projections.mjs",
-    "mlb:lineup-context": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-lineup-context.mjs"
+    "mlb:lineup-context": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-lineup-context.mjs",
+    "mlb:starter-intelligence": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-starter-intelligence.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

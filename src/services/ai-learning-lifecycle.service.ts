@@ -11,6 +11,7 @@ import { getMlbFirstFiveReadiness } from '@/services/mlb-first-five-readiness.se
 import { getUniversalMarketInventory } from '@/services/universal-market-intelligence.service'
 import { getMlbPlayerPropsReadinessAudit } from '@/services/mlb-player-props-readiness-audit.service'
 import { getMlbPlayerProjectionLifecycleDiagnostics } from '@/services/mlb-player-projection-engine.service'
+import { getMlbStarterIntelligence } from '@/services/mlb-starter-intelligence.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -761,6 +762,28 @@ export async function getAiLearningLifecycle() {
   const playerProjectionRecord = asRecord(playerProjectionLifecycle)
   const playerProjectionLifecycleSummary = asRecord(playerProjectionRecord.lifecycle)
   const playerProjectionCoverage = asRecord(playerProjectionLifecycleSummary.coverage)
+  const starterIntelligence = await getMlbStarterIntelligence().catch((error) => ({
+    success: false,
+    mode: 'mlb_starter_intelligence_v1',
+    error: error instanceof Error ? error.message : 'MLB starter intelligence failed',
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    summary: {
+      confirmedStarters: 0,
+      probableStarters: 0,
+      expectedStarters: 0,
+      questionableStarters: 0,
+      scratchedStarters: 0,
+      unavailableStarters: 0,
+      projectionEligibleStarters: 0,
+      blockedPitcherProjectionSlots: 0,
+    },
+    diagnostics: { blockerSummary: { STARTER_INTELLIGENCE_ERROR: 1 } },
+  }))
+  const starterIntelligenceRecord = asRecord(starterIntelligence)
+  const starterIntelligenceSummary = asRecord(starterIntelligenceRecord.summary)
+  const starterIntelligenceDiagnostics = asRecord(starterIntelligenceRecord.diagnostics)
+  const starterIntelligenceBlockers = asRecord(starterIntelligenceDiagnostics.blockerSummary)
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -996,6 +1019,35 @@ export async function getAiLearningLifecycle() {
           : 'PLAYER_PROPS_PROVIDER_ODDS_BLOCKED',
       null,
       'Manual approval required before any prop ingestion or prediction work'
+    ),
+    panel(
+      'mlb_starter_intelligence',
+      'MLB Starter Intelligence',
+      starterIntelligenceRecord.success === false
+        ? 'Error'
+        : Number(starterIntelligenceSummary.confirmedStarters ?? 0) + Number(starterIntelligenceSummary.probableStarters ?? 0) > 0
+          ? 'Waiting'
+          : 'Blocked',
+      'Canonical starter resolver audits stored starter evidence, player mappings, starter changes and pitcher-projection eligibility without provider calls or betting activation.',
+      {
+        confirmedStarters: starterIntelligenceSummary.confirmedStarters ?? 0,
+        probableStarters: starterIntelligenceSummary.probableStarters ?? 0,
+        expectedStarters: starterIntelligenceSummary.expectedStarters ?? 0,
+        questionableStarters: starterIntelligenceSummary.questionableStarters ?? 0,
+        scratches: starterIntelligenceSummary.scratchedStarters ?? 0,
+        unknown: starterIntelligenceSummary.unavailableStarters ?? 0,
+        projectionEligibleStarters: starterIntelligenceSummary.projectionEligibleStarters ?? 0,
+        blockedPitcherProjectionSlots: starterIntelligenceSummary.blockedPitcherProjectionSlots ?? 0,
+        missingProbableStarter: starterIntelligenceBlockers.MISSING_PROBABLE_STARTER ?? 0,
+        providerCallsMade: starterIntelligenceRecord.providerCallsMade ?? 0,
+      },
+      starterIntelligenceRecord.success === false
+        ? String(starterIntelligenceRecord.error ?? 'STARTER_INTELLIGENCE_ERROR')
+        : Number(starterIntelligenceSummary.confirmedStarters ?? 0) + Number(starterIntelligenceSummary.probableStarters ?? 0) > 0
+          ? null
+          : 'NO_CURRENT_PROBABLE_OR_CONFIRMED_STARTERS',
+      null,
+      'Only affected games recalculate when starter evidence changes'
     ),
     panel(
       'mlb_player_projection_engine',

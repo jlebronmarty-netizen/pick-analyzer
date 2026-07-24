@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { puertoRicoUtcRange } from '@/services/active-event.service'
 import { getFeatureStoreStatus } from '@/services/feature-store-core.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
+import { getMlbStarterIntelligence } from '@/services/mlb-starter-intelligence.service'
 import { getMlbCurrentLineupContext } from '@/services/mlb-current-lineup-context.service'
 import { getSharedSportPredictionEngineSdk } from '@/services/sport-prediction-engine-sdk.service'
 import { resolveMlbGameLifecycle } from '@/services/mlb-game-lifecycle.service'
@@ -134,6 +135,7 @@ export type UniversalProjection = {
   lineupStatus?: 'CONFIRMED' | 'EXPECTED' | 'UNKNOWN' | null
   lineupSource?: string | null
   battingOrder?: number | null
+  historicalStarts?: number | null
   projectionOrigin?: ProjectionOrigin
   validityStatus?: ProjectionValidity
   validationErrors?: string[]
@@ -454,31 +456,51 @@ function resolveStarterRows(event: EventRow, playerStats: PlayerStatRow[], playe
     { side: 'home' as const, teamId: event.home_team_id, teamName: event.home_team, opponentTeamId: event.away_team_id, opponentTeamName: event.away_team, raw: asRecord(starters.home) },
   ]
   return sides.map((side) => {
-    const providerPlayerId = providerIdFromBag({ sportsdataio: side.raw.playerId })
+    const providerPlayerId = providerIdFromBag({ sportsdataio: side.raw.providerPlayerId ?? side.raw.playerId })
+    const canonicalPlayerId = typeof side.raw.canonicalPlayerId === 'string'
+      ? side.raw.canonicalPlayerId
+      : typeof side.raw.playerId === 'string' && side.raw.playerId.startsWith('baseball_mlb:')
+        ? side.raw.playerId
+        : null
     const mappedPlayer = providerPlayerId
       ? players.find((player) => playerProviderId(player) === providerPlayerId)
       : null
     const statRow = providerPlayerId
-      ? playerStats.find((row) => isPitcher(row) && (playerProviderId(row) === providerPlayerId || (mappedPlayer?.id && row.player_id === mappedPlayer.id)))
-      : null
-    const starterStatus: StarterStatus = side.raw.confirmed === true ? 'CONFIRMED' : side.raw.probable === true ? 'PROBABLE' : providerPlayerId ? 'EXPECTED' : 'UNVERIFIED'
+      ? playerStats.find((row) => isPitcher(row) && (playerProviderId(row) === providerPlayerId || (canonicalPlayerId && row.player_id === canonicalPlayerId) || (mappedPlayer?.id && row.player_id === mappedPlayer.id)))
+      : canonicalPlayerId
+        ? playerStats.find((row) => isPitcher(row) && row.player_id === canonicalPlayerId)
+        : null
+    const rawStatus = String(side.raw.projectionStatus ?? side.raw.status ?? '').toUpperCase()
+    const starterStatus: StarterStatus = rawStatus === 'CONFIRMED'
+      ? 'CONFIRMED'
+      : rawStatus === 'PROBABLE'
+        ? 'PROBABLE'
+        : rawStatus === 'EXPECTED'
+          ? 'EXPECTED'
+          : side.raw.confirmed === true
+            ? 'CONFIRMED'
+            : side.raw.probable === true
+              ? 'PROBABLE'
+              : providerPlayerId || canonicalPlayerId
+                ? 'EXPECTED'
+                : 'UNVERIFIED'
     const fallbackEntityId = providerPlayerId ? `sportsdataio:mlb:player:${providerPlayerId}` : null
-    const internalPlayerId = mappedPlayer?.id ?? statRow?.player_id ?? null
+    const internalPlayerId = canonicalPlayerId ?? mappedPlayer?.id ?? statRow?.player_id ?? null
     const identityConfidence = internalPlayerId ? 96 : providerPlayerId ? 82 : 0
     return {
       ...side,
       providerPlayerId,
       internalPlayerId,
       entityId: internalPlayerId ?? fallbackEntityId,
-      entityName: mappedPlayer?.display_name ?? statRow?.player_name ?? String(side.raw.name ?? 'Pitcher'),
+      entityName: mappedPlayer?.display_name ?? statRow?.player_name ?? String(side.raw.playerName ?? side.raw.name ?? 'Pitcher'),
       position: mappedPlayer?.position ?? 'P',
       active: mappedPlayer?.active ?? null,
       statRow,
       starterStatus,
-      starterSource: String(side.raw.source ?? 'sportsdataio_games_by_date_verified_snapshot'),
-      starterVerifiedAt: typeof side.raw.capturedAt === 'string' ? side.raw.capturedAt : null,
+      starterSource: String(side.raw.source ?? 'starter_intelligence'),
+      starterVerifiedAt: typeof side.raw.sourceTimestamp === 'string' ? side.raw.sourceTimestamp : typeof side.raw.capturedAt === 'string' ? side.raw.capturedAt : null,
       identityConfidence,
-      participationConfidence: starterStatus === 'CONFIRMED' ? 96 : starterStatus === 'PROBABLE' ? 86 : starterStatus === 'EXPECTED' ? 68 : 0,
+      participationConfidence: Number(side.raw.confidence ?? (starterStatus === 'CONFIRMED' ? 96 : starterStatus === 'PROBABLE' ? 86 : starterStatus === 'EXPECTED' ? 62 : 0)),
     }
   })
 }
@@ -554,6 +576,7 @@ function makePitcherProjections(event: EventRow, playerStats: PlayerStatRow[], p
       starterStatus: starter.starterStatus,
       starterSource: starter.starterSource,
       starterVerifiedAt: starter.starterVerifiedAt,
+      historicalStarts: starts ?? null,
       participationStatus: starter.starterStatus === 'CONFIRMED' ? 'CONFIRMED_STARTER' : starter.starterStatus === 'PROBABLE' ? 'PROBABLE_STARTER' : 'EXPECTED_PARTICIPANT',
       participationConfidence: starter.participationConfidence,
       projectionKey: key,
@@ -811,6 +834,7 @@ async function persistProjectionHistory(projections: UniversalProjection[], dryR
       lineupStatus: item.lineupStatus ?? null,
       lineupSource: item.lineupSource ?? null,
       battingOrder: item.battingOrder ?? null,
+      historicalStarts: item.historicalStarts ?? null,
       validationErrors: item.validationErrors ?? [],
       validationWarnings: item.validationWarnings ?? [],
       rankReasons: item.rankReasons ?? [],
@@ -1009,13 +1033,14 @@ export async function getUniversalProjectionEngine(options: { sportKey?: string 
       warnings: ['Projection adapter is currently implemented for MLB first; universal contract is reusable for future sports.'],
     }
   }
-  const [events, playerStats, players, featureStore, sdk, starterWeather, lineupContext] = await Promise.all([
+  const [events, playerStats, players, featureStore, sdk, starterWeather, starterIntelligence, lineupContext] = await Promise.all([
     loadMlbEvents(selectedDate),
     loadMlbPlayerStats(),
     loadMlbPlayers(),
     getFeatureStoreStatus(),
     getSharedSportPredictionEngineSdk(),
     getMlbStarterWeatherStadiumIntelligence(selectedDate),
+    getMlbStarterIntelligence({ date: selectedDate }),
     getMlbCurrentLineupContext({ date: selectedDate }),
   ])
   const lifecycleByEvent = new Map(events.map((event) => [event.id, resolveMlbGameLifecycle(event, new Date(generatedAt))]))
@@ -1029,7 +1054,7 @@ export async function getUniversalProjectionEngine(options: { sportKey?: string 
     ...makeTeamProjections(event, gameStats, 'away', generatedAt),
     ...makeTeamProjections(event, gameStats, 'home', generatedAt),
   ])
-  const pitcherProjections = projectionEligibleEvents.flatMap((event) => makePitcherProjections(event, playerStats, players, starterWeather as Record<string, unknown>, generatedAt))
+  const pitcherProjections = projectionEligibleEvents.flatMap((event) => makePitcherProjections(event, playerStats, players, starterIntelligence as Record<string, unknown>, generatedAt))
   const batterProjections = projectionEligibleEvents.flatMap((event) => makeBatterProjections(event, playerStats, players, lineupContext, generatedAt))
   const gameProjections = projectionEligibleEvents.flatMap((event) => makeGameProjections(event, teamProjections, generatedAt))
   const projections = [...teamProjections, ...pitcherProjections, ...batterProjections, ...gameProjections]
@@ -1038,7 +1063,7 @@ export async function getUniversalProjectionEngine(options: { sportKey?: string 
   const ready = projections.filter((item) => item.readiness === 'READY').length
   const limited = projections.filter((item) => item.readiness === 'LIMITED').length
   const blocked = projections.filter((item) => item.readiness === 'BLOCKED' || item.readiness === 'INSUFFICIENT_DATA').length
-  const projectionHealth = summarizeProjectionHealth({ projections, historyMetrics, persistence, events, projectionEligibleEvents, gameStats, playerStats, players, starterWeather: starterWeather as Record<string, unknown>, lineupContext })
+  const projectionHealth = summarizeProjectionHealth({ projections, historyMetrics, persistence, events, projectionEligibleEvents, gameStats, playerStats, players, starterWeather: starterIntelligence as Record<string, unknown>, lineupContext })
   const userBoard = buildProjectionBoard(projections)
   return {
     success: true,
@@ -1101,6 +1126,7 @@ export async function getUniversalProjectionEngine(options: { sportKey?: string 
       storedPlayerStatsRows: playerStats.length,
       sportPlayersRows: players.length,
       starterWeatherGames: starterWeather.games?.length ?? 0,
+      starterIntelligenceGames: starterIntelligence.games?.length ?? 0,
       confirmedLineups: lineupContext.summary.confirmedLineups,
       expectedLineups: lineupContext.summary.expectedLineups,
       eligibleBatters: lineupContext.summary.eligibleBatters,
