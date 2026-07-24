@@ -8,6 +8,9 @@ type Freshness = {
   status: string
   userMessage: string
   ageMinutes: number | null
+  lastUpdated?: string | null
+  fetchedAt?: string | null
+  nextRecommendedRefreshAt?: string | null
 }
 
 type FreshnessResponse = {
@@ -15,6 +18,32 @@ type FreshnessResponse = {
   activeSlateDate: string | null
   freshness: Freshness[]
   blockers: string[]
+}
+
+function timeText(value: string | null | undefined) {
+  if (!value) return 'Waiting for next scheduler execution'
+  const parsed = new Date(value)
+  if (!Number.isFinite(parsed.getTime())) return 'Waiting for next scheduler execution'
+  return parsed.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'America/Puerto_Rico',
+    timeZoneName: 'short',
+  })
+}
+
+function relativeText(value: string | null | undefined, ageMinutes: number | null) {
+  if (ageMinutes !== null && Number.isFinite(ageMinutes)) {
+    if (ageMinutes < 1) return 'Updated just now'
+    if (ageMinutes < 60) return `Updated ${Math.round(ageMinutes)} minute${Math.round(ageMinutes) === 1 ? '' : 's'} ago`
+    const hours = Math.round(ageMinutes / 60)
+    return `Updated ${hours} hour${hours === 1 ? '' : 's'} ago`
+  }
+  if (!value) return null
+  const parsed = new Date(value).getTime()
+  if (!Number.isFinite(parsed)) return null
+  const minutes = Math.max(0, Math.round((Date.now() - parsed) / 60000))
+  return relativeText(value, minutes)
 }
 
 function tone(status: string) {
@@ -64,7 +93,9 @@ export default function DataFreshnessPreviewCard() {
           <div key={item.domain} className={`rounded-lg border p-4 ${tone(item.status)}`}>
             <p className="text-xs font-black uppercase tracking-[0.12em] opacity-80">{item.label}</p>
             <p className="mt-2 text-sm font-black">{item.status.replaceAll('_', ' ')}</p>
-            <p className="mt-2 text-xs leading-5 opacity-80">{item.ageMinutes === null ? item.userMessage : `${item.ageMinutes} minutes old`}</p>
+            <p className="mt-2 text-xs leading-5 opacity-80">{relativeText(item.lastUpdated ?? item.fetchedAt, item.ageMinutes) ?? item.userMessage}</p>
+            <p className="mt-1 text-xs leading-5 opacity-80">Updated {timeText(item.lastUpdated ?? item.fetchedAt)}</p>
+            <p className="mt-1 text-xs leading-5 opacity-80">Next refresh {timeText(item.nextRecommendedRefreshAt)}</p>
           </div>
         ))}
       </div>

@@ -55,12 +55,21 @@ type TodayResponse = {
   warnings?: string[]
   errors?: Array<{ dependency: string; message: string; critical: boolean }>
   timing?: { totalMs?: number; dependencies?: Record<string, number>; slowDependencies?: string[] }
+  latestOddsTimestamp?: string | null
+  nextActionAt?: string | null
+  pipeline?: Array<{
+    id: string
+    label: string
+    status: 'Complete' | 'Running' | 'Waiting' | 'Blocked' | 'Not due'
+    detail: string
+  }>
   sections?: {
     officialPicks?: { status: string; data: OfficialPick[]; reason: string | null }
     aiPicksFeed?: { status: string; data: AiPicksFeed | null; reason: string | null }
     mostLikely?: { status: string; data: IntelligenceRow[]; reason: string | null }
     bestValue?: { status: string; data: IntelligenceRow[]; reason: string | null }
     aiBetFinder?: { status: string; data: IntelligenceRow[]; reason: string | null }
+    modelIntelligence?: { status: string; data: any; reason: string | null }
     topOpportunity?: { status: string; data: TopOpportunity | null; reason: string | null }
   }
 }
@@ -359,6 +368,25 @@ function timeText(value: unknown) {
     timeZone: 'America/Puerto_Rico',
     timeZoneName: 'short',
   })
+}
+
+function relativeTime(value: unknown) {
+  if (!value) return null
+  const parsed = new Date(String(value)).getTime()
+  if (!Number.isFinite(parsed)) return null
+  const seconds = Math.max(0, Math.round((Date.now() - parsed) / 1000))
+  if (seconds < 60) return 'Updated just now'
+  const minutes = Math.round(seconds / 60)
+  if (minutes < 60) return `Updated ${minutes} minute${minutes === 1 ? '' : 's'} ago`
+  const hours = Math.round(minutes / 60)
+  if (hours < 24) return `Updated ${hours} hour${hours === 1 ? '' : 's'} ago`
+  const days = Math.round(hours / 24)
+  return `Updated ${days} day${days === 1 ? '' : 's'} ago`
+}
+
+function timestampText(value: unknown, fallback = 'Waiting for next scheduler execution') {
+  if (!value) return fallback
+  return `${relativeTime(value) ?? 'Updated'} / ${timeText(value)}`
 }
 
 function humanStatus(value: unknown) {
@@ -1010,14 +1038,17 @@ function compactMarketAge(row: IntelligenceRow | TopOpportunity | AiPicksFeedIte
 function TodayStory({ data, mostLikely, bestValue, counts }: { data: TodayResponse; mostLikely: IntelligenceRow[]; bestValue: IntelligenceRow[]; counts: CategoryCounts }) {
   const topProbability = mostLikely[0]
   const topValue = bestValue[0]
+  const modelOnlyCount = Number(data.sections?.modelIntelligence?.data?.summary?.modelOutcomes ?? counts.modelOnly ?? 0)
   const lines = [
-    data.gamesWaitingForOdds > 0
+    data.summary?.aiBriefing ?? (data.gamesWaitingForOdds > 0
       ? 'Sportsbook odds are still pending, so recommendations stay locked until the board has current prices.'
       : counts.official > 0
         ? `${counts.official} Official Pick${counts.official === 1 ? '' : 's'} passed the production policy.`
-        : 'No game currently meets both confidence and value requirements for an Official Pick.',
+        : 'No game currently meets both confidence and value requirements for an Official Pick.'),
     topProbability
       ? `The most likely outcome is ${fieldValue(topProbability.selection)} in ${fieldValue(topProbability.matchup)} at ${formatPercent(candidateDisplayProbability(topProbability))}.`
+      : modelOnlyCount > 0
+        ? `${modelOnlyCount} model-only probabilit${modelOnlyCount === 1 ? 'y is' : 'ies are'} stored; value recommendations are waiting for current market odds.`
       : null,
     topValue && Number(topValue.edge ?? 0) > 0
       ? `The largest value signal is ${fieldValue(topValue.selection)} with ${signedNumber(topValue.edge, ' edge')}.`
@@ -1034,6 +1065,45 @@ function TodayStory({ data, mostLikely, bestValue, counts }: { data: TodayRespon
         {lines.map((line, index) => (
           <p key={index} className="text-base font-semibold leading-7 text-slate-200">{line}</p>
         ))}
+      </div>
+    </section>
+  )
+}
+
+function PipelineSummary({ data, counts }: { data: TodayResponse; counts: CategoryCounts }) {
+  const pipeline = data.pipeline ?? []
+  const byId = new Map(pipeline.map((item) => [item.id, item]))
+  const rows: Array<[string, { status: string; detail: string }]> = [
+    ['Odds', byId.get('market_prices') ?? { status: data.latestOddsTimestamp ? 'Complete' : 'Waiting', detail: data.summary.marketPrices }],
+    ['Predictions', byId.get('predictions') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? `${data.predictionCandidates} candidates available.` : 'Waiting for odds.' }],
+    ['Current Board', byId.get('current_board') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? 'Candidates are available.' : 'Waiting.' }],
+    ['Official Picks', byId.get('recommendations') ?? { status: counts.official ? 'Complete' : 'Waiting', detail: counts.official ? 'Official picks passed policy.' : 'Waiting for prediction and market comparison.' }],
+    ['Settlement', byId.get('settlement') ?? { status: data.finalGames ? 'Waiting' : 'Complete', detail: data.finalGames ? 'Final games are ready for stored settlement checks.' : 'Healthy.' }],
+    ['Learning', byId.get('learning') ?? { status: 'Not due', detail: 'Ready when settled production labels exist; no auto-promotion.' }],
+  ]
+  return (
+    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Current AI Pipeline</p>
+          <h3 className="mt-2 text-3xl font-black text-white">{fieldValue(data.nextAction, 'Waiting for next scheduler execution')}</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-400">Last odds sync: {timestampText(data.latestOddsTimestamp, 'No stored odds refresh timestamp')}</p>
+          <p className="text-sm leading-6 text-slate-400">Next scheduled refresh: {data.nextActionAt ? timeText(data.nextActionAt) : 'Waiting for next scheduler execution'}</p>
+        </div>
+        <Badge tone={data.status === 'AVAILABLE' ? 'green' : data.status === 'DEGRADED' || data.status === 'UNAVAILABLE' ? 'red' : 'yellow'}>{fieldValue(data.status, 'AVAILABLE')}</Badge>
+      </div>
+      <div className="mt-5 grid gap-3 md:grid-cols-3">
+        {rows.map(([label, item]) => {
+          const status = String(item.status ?? 'Waiting')
+          const tone = status === 'Complete' ? 'green' : status === 'Running' ? 'blue' : status === 'Blocked' ? 'red' : status === 'Not due' ? 'gray' : 'yellow'
+          return (
+            <div key={String(label)} className={`rounded-lg border p-4 ${toneClasses(tone)}`}>
+              <p className="text-xs font-black uppercase tracking-[0.12em] opacity-80">{label}</p>
+              <p className="mt-2 text-lg font-black">{status}</p>
+              <p className="mt-2 text-xs leading-5 opacity-80">{fieldValue(item.detail, 'Waiting for next scheduler execution')}</p>
+            </div>
+          )
+        })}
       </div>
     </section>
   )
@@ -1175,6 +1245,8 @@ function categoryLabel(value: unknown) {
 }
 
 function gameCategory(game: Record<string, any>) {
+  const lifecycle = String(game.lifecycle ?? game.status ?? '').toUpperCase()
+  if (lifecycle === 'FINAL' || lifecycle === 'COMPLETED' || lifecycle === 'COMPLETE') return fieldValue(game.settlementState?.label, 'Awaiting Settlement')
   const bettingEligibility = String(game.bettingEligibility ?? '').toUpperCase()
   const hasMarket = hasDisplayMarket(game)
   if (bettingEligibility === 'LOCKED_AFTER_START') return 'Betting Locked'
@@ -1211,6 +1283,8 @@ function GameCard({ game }: { game: Record<string, any> }) {
   const statusTone = status === 'Final' ? 'gray' : status === 'Live' || status === 'Status update overdue' || status === 'Status Unconfirmed' ? 'yellow' : 'blue'
   const categoryCardTone = categoryTone(aiCategory)
   const categoryBadgeTone = aiCategory === 'Waiting for Odds' || aiCategory === 'Data Aging' ? 'yellow' : aiCategory === 'Tracking' || aiCategory === 'Operational' || aiCategory === 'Insufficient Data' ? 'blue' : aiCategory === 'Betting Locked' ? 'red' : categoryCardTone
+  const isFinal = status === 'Final'
+  const marketUnavailableText = isFinal ? fieldValue(game.settlementState?.label, 'Awaiting Settlement') : 'Waiting for odds'
 
   return (
     <details className={`group rounded-lg border border-slate-800 bg-slate-950/70 p-4 ${cardMotion}`}>
@@ -1224,7 +1298,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
           <Badge tone={categoryBadgeTone}>{aiCategory}</Badge>
           <div>
             <p className="text-xs font-bold text-slate-500">{hasMarket ? displayMarket.label : 'Market'}</p>
-            <p className="text-sm font-black text-white">{hasMarket ? displayMarket.priceText : 'Waiting for odds'}</p>
+            <p className="text-sm font-black text-white">{hasMarket ? displayMarket.priceText : marketUnavailableText}</p>
             {displayMarket.sportsbook ? <p className="mt-0.5 text-xs font-bold text-slate-500">{displayMarket.sportsbook}</p> : null}
           </div>
           <span className="text-sm font-bold text-sky-300">Details</span>
@@ -1247,7 +1321,9 @@ function GameCard({ game }: { game: Record<string, any> }) {
         <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4 md:col-span-2">
           <p className="text-sm font-black text-white">AI Decision</p>
           <p className="mt-2 text-sm leading-6 text-slate-400">
-            {!hasMarket && game.oddsPresent === false
+            {isFinal
+              ? `${fieldValue(game.settlementState?.label, 'Awaiting Settlement')}. ${Number(game.settlementState?.settledPredictions ?? 0)} of ${Number(game.settlementState?.totalPredictions ?? 0)} stored prediction rows are terminal for this event.`
+              : !hasMarket && game.oddsPresent === false
               ? 'Waiting for sportsbook odds.'
               : game.bettingEligibility === 'LOCKED_AFTER_START' || game.bettingEligibility === 'STATUS_UNCONFIRMED'
                 ? fieldValue(game.statusReason, 'Awaiting provider confirmation. Betting is locked until game status is verified.')
@@ -1273,7 +1349,8 @@ function GameCard({ game }: { game: Record<string, any> }) {
 }
 
 function ProgressPipeline({ data }: { data: TodayResponse }) {
-  const steps = [
+  const contractSteps = data.pipeline?.filter((step) => ['schedule', 'market_prices', 'predictions', 'current_board', 'recommendations', 'settlement'].includes(step.id))
+  const steps = contractSteps?.length ? contractSteps.map((step) => ({ label: step.label, mark: step.label.slice(0, 1), state: step.status })) : [
     { label: 'Schedule', mark: 'S', state: data.currentGames > 0 || data.upcomingGames > 0 ? 'Complete' : 'Awaiting update' },
     { label: 'Odds', mark: 'O', state: data.gamesWaitingForOdds > 0 || data.freshness === 'empty' ? 'Waiting for odds' : 'Complete' },
     { label: 'Predictions', mark: 'P', state: data.predictionCandidates > 0 ? 'Complete' : data.gamesWaitingForOdds > 0 ? 'Waiting for odds' : 'Updating' },
@@ -1291,7 +1368,7 @@ function ProgressPipeline({ data }: { data: TodayResponse }) {
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {steps.map((step) => {
-          const tone = step.state === 'Complete' ? 'green' : step.state === 'Updating' ? 'blue' : step.state === 'Not Due' ? 'gray' : 'yellow'
+          const tone = step.state === 'Complete' ? 'green' : step.state === 'Updating' || step.state === 'Running' ? 'blue' : step.state === 'Not due' || step.state === 'Not Due' ? 'gray' : step.state === 'Blocked' ? 'red' : 'yellow'
           return (
             <div key={step.label} className={`rounded-lg border border-slate-800 bg-slate-950/70 p-3 ${cardMotion}`} title={step.label}>
               <div className="flex items-center justify-between gap-2">
@@ -1500,7 +1577,9 @@ export default function UserTodayPanel() {
     )
   }
 
-  const counts = data.marketIntelligence ?? { official: data.officialPicks, aiLeans: 0, watchlist: 0, modelOnly: 0, pass: 0, avoid: 0 }
+  const modelOnlySummaryCount = Number(data.sections?.modelIntelligence?.data?.summary?.modelOutcomes ?? 0)
+  const baseCounts = data.marketIntelligence ?? { official: data.officialPicks, aiLeans: 0, watchlist: 0, modelOnly: 0, pass: 0, avoid: 0 }
+  const counts = { ...baseCounts, modelOnly: Math.max(Number(baseCounts.modelOnly ?? 0), modelOnlySummaryCount) }
   const officialPickRows = data.sections?.officialPicks?.data ?? []
   const aiPicksFeed = data.sections?.aiPicksFeed?.data ?? null
   const aiLeanRows = aiResults.filter((row) => intelligenceCategory(row) === 'ai_lean').slice(0, 3)
@@ -1520,6 +1599,7 @@ export default function UserTodayPanel() {
       ) : null}
       <DecisionHero data={data} counts={counts} />
       <TodayStory data={data} counts={counts} mostLikely={mostLikely} bestValue={bestValue} />
+      <PipelineSummary data={data} counts={counts} />
       <AiPerformancePreviewCard />
       <DataFreshnessPreviewCard />
       <section className="grid gap-4 lg:grid-cols-6">

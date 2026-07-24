@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-24 - Use Compact Product Read Models For Live UX State
+
+Context: Product pages drifted after several backend phases. Performance could hang locally because Prediction History loaded the full AI Performance Center diagnostic graph and large history row payloads. Dashboard Today also mixed fresh prediction status, zero Model Only counts, final-game pregame odds copy and separate hand-built pipeline wording.
+
+Decision: Keep the predictive, settlement and recommendation engines unchanged, but move default product rendering to compact read models. `/api/performance/history` now reads `performance-scope-v2` compact history rows with bounded pagination. Dashboard Today attaches persisted event settlement state from existing prediction rows, and User Mode renders the existing Today pipeline plus scheduler/freshness metadata as the source of truth.
+
+Consequences: Performance History remains product-scoped and fast to load, final games no longer display `Waiting for odds`, and operational cards explain Odds, Predictions, Current Board, Official Picks, Settlement and Learning from stored evidence. Model Only remains informational and cannot become Best Value or Official Pick without the existing odds/policy gates.
+
+Affected modules: Performance History API, Performance Scope V2, Dashboard Today service, User Today Panel, Data Freshness preview and project documentation.
+
 ## 2026-07-23 - Use Local Worker For Retrosheet Phase 2A Backfill
 
 Context: Retrosheet Phase 2A full-season feature persistence needs about 70,470 historical snapshots. Serverless execution exceeded safe runtime, and the protected route write path was blocked. The next safe architecture is an operator-controlled local worker that avoids Vercel limits while preserving the certified Phase 2A engine.

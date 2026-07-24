@@ -1,6 +1,17 @@
 # Project Status
 
-Last updated: 2026-07-23 00:00:00Z
+Last updated: 2026-07-24 00:00:00Z
+
+## 2026-07-24 Product Integration & Live State Recovery V1
+
+- Recovered the Performance page local hang root cause by moving `/api/performance/history` off the heavyweight AI Performance Center diagnostic graph. The history endpoint now uses the compact production-scope V2 read model, honors bounded pagination (`limit` default 50, max 100), preserves `totalRows`, and strips large feature snapshots from table payloads.
+- Added compact production history rows to `performance-scope-v2.service.ts` so Prediction History still defaults to product Win/Loss/Push rows while Legacy, Ignored, Historical, Replay and Shadow remain audit-only.
+- Added persisted per-event settlement state to Dashboard Today game cards from existing `prediction_history` rows only. Final games now render `Settled`, `Awaiting Settlement` or `Settlement Pending` instead of falling through to pregame `Waiting for odds` copy.
+- Updated User Mode / Dashboard Today to render a unified Current AI Pipeline summary for Odds, Predictions, Current Board, Official Picks, Settlement and Learning using the existing Today pipeline contract and scheduler metadata. Relative and absolute timing now appears for last odds sync and next scheduled refresh when stored evidence exists.
+- Improved Data Freshness cards to show relative elapsed time, stored update time and next recommended refresh time from `adaptive-refresh-orchestrator` metadata instead of only generic status labels.
+- Dashboard Model Only counts now include the explicit model-only intelligence summary when present, without promoting model-only rows into Best Value or Official Picks. Most Likely remains informational; Best Value still requires current odds and positive EV; Official Pick policy is unchanged.
+- Local read-only smoke validation against the configured database confirmed `/api/performance/history?limit=5` returns 5 rows out of 731 total, Dashboard Today is `AVAILABLE` with 5 games and 3 final games, sample final games render `Settled`, provider calls remain 0, and Most Likely returns 15 opportunities with provider calls 0.
+- Build passed with `npm.cmd run build`. Historical feature backfill worker, Phase 2A data, Prediction Engine probabilities, Learning Brain weights, Current Board policy, Official Pick policy, settlement outcomes, provider calls and external sports API calls were not modified.
 
 ## 2026-07-23 Local Historical Feature Backfill Worker V1
 

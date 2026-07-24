@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Product Integration & Live State Recovery V1
+
+Status: Locally implemented, build-verified and read-only smoke-validated; production push/deployment verification pending.
+
+Evidence: `src/app/api/performance/history/route.ts`, `src/services/performance-scope-v2.service.ts`, `src/services/dashboard-today.service.ts`, `src/components/dashboard/UserTodayPanel.tsx`, `src/components/dashboard/DataFreshnessPreviewCard.tsx`, local API smoke against `/api/performance/history`, `/api/dashboard/today`, `/api/operations/data-freshness` and `/api/market-opportunities/most-likely`, plus local production build.
+
+Note: This pass unifies product-facing live state without changing prediction probabilities, Official Pick policy, Learning Brain weights, Current Board policy, settlement outcomes or historical feature-store data. Performance History now uses a compact paginated production-scope read model instead of the full AI Performance Center diagnostic graph. Dashboard Today final games show persisted settlement state, pipeline cards use the Today pipeline contract, freshness cards show real timing metadata and Model Only counts remain informational.
+
 ### Local Historical Feature Backfill Worker V1
 
 Status: Worker implemented, dry-run verified and production write blocked by protected review.

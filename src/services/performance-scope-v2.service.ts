@@ -286,6 +286,41 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
     },
     timeline: Object.fromEntries(periods.map((period) => [period.key, { label: period.label, ...metrics(period.rows) }])),
     historyEligibleIds: productHistory.map((item) => item.row.id),
+    historyRows: productHistory.map((item) => {
+      const result = resultOf(item.row)
+      const badge = lifecycleBadge(item.row, item.event)
+      return {
+        id: item.row.id,
+        timestamp: item.row.generated_at ?? item.row.commence_time ?? item.event?.start_time ?? null,
+        sport: item.row.sport_key,
+        league: null,
+        matchup: `${item.event?.away_team ?? item.row.away_team ?? 'Away'} @ ${item.event?.home_team ?? item.row.home_team ?? 'Home'}`,
+        prediction: [item.row.team ?? item.row.opponent, item.row.market, item.row.line].filter((value) => value !== null && value !== undefined && value !== '').join(' '),
+        probability: item.row.model_probability,
+        confidence: item.row.confidence,
+        modelVersion: item.row.model_version,
+        category: item.row.recommended_pick || item.row.production_eligible ? 'official' : normalize(item.row.validation_status) || 'model',
+        result,
+        lifecycleBadge: badge,
+        actualResult: result,
+        correct: result === 'win' ? true : result === 'loss' ? false : null,
+        push: result === 'push',
+        pending: result === 'pending',
+        official: item.row.recommended_pick === true || item.row.production_eligible === true,
+        shadow: normalize(item.row.model_role) === 'shadow',
+        featureSnapshot: null,
+        missingData: [],
+        settlement: item.row.settled_at || item.row.settlement_details ? {
+          settledAt: item.row.settled_at,
+          details: {
+            source: asObject(item.row.settlement_details).source ?? asObject(asObject(item.row.settlement_details).settlement_reconciliation_v2).source ?? null,
+            reason: asObject(item.row.settlement_details).reason ?? asObject(asObject(item.row.settlement_details).settlement_reconciliation_v2).reason ?? null,
+            version: asObject(item.row.settlement_details).version ?? asObject(asObject(item.row.settlement_details).settlement_reconciliation_v2).settlement_version ?? null,
+          },
+        } : undefined,
+        outcomeExplanation: badge,
+      }
+    }),
     historyPreview: productHistory.slice(0, 200).map((item) => ({
       id: item.row.id,
       eventDate: astDate(item.row.commence_time ?? item.event?.start_time ?? item.row.generated_at),

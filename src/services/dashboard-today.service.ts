@@ -51,6 +51,14 @@ type DashboardEventLoadResult = {
   }
 }
 
+type EventSettlementState = {
+  label: 'Settled' | 'Awaiting Settlement' | 'Settlement Pending'
+  totalPredictions: number
+  settledPredictions: number
+  pendingPredictions: number
+  latestSettledAt: string | null
+}
+
 export type DashboardPipelineStatus = 'Complete' | 'Running' | 'Waiting' | 'Blocked' | 'Not due'
 export type DashboardTodayStatus = 'AVAILABLE' | 'PARTIAL' | 'DEGRADED' | 'UNAVAILABLE'
 export type DashboardSectionStatus = 'AVAILABLE' | 'EMPTY' | 'DEGRADED' | 'UNAVAILABLE'
@@ -161,6 +169,7 @@ export type DashboardTodayContract = {
     normalizedUtc: string | null
     storedStartTime: string | null
     temporalWarnings: string[]
+    settlementState?: EventSettlementState
   }>
   nextSlateGames: Array<{
     eventId: string
@@ -302,7 +311,7 @@ function bettingEligibilityForCard(lifecycle: ReturnType<typeof resolveMlbGameLi
   return 'ELIGIBLE'
 }
 
-function eventCard(event: DashboardEventRow, now: Date) {
+function eventCard(event: DashboardEventRow, now: Date, settlementState?: EventSettlementState) {
   const lifecycle = resolveMlbGameLifecycle(event, now)
   const eligibility = eligibilityFromLifecycle({
     lifecycle: lifecycle.lifecycle,
@@ -332,7 +341,55 @@ function eventCard(event: DashboardEventRow, now: Date) {
     displayTimezone: lifecycle.displayTimezone,
     temporalConfidence: lifecycle.temporalConfidence,
     temporalWarnings: lifecycle.warnings,
+    settlementState,
   }
+}
+
+function terminalResult(value: unknown) {
+  return ['win', 'loss', 'push', 'void', 'cancelled', 'canceled'].includes(String(value ?? '').toLowerCase())
+}
+
+async function loadEventSettlementStates(eventIds: string[]): Promise<Record<string, EventSettlementState>> {
+  const uniqueIds = Array.from(new Set(eventIds.filter(Boolean)))
+  if (!uniqueIds.length) return {}
+  const { data, error } = await supabaseAdmin
+    .from('prediction_history')
+    .select('game_id, result, status, lifecycle_status, settled_at, settlement_details')
+    .in('game_id', uniqueIds)
+    .limit(1000)
+  if (error) throw new Error(`Dashboard today settlement-state read failed: ${error.message}`)
+  const grouped = new Map<string, Array<Record<string, any>>>()
+  for (const row of (data ?? []) as Array<Record<string, any>>) {
+    const gameId = String(row.game_id ?? '')
+    if (!gameId) continue
+    grouped.set(gameId, [...(grouped.get(gameId) ?? []), row])
+  }
+  return Object.fromEntries(uniqueIds.map((eventId) => {
+    const rows = grouped.get(eventId) ?? []
+    const settledRows = rows.filter((row) => (
+      terminalResult(row.result) ||
+      terminalResult(row.status) ||
+      terminalResult(row.lifecycle_status) ||
+      Boolean(row.settled_at)
+    ))
+    const latestSettledAt = settledRows
+      .map((row) => String(row.settled_at ?? ''))
+      .filter(Boolean)
+      .sort()
+      .at(-1) ?? null
+    const label: EventSettlementState['label'] = rows.length === 0
+      ? 'Settlement Pending'
+      : settledRows.length === rows.length
+        ? 'Settled'
+        : 'Awaiting Settlement'
+    return [eventId, {
+      label,
+      totalPredictions: rows.length,
+      settledPredictions: settledRows.length,
+      pendingPredictions: Math.max(0, rows.length - settledRows.length),
+      latestSettledAt,
+    }]
+  }))
 }
 
 async function loadEventsForDate(date: string): Promise<DashboardEventLoadResult> {
@@ -689,6 +746,8 @@ export async function getDashboardToday({
     },
   }
   const currentEvents = eventLoad.rows
+  const settlementStateResult = await timed('event_settlement_state', () => loadEventSettlementStates(currentEvents.map((event) => event.id)), 1800)
+  const settlementStates = values(settlementStateResult, {})
   const dashboardFallbackUsed = !currentEventsResult.ok && currentEventsFallbackResult?.ok === true && (currentEventsFallbackResult.value?.rows.length ?? 0) > 0
   const dashboardQueryStatus = currentEventsResult.ok
     ? currentEvents.length > 0
@@ -699,7 +758,7 @@ export async function getDashboardToday({
       : currentEventsResult.error?.toLowerCase().includes('exceeded')
         ? 'QUERY_TIMEOUT'
         : 'QUERY_FAILED'
-  const currentCards = currentEvents.map((event) => eventCard(event, now))
+  const currentCards = currentEvents.map((event) => eventCard(event, now, settlementStates[event.id]))
   const countsByLifecycle = lifecycleCounts(currentCards)
   const currentScheduled = currentCards.filter((event) => event.lifecycle === 'PREGAME' || event.lifecycle === 'STARTING_SOON').length
   const currentInProgress = countsByLifecycle.live + countsByLifecycle.statusUnconfirmed
@@ -835,6 +894,7 @@ export async function getDashboardToday({
     budgetResult,
     modelOnlyResult,
     projectedScoresResult,
+    settlementStateResult,
   ]
   const criticalLabels = new Set(['current_events'])
   const errors = dependencyResults
