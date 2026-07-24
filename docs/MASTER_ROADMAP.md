@@ -2255,3 +2255,17 @@ Persistence or migration scope: No migration. Starter evidence is stored in `spo
 Validation: `npm.cmd run build` exits 0. Fixture validation covers pregame timestamp acceptance, post-start rejection, stale labeling, schema-safe probable storage, NO_MARKET behavior and zero-provider-call validation.
 
 Completion criteria: Confirmed/probable starters can be refreshed through one protected date-wide GamesByDate call, exact identities are required, stale or final-only evidence is blocked, and eligible starters feed the pitcher-outs shadow generator without creating props, EV, edge, Kelly, stake or Official Picks.
+
+### 39. Retrosheet Historical Feature Store Phase 2A Idempotency And Resume Certification
+
+Objective: Certify the completed Retrosheet Phase 2A historical feature backfill, second-run idempotency behavior and checkpoint resume behavior without starting Phase 2B.
+
+Status: Complete.
+
+Backend scope: `scripts/retrosheet-feature-backfill.mjs` now uses stable ordered pagination for large read audits and retry-hardened Supabase reads/updates. `ai-learning-lifecycle.service.ts` reports Phase 2A completion from persisted local-worker registry/checkpoint evidence instead of timeout-prone full-table exact counts.
+
+Persistence or migration scope: No migration. The certified resume used existing `historical_feature_snapshots`, `historical_import_registry`, `historical_import_checkpoints` and `sports_sync_jobs` rows.
+
+Validation: `npm.cmd run historical:features:resume` resumed running import `4ce68718-4661-4159-ab07-d71510c40c3f`, loaded 23 completed checkpoints, completed batches 24-49, inserted 0, updated 0 and skipped 37,120 existing deterministic snapshots. Final scoped state is 2,430 games, 70,470 snapshots, 100% coverage, 0 duplicate deterministic keys, 0 leakage failures, providerCallsMade 0 and externalSportsApiCallsMade 0. AI Operations reports completed, 49 checkpoints, 70,470 snapshots, 2,430 games and 100% coverage with no active failed/pending state.
+
+Completion criteria: `PHASE_2A_BACKFILL_PASS`, `POINT_IN_TIME_HISTORY_PASS`, `BACKFILL_IDEMPOTENCY_PASS`, `BACKFILL_RESUME_PASS` and `HISTORICAL_FEATURE_STORE_COMPLETE` are certified. Phase 2B remains unstarted pending explicit approval.

@@ -1,8 +1,8 @@
 # Retrosheet Historical Feature Production Isolation
 
-Date: 2026-07-23
+Date: 2026-07-24
 
-Status: DRY_RUN/PREVIEW PASS. Persisted-row isolation blocked until import executes.
+Status: PERSISTED PASS.
 
 ## Baseline Before Import
 
@@ -29,6 +29,26 @@ Generated Phase 2A snapshots are historical-only and must remain:
 
 ## Execution Result
 
-The full production import was not executed because approval review rejected the protected write command before mutation.
+The Phase 2A persisted backfill and second-run resume certification completed through the local worker.
+
+Final verified persisted state:
+
+- Phase 2A scoped historical feature snapshots: 70,470
+- historical games covered: 2,430
+- coverage: 100%
+- duplicate deterministic keys: 0
+- leakage failures: 0
+- provider calls: 0
+- external sports API calls: 0
 
 No Prediction Engine, Learning Brain, Current Board, Official Pick, market, settlement, live Performance or universal projection rows were intentionally changed.
+
+Read-only production isolation probe after resume found:
+
+- prediction_history Retrosheet game leaks: 0
+- prediction_history Retrosheet snapshot leaks: 0
+- prediction_history Retrosheet settlement leaks: 0
+- current production-eligible MLB prediction rows: 0
+- historical pregame-eligible games: 0
+- historical training-eligible games: 0
+- non-historical-only historical games: 0

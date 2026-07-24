@@ -8,6 +8,7 @@ const EXPECTED_HOST = 'ynuocvexviorgdjrfthw.supabase.co'
 const DEFAULT_BATCH_SIZE = 50
 const DEFAULT_WRITE_SIZE = 250
 const DEFAULT_MAX_RETRIES = 3
+const DEFAULT_READ_MAX_RETRIES = 8
 
 function loadEnvLocal() {
   const path = '.env.local'
@@ -167,14 +168,62 @@ async function certifyTableReadable(client, table) {
 async function readPaged(client, table, columns, build, pageSize = 1000, maxRows = Number.POSITIVE_INFINITY) {
   const rows = []
   for (let from = 0; from < maxRows; from += pageSize) {
-    let query = client.from(table).select(columns).range(from, Math.min(from + pageSize - 1, maxRows - 1))
-    if (build) query = build(query)
-    const { data, error } = await query
-    if (error) throw new Error(`${table} read failed: ${redact(error.message)}`)
+    let data = null
+    let lastError = null
+    for (let attempt = 1; attempt <= DEFAULT_READ_MAX_RETRIES; attempt += 1) {
+      try {
+        let query = client.from(table).select(columns).range(from, Math.min(from + pageSize - 1, maxRows - 1))
+        if (build) query = build(query)
+        const result = await query
+        data = result.data
+        lastError = result.error
+      } catch (error) {
+        lastError = error
+      }
+      if (!lastError) break
+      if (attempt < DEFAULT_READ_MAX_RETRIES) await new Promise((resolve) => setTimeout(resolve, attempt * 1000))
+    }
+    if (lastError) throw new Error(`${table} read failed: ${redact(lastError.message ?? lastError)}`)
     rows.push(...(data ?? []))
     if (!data || data.length < pageSize) break
   }
   return rows
+}
+
+function applyStableOrder(query, columns) {
+  const selectedColumns = String(columns)
+    .split(',')
+    .map((column) => column.trim())
+    .filter(Boolean)
+  if (selectedColumns.includes('deterministic_key')) {
+    return query.order('deterministic_key', { ascending: true })
+  }
+  if (selectedColumns.includes('checkpoint_key')) {
+    return query.order('checkpoint_key', { ascending: true })
+  }
+  if (selectedColumns.includes('id')) {
+    return query.order('id', { ascending: true })
+  }
+  return query
+}
+
+async function readPagedStable(client, table, columns, build, pageSize = 1000, maxRows = Number.POSITIVE_INFINITY) {
+  return readPaged(client, table, columns, (query) => applyStableOrder(build ? build(query) : query, columns), pageSize, maxRows)
+}
+
+async function retrySupabase(label, operation, maxRetries = DEFAULT_MAX_RETRIES) {
+  let lastError = null
+  for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
+    try {
+      const result = await operation()
+      if (!result.error) return result
+      lastError = result.error
+    } catch (error) {
+      lastError = error
+    }
+    if (attempt < maxRetries) await new Promise((resolve) => setTimeout(resolve, attempt * 1000))
+  }
+  throw new Error(`${label} failed: ${redact(lastError?.message ?? lastError)}`)
 }
 
 async function certifyConnection(client) {
@@ -213,12 +262,12 @@ async function certifyConnection(client) {
 }
 
 async function snapshotAudit(client, contract) {
-  const rows = await readPaged(
+  const rows = await readPagedStable(
     client,
     'historical_feature_snapshots',
     'id,deterministic_key,provider_event_id,market,sport_key,feature_set_version,leakage_status,leakage_warnings,production_eligible,trial,scrambled,metadata',
-    (query) => query.eq('sport_key', contract.sportKey).eq('market', contract.market).like('deterministic_key', `${contract.deterministicKeyPrefix}:%`).order('created_at', { ascending: true }),
-    1000
+    (query) => query.eq('sport_key', contract.sportKey).eq('market', contract.market).like('deterministic_key', `${contract.deterministicKeyPrefix}:%`),
+    250
   )
   const keys = new Map()
   for (const row of rows) keys.set(row.deterministic_key, (keys.get(row.deterministic_key) ?? 0) + 1)
@@ -240,7 +289,7 @@ async function snapshotAudit(client, contract) {
 }
 
 async function learningEvidenceAudit(client) {
-  const rows = await readPaged(
+  const rows = await readPagedStable(
     client,
     'prediction_history',
     'id,sport_key,game_id,market,result,status,lifecycle_status,settlement_details,settled_at,generated_at,feature_snapshot_id,feature_snapshot_key,feature_snapshot,trial,scrambled,validation_status,model_version',
@@ -288,7 +337,22 @@ async function findRunningJob(client, contract) {
     .order('started_at', { ascending: false })
     .limit(5)
   if (error) throw new Error(`historical_import_registry resume lookup failed: ${redact(error.message)}`)
-  return (data ?? []).find((row) => row.metadata?.workerVersion === WORKER_VERSION) ?? null
+  const job = (data ?? []).find((row) => row.metadata?.workerVersion === WORKER_VERSION) ?? null
+  if (!job || job.metadata?.syncJobId) return job
+
+  const syncLookup = await client
+    .from('sports_sync_jobs')
+    .select('id,started_at')
+    .eq('job_type', WORKER_VERSION)
+    .eq('sport_key', contract.sportKey)
+    .eq('provider', contract.source)
+    .eq('season', contract.season)
+    .eq('status', 'running')
+    .order('started_at', { ascending: false })
+    .limit(1)
+  if (syncLookup.error) throw new Error(`sports_sync_jobs resume lookup failed: ${redact(syncLookup.error.message)}`)
+  const syncJobId = syncLookup.data?.[0]?.id
+  return syncJobId ? { ...job, metadata: { ...job.metadata, syncJobId } } : job
 }
 
 async function createJob(client, contract, mode, games, plannedSnapshots, args) {
@@ -382,7 +446,7 @@ async function createJob(client, contract, mode, games, plannedSnapshots, args) 
 }
 
 async function completedBatchIndexes(client, importId) {
-  const rows = await readPaged(
+  const rows = await readPagedStable(
     client,
     'historical_import_checkpoints',
     'checkpoint_key,status',
@@ -441,9 +505,11 @@ async function updateJob(client, job, status, totals, extra = {}) {
     errors: totals.errors,
     providerCallsMade: 0,
     externalSportsApiCallsMade: 0,
+    syncJobId: job.syncJobId,
+    idempotencyKey: job.idempotencyKey ?? null,
     ...extra,
   }
-  const syncUpdate = await client.from('sports_sync_jobs').update({
+  await retrySupabase('sports_sync_jobs update', () => client.from('sports_sync_jobs').update({
     status,
     completed_at: finishedAt,
     records_inserted: totals.inserted,
@@ -452,10 +518,9 @@ async function updateJob(client, job, status, totals, extra = {}) {
     error_count: totals.errors.length,
     last_error: totals.errors[0] ?? null,
     metadata,
-  }).eq('id', job.syncJobId)
-  if (syncUpdate.error) throw new Error(`sports_sync_jobs update failed: ${redact(syncUpdate.error.message)}`)
+  }).eq('id', job.syncJobId))
 
-  const importUpdate = await client.from('historical_import_registry').update({
+  await retrySupabase('historical_import_registry update', () => client.from('historical_import_registry').update({
     status,
     finished_at: finishedAt,
     normalized_record_count: totals.inserted + totals.updated + totals.skipped,
@@ -467,8 +532,7 @@ async function updateJob(client, job, status, totals, extra = {}) {
     provider_calls_made: 0,
     remote_mutations_made: totals.inserted + totals.updated,
     metadata,
-  }).eq('id', job.importId)
-  if (importUpdate.error) throw new Error(`historical_import_registry update failed: ${redact(importUpdate.error.message)}`)
+  }).eq('id', job.importId))
 }
 
 async function writeSnapshotChunk(client, rows, job, writeSize, maxRetries) {

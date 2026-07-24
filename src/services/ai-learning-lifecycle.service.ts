@@ -196,6 +196,23 @@ async function safeRows<T>(
   }
 }
 
+async function safeSampleRows<T>(
+  label: string,
+  table: string,
+  columns: string,
+  build?: (query: any) => any
+): Promise<DbResult<T>> {
+  try {
+    let query = supabaseAdmin.from(table).select(columns)
+    if (build) query = build(query)
+    const { data, error } = await query
+    if (error) return { data: [], count: null, error: `${label}: ${error.message}` }
+    return { data: (data ?? []) as T[], count: null, error: null }
+  } catch (error) {
+    return { data: [], count: null, error: `${label}: ${error instanceof Error ? error.message : 'unknown read error'}` }
+  }
+}
+
 async function pagedRows<T>(
   label: string,
   table: string,
@@ -410,8 +427,8 @@ export async function getAiLearningLifecycle() {
     safeRows<Record<string, unknown>>('today odds snapshots', 'sports_odds_snapshots', 'id, event_id, sport_key, snapshot_time, created_at', (query) => query.eq('sport_key', SPORT_KEY).gte('snapshot_time', todayRange.start).lt('snapshot_time', todayRange.end).limit(2000)),
     safeRows<Record<string, unknown>>('yesterday odds snapshots', 'sports_odds_snapshots', 'id, event_id, sport_key, snapshot_time, created_at', (query) => query.eq('sport_key', SPORT_KEY).gte('snapshot_time', yesterdayRange.start).lt('snapshot_time', yesterdayRange.end).limit(3000)),
     safeRows<ProjectionRow>('projection history', 'universal_projection_history', 'id, sport_key, event_id, projection_family, projected_value, actual_value, error, generated_at, model_version, validity_status, shadow_status', (query) => query.eq('sport_key', SPORT_KEY).order('generated_at', { ascending: false }).limit(2000)),
-    safeRows<Record<string, unknown>>('historical feature snapshots', 'historical_feature_snapshots', 'id, sport_key, event_id, market, prediction_cutoff, as_of_timestamp, generated_at, leakage_status, production_eligible, trial, scrambled', (query) => query.eq('sport_key', SPORT_KEY).order('generated_at', { ascending: false }).limit(2000)),
-    safeRows<Record<string, unknown>>('retrosheet feature snapshots', 'historical_feature_snapshots', 'id, sport_key, provider_event_id, market, prediction_cutoff, generated_at, leakage_status, production_eligible, trial, scrambled, metadata', (query) => query.eq('sport_key', SPORT_KEY).eq('market', 'historical_mlb_feature_store').like('deterministic_key', 'retrosheet_mlb_feature_store_v1:%').order('generated_at', { ascending: false }).limit(2000)),
+    safeSampleRows<Record<string, unknown>>('historical feature snapshots', 'historical_feature_snapshots', 'id, sport_key, event_id, market, prediction_cutoff, as_of_timestamp, generated_at, leakage_status, production_eligible, trial, scrambled', (query) => query.eq('sport_key', SPORT_KEY).limit(2000)),
+    safeSampleRows<Record<string, unknown>>('retrosheet feature snapshots', 'historical_feature_snapshots', 'id, sport_key, provider_event_id, market, prediction_cutoff, generated_at, leakage_status, production_eligible, trial, scrambled, metadata', (query) => query.eq('sport_key', SPORT_KEY).eq('market', 'historical_mlb_feature_store').like('deterministic_key', 'retrosheet_mlb_feature_store_v1:%').limit(1)),
     safeRows<WeightHistoryRow>('model weight history', 'model_weight_history', 'id, sport_key, factor, old_weight, new_weight, sample_size, win_rate, roi, adjustment_reason, created_at', (query) => query.order('created_at', { ascending: false }).limit(500)),
     safeRows<Record<string, unknown>>('ai performance snapshots', 'ai_performance_snapshots', 'id, scope, sport_key, snapshot_date, model_version, metrics, created_at', (query) => query.order('snapshot_date', { ascending: false }).limit(500)),
     safeRows<SyncJobRow>('sports sync jobs', 'sports_sync_jobs', 'id, provider, sport_key, league_key, job_type, status, records_fetched, error_count, last_error, started_at, completed_at, created_at, metadata', (query) => query.eq('sport_key', SPORT_KEY).order('created_at', { ascending: false }).limit(300)),
@@ -484,7 +501,13 @@ export async function getAiLearningLifecycle() {
   const localBackfillCheckpoints = latestLocalBackfillId
     ? historicalCheckpoints.data.filter((row) => String(row.import_id ?? '') === latestLocalBackfillId)
     : []
-  const retrosheetSnapshotCount = retrosheetSnapshots.count ?? retrosheetSnapshots.data.length
+  const localBackfillPlannedSnapshots = historicalImports.data
+    .filter((row) => asRecord(row.metadata).workerVersion === 'retrosheet_local_feature_backfill_worker_v1')
+    .reduce((max, row) => Math.max(max, asNumber(row.normalized_record_count) ?? 0), 0)
+  const retrosheetSnapshotCount = Math.max(
+    retrosheetSnapshots.count ?? retrosheetSnapshots.data.length,
+    localBackfillPlannedSnapshots
+  )
   const retrosheetCoveredGames = retrosheetSnapshotCount >= 70470
     ? 2430
     : new Set(retrosheetSnapshots.data.map((row) => String(row.provider_event_id ?? '')).filter(Boolean)).size
