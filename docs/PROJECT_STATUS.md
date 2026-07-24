@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Current MLB Lineup Context & Game Intelligence Experience V1
+
+- Added a provider-independent current MLB lineup context layer that reads stored games, stored lineup evidence, stored season player stats and existing starter/weather/stadium intelligence without making provider calls or remote mutations.
+- New APIs: `/api/mlb/lineup-context` and `/api/mlb/game-intelligence`. The API route inventory is now 361 routes and the app build currently emits 343 static pages.
+- Added `/game-intelligence`, `/game-intelligence/[eventId]` and `/player-projections/[projectionId]` product surfaces. Game Intelligence now exposes Overview, Team Projections, Starting Pitchers, Expected Lineups, Player Projections, Markets, AI Explanation and Performance tabs.
+- Current Board now includes player-intelligence availability metadata while preserving candidate ranking, Best Value, Most Likely and Official Pick policy. AI Operations now reports MLB player projection coverage for starters, expected lineups and eligible batters.
+- Current stored data for 2026-07-24 has 15 MLB games, 0 confirmed/probable/expected starters, 30 unavailable starter slots, 0 confirmed lineups, 26 expected lineups and 257 eligible batter contexts. Cutoff-safe projection generation excludes live games and produces 1,836 informational batter projections across 14 eligible games; pitcher projections remain blocked by missing starter context.
+- No player-prop betting, sportsbook comparison, EV, Kelly, Official Picks, production model weights, existing full-game probabilities, settlement, replay artifacts, Historical Feature Store rows or scheduler architecture were modified.
+
 ## 2026-07-24 Universal Market Intelligence Platform V1
 
 - Added a provider-independent universal market inventory and readiness layer over stored odds snapshots, market contracts and existing MLB readiness gates.

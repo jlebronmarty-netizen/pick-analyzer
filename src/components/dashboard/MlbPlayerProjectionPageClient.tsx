@@ -49,7 +49,7 @@ function ProjectionCard({ item }: { item: Projection }) {
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{item.team ?? 'Team'} vs {item.opponent ?? 'Opponent'} · {labelize(item.lineupOrStarterStatus)}</p>
-          <h3 className="mt-2 text-lg font-black text-white">{item.playerName}</h3>
+          <a href={`/player-projections/${encodeURIComponent(item.projectionId)}`} className="mt-2 block text-lg font-black text-white hover:text-emerald-100">{item.playerName}</a>
           <p className="mt-1 text-sm text-slate-300">{item.projectionLabel ?? labelize(item.projectionType)} <span className="font-black text-emerald-200">{item.expectedValue ?? 'N/A'}</span></p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs font-black uppercase">

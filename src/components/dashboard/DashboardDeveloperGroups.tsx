@@ -80,6 +80,7 @@ const ProductionReadinessAuditPanel = dynamic(() => import('@/components/dashboa
 const MlbMarketExpansionRoadmapPanel = dynamic(() => import('@/components/dashboard/MlbMarketExpansionRoadmapPanel'))
 const UniversalProjectionEnginePanel = dynamic(() => import('@/components/dashboard/UniversalProjectionEnginePanel'))
 const MlbPlayerProjectionsPanel = dynamic(() => import('@/components/dashboard/MlbPlayerProjectionsPanel'))
+const MlbGameIntelligencePanel = dynamic(() => import('@/components/dashboard/MlbGameIntelligencePanel'))
 const MlbTemporalHealthPanel = dynamic(() => import('@/components/dashboard/MlbTemporalHealthPanel'))
 
 export default function DashboardDeveloperGroups() {
@@ -118,6 +119,7 @@ export default function DashboardDeveloperGroups() {
 
       <DeveloperDetails title="Model" description="Model evidence, feature contracts, prediction safety and simulation tools.">
         <UniversalProjectionEnginePanel />
+        <MlbGameIntelligencePanel />
         <MlbPlayerProjectionsPanel />
         <MlbPredictionEnginePanel />
         <PredictionEngineV4Panel />

@@ -36,6 +36,7 @@ const compactNavItems = [
 const toolNavItems = [
   { href: '/projections', label: 'Projections', icon: 'PR' },
   { href: '/player-projections', label: 'Player Projections', icon: 'PP' },
+  { href: '/game-intelligence', label: 'Game Intelligence', icon: 'GI' },
   { href: '/betting-workbench', label: 'Betting Workbench', icon: 'BW' },
   { href: '/most-likely', label: 'Most Likely', icon: 'ML' },
   { href: '/best-value', label: 'Best Value', icon: 'BV' },

@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { isActiveBettingEvent } from '@/services/active-event.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
+import { getMlbCurrentLineupContext } from '@/services/mlb-current-lineup-context.service'
 import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
 import {
   buildMarketAlignment,
@@ -237,6 +238,9 @@ export type CurrentBoardResponse = {
     candidates: number
     markets: string[]
     latestOddsTimestamp: string | null
+    playerIntelligenceAvailable?: boolean
+    eligibleBatters?: number
+    expectedLineups?: number
   }>
   markets: string[]
   candidates: CurrentBoardCandidate[]
@@ -313,6 +317,18 @@ export type CurrentBoardResponse = {
     contract: 'ai_bet_finder_readiness_v1'
     sources: string[]
     llmUsed: false
+    providerCallsMade: 0
+    remoteMutationsMade: 0
+  }
+  playerIntelligence?: {
+    status: 'AVAILABLE' | 'BLOCKED' | 'NOT_APPLICABLE'
+    playerIntelligenceAvailable: boolean
+    eligibleBatters: number
+    expectedLineups: number
+    confirmedLineups: number
+    confirmedStarters: number
+    probableStarters: number
+    expectedStarters: number
     providerCallsMade: 0
     remoteMutationsMade: 0
   }
@@ -1190,6 +1206,20 @@ export async function getCurrentBoard({
   if (!candidates.length) warnings.push('No valid current-board candidates in selected mode.')
   if (latestOddsAgeMinutes !== null && latestOddsAgeMinutes > maxAllowedAgeMinutes) warnings.push('Latest selected odds are stale for display freshness; candidate selection still uses the immutable Current Board generation policy.')
   if (staleVisibleMarketCount > 0 && freshVisibleMarketCount > 0) warnings.push(`${staleVisibleMarketCount} visible market${staleVisibleMarketCount === 1 ? '' : 's'} are stale while ${freshVisibleMarketCount} remain fresh.`)
+  const playerIntelligenceContext = sportKey === 'baseball_mlb'
+    ? await getMlbCurrentLineupContext({ date: operatingDate ?? currentSlateDate }).catch(() => null)
+    : null
+  const playerIntelligenceByEvent = new Map((playerIntelligenceContext?.games ?? []).map((game) => [game.eventId, game]))
+  const boardGames = Array.from(gamesById.values()).map((game) => {
+    const intelligence = playerIntelligenceByEvent.get(game.eventId)
+    return {
+      ...game,
+      playerIntelligenceAvailable: Boolean((intelligence?.coverage.eligibleBatters ?? 0) > 0 || (intelligence?.coverage.eligiblePitchers ?? 0) > 0),
+      eligibleBatters: intelligence?.coverage.eligibleBatters ?? 0,
+      expectedLineups: intelligence?.coverage.expectedLineups ?? 0,
+    }
+  })
+  const playerIntelligenceAvailable = Boolean((playerIntelligenceContext?.summary.eligibleBatters ?? 0) > 0 || (playerIntelligenceContext?.summary.eligiblePitchers ?? 0) > 0)
 
   return {
     success: true,
@@ -1200,7 +1230,7 @@ export async function getCurrentBoard({
     slateDate: currentSlateDate,
     operatingDate,
     timezone: 'America/Puerto_Rico',
-    games: Array.from(gamesById.values()),
+    games: boardGames,
     markets: Array.from(new Set(candidates.map((candidate) => candidate.marketLabel))).sort(),
     candidates,
     marketSemantics: {
@@ -1301,6 +1331,29 @@ export async function getCurrentBoard({
       contract: 'ai_bet_finder_readiness_v1',
       sources: ['Current Board', 'Most Likely ranking', 'Best Value ranking', 'official Top Picks', 'Bet Slip eligibility', 'Arbitrage availability'],
       llmUsed: false,
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+    },
+    playerIntelligence: playerIntelligenceContext ? {
+      status: playerIntelligenceAvailable ? 'AVAILABLE' : 'BLOCKED',
+      playerIntelligenceAvailable,
+      eligibleBatters: playerIntelligenceContext.summary.eligibleBatters,
+      expectedLineups: playerIntelligenceContext.summary.expectedLineups,
+      confirmedLineups: playerIntelligenceContext.summary.confirmedLineups,
+      confirmedStarters: playerIntelligenceContext.summary.confirmedStarters,
+      probableStarters: playerIntelligenceContext.summary.probableStarters,
+      expectedStarters: playerIntelligenceContext.summary.expectedStarters,
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+    } : {
+      status: 'NOT_APPLICABLE',
+      playerIntelligenceAvailable: false,
+      eligibleBatters: 0,
+      expectedLineups: 0,
+      confirmedLineups: 0,
+      confirmedStarters: 0,
+      probableStarters: 0,
+      expectedStarters: 0,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
     },

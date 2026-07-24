@@ -760,6 +760,7 @@ export async function getAiLearningLifecycle() {
   }))
   const playerProjectionRecord = asRecord(playerProjectionLifecycle)
   const playerProjectionLifecycleSummary = asRecord(playerProjectionRecord.lifecycle)
+  const playerProjectionCoverage = asRecord(playerProjectionLifecycleSummary.coverage)
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -1004,6 +1005,13 @@ export async function getAiLearningLifecycle() {
       {
         eligibleGames: playerProjectionLifecycleSummary.eligibleGames ?? 0,
         eligiblePlayers: playerProjectionLifecycleSummary.eligiblePlayers ?? 0,
+        eligiblePitchers: playerProjectionCoverage.eligiblePitchers ?? 0,
+        eligibleBatters: playerProjectionCoverage.eligibleBatters ?? 0,
+        confirmedStarters: playerProjectionCoverage.confirmedStarters ?? 0,
+        probableStarters: playerProjectionCoverage.probableStarters ?? 0,
+        expectedStarters: playerProjectionCoverage.expectedStarters ?? 0,
+        confirmedLineups: playerProjectionCoverage.confirmedLineups ?? 0,
+        expectedLineups: playerProjectionCoverage.expectedLineups ?? 0,
         projectionsGenerated: playerProjectionLifecycleSummary.projectionsGenerated ?? 0,
         projectionsBlocked: playerProjectionLifecycleSummary.projectionsBlocked ?? 0,
         settlementPending: playerProjectionLifecycleSummary.settlementPending ?? 0,

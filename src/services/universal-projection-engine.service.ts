@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { puertoRicoUtcRange } from '@/services/active-event.service'
 import { getFeatureStoreStatus } from '@/services/feature-store-core.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
+import { getMlbCurrentLineupContext } from '@/services/mlb-current-lineup-context.service'
 import { getSharedSportPredictionEngineSdk } from '@/services/sport-prediction-engine-sdk.service'
 import { resolveMlbGameLifecycle } from '@/services/mlb-game-lifecycle.service'
 import {
@@ -16,6 +17,10 @@ import {
   validateMlbProjectionIntegrityFixtures,
   validateProjectionValue,
 } from '@/services/mlb-projection-integrity.service'
+import type {
+  MlbGameLineupContext,
+  MlbLineupPlayerContext,
+} from '@/services/mlb-current-lineup-context.service'
 import type {
   ProjectionOrigin,
   ProjectionRankTier,
@@ -126,6 +131,9 @@ export type UniversalProjection = {
   starterVerifiedAt?: string | null
   participationStatus?: string | null
   participationConfidence?: number | null
+  lineupStatus?: 'CONFIRMED' | 'EXPECTED' | 'UNKNOWN' | null
+  lineupSource?: string | null
+  battingOrder?: number | null
   projectionOrigin?: ProjectionOrigin
   validityStatus?: ProjectionValidity
   validationErrors?: string[]
@@ -224,7 +232,7 @@ async function loadMlbPlayerStats() {
     .eq('sport_key', 'baseball_mlb')
     .eq('league_key', 'mlb')
     .order('updated_at', { ascending: false })
-    .limit(1000)
+    .limit(3000)
   if (error) return [] as PlayerStatRow[]
   return (data ?? []) as PlayerStatRow[]
 }
@@ -385,18 +393,21 @@ function makeTeamProjections(event: EventRow, stats: GameStatRow[], side: 'home'
 function isPitcher(row: PlayerStatRow) {
   const bag = { ...asRecord(row.stats), ...asRecord(row.metadata) }
   const position = String(bag.Position ?? bag.position ?? '').toLowerCase()
-  return position === 'p' || position === 'sp' || position === 'rp' || ['ERA', 'WHIP', 'InningsPitchedDecimal', 'PitchesThrown'].some((key) => bag[key] !== undefined)
+  const pitchingWorkload = ['InningsPitchedDecimal', 'TotalOutsPitched', 'PitchesThrown', 'PitchingStrikeouts'].some((key) => Number(bag[key] ?? 0) > 0)
+  return position === 'p' || position === 'sp' || position === 'rp' || pitchingWorkload
 }
 
 function providerIdFromBag(value: unknown) {
   const bag = asRecord(value)
   const candidates = [
-    bag.sportsdataio,
+    bag.player,
     bag.sportsdataio_player_id,
     bag.PlayerID,
     bag.PlayerId,
     bag.playerId,
     bag.player_id,
+    bag.providerPlayerId,
+    bag.sportsdataio,
   ]
   const found = candidates.find((item) => item !== null && item !== undefined && String(item).trim())
   return found === undefined ? null : String(found)
@@ -404,6 +415,30 @@ function providerIdFromBag(value: unknown) {
 
 function playerProviderId(row: PlayerStatRow | PlayerRow) {
   return providerIdFromBag(row.provider_ids) ?? providerIdFromBag(row.metadata) ?? providerIdFromBag('stats' in row ? row.stats : null)
+}
+
+function lineupContextForEvent(lineupContext: { games?: MlbGameLineupContext[] } | null | undefined, event: EventRow) {
+  return lineupContext?.games?.find((game) => game.eventId === event.id) ?? null
+}
+
+function playerStatForLineupPlayer(lineupPlayer: MlbLineupPlayerContext, playerStats: PlayerStatRow[], players: PlayerRow[]) {
+  const mappedPlayer = players.find((player) =>
+    Boolean(lineupPlayer.playerId && player.id === lineupPlayer.playerId) ||
+    (lineupPlayer.providerPlayerId && playerProviderId(player) === lineupPlayer.providerPlayerId) ||
+    (lineupPlayer.playerName && player.display_name?.toLowerCase() === lineupPlayer.playerName.toLowerCase())
+  )
+  const statRow = playerStats.find((row) =>
+    !isPitcher(row) &&
+    row.stat_type === 'season' &&
+    row.team_id === lineupPlayer.teamId &&
+    (
+      Boolean(lineupPlayer.playerId && row.player_id === lineupPlayer.playerId) ||
+      Boolean(mappedPlayer?.id && row.player_id === mappedPlayer.id) ||
+      (lineupPlayer.providerPlayerId && playerProviderId(row) === lineupPlayer.providerPlayerId) ||
+      (lineupPlayer.playerName && row.player_name?.toLowerCase() === lineupPlayer.playerName.toLowerCase())
+    )
+  )
+  return { statRow, mappedPlayer }
 }
 
 function starterContextForEvent(starterWeather: Record<string, unknown>, event: EventRow) {
@@ -542,19 +577,17 @@ function makePitcherProjections(event: EventRow, playerStats: PlayerStatRow[], p
   })
 }
 
-function makeBatterProjections(event: EventRow, playerStats: PlayerStatRow[], players: PlayerRow[], generatedAt: string) {
-  const eventTeamIds = new Set([event.home_team_id, event.away_team_id].filter(Boolean))
-  const batters = playerStats
-    .filter((row) => !isPitcher(row))
-    .filter((row) => row.stat_type === 'season')
-    .filter((row) => Boolean(row.team_id && eventTeamIds.has(row.team_id)))
-    .filter((row) => Boolean(row.player_id || playerProviderId(row)))
-    .slice(0, 8)
-  return batters.flatMap((row) => {
-    const mappedPlayer = players.find((player) => player.id === row.player_id || playerProviderId(player) === playerProviderId(row))
+function makeBatterProjections(event: EventRow, playerStats: PlayerStatRow[], players: PlayerRow[], lineupContext: { games?: MlbGameLineupContext[] } | null | undefined, generatedAt: string) {
+  const context = lineupContextForEvent(lineupContext, event)
+  const lineupPlayers = [...(context?.lineups.away ?? []), ...(context?.lineups.home ?? [])]
+    .filter((player) => player.confidence >= 55)
+    .slice(0, 18)
+  return lineupPlayers.flatMap((lineupPlayer) => {
+    const { statRow: row, mappedPlayer } = playerStatForLineupPlayer(lineupPlayer, playerStats, players)
+    if (!row) return []
     if (mappedPlayer?.active === false) return []
-    const providerPlayerId = playerProviderId(row) ?? (mappedPlayer ? playerProviderId(mappedPlayer) : null)
-    const entityId = row.player_id ?? mappedPlayer?.id ?? (providerPlayerId ? `sportsdataio:mlb:player:${providerPlayerId}` : null)
+    const providerPlayerId = lineupPlayer.providerPlayerId ?? playerProviderId(row) ?? (mappedPlayer ? playerProviderId(mappedPlayer) : null)
+    const entityId = lineupPlayer.playerId ?? row.player_id ?? mappedPlayer?.id ?? (providerPlayerId ? `sportsdataio:mlb:player:${providerPlayerId}` : null)
     if (!entityId) return []
     const games = row.games ?? statNumber(row, ['Games', 'GamesPlayed'])
     const hits = statNumber(row, ['Hits', 'H']) ?? null
@@ -568,18 +601,25 @@ function makeBatterProjections(event: EventRow, playerStats: PlayerStatRow[], pl
     const woba = statNumber(row, ['wOBA', 'WeightedOnBaseAverage']) ?? null
     const hasMetrics = [hits, doubles, triples, hr, walks, strikeouts, totalBases, ops, woba].filter((value) => value !== null).length
     if (!games || games < 20 || hasMetrics < 4) return []
-    const featureQuality = clamp(22 + hasMetrics * 5, 0, 68)
-    const dataSufficiency = clamp(20 + hasMetrics * 5, 0, 66)
-    const confidence = clamp(20 + hasMetrics * 4, 0, 60)
+    const featureQuality = clamp(24 + hasMetrics * 5 + lineupPlayer.confidence * 0.08, 0, 74)
+    const dataSufficiency = clamp(22 + hasMetrics * 5 + lineupPlayer.confidence * 0.08, 0, 72)
+    const confidence = clamp(22 + hasMetrics * 4 + lineupPlayer.confidence * 0.1, 0, 68)
     const perGame = (value: number | null) => seasonCountToPerGame(value, games)
-    const side = row.team_id === event.home_team_id ? 'home' as const : 'away' as const
+    const side = lineupPlayer.side
     const teamName = side === 'home' ? event.home_team : event.away_team
     const opponentTeamId = side === 'home' ? event.away_team_id : event.home_team_id
     const opponentTeamName = side === 'home' ? event.away_team : event.home_team
     const identityConfidence = row.player_id ? 92 : providerPlayerId ? 80 : 0
     const features = [
       contribution('cached_batter_season_stats', hasMetrics >= 4 ? 'PARTIAL' : 'MISSING', hasMetrics * 5, `${hasMetrics} batter metrics were available from stored player stats.`),
-      contribution('confirmed_lineup', 'MISSING', 0, 'Confirmed lineup and batting order are unavailable.'),
+      contribution(
+        'lineup_context',
+        lineupPlayer.status === 'CONFIRMED' ? 'AVAILABLE' : 'PARTIAL',
+        Math.round(lineupPlayer.confidence / 4),
+        lineupPlayer.status === 'CONFIRMED'
+          ? `${lineupPlayer.playerName} is in a confirmed lineup slot.`
+          : `${lineupPlayer.playerName} is an expected lineup participant derived from stored player intelligence; this is not labelled confirmed.`
+      ),
       contribution('pitcher_handedness_matchup', 'MISSING', 0, 'Pitcher-vs-batter handedness context is unavailable.'),
     ]
     const values = [
@@ -606,8 +646,8 @@ function makeBatterProjections(event: EventRow, playerStats: PlayerStatRow[], pl
       eventId: event.id,
       entityType: 'player',
       entityId,
-      entityName: mappedPlayer?.display_name ?? row.player_name ?? 'Batter',
-      teamId: row.team_id,
+      entityName: mappedPlayer?.display_name ?? lineupPlayer.playerName ?? row.player_name ?? 'Batter',
+      teamId: lineupPlayer.teamId ?? row.team_id,
       teamName,
       matchup: `${event.away_team} @ ${event.home_team}`,
       scheduledTime: event.start_time,
@@ -615,10 +655,13 @@ function makeBatterProjections(event: EventRow, playerStats: PlayerStatRow[], pl
       opponentTeamId,
       opponentTeamName,
       providerPlayerId,
-      internalPlayerId: row.player_id ?? mappedPlayer?.id ?? null,
+      internalPlayerId: lineupPlayer.playerId ?? row.player_id ?? mappedPlayer?.id ?? null,
       identityConfidence,
-      participationStatus: 'PRELIMINARY_BATTER_PROJECTION',
-      participationConfidence: 42,
+      participationStatus: lineupPlayer.status === 'CONFIRMED' ? 'CONFIRMED_LINEUP' : 'EXPECTED_LINEUP',
+      participationConfidence: lineupPlayer.confidence,
+      lineupStatus: lineupPlayer.status,
+      lineupSource: lineupPlayer.source,
+      battingOrder: lineupPlayer.battingOrder,
       projectionKey: key,
       projectionLabel: label,
       projectionFamily: 'mlb_batter_projection',
@@ -630,12 +673,12 @@ function makeBatterProjections(event: EventRow, playerStats: PlayerStatRow[], pl
       dataSufficiency,
       predictionInterval: interval(value, confidence, Number(spread)),
       featureContributions: features,
-      explanation: `${label} projection for ${row.player_name ?? 'batter'} uses cached batter stats only. It does not assume lineup confirmation and does not use sportsbook lines.`,
+      explanation: `${label} projection for ${lineupPlayer.playerName} uses cached batter stats and ${lineupPlayer.status.toLowerCase()} lineup context. Expected lineups are not confirmed lineups, and no sportsbook line, odds, EV or Kelly input is used.`,
       readiness: readiness(dataSufficiency, featureQuality),
       shadowStatus: 'INSUFFICIENT_HISTORY',
       modelVersion: 'universal_projection_engine_v2',
       projectionOrigin: 'PARTIAL_MODEL',
-      validationWarnings: ['LINEUP_UNCONFIRMED'],
+      validationWarnings: lineupPlayer.status === 'CONFIRMED' ? [] : ['LINEUP_EXPECTED_NOT_CONFIRMED'],
       generatedAt,
     }))
   })
@@ -765,6 +808,9 @@ async function persistProjectionHistory(projections: UniversalProjection[], dryR
       noEv: true,
       noKelly: true,
       noOfficialPick: true,
+      lineupStatus: item.lineupStatus ?? null,
+      lineupSource: item.lineupSource ?? null,
+      battingOrder: item.battingOrder ?? null,
       validationErrors: item.validationErrors ?? [],
       validationWarnings: item.validationWarnings ?? [],
       rankReasons: item.rankReasons ?? [],
@@ -791,6 +837,7 @@ function summarizeProjectionHealth({
   playerStats,
   players,
   starterWeather,
+  lineupContext,
 }: {
   projections: UniversalProjection[]
   historyMetrics: Awaited<ReturnType<typeof safeProjectionHistoryMetrics>>
@@ -801,6 +848,7 @@ function summarizeProjectionHealth({
   playerStats: PlayerStatRow[]
   players: PlayerRow[]
   starterWeather: Record<string, unknown>
+  lineupContext: { games?: MlbGameLineupContext[]; summary?: Record<string, unknown> }
 }) {
   const ids = projections.map((item) => item.id)
   const eventEntityKeys = projections.map((item) => `${item.eventId}|${item.entityType}|${item.entityId}|${item.projectionKey}`)
@@ -858,6 +906,9 @@ function summarizeProjectionHealth({
     storedGameStatsRows: gameStats.length,
     storedPlayerStatsRows: playerStats.length,
     sportPlayersRows: players.length,
+    confirmedLineups: Number(lineupContext.summary?.confirmedLineups ?? 0),
+    expectedLineups: Number(lineupContext.summary?.expectedLineups ?? 0),
+    eligibleBatters: Number(lineupContext.summary?.eligibleBatters ?? 0),
     providerCallsMade: 0,
     remoteMutationsMade: persistence.insertedOrUpdated,
     blockerSummary,
@@ -958,13 +1009,14 @@ export async function getUniversalProjectionEngine(options: { sportKey?: string 
       warnings: ['Projection adapter is currently implemented for MLB first; universal contract is reusable for future sports.'],
     }
   }
-  const [events, playerStats, players, featureStore, sdk, starterWeather] = await Promise.all([
+  const [events, playerStats, players, featureStore, sdk, starterWeather, lineupContext] = await Promise.all([
     loadMlbEvents(selectedDate),
     loadMlbPlayerStats(),
     loadMlbPlayers(),
     getFeatureStoreStatus(),
     getSharedSportPredictionEngineSdk(),
     getMlbStarterWeatherStadiumIntelligence(selectedDate),
+    getMlbCurrentLineupContext({ date: selectedDate }),
   ])
   const lifecycleByEvent = new Map(events.map((event) => [event.id, resolveMlbGameLifecycle(event, new Date(generatedAt))]))
   const projectionEligibleEvents = events.filter((event) => {
@@ -978,7 +1030,7 @@ export async function getUniversalProjectionEngine(options: { sportKey?: string 
     ...makeTeamProjections(event, gameStats, 'home', generatedAt),
   ])
   const pitcherProjections = projectionEligibleEvents.flatMap((event) => makePitcherProjections(event, playerStats, players, starterWeather as Record<string, unknown>, generatedAt))
-  const batterProjections = projectionEligibleEvents.flatMap((event) => makeBatterProjections(event, playerStats, players, generatedAt))
+  const batterProjections = projectionEligibleEvents.flatMap((event) => makeBatterProjections(event, playerStats, players, lineupContext, generatedAt))
   const gameProjections = projectionEligibleEvents.flatMap((event) => makeGameProjections(event, teamProjections, generatedAt))
   const projections = [...teamProjections, ...pitcherProjections, ...batterProjections, ...gameProjections]
   const historyMetrics = await safeProjectionHistoryMetrics()
@@ -986,7 +1038,7 @@ export async function getUniversalProjectionEngine(options: { sportKey?: string 
   const ready = projections.filter((item) => item.readiness === 'READY').length
   const limited = projections.filter((item) => item.readiness === 'LIMITED').length
   const blocked = projections.filter((item) => item.readiness === 'BLOCKED' || item.readiness === 'INSUFFICIENT_DATA').length
-  const projectionHealth = summarizeProjectionHealth({ projections, historyMetrics, persistence, events, projectionEligibleEvents, gameStats, playerStats, players, starterWeather: starterWeather as Record<string, unknown> })
+  const projectionHealth = summarizeProjectionHealth({ projections, historyMetrics, persistence, events, projectionEligibleEvents, gameStats, playerStats, players, starterWeather: starterWeather as Record<string, unknown>, lineupContext })
   const userBoard = buildProjectionBoard(projections)
   return {
     success: true,
@@ -1049,10 +1101,13 @@ export async function getUniversalProjectionEngine(options: { sportKey?: string 
       storedPlayerStatsRows: playerStats.length,
       sportPlayersRows: players.length,
       starterWeatherGames: starterWeather.games?.length ?? 0,
+      confirmedLineups: lineupContext.summary.confirmedLineups,
+      expectedLineups: lineupContext.summary.expectedLineups,
+      eligibleBatters: lineupContext.summary.eligibleBatters,
       missing: [
         gameStats.length ? null : 'mlb_game_stats_sparse_or_absent',
         playerStats.length ? null : 'mlb_player_stats_sparse_or_absent',
-        'confirmed_lineups_not_required_and_not_fabricated',
+        lineupContext.summary.confirmedLineups ? null : 'confirmed_lineups_unavailable_expected_lineups_used_when_confident',
         'sportsbook_lines_not_used',
       ].filter(Boolean),
     },

@@ -2,7 +2,9 @@ import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { puertoRicoUtcRange } from '@/services/active-event.service'
+import { getMlbCurrentLineupContext } from '@/services/mlb-current-lineup-context.service'
 import { getUniversalProjectionEngine } from '@/services/universal-projection-engine.service'
+import type { MlbLineupPlayerContext } from '@/services/mlb-current-lineup-context.service'
 import type { UniversalProjection } from '@/services/universal-projection-engine.service'
 
 const SPORT_KEY = 'baseball_mlb'
@@ -14,6 +16,15 @@ const PROJECTION_VERSION = 'mlb_player_projection_contract_v1'
 type FamilyStatus = 'DATA_READY' | 'FEATURE_READY' | 'MODEL_READY' | 'BACKTEST_READY' | 'SHADOW_READY' | 'LIVE_PROJECTION_READY' | 'BLOCKED'
 
 type HistoricalRow = Record<string, unknown>
+type PlayerStatRow = {
+  team_id: string | null
+  player_id: string | null
+  player_name: string | null
+  games: number | null
+  provider_ids: Record<string, unknown> | null
+  stats: Record<string, unknown> | null
+  metadata: Record<string, unknown> | null
+}
 
 const PITCHER_KEYS = [
   'pitcher_strikeouts',
@@ -56,6 +67,28 @@ function todayLocalDate() {
 function asNumber(value: unknown) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : null
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+}
+
+function statNumber(row: PlayerStatRow, keys: string[]) {
+  const bag = { ...asRecord(row.stats), ...asRecord(row.metadata) }
+  for (const key of keys) {
+    const parsed = asNumber(bag[key])
+    if (parsed !== null) return parsed
+  }
+  return null
+}
+
+function providerIdFromBag(value: unknown) {
+  const bag = asRecord(value)
+  return String(bag.player ?? bag.sportsdataio_player_id ?? bag.PlayerID ?? bag.PlayerId ?? bag.playerId ?? bag.player_id ?? bag.providerPlayerId ?? '').trim() || null
+}
+
+function playerProviderId(row: PlayerStatRow) {
+  return providerIdFromBag(row.provider_ids) ?? providerIdFromBag(row.metadata) ?? providerIdFromBag(row.stats)
 }
 
 function round(value: number | null, digits = 2) {
@@ -199,6 +232,9 @@ function toPlayerProjection(item: UniversalProjection) {
     dataSufficiency: item.dataSufficiency,
     featureQuality: item.featureQuality,
     lineupOrStarterStatus: item.starterStatus ?? item.participationStatus ?? 'UNKNOWN',
+    lineupStatus: item.lineupStatus ?? null,
+    lineupSource: item.lineupSource ?? null,
+    battingOrder: item.battingOrder ?? null,
     lineupOrStarterConfidence: item.participationConfidence ?? null,
     asOfTimestamp: item.generatedAt,
     cutoffTimestamp: cutoff,
@@ -216,6 +252,136 @@ function toPlayerProjection(item: UniversalProjection) {
     noBettingRecommendation: true,
     noOfficialPick: true,
   }
+}
+
+function fallbackProjectionId(parts: unknown[]) {
+  return parts.map((part) => String(part ?? 'null').toLowerCase().replace(/[^a-z0-9.-]+/g, '_')).join(':')
+}
+
+async function loadFallbackPlayerStats() {
+  const { data, error } = await supabaseAdmin
+    .from('sport_player_stats')
+    .select('team_id, player_id, player_name, games, provider_ids, stats, metadata')
+    .eq('sport_key', SPORT_KEY)
+    .eq('league_key', LEAGUE_KEY)
+    .eq('stat_type', 'season')
+    .limit(3000)
+  if (error) return [] as PlayerStatRow[]
+  return (data ?? []) as PlayerStatRow[]
+}
+
+function statRowForLineupPlayer(player: MlbLineupPlayerContext, rows: PlayerStatRow[]) {
+  return rows.find((row) =>
+    row.team_id === player.teamId &&
+    (
+      Boolean(player.playerId && row.player_id === player.playerId) ||
+      Boolean(player.providerPlayerId && playerProviderId(row) === player.providerPlayerId) ||
+      row.player_name?.toLowerCase() === player.playerName.toLowerCase()
+    )
+  ) ?? null
+}
+
+function fallbackBatterProjection(player: MlbLineupPlayerContext, row: PlayerStatRow, key: string, label: string, expected: number | null, generatedAt: string) {
+  const confidence = clamp(player.confidence * 0.55 + 20, 0, 66)
+  const spread = key.includes('home_runs') || key.includes('stolen') ? 0.5 : key.includes('total_bases') || key.includes('hits_runs') ? 2.2 : 1.1
+  const low = expected === null ? null : round(Math.max(0, expected - spread * (1 - confidence / 100)))
+  const high = expected === null ? null : round(expected + spread * (1 - confidence / 100))
+  return {
+    projectionId: fallbackProjectionId([SPORT_KEY, player.eventId, player.playerId ?? player.providerPlayerId, key, PROJECTION_VERSION, generatedAt.slice(0, 10)]),
+    sport: SPORT_KEY,
+    league: LEAGUE_KEY,
+    eventId: player.eventId,
+    playerId: player.playerId ?? player.providerPlayerId,
+    canonicalPlayerId: player.playerId,
+    playerName: player.playerName,
+    team: player.teamName,
+    opponent: null,
+    homeOrAway: player.side,
+    projectionType: key,
+    projectionLabel: label,
+    expectedValue: expected,
+    medianEstimate: medianFromDistribution(expected),
+    lowRange: low,
+    highRange: high,
+    probabilityDistribution: poissonDistribution(expected, key),
+    thresholdProbabilities: probabilityThresholds(expected, key),
+    confidence: round(confidence) ?? 0,
+    dataSufficiency: 66,
+    featureQuality: 68,
+    lineupOrStarterStatus: `${player.status}_LINEUP`,
+    lineupStatus: player.status,
+    lineupSource: player.source,
+    battingOrder: player.battingOrder,
+    lineupOrStarterConfidence: player.confidence,
+    asOfTimestamp: generatedAt,
+    cutoffTimestamp: null,
+    modelVersion: MODEL_VERSION,
+    featureVersion: FEATURE_VERSION,
+    projectionVersion: PROJECTION_VERSION,
+    productionEligibility: false,
+    bettingEligibility: false,
+    exactBlockerReasons: [
+      player.status === 'EXPECTED' ? 'LINEUP_EXPECTED_NOT_CONFIRMED' : null,
+      'NO_SPORTSBOOK_LINE',
+      'NO_SPORTSBOOK_PRICE',
+      'NO_EV_CALCULATION',
+      'NO_OFFICIAL_PICK',
+    ].filter(Boolean) as string[],
+    explanation: `${label} projection for ${player.playerName} uses stored season batter stats and ${player.status.toLowerCase()} lineup context. It is informational only and does not compare sportsbook prop lines.`,
+    supportingFeatures: [
+      { feature: 'stored_batter_season_stats', status: 'PARTIAL' as const, contribution: 45, explanation: `${row.games ?? statNumber(row, ['Games']) ?? 'Stored'} season game sample is available.` },
+      { feature: 'lineup_context', status: player.status === 'CONFIRMED' ? 'AVAILABLE' as const : 'PARTIAL' as const, contribution: Math.round(player.confidence / 4), explanation: player.status === 'CONFIRMED' ? 'Confirmed lineup context is available.' : 'Expected lineup context is derived from stored player intelligence and is not confirmed.' },
+      { feature: 'sportsbook_independence', status: 'AVAILABLE' as const, contribution: 10, explanation: 'No sportsbook line, odds, EV, Kelly or Official Pick input is used.' },
+    ],
+    distributionMethod: expected === null ? 'blocked_missing_expected_value' : 'poisson_count_distribution',
+    informationalOnly: true,
+    noSportsbookComparison: true,
+    noBettingRecommendation: true,
+    noOfficialPick: true,
+  }
+}
+
+async function fallbackExpectedBatterProjections(selectedDate: string) {
+  const [lineupContext, playerStats] = await Promise.all([
+    getMlbCurrentLineupContext({ date: selectedDate }),
+    loadFallbackPlayerStats(),
+  ])
+  const generatedAt = nowIso()
+  return lineupContext.games.flatMap((game) => [...game.lineups.away, ...game.lineups.home])
+    .filter((player) => player.confidence >= 55)
+    .flatMap((player) => {
+      const row = statRowForLineupPlayer(player, playerStats)
+      if (!row) return []
+      const games = row.games ?? statNumber(row, ['Games', 'GamesPlayed'])
+      if (!games || games < 20) return []
+      const perGame = (value: number | null) => value === null ? null : round(value / Math.max(1, games))
+      const hits = statNumber(row, ['Hits', 'H'])
+      const doubles = statNumber(row, ['Doubles'])
+      const triples = statNumber(row, ['Triples'])
+      const homeRuns = statNumber(row, ['HomeRuns', 'HR'])
+      const runs = statNumber(row, ['Runs'])
+      const rbi = statNumber(row, ['RunsBattedIn', 'RBI'])
+      const walks = statNumber(row, ['Walks', 'BB'])
+      const stolenBases = statNumber(row, ['StolenBases', 'SB'])
+      const totalBases = statNumber(row, ['TotalBases', 'TB'])
+      const plateAppearances = statNumber(row, ['PlateAppearances', 'PA']) ?? statNumber(row, ['AtBats', 'AB'])
+      const singles = hits === null ? null : Math.max(0, hits - (doubles ?? 0) - (triples ?? 0) - (homeRuns ?? 0))
+      const values = [
+        ['batter_hits', 'Hits', perGame(hits)],
+        ['batter_singles', 'Singles', perGame(singles)],
+        ['batter_doubles', 'Doubles', perGame(doubles)],
+        ['batter_triples', 'Triples', perGame(triples)],
+        ['batter_home_runs', 'Home Runs', perGame(homeRuns)],
+        ['batter_total_bases', 'Total Bases', perGame(totalBases)],
+        ['batter_rbi', 'RBI', perGame(rbi)],
+        ['batter_runs', 'Runs', perGame(runs)],
+        ['batter_walks', 'Walks', perGame(walks)],
+        ['batter_stolen_bases', 'Stolen Bases', perGame(stolenBases)],
+        ['batter_hits_runs_rbi', 'Hits + Runs + RBI', perGame((hits ?? 0) + (runs ?? 0) + (rbi ?? 0))],
+        ['batter_projected_plate_appearances', 'Projected Plate Appearances', perGame(plateAppearances)],
+      ] as const
+      return values.map(([key, label, expected]) => fallbackBatterProjection(player, row, key, label, expected, generatedAt))
+    })
 }
 
 async function countRows(table: string) {
@@ -329,10 +495,18 @@ export async function getMlbPlayerProjectionEngine(options: { date?: string | nu
   const selectedDate = options.date ?? todayLocalDate()
   const limit = Math.min(Math.max(options.limit ?? 80, 1), 200)
   const base = await getUniversalProjectionEngine({ sportKey: SPORT_KEY, date: selectedDate, dryRun: options.persist !== true })
-  const playerRows = (base.projections ?? [])
+  const basePlayerRows = (base.projections ?? [])
     .filter((item) => item.projectionFamily === 'mlb_pitcher_projection' || item.projectionFamily === 'mlb_batter_projection')
     .filter((item) => PITCHER_KEYS.includes(item.projectionKey) || BATTER_KEYS.includes(item.projectionKey))
     .map(toPlayerProjection)
+  const cutoffExcludedEventIds = new Set((base.temporalSafety?.excludedGames ?? [])
+    .map((game) => String(game.eventId ?? '').trim())
+    .filter(Boolean))
+  const fallbackBatterRows = basePlayerRows.length
+    ? []
+    : (await fallbackExpectedBatterProjections(selectedDate))
+      .filter((row) => !cutoffExcludedEventIds.has(String(row.eventId)))
+  const playerRows = basePlayerRows.length ? basePlayerRows : fallbackBatterRows
   const pitcherProjections = playerRows.filter((row) => row.projectionType.startsWith('pitcher_'))
   const batterProjections = playerRows.filter((row) => row.projectionType.startsWith('batter_'))
   const noProjectionBlockers = playerRows.length === 0 && Number(base.summary?.games ?? 0) > 0
@@ -406,8 +580,9 @@ export async function getMlbPlayerProjectionEngine(options: { date?: string | nu
         confirmedStarters: base.projectionHealth?.verifiedStarters ?? 0,
         probableStarters: base.projectionHealth?.probableStarters ?? 0,
         expectedStarters: base.projectionHealth?.expectedStarters ?? 0,
-        confirmedLineups: 0,
-        expectedLineups: batterProjections.length ? 'LIKELY_ACTIVE_ROSTER_ONLY' : 'UNAVAILABLE',
+        confirmedLineups: base.projectionHealth?.confirmedLineups ?? 0,
+        expectedLineups: base.projectionHealth?.expectedLineups ?? 0,
+        eligibleBatters: base.projectionHealth?.eligibleBatters ?? 0,
       },
       blockerSummary,
       skipReasons: Object.entries(blockerSummary).map(([reason, count]) => ({ reason, count })),

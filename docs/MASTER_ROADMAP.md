@@ -2373,3 +2373,19 @@ Persistence scope: Reuses isolated `universal_projection_history`; no player pro
 Validation: `npm.cmd run build` exits 0. Read-only projection validation makes 0 provider calls and 0 remote mutations. Bounded historical validation uses chronological train/validation/holdout splits over stored pitcher appearances and aggregated batter player-game rows. Current slate is safely blocked by missing probable starters and expected lineups rather than fabricating participation context.
 
 Completion criteria: `MLB_PLAYER_PROJECTION_ENGINE_PASS`, `PITCHER_PROJECTION_PASS`, `BATTER_PROJECTION_PASS`, `PLAYER_PROJECTION_DISTRIBUTION_PASS`, `PLAYER_PROJECTION_POINT_IN_TIME_PASS`, `PLAYER_PROJECTION_SETTLEMENT_PASS`, `PLAYER_PROJECTION_LEARNING_PASS`, `PLAYER_PROJECTION_IDEMPOTENCY_PASS`, `PLAYER_PROJECTION_PRODUCT_PASS` and `NO_PROP_BETTING_ACTIVATION_PASS` are certified for the projection layer. Player-prop odds acquisition and betting activation remain separate future approvals.
+
+### 42. Current MLB Lineup Context And Game Intelligence Experience V1
+
+Objective: Turn stored current MLB participation context into a coherent game-intelligence experience without activating sportsbook player props.
+
+Status: Implemented locally in read-only shadow/informational mode.
+
+Backend scope: `mlb-current-lineup-context.service.ts`, `game-intelligence.service.ts`, Current Board player-intelligence metadata, Universal Projection Engine lineup handoff, MLB Player Projection Engine expected-lineup fallback, `/api/mlb/lineup-context` and `/api/mlb/game-intelligence`.
+
+Frontend scope: `/game-intelligence`, `/game-intelligence/[eventId]`, `/player-projections/[projectionId]`, Dashboard tool navigation and Dashboard Advanced Details > MLB Game Intelligence.
+
+Persistence scope: None. The module reads stored `sport_events`, `sport_lineups`, `sport_player_stats`, `sport_players` and existing intelligence services only. It does not write prediction history, projection history, model weights, settlement, replay or feature-store rows.
+
+Validation: Read-only diagnostics for 2026-07-24 report 15 MLB games, 0 confirmed/probable/expected starters, 30 unavailable starter slots, 0 confirmed lineups, 26 expected lineups and 257 eligible batter contexts. Cutoff-safe player projection generation excludes the live COL @ MIL game and produces 1,836 informational batter projections across 14 eligible games. Pitcher projections remain blocked by missing starter context. Provider calls and remote mutations remain 0.
+
+Completion criteria: `CURRENT_MLB_LINEUP_CONTEXT_PASS`, `MLB_GAME_INTELLIGENCE_EXPERIENCE_PASS`, `PLAYER_PROJECTION_CONTEXT_PASS`, `NO_PROP_BETTING_ACTIVATION_PASS`, `NO_OFFICIAL_PICK_PROMOTION_PASS`, `PROVIDER_CALL_DISCIPLINE_PASS` and `PREGAME_CUTOFF_CONTEXT_PASS` are certified for the stored-data experience. Live provider activation remains blocked until real current starter and confirmed lineup coverage are available under explicit approval.

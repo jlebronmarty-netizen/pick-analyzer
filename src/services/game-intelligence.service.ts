@@ -3,6 +3,8 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getCurrentBoardCached } from '@/services/current-board.service'
 import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
+import { getMlbCurrentLineupContext } from '@/services/mlb-current-lineup-context.service'
+import { getMlbPlayerProjectionEngine } from '@/services/mlb-player-projection-engine.service'
 
 type EventRow = {
   id: string
@@ -93,7 +95,17 @@ export async function getGameIntelligence(eventId: string) {
     }
   }
 
-  const board = await getCurrentBoardCached(event.sport_key ?? 'baseball_mlb', 'ALL_STORED_ADVANCED', 200)
+  const eventDate = event.start_time ? new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Puerto_Rico',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(event.start_time)) : null
+  const [board, lineupContext, playerProjectionEngine] = await Promise.all([
+    getCurrentBoardCached(event.sport_key ?? 'baseball_mlb', 'ALL_STORED_ADVANCED', 200),
+    getMlbCurrentLineupContext({ date: eventDate, eventId: event.id }),
+    getMlbPlayerProjectionEngine({ date: eventDate, limit: 200 }),
+  ])
   const { data: pitcherProjectionData, error: pitcherProjectionError } = await supabaseAdmin
     .from('universal_projection_history')
     .select('id, entity_id, entity_name, projected_value, confidence, feature_quality, data_sufficiency, prediction_interval_low, prediction_interval_high, model_version, starter_status, calibration, metadata, generated_at, explanation')
@@ -117,6 +129,10 @@ export async function getGameIntelligence(eventId: string) {
   if (starterEvidenceError) throw new Error(`sport_lineups starter evidence read failed: ${starterEvidenceError.message}`)
   const starterEvidenceRows = (starterEvidenceData ?? []) as StarterEvidenceRow[]
   const candidates = board.candidates.filter((candidate) => candidate.eventId === event.id)
+  const gameLineupContext = lineupContext.games[0] ?? null
+  const playerProjections = playerProjectionEngine.projections.filter((projection) => projection.eventId === event.id)
+  const pitcherStatProjections = playerProjections.filter((projection) => projection.projectionType.startsWith('pitcher_'))
+  const batterStatProjections = playerProjections.filter((projection) => projection.projectionType.startsWith('batter_'))
   const topCandidate = first(candidates)
   const classification = topCandidate ? classifyMarketIntelligence(topCandidate) : null
   const alignment = topCandidate?.marketAlignment ?? null
@@ -175,6 +191,68 @@ export async function getGameIntelligence(eventId: string) {
       sampleWindow: 'Current Board feature snapshot only; full-season splits are not fabricated.',
       home: { team: event.home_team, recentForm: null, runsFor: null, runsAllowed: null, differential: null },
       away: { team: event.away_team, recentForm: null, runsFor: null, runsAllowed: null, differential: null },
+    },
+    gameExperience: {
+      mode: 'game_intelligence_experience_v1',
+      tabs: ['Overview', 'Team Projections', 'Starting Pitchers', 'Expected Lineups', 'Player Projections', 'Markets', 'AI Explanation', 'Performance'],
+      overview: {
+        matchup: `${event.away_team} @ ${event.home_team}`,
+        startTime: event.start_time,
+        status: event.status,
+        venue: event.venue ?? (event.metadata?.venue as string | undefined) ?? null,
+        playerIntelligenceAvailable: playerProjections.length > 0,
+        bettingActivation: false,
+      },
+      teamProjections: {
+        expectedRuns: {
+          home: null,
+          away: null,
+          source: 'Universal Projection Engine team rows when stored team game stats are available',
+        },
+        winProbability: {
+          home: topCandidate?.normalizedSelection === 'home' ? topCandidate.rawProbability : null,
+          away: topCandidate?.normalizedSelection === 'away' ? topCandidate.rawProbability : null,
+          source: topCandidate ? 'Current Board model probability' : 'unavailable',
+        },
+        runLine: candidates.filter((candidate) => candidate.market === 'spread').slice(0, 4),
+        totals: candidates.filter((candidate) => candidate.market === 'total').slice(0, 4),
+        teamTotals: {
+          status: 'SHADOW_OR_BLOCKED',
+          reason: 'Team total architecture exists only where supported market data and settlement are available.',
+        },
+        confidence: topCandidate?.confidence ?? null,
+      },
+      startingPitchers: gameLineupContext?.starters ?? null,
+      expectedLineups: gameLineupContext?.lineups ?? null,
+      playerProjections: {
+        total: playerProjections.length,
+        pitchers: pitcherStatProjections,
+        batters: batterStatProjections,
+        noBettingActivation: true,
+      },
+      markets: candidates,
+      aiExplanation: {
+        positiveFactors: [
+          ...(topCandidate?.positiveFactors ?? []),
+          ...(playerProjections.length ? ['Player projection context is available from stored lineup/player-stat evidence.'] : []),
+        ],
+        negativeFactors: [
+          ...(topCandidate?.negativeFactors ?? []),
+          ...(gameLineupContext?.coverage.confirmedLineups ? [] : ['Confirmed MLB lineup feed remains unavailable; expected lineups are labelled expected.']),
+          ...(gameLineupContext?.coverage.unavailableStarters ? ['One or more starter slots remain unavailable.'] : []),
+        ],
+        dataQuality: {
+          lineupConfidence: gameLineupContext ? Math.round((gameLineupContext.coverage.eligibleBatters / Math.max(1, 18)) * 100) : 0,
+          starterConfidence: gameLineupContext ? Math.round(((gameLineupContext.starters.home.confidence + gameLineupContext.starters.away.confidence) / 2)) : 0,
+          providerCallsMade: 0,
+        },
+        unavailableInputs: ['bullpen', 'handedness', 'travel', 'rest', 'confirmed injury status'].filter(Boolean),
+      },
+      performance: {
+        projectionHistoryRows: playerProjectionEngine.persistence.projectionRows,
+        settledProjectionRows: playerProjectionEngine.persistence.settledRows,
+        validation: playerProjectionEngine.validation,
+      },
     },
     pitching: {
       status: pitcherProjections.length ? 'PITCHER_OUTS_SHADOW_AVAILABLE' : 'STORED_CONTEXT_ONLY',
