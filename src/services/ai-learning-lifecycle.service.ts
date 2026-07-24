@@ -8,6 +8,7 @@ import { getHistoricalReplayFullStatus, getHistoricalReplayPilotStatus } from '@
 import { getHistoricalShadowCalibration } from '@/services/historical-shadow-calibration.service'
 import { getMlbTeamTotalsReadiness } from '@/services/mlb-team-totals-readiness.service'
 import { getMlbFirstFiveReadiness } from '@/services/mlb-first-five-readiness.service'
+import { getUniversalMarketInventory } from '@/services/universal-market-intelligence.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -654,6 +655,55 @@ export async function getAiLearningLifecycle() {
   const firstFiveRecord = asRecord(firstFiveReadiness)
   const firstFiveCoverage = asRecord(firstFiveRecord.storedCoverage)
   const firstFiveCertifications = asRecord(firstFiveRecord.certifications)
+  const universalMarketInventory = await getUniversalMarketInventory().catch((error) => ({
+    success: false,
+    mode: 'universal_market_intelligence_platform_v1',
+    error: error instanceof Error ? error.message : 'universal market inventory read failed',
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    inventory: {
+      todaysMarkets: 0,
+      historicalMarkets: 0,
+      supportedMarkets: 0,
+      blockedMarkets: 0,
+      shadowMarkets: 0,
+      productionMarkets: 0,
+    },
+    analytics: {
+      totalMarkets: 0,
+      canonicalMarketTypes: 0,
+    },
+    readinessSummary: {
+      productionReady: 0,
+      shadowReady: 0,
+      blocked: 0,
+    },
+    providerCoverage: {
+      providers: [],
+      sportsbooks: [],
+    },
+    blockerSummary: {},
+    diagnostics: {
+      duplicateMarkets: 0,
+      idempotentDiscovery: false,
+      canonicalNormalization: false,
+      unsupportedActivationBlocked: true,
+      providerBudgetRespected: true,
+      errors: [error instanceof Error ? error.message : 'universal market inventory read failed'],
+    },
+    certifications: {
+      UNIVERSAL_MARKET_PLATFORM_PASS: false,
+      CANONICAL_MARKET_REGISTRY_PASS: false,
+      MARKET_DISCOVERY_PASS: false,
+      MARKET_READINESS_PASS: false,
+      PROVIDER_COVERAGE_PASS: true,
+    },
+  }))
+  const universalMarketRecord = asRecord(universalMarketInventory)
+  const universalMarketInventorySummary = asRecord(universalMarketRecord.inventory)
+  const universalMarketAnalytics = asRecord(universalMarketRecord.analytics)
+  const universalMarketReadiness = asRecord(universalMarketRecord.readinessSummary)
+  const universalMarketDiagnostics = asRecord(universalMarketRecord.diagnostics)
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -696,7 +746,8 @@ export async function getAiLearningLifecycle() {
     Number(providerRecord.providerCallsMade ?? 0) +
     Number(schedulerRecord.providerCallsMade ?? 0) +
     Number(teamTotalsRecord.providerCallsMade ?? 0) +
-    Number(firstFiveRecord.providerCallsMade ?? 0)
+    Number(firstFiveRecord.providerCallsMade ?? 0) +
+    Number(universalMarketRecord.providerCallsMade ?? 0)
 
   const panels = [
     panel(
@@ -847,6 +898,23 @@ export async function getAiLearningLifecycle() {
       firstFiveCertifications.FIRST_FIVE_PROVIDER_READINESS_PASS ? null : 'FIRST_FIVE_PROVIDER_COVERAGE_BLOCKED',
       null,
       'Provider activation requires verified real First Five odds coverage and starter-change policy approval'
+    ),
+    panel(
+      'universal_market_intelligence',
+      'Universal Market Intelligence',
+      universalMarketRecord.success === false ? 'Error' : 'Healthy',
+      'Provider-independent market inventory, readiness and blocker diagnostics are derived from stored odds and market contracts without activating unsupported markets.',
+      {
+        todaysMarkets: universalMarketInventorySummary.todaysMarkets ?? 0,
+        totalMarkets: universalMarketAnalytics.totalMarkets ?? 0,
+        canonicalMarketTypes: universalMarketAnalytics.canonicalMarketTypes ?? 0,
+        supported: universalMarketInventorySummary.supportedMarkets ?? 0,
+        blocked: universalMarketReadiness.blocked ?? 0,
+        duplicateMarkets: universalMarketDiagnostics.duplicateMarkets ?? 0,
+      },
+      universalMarketRecord.success === false ? String(universalMarketRecord.error ?? 'UNIVERSAL_MARKET_INVENTORY_ERROR') : null,
+      null,
+      'Read-only market discovery on next dashboard refresh'
     ),
     panel(
       'weight_updates',
@@ -1156,6 +1224,7 @@ export async function getAiLearningLifecycle() {
     historicalShadowCalibration,
     teamTotalsReadiness,
     firstFiveReadiness,
+    universalMarketInventory,
     shadowLearningValidation: {
       mode: 'SHADOW_ONLY',
       acceptedSamples: historicalShadowCalibration.sample.gradedRows,

@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Universal Market Intelligence Platform V1
+
+Status: Implemented as read-only provider-independent inventory, readiness, provider coverage and diagnostics layer.
+
+Evidence: `src/services/universal-market-intelligence.service.ts`, `/api/markets/inventory`, `/api/markets/readiness`, `/api/markets/provider-coverage`, `/api/markets/diagnostics`, `src/components/dashboard/UniversalMarketCoveragePanel.tsx`, AI Operations Universal Market Intelligence panel, `scripts/universal-market-intelligence.mjs`, additive `universal_market_registry` migration and `docs/UNIVERSAL_MARKET_INTELLIGENCE_PLATFORM_V1.md`.
+
+Note: The platform discovers and normalizes stored market snapshots plus cataloged future market families while preserving the rule: capture everything, predict only supported markets and recommend selectively. Unsupported market families such as Team Totals, First Five, First Inning, alternate lines, winning margin, race-to-runs, props and SGP legs remain blocked or shadow-only until real provider coverage, settlement, features, learning/calibration evidence and explicit promotion exist.
+
 ### MLB First Five Markets V1
 
 Status: Provider-independent architecture implemented; provider readiness and listed-starter rules pending.

@@ -2,6 +2,16 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Universal Market Intelligence Platform V1
+
+- Added a provider-independent universal market inventory and readiness layer over stored odds snapshots, market contracts and existing MLB readiness gates.
+- New APIs: `/api/markets/inventory`, `/api/markets/readiness`, `/api/markets/provider-coverage` and `/api/markets/diagnostics`.
+- Canonical inventory assigns deterministic market IDs, sport, league, event, market family/type, selection, line, odds, sportsbook, timestamp, push support, outcome count, settlement support, prediction support, learning support, provider, provider market key, canonical market key, readiness and blockers.
+- Readiness states include `COLLECT_ONLY`, `NORMALIZED`, `SETTLEMENT_READY`, `FEATURE_READY`, `PREDICTION_READY`, `SHADOW_READY`, `PRODUCTION_READY` and `BLOCKED`.
+- AI Operations now includes a Universal Market Intelligence panel. Dashboard Advanced Details > Markets now includes a Market Coverage panel with today's markets, supported, prediction-ready, official-pick-ready, shadow and blocked counts.
+- Added an additive `universal_market_registry` migration as the future persistence contract; it was not applied and no runtime remote mutation is performed in this phase.
+- Unsupported markets remain blocked or shadow-only. Official Pick policy, supported prediction models, production model weights, settlement outcomes, Historical Replay, Historical Feature Store and scheduler architecture were not modified.
+
 ## 2026-07-24 MLB First Five Markets V1
 
 - Added a provider-independent First Five readiness contract for MLB under `/api/mlb/markets/first-five` and `npm.cmd run mlb:first-five:readiness`.
