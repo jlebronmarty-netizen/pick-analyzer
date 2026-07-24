@@ -6,6 +6,7 @@ import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforceme
 import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
 import { getHistoricalReplayFullStatus, getHistoricalReplayPilotStatus } from '@/services/historical-replay-pilot.service'
 import { getHistoricalShadowCalibration } from '@/services/historical-shadow-calibration.service'
+import { getMlbTeamTotalsReadiness } from '@/services/mlb-team-totals-readiness.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -575,6 +576,44 @@ export async function getAiLearningLifecycle() {
     },
   }))
   const historicalShadowCalibrationError = String((historicalShadowCalibration as Record<string, unknown>).error ?? 'Shadow calibration unavailable.')
+  const teamTotalsReadiness = await getMlbTeamTotalsReadiness().catch((error) => ({
+    success: false,
+    mode: 'mlb_team_totals_readiness_v1',
+    error: error instanceof Error ? error.message : 'team totals readiness read failed',
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    liveProviderActivation: 'BLOCKED_READINESS_ERROR',
+    storedCoverage: {
+      teamTotalOddsRows: 0,
+      teamTotalOddsRowsWithLineAndPrice: 0,
+      sampleRows: [],
+      sampleEvents: [],
+      errors: [error instanceof Error ? error.message : 'team totals readiness read failed'],
+    },
+    readinessGate: {
+      realProviderOrStoredMarketCoverage: false,
+      canonicalEventAndMarketMapping: false,
+      teamIdentityAndSideMapping: false,
+      lineAndSportsbookPriceAvailability: false,
+      marketTimestampAndCutoff: false,
+      finalTeamScoreSettlementSupport: false,
+      historicalOutcomeAvailability: false,
+      featureReadiness: false,
+      pushAwareSemantics: false,
+      predictionLearningCalibrationPerformanceCompatibility: false,
+    },
+    blockers: ['TEAM_TOTALS_READINESS_ERROR'],
+    certifications: {
+      MLB_TEAM_TOTALS_ARCHITECTURE_PASS: false,
+      MLB_TEAM_TOTALS_SETTLEMENT_PASS: false,
+      MLB_TEAM_TOTALS_SHADOW_PASS: false,
+      MLB_TEAM_TOTALS_MARKET_SEMANTICS_PASS: false,
+      TEAM_TOTALS_PROVIDER_READINESS_PASS: false,
+    },
+  }))
+  const teamTotalsRecord = asRecord(teamTotalsReadiness)
+  const teamTotalsCoverage = asRecord(teamTotalsRecord.storedCoverage)
+  const teamTotalsCertifications = asRecord(teamTotalsRecord.certifications)
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -615,7 +654,8 @@ export async function getAiLearningLifecycle() {
 
   const providerCallsMade =
     Number(providerRecord.providerCallsMade ?? 0) +
-    Number(schedulerRecord.providerCallsMade ?? 0)
+    Number(schedulerRecord.providerCallsMade ?? 0) +
+    Number(teamTotalsRecord.providerCallsMade ?? 0)
 
   const panels = [
     panel(
@@ -726,6 +766,25 @@ export async function getAiLearningLifecycle() {
       historicalShadowCalibration.success ? null : historicalShadowCalibrationError,
       null,
       'Manual approval required for any production promotion'
+    ),
+    panel(
+      'mlb_team_totals',
+      'MLB Team Totals',
+      teamTotalsCertifications.MLB_TEAM_TOTALS_ARCHITECTURE_PASS ? 'Waiting' : 'Blocked',
+      teamTotalsCertifications.TEAM_TOTALS_PROVIDER_READINESS_PASS
+        ? 'Real stored Team Total coverage exists and is ready for shadow-only normalization review.'
+        : 'Team Totals architecture is available as a shadow/readiness contract, but live activation is blocked by missing real stored lines and prices.',
+      {
+        oddsRows: teamTotalsCoverage.teamTotalOddsRows ?? 0,
+        pricedRows: teamTotalsCoverage.teamTotalOddsRowsWithLineAndPrice ?? 0,
+        architecturePass: teamTotalsCertifications.MLB_TEAM_TOTALS_ARCHITECTURE_PASS ?? false,
+        settlementPass: teamTotalsCertifications.MLB_TEAM_TOTALS_SETTLEMENT_PASS ?? false,
+        shadowPass: teamTotalsCertifications.MLB_TEAM_TOTALS_SHADOW_PASS ?? false,
+        providerReadinessPass: teamTotalsCertifications.TEAM_TOTALS_PROVIDER_READINESS_PASS ?? false,
+      },
+      teamTotalsCertifications.TEAM_TOTALS_PROVIDER_READINESS_PASS ? null : 'TEAM_TOTALS_PROVIDER_COVERAGE_BLOCKED',
+      null,
+      'Provider activation requires verified real Team Total odds coverage'
     ),
     panel(
       'weight_updates',
@@ -1033,6 +1092,7 @@ export async function getAiLearningLifecycle() {
     pregameSchedulerCoverage: pregameCoverage,
     replayFull,
     historicalShadowCalibration,
+    teamTotalsReadiness,
     shadowLearningValidation: {
       mode: 'SHADOW_ONLY',
       acceptedSamples: historicalShadowCalibration.sample.gradedRows,

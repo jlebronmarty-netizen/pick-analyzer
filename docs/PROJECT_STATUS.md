@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 MLB Team Totals V1
+
+- Added a provider-independent Team Totals readiness contract for MLB under `/api/mlb/markets/team-totals` and `npm.cmd run mlb:team-totals:readiness`.
+- Team Totals use canonical market key `team_total`, full-game team entity semantics, required team side, line, sportsbook price, market timestamp and pregame cutoff contract.
+- Added deterministic Team Total settlement fixtures for Over, Under, Push, pending and void outcomes using final selected-team score only.
+- Extended market semantics so `team_total` is binary on fractional lines and push-capable on whole-number lines without enabling it as an actionable Current Board/Official Pick market.
+- AI Operations now exposes Team Totals architecture, settlement, shadow and provider-readiness status. Official Picks remain disabled and no production weights, full-game probabilities, settlement outcomes, Historical Replay artifacts, Historical Feature Store rows or scheduler architecture are modified.
+- `TEAM_TOTALS_PROVIDER_READINESS_PASS` remains withheld unless real stored Team Total odds with line and price are verified.
+
 ## 2026-07-24 Historical Calibration & Shadow Reweighting V1
 
 - Added a read-only historical shadow calibration layer over Full Historical Replay Phase 2B evidence. The service consumes `universal_projection_history` rows under `retrosheet_historical_replay_phase_2b_v1`, excludes push rows from binary scoring, uses strict chronological training/validation/holdout splits and exposes results through `/api/model/shadow-calibration`, AI Operations and `npm.cmd run historical:shadow-calibration`.

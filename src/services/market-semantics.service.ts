@@ -1,6 +1,6 @@
 import 'server-only'
 
-export type SupportedMarketType = 'moneyline' | 'spread' | 'run_line' | 'total'
+export type SupportedMarketType = 'moneyline' | 'spread' | 'run_line' | 'total' | 'team_total'
 export type MarketOutcomeModel = 'binary' | 'push_capable'
 
 export type MarketSemantics = {
@@ -27,6 +27,7 @@ function canonicalMarket(value: unknown): MarketSemantics['market'] {
   if (market === 'moneyline') return 'moneyline'
   if (market === 'spread' || market === 'run_line') return 'spread'
   if (market === 'total') return 'total'
+  if (market === 'team_total' || market === 'team_totals') return 'team_total'
   return 'unsupported'
 }
 
@@ -55,7 +56,7 @@ export function classifyMarketSemantics({
       pushProbabilityKnown: false,
       pushProbability: null,
       pushProbabilityLabel: 'unknown_push_probability',
-      classificationReason: 'Whole-number spread/run-line and total markets can land exactly on the line.',
+      classificationReason: 'Whole-number spread/run-line, total and team-total markets can land exactly on the line.',
     }
   }
   return {
@@ -73,7 +74,9 @@ export function classifyMarketSemantics({
         ? 'Moneyline has two graded sides in this product surface.'
         : canonical === 'unsupported'
           ? 'Unsupported market is not modeled for product recommendations.'
-          : 'Fractional spread/run-line and total markets cannot land exactly on the listed line.',
+          : canonical === 'team_total'
+            ? 'Fractional team totals cannot land exactly on the listed line.'
+            : 'Fractional spread/run-line and total markets cannot land exactly on the listed line.',
   }
 }
 
@@ -90,6 +93,8 @@ export function validateMarketSemanticsFixtures() {
     ['total 8.5 binary', classifyMarketSemantics({ market: 'total', line: 8.5 }).binary],
     ['total 9 push capable', classifyMarketSemantics({ market: 'total', line: 9 }).pushCapable],
     ['total 9.5 binary', classifyMarketSemantics({ market: 'total', line: 9.5 }).binary],
+    ['team total 3.5 binary', classifyMarketSemantics({ market: 'team_total', line: 3.5 }).binary],
+    ['team total 4 push capable', classifyMarketSemantics({ market: 'team_total', line: 4 }).pushCapable],
     ['push probability unknown', classifyMarketSemantics({ market: 'total', line: 8 }).pushProbabilityLabel === 'unknown_push_probability'],
   ] as const
   const failedChecks = fixtures.filter(([, passed]) => !passed).map(([name]) => name)

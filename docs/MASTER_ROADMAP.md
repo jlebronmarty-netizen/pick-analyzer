@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### MLB Team Totals V1
+
+Status: Provider-independent architecture implemented; provider readiness pending verified real stored Team Total odds.
+
+Evidence: `src/services/mlb-team-totals-readiness.service.ts`, `/api/mlb/markets/team-totals`, `scripts/mlb-team-totals-readiness.mjs`, AI Operations Team Totals panel and `docs/MLB_TEAM_TOTALS_V1.md`.
+
+Note: Team Totals are modeled as full-game team-scoped Over/Under markets with required team side, line, sportsbook price, market timestamp and cutoff-safe snapshot. Deterministic settlement uses final selected-team score and supports Push when the final team score equals the listed line. The implementation is shadow/readiness only unless real odds coverage exists. Current Board, Most Likely, Best Value and AI Feed remain protected from fabricated lines or EV, and Official Picks remain disabled.
+
 ### Historical Calibration & Shadow Reweighting V1
 
 Status: Implemented, read-only evidence-verified and build-verified; production deployment verification pending.
