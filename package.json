@@ -21,7 +21,8 @@
     "historical:replay:pilot": "node --loader ./scripts/local-ts-loader.mjs scripts/historical-replay-pilot.mjs",
     "historical:replay:full": "node --loader ./scripts/local-ts-loader.mjs scripts/historical-replay-pilot.mjs --mode=full",
     "historical:shadow-calibration": "node --loader ./scripts/local-ts-loader.mjs scripts/historical-shadow-calibration.mjs",
-    "mlb:team-totals:readiness": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-team-totals-readiness.mjs"
+    "mlb:team-totals:readiness": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-team-totals-readiness.mjs",
+    "mlb:first-five:readiness": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-first-five-readiness.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

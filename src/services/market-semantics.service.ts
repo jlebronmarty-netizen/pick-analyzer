@@ -1,6 +1,14 @@
 import 'server-only'
 
-export type SupportedMarketType = 'moneyline' | 'spread' | 'run_line' | 'total' | 'team_total'
+export type SupportedMarketType =
+  | 'moneyline'
+  | 'spread'
+  | 'run_line'
+  | 'total'
+  | 'team_total'
+  | 'first_five_moneyline'
+  | 'first_five_spread'
+  | 'first_five_total'
 export type MarketOutcomeModel = 'binary' | 'push_capable'
 
 export type MarketSemantics = {
@@ -28,6 +36,9 @@ function canonicalMarket(value: unknown): MarketSemantics['market'] {
   if (market === 'spread' || market === 'run_line') return 'spread'
   if (market === 'total') return 'total'
   if (market === 'team_total' || market === 'team_totals') return 'team_total'
+  if (market === 'first_five_moneyline' || market === 'first5_moneyline' || market === 'f5_moneyline') return 'first_five_moneyline'
+  if (market === 'first_five_spread' || market === 'first_five_run_line' || market === 'first5_run_line' || market === 'f5_run_line') return 'first_five_spread'
+  if (market === 'first_five_total' || market === 'first5_total' || market === 'f5_total') return 'first_five_total'
   return 'unsupported'
 }
 
@@ -44,7 +55,7 @@ export function classifyMarketSemantics({
 }): MarketSemantics {
   const canonical = canonicalMarket(market)
   const numericLine = finite(line)
-  const pushCapable = canonical !== 'moneyline' && canonical !== 'unsupported' && isWholeNumberLine(numericLine)
+  const pushCapable = !['moneyline', 'first_five_moneyline', 'unsupported'].includes(canonical) && isWholeNumberLine(numericLine)
   if (pushCapable) {
     return {
       market: canonical,
@@ -56,7 +67,7 @@ export function classifyMarketSemantics({
       pushProbabilityKnown: false,
       pushProbability: null,
       pushProbabilityLabel: 'unknown_push_probability',
-      classificationReason: 'Whole-number spread/run-line, total and team-total markets can land exactly on the line.',
+      classificationReason: 'Whole-number spread/run-line, total, team-total and first-five line markets can land exactly on the line.',
     }
   }
   return {
@@ -70,13 +81,15 @@ export function classifyMarketSemantics({
     pushProbability: null,
     pushProbabilityLabel: 'not_applicable',
     classificationReason:
-      canonical === 'moneyline'
-        ? 'Moneyline has two graded sides in this product surface.'
+      canonical === 'moneyline' || canonical === 'first_five_moneyline'
+        ? 'Moneyline-style markets have two graded sides in this product surface.'
         : canonical === 'unsupported'
           ? 'Unsupported market is not modeled for product recommendations.'
           : canonical === 'team_total'
             ? 'Fractional team totals cannot land exactly on the listed line.'
-            : 'Fractional spread/run-line and total markets cannot land exactly on the listed line.',
+            : canonical === 'first_five_spread' || canonical === 'first_five_total'
+              ? 'Fractional first-five line markets cannot land exactly on the listed line.'
+              : 'Fractional spread/run-line and total markets cannot land exactly on the listed line.',
   }
 }
 
@@ -95,6 +108,9 @@ export function validateMarketSemanticsFixtures() {
     ['total 9.5 binary', classifyMarketSemantics({ market: 'total', line: 9.5 }).binary],
     ['team total 3.5 binary', classifyMarketSemantics({ market: 'team_total', line: 3.5 }).binary],
     ['team total 4 push capable', classifyMarketSemantics({ market: 'team_total', line: 4 }).pushCapable],
+    ['first five moneyline binary', classifyMarketSemantics({ market: 'first_five_moneyline', line: null }).binary],
+    ['first five run line 0.5 binary', classifyMarketSemantics({ market: 'first_five_run_line', line: 0.5 }).binary],
+    ['first five total 4 push capable', classifyMarketSemantics({ market: 'first_five_total', line: 4 }).pushCapable],
     ['push probability unknown', classifyMarketSemantics({ market: 'total', line: 8 }).pushProbabilityLabel === 'unknown_push_probability'],
   ] as const
   const failedChecks = fixtures.filter(([, passed]) => !passed).map(([name]) => name)

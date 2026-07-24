@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### MLB First Five Markets V1
+
+Status: Provider-independent architecture implemented; provider readiness and listed-starter rules pending.
+
+Evidence: `src/services/mlb-first-five-readiness.service.ts`, `/api/mlb/markets/first-five`, `scripts/mlb-first-five-readiness.mjs`, AI Operations First Five panel and `docs/MLB_FIRST_FIVE_MARKETS_V1.md`.
+
+Note: First Five is modeled as a first-five-inning market family with moneyline, run-line and total contracts. Deterministic settlement uses score after exactly five completed innings and supports pushes for tied two-way F5 moneyline, adjusted run-line ties and whole-number totals. The implementation is shadow/readiness only unless real odds coverage and explicit starter-change/no-action rules exist. Current Board, Most Likely, Best Value and Official Picks remain protected from fabricated lines, prices, EV or labels.
+
 ### MLB Team Totals V1
 
 Status: Provider-independent architecture implemented; provider readiness pending verified real stored Team Total odds.

@@ -7,6 +7,7 @@ import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-covera
 import { getHistoricalReplayFullStatus, getHistoricalReplayPilotStatus } from '@/services/historical-replay-pilot.service'
 import { getHistoricalShadowCalibration } from '@/services/historical-shadow-calibration.service'
 import { getMlbTeamTotalsReadiness } from '@/services/mlb-team-totals-readiness.service'
+import { getMlbFirstFiveReadiness } from '@/services/mlb-first-five-readiness.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -614,6 +615,45 @@ export async function getAiLearningLifecycle() {
   const teamTotalsRecord = asRecord(teamTotalsReadiness)
   const teamTotalsCoverage = asRecord(teamTotalsRecord.storedCoverage)
   const teamTotalsCertifications = asRecord(teamTotalsRecord.certifications)
+  const firstFiveReadiness = await getMlbFirstFiveReadiness().catch((error) => ({
+    success: false,
+    mode: 'mlb_first_five_readiness_v1',
+    error: error instanceof Error ? error.message : 'first five readiness read failed',
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    liveProviderActivation: 'BLOCKED_READINESS_ERROR',
+    storedCoverage: {
+      firstFiveOddsRows: 0,
+      firstFiveOddsRowsWithPrice: 0,
+      historicalFirstFivePlayRows: 0,
+      errors: [error instanceof Error ? error.message : 'first five readiness read failed'],
+    },
+    readinessGate: {
+      realProviderOrStoredMarketCoverage: false,
+      canonicalEventAndMarketMapping: false,
+      teamIdentityAndSideMapping: false,
+      lineAndSportsbookPriceAvailability: false,
+      marketTimestampAndCutoff: false,
+      firstFiveScoreSettlementSupport: false,
+      historicalOutcomeAvailability: false,
+      featureReadiness: false,
+      pushAwareSemantics: false,
+      starterChangeRulesReady: false,
+      predictionLearningCalibrationPerformanceCompatibility: false,
+    },
+    blockers: ['FIRST_FIVE_READINESS_ERROR'],
+    certifications: {
+      MLB_FIRST_FIVE_ARCHITECTURE_PASS: false,
+      MLB_FIRST_FIVE_SETTLEMENT_PASS: false,
+      MLB_FIRST_FIVE_SHADOW_PASS: false,
+      MLB_FIRST_FIVE_MARKET_SEMANTICS_PASS: false,
+      FIRST_FIVE_PROVIDER_READINESS_PASS: false,
+      FIRST_FIVE_STARTER_RULES_PASS: false,
+    },
+  }))
+  const firstFiveRecord = asRecord(firstFiveReadiness)
+  const firstFiveCoverage = asRecord(firstFiveRecord.storedCoverage)
+  const firstFiveCertifications = asRecord(firstFiveRecord.certifications)
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -655,7 +695,8 @@ export async function getAiLearningLifecycle() {
   const providerCallsMade =
     Number(providerRecord.providerCallsMade ?? 0) +
     Number(schedulerRecord.providerCallsMade ?? 0) +
-    Number(teamTotalsRecord.providerCallsMade ?? 0)
+    Number(teamTotalsRecord.providerCallsMade ?? 0) +
+    Number(firstFiveRecord.providerCallsMade ?? 0)
 
   const panels = [
     panel(
@@ -785,6 +826,27 @@ export async function getAiLearningLifecycle() {
       teamTotalsCertifications.TEAM_TOTALS_PROVIDER_READINESS_PASS ? null : 'TEAM_TOTALS_PROVIDER_COVERAGE_BLOCKED',
       null,
       'Provider activation requires verified real Team Total odds coverage'
+    ),
+    panel(
+      'mlb_first_five',
+      'MLB First Five',
+      firstFiveCertifications.MLB_FIRST_FIVE_ARCHITECTURE_PASS ? 'Waiting' : 'Blocked',
+      firstFiveCertifications.FIRST_FIVE_PROVIDER_READINESS_PASS
+        ? 'Real stored First Five coverage exists and is ready for shadow-only normalization review.'
+        : 'First Five architecture is available as a shadow/readiness contract, but live activation is blocked by missing real stored odds and unapproved starter-change rules.',
+      {
+        oddsRows: firstFiveCoverage.firstFiveOddsRows ?? 0,
+        pricedRows: firstFiveCoverage.firstFiveOddsRowsWithPrice ?? 0,
+        historicalFirstFivePlayRows: firstFiveCoverage.historicalFirstFivePlayRows ?? 0,
+        architecturePass: firstFiveCertifications.MLB_FIRST_FIVE_ARCHITECTURE_PASS ?? false,
+        settlementPass: firstFiveCertifications.MLB_FIRST_FIVE_SETTLEMENT_PASS ?? false,
+        shadowPass: firstFiveCertifications.MLB_FIRST_FIVE_SHADOW_PASS ?? false,
+        providerReadinessPass: firstFiveCertifications.FIRST_FIVE_PROVIDER_READINESS_PASS ?? false,
+        starterRulesPass: firstFiveCertifications.FIRST_FIVE_STARTER_RULES_PASS ?? false,
+      },
+      firstFiveCertifications.FIRST_FIVE_PROVIDER_READINESS_PASS ? null : 'FIRST_FIVE_PROVIDER_COVERAGE_BLOCKED',
+      null,
+      'Provider activation requires verified real First Five odds coverage and starter-change policy approval'
     ),
     panel(
       'weight_updates',
@@ -1093,6 +1155,7 @@ export async function getAiLearningLifecycle() {
     replayFull,
     historicalShadowCalibration,
     teamTotalsReadiness,
+    firstFiveReadiness,
     shadowLearningValidation: {
       mode: 'SHADOW_ONLY',
       acceptedSamples: historicalShadowCalibration.sample.gradedRows,

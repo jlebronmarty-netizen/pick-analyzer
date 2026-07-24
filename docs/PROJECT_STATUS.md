@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 MLB First Five Markets V1
+
+- Added a provider-independent First Five readiness contract for MLB under `/api/mlb/markets/first-five` and `npm.cmd run mlb:first-five:readiness`.
+- First Five uses canonical market family `first_five` with `first_five_moneyline`, `first_five_run_line` and `first_five_total` contracts.
+- Added deterministic First Five settlement fixtures for moneyline, run line, total, push, pending and void outcomes using score after exactly five completed innings.
+- Historical Retrosheet inning-level play data is used only as a read-only outcome-basis readiness signal; no replay artifacts, prediction history rows or historical feature-store rows are mutated.
+- AI Operations now exposes First Five architecture, settlement, shadow, provider-readiness and listed-starter-rule status. Official Picks remain disabled and no production weights, full-game probabilities, settlement outcomes or scheduler architecture are modified.
+- `FIRST_FIVE_PROVIDER_READINESS_PASS` and `FIRST_FIVE_STARTER_RULES_PASS` remain withheld unless real stored First Five odds and explicit starter-change/no-action policy are verified.
+
 ## 2026-07-24 MLB Team Totals V1
 
 - Added a provider-independent Team Totals readiness contract for MLB under `/api/mlb/markets/team-totals` and `npm.cmd run mlb:team-totals:readiness`.
