@@ -65,6 +65,14 @@ type TodayResponse = {
     coverageTodayPct: number | null
     averageLeadTimeBeforeCutoffMinutes: number | null
     missedWindowsToday: number
+    nextPregameSlateDate?: string | null
+    nextPregameCoveragePct?: number | null
+    nextPregameValidGames?: number | null
+    nextPregameEligibleGames?: number | null
+    nextPregameAverageLeadTimeBeforeCutoffMinutes?: number | null
+    gamesPendingPregameExecution?: number | null
+    gamesProtectedByCutoff?: number | null
+    nextBoardReadyGames?: number | null
     nextExecution: string | null
   }
   pipeline?: Array<{
@@ -1140,8 +1148,10 @@ function TodayStory({ data, mostLikely, bestValue, counts, pipelineToday }: { da
       : null,
     schedulerCoverage
       ? `Pregame scheduler coverage is ${schedulerCoverage.coveragePct ?? 'N/A'}%; ${schedulerCoverage.validPregameGames}/${schedulerCoverage.eligibleGames} eligible game${schedulerCoverage.eligibleGames === 1 ? '' : 's'} have valid pregame evidence with ${schedulerCoverage.averageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes average lead time.`
-      : data.schedulerCoverage
-        ? `Pregame scheduler coverage is ${data.schedulerCoverage.coverageTodayPct ?? 'N/A'}%; ${data.schedulerCoverage.predictedToday}/${data.schedulerCoverage.gamesToday} game${data.schedulerCoverage.gamesToday === 1 ? '' : 's'} have prediction evidence with ${data.schedulerCoverage.averageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes average lead time.`
+      : data.schedulerCoverage?.nextPregameSlateDate
+        ? `Next-slate pregame coverage is ${data.schedulerCoverage.nextPregameCoveragePct ?? 'N/A'}%; ${data.schedulerCoverage.nextPregameValidGames ?? 0}/${data.schedulerCoverage.nextPregameEligibleGames ?? 0} eligible game${data.schedulerCoverage.nextPregameEligibleGames === 1 ? '' : 's'} have valid pregame evidence with ${data.schedulerCoverage.nextPregameAverageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes average lead time. Pending ${data.schedulerCoverage.gamesPendingPregameExecution ?? 0}; protected by cutoff ${data.schedulerCoverage.gamesProtectedByCutoff ?? 0}.`
+        : data.schedulerCoverage
+          ? `Pregame scheduler coverage is ${data.schedulerCoverage.coverageTodayPct ?? 'N/A'}%; ${data.schedulerCoverage.predictedToday}/${data.schedulerCoverage.gamesToday} game${data.schedulerCoverage.gamesToday === 1 ? '' : 's'} have prediction evidence with ${data.schedulerCoverage.averageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes average lead time.`
         : null,
     topProbability
       ? `The most likely outcome is ${fieldValue(topProbability.selection)} in ${fieldValue(topProbability.matchup)} at ${formatPercent(candidateDisplayProbability(topProbability))}.`
@@ -1173,6 +1183,19 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
   const byId = new Map(pipeline.map((item) => [item.id, item]))
   const traceCounts = pipelineToday?.counts
   const schedulerCoverage = pipelineToday?.schedulerCoverage
+  const displayCoverage = data.schedulerCoverage?.nextPregameSlateDate
+    ? {
+        coverage: data.schedulerCoverage.nextPregameCoveragePct,
+        lead: data.schedulerCoverage.nextPregameAverageLeadTimeBeforeCutoffMinutes,
+        pending: data.schedulerCoverage.gamesPendingPregameExecution,
+        protectedByCutoff: data.schedulerCoverage.gamesProtectedByCutoff,
+      }
+    : {
+        coverage: data.schedulerCoverage?.coverageTodayPct,
+        lead: data.schedulerCoverage?.averageLeadTimeBeforeCutoffMinutes,
+        pending: data.schedulerCoverage?.pendingToday,
+        protectedByCutoff: data.schedulerCoverage?.missedWindowsToday,
+      }
   const rows: Array<[string, { status: string; detail: string }]> = [
     ['Odds', byId.get('market_prices') ?? { status: data.latestOddsTimestamp ? 'Complete' : 'Waiting', detail: data.summary.marketPrices }],
     ['Predictions', traceCounts ? { status: traceCounts.predictionsGenerated ? 'Complete' : 'Waiting', detail: traceCounts.predictionsGenerated ? `${traceCounts.predictionsGenerated} stored prediction rows found; ${traceCounts.predictionsValidPregame ?? traceCounts.predictionsGenerated} valid pregame and ${traceCounts.predictionsExcludedAfterCutoff ?? 0} excluded after cutoff.` : 'Waiting for eligible pregame prediction rows.' } : byId.get('predictions') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? `${data.predictionCandidates} candidates available.` : 'Waiting for odds.' }],
@@ -1189,7 +1212,7 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
           <h3 className="mt-2 text-3xl font-black text-white">{fieldValue(data.nextAction, 'Waiting for next scheduler execution')}</h3>
           <p className="mt-2 text-sm leading-6 text-slate-400">Last odds sync: {timestampText(data.latestOddsTimestamp, 'No stored odds refresh timestamp')}</p>
           <p className="text-sm leading-6 text-slate-400">Next scheduled refresh: {data.nextActionAt ? timeText(data.nextActionAt) : 'Waiting for next scheduler execution'}</p>
-          <p className="text-sm leading-6 text-slate-400">Pregame coverage: {schedulerCoverage?.coveragePct ?? data.schedulerCoverage?.coverageTodayPct ?? 'N/A'}% · Average lead: {schedulerCoverage?.averageLeadTimeBeforeCutoffMinutes ?? data.schedulerCoverage?.averageLeadTimeBeforeCutoffMinutes ?? 'N/A'} min · Missed windows: {schedulerCoverage?.missedWindows ?? data.schedulerCoverage?.missedWindowsToday ?? 'N/A'}</p>
+          <p className="text-sm leading-6 text-slate-400">Pregame coverage: {schedulerCoverage?.coveragePct ?? displayCoverage.coverage ?? 'N/A'}% · Average lead: {schedulerCoverage?.averageLeadTimeBeforeCutoffMinutes ?? displayCoverage.lead ?? 'N/A'} min · Pending: {displayCoverage.pending ?? 'N/A'} · Protected by cutoff: {schedulerCoverage?.missedWindows ?? displayCoverage.protectedByCutoff ?? 'N/A'}</p>
         </div>
         <Badge tone={data.status === 'AVAILABLE' ? 'green' : data.status === 'DEGRADED' || data.status === 'UNAVAILABLE' ? 'red' : 'yellow'}>{fieldValue(data.status, 'AVAILABLE')}</Badge>
       </div>

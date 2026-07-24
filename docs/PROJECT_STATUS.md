@@ -7,6 +7,7 @@ Last updated: 2026-07-24 00:00:00Z
 - Recovered provider-backed MLB operating-day date selection so odds/prediction/current-board refresh actions choose the earliest pregame-actionable slate whose ten-minute prediction cutoff has not passed. If the local calendar slate exists but is already locked, started or past cutoff, scheduler execution pivots to the next safe slate instead of creating rows that cutoff enforcement must reject.
 - Extended `prepare_next_slate` so it can prewarm the next calendar date through the existing SportsDataIO prospective-preview service even when no stored future slate exists yet. The branch still uses provider budget checks, action locks, confirmation, deterministic upserts and the shared cutoff classifier.
 - Expanded `pregame-scheduler-coverage.service.ts` with `nextPregameSlate` diagnostics: selected pregame date, coverage, average lead time, pending execution count, games protected by cutoff, board-ready games and exact skip reasons.
+- Dashboard Today now returns and renders the next-pregame slate coverage fields when the current operating-day slate is already stale, so users see recovered pregame coverage, average lead time, pending games and cutoff-protected games.
 - Current Board, Official Pick policy, Learning Brain weights, settlement outcomes, prediction probabilities, Historical Replay and Historical Feature Backfill Phase 2A were not modified. Build passed locally with `npm.cmd run build`.
 
 ## 2026-07-24 Pregame Scheduler Coverage & Execution Timing V1

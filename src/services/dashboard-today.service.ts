@@ -149,6 +149,14 @@ export type DashboardTodayContract = {
     coverageTodayPct: number | null
     averageLeadTimeBeforeCutoffMinutes: number | null
     missedWindowsToday: number
+    nextPregameSlateDate?: string | null
+    nextPregameCoveragePct?: number | null
+    nextPregameValidGames?: number | null
+    nextPregameEligibleGames?: number | null
+    nextPregameAverageLeadTimeBeforeCutoffMinutes?: number | null
+    gamesPendingPregameExecution?: number | null
+    gamesProtectedByCutoff?: number | null
+    nextBoardReadyGames?: number | null
     nextExecution: string | null
   }
   providerCallsMade: 0
@@ -902,7 +910,11 @@ export async function getDashboardToday({
     modelMostLikelyData[0] ? 'Most Likely model rankings are available from stored prediction output.' : null,
     modelOnly.summary.pitcherShadowProjections > 0 ? `${modelOnly.summary.pitcherShadowProjections} pitcher shadow projections are ready as SHADOW / NO MARKET.` : null,
     projectedScores.games.length ? `${projectedScores.games.length} projected scores are available from stored model and market context.` : null,
-    schedulerCoverage ? `Scheduler coverage: ${schedulerCoverage.today.validPregameGames}/${schedulerCoverage.today.eligibleGames} eligible game${schedulerCoverage.today.eligibleGames === 1 ? '' : 's'} have valid pregame prediction evidence; average lead time is ${schedulerCoverage.today.averageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes before cutoff.` : null,
+    schedulerCoverage
+      ? schedulerCoverage.summary.nextPregameSlateDate && schedulerCoverage.summary.nextPregameSlateDate !== operatingDate
+        ? `Next-slate pregame coverage: ${schedulerCoverage.summary.nextPregameValidGames}/${schedulerCoverage.summary.nextPregameEligibleGames} eligible game${schedulerCoverage.summary.nextPregameEligibleGames === 1 ? '' : 's'} have valid pregame prediction evidence; average lead time is ${schedulerCoverage.summary.nextPregameAverageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes before cutoff.`
+        : `Scheduler coverage: ${schedulerCoverage.today.validPregameGames}/${schedulerCoverage.today.eligibleGames} eligible game${schedulerCoverage.today.eligibleGames === 1 ? '' : 's'} have valid pregame prediction evidence; average lead time is ${schedulerCoverage.today.averageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes before cutoff.`
+      : null,
     bestValueData[0] ? 'Best Value rankings are available from stored Current Board data.' : null,
     blockers.includes('market_prices_not_refreshed') ? 'Market freshness is degraded, but the Today panel remains available.' : null,
   ].filter(Boolean) as string[]
@@ -975,6 +987,14 @@ export async function getDashboardToday({
       coverageTodayPct: schedulerCoverage.summary.coverageTodayPct,
       averageLeadTimeBeforeCutoffMinutes: schedulerCoverage.summary.averageLeadTimeBeforeCutoffMinutes,
       missedWindowsToday: schedulerCoverage.summary.missedWindowsToday,
+      nextPregameSlateDate: schedulerCoverage.summary.nextPregameSlateDate,
+      nextPregameCoveragePct: schedulerCoverage.summary.nextPregameCoveragePct,
+      nextPregameValidGames: schedulerCoverage.summary.nextPregameValidGames,
+      nextPregameEligibleGames: schedulerCoverage.summary.nextPregameEligibleGames,
+      nextPregameAverageLeadTimeBeforeCutoffMinutes: schedulerCoverage.summary.nextPregameAverageLeadTimeBeforeCutoffMinutes,
+      gamesPendingPregameExecution: schedulerCoverage.summary.gamesPendingPregameExecution,
+      gamesProtectedByCutoff: schedulerCoverage.summary.gamesProtectedByCutoff,
+      nextBoardReadyGames: schedulerCoverage.nextPregameSlate.boardReadyGames,
       nextExecution: schedulerCoverage.operations.nextExecution,
     } : undefined,
     providerCallsMade: 0,
@@ -1089,6 +1109,14 @@ export async function getDashboardToday({
             coverageTodayPct: schedulerCoverage.summary.coverageTodayPct,
             averageLeadTimeBeforeCutoffMinutes: schedulerCoverage.summary.averageLeadTimeBeforeCutoffMinutes,
             missedWindowsToday: schedulerCoverage.summary.missedWindowsToday,
+            nextPregameSlateDate: schedulerCoverage.summary.nextPregameSlateDate,
+            nextPregameCoveragePct: schedulerCoverage.summary.nextPregameCoveragePct,
+            nextPregameValidGames: schedulerCoverage.summary.nextPregameValidGames,
+            nextPregameEligibleGames: schedulerCoverage.summary.nextPregameEligibleGames,
+            nextPregameAverageLeadTimeBeforeCutoffMinutes: schedulerCoverage.summary.nextPregameAverageLeadTimeBeforeCutoffMinutes,
+            gamesPendingPregameExecution: schedulerCoverage.summary.gamesPendingPregameExecution,
+            gamesProtectedByCutoff: schedulerCoverage.summary.gamesProtectedByCutoff,
+            nextBoardReadyGames: schedulerCoverage.nextPregameSlate.boardReadyGames,
             nextExecution: schedulerCoverage.operations.nextExecution,
           } : null,
         },
