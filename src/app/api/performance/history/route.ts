@@ -85,6 +85,7 @@ export async function GET(request: NextRequest) {
       rowsV2: performanceScopeV2.historyPreview,
       pendingReasons: performanceScopeV2.pending.byReason,
       cutoffExclusions: performanceScopeV2.cutoffExclusions,
+      schedulerCoverage: performanceScopeV2.schedulerCoverage,
       timelineV2: performanceScopeV2.timeline,
       totalRows: rows.length,
       page,

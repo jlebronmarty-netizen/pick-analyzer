@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Pregame Scheduler Coverage & Execution Timing V1
+
+Status: Implemented as read-only operational validation; production readiness remains blocked until future scheduler runs prove valid pregame coverage.
+
+Evidence: `src/services/pregame-scheduler-coverage.service.ts`, `/api/recommendation-pipeline/trace`, `/api/performance/history`, Dashboard Today, AI Operations Scheduler Coverage, `docs/PREGAME_SCHEDULER_COVERAGE_EXECUTION_TIMING_V1.md` and local production build.
+
+Note: The existing scheduler architecture remains intact: Vercel daily cron plus GitHub external runtime/heartbeat call the same protected `/api/cron/operating-day` endpoint. This phase exposes timing, next execution, average duration, per-game cutoff margin, rejection reasons, retry policy and duplicate/idempotency evidence. Current stored evidence shows Today 0% valid-pregame coverage and Yesterday 17.65% valid-pregame coverage, so `PRODUCTION_OPERATIONAL_READY` is not certified yet. Provider calls, prediction probabilities, Official Pick policy, Learning Brain weights, settlement outcomes, Current Board policy, Historical Replay and Phase 2A backfill were not changed.
+
 ### Existing Prediction Cutoff Classification V1
 
 Status: Persisted, idempotency-verified and build verification pending in this commit.

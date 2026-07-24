@@ -51,6 +51,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function AiOperationsPage() {
   const data = await getAiLearningLifecycle()
+  const pregameSchedulerCoverage = data.pregameSchedulerCoverage as { schedulerTiming?: any[] } | undefined
 
   return (
     <DashboardShell>
@@ -125,6 +126,42 @@ export default async function AiOperationsPage() {
               ) : null}
             </article>
           ))}
+        </div>
+      </DashboardSection>
+
+      <DashboardSection
+        id="pregame-scheduler"
+        eyebrow="Scheduler Coverage"
+        title="Pregame Timing"
+        description="Stored evidence for scheduler cadence, lead time, missed windows and retry safety."
+      >
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Metric label="Coverage Today" value={`${data.schedulerHealth.coverageTodayPct ?? 'N/A'}%`} />
+          <Metric label="Average Lead" value={data.schedulerHealth.averageLeadTimeBeforeCutoffMinutes === null || data.schedulerHealth.averageLeadTimeBeforeCutoffMinutes === undefined ? 'N/A' : `${data.schedulerHealth.averageLeadTimeBeforeCutoffMinutes} min`} />
+          <Metric label="Missed Windows" value={data.schedulerHealth.missedWindowsToday ?? 'N/A'} />
+          <Metric label="Retry Count" value={data.schedulerHealth.retryCount ?? 'N/A'} />
+        </div>
+        <div className="mt-4 overflow-hidden rounded-lg border border-slate-800">
+          <table className="w-full min-w-[760px] border-collapse bg-slate-900/70 text-left text-sm">
+            <thead className="bg-slate-950 text-xs uppercase tracking-[0.16em] text-slate-500">
+              <tr>
+                <th className="px-4 py-3">Scheduler</th>
+                <th className="px-4 py-3">Frequency</th>
+                <th className="px-4 py-3">Timezone</th>
+                <th className="px-4 py-3">Next</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(pregameSchedulerCoverage?.schedulerTiming ?? []).map((scheduler: any) => (
+                <tr key={scheduler.scheduler} className="border-t border-slate-800">
+                  <td className="px-4 py-3 text-slate-200">{scheduler.scheduler}</td>
+                  <td className="px-4 py-3 text-slate-300">{scheduler.frequency}</td>
+                  <td className="px-4 py-3 text-slate-400">{scheduler.timezone}</td>
+                  <td className="px-4 py-3 font-bold text-emerald-200">{scheduler.nextExecution || 'Manual only'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </DashboardSection>
 

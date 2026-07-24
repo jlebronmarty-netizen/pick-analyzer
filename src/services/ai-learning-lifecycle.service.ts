@@ -3,6 +3,7 @@ import { getModelCalibration } from '@/services/model-calibration.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
 import { zonedUtcRange } from '@/services/provider-time-normalization.service'
 import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
+import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -397,6 +398,7 @@ export async function getAiLearningLifecycle() {
     latestProjection,
     providerBudget,
     calibration,
+    pregameCoverage,
   ] = await Promise.all([
     safeRows<EventRow>('today sport_events', 'sport_events', 'id, sport_key, league_key, start_time, status, home_score, away_score', (query) => query.eq('sport_key', SPORT_KEY).gte('start_time', todayRange.start).lt('start_time', todayRange.end).limit(500)),
     safeRows<EventRow>('yesterday sport_events', 'sport_events', 'id, sport_key, league_key, start_time, status, home_score, away_score', (query) => query.eq('sport_key', SPORT_KEY).gte('start_time', yesterdayRange.start).lt('start_time', yesterdayRange.end).limit(500)),
@@ -421,6 +423,7 @@ export async function getAiLearningLifecycle() {
     latestTimestamp('universal_projection_history', 'generated_at', (query) => query.eq('sport_key', SPORT_KEY)),
     getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY }).catch((error) => ({ providerCallsMade: 0, error: error instanceof Error ? error.message : 'provider budget read failed' })),
     getModelCalibration().catch((error) => ({ success: false, error: error instanceof Error ? error.message : 'calibration read failed' })),
+    getPregameSchedulerCoverage().catch((error) => ({ success: false, providerCallsMade: 0, remoteMutationsMade: 0, error: error instanceof Error ? error.message : 'pregame scheduler coverage read failed' })),
   ])
 
   const warnings = [
@@ -445,6 +448,7 @@ export async function getAiLearningLifecycle() {
     latestPrediction.error,
     latestSettlement.error,
     latestProjection.error,
+    (pregameCoverage as Record<string, unknown>).error ? String((pregameCoverage as Record<string, unknown>).error) : null,
   ].filter(Boolean) as string[]
 
   const todayEventIds = new Set(todayEvents.data.map((event) => event.id))
@@ -487,6 +491,9 @@ export async function getAiLearningLifecycle() {
   const featureLabelCoverage = allQueue.total ? Number((((allQueue.accepted + allQueue.trained) / allQueue.total) * 100).toFixed(2)) : null
   const schedulerRecord = schedulerFromSyncJobs(syncJobs.data)
   const providerRecord = asRecord(providerBudget)
+  const pregameCoverageRecord = asRecord(pregameCoverage)
+  const pregameCoverageSummary = asRecord(pregameCoverageRecord.summary)
+  const pregameCoverageOperations = asRecord(pregameCoverageRecord.operations)
   const calibrationRecord = asRecord(calibration)
   const calibrationSample = asRecord(calibrationRecord.sample)
   const calibrationOverall = asRecord(calibrationRecord.overall)
@@ -591,15 +598,18 @@ export async function getAiLearningLifecycle() {
       'scheduler_health',
       'Scheduler Health',
       schedulerRecord.schedulerOperational === true ? 'Healthy' : 'Waiting',
-      schedulerRecord.schedulerOperational === true ? 'Scheduler metadata reports operational execution.' : 'Scheduler metadata is waiting for the next configured execution.',
+      schedulerRecord.schedulerOperational === true ? 'Scheduler metadata reports operational execution with pregame coverage evidence.' : 'Scheduler metadata is waiting for the next configured execution.',
       {
         schedulerConfigured: schedulerRecord.schedulerConfigured ?? null,
         schedulerOperational: schedulerRecord.schedulerOperational ?? null,
         nextAction: schedulerRecord.nextAction ?? null,
+        coveragePct: pregameCoverageSummary.coverageTodayPct ?? null,
+        averageLeadMinutes: pregameCoverageSummary.averageLeadTimeBeforeCutoffMinutes ?? null,
+        missedWindows: pregameCoverageSummary.missedWindowsToday ?? null,
       },
       schedulerRecord.error ? String(schedulerRecord.error) : null,
       String(schedulerRecord.lastSuccessfulAt ?? '') || null,
-      String(schedulerRecord.nextScheduledAt ?? 'Waiting for next scheduler execution')
+      String(pregameCoverageOperations.nextExecution ?? schedulerRecord.nextScheduledAt ?? 'Waiting for next scheduler execution')
     ),
     panel(
       'historical_imports',
@@ -776,9 +786,9 @@ export async function getAiLearningLifecycle() {
       error: calibrationRecord.success === false ? String(calibrationRecord.error ?? '') : null,
     },
     refreshTimeline: {
-      odds: { lastSuccessfulRefresh: latestOdds.value, nextScheduledRefresh: String(providerRecord.nextEligibleRefresh ?? schedulerRecord.nextScheduledAt ?? 'Waiting for next scheduler execution') },
-      prediction: { lastSuccessfulRefresh: latestPrediction.value, nextScheduledRefresh: String(schedulerRecord.nextScheduledAt ?? 'Waiting for next scheduler execution') },
-      currentBoard: { lastSuccessfulRefresh: latestPrediction.value, nextScheduledRefresh: String(schedulerRecord.nextScheduledAt ?? 'Waiting for next scheduler execution') },
+      odds: { lastSuccessfulRefresh: latestOdds.value, nextScheduledRefresh: String(providerRecord.nextEligibleRefresh ?? pregameCoverageOperations.nextExecution ?? schedulerRecord.nextScheduledAt ?? 'Waiting for next scheduler execution') },
+      prediction: { lastSuccessfulRefresh: latestPrediction.value, nextScheduledRefresh: String(pregameCoverageOperations.nextExecution ?? schedulerRecord.nextScheduledAt ?? 'Waiting for next scheduler execution') },
+      currentBoard: { lastSuccessfulRefresh: latestPrediction.value, nextScheduledRefresh: String(pregameCoverageOperations.nextExecution ?? schedulerRecord.nextScheduledAt ?? 'Waiting for next scheduler execution') },
       settlement: { lastSuccessfulRefresh: latestSettlement.value, nextScheduledRefresh: 'Waiting for next scheduler execution' },
       replay: { lastSuccessfulRefresh: latestProjection.value, nextScheduledRefresh: 'Waiting for next scheduler execution' },
       learning: { lastSuccessfulRefresh: weightRows.data[0]?.created_at ?? null, nextScheduledRefresh: 'Waiting for next scheduler execution' },
@@ -845,6 +855,7 @@ export async function getAiLearningLifecycle() {
         weightUpdates: weightRows.data.filter((row) => row.created_at && row.created_at >= last7Range.start && row.created_at < last7Range.end).length,
       },
     },
+    pregameSchedulerCoverage: pregameCoverage,
     shadowLearningValidation: {
       mode: 'SHADOW_ONLY',
       acceptedSamples: allQueue.accepted,
@@ -879,8 +890,12 @@ export async function getAiLearningLifecycle() {
       schedulerOperational: schedulerRecord.schedulerOperational ?? null,
       lastTriggeredAt: schedulerRecord.lastTriggeredAt ?? null,
       lastSuccessfulAt: schedulerRecord.lastSuccessfulAt ?? null,
-      nextScheduledAt: schedulerRecord.nextScheduledAt ?? null,
+      nextScheduledAt: pregameCoverageOperations.nextExecution ?? schedulerRecord.nextScheduledAt ?? null,
       nextAction: schedulerRecord.nextAction ?? null,
+      coverageTodayPct: pregameCoverageSummary.coverageTodayPct ?? null,
+      averageLeadTimeBeforeCutoffMinutes: pregameCoverageSummary.averageLeadTimeBeforeCutoffMinutes ?? null,
+      missedWindowsToday: pregameCoverageSummary.missedWindowsToday ?? null,
+      retryCount: pregameCoverageOperations.retryCount ?? null,
     },
     syncEvidence: {
       rowsRead: syncJobs.data.length,

@@ -5,6 +5,7 @@ import { getCurrentBoardCached } from '@/services/current-board.service'
 import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
+import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
 
 const TIMEZONE = 'America/Puerto_Rico'
 const SPORT_KEY = 'baseball_mlb'
@@ -318,9 +319,10 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
 }
 
 export async function getRecommendationPipelineTrace() {
-  const [today, yesterday] = await Promise.all([
+  const [today, yesterday, schedulerCoverage] = await Promise.all([
     traceDay('Today', dateForOffset(0)),
     traceDay('Yesterday', dateForOffset(1)),
+    getPregameSchedulerCoverage(),
   ])
   return {
     success: true,
@@ -329,8 +331,12 @@ export async function getRecommendationPipelineTrace() {
     readOnly: true,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
-    today,
-    yesterday,
-    days: [today, yesterday],
+    schedulerCoverage,
+    today: { ...today, schedulerCoverage: schedulerCoverage.today },
+    yesterday: { ...yesterday, schedulerCoverage: schedulerCoverage.yesterday },
+    days: [
+      { ...today, schedulerCoverage: schedulerCoverage.today },
+      { ...yesterday, schedulerCoverage: schedulerCoverage.yesterday },
+    ],
   }
 }

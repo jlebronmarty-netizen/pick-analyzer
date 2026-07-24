@@ -18,6 +18,7 @@ import { validateMlbOperatingDateResolutionFixtures } from '@/services/mlb-opera
 import { formatInTimeZone, localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.service'
 import { getMlbProjectedScores } from '@/services/mlb-projected-score.service'
+import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -140,6 +141,16 @@ export type DashboardTodayContract = {
   nextActionAt: string | null
   automationStatus: string
   providerCallsToday: number
+  schedulerCoverage?: {
+    gamesToday: number
+    predictedToday: number
+    pendingToday: number
+    skippedToday: number
+    coverageTodayPct: number | null
+    averageLeadTimeBeforeCutoffMinutes: number | null
+    missedWindowsToday: number
+    nextExecution: string | null
+  }
   providerCallsMade: 0
   remoteMutationsMade: 0
   championRowsMutated: false
@@ -214,6 +225,12 @@ export type DashboardTodayContract = {
       nextAction: string
       nextActionAt: string | null
       blockers: string[]
+      schedulerCoverage?: {
+        coverageTodayPct: number | null
+        averageLeadTimeBeforeCutoffMinutes: number | null
+        missedWindowsToday: number
+        nextExecution: string | null
+      } | null
     }>
   }
   partial: boolean
@@ -578,7 +595,7 @@ export async function getDashboardToday({
     hour12: false,
   }).format(now))
 
-  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, modelOnlyResult, projectedScoresResult] = await Promise.all([
+  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, modelOnlyResult, projectedScoresResult, schedulerCoverageResult] = await Promise.all([
     timed('current_events', () => loadEventsForDate(operatingDate), 4200),
     timed('current_board', () => getCurrentBoardCached(SPORT_KEY, 'CURRENT', 100, false, operatingDate), 5000),
     timed('next_slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }), 3500),
@@ -586,6 +603,7 @@ export async function getDashboardToday({
     timed('provider_budget', () => getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY }), 1600),
     timed('model_only_intelligence', () => getModelOnlyIntelligence({ date: operatingDate }), 5000),
     timed('projected_scores', () => getMlbProjectedScores(), 5000),
+    timed('pregame_scheduler_coverage', () => getPregameSchedulerCoverage({ now }), 5000),
   ])
   const currentEventsTimedOut = currentEventsResult.error?.toLowerCase().includes('exceeded') === true
   const currentEventsFallbackResult = !currentEventsResult.ok && !currentEventsTimedOut
@@ -714,6 +732,7 @@ export async function getDashboardToday({
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   } as Awaited<ReturnType<typeof getMlbProjectedScores>>)
+  const schedulerCoverage = schedulerCoverageResult.ok ? schedulerCoverageResult.value : null
   const eventLoad = currentEventsResult.ok
     ? values(currentEventsResult, {
       rows: [] as DashboardEventRow[],
@@ -883,6 +902,7 @@ export async function getDashboardToday({
     modelMostLikelyData[0] ? 'Most Likely model rankings are available from stored prediction output.' : null,
     modelOnly.summary.pitcherShadowProjections > 0 ? `${modelOnly.summary.pitcherShadowProjections} pitcher shadow projections are ready as SHADOW / NO MARKET.` : null,
     projectedScores.games.length ? `${projectedScores.games.length} projected scores are available from stored model and market context.` : null,
+    schedulerCoverage ? `Scheduler coverage: ${schedulerCoverage.today.validPregameGames}/${schedulerCoverage.today.eligibleGames} eligible game${schedulerCoverage.today.eligibleGames === 1 ? '' : 's'} have valid pregame prediction evidence; average lead time is ${schedulerCoverage.today.averageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes before cutoff.` : null,
     bestValueData[0] ? 'Best Value rankings are available from stored Current Board data.' : null,
     blockers.includes('market_prices_not_refreshed') ? 'Market freshness is degraded, but the Today panel remains available.' : null,
   ].filter(Boolean) as string[]
@@ -895,6 +915,7 @@ export async function getDashboardToday({
     modelOnlyResult,
     projectedScoresResult,
     settlementStateResult,
+    schedulerCoverageResult,
   ]
   const criticalLabels = new Set(['current_events'])
   const errors = dependencyResults
@@ -946,6 +967,16 @@ export async function getDashboardToday({
     nextActionAt,
     automationStatus: 'stored_data_read_only',
     providerCallsToday: Number(budget.callsMadeToday ?? 0),
+    schedulerCoverage: schedulerCoverage ? {
+      gamesToday: schedulerCoverage.summary.gamesToday,
+      predictedToday: schedulerCoverage.summary.predictedToday,
+      pendingToday: schedulerCoverage.summary.pendingToday,
+      skippedToday: schedulerCoverage.summary.skippedToday,
+      coverageTodayPct: schedulerCoverage.summary.coverageTodayPct,
+      averageLeadTimeBeforeCutoffMinutes: schedulerCoverage.summary.averageLeadTimeBeforeCutoffMinutes,
+      missedWindowsToday: schedulerCoverage.summary.missedWindowsToday,
+      nextExecution: schedulerCoverage.operations.nextExecution,
+    } : undefined,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
     championRowsMutated: false,
@@ -1049,7 +1080,18 @@ export async function getDashboardToday({
       topOpportunity: section(topOpportunity ? 'AVAILABLE' : 'EMPTY', topOpportunity, topOpportunity ? null : 'No top opportunity is available.', generatedAt),
       operations: section(
         errors.some((error) => error.dependency === 'provider_budget' || error.dependency === 'operating_day') ? 'DEGRADED' : 'AVAILABLE',
-        { providerCallsToday: Number(budget.callsMadeToday ?? 0), nextAction, nextActionAt, blockers },
+        {
+          providerCallsToday: Number(budget.callsMadeToday ?? 0),
+          nextAction,
+          nextActionAt,
+          blockers,
+          schedulerCoverage: schedulerCoverage ? {
+            coverageTodayPct: schedulerCoverage.summary.coverageTodayPct,
+            averageLeadTimeBeforeCutoffMinutes: schedulerCoverage.summary.averageLeadTimeBeforeCutoffMinutes,
+            missedWindowsToday: schedulerCoverage.summary.missedWindowsToday,
+            nextExecution: schedulerCoverage.operations.nextExecution,
+          } : null,
+        },
         errors.some((error) => error.dependency === 'provider_budget' || error.dependency === 'operating_day')
           ? 'Operations context is partially unavailable.'
           : null,

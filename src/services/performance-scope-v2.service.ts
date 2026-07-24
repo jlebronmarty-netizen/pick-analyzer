@@ -3,6 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { localDateInTimeZone } from '@/services/provider-time-normalization.service'
 import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
+import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
 
 const TIMEZONE = 'America/Puerto_Rico'
 const FINAL_RESULTS = new Set(['win', 'loss', 'push', 'void'])
@@ -246,6 +247,12 @@ async function loadEvents(eventIds: string[]) {
 }
 
 export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | null } = {}) {
+  const schedulerCoverage = await getPregameSchedulerCoverage().catch((error) => ({
+    success: false,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    error: error instanceof Error ? error.message : 'pregame scheduler coverage read failed',
+  }))
   const rows = await loadRows(sportKey)
   const events = await loadEvents(Array.from(new Set(rows.map((row) => row.game_id).filter(Boolean))) as string[])
   const joined = rows.map((row) => ({ row, event: row.game_id ? events.get(row.game_id) : undefined }))
@@ -287,6 +294,7 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
       byState: groupCount(joined.filter((item) => cutoffExclusion(item.row, item.event)), (item) => cutoffExclusion(item.row, item.event)),
       rows: joined.filter((item) => cutoffExclusion(item.row, item.event)).length,
     },
+    schedulerCoverage,
     pending: {
       rows: pending.length,
       byReason: groupCount(pendingClassified, (item) => item.reason),

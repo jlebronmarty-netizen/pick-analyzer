@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Pregame Scheduler Coverage & Execution Timing V1
+
+- Added read-only pregame scheduler coverage evidence in `pregame-scheduler-coverage.service.ts`. It audits stored MLB events, odds snapshots, prediction rows, cutoff classifications, operating-day lifecycle events and sync jobs to report detection, odds capture, prediction persistence, cutoff timestamp, prediction timestamp and margin before cutoff per game.
+- Exposed scheduler coverage through Recommendation Pipeline Trace, Performance History, Dashboard Today's Story / Current AI Pipeline and AI Operations Scheduler Coverage. No scheduler infrastructure, prediction model, Official Pick policy, Learning Brain, settlement, Current Board policy, Historical Replay or historical feature-store path was redesigned or modified.
+- Scheduler timing is now surfaced for the existing routes: Vercel daily cron `0 12 * * *`, GitHub production runtime `7,22,37,52 * * * *`, GitHub heartbeat `14,44 * * * *` and manual-only legacy cron routes. Observed average persisted execution duration is about 0.08 minutes.
+- Operational validation found the current stored day is not pregame-ready: Today has 5 scheduled games, 5 predicted games, 0 valid pregame games, 5 skipped/rejected games, 0% valid-pregame coverage and -211.11 minutes average lead time before cutoff. Rejection reasons: 4 `GAME_ALREADY_STARTED`, 1 `INVALID_CUTOFF`.
+- Yesterday has 17 scheduled games, 17 predicted games, 3 valid pregame games, 14 skipped/rejected games, 17.65% valid-pregame coverage and -163.52 minutes average lead time before cutoff. Rejection reasons: 14 `GAME_ALREADY_STARTED`, 3 `VALID_PREGAME`.
+- Idempotency scan passed from persisted evidence: duplicate idempotency keys 0 and duplicate current prediction identities 0 for Today and Yesterday. Provider calls and remote mutations from validation reads remained 0.
+
 ## 2026-07-24 Existing Prediction Cutoff Classification V1
 
 - Persisted cutoff classification metadata only for existing production prediction rows that were already identified by the shared cutoff diagnostics. The mutation is limited to `prediction_history.settlement_details.cutoff_enforcement_v1` with `mutationScope=classification_metadata_only`.

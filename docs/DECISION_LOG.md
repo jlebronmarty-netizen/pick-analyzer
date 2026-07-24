@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-24 - Expose Pregame Scheduler Coverage As Read-Only Operational Evidence
+
+Context: Cutoff enforcement and existing-row classification proved which predictions are valid pregame versus post-cutoff, but operators still needed to know whether future scheduler executions are actually arriving before first pitch and why games are skipped.
+
+Decision: Add a read-only pregame scheduler coverage service that reuses persisted `sport_events`, `sports_odds_snapshots`, `prediction_history`, cutoff classifications, operating-day lifecycle events and sync jobs. Surface the evidence through existing Trace, Performance, Dashboard and AI Operations contracts. Do not redesign scheduler infrastructure, prediction models, Current Board, Official Pick policy, settlement, Learning Brain, Historical Replay or historical feature backfill.
+
+Consequences: Operators can now see scheduler cadence, next execution, average duration, per-game prediction/cutoff timestamps, lead-time margin, rejection reason, retry policy and duplicate/idempotency evidence. The current evidence is intentionally reported as a blocker: Today has 0% valid-pregame coverage and Yesterday has 17.65%, so production operational readiness is not certified until future scheduler runs produce valid pregame coverage.
+
+Affected modules: Pregame scheduler coverage service, Recommendation Pipeline Trace, Performance History, Dashboard Today, AI Operations and project documentation.
+
 ## 2026-07-24 - Persist Existing Cutoff Classification Metadata Only
 
 Context: Existing production prediction rows had already been classified by diagnostics as pregame-safe, post-start, post-final or invalid-cutoff. Product read models excluded contaminated rows, but the classification itself was not persisted because the earlier bulk update attempted broader lifecycle mutations and was rejected by protected review.
