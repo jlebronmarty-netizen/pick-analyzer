@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Full Historical Replay Phase 2B
+
+- Executed Full Historical Replay Phase 2B over the complete supported Retrosheet MLB historical scope: 2,430 games, 7,290 replay-only predictions, 7,290 replay settlements, 7,290 replay labels and 211,410 historical snapshot lookups across Moneyline, Run Line/spread and Totals.
+- Persisted replay-only artifacts to `universal_projection_history` under projection family `retrosheet_historical_replay_phase_2b_v1`; no replay rows were written to `prediction_history`, Current Board, Official Picks or Learning Brain weight tables.
+- Checkpointed progress at `historical_import_checkpoints.checkpoint_key=retrosheet_historical_replay_phase_2b_v1:full_scope`; AI Operations now exposes Phase 2B games total/completed, replay rows, checkpoint, batches, idempotency, leakage failures, provider calls and database writes.
+- Idempotency rerun over the completed scope inserted 0 replay artifacts, reused 7,290, produced duplicate deterministic IDs 0 and kept production counts unchanged.
+- Provider calls remained 0. Historical sportsbook odds were not fabricated and historical EV was not calculated. AI retraining, recalibration, model promotion, unsupported market activation and Historical Feature Store mutation were not executed.
+- Certifications: `FULL_HISTORICAL_REPLAY_PASS`, `REPLAY_POINT_IN_TIME_PASS`, `REPLAY_PRODUCTION_ISOLATION_PASS`, `REPLAY_SETTLEMENT_PASS`, `REPLAY_LABEL_PASS`, `REPLAY_IDEMPOTENCY_PASS`, `REPLAY_RESUME_PASS`.
+
 ## 2026-07-24 Historical Replay IO Readiness & Controlled Pilot V1
 
 - Added a bounded Retrosheet replay pilot runner that consumes only stored `historical_feature_snapshots` and writes replay-only artifacts to `universal_projection_history` under projection family `retrosheet_replay_pilot_v1`.

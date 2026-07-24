@@ -187,7 +187,7 @@ export default async function AiOperationsPage() {
         id="replay-pilot"
         eyebrow="Historical Replay"
         title="Replay Pilot"
-        description="Controlled replay pilot evidence only. Full Historical Replay remains approval-gated."
+        description="Controlled replay pilot evidence only."
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Metric label="Status" value={data.replayPilot?.status ?? 'not_started'} />
@@ -198,6 +198,32 @@ export default async function AiOperationsPage() {
           <Metric label="Replay Duration" value={data.replayPilot?.replayDurationMs === null || data.replayPilot?.replayDurationMs === undefined ? 'N/A' : `${data.replayPilot.replayDurationMs} ms`} />
           <Metric label="Snapshot Lookups" value={data.replayPilot?.snapshotLookups ?? 'N/A'} />
           <Metric label="Idempotency" value={data.replayPilot?.idempotencyStatus ?? 'N/A'} />
+        </div>
+      </DashboardSection>
+
+      <DashboardSection
+        id="full-historical-replay"
+        eyebrow="Historical Replay Phase 2B"
+        title="Full Replay"
+        description="Replay-only Phase 2B progress from stored historical snapshots."
+      >
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Metric label="Status" value={data.replayFull?.status ?? 'not_started'} />
+          <Metric label="Games Total" value={data.replayFull?.gamesTotal ?? 'N/A'} />
+          <Metric label="Games Completed" value={data.replayFull?.gamesCompleted ?? 0} />
+          <Metric label="Replay Predictions" value={data.replayFull?.replayPredictions ?? 0} />
+          <Metric label="Replay Settlements" value={data.replayFull?.replaySettlements ?? 0} />
+          <Metric label="Replay Labels" value={data.replayFull?.replayLabels ?? 0} />
+          <Metric label="Checkpoint" value={data.replayFull?.checkpointStatus ?? 'N/A'} />
+          <Metric label="Current Batch" value={data.replayFull?.currentBatch ?? 'N/A'} />
+          <Metric label="Snapshot Lookups" value={data.replayFull?.snapshotLookups ?? 'N/A'} />
+          <Metric label="Inserted" value={data.replayFull?.inserted ?? 0} />
+          <Metric label="Reused" value={data.replayFull?.reused ?? 0} />
+          <Metric label="Duplicate IDs" value={data.replayFull?.duplicateIds ?? 0} />
+          <Metric label="Leakage Failures" value={data.replayFull?.leakageFailures ?? 0} />
+          <Metric label="Provider Calls" value={data.replayFull?.providerCallsMade ?? 0} />
+          <Metric label="Database Writes" value={data.replayFull?.databaseWrites ?? 0} />
+          <Metric label="Avg Duration" value={data.replayFull?.averageReplayDurationMsPerGame === null || data.replayFull?.averageReplayDurationMsPerGame === undefined ? 'N/A' : `${data.replayFull.averageReplayDurationMsPerGame} ms/game`} />
         </div>
       </DashboardSection>
 

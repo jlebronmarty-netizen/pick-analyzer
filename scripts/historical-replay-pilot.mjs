@@ -19,14 +19,25 @@ function argValue(name, fallback = null) {
 
 loadEnvFile()
 
-const { runHistoricalReplayPilot, getHistoricalReplayPilotStatus } = await import('../src/services/historical-replay-pilot.service.ts')
+const {
+  runHistoricalReplayPilot,
+  getHistoricalReplayPilotStatus,
+  runHistoricalReplayFull,
+  getHistoricalReplayFullStatus,
+} = await import('../src/services/historical-replay-pilot.service.ts')
 
 const mode = argValue('mode', 'run')
-const limit = Number(argValue('limit', '12'))
+const limitArg = argValue('limit', null)
+const limit = Number(limitArg ?? '12')
+const batchSize = Number(argValue('batch-size', '50'))
 const dryRun = process.argv.includes('--dry-run')
 
 const result = mode === 'status'
   ? await getHistoricalReplayPilotStatus()
-  : await runHistoricalReplayPilot({ limit, dryRun })
+  : mode === 'full-status'
+    ? await getHistoricalReplayFullStatus()
+    : mode === 'full'
+      ? await runHistoricalReplayFull({ limit: limitArg === null ? 2430 : limit, batchSize, dryRun })
+      : await runHistoricalReplayPilot({ limit, dryRun })
 
 console.log(JSON.stringify(result, null, 2))

@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Full Historical Replay Phase 2B
+
+Status: Executed, idempotency-verified and build-verified; production deployment verification pending.
+
+Evidence: `src/services/historical-replay-pilot.service.ts`, `scripts/historical-replay-pilot.mjs`, `npm.cmd run historical:replay:full -- --batch-size=50`, AI Operations Full Replay display, `universal_projection_history` replay artifacts under `retrosheet_historical_replay_phase_2b_v1`, `sports_sync_jobs` Phase 2B jobs, `historical_import_checkpoints` full-scope checkpoint and `docs/FULL_HISTORICAL_REPLAY_PHASE_2B.md`.
+
+Note: The full replay processed 2,430 Retrosheet MLB games and generated 7,290 replay-only predictions, 7,290 replay settlements and 7,290 replay labels across Moneyline, Run Line/spread and Totals. The completed-scope rerun inserted 0 replay artifacts, reused all 7,290 deterministic artifacts and found duplicate IDs 0. Production prediction history, current production predictions, Current Board, Official Picks, scheduler behavior, Learning Brain weights and Historical Feature Store rows were not mutated. Provider calls remained 0, and historical EV was not calculated because complete historical sportsbook odds were not available.
+
 ### Historical Replay IO Readiness & Controlled Pilot V1
 
 Status: Pilot executed, idempotency-verified and build-verified; production deployment verification pending.

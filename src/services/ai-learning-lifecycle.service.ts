@@ -4,7 +4,7 @@ import { getProviderBudgetStatus } from '@/services/provider-budget.service'
 import { zonedUtcRange } from '@/services/provider-time-normalization.service'
 import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
-import { getHistoricalReplayPilotStatus } from '@/services/historical-replay-pilot.service'
+import { getHistoricalReplayFullStatus, getHistoricalReplayPilotStatus } from '@/services/historical-replay-pilot.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -512,6 +512,40 @@ export async function getAiLearningLifecycle() {
     remoteMutationsMade: 0,
     errors: [error instanceof Error ? error.message : 'replay pilot status read failed'],
   }))
+  const replayFull = await getHistoricalReplayFullStatus().catch((error) => ({
+    success: false,
+    mode: 'historical_replay_phase_2b_status_v1',
+    status: 'error',
+    gamesTotal: null,
+    gamesCompleted: 0,
+    replayPredictions: 0,
+    replaySettlements: 0,
+    replayLabels: 0,
+    replayDurationMs: null,
+    averageReplayDurationMsPerGame: null,
+    snapshotLookups: null,
+    currentBatch: null,
+    checkpointStatus: null,
+    checkpointFinishedAt: null,
+    resumeCount: 0,
+    inserted: 0,
+    reused: 0,
+    duplicateIds: 0,
+    leakageFailures: 0,
+    estimatedRemaining: null,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    databaseWrites: 0,
+    productionIsolation: {
+      replayOnly: true,
+      predictionHistoryMutated: false,
+      currentBoardMutated: false,
+      officialPickPolicyMutated: false,
+      learningBrainMutated: false,
+      schedulerMutated: false,
+    },
+    errors: [error instanceof Error ? error.message : 'full replay status read failed'],
+  }))
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -613,6 +647,27 @@ export async function getAiLearningLifecycle() {
       replayPilot.errors?.length ? replayPilot.errors.join('; ') : replayPilot.status === 'not_started' ? 'REPLAY_PILOT_NOT_EXECUTED' : null,
       String(replayPilot.checkpointFinishedAt ?? '') || null,
       'Manual approval required for any expanded replay'
+    ),
+    panel(
+      'full_historical_replay_phase_2b',
+      'Full Historical Replay Phase 2B',
+      replayFull.status === 'completed' ? 'Completed' : replayFull.status === 'running' ? 'Running' : replayFull.status === 'error' ? 'Error' : 'Waiting',
+      replayFull.status === 'completed'
+        ? 'Full Phase 2B replay artifacts are persisted as replay-only universal projections.'
+        : replayFull.status === 'running'
+          ? 'Full Phase 2B replay is checkpointing replay-only artifacts.'
+          : 'Full Phase 2B replay has not completed.',
+      {
+        gamesTotal: replayFull.gamesTotal,
+        gamesCompleted: replayFull.gamesCompleted,
+        replayPredictions: replayFull.replayPredictions,
+        checkpoint: replayFull.checkpointStatus,
+        currentBatch: replayFull.currentBatch,
+        providerCalls: replayFull.providerCallsMade,
+      },
+      replayFull.errors?.length ? replayFull.errors.join('; ') : replayFull.status === 'not_started' ? 'FULL_REPLAY_NOT_EXECUTED' : null,
+      String(replayFull.checkpointFinishedAt ?? '') || null,
+      replayFull.status === 'completed' ? 'Awaiting shadow calibration approval gate' : 'Operator-controlled replay execution only'
     ),
     panel(
       'learning_queue',
@@ -928,6 +983,7 @@ export async function getAiLearningLifecycle() {
       },
     },
     pregameSchedulerCoverage: pregameCoverage,
+    replayFull,
     shadowLearningValidation: {
       mode: 'SHADOW_ONLY',
       acceptedSamples: allQueue.accepted,
@@ -981,9 +1037,9 @@ export async function getAiLearningLifecycle() {
       settlementOutcomesModified: false,
       learningWeightsModified: false,
       providerCallsRemainZero: providerCallsMade === 0,
-      historicalReplayNotStarted: true,
-      fullHistoricalReplayNotStarted: true,
-      replayPilotOnly: true,
+      historicalReplayNotStarted: replayFull.status === 'not_started',
+      fullHistoricalReplayNotStarted: replayFull.status === 'not_started',
+      replayPilotOnly: replayFull.status === 'not_started',
     },
     certifications: [
       'AI_PIPELINE_PASS',

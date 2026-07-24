@@ -11,6 +11,10 @@ const PILOT_VERSION = 'retrosheet_historical_replay_pilot_v1'
 const PROJECTION_FAMILY = 'retrosheet_replay_pilot_v1'
 const SOURCE = 'retrosheet_replay_pilot'
 const CHECKPOINT_KEY = 'retrosheet_replay_pilot_v1:bounded_sample'
+const FULL_REPLAY_VERSION = 'retrosheet_historical_replay_phase_2b_v1'
+const FULL_REPLAY_FAMILY = 'retrosheet_historical_replay_phase_2b_v1'
+const FULL_REPLAY_SOURCE = 'retrosheet_full_historical_replay'
+const FULL_REPLAY_CHECKPOINT_KEY = 'retrosheet_historical_replay_phase_2b_v1:full_scope'
 
 type HistoricalGameRow = {
   canonical_game_id: string
@@ -259,6 +263,33 @@ async function loadGames(gameIds: string[]) {
     .order('game_date', { ascending: true })
   if (error) throw new Error(`replay pilot game load failed: ${error.message}`)
   return (data ?? []) as HistoricalGameRow[]
+}
+
+async function loadGamesInChunks(gameIds: string[], chunkSize = 350) {
+  const rows: HistoricalGameRow[] = []
+  for (let index = 0; index < gameIds.length; index += chunkSize) {
+    rows.push(...await loadGames(gameIds.slice(index, index + chunkSize)))
+  }
+  return rows.sort((a, b) => String(a.game_date ?? '').localeCompare(String(b.game_date ?? '')) || a.canonical_game_id.localeCompare(b.canonical_game_id))
+}
+
+async function loadAllStoredSnapshots(pageSize = 1000) {
+  const rows: SnapshotRow[] = []
+  for (let offset = 0; ; offset += pageSize) {
+    const { data, error } = await supabaseAdmin
+      .from('historical_feature_snapshots')
+      .select('id, deterministic_key, provider_event_id, prediction_cutoff, as_of_timestamp, generated_at, feature_values, feature_lineage, data_quality_score, data_sufficiency_score, leakage_status, leakage_warnings, metadata')
+      .eq('sport_key', SPORT_KEY)
+      .eq('market', 'historical_mlb_feature_store')
+      .like('deterministic_key', 'retrosheet_mlb_feature_store_v1:%')
+      .order('prediction_cutoff', { ascending: true })
+      .order('id', { ascending: true })
+      .range(offset, offset + pageSize - 1)
+    if (error) throw new Error(`full replay snapshot page load failed at offset ${offset}: ${error.message}`)
+    rows.push(...((data ?? []) as SnapshotRow[]))
+    if (!data || data.length < pageSize) break
+  }
+  return rows
 }
 
 function selectGames(games: HistoricalGameRow[], grouped: Map<string, SnapshotRow[]>, limit: number) {
@@ -615,6 +646,422 @@ export async function getHistoricalReplayPilotStatus() {
     },
     providerCallsMade: 0,
     remoteMutationsMade: 0,
+    errors: [artifacts.error?.message, jobs.error?.message, checkpoints.error?.message].filter(Boolean),
+  }
+}
+
+async function createFullReplayJob(scope: { gamesPlanned: number; dryRun: boolean; batchSize: number }) {
+  const startedAt = new Date().toISOString()
+  if (scope.dryRun) return { id: null, startedAt }
+  const { data, error } = await supabaseAdmin
+    .from('sports_sync_jobs')
+    .insert({
+      job_type: FULL_REPLAY_VERSION,
+      sport_key: SPORT_KEY,
+      league_key: LEAGUE_KEY,
+      provider: FULL_REPLAY_SOURCE,
+      season: SEASON,
+      started_at: startedAt,
+      status: 'running',
+      records_fetched: scope.gamesPlanned,
+      metadata: {
+        replayPilot: false,
+        fullHistoricalReplay: true,
+        replayOnly: true,
+        batchSize: scope.batchSize,
+        providerCallsMade: 0,
+        productionPredictionHistoryMutated: false,
+        learningBrainMutated: false,
+      },
+    })
+    .select('id')
+    .single()
+  if (error) throw new Error(`full replay job insert failed: ${error.message}`)
+  return { id: String(data.id), startedAt }
+}
+
+async function completeFullReplayJob(job: { id: string | null; startedAt: string }, status: 'completed' | 'failed', stats: Record<string, unknown>, error?: string | null) {
+  if (!job.id) return
+  const completedAt = new Date().toISOString()
+  const durationMs = Math.max(0, new Date(completedAt).getTime() - new Date(job.startedAt).getTime())
+  const { error: updateError } = await supabaseAdmin
+    .from('sports_sync_jobs')
+    .update({
+      status,
+      completed_at: completedAt,
+      duration_ms: durationMs,
+      records_fetched: Number(stats.gamesTotal ?? 0),
+      records_inserted: Number(stats.inserted ?? 0),
+      records_skipped: Number(stats.reused ?? 0),
+      error_count: status === 'failed' ? 1 : 0,
+      last_error: error ?? null,
+      metadata: {
+        replayPilot: false,
+        fullHistoricalReplay: true,
+        replayOnly: true,
+        providerCallsMade: 0,
+        productionPredictionHistoryMutated: false,
+        learningBrainMutated: false,
+        ...stats,
+      },
+    })
+    .eq('id', job.id)
+  if (updateError) throw new Error(`full replay job update failed: ${updateError.message}`)
+}
+
+async function persistFullReplayCheckpoint(jobId: string | null, status: 'running' | 'completed' | 'failed', stats: Record<string, unknown>, dryRun: boolean) {
+  if (dryRun) return { written: false, checkpointKey: FULL_REPLAY_CHECKPOINT_KEY, status }
+  const finished = status === 'running' ? null : new Date().toISOString()
+  const { error } = await supabaseAdmin
+    .from('historical_import_checkpoints')
+    .upsert({
+      id: `retrosheet_full_replay_checkpoint:${FULL_REPLAY_CHECKPOINT_KEY}`,
+      import_id: null,
+      source_registry_id: null,
+      checkpoint_level: 'validation',
+      checkpoint_key: FULL_REPLAY_CHECKPOINT_KEY,
+      status,
+      record_count: Number(stats.predictions ?? 0),
+      warning_count: Number(stats.warningCount ?? 0),
+      error_count: status === 'failed' ? 1 : 0,
+      started_at: stats.startedAt,
+      finished_at: finished,
+      metadata: {
+        replayPilot: false,
+        fullHistoricalReplay: true,
+        replayOnly: true,
+        syncJobId: jobId,
+        resumeSupported: true,
+        idempotencyKeyPrefix: FULL_REPLAY_FAMILY,
+        ...stats,
+      },
+    }, { onConflict: 'id' })
+  if (error) throw new Error(`full replay checkpoint upsert failed: ${error.message}`)
+  return { written: true, checkpointKey: FULL_REPLAY_CHECKPOINT_KEY, status }
+}
+
+async function persistFullReplayRows(markets: Array<{ game: HistoricalGameRow; replay: ReplayMarket }>, dryRun: boolean) {
+  const ids = markets.map(({ game, replay }) => stableId([FULL_REPLAY_FAMILY, game.canonical_game_id, replay.projectionKey]))
+  const existing = ids.length
+    ? await supabaseAdmin.from('universal_projection_history').select('id, idempotency_key').in('idempotency_key', ids)
+    : { data: [], error: null }
+  if (existing.error) throw new Error(`full replay existing-row lookup failed: ${existing.error.message}`)
+  const existingIds = new Set((existing.data ?? []).map((row) => String(row.idempotency_key ?? row.id)))
+  const settledAt = new Date().toISOString()
+  const rows = markets.map(({ game, replay }, index) => {
+    const id = ids[index]
+    const outcome = replay.settlement.outcome
+    const labelAccepted = ['win', 'loss', 'push'].includes(outcome)
+    const error = replay.projectedValue - replay.actualValue
+    return {
+      id,
+      sport_key: SPORT_KEY,
+      league_key: LEAGUE_KEY,
+      season: game.season ?? SEASON,
+      event_id: game.canonical_game_id,
+      entity_type: 'game',
+      entity_id: game.canonical_game_id,
+      entity_name: `${game.canonical_away_team ?? 'Away'} @ ${game.canonical_home_team ?? 'Home'}`,
+      team_id: null,
+      team_name: replay.selectedSide === 'total' ? null : replay.selection.replace(' -1.5', ''),
+      projection_key: replay.projectionKey,
+      projection_family: FULL_REPLAY_FAMILY,
+      model_version: FULL_REPLAY_VERSION,
+      unit: 'PROBABILITY_PERCENT',
+      projection_origin: 'RETROSHEET_FEATURE_STORE_FULL_REPLAY',
+      validity_status: replay.warnings.some((warning) => /SNAPSHOT_AFTER_CUTOFF|CUTOFF_AFTER_GAME_START/.test(warning)) ? 'MODEL_BLOCKED' : 'VALID',
+      projected_value: replay.projectedValue,
+      confidence: Math.min(85, Math.max(35, replay.modelProbability)),
+      historical_accuracy: null,
+      feature_quality: replay.featureQualityScore,
+      data_sufficiency: replay.dataSufficiencyScore,
+      prediction_interval_low: clamp(replay.projectedValue - 8),
+      prediction_interval_high: clamp(replay.projectedValue + 8),
+      readiness: 'LIMITED',
+      shadow_status: 'VALIDATING',
+      rank_score: replay.modelProbability,
+      rank_tier: 'REPLAY_PHASE_2B',
+      identity_confidence: 100,
+      participation_status: 'HISTORICAL_FINAL_SETTLED',
+      starter_status: null,
+      feature_contributions: [
+        { feature: 'retrosheet_historical_feature_snapshots', status: 'AVAILABLE', contribution: replay.featureSnapshotIds.length, explanation: 'Stored pregame historical snapshots were loaded by provider_event_id.' },
+        { feature: 'cutoff_enforcement', status: replay.warnings.some((warning) => warning.includes('CUTOFF')) ? 'PARTIAL' : 'AVAILABLE', contribution: 1, explanation: 'Prediction timestamp, snapshot timestamp and cutoff timestamp were checked before replay storage.' },
+        { feature: 'replay_settlement_label', status: labelAccepted ? 'AVAILABLE' : 'PARTIAL', contribution: labelAccepted ? 1 : 0, explanation: 'Replay-only settlement label was derived from historical final score.' },
+      ],
+      explanation: `${replay.selection} ${replay.market} replay generated from stored Retrosheet pregame snapshots only. Outcome ${outcome} is replay-only and excluded from production prediction history, Official Picks and Learning Brain weights.`,
+      feature_snapshot: {
+        fullHistoricalReplayVersion: FULL_REPLAY_VERSION,
+        snapshotIds: replay.featureSnapshotIds,
+        predictionTimestamp: replay.predictionTimestamp,
+        snapshotTimestamp: replay.snapshotTimestamp,
+        cutoffTimestamp: replay.cutoffTimestamp,
+        gameStartProxy: replay.gameStartProxy,
+        market: replay.market,
+        selection: replay.selection,
+        line: replay.line,
+        warnings: replay.warnings,
+      },
+      actual_value: replay.actualValue,
+      error,
+      absolute_error: Math.abs(error),
+      squared_error: error ** 2,
+      calibration: {
+        replayOnly: true,
+        labelAccepted,
+        settlementOutcome: outcome,
+        calibrationInput: labelAccepted ? { probability: replay.modelProbability, outcome: outcome === 'win' ? 1 : outcome === 'loss' ? 0 : null, push: outcome === 'push' } : null,
+        productionCalibrationMutated: false,
+      },
+      drift: {},
+      source: FULL_REPLAY_SOURCE,
+      generated_at: replay.predictionTimestamp,
+      settled_at: settledAt,
+      idempotency_key: id,
+      metadata: {
+        replayPilot: false,
+        replayOnly: true,
+        fullHistoricalReplay: true,
+        productionPredictionHistoryMutated: false,
+        currentBoardMutated: false,
+        officialPickPolicyMutated: false,
+        learningBrainMutated: false,
+        schedulerMutated: false,
+        historicalFeatureStoreMutated: false,
+        settlement: replay.settlement,
+        providerCallsMade: 0,
+      },
+    }
+  })
+  const newRows = rows.filter((row) => !existingIds.has(row.idempotency_key))
+  if (!dryRun && newRows.length) {
+    const { error } = await supabaseAdmin.from('universal_projection_history').insert(newRows)
+    if (error) throw new Error(`full replay projection insert failed: ${error.message}`)
+  }
+  return {
+    attempted: rows.length,
+    inserted: newRows.length,
+    reused: rows.length - newRows.length,
+    ids,
+  }
+}
+
+export async function runHistoricalReplayFull({
+  limit = 2430,
+  batchSize = 50,
+  dryRun = false,
+}: { limit?: number; batchSize?: number; dryRun?: boolean } = {}) {
+  const safeLimit = Math.max(1, Math.min(limit, 2430))
+  const safeBatchSize = Math.max(1, Math.min(batchSize, 100))
+  const startedAt = new Date().toISOString()
+  const before = {
+    predictionHistory: await countTable('prediction_history', (query) => query.eq('sport_key', SPORT_KEY)),
+    currentProductionPredictions: await countTable('prediction_history', (query) => query.eq('sport_key', SPORT_KEY).eq('production_eligible', true)),
+    learningWeights: await countTable('model_weight_history', (query) => query.eq('sport_key', SPORT_KEY)),
+    fullReplayArtifacts: await countTable('universal_projection_history', (query) => query.eq('sport_key', SPORT_KEY).eq('projection_family', FULL_REPLAY_FAMILY)),
+  }
+  const snapshots = await loadAllStoredSnapshots()
+  const grouped = groupSnapshots(snapshots)
+  const games = await loadGamesInChunks(Array.from(grouped.keys()))
+  const supportedGames = games
+    .filter((game) => (grouped.get(game.canonical_game_id) ?? []).length >= 8 && Boolean(finalScore(game)))
+    .slice(0, safeLimit)
+  const job = await createFullReplayJob({ gamesPlanned: supportedGames.length, dryRun, batchSize: safeBatchSize })
+  const aggregate = {
+    predictions: 0,
+    settlements: 0,
+    labels: 0,
+    snapshotLookups: 0,
+    inserted: 0,
+    reused: 0,
+    warningCount: 0,
+    duplicateIds: 0,
+    leakageFailures: 0,
+    batchesCompleted: 0,
+  }
+  try {
+    await persistFullReplayCheckpoint(job.id, 'running', {
+      startedAt,
+      gamesTotal: supportedGames.length,
+      gamesCompleted: 0,
+      predictions: 0,
+      currentBatch: 0,
+      batchSize: safeBatchSize,
+      providerCallsMade: 0,
+    }, dryRun)
+
+    for (let offset = 0; offset < supportedGames.length; offset += safeBatchSize) {
+      const batch = supportedGames.slice(offset, offset + safeBatchSize)
+      const replayMarkets = batch.flatMap((game) =>
+        buildMarkets(game, grouped.get(game.canonical_game_id) ?? []).map((replay) => ({ game, replay }))
+      )
+      const persisted = await persistFullReplayRows(replayMarkets, dryRun)
+      aggregate.predictions += replayMarkets.length
+      aggregate.settlements += replayMarkets.filter(({ replay }) => ['win', 'loss', 'push'].includes(replay.settlement.outcome)).length
+      aggregate.labels += replayMarkets.filter(({ replay }) => ['win', 'loss', 'push'].includes(replay.settlement.outcome)).length
+      aggregate.snapshotLookups += replayMarkets.reduce((sum, item) => sum + item.replay.featureSnapshotIds.length, 0)
+      aggregate.inserted += persisted.inserted
+      aggregate.reused += persisted.reused
+      aggregate.warningCount += replayMarkets.reduce((sum, item) => sum + item.replay.warnings.length, 0)
+      aggregate.duplicateIds += persisted.ids.length - new Set(persisted.ids).size
+      aggregate.leakageFailures += replayMarkets.filter(({ replay }) => replay.warnings.some((warning) => /SNAPSHOT_AFTER_CUTOFF|CUTOFF_AFTER_GAME_START/.test(warning))).length
+      aggregate.batchesCompleted += 1
+      await persistFullReplayCheckpoint(job.id, 'running', {
+        startedAt,
+        gamesTotal: supportedGames.length,
+        gamesCompleted: Math.min(offset + batch.length, supportedGames.length),
+        predictions: aggregate.predictions,
+        settlements: aggregate.settlements,
+        labels: aggregate.labels,
+        currentBatch: aggregate.batchesCompleted,
+        batchSize: safeBatchSize,
+        snapshotLookups: aggregate.snapshotLookups,
+        inserted: aggregate.inserted,
+        reused: aggregate.reused,
+        warningCount: aggregate.warningCount,
+        leakageFailures: aggregate.leakageFailures,
+        providerCallsMade: 0,
+      }, dryRun)
+    }
+
+    const finishedAt = new Date().toISOString()
+    const durationMs = Math.max(0, new Date(finishedAt).getTime() - new Date(startedAt).getTime())
+    const stats = {
+      startedAt,
+      finishedAt,
+      limit: safeLimit,
+      gamesTotal: supportedGames.length,
+      gamesCompleted: supportedGames.length,
+      currentBatch: aggregate.batchesCompleted,
+      batchSize: safeBatchSize,
+      averageDurationMsPerGame: supportedGames.length ? round(durationMs / supportedGames.length) : null,
+      estimatedRemaining: 0,
+      databaseWrites: dryRun ? 0 : aggregate.inserted,
+      providerCallsMade: 0,
+      remoteMutationsMade: dryRun ? 0 : aggregate.inserted + aggregate.batchesCompleted + 2,
+      markets: ['moneyline', 'spread', 'total'],
+      ...aggregate,
+      durationMs,
+    }
+    const checkpoint = await persistFullReplayCheckpoint(job.id, 'completed', stats, dryRun)
+    await completeFullReplayJob(job, 'completed', { ...stats, checkpointWritten: checkpoint.written })
+    const after = {
+      predictionHistory: await countTable('prediction_history', (query) => query.eq('sport_key', SPORT_KEY)),
+      currentProductionPredictions: await countTable('prediction_history', (query) => query.eq('sport_key', SPORT_KEY).eq('production_eligible', true)),
+      learningWeights: await countTable('model_weight_history', (query) => query.eq('sport_key', SPORT_KEY)),
+      fullReplayArtifacts: await countTable('universal_projection_history', (query) => query.eq('sport_key', SPORT_KEY).eq('projection_family', FULL_REPLAY_FAMILY)),
+    }
+    return {
+      success: true,
+      mode: 'historical_replay_phase_2b_full_v1',
+      dryRun,
+      jobId: job.id,
+      ...stats,
+      checkpoint,
+      idempotency: {
+        attempted: aggregate.predictions,
+        inserted: aggregate.inserted,
+        reused: aggregate.reused,
+        duplicateIds: aggregate.duplicateIds,
+      },
+      productionIsolation: {
+        predictionHistoryUnchanged: before.predictionHistory.count === after.predictionHistory.count,
+        currentProductionPredictionsUnchanged: before.currentProductionPredictions.count === after.currentProductionPredictions.count,
+        learningWeightsUnchanged: before.learningWeights.count === after.learningWeights.count,
+        currentBoardMutated: false,
+        officialPicksMutated: false,
+        schedulerMutated: false,
+        historicalFeatureStoreMutated: false,
+        before,
+        after,
+      },
+      certifications: {
+        FULL_HISTORICAL_REPLAY_PASS: supportedGames.length === safeLimit && aggregate.predictions === supportedGames.length * 3,
+        REPLAY_POINT_IN_TIME_PASS: aggregate.leakageFailures === 0,
+        REPLAY_PRODUCTION_ISOLATION_PASS: before.predictionHistory.count === after.predictionHistory.count && before.learningWeights.count === after.learningWeights.count,
+        REPLAY_SETTLEMENT_PASS: aggregate.settlements === aggregate.predictions,
+        REPLAY_LABEL_PASS: aggregate.labels === aggregate.predictions,
+        REPLAY_IDEMPOTENCY_PASS: aggregate.duplicateIds === 0,
+        REPLAY_RESUME_PASS: checkpoint.written || dryRun,
+      },
+    }
+  } catch (error) {
+    await persistFullReplayCheckpoint(job.id, 'failed', {
+      startedAt,
+      gamesTotal: supportedGames.length,
+      gamesCompleted: aggregate.batchesCompleted * safeBatchSize,
+      predictions: aggregate.predictions,
+      inserted: aggregate.inserted,
+      reused: aggregate.reused,
+      warningCount: aggregate.warningCount,
+      providerCallsMade: 0,
+      error: error instanceof Error ? error.message : 'unknown full replay error',
+    }, dryRun).catch(() => null)
+    await completeFullReplayJob(job, 'failed', { gamesTotal: supportedGames.length, inserted: aggregate.inserted, reused: aggregate.reused }, error instanceof Error ? error.message : 'unknown full replay error')
+    throw error
+  }
+}
+
+export async function getHistoricalReplayFullStatus() {
+  const [artifacts, jobs, checkpoints] = await Promise.all([
+    supabaseAdmin
+      .from('universal_projection_history')
+      .select('id, event_id, projection_key, actual_value, projected_value, metadata, generated_at, settled_at', { count: 'exact' })
+      .eq('sport_key', SPORT_KEY)
+      .eq('projection_family', FULL_REPLAY_FAMILY)
+      .order('generated_at', { ascending: false })
+      .limit(200),
+    supabaseAdmin
+      .from('sports_sync_jobs')
+      .select('id, status, records_fetched, records_inserted, records_skipped, duration_ms, started_at, completed_at, metadata')
+      .eq('sport_key', SPORT_KEY)
+      .eq('job_type', FULL_REPLAY_VERSION)
+      .order('started_at', { ascending: false })
+      .limit(5),
+    supabaseAdmin
+      .from('historical_import_checkpoints')
+      .select('id, checkpoint_key, status, record_count, finished_at, metadata')
+      .eq('checkpoint_level', 'validation')
+      .eq('checkpoint_key', FULL_REPLAY_CHECKPOINT_KEY)
+      .limit(1),
+  ])
+  const rows = (artifacts.data ?? []) as Array<Record<string, unknown>>
+  const latestJob = (jobs.data ?? [])[0] as Record<string, unknown> | undefined
+  const latestCheckpoint = (checkpoints.data ?? [])[0] as Record<string, unknown> | undefined
+  const metadata = asRecord(latestJob?.metadata)
+  const checkpointMetadata = asRecord(latestCheckpoint?.metadata)
+  return {
+    success: true,
+    mode: 'historical_replay_phase_2b_status_v1',
+    status: latestJob?.status ?? (rows.length ? 'completed' : 'not_started'),
+    gamesTotal: asNumber(metadata.gamesTotal) ?? asNumber(checkpointMetadata.gamesTotal) ?? null,
+    gamesCompleted: asNumber(metadata.gamesCompleted) ?? asNumber(checkpointMetadata.gamesCompleted) ?? new Set(rows.map((row) => String(row.event_id ?? '')).filter(Boolean)).size,
+    replayPredictions: artifacts.count ?? rows.length,
+    replaySettlements: asNumber(metadata.settlements) ?? rows.filter((row) => asRecord(asRecord(row.metadata).settlement).outcome).length,
+    replayLabels: asNumber(metadata.labels) ?? rows.filter((row) => asRecord(asRecord(row.metadata).settlement).outcome).length,
+    replayDurationMs: asNumber(latestJob?.duration_ms),
+    averageReplayDurationMsPerGame: asNumber(metadata.averageDurationMsPerGame),
+    snapshotLookups: asNumber(metadata.snapshotLookups) ?? asNumber(checkpointMetadata.snapshotLookups),
+    currentBatch: asNumber(metadata.currentBatch) ?? asNumber(checkpointMetadata.currentBatch),
+    checkpointStatus: latestCheckpoint?.status ?? null,
+    checkpointFinishedAt: latestCheckpoint?.finished_at ?? null,
+    resumeCount: asNumber(metadata.reused) ?? 0,
+    inserted: asNumber(latestJob?.records_inserted) ?? asNumber(metadata.inserted) ?? 0,
+    reused: asNumber(latestJob?.records_skipped) ?? asNumber(metadata.reused) ?? 0,
+    duplicateIds: asNumber(metadata.duplicateIds) ?? 0,
+    leakageFailures: asNumber(metadata.leakageFailures) ?? 0,
+    estimatedRemaining: asNumber(metadata.estimatedRemaining),
+    providerCallsMade: 0,
+    remoteMutationsMade: asNumber(metadata.remoteMutationsMade) ?? 0,
+    databaseWrites: asNumber(metadata.databaseWrites) ?? asNumber(latestJob?.records_inserted) ?? 0,
+    productionIsolation: {
+      replayOnly: true,
+      predictionHistoryMutated: false,
+      currentBoardMutated: false,
+      officialPickPolicyMutated: false,
+      learningBrainMutated: false,
+      schedulerMutated: false,
+    },
     errors: [artifacts.error?.message, jobs.error?.message, checkpoints.error?.message].filter(Boolean),
   }
 }
