@@ -9,17 +9,19 @@ import { resolveMlbGameLifecycle } from '@/services/mlb-game-lifecycle.service'
 import {
   decimalInningsToOuts,
   perNineToGameCount,
-  ProjectionOrigin,
-  ProjectionRankTier,
-  ProjectionUnit,
-  ProjectionValidity,
   rankProjection,
   roundProjection,
   seasonCountToPerGame,
   stableProjectionId,
-  StarterStatus,
   validateMlbProjectionIntegrityFixtures,
   validateProjectionValue,
+} from '@/services/mlb-projection-integrity.service'
+import type {
+  ProjectionOrigin,
+  ProjectionRankTier,
+  ProjectionUnit,
+  ProjectionValidity,
+  StarterStatus,
 } from '@/services/mlb-projection-integrity.service'
 
 type ProjectionType = 'team' | 'player' | 'pitcher' | 'game'
@@ -139,6 +141,15 @@ function round(value: number, digits = 2) {
   if (!Number.isFinite(value)) return 0
   const factor = 10 ** digits
   return Math.round(value * factor) / factor
+}
+
+function todayPuertoRicoDate() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Puerto_Rico',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date())
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -476,6 +487,7 @@ function makePitcherProjections(event: EventRow, playerStats: PlayerStatRow[], p
     const values = [
       ['pitcher_strikeouts', 'Strikeouts', projectedStrikeouts, 2, 'COUNT_PER_GAME'],
       ['pitcher_outs_recorded', 'Outs Recorded', outsPerStart, 4, 'OUTS_COUNT'],
+      ['pitcher_projected_innings', 'Projected Innings Pitched', inningsPerStart, 1.4, 'COUNT_PER_GAME'],
       ['pitcher_hits_allowed', 'Hits Allowed', projectedHits, 3, 'COUNT_PER_GAME'],
       ['pitcher_earned_runs', 'Earned Runs', projectedEarnedRuns, 2, 'COUNT_PER_GAME'],
       ['pitcher_walks_allowed', 'Walks Allowed', projectedWalks, 1.5, 'COUNT_PER_GAME'],
@@ -582,6 +594,8 @@ function makeBatterProjections(event: EventRow, playerStats: PlayerStatRow[], pl
       ['batter_strikeouts', 'Strikeouts', perGame(strikeouts), 1.1, 'COUNT_PER_GAME'],
       ['batter_stolen_bases', 'Stolen Bases', perGame(statNumber(row, ['StolenBases', 'SB'])), 0.4, 'COUNT_PER_GAME'],
       ['batter_total_bases', 'Total Bases', perGame(totalBases), 2, 'COUNT_PER_GAME'],
+      ['batter_hits_runs_rbi', 'Hits + Runs + RBI', (perGame(hits) ?? 0) + (perGame(statNumber(row, ['Runs'])) ?? 0) + (perGame(statNumber(row, ['RunsBattedIn', 'RBI'])) ?? 0), 2.4, 'COUNT_PER_GAME'],
+      ['batter_projected_plate_appearances', 'Projected Plate Appearances', perGame(statNumber(row, ['PlateAppearances', 'PA']) ?? statNumber(row, ['AtBats', 'AB'])), 1.1, 'COUNT_PER_GAME'],
       ['batter_ops', 'OPS', ops, 0.18, 'DECIMAL_RATE'],
       ['batter_woba', 'wOBA', woba, 0.08, 'DECIMAL_RATE'],
     ] as const
@@ -885,7 +899,7 @@ function buildProjectionBoard(projections: UniversalProjection[]) {
 
 export async function getUniversalProjectionEngine(options: { sportKey?: string | null; date?: string; dryRun?: boolean } = {}) {
   const sportKey = options.sportKey ?? 'baseball_mlb'
-  const selectedDate = options.date ?? '2026-07-19'
+  const selectedDate = options.date ?? todayPuertoRicoDate()
   const generatedAt = new Date().toISOString()
   if (sportKey !== 'baseball_mlb') {
     return {

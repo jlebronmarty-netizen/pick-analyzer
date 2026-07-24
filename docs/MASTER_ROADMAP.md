@@ -2357,3 +2357,19 @@ Persistence or migration scope: None. Existing `sport_players`, `provider_entity
 Validation: The module reports zero provider calls and zero remote mutations. It keeps player props out of production predictions, Current Board, Most Likely, Best Value, Official Picks, Learning Brain, model weights, Historical Replay and Historical Feature Store.
 
 Completion criteria: `PLAYER_PROP_DATA_AUDIT_PASS`, `PLAYER_MAPPING_AUDIT_PASS`, `PLAYER_SETTLEMENT_AUDIT_PASS`, `PLAYER_PROVIDER_AUDIT_PASS` and `PLAYER_PROP_READINESS_PASS` are audit certifications only. Live props remain blocked until verified current/historical player-prop odds, opening/closing lines, line movement, live settlement and explicit activation approval exist.
+
+### 41. MLB Player Projection Engine V1
+
+Objective: Build a production-safe MLB player statistical projection layer before any sportsbook player-prop comparison.
+
+Status: Implemented locally in shadow/informational mode.
+
+Backend scope: `mlb-player-projection-engine.service.ts`, Universal Projection Engine player-family extensions, `/api/mlb/player-projections`, `/api/mlb/player-projections/pitchers`, `/api/mlb/player-projections/batters`, `/api/mlb/player-projections/[projectionId]`, `/api/mlb/player-projections/readiness`, `/api/mlb/player-projections/performance`, `/api/mlb/player-projections/lifecycle` and AI Operations.
+
+Frontend scope: `/player-projections` plus Dashboard Advanced Details > Model Player Projections summary.
+
+Persistence scope: Reuses isolated `universal_projection_history`; no player projection is stored in `prediction_history` or as sportsbook prop predictions.
+
+Validation: `npm.cmd run build` exits 0. Read-only projection validation makes 0 provider calls and 0 remote mutations. Bounded historical validation uses chronological train/validation/holdout splits over stored pitcher appearances and aggregated batter player-game rows. Current slate is safely blocked by missing probable starters and expected lineups rather than fabricating participation context.
+
+Completion criteria: `MLB_PLAYER_PROJECTION_ENGINE_PASS`, `PITCHER_PROJECTION_PASS`, `BATTER_PROJECTION_PASS`, `PLAYER_PROJECTION_DISTRIBUTION_PASS`, `PLAYER_PROJECTION_POINT_IN_TIME_PASS`, `PLAYER_PROJECTION_SETTLEMENT_PASS`, `PLAYER_PROJECTION_LEARNING_PASS`, `PLAYER_PROJECTION_IDEMPOTENCY_PASS`, `PLAYER_PROJECTION_PRODUCT_PASS` and `NO_PROP_BETTING_ACTIVATION_PASS` are certified for the projection layer. Player-prop odds acquisition and betting activation remain separate future approvals.

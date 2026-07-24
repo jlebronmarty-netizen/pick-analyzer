@@ -24,7 +24,8 @@
     "mlb:team-totals:readiness": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-team-totals-readiness.mjs",
     "mlb:first-five:readiness": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-first-five-readiness.mjs",
     "markets:diagnostics": "node --loader ./scripts/local-ts-loader.mjs scripts/universal-market-intelligence.mjs",
-    "mlb:player-props:readiness": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-player-props-readiness.mjs"
+    "mlb:player-props:readiness": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-player-props-readiness.mjs",
+    "mlb:player-projections": "node --loader ./scripts/local-ts-loader.mjs scripts/mlb-player-projections.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

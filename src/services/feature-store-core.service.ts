@@ -1,5 +1,5 @@
-import { SportKey } from '@/config/sports.config'
-import { MarketKey } from '@/types/multi-sport'
+import type { SportKey } from '@/config/sports.config'
+import type { MarketKey } from '@/types/multi-sport'
 import {
   PRODUCTION_DATA_GATE_V1_POLICY,
   evaluateProductionDataGate,

@@ -10,6 +10,7 @@ import { getMlbTeamTotalsReadiness } from '@/services/mlb-team-totals-readiness.
 import { getMlbFirstFiveReadiness } from '@/services/mlb-first-five-readiness.service'
 import { getUniversalMarketInventory } from '@/services/universal-market-intelligence.service'
 import { getMlbPlayerPropsReadinessAudit } from '@/services/mlb-player-props-readiness-audit.service'
+import { getMlbPlayerProjectionLifecycleDiagnostics } from '@/services/mlb-player-projection-engine.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -739,6 +740,26 @@ export async function getAiLearningLifecycle() {
   const playerPropsRecord = asRecord(playerPropsReadiness)
   const playerPropsSummary = asRecord(playerPropsRecord.summary)
   const playerPropsCoverage = asRecord(playerPropsRecord.storedCoverage)
+  const playerProjectionLifecycle = await getMlbPlayerProjectionLifecycleDiagnostics().catch((error) => ({
+    success: false,
+    mode: 'mlb_player_projection_lifecycle_v1',
+    error: error instanceof Error ? error.message : 'MLB player projection lifecycle failed',
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    lifecycle: {
+      eligibleGames: 0,
+      eligiblePlayers: 0,
+      projectionsGenerated: 0,
+      projectionsBlocked: 0,
+      settlementPending: 0,
+      gradedProjections: 0,
+      cutoffRejections: 0,
+      coverage: {},
+    },
+    blockerSummary: { PLAYER_PROJECTION_LIFECYCLE_ERROR: 1 },
+  }))
+  const playerProjectionRecord = asRecord(playerProjectionLifecycle)
+  const playerProjectionLifecycleSummary = asRecord(playerProjectionRecord.lifecycle)
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -783,7 +804,8 @@ export async function getAiLearningLifecycle() {
     Number(teamTotalsRecord.providerCallsMade ?? 0) +
     Number(firstFiveRecord.providerCallsMade ?? 0) +
     Number(universalMarketRecord.providerCallsMade ?? 0) +
-    Number(playerPropsRecord.providerCallsMade ?? 0)
+    Number(playerPropsRecord.providerCallsMade ?? 0) +
+    Number(playerProjectionRecord.providerCallsMade ?? 0)
 
   const panels = [
     panel(
@@ -973,6 +995,29 @@ export async function getAiLearningLifecycle() {
           : 'PLAYER_PROPS_PROVIDER_ODDS_BLOCKED',
       null,
       'Manual approval required before any prop ingestion or prediction work'
+    ),
+    panel(
+      'mlb_player_projection_engine',
+      'MLB Player Projection Engine',
+      playerProjectionRecord.success === false ? 'Error' : Number(playerProjectionLifecycleSummary.projectionsGenerated ?? 0) > 0 ? 'Waiting' : 'Blocked',
+      'Sportsbook-independent player stat projection lifecycle. It creates no player-prop recommendations, EV, Kelly or Official Picks.',
+      {
+        eligibleGames: playerProjectionLifecycleSummary.eligibleGames ?? 0,
+        eligiblePlayers: playerProjectionLifecycleSummary.eligiblePlayers ?? 0,
+        projectionsGenerated: playerProjectionLifecycleSummary.projectionsGenerated ?? 0,
+        projectionsBlocked: playerProjectionLifecycleSummary.projectionsBlocked ?? 0,
+        settlementPending: playerProjectionLifecycleSummary.settlementPending ?? 0,
+        gradedProjections: playerProjectionLifecycleSummary.gradedProjections ?? 0,
+        cutoffRejections: playerProjectionLifecycleSummary.cutoffRejections ?? 0,
+        providerCallsMade: playerProjectionRecord.providerCallsMade ?? 0,
+      },
+      playerProjectionRecord.success === false
+        ? String(playerProjectionRecord.error ?? 'PLAYER_PROJECTION_LIFECYCLE_ERROR')
+        : Number(playerProjectionLifecycleSummary.projectionsGenerated ?? 0) > 0
+          ? null
+          : 'NO_CURRENT_PLAYER_PROJECTIONS',
+      null,
+      'Next run stays informational until explicit approval for any sportsbook connector'
     ),
     panel(
       'weight_updates',
@@ -1284,6 +1329,7 @@ export async function getAiLearningLifecycle() {
     firstFiveReadiness,
     universalMarketInventory,
     playerPropsReadiness,
+    playerProjectionLifecycle,
     shadowLearningValidation: {
       mode: 'SHADOW_ONLY',
       acceptedSamples: historicalShadowCalibration.sample.gradedRows,

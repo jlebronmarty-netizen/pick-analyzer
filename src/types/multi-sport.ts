@@ -1,4 +1,4 @@
-import { SportDefinition, SportKey } from '@/config/sports.config'
+import type { SportDefinition, SportKey } from '@/config/sports.config'
 
 export type MultiSportStatus =
   | 'healthy'

@@ -1,7 +1,8 @@
 import { calculateQuarterKellyStake } from '@/services/kelly.service'
 import { calculateSmartScore } from '@/services/smart-ranking.service'
-import { createFeatureSnapshot, FeatureSnapshot } from '@/services/feature-store-core.service'
-import { MarketKey } from '@/types/multi-sport'
+import { createFeatureSnapshot } from '@/services/feature-store-core.service'
+import type { FeatureSnapshot } from '@/services/feature-store-core.service'
+import type { MarketKey } from '@/types/multi-sport'
 
 export type SportEngineCompletionStatus =
   | 'ARCHITECTURE_COMPLETE'
