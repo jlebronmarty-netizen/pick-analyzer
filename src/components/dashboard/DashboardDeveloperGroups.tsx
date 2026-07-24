@@ -11,6 +11,7 @@ const DailyReportPanel = dynamic(() => import('@/components/dashboard/DailyRepor
 const NextSlateStatusPanel = dynamic(() => import('@/components/dashboard/NextSlateStatusPanel'))
 const MarketIntelligenceSummaryPanel = dynamic(() => import('@/components/dashboard/MarketIntelligenceSummaryPanel'))
 const UniversalMarketCoveragePanel = dynamic(() => import('@/components/dashboard/UniversalMarketCoveragePanel'))
+const MlbPlayerPropsReadinessPanel = dynamic(() => import('@/components/dashboard/MlbPlayerPropsReadinessPanel'))
 const RecommendationReadinessPanel = dynamic(() => import('@/components/dashboard/RecommendationReadinessPanel'))
 const OperatingDayPanel = dynamic(() => import('@/components/dashboard/OperatingDayPanel'))
 const MlbProspectivePreviewPanel = dynamic(() => import('@/components/dashboard/MlbProspectivePreviewPanel'))
@@ -102,6 +103,7 @@ export default function DashboardDeveloperGroups() {
       <DeveloperDetails title="Markets" description="Market intelligence, opportunities, ticket state and AI command surfaces.">
         <MlbMarketExpansionRoadmapPanel />
         <UniversalMarketCoveragePanel />
+        <MlbPlayerPropsReadinessPanel />
         <MarketIntelligenceSummaryPanel />
         <MlbProspectivePreviewPanel />
         <PlayOfTheDayPanel />

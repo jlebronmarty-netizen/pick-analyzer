@@ -9,6 +9,7 @@ import { getHistoricalShadowCalibration } from '@/services/historical-shadow-cal
 import { getMlbTeamTotalsReadiness } from '@/services/mlb-team-totals-readiness.service'
 import { getMlbFirstFiveReadiness } from '@/services/mlb-first-five-readiness.service'
 import { getUniversalMarketInventory } from '@/services/universal-market-intelligence.service'
+import { getMlbPlayerPropsReadinessAudit } from '@/services/mlb-player-props-readiness-audit.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -704,6 +705,40 @@ export async function getAiLearningLifecycle() {
   const universalMarketAnalytics = asRecord(universalMarketRecord.analytics)
   const universalMarketReadiness = asRecord(universalMarketRecord.readinessSummary)
   const universalMarketDiagnostics = asRecord(universalMarketRecord.diagnostics)
+  const playerPropsReadiness = await getMlbPlayerPropsReadinessAudit().catch((error) => ({
+    success: false,
+    mode: 'mlb_player_props_data_readiness_audit_v1',
+    error: error instanceof Error ? error.message : 'MLB player props readiness audit failed',
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    summary: {
+      propsAudited: 0,
+      settlementReadyProps: 0,
+      currentOddsReadyProps: 0,
+      productionReadyProps: 0,
+      blockedProps: 0,
+      overallStatus: 'AUDIT_ERROR',
+    },
+    storedCoverage: {
+      sportPlayers: 0,
+      playerMappings: 0,
+      currentPropOdds: 0,
+      historicalPropOdds: 0,
+      openingPropOdds: 0,
+      closingPropOdds: 0,
+    },
+    blockerSummary: { PLAYER_PROP_AUDIT_ERROR: 1 },
+    certifications: {
+      PLAYER_PROP_DATA_AUDIT_PASS: false,
+      PLAYER_MAPPING_AUDIT_PASS: false,
+      PLAYER_SETTLEMENT_AUDIT_PASS: false,
+      PLAYER_PROVIDER_AUDIT_PASS: false,
+      PLAYER_PROP_READINESS_PASS: false,
+    },
+  }))
+  const playerPropsRecord = asRecord(playerPropsReadiness)
+  const playerPropsSummary = asRecord(playerPropsRecord.summary)
+  const playerPropsCoverage = asRecord(playerPropsRecord.storedCoverage)
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -747,7 +782,8 @@ export async function getAiLearningLifecycle() {
     Number(schedulerRecord.providerCallsMade ?? 0) +
     Number(teamTotalsRecord.providerCallsMade ?? 0) +
     Number(firstFiveRecord.providerCallsMade ?? 0) +
-    Number(universalMarketRecord.providerCallsMade ?? 0)
+    Number(universalMarketRecord.providerCallsMade ?? 0) +
+    Number(playerPropsRecord.providerCallsMade ?? 0)
 
   const panels = [
     panel(
@@ -915,6 +951,28 @@ export async function getAiLearningLifecycle() {
       universalMarketRecord.success === false ? String(universalMarketRecord.error ?? 'UNIVERSAL_MARKET_INVENTORY_ERROR') : null,
       null,
       'Read-only market discovery on next dashboard refresh'
+    ),
+    panel(
+      'mlb_player_props_readiness',
+      'MLB Player Props Readiness',
+      playerPropsRecord.success === false ? 'Error' : Number(playerPropsSummary.productionReadyProps ?? 0) > 0 ? 'Waiting' : 'Blocked',
+      'Audit-only MLB player-prop readiness checks settlement data, player mapping, sportsbook odds and provider blockers without activating prop predictions or Official Picks.',
+      {
+        propsAudited: playerPropsSummary.propsAudited ?? 0,
+        settlementReadyProps: playerPropsSummary.settlementReadyProps ?? 0,
+        currentOddsReadyProps: playerPropsSummary.currentOddsReadyProps ?? 0,
+        productionReadyProps: playerPropsSummary.productionReadyProps ?? 0,
+        storedPropOdds: playerPropsCoverage.historicalPropOdds ?? 0,
+        playerMappings: playerPropsCoverage.playerMappings ?? 0,
+        providerCallsMade: playerPropsRecord.providerCallsMade ?? 0,
+      },
+      playerPropsRecord.success === false
+        ? String(playerPropsRecord.error ?? 'PLAYER_PROP_AUDIT_ERROR')
+        : Number(playerPropsSummary.productionReadyProps ?? 0) > 0
+          ? null
+          : 'PLAYER_PROPS_PROVIDER_ODDS_BLOCKED',
+      null,
+      'Manual approval required before any prop ingestion or prediction work'
     ),
     panel(
       'weight_updates',
@@ -1225,6 +1283,7 @@ export async function getAiLearningLifecycle() {
     teamTotalsReadiness,
     firstFiveReadiness,
     universalMarketInventory,
+    playerPropsReadiness,
     shadowLearningValidation: {
       mode: 'SHADOW_ONLY',
       acceptedSamples: historicalShadowCalibration.sample.gradedRows,

@@ -2341,3 +2341,19 @@ Persistence or migration scope: No migration. The certified resume used existing
 Validation: `npm.cmd run historical:features:resume` resumed running import `4ce68718-4661-4159-ab07-d71510c40c3f`, loaded 23 completed checkpoints, completed batches 24-49, inserted 0, updated 0 and skipped 37,120 existing deterministic snapshots. Final scoped state is 2,430 games, 70,470 snapshots, 100% coverage, 0 duplicate deterministic keys, 0 leakage failures, providerCallsMade 0 and externalSportsApiCallsMade 0. AI Operations reports completed, 49 checkpoints, 70,470 snapshots, 2,430 games and 100% coverage with no active failed/pending state.
 
 Completion criteria: `PHASE_2A_BACKFILL_PASS`, `POINT_IN_TIME_HISTORY_PASS`, `BACKFILL_IDEMPOTENCY_PASS`, `BACKFILL_RESUME_PASS` and `HISTORICAL_FEATURE_STORE_COMPLETE` are certified. Phase 2B remains unstarted pending explicit approval.
+
+### 40. MLB Player Props Data Readiness Audit V1
+
+Objective: Audit MLB pitcher and batter prop readiness across player identity, stored outcomes, feature foundations, sportsbook odds, settlement, learning and calibration without activating props.
+
+Status: Implemented locally as an audit-only readiness layer.
+
+Backend scope: `mlb-player-props-readiness-audit.service.ts`, `/api/mlb/player-props/readiness`, `/api/mlb/player-props/mapping-diagnostics`, `/api/mlb/player-props/provider-audit` and AI Operations.
+
+Frontend scope: Dashboard Advanced Details > Markets includes the MLB Player Props Data Readiness Audit panel.
+
+Persistence or migration scope: None. Existing `sport_players`, `provider_entity_mappings`, `sport_player_stats`, `sport_lineups`, `sports_odds_snapshots`, `historical_baseball_games`, `historical_baseball_lineups`, `historical_baseball_pitcher_appearances` and `historical_baseball_batter_appearances` rows are read only.
+
+Validation: The module reports zero provider calls and zero remote mutations. It keeps player props out of production predictions, Current Board, Most Likely, Best Value, Official Picks, Learning Brain, model weights, Historical Replay and Historical Feature Store.
+
+Completion criteria: `PLAYER_PROP_DATA_AUDIT_PASS`, `PLAYER_MAPPING_AUDIT_PASS`, `PLAYER_SETTLEMENT_AUDIT_PASS`, `PLAYER_PROVIDER_AUDIT_PASS` and `PLAYER_PROP_READINESS_PASS` are audit certifications only. Live props remain blocked until verified current/historical player-prop odds, opening/closing lines, line movement, live settlement and explicit activation approval exist.
