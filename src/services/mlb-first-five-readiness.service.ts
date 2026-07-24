@@ -5,6 +5,7 @@ import { classifyMarketSemantics } from '@/services/market-semantics.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
+const MARKET_KEYS = ['first_five', 'first_five_moneyline', 'first_five_run_line', 'first_five_spread', 'first_five_total', 'first5', 'first5_moneyline', 'first5_run_line', 'first5_total', 'f5_moneyline', 'f5_run_line', 'f5_total']
 
 type FirstFiveMarket = 'first_five_moneyline' | 'first_five_spread' | 'first_five_total'
 type FirstFiveOutcome = 'win' | 'loss' | 'push' | 'void' | 'pending'
@@ -34,9 +35,7 @@ function isFinalStatus(value: unknown) {
 }
 
 function firstFiveMarketFilter(query: any) {
-  return query
-    .eq('sport_key', SPORT_KEY)
-    .or('market.eq.first_five,market.eq.first_five_moneyline,market.eq.first_five_run_line,market.eq.first_five_spread,market.eq.first_five_total,market.eq.first5,market.ilike.%first%five%,market.ilike.%first_5%,market.ilike.%first5%,market.ilike.%f5%')
+  return query.eq('sport_key', SPORT_KEY).in('market', MARKET_KEYS)
 }
 
 async function safeCount(label: string, table: string, build: (query: any) => any) {
@@ -56,6 +55,16 @@ async function safeRows<T>(label: string, table: string, columns: string, build:
     return { data: (data ?? []) as T[], error: null }
   } catch (error) {
     return { data: [] as T[], error: `${label}: ${error instanceof Error ? error.message : 'unknown read error'}` }
+  }
+}
+
+async function safeExists(label: string, table: string, columns: string, build: (query: any) => any) {
+  try {
+    const { data, error } = await build(supabaseAdmin.from(table).select(columns).limit(1))
+    if (error) return { exists: false, error: `${label}: ${error.message}` }
+    return { exists: (data ?? []).length > 0, error: null }
+  } catch (error) {
+    return { exists: false, error: `${label}: ${error instanceof Error ? error.message : 'unknown read error'}` }
   }
 }
 
@@ -137,18 +146,18 @@ export async function getMlbFirstFiveReadiness() {
     pricedFirstFiveOdds,
     currentFirstFivePredictions,
     shadowFirstFivePredictions,
-    historicalFirstFivePlays,
+    historicalFirstFivePlayEvidence,
     historicalGames,
-    historicalFeatures,
+    historicalFeatureEvidence,
     sampleOdds,
   ] = await Promise.all([
     safeCount('stored first-five odds', 'sports_odds_snapshots', firstFiveMarketFilter),
     safeCount('priced first-five odds', 'sports_odds_snapshots', (query) => firstFiveMarketFilter(query).not('price', 'is', null)),
     safeCount('current first-five predictions', 'prediction_history', (query) => query.eq('sport_key', SPORT_KEY).ilike('market', '%first%five%').eq('is_current', true)),
     safeCount('shadow first-five predictions', 'prediction_history', (query) => query.eq('sport_key', SPORT_KEY).ilike('market', '%first%five%').or('lifecycle_status.eq.shadow,model_role.eq.shadow,production_eligible.eq.false')),
-    safeCount('historical first-five plays', 'historical_baseball_plays', (query) => query.lte('inning', 5)),
+    safeExists('historical first-five plays', 'historical_baseball_plays', 'id', (query) => query.lte('inning', 5)),
     safeCount('historical baseball games', 'historical_baseball_games', (query) => query.eq('sport_key', SPORT_KEY)),
-    safeCount('historical MLB feature snapshots', 'historical_feature_snapshots', (query) => query.eq('sport_key', SPORT_KEY)),
+    safeExists('historical MLB feature snapshots', 'historical_feature_snapshots', 'id', (query) => query.eq('sport_key', SPORT_KEY)),
     safeRows<Record<string, unknown>>('first-five odds samples', 'sports_odds_snapshots', 'id, event_id, sportsbook, market, outcome, price, line, snapshot_time, metadata', firstFiveMarketFilter, 20),
   ])
 
@@ -159,15 +168,15 @@ export async function getMlbFirstFiveReadiness() {
     pricedFirstFiveOdds.error,
     currentFirstFivePredictions.error,
     shadowFirstFivePredictions.error,
-    historicalFirstFivePlays.error,
+    historicalFirstFivePlayEvidence.error,
     historicalGames.error,
-    historicalFeatures.error,
+    historicalFeatureEvidence.error,
     sampleOdds.error,
   ].filter((item): item is string => Boolean(item))
   const blockers = [
     hasRealCoverage ? '' : 'FIRST_FIVE_ODDS_NOT_AVAILABLE_FROM_STORED_PROVIDER_ROWS',
     pricedFirstFiveOdds.count > 0 ? '' : 'FIRST_FIVE_LINE_OR_PRICE_MISSING',
-    historicalFirstFivePlays.count > 0 ? '' : 'FIRST_FIVE_HISTORICAL_INNING_SCORE_BASIS_MISSING',
+    historicalFirstFivePlayEvidence.exists ? '' : 'FIRST_FIVE_HISTORICAL_INNING_SCORE_BASIS_MISSING',
     'FIRST_FIVE_LISTED_STARTER_CHANGE_RULES_REQUIRE_APPROVAL',
     errors.length ? 'READINESS_QUERY_ERROR' : '',
   ].filter(Boolean)
@@ -191,9 +200,9 @@ export async function getMlbFirstFiveReadiness() {
       firstFiveOddsRowsWithPrice: pricedFirstFiveOdds.count,
       currentFirstFivePredictions: currentFirstFivePredictions.count,
       shadowFirstFivePredictions: shadowFirstFivePredictions.count,
-      historicalFirstFivePlayRows: historicalFirstFivePlays.count,
+      historicalFirstFiveScoreBasisAvailable: historicalFirstFivePlayEvidence.exists,
       historicalGames: historicalGames.count,
-      historicalFeatureSnapshots: historicalFeatures.count,
+      historicalFeatureEvidenceAvailable: historicalFeatureEvidence.exists,
       sampleRows: sampleOdds.data,
       errors,
     },
@@ -203,9 +212,9 @@ export async function getMlbFirstFiveReadiness() {
       teamIdentityAndSideMapping: sampleOdds.data.length > 0,
       lineAndSportsbookPriceAvailability: pricedFirstFiveOdds.count > 0,
       marketTimestampAndCutoff: sampleOdds.data.length > 0 && sampleOdds.data.every((row) => Boolean(row.snapshot_time)),
-      firstFiveScoreSettlementSupport: historicalFirstFivePlays.count > 0 && validation.success,
-      historicalOutcomeAvailability: historicalFirstFivePlays.count > 0 && historicalGames.count > 0,
-      featureReadiness: historicalFeatures.count > 0,
+      firstFiveScoreSettlementSupport: historicalFirstFivePlayEvidence.exists && validation.success,
+      historicalOutcomeAvailability: historicalFirstFivePlayEvidence.exists && historicalGames.count > 0,
+      featureReadiness: historicalFeatureEvidence.exists,
       pushAwareSemantics: validation.success,
       starterChangeRulesReady: false,
       predictionLearningCalibrationPerformanceCompatibility: true,
@@ -245,7 +254,7 @@ export async function getMlbFirstFiveReadiness() {
     blockers,
     certifications: {
       MLB_FIRST_FIVE_ARCHITECTURE_PASS: validation.success,
-      MLB_FIRST_FIVE_SETTLEMENT_PASS: validation.success && historicalFirstFivePlays.count > 0,
+      MLB_FIRST_FIVE_SETTLEMENT_PASS: validation.success && historicalFirstFivePlayEvidence.exists,
       MLB_FIRST_FIVE_SHADOW_PASS: true,
       MLB_FIRST_FIVE_MARKET_SEMANTICS_PASS: validation.success,
       FIRST_FIVE_PROVIDER_READINESS_PASS: hasRealCoverage,

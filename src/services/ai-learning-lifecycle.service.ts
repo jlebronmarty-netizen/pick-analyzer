@@ -837,7 +837,7 @@ export async function getAiLearningLifecycle() {
       {
         oddsRows: firstFiveCoverage.firstFiveOddsRows ?? 0,
         pricedRows: firstFiveCoverage.firstFiveOddsRowsWithPrice ?? 0,
-        historicalFirstFivePlayRows: firstFiveCoverage.historicalFirstFivePlayRows ?? 0,
+      historicalFirstFiveScoreBasisAvailable: firstFiveCoverage.historicalFirstFiveScoreBasisAvailable ?? false,
         architecturePass: firstFiveCertifications.MLB_FIRST_FIVE_ARCHITECTURE_PASS ?? false,
         settlementPass: firstFiveCertifications.MLB_FIRST_FIVE_SETTLEMENT_PASS ?? false,
         shadowPass: firstFiveCertifications.MLB_FIRST_FIVE_SHADOW_PASS ?? false,

@@ -5,7 +5,7 @@ import { classifyMarketSemantics } from '@/services/market-semantics.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
-const MARKET_KEYS = ['team_total', 'team_totals', 'team total', 'team totals']
+const MARKET_KEYS = ['team_total', 'team_totals']
 
 type TeamTotalSelection = 'over' | 'under'
 type TeamTotalOutcome = 'win' | 'loss' | 'push' | 'void' | 'pending'
@@ -63,7 +63,17 @@ function isTeamTotalMarket(value: unknown) {
 }
 
 function teamTotalMarketFilter(query: any) {
-  return query.eq('sport_key', SPORT_KEY).or('market.eq.team_total,market.eq.team_totals,market.ilike.%team%total%')
+  return query.eq('sport_key', SPORT_KEY).in('market', MARKET_KEYS)
+}
+
+async function safeExists(label: string, table: string, columns: string, build: (query: any) => any) {
+  try {
+    const { data, error } = await build(supabaseAdmin.from(table).select(columns).limit(1))
+    if (error) return { exists: false, error: `${label}: ${error.message}` }
+    return { exists: (data ?? []).length > 0, error: null }
+  } catch (error) {
+    return { exists: false, error: `${label}: ${error instanceof Error ? error.message : 'unknown read error'}` }
+  }
 }
 
 export function settleMlbTeamTotal(input: TeamTotalSettlementInput) {
@@ -132,7 +142,7 @@ export async function getMlbTeamTotalsReadiness() {
     currentTeamTotalPredictions,
     shadowTeamTotalPredictions,
     finalScoredEvents,
-    historicalFeatures,
+    historicalFeatureEvidence,
     teamTotalSamples,
   ] = await Promise.all([
     safeCount('stored team-total odds', 'sports_odds_snapshots', teamTotalMarketFilter),
@@ -140,7 +150,7 @@ export async function getMlbTeamTotalsReadiness() {
     safeCount('current team-total predictions', 'prediction_history', (query) => query.eq('sport_key', SPORT_KEY).eq('market', 'team_total').eq('is_current', true)),
     safeCount('shadow team-total predictions', 'prediction_history', (query) => query.eq('sport_key', SPORT_KEY).eq('market', 'team_total').or('lifecycle_status.eq.shadow,model_role.eq.shadow,production_eligible.eq.false')),
     safeCount('final scored MLB events', 'sport_events', (query) => query.eq('sport_key', SPORT_KEY).not('home_score', 'is', null).not('away_score', 'is', null)),
-    safeCount('historical MLB feature snapshots', 'historical_feature_snapshots', (query) => query.eq('sport_key', SPORT_KEY)),
+    safeExists('historical MLB feature snapshots', 'historical_feature_snapshots', 'id', (query) => query.eq('sport_key', SPORT_KEY)),
     safeRows<Record<string, unknown>>(
       'team-total odds samples',
       'sports_odds_snapshots',
@@ -170,7 +180,7 @@ export async function getMlbTeamTotalsReadiness() {
     currentTeamTotalPredictions.error,
     shadowTeamTotalPredictions.error,
     finalScoredEvents.error,
-    historicalFeatures.error,
+    historicalFeatureEvidence.error,
     teamTotalSamples.error,
     sampleEvents.error,
   ].filter((item): item is string => Boolean(item))
@@ -211,7 +221,7 @@ export async function getMlbTeamTotalsReadiness() {
       marketTimestampAndCutoff: samples.length > 0 && samples.every((row) => Boolean(row.snapshot_time)),
       finalTeamScoreSettlementSupport: finalScoredEvents.count > 0 && contractValidation.success,
       historicalOutcomeAvailability: finalScoredEvents.count > 0,
-      featureReadiness: historicalFeatures.count > 0,
+      featureReadiness: historicalFeatureEvidence.exists,
       pushAwareSemantics: classifyMarketSemantics({ market: 'team_total', line: 4 }).pushCapable && classifyMarketSemantics({ market: 'team_total', line: 3.5 }).binary,
       predictionLearningCalibrationPerformanceCompatibility: true,
     },
