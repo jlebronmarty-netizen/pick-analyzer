@@ -9,10 +9,18 @@ type Opportunity = {
   selection: string
   line: number | null
   americanOdds: number | null
-  impliedProbability: number
+  impliedProbability: number | null
   rawProbability: number
-  edge: number
-  expectedValue: number
+  edge: number | null
+  expectedValue: number | null
+  canonicalDisplaySelection?: string
+  canonicalDisplayLine?: number | null
+  canonicalDisplayOdds?: number | null
+  canonicalDisplayImpliedProbability?: number | null
+  canonicalDisplayEdge?: number | null
+  canonicalDisplayExpectedValue?: number | null
+  canonicalDisplayProbability?: number
+  canonicalDisplayReason?: string
   confidence: number
   reliability: string
   reliabilityScore: number
@@ -56,12 +64,12 @@ function odds(value: number | null) {
   return value > 0 ? `+${value}` : String(value)
 }
 
-function pct(value: number | null) {
-  return `${Number(value ?? 0).toFixed(1)}%`
+function pct(value: number | null | undefined) {
+  return value === null || value === undefined ? 'N/A' : `${Number(value).toFixed(1)}%`
 }
 
-function tone(value: number) {
-  return value > 0 ? 'text-emerald-300' : 'text-red-300'
+function tone(value: number | null | undefined) {
+  return Number(value ?? 0) > 0 ? 'text-emerald-300' : 'text-red-300'
 }
 
 function statusClass(item: Opportunity) {
@@ -73,12 +81,14 @@ function statusClass(item: Opportunity) {
 }
 
 function selectionLabel(item: Opportunity) {
-  if (item.marketLabel === 'Total') return `${item.selection} ${item.line ?? ''} Total`.trim()
+  const selection = item.canonicalDisplaySelection ?? item.selection
+  const lineValue = item.canonicalDisplayLine ?? item.line
+  if (item.marketLabel === 'Total') return `${selection} ${lineValue ?? ''} Total`.trim()
   if (item.marketLabel === 'Run Line') {
-    const line = item.line === null ? '' : item.line > 0 ? `+${item.line}` : String(item.line)
-    return `${item.selection} ${line} Run Line`.trim()
+    const line = lineValue === null ? '' : Number(lineValue) > 0 ? `+${lineValue}` : String(lineValue)
+    return `${selection} ${line} Run Line`.trim()
   }
-  return `${item.selection} Moneyline`
+  return `${selection} Moneyline`
 }
 
 export default function BestValueTool() {
@@ -170,13 +180,13 @@ export default function BestValueTool() {
                     ) : null}
                   </div>
                   <div className="grid min-w-0 grid-cols-1 gap-3 text-center sm:grid-cols-3">
-                    <Metric label="EV" value={pct(item.expectedValue)} color={tone(item.expectedValue)} />
-                    <Metric label="Edge" value={pct(item.edge)} color={tone(item.edge)} />
-                    <Metric label="Odds" value={odds(item.americanOdds)} />
+                    <Metric label="EV" value={pct(item.canonicalDisplayExpectedValue ?? item.expectedValue)} color={tone(item.canonicalDisplayExpectedValue ?? item.expectedValue)} />
+                    <Metric label="Edge" value={pct(item.canonicalDisplayEdge ?? item.edge)} color={tone(item.canonicalDisplayEdge ?? item.edge)} />
+                    <Metric label="Odds" value={odds(item.canonicalDisplayOdds ?? item.americanOdds)} />
                   </div>
                   <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
-                    <Metric label="Model" value={pct(item.rawProbability)} />
-                    <Metric label="Book" value={pct(item.impliedProbability)} />
+                    <Metric label="Model" value={pct(item.canonicalDisplayProbability ?? item.rawProbability)} />
+                    <Metric label="Book" value={pct(item.canonicalDisplayImpliedProbability ?? item.impliedProbability)} />
                     <Metric label="Confidence" value={pct(item.confidence)} />
                     <Metric label="Reliability" value={item.reliability} />
                   </div>
@@ -191,6 +201,7 @@ export default function BestValueTool() {
                   <div className="mt-4 grid gap-3 md:grid-cols-4">
                     <Metric label="Semantic Label" value={item.semanticLabel} />
                     <Metric label="Board Label" value={item.boardLabel} />
+                    <Metric label="Canonical Reason" value={item.canonicalDisplayReason ?? 'ALIGNED'} />
                     <Metric label="Odds Age" value={`${item.oddsAgeMinutes}m`} />
                     <Metric label="Feature Quality" value={item.featureQuality === null ? 'n/a' : pct(item.featureQuality)} />
                     <Metric label="Sufficiency" value={item.dataSufficiency === null ? 'n/a' : pct(item.dataSufficiency)} />

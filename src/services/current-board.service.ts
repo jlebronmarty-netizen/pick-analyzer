@@ -181,6 +181,35 @@ export type CurrentBoardCandidate = {
     highestProbability: number
     probabilityBasis: 'stored_binary_selection_with_complement' | 'push_capable_selected_side_only_unknown_push'
   }
+  canonicalOutcome?: {
+    selection: string
+    line: number | null
+    probability: number
+    sourceSelection: string
+    sourceLine: number | null
+    sourceProbability: number
+    complementDerived: boolean
+    pushProbability: number | null
+    totalProbability: number | null
+    probabilityBasis: 'stored_selection' | 'binary_complement' | 'push_capable_selected_side'
+  }
+  canonicalPrice?: {
+    americanOdds: number | null
+    impliedProbability: number | null
+    sportsbook: string | null
+    oddsSnapshotId: string | null
+    timestamp: string | null
+    source: 'selected_stored_price' | 'opposite_stored_price' | 'unavailable'
+    status: 'AVAILABLE' | 'NO_STORED_ODDS' | 'NO_OPPOSITE_PRICE' | 'STALE_MARKET' | 'MARKET_MISMATCH' | 'UNKNOWN_PUSH'
+  }
+  canonicalEv?: {
+    edge: number | null
+    expectedValue: number | null
+    actionableEdge: number | null
+    actionableExpectedValue: number | null
+    reason: string
+  }
+  canonicalReason?: string
   calibratedProbability: number | null
   confidence: number
   confidenceLabel: string
@@ -302,6 +331,12 @@ export type CurrentBoardResponse = {
     candidates: Array<{
       predictionId: string
       selection: string
+      canonicalSelection?: string
+      canonicalLine?: number | null
+      canonicalPrice?: number | null
+      canonicalImpliedProbability?: number | null
+      canonicalExpectedValue?: number | null
+      canonicalReason?: string
       market: string
       edge: number
       expectedValue: number
@@ -311,6 +346,37 @@ export type CurrentBoardResponse = {
       dataSufficiency: number | null
       modeledValueStatus: CurrentBoardCandidate['modeledValueStatus']
       officialEligibility: CurrentBoardCandidate['officialEligibility']
+    }>
+  }
+  currentBoardReconciliation?: {
+    contract: 'current_board_reconciliation_v1'
+    predictionsEvaluated: number
+    candidatesReturned: number
+    filteredOut: number
+    duplicateRowsRemoved: number
+    byReason: Record<CurrentBoardReasonCode, number>
+    perGame: Array<{
+      eventId: string
+      matchup: string
+      predictionsEvaluated: number
+      candidatesReturned: number
+      filteredOut: number
+      markets: Array<{
+        market: string
+        line: number | null
+        predictionsEvaluated: number
+        candidatesReturned: number
+        canonicalOutcomes: Array<{
+          predictionId: string
+          selection: string
+          line: number | null
+          probability: number
+          price: number | null
+          impliedProbability: number | null
+          expectedValue: number | null
+          reason: string
+        }>
+      }>
     }>
   }
   aiBetFinderReadiness: {
@@ -841,6 +907,13 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     marketPeriod(row),
     normalizedSelection(row),
   ].join('|')
+  const baseCanonicalReason = marketSemantics.pushCapable && !marketSemantics.pushProbabilityKnown
+    ? 'UNKNOWN_PUSH'
+    : stale
+      ? 'STALE_MARKET'
+      : marketAlignment.alignmentStatus !== 'ALIGNED'
+        ? marketAlignment.alignmentStatus
+        : marketAlignment.actionableUnavailableReason ?? 'ALIGNED'
 
   return {
     predictionId: row.id,
@@ -897,6 +970,35 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
       highestProbability: round(oppositeProbability === null ? boundedProbability : Math.max(boundedProbability, oppositeProbability)),
       probabilityBasis: marketSemantics.pushCapable ? 'push_capable_selected_side_only_unknown_push' : 'stored_binary_selection_with_complement',
     },
+    canonicalOutcome: {
+      selection: oppositeMoreLikely ? opposite : selectionLabel(row),
+      line: oppositeMoreLikely && row.line !== null ? -row.line : row.line,
+      probability: round(oppositeProbability === null ? boundedProbability : Math.max(boundedProbability, oppositeProbability)),
+      sourceSelection: selectionLabel(row),
+      sourceLine: row.line,
+      sourceProbability: round(boundedProbability),
+      complementDerived: oppositeMoreLikely,
+      pushProbability: marketSemantics.pushProbability,
+      totalProbability: marketSemantics.pushCapable ? null : 100,
+      probabilityBasis: marketSemantics.pushCapable ? 'push_capable_selected_side' : oppositeMoreLikely ? 'binary_complement' : 'stored_selection',
+    },
+    canonicalPrice: {
+      americanOdds: oppositeMoreLikely ? null : selectedOdds,
+      impliedProbability: oppositeMoreLikely ? null : marketAlignment.marketImpliedProbability,
+      sportsbook: oppositeMoreLikely ? null : odds?.sportsbook ?? row.sportsbook ?? 'Unknown',
+      oddsSnapshotId: oppositeMoreLikely ? null : odds?.id ?? null,
+      timestamp: oppositeMoreLikely ? null : oddsTimestamp,
+      source: oppositeMoreLikely ? 'unavailable' : 'selected_stored_price',
+      status: oppositeMoreLikely ? 'NO_OPPOSITE_PRICE' : stale ? 'STALE_MARKET' : marketAlignment.alignmentStatus === 'ALIGNED' ? 'AVAILABLE' : 'MARKET_MISMATCH',
+    },
+    canonicalEv: {
+      edge: oppositeMoreLikely ? null : marketAlignment.edgePercentagePoints,
+      expectedValue: oppositeMoreLikely ? null : marketAlignment.expectedValuePercent,
+      actionableEdge: oppositeMoreLikely ? null : marketAlignment.actionableEdgePercentagePoints,
+      actionableExpectedValue: oppositeMoreLikely ? null : marketAlignment.actionableExpectedValuePercent,
+      reason: oppositeMoreLikely ? 'NO_OPPOSITE_PRICE' : baseCanonicalReason,
+    },
+    canonicalReason: oppositeMoreLikely ? 'NO_OPPOSITE_PRICE' : baseCanonicalReason,
     calibratedProbability: numberValue(snapshot.calibratedProbability),
     confidence,
     confidenceLabel: String(snapshot.confidenceLabel ?? (confidence >= 70 ? 'High' : confidence >= 60 ? 'Medium' : 'Low')),
@@ -1010,6 +1112,122 @@ function attachOfficialPickContracts(candidates: CurrentBoardCandidate[]) {
     ...candidate,
     officialPick: buildOfficialPickContract(candidate),
   }))
+}
+
+function sameLine(left: number | null, right: number | null) {
+  if (left === null || right === null) return left === right
+  return Math.abs(left - right) < 0.001
+}
+
+function canonicalMatchKey(candidate: CurrentBoardCandidate, selection: string, line: number | null) {
+  return [
+    candidate.eventId,
+    candidate.market,
+    candidate.period,
+    selection.toLowerCase(),
+    line === null ? 'null' : line.toFixed(3),
+    candidate.sportsbook.toLowerCase(),
+  ].join('|')
+}
+
+function attachCanonicalOutcomeContracts(candidates: CurrentBoardCandidate[]) {
+  const byOutcome = new Map<string, CurrentBoardCandidate>()
+  for (const candidate of candidates) {
+    byOutcome.set(canonicalMatchKey(candidate, candidate.selection, candidate.line), candidate)
+  }
+
+  return candidates.map((candidate) => {
+    const canonical = candidate.canonicalOutcome!
+    if (!canonical.complementDerived) {
+      const canonicalPrice = candidate.canonicalPrice!
+      const reason =
+        candidate.marketSemantics.pushCapable && !candidate.marketSemantics.pushProbabilityKnown
+          ? 'UNKNOWN_PUSH'
+          : candidate.stale || ['STALE', 'EXPIRED'].includes(candidate.marketAlignment.freshnessStatus)
+            ? 'STALE_MARKET'
+            : candidate.marketAlignment.alignmentStatus !== 'ALIGNED'
+              ? 'MARKET_MISMATCH'
+              : candidate.marketAlignment.actionableUnavailableReason ?? 'ALIGNED'
+      return {
+        ...candidate,
+        canonicalPrice: {
+          ...canonicalPrice,
+          status:
+            reason === 'UNKNOWN_PUSH'
+              ? 'UNKNOWN_PUSH'
+              : reason === 'STALE_MARKET'
+                ? 'STALE_MARKET'
+                : reason === 'MARKET_MISMATCH'
+                  ? 'MARKET_MISMATCH'
+                  : canonicalPrice.americanOdds === null
+                    ? 'NO_STORED_ODDS'
+                    : 'AVAILABLE',
+        },
+        canonicalEv: {
+          edge: candidate.marketAlignment.edgePercentagePoints,
+          expectedValue: candidate.marketAlignment.expectedValuePercent,
+          actionableEdge: candidate.marketAlignment.actionableEdgePercentagePoints,
+          actionableExpectedValue: candidate.marketAlignment.actionableExpectedValuePercent,
+          reason,
+        },
+        canonicalReason: reason,
+      } satisfies CurrentBoardCandidate
+    }
+
+    const opposite = byOutcome.get(canonicalMatchKey(candidate, canonical.selection, canonical.line))
+    const oppositePriceUsable =
+      opposite &&
+      sameLine(opposite.line, canonical.line) &&
+      opposite.marketAlignment.alignmentStatus === 'ALIGNED' &&
+      opposite.americanOdds !== null
+    if (!oppositePriceUsable) {
+      return {
+        ...candidate,
+        canonicalPrice: {
+          americanOdds: null,
+          impliedProbability: null,
+          sportsbook: null,
+          oddsSnapshotId: null,
+          timestamp: null,
+          source: 'unavailable',
+          status: 'NO_OPPOSITE_PRICE',
+        },
+        canonicalEv: {
+          edge: null,
+          expectedValue: null,
+          actionableEdge: null,
+          actionableExpectedValue: null,
+          reason: 'NO_OPPOSITE_PRICE',
+        },
+        canonicalReason: 'NO_OPPOSITE_PRICE',
+      } satisfies CurrentBoardCandidate
+    }
+
+    const reason =
+      opposite.stale || ['STALE', 'EXPIRED'].includes(opposite.marketAlignment.freshnessStatus)
+        ? 'STALE_MARKET'
+        : opposite.marketAlignment.actionableUnavailableReason ?? 'ALIGNED'
+    return {
+      ...candidate,
+      canonicalPrice: {
+        americanOdds: opposite.americanOdds,
+        impliedProbability: opposite.marketAlignment.marketImpliedProbability,
+        sportsbook: opposite.sportsbook,
+        oddsSnapshotId: opposite.oddsSnapshotId,
+        timestamp: opposite.marketInputTimestamp,
+        source: 'opposite_stored_price',
+        status: reason === 'STALE_MARKET' ? 'STALE_MARKET' : 'AVAILABLE',
+      },
+      canonicalEv: {
+        edge: opposite.marketAlignment.edgePercentagePoints,
+        expectedValue: opposite.marketAlignment.expectedValuePercent,
+        actionableEdge: opposite.marketAlignment.actionableEdgePercentagePoints,
+        actionableExpectedValue: opposite.marketAlignment.actionableExpectedValuePercent,
+        reason,
+      },
+      canonicalReason: reason,
+    } satisfies CurrentBoardCandidate
+  })
 }
 
 function shouldInclude(mode: CurrentBoardMode, reasons: Set<CurrentBoardReasonCode>) {
@@ -1140,7 +1358,7 @@ export async function getCurrentBoard({
     .sort((left, right) => {
       if (mode === 'CURRENT' || mode === 'UPCOMING') {
         return (
-          right.rawProbability - left.rawProbability ||
+          (right.outcomeCompleteness?.highestProbability ?? right.rawProbability) - (left.outcomeCompleteness?.highestProbability ?? left.rawProbability) ||
           right.confidence - left.confidence ||
           right.reliabilityScore - left.reliabilityScore ||
           right.aiRating - left.aiRating
@@ -1155,6 +1373,7 @@ export async function getCurrentBoard({
   if (sportKey === 'baseball_mlb' && includeMlbContext) {
     candidates = await enrichMlbCandidatesWithVerifiedContext(candidates, currentSlateDate)
   }
+  candidates = attachCanonicalOutcomeContracts(candidates)
   candidates = attachRecommendationExplanations(candidates)
   candidates = attachOfficialPickContracts(candidates)
   const responseGeneratedAt = new Date().toISOString()
@@ -1220,6 +1439,49 @@ export async function getCurrentBoard({
     }
   })
   const playerIntelligenceAvailable = Boolean((playerIntelligenceContext?.summary.eligibleBatters ?? 0) > 0 || (playerIntelligenceContext?.summary.eligiblePitchers ?? 0) > 0)
+  const evaluatedByGame = new Map<string, number>()
+  for (const row of slateScoped.map((item) => item.row)) {
+    evaluatedByGame.set(row.game_id, (evaluatedByGame.get(row.game_id) ?? 0) + 1)
+  }
+  const currentBoardReconciliation: CurrentBoardResponse['currentBoardReconciliation'] = {
+    contract: 'current_board_reconciliation_v1',
+    predictionsEvaluated: rows.length,
+    candidatesReturned: candidates.length,
+    filteredOut: Math.max(0, rows.length - candidates.length),
+    duplicateRowsRemoved: reasonCounts.DUPLICATE,
+    byReason: reasonCounts,
+    perGame: boardGames.map((game) => {
+      const gameCandidates = candidates.filter((candidate) => candidate.eventId === game.eventId)
+      const marketGroups = new Map<string, CurrentBoardCandidate[]>()
+      for (const candidate of gameCandidates) {
+        const key = [candidate.market, candidate.canonicalOutcome!.line === null ? 'null' : candidate.canonicalOutcome!.line].join('|')
+        marketGroups.set(key, [...(marketGroups.get(key) ?? []), candidate])
+      }
+      return {
+        eventId: game.eventId,
+        matchup: game.matchup,
+        predictionsEvaluated: evaluatedByGame.get(game.eventId) ?? gameCandidates.length,
+        candidatesReturned: gameCandidates.length,
+        filteredOut: Math.max(0, (evaluatedByGame.get(game.eventId) ?? gameCandidates.length) - gameCandidates.length),
+        markets: Array.from(marketGroups.values()).map((items) => ({
+          market: items[0]?.marketLabel ?? 'Market',
+          line: items[0]?.canonicalOutcome?.line ?? null,
+          predictionsEvaluated: items.length,
+          candidatesReturned: items.length,
+          canonicalOutcomes: items.map((candidate) => ({
+            predictionId: candidate.predictionId,
+            selection: candidate.canonicalOutcome!.selection,
+            line: candidate.canonicalOutcome!.line,
+            probability: candidate.canonicalOutcome!.probability,
+            price: candidate.canonicalPrice!.americanOdds,
+            impliedProbability: candidate.canonicalPrice!.impliedProbability,
+            expectedValue: candidate.canonicalEv!.expectedValue,
+            reason: candidate.canonicalReason!,
+          })),
+        })),
+      }
+    }),
+  }
 
   return {
     success: true,
@@ -1233,6 +1495,7 @@ export async function getCurrentBoard({
     games: boardGames,
     markets: Array.from(new Set(candidates.map((candidate) => candidate.marketLabel))).sort(),
     candidates,
+    currentBoardReconciliation,
     marketSemantics: {
       contract: 'market_semantics_v1',
       markets: [
@@ -1312,6 +1575,12 @@ export async function getCurrentBoard({
         .map((candidate) => ({
           predictionId: candidate.predictionId,
           selection: candidate.selection,
+          canonicalSelection: candidate.canonicalOutcome!.selection,
+          canonicalLine: candidate.canonicalOutcome!.line,
+          canonicalPrice: candidate.canonicalPrice!.americanOdds,
+          canonicalImpliedProbability: candidate.canonicalPrice!.impliedProbability,
+          canonicalExpectedValue: candidate.canonicalEv!.expectedValue,
+          canonicalReason: candidate.canonicalReason!,
           market: candidate.market,
           edge: candidate.edge,
           expectedValue: candidate.expectedValue,

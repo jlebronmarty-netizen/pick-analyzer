@@ -2,6 +2,16 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Canonical Outcome, Odds Alignment & Performance State Reconciliation V1
+
+- Added additive canonical outcome, canonical price, canonical EV and canonical reason fields to Current Board candidates for Moneyline, Run Line/spread and Totals.
+- Most Likely now ranks and displays the highest-probability outcome while refusing to reuse the stored side's odds, implied probability, edge or EV when the displayed outcome is the binary complement. If the opposite side price is not stored, price, implied probability and EV remain `N/A` with `NO_OPPOSITE_PRICE`.
+- Best Value now ranks only canonical actionable positive EV/edge and surfaces explicit blockers such as `NO_OPPOSITE_PRICE`, `NO_STORED_ODDS`, `UNKNOWN_PUSH`, `STALE_MARKET` and `MARKET_MISMATCH`.
+- Current Board now returns `currentBoardReconciliation` with predictions evaluated, candidates returned, filters, duplicate removals and per-game/per-market canonical outcome details.
+- AI Feed and Game Intelligence now consume the same canonical outcome/price/EV fields as Current Board and Most Likely.
+- Performance APIs now expose one scope reconciliation contract for Trust, Accuracy, Calibration, Prediction History, Timeline, Daily Report Card, Goals, Model Maturity and Engineering Advisor. Calibration Error remains absolute; Calibration Bias remains signed. Replay/shadow samples are labeled separate from production performance.
+- Build verification passed with `npm.cmd run build`; the app currently emits 347 static pages. No prediction probabilities, Learning Brain behavior, Official Pick policy, settlement, Historical Replay, Historical Feature Store, scheduler architecture or production model weights were changed.
+
 ## 2026-07-24 MLB Starter Intelligence & Probable Pitcher Recovery V1
 
 - Added a provider-independent MLB Starter Intelligence resolver over stored `sport_lineups`, existing GamesByDate starter/weather evidence, current event metadata, player mappings and historical starter evidence.

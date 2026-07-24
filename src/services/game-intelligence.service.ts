@@ -185,23 +185,45 @@ export async function getGameIntelligence(eventId: string) {
       predictionCutoff: topCandidate.cutoff,
       eligibility: topCandidate.officialEligibility,
     } : null,
-    market: candidates.map((candidate) => ({
-      predictionId: candidate.predictionId,
-      market: candidate.marketLabel,
-      selection: candidate.selection,
-      line: candidate.line,
-      currentStoredPrice: candidate.americanOdds,
-      sportsbook: candidate.sportsbook,
-      snapshotTime: candidate.marketInputTimestamp,
-      freshness: candidate.marketAlignment.freshnessStatus,
-      impliedProbability: candidate.marketAlignment.marketImpliedProbability,
-      snapshotEdge: candidate.marketAlignment.snapshotEdgePercentagePoints,
-      snapshotEv: candidate.marketAlignment.snapshotExpectedValuePercent,
-      actionableEdge: candidate.marketAlignment.actionableEdgePercentagePoints,
-      actionableEv: candidate.marketAlignment.actionableExpectedValuePercent,
-      marketBlockers: Array.from(new Set([...candidate.blockers, ...candidate.marketAlignment.reasonCodes])),
-      classification: classifyMarketIntelligence(candidate).canonicalState,
-    })),
+    market: candidates.map((candidate) => {
+      const canonicalOutcome = candidate.canonicalOutcome ?? {
+        selection: candidate.selection,
+        line: candidate.line,
+        probability: candidate.rawProbability,
+      }
+      const canonicalPrice = candidate.canonicalPrice ?? {
+        americanOdds: candidate.americanOdds,
+        impliedProbability: candidate.impliedProbability,
+        timestamp: candidate.marketInputTimestamp,
+      }
+      const canonicalEv = candidate.canonicalEv ?? {
+        edge: candidate.marketAlignment.edgePercentagePoints,
+        expectedValue: candidate.marketAlignment.expectedValuePercent,
+        actionableEdge: candidate.marketAlignment.actionableEdgePercentagePoints,
+        actionableExpectedValue: candidate.marketAlignment.actionableExpectedValuePercent,
+      }
+      return {
+        predictionId: candidate.predictionId,
+        market: candidate.marketLabel,
+        selection: canonicalOutcome.selection,
+        sourceSelection: candidate.selection,
+        line: canonicalOutcome.line,
+        sourceLine: candidate.line,
+        probability: canonicalOutcome.probability,
+        currentStoredPrice: canonicalPrice.americanOdds,
+        sportsbook: candidate.sportsbook,
+        snapshotTime: canonicalPrice.timestamp ?? candidate.marketInputTimestamp,
+        freshness: candidate.marketAlignment.freshnessStatus,
+        impliedProbability: canonicalPrice.impliedProbability,
+        snapshotEdge: canonicalEv.edge,
+        snapshotEv: canonicalEv.expectedValue,
+        actionableEdge: canonicalEv.actionableEdge,
+        actionableEv: canonicalEv.actionableExpectedValue,
+        canonicalReason: candidate.canonicalReason ?? candidate.marketAlignment.actionableUnavailableReason ?? 'ALIGNED',
+        marketBlockers: Array.from(new Set([...candidate.blockers, ...candidate.marketAlignment.reasonCodes])),
+        classification: classifyMarketIntelligence(candidate).canonicalState,
+      }
+    }),
     teamComparison: {
       status: 'LIMITED_STORED_EVIDENCE',
       sampleWindow: 'Current Board feature snapshot only; full-season splits are not fabricated.',

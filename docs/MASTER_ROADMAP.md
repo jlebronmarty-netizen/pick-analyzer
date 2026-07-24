@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Canonical Outcome, Odds Alignment & Performance State Reconciliation V1
+
+Status: Implemented and build-verified; production deployment verification pending.
+
+Evidence: `src/services/current-board.service.ts`, `src/services/market-opportunity-suite.service.ts`, `src/services/best-value-scanner.service.ts`, `src/services/mlb-ai-picks-feed.service.ts`, `src/services/game-intelligence.service.ts`, `src/services/performance-product-contract.service.ts`, performance API routes, Most Likely/Best Value UI components and local production build.
+
+Note: This product-maturity pass adds canonical outcome, canonical price, canonical implied probability, canonical EV and canonical reason fields without changing model probabilities or recommendation policy. Most Likely displays the highest-probability outcome and does not borrow the stored side's price for complement-derived outcomes. Best Value ranks only canonical actionable positive EV/edge and reports explicit blockers when EV is unavailable. Performance surfaces now expose one cutoff-safe production scope reconciliation while keeping replay/shadow samples labeled separately.
+
 ### Universal Market Intelligence Platform V1
 
 Status: Implemented as read-only provider-independent inventory, readiness, provider coverage and diagnostics layer.

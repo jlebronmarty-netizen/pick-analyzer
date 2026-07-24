@@ -14,9 +14,9 @@ type Opportunity = {
   eventStatus: string
   period: string
   probability: number
-  sportsbookProbability: number
-  edge: number
-  expectedValue: number
+  sportsbookProbability: number | null
+  edge: number | null
+  expectedValue: number | null
   snapshotEdge?: number | null
   snapshotExpectedValue?: number | null
   actionableEdge?: number | null
@@ -57,6 +57,7 @@ type Opportunity = {
   oddsAgeMinutes: number
   selectedOddsSnapshotId: string | null
   anomalies: string[]
+  canonicalReason?: string
 }
 
 type Response = {
@@ -158,8 +159,8 @@ function odds(value: number | null) {
   return value > 0 ? `+${value}` : String(value)
 }
 
-function pct(value: number) {
-  return `${Number(value ?? 0).toFixed(1)}%`
+function pct(value: number | null | undefined) {
+  return value === null || value === undefined ? 'N/A' : `${Number(value).toFixed(1)}%`
 }
 
 function time(value: string | null) {
@@ -359,7 +360,7 @@ export default function MostLikelyTool() {
                   <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 text-center sm:grid-cols-3">
                     <Metric label="Pick Analyzer thinks" value={pct(item.probability)} />
                     <Metric label="Sportsbook thinks" value={pct(item.sportsbookProbability)} />
-                    <Metric label="Difference" value={`${item.edge > 0 ? '+' : ''}${pct(item.edge)}`} tone={item.edge > 0 ? 'good' : 'bad'} />
+                    <Metric label="Difference" value={`${Number(item.edge ?? 0) > 0 ? '+' : ''}${pct(item.edge)}`} tone={Number(item.edge ?? 0) > 0 ? 'good' : 'bad'} />
                   </div>
                 </div>
 
@@ -380,7 +381,7 @@ export default function MostLikelyTool() {
                 <summary className="cursor-pointer text-sm font-black">Advanced Details</summary>
                 <div className="mt-4 grid gap-3 md:grid-cols-4">
                   <Metric label="Model Probability" value={pct(item.probability)} />
-                  <Metric label="Expected Value" value={pct(item.expectedValue)} tone={item.expectedValue > 0 ? 'good' : 'bad'} />
+                  <Metric label="Expected Value" value={pct(item.expectedValue)} tone={Number(item.expectedValue ?? 0) > 0 ? 'good' : 'bad'} />
                   <Metric label="Reliability Score" value={String(item.reliabilityScore)} />
                   <Metric label="Odds Time" value={time(item.oddsTimestamp)} />
                   <Metric label="Model Version" value={item.modelVersion} />
@@ -456,7 +457,7 @@ function Spotlight({
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Metric label="Model Probability" value={pct(candidate.probability)} />
             <Metric label="Market Odds" value={odds(candidate.odds)} />
-            <Metric label={evLabel(candidate)} value={evValue(candidate)} tone={(candidate.actionableExpectedValue ?? candidate.expectedValue) > 0 && !candidate.actionableUnavailableReason ? 'good' : 'bad'} />
+            <Metric label={evLabel(candidate)} value={evValue(candidate)} tone={Number(candidate.actionableExpectedValue ?? candidate.expectedValue ?? 0) > 0 && !candidate.actionableUnavailableReason ? 'good' : 'bad'} />
             <Metric label="Official Status" value={candidate.officialEligibility} />
           </div>
           {candidate.probability < 50 ? (

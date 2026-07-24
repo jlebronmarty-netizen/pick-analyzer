@@ -83,6 +83,13 @@ export async function GET(request: NextRequest) {
       filters: { sportKey, category, modelVersion, status, mode, minConfidence: Number.isFinite(minConfidence) ? minConfidence : null, maxConfidence: Number.isFinite(maxConfidence) ? maxConfidence : null, limit, page },
       rows: pageRows,
       rowsV2: performanceScopeV2.historyPreview,
+      scopePolicy: performanceScopeV2.scopePolicy,
+      scopeReconciliation: {
+        contract: 'performance_history_scope_v1',
+        canonicalScope: 'cutoff_safe_production_scope',
+        source: 'performance_scope_v2.historyRows',
+        note: 'History rows use the same eligibility function as Trust, Accuracy, Calibration, Timeline and Report Card.',
+      },
       pendingReasons: performanceScopeV2.pending.byReason,
       cutoffExclusions: performanceScopeV2.cutoffExclusions,
       schedulerCoverage: performanceScopeV2.schedulerCoverage,

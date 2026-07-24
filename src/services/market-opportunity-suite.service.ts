@@ -358,7 +358,7 @@ function combinedScore(row: PredictionRow, snapshot: Record<string, unknown>) {
 
 function compareOpportunity(sort: SortMode) {
   return (left: MostLikelyCard, right: MostLikelyCard) => {
-    if (sort === 'best_value') return right.edge - left.edge || right.expectedValue - left.expectedValue
+    if (sort === 'best_value') return (right.edge ?? Number.NEGATIVE_INFINITY) - (left.edge ?? Number.NEGATIVE_INFINITY) || (right.expectedValue ?? Number.NEGATIVE_INFINITY) - (left.expectedValue ?? Number.NEGATIVE_INFINITY)
     if (sort === 'best_combined') return right.combinedScore - left.combinedScore
     if (sort === 'lowest_risk') return right.reliabilityScore - left.reliabilityScore || right.confidence - left.confidence
     if (sort === 'highest_confidence') return right.confidence - left.confidence
@@ -371,7 +371,7 @@ function compareOpportunity(sort: SortMode) {
 
 function compareCurrentBoardOpportunity(sort: SortMode) {
   return (left: ReturnType<typeof currentBoardCandidateToMostLikelyCard>, right: ReturnType<typeof currentBoardCandidateToMostLikelyCard>) => {
-    if (sort === 'best_value') return right.edge - left.edge || right.expectedValue - left.expectedValue
+    if (sort === 'best_value') return (right.edge ?? Number.NEGATIVE_INFINITY) - (left.edge ?? Number.NEGATIVE_INFINITY) || (right.expectedValue ?? Number.NEGATIVE_INFINITY) - (left.expectedValue ?? Number.NEGATIVE_INFINITY)
     if (sort === 'best_combined') return right.combinedScore - left.combinedScore
     if (sort === 'lowest_risk') return right.reliabilityScore - left.reliabilityScore || right.confidence - left.confidence
     if (sort === 'highest_confidence') return right.confidence - left.confidence
@@ -427,6 +427,34 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     ? null
     : classification.reasonNotOfficial
   const likely = mostLikelyOutcome(candidate)
+  const canonicalOutcome = candidate.canonicalOutcome ?? {
+    selection: likely.displayedSelection,
+    line: likely.displayedLine,
+    probability: likely.displayedProbability,
+    sourceSelection: candidate.selection,
+    sourceLine: candidate.line,
+    sourceProbability: likely.selectedProbability,
+    complementDerived: likely.complementDerived,
+    pushProbability: candidate.marketSemantics.pushProbability,
+    totalProbability: candidate.marketSemantics.pushCapable ? null : 100,
+    probabilityBasis: likely.complementDerived ? 'binary_complement' : 'stored_selection',
+  }
+  const canonicalPrice = candidate.canonicalPrice ?? {
+    americanOdds: likely.complementDerived ? null : candidate.americanOdds,
+    impliedProbability: likely.complementDerived ? null : candidate.impliedProbability,
+    sportsbook: likely.complementDerived ? null : candidate.sportsbook,
+    oddsSnapshotId: likely.complementDerived ? null : candidate.oddsSnapshotId,
+    timestamp: likely.complementDerived ? null : candidate.oddsTimestamp,
+    source: likely.complementDerived ? 'unavailable' : 'selected_stored_price',
+    status: likely.complementDerived ? 'NO_OPPOSITE_PRICE' : 'AVAILABLE',
+  }
+  const canonicalEv = candidate.canonicalEv ?? {
+    edge: likely.complementDerived ? null : candidate.edge,
+    expectedValue: likely.complementDerived ? null : candidate.expectedValue,
+    actionableEdge: likely.complementDerived ? null : candidate.marketAlignment.actionableEdgePercentagePoints,
+    actionableExpectedValue: likely.complementDerived ? null : candidate.marketAlignment.actionableExpectedValuePercent,
+    reason: likely.complementDerived ? 'NO_OPPOSITE_PRICE' : candidate.marketAlignment.actionableUnavailableReason ?? 'ALIGNED',
+  }
   return {
     id: candidate.predictionId,
     sportKey: candidate.sportKey,
@@ -437,26 +465,26 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     market: candidate.market,
     marketLabel: candidate.marketLabel,
     period: candidate.period,
-    selection: likely.displayedSelection,
+    selection: canonicalOutcome.selection,
     sourceSelection: candidate.selection,
-    line: likely.displayedLine,
+    line: canonicalOutcome.line,
     sourceLine: candidate.line,
-    odds: likely.complementDerived ? null : candidate.americanOdds,
+    odds: canonicalPrice.americanOdds,
     sourceOdds: candidate.americanOdds,
-    sportsbook: candidate.sportsbook,
-    probability: likely.displayedProbability,
+    sportsbook: canonicalPrice.sportsbook ?? candidate.sportsbook,
+    probability: canonicalOutcome.probability,
     selectedSideProbability: likely.selectedProbability,
     complementProbability: likely.complementProbability,
     complementDerived: likely.complementDerived,
     probabilitySemantic: likely.probabilitySemantic,
-    sportsbookProbability: candidate.impliedProbability,
-    edge: candidate.edge,
-    expectedValue: candidate.expectedValue,
+    sportsbookProbability: canonicalPrice.impliedProbability,
+    edge: canonicalEv.edge,
+    expectedValue: canonicalEv.expectedValue,
     snapshotEdge: candidate.marketAlignment.snapshotEdgePercentagePoints,
     snapshotExpectedValue: candidate.marketAlignment.snapshotExpectedValuePercent,
-    actionableEdge: candidate.marketAlignment.actionableEdgePercentagePoints,
-    actionableExpectedValue: candidate.marketAlignment.actionableExpectedValuePercent,
-    actionableUnavailableReason: candidate.marketAlignment.actionableUnavailableReason,
+    actionableEdge: canonicalEv.actionableEdge,
+    actionableExpectedValue: canonicalEv.actionableExpectedValue,
+    actionableUnavailableReason: canonicalEv.reason === 'ALIGNED' ? null : canonicalEv.reason,
     confidence: candidate.confidence,
     confidenceLabel: candidate.confidenceLabel,
     reliability: candidate.reliability,
@@ -464,7 +492,7 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     aiRating: candidate.aiRating,
     aiGrade: candidate.aiGrade,
     combinedScore: round(
-      likely.displayedProbability * 0.34 +
+      canonicalOutcome.probability * 0.34 +
         candidate.confidence * 0.22 +
         candidate.reliabilityScore * 0.18 +
         candidate.aiRating * 0.16 +
@@ -511,11 +539,11 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     featureQuality: candidate.featureQuality,
     dataSufficiency: candidate.dataSufficiency,
     criticalDataCompleteness: candidate.criticalDataCompleteness ?? null,
-    fairOdds: fairAmericanFromProbability(likely.displayedProbability),
+    fairOdds: fairAmericanFromProbability(canonicalOutcome.probability),
     actionability:
       official
         ? 'official_review_candidate'
-        : candidate.expectedValue > 0
+        : (canonicalEv.expectedValue ?? Number.NEGATIVE_INFINITY) > 0
           ? 'preview_value_only_not_official'
           : 'informational_probability_only',
     explanation: {
@@ -542,9 +570,13 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     oddsIngestedAt: candidate.oddsIngestedAt,
     oddsSnapshotCreatedAt: candidate.oddsSnapshotCreatedAt,
     marketAlignment: candidate.marketAlignment,
+    canonicalOutcome,
+    canonicalPrice,
+    canonicalEv,
+    canonicalReason: candidate.canonicalReason ?? canonicalEv.reason,
     recommendationExplanation: candidate.recommendationExplanation,
-    selectedOddsSnapshotId: candidate.oddsSnapshotId,
-    selectedOddsSource: candidate.oddsSnapshotId ? 'sports_odds_snapshots' : 'prediction_history_offered_price',
+    selectedOddsSnapshotId: canonicalPrice.oddsSnapshotId,
+    selectedOddsSource: canonicalPrice.source,
     anomalies: candidate.anomalyReasons,
     productionEligible: candidate.productionEligible,
     independentTool: true,

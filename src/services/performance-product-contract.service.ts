@@ -82,6 +82,102 @@ function reportCardFrom(metrics: TimelineMetrics) {
   }
 }
 
+function goalStatus({
+  currentValue,
+  target,
+  higherIsBetter,
+  sample,
+}: {
+  currentValue: number | null
+  target: number
+  higherIsBetter: boolean
+  sample: number
+}) {
+  if (currentValue === null || sample === 0) return 'NOT ENOUGH DATA'
+  const achieved = higherIsBetter ? currentValue >= target : currentValue <= target
+  if (achieved) return 'ACHIEVED'
+  const progress = higherIsBetter ? (currentValue / target) * 100 : (target / Math.max(currentValue, 0.0001)) * 100
+  if (progress >= 75) return 'ON TRACK'
+  if (progress >= 45) return 'WATCH'
+  return 'BLOCKED'
+}
+
+function goalsFrom(metrics: TimelineMetrics) {
+  const scored = metrics.wins + metrics.losses
+  const calibration = calibrationFrom(metrics)
+  const definitions = [
+    { key: 'minimum_settled_sample', label: 'Minimum settled sample', currentValue: scored, target: 100, higherIsBetter: true },
+    { key: 'maximum_brier_score', label: 'Maximum Brier Score', currentValue: metrics.brier, target: 0.22, higherIsBetter: false },
+    { key: 'maximum_calibration_error', label: 'Maximum calibration error', currentValue: calibration.calibrationError, target: 8, higherIsBetter: false },
+    { key: 'minimum_settlement_coverage', label: 'Minimum settlement coverage', currentValue: metrics.settlementCoverage, target: 70, higherIsBetter: true },
+  ]
+  return {
+    mode: 'performance_goals_scope_v2',
+    scope: 'cutoff_safe_production_scope',
+    goals: definitions.map((goal) => {
+      const available = goal.currentValue !== null && Number.isFinite(Number(goal.currentValue))
+      const progress = !available || scored === 0
+        ? 0
+        : goal.higherIsBetter
+          ? Math.min(100, round((Number(goal.currentValue) / goal.target) * 100))
+          : Math.min(100, round((goal.target / Math.max(Number(goal.currentValue), 0.0001)) * 100))
+      const status = goalStatus({ currentValue: available ? Number(goal.currentValue) : null, target: goal.target, higherIsBetter: goal.higherIsBetter, sample: scored })
+      return {
+        ...goal,
+        progressPercentage: progress,
+        direction: goal.higherIsBetter ? 'HIGHER_IS_BETTER' : 'LOWER_IS_BETTER',
+        status,
+        sampleQualification: scored === 0 ? 'NO_SETTLED_SAMPLE' : scored < 30 ? 'SMALL_SAMPLE' : 'QUALIFIED_SAMPLE',
+        blocker: status === 'ACHIEVED' ? null : goal.key,
+      }
+    }),
+  }
+}
+
+function maturityPipelineFrom(metrics: TimelineMetrics) {
+  const scored = metrics.wins + metrics.losses
+  const calibration = calibrationFrom(metrics)
+  const stage = (status: string, score: number, evidence: string[], blockers: string[], nextAction: string, sampleScope: string) => ({
+    status,
+    score,
+    evidence,
+    blockers,
+    nextAction,
+    sampleScope,
+  })
+  return {
+    DATA: stage('ACTIVE', metrics.generated ? 80 : 0, [`${metrics.generated} cutoff-safe production rows in scope.`], metrics.generated ? [] : ['NO_PRODUCTION_ROWS'], 'Maintain production data quality monitoring.', 'Production Sample'),
+    BACKTESTING: stage(scored >= 100 ? 'COMPLETE' : scored > 0 ? 'ACTIVE' : 'NOT STARTED', Math.min(100, scored), [`${scored} scored Win/Loss outcomes.`], scored < 100 ? ['SETTLED_SAMPLE_BELOW_100'] : [], 'Accumulate settled production samples.', 'Production Sample'),
+    CALIBRATION: stage(scored >= 30 && calibration.calibrationError !== null && calibration.calibrationError <= 8 ? 'COMPLETE' : scored ? 'LIMITED' : 'BLOCKED', calibration.confidenceReliability ?? 0, [`Calibration error ${calibration.calibrationError ?? 'N/A'} on ${calibration.sample} scored outcomes.`], scored < 30 ? ['CALIBRATION_SAMPLE_BELOW_30'] : [], 'Review reliability after more same-scope settlements.', 'Production Sample'),
+    SHADOW_REPLAY: stage('SEPARATE_SCOPE', 0, ['Replay and shadow samples are intentionally excluded from production performance trust.'], [], 'Keep replay/shadow evidence labeled separately.', 'Replay/Shadow Sample'),
+  }
+}
+
+function engineeringAdvisorFrom(metrics: TimelineMetrics) {
+  const scored = metrics.wins + metrics.losses
+  const calibration = calibrationFrom(metrics)
+  const blockers = [
+    ...(scored < 30 ? ['LOW_SETTLED_PRODUCTION_SAMPLE'] : []),
+    ...(calibration.calibrationError !== null && calibration.calibrationError > 8 ? ['CALIBRATION_ERROR_ABOVE_TARGET'] : []),
+    ...((metrics.settlementCoverage ?? 0) < 70 ? ['SETTLEMENT_COVERAGE_BELOW_TARGET'] : []),
+  ]
+  return {
+    currentStrengths: [
+      'Performance, trust, report card, goals, timeline and history use performance_scope_v2.',
+      metrics.generated ? 'Cutoff-safe production prediction history is available.' : 'Scope contract is available.',
+    ],
+    currentWeaknesses: blockers.map((item) => item.replaceAll('_', ' ').toLowerCase()),
+    currentBlockers: blockers,
+    estimatedReadiness: scored === 0 ? 'INSUFFICIENT DATA' : scored < 30 ? 'LIMITED_SAMPLE' : 'PRODUCTION_SCOPE',
+    nextRecommendedImprovements: blockers.length
+      ? ['Accumulate same-scope settled production samples before making stronger trust or calibration claims.']
+      : ['Continue monitoring market alignment, settlement coverage and calibration drift.'],
+    highestImpactTasks: blockers.length
+      ? blockers
+      : ['Monitor current market alignment blockers: stale market, missing opposite price, unknown push probability.'],
+  }
+}
+
 function change(current: number | null, previous: number | null) {
   return {
     currentValue: current,
@@ -198,6 +294,18 @@ export async function getPerformanceProductContract({ sportKey }: { sportKey?: s
     mode: 'performance_product_contract_v1',
     generatedAt: scope.generatedAt,
     scopePolicy: scope.scopePolicy,
+    scopeReconciliation: {
+      contract: 'performance_scope_reconciliation_v1',
+      canonicalScope: 'cutoff_safe_production_scope',
+      trust: 'season timeline from performance_scope_v2',
+      accuracy: 'same season timeline Win/Loss sample',
+      calibration: 'same season timeline scored sample; error is absolute, bias is signed',
+      predictionHistory: 'performance_scope_v2.historyRows',
+      timeline: 'performance_scope_v2.timeline',
+      dailyReportCard: 'same selected reportCardFrom(season) contract',
+      goals: 'same selected goalsFrom(season) contract',
+      modelMaturity: 'production sample with replay/shadow explicitly labeled separate',
+    },
     performanceScopeV2: scope,
     trustScore: selectedTrust,
     trustChange: {
@@ -227,6 +335,9 @@ export async function getPerformanceProductContract({ sportKey }: { sportKey?: s
       today: reportCardFrom(today),
       allSports: reportCardFrom(season),
     },
+    goals: goalsFrom(season),
+    maturityPipeline: maturityPipelineFrom(season),
+    engineeringAdvisor: engineeringAdvisorFrom(season),
     sports,
     providerCallsMade: 0,
     remoteMutationsMade: 0,

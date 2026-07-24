@@ -82,6 +82,9 @@ export async function GET(request: NextRequest) {
         overallGrade: selectedReport.overallGrade,
         dimensions: reportDimensions(selectedReport),
       },
+      goals: product.goals,
+      maturityPipeline: product.maturityPipeline,
+      engineeringAdvisor: product.engineeringAdvisor,
       trustChange: product.trustChange,
       evolution: product.evolution,
       internalView: {
@@ -104,6 +107,7 @@ export async function GET(request: NextRequest) {
       mode: 'performance_api_v1',
       generatedAt: product.generatedAt,
       performanceScopeV2: product.performanceScopeV2,
+      performanceScopeReconciliation: product.scopeReconciliation,
       publicView: {
         ...data.aiBrain.publicView,
         overallAiGrade: selectedReport.overallGrade,
@@ -117,6 +121,9 @@ export async function GET(request: NextRequest) {
       aiBrain,
       sports: product.sports,
       reportCards: product.reportCards,
+      goals: product.goals,
+      maturityPipeline: product.maturityPipeline,
+      engineeringAdvisor: product.engineeringAdvisor,
       trendAnalysis: data.trendAnalysis,
       evolutionSnapshots: {
         ...data.evolutionSnapshots,

@@ -7,10 +7,10 @@ import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-nor
 export type BestValueMode = 'current' | 'upcoming' | 'historical_explorer' | 'all_stored_advanced'
 
 function score(candidate: CurrentBoardCandidate) {
-  const actionableEv = candidate.marketAlignment?.actionableExpectedValuePercent ?? null
-  const actionableEdge = candidate.marketAlignment?.actionableEdgePercentagePoints ?? null
-  const ev = Number.isFinite(actionableEv) ? Number(actionableEv) : candidate.expectedValue
-  const edge = Number.isFinite(actionableEdge) ? Number(actionableEdge) : candidate.edge
+  const actionableEv = candidate.canonicalEv?.actionableExpectedValue ?? null
+  const actionableEdge = candidate.canonicalEv?.actionableEdge ?? null
+  const ev = Number.isFinite(actionableEv) ? Number(actionableEv) : candidate.canonicalEv?.expectedValue ?? Number.NEGATIVE_INFINITY
+  const edge = Number.isFinite(actionableEdge) ? Number(actionableEdge) : candidate.canonicalEv?.edge ?? Number.NEGATIVE_INFINITY
   return (
     Number(ev > 0) * 10000 +
     Number(edge > 0) * 5000 +
@@ -26,19 +26,17 @@ function score(candidate: CurrentBoardCandidate) {
 
 function isAlignedFreshPositiveValue(candidate: CurrentBoardCandidate) {
   return (
-    candidate.marketAlignment?.alignmentStatus === 'ALIGNED' &&
-    candidate.marketAlignment.freshnessStatus !== 'STALE' &&
-    candidate.marketAlignment.freshnessStatus !== 'EXPIRED' &&
-    Number.isFinite(candidate.marketAlignment.actionableExpectedValuePercent) &&
-    Number.isFinite(candidate.marketAlignment.actionableEdgePercentagePoints) &&
-    Number(candidate.marketAlignment.actionableExpectedValuePercent) > 0 &&
-    Number(candidate.marketAlignment.actionableEdgePercentagePoints) > 0
+    candidate.canonicalPrice?.status === 'AVAILABLE' &&
+    Number.isFinite(candidate.canonicalEv?.actionableExpectedValue) &&
+    Number.isFinite(candidate.canonicalEv?.actionableEdge) &&
+    Number(candidate.canonicalEv?.actionableExpectedValue) > 0 &&
+    Number(candidate.canonicalEv?.actionableEdge) > 0
   )
 }
 
 function category(candidate: CurrentBoardCandidate) {
-  const ev = candidate.marketAlignment.actionableExpectedValuePercent
-  const edge = candidate.marketAlignment.actionableEdgePercentagePoints
+  const ev = candidate.canonicalEv?.actionableExpectedValue
+  const edge = candidate.canonicalEv?.actionableEdge
   if (!Number.isFinite(ev) || !Number.isFinite(edge) || Number(ev) <= 0 || Number(edge) <= 0) return 'No Modeled Value'
   if (Number(ev) >= 8 && Number(edge) >= 5 && candidate.confidence >= 60) return 'Strong Modeled Value'
   if (Number(ev) >= 5 && Number(edge) >= 3) return 'Developing Value'
@@ -75,21 +73,21 @@ function opportunityStatus(candidate: CurrentBoardCandidate) {
 
 function noPositiveValueWarning(sourceCandidates: CurrentBoardCandidate[]) {
   if (!sourceCandidates.length) return 'No opportunities available because no eligible games have grounded odds and probabilities.'
-  const aligned = sourceCandidates.filter((candidate) => candidate.marketAlignment?.alignmentStatus === 'ALIGNED')
+  const aligned = sourceCandidates.filter((candidate) => candidate.canonicalPrice?.status === 'AVAILABLE' || candidate.marketAlignment?.alignmentStatus === 'ALIGNED')
   if (!aligned.length) {
     return 'Odds or probabilities exist, but no candidate has an exact aligned event, market, selection, line, sportsbook and snapshot for EV ranking.'
   }
-  const stale = aligned.filter((candidate) => ['STALE', 'EXPIRED', 'UNKNOWN'].includes(candidate.marketAlignment.freshnessStatus))
+  const stale = aligned.filter((candidate) => candidate.canonicalReason === 'STALE_MARKET' || ['STALE', 'EXPIRED', 'UNKNOWN'].includes(candidate.marketAlignment.freshnessStatus))
   if (stale.length === aligned.length) {
     return 'Aligned odds exist, but EV is not actionable because market freshness is stale, expired or timestamp-unknown.'
   }
-  const unknownPush = aligned.filter((candidate) => candidate.marketAlignment.actionableUnavailableReason === 'UNKNOWN_PUSH_PROBABILITY')
+  const unknownPush = aligned.filter((candidate) => candidate.canonicalReason === 'UNKNOWN_PUSH' || candidate.marketAlignment.actionableUnavailableReason === 'UNKNOWN_PUSH_PROBABILITY')
   if (unknownPush.length) {
     return 'Aligned odds exist, but push-capable markets cannot be value-ranked until Win/Push/Loss probability is known.'
   }
   const priced = aligned.filter((candidate) =>
-    Number.isFinite(candidate.marketAlignment.actionableExpectedValuePercent) &&
-    Number.isFinite(candidate.marketAlignment.actionableEdgePercentagePoints)
+    Number.isFinite(candidate.canonicalEv?.actionableExpectedValue) &&
+    Number.isFinite(candidate.canonicalEv?.actionableEdge)
   )
   if (priced.length) {
     return 'Aligned fresh odds exist, but model probability does not clear both positive EV and positive edge at the current price.'
@@ -163,8 +161,32 @@ export async function getBestValueOpportunities({
     categories,
     opportunities: ranked.map((candidate) => {
       const classification = classifyMarketIntelligence(candidate)
+      const canonicalOutcome = candidate.canonicalOutcome ?? {
+        selection: candidate.selection,
+        line: candidate.line,
+        probability: candidate.rawProbability,
+      }
+      const canonicalPrice = candidate.canonicalPrice ?? {
+        americanOdds: candidate.americanOdds,
+        impliedProbability: candidate.impliedProbability,
+      }
+      const canonicalEv = candidate.canonicalEv ?? {
+        edge: candidate.edge,
+        expectedValue: candidate.expectedValue,
+        actionableEdge: candidate.marketAlignment?.actionableEdgePercentagePoints ?? null,
+        actionableExpectedValue: candidate.marketAlignment?.actionableExpectedValuePercent ?? null,
+      }
+      const canonicalReason = candidate.canonicalReason ?? candidate.marketAlignment?.actionableUnavailableReason ?? 'ALIGNED'
       return {
         ...candidate,
+        canonicalDisplaySelection: canonicalOutcome.selection,
+        canonicalDisplayLine: canonicalOutcome.line,
+        canonicalDisplayOdds: canonicalPrice.americanOdds,
+        canonicalDisplayImpliedProbability: canonicalPrice.impliedProbability,
+        canonicalDisplayEdge: canonicalEv.edge,
+        canonicalDisplayExpectedValue: canonicalEv.expectedValue,
+        canonicalDisplayProbability: canonicalOutcome.probability,
+        canonicalDisplayReason: canonicalReason,
         valueCategory: category(candidate),
         valueScore: Number(score(candidate).toFixed(2)),
         officialDisplay:
@@ -176,15 +198,19 @@ export async function getBestValueOpportunities({
             ? 'POSITIVE VALUE'
             : classification.category === 'avoid'
               ? 'AVOID - NO POSITIVE VALUE'
+              : canonicalReason === 'NO_OPPOSITE_PRICE'
+                ? 'NOT VALUE RANKED - NO OPPOSITE PRICE'
+              : canonicalReason === 'NO_STORED_ODDS'
+                ? 'NOT VALUE RANKED - NO STORED ODDS'
               : candidate.marketAlignment?.alignmentStatus !== 'ALIGNED'
                 ? `NOT VALUE RANKED - ${candidate.marketAlignment?.alignmentStatus ?? 'UNALIGNED'}`
-                : candidate.marketAlignment?.actionableUnavailableReason === 'UNKNOWN_PUSH_PROBABILITY'
+                : canonicalReason === 'UNKNOWN_PUSH' || candidate.marketAlignment?.actionableUnavailableReason === 'UNKNOWN_PUSH_PROBABILITY'
                   ? 'NOT VALUE RANKED - UNKNOWN PUSH PROBABILITY'
-                : ['STALE', 'EXPIRED', 'UNKNOWN'].includes(candidate.marketAlignment?.freshnessStatus ?? 'UNKNOWN')
+                : canonicalReason === 'STALE_MARKET' || ['STALE', 'EXPIRED', 'UNKNOWN'].includes(candidate.marketAlignment?.freshnessStatus ?? 'UNKNOWN')
                   ? `NOT VALUE RANKED - ${candidate.marketAlignment?.freshnessStatus ?? 'UNKNOWN'} MARKET INPUT`
-                  : Number(candidate.marketAlignment?.actionableExpectedValuePercent ?? Number.NaN) <= 0
+                : Number(canonicalEv.actionableExpectedValue ?? Number.NaN) <= 0
                     ? 'NOT VALUE RANKED - NEGATIVE EV AT CURRENT ODDS'
-                    : Number(candidate.marketAlignment?.actionableEdgePercentagePoints ?? Number.NaN) <= 0
+                    : Number(canonicalEv.actionableEdge ?? Number.NaN) <= 0
                       ? 'NOT VALUE RANKED - MODEL PROBABILITY BELOW SPORTSBOOK IMPLIED PROBABILITY'
                       : 'NOT VALUE RANKED - EV UNAVAILABLE',
         marketIntelligenceCategory: classification.category,

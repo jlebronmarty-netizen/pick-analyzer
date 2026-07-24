@@ -35,7 +35,7 @@ export type MlbAiPicksFeedItem = {
   sportsbook: string
   modelProbability: number
   calibratedProbability: number | null
-  impliedProbability: number
+  impliedProbability: number | null
   marketImpliedProbability: number | null
   edgePercentagePoints: number | null
   expectedValuePercent: number | null
@@ -126,6 +126,9 @@ function baseItem(
   if (!explanation) return null
   const alignment = candidate.marketAlignment
   const mostLikely = itemType === 'MOST_LIKELY' ? candidate.outcomeCompleteness ?? null : null
+  const canonicalOutcome = itemType === 'MOST_LIKELY' ? candidate.canonicalOutcome : null
+  const canonicalPrice = itemType === 'MOST_LIKELY' ? candidate.canonicalPrice : null
+  const canonicalEv = itemType === 'MOST_LIKELY' ? candidate.canonicalEv : null
   const pushAwareText = candidate.marketSemantics.pushCapable
     ? 'Push-capable market: Win/Push/Loss semantics apply, and EV is not actionable until push probability is known.'
     : 'Binary market: selected-side and opposite-side probabilities sum to 100%.'
@@ -157,21 +160,21 @@ function baseItem(
     scheduledTime: candidate.scheduledTime,
     market: candidate.market,
     marketLabel: candidate.marketLabel,
-    selection: mostLikely?.highestProbabilitySelection ?? candidate.selection,
-    line: mostLikely?.highestProbabilityLine ?? candidate.line,
-    americanOdds: mostLikely && mostLikely.highestProbabilitySelection !== candidate.selection ? null : candidate.americanOdds,
+    selection: canonicalOutcome?.selection ?? mostLikely?.highestProbabilitySelection ?? candidate.selection,
+    line: canonicalOutcome?.line ?? mostLikely?.highestProbabilityLine ?? candidate.line,
+    americanOdds: canonicalPrice?.americanOdds ?? candidate.americanOdds,
     sportsbook: candidate.sportsbook,
-    modelProbability: mostLikely?.highestProbability ?? candidate.rawProbability,
+    modelProbability: canonicalOutcome?.probability ?? mostLikely?.highestProbability ?? candidate.rawProbability,
     calibratedProbability: candidate.calibratedProbability,
-    impliedProbability: candidate.impliedProbability,
-    marketImpliedProbability: round(alignment.marketImpliedProbability),
-    edgePercentagePoints: round(alignment.edgePercentagePoints),
-    expectedValuePercent: round(alignment.expectedValuePercent),
+    impliedProbability: canonicalPrice?.impliedProbability ?? candidate.impliedProbability,
+    marketImpliedProbability: round(canonicalPrice?.impliedProbability ?? alignment.marketImpliedProbability),
+    edgePercentagePoints: round(canonicalEv?.edge ?? alignment.edgePercentagePoints),
+    expectedValuePercent: round(canonicalEv?.expectedValue ?? alignment.expectedValuePercent),
     confidence: candidate.confidence,
     risk: alignment.risk ?? itemRisk(candidate),
     freshnessStatus: alignment.freshnessStatus ?? 'UNKNOWN',
     marketAgeMinutes: round(alignment.marketAgeMinutes ?? candidate.marketInputAgeMinutes, 1),
-    oddsSnapshotId: candidate.oddsSnapshotId,
+    oddsSnapshotId: canonicalPrice?.oddsSnapshotId ?? candidate.oddsSnapshotId,
     featureSnapshotId: candidate.snapshotId,
     predictionGeneratedAt: candidate.predictionGeneratedAt ?? null,
     recommendationGeneratedAt: candidate.recommendationGeneratedAt ?? null,
@@ -429,6 +432,47 @@ export function validateMlbAiPicksFeedFixtures() {
     anomalyReasons: [],
     currentLatest: true,
     rawProbability: 58,
+    outcomeCompleteness: {
+      marketSemantics: classifyMarketSemantics({ market: 'moneyline', line: null }),
+      storedSelectionProbability: 58,
+      oppositeSelection: 'AWY',
+      oppositeSelectionProbability: 42,
+      pushProbability: null,
+      totalProbability: 100,
+      highestProbabilitySelection: 'HOM',
+      highestProbabilityLine: null,
+      highestProbability: 58,
+      probabilityBasis: 'stored_binary_selection_with_complement',
+    },
+    canonicalOutcome: {
+      selection: 'HOM',
+      line: null,
+      probability: 58,
+      sourceSelection: 'HOM',
+      sourceLine: null,
+      sourceProbability: 58,
+      complementDerived: false,
+      pushProbability: null,
+      totalProbability: 100,
+      probabilityBasis: 'stored_selection',
+    },
+    canonicalPrice: {
+      americanOdds: -110,
+      impliedProbability: 52.38,
+      sportsbook: 'Consensus',
+      oddsSnapshotId: 'odds-1',
+      timestamp: '2026-07-20T18:00:00.000Z',
+      source: 'selected_stored_price',
+      status: 'AVAILABLE',
+    },
+    canonicalEv: {
+      edge: 5.62,
+      expectedValue: 10.73,
+      actionableEdge: 5.62,
+      actionableExpectedValue: 10.73,
+      reason: 'ALIGNED',
+    },
+    canonicalReason: 'ALIGNED',
     calibratedProbability: null,
     confidence: 62,
     confidenceLabel: 'Medium',
