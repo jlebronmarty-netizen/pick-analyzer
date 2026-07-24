@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Historical Calibration & Shadow Reweighting V1
+
+- Added a read-only historical shadow calibration layer over Full Historical Replay Phase 2B evidence. The service consumes `universal_projection_history` rows under `retrosheet_historical_replay_phase_2b_v1`, excludes push rows from binary scoring, uses strict chronological training/validation/holdout splits and exposes results through `/api/model/shadow-calibration`, AI Operations and `npm.cmd run historical:shadow-calibration`.
+- Evidence: 7,290 replay rows read, 7,260 graded rows, 30 push rows excluded, 4,356 training rows, 1,452 validation rows and 1,452 holdout rows across Moneyline, Run Line/spread and Totals.
+- Holdout baseline vs shadow: accuracy 56.61% -> 57.16%, Brier 0.2422 -> 0.2425, log loss 0.6774 -> 0.6782, calibration error 3.27 -> 0.73 and confidence reliability 96.73 -> 99.27.
+- Recommendation: `Shadow equivalent`; do not promote automatically because Brier/log loss were fractionally worse despite materially improved calibration error/reliability.
+- Provider calls remained 0 and remote mutations remained 0 during shadow calibration validation. Production weights, model promotion, prediction history, Current Board, Official Picks, Learning Brain, Historical Feature Store and replay artifacts were not mutated.
+- Certifications: `CHRONOLOGICAL_CALIBRATION_PASS`, `SHADOW_REWEIGHTING_PASS`, `NO_AUTO_PROMOTION_PASS`, `SHADOW_COMPARISON_PASS`, `CALIBRATION_EVIDENCE_PASS`.
+
 ## 2026-07-24 Full Historical Replay Phase 2B
 
 - Executed Full Historical Replay Phase 2B over the complete supported Retrosheet MLB historical scope: 2,430 games, 7,290 replay-only predictions, 7,290 replay settlements, 7,290 replay labels and 211,410 historical snapshot lookups across Moneyline, Run Line/spread and Totals.

@@ -19,7 +19,8 @@
     "historical:features:idempotency": "node --loader ./scripts/local-ts-loader.mjs scripts/retrosheet-feature-backfill.mjs --mode idempotency",
     "historical:features:single-game": "node --loader ./scripts/local-ts-loader.mjs scripts/retrosheet-feature-backfill.mjs --mode single-game",
     "historical:replay:pilot": "node --loader ./scripts/local-ts-loader.mjs scripts/historical-replay-pilot.mjs",
-    "historical:replay:full": "node --loader ./scripts/local-ts-loader.mjs scripts/historical-replay-pilot.mjs --mode=full"
+    "historical:replay:full": "node --loader ./scripts/local-ts-loader.mjs scripts/historical-replay-pilot.mjs --mode=full",
+    "historical:shadow-calibration": "node --loader ./scripts/local-ts-loader.mjs scripts/historical-shadow-calibration.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

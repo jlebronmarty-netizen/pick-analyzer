@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Historical Calibration & Shadow Reweighting V1
+
+Status: Implemented, read-only evidence-verified and build-verified; production deployment verification pending.
+
+Evidence: `src/services/historical-shadow-calibration.service.ts`, `/api/model/shadow-calibration`, `scripts/historical-shadow-calibration.mjs`, AI Operations shadow calibration display and `docs/HISTORICAL_CALIBRATION_SHADOW_REWEIGHTING_V1.md`.
+
+Note: Phase 2 consumes Full Historical Replay Phase 2B rows under `retrosheet_historical_replay_phase_2b_v1`, excludes 30 push rows from binary metrics and evaluates 7,260 graded rows with strict chronological splits: 4,356 training, 1,452 validation and 1,452 holdout. The versioned shadow bucket calibration improves holdout calibration error from 3.27 to 0.73 and accuracy from 56.61% to 57.16%, while Brier score moves from 0.2422 to 0.2425 and log loss from 0.6774 to 0.6782. Recommendation is Shadow equivalent / do not promote automatically. Provider calls, remote mutations, production weights, Current Board, Official Picks, Learning Brain, prediction history, replay artifacts and Historical Feature Store rows remain unchanged.
+
 ### Full Historical Replay Phase 2B
 
 Status: Executed, idempotency-verified and build-verified; production deployment verification pending.

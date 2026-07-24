@@ -5,6 +5,7 @@ import { zonedUtcRange } from '@/services/provider-time-normalization.service'
 import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
 import { getHistoricalReplayFullStatus, getHistoricalReplayPilotStatus } from '@/services/historical-replay-pilot.service'
+import { getHistoricalShadowCalibration } from '@/services/historical-shadow-calibration.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -546,6 +547,34 @@ export async function getAiLearningLifecycle() {
     },
     errors: [error instanceof Error ? error.message : 'full replay status read failed'],
   }))
+  const historicalShadowCalibration = await getHistoricalShadowCalibration().catch((error) => ({
+    success: false,
+    mode: 'historical_calibration_shadow_reweighting_v1',
+    error: error instanceof Error ? error.message : 'historical shadow calibration read failed',
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    productionWeightsChanged: false,
+    productionModelPromoted: false,
+    sample: { replayRowsRead: 0, gradedRows: 0, excludedPushRows: 0, markets: [] },
+    chronologicalSplit: {
+      training: { count: 0, start: null, end: null },
+      validation: { count: 0, start: null, end: null },
+      holdout: { count: 0, start: null, end: null },
+      integrity: 'ERROR',
+    },
+    baseline: null,
+    shadow: null,
+    metricDeltas: null,
+    recommendation: 'Insufficient evidence',
+    certifications: {
+      CHRONOLOGICAL_CALIBRATION_PASS: false,
+      SHADOW_REWEIGHTING_PASS: false,
+      NO_AUTO_PROMOTION_PASS: true,
+      SHADOW_COMPARISON_PASS: false,
+      CALIBRATION_EVIDENCE_PASS: false,
+    },
+  }))
+  const historicalShadowCalibrationError = String((historicalShadowCalibration as Record<string, unknown>).error ?? 'Shadow calibration unavailable.')
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -678,6 +707,25 @@ export async function getAiLearningLifecycle() {
       allQueue.queued > 0 ? 'LEARNING_NOT_RUN' : allQueue.rejected > 0 ? 'LEARNING_EVIDENCE_INCOMPLETE' : null,
       allQueue.latestWeightUpdate,
       'Waiting for next scheduler execution'
+    ),
+    panel(
+      'historical_shadow_calibration',
+      'Historical Shadow Calibration',
+      historicalShadowCalibration.success ? 'Completed' : 'Error',
+      historicalShadowCalibration.success
+        ? 'Replay evidence produced a shadow-only chronological calibration comparison.'
+        : historicalShadowCalibrationError,
+      {
+        replayRowsRead: historicalShadowCalibration.sample.replayRowsRead,
+        gradedRows: historicalShadowCalibration.sample.gradedRows,
+        training: historicalShadowCalibration.chronologicalSplit.training.count,
+        validation: historicalShadowCalibration.chronologicalSplit.validation.count,
+        holdout: historicalShadowCalibration.chronologicalSplit.holdout.count,
+        productionWeightsChanged: historicalShadowCalibration.productionWeightsChanged,
+      },
+      historicalShadowCalibration.success ? null : historicalShadowCalibrationError,
+      null,
+      'Manual approval required for any production promotion'
     ),
     panel(
       'weight_updates',
@@ -984,24 +1032,25 @@ export async function getAiLearningLifecycle() {
     },
     pregameSchedulerCoverage: pregameCoverage,
     replayFull,
+    historicalShadowCalibration,
     shadowLearningValidation: {
       mode: 'SHADOW_ONLY',
-      acceptedSamples: allQueue.accepted,
-      trainingDatasetSize: allQueue.accepted,
-      chronologicalSplit: allQueue.chronologicalSplit,
-      brierBefore: null,
-      brierAfter: null,
-      logLossBefore: null,
-      logLossAfter: null,
-      calibrationBefore: null,
-      calibrationAfter: null,
-      accuracyBefore: null,
-      accuracyAfter: null,
+      acceptedSamples: historicalShadowCalibration.sample.gradedRows,
+      trainingDatasetSize: historicalShadowCalibration.chronologicalSplit.training.count,
+      chronologicalSplit: historicalShadowCalibration.chronologicalSplit,
+      brierBefore: historicalShadowCalibration.baseline?.holdout?.brierScore ?? null,
+      brierAfter: historicalShadowCalibration.shadow?.holdout?.brierScore ?? null,
+      logLossBefore: historicalShadowCalibration.baseline?.holdout?.logLoss ?? null,
+      logLossAfter: historicalShadowCalibration.shadow?.holdout?.logLoss ?? null,
+      calibrationBefore: historicalShadowCalibration.baseline?.holdout?.calibrationError ?? null,
+      calibrationAfter: historicalShadowCalibration.shadow?.holdout?.calibrationError ?? null,
+      accuracyBefore: historicalShadowCalibration.baseline?.holdout?.accuracy ?? null,
+      accuracyAfter: historicalShadowCalibration.shadow?.holdout?.accuracy ?? null,
       candidateWeightChanges: [],
       productionWeightsChanged: false,
-      activationGate: allQueue.accepted >= 100 ? 'READY_FOR_VALIDATION_REVIEW' : 'BLOCKED_INSUFFICIENT_EVIDENCE',
+      activationGate: historicalShadowCalibration.certifications.CALIBRATION_EVIDENCE_PASS ? 'READY_FOR_MANUAL_REVIEW' : 'BLOCKED_INSUFFICIENT_EVIDENCE',
       rollbackReady: weightRows.data.length > 0,
-      explanation: 'Shadow candidate weights are not generated until accepted samples meet the configured minimum evidence gate.',
+      explanation: 'Historical shadow calibration is computed from replay evidence only. Production weights remain unchanged and require manual promotion approval.',
     },
     panels,
     providerHealth: {
