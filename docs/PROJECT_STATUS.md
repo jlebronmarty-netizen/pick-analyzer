@@ -2,6 +2,16 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Push-Aware Outcome Distribution & Market Semantics V1
+
+- Added canonical market semantics for Moneyline, Run Line/spread and Totals without changing prediction probabilities, Learning Brain, Official Pick policy, settlement, scheduler, Historical Replay or Historical Feature Store Phase 2A.
+- Current Board now exposes candidate-level and response-level market semantics: binary, push-capable, outcome count and push support. Moneyline and fractional run-line/total markets remain binary; whole-number run-line/spread and total markets are push-capable with unknown push probability when the prediction engine does not expose a full Win/Push/Loss distribution.
+- Most Likely ranks binary markets by the higher selected/complement outcome and does not reconstruct a fake opposite side for push-capable markets.
+- Best Value now uses only actionable aligned fresh EV/edge and blocks push-capable EV ranking with `UNKNOWN_PUSH_PROBABILITY` until push probability is available.
+- AI Feed and recommendation explanations carry the same binary versus Win/Push/Loss semantics.
+- Performance scope explicitly counts pushes as settled while excluding pushes from win/loss accuracy and Brier scoring. Settlement Core push behavior was verified as already present for whole-number spreads/totals.
+- Build passed with `npm.cmd run build`. Provider calls, remote mutations, Phase 2A reruns, Historical Replay starts, retraining and recalibration remained 0.
+
 ## 2026-07-24 Market Outcome Completeness & Performance Consistency V1
 
 - Corrected product market semantics without changing prediction probabilities, Learning Brain, Official Pick policy, settlement, Historical Replay, Historical Feature Store or cutoff enforcement.

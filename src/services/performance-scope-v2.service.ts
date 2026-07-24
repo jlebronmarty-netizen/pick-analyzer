@@ -289,6 +289,7 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
     scopePolicy: {
       generatedUses: 'event_start_ast_date_fallback_prediction_generated_at',
       settlementUses: 'stored_result_and_settled_at_when_available',
+      pushHandling: 'pushes_count_as_settled_but_are_excluded_from_win_loss_accuracy_and_brier_scoring',
       exclusions: ['LEGACY', 'TEST_FIXTURE', 'PREDICTION_POST_START', 'DUPLICATE_SUPERSEDED'],
       separatedContexts: ['market_predictions', 'official_picks', 'model_only_predictions', 'shadow_predictions'],
     },
@@ -374,8 +375,16 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
 }
 
 export function validatePerformanceScopeV2Fixtures() {
+  const pushAware = metrics([
+    { row: fixturePerformanceRow('win-1', 'win', 60), event: fixtureFinalEvent() },
+    { row: fixturePerformanceRow('loss-1', 'loss', 60), event: fixtureFinalEvent() },
+    { row: fixturePerformanceRow('push-1', 'push', 60), event: fixtureFinalEvent() },
+  ])
   const checks = [
     ['pending reason uses exact labels', pendingReason({ id: 'x', sport_key: 'baseball_mlb', game_id: 'missing', commence_time: null, home_team: null, away_team: null, team: null, opponent: null, market: 'moneyline', sportsbook: null, odds: null, implied_probability: null, model_probability: null, confidence: null, line: null, result: null, status: 'pending', lifecycle_status: null, recommended_pick: false, production_eligible: false, trial: false, scrambled: false, validation_status: null, validation_warnings: [], model_role: null, model_version: null, feature_snapshot_id: null, odds_snapshot_id: null, operating_day_id: null, idempotency_key: null, generated_at: null, cutoff_at: null, settled_at: null, settlement_details: null }, undefined) === 'LEGACY'],
+    ['push counts as settled', pushAware.settled === 3 && pushAware.pushes === 1],
+    ['push excluded from accuracy denominator', pushAware.accuracy === 50],
+    ['push excluded from brier denominator', pushAware.brier === 0.26],
     ['zero provider calls', true],
   ] as const
   const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
@@ -388,5 +397,58 @@ export function validatePerformanceScopeV2Fixtures() {
     failedChecks,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
+  }
+}
+
+function fixtureFinalEvent(): EventRow {
+  return {
+    id: 'event-1',
+    start_time: '2026-07-01T23:00:00.000Z',
+    status: 'completed',
+    home_team: 'Home',
+    away_team: 'Away',
+    home_score: 4,
+    away_score: 3,
+  }
+}
+
+function fixturePerformanceRow(id: string, result: string, probability: number): PredictionRow {
+  return {
+    id,
+    sport_key: 'baseball_mlb',
+    game_id: 'event-1',
+    commence_time: '2026-07-01T23:00:00.000Z',
+    home_team: 'Home',
+    away_team: 'Away',
+    team: 'Home',
+    opponent: 'Away',
+    market: 'moneyline',
+    sportsbook: 'Fixture',
+    odds: -110,
+    implied_probability: 52.38,
+    model_probability: probability,
+    confidence: 60,
+    line: null,
+    result,
+    status: 'settled',
+    lifecycle_status: 'closed',
+    recommended_pick: true,
+    production_eligible: true,
+    trial: false,
+    scrambled: false,
+    validation_status: 'validated',
+    validation_warnings: [],
+    model_role: 'champion',
+    model_version: 'fixture',
+    feature_snapshot_id: 'snapshot-1',
+    odds_snapshot_id: 'odds-1',
+    operating_day_id: 'op-day-1',
+    idempotency_key: id,
+    generated_at: '2026-07-01T20:00:00.000Z',
+    cutoff_at: '2026-07-01T22:50:00.000Z',
+    created_at: '2026-07-01T20:00:00.000Z',
+    settled_at: '2026-07-02T03:00:00.000Z',
+    settlement_details: null,
+    is_current: true,
   }
 }

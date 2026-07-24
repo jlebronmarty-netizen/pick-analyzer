@@ -4,6 +4,7 @@ import type { CurrentBoardCandidate } from '@/services/current-board.service'
 import type { MarketAlignmentContract } from '@/services/market-alignment.service'
 import type { RecommendationExplanation } from '@/services/recommendation-explanation.service'
 import { fairAmericanOddsFromProbability } from '@/services/recommendation-explanation.service'
+import { classifyMarketSemantics } from '@/services/market-semantics.service'
 import {
   isOfficialRecommendationStatus,
   RECOMMENDATION_THRESHOLDS_V1,
@@ -227,6 +228,7 @@ export function validateOfficialPickExperienceFixtures() {
     actionableEdgePercentagePoints: 14.55,
     actionableExpectedValuePercent: 32,
     actionableUnavailableReason: null,
+    marketSemantics: classifyMarketSemantics({ market: 'moneyline', line: null }),
     marketInputTimestamp: '2026-07-15T19:30:00.000Z',
     providerSourceTimestamp: '2026-07-15T19:20:00.000Z',
     oddsIngestedAt: '2026-07-15T19:31:00.000Z',

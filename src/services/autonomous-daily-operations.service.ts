@@ -14,6 +14,7 @@ import {
 import { getMlbDataQualityStatus } from '@/services/mlb-data-quality.service'
 import { getMlbAiCoach } from '@/services/mlb-ai-coach.service'
 import { getMostLikelyOpportunities } from '@/services/market-opportunity-suite.service'
+import { classifyMarketSemantics } from '@/services/market-semantics.service'
 import { getOperatingDayAutomationStatus } from '@/services/operating-day-automation.service'
 import { executeOperatingDay, getOperatingDayStatus } from '@/services/operating-day.service'
 import {
@@ -428,6 +429,25 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
     games: [],
     markets: [],
     candidates: [],
+    marketSemantics: {
+      contract: 'market_semantics_v1' as const,
+      markets: [
+        { semantics: classifyMarketSemantics({ market: 'moneyline', line: null }), examples: [null] },
+        { semantics: classifyMarketSemantics({ market: 'spread', line: 1.5 }), examples: [1.5, -1.5] },
+        { semantics: classifyMarketSemantics({ market: 'spread', line: 1 }), examples: [1, -1] },
+        { semantics: classifyMarketSemantics({ market: 'total', line: 7.5 }), examples: [7.5, 8.5, 9.5] },
+        { semantics: classifyMarketSemantics({ market: 'total', line: 8 }), examples: [7, 8, 9] },
+      ].map(({ semantics, examples }) => ({
+        market: semantics.market === 'unsupported' ? 'moneyline' as const : semantics.market,
+        examples,
+        binary: semantics.binary,
+        pushCapable: semantics.pushCapable,
+        outcomeCount: semantics.outcomeCount,
+        supportsPush: semantics.supportsPush,
+        pushProbabilityKnown: semantics.pushProbabilityKnown,
+        pushProbability: semantics.pushProbability,
+      })),
+    },
     latestOddsTimestamp: null,
     latestOddsSourceTimestamp: null,
     latestVisibleMarketSnapshotTimestamp: null,

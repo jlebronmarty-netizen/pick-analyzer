@@ -1,6 +1,7 @@
 import 'server-only'
 
 import type { MarketAlignmentContract } from '@/services/market-alignment.service'
+import { classifyMarketSemantics } from '@/services/market-semantics.service'
 import { RECOMMENDATION_THRESHOLDS_V1 } from '@/services/recommendation-eligibility-policy.service'
 
 export type RecommendationExplanationCategory = 'official' | 'ai_lean' | 'watchlist' | 'model_only' | 'pass' | 'avoid'
@@ -101,6 +102,7 @@ function uniqueItems(items: RecommendationEvidenceItem[]) {
 
 const BLOCKER_PRIORITY: Record<string, number> = {
   FRESHNESS_BLOCKER: 1,
+  UNKNOWN_PUSH_PROBABILITY: 2,
   MISSING_ALIGNED_PRICE: 2,
   LINE_MISMATCH: 3,
   SELECTION_MISMATCH: 4,
@@ -194,6 +196,9 @@ function secondaryReasonItems(input: ExplanationInput) {
   if (alignment?.freshnessStatus === 'STALE') {
     items.push(evidence('STALE_MARKET_INPUT', 'Market Freshness', alignment.marketAgeMinutes, 'warning', 'marketAlignment.marketAgeMinutes', `Selected market input is ${alignment.marketAgeMinutes ?? 'unknown'} minutes old.`))
   }
+  if (alignment?.actionableUnavailableReason === 'UNKNOWN_PUSH_PROBABILITY') {
+    items.push(evidence('UNKNOWN_PUSH_PROBABILITY', 'Push Probability', 'unknown', 'warning', 'marketAlignment.marketSemantics', 'This market can push, so EV requires a Win/Push/Loss distribution and is not actionable from a binary complement.'))
+  }
   if (confidence !== null && confidence < RECOMMENDATION_THRESHOLDS_V1.minimumOfficialConfidence) {
     items.push(evidence('LOW_CONFIDENCE', 'Confidence', one(confidence), 'warning', 'confidence', `Confidence is below the Official threshold of ${RECOMMENDATION_THRESHOLDS_V1.minimumOfficialConfidence}%.`))
   }
@@ -207,8 +212,9 @@ function secondaryReasonItems(input: ExplanationInput) {
 }
 
 function blockerItems(input: ExplanationInput) {
-  const blockers = [...(input.blockers ?? []), ...(input.marketAlignment?.reasonCodes ?? [])]
-  return priorityItems(uniqueItems(blockers.filter(Boolean).map((code) => {
+  const blockers = [...(input.blockers ?? []), ...(input.marketAlignment?.reasonCodes ?? []), input.marketAlignment?.actionableUnavailableReason ?? null]
+  return priorityItems(uniqueItems(blockers.filter((code): code is string => Boolean(code)).map((code) => {
+    if (code === 'UNKNOWN_PUSH_PROBABILITY') return evidence('UNKNOWN_PUSH_PROBABILITY', 'Push Probability Blocker', code, 'warning', 'marketAlignment.marketSemantics', 'Push-capable market cannot be value-ranked until push probability is known.')
     if (code === 'STALE_INPUT' || code === 'STALE_ODDS') return evidence('FRESHNESS_BLOCKER', 'Freshness Blocker', code, 'warning', 'blockers,marketAlignment.reasonCodes', 'A fresher selected market input is required before this can be treated as actionable.')
     if (code === 'NON_POSITIVE_EV') return evidence('NON_POSITIVE_EV', 'Value Blocker', code, 'negative', 'blockers', 'Expected value is not positive.')
     if (code === 'NON_POSITIVE_EDGE') return evidence('NON_POSITIVE_EDGE', 'Edge Blocker', code, 'negative', 'blockers', 'Model edge is not positive.')
@@ -228,6 +234,9 @@ function promotionConditions(input: ExplanationInput, fairOdds: number | null) {
   }
   if (!alignment || alignment.alignmentStatus !== 'ALIGNED') conditions.push('Could become easier to evaluate if an exact aligned price is available.')
   if (alignment?.freshnessStatus === 'STALE') conditions.push('Could become eligible if market input refreshes before game start.')
+  if (alignment?.actionableUnavailableReason === 'UNKNOWN_PUSH_PROBABILITY') {
+    conditions.push('Could become value-ranked if the prediction engine exposes a complete Win/Push/Loss probability distribution.')
+  }
   if ((alignment?.expectedValuePercent ?? 0) <= 0 || (alignment?.edgePercentagePoints ?? 0) <= 0) {
     conditions.push('Could improve if the market price becomes less expensive or model probability strengthens.')
   }
@@ -314,6 +323,7 @@ export function validateRecommendationExplanationFixtures() {
     actionableEdgePercentagePoints: null,
     actionableExpectedValuePercent: null,
     actionableUnavailableReason: 'STALE_MARKET_INPUT',
+    marketSemantics: classifyMarketSemantics({ market: 'run_line', line: 1.5 }),
     marketInputTimestamp: new Date(Date.now() - 90 * 60000).toISOString(),
     providerSourceTimestamp: null,
     oddsIngestedAt: null,

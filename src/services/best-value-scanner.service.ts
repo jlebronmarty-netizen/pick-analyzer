@@ -37,9 +37,11 @@ function isAlignedFreshPositiveValue(candidate: CurrentBoardCandidate) {
 }
 
 function category(candidate: CurrentBoardCandidate) {
-  if (candidate.modeledValueStatus !== 'MODELED_VALUE') return 'No Modeled Value'
-  if (candidate.expectedValue >= 8 && candidate.edge >= 5 && candidate.confidence >= 60) return 'Strong Modeled Value'
-  if (candidate.expectedValue >= 5 && candidate.edge >= 3) return 'Developing Value'
+  const ev = candidate.marketAlignment.actionableExpectedValuePercent
+  const edge = candidate.marketAlignment.actionableEdgePercentagePoints
+  if (!Number.isFinite(ev) || !Number.isFinite(edge) || Number(ev) <= 0 || Number(edge) <= 0) return 'No Modeled Value'
+  if (Number(ev) >= 8 && Number(edge) >= 5 && candidate.confidence >= 60) return 'Strong Modeled Value'
+  if (Number(ev) >= 5 && Number(edge) >= 3) return 'Developing Value'
   return 'Thin Value'
 }
 
@@ -81,9 +83,13 @@ function noPositiveValueWarning(sourceCandidates: CurrentBoardCandidate[]) {
   if (stale.length === aligned.length) {
     return 'Aligned odds exist, but EV is not actionable because market freshness is stale, expired or timestamp-unknown.'
   }
+  const unknownPush = aligned.filter((candidate) => candidate.marketAlignment.actionableUnavailableReason === 'UNKNOWN_PUSH_PROBABILITY')
+  if (unknownPush.length) {
+    return 'Aligned odds exist, but push-capable markets cannot be value-ranked until Win/Push/Loss probability is known.'
+  }
   const priced = aligned.filter((candidate) =>
-    Number.isFinite(candidate.marketAlignment.expectedValuePercent) &&
-    Number.isFinite(candidate.marketAlignment.edgePercentagePoints)
+    Number.isFinite(candidate.marketAlignment.actionableExpectedValuePercent) &&
+    Number.isFinite(candidate.marketAlignment.actionableEdgePercentagePoints)
   )
   if (priced.length) {
     return 'Aligned fresh odds exist, but model probability does not clear both positive EV and positive edge at the current price.'
@@ -172,11 +178,13 @@ export async function getBestValueOpportunities({
               ? 'AVOID - NO POSITIVE VALUE'
               : candidate.marketAlignment?.alignmentStatus !== 'ALIGNED'
                 ? `NOT VALUE RANKED - ${candidate.marketAlignment?.alignmentStatus ?? 'UNALIGNED'}`
+                : candidate.marketAlignment?.actionableUnavailableReason === 'UNKNOWN_PUSH_PROBABILITY'
+                  ? 'NOT VALUE RANKED - UNKNOWN PUSH PROBABILITY'
                 : ['STALE', 'EXPIRED', 'UNKNOWN'].includes(candidate.marketAlignment?.freshnessStatus ?? 'UNKNOWN')
                   ? `NOT VALUE RANKED - ${candidate.marketAlignment?.freshnessStatus ?? 'UNKNOWN'} MARKET INPUT`
-                  : Number(candidate.marketAlignment?.expectedValuePercent ?? Number.NaN) <= 0
+                  : Number(candidate.marketAlignment?.actionableExpectedValuePercent ?? Number.NaN) <= 0
                     ? 'NOT VALUE RANKED - NEGATIVE EV AT CURRENT ODDS'
-                    : Number(candidate.marketAlignment?.edgePercentagePoints ?? Number.NaN) <= 0
+                    : Number(candidate.marketAlignment?.actionableEdgePercentagePoints ?? Number.NaN) <= 0
                       ? 'NOT VALUE RANKED - MODEL PROBABILITY BELOW SPORTSBOOK IMPLIED PROBABILITY'
                       : 'NOT VALUE RANKED - EV UNAVAILABLE',
         marketIntelligenceCategory: classification.category,

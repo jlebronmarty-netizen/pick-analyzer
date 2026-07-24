@@ -25,6 +25,7 @@ import {
   buildMlbAiPicksFeed,
   type MlbAiPicksFeed,
 } from '@/services/mlb-ai-picks-feed.service'
+import { classifyMarketSemantics, type MarketSemantics, type SupportedMarketType } from '@/services/market-semantics.service'
 import { normalizeStoredSportsDataIoMlbStart, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
@@ -154,6 +155,7 @@ export type CurrentBoardCandidate = {
   oddsIngestedAt: string | null
   oddsSnapshotCreatedAt: string | null
   marketAlignment: MarketAlignmentContract
+  marketSemantics: MarketSemantics
   recommendationExplanation?: RecommendationExplanation
   officialPick?: OfficialPickContract | null
   maxAllowedAgeMinutes: number
@@ -167,15 +169,16 @@ export type CurrentBoardCandidate = {
   currentLatest: boolean
   rawProbability: number
   outcomeCompleteness?: {
+    marketSemantics: MarketSemantics
     storedSelectionProbability: number
     oppositeSelection: string
-    oppositeSelectionProbability: number
+    oppositeSelectionProbability: number | null
     pushProbability: number | null
-    totalProbability: number
+    totalProbability: number | null
     highestProbabilitySelection: string
     highestProbabilityLine: number | null
     highestProbability: number
-    probabilityBasis: 'stored_binary_selection_with_complement'
+    probabilityBasis: 'stored_binary_selection_with_complement' | 'push_capable_selected_side_only_unknown_push'
   }
   calibratedProbability: number | null
   confidence: number
@@ -237,6 +240,19 @@ export type CurrentBoardResponse = {
   }>
   markets: string[]
   candidates: CurrentBoardCandidate[]
+  marketSemantics: {
+    contract: 'market_semantics_v1'
+    markets: Array<{
+      market: SupportedMarketType
+      examples: Array<number | null>
+      binary: boolean
+      pushCapable: boolean
+      outcomeCount: 2 | 3
+      supportsPush: boolean
+      pushProbabilityKnown: boolean
+      pushProbability: number | null
+    }>
+  }
   latestOddsTimestamp: string | null
   latestOddsSourceTimestamp: string | null
   latestVisibleMarketSnapshotTimestamp: string | null
@@ -734,8 +750,9 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
   const rawProbability = numberValue(row.model_probability) ?? 0
   const boundedProbability = Math.max(0, Math.min(100, rawProbability))
   const opposite = oppositeSelection(row)
-  const oppositeProbability = round(100 - boundedProbability)
-  const oppositeMoreLikely = oppositeProbability > boundedProbability
+  const marketSemantics = classifyMarketSemantics({ market, line: row.line })
+  const oppositeProbability = marketSemantics.pushCapable ? null : round(100 - boundedProbability)
+  const oppositeMoreLikely = oppositeProbability !== null && oppositeProbability > boundedProbability
   const confidence = numberValue(row.confidence) ?? 0
   const reliabilityScore = numberValue(snapshot.reliabilityScore) ?? Math.min(100, Math.max(0, confidence))
   const aiRating = numberValue(snapshot.aiRating) ?? round(rawProbability * 0.34 + confidence * 0.22 + reliabilityScore * 0.18)
@@ -841,6 +858,7 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     oddsIngestedAt,
     oddsSnapshotCreatedAt,
     marketAlignment,
+    marketSemantics,
     maxAllowedAgeMinutes: maxAgeFor(row.sport_key, market, mode),
     cutoff: row.cutoff_at,
     predictionGeneratedAt: row.generated_at,
@@ -852,15 +870,16 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     currentLatest: true,
     rawProbability,
     outcomeCompleteness: {
+      marketSemantics,
       storedSelectionProbability: round(boundedProbability),
       oppositeSelection: opposite,
       oppositeSelectionProbability: oppositeProbability,
-      pushProbability: null,
-      totalProbability: 100,
+      pushProbability: marketSemantics.pushProbability,
+      totalProbability: marketSemantics.pushCapable ? null : 100,
       highestProbabilitySelection: oppositeMoreLikely ? opposite : selectionLabel(row),
       highestProbabilityLine: oppositeMoreLikely && row.line !== null ? -row.line : row.line,
-      highestProbability: round(Math.max(boundedProbability, oppositeProbability)),
-      probabilityBasis: 'stored_binary_selection_with_complement',
+      highestProbability: round(oppositeProbability === null ? boundedProbability : Math.max(boundedProbability, oppositeProbability)),
+      probabilityBasis: marketSemantics.pushCapable ? 'push_capable_selected_side_only_unknown_push' : 'stored_binary_selection_with_complement',
     },
     calibratedProbability: numberValue(snapshot.calibratedProbability),
     confidence,
@@ -1184,6 +1203,30 @@ export async function getCurrentBoard({
     games: Array.from(gamesById.values()),
     markets: Array.from(new Set(candidates.map((candidate) => candidate.marketLabel))).sort(),
     candidates,
+    marketSemantics: {
+      contract: 'market_semantics_v1',
+      markets: [
+        classifyMarketSemantics({ market: 'moneyline', line: null }),
+        classifyMarketSemantics({ market: 'spread', line: 1.5 }),
+        classifyMarketSemantics({ market: 'spread', line: 1 }),
+        classifyMarketSemantics({ market: 'total', line: 7.5 }),
+        classifyMarketSemantics({ market: 'total', line: 8 }),
+      ].map((semantics) => ({
+        market: semantics.market === 'unsupported' ? 'moneyline' : semantics.market,
+        examples:
+          semantics.market === 'moneyline'
+            ? [null]
+            : semantics.market === 'spread'
+              ? semantics.pushCapable ? [1, -1] : [1.5, -1.5]
+              : semantics.pushCapable ? [7, 8, 9] : [7.5, 8.5, 9.5],
+        binary: semantics.binary,
+        pushCapable: semantics.pushCapable,
+        outcomeCount: semantics.outcomeCount,
+        supportsPush: semantics.supportsPush,
+        pushProbabilityKnown: semantics.pushProbabilityKnown,
+        pushProbability: semantics.pushProbability,
+      })),
+    },
     latestOddsTimestamp,
     latestOddsSourceTimestamp,
     latestVisibleMarketSnapshotTimestamp: latestOddsTimestamp,
@@ -1225,12 +1268,12 @@ export async function getCurrentBoard({
       remoteMutationsMade: 0,
     },
     bestValueReadiness: {
-      rankingContract: ['positive EV first', 'positive edge', 'confidence', 'reliability', 'market stability', 'data quality', 'data sufficiency'],
+      rankingContract: ['actionable positive EV first', 'actionable positive edge', 'confidence', 'reliability', 'market stability', 'data quality', 'data sufficiency'],
       candidates: [...candidates]
         .sort((left, right) =>
-          Number(right.expectedValue > 0) - Number(left.expectedValue > 0) ||
-          right.expectedValue - left.expectedValue ||
-          right.edge - left.edge ||
+          Number((right.marketAlignment.actionableExpectedValuePercent ?? Number.NaN) > 0) - Number((left.marketAlignment.actionableExpectedValuePercent ?? Number.NaN) > 0) ||
+          Number(right.marketAlignment.actionableExpectedValuePercent ?? Number.NEGATIVE_INFINITY) - Number(left.marketAlignment.actionableExpectedValuePercent ?? Number.NEGATIVE_INFINITY) ||
+          Number(right.marketAlignment.actionableEdgePercentagePoints ?? Number.NEGATIVE_INFINITY) - Number(left.marketAlignment.actionableEdgePercentagePoints ?? Number.NEGATIVE_INFINITY) ||
           right.confidence - left.confidence ||
           right.reliabilityScore - left.reliabilityScore ||
           (right.featureQuality ?? 0) - (left.featureQuality ?? 0) ||
@@ -1242,6 +1285,10 @@ export async function getCurrentBoard({
           market: candidate.market,
           edge: candidate.edge,
           expectedValue: candidate.expectedValue,
+          actionableEdge: candidate.marketAlignment.actionableEdgePercentagePoints,
+          actionableExpectedValue: candidate.marketAlignment.actionableExpectedValuePercent,
+          actionableUnavailableReason: candidate.marketAlignment.actionableUnavailableReason,
+          marketSemantics: candidate.marketSemantics,
           confidence: candidate.confidence,
           reliabilityScore: candidate.reliabilityScore,
           dataQuality: candidate.featureQuality,

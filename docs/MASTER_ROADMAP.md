@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Push-Aware Outcome Distribution & Market Semantics V1
+
+Status: Locally implemented and build-verified; production deployment verification pending.
+
+Evidence: `src/services/market-semantics.service.ts`, `src/services/current-board.service.ts`, `src/services/market-alignment.service.ts`, `src/services/market-opportunity-suite.service.ts`, `src/services/best-value-scanner.service.ts`, `src/services/mlb-ai-picks-feed.service.ts`, `src/services/recommendation-explanation.service.ts`, `src/services/performance-scope-v2.service.ts`, `docs/PUSH_AWARE_OUTCOME_DISTRIBUTION_MARKET_SEMANTICS_V1.md` and local production build.
+
+Note: This pass preserves all underlying model probabilities and completed Phase 2A/replay boundaries while distinguishing binary markets from push-capable markets. Best Value requires actionable Win/Push/Loss EV for push-capable markets, Most Likely does not fabricate complements for whole-number lines, Current Board/API responses expose market semantics, AI Feed explains the semantics and Performance treats pushes as settled but excluded from accuracy/Brier scoring.
+
 ### Market Outcome Completeness & Performance Consistency V1
 
 Status: Locally implemented and build-verified; production deployment verification pending.

@@ -11,6 +11,7 @@ import {
   type MarketIntelligenceStatusLabel,
 } from '@/services/market-intelligence-category.service'
 import { buildMarketAlignment } from '@/services/market-alignment.service'
+import { classifyMarketSemantics } from '@/services/market-semantics.service'
 
 type BestBetsLabel = 'BEST BETS TODAY' | 'BEST BETS TODAY - NOT RECOMMENDED'
 type BestBetsMode = 'official_recommendations' | 'informational_not_recommended'
@@ -488,6 +489,7 @@ export function validateBestBetsTodayFixtures() {
     providerFetchedAt: '2026-07-17T18:00:00.000Z',
     oddsIngestedAt: '2026-07-17T18:00:00.000Z',
     oddsSnapshotCreatedAt: '2026-07-17T18:00:00.000Z',
+    marketSemantics: classifyMarketSemantics({ market: 'moneyline', line: null }),
     marketAlignment: buildMarketAlignment({
       eventId: 'event-1',
       predictionId: 'fixture-1',
@@ -572,6 +574,19 @@ export function validateBestBetsTodayFixtures() {
     games: [],
     markets: ['Moneyline'],
     candidates: [base],
+    marketSemantics: {
+      contract: 'market_semantics_v1',
+      markets: [{
+        market: 'moneyline',
+        examples: [null],
+        binary: true,
+        pushCapable: false,
+        outcomeCount: 2,
+        supportsPush: false,
+        pushProbabilityKnown: false,
+        pushProbability: null,
+      }],
+    },
     latestOddsTimestamp: base.oddsTimestamp,
     latestOddsSourceTimestamp: base.marketSourceTimestamp,
     latestVisibleMarketSnapshotTimestamp: base.marketFreshnessTimestamp,

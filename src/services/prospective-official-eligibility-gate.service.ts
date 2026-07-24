@@ -3,6 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getCurrentBoard, type CurrentBoardCandidate } from '@/services/current-board.service'
 import { buildMarketAlignment } from '@/services/market-alignment.service'
+import { classifyMarketSemantics } from '@/services/market-semantics.service'
 import {
   evaluateRecommendationEligibility,
   isOfficialRecommendationStatus,
@@ -312,6 +313,7 @@ function fixtureCandidate(overrides: Partial<CurrentBoardCandidate> = {}): Curre
     providerFetchedAt: now.toISOString(),
     oddsIngestedAt: now.toISOString(),
     oddsSnapshotCreatedAt: now.toISOString(),
+    marketSemantics: classifyMarketSemantics({ market: 'moneyline', line: null }),
     marketAlignment: buildMarketAlignment({
       eventId: 'fixture:event:excellent',
       predictionId: 'fixture:prediction:excellent',

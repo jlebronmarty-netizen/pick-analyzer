@@ -10,6 +10,7 @@ import {
   getBsnReadinessEngine,
 } from '@/services/bsn-model-maturity.service'
 import { validateMarketAlignmentFixtures } from '@/services/market-alignment.service'
+import { validateMarketSemanticsFixtures } from '@/services/market-semantics.service'
 import { validateRecommendationExplanationFixtures } from '@/services/recommendation-explanation.service'
 import { validateOfficialPickExperienceFixtures } from '@/services/official-pick-experience.service'
 import { validateMlbAiPicksFeedFixtures } from '@/services/mlb-ai-picks-feed.service'
@@ -66,6 +67,7 @@ export async function getBsnCoreCertification() {
   const predictionSdk = runSportPredictionSdkValidation()
   const sharedValidators = {
     predictionSdk,
+    marketSemantics: validateMarketSemanticsFixtures(),
     marketAlignment: validateMarketAlignmentFixtures(),
     recommendationExplanation: validateRecommendationExplanationFixtures(),
     officialPickExperience: validateOfficialPickExperienceFixtures(),
@@ -76,6 +78,7 @@ export async function getBsnCoreCertification() {
   const operationsBlockers = list(record(operations).blockers)
   const sharedValidationPass =
     pass(sharedValidators.predictionSdk.success) &&
+    pass(sharedValidators.marketSemantics.success) &&
     pass(sharedValidators.marketAlignment.success) &&
     pass(sharedValidators.recommendationExplanation.success) &&
     pass(sharedValidators.officialPickExperience.success) &&
@@ -100,6 +103,7 @@ export async function getBsnCoreCertification() {
         : 'One or more shared Sports Brain validators failed.',
       evidence: {
         predictionSdk: sharedValidators.predictionSdk.success,
+        marketSemantics: sharedValidators.marketSemantics.success,
         marketAlignment: sharedValidators.marketAlignment.success,
         recommendationExplanation: sharedValidators.recommendationExplanation.success,
         officialPickExperience: sharedValidators.officialPickExperience.success,

@@ -2,6 +2,7 @@ import 'server-only'
 
 import type { CurrentBoardCandidate } from '@/services/current-board.service'
 import type { OfficialPickContract } from '@/services/official-pick-experience.service'
+import { classifyMarketSemantics } from '@/services/market-semantics.service'
 
 export type MlbAiPicksFeedItemType =
   | 'OFFICIAL_PICK'
@@ -50,6 +51,8 @@ export type MlbAiPicksFeedItem = {
   marketFreshnessTimestamp: string | null
   marketFreshnessSource: CurrentBoardCandidate['marketFreshnessSource']
   marketAlignment: CurrentBoardCandidate['marketAlignment']
+  marketSemantics: CurrentBoardCandidate['marketSemantics']
+  outcomeCompleteness: CurrentBoardCandidate['outcomeCompleteness'] | null
   recommendationExplanation: NonNullable<CurrentBoardCandidate['recommendationExplanation']>
   officialPick: OfficialPickContract | null
   evidence: string[]
@@ -123,9 +126,13 @@ function baseItem(
   if (!explanation) return null
   const alignment = candidate.marketAlignment
   const mostLikely = itemType === 'MOST_LIKELY' ? candidate.outcomeCompleteness ?? null : null
+  const pushAwareText = candidate.marketSemantics.pushCapable
+    ? 'Push-capable market: Win/Push/Loss semantics apply, and EV is not actionable until push probability is known.'
+    : 'Binary market: selected-side and opposite-side probabilities sum to 100%.'
   const evidence = [
     explanation.headline,
     explanation.summary,
+    pushAwareText,
     firstText(explanation.primaryReasons ?? []),
     firstText(explanation.secondaryReasons ?? []),
   ].filter((value): value is string => Boolean(value))
@@ -133,6 +140,9 @@ function baseItem(
     firstText(explanation.riskWarnings ?? []),
     candidate.stale ? 'Market input is stale.' : null,
     candidate.anomalous ? 'Market price or line requires anomaly review.' : null,
+    candidate.marketAlignment.actionableUnavailableReason === 'UNKNOWN_PUSH_PROBABILITY'
+      ? 'Push probability is unknown, so Best Value EV is not ranked for this market.'
+      : null,
     ...candidate.missingInformation.slice(0, 3),
   ].filter((value): value is string => Boolean(value))
   return {
@@ -169,6 +179,8 @@ function baseItem(
     marketFreshnessTimestamp: candidate.marketFreshnessTimestamp,
     marketFreshnessSource: candidate.marketFreshnessSource,
     marketAlignment: alignment,
+    marketSemantics: candidate.marketSemantics,
+    outcomeCompleteness: candidate.outcomeCompleteness ?? null,
     recommendationExplanation: explanation,
     officialPick: candidate.officialPick ?? null,
     evidence: evidence.slice(0, 5),
@@ -189,9 +201,10 @@ function probabilityRank(candidates: CurrentBoardCandidate[]) {
 
 function valueRank(candidates: CurrentBoardCandidate[]) {
   return [...candidates].sort((left, right) =>
-    Number(right.expectedValue > 0 && right.edge > 0) - Number(left.expectedValue > 0 && left.edge > 0) ||
-    right.expectedValue - left.expectedValue ||
-    right.edge - left.edge ||
+    Number((right.marketAlignment.actionableExpectedValuePercent ?? Number.NaN) > 0 && (right.marketAlignment.actionableEdgePercentagePoints ?? Number.NaN) > 0) -
+      Number((left.marketAlignment.actionableExpectedValuePercent ?? Number.NaN) > 0 && (left.marketAlignment.actionableEdgePercentagePoints ?? Number.NaN) > 0) ||
+    Number(right.marketAlignment.actionableExpectedValuePercent ?? Number.NEGATIVE_INFINITY) - Number(left.marketAlignment.actionableExpectedValuePercent ?? Number.NEGATIVE_INFINITY) ||
+    Number(right.marketAlignment.actionableEdgePercentagePoints ?? Number.NEGATIVE_INFINITY) - Number(left.marketAlignment.actionableEdgePercentagePoints ?? Number.NEGATIVE_INFINITY) ||
     right.confidence - left.confidence
   )
 }
@@ -200,8 +213,11 @@ function isPositiveFreshAligned(candidate: CurrentBoardCandidate) {
   return (
     candidate.marketAlignment.alignmentStatus === 'ALIGNED' &&
     candidate.marketAlignment.freshnessStatus !== 'STALE' &&
-    Number(candidate.marketAlignment.edgePercentagePoints ?? candidate.edge) > 0 &&
-    Number(candidate.marketAlignment.expectedValuePercent ?? candidate.expectedValue) > 0
+    candidate.marketAlignment.freshnessStatus !== 'EXPIRED' &&
+    Number.isFinite(candidate.marketAlignment.actionableEdgePercentagePoints) &&
+    Number.isFinite(candidate.marketAlignment.actionableExpectedValuePercent) &&
+    Number(candidate.marketAlignment.actionableEdgePercentagePoints) > 0 &&
+    Number(candidate.marketAlignment.actionableExpectedValuePercent) > 0
   )
 }
 
@@ -386,6 +402,7 @@ export function validateMlbAiPicksFeedFixtures() {
       actionableEdgePercentagePoints: 5.62,
       actionableExpectedValuePercent: 10.73,
       actionableUnavailableReason: null,
+      marketSemantics: classifyMarketSemantics({ market: 'moneyline', line: null }),
       marketInputTimestamp: '2026-07-20T18:00:00.000Z',
       providerSourceTimestamp: '2026-07-20T17:50:00.000Z',
       oddsIngestedAt: '2026-07-20T18:00:00.000Z',
@@ -399,6 +416,7 @@ export function validateMlbAiPicksFeedFixtures() {
       calculationVersion: 'market_alignment_v1',
       reasonCodes: [],
     },
+    marketSemantics: classifyMarketSemantics({ market: 'moneyline', line: null }),
     recommendationExplanation: explanation,
     officialPick: null,
     maxAllowedAgeMinutes: 1440,

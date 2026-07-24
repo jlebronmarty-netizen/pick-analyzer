@@ -5,6 +5,7 @@ import { getCurrentBoardCached, mapLegacyBoardMode, type CurrentBoardCandidate }
 import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.service'
+import { classifyMarketSemantics } from '@/services/market-semantics.service'
 
 type PredictionRow = {
   id: string
@@ -391,6 +392,18 @@ function complementSelection(candidate: CurrentBoardCandidate) {
 }
 
 function mostLikelyOutcome(candidate: CurrentBoardCandidate) {
+  const completeness = candidate.outcomeCompleteness
+  if (completeness?.marketSemantics.pushCapable) {
+    return {
+      selectedProbability: round(completeness.storedSelectionProbability),
+      complementProbability: null,
+      displayedProbability: round(completeness.storedSelectionProbability),
+      displayedSelection: candidate.selection,
+      displayedLine: candidate.line,
+      complementDerived: false,
+      probabilitySemantic: 'Push-capable market. Stored selected-side probability is shown because push probability is unknown and the opposite side cannot be reconstructed as 100 minus selected probability.',
+    }
+  }
   const selectedProbability = Math.max(0, Math.min(100, Number(candidate.rawProbability ?? 0)))
   const complementProbability = Math.max(0, Math.min(100, 100 - selectedProbability))
   const complementIsMoreLikely = complementProbability > selectedProbability
@@ -461,6 +474,8 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     recommendationStatus: candidate.recommendationPolicyStatus,
     semanticLabel: candidate.semanticLabel,
     probabilityOrigin: candidate.probabilityOrigin,
+    marketSemantics: candidate.marketSemantics,
+    outcomeCompleteness: candidate.outcomeCompleteness ?? null,
     officialEligibility:
       official
         ? 'ELIGIBLE_FOR_OFFICIAL_REVIEW'
@@ -509,7 +524,9 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
       missingData: candidate.missingInformation,
       recommendationBlockers: candidate.blockers,
       probabilityVsValue:
-        'Most Likely ranks binary outcome probability. Betting value still requires aligned odds, positive edge and positive EV.',
+        candidate.marketSemantics.pushCapable
+          ? 'Most Likely shows the stored selected-side probability for this push-capable market because push probability is unknown. Betting value still requires Win/Push/Loss EV.'
+          : 'Most Likely ranks binary outcome probability. Betting value still requires aligned odds, positive edge and positive EV.',
     },
     oddsTimestamp: candidate.oddsTimestamp,
     oddsAgeMinutes: candidate.oddsAgeMinutes,
@@ -538,10 +555,11 @@ type CanonicalProbabilityCard = ReturnType<typeof currentBoardCandidateToMostLik
 
 function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCard {
   const sourceProbability = Math.max(0, Math.min(100, round(Number(outcome.modelProbability ?? outcome.probability ?? 0))))
-  const complementProbability = round(100 - sourceProbability)
-  const complementDerived = complementProbability > sourceProbability
   const confidence = round(Number(outcome.confidence ?? 0))
   const market = String(outcome.market ?? 'unknown')
+  const marketSemantics = classifyMarketSemantics({ market, line: outcome.line })
+  const complementProbability = marketSemantics.pushCapable ? null : round(100 - sourceProbability)
+  const complementDerived = complementProbability !== null && complementProbability > sourceProbability
   const marketLabelValue = String(outcome.marketLabel ?? marketLabel(market))
   const matchup = String(outcome.matchup ?? 'Matchup pending')
   const sourceSelection = String(outcome.selection ?? 'Selection pending')
@@ -569,7 +587,9 @@ function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCar
     selectedSideProbability: sourceProbability,
     complementProbability,
     complementDerived,
-    probabilitySemantic: complementDerived
+    probabilitySemantic: marketSemantics.pushCapable
+      ? 'Push-capable model-only market. Stored selected-side probability is shown because push probability is unknown.'
+      : complementDerived
       ? 'Derived complement probability from the stored binary selected-side model-only probability. Betting value still requires current market odds.'
       : 'Stored model-only pregame probability. Betting value still requires current market odds.',
     sportsbookProbability: Number(outcome.impliedProbability ?? outcome.sportsbookProbability ?? 0) || 0,
@@ -591,6 +611,7 @@ function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCar
     recommendationStatus: 'MODEL_ONLY',
     semanticLabel: 'Model Only',
     probabilityOrigin: 'model_only',
+    marketSemantics,
     officialEligibility: 'NOT OFFICIALLY ELIGIBLE',
     marketIntelligenceCategory: 'model_only',
     canonicalMarketState: 'model_only',
@@ -623,7 +644,9 @@ function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCar
       secondaryContext: ['Current Board value gates remain unchanged.'],
       missingData: outcome.marketAvailable ? [] : ['Current sportsbook odds'],
       recommendationBlockers: outcome.blockers ?? ['NO_OFFICIAL_PICK'],
-      probabilityVsValue: 'Most Likely can show probability before value is actionable.',
+      probabilityVsValue: marketSemantics.pushCapable
+        ? 'Most Likely can show selected-side probability for push-capable model-only markets, but value is not actionable without push probability and current odds.'
+        : 'Most Likely can show probability before value is actionable.',
     },
     oddsTimestamp: null,
     oddsAgeMinutes: Number.POSITIVE_INFINITY,
@@ -641,6 +664,7 @@ function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCar
     marketAlignment: {
       alignmentStatus: 'MODEL_ONLY',
       freshnessStatus: outcome.marketAvailable ? 'AVAILABLE' : 'NO_MARKET',
+      marketSemantics,
       marketAgeMinutes: null,
       edgePercentagePoints: null,
       expectedValuePercent: null,
@@ -655,6 +679,18 @@ function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCar
     selectedOddsSnapshotId: null,
     selectedOddsSource: 'model_only',
     anomalies: [],
+    outcomeCompleteness: {
+      marketSemantics,
+      storedSelectionProbability: sourceProbability,
+      oppositeSelection: complementForOutcome({ market, selection: sourceSelection, matchup }),
+      oppositeSelectionProbability: complementProbability,
+      pushProbability: marketSemantics.pushProbability,
+      totalProbability: marketSemantics.pushCapable ? null : 100,
+      highestProbabilitySelection: selection,
+      highestProbabilityLine: displayedLine,
+      highestProbability: probability,
+      probabilityBasis: marketSemantics.pushCapable ? 'push_capable_selected_side_only_unknown_push' : 'stored_binary_selection_with_complement',
+    },
     productionEligible: false,
     independentTool: true,
   } as unknown) as CanonicalProbabilityCard

@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { classifyMarketSemantics, type MarketSemantics } from '@/services/market-semantics.service'
+
 export type MarketAlignmentStatus =
   | 'ALIGNED'
   | 'MISSING_PRICE'
@@ -37,6 +39,7 @@ export type MarketAlignmentContract = {
   actionableEdgePercentagePoints: number | null
   actionableExpectedValuePercent: number | null
   actionableUnavailableReason: string | null
+  marketSemantics: MarketSemantics
   marketInputTimestamp: string | null
   providerSourceTimestamp: string | null
   oddsIngestedAt: string | null
@@ -146,6 +149,22 @@ export function expectedValuePercentFromAmerican(modelProbability: number | null
   return (probability / 100) * decimalOdds * 100 - 100
 }
 
+function expectedValuePercentWithPush({
+  modelProbability,
+  pushProbability,
+  americanOdds,
+}: {
+  modelProbability: number | null
+  pushProbability: number | null
+  americanOdds: number | null
+}) {
+  const probability = finite(modelProbability)
+  const push = finite(pushProbability)
+  const decimalOdds = americanToDecimalOdds(americanOdds)
+  if (probability === null || probability <= 0 || push === null || push < 0 || decimalOdds === null) return null
+  return (probability / 100) * decimalOdds * 100 + push - 100
+}
+
 export function buildMarketAlignment(input: MarketAlignmentInput): MarketAlignmentContract {
   const marketType = String(input.marketType ?? 'unknown')
   const period = String(input.period ?? 'full_game')
@@ -157,6 +176,7 @@ export function buildMarketAlignment(input: MarketAlignmentInput): MarketAlignme
   const americanOdds = finite(input.americanOdds)
   const modelProbability = finite(input.modelProbability)
   const calibratedProbability = finite(input.calibratedProbability)
+  const marketSemantics = classifyMarketSemantics({ market: marketType, line })
   const marketAge = finite(input.marketAgeMinutes) ?? ageMinutes(input.marketInputTimestamp)
   const sourceAge = finite(input.providerSourceAgeMinutes) ?? ageMinutes(input.providerSourceTimestamp)
   const ingestionAge = finite(input.snapshotIngestionAgeMinutes) ?? ageMinutes(input.oddsIngestedAt)
@@ -177,9 +197,15 @@ export function buildMarketAlignment(input: MarketAlignmentInput): MarketAlignme
   const decimalOdds = aligned ? americanToDecimalOdds(americanOdds) : null
   const marketImpliedProbability = aligned ? marketImpliedProbabilityFromAmerican(americanOdds) : null
   const edge = aligned && modelProbability !== null && marketImpliedProbability !== null ? modelProbability - marketImpliedProbability : null
-  const ev = aligned ? expectedValuePercentFromAmerican(modelProbability, americanOdds) : null
+  const ev = aligned
+    ? marketSemantics.pushCapable
+      ? expectedValuePercentWithPush({ modelProbability, pushProbability: marketSemantics.pushProbability, americanOdds })
+      : expectedValuePercentFromAmerican(modelProbability, americanOdds)
+    : null
   const actionableUnavailableReason = !aligned
     ? alignmentStatus
+    : marketSemantics.pushCapable && !marketSemantics.pushProbabilityKnown
+      ? 'UNKNOWN_PUSH_PROBABILITY'
     : freshness === 'STALE' || freshness === 'EXPIRED'
       ? 'STALE_MARKET_INPUT'
       : freshness === 'UNKNOWN'
@@ -213,6 +239,7 @@ export function buildMarketAlignment(input: MarketAlignmentInput): MarketAlignme
     actionableEdgePercentagePoints: actionableEdge === null ? null : round(actionableEdge, 2),
     actionableExpectedValuePercent: actionableEv === null ? null : round(actionableEv, 2),
     actionableUnavailableReason,
+    marketSemantics,
     marketInputTimestamp: input.marketInputTimestamp ?? null,
     providerSourceTimestamp: input.providerSourceTimestamp ?? null,
     oddsIngestedAt: input.oddsIngestedAt ?? null,
@@ -266,6 +293,8 @@ export function validateMarketAlignmentFixtures() {
     ['moneyline alignment', buildMarketAlignment(alignedBase).alignmentStatus === 'ALIGNED'],
     ['run-line alignment', buildMarketAlignment({ ...alignedBase, marketType: 'run_line', line: 1.5, oddsLine: 1.5 }).alignmentStatus === 'ALIGNED'],
     ['total alignment', buildMarketAlignment({ ...alignedBase, marketType: 'total', selection: 'Under', normalizedSelection: 'under', oddsOutcome: 'under', line: 8.5, oddsLine: 8.5 }).alignmentStatus === 'ALIGNED'],
+    ['push-capable total with unknown push blocks actionable EV', buildMarketAlignment({ ...alignedBase, marketType: 'total', selection: 'Under', normalizedSelection: 'under', oddsOutcome: 'under', line: 8, oddsLine: 8 }).actionableUnavailableReason === 'UNKNOWN_PUSH_PROBABILITY'],
+    ['push-capable run line classified', buildMarketAlignment({ ...alignedBase, marketType: 'run_line', line: -1, oddsLine: -1 }).marketSemantics.pushCapable === true],
     ['line mismatch', buildMarketAlignment({ ...alignedBase, marketType: 'run_line', line: 1.5, oddsLine: -1.5 }).alignmentStatus === 'LINE_MISMATCH'],
     ['selection mismatch', buildMarketAlignment({ ...alignedBase, oddsOutcome: 'home' }).alignmentStatus === 'SELECTION_MISMATCH'],
     ['missing probability', buildMarketAlignment({ ...alignedBase, modelProbability: null }).alignmentStatus === 'MISSING_PROBABILITY'],
