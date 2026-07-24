@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 type Opportunity = {
   predictionId: string
+  eventId?: string
   matchup: string
   marketLabel: string
   selection: string
@@ -172,6 +173,9 @@ export default function BestValueTool() {
                     </span>
                     <h2 className="mt-3 break-words text-2xl font-black">{selectionLabel(item)}</h2>
                     <p className="mt-1 break-words text-sm text-slate-400">{item.marketLabel} | {item.matchup}</p>
+                    {item.eventId ? (
+                      <a href={`/game-intelligence/${encodeURIComponent(item.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Center</a>
+                    ) : null}
                     <p className="mt-3 text-sm font-bold text-slate-300">{item.officialDisplay}</p>
                     {item.informationalWarning ? (
                       <p className="mt-3 whitespace-pre-line rounded-xl border border-amber-500/30 bg-amber-950/20 p-3 text-xs font-black text-amber-100">

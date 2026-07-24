@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Product Navigation & Information Architecture V1
+
+Status: Implemented and build-verified; production deployment verification pending.
+
+Evidence: `src/components/dashboard/DashboardShell.tsx`, `src/components/dashboard/UserTodayPanel.tsx`, Game Intelligence list/detail clients, Player Projection list/detail clients, Most Likely, Best Value and Betting Workbench UI components.
+
+Note: This phase preserves all existing routes while grouping primary product navigation by Today, Games, Players, Markets, Performance, AI Operations, Advanced and Administration. Visible game surfaces now link to Game Center, player projection rows link to Player Detail, expected-lineup names link to filtered Player Projections, and breadcrumbs clarify Dashboard -> Games -> Game Intelligence and Dashboard -> Players -> Player Detail context. No prediction engine, provider, settlement, replay, model weight or Official Pick policy behavior changed.
+
 ### Canonical Outcome, Odds Alignment & Performance State Reconciliation V1
 
 Status: Implemented and build-verified; production deployment verification pending.

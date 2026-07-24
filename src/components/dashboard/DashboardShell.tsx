@@ -23,25 +23,59 @@ const navItems = [
   { id: 'sports-brain', label: 'Sports Brain', icon: '✦' },
 ]
 
-const compactNavItems = [
-  { id: 'today', label: 'User Mode', icon: '01' },
-  { id: 'performance', label: 'Performance', icon: '02', href: '/performance' },
-  { id: 'ai-operations', label: 'AI Operations', icon: '03', href: '/ai-operations' },
-  { id: 'overview', label: 'Advanced Overview', icon: '04' },
-  { id: 'model-lab', label: 'Model', icon: '05' },
-  { id: 'data-operations', label: 'Data', icon: '06' },
-  { id: 'advanced', label: 'Administration', icon: '07' },
-]
-
-const toolNavItems = [
-  { href: '/projections', label: 'Projections', icon: 'PR' },
-  { href: '/player-projections', label: 'Player Projections', icon: 'PP' },
-  { href: '/game-intelligence', label: 'Game Intelligence', icon: 'GI' },
-  { href: '/betting-workbench', label: 'Betting Workbench', icon: 'BW' },
-  { href: '/most-likely', label: 'Most Likely', icon: 'ML' },
-  { href: '/best-value', label: 'Best Value', icon: 'BV' },
-  { href: '/arbitrage', label: 'Arbitrage', icon: 'AR' },
-  { href: '/ai-bet-finder', label: 'AI Bet Finder', icon: 'AI' },
+const productNavGroups = [
+  {
+    label: 'Today',
+    items: [
+      { id: 'today', label: 'Daily Briefing', icon: '01' },
+      { href: '/dashboard', label: 'Dashboard', icon: 'DB' },
+    ],
+  },
+  {
+    label: 'Games',
+    items: [
+      { href: '/game-intelligence', label: 'Game Intelligence', icon: 'GI' },
+      { href: '/projections', label: 'Projection Board', icon: 'PB' },
+    ],
+  },
+  {
+    label: 'Players',
+    items: [
+      { href: '/player-projections', label: 'Player Projections', icon: 'PP' },
+    ],
+  },
+  {
+    label: 'Markets',
+    items: [
+      { href: '/most-likely', label: 'Most Likely', icon: 'ML' },
+      { href: '/best-value', label: 'Best Value', icon: 'BV' },
+      { href: '/betting-workbench', label: 'Betting Workbench', icon: 'BW' },
+      { href: '/ai-bet-finder', label: 'AI Bet Finder', icon: 'AI' },
+      { href: '/dashboard#advanced-details', label: 'Market Intelligence', icon: 'MI' },
+    ],
+  },
+  {
+    label: 'Performance',
+    items: [
+      { href: '/performance', label: 'Performance', icon: 'PF' },
+    ],
+  },
+  {
+    label: 'AI Operations',
+    items: [
+      { href: '/ai-operations', label: 'AI Operations', icon: 'AO' },
+      { href: '/mlb-operations', label: 'MLB Operations', icon: 'MO' },
+    ],
+  },
+  {
+    label: 'Advanced',
+    items: [
+      { id: 'overview', label: 'Advanced Overview', icon: 'AV' },
+      { id: 'model-lab', label: 'Model Center', icon: 'MC' },
+      { id: 'data-operations', label: 'Data Operations', icon: 'DO' },
+      { id: 'advanced', label: 'Administration', icon: 'AD' },
+    ],
+  },
 ]
 
 export default function DashboardShell({
@@ -69,36 +103,37 @@ export default function DashboardShell({
             </div>
 
             <nav className="mt-8 space-y-2 pb-24">
-              {compactNavItems.map((item) => (
-                <a
-                  key={item.id}
-                  href={'href' in item ? item.href : `#${item.id}`}
-                  className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
-                >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
-                    {item.icon}
-                  </span>
+              {productNavGroups.map((group) => (
+                <div key={group.label} className="pt-2">
+                  <p className="px-4 text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
+                    {group.label}
+                  </p>
+                  <div className="mt-2 space-y-1">
+                    {group.items.map((item) => (
+                      <a
+                        key={'href' in item ? item.href : item.id}
+                        href={'href' in item ? item.href : `#${item.id}`}
+                        className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
+                      >
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
+                          {item.icon}
+                        </span>
 
-                  {item.label}
-                </a>
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                </div>
               ))}
               <div className="pt-4">
                 <p className="px-4 text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
-                  Extra Utilities
+                  Administration
                 </p>
                 <div className="mt-2 space-y-2">
-                  {toolNavItems.map((item) => (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
-                    >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-amber-300 group-hover:bg-amber-500/15">
-                        {item.icon}
-                      </span>
-                      {item.label}
-                    </a>
-                  ))}
+                  <a href="/arbitrage" className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-amber-300 group-hover:bg-amber-500/15">AR</span>
+                    Arbitrage Diagnostics
+                  </a>
                 </div>
               </div>
             </nav>

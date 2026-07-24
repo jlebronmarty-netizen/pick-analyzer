@@ -62,7 +62,13 @@ export default function MlbPlayerProjectionDetailClient({ projectionId }: { proj
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-8">
       <div className="mx-auto max-w-6xl">
-        <a href="/player-projections" className="text-sm font-bold text-emerald-200 hover:text-emerald-100">Back to player projections</a>
+        <nav className="flex flex-wrap gap-2 text-sm font-bold text-slate-400" aria-label="Breadcrumb">
+          <a href="/dashboard" className="text-emerald-200 hover:text-emerald-100">Dashboard</a>
+          <span>/</span>
+          <a href="/player-projections" className="text-emerald-200 hover:text-emerald-100">Players</a>
+          <span>/</span>
+          <span className="text-slate-300">Player Detail</span>
+        </nav>
         <div className="mt-4 border-b border-slate-800 pb-5">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-300">Player Projection Detail</p>
           <h1 className="mt-2 text-3xl font-black md:text-5xl">{projection.playerName}</h1>

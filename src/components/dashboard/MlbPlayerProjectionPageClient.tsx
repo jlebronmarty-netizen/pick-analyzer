@@ -85,6 +85,8 @@ export default function MlbPlayerProjectionPageClient() {
 
   useEffect(() => {
     let alive = true
+    const initialSearch = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('search') : null
+    if (initialSearch) setQuery(initialSearch)
     fetch('/api/mlb/player-projections?limit=200', { cache: 'no-store' })
       .then((response) => {
         if (!response.ok) throw new Error(`Player projections failed (${response.status})`)
@@ -110,6 +112,11 @@ export default function MlbPlayerProjectionPageClient() {
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="border-b border-slate-800 pb-6">
+          <nav className="mb-4 flex flex-wrap gap-2 text-sm font-bold text-slate-400" aria-label="Breadcrumb">
+            <a href="/dashboard" className="text-emerald-200 hover:text-emerald-100">Dashboard</a>
+            <span>/</span>
+            <span className="text-slate-300">Players</span>
+          </nav>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-300">Informational Projection Layer</p>
           <h1 className="mt-2 text-3xl font-black md:text-5xl">MLB Player Projections</h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">Expected player outcomes, ranges and coarse probability distributions. No sportsbook lines, EV, Best Value, Kelly or Official Picks.</p>

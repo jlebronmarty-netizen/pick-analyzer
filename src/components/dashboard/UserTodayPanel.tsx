@@ -1409,6 +1409,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
   const categoryBadgeTone = aiCategory === 'Waiting for Odds' || aiCategory === 'Data Aging' ? 'yellow' : aiCategory === 'Tracking' || aiCategory === 'Operational' || aiCategory === 'Insufficient Data' ? 'blue' : aiCategory === 'Betting Locked' ? 'red' : categoryCardTone
   const isFinal = status === 'Final'
   const marketUnavailableText = isFinal ? fieldValue(game.settlementState?.label, 'Awaiting Settlement') : 'Waiting for odds'
+  const gameHref = game.eventId || game.id ? `/game-intelligence/${encodeURIComponent(String(game.eventId ?? game.id))}` : '/game-intelligence'
 
   return (
     <details className={`group rounded-lg border border-slate-800 bg-slate-950/70 p-4 ${cardMotion}`}>
@@ -1425,7 +1426,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
             <p className="text-sm font-black text-white">{hasMarket ? displayMarket.priceText : marketUnavailableText}</p>
             {displayMarket.sportsbook ? <p className="mt-0.5 text-xs font-bold text-slate-500">{displayMarket.sportsbook}</p> : null}
           </div>
-          <span className="text-sm font-bold text-sky-300">Details</span>
+          <a href={gameHref} className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-center text-sm font-bold text-sky-200 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300" onClick={(event) => event.stopPropagation()}>Game Center</a>
         </div>
       </summary>
       <div className="mt-5 grid gap-4 border-t border-slate-800 pt-5 md:grid-cols-2">
@@ -1466,6 +1467,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
               {fieldValue(game.statusSource)} · {fieldValue(game.normalizedUtc ?? game.scheduledTime, 'Time pending')}
             </p>
           )}
+          <a href={gameHref} className="mt-4 inline-flex rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-black text-emerald-100 outline-none hover:bg-emerald-500/20 focus-visible:ring-2 focus-visible:ring-emerald-300">Open Game Intelligence</a>
         </div>
       </div>
     </details>

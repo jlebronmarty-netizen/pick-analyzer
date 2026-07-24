@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 type WorkbenchBet = {
   id: string
+  eventId?: string
   source: string
   matchup: string
   market: string
@@ -139,6 +140,7 @@ function mapBoardCandidate(candidate: Record<string, unknown>): WorkbenchBet {
   const statusLabel = stringValue(candidate.opportunityCategory ?? candidate.statusLabel, official ? 'Official' : 'Pass')
   return {
     id: stringValue(candidate.id ?? candidate.predictionId, `${selection}-${market}`),
+    eventId: typeof candidate.eventId === 'string' ? candidate.eventId : undefined,
     source: stringValue(candidate.boardLabel ?? candidate.source, 'Current Board'),
     matchup: stringValue(candidate.matchup ?? candidate.game, 'Current slate'),
     market,
@@ -188,6 +190,7 @@ function mapTopPick(pick: Record<string, unknown>): WorkbenchBet {
   const status = stringValue(pick.recommendation_status ?? pick.recommendationStatus, 'OFFICIAL')
   return {
     id: stringValue(pick.id, `${selection}-${market}-top`),
+    eventId: typeof pick.event_id === 'string' ? pick.event_id : typeof pick.eventId === 'string' ? pick.eventId : undefined,
     source: 'Top Picks',
     matchup: `${stringValue(pick.away_team ?? pick.awayTeam, '')} at ${stringValue(pick.home_team ?? pick.homeTeam, '')}`.trim(),
     market,
@@ -527,6 +530,9 @@ function BetHeader({ bet }: { bet: WorkbenchBet }) {
       </div>
       <h2 className="mt-3 break-words text-2xl font-black text-white">{selectionName(bet)}</h2>
       <p className="mt-1 text-sm text-slate-400">{bet.matchup} | {time(bet.startTime)}</p>
+      {bet.eventId ? (
+        <a href={`/game-intelligence/${encodeURIComponent(bet.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Center</a>
+      ) : null}
     </div>
   )
 }

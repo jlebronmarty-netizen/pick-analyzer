@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Product Navigation & Information Architecture V1
+
+- Reorganized the dashboard shell navigation into clear product groups: Today, Games, Players, Markets, Performance, AI Operations, Advanced and Administration.
+- Added Game Center links from Dashboard game cards, Most Likely opportunities, Best Value rows and Betting Workbench cards while preserving all existing routes.
+- Added player navigation from Game Intelligence player projection rows to Player Detail and from expected-lineup names to filtered Player Projections.
+- Added breadcrumbs to Game Intelligence list/detail and Player Projections list/detail pages.
+- Advanced modules remain accessible from grouped navigation and dashboard anchors; developer-heavy diagnostics are not promoted as primary user actions.
+- `npm.cmd run build` passed locally with 347 static pages. No prediction probabilities, production weights, Official Pick policy, provider calls, remote mutations, Historical Replay or Historical Feature Backfill behavior changed.
+
 ## 2026-07-24 Canonical Outcome, Odds Alignment & Performance State Reconciliation V1
 
 - Added additive canonical outcome, canonical price, canonical EV and canonical reason fields to Current Board candidates for Moneyline, Run Line/spread and Totals.

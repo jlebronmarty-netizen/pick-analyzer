@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 
 type Opportunity = {
   id: string
+  eventId?: string
   matchup: string
   marketLabel: string
   selection: string
@@ -339,6 +340,9 @@ export default function MostLikelyTool() {
                   </span>
                     <h2 className="mt-3 break-words text-2xl font-black">{selectionLabel(item)}</h2>
                   <p className="mt-1 break-words text-sm text-slate-400">{item.marketLabel} | {item.matchup}</p>
+                  {item.eventId ? (
+                    <a href={`/game-intelligence/${encodeURIComponent(item.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Center</a>
+                  ) : null}
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-400 sm:grid-cols-3">
                     <span>{time(item.startTime)}</span>
                     <span>{item.eventStatus}</span>
@@ -454,6 +458,9 @@ function Spotlight({
         <>
           <h2 className="mt-3 break-words text-xl font-black">{selectionLabel(candidate)}</h2>
           <p className="mt-1 break-words text-sm text-slate-400">{candidate.matchup}</p>
+          {candidate.eventId ? (
+            <a href={`/game-intelligence/${encodeURIComponent(candidate.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Center</a>
+          ) : null}
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Metric label="Model Probability" value={pct(candidate.probability)} />
             <Metric label="Market Odds" value={odds(candidate.odds)} />

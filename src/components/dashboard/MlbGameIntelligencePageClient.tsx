@@ -82,6 +82,11 @@ export default function MlbGameIntelligencePageClient() {
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="border-b border-slate-800 pb-5">
+          <nav className="mb-4 flex flex-wrap gap-2 text-sm font-bold text-slate-400" aria-label="Breadcrumb">
+            <a href="/dashboard" className="text-emerald-200 hover:text-emerald-100">Dashboard</a>
+            <span>/</span>
+            <span className="text-slate-300">Games</span>
+          </nav>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-300">MLB Game Intelligence</p>
           <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <h1 className="text-3xl font-black md:text-5xl">Today&apos;s Games</h1>

@@ -50,7 +50,9 @@ function ProjectionTable({ rows }: { rows: Projection[] }) {
         <tbody className="divide-y divide-slate-800 text-slate-200">
           {rows.map((row) => (
             <tr key={row.projectionId}>
-              <td className="py-3 font-bold text-white">{row.playerName}</td>
+              <td className="py-3 font-bold text-white">
+                <a href={`/player-projections/${encodeURIComponent(row.projectionId)}`} className="text-white underline decoration-slate-600 underline-offset-4 hover:text-emerald-100 hover:decoration-emerald-300">{row.playerName}</a>
+              </td>
               <td>{row.projectionLabel}</td>
               <td>{row.expectedValue ?? 'N/A'}</td>
               <td>{row.lowRange ?? 'N/A'}-{row.highRange ?? 'N/A'}</td>
@@ -91,7 +93,13 @@ export default function MlbGameIntelligenceDetailClient({ eventId }: DetailProps
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-8">
       <div className="mx-auto max-w-7xl">
-        <a href="/game-intelligence" className="text-sm font-bold text-emerald-200 hover:text-emerald-100">Back to games</a>
+        <nav className="flex flex-wrap gap-2 text-sm font-bold text-slate-400" aria-label="Breadcrumb">
+          <a href="/dashboard" className="text-emerald-200 hover:text-emerald-100">Dashboard</a>
+          <span>/</span>
+          <a href="/game-intelligence" className="text-emerald-200 hover:text-emerald-100">Games</a>
+          <span>/</span>
+          <span className="text-slate-300">Game Intelligence</span>
+        </nav>
         <div className="mt-4 border-b border-slate-800 pb-5">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-300">Game Intelligence</p>
           <h1 className="mt-2 text-3xl font-black md:text-5xl">{data.gameExperience.overview.matchup}</h1>
@@ -122,7 +130,7 @@ export default function MlbGameIntelligenceDetailClient({ eventId }: DetailProps
                   <div key={side}>
                     <h2 className="text-lg font-black capitalize">{side}</h2>
                     <div className="mt-3 space-y-2">
-                      {lineup.map((player) => <p key={`${side}-${player.playerName}-${player.battingOrder}`} className="rounded-lg bg-slate-950 p-3 text-sm text-slate-300">{player.battingOrder ?? '-'} - <span className="font-bold text-white">{player.playerName}</span> - {player.position ?? 'POS'} - {player.status} - {player.confidence}%</p>)}
+                      {lineup.map((player) => <p key={`${side}-${player.playerName}-${player.battingOrder}`} className="rounded-lg bg-slate-950 p-3 text-sm text-slate-300">{player.battingOrder ?? '-'} - <a href={`/player-projections?search=${encodeURIComponent(player.playerName)}`} className="font-bold text-white underline decoration-slate-600 underline-offset-4 hover:text-emerald-100 hover:decoration-emerald-300">{player.playerName}</a> - {player.position ?? 'POS'} - {player.status} - {player.confidence}%</p>)}
                     </div>
                   </div>
                 ))}
