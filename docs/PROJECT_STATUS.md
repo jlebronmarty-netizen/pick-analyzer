@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Existing Prediction Cutoff Classification V1
+
+- Persisted cutoff classification metadata only for existing production prediction rows that were already identified by the shared cutoff diagnostics. The mutation is limited to `prediction_history.settlement_details.cutoff_enforcement_v1` with `mutationScope=classification_metadata_only`.
+- Dry run audited 1,342 prediction rows: 638 `PREGAME` rows, 331 `POST_START`, 370 `POST_FINAL` and 3 `INVALID_CUTOFF`. Pending metadata classifications before apply: 704.
+- Approved metadata-only execution updated 704 existing rows in 8 batches, checkpointed all 8 batches in `historical_import_checkpoints`, and recorded the operation under `sports_sync_jobs` job `a65bb66b-fcda-4cc4-8407-295410f34771`.
+- Idempotency validation reran the same classifier and produced 0 updated rows, 704 skipped rows, 0 pending classifications and 704 already-classified rows. Resume safety is backed by the persisted batch checkpoints and the classifier's deterministic metadata comparison.
+- Performance, settlement and learning read models remained unchanged by the classification metadata: production settled 215, wins 96, losses 114, pushes 5, accuracy 45.71%, Brier 0.2443, settlement coverage 100%, learning queue 215 total / 183 accepted / 32 rejected / 0 trained.
+- Provider calls remained 0. Prediction timestamps, event timestamps, probabilities, confidence, outcomes, feature snapshots, settlement rows, Learning Brain weights, recommendation policy, Historical Replay and Historical Feature Backfill Phase 2A were not modified.
+
 ## 2026-07-24 Prediction Cutoff Enforcement & Leakage Recovery V1
 
 - Added shared cutoff enforcement in `prediction-cutoff-enforcement.service.ts`. The classifier records `PREGAME`, `POST_START`, `POST_FINAL` and `INVALID_CUTOFF` using persisted prediction timestamps, cutoff timestamps, canonical event start and final-observed timestamps when available.
@@ -9,7 +18,7 @@ Last updated: 2026-07-24 00:00:00Z
 - Shared `savePredictionHistory` now rejects production-eligible rows whose prediction timestamp is not before cutoff. The MLB direct prospective-preview upsert path now rejects post-cutoff candidates before snapshot/prediction persistence and reports `rejectedByCutoff`.
 - Settlement, Learning, Performance and Recommendation Pipeline Trace now use the same cutoff classifier. Post-start, post-final and invalid-cutoff rows remain diagnostic-only and are excluded from production settlement, learning and product metrics.
 - Dashboard Today and AI Picks Feed now distinguish generated rows from valid pregame rows and excluded-after-cutoff rows.
-- Dry-run classification of existing `prediction_history` rows audited 1,342 rows: 638 pregame eligible, 331 `POST_START`, 3 `INVALID_CUTOFF` and 370 `POST_FINAL`. A protected review rejected bulk mutation of 704 existing rows, so persisted historical reclassification remains approval-required. Read models classify them without rewriting history.
+- Dry-run classification of existing `prediction_history` rows audited 1,342 rows: 638 pregame eligible, 331 `POST_START`, 3 `INVALID_CUTOFF` and 370 `POST_FINAL`. The later Existing Prediction Cutoff Classification V1 phase persisted only this diagnostic classification metadata for the 704 excluded rows without changing prediction content, settlement, learning or policy fields.
 
 ## 2026-07-24 Daily Prediction Continuity & Learning Closure V1
 

@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-24 - Persist Existing Cutoff Classification Metadata Only
+
+Context: Existing production prediction rows had already been classified by diagnostics as pregame-safe, post-start, post-final or invalid-cutoff. Product read models excluded contaminated rows, but the classification itself was not persisted because the earlier bulk update attempted broader lifecycle mutations and was rejected by protected review.
+
+Decision: Reuse the existing cutoff classifier and persist only `settlement_details.cutoff_enforcement_v1` metadata on already-diagnosed excluded rows. Keep prediction content, timestamps, probabilities, confidence, outcomes, settlement, learning weights, feature snapshots, recommendation policy, Current Board, Historical Replay and Phase 2A backfill untouched. Execute in 100-row batches with job/checkpoint evidence and deterministic idempotency comparison.
+
+Consequences: The database now carries durable diagnostic classification for 704 existing excluded rows: 331 `POST_START`, 370 `POST_FINAL` and 3 `INVALID_CUTOFF`. A repeat execution updates 0 rows and skips all 704 already-classified rows. Product metrics and learning evidence remain numerically stable while AI Operations and Performance diagnostics can read persisted cutoff state.
+
+Affected modules: Prediction cutoff enforcement service, prediction history diagnostic metadata, operations job/checkpoint metadata and project documentation.
+
 ## 2026-07-24 - Enforce Prediction Cutoff Before Production Use
 
 Context: Daily continuity diagnostics exposed prediction rows generated after event start or after final-observed timestamps. The rows came from existing production history and were not modified in the prior phase.

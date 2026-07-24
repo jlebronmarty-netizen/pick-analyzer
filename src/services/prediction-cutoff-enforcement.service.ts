@@ -117,6 +117,34 @@ export function withCutoffMetadata<T extends CutoffPredictionLike>(row: T, event
   }
 }
 
+function metadataFor(classification: ReturnType<typeof classifyPredictionCutoff>, timestamp: string) {
+  return {
+    ...classification,
+    classificationVersion: CUTOFF_ENFORCEMENT_VERSION,
+    classificationTimestamp: timestamp,
+    source: 'existing_prediction_cutoff_classification_v1',
+    mutationScope: 'classification_metadata_only',
+  }
+}
+
+function existingClassification(row: CutoffPredictionLike) {
+  return asObject(asObject(row.settlement_details).cutoff_enforcement_v1)
+}
+
+function classificationMatches(existing: Record<string, unknown>, next: Record<string, unknown>) {
+  return (
+    existing.version === next.version &&
+    existing.state === next.state &&
+    existing.reason === next.reason &&
+    existing.predictionTimestamp === next.predictionTimestamp &&
+    existing.persistedTimestamp === next.persistedTimestamp &&
+    existing.canonicalEventStart === next.canonicalEventStart &&
+    existing.finalObservedAt === next.finalObservedAt &&
+    existing.cutoffTimestamp === next.cutoffTimestamp &&
+    existing.eventIdentifier === next.eventIdentifier
+  )
+}
+
 type StoredPredictionRow = CutoffPredictionLike & {
   id: string
   production_eligible?: boolean | null
@@ -125,7 +153,18 @@ type StoredPredictionRow = CutoffPredictionLike & {
   validation_status?: string | null
 }
 
-export async function reconcilePredictionCutoffRows({ apply = false, sportKey }: { apply?: boolean; sportKey?: string | null } = {}) {
+export async function reconcilePredictionCutoffRows({
+  apply = false,
+  sportKey,
+  batchSize = 100,
+  maxBatches,
+}: {
+  apply?: boolean
+  sportKey?: string | null
+  batchSize?: number
+  maxBatches?: number | null
+} = {}) {
+  const startedAt = new Date().toISOString()
   const predictions: StoredPredictionRow[] = []
   for (let from = 0; ; from += 1000) {
     let query = supabaseAdmin
@@ -156,29 +195,117 @@ export async function reconcilePredictionCutoffRows({ apply = false, sportKey }:
     return { row, event, classification: classifyPredictionCutoff(row, event) }
   })
   const excluded = classified.filter((item) => !item.classification.eligible)
+  const alreadyClassified = excluded.filter((item) =>
+    classificationMatches(existingClassification(item.row), metadataFor(item.classification, String(existingClassification(item.row).classificationTimestamp ?? startedAt)))
+  )
+  const pendingClassification = excluded.filter((item) =>
+    !classificationMatches(existingClassification(item.row), metadataFor(item.classification, String(existingClassification(item.row).classificationTimestamp ?? startedAt)))
+  )
   const byState = excluded.reduce<Record<string, number>>((acc, item) => {
     acc[item.classification.state] = (acc[item.classification.state] ?? 0) + 1
     return acc
   }, {})
 
   let updated = 0
+  let skipped = alreadyClassified.length
+  let batchesCompleted = 0
+  let syncJobId: string | null = null
   if (apply) {
-    for (const item of excluded) {
-      const next = withCutoffMetadata(item.row, item.event)
-      const { error } = await supabaseAdmin
-        .from('prediction_history')
-        .update({
-          production_eligible: false,
-          recommended_pick: false,
-          lifecycle_status: 'skipped',
-          validation_status: 'skipped',
-          validation_warnings: next.validation_warnings,
-          settlement_details: next.settlement_details,
-        })
-        .eq('id', item.row.id)
-      if (error) throw new Error(`prediction cutoff update failed for ${item.row.id}: ${error.message}`)
-      updated += 1
+    const job = await supabaseAdmin.from('sports_sync_jobs').insert({
+      job_type: CUTOFF_ENFORCEMENT_VERSION,
+      sport_key: sportKey ?? 'all',
+      league_key: null,
+      provider: 'internal',
+      season: null,
+      status: 'running',
+      records_fetched: predictions.length,
+      records_inserted: 0,
+      records_updated: 0,
+      records_skipped: skipped,
+      error_count: 0,
+      metadata: {
+        mode: CUTOFF_ENFORCEMENT_VERSION,
+        apply,
+        mutationScope: 'classification_metadata_only',
+        expectedExcluded: excluded.length,
+        expectedByState: byState,
+        startedAt,
+      },
+    }).select('id').single()
+    if (job.error) throw new Error(`prediction cutoff job insert failed: ${job.error.message}`)
+    syncJobId = String(job.data.id)
+
+    const capped = maxBatches ? pendingClassification.slice(0, Math.max(0, maxBatches) * batchSize) : pendingClassification
+    for (let index = 0; index < capped.length; index += batchSize) {
+      const batch = capped.slice(index, index + batchSize)
+      const batchNumber = Math.floor(index / batchSize) + 1
+      const batchStarted = new Date().toISOString()
+      let batchUpdated = 0
+      for (const item of batch) {
+        const details = asObject(item.row.settlement_details)
+        const classificationTimestamp = new Date().toISOString()
+        const metadata = metadataFor(item.classification, classificationTimestamp)
+        const { error } = await supabaseAdmin
+          .from('prediction_history')
+          .update({
+            settlement_details: {
+              ...details,
+              cutoff_enforcement_v1: metadata,
+            },
+          })
+          .eq('id', item.row.id)
+        if (error) throw new Error(`prediction cutoff metadata update failed for ${item.row.id}: ${error.message}`)
+        batchUpdated += 1
+      }
+      updated += batchUpdated
+      batchesCompleted += 1
+      const batchFinished = new Date().toISOString()
+      const checkpoint = await supabaseAdmin.from('historical_import_checkpoints').upsert([{
+        id: `${CUTOFF_ENFORCEMENT_VERSION}:${syncJobId}:batch:${batchNumber}`,
+        import_id: null,
+        source_registry_id: null,
+        checkpoint_level: 'normalization',
+        checkpoint_key: `${CUTOFF_ENFORCEMENT_VERSION}_batch_${batchNumber}`,
+        status: 'completed',
+        record_count: batch.length,
+        warning_count: 0,
+        error_count: 0,
+        checksum_sha256: null,
+        started_at: batchStarted,
+        finished_at: batchFinished,
+        metadata: {
+          mode: CUTOFF_ENFORCEMENT_VERSION,
+          syncJobId,
+          batchNumber,
+          updated: batchUpdated,
+          skipped: 0,
+          firstPredictionId: batch[0]?.row.id ?? null,
+          lastPredictionId: batch[batch.length - 1]?.row.id ?? null,
+          mutationScope: 'classification_metadata_only',
+        },
+      }], { onConflict: 'id' })
+      if (checkpoint.error) throw new Error(`prediction cutoff checkpoint failed: ${checkpoint.error.message}`)
     }
+    const completedAt = new Date().toISOString()
+    const jobUpdate = await supabaseAdmin.from('sports_sync_jobs').update({
+      completed_at: completedAt,
+      status: 'completed',
+      records_updated: updated,
+      records_skipped: skipped,
+      duration_ms: Date.parse(completedAt) - Date.parse(startedAt),
+      metadata: {
+        mode: CUTOFF_ENFORCEMENT_VERSION,
+        apply,
+        mutationScope: 'classification_metadata_only',
+        expectedExcluded: excluded.length,
+        expectedByState: byState,
+        updated,
+        skipped,
+        batchesCompleted,
+        completedAt,
+      },
+    }).eq('id', syncJobId)
+    if (jobUpdate.error) throw new Error(`prediction cutoff job update failed: ${jobUpdate.error.message}`)
   }
 
   return {
@@ -189,7 +316,12 @@ export async function reconcilePredictionCutoffRows({ apply = false, sportKey }:
     eligible: classified.length - excluded.length,
     excluded: excluded.length,
     byState,
+    pendingClassification: pendingClassification.length,
+    alreadyClassified: alreadyClassified.length,
     updated,
+    skipped,
+    batchesCompleted,
+    syncJobId,
     sample: excluded.slice(0, 25).map((item) => ({
       predictionId: item.row.id,
       sportKey: item.row.sport_key,

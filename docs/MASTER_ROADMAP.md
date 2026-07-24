@@ -8,13 +8,21 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Existing Prediction Cutoff Classification V1
+
+Status: Persisted, idempotency-verified and build verification pending in this commit.
+
+Evidence: `src/services/prediction-cutoff-enforcement.service.ts`, persisted `prediction_history.settlement_details.cutoff_enforcement_v1` metadata, cutoff `sports_sync_jobs` records, 8 `historical_import_checkpoints`, Performance Scope V2, AI Learning Lifecycle and local validation output.
+
+Note: This phase did not change prediction content, generated timestamps, event timestamps, probabilities, confidence, outcomes, settlement, Learning Brain weights, feature snapshots, Current Board, Official Pick policy, Historical Replay or Historical Feature Backfill Phase 2A. It stamped only the already-diagnosed cutoff classification for 704 excluded rows: 331 `POST_START`, 370 `POST_FINAL` and 3 `INVALID_CUTOFF`. Reruns update 0 rows and skip all 704 already-classified rows.
+
 ### Prediction Cutoff Enforcement & Leakage Recovery V1
 
-Status: Code-level enforcement implemented; persisted bulk classification of existing contaminated rows blocked by protected write review.
+Status: Code-level enforcement implemented; existing contaminated rows are now persisted with metadata-only classification by Existing Prediction Cutoff Classification V1.
 
 Evidence: `src/services/prediction-cutoff-enforcement.service.ts`, shared `savePredictionHistory` cutoff rejection, MLB prospective-preview cutoff rejection, Settlement/Learning/Performance/Trace read-model guards, Dashboard Today copy and local production build.
 
-Note: The exact root cause was a missing prediction-generation-time cutoff check in the MLB prospective-preview persistence path. Existing odds snapshots were filtered as pregame, but late scheduler retries could reuse those snapshots and persist predictions after each game's cutoff. Future production-eligible rows are rejected before persistence; direct MLB preview rows are rejected before snapshot/prediction upsert. Existing rows are classified in read models, but a bulk write to stamp 704 historical rows as diagnostic-only was rejected by protected review and requires explicit approval.
+Note: The exact root cause was a missing prediction-generation-time cutoff check in the MLB prospective-preview persistence path. Existing odds snapshots were filtered as pregame, but late scheduler retries could reuse those snapshots and persist predictions after each game's cutoff. Future production-eligible rows are rejected before persistence; direct MLB preview rows are rejected before snapshot/prediction upsert. Existing rows are classified in read models and now carry persisted diagnostic-only cutoff metadata. No probabilities, outcomes, settlement, learning weights or recommendation policy fields were changed.
 
 ### Daily Prediction Continuity & Learning Closure V1
 
