@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-24 - Certify Historical Feature Persistence With One Game Only
+
+Context: The local Retrosheet feature backfill worker had passed full-season dry-run, but production persistence safety still needed proof before any larger Phase 2A backfill could be considered. The requested scope allowed exactly one historical game and prohibited batch/season execution.
+
+Decision: Use the existing local worker write path with `--start-game-id retrosheet:mlb:game:CHN202503180 --limit 1 --batch-size 1 --write-size 50`. Do not alter Prediction Engine, Learning Brain, Settlement, Current Board, Official Picks, replay or the historical worker architecture.
+
+Consequences: The first successful run inserted 29 historical-only snapshots. The same one-game scope rerun in idempotency mode inserted 0, updated 0 and skipped 29. Regenerated deterministic keys matched persisted keys exactly. AI Operations now shows 29 persisted snapshots and 1 game covered. The complete historical backfill remains blocked until explicitly approved.
+
+Affected modules: Historical feature snapshots data, historical import job/checkpoint metadata, AI Operations diagnostics and project documentation.
+
 ## 2026-07-24 - Use Compact Product Read Models For Live UX State
 
 Context: Product pages drifted after several backend phases. Performance could hang locally because Prediction History loaded the full AI Performance Center diagnostic graph and large history row payloads. Dashboard Today also mixed fresh prediction status, zero Model Only counts, final-game pregame odds copy and separate hand-built pipeline wording.

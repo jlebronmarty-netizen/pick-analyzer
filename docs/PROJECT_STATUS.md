@@ -2,6 +2,18 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Historical Feature Persistence Certification V1
+
+- Certified one-game Retrosheet historical feature persistence using the existing local worker only. Selected game: `retrosheet:mlb:game:CHN202503180`.
+- First write-capable run used `historical:features:backfill` with `--start-game-id retrosheet:mlb:game:CHN202503180 --limit 1 --batch-size 1 --write-size 50`. A first attempt stopped before mutation on a transient Supabase statement timeout while reading batter appearances; the retry completed.
+- Persistence result: 29 historical feature snapshots inserted, 0 updated, 0 skipped. Expected feature categories were present: Teams 2, Pitchers 2, Bullpen 2, Lineups 2, Batters 18, Park Factors 1, Umpires 1 and Game State 1.
+- Idempotency run used the same one-game scope through `historical:features:idempotency` and produced 0 inserted, 0 updated, 29 skipped. Duplicate deterministic keys remained 0.
+- Deterministic-key regeneration matched persisted rows exactly: generated 29, persisted 29, hash `5fe647ab02c1af600f49703bd0bc9a6e34e2559d88eacc8f665cbcfc326e576f`.
+- Point-in-time validation passed for this game: all persisted rows use `prediction_cutoff` and `as_of_timestamp` of `2025-03-18T00:00:00+00:00`; leakage failures were 0. Leakage warnings were expected early-season insufficient-prior-sample warnings and did not block persistence.
+- Production isolation passed: persisted historical snapshots remain `production_eligible=false`, `metadata.trainingEligible=false`, `metadata.livePredictionEligible=false`, provider calls 0 and external sports API calls 0. Prediction history, settlement labels, Current Board, Official Pick policy, Learning Brain weights and replay were not modified.
+- AI Operations historical diagnostics report the certification evidence: 29 snapshots persisted, 1 game covered, 0.04% coverage, feature-label coverage 29.38%, accepted samples 228, missing-feature rejections 548, shadow readiness `READY_FOR_SHADOW_VALIDATION`, provider calls 0.
+- The worker checkpointed `local_game_batch_1`; restarting the same one-game scope detected existing deterministic rows and skipped all 29 snapshots. No season/full backfill was started.
+
 ## 2026-07-24 Product Integration & Live State Recovery V1
 
 - Recovered the Performance page local hang root cause by moving `/api/performance/history` off the heavyweight AI Performance Center diagnostic graph. The history endpoint now uses the compact production-scope V2 read model, honors bounded pagination (`limit` default 50, max 100), preserves `totalRows`, and strips large feature snapshots from table payloads.

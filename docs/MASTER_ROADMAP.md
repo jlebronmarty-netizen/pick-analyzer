@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Historical Feature Persistence Certification V1
+
+Status: Single-game persistence certified; complete backfill still blocked pending explicit approval.
+
+Evidence: Existing `scripts/retrosheet-feature-backfill.mjs` worker, selected game `retrosheet:mlb:game:CHN202503180`, persisted 29 `historical_feature_snapshots`, completed `local_game_batch_1` checkpoints, regenerated deterministic-key hash `5fe647ab02c1af600f49703bd0bc9a6e34e2559d88eacc8f665cbcfc326e576f`, AI Operations historical diagnostics and local production build.
+
+Note: This phase proves persistence safety for exactly one historical game. It did not run a batch/season backfill, did not modify prediction probabilities, settlement outcomes, Learning Brain weights, Current Board, Official Pick policy or replay. Rerunning the same one-game scope inserted 0, updated 0 and skipped 29 existing deterministic rows.
+
 ### Product Integration & Live State Recovery V1
 
 Status: Locally implemented, build-verified and read-only smoke-validated; production push/deployment verification pending.
