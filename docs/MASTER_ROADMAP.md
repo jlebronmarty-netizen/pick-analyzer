@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Pregame Execution Recovery & Slate Prewarm V1
+
+Status: Locally implemented and build-verified; production execution/deployment verification pending.
+
+Evidence: `src/services/mlb-operating-date-resolution.service.ts`, `src/services/operating-day.service.ts`, `src/services/pregame-scheduler-coverage.service.ts`, `docs/PREGAME_EXECUTION_RECOVERY_SLATE_PREWARM_V1.md` and local production build.
+
+Note: Provider-backed MLB refresh actions now select the earliest pregame-actionable slate instead of a same-day slate that is already past cutoff. `prepare_next_slate` can prewarm the next calendar date when a future slate is not stored yet, while keeping the existing SportsDataIO prospective-preview path, budget guard, action lock, idempotent upserts and cutoff enforcement. No probabilities, Official Pick policy, Learning Brain weights, settlement outcomes, Current Board policy, Historical Replay or Phase 2A backfill behavior was changed.
+
 ### Pregame Scheduler Coverage & Execution Timing V1
 
 Status: Implemented as read-only operational validation; production readiness remains blocked until future scheduler runs prove valid pregame coverage.

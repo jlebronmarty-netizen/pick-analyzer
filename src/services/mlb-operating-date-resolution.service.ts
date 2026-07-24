@@ -70,6 +70,19 @@ function actionUsesCurrentActionableSlate(action: DateResolutionAction) {
   ].includes(action)
 }
 
+function eventCutoffMs(event: StoredEvent) {
+  const startMs = event.start_time ? Date.parse(event.start_time) : Number.NaN
+  return Number.isFinite(startMs) ? startMs - 10 * 60 * 1000 : Number.NaN
+}
+
+function pregameActionableEvent(event: StoredEvent, now: Date) {
+  if (terminalStatus(event.status)) return false
+  const cutoffMs = eventCutoffMs(event)
+  if (!Number.isFinite(cutoffMs) || cutoffMs <= now.getTime()) return false
+  const lifecycle = resolveMlbGameLifecycle(event, now)
+  return ['PREGAME', 'STARTING_SOON'].includes(lifecycle.lifecycle)
+}
+
 async function loadEvents(now: Date, searchBackDays: number, searchForwardDays: number) {
   const today = localDate(now)
   const startDate = addDays(today, -Math.max(0, searchBackDays))
@@ -121,6 +134,12 @@ export async function resolveMlbOperatingDate({
   const recoveryCandidateDate = recoveryEligibleDates[0]?.date ?? null
   const oldestUnresolvedDate = unresolvedDates[0]?.date ?? null
   const currentDateHasEvents = (byDate.get(localCalendarDate)?.length ?? 0) > 0
+  const pregameActionableDates = dates
+    .filter((date) => date >= localCalendarDate)
+    .map((date) => ({ date, events: byDate.get(date) ?? [] }))
+    .filter((entry) => entry.events.some((event) => pregameActionableEvent(event, now)))
+  const currentPregameActionableDate = pregameActionableDates[0]?.date ?? null
+  const currentDateHasPregameActionableEvents = currentPregameActionableDate === localCalendarDate
   const selectedAction = String(action ?? 'status')
   const recoveryAllowed = actionUsesRecoverySlate(selectedAction)
   const activeOperatingDate = recoveryAllowed && recoveryCandidateDate
@@ -130,23 +149,27 @@ export async function resolveMlbOperatingDate({
       : null
   const nextSlateDate = dates.find((date) => date > (activeOperatingDate ?? localCalendarDate)) ?? null
   const providerQueryDate = actionUsesNextSlate(selectedAction)
-    ? nextSlateDate ?? localCalendarDate
+    ? nextSlateDate ?? currentPregameActionableDate ?? addDays(localCalendarDate, 1)
     : actionUsesCurrentActionableSlate(selectedAction)
-      ? currentDateHasEvents
-        ? localCalendarDate
-        : nextSlateDate ?? localCalendarDate
+      ? currentPregameActionableDate ?? nextSlateDate ?? localCalendarDate
     : activeOperatingDate ?? (currentDateHasEvents ? localCalendarDate : nextSlateDate ?? localCalendarDate)
   const dateSelectionReason = recoveryCandidateDate && recoveryAllowed
     ? 'bounded_recovery_slate_precedes_current_or_next_slate'
     : recoveryCandidateDate && actionUsesCurrentActionableSlate(selectedAction)
       ? 'current_action_ignores_stale_recovery_slate'
+    : actionUsesCurrentActionableSlate(selectedAction) && currentPregameActionableDate && currentPregameActionableDate !== localCalendarDate
+      ? 'current_slate_past_cutoff_using_next_pregame_actionable_slate'
+    : actionUsesCurrentActionableSlate(selectedAction) && currentDateHasPregameActionableEvents
+      ? 'current_local_date_has_pregame_actionable_events'
     : actionUsesNextSlate(selectedAction) && nextSlateDate
       ? 'next_slate_allowed_for_preparation_action'
-      : currentDateHasEvents
-        ? 'current_local_date_has_relevant_events'
-        : nextSlateDate
-          ? 'no_current_events_using_next_slate'
-          : 'fallback_local_calendar_date'
+    : actionUsesNextSlate(selectedAction) && !nextSlateDate
+      ? 'next_slate_prewarm_fallback_calendar_date'
+    : currentDateHasEvents
+      ? 'current_local_date_has_relevant_events'
+      : nextSlateDate
+        ? 'no_current_events_using_next_slate'
+        : 'fallback_local_calendar_date'
   const unresolvedEventsByDate = Object.fromEntries(dates.map((date) => [date, (byDate.get(date) ?? []).filter((event) => unresolvedEvent(event, now)).length]))
   const recoveryClassification = recoveryCandidateDate && recoveryAllowed
     ? 'RECOVERY_ELIGIBLE'
@@ -179,9 +202,14 @@ export async function resolveMlbOperatingDate({
     excludedStaleOrphanCount: staleOrphanDates.reduce((sum, entry) => sum + entry.events.filter((event) => unresolvedEvent(event, now)).length, 0),
     oldestUnresolvedDate,
     unresolvedEventsByDate,
+    currentPregameActionableDate,
+    currentDateHasPregameActionableEvents,
+    pregameActionableEventsByDate: Object.fromEntries(dates.map((date) => [date, (byDate.get(date) ?? []).filter((event) => pregameActionableEvent(event, now)).length])),
     diagnostics: {
       dates,
       currentDateHasEvents,
+      currentDateHasPregameActionableEvents,
+      currentPregameActionableDate,
       activeUnresolvedDate: recoveryCandidateDate,
       recoveryAllowedForAction: recoveryAllowed,
       currentActionableSlateAction: actionUsesCurrentActionableSlate(selectedAction),
@@ -203,6 +231,7 @@ export function validateMlbOperatingDateResolutionFixtures() {
     ['midday refresh never selects bounded recovery slate', !actionUsesRecoverySlate('midday_refresh') && actionUsesCurrentActionableSlate('midday_refresh')],
     ['odds refresh never selects bounded recovery slate', !actionUsesRecoverySlate('odds_refresh') && actionUsesCurrentActionableSlate('odds_refresh')],
     ['prediction refresh never selects bounded recovery slate', !actionUsesRecoverySlate('prediction_refresh') && actionUsesCurrentActionableSlate('prediction_refresh')],
+    ['pregame cutoff uses ten minute guard', eventCutoffMs({ id: 'x', sport_key: 'baseball_mlb', league_key: 'mlb', start_time: '2026-07-17T23:10:00.000Z', status: 'scheduled', updated_at: null, metadata: null }) === Date.parse('2026-07-17T23:00:00.000Z')],
     ['final statuses are terminal', terminalStatus('Final')],
     ['postponed statuses are terminal', terminalStatus('Postponed')],
     ['status unconfirmed is nonterminal', !terminalStatus('STATUS_UNCONFIRMED')],

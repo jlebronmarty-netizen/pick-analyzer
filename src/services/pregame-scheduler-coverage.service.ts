@@ -3,6 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
+import { resolveMlbOperatingDate } from '@/services/mlb-operating-date-resolution.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -300,9 +301,12 @@ async function loadSchedulerEvidence() {
 export async function getPregameSchedulerCoverage({ now = new Date() }: { now?: Date } = {}) {
   const today = localDateOffset(0, now)
   const yesterday = localDateOffset(-1, now)
-  const [todayRows, yesterdayRows, schedulerEvidence] = await Promise.all([
+  const nextResolution = await resolveMlbOperatingDate({ action: 'midday_refresh', now }).catch(() => null)
+  const nextPregameDate = typeof nextResolution?.providerQueryDate === 'string' ? nextResolution.providerQueryDate : today
+  const [todayRows, yesterdayRows, nextRows, schedulerEvidence] = await Promise.all([
     loadCoverageRows(today),
     loadCoverageRows(yesterday),
+    nextPregameDate === today ? loadCoverageRows(today) : loadCoverageRows(nextPregameDate),
     loadSchedulerEvidence(),
   ])
 
@@ -394,6 +398,12 @@ export async function getPregameSchedulerCoverage({ now = new Date() }: { now?: 
 
   const todayCoverage = buildDay('Today', today, todayRows)
   const yesterdayCoverage = buildDay('Yesterday', yesterday, yesterdayRows)
+  const nextPregameCoverage = buildDay('Today', nextPregameDate, nextRows)
+  const protectedByCutoff = nextPregameCoverage.games.filter((game) => {
+    const cutoffMs = ms(game.cutoffTimestamp)
+    return cutoffMs !== null && cutoffMs <= now.getTime() && game.validPregamePredictions === 0
+  }).length
+  const boardReady = nextPregameCoverage.games.filter((game) => game.validPregamePredictions > 0 && game.oddsCaptured).length
 
   return {
     success: true,
@@ -421,6 +431,18 @@ export async function getPregameSchedulerCoverage({ now = new Date() }: { now?: 
     ],
     today: todayCoverage,
     yesterday: yesterdayCoverage,
+    nextPregameSlate: {
+      ...nextPregameCoverage,
+      dateSelectionReason: nextResolution?.dateSelectionReason ?? null,
+      selectedByAction: nextResolution?.action ?? 'midday_refresh',
+      boardReadyGames: boardReady,
+      gamesProtectedByCutoff: protectedByCutoff,
+      gamesPendingPregameExecution: nextPregameCoverage.games.filter((game) => game.rejectionReason === 'PREDICTION_NOT_DUE' || game.rejectionReason === 'NO_ODDS').length,
+      prewarmEligible: nextPregameCoverage.eligibleGames > 0 && nextPregameCoverage.games.some((game) => {
+        const cutoffMs = ms(game.cutoffTimestamp)
+        return cutoffMs !== null && cutoffMs > now.getTime()
+      }),
+    },
     summary: {
       gamesToday: todayCoverage.gamesScheduled,
       predictedToday: todayCoverage.predicted,
@@ -429,6 +451,13 @@ export async function getPregameSchedulerCoverage({ now = new Date() }: { now?: 
       coverageTodayPct: todayCoverage.coveragePct,
       averageLeadTimeBeforeCutoffMinutes: todayCoverage.averageLeadTimeBeforeCutoffMinutes,
       missedWindowsToday: todayCoverage.missedWindows,
+      nextPregameSlateDate: nextPregameDate,
+      nextPregameCoveragePct: nextPregameCoverage.coveragePct,
+      nextPregameValidGames: nextPregameCoverage.validPregameGames,
+      nextPregameEligibleGames: nextPregameCoverage.eligibleGames,
+      nextPregameAverageLeadTimeBeforeCutoffMinutes: nextPregameCoverage.averageLeadTimeBeforeCutoffMinutes,
+      gamesPendingPregameExecution: nextPregameCoverage.games.filter((game) => game.rejectionReason === 'PREDICTION_NOT_DUE' || game.rejectionReason === 'NO_ODDS').length,
+      gamesProtectedByCutoff: protectedByCutoff,
       retryValidation: 'Retries call the same protected operating-day route and reuse provider budget, action lock and persistence idempotency keys.',
       idempotencyValidation: todayCoverage.idempotency.duplicateCurrentPredictionIdentities === 0 && todayCoverage.idempotency.duplicateIdempotencyKeys === 0
         ? 'PASS'
@@ -439,6 +468,14 @@ export async function getPregameSchedulerCoverage({ now = new Date() }: { now?: 
       nextExecution: definitions.find((item) => item.active)?.nextExecution ?? null,
       coverage: todayCoverage.coveragePct,
       predictionLeadTimeMinutes: todayCoverage.averageLeadTimeBeforeCutoffMinutes,
+      nextPregameCoverage: nextPregameCoverage.coveragePct,
+      nextPregameLeadTimeMinutes: nextPregameCoverage.averageLeadTimeBeforeCutoffMinutes,
+      successfulPregameExecutions: nextPregameCoverage.validPregameGames,
+      skippedExecutions: nextPregameCoverage.skipped,
+      skippedReasons: nextPregameCoverage.rejectionReasons,
+      boardReadyGames: boardReady,
+      gamesPendingPregameExecution: nextPregameCoverage.games.filter((game) => game.rejectionReason === 'PREDICTION_NOT_DUE' || game.rejectionReason === 'NO_ODDS').length,
+      gamesProtectedByCutoff: protectedByCutoff,
       missedWindows: todayCoverage.missedWindows,
       retryCount: lifecycleRows.filter((row) => ['FAILED_RETRYABLE', 'MISSED_REFRESH', 'BUDGET_BLOCKED', 'BLOCKED'].includes(String(row.status))).length,
     },

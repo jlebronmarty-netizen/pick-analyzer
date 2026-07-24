@@ -15,6 +15,7 @@ import { getTopPicks } from '@/services/top-picks.service'
 import { optimizeBetSlip } from '@/services/bet-slip-optimizer.service'
 import { getDay1RecommendationReadiness } from '@/services/day1-recommendation-readiness.service'
 import { assertSportEventStatusWrite, isSportEventCanonicalStatus, mapMlbStatsGameToSportEventStatus, validateSportEventStatusWriteTracingFixtures } from '@/services/mlb-event-status-mapper.service'
+import { resolveMlbOperatingDate } from '@/services/mlb-operating-date-resolution.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
@@ -147,6 +148,22 @@ type MlbStatsGame = {
 
 function nowIso() {
   return new Date().toISOString()
+}
+
+function sportsDataIoMlbDate(date: string) {
+  const parsed = new Date(`${date}T00:00:00.000Z`)
+  const month = parsed.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase()
+  return `${parsed.getUTCFullYear()}-${month}-${String(parsed.getUTCDate()).padStart(2, '0')}`
+}
+
+function plannedMlbProviderEndpoints(date: string | null) {
+  if (!date) return []
+  const providerDate = sportsDataIoMlbDate(date)
+  return [
+    `/api/mlb/odds/json/GamesByDate/${providerDate}`,
+    `/api/mlb/odds/json/GameOddsByDate/${date}`,
+    `/api/mlb/fantasy/json/PlayerGameProjectionStatsByDate/${providerDate}`,
+  ]
 }
 
 function selectedDate(input?: string | null) {
@@ -1271,21 +1288,30 @@ export async function executeOperatingDay(request: ExecuteRequest) {
   if (action === 'reconcile_preview') return reconcilePreview({ sportKey, leagueKey, date, dryRun })
   if (action === 'resolve_next_slate' || action === 'next_slate_preview' || action === 'prepare_next_slate' || action === 'postgame_rollover') {
     const slate = await getNextSlateStatus({ sportKey, leagueKey, searchDays: request.searchDays ?? 7 })
-    const providerEndpoints = slate.plannedProviderEndpoints ?? []
+    const dateResolution = sportKey === SPORT_KEY && leagueKey === LEAGUE_KEY
+      ? await resolveMlbOperatingDate({ action, now: new Date(startedAt), searchForwardDays: request.searchDays ?? 7 })
+      : null
+    const executionSlateDate = String(slate.selectedSlateDate ?? dateResolution?.providerQueryDate ?? date)
+    const providerEndpoints = (slate.plannedProviderEndpoints?.length ? slate.plannedProviderEndpoints : plannedMlbProviderEndpoints(executionSlateDate)) ?? []
     const requiredCalls = slate.waitingForOdds > 0 || slate.waitingForPredictions > 0 ? Math.min(providerEndpoints.length, 3) : 0
+    const prewarmRequiredCalls = action === 'prepare_next_slate' && executionSlateDate && slate.selectedSlateDate !== executionSlateDate
+      ? Math.min(providerEndpoints.length, 3)
+      : requiredCalls
     const providerPlan = {
       providerCallsMade: 0,
       dryRun,
-      selectedSlateDate: slate.selectedSlateDate,
+      selectedSlateDate: executionSlateDate,
       plannedEndpoints: providerEndpoints,
-      minimumRequiredCalls: requiredCalls,
+      minimumRequiredCalls: prewarmRequiredCalls,
       maximumPossibleCalls: providerEndpoints.length,
+      dateSelectionReason: dateResolution?.dateSelectionReason ?? null,
+      storedSlatePresent: Boolean(slate.selectedSlateDate),
       blockedUntilConfirmedRealExecution: null,
     }
     if (action === 'prepare_next_slate' && !dryRun) {
       if (!request.confirmed) throw new Error('confirmed=true is required for real next-slate preparation.')
       if (sportKey !== SPORT_KEY || leagueKey !== LEAGUE_KEY) throw new Error('prepare_next_slate currently supports baseball_mlb/mlb only.')
-      if (!slate.selectedSlateDate) {
+      if (!executionSlateDate) {
         return {
           success: false,
           mode: 'prepare_next_slate_plan_v1',
@@ -1298,12 +1324,12 @@ export async function executeOperatingDay(request: ExecuteRequest) {
           slate,
         }
       }
-      const requestedCalls = Math.min(Number(request.maximumRequests ?? requiredCalls) || requiredCalls, providerEndpoints.length)
+      const requestedCalls = Math.min(Number(request.maximumRequests ?? prewarmRequiredCalls) || prewarmRequiredCalls, providerEndpoints.length)
       const budget = await checkProviderBudget({
         provider: 'sportsdataio',
         sportKey,
         action,
-        requestedCalls: requiredCalls,
+        requestedCalls: prewarmRequiredCalls,
         dryRun: false,
         forceRefresh: request.forceRefresh,
       })
@@ -1313,7 +1339,7 @@ export async function executeOperatingDay(request: ExecuteRequest) {
           mode: 'prepare_next_slate_plan_v1',
           action,
           ...base,
-          selectedDate: slate.selectedSlateDate,
+          selectedDate: executionSlateDate,
           status: 'provider_budget_blocked',
           providerCallsMade: 0,
           remoteMutationsMade: 0,
@@ -1322,14 +1348,14 @@ export async function executeOperatingDay(request: ExecuteRequest) {
           slate,
         }
       }
-      const lockKey = `sportsdataio:${sportKey}:${leagueKey}:${slate.selectedSlateDate}:prepare_next_slate`
+      const lockKey = `sportsdataio:${sportKey}:${leagueKey}:${executionSlateDate}:prepare_next_slate`
       if (!claimProviderActionLock(lockKey)) {
         return {
           success: false,
           mode: 'prepare_next_slate_plan_v1',
           action,
           ...base,
-          selectedDate: slate.selectedSlateDate,
+          selectedDate: executionSlateDate,
           status: 'refresh_already_in_progress',
           providerCallsMade: 0,
           remoteMutationsMade: 0,
@@ -1343,20 +1369,20 @@ export async function executeOperatingDay(request: ExecuteRequest) {
       let linkedEvents = 0
       let providerCallsMade = 0
       try {
-        const realDay = await getOrCreateOperatingDay(sportKey, leagueKey, slate.selectedSlateDate, false)
+        const realDay = await getOrCreateOperatingDay(sportKey, leagueKey, executionSlateDate, false)
         realOperatingDayId = String(realDay?.id ?? realOperatingDayId)
-        linkedEvents = await linkEvents(realOperatingDayId, sportKey, leagueKey, slate.selectedSlateDate)
+        linkedEvents = await linkEvents(realOperatingDayId, sportKey, leagueKey, executionSlateDate)
         const preview = await runSportsDataIoMlbProspectivePreview({
           dryRun: false,
           confirmed: true,
-          selectedDate: slate.selectedSlateDate,
+          selectedDate: executionSlateDate,
           operatingDayId: realOperatingDayId,
           operatingDayRefresh: true,
-          maximumRequests: Math.max(requiredCalls, requestedCalls),
+          maximumRequests: Math.max(prewarmRequiredCalls, requestedCalls),
           timeoutMs: request.timeoutMs,
         })
         providerCallsMade = Number(asRecord(preview.providerUsage).externalProviderCallsMade ?? preview.providerCallsMade ?? 0)
-        linkedEvents = Math.max(linkedEvents, await linkEvents(realOperatingDayId, sportKey, leagueKey, slate.selectedSlateDate))
+        linkedEvents = Math.max(linkedEvents, await linkEvents(realOperatingDayId, sportKey, leagueKey, executionSlateDate))
         const refreshedSlate = await getNextSlateStatus({ sportKey, leagueKey, searchDays: request.searchDays ?? 7 })
         const intelligence = await refreshIntelligenceSurfaceSummary(sportKey)
         const status = String(preview.status) === 'completed' || String(preview.status) === 'final_refresh_completed'
@@ -1374,7 +1400,8 @@ export async function executeOperatingDay(request: ExecuteRequest) {
             ...asRecord(realDay?.metadata),
             version: POLICY_VERSION,
             lastPrepareNextSlateAt: nowIso(),
-            selectedSlateDate: slate.selectedSlateDate,
+            selectedSlateDate: executionSlateDate,
+            dateSelectionReason: dateResolution?.dateSelectionReason ?? null,
           },
         })
         await writeLifecycleEvent({
@@ -1383,7 +1410,7 @@ export async function executeOperatingDay(request: ExecuteRequest) {
           action,
           status: String(preview.status ?? status),
           startedAt,
-          providerCallsPlanned: requiredCalls,
+          providerCallsPlanned: prewarmRequiredCalls,
           providerCallsMade,
           databaseWrites: linkedEvents,
           warnings,
@@ -1391,7 +1418,9 @@ export async function executeOperatingDay(request: ExecuteRequest) {
             provider: 'sportsdataio',
             sportKey,
             leagueKey,
-            selectedDate: slate.selectedSlateDate,
+            selectedDate: executionSlateDate,
+            storedSlatePresent: Boolean(slate.selectedSlateDate),
+            dateSelectionReason: dateResolution?.dateSelectionReason ?? null,
             providerBudget: budget.status,
             providerPreparation: preview as unknown as Record<string, unknown>,
             intelligence,
@@ -1410,12 +1439,12 @@ export async function executeOperatingDay(request: ExecuteRequest) {
           mode: 'prepare_next_slate_execution_v1',
           action,
           operatingDayId: realOperatingDayId,
-          selectedDate: slate.selectedSlateDate,
+          selectedDate: executionSlateDate,
           sportKey,
           leagueKey,
           dryRun: false,
           status: warnings.length ? 'completed_with_warnings' : 'prepared',
-          providerCallsPlanned: requiredCalls,
+          providerCallsPlanned: prewarmRequiredCalls,
           providerCallsMade,
           remoteMutationsMade: linkedEvents + Number(previewRecord.snapshotsInserted ?? 0) + Number(previewRecord.predictionsRegenerated ?? 0),
           eventsReceived: Number(previewSlate.gamesFound ?? refreshedSlate.eventsFound ?? 0),
@@ -1445,11 +1474,11 @@ export async function executeOperatingDay(request: ExecuteRequest) {
             action,
             status,
             startedAt,
-            providerCallsPlanned: requiredCalls,
+            providerCallsPlanned: prewarmRequiredCalls,
             providerCallsMade,
             warnings: [message],
             blockingReason: message,
-            metadata: { provider: 'sportsdataio', sportKey, leagueKey, selectedDate: slate.selectedSlateDate, providerBudget: budget.status },
+            metadata: { provider: 'sportsdataio', sportKey, leagueKey, selectedDate: executionSlateDate, providerBudget: budget.status, dateSelectionReason: dateResolution?.dateSelectionReason ?? null },
           }).catch(() => undefined)
         }
         return {
@@ -1457,12 +1486,12 @@ export async function executeOperatingDay(request: ExecuteRequest) {
           mode: 'prepare_next_slate_execution_v1',
           action,
           operatingDayId: realOperatingDayId,
-          selectedDate: slate.selectedSlateDate,
+          selectedDate: executionSlateDate,
           sportKey,
           leagueKey,
           dryRun: false,
           status,
-          providerCallsPlanned: requiredCalls,
+          providerCallsPlanned: prewarmRequiredCalls,
           providerCallsMade,
           remoteMutationsMade: 0,
           warnings: [message],

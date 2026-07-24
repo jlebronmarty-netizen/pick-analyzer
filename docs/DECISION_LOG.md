@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-24 - Recover Pregame Execution With Slate Prewarm
+
+Context: Cutoff enforcement prevented late prediction persistence, but scheduler execution still selected the local operating date whenever stored games existed. After those games crossed cutoff, late passes correctly produced rejected rows and never pivoted to a future slate. `prepare_next_slate` also required a stored future slate before it could call provider schedule discovery.
+
+Decision: Make MLB operating-date resolution select the earliest pregame-actionable date for provider-backed odds/prediction/current-board work, using a ten-minute cutoff guard. Let `prepare_next_slate` prewarm a next calendar date through the existing SportsDataIO prospective-preview service when no future slate is stored. Keep provider budget, protected execution, action locks, deterministic upserts and cutoff enforcement unchanged.
+
+Consequences: Future scheduler passes can recover by working the next safe slate instead of repeatedly missing the stale same-day slate. Read-only coverage now reports next-slate coverage, lead time, cutoff-protected games, board readiness and skip reasons. The change does not alter prediction probabilities, recommendation policy, settlement, learning, replay or historical feature-store data.
+
+Affected modules: MLB operating-date resolution, Operating Day executor, Pregame Scheduler Coverage and project documentation.
+
 ## 2026-07-24 - Expose Pregame Scheduler Coverage As Read-Only Operational Evidence
 
 Context: Cutoff enforcement and existing-row classification proved which predictions are valid pregame versus post-cutoff, but operators still needed to know whether future scheduler executions are actually arriving before first pitch and why games are skipped.
