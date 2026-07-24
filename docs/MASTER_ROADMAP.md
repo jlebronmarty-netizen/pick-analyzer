@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Daily Prediction Continuity & Learning Closure V1
+
+Status: Locally implemented; build, push and production deployment verification pending.
+
+Evidence: `src/services/recommendation-pipeline-trace.service.ts`, `src/services/performance-scope-v2.service.ts`, `src/services/ai-learning-lifecycle.service.ts`, `src/components/dashboard/UserTodayPanel.tsx`, `/api/recommendation-pipeline/trace`, `/api/ai-operations/lifecycle` and Dashboard Today.
+
+Note: This pass keeps the daily lifecycle read-only while proving continuity from scheduled games through stored odds, persisted predictions, board classification, settlement labels and learning evidence. Product Performance periods now use canonical event start dates for production-day grouping. The trace reports per-game lifecycle status, miss reasons, coverage percentages and no-leakage checks. Dashboard empty states now show pipeline activity instead of appearing silently empty. Prediction probabilities, Official Pick policy, Learning Brain weights, settlement outcomes, Current Board mutation, Historical Replay, Phase 2A backfill and historical feature snapshots remain unchanged.
+
 ### Historical Feature Persistence Certification V1
 
 Status: Single-game persistence certified; complete backfill still blocked pending explicit approval.

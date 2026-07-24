@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-24 - Use Event-Linked Daily Scope For Prediction Continuity
+
+Context: Daily pipeline trace showed same-day scheduled games and persisted predictions, while product Performance and AI Operations could still display `Today Generated 0`. The mismatch came from direct prediction `commence_time` grouping even when canonical event-linked predictions existed for the operating date.
+
+Decision: Prefer canonical `sport_events.start_time` for production-day Performance grouping and derive AI Operations daily prediction counts from event-linked `prediction_history.game_id` rows when operating-day events exist. Expand the read-only recommendation trace with per-game lifecycle status, miss reasons, coverage percentages and no-leakage checks. Surface the same evidence in Dashboard Today's Story, Current AI Pipeline and empty AI Picks Feed states.
+
+Consequences: Users can see that games and predictions were processed even when Official Picks remain at zero. Every missed game now has an explicit diagnostic reason instead of silently disappearing. This does not generate predictions, settle rows, run learning, mutate Current Board, alter Official Pick policy or modify historical feature snapshots.
+
+Affected modules: Performance Scope V2, Recommendation Pipeline Trace, AI Learning Lifecycle, User Today Panel and project documentation.
+
 ## 2026-07-24 - Certify Historical Feature Persistence With One Game Only
 
 Context: The local Retrosheet feature backfill worker had passed full-season dry-run, but production persistence safety still needed proof before any larger Phase 2A backfill could be considered. The requested scope allowed exactly one historical game and prohibited batch/season execution.

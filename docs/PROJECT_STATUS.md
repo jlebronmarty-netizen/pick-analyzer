@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Daily Prediction Continuity & Learning Closure V1
+
+- Repaired product-day Performance grouping so Today, Yesterday, Last 7 Days and Last 30 Days derive generated counts from the canonical event start date before falling back to prediction `commence_time`. This fixes false `Generated 0` displays when predictions are linked to today's `sport_events` but have missing or mismatched prediction commence dates.
+- Expanded `/api/recommendation-pipeline/trace` with per-game lifecycle diagnostics for Today and Yesterday: game detected, odds snapshots, persisted predictions, prediction timestamp, pre-start/pre-cutoff validation, Current Board classification, Most Likely/Best Value/Official Pick eligibility, final state, settlement count, learning decision and explicit miss reason.
+- Added coverage diagnostics for games detected, predicted, settled, learned, missed, miss reasons, prediction coverage, settlement coverage, learning-decision coverage and no-post-start/no-post-final prediction checks.
+- Aligned AI Operations daily lifecycle counts to the same event-linked prediction scope used by the trace so stored same-day predictions are visible even when direct `commence_time` filters miss them.
+- Updated Dashboard Today's Story, Current AI Pipeline and empty AI Picks Feed states to summarize real pipeline activity when no Official Picks exist, including scheduled games, stored predictions, board candidates, settlements, learning labels, coverage and reason codes.
+- This pass is read-only for production data: no prediction probabilities, Official Pick policy, Learning Brain weights, settlement outcomes, Current Board mutations, Historical Replay, Phase 2A backfill or historical feature snapshots were modified.
+
 ## 2026-07-24 Historical Feature Persistence Certification V1
 
 - Certified one-game Retrosheet historical feature persistence using the existing local worker only. Selected game: `retrosheet:mlb:game:CHN202503180`.

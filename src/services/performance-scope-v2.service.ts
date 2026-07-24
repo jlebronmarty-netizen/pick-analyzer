@@ -247,11 +247,12 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
     date.setUTCDate(date.getUTCDate() - days)
     return astDate(date.toISOString())
   }
+  const productionDate = (item: { row: PredictionRow; event?: EventRow }) => astDate(item.event?.start_time ?? item.row.commence_time ?? item.row.generated_at)
   const periods = [
-    { key: 'today', label: 'Today', rows: joined.filter((item) => astDate(item.row.commence_time ?? item.event?.start_time ?? item.row.generated_at) === today) },
-    { key: 'yesterday', label: 'Yesterday', rows: joined.filter((item) => astDate(item.row.commence_time ?? item.event?.start_time ?? item.row.generated_at) === daysAgo(1)) },
-    { key: 'last7Days', label: 'Last 7 Days', rows: joined.filter((item) => astDate(item.row.commence_time ?? item.event?.start_time ?? item.row.generated_at) >= daysAgo(6)) },
-    { key: 'last30Days', label: 'Last 30 Days', rows: joined.filter((item) => astDate(item.row.commence_time ?? item.event?.start_time ?? item.row.generated_at) >= daysAgo(29)) },
+    { key: 'today', label: 'Today', rows: joined.filter((item) => productionDate(item) === today) },
+    { key: 'yesterday', label: 'Yesterday', rows: joined.filter((item) => productionDate(item) === daysAgo(1)) },
+    { key: 'last7Days', label: 'Last 7 Days', rows: joined.filter((item) => productionDate(item) >= daysAgo(6)) },
+    { key: 'last30Days', label: 'Last 30 Days', rows: joined.filter((item) => productionDate(item) >= daysAgo(29)) },
     { key: 'season', label: 'Season', rows: joined },
     { key: 'lifetime', label: 'Lifetime', rows: joined },
   ]

@@ -74,6 +74,53 @@ type TodayResponse = {
   }
 }
 
+type PipelineTraceDay = {
+  date: string
+  label?: string
+  counts: {
+    gamesScheduled: number
+    gamesEligibleBeforeStart: number
+    oddsSnapshotsAvailable: number
+    predictionsGenerated: number
+    currentBoardCandidates: number
+    modelOnlyRows: number
+    aiLeans: number
+    watchlist: number
+    bestValue: number
+    officialPicks: number
+    gamesCompleted: number
+    productionPredictionsSettled: number
+    learningSamplesQueued: number
+    learningSamplesAccepted: number
+    learningSamplesRejected: number
+    weightUpdates: number
+  }
+  coverage?: {
+    gamesDetected: number
+    gamesPredicted: number
+    gamesSettled: number
+    gamesLearned: number
+    gamesMissed: number
+    missReasons: Record<string, number>
+    predictionCoveragePct: number | null
+    settlementCoveragePct: number | null
+    learningDecisionCoveragePct: number | null
+    noPostStartPredictions: boolean
+    noPostFinalPredictions: boolean
+  }
+  zeroReasonCodes?: string[]
+  gameLifecycles?: Array<Record<string, unknown>>
+}
+
+type RecommendationPipelineTraceResponse = {
+  success?: boolean
+  providerCallsMade?: number
+  remoteMutationsMade?: number
+  days?: PipelineTraceDay[]
+  today?: PipelineTraceDay
+  yesterday?: PipelineTraceDay
+}
+
 type TopOpportunity = {
   predictionId?: string
   title?: string
@@ -716,8 +763,13 @@ function feedItemTitle(item: AiPicksFeedItem) {
   return `${label}: ${fieldValue(item.selection, 'Selection pending')}`
 }
 
-function AiPicksFeedPanel({ feed, reason }: { feed: AiPicksFeed | null | undefined; reason?: string | null }) {
+function AiPicksFeedPanel({ feed, reason, pipelineToday }: { feed: AiPicksFeed | null | undefined; reason?: string | null; pipelineToday?: PipelineTraceDay | null }) {
   const items = Array.isArray(feed?.items) ? feed.items : []
+  const traceCounts = pipelineToday?.counts
+  const traceReason = traceReasonSummary(pipelineToday)
+  const emptyDetail = traceCounts
+    ? `${traceCounts.predictionsGenerated} stored prediction${traceCounts.predictionsGenerated === 1 ? '' : 's'} were generated for ${traceCounts.gamesScheduled} scheduled game${traceCounts.gamesScheduled === 1 ? '' : 's'}. ${traceCounts.bestValue} Best Value candidate${traceCounts.bestValue === 1 ? '' : 's'} and ${traceCounts.officialPicks} Official Pick${traceCounts.officialPicks === 1 ? '' : 's'} passed current gates. ${traceReason ? `Reason codes: ${traceReason}.` : 'No additional miss reason was recorded.'}`
+    : reason ?? feed?.emptyState?.summary ?? 'No current-board candidate produced a feed item. No pick is promoted from an empty feed.'
   if (!items.length) {
     return (
       <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
@@ -726,7 +778,7 @@ function AiPicksFeedPanel({ feed, reason }: { feed: AiPicksFeed | null | undefin
             <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">AI Picks Feed</p>
             <h3 className="mt-2 text-3xl font-black text-white">{fieldValue(feed?.emptyState?.headline, 'No AI picks feed items')}</h3>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-              {reason ?? feed?.emptyState?.summary ?? 'No current-board candidate produced a feed item. No pick is promoted from an empty feed.'}
+              {emptyDetail}
             </p>
           </div>
           <Badge tone="yellow">{fieldValue(feed?.status, 'EMPTY_VALID')}</Badge>
@@ -1035,16 +1087,34 @@ function compactMarketAge(row: IntelligenceRow | TopOpportunity | AiPicksFeedIte
   return `${Math.round(age / 60)} hr`
 }
 
-function TodayStory({ data, mostLikely, bestValue, counts }: { data: TodayResponse; mostLikely: IntelligenceRow[]; bestValue: IntelligenceRow[]; counts: CategoryCounts }) {
+function traceReasonSummary(day: PipelineTraceDay | null | undefined) {
+  const missReasons = Object.entries(day?.coverage?.missReasons ?? {})
+    .sort((a, b) => b[1] - a[1])
+    .map(([reason, count]) => `${reason} (${count})`)
+  if (missReasons.length) return missReasons.slice(0, 3).join(', ')
+  const zeroReasons = Array.isArray(day?.zeroReasonCodes) ? day.zeroReasonCodes.filter(Boolean) : []
+  return zeroReasons.slice(0, 3).join(', ')
+}
+
+function TodayStory({ data, mostLikely, bestValue, counts, pipelineToday }: { data: TodayResponse; mostLikely: IntelligenceRow[]; bestValue: IntelligenceRow[]; counts: CategoryCounts; pipelineToday?: PipelineTraceDay | null }) {
   const topProbability = mostLikely[0]
   const topValue = bestValue[0]
   const modelOnlyCount = Number(data.sections?.modelIntelligence?.data?.summary?.modelOutcomes ?? counts.modelOnly ?? 0)
+  const traceCounts = pipelineToday?.counts
+  const predictionCoverage = pipelineToday?.coverage?.predictionCoveragePct
+  const traceReason = traceReasonSummary(pipelineToday)
   const lines = [
     data.summary?.aiBriefing ?? (data.gamesWaitingForOdds > 0
       ? 'Sportsbook odds are still pending, so recommendations stay locked until the board has current prices.'
       : counts.official > 0
         ? `${counts.official} Official Pick${counts.official === 1 ? '' : 's'} passed the production policy.`
         : 'No game currently meets both confidence and value requirements for an Official Pick.'),
+    traceCounts
+      ? `Pipeline trace found ${traceCounts.gamesScheduled} scheduled game${traceCounts.gamesScheduled === 1 ? '' : 's'}, ${traceCounts.predictionsGenerated} stored prediction${traceCounts.predictionsGenerated === 1 ? '' : 's'}, ${traceCounts.currentBoardCandidates} Current Board candidate${traceCounts.currentBoardCandidates === 1 ? '' : 's'} and ${traceCounts.productionPredictionsSettled} production settlement${traceCounts.productionPredictionsSettled === 1 ? '' : 's'} for the operating day.`
+      : null,
+    predictionCoverage !== undefined && predictionCoverage !== null
+      ? `Prediction coverage is ${predictionCoverage}% by scheduled game; missed-game reasons: ${traceReason || 'none recorded'}.`
+      : null,
     topProbability
       ? `The most likely outcome is ${fieldValue(topProbability.selection)} in ${fieldValue(topProbability.matchup)} at ${formatPercent(candidateDisplayProbability(topProbability))}.`
       : modelOnlyCount > 0
@@ -1070,16 +1140,17 @@ function TodayStory({ data, mostLikely, bestValue, counts }: { data: TodayRespon
   )
 }
 
-function PipelineSummary({ data, counts }: { data: TodayResponse; counts: CategoryCounts }) {
+function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse; counts: CategoryCounts; pipelineToday?: PipelineTraceDay | null }) {
   const pipeline = data.pipeline ?? []
   const byId = new Map(pipeline.map((item) => [item.id, item]))
+  const traceCounts = pipelineToday?.counts
   const rows: Array<[string, { status: string; detail: string }]> = [
     ['Odds', byId.get('market_prices') ?? { status: data.latestOddsTimestamp ? 'Complete' : 'Waiting', detail: data.summary.marketPrices }],
-    ['Predictions', byId.get('predictions') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? `${data.predictionCandidates} candidates available.` : 'Waiting for odds.' }],
-    ['Current Board', byId.get('current_board') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? 'Candidates are available.' : 'Waiting.' }],
-    ['Official Picks', byId.get('recommendations') ?? { status: counts.official ? 'Complete' : 'Waiting', detail: counts.official ? 'Official picks passed policy.' : 'Waiting for prediction and market comparison.' }],
-    ['Settlement', byId.get('settlement') ?? { status: data.finalGames ? 'Waiting' : 'Complete', detail: data.finalGames ? 'Final games are ready for stored settlement checks.' : 'Healthy.' }],
-    ['Learning', byId.get('learning') ?? { status: 'Not due', detail: 'Ready when settled production labels exist; no auto-promotion.' }],
+    ['Predictions', traceCounts ? { status: traceCounts.predictionsGenerated ? 'Complete' : 'Waiting', detail: traceCounts.predictionsGenerated ? `${traceCounts.predictionsGenerated} stored prediction rows found for ${traceCounts.gamesScheduled} scheduled games.` : 'Waiting for eligible pregame prediction rows.' } : byId.get('predictions') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? `${data.predictionCandidates} candidates available.` : 'Waiting for odds.' }],
+    ['Current Board', traceCounts ? { status: traceCounts.currentBoardCandidates ? 'Complete' : 'Waiting', detail: traceCounts.currentBoardCandidates ? `${traceCounts.currentBoardCandidates} candidates are visible after board gates.` : 'Stored predictions exist, but no candidate passed Current Board gates.' } : byId.get('current_board') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? 'Candidates are available.' : 'Waiting.' }],
+    ['Official Picks', traceCounts ? { status: traceCounts.officialPicks ? 'Complete' : 'Waiting', detail: traceCounts.officialPicks ? `${traceCounts.officialPicks} Official Picks passed policy.` : 'No stored candidate passed Official Pick policy gates.' } : byId.get('recommendations') ?? { status: counts.official ? 'Complete' : 'Waiting', detail: counts.official ? 'Official picks passed policy.' : 'Waiting for prediction and market comparison.' }],
+    ['Settlement', traceCounts ? { status: traceCounts.productionPredictionsSettled ? 'Complete' : traceCounts.gamesCompleted ? 'Waiting' : 'Not due', detail: traceCounts.productionPredictionsSettled ? `${traceCounts.productionPredictionsSettled} production predictions settled.` : traceCounts.gamesCompleted ? `${traceCounts.gamesCompleted} completed games are waiting for eligible production settlement evidence.` : 'No completed games require settlement yet.' } : byId.get('settlement') ?? { status: data.finalGames ? 'Waiting' : 'Complete', detail: data.finalGames ? 'Final games are ready for stored settlement checks.' : 'Healthy.' }],
+    ['Learning', traceCounts ? { status: traceCounts.learningSamplesQueued ? 'Complete' : 'Not due', detail: traceCounts.learningSamplesQueued ? `${traceCounts.learningSamplesQueued} learning labels queued; ${traceCounts.learningSamplesAccepted} accepted and ${traceCounts.learningSamplesRejected} rejected by evidence checks.` : 'Ready when settled production labels exist; no auto-promotion.' } : byId.get('learning') ?? { status: 'Not due', detail: 'Ready when settled production labels exist; no auto-promotion.' }],
   ]
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
@@ -1446,6 +1517,7 @@ export default function UserTodayPanel() {
   const [mostLikely, setMostLikely] = useState<IntelligenceRow[]>([])
   const [bestValue, setBestValue] = useState<IntelligenceRow[]>([])
   const [aiResults, setAiResults] = useState<IntelligenceRow[]>([])
+  const [pipelineToday, setPipelineToday] = useState<PipelineTraceDay | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [sectionWarnings, setSectionWarnings] = useState<string[]>([])
   const [slowLoading, setSlowLoading] = useState(false)
@@ -1468,11 +1540,15 @@ export default function UserTodayPanel() {
       try {
         setError(null)
         setSectionWarnings([])
+        const tracePromise = optionalJson<RecommendationPipelineTraceResponse>('/api/recommendation-pipeline/trace')
         const todayResponse = await fetch('/api/dashboard/today', { cache: 'no-store' })
         const todayJson = await todayResponse.json()
         if (!todayResponse.ok || todayJson.success === false) throw new Error(todayJson.error?.message ?? todayJson.error ?? 'Unable to load today.')
         if (!active) return
         setData(todayJson)
+        const traceJson = await tracePromise
+        if (!active) return
+        setPipelineToday(traceJson?.today ?? traceJson?.days?.find((day) => String(day.label ?? '').toLowerCase() === 'today') ?? traceJson?.days?.[0] ?? null)
 
         const embeddedMostLikely = todayJson.sections?.mostLikely?.data
         const embeddedBestValue = todayJson.sections?.bestValue?.data
@@ -1598,8 +1674,8 @@ export default function UserTodayPanel() {
         </div>
       ) : null}
       <DecisionHero data={data} counts={counts} />
-      <TodayStory data={data} counts={counts} mostLikely={mostLikely} bestValue={bestValue} />
-      <PipelineSummary data={data} counts={counts} />
+      <TodayStory data={data} counts={counts} mostLikely={mostLikely} bestValue={bestValue} pipelineToday={pipelineToday} />
+      <PipelineSummary data={data} counts={counts} pipelineToday={pipelineToday} />
       <AiPerformancePreviewCard />
       <DataFreshnessPreviewCard />
       <section className="grid gap-4 lg:grid-cols-6">
@@ -1611,7 +1687,7 @@ export default function UserTodayPanel() {
         <CategoryCard title="Avoid" value={counts.avoid} tone="red" icon="AV" href="/ai-bet-finder" status={counts.avoid ? 'Avoid' : 'Clear'} tooltip="Materially negative, invalid or unsafe markets only." />
       </section>
       <OfficialPickExperienceCard picks={officialPickRows} reason={data.sections?.officialPicks?.reason} topOpportunity={topOpportunity} />
-      <AiPicksFeedPanel feed={aiPicksFeed} reason={data.sections?.aiPicksFeed?.reason} />
+      <AiPicksFeedPanel feed={aiPicksFeed} reason={data.sections?.aiPicksFeed?.reason} pipelineToday={pipelineToday} />
       <section className="grid gap-4 xl:grid-cols-[1.4fr_0.6fr]">
         <TopOpportunityCard opportunity={topOpportunity} />
         <AIConfidenceCard opportunity={topOpportunity} />

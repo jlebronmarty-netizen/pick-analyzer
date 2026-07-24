@@ -12,12 +12,23 @@ type EventRow = {
   id: string
   start_time: string | null
   status: string | null
+  home_team?: string | null
+  away_team?: string | null
+  home_score?: number | null
+  away_score?: number | null
 }
 
 type PredictionRow = {
   id: string
   game_id: string | null
+  commence_time?: string | null
   generated_at: string | null
+  cutoff_at?: string | null
+  market?: string | null
+  odds_snapshot_id?: string | null
+  feature_snapshot_id?: string | null
+  feature_snapshot_key?: string | null
+  feature_snapshot?: Record<string, unknown> | null
   result: string | null
   status: string | null
   recommended_pick: boolean | null
@@ -26,6 +37,7 @@ type PredictionRow = {
   trial: boolean | null
   scrambled: boolean | null
   settlement_details: Record<string, unknown> | null
+  settled_at?: string | null
 }
 
 function astDate(value: string) {
@@ -46,12 +58,46 @@ function isFinal(status: string | null) {
   return ['completed', 'final', 'closed'].includes(lower(status))
 }
 
+function hasFeatureEvidence(row: PredictionRow) {
+  return Boolean(
+    row.feature_snapshot_id ||
+      row.feature_snapshot_key ||
+      (row.feature_snapshot && Object.keys(row.feature_snapshot).length > 0)
+  )
+}
+
 function isProductionSettled(row: PredictionRow) {
   const result = lower(row.result ?? row.status)
   const lifecycle = lower((row.settlement_details?.settlement_reconciliation_v2 as Record<string, unknown> | undefined)?.lifecycle)
   if (row.trial || row.scrambled || lower(row.model_role).includes('shadow')) return false
   if (['legacy', 'ignored', 'historical', 'replay', 'shadow', 'cancelled', 'voided', 'unknown'].includes(lifecycle)) return false
   return ['win', 'loss', 'push'].includes(result)
+}
+
+function predictionBeforeStart(row: PredictionRow, event: EventRow) {
+  const generated = Date.parse(row.generated_at ?? '')
+  const start = Date.parse(event.start_time ?? row.commence_time ?? '')
+  return Number.isFinite(generated) && Number.isFinite(start) && generated < start
+}
+
+function predictionBeforeCutoff(row: PredictionRow, event: EventRow) {
+  const generated = Date.parse(row.generated_at ?? '')
+  const cutoff = Date.parse(row.cutoff_at ?? event.start_time ?? '')
+  return Number.isFinite(generated) && Number.isFinite(cutoff) && generated <= cutoff
+}
+
+function missedReason(input: {
+  event: EventRow
+  odds: number
+  predictions: PredictionRow[]
+  boardCandidates: number
+}) {
+  if (input.predictions.length > 0) return null
+  if (!input.odds) return 'ODDS_UNAVAILABLE'
+  const start = Date.parse(input.event.start_time ?? '')
+  if (Number.isFinite(start) && start <= Date.now()) return 'SCHEDULER_MISSED_WINDOW'
+  if (!input.boardCandidates) return 'NO_ELIGIBLE_MARKET'
+  return 'PREDICTION_NOT_DUE'
 }
 
 function reasons(counts: Record<string, number>) {
@@ -83,7 +129,7 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
   const range = zonedUtcRange(date, TIMEZONE)
   const { data: eventsData, error: eventsError } = await supabaseAdmin
     .from('sport_events')
-    .select('id, start_time, status')
+    .select('id, start_time, status, home_team, away_team, home_score, away_score')
     .eq('sport_key', SPORT_KEY)
     .gte('start_time', range.utcStart)
     .lt('start_time', range.utcEndExclusive)
@@ -103,7 +149,7 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
   const predictionsResult = eventIds.length
     ? await supabaseAdmin
         .from('prediction_history')
-        .select('id, game_id, generated_at, result, status, recommended_pick, model_role, production_eligible, trial, scrambled, settlement_details')
+        .select('id, game_id, commence_time, generated_at, cutoff_at, market, odds_snapshot_id, feature_snapshot_id, feature_snapshot_key, feature_snapshot, result, status, recommended_pick, model_role, production_eligible, trial, scrambled, settlement_details, settled_at')
         .in('game_id', eventIds)
     : { data: [], error: null }
   const predictions = ((predictionsResult.data ?? []) as PredictionRow[])
@@ -119,13 +165,88 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
   const weightUpdates = await safeCount('model_weight_history', (query) => query.gte('created_at', range.utcStart).lt('created_at', range.utcEndExclusive))
 
   const boardCandidates = board?.candidates ?? []
+  const boardByEvent = new Map<string, any[]>()
+  for (const candidate of boardCandidates as any[]) {
+    const id = String(candidate.eventId ?? candidate.gameId ?? '')
+    if (!id) continue
+    boardByEvent.set(id, [...(boardByEvent.get(id) ?? []), candidate])
+  }
+  const oddsByEvent = new Map<string, number>()
+  if (eventIds.length) {
+    const { data: oddsRows } = await supabaseAdmin
+      .from('sports_odds_snapshots')
+      .select('event_id')
+      .in('event_id', eventIds)
+      .limit(5000)
+    for (const row of (oddsRows ?? []) as Array<{ event_id: string | null }>) {
+      if (!row.event_id) continue
+      oddsByEvent.set(row.event_id, (oddsByEvent.get(row.event_id) ?? 0) + 1)
+    }
+  }
+  const predictionsByEvent = new Map<string, PredictionRow[]>()
+  for (const prediction of predictions) {
+    const id = String(prediction.game_id ?? '')
+    if (!id) continue
+    predictionsByEvent.set(id, [...(predictionsByEvent.get(id) ?? []), prediction])
+  }
+  const gameLifecycles = events.map((event) => {
+    const eventPredictions = predictionsByEvent.get(event.id) ?? []
+    const eventBoard = boardByEvent.get(event.id) ?? []
+    const settled = eventPredictions.filter(isProductionSettled)
+    const learningAccepted = settled.filter(hasFeatureEvidence)
+    const learningRejected = settled.filter((row) => !hasFeatureEvidence(row))
+    const beforeStart = eventPredictions.filter((row) => predictionBeforeStart(row, event)).length
+    const beforeCutoff = eventPredictions.filter((row) => predictionBeforeCutoff(row, event)).length
+    const odds = oddsByEvent.get(event.id) ?? 0
+    const reason = missedReason({ event, odds, predictions: eventPredictions, boardCandidates: eventBoard.length })
+    return {
+      eventId: event.id,
+      matchup: `${event.away_team ?? 'Away'} @ ${event.home_team ?? 'Home'}`,
+      startTime: event.start_time,
+      status: event.status,
+      gameDetected: true,
+      oddsAvailable: odds > 0,
+      oddsSnapshots: odds,
+      predictionGenerated: eventPredictions.length > 0,
+      predictionsPersisted: eventPredictions.length,
+      predictionTimestamp: eventPredictions.map((row) => row.generated_at).filter(Boolean).sort()[0] ?? null,
+      predictionBeforeStart: eventPredictions.length ? beforeStart === eventPredictions.length : null,
+      predictionBeforeCutoff: eventPredictions.length ? beforeCutoff === eventPredictions.length : null,
+      currentBoardClassification: eventBoard[0]?.marketIntelligenceCategory ?? eventBoard[0]?.recommendationPolicyStatus ?? null,
+      mostLikelyEligible: eventPredictions.length > 0 || eventBoard.length > 0,
+      bestValueEligible: eventBoard.some((candidate) => Number(candidate.expectedValue ?? 0) > 0 && Number(candidate.edge ?? 0) > 0),
+      officialPickEligible: eventPredictions.some((row) => row.recommended_pick === true || row.production_eligible === true) || eventBoard.some((candidate) => candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'),
+      gameFinal: isFinal(event.status) || (event.home_score !== null && event.away_score !== null),
+      settlementCompleted: settled.length,
+      learningLabel: settled.length,
+      learningAccepted: learningAccepted.length,
+      learningRejected: learningRejected.length,
+      learningSkipped: 0,
+      learningDecisionReason: settled.length
+        ? learningRejected.length
+          ? 'FEATURE_SNAPSHOT_MISSING'
+          : 'DETERMINISTIC_LABEL_AND_FEATURE_EVIDENCE_ACCEPTED'
+        : eventPredictions.length
+          ? 'RESULT_NOT_FINAL_OR_NOT_SETTLED'
+          : reason,
+      missedReason: reason,
+    }
+  })
+  const gamesPredicted = gameLifecycles.filter((game) => game.predictionGenerated).length
+  const gamesSettled = gameLifecycles.filter((game) => game.settlementCompleted > 0).length
+  const gamesLearned = gameLifecycles.filter((game) => game.learningAccepted + game.learningRejected + game.learningSkipped > 0).length
+  const gamesMissed = gameLifecycles.filter((game) => !game.predictionGenerated).length
+  const missReasons = gameLifecycles.reduce<Record<string, number>>((acc, game) => {
+    if (game.missedReason) acc[game.missedReason] = (acc[game.missedReason] ?? 0) + 1
+    return acc
+  }, {})
   const counts = {
     gamesScheduled: events.length,
     gamesEligibleBeforeStart,
     oddsSnapshotsAvailable: oddsSnapshots.count,
     predictionsGenerated: predictions.length,
-    currentBoardCandidates: board?.candidates.length ?? 0,
-    modelOnlyRows: modelOnly?.summary.modelOutcomes ?? 0,
+    currentBoardCandidates: board?.candidates?.length ?? 0,
+    modelOnlyRows: modelOnly?.summary?.modelOutcomes ?? 0,
     aiLeans: boardCandidates.filter((candidate: any) => /LEAN|QUALIFIED|PREVIEW/i.test(String(candidate.recommendationPolicyStatus ?? candidate.semanticLabel ?? ''))).length,
     watchlist: boardCandidates.filter((candidate: any) => /WATCH/i.test(String(candidate.recommendationPolicyStatus ?? candidate.semanticLabel ?? ''))).length,
     bestValue: boardCandidates.filter((candidate: any) => Number(candidate.expectedValue ?? 0) > 0 && Number(candidate.edge ?? 0) > 0).length,
@@ -137,12 +258,33 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
     learningSamplesRejected: Math.max(0, predictions.filter(isProductionSettled).length - learningAccepted.count),
     weightUpdates: weightUpdates.count,
   }
+  const coverage = {
+    gamesDetected: events.length,
+    gamesPredicted,
+    gamesSettled,
+    gamesLearned,
+    gamesMissed,
+    missReasons,
+    predictionCoveragePct: events.length ? Number(((gamesPredicted / events.length) * 100).toFixed(2)) : null,
+    settlementCoveragePct: events.length ? Number(((gamesSettled / events.length) * 100).toFixed(2)) : null,
+    learningDecisionCoveragePct: events.length ? Number(((gamesLearned / events.length) * 100).toFixed(2)) : null,
+    noPostStartPredictions: gameLifecycles.every((game) => game.predictionBeforeStart !== false),
+    noPostFinalPredictions: predictions.every((row) => {
+      const event = events.find((item) => item.id === row.game_id)
+      if (!event || !isFinal(event.status)) return true
+      const generated = Date.parse(row.generated_at ?? '')
+      const start = Date.parse(event.start_time ?? '')
+      return Number.isFinite(generated) && Number.isFinite(start) ? generated < start : true
+    }),
+  }
 
   return {
     label,
     date,
     timezone: TIMEZONE,
     counts,
+    coverage,
+    gameLifecycles,
     zeroReasonCodes: reasons(counts),
     evidence: {
       scheduleReadError: eventsError?.message ?? null,
@@ -168,6 +310,8 @@ export async function getRecommendationPipelineTrace() {
     readOnly: true,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
+    today,
+    yesterday,
     days: [today, yesterday],
   }
 }

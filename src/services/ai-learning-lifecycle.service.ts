@@ -444,14 +444,23 @@ export async function getAiLearningLifecycle() {
     latestProjection.error,
   ].filter(Boolean) as string[]
 
-  const todaySummary = summarizePredictions(todayPredictions.data)
-  const yesterdaySummary = summarizePredictions(yesterdayPredictions.data)
-  const last7Summary = summarizePredictions(last7Predictions.data)
+  const todayEventIds = new Set(todayEvents.data.map((event) => event.id))
+  const yesterdayEventIds = new Set(yesterdayEvents.data.map((event) => event.id))
+  const last7EventIds = new Set(last7Events.data.map((event) => event.id))
+  const todayPredictionRows = allPredictions.data.filter((row) => row.game_id && todayEventIds.has(row.game_id))
+  const yesterdayPredictionRows = allPredictions.data.filter((row) => row.game_id && yesterdayEventIds.has(row.game_id))
+  const last7PredictionRows = allPredictions.data.filter((row) => row.game_id && last7EventIds.has(row.game_id))
+  const todaySummary = summarizePredictions(todayPredictionRows.length || todayEvents.data.length ? todayPredictionRows : todayPredictions.data)
+  const yesterdaySummary = summarizePredictions(yesterdayPredictionRows.length || yesterdayEvents.data.length ? yesterdayPredictionRows : yesterdayPredictions.data)
+  const last7Summary = summarizePredictions(last7PredictionRows.length || last7Events.data.length ? last7PredictionRows : last7Predictions.data)
   const allSummary = summarizePredictions(allPredictions.data)
   const allQueue = learningQueue(allPredictions.data, weightRows.data)
-  const todayQueue = learningQueue(todayPredictions.data, weightRows.data)
-  const yesterdayQueue = learningQueue(yesterdayPredictions.data, weightRows.data)
-  const last7Queue = learningQueue(last7Predictions.data, weightRows.data)
+  const effectiveTodayPredictions = todayPredictionRows.length || todayEvents.data.length ? todayPredictionRows : todayPredictions.data
+  const effectiveYesterdayPredictions = yesterdayPredictionRows.length || yesterdayEvents.data.length ? yesterdayPredictionRows : yesterdayPredictions.data
+  const effectiveLast7Predictions = last7PredictionRows.length || last7Events.data.length ? last7PredictionRows : last7Predictions.data
+  const todayQueue = learningQueue(effectiveTodayPredictions, weightRows.data)
+  const yesterdayQueue = learningQueue(effectiveYesterdayPredictions, weightRows.data)
+  const last7Queue = learningQueue(effectiveLast7Predictions, weightRows.data)
 
   const projectionSettled = projectionRows.data.filter((row) => asNumber(row.actual_value) !== null && asNumber(row.projected_value) !== null)
   const projectionErrors = projectionSettled.map((row) => asNumber(row.error)).filter((value): value is number => value !== null)
@@ -489,17 +498,17 @@ export async function getAiLearningLifecycle() {
     panel(
       'prediction_pipeline',
       'Prediction Pipeline',
-      todayPredictions.data.length > 0 ? 'Completed' : todayEvents.data.length > 0 ? 'Waiting' : 'Blocked',
-      todayPredictions.data.length > 0 ? 'Stored predictions exist for the operating day.' : 'No stored predictions exist for the operating day.',
-      { todayGames: todayEvents.data.length, todayPredictions: todayPredictions.data.length, todayOddsSnapshots: todayOdds.data.length },
-      todayPredictions.data.length ? null : todayOdds.data.length ? 'PREDICTION_NOT_DUE' : 'ODDS_NOT_AVAILABLE',
+      effectiveTodayPredictions.length > 0 ? 'Completed' : todayEvents.data.length > 0 ? 'Waiting' : 'Blocked',
+      effectiveTodayPredictions.length > 0 ? 'Stored predictions exist for the operating day.' : 'No stored predictions exist for the operating day.',
+      { todayGames: todayEvents.data.length, todayPredictions: effectiveTodayPredictions.length, todayOddsSnapshots: todayOdds.data.length, source: effectiveTodayPredictions === todayPredictionRows ? 'event_id_scope' : 'commence_time_scope' },
+      effectiveTodayPredictions.length ? null : todayOdds.data.length ? 'PREDICTION_NOT_DUE' : 'ODDS_NOT_AVAILABLE',
       latestPrediction.value,
       String(schedulerRecord.nextScheduledAt ?? 'Waiting for next scheduler execution')
     ),
     panel(
       'current_board',
       'Current Board',
-      todayPredictions.data.length > 0 ? 'Waiting' : 'Waiting',
+      effectiveTodayPredictions.length > 0 ? 'Waiting' : 'Waiting',
       'Current Board remains policy-gated and is not mutated by this diagnostic.',
       { source: 'stored_prediction_history_read_only', candidatesDerivedHere: 0 },
       'READ_ONLY_DIAGNOSTIC_DOES_NOT_BUILD_BOARD',
@@ -672,7 +681,7 @@ export async function getAiLearningLifecycle() {
         gamesScheduled: todayEvents.data.length,
         gamesCompleted: finalTodayEvents,
         oddsSnapshots: todayOdds.data.length,
-        predictionsGenerated: todayPredictions.data.length,
+        predictionsGenerated: effectiveTodayPredictions.length,
         ...todaySummary,
         learning: { queued: todayQueue.queued, accepted: todayQueue.accepted, rejected: todayQueue.rejected },
         reasonCodes: todaySummary.productionSettled === 0 ? ['RESULT_NOT_FINAL', 'NO_LEARNING_LABEL', 'LEARNING_NOT_RUN'] : [],
@@ -682,7 +691,7 @@ export async function getAiLearningLifecycle() {
         gamesScheduled: yesterdayEvents.data.length,
         gamesCompleted: finalYesterdayEvents,
         oddsSnapshots: yesterdayOdds.data.length,
-        predictionsGenerated: yesterdayPredictions.data.length,
+        predictionsGenerated: effectiveYesterdayPredictions.length,
         ...yesterdaySummary,
         learning: { queued: yesterdayQueue.queued, accepted: yesterdayQueue.accepted, rejected: yesterdayQueue.rejected },
         reasonCodes: yesterdaySummary.productionSettled === 0 ? ['NO_PRODUCTION_SETTLEMENT', 'NO_LEARNING_LABEL', 'LEARNING_NOT_RUN'] : [],
@@ -690,7 +699,7 @@ export async function getAiLearningLifecycle() {
       last7Days: {
         gamesScheduled: last7Events.data.length,
         gamesCompleted: finalLast7Events,
-        predictionsGenerated: last7Predictions.data.length,
+        predictionsGenerated: effectiveLast7Predictions.length,
         ...last7Summary,
         learning: { queued: last7Queue.queued, accepted: last7Queue.accepted, rejected: last7Queue.rejected },
         reasonCodes: last7Summary.productionSettled === 0 ? ['NO_ELIGIBLE_PREDICTIONS_SETTLED_IN_PERIOD'] : [],
@@ -698,7 +707,7 @@ export async function getAiLearningLifecycle() {
     },
     pipelineTransitions: [
       { from: 'Game Scheduled', to: 'Odds Snapshot', status: todayOdds.data.length > 0 ? 'Completed' : 'Waiting', evidence: todayOdds.data.length, blocker: todayOdds.data.length ? null : 'ODDS_NOT_AVAILABLE' },
-      { from: 'Odds Snapshot', to: 'Prediction Generated', status: todayPredictions.data.length > 0 ? 'Completed' : 'Waiting', evidence: todayPredictions.data.length, blocker: todayPredictions.data.length ? null : 'PREDICTION_NOT_DUE' },
+      { from: 'Odds Snapshot', to: 'Prediction Generated', status: effectiveTodayPredictions.length > 0 ? 'Completed' : 'Waiting', evidence: effectiveTodayPredictions.length, blocker: effectiveTodayPredictions.length ? null : 'PREDICTION_NOT_DUE' },
       { from: 'Prediction Generated', to: 'Current Board', status: 'Waiting', evidence: 0, blocker: 'READ_ONLY_DIAGNOSTIC_DOES_NOT_BUILD_BOARD' },
       { from: 'Game Finished', to: 'Settlement', status: allSummary.pending > 0 ? 'Waiting' : 'Completed', evidence: allSummary.productionSettled, blocker: allSummary.pending ? 'PENDING_ROWS_REMAIN' : null },
       { from: 'Settlement', to: 'Replay Snapshot', status: projectionRows.data.length > 0 ? 'Completed' : 'Waiting', evidence: projectionRows.data.length, blocker: projectionRows.data.length ? null : 'REPLAY_SNAPSHOT_MISSING' },
@@ -772,9 +781,9 @@ export async function getAiLearningLifecycle() {
       learning: { lastSuccessfulRefresh: weightRows.data[0]?.created_at ?? null, nextScheduledRefresh: 'Waiting for next scheduler execution' },
     },
     dailyAiStory: {
-      today: `Today has ${todayEvents.data.length} scheduled MLB games, ${todayOdds.data.length} stored odds snapshots, ${todayPredictions.data.length} stored predictions, ${todaySummary.productionSettled} production settlements and ${todayQueue.accepted} accepted learning samples.`,
-      yesterday: `Yesterday has ${yesterdayEvents.data.length} scheduled MLB games, ${yesterdayOdds.data.length} stored odds snapshots, ${yesterdayPredictions.data.length} stored predictions, ${yesterdaySummary.productionSettled} production settlements and ${yesterdayQueue.accepted} accepted learning samples.`,
-      last7Days: `The last 7 days have ${last7Events.data.length} scheduled MLB games, ${last7Predictions.data.length} stored predictions, ${last7Summary.productionSettled} production settlements and ${last7Queue.accepted} accepted learning samples.`,
+      today: `Today has ${todayEvents.data.length} scheduled MLB games, ${todayOdds.data.length} stored odds snapshots, ${effectiveTodayPredictions.length} stored predictions, ${todaySummary.productionSettled} production settlements and ${todayQueue.accepted} accepted learning samples.`,
+      yesterday: `Yesterday has ${yesterdayEvents.data.length} scheduled MLB games, ${yesterdayOdds.data.length} stored odds snapshots, ${effectiveYesterdayPredictions.length} stored predictions, ${yesterdaySummary.productionSettled} production settlements and ${yesterdayQueue.accepted} accepted learning samples.`,
+      last7Days: `The last 7 days have ${last7Events.data.length} scheduled MLB games, ${effectiveLast7Predictions.length} stored predictions, ${last7Summary.productionSettled} production settlements and ${last7Queue.accepted} accepted learning samples.`,
       blockers: uniq([
         todaySummary.productionSettled === 0 ? 'NO_TODAY_PRODUCTION_SETTLEMENT' : '',
         yesterdaySummary.productionSettled === 0 ? 'NO_YESTERDAY_PRODUCTION_SETTLEMENT' : '',
@@ -786,7 +795,7 @@ export async function getAiLearningLifecycle() {
       today: {
         games: todayEvents.data.length,
         odds: todayOdds.data.length,
-        predictions: todayPredictions.data.length,
+        predictions: effectiveTodayPredictions.length,
         boardCandidates: 0,
         officialPicks: todayPredictions.data.filter((row) => row.recommended_pick === true).length,
         completedGames: finalTodayEvents,
@@ -798,7 +807,7 @@ export async function getAiLearningLifecycle() {
         weightUpdates: weightRows.data.filter((row) => row.created_at && row.created_at >= todayRange.start && row.created_at < todayRange.end).length,
         zeroReasons: {
           odds: todayOdds.data.length === 0 ? 'ODDS_NOT_AVAILABLE' : null,
-          predictions: todayPredictions.data.length === 0 ? 'PREDICTION_NOT_DUE_OR_ODDS_BLOCKED' : null,
+          predictions: effectiveTodayPredictions.length === 0 ? 'PREDICTION_NOT_DUE_OR_ODDS_BLOCKED' : null,
           settlements: todaySummary.productionSettled === 0 ? 'NO_PRODUCTION_SETTLEMENTS_IN_PERIOD' : null,
           learning: todayQueue.accepted === 0 ? 'NO_ACCEPTED_LEARNING_SAMPLE_IN_PERIOD' : null,
         },
@@ -806,7 +815,7 @@ export async function getAiLearningLifecycle() {
       yesterday: {
         games: yesterdayEvents.data.length,
         odds: yesterdayOdds.data.length,
-        predictions: yesterdayPredictions.data.length,
+        predictions: effectiveYesterdayPredictions.length,
         boardCandidates: 0,
         officialPicks: yesterdayPredictions.data.filter((row) => row.recommended_pick === true).length,
         completedGames: finalYesterdayEvents,
@@ -823,7 +832,7 @@ export async function getAiLearningLifecycle() {
       },
       last7Days: {
         games: last7Events.data.length,
-        predictions: last7Predictions.data.length,
+        predictions: effectiveLast7Predictions.length,
         completedGames: finalLast7Events,
         settlements: last7Summary.productionSettled,
         labels: last7Queue.total,
