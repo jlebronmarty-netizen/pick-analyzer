@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Supabase Disk IO Recovery Audit V1
+
+Status: Locally implemented and build-verified; production deployment verification pending.
+
+Evidence: `scripts/database-io-readonly-audit.mjs`, `scripts/retrosheet-feature-backfill.mjs`, `src/services/retrosheet-historical-feature-store.service.ts`, `docs/SUPABASE_DISK_IO_RECOVERY_AUDIT_V1.md`, read-only Supabase REST audit output and local production build.
+
+Note: The audit classifies the Supabase Disk IO warning as a Phase 2A backfill/resume spike amplified by repeated full scoped exact counts over `historical_feature_snapshots`. Future approved Phase 2A write paths now use deterministic-key chunk lookups instead of before/after partition counts, and diagnostics reads Phase 2A counts from completed import registry metadata. Provider calls 0, remote mutations 0, Phase 2A was not rerun, Phase 2B was not started, and retraining/recalibration were not executed. `REPLAY_IO_READINESS_PASS` remains withheld until platform cache/bloat/autovacuum/lock metrics are checked.
+
 ### Pregame Execution Recovery & Slate Prewarm V1
 
 Status: Locally implemented and build-verified; production execution/deployment verification pending.

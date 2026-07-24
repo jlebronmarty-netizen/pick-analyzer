@@ -2,6 +2,14 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Supabase Disk IO Recovery Audit V1
+
+- Completed a read-only Supabase Disk IO recovery audit after the Phase 2A backfill window. The audit made 0 provider calls, 0 remote mutations, did not rerun Historical Feature Backfill Phase 2A, did not start Historical Replay Phase 2B and did not execute AI retraining or recalibration.
+- Root cause classification: the Disk IO warning was most consistent with a temporary Phase 2A full-write/resume spike amplified by repeated full scoped exact counts over `historical_feature_snapshots` inside the snapshot chunk write path.
+- Hardened `scripts/retrosheet-feature-backfill.mjs` and `retrosheet-historical-feature-store.service.ts` so approved future writes calculate inserted/skipped counts from deterministic keys in each chunk instead of before/after full partition counts.
+- Historical diagnostics now derives stored Phase 2A snapshot evidence from completed `historical_import_registry` metadata instead of exact-counting the snapshot table on every diagnostics request.
+- Platform catalog metrics for true table/index byte size, cache hit ratio, dead tuples, autovacuum recency, bloat and locks were not exposed through Supabase REST; `REPLAY_IO_READINESS_PASS` remains withheld pending dashboard/SQL metric confirmation and an approved bounded Phase 2B plan.
+
 ## 2026-07-24 Pregame Execution Recovery & Slate Prewarm V1
 
 - Recovered provider-backed MLB operating-day date selection so odds/prediction/current-board refresh actions choose the earliest pregame-actionable slate whose ten-minute prediction cutoff has not passed. If the local calendar slate exists but is already locked, started or past cutoff, scheduler execution pivots to the next safe slate instead of creating rows that cutoff enforcement must reject.

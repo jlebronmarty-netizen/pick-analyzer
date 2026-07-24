@@ -544,9 +544,14 @@ async function writeSnapshotChunk(client, rows, job, writeSize, maxRetries) {
     for (;;) {
       attempt += 1
       try {
-        const before = await countTable(client, 'historical_feature_snapshots', (query) =>
-          query.eq('sport_key', 'baseball_mlb').eq('market', 'historical_mlb_feature_store').like('deterministic_key', 'retrosheet_mlb_feature_store_v1:%')
+        const existing = await readPagedStable(
+          client,
+          'historical_feature_snapshots',
+          'deterministic_key',
+          (query) => query.in('deterministic_key', batch.map((row) => row.deterministic_key)),
+          writeSize
         )
+        const existingKeys = new Set(existing.map((row) => row.deterministic_key))
         const payload = batch.map((row) => ({
           ...row,
           generation_job_id: job.syncJobId,
@@ -554,10 +559,7 @@ async function writeSnapshotChunk(client, rows, job, writeSize, maxRetries) {
         }))
         const { error } = await client.from('historical_feature_snapshots').upsert(payload, { onConflict: 'deterministic_key', ignoreDuplicates: true })
         if (error) throw new Error(error.message)
-        const after = await countTable(client, 'historical_feature_snapshots', (query) =>
-          query.eq('sport_key', 'baseball_mlb').eq('market', 'historical_mlb_feature_store').like('deterministic_key', 'retrosheet_mlb_feature_store_v1:%')
-        )
-        const batchInserted = Math.max(0, after - before)
+        const batchInserted = batch.filter((row) => !existingKeys.has(row.deterministic_key)).length
         inserted += batchInserted
         skipped += batch.length - batchInserted
         break

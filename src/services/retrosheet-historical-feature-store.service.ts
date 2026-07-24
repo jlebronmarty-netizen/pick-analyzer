@@ -994,6 +994,53 @@ async function countStoredSnapshots() {
   return count ?? 0
 }
 
+async function estimateStoredSnapshotsFromCompletedImport() {
+  const { data, error } = await supabaseAdmin
+    .from('historical_import_registry')
+    .select('normalized_record_count, game_count, checkpoint, metadata, started_at, finished_at')
+    .eq('source', SOURCE)
+    .eq('sport_key', SPORT_KEY)
+    .eq('league_key', LEAGUE_KEY)
+    .eq('season', SEASON)
+    .eq('status', 'completed')
+    .order('started_at', { ascending: false })
+    .limit(25)
+
+  if (error) throw new Error(`historical import registry read failed: ${error.message}`)
+  const rows = (data ?? []) as Array<{
+    normalized_record_count: number | null
+    game_count: number | null
+    checkpoint: Record<string, unknown> | null
+    metadata: Record<string, unknown> | null
+    started_at: string | null
+    finished_at: string | null
+  }>
+  const localRows = rows.filter((row) => row.metadata?.workerVersion === 'retrosheet_local_feature_backfill_worker_v1')
+  const planned = localRows.reduce((max, row) => Math.max(max, Number(row.normalized_record_count ?? 0)), 0)
+  const latest = localRows[0] ?? null
+
+  return {
+    count: planned,
+    source: planned > 0 ? 'completed_historical_import_registry' : 'unavailable',
+    games: latest?.game_count ?? null,
+    checkpoint: latest?.checkpoint ?? null,
+    startedAt: latest?.started_at ?? null,
+    finishedAt: latest?.finished_at ?? null,
+  }
+}
+
+async function readExistingSnapshotKeys(rows: FeatureSnapshotRow[]) {
+  const keys = rows.map((row) => row.deterministic_key)
+  if (!keys.length) return new Set<string>()
+  const { data, error } = await supabaseAdmin
+    .from('historical_feature_snapshots')
+    .select('deterministic_key')
+    .in('deterministic_key', keys)
+
+  if (error) throw new Error(`historical feature key lookup failed: ${error.message}`)
+  return new Set(((data ?? []) as Array<{ deterministic_key: string | null }>).map((row) => row.deterministic_key).filter(Boolean) as string[])
+}
+
 export async function countRetrosheetHistoricalFeatureSnapshots() {
   return countStoredSnapshots()
 }
@@ -1238,13 +1285,12 @@ async function persistSnapshots(rows: FeatureSnapshotRow[], job: { syncJobId: st
         historicalImportId: job.importId,
       },
     }))
-    const before = await countStoredSnapshots()
+    const existingKeys = await readExistingSnapshotKeys(batch)
     const { error } = await supabaseAdmin
       .from('historical_feature_snapshots')
       .upsert(batch, { onConflict: 'deterministic_key', ignoreDuplicates: true })
     if (error) throw new Error(`historical feature upsert failed at ${index}: ${error.message}`)
-    const after = await countStoredSnapshots()
-    const batchInserted = Math.max(0, after - before)
+    const batchInserted = batch.filter((row) => !existingKeys.has(row.deterministic_key)).length
     inserted += batchInserted
     await persistCheckpoint({
       importId: job.importId,
@@ -1322,7 +1368,7 @@ export async function runRetrosheetHistoricalFeatureStore(options: {
   const selectedGames = selectGames(data, options)
   const snapshots = selectedGames.flatMap((game) => snapshotsForGame(game, data))
   const shouldPersist = mode === 'RANGE_IMPORT' || mode === 'FULL_SEASON_IMPORT'
-  const beforeCount = shouldPersist ? await countStoredSnapshots() : 0
+  const beforeCount = null
   let job: { syncJobId: string; importId: string; startedAt: string } | null = null
   let writeResult = { inserted: 0, skipped: shouldPersist ? snapshots.length : 0, checkpoints: 0 }
 
@@ -1354,7 +1400,7 @@ export async function runRetrosheetHistoricalFeatureStore(options: {
     }
   }
 
-  const afterCount = shouldPersist ? await countStoredSnapshots() : beforeCount
+  const afterCount = null
   const inserted = shouldPersist ? writeResult.inserted : 0
   const updatedOrSkipped = shouldPersist ? writeResult.skipped : 0
   const qualityCounts = snapshots.reduce<Record<Quality, number>>((acc, row) => {
@@ -1396,6 +1442,7 @@ export async function runRetrosheetHistoricalFeatureStore(options: {
       generatedSnapshots: snapshots.length,
       beforeStoredSnapshots: beforeCount,
       afterStoredSnapshots: afterCount,
+      storedSnapshotCountStrategy: shouldPersist ? 'omitted_to_avoid_full_partition_scan' : 'not_applicable',
       insertedSnapshots: inserted,
       updatedOrIdempotentSnapshots: updatedOrSkipped,
       skippedSnapshots: updatedOrSkipped,
@@ -1429,7 +1476,14 @@ export async function getRetrosheetHistoricalFeatureStoreDiagnostics(options: {
   limit?: number | null
 } = {}) {
   const contract = getRetrosheetHistoricalFeatureContract()
-  const count = await countStoredSnapshots().catch(() => 0)
+  const stored = await estimateStoredSnapshotsFromCompletedImport().catch(() => ({
+    count: 0,
+    source: 'unavailable',
+    games: null,
+    checkpoint: null,
+    startedAt: null,
+    finishedAt: null,
+  }))
   const preview = await runRetrosheetHistoricalFeatureStore({
     mode: 'SINGLE_GAME_PREVIEW',
     gameId: options.gameId,
@@ -1446,9 +1500,16 @@ export async function getRetrosheetHistoricalFeatureStoreDiagnostics(options: {
     generatedAt: new Date().toISOString(),
     providerCallsMade: 0,
     remoteMutationsMade: 0,
-    status: count > 0 ? 'imported' : 'ready_for_import',
+    status: stored.count > 0 ? 'imported' : 'ready_for_import',
     summary: {
-      storedSnapshots: count,
+      storedSnapshots: stored.count,
+      storedSnapshotCountSource: stored.source,
+      gamesCovered: stored.games,
+      latestCompletedImport: {
+        checkpoint: stored.checkpoint,
+        startedAt: stored.startedAt,
+        finishedAt: stored.finishedAt,
+      },
       featureDefinitions: contract.summary.candidateFeatures,
       featureGroups: contract.summary.featureGroups,
       storageTable: 'historical_feature_snapshots',
