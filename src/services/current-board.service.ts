@@ -437,6 +437,8 @@ export const CURRENT_BOARD_FRESHNESS_POLICY = {
 } as const
 
 const DEFAULT_CURRENT_BOARD_DISPLAY_ODDS_STALE_MINUTES = 30
+const CURRENT_BOARD_LOOKBACK_HOURS = 2
+const CURRENT_BOARD_LOOKAHEAD_DAYS = 14
 
 function emptyReasonCounts() {
   return Object.fromEntries(ALL_REASON_CODES.map((code) => [code, 0])) as Record<CurrentBoardReasonCode, number>
@@ -529,6 +531,13 @@ function displayMaxOddsAgeMinutes() {
     ['MLB_CURRENT_BOARD_DISPLAY_ODDS_STALE_MINUTES', 'MLB_ODDS_DISPLAY_STALE_MINUTES'],
     DEFAULT_CURRENT_BOARD_DISPLAY_ODDS_STALE_MINUTES
   )
+}
+
+function currentBoardPregameRange(nowMs: number) {
+  return {
+    utcStart: new Date(nowMs - CURRENT_BOARD_LOOKBACK_HOURS * 60 * 60 * 1000).toISOString(),
+    utcEndExclusive: new Date(nowMs + CURRENT_BOARD_LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+  }
 }
 
 function round(value: number, digits = 2) {
@@ -1271,8 +1280,10 @@ export async function getCurrentBoard({
   } else if (versioning.applied && (mode === 'CURRENT' || mode === 'UPCOMING')) {
     predictionsQuery = predictionsQuery.eq('is_current', true)
   }
-  if (slateDate && sportKey === 'baseball_mlb' && (mode === 'CURRENT' || mode === 'UPCOMING')) {
-    const range = zonedUtcRange(slateDate, 'America/Puerto_Rico')
+  if (sportKey === 'baseball_mlb' && (mode === 'CURRENT' || mode === 'UPCOMING')) {
+    const range = slateDate
+      ? zonedUtcRange(slateDate, 'America/Puerto_Rico')
+      : currentBoardPregameRange(nowMs)
     predictionsQuery = predictionsQuery.gte('commence_time', range.utcStart).lt('commence_time', range.utcEndExclusive)
   }
   const predictionsResult = await predictionsQuery

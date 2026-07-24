@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Current Board Database Timeout Recovery V1
+
+Status: Implemented locally; production verification pending.
+
+Evidence: `src/services/current-board.service.ts` and `supabase/migrations/202607240001_current_board_timeout_recovery_v1.sql`.
+
+Note: The Current Board product read now applies a bounded pregame `commence_time` range for `CURRENT` and `UPCOMING` modes before ordering by odds timestamp, so normal requests do not scan historical prediction growth after large backfills. The migration adds narrow indexes matching current prediction reads and event/market odds snapshot lookups. Most Likely remains a Current Board consumer; no model probabilities, production weights, Official Pick policy, replay/backfill artifacts, provider calls or unsupported market activation changed.
+
 ### Product Navigation & Information Architecture V1
 
 Status: Implemented and build-verified; production deployment verification pending.

@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Current Board Database Timeout Recovery V1
+
+- Scoped normal Current Board `CURRENT` and `UPCOMING` reads to a bounded pregame window before ordering prediction rows, preventing the product API from scanning historical growth when callers only need the active board.
+- Added narrow Current Board indexes for current prediction reads and event/market odds snapshot lookups.
+- Most Likely continues to consume the existing Current Board contract; no duplicate ranking logic, prediction probability change, model weight change, Official Pick policy change, provider call, replay/backfill action or unsupported-market activation was introduced.
+
 ## 2026-07-24 Product Navigation & Information Architecture V1
 
 - Reorganized the dashboard shell navigation into clear product groups: Today, Games, Players, Markets, Performance, AI Operations, Advanced and Administration.
