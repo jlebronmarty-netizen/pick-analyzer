@@ -6,6 +6,7 @@ import { classifyMarketIntelligence } from '@/services/market-intelligence-categ
 import { getMlbCurrentLineupContext } from '@/services/mlb-current-lineup-context.service'
 import { getMlbPlayerProjectionEngine } from '@/services/mlb-player-projection-engine.service'
 import { getMlbStarterIntelligence } from '@/services/mlb-starter-intelligence.service'
+import { buildExplainableIntelligence } from '@/services/explainable-intelligence.service'
 
 type EventRow = {
   id: string
@@ -153,6 +154,33 @@ export async function getGameIntelligence(eventId: string) {
   const classification = topCandidate ? classifyMarketIntelligence(topCandidate) : null
   const alignment = topCandidate?.marketAlignment ?? null
   const dataFreshness = freshness(event.updated_at ?? event.start_time)
+  const unavailableInputs = ['bullpen', 'handedness', 'travel', 'rest', 'confirmed injury status']
+  const explanationContract = buildExplainableIntelligence({
+    subject: `${event.away_team} @ ${event.home_team}`,
+    positive: [
+      ...(topCandidate?.positiveFactors ?? []),
+      ...(playerProjections.length ? ['Player projection context is available from stored lineup/player-stat evidence.'] : []),
+      ...(pitcherStatProjections.length ? ['Starter Intelligence enabled pitcher projection context for this game.'] : []),
+    ],
+    negative: [
+      ...(topCandidate?.negativeFactors ?? []),
+      ...(gameLineupContext?.coverage.confirmedLineups ? [] : ['Confirmed MLB lineup feed remains unavailable; expected lineups are labelled expected.']),
+      ...(gameStarterIntelligence?.coverage.blockedPitcherProjectionSlots ? ['One or more starter slots remain unavailable or projection-blocked.'] : []),
+    ],
+    neutral: [
+      topCandidate ? `Top supported market state is ${classification?.canonicalState ?? 'unknown'}.` : 'No Current Board market row is linked to this event.',
+      'Game Center evidence is read-only and does not create a new prediction model.',
+    ],
+    unavailable: unavailableInputs,
+    missingData: missingInputs().map((item) => item.reason),
+    blockers: topCandidate?.blockers ?? ['NO_CURRENT_BOARD_MARKET'],
+    confidence: topCandidate?.confidence ?? null,
+    featureQuality: topCandidate?.featureQuality ?? null,
+    dataSufficiency: topCandidate?.dataSufficiency ?? null,
+    marketFreshness: alignment?.freshnessStatus ?? dataFreshness.state,
+    calibrationStatus: topCandidate?.calibrationStatus ?? null,
+    officialEligible: topCandidate?.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE',
+  })
 
   return {
     success: true,
@@ -298,8 +326,9 @@ export async function getGameIntelligence(eventId: string) {
           starterConfidence: gameStarterIntelligence ? Math.round(((gameStarterIntelligence.starters.home.confidence + gameStarterIntelligence.starters.away.confidence) / 2)) : gameLineupContext ? Math.round(((gameLineupContext.starters.home.confidence + gameLineupContext.starters.away.confidence) / 2)) : 0,
           providerCallsMade: 0,
         },
-        unavailableInputs: ['bullpen', 'handedness', 'travel', 'rest', 'confirmed injury status'].filter(Boolean),
+        unavailableInputs,
       },
+      explainableIntelligence: explanationContract,
       performance: {
         projectionHistoryRows: playerProjectionEngine.persistence.projectionRows,
         settledProjectionRows: playerProjectionEngine.persistence.settledRows,
@@ -351,6 +380,7 @@ export async function getGameIntelligence(eventId: string) {
     },
     missingData: missingInputs(),
     explanation: topCandidate?.recommendationExplanation ?? null,
+    explainableIntelligence: explanationContract,
     summary: {
       state: classification?.canonicalState ?? 'INSUFFICIENT_DATA',
       label: classification?.display ?? 'INSUFFICIENT DATA',

@@ -59,6 +59,18 @@ type Opportunity = {
   selectedOddsSnapshotId: string | null
   anomalies: string[]
   canonicalReason?: string
+  explainableIntelligence?: ExplainableIntelligence
+}
+
+type ExplanationFactor = { label: string; impact: string; status: string; evidence: string; confidenceImpact: string }
+type ExplainableIntelligence = {
+  summary: string
+  positiveDrivers: ExplanationFactor[]
+  negativeDrivers: ExplanationFactor[]
+  unavailableFactors: ExplanationFactor[]
+  dataQualityLimitations: string[]
+  confidenceImpact: string
+  recommendationBoundary: string
 }
 
 type Response = {
@@ -398,6 +410,14 @@ export default function MostLikelyTool() {
                   <Info title="Missing Data" items={item.missingData} empty="No missing data listed." />
                   <Info title="Odds Flags" items={item.anomalies} empty="No odds anomalies." />
                 </div>
+                {item.explainableIntelligence ? (
+                  <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm">
+                    <p className="font-black text-emerald-100">Explainable Intelligence</p>
+                    <p className="mt-2 leading-6 text-emerald-50">{item.explainableIntelligence.summary}</p>
+                    <p className="mt-2 leading-6 text-slate-300">{item.explainableIntelligence.confidenceImpact}</p>
+                    <p className="mt-2 leading-6 text-amber-100">{item.explainableIntelligence.recommendationBoundary}</p>
+                  </div>
+                ) : null}
               </details>
             </article>
           ))}

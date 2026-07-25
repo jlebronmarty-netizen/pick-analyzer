@@ -37,11 +37,24 @@ type ApiData = {
   projection: Projection
   relatedProjections?: Projection[]
   comparison?: Projection[]
+  explainableIntelligence?: ExplainableIntelligence
   history?: { rows: HistoryRow[]; limit: number; source: string }
   performance?: PerformanceMetric | null
   providerCallsMade?: number
   remoteMutationsMade?: number
   settlementAndLearning?: { settlementStatus?: string; learningEvidence?: string; productionWeightsChanged?: boolean; autoPromotionEnabled?: boolean }
+}
+
+type ExplanationFactor = { label: string; impact: string; status: string; evidence: string; confidenceImpact: string }
+type ExplainableIntelligence = {
+  summary: string
+  positiveDrivers: ExplanationFactor[]
+  negativeDrivers: ExplanationFactor[]
+  neutralFactors: ExplanationFactor[]
+  unavailableFactors: ExplanationFactor[]
+  dataQualityLimitations: string[]
+  confidenceImpact: string
+  recommendationBoundary: string
 }
 
 type HistoryRow = {
@@ -114,6 +127,22 @@ function ProjectionMiniTable({ rows, empty }: { rows: Projection[]; empty: strin
           ))}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+function ExplanationColumn({ title, rows, empty }: { title: string; rows: ExplanationFactor[]; empty: string }) {
+  return (
+    <div>
+      <h3 className="font-black text-white">{title}</h3>
+      <div className="mt-3 space-y-2">
+        {rows.length ? rows.map((item) => (
+          <div key={`${item.label}-${item.evidence}`} className="rounded-lg border border-slate-800 bg-slate-950 p-3">
+            <p className="text-sm font-black text-white">{item.label} <span className="text-xs uppercase text-slate-500">{labelize(item.impact)}</span></p>
+            <p className="mt-1 text-sm leading-6 text-slate-400">{item.evidence}</p>
+          </div>
+        )) : <p className="rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-400">{empty}</p>}
+      </div>
     </div>
   )
 }
@@ -196,6 +225,21 @@ export default function MlbPlayerProjectionDetailClient({ projectionId }: { proj
         <section className="mt-5 rounded-lg border border-slate-800 bg-slate-900/75 p-5">
           <h2 className="text-xl font-black">Projection Evidence</h2>
           <p className="mt-3 text-sm leading-6 text-slate-300">{projection.explanation}</p>
+          {data.explainableIntelligence ? (
+            <div className="mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
+              <p className="font-black text-emerald-100">Explainable Intelligence</p>
+              <p className="mt-2 text-sm leading-6 text-emerald-50">{data.explainableIntelligence.summary}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{data.explainableIntelligence.confidenceImpact}</p>
+              <p className="mt-2 text-sm leading-6 text-amber-100">{data.explainableIntelligence.recommendationBoundary}</p>
+            </div>
+          ) : null}
+          {data.explainableIntelligence ? (
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              <ExplanationColumn title="Positive Drivers" rows={data.explainableIntelligence.positiveDrivers} empty="No positive driver was stored." />
+              <ExplanationColumn title="Negative Drivers" rows={data.explainableIntelligence.negativeDrivers} empty="No negative driver was stored." />
+              <ExplanationColumn title="Unavailable Factors" rows={data.explainableIntelligence.unavailableFactors} empty="No unavailable factor was stored." />
+            </div>
+          ) : null}
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {projection.supportingFeatures.map((feature) => (
               <div key={feature.feature} className="rounded-lg border border-slate-800 bg-slate-950 p-4">

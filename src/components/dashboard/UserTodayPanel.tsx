@@ -335,6 +335,11 @@ type AiPicksFeedItem = {
   marketFreshnessSource?: string
   marketAlignment?: MarketAlignment
   recommendationExplanation?: RecommendationExplanation
+  explainableIntelligence?: {
+    summary?: string
+    confidenceImpact?: string
+    recommendationBoundary?: string
+  } | null
   officialPick?: OfficialPick | null
   evidence?: string[]
   warnings?: string[]
@@ -845,6 +850,11 @@ function AiPicksFeedPanel({ feed, reason, pipelineToday }: { feed: AiPicksFeed |
                   <h4 className="mt-3 text-xl font-black text-white">{feedItemTitle(item)}</h4>
                   <p className="mt-1 text-sm text-slate-400">{fieldValue(item.matchup, 'Game pending')} · {timeText(item.scheduledTime)}</p>
                   <p className="mt-3 text-sm leading-6 text-slate-300">{fieldValue(explanation?.headline ?? item.evidence?.[0], 'Stored Current Board evidence.')}</p>
+                  {item.explainableIntelligence?.summary ? (
+                    <p className="mt-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm leading-6 text-emerald-50">
+                      {item.explainableIntelligence.summary} {item.explainableIntelligence.recommendationBoundary ?? ''}
+                    </p>
+                  ) : null}
                   {item.blocker || item.promotionCondition ? (
                     <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
                       {item.blocker ? `Blocker: ${item.blocker}` : 'No blocker'} · {item.promotionCondition ?? 'No promotion condition attached'}

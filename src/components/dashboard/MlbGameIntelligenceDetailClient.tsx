@@ -26,8 +26,22 @@ type ApiData = {
     playerProjections: { total: number; pitchers: Projection[]; batters: Projection[]; noBettingActivation: boolean }
     markets: MarketCandidate[]
     aiExplanation: { positiveFactors: string[]; negativeFactors: string[]; unavailableInputs: string[]; dataQuality: Record<string, number> }
+    explainableIntelligence?: ExplainableIntelligence
     performance: { projectionHistoryRows: number; settledProjectionRows: number; validation?: Record<string, unknown> }
   }
+  explainableIntelligence?: ExplainableIntelligence
+}
+
+type ExplanationFactor = { label: string; impact: string; status: string; evidence: string; confidenceImpact: string }
+type ExplainableIntelligence = {
+  summary: string
+  positiveDrivers: ExplanationFactor[]
+  negativeDrivers: ExplanationFactor[]
+  neutralFactors: ExplanationFactor[]
+  unavailableFactors: ExplanationFactor[]
+  dataQualityLimitations: string[]
+  confidenceImpact: string
+  recommendationBoundary: string
 }
 
 type Projection = {
@@ -179,6 +193,22 @@ function Tile({ label, value: tileValue, detail }: { label: string; value: React
 
 function EmptyReason({ children }: { children: ReactNode }) {
   return <p className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-sm leading-6 text-amber-100">{children}</p>
+}
+
+function ExplanationList({ title, rows, empty }: { title: string; rows: ExplanationFactor[]; empty: string }) {
+  return (
+    <div>
+      <h2 className="font-black">{title}</h2>
+      <div className="mt-3 space-y-2 text-sm text-slate-300">
+        {rows.length ? rows.map((item) => (
+          <div key={`${item.label}-${item.evidence}`} className="rounded-lg border border-slate-800 bg-slate-950 p-3">
+            <p className="font-bold text-white">{item.label} <span className="text-xs uppercase text-slate-500">{labelize(item.impact)}</span></p>
+            <p className="mt-1 leading-6 text-slate-400">{item.evidence}</p>
+          </div>
+        )) : <p>{empty}</p>}
+      </div>
+    </div>
+  )
 }
 
 function ProjectionTable({ rows }: { rows: Projection[] }) {
@@ -421,11 +451,25 @@ export default function MlbGameIntelligenceDetailClient({ eventId }: DetailProps
           )}
           {active === 'Why the Model Thinks This' && (
             <Panel>
+              {data.gameExperience.explainableIntelligence ? (
+                <div className="mb-5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
+                  <h2 className="font-black text-emerald-100">Explainable Intelligence</h2>
+                  <p className="mt-2 text-sm leading-6 text-emerald-50">{data.gameExperience.explainableIntelligence.summary}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">{data.gameExperience.explainableIntelligence.confidenceImpact}</p>
+                  <p className="mt-2 text-sm leading-6 text-amber-100">{data.gameExperience.explainableIntelligence.recommendationBoundary}</p>
+                </div>
+              ) : null}
               <div className="grid gap-4 lg:grid-cols-3">
-                <div><h2 className="font-black">Positive Drivers</h2><ul className="mt-3 space-y-2 text-sm text-slate-300">{(data.gameExperience.aiExplanation.positiveFactors.length ? data.gameExperience.aiExplanation.positiveFactors : ['No positive driver was stored.']).map((item) => <li key={item}>{item}</li>)}</ul></div>
-                <div><h2 className="font-black">Negative Drivers</h2><ul className="mt-3 space-y-2 text-sm text-slate-300">{(data.gameExperience.aiExplanation.negativeFactors.length ? data.gameExperience.aiExplanation.negativeFactors : ['No negative driver was stored.']).map((item) => <li key={item}>{item}</li>)}</ul></div>
-                <div><h2 className="font-black">Unavailable Factors</h2><ul className="mt-3 space-y-2 text-sm text-slate-300">{[...data.gameExperience.aiExplanation.unavailableInputs, ...(data.missingData ?? []).map((item) => `${labelize(item.input)}: ${item.reason}`)].map((item) => <li key={item}>{item}</li>)}</ul></div>
+                <ExplanationList title="Positive Drivers" rows={data.gameExperience.explainableIntelligence?.positiveDrivers ?? []} empty="No positive driver was stored." />
+                <ExplanationList title="Negative Drivers" rows={data.gameExperience.explainableIntelligence?.negativeDrivers ?? []} empty="No negative driver was stored." />
+                <ExplanationList title="Unavailable Factors" rows={data.gameExperience.explainableIntelligence?.unavailableFactors ?? []} empty="No unavailable factor was stored." />
               </div>
+              {data.gameExperience.explainableIntelligence?.dataQualityLimitations.length ? (
+                <div className="mt-5">
+                  <h2 className="font-black">Data-Quality Limitations</h2>
+                  <ul className="mt-3 space-y-2 text-sm text-slate-300">{data.gameExperience.explainableIntelligence.dataQualityLimitations.map((item) => <li key={item}>{item}</li>)}</ul>
+                </div>
+              ) : null}
             </Panel>
           )}
           {active === 'Performance & Evidence' && (

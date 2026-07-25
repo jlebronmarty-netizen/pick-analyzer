@@ -3,6 +3,7 @@ import 'server-only'
 import { getCurrentBoardCached, type CurrentBoardCandidate } from '@/services/current-board.service'
 import { classifyMarketIntelligence } from '@/services/market-intelligence-category.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
+import { buildExplainableIntelligence } from '@/services/explainable-intelligence.service'
 
 export type BestValueMode = 'current' | 'upcoming' | 'historical_explorer' | 'all_stored_advanced'
 
@@ -177,6 +178,25 @@ export async function getBestValueOpportunities({
         actionableExpectedValue: candidate.marketAlignment?.actionableExpectedValuePercent ?? null,
       }
       const canonicalReason = candidate.canonicalReason ?? candidate.marketAlignment?.actionableUnavailableReason ?? 'ALIGNED'
+      const explanationContract = buildExplainableIntelligence({
+        subject: `${canonicalOutcome.selection} ${candidate.marketLabel}`,
+        positive: classification.strengths,
+        negative: classification.weaknesses,
+        neutral: [
+          isAlignedFreshPositiveValue(candidate)
+            ? 'Current price, model probability and implied probability produce positive modeled EV.'
+            : 'Best Value requires aligned fresh odds, positive EV and positive edge.',
+        ],
+        unavailable: classification.missingData,
+        missingData: classification.missingData,
+        blockers: candidate.blockers,
+        confidence: candidate.confidence,
+        featureQuality: candidate.featureQuality,
+        dataSufficiency: candidate.dataSufficiency,
+        marketFreshness: candidate.marketAlignment.freshnessStatus,
+        calibrationStatus: candidate.calibrationStatus,
+        officialEligible: candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE',
+      })
       return {
         ...candidate,
         canonicalDisplaySelection: canonicalOutcome.selection,
@@ -229,6 +249,7 @@ export async function getBestValueOpportunities({
         strengths: classification.strengths,
         weaknesses: classification.weaknesses,
         missingData: classification.missingData,
+        explainableIntelligence: explanationContract,
       }
     }),
   }

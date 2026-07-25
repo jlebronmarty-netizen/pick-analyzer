@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { buildExplainableIntelligence } from '@/services/explainable-intelligence.service'
 import { getMlbPlayerProjectionEngine } from '@/services/mlb-player-projection-engine.service'
 
 type StoredProjectionRow = {
@@ -137,6 +138,31 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       throw new Error(`player projection history read failed: ${historyResult.error.message}`)
     }
     const performance = data.validation.metricsByFamily?.[projection.projectionType as keyof typeof data.validation.metricsByFamily] ?? null
+    const supportingFeatures = Array.isArray(projection.supportingFeatures) ? projection.supportingFeatures : []
+    const positiveFeatures = supportingFeatures
+      .filter((item) => Number(item.contribution ?? 0) > 0)
+      .map((item) => item.explanation ?? item.feature)
+    const negativeFeatures = [
+      ...supportingFeatures.filter((item) => Number(item.contribution ?? 0) < 0).map((item) => item.explanation ?? item.feature),
+      ...(projection.exactBlockerReasons ?? []),
+    ]
+    const explanationContract = buildExplainableIntelligence({
+      subject: `${projection.playerName} ${projection.projectionLabel ?? projection.projectionType}`,
+      positive: positiveFeatures,
+      negative: negativeFeatures,
+      neutral: [
+        projection.explanation,
+        'Player projections are sportsbook-independent and do not create prop EV or Official Picks.',
+      ].filter(Boolean),
+      unavailable: ['sportsbook prop line', 'sportsbook prop price', 'official prop recommendation'],
+      missingData: projection.exactBlockerReasons ?? [],
+      blockers: projection.exactBlockerReasons ?? [],
+      confidence: projection.confidence,
+      featureQuality: projection.featureQuality,
+      dataSufficiency: projection.dataSufficiency,
+      calibrationStatus: performance ? 'validation_available' : 'validation_unavailable',
+      officialEligible: false,
+    })
     return apiOk({
       success: true,
       mode: 'mlb_player_projection_detail_v1',
@@ -146,6 +172,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       projection,
       relatedProjections,
       comparison,
+      explainableIntelligence: explanationContract,
       history: {
         rows: historyResult.data ?? [],
         limit: 25,

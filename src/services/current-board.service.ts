@@ -17,6 +17,10 @@ import {
   type RecommendationExplanation,
 } from '@/services/recommendation-explanation.service'
 import {
+  buildExplainableIntelligence,
+  type ExplainableIntelligenceContract,
+} from '@/services/explainable-intelligence.service'
+import {
   buildOfficialPickContract,
   buildOfficialPickExperience,
   type OfficialPickContract,
@@ -157,6 +161,7 @@ export type CurrentBoardCandidate = {
   oddsSnapshotCreatedAt: string | null
   marketAlignment: MarketAlignmentContract
   marketSemantics: MarketSemantics
+  explainableIntelligence?: ExplainableIntelligenceContract
   recommendationExplanation?: RecommendationExplanation
   officialPick?: OfficialPickContract | null
   maxAllowedAgeMinutes: number
@@ -1111,6 +1116,26 @@ function attachRecommendationExplanations(candidates: CurrentBoardCandidate[]) {
         sportsbook: candidate.sportsbook,
         marketLabel: candidate.marketLabel,
         selection: candidate.selection,
+      }),
+      explainableIntelligence: buildExplainableIntelligence({
+        subject: `${candidate.selection} ${candidate.marketLabel}`,
+        positive: candidate.positiveFactors,
+        negative: candidate.negativeFactors,
+        neutral: [
+          classification.display,
+          candidate.marketSemantics.pushCapable
+            ? 'Push-capable market: value requires explicit Win/Push/Loss semantics.'
+            : 'Binary market: highest probability and betting value are evaluated separately.',
+        ],
+        unavailable: candidate.missingInformation,
+        missingData: candidate.missingInformation,
+        blockers: candidate.blockers,
+        confidence: candidate.confidence,
+        featureQuality: candidate.featureQuality,
+        dataSufficiency: candidate.dataSufficiency,
+        marketFreshness: candidate.marketAlignment.freshnessStatus,
+        calibrationStatus: candidate.calibrationStatus,
+        officialEligible: candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE',
       }),
     }
   })

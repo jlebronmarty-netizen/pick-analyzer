@@ -2445,3 +2445,19 @@ Persistence scope: None. The module reads stored `sport_events`, `sport_lineups`
 Validation: `npm.cmd run mlb:starter-intelligence -- --date=2026-07-24 --summary` reports 15 games, 0 confirmed starters, 0 probable starters, 0 expected starters, 30 unavailable starter slots, 0 projection-eligible starters, 30 blocked pitcher-projection slots, 1,000 bounded player rows, 1,000 bounded SportsDataIO mappings, 0 duplicate provider IDs, 0 provider calls and 0 remote mutations. Player projections remain batter-only for the current slate until real current starter evidence appears.
 
 Completion criteria: `STARTER_INTELLIGENCE_PASS`, `STARTER_MAPPING_PASS`, `GAME_INTELLIGENCE_STARTER_PASS` and conditional `PITCHER_PROJECTION_ACTIVATION_PASS` are certified for the resolver and integration. `PROBABLE_STARTER_PASS` is withheld for the current slate until confirmed/probable stored starter evidence is available.
+
+### 44. Explainable Intelligence Layer V1
+
+Objective: Create one consistent explanation framework for team, game, player and market projections using stored evidence only.
+
+Status: Implemented locally as an additive explanation contract.
+
+Backend scope: `explainable-intelligence.service.ts`, Current Board candidate enrichment, AI Picks Feed item passthrough, Game Intelligence detail, Player Projection detail, Most Likely and Best Value opportunity responses.
+
+Frontend scope: Game Center Why tab, Player Projection Evidence, Most Likely advanced details, Best Value advanced details and Dashboard AI Picks Feed cards.
+
+Persistence scope: None. The layer does not write database rows and does not change prediction probabilities, model weights, settlement, replay, learning, Official Pick policy or provider execution.
+
+Validation: `npm.cmd run build` exits 0 with 347 static pages. The contract uses grounded qualitative impact labels only: positive drivers, negative drivers, neutral factors, unavailable factors, data-quality limitations, confidence impact and recommendation boundary.
+
+Completion criteria: `EXPLAINABLE_INTELLIGENCE_PASS`, `EXPLANATION_CONSISTENCY_PASS` and `DATA_LIMITATION_TRANSPARENCY_PASS` are certified locally pending production deployment smoke.

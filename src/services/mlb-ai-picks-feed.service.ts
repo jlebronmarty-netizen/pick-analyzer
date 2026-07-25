@@ -1,6 +1,7 @@
 import 'server-only'
 
 import type { CurrentBoardCandidate } from '@/services/current-board.service'
+import type { ExplainableIntelligenceContract } from '@/services/explainable-intelligence.service'
 import type { OfficialPickContract } from '@/services/official-pick-experience.service'
 import { classifyMarketSemantics } from '@/services/market-semantics.service'
 
@@ -54,6 +55,7 @@ export type MlbAiPicksFeedItem = {
   marketSemantics: CurrentBoardCandidate['marketSemantics']
   outcomeCompleteness: CurrentBoardCandidate['outcomeCompleteness'] | null
   recommendationExplanation: NonNullable<CurrentBoardCandidate['recommendationExplanation']>
+  explainableIntelligence: ExplainableIntelligenceContract | null
   officialPick: OfficialPickContract | null
   evidence: string[]
   warnings: string[]
@@ -185,6 +187,7 @@ function baseItem(
     marketSemantics: candidate.marketSemantics,
     outcomeCompleteness: candidate.outcomeCompleteness ?? null,
     recommendationExplanation: explanation,
+    explainableIntelligence: candidate.explainableIntelligence ?? null,
     officialPick: candidate.officialPick ?? null,
     evidence: evidence.slice(0, 5),
     warnings: warnings.slice(0, 5),

@@ -6,6 +6,7 @@ import { classifyMarketIntelligence } from '@/services/market-intelligence-categ
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.service'
 import { classifyMarketSemantics } from '@/services/market-semantics.service'
+import { buildExplainableIntelligence } from '@/services/explainable-intelligence.service'
 
 type PredictionRow = {
   id: string
@@ -455,6 +456,26 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     actionableExpectedValue: likely.complementDerived ? null : candidate.marketAlignment.actionableExpectedValuePercent,
     reason: likely.complementDerived ? 'NO_OPPOSITE_PRICE' : candidate.marketAlignment.actionableUnavailableReason ?? 'ALIGNED',
   }
+  const explanationContract = buildExplainableIntelligence({
+    subject: `${canonicalOutcome.selection} ${candidate.marketLabel}`,
+    positive: candidate.positiveFactors,
+    negative: candidate.negativeFactors,
+    neutral: [
+      candidate.summary,
+      candidate.marketSemantics.pushCapable
+        ? 'Push-capable market: value requires explicit Win/Push/Loss semantics.'
+        : 'Binary market: highest probability and betting value are evaluated separately.',
+    ],
+    unavailable: candidate.missingInformation,
+    missingData: candidate.missingInformation,
+    blockers: candidate.blockers,
+    confidence: candidate.confidence,
+    featureQuality: candidate.featureQuality,
+    dataSufficiency: candidate.dataSufficiency,
+    marketFreshness: candidate.marketAlignment.freshnessStatus,
+    calibrationStatus: candidate.calibrationStatus,
+    officialEligible: official,
+  })
   return {
     id: candidate.predictionId,
     sportKey: candidate.sportKey,
@@ -556,6 +577,7 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
           ? 'Most Likely shows the stored selected-side probability for this push-capable market because push probability is unknown. Betting value still requires Win/Push/Loss EV.'
           : 'Most Likely ranks binary outcome probability. Betting value still requires aligned odds, positive edge and positive EV.',
     },
+    explainableIntelligence: explanationContract,
     oddsTimestamp: candidate.oddsTimestamp,
     oddsAgeMinutes: candidate.oddsAgeMinutes,
     storedOddsTimestamp: candidate.oddsTimestamp,
@@ -903,6 +925,25 @@ function toMostLikelyCard(row: PredictionRow, oddsRow: OddsRow | null, event: Ev
     stale: anomalies.includes('stale_odds'),
     quarantined,
   })
+  const explanationContract = buildExplainableIntelligence({
+    subject: `${selectionLabel(row)} ${marketLabel(row.market)}`,
+    positive: positiveFactors,
+    negative: negativeFactors,
+    neutral: [
+      probability >= 70
+        ? 'Stored model probability is high; current price still controls betting value.'
+        : 'Stored model probability is ranked without changing the model output.',
+    ],
+    unavailable: missingData,
+    missingData,
+    blockers,
+    confidence,
+    featureQuality: numberValue(snapshot.featureQuality),
+    dataSufficiency: numberValue(snapshot.dataSufficiency),
+    marketFreshness: anomalies.includes('stale_odds') ? 'STALE' : 'FRESH',
+    calibrationStatus: calibration,
+    officialEligible: row.production_eligible === true,
+  })
   return {
     id: row.id,
     sportKey: row.sport_key,
@@ -957,6 +998,7 @@ function toMostLikelyCard(row: PredictionRow, oddsRow: OddsRow | null, event: Ev
     anomalies,
     productionEligible: row.production_eligible === true,
     independentTool: true,
+    explainableIntelligence: explanationContract,
   }
 }
 
