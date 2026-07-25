@@ -2514,14 +2514,14 @@ Completion criteria: `DAILY_BRIEFING_PASS`, `DASHBOARD_INTELLIGENCE_PASS`, `PROD
 
 Objective: Recover the July 24 production settlement backlog, make postgame continuity automatic, and reconcile provider budget/scheduler ownership without changing models or recommendation policy.
 
-Status: In progress with Phase 2 settlement recovery complete and Phase 3/4 scheduler-budget hardening implemented locally.
+Status: In progress with Phase 2 settlement recovery complete and GitHub-owned scheduler-budget hardening implemented locally after Vercel Hobby rejected more-than-daily cron.
 
 Backend scope: Existing results sync, scoped operating-day settlement, operating-day cron continuity bridge, provider budget service, adaptive refresh scheduler audit and daily performance refresh.
 
 Frontend scope: None in the scheduler/budget hardening step; homepage/performance reconciliation remains validated through existing dashboard APIs before certification.
 
-Persistence scope: Production settlement wrote only canonical July 24 settlement outcomes and derived learning-label closure for the 45 eligible production predictions. The code patch changes provider-budget defaults and scheduler cadence only; it does not mutate predictions, model weights, Official Pick policy, replay artifacts or feature-store history.
+Persistence scope: Production settlement wrote only canonical July 24 settlement outcomes and derived learning-label closure for the 45 eligible production predictions. The code patch changes provider-budget defaults and scheduler ownership/cadence only; it does not mutate predictions, model weights, Official Pick policy, replay artifacts or feature-store history.
 
-Validation: Production settlement recovered 15 final MLB games and settled exactly 45 predictions with an idempotent rerun returning 0 newly eligible rows. Provider budget defaults are now 1,000 daily calls with a 150 reserve, 3 calls per action and 12 calls per hour. The single scheduled Vercel cron is `*/15 * * * *`; GitHub workflows remain dry-run observers.
+Validation: Production settlement recovered 15 final MLB games and settled exactly 45 predictions with an idempotent rerun returning 0 newly eligible rows. Provider budget defaults are now 1,000 daily calls with a 150 reserve, 3 calls per action and 12 calls per hour. The single frequent write-capable scheduler is GitHub Actions at `7,22,37,52 * * * *`; `vercel.json` has no cron entries and heartbeat/manual workflows remain dry-run observers.
 
 Completion criteria: `PRODUCTION_SETTLEMENT_RECOVERY_PASS`, `SETTLEMENT_IDEMPOTENCY_PASS`, `LEARNING_LABEL_CLOSURE_PASS`, `POSTGAME_CONTINUITY_PASS` and `SCHEDULER_OWNERSHIP_PASS` are locally certified. Provider-budget, homepage, performance and end-to-end production certifications remain pending final build, deployment and smoke validation.

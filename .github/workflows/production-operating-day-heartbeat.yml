@@ -7,8 +7,6 @@ on:
         description: "Run observer planner only without provider calls or mutations"
         required: false
         default: "true"
-  schedule:
-    - cron: "14,44 * * * *"
 
 concurrency:
   group: production-operating-day-runtime
@@ -23,7 +21,7 @@ jobs:
     timeout-minutes: 10
     env:
       PICK_ANALYZER_BASE_URL: https://pick-analyzer.vercel.app
-      DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
+      DRY_RUN: "true"
     steps:
       - name: Call production operating-day heartbeat observer
         env:

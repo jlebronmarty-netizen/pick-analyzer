@@ -1,12 +1,12 @@
-name: Production Operating Day Runtime
+name: Production Operating Day Scheduler
 
 on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Run observer planner only without provider calls or mutations"
+        description: "Use true for observer-only validation; scheduled production runs use false"
         required: false
-        default: "true"
+        default: "false"
   schedule:
     - cron: "7,22,37,52 * * * *"
 
@@ -23,9 +23,9 @@ jobs:
     timeout-minutes: 10
     env:
       PICK_ANALYZER_BASE_URL: https://pick-analyzer.vercel.app
-      DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
+      DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
     steps:
-      - name: Call production operating-day observer
+      - name: Call production operating-day scheduler
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
@@ -44,7 +44,7 @@ jobs:
             --write-out "%{http_code}" \
             --request POST \
             --header "Authorization: Bearer ${CRON_SECRET}" \
-            "${PICK_ANALYZER_BASE_URL%/}/api/cron/operating-day?dryRun=true")"
+            "${PICK_ANALYZER_BASE_URL%/}/api/cron/operating-day?dryRun=${DRY_RUN}")"
 
           echo "Operating-day runtime HTTP ${status_code}"
           head -c 4000 "${response_file}"

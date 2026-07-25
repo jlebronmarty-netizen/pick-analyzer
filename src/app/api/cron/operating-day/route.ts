@@ -41,15 +41,19 @@ function parseDryRun(request: NextRequest) {
 
 function schedulerOwner(request: NextRequest, dryRun: boolean) {
   return {
-    writeOwner: dryRun ? 'NONE_DRY_RUN' : 'VERCEL_OPERATING_DAY_CRON',
+    writeOwner: dryRun ? 'NONE_DRY_RUN' : 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER',
     runtimeOwner: 'adaptive_refresh_execution_bridge_v2',
-    observerSchedulers: ['GITHUB_PRODUCTION_OPERATING_DAY_RUNTIME', 'GITHUB_PRODUCTION_OPERATING_DAY_HEARTBEAT'],
+    observerSchedulers: ['GITHUB_PRODUCTION_OPERATING_DAY_HEARTBEAT_MANUAL', 'GITHUB_OPERATING_DAY_REFRESH_MANUAL'],
+    disabledSchedulers: ['VERCEL_OPERATING_DAY_CRON'],
     responsibilities: {
-      resultsSync: 'VERCEL_OPERATING_DAY_CRON',
-      settlement: 'VERCEL_OPERATING_DAY_CRON',
+      eventStatusPersistence: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER',
+      resultsSync: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER',
+      settlement: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER',
       learningLabels: 'SETTLEMENT_DERIVED_PREDICTION_HISTORY_LABELS',
-      performanceRefresh: 'VERCEL_OPERATING_DAY_CRON_AFTER_SETTLEMENT',
-      dailySnapshot: 'VERCEL_OPERATING_DAY_CRON_AFTER_SETTLEMENT',
+      performanceRefresh: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER_AFTER_SETTLEMENT',
+      dailySnapshot: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER_AFTER_SETTLEMENT',
+      providerBudgetEnforcement: 'APPLICATION_PROVIDER_BUDGET_SERVICE',
+      postgameReconciliation: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER',
     },
     duplicateProtection: [
       'provider_action_lock',
@@ -122,7 +126,7 @@ async function handle(request: NextRequest) {
   try {
     const adaptive = await runPostgameContinuity(
       dryRun,
-      request.method === 'POST' ? 'PRODUCTION_CRON_OBSERVER' : 'VERCEL_CRON'
+      request.method === 'POST' ? 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER' : 'MANUAL_OR_VERCEL_READ_ONLY_CALLER'
     )
     const adaptiveRecord = adaptive as Record<string, unknown>
     const adaptiveStatus = String(adaptiveRecord.status ?? (adaptive.success ? 'SUCCESS' : 'FAILED_RETRYABLE'))

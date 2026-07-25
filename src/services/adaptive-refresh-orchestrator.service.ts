@@ -720,12 +720,12 @@ function schedulerJobs(lifecycle: LifecycleEventRow[], budget: Awaited<ReturnTyp
     if (!latestByAction.has(action)) latestByAction.set(action, row)
   }
   const vercel = {
-    id: 'vercel_operating_day_cron',
-    name: 'Vercel Operating Day Cron',
+    id: 'github_actions_production_operating_day_scheduler',
+    name: 'GitHub Actions Production Operating Day Scheduler',
     path: '/api/cron/operating-day',
-    cadence: '*/15 * * * *',
+    cadence: '7,22,37,52 * * * *',
     active: true,
-    timezone: 'UTC schedule; service resolves America/Puerto_Rico operating date',
+    timezone: 'UTC GitHub schedule; service resolves America/Puerto_Rico operating date',
     lastRunAt: lifecycle[0]?.created_at ?? null,
     nextRunAt: null,
     status: lifecycle[0]?.status ?? 'configured',
@@ -989,9 +989,9 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     },
     schedulerAudit: {
       configuredCronCount: 1,
-      configuredCrons: [{ path: '/api/cron/operating-day', schedule: '*/15 * * * *' }],
+      configuredCrons: [{ owner: 'github_actions', path: '/api/cron/operating-day', schedule: '7,22,37,52 * * * *', dryRun: false }],
       jobs: schedulerJobs(lifecycle, budget),
-      finding: 'Only the consolidated operating-day cron is scheduled in vercel.json; adaptive status is the decision layer over that write-capable scheduler.',
+      finding: 'GitHub Actions is the single frequent write-capable scheduler; vercel.json has no operating-day cron ownership, and adaptive status remains the decision layer over execution.',
     },
     freshness,
     refreshPlan,
