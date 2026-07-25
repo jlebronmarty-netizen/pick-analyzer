@@ -6,6 +6,18 @@ function boundedInteger(value: string | null, fallback: number, min: number, max
   return Number.isFinite(parsed) ? Math.max(min, Math.min(max, Math.floor(parsed))) : fallback
 }
 
+function probabilityError(row: Record<string, any>) {
+  const probability = Number(row.probability)
+  if (row.correct === null || row.correct === undefined || !Number.isFinite(probability)) return null
+  return Number((row.correct ? 100 - probability : probability).toFixed(2))
+}
+
+function brierContribution(row: Record<string, any>) {
+  const probability = Number(row.probability)
+  if (row.correct === null || row.correct === undefined || !Number.isFinite(probability)) return null
+  return Number((((probability / 100) - (row.correct ? 1 : 0)) ** 2).toFixed(4))
+}
+
 function sanitizeHistoryRow(row: Record<string, any>) {
   return {
     id: row.id,
@@ -22,6 +34,10 @@ function sanitizeHistoryRow(row: Record<string, any>) {
     lifecycleBadge: row.lifecycleBadge,
     actualResult: row.actualResult ?? null,
     correct: row.correct ?? null,
+    probabilityError: probabilityError(row),
+    probabilityErrorLabel: 'Absolute probability error in percentage points for this settled outcome.',
+    brierContribution: brierContribution(row),
+    brierContributionLabel: 'Per-prediction Brier contribution: squared probability error on a 0-1 scale.',
     push: row.push === true,
     pending: row.pending === true,
     official: row.official === true,
@@ -75,6 +91,7 @@ export async function GET(request: NextRequest) {
       return true
     })
     const pageRows = rows.slice(offset, offset + limit).map((row) => sanitizeHistoryRow(row as Record<string, any>))
+    const totalPages = Math.max(1, Math.ceil(rows.length / limit))
     return NextResponse.json({
       success: true,
       apiStatus: rows.length ? 'SUCCESS' : 'INSUFFICIENT_DATA',
@@ -82,6 +99,7 @@ export async function GET(request: NextRequest) {
       generatedAt: performanceScopeV2.generatedAt,
       filters: { sportKey, category, modelVersion, status, mode, minConfidence: Number.isFinite(minConfidence) ? minConfidence : null, maxConfidence: Number.isFinite(maxConfidence) ? maxConfidence : null, limit, page },
       rows: pageRows,
+      categories: Array.from(new Set(performanceScopeV2.historyRows.map((row) => row.category).filter(Boolean))).sort(),
       rowsV2: performanceScopeV2.historyPreview,
       scopePolicy: performanceScopeV2.scopePolicy,
       scopeReconciliation: {
@@ -97,7 +115,9 @@ export async function GET(request: NextRequest) {
       totalRows: rows.length,
       page,
       limit,
-      totalPages: Math.ceil(rows.length / limit),
+      totalPages,
+      hasPreviousPage: page > 1,
+      hasNextPage: page < totalPages,
       immutableHistory: true,
       providerCallsMade: 0,
       remoteMutationsMade: 0,

@@ -10,7 +10,7 @@ type Opportunity = {
   selection: string
   line: number | null
   odds: number | null
-  sportsbook: string
+  sportsbook: string | null
   startTime: string | null
   eventStatus: string
   period: string
@@ -57,6 +57,8 @@ type Opportunity = {
   oddsTimestamp: string | null
   oddsAgeMinutes: number
   selectedOddsSnapshotId: string | null
+  selectedOddsSource?: string | null
+  selectedOddsStatus?: string | null
   anomalies: string[]
   canonicalReason?: string
   explainableIntelligence?: ExplainableIntelligence
@@ -242,6 +244,11 @@ function evValue(item: Opportunity) {
   return pct(item.actionableExpectedValue ?? item.expectedValue)
 }
 
+function oddsContext(item: Opportunity) {
+  if (item.odds === null) return item.selectedOddsStatus === 'NO_OPPOSITE_PRICE' ? 'n/a - no opposite price' : 'n/a'
+  return `${odds(item.odds)} ${item.sportsbook ?? ''}`.trim()
+}
+
 export default function MostLikelyTool() {
   const [sort, setSort] = useState('highest_probability')
   const [mode, setMode] = useState('current_board')
@@ -385,7 +392,7 @@ export default function MostLikelyTool() {
                 <div className="min-w-0">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Bet Context</p>
                   <div className="mt-3 grid min-w-0 grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                    <Metric label="Odds" value={`${odds(item.odds)} ${item.sportsbook}`} />
+                    <Metric label="Odds" value={oddsContext(item)} />
                     <Metric label="Odds Age" value={Number.isFinite(item.oddsAgeMinutes) ? `${item.oddsAgeMinutes}m` : 'n/a'} />
                     <Metric label="Confidence" value={item.confidenceLabel} />
                     <Metric label="Reliability" value={item.reliability} />
