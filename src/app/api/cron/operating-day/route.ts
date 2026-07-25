@@ -32,19 +32,98 @@ function authorized(request: NextRequest) {
   return request.headers.get('authorization') === `Bearer ${secret}` || request.nextUrl.searchParams.get('secret') === secret
 }
 
+function parseDryRun(request: NextRequest) {
+  const value = request.nextUrl.searchParams.get('dryRun')
+  if (value === 'true') return true
+  if (value === 'false') return false
+  return false
+}
+
+function schedulerOwner(request: NextRequest, dryRun: boolean) {
+  return {
+    writeOwner: dryRun ? 'NONE_DRY_RUN' : 'VERCEL_OPERATING_DAY_CRON',
+    runtimeOwner: 'adaptive_refresh_execution_bridge_v2',
+    observerSchedulers: ['GITHUB_PRODUCTION_OPERATING_DAY_RUNTIME', 'GITHUB_PRODUCTION_OPERATING_DAY_HEARTBEAT'],
+    responsibilities: {
+      resultsSync: 'VERCEL_OPERATING_DAY_CRON',
+      settlement: 'VERCEL_OPERATING_DAY_CRON',
+      learningLabels: 'SETTLEMENT_DERIVED_PREDICTION_HISTORY_LABELS',
+      performanceRefresh: 'VERCEL_OPERATING_DAY_CRON_AFTER_SETTLEMENT',
+      dailySnapshot: 'VERCEL_OPERATING_DAY_CRON_AFTER_SETTLEMENT',
+    },
+    duplicateProtection: [
+      'provider_action_lock',
+      'operating_day_unique_date',
+      'game_results_upsert',
+      'prediction_status_already_settled_guard',
+      'ai_performance_snapshots_idempotency_key',
+    ],
+    requestMethod: request.method,
+    dryRun,
+  }
+}
+
+async function runPostgameContinuity(dryRun: boolean, source: string) {
+  const { runAdaptiveRefresh } = await import('@/services/adaptive-refresh-orchestrator.service')
+  const steps = []
+  let totalProviderCalls = 0
+  let totalWrites = 0
+  let settlementObserved = false
+
+  for (let step = 0; step < 3; step += 1) {
+    const adaptive = await runAdaptiveRefresh({ dryRun, source })
+    const record = adaptive as Record<string, unknown>
+    const selectedAction = String(record.selectedAction ?? '')
+    steps.push(adaptive)
+    totalProviderCalls += Number(record.providerCallsMade ?? 0)
+    totalWrites += Number(record.remoteMutationsMade ?? 0)
+    if (selectedAction === 'settle') settlementObserved = true
+    const status = String(record.status ?? '')
+    const shouldContinue =
+      dryRun === false &&
+      adaptive.success === true &&
+      ['sync_results', 'settle'].includes(selectedAction) &&
+      !['NOT_DUE', 'SUCCESS_NO_CHANGE'].includes(status)
+    if (!shouldContinue) break
+  }
+
+  let dailyUpdate: Record<string, unknown> | null = null
+  if (dryRun === false && settlementObserved) {
+    const { getAiPerformanceCenterDailyUpdate } = await import('@/services/ai-performance-center.service')
+    dailyUpdate = await getAiPerformanceCenterDailyUpdate({ dryRun: false, validationMode: true }) as Record<string, unknown>
+    totalWrites += Number((dailyUpdate.automaticDailyUpdate as Record<string, unknown> | undefined)?.durableWritesMade ?? 0)
+  }
+
+  const last = (steps.at(-1) ?? {}) as Record<string, unknown>
+  return {
+    success: steps.every((step) => step.success),
+    status: String(last.status ?? (steps.every((step) => step.success) ? 'SUCCESS' : 'FAILED_RETRYABLE')),
+    mode: 'operating_day_postgame_continuity_owner_v1',
+    delegatedMode: 'adaptive_refresh_execution_bridge_v2',
+    dryRun,
+    source,
+    steps,
+    selectedAction: last.selectedAction ?? null,
+    selectedDate: last.selectedDate ?? null,
+    settlementObserved,
+    dailyUpdate,
+    providerCallsMade: totalProviderCalls,
+    remoteMutationsMade: totalWrites,
+  }
+}
+
 async function handle(request: NextRequest) {
   const id = requestId(request)
   if (!authorized(request)) {
     return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized operating-day cron request.', status: 401 })
   }
-  const dryRun = request.nextUrl.searchParams.get('dryRun') !== 'false'
+  const dryRun = parseDryRun(request)
   let status: any = {}
   try {
-    const { runAdaptiveRefresh } = await import('@/services/adaptive-refresh-orchestrator.service')
-    const adaptive = await runAdaptiveRefresh({
+    const adaptive = await runPostgameContinuity(
       dryRun,
-      source: request.method === 'POST' ? 'PRODUCTION_CRON' : 'VERCEL_CRON',
-    })
+      request.method === 'POST' ? 'PRODUCTION_CRON_OBSERVER' : 'VERCEL_CRON'
+    )
     const adaptiveRecord = adaptive as Record<string, unknown>
     const adaptiveStatus = String(adaptiveRecord.status ?? (adaptive.success ? 'SUCCESS' : 'FAILED_RETRYABLE'))
     return apiOk(
@@ -63,6 +142,8 @@ async function handle(request: NextRequest) {
           refreshWindowGuarded: true,
           providerCallsMadeByDryRun: dryRun ? 0 : undefined,
           legacyAutomationShortCircuitBypassed: true,
+          schedulerOwnership: schedulerOwner(request, dryRun),
+          dryRunDefault: 'false_for_production_continuity',
         },
       },
       id,

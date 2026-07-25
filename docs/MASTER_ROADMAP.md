@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Homepage Consistency, Settlement Recovery & Scheduler Ownership V1
+
+Status: Implemented locally; production settlement recovery and idempotent Performance/AI Evolution refresh completed.
+
+Evidence: `/api/results/sync`, `/api/operating-day/[operatingDayId]/settle`, `/api/ai-operations/lifecycle`, `/api/performance/daily-update`, `src/app/api/cron/operating-day/route.ts`, Vercel cron config and GitHub observer workflow updates.
+
+Note: July 24 MLB backlog was recovered using canonical services only: 15 final game results were synced, 45 verified eligible prediction rows were settled, 45 learning labels became accepted in AI Operations, and AI Performance snapshots were refreshed idempotently. Scheduler ownership is now explicit: Vercel Cron is the single write-capable owner for postgame continuity, while GitHub runtime, heartbeat and manual refresh workflows are dry-run observers. No model probabilities, production model weights, Official Pick policy, replay/backfill artifacts, retraining or recalibration were changed.
+
 ### Product Experience Phase 7 Recovery Certification V1
 
 Status: Implemented, build-verified, rendered-browser certified and production-deployed.

@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-25 Homepage Consistency, Settlement Recovery & Scheduler Ownership V1
+
+- Recovered the July 24 MLB production settlement backlog using the existing operating-day scoped settlement service after authoritative MLB Stats API final results were synced through the canonical results service.
+- July 24 settlement completed for exactly 45 verified eligible prospective production predictions: 29 wins, 16 losses, 0 pushes, 0 skipped and 0 unresolved. Official Picks remained 0 and all rows remained hypothetical/prospective.
+- AI Operations now derives 45 accepted July 24 learning labels from settled `prediction_history`; no production model weights, retraining, recalibration, Historical Replay or Historical Feature Backfill changed.
+- Refreshed Performance and AI Evolution through the existing idempotent AI Performance Center daily update, writing snapshots with `ai_performance_snapshots.idempotency_key`.
+- Fixed production scheduler ownership: `/api/cron/operating-day` no longer silently defaults to dry-run, Vercel Cron is the single write-capable owner for results sync, settlement, derived learning-label continuity, Performance refresh and daily AI snapshots, and GitHub scheduled/manual workflows are observer-only dry-runs.
+- Duplicate protection remains layered through provider action locks, operating-day uniqueness, `game_results` upsert behavior, already-settled prediction guards and AI snapshot idempotency keys.
+
 ## 2026-07-24 Product Experience Phase 7 Recovery Certification V1
 
 - Added dev-only rendered browser certification with Playwright Chromium and axe across Dashboard, Game Intelligence, Player Projections, Performance, Most Likely, Best Value, Betting Workbench, AI Operations and detail routes.

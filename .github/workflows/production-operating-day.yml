@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Run planner only without provider calls or mutations"
+        description: "Run observer planner only without provider calls or mutations"
         required: false
-        default: "false"
+        default: "true"
   schedule:
     - cron: "7,22,37,52 * * * *"
 
@@ -23,9 +23,9 @@ jobs:
     timeout-minutes: 10
     env:
       PICK_ANALYZER_BASE_URL: https://pick-analyzer.vercel.app
-      DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+      DRY_RUN: ${{ github.event.inputs.dry_run || 'true' }}
     steps:
-      - name: Call protected production operating-day runtime
+      - name: Call production operating-day observer
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
@@ -44,7 +44,7 @@ jobs:
             --write-out "%{http_code}" \
             --request POST \
             --header "Authorization: Bearer ${CRON_SECRET}" \
-            "${PICK_ANALYZER_BASE_URL%/}/api/cron/operating-day?dryRun=${DRY_RUN}")"
+            "${PICK_ANALYZER_BASE_URL%/}/api/cron/operating-day?dryRun=true")"
 
           echo "Operating-day runtime HTTP ${status_code}"
           head -c 4000 "${response_file}"

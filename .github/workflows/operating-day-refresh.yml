@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Call consolidated operating-day scheduler
+      - name: Call consolidated operating-day observer
         env:
           PICK_ANALYZER_BASE_URL: ${{ secrets.PICK_ANALYZER_BASE_URL }}
           PICK_ANALYZER_CRON_SECRET: ${{ secrets.PICK_ANALYZER_CRON_SECRET }}
@@ -21,4 +21,4 @@ jobs:
           curl --fail-with-body --show-error --silent \
             --request POST \
             --header "Authorization: Bearer ${PICK_ANALYZER_CRON_SECRET}" \
-            "${PICK_ANALYZER_BASE_URL%/}/api/cron/operating-day?dryRun=false"
+            "${PICK_ANALYZER_BASE_URL%/}/api/cron/operating-day?dryRun=true"
