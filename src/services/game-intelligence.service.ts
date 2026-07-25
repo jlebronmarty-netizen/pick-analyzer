@@ -7,6 +7,7 @@ import { getMlbCurrentLineupContext } from '@/services/mlb-current-lineup-contex
 import { getMlbPlayerProjectionEngine } from '@/services/mlb-player-projection-engine.service'
 import { getMlbStarterIntelligence } from '@/services/mlb-starter-intelligence.service'
 import { buildExplainableIntelligence } from '@/services/explainable-intelligence.service'
+import { getProjectionEvolution } from '@/services/projection-evolution.service'
 
 type EventRow = {
   id: string
@@ -103,11 +104,12 @@ export async function getGameIntelligence(eventId: string) {
     month: '2-digit',
     day: '2-digit',
   }).format(new Date(event.start_time)) : null
-  const [board, lineupContext, starterIntelligence, playerProjectionEngine] = await Promise.all([
+  const [board, lineupContext, starterIntelligence, playerProjectionEngine, projectionEvolution] = await Promise.all([
     getCurrentBoardCached(event.sport_key ?? 'baseball_mlb', 'ALL_STORED_ADVANCED', 200),
     getMlbCurrentLineupContext({ date: eventDate, eventId: event.id }),
     getMlbStarterIntelligence({ date: eventDate, eventId: event.id }),
     getMlbPlayerProjectionEngine({ date: eventDate, limit: 200 }),
+    getProjectionEvolution({ eventId: event.id, limit: 60 }),
   ])
   const { data: pitcherProjectionData, error: pitcherProjectionError } = await supabaseAdmin
     .from('universal_projection_history')
@@ -334,6 +336,7 @@ export async function getGameIntelligence(eventId: string) {
         settledProjectionRows: playerProjectionEngine.persistence.settledRows,
         validation: playerProjectionEngine.validation,
       },
+      projectionEvolution,
     },
     pitching: {
       status: pitcherProjections.length ? 'PITCHER_OUTS_SHADOW_AVAILABLE' : 'STORED_CONTEXT_ONLY',

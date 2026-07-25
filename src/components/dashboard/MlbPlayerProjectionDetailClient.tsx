@@ -38,6 +38,7 @@ type ApiData = {
   relatedProjections?: Projection[]
   comparison?: Projection[]
   explainableIntelligence?: ExplainableIntelligence
+  projectionEvolution?: ProjectionEvolution
   history?: { rows: HistoryRow[]; limit: number; source: string }
   performance?: PerformanceMetric | null
   providerCallsMade?: number
@@ -55,6 +56,13 @@ type ExplainableIntelligence = {
   dataQualityLimitations: string[]
   confidenceImpact: string
   recommendationBoundary: string
+}
+
+type ProjectionEvolution = {
+  playerProjectionEvolution: Array<{ playerName: string | null; projectionKey: string | null; versions: number; change: { projectedValueDelta: number | null; confidenceDelta: number | null; reason: string }; latestValidPregameProjection: { generatedAt: string | null; modelVersion: string | null } }>
+  modelEvidence: { shadowModelVersion: string | null; playerProjectionSample: number; cutoffSafeStatus: string; dataQuality: string }
+  performanceLinks: { playerProjectionPerformance: string; projectionFamilyPerformance: string; modelCalibration: string }
+  guardrails: { providerCallsMade: number; remoteMutationsMade: number; predictionModelsChanged: boolean; sportsbookPerformanceMergedWithSportsProjectionPerformance: boolean }
 }
 
 type HistoryRow = {
@@ -254,6 +262,27 @@ export default function MlbPlayerProjectionDetailClient({ projectionId }: { proj
         <section className="mt-5 rounded-lg border border-slate-800 bg-slate-900/75 p-5">
           <h2 className="text-xl font-black">Projection History</h2>
           <p className="mt-1 text-sm text-slate-400">Bounded to {data.history?.limit ?? 25} indexed rows from {data.history?.source ?? 'projection history'}.</p>
+          {data.projectionEvolution ? (
+            <div className="mt-4 rounded-lg border border-sky-500/20 bg-sky-500/10 p-4">
+              <h3 className="font-black text-sky-100">Projection Evolution</h3>
+              <p className="mt-2 text-sm leading-6 text-sky-50">Chronological, cutoff-safe evolution from stored player projection rows. Sports-projection evidence is not merged with betting ROI.</p>
+              <div className="mt-3 grid gap-3 md:grid-cols-4">
+                <Stat label="Rows Read" value={data.projectionEvolution.modelEvidence.playerProjectionSample} />
+                <Stat label="Shadow Model" value={data.projectionEvolution.modelEvidence.shadowModelVersion ?? 'N/A'} />
+                <Stat label="Cutoff Status" value={labelize(data.projectionEvolution.modelEvidence.cutoffSafeStatus)} />
+                <Stat label="Provider Calls" value={data.projectionEvolution.guardrails.providerCallsMade} />
+              </div>
+              <div className="mt-3 space-y-2 text-sm text-slate-300">
+                {data.projectionEvolution.playerProjectionEvolution.length ? data.projectionEvolution.playerProjectionEvolution.slice(0, 5).map((row) => (
+                  <div key={`${row.playerName}-${row.projectionKey}`} className="rounded-lg border border-slate-800 bg-slate-950 p-3">
+                    <p className="font-bold text-white">{row.playerName ?? projection.playerName} / {labelize(row.projectionKey)}</p>
+                    <p className="mt-1">Versions {row.versions} / value change {display(row.change.projectedValueDelta)} / confidence change {display(row.change.confidenceDelta, '%')}</p>
+                    <p className="mt-1 text-slate-400">{row.change.reason}</p>
+                  </div>
+                )) : <p>No multiple valid player-projection versions were found in the bounded scope.</p>}
+              </div>
+            </div>
+          ) : null}
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead className="text-xs uppercase tracking-[0.14em] text-slate-500">

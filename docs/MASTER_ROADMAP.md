@@ -2461,3 +2461,19 @@ Persistence scope: None. The layer does not write database rows and does not cha
 Validation: `npm.cmd run build` exits 0 with 347 static pages. The contract uses grounded qualitative impact labels only: positive drivers, negative drivers, neutral factors, unavailable factors, data-quality limitations, confidence impact and recommendation boundary.
 
 Completion criteria: `EXPLAINABLE_INTELLIGENCE_PASS`, `EXPLANATION_CONSISTENCY_PASS` and `DATA_LIMITATION_TRANSPARENCY_PASS` are certified locally pending production deployment smoke.
+
+### 45. Projection Evolution & Model Evidence Experience V1
+
+Objective: Show how game and player projections changed over time while preserving cutoff-safe evidence boundaries.
+
+Status: Implemented locally as a read-only evidence layer.
+
+Backend scope: `projection-evolution.service.ts`, `/api/projection-evolution`, Game Intelligence detail enrichment and Player Projection detail enrichment.
+
+Frontend scope: Game Center Performance & Evidence and Player Projection History now show bounded evolution summaries, model evidence and guardrail labels.
+
+Persistence scope: None. The layer reads `prediction_history`, `sport_events` and `universal_projection_history` only. It does not mutate projections, model weights, settlement, replay, learning or Official Pick policy.
+
+Validation: `npm.cmd run build` exits 0 with 348 static pages. Evolution rows are ordered by `generated_at`, post-start evidence is excluded when an event cutoff is available, and missing change reasons are explicitly labelled instead of inferred.
+
+Completion criteria: `PROJECTION_EVOLUTION_PASS`, `MODEL_EVIDENCE_EXPERIENCE_PASS` and `PERFORMANCE_SCOPE_TRANSPARENCY_PASS` are certified locally pending production deployment smoke.

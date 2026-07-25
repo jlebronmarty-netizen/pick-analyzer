@@ -28,6 +28,7 @@ type ApiData = {
     aiExplanation: { positiveFactors: string[]; negativeFactors: string[]; unavailableInputs: string[]; dataQuality: Record<string, number> }
     explainableIntelligence?: ExplainableIntelligence
     performance: { projectionHistoryRows: number; settledProjectionRows: number; validation?: Record<string, unknown> }
+    projectionEvolution?: ProjectionEvolution
   }
   explainableIntelligence?: ExplainableIntelligence
 }
@@ -42,6 +43,13 @@ type ExplainableIntelligence = {
   dataQualityLimitations: string[]
   confidenceImpact: string
   recommendationBoundary: string
+}
+
+type ProjectionEvolution = {
+  gameProjectionEvolution: Array<{ market: string | null; selection: string | null; line: number | null; versions: number; change: { probabilityDelta: number | null; confidenceDelta: number | null; reason: string }; latestValidPregameProjection: { generatedAt: string | null; oddsSnapshotTime: string | null; modelVersion: string | null } }>
+  playerProjectionEvolution: Array<{ playerName: string | null; projectionKey: string | null; versions: number; change: { projectedValueDelta: number | null; confidenceDelta: number | null; reason: string }; latestValidPregameProjection: { generatedAt: string | null; modelVersion: string | null } }>
+  modelEvidence: { productionModelVersion: string | null; shadowModelVersion: string | null; productionScopeSample: number; playerProjectionSample: number; marketSpecificSample: number; cutoffSafeStatus: string; dataQuality: string }
+  guardrails: { providerCallsMade: number; remoteMutationsMade: number; predictionModelsChanged: boolean; sportsbookPerformanceMergedWithSportsProjectionPerformance: boolean }
 }
 
 type Projection = {
@@ -479,6 +487,33 @@ export default function MlbGameIntelligenceDetailClient({ eventId }: DetailProps
                 <Tile label="Settled Rows" value={data.gameExperience.performance.settledProjectionRows} detail="Sports projection settlement, not betting ROI." />
                 <Tile label="Model Version" value={data.model?.eligibility ?? 'N/A'} detail="Official policy remains separate from model evidence." />
               </div>
+              {data.gameExperience.projectionEvolution ? (
+                <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                  <div className="rounded-lg border border-slate-800 bg-slate-950 p-4">
+                    <h2 className="font-black">Game Projection Evolution</h2>
+                    <div className="mt-3 space-y-3 text-sm text-slate-300">
+                      {data.gameExperience.projectionEvolution.gameProjectionEvolution.length ? data.gameExperience.projectionEvolution.gameProjectionEvolution.slice(0, 5).map((row) => (
+                        <div key={`${row.market}-${row.selection}-${row.line}`} className="rounded-lg bg-slate-900 p-3">
+                          <p className="font-bold text-white">{labelize(row.market)} {row.selection ?? 'Selection'} {row.line ?? ''}</p>
+                          <p className="mt-1">Versions {row.versions} / probability change {value(row.change.probabilityDelta, '%')} / confidence change {value(row.change.confidenceDelta, '%')}</p>
+                          <p className="mt-1 text-slate-400">{row.change.reason}</p>
+                        </div>
+                      )) : <p>No multiple valid pregame game-projection versions were found in the bounded scope.</p>}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border border-slate-800 bg-slate-950 p-4">
+                    <h2 className="font-black">Model Evidence</h2>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <Tile label="Production Model" value={data.gameExperience.projectionEvolution.modelEvidence.productionModelVersion ?? 'N/A'} />
+                      <Tile label="Shadow Model" value={data.gameExperience.projectionEvolution.modelEvidence.shadowModelVersion ?? 'N/A'} />
+                      <Tile label="Production Sample" value={data.gameExperience.projectionEvolution.modelEvidence.productionScopeSample} />
+                      <Tile label="Player Sample" value={data.gameExperience.projectionEvolution.modelEvidence.playerProjectionSample} />
+                      <Tile label="Cutoff Safe" value={labelize(data.gameExperience.projectionEvolution.modelEvidence.cutoffSafeStatus)} />
+                      <Tile label="Provider Calls" value={data.gameExperience.projectionEvolution.guardrails.providerCallsMade} />
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </Panel>
           )}
           {active === 'Data Quality' && (

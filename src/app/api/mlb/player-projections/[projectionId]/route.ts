@@ -3,6 +3,7 @@ import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { buildExplainableIntelligence } from '@/services/explainable-intelligence.service'
 import { getMlbPlayerProjectionEngine } from '@/services/mlb-player-projection-engine.service'
+import { getProjectionEvolution } from '@/services/projection-evolution.service'
 
 type StoredProjectionRow = {
   id: string
@@ -138,6 +139,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       throw new Error(`player projection history read failed: ${historyResult.error.message}`)
     }
     const performance = data.validation.metricsByFamily?.[projection.projectionType as keyof typeof data.validation.metricsByFamily] ?? null
+    const projectionEvolution = await getProjectionEvolution({
+      eventId: projection.eventId,
+      playerId: projection.canonicalPlayerId ?? projection.playerId,
+      limit: 60,
+    })
     const supportingFeatures = Array.isArray(projection.supportingFeatures) ? projection.supportingFeatures : []
     const positiveFeatures = supportingFeatures
       .filter((item) => Number(item.contribution ?? 0) > 0)
@@ -173,6 +179,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       relatedProjections,
       comparison,
       explainableIntelligence: explanationContract,
+      projectionEvolution,
       history: {
         rows: historyResult.data ?? [],
         limit: 25,
