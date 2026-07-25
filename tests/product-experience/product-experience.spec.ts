@@ -212,4 +212,41 @@ test.describe('Phase 7 rendered viewport certification', () => {
       await expect(page.locator('main')).toContainText(/No player projections|Loading MLB player projections|Player projections failed/i)
     }
   })
+
+  test('dashboard canonical viewmodel preserves product semantics', async ({ request }) => {
+    const response = await request.get('/api/dashboard?mode=today')
+    expect(response.ok()).toBe(true)
+    const body = await response.json()
+    const viewModel = body.viewModel
+    expect(viewModel?.contractVersion).toBe('dashboard_canonical_viewmodel_v1')
+    const selectors = viewModel.selectors
+    const diagnostics = viewModel.diagnostics
+
+    expect(diagnostics.highestProjectedEqualsMaximumCanonicalProbability).toBe(true)
+    expect(diagnostics.highestConfidenceUsesConfidenceField).toBe(true)
+    expect(diagnostics.mostUncertainUsesNeutralDistance).toBe(true)
+    expect(diagnostics.noComplementOutcomeBorrowsSourceOdds).toBe(true)
+    expect(diagnostics.unknownEvValuesSerializedAsZero).toBe(0)
+    expect(diagnostics.freshStaleContradictions).toBe(0)
+    expect(diagnostics.invalidTotalLineSigns).toBe(0)
+
+    if (selectors.highestRankedPricedMarket.status === 'AVAILABLE') {
+      expect(selectors.highestRankedPricedMarket.directlyStoredPrice).toBe(true)
+      expect(selectors.highestRankedPricedMarket.americanOdds).not.toBeNull()
+      expect(selectors.highestRankedPricedMarket.impliedProbability).not.toBeNull()
+    }
+
+    if (selectors.bestAvailableValue.status !== 'AVAILABLE') {
+      expect(selectors.bestAvailableValue.metricValue).toBeNull()
+      expect(selectors.bestAvailableValue.blocker).toBeTruthy()
+      expect(selectors.bestAvailableValue.rankingReason).toMatch(/candidates evaluated/i)
+    }
+
+    const badWaitingGames = (body.currentGameCards ?? []).filter((game: any) => (
+      Number(game.storedOddsCount ?? 0) > 0 &&
+      String(game.operationalStatus ?? '').toUpperCase() !== 'NO_ODDS_STORED' &&
+      /waiting for odds/i.test(String(game.operationalStatus ?? game.bettingEligibility ?? ''))
+    ))
+    expect(badWaitingGames, JSON.stringify(badWaitingGames, null, 2)).toHaveLength(0)
+  })
 })

@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Dashboard ViewModel & Product Semantics Final Certification V1
+
+Status: Implemented locally and build-verified; production deployment verification pending.
+
+Evidence: `src/services/dashboard-today.service.ts`, `src/components/dashboard/UserTodayPanel.tsx`, `/api/dashboard?mode=today`, `/api/mlb/game-intelligence`, `tests/product-experience/product-experience.spec.ts` and local production build.
+
+Note: The Dashboard now has a shared canonical ViewModel for probability, confidence, priced-market, uncertainty, value, player-intelligence, coverage, learning, freshness and per-game operational selectors. Visible Dashboard sections consume this contract instead of mixing Current Board, Most Likely, Best Value, pipeline trace and fallback candidates under overlapping labels. Game Intelligence index fallback is typed/degraded rather than a hard 500 when stored context is temporarily unavailable. No prediction probabilities, production weights, Official Pick policy, settlement, replay/backfill, provider credentials, supported markets or Learning Brain behavior changed.
+
 ### Homepage Consistency, Settlement Recovery & Scheduler Ownership V1
 
 Status: Implemented locally; production settlement recovery and idempotent Performance/AI Evolution refresh completed.

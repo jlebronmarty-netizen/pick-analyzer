@@ -49,6 +49,7 @@ type TodayResponse = {
     nextSlate: string
     marketPrices: string
   }
+  viewModel?: DashboardCanonicalViewModel
   currentGameCards: Array<Record<string, any>>
   nextSlateGames: Array<Record<string, any>>
   partial?: boolean
@@ -89,6 +90,80 @@ type TodayResponse = {
     aiBetFinder?: { status: string; data: IntelligenceRow[]; reason: string | null }
     modelIntelligence?: { status: string; data: any; reason: string | null }
     topOpportunity?: { status: string; data: TopOpportunity | null; reason: string | null }
+  }
+}
+
+type DashboardSelector = {
+  status: 'AVAILABLE' | 'EMPTY' | 'BLOCKED'
+  eventId: string | null
+  matchup: string | null
+  market: string | null
+  marketLabel: string | null
+  selection: string | null
+  line: number | null
+  metricName: string
+  metricValue: number | null
+  modelProbability: number | null
+  confidence: number | null
+  directlyStoredPrice: boolean
+  priceState: string
+  americanOdds: number | null
+  sportsbook: string | null
+  oddsSnapshotId: string | null
+  impliedProbability: number | null
+  edge: number | null
+  expectedValue: number | null
+  freshness: 'FRESH' | 'AGING' | 'STALE' | 'UNKNOWN_TIMESTAMP'
+  blocker: string | null
+  candidateUniverseSize: number
+  rankingReason: string
+}
+
+type DashboardCanonicalViewModel = {
+  contractVersion: 'dashboard_canonical_viewmodel_v1'
+  selectors: {
+    highestProjectedOutcome: DashboardSelector
+    highestConfidenceOutcome: DashboardSelector
+    highestRankedPricedMarket: DashboardSelector
+    mostUncertainOutcome: DashboardSelector
+    bestAvailableValue: DashboardSelector
+    strongestPlayerIntelligence: DashboardSelector & {
+      pitcherProjectionCount: number
+      batterProjectionCount: number
+      starterCoverage: number
+      lineupCoverage: number
+      historicalCapabilityAvailable: boolean
+    }
+    mostLikelySummary: { meaning: 'Highest Projected Outcome'; selector: DashboardSelector }
+    currentBoardSummary: {
+      candidates: number
+      displayableMarkets: number
+      directlyPricedCandidates: number
+      noOppositePriceCandidates: number
+    }
+    gameCoverageSummary: {
+      gamesToday: number
+      gamesWithValidPregamePredictions: number
+      gamesWithDisplayableCurrentBoardMarket: number
+      marketsPredicted: number
+      currentBoardCandidates: number
+      gamesWithNoStoredOdds: number
+      gamesWithPartialCoverage: number
+    }
+    learningSummary: {
+      labelsCreatedToday: number
+      labelsPending: number
+      updatesApplied: number
+      autoPromotions: 0
+      status: 'AVAILABLE' | 'EMPTY'
+      message: string
+    }
+    marketFreshnessSummary: {
+      state: 'FRESH' | 'AGING' | 'STALE' | 'UNKNOWN_TIMESTAMP'
+      latestOddsTimestamp: string | null
+      staleBlockers: number
+      freshStaleContradictions: 0
+    }
   }
 }
 
@@ -1060,6 +1135,7 @@ function formatMarketLine(value: unknown, game?: Record<string, any>) {
   if (parsed === null) return null
   const market = String(game?.marketLabel ?? game?.market ?? '').toLowerCase()
   if (parsed === 0 && market.includes('moneyline')) return null
+  if (market.includes('total')) return `${Math.abs(parsed) % 1 === 0 ? Math.abs(parsed).toFixed(0) : Math.abs(parsed).toFixed(1)}`
   return `${parsed > 0 ? '+' : ''}${Number.isInteger(parsed) ? parsed.toFixed(0) : parsed.toFixed(1)}`
 }
 
@@ -1137,6 +1213,7 @@ function traceReasonSummary(day: PipelineTraceDay | null | undefined) {
 }
 
 function TodayStory({ data, mostLikely, bestValue, counts, pipelineToday }: { data: TodayResponse; mostLikely: IntelligenceRow[]; bestValue: IntelligenceRow[]; counts: CategoryCounts; pipelineToday?: PipelineTraceDay | null }) {
+  const vm = data.viewModel?.selectors
   const topProbability = mostLikely[0]
   const topValue = bestValue[0]
   const modelOnlyCount = Number(data.sections?.modelIntelligence?.data?.summary?.modelOutcomes ?? counts.modelOnly ?? 0)
@@ -1163,15 +1240,21 @@ function TodayStory({ data, mostLikely, bestValue, counts, pipelineToday }: { da
         : data.schedulerCoverage
           ? `Pregame scheduler coverage is ${data.schedulerCoverage.coverageTodayPct ?? 'N/A'}%; ${data.schedulerCoverage.predictedToday}/${data.schedulerCoverage.gamesToday} game${data.schedulerCoverage.gamesToday === 1 ? '' : 's'} have prediction evidence with ${data.schedulerCoverage.averageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes average lead time.`
         : null,
-    topProbability
+    vm?.mostLikelySummary.selector.status === 'AVAILABLE'
+      ? `The most likely outcome is ${fieldValue(vm.mostLikelySummary.selector.selection)} in ${fieldValue(vm.mostLikelySummary.selector.matchup)} at ${formatPercent(vm.mostLikelySummary.selector.modelProbability)}.`
+      : topProbability
       ? `The most likely outcome is ${fieldValue(topProbability.selection)} in ${fieldValue(topProbability.matchup)} at ${formatPercent(candidateDisplayProbability(topProbability))}.`
       : modelOnlyCount > 0
         ? `${modelOnlyCount} model-only probabilit${modelOnlyCount === 1 ? 'y is' : 'ies are'} stored; value recommendations are waiting for current market odds.`
-      : null,
-    topValue && Number(topValue.edge ?? 0) > 0
+        : null,
+    vm?.bestAvailableValue.status === 'AVAILABLE'
+      ? `The largest value signal is ${fieldValue(vm.bestAvailableValue.selection)} with ${formatPercent(vm.bestAvailableValue.metricValue)} expected value.`
+      : topValue && Number(topValue.edge ?? 0) > 0
       ? `The largest value signal is ${fieldValue(topValue.selection)} with ${signedNumber(topValue.edge, ' edge')}.`
       : topValue
         ? 'The strongest value candidates remain below official value standards.'
+        : vm?.bestAvailableValue
+          ? `Best Value is blocked: ${fieldValue(vm.bestAvailableValue.blocker, 'No eligible value')}. ${vm.bestAvailableValue.rankingReason}`
         : null,
     counts.watchlist > 0 ? `${counts.watchlist} market${counts.watchlist === 1 ? '' : 's'} are on the Watchlist because the AI needs more confirmation.` : null,
   ].filter(Boolean)
@@ -1192,6 +1275,7 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
   const pipeline = data.pipeline ?? []
   const byId = new Map(pipeline.map((item) => [item.id, item]))
   const traceCounts = pipelineToday?.counts
+  const learning = data.viewModel?.selectors.learningSummary
   const schedulerCoverage = pipelineToday?.schedulerCoverage
   const displayCoverage = data.schedulerCoverage?.nextPregameSlateDate
     ? {
@@ -1212,7 +1296,7 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
     ['Current Board', traceCounts ? { status: traceCounts.currentBoardCandidates ? 'Complete' : 'Waiting', detail: traceCounts.currentBoardCandidates ? `${traceCounts.currentBoardCandidates} candidates are visible after board gates.` : 'Stored predictions exist, but no candidate passed Current Board gates.' } : byId.get('current_board') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? 'Candidates are available.' : 'Waiting.' }],
     ['Official Picks', traceCounts ? { status: traceCounts.officialPicks ? 'Complete' : 'Waiting', detail: traceCounts.officialPicks ? `${traceCounts.officialPicks} Official Picks passed policy.` : 'No stored candidate passed Official Pick policy gates.' } : byId.get('recommendations') ?? { status: counts.official ? 'Complete' : 'Waiting', detail: counts.official ? 'Official picks passed policy.' : 'Waiting for prediction and market comparison.' }],
     ['Settlement', traceCounts ? { status: traceCounts.productionPredictionsSettled ? 'Complete' : traceCounts.gamesCompleted ? 'Waiting' : 'Not due', detail: traceCounts.productionPredictionsSettled ? `${traceCounts.productionPredictionsSettled} production predictions settled.` : traceCounts.gamesCompleted ? `${traceCounts.gamesCompleted} completed games are waiting for eligible production settlement evidence.` : 'No completed games require settlement yet.' } : byId.get('settlement') ?? { status: data.finalGames ? 'Waiting' : 'Complete', detail: data.finalGames ? 'Final games are ready for stored settlement checks.' : 'Healthy.' }],
-    ['Learning', traceCounts ? { status: traceCounts.learningSamplesQueued ? 'Complete' : 'Not due', detail: traceCounts.learningSamplesQueued ? `${traceCounts.learningSamplesQueued} learning labels queued; ${traceCounts.learningSamplesAccepted} accepted and ${traceCounts.learningSamplesRejected} rejected by evidence checks.` : 'Ready when settled production labels exist; no auto-promotion.' } : byId.get('learning') ?? { status: 'Not due', detail: 'Ready when settled production labels exist; no auto-promotion.' }],
+    ['Learning', learning ? { status: learning.labelsCreatedToday || learning.labelsPending ? 'Complete' : 'Not due', detail: `${learning.message} Updates applied: ${learning.updatesApplied}; auto-promotions: ${learning.autoPromotions}.` } : traceCounts ? { status: traceCounts.learningSamplesQueued ? 'Complete' : 'Not due', detail: traceCounts.learningSamplesQueued ? `${traceCounts.learningSamplesQueued} learning labels queued; ${traceCounts.learningSamplesAccepted} accepted and ${traceCounts.learningSamplesRejected} rejected by evidence checks.` : 'Ready when settled production labels exist; no auto-promotion.' } : byId.get('learning') ?? { status: 'Not due', detail: 'Ready when settled production labels exist; no auto-promotion.' }],
   ]
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
@@ -1303,7 +1387,7 @@ function IntelligenceSection({
           <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">{eyebrow}</p>
           <h3 className="mt-2 text-3xl font-black text-white">{title}</h3>
         </div>
-        <Badge tone={rows.length ? 'blue' : 'yellow'}>{rows.length ? `${rows.length} shown` : 'Odds pending'}</Badge>
+        <Badge tone={rows.length ? 'blue' : 'yellow'}>{rows.length ? `${rows.length} shown` : 'Structured empty state'}</Badge>
       </div>
       <div className="mt-5 grid gap-3">
         {rows.length ? rows.slice(0, 10).map((row, index) => <OpportunityRow key={opportunityKey(row, index)} row={row} rank={index + 1} mode={mode} />) : (
@@ -1383,6 +1467,11 @@ function gameCategory(game: Record<string, any>) {
   if (lifecycle === 'FINAL' || lifecycle === 'COMPLETED' || lifecycle === 'COMPLETE') return fieldValue(game.settlementState?.label, 'Awaiting Settlement')
   const bettingEligibility = String(game.bettingEligibility ?? '').toUpperCase()
   const hasMarket = hasDisplayMarket(game)
+  const operational = String(game.operationalStatus ?? '').toUpperCase()
+  if (operational === 'FRESH_MARKET' || operational === 'AGING_MARKET' || operational === 'PARTIAL_MARKET_COVERAGE') return operational === 'AGING_MARKET' ? 'Data Aging' : 'Operational'
+  if (operational === 'STALE_MARKET') return 'Data Aging'
+  if (operational === 'NO_ALIGNED_PRICE' || operational === 'NO_ELIGIBLE_MARKET') return 'Tracking'
+  if (operational === 'NO_ODDS_STORED') return 'Waiting for Odds'
   if (bettingEligibility === 'LOCKED_AFTER_START') return 'Betting Locked'
   if (bettingEligibility === 'STATUS_UNCONFIRMED') return 'Betting Locked'
   if (bettingEligibility === 'DATA_AGING' || bettingEligibility === 'STALE') return 'Data Aging'
@@ -1418,7 +1507,12 @@ function GameCard({ game }: { game: Record<string, any> }) {
   const categoryCardTone = categoryTone(aiCategory)
   const categoryBadgeTone = aiCategory === 'Waiting for Odds' || aiCategory === 'Data Aging' ? 'yellow' : aiCategory === 'Tracking' || aiCategory === 'Operational' || aiCategory === 'Insufficient Data' ? 'blue' : aiCategory === 'Betting Locked' ? 'red' : categoryCardTone
   const isFinal = status === 'Final'
-  const marketUnavailableText = isFinal ? fieldValue(game.settlementState?.label, 'Awaiting Settlement') : 'Waiting for odds'
+  const storedOddsCount = Number(game.storedOddsCount ?? 0)
+  const marketUnavailableText = isFinal
+    ? fieldValue(game.settlementState?.label, 'Awaiting Settlement')
+    : storedOddsCount > 0
+      ? fieldValue(game.operationalStatus, 'No aligned displayable market')
+      : 'Waiting for odds'
   const gameHref = game.eventId || game.id ? `/game-intelligence/${encodeURIComponent(String(game.eventId ?? game.id))}` : '/game-intelligence'
   const gameLinkLabel = `Open Game Intelligence for ${fieldValue(game.matchup, 'this game')}`
 
@@ -1459,7 +1553,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
           <p className="mt-2 text-sm leading-6 text-slate-400">
             {isFinal
               ? `${fieldValue(game.settlementState?.label, 'Awaiting Settlement')}. ${Number(game.settlementState?.settledPredictions ?? 0)} of ${Number(game.settlementState?.totalPredictions ?? 0)} stored prediction rows are terminal for this event.`
-              : !hasMarket && game.oddsPresent === false
+              : !hasMarket && game.oddsPresent === false && storedOddsCount === 0
               ? 'Waiting for sportsbook odds.'
               : game.bettingEligibility === 'LOCKED_AFTER_START' || game.bettingEligibility === 'STATUS_UNCONFIRMED'
                 ? fieldValue(game.statusReason, 'Awaiting provider confirmation. Betting is locked until game status is verified.')
@@ -1591,22 +1685,27 @@ function DailyBriefing({
   pipelineToday?: PipelineTraceDay | null
 }) {
   const trace = pipelineToday?.counts
+  const vm = data.viewModel?.selectors
+  const coverage = vm?.gameCoverageSummary
+  const learning = vm?.learningSummary
   const starterReady = games.filter((game) => Boolean(game.playerIntelligenceAvailable || game.starterContext || game.pitcherContext)).length
   const lineupReady = games.filter((game) => Boolean(game.expectedLineups || game.lineupContext || game.playerIntelligenceAvailable)).length
   const playerReady = games.filter((game) => Boolean(game.playerIntelligenceAvailable)).length
   const cards = [
-    ['Games Today', data.lifecycleCounts?.totalScheduledToday ?? data.currentGames ?? games.length, games.length ? 'Visible slate loaded' : 'No games visible'],
-    ['Games Covered', data.gamesReadyForAnalysis ?? games.length, data.gamesWaitingForOdds ? `${data.gamesWaitingForOdds} waiting for odds` : 'Coverage available'],
-    ['Pregame Coverage', trace?.predictionsValidPregame ?? data.predictionCandidates, trace ? `${trace.predictionsExcludedAfterCutoff ?? 0} excluded after cutoff` : 'Stored prediction scope'],
+    ['Games Today', coverage?.gamesToday ?? data.lifecycleCounts?.totalScheduledToday ?? data.currentGames ?? games.length, games.length ? 'Visible slate loaded' : 'No games visible'],
+    ['Valid Pregame Predictions', `${coverage?.gamesWithValidPregamePredictions ?? trace?.predictionsValidPregame ?? data.predictionCandidates} / ${coverage?.gamesToday ?? data.currentGames ?? games.length}`, 'Game-level production prediction scope'],
+    ['Displayable Current Board', `${coverage?.gamesWithDisplayableCurrentBoardMarket ?? data.gamesReadyForAnalysis ?? games.length} / ${coverage?.gamesToday ?? data.currentGames ?? games.length}`, `${coverage?.gamesWithNoStoredOdds ?? data.gamesWaitingForOdds ?? 0} with no stored odds`],
+    ['Markets Predicted', coverage?.marketsPredicted ?? trace?.predictionsGenerated ?? data.predictionCandidates, `${coverage?.currentBoardCandidates ?? trace?.currentBoardCandidates ?? data.predictionCandidates} Current Board candidates`],
     ['Player Coverage', playerReady, playerReady ? 'Player intelligence linked' : 'No player projections grounded'],
     ['Starter Coverage', starterReady, starterReady ? 'Starter evidence linked' : 'No starter data grounded'],
     ['Lineup Coverage', lineupReady, lineupReady ? 'Lineup context linked' : 'No lineup context grounded'],
     ['Official Picks', data.officialPicks, data.officialPicks ? 'Policy-qualified' : 'None passed policy'],
-    ['Most Likely', mostLikely[0]?.selection ?? 'N/A', mostLikely[0] ? `${formatPercent(candidateDisplayProbability(mostLikely[0]))} model` : 'No supported outcome'],
-    ['Best Value', bestValue.length ? 'Available' : 'N/A', bestValue.length ? `${bestValue.length} value row${bestValue.length === 1 ? '' : 's'}` : data.sections?.bestValue?.reason ?? 'No positive EV'],
+    ['Most Likely', vm?.mostLikelySummary.selector.selection ?? mostLikely[0]?.selection ?? 'Not available', vm?.mostLikelySummary.selector.status === 'AVAILABLE' ? `${formatPercent(vm.mostLikelySummary.selector.modelProbability)} model` : 'No supported outcome'],
+    ['Best Value', vm?.bestAvailableValue.status === 'AVAILABLE' ? 'Available' : 'No eligible value', vm?.bestAvailableValue.status === 'AVAILABLE' ? `${formatPercent(vm.bestAvailableValue.metricValue)} EV` : vm?.bestAvailableValue.rankingReason ?? data.sections?.bestValue?.reason ?? 'No positive EV'],
     ['Settlement', trace?.productionPredictionsSettled ?? data.finalGames, data.finalGames ? 'Final games present' : 'Settlement pending'],
-    ['Learning', trace?.learningSamplesAccepted ?? 0, trace?.learningSamplesQueued ? `${trace.learningSamplesQueued} queued` : 'No learning sample queued'],
-    ['Freshness', simpleAction(data.freshness), data.latestOddsTimestamp ? `Odds ${timeText(data.latestOddsTimestamp)}` : 'No odds timestamp'],
+    ['Learning Labels Created', learning?.labelsCreatedToday ?? trace?.learningSamplesAccepted ?? 0, learning?.message ?? (trace?.learningSamplesQueued ? `${trace.learningSamplesQueued} queued` : 'No learning labels pending')],
+    ['Learning Labels Pending', learning?.labelsPending ?? Math.max(0, Number(trace?.learningSamplesQueued ?? 0) - Number(trace?.learningSamplesAccepted ?? 0)), learning ? `${learning.updatesApplied} updates applied; ${learning.autoPromotions} auto-promotions` : 'No automatic promotion'],
+    ['Freshness', vm?.marketFreshnessSummary.state ?? simpleAction(data.freshness), vm?.marketFreshnessSummary.latestOddsTimestamp ? `Odds ${timeText(vm.marketFreshnessSummary.latestOddsTimestamp)}` : data.latestOddsTimestamp ? `Odds ${timeText(data.latestOddsTimestamp)}` : 'No odds timestamp'],
   ]
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-5 ${cardMotion}`}>
@@ -1630,7 +1729,55 @@ function DailyBriefing({
   )
 }
 
-function TopGameIntelligence({ games, mostLikely, bestValue }: { games: Array<Record<string, any>>; mostLikely: IntelligenceRow[]; bestValue: IntelligenceRow[] }) {
+function metricText(selector: DashboardSelector | null | undefined) {
+  if (!selector) return 'Not available'
+  if (selector.status !== 'AVAILABLE') return selector.blocker ?? 'Not available'
+  if (selector.metricName.toLowerCase().includes('distance')) return `${Number(selector.metricValue ?? 0).toFixed(1)} pts from neutral`
+  if (selector.metricName.toLowerCase().includes('ranking')) return selector.metricValue === null ? 'Priced' : selector.metricValue.toFixed(1)
+  return formatPercent(selector.metricValue)
+}
+
+function selectorDetail(selector: DashboardSelector | null | undefined) {
+  if (!selector) return 'Not available'
+  const price = selector.directlyStoredPrice ? formatAmericanOdds(selector.americanOdds) ?? 'priced' : selector.priceState
+  return `${selector.metricName}: ${metricText(selector)} | Price: ${price}`
+}
+
+function TopGameIntelligence({ data, games, mostLikely, bestValue }: { data: TodayResponse; games: Array<Record<string, any>>; mostLikely: IntelligenceRow[]; bestValue: IntelligenceRow[] }) {
+  const vm = data.viewModel?.selectors
+  if (vm) {
+    const rows = [
+      ['Highest Projected Outcome', vm.highestProjectedOutcome],
+      ['Highest Confidence Outcome', vm.highestConfidenceOutcome],
+      ['Highest-Ranked Priced Market', vm.highestRankedPricedMarket],
+      ['Most Uncertain Outcome', vm.mostUncertainOutcome],
+      ['Strongest Player Intelligence', vm.strongestPlayerIntelligence],
+    ].map(([label, selector]) => {
+      const typed = selector as DashboardSelector
+      return {
+        label: String(label),
+        eventId: typed.eventId ?? '',
+        matchup: typed.matchup ?? (label === 'Strongest Player Intelligence' ? 'Player projection coverage' : 'Not available'),
+        selection: typed.selection ?? typed.blocker ?? 'Not available',
+        metric: selectorDetail(typed),
+      }
+    })
+    return (
+      <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-5 ${cardMotion}`}>
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Top Game Intelligence</p>
+        <div className="mt-4 grid gap-3 lg:grid-cols-5">
+          {rows.map((row) => (
+            <a key={row.label} href={row.eventId ? `/game-intelligence/${encodeURIComponent(row.eventId)}` : '/game-intelligence'} aria-label={`Open ${row.label} Game Intelligence for ${row.matchup}`} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 outline-none transition hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-300">
+              <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{row.label}</p>
+              <p className="mt-2 text-sm font-black text-white">{row.matchup}</p>
+              <p className="mt-1 text-xs leading-5 text-slate-400">{row.selection}</p>
+              <p className="mt-2 text-xs leading-5 text-slate-500">{row.metric}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+    )
+  }
   const byEvent = (eventId: string | undefined) => games.find((game) => String(game.eventId ?? game.id ?? '') === String(eventId ?? ''))
   const probability = mostLikely[0]
   const confidence = [...mostLikely, ...bestValue].sort((left, right) => Number(right.confidence ?? 0) - Number(left.confidence ?? 0))[0]
@@ -1830,7 +1977,7 @@ export default function UserTodayPanel() {
       <TodayStory data={data} counts={counts} mostLikely={mostLikely} bestValue={bestValue} pipelineToday={pipelineToday} />
       <PipelineSummary data={data} counts={counts} pipelineToday={pipelineToday} />
       <DailyBriefing data={data} games={games} mostLikely={mostLikely} bestValue={bestValue} pipelineToday={pipelineToday} />
-      <TopGameIntelligence games={games} mostLikely={mostLikely} bestValue={bestValue} />
+      <TopGameIntelligence data={data} games={games} mostLikely={mostLikely} bestValue={bestValue} />
       <AiPerformancePreviewCard />
       <DataFreshnessPreviewCard />
       <section className="grid gap-4 lg:grid-cols-6">

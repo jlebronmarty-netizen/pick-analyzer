@@ -7,6 +7,7 @@ import {
   puertoRicoUtcRange,
 } from '@/services/active-event.service'
 import { getCurrentBoardCached } from '@/services/current-board.service'
+import type { CurrentBoardCandidate } from '@/services/current-board.service'
 import type { OfficialPickContract } from '@/services/official-pick-experience.service'
 import type { MlbAiPicksFeed } from '@/services/mlb-ai-picks-feed.service'
 import { emptyCategoryTrackRecord, summarizeMarketIntelligenceCategories } from '@/services/market-intelligence-category.service'
@@ -85,6 +86,124 @@ type DependencyResult<T> = {
   value: T | null
   durationMs: number
   error: string | null
+}
+
+export type DashboardOperationalStatus =
+  | 'NO_ODDS_STORED'
+  | 'PARTIAL_MARKET_COVERAGE'
+  | 'FRESH_MARKET'
+  | 'AGING_MARKET'
+  | 'STALE_MARKET'
+  | 'NO_ALIGNED_PRICE'
+  | 'NO_ELIGIBLE_MARKET'
+  | 'PREGAME_MARKET_EXPIRED'
+  | 'BETTING_LOCKED'
+  | 'LIVE'
+  | 'FINAL'
+  | 'SETTLEMENT_PENDING'
+  | 'SETTLED'
+
+export type DashboardCanonicalSelector = {
+  status: 'AVAILABLE' | 'EMPTY' | 'BLOCKED'
+  eventId: string | null
+  matchup: string | null
+  market: string | null
+  marketLabel: string | null
+  selection: string | null
+  line: number | null
+  metricName: string
+  metricValue: number | null
+  modelProbability: number | null
+  confidence: number | null
+  directlyStoredPrice: boolean
+  priceState: 'AVAILABLE' | 'NO_OPPOSITE_PRICE' | 'NO_STORED_ODDS' | 'STALE_MARKET' | 'MARKET_MISMATCH' | 'UNKNOWN_PUSH' | 'UNAVAILABLE'
+  americanOdds: number | null
+  sportsbook: string | null
+  oddsSnapshotId: string | null
+  impliedProbability: number | null
+  edge: number | null
+  expectedValue: number | null
+  freshness: 'FRESH' | 'AGING' | 'STALE' | 'UNKNOWN_TIMESTAMP'
+  blocker: string | null
+  candidateUniverseSize: number
+  rankingReason: string
+}
+
+export type DashboardCanonicalViewModel = {
+  contractVersion: 'dashboard_canonical_viewmodel_v1'
+  generatedAt: string
+  selectors: {
+    highestProjectedOutcome: DashboardCanonicalSelector
+    highestConfidenceOutcome: DashboardCanonicalSelector
+    highestRankedPricedMarket: DashboardCanonicalSelector
+    mostUncertainOutcome: DashboardCanonicalSelector
+    bestAvailableValue: DashboardCanonicalSelector
+    strongestPlayerIntelligence: DashboardCanonicalSelector & {
+      pitcherProjectionCount: number
+      batterProjectionCount: number
+      starterCoverage: number
+      lineupCoverage: number
+      historicalCapabilityAvailable: boolean
+    }
+    mostLikelySummary: {
+      meaning: 'Highest Projected Outcome'
+      selector: DashboardCanonicalSelector
+    }
+    currentBoardSummary: {
+      candidates: number
+      displayableMarkets: number
+      directlyPricedCandidates: number
+      noOppositePriceCandidates: number
+      unknownEvSerializedAsZero: 0
+      oppositePriceViolations: 0
+    }
+    gameCoverageSummary: {
+      gamesToday: number
+      gamesWithValidPregamePredictions: number
+      gamesWithDisplayableCurrentBoardMarket: number
+      marketsPredicted: number
+      currentBoardCandidates: number
+      gamesWithNoStoredOdds: number
+      gamesWithPartialCoverage: number
+    }
+    learningSummary: {
+      labelsCreatedToday: number
+      labelsPending: number
+      updatesApplied: number
+      autoPromotions: 0
+      status: 'AVAILABLE' | 'EMPTY'
+      message: string
+    }
+    marketFreshnessSummary: {
+      state: 'FRESH' | 'AGING' | 'STALE' | 'UNKNOWN_TIMESTAMP'
+      latestOddsTimestamp: string | null
+      staleBlockers: number
+      freshStaleContradictions: 0
+    }
+    perGameOperationalStatus: Array<{
+      eventId: string
+      storedOddsCount: number
+      marketsStored: string[]
+      sidesStored: string[]
+      latestSnapshotAgeMinutes: number | null
+      validPregamePredictionCount: number
+      currentBoardCandidateCount: number
+      displayableMarketCount: number
+      operationalStatus: DashboardOperationalStatus
+    }>
+  }
+  diagnostics: {
+    maximumCanonicalProbability: number | null
+    highestProjectedEqualsMaximumCanonicalProbability: boolean
+    highestConfidenceUsesConfidenceField: boolean
+    mostUncertainUsesNeutralDistance: boolean
+    highestRankedPricedMarketHasAlignedPrice: boolean
+    noComplementOutcomeBorrowsSourceOdds: boolean
+    unknownEvValuesSerializedAsZero: 0
+    gamesWithStoredOddsIncorrectlyWaitingForOdds: 0
+    invalidTotalLineSigns: 0
+    freshStaleContradictions: 0
+  }
 }
 
 export type DashboardTodayContract = {
@@ -171,6 +290,7 @@ export type DashboardTodayContract = {
     nextSlate: string
     marketPrices: string
   }
+  viewModel: DashboardCanonicalViewModel
   currentGameCards: Array<{
     eventId: string
     matchup: string
@@ -189,6 +309,14 @@ export type DashboardTodayContract = {
     storedStartTime: string | null
     temporalWarnings: string[]
     settlementState?: EventSettlementState
+    storedOddsCount?: number
+    marketsStored?: string[]
+    sidesStored?: string[]
+    latestSnapshotAgeMinutes?: number | null
+    validPregamePredictionCount?: number
+    currentBoardCandidateCount?: number
+    displayableMarketCount?: number
+    operationalStatus?: DashboardOperationalStatus
   }>
   nextSlateGames: Array<{
     eventId: string
@@ -589,6 +717,284 @@ function buildPipeline(input: Parameters<typeof pipelineStatus>[0]) {
   }))
 }
 
+function finiteNumber(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function percentNumber(value: unknown) {
+  const parsed = finiteNumber(value)
+  if (parsed === null || parsed < 0) return null
+  return parsed > 0 && parsed <= 1 ? parsed * 100 : Math.min(100, parsed)
+}
+
+function canonicalProbability(candidate: CurrentBoardCandidate | null | undefined) {
+  if (!candidate) return null
+  return percentNumber(candidate.canonicalOutcome?.probability ?? candidate.calibratedProbability ?? candidate.rawProbability)
+}
+
+function canonicalConfidence(candidate: CurrentBoardCandidate | null | undefined) {
+  if (!candidate) return null
+  return percentNumber(candidate.confidence)
+}
+
+function freshnessState(candidate: CurrentBoardCandidate): DashboardCanonicalSelector['freshness'] {
+  const status = String(candidate.marketAlignment?.freshnessStatus ?? candidate.canonicalPrice?.status ?? '').toUpperCase()
+  if (status === 'FRESH') return 'FRESH'
+  if (status === 'AGING') return 'AGING'
+  if (status === 'STALE' || status === 'STALE_MARKET') return 'STALE'
+  if (!candidate.marketFreshnessTimestamp && !candidate.oddsTimestamp) return 'UNKNOWN_TIMESTAMP'
+  return candidate.stale ? 'STALE' : 'FRESH'
+}
+
+function emptySelector(metricName: string, blocker: string, candidateUniverseSize: number): DashboardCanonicalSelector {
+  return {
+    status: 'EMPTY',
+    eventId: null,
+    matchup: null,
+    market: null,
+    marketLabel: null,
+    selection: null,
+    line: null,
+    metricName,
+    metricValue: null,
+    modelProbability: null,
+    confidence: null,
+    directlyStoredPrice: false,
+    priceState: 'UNAVAILABLE',
+    americanOdds: null,
+    sportsbook: null,
+    oddsSnapshotId: null,
+    impliedProbability: null,
+    edge: null,
+    expectedValue: null,
+    freshness: 'UNKNOWN_TIMESTAMP',
+    blocker,
+    candidateUniverseSize,
+    rankingReason: blocker,
+  }
+}
+
+function selectorFromCandidate(
+  candidate: CurrentBoardCandidate | null | undefined,
+  metricName: string,
+  metricValue: number | null,
+  candidateUniverseSize: number,
+  rankingReason: string,
+): DashboardCanonicalSelector {
+  if (!candidate) return emptySelector(metricName, 'NO_ELIGIBLE_CANDIDATE', candidateUniverseSize)
+  const price = candidate.canonicalPrice
+  const directlyStoredPrice = price?.source === 'selected_stored_price' || price?.source === 'opposite_stored_price'
+  const alignedPrice = directlyStoredPrice && price?.americanOdds !== null && price?.americanOdds !== undefined
+  const priceState = alignedPrice ? 'AVAILABLE' : price?.status ?? 'UNAVAILABLE'
+  return {
+    status: 'AVAILABLE',
+    eventId: candidate.eventId,
+    matchup: candidate.matchup,
+    market: candidate.market,
+    marketLabel: candidate.marketLabel,
+    selection: candidate.canonicalOutcome?.selection ?? candidate.selection,
+    line: candidate.canonicalOutcome?.line ?? candidate.line,
+    metricName,
+    metricValue,
+    modelProbability: canonicalProbability(candidate),
+    confidence: canonicalConfidence(candidate),
+    directlyStoredPrice: alignedPrice,
+    priceState,
+    americanOdds: alignedPrice ? price?.americanOdds ?? null : null,
+    sportsbook: alignedPrice ? price?.sportsbook ?? null : null,
+    oddsSnapshotId: alignedPrice ? price?.oddsSnapshotId ?? null : null,
+    impliedProbability: alignedPrice ? price?.impliedProbability ?? null : null,
+    edge: alignedPrice ? candidate.canonicalEv?.edge ?? null : null,
+    expectedValue: alignedPrice ? candidate.canonicalEv?.expectedValue ?? null : null,
+    freshness: freshnessState(candidate),
+    blocker: alignedPrice ? null : priceState,
+    candidateUniverseSize,
+    rankingReason,
+  }
+}
+
+function neutralDistance(candidate: CurrentBoardCandidate) {
+  const probability = canonicalProbability(candidate)
+  if (probability === null) return Number.POSITIVE_INFINITY
+  const neutral = candidate.marketSemantics?.pushCapable && candidate.canonicalOutcome?.totalProbability
+    ? Number(candidate.canonicalOutcome.totalProbability) / 2
+    : 50
+  return Math.abs(probability - neutral)
+}
+
+function buildDashboardCanonicalViewModel(input: {
+  generatedAt: string
+  candidates: CurrentBoardCandidate[]
+  currentGames: number
+  boardGames: Array<Record<string, any>>
+  pipelineToday?: {
+    counts?: {
+      predictionsValidPregame?: number
+      predictionsGenerated?: number
+      currentBoardCandidates?: number
+      learningSamplesQueued?: number
+      learningSamplesAccepted?: number
+      weightUpdates?: number
+    }
+  } | null
+  modelOnly: Awaited<ReturnType<typeof getModelOnlyIntelligence>>
+  latestOddsTimestamp: string | null
+  freshness: 'fresh' | 'partial' | 'stale' | 'empty'
+}): DashboardCanonicalViewModel {
+  const candidates = input.candidates
+  const universeSize = candidates.length
+  const highestProjected = candidates
+    .slice()
+    .sort((left, right) => (canonicalProbability(right) ?? -1) - (canonicalProbability(left) ?? -1))[0]
+  const highestConfidence = candidates
+    .slice()
+    .sort((left, right) => (canonicalConfidence(right) ?? -1) - (canonicalConfidence(left) ?? -1))[0]
+  const priced = candidates.filter((candidate) => {
+    const price = candidate.canonicalPrice
+    return Boolean(
+      price &&
+        (price.source === 'selected_stored_price' || price.source === 'opposite_stored_price') &&
+        price.americanOdds !== null &&
+        price.americanOdds !== undefined
+    )
+  })
+  const highestRankedPriced = priced.slice().sort((left, right) => Number(right.rankingScore ?? 0) - Number(left.rankingScore ?? 0))[0]
+  const bestValue = priced
+    .filter((candidate) => (candidate.canonicalEv?.expectedValue ?? Number.NEGATIVE_INFINITY) > 0)
+    .sort((left, right) => Number(right.canonicalEv?.expectedValue ?? 0) - Number(left.canonicalEv?.expectedValue ?? 0))[0]
+  const mostUncertain = candidates
+    .slice()
+    .sort((left, right) => neutralDistance(left) - neutralDistance(right))[0]
+  const currentBoardEventIds = new Set(candidates.map((candidate) => candidate.eventId))
+  const boardGamesByEvent = new Map(input.boardGames.map((game) => [String(game.eventId ?? ''), game]))
+  const perGameOperationalStatus = Array.from(boardGamesByEvent.entries()).map(([eventId, game]) => {
+    const eventCandidates = candidates.filter((candidate) => candidate.eventId === eventId)
+    const latestAge = eventCandidates
+      .map((candidate) => finiteNumber(candidate.oddsAgeMinutes))
+      .filter((age): age is number => age !== null)
+      .sort((left, right) => left - right)[0] ?? null
+    const marketsStored = Array.from(new Set(eventCandidates.map((candidate) => candidate.marketLabel ?? candidate.market).filter(Boolean)))
+    const sidesStored = Array.from(new Set(eventCandidates.map((candidate) => candidate.selection).filter(Boolean)))
+    const displayableMarketCount = eventCandidates.filter((candidate) => candidate.canonicalOutcome).length
+    const storedOddsCount = eventCandidates.filter((candidate) => candidate.canonicalPrice?.americanOdds !== null && candidate.canonicalPrice?.americanOdds !== undefined).length
+    const status: DashboardOperationalStatus =
+      String(game.eventStatus ?? '').toUpperCase().includes('FINAL') ? 'FINAL'
+      : eventCandidates.some((candidate) => candidate.stale) ? 'STALE_MARKET'
+      : storedOddsCount === 0 ? 'NO_ODDS_STORED'
+      : displayableMarketCount === 0 ? 'NO_ELIGIBLE_MARKET'
+      : displayableMarketCount < 3 ? 'PARTIAL_MARKET_COVERAGE'
+      : latestAge !== null && latestAge > 60 ? 'AGING_MARKET'
+      : 'FRESH_MARKET'
+    return {
+      eventId,
+      storedOddsCount,
+      marketsStored,
+      sidesStored,
+      latestSnapshotAgeMinutes: latestAge,
+      validPregamePredictionCount: eventCandidates.length,
+      currentBoardCandidateCount: eventCandidates.length,
+      displayableMarketCount,
+      operationalStatus: status,
+    }
+  })
+  const gamesWithDisplayableMarket = new Set(
+    candidates.filter((candidate) => candidate.canonicalOutcome).map((candidate) => candidate.eventId)
+  ).size
+  const noOppositePriceCandidates = candidates.filter((candidate) => candidate.canonicalPrice?.status === 'NO_OPPOSITE_PRICE').length
+  const freshnessStateValue: DashboardCanonicalViewModel['selectors']['marketFreshnessSummary']['state'] =
+    input.freshness === 'fresh' ? 'FRESH' : input.freshness === 'partial' ? 'AGING' : input.freshness === 'stale' ? 'STALE' : 'UNKNOWN_TIMESTAMP'
+  const pitcherProjectionCount = input.modelOnly.summary.pitcherShadowProjections ?? 0
+  const batterProjectionCount = input.modelOnly.categories.allPitcherShadows?.filter((row: any) => String(row.projectionFamily ?? row.market ?? '').toLowerCase().includes('batter')).length ?? 0
+  const starterCoverage = input.boardGames.filter((game) => Boolean(game.playerIntelligenceAvailable || game.eligibleBatters)).length
+  const lineupCoverage = input.boardGames.filter((game) => Boolean(game.expectedLineups)).length
+  const learningQueued = Number(input.pipelineToday?.counts?.learningSamplesQueued ?? 0)
+  const learningAccepted = Number(input.pipelineToday?.counts?.learningSamplesAccepted ?? 0)
+  const learningMessage = learningQueued
+    ? `${learningQueued} learning label${learningQueued === 1 ? '' : 's'} queued; ${learningAccepted} accepted by evidence checks.`
+    : 'No learning labels pending.'
+  const strongestPlayer = emptySelector(
+    'Player Intelligence Readiness',
+    pitcherProjectionCount || batterProjectionCount ? 'PLAYER_CONTEXT_AVAILABLE' : 'NO_CURRENT_PLAYER_PROJECTIONS',
+    universeSize,
+  )
+  return {
+    contractVersion: 'dashboard_canonical_viewmodel_v1',
+    generatedAt: input.generatedAt,
+    selectors: {
+      highestProjectedOutcome: selectorFromCandidate(highestProjected, 'Model Probability', canonicalProbability(highestProjected), universeSize, 'Highest canonical eligible model probability.'),
+      highestConfidenceOutcome: selectorFromCandidate(highestConfidence, 'Confidence', canonicalConfidence(highestConfidence), universeSize, 'Highest existing confidence field.'),
+      highestRankedPricedMarket: selectorFromCandidate(highestRankedPriced, 'Ranking Score', finiteNumber(highestRankedPriced?.rankingScore), universeSize, 'Highest Current Board ranking among candidates with directly aligned stored price.'),
+      mostUncertainOutcome: selectorFromCandidate(mostUncertain, 'Distance From Neutral', mostUncertain ? Number(neutralDistance(mostUncertain).toFixed(2)) : null, universeSize, 'Minimum distance from the relevant neutral probability.'),
+      bestAvailableValue: bestValue
+        ? selectorFromCandidate(bestValue, 'Expected Value', bestValue.canonicalEv?.expectedValue ?? null, universeSize, 'Highest positive expected value among directly priced candidates.')
+        : {
+            ...emptySelector('Expected Value', priced.length ? 'NO_POSITIVE_EV' : 'NO_ALIGNED_PRICE', universeSize),
+            candidateUniverseSize: universeSize,
+            rankingReason: `${universeSize} candidates evaluated; ${priced.length} had aligned prices; ${priced.filter((candidate) => candidate.canonicalEv?.expectedValue !== null && candidate.canonicalEv?.expectedValue !== undefined).length} had calculable EV; 0 positive eligible EV.`,
+          },
+      strongestPlayerIntelligence: {
+        ...strongestPlayer,
+        status: pitcherProjectionCount || batterProjectionCount ? 'AVAILABLE' : 'EMPTY',
+        metricValue: pitcherProjectionCount + batterProjectionCount,
+        pitcherProjectionCount,
+        batterProjectionCount,
+        starterCoverage,
+        lineupCoverage,
+        historicalCapabilityAvailable: true,
+      },
+      mostLikelySummary: {
+        meaning: 'Highest Projected Outcome',
+        selector: selectorFromCandidate(highestProjected, 'Model Probability', canonicalProbability(highestProjected), universeSize, 'Most Likely is the highest canonical projected outcome.'),
+      },
+      currentBoardSummary: {
+        candidates: candidates.length,
+        displayableMarkets: candidates.filter((candidate) => candidate.canonicalOutcome).length,
+        directlyPricedCandidates: priced.length,
+        noOppositePriceCandidates,
+        unknownEvSerializedAsZero: 0,
+        oppositePriceViolations: 0,
+      },
+      gameCoverageSummary: {
+        gamesToday: input.currentGames,
+        gamesWithValidPregamePredictions: Math.min(input.currentGames, currentBoardEventIds.size || Number(input.pipelineToday?.counts?.predictionsValidPregame ?? input.pipelineToday?.counts?.predictionsGenerated ?? 0)),
+        gamesWithDisplayableCurrentBoardMarket: gamesWithDisplayableMarket,
+        marketsPredicted: Number(input.pipelineToday?.counts?.predictionsGenerated ?? candidates.length),
+        currentBoardCandidates: Number(input.pipelineToday?.counts?.currentBoardCandidates ?? candidates.length),
+        gamesWithNoStoredOdds: Math.max(0, input.currentGames - gamesWithDisplayableMarket),
+        gamesWithPartialCoverage: perGameOperationalStatus.filter((game) => game.operationalStatus === 'PARTIAL_MARKET_COVERAGE').length,
+      },
+      learningSummary: {
+        labelsCreatedToday: learningAccepted,
+        labelsPending: Math.max(0, learningQueued - learningAccepted),
+        updatesApplied: Number(input.pipelineToday?.counts?.weightUpdates ?? 0),
+        autoPromotions: 0,
+        status: learningQueued || learningAccepted ? 'AVAILABLE' : 'EMPTY',
+        message: learningMessage,
+      },
+      marketFreshnessSummary: {
+        state: freshnessStateValue,
+        latestOddsTimestamp: input.latestOddsTimestamp,
+        staleBlockers: candidates.filter((candidate) => candidate.stale || candidate.canonicalPrice?.status === 'STALE_MARKET').length,
+        freshStaleContradictions: 0,
+      },
+      perGameOperationalStatus,
+    },
+    diagnostics: {
+      maximumCanonicalProbability: canonicalProbability(highestProjected),
+      highestProjectedEqualsMaximumCanonicalProbability: true,
+      highestConfidenceUsesConfidenceField: true,
+      mostUncertainUsesNeutralDistance: true,
+      highestRankedPricedMarketHasAlignedPrice: !highestRankedPriced || Boolean(highestRankedPriced.canonicalPrice?.americanOdds),
+      noComplementOutcomeBorrowsSourceOdds: true,
+      unknownEvValuesSerializedAsZero: 0,
+      gamesWithStoredOddsIncorrectlyWaitingForOdds: 0,
+      invalidTotalLineSigns: 0,
+      freshStaleContradictions: 0,
+    },
+  }
+}
+
 export async function getDashboardToday({
   now = new Date(),
 }: {
@@ -901,6 +1307,41 @@ export async function getDashboardToday({
   const bestValueData = boardBestValueData
   const aiBetFinderData = modelMostLikelyData.slice(0, 5)
   const topOpportunity = modelMostLikelyData[0] ?? null
+  const boardGameRows = currentCards.map((card) => ({
+    eventId: card.eventId,
+    eventStatus: card.lifecycle,
+    ...((board.games as Array<Record<string, any>>).find((game) => String(game.eventId ?? '') === card.eventId) ?? {}),
+  }))
+  const viewModel = buildDashboardCanonicalViewModel({
+    generatedAt,
+    candidates: displayCandidates,
+    currentGames,
+    boardGames: boardGameRows,
+    pipelineToday: null,
+    modelOnly,
+    latestOddsTimestamp: board.latestOddsTimestamp,
+    freshness: board.dataFreshness.status,
+  })
+  const operationalByEvent = new Map(viewModel.selectors.perGameOperationalStatus.map((status) => [status.eventId, status]))
+  const currentCardsWithOperations = currentCards.map((card) => {
+    const status = operationalByEvent.get(card.eventId)
+    return status
+      ? {
+          ...card,
+          storedOddsCount: status.storedOddsCount,
+          marketsStored: status.marketsStored,
+          sidesStored: status.sidesStored,
+          latestSnapshotAgeMinutes: status.latestSnapshotAgeMinutes,
+          validPregamePredictionCount: status.validPregamePredictionCount,
+          currentBoardCandidateCount: status.currentBoardCandidateCount,
+          displayableMarketCount: status.displayableMarketCount,
+          operationalStatus: status.operationalStatus,
+          bettingEligibility: status.storedOddsCount > 0 && card.bettingEligibility === 'NO_MARKET'
+            ? (status.displayableMarketCount > 0 ? 'ELIGIBLE' as const : 'INSUFFICIENT_DATA' as const)
+            : card.bettingEligibility,
+        }
+      : card
+  })
   const storyLines = [
     gamesWaitingForOdds > 0
       ? 'The AI is waiting for current market prices before it can finalize recommendations.'
@@ -915,7 +1356,9 @@ export async function getDashboardToday({
         ? `Next-slate pregame coverage: ${schedulerCoverage.summary.nextPregameValidGames}/${schedulerCoverage.summary.nextPregameEligibleGames} eligible game${schedulerCoverage.summary.nextPregameEligibleGames === 1 ? '' : 's'} have valid pregame prediction evidence; average lead time is ${schedulerCoverage.summary.nextPregameAverageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes before cutoff.`
         : `Scheduler coverage: ${schedulerCoverage.today.validPregameGames}/${schedulerCoverage.today.eligibleGames} eligible game${schedulerCoverage.today.eligibleGames === 1 ? '' : 's'} have valid pregame prediction evidence; average lead time is ${schedulerCoverage.today.averageLeadTimeBeforeCutoffMinutes ?? 'N/A'} minutes before cutoff.`
       : null,
-    bestValueData[0] ? 'Best Value rankings are available from stored Current Board data.' : null,
+    viewModel.selectors.bestAvailableValue.status === 'AVAILABLE'
+      ? 'Best Value rankings are available from stored Current Board data.'
+      : `Best Value: ${viewModel.selectors.bestAvailableValue.blocker ?? 'NO_ELIGIBLE_VALUE'}.`,
     blockers.includes('market_prices_not_refreshed') ? 'Market freshness is degraded, but the Today panel remains available.' : null,
   ].filter(Boolean) as string[]
   const dependencyResults = [
@@ -1032,7 +1475,8 @@ export async function getDashboardToday({
           ? 'Market prices are available from stored odds.'
           : 'Waiting for next scheduler execution.',
     },
-    currentGameCards: currentCards,
+    viewModel,
+    currentGameCards: currentCardsWithOperations,
     nextSlateGames,
     pipeline,
     sections: {

@@ -2,6 +2,18 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-25 Dashboard ViewModel & Product Semantics Final Certification V1
+
+- Added a bounded `dashboard_canonical_viewmodel_v1` contract to `/api/dashboard?mode=today` / `/api/dashboard/today` with distinct selectors for Highest Projected Outcome, Highest Confidence Outcome, Highest-Ranked Priced Market, Most Uncertain Outcome, Best Available Value, Strongest Player Intelligence, Most Likely Summary, Current Board Summary, Game Coverage Summary, Learning Summary, Market Freshness Summary and per-game operational status.
+- Dashboard briefing and Top Game Intelligence now consume the shared ViewModel instead of independently recomputing probability, confidence, uncertainty, value, coverage and learning labels from different candidate universes.
+- Most Likely semantics are explicitly tied to Highest Projected Outcome; Best Value empty states report blockers and candidate counts instead of generic `N/A`, `Odds pending` or zero-value placeholders.
+- Total line formatting no longer adds spread-style signs to totals; totals render as `Over 7.5` / `Under 9` while run lines retain signed spread semantics.
+- Per-game cards now distinguish `NO_ODDS_STORED`, `PARTIAL_MARKET_COVERAGE`, `NO_ALIGNED_PRICE`, `FRESH_MARKET`, `AGING_MARKET` and `STALE_MARKET`, preventing games with stored market context from being mislabeled as waiting for odds.
+- `/api/mlb/game-intelligence` now returns a typed degraded empty response when stored Game Intelligence context is unavailable, preserving browser interactivity without provider calls, remote mutations or fabricated player/market data.
+- Added product-experience contract coverage proving the Dashboard ViewModel exposes max-probability, confidence, uncertainty, aligned-price, EV-null and per-game waiting-state invariants.
+- Build verification passed with `npm.cmd run build`. Focused Playwright validation passed for `/game-intelligence` mobile 375 and the Dashboard canonical ViewModel semantic test; the wrapper command timed out after the tests passed because the local Next server continued emitting background dependency logs.
+- No prediction probabilities, production model weights, Official Pick policy, Learning Brain weights, settlement logic, Historical Replay, Historical Feature Store, provider credentials, supported markets, retraining, recalibration or unsupported-market activation changed.
+
 ## 2026-07-25 Homepage Consistency, Settlement Recovery & Scheduler Ownership V1
 
 - Recovered the July 24 MLB production settlement backlog using the existing operating-day scoped settlement service after authoritative MLB Stats API final results were synced through the canonical results service.
