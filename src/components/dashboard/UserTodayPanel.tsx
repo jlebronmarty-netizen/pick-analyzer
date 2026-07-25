@@ -1576,6 +1576,93 @@ function HistoryCard({ data }: { data: TodayResponse }) {
   )
 }
 
+function DailyBriefing({
+  data,
+  games,
+  mostLikely,
+  bestValue,
+  pipelineToday,
+}: {
+  data: TodayResponse
+  games: Array<Record<string, any>>
+  mostLikely: IntelligenceRow[]
+  bestValue: IntelligenceRow[]
+  pipelineToday?: PipelineTraceDay | null
+}) {
+  const trace = pipelineToday?.counts
+  const starterReady = games.filter((game) => Boolean(game.playerIntelligenceAvailable || game.starterContext || game.pitcherContext)).length
+  const lineupReady = games.filter((game) => Boolean(game.expectedLineups || game.lineupContext || game.playerIntelligenceAvailable)).length
+  const playerReady = games.filter((game) => Boolean(game.playerIntelligenceAvailable)).length
+  const cards = [
+    ['Games Today', data.lifecycleCounts?.totalScheduledToday ?? data.currentGames ?? games.length, games.length ? 'Visible slate loaded' : 'No games visible'],
+    ['Games Covered', data.gamesReadyForAnalysis ?? games.length, data.gamesWaitingForOdds ? `${data.gamesWaitingForOdds} waiting for odds` : 'Coverage available'],
+    ['Pregame Coverage', trace?.predictionsValidPregame ?? data.predictionCandidates, trace ? `${trace.predictionsExcludedAfterCutoff ?? 0} excluded after cutoff` : 'Stored prediction scope'],
+    ['Player Coverage', playerReady, playerReady ? 'Player intelligence linked' : 'No player projections grounded'],
+    ['Starter Coverage', starterReady, starterReady ? 'Starter evidence linked' : 'No starter data grounded'],
+    ['Lineup Coverage', lineupReady, lineupReady ? 'Lineup context linked' : 'No lineup context grounded'],
+    ['Official Picks', data.officialPicks, data.officialPicks ? 'Policy-qualified' : 'None passed policy'],
+    ['Most Likely', mostLikely[0]?.selection ?? 'N/A', mostLikely[0] ? `${formatPercent(candidateDisplayProbability(mostLikely[0]))} model` : 'No supported outcome'],
+    ['Best Value', bestValue.length ? 'Available' : 'N/A', bestValue.length ? `${bestValue.length} value row${bestValue.length === 1 ? '' : 's'}` : data.sections?.bestValue?.reason ?? 'No positive EV'],
+    ['Settlement', trace?.productionPredictionsSettled ?? data.finalGames, data.finalGames ? 'Final games present' : 'Settlement pending'],
+    ['Learning', trace?.learningSamplesAccepted ?? 0, trace?.learningSamplesQueued ? `${trace.learningSamplesQueued} queued` : 'No learning sample queued'],
+    ['Freshness', simpleAction(data.freshness), data.latestOddsTimestamp ? `Odds ${timeText(data.latestOddsTimestamp)}` : 'No odds timestamp'],
+  ]
+  return (
+    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-5 ${cardMotion}`}>
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Ten-Second Briefing</p>
+          <h3 className="mt-2 text-2xl font-black text-white">Today at a glance</h3>
+        </div>
+        <Badge tone={data.freshness === 'fresh' ? 'green' : data.freshness === 'stale' ? 'red' : 'yellow'}>{simpleAction(data.freshness)}</Badge>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {cards.map(([label, cardValue, detail]) => (
+          <div key={String(label)} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</p>
+            <p className="mt-2 break-words text-lg font-black text-white">{String(cardValue)}</p>
+            <p className="mt-1 text-xs leading-5 text-slate-400">{String(detail)}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function TopGameIntelligence({ games, mostLikely, bestValue }: { games: Array<Record<string, any>>; mostLikely: IntelligenceRow[]; bestValue: IntelligenceRow[] }) {
+  const byEvent = (eventId: string | undefined) => games.find((game) => String(game.eventId ?? game.id ?? '') === String(eventId ?? ''))
+  const probability = mostLikely[0]
+  const confidence = [...mostLikely, ...bestValue].sort((left, right) => Number(right.confidence ?? 0) - Number(left.confidence ?? 0))[0]
+  const value = bestValue[0]
+  const valueMetric = value ? value.expectedValue ?? (value as Record<string, unknown>).canonicalDisplayExpectedValue : null
+  const uncertain = [...mostLikely].sort((left, right) => Math.abs(Number(left.probability ?? left.rawProbability ?? 50) - 50) - Math.abs(Number(right.probability ?? right.rawProbability ?? 50) - 50))[0]
+  const playerGame = games.find((game) => Boolean(game.playerIntelligenceAvailable))
+  const rows = [
+    ['Highest model probability', probability?.eventId, probability?.matchup, probability?.selection, formatPercent(probability ? candidateDisplayProbability(probability) : null)],
+    ['Highest confidence', confidence?.eventId, confidence?.matchup, confidence?.selection, formatPercent(confidence?.confidence)],
+    ['Best available value', value?.eventId, value?.matchup, value?.selection, value ? formatPercent(valueMetric) : 'N/A'],
+    ['Most uncertain game', uncertain?.eventId, uncertain?.matchup, uncertain?.selection, uncertain ? formatPercent(candidateDisplayProbability(uncertain)) : 'N/A'],
+    ['Strongest player intelligence', String(playerGame?.eventId ?? playerGame?.id ?? ''), String(playerGame?.matchup ?? playerGame?.title ?? 'N/A'), 'Player context', playerGame ? 'Grounded' : 'N/A'],
+  ].map(([label, eventId, matchup, selection, metric]) => {
+    const game = byEvent(String(eventId))
+    return { label: String(label), eventId: String(eventId ?? game?.eventId ?? game?.id ?? ''), matchup: String(matchup ?? game?.matchup ?? 'N/A'), selection: String(selection ?? 'N/A'), metric: String(metric ?? 'N/A') }
+  })
+  return (
+    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-5 ${cardMotion}`}>
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Top Game Intelligence</p>
+      <div className="mt-4 grid gap-3 lg:grid-cols-5">
+        {rows.map((row) => (
+          <a key={row.label} href={row.eventId ? `/game-intelligence/${encodeURIComponent(row.eventId)}` : '/game-intelligence'} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 outline-none transition hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-300">
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{row.label}</p>
+            <p className="mt-2 text-sm font-black text-white">{row.matchup}</p>
+            <p className="mt-1 text-xs text-slate-400">{row.selection} / {row.metric}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export default function UserTodayPanel() {
   const [data, setData] = useState<TodayResponse | null>(null)
   const [topOpportunity, setTopOpportunity] = useState<TopOpportunity | null>(null)
@@ -1741,6 +1828,8 @@ export default function UserTodayPanel() {
       <DecisionHero data={data} counts={counts} />
       <TodayStory data={data} counts={counts} mostLikely={mostLikely} bestValue={bestValue} pipelineToday={pipelineToday} />
       <PipelineSummary data={data} counts={counts} pipelineToday={pipelineToday} />
+      <DailyBriefing data={data} games={games} mostLikely={mostLikely} bestValue={bestValue} pipelineToday={pipelineToday} />
+      <TopGameIntelligence games={games} mostLikely={mostLikely} bestValue={bestValue} />
       <AiPerformancePreviewCard />
       <DataFreshnessPreviewCard />
       <section className="grid gap-4 lg:grid-cols-6">

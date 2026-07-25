@@ -2477,3 +2477,19 @@ Persistence scope: None. The layer reads `prediction_history`, `sport_events` an
 Validation: `npm.cmd run build` exits 0 with 348 static pages. Evolution rows are ordered by `generated_at`, post-start evidence is excluded when an event cutoff is available, and missing change reasons are explicitly labelled instead of inferred.
 
 Completion criteria: `PROJECTION_EVOLUTION_PASS`, `MODEL_EVIDENCE_EXPERIENCE_PASS` and `PERFORMANCE_SCOPE_TRANSPARENCY_PASS` are certified locally pending production deployment smoke.
+
+### 46. Dashboard & Daily AI Briefing Refinement V1
+
+Objective: Make Dashboard a concise entry point into deeper intelligence without overloading the main page.
+
+Status: Implemented locally using existing Today dashboard data.
+
+Backend scope: None. The phase reuses `/api/dashboard/today`, Most Likely, Best Value and recommendation pipeline data already loaded by the dashboard.
+
+Frontend scope: `UserTodayPanel` adds a ten-second briefing and top-game intelligence strip. Cards link to Game Center and preserve existing lazy advanced panels.
+
+Persistence scope: None. No database writes, provider calls, prediction changes, model changes, settlement changes, learning changes or Official Pick policy changes.
+
+Validation: `npm.cmd run build` exits 0 with 348 static pages. The briefing uses bounded current-day data already present on the dashboard and labels unavailable player/starter/lineup/value states explicitly.
+
+Completion criteria: `DAILY_BRIEFING_PASS`, `DASHBOARD_INTELLIGENCE_PASS`, `PRODUCT_EMPTY_STATE_PASS` and `DASHBOARD_PERFORMANCE_PASS` are certified locally pending production deployment smoke.
