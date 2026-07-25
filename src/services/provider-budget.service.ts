@@ -3,7 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
-const DEFAULT_DAILY_CALL_BUDGET = 1500
+const DEFAULT_DAILY_CALL_BUDGET = 1000
 const DEFAULT_SOFT_RESERVE = 150
 const DEFAULT_MAX_CALLS_PER_ACTION = 3
 const DEFAULT_MAX_REFRESH_CALLS_PER_HOUR = 12

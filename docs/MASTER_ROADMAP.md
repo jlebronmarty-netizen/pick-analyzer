@@ -2509,3 +2509,19 @@ Persistence scope: None. No database writes, provider calls, prediction changes,
 Validation: `npm.cmd run build` exits 0 with 348 static pages. The briefing uses bounded current-day data already present on the dashboard and labels unavailable player/starter/lineup/value states explicitly.
 
 Completion criteria: `DAILY_BRIEFING_PASS`, `DASHBOARD_INTELLIGENCE_PASS`, `PRODUCT_EMPTY_STATE_PASS` and `DASHBOARD_PERFORMANCE_PASS` are certified locally pending production deployment smoke.
+
+### 47. Homepage Consistency, Automatic Settlement And Provider Budget Utilization V1
+
+Objective: Recover the July 24 production settlement backlog, make postgame continuity automatic, and reconcile provider budget/scheduler ownership without changing models or recommendation policy.
+
+Status: In progress with Phase 2 settlement recovery complete and Phase 3/4 scheduler-budget hardening implemented locally.
+
+Backend scope: Existing results sync, scoped operating-day settlement, operating-day cron continuity bridge, provider budget service, adaptive refresh scheduler audit and daily performance refresh.
+
+Frontend scope: None in the scheduler/budget hardening step; homepage/performance reconciliation remains validated through existing dashboard APIs before certification.
+
+Persistence scope: Production settlement wrote only canonical July 24 settlement outcomes and derived learning-label closure for the 45 eligible production predictions. The code patch changes provider-budget defaults and scheduler cadence only; it does not mutate predictions, model weights, Official Pick policy, replay artifacts or feature-store history.
+
+Validation: Production settlement recovered 15 final MLB games and settled exactly 45 predictions with an idempotent rerun returning 0 newly eligible rows. Provider budget defaults are now 1,000 daily calls with a 150 reserve, 3 calls per action and 12 calls per hour. The single scheduled Vercel cron is `*/15 * * * *`; GitHub workflows remain dry-run observers.
+
+Completion criteria: `PRODUCTION_SETTLEMENT_RECOVERY_PASS`, `SETTLEMENT_IDEMPOTENCY_PASS`, `LEARNING_LABEL_CLOSURE_PASS`, `POSTGAME_CONTINUITY_PASS` and `SCHEDULER_OWNERSHIP_PASS` are locally certified. Provider-budget, homepage, performance and end-to-end production certifications remain pending final build, deployment and smoke validation.

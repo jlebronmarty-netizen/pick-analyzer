@@ -819,6 +819,10 @@ Future migrations should remain additive unless explicitly approved.
 
 ## Current Endpoint Count
 
+## Latest Update - 2026-07-25
+
+- Homepage Consistency, Automatic Settlement and Provider Budget Utilization V1 is in progress after production recovery. July 24 MLB production settlement was executed through the existing canonical scoped settlement route after canonical results sync, settling exactly 45 eligible predictions across 15 final games with 29 wins, 16 losses, 0 pushes, 45 learning labels and an idempotent zero-settlement rerun. Postgame scheduler ownership is now centralized in `/api/cron/operating-day`: Vercel is the only write-capable owner for results sync, settlement, learning-label closure, performance refresh and daily snapshot; GitHub Actions and heartbeat workflows call dry-run observer mode only. Provider budget defaults now enforce a 1,000-call daily cap with a 150-call reserve, 3 calls per action and 12 refresh calls per hour, and the single Vercel cron cadence is `*/15 * * * *` so adaptive refresh can decide due work without duplicate write-capable schedulers. No prediction probabilities, production model weights, Official Pick policy, Historical Replay or Historical Feature Store artifacts were changed.
+
 There are 359 `src/app/api/**/route.ts` files.
 
 ## Last Successful Build
