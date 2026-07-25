@@ -11,7 +11,6 @@ type StoredProjectionRow = {
   entity_id: string | null
   entity_name: string | null
   team_name: string | null
-  opponent_team_name: string | null
   projection_key: string | null
   projection_family: string | null
   projected_value: number | null
@@ -46,7 +45,7 @@ function storedProjectionToDetail(row: StoredProjectionRow) {
     canonicalPlayerId: row.entity_id,
     playerName: row.entity_name ?? 'Unknown player',
     team: row.team_name,
-    opponent: row.opponent_team_name,
+    opponent: null,
     homeOrAway: side,
     projectionType: row.projection_key ?? 'stored_projection',
     projectionLabel: String(metadata.projectionLabel ?? row.projection_key ?? 'Stored Projection'),
@@ -96,7 +95,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     if (!projection) {
       const stored = await supabaseAdmin
         .from('universal_projection_history')
-        .select('id, sport_key, league_key, event_id, entity_id, entity_name, team_name, opponent_team_name, projection_key, projection_family, projected_value, confidence, feature_quality, data_sufficiency, prediction_interval_low, prediction_interval_high, model_version, readiness, shadow_status, starter_status, metadata, generated_at, explanation')
+        .select('id, sport_key, league_key, event_id, entity_id, entity_name, team_name, projection_key, projection_family, projected_value, confidence, feature_quality, data_sufficiency, prediction_interval_low, prediction_interval_high, model_version, readiness, shadow_status, starter_status, metadata, generated_at, explanation')
         .eq('sport_key', 'baseball_mlb')
         .eq('id', projectionId)
         .maybeSingle()
