@@ -20,6 +20,7 @@ import { formatInTimeZone, localDateInTimeZone, zonedUtcRange } from '@/services
 import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.service'
 import { getMlbProjectedScores } from '@/services/mlb-projected-score.service'
 import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
+import { getRecommendationPipelineTrace } from '@/services/recommendation-pipeline-trace.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -1009,7 +1010,7 @@ export async function getDashboardToday({
     hour12: false,
   }).format(now))
 
-  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, modelOnlyResult, projectedScoresResult, schedulerCoverageResult] = await Promise.all([
+  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, modelOnlyResult, projectedScoresResult, schedulerCoverageResult, pipelineTraceResult] = await Promise.all([
     timed('current_events', () => loadEventsForDate(operatingDate), 4200),
     timed('current_board', () => getCurrentBoardCached(SPORT_KEY, 'CURRENT', 100, false, operatingDate), 5000),
     timed('next_slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }), 3500),
@@ -1018,6 +1019,7 @@ export async function getDashboardToday({
     timed('model_only_intelligence', () => getModelOnlyIntelligence({ date: operatingDate }), 5000),
     timed('projected_scores', () => getMlbProjectedScores(), 5000),
     timed('pregame_scheduler_coverage', () => getPregameSchedulerCoverage({ now }), 5000),
+    timed('recommendation_pipeline_trace', () => getRecommendationPipelineTrace(), 5000),
   ])
   const currentEventsTimedOut = currentEventsResult.error?.toLowerCase().includes('exceeded') === true
   const currentEventsFallbackResult = !currentEventsResult.ok && !currentEventsTimedOut
@@ -1147,6 +1149,7 @@ export async function getDashboardToday({
     remoteMutationsMade: 0,
   } as Awaited<ReturnType<typeof getMlbProjectedScores>>)
   const schedulerCoverage = schedulerCoverageResult.ok ? schedulerCoverageResult.value : null
+  const pipelineTrace = pipelineTraceResult.ok ? pipelineTraceResult.value : null
   const eventLoad = currentEventsResult.ok
     ? values(currentEventsResult, {
       rows: [] as DashboardEventRow[],
@@ -1317,7 +1320,7 @@ export async function getDashboardToday({
     candidates: displayCandidates,
     currentGames,
     boardGames: boardGameRows,
-    pipelineToday: null,
+    pipelineToday: pipelineTrace?.today ?? null,
     modelOnly,
     latestOddsTimestamp: board.latestOddsTimestamp,
     freshness: board.dataFreshness.status,
@@ -1371,6 +1374,7 @@ export async function getDashboardToday({
     projectedScoresResult,
     settlementStateResult,
     schedulerCoverageResult,
+    pipelineTraceResult,
   ]
   const criticalLabels = new Set(['current_events'])
   const errors = dependencyResults
