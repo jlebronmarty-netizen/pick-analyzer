@@ -2,6 +2,14 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 AI Game Center Experience V1
+
+- Upgraded the MLB Game Intelligence detail page into an AI Game Center presentation over the existing `game_intelligence_v1` API without adding a second engine.
+- Added product sections for Overview, Team Intelligence, Starting Pitchers, Expected Lineups, Player Projections, Market Intelligence, Why the Model Thinks This, Performance & Evidence and Data Quality.
+- Market display now uses canonical outcome, canonical price, canonical implied probability, canonical EV and canonical reason where available, while preserving N/A states and blockers for missing prices or unavailable metrics.
+- Expected lineup and player projection rows remain linked to Player Detail or filtered Player Projections; expected lineups are not labelled confirmed.
+- No prediction probabilities, production weights, Official Pick policy, provider calls, remote data mutations, Historical Replay, Historical Feature Backfill, player-prop betting or unsupported market activation changed.
+
 ## 2026-07-24 Current Board Database Timeout Recovery V1
 
 - Scoped normal Current Board `CURRENT` and `UPCOMING` reads to a bounded pregame window before ordering prediction rows, preventing the product API from scanning historical growth when callers only need the active board.

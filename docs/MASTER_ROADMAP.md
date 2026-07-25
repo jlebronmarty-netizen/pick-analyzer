@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### AI Game Center Experience V1
+
+Status: Implemented locally and build-verified; production deployment verification pending.
+
+Evidence: `src/components/dashboard/MlbGameIntelligenceDetailClient.tsx`, existing `/api/games/[eventId]/intelligence` contract and local production build.
+
+Note: The Game Intelligence detail page now presents a full AI Game Center with Overview, Team Intelligence, Starting Pitchers, Expected Lineups, Player Projections, Market Intelligence, deterministic model explanation, Performance & Evidence and Data Quality sections. It reuses existing Game Intelligence, Current Board, Starter Intelligence, Lineup Context and Player Projection contracts, keeps unavailable metrics as N/A with reasons, and does not change prediction probabilities, market policy, Official Picks, provider calls, replay/backfill artifacts or production weights.
+
 ### Current Board Database Timeout Recovery V1
 
 Status: Implemented locally; production verification pending.
