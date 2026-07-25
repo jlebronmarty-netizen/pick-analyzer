@@ -839,6 +839,7 @@ function buildDashboardCanonicalViewModel(input: {
       weightUpdates?: number
     }
   } | null
+  schedulerCoverage?: Awaited<ReturnType<typeof getPregameSchedulerCoverage>> | null
   modelOnly: Awaited<ReturnType<typeof getModelOnlyIntelligence>>
   latestOddsTimestamp: string | null
   freshness: 'fresh' | 'partial' | 'stale' | 'empty'
@@ -914,6 +915,7 @@ function buildDashboardCanonicalViewModel(input: {
   const learningMessage = learningQueued
     ? `${learningQueued} learning label${learningQueued === 1 ? '' : 's'} queued; ${learningAccepted} accepted by evidence checks.`
     : 'No learning labels pending.'
+  const schedulerValidGames = Number(input.schedulerCoverage?.summary?.predictedToday ?? input.schedulerCoverage?.today?.validPregameGames ?? Number.NaN)
   const strongestPlayer = emptySelector(
     'Player Intelligence Readiness',
     pitcherProjectionCount || batterProjectionCount ? 'PLAYER_CONTEXT_AVAILABLE' : 'NO_CURRENT_PLAYER_PROJECTIONS',
@@ -958,7 +960,9 @@ function buildDashboardCanonicalViewModel(input: {
       },
       gameCoverageSummary: {
         gamesToday: input.currentGames,
-        gamesWithValidPregamePredictions: Math.min(input.currentGames, currentBoardEventIds.size || Number(input.pipelineToday?.counts?.predictionsValidPregame ?? input.pipelineToday?.counts?.predictionsGenerated ?? 0)),
+        gamesWithValidPregamePredictions: Number.isFinite(schedulerValidGames)
+          ? Math.min(input.currentGames, schedulerValidGames)
+          : Math.min(input.currentGames, currentBoardEventIds.size || Number(input.pipelineToday?.counts?.predictionsValidPregame ?? input.pipelineToday?.counts?.predictionsGenerated ?? 0)),
         gamesWithDisplayableCurrentBoardMarket: gamesWithDisplayableMarket,
         marketsPredicted: Number(input.pipelineToday?.counts?.predictionsGenerated ?? candidates.length),
         currentBoardCandidates: Number(input.pipelineToday?.counts?.currentBoardCandidates ?? candidates.length),
@@ -1321,6 +1325,7 @@ export async function getDashboardToday({
     currentGames,
     boardGames: boardGameRows,
     pipelineToday: pipelineTrace?.today ?? null,
+    schedulerCoverage,
     modelOnly,
     latestOddsTimestamp: board.latestOddsTimestamp,
     freshness: board.dataFreshness.status,
