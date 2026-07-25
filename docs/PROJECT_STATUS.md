@@ -2,6 +2,14 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Player Intelligence Experience V1
+
+- Expanded Player Projection Detail into a Player Intelligence product surface using the existing MLB Player Projection Engine and stored projection history.
+- Added current same-player projections, probability distributions, grounded supporting features, bounded indexed projection history, projection-family performance metrics and same-game comparison.
+- Player comparison remains sports-projection only and never presents sportsbook EV, Kelly, ROI or betting recommendations.
+- Projection history is capped and keyed through `universal_projection_history` player/entity indexes; no unrestricted history scan was added.
+- No player-prop betting, production probability changes, production weight changes, Official Pick policy changes, provider calls, replay/backfill actions or unsupported-market activation changed.
+
 ## 2026-07-24 AI Game Center Experience V1
 
 - Upgraded the MLB Game Intelligence detail page into an AI Game Center presentation over the existing `game_intelligence_v1` API without adding a second engine.

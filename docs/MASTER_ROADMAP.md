@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Player Intelligence Experience V1
+
+Status: Implemented locally and build-verified; production deployment verification pending.
+
+Evidence: `src/app/api/mlb/player-projections/[projectionId]/route.ts`, `src/components/dashboard/MlbPlayerProjectionDetailClient.tsx`, existing MLB Player Projection Engine contracts and local production build.
+
+Note: Player Detail now presents current same-player projections, distributions, projection evidence, bounded indexed history, projection-family performance and same-game comparison without activating sportsbook props, EV, Kelly, ROI or Official Picks. History is capped at 25 rows through `universal_projection_history` entity lookup, and comparison is bounded to the same game/projection family.
+
 ### AI Game Center Experience V1
 
 Status: Implemented locally and build-verified; production deployment verification pending.
