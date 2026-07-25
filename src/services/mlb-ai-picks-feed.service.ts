@@ -54,6 +54,9 @@ export type MlbAiPicksFeedItem = {
   marketAlignment: CurrentBoardCandidate['marketAlignment']
   marketSemantics: CurrentBoardCandidate['marketSemantics']
   outcomeCompleteness: CurrentBoardCandidate['outcomeCompleteness'] | null
+  canonicalOutcome: CurrentBoardCandidate['canonicalOutcome'] | null
+  canonicalPrice: CurrentBoardCandidate['canonicalPrice'] | null
+  canonicalEv: CurrentBoardCandidate['canonicalEv'] | null
   recommendationExplanation: NonNullable<CurrentBoardCandidate['recommendationExplanation']>
   explainableIntelligence: ExplainableIntelligenceContract | null
   officialPick: OfficialPickContract | null
@@ -131,6 +134,7 @@ function baseItem(
   const canonicalOutcome = itemType === 'MOST_LIKELY' ? candidate.canonicalOutcome : null
   const canonicalPrice = itemType === 'MOST_LIKELY' ? candidate.canonicalPrice : null
   const canonicalEv = itemType === 'MOST_LIKELY' ? candidate.canonicalEv : null
+  const useCanonicalMarket = itemType === 'MOST_LIKELY' && Boolean(canonicalOutcome)
   const pushAwareText = candidate.marketSemantics.pushCapable
     ? 'Push-capable market: Win/Push/Loss semantics apply, and EV is not actionable until push probability is known.'
     : 'Binary market: selected-side and opposite-side probabilities sum to 100%.'
@@ -164,19 +168,19 @@ function baseItem(
     marketLabel: candidate.marketLabel,
     selection: canonicalOutcome?.selection ?? mostLikely?.highestProbabilitySelection ?? candidate.selection,
     line: canonicalOutcome?.line ?? mostLikely?.highestProbabilityLine ?? candidate.line,
-    americanOdds: canonicalPrice?.americanOdds ?? candidate.americanOdds,
-    sportsbook: candidate.sportsbook,
+    americanOdds: useCanonicalMarket ? canonicalPrice?.americanOdds ?? null : candidate.americanOdds,
+    sportsbook: useCanonicalMarket ? canonicalPrice?.sportsbook ?? 'N/A' : candidate.sportsbook,
     modelProbability: canonicalOutcome?.probability ?? mostLikely?.highestProbability ?? candidate.rawProbability,
     calibratedProbability: candidate.calibratedProbability,
-    impliedProbability: canonicalPrice?.impliedProbability ?? candidate.impliedProbability,
-    marketImpliedProbability: round(canonicalPrice?.impliedProbability ?? alignment.marketImpliedProbability),
-    edgePercentagePoints: round(canonicalEv?.edge ?? alignment.edgePercentagePoints),
-    expectedValuePercent: round(canonicalEv?.expectedValue ?? alignment.expectedValuePercent),
+    impliedProbability: useCanonicalMarket ? canonicalPrice?.impliedProbability ?? null : candidate.impliedProbability,
+    marketImpliedProbability: round(useCanonicalMarket ? canonicalPrice?.impliedProbability ?? null : alignment.marketImpliedProbability),
+    edgePercentagePoints: round(useCanonicalMarket ? canonicalEv?.edge ?? null : alignment.edgePercentagePoints),
+    expectedValuePercent: round(useCanonicalMarket ? canonicalEv?.expectedValue ?? null : alignment.expectedValuePercent),
     confidence: candidate.confidence,
     risk: alignment.risk ?? itemRisk(candidate),
     freshnessStatus: alignment.freshnessStatus ?? 'UNKNOWN',
     marketAgeMinutes: round(alignment.marketAgeMinutes ?? candidate.marketInputAgeMinutes, 1),
-    oddsSnapshotId: canonicalPrice?.oddsSnapshotId ?? candidate.oddsSnapshotId,
+    oddsSnapshotId: useCanonicalMarket ? canonicalPrice?.oddsSnapshotId ?? null : candidate.oddsSnapshotId,
     featureSnapshotId: candidate.snapshotId,
     predictionGeneratedAt: candidate.predictionGeneratedAt ?? null,
     recommendationGeneratedAt: candidate.recommendationGeneratedAt ?? null,
@@ -186,6 +190,9 @@ function baseItem(
     marketAlignment: alignment,
     marketSemantics: candidate.marketSemantics,
     outcomeCompleteness: candidate.outcomeCompleteness ?? null,
+    canonicalOutcome: canonicalOutcome ?? null,
+    canonicalPrice: canonicalPrice ?? null,
+    canonicalEv: canonicalEv ?? null,
     recommendationExplanation: explanation,
     explainableIntelligence: candidate.explainableIntelligence ?? null,
     officialPick: candidate.officialPick ?? null,

@@ -204,7 +204,7 @@ export type CurrentBoardCandidate = {
     sportsbook: string | null
     oddsSnapshotId: string | null
     timestamp: string | null
-    source: 'selected_stored_price' | 'opposite_stored_price' | 'unavailable'
+    source: 'selected_stored_price' | 'unavailable'
     status: 'AVAILABLE' | 'NO_STORED_ODDS' | 'NO_OPPOSITE_PRICE' | 'STALE_MARKET' | 'MARKET_MISMATCH' | 'UNKNOWN_PUSH'
   }
   canonicalEv?: {
@@ -271,6 +271,8 @@ export type CurrentBoardResponse = {
     eventStatus: string
     candidates: number
     markets: string[]
+    storedOddsCount: number
+    displayableMarketCount: number
     latestOddsTimestamp: string | null
     playerIntelligenceAvailable?: boolean
     eligibleBatters?: number
@@ -1148,28 +1150,7 @@ function attachOfficialPickContracts(candidates: CurrentBoardCandidate[]) {
   }))
 }
 
-function sameLine(left: number | null, right: number | null) {
-  if (left === null || right === null) return left === right
-  return Math.abs(left - right) < 0.001
-}
-
-function canonicalMatchKey(candidate: CurrentBoardCandidate, selection: string, line: number | null) {
-  return [
-    candidate.eventId,
-    candidate.market,
-    candidate.period,
-    selection.toLowerCase(),
-    line === null ? 'null' : line.toFixed(3),
-    candidate.sportsbook.toLowerCase(),
-  ].join('|')
-}
-
 function attachCanonicalOutcomeContracts(candidates: CurrentBoardCandidate[]) {
-  const byOutcome = new Map<string, CurrentBoardCandidate>()
-  for (const candidate of candidates) {
-    byOutcome.set(canonicalMatchKey(candidate, candidate.selection, candidate.line), candidate)
-  }
-
   return candidates.map((candidate) => {
     const canonical = candidate.canonicalOutcome!
     if (!canonical.complementDerived) {
@@ -1208,58 +1189,25 @@ function attachCanonicalOutcomeContracts(candidates: CurrentBoardCandidate[]) {
       } satisfies CurrentBoardCandidate
     }
 
-    const opposite = byOutcome.get(canonicalMatchKey(candidate, canonical.selection, canonical.line))
-    const oppositePriceUsable =
-      opposite &&
-      sameLine(opposite.line, canonical.line) &&
-      opposite.marketAlignment.alignmentStatus === 'ALIGNED' &&
-      opposite.americanOdds !== null
-    if (!oppositePriceUsable) {
-      return {
-        ...candidate,
-        canonicalPrice: {
-          americanOdds: null,
-          impliedProbability: null,
-          sportsbook: null,
-          oddsSnapshotId: null,
-          timestamp: null,
-          source: 'unavailable',
-          status: 'NO_OPPOSITE_PRICE',
-        },
-        canonicalEv: {
-          edge: null,
-          expectedValue: null,
-          actionableEdge: null,
-          actionableExpectedValue: null,
-          reason: 'NO_OPPOSITE_PRICE',
-        },
-        canonicalReason: 'NO_OPPOSITE_PRICE',
-      } satisfies CurrentBoardCandidate
-    }
-
-    const reason =
-      opposite.stale || ['STALE', 'EXPIRED'].includes(opposite.marketAlignment.freshnessStatus)
-        ? 'STALE_MARKET'
-        : opposite.marketAlignment.actionableUnavailableReason ?? 'ALIGNED'
     return {
       ...candidate,
       canonicalPrice: {
-        americanOdds: opposite.americanOdds,
-        impliedProbability: opposite.marketAlignment.marketImpliedProbability,
-        sportsbook: opposite.sportsbook,
-        oddsSnapshotId: opposite.oddsSnapshotId,
-        timestamp: opposite.marketInputTimestamp,
-        source: 'opposite_stored_price',
-        status: reason === 'STALE_MARKET' ? 'STALE_MARKET' : 'AVAILABLE',
+        americanOdds: null,
+        impliedProbability: null,
+        sportsbook: null,
+        oddsSnapshotId: null,
+        timestamp: null,
+        source: 'unavailable',
+        status: 'NO_OPPOSITE_PRICE',
       },
       canonicalEv: {
-        edge: opposite.marketAlignment.edgePercentagePoints,
-        expectedValue: opposite.marketAlignment.expectedValuePercent,
-        actionableEdge: opposite.marketAlignment.actionableEdgePercentagePoints,
-        actionableExpectedValue: opposite.marketAlignment.actionableExpectedValuePercent,
-        reason,
+        edge: null,
+        expectedValue: null,
+        actionableEdge: null,
+        actionableExpectedValue: null,
+        reason: 'NO_OPPOSITE_PRICE',
       },
-      canonicalReason: reason,
+      canonicalReason: 'NO_OPPOSITE_PRICE',
     } satisfies CurrentBoardCandidate
   })
 }
@@ -1449,9 +1397,13 @@ export async function getCurrentBoard({
       eventStatus: candidate.eventStatus,
       candidates: 0,
       markets: [],
+      storedOddsCount: 0,
+      displayableMarketCount: 0,
       latestOddsTimestamp: null,
     }
     current.candidates += 1
+    if (candidate.americanOdds !== null && candidate.americanOdds !== undefined) current.storedOddsCount += 1
+    if (candidate.canonicalOutcome) current.displayableMarketCount += 1
     current.markets = Array.from(new Set([...current.markets, candidate.marketLabel])).sort()
     current.latestOddsTimestamp = [current.latestOddsTimestamp, candidate.marketFreshnessTimestamp ?? candidate.oddsTimestamp].filter(Boolean).sort().at(-1) ?? null
     gamesById.set(candidate.eventId, current)

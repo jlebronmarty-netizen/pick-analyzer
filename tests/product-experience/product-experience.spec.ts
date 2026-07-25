@@ -214,9 +214,10 @@ test.describe('Phase 7 rendered viewport certification', () => {
   })
 
   test('dashboard canonical viewmodel preserves product semantics', async ({ request }) => {
-    const response = await request.get('/api/dashboard?mode=today')
+    const response = await request.get('/api/dashboard?mode=today&includeValidation=true')
     expect(response.ok()).toBe(true)
     const body = await response.json()
+    expect(body.validation?.success, JSON.stringify(body.validation ?? {}, null, 2)).toBe(true)
     const viewModel = body.viewModel
     expect(viewModel?.contractVersion).toBe('dashboard_canonical_viewmodel_v1')
     const selectors = viewModel.selectors
@@ -229,6 +230,9 @@ test.describe('Phase 7 rendered viewport certification', () => {
     expect(diagnostics.unknownEvValuesSerializedAsZero).toBe(0)
     expect(diagnostics.freshStaleContradictions).toBe(0)
     expect(diagnostics.invalidTotalLineSigns).toBe(0)
+    expect(diagnostics.gamesWithStoredOddsIncorrectlyWaitingForOdds).toBe(0)
+    expect(selectors.currentBoardSummary.oppositePriceViolations).toBe(0)
+    expect(selectors.marketFreshnessSummary.freshStaleContradictions).toBe(0)
 
     if (selectors.highestRankedPricedMarket.status === 'AVAILABLE') {
       expect(selectors.highestRankedPricedMarket.directlyStoredPrice).toBe(true)
@@ -241,6 +245,11 @@ test.describe('Phase 7 rendered viewport certification', () => {
       expect(selectors.bestAvailableValue.blocker).toBeTruthy()
       expect(selectors.bestAvailableValue.rankingReason).toMatch(/candidates evaluated/i)
     }
+    expect(selectors.bestValueSemantics.candidatesWithPositiveEv).toBeGreaterThanOrEqual(selectors.bestValueSemantics.candidatesPassingPolicy)
+    if (selectors.bestValueSemantics.candidatesWithPositiveEv > 0 && selectors.bestValueSemantics.candidatesPassingPolicy === 0) {
+      expect(selectors.bestValueSemantics.primaryRejectionReason).toBe('OFFICIAL_POLICY_NOT_SATISFIED')
+    }
+    expect(selectors.mostLikelySummary.selector.selection).toBe(selectors.highestProjectedOutcome.selection)
 
     const badWaitingGames = (body.currentGameCards ?? []).filter((game: any) => (
       Number(game.storedOddsCount ?? 0) > 0 &&
@@ -248,5 +257,14 @@ test.describe('Phase 7 rendered viewport certification', () => {
       /waiting for odds/i.test(String(game.operationalStatus ?? game.bettingEligibility ?? ''))
     ))
     expect(badWaitingGames, JSON.stringify(badWaitingGames, null, 2)).toHaveLength(0)
+    for (const game of body.currentGameCards ?? []) {
+      if (Number(game.storedOddsCount ?? 0) > 0) {
+        expect(String(game.operationalStatus ?? '').toUpperCase()).not.toBe('NO_ODDS_STORED')
+      }
+      for (const market of game.marketsStored ?? []) {
+        const text = String(market)
+        expect(text).not.toMatch(/\b(?:Over|Under)\s+[+-]/i)
+      }
+    }
   })
 })

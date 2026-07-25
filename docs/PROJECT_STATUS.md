@@ -1,6 +1,16 @@
 # Project Status
 
-Last updated: 2026-07-24 00:00:00Z
+Last updated: 2026-07-25 00:00:00Z
+
+## 2026-07-25 Dashboard Final Data Contract Regression Fix V1
+
+- Reconciled remaining Dashboard display contracts without changing model probabilities, production weights, Official Pick policy, settlement, Learning Brain behavior, provider calls or supported-market activation.
+- Complement-derived canonical outcomes no longer borrow the stored opposite side's odds, sportsbook, snapshot, implied probability, edge or EV; unavailable own-side pricing stays `N/A` with `NO_OPPOSITE_PRICE`.
+- Dashboard selectors now separate highest canonical probability, highest confidence, highest ranked directly priced market, Most Likely canonical rankings, positive-EV candidates, policy-eligible value candidates, displayable markets and Current Board candidates.
+- Per-game operational status uses stored odds counts separately from displayable canonical markets, so games with stored market data are not labeled as Waiting for Odds.
+- Edge display uses percentage-point formatting, totals keep unsigned line formatting, freshness counters prevent `FRESH` plus stale blockers, explanations for complement outcomes are prefixed as opposing-team factors when needed, and today's learning label count is labeled explicitly.
+- Added deterministic Dashboard ViewModel assertions and expanded product-experience API assertions for canonical probability, price alignment, freshness, Best Value semantics, edge scale, waiting-for-odds, total-line and probability-ranking contracts.
+- Local build verification passed with `npm.cmd run build`; full Playwright and production deployment verification remain pending for final certification.
 
 ## 2026-07-25 Dashboard ViewModel & Product Semantics Final Certification V1
 

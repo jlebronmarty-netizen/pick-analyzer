@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Dashboard Final Data Contract Regression Fix V1
+
+Status: Implemented locally and build-verified; full Playwright and production deployment verification pending.
+
+Evidence: `src/services/current-board.service.ts`, `src/services/dashboard-today.service.ts`, `src/services/mlb-ai-picks-feed.service.ts`, `src/components/dashboard/UserTodayPanel.tsx`, `tests/product-experience/product-experience.spec.ts`, `/api/dashboard?mode=today&includeValidation=true` and local production build.
+
+Note: The Dashboard data contracts now keep canonical probability outcomes, directly priced markets, positive EV, Official Pick policy eligibility, per-game stored odds, displayable markets, freshness and learning labels separate. Complement-derived outcomes no longer borrow opposite-side pricing or EV, edge displays use percentage-point units, totals keep unsigned line display and waiting-for-odds appears only when stored odds are absent. No prediction probabilities, model weights, Official Pick policy, settlement, Learning Brain behavior, provider calls, replay/backfill or unsupported-market activation changed.
+
 ### Dashboard ViewModel & Product Semantics Final Certification V1
 
 Status: Implemented locally and build-verified; production deployment verification pending.

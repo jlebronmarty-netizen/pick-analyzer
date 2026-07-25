@@ -141,6 +141,11 @@ type DashboardCanonicalViewModel = {
       directlyPricedCandidates: number
       noOppositePriceCandidates: number
     }
+    bestValueSemantics?: {
+      candidatesWithPositiveEv: number
+      candidatesPassingPolicy: number
+      primaryRejectionReason: string
+    }
     gameCoverageSummary: {
       gamesToday: number
       gamesWithValidPregamePredictions: number
@@ -162,7 +167,7 @@ type DashboardCanonicalViewModel = {
       state: 'FRESH' | 'AGING' | 'STALE' | 'UNKNOWN_TIMESTAMP'
       latestOddsTimestamp: string | null
       staleBlockers: number
-      freshStaleContradictions: 0
+      freshStaleContradictions: number
     }
   }
 }
@@ -255,6 +260,25 @@ type TopOpportunity = {
   oddsAgeMinutes?: number | null
   marketAlignment?: MarketAlignment
   recommendationExplanation?: RecommendationExplanation
+  canonicalOutcome?: {
+    selection?: string
+    line?: number | null
+    probability?: number | null
+    complementDerived?: boolean
+  }
+  canonicalPrice?: {
+    americanOdds?: number | null
+    impliedProbability?: number | null
+    sportsbook?: string | null
+    oddsSnapshotId?: string | null
+    status?: string
+    source?: string
+  }
+  canonicalEv?: {
+    edge?: number | null
+    expectedValue?: number | null
+    reason?: string
+  }
 }
 
 type MarketAlignment = {
@@ -409,6 +433,9 @@ type AiPicksFeedItem = {
   marketFreshnessTimestamp?: string | null
   marketFreshnessSource?: string
   marketAlignment?: MarketAlignment
+  canonicalOutcome?: TopOpportunity['canonicalOutcome']
+  canonicalPrice?: TopOpportunity['canonicalPrice']
+  canonicalEv?: TopOpportunity['canonicalEv']
   recommendationExplanation?: RecommendationExplanation
   explainableIntelligence?: {
     summary?: string
@@ -493,6 +520,10 @@ type IntelligenceRow = {
   probabilityOrigin?: string
   recommendationPolicyStatus?: string
   officialEligibility?: string
+  canonicalOutcome?: TopOpportunity['canonicalOutcome']
+  canonicalPrice?: TopOpportunity['canonicalPrice']
+  canonicalEv?: TopOpportunity['canonicalEv']
+  canonicalReason?: string
 }
 
 type IntelligenceResponse = {
@@ -600,6 +631,12 @@ function formatPercent(value: unknown) {
   return `${Math.min(100, percent).toFixed(1)}%`
 }
 
+function formatPercentagePoints(value: unknown) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return 'Not available'
+  return `${parsed > 0 ? '+' : ''}${parsed.toFixed(2)} pts`
+}
+
 function percentNumber(value: unknown) {
   const parsed = Number(value)
   if (!Number.isFinite(parsed)) return null
@@ -619,10 +656,13 @@ function positiveFiniteNumber(value: unknown) {
 }
 
 function candidateDisplayProbability(candidate: {
+  canonicalOutcome?: { probability?: unknown } | null
   calibratedProbability?: unknown
   rawProbability?: unknown
   modelProbability?: unknown
 }) {
+  const canonical = positiveFiniteNumber(candidate.canonicalOutcome?.probability)
+  if (canonical !== null) return canonical
   const calibrated = positiveFiniteNumber(candidate.calibratedProbability)
   if (calibrated !== null) return calibrated
   const raw = positiveFiniteNumber(candidate.rawProbability)
@@ -773,6 +813,22 @@ function fieldValue(value: unknown, fallback = 'Pending') {
   return text.replaceAll('_', ' ')
 }
 
+function EdgeMetric({ label = 'Edge', value, tone = 'blue' }: { label?: string; value: unknown; tone?: 'green' | 'yellow' | 'blue' | 'red' | 'gray' }) {
+  const parsed = Number(value)
+  const bounded = Number.isFinite(parsed) ? Math.min(100, Math.max(0, Math.abs(parsed))) : null
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</p>
+        <p className="text-sm font-black text-white">{formatPercentagePoints(value)}</p>
+      </div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-slate-800" role={bounded === null ? undefined : 'meter'} aria-label={bounded === null ? undefined : label} aria-valuemin={bounded === null ? undefined : 0} aria-valuemax={bounded === null ? undefined : 100} aria-valuenow={bounded ?? undefined}>
+        {bounded !== null && <div className={`h-full rounded-full ${meterColor(tone)} transition-all duration-700 ease-out`} style={{ width: `${bounded}%` }} />}
+      </div>
+    </div>
+  )
+}
+
 function OfficialPickExperienceCard({ picks, reason, topOpportunity }: { picks: OfficialPick[]; reason?: string | null; topOpportunity: TopOpportunity | null }) {
   const pick = picks[0] ?? null
   if (!pick) {
@@ -833,7 +889,7 @@ function OfficialPickExperienceCard({ picks, reason, topOpportunity }: { picks: 
       <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
         <Meter label="Model Probability" value={pick.modelProbability} tone="blue" />
         <Meter label="Market Implied" value={pick.marketImpliedProbability ?? pick.impliedProbability} tone="yellow" />
-        <Meter label="Model Edge" value={pick.edgePercentagePoints} tone="blue" />
+        <EdgeMetric label="Model Edge" value={pick.edgePercentagePoints} tone="blue" />
         <Meter label="Expected Value" value={pick.expectedValuePercent} tone="green" />
         <Meter label="Confidence" value={pick.confidence} tone="green" />
       </div>
@@ -924,7 +980,7 @@ function AiPicksFeedPanel({ feed, reason, pipelineToday }: { feed: AiPicksFeed |
                   </div>
                   <h4 className="mt-3 text-xl font-black text-white">{feedItemTitle(item)}</h4>
                   <p className="mt-1 text-sm text-slate-400">{fieldValue(item.matchup, 'Game pending')} · {timeText(item.scheduledTime)}</p>
-                  <p className="mt-3 text-sm leading-6 text-slate-300">{fieldValue(explanation?.headline ?? item.evidence?.[0], 'Stored Current Board evidence.')}</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">{fieldValue(explanationSummaryForSelection(item, explanation?.headline ?? item.evidence?.[0] ?? ''), 'Stored Current Board evidence.')}</p>
                   {item.explainableIntelligence?.summary ? (
                     <p className="mt-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm leading-6 text-emerald-50">
                       {item.explainableIntelligence.summary} {item.explainableIntelligence.recommendationBoundary ?? ''}
@@ -945,7 +1001,7 @@ function AiPicksFeedPanel({ feed, reason, pipelineToday }: { feed: AiPicksFeed |
                   <div className="grid grid-cols-2 gap-2">
                     <Meter label="Model" value={feedProbability(item)} tone="blue" />
                     <Meter label="Implied" value={alignment?.marketImpliedProbability ?? item.marketImpliedProbability} tone="yellow" />
-                    <Meter label="Edge" value={alignment?.edgePercentagePoints ?? item.edgePercentagePoints} tone="blue" />
+                    <EdgeMetric value={alignment?.edgePercentagePoints ?? item.edgePercentagePoints} tone="blue" />
                     <Meter label="EV" value={alignment?.expectedValuePercent ?? item.expectedValuePercent} tone={Number(alignment?.expectedValuePercent ?? item.expectedValuePercent ?? 0) > 0 ? 'green' : 'red'} />
                   </div>
                 </div>
@@ -973,7 +1029,9 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
   const actionabilityBlocked = Boolean(alignment?.actionableUnavailableReason)
   const title = Number(alignment?.actionableExpectedValuePercent ?? opportunity.expectedValue ?? 0) > 0 && !actionabilityBlocked
     ? 'Top Tracked Market'
-    : 'Highest-Ranked Market Under Review'
+    : opportunity.canonicalOutcome
+      ? 'Highest Projected Outcome Under Review'
+      : 'Highest-Ranked Priced Market Under Review'
 
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
@@ -1007,7 +1065,7 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
       <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
         <Meter label="Probability" value={probability} tone="blue" />
         <Meter label="Market Implied" value={aligned ? alignment?.marketImpliedProbability : null} tone="yellow" />
-        <Meter label="Snapshot Edge" value={aligned ? alignment?.snapshotEdgePercentagePoints ?? alignment?.edgePercentagePoints : null} tone="blue" />
+        <EdgeMetric label="Snapshot Edge" value={aligned ? alignment?.snapshotEdgePercentagePoints ?? alignment?.edgePercentagePoints : null} tone="blue" />
         <Meter label={actionabilityBlocked ? 'Actionable EV' : 'Expected Value'} value={actionabilityBlocked ? null : aligned ? alignment?.actionableExpectedValuePercent ?? alignment?.expectedValuePercent : null} tone={Number(alignment?.actionableExpectedValuePercent ?? alignment?.expectedValuePercent ?? 0) > 0 && !actionabilityBlocked ? 'green' : 'red'} />
         <Meter label="Confidence" value={opportunity.confidence} tone={tone} />
       </div>
@@ -1018,7 +1076,7 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
       {explanation?.summary ? (
         <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-4">
           <p className="text-sm font-black text-white">{fieldValue(explanation.headline, category)}</p>
-          <p className="mt-2 text-sm leading-6 text-slate-300">{explanation.summary}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-300">{explanationSummaryForSelection(opportunity, explanation.summary)}</p>
           {explanation.promotionConditions?.[0] ? <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">{explanation.promotionConditions[0]}</p> : null}
         </div>
       ) : null}
@@ -1141,18 +1199,20 @@ function formatMarketLine(value: unknown, game?: Record<string, any>) {
 
 function marketDisplay(game: Record<string, any>) {
   const label = marketField(game.marketLabel ?? game.market) ?? 'Market'
-  const selection = marketField(game.selection)
-  const line = formatMarketLine(game.line, game)
-  const odds = formatAmericanOdds(game.americanOdds ?? game.odds)
-  const sportsbook = marketField(game.sportsbook)
+  const canonicalPrice = game.canonicalPrice as Record<string, unknown> | undefined
+  const hasCanonicalOutcome = Boolean(game.canonicalOutcome)
+  const selection = marketField((game.canonicalOutcome as Record<string, unknown> | undefined)?.selection ?? game.selection)
+  const line = formatMarketLine((game.canonicalOutcome as Record<string, unknown> | undefined)?.line ?? game.line, game)
+  const odds = formatAmericanOdds(hasCanonicalOutcome ? canonicalPrice?.americanOdds : game.americanOdds ?? game.odds)
+  const sportsbook = marketField(hasCanonicalOutcome ? canonicalPrice?.sportsbook : game.sportsbook)
   const selectionText = [selection, line].filter(Boolean).join(' ')
-  const priceText = odds ? `${selectionText || 'Selection'} (${odds})` : selectionText || 'Selection pending'
+  const priceText = odds ? `${selectionText || 'Selection'} (${odds})` : selectionText ? `${selectionText} (N/A)` : 'Selection pending'
   return { label, priceText, sportsbook }
 }
 
 function reasonSummary(row: IntelligenceRow) {
   const explanation = row.recommendationExplanation
-  if (explanation?.headline) return explanation.headline
+  if (explanation?.headline) return explanationSummaryForSelection(row, explanation.headline)
   const positives = row.strengths?.filter(Boolean) ?? []
   const why = String(row.why ?? row.reasonNotOfficial ?? row.recommendation ?? row.semanticLabel ?? '').trim()
   if (positives.length) return positives.slice(0, 2).join(' + ')
@@ -1162,11 +1222,20 @@ function reasonSummary(row: IntelligenceRow) {
   return 'Ranked from stored AI output.'
 }
 
+function explanationSummaryForSelection(row: { canonicalOutcome?: TopOpportunity['canonicalOutcome']; selection?: string; recommendationExplanation?: RecommendationExplanation }, text: string) {
+  if (!row.canonicalOutcome?.complementDerived) return text
+  const selection = String(row.canonicalOutcome.selection ?? row.selection ?? '').trim()
+  if (selection && text.toLowerCase().includes(selection.toLowerCase())) return text
+  return `Opposing-team factor: ${text}`
+}
+
 function opportunityKey(row: IntelligenceRow, index: number) {
   return row.id ?? row.predictionId ?? `${row.eventId ?? row.matchup ?? 'row'}-${row.market ?? row.marketLabel ?? 'market'}-${index}`
 }
 
 function formatFreshness(row: IntelligenceRow) {
+  const state = String(row.marketAlignment?.freshnessStatus ?? '').toUpperCase()
+  if (['FRESH', 'AGING', 'STALE', 'UNKNOWN'].includes(state)) return state
   if (typeof row.oddsAgeMinutes === 'number' && Number.isFinite(row.oddsAgeMinutes)) {
     if (row.oddsAgeMinutes < 60) return `${Math.round(row.oddsAgeMinutes)} min old`
     return `${Math.round(row.oddsAgeMinutes / 60)} hr old`
@@ -1249,8 +1318,10 @@ function TodayStory({ data, mostLikely, bestValue, counts, pipelineToday }: { da
         : null,
     vm?.bestAvailableValue.status === 'AVAILABLE'
       ? `The largest value signal is ${fieldValue(vm.bestAvailableValue.selection)} with ${formatPercent(vm.bestAvailableValue.metricValue)} expected value.`
-      : topValue && Number(topValue.edge ?? 0) > 0
-      ? `The largest value signal is ${fieldValue(topValue.selection)} with ${signedNumber(topValue.edge, ' edge')}.`
+      : vm?.bestValueSemantics
+      ? `Best Value has ${vm.bestValueSemantics.candidatesWithPositiveEv} positive-EV candidate${vm.bestValueSemantics.candidatesWithPositiveEv === 1 ? '' : 's'}, ${vm.bestValueSemantics.candidatesPassingPolicy} policy-eligible candidate${vm.bestValueSemantics.candidatesPassingPolicy === 1 ? '' : 's'} and primary blocker ${vm.bestValueSemantics.primaryRejectionReason}.`
+      : topValue && Number(topValue.canonicalEv?.edge ?? topValue.edge ?? 0) > 0
+      ? `The largest value signal is ${fieldValue(topValue.selection)} with ${formatPercentagePoints(topValue.canonicalEv?.edge ?? topValue.edge)} edge.`
       : topValue
         ? 'The strongest value candidates remain below official value standards.'
         : vm?.bestAvailableValue
@@ -1350,13 +1421,13 @@ function OpportunityRow({ row, rank, mode }: { row: IntelligenceRow; rank: numbe
           {mode === 'likely' ? (
             <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Risk: {riskLabel(row)} · {formatFreshness(row)}</p>
           ) : (
-            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Edge {signedNumber(row.edge, '%')} · EV {signedNumber(row.expectedValue, '%')} · {formatFreshness(row)}</p>
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Edge {formatPercentagePoints(row.canonicalEv?.edge ?? row.edge)} · EV {signedNumber(row.canonicalEv?.expectedValue ?? row.expectedValue, '%')} · {formatFreshness(row)}</p>
           )}
         </div>
         <div className="grid min-w-40 gap-3">
           <Meter label="Probability" value={probability} tone="blue" />
           <Meter label="Implied" value={aligned ? alignment?.marketImpliedProbability : null} tone="yellow" />
-          <Meter label="Edge" value={aligned ? alignment?.edgePercentagePoints : null} tone="blue" />
+          <EdgeMetric value={aligned ? alignment?.edgePercentagePoints : null} tone="blue" />
           <Meter label="EV" value={aligned ? alignment?.expectedValuePercent : null} tone={Number(alignment?.expectedValuePercent ?? 0) > 0 ? 'green' : 'red'} />
           <Meter label="Confidence" value={row.confidence} tone="green" />
         </div>
@@ -1468,6 +1539,7 @@ function gameCategory(game: Record<string, any>) {
   const bettingEligibility = String(game.bettingEligibility ?? '').toUpperCase()
   const hasMarket = hasDisplayMarket(game)
   const operational = String(game.operationalStatus ?? '').toUpperCase()
+  const storedOddsCount = Number(game.storedOddsCount ?? 0)
   if (operational === 'FRESH_MARKET' || operational === 'AGING_MARKET' || operational === 'PARTIAL_MARKET_COVERAGE') return operational === 'AGING_MARKET' ? 'Data Aging' : 'Operational'
   if (operational === 'STALE_MARKET') return 'Data Aging'
   if (operational === 'NO_ALIGNED_PRICE' || operational === 'NO_ELIGIBLE_MARKET') return 'Tracking'
@@ -1475,7 +1547,7 @@ function gameCategory(game: Record<string, any>) {
   if (bettingEligibility === 'LOCKED_AFTER_START') return 'Betting Locked'
   if (bettingEligibility === 'STATUS_UNCONFIRMED') return 'Betting Locked'
   if (bettingEligibility === 'DATA_AGING' || bettingEligibility === 'STALE') return 'Data Aging'
-  if (bettingEligibility === 'NO_MARKET' && !hasMarket) return 'Waiting for Odds'
+  if (bettingEligibility === 'NO_MARKET' && !hasMarket) return storedOddsCount === 0 ? 'Waiting for Odds' : 'Tracking'
   if (bettingEligibility === 'INSUFFICIENT_DATA') return 'Insufficient Data'
   if (bettingEligibility === 'ELIGIBLE') return 'Operational'
   const eligibility = String(game.eligibility ?? '').toUpperCase()
@@ -1485,7 +1557,7 @@ function gameCategory(game: Record<string, any>) {
   if (eligibility === 'READY') return 'Operational'
   const grounded = categoryLabel(game.marketIntelligenceCategory ?? game.opportunityCategory ?? game.recommendationCategory)
   if (grounded) return grounded
-  if (game.oddsPresent === false) return 'Waiting for Odds'
+  if (game.oddsPresent === false && storedOddsCount === 0) return 'Waiting for Odds'
   if (game.predictionReady === false) return 'Tracking'
   return 'Operational'
 }
@@ -1701,9 +1773,9 @@ function DailyBriefing({
     ['Lineup Coverage', lineupReady, lineupReady ? 'Lineup context linked' : 'No lineup context grounded'],
     ['Official Picks', data.officialPicks, data.officialPicks ? 'Policy-qualified' : 'None passed policy'],
     ['Most Likely', vm?.mostLikelySummary.selector.selection ?? mostLikely[0]?.selection ?? 'Not available', vm?.mostLikelySummary.selector.status === 'AVAILABLE' ? `${formatPercent(vm.mostLikelySummary.selector.modelProbability)} model` : 'No supported outcome'],
-    ['Best Value', vm?.bestAvailableValue.status === 'AVAILABLE' ? 'Available' : 'No eligible value', vm?.bestAvailableValue.status === 'AVAILABLE' ? `${formatPercent(vm.bestAvailableValue.metricValue)} EV` : vm?.bestAvailableValue.rankingReason ?? data.sections?.bestValue?.reason ?? 'No positive EV'],
+    ['Best Value', vm?.bestAvailableValue.status === 'AVAILABLE' ? 'Policy eligible' : 'No policy-eligible value', vm?.bestAvailableValue.status === 'AVAILABLE' ? `${formatPercent(vm.bestAvailableValue.metricValue)} EV` : vm?.bestValueSemantics ? `${vm.bestValueSemantics.candidatesWithPositiveEv} positive EV; ${vm.bestValueSemantics.candidatesPassingPolicy} policy eligible; ${vm.bestValueSemantics.primaryRejectionReason}` : vm?.bestAvailableValue.rankingReason ?? data.sections?.bestValue?.reason ?? 'No positive EV'],
     ['Settlement', trace?.productionPredictionsSettled ?? data.finalGames, data.finalGames ? 'Final games present' : 'Settlement pending'],
-    ['Learning Labels Created', learning?.labelsCreatedToday ?? trace?.learningSamplesAccepted ?? 0, learning?.message ?? (trace?.learningSamplesQueued ? `${trace.learningSamplesQueued} queued` : 'No learning labels pending')],
+    ["Today's Learning Labels Created", learning?.labelsCreatedToday ?? trace?.learningSamplesAccepted ?? 0, learning?.message ?? (trace?.learningSamplesQueued ? `${trace.learningSamplesQueued} queued` : 'No learning labels pending')],
     ['Learning Labels Pending', learning?.labelsPending ?? Math.max(0, Number(trace?.learningSamplesQueued ?? 0) - Number(trace?.learningSamplesAccepted ?? 0)), learning ? `${learning.updatesApplied} updates applied; ${learning.autoPromotions} auto-promotions` : 'No automatic promotion'],
     ['Freshness', vm?.marketFreshnessSummary.state ?? simpleAction(data.freshness), vm?.marketFreshnessSummary.latestOddsTimestamp ? `Odds ${timeText(vm.marketFreshnessSummary.latestOddsTimestamp)}` : data.latestOddsTimestamp ? `Odds ${timeText(data.latestOddsTimestamp)}` : 'No odds timestamp'],
   ]
@@ -1995,8 +2067,8 @@ export default function UserTodayPanel() {
         <AIConfidenceCard opportunity={topOpportunity} />
       </section>
       <IntelligenceSection
-        eyebrow="Probability Rankings"
-        title="Most Likely"
+        eyebrow="Canonical Probability Rankings"
+        title="Most Likely Outcomes"
         rows={mostLikely}
         mode="likely"
         emptyTitle="Most Likely is waiting for grounded probabilities"

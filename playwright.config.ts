@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const port = Number(process.env.PLAYWRIGHT_PORT ?? 3107)
+const useExternalServer = process.env.PLAYWRIGHT_EXTERNAL_SERVER === 'true'
 
 export default defineConfig({
   testDir: './tests/product-experience',
@@ -17,7 +18,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  webServer: {
+  webServer: useExternalServer ? undefined : {
     command: `npm.cmd run start -- -p ${port}`,
     url: `http://127.0.0.1:${port}/api/system/version`,
     reuseExistingServer: true,
