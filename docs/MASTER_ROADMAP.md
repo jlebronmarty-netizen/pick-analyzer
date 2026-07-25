@@ -10,11 +10,11 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ### Product Experience Phase 7 Recovery Certification V1
 
-Status: Implemented, build-verified and rendered-browser certified locally; production deployment verification pending.
+Status: Implemented, build-verified, rendered-browser certified and production-deployed.
 
 Evidence: `playwright.config.ts`, `tests/product-experience/product-experience.spec.ts`, dev-only `@playwright/test` and `@axe-core/playwright`, screenshots in ignored `test-results/product-experience/screenshots/`, local production build and complete Playwright Chromium run.
 
-Note: Phase 7 now has real viewport, keyboard, navigation, screenshot and axe evidence across Dashboard, Game Intelligence, Player Projections, Performance, Most Likely, Best Value, Betting Workbench, AI Operations and detail routes. Fixes were limited to accessibility, responsive layout and navigable loading/error states. No prediction logic, provider calls, model weights, Official Pick policy, replay/backfill, retraining, recalibration or unsupported-market activation changed.
+Note: Phase 7 now has real viewport, keyboard, navigation, screenshot and axe evidence across Dashboard, Game Intelligence, Player Projections, Performance, Most Likely, Best Value, Betting Workbench, AI Operations and detail routes. Vercel production deployment `dpl_HWFtKoFnBvywiZb5wnAZSKja9S7T` reached READY and `/api/system/version` reported commit `5d37ab86f9360b97292166bc318f41acc81da7d2` before this documentation-only completion note. Fixes were limited to accessibility, responsive layout and navigable loading/error states. No prediction logic, provider calls, model weights, Official Pick policy, replay/backfill, retraining, recalibration or unsupported-market activation changed.
 
 ### Player Intelligence Experience V1
 
