@@ -141,6 +141,32 @@ function labelize(value: string | null | undefined) {
   return String(value ?? 'unavailable').replace(/_/g, ' ').replace(/\b\w/g, (match) => match.toUpperCase())
 }
 
+function operationalMarketState(data: ApiData) {
+  const status = String(data.event.status ?? '').toLowerCase()
+  if (['live', 'in_progress', 'inprogress'].includes(status)) {
+    return {
+      label: 'Betting locked',
+      reason: 'This game is live; it must not wait for or create a new pregame betting opportunity.',
+    }
+  }
+  if (['completed', 'final', 'closed'].includes(status)) {
+    return {
+      label: 'Settled or closed',
+      reason: 'This game is completed; market intelligence is historical/evidence context only.',
+    }
+  }
+  if (!data.gameExperience.markets.length && !(data.market ?? []).length) {
+    return {
+      label: 'No eligible candidate',
+      reason: 'No supported Current Board market row is linked to this game.',
+    }
+  }
+  return {
+    label: data.summary?.state ? labelize(data.summary.state) : 'Market available',
+    reason: data.summary?.reason ?? 'Stored market rows are available for this game.',
+  }
+}
+
 function Tile({ label, value: tileValue, detail }: { label: string; value: ReactNode; detail?: ReactNode }) {
   return (
     <div className="rounded-lg bg-slate-950 p-4">
@@ -245,6 +271,7 @@ export default function MlbGameIntelligenceDetailClient({ eventId }: DetailProps
 
   const allPlayerRows = useMemo(() => [...(data?.gameExperience.playerProjections.pitchers ?? []), ...(data?.gameExperience.playerProjections.batters ?? [])], [data])
   const marketRows = data?.gameExperience.markets?.length ? data.gameExperience.markets : data?.market ?? []
+  const operationalState = data ? operationalMarketState(data) : null
   const officialStatus = marketRows.some((row) => 'officialPick' in row && row.officialPick)
     ? 'Official Pick available'
     : data?.summary?.reason ?? 'No Official Pick passed policy for this game.'
@@ -292,7 +319,7 @@ export default function MlbGameIntelligenceDetailClient({ eventId }: DetailProps
                 <Tile label="Supported Markets" value={marketRows.length} detail={marketRows.length ? 'Moneyline, Run Line or Total candidates are linked where real rows exist.' : 'No eligible candidate is linked to this game.'} />
                 <Tile label="Official Pick" value={marketRows.some((row) => 'officialPick' in row && row.officialPick) ? 'Available' : 'None'} detail={officialStatus} />
                 <Tile label="Data Readiness" value={data.gameExperience.overview.playerIntelligenceAvailable ? 'Player context available' : 'Limited'} detail={`${data.gameExperience.playerProjections.total} player projections linked.`} />
-                <Tile label="Market State" value={data.summary?.state ?? 'INSUFFICIENT_DATA'} detail={data.summary?.reason ?? 'No Current Board market row is linked.'} />
+                <Tile label="Market State" value={operationalState?.label ?? 'Insufficient data'} detail={operationalState?.reason ?? 'No Current Board market row is linked.'} />
               </div>
               <div className="mt-5 rounded-lg border border-slate-800 bg-slate-950 p-4">
                 <p className="text-sm font-black text-white">AI Game Summary</p>
@@ -381,7 +408,10 @@ export default function MlbGameIntelligenceDetailClient({ eventId }: DetailProps
           {active === 'Player Projections' && <Panel><ProjectionTable rows={allPlayerRows} /></Panel>}
           {active === 'Market Intelligence' && (
             <Panel>
+              {operationalState ? <EmptyReason>{operationalState.label}: {operationalState.reason}</EmptyReason> : null}
+              <div className="mt-4">
               <MarketTable rows={marketRows} />
+              </div>
               <div className="mt-4 grid gap-3 md:grid-cols-3">
                 <Tile label="Team Totals" value={labelize(data.gameExperience.teamProjections.teamTotals?.status)} detail={data.gameExperience.teamProjections.teamTotals?.reason} />
                 <Tile label="First Five" value="Architecture Ready" detail="Shadow/readiness only unless real First Five odds and policy exist." />
