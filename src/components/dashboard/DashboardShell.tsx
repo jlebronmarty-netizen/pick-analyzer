@@ -146,7 +146,7 @@ export default function DashboardShell({
             </div>
           </aside>
 
-          <main className="w-full">
+          <main className="min-w-0 flex-1 overflow-x-hidden">
             <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/90 px-4 py-4 backdrop-blur md:px-8">
               <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-4">
                 <div>
@@ -159,7 +159,7 @@ export default function DashboardShell({
                   </h2>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3 overflow-x-auto">
                   <SportSelector />
 
                   <span className="hidden rounded-full border border-emerald-500/30 bg-emerald-950/20 px-4 py-2 text-xs font-bold text-emerald-200 md:inline-flex">

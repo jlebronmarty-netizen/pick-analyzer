@@ -6,6 +6,7 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
+    "test:product-experience": "playwright test --config=playwright.config.ts",
     "lint": "eslint",
     "basketball:history": "node scripts/basketball-cli.js history",
     "basketball:sync": "node scripts/basketball-cli.js sync",
@@ -36,6 +37,8 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -281,6 +281,7 @@ export default function MostLikelyTool() {
           </div>
           <div className="flex w-full max-w-full flex-col gap-3 sm:flex-row lg:w-auto">
             <select
+              aria-label="Most likely market filter"
               value={mode}
               onChange={(event) => setMode(event.target.value)}
               className="min-w-0 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm font-bold text-white"
@@ -290,6 +291,7 @@ export default function MostLikelyTool() {
               ))}
             </select>
             <select
+              aria-label="Most likely sort order"
               value={sort}
               onChange={(event) => setSort(event.target.value)}
               className="min-w-0 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm font-bold text-white"

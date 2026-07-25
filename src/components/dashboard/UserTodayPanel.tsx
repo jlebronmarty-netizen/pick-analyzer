@@ -591,7 +591,7 @@ function Meter({ label, value, tone = 'blue' }: { label: string; value: unknown;
         <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</p>
         <p className="text-sm font-black text-white">{formatPercent(value)}</p>
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-slate-800" role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent ?? undefined}>
+      <div className="h-2.5 overflow-hidden rounded-full bg-slate-800" role={percent === null ? undefined : 'meter'} aria-label={percent === null ? undefined : label} aria-valuemin={percent === null ? undefined : 0} aria-valuemax={percent === null ? undefined : 100} aria-valuenow={percent ?? undefined}>
         {percent !== null && <div className={`h-full rounded-full ${meterColor(tone)} transition-all duration-700 ease-out`} style={{ width: `${percent}%` }} />}
       </div>
     </div>
@@ -1362,7 +1362,7 @@ function AIConfidenceCard({ opportunity }: { opportunity: TopOpportunity | null 
         </div>
         <Badge tone={tone}>{label}</Badge>
       </div>
-      <div className="mt-6 h-3 overflow-hidden rounded-full bg-slate-800" role="meter" aria-label="AI Confidence" aria-valuemin={0} aria-valuemax={100} aria-valuenow={confidence ?? undefined}>
+      <div className="mt-6 h-3 overflow-hidden rounded-full bg-slate-800" role={confidence === null ? undefined : 'meter'} aria-label={confidence === null ? undefined : 'AI Confidence'} aria-valuemin={confidence === null ? undefined : 0} aria-valuemax={confidence === null ? undefined : 100} aria-valuenow={confidence ?? undefined}>
         {confidence !== null && <div className={`h-full rounded-full ${meterColor(tone)} transition-all duration-700 ease-out`} style={{ width: `${confidence}%` }} />}
       </div>
     </section>
@@ -1420,6 +1420,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
   const isFinal = status === 'Final'
   const marketUnavailableText = isFinal ? fieldValue(game.settlementState?.label, 'Awaiting Settlement') : 'Waiting for odds'
   const gameHref = game.eventId || game.id ? `/game-intelligence/${encodeURIComponent(String(game.eventId ?? game.id))}` : '/game-intelligence'
+  const gameLinkLabel = `Open Game Intelligence for ${fieldValue(game.matchup, 'this game')}`
 
   return (
     <details className={`group rounded-lg border border-slate-800 bg-slate-950/70 p-4 ${cardMotion}`}>
@@ -1436,7 +1437,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
             <p className="text-sm font-black text-white">{hasMarket ? displayMarket.priceText : marketUnavailableText}</p>
             {displayMarket.sportsbook ? <p className="mt-0.5 text-xs font-bold text-slate-500">{displayMarket.sportsbook}</p> : null}
           </div>
-          <a href={gameHref} className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-center text-sm font-bold text-sky-200 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300" onClick={(event) => event.stopPropagation()}>Game Center</a>
+          <span className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-center text-sm font-bold text-sky-200">Game Center</span>
         </div>
       </summary>
       <div className="mt-5 grid gap-4 border-t border-slate-800 pt-5 md:grid-cols-2">
@@ -1477,7 +1478,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
               {fieldValue(game.statusSource)} · {fieldValue(game.normalizedUtc ?? game.scheduledTime, 'Time pending')}
             </p>
           )}
-          <a href={gameHref} className="mt-4 inline-flex rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-black text-emerald-100 outline-none hover:bg-emerald-500/20 focus-visible:ring-2 focus-visible:ring-emerald-300">Open Game Intelligence</a>
+          <a href={gameHref} aria-label={gameLinkLabel} className="mt-4 inline-flex rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm font-black text-emerald-100 outline-none hover:bg-emerald-500/20 focus-visible:ring-2 focus-visible:ring-emerald-300">Open Game Intelligence</a>
         </div>
       </div>
     </details>
@@ -1652,7 +1653,7 @@ function TopGameIntelligence({ games, mostLikely, bestValue }: { games: Array<Re
       <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Top Game Intelligence</p>
       <div className="mt-4 grid gap-3 lg:grid-cols-5">
         {rows.map((row) => (
-          <a key={row.label} href={row.eventId ? `/game-intelligence/${encodeURIComponent(row.eventId)}` : '/game-intelligence'} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 outline-none transition hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-300">
+          <a key={row.label} href={row.eventId ? `/game-intelligence/${encodeURIComponent(row.eventId)}` : '/game-intelligence'} aria-label={`Open ${row.label} Game Intelligence for ${row.matchup}`} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 outline-none transition hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-300">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{row.label}</p>
             <p className="mt-2 text-sm font-black text-white">{row.matchup}</p>
             <p className="mt-1 text-xs text-slate-400">{row.selection} / {row.metric}</p>

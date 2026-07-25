@@ -105,8 +105,18 @@ export default function MlbPlayerProjectionPageClient() {
     return needle ? source.filter((item) => `${item.playerName} ${item.team} ${item.opponent} ${item.projectionType}`.toLowerCase().includes(needle)) : source
   }, [active, data, query])
 
-  if (error) return <main className="min-h-screen bg-slate-950 p-6 text-red-100">{error}</main>
-  if (!data) return <main className="min-h-screen bg-slate-950 p-6 text-slate-300">Loading MLB player projections...</main>
+  if (error) return (
+    <main className="min-h-screen bg-slate-950 p-6 text-red-100">
+      <a href="/dashboard" className="inline-flex rounded-lg border border-red-400/30 px-4 py-2 text-sm font-bold text-red-100 outline-none focus-visible:ring-2 focus-visible:ring-red-200">Back to Dashboard</a>
+      <p className="mt-4">{error}</p>
+    </main>
+  )
+  if (!data) return (
+    <main className="min-h-screen bg-slate-950 p-6 text-slate-300">
+      <a href="/dashboard" className="inline-flex rounded-lg border border-slate-700 px-4 py-2 text-sm font-bold text-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Back to Dashboard</a>
+      <p className="mt-4">Loading MLB player projections...</p>
+    </main>
+  )
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-8">

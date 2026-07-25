@@ -173,8 +173,21 @@ export default function MlbPlayerProjectionDetailClient({ projectionId }: { proj
     }
   }, [projectionId])
 
-  if (error) return <main className="min-h-screen bg-slate-950 p-6 text-red-100">{error}</main>
-  if (!data) return <main className="min-h-screen bg-slate-950 p-6 text-slate-300">Loading player projection...</main>
+  if (error) return (
+    <main className="min-h-screen bg-slate-950 p-6 text-red-100">
+      <nav className="flex flex-wrap gap-2 text-sm font-bold text-red-100" aria-label="Projection fallback navigation">
+        <a href="/dashboard" className="rounded-lg border border-red-400/30 px-4 py-2 outline-none focus-visible:ring-2 focus-visible:ring-red-200">Dashboard</a>
+        <a href="/player-projections" className="rounded-lg border border-red-400/30 px-4 py-2 outline-none focus-visible:ring-2 focus-visible:ring-red-200">Player Projections</a>
+      </nav>
+      <p className="mt-4">{error}</p>
+    </main>
+  )
+  if (!data) return (
+    <main className="min-h-screen bg-slate-950 p-6 text-slate-300">
+      <a href="/player-projections" className="inline-flex rounded-lg border border-slate-700 px-4 py-2 text-sm font-bold text-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Back to Player Projections</a>
+      <p className="mt-4">Loading player projection...</p>
+    </main>
+  )
 
   const projection = data.projection
   const related = data.relatedProjections ?? []

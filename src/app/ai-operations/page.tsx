@@ -11,29 +11,29 @@ function statusTone(status: string) {
 
 function Metric({ label, value }: { label: string; value: unknown }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-950 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-black text-white">{value === null || value === undefined || value === '' ? 'N/A' : String(value)}</p>
+    <div className="min-w-0 rounded-lg border border-slate-800 bg-slate-950 p-4">
+      <p className="break-words text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 sm:tracking-[0.18em]">{label}</p>
+      <p className="mt-2 break-words text-2xl font-black text-white">{value === null || value === undefined || value === '' ? 'N/A' : String(value)}</p>
     </div>
   )
 }
 
 function PanelCard({ panel }: { panel: any }) {
   return (
-    <article className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
+    <article className="min-w-0 rounded-lg border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
+      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <h3 className="text-base font-black text-white">{panel.label}</h3>
           <p className="mt-2 text-sm leading-6 text-slate-400">{panel.summary}</p>
         </div>
-        <span className={`shrink-0 rounded-full border px-3 py-1 text-xs font-bold ${statusTone(panel.status)}`}>
+        <span className={`max-w-full break-words rounded-full border px-3 py-1 text-xs font-bold sm:shrink-0 ${statusTone(panel.status)}`}>
           {panel.status}
         </span>
       </div>
-      <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
+      <dl className="mt-5 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
         {Object.entries(panel.metrics ?? {}).slice(0, 6).map(([key, value]) => (
-          <div key={key} className="rounded-lg bg-slate-950/70 p-3">
-            <dt className="text-xs uppercase tracking-[0.16em] text-slate-500">{key.replace(/([A-Z])/g, ' $1')}</dt>
+          <div key={key} className="min-w-0 rounded-lg bg-slate-950/70 p-3">
+            <dt className="break-words text-xs uppercase tracking-[0.16em] text-slate-500">{key.replace(/([A-Z])/g, ' $1')}</dt>
             <dd className="mt-1 font-bold text-slate-100">{value === null || value === undefined || value === '' ? 'N/A' : String(value)}</dd>
           </div>
         ))}
@@ -93,14 +93,14 @@ export default async function AiOperationsPage() {
       >
         <div className="grid gap-4 lg:grid-cols-3">
           {Object.entries(data.aiOperationsCenterV2).map(([period, stage]: [string, any]) => (
-            <article key={period} className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
-              <div className="flex items-center justify-between gap-3">
+            <article key={period} className="min-w-0 rounded-lg border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="text-sm font-black uppercase tracking-[0.18em] text-emerald-200">{period}</h3>
-                <span className={`rounded-full border px-3 py-1 text-xs font-bold ${statusTone(stage.acceptedLearningSamples > 0 ? 'Completed' : 'Waiting')}`}>
+                <span className={`max-w-full break-words rounded-full border px-3 py-1 text-xs font-bold ${statusTone(stage.acceptedLearningSamples > 0 ? 'Completed' : 'Waiting')}`}>
                   {stage.shadowLearning}
                 </span>
               </div>
-              <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
+              <dl className="mt-5 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                 {[
                   ['Games', stage.games],
                   ['Odds', stage.odds ?? 'N/A'],
@@ -111,8 +111,8 @@ export default async function AiOperationsPage() {
                   ['Rejected', stage.rejectedSamples],
                   ['Weights', stage.weightUpdates],
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-lg bg-slate-950/70 p-3">
-                    <dt className="text-xs uppercase tracking-[0.16em] text-slate-500">{label}</dt>
+                  <div key={label} className="min-w-0 rounded-lg bg-slate-950/70 p-3">
+                    <dt className="break-words text-xs uppercase tracking-[0.16em] text-slate-500">{label}</dt>
                     <dd className="mt-1 font-bold text-slate-100">{String(value)}</dd>
                   </div>
                 ))}
@@ -141,7 +141,7 @@ export default async function AiOperationsPage() {
           <Metric label="Missed Windows" value={data.schedulerHealth.missedWindowsToday ?? 'N/A'} />
           <Metric label="Retry Count" value={data.schedulerHealth.retryCount ?? 'N/A'} />
         </div>
-        <div className="mt-4 overflow-hidden rounded-lg border border-slate-800">
+        <div className="mt-4 overflow-x-auto rounded-lg border border-slate-800">
           <table className="w-full min-w-[760px] border-collapse bg-slate-900/70 text-left text-sm">
             <thead className="bg-slate-950 text-xs uppercase tracking-[0.16em] text-slate-500">
               <tr>
@@ -246,7 +246,7 @@ export default async function AiOperationsPage() {
         title="Stage Transitions"
         description="The AI learning chain is shown as evidence, blocker and current state for every transition."
       >
-        <div className="overflow-hidden rounded-lg border border-slate-800">
+        <div className="overflow-x-auto rounded-lg border border-slate-800">
           <table className="w-full min-w-[760px] border-collapse bg-slate-900/70 text-left text-sm">
             <thead className="bg-slate-950 text-xs uppercase tracking-[0.16em] text-slate-500">
               <tr>

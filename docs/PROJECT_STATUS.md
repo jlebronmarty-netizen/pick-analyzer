@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-24 00:00:00Z
 
+## 2026-07-24 Product Experience Phase 7 Recovery Certification V1
+
+- Added dev-only rendered browser certification with Playwright Chromium and axe across Dashboard, Game Intelligence, Player Projections, Performance, Most Likely, Best Value, Betting Workbench, AI Operations and detail routes.
+- Captured responsive screenshots under ignored `test-results/product-experience/screenshots/` for mobile 390, tablet 768 and desktop 1280 on the main product routes.
+- Fixed Phase 7 accessibility and responsiveness defects: low-contrast slate labels, desktop shell overflow beside the sidebar, overflowing AI Operations metric/table content, missing visible focus on the sport selector, unlabeled Most Likely selects, invalid nested links inside game-card summaries, missing game-link accessible names and invalid unavailable-meter ARIA.
+- Added keyboard-safe loading/error fallbacks for Performance and Player Projection routes without fabricating provider data or activating unsupported markets.
+- Validation passed: `npm.cmd run build` and `npm.cmd run test:product-experience` with 62/62 rendered browser tests passing across 375x667, 390x844, 768x1024, 1280x800 and 1440x900.
+- No prediction probabilities, production model weights, Official Pick policy, provider calls, remote mutations, replay/backfill artifacts, Historical Feature Store rows, retraining, recalibration or unsupported-market activation were changed.
+
 ## 2026-07-24 Player Intelligence Experience V1
 
 - Expanded Player Projection Detail into a Player Intelligence product surface using the existing MLB Player Projection Engine and stored projection history.

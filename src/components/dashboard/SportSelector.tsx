@@ -18,7 +18,7 @@ export default function SportSelector() {
       <select
         value={sportKey}
         onChange={(event) => setSportKey(event.target.value as SportKey)}
-        className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-white outline-none xl:hidden"
+        className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-white outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 xl:hidden"
       >
         {PRODUCT_SPORTS.map((item) => {
           const sport = SPORTS.find((candidate) => candidate.key === item.key)
@@ -36,7 +36,7 @@ export default function SportSelector() {
               key={sport.key}
               type="button"
               onClick={() => setSportKey(sport.key)}
-              className={`rounded-lg border px-3 py-2 text-left text-xs transition ${active ? item.tone : 'border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 hover:text-white'}`}
+              className={`rounded-lg border px-3 py-2 text-left text-xs outline-none transition focus-visible:ring-2 focus-visible:ring-emerald-300 ${active ? item.tone : 'border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 hover:text-white'}`}
               aria-pressed={active}
             >
               <span className="block font-black">{sport.shortLabel}</span>

@@ -111,7 +111,7 @@ export default function MlbGameIntelligencePageClient() {
                   <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">{game.scheduledTime ? new Date(game.scheduledTime).toLocaleString() : 'Time TBD'}</p>
                   <h2 className="mt-2 text-xl font-black text-white">{game.matchup}</h2>
                 </div>
-                <a href={`/game-intelligence/${encodeURIComponent(game.eventId)}`} className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-black text-emerald-100 hover:bg-emerald-500/20">Open</a>
+                <a href={`/game-intelligence/${encodeURIComponent(game.eventId)}`} aria-label={`Open Game Intelligence for ${game.matchup ?? game.eventId}`} className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-sm font-black text-emerald-100 hover:bg-emerald-500/20">Open</a>
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <Metric label="Eligible Batters" value={game.coverage.eligibleBatters} />
