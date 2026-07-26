@@ -582,7 +582,7 @@ function humanStatus(value: unknown) {
   if (raw.includes('unconfirmed')) return 'Status Unconfirmed'
   if (raw.includes('starting_soon')) return 'Starting Soon'
   if (raw.includes('in_progress') || raw.includes('live')) return 'Live'
-  if (raw.includes('final') || raw.includes('complete')) return 'Final'
+  if (raw.includes('final') || raw.includes('complete')) return 'Completed'
   if (raw.includes('pregame') || raw.includes('scheduled')) return 'Pregame'
   if (raw.includes('postponed')) return 'Postponed'
   if (raw.includes('suspended')) return 'Suspended'
@@ -596,9 +596,27 @@ function simpleAction(text: string) {
   const lower = text.toLowerCase()
   if (lower.includes('sync final')) return 'Waiting for final scores.'
   if (lower.includes('morning')) return 'Schedule sync is the next lifecycle step.'
-  if (lower.includes('odds')) return 'Waiting for updated betting odds.'
+  if (lower.includes('odds')) return 'Market refresh is the next lifecycle step.'
   if (lower.includes('refresh')) return 'The AI will refresh when odds update.'
   return text.replaceAll('_', ' ')
+}
+
+const tooltipText: Record<string, string> = {
+  Probability: 'Model-estimated chance for the displayed outcome before price or policy filters.',
+  Confidence: 'Signal quality after data completeness, model agreement and known blockers.',
+  Edge: 'Difference between model probability and market-implied probability, in percentage points.',
+  'Expected Value': 'Estimated value versus the aligned market price when EV is calculable.',
+  EV: 'Estimated value versus the aligned market price when EV is calculable.',
+  'Official Pick': 'Only policy-qualified recommendations are official picks.',
+  Tracking: 'Informational state: useful intelligence exists, but action is blocked or policy is not met.',
+  'Best Value': 'Positive EV candidates that also satisfy current policy gates.',
+  'Current Board': 'Stored pregame candidates that passed board eligibility and display gates.',
+  Settlement: 'Postgame result matching for production prediction rows.',
+  Learning: 'Evidence-checked labels used by adaptive learning; no automatic promotion is implied.',
+}
+
+function tooltipFor(label: string) {
+  return tooltipText[label] ?? tooltipText[label.replace('Model ', '')] ?? undefined
 }
 
 function categoryTone(category?: string): 'green' | 'yellow' | 'blue' | 'red' | 'gray' {
@@ -625,15 +643,15 @@ function Badge({ children, tone = 'gray' }: { children: ReactNode; tone?: 'green
 
 function formatPercent(value: unknown) {
   const parsed = Number(value)
-  if (!Number.isFinite(parsed)) return 'Not available'
+  if (!Number.isFinite(parsed)) return 'N/A'
   const percent = parsed > 0 && parsed <= 1 ? parsed * 100 : parsed
-  if (percent < 0) return 'Not available'
+  if (percent < 0) return 'N/A'
   return `${Math.min(100, percent).toFixed(1)}%`
 }
 
 function formatPercentagePoints(value: unknown) {
   const parsed = Number(value)
-  if (!Number.isFinite(parsed)) return 'Not available'
+  if (!Number.isFinite(parsed)) return 'N/A'
   return `${parsed > 0 ? '+' : ''}${parsed.toFixed(2)} pts`
 }
 
@@ -703,7 +721,7 @@ function Meter({ label, value, tone = 'blue' }: { label: string; value: unknown;
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</p>
+        <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500" title={tooltipFor(label)}>{label}</p>
         <p className="text-sm font-black text-white">{formatPercent(value)}</p>
       </div>
       <div className="h-2.5 overflow-hidden rounded-full bg-slate-800" role={percent === null ? undefined : 'meter'} aria-label={percent === null ? undefined : label} aria-valuemin={percent === null ? undefined : 0} aria-valuemax={percent === null ? undefined : 100} aria-valuenow={percent ?? undefined}>
@@ -715,7 +733,7 @@ function Meter({ label, value, tone = 'blue' }: { label: string; value: unknown;
 
 function EmptyState({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-6">
+    <div className="max-w-[calc(100vw-2rem)] rounded-lg border border-slate-800 bg-slate-950/70 p-4 sm:max-w-none sm:p-6">
       <p className="text-base font-black text-white">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-400">{detail}</p>
     </div>
@@ -738,28 +756,37 @@ function QuickNumber({ label, value, tone }: { label: string; value: number; ton
 }
 
 function marketSentiment(data: TodayResponse, counts: CategoryCounts) {
-  if (counts.official > 0) return { label: 'AGGRESSIVE', tone: 'green' as const }
-  if (counts.aiLeans > 0 || data.gamesReadyForAnalysis > 0 || data.predictionCandidates > 0) return { label: 'SELECTIVE', tone: 'yellow' as const }
-  if (data.gamesWaitingForOdds > 0 || data.freshness === 'empty') return { label: 'ODDS PENDING', tone: 'blue' as const }
-  return { label: 'DEFENSIVE', tone: 'red' as const }
+  if (counts.official > 0) return { label: 'Qualified', tone: 'green' as const }
+  if (counts.aiLeans > 0 || data.gamesReadyForAnalysis > 0 || data.predictionCandidates > 0) return { label: 'Selective', tone: 'yellow' as const }
+  if (data.currentGames || data.upcomingGames) return { label: 'Preparing', tone: 'blue' as const }
+  return { label: 'No Qualified Pick', tone: 'red' as const }
 }
 
 function DecisionHero({ data, counts }: { data: TodayResponse; counts: CategoryCounts }) {
+  const hasMarkets = data.gamesReadyForAnalysis > 0 || data.predictionCandidates > 0
+  const hasLive = Number(data.lifecycleCounts?.live ?? 0) > 0
+  const hasFinal = Number(data.finalGames ?? 0) > 0
   const decision = data.officialPicks > 0
-    ? 'BET TODAY'
-    : counts.aiLeans > 0 || counts.watchlist > 0 || data.gamesWaitingForOdds > 0 || data.upcomingGames > 0
-      ? 'WAIT FOR ODDS'
-      : 'STAY OUT'
-  const tone = data.officialPicks > 0 ? 'green' : counts.aiLeans > 0 ? 'yellow' : data.gamesWaitingForOdds > 0 || data.upcomingGames > 0 ? 'blue' : 'gray'
+    ? 'Qualified Official Pick'
+    : hasLive
+      ? 'Live Operations'
+      : hasFinal
+        ? 'Settlement In Progress'
+        : hasMarkets
+          ? 'Markets Available'
+          : data.currentGames || data.upcomingGames
+            ? "Preparing Today's Slate"
+            : 'No Qualified Official Pick'
+  const tone = data.officialPicks > 0 ? 'green' : counts.aiLeans > 0 || hasMarkets ? 'yellow' : data.currentGames || data.upcomingGames ? 'blue' : 'gray'
   const sentiment = marketSentiment(data, counts)
   const gamesToday = data.currentGames || data.upcomingGames
   const summary = data.officialPicks > 0
     ? `${data.officialPicks} Official Pick${data.officialPicks === 1 ? '' : 's'} meet the standard.`
     : counts.aiLeans > 0
-      ? `${counts.aiLeans} AI Lean${counts.aiLeans === 1 ? '' : 's'} are available, but no Official Pick.`
-      : data.gamesWaitingForOdds > 0
-        ? 'Sportsbook odds are needed before picks can be finalized.'
-        : 'No play meets the Official standard right now.'
+      ? `${counts.aiLeans} AI Lean${counts.aiLeans === 1 ? '' : 's'} are tracking with operational blockers below.`
+      : hasMarkets
+        ? 'Markets exist, but no candidate currently satisfies Official Pick policy.'
+        : 'The slate is loading market and prediction context before recommendations can be evaluated.'
 
   return (
     <section className={`overflow-hidden rounded-lg border p-5 md:p-6 ${toneClasses(tone)} ${cardMotion}`}>
@@ -806,11 +833,30 @@ function fieldValue(value: unknown, fallback = 'Pending') {
   const text = String(value ?? '').trim()
   const normalized = text.toLowerCase().replaceAll('_', ' ')
   if (!text) return fallback === 'Pending' ? 'Awaiting update' : fallback
-  if (normalized === 'no market') return 'Waiting for sportsbook odds'
-  if (normalized === 'not available' || normalized === 'n/a' || normalized === 'unavailable') return 'Not available yet'
+  if (normalized === 'no opposite price') return 'No aligned market price'
+  if (normalized === 'no aligned price' || normalized === 'market mismatch') return 'No aligned market'
+  if (normalized === 'no stored odds' || normalized === 'no market') return 'No stored odds'
+  if (normalized === 'unknown push') return 'Push probability unavailable'
+  if (normalized === 'stale market' || normalized === 'stale') return 'Data Aging'
+  if (normalized === 'fresh') return 'Fresh'
+  if (normalized === 'aging') return 'Aging'
+  if (normalized === 'expired') return 'Expired'
+  if (normalized === 'not available' || normalized === 'n/a' || normalized === 'unavailable') return 'N/A'
   if (normalized === 'pending') return 'Awaiting update'
   if (normalized === 'waiting') return 'Waiting for update'
   return text.replaceAll('_', ' ')
+}
+
+function sportsbookDisplay(value: unknown, aligned = true) {
+  const text = String(value ?? '').trim()
+  if (!aligned || !text || ['n/a', 'unavailable', 'null', 'undefined'].includes(text.toLowerCase())) return 'Unavailable'
+  return text
+}
+
+function operationalReason(value: unknown, fallback = 'Policy not met') {
+  const label = fieldValue(value, fallback)
+  if (label === 'N/A' || label === 'Awaiting update') return fallback
+  return label
 }
 
 function EdgeMetric({ label = 'Edge', value, tone = 'blue' }: { label?: string; value: unknown; tone?: 'green' | 'yellow' | 'blue' | 'red' | 'gray' }) {
@@ -819,7 +865,7 @@ function EdgeMetric({ label = 'Edge', value, tone = 'blue' }: { label?: string; 
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</p>
+        <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500" title={tooltipFor(label)}>{label}</p>
         <p className="text-sm font-black text-white">{formatPercentagePoints(value)}</p>
       </div>
       <div className="h-2.5 overflow-hidden rounded-full bg-slate-800" role={bounded === null ? undefined : 'meter'} aria-label={bounded === null ? undefined : label} aria-valuemin={bounded === null ? undefined : 0} aria-valuemax={bounded === null ? undefined : 100} aria-valuenow={bounded ?? undefined}>
@@ -846,7 +892,7 @@ function OfficialPickExperienceCard({ picks, reason, topOpportunity }: { picks: 
         </div>
         {topOpportunity ? (
           <p className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-sm font-bold text-slate-300">
-            Top tracked market is still shown below as informational: {fieldValue(topOpportunity.matchup)} · {fieldValue(topOpportunity.selection)} {fieldValue(topOpportunity.marketLabel)}.
+            Top tracked market remains informational: {fieldValue(topOpportunity.matchup)} / {fieldValue(topOpportunity.selection)} {fieldValue(topOpportunity.marketLabel)}. Reason: {operationalReason((topOpportunity as { canonicalReason?: unknown }).canonicalReason, 'Policy not met')}.
           </p>
         ) : null}
       </section>
@@ -860,15 +906,15 @@ function OfficialPickExperienceCard({ picks, reason, topOpportunity }: { picks: 
         <div>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200">Official Pick</p>
           <h3 className="mt-3 text-3xl font-black text-white">{fieldValue(pick.matchup, 'Teams pending')}</h3>
-          <p className="mt-2 text-sm font-bold text-emerald-100">{fieldValue(pick.selection)} · {fieldValue(pick.marketLabel)}</p>
+          <p className="mt-2 text-sm font-bold text-emerald-100">{fieldValue(pick.selection)} / {fieldValue(pick.marketLabel)}</p>
         </div>
         <Badge tone="green">{fieldValue(pick.actionLabel, 'Official Pick')}</Badge>
       </div>
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-white/10 bg-slate-950/70 p-4">
           <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Price</p>
-          <p className="mt-2 text-base font-black text-white">{fieldValue(pick.selection)} {formatAmericanOdds(pick.americanOdds) ?? 'n/a'}</p>
-          <p className="mt-1 text-xs font-bold text-slate-500">{fieldValue(pick.sportsbook, 'Consensus')}</p>
+          <p className="mt-2 text-base font-black text-white">{formatAmericanOdds(pick.americanOdds) ?? 'N/A'}</p>
+          <p className="mt-1 text-xs font-bold text-slate-500">Selection {fieldValue(pick.selection)} / {sportsbookDisplay(pick.sportsbook, Boolean(pick.americanOdds))}</p>
         </div>
         <div className="rounded-lg border border-white/10 bg-slate-950/70 p-4">
           <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Model Fair Odds</p>
@@ -954,7 +1000,7 @@ function AiPicksFeedPanel({ feed, reason, pipelineToday }: { feed: AiPicksFeed |
   }
 
   return (
-    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
+    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-4 sm:p-6 ${cardMotion}`}>
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">AI Picks Feed</p>
@@ -979,7 +1025,7 @@ function AiPicksFeedPanel({ feed, reason, pipelineToday }: { feed: AiPicksFeed |
                     <Badge tone={item.freshnessStatus === 'STALE' ? 'red' : item.freshnessStatus === 'FRESH' ? 'green' : 'yellow'}>{fieldValue(item.freshnessStatus, 'Freshness pending')}</Badge>
                   </div>
                   <h4 className="mt-3 text-xl font-black text-white">{feedItemTitle(item)}</h4>
-                  <p className="mt-1 text-sm text-slate-400">{fieldValue(item.matchup, 'Game pending')} · {timeText(item.scheduledTime)}</p>
+                  <p className="mt-1 text-sm text-slate-400">{fieldValue(item.matchup, 'Game pending')} / {timeText(item.scheduledTime)}</p>
                   <p className="mt-3 text-sm leading-6 text-slate-300">{fieldValue(explanationSummaryForSelection(item, explanation?.headline ?? item.evidence?.[0] ?? ''), 'Stored Current Board evidence.')}</p>
                   {item.explainableIntelligence?.summary ? (
                     <p className="mt-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm leading-6 text-emerald-50">
@@ -988,7 +1034,7 @@ function AiPicksFeedPanel({ feed, reason, pipelineToday }: { feed: AiPicksFeed |
                   ) : null}
                   {item.blocker || item.promotionCondition ? (
                     <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
-                      {item.blocker ? `Blocker: ${item.blocker}` : 'No blocker'} · {item.promotionCondition ?? 'No promotion condition attached'}
+                      {item.blocker ? `Blocker: ${fieldValue(item.blocker)}` : 'No blocker'} / {fieldValue(item.promotionCondition, 'No promotion condition attached')}
                     </p>
                   ) : null}
                 </div>
@@ -996,7 +1042,7 @@ function AiPicksFeedPanel({ feed, reason, pipelineToday }: { feed: AiPicksFeed |
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Price</p>
                     <p className="mt-1 text-base font-black text-white">{marketDisplay(item as Record<string, any>).priceText}</p>
-                    <p className="text-xs font-bold text-slate-500">{fieldValue(item.sportsbook, 'Consensus')}</p>
+                    <p className="text-xs font-bold text-slate-500">{sportsbookDisplay(item.sportsbook, Boolean(item.americanOdds))}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Meter label="Model" value={feedProbability(item)} tone="blue" />
@@ -1007,7 +1053,7 @@ function AiPicksFeedPanel({ feed, reason, pipelineToday }: { feed: AiPicksFeed |
                 </div>
               </div>
               <p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
-                Risk {fieldValue(item.risk, 'Pending')} · Market age {compactMarketAge(item)} · Odds snapshot {fieldValue(item.oddsSnapshotId, 'n/a')}
+                Risk {fieldValue(item.risk, 'Pending')} / Market age {compactMarketAge(item)} / Odds snapshot {fieldValue(item.oddsSnapshotId, 'N/A')}
               </p>
             </article>
           )
@@ -1030,8 +1076,8 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
   const title = Number(alignment?.actionableExpectedValuePercent ?? opportunity.expectedValue ?? 0) > 0 && !actionabilityBlocked
     ? 'Top Tracked Market'
     : opportunity.canonicalOutcome
-      ? 'Highest Projected Outcome Under Review'
-      : 'Highest-Ranked Priced Market Under Review'
+      ? 'Highest Projected Outcome'
+      : 'Highest-Ranked Priced Market'
 
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
@@ -1044,17 +1090,19 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
       </div>
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Market</p>
-          <p className="mt-2 text-base font-black text-white">{displayMarket.priceText}</p>
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Selection</p>
+          <p className="mt-2 text-base font-black text-white">{fieldValue(displayMarket.selectionText, fieldValue(opportunity.selection))}</p>
           <p className="mt-1 text-xs font-bold text-slate-500">{fieldValue(opportunity.marketLabel)}</p>
         </div>
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Sportsbook</p>
-          <p className="mt-2 text-base font-black text-white">{fieldValue(displayMarket.sportsbook, 'Consensus')}</p>
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Price</p>
+          <p className="mt-2 text-base font-black text-white">{displayMarket.oddsText}</p>
+          <p className="mt-1 text-xs font-bold text-slate-500">{sportsbookDisplay(displayMarket.sportsbook, displayMarket.oddsText !== 'N/A')}</p>
         </div>
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Recommendation</p>
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500" title={tooltipFor(category === 'Official' ? 'Official Pick' : 'Tracking')}>Recommendation</p>
           <p className="mt-2 text-base font-black text-white">{category}</p>
+          {category !== 'Official' ? <p className="mt-1 text-xs font-bold text-slate-500">{operationalReason(alignment?.actionableUnavailableReason ?? (opportunity as { canonicalReason?: unknown }).canonicalReason, 'Policy not met')}</p> : null}
         </div>
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
           <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Market Age</p>
@@ -1070,8 +1118,8 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
         <Meter label="Confidence" value={opportunity.confidence} tone={tone} />
       </div>
       <p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
-        Alignment {fieldValue(alignment?.alignmentStatus, 'Pending')} | Risk {fieldValue(alignment?.risk, riskLabel(opportunity as IntelligenceRow))}
-        {actionabilityBlocked ? ` | Actionable value unavailable: ${fieldValue(alignment?.actionableUnavailableReason, 'market input unavailable')}` : ''}
+        Alignment {fieldValue(alignment?.alignmentStatus, 'Pending')} / Risk {fieldValue(alignment?.risk, riskLabel(opportunity as IntelligenceRow))}
+        {actionabilityBlocked ? ` / Actionable value unavailable: ${operationalReason(alignment?.actionableUnavailableReason, 'Blocked by missing aligned price')}` : ''}
       </p>
       {explanation?.summary ? (
         <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-4">
@@ -1081,7 +1129,7 @@ function TopOpportunityCard({ opportunity }: { opportunity: TopOpportunity | nul
         </div>
       ) : null}
       <div className="mt-5">
-        <a href="/most-likely" className="inline-flex rounded-full bg-white px-5 py-2 text-sm font-black text-slate-950 outline-none transition hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-white">View Details</a>
+        <a href="/most-likely" className="inline-flex rounded-full bg-white px-5 py-2 text-sm font-black text-slate-950 outline-none transition hover:bg-slate-200 focus-visible:ring-2 focus-visible:ring-white">Open Game Intelligence</a>
       </div>
     </section>
   )
@@ -1157,7 +1205,7 @@ function intelligenceCategory(row: IntelligenceRow): string {
 
 function signedNumber(value: unknown, suffix = '') {
   const parsed = Number(value)
-  if (!Number.isFinite(parsed)) return 'n/a'
+  if (!Number.isFinite(parsed)) return 'N/A'
   return `${parsed > 0 ? '+' : ''}${parsed.toFixed(2)}${suffix}`
 }
 
@@ -1206,8 +1254,9 @@ function marketDisplay(game: Record<string, any>) {
   const odds = formatAmericanOdds(hasCanonicalOutcome ? canonicalPrice?.americanOdds : game.americanOdds ?? game.odds)
   const sportsbook = marketField(hasCanonicalOutcome ? canonicalPrice?.sportsbook : game.sportsbook)
   const selectionText = [selection, line].filter(Boolean).join(' ')
-  const priceText = odds ? `${selectionText || 'Selection'} (${odds})` : selectionText ? `${selectionText} (N/A)` : 'Selection pending'
-  return { label, priceText, sportsbook }
+  const oddsText = odds ?? 'N/A'
+  const priceText = selectionText ? `${selectionText} / ${oddsText}` : oddsText
+  return { label, selectionText, oddsText, priceText, sportsbook }
 }
 
 function reasonSummary(row: IntelligenceRow) {
@@ -1226,7 +1275,7 @@ function explanationSummaryForSelection(row: { canonicalOutcome?: TopOpportunity
   if (!row.canonicalOutcome?.complementDerived) return text
   const selection = String(row.canonicalOutcome.selection ?? row.selection ?? '').trim()
   if (selection && text.toLowerCase().includes(selection.toLowerCase())) return text
-  return `Opposing-team factor: ${text}`
+  return `Opponent projection: ${text}`
 }
 
 function opportunityKey(row: IntelligenceRow, index: number) {
@@ -1235,7 +1284,10 @@ function opportunityKey(row: IntelligenceRow, index: number) {
 
 function formatFreshness(row: IntelligenceRow) {
   const state = String(row.marketAlignment?.freshnessStatus ?? '').toUpperCase()
-  if (['FRESH', 'AGING', 'STALE', 'UNKNOWN'].includes(state)) return state
+  if (state === 'FRESH') return 'Fresh'
+  if (state === 'AGING') return 'Aging'
+  if (state === 'STALE' || state === 'EXPIRED') return 'Expired'
+  if (state === 'UNKNOWN') return 'Freshness pending'
   if (typeof row.oddsAgeMinutes === 'number' && Number.isFinite(row.oddsAgeMinutes)) {
     if (row.oddsAgeMinutes < 60) return `${Math.round(row.oddsAgeMinutes)} min old`
     return `${Math.round(row.oddsAgeMinutes / 60)} hr old`
@@ -1267,7 +1319,7 @@ function compactMarketAge(row: IntelligenceRow | TopOpportunity | AiPicksFeedIte
   const ageFields = row as { oddsAgeMinutes?: unknown; marketAgeMinutes?: unknown }
   const fallbackAge = ageFields.oddsAgeMinutes ?? ageFields.marketAgeMinutes
   const age = numberField(marketMetric(row, 'marketAgeMinutes', fallbackAge))
-  if (age === null) return 'n/a'
+  if (age === null) return 'N/A'
   if (age < 60) return `${Math.round(age)} min`
   return `${Math.round(age / 60)} hr`
 }
@@ -1319,7 +1371,7 @@ function TodayStory({ data, mostLikely, bestValue, counts, pipelineToday }: { da
     vm?.bestAvailableValue.status === 'AVAILABLE'
       ? `The largest value signal is ${fieldValue(vm.bestAvailableValue.selection)} with ${formatPercent(vm.bestAvailableValue.metricValue)} expected value.`
       : vm?.bestValueSemantics
-      ? `Best Value has ${vm.bestValueSemantics.candidatesWithPositiveEv} positive-EV candidate${vm.bestValueSemantics.candidatesWithPositiveEv === 1 ? '' : 's'}, ${vm.bestValueSemantics.candidatesPassingPolicy} policy-eligible candidate${vm.bestValueSemantics.candidatesPassingPolicy === 1 ? '' : 's'} and primary blocker ${vm.bestValueSemantics.primaryRejectionReason}.`
+      ? `Best Value has ${vm.bestValueSemantics.candidatesWithPositiveEv} positive-EV candidate${vm.bestValueSemantics.candidatesWithPositiveEv === 1 ? '' : 's'}, ${vm.bestValueSemantics.candidatesPassingPolicy} policy-eligible candidate${vm.bestValueSemantics.candidatesPassingPolicy === 1 ? '' : 's'} and primary blocker ${fieldValue(vm.bestValueSemantics.primaryRejectionReason)}.`
       : topValue && Number(topValue.canonicalEv?.edge ?? topValue.edge ?? 0) > 0
       ? `The largest value signal is ${fieldValue(topValue.selection)} with ${formatPercentagePoints(topValue.canonicalEv?.edge ?? topValue.edge)} edge.`
       : topValue
@@ -1363,14 +1415,14 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
       }
   const rows: Array<[string, { status: string; detail: string }]> = [
     ['Odds', byId.get('market_prices') ?? { status: data.latestOddsTimestamp ? 'Complete' : 'Waiting', detail: data.summary.marketPrices }],
-    ['Predictions', traceCounts ? { status: traceCounts.predictionsGenerated ? 'Complete' : 'Waiting', detail: traceCounts.predictionsGenerated ? `${traceCounts.predictionsGenerated} stored prediction rows found; ${traceCounts.predictionsValidPregame ?? traceCounts.predictionsGenerated} valid pregame and ${traceCounts.predictionsExcludedAfterCutoff ?? 0} excluded after cutoff.` : 'Waiting for eligible pregame prediction rows.' } : byId.get('predictions') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? `${data.predictionCandidates} candidates available.` : 'Waiting for odds.' }],
+    ['Predictions', traceCounts ? { status: traceCounts.predictionsGenerated ? 'Complete' : 'Waiting', detail: traceCounts.predictionsGenerated ? `${traceCounts.predictionsGenerated} stored prediction rows found; ${traceCounts.predictionsValidPregame ?? traceCounts.predictionsGenerated} valid pregame and ${traceCounts.predictionsExcludedAfterCutoff ?? 0} excluded after cutoff.` : 'Waiting for eligible pregame prediction rows.' } : byId.get('predictions') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? `${data.predictionCandidates} candidates available.` : 'No stored odds or eligible pregame inputs yet.' }],
     ['Current Board', traceCounts ? { status: traceCounts.currentBoardCandidates ? 'Complete' : 'Waiting', detail: traceCounts.currentBoardCandidates ? `${traceCounts.currentBoardCandidates} candidates are visible after board gates.` : 'Stored predictions exist, but no candidate passed Current Board gates.' } : byId.get('current_board') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? 'Candidates are available.' : 'Waiting.' }],
     ['Official Picks', traceCounts ? { status: traceCounts.officialPicks ? 'Complete' : 'Waiting', detail: traceCounts.officialPicks ? `${traceCounts.officialPicks} Official Picks passed policy.` : 'No stored candidate passed Official Pick policy gates.' } : byId.get('recommendations') ?? { status: counts.official ? 'Complete' : 'Waiting', detail: counts.official ? 'Official picks passed policy.' : 'Waiting for prediction and market comparison.' }],
     ['Settlement', traceCounts ? { status: traceCounts.productionPredictionsSettled ? 'Complete' : traceCounts.gamesCompleted ? 'Waiting' : 'Not due', detail: traceCounts.productionPredictionsSettled ? `${traceCounts.productionPredictionsSettled} production predictions settled.` : traceCounts.gamesCompleted ? `${traceCounts.gamesCompleted} completed games are waiting for eligible production settlement evidence.` : 'No completed games require settlement yet.' } : byId.get('settlement') ?? { status: data.finalGames ? 'Waiting' : 'Complete', detail: data.finalGames ? 'Final games are ready for stored settlement checks.' : 'Healthy.' }],
     ['Learning', learning ? { status: learning.labelsCreatedToday || learning.labelsPending ? 'Complete' : 'Not due', detail: `${learning.message} Updates applied: ${learning.updatesApplied}; auto-promotions: ${learning.autoPromotions}.` } : traceCounts ? { status: traceCounts.learningSamplesQueued ? 'Complete' : 'Not due', detail: traceCounts.learningSamplesQueued ? `${traceCounts.learningSamplesQueued} learning labels queued; ${traceCounts.learningSamplesAccepted} accepted and ${traceCounts.learningSamplesRejected} rejected by evidence checks.` : 'Ready when settled production labels exist; no auto-promotion.' } : byId.get('learning') ?? { status: 'Not due', detail: 'Ready when settled production labels exist; no auto-promotion.' }],
   ]
   return (
-    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
+    <section className={`max-w-[calc(100vw-2rem)] rounded-lg border border-slate-800 bg-slate-900/80 p-4 sm:max-w-none sm:p-6 ${cardMotion}`}>
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Current AI Pipeline</p>
@@ -1489,7 +1541,7 @@ function InsightList({ title, rows, empty, count }: { title: string; rows: Intel
             <div className="mt-3 grid gap-2 sm:grid-cols-4">
               <p className="text-xs font-bold text-slate-400">Edge {signedNumber(row.marketAlignment?.edgePercentagePoints ?? row.edge, ' pts')}</p>
               <p className="text-xs font-bold text-slate-400">EV {signedNumber(row.marketAlignment?.expectedValuePercent ?? row.expectedValue, '%')}</p>
-              <p className="text-xs font-bold text-slate-400">Price {formatAmericanOdds(row.americanOdds ?? row.odds) ?? 'n/a'}</p>
+              <p className="text-xs font-bold text-slate-400">Price {formatAmericanOdds(row.americanOdds ?? row.odds) ?? 'N/A'}</p>
               <p className="text-xs font-bold text-slate-400">{compactMarketAge(row)}</p>
             </div>
             {topBlocker(row) ? <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-200">{topBlocker(row)}</p> : null}
@@ -1507,18 +1559,58 @@ function AIConfidenceCard({ opportunity }: { opportunity: TopOpportunity | null 
   const confidence = percentNumber(opportunity?.confidence)
   const label = confidenceLabel(confidence)
   const tone = confidence === null ? 'gray' : confidence >= 70 ? 'green' : confidence >= 50 ? 'yellow' : 'red'
+  const explanation = opportunity?.recommendationExplanation
+  const optionalEvidence = opportunity as { strengths?: string[]; blockers?: string[]; missingData?: string[] } | null
+  const drivers = [
+    ...(explanation?.primaryReasons?.map((item) => evidenceText(item)).filter(Boolean) ?? []),
+    ...(optionalEvidence?.strengths ?? []),
+  ].slice(0, 3)
+  const blockers = [
+    ...(explanation?.blockers?.map((item) => evidenceText(item)).filter(Boolean) ?? []),
+    ...(optionalEvidence?.blockers ?? []),
+    ...(optionalEvidence?.missingData ?? []),
+  ].slice(0, 3)
+  const quality = confidence === null ? 'Unavailable' : confidence >= 70 ? 'Strong' : confidence >= 50 ? 'Moderate' : 'Limited'
   return (
-    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
-      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">AI Confidence</p>
-      <div className="mt-4 flex items-end justify-between gap-4">
+    <section className={`max-w-[calc(100vw-2rem)] rounded-lg border border-slate-800 bg-slate-900/80 p-4 sm:max-w-none sm:p-6 ${cardMotion}`}>
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-5xl font-black text-white">{confidence === null ? '--' : `${confidence.toFixed(1)}%`}</p>
-          <p className="mt-2 text-sm font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500" title={tooltipFor('Confidence')}>AI Confidence</p>
+          <h3 className="mt-2 text-3xl font-black text-white">{label}</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-400">Confidence reflects model signal quality, available evidence and blockers. It is not an Official Pick by itself.</p>
         </div>
-        <Badge tone={tone}>{label}</Badge>
+        <Badge tone={tone}>{quality}</Badge>
       </div>
-      <div className="mt-6 h-3 overflow-hidden rounded-full bg-slate-800" role={confidence === null ? undefined : 'meter'} aria-label={confidence === null ? undefined : 'AI Confidence'} aria-valuemin={confidence === null ? undefined : 0} aria-valuemax={confidence === null ? undefined : 100} aria-valuenow={confidence ?? undefined}>
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Confidence</p>
+          <p className="mt-2 text-lg font-black text-white">{confidence === null ? 'N/A' : `${confidence.toFixed(1)}%`}</p>
+        </div>
+        <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Quality</p>
+          <p className="mt-2 text-lg font-black text-white">{quality}</p>
+        </div>
+        <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Confidence Level</p>
+          <p className="mt-2 text-lg font-black text-white">{label}</p>
+        </div>
+      </div>
+      <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-800" role={confidence === null ? undefined : 'meter'} aria-label={confidence === null ? undefined : 'AI Confidence'} aria-valuemin={confidence === null ? undefined : 0} aria-valuemax={confidence === null ? undefined : 100} aria-valuenow={confidence ?? undefined}>
         {confidence !== null && <div className={`h-full rounded-full ${meterColor(tone)} transition-all duration-700 ease-out`} style={{ width: `${confidence}%` }} />}
+      </div>
+      <div className="mt-5 grid gap-3 md:grid-cols-2">
+        <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Main Drivers</p>
+          <div className="mt-3 space-y-2 text-sm text-slate-300">
+            {drivers.length ? drivers.map((item) => <p key={item}>{fieldValue(item)}</p>) : <p>No strong positive driver is attached to the current top outcome.</p>}
+          </div>
+        </div>
+        <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Main Blockers</p>
+          <div className="mt-3 space-y-2 text-sm text-slate-300">
+            {blockers.length ? blockers.map((item) => <p key={item}>{fieldValue(item)}</p>) : <p>No current blocker is attached to this signal.</p>}
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -1535,29 +1627,31 @@ function categoryLabel(value: unknown) {
 
 function gameCategory(game: Record<string, any>) {
   const lifecycle = String(game.lifecycle ?? game.status ?? '').toUpperCase()
-  if (lifecycle === 'FINAL' || lifecycle === 'COMPLETED' || lifecycle === 'COMPLETE') return fieldValue(game.settlementState?.label, 'Awaiting Settlement')
+  if (lifecycle === 'FINAL' || lifecycle === 'COMPLETED' || lifecycle === 'COMPLETE') return Number(game.settlementState?.settledPredictions ?? 0) > 0 ? 'Completed' : 'Settlement Pending'
+  if (lifecycle === 'IN_PROGRESS' || lifecycle === 'LIVE') return 'Live'
   const bettingEligibility = String(game.bettingEligibility ?? '').toUpperCase()
   const hasMarket = hasDisplayMarket(game)
   const operational = String(game.operationalStatus ?? '').toUpperCase()
   const storedOddsCount = Number(game.storedOddsCount ?? 0)
-  if (operational === 'FRESH_MARKET' || operational === 'AGING_MARKET' || operational === 'PARTIAL_MARKET_COVERAGE') return operational === 'AGING_MARKET' ? 'Data Aging' : 'Operational'
+  if (operational === 'FRESH_MARKET' || operational === 'PARTIAL_MARKET_COVERAGE') return 'Fresh Market'
+  if (operational === 'AGING_MARKET') return 'Data Aging'
   if (operational === 'STALE_MARKET') return 'Data Aging'
-  if (operational === 'NO_ALIGNED_PRICE' || operational === 'NO_ELIGIBLE_MARKET') return 'Tracking'
-  if (operational === 'NO_ODDS_STORED') return 'Waiting for Odds'
+  if (operational === 'NO_ALIGNED_PRICE' || operational === 'NO_ELIGIBLE_MARKET') return 'No Aligned Price'
+  if (operational === 'NO_ODDS_STORED') return 'No Stored Odds'
   if (bettingEligibility === 'LOCKED_AFTER_START') return 'Betting Locked'
   if (bettingEligibility === 'STATUS_UNCONFIRMED') return 'Betting Locked'
   if (bettingEligibility === 'DATA_AGING' || bettingEligibility === 'STALE') return 'Data Aging'
-  if (bettingEligibility === 'NO_MARKET' && !hasMarket) return storedOddsCount === 0 ? 'Waiting for Odds' : 'Tracking'
+  if (bettingEligibility === 'NO_MARKET' && !hasMarket) return storedOddsCount === 0 ? 'No Stored Odds' : 'Tracking'
   if (bettingEligibility === 'INSUFFICIENT_DATA') return 'Insufficient Data'
-  if (bettingEligibility === 'ELIGIBLE') return 'Operational'
+  if (bettingEligibility === 'ELIGIBLE') return 'Fresh Market'
   const eligibility = String(game.eligibility ?? '').toUpperCase()
   if (eligibility === 'LOCKED') return 'Locked'
   if (eligibility === 'STATUS_UNCONFIRMED') return 'Status Unconfirmed'
-  if (eligibility === 'STALE') return 'Stale'
-  if (eligibility === 'READY') return 'Operational'
+  if (eligibility === 'STALE') return 'Data Aging'
+  if (eligibility === 'READY') return 'Fresh Market'
   const grounded = categoryLabel(game.marketIntelligenceCategory ?? game.opportunityCategory ?? game.recommendationCategory)
   if (grounded) return grounded
-  if (game.oddsPresent === false && storedOddsCount === 0) return 'Waiting for Odds'
+  if (game.oddsPresent === false && storedOddsCount === 0) return 'No Stored Odds'
   if (game.predictionReady === false) return 'Tracking'
   return 'Operational'
 }
@@ -1575,16 +1669,16 @@ function GameCard({ game }: { game: Record<string, any> }) {
   const aiCategory = gameCategory(game)
   const hasMarket = hasDisplayMarket(game)
   const displayMarket = marketDisplay(game)
-  const statusTone = status === 'Final' ? 'gray' : status === 'Live' || status === 'Status update overdue' || status === 'Status Unconfirmed' ? 'yellow' : 'blue'
+  const statusTone = status === 'Completed' ? 'gray' : status === 'Live' || status === 'Status update overdue' || status === 'Status Unconfirmed' ? 'yellow' : 'blue'
   const categoryCardTone = categoryTone(aiCategory)
-  const categoryBadgeTone = aiCategory === 'Waiting for Odds' || aiCategory === 'Data Aging' ? 'yellow' : aiCategory === 'Tracking' || aiCategory === 'Operational' || aiCategory === 'Insufficient Data' ? 'blue' : aiCategory === 'Betting Locked' ? 'red' : categoryCardTone
-  const isFinal = status === 'Final'
+  const categoryBadgeTone = aiCategory === 'No Stored Odds' || aiCategory === 'Data Aging' ? 'yellow' : aiCategory === 'Tracking' || aiCategory === 'Fresh Market' || aiCategory === 'No Aligned Price' || aiCategory === 'Insufficient Data' ? 'blue' : aiCategory === 'Betting Locked' ? 'red' : categoryCardTone
+  const isFinal = status === 'Completed'
   const storedOddsCount = Number(game.storedOddsCount ?? 0)
   const marketUnavailableText = isFinal
     ? fieldValue(game.settlementState?.label, 'Awaiting Settlement')
     : storedOddsCount > 0
       ? fieldValue(game.operationalStatus, 'No aligned displayable market')
-      : 'Waiting for odds'
+      : 'No stored odds'
   const gameHref = game.eventId || game.id ? `/game-intelligence/${encodeURIComponent(String(game.eventId ?? game.id))}` : '/game-intelligence'
   const gameLinkLabel = `Open Game Intelligence for ${fieldValue(game.matchup, 'this game')}`
 
@@ -1626,7 +1720,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
             {isFinal
               ? `${fieldValue(game.settlementState?.label, 'Awaiting Settlement')}. ${Number(game.settlementState?.settledPredictions ?? 0)} of ${Number(game.settlementState?.totalPredictions ?? 0)} stored prediction rows are terminal for this event.`
               : !hasMarket && game.oddsPresent === false && storedOddsCount === 0
-              ? 'Waiting for sportsbook odds.'
+              ? 'No stored sportsbook odds are attached yet.'
               : game.bettingEligibility === 'LOCKED_AFTER_START' || game.bettingEligibility === 'STATUS_UNCONFIRMED'
                 ? fieldValue(game.statusReason, 'Awaiting provider confirmation. Betting is locked until game status is verified.')
               : game.bettingEligibility === 'DATA_AGING' || game.bettingEligibility === 'STALE'
@@ -1636,7 +1730,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
                 : game.eligibility === 'STATUS_UNCONFIRMED'
                   ? fieldValue(game.statusReason, 'Game status is unconfirmed.')
                   : !hasMarket && game.predictionReady === false
-                ? 'Tracking current market state.'
+                ? 'Tracking current market state. No actionable recommendation is available until missing inputs clear.'
                 : fieldValue(game.reasonSummary, `${aiCategory} status from the current board.`)}
           </p>
           {game.statusSource && (
@@ -1655,8 +1749,8 @@ function ProgressPipeline({ data }: { data: TodayResponse }) {
   const contractSteps = data.pipeline?.filter((step) => ['schedule', 'market_prices', 'predictions', 'current_board', 'recommendations', 'settlement'].includes(step.id))
   const steps = contractSteps?.length ? contractSteps.map((step) => ({ label: step.label, mark: step.label.slice(0, 1), state: step.status })) : [
     { label: 'Schedule', mark: 'S', state: data.currentGames > 0 || data.upcomingGames > 0 ? 'Complete' : 'Awaiting update' },
-    { label: 'Odds', mark: 'O', state: data.gamesWaitingForOdds > 0 || data.freshness === 'empty' ? 'Waiting for odds' : 'Complete' },
-    { label: 'Predictions', mark: 'P', state: data.predictionCandidates > 0 ? 'Complete' : data.gamesWaitingForOdds > 0 ? 'Waiting for odds' : 'Updating' },
+    { label: 'Odds', mark: 'O', state: data.gamesWaitingForOdds > 0 || data.freshness === 'empty' ? 'No Stored Odds' : 'Complete' },
+    { label: 'Predictions', mark: 'P', state: data.predictionCandidates > 0 ? 'Complete' : data.gamesWaitingForOdds > 0 ? 'No Stored Odds' : 'Updating' },
     { label: 'Picks', mark: 'R', state: data.officialPicks > 0 ? 'Complete' : data.predictionCandidates > 0 ? 'Not due' : 'Awaiting board' },
     { label: 'Results', mark: 'F', state: data.finalGames > 0 ? 'Complete' : data.currentGames > 0 ? 'Not due' : 'Awaiting games' },
   ]
@@ -1688,17 +1782,17 @@ function ProgressPipeline({ data }: { data: TodayResponse }) {
 
 function HealthCard({ data }: { data: TodayResponse }) {
   const status = data.gamesWaitingForOdds > 0
-      ? 'Waiting for Odds'
+      ? 'No Stored Odds'
     : data.freshness === 'stale'
       ? 'Data Aging'
       : data.freshness === 'empty'
-        ? 'Waiting for Odds'
+        ? 'No Stored Odds'
         : data.success
           ? 'Healthy'
           : 'Operational Blocker'
-  const tone = status === 'Healthy' ? 'green' : status === 'Operational Blocker' ? 'red' : status === 'Waiting for Odds' ? 'yellow' : 'blue'
-  const detail = status === 'Waiting for Odds'
-    ? 'Market prices are needed before recommendations can be finalized.'
+  const tone = status === 'Healthy' ? 'green' : status === 'Operational Blocker' ? 'red' : status === 'No Stored Odds' ? 'yellow' : 'blue'
+  const detail = status === 'No Stored Odds'
+    ? 'No stored market price is attached for at least one game; recommendations remain non-actionable there.'
     : status === 'Data Aging'
       ? simpleAction(data.nextAction)
       : status === 'Operational Blocker'
@@ -1773,11 +1867,11 @@ function DailyBriefing({
     ['Lineup Coverage', lineupReady, lineupReady ? 'Lineup context linked' : 'No lineup context grounded'],
     ['Official Picks', data.officialPicks, data.officialPicks ? 'Policy-qualified' : 'None passed policy'],
     ['Most Likely', vm?.mostLikelySummary.selector.selection ?? mostLikely[0]?.selection ?? 'Not available', vm?.mostLikelySummary.selector.status === 'AVAILABLE' ? `${formatPercent(vm.mostLikelySummary.selector.modelProbability)} model` : 'No supported outcome'],
-    ['Best Value', vm?.bestAvailableValue.status === 'AVAILABLE' ? 'Policy eligible' : 'No policy-eligible value', vm?.bestAvailableValue.status === 'AVAILABLE' ? `${formatPercent(vm.bestAvailableValue.metricValue)} EV` : vm?.bestValueSemantics ? `${vm.bestValueSemantics.candidatesWithPositiveEv} positive EV; ${vm.bestValueSemantics.candidatesPassingPolicy} policy eligible; ${vm.bestValueSemantics.primaryRejectionReason}` : vm?.bestAvailableValue.rankingReason ?? data.sections?.bestValue?.reason ?? 'No positive EV'],
+    ['Best Value', vm?.bestAvailableValue.status === 'AVAILABLE' ? 'Policy eligible' : 'No policy-eligible value', vm?.bestAvailableValue.status === 'AVAILABLE' ? `${formatPercent(vm.bestAvailableValue.metricValue)} EV` : vm?.bestValueSemantics ? `${vm.bestValueSemantics.candidatesWithPositiveEv} positive EV; ${vm.bestValueSemantics.candidatesPassingPolicy} policy eligible; ${fieldValue(vm.bestValueSemantics.primaryRejectionReason)}` : vm?.bestAvailableValue.rankingReason ?? data.sections?.bestValue?.reason ?? 'No positive EV'],
     ['Settlement', trace?.productionPredictionsSettled ?? data.finalGames, data.finalGames ? 'Final games present' : 'Settlement pending'],
     ["Today's Learning Labels Created", learning?.labelsCreatedToday ?? trace?.learningSamplesAccepted ?? 0, learning?.message ?? (trace?.learningSamplesQueued ? `${trace.learningSamplesQueued} queued` : 'No learning labels pending')],
     ['Learning Labels Pending', learning?.labelsPending ?? Math.max(0, Number(trace?.learningSamplesQueued ?? 0) - Number(trace?.learningSamplesAccepted ?? 0)), learning ? `${learning.updatesApplied} updates applied; ${learning.autoPromotions} auto-promotions` : 'No automatic promotion'],
-    ['Freshness', vm?.marketFreshnessSummary.state ?? simpleAction(data.freshness), vm?.marketFreshnessSummary.latestOddsTimestamp ? `Odds ${timeText(vm.marketFreshnessSummary.latestOddsTimestamp)}` : data.latestOddsTimestamp ? `Odds ${timeText(data.latestOddsTimestamp)}` : 'No odds timestamp'],
+    ['Freshness', fieldValue(vm?.marketFreshnessSummary.state ?? simpleAction(data.freshness)), vm?.marketFreshnessSummary.latestOddsTimestamp ? `Odds ${timeText(vm.marketFreshnessSummary.latestOddsTimestamp)}` : data.latestOddsTimestamp ? `Odds ${timeText(data.latestOddsTimestamp)}` : 'No odds timestamp'],
   ]
   return (
     <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-5 ${cardMotion}`}>
@@ -1803,7 +1897,7 @@ function DailyBriefing({
 
 function metricText(selector: DashboardSelector | null | undefined) {
   if (!selector) return 'Not available'
-  if (selector.status !== 'AVAILABLE') return selector.blocker ?? 'Not available'
+  if (selector.status !== 'AVAILABLE') return operationalReason(selector.blocker, 'Not available')
   if (selector.metricName.toLowerCase().includes('distance')) return `${Number(selector.metricValue ?? 0).toFixed(1)} pts from neutral`
   if (selector.metricName.toLowerCase().includes('ranking')) return selector.metricValue === null ? 'Priced' : selector.metricValue.toFixed(1)
   return formatPercent(selector.metricValue)
@@ -1811,8 +1905,8 @@ function metricText(selector: DashboardSelector | null | undefined) {
 
 function selectorDetail(selector: DashboardSelector | null | undefined) {
   if (!selector) return 'Not available'
-  const price = selector.directlyStoredPrice ? formatAmericanOdds(selector.americanOdds) ?? 'priced' : selector.priceState
-  return `${selector.metricName}: ${metricText(selector)} | Price: ${price}`
+  const price = selector.directlyStoredPrice ? formatAmericanOdds(selector.americanOdds) ?? 'Priced' : fieldValue(selector.priceState, 'Unavailable')
+  return `${selector.metricName}: ${metricText(selector)} / Price: ${price}`
 }
 
 function TopGameIntelligence({ data, games, mostLikely, bestValue }: { data: TodayResponse; games: Array<Record<string, any>>; mostLikely: IntelligenceRow[]; bestValue: IntelligenceRow[] }) {
@@ -1830,7 +1924,7 @@ function TopGameIntelligence({ data, games, mostLikely, bestValue }: { data: Tod
         label: String(label),
         eventId: typed.eventId ?? '',
         matchup: typed.matchup ?? (label === 'Strongest Player Intelligence' ? 'Player projection coverage' : 'Not available'),
-        selection: typed.selection ?? typed.blocker ?? 'Not available',
+        selection: typed.selection ?? operationalReason(typed.blocker, 'Not available'),
         metric: selectorDetail(typed),
       }
     })

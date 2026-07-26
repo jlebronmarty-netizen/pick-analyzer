@@ -2,6 +2,16 @@
 
 Last updated: 2026-07-25 00:00:00Z
 
+## 2026-07-25 Production UX Polish V1
+
+- Polished existing Dashboard, Most Likely and Best Value presentation without creating new intelligence or changing prediction probabilities, production weights, Official Pick policy, Learning Brain, settlement logic, provider behavior, replay/backfill or Portfolio Intelligence.
+- Replaced raw unavailable UI values with structured `N/A`, `Unavailable`, `No aligned market`, `No stored odds` and policy/blocker explanations where appropriate.
+- Updated AI Market Outlook, Top Game Intelligence, per-game statuses, sportsbook display, actionable EV, edge units and recommendation copy to use consistent operational language.
+- Expanded AI Confidence from a single percentage into confidence, quality, confidence level, main drivers and main blockers.
+- Added concise native tooltips for key concepts including probability, confidence, edge, EV, Official Pick, Tracking, Current Board, Settlement and Learning labels.
+- Improved Best Value and Player/market empty states to explain why data is empty, what is missing and what could change.
+- Local build verification passed with `npm.cmd run build`; Playwright/product walkthrough and production deployment verification pending.
+
 ## 2026-07-25 Dashboard Final Data Contract Regression Fix V1
 
 - Reconciled remaining Dashboard display contracts without changing model probabilities, production weights, Official Pick policy, settlement, Learning Brain behavior, provider calls or supported-market activation.

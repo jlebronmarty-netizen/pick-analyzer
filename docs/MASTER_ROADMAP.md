@@ -8,6 +8,14 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Completed
 
+### Production UX Polish V1
+
+Status: Implemented locally and build-verified; Playwright walkthrough and production deployment verification pending.
+
+Evidence: `src/components/dashboard/UserTodayPanel.tsx`, `src/components/market-opportunities/MostLikelyTool.tsx`, `src/components/market-opportunities/BestValueTool.tsx`, `docs/PROJECT_STATUS.md`, `docs/MASTER_ROADMAP.md` and local production build.
+
+Note: Final pre-Portfolio polish improves visible wording, empty states, tooltips, price/sportsbook display, edge units, AI Confidence, Top Game Intelligence and per-game operational labels while preserving every production intelligence contract. No prediction probabilities, production weights, Official Pick policy, Learning Brain behavior, settlement logic, provider calls, replay/backfill or Portfolio Intelligence changed.
+
 ### Dashboard Final Data Contract Regression Fix V1
 
 Status: Implemented locally and build-verified; full Playwright and production deployment verification pending.

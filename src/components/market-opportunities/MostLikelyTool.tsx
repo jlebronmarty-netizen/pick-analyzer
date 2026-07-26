@@ -170,7 +170,7 @@ const modeOptions = [
 ]
 
 function odds(value: number | null) {
-  if (value === null) return 'n/a'
+  if (value === null) return 'N/A'
   return value > 0 ? `+${value}` : String(value)
 }
 
@@ -178,8 +178,14 @@ function pct(value: number | null | undefined) {
   return value === null || value === undefined ? 'N/A' : `${Number(value).toFixed(1)}%`
 }
 
+function points(value: number | null | undefined) {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) return 'N/A'
+  const parsed = Number(value)
+  return `${parsed > 0 ? '+' : ''}${parsed.toFixed(2)} pts`
+}
+
 function time(value: string | null) {
-  if (!value) return 'n/a'
+  if (!value) return 'N/A'
   return new Date(value).toLocaleString([], {
     timeZone: 'America/Puerto_Rico',
     month: 'short',
@@ -245,8 +251,8 @@ function evValue(item: Opportunity) {
 }
 
 function oddsContext(item: Opportunity) {
-  if (item.odds === null) return item.selectedOddsStatus === 'NO_OPPOSITE_PRICE' ? 'n/a - no opposite price' : 'n/a'
-  return `${odds(item.odds)} ${item.sportsbook ?? ''}`.trim()
+  if (item.odds === null) return 'Price N/A / Reason No aligned market'
+  return `${odds(item.odds)} ${item.sportsbook ?? 'Unavailable'}`.trim()
 }
 
 export default function MostLikelyTool() {
@@ -310,7 +316,14 @@ export default function MostLikelyTool() {
           </div>
         </header>
 
-        {error ? <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-red-200">{error}</div> : null}
+        {error ? (
+          <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-red-200">
+            <p className="font-black text-red-50">Data temporarily unavailable.</p>
+            <p className="mt-1 text-sm leading-6">Most Likely did not complete its Current Board scan.</p>
+            <p className="mt-2 text-sm leading-6 text-red-50">Why: current board data could not be read. Missing: a completed stored candidate response. What could change: refreshed data access or a later board scan can restore ranked outcomes.</p>
+            <a href="/game-intelligence" className="mt-3 inline-flex rounded-lg border border-red-300/30 bg-red-300/10 px-3 py-2 text-xs font-black text-red-50 outline-none hover:bg-red-300/20 focus-visible:ring-2 focus-visible:ring-red-100">Open Game Intelligence</a>
+          </div>
+        ) : null}
 
         <section className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Summary label="Rows Evaluated" value={data?.summary.rowsBeforeFiltering ?? 0} />
@@ -362,7 +375,7 @@ export default function MostLikelyTool() {
                     <h2 className="mt-3 break-words text-2xl font-black">{selectionLabel(item)}</h2>
                   <p className="mt-1 break-words text-sm text-slate-400">{item.marketLabel} | {item.matchup}</p>
                   {item.eventId ? (
-                    <a href={`/game-intelligence/${encodeURIComponent(item.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Center</a>
+                    <a href={`/game-intelligence/${encodeURIComponent(item.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Intelligence</a>
                   ) : null}
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-400 sm:grid-cols-3">
                     <span>{time(item.startTime)}</span>
@@ -385,7 +398,7 @@ export default function MostLikelyTool() {
                   <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 text-center sm:grid-cols-3">
                     <Metric label="Pick Analyzer thinks" value={pct(item.probability)} />
                     <Metric label="Sportsbook thinks" value={pct(item.sportsbookProbability)} />
-                    <Metric label="Difference" value={`${Number(item.edge ?? 0) > 0 ? '+' : ''}${pct(item.edge)}`} tone={Number(item.edge ?? 0) > 0 ? 'good' : 'bad'} />
+                    <Metric label="Edge" value={points(item.edge)} tone={Number(item.edge ?? 0) > 0 ? 'good' : 'bad'} />
                   </div>
                 </div>
 
@@ -393,7 +406,7 @@ export default function MostLikelyTool() {
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Bet Context</p>
                   <div className="mt-3 grid min-w-0 grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                     <Metric label="Odds" value={oddsContext(item)} />
-                    <Metric label="Odds Age" value={Number.isFinite(item.oddsAgeMinutes) ? `${item.oddsAgeMinutes}m` : 'n/a'} />
+                    <Metric label="Odds Age" value={Number.isFinite(item.oddsAgeMinutes) ? `${item.oddsAgeMinutes}m` : 'N/A'} />
                     <Metric label="Confidence" value={item.confidenceLabel} />
                     <Metric label="Reliability" value={item.reliability} />
                     <Metric label="AI Rating" value={`${stars(item.aiRating)} ${ratingLabel(item.aiRating)}`} />
@@ -406,7 +419,7 @@ export default function MostLikelyTool() {
                 <summary className="cursor-pointer text-sm font-black">Advanced Details</summary>
                 <div className="mt-4 grid gap-3 md:grid-cols-4">
                   <Metric label="Model Probability" value={pct(item.probability)} />
-                  <Metric label="Expected Value" value={pct(item.expectedValue)} tone={Number(item.expectedValue ?? 0) > 0 ? 'good' : 'bad'} />
+                  <Metric label="Expected Value" value={item.actionableUnavailableReason ? `N/A / ${item.actionableUnavailableReason}` : pct(item.expectedValue)} tone={Number(item.expectedValue ?? 0) > 0 ? 'good' : 'bad'} />
                   <Metric label="Reliability Score" value={String(item.reliabilityScore)} />
                   <Metric label="Odds Time" value={time(item.oddsTimestamp)} />
                   <Metric label="Model Version" value={item.modelVersion} />
@@ -488,7 +501,7 @@ function Spotlight({
           <h2 className="mt-3 break-words text-xl font-black">{selectionLabel(candidate)}</h2>
           <p className="mt-1 break-words text-sm text-slate-400">{candidate.matchup}</p>
           {candidate.eventId ? (
-            <a href={`/game-intelligence/${encodeURIComponent(candidate.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Center</a>
+            <a href={`/game-intelligence/${encodeURIComponent(candidate.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Intelligence</a>
           ) : null}
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Metric label="Model Probability" value={pct(candidate.probability)} />
@@ -529,10 +542,10 @@ function ParlaySpotlight({ parlay }: { parlay: Response['mostLikelyMoneylineParl
             ))}
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <Metric label="Adjusted Joint" value={parlay?.adjustedJointProbability === null ? 'n/a' : pct(parlay?.adjustedJointProbability ?? 0)} />
+            <Metric label="Adjusted Joint" value={parlay?.adjustedJointProbability === null ? 'N/A' : pct(parlay?.adjustedJointProbability ?? 0)} />
             <Metric label="Combined Odds" value={odds(parlay?.combinedOdds?.american ?? null)} />
-            <Metric label="Parlay EV" value={parlay?.ev === null ? 'n/a' : pct(parlay?.ev ?? 0)} tone={(parlay?.ev ?? 0) > 0 ? 'good' : 'bad'} />
-            <Metric label="Confidence" value={parlay?.confidence === null ? 'n/a' : pct(parlay?.confidence ?? 0)} />
+            <Metric label="Parlay EV" value={parlay?.ev === null ? 'N/A' : pct(parlay?.ev ?? 0)} tone={(parlay?.ev ?? 0) > 0 ? 'good' : 'bad'} />
+            <Metric label="Confidence" value={parlay?.confidence === null ? 'N/A' : pct(parlay?.confidence ?? 0)} />
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-300">{parlay?.disclaimer}</p>
         </>

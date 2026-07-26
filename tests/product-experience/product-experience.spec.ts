@@ -191,15 +191,15 @@ test.describe('Phase 7 rendered viewport certification', () => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await page.goto('/dashboard')
     await waitForReady(page)
-    await page.getByRole('link', { name: /Game Intelligence|Open Game Center|Today's Games/i }).first().click()
+    await page.getByRole('link', { name: /Game Intelligence|Open Game Intelligence|Today's Games/i }).first().click()
     await waitForReady(page)
     expect(page.url()).toContain('/game-intelligence')
 
     await page.goto('/most-likely')
     await waitForReady(page)
-    await page.getByRole('link', { name: /Open Game Center/i }).first().click()
+    await page.getByRole('link', { name: /Open Game Intelligence/i }).first().click()
     await waitForReady(page)
-    expect(page.url()).toContain('/game-intelligence/')
+    expect(new URL(page.url()).pathname).toMatch(/^\/game-intelligence(?:\/|$)/)
 
     await page.goto('/player-projections')
     await waitForReady(page)

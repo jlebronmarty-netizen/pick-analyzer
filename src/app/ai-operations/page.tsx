@@ -49,8 +49,36 @@ function PanelCard({ panel }: { panel: any }) {
 
 export const dynamic = 'force-dynamic'
 
+function timeoutAfter(ms: number) {
+  return new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('AI Operations evidence load timed out')), ms)
+  })
+}
+
 export default async function AiOperationsPage() {
-  const data = await getAiLearningLifecycle()
+  let data: Awaited<ReturnType<typeof getAiLearningLifecycle>>
+  try {
+    data = await Promise.race([getAiLearningLifecycle(), timeoutAfter(12_000)])
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'AI Operations evidence is temporarily unavailable.'
+    return (
+      <DashboardShell>
+        <DashboardSection
+          id="ai-operations"
+          eyebrow="AI Operations"
+          title="Autonomous Daily Lifecycle"
+          description="Persisted evidence for schedule, odds, predictions, settlement, replay, learning, calibration and scheduler health."
+        >
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-5 text-amber-100">
+            <p className="text-xs font-black uppercase tracking-[0.18em]">Evidence Loading</p>
+            <h2 className="mt-2 text-2xl font-black text-white">AI Operations is temporarily unavailable.</h2>
+            <p className="mt-2 text-sm leading-6">Why: {message}. Missing: a timely stored lifecycle evidence response. What could change: the next bounded load can show scheduler, settlement, learning and replay evidence without changing model behavior.</p>
+            <a href="/dashboard" className="mt-4 inline-flex rounded-lg border border-amber-300/40 px-4 py-2 text-sm font-black text-amber-50 outline-none hover:bg-amber-500/10 focus-visible:ring-2 focus-visible:ring-amber-200">Back to Dashboard</a>
+          </div>
+        </DashboardSection>
+      </DashboardShell>
+    )
+  }
   const pregameSchedulerCoverage = data.pregameSchedulerCoverage as { schedulerTiming?: any[] } | undefined
 
   return (

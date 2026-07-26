@@ -73,12 +73,18 @@ type Response = {
 }
 
 function odds(value: number | null) {
-  if (value === null) return 'n/a'
+  if (value === null) return 'N/A'
   return value > 0 ? `+${value}` : String(value)
 }
 
 function pct(value: number | null | undefined) {
   return value === null || value === undefined ? 'N/A' : `${Number(value).toFixed(1)}%`
+}
+
+function points(value: number | null | undefined) {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) return 'N/A'
+  const parsed = Number(value)
+  return `${parsed > 0 ? '+' : ''}${parsed.toFixed(2)} pts`
 }
 
 function tone(value: number | null | undefined) {
@@ -137,11 +143,11 @@ export default function BestValueTool() {
           </div>
         </header>
 
-        {error ? <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-red-200">DATA TEMPORARILY UNAVAILABLE</div> : null}
+        {error ? <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-red-200">Best Value scan did not complete. The detailed state below explains what is missing.</div> : null}
         {data && data.summary.dataAvailable === false ? (
           <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 text-red-200">
-            <p className="font-black">DATA TEMPORARILY UNAVAILABLE</p>
-            <p className="mt-1 text-sm text-red-100">Best Value did not complete its Current Board scan.</p>
+            <p className="font-black">Value candidates paused.</p>
+            <p className="mt-1 text-sm text-red-100">The Current Board scan needs a clean value pass before candidates can be ranked.</p>
           </div>
         ) : null}
 
@@ -153,26 +159,26 @@ export default function BestValueTool() {
         </section>
 
         <div className="rounded-2xl border border-amber-500/20 bg-amber-950/10 p-4 text-sm leading-6 text-amber-100">
-          {data?.summary.warning ?? 'No Positive Value Available Today.'}
+          {data?.summary.warning ?? 'No positive-value opportunities are available right now.'}
         </div>
 
         {data?.summary.dataAvailable === false ? (
           <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
             <h2 className="text-2xl font-black">Data temporarily unavailable.</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-400">The scan did not complete, so this page is not claiming there are no value candidates.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">Why: the scan did not complete. Missing: a successful Current Board value pass. What could change: the next clean scan can repopulate value candidates.</p>
             <details className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
               <summary className="cursor-pointer text-sm font-black">Advanced Details</summary>
               <div className="mt-3 grid gap-3 md:grid-cols-3">
                 <Metric label="Scan Completed" value={String(data.summary.scanCompleted)} />
-                <Metric label="Error Code" value={data.summary.errorCode ?? 'n/a'} />
-                <Metric label="Safe Message" value={data.summary.errorMessageSafe ?? 'n/a'} />
+                <Metric label="Error Code" value={data.summary.errorCode ?? 'N/A'} />
+                <Metric label="Safe Message" value={data.summary.errorMessageSafe ?? 'N/A'} />
               </div>
             </details>
           </section>
         ) : (data?.opportunities ?? []).length === 0 ? (
           <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
             <h2 className="text-2xl font-black">No positive-value opportunities today.</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-400">No current candidate has both positive EV and positive edge. High probability and good value remain separate.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">Why: no current candidate has both positive EV and positive edge. Missing: aligned price plus policy-qualified value. What could change: market movement, fresher odds or stronger model confidence can create a new candidate.</p>
           </section>
         ) : (
           <section className="grid gap-4">
@@ -186,7 +192,7 @@ export default function BestValueTool() {
                     <h2 className="mt-3 break-words text-2xl font-black">{selectionLabel(item)}</h2>
                     <p className="mt-1 break-words text-sm text-slate-400">{item.marketLabel} | {item.matchup}</p>
                     {item.eventId ? (
-                      <a href={`/game-intelligence/${encodeURIComponent(item.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Center</a>
+                      <a href={`/game-intelligence/${encodeURIComponent(item.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Intelligence</a>
                     ) : null}
                     <p className="mt-3 text-sm font-bold text-slate-300">{item.officialDisplay}</p>
                     {item.informationalWarning ? (
@@ -197,7 +203,7 @@ export default function BestValueTool() {
                   </div>
                   <div className="grid min-w-0 grid-cols-1 gap-3 text-center sm:grid-cols-3">
                     <Metric label="EV" value={pct(item.canonicalDisplayExpectedValue ?? item.expectedValue)} color={tone(item.canonicalDisplayExpectedValue ?? item.expectedValue)} />
-                    <Metric label="Edge" value={pct(item.canonicalDisplayEdge ?? item.edge)} color={tone(item.canonicalDisplayEdge ?? item.edge)} />
+                    <Metric label="Edge" value={points(item.canonicalDisplayEdge ?? item.edge)} color={tone(item.canonicalDisplayEdge ?? item.edge)} />
                     <Metric label="Odds" value={odds(item.canonicalDisplayOdds ?? item.americanOdds)} />
                   </div>
                   <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
@@ -219,8 +225,8 @@ export default function BestValueTool() {
                     <Metric label="Board Label" value={item.boardLabel} />
                     <Metric label="Canonical Reason" value={item.canonicalDisplayReason ?? 'ALIGNED'} />
                     <Metric label="Odds Age" value={`${item.oddsAgeMinutes}m`} />
-                    <Metric label="Feature Quality" value={item.featureQuality === null ? 'n/a' : pct(item.featureQuality)} />
-                    <Metric label="Sufficiency" value={item.dataSufficiency === null ? 'n/a' : pct(item.dataSufficiency)} />
+                    <Metric label="Feature Quality" value={item.featureQuality === null ? 'N/A' : pct(item.featureQuality)} />
+                    <Metric label="Sufficiency" value={item.dataSufficiency === null ? 'N/A' : pct(item.dataSufficiency)} />
                   </div>
                   {item.explainableIntelligence ? (
                     <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm">

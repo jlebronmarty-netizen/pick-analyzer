@@ -321,8 +321,22 @@ export default function MlbGameIntelligenceDetailClient({ eventId }: DetailProps
     officialStatus,
   ].filter(Boolean)
 
-  if (error) return <main className="min-h-screen bg-slate-950 p-6 text-red-100">{error}</main>
-  if (!data) return <main className="min-h-screen bg-slate-950 p-6 text-slate-300">Loading game intelligence...</main>
+  if (error) return (
+    <main className="min-h-screen bg-slate-950 p-6 text-red-100">
+      <a href="/game-intelligence" className="inline-flex rounded-lg border border-red-400/30 px-4 py-2 text-sm font-black text-red-100 outline-none hover:bg-red-500/10 focus-visible:ring-2 focus-visible:ring-red-200">Back to Game Intelligence</a>
+      <section className="mt-5 rounded-lg border border-red-500/30 bg-red-500/10 p-5">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-red-200">Game Intelligence Unavailable</p>
+        <h1 className="mt-2 text-2xl font-black text-white">Stored detail could not be loaded.</h1>
+        <p className="mt-2 text-sm leading-6 text-red-100">Why: {error}. Missing: a readable stored game-intelligence contract for this event. What could change: a later refresh or a different game can provide linked Current Board, player and market context.</p>
+      </section>
+    </main>
+  )
+  if (!data) return (
+    <main className="min-h-screen bg-slate-950 p-6 text-slate-300">
+      <a href="/game-intelligence" className="inline-flex rounded-lg border border-slate-700 px-4 py-2 text-sm font-black text-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Back to Game Intelligence</a>
+      <p className="mt-4">Loading game intelligence...</p>
+    </main>
+  )
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-white md:px-8">

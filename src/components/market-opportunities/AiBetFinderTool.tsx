@@ -184,7 +184,7 @@ export default function AiBetFinderTool() {
                 </p>
               ) : null}
               <div className="mt-5 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <Meta label="Board" value={data.meta?.boardMode ?? 'n/a'} />
+                <Meta label="Board" value={data.meta?.boardMode ?? 'N/A'} />
                 <Meta label="Current Markets Analyzed" value={String(data.meta?.candidatesScanned ?? 0)} />
                 <Meta label="Matched" value={String(data.meta?.candidatesMatched ?? 0)} />
                 <Meta label="Official" value={data.meta?.officialPickStatus ?? 'No official picks are currently enabled.'} />

@@ -56,7 +56,7 @@ function numberValue(value: unknown, fallback = 0) {
   return Number.isFinite(number) ? number : fallback
 }
 
-function stringValue(value: unknown, fallback = 'n/a') {
+function stringValue(value: unknown, fallback = 'N/A') {
   return typeof value === 'string' && value.trim() ? value : fallback
 }
 
@@ -67,7 +67,7 @@ function stringArray(value: unknown): string[] {
 }
 
 function formatOdds(value: number | null) {
-  if (value === null) return 'n/a'
+  if (value === null) return 'N/A'
   return value > 0 ? `+${value}` : String(value)
 }
 
@@ -76,7 +76,7 @@ function pct(value: number) {
 }
 
 function time(value: string | null) {
-  if (!value) return 'n/a'
+  if (!value) return 'N/A'
   return new Date(value).toLocaleString([], {
     timeZone: 'America/Puerto_Rico',
     month: 'short',
@@ -418,7 +418,7 @@ export default function BettingWorkbenchTool() {
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <Summary label="Legs" value={ticket.length} />
-                <Summary label="Avg Conf." value={ticket.length ? pct(ticket.reduce((sum, bet) => sum + bet.confidence, 0) / ticket.length) : 'n/a'} />
+                <Summary label="Avg Conf." value={ticket.length ? pct(ticket.reduce((sum, bet) => sum + bet.confidence, 0) / ticket.length) : 'N/A'} />
               </div>
             </div>
           </section>
@@ -531,7 +531,7 @@ function BetHeader({ bet }: { bet: WorkbenchBet }) {
       <h2 className="mt-3 break-words text-2xl font-black text-white">{selectionName(bet)}</h2>
       <p className="mt-1 text-sm text-slate-400">{bet.matchup} | {time(bet.startTime)}</p>
       {bet.eventId ? (
-        <a href={`/game-intelligence/${encodeURIComponent(bet.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Center</a>
+        <a href={`/game-intelligence/${encodeURIComponent(bet.eventId)}`} className="mt-3 inline-flex rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs font-black text-sky-100 outline-none hover:bg-sky-500/20 focus-visible:ring-2 focus-visible:ring-sky-300">Open Game Intelligence</a>
       ) : null}
     </div>
   )
@@ -554,7 +554,7 @@ function BetCard({ bet, onSave, compact = false }: { bet: WorkbenchBet; onSave: 
         <Metric label="Risk" value={riskLabel(bet)} />
         <Metric label="Odds" value={formatOdds(bet.odds)} />
         <Metric label="Market" value={bet.market} />
-        <Metric label="Line" value={bet.line === null ? 'n/a' : String(bet.line)} />
+        <Metric label="Line" value={bet.line === null ? 'N/A' : String(bet.line)} />
       </div>
       {!compact ? <p className="mt-4 text-sm leading-6 text-slate-300">{modelWhy(bet)}</p> : null}
       {bet.informationalWarning ? (
