@@ -55,16 +55,78 @@ function reportDimensions(reportCard: any) {
 function userStatus(value: unknown) {
   const normalized = String(value ?? '').replaceAll('_', ' ').trim().toLowerCase()
   const labels: Record<string, string> = {
+    available: 'Available',
+    unavailable: 'Unavailable',
+    active: 'Active',
+    complete: 'Complete',
+    limited: 'Limited',
+    blocked: 'Blocked',
+    ready: 'Ready',
     'production scope': 'Production-scope sample',
     'limited sample': 'Limited sample',
     'no settled sample': 'No settled sample',
+    'no settled production predictions': 'No settled production predictions',
+    'low settled sample': 'Low settled sample',
+    'low settled production sample': 'Low settled production sample',
     'insufficient data': 'Insufficient data',
+    'insufficient sample': 'Insufficient sample',
     'brier score above target': 'Brier score is above target',
+    'calibration error above target': 'Calibration error is above target',
+    'settlement coverage below target': 'Settlement coverage is below target',
     'value above target': 'Value is above target',
+    'below target': 'Below target',
     'qualified sample': 'Qualified sample',
     'small sample': 'Small sample',
+    'higher is better': 'Higher is better',
+    'lower is better': 'Lower is better',
+    'range target': 'Range target',
+    'not started': 'Not started',
+    'separate scope': 'Separate scope',
+    improving: 'Improving',
+    declining: 'Declining',
   }
   return labels[normalized] ?? String(value ?? '').replaceAll('_', ' ')
+}
+
+const RAW_USER_MODE_CODES = new Set([
+  'AVAILABLE',
+  'UNAVAILABLE',
+  'ACTIVE',
+  'COMPLETE',
+  'LIMITED',
+  'BLOCKED',
+  'READY',
+  'PRODUCTION_SCOPE',
+  'LIMITED_SAMPLE',
+  'NO_SETTLED_SAMPLE',
+  'NO_SETTLED_PRODUCTION_PREDICTIONS',
+  'LOW_SETTLED_SAMPLE',
+  'LOW_SETTLED_PRODUCTION_SAMPLE',
+  'INSUFFICIENT_DATA',
+  'INSUFFICIENT_SAMPLE',
+  'BRIER_SCORE_ABOVE_TARGET',
+  'CALIBRATION_ERROR_ABOVE_TARGET',
+  'SETTLEMENT_COVERAGE_BELOW_TARGET',
+  'VALUE_ABOVE_TARGET',
+  'BELOW_TARGET',
+  'QUALIFIED_SAMPLE',
+  'SMALL_SAMPLE',
+  'HIGHER_IS_BETTER',
+  'LOWER_IS_BETTER',
+  'RANGE_TARGET',
+  'NOT STARTED',
+  'SEPARATE_SCOPE',
+  'IMPROVING',
+  'DECLINING',
+])
+
+function userModeValue(value: unknown): unknown {
+  if (typeof value === 'string' && RAW_USER_MODE_CODES.has(value)) return userStatus(value)
+  if (Array.isArray(value)) return value.map(userModeValue)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([key, item]) => [key, userModeValue(item)]))
+  }
+  return value
 }
 
 export async function GET(request: NextRequest) {
@@ -78,34 +140,38 @@ export async function GET(request: NextRequest) {
     const selectedMetrics = selectedReport.metrics
     const selectedTrust = product.trustScore
     const productTimeline = timelineRows(product.performanceScopeV2.timeline)
+    const publicTrustScore = userModeValue(selectedTrust)
+    const publicGoals = userModeValue(product.goals)
+    const publicMaturityPipeline = userModeValue(product.maturityPipeline)
+    const publicEngineeringAdvisor = userModeValue(product.engineeringAdvisor)
+    const publicTrustChange = userModeValue(product.trustChange)
+    const publicEvolution = userModeValue(product.evolution)
+    const publicSports = userModeValue(product.sports)
+    const publicReportCards = userModeValue(product.reportCards)
     const aiBrain = {
       ...data.aiBrain,
       selected: {
         ...data.aiBrain.selected,
         overallHealth: userStatus(selectedTrust.trustStatus),
-        internalOverallHealth: selectedTrust.trustStatus,
         sampleSize: selectedMetrics.settled,
         calibrationStatus: selectedReport.calibration.calibrationError === null ? 'Insufficient data' : 'Available',
-        internalCalibrationStatus: selectedReport.calibration.calibrationError === null ? 'INSUFFICIENT_DATA' : 'AVAILABLE',
         blockers: selectedTrust.blockers.map(userStatus),
-        internalBlockers: selectedTrust.blockers,
         readiness: {
           score: selectedTrust.trustScore,
           status: userStatus(selectedTrust.trustStatus),
-          internalStatus: selectedTrust.trustStatus,
         },
-        trustScore: selectedTrust,
+        trustScore: publicTrustScore,
       },
       dailyReportCard: {
         ...data.aiBrain.dailyReportCard,
         overallGrade: selectedReport.overallGrade,
         dimensions: reportDimensions(selectedReport),
       },
-      goals: product.goals,
-      maturityPipeline: product.maturityPipeline,
-      engineeringAdvisor: product.engineeringAdvisor,
-      trustChange: product.trustChange,
-      evolution: product.evolution,
+      goals: publicGoals,
+      maturityPipeline: publicMaturityPipeline,
+      engineeringAdvisor: publicEngineeringAdvisor,
+      trustChange: publicTrustChange,
+      evolution: publicEvolution,
       internalView: {
         ...data.aiBrain.internalView,
         brierScore: selectedMetrics.brier,
@@ -117,6 +183,18 @@ export async function GET(request: NextRequest) {
         rawDiagnostics: {
           ...data.aiBrain.internalView.rawDiagnostics,
           productScope: product.scopePolicy,
+          userModeRawCodes: {
+            selectedTrustStatus: selectedTrust.trustStatus,
+            selectedSampleQualification: selectedTrust.sampleQualification,
+            selectedBlockers: selectedTrust.blockers,
+            selectedCalibrationStatus: selectedReport.calibration.calibrationError === null ? 'INSUFFICIENT_DATA' : 'AVAILABLE',
+            goals: product.goals,
+            maturityPipeline: product.maturityPipeline,
+            engineeringAdvisor: product.engineeringAdvisor,
+            trustChange: product.trustChange,
+            evolution: product.evolution,
+            reportCards: product.reportCards,
+          },
         },
       },
     }
@@ -134,16 +212,15 @@ export async function GET(request: NextRequest) {
         settledSample: selectedMetrics.settled,
         accuracy: selectedMetrics.accuracy,
         recentTrend: userStatus(selectedTrust.trustStatus),
-        internalRecentTrend: selectedTrust.trustStatus,
         lastUpdate: product.generatedAt,
       },
       internalView: aiBrain.internalView,
       aiBrain,
-      sports: product.sports,
-      reportCards: product.reportCards,
-      goals: product.goals,
-      maturityPipeline: product.maturityPipeline,
-      engineeringAdvisor: product.engineeringAdvisor,
+      sports: publicSports,
+      reportCards: publicReportCards,
+      goals: publicGoals,
+      maturityPipeline: publicMaturityPipeline,
+      engineeringAdvisor: publicEngineeringAdvisor,
       trendAnalysis: data.trendAnalysis,
       evolutionSnapshots: {
         ...data.evolutionSnapshots,

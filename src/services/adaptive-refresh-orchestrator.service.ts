@@ -1119,20 +1119,55 @@ export async function getRecommendationChangeEvents() {
 
 function executableActionFromStatus(status: Awaited<ReturnType<typeof getAdaptiveRefreshStatus>>) {
   const nextAction = String(status.nextAction ?? 'status')
-  if (['status_refresh', 'morning_sync', 'midday_refresh', 'final_refresh', 'sync_results', 'settle', 'lock', 'replay', 'calibrate'].includes(nextAction)) {
-    return nextAction as Parameters<typeof executeOperatingDay>[0]['action']
-  }
   const dueDomains = status.refreshPlan.filter((item) => item.decision === 'DUE_NOW').map((item) => item.domain)
   if (dueDomains.includes('results')) return 'sync_results'
   if (dueDomains.includes('settlement')) return 'settle'
   if (dueDomains.includes('odds')) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('schedule')) return 'morning_sync'
+  if (['status_refresh', 'morning_sync', 'midday_refresh', 'final_refresh', 'sync_results', 'settle', 'lock', 'replay', 'calibrate'].includes(nextAction)) {
+    return nextAction as Parameters<typeof executeOperatingDay>[0]['action']
+  }
   return null
 }
 
 function providerForAction(action: Parameters<typeof executeOperatingDay>[0]['action'] | null) {
   if (action === 'status_refresh' || action === 'sync_results') return 'mlb_stats_api'
   return 'sportsdataio'
+}
+
+function executedDomainForAction(action: Parameters<typeof executeOperatingDay>[0]['action'] | null) {
+  if (action === 'status_refresh') return 'status'
+  if (action === 'sync_results') return 'results'
+  if (action === 'settle') return 'settlement'
+  if (action === 'morning_sync' || action === 'midday_refresh' || action === 'final_refresh') return 'odds'
+  return action ?? 'none'
+}
+
+function providerResultClassification({
+  action,
+  providerCheckAttempted,
+  providerCheckCompleted,
+  providerCallsMade,
+  rowsReceived,
+  rowsInserted,
+  rowsUpdated,
+  failureReason,
+}: {
+  action: Parameters<typeof executeOperatingDay>[0]['action'] | null
+  providerCheckAttempted: boolean
+  providerCheckCompleted: boolean
+  providerCallsMade: number
+  rowsReceived: number
+  rowsInserted: number
+  rowsUpdated: number
+  failureReason: string | null
+}) {
+  if (action === 'status_refresh' && providerCallsMade > 0) return 'STATUS_PROVIDER_CHECK'
+  if (!providerCheckAttempted) return 'PROVIDER_NOT_ATTEMPTED'
+  if (!providerCheckCompleted) return failureReason ? 'PROVIDER_CHECK_FAILED' : 'PROVIDER_CHECK_INCOMPLETE'
+  if (rowsReceived === 0) return 'PROVIDER_RETURNED_NO_MARKETS'
+  if (rowsInserted + rowsUpdated > 0) return 'PROVIDER_RETURNED_NEW_OR_CHANGED_MARKETS'
+  return 'PROVIDER_CHECK_COMPLETED_NO_CHANGE'
 }
 
 export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTECTED' }: { dryRun?: boolean | null; source?: string | null } = {}) {
@@ -1283,6 +1318,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
     const rowsInserted = Number(record.rowsInserted ?? providerCheck?.rowsInserted ?? 0)
     const rowsUpdated = Number(record.rowsUpdated ?? providerCheck?.rowsUpdated ?? 0)
     const rowsSkipped = Number(record.rowsSkipped ?? providerCheck?.rowsSkipped ?? 0)
+    const failureReason = String(providerCheck?.failureReason ?? record.blockingReason ?? '') || null
     const delegatedRefreshStatus = String(record.refreshStatus ?? '')
     const verifiedNoChangeStatuses = ['no_future_games', 'locked_or_started', 'unsafe_timing', 'already_current', 'not_due']
     const normalizedStatus =
@@ -1330,6 +1366,34 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
         rule: 'SUCCESS_NO_CHANGE is only allowed when no provider-backed step is due, a provider check occurred, or the existing operating-day pipeline returned an explicit terminal/no-work condition.',
       },
       providerCheck,
+      executedSteps: [
+        {
+          domain: executedDomainForAction(action),
+          action,
+          provider: providerForAction(action),
+          providerCallsMade,
+          providerCheckAttempted,
+          providerCheckCompleted,
+          providerResultClassification: providerResultClassification({
+            action,
+            providerCheckAttempted,
+            providerCheckCompleted,
+            providerCallsMade,
+            rowsReceived,
+            rowsInserted,
+            rowsUpdated,
+            failureReason,
+          }),
+          lastProviderCheckAt: providerCheck?.responseTimestamp ?? record.lastProviderCheckAt ?? null,
+          lastProviderSuccessAt: providerCheckCompleted && !failureReason ? providerCheck?.responseTimestamp ?? record.lastProviderCheckAt ?? null : null,
+          latestSourceTimestamp: providerCheck?.sourceLatestTimestamp ?? record.latestSourceTimestamp ?? null,
+          rowsReceived,
+          rowsInserted,
+          rowsUpdated,
+          rowsSkipped,
+          failureReason,
+        },
+      ],
       oddsChangesDetected,
       rowsReceived,
       rowsInserted,
