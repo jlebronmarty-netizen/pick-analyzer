@@ -16,7 +16,7 @@ The certified platform baseline locks the production architecture, canonical ope
 
 Future changes to these locked modules require documented reason, proven production defect or approved product requirement, impact analysis, focused regression tests, build pass, production smoke verification and explicit approval before deployment.
 
-Current additive phase: MLB Player Prop Market Comparison V1. Portfolio Intelligence V1 remains NOT STARTED.
+Current additive phase: MLB Player Prop Ingestion V1. Portfolio Intelligence V1 remains NOT STARTED.
 
 ## Next.js Structure
 
@@ -429,6 +429,16 @@ Runtime flow:
 6. The existing Player Projections UI adds an MLB Pitcher Outs tab without adding a duplicate navigation section.
 
 The module performs no provider calls during read rendering and preserves all platform-locked contracts.
+
+# Additive Module: MLB Player Prop Ingestion V1
+
+MLB Player Prop Ingestion V1 lives in `src/services/mlb-player-prop-sync.service.ts` with contracts in `src/types/mlb-player-prop-ingestion.ts` and the protected dry-run-first API `/api/mlb/player-props/sync`.
+
+The module is limited to pitcher recorded-outs player prop markets at 14.5, 15.5, 16.5, 17.5 and 18.5 over/under lines. It normalizes provider market keys, bookmaker names, American odds, decimal odds, implied probability, timestamps and deterministic snapshot IDs into the existing `sports_odds_snapshots` table contract. No new prop storage table is introduced.
+
+The live provider gate fails closed. SportsDataIO MLB player props are cataloged as enterprise `/v3/mlb/odds/json/BettingPlayerPropsByGameID/{gameId}` and are not confirmed for the current Discovery Lab channel. The Odds API documents MLB `pitcher_outs`, but Business-tier entitlement and event ID crosswalk are not proven in the runtime. Until those gates are satisfied, sync runs as dry-run/provider-audit only and reports zero provider calls, zero remote mutations and zero persisted rows.
+
+No scheduler ownership changed. Future live ingestion must be invoked through the existing operating-day/adaptive-refresh ownership path after provider entitlement, event identity, sportsbook coverage and budget gates are approved.
 
 Additive starter integration:
 

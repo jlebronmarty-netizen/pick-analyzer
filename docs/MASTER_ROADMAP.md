@@ -36,11 +36,19 @@ Note: Portfolio Intelligence V1 remains NOT STARTED. MLB Player Prop Market Comp
 
 ### MLB Player Prop Market Comparison V1
 
-Status: Implemented locally; push and production certification pending approval.
+Status: Complete and production-certified at commit `26d5e6dda95f3ff8ffe95c01a76714898b7bf86c`.
 
 Evidence: `src/types/mlb-player-prop-comparison.ts`, `src/services/mlb-player-prop-comparison.service.ts`, `/api/mlb/player-props`, `/api/mlb/player-props/health`, `/api/mlb/player-props/validation`, `/api/mlb/player-props/[pitcherId]`, `/api/mlb/player-props/preview`, `/api/mlb/player-props/generate`, `src/components/dashboard/MlbPlayerProjectionPageClient.tsx`, `docs/MLB_PLAYER_PROP_MARKET_COMPARISON_V1.md`.
 
 Note: V1 supports pitcher recorded-outs market comparison only for 14.5, 15.5, 16.5, 17.5 and 18.5 over/under lines. It computes implied probability, fair odds and percentage-point difference from stored `sports_odds_snapshots` player-prop rows. Current live audit found 0 stored MLB `player_props:%` rows, so comparisons return `NO_PROP_AVAILABLE` without fabricating sportsbooks, lines or prices. No provider calls, remote mutations, projection formula changes, EV, Kelly, Official Picks, settlement changes, scheduler changes or Portfolio Intelligence were introduced.
+
+### MLB Player Prop Ingestion V1
+
+Status: Locally implemented as fail-closed ingestion pipeline; live provider persistence blocked by provider contract/tier proof.
+
+Evidence: `src/types/mlb-player-prop-ingestion.ts`, `src/services/mlb-player-prop-sync.service.ts`, `/api/mlb/player-props/sync`, `/api/mlb/player-props/health`, `/api/mlb/player-props/validation`, `/api/mlb/player-props/provider-audit`, `docs/MLB_PLAYER_PROP_INGESTION_V1.md`.
+
+Note: V1 adds provider audit, canonical snapshot contracts, Odds API `pitcher_outs` normalization fixtures, storage shaping for existing `sports_odds_snapshots`, health, validation and protected dry-run sync. SportsDataIO MLB player props remain enterprise-only and unconfirmed for the current Discovery Lab channel. The Odds API documents MLB `pitcher_outs`, but Business-tier entitlement and event ID crosswalk are not proven. Live sync returns `BLOCKED_PROVIDER_CONTRACT_UNAVAILABLE`; no EV, Kelly, Official Pick, settlement, scheduler or Portfolio Intelligence behavior was added.
 
 ### Production UX Polish V1
 

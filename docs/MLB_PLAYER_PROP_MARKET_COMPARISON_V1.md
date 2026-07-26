@@ -1,6 +1,6 @@
 # MLB Player Prop Market Comparison V1
 
-Status: IMPLEMENTED LOCALLY - NOT PUSHED
+Status: PRODUCTION CERTIFIED AT `26d5e6dda95f3ff8ffe95c01a76714898b7bf86c`
 
 MLB Player Prop Market Comparison V1 compares the completed MLB Pitcher Projection Engine output against stored sportsbook player prop markets. It does not improve projections, create recommendations, create Official Picks, calculate EV, calculate Kelly or start Portfolio Intelligence.
 
@@ -103,3 +103,11 @@ Fixture validation covers:
 - Zero provider calls and zero remote mutations
 
 Current live validation is expected to report `NO_PROP_AVAILABLE` comparisons until a licensed player-prop odds feed stores recorded-outs lines.
+
+## Ingestion Dependency
+
+MLB Player Prop Ingestion V1 adds the fail-closed provider, normalization, storage, health and validation layer in `src/services/mlb-player-prop-sync.service.ts`.
+
+Comparison V1 remains read-only. It consumes only stored `sports_odds_snapshots` rows and does not call providers directly.
+
+Current ingestion status is blocked for live persistence because SportsDataIO MLB player props are not confirmed for the active Discovery Lab channel and The Odds API Business-tier entitlement plus event ID crosswalk are not proven.

@@ -1,6 +1,16 @@
 # Project Status
 
-Last updated: 2026-07-26 16:30:00Z
+Last updated: 2026-07-26 18:30:00Z
+
+## 2026-07-26 MLB Player Prop Ingestion V1
+
+- Added a fail-closed MLB player prop ingestion contract for pitcher recorded-outs markets only: over/under 14.5, 15.5, 16.5, 17.5 and 18.5.
+- Added `src/types/mlb-player-prop-ingestion.ts`, `src/services/mlb-player-prop-sync.service.ts` and protected dry-run-first `POST /api/mlb/player-props/sync`.
+- Extended `/api/mlb/player-props/health`, `/api/mlb/player-props/validation` and `/api/mlb/player-props/provider-audit` with ingestion health, deterministic fixture validation and provider audit data.
+- Reused `sports_odds_snapshots`; no migration was required. Player prop fields are stored in metadata under the existing odds snapshot row contract when live persistence becomes legally and operationally available.
+- Provider audit found SportsDataIO MLB player props are enterprise-only in the repository catalog and not confirmed for the current Discovery Lab channel. The Odds API documents MLB `pitcher_outs`, but Business-tier entitlement and event ID crosswalk are not proven in the current runtime.
+- Live provider ingestion is therefore blocked with `BLOCKED_PROVIDER_CONTRACT_UNAVAILABLE`. Dry-run validation makes 0 provider calls and 0 remote mutations.
+- Player Prop EV V2 and Portfolio Intelligence remain NOT STARTED.
 
 ## 2026-07-26 MLB Player Prop Market Comparison V1
 
@@ -9,7 +19,7 @@ Last updated: 2026-07-26 16:30:00Z
 - Extended the existing Player Projections Pitcher Outs tab with a Sportsbook Comparison panel showing sportsbook, line, price, implied probability, model probability, difference, fair odds and status when stored markets exist.
 - Current production data audit found zero stored MLB `player_props:%` rows in `sports_odds_snapshots`, so live comparisons honestly return `NO_PROP_AVAILABLE` and render no-current-line empty states.
 - The module makes 0 provider calls, performs 0 remote mutations, creates no migration and does not change pitcher projection formulas, prediction logic, Current Board, Most Likely, Best Value, Official Pick policy, settlement, scheduler, Learning Brain or Dashboard contracts.
-- Portfolio Intelligence V1 remains NOT STARTED.
+- Production deployment was certified at commit `26d5e6dda95f3ff8ffe95c01a76714898b7bf86c`. Portfolio Intelligence V1 remains NOT STARTED.
 
 ## 2026-07-26 Platform Baseline Certified
 
@@ -45,7 +55,7 @@ Completed certified phases:
 - Performance product contract
 - Platform certification
 
-Current additive phase: MLB Player Prop Market Comparison V1.
+Current additive phase: MLB Player Prop Ingestion V1.
 
 Portfolio Intelligence V1 status: NOT STARTED.
 

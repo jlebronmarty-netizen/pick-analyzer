@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-26 - Add Fail-Closed MLB Player Prop Ingestion Contract
+
+Context: Player Prop Market Comparison V1 is production-certified, but production `sports_odds_snapshots` currently has zero recorded-outs prop rows. SportsDataIO MLB player props are cataloged as enterprise-only and not confirmed for the active Discovery Lab channel. The Odds API documents MLB `pitcher_outs`, but Business-tier entitlement and event ID crosswalk are not proven in this runtime.
+
+Decision: Add MLB Player Prop Ingestion V1 as a provider-audit, normalization, storage-shaping, health, validation and protected dry-run sync layer for pitcher recorded-outs markets only.
+
+Consequences: The new sync path fails closed with `BLOCKED_PROVIDER_CONTRACT_UNAVAILABLE` for live persistence and makes zero provider calls and zero remote mutations in dry-run validation. It reuses `sports_odds_snapshots`, emits no recommendation, EV, Kelly, Official Pick, settlement, scheduler, Current Board, Best Value, Most Likely, Learning Brain or Portfolio Intelligence behavior, and does not fabricate sportsbook lines.
+
+Affected modules: `src/types/mlb-player-prop-ingestion.ts`, `src/services/mlb-player-prop-sync.service.ts`, `/api/mlb/player-props/sync`, `/api/mlb/player-props/health`, `/api/mlb/player-props/validation`, `/api/mlb/player-props/provider-audit`, `docs/MLB_PLAYER_PROP_INGESTION_V1.md`.
+
 ## 2026-07-26 - Add MLB Player Prop Market Comparison Without Recommendations
 
 Context: MLB Pitcher Projection Engine V1 now produces grounded pitcher recorded-outs projections, distributions and threshold probabilities. The next approved task is to compare those model probabilities with real sportsbook player-prop markets when stored market rows exist, without improving projections or creating betting recommendations.
