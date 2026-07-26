@@ -28,6 +28,8 @@ type GameResultRow = {
 type SettlementResult = {
   checked: number
   settled: number
+  wouldSettle?: number
+  dryRun?: boolean
   wins: number
   losses: number
   pushes: number
@@ -137,10 +139,13 @@ function findResultForPrediction(
   }
 }
 
-export async function settlePredictions(): Promise<SettlementResult> {
+export async function settlePredictions(options: { dryRun?: boolean } = {}): Promise<SettlementResult> {
+  const dryRun = options.dryRun === true
   const summary: SettlementResult = {
     checked: 0,
     settled: 0,
+    wouldSettle: dryRun ? 0 : undefined,
+    dryRun,
     wins: 0,
     losses: 0,
     pushes: 0,
@@ -239,6 +244,16 @@ export async function settlePredictions(): Promise<SettlementResult> {
 
     const stake = prediction.stake ?? 100
     const profit = calculateProfit(prediction.odds, stake, status)
+
+    if (dryRun) {
+      summary.wouldSettle = (summary.wouldSettle ?? 0) + 1
+      if (matchType === 'game_id') summary.matchedByGameId += 1
+      if (matchType === 'team_date') summary.matchedByTeamsAndDate += 1
+      if (status === 'win') summary.wins += 1
+      if (status === 'loss') summary.losses += 1
+      if (status === 'push') summary.pushes += 1
+      continue
+    }
 
     const { error: updateError } = await supabase
       .from('prediction_history')
