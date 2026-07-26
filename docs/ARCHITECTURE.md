@@ -22,6 +22,10 @@ Current additive phase: Historical Sports Data Foundation V2 and Prediction Epoc
 
 Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as a machine-readable phase ledger. The ledger records phase status, commits, build and validation results, provider calls, mutation counts, migrations and continuation decisions so an interrupted run can resume without relying on chat memory. This governance layer is local-only and does not authorize production SQL, production mutations, deployment, historical odds, prediction deletion or production epoch activation.
 
+## Data Foundation Coverage Audit V2
+
+`src/services/data-foundation-coverage.service.ts` and `/api/data-foundation/coverage` provide a read-only stored-data inventory across MLB, NBA, NFL, NHL, Soccer, BSN, Tennis and UFC. The service queries existing canonical tables defensively, reports row counts, date bounds, source providers, duplicate indicators, stale records, missing required fields, import readiness and prediction readiness, and always reports `providerCallsMade=0` and `remoteMutationsMade=0`. Empty sports and unsupported domains are represented as readiness findings rather than fabricated coverage.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

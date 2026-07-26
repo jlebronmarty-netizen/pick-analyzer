@@ -8,6 +8,14 @@ Decision: Add `docs/AUTONOMOUS_EXECUTION_V2.md` and `docs/autonomous-execution-v
 
 Consequences: The run can resume after interruption from repository files instead of chat memory. The ledger records that Phase 0 has zero provider calls, zero remote mutations and no migrations. A phase commit cannot contain its own final hash without changing that hash, so self hashes are recorded as `pending_self_reference` and resolved by subsequent ledger updates/final reporting.
 
+## 2026-07-26 - Add Stored-Data Sports Coverage Audit V2
+
+Context: The historical foundation run needs a cross-sport baseline before adding governance, warehouse, ingestion or epoch contracts. The audit must not spend provider quota or mutate production data.
+
+Decision: Add `src/services/data-foundation-coverage.service.ts` and `/api/data-foundation/coverage` as a defensive read-only inventory over existing canonical and operational tables. The API supports `?validate=true` fixtures and normal GET audit mode with `providerCallsMade=0` and `remoteMutationsMade=0`.
+
+Consequences: MLB and NBA have high stored-data coverage, BSN is partially ready for prediction, and NFL/NHL/Soccer/Tennis/UFC remain blocked or empty without pretending coverage exists. The audit distinguishes soccer competition-specific coverage and Tennis/UFC event-driven structures instead of forcing a global team-season model.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.
