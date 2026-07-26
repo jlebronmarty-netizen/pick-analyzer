@@ -30,6 +30,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/data-foundation-season-governance.service.ts` and `/api/data-foundation/seasons` define read-only season and competition governance for registered sports. The contract distinguishes MLB/BSN calendar-year seasons, NBA/NHL cross-year seasons, NFL kickoff-year seasons with cross-calendar postseason, competition-specific Soccer, and event-driven Tennis/UFC. It is a code-level governance contract for this run and does not require production SQL or epoch activation.
 
+## Sports Data Warehouse Contract V2
+
+`docs/SPORTS_DATA_WAREHOUSE_V2.md` maps existing persistence into warehouse layers: provider raw/staging, canonical entities, canonical events/results, statistics and boxscores, market data, feature store, prediction and settlement, and audit/provenance. The contract requires provider identity, canonical identity, source/ingestion/effective timestamps, deterministic keys, data version, confidence, completeness, lineage, validation state and correction state. It intentionally reuses existing tables and metadata rather than creating a competing warehouse.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

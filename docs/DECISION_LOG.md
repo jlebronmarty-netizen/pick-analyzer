@@ -24,6 +24,14 @@ Decision: Add `src/services/data-foundation-season-governance.service.ts` and `/
 
 Consequences: Later phases can reference consistent season and competition semantics without applying production SQL. Future persistence of season governance remains migration-ready, not required for local continuation.
 
+## 2026-07-26 - Define Sports Data Warehouse Contract V2
+
+Context: Historical foundation work needs a shared warehouse model for raw provider evidence, canonical entities, events/results, stats, market data, features, predictions, settlements and provenance. Creating duplicate tables would risk drift from the already-certified architecture.
+
+Decision: Add `docs/SPORTS_DATA_WAREHOUSE_V2.md` as a contract mapping existing tables into warehouse layers and defining required lineage fields, deterministic key policy, validation states and correction states.
+
+Consequences: Later phases can build ingestion, quality, feature rebuild and epoch contracts against a single warehouse vocabulary. No migration, provider call, production mutation or storage duplication was introduced.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

@@ -26,6 +26,8 @@ Phase 1 coverage audit is locally implemented at `/api/data-foundation/coverage`
 
 Phase 2 season and competition governance is locally implemented at `/api/data-foundation/seasons`. It defines calendar-year MLB/BSN, cross-year NBA/NHL, NFL season-year with cross-calendar postseason, competition-specific Soccer and event-driven Tennis/UFC without requiring production SQL.
 
+Phase 3 sports data warehouse contract is locally documented in `docs/SPORTS_DATA_WAREHOUSE_V2.md`. It maps existing storage into canonical warehouse layers and defines lineage, deterministic key, validation-state and correction-state rules without adding duplicate tables.
+
 ## Completed
 
 ### Platform Certification

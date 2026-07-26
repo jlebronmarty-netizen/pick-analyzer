@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-26T23:45:00Z"
+    "updatedAt": "2026-07-26T23:55:00Z"
   },
   "phases": [
     {
@@ -87,7 +87,7 @@
       "status": "completed",
       "startedAt": "2026-07-26T23:35:00Z",
       "completedAt": "2026-07-26T23:45:00Z",
-      "commit": "pending_self_reference",
+      "commit": "99d0ac1e21c0f7d2ff3908527fb363d60c2511ba",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -116,6 +116,35 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_3"
+    },
+    {
+      "phaseId": 3,
+      "phaseName": "SPORTS_DATA_WAREHOUSE_CONTRACT_V2",
+      "status": "completed",
+      "startedAt": "2026-07-26T23:45:00Z",
+      "completedAt": "2026-07-26T23:55:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "warehouse_layers_defined",
+          "lineage_fields_defined",
+          "deterministic_key_policy_defined",
+          "validation_states_defined",
+          "correction_states_defined",
+          "no_duplicate_tables_created"
+        ]
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_4"
     }
   ],
   "certificationMarkers": [
@@ -123,6 +152,8 @@
     "SPORTS_DATA_COVERAGE_AUDIT_V2_PASS",
     "NO_PROVIDER_CALL_AUDIT_PASS",
     "SEASON_GOVERNANCE_V2_PASS",
-    "COMPETITION_GOVERNANCE_V2_PASS"
+    "COMPETITION_GOVERNANCE_V2_PASS",
+    "SPORTS_DATA_WAREHOUSE_CONTRACT_V2_PASS",
+    "DATA_LINEAGE_CONTRACT_PASS"
   ]
 }

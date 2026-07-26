@@ -10,6 +10,7 @@ Last updated: 2026-07-26 23:20:00Z
 - Phase 1 validation audited MLB, NBA, NFL, NHL, Soccer, BSN, Tennis and UFC with 0 provider calls and 0 remote mutations. MLB and NBA show ready coverage, BSN shows partial prediction readiness, and NFL/NHL/Soccer/Tennis/UFC remain honest blocked or empty coverage states.
 - Phase 2 added Season and Competition Governance V2 through `src/services/data-foundation-season-governance.service.ts` and `/api/data-foundation/seasons`.
 - Phase 2 validation passed 8/8 fixture checks and governs 9 competitions: MLB, NBA, NFL, NHL, BSN, Soccer generic, ATP, WTA and UFC. Soccer remains competition-specific; Tennis and UFC remain event-driven.
+- Phase 3 added `docs/SPORTS_DATA_WAREHOUSE_V2.md`, mapping existing tables into provider staging, canonical entity, event/result, statistics, market, feature, prediction/settlement and audit/provenance layers without creating duplicate storage.
 - Push, production deployment, production SQL, production data mutation, historical odds, scheduled player-prop ingestion, Player Prop EV V2 and Portfolio Intelligence remain disallowed for this run.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1
