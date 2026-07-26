@@ -63,6 +63,7 @@ const productNavGroups = [
   {
     label: 'AI Operations',
     items: [
+      { href: '/probability-picks', label: 'Probability Picks', icon: 'PR' },
       { href: '/ai-operations', label: 'AI Operations', icon: 'AO' },
       { href: '/mlb-operations', label: 'MLB Operations', icon: 'MO' },
     ],

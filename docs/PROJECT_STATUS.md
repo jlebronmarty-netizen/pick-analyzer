@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-26 18:30:00Z
 
+## 2026-07-26 Probability Picks & Parlay Builder V1
+
+- Added a projection-only Probability Picks workspace under `/probability-picks` and AI Operations navigation.
+- Added `src/types/probability-picks.ts`, `src/services/probability-picks.service.ts` and APIs at `/api/probability-picks`, `/parlays`, `/validation`, `/preview` and `/generate`.
+- V1 supports Moneyline, Run Line, Totals and Pitcher Outs using stored model probability rows plus the existing MLB Pitcher Projection Engine threshold projections.
+- Parlay generation supports 2-5 legs, Conservative/Balanced/Aggressive modes, MLB Only/Multi-Sport scopes and a correlation penalty for same-event, shared-group, moneyline/run-line, pitcher/team and pitcher/total dependencies.
+- The module does not read or display sportsbook lines, does not compute EV, Kelly, stake, bankroll, Official Picks or portfolio outputs, makes 0 provider calls, performs 0 remote mutations and adds no migration.
+- Current Board, Most Likely, Best Value, Player Prop Market Comparison, Player Prop Ingestion, pitcher projection formulas, settlement, scheduler and Learning Brain remain unchanged. Player Prop EV V2 and Portfolio Intelligence remain NOT STARTED.
+
 ## 2026-07-26 MLB Player Prop Ingestion V1
 
 - Added a fail-closed MLB player prop ingestion contract for pitcher recorded-outs markets only: over/under 14.5, 15.5, 16.5, 17.5 and 18.5.

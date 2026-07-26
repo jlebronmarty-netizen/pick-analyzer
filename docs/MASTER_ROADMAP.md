@@ -34,6 +34,14 @@ Status: NOT STARTED.
 
 Note: Portfolio Intelligence V1 remains NOT STARTED. MLB Player Prop Market Comparison V1 is a separate model-vs-market comparison layer and does not create portfolio construction, bankroll, staking, Kelly or Official Pick behavior.
 
+### Probability Picks & Parlay Builder V1
+
+Status: Locally implemented; production deployment pending approval.
+
+Evidence: `src/types/probability-picks.ts`, `src/services/probability-picks.service.ts`, `/api/probability-picks`, `/api/probability-picks/parlays`, `/api/probability-picks/validation`, `/api/probability-picks/preview`, `/api/probability-picks/generate`, `/probability-picks`, `docs/PROBABILITY_PICKS_V1.md`.
+
+Note: V1 ranks internal model probabilities and builds correlation-aware projection parlays only. It reads no sportsbook lines, computes no EV, Kelly, stakes, bankroll, Official Picks or portfolio outputs, performs no provider calls, performs no remote mutations and adds no persistence migration. Portfolio Intelligence remains NOT STARTED.
+
 ### MLB Player Prop Market Comparison V1
 
 Status: Complete and production-certified at commit `26d5e6dda95f3ff8ffe95c01a76714898b7bf86c`.

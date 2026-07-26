@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-26 - Add Projection-Only Probability Picks And Parlays
+
+Context: Operators need a separate AI surface for high-probability model projections and correlation-aware parlays without touching Current Board, Most Likely, Best Value, Official Picks, EV, Kelly, sportsbook market comparison or portfolio construction.
+
+Decision: Add Probability Picks & Parlay Builder V1 as an additive projection-only module. It reads stored model probability rows using a no-price column selection, reuses the existing MLB Pitcher Projection Engine for pitcher-outs thresholds, scores picks by model probability/confidence/quality/freshness/completeness/starter certainty and builds parlays with explicit correlation penalties.
+
+Consequences: `/probability-picks` and `/api/probability-picks*` can show Probability Only cards and 2-5 leg projection parlays with no sportsbook lines, no provider calls, no remote mutations, no persistence migration, no EV, no Kelly, no staking, no Official Picks and no Portfolio Intelligence. Current Board, Most Likely, Best Value, Player Prop Market Comparison, Player Prop Ingestion, settlement, scheduler and Learning Brain remain unchanged.
+
+Affected modules: `src/types/probability-picks.ts`, `src/services/probability-picks.service.ts`, `/api/probability-picks*`, `/probability-picks`, `docs/PROBABILITY_PICKS_V1.md`.
+
 ## 2026-07-26 - Add Fail-Closed MLB Player Prop Ingestion Contract
 
 Context: Player Prop Market Comparison V1 is production-certified, but production `sports_odds_snapshots` currently has zero recorded-outs prop rows. SportsDataIO MLB player props are cataloged as enterprise-only and not confirmed for the active Discovery Lab channel. The Odds API documents MLB `pitcher_outs`, but Business-tier entitlement and event ID crosswalk are not proven in this runtime.
