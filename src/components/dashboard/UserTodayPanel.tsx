@@ -22,6 +22,26 @@ type TodayResponse = {
   currentGames: number
   upcomingGames: number
   finalGames: number
+  settlementSummary?: {
+    finalGames: number
+    settlementEligibleGames: number
+    settlementPendingGames: number
+    settledGames: number
+    unresolvedFinalGames: number
+    settlementBlockedGames: number
+  }
+  groundedOpportunitySummary?: {
+    predictionRows: number
+    groundedRows: number
+    pricedGroundedRows: number
+    expiredGroundedRows: number
+    currentBoardEligible: number
+    officialPicks: number
+    actionableOpportunities: number
+    informationalOpportunities: number
+    unexplainedDroppedRows: number
+    reasonCounts: Record<string, number>
+  }
   lifecycleCounts?: {
     totalScheduledToday: number
     upcoming: number
@@ -86,6 +106,7 @@ type TodayResponse = {
     officialPicks?: { status: string; data: OfficialPick[]; reason: string | null }
     aiPicksFeed?: { status: string; data: AiPicksFeed | null; reason: string | null }
     mostLikely?: { status: string; data: IntelligenceRow[]; reason: string | null }
+    groundedOpportunities?: { status: string; data: IntelligenceRow[]; reason: string | null }
     bestValue?: { status: string; data: IntelligenceRow[]; reason: string | null }
     aiBetFinder?: { status: string; data: IntelligenceRow[]; reason: string | null }
     modelIntelligence?: { status: string; data: any; reason: string | null }
@@ -832,6 +853,26 @@ function CategoryCard({ title, value, tone, icon, href, status, tooltip }: { tit
 function fieldValue(value: unknown, fallback = 'Pending') {
   const text = String(value ?? '').trim()
   const normalized = text.toLowerCase().replaceAll('_', ' ')
+  const reasonLabels: Record<string, string> = {
+    'no eligible candidate': 'No eligible outcome',
+    'no current player projections': 'Player intelligence unavailable',
+    'no positive ev': 'No positive-value market',
+    'no aligned market': 'No aligned market price',
+    'event already started': 'Pregame betting window closed',
+    'event started': 'Pregame betting window closed',
+    'event final': 'Game completed',
+    'production scope': 'Production-scope sample',
+    'no settled sample': 'No settled sample',
+    'insufficient data': 'Insufficient data',
+    'price expired': 'Pregame market expired',
+    'grounded informational': 'Grounded informational',
+    'grounded actionable': 'Grounded actionable',
+    'no stored odds': 'No stored odds',
+    'betting locked': 'Pregame markets closed',
+    'expired pregame price': 'Pregame market expired',
+    'active pregame price': 'Active pregame price',
+  }
+  if (reasonLabels[normalized]) return reasonLabels[normalized]
   if (!text) return fallback === 'Pending' ? 'Awaiting update' : fallback
   if (normalized === 'no opposite price') return 'No aligned market price'
   if (normalized === 'no aligned price' || normalized === 'market mismatch') return 'No aligned market'
@@ -1400,6 +1441,12 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
   const traceCounts = pipelineToday?.counts
   const learning = data.viewModel?.selectors.learningSummary
   const schedulerCoverage = pipelineToday?.schedulerCoverage
+  const settlementPending = Number(data.settlementSummary?.settlementPendingGames ?? data.finalGames ?? 0)
+  const settlementText = settlementPending === 1
+    ? '1 completed game is waiting for settlement.'
+    : settlementPending > 1
+      ? `${settlementPending} completed games are waiting for settlement.`
+      : 'No eligible final games are pending settlement.'
   const displayCoverage = data.schedulerCoverage?.nextPregameSlateDate
     ? {
         coverage: data.schedulerCoverage.nextPregameCoveragePct,
@@ -1418,7 +1465,7 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
     ['Predictions', traceCounts ? { status: traceCounts.predictionsGenerated ? 'Complete' : 'Waiting', detail: traceCounts.predictionsGenerated ? `${traceCounts.predictionsGenerated} stored prediction rows found; ${traceCounts.predictionsValidPregame ?? traceCounts.predictionsGenerated} valid pregame and ${traceCounts.predictionsExcludedAfterCutoff ?? 0} excluded after cutoff.` : 'Waiting for eligible pregame prediction rows.' } : byId.get('predictions') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? `${data.predictionCandidates} candidates available.` : 'No stored odds or eligible pregame inputs yet.' }],
     ['Current Board', traceCounts ? { status: traceCounts.currentBoardCandidates ? 'Complete' : 'Waiting', detail: traceCounts.currentBoardCandidates ? `${traceCounts.currentBoardCandidates} candidates are visible after board gates.` : 'Stored predictions exist, but no candidate passed Current Board gates.' } : byId.get('current_board') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? 'Candidates are available.' : 'Waiting.' }],
     ['Official Picks', traceCounts ? { status: traceCounts.officialPicks ? 'Complete' : 'Waiting', detail: traceCounts.officialPicks ? `${traceCounts.officialPicks} Official Picks passed policy.` : 'No stored candidate passed Official Pick policy gates.' } : byId.get('recommendations') ?? { status: counts.official ? 'Complete' : 'Waiting', detail: counts.official ? 'Official picks passed policy.' : 'Waiting for prediction and market comparison.' }],
-    ['Settlement', traceCounts ? { status: traceCounts.productionPredictionsSettled ? 'Complete' : traceCounts.gamesCompleted ? 'Waiting' : 'Not due', detail: traceCounts.productionPredictionsSettled ? `${traceCounts.productionPredictionsSettled} production predictions settled.` : traceCounts.gamesCompleted ? `${traceCounts.gamesCompleted} completed games are waiting for eligible production settlement evidence.` : 'No completed games require settlement yet.' } : byId.get('settlement') ?? { status: data.finalGames ? 'Waiting' : 'Complete', detail: data.finalGames ? 'Final games are ready for stored settlement checks.' : 'Healthy.' }],
+    ['Settlement', { status: settlementPending ? 'Waiting' : data.finalGames ? 'Complete' : 'Not due', detail: settlementText }],
     ['Learning', learning ? { status: learning.labelsCreatedToday || learning.labelsPending ? 'Complete' : 'Not due', detail: `${learning.message} Updates applied: ${learning.updatesApplied}; auto-promotions: ${learning.autoPromotions}.` } : traceCounts ? { status: traceCounts.learningSamplesQueued ? 'Complete' : 'Not due', detail: traceCounts.learningSamplesQueued ? `${traceCounts.learningSamplesQueued} learning labels queued; ${traceCounts.learningSamplesAccepted} accepted and ${traceCounts.learningSamplesRejected} rejected by evidence checks.` : 'Ready when settled production labels exist; no auto-promotion.' } : byId.get('learning') ?? { status: 'Not due', detail: 'Ready when settled production labels exist; no auto-promotion.' }],
   ]
   return (
@@ -1570,6 +1617,7 @@ function AIConfidenceCard({ opportunity }: { opportunity: TopOpportunity | null 
     ...(optionalEvidence?.blockers ?? []),
     ...(optionalEvidence?.missingData ?? []),
   ].slice(0, 3)
+  const emptyBlockers = ['No eligible outcome', 'No active aligned market price', 'Pregame betting window closed']
   const quality = confidence === null ? 'Unavailable' : confidence >= 70 ? 'Strong' : confidence >= 50 ? 'Moderate' : 'Limited'
   return (
     <section className={`max-w-[calc(100vw-2rem)] rounded-lg border border-slate-800 bg-slate-900/80 p-4 sm:max-w-none sm:p-6 ${cardMotion}`}>
@@ -1608,7 +1656,7 @@ function AIConfidenceCard({ opportunity }: { opportunity: TopOpportunity | null 
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
           <p className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Main Blockers</p>
           <div className="mt-3 space-y-2 text-sm text-slate-300">
-            {blockers.length ? blockers.map((item) => <p key={item}>{fieldValue(item)}</p>) : <p>No current blocker is attached to this signal.</p>}
+            {(blockers.length ? blockers : emptyBlockers).map((item) => <p key={item}>{fieldValue(item)}</p>)}
           </div>
         </div>
       </div>
@@ -1632,7 +1680,14 @@ function gameCategory(game: Record<string, any>) {
   const bettingEligibility = String(game.bettingEligibility ?? '').toUpperCase()
   const hasMarket = hasDisplayMarket(game)
   const operational = String(game.operationalStatus ?? '').toUpperCase()
+  const availability = String(game.marketAvailability ?? '').toUpperCase()
   const storedOddsCount = Number(game.storedOddsCount ?? 0)
+  if (availability === 'BETTING_LOCKED') return storedOddsCount > 0 ? 'Pregame Markets Closed' : 'Betting Locked'
+  if (availability === 'EXPIRED_PREGAME_PRICE') return 'Pregame Market Expired'
+  if (availability === 'STALE_PREGAME_PRICE') return 'Data Aging'
+  if (availability === 'NO_ALIGNED_PRICE') return 'No Aligned Price'
+  if (availability === 'NO_STORED_ODDS') return 'No Stored Odds'
+  if (availability === 'ACTIVE_PREGAME_PRICE') return 'Fresh Market'
   if (operational === 'FRESH_MARKET' || operational === 'PARTIAL_MARKET_COVERAGE') return 'Fresh Market'
   if (operational === 'AGING_MARKET') return 'Data Aging'
   if (operational === 'STALE_MARKET') return 'Data Aging'
@@ -1676,6 +1731,8 @@ function GameCard({ game }: { game: Record<string, any> }) {
   const storedOddsCount = Number(game.storedOddsCount ?? 0)
   const marketUnavailableText = isFinal
     ? fieldValue(game.settlementState?.label, 'Awaiting Settlement')
+    : String(game.marketAvailability ?? '').toUpperCase() === 'BETTING_LOCKED' && storedOddsCount > 0
+      ? 'Pregame markets closed'
     : storedOddsCount > 0
       ? fieldValue(game.operationalStatus, 'No aligned displayable market')
       : 'No stored odds'
@@ -1722,7 +1779,7 @@ function GameCard({ game }: { game: Record<string, any> }) {
               : !hasMarket && game.oddsPresent === false && storedOddsCount === 0
               ? 'No stored sportsbook odds are attached yet.'
               : game.bettingEligibility === 'LOCKED_AFTER_START' || game.bettingEligibility === 'STATUS_UNCONFIRMED'
-                ? fieldValue(game.statusReason, 'Awaiting provider confirmation. Betting is locked until game status is verified.')
+                ? (storedOddsCount > 0 ? 'Stored pregame odds exist, but the betting window is closed for this game.' : fieldValue(game.statusReason, 'Awaiting provider confirmation. Betting is locked until game status is verified.'))
               : game.bettingEligibility === 'DATA_AGING' || game.bettingEligibility === 'STALE'
                 ? 'Status awaiting refresh. Betting analysis remains gated until market and provider state are current.'
               : game.eligibility === 'LOCKED'
@@ -1781,7 +1838,10 @@ function ProgressPipeline({ data }: { data: TodayResponse }) {
 }
 
 function HealthCard({ data }: { data: TodayResponse }) {
-  const status = data.gamesWaitingForOdds > 0
+  const settlementPending = Number(data.settlementSummary?.settlementPendingGames ?? 0)
+  const status = settlementPending > 0
+    ? 'Settlement Pending'
+    : data.gamesWaitingForOdds > 0
       ? 'No Stored Odds'
     : data.freshness === 'stale'
       ? 'Data Aging'
@@ -1790,8 +1850,10 @@ function HealthCard({ data }: { data: TodayResponse }) {
         : data.success
           ? 'Healthy'
           : 'Operational Blocker'
-  const tone = status === 'Healthy' ? 'green' : status === 'Operational Blocker' ? 'red' : status === 'No Stored Odds' ? 'yellow' : 'blue'
-  const detail = status === 'No Stored Odds'
+  const tone = status === 'Healthy' ? 'green' : status === 'Operational Blocker' ? 'red' : status === 'No Stored Odds' || status === 'Settlement Pending' ? 'yellow' : 'blue'
+  const detail = status === 'Settlement Pending'
+    ? `${settlementPending} completed game${settlementPending === 1 ? ' is' : 's are'} waiting for settlement.`
+    : status === 'No Stored Odds'
     ? 'No stored market price is attached for at least one game; recommendations remain non-actionable there.'
     : status === 'Data Aging'
       ? simpleAction(data.nextAction)
@@ -1857,6 +1919,7 @@ function DailyBriefing({
   const starterReady = games.filter((game) => Boolean(game.playerIntelligenceAvailable || game.starterContext || game.pitcherContext)).length
   const lineupReady = games.filter((game) => Boolean(game.expectedLineups || game.lineupContext || game.playerIntelligenceAvailable)).length
   const playerReady = games.filter((game) => Boolean(game.playerIntelligenceAvailable)).length
+  const settlementPending = Number(data.settlementSummary?.settlementPendingGames ?? 0)
   const cards = [
     ['Games Today', coverage?.gamesToday ?? data.lifecycleCounts?.totalScheduledToday ?? data.currentGames ?? games.length, games.length ? 'Visible slate loaded' : 'No games visible'],
     ['Valid Pregame Predictions', `${coverage?.gamesWithValidPregamePredictions ?? trace?.predictionsValidPregame ?? data.predictionCandidates} / ${coverage?.gamesToday ?? data.currentGames ?? games.length}`, 'Game-level production prediction scope'],
@@ -1868,7 +1931,7 @@ function DailyBriefing({
     ['Official Picks', data.officialPicks, data.officialPicks ? 'Policy-qualified' : 'None passed policy'],
     ['Most Likely', vm?.mostLikelySummary.selector.selection ?? mostLikely[0]?.selection ?? 'Not available', vm?.mostLikelySummary.selector.status === 'AVAILABLE' ? `${formatPercent(vm.mostLikelySummary.selector.modelProbability)} model` : 'No supported outcome'],
     ['Best Value', vm?.bestAvailableValue.status === 'AVAILABLE' ? 'Policy eligible' : 'No policy-eligible value', vm?.bestAvailableValue.status === 'AVAILABLE' ? `${formatPercent(vm.bestAvailableValue.metricValue)} EV` : vm?.bestValueSemantics ? `${vm.bestValueSemantics.candidatesWithPositiveEv} positive EV; ${vm.bestValueSemantics.candidatesPassingPolicy} policy eligible; ${fieldValue(vm.bestValueSemantics.primaryRejectionReason)}` : vm?.bestAvailableValue.rankingReason ?? data.sections?.bestValue?.reason ?? 'No positive EV'],
-    ['Settlement', trace?.productionPredictionsSettled ?? data.finalGames, data.finalGames ? 'Final games present' : 'Settlement pending'],
+    ['Settlement', settlementPending, settlementPending ? `${settlementPending} completed game${settlementPending === 1 ? ' is' : 's are'} waiting` : 'No eligible final games pending'],
     ["Today's Learning Labels Created", learning?.labelsCreatedToday ?? trace?.learningSamplesAccepted ?? 0, learning?.message ?? (trace?.learningSamplesQueued ? `${trace.learningSamplesQueued} queued` : 'No learning labels pending')],
     ['Learning Labels Pending', learning?.labelsPending ?? Math.max(0, Number(trace?.learningSamplesQueued ?? 0) - Number(trace?.learningSamplesAccepted ?? 0)), learning ? `${learning.updatesApplied} updates applied; ${learning.autoPromotions} auto-promotions` : 'No automatic promotion'],
     ['Freshness', fieldValue(vm?.marketFreshnessSummary.state ?? simpleAction(data.freshness)), vm?.marketFreshnessSummary.latestOddsTimestamp ? `Odds ${timeText(vm.marketFreshnessSummary.latestOddsTimestamp)}` : data.latestOddsTimestamp ? `Odds ${timeText(data.latestOddsTimestamp)}` : 'No odds timestamp'],
@@ -2124,6 +2187,7 @@ export default function UserTodayPanel() {
   const counts = { ...baseCounts, modelOnly: Math.max(Number(baseCounts.modelOnly ?? 0), modelOnlySummaryCount) }
   const officialPickRows = data.sections?.officialPicks?.data ?? []
   const aiPicksFeed = data.sections?.aiPicksFeed?.data ?? null
+  const groundedRows = data.sections?.groundedOpportunities?.data ?? []
   const aiLeanRows = aiResults.filter((row) => intelligenceCategory(row) === 'ai_lean').slice(0, 3)
   const categorySourceRows = Array.from(
     new Map([...aiResults, ...mostLikely, ...bestValue].map((row, index) => [opportunityKey(row, index), row])).values()
@@ -2160,6 +2224,14 @@ export default function UserTodayPanel() {
         <TopOpportunityCard opportunity={topOpportunity} />
         <AIConfidenceCard opportunity={topOpportunity} />
       </section>
+      <IntelligenceSection
+        eyebrow="Grounded Evidence"
+        title="Grounded Opportunities"
+        rows={groundedRows}
+        mode="likely"
+        emptyTitle="No grounded opportunities are visible"
+        emptyDetail={data.sections?.groundedOpportunities?.reason ?? 'Every stored prediction row has an explicit diagnostic reason; no grounded evidence row is currently displayable.'}
+      />
       <IntelligenceSection
         eyebrow="Canonical Probability Rankings"
         title="Most Likely Outcomes"

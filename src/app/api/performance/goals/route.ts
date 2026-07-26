@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPerformanceProductContract } from '@/services/performance-product-contract.service'
+import { getPerformanceProductContract, validatePerformanceProductContractFixtures } from '@/services/performance-product-contract.service'
 
 export async function GET(request: NextRequest) {
+  if (request.nextUrl.searchParams.get('validate') === 'true') {
+    return NextResponse.json(validatePerformanceProductContractFixtures())
+  }
   const sportKey = request.nextUrl.searchParams.get('sportKey')
   const data = await getPerformanceProductContract({ sportKey })
   return NextResponse.json({

@@ -2534,7 +2534,23 @@ Validation: `npm.cmd run build` exits 0 with 348 static pages. The briefing uses
 
 Completion criteria: `DAILY_BRIEFING_PASS`, `DASHBOARD_INTELLIGENCE_PASS`, `PRODUCT_EMPTY_STATE_PASS` and `DASHBOARD_PERFORMANCE_PASS` are certified locally pending production deployment smoke.
 
-### 47. Homepage Consistency, Automatic Settlement And Provider Budget Utilization V1
+### 47. Dashboard Production Data Contract Repair V1
+
+Objective: Repair Today Dashboard operating-day semantics, lifecycle/market presentation, grounded-opportunity reconciliation, settlement backlog consistency and performance goal/status correctness without changing model or recommendation policy.
+
+Status: Implemented locally as an additive contract repair.
+
+Backend scope: `dashboard-today.service.ts` now exposes presentation lifecycle, market availability, settlement summary and grounded-opportunity reconciliation using stored event, prediction and odds diagnostics. `performance-product-contract.service.ts` now evaluates goals by direction and exposes qualified evolution status separately from trend-comparison availability.
+
+Frontend scope: `UserTodayPanel` displays Grounded Opportunities separately from Best Value, uses the settlement backlog source everywhere, prioritizes settlement backlog in System Health and sanitizes internal reason codes in User Mode. `PerformanceProductClient` labels Brier, calibration error and production-scope status with user-facing text.
+
+Persistence scope: None. The repair reads existing stored data only and does not mutate predictions, settlements, learning labels, model weights, Current Board eligibility, Official Pick policy or replay artifacts.
+
+Validation: `npm.cmd run build` exits 0 with 348 static pages. Focused bounded API validation passed dashboard semantic contract 42/42 and performance product contract 6/6. Local live-data validation returned zero grounded rows for the local operating date with zero unexplained drops.
+
+Completion criteria: `OPERATING_DAY_SEMANTICS_PASS`, `GAME_LIFECYCLE_CONTRACT_PASS`, `MARKET_AVAILABILITY_CONTRACT_PASS`, `GROUNDED_OPPORTUNITY_RECONCILIATION_PASS`, `SETTLEMENT_COUNT_CONSISTENCY_PASS`, `USER_MODE_REASON_SANITIZATION_PASS`, `PERFORMANCE_STATUS_CONTRACT_PASS`, `BRIER_GOAL_SEMANTICS_PASS`, `CALIBRATION_LABELING_PASS` and `FOCUSED_REGRESSION_PASS` are certified locally pending production deployment smoke.
+
+### 48. Homepage Consistency, Automatic Settlement And Provider Budget Utilization V1
 
 Objective: Recover the July 24 production settlement backlog, make postgame continuity automatic, and reconcile provider budget/scheduler ownership without changing models or recommendation policy.
 

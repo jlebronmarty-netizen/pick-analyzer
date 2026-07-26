@@ -47,6 +47,10 @@ function trustFrom(metrics: TimelineMetrics) {
   const brierScore = scoreFromBrier(metrics.brier)
   const accuracyScore = metrics.accuracy
   const sampleScore = Math.min(100, round((scored / 250) * 100))
+  const blockers = [
+    ...(scored === 0 ? ['NO_SETTLED_PRODUCTION_PREDICTIONS'] : scored < 30 ? ['LOW_SETTLED_SAMPLE'] : []),
+    ...(metrics.brier !== null && metrics.brier > 0.22 ? ['BRIER_SCORE_ABOVE_TARGET'] : []),
+  ]
   const components = [
     { key: 'sample_size', label: 'Production Sample Size', value: scored, normalizedScore: scored ? sampleScore : null, weight: 0.35, contribution: scored ? round(sampleScore * 0.35) : 0, availability: scored ? 'AVAILABLE' : 'UNAVAILABLE', explanation: 'Cutoff-safe production Win/Loss sample.' },
     { key: 'accuracy', label: 'Accuracy', value: metrics.accuracy, normalizedScore: metrics.accuracy, weight: 0.25, contribution: metrics.accuracy === null ? 0 : round(metrics.accuracy * 0.25), availability: metrics.accuracy === null ? 'UNAVAILABLE' : 'AVAILABLE', explanation: 'Win rate over the same production scope.' },
@@ -64,7 +68,7 @@ function trustFrom(metrics: TimelineMetrics) {
     trustStatus: scored === 0 ? 'NO_SETTLED_SAMPLE' : scored < 30 ? 'LIMITED_SAMPLE' : 'PRODUCTION_SCOPE',
     trustConfidence: scored,
     sampleQualification: scored === 0 ? 'NO_SETTLED_SAMPLE' : scored < 30 ? 'SMALL_SAMPLE' : 'QUALIFIED_SAMPLE',
-    blockers: scored === 0 ? ['NO_SETTLED_PRODUCTION_PREDICTIONS'] : scored < 30 ? ['LOW_SETTLED_SAMPLE'] : [],
+    blockers,
     warnings: scored === 0 ? ['Trust is not available until production predictions settle.'] : [],
     components,
   }
@@ -82,55 +86,106 @@ function reportCardFrom(metrics: TimelineMetrics) {
   }
 }
 
-function goalStatus({
+type GoalDirection = 'HIGHER_IS_BETTER' | 'LOWER_IS_BETTER' | 'RANGE_TARGET'
+
+function evaluateGoal({
   currentValue,
   target,
-  higherIsBetter,
+  direction,
   sample,
 }: {
   currentValue: number | null
   target: number
-  higherIsBetter: boolean
+  direction: GoalDirection
   sample: number
 }) {
-  if (currentValue === null || sample === 0) return 'NOT ENOUGH DATA'
-  const achieved = higherIsBetter ? currentValue >= target : currentValue <= target
-  if (achieved) return 'ACHIEVED'
-  const progress = higherIsBetter ? (currentValue / target) * 100 : (target / Math.max(currentValue, 0.0001)) * 100
-  if (progress >= 75) return 'ON TRACK'
-  if (progress >= 45) return 'WATCH'
-  return 'BLOCKED'
+  if (currentValue === null || sample === 0) {
+    return { status: 'NOT ENOUGH DATA', progressPercentage: 0, blocker: 'INSUFFICIENT_SAMPLE' }
+  }
+  const achieved = direction === 'HIGHER_IS_BETTER'
+    ? currentValue >= target
+    : direction === 'LOWER_IS_BETTER'
+      ? currentValue <= target
+      : currentValue === target
+  const progressPercentage = direction === 'HIGHER_IS_BETTER'
+    ? Math.min(100, round((currentValue / target) * 100))
+    : direction === 'LOWER_IS_BETTER'
+      ? Math.min(100, round((target / Math.max(currentValue, 0.0001)) * 100))
+      : achieved ? 100 : 0
+  if (achieved) return { status: 'ACHIEVED', progressPercentage, blocker: null }
+  if (direction === 'LOWER_IS_BETTER') return { status: 'NEEDS IMPROVEMENT', progressPercentage, blocker: 'VALUE_ABOVE_TARGET' }
+  if (progressPercentage >= 75) return { status: 'APPROACHING TARGET', progressPercentage, blocker: 'BELOW_TARGET' }
+  if (progressPercentage >= 45) return { status: 'WATCH', progressPercentage, blocker: 'BELOW_TARGET' }
+  return { status: 'BLOCKED', progressPercentage, blocker: 'BELOW_TARGET' }
 }
 
 function goalsFrom(metrics: TimelineMetrics) {
   const scored = metrics.wins + metrics.losses
   const calibration = calibrationFrom(metrics)
   const definitions = [
-    { key: 'minimum_settled_sample', label: 'Minimum settled sample', currentValue: scored, target: 100, higherIsBetter: true },
-    { key: 'maximum_brier_score', label: 'Maximum Brier Score', currentValue: metrics.brier, target: 0.22, higherIsBetter: false },
-    { key: 'maximum_calibration_error', label: 'Maximum calibration error', currentValue: calibration.calibrationError, target: 8, higherIsBetter: false },
-    { key: 'minimum_settlement_coverage', label: 'Minimum settlement coverage', currentValue: metrics.settlementCoverage, target: 70, higherIsBetter: true },
+    { key: 'minimum_settled_sample', label: 'Minimum settled sample', currentValue: scored, target: 100, direction: 'HIGHER_IS_BETTER' as const },
+    { key: 'maximum_brier_score', label: 'Maximum Brier Score', currentValue: metrics.brier, target: 0.22, direction: 'LOWER_IS_BETTER' as const },
+    { key: 'maximum_calibration_error', label: 'Maximum calibration error', currentValue: calibration.calibrationError, target: 8, direction: 'LOWER_IS_BETTER' as const },
+    { key: 'minimum_settlement_coverage', label: 'Minimum settlement coverage', currentValue: metrics.settlementCoverage, target: 70, direction: 'HIGHER_IS_BETTER' as const },
   ]
   return {
     mode: 'performance_goals_scope_v2',
     scope: 'cutoff_safe_production_scope',
     goals: definitions.map((goal) => {
       const available = goal.currentValue !== null && Number.isFinite(Number(goal.currentValue))
-      const progress = !available || scored === 0
-        ? 0
-        : goal.higherIsBetter
-          ? Math.min(100, round((Number(goal.currentValue) / goal.target) * 100))
-          : Math.min(100, round((goal.target / Math.max(Number(goal.currentValue), 0.0001)) * 100))
-      const status = goalStatus({ currentValue: available ? Number(goal.currentValue) : null, target: goal.target, higherIsBetter: goal.higherIsBetter, sample: scored })
+      const evaluation = evaluateGoal({ currentValue: available ? Number(goal.currentValue) : null, target: goal.target, direction: goal.direction, sample: scored })
       return {
         ...goal,
-        progressPercentage: progress,
-        direction: goal.higherIsBetter ? 'HIGHER_IS_BETTER' : 'LOWER_IS_BETTER',
-        status,
+        progressPercentage: evaluation.progressPercentage,
+        status: evaluation.status,
         sampleQualification: scored === 0 ? 'NO_SETTLED_SAMPLE' : scored < 30 ? 'SMALL_SAMPLE' : 'QUALIFIED_SAMPLE',
-        blocker: status === 'ACHIEVED' ? null : goal.key,
+        blocker: evaluation.status === 'ACHIEVED' ? null : goal.key,
       }
     }),
+  }
+}
+
+export function validatePerformanceProductContractFixtures() {
+  const metric = (brier: number): TimelineMetrics => ({
+    label: 'fixture',
+    generated: 3,
+    eligible: 3,
+    uniqueMarkets: 3,
+    current: 0,
+    superseded: 0,
+    settled: 3,
+    pending: 0,
+    wins: 2,
+    losses: 1,
+    pushes: 0,
+    voids: 0,
+    accuracy: 66.67,
+    brier,
+    averageConfidence: 61,
+    settlementCoverage: 100,
+  })
+  const achieved = goalsFrom(metric(0.2)).goals.find((goal) => goal.key === 'maximum_brier_score')
+  const exact = goalsFrom(metric(0.22)).goals.find((goal) => goal.key === 'maximum_brier_score')
+  const above = goalsFrom(metric(0.2549)).goals.find((goal) => goal.key === 'maximum_brier_score')
+  const evolution = evolutionEntry('season', metric(0.2549))
+  const checks = [
+    ['brier below target achieved', achieved?.status === 'ACHIEVED'],
+    ['brier equal target achieved', exact?.status === 'ACHIEVED'],
+    ['brier above target needs improvement', above?.status === 'NEEDS IMPROVEMENT' && above.blocker === 'maximum_brier_score'],
+    ['qualified metrics do not use insufficient status', evolution.status === 'LIMITED_SAMPLE' || evolution.status === 'PRODUCTION_SCOPE'],
+    ['trend scope explanation is explicit', typeof evolution.scopeExplanation === 'string' && evolution.scopeExplanation.includes('matching prior comparison cohort')],
+    ['brier blocker emitted', trustFrom(metric(0.2549)).blockers.includes('BRIER_SCORE_ABOVE_TARGET')],
+  ] as const
+  const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
+  return {
+    success: failedChecks.length === 0,
+    mode: 'performance_product_contract_validation_v1',
+    checks: checks.length,
+    passed: checks.length - failedChecks.length,
+    failed: failedChecks.length,
+    failedChecks,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
   }
 }
 
@@ -158,6 +213,7 @@ function engineeringAdvisorFrom(metrics: TimelineMetrics) {
   const calibration = calibrationFrom(metrics)
   const blockers = [
     ...(scored < 30 ? ['LOW_SETTLED_PRODUCTION_SAMPLE'] : []),
+    ...(metrics.brier !== null && metrics.brier > 0.22 ? ['BRIER_SCORE_ABOVE_TARGET'] : []),
     ...(calibration.calibrationError !== null && calibration.calibrationError > 8 ? ['CALIBRATION_ERROR_ABOVE_TARGET'] : []),
     ...((metrics.settlementCoverage ?? 0) < 70 ? ['SETTLEMENT_COVERAGE_BELOW_TARGET'] : []),
   ]
@@ -193,6 +249,10 @@ function evolutionEntry(period: string, current: TimelineMetrics, previous?: Tim
   const previousCalibration = previous ? calibrationFrom(previous) : null
   return {
     period,
+    status: currentTrust.trustStatus,
+    scopeExplanation: previousTrust?.trustScore === null || previousTrust === null
+      ? 'Current metrics are available in the cutoff-safe production scope; trend direction is unavailable until a matching prior comparison cohort exists.'
+      : 'Current and previous values use the same cutoff-safe production scope.',
     trendDirection: previousTrust?.trustScore === null || previousTrust === null || currentTrust.trustScore === null
       ? 'INSUFFICIENT_DATA'
       : currentTrust.trustScore >= previousTrust.trustScore

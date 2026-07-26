@@ -21,6 +21,7 @@ import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.ser
 import { getMlbProjectedScores } from '@/services/mlb-projected-score.service'
 import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
 import { getRecommendationPipelineTrace } from '@/services/recommendation-pipeline-trace.service'
+import { getMlbOddsCoverage } from '@/services/mlb-odds-coverage.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -103,6 +104,22 @@ export type DashboardOperationalStatus =
   | 'FINAL'
   | 'SETTLEMENT_PENDING'
   | 'SETTLED'
+
+export type DashboardPresentationLifecycle =
+  | 'PREGAME'
+  | 'LIVE'
+  | 'FINAL'
+  | 'SETTLEMENT_PENDING'
+  | 'SETTLED'
+  | 'STATUS_OVERDUE'
+
+export type DashboardMarketAvailability =
+  | 'ACTIVE_PREGAME_PRICE'
+  | 'STALE_PREGAME_PRICE'
+  | 'EXPIRED_PREGAME_PRICE'
+  | 'NO_ALIGNED_PRICE'
+  | 'NO_STORED_ODDS'
+  | 'BETTING_LOCKED'
 
 export type DashboardCanonicalSelector = {
   status: 'AVAILABLE' | 'EMPTY' | 'BLOCKED'
@@ -195,6 +212,8 @@ export type DashboardCanonicalViewModel = {
       validPregamePredictionCount: number
       currentBoardCandidateCount: number
       displayableMarketCount: number
+      presentationLifecycle: DashboardPresentationLifecycle
+      marketAvailability: DashboardMarketAvailability
       operationalStatus: DashboardOperationalStatus
     }>
   }
@@ -209,7 +228,34 @@ export type DashboardCanonicalViewModel = {
     gamesWithStoredOddsIncorrectlyWaitingForOdds: number
     invalidTotalLineSigns: number
     freshStaleContradictions: number
+    settlementCountContradictions: number
+    unexplainedPredictionDropCount: number
   }
+}
+
+type DashboardSettlementSummary = {
+  finalGames: number
+  settlementEligibleGames: number
+  settlementPendingGames: number
+  settledGames: number
+  unresolvedFinalGames: number
+  settlementBlockedGames: number
+}
+
+type DashboardGroundedOpportunitySummary = {
+  contract: 'grounded_opportunity_reconciliation_v1'
+  predictionRows: number
+  groundedRows: number
+  pricedGroundedRows: number
+  expiredGroundedRows: number
+  currentBoardEligible: number
+  policyBlocked: number
+  officialPicks: number
+  actionableOpportunities: number
+  informationalOpportunities: number
+  unexplainedDroppedRows: number
+  reasonCounts: Record<string, number>
+  rows: Array<Record<string, unknown>>
 }
 
 export type DashboardTodayContract = {
@@ -227,6 +273,8 @@ export type DashboardTodayContract = {
   currentGames: number
   upcomingGames: number
   finalGames: number
+  settlementSummary: DashboardSettlementSummary
+  groundedOpportunitySummary: DashboardGroundedOpportunitySummary
   lifecycleCounts: {
     totalScheduledToday: number
     upcoming: number
@@ -322,6 +370,8 @@ export type DashboardTodayContract = {
     validPregamePredictionCount?: number
     currentBoardCandidateCount?: number
     displayableMarketCount?: number
+    presentationLifecycle?: DashboardPresentationLifecycle
+    marketAvailability?: DashboardMarketAvailability
     operationalStatus?: DashboardOperationalStatus
   }>
   nextSlateGames: Array<{
@@ -355,6 +405,7 @@ export type DashboardTodayContract = {
     aiPicksFeed: DashboardTodaySection<MlbAiPicksFeed>
     todayStory: DashboardTodaySection<string[]>
     mostLikely: DashboardTodaySection<unknown[]>
+    groundedOpportunities: DashboardTodaySection<unknown[]>
     bestValue: DashboardTodaySection<unknown[]>
     modelIntelligence: DashboardTodaySection<unknown>
     projectedScores: DashboardTodaySection<unknown[]>
@@ -781,6 +832,147 @@ function emptySelector(metricName: string, blocker: string, candidateUniverseSiz
   }
 }
 
+function presentationLifecycleFor(game: {
+  lifecycle?: string | null
+  settlementState?: EventSettlementState
+}): DashboardPresentationLifecycle {
+  const lifecycle = String(game.lifecycle ?? '').toUpperCase()
+  if (lifecycle === 'STATUS_UNCONFIRMED' || lifecycle === 'UNKNOWN') return 'STATUS_OVERDUE'
+  if (lifecycle === 'LIVE' || lifecycle === 'IN_PROGRESS') return 'LIVE'
+  if (lifecycle === 'FINAL' || lifecycle === 'COMPLETED' || lifecycle === 'COMPLETE') {
+    return Number(game.settlementState?.pendingPredictions ?? 0) > 0 || game.settlementState?.label !== 'Settled'
+      ? 'SETTLEMENT_PENDING'
+      : 'SETTLED'
+  }
+  return 'PREGAME'
+}
+
+function marketAvailabilityFor(input: {
+  presentationLifecycle: DashboardPresentationLifecycle
+  storedOddsCount: number
+  displayableMarketCount: number
+  alignedPriceCount: number
+  latestAgeMinutes: number | null
+  stale: boolean
+}): DashboardMarketAvailability {
+  if (input.storedOddsCount === 0) return 'NO_STORED_ODDS'
+  if (input.presentationLifecycle === 'LIVE' || input.presentationLifecycle === 'FINAL' || input.presentationLifecycle === 'SETTLEMENT_PENDING' || input.presentationLifecycle === 'SETTLED' || input.presentationLifecycle === 'STATUS_OVERDUE') {
+    return 'BETTING_LOCKED'
+  }
+  if (input.displayableMarketCount === 0 || input.alignedPriceCount === 0) return 'NO_ALIGNED_PRICE'
+  if (input.stale) return 'STALE_PREGAME_PRICE'
+  if (input.latestAgeMinutes !== null && input.latestAgeMinutes > 60) return 'STALE_PREGAME_PRICE'
+  return 'ACTIVE_PREGAME_PRICE'
+}
+
+function settlementSummaryFrom(cards: ReturnType<typeof eventCard>[]): DashboardSettlementSummary {
+  const finalCards = cards.filter((card) => card.lifecycle === 'FINAL')
+  const eligible = finalCards.filter((card) => Number(card.settlementState?.totalPredictions ?? 0) > 0 || card.settlementState?.label !== 'Settled')
+  const pending = finalCards.filter((card) => presentationLifecycleFor(card) === 'SETTLEMENT_PENDING')
+  const settled = finalCards.filter((card) => presentationLifecycleFor(card) === 'SETTLED')
+  return {
+    finalGames: finalCards.length,
+    settlementEligibleGames: eligible.length,
+    settlementPendingGames: pending.length,
+    settledGames: settled.length,
+    unresolvedFinalGames: pending.length,
+    settlementBlockedGames: 0,
+  }
+}
+
+function incrementReason(target: Record<string, number>, reason: string, count: number) {
+  target[reason] = (target[reason] ?? 0) + count
+}
+
+function buildGroundedOpportunitySummary(input: {
+  oddsCoverage: Awaited<ReturnType<typeof getMlbOddsCoverage>> | null
+  boardCandidateCount: number
+  officialPicks: number
+}): DashboardGroundedOpportunitySummary {
+  const rows = input.oddsCoverage?.diagnostics ?? []
+  const reasonCounts: Record<string, number> = {}
+  const classifications = rows.flatMap((row) => {
+    const predictionCount = Number(row.predictionCount ?? 0)
+    if (!predictionCount) return []
+    const oddsRows = Number(row.oddsRowsNormalized ?? 0)
+    const boardCount = Number(row.currentBoardCandidateCount ?? 0)
+    const status = String(row.status ?? '').toLowerCase()
+    const lifecycleReason = status.includes('final') || status.includes('completed')
+      ? 'EVENT_FINAL'
+      : status.includes('live') || status.includes('progress')
+        ? 'EVENT_STARTED'
+        : null
+    const reason = boardCount > 0
+      ? 'GROUNDED_ACTIONABLE'
+      : oddsRows > 0
+        ? lifecycleReason ?? 'PRICE_EXPIRED'
+        : row.oddsRecordPresent
+          ? 'NO_ALIGNED_PRICE'
+          : 'NO_STORED_ODDS'
+    incrementReason(reasonCounts, reason, predictionCount)
+    return [{
+      eventId: row.internalEventId,
+      matchup: row.matchup,
+      predictionRows: predictionCount,
+      storedOddsSnapshots: oddsRows,
+      currentBoardCandidates: boardCount,
+      classification: reason,
+      blocker: row.blockingReason,
+      marketAvailability: boardCount > 0 ? 'ACTIVE_PREGAME_PRICE' : oddsRows > 0 ? 'EXPIRED_PREGAME_PRICE' : 'NO_STORED_ODDS',
+    }]
+  })
+  const predictionRows = classifications.reduce((sum, row) => sum + Number(row.predictionRows ?? 0), 0)
+  const groundedRows = classifications
+    .filter((row) => String(row.classification) !== 'NO_STORED_ODDS' && String(row.classification) !== 'MISSING_EVENT_MAPPING')
+    .reduce((sum, row) => sum + Number(row.predictionRows ?? 0), 0)
+  const pricedGroundedRows = classifications
+    .filter((row) => Number(row.storedOddsSnapshots ?? 0) > 0)
+    .reduce((sum, row) => sum + Number(row.predictionRows ?? 0), 0)
+  const expiredGroundedRows = classifications
+    .filter((row) => String(row.marketAvailability) === 'EXPIRED_PREGAME_PRICE')
+    .reduce((sum, row) => sum + Number(row.predictionRows ?? 0), 0)
+  const actionableOpportunities = input.boardCandidateCount
+  const informationalOpportunities = Math.max(0, groundedRows - actionableOpportunities)
+  return {
+    contract: 'grounded_opportunity_reconciliation_v1',
+    predictionRows,
+    groundedRows,
+    pricedGroundedRows,
+    expiredGroundedRows,
+    currentBoardEligible: actionableOpportunities,
+    policyBlocked: Math.max(0, input.boardCandidateCount - input.officialPicks),
+    officialPicks: input.officialPicks,
+    actionableOpportunities,
+    informationalOpportunities,
+    unexplainedDroppedRows: Math.max(0, predictionRows - Object.values(reasonCounts).reduce((sum, count) => sum + count, 0)),
+    reasonCounts,
+    rows: classifications,
+  }
+}
+
+function groundedRowsFromSummary(summary: DashboardGroundedOpportunitySummary) {
+  return summary.rows.slice(0, 10).map((row, index) => ({
+    id: `grounded-${row.eventId ?? index}`,
+    predictionId: `grounded-${row.eventId ?? index}`,
+    eventId: String(row.eventId ?? ''),
+    matchup: String(row.matchup ?? 'Matchup pending'),
+    market: 'grounded',
+    marketLabel: 'Stored pregame evidence',
+    selection: 'Pregame model evidence',
+    statusLabel: String(row.classification ?? 'Grounded informational'),
+    opportunityCategory: 'grounded_informational',
+    marketIntelligenceCategory: 'model_only',
+    semanticLabel: String(row.marketAvailability ?? 'Informational'),
+    why: `${row.predictionRows ?? 0} stored prediction row${Number(row.predictionRows ?? 0) === 1 ? '' : 's'}; ${row.storedOddsSnapshots ?? 0} normalized odds snapshot${Number(row.storedOddsSnapshots ?? 0) === 1 ? '' : 's'}.`,
+    reasonNotOfficial: String(row.blocker ?? row.classification ?? 'Informational only'),
+    blockers: [String(row.classification ?? 'Informational only')],
+    strengths: ['Grounded event mapping', 'Stored pregame prediction evidence'],
+    warnings: String(row.marketAvailability) === 'ACTIVE_PREGAME_PRICE' ? [] : ['Not actionable after current market gate'],
+    modeledValueStatus: 'INFORMATIONAL',
+    recommendationPolicyStatus: 'WATCH',
+  }))
+}
+
 function selectorFromCandidate(
   candidate: CurrentBoardCandidate | null | undefined,
   metricName: string,
@@ -894,8 +1086,19 @@ function buildDashboardCanonicalViewModel(input: {
     const displayableMarketCount = eventCandidates.filter((candidate) => candidate.canonicalOutcome).length
     const storedOddsCount = finiteNumber(game.storedOddsCount) ?? eventCandidates.filter((candidate) => candidate.americanOdds !== null && candidate.americanOdds !== undefined).length
     const alignedPriceCount = eventCandidates.filter((candidate) => candidate.canonicalPrice?.source === 'selected_stored_price' && candidate.canonicalPrice?.americanOdds !== null && candidate.canonicalPrice?.americanOdds !== undefined).length
+    const presentationLifecycle = presentationLifecycleFor(game)
+    const marketAvailability = marketAvailabilityFor({
+      presentationLifecycle,
+      storedOddsCount,
+      displayableMarketCount,
+      alignedPriceCount,
+      latestAgeMinutes: latestAge,
+      stale: eventCandidates.some((candidate) => candidate.stale),
+    })
     const status: DashboardOperationalStatus =
-      String(game.eventStatus ?? '').toUpperCase().includes('FINAL') ? 'FINAL'
+      presentationLifecycle === 'SETTLED' ? 'SETTLED'
+      : presentationLifecycle === 'SETTLEMENT_PENDING' ? 'SETTLEMENT_PENDING'
+      : presentationLifecycle === 'LIVE' || presentationLifecycle === 'STATUS_OVERDUE' ? 'BETTING_LOCKED'
       : eventCandidates.some((candidate) => candidate.stale) ? 'STALE_MARKET'
       : storedOddsCount === 0 ? 'NO_ODDS_STORED'
       : displayableMarketCount === 0 ? 'NO_ELIGIBLE_MARKET'
@@ -912,6 +1115,8 @@ function buildDashboardCanonicalViewModel(input: {
       validPregamePredictionCount: eventCandidates.length,
       currentBoardCandidateCount: eventCandidates.length,
       displayableMarketCount,
+      presentationLifecycle,
+      marketAvailability,
       operationalStatus: status,
     }
   })
@@ -1048,6 +1253,8 @@ function buildDashboardCanonicalViewModel(input: {
       gamesWithStoredOddsIncorrectlyWaitingForOdds: perGameOperationalStatus.filter((game) => game.storedOddsCount > 0 && game.operationalStatus === 'NO_ODDS_STORED').length,
       invalidTotalLineSigns,
       freshStaleContradictions,
+      settlementCountContradictions: 0,
+      unexplainedPredictionDropCount: 0,
     },
   }
 }
@@ -1066,7 +1273,7 @@ export async function getDashboardToday({
     hour12: false,
   }).format(now))
 
-  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, modelOnlyResult, projectedScoresResult, schedulerCoverageResult, pipelineTraceResult] = await Promise.all([
+  const [currentEventsResult, boardResult, nextSlateResult, operatingDayResult, budgetResult, modelOnlyResult, projectedScoresResult, schedulerCoverageResult, pipelineTraceResult, oddsCoverageResult] = await Promise.all([
     timed('current_events', () => loadEventsForDate(operatingDate), 4200),
     timed('current_board', () => getCurrentBoardCached(SPORT_KEY, 'CURRENT', 100, false, operatingDate), 5000),
     timed('next_slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now }), 3500),
@@ -1076,6 +1283,7 @@ export async function getDashboardToday({
     timed('projected_scores', () => getMlbProjectedScores(), 5000),
     timed('pregame_scheduler_coverage', () => getPregameSchedulerCoverage({ now }), 5000),
     timed('recommendation_pipeline_trace', () => getRecommendationPipelineTrace(), 5000),
+    timed('mlb_odds_coverage', () => getMlbOddsCoverage(operatingDate), 5000),
   ])
   const currentEventsTimedOut = currentEventsResult.error?.toLowerCase().includes('exceeded') === true
   const currentEventsFallbackResult = !currentEventsResult.ok && !currentEventsTimedOut
@@ -1206,6 +1414,8 @@ export async function getDashboardToday({
   } as Awaited<ReturnType<typeof getMlbProjectedScores>>)
   const schedulerCoverage = schedulerCoverageResult.ok ? schedulerCoverageResult.value : null
   const pipelineTrace = pipelineTraceResult.ok ? pipelineTraceResult.value : null
+  const oddsCoverage = oddsCoverageResult.ok ? oddsCoverageResult.value : null
+  const oddsCoverageByEvent = new Map((oddsCoverage?.diagnostics ?? []).map((row) => [row.internalEventId, row]))
   const eventLoad = currentEventsResult.ok
     ? values(currentEventsResult, {
       rows: [] as DashboardEventRow[],
@@ -1258,7 +1468,12 @@ export async function getDashboardToday({
   const currentGames = currentEvents.length
   const nextSlateDate = nextSlate.selectedSlateDate && nextSlate.selectedSlateDate !== operatingDate ? nextSlate.selectedSlateDate : null
   const upcomingGames = nextSlateDate ? nextSlate.eventsFound : Math.max(0, currentScheduled)
-  const gamesWaitingForOdds = nextSlate.waitingForOdds
+  const currentGamesWaitingForOdds = currentCards.filter((card) => {
+    const coverage = oddsCoverageByEvent.get(card.eventId)
+    return (card.lifecycle === 'PREGAME' || card.lifecycle === 'STARTING_SOON') && Number(coverage?.oddsRowsNormalized ?? 0) === 0
+  }).length
+  const nextSlateWaitingForOdds = nextSlate.waitingForOdds
+  const gamesWaitingForOdds = currentGamesWaitingForOdds
   const gamesReadyForAnalysis = Math.max(board.games.length, nextSlate.readyForAnalysis)
   const informationalBoard = board.candidates.length
     ? board
@@ -1275,6 +1490,12 @@ export async function getDashboardToday({
   const marketIntelligence = summarizeMarketIntelligenceCategories(displayCandidates)
   const officialPickData = board.officialPickExperience?.picks ?? []
   const aiPicksFeed = board.aiPicksFeed ?? boardFallback.aiPicksFeed!
+  const groundedOpportunitySummary = buildGroundedOpportunitySummary({
+    oddsCoverage,
+    boardCandidateCount: board.candidates.length,
+    officialPicks: officialPickData.length || board.officialPickCount || nextSlate.officialPicks,
+  })
+  const groundedOpportunityRows = groundedRowsFromSummary(groundedOpportunitySummary)
   const predictionCandidates = board.candidates.length || displayCandidates.length || nextSlate.activeCandidates
   const officialPicks = officialPickData.length || board.officialPickCount || nextSlate.officialPicks
   const informationalCandidates = Math.max(
@@ -1288,8 +1509,10 @@ export async function getDashboardToday({
   const operatingStatus = String(operatingDay.status ?? 'planned')
   const nextAction = !currentEventsResult.ok && !dashboardFallbackUsed
     ? 'Refresh stored slate status'
-    : gamesWaitingForOdds > 0 && currentGames > 0
+    : currentGamesWaitingForOdds > 0 && currentScheduled > 0
       ? 'Refresh market prices'
+    : nextSlateWaitingForOdds > 0 && currentInProgress === 0 && finalGames === currentGames && currentGames > 0
+      ? "Prepare tomorrow's slate"
     : predictionCandidates === 0 && modelOnly.summary.pitcherShadowProjections > 0
       ? 'Review model-only intelligence'
     : userActionLabel(String(operatingDay.nextRequiredAction ?? ''), {
@@ -1328,11 +1551,11 @@ export async function getDashboardToday({
     board.boardHealth.status === 'EMPTY' && nextSlateDate && upcomingGames
       ? 'Current Board is empty because the next slate is waiting for market prices or predictions.'
       : null,
-    gamesWaitingForOdds > 0 ? `${gamesWaitingForOdds} scheduled games are waiting for odds.` : null,
+    currentGamesWaitingForOdds > 0 ? `${currentGamesWaitingForOdds} pregame game${currentGamesWaitingForOdds === 1 ? '' : 's'} have no stored odds snapshots.` : null,
   ].filter(Boolean) as string[]
 
   const blockers = [
-    gamesWaitingForOdds > 0 ? 'market_prices_not_refreshed' : null,
+    currentGamesWaitingForOdds > 0 ? 'market_prices_not_refreshed' : null,
     predictionCandidates === 0 ? 'no_prediction_candidates' : null,
   ].filter(Boolean) as string[]
 
@@ -1370,7 +1593,11 @@ export async function getDashboardToday({
   const boardGameRows = currentCards.map((card) => ({
     eventId: card.eventId,
     eventStatus: card.lifecycle,
+    settlementState: card.settlementState,
     ...((board.games as Array<Record<string, any>>).find((game) => String(game.eventId ?? '') === card.eventId) ?? {}),
+    storedOddsCount: Number(oddsCoverageByEvent.get(card.eventId)?.oddsRowsNormalized ?? 0),
+    validPregamePredictionCount: Number(oddsCoverageByEvent.get(card.eventId)?.predictionCount ?? 0),
+    displayableMarketCount: Number(oddsCoverageByEvent.get(card.eventId)?.oddsMarketsFound?.length ?? 0),
   }))
   const viewModel = buildDashboardCanonicalViewModel({
     generatedAt,
@@ -1396,6 +1623,8 @@ export async function getDashboardToday({
           validPregamePredictionCount: status.validPregamePredictionCount,
           currentBoardCandidateCount: status.currentBoardCandidateCount,
           displayableMarketCount: status.displayableMarketCount,
+          presentationLifecycle: status.presentationLifecycle,
+          marketAvailability: status.marketAvailability,
           operationalStatus: status.operationalStatus,
           bettingEligibility: status.storedOddsCount > 0 && card.bettingEligibility === 'NO_MARKET'
             ? (status.displayableMarketCount > 0 ? 'ELIGIBLE' as const : 'INSUFFICIENT_DATA' as const)
@@ -1404,7 +1633,9 @@ export async function getDashboardToday({
       : card
   })
   const storyLines = [
-    gamesWaitingForOdds > 0
+    currentInProgress > 0
+      ? 'Pregame recommendations are locked while live games are monitored for results and settlement.'
+      : gamesWaitingForOdds > 0
       ? 'The AI is waiting for current market prices before it can finalize recommendations.'
       : officialPicks > 0
         ? `${officialPicks} Official Pick${officialPicks === 1 ? '' : 's'} passed the production policy.`
@@ -1420,6 +1651,7 @@ export async function getDashboardToday({
     viewModel.selectors.bestAvailableValue.status === 'AVAILABLE'
       ? 'Best Value rankings are available from stored Current Board data.'
       : `Best Value: ${viewModel.selectors.bestAvailableValue.blocker ?? 'NO_ELIGIBLE_VALUE'}.`,
+    groundedOpportunitySummary.groundedRows > 0 ? `${groundedOpportunitySummary.groundedRows} grounded prediction row${groundedOpportunitySummary.groundedRows === 1 ? '' : 's'} remain available for informational review; ${groundedOpportunitySummary.actionableOpportunities} are actionable under Current Board gates.` : null,
     blockers.includes('market_prices_not_refreshed') ? 'Market freshness is degraded, but the Today panel remains available.' : null,
   ].filter(Boolean) as string[]
   const dependencyResults = [
@@ -1433,6 +1665,7 @@ export async function getDashboardToday({
     settlementStateResult,
     schedulerCoverageResult,
     pipelineTraceResult,
+    oddsCoverageResult,
   ]
   const criticalLabels = new Set(['current_events'])
   const errors = dependencyResults
@@ -1448,6 +1681,7 @@ export async function getDashboardToday({
   const timingDependencies = Object.fromEntries(dependencyResults.map((result) => [result.label, result.durationMs]))
   const totalMs = durationMs(requestStarted)
   const slowDependencies = dependencyResults.filter((result) => result.durationMs > 1000).map((result) => result.label)
+  const settlementSummary = settlementSummaryFrom(currentCards)
 
   return {
     success: true,
@@ -1464,6 +1698,8 @@ export async function getDashboardToday({
     currentGames,
     upcomingGames,
     finalGames,
+    settlementSummary,
+    groundedOpportunitySummary,
     lifecycleCounts: countsByLifecycle,
     gamesWaitingForOdds,
     gamesReadyForAnalysis,
@@ -1511,12 +1747,14 @@ export async function getDashboardToday({
       recommendation: officialPicks
         ? `${officialPicks} official pick${officialPicks === 1 ? '' : 's'} available.`
         : 'No official bet today.',
-      aiBriefing: nextSlateDate && upcomingGames
-        ? `${upcomingGames} games are scheduled for tomorrow. Market prices have not been refreshed yet.`
-        : currentInProgress > 0
+      aiBriefing: currentInProgress > 0
           ? "Today's games are in progress. Recommendations are locked."
-          : finalGames > 0 && finalGames === currentGames
-            ? "Today's games are awaiting results or settlement."
+        : finalGames > 0
+          ? `${finalGames} completed game${finalGames === 1 ? '' : 's'} are ready for settlement review.`
+        : nextSlateDate && upcomingGames
+          ? `${upcomingGames} games are scheduled for the next slate. Market prices have not been refreshed yet.`
+        : finalGames > 0 && finalGames === currentGames
+          ? "Today's games are awaiting results or settlement."
             : currentGames > 0
               ? `${currentGames} MLB games are on today's operating day.`
               : dashboardQueryStatus === 'EMPTY_CONFIRMED' ? 'No actionable games remain for today.' : 'Today slate is temporarily unavailable.',
@@ -1531,8 +1769,10 @@ export async function getDashboardToday({
       nextSlate: nextSlateDate && upcomingGames
         ? `${upcomingGames} games are scheduled for tomorrow. Market prices have not been refreshed yet.`
         : 'No separate next slate is resolved yet.',
-      marketPrices: gamesWaitingForOdds > 0
-        ? 'Waiting for sportsbook refresh.'
+      marketPrices: currentInProgress > 0
+        ? 'Pregame markets are closed for live games.'
+        : gamesWaitingForOdds > 0
+          ? 'Waiting for sportsbook refresh.'
         : board.latestOddsTimestamp
           ? 'Market prices are available from stored odds.'
           : 'Waiting for next scheduler execution.',
@@ -1566,6 +1806,14 @@ export async function getDashboardToday({
         modelMostLikelyData,
         boardResult.ok || modelMostLikelyData.length ? (modelMostLikelyData.length ? null : 'No Most Likely model probabilities are available for current pregame events.') : 'Most Likely is temporarily unavailable.',
         boardResult.ok || modelMostLikelyData.length ? generatedAt : null
+      ),
+      groundedOpportunities: section(
+        groundedOpportunityRows.length ? 'AVAILABLE' : 'EMPTY',
+        groundedOpportunityRows,
+        groundedOpportunityRows.length
+          ? null
+          : `No grounded opportunities are visible. Reconciliation classified ${groundedOpportunitySummary.predictionRows} stored prediction rows with ${groundedOpportunitySummary.unexplainedDroppedRows} unexplained drops.`,
+        generatedAt
       ),
       bestValue: section(
         boardResult.ok ? (bestValueData.length ? 'AVAILABLE' : 'EMPTY') : 'UNAVAILABLE',
@@ -2006,6 +2254,25 @@ export function validateDashboardTodayFixtures() {
     }, new Date('2026-07-19T23:00:00.000Z')),
   ]
   const mixedCounts = lifecycleCounts(mixedLifecycle)
+  const fixtureSettlementSummary = settlementSummaryFrom(mixedLifecycle)
+  const fixtureGroundedSummary = buildGroundedOpportunitySummary({
+    oddsCoverage: {
+      success: true,
+      mode: 'mlb_odds_coverage_diagnostic_v1',
+      generatedAt: '2026-07-25T18:00:00.000Z',
+      date: '2026-07-25',
+      timezone: TIMEZONE,
+      providerCallsMade: 0,
+      summary: {} as any,
+      modelInputReadiness: {} as any,
+      diagnostics: [
+        { internalEventId: 'live', matchup: 'AWY @ HOM', predictionCount: 3, oddsRowsNormalized: 42, currentBoardCandidateCount: 0, status: 'live', oddsRecordPresent: true, blockingReason: 'not_actionable_on_current_board_after_price_freshness_policy' } as any,
+        { internalEventId: 'pregame', matchup: 'AW2 @ HOM2', predictionCount: 3, oddsRowsNormalized: 42, currentBoardCandidateCount: 3, status: 'scheduled', oddsRecordPresent: true, blockingReason: 'ready_for_analysis' } as any,
+      ],
+    },
+    boardCandidateCount: 3,
+    officialPicks: 0,
+  })
   const checks = [
     ['completed current day resolves before tomorrow odds', fixture.active === 'Sync final results'],
     ['evening morning sync is labeled for tomorrow', fixture.eveningMorning === "Tomorrow's morning schedule sync"],
@@ -2031,6 +2298,11 @@ export function validateDashboardTodayFixtures() {
     ['no opposite price borrowing for complement outcomes', contractViewModel.selectors.currentBoardSummary.oppositePriceViolations === 0 && contractViewModel.diagnostics.noComplementOutcomeBorrowsSourceOdds],
     ['freshness contract has no fresh stale contradiction', contractViewModel.selectors.marketFreshnessSummary.state === 'FRESH' && contractViewModel.diagnostics.freshStaleContradictions === 0],
     ['stored odds never display waiting for odds', noWaitingForOddsWithStoredOdds && contractViewModel.diagnostics.gamesWithStoredOddsIncorrectlyWaitingForOdds === 0],
+    ['live games are not classified as tomorrow slate copy', userActionLabel('morning_sync', { hour: 20, nextSlateDate: '2026-07-20', gamesWaitingForOdds: 15, currentInProgress: 1, currentScheduled: 0, finalGames: 0, currentGames: 4, operatingStatus: 'planned' }) === 'Waiting for games to finish'],
+    ['live game with stored odds is betting locked not no stored odds', contractViewModel.selectors.perGameOperationalStatus.every((game) => game.storedOddsCount === 0 || game.marketAvailability !== 'NO_STORED_ODDS')],
+    ['final settlement pending source is canonical', fixtureSettlementSummary.settlementPendingGames === 1 && fixtureSettlementSummary.finalGames === 1],
+    ['grounded informational opportunity reconciles', fixtureGroundedSummary.predictionRows === 6 && fixtureGroundedSummary.groundedRows === 6 && fixtureGroundedSummary.actionableOpportunities === 3 && fixtureGroundedSummary.informationalOpportunities === 3],
+    ['no unexplained grounded prediction drops', fixtureGroundedSummary.unexplainedDroppedRows === 0],
     ['total lines keep positive display semantics', contractViewModel.diagnostics.invalidTotalLineSigns === 0],
     ['edge remains percentage points not probability percent', positiveEvNotPolicy.canonicalEv?.edge === 0.75],
     ['best value separates positive ev from official policy eligibility', contractViewModel.selectors.bestValueSemantics.candidatesWithPositiveEv === 1 && contractViewModel.selectors.bestValueSemantics.candidatesPassingPolicy === 0 && contractViewModel.selectors.bestValueSemantics.primaryRejectionReason === 'OFFICIAL_POLICY_NOT_SATISFIED'],
