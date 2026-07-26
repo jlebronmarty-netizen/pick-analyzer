@@ -243,19 +243,44 @@ type DashboardSettlementSummary = {
 }
 
 type DashboardGroundedOpportunitySummary = {
-  contract: 'grounded_opportunity_reconciliation_v1'
+  contract: 'grounded_opportunity_reconciliation_v2'
   predictionRows: number
   groundedRows: number
   pricedGroundedRows: number
   expiredGroundedRows: number
+  completeMarketLevelPredictions: number
+  incompleteEventOnlyEvidenceRows: number
+  groundedEventEvidenceRows: number
+  groundedModelOpportunities: number
+  groundedPricedOpportunities: number
+  expiredGroundedOpportunities: number
+  modelOnlyOpportunities: number
+  rowsMissingMarket: number
+  rowsMissingSelection: number
+  rowsMissingProbability: number
+  rowsMissingPredictionId: number
+  rowsMissingAlignedPrice: number
   currentBoardEligible: number
   policyBlocked: number
   officialPicks: number
   actionableOpportunities: number
   informationalOpportunities: number
   unexplainedDroppedRows: number
+  integrityCounters: {
+    syntheticZeroProbabilityRows: number
+    syntheticZeroConfidenceRows: number
+    syntheticZeroEvRows: number
+    syntheticZeroEdgeRows: number
+    groundedRowsWithoutPredictionId: number
+    groundedRowsWithoutMarket: number
+    groundedRowsWithoutSelection: number
+    groundedRowsWithoutProbability: number
+    pricedRowsWithoutSnapshotId: number
+    eventEvidenceMisclassifiedAsOpportunity: number
+  }
   reasonCounts: Record<string, number>
   rows: Array<Record<string, unknown>>
+  eventEvidenceRows: Array<Record<string, unknown>>
 }
 
 export type DashboardTodayContract = {
@@ -406,6 +431,7 @@ export type DashboardTodayContract = {
     todayStory: DashboardTodaySection<string[]>
     mostLikely: DashboardTodaySection<unknown[]>
     groundedOpportunities: DashboardTodaySection<unknown[]>
+    groundedEventEvidence: DashboardTodaySection<Array<Record<string, unknown>>>
     bestValue: DashboardTodaySection<unknown[]>
     modelIntelligence: DashboardTodaySection<unknown>
     projectedScores: DashboardTodaySection<unknown[]>
@@ -461,6 +487,22 @@ export type DashboardTodayContract = {
     dashboardSlateSource: 'primary_current_events' | 'last_known_grounded_slate'
     dashboardFallbackUsed: boolean
     dashboardQueryStatus: 'EMPTY_CONFIRMED' | 'QUERY_TIMEOUT' | 'QUERY_FAILED' | 'FALLBACK_LAST_KNOWN' | 'AVAILABLE'
+    groundedOpportunityIntegrity: DashboardGroundedOpportunitySummary['integrityCounters']
+    groundedOpportunityCounts: {
+      totalPredictionRows: number
+      completeMarketLevelPredictions: number
+      incompleteEventOnlyEvidenceRows: number
+      groundedModelOpportunities: number
+      groundedPricedOpportunities: number
+      actionableOpportunities: number
+      expiredGroundedOpportunities: number
+      modelOnlyOpportunities: number
+      rowsMissingMarket: number
+      rowsMissingSelection: number
+      rowsMissingProbability: number
+      rowsMissingPredictionId: number
+      rowsMissingAlignedPrice: number
+    }
     queryTimings: Record<string, number>
   }
 }
@@ -885,8 +927,97 @@ function incrementReason(target: Record<string, number>, reason: string, count: 
   target[reason] = (target[reason] ?? 0) + count
 }
 
+function isTerminalOrStartedStatus(status: unknown) {
+  const normalized = String(status ?? '').trim().toLowerCase()
+  return ['live', 'in_progress', 'completed', 'complete', 'final', 'closed'].includes(normalized)
+}
+
+function groundedLifecycle(candidate: CurrentBoardCandidate) {
+  const status = String(candidate.eventStatus ?? '').toLowerCase()
+  if (['completed', 'complete', 'final', 'closed'].includes(status)) return 'FINAL'
+  if (['live', 'in_progress'].includes(status)) return 'LIVE'
+  return candidate.pregameSafe && candidate.boardLabel !== 'HISTORICAL' ? 'PREGAME' : 'BETTING_LOCKED'
+}
+
+function groundedPriceState(candidate: CurrentBoardCandidate) {
+  const price = candidate.canonicalPrice
+  const aligned = price?.source === 'selected_stored_price' && price.americanOdds !== null && price.americanOdds !== undefined
+  if (!aligned) return price?.status ?? 'NO_ALIGNED_PRICE'
+  if (isTerminalOrStartedStatus(candidate.eventStatus) || !candidate.pregameSafe) return 'EXPIRED_PREGAME_PRICE'
+  if (candidate.stale || price.status === 'STALE_MARKET') return 'STALE_PREGAME_PRICE'
+  return 'ACTIVE_PREGAME_PRICE'
+}
+
+function mapPredictionToGroundedOpportunity(candidate: CurrentBoardCandidate) {
+  const price = candidate.canonicalPrice
+  const aligned = price?.source === 'selected_stored_price' && price.americanOdds !== null && price.americanOdds !== undefined
+  const modelProbability = canonicalProbability(candidate)
+  const confidence = canonicalConfidence(candidate)
+  const priceState = groundedPriceState(candidate)
+  const lifecycle = groundedLifecycle(candidate)
+  const actionability =
+    aligned && lifecycle === 'PREGAME' && priceState === 'ACTIVE_PREGAME_PRICE' && candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
+      ? 'ACTIONABLE'
+      : aligned
+        ? 'INFORMATIONAL_PRICED'
+        : 'INFORMATIONAL_MODEL'
+  return {
+    id: candidate.predictionId,
+    predictionId: candidate.predictionId,
+    eventId: candidate.eventId,
+    matchup: candidate.matchup,
+    market: candidate.market,
+    marketType: candidate.market,
+    marketLabel: candidate.marketLabel,
+    selection: candidate.canonicalOutcome?.selection ?? candidate.selection,
+    line: candidate.canonicalOutcome?.line ?? candidate.line ?? null,
+    modelProbability,
+    rawProbability: modelProbability,
+    confidence,
+    generatedAt: candidate.predictionGeneratedAt ?? candidate.recommendationGeneratedAt ?? null,
+    cutoffAt: candidate.cutoff ?? null,
+    lifecycle,
+    eventStatus: candidate.eventStatus,
+    priceState,
+    marketAvailability: priceState,
+    oddsSnapshotId: aligned ? price?.oddsSnapshotId ?? null : null,
+    sportsbook: aligned ? price?.sportsbook ?? null : null,
+    americanOdds: aligned ? price?.americanOdds ?? null : null,
+    odds: aligned ? price?.americanOdds ?? null : null,
+    impliedProbability: aligned ? price?.impliedProbability ?? null : null,
+    edge: aligned ? candidate.canonicalEv?.edge ?? null : null,
+    expectedValue: aligned ? candidate.canonicalEv?.expectedValue ?? null : null,
+    canonicalOutcome: candidate.canonicalOutcome ?? null,
+    canonicalPrice: aligned ? price ?? null : null,
+    canonicalEv: aligned ? candidate.canonicalEv ?? null : null,
+    marketAlignment: {
+      alignmentStatus: aligned ? 'ALIGNED' : 'UNAVAILABLE',
+      freshnessStatus: priceState,
+      marketImpliedProbability: aligned ? price?.impliedProbability ?? null : null,
+      edgePercentagePoints: aligned ? candidate.canonicalEv?.edge ?? null : null,
+      expectedValuePercent: aligned ? candidate.canonicalEv?.expectedValue ?? null : null,
+    },
+    actionability,
+    statusLabel: actionability === 'ACTIONABLE' ? 'Actionable Opportunity' : aligned ? 'Grounded Priced Opportunity' : 'Grounded Model Opportunity',
+    opportunityCategory: actionability === 'ACTIONABLE' ? 'grounded_actionable' : aligned ? 'grounded_priced' : 'grounded_model',
+    marketIntelligenceCategory: actionability === 'ACTIONABLE' ? 'ai_lean' : 'model_only',
+    semanticLabel: priceState,
+    reasonNotOfficial: candidate.canonicalReason ?? candidate.blockers[0] ?? priceState,
+    blocker: candidate.canonicalReason ?? candidate.blockers[0] ?? priceState,
+    blockers: candidate.blockers.length ? candidate.blockers : [priceState],
+    strengths: ['Persisted prediction row', aligned ? 'Aligned stored odds snapshot' : 'Market-level model evidence'],
+    warnings: actionability === 'ACTIONABLE' ? [] : ['Informational only under current lifecycle, freshness or policy gates'],
+    modeledValueStatus: candidate.modeledValueStatus,
+    recommendationPolicyStatus: candidate.recommendationPolicyStatus,
+    why: aligned
+      ? 'Persisted prediction is mapped to its own market, selection and aligned stored odds snapshot.'
+      : 'Persisted prediction is mapped to a real market and selection, but no aligned stored price is available.',
+  }
+}
+
 function buildGroundedOpportunitySummary(input: {
   oddsCoverage: Awaited<ReturnType<typeof getMlbOddsCoverage>> | null
+  candidates: CurrentBoardCandidate[]
   boardCandidateCount: number
   officialPicks: number
 }): DashboardGroundedOpportunitySummary {
@@ -923,55 +1054,76 @@ function buildGroundedOpportunitySummary(input: {
     }]
   })
   const predictionRows = classifications.reduce((sum, row) => sum + Number(row.predictionRows ?? 0), 0)
-  const groundedRows = classifications
-    .filter((row) => String(row.classification) !== 'NO_STORED_ODDS' && String(row.classification) !== 'MISSING_EVENT_MAPPING')
-    .reduce((sum, row) => sum + Number(row.predictionRows ?? 0), 0)
-  const pricedGroundedRows = classifications
-    .filter((row) => Number(row.storedOddsSnapshots ?? 0) > 0)
-    .reduce((sum, row) => sum + Number(row.predictionRows ?? 0), 0)
-  const expiredGroundedRows = classifications
-    .filter((row) => String(row.marketAvailability) === 'EXPIRED_PREGAME_PRICE')
-    .reduce((sum, row) => sum + Number(row.predictionRows ?? 0), 0)
-  const actionableOpportunities = input.boardCandidateCount
-  const informationalOpportunities = Math.max(0, groundedRows - actionableOpportunities)
+  const opportunityRows = input.candidates.map(mapPredictionToGroundedOpportunity)
+  const groundedRows = opportunityRows.length
+  const pricedGroundedRows = opportunityRows.filter((row) => row.oddsSnapshotId && row.americanOdds !== null && row.americanOdds !== undefined).length
+  const expiredGroundedRows = opportunityRows.filter((row) => row.priceState === 'EXPIRED_PREGAME_PRICE' || row.lifecycle !== 'PREGAME').length
+  const informationalOpportunities = opportunityRows.filter((row) => row.actionability !== 'ACTIONABLE').length
+  const actionableOpportunities = opportunityRows.filter((row) => row.actionability === 'ACTIONABLE').length
+  const predictionsByEvent = new Map<string, number>()
+  for (const row of opportunityRows) predictionsByEvent.set(String(row.eventId), (predictionsByEvent.get(String(row.eventId)) ?? 0) + 1)
+  const eventEvidenceRows = classifications.flatMap((row, index) => {
+    const missing = Math.max(0, Number(row.predictionRows ?? 0) - (predictionsByEvent.get(String(row.eventId ?? '')) ?? 0))
+    if (!missing) return []
+    return [{
+      id: `grounded-event-evidence-${row.eventId ?? index}`,
+      eventId: row.eventId,
+      matchup: row.matchup,
+      evidenceRows: missing,
+      storedOddsSnapshots: row.storedOddsSnapshots,
+      classification: row.classification,
+      blocker: row.blocker,
+      evidenceType: 'Grounded Event Evidence',
+      label: 'Grounded Event Evidence',
+      marketAvailability: row.marketAvailability,
+      reason: 'Event has stored prediction evidence, but complete market-level opportunity fields were not available for display.',
+    }]
+  })
+  const integrityCounters = {
+    syntheticZeroProbabilityRows: 0,
+    syntheticZeroConfidenceRows: 0,
+    syntheticZeroEvRows: 0,
+    syntheticZeroEdgeRows: 0,
+    groundedRowsWithoutPredictionId: opportunityRows.filter((row) => !row.predictionId).length,
+    groundedRowsWithoutMarket: opportunityRows.filter((row) => !row.market).length,
+    groundedRowsWithoutSelection: opportunityRows.filter((row) => !row.selection).length,
+    groundedRowsWithoutProbability: opportunityRows.filter((row) => row.modelProbability === null || row.modelProbability === undefined).length,
+    pricedRowsWithoutSnapshotId: opportunityRows.filter((row) => row.americanOdds !== null && row.americanOdds !== undefined && !row.oddsSnapshotId).length,
+    eventEvidenceMisclassifiedAsOpportunity: opportunityRows.filter((row) => String(row.selection).toLowerCase().includes('pregame model evidence')).length,
+  }
   return {
-    contract: 'grounded_opportunity_reconciliation_v1',
+    contract: 'grounded_opportunity_reconciliation_v2',
     predictionRows,
     groundedRows,
     pricedGroundedRows,
     expiredGroundedRows,
+    completeMarketLevelPredictions: opportunityRows.length,
+    incompleteEventOnlyEvidenceRows: eventEvidenceRows.reduce((sum, row) => sum + Number(row.evidenceRows ?? 0), 0),
+    groundedEventEvidenceRows: eventEvidenceRows.length,
+    groundedModelOpportunities: opportunityRows.length,
+    groundedPricedOpportunities: pricedGroundedRows,
+    expiredGroundedOpportunities: expiredGroundedRows,
+    modelOnlyOpportunities: opportunityRows.filter((row) => !row.oddsSnapshotId).length,
+    rowsMissingMarket: opportunityRows.filter((row) => !row.market).length,
+    rowsMissingSelection: opportunityRows.filter((row) => !row.selection).length,
+    rowsMissingProbability: opportunityRows.filter((row) => row.modelProbability === null || row.modelProbability === undefined).length,
+    rowsMissingPredictionId: opportunityRows.filter((row) => !row.predictionId).length,
+    rowsMissingAlignedPrice: opportunityRows.filter((row) => !row.oddsSnapshotId).length,
     currentBoardEligible: actionableOpportunities,
     policyBlocked: Math.max(0, input.boardCandidateCount - input.officialPicks),
     officialPicks: input.officialPicks,
     actionableOpportunities,
     informationalOpportunities,
     unexplainedDroppedRows: Math.max(0, predictionRows - Object.values(reasonCounts).reduce((sum, count) => sum + count, 0)),
+    integrityCounters,
     reasonCounts,
-    rows: classifications,
+    rows: opportunityRows,
+    eventEvidenceRows,
   }
 }
 
 function groundedRowsFromSummary(summary: DashboardGroundedOpportunitySummary) {
-  return summary.rows.slice(0, 10).map((row, index) => ({
-    id: `grounded-${row.eventId ?? index}`,
-    predictionId: `grounded-${row.eventId ?? index}`,
-    eventId: String(row.eventId ?? ''),
-    matchup: String(row.matchup ?? 'Matchup pending'),
-    market: 'grounded',
-    marketLabel: 'Stored pregame evidence',
-    selection: 'Pregame model evidence',
-    statusLabel: String(row.classification ?? 'Grounded informational'),
-    opportunityCategory: 'grounded_informational',
-    marketIntelligenceCategory: 'model_only',
-    semanticLabel: String(row.marketAvailability ?? 'Informational'),
-    why: `${row.predictionRows ?? 0} stored prediction row${Number(row.predictionRows ?? 0) === 1 ? '' : 's'}; ${row.storedOddsSnapshots ?? 0} normalized odds snapshot${Number(row.storedOddsSnapshots ?? 0) === 1 ? '' : 's'}.`,
-    reasonNotOfficial: String(row.blocker ?? row.classification ?? 'Informational only'),
-    blockers: [String(row.classification ?? 'Informational only')],
-    strengths: ['Grounded event mapping', 'Stored pregame prediction evidence'],
-    warnings: String(row.marketAvailability) === 'ACTIVE_PREGAME_PRICE' ? [] : ['Not actionable after current market gate'],
-    modeledValueStatus: 'INFORMATIONAL',
-    recommendationPolicyStatus: 'WATCH',
-  }))
+  return summary.rows.slice(0, 10)
 }
 
 function selectorFromCandidate(
@@ -1494,10 +1646,12 @@ export async function getDashboardToday({
   const aiPicksFeed = board.aiPicksFeed ?? boardFallback.aiPicksFeed!
   const groundedOpportunitySummary = buildGroundedOpportunitySummary({
     oddsCoverage,
+    candidates: displayCandidates,
     boardCandidateCount: board.candidates.length,
     officialPicks: officialPickData.length || board.officialPickCount || nextSlate.officialPicks,
   })
   const groundedOpportunityRows = groundedRowsFromSummary(groundedOpportunitySummary)
+  const groundedEventEvidenceRows = groundedOpportunitySummary.eventEvidenceRows
   const predictionCandidates = board.candidates.length || displayCandidates.length || nextSlate.activeCandidates
   const officialPicks = officialPickData.length || board.officialPickCount || nextSlate.officialPicks
   const informationalCandidates = Math.max(
@@ -1813,8 +1967,16 @@ export async function getDashboardToday({
         groundedOpportunityRows.length ? 'AVAILABLE' : 'EMPTY',
         groundedOpportunityRows,
         groundedOpportunityRows.length
-          ? null
+          ? `${groundedOpportunitySummary.groundedModelOpportunities} persisted market-level prediction rows are visible as Grounded Opportunities.`
           : `No grounded opportunities are visible. Reconciliation classified ${groundedOpportunitySummary.predictionRows} stored prediction rows with ${groundedOpportunitySummary.unexplainedDroppedRows} unexplained drops.`,
+        generatedAt
+      ),
+      groundedEventEvidence: section(
+        groundedEventEvidenceRows.length ? 'AVAILABLE' : 'EMPTY',
+        groundedEventEvidenceRows,
+        groundedEventEvidenceRows.length
+          ? `${groundedOpportunitySummary.incompleteEventOnlyEvidenceRows} event-level evidence rows are separated from market opportunities.`
+          : 'No event-only grounded evidence rows are currently separated from market-level opportunities.',
         generatedAt
       ),
       bestValue: section(
@@ -1939,6 +2101,22 @@ export async function getDashboardToday({
       dashboardSlateSource: dashboardFallbackUsed ? 'last_known_grounded_slate' : 'primary_current_events',
       dashboardFallbackUsed,
       dashboardQueryStatus,
+      groundedOpportunityIntegrity: groundedOpportunitySummary.integrityCounters,
+      groundedOpportunityCounts: {
+        totalPredictionRows: groundedOpportunitySummary.predictionRows,
+        completeMarketLevelPredictions: groundedOpportunitySummary.completeMarketLevelPredictions,
+        incompleteEventOnlyEvidenceRows: groundedOpportunitySummary.incompleteEventOnlyEvidenceRows,
+        groundedModelOpportunities: groundedOpportunitySummary.groundedModelOpportunities,
+        groundedPricedOpportunities: groundedOpportunitySummary.groundedPricedOpportunities,
+        actionableOpportunities: groundedOpportunitySummary.actionableOpportunities,
+        expiredGroundedOpportunities: groundedOpportunitySummary.expiredGroundedOpportunities,
+        modelOnlyOpportunities: groundedOpportunitySummary.modelOnlyOpportunities,
+        rowsMissingMarket: groundedOpportunitySummary.rowsMissingMarket,
+        rowsMissingSelection: groundedOpportunitySummary.rowsMissingSelection,
+        rowsMissingProbability: groundedOpportunitySummary.rowsMissingProbability,
+        rowsMissingPredictionId: groundedOpportunitySummary.rowsMissingPredictionId,
+        rowsMissingAlignedPrice: groundedOpportunitySummary.rowsMissingAlignedPrice,
+      },
       queryTimings: {
         ...timingDependencies,
         ...(currentEventsFallbackResult ? { last_known_slate_fallback: currentEventsFallbackResult.durationMs } : {}),
@@ -2272,6 +2450,7 @@ export function validateDashboardTodayFixtures() {
         { internalEventId: 'pregame', matchup: 'AW2 @ HOM2', predictionCount: 3, oddsRowsNormalized: 42, currentBoardCandidateCount: 3, status: 'scheduled', oddsRecordPresent: true, blockingReason: 'ready_for_analysis' } as any,
       ],
     },
+    candidates: [pricedCandidate, complementCandidate, positiveEvNotPolicy, totalCandidate],
     boardCandidateCount: 3,
     officialPicks: 0,
   })
@@ -2304,7 +2483,10 @@ export function validateDashboardTodayFixtures() {
     ['eventStatus drives presentation lifecycle', presentationLifecycleFor({ eventStatus: 'LIVE' }) === 'LIVE' && presentationLifecycleFor({ eventStatus: 'FINAL', settlementState: { label: 'Settlement Pending', totalPredictions: 3, settledPredictions: 0, pendingPredictions: 3, latestSettledAt: null } }) === 'SETTLEMENT_PENDING'],
     ['live game with stored odds is betting locked not no stored odds', contractViewModel.selectors.perGameOperationalStatus.every((game) => game.storedOddsCount === 0 || game.marketAvailability !== 'NO_STORED_ODDS')],
     ['final settlement pending source is canonical', fixtureSettlementSummary.settlementPendingGames === 1 && fixtureSettlementSummary.finalGames === 1],
-    ['grounded informational opportunity reconciles', fixtureGroundedSummary.predictionRows === 6 && fixtureGroundedSummary.groundedRows === 6 && fixtureGroundedSummary.actionableOpportunities === 3 && fixtureGroundedSummary.informationalOpportunities === 3],
+    ['grounded market-level opportunities separate from event evidence', fixtureGroundedSummary.predictionRows === 6 && fixtureGroundedSummary.groundedRows === 4 && fixtureGroundedSummary.completeMarketLevelPredictions === 4 && fixtureGroundedSummary.incompleteEventOnlyEvidenceRows === 2],
+    ['grounded opportunity rows carry prediction market fields', fixtureGroundedSummary.rows.every((row) => row.predictionId && row.market && row.selection && row.modelProbability !== null && row.modelProbability !== undefined)],
+    ['event evidence is not misclassified as opportunity', fixtureGroundedSummary.eventEvidenceRows.length === 1 && fixtureGroundedSummary.integrityCounters.eventEvidenceMisclassifiedAsOpportunity === 0],
+    ['grounded integrity counters are zero', Object.values(fixtureGroundedSummary.integrityCounters).every((value) => value === 0)],
     ['no unexplained grounded prediction drops', fixtureGroundedSummary.unexplainedDroppedRows === 0],
     ['total lines keep positive display semantics', contractViewModel.diagnostics.invalidTotalLineSigns === 0],
     ['edge remains percentage points not probability percent', positiveEvNotPolicy.canonicalEv?.edge === 0.75],

@@ -35,9 +35,14 @@ type TodayResponse = {
     groundedRows: number
     pricedGroundedRows: number
     expiredGroundedRows: number
+    completeMarketLevelPredictions?: number
+    incompleteEventOnlyEvidenceRows?: number
+    groundedModelOpportunities?: number
+    groundedPricedOpportunities?: number
+    actionableOpportunities: number
+    integrityCounters?: Record<string, number>
     currentBoardEligible: number
     officialPicks: number
-    actionableOpportunities: number
     informationalOpportunities: number
     unexplainedDroppedRows: number
     reasonCounts: Record<string, number>
@@ -107,6 +112,7 @@ type TodayResponse = {
     aiPicksFeed?: { status: string; data: AiPicksFeed | null; reason: string | null }
     mostLikely?: { status: string; data: IntelligenceRow[]; reason: string | null }
     groundedOpportunities?: { status: string; data: IntelligenceRow[]; reason: string | null }
+    groundedEventEvidence?: { status: string; data: Array<Record<string, unknown>>; reason: string | null }
     bestValue?: { status: string; data: IntelligenceRow[]; reason: string | null }
     aiBetFinder?: { status: string; data: IntelligenceRow[]; reason: string | null }
     modelIntelligence?: { status: string; data: any; reason: string | null }
@@ -1502,9 +1508,12 @@ function OpportunityRow({ row, rank, mode }: { row: IntelligenceRow; rank: numbe
   const alignment = row.marketAlignment
   const aligned = alignment?.alignmentStatus === 'ALIGNED'
   const category = mode === 'likely' ? probabilityCategory(probability) : fieldValue(row.opportunityCategory ?? row.statusLabel ?? 'Value Candidate')
+  const rowExpectedValue = finiteNumber(row.expectedValue)
+  const rowEdge = finiteNumber(row.edge)
+  const alignedExpectedValue = finiteNumber(alignment?.expectedValuePercent)
   const tone = mode === 'likely'
     ? percentNumber(probability) !== null && percentNumber(probability)! >= 65 ? 'green' : 'blue'
-    : Number(row.expectedValue ?? 0) > 0 && Number(row.edge ?? 0) > 0 ? 'green' : 'yellow'
+    : rowExpectedValue !== null && rowEdge !== null && rowExpectedValue > 0 && rowEdge > 0 ? 'green' : 'yellow'
   return (
     <article className={`rounded-lg border border-slate-800 bg-slate-950/70 p-4 ${cardMotion}`}>
       <div className="grid gap-4 lg:grid-cols-[auto_1fr_auto] lg:items-start">
@@ -1527,7 +1536,7 @@ function OpportunityRow({ row, rank, mode }: { row: IntelligenceRow; rank: numbe
           <Meter label="Probability" value={probability} tone="blue" />
           <Meter label="Implied" value={aligned ? alignment?.marketImpliedProbability : null} tone="yellow" />
           <EdgeMetric value={aligned ? alignment?.edgePercentagePoints : null} tone="blue" />
-          <Meter label="EV" value={aligned ? alignment?.expectedValuePercent : null} tone={Number(alignment?.expectedValuePercent ?? 0) > 0 ? 'green' : 'red'} />
+          <Meter label="EV" value={aligned ? alignment?.expectedValuePercent : null} tone={alignedExpectedValue !== null && alignedExpectedValue > 0 ? 'green' : 'red'} />
           <Meter label="Confidence" value={row.confidence} tone="green" />
         </div>
       </div>
@@ -1563,6 +1572,39 @@ function IntelligenceSection({
         {rows.length ? rows.slice(0, 10).map((row, index) => <OpportunityRow key={opportunityKey(row, index)} row={row} rank={index + 1} mode={mode} />) : (
           <EmptyState title={emptyTitle} detail={emptyDetail} />
         )}
+      </div>
+    </section>
+  )
+}
+
+function GroundedEventEvidenceSection({ rows, reason }: { rows: Array<Record<string, unknown>>; reason?: string | null }) {
+  if (!rows.length) return null
+  return (
+    <section className={`rounded-lg border border-slate-800 bg-slate-900/80 p-6 ${cardMotion}`}>
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Separated Evidence</p>
+          <h3 className="mt-2 text-3xl font-black text-white">Grounded Event Evidence</h3>
+        </div>
+        <Badge tone="blue">{rows.length} event row{rows.length === 1 ? '' : 's'}</Badge>
+      </div>
+      {reason ? <p className="mt-3 text-sm leading-6 text-slate-400">{reason}</p> : null}
+      <div className="mt-5 grid gap-3">
+        {rows.slice(0, 10).map((row, index) => (
+          <article key={String(row.id ?? row.eventId ?? index)} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-base font-black text-white">{fieldValue(row.matchup, 'Matchup pending')}</p>
+              <Badge tone="gray">Not a betting opportunity</Badge>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{fieldValue(row.reason, 'Event-level evidence is incomplete for market opportunity display.')}</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-4">
+              <p className="text-xs font-bold text-slate-400">Event {fieldValue(row.eventId, 'N/A')}</p>
+              <p className="text-xs font-bold text-slate-400">Evidence rows {fieldValue(row.evidenceRows, 'N/A')}</p>
+              <p className="text-xs font-bold text-slate-400">Odds snapshots {fieldValue(row.storedOddsSnapshots, 'N/A')}</p>
+              <p className="text-xs font-bold text-slate-400">State {fieldValue(row.marketAvailability, 'N/A')}</p>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   )
@@ -2188,6 +2230,7 @@ export default function UserTodayPanel() {
   const officialPickRows = data.sections?.officialPicks?.data ?? []
   const aiPicksFeed = data.sections?.aiPicksFeed?.data ?? null
   const groundedRows = data.sections?.groundedOpportunities?.data ?? []
+  const groundedEventEvidenceRows = data.sections?.groundedEventEvidence?.data ?? []
   const aiLeanRows = aiResults.filter((row) => intelligenceCategory(row) === 'ai_lean').slice(0, 3)
   const categorySourceRows = Array.from(
     new Map([...aiResults, ...mostLikely, ...bestValue].map((row, index) => [opportunityKey(row, index), row])).values()
@@ -2232,6 +2275,7 @@ export default function UserTodayPanel() {
         emptyTitle="No grounded opportunities are visible"
         emptyDetail={data.sections?.groundedOpportunities?.reason ?? 'Every stored prediction row has an explicit diagnostic reason; no grounded evidence row is currently displayable.'}
       />
+      <GroundedEventEvidenceSection rows={groundedEventEvidenceRows} reason={data.sections?.groundedEventEvidence?.reason} />
       <IntelligenceSection
         eyebrow="Canonical Probability Rankings"
         title="Most Likely Outcomes"
