@@ -63,6 +63,45 @@ type EventSettlementState = {
   latestSettledAt: string | null
 }
 
+type GroundedPredictionRow = {
+  id: string
+  sport_key: string
+  game_id: string
+  commence_time: string | null
+  home_team: string | null
+  away_team: string | null
+  team: string | null
+  opponent: string | null
+  market: string | null
+  sportsbook: string | null
+  odds: number | null
+  implied_probability: number | null
+  model_probability: number | null
+  edge: number | null
+  ev: number | null
+  confidence: number | null
+  line: number | null
+  odds_timestamp: string | null
+  generated_at: string | null
+  cutoff_at: string | null
+  status: string | null
+  skip_reason: string | null
+  production_eligible: boolean | null
+  recommended_pick: boolean | null
+}
+
+type GroundedOddsSnapshotRow = {
+  id: string
+  event_id: string
+  sportsbook: string | null
+  market: string | null
+  outcome: string | null
+  price: number | null
+  line: number | null
+  snapshot_time: string | null
+  created_at: string | null
+}
+
 export type DashboardPipelineStatus = 'Complete' | 'Running' | 'Waiting' | 'Blocked' | 'Not due'
 export type DashboardTodayStatus = 'AVAILABLE' | 'PARTIAL' | 'DEGRADED' | 'UNAVAILABLE'
 export type DashboardSectionStatus = 'AVAILABLE' | 'EMPTY' | 'DEGRADED' | 'UNAVAILABLE'
@@ -827,6 +866,76 @@ function percentNumber(value: unknown) {
   return parsed > 0 && parsed <= 1 ? parsed * 100 : Math.min(100, parsed)
 }
 
+function roundMetric(value: number | null, decimals = 2) {
+  if (value === null || !Number.isFinite(value)) return null
+  return Number(value.toFixed(decimals))
+}
+
+function dashboardMarketLabel(value: string | null) {
+  if (value === 'moneyline') return 'Moneyline'
+  if (value === 'spread' || value === 'run_line') return 'Run Line'
+  if (value === 'total') return 'Total'
+  return value ?? 'Market'
+}
+
+function canonicalDashboardMarket(value: string | null) {
+  if (value === 'run_line') return 'spread'
+  return String(value ?? 'unknown')
+}
+
+function canonicalDashboardOddsMarket(value: string | null) {
+  if (value === 'spread') return 'run_line'
+  return String(value ?? 'unknown')
+}
+
+function groundedSelection(row: GroundedPredictionRow) {
+  return row.team ?? row.opponent ?? null
+}
+
+function normalizedGroundedSelection(row: GroundedPredictionRow) {
+  const selection = String(groundedSelection(row) ?? '').toLowerCase()
+  if (String(row.market) === 'total') {
+    if (selection.includes('under')) return 'under'
+    if (selection.includes('over')) return 'over'
+  }
+  if (row.home_team && selection === row.home_team.toLowerCase()) return 'home'
+  if (row.away_team && selection === row.away_team.toLowerCase()) return 'away'
+  if (['home', 'away', 'over', 'under'].includes(selection)) return selection
+  return selection
+}
+
+function groundedOddsMatchesPrediction(odds: GroundedOddsSnapshotRow, row: GroundedPredictionRow) {
+  if (canonicalDashboardOddsMarket(row.market) !== canonicalDashboardOddsMarket(odds.market)) return false
+  const outcome = String(odds.outcome ?? '').toLowerCase()
+  const normalized = normalizedGroundedSelection(row)
+  const selection = String(groundedSelection(row) ?? '').toLowerCase()
+  if (!outcome || (outcome !== normalized && outcome !== selection)) return false
+  const predictionLine = finiteNumber(row.line)
+  const oddsLine = finiteNumber(odds.line)
+  if (canonicalDashboardMarket(row.market) === 'moneyline') return oddsLine === null
+  if (predictionLine === null || oddsLine === null) return false
+  return Math.abs(predictionLine - oddsLine) < 0.001
+}
+
+function latestAlignedGroundedOdds(row: GroundedPredictionRow, oddsRows: GroundedOddsSnapshotRow[]) {
+  return oddsRows
+    .filter((odds) => odds.event_id === row.game_id)
+    .filter((odds) => groundedOddsMatchesPrediction(odds, row))
+    .sort((left, right) => String(right.snapshot_time ?? right.created_at ?? '').localeCompare(String(left.snapshot_time ?? left.created_at ?? '')))[0] ?? null
+}
+
+function impliedFromAmericanOdds(odds: number | null) {
+  if (odds === null || !Number.isFinite(odds) || odds === 0) return null
+  return odds > 0 ? roundMetric(100 / (odds + 100) * 100) : roundMetric(Math.abs(odds) / (Math.abs(odds) + 100) * 100)
+}
+
+function expectedValueFromAmerican(probability: number | null, odds: number | null) {
+  if (probability === null || odds === null || !Number.isFinite(probability) || !Number.isFinite(odds) || odds === 0) return null
+  const p = probability > 1 ? probability / 100 : probability
+  const profit = odds > 0 ? odds / 100 : 100 / Math.abs(odds)
+  return roundMetric((p * profit - (1 - p)) * 100)
+}
+
 function canonicalProbability(candidate: CurrentBoardCandidate | null | undefined) {
   if (!candidate) return null
   return percentNumber(candidate.canonicalOutcome?.probability ?? candidate.calibratedProbability ?? candidate.rawProbability)
@@ -1016,9 +1125,137 @@ function mapPredictionToGroundedOpportunity(candidate: CurrentBoardCandidate) {
   }
 }
 
+function mapStoredPredictionToGroundedOpportunity(row: GroundedPredictionRow, event: DashboardEventRow | undefined, odds: GroundedOddsSnapshotRow | null) {
+  const modelProbability = percentNumber(row.model_probability)
+  const confidence = percentNumber(row.confidence)
+  const impliedProbability = odds ? impliedFromAmericanOdds(finiteNumber(odds.price)) : null
+  const edge = modelProbability !== null && impliedProbability !== null ? roundMetric(modelProbability - impliedProbability) : null
+  const expectedValue = odds ? expectedValueFromAmerican(modelProbability, finiteNumber(odds.price)) : null
+  const status = String(event?.status ?? row.status ?? '').toLowerCase()
+  const lifecycle = ['completed', 'complete', 'final', 'closed'].includes(status)
+    ? 'FINAL'
+    : ['live', 'in_progress'].includes(status)
+      ? 'LIVE'
+      : 'PREGAME'
+  const priceState = odds ? (lifecycle === 'PREGAME' ? 'ACTIVE_PREGAME_PRICE' : 'EXPIRED_PREGAME_PRICE') : 'NO_ALIGNED_PRICE'
+  const market = canonicalDashboardMarket(row.market)
+  const selection = groundedSelection(row)
+  return {
+    id: row.id,
+    predictionId: row.id,
+    eventId: row.game_id,
+    matchup: `${event?.away_team ?? row.away_team ?? 'Away'} @ ${event?.home_team ?? row.home_team ?? 'Home'}`,
+    market,
+    marketType: market,
+    marketLabel: dashboardMarketLabel(market),
+    selection,
+    line: row.line ?? null,
+    modelProbability,
+    rawProbability: modelProbability,
+    confidence,
+    generatedAt: row.generated_at,
+    cutoffAt: row.cutoff_at,
+    lifecycle,
+    eventStatus: event?.status ?? row.status ?? null,
+    priceState,
+    marketAvailability: priceState,
+    oddsSnapshotId: odds?.id ?? null,
+    sportsbook: odds?.sportsbook ?? row.sportsbook ?? null,
+    americanOdds: odds ? finiteNumber(odds.price) : null,
+    odds: odds ? finiteNumber(odds.price) : null,
+    impliedProbability,
+    edge,
+    expectedValue,
+    canonicalOutcome: {
+      selection,
+      line: row.line ?? null,
+      probability: modelProbability,
+      sourceSelection: selection,
+      sourceLine: row.line ?? null,
+      sourceProbability: modelProbability,
+      complementDerived: false,
+      pushProbability: null,
+      totalProbability: null,
+      probabilityBasis: 'persisted_prediction_history',
+    },
+    canonicalPrice: odds ? {
+      americanOdds: finiteNumber(odds.price),
+      impliedProbability,
+      sportsbook: odds.sportsbook,
+      oddsSnapshotId: odds.id,
+      timestamp: odds.snapshot_time ?? odds.created_at,
+      source: 'selected_stored_price',
+      status: 'AVAILABLE',
+    } : null,
+    canonicalEv: odds ? {
+      edge,
+      expectedValue,
+      actionableEdge: lifecycle === 'PREGAME' ? edge : null,
+      actionableExpectedValue: lifecycle === 'PREGAME' ? expectedValue : null,
+      reason: priceState,
+    } : null,
+    marketAlignment: {
+      alignmentStatus: odds ? 'ALIGNED' : 'UNAVAILABLE',
+      freshnessStatus: priceState,
+      marketImpliedProbability: impliedProbability,
+      edgePercentagePoints: edge,
+      expectedValuePercent: expectedValue,
+    },
+    actionability: row.production_eligible === true && odds && lifecycle === 'PREGAME' ? 'ACTIONABLE' : odds ? 'INFORMATIONAL_PRICED' : 'INFORMATIONAL_MODEL',
+    statusLabel: odds ? 'Grounded Priced Opportunity' : 'Grounded Model Opportunity',
+    opportunityCategory: odds ? 'grounded_priced' : 'grounded_model',
+    marketIntelligenceCategory: 'model_only',
+    semanticLabel: priceState,
+    reasonNotOfficial: row.skip_reason ?? priceState,
+    blocker: row.skip_reason ?? priceState,
+    blockers: row.skip_reason ? String(row.skip_reason).split(',').map((item) => item.trim()).filter(Boolean) : [priceState],
+    strengths: ['Persisted prediction row', odds ? 'Exact-side stored odds snapshot' : 'Market-level model evidence'],
+    warnings: ['Informational only under current lifecycle, freshness or policy gates'],
+    modeledValueStatus: odds ? 'MODELED_VALUE' : 'NO_MODELED_VALUE',
+    recommendationPolicyStatus: row.production_eligible === true ? 'PRODUCTION_ELIGIBLE' : 'NOT_OFFICIALLY_ELIGIBLE',
+    why: odds
+      ? 'Persisted prediction row is mapped to its own market, selection and exact-side stored odds snapshot.'
+      : 'Persisted prediction row is mapped to a real market and selection, but no exact-side stored price is available.',
+  }
+}
+
+async function loadStoredGroundedOpportunities(eventIds: string[], events: DashboardEventRow[]) {
+  const ids = Array.from(new Set(eventIds.filter(Boolean)))
+  if (!ids.length) return []
+  const { data: predictionData, error: predictionError } = await supabaseAdmin
+    .from('prediction_history')
+    .select('id,sport_key,game_id,commence_time,home_team,away_team,team,opponent,market,sportsbook,odds,implied_probability,model_probability,edge,ev,confidence,line,odds_timestamp,generated_at,cutoff_at,status,skip_reason,production_eligible,recommended_pick')
+    .eq('sport_key', SPORT_KEY)
+    .in('game_id', ids)
+    .order('generated_at', { ascending: false })
+    .limit(200)
+  if (predictionError) throw new Error(`grounded prediction read failed: ${predictionError.message}`)
+  const rows = ((predictionData ?? []) as GroundedPredictionRow[])
+    .filter((row) => ['moneyline', 'spread', 'run_line', 'total'].includes(String(row.market ?? '')))
+    .filter((row) => row.id && row.game_id && row.market && groundedSelection(row) && row.model_probability !== null && row.model_probability !== undefined)
+  if (!rows.length) return []
+  const { data: oddsData, error: oddsError } = await supabaseAdmin
+    .from('sports_odds_snapshots')
+    .select('id,event_id,sportsbook,market,outcome,price,line,snapshot_time,created_at')
+    .in('event_id', ids)
+    .limit(1000)
+  if (oddsError) throw new Error(`grounded odds read failed: ${oddsError.message}`)
+  const oddsRows = (oddsData ?? []) as GroundedOddsSnapshotRow[]
+  const eventsById = new Map(events.map((event) => [event.id, event]))
+  const latestByKey = new Map<string, ReturnType<typeof mapStoredPredictionToGroundedOpportunity>>()
+  for (const row of rows) {
+    const opportunity = mapStoredPredictionToGroundedOpportunity(row, eventsById.get(row.game_id), latestAlignedGroundedOdds(row, oddsRows))
+    const key = [opportunity.eventId, opportunity.market, opportunity.selection, opportunity.line ?? 'null'].join('|')
+    const existing = latestByKey.get(key)
+    if (!existing || String(opportunity.generatedAt ?? '') > String(existing.generatedAt ?? '')) latestByKey.set(key, opportunity)
+  }
+  return Array.from(latestByKey.values())
+}
+
 function buildGroundedOpportunitySummary(input: {
   oddsCoverage: Awaited<ReturnType<typeof getMlbOddsCoverage>> | null
   candidates: CurrentBoardCandidate[]
+  persistedOpportunities?: Array<Record<string, any>>
   boardCandidateCount: number
   officialPicks: number
 }): DashboardGroundedOpportunitySummary {
@@ -1055,7 +1292,7 @@ function buildGroundedOpportunitySummary(input: {
     }]
   })
   const predictionRows = classifications.reduce((sum, row) => sum + Number(row.predictionRows ?? 0), 0)
-  const opportunityRows = input.candidates.map(mapPredictionToGroundedOpportunity)
+  const opportunityRows = input.persistedOpportunities?.length ? input.persistedOpportunities : input.candidates.map(mapPredictionToGroundedOpportunity)
   const groundedRows = opportunityRows.length
   const pricedGroundedRows = opportunityRows.filter((row) => row.oddsSnapshotId && row.americanOdds !== null && row.americanOdds !== undefined).length
   const expiredGroundedRows = opportunityRows.filter((row) => row.priceState === 'EXPIRED_PREGAME_PRICE' || row.lifecycle !== 'PREGAME').length
@@ -1645,9 +1882,16 @@ export async function getDashboardToday({
   const marketIntelligence = summarizeMarketIntelligenceCategories(displayCandidates)
   const officialPickData = board.officialPickExperience?.picks ?? []
   const aiPicksFeed = board.aiPicksFeed ?? boardFallback.aiPicksFeed!
+  const groundedPersistedResult = await timed(
+    'grounded_persisted_predictions',
+    () => loadStoredGroundedOpportunities((oddsCoverage?.diagnostics ?? []).map((row) => String(row.internalEventId ?? '')).filter(Boolean), currentEvents),
+    1800
+  )
+  const groundedPersistedOpportunities = values(groundedPersistedResult, [])
   const groundedOpportunitySummary = buildGroundedOpportunitySummary({
     oddsCoverage,
     candidates: displayCandidates,
+    persistedOpportunities: groundedPersistedOpportunities,
     boardCandidateCount: board.candidates.length,
     officialPicks: officialPickData.length || board.officialPickCount || nextSlate.officialPicks,
   })
@@ -2447,8 +2691,11 @@ export function validateDashboardTodayFixtures() {
       summary: {} as any,
       modelInputReadiness: {} as any,
       diagnostics: [
-        { internalEventId: 'live', matchup: 'AWY @ HOM', predictionCount: 3, oddsRowsNormalized: 42, currentBoardCandidateCount: 0, status: 'live', oddsRecordPresent: true, blockingReason: 'not_actionable_on_current_board_after_price_freshness_policy' } as any,
-        { internalEventId: 'pregame', matchup: 'AW2 @ HOM2', predictionCount: 3, oddsRowsNormalized: 42, currentBoardCandidateCount: 3, status: 'scheduled', oddsRecordPresent: true, blockingReason: 'ready_for_analysis' } as any,
+        { internalEventId: 'event-bos', matchup: 'AWY @ HOM', predictionCount: 1, oddsRowsNormalized: 42, currentBoardCandidateCount: 1, status: 'live', oddsRecordPresent: true, blockingReason: 'not_actionable_on_current_board_after_price_freshness_policy' } as any,
+        { internalEventId: 'event-ari', matchup: 'AW2 @ HOM2', predictionCount: 1, oddsRowsNormalized: 42, currentBoardCandidateCount: 1, status: 'scheduled', oddsRecordPresent: true, blockingReason: 'ready_for_analysis' } as any,
+        { internalEventId: 'event-chc', matchup: 'AW3 @ HOM3', predictionCount: 1, oddsRowsNormalized: 42, currentBoardCandidateCount: 1, status: 'scheduled', oddsRecordPresent: true, blockingReason: 'ready_for_analysis' } as any,
+        { internalEventId: 'event-total', matchup: 'AW4 @ HOM4', predictionCount: 1, oddsRowsNormalized: 42, currentBoardCandidateCount: 1, status: 'scheduled', oddsRecordPresent: true, blockingReason: 'ready_for_analysis' } as any,
+        { internalEventId: 'event-evidence-only', matchup: 'AW5 @ HOM5', predictionCount: 2, oddsRowsNormalized: 42, currentBoardCandidateCount: 0, status: 'scheduled', oddsRecordPresent: true, blockingReason: 'event_level_evidence_only' } as any,
       ],
     },
     candidates: [pricedCandidate, complementCandidate, positiveEvNotPolicy, totalCandidate],
