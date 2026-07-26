@@ -16,7 +16,7 @@ The certified platform baseline locks the production architecture, canonical ope
 
 Future changes to these locked modules require documented reason, proven production defect or approved product requirement, impact analysis, focused regression tests, build pass, production smoke verification and explicit approval before deployment.
 
-Next approved phase: Portfolio Intelligence V1, status NOT STARTED.
+Current additive phase: MLB Player Prop Market Comparison V1. Portfolio Intelligence V1 remains NOT STARTED.
 
 ## Next.js Structure
 
@@ -410,6 +410,14 @@ Create focused panels under `src/components/dashboard`, fetch typed API response
 # Additive Module: MLB Pitcher Projection Engine V1
 
 The MLB Pitcher Projection Engine V1 is isolated from locked production prediction, settlement, Current Board, Grounded Opportunities, Best Value, Official Pick, Learning Brain and scheduler contracts.
+
+# Additive Module: MLB Player Prop Market Comparison V1
+
+MLB Player Prop Market Comparison V1 lives in `src/services/mlb-player-prop-comparison.service.ts` with contracts in `src/types/mlb-player-prop-comparison.ts` and APIs under `/api/mlb/player-props`.
+
+The module compares completed pitcher recorded-outs projections to stored sportsbook player-prop rows from `sports_odds_snapshots`. It supports only recorded-outs over/under lines 14.5, 15.5, 16.5, 17.5 and 18.5 in V1. It normalizes American odds, decimal odds, implied probability, fair odds, model probability and percentage-point difference, then classifies disagreement as model-vs-market status only.
+
+The module is read-only: no provider calls, no remote mutations, no migration, no persistence table and no scheduler. It does not alter pitcher projection formulas, prediction probabilities, Current Board, Most Likely, Best Value, Official Pick policy, settlement, Learning Brain or Dashboard contracts. Portfolio Intelligence remains not started.
 
 Runtime flow:
 

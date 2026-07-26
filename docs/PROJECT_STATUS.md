@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-07-26 00:00:00Z
+Last updated: 2026-07-26 16:30:00Z
+
+## 2026-07-26 MLB Player Prop Market Comparison V1
+
+- Added an additive model-vs-market comparison layer for MLB pitcher recorded-outs props only.
+- Added `src/types/mlb-player-prop-comparison.ts`, `src/services/mlb-player-prop-comparison.service.ts` and APIs under `/api/mlb/player-props`, `/health`, `/validation`, `/[pitcherId]`, `/preview` and `/generate`.
+- Extended the existing Player Projections Pitcher Outs tab with a Sportsbook Comparison panel showing sportsbook, line, price, implied probability, model probability, difference, fair odds and status when stored markets exist.
+- Current production data audit found zero stored MLB `player_props:%` rows in `sports_odds_snapshots`, so live comparisons honestly return `NO_PROP_AVAILABLE` and render no-current-line empty states.
+- The module makes 0 provider calls, performs 0 remote mutations, creates no migration and does not change pitcher projection formulas, prediction logic, Current Board, Most Likely, Best Value, Official Pick policy, settlement, scheduler, Learning Brain or Dashboard contracts.
+- Portfolio Intelligence V1 remains NOT STARTED.
 
 ## 2026-07-26 Platform Baseline Certified
 
@@ -36,7 +45,7 @@ Completed certified phases:
 - Performance product contract
 - Platform certification
 
-Next approved phase: Portfolio Intelligence V1.
+Current additive phase: MLB Player Prop Market Comparison V1.
 
 Portfolio Intelligence V1 status: NOT STARTED.
 

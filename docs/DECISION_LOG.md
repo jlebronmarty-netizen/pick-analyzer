@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-26 - Add MLB Player Prop Market Comparison Without Recommendations
+
+Context: MLB Pitcher Projection Engine V1 now produces grounded pitcher recorded-outs projections, distributions and threshold probabilities. The next approved task is to compare those model probabilities with real sportsbook player-prop markets when stored market rows exist, without improving projections or creating betting recommendations.
+
+Decision: Add MLB Player Prop Market Comparison V1 as a read-only model-vs-market layer. It supports only pitcher recorded-outs over/under lines 14.5, 15.5, 16.5, 17.5 and 18.5, reads stored `sports_odds_snapshots` player-prop rows, computes implied probability, fair odds and percentage-point difference, and classifies market disagreement without EV, Kelly, staking, Official Picks or Portfolio Intelligence.
+
+Consequences: The Player Projections Pitcher Outs tab can display a Sportsbook Comparison panel and honest `NO_PROP_AVAILABLE` empty states. Current stored coverage has zero MLB `player_props:%` rows, so no sportsbook line, price or implied probability is fabricated. The module makes zero provider calls and zero remote mutations and does not change pitcher projection formulas, prediction logic, settlement, scheduler, Learning Brain, Current Board, Most Likely, Best Value or Dashboard contracts.
+
+Affected modules: `src/types/mlb-player-prop-comparison.ts`, `src/services/mlb-player-prop-comparison.service.ts`, `/api/mlb/player-props*`, `src/components/dashboard/MlbPlayerProjectionPageClient.tsx`, `docs/MLB_PLAYER_PROP_MARKET_COMPARISON_V1.md`.
+
 ## 2026-07-26 - Certify Platform Baseline And Lock Governance
 
 Context: Production was certified at runtime commit `94159038571ba16cf31107403efce3af7f13ba50` after live verification of operations status, operations validation, Dashboard, Current Board, Most Likely, Best Value, settlement dry-run safety, Performance user-mode sanitization and adaptive odds provider evidence persistence.

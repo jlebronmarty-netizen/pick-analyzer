@@ -32,7 +32,15 @@ Note: Product Experience, Dashboard canonical reconciliation, Grounded Opportuni
 
 Status: NOT STARTED.
 
-Note: Portfolio Intelligence V1 is the next approved phase. No implementation details are introduced in the certified baseline documentation.
+Note: Portfolio Intelligence V1 remains NOT STARTED. MLB Player Prop Market Comparison V1 is a separate model-vs-market comparison layer and does not create portfolio construction, bankroll, staking, Kelly or Official Pick behavior.
+
+### MLB Player Prop Market Comparison V1
+
+Status: Implemented locally; push and production certification pending approval.
+
+Evidence: `src/types/mlb-player-prop-comparison.ts`, `src/services/mlb-player-prop-comparison.service.ts`, `/api/mlb/player-props`, `/api/mlb/player-props/health`, `/api/mlb/player-props/validation`, `/api/mlb/player-props/[pitcherId]`, `/api/mlb/player-props/preview`, `/api/mlb/player-props/generate`, `src/components/dashboard/MlbPlayerProjectionPageClient.tsx`, `docs/MLB_PLAYER_PROP_MARKET_COMPARISON_V1.md`.
+
+Note: V1 supports pitcher recorded-outs market comparison only for 14.5, 15.5, 16.5, 17.5 and 18.5 over/under lines. It computes implied probability, fair odds and percentage-point difference from stored `sports_odds_snapshots` player-prop rows. Current live audit found 0 stored MLB `player_props:%` rows, so comparisons return `NO_PROP_AVAILABLE` without fabricating sportsbooks, lines or prices. No provider calls, remote mutations, projection formula changes, EV, Kelly, Official Picks, settlement changes, scheduler changes or Portfolio Intelligence were introduced.
 
 ### Production UX Polish V1
 
