@@ -1,0 +1,52 @@
+{
+  "run": {
+    "name": "HISTORICAL_SPORTS_DATA_FOUNDATION_V2_AND_PREDICTION_EPOCH_RESET_V2",
+    "status": "in_progress",
+    "repository": "C:\\Projects\\pick-analyzer",
+    "startingCommit": "c1735c86ebbe2525f6eac8a919d8c807e9cbed6e",
+    "certifiedPlatformTag": "v1.0-platform-certified",
+    "certifiedPlatformCommit": "eb15613efd81ff1a8e57797e11feb7254c1b604a",
+    "productionMutationsAllowed": false,
+    "pushAllowed": false,
+    "deploymentAllowed": false,
+    "historicalOddsAllowed": false,
+    "providerCallBudgetPreferred": 25,
+    "providerCallBudgetHard": 50,
+    "providerCallsUsed": 0,
+    "remoteMutationsMade": 0,
+    "createdAt": "2026-07-26T23:20:00Z",
+    "updatedAt": "2026-07-26T23:25:00Z"
+  },
+  "phases": [
+    {
+      "phaseId": 0,
+      "phaseName": "AUTONOMOUS_EXECUTION_GOVERNANCE_V2",
+      "status": "completed",
+      "startedAt": "2026-07-26T23:20:00Z",
+      "completedAt": "2026-07-26T23:20:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "governance_document_created",
+          "machine_readable_ledger_created",
+          "resume_procedure_documented",
+          "production_mutation_policy_recorded"
+        ]
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_1"
+    }
+  ],
+  "certificationMarkers": [
+    "AUTONOMOUS_GOVERNANCE_V2_PASS"
+  ]
+}

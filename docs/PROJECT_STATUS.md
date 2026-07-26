@@ -1,6 +1,12 @@
 # Project Status
 
-Last updated: 2026-07-26 22:55:00Z
+Last updated: 2026-07-26 23:20:00Z
+
+## 2026-07-26 Historical Sports Data Foundation V2 Autonomous Run
+
+- Started local-only Historical Sports Data Foundation V2 and Prediction Epoch Reset V2 autonomous execution from commit `c1735c86ebbe2525f6eac8a919d8c807e9cbed6e`.
+- Added `docs/AUTONOMOUS_EXECUTION_V2.md` and `docs/autonomous-execution-v2.json` as the resumable governance and ledger contract.
+- Push, production deployment, production SQL, production data mutation, historical odds, scheduled player-prop ingestion, Player Prop EV V2 and Portfolio Intelligence remain disallowed for this run.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1
 

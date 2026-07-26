@@ -1,5 +1,13 @@
 # Decision Log
 
+## 2026-07-26 - Start Historical Sports Data Foundation V2 With Resumable Governance
+
+Context: The next approved work is a multi-phase historical sports data foundation and prediction epoch reset run. The run must be autonomous but local-only, with no push, deployment, production SQL, production data mutation, historical odds, destructive prediction reset or new production epoch activation.
+
+Decision: Add `docs/AUTONOMOUS_EXECUTION_V2.md` and `docs/autonomous-execution-v2.json` as the governance and machine-readable ledger for phase status, validation, build results, provider calls, mutation counts, migrations, blockers and continuation decisions.
+
+Consequences: The run can resume after interruption from repository files instead of chat memory. The ledger records that Phase 0 has zero provider calls, zero remote mutations and no migrations. A phase commit cannot contain its own final hash without changing that hash, so self hashes are recorded as `pending_self_reference` and resolved by subsequent ledger updates/final reporting.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

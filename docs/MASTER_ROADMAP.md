@@ -18,6 +18,10 @@ The certified platform baseline freezes the current production architecture, ope
 
 MLB is now production stable and in maintenance mode. The primary roadmap focus is BSN, basketball intelligence, basketball prediction readiness after data maturity, AI market intelligence expansion and then additional sports. MLB work should remain limited to maintenance unless a future explicit major project authorizes architecture or model changes.
 
+## Active Local Run
+
+Historical Sports Data Foundation V2 and Prediction Epoch Reset V2 is in autonomous local execution. The run is governed by `docs/AUTONOMOUS_EXECUTION_V2.md` and `docs/autonomous-execution-v2.json`. It may create local commits and additive migration files, but it must not push, deploy, apply production SQL, execute historical odds, delete predictions, activate a new production epoch or enable new production cron jobs.
+
 ## Completed
 
 ### Platform Certification

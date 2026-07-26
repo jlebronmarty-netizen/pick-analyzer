@@ -16,7 +16,11 @@ The certified platform baseline locks the production architecture, canonical ope
 
 Future changes to these locked modules require documented reason, proven production defect or approved product requirement, impact analysis, focused regression tests, build pass, production smoke verification and explicit approval before deployment.
 
-Current additive phase: Probability Picks & Parlay Builder V1. Portfolio Intelligence V1 remains NOT STARTED.
+Current additive phase: Historical Sports Data Foundation V2 and Prediction Epoch Reset V2 is running locally under `docs/AUTONOMOUS_EXECUTION_V2.md`. Portfolio Intelligence V1 remains NOT STARTED.
+
+## Autonomous Execution Governance V2
+
+Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as a machine-readable phase ledger. The ledger records phase status, commits, build and validation results, provider calls, mutation counts, migrations and continuation decisions so an interrupted run can resume without relying on chat memory. This governance layer is local-only and does not authorize production SQL, production mutations, deployment, historical odds, prediction deletion or production epoch activation.
 
 ## Next.js Structure
 
