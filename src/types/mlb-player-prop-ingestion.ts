@@ -39,8 +39,10 @@ export type PitcherPropMarket = {
 export type PitcherPropSnapshot = {
   id: string
   eventId: string
+  providerEventId?: string | null
   pitcherId: string | null
   providerPitcherId: string | null
+  pitcherName?: string | null
   market: MlbPlayerPropIngestionMarket
   providerMarketKey: string
   line: number

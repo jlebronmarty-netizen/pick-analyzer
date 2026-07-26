@@ -1,6 +1,17 @@
 # Project Status
 
-Last updated: 2026-07-26 18:30:00Z
+Last updated: 2026-07-26 20:45:00Z
+
+## 2026-07-26 The Odds API Event Crosswalk And Live Player Prop Ingestion Enablement V1
+
+- Added deterministic current-MLB event crosswalk service `src/services/the-odds-api-event-crosswalk.service.ts` and route `/api/providers/the-odds-api/event-crosswalk`.
+- Dry-run/validation paths make 0 provider calls; live crosswalk requires `confirm=ODDS_API_EVENT_CROSSWALK`; persistence requires `confirm=ODDS_API_EVENT_CROSSWALK_PERSIST`.
+- Root cause was confirmed: internal `sport_events` use SportsDataIO-backed IDs and team abbreviations, while The Odds API returns independent event IDs and full team names, with no existing `the-odds-api` event mappings.
+- Bounded live review used 1 events call, evaluated 13 provider events against 26 internal events, found 13 deterministic team/time matches, 0 ambiguous matches and 0 unmatched provider events.
+- Approved persist mode wrote 13 certified `provider_entity_mappings` event rows and no other table changes.
+- Extended the protected MLB player prop sync to use only certified The Odds API event mappings for manual `pitcher_outs` sync with `confirm=MLB_PLAYER_PROP_SYNC`, capped to 3 events.
+- Live sync stores only real provider rows into existing `sports_odds_snapshots`; unresolved pitcher identities are rejected and all-unresolved provider rows fail closed with `ALL_PITCHER_IDENTITIES_UNRESOLVED`.
+- No historical odds endpoints, scheduled ingestion, fake lines, EV, Kelly, Official Picks, Probability Picks changes or Portfolio Intelligence behavior were introduced.
 
 ## 2026-07-26 The Odds API Free-Tier Capability Audit V1
 

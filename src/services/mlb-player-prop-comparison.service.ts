@@ -3,7 +3,7 @@ import 'server-only'
 import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { previewPitcherProjection } from '@/services/mlb-pitcher-projection-engine.service'
-import type { MlbPitcherProjection } from '@/types/mlb-pitcher-projections'
+import type { MlbPitcherProjection, PitcherDataSufficiency, PitcherStarterStatus, PitcherWorkloadContext } from '@/types/mlb-pitcher-projections'
 import type {
   PitcherPropComparison,
   PitcherPropComparisonStatus,
@@ -35,6 +35,32 @@ type OddsRow = {
   metadata: Record<string, unknown> | null
 }
 
+type StoredPitcherProjectionRow = {
+  id: string
+  event_id: string
+  pitcher_id: string
+  provider_pitcher_id: string | null
+  starter_status: string
+  projected_outs: number | string | null
+  projected_innings: number | string | null
+  projected_pitch_count: number | string | null
+  projected_strikeouts: number | string | null
+  projected_hits_allowed: number | string | null
+  projected_earned_runs: number | string | null
+  outs_distribution: Record<string, unknown> | null
+  threshold_probabilities: Record<string, unknown> | null
+  confidence: number | string
+  quality_score: number | string
+  data_sufficiency: string
+  feature_snapshot: Record<string, unknown> | null
+  drivers: string[] | null
+  risks: string[] | null
+  warnings: string[] | null
+  model_version: string
+  generated_at: string
+  cutoff_at: string | null
+}
+
 function nowIso() {
   return new Date().toISOString()
 }
@@ -54,6 +80,10 @@ function text(value: unknown) {
 
 function asRecord(value: unknown) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
+
+function arr(value: unknown) {
+  return Array.isArray(value) ? value.map((item) => String(item)) : []
 }
 
 function round(value: number | null, digits = 4) {
@@ -102,6 +132,111 @@ export function probabilityToFairDecimal(probability: number | null) {
 function marketProbability(projection: MlbPitcherProjection, outcome: PitcherPropOutcome, line: number) {
   const key = String(line) as keyof MlbPitcherProjection['overProbabilities']
   return outcome === 'OVER' ? projection.overProbabilities[key] ?? null : projection.underProbabilities[key] ?? null
+}
+
+function confidenceLevel(confidence: number) {
+  if (confidence >= 80) return 'HIGH'
+  if (confidence >= 60) return 'MODERATE'
+  if (confidence > 0) return 'LOW'
+  return 'INSUFFICIENT'
+}
+
+function starterStatus(value: unknown): PitcherStarterStatus {
+  const raw = String(value ?? '')
+  return raw === 'CONFIRMED' || raw === 'PROBABLE' || raw === 'EXPECTED' || raw === 'UNVERIFIED' ? raw : 'UNVERIFIED'
+}
+
+function dataSufficiency(value: unknown): PitcherDataSufficiency {
+  const raw = String(value ?? '')
+  return raw === 'FULL' || raw === 'STANDARD' || raw === 'LIMITED' || raw === 'INSUFFICIENT' ? raw : 'INSUFFICIENT'
+}
+
+function workloadClassification(value: unknown): PitcherWorkloadContext['workloadClassification'] {
+  const raw = String(value ?? '')
+  return raw === 'WORKHORSE' || raw === 'STANDARD' || raw === 'LIMITED' || raw === 'VOLATILE' || raw === 'INSUFFICIENT' ? raw : 'INSUFFICIENT'
+}
+
+async function storedPitcherProjectionFallback(options: { date?: string | null; limit?: number }) {
+  let query = supabaseAdmin
+    .from('mlb_pitcher_projections')
+    .select('id,event_id,pitcher_id,provider_pitcher_id,starter_status,projected_outs,projected_innings,projected_pitch_count,projected_strikeouts,projected_hits_allowed,projected_earned_runs,outs_distribution,threshold_probabilities,confidence,quality_score,data_sufficiency,feature_snapshot,drivers,risks,warnings,model_version,generated_at,cutoff_at')
+    .order('generated_at', { ascending: false })
+    .limit(Math.min(Math.max(options.limit ?? 200, 1), 500))
+  if (options.date) query = query.eq('projection_date', options.date)
+  const { data, error } = await query
+  if (error) throw new Error(`stored MLB pitcher projections read failed: ${error.message}`)
+  const seen = new Set<string>()
+  return ((data ?? []) as StoredPitcherProjectionRow[]).flatMap((row) => {
+    const featureSnapshot = asRecord(row.feature_snapshot)
+    const identity = asRecord(featureSnapshot.identity)
+    const starterAssignment = asRecord(featureSnapshot.starterAssignment)
+    const workload = asRecord(featureSnapshot.workload)
+    const thresholds = asRecord(row.threshold_probabilities)
+    const over = asRecord(thresholds.over)
+    const under = asRecord(thresholds.under)
+    const pitcherName = text(identity.pitcherName)
+    if (!pitcherName || seen.has(row.id)) return []
+    seen.add(row.id)
+    const confidence = num(row.confidence) ?? 0
+    return [{
+      projectionId: row.id,
+      eventId: row.event_id,
+      pitcherId: row.pitcher_id,
+      providerPitcherId: row.provider_pitcher_id,
+      historicalPitcherId: text(identity.historicalPitcherId),
+      pitcherName,
+      team: text(identity.team),
+      opponent: text(starterAssignment.opponent),
+      homeAway: starterAssignment.homeAway === 'home' || starterAssignment.homeAway === 'away' ? starterAssignment.homeAway : null,
+      handedness: text(identity.handedness),
+      starterStatus: starterStatus(row.starter_status),
+      starterSource: text(starterAssignment.starterSource) ?? 'stored_projection',
+      starterConfirmedAt: text(starterAssignment.starterConfirmedAt),
+      projectedOuts: num(row.projected_outs),
+      projectedInnings: num(row.projected_innings),
+      projectedPitchCount: num(row.projected_pitch_count),
+      projectedStrikeouts: num(row.projected_strikeouts),
+      projectedHitsAllowed: num(row.projected_hits_allowed),
+      projectedEarnedRuns: num(row.projected_earned_runs),
+      secondaryAvailability: {
+        pitchCount: 'LIMITED',
+        innings: 'LIMITED',
+        strikeouts: 'LIMITED',
+        hitsAllowed: 'LIMITED',
+        earnedRuns: 'LIMITED',
+      },
+      outsDistribution: row.outs_distribution as MlbPitcherProjection['outsDistribution'],
+      overProbabilities: {
+        '14.5': num(over['14.5']),
+        '15.5': num(over['15.5']),
+        '16.5': num(over['16.5']),
+        '17.5': num(over['17.5']),
+        '18.5': num(over['18.5']),
+      },
+      underProbabilities: {
+        '14.5': num(under['14.5']),
+        '15.5': num(under['15.5']),
+        '16.5': num(under['16.5']),
+        '17.5': num(under['17.5']),
+        '18.5': num(under['18.5']),
+      },
+      confidence,
+      confidenceLevel: confidenceLevel(confidence),
+      qualityScore: num(row.quality_score) ?? 0,
+      dataSufficiency: dataSufficiency(row.data_sufficiency),
+      recommendationStatus: 'MODEL_PROJECTION_ONLY',
+      featureSnapshot: featureSnapshot as MlbPitcherProjection['featureSnapshot'],
+      mainDrivers: arr(row.drivers),
+      mainRisks: arr(row.risks),
+      blockers: [],
+      warnings: arr(row.warnings),
+      expectedWorkloadClassification: workloadClassification(workload.workloadClassification),
+      modelVersion: row.model_version,
+      generatedAt: row.generated_at,
+      eventStartTime: text(starterAssignment.eventStartTime),
+      cutoffAt: row.cutoff_at,
+    } satisfies MlbPitcherProjection]
+  })
 }
 
 function metadataPlayerId(row: OddsRow) {
@@ -351,7 +486,12 @@ export function validatePlayerPropComparisonFixtures() {
 }
 
 export async function getMlbPlayerPropComparisons(options: { date?: string | null; limit?: number; pitcherId?: string | null } = {}) {
-  const slate = await previewPitcherProjection({ date: options.date, limit: 200 })
+  const slate = await previewPitcherProjection({ date: options.date, limit: 200 }).catch(async (error) => ({
+    generatedAt: nowIso(),
+    selectedDate: options.date ?? new Date().toISOString().slice(0, 10),
+    projections: await storedPitcherProjectionFallback({ date: options.date, limit: options.limit ?? 200 }),
+    fallbackWarning: `PITCHER_PROJECTION_PREVIEW_FAILED_STORED_FALLBACK_USED: ${error instanceof Error ? error.message : String(error)}`,
+  }))
   const projections = slate.projections.filter((projection) =>
     !options.pitcherId ||
     projection.pitcherId === options.pitcherId ||
@@ -404,6 +544,7 @@ export async function getMlbPlayerPropComparisons(options: { date?: string | nul
     deterministicFixtures: validatePlayerPropComparisonFixtures(),
     comparisons,
     warnings: [
+      'fallbackWarning' in slate ? slate.fallbackWarning : null,
       oddsRows.length === 0 ? 'No current recorded-outs sportsbook prop market is stored. Returning NO_PROP_AVAILABLE comparisons only.' : null,
       'Projection Only',
       'No betting recommendation',

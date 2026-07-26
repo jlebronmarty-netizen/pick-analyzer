@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-26 - Enable The Odds API Current Event Crosswalk Before Manual Pitcher Outs Sync
+
+Context: The prior The Odds API capability audit proved current MLB player-prop rows exist, but event identity was blocked because The Odds API event IDs did not map to internal `sport_events` and no provider mapping rows existed.
+
+Decision: Add a deterministic current-event crosswalk that normalizes MLB team names, matches home team, away team and bounded UTC start time, rejects ambiguous or stale candidates, and persists only reviewed deterministic mappings. Extend the protected player-prop sync to use certified mappings for a manual, confirmation-gated, capped The Odds API `pitcher_outs` read.
+
+Consequences: The prior root cause is documented and the current-event crosswalk can persist `provider_entity_mappings` rows without touching unrelated tables. Manual prop sync remains pregame-only, mapping-dependent and pitcher-identity-gated; unresolved pitcher rows are rejected. No historical odds, scheduled ingestion, fake markets, EV, Kelly, Official Picks, Probability Picks behavior or Portfolio Intelligence were added.
+
+Affected modules: `src/services/the-odds-api-event-crosswalk.service.ts`, `/api/providers/the-odds-api/event-crosswalk`, `src/services/mlb-player-prop-sync.service.ts`, `/api/mlb/player-props/sync`, `docs/THE_ODDS_API_EVENT_CROSSWALK_AND_PROP_SYNC_V1.md`.
+
 ## 2026-07-26 - Audit Existing The Odds API Free-Tier Capability
 
 Context: The application has an existing The Odds API credential, but player-prop availability, quota state and event identity crosswalk were not proven in the current runtime. Before changing providers or purchasing a plan, the account needed a bounded live capability audit.

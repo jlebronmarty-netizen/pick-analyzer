@@ -4,6 +4,8 @@ import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { sportsDataIoCatalogForSport } from '@/config/sportsdataio-endpoint-catalog'
 import { checkProviderBudget } from '@/services/provider-budget.service'
+import { previewPitcherProjection } from '@/services/mlb-pitcher-projection-engine.service'
+import { getCertifiedOddsApiEventMappings, ODDS_API_PROVIDER } from '@/services/the-odds-api-event-crosswalk.service'
 import type {
   MlbPlayerPropIngestionProvider,
   MlbPlayerPropIngestionSelection,
@@ -19,11 +21,14 @@ const ODDS_API_MARKET = 'pitcher_outs'
 const SPORTS_ODDS_MARKET = 'player_props:pitcher_outs_recorded'
 const SOURCE_VERSION = 'mlb_player_prop_ingestion_v1'
 const SUPPORTED_LINES = [14.5, 15.5, 16.5, 17.5, 18.5] as const
+const ODDS_API_BASE_URL = 'https://api.the-odds-api.com/v4'
+const LIVE_CONFIRMATION = 'MLB_PLAYER_PROP_SYNC'
 
 type SyncOptions = {
   date?: string | null
   dryRun?: boolean | null
   confirmed?: boolean | null
+  confirm?: string | null
   provider?: MlbPlayerPropIngestionProvider | null
   maximumEvents?: number | null
 }
@@ -70,6 +75,12 @@ type StoredPropRow = {
   metadata: Record<string, unknown> | null
 }
 
+type PitcherIdentityCandidate = {
+  pitcherId: string
+  providerPitcherId: string | null
+  pitcherName: string
+}
+
 function nowIso() {
   return new Date().toISOString()
 }
@@ -94,8 +105,16 @@ function configured(name: string) {
   return Boolean(process.env[name]?.trim())
 }
 
+function oddsApiKey() {
+  return process.env.ODDS_API_KEY?.trim() ?? process.env.THE_ODDS_API_KEY?.trim() ?? ''
+}
+
 function hash(parts: unknown[]) {
   return createHash('sha256').update(parts.map((part) => String(part ?? 'null')).join('|')).digest('hex').slice(0, 24)
+}
+
+function normalizeName(value: unknown) {
+  return String(value ?? '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim()
 }
 
 export function americanToDecimal(american: number | null) {
@@ -142,10 +161,12 @@ function snapshotId(input: {
   selection: MlbPlayerPropIngestionSelection
   line: number
   providerTimestamp: string
+  providerEventId?: string | null
 }) {
   return `mlb_prop:${hash([
     input.provider,
     input.eventId,
+    input.providerEventId,
     input.providerPitcherId ?? input.pitcherName,
     MARKET,
     input.sportsbook,
@@ -158,15 +179,17 @@ function snapshotId(input: {
 
 function snapshotFromOddsApi(input: {
   event: OddsApiEvent
+  internalEventId?: string | null
   bookmaker: OddsApiBookmaker
   market: OddsApiMarket
   outcome: OddsApiOutcome
   storedTimestamp: string
 }): PitcherPropSnapshot | null {
-  const eventId = text(input.event.id)
+  const providerEventId = text(input.event.id)
+  const eventId = text(input.internalEventId) ?? providerEventId
   const selection = normalizeOutcome(input.outcome.name)
   const line = supportedLine(input.outcome.point)
-  if (!eventId || !selection || line === null || input.market.key !== ODDS_API_MARKET) return null
+  if (!eventId || !providerEventId || !selection || line === null || input.market.key !== ODDS_API_MARKET) return null
   const providerTimestamp = normalizeProviderTimestamp(input.market.last_update ?? input.bookmaker.last_update, input.storedTimestamp)
   const americanOdds = num(input.outcome.price)
   const sportsbook = normalizeBookmaker(input.bookmaker.title ?? input.bookmaker.key)
@@ -175,6 +198,7 @@ function snapshotFromOddsApi(input: {
   const id = snapshotId({
     provider: 'the-odds-api',
     eventId,
+    providerEventId,
     providerPitcherId: null,
     pitcherName,
     sportsbook,
@@ -186,8 +210,10 @@ function snapshotFromOddsApi(input: {
   return {
     id,
     eventId,
+    providerEventId,
     pitcherId: null,
     providerPitcherId: null,
+    pitcherName,
     market: MARKET,
     providerMarketKey: ODDS_API_MARKET,
     line,
@@ -205,7 +231,7 @@ function snapshotFromOddsApi(input: {
   }
 }
 
-function normalizeOddsApiPayload(payload: OddsApiEvent | OddsApiEvent[], storedTimestamp = nowIso()) {
+function normalizeOddsApiPayload(payload: OddsApiEvent | OddsApiEvent[], storedTimestamp = nowIso(), eventMap = new Map<string, string>()) {
   const events = Array.isArray(payload) ? payload : [payload]
   const snapshots: PitcherPropSnapshot[] = []
   let rowsRead = 0
@@ -214,7 +240,7 @@ function normalizeOddsApiPayload(payload: OddsApiEvent | OddsApiEvent[], storedT
       for (const market of bookmaker.markets ?? []) {
         for (const outcome of market.outcomes ?? []) {
           rowsRead += 1
-          const snapshot = snapshotFromOddsApi({ event, bookmaker, market, outcome, storedTimestamp })
+          const snapshot = snapshotFromOddsApi({ event, internalEventId: eventMap.get(String(event.id ?? '')), bookmaker, market, outcome, storedTimestamp })
           if (snapshot) snapshots.push(snapshot)
         }
       }
@@ -243,9 +269,10 @@ function toStorageRow(snapshot: PitcherPropSnapshot) {
       sourceVersion: SOURCE_VERSION,
       market: snapshot.market,
       providerMarketKey: snapshot.providerMarketKey,
+      providerEventId: snapshot.providerEventId,
       playerId: snapshot.pitcherId,
       providerPlayerId: snapshot.providerPitcherId,
-      playerName: null,
+      playerName: snapshot.pitcherName ?? null,
       pitcherId: snapshot.pitcherId,
       providerPitcherId: snapshot.providerPitcherId,
       selection: snapshot.selection,
@@ -322,8 +349,10 @@ function healthFromRows(rows: StoredPropRow[], status: MlbPlayerPropIngestionSta
     duplicateSnapshots: duplicateCount(rows.map((row) => ({
       id: row.id,
       eventId: '',
+      providerEventId: null,
       pitcherId: null,
       providerPitcherId: null,
+      pitcherName: null,
       market: MARKET,
       providerMarketKey: ODDS_API_MARKET,
       line: Number(row.line),
@@ -470,6 +499,143 @@ export function validateMlbPlayerPropIngestionFixtures() {
   }
 }
 
+type CertifiedMapping = {
+  provider_id: string | null
+  internal_id: string | null
+  metadata: Record<string, unknown> | null
+}
+
+function mappingTime(row: CertifiedMapping) {
+  const raw = text(row.metadata?.internalStartTime)
+  return raw ? new Date(raw) : null
+}
+
+async function eligibleCertifiedMappings(maximumEvents: number) {
+  const rows = await getCertifiedOddsApiEventMappings() as CertifiedMapping[]
+  const now = new Date()
+  return rows
+    .filter((row) => row.provider_id && row.internal_id)
+    .filter((row) => {
+      const start = mappingTime(row)
+      return start && Number.isFinite(start.getTime()) && start > now
+    })
+    .sort((a, b) => (mappingTime(a)?.getTime() ?? 0) - (mappingTime(b)?.getTime() ?? 0))
+    .slice(0, Math.min(Math.max(maximumEvents, 1), 3))
+}
+
+async function fetchOddsApiPitcherOuts(providerEventId: string) {
+  const key = oddsApiKey()
+  if (!key) return { payload: null as OddsApiEvent | null, call: null, error: 'ODDS_API_KEY_NOT_PRESENT' }
+  const url = new URL(`${ODDS_API_BASE_URL}/sports/${SPORT_KEY}/events/${providerEventId}/odds`)
+  url.searchParams.set('apiKey', key)
+  url.searchParams.set('regions', 'us')
+  url.searchParams.set('markets', ODDS_API_MARKET)
+  url.searchParams.set('oddsFormat', 'american')
+  const response = await fetch(url.toString(), { cache: 'no-store' })
+  const payload = await response.json().catch(() => null)
+  return {
+    payload: response.ok ? payload as OddsApiEvent : null,
+    call: {
+      httpStatus: response.status,
+      ok: response.ok,
+      requestsRemaining: Number(response.headers.get('x-requests-remaining') ?? NaN),
+      requestsUsed: Number(response.headers.get('x-requests-used') ?? NaN),
+      requestsLast: Number(response.headers.get('x-requests-last') ?? NaN),
+    },
+    error: response.ok ? null : 'ODDS_API_PITCHER_OUTS_READ_FAILED',
+  }
+}
+
+async function resolvePitchers(snapshots: PitcherPropSnapshot[]) {
+  const eventIds = Array.from(new Set(snapshots.map((row) => row.eventId)))
+  const slate = await previewPitcherProjection({ limit: 200 })
+  const byEventName = new Map<string, PitcherIdentityCandidate>()
+  for (const projection of slate.projections.filter((row) => eventIds.includes(row.eventId))) {
+    byEventName.set(`${projection.eventId}|${normalizeName(projection.pitcherName)}`, {
+      pitcherId: projection.pitcherId,
+      providerPitcherId: projection.providerPitcherId,
+      pitcherName: projection.pitcherName,
+    })
+  }
+  let exact = 0
+  let normalized = 0
+  let unresolved = 0
+  const resolved = snapshots.flatMap((snapshot) => {
+    const candidate = byEventName.get(`${snapshot.eventId}|${normalizeName(snapshot.pitcherName)}`)
+    if (!candidate) {
+      unresolved += 1
+      return []
+    }
+    if (candidate.pitcherName === snapshot.pitcherName) exact += 1
+    else normalized += 1
+    return [{
+      ...snapshot,
+      pitcherId: candidate.pitcherId,
+      providerPitcherId: candidate.providerPitcherId,
+      pitcherName: candidate.pitcherName,
+    }]
+  })
+  return { resolved, exact, normalized, unresolved }
+}
+
+async function resolvePitchersFromStoredProjections(snapshots: PitcherPropSnapshot[]) {
+  const eventIds = Array.from(new Set(snapshots.map((row) => row.eventId))).filter(Boolean)
+  const byEventName = new Map<string, PitcherIdentityCandidate>()
+  if (eventIds.length) {
+    const { data, error } = await supabaseAdmin
+      .from('mlb_pitcher_projections')
+      .select('event_id,pitcher_id,provider_pitcher_id,feature_snapshot,generated_at')
+      .in('event_id', eventIds)
+      .order('generated_at', { ascending: false })
+      .limit(200)
+    if (error) throw new Error(`stored pitcher projection identity read failed: ${error.message}`)
+    for (const row of data ?? []) {
+      const eventId = text(row.event_id)
+      const pitcherId = text(row.pitcher_id)
+      const pitcherName = text((row.feature_snapshot as { identity?: { pitcherName?: unknown } } | null)?.identity?.pitcherName)
+      if (!eventId || !pitcherId || !pitcherName) continue
+      const key = `${eventId}|${normalizeName(pitcherName)}`
+      if (!byEventName.has(key)) {
+        byEventName.set(key, {
+          pitcherId,
+          providerPitcherId: text(row.provider_pitcher_id),
+          pitcherName,
+        })
+      }
+    }
+  }
+  let exact = 0
+  let normalized = 0
+  let unresolved = 0
+  const resolved = snapshots.flatMap((snapshot) => {
+    const candidate = byEventName.get(`${snapshot.eventId}|${normalizeName(snapshot.pitcherName)}`)
+    if (!candidate) {
+      unresolved += 1
+      return []
+    }
+    if (candidate.pitcherName === snapshot.pitcherName) exact += 1
+    else normalized += 1
+    return [{
+      ...snapshot,
+      pitcherId: candidate.pitcherId,
+      providerPitcherId: candidate.providerPitcherId,
+      pitcherName: candidate.pitcherName,
+    }]
+  })
+  return { resolved, exact, normalized, unresolved }
+}
+
+function errorText(error: unknown) {
+  return error instanceof Error ? error.message : String(error ?? 'unknown error')
+}
+
+async function persistRows(snapshots: PitcherPropSnapshot[], persist: boolean) {
+  const rows = snapshots.map(toStorageRow)
+  if (!persist || !rows.length) return { rowsPersisted: 0, rowsSkipped: rows.length, error: null as string | null }
+  const { error } = await supabaseAdmin.from('sports_odds_snapshots').upsert(rows, { onConflict: 'id' })
+  return { rowsPersisted: error ? 0 : rows.length, rowsSkipped: error ? rows.length : 0, error: error?.message ?? null }
+}
+
 export async function syncMlbPlayerProps(options: SyncOptions = {}) {
   const dryRun = options.dryRun !== false
   const provider = options.provider ?? 'the-odds-api'
@@ -483,16 +649,134 @@ export async function syncMlbPlayerProps(options: SyncOptions = {}) {
     requestedCalls: dryRun ? 0 : Math.max(1, Number(options.maximumEvents ?? 1) || 1),
     dryRun,
   })
-  const blocked = providerAudit.blockers.length > 0
+  const confirmed = options.confirmed === true || options.confirm === LIVE_CONFIRMATION
+  const isOddsApi = provider === ODDS_API_PROVIDER
+  const blocked = !isOddsApi && providerAudit.blockers.length > 0
   const status: MlbPlayerPropIngestionStatus = dryRun
     ? 'DRY_RUN'
     : blocked
       ? 'BLOCKED_PROVIDER_CONTRACT_UNAVAILABLE'
       : !budget.allowed
         ? 'BLOCKED_UNSAFE_WRITE'
-        : !options.confirmed
+        : !confirmed
           ? 'BLOCKED_UNSAFE_WRITE'
-          : 'BLOCKED_PROVIDER_CONTRACT_UNAVAILABLE'
+          : 'SYNCED'
+
+  if (!dryRun && status === 'SYNCED' && isOddsApi) {
+    const mappings = await eligibleCertifiedMappings(Number(options.maximumEvents ?? 1) || 1)
+    if (!mappings.length) {
+      return {
+        success: false,
+        mode: 'mlb_player_prop_ingestion_sync_v1',
+        generatedAt: nowIso(),
+        selectedDate: options.date ?? new Date().toISOString().slice(0, 10),
+        provider,
+        dryRun,
+        confirmed,
+        status: 'BLOCKED_NO_ELIGIBLE_EVENTS' as MlbPlayerPropIngestionStatus,
+        providerCallsMade: 0,
+        remoteMutationsMade: 0,
+        rowsRead: 0,
+        rowsNormalized: 0,
+        rowsEligibleForStorage: 0,
+        rowsPersisted: 0,
+        rowsSkipped: 0,
+        storageTable: 'sports_odds_snapshots',
+        supportedMarket: MARKET,
+        supportedLines: [...SUPPORTED_LINES],
+        providerAudit,
+        providerBudget: budget.status,
+        healthBefore,
+        validation,
+        blockers: ['NO_CERTIFIED_PREGAME_ODDS_API_EVENT_MAPPING'],
+        warnings: ['Manual live sync blocked before provider calls because no certified pregame mapping is available.'],
+      }
+    }
+    const eventMap = new Map(mappings.map((row) => [String(row.provider_id), String(row.internal_id)]))
+    const providerPayloads: OddsApiEvent[] = []
+    const calls = []
+    const errors: string[] = []
+    for (const mapping of mappings) {
+      const result = await fetchOddsApiPitcherOuts(String(mapping.provider_id))
+      if (result.call) calls.push(result.call)
+      if (result.error) errors.push(result.error)
+      if (result.payload) providerPayloads.push(result.payload)
+    }
+    const normalized = normalizeOddsApiPayload(providerPayloads, nowIso(), eventMap)
+    const identity = await resolvePitchers(normalized.snapshots).catch(async (error) => {
+      const fallback = await resolvePitchersFromStoredProjections(normalized.snapshots).catch((fallbackError) => ({
+        resolved: [] as PitcherPropSnapshot[],
+        exact: 0,
+        normalized: 0,
+        unresolved: normalized.snapshots.length,
+        fallbackError: errorText(fallbackError),
+      }))
+      const recovered = fallback.resolved.length > 0
+      return {
+        ...fallback,
+        error: recovered
+          ? `PITCHER_IDENTITY_PREVIEW_FAILED_STORED_FALLBACK_USED: ${errorText(error)}`
+          : `PITCHER_IDENTITY_RESOLUTION_FAILED: ${errorText(error)}${'fallbackError' in fallback ? `; fallback: ${fallback.fallbackError}` : ''}`,
+      }
+    })
+    const rows = identity.resolved
+    const rowValidation = validateSnapshots(rows)
+    const persisted = await persistRows(rows, rowValidation.success)
+    const identityBlocked = normalized.snapshots.length > 0 && rows.length === 0
+    const identityError = 'error' in identity ? [identity.error] : []
+    const identityWarnings = !identityBlocked ? identityError : []
+    const identityBlockers = identityBlocked ? ['ALL_PITCHER_IDENTITIES_UNRESOLVED', ...identityError] : []
+    const nextStatus: MlbPlayerPropIngestionStatus = persisted.error || !rowValidation.success || identityBlocked ? 'VALIDATION_FAILED' : 'SYNCED'
+    return {
+      success: nextStatus === 'SYNCED',
+      mode: 'mlb_player_prop_ingestion_sync_v1',
+      generatedAt: nowIso(),
+      selectedDate: options.date ?? new Date().toISOString().slice(0, 10),
+      provider,
+      dryRun,
+      confirmed,
+      status: nextStatus,
+      providerCallsMade: calls.length,
+      remoteMutationsMade: persisted.rowsPersisted,
+      rowsRead: normalized.rowsRead,
+      rowsNormalized: normalized.snapshots.length,
+      rowsEligibleForStorage: rows.length,
+      rowsPersisted: persisted.rowsPersisted,
+      rowsSkipped: normalized.snapshots.length - rows.length + persisted.rowsSkipped,
+      storageTable: 'sports_odds_snapshots',
+      supportedMarket: MARKET,
+      supportedLines: [...SUPPORTED_LINES],
+      providerAudit,
+      providerBudget: budget.status,
+      healthBefore,
+      validation: {
+        success: rowValidation.success && !persisted.error && !identityBlocked,
+        failedChecks: [...rowValidation.failedChecks, ...(persisted.error ? [persisted.error] : []), ...identityBlockers],
+      },
+      certifiedMappingsUsed: mappings.length,
+      bookmakerCount: Array.from(new Set(rows.map((row) => row.sportsbook))).length,
+      sportsbooks: Array.from(new Set(rows.map((row) => row.sportsbook))).sort(),
+      pitcherIdentity: {
+        exactMatches: identity.exact,
+        normalizedMatches: identity.normalized,
+        unresolved: identity.unresolved,
+        ambiguous: 0,
+      },
+      quota: {
+        requestsRemainingBefore: calls[0]?.requestsRemaining ?? null,
+        requestsRemainingAfter: calls.at(-1)?.requestsRemaining ?? null,
+        requestsUsedObserved: calls.reduce((sum, call) => sum + (Number.isFinite(call.requestsLast) ? Number(call.requestsLast) : 1), 0),
+        requestsLast: calls.at(-1)?.requestsLast ?? null,
+      },
+      blockers: [...errors, ...identityBlockers],
+      warnings: [
+        ...identityWarnings,
+        'Manual live sync only; no scheduled ingestion was enabled.',
+        'No sportsbook lines were fabricated.',
+        'No EV, Kelly, Official Pick or Portfolio Intelligence output is produced.',
+      ],
+    }
+  }
 
   return {
     success: dryRun && validation.success,
@@ -501,7 +785,7 @@ export async function syncMlbPlayerProps(options: SyncOptions = {}) {
     selectedDate: options.date ?? new Date().toISOString().slice(0, 10),
     provider,
     dryRun,
-    confirmed: options.confirmed === true,
+    confirmed,
     status,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
@@ -520,8 +804,8 @@ export async function syncMlbPlayerProps(options: SyncOptions = {}) {
     blockers: Array.from(new Set([
       ...providerAudit.blockers,
       budget.blockedReason,
-      !dryRun && !options.confirmed ? 'confirmed=true required for protected writes' : null,
-      'LIVE_PLAYER_PROP_PROVIDER_CALL_DISABLED_UNTIL_CONTRACT_CONFIRMED',
+      !dryRun && !confirmed ? 'confirm=MLB_PLAYER_PROP_SYNC required for protected live sync' : null,
+      !dryRun && provider !== ODDS_API_PROVIDER ? 'LIVE_PLAYER_PROP_PROVIDER_CALL_DISABLED_UNTIL_CONTRACT_CONFIRMED' : null,
     ].filter(Boolean) as string[])),
     warnings: [
       'Dry-run first: no provider calls and no database mutations were made.',

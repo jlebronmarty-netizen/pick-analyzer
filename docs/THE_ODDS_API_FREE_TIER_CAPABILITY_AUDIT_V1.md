@@ -113,6 +113,8 @@ Blocker: `ODDS_API_EVENT_CROSSWALK_NOT_PROVEN`.
 
 The current The Odds API event IDs cannot be treated as reliably crosswalked to Pick Analyzer `sport_events` yet.
 
+Update: `docs/THE_ODDS_API_EVENT_CROSSWALK_AND_PROP_SYNC_V1.md` adds the follow-up current-event crosswalk. The root cause was confirmed as provider-ID mismatch plus team-name representation mismatch and no existing `the-odds-api` event mappings. A bounded live review found deterministic team/time matches for current MLB events, and approved persist mode wrote only certified event mappings into `provider_entity_mappings`. This resolves the current-event crosswalk blocker for the reviewed mapped slate only; it does not prove historical odds, scheduled ingestion, settlement, replay, EV, Kelly, Official Picks or Portfolio Intelligence.
+
 ## Provider Replacement Implications
 
 The existing The Odds API credential is valid and sufficient for tightly bounded live-development audits of current standard MLB odds and current event-level player props, including pitcher outs.

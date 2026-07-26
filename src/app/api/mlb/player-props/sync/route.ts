@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
   const id = requestId(request)
   try {
     const body = await request.json().catch(() => ({}))
-    const dryRun = body?.dryRun === undefined ? true : parseBooleanParam(String(body.dryRun), true)
+    const live = parseBooleanParam(request.nextUrl.searchParams.get('live'), false) || body?.live === true
+    const dryRun = live ? false : body?.dryRun === undefined ? true : parseBooleanParam(String(body.dryRun), true)
     if (!dryRun && !authorized(request)) {
       return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized MLB player prop sync request.', status: 401 })
     }
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
       date: typeof body?.date === 'string' ? body.date : null,
       dryRun,
       confirmed: body?.confirmed === true,
+      confirm: request.nextUrl.searchParams.get('confirm') ?? (typeof body?.confirm === 'string' ? body.confirm : null),
       provider: provider(body?.provider),
       maximumEvents: parseIntegerParam({
         value: body?.maximumEvents === undefined ? null : String(body.maximumEvents),

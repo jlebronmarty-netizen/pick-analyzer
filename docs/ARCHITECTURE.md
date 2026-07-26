@@ -439,6 +439,10 @@ The module is limited to pitcher recorded-outs player prop markets at 14.5, 15.5
 
 The live provider gate fails closed. SportsDataIO MLB player props are cataloged as enterprise `/v3/mlb/odds/json/BettingPlayerPropsByGameID/{gameId}` and are not confirmed for the current Discovery Lab channel. The Odds API documents MLB `pitcher_outs`, but Business-tier entitlement and event ID crosswalk are not proven in the runtime. Until those gates are satisfied, sync runs as dry-run/provider-audit only and reports zero provider calls, zero remote mutations and zero persisted rows.
 
+The Odds API current-event crosswalk now lives in `src/services/the-odds-api-event-crosswalk.service.ts` and `/api/providers/the-odds-api/event-crosswalk`. It maps current MLB provider event IDs to existing `sport_events` only when canonical home team, away team and bounded UTC start time match deterministically. Dry-run and validation paths make no provider calls; live review and persistence require explicit confirmations. Persisted mappings use existing `provider_entity_mappings` rows with `provider='the-odds-api'`, `entity_type='event'` and sanitized metadata.
+
+When certified mappings exist, the protected `POST /api/mlb/player-props/sync` path can execute a bounded manual The Odds API `pitcher_outs` read for up to 3 future mapped events with `confirm=MLB_PLAYER_PROP_SYNC`. Normalization rejects unsupported lines and unresolved pitcher identities before writing deterministic `sports_odds_snapshots` rows. The path does not enable scheduled ingestion, historical odds, EV, Kelly, Official Picks, Probability Picks changes or Portfolio Intelligence.
+
 No scheduler ownership changed. Future live ingestion must be invoked through the existing operating-day/adaptive-refresh ownership path after provider entitlement, event identity, sportsbook coverage and budget gates are approved.
 
 Additive starter integration:
