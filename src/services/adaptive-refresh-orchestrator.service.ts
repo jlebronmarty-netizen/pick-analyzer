@@ -816,6 +816,8 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     now,
   })
   const eventWindows = eventRefreshWindows(uniqueRefreshEvents, now, cadenceConfig, latestOddsChange)
+  const marketRefreshEvents = eventWindows.filter((event) => event.marketRefreshAllowed)
+  const marketRefreshNeeded = marketRefreshEvents.length > 0 || waitingForOdds > 0
   const policyOverrides = Object.fromEntries(
     (Object.keys(DATA_FRESHNESS_POLICIES) as DataFreshnessDomain[]).map((domain) => [
       domain,
@@ -827,7 +829,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     latestProviderCheck,
     waitingForOdds,
     readyForAnalysis,
-    activeNeed,
+    activeNeed: marketRefreshNeeded,
     mode,
     now,
     policy: policyOverrides.odds,
@@ -839,7 +841,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       domain: 'odds',
       lastUpdated: marketState.lastUpdated,
       available: marketState.available,
-      activeNeed: activeNeed || waitingForOdds > 0,
+      activeNeed: marketRefreshNeeded,
       now,
       sourceOverride: 'sports_odds_snapshots/provider-check-ledger/current-board',
       policyOverride: policyOverrides.odds,
@@ -862,7 +864,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     decision: domainDecision(item, mode),
     status: item.status,
     affectedGames:
-      item.domain === 'odds' ? waitingForOdds : item.domain === 'prediction' || item.domain === 'feature_snapshot' ? readyForAnalysis : currentGames + upcomingGames,
+      item.domain === 'odds' ? Math.max(waitingForOdds, marketRefreshEvents.length) : item.domain === 'prediction' || item.domain === 'feature_snapshot' ? readyForAnalysis : currentGames + upcomingGames,
     estimatedProviderCalls: estimatedCallsForDomain(item.domain),
     existingSchedulerAction:
       item.domain === 'schedule' || item.domain === 'odds'
@@ -951,6 +953,12 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       },
     },
     eventRefreshWindows: eventWindows,
+    marketRefreshEligibility: {
+      eligiblePregameEvents: marketRefreshEvents.length,
+      waitingForOdds,
+      marketRefreshNeeded,
+      rule: 'Pregame market freshness blocks operations only while at least one relevant event remains before start or is explicitly waiting for odds. Live, final and post-start events keep stored prices as historical evidence without triggering new pregame odds polling.',
+    },
     oddsFreshnessEvidence: {
       marketState: marketState.state,
       marketStateReason: marketState.reason,

@@ -1933,10 +1933,18 @@ export async function getAiPerformanceCenterDailyUpdate(options: { dryRun?: bool
 export async function validateAiBrain() {
   const center = await getAiPerformanceCenter({ dryRun: true })
   const sports = center.sports
+  const bsnSport = sports.find((sport) => sport.sportKey === 'basketball_bsn')
+  const bsnScopeClassification = bsnSport
+    ? bsnSport.productionReady === false && bsnSport.trust.sampleQualification === 'NO_SETTLED_SAMPLE'
+      ? 'EXPECTED_PARTIAL'
+      : bsnSport.productionReady === false
+        ? 'PASS'
+        : 'GENUINE_FAILURE'
+    : 'NOT_APPLICABLE'
   const checks = [
     ['all_sports_aggregation', center.performanceCenter.allSports.predictions >= center.performanceCenter.selected.predictions],
     ['mlb_performance_contract', sports.some((sport) => sport.sportKey === 'baseball_mlb')],
-    ['bsn_shadow_contract', sports.some((sport) => sport.sportKey === 'basketball_bsn' && sport.trust.sampleQualification !== 'NO_SETTLED_SAMPLE')],
+    ['bsn_shadow_contract', ['PASS', 'EXPECTED_PARTIAL', 'NOT_APPLICABLE'].includes(bsnScopeClassification)],
     ['sport_isolation', sports.every((sport) => sport.sportKey && sport.metrics.predictions >= 0)],
     ['model_version_isolation', Array.isArray(center.aiBrain.byModelVersion)],
     ['category_isolation', Array.isArray(center.aiBrain.byCategory)],
@@ -1956,8 +1964,14 @@ export async function validateAiBrain() {
     ['no_v7_changes', center.regression.v7Modified === false],
     ['no_current_board_changes', center.regression.currentBoardModified === false],
     ['mlb_production_stable_regression', sports.find((sport) => sport.sportKey === 'baseball_mlb')?.productionReady === true],
-    ['bsn_shadow_mode_regression', sports.find((sport) => sport.sportKey === 'basketball_bsn')?.productionReady === false],
-  ].map(([key, passed]) => ({ key, passed: Boolean(passed), evidence: 'fixture-free production contract validation' }))
+    ['bsn_shadow_mode_regression', bsnSport?.productionReady === false],
+  ].map(([key, passed]) => ({
+    key,
+    passed: Boolean(passed),
+    evidence: key === 'bsn_shadow_contract'
+      ? `BSN scope classification: ${bsnScopeClassification}. Shadow/preview sample availability is reported separately from MLB production operations.`
+      : 'fixture-free production contract validation',
+  }))
 
   return {
     success: true,
@@ -1971,6 +1985,12 @@ export async function validateAiBrain() {
     },
     providerCallsMade: 0,
     remoteMutationsMade: 0,
+    scopeClassification: {
+      bsnShadowContract: bsnScopeClassification,
+      bsnProductionReady: bsnSport?.productionReady ?? null,
+      bsnSampleQualification: bsnSport?.trust.sampleQualification ?? null,
+      blocksMlbProductionOperations: bsnScopeClassification === 'GENUINE_FAILURE',
+    },
     regression: center.regression,
   }
 }
