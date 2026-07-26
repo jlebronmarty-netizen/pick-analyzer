@@ -55,7 +55,7 @@ function trustFrom(metrics: TimelineMetrics) {
     { key: 'sample_size', label: 'Production Sample Size', value: scored, normalizedScore: scored ? sampleScore : null, weight: 0.35, contribution: scored ? round(sampleScore * 0.35) : 0, availability: scored ? 'AVAILABLE' : 'UNAVAILABLE', explanation: 'Cutoff-safe production Win/Loss sample.' },
     { key: 'accuracy', label: 'Accuracy', value: metrics.accuracy, normalizedScore: metrics.accuracy, weight: 0.25, contribution: metrics.accuracy === null ? 0 : round(metrics.accuracy * 0.25), availability: metrics.accuracy === null ? 'UNAVAILABLE' : 'AVAILABLE', explanation: 'Win rate over the same production scope.' },
     { key: 'brier_score', label: 'Brier Score', value: metrics.brier, normalizedScore: brierScore, weight: 0.2, contribution: brierScore === null ? 0 : round(brierScore * 0.2), availability: brierScore === null ? 'UNAVAILABLE' : 'AVAILABLE', explanation: 'Probability accuracy over scored outcomes.' },
-    { key: 'calibration_error', label: 'Calibration Error', value: calibration.calibrationError, normalizedScore: calibration.confidenceReliability, weight: 0.2, contribution: calibration.confidenceReliability === null ? 0 : round(calibration.confidenceReliability * 0.2), availability: calibration.confidenceReliability === null ? 'UNAVAILABLE' : 'AVAILABLE', explanation: calibration.explanation },
+    { key: 'calibration_quality', label: 'Calibration Quality Score', value: calibration.calibrationError, normalizedScore: calibration.confidenceReliability, weight: 0.2, contribution: calibration.confidenceReliability === null ? 0 : round(calibration.confidenceReliability * 0.2), availability: calibration.confidenceReliability === null ? 'UNAVAILABLE' : 'AVAILABLE', explanation: `${calibration.explanation} The displayed trust component is a 0-100 quality score; the raw calibration error remains available as the component value.` },
   ]
   const available = components.filter((item) => item.availability === 'AVAILABLE')
   const weight = available.reduce((sum, item) => sum + item.weight, 0)
@@ -175,6 +175,7 @@ export function validatePerformanceProductContractFixtures() {
     ['qualified metrics do not use insufficient status', evolution.status === 'LIMITED_SAMPLE' || evolution.status === 'PRODUCTION_SCOPE'],
     ['trend scope explanation is explicit', typeof evolution.scopeExplanation === 'string' && evolution.scopeExplanation.includes('matching prior comparison cohort')],
     ['brier blocker emitted', trustFrom(metric(0.2549)).blockers.includes('BRIER_SCORE_ABOVE_TARGET')],
+    ['calibration quality label is not calibration error', trustFrom(metric(0.2549)).components.some((item) => item.key === 'calibration_quality' && item.label === 'Calibration Quality Score' && item.value === 5.67 && item.normalizedScore === 77.32)],
   ] as const
   const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
   return {

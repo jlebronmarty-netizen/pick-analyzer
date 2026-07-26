@@ -1445,6 +1445,35 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
   const pipeline = data.pipeline ?? []
   const byId = new Map(pipeline.map((item) => [item.id, item]))
   const traceCounts = pipelineToday?.counts
+  const storedPredictions = Number(traceCounts?.predictionsGenerated ?? data.predictionCandidates ?? 0)
+  const validPregamePredictions = Number(traceCounts?.predictionsValidPregame ?? storedPredictions)
+  const currentBoardCandidates = Number(traceCounts?.currentBoardCandidates ?? 0)
+  const waitingForOdds = Number(data.gamesWaitingForOdds ?? 0)
+  const hasOddsTimestamp = Boolean(data.latestOddsTimestamp)
+  const oddsState = hasOddsTimestamp
+    ? { status: 'Complete', detail: data.summary.marketPrices }
+    : waitingForOdds > 0
+      ? { status: 'Refresh overdue', detail: `${waitingForOdds} pregame game${waitingForOdds === 1 ? '' : 's'} are waiting for market prices.` }
+      : { status: 'Not due', detail: 'No current pregame market refresh is due.' }
+  const predictionState = storedPredictions > 0
+    ? { status: 'Complete', detail: `${storedPredictions} stored prediction row${storedPredictions === 1 ? '' : 's'} found; ${validPregamePredictions} valid pregame.` }
+    : waitingForOdds > 0
+      ? { status: 'Not ready', detail: 'Predictions: Waiting for market prices.' }
+      : { status: 'Not due', detail: 'Predictions are not due until a market-priced pregame slate is available.' }
+  const currentBoardState = currentBoardCandidates > 0
+    ? { status: 'Complete', detail: `${currentBoardCandidates} candidate${currentBoardCandidates === 1 ? '' : 's'} are visible after board gates.` }
+    : storedPredictions > 0
+      ? { status: 'Not ready', detail: 'Stored predictions exist, but no candidate passed Current Board gates.' }
+      : waitingForOdds > 0
+        ? { status: 'Not ready', detail: 'Current Board: Not ready; predictions are waiting for market prices.' }
+        : { status: 'Not due', detail: 'Current Board is not due until prediction rows exist.' }
+  const recommendationState = counts.official > 0
+    ? { status: 'Complete', detail: 'Official picks passed policy.' }
+    : storedPredictions > 0
+      ? { status: 'Not ready', detail: 'No stored candidate passed Official Pick policy gates.' }
+      : waitingForOdds > 0
+        ? { status: 'Not ready', detail: 'Most Likely and Best Value are not ready; predictions are waiting for market prices.' }
+        : { status: 'Not due', detail: 'Recommendations are not due until prediction rows exist.' }
   const learning = data.viewModel?.selectors.learningSummary
   const schedulerCoverage = pipelineToday?.schedulerCoverage
   const settlementPending = Number(data.settlementSummary?.settlementPendingGames ?? data.finalGames ?? 0)
@@ -1467,10 +1496,10 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
         protectedByCutoff: data.schedulerCoverage?.missedWindowsToday,
       }
   const rows: Array<[string, { status: string; detail: string }]> = [
-    ['Odds', byId.get('market_prices') ?? { status: data.latestOddsTimestamp ? 'Complete' : 'Waiting', detail: data.summary.marketPrices }],
-    ['Predictions', traceCounts ? { status: traceCounts.predictionsGenerated ? 'Complete' : 'Waiting', detail: traceCounts.predictionsGenerated ? `${traceCounts.predictionsGenerated} stored prediction rows found; ${traceCounts.predictionsValidPregame ?? traceCounts.predictionsGenerated} valid pregame and ${traceCounts.predictionsExcludedAfterCutoff ?? 0} excluded after cutoff.` : 'Waiting for eligible pregame prediction rows.' } : byId.get('predictions') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? `${data.predictionCandidates} candidates available.` : 'No stored odds or eligible pregame inputs yet.' }],
-    ['Current Board', traceCounts ? { status: traceCounts.currentBoardCandidates ? 'Complete' : 'Waiting', detail: traceCounts.currentBoardCandidates ? `${traceCounts.currentBoardCandidates} candidates are visible after board gates.` : 'Stored predictions exist, but no candidate passed Current Board gates.' } : byId.get('current_board') ?? { status: data.predictionCandidates ? 'Complete' : 'Waiting', detail: data.predictionCandidates ? 'Candidates are available.' : 'Waiting.' }],
-    ['Official Picks', traceCounts ? { status: traceCounts.officialPicks ? 'Complete' : 'Waiting', detail: traceCounts.officialPicks ? `${traceCounts.officialPicks} Official Picks passed policy.` : 'No stored candidate passed Official Pick policy gates.' } : byId.get('recommendations') ?? { status: counts.official ? 'Complete' : 'Waiting', detail: counts.official ? 'Official picks passed policy.' : 'Waiting for prediction and market comparison.' }],
+    ['Odds', byId.get('market_prices') ?? oddsState],
+    ['Predictions', traceCounts ? predictionState : byId.get('predictions') ?? predictionState],
+    ['Current Board', traceCounts ? currentBoardState : byId.get('current_board') ?? currentBoardState],
+    ['Official Picks', traceCounts ? recommendationState : byId.get('recommendations') ?? recommendationState],
     ['Settlement', { status: settlementPending ? 'Waiting' : data.finalGames ? 'Complete' : 'Not due', detail: settlementText }],
     ['Learning', learning ? { status: learning.labelsCreatedToday || learning.labelsPending ? 'Complete' : 'Not due', detail: `${learning.message} Updates applied: ${learning.updatesApplied}; auto-promotions: ${learning.autoPromotions}.` } : traceCounts ? { status: traceCounts.learningSamplesQueued ? 'Complete' : 'Not due', detail: traceCounts.learningSamplesQueued ? `${traceCounts.learningSamplesQueued} learning labels queued; ${traceCounts.learningSamplesAccepted} accepted and ${traceCounts.learningSamplesRejected} rejected by evidence checks.` : 'Ready when settled production labels exist; no auto-promotion.' } : byId.get('learning') ?? { status: 'Not due', detail: 'Ready when settled production labels exist; no auto-promotion.' }],
   ]
@@ -1481,7 +1510,7 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
           <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Current AI Pipeline</p>
           <h3 className="mt-2 text-3xl font-black text-white">{fieldValue(data.nextAction, 'Waiting for next scheduler execution')}</h3>
           <p className="mt-2 text-sm leading-6 text-slate-400">Last odds sync: {timestampText(data.latestOddsTimestamp, 'No stored odds refresh timestamp')}</p>
-          <p className="text-sm leading-6 text-slate-400">Next scheduled refresh: {data.nextActionAt ? timeText(data.nextActionAt) : 'Waiting for next scheduler execution'}</p>
+          <p className="text-sm leading-6 text-slate-400">Next scheduled refresh: {data.nextActionAt ? timeText(data.nextActionAt) : waitingForOdds > 0 ? 'Refresh overdue' : 'Not due'}</p>
           <p className="text-sm leading-6 text-slate-400">Pregame coverage: {schedulerCoverage?.coveragePct ?? displayCoverage.coverage ?? 'N/A'}% · Average lead: {schedulerCoverage?.averageLeadTimeBeforeCutoffMinutes ?? displayCoverage.lead ?? 'N/A'} min · Pending: {displayCoverage.pending ?? 'N/A'} · Protected by cutoff: {schedulerCoverage?.missedWindows ?? displayCoverage.protectedByCutoff ?? 'N/A'}</p>
         </div>
         <Badge tone={data.status === 'AVAILABLE' ? 'green' : data.status === 'DEGRADED' || data.status === 'UNAVAILABLE' ? 'red' : 'yellow'}>{fieldValue(data.status, 'AVAILABLE')}</Badge>
@@ -1489,7 +1518,7 @@ function PipelineSummary({ data, counts, pipelineToday }: { data: TodayResponse;
       <div className="mt-5 grid gap-3 md:grid-cols-3">
         {rows.map(([label, item]) => {
           const status = String(item.status ?? 'Waiting')
-          const tone = status === 'Complete' ? 'green' : status === 'Running' ? 'blue' : status === 'Blocked' ? 'red' : status === 'Not due' ? 'gray' : 'yellow'
+          const tone = status === 'Complete' ? 'green' : status === 'Running' || status === 'Not ready' ? 'blue' : status === 'Blocked' || status === 'Refresh overdue' ? 'red' : status === 'Not due' ? 'gray' : 'yellow'
           return (
             <div key={String(label)} className={`rounded-lg border p-4 ${toneClasses(tone)}`}>
               <p className="text-xs font-black uppercase tracking-[0.12em] opacity-80">{label}</p>
@@ -1659,7 +1688,7 @@ function AIConfidenceCard({ opportunity }: { opportunity: TopOpportunity | null 
     ...(optionalEvidence?.blockers ?? []),
     ...(optionalEvidence?.missingData ?? []),
   ].slice(0, 3)
-  const emptyBlockers = ['No eligible outcome', 'No active aligned market price', 'Pregame betting window closed']
+  const emptyBlockers = ['No eligible outcome yet', 'Market prices not available', 'Predictions waiting for odds']
   const quality = confidence === null ? 'Unavailable' : confidence >= 70 ? 'Strong' : confidence >= 50 ? 'Moderate' : 'Limited'
   return (
     <section className={`max-w-[calc(100vw-2rem)] rounded-lg border border-slate-800 bg-slate-900/80 p-4 sm:max-w-none sm:p-6 ${cardMotion}`}>
@@ -1881,20 +1910,28 @@ function ProgressPipeline({ data }: { data: TodayResponse }) {
 
 function HealthCard({ data }: { data: TodayResponse }) {
   const settlementPending = Number(data.settlementSummary?.settlementPendingGames ?? 0)
+  const waitingForOdds = Number(data.gamesWaitingForOdds ?? 0)
+  const hasOddsTimestamp = Boolean(data.latestOddsTimestamp)
   const status = settlementPending > 0
     ? 'Settlement Pending'
-    : data.gamesWaitingForOdds > 0
-      ? 'No Stored Odds'
+    : waitingForOdds > 0 && !hasOddsTimestamp
+      ? 'Refresh overdue'
+    : waitingForOdds === 0 && !hasOddsTimestamp && data.freshness === 'empty'
+      ? 'Odds not due'
     : data.freshness === 'stale'
       ? 'Data Aging'
-      : data.freshness === 'empty'
+    : data.freshness === 'empty'
         ? 'No Stored Odds'
         : data.success
           ? 'Healthy'
           : 'Operational Blocker'
-  const tone = status === 'Healthy' ? 'green' : status === 'Operational Blocker' ? 'red' : status === 'No Stored Odds' || status === 'Settlement Pending' ? 'yellow' : 'blue'
+  const tone = status === 'Healthy' ? 'green' : status === 'Operational Blocker' || status === 'Refresh overdue' ? 'red' : status === 'No Stored Odds' || status === 'Settlement Pending' ? 'yellow' : 'blue'
   const detail = status === 'Settlement Pending'
     ? `${settlementPending} completed game${settlementPending === 1 ? ' is' : 's are'} waiting for settlement.`
+    : status === 'Refresh overdue'
+    ? `${waitingForOdds} eligible pregame game${waitingForOdds === 1 ? '' : 's'} need market prices before predictions can run.`
+    : status === 'Odds not due'
+    ? 'No current pregame market refresh is due.'
     : status === 'No Stored Odds'
     ? 'No stored market price is attached for at least one game; recommendations remain non-actionable there.'
     : status === 'Data Aging'

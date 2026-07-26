@@ -102,7 +102,7 @@ type GroundedOddsSnapshotRow = {
   created_at: string | null
 }
 
-export type DashboardPipelineStatus = 'Complete' | 'Running' | 'Waiting' | 'Blocked' | 'Not due'
+export type DashboardPipelineStatus = 'Complete' | 'Running' | 'Waiting' | 'Blocked' | 'Not due' | 'Not ready' | 'Refresh overdue'
 export type DashboardTodayStatus = 'AVAILABLE' | 'PARTIAL' | 'DEGRADED' | 'UNAVAILABLE'
 export type DashboardSectionStatus = 'AVAILABLE' | 'EMPTY' | 'DEGRADED' | 'UNAVAILABLE'
 export type DashboardBettingEligibility =
@@ -817,14 +817,14 @@ function pipelineStatus(input: {
   operatingStatus: string
 }): DashboardPipelineStatus {
   if (input.id === 'schedule') return input.currentGames || input.nextSlateDate ? 'Complete' : 'Waiting'
-  if (input.id === 'market_prices') return input.latestOddsTimestamp ? 'Complete' : input.gamesWaitingForOdds ? 'Waiting' : 'Not due'
+  if (input.id === 'market_prices') return input.latestOddsTimestamp ? 'Complete' : input.gamesWaitingForOdds ? 'Refresh overdue' : 'Not due'
   if (input.id === 'player_context') return 'Complete'
   if (input.id === 'pitching_context') return 'Complete'
   if (input.id === 'weather') return 'Complete'
-  if (input.id === 'features') return input.predictionCandidates ? 'Complete' : input.gamesWaitingForOdds ? 'Waiting' : 'Not due'
-  if (input.id === 'predictions') return input.gamesReadyForAnalysis ? 'Complete' : input.gamesWaitingForOdds ? 'Waiting' : 'Not due'
-  if (input.id === 'current_board') return input.predictionCandidates ? 'Complete' : input.gamesWaitingForOdds ? 'Waiting' : 'Not due'
-  if (input.id === 'recommendations') return input.officialPicks ? 'Complete' : input.predictionCandidates ? 'Waiting' : 'Not due'
+  if (input.id === 'features') return input.predictionCandidates ? 'Complete' : input.gamesWaitingForOdds ? 'Not ready' : 'Not due'
+  if (input.id === 'predictions') return input.gamesReadyForAnalysis ? 'Complete' : input.gamesWaitingForOdds ? 'Not ready' : 'Not due'
+  if (input.id === 'current_board') return input.predictionCandidates ? 'Complete' : input.gamesWaitingForOdds ? 'Not ready' : 'Not due'
+  if (input.id === 'recommendations') return input.officialPicks ? 'Complete' : input.predictionCandidates ? 'Not ready' : input.gamesWaitingForOdds ? 'Not ready' : 'Not due'
   if (input.id === 'results') return input.finalGames ? 'Running' : input.currentGames ? 'Waiting' : 'Not due'
   if (input.id === 'settlement') return ['settled', 'replayed', 'calibrated', 'completed'].includes(input.operatingStatus) ? 'Complete' : input.finalGames ? 'Waiting' : 'Not due'
   if (input.id === 'learning') return ['calibrated', 'completed'].includes(input.operatingStatus) ? 'Complete' : 'Not due'
@@ -833,16 +833,17 @@ function pipelineStatus(input: {
 }
 
 function buildPipeline(input: Parameters<typeof pipelineStatus>[0]) {
+  const predictionsWaitingForOdds = input.gamesWaitingForOdds > 0 && !input.latestOddsTimestamp
   return [
     ['schedule', 'Schedule', input.currentGames ? `${input.currentGames} current-day games tracked.` : input.nextSlateDate ? 'Next slate is known.' : 'No slate found.'],
-    ['market_prices', 'Odds', input.latestOddsTimestamp ? 'Stored sportsbook refresh is available.' : input.gamesWaitingForOdds ? 'Waiting for sportsbook refresh.' : 'Waiting for next scheduler execution.'],
+    ['market_prices', 'Odds', input.latestOddsTimestamp ? 'Stored sportsbook refresh is available.' : input.gamesWaitingForOdds ? 'Refresh overdue: eligible pregame games are waiting for market prices.' : 'Not due.'],
     ['player_context', 'Player context', 'Roster and metadata checks are available when source data exists.'],
     ['pitching_context', 'Pitching context', 'Starter and pitcher context remains separated from lineup confirmation.'],
     ['weather', 'Weather', 'Weather context is read from stored verified inputs when present.'],
-    ['features', 'Feature generation', input.predictionCandidates ? 'Feature snapshots are attached to candidates.' : 'Waiting for odds and eligible games.'],
-    ['predictions', 'Predictions', input.gamesReadyForAnalysis ? 'Predictions are available for eligible games.' : input.latestOddsTimestamp ? 'Waiting for eligible games.' : 'Waiting for odds.'],
-    ['current_board', 'Current Board', input.predictionCandidates ? 'Candidates are available.' : 'Waiting.'],
-    ['recommendations', 'Official Picks', input.officialPicks ? 'Official picks passed policy.' : 'Waiting for prediction and market comparison.'],
+    ['features', 'Feature generation', input.predictionCandidates ? 'Feature snapshots are attached to candidates.' : predictionsWaitingForOdds ? 'Not ready; market prices are unavailable.' : 'Not due.'],
+    ['predictions', 'Predictions', input.gamesReadyForAnalysis ? 'Predictions are available for eligible games.' : predictionsWaitingForOdds ? 'Predictions: Waiting for market prices.' : 'Not due.'],
+    ['current_board', 'Current Board', input.predictionCandidates ? 'Candidates are available.' : predictionsWaitingForOdds ? 'Current Board: Not ready; predictions are waiting for market prices.' : 'Not due.'],
+    ['recommendations', 'Official Picks', input.officialPicks ? 'Official picks passed policy.' : input.predictionCandidates ? 'No stored candidate passed Official Pick policy gates.' : predictionsWaitingForOdds ? 'Most Likely and Best Value: Not ready; predictions are waiting for market prices.' : 'Not due.'],
     ['results', 'Results', input.finalGames ? `${input.finalGames} final games tracked.` : 'Waiting for games to finish.'],
     ['settlement', 'Settlement', input.finalGames ? 'Final games are ready for stored settlement checks.' : 'Healthy.'],
     ['replay', 'Replay', 'Ready.'],
@@ -2617,6 +2618,42 @@ export function validateDashboardTodayFixtures() {
       nextSlateDate: '2026-07-19',
       operatingStatus: 'morning_synced',
     }),
+    pipelineNotDue: pipelineStatus({
+      id: 'market_prices',
+      currentGames: 0,
+      finalGames: 0,
+      gamesWaitingForOdds: 0,
+      gamesReadyForAnalysis: 0,
+      predictionCandidates: 0,
+      officialPicks: 0,
+      latestOddsTimestamp: null,
+      nextSlateDate: null,
+      operatingStatus: 'planned',
+    }),
+    upcomingNoOddsPipeline: buildPipeline({
+      id: 'schedule',
+      currentGames: 15,
+      finalGames: 0,
+      gamesWaitingForOdds: 15,
+      gamesReadyForAnalysis: 0,
+      predictionCandidates: 0,
+      officialPicks: 0,
+      latestOddsTimestamp: null,
+      nextSlateDate: '2026-07-26',
+      operatingStatus: 'morning_synced',
+    }),
+    currentOddsPipeline: buildPipeline({
+      id: 'schedule',
+      currentGames: 15,
+      finalGames: 0,
+      gamesWaitingForOdds: 0,
+      gamesReadyForAnalysis: 15,
+      predictionCandidates: 15,
+      officialPicks: 0,
+      latestOddsTimestamp: '2026-07-26T12:00:00.000Z',
+      nextSlateDate: '2026-07-26',
+      operatingStatus: 'morning_synced',
+    }),
     optionalUnavailable,
     criticalDegraded,
   }
@@ -2705,7 +2742,11 @@ export function validateDashboardTodayFixtures() {
   const checks = [
     ['completed current day resolves before tomorrow odds', fixture.active === 'Sync final results'],
     ['evening morning sync is labeled for tomorrow', fixture.eveningMorning === "Tomorrow's morning schedule sync"],
-    ['next slate with schedule but no odds waits for market prices', fixture.pipelineWaiting === 'Waiting'],
+    ['next slate with schedule but no odds reports refresh overdue', fixture.pipelineWaiting === 'Refresh overdue'],
+    ['odds not due is explicit', fixture.pipelineNotDue === 'Not due'],
+    ['all-upcoming no-odds pipeline is not ready without false stored predictions', fixture.upcomingNoOddsPipeline.some((item) => item.id === 'current_board' && item.status === 'Not ready' && item.detail.includes('predictions are waiting for market prices'))],
+    ['all-upcoming no-odds predictions wait on market prices', fixture.upcomingNoOddsPipeline.some((item) => item.id === 'predictions' && item.status === 'Not ready' && item.detail.includes('Waiting for market prices'))],
+    ['pregame current odds pipeline reaches board candidates', fixture.currentOddsPipeline.some((item) => item.id === 'current_board' && item.status === 'Complete')],
     ['optional unavailable section remains typed', fixture.optionalUnavailable.status === 'UNAVAILABLE' && Array.isArray(fixture.optionalUnavailable.data)],
     ['critical degraded section remains typed', fixture.criticalDegraded.status === 'DEGRADED' && fixture.criticalDegraded.data.freshness === 'empty'],
     ['odds not current is a warning/blocker, not an exception', true],

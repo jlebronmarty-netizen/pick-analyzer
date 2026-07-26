@@ -52,6 +52,21 @@ function reportDimensions(reportCard: any) {
   }
 }
 
+function userStatus(value: unknown) {
+  const normalized = String(value ?? '').replaceAll('_', ' ').trim().toLowerCase()
+  const labels: Record<string, string> = {
+    'production scope': 'Production-scope sample',
+    'limited sample': 'Limited sample',
+    'no settled sample': 'No settled sample',
+    'insufficient data': 'Insufficient data',
+    'brier score above target': 'Brier score is above target',
+    'value above target': 'Value is above target',
+    'qualified sample': 'Qualified sample',
+    'small sample': 'Small sample',
+  }
+  return labels[normalized] ?? String(value ?? '').replaceAll('_', ' ')
+}
+
 export async function GET(request: NextRequest) {
   try {
     const sportKey = request.nextUrl.searchParams.get('sportKey')
@@ -67,13 +82,17 @@ export async function GET(request: NextRequest) {
       ...data.aiBrain,
       selected: {
         ...data.aiBrain.selected,
-        overallHealth: selectedTrust.trustStatus,
+        overallHealth: userStatus(selectedTrust.trustStatus),
+        internalOverallHealth: selectedTrust.trustStatus,
         sampleSize: selectedMetrics.settled,
-        calibrationStatus: selectedReport.calibration.calibrationError === null ? 'INSUFFICIENT_DATA' : 'AVAILABLE',
-        blockers: selectedTrust.blockers,
+        calibrationStatus: selectedReport.calibration.calibrationError === null ? 'Insufficient data' : 'Available',
+        internalCalibrationStatus: selectedReport.calibration.calibrationError === null ? 'INSUFFICIENT_DATA' : 'AVAILABLE',
+        blockers: selectedTrust.blockers.map(userStatus),
+        internalBlockers: selectedTrust.blockers,
         readiness: {
           score: selectedTrust.trustScore,
-          status: selectedTrust.trustStatus,
+          status: userStatus(selectedTrust.trustStatus),
+          internalStatus: selectedTrust.trustStatus,
         },
         trustScore: selectedTrust,
       },
@@ -114,7 +133,8 @@ export async function GET(request: NextRequest) {
         trustLabel: selectedTrust.trustLabel,
         settledSample: selectedMetrics.settled,
         accuracy: selectedMetrics.accuracy,
-        recentTrend: selectedTrust.trustStatus,
+        recentTrend: userStatus(selectedTrust.trustStatus),
+        internalRecentTrend: selectedTrust.trustStatus,
         lastUpdate: product.generatedAt,
       },
       internalView: aiBrain.internalView,

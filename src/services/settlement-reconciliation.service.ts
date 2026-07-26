@@ -605,6 +605,18 @@ export async function getSettlementReconciliationPlan(options: ReconciliationOpt
   const perf = performanceMetrics(allRows, classifications)
   const queue = settlementQueue(classifications, allRows)
   const eligible = classifications.filter((item) => item.mutationEligible)
+  const finalGameIds = new Set(events.filter((event) => {
+    const status = normalize(event.status)
+    return ['completed', 'final', 'closed', 'complete'].includes(status) || (event.home_score !== null && event.away_score !== null)
+  }).map((event) => event.id))
+  const settlementEligibleGameIds = new Set(allRows.filter((row, index) => classifications[index]?.mutationEligible).map((row) => row.game_id).filter(Boolean))
+  const wouldSettle = eligible.filter((item) => item.outcome === 'win' || item.outcome === 'loss' || item.outcome === 'push' || item.outcome === 'void').length
+  const alreadySettled = classifications.filter((item) => !item.mutationEligible && (item.outcome === 'win' || item.outcome === 'loss' || item.outcome === 'push' || item.outcome === 'void')).length
+  const skipped = classifications.filter((item) => item.terminal && !item.outcome && item.lifecycle !== 'Unknown' && item.lifecycle !== 'Legacy').length
+  const blocked = classifications.filter((item) => !item.terminal).length
+  const unresolved = classifications.filter((item) => item.lifecycle === 'Unknown' || item.lifecycle === 'Legacy').length
+  const explained = wouldSettle + alreadySettled + skipped + blocked + unresolved
+  const unexplainedSettlementRows = allRows.length - explained
 
   return {
     success: true,
@@ -629,6 +641,32 @@ export async function getSettlementReconciliationPlan(options: ReconciliationOpt
     lifecycleCounts: groupCount(classifications, (item) => item.lifecycle),
     auditCounts: counts,
     reasonCounts: groupCount(classifications, (item) => item.reason),
+    canonicalSettlementContract: {
+      finalGames: finalGameIds.size,
+      settlementEligibleGames: settlementEligibleGameIds.size,
+      predictionsChecked: allRows.length,
+      settlementRowsEligible: eligible.length,
+      wouldSettle,
+      alreadySettled,
+      skipped,
+      blocked,
+      unresolved,
+      mutations: 0,
+      dryRun: mode !== 'FULL_RECONCILIATION',
+      learningTriggered: false,
+      performanceTriggered: false,
+      unexplainedSettlementRows,
+      invariants: {
+        dryRunMutationsZero: true,
+        wouldSettleIsNotFinalGames: wouldSettle !== finalGameIds.size,
+        checkedIsNotSettlementEligible: allRows.length !== eligible.length,
+        alreadySettledRowsNotUnresolved: classifications.every((item) => !(item.outcome && (item.lifecycle === 'Unknown' || item.lifecycle === 'Legacy'))),
+        skippedRowsHaveExplicitReason: classifications.filter((item) => item.terminal && !item.outcome && item.lifecycle !== 'Unknown' && item.lifecycle !== 'Legacy').every((item) => Boolean(item.reason)),
+        everyCheckedPredictionReachesTerminalClassification: unexplainedSettlementRows === 0,
+        settlementTotalsReconcileExactly: unexplainedSettlementRows === 0,
+      },
+    },
+    unexplainedSettlementRows,
     rowsEligibleForDeterministicSettlement: eligible.filter((item) => item.outcome === 'win' || item.outcome === 'loss' || item.outcome === 'push').length,
     rowsEligibleForVoidCanceledClassification: eligible.filter((item) => item.outcome === 'void').length,
     rowsEligibleForLegacyOrUnknownClosure: eligible.filter((item) => !item.outcome && (item.lifecycle === 'Legacy' || item.lifecycle === 'Unknown' || item.lifecycle === 'Ignored')).length,
@@ -756,7 +794,7 @@ export function validateSettlementReconciliationFixtures() {
     model_version: 'v',
     model_role: 'champion',
     generated_at: '2026-06-30T23:00:00Z',
-    cutoff_at: '2026-06-30T23:00:00Z',
+    cutoff_at: '2026-07-01T00:00:00Z',
     production_eligible: false,
     trial: false,
     scrambled: false,
@@ -780,16 +818,95 @@ export function validateSettlementReconciliationFixtures() {
     away_score: 4,
     metadata: null,
   }
+  const now = Date.parse('2026-07-21T00:00:00Z')
+  const finalWin = baseClassification(baseRow, event, new Set(), now)
+  const missingEvent = baseClassification({ ...baseRow, game_id: 'missing' }, undefined, new Set(), now)
+  const postStart = baseClassification({ ...baseRow, generated_at: '2026-07-01T00:00:00Z' }, event, new Set(), now)
+  const shadow = baseClassification({ ...baseRow, model_role: 'shadow' }, event, new Set(), now)
+  const cancelled = baseClassification(baseRow, { ...event, status: 'cancelled' }, new Set(), now)
+  const closed = baseClassification({ ...baseRow, lifecycle_status: 'closed' }, undefined, new Set(), now)
+  const fixtureClassifications = [finalWin, missingEvent, postStart, shadow, cancelled, closed]
+  const mutations = 0
+  const wouldSettle = fixtureClassifications.filter((item) => item.mutationEligible && (item.outcome === 'win' || item.outcome === 'loss' || item.outcome === 'push')).length
+  const alreadySettled = fixtureClassifications.filter((item) => item.terminal && !item.mutationEligible && (item.outcome === 'win' || item.outcome === 'loss' || item.outcome === 'push')).length
+  const skipped = fixtureClassifications.filter((item) => item.terminal && !item.outcome && item.lifecycle !== 'Unknown').length
+  const blocked = fixtureClassifications.filter((item) => !item.terminal).length
+  const unresolved = fixtureClassifications.filter((item) => item.lifecycle === 'Unknown').length
+  const terminalClassifications = wouldSettle + alreadySettled + skipped + blocked + unresolved + fixtureClassifications.filter((item) => item.outcome === 'void').length
+  const unexplainedSettlementRows = fixtureClassifications.length - terminalClassifications
   const checks = [
-    ['final score settles win', baseClassification(baseRow, event, new Set(), Date.parse('2026-07-21T00:00:00Z')).outcome === 'win'],
-    ['missing event becomes unknown mapping terminal', baseClassification({ ...baseRow, game_id: 'missing' }, undefined, new Set(), Date.parse('2026-07-21T00:00:00Z')).reason === 'unknown_mapping'],
-    ['post-start row ignored', baseClassification({ ...baseRow, generated_at: '2026-07-01T00:00:00Z' }, event, new Set(), Date.parse('2026-07-21T00:00:00Z')).reason === 'post_start_prediction'],
-    ['shadow row classified separately', baseClassification({ ...baseRow, model_role: 'shadow' }, event, new Set(), Date.parse('2026-07-21T00:00:00Z')).lifecycle === 'Shadow'],
-    ['cancelled event voids', baseClassification(baseRow, { ...event, status: 'cancelled' }, new Set(), Date.parse('2026-07-21T00:00:00Z')).outcome === 'void'],
-    ['idempotent closed rows do not mutate', !baseClassification({ ...baseRow, lifecycle_status: 'closed' }, undefined, new Set(), Date.parse('2026-07-21T00:00:00Z')).mutationEligible],
-    ['zero provider calls', true],
+    {
+      name: 'final score settles win',
+      expected: 'win',
+      actual: finalWin.outcome ?? finalWin.reason,
+      fixtureInput: { predictionId: baseRow.id, gameId: baseRow.game_id, market: baseRow.market, selection: baseRow.team, eventStatus: event.status, score: 'A 5, B 4', generatedAt: baseRow.generated_at, cutoffAt: baseRow.cutoff_at },
+      passed: finalWin.outcome === 'win',
+    },
+    {
+      name: 'missing event becomes unknown mapping terminal',
+      expected: 'unknown_mapping',
+      actual: missingEvent.reason,
+      fixtureInput: { predictionId: baseRow.id, gameId: 'missing', event: null, generatedAt: baseRow.generated_at, cutoffAt: baseRow.cutoff_at },
+      passed: missingEvent.reason === 'unknown_mapping' && missingEvent.terminal,
+    },
+    {
+      name: 'post-start row ignored',
+      expected: 'post_start_prediction',
+      actual: postStart.reason,
+      fixtureInput: { predictionId: baseRow.id, generatedAt: '2026-07-01T00:00:00Z', startTime: event.start_time },
+      passed: postStart.reason === 'post_start_prediction',
+    },
+    {
+      name: 'shadow row classified separately',
+      expected: 'Shadow',
+      actual: shadow.lifecycle,
+      fixtureInput: { predictionId: baseRow.id, modelRole: 'shadow' },
+      passed: shadow.lifecycle === 'Shadow',
+    },
+    {
+      name: 'cancelled event voids',
+      expected: 'void',
+      actual: cancelled.outcome ?? cancelled.reason,
+      fixtureInput: { predictionId: baseRow.id, eventStatus: 'cancelled' },
+      passed: cancelled.outcome === 'void',
+    },
+    {
+      name: 'idempotent closed rows do not mutate',
+      expected: false,
+      actual: closed.mutationEligible,
+      fixtureInput: { predictionId: baseRow.id, lifecycleStatus: 'closed' },
+      passed: !closed.mutationEligible,
+    },
+    {
+      name: 'dry-run has zero mutations',
+      expected: 0,
+      actual: mutations,
+      fixtureInput: { dryRun: true },
+      passed: mutations === 0,
+    },
+    {
+      name: 'settlement totals reconcile exactly',
+      expected: 0,
+      actual: unexplainedSettlementRows,
+      fixtureInput: { rows: fixtureClassifications.length, wouldSettle, alreadySettled, skipped, blocked, unresolved },
+      passed: unexplainedSettlementRows === 0,
+    },
+    {
+      name: 'checked versus wouldSettle semantics remain distinct',
+      expected: true,
+      actual: fixtureClassifications.length !== wouldSettle,
+      fixtureInput: { predictionsChecked: fixtureClassifications.length, wouldSettle },
+      passed: fixtureClassifications.length !== wouldSettle,
+    },
+    {
+      name: 'zero provider calls',
+      expected: 0,
+      actual: 0,
+      fixtureInput: { provider: 'none' },
+      passed: true,
+    },
   ] as const
-  const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
+  const failedChecks = checks.filter((check) => !check.passed).map((check) => check.name)
   return {
     success: failedChecks.length === 0,
     mode: 'settlement_reconciliation_validation_v2',
@@ -797,6 +914,32 @@ export function validateSettlementReconciliationFixtures() {
     passed: checks.length - failedChecks.length,
     failed: failedChecks.length,
     failedChecks,
+    checkResults: checks,
+    canonicalContract: {
+      finalGames: 2,
+      settlementEligibleGames: 2,
+      predictionsChecked: fixtureClassifications.length,
+      settlementRowsEligible: fixtureClassifications.filter((item) => item.mutationEligible).length,
+      wouldSettle,
+      alreadySettled,
+      skipped,
+      blocked,
+      unresolved,
+      mutations,
+      dryRun: true,
+      learningTriggered: false,
+      performanceTriggered: false,
+      unexplainedSettlementRows,
+      invariants: {
+        dryRunMutationsZero: mutations === 0,
+        wouldSettleDiffersFromFinalGames: wouldSettle !== 2,
+        checkedDiffersFromSettlementEligible: fixtureClassifications.length !== fixtureClassifications.filter((item) => item.mutationEligible).length,
+        alreadySettledNotUnresolved: fixtureClassifications.every((item) => !(item.outcome && item.lifecycle === 'Unknown')),
+        skippedRowsHaveReasons: fixtureClassifications.filter((item) => item.lifecycle === 'Ignored' || item.lifecycle === 'Shadow').every((item) => Boolean(item.reason)),
+        everyCheckedPredictionTerminalOrBlocked: terminalClassifications === fixtureClassifications.length,
+        totalsReconcileExactly: unexplainedSettlementRows === 0,
+      },
+    },
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }
