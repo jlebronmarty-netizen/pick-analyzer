@@ -22,6 +22,7 @@ const RECOMMENDATION_TYPE = 'PROBABILITY_ONLY' as const
 const SUPPORTED_MARKETS: ProbabilityMarketType[] = ['moneyline', 'run_line', 'total', 'pitcher_outs']
 const PITCHER_LINES = ['14.5', '15.5', '16.5', '17.5', '18.5'] as const
 const EXCLUDED_STATUSES = new Set(['completed', 'final', 'settled', 'closed', 'ignored', 'historical', 'replay', 'shadow', 'live', 'started', 'cancelled', 'void'])
+const FORBIDDEN_PROBABILITY_TEXT = /\b(sportsbook|odds|ev|kelly|stake|bankroll|official pick|portfolio)\b/i
 
 type PredictionHistoryRow = {
   id: string
@@ -94,6 +95,13 @@ function asRecord(value: unknown) {
 
 function arrayOfText(value: unknown) {
   return Array.isArray(value) ? value.map((item) => String(item ?? '').trim()).filter(Boolean).slice(0, 6) : []
+}
+
+function probabilityOnlyText(values: string[], fallback: string) {
+  const clean = values
+    .map((value) => value.trim())
+    .filter((value) => value && !FORBIDDEN_PROBABILITY_TEXT.test(value))
+  return clean.length ? clean.slice(0, 4) : [fallback]
 }
 
 function normalizePercent(value: unknown, fallback = 50) {
@@ -206,11 +214,11 @@ function driversFromRow(row: PredictionHistoryRow, snapshot: Record<string, unkn
     ...arrayOfText(snapshot.drivers),
     ...arrayOfText(snapshot.keyFactors),
   ]
-  if (candidates.length) return candidates.slice(0, 4)
-  return [
+  if (candidates.length) return probabilityOnlyText(candidates, 'Model probability signal available')
+  return probabilityOnlyText([
     `${text(row.market, 'Market')} model probability: ${round(normalizePercent(row.model_probability), 1)}%`,
     `Confidence signal: ${round(normalizePercent(row.confidence), 1)}%`,
-  ]
+  ], 'Model probability signal available')
 }
 
 function risksFromRow(row: PredictionHistoryRow, snapshot: Record<string, unknown>) {
@@ -219,9 +227,9 @@ function risksFromRow(row: PredictionHistoryRow, snapshot: Record<string, unknow
     ...arrayOfText(snapshot.risks),
     ...arrayOfText(row.validation_warnings),
   ]
-  if (warnings.length) return warnings.slice(0, 4)
+  if (warnings.length) return probabilityOnlyText(warnings, 'Projection uncertainty')
   const status = text(snapshot.starterStatus ?? snapshot.lineupStatus ?? row.status, 'standard model uncertainty')
-  return [`Lifecycle status: ${status}`]
+  return probabilityOnlyText([`Lifecycle status: ${status}`], 'Projection uncertainty')
 }
 
 function predictionRowToPick(row: PredictionHistoryRow): ProbabilityPick | null {
@@ -297,8 +305,8 @@ function pitcherPickFromProjection(projection: MlbPitcherProjection): Probabilit
     generatedAt: projection.generatedAt,
     cutoffAt: projection.cutoffAt,
     projectionVersion: projection.modelVersion,
-    drivers: (projection.mainDrivers.length ? projection.mainDrivers : [`Projected workload: ${projection.projectedOuts ?? 'N/A'} outs`]).slice(0, 4),
-    risks: (warnings.length ? warnings : ['Pitcher workload projection uncertainty']).slice(0, 4),
+    drivers: probabilityOnlyText(projection.mainDrivers.length ? projection.mainDrivers : [`Projected workload: ${projection.projectedOuts ?? 'N/A'} outs`], 'Pitcher workload model signal available'),
+    risks: probabilityOnlyText(warnings.length ? warnings : ['Pitcher workload projection uncertainty'], 'Pitcher workload projection uncertainty'),
     correlationGroup: `${projection.eventId}:${projection.pitcherId}`,
     recommendationType: RECOMMENDATION_TYPE,
     score,
