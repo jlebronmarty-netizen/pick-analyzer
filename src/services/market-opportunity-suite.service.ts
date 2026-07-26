@@ -756,11 +756,16 @@ function puertoRicoTodayStartMs() {
   return new Date(zonedUtcRange(localDate, 'America/Puerto_Rico').utcStart).getTime()
 }
 
+function isPregameDisplayStatus(status: unknown) {
+  const normalized = String(status ?? '').trim().toLowerCase()
+  return !['live', 'in_progress', 'completed', 'complete', 'final', 'closed', 'cancelled', 'canceled', 'postponed', 'suspended'].includes(normalized)
+}
+
 function currentOrFutureInformational(cards: CanonicalProbabilityCard[]) {
   const todayStart = puertoRicoTodayStartMs()
   return cards.filter((card) => {
     const startMs = card.startTime ? new Date(card.startTime).getTime() : Number.NaN
-    return Number.isFinite(startMs) && startMs >= todayStart
+    return Number.isFinite(startMs) && startMs >= todayStart && isPregameDisplayStatus(card.eventStatus)
   })
 }
 
@@ -1042,10 +1047,15 @@ export async function getMostLikelyOpportunities({
   }
 
   const modelOnly = rows.length === 0 ? await getModelOnlyIntelligence() : null
+  const modelOnlyOutcomes = currentOrFutureInformational(
+    (modelOnly?.categories.allModelOutcomes ?? []).map(modelOnlyOutcomeToMostLikelyCard)
+  )
+  const modelOnlyMoneylineOutcomes = currentOrFutureInformational(
+    (modelOnly?.categories.highestMoneylineProbability ?? []).map(modelOnlyOutcomeToMostLikelyCard)
+  )
   const modelOnlyRows = rows.length
     ? []
-    : (modelOnly?.categories.allModelOutcomes ?? [])
-        .map(modelOnlyOutcomeToMostLikelyCard)
+    : modelOnlyOutcomes
         .sort(compareCurrentBoardOpportunity(sort))
         .slice(0, safeLimit)
   const displayRows = rows.length ? rows : modelOnlyRows
@@ -1147,27 +1157,40 @@ export async function getMostLikelyOpportunities({
       modelOnlyFallbackUsed: rows.length === 0 && modelOnlyRows.length > 0,
     },
     topPick: displayRows.length ? topPick : {
-      type: modelOnly?.categories.allModelOutcomes[0] ? 'model_only_outcome' : modelOnly?.categories.allPitcherShadows[0] ? 'pitcher_outs_shadow' : 'none',
-      candidate: modelOnly?.categories.allModelOutcomes[0] ?? modelOnly?.categories.allPitcherShadows[0] ?? null,
-      disclaimer: modelOnly?.categories.allModelOutcomes[0] || modelOnly?.categories.allPitcherShadows[0]
+      type: modelOnlyOutcomes[0] ? 'model_only_outcome' : modelOnly?.categories.allPitcherShadows[0] ? 'pitcher_outs_shadow' : 'none',
+      candidate: modelOnlyOutcomes[0] ?? modelOnly?.categories.allPitcherShadows[0] ?? null,
+      disclaimer: modelOnlyOutcomes[0] || modelOnly?.categories.allPitcherShadows[0]
         ? 'This is model-only or shadow intelligence. It is not an Official Pick and has no EV, Kelly or stake.'
         : 'No valid current supported model-only outcome is available.',
     },
-    highestProbabilitySupportedOutcome: displayRows.length ? topPick.candidate : modelOnly?.categories.allModelOutcomes[0] ?? null,
+    highestProbabilitySupportedOutcome: displayRows.length ? topPick.candidate : modelOnlyOutcomes[0] ?? null,
     mostLikelyMoneyline: displayRows.length ? mostLikelyMoneyline : {
-      candidate: modelOnly?.categories.highestMoneylineProbability[0] ?? null,
-      probability: modelOnly?.categories.highestMoneylineProbability[0]?.modelProbability ?? null,
+      candidate: modelOnlyMoneylineOutcomes[0] ?? null,
+      probability: modelOnlyMoneylineOutcomes[0]?.probability ?? null,
       fairOdds: null,
-      marketOdds: modelOnly?.categories.highestMoneylineProbability[0]?.sportsbookOdds ?? null,
+      marketOdds: modelOnlyMoneylineOutcomes[0]?.odds ?? null,
       ev: null,
-      confidence: modelOnly?.categories.highestMoneylineProbability[0]?.confidence ?? null,
+      confidence: modelOnlyMoneylineOutcomes[0]?.confidence ?? null,
       officialStatus: 'model_only_not_official',
-      blockers: modelOnly?.categories.highestMoneylineProbability[0] ? ['NO_OFFICIAL_PICK', 'EV_NOT_AVAILABLE_ON_MODEL_ONLY_SURFACE'] : ['NO_VALID_CURRENT_MONEYLINE'],
-      explanation: modelOnly?.categories.highestMoneylineProbability[0]
+      blockers: modelOnlyMoneylineOutcomes[0] ? ['NO_OFFICIAL_PICK', 'EV_NOT_AVAILABLE_ON_MODEL_ONLY_SURFACE'] : ['NO_VALID_CURRENT_MONEYLINE'],
+      explanation: modelOnlyMoneylineOutcomes[0]
         ? 'Highest current pregame model moneyline probability from stored prediction history. Odds are not required for this informational surface.'
         : 'No valid current moneyline candidate is available.',
     },
-    mostLikelyMoneylineParlay: displayRows.length ? mostLikelyMoneylineParlay : modelOnly?.informationalParlays.twoLegHighestProbability ?? {
+    mostLikelyMoneylineParlay: displayRows.length ? mostLikelyMoneylineParlay : modelOnlyRows.length ? modelOnly?.informationalParlays.twoLegHighestProbability ?? {
+      legs: [],
+      rawJointProbability: null,
+      adjustedJointProbability: null,
+      impliedProbability: null,
+      combinedOdds: null,
+      ev: null,
+      confidence: null,
+      independenceAssumed: true,
+      correlationAdjustment: 'not_enough_eligible_legs',
+      officialStatus: 'informational_only',
+      blockers: ['NEEDS_TWO_DISTINCT_VALID_MONEYLINES'],
+      disclaimer: 'No informational two-leg moneyline parlay is available.',
+    } : {
       legs: [],
       rawJointProbability: null,
       adjustedJointProbability: null,
