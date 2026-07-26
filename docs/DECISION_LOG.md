@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-26 - Certify Platform Baseline And Lock Governance
+
+Context: Production was certified at runtime commit `94159038571ba16cf31107403efce3af7f13ba50` after live verification of operations status, operations validation, Dashboard, Current Board, Most Likely, Best Value, settlement dry-run safety, Performance user-mode sanitization and adaptive odds provider evidence persistence.
+
+Decision: Create a documentation-only certified platform baseline with release manifest, platform lock policy and rollback runbook. Use stable release tag `v1.0-platform-certified` as the release-governance marker after approval. Keep `/api/system/version` unchanged because the release manifest provides the certification metadata without risking the existing runtime contract.
+
+Consequences: The certified platform now has a trusted rollback point and locked-module policy. Future changes to architecture, operating-day context, scheduler ownership, odds pipeline, provider evidence, prediction cutoff policy, Grounded Opportunities, Current Board, Most Likely, Best Value, Official Pick policy, settlement grading, Learning Brain policy, Performance Scope V2, Dashboard ViewModel, cache invalidation or operations diagnostics require documented approval and production verification. Portfolio Intelligence V1 is the next approved phase but remains NOT STARTED.
+
+Affected modules: Release documentation only. No application logic, prediction probabilities, confidence formulas, Official Pick policy, settlement grading, Learning Brain behavior, scheduler cadence, odds operations, Dashboard behavior, Performance behavior, Current Board, Most Likely or Best Value changed.
+
 ## 2026-07-24 - Recover Pregame Execution With Slate Prewarm
 
 Context: Cutoff enforcement prevented late prediction persistence, but scheduler execution still selected the local operating date whenever stored games existed. After those games crossed cutoff, late passes correctly produced rejected rows and never pivoted to a future slate. `prepare_next_slate` also required a stored future slate before it could call provider schedule discovery.

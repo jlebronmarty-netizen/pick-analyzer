@@ -1,0 +1,73 @@
+{
+  "release": "v1.0-platform-certified",
+  "certifiedCommit": "94159038571ba16cf31107403efce3af7f13ba50",
+  "certificationDate": "2026-07-26",
+  "productionUrl": "https://pick-analyzer.vercel.app",
+  "repository": "https://github.com/jlebronmarty-netizen/pick-analyzer",
+  "schedulerOwner": "github-actions",
+  "productionSport": "MLB",
+  "bsnScope": "EXPECTED_PARTIAL",
+  "architectureLocked": true,
+  "officialPickPolicyLocked": true,
+  "learningPolicyLocked": true,
+  "historicalReplayStarted": false,
+  "portfolioIntelligenceStarted": false,
+  "validationCounts": {
+    "dashboard": {
+      "checks": 50,
+      "passed": 50,
+      "failed": 0
+    },
+    "currentBoard": {
+      "checks": 20,
+      "passed": 20,
+      "failed": 0
+    },
+    "operationsValidationTrueFailures": 0,
+    "groundedIntegrityCounters": 0,
+    "settlementDryRunMutations": 0,
+    "rawUserModeCodeLeaks": 0,
+    "modelPolicyChanges": 0
+  },
+  "oddsProviderEvidence": {
+    "selectedAction": "midday_refresh",
+    "executedDomain": "odds",
+    "provider": "sportsdataio",
+    "gamesReceived": 15,
+    "oddsRowsInserted": 90,
+    "providerCallsMade": 3,
+    "providerCallsAttributed": 3,
+    "lastProviderCheckAt": "2026-07-26T12:32:02.411+00:00",
+    "lastProviderSuccessAt": "2026-07-26T12:32:02.411+00:00",
+    "latestSourceTimestamp": "2026-07-26T08:31:43.000Z",
+    "nextRecommendedRefreshAt": "2026-07-26T12:46:53.275Z"
+  },
+  "certifications": [
+    "ODDS_PROVIDER_EVIDENCE_CONTRACT_PASS",
+    "OPERATIONS_EVIDENCE_PERSISTENCE_PASS",
+    "SCHEDULER_STEP_ATTRIBUTION_PASS",
+    "ODDS_STATUS_TRUTHFULNESS_PASS",
+    "NEXT_REFRESH_TIMESTAMP_PASS",
+    "PERFORMANCE_USER_MODE_ISOLATION_PASS",
+    "OPERATIONS_STATUS_PASS",
+    "DASHBOARD_AVAILABILITY_PASS",
+    "GROUNDING_EVENT_EVIDENCE_SEPARATION_PASS",
+    "GROUNDING_MARKET_LEVEL_MAPPING_PASS",
+    "GROUNDING_PROBABILITY_INTEGRITY_PASS",
+    "GROUNDING_CONFIDENCE_INTEGRITY_PASS",
+    "GROUNDING_PRICE_INTEGRITY_PASS",
+    "NO_SYNTHETIC_ZERO_PLACEHOLDERS_PASS",
+    "SETTLEMENT_DRY_RUN_SAFETY_PASS",
+    "BSN_SCOPE_CLASSIFICATION_PASS",
+    "NO_MODEL_POLICY_REGRESSION_PASS",
+    "PRODUCTION_PLATFORM_CERTIFIED",
+    "CERTIFIED_BASELINE_DOCUMENTED",
+    "PLATFORM_LOCK_POLICY_PASS",
+    "ROLLBACK_RUNBOOK_PASS",
+    "RELEASE_MANIFEST_PASS"
+  ],
+  "nextApprovedPhase": {
+    "name": "Portfolio Intelligence V1",
+    "status": "NOT_STARTED"
+  }
+}

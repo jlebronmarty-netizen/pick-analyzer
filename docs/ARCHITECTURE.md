@@ -2,6 +2,22 @@
 
 Pick Analyzer is a Next.js 16 App Router application with a service-heavy backend inside the same repository. It combines sports data synchronization, normalized multi-sport adapters, prediction generation, settlement, analytics, portfolio tools and dashboard panels.
 
+## Certified Platform Baseline
+
+Status: PLATFORM BASELINE CERTIFIED.
+
+Certified commit: `94159038571ba16cf31107403efce3af7f13ba50`
+
+Stable release tag: `v1.0-platform-certified`
+
+Certification date: 2026-07-26
+
+The certified platform baseline locks the production architecture, canonical operating-day context, GitHub-owned scheduler, adaptive odds refresh, SportsDataIO odds path, provider budget controls, event lifecycle, prediction generation boundaries, Grounded Opportunities, Current Board, Most Likely, Best Value, Official Pick policy, results synchronization, settlement, settlement dry-run safety, Learning chain, Performance Scope V2, Dashboard canonical ViewModel, cache invalidation, operations evidence persistence, User Mode sanitization and BSN EXPECTED_PARTIAL scope.
+
+Future changes to these locked modules require documented reason, proven production defect or approved product requirement, impact analysis, focused regression tests, build pass, production smoke verification and explicit approval before deployment.
+
+Next approved phase: Portfolio Intelligence V1, status NOT STARTED.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

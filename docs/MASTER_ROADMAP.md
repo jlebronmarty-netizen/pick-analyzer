@@ -2,11 +2,37 @@
 
 This roadmap is dependency-aware and based on repository inspection. A module is marked completed only when the repository contains service/API/dashboard/persistence evidence and recent verification supports it.
 
+## Platform Baseline
+
+Status: PLATFORM BASELINE CERTIFIED.
+
+Certified commit: `94159038571ba16cf31107403efce3af7f13ba50`
+
+Stable release tag: `v1.0-platform-certified`
+
+Production URL: `https://pick-analyzer.vercel.app`
+
+The certified platform baseline freezes the current production architecture, operating-day context, GitHub-owned scheduler, adaptive odds operations, provider evidence contract, Grounded Opportunities, Current Board, Most Likely, Best Value, Official Pick policy, settlement dry-run safety, Learning Brain policy, Performance Scope V2, Dashboard canonical ViewModel, cache invalidation chain and operations diagnostics.
+
 ## Dependency Reasoning
 
 MLB is now production stable and in maintenance mode. The primary roadmap focus is BSN, basketball intelligence, basketball prediction readiness after data maturity, AI market intelligence expansion and then additional sports. MLB work should remain limited to maintenance unless a future explicit major project authorizes architecture or model changes.
 
 ## Completed
+
+### Platform Certification
+
+Status: Complete and production-certified.
+
+Evidence: `docs/releases/PLATFORM_CERTIFIED_V1.md`, `docs/PLATFORM_LOCK_POLICY.md`, `docs/PLATFORM_ROLLBACK_RUNBOOK.md`, `docs/releases/v1.0-platform-certified.json`, production `/api/system/version`, `/api/operations/status`, `/api/operations/validation`, `/api/dashboard?mode=today&includeValidation=true`, `/api/current-board?includeValidation=true`, `/api/market-opportunities/most-likely`, `/api/market-opportunities/best-value`, `/api/predictions/settle?dryRun=true`, `/api/performance`, `/api/performance/goals` and `/api/performance/validation`.
+
+Note: Product Experience, Dashboard canonical reconciliation, Grounded Opportunities integrity, Settlement dry-run safety, Operations validation, Adaptive odds operations, Production autonomous execution and Performance product contract are complete at the certified baseline. No application behavior or model policy changed during the release-governance documentation phase.
+
+### Portfolio Intelligence V1
+
+Status: NOT STARTED.
+
+Note: Portfolio Intelligence V1 is the next approved phase. No implementation details are introduced in the certified baseline documentation.
 
 ### Production UX Polish V1
 

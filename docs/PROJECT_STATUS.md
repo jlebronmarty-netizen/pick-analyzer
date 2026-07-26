@@ -1,6 +1,46 @@
 # Project Status
 
-Last updated: 2026-07-25 00:00:00Z
+Last updated: 2026-07-26 00:00:00Z
+
+## 2026-07-26 Platform Baseline Certified
+
+Status: PLATFORM BASELINE CERTIFIED.
+
+Certified commit: `94159038571ba16cf31107403efce3af7f13ba50`
+
+Stable release tag: `v1.0-platform-certified`
+
+Production URL: `https://pick-analyzer.vercel.app`
+
+Certification evidence:
+
+- Operations status returned `SUCCESS`.
+- Operations validation returned `PASS` with no true failures.
+- Dashboard validation passed `50/50`.
+- Current Board validation passed `20/20`.
+- Adaptive odds execution used the canonical SportsDataIO odds path with provider calls attributed `3/3`, 15 provider games received and 90 odds rows inserted.
+- Grounded integrity counters were 0.
+- Settlement dry-run mutations were 0.
+- Raw User Mode code leaks were 0.
+- Model policy changes were 0.
+
+Completed certified phases:
+
+- Product Experience
+- Dashboard canonical reconciliation
+- Grounded Opportunities integrity
+- Settlement dry-run safety
+- Operations validation
+- Adaptive odds operations
+- Production autonomous execution
+- Performance product contract
+- Platform certification
+
+Next approved phase: Portfolio Intelligence V1.
+
+Portfolio Intelligence V1 status: NOT STARTED.
+
+No prediction probabilities, confidence formulas, Official Pick policy, settlement grading, Learning Brain behavior, scheduler cadence, odds operations, Dashboard behavior, Performance behavior, Current Board, Most Likely or Best Value changed in this release-governance phase.
 
 ## 2026-07-25 Production UX Polish V1
 
