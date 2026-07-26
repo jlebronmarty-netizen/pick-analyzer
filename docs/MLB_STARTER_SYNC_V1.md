@@ -57,4 +57,25 @@ POST defaults to dry-run. Production writes require the existing `CRON_SECRET` a
 
 Local migration only: `202607260002_mlb_starter_assignments_v1.sql`.
 
+The migration creates `mlb_starter_assignments` for canonical current-starter evidence. It is additive and does not alter or drop existing certified platform tables.
+
+RLS state: intentionally not enabled, matching the existing certified service-owned table pattern in this repository. Writes are performed by `service_role` through protected server APIs. Authenticated read access is canonical assignment evidence only, and UI/API workflows should continue to read through server-side routes. Rows are source evidence and must not be presented as betting advice.
+
+Index coverage:
+
+- `mlb_starter_assignments_active_event_team_idx` enforces one active assignment per event/team while preserving replacement history with `valid_until`.
+- `mlb_starter_assignments_active_lookup_idx` supports current active assignment lookup by event/team.
+- `mlb_starter_assignments_active_event_idx` supports active assignments by event.
+- `mlb_starter_assignments_event_idx` supports event/status/role reads.
+- `mlb_starter_assignments_pitcher_idx` supports canonical pitcher assignment history.
+- `mlb_starter_assignments_provider_pitcher_idx` supports provider pitcher lookup while canonical player rows are pending.
+- `mlb_starter_assignments_historical_pitcher_idx` supports Retrosheet identity traceability.
+- `mlb_starter_assignments_source_updated_idx` supports source recency, scratch and replacement audits.
+
 Not applied. Production application still requires explicit approval.
+
+## Migration Rollback Notes
+
+The migration should run after certified sports tables exist because it references `sport_events(id)` and `sports_teams(id)`. It should run before application deployment that persists starter assignments, and before pitcher projection persistence that depends on durable starter evidence.
+
+Rollback limitation: dropping `mlb_starter_assignments` deletes persisted assignment history, including scratch/replacement audit evidence. Export rows before any destructive rollback. If rollback is required after code deployment, roll back the application first so production routes stop depending on the table, then perform any database rollback only with explicit destructive approval.

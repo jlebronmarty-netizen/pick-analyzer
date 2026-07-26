@@ -38,7 +38,28 @@ POST generation defaults to dry-run. Persisting requires existing CRON authoriza
 
 The proposed `mlb_pitcher_projections` table is narrow and additive. Projection IDs are deterministic from sport, event, pitcher, projection key, model version and projection date. Upsert is idempotent by primary key.
 
+Migration file: `supabase/migrations/202607260001_mlb_pitcher_projections_v1.sql`.
+
+RLS state: intentionally not enabled, matching the existing certified service-owned table pattern in this repository. Writes are performed by `service_role` through protected server APIs. Authenticated read access is projection-only, and UI routes should continue to read through server APIs. The table does not contain sportsbook recommendations, official picks, stakes or portfolio selections.
+
+Index coverage:
+
+- `mlb_pitcher_projections_event_idx` supports event/date/model lookup.
+- `mlb_pitcher_projections_pitcher_idx` supports pitcher/date lookup.
+- `mlb_pitcher_projections_provider_pitcher_generated_idx` supports provider pitcher lookup and provider-scoped rows while canonical player rows are pending.
+- `mlb_pitcher_projections_generated_idx` supports latest projections globally and generation audits.
+- `mlb_pitcher_projections_event_generated_idx` supports latest projections by event.
+- `mlb_pitcher_projections_pitcher_generated_idx` supports latest projections by pitcher.
+
 The migration has not been applied to production.
+
+## Migration Rollback Notes
+
+The migration is additive: it creates `mlb_pitcher_projections`, indexes, grants and table comments. It does not alter or drop existing production tables.
+
+Expected production impact is limited to enabling durable storage for MLB pitcher recorded-outs projections. The migration depends on existing `sport_events(id)` and should run after certified platform/base sports tables exist. For this module, apply database migrations before deploying code that persists projections.
+
+Rollback limitation: dropping `mlb_pitcher_projections` deletes persisted pitcher projection history. Export rows before any destructive rollback. If rollback is required after code deployment, roll back the application first so production routes stop depending on the table, then perform any database rollback only with explicit destructive approval.
 
 ## Live Dry-Run Proof
 
