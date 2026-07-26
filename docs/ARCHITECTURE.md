@@ -34,6 +34,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `docs/SPORTS_DATA_WAREHOUSE_V2.md` maps existing persistence into warehouse layers: provider raw/staging, canonical entities, canonical events/results, statistics and boxscores, market data, feature store, prediction and settlement, and audit/provenance. The contract requires provider identity, canonical identity, source/ingestion/effective timestamps, deterministic keys, data version, confidence, completeness, lineage, validation state and correction state. It intentionally reuses existing tables and metadata rather than creating a competing warehouse.
 
+## Historical Import Orchestrator V2
+
+`src/services/data-foundation-import-orchestrator.service.ts` and `/api/data-foundation/import-orchestrator` provide a V2 orchestration wrapper over the existing Historical Import Engine Core. The wrapper exposes PLAN_ONLY, DRY_RUN, LOCAL_EXECUTION and MANUAL_PRODUCTION_READY modes, but this autonomous run permits only plan/dry-run behavior. Local execution and production-ready modes return contract blockers until a separately approved bounded execution plan exists.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

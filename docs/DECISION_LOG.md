@@ -32,6 +32,14 @@ Decision: Add `docs/SPORTS_DATA_WAREHOUSE_V2.md` as a contract mapping existing 
 
 Consequences: Later phases can build ingestion, quality, feature rebuild and epoch contracts against a single warehouse vocabulary. No migration, provider call, production mutation or storage duplication was introduced.
 
+## 2026-07-27 - Add Historical Import Orchestrator V2 Wrapper
+
+Context: Historical foundation work needs a higher-level orchestration contract for plan, dry-run, local execution, manual production readiness, checkpointing, resume, retry, quota and reconciliation while preserving the existing Historical Import Engine Core.
+
+Decision: Add `src/services/data-foundation-import-orchestrator.service.ts`, `/api/data-foundation/import-orchestrator` and `docs/HISTORICAL_IMPORT_ORCHESTRATOR_V2.md`. The wrapper delegates core planning to `historical-import-engine.service.ts` and blocks LOCAL_EXECUTION and MANUAL_PRODUCTION_READY to contract-only in this autonomous run.
+
+Consequences: Later phases can reference a unified import orchestration surface without duplicating the import engine or executing provider transport. No provider calls, remote mutations, production SQL, historical odds or scheduled ingestion were introduced.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

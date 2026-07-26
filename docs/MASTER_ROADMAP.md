@@ -28,6 +28,8 @@ Phase 2 season and competition governance is locally implemented at `/api/data-f
 
 Phase 3 sports data warehouse contract is locally documented in `docs/SPORTS_DATA_WAREHOUSE_V2.md`. It maps existing storage into canonical warehouse layers and defines lineage, deterministic key, validation-state and correction-state rules without adding duplicate tables.
 
+Phase 4 historical import orchestration is locally implemented at `/api/data-foundation/import-orchestrator`. It wraps the existing Historical Import Engine Core, exposes PLAN_ONLY and DRY_RUN planning, and keeps LOCAL_EXECUTION and MANUAL_PRODUCTION_READY blocked to contract-only for this no-production-mutation run.
+
 ## Completed
 
 ### Platform Certification

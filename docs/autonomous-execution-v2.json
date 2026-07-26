@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-26T23:55:00Z"
+    "updatedAt": "2026-07-27T00:05:00Z"
   },
   "phases": [
     {
@@ -123,7 +123,7 @@
       "status": "completed",
       "startedAt": "2026-07-26T23:45:00Z",
       "completedAt": "2026-07-26T23:55:00Z",
-      "commit": "pending_self_reference",
+      "commit": "ba10970b6c348ad24e41bf970065aec1224499ee",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -145,6 +145,36 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_4"
+    },
+    {
+      "phaseId": 4,
+      "phaseName": "HISTORICAL_INGESTION_ORCHESTRATOR_V2",
+      "status": "completed",
+      "startedAt": "2026-07-26T23:55:00Z",
+      "completedAt": "2026-07-27T00:05:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "orchestrator_wrapper_created",
+          "plan_only_mode_defined",
+          "dry_run_mode_defined",
+          "local_execution_blocked_to_contract_only",
+          "manual_production_ready_blocked_to_contract_only",
+          "checkpoint_resume_idempotency_contracts_exposed",
+          "next_build_route_manifest_includes_import_orchestrator"
+        ]
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_5"
     }
   ],
   "certificationMarkers": [
@@ -154,6 +184,9 @@
     "SEASON_GOVERNANCE_V2_PASS",
     "COMPETITION_GOVERNANCE_V2_PASS",
     "SPORTS_DATA_WAREHOUSE_CONTRACT_V2_PASS",
-    "DATA_LINEAGE_CONTRACT_PASS"
+    "DATA_LINEAGE_CONTRACT_PASS",
+    "HISTORICAL_IMPORT_ORCHESTRATOR_V2_PASS",
+    "CHECKPOINT_RESUME_PASS",
+    "IMPORT_IDEMPOTENCY_PASS"
   ]
 }
