@@ -2,6 +2,16 @@
 
 Last updated: 2026-07-26 18:30:00Z
 
+## 2026-07-26 The Odds API Free-Tier Capability Audit V1
+
+- Added protected audit-only route `/api/providers/the-odds-api/capability-audit` and `src/services/the-odds-api-capability-audit.service.ts`.
+- Dry-run mode returns the planned request set with `providerCallsMade: 0`; live mode requires `confirm=ODDS_API_AUDIT` and enforces a hard 15-call cap.
+- A bounded live audit used 15 provider calls, validated the runtime credential, observed quota header movement from 20000 remaining to 19985 remaining, found 14 current MLB provider events, and found standard `h2h`, `spreads` and `totals` rows.
+- Current event-level player prop calls returned rows for `pitcher_outs`, pitcher strikeouts/walks/hits allowed/earned runs, batter hits/total bases/home runs/RBIs/runs scored/walks/stolen bases; `batter_strikeouts` returned no current rows for the tested event.
+- `pitcher_outs` returned 26 rows across BetMGM, BetOnline, BetRivers, Bovada, DraftKings, Fanatics, FanDuel and William Hill US.
+- Event ID crosswalk to existing Pick Analyzer `sport_events` was not proven: 0 exact matches, 0 probable matches, 14 unmatched provider events and 22 unmatched internal events in the inspected window.
+- No provider rows were persisted, no historical odds endpoints were called, no scheduled ingestion was enabled and no Current Board, Probability Picks, EV, Kelly, Official Pick or Portfolio behavior changed.
+
 ## 2026-07-26 Probability Picks & Parlay Builder V1
 
 - Added a projection-only Probability Picks workspace under `/probability-picks` and AI Operations navigation.

@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-26 - Audit Existing The Odds API Free-Tier Capability
+
+Context: The application has an existing The Odds API credential, but player-prop availability, quota state and event identity crosswalk were not proven in the current runtime. Before changing providers or purchasing a plan, the account needed a bounded live capability audit.
+
+Decision: Add an audit-only service and protected route for The Odds API. GET performs dry-run metadata only. Live execution requires `confirm=ODDS_API_AUDIT`, caps provider calls at 15, summarizes sanitized response evidence and performs no persistence.
+
+Consequences: The live audit proved the key is valid, standard MLB markets are available, and current event-level MLB player props including `pitcher_outs` return rows. It also proved event crosswalk is still blocked: The Odds API event IDs did not match existing canonical `sport_events` through provider mappings or team/time matching in the inspected window. The evidence supports bounded live-development experiments, not provider replacement, scheduled ingestion, historical replay or production player-prop activation.
+
+Affected modules: `src/services/the-odds-api-capability-audit.service.ts`, `/api/providers/the-odds-api/capability-audit`, `docs/THE_ODDS_API_FREE_TIER_CAPABILITY_AUDIT_V1.md`.
+
 ## 2026-07-26 - Add Projection-Only Probability Picks And Parlays
 
 Context: Operators need a separate AI surface for high-probability model projections and correlation-aware parlays without touching Current Board, Most Likely, Best Value, Official Picks, EV, Kelly, sportsbook market comparison or portfolio construction.
