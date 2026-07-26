@@ -38,6 +38,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/data-foundation-import-orchestrator.service.ts` and `/api/data-foundation/import-orchestrator` provide a V2 orchestration wrapper over the existing Historical Import Engine Core. The wrapper exposes PLAN_ONLY, DRY_RUN, LOCAL_EXECUTION and MANUAL_PRODUCTION_READY modes, but this autonomous run permits only plan/dry-run behavior. Local execution and production-ready modes return contract blockers until a separately approved bounded execution plan exists.
 
+## MLB Historical Foundation V2
+
+`src/services/mlb-historical-foundation-v2.service.ts` and `/api/data-foundation/mlb` provide a read-only MLB foundation audit for previous and current season coverage. The audit composes coverage data with MLB-specific event, mapping, starter, pitcher projection, player prop, prediction and feature snapshot checks. It reports no provider calls, no remote mutations and no retrospective predictions. Stored player props remain same-event projection gated.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

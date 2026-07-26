@@ -30,6 +30,8 @@ Phase 3 sports data warehouse contract is locally documented in `docs/SPORTS_DAT
 
 Phase 4 historical import orchestration is locally implemented at `/api/data-foundation/import-orchestrator`. It wraps the existing Historical Import Engine Core, exposes PLAN_ONLY and DRY_RUN planning, and keeps LOCAL_EXECUTION and MANUAL_PRODUCTION_READY blocked to contract-only for this no-production-mutation run.
 
+Phase 5 MLB historical foundation is locally implemented at `/api/data-foundation/mlb`. It certifies stored MLB coverage for 2025 and 2026, event/player mappings, feature compatibility, player props and pitcher projections without calling providers, mutating production or generating retrospective predictions.
+
 ## Completed
 
 ### Platform Certification

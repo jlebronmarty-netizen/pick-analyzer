@@ -12,6 +12,7 @@ Last updated: 2026-07-26 23:20:00Z
 - Phase 2 validation passed 8/8 fixture checks and governs 9 competitions: MLB, NBA, NFL, NHL, BSN, Soccer generic, ATP, WTA and UFC. Soccer remains competition-specific; Tennis and UFC remain event-driven.
 - Phase 3 added `docs/SPORTS_DATA_WAREHOUSE_V2.md`, mapping existing tables into provider staging, canonical entity, event/result, statistics, market, feature, prediction/settlement and audit/provenance layers without creating duplicate storage.
 - Phase 4 added Historical Import Orchestrator V2 through `src/services/data-foundation-import-orchestrator.service.ts` and `/api/data-foundation/import-orchestrator`, delegating planning to the existing Historical Import Engine Core while keeping local execution and manual-production-ready modes blocked to contract-only during this run.
+- Phase 5 added MLB Historical Foundation V2 through `src/services/mlb-historical-foundation-v2.service.ts` and `/api/data-foundation/mlb`. Validation passed 8/8 with 0 provider calls and 0 remote mutations; current and previous MLB season coverage are available from stored data, with honest blockers for missing injury coverage and same-event player-prop/projection overlap.
 - Push, production deployment, production SQL, production data mutation, historical odds, scheduled player-prop ingestion, Player Prop EV V2 and Portfolio Intelligence remain disallowed for this run.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1

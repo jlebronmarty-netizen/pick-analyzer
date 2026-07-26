@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T00:05:00Z"
+    "updatedAt": "2026-07-27T00:20:00Z"
   },
   "phases": [
     {
@@ -152,7 +152,7 @@
       "status": "completed",
       "startedAt": "2026-07-26T23:55:00Z",
       "completedAt": "2026-07-27T00:05:00Z",
-      "commit": "pending_self_reference",
+      "commit": "07d0d2ce20838df5ad9a414ce163be6a899a7159",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -175,6 +175,46 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_5"
+    },
+    {
+      "phaseId": 5,
+      "phaseName": "MLB_HISTORICAL_FOUNDATION_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T00:05:00Z",
+      "completedAt": "2026-07-27T00:20:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "mlb_foundation_validation_8_of_8",
+          "stored_data_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "current_season_coverage_available",
+          "previous_season_coverage_available",
+          "no_retrospective_predictions_generated"
+        ],
+        "summary": {
+          "eventMappings": 878,
+          "playerMappings": 71,
+          "storedPlayerProps": 11,
+          "pitcherProjections": 18,
+          "blockers": [
+            "PLAYER_PROP_COMPARISON_REMAINS_SAME_EVENT_PROJECTION_GATED",
+            "MLB_INJURY_COVERAGE_NOT_AVAILABLE_IN_STORED_DATA"
+          ]
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_6"
     }
   ],
   "certificationMarkers": [
@@ -187,6 +227,9 @@
     "DATA_LINEAGE_CONTRACT_PASS",
     "HISTORICAL_IMPORT_ORCHESTRATOR_V2_PASS",
     "CHECKPOINT_RESUME_PASS",
-    "IMPORT_IDEMPOTENCY_PASS"
+    "IMPORT_IDEMPOTENCY_PASS",
+    "MLB_HISTORICAL_FOUNDATION_V2_PASS",
+    "MLB_IDENTITY_RECONCILIATION_PASS",
+    "MLB_NO_TEMPORAL_LEAKAGE_PASS"
   ]
 }
