@@ -17,6 +17,7 @@ export type PitcherFeatureValue = {
 export type PitcherIdentity = {
   pitcherId: string
   providerPitcherId: string | null
+  historicalPitcherId: string | null
   mlbPlayerId: string | null
   pitcherName: string
   team: string | null
@@ -142,6 +143,7 @@ export type MlbPitcherProjection = {
   eventId: string
   pitcherId: string
   providerPitcherId: string | null
+  historicalPitcherId: string | null
   pitcherName: string
   team: string | null
   opponent: string | null

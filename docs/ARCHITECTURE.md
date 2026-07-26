@@ -421,3 +421,10 @@ Runtime flow:
 6. The existing Player Projections UI adds an MLB Pitcher Outs tab without adding a duplicate navigation section.
 
 The module performs no provider calls during read rendering and preserves all platform-locked contracts.
+
+Additive starter integration:
+
+- `mlb-starter-sync.service.ts` owns canonical starter assignment assembly and identity bridge validation.
+- Starter-source refresh uses the existing SportsDataIO GamesByDate verification path and provider budget checks.
+- Starter sync is a pregame operating-day substep candidate, not a new scheduler.
+- Projection engine consumes starter assignments only, not provider payloads directly.

@@ -75,3 +75,15 @@ Matchup data:
 - INSUFFICIENT: missing pitcher ID, missing event, unverified starter, fewer than 3 historical starts, no recorded-outs history, no recent workload, missing opponent mapping, or invalid feature timestamps.
 
 League-average fallbacks are not used in V1 numeric pitcher projections.
+
+## 2026-07-26 Starter Integration Update
+
+An authorized SportsDataIO GamesByDate refresh for `2026-JUL-26` returned 15 games and populated documented starter fields. The canonical starter assignment dry-run evaluated all 30 slots:
+
+- Slots with provider starter evidence: 16
+- Projection-safe mapped starter slots: 11
+- Provider calls during projection preview: 0
+- Projection preview mutations: 0
+- Unexplained starter slots: 0
+
+Remaining missing assignments are source-level absences: 14 slots did not include starter fields in the provider payload at refresh time.

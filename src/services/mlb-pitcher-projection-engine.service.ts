@@ -3,7 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { puertoRicoUtcRange } from '@/services/active-event.service'
 import { stableProjectionId } from '@/services/mlb-projection-integrity.service'
-import { getMlbStarterIntelligence } from '@/services/mlb-starter-intelligence.service'
+import { getMlbStarterAssignments } from '@/services/mlb-starter-sync.service'
 import { buildMlbPitcherProjectionFeatures } from '@/services/mlb-pitcher-feature-builder.service'
 import type {
   MlbPitcherProjection,
@@ -157,26 +157,25 @@ async function loadEvents(date: string) {
   return (data ?? []) as EventRow[]
 }
 
-function starterInputs(starterIntelligence: Awaited<ReturnType<typeof getMlbStarterIntelligence>>) {
-  return starterIntelligence.games.flatMap((game) => [
-    { side: game.starters.away, opponent: game.homeTeam, scheduledTime: game.scheduledTime },
-    { side: game.starters.home, opponent: game.awayTeam, scheduledTime: game.scheduledTime },
-  ]).map(({ side, opponent, scheduledTime }) => ({
-    eventId: side.eventId,
-    pitcherId: side.playerId,
-    providerPitcherId: side.providerPlayerId,
-    pitcherName: side.playerName,
-    team: side.teamName,
-    teamId: side.teamId,
-    opponent,
-    opponentTeamId: side.opponentTeamId,
-    homeAway: side.side,
-    handedness: null,
+function starterInputs(starterAssignments: Awaited<ReturnType<typeof getMlbStarterAssignments>>) {
+  return starterAssignments.assignments.map((assignment) => ({
+    eventId: assignment.eventId,
+    pitcherId: assignment.pitcherId,
+    providerPitcherId: assignment.providerPitcherId,
+    historicalPitcherId: assignment.historicalPitcherId,
+    pitcherName: assignment.pitcherName,
+    team: assignment.team,
+    teamId: assignment.teamId,
+    opponent: assignment.opponent,
+    opponentTeamId: assignment.opponentTeamId,
+    homeAway: assignment.homeAway,
+    handedness: assignment.handedness,
     activeStatus: null,
-    starterStatus: side.projectionStatus,
-    starterSource: side.source,
-    starterConfirmedAt: side.sourceTimestamp,
-    eventStartTime: scheduledTime,
+    starterStatus: (assignment.status === 'CONFIRMED' || assignment.status === 'PROBABLE' || assignment.status === 'EXPECTED' ? assignment.status : 'UNVERIFIED') as 'CONFIRMED' | 'PROBABLE' | 'EXPECTED' | 'UNVERIFIED',
+    starterSource: assignment.source,
+    starterConfirmedAt: assignment.confirmedAt ?? assignment.sourceUpdatedAt,
+    eventStartTime: assignment.eventStartTime,
+    assignmentBlocker: assignment.blocker,
   }))
 }
 
@@ -193,6 +192,7 @@ export function buildMlbPitcherProjectionFromFeatures(features: PitcherProjectio
     eventId: features.starterAssignment.eventId,
     pitcherId: features.identity.pitcherId,
     providerPitcherId: features.identity.providerPitcherId,
+    historicalPitcherId: features.identity.historicalPitcherId,
     pitcherName: features.identity.pitcherName,
     team: features.identity.team,
     opponent: features.starterAssignment.opponent,
@@ -279,10 +279,10 @@ export async function generateSlatePitcherProjections(options: { date?: string |
   const selectedDate = options.date ?? todayLocalDate()
   const limit = Math.min(Math.max(options.limit ?? 80, 1), 200)
   const generatedAt = new Date().toISOString()
-  const [events, starterIntelligence] = await Promise.all([loadEvents(selectedDate), getMlbStarterIntelligence({ date: selectedDate })])
+  const [events, starterAssignments] = await Promise.all([loadEvents(selectedDate), getMlbStarterAssignments({ date: selectedDate })])
   const eventIds = new Set(events.map((event) => event.id))
-  const allInputs = starterInputs(starterIntelligence).filter((starter) => eventIds.has(starter.eventId))
-  const inputs = allInputs.filter((starter) => starter.pitcherId && starter.pitcherName && starter.starterStatus !== 'UNVERIFIED')
+  const allInputs = starterInputs(starterAssignments).filter((starter) => eventIds.has(starter.eventId))
+  const inputs = allInputs.filter((starter) => !starter.assignmentBlocker && starter.pitcherId && starter.pitcherName && starter.historicalPitcherId && starter.starterStatus !== 'UNVERIFIED')
   const features = await Promise.all(inputs.map((starter) => buildMlbPitcherProjectionFeatures(starter, generatedAt)))
   const projections = features.map((feature) => buildMlbPitcherProjectionFromFeatures(feature, generatedAt))
   const eligible = projections.filter((row) => row.projectedOuts !== null && row.dataSufficiency !== 'INSUFFICIENT' && row.featureSnapshot.leakageCounters.invalidFeatureTimestamps === 0)

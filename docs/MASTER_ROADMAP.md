@@ -2598,3 +2598,5 @@ Status: PARTIAL
 Additive projection-only engine for MLB starter recorded outs is implemented locally. It supports projected outs, innings, pitch count, strikeouts, hits allowed, earned runs, discrete outs distributions and Over/Under probabilities for 14.5 through 18.5 outs. It remains sportsbook-independent and cannot create Official Picks, Best Value, EV, edge, stake or portfolio selections.
 
 Next phase should focus on pitcher identity hardening and synchronization, not Player Prop Market Comparison or Portfolio Intelligence.
+
+Starter Sync V1 has been added as the required bridge from current-slate starter evidence to historical pitcher logs. Portfolio Intelligence V1 remains NOT STARTED. Player Prop Market Comparison V1 remains NOT STARTED.

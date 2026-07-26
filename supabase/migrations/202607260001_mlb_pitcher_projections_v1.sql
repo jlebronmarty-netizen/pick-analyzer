@@ -1,7 +1,7 @@
 create table if not exists mlb_pitcher_projections (
   id text primary key,
   event_id text not null references sport_events(id),
-  pitcher_id text not null references sport_players(id),
+  pitcher_id text not null,
   provider_pitcher_id text,
   projection_date date not null,
   starter_status text not null,

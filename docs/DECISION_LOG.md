@@ -2089,3 +2089,16 @@ Consequences:
 - Missing fields render as `N/A`, not zero.
 - POST generation defaults to dry-run and persistence requires authorization plus explicit migration approval.
 - Portfolio Intelligence V1 and Player Prop Market Comparison V1 remain NOT STARTED.
+
+# 2026-07-26 - Starter Assignments Use Provider-Scoped IDs When Canonical Rows Lag
+
+Decision: Allow dry-run pitcher projections to use a real SportsDataIO provider-scoped pitcher ID when the provider supplies a full starter assignment but the local `sport_players` row is missing.
+
+Reasoning: This avoids fabricating player identity while preserving the exact provider ID and preventing duplicate local player creation. Durable persistence remains gated until migrations are approved and player row synchronization catches up.
+
+Consequences:
+
+- Provider-scoped rows are marked `CANONICAL_PLAYER_ROW_PENDING`.
+- No local player rows are created by starter sync.
+- Projection persistence migrations no longer require a `sport_players` foreign key on `pitcher_id`.
+- Ambiguous historical full-name matches remain blocked.

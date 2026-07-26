@@ -17,6 +17,7 @@ type StarterInput = {
   eventId: string
   pitcherId: string | null
   providerPitcherId: string | null
+  historicalPitcherId?: string | null
   pitcherName: string | null
   team: string | null
   teamId: string | null
@@ -113,6 +114,19 @@ function daysBetween(a: string | null, b: string | null) {
 }
 
 async function loadHistoricalStarts(starter: StarterInput) {
+  if (starter.historicalPitcherId) {
+    const { data, error } = await supabaseAdmin
+      .from('historical_baseball_pitcher_appearances')
+      .select('id, canonical_game_id, canonical_pitcher_id, pitcher_source_id, pitcher_name, team_side, starter, outs, batters_faced, hits, walks, strikeouts, runs, pitch_count, created_at')
+      .eq('starter', true)
+      .eq('canonical_pitcher_id', starter.historicalPitcherId)
+      .order('canonical_game_id', { ascending: false })
+      .limit(40)
+
+    if (error) throw new Error(`historical pitcher starts read failed: ${error.message}`)
+    return (data ?? []) as HistoricalPitcherRow[]
+  }
+
   if (!starter.pitcherName) return [] as HistoricalPitcherRow[]
 
   const exactName = starter.pitcherName.replaceAll('%', '').replaceAll('_', '')
@@ -173,6 +187,7 @@ export async function buildMlbPitcherProjectionFeatures(starter: StarterInput, g
   const identity: PitcherIdentity = {
     pitcherId: starter.pitcherId ?? '',
     providerPitcherId: starter.providerPitcherId,
+    historicalPitcherId: starter.historicalPitcherId ?? null,
     mlbPlayerId: null,
     pitcherName: starter.pitcherName ?? '',
     team: starter.team,

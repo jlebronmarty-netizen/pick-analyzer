@@ -945,3 +945,5 @@ Status: PARTIAL
 Implemented an additive, projection-only MLB starting pitcher outs engine with canonical types, feature builder, projection service, dry-run APIs, UI integration, validation fixtures and a local-only migration proposal. The module uses stored starter evidence and historical pitcher appearances only; it makes zero provider calls during projection rendering and never emits betting recommendations.
 
 Current blockers for COMPLETE status: approved/application of `mlb_pitcher_projections` migration for persistence, stronger SportsDataIO-to-Retrosheet identity bridge for certification-grade historical matching, and live slate availability of mapped probable/confirmed starters with sufficient recorded-outs history.
+
+Update: Starter Sync V1 now produces live dry-run pitcher projections from current SportsDataIO GamesByDate starter evidence. The 2026-07-26 proof generated 11 projection-safe mapped starters and 11 numeric pitcher outs projections. Persistence migrations remain unapplied.

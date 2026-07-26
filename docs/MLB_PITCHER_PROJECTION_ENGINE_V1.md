@@ -40,6 +40,18 @@ The proposed `mlb_pitcher_projections` table is narrow and additive. Projection 
 
 The migration has not been applied to production.
 
+## Live Dry-Run Proof
+
+After authorized starter-source refresh, the 2026-07-26 dry-run projection preview generated 11 grounded pitcher rows and 11 numeric projections.
+
+Projection preview made:
+
+- Provider calls: 0
+- Remote mutations: 0
+- Validation failures: 0
+
+The provider refresh used for source grounding made 1 SportsDataIO call and wrote 1 existing `sports_sync_jobs` ledger row for attribution.
+
 ## Completion Classification
 
-PARTIAL. The engine is implemented locally and guarded, but live complete status requires enough current grounded starter rows for the selected slate plus approved persistence migration if durable storage is desired.
+PARTIAL. The engine is now functional in live dry-run mode with real current-slate data. Durable persistence still requires explicit migration approval, and canonical player row synchronization should backfill provider-scoped starter IDs before production persistence.
