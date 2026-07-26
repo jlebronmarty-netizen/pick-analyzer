@@ -2077,3 +2077,15 @@ Decision: Add provider-specific nested payload flattening, sanitized shape summa
 Consequences: The code can now traverse nested team/game containers and avoids duplicate-upsert failures from repeated players. The first normalization run consumed the approved two provider calls and stopped on duplicate `sport_players` upsert input before the dedupe fix was applied, so no lineup/depth rows were persisted in that run. A later approved capped rerun verified persistence: 39 top-level provider records flattened into 758 normalized lineup/depth rows, persisted 758 `sport_lineups` rows and 758 provider mappings, and preserved production confidence isolation.
 
 Affected modules: SportsDataIO NBA Depth Charts and Starting Lineups Pilot V1, SportsDataIO Historical Import Execution Readiness V1, NBA Injury and Lineup Confidence Integration V1.
+# 2026-07-26 - MLB Pitcher Projection Engine V1 Is Projection-Only
+
+Decision: Implement MLB Pitcher Projection Engine V1 as an additive projection-only service, not as a betting recommendation, player prop comparison, Best Value, Official Pick or portfolio module.
+
+Reasoning: The platform lock prohibits modifying certified betting and prediction contracts. Current pitcher data supports a guarded workload projection, but sportsbook prop-line ingestion, player prop settlement and identity-hardening are not complete enough to activate recommendations.
+
+Consequences:
+
+- `recommendationStatus` is always `MODEL_PROJECTION_ONLY`.
+- Missing fields render as `N/A`, not zero.
+- POST generation defaults to dry-run and persistence requires authorization plus explicit migration approval.
+- Portfolio Intelligence V1 and Player Prop Market Comparison V1 remain NOT STARTED.

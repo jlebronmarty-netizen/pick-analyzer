@@ -2591,3 +2591,10 @@ Persistence scope: Production settlement wrote only canonical July 24 settlement
 Validation: Production settlement recovered 15 final MLB games and settled exactly 45 predictions with an idempotent rerun returning 0 newly eligible rows. Provider budget defaults are now 1,000 daily calls with a 150 reserve, 3 calls per action and 12 calls per hour. The single frequent write-capable scheduler is GitHub Actions at `7,22,37,52 * * * *`; `vercel.json` has no cron entries and heartbeat/manual workflows remain dry-run observers.
 
 Completion criteria: `PRODUCTION_SETTLEMENT_RECOVERY_PASS`, `SETTLEMENT_IDEMPOTENCY_PASS`, `LEARNING_LABEL_CLOSURE_PASS`, `POSTGAME_CONTINUITY_PASS` and `SCHEDULER_OWNERSHIP_PASS` are certified. Remaining product consistency work adds paginated Prediction History navigation, explicit absolute probability error and Brier contribution labels, and Most Likely opposite-price display safety. Provider-budget, homepage, performance and end-to-end production certifications remain pending final deployment and smoke validation for the latest local commit.
+# MLB Pitcher Projection Engine V1
+
+Status: PARTIAL
+
+Additive projection-only engine for MLB starter recorded outs is implemented locally. It supports projected outs, innings, pitch count, strikeouts, hits allowed, earned runs, discrete outs distributions and Over/Under probabilities for 14.5 through 18.5 outs. It remains sportsbook-independent and cannot create Official Picks, Best Value, EV, edge, stake or portfolio selections.
+
+Next phase should focus on pitcher identity hardening and synchronization, not Player Prop Market Comparison or Portfolio Intelligence.

@@ -407,3 +407,17 @@ Start with `sport-prediction-engine-sdk.service.ts`, Feature Store Core and the 
 ### New Dashboard Modules
 
 Create focused panels under `src/components/dashboard`, fetch typed API responses and keep privileged mutations server-side behind protected routes.
+# Additive Module: MLB Pitcher Projection Engine V1
+
+The MLB Pitcher Projection Engine V1 is isolated from locked production prediction, settlement, Current Board, Grounded Opportunities, Best Value, Official Pick, Learning Brain and scheduler contracts.
+
+Runtime flow:
+
+1. Current MLB events are read from `sport_events`.
+2. Starter identity/status is resolved through `mlb-starter-intelligence.service.ts` and stored `sport_lineups` evidence.
+3. Historical workload features are built from `historical_baseball_pitcher_appearances` and `historical_baseball_games`.
+4. `mlb-pitcher-projection-engine.service.ts` validates sufficiency, computes projection-only outputs and distribution probabilities.
+5. Read APIs expose dry-run projection payloads; mutation requires CRON authorization and the additive migration.
+6. The existing Player Projections UI adds an MLB Pitcher Outs tab without adding a duplicate navigation section.
+
+The module performs no provider calls during read rendering and preserves all platform-locked contracts.

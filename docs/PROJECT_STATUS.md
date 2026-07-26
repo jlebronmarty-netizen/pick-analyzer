@@ -938,3 +938,10 @@ Primary project focus remains controlled expansion from evidence. For MLB provid
 - Validation is fixture/read-only only: `/api/operations/validation` reports `sportsDataIoMlbImportDurability` 11/11 PASS with `providerCallsMade=0` and `remoteMutationsMade=0`; `/api/historical-import/jobs` reports 100 jobs, 0 running, 0 stuck and 0 reconciliation required; provider budget status remains AVAILABLE with validation 14/14 PASS.
 - `npm.cmd run build` completed successfully after this module.
 - MLB Player Identity Resolution V1 repaired the stored-data-only player lookup used by SportsDataIO MLB historical imports. The executor now pages all MLB `sport_players` rows and supplements `sport_players.provider_ids` with exact `provider_entity_mappings` for `entity_type='player'`, season-scoped to the requested MLB season, without creating duplicate players or overwriting conflicting provider IDs. The 2026-07-17 PlayerGameStatsByDate import was reconciled using stored mappings only: 418 rows examined, player_id coverage improved from 82/418 to 418/418, 336 stat rows updated, 0 duplicate stat rows, 0 mapping conflicts, 0 provider calls. The 2026-07-16 first pilot date exposed the missing player pagination defect after 1 provider call; the pilot was stopped before later dates and 19 rows were reconciled from stored mappings only.
+# 2026-07-26 - MLB Pitcher Projection Engine V1
+
+Status: PARTIAL
+
+Implemented an additive, projection-only MLB starting pitcher outs engine with canonical types, feature builder, projection service, dry-run APIs, UI integration, validation fixtures and a local-only migration proposal. The module uses stored starter evidence and historical pitcher appearances only; it makes zero provider calls during projection rendering and never emits betting recommendations.
+
+Current blockers for COMPLETE status: approved/application of `mlb_pitcher_projections` migration for persistence, stronger SportsDataIO-to-Retrosheet identity bridge for certification-grade historical matching, and live slate availability of mapped probable/confirmed starters with sufficient recorded-outs history.
