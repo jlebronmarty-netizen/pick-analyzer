@@ -48,6 +48,14 @@ Decision: Add `src/services/mlb-historical-foundation-v2.service.ts`, `/api/data
 
 Consequences: MLB current and previous season coverage are certified from stored data with zero provider calls and zero mutations. Remaining blockers are documented honestly: missing stored injury coverage and same-event player-prop/projection overlap. No retrospective projections or predictions were created.
 
+## 2026-07-27 - Add NBA Historical Foundation V2 Read-Only Audit
+
+Context: NBA has stored trial/pilot data and existing sync contracts, but production promotion requires strict trial isolation and complete canonical result evidence.
+
+Decision: Add `src/services/nba-historical-foundation-v2.service.ts`, `/api/data-foundation/nba` and `docs/NBA_HISTORICAL_FOUNDATION_V2.md` to audit stored NBA schedule, stats, injuries/lineups, odds, mappings and prediction isolation.
+
+Consequences: NBA foundation readiness is documented without provider calls or mutations. Stored NBA predictions remain trial/non-production, canonical game results are still empty, and no retrospective predictions or model-confidence changes were introduced.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

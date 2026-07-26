@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T00:20:00Z"
+    "updatedAt": "2026-07-27T00:35:00Z"
   },
   "phases": [
     {
@@ -182,7 +182,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T00:05:00Z",
       "completedAt": "2026-07-27T00:20:00Z",
-      "commit": "pending_self_reference",
+      "commit": "314e11d05755eadf62fbf77fe1812393a5cea3fa",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -215,6 +215,46 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_6"
+    },
+    {
+      "phaseId": 6,
+      "phaseName": "NBA_HISTORICAL_FOUNDATION_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T00:20:00Z",
+      "completedAt": "2026-07-27T00:35:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "nba_foundation_validation_8_of_8",
+          "stored_data_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "trial_isolation_preserved",
+          "no_retrospective_predictions_generated"
+        ],
+        "summary": {
+          "events": 14,
+          "playerStats": 918,
+          "oddsRows": 540,
+          "predictionRows": 27,
+          "productionEligiblePredictionRows": 0,
+          "blockers": [
+            "NBA_STORED_PREDICTIONS_REMAIN_TRIAL_OR_NON_PRODUCTION",
+            "NBA_CANONICAL_GAME_RESULTS_EMPTY"
+          ]
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_7"
     }
   ],
   "certificationMarkers": [
@@ -230,6 +270,9 @@
     "IMPORT_IDEMPOTENCY_PASS",
     "MLB_HISTORICAL_FOUNDATION_V2_PASS",
     "MLB_IDENTITY_RECONCILIATION_PASS",
-    "MLB_NO_TEMPORAL_LEAKAGE_PASS"
+    "MLB_NO_TEMPORAL_LEAKAGE_PASS",
+    "NBA_HISTORICAL_FOUNDATION_V2_PASS",
+    "NBA_IDENTITY_RECONCILIATION_PASS",
+    "NBA_NO_TEMPORAL_LEAKAGE_PASS"
   ]
 }

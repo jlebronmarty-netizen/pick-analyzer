@@ -32,6 +32,8 @@ Phase 4 historical import orchestration is locally implemented at `/api/data-fou
 
 Phase 5 MLB historical foundation is locally implemented at `/api/data-foundation/mlb`. It certifies stored MLB coverage for 2025 and 2026, event/player mappings, feature compatibility, player props and pitcher projections without calling providers, mutating production or generating retrospective predictions.
 
+Phase 6 NBA historical foundation is locally implemented at `/api/data-foundation/nba`. It audits stored NBA schedule, stats, odds, mappings and predictions while preserving trial/non-production isolation and reporting canonical game-result gaps.
+
 ## Completed
 
 ### Platform Certification

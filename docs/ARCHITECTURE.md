@@ -42,6 +42,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/mlb-historical-foundation-v2.service.ts` and `/api/data-foundation/mlb` provide a read-only MLB foundation audit for previous and current season coverage. The audit composes coverage data with MLB-specific event, mapping, starter, pitcher projection, player prop, prediction and feature snapshot checks. It reports no provider calls, no remote mutations and no retrospective predictions. Stored player props remain same-event projection gated.
 
+## NBA Historical Foundation V2
+
+`src/services/nba-historical-foundation-v2.service.ts` and `/api/data-foundation/nba` provide a read-only NBA foundation audit for cross-year season coverage. The audit reports stored schedule, stats, odds, mapping and prediction coverage while preserving trial/scrambled and non-production isolation. It does not promote NBA rows into production eligibility or generate retrospective predictions.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.
