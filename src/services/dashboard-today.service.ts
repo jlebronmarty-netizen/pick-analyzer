@@ -955,6 +955,7 @@ function mapPredictionToGroundedOpportunity(candidate: CurrentBoardCandidate) {
   const confidence = canonicalConfidence(candidate)
   const priceState = groundedPriceState(candidate)
   const lifecycle = groundedLifecycle(candidate)
+  const blockers = Array.isArray(candidate.blockers) ? candidate.blockers : []
   const actionability =
     aligned && lifecycle === 'PREGAME' && priceState === 'ACTIVE_PREGAME_PRICE' && candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
       ? 'ACTIONABLE'
@@ -1002,9 +1003,9 @@ function mapPredictionToGroundedOpportunity(candidate: CurrentBoardCandidate) {
     opportunityCategory: actionability === 'ACTIONABLE' ? 'grounded_actionable' : aligned ? 'grounded_priced' : 'grounded_model',
     marketIntelligenceCategory: actionability === 'ACTIONABLE' ? 'ai_lean' : 'model_only',
     semanticLabel: priceState,
-    reasonNotOfficial: candidate.canonicalReason ?? candidate.blockers[0] ?? priceState,
-    blocker: candidate.canonicalReason ?? candidate.blockers[0] ?? priceState,
-    blockers: candidate.blockers.length ? candidate.blockers : [priceState],
+    reasonNotOfficial: candidate.canonicalReason ?? blockers[0] ?? priceState,
+    blocker: candidate.canonicalReason ?? blockers[0] ?? priceState,
+    blockers: blockers.length ? blockers : [priceState],
     strengths: ['Persisted prediction row', aligned ? 'Aligned stored odds snapshot' : 'Market-level model evidence'],
     warnings: actionability === 'ACTIONABLE' ? [] : ['Informational only under current lifecycle, freshness or policy gates'],
     modeledValueStatus: candidate.modeledValueStatus,
