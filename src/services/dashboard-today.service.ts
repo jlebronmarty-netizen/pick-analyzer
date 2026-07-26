@@ -834,9 +834,10 @@ function emptySelector(metricName: string, blocker: string, candidateUniverseSiz
 
 function presentationLifecycleFor(game: {
   lifecycle?: string | null
+  eventStatus?: string | null
   settlementState?: EventSettlementState
 }): DashboardPresentationLifecycle {
-  const lifecycle = String(game.lifecycle ?? '').toUpperCase()
+  const lifecycle = String(game.lifecycle ?? game.eventStatus ?? '').toUpperCase()
   if (lifecycle === 'STATUS_UNCONFIRMED' || lifecycle === 'UNKNOWN') return 'STATUS_OVERDUE'
   if (lifecycle === 'LIVE' || lifecycle === 'IN_PROGRESS') return 'LIVE'
   if (lifecycle === 'FINAL' || lifecycle === 'COMPLETED' || lifecycle === 'COMPLETE') {
@@ -1083,8 +1084,9 @@ function buildDashboardCanonicalViewModel(input: {
       .sort((left, right) => left - right)[0] ?? null
     const marketsStored = Array.from(new Set(eventCandidates.map((candidate) => candidate.marketLabel ?? candidate.market).filter(Boolean)))
     const sidesStored = Array.from(new Set(eventCandidates.map((candidate) => candidate.selection).filter(Boolean)))
-    const displayableMarketCount = eventCandidates.filter((candidate) => candidate.canonicalOutcome).length
+    const displayableMarketCount = eventCandidates.filter((candidate) => candidate.canonicalOutcome).length || finiteNumber(game.displayableMarketCount) || 0
     const storedOddsCount = finiteNumber(game.storedOddsCount) ?? eventCandidates.filter((candidate) => candidate.americanOdds !== null && candidate.americanOdds !== undefined).length
+    const validPregamePredictionCount = eventCandidates.length || finiteNumber(game.validPregamePredictionCount) || 0
     const alignedPriceCount = eventCandidates.filter((candidate) => candidate.canonicalPrice?.source === 'selected_stored_price' && candidate.canonicalPrice?.americanOdds !== null && candidate.canonicalPrice?.americanOdds !== undefined).length
     const presentationLifecycle = presentationLifecycleFor(game)
     const marketAvailability = marketAvailabilityFor({
@@ -1112,7 +1114,7 @@ function buildDashboardCanonicalViewModel(input: {
       marketsStored,
       sidesStored,
       latestSnapshotAgeMinutes: latestAge,
-      validPregamePredictionCount: eventCandidates.length,
+      validPregamePredictionCount,
       currentBoardCandidateCount: eventCandidates.length,
       displayableMarketCount,
       presentationLifecycle,
@@ -2299,6 +2301,7 @@ export function validateDashboardTodayFixtures() {
     ['freshness contract has no fresh stale contradiction', contractViewModel.selectors.marketFreshnessSummary.state === 'FRESH' && contractViewModel.diagnostics.freshStaleContradictions === 0],
     ['stored odds never display waiting for odds', noWaitingForOddsWithStoredOdds && contractViewModel.diagnostics.gamesWithStoredOddsIncorrectlyWaitingForOdds === 0],
     ['live games are not classified as tomorrow slate copy', userActionLabel('morning_sync', { hour: 20, nextSlateDate: '2026-07-20', gamesWaitingForOdds: 15, currentInProgress: 1, currentScheduled: 0, finalGames: 0, currentGames: 4, operatingStatus: 'planned' }) === 'Waiting for games to finish'],
+    ['eventStatus drives presentation lifecycle', presentationLifecycleFor({ eventStatus: 'LIVE' }) === 'LIVE' && presentationLifecycleFor({ eventStatus: 'FINAL', settlementState: { label: 'Settlement Pending', totalPredictions: 3, settledPredictions: 0, pendingPredictions: 3, latestSettledAt: null } }) === 'SETTLEMENT_PENDING'],
     ['live game with stored odds is betting locked not no stored odds', contractViewModel.selectors.perGameOperationalStatus.every((game) => game.storedOddsCount === 0 || game.marketAvailability !== 'NO_STORED_ODDS')],
     ['final settlement pending source is canonical', fixtureSettlementSummary.settlementPendingGames === 1 && fixtureSettlementSummary.finalGames === 1],
     ['grounded informational opportunity reconciles', fixtureGroundedSummary.predictionRows === 6 && fixtureGroundedSummary.groundedRows === 6 && fixtureGroundedSummary.actionableOpportunities === 3 && fixtureGroundedSummary.informationalOpportunities === 3],
