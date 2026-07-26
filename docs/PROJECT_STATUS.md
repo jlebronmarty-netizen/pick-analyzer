@@ -8,6 +8,8 @@ Last updated: 2026-07-26 23:20:00Z
 - Added `docs/AUTONOMOUS_EXECUTION_V2.md` and `docs/autonomous-execution-v2.json` as the resumable governance and ledger contract.
 - Phase 1 added stored-data-only Sports Data Coverage Audit V2 through `src/services/data-foundation-coverage.service.ts` and `/api/data-foundation/coverage`.
 - Phase 1 validation audited MLB, NBA, NFL, NHL, Soccer, BSN, Tennis and UFC with 0 provider calls and 0 remote mutations. MLB and NBA show ready coverage, BSN shows partial prediction readiness, and NFL/NHL/Soccer/Tennis/UFC remain honest blocked or empty coverage states.
+- Phase 2 added Season and Competition Governance V2 through `src/services/data-foundation-season-governance.service.ts` and `/api/data-foundation/seasons`.
+- Phase 2 validation passed 8/8 fixture checks and governs 9 competitions: MLB, NBA, NFL, NHL, BSN, Soccer generic, ATP, WTA and UFC. Soccer remains competition-specific; Tennis and UFC remain event-driven.
 - Push, production deployment, production SQL, production data mutation, historical odds, scheduled player-prop ingestion, Player Prop EV V2 and Portfolio Intelligence remain disallowed for this run.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1

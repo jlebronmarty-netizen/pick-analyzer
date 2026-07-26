@@ -26,6 +26,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/data-foundation-coverage.service.ts` and `/api/data-foundation/coverage` provide a read-only stored-data inventory across MLB, NBA, NFL, NHL, Soccer, BSN, Tennis and UFC. The service queries existing canonical tables defensively, reports row counts, date bounds, source providers, duplicate indicators, stale records, missing required fields, import readiness and prediction readiness, and always reports `providerCallsMade=0` and `remoteMutationsMade=0`. Empty sports and unsupported domains are represented as readiness findings rather than fabricated coverage.
 
+## Season And Competition Governance V2
+
+`src/services/data-foundation-season-governance.service.ts` and `/api/data-foundation/seasons` define read-only season and competition governance for registered sports. The contract distinguishes MLB/BSN calendar-year seasons, NBA/NHL cross-year seasons, NFL kickoff-year seasons with cross-calendar postseason, competition-specific Soccer, and event-driven Tennis/UFC. It is a code-level governance contract for this run and does not require production SQL or epoch activation.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

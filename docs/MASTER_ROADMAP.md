@@ -24,6 +24,8 @@ Historical Sports Data Foundation V2 and Prediction Epoch Reset V2 is in autonom
 
 Phase 1 coverage audit is locally implemented at `/api/data-foundation/coverage` with zero provider calls and zero mutations. It reports MLB and NBA as stored-data ready, BSN as partial for prediction readiness, and NFL/NHL/Soccer/Tennis/UFC as blocked or empty until legitimate data adapters/contracts are added.
 
+Phase 2 season and competition governance is locally implemented at `/api/data-foundation/seasons`. It defines calendar-year MLB/BSN, cross-year NBA/NHL, NFL season-year with cross-calendar postseason, competition-specific Soccer and event-driven Tennis/UFC without requiring production SQL.
+
 ## Completed
 
 ### Platform Certification

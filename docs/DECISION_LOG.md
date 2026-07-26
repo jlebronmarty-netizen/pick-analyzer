@@ -16,6 +16,14 @@ Decision: Add `src/services/data-foundation-coverage.service.ts` and `/api/data-
 
 Consequences: MLB and NBA have high stored-data coverage, BSN is partially ready for prediction, and NFL/NHL/Soccer/Tennis/UFC remain blocked or empty without pretending coverage exists. The audit distinguishes soccer competition-specific coverage and Tennis/UFC event-driven structures instead of forcing a global team-season model.
 
+## 2026-07-26 - Add Season And Competition Governance V2 Contract
+
+Context: Historical ingestion, feature rebuilds and epoch boundaries require explicit sport-aware season semantics. The current sport registry identifies sports/leagues but does not fully govern cross-year seasons, competition-specific soccer or event-driven individual sports for the data-foundation run.
+
+Decision: Add `src/services/data-foundation-season-governance.service.ts` and `/api/data-foundation/seasons` as a read-only governance contract. The contract defines MLB/BSN calendar-year seasons, NBA/NHL cross-year seasons, NFL kickoff-year seasons with cross-calendar postseason, competition-specific Soccer and event-driven Tennis/UFC.
+
+Consequences: Later phases can reference consistent season and competition semantics without applying production SQL. Future persistence of season governance remains migration-ready, not required for local continuation.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.
