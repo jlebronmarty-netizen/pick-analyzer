@@ -344,6 +344,19 @@ async function oddsRowsForEvents(eventIds: string[]) {
   return (data ?? []) as OddsRow[]
 }
 
+async function allStoredPlayerPropRows() {
+  const { data, error } = await supabaseAdmin
+    .from('sports_odds_snapshots')
+    .select('id,event_id,provider,sportsbook,market,outcome,price,line,snapshot_time,metadata')
+    .eq('sport_key', SPORT_KEY)
+    .eq('league_key', LEAGUE_KEY)
+    .like('market', 'player_props:%')
+    .order('snapshot_time', { ascending: false })
+    .limit(5000)
+  if (error) throw new Error(`MLB player prop odds inventory read failed: ${error.message}`)
+  return (data ?? []) as OddsRow[]
+}
+
 function groupedByBookAndLine(rows: PitcherPropLine[]) {
   const map = new Map<string, PitcherPropLine[]>()
   for (const row of rows) {
@@ -499,9 +512,10 @@ export async function getMlbPlayerPropComparisons(options: { date?: string | nul
     projection.projectionId === options.pitcherId
   )
   const oddsRows = await oddsRowsForEvents(Array.from(new Set(projections.map((projection) => projection.eventId))))
+  const storedPropRows = await allStoredPlayerPropRows()
   const comparisons = projections.flatMap((projection) => compareProjection(projection, oddsRows)).slice(0, Math.min(Math.max(options.limit ?? 200, 1), 500))
   const validation = validatePlayerPropComparisonRows(comparisons)
-  const health = healthFrom(comparisons, oddsRows, validation)
+  const health = healthFrom(comparisons, storedPropRows, validation)
   const markets: PitcherPropMarket[] = [{
     marketKey: MARKET_KEY,
     displayName: MARKET_LABEL,
@@ -533,10 +547,11 @@ export async function getMlbPlayerPropComparisons(options: { date?: string | nul
     },
     coverage: {
       supportedMarket: MARKET_KEY,
-      currentStoredRows: oddsRows.length,
+      currentStoredRows: storedPropRows.length,
       sportsbooks: health.sportsbooks,
       freshness: health.freshness,
-      historicalDepth: oddsRows.length ? 'STORED_CURRENT_OR_HISTORICAL_PLAYER_PROP_ROWS_FOUND' : 'NO_STORED_RECORDED_OUTS_PROP_MARKET_ROWS',
+      comparableRowsForProjectionEvents: oddsRows.length,
+      historicalDepth: storedPropRows.length ? 'STORED_CURRENT_OR_HISTORICAL_PLAYER_PROP_ROWS_FOUND' : 'NO_STORED_RECORDED_OUTS_PROP_MARKET_ROWS',
       providerOwnership: 'SportsDataIO or future licensed odds provider writes normalized rows to sports_odds_snapshots before comparison.',
     },
     health,
@@ -545,7 +560,8 @@ export async function getMlbPlayerPropComparisons(options: { date?: string | nul
     comparisons,
     warnings: [
       'fallbackWarning' in slate ? slate.fallbackWarning : null,
-      oddsRows.length === 0 ? 'No current recorded-outs sportsbook prop market is stored. Returning NO_PROP_AVAILABLE comparisons only.' : null,
+      storedPropRows.length === 0 ? 'No current recorded-outs sportsbook prop market is stored. Returning NO_PROP_AVAILABLE comparisons only.' : null,
+      storedPropRows.length > 0 && oddsRows.length === 0 ? 'Stored recorded-outs prop rows exist, but no same-event pitcher projection is available for comparison yet.' : null,
       'Projection Only',
       'No betting recommendation',
       'No Kelly, stake, official pick or portfolio output.',

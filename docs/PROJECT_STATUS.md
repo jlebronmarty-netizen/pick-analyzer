@@ -1,6 +1,18 @@
 # Project Status
 
-Last updated: 2026-07-26 20:45:00Z
+Last updated: 2026-07-26 22:55:00Z
+
+## 2026-07-26 The Odds API Pitcher Identity Bridge V1
+
+- Added deterministic pitcher identity bridge service `src/services/the-odds-api-pitcher-identity-bridge.service.ts` and route `/api/providers/the-odds-api/pitcher-identity`.
+- Root cause was confirmed: The Odds API `pitcher_outs` exposes pitcher names in `outcome.description` with no native player ID in the observed payload, while certified future event mappings had no active starter assignment, no same-event stored pitcher projection and no existing The Odds API player mappings.
+- Added shared provider-name normalization for The Odds API pitcher names and deterministic provider name keys such as `name:will-warren`.
+- Persisted only certified player mappings through `provider_entity_mappings`; V1 allows `EXACT_MATCH` and `DETERMINISTIC_MATCH` only.
+- Bounded live validation mapped and persisted Will Warren to canonical player `baseball_mlb:mlb:sportsdataio:player:10013936`; Cristopher Sanchez normalized to the canonical accented name but remained review-required and unpersisted as `NORMALIZED_MATCH`.
+- Existing player-prop sync now falls back to certified The Odds API player mappings after projection/stored-projection identity is unavailable. The bounded live sync persisted 11 real Will Warren recorded-outs rows across BetMGM, BetRivers, Bovada, Caesars, DraftKings and FanDuel.
+- Stable prop snapshot IDs now exclude provider timestamp so reruns update the same provider/book/player/line/outcome row; idempotency rerun created 0 duplicate rows.
+- Comparison inventory now reports 11 stored current prop rows but still returns `NO_PROP_AVAILABLE` because no same-event pitcher projection exists for the stored prop event. `MARKET_LINE_AVAILABLE` remains correctly gated by same-event projection availability.
+- No historical odds, scheduled ingestion, EV, Kelly, Official Picks, Probability Picks changes or Portfolio Intelligence behavior were introduced.
 
 ## 2026-07-26 The Odds API Event Crosswalk And Live Player Prop Ingestion Enablement V1
 

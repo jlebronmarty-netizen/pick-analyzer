@@ -6,6 +6,7 @@ import { sportsDataIoCatalogForSport } from '@/config/sportsdataio-endpoint-cata
 import { checkProviderBudget } from '@/services/provider-budget.service'
 import { previewPitcherProjection } from '@/services/mlb-pitcher-projection-engine.service'
 import { getCertifiedOddsApiEventMappings, ODDS_API_PROVIDER } from '@/services/the-odds-api-event-crosswalk.service'
+import { normalizeOddsApiPitcherName, oddsApiProviderPlayerId } from '@/services/the-odds-api-pitcher-identity-bridge.service'
 import type {
   MlbPlayerPropIngestionProvider,
   MlbPlayerPropIngestionSelection,
@@ -114,7 +115,7 @@ function hash(parts: unknown[]) {
 }
 
 function normalizeName(value: unknown) {
-  return String(value ?? '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim()
+  return normalizeOddsApiPitcherName(value).toLowerCase()
 }
 
 export function americanToDecimal(american: number | null) {
@@ -173,7 +174,6 @@ function snapshotId(input: {
     input.bookmakerId,
     input.selection,
     input.line,
-    input.providerTimestamp,
   ])}`
 }
 
@@ -625,6 +625,68 @@ async function resolvePitchersFromStoredProjections(snapshots: PitcherPropSnapsh
   return { resolved, exact, normalized, unresolved }
 }
 
+async function resolvePitchersFromProviderMappings(snapshots: PitcherPropSnapshot[]) {
+  const providerIds = Array.from(new Set(snapshots.map((row) => oddsApiProviderPlayerId(row.pitcherName)).filter(Boolean))) as string[]
+  const eventIds = Array.from(new Set(snapshots.map((row) => row.eventId))).filter(Boolean)
+  if (!providerIds.length) return { resolved: [] as PitcherPropSnapshot[], exact: 0, normalized: 0, unresolved: snapshots.length }
+  const [{ data: mappings, error: mappingsError }, { data: events, error: eventsError }] = await Promise.all([
+    supabaseAdmin
+      .from('provider_entity_mappings')
+      .select('internal_id,provider_id,metadata')
+      .eq('sport_key', SPORT_KEY)
+      .eq('entity_type', 'player')
+      .eq('provider', ODDS_API_PROVIDER)
+      .in('provider_id', providerIds)
+      .limit(1000),
+    supabaseAdmin
+      .from('sport_events')
+      .select('id,home_team_id,away_team_id')
+      .in('id', eventIds),
+  ])
+  if (mappingsError) throw new Error(`Odds API pitcher identity mapping read failed: ${mappingsError.message}`)
+  if (eventsError) throw new Error(`event team identity read failed: ${eventsError.message}`)
+  const playerIds = Array.from(new Set((mappings ?? []).map((row) => String(row.internal_id)).filter(Boolean)))
+  const players = []
+  for (const chunkStart of Array.from({ length: Math.ceil(playerIds.length / 100) }, (_, index) => index * 100)) {
+    const chunk = playerIds.slice(chunkStart, chunkStart + 100)
+    if (!chunk.length) continue
+    const { data, error } = await supabaseAdmin
+      .from('sport_players')
+      .select('id,display_name,provider_ids,team_id,team_name')
+      .eq('sport_key', SPORT_KEY)
+      .in('id', chunk)
+    if (error) throw new Error(`canonical pitcher identity read failed: ${error.message}`)
+    players.push(...(data ?? []))
+  }
+  const mappingByProvider = new Map((mappings ?? []).map((row) => [String(row.provider_id), row]))
+  const playerById = new Map((players ?? []).map((row) => [String(row.id), row]))
+  const eventById = new Map((events ?? []).map((row) => [String(row.id), row]))
+  let exact = 0
+  let normalized = 0
+  let unresolved = 0
+  const resolved = snapshots.flatMap((snapshot) => {
+    const providerPlayerId = oddsApiProviderPlayerId(snapshot.pitcherName)
+    const mapping = providerPlayerId ? mappingByProvider.get(providerPlayerId) : null
+    const player = mapping ? playerById.get(String(mapping.internal_id)) : null
+    const event = eventById.get(snapshot.eventId)
+    if (!mapping || !player || !event || (player.team_id !== event.home_team_id && player.team_id !== event.away_team_id)) {
+      unresolved += 1
+      return []
+    }
+    const sportsDataIoId = text(player.provider_ids?.sportsdataio) ?? text(player.provider_ids?.PlayerID)
+    const canonicalName = text(player.display_name) ?? snapshot.pitcherName ?? null
+    if (canonicalName === snapshot.pitcherName) exact += 1
+    else normalized += 1
+    return [{
+      ...snapshot,
+      pitcherId: String(player.id),
+      providerPitcherId: sportsDataIoId,
+      pitcherName: canonicalName,
+    }]
+  })
+  return { resolved, exact, normalized, unresolved }
+}
+
 function errorText(error: unknown) {
   return error instanceof Error ? error.message : String(error ?? 'unknown error')
 }
@@ -704,7 +766,10 @@ export async function syncMlbPlayerProps(options: SyncOptions = {}) {
     }
     const normalized = normalizeOddsApiPayload(providerPayloads, nowIso(), eventMap)
     const identity = await resolvePitchers(normalized.snapshots).catch(async (error) => {
-      const fallback = await resolvePitchersFromStoredProjections(normalized.snapshots).catch((fallbackError) => ({
+      const fallback = await resolvePitchersFromStoredProjections(normalized.snapshots).then(async (stored) => {
+        if (stored.resolved.length) return stored
+        return resolvePitchersFromProviderMappings(normalized.snapshots)
+      }).catch((fallbackError) => ({
         resolved: [] as PitcherPropSnapshot[],
         exact: 0,
         normalized: 0,
@@ -715,7 +780,7 @@ export async function syncMlbPlayerProps(options: SyncOptions = {}) {
       return {
         ...fallback,
         error: recovered
-          ? `PITCHER_IDENTITY_PREVIEW_FAILED_STORED_FALLBACK_USED: ${errorText(error)}`
+          ? `PITCHER_IDENTITY_PREVIEW_FAILED_CERTIFIED_MAPPING_FALLBACK_USED: ${errorText(error)}`
           : `PITCHER_IDENTITY_RESOLUTION_FAILED: ${errorText(error)}${'fallbackError' in fallback ? `; fallback: ${fallback.fallbackError}` : ''}`,
       }
     })

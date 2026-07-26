@@ -1,5 +1,15 @@
 # Decision Log
 
+## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
+
+Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.
+
+Decision: Add a pitcher identity bridge that normalizes provider names, checks mapped event team membership against canonical `sport_players`, reuses `provider_entity_mappings` with `entity_type='player'`, and persists only `EXACT_MATCH` or `DETERMINISTIC_MATCH`. The existing sync resolver can use those certified mappings as a fallback after same-event projection lookup fails.
+
+Consequences: Will Warren was deterministically mapped to the canonical SportsDataIO player row and 11 real recorded-outs prop rows were stored idempotently. Cristopher Sanchez normalized to the canonical accented name but remained unpersisted because normalized-only matches are review-required in V1. Comparison now reports stored prop inventory honestly, but still withholds `MARKET_LINE_AVAILABLE` until a same-event pitcher projection exists. No historical odds, scheduled ingestion, EV, Kelly, Official Picks, Probability Picks changes or Portfolio Intelligence were added.
+
+Affected modules: `src/services/the-odds-api-pitcher-identity-bridge.service.ts`, `/api/providers/the-odds-api/pitcher-identity`, `src/services/mlb-player-prop-sync.service.ts`, `src/services/mlb-player-prop-comparison.service.ts`, `docs/THE_ODDS_API_PITCHER_IDENTITY_BRIDGE_V1.md`.
+
 ## 2026-07-26 - Enable The Odds API Current Event Crosswalk Before Manual Pitcher Outs Sync
 
 Context: The prior The Odds API capability audit proved current MLB player-prop rows exist, but event identity was blocked because The Odds API event IDs did not map to internal `sport_events` and no provider mapping rows existed.

@@ -443,6 +443,8 @@ The Odds API current-event crosswalk now lives in `src/services/the-odds-api-eve
 
 When certified mappings exist, the protected `POST /api/mlb/player-props/sync` path can execute a bounded manual The Odds API `pitcher_outs` read for up to 3 future mapped events with `confirm=MLB_PLAYER_PROP_SYNC`. Normalization rejects unsupported lines and unresolved pitcher identities before writing deterministic `sports_odds_snapshots` rows. The path does not enable scheduled ingestion, historical odds, EV, Kelly, Official Picks, Probability Picks changes or Portfolio Intelligence.
 
+The Odds API pitcher identity bridge lives in `src/services/the-odds-api-pitcher-identity-bridge.service.ts` and `/api/providers/the-odds-api/pitcher-identity`. It reuses `provider_entity_mappings` for `entity_type='player'` and persists only exact or deterministic mappings. Because observed The Odds API `pitcher_outs` outcomes expose names but no stable native player IDs, provider IDs are deterministic name keys only after event-team canonical identity is certified. Normalized-only, ambiguous, unknown, team-conflicted, event-conflicted and starter-conflicted players remain unpersisted. The prop sync may use those certified mappings as a fallback after projection identity lookup fails, but comparison still requires a same-event pitcher projection before showing market lines.
+
 No scheduler ownership changed. Future live ingestion must be invoked through the existing operating-day/adaptive-refresh ownership path after provider entitlement, event identity, sportsbook coverage and budget gates are approved.
 
 Additive starter integration:
