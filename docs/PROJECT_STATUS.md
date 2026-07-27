@@ -1,6 +1,13 @@
 # Project Status
 
-Last updated: 2026-07-27 06:02:00Z
+Last updated: 2026-07-27 16:54:00Z
+
+## 2026-07-27 Product Experience, Data Trust, And Live-State Readiness Audit V1
+
+- Stage 1 is complete locally. Added a bounded route inventory and smoke harness in `scripts/product-audit-v1-route-inventory.mjs`, plus `docs/PRODUCT_ROUTE_INVENTORY_V1.md`, `docs/product-route-inventory-v1.json` and `docs/product-audit-v1-ledger.json`.
+- The inventory scanned 20 user-facing page routes and 409 API routes, with 41 APIs conservatively classified as mutation/protected by path. Major product routes are now classified by section, sport scope, data source, live/stored/preview state, usefulness and blockers.
+- Bounded local smoke used `next start` only inside the harness and cleaned up the temporary server. Result: 8/9 checks returned HTTP 2xx. `/api/data-foundation/readiness` timed out under the 30-second local cap and is recorded as a product audit caveat, not hidden.
+- Provider calls, remote mutations, production mutations, SQL application, imports, feature rebuilds, epoch activation, scheduler changes and Learning Brain weight changes remain 0/not executed.
 
 ## 2026-07-26 Historical Sports Data Foundation V2 Autonomous Run
 

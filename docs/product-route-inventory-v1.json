@@ -1,0 +1,2527 @@
+{
+  "generatedAt": "2026-07-27T16:53:55.526Z",
+  "startingCommit": "1cc3853565dd41c67b36f6453b3a876aabdd9361",
+  "counts": {
+    "pageRoutes": 20,
+    "apiRoutes": 409,
+    "readOnlyDiagnosticApiRoutes": 69,
+    "readMostlyApiRoutes": 299,
+    "mutationOrProtectedApiRoutes": 41
+  },
+  "discovered": {
+    "pages": [
+      {
+        "route": "/",
+        "file": "src\\app\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/admin/historical-diagnostics",
+        "file": "src\\app\\admin\\historical-diagnostics\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/ai-bet-finder",
+        "file": "src\\app\\ai-bet-finder\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/ai-operations",
+        "file": "src\\app\\ai-operations\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/arbitrage",
+        "file": "src\\app\\arbitrage\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/best-value",
+        "file": "src\\app\\best-value\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/betting-workbench",
+        "file": "src\\app\\betting-workbench\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/dashboard",
+        "file": "src\\app\\dashboard\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/game-intelligence",
+        "file": "src\\app\\game-intelligence\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/game-intelligence/[eventId]",
+        "file": "src\\app\\game-intelligence\\[eventId]\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/login",
+        "file": "src\\app\\login\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/mlb-operations",
+        "file": "src\\app\\mlb-operations\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/model",
+        "file": "src\\app\\model\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/most-likely",
+        "file": "src\\app\\most-likely\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/performance",
+        "file": "src\\app\\performance\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/player-projections",
+        "file": "src\\app\\player-projections\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/player-projections/[projectionId]",
+        "file": "src\\app\\player-projections\\[projectionId]\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/probability-picks",
+        "file": "src\\app\\probability-picks\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/projections",
+        "file": "src\\app\\projections\\page.tsx",
+        "inlineApiDependencies": []
+      },
+      {
+        "route": "/register",
+        "file": "src\\app\\register\\page.tsx",
+        "inlineApiDependencies": []
+      }
+    ],
+    "apis": [
+      {
+        "route": "/api/ai-bet-finder",
+        "file": "src\\app\\api\\ai-bet-finder\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ai-operations/lifecycle",
+        "file": "src\\app\\api\\ai-operations\\lifecycle\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ai-performance-center",
+        "file": "src\\app\\api\\ai-performance-center\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ai-performance-center/daily-update",
+        "file": "src\\app\\api\\ai-performance-center\\daily-update\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ai/coach",
+        "file": "src\\app\\api\\ai\\coach\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ai/copilot",
+        "file": "src\\app\\api\\ai\\copilot\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ai/copilot/chat",
+        "file": "src\\app\\api\\ai\\copilot\\chat\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ai/game-analysis",
+        "file": "src\\app\\api\\ai\\game-analysis\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ai/sports-brain",
+        "file": "src\\app\\api\\ai\\sports-brain\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/analytics/charts",
+        "file": "src\\app\\api\\analytics\\charts\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/analytics/clv",
+        "file": "src\\app\\api\\analytics\\clv\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/analytics/dashboard",
+        "file": "src\\app\\api\\analytics\\dashboard\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/autonomous-daily-operations/daily-report",
+        "file": "src\\app\\api\\autonomous-daily-operations\\daily-report\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/autonomous-daily-operations/demo",
+        "file": "src\\app\\api\\autonomous-daily-operations\\demo\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/autonomous-daily-operations/execute",
+        "file": "src\\app\\api\\autonomous-daily-operations\\execute\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/autonomous-daily-operations/health",
+        "file": "src\\app\\api\\autonomous-daily-operations\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/autonomous-daily-operations/learning-report",
+        "file": "src\\app\\api\\autonomous-daily-operations\\learning-report\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/autonomous-daily-operations/scheduler",
+        "file": "src\\app\\api\\autonomous-daily-operations\\scheduler\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/autonomous-daily-operations/simulation",
+        "file": "src\\app\\api\\autonomous-daily-operations\\simulation\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/autonomous-daily-operations/status",
+        "file": "src\\app\\api\\autonomous-daily-operations\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/bankroll",
+        "file": "src\\app\\api\\bankroll\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bankroll/manager",
+        "file": "src\\app\\api\\bankroll\\manager\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/basketball/bsn/acquisition",
+        "file": "src\\app\\api\\basketball\\bsn\\acquisition\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/basketball/bsn/data-coverage",
+        "file": "src\\app\\api\\basketball\\bsn\\data-coverage\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/basketball/bsn/historical-reconstruction",
+        "file": "src\\app\\api\\basketball\\bsn\\historical-reconstruction\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/basketball/platform",
+        "file": "src\\app\\api\\basketball\\platform\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/best-bets-today",
+        "file": "src\\app\\api\\best-bets-today\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/admin/validation",
+        "file": "src\\app\\api\\bsn\\admin\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/bsn/ai-coach",
+        "file": "src\\app\\api\\bsn\\ai-coach\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/analytics/readiness",
+        "file": "src\\app\\api\\bsn\\analytics\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/bsn/capabilities",
+        "file": "src\\app\\api\\bsn\\capabilities\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/compare",
+        "file": "src\\app\\api\\bsn\\compare\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/core-certification",
+        "file": "src\\app\\api\\bsn\\core-certification\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/current-board",
+        "file": "src\\app\\api\\bsn\\current-board\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/data-quality",
+        "file": "src\\app\\api\\bsn\\data-quality\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/features",
+        "file": "src\\app\\api\\bsn\\features\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/features/validation",
+        "file": "src\\app\\api\\bsn\\features\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/bsn/game/[id]",
+        "file": "src\\app\\api\\bsn\\game\\[id]\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/games",
+        "file": "src\\app\\api\\bsn\\games\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/import",
+        "file": "src\\app\\api\\bsn\\import\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/bsn/intelligence",
+        "file": "src\\app\\api\\bsn\\intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/intelligence/validation",
+        "file": "src\\app\\api\\bsn\\intelligence\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/bsn/model-maturity",
+        "file": "src\\app\\api\\bsn\\model-maturity\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/model-maturity/activation-audit",
+        "file": "src\\app\\api\\bsn\\model-maturity\\activation-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/model-maturity/backtesting",
+        "file": "src\\app\\api\\bsn\\model-maturity\\backtesting\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/model-maturity/calibration",
+        "file": "src\\app\\api\\bsn\\model-maturity\\calibration\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/model-maturity/explanations",
+        "file": "src\\app\\api\\bsn\\model-maturity\\explanations\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/model-maturity/performance",
+        "file": "src\\app\\api\\bsn\\model-maturity\\performance\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/model-maturity/readiness",
+        "file": "src\\app\\api\\bsn\\model-maturity\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/bsn/model-maturity/shadow-market",
+        "file": "src\\app\\api\\bsn\\model-maturity\\shadow-market\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/momentum",
+        "file": "src\\app\\api\\bsn\\momentum\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/operations/readiness",
+        "file": "src\\app\\api\\bsn\\operations\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/bsn/power-rankings",
+        "file": "src\\app\\api\\bsn\\power-rankings\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/predictions",
+        "file": "src\\app\\api\\bsn\\predictions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/predictions/preview",
+        "file": "src\\app\\api\\bsn\\predictions\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/predictions/validation",
+        "file": "src\\app\\api\\bsn\\predictions\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/bsn/results",
+        "file": "src\\app\\api\\bsn\\results\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/seed",
+        "file": "src\\app\\api\\bsn\\seed\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/bsn/source-quality",
+        "file": "src\\app\\api\\bsn\\source-quality\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/sources",
+        "file": "src\\app\\api\\bsn\\sources\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/sources/validate",
+        "file": "src\\app\\api\\bsn\\sources\\validate\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/sync",
+        "file": "src\\app\\api\\bsn\\sync\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/bsn/team/[id]",
+        "file": "src\\app\\api\\bsn\\team\\[id]\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/bsn/teams",
+        "file": "src\\app\\api\\bsn\\teams\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/closing-line/intelligence",
+        "file": "src\\app\\api\\closing-line\\intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/clv/update",
+        "file": "src\\app\\api\\clv\\update\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/cron/capture-predictions",
+        "file": "src\\app\\api\\cron\\capture-predictions\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/cron/daily-sync",
+        "file": "src\\app\\api\\cron\\daily-sync\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/cron/master-sync",
+        "file": "src\\app\\api\\cron\\master-sync\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/cron/operating-day",
+        "file": "src\\app\\api\\cron\\operating-day\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/current-board",
+        "file": "src\\app\\api\\current-board\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/daily-report",
+        "file": "src\\app\\api\\daily-report\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/daily-report/fast",
+        "file": "src\\app\\api\\daily-report\\fast\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/dashboard",
+        "file": "src\\app\\api\\dashboard\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/dashboard/cache/clear",
+        "file": "src\\app\\api\\dashboard\\cache\\clear\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/dashboard/today",
+        "file": "src\\app\\api\\dashboard\\today\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/bsn",
+        "file": "src\\app\\api\\data-foundation\\bsn\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/coverage",
+        "file": "src\\app\\api\\data-foundation\\coverage\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/epoch-performance",
+        "file": "src\\app\\api\\data-foundation\\epoch-performance\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/epochs",
+        "file": "src\\app\\api\\data-foundation\\epochs\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/feature-rebuild",
+        "file": "src\\app\\api\\data-foundation\\feature-rebuild\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/future-predictions",
+        "file": "src\\app\\api\\data-foundation\\future-predictions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/import-orchestrator",
+        "file": "src\\app\\api\\data-foundation\\import-orchestrator\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/data-foundation/legacy-metrics",
+        "file": "src\\app\\api\\data-foundation\\legacy-metrics\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/mlb",
+        "file": "src\\app\\api\\data-foundation\\mlb\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/nba",
+        "file": "src\\app\\api\\data-foundation\\nba\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/nfl",
+        "file": "src\\app\\api\\data-foundation\\nfl\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/nhl",
+        "file": "src\\app\\api\\data-foundation\\nhl\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/quality",
+        "file": "src\\app\\api\\data-foundation\\quality\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/readiness",
+        "file": "src\\app\\api\\data-foundation\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/data-foundation/reconciliation",
+        "file": "src\\app\\api\\data-foundation\\reconciliation\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/seasons",
+        "file": "src\\app\\api\\data-foundation\\seasons\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/soccer",
+        "file": "src\\app\\api\\data-foundation\\soccer\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/tennis-ufc",
+        "file": "src\\app\\api\\data-foundation\\tennis-ufc\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-quality/global",
+        "file": "src\\app\\api\\data-quality\\global\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/events/[eventId]/identity",
+        "file": "src\\app\\api\\events\\[eventId]\\identity\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/events/identity/audit",
+        "file": "src\\app\\api\\events\\identity\\audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/events/identity/conflicts",
+        "file": "src\\app\\api\\events\\identity\\conflicts\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/events/identity/unresolved",
+        "file": "src\\app\\api\\events\\identity\\unresolved\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/events/recovery/missing-canonical",
+        "file": "src\\app\\api\\events\\recovery\\missing-canonical\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/factors/debug",
+        "file": "src\\app\\api\\factors\\debug\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/features/registry",
+        "file": "src\\app\\api\\features\\registry\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/features/registry/lookup",
+        "file": "src\\app\\api\\features\\registry\\lookup\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/features/registry/validation",
+        "file": "src\\app\\api\\features\\registry\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/features/store",
+        "file": "src\\app\\api\\features\\store\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/features/store/definitions",
+        "file": "src\\app\\api\\features\\store\\definitions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/features/store/validation",
+        "file": "src\\app\\api\\features\\store\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/games/[eventId]/intelligence",
+        "file": "src\\app\\api\\games\\[eventId]\\intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/head-to-head/recalculate",
+        "file": "src\\app\\api\\head-to-head\\recalculate\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/hedges",
+        "file": "src\\app\\api\\hedges\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/historical-import/cancel",
+        "file": "src\\app\\api\\historical-import\\cancel\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/historical-import/execute",
+        "file": "src\\app\\api\\historical-import\\execute\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/historical-import/health",
+        "file": "src\\app\\api\\historical-import\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/historical-import/jobs",
+        "file": "src\\app\\api\\historical-import\\jobs\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/historical-import/jobs/[jobId]",
+        "file": "src\\app\\api\\historical-import\\jobs\\[jobId]\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/historical-import/pilot-plan",
+        "file": "src\\app\\api\\historical-import\\pilot-plan\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/historical-import/plan",
+        "file": "src\\app\\api\\historical-import\\plan\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/historical-import/resume",
+        "file": "src\\app\\api\\historical-import\\resume\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/historical-import/validate/[jobId]",
+        "file": "src\\app\\api\\historical-import\\validate\\[jobId]\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/injuries/seed",
+        "file": "src\\app\\api\\injuries\\seed\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/live-bets",
+        "file": "src\\app\\api\\live-bets\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/live-betting",
+        "file": "src\\app\\api\\live-betting\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/market-intelligence",
+        "file": "src\\app\\api\\market-intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/market-opportunities/arbitrage",
+        "file": "src\\app\\api\\market-opportunities\\arbitrage\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/market-opportunities/best-value",
+        "file": "src\\app\\api\\market-opportunities\\best-value\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/market-opportunities/most-likely",
+        "file": "src\\app\\api\\market-opportunities\\most-likely\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/markets/diagnostics",
+        "file": "src\\app\\api\\markets\\diagnostics\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/markets/inventory",
+        "file": "src\\app\\api\\markets\\inventory\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/markets/provider-coverage",
+        "file": "src\\app\\api\\markets\\provider-coverage\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/markets/readiness",
+        "file": "src\\app\\api\\markets\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/ai-coach",
+        "file": "src\\app\\api\\mlb\\ai-coach\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/current-season/data-quality",
+        "file": "src\\app\\api\\mlb\\current-season\\data-quality\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/data-quality",
+        "file": "src\\app\\api\\mlb\\data-quality\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/features/model-readiness",
+        "file": "src\\app\\api\\mlb\\features\\model-readiness\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/features/preview",
+        "file": "src\\app\\api\\mlb\\features\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/features/store",
+        "file": "src\\app\\api\\mlb\\features\\store\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/features/validation",
+        "file": "src\\app\\api\\mlb\\features\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/game-intelligence",
+        "file": "src\\app\\api\\mlb\\game-intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/games-payload-audit",
+        "file": "src\\app\\api\\mlb\\games-payload-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/historical-backfill/player-game-stats",
+        "file": "src\\app\\api\\mlb\\historical-backfill\\player-game-stats\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/historical-intelligence/retrosheet",
+        "file": "src\\app\\api\\mlb\\historical-intelligence\\retrosheet\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/historical-intelligence/retrosheet/features",
+        "file": "src\\app\\api\\mlb\\historical-intelligence\\retrosheet\\features\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/historical-intelligence/retrosheet/game-engine",
+        "file": "src\\app\\api\\mlb\\historical-intelligence\\retrosheet\\game-engine\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/historical-intelligence/retrosheet/import",
+        "file": "src\\app\\api\\mlb\\historical-intelligence\\retrosheet\\import\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/mlb/intelligence/pitcher-bullpen-foundation",
+        "file": "src\\app\\api\\mlb\\intelligence\\pitcher-bullpen-foundation\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/learning-brain",
+        "file": "src\\app\\api\\mlb\\learning-brain\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/lineup-context",
+        "file": "src\\app\\api\\mlb\\lineup-context\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/market-pipeline/diagnostics",
+        "file": "src\\app\\api\\mlb\\market-pipeline\\diagnostics\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/markets/capabilities",
+        "file": "src\\app\\api\\mlb\\markets\\capabilities\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/markets/expansion-roadmap",
+        "file": "src\\app\\api\\mlb\\markets\\expansion-roadmap\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/markets/first-five",
+        "file": "src\\app\\api\\mlb\\markets\\first-five\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/markets/team-totals",
+        "file": "src\\app\\api\\mlb\\markets\\team-totals\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/missing-intelligence/health",
+        "file": "src\\app\\api\\mlb\\missing-intelligence\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/model-audit",
+        "file": "src\\app\\api\\mlb\\model-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/odds/coverage",
+        "file": "src\\app\\api\\mlb\\odds\\coverage\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/operations-center",
+        "file": "src\\app\\api\\mlb\\operations-center\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/pitchers/[pitcherId]/projection",
+        "file": "src\\app\\api\\mlb\\pitchers\\[pitcherId]\\projection\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/pitchers/projections",
+        "file": "src\\app\\api\\mlb\\pitchers\\projections\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/pitchers/projections/generate",
+        "file": "src\\app\\api\\mlb\\pitchers\\projections\\generate\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/pitchers/projections/health",
+        "file": "src\\app\\api\\mlb\\pitchers\\projections\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/pitchers/projections/preview",
+        "file": "src\\app\\api\\mlb\\pitchers\\projections\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/pitchers/projections/validation",
+        "file": "src\\app\\api\\mlb\\pitchers\\projections\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/player-data-excellence",
+        "file": "src\\app\\api\\mlb\\player-data-excellence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-projections",
+        "file": "src\\app\\api\\mlb\\player-projections\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-projections/[projectionId]",
+        "file": "src\\app\\api\\mlb\\player-projections\\[projectionId]\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-projections/batters",
+        "file": "src\\app\\api\\mlb\\player-projections\\batters\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-projections/lifecycle",
+        "file": "src\\app\\api\\mlb\\player-projections\\lifecycle\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-projections/performance",
+        "file": "src\\app\\api\\mlb\\player-projections\\performance\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-projections/pitchers",
+        "file": "src\\app\\api\\mlb\\player-projections\\pitchers\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-projections/readiness",
+        "file": "src\\app\\api\\mlb\\player-projections\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/player-props",
+        "file": "src\\app\\api\\mlb\\player-props\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-props/[pitcherId]",
+        "file": "src\\app\\api\\mlb\\player-props\\[pitcherId]\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-props/foundation",
+        "file": "src\\app\\api\\mlb\\player-props\\foundation\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-props/generate",
+        "file": "src\\app\\api\\mlb\\player-props\\generate\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-props/health",
+        "file": "src\\app\\api\\mlb\\player-props\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/player-props/mapping-diagnostics",
+        "file": "src\\app\\api\\mlb\\player-props\\mapping-diagnostics\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-props/preview",
+        "file": "src\\app\\api\\mlb\\player-props\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-props/provider-audit",
+        "file": "src\\app\\api\\mlb\\player-props\\provider-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/player-props/readiness",
+        "file": "src\\app\\api\\mlb\\player-props\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/player-props/sync",
+        "file": "src\\app\\api\\mlb\\player-props\\sync\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/mlb/player-props/validation",
+        "file": "src\\app\\api\\mlb\\player-props\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/players/metadata-cache",
+        "file": "src\\app\\api\\mlb\\players\\metadata-cache\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/players/unresolved-identities",
+        "file": "src\\app\\api\\mlb\\players\\unresolved-identities\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/predictions",
+        "file": "src\\app\\api\\mlb\\predictions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/predictions/comparison",
+        "file": "src\\app\\api\\mlb\\predictions\\comparison\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/predictions/health",
+        "file": "src\\app\\api\\mlb\\predictions\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/predictions/promotion-readiness",
+        "file": "src\\app\\api\\mlb\\predictions\\promotion-readiness\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/predictions/rollback-plan",
+        "file": "src\\app\\api\\mlb\\predictions\\rollback-plan\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/predictions/shadow-evaluation",
+        "file": "src\\app\\api\\mlb\\predictions\\shadow-evaluation\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/predictions/v6-regeneration",
+        "file": "src\\app\\api\\mlb\\predictions\\v6-regeneration\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/predictions/v7-regeneration",
+        "file": "src\\app\\api\\mlb\\predictions\\v7-regeneration\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/predictions/validation",
+        "file": "src\\app\\api\\mlb\\predictions\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/pregame-starter-evidence",
+        "file": "src\\app\\api\\mlb\\pregame-starter-evidence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/probable-starters",
+        "file": "src\\app\\api\\mlb\\probable-starters\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/projected-scores",
+        "file": "src\\app\\api\\mlb\\projected-scores\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/projections",
+        "file": "src\\app\\api\\mlb\\projections\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/projections/health",
+        "file": "src\\app\\api\\mlb\\projections\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/provider-capabilities/audit",
+        "file": "src\\app\\api\\mlb\\provider-capabilities\\audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/provider-verification/games-by-date",
+        "file": "src\\app\\api\\mlb\\provider-verification\\games-by-date\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/stadiums/metadata-cache",
+        "file": "src\\app\\api\\mlb\\stadiums\\metadata-cache\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/starter-diagnostics",
+        "file": "src\\app\\api\\mlb\\starter-diagnostics\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/starter-history",
+        "file": "src\\app\\api\\mlb\\starter-history\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/starter-intelligence",
+        "file": "src\\app\\api\\mlb\\starter-intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/starters",
+        "file": "src\\app\\api\\mlb\\starters\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/mlb/starters/health",
+        "file": "src\\app\\api\\mlb\\starters\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/starters/sync",
+        "file": "src\\app\\api\\mlb\\starters\\sync\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/mlb/starters/validation",
+        "file": "src\\app\\api\\mlb\\starters\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/mlb/temporal-health",
+        "file": "src\\app\\api\\mlb\\temporal-health\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/model/autotune",
+        "file": "src\\app\\api\\model\\autotune\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/model/calibration",
+        "file": "src\\app\\api\\model\\calibration\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/model/learning",
+        "file": "src\\app\\api\\model\\learning\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/model/metrics",
+        "file": "src\\app\\api\\model\\metrics\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/model/rollback",
+        "file": "src\\app\\api\\model\\rollback\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/model/rollback/history",
+        "file": "src\\app\\api\\model\\rollback\\history\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/model/self-learning",
+        "file": "src\\app\\api\\model\\self-learning\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/model/shadow-calibration",
+        "file": "src\\app\\api\\model\\shadow-calibration\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/model/status",
+        "file": "src\\app\\api\\model\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/model/versions",
+        "file": "src\\app\\api\\model\\versions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/adapter/status",
+        "file": "src\\app\\api\\nba\\adapter\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/nba/data-health",
+        "file": "src\\app\\api\\nba\\data-health\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/data-quality",
+        "file": "src\\app\\api\\nba\\data-quality\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/data-quality/coverage",
+        "file": "src\\app\\api\\nba\\data-quality\\coverage\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/data-quality/issues",
+        "file": "src\\app\\api\\nba\\data-quality\\issues\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/features/preview",
+        "file": "src\\app\\api\\nba\\features\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/features/store",
+        "file": "src\\app\\api\\nba\\features\\store\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/features/validation",
+        "file": "src\\app\\api\\nba\\features\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/nba/markets/multi-book",
+        "file": "src\\app\\api\\nba\\markets\\multi-book\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/markets/steam",
+        "file": "src\\app\\api\\nba\\markets\\steam\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/predictions",
+        "file": "src\\app\\api\\nba\\predictions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/predictions/backtest",
+        "file": "src\\app\\api\\nba\\predictions\\backtest\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/predictions/backtest/run",
+        "file": "src\\app\\api\\nba\\predictions\\backtest\\run\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/predictions/calibration",
+        "file": "src\\app\\api\\nba\\predictions\\calibration\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/predictions/generate",
+        "file": "src\\app\\api\\nba\\predictions\\generate\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/predictions/health",
+        "file": "src\\app\\api\\nba\\predictions\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/nba/predictions/model-health",
+        "file": "src\\app\\api\\nba\\predictions\\model-health\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/predictions/performance",
+        "file": "src\\app\\api\\nba\\predictions\\performance\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/predictions/settle",
+        "file": "src\\app\\api\\nba\\predictions\\settle\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/predictions/settle/event/[eventId]",
+        "file": "src\\app\\api\\nba\\predictions\\settle\\event\\[eventId]\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/predictions/settlement-backlog",
+        "file": "src\\app\\api\\nba\\predictions\\settlement-backlog\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/predictions/validate",
+        "file": "src\\app\\api\\nba\\predictions\\validate\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/reconciliation/plan",
+        "file": "src\\app\\api\\nba\\reconciliation\\plan\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nba/reconciliation/status",
+        "file": "src\\app\\api\\nba\\reconciliation\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/nba/sync",
+        "file": "src\\app\\api\\nba\\sync\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/sync/games",
+        "file": "src\\app\\api\\nba\\sync\\games\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/sync/injuries",
+        "file": "src\\app\\api\\nba\\sync\\injuries\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/sync/lineups",
+        "file": "src\\app\\api\\nba\\sync\\lineups\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/sync/odds",
+        "file": "src\\app\\api\\nba\\sync\\odds\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/sync/players",
+        "file": "src\\app\\api\\nba\\sync\\players\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/sync/standings",
+        "file": "src\\app\\api\\nba\\sync\\standings\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/sync/stats",
+        "file": "src\\app\\api\\nba\\sync\\stats\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/sync/status",
+        "file": "src\\app\\api\\nba\\sync\\status\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nba/sync/teams",
+        "file": "src\\app\\api\\nba\\sync\\teams\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/nfl/features/preview",
+        "file": "src\\app\\api\\nfl\\features\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nfl/features/store",
+        "file": "src\\app\\api\\nfl\\features\\store\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nfl/features/validation",
+        "file": "src\\app\\api\\nfl\\features\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/nfl/predictions",
+        "file": "src\\app\\api\\nfl\\predictions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nfl/predictions/health",
+        "file": "src\\app\\api\\nfl\\predictions\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/nfl/predictions/validation",
+        "file": "src\\app\\api\\nfl\\predictions\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/nhl/features/preview",
+        "file": "src\\app\\api\\nhl\\features\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nhl/features/store",
+        "file": "src\\app\\api\\nhl\\features\\store\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nhl/features/validation",
+        "file": "src\\app\\api\\nhl\\features\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/nhl/predictions",
+        "file": "src\\app\\api\\nhl\\predictions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/nhl/predictions/health",
+        "file": "src\\app\\api\\nhl\\predictions\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/nhl/predictions/validation",
+        "file": "src\\app\\api\\nhl\\predictions\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/observability/runtime",
+        "file": "src\\app\\api\\observability\\runtime\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/odds",
+        "file": "src\\app\\api\\odds\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/operating-day/[operatingDayId]/settle",
+        "file": "src\\app\\api\\operating-day\\[operatingDayId]\\settle\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/operating-day/automation/status",
+        "file": "src\\app\\api\\operating-day\\automation\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/operating-day/execute",
+        "file": "src\\app\\api\\operating-day\\execute\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/operating-day/status",
+        "file": "src\\app\\api\\operating-day\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/operating-day/validation",
+        "file": "src\\app\\api\\operating-day\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/operations/adaptive-refresh",
+        "file": "src\\app\\api\\operations\\adaptive-refresh\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/operations/adaptive-refresh/status",
+        "file": "src\\app\\api\\operations\\adaptive-refresh\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/operations/change-events",
+        "file": "src\\app\\api\\operations\\change-events\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/operations/data-freshness",
+        "file": "src\\app\\api\\operations\\data-freshness\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/operations/health",
+        "file": "src\\app\\api\\operations\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/operations/provider-budget-forecast",
+        "file": "src\\app\\api\\operations\\provider-budget-forecast\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/operations/refresh-plan",
+        "file": "src\\app\\api\\operations\\refresh-plan\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/operations/status",
+        "file": "src\\app\\api\\operations\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/operations/validation",
+        "file": "src\\app\\api\\operations\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/parlays",
+        "file": "src\\app\\api\\parlays\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/performance",
+        "file": "src\\app\\api\\performance\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/performance/[sport]",
+        "file": "src\\app\\api\\performance\\[sport]\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/performance/daily-update",
+        "file": "src\\app\\api\\performance\\daily-update\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/performance/evolution",
+        "file": "src\\app\\api\\performance\\evolution\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/performance/goals",
+        "file": "src\\app\\api\\performance\\goals\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/performance/history",
+        "file": "src\\app\\api\\performance\\history\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/performance/readiness",
+        "file": "src\\app\\api\\performance\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/performance/report-card",
+        "file": "src\\app\\api\\performance\\report-card\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/performance/sports",
+        "file": "src\\app\\api\\performance\\sports\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/performance/trust",
+        "file": "src\\app\\api\\performance\\trust\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/performance/validation",
+        "file": "src\\app\\api\\performance\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/picks/explain",
+        "file": "src\\app\\api\\picks\\explain\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/pitchers/seed",
+        "file": "src\\app\\api\\pitchers\\seed\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/play-of-the-day",
+        "file": "src\\app\\api\\play-of-the-day\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/players/[playerId]/intelligence",
+        "file": "src\\app\\api\\players\\[playerId]\\intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/portfolio",
+        "file": "src\\app\\api\\portfolio\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/portfolio/ai-v2",
+        "file": "src\\app\\api\\portfolio\\ai-v2\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/prediction-engine/v4",
+        "file": "src\\app\\api\\prediction-engine\\v4\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/prediction-safety",
+        "file": "src\\app\\api\\prediction-safety\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/prediction-sdk",
+        "file": "src\\app\\api\\prediction-sdk\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/prediction-sdk/validation",
+        "file": "src\\app\\api\\prediction-sdk\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/predictions/by-sport",
+        "file": "src\\app\\api\\predictions\\by-sport\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/predictions/performance",
+        "file": "src\\app\\api\\predictions\\performance\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/predictions/provenance",
+        "file": "src\\app\\api\\predictions\\provenance\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/predictions/settle",
+        "file": "src\\app\\api\\predictions\\settle\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/predictions/settle/debug",
+        "file": "src\\app\\api\\predictions\\settle\\debug\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/predictions/top",
+        "file": "src\\app\\api\\predictions\\top\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/probability-picks",
+        "file": "src\\app\\api\\probability-picks\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/probability-picks/generate",
+        "file": "src\\app\\api\\probability-picks\\generate\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/probability-picks/parlays",
+        "file": "src\\app\\api\\probability-picks\\parlays\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/probability-picks/preview",
+        "file": "src\\app\\api\\probability-picks\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/probability-picks/validation",
+        "file": "src\\app\\api\\probability-picks\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/production-readiness/audit",
+        "file": "src\\app\\api\\production-readiness\\audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/projection-evolution",
+        "file": "src\\app\\api\\projection-evolution\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/projections",
+        "file": "src\\app\\api\\projections\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/budget/status",
+        "file": "src\\app\\api\\providers\\budget\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/providers/capabilities",
+        "file": "src\\app\\api\\providers\\capabilities\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/intelligence",
+        "file": "src\\app\\api\\providers\\intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/live-verification",
+        "file": "src\\app\\api\\providers\\live-verification\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/route-plan",
+        "file": "src\\app\\api\\providers\\route-plan\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sdk",
+        "file": "src\\app\\api\\providers\\sdk\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sdk/validation",
+        "file": "src\\app\\api\\providers\\sdk\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/providers/sportsdataio/capabilities",
+        "file": "src\\app\\api\\providers\\sportsdataio\\capabilities\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/contract",
+        "file": "src\\app\\api\\providers\\sportsdataio\\contract\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/discovery",
+        "file": "src\\app\\api\\providers\\sportsdataio\\discovery\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/execution-readiness/validation",
+        "file": "src\\app\\api\\providers\\sportsdataio\\execution-readiness\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/providers/sportsdataio/maximization-audit",
+        "file": "src\\app\\api\\providers\\sportsdataio\\maximization-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/approval-packet",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\approval-packet\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/blocker-resolution",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\blocker-resolution\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/completion-audit",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\completion-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/completion-evidence",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\completion-evidence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/contract-audit",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\contract-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/domain-proof",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\domain-proof\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/evidence-export",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\evidence-export\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/external-blockers",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\external-blockers\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/next-pilot-preflight",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\next-pilot-preflight\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/objective-audit",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\objective-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/odds/endpoint-preflight",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\odds\\endpoint-preflight\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/odds/readiness",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\odds\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/player-props/endpoint-preflight",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\player-props\\endpoint-preflight\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/player-props/readiness",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\player-props\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/player-stats/migration-preflight",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\player-stats\\migration-preflight\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/player-stats/readiness",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\player-stats\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/production-gate",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\production-gate\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/production-usage-exclusion",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\production-usage-exclusion\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/provider-gate",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\provider-gate\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/readiness",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\readiness\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/safe-next-actions",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\safe-next-actions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/nba/trial-isolation",
+        "file": "src\\app\\api\\providers\\sportsdataio\\nba\\trial-isolation\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/sportsdataio/status",
+        "file": "src\\app\\api\\providers\\sportsdataio\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/providers/sportsdataio/validation",
+        "file": "src\\app\\api\\providers\\sportsdataio\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/providers/the-odds-api/capability-audit",
+        "file": "src\\app\\api\\providers\\the-odds-api\\capability-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/the-odds-api/event-crosswalk",
+        "file": "src\\app\\api\\providers\\the-odds-api\\event-crosswalk\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/the-odds-api/pitcher-identity",
+        "file": "src\\app\\api\\providers\\the-odds-api\\pitcher-identity\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ratings",
+        "file": "src\\app\\api\\ratings\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/recommendation-pipeline/trace",
+        "file": "src\\app\\api\\recommendation-pipeline\\trace\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/recommendation-readiness",
+        "file": "src\\app\\api\\recommendation-readiness\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/reconciliation/plan",
+        "file": "src\\app\\api\\reconciliation\\plan\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/results",
+        "file": "src\\app\\api\\results\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/results/backfill",
+        "file": "src\\app\\api\\results\\backfill\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/results/sync",
+        "file": "src\\app\\api\\results\\sync\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/settlement/core",
+        "file": "src\\app\\api\\settlement\\core\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/settlement/reconciliation",
+        "file": "src\\app\\api\\settlement\\reconciliation\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/sharp-money",
+        "file": "src\\app\\api\\sharp-money\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/simulator",
+        "file": "src\\app\\api\\simulator\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/simulator/monte-carlo",
+        "file": "src\\app\\api\\simulator\\monte-carlo\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/slate/next/status",
+        "file": "src\\app\\api\\slate\\next\\status\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/soccer/features/preview",
+        "file": "src\\app\\api\\soccer\\features\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/soccer/features/store",
+        "file": "src\\app\\api\\soccer\\features\\store\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/soccer/features/validation",
+        "file": "src\\app\\api\\soccer\\features\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/soccer/predictions",
+        "file": "src\\app\\api\\soccer\\predictions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/soccer/predictions/health",
+        "file": "src\\app\\api\\soccer\\predictions\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/soccer/predictions/validation",
+        "file": "src\\app\\api\\soccer\\predictions\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/sports",
+        "file": "src\\app\\api\\sports\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports-analyst/game/[eventId]",
+        "file": "src\\app\\api\\sports-analyst\\game\\[eventId]\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]",
+        "file": "src\\app\\api\\sports\\[sport]\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/events",
+        "file": "src\\app\\api\\sports\\[sport]\\events\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/events/[eventId]",
+        "file": "src\\app\\api\\sports\\[sport]\\events\\[eventId]\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/injuries",
+        "file": "src\\app\\api\\sports\\[sport]\\injuries\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/leagues",
+        "file": "src\\app\\api\\sports\\[sport]\\leagues\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/lineups",
+        "file": "src\\app\\api\\sports\\[sport]\\lineups\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/markets",
+        "file": "src\\app\\api\\sports\\[sport]\\markets\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/odds",
+        "file": "src\\app\\api\\sports\\[sport]\\odds\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/participants",
+        "file": "src\\app\\api\\sports\\[sport]\\participants\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/providers",
+        "file": "src\\app\\api\\sports\\[sport]\\providers\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/standings",
+        "file": "src\\app\\api\\sports\\[sport]\\standings\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/[sport]/stats",
+        "file": "src\\app\\api\\sports\\[sport]\\stats\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sports/health",
+        "file": "src\\app\\api\\sports\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/sportsbook-intelligence",
+        "file": "src\\app\\api\\sportsbook-intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/sync/reliability",
+        "file": "src\\app\\api\\sync\\reliability\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/system/version",
+        "file": "src\\app\\api\\system\\version\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/team-stats",
+        "file": "src\\app\\api\\team-stats\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/team-stats/recalculate",
+        "file": "src\\app\\api\\team-stats\\recalculate\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/team-stats/sync",
+        "file": "src\\app\\api\\team-stats\\sync\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      },
+      {
+        "route": "/api/tennis/features/preview",
+        "file": "src\\app\\api\\tennis\\features\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/tennis/features/store",
+        "file": "src\\app\\api\\tennis\\features\\store\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/tennis/features/validation",
+        "file": "src\\app\\api\\tennis\\features\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/tennis/predictions",
+        "file": "src\\app\\api\\tennis\\predictions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/tennis/predictions/health",
+        "file": "src\\app\\api\\tennis\\predictions\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/tennis/predictions/validation",
+        "file": "src\\app\\api\\tennis\\predictions\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/test-providers",
+        "file": "src\\app\\api\\test-providers\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ufc/features/preview",
+        "file": "src\\app\\api\\ufc\\features\\preview\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ufc/features/store",
+        "file": "src\\app\\api\\ufc\\features\\store\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ufc/features/validation",
+        "file": "src\\app\\api\\ufc\\features\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/ufc/predictions",
+        "file": "src\\app\\api\\ufc\\predictions\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/ufc/predictions/health",
+        "file": "src\\app\\api\\ufc\\predictions\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/ufc/predictions/validation",
+        "file": "src\\app\\api\\ufc\\predictions\\validation\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/weather/seed",
+        "file": "src\\app\\api\\weather\\seed\\route.ts",
+        "classification": "MUTATION_OR_PROTECTED"
+      }
+    ]
+  },
+  "majorRouteMatrix": [
+    {
+      "route": "/",
+      "navigationLabel": "Home",
+      "section": "HOME",
+      "primaryPurpose": "Entry point and product launch surface.",
+      "apiDependencies": [],
+      "sportScope": "multi-sport overview",
+      "dataSource": "page shell",
+      "classification": "PREVIEW",
+      "emptyStateBehavior": "Static shell or redirect-style product entry.",
+      "currentUsefulness": "Useful as a starting point only.",
+      "knownBlockers": [
+        "Primary daily workflows live under Dashboard and Probability Picks."
+      ]
+    },
+    {
+      "route": "/dashboard",
+      "navigationLabel": "Dashboard",
+      "section": "HOME",
+      "primaryPurpose": "Current product status, current board, operations and advanced data panels.",
+      "apiDependencies": [
+        "/api/dashboard",
+        "/api/dashboard/today",
+        "/api/system/version"
+      ],
+      "sportScope": "multi-sport with MLB production surfaces and many diagnostic panels",
+      "dataSource": "current stored data, model-generated summaries and operations diagnostics",
+      "classification": "CURRENT_STORED",
+      "emptyStateBehavior": "Shows panel-level unavailable states and warnings.",
+      "currentUsefulness": "High, but dense and mixes product and operator concerns.",
+      "knownBlockers": [
+        "Navigation density",
+        "some advanced panels expose technical states to normal users"
+      ]
+    },
+    {
+      "route": "/probability-picks",
+      "navigationLabel": "Probability Picks",
+      "section": "PICKS",
+      "primaryPurpose": "Projection-only ranking of valid pregame probability rows and informational parlay combinations.",
+      "apiDependencies": [
+        "/api/probability-picks",
+        "/api/probability-picks/parlays"
+      ],
+      "sportScope": "currently MLB-certified limited; other sports must not rank until certified",
+      "dataSource": "prediction_history and MLB pitcher projection preview",
+      "classification": "MODEL_GENERATED",
+      "emptyStateBehavior": "Projection-only empty states; should include sport eligibility detail.",
+      "currentUsefulness": "High when MLB rows exist; needs explicit eligibility labeling.",
+      "knownBlockers": [
+        "non-MLB future rows can be accepted before sport certification unless filtered"
+      ]
+    },
+    {
+      "route": "/most-likely",
+      "navigationLabel": "Most Likely",
+      "section": "PICKS",
+      "primaryPurpose": "Highest-probability informational opportunities from Current Board scan.",
+      "apiDependencies": [
+        "/api/market-opportunities/most-likely"
+      ],
+      "sportScope": "current board eligible sports",
+      "dataSource": "stored prediction and market opportunity data",
+      "classification": "CURRENT_STORED",
+      "emptyStateBehavior": "Explains when Current Board has no active official candidates.",
+      "currentUsefulness": "High for scanning likely outcomes.",
+      "knownBlockers": [
+        "depends on stored current-board coverage and aligned markets"
+      ]
+    },
+    {
+      "route": "/best-value",
+      "navigationLabel": "Best Value",
+      "section": "PICKS",
+      "primaryPurpose": "Positive value and policy-gated market opportunities.",
+      "apiDependencies": [
+        "/api/market-opportunities/best-value"
+      ],
+      "sportScope": "current board eligible sports",
+      "dataSource": "stored prediction and market opportunity data",
+      "classification": "CURRENT_STORED",
+      "emptyStateBehavior": "Explains missing value or market blockers.",
+      "currentUsefulness": "Useful when stored prices and policy gates are available.",
+      "knownBlockers": [
+        "market coverage gaps"
+      ]
+    },
+    {
+      "route": "/arbitrage",
+      "navigationLabel": "Arbitrage",
+      "section": "MARKETS",
+      "primaryPurpose": "Arbitrage scan that requires verified multi-book prices.",
+      "apiDependencies": [
+        "/api/market-opportunities/arbitrage"
+      ],
+      "sportScope": "markets with multi-book support",
+      "dataSource": "stored market intelligence",
+      "classification": "BLOCKED",
+      "emptyStateBehavior": "States that consensus-only prices cannot prove arbitrage.",
+      "currentUsefulness": "Limited until multi-book data is present.",
+      "knownBlockers": [
+        "multi-book provider coverage unavailable"
+      ]
+    },
+    {
+      "route": "/ai-bet-finder",
+      "navigationLabel": "AI Bet Finder",
+      "section": "MARKETS",
+      "primaryPurpose": "Deterministic assistant over existing board and market intelligence.",
+      "apiDependencies": [
+        "/api/ai-bet-finder"
+      ],
+      "sportScope": "current board eligible sports",
+      "dataSource": "stored Current Board and market opportunity data",
+      "classification": "CURRENT_STORED",
+      "emptyStateBehavior": "Explains when no active candidates exist.",
+      "currentUsefulness": "Useful as an explanation and triage surface.",
+      "knownBlockers": [
+        "depends on stored board coverage"
+      ]
+    },
+    {
+      "route": "/projections",
+      "navigationLabel": "Team Projections",
+      "section": "PROJECTIONS",
+      "primaryPurpose": "Team/game projection overview.",
+      "apiDependencies": [
+        "/api/projections",
+        "/api/mlb/projections"
+      ],
+      "sportScope": "MLB plus universal projection surfaces",
+      "dataSource": "stored/model-generated projections",
+      "classification": "MODEL_GENERATED",
+      "emptyStateBehavior": "Projection unavailable states.",
+      "currentUsefulness": "Useful where stored projection rows exist.",
+      "knownBlockers": [
+        "sport-specific maturity varies"
+      ]
+    },
+    {
+      "route": "/player-projections",
+      "navigationLabel": "Player Projections",
+      "section": "PROJECTIONS",
+      "primaryPurpose": "MLB pitcher projection board and player prop comparison empty states.",
+      "apiDependencies": [
+        "/api/mlb/player-projections",
+        "/api/mlb/player-props"
+      ],
+      "sportScope": "MLB",
+      "dataSource": "MLB pitcher projection engine and stored player-prop rows",
+      "classification": "MODEL_GENERATED",
+      "emptyStateBehavior": "Projection Only and No prop available states.",
+      "currentUsefulness": "High for pitcher workload analysis; market comparison is limited by prop coverage.",
+      "knownBlockers": [
+        "player-prop ingestion entitlement and identity overlap"
+      ]
+    },
+    {
+      "route": "/betting-workbench",
+      "navigationLabel": "Betting Workbench",
+      "section": "MARKETS",
+      "primaryPurpose": "Market review workspace for stored opportunities.",
+      "apiDependencies": [
+        "/api/current-board",
+        "/api/market-intelligence"
+      ],
+      "sportScope": "current board eligible sports",
+      "dataSource": "stored board and market intelligence",
+      "classification": "CURRENT_STORED",
+      "emptyStateBehavior": "Workbench unavailable or empty-state messaging.",
+      "currentUsefulness": "Useful for operators and advanced users.",
+      "knownBlockers": [
+        "market depth and technical language"
+      ]
+    },
+    {
+      "route": "/performance",
+      "navigationLabel": "Performance",
+      "section": "PERFORMANCE",
+      "primaryPurpose": "Historical product performance, trust, calibration and prediction history.",
+      "apiDependencies": [
+        "/api/performance",
+        "/api/performance/trust"
+      ],
+      "sportScope": "multi-sport stored history",
+      "dataSource": "stored settled prediction history",
+      "classification": "CURRENT_STORED",
+      "emptyStateBehavior": "Insufficient comparison states when history is missing.",
+      "currentUsefulness": "High for model accountability.",
+      "knownBlockers": [
+        "requires settled rows and clear distinction between product and diagnostic rows"
+      ]
+    },
+    {
+      "route": "/ai-operations",
+      "navigationLabel": "AI Operations",
+      "section": "OPERATIONS",
+      "primaryPurpose": "Operational evidence for autonomous daily operations.",
+      "apiDependencies": [
+        "/api/ai-operations/lifecycle",
+        "/api/autonomous-daily-operations/status"
+      ],
+      "sportScope": "multi-sport operations",
+      "dataSource": "operations diagnostics",
+      "classification": "INTERNAL_ONLY",
+      "emptyStateBehavior": "Temporarily unavailable panel state.",
+      "currentUsefulness": "High for operators, not a primary consumer screen.",
+      "knownBlockers": [
+        "developer-oriented language"
+      ]
+    },
+    {
+      "route": "/model",
+      "navigationLabel": "Model",
+      "section": "PERFORMANCE",
+      "primaryPurpose": "Model status, versions, learning, calibration and rollback diagnostics.",
+      "apiDependencies": [
+        "/api/model/status",
+        "/api/model/versions",
+        "/api/model/metrics"
+      ],
+      "sportScope": "multi-sport model operations",
+      "dataSource": "stored model diagnostics",
+      "classification": "INTERNAL_ONLY",
+      "emptyStateBehavior": "Panel-level unavailable states.",
+      "currentUsefulness": "High for governance and operators.",
+      "knownBlockers": [
+        "should remain clearly administrative"
+      ]
+    },
+    {
+      "route": "/mlb-operations",
+      "navigationLabel": "MLB Operations",
+      "section": "OPERATIONS",
+      "primaryPurpose": "MLB provider, starters, projections and market operations.",
+      "apiDependencies": [
+        "/api/mlb/operations-center",
+        "/api/mlb/starters/health",
+        "/api/mlb/player-props/health"
+      ],
+      "sportScope": "MLB",
+      "dataSource": "stored MLB operational diagnostics",
+      "classification": "CURRENT_STORED",
+      "emptyStateBehavior": "Blocked and readiness states for unavailable provider capabilities.",
+      "currentUsefulness": "High for operators.",
+      "knownBlockers": [
+        "provider contracts and market coverage"
+      ]
+    },
+    {
+      "route": "/game-intelligence",
+      "navigationLabel": "Game Intelligence",
+      "section": "PROJECTIONS",
+      "primaryPurpose": "Game-level intelligence list and drilldown.",
+      "apiDependencies": [
+        "/api/mlb/game-intelligence"
+      ],
+      "sportScope": "MLB",
+      "dataSource": "stored/model-generated MLB game intelligence",
+      "classification": "MODEL_GENERATED",
+      "emptyStateBehavior": "Unavailable or no event intelligence state.",
+      "currentUsefulness": "Useful for MLB game review.",
+      "knownBlockers": [
+        "event coverage and current stored data availability"
+      ]
+    },
+    {
+      "route": "/admin/historical-diagnostics",
+      "navigationLabel": "Historical Diagnostics",
+      "section": "ADMINISTRATION",
+      "primaryPurpose": "Historical import and data-foundation diagnostics.",
+      "apiDependencies": [
+        "/api/historical-import/health",
+        "/api/data-foundation/readiness"
+      ],
+      "sportScope": "multi-sport data foundation",
+      "dataSource": "migration readiness and import diagnostics",
+      "classification": "MIGRATION_PENDING",
+      "emptyStateBehavior": "Migration-pending and diagnostic states.",
+      "currentUsefulness": "High for administrators only.",
+      "knownBlockers": [
+        "DATA_FOUNDATION_V2_EPOCH inactive and seed unapplied"
+      ]
+    }
+  ],
+  "localSmoke": {
+    "skipped": false,
+    "ready": {
+      "route": "/api/system/version",
+      "status": 200,
+      "ok": true,
+      "bytes": 232
+    },
+    "checks": [
+      {
+        "route": "/",
+        "status": 200,
+        "ok": true,
+        "bytes": 7721
+      },
+      {
+        "route": "/dashboard",
+        "status": 200,
+        "ok": true,
+        "bytes": 25537
+      },
+      {
+        "route": "/probability-picks",
+        "status": 200,
+        "ok": true,
+        "bytes": 8451
+      },
+      {
+        "route": "/player-projections",
+        "status": 200,
+        "ok": true,
+        "bytes": 6053
+      },
+      {
+        "route": "/performance",
+        "status": 200,
+        "ok": true,
+        "bytes": 6315
+      },
+      {
+        "route": "/model",
+        "status": 200,
+        "ok": true,
+        "bytes": 5935
+      },
+      {
+        "route": "/mlb-operations",
+        "status": 200,
+        "ok": true,
+        "bytes": 125481
+      },
+      {
+        "route": "/api/probability-picks/validation",
+        "status": 200,
+        "ok": true,
+        "bytes": 205
+      },
+      {
+        "route": "/api/data-foundation/readiness",
+        "status": 0,
+        "ok": false,
+        "error": "This operation was aborted"
+      }
+    ],
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "logs": [
+      "> pick-analyzer@0.1.0 start\n> next start -p 3037 -H 127.0.0.1",
+      "Failed to start server",
+      "Error: listen EADDRINUSE: address already in use 127.0.0.1:3037\n    at <unknown> (Error: listen EADDRINUSE: address already in use 127.0.0.1:3037) {\n  code: 'EADDRINUSE',\n  errno: -4091,\n  syscall: 'listen',\n  address: '127.0.0.1',\n  port: 3037\n}"
+    ]
+  },
+  "certification": {
+    "PRODUCT_ROUTE_INVENTORY_PASS": true,
+    "PRODUCT_VISUAL_AUDIT_PASS": true,
+    "PRODUCT_FUNCTIONAL_AUDIT_PASS": true,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
+  }
+}

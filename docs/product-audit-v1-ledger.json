@@ -1,0 +1,61 @@
+{
+  "run": {
+    "name": "PRODUCT_EXPERIENCE_DATA_TRUST_AND_LIVE_STATE_READINESS_AUDIT_V1",
+    "status": "in_progress",
+    "repository": "C:\\Projects\\pick-analyzer",
+    "startingCommit": "1cc3853565dd41c67b36f6453b3a876aabdd9361",
+    "certifiedPlatformTag": "v1.0-platform-certified",
+    "certifiedPlatformCommit": "eb15613efd81ff1a8e57797e11feb7254c1b604a",
+    "pushAllowed": false,
+    "deploymentAllowed": false,
+    "productionSqlAllowed": false,
+    "productionImportsAllowed": false,
+    "featureRebuildsAllowed": false,
+    "epochActivationAllowed": false,
+    "learningBrainWeightChangesAllowed": false,
+    "providerCallsUsed": 0,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 0,
+    "createdAt": "2026-07-27T16:45:00Z",
+    "updatedAt": "2026-07-27T16:54:00Z"
+  },
+  "phases": [
+    {
+      "phaseId": "STAGE_1",
+      "phaseName": "LOCAL_APPLICATION_BOOT_AND_ROUTE_INVENTORY",
+      "status": "completed",
+      "startedAt": "2026-07-27T16:45:00Z",
+      "completedAt": "2026-07-27T16:54:00Z",
+      "commit": "pending_self_reference",
+      "artifacts": [
+        "docs/PRODUCT_ROUTE_INVENTORY_V1.md",
+        "docs/product-route-inventory-v1.json",
+        "scripts/product-audit-v1-route-inventory.mjs"
+      ],
+      "validation": {
+        "command": "node scripts/product-audit-v1-route-inventory.mjs",
+        "status": "passed_with_timeout_caveat",
+        "pageRoutes": 20,
+        "apiRoutes": 409,
+        "boundedSmokePassed": 8,
+        "boundedSmokeTotal": 9,
+        "boundedSmokeCaveats": [
+          "/api/data-foundation/readiness timed out under the 30-second local bounded smoke cap"
+        ]
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "productionMutations": 0,
+      "blockers": [
+        "data_foundation_readiness_local_smoke_timeout_under_bounded_cap"
+      ],
+      "continuationDecision": "continue_to_probability_picks_multi_sport_audit"
+    }
+  ],
+  "certificationMarkers": [
+    "PRODUCT_ROUTE_INVENTORY_PASS",
+    "NO_PROVIDER_CALL_BREACH_PASS",
+    "NO_DATABASE_MUTATION_PASS",
+    "NO_EPOCH_ACTIVATION_PASS"
+  ]
+}
