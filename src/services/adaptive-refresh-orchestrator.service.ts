@@ -65,6 +65,24 @@ type PredictionFreshnessRow = {
   feature_snapshot: Record<string, unknown> | null
 }
 
+type SettlementBacklogPredictionRow = {
+  id: string
+  game_id: string | null
+  commence_time: string | null
+  status: string | null
+  result: string | null
+  lifecycle_status: string | null
+}
+
+type SettlementBacklogEventRow = {
+  id: string
+  start_time: string | null
+  status: string | null
+  home_score: number | null
+  away_score: number | null
+  updated_at: string | null
+}
+
 type LifecycleEventRow = {
   action: string | null
   status: string | null
@@ -632,6 +650,83 @@ async function loadPredictions(eventIds: string[]) {
   return rows
 }
 
+function isPendingPrediction(row: SettlementBacklogPredictionRow) {
+  const result = String(row.result ?? '').toLowerCase()
+  if (['win', 'loss', 'push', 'void'].includes(result)) return false
+  const status = String(row.status ?? '').toLowerCase()
+  if (['win', 'loss', 'push', 'void'].includes(status)) return false
+  const lifecycle = String(row.lifecycle_status ?? '').toLowerCase()
+  return !['settled', 'void', 'closed', 'skipped'].includes(lifecycle)
+}
+
+function isFinalScoredEvent(event: SettlementBacklogEventRow | undefined) {
+  if (!event) return false
+  const status = String(event.status ?? '').toLowerCase()
+  return (
+    ['completed', 'final', 'closed', 'complete'].includes(status) &&
+    event.home_score !== null &&
+    event.away_score !== null
+  )
+}
+
+async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
+  const today = localDate(now)
+  const startDate = new Date(`${today}T00:00:00.000Z`)
+  startDate.setUTCDate(startDate.getUTCDate() - Math.max(1, lookbackDays))
+  const start = puertoRicoUtcRange(puertoRicoLocalDateFromUtc(startDate.toISOString()) ?? today).utcStart
+  const end = puertoRicoUtcRange(today).utcEndExclusive
+  const { data, error } = await supabaseAdmin
+    .from('prediction_history')
+    .select('id, game_id, commence_time, status, result, lifecycle_status')
+    .eq('sport_key', SPORT_KEY)
+    .gte('commence_time', start)
+    .lt('commence_time', end)
+    .order('commence_time', { ascending: true })
+    .limit(2000)
+  if (error) throw new Error(`Settlement backlog prediction read failed: ${error.message}`)
+
+  const pending = ((data ?? []) as SettlementBacklogPredictionRow[]).filter(isPendingPrediction)
+  const eventIds = Array.from(new Set(pending.map((row) => row.game_id).filter(Boolean))) as string[]
+  const events: SettlementBacklogEventRow[] = []
+  for (let index = 0; index < eventIds.length; index += 100) {
+    const { data: eventRows, error: eventError } = await supabaseAdmin
+      .from('sport_events')
+      .select('id, start_time, status, home_score, away_score, updated_at')
+      .in('id', eventIds.slice(index, index + 100))
+    if (eventError) throw new Error(`Settlement backlog event read failed: ${eventError.message}`)
+    events.push(...((eventRows ?? []) as SettlementBacklogEventRow[]))
+  }
+
+  const eventsById = new Map(events.map((event) => [event.id, event]))
+  const eligible = pending.filter((row) => isFinalScoredEvent(row.game_id ? eventsById.get(row.game_id) : undefined))
+  const awaitingResult = pending.length - eligible.length
+  const dates = eligible
+    .map((row) => puertoRicoLocalDateFromUtc(row.commence_time ?? ''))
+    .filter((date): date is string => Boolean(date))
+    .sort()
+  const rowsByDate = dates.reduce<Record<string, number>>((counts, date) => {
+    counts[date] = (counts[date] ?? 0) + 1
+    return counts
+  }, {})
+  const latestResultUpdatedAt = eligible
+    .map((row) => row.game_id ? eventsById.get(row.game_id)?.updated_at ?? null : null)
+    .filter(Boolean)
+    .sort()
+    .at(-1) ?? null
+
+  return {
+    checkedRows: pending.length,
+    settlementReadyRows: eligible.length,
+    awaitingResultRows: awaitingResult,
+    oldestReadyDate: dates[0] ?? null,
+    newestReadyDate: dates.at(-1) ?? null,
+    readyRowsByDate: rowsByDate,
+    latestResultUpdatedAt,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  }
+}
+
 function budgetMode(budget: Awaited<ReturnType<typeof getProviderBudgetStatus>> | null): ProviderBudgetMode {
   if (!budget) return 'CONSERVATIVE'
   const remaining = Number(budget.estimatedCallsRemaining ?? 0)
@@ -653,7 +748,7 @@ function estimatedCallsForDomain(domain: DataFreshnessDomain) {
 function domainDecision(item: DataFreshnessItem, mode: ProviderBudgetMode): RefreshDecision {
   if (!item.supported) return 'NOT_SUPPORTED'
   if (mode === 'EXHAUSTED' && estimatedCallsForDomain(item.domain) > 0) return 'BLOCKED'
-  if (['STALE', 'PENDING'].includes(item.status) && ['schedule', 'odds', 'results'].includes(item.domain)) return 'DUE_NOW'
+  if (['STALE', 'PENDING'].includes(item.status) && ['schedule', 'odds', 'results', 'settlement'].includes(item.domain)) return 'DUE_NOW'
   if (item.status === 'AGING' && item.nextRecommendedRefreshAt) return 'DUE_SOON'
   return 'NOT_DUE'
 }
@@ -764,7 +859,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
   const activeSlateDate = dateResolution?.activeSlateDate ?? dashboard?.activeSlateDate ?? operatingDate
   const providerQueryDate = dateResolution?.providerQueryDate ?? activeSlateDate
 
-  const [boardResult, nextSlateResult, operatingResult, automationResult, budgetResult, lifecycleResult, currentEventsResult, activeEventsResult] =
+  const [boardResult, nextSlateResult, operatingResult, automationResult, budgetResult, lifecycleResult, currentEventsResult, activeEventsResult, settlementBacklogResult] =
     await Promise.all([
       safe('Current Board', () => getCurrentBoard({ sportKey: SPORT_KEY, mode: 'CURRENT', limit: 200 })),
       safe('Next Slate', () => getNextSlateStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, now })),
@@ -774,6 +869,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       safe('Lifecycle Events', () => loadLifecycleEvents(now)),
       safe('Current Events', () => loadEvents(operatingDate)),
       safe('Active Slate Events', () => loadEvents(activeSlateDate)),
+      safe('Settlement Backlog', () => loadSettlementBacklog(now)),
     ])
 
   const board = boardResult.ok ? boardResult.value : null
@@ -784,6 +880,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
   const lifecycle = lifecycleResult.ok ? lifecycleResult.value : []
   const currentEvents = currentEventsResult.ok ? currentEventsResult.value : []
   const activeEvents = activeEventsResult.ok ? activeEventsResult.value : []
+  const settlementBacklog = settlementBacklogResult.ok ? settlementBacklogResult.value : null
   const eventIds = Array.from(new Set([...currentEvents, ...activeEvents].map((event) => event.id)))
   const predictionsResult = await safe('Prediction Freshness', () => loadPredictions(eventIds))
   const predictions = predictionsResult.ok ? predictionsResult.value : []
@@ -855,7 +952,14 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     freshnessItem({ domain: 'feature_snapshot', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.feature_snapshot }),
     freshnessItem({ domain: 'prediction', lastUpdated: latestPrediction, available: predictions.length > 0, activeNeed: readyForAnalysis > 0 || waitingForOdds === 0, now, policyOverride: policyOverrides.prediction }),
     freshnessItem({ domain: 'recommendation', lastUpdated: latestPrediction, available: Boolean(board && board.candidates.length > 0), activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.recommendation }),
-    freshnessItem({ domain: 'settlement', lastUpdated: latestSettlement, available: Boolean(latestSettlement), activeNeed: finalGames > 0, now, policyOverride: policyOverrides.settlement }),
+    freshnessItem({
+      domain: 'settlement',
+      lastUpdated: latestSettlement ?? settlementBacklog?.latestResultUpdatedAt ?? null,
+      available: Boolean(latestSettlement) && Number(settlementBacklog?.settlementReadyRows ?? 0) === 0,
+      activeNeed: finalGames > 0 || Number(settlementBacklog?.settlementReadyRows ?? 0) > 0,
+      now,
+      policyOverride: policyOverrides.settlement,
+    }),
   ]
 
   const refreshPlan = freshness.map((item) => ({
@@ -874,12 +978,27 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
           : 'stored_contract_only',
     predictionRegenerationNeeded:
       ['odds', 'feature_snapshot'].includes(item.domain) && ['STALE', 'PENDING'].includes(item.status) && readyForAnalysis > 0,
-    reason: item.domain === 'odds' ? marketState.reason : item.staleReason ?? item.userMessage,
+    reason:
+      item.domain === 'settlement' && Number(settlementBacklog?.settlementReadyRows ?? 0) > 0
+        ? `${settlementBacklog?.settlementReadyRows ?? 0} prior prediction rows are settlement-ready from completed stored results.`
+        : item.domain === 'odds'
+          ? marketState.reason
+          : item.staleReason ?? item.userMessage,
   }))
   const oddsPlan = refreshPlan.find((item) => item.domain === 'odds')
   if (oddsPlan && ['CHECK_DUE', 'CHECK_OVERDUE', 'NO_MARKETS_RETURNED', 'PROVIDER_CHECK_FAILED', 'PROVIDER_DELAYED'].includes(marketState.state)) {
     oddsPlan.decision = mode === 'EXHAUSTED' ? 'BLOCKED' : 'DUE_NOW'
   }
+  const dueDomains = refreshPlan.filter((item) => item.decision === 'DUE_NOW').map((item) => item.domain)
+  const effectiveNextAction = dueDomains.includes('results')
+    ? 'sync_results'
+    : dueDomains.includes('settlement')
+      ? 'settle'
+      : dueDomains.includes('odds')
+        ? currentGames > 0 ? 'midday_refresh' : 'morning_sync'
+        : dueDomains.includes('schedule')
+          ? 'morning_sync'
+          : String(automation?.nextAction ?? operatingDay?.nextRequiredAction ?? dashboard?.nextAction ?? 'status')
 
   const totalEstimatedProviderCalls = refreshPlan
     .filter((item) => item.decision === 'DUE_NOW')
@@ -972,7 +1091,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       latestProviderChangesDetected: latestProviderCheck?.changesDetected ?? null,
       latestProviderFailureReason: latestProviderCheck?.failureReason ?? null,
     },
-    nextAction: String(automation?.nextAction ?? operatingDay?.nextRequiredAction ?? dashboard?.nextAction ?? 'status'),
+    nextAction: effectiveNextAction,
     nextActionAt: dashboard?.nextActionAt ?? budget?.nextEligibleRefresh ?? null,
     automationStatus: String(automation?.currentLifecycleState ?? dashboard?.automationStatus ?? 'stored_data_read_only'),
     providerBudget: {
@@ -1044,6 +1163,17 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       v7Promoted: false,
       currentBoardPolicyChanged: false,
       settlementPolicyChanged: false,
+    },
+    settlementBacklog: settlementBacklog ?? {
+      checkedRows: 0,
+      settlementReadyRows: 0,
+      awaitingResultRows: 0,
+      oldestReadyDate: null,
+      newestReadyDate: null,
+      readyRowsByDate: {},
+      latestResultUpdatedAt: null,
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
     },
     warnings,
     blockers,
@@ -1177,8 +1307,11 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
   const actionDateResolution = action
     ? await resolveMlbOperatingDate({ action, now: new Date(status.generatedAt) })
     : null
+  const settlementBacklog = status.settlementBacklog
   const selectedDate = String(
-    action === 'status_refresh'
+    action === 'settle' && settlementBacklog.oldestReadyDate
+      ? settlementBacklog.oldestReadyDate
+      : action === 'status_refresh'
       ? (status as Record<string, unknown>).providerQueryDate ?? status.activeSlateDate ?? status.operatingDate
       : actionDateResolution?.providerQueryDate ?? (status as Record<string, unknown>).providerQueryDate ?? status.activeSlateDate ?? status.nextSlateDate ?? status.operatingDate
   )
