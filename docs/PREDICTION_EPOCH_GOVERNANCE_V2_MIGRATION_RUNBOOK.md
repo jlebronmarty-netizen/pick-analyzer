@@ -77,7 +77,8 @@ If these counts naturally change before application, pause and update the preche
 After successful SQL Editor application:
 
 - Wait for Supabase/PostgREST schema cache refresh.
-- If API routes still report missing table immediately after migration, retry after a short delay.
+- If API routes still report `SCHEMA_CACHE_PENDING` immediately after migration, retry after a short delay.
+- If `prediction_epochs` is readable with zero rows and the epoch columns are readable, the expected state is `APPLIED_EMPTY`, not missing.
 - Do not run activation SQL to fix schema-cache timing.
 
 ## Postcheck Order
@@ -124,6 +125,7 @@ Expected:
 - `providerCallsMade = 0`
 - `remoteMutationsMade = 0`
 - no automatic epoch activation
+- `/api/data-foundation/epochs` reports `migrationApplied: true`, `migrationState: APPLIED_EMPTY`, `newEpochActive: false` and `legacyBehaviorActive: true` when the migrated table is empty
 - no current dashboard/performance behavior change
 - no legacy prediction rows disappear
 

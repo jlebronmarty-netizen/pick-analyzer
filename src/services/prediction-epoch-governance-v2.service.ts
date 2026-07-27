@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getPredictionEpochMigrationState } from '@/services/prediction-epoch-migration-state.service'
 
 const MIGRATION_FILE = 'supabase/migrations/202607270001_prediction_epoch_governance_v2.sql'
 
@@ -17,7 +18,8 @@ async function countPredictions(builder?: (query: any) => any) {
 }
 
 export async function getPredictionEpochGovernanceV2() {
-  const [totalRows, currentRows, championRows, challengerRows, shadowRows, archivedRows, productionEligibleRows] = await Promise.all([
+  const [migrationState, totalRows, currentRows, championRows, challengerRows, shadowRows, archivedRows, productionEligibleRows] = await Promise.all([
+    getPredictionEpochMigrationState(),
     countPredictions(),
     countPredictions((query) => query.eq('is_current', true)),
     countPredictions((query) => query.eq('model_role', 'champion')),
@@ -34,8 +36,24 @@ export async function getPredictionEpochGovernanceV2() {
     providerCallsMade: 0,
     remoteMutationsMade: 0,
     productionMutationsMade: 0,
-    migrationReady: true,
-    migrationApplied: false,
+    migrationReady: migrationState.migrationReady,
+    migrationApplied: migrationState.migrationApplied,
+    migrationState: migrationState.migrationState,
+    tableExists: migrationState.tableExists,
+    epochColumnsExist: migrationState.epochColumnsExist,
+    requiredIndexesVerified: migrationState.requiredIndexesVerified,
+    rlsVerified: migrationState.rlsVerified,
+    epochRows: migrationState.epochRows,
+    epochRowCount: migrationState.epochRowCount,
+    activeEpochRows: migrationState.activeEpochRows,
+    activeEpochCount: migrationState.activeEpochCount,
+    legacyEpochPresent: migrationState.legacyEpochPresent,
+    v2EpochPresent: migrationState.v2EpochPresent,
+    newEpochActive: migrationState.newEpochActive,
+    legacyBehaviorActive: migrationState.legacyBehaviorActive,
+    activationRequired: migrationState.activationRequired,
+    schemaCacheWarning: migrationState.schemaCacheWarning,
+    verificationWarnings: migrationState.verificationWarnings,
     migrationsCreated: [MIGRATION_FILE],
     epochs: [
       {
@@ -97,7 +115,10 @@ export async function getPredictionEpochGovernanceV2() {
       'Keep rollback_epoch_key pointing to LEGACY_EPOCH_V1.',
     ],
     warnings: [
-      'This phase does not apply the migration.',
+      migrationState.migrationApplied
+        ? `Migration schema detected with state ${migrationState.migrationState}; epoch activation remains separate.`
+        : `Migration schema not fully active; current state ${migrationState.migrationState}.`,
+      ...migrationState.verificationWarnings,
       'This phase does not archive, update or delete prediction_history rows.',
       'DATA_FOUNDATION_V2_EPOCH is migration-ready only and not active.',
     ],
@@ -110,6 +131,7 @@ export async function validatePredictionEpochGovernanceV2() {
     ['read-only contract', result.readOnly],
     ['zero provider calls', result.providerCallsMade === 0],
     ['zero remote mutations', result.remoteMutationsMade === 0],
+    ['migration detection contract', typeof result.migrationState === 'string'],
     ['migration file created', result.migrationsCreated.includes(MIGRATION_FILE)],
     ['legacy epoch defined', result.epochs.some((epoch) => epoch.epochKey === 'LEGACY_EPOCH_V1')],
     ['new epoch defined but inactive', result.epochs.some((epoch) => epoch.epochKey === 'DATA_FOUNDATION_V2_EPOCH' && epoch.status === 'MIGRATION_READY_NOT_ACTIVE')],
@@ -132,7 +154,11 @@ export async function validatePredictionEpochGovernanceV2() {
       migrationsCreated: result.migrationsCreated,
       totalPredictionRowsAudited: result.predictionHistorySnapshot.totalRows.rows,
       productionEligibleRows: result.predictionHistorySnapshot.productionEligibleRows.rows,
-      activationRequired: true,
+      migrationApplied: result.migrationApplied,
+      migrationState: result.migrationState,
+      epochRowCount: result.epochRowCount,
+      activeEpochCount: result.activeEpochCount,
+      activationRequired: result.activationRequired,
       automaticActivation: false,
     },
   }

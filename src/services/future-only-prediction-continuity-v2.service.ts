@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getPredictionEpochMigrationState } from '@/services/prediction-epoch-migration-state.service'
 
 function nowIso() {
   return new Date().toISOString()
@@ -33,7 +34,8 @@ async function postStartRiskSamples() {
 
 export async function getFutureOnlyPredictionContinuityV2() {
   const now = nowIso()
-  const [totalRows, futureRows, completedLikeRows, postStartRiskRows] = await Promise.all([
+  const [migrationState, totalRows, futureRows, completedLikeRows, postStartRiskRows] = await Promise.all([
+    getPredictionEpochMigrationState(),
     countPredictions(),
     countPredictions((query) => query.gt('commence_time', now)),
     countPredictions((query) => query.lt('commence_time', now).not('result', 'is', null)),
@@ -51,6 +53,7 @@ export async function getFutureOnlyPredictionContinuityV2() {
     productionSchedulingEnabled: false,
     historicalReplayActivated: false,
     retrospectivePredictionsGenerated: false,
+    migrationState,
     snapshot: {
       totalRows,
       futureRows,
@@ -89,7 +92,7 @@ export async function getFutureOnlyPredictionContinuityV2() {
     warnings: [
       'This phase does not activate production scheduling.',
       'This phase does not generate predictions.',
-      'Future-only continuity becomes enforceable after manual epoch migration and activation.',
+      `Future-only continuity becomes enforceable after activation; current migration state is ${migrationState.migrationState}.`,
     ],
   }
 }
@@ -100,6 +103,7 @@ export async function validateFutureOnlyPredictionContinuityV2() {
     ['read-only report', result.readOnly],
     ['zero provider calls', result.providerCallsMade === 0],
     ['zero remote mutations', result.remoteMutationsMade === 0],
+    ['canonical migration state present', typeof result.migrationState.migrationState === 'string'],
     ['future-only contract', result.contract.onlyFutureEligibleEventsReceivePredictions],
     ['cutoff enforcement contract', result.contract.generatedAtBeforeCutoff],
     ['completed events blocked', result.contract.completedEventsBlocked],
@@ -120,6 +124,8 @@ export async function validateFutureOnlyPredictionContinuityV2() {
     remoteMutationsMade: 0,
     summary: {
       totalPredictionRowsAudited: result.snapshot.totalRows.rows,
+      migrationState: result.migrationState.migrationState,
+      migrationApplied: result.migrationState.migrationApplied,
       futureRows: result.snapshot.futureRows.rows,
       retrospectivePredictionsGenerated: result.retrospectivePredictionsGenerated,
       productionSchedulingEnabled: result.productionSchedulingEnabled,

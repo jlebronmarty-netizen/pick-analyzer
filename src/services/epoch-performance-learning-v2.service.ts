@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getPredictionEpochMigrationState } from '@/services/prediction-epoch-migration-state.service'
 
 type PredictionRow = {
   id: string
@@ -107,7 +108,10 @@ function calibrationBuckets(rows: PredictionRow[]) {
 }
 
 export async function getEpochPerformanceLearningV2() {
-  const sample = await loadPredictionRows()
+  const [sample, migrationState] = await Promise.all([
+    loadPredictionRows(),
+    getPredictionEpochMigrationState(),
+  ])
   const rows = sample.rows
   const settledRows = rows.filter(isSettled)
   const learningEligibleRows = settledRows.filter((row) => Boolean(row.feature_snapshot_id))
@@ -124,7 +128,8 @@ export async function getEpochPerformanceLearningV2() {
     productionMutationsMade: 0,
     sampleLimit: 5000,
     sourceError: sample.error,
-    migrationApplied: false,
+    migrationApplied: migrationState.migrationApplied,
+    migrationState,
     activeEpochKey,
     legacyEpochKey,
     predictionRowsAudited: sample.count,
@@ -172,8 +177,8 @@ export async function getEpochPerformanceLearningV2() {
     },
     warnings: [
       'This report is read-only and does not mutate Learning Brain weights.',
-      'The Phase 13 epoch migration remains unapplied by this local run.',
-      'Active epoch metrics become enforceable only after manual migration and activation approval.',
+      `Current migration state is ${migrationState.migrationState}.`,
+      'Active epoch metrics become enforceable only after activation approval.',
     ],
   }
 }
@@ -184,6 +189,7 @@ export async function validateEpochPerformanceLearningV2() {
     ['read-only report', result.readOnly],
     ['zero provider calls', result.providerCallsMade === 0],
     ['zero remote mutations', result.remoteMutationsMade === 0],
+    ['canonical migration state present', typeof result.migrationState.migrationState === 'string'],
     ['active epoch view defined', result.reportingViews.activeEpoch.epochKey === 'DATA_FOUNDATION_V2_EPOCH'],
     ['archived epoch view defined', result.reportingViews.archivedEpochs.epochKeys.includes('LEGACY_EPOCH_V1')],
     ['all epoch view explicit scope', result.reportingViews.allEpochs.requiresExplicitScope],
@@ -206,6 +212,8 @@ export async function validateEpochPerformanceLearningV2() {
     remoteMutationsMade: 0,
     summary: {
       predictionRowsAudited: result.predictionRowsAudited,
+      migrationState: result.migrationState.migrationState,
+      migrationApplied: result.migrationState.migrationApplied,
       settledRows: result.learningLabels.settledRows,
       epochAwareEligibleRows: result.learningLabels.epochAwareEligibleRows,
       activeEpochKey: result.activeEpochKey,

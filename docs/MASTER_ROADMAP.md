@@ -60,6 +60,8 @@ Phase 18 final local certification is documented in `docs/HISTORICAL_SPORTS_DATA
 
 Prediction Epoch Governance V2 production migration review and hardening is locally complete. `supabase/migrations/202607270001_prediction_epoch_governance_v2.sql` remains unapplied, but has been hardened with RLS, guarded additive constraints, epoch indexes and no seed/backfill/activation behavior. Manual application is blocked until explicit approval and must follow `docs/PREDICTION_EPOCH_GOVERNANCE_V2_MIGRATION_RUNBOOK.md`.
 
+Prediction Epoch Migration Detection Fix V1 is locally implemented. The data-foundation epoch APIs now use a canonical read-only migration-state contract that treats an empty `prediction_epochs` table as `APPLIED_EMPTY`, keeps `DATA_FOUNDATION_V2_EPOCH` inactive, preserves legacy behavior and detects partial/schema-cache states without mutating production data.
+
 ## Completed
 
 ### Platform Certification

@@ -152,6 +152,14 @@ Decision: Add `docs/HISTORICAL_SPORTS_DATA_FOUNDATION_V2_CERTIFICATION.md` and c
 
 Consequences: The final certification records 0 provider calls, 0 remote mutations, no retrospective predictions, no production SQL and no certified platform tag change. Production migration and epoch activation remain separate approval gates.
 
+## 2026-07-27 - Fix Prediction Epoch Migration Detection
+
+Context: Manual SQL Editor execution of the epoch migration can legitimately leave `prediction_epochs` empty because seeding and activation are separate gates. The previous endpoint response hardcoded `migrationApplied: false`.
+
+Decision: Add `prediction-epoch-migration-state.service.ts` as the canonical read-only detector and wire epoch governance, legacy metrics, future-only continuity, epoch performance and readiness responses to it.
+
+Consequences: Empty `prediction_epochs` now reports `APPLIED_EMPTY` with legacy behavior active and V2 inactive. Partial/schema-cache states are explicit. No SQL is reapplied, no epoch rows are inserted, no prediction rows are modified and no activation occurs.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

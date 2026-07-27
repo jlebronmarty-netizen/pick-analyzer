@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { getSportsDataCoverageAuditV2 } from '@/services/data-foundation-coverage.service'
+import { getPredictionEpochMigrationState } from '@/services/prediction-epoch-migration-state.service'
 
 function nowIso() {
   return new Date().toISOString()
@@ -127,7 +128,10 @@ export async function getDataFoundationReconciliationV2() {
 }
 
 export async function getDataFoundationReadinessV2() {
-  const report = await getDataFoundationQualityV2()
+  const [report, migrationState] = await Promise.all([
+    getDataFoundationQualityV2(),
+    getPredictionEpochMigrationState(),
+  ])
   const readiness = report.quality.map((sport) => ({
     sportKey: sport.sportKey,
     leagueKey: sport.leagueKey,
@@ -148,6 +152,7 @@ export async function getDataFoundationReadinessV2() {
     providerCallsMade: 0,
     remoteMutationsMade: 0,
     productionMutationsMade: 0,
+    migrationState,
     readiness,
     summary: {
       sportsAudited: readiness.length,
@@ -157,6 +162,8 @@ export async function getDataFoundationReadinessV2() {
       predictionReady: readiness.filter((sport) => sport.predictionReadiness === 'ready').length,
       predictionPartial: readiness.filter((sport) => sport.predictionReadiness === 'partial').length,
       predictionBlocked: readiness.filter((sport) => sport.predictionReadiness === 'blocked').length,
+      predictionEpochMigrationState: migrationState.migrationState,
+      predictionEpochMigrationApplied: migrationState.migrationApplied,
     },
   }
 }
@@ -173,6 +180,7 @@ export async function validateDataFoundationQualityV2() {
     ['readiness read-only', readiness.readOnly],
     ['zero provider calls', quality.providerCallsMade === 0 && reconciliation.providerCallsMade === 0 && readiness.providerCallsMade === 0],
     ['zero remote mutations', quality.remoteMutationsMade === 0 && reconciliation.remoteMutationsMade === 0 && readiness.remoteMutationsMade === 0],
+    ['canonical migration state present', typeof readiness.migrationState.migrationState === 'string'],
     ['audits eight sports', quality.summary.sportsAudited === 8],
     ['reconciliation has no mutation plan', reconciliation.summary.mutationPlan === 'none_read_only_report'],
     ['readiness covers eight sports', readiness.summary.sportsAudited === 8],
@@ -193,6 +201,7 @@ export async function validateDataFoundationQualityV2() {
       reconciliationItems: reconciliation.summary.reconciliationItems,
       importReady: readiness.summary.importReady,
       predictionReady: readiness.summary.predictionReady,
+      predictionEpochMigrationState: readiness.migrationState.migrationState,
     },
   }
 }

@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { getPredictionEpochMigrationState } from '@/services/prediction-epoch-migration-state.service'
 
 function nowIso() {
   return new Date().toISOString()
@@ -34,7 +35,10 @@ function classify(row: Record<string, unknown>) {
 }
 
 export async function getLegacyPredictionMetricIsolationV2() {
-  const sample = await loadPredictionSamples()
+  const [sample, migrationState] = await Promise.all([
+    loadPredictionSamples(),
+    getPredictionEpochMigrationState(),
+  ])
   const rows = sample.rows
   const candidates = rows.map((row) => ({ id: row.id, sportKey: row.sport_key, reasons: classify(row) })).filter((row) => row.reasons.length > 0)
   const activeEpochFilter = {
@@ -51,6 +55,7 @@ export async function getLegacyPredictionMetricIsolationV2() {
     providerCallsMade: 0,
     remoteMutationsMade: 0,
     productionMutationsMade: 0,
+    migrationState,
     predictionRowsAudited: sample.count,
     sampleLimit: 5000,
     sourceError: sample.error,
@@ -87,7 +92,7 @@ export async function getLegacyPredictionMetricIsolationV2() {
     warnings: [
       'This phase classifies deletion candidates only; it does not delete rows.',
       'Legacy rows remain queryable and auditable.',
-      'Active epoch filtering becomes enforceable after the Phase 13 migration is manually applied and activated.',
+      `Active epoch filtering becomes enforceable only after activation; current migration state is ${migrationState.migrationState}.`,
     ],
   }
 }
@@ -98,6 +103,7 @@ export async function validateLegacyPredictionMetricIsolationV2() {
     ['read-only report', result.readOnly],
     ['zero provider calls', result.providerCallsMade === 0],
     ['zero remote mutations', result.remoteMutationsMade === 0],
+    ['canonical migration state present', typeof result.migrationState.migrationState === 'string'],
     ['legacy rows remain queryable', result.archiveContract.legacyRowsRemainQueryable],
     ['no prediction deletion', result.validation.noPredictionDeletion && result.deletionCandidateReport.deleteExecuted === false],
     ['epoch filtering contract', result.validation.epochFilteringContract],
@@ -116,6 +122,8 @@ export async function validateLegacyPredictionMetricIsolationV2() {
     remoteMutationsMade: 0,
     summary: {
       predictionRowsAudited: result.predictionRowsAudited,
+      migrationState: result.migrationState.migrationState,
+      migrationApplied: result.migrationState.migrationApplied,
       deletionCandidates: result.deletionCandidateReport.candidates,
       candidateReasons: result.deletionCandidateReport.byReason,
       deleteExecuted: result.deletionCandidateReport.deleteExecuted,

@@ -94,6 +94,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `docs/HISTORICAL_SPORTS_DATA_FOUNDATION_V2_CERTIFICATION.md` records the local-only final certification for the V2 data foundation and epoch reset run. It preserves the certified platform tag, records zero provider calls and zero remote mutations, and keeps production SQL, deployment and epoch activation outside this local run.
 
+## Prediction Epoch Migration State
+
+`src/services/prediction-epoch-migration-state.service.ts` is the canonical read-only migration-state detector for Prediction Epoch Governance V2. It distinguishes `NOT_APPLIED`, `APPLIED_EMPTY`, `APPLIED_INACTIVE`, `APPLIED_ACTIVE`, `PARTIALLY_APPLIED`, `SCHEMA_CACHE_PENDING` and `VERIFICATION_ERROR` by probing `prediction_epochs` and the nullable epoch columns on `prediction_history`. An empty `prediction_epochs` table is treated as applied schema with inactive V2 epoch, not as a missing migration.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.
