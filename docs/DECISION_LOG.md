@@ -64,6 +64,14 @@ Decision: Add `src/services/nfl-historical-foundation-v2.service.ts`, `/api/data
 
 Consequences: NFL readiness is documented as an honest empty/blocked stored-data state with zero provider calls and zero mutations. Bye weeks remain represented as schedule gaps, no fake events or odds were created, and no retrospective NFL predictions were generated.
 
+## 2026-07-27 - Add NHL Historical Foundation V2 Read-Only Audit
+
+Context: NHL requires cross-year season governance and goalie/starter plus period-score readiness before any production prediction or pick surface can be trusted.
+
+Decision: Add `src/services/nhl-historical-foundation-v2.service.ts`, `/api/data-foundation/nhl` and `docs/NHL_HISTORICAL_FOUNDATION_V2.md` to audit stored NHL schedule, results, stats, goalie/starter coverage, injuries, odds, mappings and prediction readiness.
+
+Consequences: NHL readiness is documented as an honest empty/blocked stored-data state with zero provider calls and zero mutations. No NHL picks, fake odds, fake goalie starters or retrospective predictions were generated.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

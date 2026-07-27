@@ -50,6 +50,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/nfl-historical-foundation-v2.service.ts` and `/api/data-foundation/nfl` provide a read-only NFL foundation audit for season-year coverage. The audit preserves cross-calendar postseason and bye-week schedule-gap semantics while reporting stored schedule, result, stats, injury, depth-chart/starter, odds, mapping and prediction readiness. Empty NFL coverage is returned as an explicit blocker state, not fabricated historical data.
 
+## NHL Historical Foundation V2
+
+`src/services/nhl-historical-foundation-v2.service.ts` and `/api/data-foundation/nhl` provide a read-only NHL foundation audit for cross-year season coverage. The audit reports schedule, result, stats, period-score, goalie/starter, injury, odds, mapping and prediction readiness while explicitly preventing NHL pick generation when stored data or certified engine readiness is unavailable.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

@@ -36,6 +36,8 @@ Phase 6 NBA historical foundation is locally implemented at `/api/data-foundatio
 
 Phase 7 NFL historical foundation is locally implemented at `/api/data-foundation/nfl`. It preserves NFL season-year and cross-calendar postseason governance while reporting the current stored-data state honestly as empty/blocked across schedule, results, stats, injuries, depth charts/starters and odds.
 
+Phase 8 NHL historical foundation is locally implemented at `/api/data-foundation/nhl`. It preserves cross-year season governance and reports NHL readiness honestly as empty/blocked across schedule, results, stats, goalie/starter coverage, injuries and odds until legitimate stored or licensed data is available.
+
 ## Completed
 
 ### Platform Certification

@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T00:55:00Z"
+    "updatedAt": "2026-07-27T01:15:00Z"
   },
   "phases": [
     {
@@ -262,7 +262,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T00:35:00Z",
       "completedAt": "2026-07-27T00:55:00Z",
-      "commit": "pending_self_reference",
+      "commit": "6a96872f8104b75e1007fbc1a9eb1f4d09a63b3e",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -300,6 +300,52 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_8"
+    },
+    {
+      "phaseId": 8,
+      "phaseName": "NHL_HISTORICAL_FOUNDATION_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T00:55:00Z",
+      "completedAt": "2026-07-27T01:15:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "nhl_foundation_validation_8_of_8",
+          "stored_data_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "cross_year_season_model_present",
+          "no_nhl_picks_generated",
+          "no_retrospective_predictions_generated"
+        ],
+        "summary": {
+          "events": 0,
+          "gameStats": 0,
+          "playerStats": 0,
+          "oddsRows": 0,
+          "predictionRows": 0,
+          "blockers": [
+            "NHL_SCHEDULE_COVERAGE_EMPTY",
+            "NHL_CANONICAL_GAME_RESULTS_EMPTY",
+            "NHL_GAME_STATS_EMPTY",
+            "NHL_PLAYER_STATS_EMPTY",
+            "NHL_GOALIE_STARTER_COVERAGE_NOT_AVAILABLE",
+            "NHL_INJURY_COVERAGE_NOT_AVAILABLE",
+            "NHL_ODDS_COVERAGE_EMPTY"
+          ]
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_9"
     }
   ],
   "certificationMarkers": [
@@ -321,6 +367,8 @@
     "NBA_NO_TEMPORAL_LEAKAGE_PASS",
     "NFL_HISTORICAL_FOUNDATION_V2_PASS",
     "NFL_SEASON_BOUNDARY_PASS",
-    "NFL_NO_TEMPORAL_LEAKAGE_PASS"
+    "NFL_NO_TEMPORAL_LEAKAGE_PASS",
+    "NHL_HISTORICAL_FOUNDATION_V2_PASS",
+    "NHL_DATA_READINESS_PASS"
   ]
 }
