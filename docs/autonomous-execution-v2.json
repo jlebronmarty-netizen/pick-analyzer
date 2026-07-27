@@ -1188,7 +1188,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T03:45:00Z",
       "completedAt": "2026-07-27T03:49:00Z",
-      "commit": "pending_self_reference",
+      "commit": "8e12353b1608f4eec2839869748e5ddd10e2238e",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -1307,6 +1307,79 @@
         "command": "git diff --check",
         "status": "passed"
       }
+    },
+    {
+      "phaseId": "C1",
+      "phaseName": "NBA_BASELINE_CERTIFICATION_V1",
+      "status": "completed",
+      "startedAt": "2026-07-27T04:12:00Z",
+      "completedAt": "2026-07-27T04:18:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-c1-nba-baseline-certify.mjs",
+        "status": "passed",
+        "checks": 10,
+        "passed": 10
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "partial_baseline_status_documented",
+          "teams_players_events_documented",
+          "canonical_results_blocked",
+          "stats_and_boxscores_partial",
+          "odds_and_props_truthful",
+          "trial_isolation_preserved",
+          "production_prediction_readiness_blocked",
+          "no_fabrication_rule_documented",
+          "zero_execution_accounting_documented",
+          "certification_markers_present"
+        ],
+        "summary": {
+          "verdict": "PARTIAL_BASELINE_CERTIFIED_PRODUCTION_BLOCKED",
+          "teams": 30,
+          "players": 579,
+          "events": 14,
+          "completedEvents": 13,
+          "canonicalResults": 0,
+          "teamGameStats": 18,
+          "playerStats": 918,
+          "boxscores": 18,
+          "lineups": 758,
+          "injuries": 6,
+          "oddsSnapshots": 540,
+          "playerProps": 0,
+          "predictions": 27,
+          "retrospectivePredictionsGenerated": 0
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "artifacts": [
+        "docs/NBA_BASELINE_CERTIFICATION_V1.md",
+        "scripts/historical-completion-v1-c1-nba-baseline-certify.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [
+        "nba_full_schedule_import_not_approved",
+        "nba_canonical_results_empty",
+        "nba_full_stats_boxscores_import_not_approved",
+        "nba_player_props_empty",
+        "nba_production_prediction_activation_blocked"
+      ],
+      "nextPhase": "C2_NBA_RESULT_STAT_COMPLETION_PLAN_V1",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-c1-nba-baseline-certify.mjs, npm.cmd run build, git diff --check, then continue to Phase C2.",
+      "continuationDecision": "continue_to_phase_C2_with_nba_partial_baseline_certified",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
     }
   ],
   "certificationMarkers": [
@@ -1388,6 +1461,13 @@
     "NO_PROVIDER_CALL_B6_PASS",
     "NO_REMOTE_MUTATION_B6_PASS",
     "NO_HISTORICAL_ODDS_B6_PASS",
-    "NO_RETROSPECTIVE_PREDICTIONS_B6_PASS"
+    "NO_RETROSPECTIVE_PREDICTIONS_B6_PASS",
+    "NBA_BASELINE_CERTIFICATION_V1_PASS",
+    "NBA_PARTIAL_FOUNDATION_NO_PRODUCTION_OVERCLAIM_PASS",
+    "NBA_CANONICAL_RESULTS_BLOCKED_PASS",
+    "NBA_TRIAL_ISOLATION_PRESERVED_PASS",
+    "NO_PROVIDER_CALL_C1_PASS",
+    "NO_REMOTE_MUTATION_C1_PASS",
+    "NO_RETROSPECTIVE_PREDICTIONS_C1_PASS"
   ]
 }

@@ -261,3 +261,22 @@ Validation:
 - provider calls: 0
 - remote mutations: 0
 - production mutations: 0
+
+### Phase C1 - NBA Baseline Certification V1
+
+Status: completed locally as partial baseline certification with production prediction readiness blocked.
+
+Artifacts:
+
+- `docs/NBA_BASELINE_CERTIFICATION_V1.md`
+- `scripts/historical-completion-v1-c1-nba-baseline-certify.mjs`
+
+Validation:
+
+- NBA baseline certification validation passed 10/10
+- stored NBA rows remain classified as partial/trial rather than production-complete
+- canonical NBA results remain blocked at 0 rows
+- no NBA player props, fake odds, retrospective predictions or production activation were introduced
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0
