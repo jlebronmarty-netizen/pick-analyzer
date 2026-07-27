@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
+import { productStatusTone, type ProductStatus, type ProductStatusTone } from '@/config/product-status'
 
-type Tone = 'green' | 'blue' | 'yellow' | 'red' | 'gray'
+type Tone = ProductStatusTone
 
 const toneClass: Record<Tone, string> = {
   green: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100',
@@ -8,6 +9,10 @@ const toneClass: Record<Tone, string> = {
   yellow: 'border-amber-500/30 bg-amber-500/10 text-amber-100',
   red: 'border-rose-500/30 bg-rose-500/10 text-rose-100',
   gray: 'border-slate-700 bg-slate-900 text-slate-100',
+}
+
+export function ProductStatusPill({ status }: { status: ProductStatus }) {
+  return <ProductStatusBadge tone={productStatusTone(status)}>{status}</ProductStatusBadge>
 }
 
 export function ProductStatusBadge({ children, tone = 'gray' }: { children: ReactNode; tone?: Tone }) {

@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import Link from 'next/link'
 import { SportProvider } from '@/context/SportContext'
 import SportSelector from '@/components/dashboard/SportSelector'
 import { ProductStatusBadge } from '@/components/product/ProductStatus'
@@ -29,6 +30,7 @@ const productNavGroups = [
     label: 'Home',
     items: [
       { href: '/dashboard', label: 'Dashboard', icon: 'DB' },
+      { href: '/sports-center', label: 'Sports Center', icon: 'SC' },
       { href: '/ai-operations', label: 'AI Briefing', icon: 'AI' },
     ],
   },
@@ -156,7 +158,7 @@ export default function DashboardShell({
                   </p>
 
                   <h2 className="text-xl font-black text-white">
-                    Today's Betting Briefing
+                    Today&apos;s Betting Briefing
                   </h2>
                 </div>
 
@@ -181,12 +183,19 @@ export default function DashboardShell({
                     Performance
                   </a>
 
-                  <a
+                  <Link
+                    href="/sports-center"
+                    className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
+                  >
+                    Sports Center
+                  </Link>
+
+                  <Link
                     href="/player-projections"
                     className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
                   >
                     Player Projections
-                  </a>
+                  </Link>
 
                   <a
                     href="/ai-operations"

@@ -1,6 +1,13 @@
 # Project Status
 
-Last updated: 2026-07-27 16:54:00Z
+Last updated: 2026-07-27 18:30:00Z
+
+## 2026-07-27 Sports Center V1 Product Consistency
+
+- Sports Center V1 is locally implemented at `/sports-center` with detail pages for MLB, NBA, NFL, Soccer, BSN, NHL, Tennis and UFC. It exposes sport readiness, current product surfaces, hidden readiness routes, blockers, data freshness language, provider health language and settlement-pipeline boundaries without changing prediction, probability, confidence, quality, Learning Brain, scheduler or settlement logic.
+- Added the canonical product status vocabulary: Production, Certified, Foundation, Preview, Planning, Unavailable, Blocked, Pending and Deprecated. The Sports Center uses those statuses to avoid presenting foundation, preview, planning or blocked sports as certified product.
+- The root page no longer displays stale hardcoded sample picks and now redirects to the existing `/dashboard` product entry point. Dashboard navigation now exposes Sports Center under Home and as a top action link.
+- The phase remains read-only: provider calls, remote mutations, production mutations, SQL, imports, feature rebuilds, epoch activation, retrospective predictions and scheduler changes remain 0/not executed.
 
 ## 2026-07-27 Probability Picks V2
 
