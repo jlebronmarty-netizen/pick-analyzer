@@ -88,6 +88,8 @@ Phase C2 adds the NBA Result And Stat Completion Plan V1. It defines bounded pla
 
 Phase C3 adds the NBA Identity And Market Readiness V1 contract. It permits only exact identity evidence, blocks fuzzy/normalized persistence and keeps NBA props, alternate/live markets and recommendation logic out of scope.
 
+Phase D1 adds the NFL Baseline Certification V1. NFL is locally certified as empty/blocked for canonical data foundation purposes, with legacy prediction rows preserved but no production readiness claim.
+
 Phase B5 adds the MLB Market Data Foundation V2 readiness contract. It preserves existing current standard-market and genuine pitcher-outs prop evidence, blocks historical odds/open-close claims without entitlement and cost approval, and adds no EV, Kelly, Official Pick or recommendation behavior.
 
 ## Completed

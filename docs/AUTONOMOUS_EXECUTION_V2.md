@@ -314,3 +314,21 @@ Validation:
 - provider calls: 0
 - remote mutations: 0
 - production mutations: 0
+
+### Phase D1 - NFL Baseline Certification V1
+
+Status: completed locally as empty/blocked foundation certification.
+
+Artifacts:
+
+- `docs/NFL_BASELINE_CERTIFICATION_V1.md`
+- `scripts/historical-completion-v1-d1-nfl-baseline-certify.mjs`
+
+Validation:
+
+- NFL baseline certification validation passed 10/10
+- canonical NFL teams, players, events, results, stats, odds, provider identities and features remain 0 rows
+- 190 legacy prediction/settlement rows are preserved but do not certify production readiness
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0
