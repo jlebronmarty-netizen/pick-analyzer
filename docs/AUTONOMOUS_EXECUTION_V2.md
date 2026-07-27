@@ -242,3 +242,22 @@ Validation:
 - provider calls: 0
 - remote mutations: 0
 - production mutations: 0
+
+### Phase B6 - MLB Historical Foundation V3 Certification
+
+Status: completed locally as core/partial foundation certification with import blockers recorded.
+
+Artifacts:
+
+- `docs/MLB_HISTORICAL_FOUNDATION_V3_CERTIFICATION.md`
+- `scripts/historical-completion-v1-b6-mlb-foundation-certify.mjs`
+
+Validation:
+
+- foundation certification validation passed 9/9
+- MLB is certified as core/partial, not fully historically complete
+- result, stat, boxscore, starter, injury, historical odds and broader market blockers remain documented
+- temporal/as-of safety and no-retrospective-prediction boundaries remain preserved
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0

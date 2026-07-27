@@ -744,7 +744,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T04:05:00Z",
       "completedAt": "2026-07-27T04:30:00Z",
-      "commit": "pending_self_reference",
+      "commit": "c81a4467ede5d4f0d02cff74ecc2dabcd085cb10",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -1233,7 +1233,80 @@
       ],
       "nextPhase": "B6_MLB_FOUNDATION_CERTIFICATION_V3",
       "resumeInstructions": "Run node scripts/historical-completion-v1-b5-mlb-markets-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase B6.",
-      "continuationDecision": "continue_to_phase_B6_with_market_blockers_documented"
+      "continuationDecision": "continue_to_phase_B6_with_market_blockers_documented",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
+    },
+    {
+      "phaseId": "B6",
+      "phaseName": "MLB_HISTORICAL_FOUNDATION_V3_CERTIFICATION",
+      "status": "completed",
+      "startedAt": "2026-07-27T04:00:00Z",
+      "completedAt": "2026-07-27T04:06:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-b6-mlb-foundation-certify.mjs",
+        "status": "passed",
+        "checks": 9,
+        "passed": 9
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "core_partial_verdict_documented",
+          "no_full_completion_overclaim",
+          "result_gap_documented",
+          "stat_and_boxscore_gaps_documented",
+          "injury_gap_documented",
+          "market_blockers_documented",
+          "no_execution_boundary_documented",
+          "temporal_and_retrospective_safety_documented",
+          "certification_markers_present"
+        ],
+        "summary": {
+          "verdict": "CORE_PARTIAL_CERTIFIED_IMPORTS_REQUIRED",
+          "storedEvents": 4922,
+          "completedEvents": 4012,
+          "storedResults": 471,
+          "teamGameStats": 2926,
+          "playerStats": 47232,
+          "boxscores": 2926,
+          "starterLineupRows": 27,
+          "injuryRows": 0,
+          "historicalOddsCalls": 0,
+          "retrospectivePredictionsGenerated": 0
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "artifacts": [
+        "docs/MLB_HISTORICAL_FOUNDATION_V3_CERTIFICATION.md",
+        "scripts/historical-completion-v1-b6-mlb-foundation-certify.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [
+        "mlb_results_import_not_approved",
+        "mlb_full_stats_boxscores_import_not_approved",
+        "mlb_starter_lineup_history_import_not_approved",
+        "mlb_injury_source_not_available",
+        "historical_odds_entitlement_and_cost_not_approved",
+        "broader_player_props_not_certified"
+      ],
+      "nextPhase": "C1_NBA_BASELINE_CERTIFICATION_V1",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-b6-mlb-foundation-certify.mjs, npm.cmd run build, git diff --check, then continue to Phase C1.",
+      "continuationDecision": "continue_to_phase_C1_with_mlb_core_partial_certified",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
     }
   ],
   "certificationMarkers": [
@@ -1307,6 +1380,14 @@
     "MLB_STARTER_IDENTITY_V3_PASS",
     "NO_AMBIGUOUS_PLAYER_PERSISTENCE_PASS",
     "MLB_MARKET_DATA_FOUNDATION_V2_PASS",
-    "MLB_PROP_MARKET_READINESS_PASS"
+    "MLB_PROP_MARKET_READINESS_PASS",
+    "MLB_HISTORICAL_FOUNDATION_V3_CORE_PARTIAL_PASS",
+    "MLB_HISTORICAL_FOUNDATION_V3_NO_FULL_COMPLETION_OVERCLAIM_PASS",
+    "MLB_TEMPORAL_SAFETY_V3_PASS",
+    "MLB_IMPORT_BLOCKERS_RECORDED_PASS",
+    "NO_PROVIDER_CALL_B6_PASS",
+    "NO_REMOTE_MUTATION_B6_PASS",
+    "NO_HISTORICAL_ODDS_B6_PASS",
+    "NO_RETROSPECTIVE_PREDICTIONS_B6_PASS"
   ]
 }

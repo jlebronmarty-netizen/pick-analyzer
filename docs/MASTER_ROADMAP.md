@@ -78,6 +78,10 @@ Phase B3 adds the MLB Boxscore And Stat Completion V3 reconciliation contract. I
 
 Phase B4 adds the MLB Player And Starter Identity V3 contract. It preserves exact/deterministic-only persistence, blocks normalized-only and ambiguous player mappings, defines manual review queue shape and keeps starter identity pregame/source-timestamp gated.
 
+Phase B5 adds the MLB Market Data Foundation V2 contract. It documents standard current-market readiness, genuine stored pitcher-outs rows and storage lineage while keeping historical odds, opening/closing lines and broader player props blocked pending entitlement and approval.
+
+Phase B6 adds the MLB Historical Foundation V3 certification. MLB is locally certified as core/partial, not fully historically complete; result, stat, boxscore, starter, injury and historical market gaps remain explicit import blockers.
+
 Phase B5 adds the MLB Market Data Foundation V2 readiness contract. It preserves existing current standard-market and genuine pitcher-outs prop evidence, blocks historical odds/open-close claims without entitlement and cost approval, and adds no EV, Kelly, Official Pick or recommendation behavior.
 
 ## Completed

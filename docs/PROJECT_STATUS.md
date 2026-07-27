@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-27 03:49:00Z
+Last updated: 2026-07-27 04:06:00Z
 
 ## 2026-07-26 Historical Sports Data Foundation V2 Autonomous Run
 
@@ -38,6 +38,7 @@ Last updated: 2026-07-27 03:49:00Z
 - Phase B3 added `docs/MLB_BOXSCORE_STAT_COMPLETION_V3.md`, documenting team/player stat, boxscore, pitching, recorded-outs and identity reconciliation contracts. Stored MLB stat coverage remains useful but not full-season complete; approved imports are still required for full stat/boxscore completion. No provider calls, imports, feature rebuilds, mutations or retrospective predictions were executed.
 - Phase B4 added `docs/MLB_PLAYER_STARTER_IDENTITY_V3.md`, documenting deterministic-only identity rules across SportsDataIO, Retrosheet, The Odds API pitcher names, canonical players, starter assignments, pitcher projections and props. No ambiguous mappings were persisted and no provider calls or mutations were made.
 - Phase B5 added `docs/MLB_MARKET_DATA_FOUNDATION_V2.md`, documenting current MLB standard market readiness, 11 genuine stored pitcher-outs prop rows, storage lineage and hard blockers for historical odds, opening/closing lines and broader props. No provider calls, market sync, EV, Kelly, recommendations or mutations were executed.
+- Phase B6 added `docs/MLB_HISTORICAL_FOUNDATION_V3_CERTIFICATION.md`, certifying MLB as a core/partial historical foundation while explicitly blocking any full-completion claim until result, stat, boxscore, starter, injury and historical market imports are approved and completed. No provider calls, imports, SQL, feature rebuilds, retrospective predictions or mutations were executed.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1
 
