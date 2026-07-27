@@ -137,7 +137,9 @@ Validation:
 
 ### Phase B1 - MLB Season Coverage Plan V3
 
-Status: completed locally, pending commit.
+Status: completed locally.
+
+Commit: `56fe679d4a2896f40a87172a2115836c77b44dfc`
 
 Artifacts:
 
@@ -155,3 +157,23 @@ Validation:
 - remote mutations: 0
 - production mutations: 0
 - certification: `MLB_SEASON_PLAN_V3_PASS`
+
+### Phase B2 - MLB Event And Result Completion V3
+
+Status: completed locally with import blocker.
+
+Artifacts:
+
+- `docs/MLB_EVENT_RESULT_COMPLETION_V3.md`
+- `scripts/historical-completion-v1-b2-mlb-events-validate.mjs`
+
+Validation:
+
+- event/result validation passed 8/8
+- stored result coverage is documented as partial, not complete
+- doubleheader and reschedule safeguards documented
+- import idempotency contract documented
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0
+- blocker: production result import requires separate approval

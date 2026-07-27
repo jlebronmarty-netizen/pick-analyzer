@@ -72,6 +72,8 @@ Phase A3 adds `docs/SPORTS_DATA_SOURCE_REGISTRY_V2.md`, a source/provenance regi
 
 Phase B1 adds the MLB Season Coverage Plan V3 with exact previous/current/future target windows and bounded import manifests for event/results, stats/boxscores, starter/lineup context and current markets. All manifests remain plan-only and require future approval before provider calls or mutations.
 
+Phase B2 adds the MLB Event And Result Completion V3 reconciliation contract. It explicitly records that stored MLB results are partial and prepares deterministic event identity, doubleheader safety and result idempotency rules without executing imports or claiming full result completion.
+
 ## Completed
 
 ### Platform Certification
