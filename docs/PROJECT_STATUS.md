@@ -27,6 +27,7 @@ Last updated: 2026-07-26 23:20:00Z
 - Phase 17 added Epoch-Aware Performance And Learning V2 through `src/services/epoch-performance-learning-v2.service.ts` and `/api/data-foundation/epoch-performance`. Validation passed 12/12 with 0 provider calls and 0 remote mutations; active, archived and all-epoch reporting scopes are defined without Learning Brain weight changes, recalibration, model promotion or production scheduling.
 - Phase 18 added final local certification in `docs/HISTORICAL_SPORTS_DATA_FOUNDATION_V2_CERTIFICATION.md`. The run remains local-only with 0 provider calls, 0 remote mutations, no production SQL, no deployment, no retrospective predictions, no epoch activation and no certified platform tag change.
 - Push, production deployment, production SQL, production data mutation, historical odds, scheduled player-prop ingestion, Player Prop EV V2 and Portfolio Intelligence remain disallowed for this run.
+- Prediction Epoch Governance V2 Production Migration Review and Hardening is locally complete. The root migration remains unapplied, but now includes guarded additive schema, RLS, indexes and comments; new read-only precheck/postcheck SQL, guarded rollback SQL and a manual runbook were added. Classification: `MIGRATION_READY_FOR_MANUAL_APPLICATION` pending explicit approval.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1
 

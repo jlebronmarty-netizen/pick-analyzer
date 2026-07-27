@@ -58,6 +58,8 @@ Phase 17 epoch-aware performance and learning reporting is locally implemented a
 
 Phase 18 final local certification is documented in `docs/HISTORICAL_SPORTS_DATA_FOUNDATION_V2_CERTIFICATION.md`. The run is complete locally and remains blocked from production SQL, push, deployment and epoch activation until separate explicit approval.
 
+Prediction Epoch Governance V2 production migration review and hardening is locally complete. `supabase/migrations/202607270001_prediction_epoch_governance_v2.sql` remains unapplied, but has been hardened with RLS, guarded additive constraints, epoch indexes and no seed/backfill/activation behavior. Manual application is blocked until explicit approval and must follow `docs/PREDICTION_EPOCH_GOVERNANCE_V2_MIGRATION_RUNBOOK.md`.
+
 ## Completed
 
 ### Platform Certification
