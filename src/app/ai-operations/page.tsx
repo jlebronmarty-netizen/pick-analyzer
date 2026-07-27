@@ -1,5 +1,6 @@
 import DashboardSection from '@/components/dashboard/DashboardSection'
 import DashboardShell from '@/components/dashboard/DashboardShell'
+import { productDateTime } from '@/components/product/ProductStatus'
 import { getAiLearningLifecycle } from '@/services/ai-learning-lifecycle.service'
 
 function statusTone(status: string) {
@@ -39,8 +40,8 @@ function PanelCard({ panel }: { panel: any }) {
         ))}
       </dl>
       <div className="mt-4 space-y-1 text-xs text-slate-500">
-        <p>Last: {panel.lastUpdated || 'N/A'}</p>
-        <p>Next: {panel.nextRun || 'Waiting for next scheduler execution'}</p>
+        <p>Last Updated: {productDateTime(panel.lastUpdated, 'No stored update time')}</p>
+        <p>Next Scheduled: {panel.nextRun || 'Waiting for next scheduler execution'}</p>
         {panel.blocker ? <p className="text-amber-300">Reason: {panel.blocker}</p> : null}
       </div>
     </article>

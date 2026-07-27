@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { ProductStatusBadge, ProductStatusBanner, productDateTime } from '@/components/product/ProductStatus'
 
 type Projection = {
   projectionId: string
@@ -85,12 +86,24 @@ export default function MlbPlayerProjectionsPanel() {
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300">MLB Player Projection Engine</p>
           <h3 className="mt-2 text-xl font-black text-white">Player Projections</h3>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-            Informational player stat projections with ranges and probability buckets. No sportsbook comparison, EV or Official Picks.
+            Informational player stat projections with ranges and probability buckets. Projection Only. No sportsbook recommendation is produced here.
           </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <ProductStatusBadge tone="blue">Projection Only</ProductStatusBadge>
+            <ProductStatusBadge tone="gray">Data As Of {productDateTime(data?.generatedAt)}</ProductStatusBadge>
+          </div>
         </div>
         <a href="/player-projections" className="rounded-full border border-slate-700 bg-slate-950 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800">
           Open Page
         </a>
+      </div>
+
+      <div className="mt-5">
+        <ProductStatusBanner
+          title="No Recommendation"
+          detail="Player projections stay separate from sportsbook markets. When a current market does not overlap the active projection, the UI remains Projection Only."
+          tone="blue"
+        />
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -107,7 +120,7 @@ export default function MlbPlayerProjectionsPanel() {
       <div className="mt-5 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Top Blockers</p>
         <div className="mt-3 flex flex-wrap gap-2 text-xs text-amber-200">
-          {blockers.length ? blockers.map(([label, value]) => <span key={label} className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1">{label}: {value}</span>) : <span>No blockers reported.</span>}
+          {blockers.length ? blockers.map(([label, value]) => <span key={label} className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1">{label}: {value}</span>) : <span>No current blockers were reported by stored projection checks.</span>}
         </div>
       </div>
     </section>

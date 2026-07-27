@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-27 16:54:00Z
 
+## 2026-07-27 Product Navigation & Freshness Hardening V1
+
+- Product Navigation & Freshness Hardening V1 is locally implemented as a UX-only hardening phase. Dashboard navigation is now grouped into Home, Picks, Projections, Markets, Performance, Operations and Administration; Probability Picks, Performance, Player Projections and AI Operations now share clearer status, freshness and empty-state language.
+- Added shared product status helpers for badges, banners, sport readiness labels and local timestamp presentation. Probability Picks and Player Projections continue to label Projection Only / No Recommendation boundaries, and empty states now explain why qualified rows or market overlap are unavailable.
+- Provider calls, remote mutations, SQL application, imports, feature rebuilds, epoch activation, scheduler changes, prediction probabilities, confidence/quality calculations, thresholds and Learning Brain weights remain unchanged.
+
 ## 2026-07-27 Product Experience, Data Trust, And Live-State Readiness Audit V1
 
 - Stage 1 is complete locally. Added a bounded route inventory and smoke harness in `scripts/product-audit-v1-route-inventory.mjs`, plus `docs/PRODUCT_ROUTE_INVENTORY_V1.md`, `docs/product-route-inventory-v1.json` and `docs/product-audit-v1-ledger.json`.

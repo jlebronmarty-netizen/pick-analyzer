@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { ProductStatusBadge, ProductStatusBanner, productDateTime, sportReadinessLabel } from '@/components/product/ProductStatus'
 import type { ProbabilityParlay, ProbabilityParlayMode, ProbabilityParlayScope, ProbabilityPick, ProbabilityPickSection, ProbabilitySportEligibilitySummary } from '@/types/probability-picks'
 
 type PicksData = {
@@ -63,6 +64,7 @@ function dataStatusText(value: string) {
 }
 
 function PickCard({ pick }: { pick: ProbabilityPick }) {
+  const readiness = sportReadinessLabel(pick.sport)
   return (
     <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -72,8 +74,9 @@ function PickCard({ pick }: { pick: ProbabilityPick }) {
           <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-sky-200">Projection Only | No Betting Recommendation</p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs font-black uppercase">
+          <ProductStatusBadge tone={readiness.tone}>{readiness.label}</ProductStatusBadge>
           <span className={`rounded-full border px-3 py-1 ${eligibilityClass(pick.sportEligibility.eligibleForRanking)}`}>{labelize(pick.sportEligibility.status)}</span>
-          <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-slate-100">{dataStatusText(pick.dataStatus)}</span>
+          <ProductStatusBadge tone="blue">{dataStatusText(pick.dataStatus)}</ProductStatusBadge>
           <span className={`rounded-full border px-3 py-1 ${riskClass(pick.risk)}`}>{pick.risk} Risk</span>
           <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-slate-100">Score {Math.round(pick.score)}</span>
         </div>
@@ -114,7 +117,7 @@ function PickCard({ pick }: { pick: ProbabilityPick }) {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold uppercase text-slate-400">
-        <span>Generated {new Date(pick.generatedAt).toLocaleString()}</span>
+        <span>Generated {productDateTime(pick.generatedAt)}</span>
         <span>Version {pick.projectionVersion}</span>
         <span>Group {pick.correlationGroup}</span>
         <span>{pick.sportEligibility.engineCertification}</span>
@@ -222,9 +225,9 @@ export default function ProbabilityPicksClient() {
       <div className="mx-auto max-w-[1800px] px-4 py-6 md:px-8">
         <div className="flex flex-col gap-4 border-b border-slate-800 pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-sky-300">AI Operations</p>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-sky-300">Picks</p>
             <h1 className="mt-2 text-3xl font-black text-white md:text-4xl">Probability Picks</h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">Projection Only | No Betting Recommendation. Rankings use internal model probability, confidence, quality, freshness and correlation controls.</p>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">Projection Only | No Betting Recommendation. Rankings use stored model probability, confidence, quality, freshness and correlation controls.</p>
             <p className="mt-2 max-w-3xl text-xs font-bold uppercase tracking-[0.14em] text-emerald-200">Sport eligibility: MLB certified limited. Uncertified sports are excluded from rankings and reported as insufficient certification.</p>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center text-xs font-black uppercase md:min-w-[420px]">
@@ -232,6 +235,14 @@ export default function ProbabilityPicksClient() {
             <p className="rounded-lg border border-slate-800 bg-slate-900 p-3 text-slate-400">Parlays<span className="block text-xl text-white">{parlaysData?.summary.parlaysGenerated ?? 0}</span></p>
             <p className="rounded-lg border border-slate-800 bg-slate-900 p-3 text-slate-400">Calls<span className="block text-xl text-white">0</span></p>
           </div>
+        </div>
+
+        <div className="mt-5">
+          <ProductStatusBanner
+            title="Projection Only"
+            detail="This page ranks model outcomes for review. It does not attach sportsbook lines, calculate stakes, or turn a high-probability row into a betting recommendation."
+            tone="blue"
+          />
         </div>
 
         <div className="mt-5 flex flex-wrap items-end gap-3">
@@ -288,9 +299,9 @@ export default function ProbabilityPicksClient() {
             <section className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-black text-white">{section?.label ?? 'Projection Only'}</h2>
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{picksData?.generatedAt ? new Date(picksData.generatedAt).toLocaleString() : 'N/A'}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Generated {productDateTime(picksData?.generatedAt)}</p>
               </div>
-              {!section?.picks.length && <div className="rounded-lg border border-slate-800 bg-slate-900 p-6 text-sm text-slate-300">No qualifying projection-only picks match the current filters or certified sport eligibility. Registered but uncertified sports remain Insufficient Data until their engine and stored data are certified.</div>}
+              {!section?.picks.length && <div className="rounded-lg border border-slate-800 bg-slate-900 p-6 text-sm text-slate-300">No qualified picks satisfy today's probability filters. Why: either no eligible MLB row meets the selected thresholds or the sport is not certified for ranking.</div>}
               {section?.picks.map((pick) => <PickCard key={pick.id} pick={pick} />)}
             </section>
           </div>
@@ -310,7 +321,7 @@ export default function ProbabilityPicksClient() {
                 <option value="MULTI_SPORT">Multi-Sport</option>
               </select>
             </div>
-            {!parlaysData?.parlays.length && <div className="rounded-lg border border-slate-800 bg-slate-900 p-6 text-sm text-slate-300">No qualifying projection-only combinations match the current filters and correlation limits.</div>}
+            {!parlaysData?.parlays.length && <div className="rounded-lg border border-slate-800 bg-slate-900 p-6 text-sm text-slate-300">No projection-only parlay combinations satisfy the current filters, sport eligibility and correlation limits.</div>}
             {parlaysData?.parlays.map((parlay) => <ParlayCard key={parlay.id} parlay={parlay} />)}
           </section>
         )}

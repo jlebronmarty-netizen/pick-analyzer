@@ -3,6 +3,7 @@
 import { ReactNode } from 'react'
 import { SportProvider } from '@/context/SportContext'
 import SportSelector from '@/components/dashboard/SportSelector'
+import { ProductStatusBadge } from '@/components/product/ProductStatus'
 
 const navItems = [
   { id: 'overview', label: 'Overview', icon: '⌁' },
@@ -25,56 +26,60 @@ const navItems = [
 
 const productNavGroups = [
   {
-    label: 'Today',
+    label: 'Home',
     items: [
-      { id: 'today', label: 'Daily Briefing', icon: '01' },
       { href: '/dashboard', label: 'Dashboard', icon: 'DB' },
+      { href: '/ai-operations', label: 'AI Briefing', icon: 'AI' },
     ],
   },
   {
-    label: 'Games',
+    label: 'Picks',
     items: [
-      { href: '/game-intelligence', label: 'Game Intelligence', icon: 'GI' },
-      { href: '/projections', label: 'Projection Board', icon: 'PB' },
+      { href: '/probability-picks', label: 'Probability Picks', icon: 'PR', badge: 'LIMITED' },
+      { id: 'today', label: 'Current Board', icon: 'CB' },
+      { href: '/most-likely', label: 'Most Likely', icon: 'ML' },
+      { href: '/best-value', label: 'Best Value', icon: 'BV' },
     ],
   },
   {
-    label: 'Players',
+    label: 'Projections',
     items: [
+      { href: '/projections', label: 'Team Projections', icon: 'TP' },
       { href: '/player-projections', label: 'Player Projections', icon: 'PP' },
+      { href: '/game-intelligence', label: 'Game Intelligence', icon: 'GI' },
     ],
   },
   {
     label: 'Markets',
     items: [
-      { href: '/most-likely', label: 'Most Likely', icon: 'ML' },
-      { href: '/best-value', label: 'Best Value', icon: 'BV' },
       { href: '/betting-workbench', label: 'Betting Workbench', icon: 'BW' },
-      { href: '/ai-bet-finder', label: 'AI Bet Finder', icon: 'AI' },
-      { href: '/dashboard#advanced-details', label: 'Market Intelligence', icon: 'MI' },
+      { href: '/dashboard#advanced-details', label: 'Market Comparison', icon: 'MC' },
+      { href: '/arbitrage', label: 'Arbitrage', icon: 'AR', badge: 'BLOCKED' },
+      { href: '/ai-bet-finder', label: 'AI Bet Finder', icon: 'AF' },
     ],
   },
   {
     label: 'Performance',
     items: [
       { href: '/performance', label: 'Performance', icon: 'PF' },
+      { id: 'model-center', label: 'Model Health', icon: 'MH' },
     ],
   },
   {
-    label: 'AI Operations',
+    label: 'Operations',
     items: [
-      { href: '/probability-picks', label: 'Probability Picks', icon: 'PR' },
       { href: '/ai-operations', label: 'AI Operations', icon: 'AO' },
+      { id: 'data-operations', label: 'Data Foundation', icon: 'DF', badge: 'PENDING' },
       { href: '/mlb-operations', label: 'MLB Operations', icon: 'MO' },
+      { href: '/dashboard#advanced-details', label: 'Providers', icon: 'PV' },
     ],
   },
   {
-    label: 'Advanced',
+    label: 'Administration',
     items: [
-      { id: 'overview', label: 'Advanced Overview', icon: 'AV' },
-      { id: 'model-lab', label: 'Model Center', icon: 'MC' },
-      { id: 'data-operations', label: 'Data Operations', icon: 'DO' },
-      { id: 'advanced', label: 'Administration', icon: 'AD' },
+      { id: 'advanced', label: 'Validation', icon: 'VA' },
+      { href: '/dashboard#advanced-details', label: 'Governance', icon: 'GV' },
+      { href: '/dashboard#advanced-details', label: 'Diagnostics', icon: 'DX' },
     ],
   },
 ]
@@ -120,30 +125,25 @@ export default function DashboardShell({
                           {item.icon}
                         </span>
 
-                        {item.label}
+                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                        {'badge' in item && item.badge ? (
+                          <ProductStatusBadge tone={item.badge === 'BLOCKED' || item.badge === 'PENDING' ? 'yellow' : 'green'}>
+                            {item.badge}
+                          </ProductStatusBadge>
+                        ) : null}
                       </a>
                     ))}
                   </div>
                 </div>
               ))}
-              <div className="pt-4">
-                <p className="px-4 text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
-                  Administration
-                </p>
-                <div className="mt-2 space-y-2">
-                  <a href="/arbitrage" className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-amber-300 group-hover:bg-amber-500/15">AR</span>
-                    Arbitrage Diagnostics
-                  </a>
-                </div>
-              </div>
             </nav>
 
             <div className="fixed bottom-6 w-[224px] rounded-lg border border-slate-800 bg-slate-900/95 p-4">
               <p className="text-xs text-slate-500">System</p>
-              <p className="mt-1 text-sm font-bold text-emerald-300">
-                MLB board active
-              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <ProductStatusBadge tone="green">MLB Limited</ProductStatusBadge>
+                <ProductStatusBadge tone="blue">Stored Data</ProductStatusBadge>
+              </div>
             </div>
           </aside>
 
@@ -163,13 +163,16 @@ export default function DashboardShell({
                 <div className="flex min-w-0 items-center gap-3 overflow-x-auto">
                   <SportSelector />
 
-                  <span className="hidden rounded-full border border-emerald-500/30 bg-emerald-950/20 px-4 py-2 text-xs font-bold text-emerald-200 md:inline-flex">
-                    MLB ACTIVE
-                  </span>
+                  <span className="hidden md:inline-flex"><ProductStatusBadge tone="green">MLB Limited</ProductStatusBadge></span>
 
-                  <span className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 lg:inline-flex">
-                    OFFICIAL PICKS ONLY
-                  </span>
+                  <span className="hidden lg:inline-flex"><ProductStatusBadge tone="blue">Official Picks Only</ProductStatusBadge></span>
+
+                  <a
+                    href="/probability-picks"
+                    className="hidden rounded-full border border-emerald-500/30 bg-emerald-950/20 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-900/30 lg:inline-flex"
+                  >
+                    Probability Picks
+                  </a>
 
                   <a
                     href="/performance"
@@ -179,45 +182,17 @@ export default function DashboardShell({
                   </a>
 
                   <a
-                    href="/betting-workbench"
-                    className="hidden rounded-full border border-emerald-500/30 bg-emerald-950/20 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-900/30 lg:inline-flex"
-                  >
-                    Betting Workbench
-                  </a>
-
-                  <a
-                    href="/most-likely"
+                    href="/player-projections"
                     className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
                   >
-                    Most Likely
+                    Player Projections
                   </a>
 
                   <a
-                    href="/best-value"
+                    href="/ai-operations"
                     className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
                   >
-                    Best Value
-                  </a>
-
-                  <a
-                    href="/ai-bet-finder"
-                    className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
-                  >
-                    AI Bet Finder
-                  </a>
-
-                  <a
-                    href="/arbitrage"
-                    className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 lg:inline-flex"
-                  >
-                    Arbitrage
-                  </a>
-
-                  <a
-                    href="/model"
-                    className="hidden rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-xs font-bold text-slate-200 hover:bg-slate-800 md:inline-flex"
-                  >
-                    AI Model Center
+                    AI Operations
                   </a>
                 </div>
               </div>
