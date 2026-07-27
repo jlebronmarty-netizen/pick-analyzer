@@ -162,6 +162,8 @@ Validation:
 
 Status: completed locally with import blocker.
 
+Commit: `0e5e742345ca57f65fe5d08295b068dbfd0217fd`
+
 Artifacts:
 
 - `docs/MLB_EVENT_RESULT_COMPLETION_V3.md`
@@ -177,3 +179,23 @@ Validation:
 - remote mutations: 0
 - production mutations: 0
 - blocker: production result import requires separate approval
+
+### Phase B3 - MLB Boxscore And Stat Completion V3
+
+Status: completed locally with import blocker.
+
+Artifacts:
+
+- `docs/MLB_BOXSCORE_STAT_COMPLETION_V3.md`
+- `scripts/historical-completion-v1-b3-mlb-stats-validate.mjs`
+
+Validation:
+
+- stat/boxscore validation passed 8/8
+- team/player stat reconciliation rules documented
+- recorded-outs and innings-derived conflict quarantine preserved
+- pitch count remains optional/unavailable when source data lacks it
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0
+- blocker: production stat import requires separate approval

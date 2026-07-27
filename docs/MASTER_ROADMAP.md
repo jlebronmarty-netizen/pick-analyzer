@@ -74,6 +74,8 @@ Phase B1 adds the MLB Season Coverage Plan V3 with exact previous/current/future
 
 Phase B2 adds the MLB Event And Result Completion V3 reconciliation contract. It explicitly records that stored MLB results are partial and prepares deterministic event identity, doubleheader safety and result idempotency rules without executing imports or claiming full result completion.
 
+Phase B3 adds the MLB Boxscore And Stat Completion V3 reconciliation contract. It preserves recorded-outs unit safety, player identity guards, duplicate/natural-key collision handling and as-of feature boundaries while keeping full stat import execution blocked pending approval.
+
 ## Completed
 
 ### Platform Certification
