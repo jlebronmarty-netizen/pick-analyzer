@@ -1511,7 +1511,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T04:43:00Z",
       "completedAt": "2026-07-27T04:49:00Z",
-      "commit": "pending_self_reference",
+      "commit": "eba81a3099da4820d3c90ae5a9648286cc2d3ae9",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -1635,6 +1635,68 @@
         "command": "git diff --check",
         "status": "passed"
       }
+    },
+    {
+      "phaseId": "E1",
+      "phaseName": "NHL_BASELINE_AND_COMPLETION_PLAN_V1",
+      "status": "completed",
+      "startedAt": "2026-07-27T05:08:00Z",
+      "completedAt": "2026-07-27T05:14:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-e1-nhl-baseline-plan-validate.mjs",
+        "status": "passed",
+        "checks": 10,
+        "passed": 10
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "empty_blocked_status_documented",
+          "core_zeros_documented",
+          "results_stats_market_zeros_documented",
+          "goalie_context_documented",
+          "future_manifests_documented",
+          "cross_year_season_governance_documented",
+          "goalie_temporal_safety_documented",
+          "activation_blocked",
+          "zero_execution_accounting_documented",
+          "certification_markers_present"
+        ],
+        "summary": {
+          "canonicalRows": 0,
+          "importsExecuted": 0,
+          "providerCallsMade": 0,
+          "retrospectivePredictionsGenerated": 0
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "artifacts": [
+        "docs/NHL_BASELINE_AND_COMPLETION_PLAN_V1.md",
+        "scripts/historical-completion-v1-e1-nhl-baseline-plan-validate.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [
+        "nhl_canonical_foundation_empty",
+        "nhl_provider_source_approval_required",
+        "nhl_mutation_approval_required",
+        "nhl_goalie_starter_source_required",
+        "nhl_production_activation_blocked"
+      ],
+      "nextPhase": "F1_SOCCER_COMPETITION_COMPLETION_PLAN_V1",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-e1-nhl-baseline-plan-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase F1.",
+      "continuationDecision": "continue_to_phase_F1_with_nhl_empty_foundation_certified",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
     }
   ],
   "certificationMarkers": [
@@ -1748,6 +1810,13 @@
     "NFL_SEASON_YEAR_GOVERNANCE_PASS",
     "NFL_NO_RETROSPECTIVE_PREDICTIONS_D2_PASS",
     "NO_PROVIDER_CALL_D2_PASS",
-    "NO_REMOTE_MUTATION_D2_PASS"
+    "NO_REMOTE_MUTATION_D2_PASS",
+    "NHL_BASELINE_AND_COMPLETION_PLAN_V1_PASS",
+    "NHL_EMPTY_FOUNDATION_NO_PRODUCTION_OVERCLAIM_PASS",
+    "NHL_GOALIE_TEMPORAL_SAFETY_PASS",
+    "NHL_IMPORT_MANIFESTS_PLAN_ONLY_PASS",
+    "NO_PROVIDER_CALL_E1_PASS",
+    "NO_REMOTE_MUTATION_E1_PASS",
+    "NO_RETROSPECTIVE_PREDICTIONS_E1_PASS"
   ]
 }

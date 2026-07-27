@@ -92,6 +92,8 @@ Phase D1 adds the NFL Baseline Certification V1. NFL is locally certified as emp
 
 Phase D2 adds the NFL Completion Plan V1. It defines bounded future import manifests and post-import gates while keeping provider calls, imports, mutations, props, recommendation logic and production NFL activation blocked.
 
+Phase E1 adds the NHL Baseline And Completion Plan V1. NHL is locally certified as empty/blocked with future plan-only manifests, cross-year season governance and goalie/starter temporal safeguards.
+
 Phase B5 adds the MLB Market Data Foundation V2 readiness contract. It preserves existing current standard-market and genuine pitcher-outs prop evidence, blocks historical odds/open-close claims without entitlement and cost approval, and adds no EV, Kelly, Official Pick or recommendation behavior.
 
 ## Completed

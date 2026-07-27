@@ -348,3 +348,19 @@ Validation:
 - future manifests for identity, schedule/results, stats/boxscores, injuries/depth charts and markets are plan-only
 - NFL season-year and cross-calendar postseason governance are preserved
 - no provider calls, imports, mutations, retrospective predictions or production activation were executed
+
+### Phase E1 - NHL Baseline And Completion Plan V1
+
+Status: completed locally as empty/blocked baseline certification plus plan-only import contract.
+
+Artifacts:
+
+- `docs/NHL_BASELINE_AND_COMPLETION_PLAN_V1.md`
+- `scripts/historical-completion-v1-e1-nhl-baseline-plan-validate.mjs`
+
+Validation:
+
+- NHL baseline/completion plan validation passed 10/10
+- all canonical NHL foundation datasets remain 0 rows
+- cross-year season governance and goalie/starter temporal safety are documented
+- no provider calls, imports, mutations, retrospective predictions or production activation were executed
