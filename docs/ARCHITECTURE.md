@@ -66,6 +66,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/tennis-ufc-data-readiness-v2.service.ts` and `/api/data-foundation/tennis-ufc` provide read-only event-oriented readiness for Tennis and UFC. Tennis requires tour, tournament, surface, round, player, match, result, ranking and odds readiness; UFC requires event, fighter, bout, division, weigh-in, method/round result and odds readiness. Neither sport is forced into a team-season model.
 
+## Global Data Quality And Reconciliation V2
+
+`src/services/data-foundation-quality-v2.service.ts` powers `/api/data-foundation/quality`, `/api/data-foundation/reconciliation` and `/api/data-foundation/readiness`. The layer composes stored coverage into completeness, freshness, duplicate, orphan, unresolved identity, missing-result, missing-stat and readiness reports. Reconciliation is report-only and never persists identity changes, deletes rows or calls providers.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

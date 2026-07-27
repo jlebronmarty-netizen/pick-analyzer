@@ -96,6 +96,14 @@ Decision: Add `src/services/tennis-ufc-data-readiness-v2.service.ts`, `/api/data
 
 Consequences: Tennis and UFC readiness now reports missing event, participant, result/stat, odds and provider-mapping domains explicitly. No provider calls, mutations, team-season forcing, production picks or retrospective predictions were introduced.
 
+## 2026-07-27 - Add Global Data Quality And Reconciliation V2
+
+Context: The historical foundation run needs one cross-sport read-only quality layer before prediction epoch governance.
+
+Decision: Add `src/services/data-foundation-quality-v2.service.ts` plus `/api/data-foundation/quality`, `/api/data-foundation/reconciliation` and `/api/data-foundation/readiness`.
+
+Consequences: The new layer reports completeness, duplicate indicators, orphan indicators, unresolved identities, missing results, missing stats and readiness without executing provider calls or mutations. Reconciliation output is a report and never an automatic write plan.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

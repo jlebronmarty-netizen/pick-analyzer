@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T02:20:00Z"
+    "updatedAt": "2026-07-27T02:40:00Z"
   },
   "phases": [
     {
@@ -456,7 +456,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T01:55:00Z",
       "completedAt": "2026-07-27T02:20:00Z",
-      "commit": "pending_self_reference",
+      "commit": "c439faf722a92a4ac0891ca565866b4b07ff32d3",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -500,6 +500,43 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_12"
+    },
+    {
+      "phaseId": 12,
+      "phaseName": "GLOBAL_DATA_QUALITY_AND_RECONCILIATION_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T02:20:00Z",
+      "completedAt": "2026-07-27T02:40:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "data_foundation_quality_validation_8_of_8",
+          "quality_read_only",
+          "reconciliation_read_only",
+          "readiness_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "reconciliation_has_no_mutation_plan"
+        ],
+        "summary": {
+          "sportsAudited": 8,
+          "totalRowsObserved": 0,
+          "reconciliationItems": 8,
+          "importReady": 0,
+          "predictionReady": 0
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_13"
     }
   ],
   "certificationMarkers": [
@@ -531,6 +568,9 @@
     "BSN_CSV_IMPORT_READINESS_PASS",
     "BSN_IDENTITY_GOVERNANCE_PASS",
     "TENNIS_DATA_READINESS_V2_PASS",
-    "UFC_DATA_READINESS_V2_PASS"
+    "UFC_DATA_READINESS_V2_PASS",
+    "GLOBAL_DATA_QUALITY_V2_PASS",
+    "GLOBAL_RECONCILIATION_V2_PASS",
+    "DATA_READINESS_REPORT_PASS"
   ]
 }

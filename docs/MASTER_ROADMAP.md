@@ -44,6 +44,8 @@ Phase 10 BSN historical foundation is locally implemented at `/api/data-foundati
 
 Phase 11 Tennis and UFC data readiness is locally implemented at `/api/data-foundation/tennis-ufc`. It treats both sports as event-oriented, refuses team-season schema forcing and keeps production picks blocked until certified engines and sufficient stored data exist.
 
+Phase 12 global data quality and reconciliation is locally implemented at `/api/data-foundation/quality`, `/api/data-foundation/reconciliation` and `/api/data-foundation/readiness`. These APIs are read-only, report reconciliation items without mutation plans and keep provider calls at zero.
+
 ## Completed
 
 ### Platform Certification
