@@ -58,6 +58,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/soccer-historical-foundation-v2.service.ts` and `/api/data-foundation/soccer` provide a read-only competition readiness registry. Soccer is never treated as one global league; each competition must prove timezone, season windows, fixtures, results, half scores, standings, stats, lineup/injury availability, odds, knockout-stage, extra-time, penalties and aggregate-scoring rules before production use.
 
+## BSN Historical Foundation V2
+
+`src/services/bsn-historical-foundation-v2.service.ts` and `/api/data-foundation/bsn` provide a read-only custom-league foundation contract. BSN uses deterministic CSV/manual import contracts, source provenance requirements, idempotency keys and identity-governance blockers until a permissioned feed or operator-owned source file is approved. Missing BSN data remains explicit null/blocked state.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

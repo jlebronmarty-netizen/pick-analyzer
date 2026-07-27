@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T01:35:00Z"
+    "updatedAt": "2026-07-27T01:55:00Z"
   },
   "phases": [
     {
@@ -353,7 +353,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T01:15:00Z",
       "completedAt": "2026-07-27T01:35:00Z",
-      "commit": "pending_self_reference",
+      "commit": "d24b2a627dde2ea341265fea890cbc71ff0957c6",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -392,6 +392,63 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_10"
+    },
+    {
+      "phaseId": 10,
+      "phaseName": "BSN_HISTORICAL_FOUNDATION_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T01:35:00Z",
+      "completedAt": "2026-07-27T01:55:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "bsn_foundation_validation_10_of_10",
+          "stored_data_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "csv_import_readiness_certified",
+          "identity_governance_certified",
+          "no_fabricated_bsn_data",
+          "no_retrospective_predictions_generated"
+        ],
+        "summary": {
+          "teams": 0,
+          "events": 0,
+          "players": 0,
+          "standings": 0,
+          "gameStats": 0,
+          "playerStats": 0,
+          "oddsRows": 0,
+          "predictionRows": 0,
+          "legacyBsnGames": 0,
+          "legacyBsnResults": 0,
+          "csvContracts": 8,
+          "blockers": [
+            "bsn_schedule_missing",
+            "bsn_results_missing",
+            "bsn_teams_missing",
+            "bsn_players_missing",
+            "bsn_standings_missing",
+            "bsn_team_stats_missing",
+            "bsn_player_stats_missing",
+            "bsn_boxscores_missing",
+            "bsn_odds_missing",
+            "approved_bsn_source_ingestion_required",
+            "permissioned_bsn_feed_or_operator_csv_required"
+          ]
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_11"
     }
   ],
   "certificationMarkers": [
@@ -418,6 +475,9 @@
     "NHL_DATA_READINESS_PASS",
     "SOCCER_COMPETITION_FOUNDATION_V2_PASS",
     "SOCCER_SEASON_IDENTITY_PASS",
-    "SOCCER_NO_GLOBAL_COVERAGE_OVERCLAIM_PASS"
+    "SOCCER_NO_GLOBAL_COVERAGE_OVERCLAIM_PASS",
+    "BSN_FOUNDATION_CONTRACT_V2_PASS",
+    "BSN_CSV_IMPORT_READINESS_PASS",
+    "BSN_IDENTITY_GOVERNANCE_PASS"
   ]
 }

@@ -80,6 +80,14 @@ Decision: Add `src/services/soccer-historical-foundation-v2.service.ts`, `/api/d
 
 Consequences: The current `soccer_generic` governance entry remains a placeholder and not production coverage. The audit makes zero provider calls, performs zero mutations, generates no retrospective predictions and explicitly blocks global soccer overclaiming.
 
+## 2026-07-27 - Add BSN Historical Foundation V2 CSV Contract
+
+Context: BSN is a custom league adapter and cannot rely on unapproved scraping or assumed provider coverage. Historical foundation work needs deterministic IDs, source provenance and an import path that remains blocked until an approved source exists.
+
+Decision: Add `src/services/bsn-historical-foundation-v2.service.ts`, `/api/data-foundation/bsn` and `docs/BSN_HISTORICAL_FOUNDATION_V2.md` as a read-only foundation and CSV/manual import readiness contract.
+
+Consequences: BSN readiness is documented with 8 accepted CSV contract shapes, idempotency requirements and identity governance. Stored BSN coverage remains honestly empty in this environment, and no unapproved source retrieval, provider call, mutation, fabricated data or retrospective prediction was introduced. A few existing multi-sport type imports were converted to `import type` so local TS validation can import the BSN foundation without runtime type-export errors.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

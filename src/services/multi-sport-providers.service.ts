@@ -1,5 +1,5 @@
-import { SportKey } from '@/config/sports.config'
-import { SportsProvider } from '@/types/multi-sport'
+import type { SportKey } from '@/config/sports.config'
+import type { SportsProvider } from '@/types/multi-sport'
 
 function hasEnv(name: string) {
   return Boolean(process.env[name])

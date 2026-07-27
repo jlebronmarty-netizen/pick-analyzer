@@ -1,6 +1,6 @@
-import { SportKey } from '@/config/sports.config'
 import { getFeatureDefinitions } from '@/services/feature-store-core.service'
-import { MarketKey } from '@/types/multi-sport'
+import type { SportKey } from '@/config/sports.config'
+import type { MarketKey } from '@/types/multi-sport'
 
 type FeatureSetStatus = 'ready' | 'partial' | 'unsupported'
 

@@ -40,6 +40,8 @@ Phase 8 NHL historical foundation is locally implemented at `/api/data-foundatio
 
 Phase 9 Soccer historical foundation is locally implemented at `/api/data-foundation/soccer`. It adds a competition readiness registry and preserves the explicit rule that Soccer is competition-specific; the current `soccer_generic` placeholder is migration readiness, not global production coverage.
 
+Phase 10 BSN historical foundation is locally implemented at `/api/data-foundation/bsn`. It preserves BSN as a custom-league adapter, exposes deterministic CSV/manual import contracts, requires approved source provenance and reports current stored BSN coverage as empty rather than fabricated.
+
 ## Completed
 
 ### Platform Certification

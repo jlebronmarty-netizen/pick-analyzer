@@ -1,5 +1,5 @@
-import { SportKey } from '@/config/sports.config'
-import { MarketKey, NormalizedMarket } from '@/types/multi-sport'
+import type { SportKey } from '@/config/sports.config'
+import type { MarketKey, NormalizedMarket } from '@/types/multi-sport'
 
 export const MULTI_SPORT_MARKETS: NormalizedMarket[] = [
   {

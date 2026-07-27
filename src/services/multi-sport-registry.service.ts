@@ -2,10 +2,10 @@ import {
   getSportDefinition,
   getSupportedSport,
   SPORTS,
-  SportKey,
 } from '@/config/sports.config'
 import { getMarketsForSport } from '@/services/multi-sport-markets.service'
-import { NormalizedLeague, NormalizedSport } from '@/types/multi-sport'
+import type { SportKey } from '@/config/sports.config'
+import type { NormalizedLeague, NormalizedSport } from '@/types/multi-sport'
 
 export const MULTI_SPORT_LEAGUES: NormalizedLeague[] = [
   {

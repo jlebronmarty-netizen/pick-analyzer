@@ -1,7 +1,7 @@
 ﻿import 'server-only'
 
-import { SportKey } from '@/config/sports.config'
-import { MarketKey } from '@/types/multi-sport'
+import type { SportKey } from '@/config/sports.config'
+import type { MarketKey } from '@/types/multi-sport'
 import {
   OFFICIAL_BSN_HOMEPAGE_CONNECTOR_ID,
   OFFICIAL_BSN_HOMEPAGE_TTL_SECONDS,
