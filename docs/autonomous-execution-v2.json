@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T02:35:00Z"
+    "updatedAt": "2026-07-27T02:40:00Z"
   },
   "phases": [
     {
@@ -790,7 +790,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T02:20:00Z",
       "completedAt": "2026-07-27T02:27:13Z",
-      "commit": "pending_self_reference",
+      "commit": "64f6030857c54768713f0f5631570a9101106798",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed",
@@ -843,6 +843,65 @@
       "nextPhase": "A2_DATA_COMPLETION_MATRIX_V1",
       "resumeInstructions": "Run node scripts/historical-completion-v1-a1-baseline.mjs, npm.cmd run build, git diff --check, then continue to Phase A2.",
       "continuationDecision": "continue_to_phase_A2",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
+    },
+    {
+      "phaseId": "A2",
+      "phaseName": "DATA_COMPLETION_MATRIX_V1",
+      "status": "completed",
+      "startedAt": "2026-07-27T02:28:00Z",
+      "completedAt": "2026-07-27T02:31:15Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed",
+        "staticPages": 368
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-a2-matrix.mjs",
+        "status": "passed",
+        "rows": 176
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "matrix_created_for_8_sports",
+          "matrix_created_for_176_sport_dataset_rows",
+          "classification_counts_present",
+          "expected_rows_not_fabricated_when_unknown",
+          "provider_calls_zero",
+          "remote_mutations_zero"
+        ],
+        "summary": {
+          "rows": 176,
+          "classificationCounts": {
+            "COMPLETE": 16,
+            "PARTIAL": 36,
+            "EMPTY": 54,
+            "PROVIDER_BLOCKED": 25,
+            "ENTITLEMENT_BLOCKED": 15,
+            "READY_FOR_IMPORT": 21,
+            "MANUAL_IMPORT_REQUIRED": 3,
+            "NOT_APPLICABLE": 6
+          }
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "artifacts": [
+        "docs/data-completion-matrix-v1.json",
+        "scripts/historical-completion-v1-a2-matrix.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [],
+      "nextPhase": "A3_SOURCE_AND_PROVENANCE_REGISTRY_V2",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-a2-matrix.mjs, npm.cmd run build, git diff --check, then continue to Phase A3.",
+      "continuationDecision": "continue_to_phase_A3",
       "diffCheck": {
         "command": "git diff --check",
         "status": "passed"
@@ -907,6 +966,7 @@
     "NO_RETROSPECTIVE_PREDICTIONS_FINAL_PASS",
     "NO_CERTIFIED_PLATFORM_TAG_CHANGE_PASS",
     "GLOBAL_COVERAGE_BASELINE_V3_PASS",
-    "GLOBAL_STORED_DATA_AUDIT_PASS"
+    "GLOBAL_STORED_DATA_AUDIT_PASS",
+    "DATA_COMPLETION_MATRIX_V1_PASS"
   ]
 }

@@ -66,6 +66,8 @@ Prediction Epoch Governance Seeding V1 is locally prepared as Gate 2. The seed a
 
 Historical Sports Data Completion Program V1 is now in local autonomous execution. Phase A1 refreshed the global stored-data baseline across MLB, NBA, NFL, NHL, Soccer, BSN, Tennis and UFC with zero provider calls and zero mutations. The baseline is stored in `docs/HISTORICAL_DATA_COMPLETION_BASELINE_V3.md` and will feed the completion matrix and source registry phases.
 
+Phase A2 adds `docs/data-completion-matrix-v1.json`, a machine-readable matrix across 8 sports and 22 datasets per sport. It preserves unknown expected row counts as `null`, separates provider and entitlement blockers, and marks manual-import candidates without executing imports.
+
 ## Completed
 
 ### Platform Certification
