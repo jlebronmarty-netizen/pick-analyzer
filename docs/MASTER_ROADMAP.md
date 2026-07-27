@@ -84,6 +84,8 @@ Phase B6 adds the MLB Historical Foundation V3 certification. MLB is locally cer
 
 Phase C1 adds the NBA Baseline Certification V1. NBA is locally certified only as a partial/trial stored-data baseline with canonical results still empty and production prediction readiness blocked.
 
+Phase C2 adds the NBA Result And Stat Completion Plan V1. It defines bounded plan-only manifests and post-import gates while keeping provider calls, imports, mutations and production NBA activation blocked.
+
 Phase B5 adds the MLB Market Data Foundation V2 readiness contract. It preserves existing current standard-market and genuine pitcher-outs prop evidence, blocks historical odds/open-close claims without entitlement and cost approval, and adds no EV, Kelly, Official Pick or recommendation behavior.
 
 ## Completed
