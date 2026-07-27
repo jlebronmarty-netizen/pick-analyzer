@@ -42,6 +42,8 @@ Phase 9 Soccer historical foundation is locally implemented at `/api/data-founda
 
 Phase 10 BSN historical foundation is locally implemented at `/api/data-foundation/bsn`. It preserves BSN as a custom-league adapter, exposes deterministic CSV/manual import contracts, requires approved source provenance and reports current stored BSN coverage as empty rather than fabricated.
 
+Phase 11 Tennis and UFC data readiness is locally implemented at `/api/data-foundation/tennis-ufc`. It treats both sports as event-oriented, refuses team-season schema forcing and keeps production picks blocked until certified engines and sufficient stored data exist.
+
 ## Completed
 
 ### Platform Certification

@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T01:55:00Z"
+    "updatedAt": "2026-07-27T02:20:00Z"
   },
   "phases": [
     {
@@ -399,7 +399,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T01:35:00Z",
       "completedAt": "2026-07-27T01:55:00Z",
-      "commit": "pending_self_reference",
+      "commit": "72d16500323bf8133d9ac4274d753c62667598a3",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -449,6 +449,57 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_11"
+    },
+    {
+      "phaseId": 11,
+      "phaseName": "TENNIS_AND_UFC_DATA_READINESS_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T01:55:00Z",
+      "completedAt": "2026-07-27T02:20:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "tennis_ufc_readiness_validation_8_of_8",
+          "stored_data_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "event_driven_contracts",
+          "no_team_season_forcing",
+          "no_production_picks_generated",
+          "no_retrospective_predictions_generated"
+        ],
+        "summary": {
+          "sportsAudited": 2,
+          "productionPicksGenerated": 0,
+          "tennisEvents": 0,
+          "ufcEvents": 0,
+          "tennisOddsRows": 0,
+          "ufcOddsRows": 0,
+          "blockers": [
+            "TENNIS_EVENT_COVERAGE_EMPTY",
+            "TENNIS_PARTICIPANT_COVERAGE_EMPTY",
+            "TENNIS_RESULT_OR_STATS_COVERAGE_EMPTY",
+            "TENNIS_ODDS_COVERAGE_EMPTY",
+            "TENNIS_PROVIDER_MAPPING_EMPTY",
+            "UFC_EVENT_COVERAGE_EMPTY",
+            "UFC_PARTICIPANT_COVERAGE_EMPTY",
+            "UFC_RESULT_OR_STATS_COVERAGE_EMPTY",
+            "UFC_ODDS_COVERAGE_EMPTY",
+            "UFC_PROVIDER_MAPPING_EMPTY"
+          ]
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_12"
     }
   ],
   "certificationMarkers": [
@@ -478,6 +529,8 @@
     "SOCCER_NO_GLOBAL_COVERAGE_OVERCLAIM_PASS",
     "BSN_FOUNDATION_CONTRACT_V2_PASS",
     "BSN_CSV_IMPORT_READINESS_PASS",
-    "BSN_IDENTITY_GOVERNANCE_PASS"
+    "BSN_IDENTITY_GOVERNANCE_PASS",
+    "TENNIS_DATA_READINESS_V2_PASS",
+    "UFC_DATA_READINESS_V2_PASS"
   ]
 }

@@ -62,6 +62,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/bsn-historical-foundation-v2.service.ts` and `/api/data-foundation/bsn` provide a read-only custom-league foundation contract. BSN uses deterministic CSV/manual import contracts, source provenance requirements, idempotency keys and identity-governance blockers until a permissioned feed or operator-owned source file is approved. Missing BSN data remains explicit null/blocked state.
 
+## Tennis And UFC Data Readiness V2
+
+`src/services/tennis-ufc-data-readiness-v2.service.ts` and `/api/data-foundation/tennis-ufc` provide read-only event-oriented readiness for Tennis and UFC. Tennis requires tour, tournament, surface, round, player, match, result, ranking and odds readiness; UFC requires event, fighter, bout, division, weigh-in, method/round result and odds readiness. Neither sport is forced into a team-season model.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

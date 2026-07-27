@@ -88,6 +88,14 @@ Decision: Add `src/services/bsn-historical-foundation-v2.service.ts`, `/api/data
 
 Consequences: BSN readiness is documented with 8 accepted CSV contract shapes, idempotency requirements and identity governance. Stored BSN coverage remains honestly empty in this environment, and no unapproved source retrieval, provider call, mutation, fabricated data or retrospective prediction was introduced. A few existing multi-sport type imports were converted to `import type` so local TS validation can import the BSN foundation without runtime type-export errors.
 
+## 2026-07-27 - Add Tennis And UFC Event-Oriented Readiness V2
+
+Context: Tennis and UFC are event-oriented sports and must not be forced into team-season storage or prediction assumptions.
+
+Decision: Add `src/services/tennis-ufc-data-readiness-v2.service.ts`, `/api/data-foundation/tennis-ufc` and `docs/TENNIS_UFC_DATA_READINESS_V2.md` as a combined read-only readiness contract.
+
+Consequences: Tennis and UFC readiness now reports missing event, participant, result/stat, odds and provider-mapping domains explicitly. No provider calls, mutations, team-season forcing, production picks or retrospective predictions were introduced.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.
