@@ -1,21 +1,21 @@
 {
   "run": {
-    "name": "HISTORICAL_SPORTS_DATA_FOUNDATION_V2_AND_PREDICTION_EPOCH_RESET_V2",
-    "status": "completed",
+    "name": "HISTORICAL_SPORTS_DATA_COMPLETION_PROGRAM_V1",
+    "status": "in_progress",
     "repository": "C:\\Projects\\pick-analyzer",
-    "startingCommit": "c1735c86ebbe2525f6eac8a919d8c807e9cbed6e",
+    "startingCommit": "2cf3535ed98c722435ea29e8d5acb3989c2ff16b",
     "certifiedPlatformTag": "v1.0-platform-certified",
     "certifiedPlatformCommit": "eb15613efd81ff1a8e57797e11feb7254c1b604a",
     "productionMutationsAllowed": false,
     "pushAllowed": false,
     "deploymentAllowed": false,
     "historicalOddsAllowed": false,
-    "providerCallBudgetPreferred": 25,
-    "providerCallBudgetHard": 50,
+    "providerCallBudgetPreferred": 50,
+    "providerCallBudgetHard": 100,
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T04:30:00Z"
+    "updatedAt": "2026-07-27T02:35:00Z"
   },
   "phases": [
     {
@@ -783,6 +783,70 @@
         "production_activation_requires_separate_approval"
       ],
       "continuationDecision": "local_run_complete_request_push_or_migration_approval_separately"
+    },
+    {
+      "phaseId": "A1",
+      "phaseName": "PRODUCTION_DATA_INVENTORY_REFRESH_V3",
+      "status": "completed",
+      "startedAt": "2026-07-27T02:20:00Z",
+      "completedAt": "2026-07-27T02:27:13Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed",
+        "staticPages": 368
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-a1-baseline.mjs",
+        "status": "passed",
+        "checks": 6,
+        "passed": 6
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "audited_8_supported_sports",
+          "generated_historical_data_completion_baseline_v3",
+          "normal_get_contract_provider_calls_zero",
+          "normal_get_contract_remote_mutations_zero",
+          "no_imports_or_feature_rebuilds",
+          "no_epoch_seed_or_activation"
+        ],
+        "summary": {
+          "sportsAudited": 8,
+          "totalRowsObserved": 263805,
+          "coreAvailableSports": 1,
+          "partialSports": 3,
+          "emptyOrBlockedSports": 4
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "dataCoverage": {
+        "MLB": "CORE_AVAILABLE",
+        "NBA": "PARTIAL",
+        "NFL": "PARTIAL",
+        "NHL": "EMPTY_OR_BLOCKED",
+        "Soccer": "EMPTY_OR_BLOCKED",
+        "BSN": "PARTIAL",
+        "Tennis": "EMPTY_OR_BLOCKED",
+        "UFC": "EMPTY_OR_BLOCKED"
+      },
+      "artifacts": [
+        "docs/HISTORICAL_DATA_COMPLETION_BASELINE_V3.md",
+        "scripts/historical-completion-v1-a1-baseline.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [],
+      "nextPhase": "A2_DATA_COMPLETION_MATRIX_V1",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-a1-baseline.mjs, npm.cmd run build, git diff --check, then continue to Phase A2.",
+      "continuationDecision": "continue_to_phase_A2",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
     }
   ],
   "certificationMarkers": [
@@ -841,6 +905,8 @@
     "NO_REMOTE_MUTATION_FINAL_PASS",
     "NO_PRODUCTION_SQL_APPLIED_PASS",
     "NO_RETROSPECTIVE_PREDICTIONS_FINAL_PASS",
-    "NO_CERTIFIED_PLATFORM_TAG_CHANGE_PASS"
+    "NO_CERTIFIED_PLATFORM_TAG_CHANGE_PASS",
+    "GLOBAL_COVERAGE_BASELINE_V3_PASS",
+    "GLOBAL_STORED_DATA_AUDIT_PASS"
   ]
 }

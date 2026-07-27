@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-27 00:00:00Z
+Last updated: 2026-07-27 02:27:13Z
 
 ## 2026-07-26 Historical Sports Data Foundation V2 Autonomous Run
 
@@ -30,6 +30,7 @@ Last updated: 2026-07-27 00:00:00Z
 - Prediction Epoch Governance V2 Production Migration Review and Hardening is locally complete. The root migration remains unapplied, but now includes guarded additive schema, RLS, indexes and comments; new read-only precheck/postcheck SQL, guarded rollback SQL and a manual runbook were added. Classification: `MIGRATION_READY_FOR_MANUAL_APPLICATION` pending explicit approval.
 - Prediction Epoch Migration Detection Fix V1 is locally implemented after manual SQL Editor execution exposed a false-negative migration status. Root cause: `/api/data-foundation/epochs` hardcoded `migrationApplied: false` and did not distinguish an applied-but-empty `prediction_epochs` table. A canonical read-only migration-state service now classifies `NOT_APPLIED`, `APPLIED_EMPTY`, `APPLIED_INACTIVE`, `APPLIED_ACTIVE`, `PARTIALLY_APPLIED`, `SCHEMA_CACHE_PENDING` and `VERIFICATION_ERROR`; related epoch endpoints consume the same contract.
 - Prediction Epoch Governance Seeding V1 is locally prepared as Gate 2 artifacts only. The additive idempotent seed SQL creates `LEGACY_EPOCH_V1` as the single active fallback and `DATA_FOUNDATION_V2_EPOCH` as `SHADOW`, with precheck, postcheck, guarded rollback, fixture validation and docs. It does not apply SQL, backfill `prediction_history`, activate V2, archive legacy behavior, run historical imports, rebuild features, change scheduler behavior or enable cron jobs.
+- Historical Sports Data Completion Program V1 has started locally from commit `2cf3535ed98c722435ea29e8d5acb3989c2ff16b`. Phase A1 refreshed the stored production-compatible inventory in `docs/HISTORICAL_DATA_COMPLETION_BASELINE_V3.md`: 8 sports audited, 263805 stored rows observed, MLB core available, NBA/NFL/BSN partial, NHL/Soccer/Tennis/UFC empty or blocked. Provider calls, remote mutations, production mutations, imports, rebuilds, epoch seeding and V2 activation remain 0/not executed.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1
 

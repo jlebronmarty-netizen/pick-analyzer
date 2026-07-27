@@ -1,6 +1,6 @@
 # Autonomous Execution V2
 
-Status: Phase 0 locally implemented.
+Status: Historical Sports Data Completion Program V1 is in progress locally.
 
 This document governs the Historical Sports Data Foundation V2 and Prediction Epoch Reset V2 autonomous run. It is intentionally local-first: this run may create commits, docs, services, API routes, fixtures and additive migration files, but it must not push, deploy, apply production SQL, delete prediction history, activate a new production epoch, enable new cron jobs, execute historical odds or mutate production data.
 
@@ -58,3 +58,36 @@ A commit cannot include its own final hash inside a tracked file without changin
 Phase 0 certification marker:
 
 `AUTONOMOUS_GOVERNANCE_V2_PASS`
+
+## Historical Sports Data Completion Program V1
+
+This continuation starts from production commit `2cf3535ed98c722435ea29e8d5acb3989c2ff16b`.
+
+Current safety boundary:
+
+- no push
+- no deployment
+- no production SQL
+- no epoch seed application
+- no `prediction_history` backfill
+- no historical import execution
+- no feature rebuild execution
+- no `DATA_FOUNDATION_V2_EPOCH` activation
+
+### Phase A1 - Production Data Inventory Refresh V3
+
+Status: completed locally, pending commit.
+
+Artifacts:
+
+- `docs/HISTORICAL_DATA_COMPLETION_BASELINE_V3.md`
+- `scripts/historical-completion-v1-a1-baseline.mjs`
+
+Validation:
+
+- 8 sports audited
+- 263805 stored rows observed
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0
+- certifications: `GLOBAL_COVERAGE_BASELINE_V3_PASS`, `GLOBAL_STORED_DATA_AUDIT_PASS`
