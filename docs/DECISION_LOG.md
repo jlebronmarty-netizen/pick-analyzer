@@ -144,6 +144,14 @@ Decision: Add `src/services/epoch-performance-learning-v2.service.ts`, `/api/dat
 
 Consequences: Active, archived and all-epoch reporting scopes are explicit. Sport, model-version and calibration reporting is epoch-scoped, while Learning Brain weight changes, recalibration, model promotion and production scheduling remain disabled.
 
+## 2026-07-27 - Certify Historical Sports Data Foundation V2 Locally
+
+Context: The autonomous local-only run reached the final certification gate after Phase 17.
+
+Decision: Add `docs/HISTORICAL_SPORTS_DATA_FOUNDATION_V2_CERTIFICATION.md` and close the run locally without pushing, deploying, applying production SQL, activating epochs or enabling scheduled ingestion.
+
+Consequences: The final certification records 0 provider calls, 0 remote mutations, no retrospective predictions, no production SQL and no certified platform tag change. Production migration and epoch activation remain separate approval gates.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

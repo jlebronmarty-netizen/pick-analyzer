@@ -1,8 +1,10 @@
-import { SportKey } from '@/config/sports.config'
+import type { SportKey } from '@/config/sports.config'
 import {
+  probeHistoricalFeatureSchemaCapabilities,
+} from '@/lib/server-schema-capabilities'
+import type {
   HistoricalFeatureSchemaCapabilities,
   SchemaCapabilityStatus,
-  probeHistoricalFeatureSchemaCapabilities,
 } from '@/lib/server-schema-capabilities'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import {
@@ -13,7 +15,7 @@ import { lookupFeatureSet } from '@/services/multi-sport-feature-registry.servic
 import { settleNbaPredictionsByIds } from '@/services/nba-prediction-settlement.service'
 import { settleMarket } from '@/services/settlement-core.service'
 import { buildSportPrediction } from '@/services/sport-prediction-engine-sdk.service'
-import { MarketKey } from '@/types/multi-sport'
+import type { MarketKey } from '@/types/multi-sport'
 
 type HistoricalFeatureExecutionMode = 'trial_only' | 'production'
 type HistoricalFeatureRecordKind =

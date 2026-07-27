@@ -1,4 +1,4 @@
-import {
+import type {
   ProviderAdapterCapability,
   ProviderAdapterContract,
   ProviderAdapterEndpointContract,
@@ -8,7 +8,7 @@ import {
   normalizeOddsSnapshots,
   normalizeProviderEvent,
 } from '@/services/multi-sport-normalizers.service'
-import {
+import type {
   MarketKey,
   NormalizedEvent,
   NormalizedOddsSnapshot,

@@ -1,13 +1,13 @@
-import { SportKey } from '@/config/sports.config'
+import type { SportKey } from '@/config/sports.config'
 import {
   getProviderCapabilityRegistry,
-  ProviderDataType,
 } from '@/services/provider-intelligence.service'
+import type { ProviderDataType } from '@/services/provider-intelligence.service'
 import {
   normalizeOddsSnapshots,
   normalizeProviderEvent,
 } from '@/services/multi-sport-normalizers.service'
-import {
+import type {
   AdapterResult,
   EventStatus,
   MarketKey,

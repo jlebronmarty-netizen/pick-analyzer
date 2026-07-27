@@ -1,7 +1,7 @@
 import 'server-only'
 
-import { SportKey } from '@/config/sports.config'
-import {
+import type { SportKey } from '@/config/sports.config'
+import type {
   ProviderAdapterPage,
   ProviderAdapterQuery,
   ProviderRetryHint,
@@ -20,7 +20,7 @@ import {
   normalizeProviderEvent,
   normalizeStartTime,
 } from '@/services/multi-sport-normalizers.service'
-import {
+import type {
   AdapterResult,
   EventStatus,
   MarketKey,

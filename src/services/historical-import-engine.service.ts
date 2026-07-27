@@ -1,16 +1,15 @@
-import { SportKey } from '@/config/sports.config'
+import type { SportKey } from '@/config/sports.config'
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { HistoricalFeatureSchemaCapabilities } from '@/lib/server-schema-capabilities'
+import type { HistoricalFeatureSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import {
-  HistoricalFeatureGenerationPlan,
   planHistoricalFeatureGeneration,
 } from '@/services/historical-feature-generation.service'
+import type { HistoricalFeatureGenerationPlan } from '@/services/historical-feature-generation.service'
 import { getLeaguesForSport, getSportsRegistry } from '@/services/multi-sport-registry.service'
 import {
-  CostTier,
-  ProviderDataType,
   planProviderRoute,
 } from '@/services/provider-intelligence.service'
+import type { CostTier, ProviderDataType } from '@/services/provider-intelligence.service'
 import {
   createCursorContract,
   getDefaultRetryPolicy,

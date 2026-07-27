@@ -90,6 +90,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/epoch-performance-learning-v2.service.ts` and `/api/data-foundation/epoch-performance` provide read-only epoch-aware performance views. The service separates active, archived and all-epoch scopes and reports bounded groups by inferred epoch, sport, model version and calibration bucket without changing Learning Brain weights, recalibrating models or promoting a production model.
 
+## Historical Data Foundation V2 Certification
+
+`docs/HISTORICAL_SPORTS_DATA_FOUNDATION_V2_CERTIFICATION.md` records the local-only final certification for the V2 data foundation and epoch reset run. It preserves the certified platform tag, records zero provider calls and zero remote mutations, and keeps production SQL, deployment and epoch activation outside this local run.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

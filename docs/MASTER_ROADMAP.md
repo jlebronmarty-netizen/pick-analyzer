@@ -56,6 +56,8 @@ Phase 16 future-only prediction continuity is locally implemented at `/api/data-
 
 Phase 17 epoch-aware performance and learning reporting is locally implemented at `/api/data-foundation/epoch-performance`. It separates active, archived and all-epoch performance scopes, reports bounded performance groups by inferred epoch, sport and model version, and keeps learning labels epoch-aware without changing Learning Brain weights or recalibrating models.
 
+Phase 18 final local certification is documented in `docs/HISTORICAL_SPORTS_DATA_FOUNDATION_V2_CERTIFICATION.md`. The run is complete locally and remains blocked from production SQL, push, deployment and epoch activation until separate explicit approval.
+
 ## Completed
 
 ### Platform Certification

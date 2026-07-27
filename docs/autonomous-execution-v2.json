@@ -1,7 +1,7 @@
 {
   "run": {
     "name": "HISTORICAL_SPORTS_DATA_FOUNDATION_V2_AND_PREDICTION_EPOCH_RESET_V2",
-    "status": "in_progress",
+    "status": "completed",
     "repository": "C:\\Projects\\pick-analyzer",
     "startingCommit": "c1735c86ebbe2525f6eac8a919d8c807e9cbed6e",
     "certifiedPlatformTag": "v1.0-platform-certified",
@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T04:05:00Z"
+    "updatedAt": "2026-07-27T04:30:00Z"
   },
   "phases": [
     {
@@ -702,7 +702,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T03:50:00Z",
       "completedAt": "2026-07-27T04:05:00Z",
-      "commit": "pending_self_reference",
+      "commit": "d089655006b0060b0b0fecf7cf8fd624941f71a8",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -737,6 +737,52 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_18"
+    },
+    {
+      "phaseId": 18,
+      "phaseName": "FINAL_LOCAL_CERTIFICATION_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T04:05:00Z",
+      "completedAt": "2026-07-27T04:30:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "phase_by_phase_ledger_complete",
+          "final_certification_document_created",
+          "certified_platform_tag_unchanged",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "no_production_sql_applied",
+          "no_push_or_deployment",
+          "no_retrospective_predictions_generated",
+          "no_player_prop_ev_v2_started",
+          "no_portfolio_intelligence_started"
+        ],
+        "summary": {
+          "phasesCompleted": 19,
+          "providerCallsUsed": 0,
+          "remoteMutationsMade": 0,
+          "productionSqlApplied": false,
+          "pushPerformed": false,
+          "deploymentPerformed": false,
+          "certifiedPlatformTagCommit": "eb15613efd81ff1a8e57797e11feb7254c1b604a"
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [
+        "production_epoch_migration_unapplied",
+        "data_foundation_v2_epoch_inactive",
+        "production_activation_requires_separate_approval"
+      ],
+      "continuationDecision": "local_run_complete_request_push_or_migration_approval_separately"
     }
   ],
   "certificationMarkers": [
@@ -788,6 +834,13 @@
     "EPOCH_PERFORMANCE_REPORTING_PASS",
     "EPOCH_AWARE_LEARNING_LABELS_PASS",
     "NO_LEARNING_WEIGHT_CHANGE_PASS",
-    "NO_MODEL_RECALIBRATION_PASS"
+    "NO_MODEL_RECALIBRATION_PASS",
+    "HISTORICAL_SPORTS_DATA_FOUNDATION_V2_PASS",
+    "PREDICTION_EPOCH_RESET_V2_PASS",
+    "NO_PROVIDER_CALL_FINAL_PASS",
+    "NO_REMOTE_MUTATION_FINAL_PASS",
+    "NO_PRODUCTION_SQL_APPLIED_PASS",
+    "NO_RETROSPECTIVE_PREDICTIONS_FINAL_PASS",
+    "NO_CERTIFIED_PLATFORM_TAG_CHANGE_PASS"
   ]
 }

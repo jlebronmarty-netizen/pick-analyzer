@@ -1,4 +1,4 @@
-import { SportKey } from '@/config/sports.config'
+import type { SportKey } from '@/config/sports.config'
 import { getMarketsForSport } from '@/services/multi-sport-markets.service'
 import {
   getLeaguesForSport,
@@ -8,7 +8,7 @@ import {
   getProvidersForSport,
   getSportsProviders,
 } from '@/services/multi-sport-providers.service'
-import { MultiSportStatus, SportsProvider } from '@/types/multi-sport'
+import type { MultiSportStatus, SportsProvider } from '@/types/multi-sport'
 
 export type ProviderDataType =
   | 'schedules'

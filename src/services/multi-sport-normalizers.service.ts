@@ -1,5 +1,5 @@
-import { SportKey } from '@/config/sports.config'
-import {
+import type { SportKey } from '@/config/sports.config'
+import type {
   EventStatus,
   MarketKey,
   NormalizedEvent,
