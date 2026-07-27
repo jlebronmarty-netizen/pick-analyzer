@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T02:40:00Z"
+    "updatedAt": "2026-07-27T02:52:00Z"
   },
   "phases": [
     {
@@ -854,7 +854,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T02:28:00Z",
       "completedAt": "2026-07-27T02:31:15Z",
-      "commit": "pending_self_reference",
+      "commit": "ebb2cea4e9db8782aeb2803ebb12eef43cbe2e33",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed",
@@ -902,6 +902,55 @@
       "nextPhase": "A3_SOURCE_AND_PROVENANCE_REGISTRY_V2",
       "resumeInstructions": "Run node scripts/historical-completion-v1-a2-matrix.mjs, npm.cmd run build, git diff --check, then continue to Phase A3.",
       "continuationDecision": "continue_to_phase_A3",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
+    },
+    {
+      "phaseId": "A3",
+      "phaseName": "SOURCE_AND_PROVENANCE_REGISTRY_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T02:41:00Z",
+      "completedAt": "2026-07-27T02:45:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed",
+        "staticPages": 368
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-a3-source-registry-validate.mjs",
+        "status": "passed",
+        "checks": 8,
+        "passed": 8
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "sportsdataio_role_documented",
+          "the_odds_api_role_documented",
+          "retrosheet_role_documented",
+          "manual_csv_role_documented",
+          "provenance_fields_documented",
+          "historical_odds_entitlement_gate_preserved",
+          "no_secrets_stored",
+          "zero_provider_calls"
+        ]
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "artifacts": [
+        "docs/SPORTS_DATA_SOURCE_REGISTRY_V2.md",
+        "scripts/historical-completion-v1-a3-source-registry-validate.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [],
+      "nextPhase": "B1_MLB_SEASON_COVERAGE_PLAN_V3",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-a3-source-registry-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase B1.",
+      "continuationDecision": "continue_to_phase_B1",
       "diffCheck": {
         "command": "git diff --check",
         "status": "passed"
@@ -967,6 +1016,7 @@
     "NO_CERTIFIED_PLATFORM_TAG_CHANGE_PASS",
     "GLOBAL_COVERAGE_BASELINE_V3_PASS",
     "GLOBAL_STORED_DATA_AUDIT_PASS",
-    "DATA_COMPLETION_MATRIX_V1_PASS"
+    "DATA_COMPLETION_MATRIX_V1_PASS",
+    "SOURCE_PROVENANCE_REGISTRY_V2_PASS"
   ]
 }

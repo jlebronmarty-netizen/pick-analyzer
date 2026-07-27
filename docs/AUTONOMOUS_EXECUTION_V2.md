@@ -96,7 +96,9 @@ Validation:
 
 ### Phase A2 - Data Completion Matrix V1
 
-Status: completed locally, pending commit.
+Status: completed locally.
+
+Commit: `ebb2cea4e9db8782aeb2803ebb12eef43cbe2e33`
 
 Artifacts:
 
@@ -111,3 +113,22 @@ Validation:
 - remote mutations: 0
 - production mutations: 0
 - certification: `DATA_COMPLETION_MATRIX_V1_PASS`
+
+### Phase A3 - Source And Provenance Registry V2
+
+Status: completed locally, pending commit.
+
+Artifacts:
+
+- `docs/SPORTS_DATA_SOURCE_REGISTRY_V2.md`
+- `scripts/historical-completion-v1-a3-source-registry-validate.mjs`
+
+Validation:
+
+- source registry validation passed 8/8
+- SportsDataIO, The Odds API, Retrosheet, official public sources and manual CSV roles documented
+- historical odds remain entitlement/cost blocked
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0
+- certification: `SOURCE_PROVENANCE_REGISTRY_V2_PASS`

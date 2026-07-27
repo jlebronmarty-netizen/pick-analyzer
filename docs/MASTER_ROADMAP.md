@@ -68,6 +68,8 @@ Historical Sports Data Completion Program V1 is now in local autonomous executio
 
 Phase A2 adds `docs/data-completion-matrix-v1.json`, a machine-readable matrix across 8 sports and 22 datasets per sport. It preserves unknown expected row counts as `null`, separates provider and entitlement blockers, and marks manual-import candidates without executing imports.
 
+Phase A3 adds `docs/SPORTS_DATA_SOURCE_REGISTRY_V2.md`, a source/provenance registry covering SportsDataIO, The Odds API, Retrosheet, approved official sources, manual CSV and existing stored tables. The registry keeps historical odds and unproven provider domains blocked until entitlement, cost and approval are explicit.
+
 ## Completed
 
 ### Platform Certification

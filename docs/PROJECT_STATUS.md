@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-27 02:31:15Z
+Last updated: 2026-07-27 02:45:00Z
 
 ## 2026-07-26 Historical Sports Data Foundation V2 Autonomous Run
 
@@ -32,6 +32,7 @@ Last updated: 2026-07-27 02:31:15Z
 - Prediction Epoch Governance Seeding V1 is locally prepared as Gate 2 artifacts only. The additive idempotent seed SQL creates `LEGACY_EPOCH_V1` as the single active fallback and `DATA_FOUNDATION_V2_EPOCH` as `SHADOW`, with precheck, postcheck, guarded rollback, fixture validation and docs. It does not apply SQL, backfill `prediction_history`, activate V2, archive legacy behavior, run historical imports, rebuild features, change scheduler behavior or enable cron jobs.
 - Historical Sports Data Completion Program V1 has started locally from commit `2cf3535ed98c722435ea29e8d5acb3989c2ff16b`. Phase A1 refreshed the stored production-compatible inventory in `docs/HISTORICAL_DATA_COMPLETION_BASELINE_V3.md`: 8 sports audited, 263805 stored rows observed, MLB core available, NBA/NFL/BSN partial, NHL/Soccer/Tennis/UFC empty or blocked. Provider calls, remote mutations, production mutations, imports, rebuilds, epoch seeding and V2 activation remain 0/not executed.
 - Phase A2 added `docs/data-completion-matrix-v1.json`, a 176-row sport/dataset matrix that classifies each dataset as complete, partial, empty, blocked, import-ready or not applicable without inventing unknown expected row counts. Provider calls, remote mutations and production mutations remain 0.
+- Phase A3 added `docs/SPORTS_DATA_SOURCE_REGISTRY_V2.md`, documenting source roles, provenance fields, entitlement gates and fallback hierarchy for SportsDataIO, The Odds API, Retrosheet, official sources, manual CSV and existing stored tables. No provider calls, imports, SQL, rebuilds or mutations were executed.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1
 
