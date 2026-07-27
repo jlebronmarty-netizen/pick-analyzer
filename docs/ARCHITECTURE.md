@@ -74,6 +74,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/prediction-epoch-governance-v2.service.ts` and `/api/data-foundation/epochs` define `LEGACY_EPOCH_V1` and `DATA_FOUNDATION_V2_EPOCH` as a migration-ready contract. Additive migration `202607270001_prediction_epoch_governance_v2.sql` creates `prediction_epochs` and nullable epoch links on `prediction_history`, but it is not applied or activated by this local run.
 
+## Legacy Metric Isolation V2
+
+`src/services/legacy-prediction-metric-isolation-v2.service.ts` and `/api/data-foundation/legacy-metrics` provide read-only deletion-candidate classification and epoch-aware metric filtering rules. The service never deletes predictions, mass-updates rows or archives legacy rows automatically; it only reports candidates and filter contracts.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

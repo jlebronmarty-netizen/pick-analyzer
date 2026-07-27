@@ -48,6 +48,8 @@ Phase 12 global data quality and reconciliation is locally implemented at `/api/
 
 Phase 13 prediction epoch governance is locally implemented at `/api/data-foundation/epochs` with additive unapplied migration `202607270001_prediction_epoch_governance_v2.sql`. It defines `LEGACY_EPOCH_V1` and `DATA_FOUNDATION_V2_EPOCH` while keeping the new epoch inactive until manual migration and activation approval.
 
+Phase 14 legacy prediction archive and metric isolation is locally implemented at `/api/data-foundation/legacy-metrics`. It provides report-only deletion-candidate classification and active-epoch metric filtering rules without deleting, archiving or updating prediction rows.
+
 ## Completed
 
 ### Platform Certification

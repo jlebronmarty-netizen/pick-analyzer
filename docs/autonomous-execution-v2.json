@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T03:00:00Z"
+    "updatedAt": "2026-07-27T03:15:00Z"
   },
   "phases": [
     {
@@ -544,7 +544,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T02:40:00Z",
       "completedAt": "2026-07-27T03:00:00Z",
-      "commit": "pending_self_reference",
+      "commit": "8dc9969bfb4a8ea9efc007d8873dec49fe5a898c",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -581,6 +581,42 @@
       ],
       "blockers": [],
       "continuationDecision": "continue_to_phase_14"
+    },
+    {
+      "phaseId": 14,
+      "phaseName": "LEGACY_PREDICTION_ARCHIVE_AND_METRIC_ISOLATION_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T03:00:00Z",
+      "completedAt": "2026-07-27T03:15:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "legacy_metric_isolation_validation_8_of_8",
+          "stored_data_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "legacy_rows_remain_queryable",
+          "no_prediction_deletion",
+          "epoch_filtering_contract",
+          "legacy_preservation"
+        ],
+        "summary": {
+          "predictionRowsAudited": 0,
+          "deletionCandidates": 0,
+          "deleteExecuted": false
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_15"
     }
   ],
   "certificationMarkers": [
@@ -618,6 +654,9 @@
     "DATA_READINESS_REPORT_PASS",
     "PREDICTION_EPOCH_GOVERNANCE_V2_PASS",
     "LEGACY_PREDICTION_PRESERVATION_PASS",
-    "PREDICTION_ROLLBACK_CONTRACT_PASS"
+    "PREDICTION_ROLLBACK_CONTRACT_PASS",
+    "LEGACY_METRIC_ISOLATION_V2_PASS",
+    "NO_PREDICTION_DELETION_PASS",
+    "EPOCH_FILTERING_PASS"
   ]
 }

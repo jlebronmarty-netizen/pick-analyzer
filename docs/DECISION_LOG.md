@@ -112,6 +112,14 @@ Decision: Add `src/services/prediction-epoch-governance-v2.service.ts`, `/api/da
 
 Consequences: `LEGACY_EPOCH_V1` and `DATA_FOUNDATION_V2_EPOCH` are defined, rollback is explicit, and legacy prediction preservation is required. No migration was applied, no prediction rows were updated or deleted, and the new epoch was not activated.
 
+## 2026-07-27 - Add Legacy Prediction Metric Isolation V2
+
+Context: Legacy predictions must remain auditable while new epoch metrics need a clean default scope.
+
+Decision: Add `src/services/legacy-prediction-metric-isolation-v2.service.ts`, `/api/data-foundation/legacy-metrics` and `docs/LEGACY_PREDICTION_ARCHIVE_METRIC_ISOLATION_V2.md`.
+
+Consequences: Deletion candidates are classified for review only. No prediction rows are deleted, mass-updated, archived or hidden, and active epoch metrics are defined to exclude legacy/non-production rows by default after manual epoch activation.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.
