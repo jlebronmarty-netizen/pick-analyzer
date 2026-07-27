@@ -364,3 +364,19 @@ Validation:
 - all canonical NHL foundation datasets remain 0 rows
 - cross-year season governance and goalie/starter temporal safety are documented
 - no provider calls, imports, mutations, retrospective predictions or production activation were executed
+
+### Phase F1 - Soccer Competition Completion Plan V1
+
+Status: completed locally as competition-specific empty/blocked baseline and plan-only import contract.
+
+Artifacts:
+
+- `docs/SOCCER_COMPETITION_COMPLETION_PLAN_V1.md`
+- `scripts/historical-completion-v1-f1-soccer-competition-plan-validate.mjs`
+
+Validation:
+
+- soccer competition completion plan validation passed 10/10
+- soccer remains competition-specific with no global coverage claim
+- all current soccer datasets remain 0 rows
+- no provider calls, imports, mutations, retrospective predictions or production activation were executed

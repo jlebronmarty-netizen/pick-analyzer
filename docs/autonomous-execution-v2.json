@@ -1581,7 +1581,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T04:56:00Z",
       "completedAt": "2026-07-27T05:02:00Z",
-      "commit": "pending_self_reference",
+      "commit": "b1bcb87faeb5b17d9dab487fb8a905ad3b3ce281",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -1693,6 +1693,70 @@
       "nextPhase": "F1_SOCCER_COMPETITION_COMPLETION_PLAN_V1",
       "resumeInstructions": "Run node scripts/historical-completion-v1-e1-nhl-baseline-plan-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase F1.",
       "continuationDecision": "continue_to_phase_F1_with_nhl_empty_foundation_certified",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
+    },
+    {
+      "phaseId": "F1",
+      "phaseName": "SOCCER_COMPETITION_COMPLETION_PLAN_V1",
+      "status": "completed",
+      "startedAt": "2026-07-27T05:20:00Z",
+      "completedAt": "2026-07-27T05:26:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-f1-soccer-competition-plan-validate.mjs",
+        "status": "passed",
+        "checks": 10,
+        "passed": 10
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "competition_specific_status_documented",
+          "no_global_league_rule_documented",
+          "empty_baseline_documented",
+          "competition_manifests_documented",
+          "required_scope_documented",
+          "no_global_overclaim_boundary",
+          "market_identity_boundary_documented",
+          "recommendation_logic_blocked",
+          "zero_execution_accounting_documented",
+          "certification_markers_present"
+        ],
+        "summary": {
+          "canonicalRows": 0,
+          "competitionScoped": true,
+          "globalCoverageClaim": false,
+          "importsExecuted": 0,
+          "providerCallsMade": 0,
+          "retrospectivePredictionsGenerated": 0
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "artifacts": [
+        "docs/SOCCER_COMPETITION_COMPLETION_PLAN_V1.md",
+        "scripts/historical-completion-v1-f1-soccer-competition-plan-validate.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [
+        "soccer_competition_scope_required",
+        "soccer_provider_source_approval_required",
+        "soccer_mutation_approval_required",
+        "soccer_canonical_foundation_empty",
+        "soccer_production_activation_blocked"
+      ],
+      "nextPhase": "G1_BSN_COMPLETION_CERTIFICATION_V1",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-f1-soccer-competition-plan-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase G1.",
+      "continuationDecision": "continue_to_phase_G1_with_soccer_competition_scope_certified",
       "diffCheck": {
         "command": "git diff --check",
         "status": "passed"
@@ -1817,6 +1881,13 @@
     "NHL_IMPORT_MANIFESTS_PLAN_ONLY_PASS",
     "NO_PROVIDER_CALL_E1_PASS",
     "NO_REMOTE_MUTATION_E1_PASS",
-    "NO_RETROSPECTIVE_PREDICTIONS_E1_PASS"
+    "NO_RETROSPECTIVE_PREDICTIONS_E1_PASS",
+    "SOCCER_COMPETITION_COMPLETION_PLAN_V1_PASS",
+    "SOCCER_NO_GLOBAL_COVERAGE_OVERCLAIM_V1_PASS",
+    "SOCCER_IMPORT_MANIFESTS_PLAN_ONLY_PASS",
+    "SOCCER_COMPETITION_SCOPE_ENFORCED_PASS",
+    "NO_PROVIDER_CALL_F1_PASS",
+    "NO_REMOTE_MUTATION_F1_PASS",
+    "NO_RETROSPECTIVE_PREDICTIONS_F1_PASS"
   ]
 }

@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-27 05:14:00Z
+Last updated: 2026-07-27 05:26:00Z
 
 ## 2026-07-26 Historical Sports Data Foundation V2 Autonomous Run
 
@@ -45,6 +45,7 @@ Last updated: 2026-07-27 05:14:00Z
 - Phase D1 added `docs/NFL_BASELINE_CERTIFICATION_V1.md`, certifying NFL as an empty/blocked foundation with 0 canonical teams, players, events, results, stats, odds, identities and features. Existing 190 prediction/settlement rows are preserved as legacy evidence only and do not certify production readiness.
 - Phase D2 added `docs/NFL_COMPLETION_PLAN_V1.md`, defining plan-only NFL manifests for identity, schedule/results, stats/boxscores, injuries/depth charts and market snapshots while preserving season-year governance. No provider calls, imports, mutations, retrospective predictions or production activation were executed.
 - Phase E1 added `docs/NHL_BASELINE_AND_COMPLETION_PLAN_V1.md`, certifying NHL as an empty/blocked foundation and documenting future plan-only manifests with cross-year season governance and goalie/starter temporal safety. No provider calls, imports, mutations, retrospective predictions or production activation were executed.
+- Phase F1 added `docs/SOCCER_COMPETITION_COMPLETION_PLAN_V1.md`, preserving soccer as competition-specific only. The current baseline remains empty/blocked and all future manifests require explicit competition, season, source and coverage-window scope.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1
 
