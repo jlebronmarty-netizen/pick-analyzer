@@ -7,8 +7,9 @@ export async function GET(request: NextRequest) {
   const id = requestId(request)
   try {
     const date = request.nextUrl.searchParams.get('date')
+    const market = request.nextUrl.searchParams.get('market')
     const [comparison, ingestion] = await Promise.all([
-      getMlbPlayerPropHealth({ date }),
+      getMlbPlayerPropHealth({ date, market }),
       getMlbPlayerPropIngestionHealth(),
     ])
     return apiOk({ ...comparison, ingestion }, id)

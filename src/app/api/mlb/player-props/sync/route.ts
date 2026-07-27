@@ -32,6 +32,11 @@ export async function POST(request: NextRequest) {
       confirmed: body?.confirmed === true,
       confirm: request.nextUrl.searchParams.get('confirm') ?? (typeof body?.confirm === 'string' ? body.confirm : null),
       provider: provider(body?.provider),
+      markets: Array.isArray(body?.markets)
+        ? body.markets.map((market: unknown) => String(market)).filter(Boolean)
+        : typeof body?.market === 'string'
+          ? [body.market]
+          : null,
       maximumEvents: parseIntegerParam({
         value: body?.maximumEvents === undefined ? null : String(body.maximumEvents),
         fallback: 1,

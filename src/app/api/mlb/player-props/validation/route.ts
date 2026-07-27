@@ -7,8 +7,9 @@ export async function GET(request: NextRequest) {
   const id = requestId(request)
   try {
     const date = request.nextUrl.searchParams.get('date')
+    const market = request.nextUrl.searchParams.get('market')
     const [comparison, ingestionHealth] = await Promise.all([
-      getMlbPlayerPropComparisons({ date, limit: 500 }),
+      getMlbPlayerPropComparisons({ date, market, limit: 500 }),
       getMlbPlayerPropIngestionHealth(),
     ])
     const fixtures = validatePlayerPropComparisonFixtures()

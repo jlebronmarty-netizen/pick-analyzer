@@ -6,13 +6,24 @@ MLB Player Prop Market Comparison V1 compares the completed MLB Pitcher Projecti
 
 ## Scope
 
-Supported V1 market:
+Supported market catalog after Player Prop Multi-Market Expansion V1:
 
 - Pitcher recorded outs
+- Pitcher strikeouts
+- Pitcher walks
+- Pitcher hits allowed
+- Pitcher earned runs
+- Batter hits
+- Batter total bases
+- Batter home runs
+- Batter RBI
+- Batter runs
+- Batter walks
+- Batter stolen bases
 - Over and Under sides
-- Half-out lines: 14.5, 15.5, 16.5, 17.5, 18.5
+- Market-specific supported lines from `src/config/mlb-player-prop-markets.ts`
 
-Future phases may add strikeouts, earned runs, hits allowed, walks and pitch count, but they are not active in V1.
+Pitcher Outs keeps full certified model-vs-market probability comparison. New markets share storage, inventory, API summary and UI empty-state behavior, and only compare genuine stored lines for same-event/player evidence.
 
 ## Data Audit
 
@@ -74,7 +85,7 @@ The existing Player Projections Pitcher Outs tab now includes a Sportsbook Compa
 - Projection Only
 - No recommendation
 
-When market rows are available, the panel displays sportsbook, line, price, implied probability, model probability, difference, fair odds and classification status.
+When market rows are available, the panel displays sportsbook, line, price, implied probability, model probability when available, difference, fair odds and classification status. The page now includes a market selector and stored-row/bookmaker coverage summary for the selected market.
 
 ## Guardrails
 

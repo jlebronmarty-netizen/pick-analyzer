@@ -2,6 +2,12 @@ import 'server-only'
 
 import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import {
+  MLB_PLAYER_PROP_MARKETS,
+  playerPropMarketByKey,
+  playerPropMarketFromStorage,
+  playerPropSupportedLine,
+} from '@/config/mlb-player-prop-markets'
 import { previewPitcherProjection } from '@/services/mlb-pitcher-projection-engine.service'
 import type { MlbPitcherProjection, PitcherDataSufficiency, PitcherStarterStatus, PitcherWorkloadContext } from '@/types/mlb-pitcher-projections'
 import type {
@@ -11,6 +17,7 @@ import type {
   PitcherPropHealth,
   PitcherPropLine,
   PitcherPropMarket,
+  PitcherPropMarketKey,
   PitcherPropOutcome,
 } from '@/types/mlb-player-prop-comparison'
 
@@ -19,7 +26,6 @@ const LEAGUE_KEY = 'mlb'
 const MODE = 'mlb_player_prop_market_comparison_v1'
 const MARKET_KEY = 'pitcher_outs_recorded'
 const MARKET_LABEL = 'Pitcher Recorded Outs'
-const SUPPORTED_LINES = [14.5, 15.5, 16.5, 17.5, 18.5] as const
 const MARKET_ALIGNED_THRESHOLD = 0.025
 
 type OddsRow = {
@@ -99,12 +105,7 @@ function normalizeOutcome(value: unknown): PitcherPropOutcome | null {
 }
 
 function normalizeMarket(value: unknown) {
-  const raw = String(value ?? '').trim().toLowerCase()
-  if (raw === 'player_props:pitcher_outs_recorded') return MARKET_KEY
-  if (raw === 'pitcher_outs_recorded') return MARKET_KEY
-  if (raw === 'player_props:pitcher_pitching_outs') return MARKET_KEY
-  if (raw === 'pitcher_pitching_outs') return MARKET_KEY
-  return null
+  return playerPropMarketFromStorage(value)?.key ?? null
 }
 
 export function americanToDecimal(american: number | null) {
@@ -132,6 +133,14 @@ export function probabilityToFairDecimal(probability: number | null) {
 function marketProbability(projection: MlbPitcherProjection, outcome: PitcherPropOutcome, line: number) {
   const key = String(line) as keyof MlbPitcherProjection['overProbabilities']
   return outcome === 'OVER' ? projection.overProbabilities[key] ?? null : projection.underProbabilities[key] ?? null
+}
+
+function projectionValueForMarket(projection: MlbPitcherProjection, marketKey: PitcherPropMarketKey) {
+  if (marketKey === 'pitcher_outs_recorded') return projection.projectedOuts
+  if (marketKey === 'pitcher_strikeouts') return projection.projectedStrikeouts
+  if (marketKey === 'pitcher_hits_allowed') return projection.projectedHitsAllowed
+  if (marketKey === 'pitcher_earned_runs') return projection.projectedEarnedRuns
+  return null
 }
 
 function confidenceLevel(confidence: number) {
@@ -273,7 +282,7 @@ function lineFrom(row: OddsRow, projection: MlbPitcherProjection): PitcherPropLi
   const market = normalizeMarket(row.market)
   const outcome = normalizeOutcome(row.outcome)
   const line = num(row.line)
-  if (market !== MARKET_KEY || !outcome || line === null || !SUPPORTED_LINES.includes(line as typeof SUPPORTED_LINES[number])) return null
+  if (!market || !outcome || line === null || playerPropSupportedLine(market, line) === null) return null
   const americanOdds = num(row.price)
   return {
     lineId: row.id,
@@ -285,7 +294,7 @@ function lineFrom(row: OddsRow, projection: MlbPitcherProjection): PitcherPropLi
     bookmakerId: metadataBookmakerId(row),
     provider: row.provider,
     marketId: metadataMarketId(row),
-    marketKey: MARKET_KEY,
+    marketKey: market,
     outcome,
     line,
     americanOdds,
@@ -366,8 +375,21 @@ function groupedByBookAndLine(rows: PitcherPropLine[]) {
   return map
 }
 
-function compareProjection(projection: MlbPitcherProjection, rows: OddsRow[]): PitcherPropComparison[] {
-  const normalized = rows.map((row) => lineFrom(row, projection)).filter(Boolean) as PitcherPropLine[]
+function duplicateStoredRowCount(rows: OddsRow[]) {
+  const seen = new Set<string>()
+  let duplicates = 0
+  for (const row of rows) {
+    if (seen.has(row.id)) duplicates += 1
+    seen.add(row.id)
+  }
+  return duplicates
+}
+
+function compareProjection(projection: MlbPitcherProjection, rows: OddsRow[], marketKey: PitcherPropMarketKey): PitcherPropComparison[] {
+  const market = playerPropMarketByKey(marketKey) ?? MLB_PLAYER_PROP_MARKETS[0]
+  const normalized = rows
+    .map((row) => lineFrom(row, projection))
+    .filter((row): row is PitcherPropLine => row !== null && row.marketKey === marketKey)
   const matched = normalized.filter((row) => matchesProjection(rows.find((source) => source.id === row.snapshotId)!, projection))
   const byBookLine = groupedByBookAndLine(matched)
   if (!byBookLine.size) {
@@ -381,8 +403,9 @@ function compareProjection(projection: MlbPitcherProjection, rows: OddsRow[]): P
       pitcherName: projection.pitcherName,
       matchup: `${projection.team ?? 'Team'} vs ${projection.opponent ?? 'Opponent'}`,
       starterStatus: projection.starterStatus,
-      marketKey: MARKET_KEY,
-      marketLabel: MARKET_LABEL,
+      marketKey,
+      marketLabel: market.displayName,
+      marketFamily: market.family,
       sportsbook: null,
       bookmakerId: null,
       line: null,
@@ -390,7 +413,7 @@ function compareProjection(projection: MlbPitcherProjection, rows: OddsRow[]): P
       underLine: null,
       overEdge: null,
       underEdge: null,
-      bestStatus: projection.projectedOuts === null ? 'PROJECTION_ONLY' : 'NO_PROP_AVAILABLE',
+      bestStatus: projectionValueForMarket(projection, marketKey) === null ? 'PROJECTION_ONLY' : 'NO_PROP_AVAILABLE',
       projectionConfidence: projection.confidence,
       projectionQuality: projection.qualityScore,
       dataSufficiency: projection.dataSufficiency,
@@ -399,8 +422,9 @@ function compareProjection(projection: MlbPitcherProjection, rows: OddsRow[]): P
       historicalStartsUsed: projection.featureSnapshot.gameLogs.length,
       generatedAt: projection.generatedAt,
       cutoffAt: projection.cutoffAt,
-      warnings: ['NO_CURRENT_RECORDED_OUTS_PROP_MARKET'],
+      warnings: [`NO_CURRENT_${marketKey.toUpperCase()}_PROP_MARKET`],
       notes: ['Projection Only', 'No betting recommendation'],
+      emptyStateReason: 'NO_CURRENT_SPORTSBOOK_LINE',
       recommendationStatus: 'MODEL_MARKET_COMPARISON_ONLY',
     }]
   }
@@ -422,8 +446,9 @@ function compareProjection(projection: MlbPitcherProjection, rows: OddsRow[]): P
       pitcherName: projection.pitcherName,
       matchup: `${projection.team ?? 'Team'} vs ${projection.opponent ?? 'Opponent'}`,
       starterStatus: projection.starterStatus,
-      marketKey: MARKET_KEY,
-      marketLabel: MARKET_LABEL,
+      marketKey,
+      marketLabel: market.displayName,
+      marketFamily: market.family,
       sportsbook,
       bookmakerId: selectedLine?.bookmakerId ?? null,
       line: selectedLine?.line ?? null,
@@ -449,6 +474,10 @@ function compareProjection(projection: MlbPitcherProjection, rows: OddsRow[]): P
 
 function healthFrom(comparisons: PitcherPropComparison[], oddsRows: OddsRow[], validation: { success: boolean; failedChecks: string[] }): PitcherPropHealth {
   const marketTimes = oddsRows.map((row) => row.snapshot_time).filter(Boolean).sort() as string[]
+  const supportedRowsByMarket = MLB_PLAYER_PROP_MARKETS.reduce((acc, market) => {
+    acc[market.key] = oddsRows.filter((row) => normalizeMarket(row.market) === market.key && playerPropSupportedLine(market.key, row.line) !== null).length
+    return acc
+  }, {} as Record<PitcherPropMarketKey, number>)
   return {
     success: validation.success,
     mode: 'mlb_player_prop_market_comparison_health_v1',
@@ -459,9 +488,13 @@ function healthFrom(comparisons: PitcherPropComparison[], oddsRows: OddsRow[], v
     marketRowsEvaluated: oddsRows.length,
     comparisonsGenerated: comparisons.length,
     noPropAvailable: comparisons.filter((row) => row.bestStatus === 'NO_PROP_AVAILABLE').length,
-    lineMismatchRows: oddsRows.filter((row) => normalizeMarket(row.market) === MARKET_KEY && !SUPPORTED_LINES.includes(Number(row.line) as typeof SUPPORTED_LINES[number])).length,
+    lineMismatchRows: oddsRows.filter((row) => {
+      const market = normalizeMarket(row.market)
+      return market && playerPropSupportedLine(market, row.line) === null
+    }).length,
     duplicateSportsbookLines: comparisons.filter((row) => row.warnings.includes('DUPLICATED_SPORTSBOOK_LINE')).length,
-    supportedRecordedOutsRows: oddsRows.filter((row) => normalizeMarket(row.market) === MARKET_KEY && SUPPORTED_LINES.includes(Number(row.line) as typeof SUPPORTED_LINES[number])).length,
+    supportedRecordedOutsRows: supportedRowsByMarket.pitcher_outs_recorded,
+    supportedRowsByMarket,
     sportsbooks: Array.from(new Set(oddsRows.map((row) => row.sportsbook))).sort(),
     freshness: {
       latestMarketUpdate: marketTimes.at(-1) ?? null,
@@ -481,16 +514,18 @@ export function validatePlayerPropComparisonFixtures() {
     ['positive American odds implied probability', plusImplied === 0.4444],
     ['fair American odds from probability', fairAmerican === -245],
     ['fair decimal odds from probability', fairDecimal === 1.4085],
-    ['supported half-out lines only', SUPPORTED_LINES.every((line) => Number.isInteger(line * 2) && !Number.isInteger(line))],
-    ['line mismatch is blocked', normalizeMarket('player_props:pitcher_outs_recorded') === MARKET_KEY && !SUPPORTED_LINES.includes(16 as typeof SUPPORTED_LINES[number])],
+    ['supported market catalog includes pitcher and batter markets', MLB_PLAYER_PROP_MARKETS.length === 12 && MLB_PLAYER_PROP_MARKETS.some((market) => market.key === 'batter_total_bases')],
+    ['supported half-out lines only', (playerPropMarketByKey(MARKET_KEY)?.supportedLines ?? []).every((line) => Number.isInteger(line * 2) && !Number.isInteger(line))],
+    ['line mismatch is blocked', normalizeMarket('player_props:pitcher_outs_recorded') === MARKET_KEY && playerPropSupportedLine(MARKET_KEY, 16) === null],
     ['opposite outcome normalization works', normalizeOutcome('Under') === 'UNDER' && normalizeOutcome('Over') === 'OVER'],
+    ['canonical market aliases normalize', normalizeMarket('player_props:batter_rbi') === 'batter_rbi' && normalizeMarket('player_props:batter_runs') === 'batter_runs'],
     ['no zero odds probabilities', americanToImpliedProbability(0) === null && americanToDecimal(0) === null],
   ].filter(([, passed]) => !passed).map(([name]) => name as string)
   return {
     success: failedChecks.length === 0,
     mode: 'mlb_player_prop_market_comparison_validation_v1',
-    checks: 8,
-    passed: 8 - failedChecks.length,
+    checks: 10,
+    passed: 10 - failedChecks.length,
     failed: failedChecks.length,
     failedChecks,
     providerCallsMade: 0,
@@ -498,7 +533,8 @@ export function validatePlayerPropComparisonFixtures() {
   }
 }
 
-export async function getMlbPlayerPropComparisons(options: { date?: string | null; limit?: number; pitcherId?: string | null } = {}) {
+export async function getMlbPlayerPropComparisons(options: { date?: string | null; limit?: number; pitcherId?: string | null; market?: string | null } = {}) {
+  const selectedMarket = playerPropMarketByKey(options.market) ?? MLB_PLAYER_PROP_MARKETS[0]
   const slate = await previewPitcherProjection({ date: options.date, limit: 200 }).catch(async (error) => ({
     generatedAt: nowIso(),
     selectedDate: options.date ?? new Date().toISOString().slice(0, 10),
@@ -513,17 +549,38 @@ export async function getMlbPlayerPropComparisons(options: { date?: string | nul
   )
   const oddsRows = await oddsRowsForEvents(Array.from(new Set(projections.map((projection) => projection.eventId))))
   const storedPropRows = await allStoredPlayerPropRows()
-  const comparisons = projections.flatMap((projection) => compareProjection(projection, oddsRows)).slice(0, Math.min(Math.max(options.limit ?? 200, 1), 500))
+  const comparisons = projections.flatMap((projection) => compareProjection(projection, oddsRows, selectedMarket.key)).slice(0, Math.min(Math.max(options.limit ?? 200, 1), 500))
   const validation = validatePlayerPropComparisonRows(comparisons)
   const health = healthFrom(comparisons, storedPropRows, validation)
-  const markets: PitcherPropMarket[] = [{
-    marketKey: MARKET_KEY,
-    displayName: MARKET_LABEL,
-    supportedLines: [...SUPPORTED_LINES],
+  const marketSummary = MLB_PLAYER_PROP_MARKETS.map((market) => {
+    const rows = storedPropRows.filter((row) => normalizeMarket(row.market) === market.key)
+    const comparableRows = oddsRows.filter((row) => normalizeMarket(row.market) === market.key)
+    return {
+      marketKey: market.key,
+      displayName: market.displayName,
+      family: market.family,
+      providerMarketKeys: market.providerMarketKeys,
+      storedRows: rows.length,
+      comparableRowsForProjectionEvents: comparableRows.length,
+      availableBookmakers: Array.from(new Set(rows.map((row) => row.sportsbook))).sort(),
+      projectionKeys: market.projectionKeys,
+      status: rows.length ? 'MARKET_LINE_AVAILABLE' : 'NO_PROP_AVAILABLE',
+    }
+  })
+  const markets: PitcherPropMarket[] = MLB_PLAYER_PROP_MARKETS.map((market) => ({
+    marketKey: market.key,
+    displayName: market.displayName,
+    shortLabel: market.shortLabel,
+    family: market.family,
+    providerMarketKeys: market.providerMarketKeys,
+    supportedLines: [...market.supportedLines],
+    storedRows: marketSummary.find((row) => row.marketKey === market.key)?.storedRows ?? 0,
+    availableBookmakers: marketSummary.find((row) => row.marketKey === market.key)?.availableBookmakers ?? [],
     providerOwnership: 'Stored sports_odds_snapshots player_props rows; no direct provider calls from comparison service.',
     providerCallsMade: 0,
     remoteMutationsMade: 0,
-  }]
+  }))
+  const availableBookmakers = Array.from(new Set(storedPropRows.map((row) => row.sportsbook))).sort()
   return {
     success: validation.success,
     mode: MODE,
@@ -534,7 +591,11 @@ export async function getMlbPlayerPropComparisons(options: { date?: string | nul
     readOnly: true,
     recommendationStatus: 'MODEL_MARKET_COMPARISON_ONLY',
     noBettingRecommendations: true,
+    selectedMarket: selectedMarket.key,
+    supportedMarkets: markets,
     markets,
+    marketSummary,
+    availableBookmakers,
     summary: {
       projectionsEvaluated: projections.length,
       marketRowsEvaluated: oddsRows.length,
@@ -547,12 +608,29 @@ export async function getMlbPlayerPropComparisons(options: { date?: string | nul
     },
     coverage: {
       supportedMarket: MARKET_KEY,
+      selectedMarket: selectedMarket.key,
+      supportedMarkets: markets.map((market) => market.marketKey),
       currentStoredRows: storedPropRows.length,
       sportsbooks: health.sportsbooks,
       freshness: health.freshness,
       comparableRowsForProjectionEvents: oddsRows.length,
-      historicalDepth: storedPropRows.length ? 'STORED_CURRENT_OR_HISTORICAL_PLAYER_PROP_ROWS_FOUND' : 'NO_STORED_RECORDED_OUTS_PROP_MARKET_ROWS',
+      currentStoredRowsByMarket: health.supportedRowsByMarket,
+      historicalDepth: storedPropRows.length ? 'STORED_CURRENT_OR_HISTORICAL_PLAYER_PROP_ROWS_FOUND' : 'NO_STORED_PLAYER_PROP_MARKET_ROWS',
       providerOwnership: 'SportsDataIO or future licensed odds provider writes normalized rows to sports_odds_snapshots before comparison.',
+    },
+    identityCoverage: {
+      projectionsWithCanonicalPitcherId: projections.filter((projection) => Boolean(projection.pitcherId)).length,
+      projectionsWithProviderPitcherId: projections.filter((projection) => Boolean(projection.providerPitcherId)).length,
+      unresolvedStoredPropRows: storedPropRows.filter((row) => !metadataPlayerId(row) && !metadataPitcherName(row)).length,
+      deterministicOnly: true,
+    },
+    storageCoverage: {
+      table: 'sports_odds_snapshots',
+      rowCount: storedPropRows.length,
+      rowCountByMarket: health.supportedRowsByMarket,
+      bookmakerCount: availableBookmakers.length,
+      bookmakers: availableBookmakers,
+      duplicateDeterministicKeys: duplicateStoredRowCount(storedPropRows),
     },
     health,
     validation,
@@ -560,8 +638,8 @@ export async function getMlbPlayerPropComparisons(options: { date?: string | nul
     comparisons,
     warnings: [
       'fallbackWarning' in slate ? slate.fallbackWarning : null,
-      storedPropRows.length === 0 ? 'No current recorded-outs sportsbook prop market is stored. Returning NO_PROP_AVAILABLE comparisons only.' : null,
-      storedPropRows.length > 0 && oddsRows.length === 0 ? 'Stored recorded-outs prop rows exist, but no same-event pitcher projection is available for comparison yet.' : null,
+      storedPropRows.length === 0 ? 'No current sportsbook player prop market is stored. Returning NO_PROP_AVAILABLE comparisons only.' : null,
+      storedPropRows.length > 0 && oddsRows.length === 0 ? 'Stored player prop rows exist, but no same-event projection is available for comparison yet.' : null,
       'Projection Only',
       'No betting recommendation',
       'No Kelly, stake, official pick or portfolio output.',
@@ -569,17 +647,17 @@ export async function getMlbPlayerPropComparisons(options: { date?: string | nul
   }
 }
 
-export async function getMlbPlayerPropHealth(options: { date?: string | null } = {}) {
-  return (await getMlbPlayerPropComparisons({ date: options.date, limit: 500 })).health
+export async function getMlbPlayerPropHealth(options: { date?: string | null; market?: string | null } = {}) {
+  return (await getMlbPlayerPropComparisons({ date: options.date, market: options.market, limit: 500 })).health
 }
 
-export async function getMlbPlayerPropComparisonForPitcher(pitcherId: string, options: { date?: string | null } = {}) {
+export async function getMlbPlayerPropComparisonForPitcher(pitcherId: string, options: { date?: string | null; market?: string | null } = {}) {
   const result = await getMlbPlayerPropComparisons({ ...options, pitcherId, limit: 200 })
   return { ...result, comparisons: result.comparisons }
 }
 
-export async function generateMlbPlayerPropComparison(options: { date?: string | null; limit?: number; dryRun?: boolean } = {}) {
-  const result = await getMlbPlayerPropComparisons({ date: options.date, limit: options.limit })
+export async function generateMlbPlayerPropComparison(options: { date?: string | null; limit?: number; dryRun?: boolean; market?: string | null } = {}) {
+  const result = await getMlbPlayerPropComparisons({ date: options.date, limit: options.limit, market: options.market })
   return {
     ...result,
     dryRun: options.dryRun !== false,
@@ -599,7 +677,7 @@ export function validatePlayerPropComparisonRows(comparisons: PitcherPropCompari
   const seenBookLines = new Set<string>()
   for (const comparison of comparisons) {
     if (comparison.recommendationStatus !== 'MODEL_MARKET_COMPARISON_ONLY') failedChecks.push(`${comparison.pitcherName} recommendation status leakage`)
-    if (comparison.line !== null && !SUPPORTED_LINES.includes(comparison.line as typeof SUPPORTED_LINES[number])) failedChecks.push(`${comparison.pitcherName} unsupported line`)
+    if (comparison.line !== null && playerPropSupportedLine(comparison.marketKey, comparison.line) === null) failedChecks.push(`${comparison.pitcherName} unsupported line`)
     if (comparison.overLine && comparison.underLine && comparison.overLine.line !== comparison.underLine.line) failedChecks.push(`${comparison.pitcherName} over/under line mismatch`)
     if (comparison.overEdge?.modelProbability === 0 || comparison.underEdge?.modelProbability === 0) failedChecks.push(`${comparison.pitcherName} unavailable probability rendered as zero`)
     if (comparison.sportsbook && comparison.line !== null) {

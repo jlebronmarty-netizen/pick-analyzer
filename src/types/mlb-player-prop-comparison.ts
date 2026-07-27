@@ -1,4 +1,6 @@
-export type PitcherPropMarketKey = 'pitcher_outs_recorded'
+import type { MlbPlayerPropMarketKey } from '@/config/mlb-player-prop-markets'
+
+export type PitcherPropMarketKey = MlbPlayerPropMarketKey
 export type PitcherPropOutcome = 'OVER' | 'UNDER'
 export type PitcherPropComparisonStatus =
   | 'MODEL_FAVORS_OVER'
@@ -13,7 +15,12 @@ export type PitcherPropComparisonStatus =
 export type PitcherPropMarket = {
   marketKey: PitcherPropMarketKey
   displayName: string
+  shortLabel?: string
+  family?: 'pitcher' | 'batter'
+  providerMarketKeys?: string[]
   supportedLines: number[]
+  storedRows?: number
+  availableBookmakers?: string[]
   providerOwnership: string
   providerCallsMade: number
   remoteMutationsMade: number
@@ -56,13 +63,17 @@ export type PitcherPropComparison = {
   projectionId: string
   eventId: string
   pitcherId: string
+  playerId?: string
   providerPitcherId: string | null
+  providerPlayerId?: string | null
   historicalPitcherId: string | null
   pitcherName: string
+  playerName?: string
   matchup: string
   starterStatus: string
   marketKey: PitcherPropMarketKey
   marketLabel: string
+  marketFamily?: 'pitcher' | 'batter'
   sportsbook: string | null
   bookmakerId: string | null
   line: number | null
@@ -81,6 +92,7 @@ export type PitcherPropComparison = {
   cutoffAt: string | null
   warnings: string[]
   notes: string[]
+  emptyStateReason?: 'NO_CURRENT_SPORTSBOOK_LINE' | 'NO_PROJECTION_EXISTS' | 'IDENTITY_UNRESOLVED' | 'PROVIDER_UNAVAILABLE' | 'NO_PROP_AVAILABLE'
   recommendationStatus: 'MODEL_MARKET_COMPARISON_ONLY'
 }
 
@@ -97,6 +109,7 @@ export type PitcherPropHealth = {
   lineMismatchRows: number
   duplicateSportsbookLines: number
   supportedRecordedOutsRows: number
+  supportedRowsByMarket?: Record<PitcherPropMarketKey, number>
   sportsbooks: string[]
   freshness: {
     latestMarketUpdate: string | null

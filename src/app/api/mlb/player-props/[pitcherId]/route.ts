@@ -7,7 +7,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ pit
   try {
     const { pitcherId } = await context.params
     const date = request.nextUrl.searchParams.get('date')
-    const result = await getMlbPlayerPropComparisonForPitcher(decodeURIComponent(pitcherId), { date })
+    const market = request.nextUrl.searchParams.get('market')
+    const result = await getMlbPlayerPropComparisonForPitcher(decodeURIComponent(pitcherId), { date, market })
     if (!result.comparisons.length) return apiError({ id, code: 'NOT_FOUND', message: 'MLB player prop comparison not found.', status: 404 })
     return apiOk(result, id)
   } catch (error) {

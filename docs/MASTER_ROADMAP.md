@@ -2713,6 +2713,22 @@ Persistence scope: Production settlement wrote only canonical July 24 settlement
 Validation: Production settlement recovered 15 final MLB games and settled exactly 45 predictions with an idempotent rerun returning 0 newly eligible rows. Provider budget defaults are now 1,000 daily calls with a 150 reserve, 3 calls per action and 12 calls per hour. The single frequent write-capable scheduler is GitHub Actions at `7,22,37,52 * * * *`; `vercel.json` has no cron entries and heartbeat/manual workflows remain dry-run observers.
 
 Completion criteria: `PRODUCTION_SETTLEMENT_RECOVERY_PASS`, `SETTLEMENT_IDEMPOTENCY_PASS`, `LEARNING_LABEL_CLOSURE_PASS`, `POSTGAME_CONTINUITY_PASS` and `SCHEDULER_OWNERSHIP_PASS` are certified. Remaining product consistency work adds paginated Prediction History navigation, explicit absolute probability error and Brier contribution labels, and Most Likely opposite-price display safety. Provider-budget, homepage, performance and end-to-end production certifications remain pending final deployment and smoke validation for the latest local commit.
+
+### 49. Player Prop Multi-Market Expansion V1
+
+Objective: Extend the certified MLB player-prop storage/comparison/UI architecture beyond Pitcher Outs without changing prediction engines or enabling betting recommendations.
+
+Status: Implemented locally as an additive projection-only expansion.
+
+Backend scope: `mlb-player-prop-markets.ts` adds a canonical market catalog for Pitcher Outs, Pitcher Strikeouts, Pitcher Walks, Pitcher Hits Allowed, Pitcher Earned Runs, Batter Hits, Batter Total Bases, Batter Home Runs, Batter RBI, Batter Runs, Batter Walks and Batter Stolen Bases. Ingestion normalization recognizes the matching The Odds API provider keys, including `batter_rbis` and `batter_runs_scored`, while preserving the existing protected dry-run/live gate. Comparison APIs expose supported markets, market summary, bookmaker coverage, identity coverage and storage coverage with optional market filtering.
+
+Frontend scope: `/player-projections` adds a prop-market selector and market coverage summary inside the existing player projection workflow. Sportsbook comparison remains Projection Only / No recommendation and only displays genuine stored sportsbook rows.
+
+Persistence scope: None. Existing `sports_odds_snapshots` rows are reused; no SQL migration, epoch activation, import, feature rebuild or scheduler change was made.
+
+Validation: `node --loader ./scripts/local-ts-loader.mjs scripts/player-prop-multi-market-v1-validate.mjs` passed 11/11 checks with 0 provider calls and 0 remote mutations. `npm.cmd run build` exits 0 with 368 static pages.
+
+Completion criteria: `PLAYER_PROP_MULTI_MARKET_V1_PASS`, `PLAYER_PROP_STORAGE_EXTENSION_PASS`, `PLAYER_PROP_COMPARISON_EXTENSION_PASS`, `PLAYER_PROP_IDENTITY_PASS`, `PLAYER_PROP_UI_EXTENSION_PASS`, `PLAYER_PROP_API_EXTENSION_PASS`, `NO_FAKE_MARKETS_PASS`, `NO_PROVIDER_REGRESSION_PASS`, `NO_PROBABILITY_CHANGE_PASS`, `NO_MODEL_CHANGE_PASS`, `NO_DATABASE_MUTATION_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS` are certified locally pending push/deploy approval.
 # MLB Pitcher Projection Engine V1
 
 Status: PARTIAL

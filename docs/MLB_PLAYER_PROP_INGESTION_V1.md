@@ -2,15 +2,26 @@
 
 Status: LOCALLY IMPLEMENTED AS FAIL-CLOSED INGESTION PIPELINE - LIVE PROVIDER PERSISTENCE BLOCKED
 
-MLB Player Prop Ingestion V1 adds the provider-to-storage pipeline contract for pitcher recorded-outs prop markets. It does not calculate EV, compare probabilities, recommend bets, create Official Picks, build parlays, modify portfolio logic or change the MLB Pitcher Projection Engine.
+MLB Player Prop Ingestion V1 adds the provider-to-storage pipeline contract for pitcher recorded-outs prop markets. Player Prop Multi-Market Expansion V1 extends the same contract to the supported MLB pitcher and batter prop catalog without changing the protected live-sync default. It does not calculate EV, compare probabilities, recommend bets, create Official Picks, build parlays, modify portfolio logic or change the MLB Pitcher Projection Engine.
 
 ## Scope
 
-Supported V1 market:
+Supported market catalog:
 
 - Pitcher recorded outs
+- Pitcher strikeouts
+- Pitcher walks
+- Pitcher hits allowed
+- Pitcher earned runs
+- Batter hits
+- Batter total bases
+- Batter home runs
+- Batter RBI
+- Batter runs
+- Batter walks
+- Batter stolen bases
 - Over and Under selections
-- Half-out lines: 14.5, 15.5, 16.5, 17.5, 18.5
+- Market-specific supported lines from `src/config/mlb-player-prop-markets.ts`
 
 ## Provider Audit
 
@@ -32,7 +43,7 @@ The Odds API:
 
 Current stored production coverage remains:
 
-- `sports_odds_snapshots` recorded-outs prop rows: 0
+- `sports_odds_snapshots` player-prop rows: provider/stored-state dependent
 - Sportsbooks: 0
 - Current provider calls from this module: 0
 - Remote mutations from this module: 0
@@ -47,23 +58,23 @@ Added `src/types/mlb-player-prop-ingestion.ts`:
 - `PitcherPropMarket`
 - `PitcherPropHealth`
 
-Canonical snapshot fields include event, pitcher, provider pitcher ID, market, line, selection, sportsbook, American odds, decimal odds, implied probability, provider timestamp, stored timestamp, snapshot ID, provider and source version.
+Canonical snapshot fields include event, player, provider player ID, market, line, selection, sportsbook, American odds, decimal odds, implied probability, provider timestamp, stored timestamp, snapshot ID, provider and source version.
 
 ## Normalization
 
 The ingestion service normalizes:
 
-- Provider market `pitcher_outs` to stored market `player_props:pitcher_outs_recorded`
+- Provider markets such as `pitcher_outs`, `pitcher_strikeouts`, `batter_rbis` and `batter_runs_scored` to canonical stored `player_props:<market>` keys
 - Over and Under outcomes
 - Bookmaker names and IDs
-- Half-out supported lines only
+- Market-specific supported lines only
 - American odds
 - Decimal odds
 - Implied probability
 - Provider timestamps
 - Deterministic snapshot IDs
 
-Unsupported integer lines, unsupported markets and malformed outcomes are skipped.
+Unsupported lines, unsupported markets and malformed outcomes are skipped.
 
 ## Storage
 
@@ -71,9 +82,9 @@ The existing `sports_odds_snapshots` table is compatible and reused.
 
 Player prop specifics are stored in `metadata` because the table does not have first-class player columns. Stored rows are comparison-compatible:
 
-- `market`: `player_props:pitcher_outs_recorded`
+- `market`: `player_props:<canonical_market_key>`
 - `outcome`: `over` or `under`
-- `line`: supported half-out line
+- `line`: supported market line
 - `price`: American odds
 - `snapshot_time` and `provider_timestamp`: provider update time
 - `metadata`: player/provider/player-prop contract details and safety flags

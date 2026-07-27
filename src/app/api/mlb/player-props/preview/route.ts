@@ -7,8 +7,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
     const date = typeof body?.date === 'string' ? body.date : null
+    const market = typeof body?.market === 'string' ? body.market : null
     const limit = parseIntegerParam({ value: body?.limit === undefined ? null : String(body.limit), fallback: 200, min: 1, max: 500 })
-    return apiOk(await generateMlbPlayerPropComparison({ date, limit, dryRun: true }), id)
+    return apiOk(await generateMlbPlayerPropComparison({ date, market, limit, dryRun: true }), id)
   } catch (error) {
     return apiError({ id, code: 'INTERNAL_ERROR', message: errorMessage(error, 'Unknown MLB player prop preview error') })
   }

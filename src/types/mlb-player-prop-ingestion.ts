@@ -1,5 +1,7 @@
+import type { MlbPlayerPropMarketKey } from '@/config/mlb-player-prop-markets'
+
 export type MlbPlayerPropIngestionProvider = 'sportsdataio' | 'the-odds-api'
-export type MlbPlayerPropIngestionMarket = 'pitcher_outs_recorded'
+export type MlbPlayerPropIngestionMarket = MlbPlayerPropMarketKey
 export type MlbPlayerPropIngestionSelection = 'OVER' | 'UNDER'
 export type MlbPlayerPropIngestionStatus =
   | 'DRY_RUN'
@@ -10,7 +12,7 @@ export type MlbPlayerPropIngestionStatus =
   | 'SYNCED'
   | 'VALIDATION_FAILED'
 
-export type PitcherPropLine = {
+export type MlbPlayerPropLine = {
   line: number
   selection: MlbPlayerPropIngestionSelection
   americanOdds: number | null
@@ -18,31 +20,31 @@ export type PitcherPropLine = {
   impliedProbability: number | null
 }
 
-export type PitcherPropBook = {
+export type MlbPlayerPropBook = {
   sportsbook: string
   bookmakerId: string | null
   provider: MlbPlayerPropIngestionProvider
   providerTimestamp: string | null
-  lines: PitcherPropLine[]
+  lines: MlbPlayerPropLine[]
 }
 
-export type PitcherPropMarket = {
+export type MlbPlayerPropMarket = {
   market: MlbPlayerPropIngestionMarket
   providerMarketKey: string
   eventId: string
-  pitcherId: string | null
-  providerPitcherId: string | null
-  pitcherName: string | null
-  books: PitcherPropBook[]
+  playerId: string | null
+  providerPlayerId: string | null
+  playerName: string | null
+  books: MlbPlayerPropBook[]
 }
 
-export type PitcherPropSnapshot = {
+export type MlbPlayerPropSnapshot = {
   id: string
   eventId: string
   providerEventId?: string | null
-  pitcherId: string | null
-  providerPitcherId: string | null
-  pitcherName?: string | null
+  playerId: string | null
+  providerPlayerId: string | null
+  playerName?: string | null
   market: MlbPlayerPropIngestionMarket
   providerMarketKey: string
   line: number
@@ -56,10 +58,10 @@ export type PitcherPropSnapshot = {
   storedTimestamp: string
   snapshotId: string
   provider: MlbPlayerPropIngestionProvider
-  sourceVersion: 'mlb_player_prop_ingestion_v1'
+  sourceVersion: 'mlb_player_prop_ingestion_v1' | 'mlb_player_prop_multi_market_v1'
 }
 
-export type PitcherPropHealth = {
+export type MlbPlayerPropHealth = {
   success: boolean
   mode: 'mlb_player_prop_ingestion_health_v1'
   generatedAt: string
@@ -72,6 +74,7 @@ export type PitcherPropHealth = {
   rowsPersisted: number
   duplicateSnapshots: number
   supportedRecordedOutsRows: number
+  supportedRowsByMarket: Record<MlbPlayerPropIngestionMarket, number>
   sportsbooks: string[]
   markets: MlbPlayerPropIngestionMarket[]
   freshness: {
@@ -84,3 +87,17 @@ export type PitcherPropHealth = {
     failedChecks: string[]
   }
 }
+
+export type PitcherPropLine = MlbPlayerPropLine
+export type PitcherPropBook = MlbPlayerPropBook
+export type PitcherPropMarket = MlbPlayerPropMarket & {
+  pitcherId?: string | null
+  providerPitcherId?: string | null
+  pitcherName?: string | null
+}
+export type PitcherPropSnapshot = MlbPlayerPropSnapshot & {
+  pitcherId?: string | null
+  providerPitcherId?: string | null
+  pitcherName?: string | null
+}
+export type PitcherPropHealth = MlbPlayerPropHealth

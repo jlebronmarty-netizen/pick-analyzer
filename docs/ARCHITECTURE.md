@@ -501,7 +501,7 @@ The MLB Pitcher Projection Engine V1 is isolated from locked production predicti
 
 MLB Player Prop Market Comparison V1 lives in `src/services/mlb-player-prop-comparison.service.ts` with contracts in `src/types/mlb-player-prop-comparison.ts` and APIs under `/api/mlb/player-props`.
 
-The module compares completed pitcher recorded-outs projections to stored sportsbook player-prop rows from `sports_odds_snapshots`. It supports only recorded-outs over/under lines 14.5, 15.5, 16.5, 17.5 and 18.5 in V1. It normalizes American odds, decimal odds, implied probability, fair odds, model probability and percentage-point difference, then classifies disagreement as model-vs-market status only.
+The module compares completed pitcher recorded-outs projections to stored sportsbook player-prop rows from `sports_odds_snapshots`. Player Prop Multi-Market Expansion V1 adds a shared canonical market catalog for Pitcher Outs, Pitcher Strikeouts, Pitcher Walks, Pitcher Hits Allowed, Pitcher Earned Runs, Batter Hits, Batter Total Bases, Batter Home Runs, Batter RBI, Batter Runs, Batter Walks and Batter Stolen Bases. Pitcher Outs keeps its certified over/under lines 14.5, 15.5, 16.5, 17.5 and 18.5. Other markets are inventoried through the same storage/comparison contract and return truthful stored-line or empty-state coverage until same-event projection probability certification is available. It normalizes American odds, decimal odds, implied probability, fair odds, model probability and percentage-point difference where supported, then classifies disagreement as model-vs-market status only.
 
 The module is read-only: no provider calls, no remote mutations, no migration, no persistence table and no scheduler. It does not alter pitcher projection formulas, prediction probabilities, Current Board, Most Likely, Best Value, Official Pick policy, settlement, Learning Brain or Dashboard contracts. Portfolio Intelligence remains not started.
 
@@ -520,7 +520,7 @@ The module performs no provider calls during read rendering and preserves all pl
 
 MLB Player Prop Ingestion V1 lives in `src/services/mlb-player-prop-sync.service.ts` with contracts in `src/types/mlb-player-prop-ingestion.ts` and the protected dry-run-first API `/api/mlb/player-props/sync`.
 
-The module is limited to pitcher recorded-outs player prop markets at 14.5, 15.5, 16.5, 17.5 and 18.5 over/under lines. It normalizes provider market keys, bookmaker names, American odds, decimal odds, implied probability, timestamps and deterministic snapshot IDs into the existing `sports_odds_snapshots` table contract. No new prop storage table is introduced.
+The module now recognizes the multi-market MLB player-prop catalog while preserving the certified Pitcher Outs default for protected live sync. It normalizes provider market keys, bookmaker names, player names, American odds, decimal odds, implied probability, timestamps and deterministic snapshot IDs into the existing `sports_odds_snapshots` table contract. No new prop storage table is introduced.
 
 The live provider gate fails closed. SportsDataIO MLB player props are cataloged as enterprise `/v3/mlb/odds/json/BettingPlayerPropsByGameID/{gameId}` and are not confirmed for the current Discovery Lab channel. The Odds API documents MLB `pitcher_outs`, but Business-tier entitlement and event ID crosswalk are not proven in the runtime. Until those gates are satisfied, sync runs as dry-run/provider-audit only and reports zero provider calls, zero remote mutations and zero persisted rows.
 
