@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-27T16:53:55.526Z",
-  "startingCommit": "1cc3853565dd41c67b36f6453b3a876aabdd9361",
+  "generatedAt": "2026-07-27T17:03:36.545Z",
+  "startingCommit": "f193d356a861c97bb82d69e7412d8026ed653f8a",
   "counts": {
     "pageRoutes": 20,
     "apiRoutes": 409,
@@ -2494,7 +2494,7 @@
         "route": "/mlb-operations",
         "status": 200,
         "ok": true,
-        "bytes": 125481
+        "bytes": 125487
       },
       {
         "route": "/api/probability-picks/validation",
