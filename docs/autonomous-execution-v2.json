@@ -1642,7 +1642,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T05:08:00Z",
       "completedAt": "2026-07-27T05:14:00Z",
-      "commit": "pending_self_reference",
+      "commit": "8d87a470cd29e6cf2270b9fcdaec9f081013eae3",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -1757,6 +1757,71 @@
       "nextPhase": "G1_BSN_COMPLETION_CERTIFICATION_V1",
       "resumeInstructions": "Run node scripts/historical-completion-v1-f1-soccer-competition-plan-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase G1.",
       "continuationDecision": "continue_to_phase_G1_with_soccer_competition_scope_certified",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
+    },
+    {
+      "phaseId": "G1",
+      "phaseName": "BSN_COMPLETION_CERTIFICATION_V1",
+      "status": "completed",
+      "startedAt": "2026-07-27T05:32:00Z",
+      "completedAt": "2026-07-27T05:38:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-g1-bsn-completion-certify.mjs",
+        "status": "passed",
+        "checks": 10,
+        "passed": 10
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "partial_custom_status_documented",
+          "available_rows_documented",
+          "result_gap_documented",
+          "stats_and_odds_gaps_documented",
+          "provider_identities_documented",
+          "no_full_production_overclaim",
+          "completion_source_provenance_documented",
+          "no_fake_data_boundary_documented",
+          "zero_execution_accounting_documented",
+          "certification_markers_present"
+        ],
+        "summary": {
+          "teams": 12,
+          "events": 38,
+          "results": 2,
+          "periodScores": 38,
+          "providerIdentities": 87,
+          "predictions": 8,
+          "importsExecuted": 0,
+          "providerCallsMade": 0
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "artifacts": [
+        "docs/BSN_COMPLETION_CERTIFICATION_V1.md",
+        "scripts/historical-completion-v1-g1-bsn-completion-certify.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [
+        "bsn_result_completion_import_not_approved",
+        "bsn_stats_boxscores_import_not_approved",
+        "bsn_market_data_unavailable",
+        "bsn_production_activation_blocked"
+      ],
+      "nextPhase": "H1_TENNIS_UFC_EVENT_READINESS_CERTIFICATION_V1",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-g1-bsn-completion-certify.mjs, npm.cmd run build, git diff --check, then continue to Phase H1.",
+      "continuationDecision": "continue_to_phase_H1_with_bsn_partial_certified",
       "diffCheck": {
         "command": "git diff --check",
         "status": "passed"
@@ -1888,6 +1953,13 @@
     "SOCCER_COMPETITION_SCOPE_ENFORCED_PASS",
     "NO_PROVIDER_CALL_F1_PASS",
     "NO_REMOTE_MUTATION_F1_PASS",
-    "NO_RETROSPECTIVE_PREDICTIONS_F1_PASS"
+    "NO_RETROSPECTIVE_PREDICTIONS_F1_PASS",
+    "BSN_COMPLETION_CERTIFICATION_V1_PASS",
+    "BSN_PARTIAL_FOUNDATION_NO_OVERCLAIM_PASS",
+    "BSN_CSV_MANUAL_IMPORT_PLAN_ONLY_PASS",
+    "BSN_NO_FAKE_MARKET_OR_STAT_DATA_PASS",
+    "NO_PROVIDER_CALL_G1_PASS",
+    "NO_REMOTE_MUTATION_G1_PASS",
+    "NO_RETROSPECTIVE_PREDICTIONS_G1_PASS"
   ]
 }

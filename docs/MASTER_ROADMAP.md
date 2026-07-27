@@ -96,6 +96,8 @@ Phase E1 adds the NHL Baseline And Completion Plan V1. NHL is locally certified 
 
 Phase F1 adds the Soccer Competition Completion Plan V1. Soccer remains competition-specific only, with no global coverage claim and no production activation until scoped competition imports are approved and certified.
 
+Phase G1 adds the BSN Completion Certification V1. BSN is certified as a partial custom-league foundation with manual/CSV source readiness only; missing results, stats, boxscores and markets remain blocked.
+
 Phase B5 adds the MLB Market Data Foundation V2 readiness contract. It preserves existing current standard-market and genuine pitcher-outs prop evidence, blocks historical odds/open-close claims without entitlement and cost approval, and adds no EV, Kelly, Official Pick or recommendation behavior.
 
 ## Completed

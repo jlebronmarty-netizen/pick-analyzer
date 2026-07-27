@@ -380,3 +380,19 @@ Validation:
 - soccer remains competition-specific with no global coverage claim
 - all current soccer datasets remain 0 rows
 - no provider calls, imports, mutations, retrospective predictions or production activation were executed
+
+### Phase G1 - BSN Completion Certification V1
+
+Status: completed locally as partial custom-league foundation certification.
+
+Artifacts:
+
+- `docs/BSN_COMPLETION_CERTIFICATION_V1.md`
+- `scripts/historical-completion-v1-g1-bsn-completion-certify.mjs`
+
+Validation:
+
+- BSN completion certification validation passed 10/10
+- BSN remains a partial custom-league foundation with completion blocked pending approved manual/CSV or official-source imports
+- canonical results, stats, boxscores, injuries, lineups, odds and props remain incomplete or unavailable
+- no provider calls, imports, mutations, retrospective predictions or production activation were executed
