@@ -70,6 +70,8 @@ Phase A2 adds `docs/data-completion-matrix-v1.json`, a machine-readable matrix a
 
 Phase A3 adds `docs/SPORTS_DATA_SOURCE_REGISTRY_V2.md`, a source/provenance registry covering SportsDataIO, The Odds API, Retrosheet, approved official sources, manual CSV and existing stored tables. The registry keeps historical odds and unproven provider domains blocked until entitlement, cost and approval are explicit.
 
+Phase B1 adds the MLB Season Coverage Plan V3 with exact previous/current/future target windows and bounded import manifests for event/results, stats/boxscores, starter/lineup context and current markets. All manifests remain plan-only and require future approval before provider calls or mutations.
+
 ## Completed
 
 ### Platform Certification

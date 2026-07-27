@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T02:52:00Z"
+    "updatedAt": "2026-07-27T03:05:00Z"
   },
   "phases": [
     {
@@ -913,7 +913,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T02:41:00Z",
       "completedAt": "2026-07-27T02:45:00Z",
-      "commit": "pending_self_reference",
+      "commit": "bf79de835782805c3821c8a6c561c69d54f056b7",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed",
@@ -951,6 +951,62 @@
       "nextPhase": "B1_MLB_SEASON_COVERAGE_PLAN_V3",
       "resumeInstructions": "Run node scripts/historical-completion-v1-a3-source-registry-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase B1.",
       "continuationDecision": "continue_to_phase_B1",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
+    },
+    {
+      "phaseId": "B1",
+      "phaseName": "MLB_SEASON_COVERAGE_PLAN_V3",
+      "status": "completed",
+      "startedAt": "2026-07-27T02:53:00Z",
+      "completedAt": "2026-07-27T02:58:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed",
+        "staticPages": 368
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-b1-mlb-plan-validate.mjs",
+        "status": "passed",
+        "checks": 8,
+        "passed": 8
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "previous_completed_mlb_season_window_defined",
+          "current_mlb_safe_completed_window_defined",
+          "future_schedule_window_defined",
+          "bounded_import_manifests_created",
+          "manifest_mutations_not_approved",
+          "provider_calls_zero",
+          "historical_imports_zero",
+          "no_retrospective_predictions"
+        ],
+        "summary": {
+          "targetWindows": 3,
+          "manifests": 5,
+          "latestSafeCompletedDate": "2026-07-26",
+          "providerCallsMade": 0
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "artifacts": [
+        "docs/MLB_SEASON_COVERAGE_PLAN_V3.md",
+        "docs/mlb-season-coverage-plan-v3.json",
+        "scripts/historical-completion-v1-b1-mlb-plan-validate.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [],
+      "nextPhase": "B2_MLB_EVENT_AND_RESULT_COMPLETION_V3",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-b1-mlb-plan-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase B2.",
+      "continuationDecision": "continue_to_phase_B2",
       "diffCheck": {
         "command": "git diff --check",
         "status": "passed"
@@ -1017,6 +1073,7 @@
     "GLOBAL_COVERAGE_BASELINE_V3_PASS",
     "GLOBAL_STORED_DATA_AUDIT_PASS",
     "DATA_COMPLETION_MATRIX_V1_PASS",
-    "SOURCE_PROVENANCE_REGISTRY_V2_PASS"
+    "SOURCE_PROVENANCE_REGISTRY_V2_PASS",
+    "MLB_SEASON_PLAN_V3_PASS"
   ]
 }

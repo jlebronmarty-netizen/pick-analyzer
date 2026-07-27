@@ -1,0 +1,87 @@
+{
+  "mode": "mlb_season_coverage_plan_v3",
+  "generatedAt": "2026-07-27T02:55:00Z",
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "productionMutationsMade": 0,
+  "historicalImportsExecuted": 0,
+  "retrospectivePredictionsGenerated": 0,
+  "targetWindows": [
+    {
+      "key": "previous_completed_mlb_season",
+      "season": "2025",
+      "startDate": "2025-03-18",
+      "endDate": "2025-11-02",
+      "posture": "stored_data_reconciliation_and_manifest_planning_only"
+    },
+    {
+      "key": "current_mlb_safe_completed",
+      "season": "2026",
+      "startDate": "2026-03-26",
+      "endDate": "2026-07-26",
+      "posture": "stored_data_reconciliation_and_future_import_planning_only"
+    },
+    {
+      "key": "current_mlb_future_schedule",
+      "season": "2026",
+      "startDate": "2026-07-27",
+      "endDate": "2026-09-27",
+      "posture": "schedule_identity_readiness_only"
+    }
+  ],
+  "storedEvidence": {
+    "teams": 30,
+    "players": 7389,
+    "events": 4922,
+    "completedEvents": 4012,
+    "futureEvents": 847,
+    "results": 471,
+    "standings": 60,
+    "teamStats": 2926,
+    "playerStats": 47232,
+    "boxscores": 2926,
+    "startersLineups": 27,
+    "injuries": 0,
+    "oddsSnapshots": 48569,
+    "playerProps": 11,
+    "featureSnapshots": 72223,
+    "predictions": 1110,
+    "settlements": 837,
+    "providerIdentities": 59239
+  },
+  "manifests": [
+    {
+      "id": "MLB-2025-EVENT-RESULTS",
+      "batchKey": "date",
+      "maxDryRunBatchDates": 7,
+      "mutationApproved": false
+    },
+    {
+      "id": "MLB-2026-EVENT-RESULTS",
+      "batchKey": "date",
+      "maxDryRunBatchDates": 3,
+      "mutationApproved": false
+    },
+    {
+      "id": "MLB-2026-STATS-BOXSCORES",
+      "batchKey": "event_date",
+      "maxDryRunBatchDates": 3,
+      "mutationApproved": false
+    },
+    {
+      "id": "MLB-2026-STARTERS-LINEUPS",
+      "batchKey": "date",
+      "maxDryRunBatchDates": 1,
+      "mutationApproved": false
+    },
+    {
+      "id": "MLB-MARKETS-CURRENT",
+      "batchKey": "operating_day",
+      "maxDryRunBatchDates": 1,
+      "mutationApproved": false
+    }
+  ],
+  "certificationMarkers": [
+    "MLB_SEASON_PLAN_V3_PASS"
+  ]
+}

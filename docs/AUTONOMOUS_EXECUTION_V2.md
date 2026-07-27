@@ -116,7 +116,9 @@ Validation:
 
 ### Phase A3 - Source And Provenance Registry V2
 
-Status: completed locally, pending commit.
+Status: completed locally.
+
+Commit: `bf79de835782805c3821c8a6c561c69d54f056b7`
 
 Artifacts:
 
@@ -132,3 +134,24 @@ Validation:
 - remote mutations: 0
 - production mutations: 0
 - certification: `SOURCE_PROVENANCE_REGISTRY_V2_PASS`
+
+### Phase B1 - MLB Season Coverage Plan V3
+
+Status: completed locally, pending commit.
+
+Artifacts:
+
+- `docs/MLB_SEASON_COVERAGE_PLAN_V3.md`
+- `docs/mlb-season-coverage-plan-v3.json`
+- `scripts/historical-completion-v1-b1-mlb-plan-validate.mjs`
+
+Validation:
+
+- previous completed MLB season window: 2025
+- current safe completed window: 2026 through 2026-07-26
+- future schedule window: 2026-07-27 through 2026-09-27
+- bounded manifests: 5
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0
+- certification: `MLB_SEASON_PLAN_V3_PASS`
