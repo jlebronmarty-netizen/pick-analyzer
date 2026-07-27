@@ -72,6 +72,14 @@ Decision: Add `src/services/nhl-historical-foundation-v2.service.ts`, `/api/data
 
 Consequences: NHL readiness is documented as an honest empty/blocked stored-data state with zero provider calls and zero mutations. No NHL picks, fake odds, fake goalie starters or retrospective predictions were generated.
 
+## 2026-07-27 - Add Soccer Historical Foundation V2 Competition Registry
+
+Context: Soccer cannot be represented as one global league. Production readiness must be proven competition by competition with season, timezone, fixture, result, scoring, lineup and market rules.
+
+Decision: Add `src/services/soccer-historical-foundation-v2.service.ts`, `/api/data-foundation/soccer` and `docs/SOCCER_HISTORICAL_FOUNDATION_V2.md` as a read-only competition readiness registry.
+
+Consequences: The current `soccer_generic` governance entry remains a placeholder and not production coverage. The audit makes zero provider calls, performs zero mutations, generates no retrospective predictions and explicitly blocks global soccer overclaiming.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T01:15:00Z"
+    "updatedAt": "2026-07-27T01:35:00Z"
   },
   "phases": [
     {
@@ -307,7 +307,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T00:55:00Z",
       "completedAt": "2026-07-27T01:15:00Z",
-      "commit": "pending_self_reference",
+      "commit": "cf24d31ab1195ec6f7fd340e48cf735d4ad2aaa8",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -346,6 +346,52 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_9"
+    },
+    {
+      "phaseId": 9,
+      "phaseName": "SOCCER_HISTORICAL_FOUNDATION_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T01:15:00Z",
+      "completedAt": "2026-07-27T01:35:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "soccer_foundation_validation_8_of_8",
+          "stored_data_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "competition_specific_governance",
+          "no_global_coverage_overclaim",
+          "no_retrospective_predictions_generated"
+        ],
+        "summary": {
+          "competitions": 1,
+          "events": 0,
+          "gameStats": 0,
+          "playerStats": 0,
+          "oddsRows": 0,
+          "predictionRows": 0,
+          "blockers": [
+            "SOCCER_FIXTURE_COVERAGE_EMPTY",
+            "SOCCER_RESULTS_EMPTY",
+            "SOCCER_STANDINGS_EMPTY",
+            "SOCCER_HALF_SCORE_AND_TEAM_STATS_EMPTY",
+            "SOCCER_ODDS_COVERAGE_EMPTY",
+            "SOCCER_GENERIC_PLACEHOLDER_NOT_PRODUCTION_COVERAGE"
+          ]
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_10"
     }
   ],
   "certificationMarkers": [
@@ -369,6 +415,9 @@
     "NFL_SEASON_BOUNDARY_PASS",
     "NFL_NO_TEMPORAL_LEAKAGE_PASS",
     "NHL_HISTORICAL_FOUNDATION_V2_PASS",
-    "NHL_DATA_READINESS_PASS"
+    "NHL_DATA_READINESS_PASS",
+    "SOCCER_COMPETITION_FOUNDATION_V2_PASS",
+    "SOCCER_SEASON_IDENTITY_PASS",
+    "SOCCER_NO_GLOBAL_COVERAGE_OVERCLAIM_PASS"
   ]
 }

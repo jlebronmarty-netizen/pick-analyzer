@@ -38,6 +38,8 @@ Phase 7 NFL historical foundation is locally implemented at `/api/data-foundatio
 
 Phase 8 NHL historical foundation is locally implemented at `/api/data-foundation/nhl`. It preserves cross-year season governance and reports NHL readiness honestly as empty/blocked across schedule, results, stats, goalie/starter coverage, injuries and odds until legitimate stored or licensed data is available.
 
+Phase 9 Soccer historical foundation is locally implemented at `/api/data-foundation/soccer`. It adds a competition readiness registry and preserves the explicit rule that Soccer is competition-specific; the current `soccer_generic` placeholder is migration readiness, not global production coverage.
+
 ## Completed
 
 ### Platform Certification
