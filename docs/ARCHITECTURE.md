@@ -86,6 +86,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/future-only-prediction-continuity-v2.service.ts` and `/api/data-foundation/future-predictions` provide the new epoch future-only contract. The service defines future eligibility, cutoff enforcement, completed-event blocking, originating-epoch settlement and epoch-aware learning labels, but it does not enable production scheduling or generate predictions.
 
+## Epoch Performance Learning V2
+
+`src/services/epoch-performance-learning-v2.service.ts` and `/api/data-foundation/epoch-performance` provide read-only epoch-aware performance views. The service separates active, archived and all-epoch scopes and reports bounded groups by inferred epoch, sport, model version and calibration bucket without changing Learning Brain weights, recalibrating models or promoting a production model.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

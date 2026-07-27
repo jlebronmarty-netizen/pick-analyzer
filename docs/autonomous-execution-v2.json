@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T03:50:00Z"
+    "updatedAt": "2026-07-27T04:05:00Z"
   },
   "phases": [
     {
@@ -662,7 +662,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T03:30:00Z",
       "completedAt": "2026-07-27T03:45:00Z",
-      "commit": "pending_self_reference",
+      "commit": "1a924d6439a653f9fba1e542aac5426dcee91d44",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -695,6 +695,48 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_17"
+    },
+    {
+      "phaseId": 17,
+      "phaseName": "EPOCH_AWARE_PERFORMANCE_AND_LEARNING_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T03:50:00Z",
+      "completedAt": "2026-07-27T04:05:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "epoch_performance_learning_validation_12_of_12",
+          "stored_data_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "active_archived_all_epoch_views",
+          "sport_performance_epoch_scoped",
+          "model_version_performance_epoch_scoped",
+          "calibration_epoch_scoped",
+          "learning_labels_epoch_aware",
+          "no_learning_weight_changes",
+          "no_model_recalibration"
+        ],
+        "summary": {
+          "predictionRowsAudited": 0,
+          "settledRows": 0,
+          "epochAwareEligibleRows": 0,
+          "activeEpochKey": "DATA_FOUNDATION_V2_EPOCH",
+          "learningWeightChangesExecuted": false,
+          "recalibrationExecuted": false
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_18"
     }
   ],
   "certificationMarkers": [
@@ -742,6 +784,10 @@
     "FUTURE_ONLY_PREDICTION_V2_PASS",
     "EPOCH_AWARE_SETTLEMENT_PASS",
     "NO_RETROSPECTIVE_PREDICTIONS_PASS",
-    "CUTOFF_ENFORCEMENT_V2_PASS"
+    "CUTOFF_ENFORCEMENT_V2_PASS",
+    "EPOCH_PERFORMANCE_REPORTING_PASS",
+    "EPOCH_AWARE_LEARNING_LABELS_PASS",
+    "NO_LEARNING_WEIGHT_CHANGE_PASS",
+    "NO_MODEL_RECALIBRATION_PASS"
   ]
 }

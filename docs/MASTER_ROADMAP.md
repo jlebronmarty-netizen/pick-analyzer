@@ -54,6 +54,8 @@ Phase 15 feature rebuild planning is locally implemented at `/api/data-foundatio
 
 Phase 16 future-only prediction continuity is locally implemented at `/api/data-foundation/future-predictions`. It defines active-epoch future eligibility, cutoff enforcement, originating-epoch settlement and epoch-aware learning labels while keeping production scheduling disabled.
 
+Phase 17 epoch-aware performance and learning reporting is locally implemented at `/api/data-foundation/epoch-performance`. It separates active, archived and all-epoch performance scopes, reports bounded performance groups by inferred epoch, sport and model version, and keeps learning labels epoch-aware without changing Learning Brain weights or recalibrating models.
+
 ## Completed
 
 ### Platform Certification
