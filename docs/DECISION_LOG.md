@@ -56,6 +56,14 @@ Decision: Add `src/services/nba-historical-foundation-v2.service.ts`, `/api/data
 
 Consequences: NBA foundation readiness is documented without provider calls or mutations. Stored NBA predictions remain trial/non-production, canonical game results are still empty, and no retrospective predictions or model-confidence changes were introduced.
 
+## 2026-07-27 - Add NFL Historical Foundation V2 Read-Only Audit
+
+Context: NFL requires season-year governance with cross-calendar postseason handling, but the current stored canonical NFL foundation is empty in this local environment.
+
+Decision: Add `src/services/nfl-historical-foundation-v2.service.ts`, `/api/data-foundation/nfl` and `docs/NFL_HISTORICAL_FOUNDATION_V2.md` to audit stored NFL schedule, results, stats, injuries, depth-chart/starter coverage, odds, mappings, predictions and season-boundary readiness.
+
+Consequences: NFL readiness is documented as an honest empty/blocked stored-data state with zero provider calls and zero mutations. Bye weeks remain represented as schedule gaps, no fake events or odds were created, and no retrospective NFL predictions were generated.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

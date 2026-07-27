@@ -34,6 +34,8 @@ Phase 5 MLB historical foundation is locally implemented at `/api/data-foundatio
 
 Phase 6 NBA historical foundation is locally implemented at `/api/data-foundation/nba`. It audits stored NBA schedule, stats, odds, mappings and predictions while preserving trial/non-production isolation and reporting canonical game-result gaps.
 
+Phase 7 NFL historical foundation is locally implemented at `/api/data-foundation/nfl`. It preserves NFL season-year and cross-calendar postseason governance while reporting the current stored-data state honestly as empty/blocked across schedule, results, stats, injuries, depth charts/starters and odds.
+
 ## Completed
 
 ### Platform Certification
