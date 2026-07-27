@@ -396,3 +396,19 @@ Validation:
 - BSN remains a partial custom-league foundation with completion blocked pending approved manual/CSV or official-source imports
 - canonical results, stats, boxscores, injuries, lineups, odds and props remain incomplete or unavailable
 - no provider calls, imports, mutations, retrospective predictions or production activation were executed
+
+### Phase H1 - Tennis And UFC Event Readiness Certification V1
+
+Status: completed locally as event-driven empty/blocked readiness certification.
+
+Artifacts:
+
+- `docs/TENNIS_UFC_EVENT_READINESS_CERTIFICATION_V1.md`
+- `scripts/historical-completion-v1-h1-tennis-ufc-readiness-validate.mjs`
+
+Validation:
+
+- Tennis/UFC event readiness validation passed 10/10
+- both sports remain event-driven, not team-season forced
+- all tracked Tennis and UFC datasets remain 0 rows
+- no provider calls, imports, mutations, retrospective predictions or production activation were executed
