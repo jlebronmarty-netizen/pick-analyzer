@@ -23,6 +23,7 @@ Root cause: the adaptive refresh scheduler could report settlement freshness, an
 - Included settlement in the existing due-now domain decision path.
 - Exposed settlement backlog evidence in operations status.
 - Routed adaptive dry-run/execution planning for settlement to the oldest settlement-ready local date instead of the current slate date.
+- Added an optional protected execution `expectedAction` guard so approved settlement certifications cannot drift into a different due action if live scheduler state changes between preflight and execution.
 - Kept settlement scoring, prediction probability, confidence, quality, threshold, model, Official Pick, Learning Brain, Kelly, Portfolio and player-prop logic unchanged.
 
 ## Guardrails
@@ -32,6 +33,7 @@ Root cause: the adaptive refresh scheduler could report settlement freshness, an
 - Remote mutations during certification: 0.
 - Production mutations during certification: 0.
 - Scheduler behavior changed only to surface already-eligible settlement work; it does not create predictions, rebuild features or alter model outputs.
+- `expectedAction` is optional and preserves default scheduler behavior for existing cron callers.
 
 ## Certification Markers
 

@@ -12,6 +12,10 @@ async function handle(request: NextRequest) {
   const id = requestId(request)
   try {
     const dryRun = parseBooleanParam(request.nextUrl.searchParams.get('dryRun'), true)
+    const body = request.method === 'POST' ? await request.json().catch(() => ({})) : {}
+    const expectedAction = String(
+      (body as Record<string, unknown>)?.expectedAction ?? request.nextUrl.searchParams.get('expectedAction') ?? ''
+    ).trim() || null
     if (dryRun === false && !authorized(request)) {
       return apiError({
         id,
@@ -21,7 +25,11 @@ async function handle(request: NextRequest) {
       })
     }
     const { runAdaptiveRefresh } = await loadAdaptiveRefreshOrchestrator()
-    return apiOk(await runAdaptiveRefresh({ dryRun, source: request.method === 'POST' ? 'MANUAL_PROTECTED' : 'SYSTEM' }), id)
+    return apiOk(await runAdaptiveRefresh({
+      dryRun,
+      source: request.method === 'POST' ? 'MANUAL_PROTECTED' : 'SYSTEM',
+      expectedAction,
+    }), id)
   } catch (error) {
     return apiError({ id, code: 'INTERNAL_ERROR', message: errorMessage(error, 'Unknown adaptive refresh error') })
   }

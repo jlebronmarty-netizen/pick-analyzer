@@ -23,6 +23,10 @@ const checks = [
     pass: service.includes("action === 'settle' && settlementBacklog.oldestReadyDate"),
   },
   {
+    name: 'protected execution can guard expected action drift',
+    pass: service.includes("executionMode: 'expected_action_mismatch'") && service.includes('expectedAction'),
+  },
+  {
     name: 'settlement backlog declares zero provider calls',
     pass: service.includes('providerCallsMade: 0') && service.includes('remoteMutationsMade: 0'),
   },

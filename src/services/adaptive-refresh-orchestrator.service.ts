@@ -1260,7 +1260,12 @@ function executableActionFromStatus(status: Awaited<ReturnType<typeof getAdaptiv
   return null
 }
 
+function isSupportedAdaptiveAction(action: string): action is Parameters<typeof executeOperatingDay>[0]['action'] {
+  return ['status_refresh', 'morning_sync', 'midday_refresh', 'final_refresh', 'sync_results', 'settle', 'lock', 'replay', 'calibrate'].includes(action)
+}
+
 function providerForAction(action: Parameters<typeof executeOperatingDay>[0]['action'] | null) {
+  if (action === 'settle' || action === 'lock' || action === 'replay' || action === 'calibrate') return 'internal'
   if (action === 'status_refresh' || action === 'sync_results') return 'mlb_stats_api'
   return 'sportsdataio'
 }
@@ -1300,10 +1305,19 @@ function providerResultClassification({
   return 'PROVIDER_CHECK_COMPLETED_NO_CHANGE'
 }
 
-export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTECTED' }: { dryRun?: boolean | null; source?: string | null } = {}) {
+export async function runAdaptiveRefresh({
+  dryRun = true,
+  source = 'MANUAL_PROTECTED',
+  expectedAction = null,
+}: {
+  dryRun?: boolean | null
+  source?: string | null
+  expectedAction?: string | null
+} = {}) {
   const status = await getAdaptiveRefreshStatus()
   const dueNow = status.refreshPlan.filter((item) => item.decision === 'DUE_NOW')
   const action = executableActionFromStatus(status)
+  const normalizedExpectedAction = expectedAction ? String(expectedAction).trim() : null
   const actionDateResolution = action
     ? await resolveMlbOperatingDate({ action, now: new Date(status.generatedAt) })
     : null
@@ -1329,6 +1343,50 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
   const executionRunId = crypto.randomUUID()
   const lockKey = `adaptive-refresh:${status.sportKey}:${selectedDate}:${action ?? 'status'}`
 
+  if (normalizedExpectedAction && !isSupportedAdaptiveAction(normalizedExpectedAction)) {
+    return {
+      success: false,
+      status: 'BLOCKED',
+      mode: 'adaptive_refresh_execution_bridge_v2',
+      generatedAt: status.generatedAt,
+      dryRun: dryRun !== false,
+      executionMode: 'invalid_expected_action',
+      executionRunId,
+      expectedAction: normalizedExpectedAction,
+      selectedAction: action,
+      selectedDate,
+      dateSelection: executionDateSelection,
+      dueSteps: dueNow,
+      blockedReason: 'The requested expectedAction is not supported by the adaptive refresh execution bridge.',
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+      guardrails: status.guardrails,
+    }
+  }
+
+  if (dryRun === false && normalizedExpectedAction && action !== normalizedExpectedAction) {
+    return {
+      success: false,
+      status: 'BLOCKED',
+      mode: 'adaptive_refresh_execution_bridge_v2',
+      generatedAt: status.generatedAt,
+      dryRun: false,
+      executionMode: 'expected_action_mismatch',
+      executionRunId,
+      expectedAction: normalizedExpectedAction,
+      selectedAction: action,
+      selectedDate,
+      dateSelection: executionDateSelection,
+      dueSteps: dueNow,
+      refreshPlan: status.refreshPlan,
+      providerCallForecast: status.providerCallForecast,
+      blockedReason: 'Live scheduler state no longer matches the caller-approved expected action; no execution was attempted.',
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+      guardrails: status.guardrails,
+    }
+  }
+
   if (dryRun !== false) {
     return {
       success: true,
@@ -1338,6 +1396,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
       dryRun: true,
       executionMode: 'dry_run_plan_only',
       executionRunId,
+      expectedAction: normalizedExpectedAction,
       selectedAction: action,
       selectedDate,
       dateSelection: executionDateSelection,
@@ -1362,6 +1421,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
       dryRun: false,
       executionMode: 'no_supported_due_action',
       executionRunId,
+      expectedAction: normalizedExpectedAction,
       selectedAction: null,
       selectedDate,
       dateSelection: null,
@@ -1393,6 +1453,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
       dryRun: false,
       executionMode: 'provider_budget_blocked',
       executionRunId,
+      expectedAction: normalizedExpectedAction,
       selectedAction: action,
       selectedDate,
       dateSelection: executionDateSelection,
@@ -1415,6 +1476,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
       dryRun: false,
       executionMode: 'duplicate_or_overlapping_run_blocked',
       executionRunId,
+      expectedAction: normalizedExpectedAction,
       selectedAction: action,
       selectedDate,
       dateSelection: executionDateSelection,
@@ -1479,6 +1541,7 @@ export async function runAdaptiveRefresh({ dryRun = true, source = 'MANUAL_PROTE
       executionMode: 'executed_existing_operating_day_pipeline',
       executionSource: source ?? 'MANUAL_PROTECTED',
       executionRunId,
+      expectedAction: normalizedExpectedAction,
       selectedAction: action,
       selectedDate,
       dateSelection: executionDateSelection,
