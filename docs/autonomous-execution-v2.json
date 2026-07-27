@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T03:44:00Z"
+    "updatedAt": "2026-07-27T03:49:00Z"
   },
   "phases": [
     {
@@ -1133,7 +1133,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T03:32:00Z",
       "completedAt": "2026-07-27T03:36:00Z",
-      "commit": "pending_self_reference",
+      "commit": "a387408fa4748338fc7ff280a355e3a953b6f0e5",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed",
@@ -1181,6 +1181,59 @@
         "command": "git diff --check",
         "status": "passed"
       }
+    },
+    {
+      "phaseId": "B5",
+      "phaseName": "MLB_MARKET_DATA_FOUNDATION_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T03:45:00Z",
+      "completedAt": "2026-07-27T03:49:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-b5-mlb-markets-validate.mjs",
+        "status": "passed",
+        "checks": 8,
+        "passed": 8
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "stored_current_odds_documented",
+          "genuine_stored_player_props_documented",
+          "standard_market_contracts_preserved",
+          "historical_odds_blocked",
+          "no_fabricated_sportsbook_lines",
+          "sports_odds_snapshots_storage_contract",
+          "no_ev_kelly_recommendation_logic",
+          "provider_calls_zero"
+        ],
+        "summary": {
+          "oddsSnapshots": 48569,
+          "storedPlayerProps": 11,
+          "historicalOddsCalls": 0,
+          "evOrKellyAdded": false
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "artifacts": [
+        "docs/MLB_MARKET_DATA_FOUNDATION_V2.md",
+        "scripts/historical-completion-v1-b5-mlb-markets-validate.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [
+        "historical_odds_entitlement_and_cost_not_approved",
+        "broader_player_props_not_certified"
+      ],
+      "nextPhase": "B6_MLB_FOUNDATION_CERTIFICATION_V3",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-b5-mlb-markets-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase B6.",
+      "continuationDecision": "continue_to_phase_B6_with_market_blockers_documented"
     }
   ],
   "certificationMarkers": [
@@ -1252,6 +1305,8 @@
     "MLB_STAT_RECONCILIATION_V3_PASS",
     "MLB_PLAYER_IDENTITY_V3_PASS",
     "MLB_STARTER_IDENTITY_V3_PASS",
-    "NO_AMBIGUOUS_PLAYER_PERSISTENCE_PASS"
+    "NO_AMBIGUOUS_PLAYER_PERSISTENCE_PASS",
+    "MLB_MARKET_DATA_FOUNDATION_V2_PASS",
+    "MLB_PROP_MARKET_READINESS_PASS"
   ]
 }

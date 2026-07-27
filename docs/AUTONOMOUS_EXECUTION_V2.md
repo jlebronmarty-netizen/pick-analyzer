@@ -206,6 +206,8 @@ Validation:
 
 Status: completed locally.
 
+Commit: `a387408fa4748338fc7ff280a355e3a953b6f0e5`
+
 Artifacts:
 
 - `docs/MLB_PLAYER_STARTER_IDENTITY_V3.md`
@@ -217,6 +219,26 @@ Validation:
 - SportsDataIO, Retrosheet, The Odds API pitcher names, starter assignments, pitcher projections and props covered
 - normalized-only and ambiguous mappings remain blocked
 - new mappings persisted: 0
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0
+
+### Phase B5 - MLB Market Data Foundation V2
+
+Status: completed locally with market blockers documented.
+
+Artifacts:
+
+- `docs/MLB_MARKET_DATA_FOUNDATION_V2.md`
+- `scripts/historical-completion-v1-b5-mlb-markets-validate.mjs`
+
+Validation:
+
+- market-foundation validation passed 8/8
+- stored current odds and 11 genuine pitcher-outs prop rows documented
+- historical odds remain entitlement/cost blocked
+- broader player props remain future readiness only
+- EV/Kelly/recommendation logic added: false
 - provider calls: 0
 - remote mutations: 0
 - production mutations: 0
