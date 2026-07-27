@@ -665,9 +665,9 @@ function buildFilterMetadata(sportEligibility: ProbabilitySportEligibilitySummar
     defaults: {
       sport: 'all',
       market: 'all',
-      minProbability: 50,
-      minConfidence: 45,
-      minQuality: 45,
+      minProbability: 0,
+      minConfidence: 0,
+      minQuality: 0,
       maxRisk: 'all',
       dataFreshness: 'all',
       certificationLevel: 'all',
