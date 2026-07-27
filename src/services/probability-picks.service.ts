@@ -11,6 +11,8 @@ import type {
   ProbabilityParlayScope,
   ProbabilityPick,
   ProbabilityPickRisk,
+  ProbabilitySportEligibility,
+  ProbabilitySportEligibilitySummary,
   ProbabilityPicksResponse,
   ProbabilityParlaysResponse,
   ProbabilityValidationResponse,
@@ -23,6 +25,18 @@ const SUPPORTED_MARKETS: ProbabilityMarketType[] = ['moneyline', 'run_line', 'to
 const PITCHER_LINES = ['14.5', '15.5', '16.5', '17.5', '18.5'] as const
 const EXCLUDED_STATUSES = new Set(['completed', 'final', 'settled', 'closed', 'ignored', 'historical', 'replay', 'shadow', 'live', 'started', 'cancelled', 'void'])
 const FORBIDDEN_PROBABILITY_TEXT = /\b(sportsbook|odds|ev|kelly|stake|bankroll|official pick|portfolio)\b/i
+const MLB_LIMITED_ELIGIBILITY: ProbabilitySportEligibility = {
+  status: 'CERTIFIED_LIMITED',
+  eligibleForRanking: true,
+  reason: 'MLB projection-only rows are allowed because the stored pregame probability and pitcher projection surfaces have local certification evidence.',
+  engineCertification: 'MLB_PROJECTION_ONLY_LIMITED',
+}
+const UNCERTIFIED_ELIGIBILITY: ProbabilitySportEligibility = {
+  status: 'ENGINE_NOT_CERTIFIED',
+  eligibleForRanking: false,
+  reason: 'This sport is registered in stored prediction history, but its global Probability Picks ranking contract is not production-certified.',
+  engineCertification: 'NOT_CERTIFIED_FOR_PROBABILITY_PICKS_V1',
+}
 
 type PredictionHistoryRow = {
   id: string
@@ -122,6 +136,37 @@ function normalizeMarket(value: unknown): ProbabilityMarketType | null {
 function text(value: unknown, fallback = 'Unavailable') {
   const raw = typeof value === 'string' ? value.trim() : ''
   return raw || fallback
+}
+
+function sportEligibility(sport: string): ProbabilitySportEligibility {
+  return sport === 'baseball_mlb' ? MLB_LIMITED_ELIGIBILITY : UNCERTIFIED_ELIGIBILITY
+}
+
+function isRankEligible(pick: ProbabilityPick) {
+  return pick.sportEligibility.eligibleForRanking
+}
+
+function emptyEligibilityDetail(eligibility: ProbabilitySportEligibility) {
+  return { ...eligibility, rowsSeen: 0, rowsRanked: 0, rowsExcluded: 0 }
+}
+
+function buildSportEligibilitySummary(picks: ProbabilityPick[], excluded: ProbabilityPick[], requestedSport?: string | null): ProbabilitySportEligibilitySummary {
+  const details: ProbabilitySportEligibilitySummary['details'] = {}
+  for (const pick of [...picks, ...excluded]) {
+    const detail = details[pick.sport] ?? emptyEligibilityDetail(pick.sportEligibility)
+    detail.rowsSeen += 1
+    if (pick.sportEligibility.eligibleForRanking) detail.rowsRanked += 1
+    else detail.rowsExcluded += 1
+    details[pick.sport] = detail
+  }
+  const requested = requestedSport && requestedSport !== 'all' ? requestedSport : null
+  if (requested && !details[requested]) details[requested] = emptyEligibilityDetail(sportEligibility(requested))
+  return {
+    eligibleSports: Object.entries(details).filter(([, detail]) => detail.eligibleForRanking).map(([sport]) => sport).sort(),
+    excludedSports: Object.entries(details).filter(([, detail]) => !detail.eligibleForRanking && detail.rowsSeen > 0).map(([sport]) => sport).sort(),
+    excludedRows: Object.values(details).reduce((sum, detail) => sum + detail.rowsExcluded, 0),
+    details,
+  }
 }
 
 function isExcludedLifecycle(row: PredictionHistoryRow, now: Date) {
@@ -236,6 +281,7 @@ function predictionRowToPick(row: PredictionHistoryRow): ProbabilityPick | null 
   const market = normalizeMarket(row.market)
   if (!market || market === 'pitcher_outs') return null
   const snapshot = asRecord(row.feature_snapshot)
+  const sport = text(row.sport_key, 'unknown')
   const probability = normalizePercent(row.model_probability)
   const confidence = normalizePercent(row.confidence, 55)
   const quality = normalizePercent(snapshot.qualityScore ?? snapshot.featureQuality ?? snapshot.feature_quality ?? snapshot.dataQuality, Math.max(50, confidence - 6))
@@ -247,7 +293,7 @@ function predictionRowToPick(row: PredictionHistoryRow): ProbabilityPick | null 
   const generatedAt = text(row.generated_at ?? row.feature_snapshot_generated_at, nowIso())
   return {
     id: `prob_${hash([row.id, market, row.selection, row.line])}`,
-    sport: text(row.sport_key, 'unknown'),
+    sport,
     eventId: text(row.game_id, `event_${row.id}`),
     marketType: market,
     selection: selectionForRow(row, market),
@@ -267,6 +313,8 @@ function predictionRowToPick(row: PredictionHistoryRow): ProbabilityPick | null 
     freshness: round(freshness),
     featureCompleteness: round(completeness),
     source: 'prediction_history',
+    sportEligibility: sportEligibility(sport),
+    dataStatus: 'CURRENT_STORED',
   }
 }
 
@@ -313,6 +361,8 @@ function pitcherPickFromProjection(projection: MlbPitcherProjection): Probabilit
     freshness: round(freshness),
     featureCompleteness: round(completeness),
     source: 'mlb_pitcher_projection_engine',
+    sportEligibility: sportEligibility('baseball_mlb'),
+    dataStatus: 'MODEL_GENERATED',
   }
 }
 
@@ -326,12 +376,14 @@ async function loadPredictionHistoryPicks(limit: number) {
     .order('commence_time', { ascending: true })
     .limit(Math.min(Math.max(limit, 1), 500))
 
-  if (error) return { picks: [] as ProbabilityPick[], warning: `prediction_history_read_failed:${error.message}` }
-  const picks = (data ?? [])
+  if (error) return { picks: [] as ProbabilityPick[], excluded: [] as ProbabilityPick[], warning: `prediction_history_read_failed:${error.message}` }
+  const allPicks = (data ?? [])
     .filter((row) => !isExcludedLifecycle(row as PredictionHistoryRow, now))
     .map((row) => predictionRowToPick(row as PredictionHistoryRow))
     .filter((pick): pick is ProbabilityPick => Boolean(pick))
-  return { picks, warning: null as string | null }
+  const picks = allPicks.filter(isRankEligible)
+  const excluded = allPicks.filter((pick) => !isRankEligible(pick))
+  return { picks, excluded, warning: null as string | null }
 }
 
 async function loadPitcherPicks(date: string | null | undefined, limit: number) {
@@ -339,10 +391,11 @@ async function loadPitcherPicks(date: string | null | undefined, limit: number) 
     const slate = await previewPitcherProjection({ date, limit: Math.min(Math.max(limit, 1), 200) })
     return {
       picks: slate.projections.map(pitcherPickFromProjection).filter((pick): pick is ProbabilityPick => Boolean(pick)),
+      excluded: [] as ProbabilityPick[],
       warning: null as string | null,
     }
   } catch (error) {
-    return { picks: [] as ProbabilityPick[], warning: `pitcher_projection_read_failed:${error instanceof Error ? error.message : 'unknown'}` }
+    return { picks: [] as ProbabilityPick[], excluded: [] as ProbabilityPick[], warning: `pitcher_projection_read_failed:${error instanceof Error ? error.message : 'unknown'}` }
   }
 }
 
@@ -395,6 +448,10 @@ export async function getProbabilityPicks(filters: ProbabilityPickFilters = {}):
   ])
   const warnings = [history.warning, pitcher.warning].filter((warning): warning is string => Boolean(warning))
   const picks = top(uniqueById(applyFilters([...history.picks, ...pitcher.picks], filters)), (a, b) => b.score - a.score, limit)
+  const sportEligibility = buildSportEligibilitySummary(picks, [...history.excluded, ...pitcher.excluded], filters.sport)
+  if (sportEligibility.excludedRows > 0) {
+    warnings.push(`excluded_uncertified_probability_pick_rows:${sportEligibility.excludedRows}`)
+  }
   const sections = buildSections(picks)
   return {
     success: true,
@@ -409,6 +466,7 @@ export async function getProbabilityPicks(filters: ProbabilityPickFilters = {}):
       sports: [...new Set(picks.map((pick) => pick.sport))],
       markets: [...new Set(picks.map((pick) => pick.marketType))],
       projectionOnly: true,
+      sportEligibility,
     },
     filters: {
       sport: filters.sport ?? 'all',
@@ -632,10 +690,12 @@ export function validateProbabilityPickFixtures(): ProbabilityValidationResponse
   const checks = [
     ['fixture pick created', Boolean(pick)],
     ['recommendation type is probability only', pick?.recommendationType === RECOMMENDATION_TYPE],
+    ['mlb fixture is ranking eligible', pick?.sportEligibility.status === 'CERTIFIED_LIMITED' && pick.sportEligibility.eligibleForRanking],
     ['probability normalized to percentage', pick?.modelProbability === 64],
     ['post-start rows excluded', postStartExcluded],
     ['same-game correlation penalized', sameGameCorrelation],
     ['parlay generated without simple product', parlay !== null && parlay.combinedProbability !== round((64 / 100) * (58 / 100) * 100)],
+    ['uncertified sport rows are not ranking eligible', predictionRowToPick({ ...fixture, id: 'fixture-nfl', sport_key: 'americanfootball_nfl' })?.sportEligibility.eligibleForRanking === false],
     ['provider calls remain zero', true],
     ['remote mutations remain zero', true],
   ] as const

@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import type { ProbabilityParlay, ProbabilityParlayMode, ProbabilityParlayScope, ProbabilityPick, ProbabilityPickSection } from '@/types/probability-picks'
+import type { ProbabilityParlay, ProbabilityParlayMode, ProbabilityParlayScope, ProbabilityPick, ProbabilityPickSection, ProbabilitySportEligibilitySummary } from '@/types/probability-picks'
 
 type PicksData = {
   generatedAt: string
-  summary: { picksGenerated: number; sports: string[]; markets: string[] }
+  summary: { picksGenerated: number; sports: string[]; markets: string[]; sportEligibility: ProbabilitySportEligibilitySummary }
   sections: ProbabilityPickSection[]
   picks: ProbabilityPick[]
   warnings: string[]
@@ -52,6 +52,16 @@ function riskClass(risk: string) {
   return 'border-rose-500/40 bg-rose-500/10 text-rose-100'
 }
 
+function eligibilityClass(eligible: boolean) {
+  return eligible ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100' : 'border-amber-500/40 bg-amber-500/10 text-amber-100'
+}
+
+function dataStatusText(value: string) {
+  if (value === 'CURRENT_STORED') return 'Current Stored'
+  if (value === 'MODEL_GENERATED') return 'Model Generated'
+  return labelize(value)
+}
+
 function PickCard({ pick }: { pick: ProbabilityPick }) {
   return (
     <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-4">
@@ -62,6 +72,8 @@ function PickCard({ pick }: { pick: ProbabilityPick }) {
           <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-sky-200">Projection Only | No Betting Recommendation</p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs font-black uppercase">
+          <span className={`rounded-full border px-3 py-1 ${eligibilityClass(pick.sportEligibility.eligibleForRanking)}`}>{labelize(pick.sportEligibility.status)}</span>
+          <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-slate-100">{dataStatusText(pick.dataStatus)}</span>
           <span className={`rounded-full border px-3 py-1 ${riskClass(pick.risk)}`}>{pick.risk} Risk</span>
           <span className="rounded-full border border-slate-700 bg-slate-950 px-3 py-1 text-slate-100">Score {Math.round(pick.score)}</span>
         </div>
@@ -105,6 +117,7 @@ function PickCard({ pick }: { pick: ProbabilityPick }) {
         <span>Generated {new Date(pick.generatedAt).toLocaleString()}</span>
         <span>Version {pick.projectionVersion}</span>
         <span>Group {pick.correlationGroup}</span>
+        <span>{pick.sportEligibility.engineCertification}</span>
       </div>
     </article>
   )
@@ -152,6 +165,7 @@ function ParlayCard({ parlay }: { parlay: ProbabilityParlay }) {
 export default function ProbabilityPicksClient() {
   const [activeTab, setActiveTab] = useState<'picks' | 'parlays'>('picks')
   const [activeSection, setActiveSection] = useState('highest_probability')
+  const [sport, setSport] = useState('all')
   const [market, setMarket] = useState('all')
   const [minProbability, setMinProbability] = useState(50)
   const [minConfidence, setMinConfidence] = useState(45)
@@ -164,12 +178,13 @@ export default function ProbabilityPicksClient() {
   const [error, setError] = useState<string | null>(null)
 
   const query = useMemo(() => new URLSearchParams({
+    sport,
     market,
     minProbability: String(minProbability),
     minConfidence: String(minConfidence),
     minQuality: String(minQuality),
     limit: '120',
-  }).toString(), [market, minProbability, minConfidence, minQuality])
+  }).toString(), [sport, market, minProbability, minConfidence, minQuality])
 
   useEffect(() => {
     let cancelled = false
@@ -199,6 +214,8 @@ export default function ProbabilityPicksClient() {
 
   const section = picksData?.sections.find((item) => item.id === activeSection) ?? picksData?.sections[0]
   const visibleSections = picksData?.sections.filter((item) => sectionOrder.includes(item.id)) ?? []
+  const eligibleSports = picksData?.summary.sportEligibility.eligibleSports ?? []
+  const excludedRows = picksData?.summary.sportEligibility.excludedRows ?? 0
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -208,6 +225,7 @@ export default function ProbabilityPicksClient() {
             <p className="text-xs font-black uppercase tracking-[0.28em] text-sky-300">AI Operations</p>
             <h1 className="mt-2 text-3xl font-black text-white md:text-4xl">Probability Picks</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">Projection Only | No Betting Recommendation. Rankings use internal model probability, confidence, quality, freshness and correlation controls.</p>
+            <p className="mt-2 max-w-3xl text-xs font-bold uppercase tracking-[0.14em] text-emerald-200">Sport eligibility: MLB certified limited. Uncertified sports are excluded from rankings and reported as insufficient certification.</p>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center text-xs font-black uppercase md:min-w-[420px]">
             <p className="rounded-lg border border-slate-800 bg-slate-900 p-3 text-slate-400">Picks<span className="block text-xl text-white">{picksData?.summary.picksGenerated ?? 0}</span></p>
@@ -217,6 +235,13 @@ export default function ProbabilityPicksClient() {
         </div>
 
         <div className="mt-5 flex flex-wrap items-end gap-3">
+          <label className="text-xs font-bold uppercase text-slate-400">
+            Sport
+            <select value={sport} onChange={(event) => setSport(event.target.value)} className="mt-1 block h-10 rounded-lg border border-slate-700 bg-slate-900 px-3 text-sm font-bold text-white">
+              <option value="all">All Certified</option>
+              {eligibleSports.map((item) => <option key={item} value={item}>{labelize(item)}</option>)}
+            </select>
+          </label>
           <label className="text-xs font-bold uppercase text-slate-400">
             Market
             <select value={market} onChange={(event) => setMarket(event.target.value)} className="mt-1 block h-10 rounded-lg border border-slate-700 bg-slate-900 px-3 text-sm font-bold text-white">
@@ -243,6 +268,12 @@ export default function ProbabilityPicksClient() {
 
         {error && <div className="mt-5 rounded-lg border border-rose-500/30 bg-rose-950/30 p-4 text-sm font-bold text-rose-100">{error}</div>}
         {loading && <div className="mt-8 rounded-lg border border-slate-800 bg-slate-900 p-6 text-sm font-bold text-slate-300">Loading projection rankings...</div>}
+        {!loading && !error && (
+          <div className="mt-5 rounded-lg border border-slate-800 bg-slate-900/80 p-4 text-sm text-slate-300">
+            <p className="font-black text-white">Probability means estimated outcome likelihood. Confidence means trust in that estimate. Quality means completeness of the inputs.</p>
+            <p className="mt-1">Eligible sports: {eligibleSports.length ? eligibleSports.map(labelize).join(', ') : 'None'}. Excluded uncertified rows: {excludedRows}. Provider calls: 0. Remote mutations: 0.</p>
+          </div>
+        )}
 
         {!loading && !error && activeTab === 'picks' && (
           <div className="mt-6 grid gap-6 xl:grid-cols-[300px_1fr]">
@@ -259,7 +290,7 @@ export default function ProbabilityPicksClient() {
                 <h2 className="text-xl font-black text-white">{section?.label ?? 'Projection Only'}</h2>
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{picksData?.generatedAt ? new Date(picksData.generatedAt).toLocaleString() : 'N/A'}</p>
               </div>
-              {!section?.picks.length && <div className="rounded-lg border border-slate-800 bg-slate-900 p-6 text-sm text-slate-300">No qualifying projection-only picks match the current filters.</div>}
+              {!section?.picks.length && <div className="rounded-lg border border-slate-800 bg-slate-900 p-6 text-sm text-slate-300">No qualifying projection-only picks match the current filters or certified sport eligibility. Registered but uncertified sports remain Insufficient Data until their engine and stored data are certified.</div>}
               {section?.picks.map((pick) => <PickCard key={pick.id} pick={pick} />)}
             </section>
           </div>

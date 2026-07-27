@@ -10,6 +10,47 @@ export type ProbabilityParlayMode = 'CONSERVATIVE' | 'BALANCED' | 'AGGRESSIVE'
 
 export type ProbabilityParlayScope = 'MULTI_SPORT' | 'MLB_ONLY'
 
+export type ProbabilitySportEligibilityStatus =
+  | 'CERTIFIED_ACTIVE'
+  | 'CERTIFIED_LIMITED'
+  | 'SHADOW_ONLY'
+  | 'INSUFFICIENT_DATA'
+  | 'ENGINE_NOT_CERTIFIED'
+  | 'OUT_OF_SEASON'
+  | 'STALE'
+  | 'BLOCKED'
+
+export type ProbabilityDataStatus =
+  | 'LIVE_PROVIDER'
+  | 'CURRENT_STORED'
+  | 'STALE_STORED'
+  | 'MODEL_GENERATED'
+  | 'FALLBACK'
+  | 'FIXTURE'
+  | 'SHADOW'
+  | 'PREVIEW'
+  | 'EMPTY'
+  | 'BLOCKED'
+  | 'UNKNOWN'
+
+export type ProbabilitySportEligibility = {
+  status: ProbabilitySportEligibilityStatus
+  eligibleForRanking: boolean
+  reason: string
+  engineCertification: string
+}
+
+export type ProbabilitySportEligibilitySummary = {
+  eligibleSports: string[]
+  excludedSports: string[]
+  excludedRows: number
+  details: Record<string, ProbabilitySportEligibility & {
+    rowsSeen: number
+    rowsRanked: number
+    rowsExcluded: number
+  }>
+}
+
 export type ProbabilityPick = {
   id: string
   sport: string
@@ -32,6 +73,8 @@ export type ProbabilityPick = {
   freshness: number
   featureCompleteness: number
   source: 'prediction_history' | 'mlb_pitcher_projection_engine'
+  sportEligibility: ProbabilitySportEligibility
+  dataStatus: ProbabilityDataStatus
 }
 
 export type ProbabilityPickSection = {
@@ -86,6 +129,7 @@ export type ProbabilityPicksResponse = {
     sports: string[]
     markets: ProbabilityMarketType[]
     projectionOnly: true
+    sportEligibility: ProbabilitySportEligibilitySummary
   }
   filters: Record<string, string | number | null>
   sections: ProbabilityPickSection[]

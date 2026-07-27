@@ -17,7 +17,7 @@
     "remoteMutationsMade": 0,
     "productionMutationsMade": 0,
     "createdAt": "2026-07-27T16:45:00Z",
-    "updatedAt": "2026-07-27T16:54:00Z"
+    "updatedAt": "2026-07-27T17:20:00Z"
   },
   "phases": [
     {
@@ -50,10 +50,42 @@
         "data_foundation_readiness_local_smoke_timeout_under_bounded_cap"
       ],
       "continuationDecision": "continue_to_probability_picks_multi_sport_audit"
+    },
+    {
+      "phaseId": "STAGE_4",
+      "phaseName": "PROBABILITY_PICKS_MULTI_SPORT_AUDIT_AND_ELIGIBILITY_HARDENING",
+      "status": "completed",
+      "startedAt": "2026-07-27T17:05:00Z",
+      "completedAt": "2026-07-27T17:20:00Z",
+      "commit": "pending_self_reference",
+      "artifacts": [
+        "src/types/probability-picks.ts",
+        "src/services/probability-picks.service.ts",
+        "src/components/probability-picks/ProbabilityPicksClient.tsx",
+        "docs/PROBABILITY_PICKS_MULTI_SPORT_AUDIT_V1.md",
+        "scripts/product-audit-v1-probability-picks-validate.mjs"
+      ],
+      "validation": {
+        "command": "node scripts/product-audit-v1-probability-picks-validate.mjs",
+        "status": "passed",
+        "checks": 12,
+        "passed": 12
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "productionMutations": 0,
+      "probabilityLogicChanged": false,
+      "learningBrainChanged": false,
+      "blockers": [],
+      "continuationDecision": "continue_to_metric_language_and_readiness_matrix"
     }
   ],
   "certificationMarkers": [
     "PRODUCT_ROUTE_INVENTORY_PASS",
+    "PROBABILITY_PICKS_SPORT_ELIGIBILITY_PASS",
+    "NO_UNCERTIFIED_SPORT_RANKING_PASS",
+    "PROBABILITY_CONFIDENCE_CLARITY_PASS",
+    "NO_PROBABILITY_LOGIC_CHANGE_PASS",
     "NO_PROVIDER_CALL_BREACH_PASS",
     "NO_DATABASE_MUTATION_PASS",
     "NO_EPOCH_ACTIVATION_PASS"
