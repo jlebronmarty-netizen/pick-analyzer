@@ -82,6 +82,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/feature-rebuild-plan-v2.service.ts` and `/api/data-foundation/feature-rebuild` provide a plan-only feature rebuild contract. It requires sport-aware and season-aware windows, as-of-time safety, no future information, checkpoint/resume, deterministic idempotency and validation after each batch, while production execution remains disabled.
 
+## Future-Only Prediction Continuity V2
+
+`src/services/future-only-prediction-continuity-v2.service.ts` and `/api/data-foundation/future-predictions` provide the new epoch future-only contract. The service defines future eligibility, cutoff enforcement, completed-event blocking, originating-epoch settlement and epoch-aware learning labels, but it does not enable production scheduling or generate predictions.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

@@ -52,6 +52,8 @@ Phase 14 legacy prediction archive and metric isolation is locally implemented a
 
 Phase 15 feature rebuild planning is locally implemented at `/api/data-foundation/feature-rebuild`. It defines sport-aware, season-aware, as-of-time-safe, checkpointed and idempotent rebuild contracts while keeping production execution disabled.
 
+Phase 16 future-only prediction continuity is locally implemented at `/api/data-foundation/future-predictions`. It defines active-epoch future eligibility, cutoff enforcement, originating-epoch settlement and epoch-aware learning labels while keeping production scheduling disabled.
+
 ## Completed
 
 ### Platform Certification

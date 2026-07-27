@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T03:30:00Z"
+    "updatedAt": "2026-07-27T03:50:00Z"
   },
   "phases": [
     {
@@ -624,7 +624,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T03:15:00Z",
       "completedAt": "2026-07-27T03:30:00Z",
-      "commit": "pending_self_reference",
+      "commit": "0809475e75d61867ee486e7490d94becf4b4dd79",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -655,6 +655,46 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_16"
+    },
+    {
+      "phaseId": 16,
+      "phaseName": "NEW_EPOCH_FUTURE_ONLY_PREDICTION_CONTINUITY_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T03:30:00Z",
+      "completedAt": "2026-07-27T03:45:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "future_only_prediction_validation_10_of_10",
+          "stored_data_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "future_only_contract",
+          "cutoff_enforcement_contract",
+          "settlement_epoch_aware",
+          "learning_labels_epoch_aware",
+          "no_retrospective_predictions_generated",
+          "production_scheduling_not_enabled"
+        ],
+        "summary": {
+          "totalPredictionRowsAudited": 0,
+          "futureRows": 0,
+          "retrospectivePredictionsGenerated": false,
+          "productionSchedulingEnabled": false,
+          "historicalReplayActivated": false
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_17"
     }
   ],
   "certificationMarkers": [
@@ -698,6 +738,10 @@
     "EPOCH_FILTERING_PASS",
     "FEATURE_REBUILD_PLAN_V2_PASS",
     "FEATURE_AS_OF_SAFETY_PASS",
-    "FEATURE_REBUILD_IDEMPOTENCY_PASS"
+    "FEATURE_REBUILD_IDEMPOTENCY_PASS",
+    "FUTURE_ONLY_PREDICTION_V2_PASS",
+    "EPOCH_AWARE_SETTLEMENT_PASS",
+    "NO_RETROSPECTIVE_PREDICTIONS_PASS",
+    "CUTOFF_ENFORCEMENT_V2_PASS"
   ]
 }

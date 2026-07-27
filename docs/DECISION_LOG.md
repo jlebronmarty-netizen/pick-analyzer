@@ -128,6 +128,14 @@ Decision: Add `src/services/feature-rebuild-plan-v2.service.ts`, `/api/data-foun
 
 Consequences: Rebuild planning is sport-aware, season-aware, as-of-time safe, checkpointed, resumable and idempotent. No production feature rows are rebuilt or written.
 
+## 2026-07-27 - Add Future-Only Prediction Continuity V2
+
+Context: After manual epoch activation, prediction generation must remain prospective only and preserve settlement and learning lineage.
+
+Decision: Add `src/services/future-only-prediction-continuity-v2.service.ts`, `/api/data-foundation/future-predictions` and `docs/FUTURE_ONLY_PREDICTION_CONTINUITY_V2.md`.
+
+Consequences: The future-only contract blocks completed events, requires generated timestamps before cutoff, keeps missed opportunities missed, and makes settlement/learning epoch-aware. Production scheduling remains disabled and no predictions were generated.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.
