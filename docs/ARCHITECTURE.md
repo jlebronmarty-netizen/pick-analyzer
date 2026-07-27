@@ -70,6 +70,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/data-foundation-quality-v2.service.ts` powers `/api/data-foundation/quality`, `/api/data-foundation/reconciliation` and `/api/data-foundation/readiness`. The layer composes stored coverage into completeness, freshness, duplicate, orphan, unresolved identity, missing-result, missing-stat and readiness reports. Reconciliation is report-only and never persists identity changes, deletes rows or calls providers.
 
+## Prediction Epoch Governance V2
+
+`src/services/prediction-epoch-governance-v2.service.ts` and `/api/data-foundation/epochs` define `LEGACY_EPOCH_V1` and `DATA_FOUNDATION_V2_EPOCH` as a migration-ready contract. Additive migration `202607270001_prediction_epoch_governance_v2.sql` creates `prediction_epochs` and nullable epoch links on `prediction_history`, but it is not applied or activated by this local run.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

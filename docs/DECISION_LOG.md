@@ -104,6 +104,14 @@ Decision: Add `src/services/data-foundation-quality-v2.service.ts` plus `/api/da
 
 Consequences: The new layer reports completeness, duplicate indicators, orphan indicators, unresolved identities, missing results, missing stats and readiness without executing provider calls or mutations. Reconciliation output is a report and never an automatic write plan.
 
+## 2026-07-27 - Add Prediction Epoch Governance V2 Contract
+
+Context: The platform needs an explicit epoch model before legacy metric isolation and future-only prediction continuity can be certified.
+
+Decision: Add `src/services/prediction-epoch-governance-v2.service.ts`, `/api/data-foundation/epochs`, `docs/PREDICTION_EPOCH_GOVERNANCE_V2.md` and additive migration `202607270001_prediction_epoch_governance_v2.sql`.
+
+Consequences: `LEGACY_EPOCH_V1` and `DATA_FOUNDATION_V2_EPOCH` are defined, rollback is explicit, and legacy prediction preservation is required. No migration was applied, no prediction rows were updated or deleted, and the new epoch was not activated.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

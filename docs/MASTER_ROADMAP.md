@@ -46,6 +46,8 @@ Phase 11 Tennis and UFC data readiness is locally implemented at `/api/data-foun
 
 Phase 12 global data quality and reconciliation is locally implemented at `/api/data-foundation/quality`, `/api/data-foundation/reconciliation` and `/api/data-foundation/readiness`. These APIs are read-only, report reconciliation items without mutation plans and keep provider calls at zero.
 
+Phase 13 prediction epoch governance is locally implemented at `/api/data-foundation/epochs` with additive unapplied migration `202607270001_prediction_epoch_governance_v2.sql`. It defines `LEGACY_EPOCH_V1` and `DATA_FOUNDATION_V2_EPOCH` while keeping the new epoch inactive until manual migration and activation approval.
+
 ## Completed
 
 ### Platform Certification
