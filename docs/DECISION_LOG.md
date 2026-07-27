@@ -160,6 +160,14 @@ Decision: Add `prediction-epoch-migration-state.service.ts` as the canonical rea
 
 Consequences: Empty `prediction_epochs` now reports `APPLIED_EMPTY` with legacy behavior active and V2 inactive. Partial/schema-cache states are explicit. No SQL is reapplied, no epoch rows are inserted, no prediction rows are modified and no activation occurs.
 
+## 2026-07-27 - Prepare Prediction Epoch Governance Seed Rows
+
+Context: After Gate 1 schema migration and migration-state detection were certified, production needed a separate manually approved Gate 2 for canonical epoch governance rows without backfilling or activating V2.
+
+Decision: Add `supabase/migrations/202607270002_prediction_epoch_governance_seed_v1.sql`, read-only precheck/postcheck SQL, guarded rollback SQL, fixture validation and `docs/PREDICTION_EPOCH_GOVERNANCE_SEEDING_V1.md`. The seed inserts `LEGACY_EPOCH_V1` as `ACTIVE` and `DATA_FOUNDATION_V2_EPOCH` as `SHADOW` only when absent and only after conflict guards pass.
+
+Consequences: Future manual Gate 2 application can create exactly two governance rows while preserving legacy behavior. V2 activation, legacy backfill, scheduler selection, metrics filtering, historical imports and feature rebuilds remain Gate 3 and are not started.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.

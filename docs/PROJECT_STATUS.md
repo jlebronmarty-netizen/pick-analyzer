@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-26 23:20:00Z
+Last updated: 2026-07-27 00:00:00Z
 
 ## 2026-07-26 Historical Sports Data Foundation V2 Autonomous Run
 
@@ -29,6 +29,7 @@ Last updated: 2026-07-26 23:20:00Z
 - Push, production deployment, production SQL, production data mutation, historical odds, scheduled player-prop ingestion, Player Prop EV V2 and Portfolio Intelligence remain disallowed for this run.
 - Prediction Epoch Governance V2 Production Migration Review and Hardening is locally complete. The root migration remains unapplied, but now includes guarded additive schema, RLS, indexes and comments; new read-only precheck/postcheck SQL, guarded rollback SQL and a manual runbook were added. Classification: `MIGRATION_READY_FOR_MANUAL_APPLICATION` pending explicit approval.
 - Prediction Epoch Migration Detection Fix V1 is locally implemented after manual SQL Editor execution exposed a false-negative migration status. Root cause: `/api/data-foundation/epochs` hardcoded `migrationApplied: false` and did not distinguish an applied-but-empty `prediction_epochs` table. A canonical read-only migration-state service now classifies `NOT_APPLIED`, `APPLIED_EMPTY`, `APPLIED_INACTIVE`, `APPLIED_ACTIVE`, `PARTIALLY_APPLIED`, `SCHEMA_CACHE_PENDING` and `VERIFICATION_ERROR`; related epoch endpoints consume the same contract.
+- Prediction Epoch Governance Seeding V1 is locally prepared as Gate 2 artifacts only. The additive idempotent seed SQL creates `LEGACY_EPOCH_V1` as the single active fallback and `DATA_FOUNDATION_V2_EPOCH` as `SHADOW`, with precheck, postcheck, guarded rollback, fixture validation and docs. It does not apply SQL, backfill `prediction_history`, activate V2, archive legacy behavior, run historical imports, rebuild features, change scheduler behavior or enable cron jobs.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1
 

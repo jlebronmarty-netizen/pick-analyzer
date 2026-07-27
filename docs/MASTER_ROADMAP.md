@@ -62,6 +62,8 @@ Prediction Epoch Governance V2 production migration review and hardening is loca
 
 Prediction Epoch Migration Detection Fix V1 is locally implemented. The data-foundation epoch APIs now use a canonical read-only migration-state contract that treats an empty `prediction_epochs` table as `APPLIED_EMPTY`, keeps `DATA_FOUNDATION_V2_EPOCH` inactive, preserves legacy behavior and detects partial/schema-cache states without mutating production data.
 
+Prediction Epoch Governance Seeding V1 is locally prepared as Gate 2. The seed artifacts create exactly two canonical governance rows when manually approved: `LEGACY_EPOCH_V1` as the single active fallback and `DATA_FOUNDATION_V2_EPOCH` as `SHADOW`. No seed SQL has been applied, no prediction rows are linked, and Gate 3 legacy backfill/V2 activation remains not started.
+
 ## Completed
 
 ### Platform Certification

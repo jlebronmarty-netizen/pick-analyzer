@@ -94,14 +94,23 @@ export function classifyPredictionEpochMigrationState(input: PredictionEpochMigr
   const activeEpochRows = tableOk
     ? input.epochTable.rows.filter((row) => String(row.status ?? '').toUpperCase() === 'ACTIVE').length
     : 0
+  const activeEpochRow = tableOk
+    ? input.epochTable.rows.find((row) => String(row.status ?? '').toUpperCase() === 'ACTIVE') ?? null
+    : null
   const activeV2Rows = tableOk
     ? input.epochTable.rows.filter((row) => row.epoch_key === 'DATA_FOUNDATION_V2_EPOCH' && String(row.status ?? '').toUpperCase() === 'ACTIVE').length
     : 0
+  const legacyEpochRow = tableOk
+    ? input.epochTable.rows.find((row) => row.epoch_key === 'LEGACY_EPOCH_V1') ?? null
+    : null
+  const v2EpochRow = tableOk
+    ? input.epochTable.rows.find((row) => row.epoch_key === 'DATA_FOUNDATION_V2_EPOCH') ?? null
+    : null
   const legacyEpochPresent = tableOk
-    ? input.epochTable.rows.some((row) => row.epoch_key === 'LEGACY_EPOCH_V1')
+    ? Boolean(legacyEpochRow)
     : false
   const v2EpochPresent = tableOk
-    ? input.epochTable.rows.some((row) => row.epoch_key === 'DATA_FOUNDATION_V2_EPOCH')
+    ? Boolean(v2EpochRow)
     : false
   const migrationApplied = ['APPLIED_EMPTY', 'APPLIED_UNSEEDED', 'APPLIED_INACTIVE', 'APPLIED_ACTIVE'].includes(migrationState)
 
@@ -117,8 +126,12 @@ export function classifyPredictionEpochMigrationState(input: PredictionEpochMigr
     epochRowCount: epochRows,
     activeEpochRows,
     activeEpochCount: activeEpochRows,
+    activeEpochKey: activeEpochRow?.epoch_key ?? null,
+    activeEpochStatus: activeEpochRow?.status ?? null,
     legacyEpochPresent,
+    legacyEpochStatus: legacyEpochRow?.status ?? null,
     v2EpochPresent,
+    v2EpochStatus: v2EpochRow?.status ?? null,
     newEpochActive: activeV2Rows > 0,
     legacyBehaviorActive: activeV2Rows === 0,
     activationRequired: activeV2Rows === 0,

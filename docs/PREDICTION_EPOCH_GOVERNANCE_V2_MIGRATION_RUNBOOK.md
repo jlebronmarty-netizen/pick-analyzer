@@ -1,6 +1,6 @@
 # Prediction Epoch Governance V2 Migration Runbook
 
-Status: migration review and hardening complete; production application requires separate explicit approval.
+Status: schema migration applied in production; governance seeding artifacts are prepared locally and require separate explicit approval before SQL application.
 
 Root migration:
 
@@ -18,11 +18,50 @@ Rollback:
 
 `supabase/migrations/rollback/202607270001_prediction_epoch_governance_v2_rollback.sql`
 
+Gate 2 seed SQL:
+
+`supabase/migrations/202607270002_prediction_epoch_governance_seed_v1.sql`
+
+Gate 2 precheck:
+
+`supabase/migrations/checks/202607270002_prediction_epoch_governance_seed_v1_precheck.sql`
+
+Gate 2 postcheck:
+
+`supabase/migrations/checks/202607270002_prediction_epoch_governance_seed_v1_postcheck.sql`
+
+Gate 2 rollback:
+
+`supabase/migrations/rollback/202607270002_prediction_epoch_governance_seed_v1_rollback.sql`
+
 ## Critical Boundary
 
-This migration is a schema contract only. It must not activate `DATA_FOUNDATION_V2_EPOCH`, archive legacy predictions, backfill epoch columns, change scheduler behavior, execute historical imports, rebuild features, change Learning Brain weights, change model calibration or mutate production prediction rows.
+Gate 1 is a schema contract only. Gate 2 creates governance rows only. Neither gate may activate `DATA_FOUNDATION_V2_EPOCH`, archive legacy predictions, backfill epoch columns, change scheduler behavior, execute historical imports, rebuild features, change Learning Brain weights, change model calibration or mutate production prediction rows.
 
-`DATA_FOUNDATION_V2_EPOCH` activation is a separate later gate.
+`DATA_FOUNDATION_V2_EPOCH` activation is Gate 3 and requires separate later approval.
+
+## Governance Gates
+
+Gate 1: schema migration
+
+- File: `supabase/migrations/202607270001_prediction_epoch_governance_v2.sql`
+- Status after successful application with no seed rows: `APPLIED_EMPTY`
+- Expected epoch rows: `0`
+
+Gate 2: governance row seeding
+
+- File: `supabase/migrations/202607270002_prediction_epoch_governance_seed_v1.sql`
+- Expected state after application: `APPLIED_INACTIVE`
+- Expected epoch rows: `2`
+- Expected active epoch key: `LEGACY_EPOCH_V1`
+- Expected V2 state: `DATA_FOUNDATION_V2_EPOCH` remains `SHADOW`
+- No prediction rows are linked or updated
+
+Gate 3: legacy backfill and V2 activation
+
+- Not started
+- Requires separate approval
+- Must define bounded prediction-history linking, future-only prediction selection, metric filtering, scheduler behavior, rollback and monitoring
 
 ## Backup Recommendations
 
@@ -182,3 +221,28 @@ A later gate must separately review and approve:
 - scheduler activation behavior
 - performance/learning epoch filters
 - rollback and deactivation rules after activation
+
+## Gate 2 Governance Seed Procedure
+
+Run this only after explicit approval.
+
+1. Confirm Gate 1 production state is `APPLIED_EMPTY` or the exact two-row seeded state from a prior successful Gate 2 run.
+2. Paste and run:
+   `supabase/migrations/checks/202607270002_prediction_epoch_governance_seed_v1_precheck.sql`
+3. Confirm `precheck_status = PASS`.
+4. Paste and run:
+   `supabase/migrations/202607270002_prediction_epoch_governance_seed_v1.sql`
+5. Paste and run:
+   `supabase/migrations/checks/202607270002_prediction_epoch_governance_seed_v1_postcheck.sql`
+6. Confirm:
+   - exactly one `LEGACY_EPOCH_V1` row
+   - exactly one `DATA_FOUNDATION_V2_EPOCH` row
+   - exactly one active epoch
+   - active epoch is legacy
+   - V2 remains `SHADOW`
+   - `prediction_history` count remains unchanged
+   - epoch-linked prediction rows remain `0`
+
+Gate 2 rollback is allowed only before epoch linking or V2 activation:
+
+`supabase/migrations/rollback/202607270002_prediction_epoch_governance_seed_v1_rollback.sql`

@@ -98,6 +98,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/prediction-epoch-migration-state.service.ts` is the canonical read-only migration-state detector for Prediction Epoch Governance V2. It distinguishes `NOT_APPLIED`, `APPLIED_EMPTY`, `APPLIED_INACTIVE`, `APPLIED_ACTIVE`, `PARTIALLY_APPLIED`, `SCHEMA_CACHE_PENDING` and `VERIFICATION_ERROR` by probing `prediction_epochs` and the nullable epoch columns on `prediction_history`. An empty `prediction_epochs` table is treated as applied schema with inactive V2 epoch, not as a missing migration.
 
+## Prediction Epoch Governance Seeding
+
+`supabase/migrations/202607270002_prediction_epoch_governance_seed_v1.sql` is the Gate 2 governance seed artifact. It is additive and idempotent, inserts `LEGACY_EPOCH_V1` as the single `ACTIVE` fallback epoch and inserts `DATA_FOUNDATION_V2_EPOCH` as `SHADOW`. Conflict guards fail before insert if canonical keys already exist with incompatible values, if prediction rows are already epoch-linked, if a noncanonical active epoch exists or if V2 is active. The seed does not backfill `prediction_history`, activate V2, archive legacy behavior, alter scheduler or settlement behavior, run historical imports or rebuild features.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.
