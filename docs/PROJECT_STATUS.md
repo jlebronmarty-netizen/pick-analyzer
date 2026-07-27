@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-27 04:29:00Z
+Last updated: 2026-07-27 04:39:00Z
 
 ## 2026-07-26 Historical Sports Data Foundation V2 Autonomous Run
 
@@ -41,6 +41,7 @@ Last updated: 2026-07-27 04:29:00Z
 - Phase B6 added `docs/MLB_HISTORICAL_FOUNDATION_V3_CERTIFICATION.md`, certifying MLB as a core/partial historical foundation while explicitly blocking any full-completion claim until result, stat, boxscore, starter, injury and historical market imports are approved and completed. No provider calls, imports, SQL, feature rebuilds, retrospective predictions or mutations were executed.
 - Phase C1 added `docs/NBA_BASELINE_CERTIFICATION_V1.md`, certifying NBA as a partial/trial baseline only. Canonical results remain 0, full schedule/stat/boxscore/prop coverage is blocked, and production prediction activation remains disallowed. No provider calls, imports, SQL, feature rebuilds, retrospective predictions or mutations were executed.
 - Phase C2 added `docs/NBA_RESULT_STAT_COMPLETION_PLAN_V1.md`, defining plan-only NBA completion manifests for schedule/results, boxscores/team stats, player stats, lineups/injuries and market snapshots. All imports remain unexecuted and require later provider/source, budget and mutation approval.
+- Phase C3 added `docs/NBA_IDENTITY_MARKET_READINESS_V1.md`, documenting exact-only NBA identity readiness and partial/trial market boundaries. NBA player props, alternate lines, live markets, EV, Kelly, staking, Official Picks and Portfolio logic remain blocked.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1
 

@@ -296,3 +296,21 @@ Validation:
 - schedule/results, team stats, player stats, lineups/injuries and market manifests are plan-only
 - canonical NBA results remain blocked at 0 rows before any future import
 - no provider calls, imports, mutations, retrospective predictions or production activation were executed
+
+### Phase C3 - NBA Identity And Market Readiness V1
+
+Status: completed locally as readiness contract with NBA props and production market activation blocked.
+
+Artifacts:
+
+- `docs/NBA_IDENTITY_MARKET_READINESS_V1.md`
+- `scripts/historical-completion-v1-c3-nba-identity-market-validate.mjs`
+
+Validation:
+
+- NBA identity/market readiness validation passed 10/10
+- exact provider identity rules are allowed while normalized-only/fuzzy persistence remains blocked
+- NBA player props, alternate lines, live markets, EV, Kelly, staking, official-pick and portfolio logic remain blocked
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0
