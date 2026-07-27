@@ -78,6 +78,10 @@ Historical Sports Data Foundation V2 uses `docs/autonomous-execution-v2.json` as
 
 `src/services/legacy-prediction-metric-isolation-v2.service.ts` and `/api/data-foundation/legacy-metrics` provide read-only deletion-candidate classification and epoch-aware metric filtering rules. The service never deletes predictions, mass-updates rows or archives legacy rows automatically; it only reports candidates and filter contracts.
 
+## Feature Rebuild Plan V2
+
+`src/services/feature-rebuild-plan-v2.service.ts` and `/api/data-foundation/feature-rebuild` provide a plan-only feature rebuild contract. It requires sport-aware and season-aware windows, as-of-time safety, no future information, checkpoint/resume, deterministic idempotency and validation after each batch, while production execution remains disabled.
+
 ## Next.js Structure
 
 - `src/app/page.tsx`, `src/app/login/page.tsx`, `src/app/register/page.tsx`, `src/app/dashboard/page.tsx` and `src/app/model/page.tsx` define pages.

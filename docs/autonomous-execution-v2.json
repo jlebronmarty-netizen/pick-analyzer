@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T03:15:00Z"
+    "updatedAt": "2026-07-27T03:30:00Z"
   },
   "phases": [
     {
@@ -588,7 +588,7 @@
       "status": "completed",
       "startedAt": "2026-07-27T03:00:00Z",
       "completedAt": "2026-07-27T03:15:00Z",
-      "commit": "pending_self_reference",
+      "commit": "74cafc8c35bd638101105a938222c11132e010c9",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed"
@@ -617,6 +617,44 @@
       "migrationsCreated": [],
       "blockers": [],
       "continuationDecision": "continue_to_phase_15"
+    },
+    {
+      "phaseId": 15,
+      "phaseName": "FEATURE_REBUILD_PLAN_V2",
+      "status": "completed",
+      "startedAt": "2026-07-27T03:15:00Z",
+      "completedAt": "2026-07-27T03:30:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed"
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "feature_rebuild_plan_validation_8_of_8",
+          "stored_data_read_only",
+          "zero_provider_calls",
+          "zero_remote_mutations",
+          "plan_only_execution",
+          "as_of_safety_contract",
+          "checkpoint_resume_contract",
+          "idempotency_contract"
+        ],
+        "summary": {
+          "sportsPlanned": 8,
+          "executionMode": "PLAN_ONLY",
+          "productionExecutionAllowed": false,
+          "fixtureWriteExecuted": false,
+          "sportsWithExistingFeatureSnapshots": 0
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "migrationsCreated": [],
+      "blockers": [],
+      "continuationDecision": "continue_to_phase_16"
     }
   ],
   "certificationMarkers": [
@@ -657,6 +695,9 @@
     "PREDICTION_ROLLBACK_CONTRACT_PASS",
     "LEGACY_METRIC_ISOLATION_V2_PASS",
     "NO_PREDICTION_DELETION_PASS",
-    "EPOCH_FILTERING_PASS"
+    "EPOCH_FILTERING_PASS",
+    "FEATURE_REBUILD_PLAN_V2_PASS",
+    "FEATURE_AS_OF_SAFETY_PASS",
+    "FEATURE_REBUILD_IDEMPOTENCY_PASS"
   ]
 }

@@ -50,6 +50,8 @@ Phase 13 prediction epoch governance is locally implemented at `/api/data-founda
 
 Phase 14 legacy prediction archive and metric isolation is locally implemented at `/api/data-foundation/legacy-metrics`. It provides report-only deletion-candidate classification and active-epoch metric filtering rules without deleting, archiving or updating prediction rows.
 
+Phase 15 feature rebuild planning is locally implemented at `/api/data-foundation/feature-rebuild`. It defines sport-aware, season-aware, as-of-time-safe, checkpointed and idempotent rebuild contracts while keeping production execution disabled.
+
 ## Completed
 
 ### Platform Certification

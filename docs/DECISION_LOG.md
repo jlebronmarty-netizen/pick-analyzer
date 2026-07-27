@@ -120,6 +120,14 @@ Decision: Add `src/services/legacy-prediction-metric-isolation-v2.service.ts`, `
 
 Consequences: Deletion candidates are classified for review only. No prediction rows are deleted, mass-updated, archived or hidden, and active epoch metrics are defined to exclude legacy/non-production rows by default after manual epoch activation.
 
+## 2026-07-27 - Add Feature Rebuild Plan V2
+
+Context: The new data foundation needs a deterministic feature rebuild process, but production feature rebuilds are not approved in this autonomous run.
+
+Decision: Add `src/services/feature-rebuild-plan-v2.service.ts`, `/api/data-foundation/feature-rebuild` and `docs/FEATURE_REBUILD_PLAN_V2.md` as a plan-only rebuild contract with fixture-level certification.
+
+Consequences: Rebuild planning is sport-aware, season-aware, as-of-time safe, checkpointed, resumable and idempotent. No production feature rows are rebuilt or written.
+
 ## 2026-07-26 - Bridge The Odds API Pitcher Names To Canonical Players Deterministically
 
 Context: Current MLB The Odds API event mappings and player-prop sync existed, but live prop sync rejected all rows because provider pitcher identity could not be proven for the certified future event. The observed The Odds API `pitcher_outs` payload exposed pitcher names in `outcome.description` and no native stable player ID fields.
