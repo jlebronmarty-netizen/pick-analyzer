@@ -1,7 +1,11 @@
 import DashboardSection from '@/components/dashboard/DashboardSection'
 import DashboardShell from '@/components/dashboard/DashboardShell'
-import { productDateTime } from '@/components/product/ProductStatus'
+import { ProductStatusBadge, ProductStatusBanner, productDateTime, sportReadinessLabel } from '@/components/product/ProductStatus'
 import { getAiLearningLifecycle } from '@/services/ai-learning-lifecycle.service'
+import { getCurrentBoard } from '@/services/current-board.service'
+import { getPerformanceProductContract } from '@/services/performance-product-contract.service'
+import { getProbabilityParlays, getProbabilityPicks } from '@/services/probability-picks.service'
+import type { ProbabilityPick } from '@/types/probability-picks'
 
 function statusTone(status: string) {
   if (status === 'Healthy' || status === 'Completed') return 'border-emerald-500/30 bg-emerald-950/20 text-emerald-200'
@@ -16,6 +20,102 @@ function Metric({ label, value }: { label: string; value: unknown }) {
       <p className="break-words text-xs font-semibold uppercase tracking-[0.08em] text-slate-500 sm:tracking-[0.18em]">{label}</p>
       <p className="mt-2 break-words text-2xl font-black text-white">{value === null || value === undefined || value === '' ? 'N/A' : String(value)}</p>
     </div>
+  )
+}
+
+function pct(value: number | null | undefined) {
+  return value === null || value === undefined || !Number.isFinite(Number(value)) ? 'N/A' : `${Number(value).toFixed(Number(value) >= 10 ? 1 : 2)}%`
+}
+
+function plainSport(value: string) {
+  const key = String(value ?? '').toLowerCase()
+  if (key === 'baseball_mlb') return 'MLB'
+  if (key === 'basketball_bsn') return 'BSN'
+  if (key.includes('nfl')) return 'NFL'
+  if (key.includes('nba')) return 'NBA'
+  if (key.includes('nhl')) return 'NHL'
+  if (key.includes('soccer')) return 'Soccer'
+  if (key.includes('tennis')) return 'Tennis'
+  if (key.includes('ufc')) return 'UFC'
+  return value.replaceAll('_', ' ')
+}
+
+function friendlyStatus(value: string | null | undefined) {
+  return String(value ?? 'Not available').replaceAll('_', ' ').replaceAll('-', ' ')
+}
+
+function previewReadiness(value: string | null | undefined) {
+  const text = String(value ?? '').toLowerCase()
+  if (text.includes('ready')) return 'Ready for preview review'
+  if (text.includes('blocked') || text.includes('insufficient')) return 'Insufficient evidence'
+  return friendlyStatus(value)
+}
+
+function topPick(picks: ProbabilityPick[], by: 'probability' | 'confidence' | 'quality' | 'stable' | 'score') {
+  const sorted = [...picks].sort((left, right) => {
+    if (by === 'probability') return right.modelProbability - left.modelProbability
+    if (by === 'confidence') return right.confidence - left.confidence
+    if (by === 'quality') return right.quality - left.quality
+    if (by === 'stable') return (right.confidence + right.quality + right.freshness) - (left.confidence + left.quality + left.freshness)
+    return right.score - left.score
+  })
+  return sorted[0] ?? null
+}
+
+function decisionStatus({
+  qualifiedPicks,
+  warnings,
+  dataFreshness,
+}: {
+  qualifiedPicks: number
+  warnings: string[]
+  dataFreshness: string | null | undefined
+}) {
+  const freshness = String(dataFreshness ?? '').toLowerCase()
+  if (!qualifiedPicks) return { label: 'Skip Today', tone: 'gray' as const, summary: 'There are no qualified projection-only opportunities today.' }
+  if (freshness === 'stale') return { label: 'Wait', tone: 'yellow' as const, summary: 'Qualified projections exist, but current market freshness is stale.' }
+  if (warnings.length) return { label: 'Review Manually', tone: 'yellow' as const, summary: 'Qualified projections exist with warnings that should be reviewed first.' }
+  return { label: 'Review Manually', tone: 'blue' as const, summary: 'Qualified projection-only opportunities are available for review.' }
+}
+
+function SummaryCard({ label, value, detail }: { label: string; value: string | number; detail?: string }) {
+  return (
+    <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+      <p className="text-xs font-bold uppercase text-slate-500">{label}</p>
+      <p className="mt-2 text-2xl font-black text-white">{value}</p>
+      {detail ? <p className="mt-2 text-sm leading-6 text-slate-400">{detail}</p> : null}
+    </article>
+  )
+}
+
+function PickSummaryCard({ title, pick }: { title: string; pick: ProbabilityPick | null }) {
+  return (
+    <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+      <p className="text-xs font-bold uppercase text-slate-500">{title}</p>
+      {pick ? (
+        <>
+          <h3 className="mt-2 text-base font-black text-white">{pick.selection}</h3>
+          <p className="mt-2 text-sm text-slate-300">{plainSport(pick.sport)} / {friendlyStatus(pick.marketType)}</p>
+          <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+            <span className="rounded-md border border-slate-800 bg-slate-900 p-2 text-slate-300">Probability <strong className="block text-white">{pct(pick.modelProbability)}</strong></span>
+            <span className="rounded-md border border-slate-800 bg-slate-900 p-2 text-slate-300">Confidence <strong className="block text-white">{Math.round(pick.confidence)}</strong></span>
+            <span className="rounded-md border border-slate-800 bg-slate-900 p-2 text-slate-300">Quality <strong className="block text-white">{Math.round(pick.quality)}</strong></span>
+          </div>
+          <p className="mt-3 text-xs font-bold uppercase text-sky-200">Projection Only / No Recommendation</p>
+        </>
+      ) : (
+        <p className="mt-2 text-sm leading-6 text-slate-400">No qualified projection-only row is available for this category today.</p>
+      )}
+    </article>
+  )
+}
+
+function LinkCard({ href, title, detail }: { href: string; title: string; detail: string }) {
+  return (
+    <a href={href} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 outline-none transition hover:border-sky-400/40 hover:bg-slate-900 focus-visible:ring-2 focus-visible:ring-sky-300">
+      <p className="font-black text-white">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-400">{detail}</p>
+    </a>
   )
 }
 
@@ -56,10 +156,33 @@ function timeoutAfter(ms: number) {
   })
 }
 
+function optionalWithin<T>(promise: Promise<T>, ms: number) {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ]).catch(() => null)
+}
+
 export default async function AiOperationsPage() {
   let data: Awaited<ReturnType<typeof getAiLearningLifecycle>>
+  let probabilityData: Awaited<ReturnType<typeof getProbabilityPicks>> | null = null
+  let parlayData: Awaited<ReturnType<typeof getProbabilityParlays>> | null = null
+  let performanceData: Awaited<ReturnType<typeof getPerformanceProductContract>> | null = null
+  let boardData: Awaited<ReturnType<typeof getCurrentBoard>> | null = null
   try {
-    data = await Promise.race([getAiLearningLifecycle(), timeoutAfter(12_000)])
+    const lifecyclePromise = getAiLearningLifecycle()
+    const [lifecycle, probability, parlays, performance, board] = await Promise.all([
+      Promise.race([lifecyclePromise, timeoutAfter(18_000)]),
+      optionalWithin(getProbabilityPicks({ limit: 120 }), 8_000),
+      optionalWithin(getProbabilityParlays({ mode: 'BALANCED', scope: 'MLB_ONLY', limit: 20 }), 8_000),
+      optionalWithin(getPerformanceProductContract(), 8_000),
+      optionalWithin(getCurrentBoard({ limit: 80, includeMlbContext: false }), 8_000),
+    ])
+    data = lifecycle
+    probabilityData = probability
+    parlayData = parlays
+    performanceData = performance
+    boardData = board
   } catch (error) {
     const message = error instanceof Error ? error.message : 'AI Operations evidence is temporarily unavailable.'
     return (
@@ -81,9 +204,182 @@ export default async function AiOperationsPage() {
     )
   }
   const pregameSchedulerCoverage = data.pregameSchedulerCoverage as { schedulerTiming?: any[] } | undefined
+  const probabilityPicks = probabilityData?.picks ?? []
+  const warnings = [
+    ...(data.warnings ?? []),
+    ...(probabilityData?.warnings ?? []),
+    ...(parlayData?.warnings ?? []),
+    ...(boardData?.boardHealth.warnings ?? []),
+  ].filter(Boolean).slice(0, 6)
+  const certifiedSports = probabilityData?.summary.sportEligibility.eligibleSports ?? []
+  const notReadySports = Object.entries(probabilityData?.summary.sportEligibility.details ?? {})
+    .filter(([, detail]) => !detail.eligibleForRanking)
+    .map(([sport, detail]) => ({ sport, detail }))
+  const strongestSport = certifiedSports
+    .map((sport) => ({ sport, count: probabilityPicks.filter((pick) => pick.sport === sport).length }))
+    .sort((left, right) => right.count - left.count)[0] ?? null
+  const decision = decisionStatus({
+    qualifiedPicks: probabilityData?.summary.picksGenerated ?? 0,
+    warnings,
+    dataFreshness: boardData?.dataFreshness.status,
+  })
+  const summaryText = probabilityData?.summary.picksGenerated
+    ? `${probabilityData.summary.picksGenerated} qualified ${certifiedSports.map(plainSport).join(', ') || 'certified sport'} projection-only opportunities are available today. ${decision.summary}`
+    : 'There are no qualified opportunities today. The available games do not satisfy today\'s quality requirements or certified sport readiness.'
+  const modelTrust = performanceData?.trustScore.trustLabel ?? 'INSUFFICIENT DATA'
+  const readiness = performanceData?.maturityPipeline?.DATA?.status ?? performanceData?.apiStatus ?? 'Not available'
+  const dataFreshness = boardData?.dataFreshness.status ?? (data.lifecycle.today.oddsSnapshots ? 'stored' : 'waiting')
+  const topProbability = topPick(probabilityPicks, 'probability')
+  const topConfidence = topPick(probabilityPicks, 'confidence')
+  const topQuality = topPick(probabilityPicks, 'quality')
+  const mostStable = topPick(probabilityPicks, 'stable')
+  const projectionOnly = topPick(probabilityPicks, 'score')
 
   return (
     <DashboardShell>
+      <DashboardSection
+        id="ai-briefing-v2"
+        eyebrow="AI Briefing"
+        title="Today's Decision Briefing"
+        description="One plain-language summary of today's certified sports, projection-only opportunities, data health and model trust."
+      >
+        <div className="grid gap-5 xl:grid-cols-[1.4fr_0.6fr]">
+          <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <ProductStatusBadge tone={decision.tone}>{decision.label}</ProductStatusBadge>
+              <ProductStatusBadge tone="blue">Projection Only</ProductStatusBadge>
+              <ProductStatusBadge tone="gray">No Recommendation</ProductStatusBadge>
+            </div>
+            <h2 className="mt-4 text-3xl font-black text-white">Is today worth betting?</h2>
+            <p className="mt-3 max-w-4xl text-base leading-7 text-slate-300">{summaryText}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              This briefing summarizes existing product evidence only. Probability, confidence and quality are model signals; they are not betting instructions.
+            </p>
+          </div>
+          <div className="grid gap-3">
+            <SummaryCard label="Certified Sports" value={certifiedSports.length ? certifiedSports.map(plainSport).join(', ') : 'None'} detail="Only certified sports appear in ranked projection summaries." />
+            <SummaryCard label="Strongest Sport" value={strongestSport ? plainSport(strongestSport.sport) : 'N/A'} detail={strongestSport ? `${strongestSport.count} qualified projection-only rows.` : 'No certified sport has qualified rows today.'} />
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <SummaryCard label="Qualified Picks" value={probabilityData?.summary.picksGenerated ?? 0} detail="Projection-only rows passing today's filters." />
+          <SummaryCard label="Parlays" value={parlayData?.summary.parlaysGenerated ?? 0} detail="Informational combinations only." />
+          <SummaryCard label="Current Predictions" value={data.lifecycle.today.predictionsGenerated} detail={`${boardData?.candidates.length ?? 0} current-board rows available.`} />
+          <SummaryCard label="Settled Yesterday" value={data.lifecycle.yesterday.productionSettled} detail={`${data.lifecycle.yesterday.wins} wins / ${data.lifecycle.yesterday.losses} losses / ${data.lifecycle.yesterday.pushes} pushes.`} />
+          <SummaryCard label="Data Freshness" value={friendlyStatus(dataFreshness)} detail={`Last market update: ${productDateTime(boardData?.latestOddsTimestamp ?? data.refreshTimeline.odds.lastSuccessfulRefresh, 'No stored market update')}`} />
+          <SummaryCard label="Model Trust" value={friendlyStatus(modelTrust)} detail={`${performanceData?.trustScore.trustConfidence ?? 0} settled evidence rows in current trust scope.`} />
+          <SummaryCard label="Readiness" value={friendlyStatus(readiness)} detail="Readiness is based on stored product evidence, not a new model run." />
+          <SummaryCard label="Last Updated" value={productDateTime(probabilityData?.generatedAt ?? data.generatedAt)} detail="Displayed in your local timezone." />
+        </div>
+      </DashboardSection>
+
+      <DashboardSection
+        id="top-projection-picks"
+        eyebrow="Top Picks"
+        title="Highest Projection Signals"
+        description="These are projection-only highlights. They do not create recommendations or change any policy gate."
+      >
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-5">
+          <PickSummaryCard title="Highest Probability" pick={topProbability} />
+          <PickSummaryCard title="Highest Confidence" pick={topConfidence} />
+          <PickSummaryCard title="Highest Quality" pick={topQuality} />
+          <PickSummaryCard title="Most Stable" pick={mostStable} />
+          <PickSummaryCard title="Projection Only" pick={projectionOnly} />
+        </div>
+      </DashboardSection>
+
+      <DashboardSection
+        id="briefing-warnings"
+        eyebrow="Warnings"
+        title="What Needs Attention"
+        description="Warnings are shown when stored evidence is stale, incomplete, blocked or waiting for the next safe update."
+      >
+        <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
+          <ProductStatusBanner
+            title={warnings.length ? 'Review Before Acting' : 'No Major Warnings'}
+            detail={warnings.length ? warnings.map(friendlyStatus).join(' / ') : 'No major product warning is present in the current read-only briefing evidence.'}
+            tone={warnings.length ? 'yellow' : 'green'}
+          />
+          <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+            <p className="text-sm font-black text-white">Not Ready Today</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {notReadySports.length ? notReadySports.map(({ sport, detail }) => {
+                const readiness = sportReadinessLabel(sport)
+                return <ProductStatusBadge key={sport} tone={readiness.tone}>{plainSport(sport)} {friendlyStatus(detail.status)}</ProductStatusBadge>
+              }) : <ProductStatusBadge tone="green">No uncertified rows in today&apos;s ranking set</ProductStatusBadge>}
+            </div>
+          </div>
+        </div>
+      </DashboardSection>
+
+      <DashboardSection
+        id="briefing-health"
+        eyebrow="Data And Model Health"
+        title="Can Today&apos;s Evidence Be Trusted?"
+        description="A short health summary using existing product contracts."
+      >
+        <div className="grid gap-4 lg:grid-cols-3">
+          <SummaryCard label="Data Health" value={friendlyStatus(dataFreshness)} detail={`${data.lifecycle.today.oddsSnapshots} stored market snapshots and ${data.lifecycle.today.gamesScheduled} scheduled MLB games today.`} />
+          <SummaryCard label="Synchronization" value={friendlyStatus(data.schedulerHealth.schedulerOperational ? 'Healthy' : 'Waiting')} detail={`Last successful sync: ${productDateTime(data.schedulerHealth.lastSuccessfulAt, 'No stored successful sync')}`} />
+          <SummaryCard label="Feature Readiness" value={previewReadiness(data.historicalFeatureBackfill.shadowReadiness)} detail={`${data.historicalFeatureBackfill.snapshotsPersisted} stored feature snapshots.`} />
+          <SummaryCard label="Trust" value={friendlyStatus(modelTrust)} detail="Trust reflects settled production history, calibration and sample size." />
+          <SummaryCard label="Calibration" value={performanceData?.trustScore.components.find((item) => item.key === 'calibration_quality')?.normalizedScore ?? 'N/A'} detail="Higher quality means model confidence is closer to settled outcomes." />
+          <SummaryCard label="Prediction Generation" value="Current generation active" detail="New generation states remain inactive unless separately approved." />
+        </div>
+      </DashboardSection>
+
+      <DashboardSection
+        id="briefing-sports"
+        eyebrow="Sport Summary"
+        title="Certified And Not Ready Sports"
+        description="Certified sports are separated from sports that need more data, certification or source readiness."
+      >
+        <div className="grid gap-4 lg:grid-cols-2">
+          {certifiedSports.length ? certifiedSports.map((sport) => {
+            const readiness = sportReadinessLabel(sport)
+            return (
+              <article key={sport} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="text-lg font-black text-white">{plainSport(sport)}</h3>
+                  <ProductStatusBadge tone={readiness.tone}>{readiness.label}</ProductStatusBadge>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <SummaryCard label="Qualified Picks" value={probabilityPicks.filter((pick) => pick.sport === sport).length} />
+                  <SummaryCard label="Current Data" value={friendlyStatus(dataFreshness)} />
+                  <SummaryCard label="Freshness" value={boardData?.dataFreshness.latestOddsAgeMinutes === null || boardData?.dataFreshness.latestOddsAgeMinutes === undefined ? 'N/A' : `${Math.round(boardData.dataFreshness.latestOddsAgeMinutes)} min`} />
+                  <SummaryCard label="Confidence" value={Math.round(probabilityPicks.filter((pick) => pick.sport === sport).reduce((sum, pick) => sum + pick.confidence, 0) / Math.max(1, probabilityPicks.filter((pick) => pick.sport === sport).length))} />
+                </div>
+              </article>
+            )
+          }) : <p className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-sm text-slate-400">No certified sport has qualified projection rows today.</p>}
+          <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+            <h3 className="text-lg font-black text-white">Not Ready Today</h3>
+            <div className="mt-4 space-y-3">
+              {notReadySports.length ? notReadySports.map(({ sport, detail }) => (
+                <p key={sport} className="text-sm leading-6 text-slate-300">
+                  <strong className="text-white">{plainSport(sport)}:</strong> {friendlyStatus(detail.status)}. {detail.reason}
+                </p>
+              )) : <p className="text-sm text-slate-400">No uncertified sport rows were present in today&apos;s probability ranking input.</p>}
+            </div>
+          </article>
+        </div>
+      </DashboardSection>
+
+      <DashboardSection
+        id="briefing-links"
+        eyebrow="Next Views"
+        title="Where To Go Next"
+        description="Open the detailed module only when the summary points you there."
+      >
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <LinkCard href="/probability-picks" title="Probability Picks" detail="Review all projection-only ranked outcomes and parlays." />
+          <LinkCard href="/dashboard#today" title="Current Board" detail="Inspect today&apos;s board context and product pipeline state." />
+          <LinkCard href="/player-projections" title="Player Projections" detail="Review player stat projection ranges without market recommendations." />
+          <LinkCard href="/performance" title="Performance" detail="Check trust, calibration, readiness and settled history." />
+        </div>
+      </DashboardSection>
+
       <DashboardSection
         id="ai-operations"
         eyebrow="AI Operations"
@@ -118,7 +414,7 @@ export default async function AiOperationsPage() {
         id="operations-v2"
         eyebrow="AI Operations V2"
         title="Daily Evidence Stages"
-        description="Daily settlement, label, shadow learning and weight evidence with explicit zero reasons."
+        description="Daily settlement, label, preview learning and weight evidence with explicit zero reasons."
       >
         <div className="grid gap-4 lg:grid-cols-3">
           {Object.entries(data.aiOperationsCenterV2).map(([period, stage]: [string, any]) => (
@@ -126,7 +422,7 @@ export default async function AiOperationsPage() {
               <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="text-sm font-black uppercase tracking-[0.18em] text-emerald-200">{period}</h3>
                 <span className={`max-w-full break-words rounded-full border px-3 py-1 text-xs font-bold ${statusTone(stage.acceptedLearningSamples > 0 ? 'Completed' : 'Waiting')}`}>
-                  {stage.shadowLearning}
+                  {previewReadiness(stage.shadowLearning)}
                 </span>
               </div>
               <dl className="mt-5 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
@@ -208,7 +504,7 @@ export default async function AiOperationsPage() {
           <Metric label="Checkpoints" value={data.historicalFeatureBackfill.checkpointsRead} />
           <Metric label="Missing Feature Labels" value={data.historicalFeatureBackfill.missingFeatureRejections} />
           <Metric label="Idempotency" value={data.historicalFeatureBackfill.idempotencyStatus ?? 'N/A'} />
-          <Metric label="Shadow Readiness" value={data.historicalFeatureBackfill.shadowReadiness} />
+          <Metric label="Preview Readiness" value={previewReadiness(data.historicalFeatureBackfill.shadowReadiness)} />
         </div>
       </DashboardSection>
 

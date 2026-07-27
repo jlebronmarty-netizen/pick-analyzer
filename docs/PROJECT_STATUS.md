@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-27 16:54:00Z
 
+## 2026-07-27 AI Briefing V2 Daily Decision Engine
+
+- AI Briefing V2 is locally implemented as the executive summary layer for `/ai-operations`. It now opens with a plain-language decision briefing, Today Snapshot, top projection-only signals, warnings, data/model health, certified/not-ready sport summary and links to Probability Picks, Current Board, Player Projections and Performance.
+- The page reuses existing read-only contracts from Probability Picks, Current Board, Performance Product and AI Learning Lifecycle. It does not replace those modules or duplicate their detailed workflows.
+- No prediction probabilities, confidence, quality, thresholds, model services, Learning Brain weights, SQL, imports, feature rebuilds, epoch activation, provider calls or database mutations were changed.
+
 ## 2026-07-27 Product Navigation & Freshness Hardening V1
 
 - Product Navigation & Freshness Hardening V1 is locally implemented as a UX-only hardening phase. Dashboard navigation is now grouped into Home, Picks, Projections, Markets, Performance, Operations and Administration; Probability Picks, Performance, Player Projections and AI Operations now share clearer status, freshness and empty-state language.
