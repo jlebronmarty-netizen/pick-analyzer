@@ -76,6 +76,8 @@ Phase B2 adds the MLB Event And Result Completion V3 reconciliation contract. It
 
 Phase B3 adds the MLB Boxscore And Stat Completion V3 reconciliation contract. It preserves recorded-outs unit safety, player identity guards, duplicate/natural-key collision handling and as-of feature boundaries while keeping full stat import execution blocked pending approval.
 
+Phase B4 adds the MLB Player And Starter Identity V3 contract. It preserves exact/deterministic-only persistence, blocks normalized-only and ambiguous player mappings, defines manual review queue shape and keeps starter identity pregame/source-timestamp gated.
+
 ## Completed
 
 ### Platform Certification

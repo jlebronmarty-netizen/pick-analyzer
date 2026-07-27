@@ -184,6 +184,8 @@ Validation:
 
 Status: completed locally with import blocker.
 
+Commit: `14bb3874bc3d28cb9b6200e698dd01c74ca1e431`
+
 Artifacts:
 
 - `docs/MLB_BOXSCORE_STAT_COMPLETION_V3.md`
@@ -199,3 +201,22 @@ Validation:
 - remote mutations: 0
 - production mutations: 0
 - blocker: production stat import requires separate approval
+
+### Phase B4 - MLB Player And Starter Identity V3
+
+Status: completed locally.
+
+Artifacts:
+
+- `docs/MLB_PLAYER_STARTER_IDENTITY_V3.md`
+- `scripts/historical-completion-v1-b4-mlb-identity-validate.mjs`
+
+Validation:
+
+- identity validation passed 8/8
+- SportsDataIO, Retrosheet, The Odds API pitcher names, starter assignments, pitcher projections and props covered
+- normalized-only and ambiguous mappings remain blocked
+- new mappings persisted: 0
+- provider calls: 0
+- remote mutations: 0
+- production mutations: 0

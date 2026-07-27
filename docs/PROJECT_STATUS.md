@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-27 03:23:00Z
+Last updated: 2026-07-27 03:36:00Z
 
 ## 2026-07-26 Historical Sports Data Foundation V2 Autonomous Run
 
@@ -36,6 +36,7 @@ Last updated: 2026-07-27 03:23:00Z
 - Phase B1 added `docs/MLB_SEASON_COVERAGE_PLAN_V3.md` and `docs/mlb-season-coverage-plan-v3.json`, defining the 2025 previous completed season, 2026 current safe completed window through 2026-07-26 and future schedule window through 2026-09-27. Five bounded MLB import manifests were prepared as plans only; no provider calls, imports, mutations or retrospective predictions were executed.
 - Phase B2 added `docs/MLB_EVENT_RESULT_COMPLETION_V3.md`, documenting deterministic MLB event identity, final-result idempotency, doubleheader/reschedule safety and import postchecks. Stored result coverage remains honestly partial at 471 result rows against 4012 completed event rows; full result completion requires a later approved import. No provider calls, imports, mutations, settlements, feature rebuilds or retrospective predictions were executed.
 - Phase B3 added `docs/MLB_BOXSCORE_STAT_COMPLETION_V3.md`, documenting team/player stat, boxscore, pitching, recorded-outs and identity reconciliation contracts. Stored MLB stat coverage remains useful but not full-season complete; approved imports are still required for full stat/boxscore completion. No provider calls, imports, feature rebuilds, mutations or retrospective predictions were executed.
+- Phase B4 added `docs/MLB_PLAYER_STARTER_IDENTITY_V3.md`, documenting deterministic-only identity rules across SportsDataIO, Retrosheet, The Odds API pitcher names, canonical players, starter assignments, pitcher projections and props. No ambiguous mappings were persisted and no provider calls or mutations were made.
 
 ## 2026-07-26 The Odds API Pitcher Identity Bridge V1
 

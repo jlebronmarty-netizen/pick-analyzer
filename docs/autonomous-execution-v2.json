@@ -15,7 +15,7 @@
     "providerCallsUsed": 0,
     "remoteMutationsMade": 0,
     "createdAt": "2026-07-26T23:20:00Z",
-    "updatedAt": "2026-07-27T03:31:00Z"
+    "updatedAt": "2026-07-27T03:44:00Z"
   },
   "phases": [
     {
@@ -1075,7 +1075,7 @@
       "status": "completed_with_import_blocker",
       "startedAt": "2026-07-27T03:19:00Z",
       "completedAt": "2026-07-27T03:23:00Z",
-      "commit": "pending_self_reference",
+      "commit": "14bb3874bc3d28cb9b6200e698dd01c74ca1e431",
       "build": {
         "command": "npm.cmd run build",
         "status": "passed",
@@ -1122,6 +1122,61 @@
       "nextPhase": "B4_MLB_PLAYER_AND_STARTER_IDENTITY_V3",
       "resumeInstructions": "Run node scripts/historical-completion-v1-b3-mlb-stats-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase B4.",
       "continuationDecision": "continue_to_phase_B4_with_stat_import_blocker_documented",
+      "diffCheck": {
+        "command": "git diff --check",
+        "status": "passed"
+      }
+    },
+    {
+      "phaseId": "B4",
+      "phaseName": "MLB_PLAYER_AND_STARTER_IDENTITY_V3",
+      "status": "completed",
+      "startedAt": "2026-07-27T03:32:00Z",
+      "completedAt": "2026-07-27T03:36:00Z",
+      "commit": "pending_self_reference",
+      "build": {
+        "command": "npm.cmd run build",
+        "status": "passed",
+        "staticPages": 368
+      },
+      "tests": {
+        "command": "node scripts/historical-completion-v1-b4-mlb-identity-validate.mjs",
+        "status": "passed",
+        "checks": 8,
+        "passed": 8
+      },
+      "validation": {
+        "status": "passed",
+        "checks": [
+          "sportsdataio_identity_domain_documented",
+          "retrosheet_identity_domain_documented",
+          "the_odds_api_pitcher_identity_domain_documented",
+          "normalized_only_matches_blocked",
+          "manual_review_queue_shape_defined",
+          "starter_identity_rules_defined",
+          "no_ambiguous_persistence",
+          "zero_new_mappings_persisted"
+        ],
+        "summary": {
+          "providerIdentityRows": 59239,
+          "starterRows": 27,
+          "storedPitcherOutsPropRows": 11,
+          "newMappingsPersisted": 0
+        }
+      },
+      "providerCalls": 0,
+      "remoteMutations": 0,
+      "localMutations": 0,
+      "productionMutations": 0,
+      "artifacts": [
+        "docs/MLB_PLAYER_STARTER_IDENTITY_V3.md",
+        "scripts/historical-completion-v1-b4-mlb-identity-validate.mjs"
+      ],
+      "migrationsCreated": [],
+      "blockers": [],
+      "nextPhase": "B5_MLB_MARKET_DATA_FOUNDATION_V2",
+      "resumeInstructions": "Run node scripts/historical-completion-v1-b4-mlb-identity-validate.mjs, npm.cmd run build, git diff --check, then continue to Phase B5.",
+      "continuationDecision": "continue_to_phase_B5",
       "diffCheck": {
         "command": "git diff --check",
         "status": "passed"
@@ -1194,6 +1249,9 @@
     "MLB_DOUBLEHEADER_RECONCILIATION_PASS",
     "MLB_IMPORT_IDEMPOTENCY_V3_PASS",
     "MLB_BOXSCORE_COMPLETION_V3_READY_FOR_IMPORT",
-    "MLB_STAT_RECONCILIATION_V3_PASS"
+    "MLB_STAT_RECONCILIATION_V3_PASS",
+    "MLB_PLAYER_IDENTITY_V3_PASS",
+    "MLB_STARTER_IDENTITY_V3_PASS",
+    "NO_AMBIGUOUS_PLAYER_PERSISTENCE_PASS"
   ]
 }
