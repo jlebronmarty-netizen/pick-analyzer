@@ -1,5 +1,13 @@
 # Decision Log
 
+## 2026-07-27 - Add Probability Picks V2 Exploration Layer
+
+Context: AI Briefing V2 now summarizes the daily state, but Probability Picks needs to serve as the detailed exploration companion for projection-only model opportunities without becoming a recommendation or market-pricing surface.
+
+Decision: Extend the existing Probability Picks service and UI with backward-compatible V2 metadata, Today Overview, top signals, by-sport grouping, not-ready sport summaries, transparent filters and sorting, pick explanations, freshness labels, parlay presentation blockers and AI Briefing deep links.
+
+Consequences: MLB remains the only ranking-eligible sport as `CERTIFIED_LIMITED`; uncertified sports remain excluded from rankings and parlays. Probability, confidence, quality, thresholds, score formula, parlay thresholds, correlation math, models, Learning Brain, scheduler, SQL, provider calls and mutations remain unchanged.
+
 ## 2026-07-26 - Start Historical Sports Data Foundation V2 With Resumable Governance
 
 Context: The next approved work is a multi-phase historical sports data foundation and prediction epoch reset run. The run must be autonomous but local-only, with no push, deployment, production SQL, production data mutation, historical odds, destructive prediction reset or new production epoch activation.

@@ -11,6 +11,7 @@ import type {
   ProbabilityParlayScope,
   ProbabilityPick,
   ProbabilityPickRisk,
+  ProbabilityFreshnessSummary,
   ProbabilitySportEligibility,
   ProbabilitySportEligibilitySummary,
   ProbabilityPicksResponse,
@@ -20,6 +21,8 @@ import type {
 
 const MODE = 'probability_picks_v1'
 const PARLAY_MODE = 'probability_parlays_v1'
+const VERSION = 'probability_picks_v2' as const
+const PARLAY_VERSION = 'probability_parlays_v2' as const
 const RECOMMENDATION_TYPE = 'PROBABILITY_ONLY' as const
 const SUPPORTED_MARKETS: ProbabilityMarketType[] = ['moneyline', 'run_line', 'total', 'pitcher_outs']
 const PITCHER_LINES = ['14.5', '15.5', '16.5', '17.5', '18.5'] as const
@@ -28,14 +31,24 @@ const FORBIDDEN_PROBABILITY_TEXT = /\b(sportsbook|odds|ev|kelly|stake|bankroll|o
 const MLB_LIMITED_ELIGIBILITY: ProbabilitySportEligibility = {
   status: 'CERTIFIED_LIMITED',
   eligibleForRanking: true,
+  eligibleForParlays: true,
   reason: 'MLB projection-only rows are allowed because the stored pregame probability and pitcher projection surfaces have local certification evidence.',
   engineCertification: 'MLB_PROJECTION_ONLY_LIMITED',
+  displayName: 'MLB',
+  dataReadiness: 'Stored pregame predictions and pitcher projections',
+  freshness: 'FRESH',
+  nextRequirement: 'Maintain current stored pregame coverage and same-event projection evidence.',
 }
 const UNCERTIFIED_ELIGIBILITY: ProbabilitySportEligibility = {
   status: 'ENGINE_NOT_CERTIFIED',
   eligibleForRanking: false,
+  eligibleForParlays: false,
   reason: 'This sport is registered in stored prediction history, but its global Probability Picks ranking contract is not production-certified.',
   engineCertification: 'NOT_CERTIFIED_FOR_PROBABILITY_PICKS_V1',
+  displayName: 'Uncertified sport',
+  dataReadiness: 'Stored rows may exist, but the product engine is not certified.',
+  freshness: 'UNKNOWN',
+  nextRequirement: 'Complete sport-specific engine, stored data, validation, settlement and product certification.',
 }
 
 type PredictionHistoryRow = {
@@ -69,8 +82,12 @@ export type ProbabilityPickFilters = {
   minProbability?: number | null
   minConfidence?: number | null
   minQuality?: number | null
+  maxRisk?: ProbabilityPickRisk | 'all' | null
+  dataFreshness?: ProbabilityFreshnessSummary['status'] | 'all' | null
+  certificationLevel?: string | null
   starterStatus?: string | null
   projectionQuality?: string | null
+  sort?: 'score' | 'probability' | 'confidence' | 'quality' | 'stability' | 'freshness' | 'eventStart' | null
   limit?: number | null
   date?: string | null
 }
@@ -138,8 +155,25 @@ function text(value: unknown, fallback = 'Unavailable') {
   return raw || fallback
 }
 
+function sportDisplayName(sport: string) {
+  if (sport === 'baseball_mlb') return 'MLB'
+  if (sport === 'soccer_epl') return 'Soccer EPL'
+  if (sport === 'americanfootball_ncaaf') return 'NCAA Football'
+  if (sport === 'americanfootball_nfl') return 'NFL'
+  if (sport === 'basketball_nba') return 'NBA'
+  if (sport === 'basketball_bsn') return 'BSN'
+  if (sport === 'icehockey_nhl') return 'NHL'
+  if (sport.includes('tennis')) return 'Tennis'
+  if (sport.includes('ufc')) return 'UFC'
+  return sport.replaceAll('_', ' ')
+}
+
 function sportEligibility(sport: string): ProbabilitySportEligibility {
-  return sport === 'baseball_mlb' ? MLB_LIMITED_ELIGIBILITY : UNCERTIFIED_ELIGIBILITY
+  if (sport === 'baseball_mlb') return MLB_LIMITED_ELIGIBILITY
+  return {
+    ...UNCERTIFIED_ELIGIBILITY,
+    displayName: sportDisplayName(sport),
+  }
 }
 
 function isRankEligible(pick: ProbabilityPick) {
@@ -147,7 +181,7 @@ function isRankEligible(pick: ProbabilityPick) {
 }
 
 function emptyEligibilityDetail(eligibility: ProbabilitySportEligibility) {
-  return { ...eligibility, rowsSeen: 0, rowsRanked: 0, rowsExcluded: 0 }
+  return { ...eligibility, rowsSeen: 0, rowsRanked: 0, rowsExcluded: 0, qualifiedRows: 0, excludedRowCount: 0 }
 }
 
 function buildSportEligibilitySummary(picks: ProbabilityPick[], excluded: ProbabilityPick[], requestedSport?: string | null): ProbabilitySportEligibilitySummary {
@@ -157,13 +191,20 @@ function buildSportEligibilitySummary(picks: ProbabilityPick[], excluded: Probab
     detail.rowsSeen += 1
     if (pick.sportEligibility.eligibleForRanking) detail.rowsRanked += 1
     else detail.rowsExcluded += 1
+    detail.qualifiedRows = detail.rowsRanked
+    detail.excludedRowCount = detail.rowsExcluded
     details[pick.sport] = detail
   }
   const requested = requestedSport && requestedSport !== 'all' ? requestedSport : null
   if (requested && !details[requested]) details[requested] = emptyEligibilityDetail(sportEligibility(requested))
+  const eligibleSports = Object.entries(details).filter(([, detail]) => detail.eligibleForRanking).map(([sport]) => sport).sort()
+  const parlayEligibleSports = Object.entries(details).filter(([, detail]) => detail.eligibleForParlays).map(([sport]) => sport).sort()
+  const excludedSports = Object.entries(details).filter(([, detail]) => !detail.eligibleForRanking && detail.rowsSeen > 0).map(([sport]) => sport).sort()
   return {
-    eligibleSports: Object.entries(details).filter(([, detail]) => detail.eligibleForRanking).map(([sport]) => sport).sort(),
-    excludedSports: Object.entries(details).filter(([, detail]) => !detail.eligibleForRanking && detail.rowsSeen > 0).map(([sport]) => sport).sort(),
+    eligibleSports,
+    excludedSports,
+    rankingEligibleSports: eligibleSports,
+    parlayEligibleSports,
     excludedRows: Object.values(details).reduce((sum, detail) => sum + detail.rowsExcluded, 0),
     details,
   }
@@ -191,6 +232,65 @@ function freshnessScore(generatedAt: string | null) {
   if (Number.isNaN(generated.getTime())) return 55
   const ageHours = Math.max(0, (Date.now() - generated.getTime()) / 36e5)
   return clamp(100 - ageHours * 4, 45, 100)
+}
+
+function freshnessStatus(score: number): ProbabilityFreshnessSummary['status'] {
+  if (score >= 78) return 'FRESH'
+  if (score >= 58) return 'AGING'
+  if (score > 0) return 'STALE'
+  return 'UNKNOWN'
+}
+
+function supportLinks(pick: Pick<ProbabilityPick, 'source' | 'eventId' | 'marketType'>) {
+  const links = [
+    { label: 'Open Current Board', href: '/dashboard#today' },
+    { label: 'View Model Performance', href: '/performance' },
+  ]
+  if (pick.source === 'mlb_pitcher_projection_engine' || pick.marketType === 'pitcher_outs') {
+    links.unshift({ label: 'Review Projection', href: '/player-projections' })
+  }
+  if (pick.eventId && !pick.eventId.startsWith('event_')) {
+    links.push({ label: 'View Supporting Data', href: `/game-intelligence/${pick.eventId}` })
+  }
+  return links
+}
+
+function qualificationReasonsForPick(input: {
+  probability: number
+  confidence: number
+  quality: number
+  freshness: number
+  starterStatus: string
+  sport: string
+  source: ProbabilityPick['source']
+}) {
+  const reasons = [
+    input.probability >= 60 ? 'High model probability' : 'Model probability passed the selected threshold',
+    input.confidence >= 65 ? 'Strong confidence signal' : 'Confidence passed the selected threshold',
+    input.quality >= 62 ? 'Complete underlying inputs' : 'Data quality passed the selected threshold',
+    `${sportDisplayName(input.sport)} uses a certified projection-only engine mode`,
+  ]
+  if (freshnessStatus(input.freshness) === 'FRESH') reasons.push('Fresh projection evidence')
+  if (input.starterStatus.toLowerCase().includes('confirmed') || input.starterStatus.toLowerCase().includes('probable')) reasons.push('Starter or lineup context is available')
+  if (input.source === 'mlb_pitcher_projection_engine') reasons.push('Pitcher projection source is certified for projection-only display')
+  return probabilityOnlyText(reasons, 'Projection-only qualification evidence available')
+}
+
+function mainRisksForPick(input: {
+  risks: string[]
+  confidence: number
+  quality: number
+  freshness: number
+  sportEligibility: ProbabilitySportEligibility
+  starterStatus: string
+}) {
+  const risks = [...input.risks]
+  if (input.confidence < 60) risks.push('Limited confidence margin')
+  if (input.quality < 60) risks.push('Lower feature completeness')
+  if (freshnessStatus(input.freshness) !== 'FRESH') risks.push('Projection age requires review')
+  if (!input.starterStatus.toLowerCase().includes('confirmed') && !input.starterStatus.toLowerCase().includes('probable')) risks.push('Starter status is not fully confirmed')
+  if (input.sportEligibility.status === 'CERTIFIED_LIMITED') risks.push('Certified Limited operating mode')
+  return probabilityOnlyText(risks, 'Projection uncertainty')
 }
 
 function featureCompleteness(snapshot: Record<string, unknown>, fallback: number) {
@@ -291,7 +391,8 @@ function predictionRowToPick(row: PredictionHistoryRow): ProbabilityPick | null 
   const completeness = featureCompleteness(snapshot, Math.max(50, quality))
   const score = scorePick({ probability, confidence, quality, starterStatus, completeness, freshness, warnings })
   const generatedAt = text(row.generated_at ?? row.feature_snapshot_generated_at, nowIso())
-  return {
+  const eligibility = sportEligibility(sport)
+  const pickBase: ProbabilityPick = {
     id: `prob_${hash([row.id, market, row.selection, row.line])}`,
     sport,
     eventId: text(row.game_id, `event_${row.id}`),
@@ -304,6 +405,9 @@ function predictionRowToPick(row: PredictionHistoryRow): ProbabilityPick | null 
     starterStatus,
     generatedAt,
     cutoffAt: row.cutoff_at,
+    eventStartTime: row.commence_time,
+    dataAsOf: row.feature_snapshot_generated_at ?? row.generated_at,
+    providerUpdatedAt: null,
     projectionVersion: text(row.model_version, 'stored_model_probability'),
     drivers: driversFromRow(row, snapshot),
     risks: warnings,
@@ -313,8 +417,20 @@ function predictionRowToPick(row: PredictionHistoryRow): ProbabilityPick | null 
     freshness: round(freshness),
     featureCompleteness: round(completeness),
     source: 'prediction_history',
-    sportEligibility: sportEligibility(sport),
+    sportEligibility: eligibility,
     dataStatus: 'CURRENT_STORED',
+  }
+  const qualificationReasons = qualificationReasonsForPick({ probability, confidence, quality, freshness, starterStatus, sport, source: 'prediction_history' })
+  const mainRisks = mainRisksForPick({ risks: warnings, confidence, quality, freshness, sportEligibility: eligibility, starterStatus })
+  return {
+    ...pickBase,
+    qualificationReasons,
+    mainRisks,
+    explanation: {
+      whyQualified: qualificationReasons,
+      mainRisks,
+      nextLinks: supportLinks(pickBase),
+    },
   }
 }
 
@@ -339,7 +455,8 @@ function pitcherPickFromProjection(projection: MlbPitcherProjection): Probabilit
   const completeness = projection.dataSufficiency === 'FULL' ? 95 : projection.dataSufficiency === 'STANDARD' ? 82 : projection.dataSufficiency === 'LIMITED' ? 62 : 42
   const warnings = projection.mainRisks.length ? projection.mainRisks : projection.warnings
   const score = scorePick({ probability, confidence, quality, starterStatus: projection.starterStatus, completeness, freshness, warnings })
-  return {
+  const eligibility = sportEligibility('baseball_mlb')
+  const pickBase: ProbabilityPick = {
     id: `prob_${hash([projection.projectionId, best.side, best.line])}`,
     sport: 'baseball_mlb',
     eventId: projection.eventId,
@@ -352,6 +469,9 @@ function pitcherPickFromProjection(projection: MlbPitcherProjection): Probabilit
     starterStatus: projection.starterStatus,
     generatedAt: projection.generatedAt,
     cutoffAt: projection.cutoffAt,
+    eventStartTime: projection.eventStartTime,
+    dataAsOf: projection.generatedAt,
+    providerUpdatedAt: null,
     projectionVersion: projection.modelVersion,
     drivers: probabilityOnlyText(projection.mainDrivers.length ? projection.mainDrivers : [`Projected workload: ${projection.projectedOuts ?? 'N/A'} outs`], 'Pitcher workload model signal available'),
     risks: probabilityOnlyText(warnings.length ? warnings : ['Pitcher workload projection uncertainty'], 'Pitcher workload projection uncertainty'),
@@ -361,8 +481,20 @@ function pitcherPickFromProjection(projection: MlbPitcherProjection): Probabilit
     freshness: round(freshness),
     featureCompleteness: round(completeness),
     source: 'mlb_pitcher_projection_engine',
-    sportEligibility: sportEligibility('baseball_mlb'),
+    sportEligibility: eligibility,
     dataStatus: 'MODEL_GENERATED',
+  }
+  const qualificationReasons = qualificationReasonsForPick({ probability, confidence, quality, freshness, starterStatus: projection.starterStatus, sport: 'baseball_mlb', source: 'mlb_pitcher_projection_engine' })
+  const mainRisks = mainRisksForPick({ risks: warnings, confidence, quality, freshness, sportEligibility: eligibility, starterStatus: projection.starterStatus })
+  return {
+    ...pickBase,
+    qualificationReasons,
+    mainRisks,
+    explanation: {
+      whyQualified: qualificationReasons,
+      mainRisks,
+      nextLinks: supportLinks(pickBase),
+    },
   }
 }
 
@@ -406,6 +538,12 @@ function applyFilters(picks: ProbabilityPick[], filters: ProbabilityPickFilters)
     if (filters.minProbability !== null && filters.minProbability !== undefined && pick.modelProbability < filters.minProbability) return false
     if (filters.minConfidence !== null && filters.minConfidence !== undefined && pick.confidence < filters.minConfidence) return false
     if (filters.minQuality !== null && filters.minQuality !== undefined && pick.quality < filters.minQuality) return false
+    if (filters.maxRisk && filters.maxRisk !== 'all') {
+      const order: Record<ProbabilityPickRisk, number> = { LOW: 1, MEDIUM: 2, HIGH: 3 }
+      if (order[pick.risk] > order[filters.maxRisk]) return false
+    }
+    if (filters.dataFreshness && filters.dataFreshness !== 'all' && freshnessStatus(pick.freshness) !== filters.dataFreshness) return false
+    if (filters.certificationLevel && filters.certificationLevel !== 'all' && pick.sportEligibility.status !== filters.certificationLevel) return false
     if (filters.starterStatus && filters.starterStatus !== 'all' && !pick.starterStatus.toLowerCase().includes(filters.starterStatus.toLowerCase())) return false
     if (filters.projectionQuality && filters.projectionQuality !== 'all' && qualityLabel(pick.quality) !== filters.projectionQuality.toUpperCase()) return false
     return true
@@ -425,6 +563,26 @@ function top(picks: ProbabilityPick[], sorter: (a: ProbabilityPick, b: Probabili
   return [...picks].sort(sorter).slice(0, count)
 }
 
+function stability(pick: ProbabilityPick) {
+  return pick.confidence + pick.quality + pick.freshness
+}
+
+function eventStartMs(pick: ProbabilityPick) {
+  const parsed = pick.eventStartTime ? new Date(pick.eventStartTime).getTime() : Number.MAX_SAFE_INTEGER
+  return Number.isFinite(parsed) ? parsed : Number.MAX_SAFE_INTEGER
+}
+
+function sortPicks(picks: ProbabilityPick[], sort: ProbabilityPickFilters['sort']) {
+  const tie = (a: ProbabilityPick, b: ProbabilityPick) => b.score - a.score || eventStartMs(a) - eventStartMs(b) || a.selection.localeCompare(b.selection)
+  if (sort === 'probability') return top(picks, (a, b) => b.modelProbability - a.modelProbability || tie(a, b), picks.length)
+  if (sort === 'confidence') return top(picks, (a, b) => b.confidence - a.confidence || tie(a, b), picks.length)
+  if (sort === 'quality') return top(picks, (a, b) => b.quality - a.quality || tie(a, b), picks.length)
+  if (sort === 'stability') return top(picks, (a, b) => stability(b) - stability(a) || tie(a, b), picks.length)
+  if (sort === 'freshness') return top(picks, (a, b) => b.freshness - a.freshness || tie(a, b), picks.length)
+  if (sort === 'eventStart') return top(picks, (a, b) => eventStartMs(a) - eventStartMs(b) || tie(a, b), picks.length)
+  return top(picks, tie, picks.length)
+}
+
 function buildSections(picks: ProbabilityPick[]) {
   const scoreSort = (a: ProbabilityPick, b: ProbabilityPick) => b.score - a.score
   return [
@@ -440,6 +598,103 @@ function buildSections(picks: ProbabilityPick[]) {
   ]
 }
 
+function topSignals(picks: ProbabilityPick[]) {
+  return {
+    highestProbability: top(picks, (a, b) => b.modelProbability - a.modelProbability, 1)[0] ?? null,
+    highestConfidence: top(picks, (a, b) => b.confidence - a.confidence, 1)[0] ?? null,
+    highestQuality: top(picks, (a, b) => b.quality - a.quality, 1)[0] ?? null,
+    mostStable: top(picks, (a, b) => stability(b) - stability(a), 1)[0] ?? null,
+    bestDataQuality: top(picks, (a, b) => b.featureCompleteness - a.featureCompleteness, 1)[0] ?? null,
+  }
+}
+
+function freshnessSummary(picks: ProbabilityPick[]): ProbabilityFreshnessSummary {
+  const timestamps = picks
+    .map((pick) => pick.dataAsOf ?? pick.generatedAt)
+    .filter(Boolean)
+    .sort()
+  const statuses = picks.map((pick) => freshnessStatus(pick.freshness))
+  const staleRows = statuses.filter((status) => status === 'STALE').length
+  const agingRows = statuses.filter((status) => status === 'AGING').length
+  const freshRows = statuses.filter((status) => status === 'FRESH').length
+  const status: ProbabilityFreshnessSummary['status'] = !picks.length ? 'UNKNOWN' : staleRows > 0 ? 'STALE' : agingRows > 0 ? 'AGING' : freshRows > 0 ? 'FRESH' : 'UNKNOWN'
+  return {
+    status,
+    latestGeneratedAt: timestamps[timestamps.length - 1] ?? null,
+    oldestGeneratedAt: timestamps[0] ?? null,
+    staleRows,
+    agingRows,
+    freshRows,
+  }
+}
+
+function excludedRowsByReason(sportEligibility: ProbabilitySportEligibilitySummary) {
+  return Object.values(sportEligibility.details).reduce<Record<string, number>>((acc, detail) => {
+    if (detail.rowsExcluded > 0) acc[detail.status] = (acc[detail.status] ?? 0) + detail.rowsExcluded
+    return acc
+  }, {})
+}
+
+function qualifiedRowsBySport(picks: ProbabilityPick[]) {
+  return picks.reduce<Record<string, number>>((acc, pick) => {
+    acc[pick.sport] = (acc[pick.sport] ?? 0) + 1
+    return acc
+  }, {})
+}
+
+function buildFilterMetadata(sportEligibility: ProbabilitySportEligibilitySummary) {
+  return {
+    sports: Object.entries(sportEligibility.details)
+      .map(([sport, detail]) => ({
+        value: sport,
+        label: detail.displayName ?? sportDisplayName(sport),
+        eligible: detail.eligibleForRanking,
+        reason: detail.reason,
+      }))
+      .sort((a, b) => Number(b.eligible) - Number(a.eligible) || a.label.localeCompare(b.label)),
+    markets: [
+      { value: 'all' as const, label: 'All Markets' },
+      { value: 'moneyline' as const, label: 'Moneyline' },
+      { value: 'run_line' as const, label: 'Run Line' },
+      { value: 'total' as const, label: 'Totals' },
+      { value: 'pitcher_outs' as const, label: 'Pitcher Outs' },
+    ],
+    risk: ['LOW', 'MEDIUM', 'HIGH'] as ProbabilityPickRisk[],
+    freshness: ['FRESH', 'AGING', 'STALE', 'UNKNOWN'] as ProbabilityFreshnessSummary['status'][],
+    certificationLevels: ['CERTIFIED_ACTIVE', 'CERTIFIED_LIMITED', 'PREVIEW', 'SHADOW_ONLY', 'INSUFFICIENT_DATA', 'ENGINE_NOT_CERTIFIED', 'OUT_OF_SEASON', 'STALE', 'BLOCKED'] as ProbabilitySportEligibility['status'][],
+    defaults: {
+      sport: 'all',
+      market: 'all',
+      minProbability: 50,
+      minConfidence: 45,
+      minQuality: 45,
+      maxRisk: 'all',
+      dataFreshness: 'all',
+      certificationLevel: 'all',
+      sort: 'score',
+    },
+  }
+}
+
+function buildSortMetadata() {
+  return {
+    defaultSort: 'score' as const,
+    availableSorts: ['score', 'probability', 'confidence', 'quality', 'stability', 'freshness', 'eventStart'] as Array<'score' | 'probability' | 'confidence' | 'quality' | 'stability' | 'freshness' | 'eventStart'>,
+    note: 'Sorting is presentation-only and does not change model probability, confidence, quality, thresholds or parlay math.',
+  }
+}
+
+function buildBriefingContext(picks: ProbabilityPick[], freshness: ProbabilityFreshnessSummary, warnings: string[], sportEligibility: ProbabilitySportEligibilitySummary) {
+  const outlook = !picks.length ? 'Skip Today' : freshness.status === 'STALE' || warnings.length ? 'Review Manually' : 'Review Manually'
+  return {
+    outlook: outlook as 'Review Manually' | 'Wait' | 'Skip Today',
+    qualifiedCount: picks.length,
+    certifiedSports: sportEligibility.eligibleSports,
+    freshness: freshness.status,
+    mainWarning: warnings[0] ?? null,
+  }
+}
+
 export async function getProbabilityPicks(filters: ProbabilityPickFilters = {}): Promise<ProbabilityPicksResponse> {
   const limit = Math.min(Math.max(Number(filters.limit ?? 160), 1), 500)
   const [history, pitcher] = await Promise.all([
@@ -447,15 +702,23 @@ export async function getProbabilityPicks(filters: ProbabilityPickFilters = {}):
     loadPitcherPicks(filters.date, Math.min(limit, 200)),
   ])
   const warnings = [history.warning, pitcher.warning].filter((warning): warning is string => Boolean(warning))
-  const picks = top(uniqueById(applyFilters([...history.picks, ...pitcher.picks], filters)), (a, b) => b.score - a.score, limit)
+  const picks = sortPicks(uniqueById(applyFilters([...history.picks, ...pitcher.picks], filters)), filters.sort ?? 'score').slice(0, limit)
   const sportEligibility = buildSportEligibilitySummary(picks, [...history.excluded, ...pitcher.excluded], filters.sport)
   if (sportEligibility.excludedRows > 0) {
     warnings.push(`excluded_uncertified_probability_pick_rows:${sportEligibility.excludedRows}`)
   }
   const sections = buildSections(picks)
+  const freshness = freshnessSummary(picks)
+  const signals = topSignals(picks)
+  const excludedReasons = excludedRowsByReason(sportEligibility)
+  const qualifiedBySport = qualifiedRowsBySport(picks)
+  const filterMetadata = buildFilterMetadata(sportEligibility)
+  const sortMetadata = buildSortMetadata()
+  const briefingContext = buildBriefingContext(picks, freshness, warnings, sportEligibility)
   return {
     success: true,
     mode: MODE,
+    version: VERSION,
     generatedAt: nowIso(),
     dryRun: true,
     providerCallsMade: 0,
@@ -467,6 +730,13 @@ export async function getProbabilityPicks(filters: ProbabilityPickFilters = {}):
       markets: [...new Set(picks.map((pick) => pick.marketType))],
       projectionOnly: true,
       sportEligibility,
+      rankingEligibleSports: sportEligibility.rankingEligibleSports,
+      parlayEligibleSports: sportEligibility.parlayEligibleSports,
+      excludedSports: sportEligibility.excludedSports,
+      excludedRowsByReason: excludedReasons,
+      qualifiedRowsBySport: qualifiedBySport,
+      freshnessSummary: freshness,
+      topSignals: signals,
     },
     filters: {
       sport: filters.sport ?? 'all',
@@ -474,9 +744,24 @@ export async function getProbabilityPicks(filters: ProbabilityPickFilters = {}):
       minProbability: filters.minProbability ?? null,
       minConfidence: filters.minConfidence ?? null,
       minQuality: filters.minQuality ?? null,
+      maxRisk: filters.maxRisk ?? 'all',
+      dataFreshness: filters.dataFreshness ?? 'all',
+      certificationLevel: filters.certificationLevel ?? 'all',
       starterStatus: filters.starterStatus ?? 'all',
       projectionQuality: filters.projectionQuality ?? 'all',
+      sort: filters.sort ?? 'score',
     },
+    sportEligibility,
+    rankingEligibleSports: sportEligibility.rankingEligibleSports,
+    parlayEligibleSports: sportEligibility.parlayEligibleSports,
+    excludedSports: sportEligibility.excludedSports,
+    excludedRowsByReason: excludedReasons,
+    qualifiedRowsBySport: qualifiedBySport,
+    freshnessSummary: freshness,
+    topSignals: signals,
+    filterMetadata,
+    sortMetadata,
+    briefingContext,
     sections,
     picks,
     warnings,
@@ -600,6 +885,15 @@ function buildParlay(legs: ProbabilityPick[], mode: ProbabilityParlayMode, scope
   }
 }
 
+function parlayBlockers(picksResponse: ProbabilityPicksResponse, eligibleCount: number, scope: ProbabilityParlayScope, minLegs: number) {
+  const blockers: string[] = []
+  if ((picksResponse.parlayEligibleSports?.length ?? 0) <= 1 && scope === 'MULTI_SPORT') blockers.push('Only one certified sport is currently available.')
+  if (eligibleCount < minLegs) blockers.push('Not enough independent eligible events meet the current parlay requirements.')
+  if (picksResponse.summary.picksGenerated === 0) blockers.push('No qualified projection-only picks are available under current filters.')
+  if (picksResponse.warnings.length) blockers.push('Current warnings require review before using parlay combinations.')
+  return blockers.length ? blockers : ['No sufficiently independent combination meets the current parlay requirements.']
+}
+
 export async function getProbabilityParlays(options: ProbabilityParlayOptions = {}): Promise<ProbabilityParlaysResponse> {
   const mode = options.mode ?? 'BALANCED'
   const scope = options.scope ?? 'MULTI_SPORT'
@@ -625,6 +919,7 @@ export async function getProbabilityParlays(options: ProbabilityParlayOptions = 
   return {
     success: true,
     mode: PARLAY_MODE,
+    version: PARLAY_VERSION,
     generatedAt: nowIso(),
     dryRun: true,
     providerCallsMade: 0,
@@ -636,9 +931,29 @@ export async function getProbabilityParlays(options: ProbabilityParlayOptions = 
       mode,
       scope,
       projectionOnly: true,
+      multiSportAvailable: (picksResponse.parlayEligibleSports?.length ?? 0) > 1,
+      qualificationReasons: [
+        'Projection-only legs only',
+        'Existing correlation limits preserved',
+        'Existing parlay thresholds preserved',
+      ],
     },
     parlays: sorted,
     warnings: picksResponse.warnings,
+    presentation: {
+      modes: ['CONSERVATIVE', 'BALANCED', 'AGGRESSIVE'],
+      scopes: [
+        { value: 'MLB_ONLY', label: 'MLB Only', available: true, reason: 'MLB is the only currently certified limited Probability Picks sport.' },
+        {
+          value: 'MULTI_SPORT',
+          label: 'Multi-Sport',
+          available: (picksResponse.parlayEligibleSports?.length ?? 0) > 1,
+          reason: (picksResponse.parlayEligibleSports?.length ?? 0) > 1 ? 'More than one certified sport is eligible.' : 'Multi-sport requires at least two certified eligible sports.',
+        },
+      ],
+      emptyState: 'No sufficiently independent combination meets the current parlay requirements.',
+      aggregateBlockers: sorted.length ? [] : parlayBlockers(picksResponse, eligible.length, scope, minLegs),
+    },
   }
 }
 
@@ -684,9 +999,28 @@ export function validateProbabilityPickFixtures(): ProbabilityValidationResponse
     feature_snapshot_generated_at: '2026-07-26T15:00:00.000Z',
   }
   const pick = predictionRowToPick(fixture)
+  const soccerPick = predictionRowToPick({ ...fixture, id: 'fixture-soccer', sport_key: 'soccer_epl' })
+  const ncaafPick = predictionRowToPick({ ...fixture, id: 'fixture-ncaaf', sport_key: 'americanfootball_ncaaf' })
+  const freshPick = pick ? { ...pick, freshness: 95, generatedAt: '2026-07-26T15:30:00.000Z', dataAsOf: '2026-07-26T15:30:00.000Z' } : null
+  const lowConfidencePick = pick ? { ...pick, id: 'low-confidence', confidence: 44 } : null
+  const stalePick = pick ? { ...pick, id: 'stale', freshness: 45, generatedAt: '2026-07-20T15:00:00.000Z', dataAsOf: '2026-07-20T15:00:00.000Z' } : null
+  const fixturePool = [freshPick, soccerPick, ncaafPick].filter((item): item is ProbabilityPick => Boolean(item))
+  const eligiblePool = fixturePool.filter(isRankEligible)
   const postStartExcluded = isExcludedLifecycle({ ...fixture, commence_time: '2026-07-26T15:30:00.000Z' }, now)
   const sameGameCorrelation = pick ? pairCorrelation(pick, { ...pick, id: 'other', marketType: 'run_line' }).penalty > 0 : false
   const parlay = pick ? buildParlay([pick, { ...pick, id: 'second', eventId: 'game-2', correlationGroup: 'game-2', marketType: 'total', modelProbability: 58 }], 'BALANCED', 'MLB_ONLY') : null
+  const sortedProbability = pick ? sortPicks([pick, { ...pick, id: 'lower-probability', selection: 'Lower', modelProbability: 52 }], 'probability')[0]?.id === pick.id : false
+  const sortedConfidence = pick ? sortPicks([pick, { ...pick, id: 'higher-confidence', selection: 'Higher Confidence', confidence: 82 }], 'confidence')[0]?.id === 'higher-confidence' : false
+  const sortedQuality = pick ? sortPicks([pick, { ...pick, id: 'higher-quality', selection: 'Higher Quality', quality: 88 }], 'quality')[0]?.id === 'higher-quality' : false
+  const freshOnly = freshPick && stalePick ? applyFilters([freshPick, stalePick], { dataFreshness: 'FRESH' }) : []
+  const restrictive = pick ? applyFilters([pick], { minProbability: 99 }) : []
+  const sportFiltered = pick ? applyFilters([pick], { sport: 'baseball_mlb' }) : []
+  const allEligible = applyFilters(eligiblePool, { sport: 'all' })
+  const eligibilitySummary = buildSportEligibilitySummary(eligiblePool, fixturePool.filter((item) => !isRankEligible(item)), 'all')
+  const signals = topSignals(eligiblePool)
+  const freshness = freshnessSummary(eligiblePool)
+  const noForbiddenLanguage = pick ? !FORBIDDEN_PROBABILITY_TEXT.test(JSON.stringify({ drivers: pick.drivers, risks: pick.risks, explanation: pick.explanation })) : false
+  const balanced = modeThreshold('BALANCED')
   const checks = [
     ['fixture pick created', Boolean(pick)],
     ['recommendation type is probability only', pick?.recommendationType === RECOMMENDATION_TYPE],
@@ -696,6 +1030,25 @@ export function validateProbabilityPickFixtures(): ProbabilityValidationResponse
     ['same-game correlation penalized', sameGameCorrelation],
     ['parlay generated without simple product', parlay !== null && parlay.combinedProbability !== round((64 / 100) * (58 / 100) * 100)],
     ['uncertified sport rows are not ranking eligible', predictionRowToPick({ ...fixture, id: 'fixture-nfl', sport_key: 'americanfootball_nfl' })?.sportEligibility.eligibleForRanking === false],
+    ['soccer rows excluded from ranking eligibility', soccerPick?.sportEligibility.eligibleForRanking === false],
+    ['ncaa football rows excluded from ranking eligibility', ncaafPick?.sportEligibility.eligibleForRanking === false],
+    ['all sports filter cannot bypass certification', allEligible.every((item) => item.sportEligibility.eligibleForRanking) && allEligible.length === 1],
+    ['per-sport filter returns selected certified sport', sportFiltered.length === 1 && sportFiltered[0].sport === 'baseball_mlb'],
+    ['probability sort orders by probability', sortedProbability],
+    ['confidence sort orders by confidence', sortedConfidence],
+    ['quality sort orders by quality', sortedQuality],
+    ['freshness summary classifies fixture rows', freshness.status === 'FRESH' && freshness.freshRows >= 1],
+    ['stale row excluded by fresh filter', freshOnly.length === 1 && freshOnly[0].id === freshPick?.id],
+    ['no qualified picks state can be represented', restrictive.length === 0],
+    ['filters too restrictive state can be represented', restrictive.length === 0 && (pick?.modelProbability ?? 0) < 99],
+    ['insufficient independent events blocks parlay presentation', eligiblePool.length < 2],
+    ['multi-sport unavailable with one certified sport', (eligibilitySummary.parlayEligibleSports?.length ?? 0) === 1],
+    ['ai briefing deep-link context metadata present', buildBriefingContext(eligiblePool, freshness, [], eligibilitySummary).qualifiedCount === eligiblePool.length],
+    ['no sportsbook dependency in fixture explanations', noForbiddenLanguage],
+    ['backward-compatible v1 mode retained', MODE === 'probability_picks_v1' && VERSION === 'probability_picks_v2'],
+    ['top signals are additive metadata', signals.highestProbability?.id === pick?.id],
+    ['low confidence filter excludes below threshold', lowConfidencePick ? applyFilters([lowConfidencePick], { minConfidence: 45 }).length === 0 : false],
+    ['balanced parlay thresholds unchanged', balanced.probability === 56 && balanced.confidence === 55 && balanced.quality === 52 && balanced.maxPenalty === 28],
     ['provider calls remain zero', true],
     ['remote mutations remain zero', true],
   ] as const

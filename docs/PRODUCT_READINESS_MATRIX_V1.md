@@ -7,7 +7,7 @@ The machine-readable matrix is stored in `docs/product-readiness-matrix-v1.json`
 | Route | Product Area | Status | Data Status | Usefulness | Main Blocker |
 | --- | --- | --- | --- | --- | --- |
 | `/dashboard` | HOME | PRODUCTION_READY_WITH_WARNINGS | CURRENT_STORED | High | Dense consumer/operator mix |
-| `/probability-picks` | PICKS | LIMITED | MODEL_GENERATED | High when MLB rows qualify | Multi-sport certification incomplete |
+| `/probability-picks` | PICKS | LIMITED | MODEL_GENERATED | High when MLB rows qualify | Multi-sport certification incomplete; V2 exploration locally implemented |
 | `/player-projections` | PROJECTIONS | PRODUCTION_READY_WITH_WARNINGS | MODEL_GENERATED | High | Same-event prop overlap and provider entitlement |
 | `/most-likely` | PICKS | PRODUCTION_READY_WITH_WARNINGS | CURRENT_STORED | High | Stored prediction and market coverage required |
 | `/best-value` | PICKS | PRODUCTION_READY_WITH_WARNINGS | CURRENT_STORED | Medium-high | Market coverage and freshness |
@@ -24,12 +24,13 @@ The machine-readable matrix is stored in `docs/product-readiness-matrix-v1.json`
 - Arbitrage should stay blocked until verified multi-book lines exist.
 - Player-prop comparison should remain same-event gated and must not attach stored lines across events.
 - Probability Picks now blocks uncertified sports from normal ranking.
+- Probability Picks V2 adds Today Overview, top signals, by-sport grouping, not-ready sport summaries, filters, sorting, explanations, freshness labels and API metadata while preserving projection-only behavior.
 
 ## Remaining Backlog
 
 - Split consumer navigation from operator/admin diagnostics.
 - Add more uniform freshness labels across every data-heavy panel.
-- Add richer per-sport empty states once future engines are certified.
+- Certify additional sports before enabling multi-sport Probability Picks ranking or multi-sport parlays.
 - Reduce internal reason-code language in advanced consumer pages.
 
 ## Certification

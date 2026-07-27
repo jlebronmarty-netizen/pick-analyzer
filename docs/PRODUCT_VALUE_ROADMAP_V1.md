@@ -4,7 +4,7 @@ Generated: 2026-07-27
 
 ## NOW
 
-1. Keep Probability Picks V1 projection-only and MLB-limited until additional sports have certified engines and sufficient current stored data.
+1. Keep Probability Picks V2 projection-only and MLB-limited until additional sports have certified engines and sufficient current stored data.
 2. Prioritize DATA_FOUNDATION_V2_EPOCH Gate 2/Gate 3 readiness only after explicit SQL seed and activation approval.
 3. Improve Dashboard information architecture by separating consumer Today views from Operations/Admin diagnostics.
 4. Standardize freshness labels for generated, synced, provider-updated, event-start, cutoff, settled and data-as-of timestamps.
@@ -12,8 +12,8 @@ Generated: 2026-07-27
 
 ## NEXT
 
-1. Probability Picks V2: per-sport tabs, certified sport readiness cards, richer insufficient-data states and clearer calibration sample-size labels.
-2. AI Briefing: concise consumer summary from existing Dashboard data without new provider calls or recommendation-policy changes.
+1. Certify a second sport for Probability Picks only after current stored data, engine validation, settlement evidence and product approval exist.
+2. Add richer calibration sample-size labels once settled sport-specific samples are sufficient.
 3. Player Prop Expansion: only after provider entitlement, identity, same-event overlap, settlement and replay support are certified.
 4. Market Comparison: broaden markets only with verified line provenance and no fabricated sportsbook rows.
 5. Historical import execution: run only under explicit provider/source, budget and mutation approval.

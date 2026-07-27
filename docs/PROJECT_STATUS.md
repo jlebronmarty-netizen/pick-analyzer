@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-27 16:54:00Z
 
+## 2026-07-27 Probability Picks V2
+
+- Probability Picks V2 is locally implemented as the detailed exploration companion to AI Briefing V2. `/probability-picks` now opens with Today Overview, top probability/confidence/quality/stability/data-quality signals, by-sport grouping, Sports Not Ready Today, AI Parlay presentation and concise metric definitions.
+- `/api/probability-picks` remains backward-compatible with `mode: probability_picks_v1` while adding `version: probability_picks_v2`, V2 sport eligibility metadata, freshness summary, top signals, filter metadata, sort metadata and briefing context. `/api/probability-picks/parlays` keeps existing parlay math and adds presentation metadata for mode/scope availability and aggregate blockers.
+- MLB remains `CERTIFIED_LIMITED` and ranking eligible. Soccer EPL, NCAA Football and other uncertified sports remain excluded from rankings and parlays until separate sport-specific certification. No probability, confidence, quality, threshold, score formula, correlation math, model service, Learning Brain weight, scheduler, SQL, import, feature rebuild, provider call or database mutation changed.
+
 ## 2026-07-27 AI Briefing V2 Daily Decision Engine
 
 - AI Briefing V2 is locally implemented as the executive summary layer for `/ai-operations`. It now opens with a plain-language decision briefing, Today Snapshot, top projection-only signals, warnings, data/model health, certified/not-ready sport summary and links to Probability Picks, Current Board, Player Projections and Performance.
