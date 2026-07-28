@@ -32,6 +32,7 @@ const productNavGroups = [
       { href: '/dashboard', label: 'Dashboard', icon: 'DB' },
       { href: '/sports-center', label: 'Sports Center', icon: 'SC' },
       { href: '/ai-operations', label: 'AI Briefing', icon: 'AI' },
+      { href: '/data-coverage', label: 'Data Coverage', icon: 'DC', badge: 'FOUNDATION' },
     ],
   },
   {
@@ -75,7 +76,7 @@ const productNavGroups = [
     items: [
       { href: '/ai-operations', label: 'AI Operations', icon: 'AO' },
       { href: '/autonomous-daily-ai', label: 'Autonomous Daily AI', icon: 'AD', badge: 'FOUNDATION' },
-      { id: 'data-operations', label: 'Data Foundation', icon: 'DF', badge: 'PENDING' },
+      { href: '/data-coverage', label: 'Data Foundation', icon: 'DF', badge: 'FOUNDATION' },
       { href: '/mlb-operations', label: 'MLB Operations', icon: 'MO' },
       { href: '/dashboard#advanced-details', label: 'Providers', icon: 'PV' },
     ],

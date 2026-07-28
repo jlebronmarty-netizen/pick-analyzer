@@ -20,6 +20,8 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Active Local Run
 
+Multi-Sport Data, Prediction And Learning Expansion Program V1 is in local autonomous execution from commit `928be40d0ebb5db65d4b4378dff1074ab08bf954`. Phase 1 adds the stored-data-only Data Coverage Center at `/data-coverage`, `/data-coverage/[sport]` and `/api/data-coverage/inventory`, composing existing data-foundation coverage without provider calls, imports, SQL, prediction generation, settlement writes, feature rebuilds, recommendation changes or epoch activation.
+
 Product Experience, Data Trust, And Live-State Readiness Audit V1 is in autonomous local execution from commit `1cc3853565dd41c67b36f6453b3a876aabdd9361`. The run is governed by `docs/product-audit-v1-ledger.json` and must not push, deploy, apply SQL, run production imports, execute feature rebuilds, seed or activate `DATA_FOUNDATION_V2_EPOCH`, switch scheduler behavior or change Learning Brain/model weights. Stage 1 route inventory is locally complete with 20 page routes, 409 API routes and bounded smoke evidence; `/api/data-foundation/readiness` remains a bounded local timeout caveat.
 
 Product Audit Stage 4 Probability Picks eligibility hardening is locally implemented. MLB remains projection-only and `CERTIFIED_LIMITED`; other sports are excluded from global Probability Picks rankings as `ENGINE_NOT_CERTIFIED` until sport-specific engines and stored data are certified. Probability math, model weights, Learning Brain, Official Picks, EV, Kelly, bankroll and Portfolio Intelligence remain unchanged.
