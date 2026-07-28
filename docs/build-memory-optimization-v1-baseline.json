@@ -1,0 +1,144 @@
+{
+    "generatedAt":  "2026-07-28T18:16:07.6853478Z",
+    "mode":  "build_memory_optimization_v1_measurement",
+    "label":  "baseline",
+    "exitCode":  null,
+    "success":  false,
+    "startedAt":  "2026-07-28T18:14:56.3399424Z",
+    "finishedAt":  "2026-07-28T18:16:07.4183503Z",
+    "durationSeconds":  71.08,
+    "peakWorkingSetBytes":  2757361664,
+    "peakWorkingSetMb":  2629.6,
+    "peakObservedProcessCount":  5,
+    "generatedStaticPagesFromOutput":  392,
+    "prerenderRouteCount":  12,
+    "routeManifestStaticRoutes":  425,
+    "routeManifestDynamicRoutes":  30,
+    "largestServerFiles":  [
+                               {
+                                   "file":  ".next/server/chunks/60319.js",
+                                   "bytes":  1255831
+                               },
+                               {
+                                   "file":  ".next/server/chunks/26218.js",
+                                   "bytes":  876552
+                               },
+                               {
+                                   "file":  ".next/server/chunks/99684.js",
+                                   "bytes":  876552
+                               },
+                               {
+                                   "file":  ".next/server/chunks/3445.js",
+                                   "bytes":  413704
+                               },
+                               {
+                                   "file":  ".next/server/app/dashboard/page.js",
+                                   "bytes":  346375
+                               },
+                               {
+                                   "file":  ".next/server/chunks/73740.js",
+                                   "bytes":  337304
+                               },
+                               {
+                                   "file":  ".next/server/app/performance/page.js",
+                                   "bytes":  219804
+                               },
+                               {
+                                   "file":  ".next/server/app/probability-picks/page.js",
+                                   "bytes":  207485
+                               },
+                               {
+                                   "file":  ".next/server/chunks/56781.js",
+                                   "bytes":  198363
+                               },
+                               {
+                                   "file":  ".next/server/app/ai-operations/page.js",
+                                   "bytes":  194927
+                               }
+                           ],
+    "stdoutTail":  [
+                       "├ ƒ /api/results",
+                       "├ ƒ /api/results/backfill",
+                       "├ ƒ /api/results/sync",
+                       "├ ƒ /api/settlement/core",
+                       "├ ƒ /api/settlement/reconciliation",
+                       "├ ƒ /api/sharp-money",
+                       "├ ƒ /api/simulator",
+                       "├ ƒ /api/simulator/monte-carlo",
+                       "├ ƒ /api/slate/next/status",
+                       "├ ƒ /api/soccer/features/preview",
+                       "├ ƒ /api/soccer/features/store",
+                       "├ ƒ /api/soccer/features/validation",
+                       "├ ƒ /api/soccer/predictions",
+                       "├ ƒ /api/soccer/predictions/health",
+                       "├ ƒ /api/soccer/predictions/validation",
+                       "├ ƒ /api/sports",
+                       "├ ƒ /api/sports-analyst/game/[eventId]",
+                       "├ ƒ /api/sports/[sport]",
+                       "├ ƒ /api/sports/[sport]/events",
+                       "├ ƒ /api/sports/[sport]/events/[eventId]",
+                       "├ ƒ /api/sports/[sport]/injuries",
+                       "├ ƒ /api/sports/[sport]/leagues",
+                       "├ ƒ /api/sports/[sport]/lineups",
+                       "├ ƒ /api/sports/[sport]/markets",
+                       "├ ƒ /api/sports/[sport]/odds",
+                       "├ ƒ /api/sports/[sport]/participants",
+                       "├ ƒ /api/sports/[sport]/providers",
+                       "├ ƒ /api/sports/[sport]/standings",
+                       "├ ƒ /api/sports/[sport]/stats",
+                       "├ ƒ /api/sports/health",
+                       "├ ƒ /api/sportsbook-intelligence",
+                       "├ ƒ /api/sync/reliability",
+                       "├ ƒ /api/system/version",
+                       "├ ƒ /api/team-stats",
+                       "├ ƒ /api/team-stats/recalculate",
+                       "├ ƒ /api/team-stats/sync",
+                       "├ ƒ /api/tennis/features/preview",
+                       "├ ƒ /api/tennis/features/store",
+                       "├ ƒ /api/tennis/features/validation",
+                       "├ ƒ /api/tennis/predictions",
+                       "├ ƒ /api/tennis/predictions/health",
+                       "├ ƒ /api/tennis/predictions/validation",
+                       "├ ƒ /api/test-providers",
+                       "├ ƒ /api/ufc/features/preview",
+                       "├ ƒ /api/ufc/features/store",
+                       "├ ƒ /api/ufc/features/validation",
+                       "├ ƒ /api/ufc/predictions",
+                       "├ ƒ /api/ufc/predictions/health",
+                       "├ ƒ /api/ufc/predictions/validation",
+                       "├ ƒ /api/weather/seed",
+                       "├ ○ /arbitrage",
+                       "├ ƒ /autonomous-daily-ai",
+                       "├ ○ /best-value",
+                       "├ ○ /betting-workbench",
+                       "├ ƒ /closing-line-intelligence",
+                       "├ ƒ /dashboard",
+                       "├ ƒ /data-coverage",
+                       "├ ƒ /data-coverage/[sport]",
+                       "├ ƒ /game-intelligence",
+                       "├ ƒ /game-intelligence/[eventId]",
+                       "├ ○ /login",
+                       "├ ƒ /market-intelligence",
+                       "├ ƒ /mlb-operations",
+                       "├ ○ /model",
+                       "├ ○ /most-likely",
+                       "├ ƒ /performance",
+                       "├ ƒ /player-projections",
+                       "├ ƒ /player-projections/[projectionId]",
+                       "├ ƒ /portfolio-intelligence",
+                       "├ ƒ /probability-picks",
+                       "├ ƒ /projections",
+                       "├ ○ /register",
+                       "├ ƒ /sports-center",
+                       "└ ƒ /sports-center/[sport]",
+                       "",
+                       "",
+                       "○  (Static)   prerendered as static content",
+                       "ƒ  (Dynamic)  server-rendered on demand",
+                       "",
+                       ""
+                   ],
+    "stderrTail":  {
+
+                   }
+}

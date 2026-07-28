@@ -2807,6 +2807,18 @@ Validation: NFL dry-run produced 776 predictions across moneyline, spread and to
 Continuation: Wait for future NFL/NHL events to complete, ingest deterministic final scores through approved result paths, then rerun settlement reconciliation before any learning, performance or promotion review.
 
 Completion criteria: `NFL_PREVIEW_PREDICTION_ACTIVATION_PASS`, `NFL_PREGAME_FEATURE_SNAPSHOT_PASS`, `NFL_PREVIEW_ISOLATION_PASS`, `NFL_SETTLEMENT_DRY_RUN_PASS`, `NHL_PREVIEW_PREDICTION_ACTIVATION_PASS`, `NHL_PREGAME_FEATURE_SNAPSHOT_PASS`, `NHL_PREVIEW_ISOLATION_PASS`, `NHL_SETTLEMENT_DRY_RUN_PASS`, `NO_RETROSPECTIVE_PREDICTION_PASS`, `NO_POST_START_LEAKAGE_PASS`, `NO_PRODUCTION_POLLUTION_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_OFFICIAL_PICK_POLICY_CHANGE_PASS`, `NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS` and `NO_SCHEDULER_DRIFT_PASS` are certified.
+
+### 53. Build Memory Optimization V1
+
+Objective: Reduce production build memory pressure without changing runtime behavior, prediction logic, scheduler behavior, Official Picks, Learning Brain, probabilities, APIs, database schema or provider behavior.
+
+Status: Phase A complete; broader optimization paused by measurement gate.
+
+Frontend scope: `/ai-bet-finder`, `/arbitrage`, `/best-value`, `/betting-workbench`, `/model` and `/most-likely` were inspected and classified as runtime-backed thin page wrappers. Each now exports `dynamic = 'force-dynamic'` only. No broad application-wide dynamic rendering policy was added.
+
+Validation: Measured local build after Phase A exits 0. Prerender routes decreased from 12 to 6 and generated static pages decreased from 392 to 386, but peak observed working set increased from 2629.6 MB to 2715.2 MB. Server bundle audit identifies the next verified pressure area as large shared server chunks and broad server-service imports, not the six converted pages.
+
+Continuation: Do not deploy on Phase A alone. The next pass should inspect largest server chunks, route tracing and server-service import boundaries before attempting broader changes.
 # MLB Pitcher Projection Engine V1
 
 Status: PARTIAL
