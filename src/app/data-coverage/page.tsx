@@ -6,6 +6,7 @@ import { getMultiSportProviderEntitlementAuditV1 } from '@/services/multi-sport-
 import { getMultiSportDataExpansionCheckpoint2V1 } from '@/services/multi-sport-data-expansion-checkpoint2.service'
 import { getMultiSportDataExpansionCheckpoint3V1 } from '@/services/multi-sport-data-expansion-checkpoint3.service'
 import { getMultiSportDataExpansionFinalCertificationV1 } from '@/services/multi-sport-data-expansion-final.service'
+import { getTheOddsApiCoverage } from '@/services/the-odds-api-maximum-utilization.service'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,12 +28,13 @@ function Metric({ label, value, detail }: { label: string; value: string | numbe
 }
 
 export default async function DataCoveragePage() {
-  const [inventory, providerAudit, checkpoint2, checkpoint3, finalCertification] = await Promise.all([
+  const [inventory, providerAudit, checkpoint2, checkpoint3, finalCertification, oddsApiCoverage] = await Promise.all([
     getDataCoverageInventoryV1(),
     getMultiSportProviderEntitlementAuditV1(),
     getMultiSportDataExpansionCheckpoint2V1(),
     getMultiSportDataExpansionCheckpoint3V1(),
     getMultiSportDataExpansionFinalCertificationV1(),
+    getTheOddsApiCoverage({ dryRun: true }),
   ])
 
   return (
@@ -106,6 +108,30 @@ export default async function DataCoveragePage() {
         <a href="/api/data-coverage/provider-audit" className="mt-4 inline-flex rounded-full border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-950/30">
           Open Provider Audit API
         </a>
+      </DashboardSection>
+
+      <DashboardSection
+        title="The Odds API Advanced Coverage"
+        description="Catalog, quota, capability and coverage endpoints are exposed for bounded provider certification. The page uses dry-run evidence and makes no live provider calls."
+      >
+        <div className="grid gap-4 md:grid-cols-4">
+          <Metric label="Mapped Sports" value={oddsApiCoverage.catalogSummary.mappedSports} />
+          <Metric label="Catalog Sports" value={oddsApiCoverage.catalogSummary.providerSportsFound} />
+          <Metric label="Provider Calls" value={oddsApiCoverage.providerCallsMade} />
+          <Metric label="Remote Mutations" value={oddsApiCoverage.remoteMutationsMade} />
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-4">
+          {[
+            ['/api/providers/the-odds-api/catalog', 'Catalog'],
+            ['/api/providers/the-odds-api/quota', 'Quota'],
+            ['/api/providers/the-odds-api/capability', 'Capability'],
+            ['/api/providers/the-odds-api/coverage', 'Coverage'],
+          ].map(([href, label]) => (
+            <a key={href} href={href} className="inline-flex justify-center rounded-full border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-950/30">
+              {label}
+            </a>
+          ))}
+        </div>
       </DashboardSection>
 
       <DashboardSection

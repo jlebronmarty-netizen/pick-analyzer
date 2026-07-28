@@ -2,6 +2,13 @@
 
 Last updated: 2026-07-28 00:00:00Z
 
+## 2026-07-28 The Odds API Maximum Utilization V1
+
+- Checkpoint 1 adds bounded The Odds API catalog, quota, capability and coverage contracts at `/api/providers/the-odds-api/catalog`, `/api/providers/the-odds-api/quota`, `/api/providers/the-odds-api/capability` and `/api/providers/the-odds-api/coverage`.
+- The Data Coverage page now links to the advanced Odds API surfaces while rendering dry-run evidence only. Live execution requires explicit confirmation and preserves a 2,000-credit provider reserve.
+- The capability matrix separates `CURRENT_EVENTS`, `CURRENT_ODDS`, `EVENT_MARKETS`, `PLAYER_PROPS`, `SCORES`, `HISTORICAL_ODDS`, `BOOKMAKER_COVERAGE`, `REGION_COVERAGE` and `SEASON_STATE`. Historical odds range discovery remains deferred to a later bounded checkpoint.
+- Checkpoint 1 validation uses `scripts/the-odds-api-maximum-utilization-v1-checkpoint1-validate.mjs`; live evidence is produced by `scripts/the-odds-api-maximum-utilization-v1-checkpoint1.mjs` and stored in sanitized docs artifacts. No SQL, feature rebuild, prediction activation, settlement, learning write, scheduler change or recommendation-policy change is part of this checkpoint.
+
 ## 2026-07-28 Live Multi-Sport Data Acquisition V1
 
 - Checkpoint A Live Entitlement Proof and Identity Certification is implemented in `scripts/live-multi-sport-acquisition-v1-checkpoint-a.mjs` with sanitized evidence in `docs/live-multi-sport-acquisition-v1-checkpoint-a.json` and `docs/LIVE_MULTI_SPORT_DATA_ACQUISITION_V1.md`.

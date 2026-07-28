@@ -1,0 +1,860 @@
+{
+  "generatedAt": "2026-07-28T02:47:53.484Z",
+  "commit": "19650ee34f680558e9edab4109c88b556828e0d5",
+  "checkpoint": "THE_ODDS_API_MAXIMUM_UTILIZATION_V1_CHECKPOINT_1",
+  "result": {
+    "success": true,
+    "mode": "the_odds_api_maximum_utilization_v1",
+    "status": "LIVE_AUDIT_COMPLETE",
+    "generatedAt": "2026-07-28T02:47:53.484Z",
+    "provider": "the-odds-api",
+    "apiKeyPresent": true,
+    "live": true,
+    "providerCallsMade": 12,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 0,
+    "rowsPersisted": 0,
+    "creditReserve": 2000,
+    "hardCallBudget": 12,
+    "requestsRemainingBefore": 19970,
+    "requestsRemainingAfter": 19953,
+    "requestsUsedObserved": 17,
+    "stopReason": null,
+    "catalog": {
+      "providerSportsFound": 173,
+      "activeProviderSports": 71,
+      "mappedSports": [
+        {
+          "sportKey": "baseball_mlb",
+          "label": "MLB Baseball",
+          "providerSportKey": "baseball_mlb",
+          "directCatalogMatch": true,
+          "active": true,
+          "catalogKeys": [
+            "baseball_mlb"
+          ],
+          "seasonState": "ACTIVE_OR_LISTED"
+        },
+        {
+          "sportKey": "basketball_nba",
+          "label": "NBA Basketball",
+          "providerSportKey": "basketball_nba",
+          "directCatalogMatch": true,
+          "active": false,
+          "catalogKeys": [
+            "basketball_nba"
+          ],
+          "seasonState": "INACTIVE_OR_NOT_LISTED"
+        },
+        {
+          "sportKey": "americanfootball_nfl",
+          "label": "NFL Football",
+          "providerSportKey": "americanfootball_nfl",
+          "directCatalogMatch": true,
+          "active": true,
+          "catalogKeys": [
+            "americanfootball_nfl"
+          ],
+          "seasonState": "ACTIVE_OR_LISTED"
+        },
+        {
+          "sportKey": "icehockey_nhl",
+          "label": "NHL Hockey",
+          "providerSportKey": "icehockey_nhl",
+          "directCatalogMatch": true,
+          "active": true,
+          "catalogKeys": [
+            "icehockey_nhl"
+          ],
+          "seasonState": "ACTIVE_OR_LISTED"
+        },
+        {
+          "sportKey": "soccer",
+          "label": "Soccer",
+          "providerSportKey": "soccer",
+          "directCatalogMatch": false,
+          "active": true,
+          "catalogKeys": [
+            "soccer_africa_cup_of_nations",
+            "soccer_argentina_primera_division",
+            "soccer_australia_aleague",
+            "soccer_austria_bundesliga",
+            "soccer_belgium_first_div",
+            "soccer_brazil_campeonato",
+            "soccer_brazil_serie_b",
+            "soccer_chile_campeonato",
+            "soccer_china_superleague",
+            "soccer_concacaf_gold_cup",
+            "soccer_concacaf_leagues_cup",
+            "soccer_conmebol_copa_america",
+            "soccer_conmebol_copa_libertadores",
+            "soccer_conmebol_copa_sudamericana",
+            "soccer_denmark_superliga",
+            "soccer_efl_champ",
+            "soccer_england_efl_cup",
+            "soccer_england_league1",
+            "soccer_england_league2",
+            "soccer_epl",
+            "soccer_fa_cup",
+            "soccer_fifa_club_world_cup",
+            "soccer_fifa_world_cup",
+            "soccer_fifa_world_cup_qualifiers_europe",
+            "soccer_fifa_world_cup_qualifiers_south_america",
+            "soccer_fifa_world_cup_winner",
+            "soccer_fifa_world_cup_womens",
+            "soccer_finland_veikkausliiga",
+            "soccer_france_coupe_de_france",
+            "soccer_france_ligue_one",
+            "soccer_france_ligue_two",
+            "soccer_germany_bundesliga",
+            "soccer_germany_bundesliga2",
+            "soccer_germany_bundesliga_women",
+            "soccer_germany_dfb_pokal",
+            "soccer_germany_liga3",
+            "soccer_greece_super_league",
+            "soccer_italy_coppa_italia",
+            "soccer_italy_serie_a",
+            "soccer_italy_serie_b",
+            "soccer_japan_j_league",
+            "soccer_korea_kleague1",
+            "soccer_league_of_ireland",
+            "soccer_mexico_ligamx",
+            "soccer_netherlands_eredivisie",
+            "soccer_norway_eliteserien",
+            "soccer_poland_ekstraklasa",
+            "soccer_portugal_primeira_liga",
+            "soccer_russia_premier_league",
+            "soccer_saudi_arabia_pro_league",
+            "soccer_spain_copa_del_rey",
+            "soccer_spain_la_liga",
+            "soccer_spain_segunda_division",
+            "soccer_spl",
+            "soccer_sweden_allsvenskan",
+            "soccer_sweden_superettan",
+            "soccer_switzerland_superleague",
+            "soccer_turkey_super_league",
+            "soccer_uefa_champs_league",
+            "soccer_uefa_champs_league_qualification",
+            "soccer_uefa_champs_league_women",
+            "soccer_uefa_euro_qualification",
+            "soccer_uefa_europa_conference_league",
+            "soccer_uefa_europa_league",
+            "soccer_uefa_european_championship",
+            "soccer_uefa_nations_league",
+            "soccer_usa_mls"
+          ],
+          "seasonState": "ACTIVE_OR_LISTED"
+        },
+        {
+          "sportKey": "tennis",
+          "label": "Tennis",
+          "providerSportKey": "tennis",
+          "directCatalogMatch": false,
+          "active": false,
+          "catalogKeys": [],
+          "seasonState": "INACTIVE_OR_NOT_LISTED"
+        },
+        {
+          "sportKey": "mma_ufc",
+          "label": "UFC",
+          "providerSportKey": "mma_mixed_martial_arts",
+          "directCatalogMatch": true,
+          "active": true,
+          "catalogKeys": [
+            "mma_mixed_martial_arts"
+          ],
+          "seasonState": "ACTIVE_OR_LISTED"
+        },
+        {
+          "sportKey": "basketball_bsn",
+          "label": "BSN Puerto Rico",
+          "providerSportKey": "basketball_bsn",
+          "directCatalogMatch": false,
+          "active": false,
+          "catalogKeys": [],
+          "seasonState": "INACTIVE_OR_NOT_LISTED"
+        }
+      ],
+      "unmappedActiveProviderSports": [
+        {
+          "key": "americanfootball_cfl",
+          "group": "American Football",
+          "title": "CFL"
+        },
+        {
+          "key": "americanfootball_ncaaf",
+          "group": "American Football",
+          "title": "NCAAF"
+        },
+        {
+          "key": "americanfootball_ncaaf_championship_winner",
+          "group": "American Football",
+          "title": "NCAAF Championship Winner"
+        },
+        {
+          "key": "americanfootball_nfl_preseason",
+          "group": "American Football",
+          "title": "NFL Preseason"
+        },
+        {
+          "key": "americanfootball_nfl_super_bowl_winner",
+          "group": "American Football",
+          "title": "NFL Super Bowl Winner"
+        },
+        {
+          "key": "aussierules_afl",
+          "group": "Aussie Rules",
+          "title": "AFL"
+        },
+        {
+          "key": "baseball_kbo",
+          "group": "Baseball",
+          "title": "KBO"
+        },
+        {
+          "key": "baseball_mlb_world_series_winner",
+          "group": "Baseball",
+          "title": "MLB World Series Winner"
+        },
+        {
+          "key": "basketball_nba_championship_winner",
+          "group": "Basketball",
+          "title": "NBA Championship Winner"
+        },
+        {
+          "key": "basketball_ncaab_championship_winner",
+          "group": "Basketball",
+          "title": "NCAAB Championship Winner"
+        },
+        {
+          "key": "basketball_wnba",
+          "group": "Basketball",
+          "title": "WNBA"
+        },
+        {
+          "key": "boxing_boxing",
+          "group": "Boxing",
+          "title": "Boxing"
+        },
+        {
+          "key": "cricket_international_t20",
+          "group": "Cricket",
+          "title": "International Twenty20"
+        },
+        {
+          "key": "cricket_test_match",
+          "group": "Cricket",
+          "title": "Test Matches"
+        },
+        {
+          "key": "cricket_the_hundred",
+          "group": "Cricket",
+          "title": "The Hundred"
+        },
+        {
+          "key": "cricket_the_hundred_womens",
+          "group": "Cricket",
+          "title": "The Hundred - Women's"
+        },
+        {
+          "key": "golf_masters_tournament_winner",
+          "group": "Golf",
+          "title": "Masters Tournament Winner"
+        },
+        {
+          "key": "golf_pga_championship_winner",
+          "group": "Golf",
+          "title": "PGA Championship Winner"
+        },
+        {
+          "key": "golf_the_open_championship_winner",
+          "group": "Golf",
+          "title": "The Open Winner"
+        },
+        {
+          "key": "golf_us_open_winner",
+          "group": "Golf",
+          "title": "US Open Winner"
+        },
+        {
+          "key": "icehockey_nhl_championship_winner",
+          "group": "Ice Hockey",
+          "title": "NHL Championship Winner"
+        },
+        {
+          "key": "lacrosse_pll",
+          "group": "Lacrosse",
+          "title": "PLL"
+        },
+        {
+          "key": "politics_us_presidential_election_winner",
+          "group": "Politics",
+          "title": "US Presidential Elections Winner"
+        },
+        {
+          "key": "rugbyleague_nrl",
+          "group": "Rugby League",
+          "title": "NRL"
+        },
+        {
+          "key": "soccer_argentina_primera_division",
+          "group": "Soccer",
+          "title": "Primera División - Argentina"
+        },
+        {
+          "key": "soccer_austria_bundesliga",
+          "group": "Soccer",
+          "title": "Austrian Football Bundesliga"
+        },
+        {
+          "key": "soccer_belgium_first_div",
+          "group": "Soccer",
+          "title": "Belgium First Div"
+        },
+        {
+          "key": "soccer_brazil_campeonato",
+          "group": "Soccer",
+          "title": "Brazil Série A"
+        },
+        {
+          "key": "soccer_brazil_serie_b",
+          "group": "Soccer",
+          "title": "Brazil Série B"
+        },
+        {
+          "key": "soccer_chile_campeonato",
+          "group": "Soccer",
+          "title": "Primera División - Chile"
+        },
+        {
+          "key": "soccer_china_superleague",
+          "group": "Soccer",
+          "title": "Super League - China"
+        },
+        {
+          "key": "soccer_conmebol_copa_libertadores",
+          "group": "Soccer",
+          "title": "Copa Libertadores"
+        },
+        {
+          "key": "soccer_conmebol_copa_sudamericana",
+          "group": "Soccer",
+          "title": "Copa Sudamericana"
+        },
+        {
+          "key": "soccer_denmark_superliga",
+          "group": "Soccer",
+          "title": "Denmark Superliga"
+        },
+        {
+          "key": "soccer_efl_champ",
+          "group": "Soccer",
+          "title": "Championship"
+        },
+        {
+          "key": "soccer_england_efl_cup",
+          "group": "Soccer",
+          "title": "EFL Cup"
+        },
+        {
+          "key": "soccer_england_league1",
+          "group": "Soccer",
+          "title": "League 1"
+        },
+        {
+          "key": "soccer_england_league2",
+          "group": "Soccer",
+          "title": "League 2"
+        },
+        {
+          "key": "soccer_epl",
+          "group": "Soccer",
+          "title": "EPL"
+        },
+        {
+          "key": "soccer_finland_veikkausliiga",
+          "group": "Soccer",
+          "title": "Veikkausliiga - Finland"
+        },
+        {
+          "key": "soccer_france_ligue_one",
+          "group": "Soccer",
+          "title": "Ligue 1 - France"
+        },
+        {
+          "key": "soccer_germany_bundesliga",
+          "group": "Soccer",
+          "title": "Bundesliga - Germany"
+        },
+        {
+          "key": "soccer_germany_bundesliga2",
+          "group": "Soccer",
+          "title": "Bundesliga 2 - Germany"
+        },
+        {
+          "key": "soccer_germany_dfb_pokal",
+          "group": "Soccer",
+          "title": "DFB-Pokal"
+        },
+        {
+          "key": "soccer_germany_liga3",
+          "group": "Soccer",
+          "title": "3. Liga - Germany"
+        },
+        {
+          "key": "soccer_greece_super_league",
+          "group": "Soccer",
+          "title": "Super League - Greece"
+        },
+        {
+          "key": "soccer_italy_serie_a",
+          "group": "Soccer",
+          "title": "Serie A - Italy"
+        },
+        {
+          "key": "soccer_italy_serie_b",
+          "group": "Soccer",
+          "title": "Serie B - Italy"
+        },
+        {
+          "key": "soccer_korea_kleague1",
+          "group": "Soccer",
+          "title": "K League 1"
+        },
+        {
+          "key": "soccer_league_of_ireland",
+          "group": "Soccer",
+          "title": "League of Ireland"
+        }
+      ]
+    },
+    "capabilityMatrix": [
+      {
+        "sportKey": "baseball_mlb",
+        "label": "MLB Baseball",
+        "providerSportKeys": [
+          "baseball_mlb"
+        ],
+        "CURRENT_EVENTS": "AVAILABLE_WITH_ROWS",
+        "CURRENT_ODDS": "AVAILABLE_WITH_ROWS",
+        "EVENT_MARKETS": "AVAILABLE",
+        "PLAYER_PROPS": "AVAILABLE_NO_CURRENT_ROWS",
+        "SCORES": "AVAILABLE_WITH_ROWS",
+        "HISTORICAL_ODDS": "NOT_TESTED_RANGE_DISCOVERY_PENDING",
+        "BOOKMAKER_COVERAGE": [
+          "betmgm",
+          "betonlineag",
+          "betrivers",
+          "betus",
+          "bovada",
+          "draftkings",
+          "fanatics",
+          "fanduel",
+          "lowvig",
+          "mybookieag",
+          "williamhill_us"
+        ],
+        "REGION_COVERAGE": [
+          "us"
+        ],
+        "SEASON_STATE": "ACTIVE_OR_LISTED"
+      },
+      {
+        "sportKey": "basketball_nba",
+        "label": "NBA Basketball",
+        "providerSportKeys": [
+          "basketball_nba"
+        ],
+        "CURRENT_EVENTS": "AVAILABLE_NO_CURRENT_ROWS",
+        "CURRENT_ODDS": "AVAILABLE_NO_CURRENT_ROWS",
+        "EVENT_MARKETS": "UNKNOWN",
+        "PLAYER_PROPS": "NOT_TESTED_CREDIT_PROTECTION",
+        "SCORES": "AVAILABLE_NO_CURRENT_ROWS",
+        "HISTORICAL_ODDS": "NOT_TESTED_RANGE_DISCOVERY_PENDING",
+        "BOOKMAKER_COVERAGE": [],
+        "REGION_COVERAGE": [
+          "us"
+        ],
+        "SEASON_STATE": "INACTIVE_OR_NOT_LISTED"
+      },
+      {
+        "sportKey": "americanfootball_nfl",
+        "label": "NFL Football",
+        "providerSportKeys": [
+          "americanfootball_nfl"
+        ],
+        "CURRENT_EVENTS": "AVAILABLE_WITH_ROWS",
+        "CURRENT_ODDS": "AVAILABLE_WITH_ROWS",
+        "EVENT_MARKETS": "AVAILABLE",
+        "PLAYER_PROPS": "NOT_TESTED_CREDIT_PROTECTION",
+        "SCORES": "BLOCKED",
+        "HISTORICAL_ODDS": "NOT_TESTED_RANGE_DISCOVERY_PENDING",
+        "BOOKMAKER_COVERAGE": [
+          "betmgm",
+          "betonlineag",
+          "betrivers",
+          "betus",
+          "bovada",
+          "draftkings",
+          "fanatics",
+          "fanduel",
+          "lowvig",
+          "mybookieag",
+          "williamhill_us"
+        ],
+        "REGION_COVERAGE": [
+          "us"
+        ],
+        "SEASON_STATE": "ACTIVE_OR_LISTED"
+      },
+      {
+        "sportKey": "icehockey_nhl",
+        "label": "NHL Hockey",
+        "providerSportKeys": [
+          "icehockey_nhl"
+        ],
+        "CURRENT_EVENTS": "AVAILABLE_WITH_ROWS",
+        "CURRENT_ODDS": "AVAILABLE_WITH_ROWS",
+        "EVENT_MARKETS": "AVAILABLE",
+        "PLAYER_PROPS": "NOT_TESTED_CREDIT_PROTECTION",
+        "SCORES": "NOT_TESTED_CREDIT_PROTECTION",
+        "HISTORICAL_ODDS": "NOT_TESTED_RANGE_DISCOVERY_PENDING",
+        "BOOKMAKER_COVERAGE": [
+          "betmgm",
+          "betonlineag",
+          "betrivers",
+          "draftkings",
+          "fanduel",
+          "lowvig",
+          "williamhill_us"
+        ],
+        "REGION_COVERAGE": [
+          "us"
+        ],
+        "SEASON_STATE": "ACTIVE_OR_LISTED"
+      },
+      {
+        "sportKey": "soccer",
+        "label": "Soccer",
+        "providerSportKeys": [
+          "soccer_africa_cup_of_nations",
+          "soccer_argentina_primera_division",
+          "soccer_australia_aleague",
+          "soccer_austria_bundesliga",
+          "soccer_belgium_first_div",
+          "soccer_brazil_campeonato",
+          "soccer_brazil_serie_b",
+          "soccer_chile_campeonato",
+          "soccer_china_superleague",
+          "soccer_concacaf_gold_cup",
+          "soccer_concacaf_leagues_cup",
+          "soccer_conmebol_copa_america",
+          "soccer_conmebol_copa_libertadores",
+          "soccer_conmebol_copa_sudamericana",
+          "soccer_denmark_superliga",
+          "soccer_efl_champ",
+          "soccer_england_efl_cup",
+          "soccer_england_league1",
+          "soccer_england_league2",
+          "soccer_epl",
+          "soccer_fa_cup",
+          "soccer_fifa_club_world_cup",
+          "soccer_fifa_world_cup",
+          "soccer_fifa_world_cup_qualifiers_europe",
+          "soccer_fifa_world_cup_qualifiers_south_america",
+          "soccer_fifa_world_cup_winner",
+          "soccer_fifa_world_cup_womens",
+          "soccer_finland_veikkausliiga",
+          "soccer_france_coupe_de_france",
+          "soccer_france_ligue_one",
+          "soccer_france_ligue_two",
+          "soccer_germany_bundesliga",
+          "soccer_germany_bundesliga2",
+          "soccer_germany_bundesliga_women",
+          "soccer_germany_dfb_pokal",
+          "soccer_germany_liga3",
+          "soccer_greece_super_league",
+          "soccer_italy_coppa_italia",
+          "soccer_italy_serie_a",
+          "soccer_italy_serie_b",
+          "soccer_japan_j_league",
+          "soccer_korea_kleague1",
+          "soccer_league_of_ireland",
+          "soccer_mexico_ligamx",
+          "soccer_netherlands_eredivisie",
+          "soccer_norway_eliteserien",
+          "soccer_poland_ekstraklasa",
+          "soccer_portugal_primeira_liga",
+          "soccer_russia_premier_league",
+          "soccer_saudi_arabia_pro_league",
+          "soccer_spain_copa_del_rey",
+          "soccer_spain_la_liga",
+          "soccer_spain_segunda_division",
+          "soccer_spl",
+          "soccer_sweden_allsvenskan",
+          "soccer_sweden_superettan",
+          "soccer_switzerland_superleague",
+          "soccer_turkey_super_league",
+          "soccer_uefa_champs_league",
+          "soccer_uefa_champs_league_qualification",
+          "soccer_uefa_champs_league_women",
+          "soccer_uefa_euro_qualification",
+          "soccer_uefa_europa_conference_league",
+          "soccer_uefa_europa_league",
+          "soccer_uefa_european_championship",
+          "soccer_uefa_nations_league",
+          "soccer_usa_mls"
+        ],
+        "CURRENT_EVENTS": "AVAILABLE_WITH_ROWS",
+        "CURRENT_ODDS": "AVAILABLE_WITH_ROWS",
+        "EVENT_MARKETS": "AVAILABLE",
+        "PLAYER_PROPS": "NOT_TESTED_CREDIT_PROTECTION",
+        "SCORES": "NOT_TESTED_CREDIT_PROTECTION",
+        "HISTORICAL_ODDS": "NOT_TESTED_RANGE_DISCOVERY_PENDING",
+        "BOOKMAKER_COVERAGE": [
+          "betmgm",
+          "betonlineag",
+          "betrivers",
+          "betus",
+          "bovada",
+          "draftkings",
+          "fanduel",
+          "lowvig"
+        ],
+        "REGION_COVERAGE": [
+          "us"
+        ],
+        "SEASON_STATE": "ACTIVE_OR_LISTED"
+      },
+      {
+        "sportKey": "tennis",
+        "label": "Tennis",
+        "providerSportKeys": [],
+        "CURRENT_EVENTS": "NOT_TESTED_CREDIT_PROTECTION",
+        "CURRENT_ODDS": "NOT_TESTED_CREDIT_PROTECTION",
+        "EVENT_MARKETS": "NOT_TESTED_CREDIT_PROTECTION",
+        "PLAYER_PROPS": "NOT_TESTED_CREDIT_PROTECTION",
+        "SCORES": "NOT_TESTED_CREDIT_PROTECTION",
+        "HISTORICAL_ODDS": "NOT_TESTED_RANGE_DISCOVERY_PENDING",
+        "BOOKMAKER_COVERAGE": [],
+        "REGION_COVERAGE": [],
+        "SEASON_STATE": "INACTIVE_OR_NOT_LISTED"
+      },
+      {
+        "sportKey": "mma_ufc",
+        "label": "UFC",
+        "providerSportKeys": [
+          "mma_mixed_martial_arts"
+        ],
+        "CURRENT_EVENTS": "AVAILABLE_WITH_ROWS",
+        "CURRENT_ODDS": "AVAILABLE_WITH_ROWS",
+        "EVENT_MARKETS": "AVAILABLE",
+        "PLAYER_PROPS": "NOT_TESTED_CREDIT_PROTECTION",
+        "SCORES": "NOT_TESTED_CREDIT_PROTECTION",
+        "HISTORICAL_ODDS": "NOT_TESTED_RANGE_DISCOVERY_PENDING",
+        "BOOKMAKER_COVERAGE": [
+          "betmgm",
+          "betonlineag",
+          "betrivers",
+          "betus",
+          "bovada",
+          "draftkings",
+          "fanduel",
+          "williamhill_us"
+        ],
+        "REGION_COVERAGE": [
+          "us"
+        ],
+        "SEASON_STATE": "ACTIVE_OR_LISTED"
+      },
+      {
+        "sportKey": "basketball_bsn",
+        "label": "BSN Puerto Rico",
+        "providerSportKeys": [],
+        "CURRENT_EVENTS": "NOT_TESTED_CREDIT_PROTECTION",
+        "CURRENT_ODDS": "NOT_TESTED_CREDIT_PROTECTION",
+        "EVENT_MARKETS": "NOT_TESTED_CREDIT_PROTECTION",
+        "PLAYER_PROPS": "NOT_TESTED_CREDIT_PROTECTION",
+        "SCORES": "NOT_TESTED_CREDIT_PROTECTION",
+        "HISTORICAL_ODDS": "NOT_TESTED_RANGE_DISCOVERY_PENDING",
+        "BOOKMAKER_COVERAGE": [],
+        "REGION_COVERAGE": [],
+        "SEASON_STATE": "INACTIVE_OR_NOT_LISTED"
+      }
+    ],
+    "coverage": {
+      "sportsWithCurrentEvents": 5,
+      "sportsWithCurrentOdds": 5,
+      "sportsWithScores": 1,
+      "sportsWithPlayerProps": 0,
+      "bookmakersObserved": [
+        "betmgm",
+        "betonlineag",
+        "betrivers",
+        "betus",
+        "bovada",
+        "draftkings",
+        "fanatics",
+        "fanduel",
+        "lowvig",
+        "mybookieag",
+        "williamhill_us"
+      ],
+      "marketsObserved": [
+        "h2h",
+        "spreads",
+        "totals"
+      ]
+    },
+    "planObserved": [
+      {
+        "label": "catalog_all_sports",
+        "endpoint": "/sports?all=true",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 173,
+        "requestsRemaining": 19970,
+        "requestsUsed": 30,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "current_odds_baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 20,
+        "requestsRemaining": 19967,
+        "requestsUsed": 33,
+        "requestsLast": 3,
+        "error": null
+      },
+      {
+        "label": "current_odds_basketball_nba",
+        "endpoint": "/sports/basketball_nba/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 0,
+        "requestsRemaining": 19967,
+        "requestsUsed": 33,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "current_odds_americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 75,
+        "requestsRemaining": 19964,
+        "requestsUsed": 36,
+        "requestsLast": 3,
+        "error": null
+      },
+      {
+        "label": "current_odds_icehockey_nhl",
+        "endpoint": "/sports/icehockey_nhl/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 32,
+        "requestsRemaining": 19961,
+        "requestsUsed": 39,
+        "requestsLast": 3,
+        "error": null
+      },
+      {
+        "label": "current_odds_soccer",
+        "endpoint": "/sports/soccer/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 8,
+        "requestsRemaining": 19958,
+        "requestsUsed": 42,
+        "requestsLast": 3,
+        "error": null
+      },
+      {
+        "label": "current_odds_mma_ufc",
+        "endpoint": "/sports/mma_mixed_martial_arts/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 32,
+        "requestsRemaining": 19955,
+        "requestsUsed": 45,
+        "requestsLast": 3,
+        "error": null
+      },
+      {
+        "label": "scores_baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/scores?daysFrom=3",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 56,
+        "requestsRemaining": 19953,
+        "requestsUsed": 47,
+        "requestsLast": 2,
+        "error": null
+      },
+      {
+        "label": "scores_basketball_nba",
+        "endpoint": "/sports/basketball_nba/scores?daysFrom=3",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 0,
+        "requestsRemaining": 19953,
+        "requestsUsed": 47,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "scores_americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/scores?daysFrom=7",
+        "httpStatus": 422,
+        "ok": false,
+        "rows": 0,
+        "requestsRemaining": 19953,
+        "requestsUsed": 47,
+        "requestsLast": 0,
+        "error": "{\"message\":\"Invalid daysFrom\",\"error_code\":\"INVALID_SCORES_DAYS_FROM\",\"details_url\":\"https://the-odds-api.com/liveapi/guides/v4/api-error-codes.html#invalid-scores-days-from\"}"
+      },
+      {
+        "label": "mlb_events_for_props",
+        "endpoint": "/sports/baseball_mlb/events",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 20,
+        "requestsRemaining": 19953,
+        "requestsUsed": 47,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "mlb_event_player_props_probe",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=pitcher_outs%2Cpitcher_strikeouts%2Cpitcher_walks%2Cpitcher_hits_allowed%2Cpitcher_earned_runs%2Cbatter_hits%2Cbatter_total_bases%2Cbatter_home_runs%2Cbatter_rbis%2Cbatter_runs_scored%2Cbatter_walks%2Cbatter_stolen_bases&oddsFormat=american",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19953,
+        "requestsUsed": 47,
+        "requestsLast": 0,
+        "error": null
+      }
+    ],
+    "blockers": [],
+    "warnings": [
+      "Historical odds range discovery is intentionally deferred to a later bounded checkpoint.",
+      "No provider payload is persisted as production odds or predictions by this checkpoint."
+    ]
+  },
+  "validation": {
+    "success": true,
+    "mode": "the_odds_api_maximum_utilization_v1_checkpoint1_validation",
+    "checks": 15,
+    "passed": 15,
+    "failed": 0,
+    "failedChecks": [],
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 0
+  }
+}
