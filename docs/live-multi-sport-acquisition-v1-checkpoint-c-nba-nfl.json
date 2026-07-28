@@ -1,0 +1,429 @@
+{
+  "success": true,
+  "mode": "live_multi_sport_data_acquisition_v1_checkpoint_c_nba_nfl",
+  "checkpoint": "CHECKPOINT_C_NBA_NFL_DATA_ACTIVATION",
+  "generatedAt": "2026-07-28T02:16:04.535Z",
+  "startingCommit": "6c2dbb8a37cf18eb85b58c8c09369fa5db9755b6",
+  "nba": {
+    "selectedDate": "2025-12-26",
+    "season": "2025",
+    "beforeCounts": {
+      "teams": 30,
+      "players": 579,
+      "scheduledGames": 14,
+      "completedGames": 0,
+      "standings": 60,
+      "teamStats": 18,
+      "playerStats": 918,
+      "boxScores": 18,
+      "periodScores": 14,
+      "injuries": 6,
+      "lineupsStarters": 758,
+      "oddsSnapshots": 540,
+      "playerProps": 0,
+      "historicalFeatures": 47,
+      "validPregamePredictions": 27,
+      "settlements": 27
+    },
+    "afterCounts": {
+      "teams": 30,
+      "players": 579,
+      "scheduledGames": 14,
+      "completedGames": 0,
+      "standings": 60,
+      "teamStats": 18,
+      "playerStats": 918,
+      "boxScores": 18,
+      "periodScores": 14,
+      "injuries": 6,
+      "lineupsStarters": 758,
+      "oddsSnapshots": 540,
+      "playerProps": 0,
+      "historicalFeatures": 47,
+      "validPregamePredictions": 27,
+      "settlements": 27
+    },
+    "executions": [
+      {
+        "group": "nba_standings_team_game_stats",
+        "domains": [
+          "standings",
+          "team_stats",
+          "game_stats"
+        ],
+        "maximumRequests": 4,
+        "dryRun": {
+          "success": true,
+          "status": "dry_run_ready",
+          "validation": {
+            "valid": true,
+            "errors": [],
+            "warnings": [
+              "maximumRequests was accepted as a cap preview only; dry-run mode made zero provider calls."
+            ]
+          },
+          "checkpoints": [
+            {
+              "id": "sportsdataio-historical-import-readiness:basketball_nba:nba:2025:standings:2025-12-26:2025-12-26",
+              "domain": "standings",
+              "status": "planned",
+              "estimatedRequests": 1,
+              "estimatedRecords": 30
+            },
+            {
+              "id": "sportsdataio-historical-import-readiness:basketball_nba:nba:2025:team_stats:2025-12-26:2025-12-26",
+              "domain": "team_stats",
+              "status": "planned",
+              "estimatedRequests": 1,
+              "estimatedRecords": 30
+            },
+            {
+              "id": "sportsdataio-historical-import-readiness:basketball_nba:nba:2025:game_stats:2025-12-26:2025-12-26",
+              "domain": "game_stats",
+              "status": "planned",
+              "estimatedRequests": 1,
+              "estimatedRecords": 160
+            }
+          ],
+          "providerCallsMade": 0,
+          "remoteMutationsMade": 0
+        },
+        "execution": {
+          "success": false,
+          "mode": "sportsdataio_historical_import_execution_readiness_v1",
+          "status": "rejected",
+          "selectedDate": null,
+          "providerCallsMade": 0,
+          "recordsFetched": null,
+          "inserted": 0,
+          "updated": 0,
+          "skipped": 0,
+          "rejected": 0,
+          "endpointResults": [],
+          "validation": {
+            "valid": false,
+            "errors": [
+              "SportsDataIO NBA provider execution gate is provider_execution_blocked_pending_approval; liveExecutionAllowed=false and providerCallsAllowedNow=0.",
+              "SportsDataIO NBA external blocker resolution checklist is blocked_pending_external_evidence; blockers=5 and providerCallsAllowedBeforeResolution=0.",
+              "Live SportsDataIO execution is only enabled for the approved capped NBA pilot shape."
+            ],
+            "warnings": []
+          },
+          "noSecretExposure": false
+        },
+        "skippedReason": null
+      },
+      {
+        "group": "nba_player_stats",
+        "domains": [
+          "player_stats"
+        ],
+        "maximumRequests": 2,
+        "dryRun": {
+          "success": true,
+          "status": "dry_run_ready",
+          "validation": {
+            "valid": true,
+            "errors": [],
+            "warnings": [
+              "maximumRequests was accepted as a cap preview only; dry-run mode made zero provider calls."
+            ]
+          },
+          "checkpoints": [
+            {
+              "id": "sportsdataio-historical-import-readiness:basketball_nba:nba:2025:player_stats:2025-12-26:2025-12-26",
+              "domain": "player_stats",
+              "status": "planned",
+              "estimatedRequests": 1,
+              "estimatedRecords": 500
+            }
+          ],
+          "providerCallsMade": 0,
+          "remoteMutationsMade": 0
+        },
+        "execution": {
+          "success": false,
+          "mode": "sportsdataio_nba_player_stats_pilot_v1",
+          "status": "rejected",
+          "selectedDate": null,
+          "providerCallsMade": 0,
+          "recordsFetched": null,
+          "inserted": 0,
+          "updated": 0,
+          "skipped": 0,
+          "rejected": 0,
+          "endpointResults": [],
+          "validation": {
+            "valid": false,
+            "errors": [
+              "SportsDataIO NBA provider execution gate is provider_execution_blocked_pending_approval; liveExecutionAllowed=false and providerCallsAllowedNow=0.",
+              "SportsDataIO NBA external blocker resolution checklist is blocked_pending_external_evidence; blockers=5 and providerCallsAllowedBeforeResolution=0.",
+              "Live SportsDataIO execution is only enabled for the approved capped NBA pilot shape.",
+              "Player stats pilot requires season=2026."
+            ],
+            "warnings": []
+          },
+          "noSecretExposure": true
+        },
+        "skippedReason": null
+      },
+      {
+        "group": "nba_lineups",
+        "domains": [
+          "lineups"
+        ],
+        "maximumRequests": 2,
+        "dryRun": {
+          "success": true,
+          "status": "dry_run_ready",
+          "validation": {
+            "valid": true,
+            "errors": [],
+            "warnings": [
+              "maximumRequests was accepted as a cap preview only; dry-run mode made zero provider calls."
+            ]
+          },
+          "checkpoints": [
+            {
+              "id": "sportsdataio-historical-import-readiness:basketball_nba:nba:2025:lineups:2025-12-26:2025-12-26",
+              "domain": "lineups",
+              "status": "planned",
+              "estimatedRequests": 1,
+              "estimatedRecords": 60
+            }
+          ],
+          "providerCallsMade": 0,
+          "remoteMutationsMade": 0
+        },
+        "execution": {
+          "success": false,
+          "mode": "sportsdataio_nba_depth_lineups_pilot_v1",
+          "status": "rejected",
+          "selectedDate": null,
+          "providerCallsMade": 0,
+          "recordsFetched": null,
+          "inserted": 0,
+          "updated": 0,
+          "skipped": 0,
+          "rejected": 0,
+          "endpointResults": [],
+          "validation": {
+            "valid": false,
+            "errors": [
+              "SportsDataIO NBA provider execution gate is provider_execution_blocked_pending_approval; liveExecutionAllowed=false and providerCallsAllowedNow=0.",
+              "SportsDataIO NBA external blocker resolution checklist is blocked_pending_external_evidence; blockers=5 and providerCallsAllowedBeforeResolution=0.",
+              "Live SportsDataIO execution is only enabled for the approved capped NBA pilot shape."
+            ],
+            "warnings": []
+          },
+          "noSecretExposure": true
+        },
+        "skippedReason": null
+      },
+      {
+        "group": "nba_injuries",
+        "domains": [
+          "injuries"
+        ],
+        "maximumRequests": 1,
+        "dryRun": {
+          "success": true,
+          "status": "dry_run_ready",
+          "validation": {
+            "valid": true,
+            "errors": [],
+            "warnings": [
+              "maximumRequests was accepted as a cap preview only; dry-run mode made zero provider calls."
+            ]
+          },
+          "checkpoints": [
+            {
+              "id": "sportsdataio-historical-import-readiness:basketball_nba:nba:2025:injuries:2025-12-26:2025-12-26",
+              "domain": "injuries",
+              "status": "planned",
+              "estimatedRequests": 1,
+              "estimatedRecords": 60
+            }
+          ],
+          "providerCallsMade": 0,
+          "remoteMutationsMade": 0
+        },
+        "execution": {
+          "success": false,
+          "mode": "sportsdataio_nba_injuries_pilot_v1",
+          "status": "rejected",
+          "selectedDate": null,
+          "providerCallsMade": 0,
+          "recordsFetched": null,
+          "inserted": 0,
+          "updated": 0,
+          "skipped": 0,
+          "rejected": 0,
+          "endpointResults": [],
+          "validation": {
+            "valid": false,
+            "errors": [
+              "SportsDataIO NBA provider execution gate is provider_execution_blocked_pending_approval; liveExecutionAllowed=false and providerCallsAllowedNow=0.",
+              "SportsDataIO NBA external blocker resolution checklist is blocked_pending_external_evidence; blockers=5 and providerCallsAllowedBeforeResolution=0.",
+              "Live SportsDataIO execution is only enabled for the approved capped NBA pilot shape."
+            ],
+            "warnings": []
+          },
+          "noSecretExposure": true
+        },
+        "skippedReason": null
+      },
+      {
+        "group": "nba_odds",
+        "domains": [
+          "odds"
+        ],
+        "maximumRequests": 1,
+        "dryRun": {
+          "success": true,
+          "status": "dry_run_ready",
+          "validation": {
+            "valid": true,
+            "errors": [],
+            "warnings": [
+              "maximumRequests was accepted as a cap preview only; dry-run mode made zero provider calls."
+            ]
+          },
+          "checkpoints": [
+            {
+              "id": "sportsdataio-historical-import-readiness:basketball_nba:nba:2025:odds:2025-12-26:2025-12-26",
+              "domain": "odds",
+              "status": "planned",
+              "estimatedRequests": 1,
+              "estimatedRecords": 250
+            }
+          ],
+          "providerCallsMade": 0,
+          "remoteMutationsMade": 0
+        },
+        "execution": {
+          "success": false,
+          "mode": "sportsdataio_nba_betting_odds_pilot_v1",
+          "status": "failed",
+          "selectedDate": "2025-12-26",
+          "providerCallsMade": 1,
+          "recordsFetched": null,
+          "inserted": 0,
+          "updated": 0,
+          "skipped": 0,
+          "rejected": 0,
+          "endpointResults": [
+            {
+              "feed": "gameOddsByDate",
+              "endpoint": "/v3/nba/odds/json/GameOddsByDate/2025-12-26",
+              "status": 200,
+              "rateLimitMetadata": {
+                "date": "Tue, 28 Jul 2026 02:15:44 GMT",
+                "content-type": "application/json; charset=utf-8"
+              },
+              "records": 9
+            }
+          ],
+          "validation": {
+            "valid": false,
+            "errors": [
+              "GameOddsByDate returned provider records but zero usable full-game sportsbook-priced outcomes."
+            ],
+            "warnings": [
+              "Pilot stopped immediately after the first fatal provider, schema, mapping, normalization or persistence error."
+            ]
+          },
+          "noSecretExposure": true
+        },
+        "skippedReason": null
+      }
+    ]
+  },
+  "nfl": {
+    "beforeCounts": {
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 190,
+      "settlements": 190
+    },
+    "afterCounts": {
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 190,
+      "settlements": 190
+    },
+    "credentialConfigured": false,
+    "status": "BLOCKED_NO_RUNTIME_SPORTSDATAIO_NFL_API_KEY",
+    "providerCallsMade": 0,
+    "productionMutationsMade": 0
+  },
+  "beforeBudget": {
+    "callsMadeToday": 15,
+    "callsMadeLastHour": 0,
+    "estimatedCallsRemaining": 835,
+    "hourlyRemaining": 12,
+    "accountingStatus": "AVAILABLE",
+    "configurationStatus": "VALID"
+  },
+  "afterBudget": {
+    "callsMadeToday": 15,
+    "callsMadeLastHour": 1,
+    "estimatedCallsRemaining": 835,
+    "hourlyRemaining": 11,
+    "accountingStatus": "AVAILABLE",
+    "configurationStatus": "VALID"
+  },
+  "providerCallsMade": 1,
+  "remoteMutationsMade": 0,
+  "productionMutationsMade": 0,
+  "inserted": 0,
+  "updated": 0,
+  "skipped": 0,
+  "rejected": 0,
+  "duplicates": 0,
+  "importsExecuted": 1,
+  "featureRebuildsExecuted": 0,
+  "predictionActivationsExecuted": 0,
+  "settlementsExecuted": 0,
+  "learningLabelsCreated": 0,
+  "postgameExplanationsCreated": 0,
+  "retrospectivePredictionsGenerated": 0,
+  "status": "PARTIAL_BLOCKED_NBA_PROVIDER_GATE_OR_NO_USABLE_MARKETS_NFL_BLOCKED",
+  "certificationMarkers": [
+    "CURRENT_SEASON_DATA_CONTINUITY_PASS",
+    "PROVIDER_QUOTA_SAFETY_PASS",
+    "NO_ACTION_DRIFT_PASS",
+    "NO_RETROSPECTIVE_PREDICTION_PASS",
+    "NO_PROBABILITY_CHANGE_PASS",
+    "NO_CONFIDENCE_CHANGE_PASS",
+    "NO_TRUST_FORMULA_CHANGE_PASS",
+    "NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS",
+    "NO_OFFICIAL_PICK_POLICY_CHANGE_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "NO_SECRET_EXPOSURE_PASS"
+  ]
+}

@@ -1,6 +1,7 @@
 import 'server-only'
 
-import { SportKey, getSupportedSport } from '@/config/sports.config'
+import { getSupportedSport } from '@/config/sports.config'
+import type { SportKey } from '@/config/sports.config'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getNbaDataQualityAudit, getNbaDataQualityCoverage } from '@/services/nba-data-quality.service'
 import {
@@ -15,17 +16,17 @@ import { idempotencyKey } from '@/services/sync-reliability.service'
 import { getSportsDataIoNbaIntegrationReadiness } from '@/services/sportsdataio-nba-integration-readiness.service'
 import { getSportsDataIoNbaTrialIsolationAudit } from '@/services/sportsdataio-nba-trial-isolation-audit.service'
 import {
-  SportsDataIoBettingClassification,
   classifySportsDataIoBettingPayload,
   runSportsDataIoBettingNormalizerValidation,
 } from '@/services/sportsdataio-betting-normalizer.service'
+import type { SportsDataIoBettingClassification } from '@/services/sportsdataio-betting-normalizer.service'
 import { assertSportEventStatusWrite } from '@/services/mlb-event-status-mapper.service'
 import {
-  SportsDataIoRuntimeDomain,
   getSportsDataIoEnvironmentStatus,
   getSportsDataIoRuntimeCapabilities,
   runSportsDataIoRuntimeValidation,
 } from '@/services/sportsdataio-runtime-adapter.service'
+import type { SportsDataIoRuntimeDomain } from '@/services/sportsdataio-runtime-adapter.service'
 import { safeExistingValueSet } from '@/services/safe-supabase-preflight.service'
 
 export type SportsDataIoExecutionStatus =
@@ -1927,15 +1928,6 @@ function teamKeyFromStats(row: SportsDataIoStatsPayload) {
 
 function eventProviderIdFromStats(row: SportsDataIoStatsPayload) {
   return providerIdFromKeys(row, EVENT_ID_KEYS)
-}
-
-function isStarterFromLineup(row: SportsDataIoStatsPayload) {
-  const direct = directValue(row, ROLE_KEYS)
-  if (typeof direct === 'boolean') return direct
-  const value = safeProviderString(direct).toLowerCase()
-  if (['starter', 'starting', 'start', 'true', '1', 'yes'].includes(value)) return true
-  if (['bench', 'reserve', 'backup', 'false', '0', 'no'].includes(value)) return false
-  return true
 }
 
 function mergeProviderContext(row: SportsDataIoStatsPayload, context: LineupDepthContext): FlattenedProviderRow {

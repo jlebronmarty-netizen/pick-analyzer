@@ -7,7 +7,7 @@ import {
   getMultiSportOdds,
 } from '@/services/multi-sport-query.service'
 import { syncRecentResults } from '@/services/results-sync.service'
-import { EventStatus, NormalizedEvent } from '@/types/multi-sport'
+import type { EventStatus, NormalizedEvent } from '@/types/multi-sport'
 
 const NBA_SPORT_KEY = 'basketball_nba'
 const NBA_LEAGUE_KEY = 'nba'

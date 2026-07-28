@@ -1,4 +1,4 @@
-import { SportDefinition, SportKey } from '@/config/sports.config'
+import type { SportDefinition, SportKey } from '@/config/sports.config'
 import { getBsnCapabilityMatrix, getBsnDataQualityStatus } from '@/services/bsn-platform.service'
 import { getBsnGames, getBsnTeams } from '@/services/bsn.service'
 import { getNbaAdapterStatus } from '@/services/nba-adapter.service'
@@ -6,7 +6,7 @@ import {
   normalizeOddsSnapshots,
   normalizeProviderEvent,
 } from '@/services/multi-sport-normalizers.service'
-import {
+import type {
   AdapterHealth,
   AdapterResult,
   NormalizedEvent,
@@ -164,8 +164,10 @@ class OddsApiSportAdapter implements SportAdapter {
   id: string
   sportKey: SportKey
   features: ProviderFeature[] = ['schedule', 'event', 'odds', 'results']
+  private sport: SportDefinition
 
-  constructor(private sport: SportDefinition) {
+  constructor(sport: SportDefinition) {
+    this.sport = sport
     this.id = sport.adapterId
     this.sportKey = sport.key
   }
@@ -253,7 +255,7 @@ class OddsApiSportAdapter implements SportAdapter {
     return unavailable(this.id, startedAt, [], 'Lineups are not supported by this adapter.')
   }
 
-  async fetchOdds(query: MultiSportAdapterQuery) {
+  async fetchOdds() {
     const startedAt = Date.now()
 
     try {

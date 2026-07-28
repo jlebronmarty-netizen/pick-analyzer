@@ -1,4 +1,4 @@
-import { SportKey } from '@/config/sports.config'
+import type { SportKey } from '@/config/sports.config'
 import { createSportAdapter } from '@/services/multi-sport-adapters.service'
 import { isMarketSupported } from '@/services/multi-sport-markets.service'
 import { getProvidersForSport } from '@/services/multi-sport-providers.service'

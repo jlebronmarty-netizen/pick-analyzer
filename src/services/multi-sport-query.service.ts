@@ -1,4 +1,4 @@
-import { SportKey } from '@/config/sports.config'
+import type { SportKey } from '@/config/sports.config'
 import { resolveMultiSportContext } from '@/services/multi-sport-resolution.service'
 import {
   getSportRegistryDetail,
@@ -6,7 +6,7 @@ import {
 } from '@/services/multi-sport-registry.service'
 import { getMarketsForSport } from '@/services/multi-sport-markets.service'
 import { getProvidersForSport } from '@/services/multi-sport-providers.service'
-import {
+import type {
   EventStatus,
   MultiSportQuery,
   NormalizedEvent,

@@ -1,7 +1,7 @@
 import { getProvidersForSport } from '@/services/multi-sport-providers.service'
 import { createSportAdapter } from '@/services/multi-sport-adapters.service'
 import { getSportsRegistry } from '@/services/multi-sport-registry.service'
-import { MultiSportStatus } from '@/types/multi-sport'
+import type { MultiSportStatus } from '@/types/multi-sport'
 
 function combineStatus(statuses: MultiSportStatus[]): MultiSportStatus {
   if (statuses.every((status) => status === 'healthy')) return 'healthy'
