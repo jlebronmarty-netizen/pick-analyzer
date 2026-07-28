@@ -2796,17 +2796,17 @@ Completion criteria: `UNIVERSAL_EVENT_IDENTITY_ENGINE_V1_PASS`, `UNIVERSAL_EVENT
 
 Objective: Activate genuine Preview-only prediction lifecycle coverage for NFL and NHL after canonical event identity was certified.
 
-Status: Checkpoint A complete for NFL. Checkpoint B pending for NHL.
+Status: Checkpoints A and B complete for NFL and NHL. Final certification pending.
 
 Backend scope: `stored-preview-prediction-lifecycle.service.ts` adds a shared stored-data adapter that reuses canonical events, stored odds snapshots, Feature Store Core, Shared Sport Prediction SDK, `historical_feature_snapshots`, `prediction_history` and Settlement Reconciliation V2. NFL and NHL prediction routes now return real stored-data Preview lifecycle output instead of fixture-only preview output.
 
-Persistence scope: NFL Checkpoint A persisted 776 immutable feature snapshots and 776 quarantined `prediction_history` Preview rows for the first 12 future canonical NFL events. Rows are `production_eligible=false`, `recommended_pick=false`, `model_role='shadow'` and `is_current=false`.
+Persistence scope: NFL Checkpoint A persisted 776 immutable feature snapshots and 776 quarantined `prediction_history` Preview rows for the first 12 future canonical NFL events. NHL Checkpoint B persisted 258 immutable feature snapshots and 258 quarantined `prediction_history` Preview rows for the first 12 future canonical NHL events. Rows are `production_eligible=false`, `recommended_pick=false`, `model_role='shadow'` and `is_current=false`.
 
-Validation: NFL dry-run produced 776 predictions across moneyline, spread and total, rejected 0 cutoff rows and made 0 provider calls. NFL persist wrote 1,552 total feature/prediction rows. The post-persist dry-run reported 776 reused predictions, 0 inserted predictions and 0 remote mutations. Settlement dry-run remains read-only and classifies rows as scheduled/awaiting result until future games complete.
+Validation: NFL dry-run produced 776 predictions across moneyline, spread and total, rejected 0 cutoff rows and made 0 provider calls. NFL persist wrote 1,552 total feature/prediction rows. The post-persist dry-run reported 776 reused predictions, 0 inserted predictions and 0 remote mutations. NHL dry-run produced 258 predictions across moneyline, spread and total, rejected 0 cutoff rows and made 0 provider calls. NHL persist wrote 516 total feature/prediction rows. The post-persist dry-run reported 258 reused predictions, 0 inserted predictions and 0 remote mutations. Settlement dry-run remains read-only and classifies rows as scheduled/awaiting result until future games complete.
 
-Continuation: Run Checkpoint B for NHL through the same shared adapter. Final certification should validate NFL and NHL together, then report that settlement, learning, performance and promotion readiness remain blocked until deterministic final results and settled Preview samples exist.
+Continuation: Run final certification for NFL and NHL together, then report that settlement, learning, performance and promotion readiness remain blocked until deterministic final results and settled Preview samples exist.
 
-Completion criteria: `NFL_PREVIEW_PREDICTION_ACTIVATION_PASS`, `NFL_PREGAME_FEATURE_SNAPSHOT_PASS`, `NFL_PREVIEW_ISOLATION_PASS`, `NFL_SETTLEMENT_DRY_RUN_PASS`, `NO_RETROSPECTIVE_PREDICTION_PASS`, `NO_POST_START_LEAKAGE_PASS`, `NO_PRODUCTION_POLLUTION_PASS` and `NO_PROVIDER_CALL_PASS` are certified for Checkpoint A.
+Completion criteria: `NFL_PREVIEW_PREDICTION_ACTIVATION_PASS`, `NFL_PREGAME_FEATURE_SNAPSHOT_PASS`, `NFL_PREVIEW_ISOLATION_PASS`, `NFL_SETTLEMENT_DRY_RUN_PASS`, `NHL_PREVIEW_PREDICTION_ACTIVATION_PASS`, `NHL_PREGAME_FEATURE_SNAPSHOT_PASS`, `NHL_PREVIEW_ISOLATION_PASS`, `NHL_SETTLEMENT_DRY_RUN_PASS`, `NO_RETROSPECTIVE_PREDICTION_PASS`, `NO_POST_START_LEAKAGE_PASS`, `NO_PRODUCTION_POLLUTION_PASS` and `NO_PROVIDER_CALL_PASS` are certified for Checkpoints A-B.
 # MLB Pitcher Projection Engine V1
 
 Status: PARTIAL

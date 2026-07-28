@@ -61,9 +61,40 @@ Lifecycle:
 
 ## Checkpoint B - NHL Preview Activation
 
-Status: pending.
+Status: PASS
 
-NHL canonical events and stored odds are available. Activation should use the same shared lifecycle adapter and remain Preview-only.
+Production data mutation scope:
+
+| Table | Rows |
+| --- | ---: |
+| `historical_feature_snapshots` | 258 |
+| `prediction_history` | 258 |
+
+Evidence:
+
+| Item | Result |
+| --- | --- |
+| Future canonical events scanned | 12 |
+| Stored odds rows used | 258 |
+| Markets | moneyline, spread, total |
+| Cutoff rejects | 0 |
+| Production eligible rows | 0 |
+| Official picks | 0 |
+| Provider calls | 0 |
+| Idempotency dry-run | 258 reused, 0 inserted, 0 mutations |
+
+Lifecycle:
+
+| Stage | Status |
+| --- | --- |
+| Canonical Event | PASS |
+| Pregame Features | PASS |
+| Pregame Prediction | PASS |
+| Result | WAITING_FOR_FUTURE_RESULTS |
+| Settlement | WAITING_FOR_DETERMINISTIC_FINAL_RESULTS |
+| Learning | BLOCKED_UNTIL_SETTLEMENT_LABELS_EXIST |
+| Performance | BLOCKED_UNTIL_SETTLED_PREVIEW_ROWS_EXIST |
+| Promotion Readiness | BLOCKED_PREVIEW_SAMPLE_AND_SETTLEMENT_SAMPLE_PENDING |
 
 ## Safety
 
@@ -83,10 +114,15 @@ NHL canonical events and stored odds are available. Activation should use the sa
 - NFL_PREGAME_FEATURE_SNAPSHOT_PASS
 - NFL_PREVIEW_ISOLATION_PASS
 - NFL_SETTLEMENT_DRY_RUN_PASS
+- NHL_PREVIEW_PREDICTION_ACTIVATION_PASS
+- NHL_PREGAME_FEATURE_SNAPSHOT_PASS
+- NHL_PREVIEW_ISOLATION_PASS
+- NHL_SETTLEMENT_DRY_RUN_PASS
 - NFL_LEARNING_BLOCKED_UNTIL_LABELS_PASS
 - NFL_PERFORMANCE_BLOCKED_UNTIL_SETTLED_SAMPLE_PASS
+- NHL_LEARNING_BLOCKED_UNTIL_LABELS_PASS
+- NHL_PERFORMANCE_BLOCKED_UNTIL_SETTLED_SAMPLE_PASS
 - NO_RETROSPECTIVE_PREDICTION_PASS
 - NO_POST_START_LEAKAGE_PASS
 - NO_PRODUCTION_POLLUTION_PASS
 - NO_PROVIDER_CALL_PASS
-
