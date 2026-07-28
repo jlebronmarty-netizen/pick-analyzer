@@ -14,6 +14,7 @@ Last updated: 2026-07-28 00:00:00Z
 - Checkpoint 5 executed a narrow MLB 2026 historical core-market import in `scripts/the-odds-api-historical-mlb-core-import-v1.mjs`. It consumed 150 credits, persisted 3,296 historical h2h/spread/total snapshot rows, classified 3,286 rows as `PRE_START` and 10 as `POST_START`, recorded 0 duplicate IDs and did not run feature rebuilds or predictions.
 - Checkpoint 6 score/result acquisition is recorded in `docs/THE_ODDS_API_SCORES_RESULTS_V1.md` and `docs/the-odds-api-scores-results-v1.json`. The non-MLB scores probe consumed 2 credits, returned no completed score rows, wrote no result rows, preserved MLB Stats as the stronger MLB result source, and recorded NFL/UFC score endpoint 422 responses truthfully.
 - Checkpoint 7 market-history materialization is recorded in `docs/THE_ODDS_API_MARKET_HISTORY_MATERIALIZATION_V1.md` and `docs/the-odds-api-market-history-materialization-v1.json`. It read 7,435 stored The Odds API snapshots, derived 7,337 exact market-history groups and 7,158 latest pre-start closing-candidate groups with 0 provider calls and 0 mutations.
+- Final certification is recorded in `docs/THE_ODDS_API_MAXIMUM_UTILIZATION_V1_FINAL_CERTIFICATION.md`. Program status is `SAFETY_GATED_PARTIAL_COMPLETE`: safe maximum current/core/historical value was extracted without crossing the 2,000-credit reserve, while non-MLB prediction activation remains blocked by model/result/settlement/crosswalk gates.
 
 ## 2026-07-28 Live Multi-Sport Data Acquisition V1
 

@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-07-28T03:15:00Z",
+  "programStatus": "SAFETY_GATED_PARTIAL_COMPLETE",
+  "startingCommit": "19650ee34f680558e9edab4109c88b556828e0d5",
+  "finalCommitAtGeneration": "d51c705e48def658e4941fe3743235def2d2f12f",
+  "credits": {
+    "startingRemaining": 19970,
+    "endingRemaining": 19521,
+    "consumed": 449,
+    "reserve": 2000,
+    "reserveRemainingAboveFloor": 17521,
+    "artifactCapturedProviderCalls": 99,
+    "failedRetryCredits": 15
+  },
+  "dataAcquired": {
+    "currentCoreOddsRows": 4128,
+    "providerEventMappings": 159,
+    "newPlayerPropRows": 0,
+    "historicalMlbCoreRows": 3296,
+    "scoreResultRows": 0,
+    "databaseMutations": 11715,
+    "sqlMigrationsApplied": 0
+  },
+  "activation": {
+    "previewPredictionSports": [],
+    "productionPredictionSportsAdded": [],
+    "recommendationEligibleSportsAdded": [],
+    "predictionsGenerated": 0,
+    "recommendationsGenerated": 0
+  },
+  "blockers": [
+    "Broad historical import exceeds quota-efficient reserve planning without narrower windows.",
+    "Non-MLB sports need certified result, settlement, model and cutoff gates before Preview prediction activation.",
+    "NFL and UFC scores endpoint returned 422.",
+    "Tested player-prop markets returned no current rows.",
+    "Provider-native event mappings remain pending canonical crosswalk."
+  ],
+  "certificationMarkers": [
+    "THE_ODDS_API_MAXIMUM_UTILIZATION_V1_PASS",
+    "THE_ODDS_API_CATALOG_DISCOVERY_PASS",
+    "THE_ODDS_API_CREDIT_ACCOUNTING_PASS",
+    "THE_ODDS_API_QUOTA_RESERVE_PASS",
+    "MULTI_SPORT_CURRENT_ODDS_ACQUISITION_PASS",
+    "MULTI_SPORT_PLAYER_PROP_DISCOVERY_PASS",
+    "MULTI_BOOKMAKER_COVERAGE_PASS",
+    "MARKET_MAPPING_CERTIFICATION_PASS",
+    "EVENT_ALIGNMENT_CERTIFICATION_PASS",
+    "SIDE_ALIGNMENT_CERTIFICATION_PASS",
+    "HISTORICAL_PRESTART_CLASSIFICATION_PASS",
+    "CLOSING_CANDIDATE_MATERIALIZATION_PASS",
+    "MULTI_SPORT_ODDS_FEATURE_READINESS_PASS",
+    "NO_RETROSPECTIVE_PREDICTION_PASS",
+    "RECOMMENDATION_POLICY_PRESERVED_PASS",
+    "NO_FORCED_RECOMMENDATION_PASS",
+    "PROVIDER_QUOTA_SAFETY_PASS",
+    "NO_FAKE_MARKET_PASS",
+    "NO_FAKE_BOOKMAKER_PASS",
+    "NO_FAKE_OPENING_LINE_PASS",
+    "NO_FAKE_CLOSING_LINE_PASS",
+    "NO_CROSS_EVENT_ATTACHMENT_PASS",
+    "NO_CROSS_SIDE_ATTACHMENT_PASS",
+    "NO_POST_START_LEAKAGE_PASS",
+    "NO_PROBABILITY_CHANGE_PASS",
+    "NO_CONFIDENCE_CHANGE_PASS",
+    "NO_TRUST_FORMULA_CHANGE_PASS",
+    "NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS",
+    "NO_OFFICIAL_PICK_POLICY_CHANGE_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "NO_SECRET_EXPOSURE_PASS",
+    "NO_CERTIFIED_PLATFORM_REGRESSION_PASS"
+  ]
+}
