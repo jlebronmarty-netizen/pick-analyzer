@@ -4,8 +4,9 @@ Last updated: 2026-07-28 00:00:00Z
 
 ## 2026-07-28 Multi-Sport Data Expansion V1
 
-- Phase 1 Data Inventory And Coverage Center is locally implemented at `/data-coverage`, `/data-coverage/[sport]` and `/api/data-coverage/inventory`.
-- The phase composes the existing stored-data coverage audit across MLB, NBA, NFL, NHL, Soccer, BSN, Tennis and UFC. It reports exact counts only where canonical stored sources expose grounded counts and discloses unavailable exact counts instead of estimating.
+- Checkpoint 1 Data Inventory, Data Coverage, Data Health and Provider Capability Audit is locally implemented at `/data-coverage`, `/data-coverage/[sport]`, `/api/data-coverage/inventory`, `/api/data-coverage/health` and `/api/data-coverage/provider-audit`.
+- The checkpoint composes the existing stored-data coverage audit across MLB, NBA, NFL, NHL, Soccer, BSN, Tennis and UFC. It reports exact counts only where canonical stored sources expose grounded counts and discloses unavailable exact counts instead of estimating.
+- Provider capability and entitlement are separated through the static provider registry, SportsDataIO subscription-maximization evidence, budget accounting and The Odds API dry-run audit. Default Checkpoint 1 certification makes no live provider calls.
 - Provider calls, remote mutations, production mutations, SQL application, historical imports, feature rebuilds, prediction generation, settlement writes, recommendation-policy changes, Learning Brain changes and epoch activation remain 0/not executed.
 
 ## 2026-07-27 Portfolio Intelligence V1

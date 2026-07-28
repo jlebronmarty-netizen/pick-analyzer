@@ -2,6 +2,7 @@ import DashboardSection from '@/components/dashboard/DashboardSection'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import { ProductStatusBadge } from '@/components/product/ProductStatus'
 import { getDataCoverageInventoryV1 } from '@/services/data-coverage-inventory.service'
+import { getMultiSportProviderEntitlementAuditV1 } from '@/services/multi-sport-provider-entitlement-audit.service'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +24,10 @@ function Metric({ label, value, detail }: { label: string; value: string | numbe
 }
 
 export default async function DataCoveragePage() {
-  const inventory = await getDataCoverageInventoryV1()
+  const [inventory, providerAudit] = await Promise.all([
+    getDataCoverageInventoryV1(),
+    getMultiSportProviderEntitlementAuditV1(),
+  ])
 
   return (
     <DashboardShell>
@@ -74,6 +78,28 @@ export default async function DataCoveragePage() {
           <Metric label="Production Mutations" value={inventory.productionMutationsMade} />
           <Metric label="Prediction Ready Sports" value={inventory.summary.predictionReadySports} />
         </div>
+      </DashboardSection>
+
+      <DashboardSection
+        title="Provider Capability Audit"
+        description="Capability, entitlement, credential availability and live-ingestion readiness are separated. This default audit uses static, prior and dry-run evidence only."
+      >
+        <div className="grid gap-4 md:grid-cols-3">
+          <Metric label="Providers" value={providerAudit.providers.length} />
+          <Metric label="Matrix Rows" value={providerAudit.rows.length.toLocaleString()} />
+          <Metric label="Live Provider Calls" value={providerAudit.providerCallsMade} />
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          {Object.entries(providerAudit.matrixSummary).map(([status, count]) => (
+            <div key={status} className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">{status}</p>
+              <p className="mt-2 text-3xl font-black text-white">{count}</p>
+            </div>
+          ))}
+        </div>
+        <a href="/api/data-coverage/provider-audit" className="mt-4 inline-flex rounded-full border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-950/30">
+          Open Provider Audit API
+        </a>
       </DashboardSection>
     </DashboardShell>
   )
