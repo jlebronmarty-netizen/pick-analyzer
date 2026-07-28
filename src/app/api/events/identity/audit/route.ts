@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
 import {
   executeEventLinkRepair,
+  getUniversalCrosswalkCoverageAudit,
   getUniversalEventIdentityAudit,
   validateUniversalEventIdentityFixtures,
 } from '@/services/universal-event-identity.service'
@@ -20,6 +21,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     if (searchParams.get('validate') === 'true') {
       return apiOk(validateUniversalEventIdentityFixtures(), id)
+    }
+    if (searchParams.get('universal') === 'true') {
+      return apiOk(await getUniversalCrosswalkCoverageAudit(), id)
     }
     return apiOk(await getUniversalEventIdentityAudit(), id)
   } catch (error) {

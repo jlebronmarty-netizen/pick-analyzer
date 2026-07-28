@@ -3,6 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export const EVENT_IDENTITY_RESOLVER_VERSION = 'universal_event_identity_v1'
+export const UNIVERSAL_CROSSWALK_ENGINE_VERSION = 'universal_crosswalk_engine_v1'
 
 export type EventIdentityConfidence =
   | 'EXACT_PROVIDER_ID'
@@ -36,6 +37,14 @@ export type EventIdentityEvidenceCode =
   | 'MULTIPLE_EVENT_CANDIDATES'
   | 'TEST_FIXTURE_EXCLUDED'
   | 'POST_START_EXCLUDED'
+  | 'COMPETITION_EQUAL'
+  | 'PROVIDER_ENTITY_MAPPING_EQUAL'
+  | 'PARTICIPANT_ID_EQUAL'
+  | 'PARTICIPANT_NAME_EQUAL'
+  | 'MARKET_SCOPE_EQUAL'
+  | 'SELECTION_SCOPE_EQUAL'
+  | 'BOOKMAKER_SCOPE_EQUAL'
+  | 'SOCCER_COMPETITION_PLACEHOLDER_EXCLUDED'
 
 export type MissingEventLinkCategory =
   | 'EXACT_PROVIDER_MAPPING_EXISTS_LOOKUP_DEFECT'
@@ -152,6 +161,70 @@ type IdentityContext = {
   stats: StatIdentityRow[]
 }
 
+export type UniversalCrosswalkProvider =
+  | 'sportsdataio'
+  | 'the-odds-api'
+  | 'supabase'
+  | 'manual'
+  | 'legacy'
+  | string
+
+export type UniversalCrosswalkEntityType =
+  | 'sport'
+  | 'competition'
+  | 'season'
+  | 'team'
+  | 'player'
+  | 'event'
+  | 'market'
+  | 'selection'
+  | 'bookmaker'
+  | 'player_prop'
+
+export type UniversalCrosswalkParticipantInput = {
+  role: 'home' | 'away' | 'competitor' | 'fighter' | 'player'
+  providerId?: string | number | null
+  canonicalId?: string | null
+  name?: string | null
+}
+
+export type UniversalCrosswalkResolveInput = {
+  sportKey: string
+  competitionKey?: string | null
+  season?: string | null
+  provider: UniversalCrosswalkProvider
+  providerEventId?: string | number | null
+  canonicalEventId?: string | null
+  startTime?: string | null
+  participants?: UniversalCrosswalkParticipantInput[]
+  marketKey?: string | null
+  selectionKey?: string | null
+  bookmakerKey?: string | null
+}
+
+export type UniversalCrosswalkResolution = {
+  canonicalEventId: string | null
+  sportKey: string
+  competitionKey: string | null
+  season: string | null
+  provider: string
+  providerEventId: string | null
+  identityConfidence: EventIdentityConfidence
+  conflictState: 'NONE' | 'CONFLICT' | 'AMBIGUOUS' | 'UNRESOLVED'
+  mappingMethod:
+    | 'provider_entity_mappings'
+    | 'sport_events_provider_ids'
+    | 'canonical_event_id'
+    | 'exact_participant_time'
+    | 'unresolved'
+    | 'conflict'
+    | 'ambiguous'
+  evidenceCodes: EventIdentityEvidenceCode[]
+  candidateCount: number
+  blockers: string[]
+  safeToPersistMapping: boolean
+}
+
 type BaseIdentityContext = Pick<IdentityContext, 'predictions' | 'events'>
 
 export type UniversalEventIdentity = {
@@ -208,6 +281,10 @@ function normalize(value: unknown) {
   return String(value ?? '').trim().toLowerCase()
 }
 
+function normalizeEntityName(value: unknown) {
+  return normalize(value).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '')
+}
+
 export function normalizeProviderEventId(value: unknown) {
   const normalized = normalize(value)
   return normalized.replace(/^0+(\d)/, '$1')
@@ -228,6 +305,18 @@ export function normalizeLeagueKey(value: unknown) {
   if (normalized === 'americanfootball_nfl') return 'nfl'
   if (normalized === 'americanfootball_ncaaf') return 'ncaaf'
   if (normalized === 'soccer_epl') return 'epl'
+  return normalized
+}
+
+export function normalizeCompetitionKey(value: unknown) {
+  const normalized = normalize(value)
+  if (!normalized) return ''
+  if (normalized === 'baseball_mlb') return 'mlb'
+  if (normalized === 'basketball_nba') return 'nba'
+  if (normalized === 'americanfootball_nfl') return 'nfl'
+  if (normalized === 'icehockey_nhl') return 'nhl'
+  if (normalized === 'mma_mixed_martial_arts') return 'ufc'
+  if (normalized === 'mma_ufc') return 'ufc'
   return normalized
 }
 
@@ -271,6 +360,24 @@ export function buildProviderEventMappingKey(input: {
     normalize(input.provider),
     normalizeProviderEventId(input.providerEventId),
     normalizeSeason(input.season),
+  ].join('|')
+}
+
+export function buildUniversalIdentityScopeKey(input: {
+  sport: unknown
+  competition: unknown
+  season: unknown
+  provider: unknown
+  entityType: unknown
+  providerId: unknown
+}) {
+  return [
+    normalizeSportKey(input.sport),
+    normalizeCompetitionKey(input.competition),
+    normalizeSeason(input.season),
+    normalize(input.provider),
+    normalize(input.entityType),
+    normalizeProviderEventId(input.providerId),
   ].join('|')
 }
 
@@ -360,6 +467,224 @@ function providerIdsContain(providerIds: Record<string, unknown> | null, eventId
   }
   visit(providerIds)
   return seen.includes(expected)
+}
+
+function providerIdsContainForProvider(providerIds: Record<string, unknown> | null, provider: string, eventId: string | null | undefined) {
+  const expected = normalizeProviderEventId(eventId)
+  if (!expected || !providerIds) return false
+  const providerKey = normalize(provider)
+  const direct = (providerIds as Record<string, unknown>)[provider] ?? (providerIds as Record<string, unknown>)[providerKey]
+  if (direct !== undefined && providerIdsContain({ [providerKey]: direct }, expected)) return true
+  return providerIdsContain(providerIds, expected)
+}
+
+function eventMatchesCompetition(event: EventRow, competitionKey: string) {
+  if (!competitionKey) return true
+  return normalizeCompetitionKey(event.league_key) === competitionKey
+}
+
+function eventMatchesSeason(event: EventRow, season: string) {
+  if (!season) return true
+  return normalizeSeason(event.season) === season || normalizeSeason(event.start_time) === season
+}
+
+function participantInputsByRole(participants: UniversalCrosswalkParticipantInput[] | undefined) {
+  const byRole = new Map<string, UniversalCrosswalkParticipantInput>()
+  for (const participant of participants ?? []) {
+    byRole.set(participant.role, participant)
+  }
+  return byRole
+}
+
+function eventMatchesParticipants(event: EventRow, participants: UniversalCrosswalkParticipantInput[] | undefined) {
+  const byRole = participantInputsByRole(participants)
+  const home = byRole.get('home') ?? byRole.get('competitor')
+  const away = byRole.get('away')
+  const evidence: EventIdentityEvidenceCode[] = []
+
+  if (home) {
+    const canonicalIdMatches = home.canonicalId && normalize(home.canonicalId) === normalize(event.home_team_id)
+    const nameMatches = home.name && normalizeEntityName(home.name) === normalizeEntityName(event.home_team)
+    if (!canonicalIdMatches && !nameMatches) return { matched: false, evidence }
+    evidence.push(canonicalIdMatches ? 'PARTICIPANT_ID_EQUAL' : 'PARTICIPANT_NAME_EQUAL')
+  }
+
+  if (away) {
+    const canonicalIdMatches = away.canonicalId && normalize(away.canonicalId) === normalize(event.away_team_id)
+    const nameMatches = away.name && normalizeEntityName(away.name) === normalizeEntityName(event.away_team)
+    if (!canonicalIdMatches && !nameMatches) return { matched: false, evidence }
+    evidence.push(canonicalIdMatches ? 'PARTICIPANT_ID_EQUAL' : 'PARTICIPANT_NAME_EQUAL')
+  }
+
+  return { matched: evidence.length > 0, evidence }
+}
+
+function secondsApart(left: string | null | undefined, right: string | null | undefined) {
+  const a = Date.parse(String(left ?? ''))
+  const b = Date.parse(String(right ?? ''))
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null
+  return Math.round(Math.abs(a - b) / 1000)
+}
+
+function makeUniversalResolution(input: UniversalCrosswalkResolveInput, partial: Partial<UniversalCrosswalkResolution>): UniversalCrosswalkResolution {
+  const conflictState =
+    partial.identityConfidence === 'CONFLICT'
+      ? 'CONFLICT'
+      : partial.identityConfidence === 'AMBIGUOUS'
+        ? 'AMBIGUOUS'
+        : partial.identityConfidence === 'UNRESOLVED'
+          ? 'UNRESOLVED'
+          : 'NONE'
+
+  return {
+    canonicalEventId: partial.canonicalEventId ?? null,
+    sportKey: normalizeSportKey(input.sportKey),
+    competitionKey: normalizeCompetitionKey(input.competitionKey) || null,
+    season: normalizeSeason(input.season ?? input.startTime),
+    provider: normalize(input.provider),
+    providerEventId: input.providerEventId === null || input.providerEventId === undefined ? null : normalizeProviderEventId(input.providerEventId),
+    identityConfidence: partial.identityConfidence ?? 'UNRESOLVED',
+    conflictState,
+    mappingMethod: partial.mappingMethod ?? 'unresolved',
+    evidenceCodes: Array.from(new Set(partial.evidenceCodes ?? [])),
+    candidateCount: partial.candidateCount ?? 0,
+    blockers: partial.blockers ?? [],
+    safeToPersistMapping: partial.safeToPersistMapping ?? false,
+  }
+}
+
+function resolveUniversalEventIdentityFromContext(
+  input: UniversalCrosswalkResolveInput,
+  context: Pick<IdentityContext, 'events' | 'mappings'>,
+  options: { toleranceSeconds?: number } = {}
+): UniversalCrosswalkResolution {
+  const sportKey = normalizeSportKey(input.sportKey)
+  const competitionKey = normalizeCompetitionKey(input.competitionKey)
+  const season = normalizeSeason(input.season ?? input.startTime)
+  const provider = normalize(input.provider)
+  const providerEventId = normalizeProviderEventId(input.providerEventId)
+  const toleranceSeconds = Math.min(Math.max(Number(options.toleranceSeconds ?? 15 * 60), 60), 90 * 60)
+  const blockers: string[] = []
+  const baseEvidence: EventIdentityEvidenceCode[] = []
+
+  if (sportKey === 'soccer' && (!competitionKey || competitionKey === 'soccer' || competitionKey === 'soccer_generic')) {
+    blockers.push('SOCCER_COMPETITION_SCOPE_NOT_CERTIFIED')
+    baseEvidence.push('SOCCER_COMPETITION_PLACEHOLDER_EXCLUDED')
+  }
+  if (input.marketKey) baseEvidence.push('MARKET_SCOPE_EQUAL')
+  if (input.selectionKey) baseEvidence.push('SELECTION_SCOPE_EQUAL')
+  if (input.bookmakerKey) baseEvidence.push('BOOKMAKER_SCOPE_EQUAL')
+
+  const scopedEvents = context.events.filter(
+    (event) =>
+      normalizeSportKey(event.sport_key) === sportKey &&
+      eventMatchesCompetition(event, competitionKey) &&
+      eventMatchesSeason(event, season)
+  )
+
+  if (providerEventId) {
+    const mappingHits = context.mappings.filter(
+      (mapping) =>
+        normalizeSportKey(mapping.sport_key) === sportKey &&
+        normalize(mapping.provider) === provider &&
+        EVENT_MAPPING_TYPES.has(normalize(mapping.entity_type)) &&
+        normalizeProviderEventId(mapping.provider_id) === providerEventId &&
+        eventMatchesSeason({ id: mapping.internal_id, sport_key: mapping.sport_key, league_key: competitionKey, season: mapping.season, home_team: null, away_team: null, home_team_id: null, away_team_id: null, start_time: null, status: null, home_score: null, away_score: null, provider_ids: null, metadata: null, created_at: null, updated_at: null }, season) &&
+        scopedEvents.some((event) => event.id === mapping.internal_id)
+    )
+    if (mappingHits.length === 1) {
+      return makeUniversalResolution(input, {
+        canonicalEventId: mappingHits[0].internal_id,
+        identityConfidence: 'EXACT_PROVIDER_ID',
+        mappingMethod: 'provider_entity_mappings',
+        evidenceCodes: [...baseEvidence, 'PROVIDER_ENTITY_MAPPING_EQUAL', 'PROVIDER_ID_EQUAL', 'SPORT_EQUAL', 'SEASON_EQUAL'],
+        candidateCount: 1,
+        blockers,
+        safeToPersistMapping: blockers.length === 0,
+      })
+    }
+    if (mappingHits.length > 1) {
+      return makeUniversalResolution(input, {
+        identityConfidence: 'CONFLICT',
+        mappingMethod: 'conflict',
+        evidenceCodes: [...baseEvidence, 'PROVIDER_MAPPING_COLLISION'],
+        candidateCount: mappingHits.length,
+        blockers: [...blockers, 'PROVIDER_MAPPING_COLLISION'],
+      })
+    }
+
+    const providerIdHits = scopedEvents.filter((event) => providerIdsContainForProvider(event.provider_ids, provider, providerEventId))
+    if (providerIdHits.length === 1) {
+      return makeUniversalResolution(input, {
+        canonicalEventId: providerIdHits[0].id,
+        identityConfidence: 'EXACT_PROVIDER_ID',
+        mappingMethod: 'sport_events_provider_ids',
+        evidenceCodes: [...baseEvidence, 'PROVIDER_ID_EQUAL', 'SPORT_EQUAL', 'SEASON_EQUAL'],
+        candidateCount: 1,
+        blockers,
+        safeToPersistMapping: blockers.length === 0,
+      })
+    }
+    if (providerIdHits.length > 1) {
+      return makeUniversalResolution(input, {
+        identityConfidence: 'CONFLICT',
+        mappingMethod: 'conflict',
+        evidenceCodes: [...baseEvidence, 'PROVIDER_MAPPING_COLLISION'],
+        candidateCount: providerIdHits.length,
+        blockers: [...blockers, 'PROVIDER_ID_COLLISION'],
+      })
+    }
+  }
+
+  if (input.canonicalEventId) {
+    const canonicalHits = scopedEvents.filter((event) => normalize(event.id) === normalize(input.canonicalEventId))
+    if (canonicalHits.length === 1) {
+      return makeUniversalResolution(input, {
+        canonicalEventId: canonicalHits[0].id,
+        identityConfidence: 'EXACT_SOURCE_MAPPING',
+        mappingMethod: 'canonical_event_id',
+        evidenceCodes: [...baseEvidence, 'CANONICAL_EVENT_ID_EQUAL', 'SPORT_EQUAL', 'SEASON_EQUAL'],
+        candidateCount: 1,
+        blockers,
+        safeToPersistMapping: Boolean(providerEventId) && blockers.length === 0,
+      })
+    }
+  }
+
+  const participantTimeCandidates = scopedEvents.filter((event) => {
+    const participantMatch = eventMatchesParticipants(event, input.participants)
+    const timeDiff = secondsApart(input.startTime, event.start_time)
+    return participantMatch.matched && timeDiff !== null && timeDiff <= toleranceSeconds
+  })
+  if (participantTimeCandidates.length === 1) {
+    const participantEvidence = eventMatchesParticipants(participantTimeCandidates[0], input.participants).evidence
+    return makeUniversalResolution(input, {
+      canonicalEventId: participantTimeCandidates[0].id,
+      identityConfidence: 'EXACT_MULTI_FIELD_MATCH',
+      mappingMethod: 'exact_participant_time',
+      evidenceCodes: [...baseEvidence, 'SPORT_EQUAL', 'COMPETITION_EQUAL', 'SEASON_EQUAL', 'START_TIME_WITHIN_RESCHEDULE_TOLERANCE', ...participantEvidence],
+      candidateCount: 1,
+      blockers,
+      safeToPersistMapping: Boolean(providerEventId) && blockers.length === 0,
+    })
+  }
+  if (participantTimeCandidates.length > 1) {
+    return makeUniversalResolution(input, {
+      identityConfidence: 'AMBIGUOUS',
+      mappingMethod: 'ambiguous',
+      evidenceCodes: [...baseEvidence, 'MULTIPLE_EVENT_CANDIDATES'],
+      candidateCount: participantTimeCandidates.length,
+      blockers: [...blockers, 'MULTIPLE_EVENT_CANDIDATES'],
+    })
+  }
+
+  return makeUniversalResolution(input, {
+    identityConfidence: blockers.length ? 'UNRESOLVED' : 'UNRESOLVED',
+    mappingMethod: 'unresolved',
+    evidenceCodes: [...baseEvidence, 'CANONICAL_EVENT_MISSING'],
+    candidateCount: 0,
+    blockers: blockers.length ? blockers : ['CANONICAL_EVENT_NOT_RESOLVED'],
+  })
 }
 
 function buildIdentity(event: EventRow | undefined, identityConfidence: EventIdentityConfidence, evidenceCodes: EventIdentityEvidenceCode[], mappingMethod: string): UniversalEventIdentity {
@@ -624,6 +949,136 @@ export async function getUniversalEventIdentityAudit() {
   }
 }
 
+export async function getUniversalCrosswalkCoverageAudit() {
+  const [events, mappings, odds, results] = await Promise.all([
+    safePage<EventRow>(
+      'sport_events',
+      'id, sport_key, league_key, season, home_team, away_team, home_team_id, away_team_id, start_time, status, home_score, away_score, provider_ids, metadata, created_at, updated_at'
+    ),
+    safePage<MappingRow>(
+      'provider_entity_mappings',
+      'sport_key, entity_type, internal_id, provider, provider_id, season, metadata, updated_at'
+    ),
+    safePage<OddsRow>(
+      'sports_odds_snapshots',
+      'sport_key, league_key, season, event_id, provider, sportsbook, market, snapshot_time, metadata'
+    ),
+    safePage<ResultRow>(
+      'game_results',
+      'sport_key, game_id, home_team, away_team, home_score, away_score, winner, commence_time',
+      (query) => query,
+      'game_id'
+    ),
+  ])
+  const eventMappings = mappings.filter((mapping) => EVENT_MAPPING_TYPES.has(normalize(mapping.entity_type)))
+  const eventIds = new Set(events.map((event) => event.id))
+  const sports = Array.from(new Set([...events.map((row) => row.sport_key), ...odds.map((row) => row.sport_key), ...results.map((row) => row.sport_key), ...eventMappings.map((row) => row.sport_key)].filter(Boolean))).sort()
+  const providerEvidence = odds.slice(0, 2500).map((row) => {
+    const resolution = resolveUniversalEventIdentityFromContext(
+      {
+        sportKey: row.sport_key,
+        competitionKey: row.league_key,
+        season: row.season,
+        provider: row.provider ?? row.sportsbook ?? 'unknown',
+        providerEventId: row.event_id,
+        canonicalEventId: row.event_id,
+        startTime: row.snapshot_time,
+        marketKey: row.market,
+        bookmakerKey: row.sportsbook,
+      },
+      { events, mappings: eventMappings }
+    )
+    return { row, resolution }
+  })
+  const sportReports = sports.map((sportKey) => {
+    const sportEvents = events.filter((row) => row.sport_key === sportKey)
+    const sportMappings = eventMappings.filter((row) => row.sport_key === sportKey)
+    const sportOdds = odds.filter((row) => row.sport_key === sportKey)
+    const sportResults = results.filter((row) => row.sport_key === sportKey)
+    const sportEvidence = providerEvidence.filter((item) => item.row.sport_key === sportKey)
+    const exactResolved = sportEvidence.filter((item) => item.resolution.canonicalEventId && item.resolution.conflictState === 'NONE')
+    const ambiguous = sportEvidence.filter((item) => item.resolution.conflictState === 'AMBIGUOUS')
+    const conflicts = sportEvidence.filter((item) => item.resolution.conflictState === 'CONFLICT')
+    const unresolved = sportEvidence.filter((item) => item.resolution.conflictState === 'UNRESOLVED')
+    const providerNativeMappings = sportMappings.filter((mapping) => mapping.internal_id === mapping.provider_id)
+    const resultCanonicalRows = sportResults.filter((row) => eventIds.has(row.game_id))
+    return {
+      sportKey,
+      canonicalEvents: sportEvents.length,
+      providerEventMappings: sportMappings.length,
+      providerNativeMappings: providerNativeMappings.length,
+      oddsRows: sportOdds.length,
+      distinctOddsEventIds: new Set(sportOdds.map((row) => row.event_id)).size,
+      resultRows: sportResults.length,
+      canonicalResultRows: resultCanonicalRows.length,
+      sampledProviderEvidenceRows: sportEvidence.length,
+      exactResolvedProviderEvidenceRows: exactResolved.length,
+      ambiguousProviderEvidenceRows: ambiguous.length,
+      conflictProviderEvidenceRows: conflicts.length,
+      unresolvedProviderEvidenceRows: unresolved.length,
+      identityCoverage:
+        sportEvidence.length > 0
+          ? Number(((exactResolved.length / sportEvidence.length) * 100).toFixed(2))
+          : sportEvents.length > 0
+            ? 100
+            : 0,
+      blockers: [
+        sportEvents.length === 0 ? 'CANONICAL_EVENTS_EMPTY' : null,
+        sportMappings.length === 0 ? 'PROVIDER_EVENT_MAPPINGS_EMPTY' : null,
+        providerNativeMappings.length > 0 ? 'PROVIDER_NATIVE_MAPPINGS_NOT_CERTIFIED_CANONICAL' : null,
+        sportResults.length > 0 && resultCanonicalRows.length === 0 ? 'RESULTS_NOT_CANONICAL_EVENT_LINKED' : null,
+        unresolved.length > 0 ? 'UNRESOLVED_PROVIDER_EVENT_EVIDENCE' : null,
+        ambiguous.length > 0 ? 'AMBIGUOUS_PROVIDER_EVENT_EVIDENCE' : null,
+        conflicts.length > 0 ? 'CONFLICTING_PROVIDER_EVENT_EVIDENCE' : null,
+      ].filter(Boolean) as string[],
+    }
+  })
+
+  return {
+    success: true,
+    mode: 'universal_crosswalk_coverage_audit_v1',
+    resolverVersion: EVENT_IDENTITY_RESOLVER_VERSION,
+    engineVersion: UNIVERSAL_CROSSWALK_ENGINE_VERSION,
+    generatedAt: new Date().toISOString(),
+    hierarchy: ['sport', 'competition', 'season', 'team', 'player', 'event', 'market', 'selection', 'bookmaker', 'player_prop'],
+    resolutionPriority: [
+      'existing provider ids',
+      'existing canonical ids',
+      'provider_entity_mappings',
+      'verified aliases',
+      'time-window + exact participant identity',
+    ],
+    sourceTables: ['provider_entity_mappings', 'sport_events', 'sports_teams', 'sport_players', 'sports_odds_snapshots', 'game_results'],
+    sports: sportReports,
+    totals: {
+      sportsAudited: sportReports.length,
+      canonicalEvents: events.length,
+      providerEventMappings: eventMappings.length,
+      providerNativeMappings: sportReports.reduce((sum, row) => sum + row.providerNativeMappings, 0),
+      oddsRows: odds.length,
+      resultRows: results.length,
+      sampledProviderEvidenceRows: providerEvidence.length,
+      exactResolvedProviderEvidenceRows: providerEvidence.filter((item) => item.resolution.canonicalEventId && item.resolution.conflictState === 'NONE').length,
+      unresolvedProviderEvidenceRows: providerEvidence.filter((item) => item.resolution.conflictState === 'UNRESOLVED').length,
+      ambiguousProviderEvidenceRows: providerEvidence.filter((item) => item.resolution.conflictState === 'AMBIGUOUS').length,
+      conflictProviderEvidenceRows: providerEvidence.filter((item) => item.resolution.conflictState === 'CONFLICT').length,
+    },
+    sampleFindings: providerEvidence.slice(0, 25).map((item) => ({
+      sportKey: item.row.sport_key,
+      competitionKey: item.row.league_key,
+      provider: item.row.provider,
+      providerEventId: item.row.event_id,
+      market: item.row.market,
+      canonicalEventId: item.resolution.canonicalEventId,
+      confidence: item.resolution.identityConfidence,
+      conflictState: item.resolution.conflictState,
+      blockers: item.resolution.blockers,
+    })),
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  }
+}
+
 export async function getEventIdentity(eventId: string) {
   const [{ data: event, error: eventError }, { data: mappings, error: mappingError }, { count: linkedPredictions }, { count: linkedOdds }, { count: linkedResults }, { count: linkedGameStats }, { count: linkedPlayerStats }] = await Promise.all([
     supabaseAdmin
@@ -768,6 +1223,45 @@ export function validateUniversalEventIdentityFixtures() {
     updated_at: '2026-07-18T00:00:00Z',
   }
   const context: IdentityContext = { predictions: [], events: [event], mappings: [], odds: [], results: [], stats: [] }
+  const universalInput: UniversalCrosswalkResolveInput = {
+    sportKey: 'baseball_mlb',
+    competitionKey: 'mlb',
+    season: '2026',
+    provider: 'the-odds-api',
+    providerEventId: 'odds-1',
+    startTime: '2026-07-17T23:05:00Z',
+    participants: [
+      { role: 'home', canonicalId: 'home-id', name: 'Home' },
+      { role: 'away', canonicalId: 'away-id', name: 'Away' },
+    ],
+  }
+  const universalEvent = { ...event, id: 'canonical-universal-1', provider_ids: { 'the-odds-api': 'odds-1' } }
+  const universalContext = {
+    events: [universalEvent],
+    mappings: [
+      {
+        sport_key: 'baseball_mlb',
+        entity_type: 'event',
+        internal_id: 'canonical-universal-1',
+        provider: 'the-odds-api',
+        provider_id: 'odds-1',
+        season: '2026',
+        metadata: {},
+        updated_at: null,
+      },
+    ],
+  }
+  const universalMappingResolution = resolveUniversalEventIdentityFromContext(universalInput, universalContext)
+  const universalProviderIdResolution = resolveUniversalEventIdentityFromContext(universalInput, { events: [universalEvent], mappings: [] })
+  const universalParticipantResolution = resolveUniversalEventIdentityFromContext({ ...universalInput, providerEventId: 'missing-provider-id' }, { events: [universalEvent], mappings: [] })
+  const universalAmbiguousResolution = resolveUniversalEventIdentityFromContext(
+    { ...universalInput, providerEventId: null },
+    { events: [universalEvent, { ...universalEvent, id: 'canonical-universal-2', provider_ids: {} }], mappings: [] }
+  )
+  const soccerPlaceholderResolution = resolveUniversalEventIdentityFromContext(
+    { ...universalInput, sportKey: 'soccer', competitionKey: 'soccer_generic', provider: 'the-odds-api', providerEventId: 'soccer-1' },
+    { events: [{ ...universalEvent, id: 'soccer-event-1', sport_key: 'soccer', league_key: 'soccer_generic' }], mappings: [] }
+  )
   const fixtures = [
     ['exact provider mapping resolves', classifyMissingEventLink(basePrediction, context).identityConfidence === 'EXACT_PROVIDER_ID'],
     ['numeric and string provider ids normalize equally', normalizeProviderEventId('001001') === normalizeProviderEventId(1001)],
@@ -793,6 +1287,12 @@ export function validateUniversalEventIdentityFixtures() {
       ).identityConfidence === 'EXACT_LEGACY_MAPPING',
     ],
     ['canonical key includes orientation', buildCanonicalEventIdentityKey({ sport: 'MLB', league: 'MLB', season: '2026', homeTeamId: 'A', awayTeamId: 'B', scheduledStart: '2026-07-17T00:00:00Z' }) !== buildCanonicalEventIdentityKey({ sport: 'MLB', league: 'MLB', season: '2026', homeTeamId: 'B', awayTeamId: 'A', scheduledStart: '2026-07-17T00:00:00Z' })],
+    ['universal mapping table has highest priority', universalMappingResolution.mappingMethod === 'provider_entity_mappings' && universalMappingResolution.canonicalEventId === 'canonical-universal-1'],
+    ['universal provider ids resolve when mapping table is absent', universalProviderIdResolution.mappingMethod === 'sport_events_provider_ids' && universalProviderIdResolution.identityConfidence === 'EXACT_PROVIDER_ID'],
+    ['universal participant time match is deterministic only when unique', universalParticipantResolution.mappingMethod === 'exact_participant_time' && universalParticipantResolution.identityConfidence === 'EXACT_MULTI_FIELD_MATCH'],
+    ['universal participant ambiguity blocks persistence', universalAmbiguousResolution.conflictState === 'AMBIGUOUS' && universalAmbiguousResolution.safeToPersistMapping === false],
+    ['soccer placeholder competition is excluded', soccerPlaceholderResolution.blockers.includes('SOCCER_COMPETITION_SCOPE_NOT_CERTIFIED') && soccerPlaceholderResolution.safeToPersistMapping === false],
+    ['universal scope key includes provider namespace', buildUniversalIdentityScopeKey({ sport: 'MLB', competition: 'MLB', season: '2026', provider: 'a', entityType: 'event', providerId: '1' }) !== buildUniversalIdentityScopeKey({ sport: 'MLB', competition: 'MLB', season: '2026', provider: 'b', entityType: 'event', providerId: '1' })],
     ['zero provider calls', true],
     ['read only fixtures', true],
   ] as const

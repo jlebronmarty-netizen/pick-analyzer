@@ -2775,6 +2775,22 @@ Validation: `node scripts/multi-sport-results-crosswalk-foundation-v1.mjs --vali
 Continuation: no automatic activation remains. NBA activation is blocked until genuine current pregame odds, completed result evidence, future event schedule and exact canonical event/result crosswalk are available. NFL and NHL activation are blocked until canonical events, completed results, settlement inputs and persistence gates exist. Soccer activation is blocked until stored rows are tied to certified real competition keys, canonical events, completed results, settlement inputs and persistence gates. Tennis remains empty/event-driven. UFC has 12 stored provider score rows but remains blocked by missing canonical event identity and settlement inputs.
 
 Completion criteria: `MULTI_SPORT_RESULTS_FOUNDATION_PASS`, `MULTI_SPORT_SCORE_RESULT_PASS`, `NBA_PREVIEW_PREDICTION_LIFECYCLE_BLOCKED_TRUTHFUL_PASS`, `NFL_PREVIEW_PREDICTION_LIFECYCLE_BLOCKED_TRUTHFUL_PASS`, `NHL_PREVIEW_PREDICTION_LIFECYCLE_BLOCKED_TRUTHFUL_PASS`, `SOCCER_COMPETITION_ACTIVATION_BLOCKED_TRUTHFUL_PASS`, `SOCCER_COMPETITION_SCOPE_ENFORCED_PASS`, `SOCCER_NO_GLOBAL_COVERAGE_OVERCLAIM_PASS`, `TENNIS_EVENT_LIFECYCLE_BLOCKED_TRUTHFUL_PASS`, `UFC_EVENT_LIFECYCLE_BLOCKED_TRUTHFUL_PASS`, `UFC_PROVIDER_RESULTS_STORED_BUT_NOT_CANONICAL_PASS`, `MULTI_SPORT_RESULTS_SETTLEMENT_PREVIEW_UNLOCK_V1_FINAL_PASS`, `SETTLEMENT_CORE_CONTRACT_AVAILABLE_PASS`, `NON_CANONICAL_SETTLEMENT_BLOCKED_PASS`, `NON_CANONICAL_LEARNING_BLOCKED_PASS`, `PROVIDER_QUOTA_SAFETY_PASS`, `NO_RETROSPECTIVE_PREDICTION_PASS`, `NO_PROBABILITY_CHANGE_PASS`, `NO_CONFIDENCE_CHANGE_PASS`, `NO_TRUST_FORMULA_CHANGE_PASS`, `NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS`, `NO_OFFICIAL_PICK_POLICY_CHANGE_PASS`, `NO_EPOCH_ACTIVATION_PASS`, `NO_SECRET_EXPOSURE_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS` are certified for Checkpoints A-G.
+
+### 51. Universal Event Identity & Crosswalk Engine V1
+
+Objective: Evolve the existing identity components into one canonical cross-sport event identity engine without creating a duplicate crosswalk system.
+
+Status: Implemented as an additive extension of `universal-event-identity.service.ts`. The existing `/api/events/identity/audit` route now supports `?universal=true` for read-only cross-sport identity coverage.
+
+Backend scope: Reuses `provider_entity_mappings`, `sport_events`, `sports_teams`, `sport_players`, `sports_odds_snapshots`, `game_results`, Multi-Sport Registry, existing MLB The Odds API crosswalk and the pitcher identity bridge. Adds provider-agnostic resolver types, hierarchy keys, competition normalization, deterministic provider/canonical/participant-time resolution and cross-sport coverage reporting.
+
+Persistence scope: None. No SQL, provider call, prediction generation, settlement execution, learning write, feature rebuild, scheduler change or production mutation was made.
+
+Validation: Universal event identity fixtures pass 16/16 with 0 provider calls and 0 remote mutations. Read-only coverage audit shows MLB and NBA sampled provider evidence resolving through canonical rows, while NFL/NHL/UFC remain blocked by provider-native mappings without canonical events and Soccer remains blocked by missing competition-scoped canonical events and mappings.
+
+Continuation: The next identity work should materialize canonical `sport_events` for NFL, NHL and UFC from already stored provider evidence only where exact competition/season/participant/start evidence is sufficient. Soccer must be handled competition by competition; `soccer` and `soccer_generic` placeholders remain blocked.
+
+Completion criteria: `UNIVERSAL_EVENT_IDENTITY_ENGINE_V1_PASS`, `NO_SECOND_CROSSWALK_ENGINE_PASS`, `PROVIDER_ENTITY_MAPPING_REUSE_PASS`, `CANONICAL_EVENT_ID_REUSE_PASS`, `SPORT_COMPETITION_SEASON_SCOPE_PASS`, `DETERMINISTIC_IDENTITY_RESOLUTION_PASS`, `AMBIGUOUS_MATCH_BLOCKED_PASS`, `SOCCER_COMPETITION_SCOPE_ENFORCED_PASS`, `NO_FUZZY_MATCHING_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_DATABASE_MUTATION_PASS`, `NO_PREDICTION_ENGINE_CHANGE_PASS`, `NO_SETTLEMENT_ENGINE_CHANGE_PASS` and `NO_LEARNING_ENGINE_CHANGE_PASS` are certified locally pending build and push.
 # MLB Pitcher Projection Engine V1
 
 Status: PARTIAL
