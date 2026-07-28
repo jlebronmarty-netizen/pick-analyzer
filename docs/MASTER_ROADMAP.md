@@ -38,6 +38,8 @@ Settlement And Learning Pipeline Recovery V1 is locally implemented. The adaptiv
 
 Portfolio Intelligence V1 is locally implemented as `/portfolio-intelligence` and `/api/portfolio-intelligence`. It reuses Probability Picks and Current Board rather than creating a second ranking engine, and labels combinations by deterministic shared exposure instead of fabricated correlation. The phase is analytical only with no bankroll sizing, Kelly, wagering execution, Official Pick promotion, model changes, provider calls or remote mutations.
 
+Market Intelligence V1 is locally implemented as `/market-intelligence` and `/api/market-intelligence/movement`. It analyzes stored sportsbook snapshots from `sports_odds_snapshots`, labels earliest evidence as earliest stored price rather than true open, reports current stored price, movement, dispersion and synchronized stored-book movement without fabricated sharp-money claims, provider calls, remote mutations or prediction changes.
+
 Historical Sports Data Foundation V2 and Prediction Epoch Reset V2 is in autonomous local execution. The run is governed by `docs/AUTONOMOUS_EXECUTION_V2.md` and `docs/autonomous-execution-v2.json`. It may create local commits and additive migration files, but it must not push, deploy, apply production SQL, execute historical odds, delete predictions, activate a new production epoch or enable new production cron jobs.
 
 Phase 1 coverage audit is locally implemented at `/api/data-foundation/coverage` with zero provider calls and zero mutations. It reports MLB and NBA as stored-data ready, BSN as partial for prediction readiness, and NFL/NHL/Soccer/Tennis/UFC as blocked or empty until legitimate data adapters/contracts are added.

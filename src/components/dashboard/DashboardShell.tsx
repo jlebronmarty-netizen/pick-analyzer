@@ -56,6 +56,7 @@ const productNavGroups = [
     items: [
       { href: '/betting-workbench', label: 'Betting Workbench', icon: 'BW' },
       { href: '/portfolio-intelligence', label: 'Portfolio Intelligence', icon: 'PI', badge: 'PREVIEW' },
+      { href: '/market-intelligence', label: 'Market Intelligence', icon: 'MI', badge: 'FOUNDATION' },
       { href: '/dashboard#advanced-details', label: 'Market Comparison', icon: 'MC' },
       { href: '/arbitrage', label: 'Arbitrage', icon: 'AR', badge: 'BLOCKED' },
       { href: '/ai-bet-finder', label: 'AI Bet Finder', icon: 'AF' },
