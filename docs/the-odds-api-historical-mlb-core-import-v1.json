@@ -1,0 +1,191 @@
+{
+  "generatedAt": "2026-07-28T03:06:13.871Z",
+  "commit": "faf07ebee0ca6db02898b169c8e2bb42139b3e20",
+  "checkpoint": "THE_ODDS_API_HISTORICAL_MLB_CORE_IMPORT_V1",
+  "result": {
+    "success": true,
+    "status": "LIVE_HISTORICAL_MLB_CORE_IMPORT_COMPLETE",
+    "generatedAt": "2026-07-28T03:06:13.871Z",
+    "provider": "the-odds-api",
+    "providerCallsMade": 6,
+    "requestsRemainingBefore": 19673,
+    "requestsRemainingAfter": 19523,
+    "requestsUsedObserved": 150,
+    "creditReserve": 2000,
+    "rowsAccepted": 3296,
+    "rowsRejected": 0,
+    "rowsInserted": 3296,
+    "rowsUpdated": 0,
+    "timestampClasses": {
+      "PRE_START": 3286,
+      "POST_START": 10,
+      "INVALID_TIMESTAMP": 0
+    },
+    "duplicateIds": 0,
+    "productionMutationsMade": 3297,
+    "byDate": [
+      {
+        "date": "2026-04-01T12:00:00Z",
+        "httpStatus": 200,
+        "requestsLast": 30,
+        "events": 15,
+        "rowsAccepted": 968,
+        "rowsRejected": 0
+      },
+      {
+        "date": "2026-05-15T12:00:00Z",
+        "httpStatus": 200,
+        "requestsLast": 30,
+        "events": 15,
+        "rowsAccepted": 952,
+        "rowsRejected": 0
+      },
+      {
+        "date": "2026-06-15T12:00:00Z",
+        "httpStatus": 200,
+        "requestsLast": 30,
+        "events": 10,
+        "rowsAccepted": 598,
+        "rowsRejected": 0
+      },
+      {
+        "date": "2026-07-15T12:00:00Z",
+        "httpStatus": 200,
+        "requestsLast": 30,
+        "events": 1,
+        "rowsAccepted": 10,
+        "rowsRejected": 0
+      },
+      {
+        "date": "2026-07-27T12:00:00Z",
+        "httpStatus": 200,
+        "requestsLast": 30,
+        "events": 12,
+        "rowsAccepted": 768,
+        "rowsRejected": 0
+      }
+    ],
+    "planObserved": [
+      {
+        "label": "catalog_credit_read",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports?all=true",
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 0,
+        "requestsRemaining": 19673,
+        "requestsUsed": 327,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "historical_mlb_core_2026-04-01T12:00:00Z",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/historical/sports/baseball_mlb/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american&date=2026-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-04-01T12:00:00Z",
+        "markets": [
+          "h2h",
+          "spreads",
+          "totals"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 15,
+        "requestsRemaining": 19643,
+        "requestsUsed": 357,
+        "requestsLast": 30,
+        "error": null
+      },
+      {
+        "label": "historical_mlb_core_2026-05-15T12:00:00Z",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/historical/sports/baseball_mlb/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american&date=2026-05-15T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-05-15T12:00:00Z",
+        "markets": [
+          "h2h",
+          "spreads",
+          "totals"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 15,
+        "requestsRemaining": 19613,
+        "requestsUsed": 387,
+        "requestsLast": 30,
+        "error": null
+      },
+      {
+        "label": "historical_mlb_core_2026-06-15T12:00:00Z",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/historical/sports/baseball_mlb/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american&date=2026-06-15T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-06-15T12:00:00Z",
+        "markets": [
+          "h2h",
+          "spreads",
+          "totals"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 10,
+        "requestsRemaining": 19583,
+        "requestsUsed": 417,
+        "requestsLast": 30,
+        "error": null
+      },
+      {
+        "label": "historical_mlb_core_2026-07-15T12:00:00Z",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/historical/sports/baseball_mlb/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american&date=2026-07-15T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-07-15T12:00:00Z",
+        "markets": [
+          "h2h",
+          "spreads",
+          "totals"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19553,
+        "requestsUsed": 447,
+        "requestsLast": 30,
+        "error": null
+      },
+      {
+        "label": "historical_mlb_core_2026-07-27T12:00:00Z",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/historical/sports/baseball_mlb/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american&date=2026-07-27T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-07-27T12:00:00Z",
+        "markets": [
+          "h2h",
+          "spreads",
+          "totals"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 12,
+        "requestsRemaining": 19523,
+        "requestsUsed": 477,
+        "requestsLast": 30,
+        "error": null
+      }
+    ],
+    "blockers": []
+  }
+}
