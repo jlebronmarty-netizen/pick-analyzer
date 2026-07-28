@@ -50,6 +50,17 @@ Surface:
 
 Checkpoint 2 consolidates existing MLB, NBA and NFL completion contracts with dry-run historical import manifests and provider entitlement evidence. It does not execute provider calls, imports, SQL, feature rebuilds, prediction generation, settlement, learning or recommendation activation. Domains that are not fully entitled remain blocked or partial rather than silently executed.
 
+## Checkpoint 3: NHL, Soccer, BSN, Tennis And UFC
+
+Status: locally implemented as read-only expansion readiness, historical import planning and feature/prediction readiness classification.
+
+Surface:
+
+- `/api/data-coverage/expansion-checkpoint3`
+- `/api/data-coverage/expansion-checkpoint3?validate=true`
+
+Checkpoint 3 preserves each sport's required shape: NHL uses cross-year season governance, Soccer remains competition-specific, BSN remains a custom-league/manual-source domain, and Tennis/UFC remain event-driven. No imports, provider calls, feature rebuilds, prediction activation, settlement writes or recommendation logic execute from this checkpoint.
+
 Safety:
 
 - Provider calls: 0
@@ -68,6 +79,7 @@ Certification markers:
 - PROVIDER_ENTITLEMENT_AUDIT_PASS
 - HISTORICAL_IMPORT_CHECKPOINT_PASS
 - PROVIDER_QUOTA_SAFETY_PASS
+- MULTI_SPORT_FEATURE_READINESS_PASS
 - NO_RETROSPECTIVE_PREDICTION_PASS
 - NO_FORCED_RECOMMENDATION_PASS
 - NO_PROBABILITY_CHANGE_PASS

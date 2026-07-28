@@ -10,6 +10,8 @@ const providerRoute = fs.readFileSync('src/app/api/data-coverage/provider-audit/
 const healthRoute = fs.readFileSync('src/app/api/data-coverage/health/route.ts', 'utf8')
 const checkpoint2 = fs.readFileSync('src/services/multi-sport-data-expansion-checkpoint2.service.ts', 'utf8')
 const checkpoint2Route = fs.readFileSync('src/app/api/data-coverage/expansion-checkpoint2/route.ts', 'utf8')
+const checkpoint3 = fs.readFileSync('src/services/multi-sport-data-expansion-checkpoint3.service.ts', 'utf8')
+const checkpoint3Route = fs.readFileSync('src/app/api/data-coverage/expansion-checkpoint3/route.ts', 'utf8')
 
 const checks = [
   ['inventory service exists', service.includes('getDataCoverageInventoryV1')],
@@ -33,9 +35,15 @@ const checks = [
   ['checkpoint 2 includes MLB NBA NFL', checkpoint2.includes("key: 'mlb'") && checkpoint2.includes("key: 'nba'") && checkpoint2.includes("key: 'nfl'")],
   ['checkpoint 2 does not execute imports', checkpoint2.includes('importsExecuted: 0')],
   ['checkpoint 2 route exposes validation', checkpoint2Route.includes("validate') === 'true'")],
+  ['checkpoint 3 service exists', checkpoint3.includes('getMultiSportDataExpansionCheckpoint3V1')],
+  ['checkpoint 3 includes five sports', ['nhl', 'soccer', 'bsn', 'tennis', 'ufc'].every((key) => checkpoint3.includes(`key: '${key}'`))],
+  ['soccer competition scoped', checkpoint3.includes('competition_specific_only')],
+  ['tennis ufc event scoped', checkpoint3.includes('event_driven_tournament_scope') && checkpoint3.includes('event_and_bout_scope')],
+  ['checkpoint 3 route exposes validation', checkpoint3Route.includes("validate') === 'true'")],
   ['docs include certification marker', docs.includes('DATA_INVENTORY_EXACTNESS_PASS')],
   ['docs include provider audit marker', docs.includes('PROVIDER_ENTITLEMENT_AUDIT_PASS')],
   ['docs include historical checkpoint marker', docs.includes('HISTORICAL_IMPORT_CHECKPOINT_PASS')],
+  ['docs include feature readiness marker', docs.includes('MULTI_SPORT_FEATURE_READINESS_PASS')],
 ]
 
 const failed = checks.filter(([, pass]) => !pass).map(([name]) => name)

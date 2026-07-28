@@ -4,6 +4,7 @@ import { ProductStatusBadge } from '@/components/product/ProductStatus'
 import { getDataCoverageInventoryV1 } from '@/services/data-coverage-inventory.service'
 import { getMultiSportProviderEntitlementAuditV1 } from '@/services/multi-sport-provider-entitlement-audit.service'
 import { getMultiSportDataExpansionCheckpoint2V1 } from '@/services/multi-sport-data-expansion-checkpoint2.service'
+import { getMultiSportDataExpansionCheckpoint3V1 } from '@/services/multi-sport-data-expansion-checkpoint3.service'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,10 +26,11 @@ function Metric({ label, value, detail }: { label: string; value: string | numbe
 }
 
 export default async function DataCoveragePage() {
-  const [inventory, providerAudit, checkpoint2] = await Promise.all([
+  const [inventory, providerAudit, checkpoint2, checkpoint3] = await Promise.all([
     getDataCoverageInventoryV1(),
     getMultiSportProviderEntitlementAuditV1(),
     getMultiSportDataExpansionCheckpoint2V1(),
+    getMultiSportDataExpansionCheckpoint3V1(),
   ])
 
   return (
@@ -129,6 +131,30 @@ export default async function DataCoveragePage() {
         </div>
         <a href="/api/data-coverage/expansion-checkpoint2" className="mt-4 inline-flex rounded-full border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-950/30">
           Open Checkpoint 2 API
+        </a>
+      </DashboardSection>
+
+      <DashboardSection
+        title="Expansion Checkpoint 3"
+        description="NHL, Soccer, BSN, Tennis and UFC remain scoped by their source model: cross-year season, competition-specific, custom league, tournament or event/bout."
+      >
+        <div className="grid gap-4 md:grid-cols-4">
+          <Metric label="Sports" value={checkpoint3.summary.sportsAudited} />
+          <Metric label="Event-driven" value={checkpoint3.summary.eventDrivenSports} />
+          <Metric label="Competition-scoped" value={checkpoint3.summary.competitionScopedSports} />
+          <Metric label="Imports Executed" value={checkpoint3.importsExecuted} />
+        </div>
+        <div className="mt-4 grid gap-4 lg:grid-cols-5">
+          {checkpoint3.sports.map((sport) => (
+            <div key={sport.key} className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
+              <h3 className="text-lg font-black text-white">{sport.label}</h3>
+              <p className="mt-2 text-xs font-bold uppercase tracking-[0.16em] text-slate-500">{sport.scopePolicy}</p>
+              <p className="mt-3 text-sm leading-6 text-slate-400">{sport.historicalImportReadiness}</p>
+            </div>
+          ))}
+        </div>
+        <a href="/api/data-coverage/expansion-checkpoint3" className="mt-4 inline-flex rounded-full border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-950/30">
+          Open Checkpoint 3 API
         </a>
       </DashboardSection>
     </DashboardShell>
