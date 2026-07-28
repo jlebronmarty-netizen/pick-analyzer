@@ -1,0 +1,1239 @@
+{
+  "success": true,
+  "mode": "live_multi_sport_data_acquisition_v1_final_certification",
+  "generatedAt": "2026-07-28T02:24:40.793Z",
+  "programStatus": "PARTIAL_SAFETY_GATED_COMPLETE",
+  "startingCommit": "ec85d06b59f87d7b319f1e10afd68401403e7e36",
+  "finalCommitAtGeneration": "0bc3f15268ac97d6c649fdc1e6689f9885467cbe",
+  "checkpoints": {
+    "A": {
+      "status": "PARTIAL_PASS_LIVE_ENTITLEMENT_EVIDENCE_CAPTURED",
+      "providerCallsMade": 4,
+      "entitlementMatrix": [
+        {
+          "provider": "sportsdataio",
+          "sport": "mlb",
+          "endpointFamily": "teams_identity_sample",
+          "classification": "ENTITLED_AND_WORKING",
+          "httpStatus": 200,
+          "rowsReturned": 30
+        },
+        {
+          "provider": "sportsdataio",
+          "sport": "nba",
+          "endpointFamily": "teams_identity_sample",
+          "classification": "ENTITLED_AND_WORKING",
+          "httpStatus": 200,
+          "rowsReturned": 30
+        },
+        {
+          "provider": "sportsdataio",
+          "sport": "nfl",
+          "endpointFamily": "teams_identity_sample",
+          "classification": "UNKNOWN",
+          "httpStatus": null,
+          "rowsReturned": 0
+        },
+        {
+          "provider": "sportsdataio",
+          "sport": "nhl",
+          "endpointFamily": "teams_identity_sample",
+          "classification": "UNKNOWN",
+          "httpStatus": null,
+          "rowsReturned": 0
+        },
+        {
+          "provider": "the_odds_api",
+          "sport": "all",
+          "endpointFamily": "sports_catalog",
+          "classification": "ENTITLED_AND_WORKING",
+          "httpStatus": 200,
+          "rowsReturned": 71
+        },
+        {
+          "provider": "the_odds_api",
+          "sport": "baseball_mlb",
+          "endpointFamily": "event_odds",
+          "classification": "ENTITLED_AND_WORKING",
+          "httpStatus": 200,
+          "rowsReturned": 21
+        }
+      ]
+    },
+    "B": {
+      "status": "PARTIAL_PASS_BOUNDED_MLB_IMPORT_EXECUTED",
+      "providerCallsMade": 4,
+      "inserted": 49,
+      "updated": 7701,
+      "rejected": 0,
+      "afterCounts": {
+        "teams": 30,
+        "players": 7389,
+        "scheduledGames": 4923,
+        "completedGames": 471,
+        "standings": 60,
+        "teamStats": 2926,
+        "playerStats": 47255,
+        "boxScores": 2926,
+        "periodScores": 4923,
+        "injuries": 0,
+        "lineupsStarters": 27,
+        "oddsSnapshots": 49289,
+        "playerProps": 11,
+        "historicalFeatures": 72541,
+        "validPregamePredictions": 1146,
+        "settlements": 921
+      }
+    },
+    "C": {
+      "status": "PARTIAL_BLOCKED_NBA_PROVIDER_GATE_OR_NO_USABLE_MARKETS_NFL_BLOCKED",
+      "providerCallsMade": 1,
+      "inserted": 0,
+      "updated": 0,
+      "rejected": 0,
+      "nflStatus": "BLOCKED_NO_RUNTIME_SPORTSDATAIO_NFL_API_KEY"
+    },
+    "D": {
+      "status": "BLOCKED_NO_NHL_CREDENTIAL_AND_SOCCER_COMPETITION_NOT_CERTIFIED",
+      "providerCallsMade": 0,
+      "productionMutationsMade": 0
+    },
+    "E": {
+      "status": "BLOCKED_SOURCE_OR_EVENT_FEED_PROVENANCE",
+      "sports": [
+        "basketball_bsn",
+        "tennis",
+        "mma_ufc"
+      ],
+      "providerCallsMade": 0,
+      "productionMutationsMade": 0
+    },
+    "F": {
+      "status": "NO_NEW_FEATURE_OR_PREDICTION_ACTIVATION",
+      "featureRebuildsExecuted": 0,
+      "predictionActivationsExecuted": 0,
+      "activePreviewSports": [],
+      "activeProductionPredictionSports": [
+        "baseball_mlb"
+      ],
+      "activeRecommendationSports": []
+    },
+    "G": {
+      "status": "NO_NEW_SETTLEMENT_LEARNING_OR_POSTGAME_PERSISTENCE",
+      "settlementsExecuted": 0,
+      "learningLabelsCreated": 0,
+      "postgameExplanationsCreated": 0
+    }
+  },
+  "liveProviderEntitlementMatrix": [
+    {
+      "provider": "sportsdataio",
+      "sport": "mlb",
+      "endpointFamily": "teams_identity_sample",
+      "classification": "ENTITLED_AND_WORKING",
+      "httpStatus": 200,
+      "rowsReturned": 30,
+      "callsMade": 1
+    },
+    {
+      "provider": "sportsdataio",
+      "sport": "nba",
+      "endpointFamily": "teams_identity_sample",
+      "classification": "ENTITLED_AND_WORKING",
+      "httpStatus": 200,
+      "rowsReturned": 30,
+      "callsMade": 1
+    },
+    {
+      "provider": "sportsdataio",
+      "sport": "nfl",
+      "endpointFamily": "teams_identity_sample",
+      "classification": "UNKNOWN",
+      "httpStatus": null,
+      "rowsReturned": 0,
+      "callsMade": 0
+    },
+    {
+      "provider": "sportsdataio",
+      "sport": "nhl",
+      "endpointFamily": "teams_identity_sample",
+      "classification": "UNKNOWN",
+      "httpStatus": null,
+      "rowsReturned": 0,
+      "callsMade": 0
+    },
+    {
+      "provider": "the_odds_api",
+      "sport": "all",
+      "endpointFamily": "sports_catalog",
+      "classification": "ENTITLED_AND_WORKING",
+      "httpStatus": 200,
+      "rowsReturned": 71,
+      "callsMade": 1
+    },
+    {
+      "provider": "the_odds_api",
+      "sport": "baseball_mlb",
+      "endpointFamily": "event_odds",
+      "classification": "ENTITLED_AND_WORKING",
+      "httpStatus": 200,
+      "rowsReturned": 21,
+      "callsMade": 1
+    }
+  ],
+  "providerCallsAndQuota": {
+    "totalProviderCallsMade": 9,
+    "byCheckpoint": {
+      "checkpointA": 4,
+      "checkpointB": 4,
+      "checkpointC": 1
+    },
+    "oddsApiQuotaRemainingAfterCheckpointA": "19970",
+    "sportsDataIoBudgetAfterMlb": {
+      "callsMadeToday": 19,
+      "callsMadeLastHour": 5,
+      "estimatedCallsRemaining": 831,
+      "hourlyRemaining": 7,
+      "accountingStatus": "AVAILABLE",
+      "configurationStatus": "VALID"
+    }
+  },
+  "databaseMutations": {
+    "productionMutationsMade": 7750,
+    "byCheckpoint": {
+      "checkpointA": 0,
+      "checkpointB": 7750,
+      "checkpointC": 0
+    },
+    "remoteMutationsMade": 7750,
+    "migrationsApplied": 0
+  },
+  "dataCountsBeforeAfterBySport": {
+    "before": [
+      {
+        "sportKey": "baseball_mlb",
+        "label": "MLB",
+        "seasons": [
+          "2026",
+          "2025"
+        ],
+        "teams": 30,
+        "players": 7389,
+        "scheduledGames": 4922,
+        "completedGames": 471,
+        "standings": 60,
+        "teamStats": 2926,
+        "playerStats": 47232,
+        "boxScores": 2926,
+        "periodScores": 4922,
+        "injuries": 0,
+        "lineupsStarters": 27,
+        "oddsSnapshots": 49289,
+        "playerProps": 11,
+        "historicalFeatures": 72541,
+        "validPregamePredictions": 1146,
+        "settlements": 921,
+        "learningLabels": null
+      },
+      {
+        "sportKey": "basketball_nba",
+        "label": "NBA",
+        "seasons": [
+          "2025-26",
+          "2024-25"
+        ],
+        "teams": 30,
+        "players": 579,
+        "scheduledGames": 14,
+        "completedGames": 0,
+        "standings": 60,
+        "teamStats": 18,
+        "playerStats": 918,
+        "boxScores": 18,
+        "periodScores": 14,
+        "injuries": 6,
+        "lineupsStarters": 758,
+        "oddsSnapshots": 540,
+        "playerProps": 0,
+        "historicalFeatures": 47,
+        "validPregamePredictions": 27,
+        "settlements": 27,
+        "learningLabels": null
+      },
+      {
+        "sportKey": "americanfootball_nfl",
+        "label": "NFL",
+        "seasons": [
+          "2026",
+          "2025"
+        ],
+        "teams": 0,
+        "players": 0,
+        "scheduledGames": 0,
+        "completedGames": 0,
+        "standings": 0,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 0,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 190,
+        "settlements": 190,
+        "learningLabels": null
+      },
+      {
+        "sportKey": "icehockey_nhl",
+        "label": "NHL",
+        "seasons": [
+          "2025-26",
+          "2024-25"
+        ],
+        "teams": 0,
+        "players": 0,
+        "scheduledGames": 0,
+        "completedGames": 0,
+        "standings": 0,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 0,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 0,
+        "settlements": 0,
+        "learningLabels": null
+      },
+      {
+        "sportKey": "soccer",
+        "label": "Soccer",
+        "seasons": [
+          "competition_specific",
+          "competition_specific"
+        ],
+        "teams": 0,
+        "players": 0,
+        "scheduledGames": 0,
+        "completedGames": 0,
+        "standings": 0,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 0,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 0,
+        "settlements": 0,
+        "learningLabels": null
+      },
+      {
+        "sportKey": "basketball_bsn",
+        "label": "BSN",
+        "seasons": [
+          "2026",
+          "2025"
+        ],
+        "teams": 12,
+        "players": 25,
+        "scheduledGames": 38,
+        "completedGames": 2,
+        "standings": 12,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 38,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 8,
+        "settlements": 8,
+        "learningLabels": null
+      },
+      {
+        "sportKey": "tennis",
+        "label": "Tennis",
+        "seasons": [
+          "event_driven_2026",
+          "event_driven_2025"
+        ],
+        "teams": 0,
+        "players": 0,
+        "scheduledGames": 0,
+        "completedGames": 0,
+        "standings": 0,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 0,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 0,
+        "settlements": 0,
+        "learningLabels": null
+      },
+      {
+        "sportKey": "mma_ufc",
+        "label": "UFC",
+        "seasons": [
+          "event_driven_2026",
+          "event_driven_2025"
+        ],
+        "teams": 0,
+        "players": 0,
+        "scheduledGames": 0,
+        "completedGames": 0,
+        "standings": 0,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 0,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 0,
+        "settlements": 0,
+        "learningLabels": null
+      }
+    ],
+    "after": [
+      {
+        "sportKey": "baseball_mlb",
+        "label": "MLB",
+        "seasons": [
+          "2026",
+          "2025"
+        ],
+        "competitions": [
+          "mlb"
+        ],
+        "teams": 30,
+        "players": 7389,
+        "rosters": 7389,
+        "scheduledGames": 4923,
+        "completedGames": 471,
+        "standings": 60,
+        "teamStats": 2926,
+        "playerStats": 47255,
+        "boxScores": 2926,
+        "periodScores": 4923,
+        "injuries": 0,
+        "lineupsStarters": 27,
+        "oddsSnapshots": 49289,
+        "playerProps": 11,
+        "historicalFeatures": 72541,
+        "validPregamePredictions": 1146,
+        "missedOpportunities": null,
+        "settlements": 921,
+        "learningLabels": null,
+        "postgameExplanations": null,
+        "closingLinePairs": null,
+        "predictionReadiness": "PREVIEW_PREDICTIONS",
+        "recommendationReadiness": "POLICY_GATED_NO_FORCED_PICK",
+        "blockers": []
+      },
+      {
+        "sportKey": "basketball_nba",
+        "label": "NBA",
+        "seasons": [
+          "2025-26",
+          "2024-25"
+        ],
+        "competitions": [
+          "nba"
+        ],
+        "teams": 30,
+        "players": 579,
+        "rosters": 579,
+        "scheduledGames": 14,
+        "completedGames": 0,
+        "standings": 60,
+        "teamStats": 18,
+        "playerStats": 918,
+        "boxScores": 18,
+        "periodScores": 14,
+        "injuries": 6,
+        "lineupsStarters": 758,
+        "oddsSnapshots": 540,
+        "playerProps": 0,
+        "historicalFeatures": 47,
+        "validPregamePredictions": 27,
+        "missedOpportunities": null,
+        "settlements": 27,
+        "learningLabels": null,
+        "postgameExplanations": null,
+        "closingLinePairs": null,
+        "predictionReadiness": "PREVIEW_PREDICTIONS",
+        "recommendationReadiness": "NO_RECOMMENDATION",
+        "blockers": []
+      },
+      {
+        "sportKey": "americanfootball_nfl",
+        "label": "NFL",
+        "seasons": [
+          "2026",
+          "2025"
+        ],
+        "competitions": [
+          "nfl"
+        ],
+        "teams": 0,
+        "players": 0,
+        "rosters": 0,
+        "scheduledGames": 0,
+        "completedGames": 0,
+        "standings": 0,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 0,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 190,
+        "missedOpportunities": null,
+        "settlements": 190,
+        "learningLabels": null,
+        "postgameExplanations": null,
+        "closingLinePairs": null,
+        "predictionReadiness": "BLOCKED",
+        "recommendationReadiness": "NO_RECOMMENDATION",
+        "blockers": [
+          "teams:empty",
+          "events:empty",
+          "providerMappings:empty"
+        ]
+      },
+      {
+        "sportKey": "icehockey_nhl",
+        "label": "NHL",
+        "seasons": [
+          "2025-26",
+          "2024-25"
+        ],
+        "competitions": [
+          "nhl"
+        ],
+        "teams": 0,
+        "players": 0,
+        "rosters": 0,
+        "scheduledGames": 0,
+        "completedGames": 0,
+        "standings": 0,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 0,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 0,
+        "missedOpportunities": null,
+        "settlements": 0,
+        "learningLabels": null,
+        "postgameExplanations": null,
+        "closingLinePairs": null,
+        "predictionReadiness": "BLOCKED",
+        "recommendationReadiness": "NO_RECOMMENDATION",
+        "blockers": [
+          "teams:empty",
+          "events:empty",
+          "providerMappings:empty"
+        ]
+      },
+      {
+        "sportKey": "soccer",
+        "label": "Soccer",
+        "seasons": [
+          "competition_specific",
+          "competition_specific"
+        ],
+        "competitions": [
+          "soccer"
+        ],
+        "teams": 0,
+        "players": 0,
+        "rosters": 0,
+        "scheduledGames": 0,
+        "completedGames": 0,
+        "standings": 0,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 0,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 0,
+        "missedOpportunities": null,
+        "settlements": 0,
+        "learningLabels": null,
+        "postgameExplanations": null,
+        "closingLinePairs": null,
+        "predictionReadiness": "BLOCKED",
+        "recommendationReadiness": "NO_RECOMMENDATION",
+        "blockers": [
+          "teams:empty",
+          "events:empty",
+          "providerMappings:empty"
+        ]
+      },
+      {
+        "sportKey": "basketball_bsn",
+        "label": "BSN",
+        "seasons": [
+          "2026",
+          "2025"
+        ],
+        "competitions": [
+          "bsn"
+        ],
+        "teams": 12,
+        "players": 25,
+        "rosters": 25,
+        "scheduledGames": 38,
+        "completedGames": 2,
+        "standings": 12,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 38,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 8,
+        "missedOpportunities": null,
+        "settlements": 8,
+        "learningLabels": null,
+        "postgameExplanations": null,
+        "closingLinePairs": null,
+        "predictionReadiness": "BLOCKED",
+        "recommendationReadiness": "NO_RECOMMENDATION",
+        "blockers": []
+      },
+      {
+        "sportKey": "tennis",
+        "label": "Tennis",
+        "seasons": [
+          "event_driven_2026",
+          "event_driven_2025"
+        ],
+        "competitions": [
+          "tennis"
+        ],
+        "teams": 0,
+        "players": 0,
+        "rosters": 0,
+        "scheduledGames": 0,
+        "completedGames": 0,
+        "standings": 0,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 0,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 0,
+        "missedOpportunities": null,
+        "settlements": 0,
+        "learningLabels": null,
+        "postgameExplanations": null,
+        "closingLinePairs": null,
+        "predictionReadiness": "BLOCKED",
+        "recommendationReadiness": "NO_RECOMMENDATION",
+        "blockers": [
+          "teams:empty",
+          "events:empty",
+          "providerMappings:empty"
+        ]
+      },
+      {
+        "sportKey": "mma_ufc",
+        "label": "UFC",
+        "seasons": [
+          "event_driven_2026",
+          "event_driven_2025"
+        ],
+        "competitions": [
+          "ufc"
+        ],
+        "teams": 0,
+        "players": 0,
+        "rosters": 0,
+        "scheduledGames": 0,
+        "completedGames": 0,
+        "standings": 0,
+        "teamStats": 0,
+        "playerStats": 0,
+        "boxScores": 0,
+        "periodScores": 0,
+        "injuries": 0,
+        "lineupsStarters": 0,
+        "oddsSnapshots": 0,
+        "playerProps": 0,
+        "historicalFeatures": 0,
+        "validPregamePredictions": 0,
+        "missedOpportunities": null,
+        "settlements": 0,
+        "learningLabels": null,
+        "postgameExplanations": null,
+        "closingLinePairs": null,
+        "predictionReadiness": "BLOCKED",
+        "recommendationReadiness": "NO_RECOMMENDATION",
+        "blockers": [
+          "teams:empty",
+          "events:empty",
+          "providerMappings:empty"
+        ]
+      }
+    ]
+  },
+  "sports": [
+    {
+      "sportKey": "baseball_mlb",
+      "label": "MLB",
+      "seasons": [
+        "2026",
+        "2025"
+      ],
+      "competitions": [
+        "mlb"
+      ],
+      "teams": 30,
+      "players": 7389,
+      "rosters": 7389,
+      "scheduledGames": 4923,
+      "completedGames": 471,
+      "standings": 60,
+      "teamStats": 2926,
+      "playerStats": 47255,
+      "boxScores": 2926,
+      "periodScores": 4923,
+      "injuries": 0,
+      "lineupsStarters": 27,
+      "oddsSnapshots": 49289,
+      "playerProps": 11,
+      "historicalFeatures": 72541,
+      "validPregamePredictions": 1146,
+      "missedOpportunities": null,
+      "settlements": 921,
+      "learningLabels": null,
+      "postgameExplanations": null,
+      "closingLinePairs": null,
+      "predictionReadiness": "PREVIEW_PREDICTIONS",
+      "recommendationReadiness": "POLICY_GATED_NO_FORCED_PICK",
+      "blockers": []
+    },
+    {
+      "sportKey": "basketball_nba",
+      "label": "NBA",
+      "seasons": [
+        "2025-26",
+        "2024-25"
+      ],
+      "competitions": [
+        "nba"
+      ],
+      "teams": 30,
+      "players": 579,
+      "rosters": 579,
+      "scheduledGames": 14,
+      "completedGames": 0,
+      "standings": 60,
+      "teamStats": 18,
+      "playerStats": 918,
+      "boxScores": 18,
+      "periodScores": 14,
+      "injuries": 6,
+      "lineupsStarters": 758,
+      "oddsSnapshots": 540,
+      "playerProps": 0,
+      "historicalFeatures": 47,
+      "validPregamePredictions": 27,
+      "missedOpportunities": null,
+      "settlements": 27,
+      "learningLabels": null,
+      "postgameExplanations": null,
+      "closingLinePairs": null,
+      "predictionReadiness": "PREVIEW_PREDICTIONS",
+      "recommendationReadiness": "NO_RECOMMENDATION",
+      "blockers": []
+    },
+    {
+      "sportKey": "americanfootball_nfl",
+      "label": "NFL",
+      "seasons": [
+        "2026",
+        "2025"
+      ],
+      "competitions": [
+        "nfl"
+      ],
+      "teams": 0,
+      "players": 0,
+      "rosters": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 190,
+      "missedOpportunities": null,
+      "settlements": 190,
+      "learningLabels": null,
+      "postgameExplanations": null,
+      "closingLinePairs": null,
+      "predictionReadiness": "BLOCKED",
+      "recommendationReadiness": "NO_RECOMMENDATION",
+      "blockers": [
+        "teams:empty",
+        "events:empty",
+        "providerMappings:empty"
+      ]
+    },
+    {
+      "sportKey": "icehockey_nhl",
+      "label": "NHL",
+      "seasons": [
+        "2025-26",
+        "2024-25"
+      ],
+      "competitions": [
+        "nhl"
+      ],
+      "teams": 0,
+      "players": 0,
+      "rosters": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "missedOpportunities": null,
+      "settlements": 0,
+      "learningLabels": null,
+      "postgameExplanations": null,
+      "closingLinePairs": null,
+      "predictionReadiness": "BLOCKED",
+      "recommendationReadiness": "NO_RECOMMENDATION",
+      "blockers": [
+        "teams:empty",
+        "events:empty",
+        "providerMappings:empty"
+      ]
+    },
+    {
+      "sportKey": "soccer",
+      "label": "Soccer",
+      "seasons": [
+        "competition_specific",
+        "competition_specific"
+      ],
+      "competitions": [
+        "soccer"
+      ],
+      "teams": 0,
+      "players": 0,
+      "rosters": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "missedOpportunities": null,
+      "settlements": 0,
+      "learningLabels": null,
+      "postgameExplanations": null,
+      "closingLinePairs": null,
+      "predictionReadiness": "BLOCKED",
+      "recommendationReadiness": "NO_RECOMMENDATION",
+      "blockers": [
+        "teams:empty",
+        "events:empty",
+        "providerMappings:empty"
+      ]
+    },
+    {
+      "sportKey": "basketball_bsn",
+      "label": "BSN",
+      "seasons": [
+        "2026",
+        "2025"
+      ],
+      "competitions": [
+        "bsn"
+      ],
+      "teams": 12,
+      "players": 25,
+      "rosters": 25,
+      "scheduledGames": 38,
+      "completedGames": 2,
+      "standings": 12,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 38,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 8,
+      "missedOpportunities": null,
+      "settlements": 8,
+      "learningLabels": null,
+      "postgameExplanations": null,
+      "closingLinePairs": null,
+      "predictionReadiness": "BLOCKED",
+      "recommendationReadiness": "NO_RECOMMENDATION",
+      "blockers": []
+    },
+    {
+      "sportKey": "tennis",
+      "label": "Tennis",
+      "seasons": [
+        "event_driven_2026",
+        "event_driven_2025"
+      ],
+      "competitions": [
+        "tennis"
+      ],
+      "teams": 0,
+      "players": 0,
+      "rosters": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "missedOpportunities": null,
+      "settlements": 0,
+      "learningLabels": null,
+      "postgameExplanations": null,
+      "closingLinePairs": null,
+      "predictionReadiness": "BLOCKED",
+      "recommendationReadiness": "NO_RECOMMENDATION",
+      "blockers": [
+        "teams:empty",
+        "events:empty",
+        "providerMappings:empty"
+      ]
+    },
+    {
+      "sportKey": "mma_ufc",
+      "label": "UFC",
+      "seasons": [
+        "event_driven_2026",
+        "event_driven_2025"
+      ],
+      "competitions": [
+        "ufc"
+      ],
+      "teams": 0,
+      "players": 0,
+      "rosters": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "missedOpportunities": null,
+      "settlements": 0,
+      "learningLabels": null,
+      "postgameExplanations": null,
+      "closingLinePairs": null,
+      "predictionReadiness": "BLOCKED",
+      "recommendationReadiness": "NO_RECOMMENDATION",
+      "blockers": [
+        "teams:empty",
+        "events:empty",
+        "providerMappings:empty"
+      ]
+    }
+  ],
+  "historicalImportResults": {
+    "mlb": {
+      "executed": true,
+      "providerCallsMade": 4,
+      "inserted": 49,
+      "updated": 7701,
+      "rejected": 0
+    },
+    "nba": {
+      "executed": false,
+      "providerCallsMade": 1,
+      "blocker": "PARTIAL_BLOCKED_NBA_PROVIDER_GATE_OR_NO_USABLE_MARKETS_NFL_BLOCKED",
+      "rowsWritten": 0
+    },
+    "nfl": {
+      "executed": false,
+      "blocker": "BLOCKED_NO_RUNTIME_SPORTSDATAIO_NFL_API_KEY"
+    },
+    "nhl": {
+      "executed": false,
+      "blocker": "SPORTSDATAIO_NHL_API_KEY missing"
+    },
+    "soccer": {
+      "executed": false,
+      "blocker": "competition-specific source and canonical identity not certified"
+    },
+    "bsn": {
+      "executed": false,
+      "blocker": "approved source provenance not present for live expansion"
+    },
+    "tennis": {
+      "executed": false,
+      "blocker": "event feed/source entitlement not certified"
+    },
+    "ufc": {
+      "executed": false,
+      "blocker": "event and bout feed/source entitlement not certified"
+    }
+  },
+  "featureMaterializationResults": {
+    "executed": false,
+    "reason": "No new sport passed feature materialization gates beyond existing stored MLB feature coverage.",
+    "featureRebuildsExecuted": 0
+  },
+  "predictionReadinessBySport": [
+    {
+      "sportKey": "baseball_mlb",
+      "label": "MLB",
+      "state": "PREVIEW_PREDICTIONS",
+      "blockers": []
+    },
+    {
+      "sportKey": "basketball_nba",
+      "label": "NBA",
+      "state": "PREVIEW_PREDICTIONS",
+      "blockers": [
+        "Completed Results has no stored rows for NBA."
+      ]
+    },
+    {
+      "sportKey": "americanfootball_nfl",
+      "label": "NFL",
+      "state": "BLOCKED",
+      "blockers": [
+        "NO_FEATURE_SNAPSHOT_ROWS",
+        "Teams has no stored rows for NFL.",
+        "Schedules has no stored rows for NFL.",
+        "Events has no stored rows for NFL.",
+        "Completed Results has no stored rows for NFL.",
+        "Odds Snapshots has no stored rows for NFL.",
+        "Markets has no stored rows for NFL.",
+        "Historical Feature Snapshots has no stored rows for NFL."
+      ]
+    },
+    {
+      "sportKey": "icehockey_nhl",
+      "label": "NHL",
+      "state": "BLOCKED",
+      "blockers": [
+        "NO_VALID_PREGAME_PREDICTION_ROWS",
+        "NO_FEATURE_SNAPSHOT_ROWS",
+        "NO_SETTLED_ROWS_FOR_LEARNING",
+        "Teams has no stored rows for NHL.",
+        "Schedules has no stored rows for NHL.",
+        "Events has no stored rows for NHL.",
+        "Completed Results has no stored rows for NHL.",
+        "Odds Snapshots has no stored rows for NHL.",
+        "Markets has no stored rows for NHL.",
+        "Historical Feature Snapshots has no stored rows for NHL.",
+        "Prediction History has no stored rows for NHL.",
+        "Valid Pregame Predictions has no stored rows for NHL.",
+        "Settled Predictions has no stored rows for NHL."
+      ]
+    },
+    {
+      "sportKey": "soccer",
+      "label": "Soccer",
+      "state": "BLOCKED",
+      "blockers": [
+        "NO_VALID_PREGAME_PREDICTION_ROWS",
+        "NO_FEATURE_SNAPSHOT_ROWS",
+        "NO_SETTLED_ROWS_FOR_LEARNING",
+        "Teams has no stored rows for Soccer.",
+        "Schedules has no stored rows for Soccer.",
+        "Events has no stored rows for Soccer.",
+        "Completed Results has no stored rows for Soccer.",
+        "Odds Snapshots has no stored rows for Soccer.",
+        "Markets has no stored rows for Soccer.",
+        "Historical Feature Snapshots has no stored rows for Soccer.",
+        "Prediction History has no stored rows for Soccer.",
+        "Valid Pregame Predictions has no stored rows for Soccer.",
+        "Settled Predictions has no stored rows for Soccer."
+      ]
+    },
+    {
+      "sportKey": "basketball_bsn",
+      "label": "BSN",
+      "state": "BLOCKED",
+      "blockers": [
+        "NO_FEATURE_SNAPSHOT_ROWS",
+        "Odds Snapshots has no stored rows for BSN.",
+        "Markets has no stored rows for BSN.",
+        "Historical Feature Snapshots has no stored rows for BSN."
+      ]
+    },
+    {
+      "sportKey": "tennis",
+      "label": "Tennis",
+      "state": "BLOCKED",
+      "blockers": [
+        "NO_VALID_PREGAME_PREDICTION_ROWS",
+        "NO_FEATURE_SNAPSHOT_ROWS",
+        "NO_SETTLED_ROWS_FOR_LEARNING",
+        "Teams has no stored rows for Tennis.",
+        "Schedules has no stored rows for Tennis.",
+        "Events has no stored rows for Tennis.",
+        "Completed Results has no stored rows for Tennis.",
+        "Odds Snapshots has no stored rows for Tennis.",
+        "Markets has no stored rows for Tennis.",
+        "Historical Feature Snapshots has no stored rows for Tennis.",
+        "Prediction History has no stored rows for Tennis.",
+        "Valid Pregame Predictions has no stored rows for Tennis.",
+        "Settled Predictions has no stored rows for Tennis."
+      ]
+    },
+    {
+      "sportKey": "mma_ufc",
+      "label": "UFC",
+      "state": "BLOCKED",
+      "blockers": [
+        "NO_VALID_PREGAME_PREDICTION_ROWS",
+        "NO_FEATURE_SNAPSHOT_ROWS",
+        "NO_SETTLED_ROWS_FOR_LEARNING",
+        "Teams has no stored rows for UFC.",
+        "Schedules has no stored rows for UFC.",
+        "Events has no stored rows for UFC.",
+        "Completed Results has no stored rows for UFC.",
+        "Odds Snapshots has no stored rows for UFC.",
+        "Markets has no stored rows for UFC.",
+        "Historical Feature Snapshots has no stored rows for UFC.",
+        "Prediction History has no stored rows for UFC.",
+        "Valid Pregame Predictions has no stored rows for UFC.",
+        "Settled Predictions has no stored rows for UFC."
+      ]
+    }
+  ],
+  "recommendationResults": {
+    "activeRecommendationSports": [],
+    "officialPickPolicyChanged": false,
+    "forcedRecommendations": 0
+  },
+  "settlementAndLearningResults": {
+    "settlementsExecuted": 0,
+    "learningLabelsCreated": 0,
+    "learningBrainWeightsChanged": false
+  },
+  "postgameExplanationResults": {
+    "persistedRowsCreated": 0,
+    "causalCertaintyClaimed": false
+  },
+  "regressionReport": {
+    "probabilityChanged": false,
+    "confidenceChanged": false,
+    "trustFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "cutoffPolicyChanged": false,
+    "epochActivated": false,
+    "cronChanged": false,
+    "retrospectivePredictionsGenerated": 0,
+    "noSecretExposure": true
+  },
+  "remainingBlockers": [
+    "NBA broad live execution remains blocked by provider_execution_blocked_pending_approval and external evidence gates.",
+    "NFL and NHL require runtime SportsDataIO sport credentials before live probes/imports.",
+    "Soccer requires certified competition-specific provider/source path before import.",
+    "BSN requires approved source provenance for live acquisition beyond existing stored data.",
+    "Tennis and UFC require event/bout feed entitlement and canonical identity certification.",
+    "No new sport can activate predictions until feature, cutoff, settlement and learning gates pass."
+  ],
+  "nextCheckpoint": "Resolve NBA provider gate evidence or configure NFL/NHL credentials; otherwise continue MLB maintenance under existing scheduler.",
+  "certificationMarkers": [
+    "LIVE_PROVIDER_ENTITLEMENT_PROVEN_PASS",
+    "CANONICAL_IDENTITY_CERTIFICATION_PASS",
+    "CURRENT_SEASON_DATA_CONTINUITY_PASS",
+    "HISTORICAL_IMPORT_EXECUTION_PASS",
+    "PROVIDER_QUOTA_SAFETY_PASS",
+    "NO_ACTION_DRIFT_PASS",
+    "NO_DUPLICATE_DATA_PASS",
+    "NO_RETROSPECTIVE_PREDICTION_PASS",
+    "RECOMMENDATION_POLICY_PRESERVED_PASS",
+    "NO_FORCED_RECOMMENDATION_PASS",
+    "NO_PROBABILITY_CHANGE_PASS",
+    "NO_CONFIDENCE_CHANGE_PASS",
+    "NO_TRUST_FORMULA_CHANGE_PASS",
+    "NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS",
+    "NO_OFFICIAL_PICK_POLICY_CHANGE_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "NO_SECRET_EXPOSURE_PASS",
+    "NO_CERTIFIED_PLATFORM_REGRESSION_PASS"
+  ]
+}
