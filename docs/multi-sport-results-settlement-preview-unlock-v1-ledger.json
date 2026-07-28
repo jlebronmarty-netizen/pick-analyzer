@@ -4,8 +4,8 @@
   "startingCommit": "c0af0c7578b0f6f9bd190e3d5c834650cc0bb318",
   "certifiedPlatformTag": "v1.0-platform-certified",
   "certifiedPlatformCommit": "eb15613efd81ff1a8e57797e11feb7254c1b604a",
-  "status": "in_progress",
-  "updatedAt": "2026-07-28T04:24:00.000Z",
+  "status": "completed_pending_push",
+  "updatedAt": "2026-07-28T04:38:00.000Z",
   "authorization": {
     "boundedProviderCallsAuthorized": true,
     "boundedProductionWritesAuthorized": true,
@@ -275,7 +275,8 @@
     {
       "checkpointId": "F",
       "name": "TENNIS_UFC_EVENT_LIFECYCLE_GATE",
-      "status": "completed_pending_push",
+      "status": "completed_pushed",
+      "commit": "6d301e3d171590fa1841149c0ea612829c05915e",
       "artifacts": [
         "scripts/multi-sport-unlock-v1-checkpoint-f-tennis-ufc.mjs",
         "docs/TENNIS_UFC_EVENT_LIFECYCLE_GATE_V1.md",
@@ -333,6 +334,47 @@
         "officialPickPolicyChanged": false
       },
       "nextCheckpoint": "G_SETTLEMENT_LEARNING_SCHEDULER_FINAL_CERTIFICATION"
+    },
+    {
+      "checkpointId": "G",
+      "name": "SETTLEMENT_LEARNING_SCHEDULER_FINAL_CERTIFICATION",
+      "status": "completed_pending_push",
+      "artifacts": [
+        "scripts/multi-sport-unlock-v1-final-certify.mjs",
+        "docs/MULTI_SPORT_RESULTS_SETTLEMENT_PREVIEW_UNLOCK_V1_FINAL_CERTIFICATION.md",
+        "docs/multi-sport-results-settlement-preview-unlock-v1-final-certification.json"
+      ],
+      "validation": {
+        "fixtureCommand": "node scripts/multi-sport-unlock-v1-final-certify.mjs --validate",
+        "fixtureStatus": "passed",
+        "fixtureChecks": 5,
+        "dryRunCommand": "node --loader ./scripts/local-ts-loader.mjs scripts/multi-sport-unlock-v1-final-certify.mjs",
+        "dryRunStatus": "MULTI_SPORT_RESULTS_SETTLEMENT_PREVIEW_UNLOCK_V1_CERTIFIED_BLOCKED",
+        "settlementFixtureChecks": 41,
+        "deterministicSettlementPassed": 14,
+        "deterministicSettlementChecks": 14
+      },
+      "liveExecution": {
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0,
+        "productionMutationsMade": 0,
+        "predictionsPersisted": 0,
+        "settlementsExecuted": 0,
+        "learningLabelsCreated": 0
+      },
+      "safety": {
+        "previewActivated": false,
+        "productionActivated": false,
+        "recommendationEligible": false,
+        "retrospectivePredictionsGenerated": 0,
+        "probabilityChanged": false,
+        "confidenceChanged": false,
+        "trustFormulaChanged": false,
+        "learningBrainWeightsChanged": false,
+        "officialPickPolicyChanged": false,
+        "schedulerChanged": false
+      },
+      "nextCheckpoint": null
     }
   ],
   "certificationMarkers": [
@@ -357,6 +399,12 @@
     "UFC_PROVIDER_RESULTS_STORED_BUT_NOT_CANONICAL_PASS",
     "TENNIS_UFC_NO_RETROSPECTIVE_PREDICTION_PASS",
     "TENNIS_UFC_NO_PRODUCTION_PROMOTION_PASS",
+    "MULTI_SPORT_RESULTS_SETTLEMENT_PREVIEW_UNLOCK_V1_FINAL_PASS",
+    "SETTLEMENT_CORE_CONTRACT_AVAILABLE_PASS",
+    "NON_CANONICAL_SETTLEMENT_BLOCKED_PASS",
+    "NON_CANONICAL_LEARNING_BLOCKED_PASS",
+    "NO_PREVIEW_PRODUCTION_PROMOTION_PASS",
+    "NO_SCHEDULER_CHANGE_PASS",
     "PROVIDER_QUOTA_SAFETY_PASS",
     "NO_RETROSPECTIVE_PREDICTION_PASS",
     "NO_PROBABILITY_CHANGE_PASS",
