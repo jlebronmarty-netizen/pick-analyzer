@@ -1,0 +1,1346 @@
+{
+  "generatedAt": "2026-07-28T03:58:17.796Z",
+  "commit": "46264320bcf562c37e304f441db50f2c0a2a0b94",
+  "checkpoint": "TENNIS_UFC_EVENT_LIFECYCLE_GATE_V1",
+  "result": {
+    "success": true,
+    "status": "TENNIS_UFC_EVENT_PREVIEW_BLOCKED",
+    "generatedAt": "2026-07-28T03:58:17.796Z",
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 0,
+    "sports": [
+      {
+        "label": "Tennis",
+        "sportKey": "tennis",
+        "prefix": "TENNIS",
+        "stored": {
+          "events": {
+            "count": 0,
+            "error": null
+          },
+          "futureEvents": {
+            "count": 0,
+            "error": null
+          },
+          "odds": {
+            "count": 0,
+            "error": null
+          },
+          "mappings": {
+            "count": 0,
+            "error": null
+          },
+          "results": {
+            "count": 0,
+            "error": null
+          },
+          "predictions": {
+            "count": 0,
+            "error": null
+          },
+          "settledPredictions": {
+            "count": 0,
+            "error": null
+          },
+          "teams": {
+            "count": 0,
+            "error": null
+          },
+          "players": {
+            "count": 0,
+            "error": null
+          },
+          "teamStats": {
+            "count": 0,
+            "error": null
+          },
+          "gameStats": {
+            "count": 0,
+            "error": null
+          },
+          "playerStats": {
+            "count": 0,
+            "error": null
+          }
+        },
+        "engine": {
+          "success": true,
+          "mode": "tennis_prediction_engine_preview_v1",
+          "generatedAt": "2026-07-28T03:58:15.638Z",
+          "providerUsage": {
+            "externalProviderCallsMade": 0,
+            "source": "deterministic_fixture_and_feature_store_contracts"
+          },
+          "status": "partial",
+          "completionLabels": [
+            "ARCHITECTURE_COMPLETE",
+            "DETERMINISTIC_VALIDATION_COMPLETE",
+            "REAL_DATA_VALIDATION_PENDING",
+            "HISTORICAL_CALIBRATION_PENDING"
+          ],
+          "summary": {
+            "predictionsGenerated": 2,
+            "recommended": 0,
+            "markets": [
+              "moneyline",
+              "total"
+            ],
+            "averageFeatureQuality": 40,
+            "averageDataSufficiency": 40,
+            "noLeakage": true,
+            "persisted": false,
+            "productionRecommendations": false
+          },
+          "compatibility": {
+            "usesSharedSportPredictionSdk": true,
+            "usesFeatureStoreSnapshot": true,
+            "usesRawProviderPayloads": false,
+            "requiresMigration": false,
+            "persistenceEnabled": false,
+            "settlementCompatible": true
+          },
+          "missingSportSpecificDomains": [
+            "Feature Store Core V1 does not yet define tennis player-form features.",
+            "Player form, surface context, ranking context and injury context are not fully available in Feature Store Core V1."
+          ],
+          "predictions": [
+            {
+              "id": "sport-sdk:tennis:tennis_prediction_fixture:moneyline:Fixture Player A",
+              "sportKey": "tennis",
+              "leagueKey": null,
+              "eventId": "tennis_prediction_fixture",
+              "market": "moneyline",
+              "selection": "Fixture Player A",
+              "opponent": "Fixture Player B",
+              "sportsbook": "Fixture Book",
+              "americanOdds": -130,
+              "line": null,
+              "projectedLine": 0.43,
+              "modelProbability": 42.99,
+              "impliedProbability": 56.52,
+              "fairOdds": 133,
+              "edge": -13.53,
+              "expectedValue": -23.94,
+              "confidence": 32.84,
+              "uncertainty": 22,
+              "recommendation": "pass",
+              "featureQualityScore": 40,
+              "dataSufficiencyScore": 40,
+              "smartScore": 14.49,
+              "kellyPercent": 0,
+              "recommendedStake": 0,
+              "explanationFactors": [
+                "Projected margin is 0.43.",
+                "Model probability is 42.99%.",
+                "Implied probability is 56.52%.",
+                "Expected value is -23.94%.",
+                "Feature quality is 40.",
+                "Data sufficiency is 40."
+              ],
+              "warnings": [
+                "event_context is stale for its maxAge policy.",
+                "market_odds is stale for its maxAge policy.",
+                "Feature Store Core V1 does not yet define tennis player-form features.",
+                "Tennis Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+                "Predictions are not persisted and are not production betting recommendations.",
+                "Player form, surface, ranking and injury inputs are unavailable and not fabricated.",
+                "Real-data validation and historical calibration are pending."
+              ],
+              "contracts": {
+                "monteCarloCompatible": true,
+                "kellyCompatible": true,
+                "smartRankingCompatible": true,
+                "persistenceCompatible": true,
+                "settlementCompatible": true
+              },
+              "completionStatus": [
+                "ARCHITECTURE_COMPLETE",
+                "DETERMINISTIC_VALIDATION_COMPLETE",
+                "REAL_DATA_VALIDATION_PENDING",
+                "HISTORICAL_CALIBRATION_PENDING"
+              ]
+            },
+            {
+              "id": "sport-sdk:tennis:tennis_prediction_fixture:total:Over",
+              "sportKey": "tennis",
+              "leagueKey": null,
+              "eventId": "tennis_prediction_fixture",
+              "market": "total",
+              "selection": "Over",
+              "opponent": "Under",
+              "sportsbook": "Fixture Book",
+              "americanOdds": -108,
+              "line": 22.5,
+              "projectedLine": 0.8,
+              "modelProbability": 42.88,
+              "impliedProbability": 51.92,
+              "fairOdds": 133,
+              "edge": -9.04,
+              "expectedValue": -17.42,
+              "confidence": 31.98,
+              "uncertainty": 24,
+              "recommendation": "pass",
+              "featureQualityScore": 40,
+              "dataSufficiencyScore": 40,
+              "smartScore": 14.19,
+              "kellyPercent": 0,
+              "recommendedStake": 0,
+              "explanationFactors": [
+                "Projected margin is 0.8.",
+                "Model probability is 42.88%.",
+                "Implied probability is 51.92%.",
+                "Expected value is -17.42%.",
+                "Feature quality is 40.",
+                "Data sufficiency is 40."
+              ],
+              "warnings": [
+                "event_context is stale for its maxAge policy.",
+                "market_odds is stale for its maxAge policy.",
+                "Feature Store Core V1 does not yet define tennis player-form features.",
+                "Tennis Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+                "Predictions are not persisted and are not production betting recommendations.",
+                "Player form, surface, ranking and injury inputs are unavailable and not fabricated.",
+                "Real-data validation and historical calibration are pending."
+              ],
+              "contracts": {
+                "monteCarloCompatible": true,
+                "kellyCompatible": true,
+                "smartRankingCompatible": true,
+                "persistenceCompatible": true,
+                "settlementCompatible": true
+              },
+              "completionStatus": [
+                "ARCHITECTURE_COMPLETE",
+                "DETERMINISTIC_VALIDATION_COMPLETE",
+                "REAL_DATA_VALIDATION_PENDING",
+                "HISTORICAL_CALIBRATION_PENDING"
+              ]
+            }
+          ],
+          "warnings": [
+            "Feature Store Core V1 does not yet define tennis player-form features.",
+            "Tennis Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.",
+            "Player form, surface context, ranking context and injury context are not fully available in Feature Store Core V1.",
+            "Unavailable tennis-specific context must degrade confidence or block later prediction engines instead of being fabricated.",
+            "Tennis Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+            "Predictions are not persisted and are not production betting recommendations.",
+            "Player form, surface, ranking and injury inputs are unavailable and not fabricated.",
+            "Real-data validation and historical calibration are pending."
+          ]
+        },
+        "health": {
+          "success": true,
+          "mode": "tennis_prediction_engine_health_v1",
+          "generatedAt": "2026-07-28T03:58:15.638Z",
+          "providerUsage": {
+            "externalProviderCallsMade": 0,
+            "source": "local_contract_health"
+          },
+          "status": "partial",
+          "completionLabels": [
+            "ARCHITECTURE_COMPLETE",
+            "DETERMINISTIC_VALIDATION_COMPLETE",
+            "REAL_DATA_VALIDATION_PENDING",
+            "HISTORICAL_CALIBRATION_PENDING"
+          ],
+          "checks": {
+            "sharedSdkReady": true,
+            "featureSnapshotNoLeakage": true,
+            "supportedMarkets": 2,
+            "unsupportedPreviewMarkets": 0,
+            "persistenceEnabled": false,
+            "productionReady": false,
+            "realDataValidationPending": true,
+            "historicalCalibrationPending": true
+          },
+          "warnings": [
+            "Feature Store Core V1 does not yet define tennis player-form features.",
+            "Tennis Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.",
+            "Player form, surface context, ranking context and injury context are not fully available in Feature Store Core V1.",
+            "Unavailable tennis-specific context must degrade confidence or block later prediction engines instead of being fabricated.",
+            "Tennis Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+            "Predictions are not persisted and are not production betting recommendations.",
+            "Player form, surface, ranking and injury inputs are unavailable and not fabricated.",
+            "Real-data validation and historical calibration are pending."
+          ]
+        },
+        "validation": {
+          "success": true,
+          "mode": "tennis_prediction_engine_validation_v1",
+          "generatedAt": "2026-07-28T03:58:15.639Z",
+          "providerUsage": {
+            "externalProviderCallsMade": 0,
+            "source": "deterministic_tennis_engine_validation"
+          },
+          "completionLabels": [
+            "ARCHITECTURE_COMPLETE",
+            "DETERMINISTIC_VALIDATION_COMPLETE",
+            "REAL_DATA_VALIDATION_PENDING",
+            "HISTORICAL_CALIBRATION_PENDING"
+          ],
+          "summary": {
+            "checks": 9,
+            "passed": 9,
+            "predictionsGenerated": 2,
+            "markets": [
+              "moneyline",
+              "total"
+            ],
+            "averageFeatureQuality": 40,
+            "averageDataSufficiency": 40,
+            "status": "partial"
+          },
+          "checks": {
+            "generatedPreviewPredictions": true,
+            "zeroProviderCalls": true,
+            "noLeakage": true,
+            "noPersistence": true,
+            "noRawProviderPayloads": true,
+            "sdkCompatible": true,
+            "settlementCompatible": true,
+            "realDataPending": true,
+            "historicalCalibrationPending": true
+          },
+          "warnings": [
+            "Feature Store Core V1 does not yet define tennis player-form features.",
+            "Tennis Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.",
+            "Player form, surface context, ranking context and injury context are not fully available in Feature Store Core V1.",
+            "Unavailable tennis-specific context must degrade confidence or block later prediction engines instead of being fabricated.",
+            "Tennis Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+            "Predictions are not persisted and are not production betting recommendations.",
+            "Player form, surface, ranking and injury inputs are unavailable and not fabricated.",
+            "Real-data validation and historical calibration are pending."
+          ]
+        },
+        "featureStatus": {
+          "success": true,
+          "mode": "tennis_feature_store_integration_v1",
+          "generatedAt": "2026-07-28T03:58:16.793Z",
+          "providerUsage": {
+            "externalProviderCallsMade": 0,
+            "source": "feature_contracts_and_existing_tennis_metadata"
+          },
+          "status": "partial",
+          "summary": {
+            "tennisDefinitions": 2,
+            "featureSets": 1,
+            "readyFeatureSets": 0,
+            "partialFeatureSets": 1,
+            "previewQuality": 40,
+            "previewSufficiency": 40,
+            "previewNoLeakage": true,
+            "storedEventsRows": 0,
+            "storedOddsRows": 0,
+            "storedPredictionRows": 0
+          },
+          "compatibility": {
+            "usesFeatureStoreCore": true,
+            "usesMultiSportFeatureRegistry": true,
+            "usesSharedSportPredictionSdk": true,
+            "changesExistingPredictionGeneration": false,
+            "requiresMigration": false,
+            "durableFeatureStorePersistence": false,
+            "rawProviderPayloadsAllowed": false
+          },
+          "missingSportSpecificDomains": [
+            "player_form_context",
+            "surface_context",
+            "ranking_context",
+            "injury_context"
+          ],
+          "definitions": [
+            {
+              "key": "event_context",
+              "displayName": "Event Context",
+              "version": "1.0.0",
+              "sportKeys": [
+                "basketball_nba",
+                "basketball_bsn",
+                "baseball_mlb",
+                "americanfootball_nfl",
+                "icehockey_nhl",
+                "soccer",
+                "tennis",
+                "mma_ufc"
+              ],
+              "markets": [
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "valueType": "json",
+              "maxAgeMinutes": 1440,
+              "required": true,
+              "sourceTables": [
+                "sport_events"
+              ],
+              "description": "Scheduled event identity, participants, venue and start time.",
+              "noLeakageRule": "Event context must be captured before event start."
+            },
+            {
+              "key": "market_odds",
+              "displayName": "Market Odds",
+              "version": "1.0.0",
+              "sportKeys": [
+                "basketball_nba",
+                "basketball_bsn",
+                "baseball_mlb",
+                "americanfootball_nfl",
+                "icehockey_nhl",
+                "soccer",
+                "tennis",
+                "mma_ufc"
+              ],
+              "markets": [
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "valueType": "json",
+              "maxAgeMinutes": 120,
+              "required": true,
+              "sourceTables": [
+                "sports_odds_snapshots"
+              ],
+              "description": "Latest pre-event prices, lines and sportsbook provenance.",
+              "noLeakageRule": "Odds snapshots must be timestamped at or before generated_at and before event start."
+            }
+          ],
+          "featureSet": {
+            "id": "tennis:moneyline:tennis_feature_set_v1",
+            "sportKey": "tennis",
+            "leagueKey": null,
+            "market": "moneyline",
+            "modelVersion": "tennis_feature_set_v1",
+            "status": "partial",
+            "requiredFeatures": [
+              "event_context",
+              "market_odds"
+            ],
+            "optionalFeatures": [],
+            "minimumDataSufficiencyScore": 50,
+            "minimumFeatureQualityScore": 60,
+            "fallbackPolicy": "Individual-player form features must be added before tennis predictions.",
+            "warnings": [
+              "Feature Store Core V1 does not yet define tennis player-form features."
+            ],
+            "availableRequiredFeatures": [
+              "event_context",
+              "market_odds"
+            ],
+            "missingRequiredFeatures": [],
+            "missingOptionalFeatures": [],
+            "ready": false
+          },
+          "preview": {
+            "id": "feature_store_core_v1:tennis:tennis_feature_preview:moneyline:2026-07-01T12:00:00.000Z",
+            "sportKey": "tennis",
+            "leagueKey": null,
+            "eventId": "tennis_feature_preview",
+            "market": "moneyline",
+            "generatedAt": "2026-07-01T12:00:00.000Z",
+            "cutoffAt": "2026-07-01T12:00:00.000Z",
+            "eventStartTime": "2026-07-01T15:00:00.000Z",
+            "storeVersion": "feature_store_core_v1",
+            "featureQualityScore": 40,
+            "dataSufficiencyScore": 40,
+            "noLeakage": true,
+            "values": [
+              {
+                "key": "event_context",
+                "value": {
+                  "fixture": true,
+                  "sportKey": "tennis",
+                  "eventId": "tennis_feature_preview",
+                  "market": "moneyline"
+                },
+                "definitionVersion": "1.0.0",
+                "computedAt": "2026-07-01T12:00:00.000Z",
+                "freshnessMinutes": 260760,
+                "qualityScore": 40,
+                "sampleSize": 12,
+                "provenance": [
+                  {
+                    "provider": "fixture-store",
+                    "sourceTable": "sport_events",
+                    "sourceId": "tennis_feature_preview:event_context",
+                    "observedAt": "2026-01-01T10:00:00.000Z"
+                  }
+                ],
+                "warnings": [
+                  "event_context is stale for its maxAge policy."
+                ]
+              },
+              {
+                "key": "market_odds",
+                "value": {
+                  "fixture": true,
+                  "sportKey": "tennis",
+                  "eventId": "tennis_feature_preview",
+                  "market": "moneyline"
+                },
+                "definitionVersion": "1.0.0",
+                "computedAt": "2026-07-01T12:00:00.000Z",
+                "freshnessMinutes": 260655,
+                "qualityScore": 40,
+                "sampleSize": 12,
+                "provenance": [
+                  {
+                    "provider": "fixture-store",
+                    "sourceTable": "sports_odds_snapshots",
+                    "sourceId": "tennis_feature_preview:market_odds",
+                    "observedAt": "2026-01-01T11:45:00.000Z"
+                  }
+                ],
+                "warnings": [
+                  "market_odds is stale for its maxAge policy."
+                ]
+              }
+            ],
+            "invalidationKeys": [
+              "event:tennis_feature_preview",
+              "sport:tennis",
+              "market:moneyline",
+              "table:sport_events",
+              "table:sports_odds_snapshots"
+            ],
+            "warnings": [
+              "event_context is stale for its maxAge policy.",
+              "market_odds is stale for its maxAge policy."
+            ]
+          },
+          "warnings": [
+            "Feature Store Core V1 does not yet define tennis player-form features.",
+            "Tennis Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.",
+            "Player form, surface context, ranking context and injury context are not fully available in Feature Store Core V1.",
+            "Unavailable tennis-specific context must degrade confidence or block later prediction engines instead of being fabricated."
+          ]
+        },
+        "crosswalk": {
+          "sportKey": "tennis",
+          "label": "Tennis",
+          "providerSportKey": "tennis",
+          "state": "BLOCKED",
+          "coverage": {
+            "oddsRows": 0,
+            "oddsEvents": 0,
+            "currentOddsCoverage": {
+              "numerator": 0,
+              "denominator": 0,
+              "pct": 0
+            },
+            "providerEventMappings": 0,
+            "canonicalEventMappings": 0,
+            "eventCrosswalkCoverage": {
+              "numerator": 0,
+              "denominator": 0,
+              "pct": 0
+            },
+            "resultRows": 0,
+            "resultCrosswalkCoverage": {
+              "numerator": 0,
+              "denominator": 0,
+              "pct": 0
+            },
+            "canonicalEvents": 0,
+            "completedCanonicalEvents": 0,
+            "predictionRows": 0,
+            "settledPredictionRows": 0
+          },
+          "markets": [],
+          "bookmakers": [],
+          "classifications": {
+            "exact": 0,
+            "deterministicAlias": 0,
+            "timeWindowWithIdentity": 0,
+            "ambiguous": 0,
+            "unresolved": 0,
+            "conflict": 0
+          },
+          "readiness": {
+            "exactEventMapping": false,
+            "completedResults": false,
+            "deterministicSettlementInputs": false,
+            "learningSample": false,
+            "previewPredictionEligible": false,
+            "productionPredictionEligible": false,
+            "recommendationEligible": false
+          },
+          "blockers": [
+            "COMPLETED_RESULT_ROWS_NOT_AVAILABLE",
+            "ODDS_CANONICAL_RESULT_CHAIN_NOT_CERTIFIED",
+            "NO_EXISTING_PREVIEW_OR_PRODUCTION_PREDICTIONS",
+            "NO_SETTLED_PREDICTION_SAMPLE"
+          ],
+          "nextAction": "COMPLETED_RESULT_ROWS_NOT_AVAILABLE"
+        },
+        "status": "TENNIS_EVENT_PREVIEW_BLOCKED",
+        "gates": [
+          {
+            "name": "Tennis event-driven scope",
+            "passed": true,
+            "blocker": null
+          },
+          {
+            "name": "Tennis exact event identity",
+            "passed": false,
+            "blocker": "TENNIS_CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED"
+          },
+          {
+            "name": "Tennis canonical events",
+            "passed": false,
+            "blocker": "TENNIS_CANONICAL_EVENTS_EMPTY"
+          },
+          {
+            "name": "Tennis scheduled future starts",
+            "passed": false,
+            "blocker": "TENNIS_FUTURE_CANONICAL_EVENTS_EMPTY"
+          },
+          {
+            "name": "Tennis completed results",
+            "passed": false,
+            "blocker": "TENNIS_COMPLETED_RESULTS_EMPTY"
+          },
+          {
+            "name": "Tennis pregame odds",
+            "passed": false,
+            "blocker": "TENNIS_PREGAME_ODDS_EMPTY"
+          },
+          {
+            "name": "Tennis feature readiness",
+            "passed": false,
+            "blocker": "TENNIS_FEATURES_PARTIAL_OR_EMPTY"
+          },
+          {
+            "name": "Tennis cutoff safety",
+            "passed": true,
+            "blocker": null
+          },
+          {
+            "name": "Tennis persistence enabled for real preview rows",
+            "passed": false,
+            "blocker": "TENNIS_PERSISTENCE_DISABLED_BY_DESIGN"
+          },
+          {
+            "name": "Tennis settlement inputs",
+            "passed": false,
+            "blocker": "TENNIS_SETTLEMENT_INPUTS_EMPTY"
+          },
+          {
+            "name": "Tennis learning labels",
+            "passed": false,
+            "blocker": "TENNIS_SETTLED_LEARNING_SAMPLE_EMPTY"
+          },
+          {
+            "name": "Tennis preview/production separation",
+            "passed": true,
+            "blocker": null
+          }
+        ],
+        "summary": {
+          "gatesPassed": 3,
+          "gatesTotal": 12,
+          "previewActivated": false,
+          "productionActivated": false,
+          "recommendationEligible": false
+        },
+        "blockers": [
+          "TENNIS_CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED",
+          "TENNIS_CANONICAL_EVENTS_EMPTY",
+          "TENNIS_FUTURE_CANONICAL_EVENTS_EMPTY",
+          "TENNIS_COMPLETED_RESULTS_EMPTY",
+          "TENNIS_PREGAME_ODDS_EMPTY",
+          "TENNIS_FEATURES_PARTIAL_OR_EMPTY",
+          "TENNIS_PERSISTENCE_DISABLED_BY_DESIGN",
+          "TENNIS_SETTLEMENT_INPUTS_EMPTY",
+          "TENNIS_SETTLED_LEARNING_SAMPLE_EMPTY"
+        ]
+      },
+      {
+        "label": "UFC",
+        "sportKey": "mma_ufc",
+        "prefix": "UFC",
+        "stored": {
+          "events": {
+            "count": 0,
+            "error": null
+          },
+          "futureEvents": {
+            "count": 0,
+            "error": null
+          },
+          "odds": {
+            "count": 360,
+            "error": null
+          },
+          "mappings": {
+            "count": 32,
+            "error": null
+          },
+          "results": {
+            "count": 12,
+            "error": null
+          },
+          "predictions": {
+            "count": 0,
+            "error": null
+          },
+          "settledPredictions": {
+            "count": 0,
+            "error": null
+          },
+          "teams": {
+            "count": 0,
+            "error": null
+          },
+          "players": {
+            "count": 0,
+            "error": null
+          },
+          "teamStats": {
+            "count": 0,
+            "error": null
+          },
+          "gameStats": {
+            "count": 0,
+            "error": null
+          },
+          "playerStats": {
+            "count": 0,
+            "error": null
+          }
+        },
+        "engine": {
+          "success": true,
+          "mode": "ufc_prediction_engine_preview_v1",
+          "generatedAt": "2026-07-28T03:58:15.641Z",
+          "providerUsage": {
+            "externalProviderCallsMade": 0,
+            "source": "deterministic_fixture_and_feature_store_contracts"
+          },
+          "status": "partial",
+          "completionLabels": [
+            "ARCHITECTURE_COMPLETE",
+            "DETERMINISTIC_VALIDATION_COMPLETE",
+            "REAL_DATA_VALIDATION_PENDING",
+            "HISTORICAL_CALIBRATION_PENDING"
+          ],
+          "summary": {
+            "predictionsGenerated": 2,
+            "recommended": 0,
+            "markets": [
+              "moneyline",
+              "method_contract"
+            ],
+            "contractOnlyMarkets": 1,
+            "averageFeatureQuality": 40,
+            "averageDataSufficiency": 40,
+            "noLeakage": true,
+            "persisted": false,
+            "productionRecommendations": false
+          },
+          "compatibility": {
+            "usesSharedSportPredictionSdk": true,
+            "usesFeatureStoreSnapshot": true,
+            "usesRawProviderPayloads": false,
+            "requiresMigration": false,
+            "persistenceEnabled": false,
+            "settlementCompatible": true,
+            "methodContractsSettlementCompatible": false
+          },
+          "missingSportSpecificDomains": [
+            "Feature Store Core V1 does not yet define fighter-form features.",
+            "Fighter form, camp context, injury context, method context and weigh-in context are not fully available in Feature Store Core V1."
+          ],
+          "predictions": [
+            {
+              "id": "sport-sdk:mma_ufc:ufc_prediction_fixture:moneyline:Fixture Fighter A",
+              "sportKey": "mma_ufc",
+              "leagueKey": "ufc",
+              "eventId": "ufc_prediction_fixture",
+              "market": "moneyline",
+              "selection": "Fixture Fighter A",
+              "opponent": "Fixture Fighter B",
+              "sportsbook": "Fixture Book",
+              "americanOdds": -120,
+              "line": null,
+              "projectedLine": 0.28,
+              "modelProbability": 42.05,
+              "impliedProbability": 54.55,
+              "fairOdds": 138,
+              "edge": -12.5,
+              "expectedValue": -22.91,
+              "confidence": 31.53,
+              "uncertainty": 24,
+              "recommendation": "pass",
+              "featureQualityScore": 40,
+              "dataSufficiencyScore": 40,
+              "smartScore": 14.04,
+              "kellyPercent": 0,
+              "recommendedStake": 0,
+              "explanationFactors": [
+                "Projected margin is 0.28.",
+                "Model probability is 42.05%.",
+                "Implied probability is 54.55%.",
+                "Expected value is -22.91%.",
+                "Feature quality is 40.",
+                "Data sufficiency is 40."
+              ],
+              "warnings": [
+                "event_context is stale for its maxAge policy.",
+                "market_odds is stale for its maxAge policy.",
+                "Feature Store Core V1 does not yet define fighter-form features.",
+                "UFC Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+                "Predictions are not persisted and are not production betting recommendations.",
+                "Fighter form, camp, injury, method and weigh-in inputs are unavailable and not fabricated.",
+                "Method markets are contract-only until combat-specific settlement rules are implemented.",
+                "Real-data validation and historical calibration are pending."
+              ],
+              "contracts": {
+                "monteCarloCompatible": true,
+                "kellyCompatible": true,
+                "smartRankingCompatible": true,
+                "persistenceCompatible": true,
+                "settlementCompatible": true
+              },
+              "completionStatus": [
+                "ARCHITECTURE_COMPLETE",
+                "DETERMINISTIC_VALIDATION_COMPLETE",
+                "REAL_DATA_VALIDATION_PENDING",
+                "HISTORICAL_CALIBRATION_PENDING"
+              ]
+            },
+            {
+              "id": "sport-sdk:mma_ufc:ufc_prediction_fixture:method_contract:Fixture Fighter A by decision",
+              "sportKey": "mma_ufc",
+              "leagueKey": "ufc",
+              "eventId": "ufc_prediction_fixture",
+              "market": "method_contract",
+              "selection": "Fixture Fighter A by decision",
+              "opponent": "Any other result",
+              "sportsbook": "Fixture Book",
+              "americanOdds": 240,
+              "line": null,
+              "projectedLine": -0.28,
+              "modelProbability": 39.05,
+              "impliedProbability": 29.41,
+              "fairOdds": 156,
+              "edge": 9.64,
+              "expectedValue": 32.77,
+              "confidence": 27.48,
+              "uncertainty": 30,
+              "recommendation": "watch",
+              "featureQualityScore": 40,
+              "dataSufficiencyScore": 40,
+              "smartScore": 30.68,
+              "kellyPercent": 3.41,
+              "recommendedStake": 0,
+              "explanationFactors": [
+                "Projected margin is -0.28.",
+                "Model probability is 39.05%.",
+                "Implied probability is 29.41%.",
+                "Expected value is 32.77%.",
+                "Feature quality is 40.",
+                "Data sufficiency is 40."
+              ],
+              "warnings": [
+                "event_context is stale for its maxAge policy.",
+                "market_odds is stale for its maxAge policy.",
+                "Feature Store Core V1 does not yet define fighter-form features.",
+                "UFC Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+                "Predictions are not persisted and are not production betting recommendations.",
+                "Fighter form, camp, injury, method and weigh-in inputs are unavailable and not fabricated.",
+                "Method markets are contract-only until combat-specific settlement rules are implemented.",
+                "Real-data validation and historical calibration are pending."
+              ],
+              "contracts": {
+                "monteCarloCompatible": true,
+                "kellyCompatible": true,
+                "smartRankingCompatible": true,
+                "persistenceCompatible": true,
+                "settlementCompatible": false
+              },
+              "completionStatus": [
+                "ARCHITECTURE_COMPLETE",
+                "DETERMINISTIC_VALIDATION_COMPLETE",
+                "REAL_DATA_VALIDATION_PENDING",
+                "HISTORICAL_CALIBRATION_PENDING"
+              ]
+            }
+          ],
+          "warnings": [
+            "Feature Store Core V1 does not yet define fighter-form features.",
+            "UFC Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.",
+            "Fighter form, camp context, injury context, method context and weigh-in context are not fully available in Feature Store Core V1.",
+            "Unavailable UFC-specific context must degrade confidence or block later prediction engines instead of being fabricated.",
+            "UFC Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+            "Predictions are not persisted and are not production betting recommendations.",
+            "Fighter form, camp, injury, method and weigh-in inputs are unavailable and not fabricated.",
+            "Method markets are contract-only until combat-specific settlement rules are implemented.",
+            "Real-data validation and historical calibration are pending."
+          ]
+        },
+        "health": {
+          "success": true,
+          "mode": "ufc_prediction_engine_health_v1",
+          "generatedAt": "2026-07-28T03:58:15.641Z",
+          "providerUsage": {
+            "externalProviderCallsMade": 0,
+            "source": "local_contract_health"
+          },
+          "status": "partial",
+          "completionLabels": [
+            "ARCHITECTURE_COMPLETE",
+            "DETERMINISTIC_VALIDATION_COMPLETE",
+            "REAL_DATA_VALIDATION_PENDING",
+            "HISTORICAL_CALIBRATION_PENDING"
+          ],
+          "checks": {
+            "sharedSdkReady": true,
+            "featureSnapshotNoLeakage": true,
+            "supportedMarkets": 2,
+            "unsupportedPreviewMarkets": 0,
+            "methodContractsExplicit": true,
+            "persistenceEnabled": false,
+            "productionReady": false,
+            "realDataValidationPending": true,
+            "historicalCalibrationPending": true
+          },
+          "warnings": [
+            "Feature Store Core V1 does not yet define fighter-form features.",
+            "UFC Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.",
+            "Fighter form, camp context, injury context, method context and weigh-in context are not fully available in Feature Store Core V1.",
+            "Unavailable UFC-specific context must degrade confidence or block later prediction engines instead of being fabricated.",
+            "UFC Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+            "Predictions are not persisted and are not production betting recommendations.",
+            "Fighter form, camp, injury, method and weigh-in inputs are unavailable and not fabricated.",
+            "Method markets are contract-only until combat-specific settlement rules are implemented.",
+            "Real-data validation and historical calibration are pending."
+          ]
+        },
+        "validation": {
+          "success": true,
+          "mode": "ufc_prediction_engine_validation_v1",
+          "generatedAt": "2026-07-28T03:58:15.642Z",
+          "providerUsage": {
+            "externalProviderCallsMade": 0,
+            "source": "deterministic_ufc_engine_validation"
+          },
+          "completionLabels": [
+            "ARCHITECTURE_COMPLETE",
+            "DETERMINISTIC_VALIDATION_COMPLETE",
+            "REAL_DATA_VALIDATION_PENDING",
+            "HISTORICAL_CALIBRATION_PENDING"
+          ],
+          "summary": {
+            "checks": 10,
+            "passed": 10,
+            "predictionsGenerated": 2,
+            "markets": [
+              "moneyline",
+              "method_contract"
+            ],
+            "averageFeatureQuality": 40,
+            "averageDataSufficiency": 40,
+            "status": "partial"
+          },
+          "checks": {
+            "generatedPreviewPredictions": true,
+            "zeroProviderCalls": true,
+            "noLeakage": true,
+            "noPersistence": true,
+            "noRawProviderPayloads": true,
+            "sdkCompatible": true,
+            "moneylineSettlementCompatible": true,
+            "methodContractsExplicitlyNotSettlementCompatible": true,
+            "realDataPending": true,
+            "historicalCalibrationPending": true
+          },
+          "warnings": [
+            "Feature Store Core V1 does not yet define fighter-form features.",
+            "UFC Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.",
+            "Fighter form, camp context, injury context, method context and weigh-in context are not fully available in Feature Store Core V1.",
+            "Unavailable UFC-specific context must degrade confidence or block later prediction engines instead of being fabricated.",
+            "UFC Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+            "Predictions are not persisted and are not production betting recommendations.",
+            "Fighter form, camp, injury, method and weigh-in inputs are unavailable and not fabricated.",
+            "Method markets are contract-only until combat-specific settlement rules are implemented.",
+            "Real-data validation and historical calibration are pending."
+          ]
+        },
+        "featureStatus": {
+          "success": true,
+          "mode": "ufc_feature_store_integration_v1",
+          "generatedAt": "2026-07-28T03:58:16.818Z",
+          "providerUsage": {
+            "externalProviderCallsMade": 0,
+            "source": "feature_contracts_and_existing_ufc_metadata"
+          },
+          "status": "partial",
+          "summary": {
+            "ufcDefinitions": 2,
+            "featureSets": 1,
+            "readyFeatureSets": 0,
+            "partialFeatureSets": 1,
+            "previewQuality": 40,
+            "previewSufficiency": 40,
+            "previewNoLeakage": true,
+            "storedEventsRows": 0,
+            "storedOddsRows": 360,
+            "storedPredictionRows": 0
+          },
+          "compatibility": {
+            "usesFeatureStoreCore": true,
+            "usesMultiSportFeatureRegistry": true,
+            "usesSharedSportPredictionSdk": true,
+            "changesExistingPredictionGeneration": false,
+            "requiresMigration": false,
+            "durableFeatureStorePersistence": false,
+            "rawProviderPayloadsAllowed": false
+          },
+          "missingSportSpecificDomains": [
+            "fighter_form_context",
+            "camp_context",
+            "injury_context",
+            "method_context",
+            "weigh_in_context"
+          ],
+          "definitions": [
+            {
+              "key": "event_context",
+              "displayName": "Event Context",
+              "version": "1.0.0",
+              "sportKeys": [
+                "basketball_nba",
+                "basketball_bsn",
+                "baseball_mlb",
+                "americanfootball_nfl",
+                "icehockey_nhl",
+                "soccer",
+                "tennis",
+                "mma_ufc"
+              ],
+              "markets": [
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "valueType": "json",
+              "maxAgeMinutes": 1440,
+              "required": true,
+              "sourceTables": [
+                "sport_events"
+              ],
+              "description": "Scheduled event identity, participants, venue and start time.",
+              "noLeakageRule": "Event context must be captured before event start."
+            },
+            {
+              "key": "market_odds",
+              "displayName": "Market Odds",
+              "version": "1.0.0",
+              "sportKeys": [
+                "basketball_nba",
+                "basketball_bsn",
+                "baseball_mlb",
+                "americanfootball_nfl",
+                "icehockey_nhl",
+                "soccer",
+                "tennis",
+                "mma_ufc"
+              ],
+              "markets": [
+                "moneyline",
+                "spread",
+                "total"
+              ],
+              "valueType": "json",
+              "maxAgeMinutes": 120,
+              "required": true,
+              "sourceTables": [
+                "sports_odds_snapshots"
+              ],
+              "description": "Latest pre-event prices, lines and sportsbook provenance.",
+              "noLeakageRule": "Odds snapshots must be timestamped at or before generated_at and before event start."
+            }
+          ],
+          "featureSet": {
+            "id": "mma_ufc:moneyline:ufc_feature_set_v1",
+            "sportKey": "mma_ufc",
+            "leagueKey": "ufc",
+            "market": "moneyline",
+            "modelVersion": "ufc_feature_set_v1",
+            "status": "partial",
+            "requiredFeatures": [
+              "event_context",
+              "market_odds"
+            ],
+            "optionalFeatures": [],
+            "minimumDataSufficiencyScore": 50,
+            "minimumFeatureQualityScore": 60,
+            "fallbackPolicy": "Fighter-form and bout-specific features must be added before UFC predictions.",
+            "warnings": [
+              "Feature Store Core V1 does not yet define fighter-form features."
+            ],
+            "availableRequiredFeatures": [
+              "event_context",
+              "market_odds"
+            ],
+            "missingRequiredFeatures": [],
+            "missingOptionalFeatures": [],
+            "ready": false
+          },
+          "preview": {
+            "id": "feature_store_core_v1:mma_ufc:ufc_feature_preview:moneyline:2026-08-01T12:00:00.000Z",
+            "sportKey": "mma_ufc",
+            "leagueKey": "ufc",
+            "eventId": "ufc_feature_preview",
+            "market": "moneyline",
+            "generatedAt": "2026-08-01T12:00:00.000Z",
+            "cutoffAt": "2026-08-01T12:00:00.000Z",
+            "eventStartTime": "2026-08-02T02:00:00.000Z",
+            "storeVersion": "feature_store_core_v1",
+            "featureQualityScore": 40,
+            "dataSufficiencyScore": 40,
+            "noLeakage": true,
+            "values": [
+              {
+                "key": "event_context",
+                "value": {
+                  "fixture": true,
+                  "sportKey": "mma_ufc",
+                  "eventId": "ufc_feature_preview",
+                  "market": "moneyline"
+                },
+                "definitionVersion": "1.0.0",
+                "computedAt": "2026-08-01T12:00:00.000Z",
+                "freshnessMinutes": 305400,
+                "qualityScore": 40,
+                "sampleSize": 12,
+                "provenance": [
+                  {
+                    "provider": "fixture-store",
+                    "sourceTable": "sport_events",
+                    "sourceId": "ufc_feature_preview:event_context",
+                    "observedAt": "2026-01-01T10:00:00.000Z"
+                  }
+                ],
+                "warnings": [
+                  "event_context is stale for its maxAge policy."
+                ]
+              },
+              {
+                "key": "market_odds",
+                "value": {
+                  "fixture": true,
+                  "sportKey": "mma_ufc",
+                  "eventId": "ufc_feature_preview",
+                  "market": "moneyline"
+                },
+                "definitionVersion": "1.0.0",
+                "computedAt": "2026-08-01T12:00:00.000Z",
+                "freshnessMinutes": 305295,
+                "qualityScore": 40,
+                "sampleSize": 12,
+                "provenance": [
+                  {
+                    "provider": "fixture-store",
+                    "sourceTable": "sports_odds_snapshots",
+                    "sourceId": "ufc_feature_preview:market_odds",
+                    "observedAt": "2026-01-01T11:45:00.000Z"
+                  }
+                ],
+                "warnings": [
+                  "market_odds is stale for its maxAge policy."
+                ]
+              }
+            ],
+            "invalidationKeys": [
+              "event:ufc_feature_preview",
+              "sport:mma_ufc",
+              "market:moneyline",
+              "table:sport_events",
+              "table:sports_odds_snapshots"
+            ],
+            "warnings": [
+              "event_context is stale for its maxAge policy.",
+              "market_odds is stale for its maxAge policy."
+            ]
+          },
+          "warnings": [
+            "Feature Store Core V1 does not yet define fighter-form features.",
+            "UFC Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.",
+            "Fighter form, camp context, injury context, method context and weigh-in context are not fully available in Feature Store Core V1.",
+            "Unavailable UFC-specific context must degrade confidence or block later prediction engines instead of being fabricated."
+          ]
+        },
+        "crosswalk": {
+          "sportKey": "mma_ufc",
+          "label": "UFC",
+          "providerSportKey": "mma_mixed_martial_arts",
+          "state": "FOUNDATION",
+          "coverage": {
+            "oddsRows": 361,
+            "oddsEvents": 32,
+            "currentOddsCoverage": {
+              "numerator": 32,
+              "denominator": 32,
+              "pct": 100
+            },
+            "providerEventMappings": 32,
+            "canonicalEventMappings": 0,
+            "eventCrosswalkCoverage": {
+              "numerator": 0,
+              "denominator": 32,
+              "pct": 0
+            },
+            "resultRows": 12,
+            "resultCrosswalkCoverage": {
+              "numerator": 0,
+              "denominator": 32,
+              "pct": 0
+            },
+            "canonicalEvents": 0,
+            "completedCanonicalEvents": 0,
+            "predictionRows": 0,
+            "settledPredictionRows": 0
+          },
+          "markets": [
+            "moneyline",
+            "total"
+          ],
+          "bookmakers": [
+            "betmgm",
+            "betonlineag",
+            "betrivers",
+            "betus",
+            "bovada",
+            "draftkings",
+            "fanduel",
+            "williamhill_us"
+          ],
+          "classifications": {
+            "exact": 0,
+            "deterministicAlias": 0,
+            "timeWindowWithIdentity": 0,
+            "ambiguous": 0,
+            "unresolved": 32,
+            "conflict": 0
+          },
+          "readiness": {
+            "exactEventMapping": false,
+            "completedResults": true,
+            "deterministicSettlementInputs": false,
+            "learningSample": false,
+            "previewPredictionEligible": false,
+            "productionPredictionEligible": false,
+            "recommendationEligible": false
+          },
+          "blockers": [
+            "CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED",
+            "ODDS_CANONICAL_RESULT_CHAIN_NOT_CERTIFIED",
+            "NO_EXISTING_PREVIEW_OR_PRODUCTION_PREDICTIONS",
+            "NO_SETTLED_PREDICTION_SAMPLE"
+          ],
+          "nextAction": "CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED"
+        },
+        "status": "UFC_EVENT_PREVIEW_BLOCKED",
+        "gates": [
+          {
+            "name": "UFC event-driven scope",
+            "passed": true,
+            "blocker": null
+          },
+          {
+            "name": "UFC exact event identity",
+            "passed": false,
+            "blocker": "UFC_CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED"
+          },
+          {
+            "name": "UFC canonical events",
+            "passed": false,
+            "blocker": "UFC_CANONICAL_EVENTS_EMPTY"
+          },
+          {
+            "name": "UFC scheduled future starts",
+            "passed": false,
+            "blocker": "UFC_FUTURE_CANONICAL_EVENTS_EMPTY"
+          },
+          {
+            "name": "UFC completed results",
+            "passed": true,
+            "blocker": null
+          },
+          {
+            "name": "UFC pregame odds",
+            "passed": true,
+            "blocker": null
+          },
+          {
+            "name": "UFC feature readiness",
+            "passed": false,
+            "blocker": "UFC_FEATURES_PARTIAL_OR_EMPTY"
+          },
+          {
+            "name": "UFC cutoff safety",
+            "passed": true,
+            "blocker": null
+          },
+          {
+            "name": "UFC persistence enabled for real preview rows",
+            "passed": false,
+            "blocker": "UFC_PERSISTENCE_DISABLED_BY_DESIGN"
+          },
+          {
+            "name": "UFC settlement inputs",
+            "passed": false,
+            "blocker": "UFC_SETTLEMENT_INPUTS_EMPTY"
+          },
+          {
+            "name": "UFC learning labels",
+            "passed": false,
+            "blocker": "UFC_SETTLED_LEARNING_SAMPLE_EMPTY"
+          },
+          {
+            "name": "UFC preview/production separation",
+            "passed": true,
+            "blocker": null
+          }
+        ],
+        "summary": {
+          "gatesPassed": 5,
+          "gatesTotal": 12,
+          "previewActivated": false,
+          "productionActivated": false,
+          "recommendationEligible": false
+        },
+        "blockers": [
+          "UFC_CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED",
+          "UFC_CANONICAL_EVENTS_EMPTY",
+          "UFC_FUTURE_CANONICAL_EVENTS_EMPTY",
+          "UFC_FEATURES_PARTIAL_OR_EMPTY",
+          "UFC_PERSISTENCE_DISABLED_BY_DESIGN",
+          "UFC_SETTLEMENT_INPUTS_EMPTY",
+          "UFC_SETTLED_LEARNING_SAMPLE_EMPTY"
+        ]
+      }
+    ],
+    "summary": {
+      "sportsAudited": 2,
+      "totalGatesPassed": 8,
+      "totalGates": 24,
+      "predictionsPersisted": 0
+    },
+    "certifications": [
+      "TENNIS_EVENT_LIFECYCLE_BLOCKED_TRUTHFUL_PASS",
+      "UFC_EVENT_LIFECYCLE_BLOCKED_TRUTHFUL_PASS",
+      "UFC_PROVIDER_RESULTS_STORED_BUT_NOT_CANONICAL_PASS",
+      "TENNIS_UFC_NO_RETROSPECTIVE_PREDICTION_PASS",
+      "TENNIS_UFC_NO_PRODUCTION_PROMOTION_PASS",
+      "NO_PROVIDER_CALL_F_PASS",
+      "NO_REMOTE_MUTATION_F_PASS",
+      "NO_PROBABILITY_CHANGE_PASS",
+      "NO_CONFIDENCE_CHANGE_PASS"
+    ]
+  }
+}
