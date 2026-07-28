@@ -268,7 +268,14 @@ async function existingResultRows(rows: GameResultRow[]) {
 
 async function persistResultRows(rows: GameResultRow[]) {
   if (!rows.length) {
-    return { inserted: 0, updated: 0, reused: 0 }
+    return {
+      inserted: 0,
+      updated: 0,
+      reused: 0,
+      insertedGameIds: [] as string[],
+      updatedGameIds: [] as string[],
+      reusedGameIds: [] as string[],
+    }
   }
 
   const uniqueRows = Array.from(
@@ -280,6 +287,7 @@ async function persistResultRows(rows: GameResultRow[]) {
   const existing = await existingResultRows(uniqueRows)
   const inserts: GameResultRow[] = []
   const updates: GameResultRow[] = []
+  const reusedGameIds: string[] = []
   let reused = 0
 
   for (const row of uniqueRows) {
@@ -290,6 +298,7 @@ async function persistResultRows(rows: GameResultRow[]) {
       updates.push(row)
     } else {
       reused += 1
+      reusedGameIds.push(row.game_id)
     }
   }
 
@@ -313,7 +322,14 @@ async function persistResultRows(rows: GameResultRow[]) {
     if (error) throw new Error(`Game result update failed for ${row.game_id}: ${error.message}`)
   }
 
-  return { inserted: inserts.length, updated: updates.length, reused }
+  return {
+    inserted: inserts.length,
+    updated: updates.length,
+    reused,
+    insertedGameIds: inserts.map((row) => row.game_id),
+    updatedGameIds: updates.map((row) => row.game_id),
+    reusedGameIds,
+  }
 }
 
 function sameResultRow(a: GameResultRow, b: GameResultRow | undefined) {
@@ -324,8 +340,17 @@ function sameResultRow(a: GameResultRow, b: GameResultRow | undefined) {
     a.home_score === b.home_score &&
     a.away_score === b.away_score &&
     a.winner === b.winner &&
-    a.commence_time === b.commence_time
+    sameTimestamp(a.commence_time, b.commence_time)
   )
+}
+
+function sameTimestamp(a: string | null | undefined, b: string | null | undefined) {
+  if (a === b) return true
+  if (!a || !b) return false
+  const aTime = new Date(a).getTime()
+  const bTime = new Date(b).getTime()
+  if (!Number.isFinite(aTime) || !Number.isFinite(bTime)) return false
+  return aTime === bTime
 }
 
 async function fetchMlbStatsResults(daysFrom = 3, timeoutMs = 12000) {
@@ -511,7 +536,7 @@ async function fetchMlbStatsResults(daysFrom = 3, timeoutMs = 12000) {
     let scoreRowsInserted = 0
     let scoreRowsUpdated = 0
     for (const row of rows) {
-      const existingRow = existing.get(`${row.sport_key}:${row.game_id}`)
+      const existingRow = existing.get(row.game_id)
       if (!existingRow) scoreRowsInserted += 1
       else if (!sameResultRow(row, existingRow)) scoreRowsUpdated += 1
     }
@@ -671,9 +696,13 @@ export async function syncRecentResults(sportKey = 'baseball_mlb', daysFrom = 3)
     }
 
     const persisted = await persistResultRows(fetched.rows)
+    const changedResultIds = new Set([...persisted.insertedGameIds, ...persisted.updatedGameIds])
+    let eventRowsUpdated = 0
     for (const eventPatch of fetched.eventPatches ?? []) {
+      if (!changedResultIds.has(eventPatch.id)) continue
       const { error } = await supabaseAdmin.from('sport_events').update(eventPatch.patch).eq('id', eventPatch.id)
       if (error) throw new Error(`MLB Stats API final event update failed: ${error.message}`)
+      eventRowsUpdated += 1
     }
 
     return {
@@ -702,6 +731,7 @@ export async function syncRecentResults(sportKey = 'baseball_mlb', daysFrom = 3)
       inserted: persisted.inserted,
       reused: persisted.reused,
       updated: persisted.updated,
+      eventRowsUpdated,
       retryable: false,
       retryAfter: null,
       failureReason: null,

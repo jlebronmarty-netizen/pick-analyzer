@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-07-28 21:47:00Z
+Last updated: 2026-07-28 22:05:00Z
+
+## 2026-07-28 Canonical Result Ingestion Recovery V1
+
+- Recovered canonical result ingestion for the July 26 NYY @ PHI MLB event (`baseball_mlb:mlb:sportsdataio:event:78870`) without executing settlement. Read-only trace confirmed three pending predictions were blocked because `game_results` lacked the authoritative result row while the quarantined `sport_events` row already showed PHI 11, NYY 4.
+- Root cause classification: `RESULT_SYNC_NEVER_REPLAYED_AFTER_LATE_FINAL`, with an additional idempotency defect in result replay. The existing MLB Stats result adapter could match SportsDataIO canonical events, but the late NYY @ PHI final was absent from `game_results`; replay telemetry also compared existing result timestamps as raw strings, causing repeated no-op updates.
+- Minimal repair: `results-sync.service.ts` now reports changed canonical result IDs, counts existing rows by canonical `game_id`, compares result timestamps by instant, and only patches `sport_events` when a canonical `game_results` row was inserted or changed.
+- Existing result replay inserted 13 genuine MLB final result rows in the 2026-07-25 through 2026-07-28 window, including the missing NYY @ PHI result. Verification replay now returns 42 reused rows, 0 inserted rows, 0 updated rows and 0 event updates.
+- Read-only settlement reconciliation for NYY @ PHI now reports three deterministic settlement candidates, all expected losses, with 0 provider calls and 0 remote mutations. Settlement was not executed. Duplicate MLB `game_results` count is 0; NFL Preview remains 776 and NHL Preview remains 258.
+- Added `scripts/canonical-result-ingestion-recovery-v1-validate.mjs`. No prediction probability, confidence, Trust formula, Official Pick policy, Learning Brain weight, scheduler behavior, SQL migration, epoch activation or production deployment was changed.
 
 ## 2026-07-28 MLB Result Evidence Reconciliation V1
 
