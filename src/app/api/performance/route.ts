@@ -2,7 +2,32 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAiPerformanceCenterLazy } from '@/lib/server-lazy-diagnostics'
 import { getPerformanceProductContract } from '@/services/performance-product-contract.service'
 
-function timelineRows(timeline: Record<string, any>) {
+type TimelineSource = Record<string, {
+  label?: string
+  generated?: number
+  settled?: number
+  wins?: number
+  losses?: number
+  pushes?: number
+  accuracy?: number | null
+}>
+
+type ReportCardSource = {
+  metrics: {
+    accuracy: number | null
+    wins: number
+    losses: number
+    brier: number | null
+  }
+  calibration: {
+    calibrationError: number | null
+    calibrationBias: number | null
+    confidenceReliability: number | null
+    sample: number
+  }
+}
+
+function timelineRows(timeline: TimelineSource) {
   return Object.entries(timeline).map(([key, item]) => ({
     label: item.label ?? key,
     generated: item.generated,
@@ -18,7 +43,7 @@ function timelineRows(timeline: Record<string, any>) {
   }))
 }
 
-function reportDimensions(reportCard: any) {
+function reportDimensions(reportCard: ReportCardSource) {
   const metrics = reportCard.metrics
   return {
     accuracy: {
@@ -132,8 +157,9 @@ function userModeValue(value: unknown): unknown {
 export async function GET(request: NextRequest) {
   try {
     const sportKey = request.nextUrl.searchParams.get('sportKey')
+    const includeFullDiagnostics = request.nextUrl.searchParams.get('diagnostics') === 'full' || request.nextUrl.searchParams.get('includeDiagnostics') === 'full'
     const [data, product] = await Promise.all([
-      getAiPerformanceCenterLazy({ sportKey, dryRun: true }),
+      includeFullDiagnostics ? getAiPerformanceCenterLazy({ sportKey, dryRun: true }) : Promise.resolve(null),
       getPerformanceProductContract({ sportKey }),
     ])
     const selectedReport = product.reportCards.selected
@@ -149,9 +175,9 @@ export async function GET(request: NextRequest) {
     const publicSports = userModeValue(product.sports)
     const publicReportCards = userModeValue(product.reportCards)
     const aiBrain = {
-      ...data.aiBrain,
+      ...(data?.aiBrain ?? {}),
       selected: {
-        ...data.aiBrain.selected,
+        ...(data?.aiBrain?.selected ?? {}),
         overallHealth: userStatus(selectedTrust.trustStatus),
         sampleSize: selectedMetrics.settled,
         calibrationStatus: selectedReport.calibration.calibrationError === null ? 'Insufficient data' : 'Available',
@@ -163,7 +189,7 @@ export async function GET(request: NextRequest) {
         trustScore: publicTrustScore,
       },
       dailyReportCard: {
-        ...data.aiBrain.dailyReportCard,
+        ...(data?.aiBrain?.dailyReportCard ?? {}),
         overallGrade: selectedReport.overallGrade,
         dimensions: reportDimensions(selectedReport),
       },
@@ -173,15 +199,28 @@ export async function GET(request: NextRequest) {
       trustChange: publicTrustChange,
       evolution: publicEvolution,
       internalView: {
-        ...data.aiBrain.internalView,
+        ...(data?.aiBrain?.internalView ?? {}),
         brierScore: selectedMetrics.brier,
+        logLoss: data?.aiBrain?.internalView?.logLoss ?? null,
         calibrationError: selectedReport.calibration.calibrationError,
         calibrationBias: selectedReport.calibration.calibrationBias,
         confidenceReliability: selectedReport.calibration.confidenceReliability,
+        featureDrift: data?.aiBrain?.internalView?.featureDrift ?? 0,
+        confidenceDrift: data?.aiBrain?.internalView?.confidenceDrift ?? 0,
+        modelDrift: data?.aiBrain?.internalView?.modelDrift ?? 0,
+        dataQuality: data?.aiBrain?.internalView?.dataQuality ?? (selectedMetrics.generated ? 100 : 0),
+        providerHealth: data?.aiBrain?.internalView?.providerHealth ?? 'stored-data-only',
+        reliabilityBuckets: data?.aiBrain?.internalView?.reliabilityBuckets ?? [],
         trustComponents: selectedTrust.components,
         blockers: selectedTrust.blockers,
         rawDiagnostics: {
-          ...data.aiBrain.internalView.rawDiagnostics,
+          ...(data?.aiBrain?.internalView?.rawDiagnostics ?? {}),
+          responseMode: includeFullDiagnostics ? 'full_diagnostics' : 'product_summary',
+          historyPagination: data?.aiBrain?.internalView?.rawDiagnostics?.historyPagination ?? {
+            rowsRead: product.performanceScopeV2.totals.generated,
+            pagesRead: Math.ceil(product.performanceScopeV2.totals.generated / 1000),
+            capApplied: false,
+          },
           productScope: product.scopePolicy,
           userModeRawCodes: {
             selectedTrustStatus: selectedTrust.trustStatus,
@@ -202,17 +241,20 @@ export async function GET(request: NextRequest) {
       success: true,
       apiStatus: product.apiStatus,
       mode: 'performance_api_v1',
+      responseMode: includeFullDiagnostics ? 'full_diagnostics' : 'product_summary',
       generatedAt: product.generatedAt,
       performanceScopeV2: product.performanceScopeV2,
       performanceScopeReconciliation: product.scopeReconciliation,
       publicView: {
-        ...data.aiBrain.publicView,
+        ...(data?.aiBrain?.publicView ?? {}),
         overallAiGrade: selectedReport.overallGrade,
         trustLabel: selectedTrust.trustLabel,
         settledSample: selectedMetrics.settled,
         accuracy: selectedMetrics.accuracy,
         recentTrend: userStatus(selectedTrust.trustStatus),
+        modelStatus: userStatus(selectedTrust.trustStatus),
         lastUpdate: product.generatedAt,
+        disclaimer: 'Performance is calculated from cutoff-safe production scope evidence only.',
       },
       internalView: aiBrain.internalView,
       aiBrain,
@@ -221,10 +263,21 @@ export async function GET(request: NextRequest) {
       goals: publicGoals,
       maturityPipeline: publicMaturityPipeline,
       engineeringAdvisor: publicEngineeringAdvisor,
-      trendAnalysis: data.trendAnalysis,
+      trendAnalysis: data?.trendAnalysis ?? {
+        source: 'performance_scope_v2',
+        storedSnapshotCount: 0,
+        daily: productTimeline.map((item) => ({
+          period: item.label,
+          accuracyTrend: item.accuracy ?? 0,
+          predictions: item.predictions,
+          settled: item.productionSettled ?? 0,
+        })),
+      },
       evolutionSnapshots: {
-        ...data.evolutionSnapshots,
+        ...(data?.evolutionSnapshots ?? {}),
+        existingSnapshots: data?.evolutionSnapshots?.existingSnapshots ?? 0,
         historyTimeline: productTimeline,
+        trendCalculationsUseStoredSnapshots: data?.evolutionSnapshots?.trendCalculationsUseStoredSnapshots ?? false,
       },
       performanceTimeline: productTimeline,
       providerCallsMade: 0,

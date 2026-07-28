@@ -2,6 +2,14 @@
 
 Last updated: 2026-07-28 22:36:00Z
 
+## 2026-07-28 Performance API Query Optimization V1
+
+- Completed the targeted P1 `/api/performance` query and payload repair. The route now defaults to a compact `product_summary` response built from the canonical Performance Scope V2 product contract, while the heavyweight AI Performance Center diagnostics graph remains available only through `?diagnostics=full` or `?includeDiagnostics=full`.
+- Read-only profiling classified the root cause as duplicate product/diagnostic reads plus an oversized unrendered diagnostics payload. Baseline local runs were 26.5-32.9s with an 11.9 MB response; optimized default local runs returned HTTP 200 in 5.470s, 4.399s and 4.857s with a 667,864 byte payload.
+- Semantic fingerprint comparison against explicit full diagnostics passed for product-visible fields: API status, grade, trust label, settled sample, accuracy, trust score, season generated/settled record, sport count and timeline rows. Provider calls and remote mutations remained 0.
+- Performance Scope V2 now loads scheduler coverage and prediction rows in parallel. Event lookup batching remains 100 IDs to preserve the prior Supabase/PostgREST header-limit safety finding.
+- Validation: `npm.cmd run build` passed with 386 static pages, bounded local smoke passed for `/api/performance`, `/api/performance?diagnostics=full`, `/performance`, `/dashboard` and `/api/system/version`, and cleanup released the temporary server listener. No prediction logic, settlement logic, learning behavior, probabilities, confidence, Trust, Official Pick policy, scheduler behavior, SQL, provider behavior or production deployment was changed.
+
 ## 2026-07-28 MLB Canonical Settlement Backlog And Immutable Learning Label Closure V1
 
 - Completed the remaining canonical-ready MLB settlement backlog through the existing protected operating-day settlement path, oldest-ready-first and local-only. The closure processed `2026-07-27` then `2026-07-28`; no Vercel deployment, epoch activation, model training, probability change, confidence change, Trust change, Official Pick policy change or Learning Brain weight mutation occurred.

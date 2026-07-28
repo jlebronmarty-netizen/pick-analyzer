@@ -251,13 +251,15 @@ async function loadEvents(eventIds: string[]) {
 }
 
 export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | null } = {}) {
-  const schedulerCoverage = await getPregameSchedulerCoverage().catch((error) => ({
-    success: false,
-    providerCallsMade: 0,
-    remoteMutationsMade: 0,
-    error: error instanceof Error ? error.message : 'pregame scheduler coverage read failed',
-  }))
-  const rows = await loadRows(sportKey)
+  const [schedulerCoverage, rows] = await Promise.all([
+    getPregameSchedulerCoverage().catch((error) => ({
+      success: false,
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+      error: error instanceof Error ? error.message : 'pregame scheduler coverage read failed',
+    })),
+    loadRows(sportKey),
+  ])
   const events = await loadEvents(Array.from(new Set(rows.map((row) => row.game_id).filter(Boolean))) as string[])
   const joined = rows.map((row) => ({ row, event: row.game_id ? events.get(row.game_id) : undefined }))
   const productHistory = joined.filter((item) => eligibility(item.row, item.event).eligible)

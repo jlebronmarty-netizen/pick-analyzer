@@ -6,7 +6,7 @@ No P0 data-corruption, unsafe official recommendation, cross-event settlement, o
 
 ## P1
 
-1. Performance API bounded-response repair: profile /api/performance, add strict sport/date bounds or cached summary, preserve output contract.
+1. Performance API bounded-response repair: COMPLETE in Performance API Query Optimization V1. `/api/performance` now defaults to the canonical product summary contract, keeps full AI diagnostics explicit, preserves product-visible semantic fingerprints, and reduces local default response latency/payload without business-rule changes.
 2. Vercel build OOM continuation: continue build-memory optimization using server bundle import graph; do not change prediction behavior.
 3. Settlement/performance count contract: standardize production settled metrics on deterministic result fields and document legacy status rows.
 
