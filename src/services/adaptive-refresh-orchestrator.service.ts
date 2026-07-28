@@ -990,15 +990,16 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     oddsPlan.decision = mode === 'EXHAUSTED' ? 'BLOCKED' : 'DUE_NOW'
   }
   const dueDomains = refreshPlan.filter((item) => item.decision === 'DUE_NOW').map((item) => item.domain)
+  const pregameOddsDue = dueDomains.includes('odds') && marketRefreshNeeded
   const effectiveNextAction = dueDomains.includes('results')
     ? 'sync_results'
-    : dueDomains.includes('settlement')
-      ? 'settle'
-      : dueDomains.includes('odds')
+    : pregameOddsDue
         ? currentGames > 0 ? 'midday_refresh' : 'morning_sync'
-        : dueDomains.includes('schedule')
-          ? 'morning_sync'
-          : String(automation?.nextAction ?? operatingDay?.nextRequiredAction ?? dashboard?.nextAction ?? 'status')
+        : dueDomains.includes('settlement')
+          ? 'settle'
+          : dueDomains.includes('schedule')
+            ? 'morning_sync'
+            : String(automation?.nextAction ?? operatingDay?.nextRequiredAction ?? dashboard?.nextAction ?? 'status')
 
   const totalEstimatedProviderCalls = refreshPlan
     .filter((item) => item.decision === 'DUE_NOW')
@@ -1250,7 +1251,9 @@ export async function getRecommendationChangeEvents() {
 function executableActionFromStatus(status: Awaited<ReturnType<typeof getAdaptiveRefreshStatus>>) {
   const nextAction = String(status.nextAction ?? 'status')
   const dueDomains = status.refreshPlan.filter((item) => item.decision === 'DUE_NOW').map((item) => item.domain)
+  const pregameOddsDue = dueDomains.includes('odds') && Number(status.gamesWaitingForOdds ?? 0) > 0
   if (dueDomains.includes('results')) return 'sync_results'
+  if (pregameOddsDue) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('settlement')) return 'settle'
   if (dueDomains.includes('odds')) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('schedule')) return 'morning_sync'

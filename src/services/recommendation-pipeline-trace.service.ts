@@ -44,6 +44,29 @@ type PredictionRow = {
   settled_at?: string | null
 }
 
+type CountQueryResult = PromiseLike<{
+  count: number | null
+  error: { message: string } | null
+}>
+
+type CountQueryBuilder = CountQueryResult & {
+  eq: (column: string, value: unknown) => CountQueryBuilder
+  gte: (column: string, value: unknown) => CountQueryBuilder
+  lt: (column: string, value: unknown) => CountQueryBuilder
+  in: (column: string, values: unknown[]) => CountQueryBuilder
+}
+
+type BoardCandidate = {
+  eventId?: unknown
+  gameId?: unknown
+  marketIntelligenceCategory?: unknown
+  recommendationPolicyStatus?: unknown
+  semanticLabel?: unknown
+  expectedValue?: unknown
+  edge?: unknown
+  officialEligibility?: unknown
+}
+
 function astDate(value: string) {
   return localDateInTimeZone(value, TIMEZONE) ?? value.slice(0, 10)
 }
@@ -120,9 +143,9 @@ function reasons(counts: Record<string, number>) {
   return Array.from(new Set(result))
 }
 
-async function safeCount(table: string, build: (query: any) => any) {
+async function safeCount(table: string, build: (query: CountQueryBuilder) => CountQueryResult) {
   try {
-    const { count, error } = await build(supabaseAdmin.from(table).select('*', { count: 'exact', head: true }))
+    const { count, error } = await build(supabaseAdmin.from(table).select('*', { count: 'exact', head: true }) as unknown as CountQueryBuilder)
     if (error) return { count: 0, error: error.message }
     return { count: count ?? 0, error: null }
   } catch (error) {
@@ -166,12 +189,11 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
     ? await getModelOnlyIntelligence({ date }).catch(() => null)
     : null
 
-  const learningAccepted = await safeCount('ai_performance_snapshots', (query) => query.eq('snapshot_date', date))
   const weightUpdates = await safeCount('model_weight_history', (query) => query.gte('created_at', range.utcStart).lt('created_at', range.utcEndExclusive))
 
-  const boardCandidates = board?.candidates ?? []
-  const boardByEvent = new Map<string, any[]>()
-  for (const candidate of boardCandidates as any[]) {
+  const boardCandidates = (board?.candidates ?? []) as BoardCandidate[]
+  const boardByEvent = new Map<string, BoardCandidate[]>()
+  for (const candidate of boardCandidates) {
     const id = String(candidate.eventId ?? candidate.gameId ?? '')
     if (!id) continue
     boardByEvent.set(id, [...(boardByEvent.get(id) ?? []), candidate])
@@ -252,6 +274,8 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
   const gamesSettled = gameLifecycles.filter((game) => game.settlementCompleted > 0).length
   const gamesLearned = gameLifecycles.filter((game) => game.learningAccepted + game.learningRejected + game.learningSkipped > 0).length
   const gamesMissed = gameLifecycles.filter((game) => !game.predictionGenerated).length
+  const productionSettledPredictions = predictions.filter(isProductionSettled)
+  const acceptedLearningLabels = productionSettledPredictions.filter(hasFeatureEvidence).length
   const missReasons = gameLifecycles.reduce<Record<string, number>>((acc, game) => {
     if (game.missedReason) acc[game.missedReason] = (acc[game.missedReason] ?? 0) + 1
     return acc
@@ -265,15 +289,15 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
     predictionsExcludedAfterCutoff,
     currentBoardCandidates: board?.candidates?.length ?? 0,
     modelOnlyRows: modelOnly?.summary?.modelOutcomes ?? 0,
-    aiLeans: boardCandidates.filter((candidate: any) => /LEAN|QUALIFIED|PREVIEW/i.test(String(candidate.recommendationPolicyStatus ?? candidate.semanticLabel ?? ''))).length,
-    watchlist: boardCandidates.filter((candidate: any) => /WATCH/i.test(String(candidate.recommendationPolicyStatus ?? candidate.semanticLabel ?? ''))).length,
-    bestValue: boardCandidates.filter((candidate: any) => Number(candidate.expectedValue ?? 0) > 0 && Number(candidate.edge ?? 0) > 0).length,
+    aiLeans: boardCandidates.filter((candidate) => /LEAN|QUALIFIED|PREVIEW/i.test(String(candidate.recommendationPolicyStatus ?? candidate.semanticLabel ?? ''))).length,
+    watchlist: boardCandidates.filter((candidate) => /WATCH/i.test(String(candidate.recommendationPolicyStatus ?? candidate.semanticLabel ?? ''))).length,
+    bestValue: boardCandidates.filter((candidate) => Number(candidate.expectedValue ?? 0) > 0 && Number(candidate.edge ?? 0) > 0).length,
     officialPicks: board?.officialPickCount ?? predictions.filter((row) => row.recommended_pick === true || row.production_eligible === true).length,
     gamesCompleted: events.filter((event) => isFinal(event.status)).length,
-    productionPredictionsSettled: predictions.filter(isProductionSettled).length,
-    learningSamplesQueued: predictions.filter(isProductionSettled).length,
-    learningSamplesAccepted: learningAccepted.count,
-    learningSamplesRejected: Math.max(0, predictions.filter(isProductionSettled).length - learningAccepted.count),
+    productionPredictionsSettled: productionSettledPredictions.length,
+    learningSamplesQueued: productionSettledPredictions.length,
+    learningSamplesAccepted: acceptedLearningLabels,
+    learningSamplesRejected: Math.max(0, productionSettledPredictions.length - acceptedLearningLabels),
     weightUpdates: weightUpdates.count,
   }
   const coverage = {
@@ -310,7 +334,7 @@ async function traceDay(label: 'Today' | 'Yesterday', date: string) {
       scheduleReadError: eventsError?.message ?? null,
       oddsReadError: oddsSnapshots.error,
       predictionReadError: predictionsResult.error?.message ?? null,
-      learningReadError: learningAccepted.error,
+      learningReadError: null,
       weightReadError: weightUpdates.error,
       modelOnlyDateSelectionReason: modelOnly?.dateSelectionReason ?? null,
       modelOnlyZeroReasons: modelOnly?.zeroReasons ?? [],
