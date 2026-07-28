@@ -25,7 +25,7 @@ type TimingStat = {
   averageMoveCents: number
 }
 
-type ClosingOpportunity = {
+type ClosingEvidenceItem = {
   id: string
   sportKey: string
   gameId: string
@@ -46,11 +46,11 @@ type ClosingOpportunity = {
   staleLine: boolean
   favorableLine: boolean
   urgencyScore: number
-  recommendation:
-    | 'BET_NOW'
-    | 'PLAYABLE'
+  lineStatus:
+    | 'AVAILABLE'
+    | 'LIMITED'
     | 'WAIT'
-    | 'PASS'
+    | 'UNAVAILABLE'
 }
 
 type ClosingLineResponse = {
@@ -74,13 +74,14 @@ type ClosingLineResponse = {
     averageMovementCents: number
     sportsbooksTracked: number
     currentOpportunities: number
-    betNowOpportunities: number
+    providerCallsMade?: number
     bestSportsbook: SportsbookStat | null
     bestTimingWindow: TimingStat | null
   }
   sportsbookStats: SportsbookStat[]
   timingStats: TimingStat[]
-  opportunities: ClosingOpportunity[]
+  opportunities: ClosingEvidenceItem[]
+  providerCallsMade?: number
   error?: string
 }
 
@@ -120,14 +121,14 @@ function qualityClass(value: string) {
   return 'text-red-300'
 }
 
-function recommendationClass(
-  value: ClosingOpportunity['recommendation']
+function lineStatusClass(
+  value: ClosingEvidenceItem['lineStatus']
 ) {
-  if (value === 'BET_NOW') {
+  if (value === 'AVAILABLE') {
     return 'text-emerald-300'
   }
 
-  if (value === 'PLAYABLE') {
+  if (value === 'LIMITED') {
     return 'text-blue-300'
   }
 
@@ -214,15 +215,15 @@ export default function ClosingLineIntelligencePanel() {
           </p>
 
           <h2 className="mt-2 text-3xl font-black text-white">
-            Entry Timing &amp; CLV Lab
+            Closing Evidence Foundation
           </h2>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-            Measures closing-line value,
-            sportsbook opportunity, expected
-            movement and the best time to enter
-            the market for {sport.icon}{' '}
-            {sport.shortLabel}.
+            Measures only aligned stored prediction
+            prices and latest valid pre-start stored
+            prices for {sport.icon}{' '}
+            {sport.shortLabel}. No estimated close
+            or recommendation is created.
           </p>
         </div>
 
@@ -289,13 +290,13 @@ export default function ClosingLineIntelligencePanel() {
         />
 
         <Stat
-          label="Opportunities"
+          label="Aligned"
           value={`${data.summary.currentOpportunities}`}
         />
 
         <Stat
-          label="Bet Now"
-          value={`${data.summary.betNowOpportunities}`}
+          label="Provider Calls"
+          value={`${data.providerCallsMade ?? 0}`}
         />
 
         <Stat
@@ -309,7 +310,7 @@ export default function ClosingLineIntelligencePanel() {
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <HighlightCard
-          title="Best Sportsbook"
+          title="Bookmaker Evidence"
           value={
             data.summary.bestSportsbook
               ?.sportsbook ??
@@ -318,7 +319,7 @@ export default function ClosingLineIntelligencePanel() {
           details={
             data.summary.bestSportsbook
               ? [
-                  `Opportunity score: ${data.summary.bestSportsbook.opportunityScore}/100`,
+                  `Evidence score: ${data.summary.bestSportsbook.opportunityScore}/100`,
                   `Average CLV: ${pct(
                     data.summary
                       .bestSportsbook
@@ -335,7 +336,7 @@ export default function ClosingLineIntelligencePanel() {
         />
 
         <HighlightCard
-          title="Best Entry Window"
+          title="Sample Window"
           value={
             data.summary.bestTimingWindow
               ?.label ??
@@ -364,7 +365,7 @@ export default function ClosingLineIntelligencePanel() {
       <div className="mt-6 grid gap-6 xl:grid-cols-2">
         <div>
           <h3 className="mb-3 font-bold text-white">
-            Sportsbook Rankings
+            Bookmaker Evidence
           </h3>
 
           <div className="space-y-3">
@@ -409,17 +410,17 @@ export default function ClosingLineIntelligencePanel() {
 
       <div className="mt-6">
         <h3 className="mb-3 font-bold text-white">
-          Current Line Opportunities
+          Closing Evidence Detail
         </h3>
 
         {data.opportunities.length === 0 ? (
-          <EmptyCard text="No pending line opportunities were found for the selected sport." />
+          <EmptyCard text="No aligned closing candidates were found for the selected sport." />
         ) : (
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {data.opportunities
               .slice(0, 9)
               .map((opportunity) => (
-                <OpportunityCard
+                <EvidenceCard
                   key={`${opportunity.id}-${opportunity.sportsbook}-${opportunity.team}`}
                   opportunity={
                     opportunity
@@ -527,7 +528,7 @@ function SportsbookCard({
           </p>
 
           <p className="text-xs text-slate-500">
-            Opportunity
+            Evidence
           </p>
         </div>
       </div>
@@ -598,10 +599,10 @@ function TimingCard({
   )
 }
 
-function OpportunityCard({
+function EvidenceCard({
   opportunity,
 }: {
-  opportunity: ClosingOpportunity
+  opportunity: ClosingEvidenceItem
 }) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
@@ -628,11 +629,11 @@ function OpportunityCard({
           </p>
 
           <p
-            className={`mt-1 text-xs font-black ${recommendationClass(
-              opportunity.recommendation
+            className={`mt-1 text-xs font-black ${lineStatusClass(
+              opportunity.lineStatus
             )}`}
           >
-            {opportunity.recommendation.replaceAll(
+            {opportunity.lineStatus.replaceAll(
               '_',
               ' '
             )}
@@ -649,7 +650,7 @@ function OpportunityCard({
         />
 
         <Mini
-          label="EV"
+          label="Implied Change"
           value={pct(opportunity.ev)}
         />
 
@@ -668,7 +669,7 @@ function OpportunityCard({
 
         {opportunity.favorableLine && (
           <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-300">
-            Favorable
+            Aligned
           </span>
         )}
 

@@ -14,6 +14,12 @@ Last updated: 2026-07-27 19:30:00Z
 - The module labels earliest evidence as `Earliest stored price`, not a true opening line, and reports synchronized bookmaker movement only when stored deterministic evidence supports it. It makes no sharp-money claim, no cross-event attachment and no cross-side attachment.
 - Validation is deterministic and reports 0 provider calls, 0 remote mutations and no database mutations.
 
+## 2026-07-27 Closing Line Intelligence V1
+
+- Closing Line Intelligence V1 is locally implemented at `/closing-line-intelligence` with read-only API `/api/closing-line/intelligence`. It uses production-evaluable settled predictions, stored odds snapshots and event start times only.
+- The canonical closing candidate is the latest valid aligned stored price before event start for the same event, market, selection and bookmaker scope. Post-start prices, cross-side attachment, cross-market attachment, invalid zero prices and estimated closing lines are excluded.
+- CLV is disclosed as `decimal_price_ratio_and_implied_probability_change` and is returned only when prediction-time and closing-candidate prices are both valid and aligned. Validation is deterministic and reports 0 provider calls, 0 remote mutations and no database mutations.
+
 ## 2026-07-27 Settlement And Learning Pipeline Recovery V1
 
 - Settlement And Learning Pipeline Recovery V1 is locally implemented. Root cause was isolated to adaptive scheduler selection: settlement-ready prior-day prediction rows were detectable by reconciliation and operating-day status, but the adaptive due-now domain list omitted settlement, allowing current-day status refresh to mask the settlement backlog.
