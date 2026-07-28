@@ -9,6 +9,7 @@ Last updated: 2026-07-28 00:00:00Z
 - The capability matrix separates `CURRENT_EVENTS`, `CURRENT_ODDS`, `EVENT_MARKETS`, `PLAYER_PROPS`, `SCORES`, `HISTORICAL_ODDS`, `BOOKMAKER_COVERAGE`, `REGION_COVERAGE` and `SEASON_STATE`. Historical odds range discovery remains deferred to a later bounded checkpoint.
 - Checkpoint 1 validation uses `scripts/the-odds-api-maximum-utilization-v1-checkpoint1-validate.mjs`; live evidence is produced by `scripts/the-odds-api-maximum-utilization-v1-checkpoint1.mjs` and stored in sanitized docs artifacts. No SQL, feature rebuild, prediction activation, settlement, learning write, scheduler change or recommendation-policy change is part of this checkpoint.
 - Checkpoint 2 adds `/api/providers/the-odds-api/current-odds` and `scripts/the-odds-api-current-odds-v1.mjs` for bounded current core odds acquisition. The live run persisted 4,128 h2h/spread/total snapshot rows to `sports_odds_snapshots`, upserted 159 provider-native event mappings as pending canonical crosswalk, recorded duplicate deterministic IDs as 0 and preserved 19,923 credits after the successful run.
+- Checkpoint 3 player-prop discovery is recorded in `docs/THE_ODDS_API_PLAYER_PROPS_V1.md` and `docs/the-odds-api-player-props-v1.json`. The bounded market-by-market probe made 40 provider calls against MLB and NFL near-term events, consumed 0 credits according to response headers, returned 0 player-prop rows, wrote only one checkpoint job row and did not fabricate unsupported markets.
 
 ## 2026-07-28 Live Multi-Sport Data Acquisition V1
 

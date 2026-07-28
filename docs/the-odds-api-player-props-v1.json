@@ -1,0 +1,759 @@
+{
+  "generatedAt": "2026-07-28T02:59:13.442Z",
+  "commit": "7fa4514e6cb6e57c33a501382c075cdc4a018c04",
+  "checkpoint": "THE_ODDS_API_PLAYER_PROPS_V1",
+  "result": {
+    "success": true,
+    "status": "LIVE_PLAYER_PROP_DISCOVERY_COMPLETE",
+    "generatedAt": "2026-07-28T02:59:13.442Z",
+    "provider": "the-odds-api",
+    "providerCallsMade": 40,
+    "requestsRemainingBefore": 19923,
+    "requestsRemainingAfter": 19923,
+    "requestsUsedObserved": 0,
+    "creditReserve": 2000,
+    "rowsAccepted": 0,
+    "rowsRejected": 0,
+    "rowsInserted": 0,
+    "rowsUpdated": 0,
+    "duplicateIds": 0,
+    "productionMutationsMade": 1,
+    "sports": [
+      {
+        "sportKey": "baseball_mlb",
+        "label": "MLB Baseball",
+        "providerSportKey": "baseball_mlb",
+        "leagueKey": "mlb",
+        "eventsTested": 2,
+        "marketsTested": 24,
+        "marketsWithRows": [],
+        "rowsAccepted": 0,
+        "rowsRejected": 0
+      },
+      {
+        "sportKey": "americanfootball_nfl",
+        "label": "NFL Football",
+        "providerSportKey": "americanfootball_nfl",
+        "leagueKey": "nfl",
+        "eventsTested": 2,
+        "marketsTested": 14,
+        "marketsWithRows": [],
+        "rowsAccepted": 0,
+        "rowsRejected": 0
+      }
+    ],
+    "planObserved": [
+      {
+        "label": "catalog_credit_read",
+        "sportKey": null,
+        "endpoint": "/sports?all=true",
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 173,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "events_baseball_mlb",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events",
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 20,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_pitcher_outs",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=pitcher_outs&oddsFormat=american",
+        "markets": [
+          "pitcher_outs"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_pitcher_strikeouts",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=pitcher_strikeouts&oddsFormat=american",
+        "markets": [
+          "pitcher_strikeouts"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_pitcher_walks",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=pitcher_walks&oddsFormat=american",
+        "markets": [
+          "pitcher_walks"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_pitcher_hits_allowed",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=pitcher_hits_allowed&oddsFormat=american",
+        "markets": [
+          "pitcher_hits_allowed"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_pitcher_earned_runs",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=pitcher_earned_runs&oddsFormat=american",
+        "markets": [
+          "pitcher_earned_runs"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_hits",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=batter_hits&oddsFormat=american",
+        "markets": [
+          "batter_hits"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_total_bases",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=batter_total_bases&oddsFormat=american",
+        "markets": [
+          "batter_total_bases"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_home_runs",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=batter_home_runs&oddsFormat=american",
+        "markets": [
+          "batter_home_runs"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_rbis",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=batter_rbis&oddsFormat=american",
+        "markets": [
+          "batter_rbis"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_runs_scored",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=batter_runs_scored&oddsFormat=american",
+        "markets": [
+          "batter_runs_scored"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_walks",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=batter_walks&oddsFormat=american",
+        "markets": [
+          "batter_walks"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_stolen_bases",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/979a29c09433f74c9cf81057e852ddf2/odds?regions=us&markets=batter_stolen_bases&oddsFormat=american",
+        "markets": [
+          "batter_stolen_bases"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_pitcher_outs",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=pitcher_outs&oddsFormat=american",
+        "markets": [
+          "pitcher_outs"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_pitcher_strikeouts",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=pitcher_strikeouts&oddsFormat=american",
+        "markets": [
+          "pitcher_strikeouts"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_pitcher_walks",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=pitcher_walks&oddsFormat=american",
+        "markets": [
+          "pitcher_walks"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_pitcher_hits_allowed",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=pitcher_hits_allowed&oddsFormat=american",
+        "markets": [
+          "pitcher_hits_allowed"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_pitcher_earned_runs",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=pitcher_earned_runs&oddsFormat=american",
+        "markets": [
+          "pitcher_earned_runs"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_hits",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=batter_hits&oddsFormat=american",
+        "markets": [
+          "batter_hits"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_total_bases",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=batter_total_bases&oddsFormat=american",
+        "markets": [
+          "batter_total_bases"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_home_runs",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=batter_home_runs&oddsFormat=american",
+        "markets": [
+          "batter_home_runs"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_rbis",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=batter_rbis&oddsFormat=american",
+        "markets": [
+          "batter_rbis"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_runs_scored",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=batter_runs_scored&oddsFormat=american",
+        "markets": [
+          "batter_runs_scored"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_walks",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=batter_walks&oddsFormat=american",
+        "markets": [
+          "batter_walks"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_baseball_mlb_batter_stolen_bases",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events/3200119bc7fbf549a208a197223c9966/odds?regions=us&markets=batter_stolen_bases&oddsFormat=american",
+        "markets": [
+          "batter_stolen_bases"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "events_americanfootball_nfl",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events",
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 75,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_pass_tds",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/8c94552d022acec4a0458d70c19d3da9/odds?regions=us&markets=player_pass_tds&oddsFormat=american",
+        "markets": [
+          "player_pass_tds"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_pass_yds",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/8c94552d022acec4a0458d70c19d3da9/odds?regions=us&markets=player_pass_yds&oddsFormat=american",
+        "markets": [
+          "player_pass_yds"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_pass_completions",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/8c94552d022acec4a0458d70c19d3da9/odds?regions=us&markets=player_pass_completions&oddsFormat=american",
+        "markets": [
+          "player_pass_completions"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_pass_attempts",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/8c94552d022acec4a0458d70c19d3da9/odds?regions=us&markets=player_pass_attempts&oddsFormat=american",
+        "markets": [
+          "player_pass_attempts"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_pass_interceptions",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/8c94552d022acec4a0458d70c19d3da9/odds?regions=us&markets=player_pass_interceptions&oddsFormat=american",
+        "markets": [
+          "player_pass_interceptions"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_rush_yds",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/8c94552d022acec4a0458d70c19d3da9/odds?regions=us&markets=player_rush_yds&oddsFormat=american",
+        "markets": [
+          "player_rush_yds"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_rush_attempts",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/8c94552d022acec4a0458d70c19d3da9/odds?regions=us&markets=player_rush_attempts&oddsFormat=american",
+        "markets": [
+          "player_rush_attempts"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_receptions",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/8c94552d022acec4a0458d70c19d3da9/odds?regions=us&markets=player_receptions&oddsFormat=american",
+        "markets": [
+          "player_receptions"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_reception_yds",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/8c94552d022acec4a0458d70c19d3da9/odds?regions=us&markets=player_reception_yds&oddsFormat=american",
+        "markets": [
+          "player_reception_yds"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_anytime_td",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/8c94552d022acec4a0458d70c19d3da9/odds?regions=us&markets=player_anytime_td&oddsFormat=american",
+        "markets": [
+          "player_anytime_td"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_pass_tds",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/acc580d74344ea3b31bbcdd057fe6a9c/odds?regions=us&markets=player_pass_tds&oddsFormat=american",
+        "markets": [
+          "player_pass_tds"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_pass_yds",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/acc580d74344ea3b31bbcdd057fe6a9c/odds?regions=us&markets=player_pass_yds&oddsFormat=american",
+        "markets": [
+          "player_pass_yds"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "prop_americanfootball_nfl_player_pass_completions",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events/acc580d74344ea3b31bbcdd057fe6a9c/odds?regions=us&markets=player_pass_completions&oddsFormat=american",
+        "markets": [
+          "player_pass_completions"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      }
+    ],
+    "blockers": [
+      "HARD_CALL_BUDGET_REACHED"
+    ]
+  }
+}
