@@ -1251,7 +1251,9 @@ export async function getRecommendationChangeEvents() {
 function executableActionFromStatus(status: Awaited<ReturnType<typeof getAdaptiveRefreshStatus>>) {
   const nextAction = String(status.nextAction ?? 'status')
   const dueDomains = status.refreshPlan.filter((item) => item.decision === 'DUE_NOW').map((item) => item.domain)
-  const pregameOddsDue = dueDomains.includes('odds') && Number(status.gamesWaitingForOdds ?? 0) > 0
+  const pregameOddsDue =
+    dueDomains.includes('odds') &&
+    (status.marketRefreshEligibility?.marketRefreshNeeded === true || Number(status.gamesWaitingForOdds ?? 0) > 0)
   if (dueDomains.includes('results')) return 'sync_results'
   if (pregameOddsDue) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('settlement')) return 'settle'

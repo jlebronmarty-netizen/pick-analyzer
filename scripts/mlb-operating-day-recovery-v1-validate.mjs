@@ -14,7 +14,12 @@ const checks = [
   ],
   [
     'adaptive execution also guards against settlement masking odds',
-    adaptive.includes("const pregameOddsDue = dueDomains.includes('odds') && Number(status.gamesWaitingForOdds ?? 0) > 0"),
+    adaptive.includes("status.marketRefreshEligibility?.marketRefreshNeeded === true") &&
+      adaptive.includes("Number(status.gamesWaitingForOdds ?? 0) > 0"),
+  ],
+  [
+    'stale available odds can trigger pregame refresh before settlement',
+    adaptive.includes("status.marketRefreshEligibility?.marketRefreshNeeded === true || Number(status.gamesWaitingForOdds ?? 0) > 0"),
   ],
   [
     'learning labels are derived from production settled predictions',

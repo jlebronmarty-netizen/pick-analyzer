@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-07-28 20:05:00Z
+Last updated: 2026-07-28 21:16:00Z
+
+## 2026-07-28 MLB Operating-Day Odds Recovery V1
+
+- Re-audited the July 28 MLB operating-day pipeline from stored schedule to Current Board and AI briefing. Read-only evidence shows 16 scheduled MLB events, 96 canonical core odds rows, 48 feature snapshots, 48 stored pregame prediction rows, 45 Current Board candidates and 0 Official Picks.
+- Root cause classification: `SCHEDULER_ACTION_MASKED`. The previous recovery fixed missing odds priority when games were waiting for odds, but execution dry-run could still select `settle` over a stale-but-present pregame odds refresh because it checked `gamesWaitingForOdds > 0` instead of the canonical `marketRefreshEligibility.marketRefreshNeeded` flag.
+- Minimal repair: adaptive refresh execution now prioritizes pregame odds whenever the status layer reports `marketRefreshNeeded`, including stale available odds. Post-repair dry-run selects `midday_refresh`, with provider calls 0 and mutations 0.
+- Learning-label audit remains canonicalized: Today's learning label counts derive from production settled predictions with feature evidence, not scheduled games or AI performance snapshots. Current July 28 evidence reports 0 production settled predictions, 0 labels queued and 0 labels accepted.
+- CLE @ CIN appears twice as two distinct canonical SportsDataIO event IDs with different start times, so it is treated as a possible genuine doubleheader and not merged.
+- Validation added `scripts/mlb-operating-day-odds-audit-v1.mjs`, `scripts/mlb-operating-day-product-state-v1.mjs` and `scripts/mlb-operating-day-recovery-smoke.mjs`. No SQL, production deploy, provider probe, live odds refresh, prediction generation, settlement, learning write, epoch activation, probability change, confidence change, Trust change or Official Pick policy change was executed.
 
 ## 2026-07-28 Product Stabilization And Intelligence Consolidation V1
 
