@@ -1,0 +1,91 @@
+{
+  "generatedAt": "2026-07-28T03:13:15.934Z",
+  "commit": "480cc298d8bbab26aacf514088b0b23b98f84d2c",
+  "checkpoint": "THE_ODDS_API_MARKET_HISTORY_MATERIALIZATION_V1",
+  "result": {
+    "success": true,
+    "status": "READ_ONLY_MARKET_HISTORY_MATERIALIZED",
+    "generatedAt": "2026-07-28T03:13:15.934Z",
+    "providerCallsMade": 0,
+    "productionMutationsMade": 0,
+    "snapshotsRead": 7435,
+    "eventsRepresented": 216,
+    "marketHistoryGroups": 7337,
+    "closingCandidates": 7158,
+    "preStartRows": 7190,
+    "postStartOrUnknownRows": 234,
+    "invalidTimestampRows": 0,
+    "bySport": [
+      {
+        "sportKey": "americanfootball_nfl",
+        "snapshots": 1978,
+        "events": 75,
+        "markets": [
+          "moneyline",
+          "spread",
+          "total"
+        ],
+        "bookmakers": 11,
+        "preStartRows": 1978,
+        "postStartOrUnknownRows": 0,
+        "closingCandidates": 1978
+      },
+      {
+        "sportKey": "baseball_mlb",
+        "snapshots": 4411,
+        "events": 69,
+        "markets": [
+          "moneyline",
+          "player_props:pitcher_outs_recorded",
+          "spread",
+          "total"
+        ],
+        "bookmakers": 17,
+        "preStartRows": 4166,
+        "postStartOrUnknownRows": 234,
+        "closingCandidates": 4134
+      },
+      {
+        "sportKey": "icehockey_nhl",
+        "snapshots": 426,
+        "events": 32,
+        "markets": [
+          "moneyline",
+          "spread",
+          "total"
+        ],
+        "bookmakers": 7,
+        "preStartRows": 426,
+        "postStartOrUnknownRows": 0,
+        "closingCandidates": 426
+      },
+      {
+        "sportKey": "mma_ufc",
+        "snapshots": 360,
+        "events": 32,
+        "markets": [
+          "moneyline",
+          "total"
+        ],
+        "bookmakers": 8,
+        "preStartRows": 360,
+        "postStartOrUnknownRows": 0,
+        "closingCandidates": 360
+      },
+      {
+        "sportKey": "soccer",
+        "snapshots": 260,
+        "events": 8,
+        "markets": [
+          "moneyline",
+          "spread",
+          "total"
+        ],
+        "bookmakers": 8,
+        "preStartRows": 260,
+        "postStartOrUnknownRows": 0,
+        "closingCandidates": 260
+      }
+    ]
+  }
+}
