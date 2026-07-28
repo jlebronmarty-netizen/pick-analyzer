@@ -1,8 +1,7 @@
 import {
   calculatePredictionV2,
-  PredictionInput,
-  PredictionResult,
 } from './prediction-engine-v2'
+import type { PredictionInput, PredictionResult } from './prediction-engine-v2'
 import {
   adjustModelProbabilityForExtremeOdds,
   clamp,

@@ -1,9 +1,7 @@
 import {
   calculatePredictionV3,
-  PredictionInput,
-  PredictionResult,
-  PredictionV3Factors,
 } from './prediction-engine-v3'
+import type { PredictionInput, PredictionResult, PredictionV3Factors } from './prediction-engine-v3'
 
 import {
   adjustConfidenceForRisk,

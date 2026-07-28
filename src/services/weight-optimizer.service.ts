@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { ModelFactor } from '@/services/model-learning.service'
+import type { ModelFactor } from '@/services/model-learning.service'
 import { isProductionEligibleRow } from '@/services/production-data-gate.service'
 
 type CandidateWeights = Record<ModelFactor, number>

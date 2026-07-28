@@ -1,0 +1,269 @@
+{
+  "generatedAt": "2026-07-28T03:39:15.748Z",
+  "commit": "a230ceffa7319b9ad007c43c9a8dad1ad1252ae9",
+  "checkpoint": "NBA_PREVIEW_PREDICTION_LIFECYCLE_V1",
+  "result": {
+    "success": true,
+    "status": "NBA_PREVIEW_BLOCKED",
+    "generatedAt": "2026-07-28T03:39:15.748Z",
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 0,
+    "stored": {
+      "events": {
+        "count": 14,
+        "error": null
+      },
+      "futureEvents": {
+        "count": 0,
+        "error": null
+      },
+      "completedEvents": {
+        "count": 13,
+        "error": null
+      },
+      "odds": {
+        "count": 540,
+        "error": null
+      },
+      "providerOdds": {
+        "count": 0,
+        "error": null
+      },
+      "results": {
+        "count": 0,
+        "error": null
+      },
+      "teamStats": {
+        "count": 30,
+        "error": null
+      },
+      "gameStats": {
+        "count": 18,
+        "error": null
+      },
+      "playerStats": {
+        "count": 918,
+        "error": null
+      },
+      "featureSnapshots": {
+        "count": 47,
+        "error": null
+      },
+      "predictions": {
+        "count": 27,
+        "error": null
+      },
+      "settledPredictions": {
+        "count": 27,
+        "error": null
+      },
+      "mappings": {
+        "count": 14,
+        "error": null
+      }
+    },
+    "dryRun": {
+      "success": true,
+      "mode": "nba_prediction_engine_v1",
+      "persisted": false,
+      "saved": 0,
+      "summary": {
+        "eventsScanned": 0,
+        "predictionsGenerated": 0,
+        "recommended": 0,
+        "averageFeatureQuality": 0,
+        "averageDataSufficiency": 0,
+        "bestPrediction": null,
+        "injuryFeedStatus": "trial_records_only",
+        "activeInjuryCount": 6,
+        "unresolvedInjuryPlayers": 2,
+        "unresolvedInjuryTeams": 2,
+        "injuryConfidencePenalty": 35,
+        "trialInjuryRowsExcluded": true,
+        "lineupFeedStatus": "lineup_trial_records_only"
+      },
+      "validation": null
+    },
+    "health": {
+      "status": "degraded",
+      "issues": [
+        "6 recent NBA sync jobs failed.",
+        "No upcoming NBA events are available for prediction generation.",
+        "Not all NBA prediction markets have persisted history yet.",
+        "NBA injury feed is stale for the 24-hour freshness policy.",
+        "Stored NBA injury rows are trial/scrambled and cannot improve production confidence.",
+        "2 NBA injury rows have unresolved player mappings.",
+        "2 NBA injury rows have unresolved team mappings.",
+        "2 unresolved injury rows have high-impact statuses.",
+        "Stored NBA lineup/depth rows are trial/scrambled and cannot improve production confidence.",
+        "NBA lineup/depth feed is stale for the 6-hour freshness policy.",
+        "54 NBA lineup/depth rows have unresolved player mappings."
+      ],
+      "coverage": {
+        "dataHealth": {
+          "teams": 30,
+          "events": 0,
+          "results": 0,
+          "standings": 30,
+          "teamStats": 30,
+          "oddsSnapshots": 540
+        },
+        "recentPredictions": 27,
+        "markets": [
+          "moneyline",
+          "spread",
+          "total"
+        ]
+      }
+    },
+    "settlementBacklog": {
+      "count": 0,
+      "sample": []
+    },
+    "crosswalk": {
+      "sportKey": "basketball_nba",
+      "label": "NBA Basketball",
+      "providerSportKey": "basketball_nba",
+      "state": "BLOCKED",
+      "coverage": {
+        "oddsRows": 0,
+        "oddsEvents": 0,
+        "currentOddsCoverage": {
+          "numerator": 0,
+          "denominator": 14,
+          "pct": 0
+        },
+        "providerEventMappings": 0,
+        "canonicalEventMappings": 0,
+        "eventCrosswalkCoverage": {
+          "numerator": 0,
+          "denominator": 0,
+          "pct": 0
+        },
+        "resultRows": 0,
+        "resultCrosswalkCoverage": {
+          "numerator": 0,
+          "denominator": 0,
+          "pct": 0
+        },
+        "canonicalEvents": 14,
+        "completedCanonicalEvents": 13,
+        "predictionRows": 27,
+        "settledPredictionRows": 27
+      },
+      "markets": [],
+      "bookmakers": [],
+      "classifications": {
+        "exact": 0,
+        "deterministicAlias": 0,
+        "timeWindowWithIdentity": 0,
+        "ambiguous": 0,
+        "unresolved": 0,
+        "conflict": 0
+      },
+      "readiness": {
+        "exactEventMapping": false,
+        "completedResults": false,
+        "deterministicSettlementInputs": false,
+        "learningSample": true,
+        "previewPredictionEligible": false,
+        "productionPredictionEligible": false,
+        "recommendationEligible": false
+      },
+      "blockers": [
+        "COMPLETED_RESULT_ROWS_NOT_AVAILABLE",
+        "ODDS_CANONICAL_RESULT_CHAIN_NOT_CERTIFIED"
+      ],
+      "nextAction": "COMPLETED_RESULT_ROWS_NOT_AVAILABLE"
+    },
+    "gates": [
+      {
+        "name": "Exact event mapping",
+        "passed": false,
+        "blocker": "NBA_EXACT_EVENT_MAPPING_NOT_CERTIFIED"
+      },
+      {
+        "name": "Valid future start times",
+        "passed": false,
+        "blocker": "NBA_FUTURE_EVENTS_EMPTY"
+      },
+      {
+        "name": "Pregame The Odds API odds evidence",
+        "passed": false,
+        "blocker": "NBA_THE_ODDS_API_ODDS_EMPTY"
+      },
+      {
+        "name": "Minimum historical result evidence",
+        "passed": false,
+        "blocker": "NBA_CANONICAL_GAME_RESULTS_EMPTY"
+      },
+      {
+        "name": "Feature contract passes",
+        "passed": false,
+        "blocker": "NBA_FEATURE_SAMPLE_NOT_AVAILABLE_FOR_CURRENT_EVENTS"
+      },
+      {
+        "name": "No post-start leakage",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Prediction persistence dry-run compatible",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Cutoff classification works",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Supported markets settle deterministically",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Learning-label derivation can remain scoped",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Preview rows separate from Production performance",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Idempotent rerun safe",
+        "passed": true,
+        "blocker": null
+      }
+    ],
+    "summary": {
+      "gatesPassed": 7,
+      "gatesTotal": 12,
+      "predictionsGenerated": 0,
+      "predictionsPersisted": 0,
+      "previewActivated": false,
+      "productionActivated": false,
+      "recommendationEligible": false
+    },
+    "blockers": [
+      "NBA_EXACT_EVENT_MAPPING_NOT_CERTIFIED",
+      "NBA_FUTURE_EVENTS_EMPTY",
+      "NBA_THE_ODDS_API_ODDS_EMPTY",
+      "NBA_CANONICAL_GAME_RESULTS_EMPTY",
+      "NBA_FEATURE_SAMPLE_NOT_AVAILABLE_FOR_CURRENT_EVENTS"
+    ],
+    "certifications": [
+      "NBA_PREVIEW_PREDICTION_LIFECYCLE_BLOCKED_TRUTHFUL_PASS",
+      "NBA_NO_RETROSPECTIVE_PREDICTION_PASS",
+      "NBA_NO_PRODUCTION_PROMOTION_PASS",
+      "NO_PROVIDER_CALL_B_PASS",
+      "NO_REMOTE_MUTATION_B_PASS",
+      "NO_PROBABILITY_CHANGE_PASS",
+      "NO_CONFIDENCE_CHANGE_PASS",
+      "NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS"
+    ]
+  }
+}

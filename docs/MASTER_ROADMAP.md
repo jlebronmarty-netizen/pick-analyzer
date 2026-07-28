@@ -2764,17 +2764,17 @@ Completion criteria: `PLAYER_PROP_MULTI_MARKET_V1_PASS`, `PLAYER_PROP_STORAGE_EX
 
 Objective: Close the odds-event to canonical-event to result to settlement to learning lifecycle for the maximum safe number of non-MLB sports without fabricating readiness or generating retrospective predictions.
 
-Status: Checkpoint A complete. Results/crosswalk foundation is implemented with read-only API evidence and bounded live score-result acquisition.
+Status: Checkpoints A-B complete. Results/crosswalk foundation is implemented with read-only API evidence and bounded live score-result acquisition. NBA Preview lifecycle is certified blocked rather than activated.
 
-Backend scope: `multi-sport-results-crosswalk-foundation.service.ts`, `/api/data-foundation/results-crosswalk` and `scripts/multi-sport-results-crosswalk-foundation-v1.mjs`.
+Backend scope: `multi-sport-results-crosswalk-foundation.service.ts`, `/api/data-foundation/results-crosswalk`, `scripts/multi-sport-results-crosswalk-foundation-v1.mjs` and `scripts/multi-sport-unlock-v1-checkpoint-b-nba.mjs`.
 
 Persistence scope: The live Checkpoint A probe inserted 12 exact completed UFC/MMA score rows in `game_results` and one `sports_sync_jobs` evidence row. It did not apply SQL, create feature snapshots, generate predictions, settle predictions, create learning labels, activate epochs, rebuild features, change scheduler behavior or alter recommendation policy.
 
-Validation: `node scripts/multi-sport-results-crosswalk-foundation-v1.mjs --validate` passed 5/5 with zero provider calls. `npm.cmd run build` exits 0 with 392 static pages.
+Validation: `node scripts/multi-sport-results-crosswalk-foundation-v1.mjs --validate` passed 5/5 with zero provider calls. `node scripts/multi-sport-unlock-v1-checkpoint-b-nba.mjs --validate` passed 4/4 with zero provider calls. NBA lifecycle dry-run generated 0 predictions, persisted 0 rows and passed 7/12 gates. `npm.cmd run build` exits 0 with 392 static pages.
 
-Continuation: NBA remains the next checkpoint, but activation is blocked until genuine current pregame odds, completed result evidence and exact canonical event/result crosswalk are available. UFC now has 12 stored provider score rows but remains blocked by missing canonical event identity. Soccer must be audited by competition-specific provider keys because the aggregate score endpoint returned 404.
+Continuation: NFL is the next checkpoint. NBA activation is blocked until genuine current pregame odds, completed result evidence, future event schedule and exact canonical event/result crosswalk are available. UFC now has 12 stored provider score rows but remains blocked by missing canonical event identity. Soccer must be audited by competition-specific provider keys because the aggregate score endpoint returned 404.
 
-Completion criteria: `MULTI_SPORT_RESULTS_FOUNDATION_PASS`, `MULTI_SPORT_SCORE_RESULT_PASS`, `PROVIDER_QUOTA_SAFETY_PASS`, `NO_RETROSPECTIVE_PREDICTION_PASS`, `NO_PROBABILITY_CHANGE_PASS`, `NO_CONFIDENCE_CHANGE_PASS`, `NO_TRUST_FORMULA_CHANGE_PASS`, `NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS`, `NO_OFFICIAL_PICK_POLICY_CHANGE_PASS`, `NO_EPOCH_ACTIVATION_PASS`, `NO_SECRET_EXPOSURE_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS` are certified for Checkpoint A only.
+Completion criteria: `MULTI_SPORT_RESULTS_FOUNDATION_PASS`, `MULTI_SPORT_SCORE_RESULT_PASS`, `NBA_PREVIEW_PREDICTION_LIFECYCLE_BLOCKED_TRUTHFUL_PASS`, `PROVIDER_QUOTA_SAFETY_PASS`, `NO_RETROSPECTIVE_PREDICTION_PASS`, `NO_PROBABILITY_CHANGE_PASS`, `NO_CONFIDENCE_CHANGE_PASS`, `NO_TRUST_FORMULA_CHANGE_PASS`, `NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS`, `NO_OFFICIAL_PICK_POLICY_CHANGE_PASS`, `NO_EPOCH_ACTIVATION_PASS`, `NO_SECRET_EXPOSURE_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS` are certified for Checkpoints A-B only.
 # MLB Pitcher Projection Engine V1
 
 Status: PARTIAL
