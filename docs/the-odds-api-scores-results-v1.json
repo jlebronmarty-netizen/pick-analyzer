@@ -1,0 +1,121 @@
+{
+  "generatedAt": "2026-07-28T03:09:55.099Z",
+  "commit": "c5be0e33ad438cd6b89c34df11eb0261b729c8a0",
+  "checkpoint": "THE_ODDS_API_SCORES_RESULTS_V1",
+  "result": {
+    "success": true,
+    "status": "LIVE_SCORES_RESULTS_SYNC_COMPLETE",
+    "generatedAt": "2026-07-28T03:09:55.099Z",
+    "provider": "the-odds-api",
+    "providerCallsMade": 4,
+    "requestsRemainingBefore": 19523,
+    "requestsRemainingAfter": 19521,
+    "requestsUsedObserved": 2,
+    "creditReserve": 2000,
+    "rowsInserted": 0,
+    "rowsUpdated": 0,
+    "rowsReused": 0,
+    "productionMutationsMade": 1,
+    "sports": [
+      {
+        "sportKey": "americanfootball_nfl",
+        "label": "NFL Football",
+        "providerSportKey": "americanfootball_nfl",
+        "daysFrom": 7,
+        "httpStatus": 422,
+        "eventsReturned": 0,
+        "completedRows": 0,
+        "inserted": 0,
+        "updated": 0,
+        "reused": 0,
+        "message": "no completed score rows returned"
+      },
+      {
+        "sportKey": "icehockey_nhl",
+        "label": "NHL Hockey",
+        "providerSportKey": "icehockey_nhl",
+        "daysFrom": 3,
+        "httpStatus": 200,
+        "eventsReturned": 32,
+        "completedRows": 0,
+        "inserted": 0,
+        "updated": 0,
+        "reused": 0,
+        "message": "no completed score rows returned"
+      },
+      {
+        "sportKey": "basketball_nba",
+        "label": "NBA Basketball",
+        "providerSportKey": "basketball_nba",
+        "daysFrom": 3,
+        "httpStatus": 200,
+        "eventsReturned": 0,
+        "completedRows": 0,
+        "inserted": 0,
+        "updated": 0,
+        "reused": 0,
+        "message": "no completed score rows returned"
+      },
+      {
+        "sportKey": "mma_ufc",
+        "label": "UFC",
+        "providerSportKey": "mma_mixed_martial_arts",
+        "daysFrom": 30,
+        "httpStatus": 422,
+        "eventsReturned": 0,
+        "completedRows": 0,
+        "inserted": 0,
+        "updated": 0,
+        "reused": 0,
+        "message": "no completed score rows returned"
+      }
+    ],
+    "planObserved": [
+      {
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/scores?daysFrom=7",
+        "httpStatus": 422,
+        "ok": false,
+        "rows": 0,
+        "requestsRemaining": 19523,
+        "requestsUsed": 477,
+        "requestsLast": 0,
+        "error": "{\"message\":\"Invalid daysFrom\",\"error_code\":\"INVALID_SCORES_DAYS_FROM\",\"details_url\":\"https://the-odds-api.com/liveapi/guides/v4/api-error-codes.html#invalid-scores-days-from\"}"
+      },
+      {
+        "sportKey": "icehockey_nhl",
+        "endpoint": "/sports/icehockey_nhl/scores?daysFrom=3",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 32,
+        "requestsRemaining": 19521,
+        "requestsUsed": 479,
+        "requestsLast": 2,
+        "error": null
+      },
+      {
+        "sportKey": "basketball_nba",
+        "endpoint": "/sports/basketball_nba/scores?daysFrom=3",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 0,
+        "requestsRemaining": 19521,
+        "requestsUsed": 479,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "sportKey": "mma_ufc",
+        "endpoint": "/sports/mma_mixed_martial_arts/scores?daysFrom=30",
+        "httpStatus": 422,
+        "ok": false,
+        "rows": 0,
+        "requestsRemaining": 19521,
+        "requestsUsed": 479,
+        "requestsLast": 0,
+        "error": "{\"message\":\"Invalid daysFrom\",\"error_code\":\"INVALID_SCORES_DAYS_FROM\",\"details_url\":\"https://the-odds-api.com/liveapi/guides/v4/api-error-codes.html#invalid-scores-days-from\"}"
+      }
+    ],
+    "blockers": []
+  }
+}
