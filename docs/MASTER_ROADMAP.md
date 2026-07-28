@@ -47,6 +47,8 @@ Current stabilization evidence:
 - 70 read-only diagnostic APIs.
 - 321 read-mostly APIs.
 - 37 mutation/protected APIs by conservative path classification.
+- Static Product Consistency Score: 100. Runtime readiness, prediction readiness, recommendation readiness and deployment readiness are explicitly not scored by the static audit.
+- NFL and NHL are Preview for product-status purposes because persisted Preview prediction rows and feature snapshots exist. They remain blocked from Production prediction status and blocked from recommendations/Official Picks.
 - Sports Center, AI Briefing, Dashboard, Performance, Current Board, Probability Picks, Portfolio Intelligence, Market Intelligence, Closing Line Intelligence, Player Projections, Autonomous Daily AI, Data Coverage, Providers, AI Operations, Model Health, Validation, Governance and Diagnostics remain represented by existing routes and docs.
 
 Evidence: `docs/PRODUCT_STABILIZATION_AND_INTELLIGENCE_CONSOLIDATION_V1.md`, `docs/product-stabilization-v1-audit.json`, `docs/PRODUCT_ROUTE_INVENTORY_V1.md`, `docs/product-route-inventory-v1.json` and `docs/product-readiness-matrix-v1.json`.

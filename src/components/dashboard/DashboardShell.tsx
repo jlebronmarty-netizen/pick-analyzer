@@ -19,7 +19,7 @@ const navItems = [
   { id: 'closing-line', label: 'Closing Line', icon: '⌛' },
   { id: 'live-betting', label: 'Live AI', icon: '●' },
   { id: 'portfolio', label: 'Portfolio', icon: '▣' },
-  { id: 'ai-coach', label: 'AI Coach', icon: '♟'  },
+  { id: 'ai-coach', label: 'AI Coach', icon: '♟' },
   { id: 'learning', label: 'Learning', icon: '↗' },
   { id: 'model-center', label: 'AI Model', icon: '◉' },
   { id: 'sports-brain', label: 'Sports Brain', icon: '✦' },
@@ -32,13 +32,23 @@ const productNavGroups = [
       { href: '/dashboard', label: 'Dashboard', icon: 'DB' },
       { href: '/sports-center', label: 'Sports Center', icon: 'SC' },
       { href: '/ai-operations', label: 'AI Briefing', icon: 'AI' },
-      { href: '/data-coverage', label: 'Data Coverage', icon: 'DC', badge: 'FOUNDATION' },
+      {
+        href: '/data-coverage',
+        label: 'Data Coverage',
+        icon: 'DC',
+        badge: 'FOUNDATION',
+      },
     ],
   },
   {
     label: 'Picks',
     items: [
-      { href: '/probability-picks', label: 'Probability Picks', icon: 'PR', badge: 'LIMITED' },
+      {
+        href: '/probability-picks',
+        label: 'Probability Picks',
+        icon: 'PR',
+        badge: 'LIMITED',
+      },
       { id: 'today', label: 'Current Board', icon: 'CB' },
       { href: '/most-likely', label: 'Most Likely', icon: 'ML' },
       { href: '/best-value', label: 'Best Value', icon: 'BV' },
@@ -48,19 +58,55 @@ const productNavGroups = [
     label: 'Projections',
     items: [
       { href: '/projections', label: 'Team Projections', icon: 'TP' },
-      { href: '/player-projections', label: 'Player Projections', icon: 'PP' },
-      { href: '/game-intelligence', label: 'Game Intelligence', icon: 'GI' },
+      {
+        href: '/player-projections',
+        label: 'Player Projections',
+        icon: 'PP',
+      },
+      {
+        href: '/game-intelligence',
+        label: 'Game Intelligence',
+        icon: 'GI',
+      },
     ],
   },
   {
     label: 'Markets',
     items: [
-      { href: '/betting-workbench', label: 'Betting Workbench', icon: 'BW' },
-      { href: '/portfolio-intelligence', label: 'Portfolio Intelligence', icon: 'PI', badge: 'PREVIEW' },
-      { href: '/market-intelligence', label: 'Market Intelligence', icon: 'MI', badge: 'FOUNDATION' },
-      { href: '/closing-line-intelligence', label: 'Closing Line Intelligence', icon: 'CL', badge: 'FOUNDATION' },
-      { href: '/dashboard#advanced-details', label: 'Market Comparison', icon: 'MC' },
-      { href: '/arbitrage', label: 'Arbitrage', icon: 'AR', badge: 'BLOCKED' },
+      {
+        href: '/betting-workbench',
+        label: 'Betting Workbench',
+        icon: 'BW',
+      },
+      {
+        href: '/portfolio-intelligence',
+        label: 'Portfolio Intelligence',
+        icon: 'PI',
+        badge: 'PREVIEW',
+      },
+      {
+        href: '/market-intelligence',
+        label: 'Market Intelligence',
+        icon: 'MI',
+        badge: 'FOUNDATION',
+      },
+      {
+        href: '/closing-line-intelligence',
+        label: 'Closing Line Intelligence',
+        icon: 'CL',
+        badge: 'FOUNDATION',
+      },
+      {
+        href: '/dashboard#advanced-details',
+        label: 'Market Comparison',
+        icon: 'MC',
+      },
+      {
+        href: '/arbitrage',
+        label: 'Arbitrage',
+        icon: 'AR',
+        badge: 'BLOCKED',
+      },
       { href: '/ai-bet-finder', label: 'AI Bet Finder', icon: 'AF' },
     ],
   },
@@ -75,18 +121,44 @@ const productNavGroups = [
     label: 'Operations',
     items: [
       { href: '/ai-operations', label: 'AI Operations', icon: 'AO' },
-      { href: '/autonomous-daily-ai', label: 'Autonomous Daily AI', icon: 'AD', badge: 'FOUNDATION' },
-      { href: '/data-coverage', label: 'Data Foundation', icon: 'DF', badge: 'FOUNDATION' },
-      { href: '/mlb-operations', label: 'MLB Operations', icon: 'MO' },
-      { href: '/dashboard#advanced-details', label: 'Providers', icon: 'PV' },
+      {
+        href: '/autonomous-daily-ai',
+        label: 'Autonomous Daily AI',
+        icon: 'AD',
+        badge: 'FOUNDATION',
+      },
+      {
+        href: '/data-coverage',
+        label: 'Data Foundation',
+        icon: 'DF',
+        badge: 'FOUNDATION',
+      },
+      {
+        href: '/mlb-operations',
+        label: 'MLB Operations',
+        icon: 'MO',
+      },
+      {
+        href: '/dashboard#advanced-details',
+        label: 'Providers',
+        icon: 'PV',
+      },
     ],
   },
   {
     label: 'Administration',
     items: [
       { id: 'advanced', label: 'Validation', icon: 'VA' },
-      { href: '/dashboard#advanced-details', label: 'Governance', icon: 'GV' },
-      { href: '/dashboard#advanced-details', label: 'Diagnostics', icon: 'DX' },
+      {
+        href: '/dashboard#advanced-details',
+        label: 'Governance',
+        icon: 'GV',
+      },
+      {
+        href: '/dashboard#advanced-details',
+        label: 'Diagnostics',
+        icon: 'DX',
+      },
     ],
   },
 ]
@@ -106,9 +178,7 @@ export default function DashboardShell({
                 Pick Analyzer
               </p>
 
-              <h1 className="mt-2 text-2xl font-black">
-                AI Briefing
-              </h1>
+              <h1 className="mt-2 text-2xl font-black">AI Briefing</h1>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
                 A clear daily answer to whether there is a bet worth making.
@@ -121,25 +191,43 @@ export default function DashboardShell({
                   <p className="px-4 text-xs font-bold uppercase tracking-[0.2em] text-slate-600">
                     {group.label}
                   </p>
-                  <div className="mt-2 space-y-1">
-                    {group.items.map((item) => (
-                      <a
-                        key={'href' in item ? item.href : item.id}
-                        href={'href' in item ? item.href : `#${item.id}`}
-                        className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
-                      >
-                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
-                          {item.icon}
-                        </span>
 
-                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                        {'badge' in item && item.badge ? (
-                          <ProductStatusBadge tone={item.badge === 'BLOCKED' || item.badge === 'PENDING' ? 'yellow' : 'green'}>
-                            {item.badge}
-                          </ProductStatusBadge>
-                        ) : null}
-                      </a>
-                    ))}
+                  <div className="mt-2 space-y-1">
+                    {group.items.map((item) => {
+                      const destination =
+                        'href' in item ? item.href : `#${item.id}`
+
+                      const itemKey = `${group.label}-${item.label}-${destination}`
+
+                      return (
+                        <a
+                          key={itemKey}
+                          href={destination}
+                          className="group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-900 hover:text-white"
+                        >
+                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-emerald-300 group-hover:bg-emerald-500/15">
+                            {item.icon}
+                          </span>
+
+                          <span className="min-w-0 flex-1 truncate">
+                            {item.label}
+                          </span>
+
+                          {'badge' in item && item.badge ? (
+                            <ProductStatusBadge
+                              tone={
+                                item.badge === 'BLOCKED' ||
+                                item.badge === 'PENDING'
+                                  ? 'yellow'
+                                  : 'green'
+                              }
+                            >
+                              {item.badge}
+                            </ProductStatusBadge>
+                          ) : null}
+                        </a>
+                      )
+                    })}
                   </div>
                 </div>
               ))}
@@ -147,9 +235,15 @@ export default function DashboardShell({
 
             <div className="fixed bottom-6 w-[224px] rounded-lg border border-slate-800 bg-slate-900/95 p-4">
               <p className="text-xs text-slate-500">System</p>
+
               <div className="mt-2 flex flex-wrap gap-2">
-                <ProductStatusBadge tone="green">MLB Limited</ProductStatusBadge>
-                <ProductStatusBadge tone="blue">Stored Data</ProductStatusBadge>
+                <ProductStatusBadge tone="green">
+                  MLB Limited
+                </ProductStatusBadge>
+
+                <ProductStatusBadge tone="blue">
+                  Stored Data
+                </ProductStatusBadge>
               </div>
             </div>
           </aside>
@@ -170,9 +264,17 @@ export default function DashboardShell({
                 <div className="flex min-w-0 items-center gap-3 overflow-x-auto">
                   <SportSelector />
 
-                  <span className="hidden md:inline-flex"><ProductStatusBadge tone="green">MLB Limited</ProductStatusBadge></span>
+                  <span className="hidden md:inline-flex">
+                    <ProductStatusBadge tone="green">
+                      MLB Limited
+                    </ProductStatusBadge>
+                  </span>
 
-                  <span className="hidden lg:inline-flex"><ProductStatusBadge tone="blue">Official Picks Only</ProductStatusBadge></span>
+                  <span className="hidden lg:inline-flex">
+                    <ProductStatusBadge tone="blue">
+                      Official Picks Only
+                    </ProductStatusBadge>
+                  </span>
 
                   <a
                     href="/probability-picks"

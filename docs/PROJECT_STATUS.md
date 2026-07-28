@@ -7,7 +7,8 @@ Last updated: 2026-07-28 20:05:00Z
 - Added `scripts/product-stabilization-v1-audit.mjs`, `docs/PRODUCT_STABILIZATION_AND_INTELLIGENCE_CONSOLIDATION_V1.md` and `docs/product-stabilization-v1-audit.json` as the certification-first product consistency audit.
 - Refreshed stale product inventory evidence: current app tree has 28 page routes and 428 API routes, with 70 read-only diagnostic APIs, 321 read-mostly APIs and 37 mutation/protected APIs by conservative path classification.
 - Repaired product evidence drift by refreshing `docs/PRODUCT_ROUTE_INVENTORY_V1.md`, `docs/product-route-inventory-v1.json` and `docs/product-readiness-matrix-v1.json` so newer product pages are represented consistently.
-- Static stabilization audit now scores page/API/status/sport consistency at 100 with no current blockers. This is a documentation and evidence-consistency result, not a claim that the betting engine is certified for real-money recommendations.
+- Static stabilization audit now reports `Static Product Consistency Score: 100` with no current static-consistency blockers. This is a documentation and evidence-consistency result, not runtime readiness, prediction readiness, recommendation readiness, deployment readiness or a claim that the betting engine is certified for real-money recommendations.
+- NFL and NHL product state has been reconciled to Preview: NFL has 776 persisted Preview prediction rows and 776 feature snapshots; NHL has 258 persisted Preview prediction rows and 258 feature snapshots. Both remain Production blocked and recommendation/Official Pick blocked with zero Production rows and zero Official Picks.
 - No product modules, dashboard pages, prediction engines, settlement logic, Learning Brain behavior, scheduler behavior, provider adapters, SQL, Historical Replay, epoch activation, provider calls or production mutations were added or changed.
 
 ## 2026-07-28 Core Prediction Certification Roadmap V1

@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-28T20:19:50.860Z",
+  "generatedAt": "2026-07-28T20:58:20.547Z",
   "mode": "product_stabilization_intelligence_consolidation_v1",
-  "head": "963eefee1b91104f1be92d8382dd53681266a93f",
+  "head": "cf43b111c24f4760f78060bf9b8f2f4c14ebcad7",
   "branch": "main",
   "mutationSafety": {
     "providerCallsMade": 0,
@@ -303,7 +303,7 @@
     {
       "key": "nfl",
       "sportKey": "americanfootball_nfl",
-      "expectedStatus": "Blocked",
+      "expectedStatus": "Preview",
       "keyPresent": true,
       "sportKeyPresent": true,
       "statusPresent": true,
@@ -333,7 +333,7 @@
     {
       "key": "nhl",
       "sportKey": "icehockey_nhl",
-      "expectedStatus": "Blocked",
+      "expectedStatus": "Preview",
       "keyPresent": true,
       "sportKeyPresent": true,
       "statusPresent": true,
@@ -454,10 +454,14 @@
   "duplicateServiceNames": [],
   "blockers": [],
   "scores": {
-    "overallProductScore": 100,
-    "averagePageScore": 100,
-    "averageSportScore": 100,
-    "inventoryFreshnessScore": 100
+    "staticProductConsistencyScore": 100,
+    "staticPageConsistencyScore": 100,
+    "staticSportStatusConsistencyScore": 100,
+    "inventoryFreshnessScore": 100,
+    "runtimeReadiness": "NOT_SCORED_STATIC_AUDIT_ONLY",
+    "predictionReadiness": "NOT_SCORED_STATIC_AUDIT_ONLY",
+    "recommendationReadiness": "NOT_SCORED_STATIC_AUDIT_ONLY",
+    "deploymentReadiness": "NOT_SCORED_STATIC_AUDIT_ONLY"
   },
   "recommendations": [
     "Refresh product route inventory evidence from the current app tree.",

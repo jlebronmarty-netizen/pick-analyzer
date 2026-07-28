@@ -6,9 +6,13 @@ Status: audit complete, repair targets identified.
 
 | Metric | Value |
 | --- | ---: |
-| Overall product score | 100 |
-| Average page score | 100 |
-| Average sport score | 100 |
+| Static Product Consistency Score | 100 |
+| Static Page Consistency Score | 100 |
+| Static Sport Status Consistency Score | 100 |
+| Runtime Readiness | NOT_SCORED_STATIC_AUDIT_ONLY |
+| Prediction Readiness | NOT_SCORED_STATIC_AUDIT_ONLY |
+| Recommendation Readiness | NOT_SCORED_STATIC_AUDIT_ONLY |
+| Deployment Readiness | NOT_SCORED_STATIC_AUDIT_ONLY |
 | Current page routes | 28 |
 | Current API routes | 428 |
 | Mutation/protected API routes by path | 37 |
@@ -46,10 +50,10 @@ Status: audit complete, repair targets identified.
 | --- | --- | --- | ---: |
 | MLB | Production | CONSISTENT | 100 |
 | NBA | Foundation | CONSISTENT | 100 |
-| NFL | Blocked | CONSISTENT | 100 |
+| NFL | Preview | CONSISTENT | 100 |
 | SOCCER | Planning | CONSISTENT | 100 |
 | BSN | Preview | CONSISTENT | 100 |
-| NHL | Blocked | CONSISTENT | 100 |
+| NHL | Preview | CONSISTENT | 100 |
 | TENNIS | Blocked | CONSISTENT | 100 |
 | UFC | Blocked | CONSISTENT | 100 |
 

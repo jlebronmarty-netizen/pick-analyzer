@@ -41,6 +41,10 @@ const checks = [
   ['Settlement logic unchanged by hub contract', serviceSource.includes('logicChanged: false')],
   ['No provider import in Sports Center service', !/from ['"]@\/services\/apis\//.test(serviceSource)],
   ['No Supabase import in Sports Center service', !serviceSource.includes('@/lib/supabase')],
+  ['NFL reconciled to Preview', serviceSource.includes("key: 'nfl'") && serviceSource.includes("status: 'Preview'") && serviceSource.includes('776 Preview rows')],
+  ['NHL reconciled to Preview', serviceSource.includes("key: 'nhl'") && serviceSource.includes("status: 'Preview'") && serviceSource.includes('258 Preview rows')],
+  ['NFL production remains blocked', serviceSource.includes("capability('Production predictions', 'Blocked'") && serviceSource.includes("capability('Recommendations', 'Blocked'")],
+  ['NHL production remains blocked', serviceSource.includes("Keep NHL in Preview until production and recommendation certification gates pass.")],
   ...expectedStatuses.map((status) => [`Canonical status present: ${status}`, statusSource.includes(`'${status}'`)]),
   ...expectedSports.map((sport) => [`Sport present: ${sport}`, serviceSource.includes(`key: '${sport}'`)]),
 ]

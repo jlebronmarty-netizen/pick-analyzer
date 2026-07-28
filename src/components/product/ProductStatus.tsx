@@ -58,7 +58,8 @@ export function sportReadinessLabel(sportKey: string | null | undefined) {
   const key = String(sportKey ?? '').toLowerCase()
   if (key === 'baseball_mlb') return { label: 'LIMITED', tone: 'green' as Tone }
   if (key === 'basketball_bsn') return { label: 'PREVIEW', tone: 'yellow' as Tone }
-  if (key.includes('nfl') || key.includes('nhl') || key.includes('soccer') || key.includes('tennis') || key.includes('ufc')) {
+  if (key.includes('nfl') || key.includes('nhl')) return { label: 'PREVIEW', tone: 'yellow' as Tone }
+  if (key.includes('soccer') || key.includes('tennis') || key.includes('ufc')) {
     return { label: 'ENGINE NOT CERTIFIED', tone: 'yellow' as Tone }
   }
   return { label: 'INSUFFICIENT DATA', tone: 'gray' as Tone }

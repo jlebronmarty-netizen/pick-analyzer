@@ -28,10 +28,10 @@ const productPages = [
 const expectedSports = [
   { key: 'mlb', sportKey: 'baseball_mlb', expectedStatus: 'Production' },
   { key: 'nba', sportKey: 'basketball_nba', expectedStatus: 'Foundation' },
-  { key: 'nfl', sportKey: 'americanfootball_nfl', expectedStatus: 'Blocked' },
+  { key: 'nfl', sportKey: 'americanfootball_nfl', expectedStatus: 'Preview' },
   { key: 'soccer', sportKey: 'soccer', expectedStatus: 'Planning' },
   { key: 'bsn', sportKey: 'basketball_bsn', expectedStatus: 'Preview' },
-  { key: 'nhl', sportKey: 'icehockey_nhl', expectedStatus: 'Blocked' },
+  { key: 'nhl', sportKey: 'icehockey_nhl', expectedStatus: 'Preview' },
   { key: 'tennis', sportKey: 'tennis', expectedStatus: 'Blocked' },
   { key: 'ufc', sportKey: 'mma_ufc', expectedStatus: 'Blocked' },
 ]
@@ -59,16 +59,6 @@ function routeFromFile(file, suffix) {
   const parts = without.split('/').filter((part) => part !== 'page' && part !== 'route' && !part.startsWith('('))
   const route = `/${parts.join('/')}`
   return route === '/' ? '/' : route.replace(/\/$/, '')
-}
-
-function apiToFile(route) {
-  const parts = route.split('/').filter(Boolean)
-  return path.join(root, 'src', 'app', ...parts, 'route.ts')
-}
-
-function pageToFile(route) {
-  const parts = route.split('/').filter(Boolean)
-  return path.join(root, 'src', 'app', ...parts, 'page.tsx')
 }
 
 function classifyApi(route) {
@@ -239,10 +229,14 @@ const result = {
   duplicateServiceNames,
   blockers,
   scores: {
-    overallProductScore: overallScore,
-    averagePageScore: pct(totalPageScore),
-    averageSportScore: pct(totalSportScore),
+    staticProductConsistencyScore: overallScore,
+    staticPageConsistencyScore: pct(totalPageScore),
+    staticSportStatusConsistencyScore: pct(totalSportScore),
     inventoryFreshnessScore,
+    runtimeReadiness: 'NOT_SCORED_STATIC_AUDIT_ONLY',
+    predictionReadiness: 'NOT_SCORED_STATIC_AUDIT_ONLY',
+    recommendationReadiness: 'NOT_SCORED_STATIC_AUDIT_ONLY',
+    deploymentReadiness: 'NOT_SCORED_STATIC_AUDIT_ONLY',
   },
   recommendations: [
     'Refresh product route inventory evidence from the current app tree.',
@@ -371,9 +365,13 @@ Status: audit complete, repair targets identified.
 
 | Metric | Value |
 | --- | ---: |
-| Overall product score | ${result.scores.overallProductScore} |
-| Average page score | ${result.scores.averagePageScore} |
-| Average sport score | ${result.scores.averageSportScore} |
+| Static Product Consistency Score | ${result.scores.staticProductConsistencyScore} |
+| Static Page Consistency Score | ${result.scores.staticPageConsistencyScore} |
+| Static Sport Status Consistency Score | ${result.scores.staticSportStatusConsistencyScore} |
+| Runtime Readiness | ${result.scores.runtimeReadiness} |
+| Prediction Readiness | ${result.scores.predictionReadiness} |
+| Recommendation Readiness | ${result.scores.recommendationReadiness} |
+| Deployment Readiness | ${result.scores.deploymentReadiness} |
 | Current page routes | ${result.inventory.pageRoutes} |
 | Current API routes | ${result.inventory.apiRoutes} |
 | Mutation/protected API routes by path | ${result.inventory.mutationOrProtectedApiRoutes} |
@@ -421,7 +419,7 @@ fs.writeFileSync(path.join(docsDir, 'PRODUCT_STABILIZATION_AND_INTELLIGENCE_CONS
 
 console.log(JSON.stringify({
   success: true,
-  overallProductScore: result.scores.overallProductScore,
+  staticProductConsistencyScore: result.scores.staticProductConsistencyScore,
   pageRoutes: result.inventory.pageRoutes,
   apiRoutes: result.inventory.apiRoutes,
   blockers,
