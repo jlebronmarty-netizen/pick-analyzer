@@ -1,0 +1,874 @@
+{
+  "generatedAt": "2026-07-28T03:02:45.449Z",
+  "commit": "1aea3db82b236bcdc57a2e0c66f95ee9528792d5",
+  "checkpoint": "THE_ODDS_API_HISTORICAL_RANGE_DISCOVERY_V1",
+  "result": {
+    "success": true,
+    "status": "LIVE_HISTORICAL_RANGE_DISCOVERY_COMPLETE",
+    "generatedAt": "2026-07-28T03:02:45.449Z",
+    "provider": "the-odds-api",
+    "providerCallsMade": 26,
+    "requestsRemainingBefore": 19923,
+    "requestsRemainingAfter": 19673,
+    "requestsUsedObserved": 250,
+    "creditReserve": 2000,
+    "rowsPersisted": 0,
+    "productionMutationsMade": 0,
+    "sports": [
+      {
+        "sportKey": "baseball_mlb",
+        "label": "MLB Baseball",
+        "providerSportKey": "baseball_mlb",
+        "status": "HISTORICAL_CAPABLE_WITH_ROWS",
+        "earliestProvenTimestamp": "2024-04-01T12:00:00Z",
+        "latestProvenTimestamp": "2026-07-27T12:00:00Z",
+        "probes": [
+          {
+            "date": "2026-07-27T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 12,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2026-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 15,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2025-10-15T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 2,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2025-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 13,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2024-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 14,
+            "bookmakerCount": 14,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          }
+        ],
+        "averageCreditsPerProbe": 10,
+        "fullSeasonCoreEstimateCredits": 10800,
+        "blockers": []
+      },
+      {
+        "sportKey": "americanfootball_nfl",
+        "label": "NFL Football",
+        "providerSportKey": "americanfootball_nfl",
+        "status": "HISTORICAL_CAPABLE_WITH_ROWS",
+        "earliestProvenTimestamp": "2024-04-01T12:00:00Z",
+        "latestProvenTimestamp": "2026-07-27T12:00:00Z",
+        "probes": [
+          {
+            "date": "2026-07-27T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 75,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2026-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 1,
+            "bookmakerCount": 0,
+            "markets": [],
+            "error": null
+          },
+          {
+            "date": "2025-10-15T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 28,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2025-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 1,
+            "bookmakerCount": 0,
+            "markets": [],
+            "error": null
+          },
+          {
+            "date": "2024-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 1,
+            "bookmakerCount": 5,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          }
+        ],
+        "averageCreditsPerProbe": 10,
+        "fullSeasonCoreEstimateCredits": 10800,
+        "blockers": []
+      },
+      {
+        "sportKey": "icehockey_nhl",
+        "label": "NHL Hockey",
+        "providerSportKey": "icehockey_nhl",
+        "status": "HISTORICAL_CAPABLE_WITH_ROWS",
+        "earliestProvenTimestamp": "2024-04-01T12:00:00Z",
+        "latestProvenTimestamp": "2026-07-27T12:00:00Z",
+        "probes": [
+          {
+            "date": "2026-07-27T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 32,
+            "bookmakerCount": 7,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2026-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 3,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2025-10-15T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 4,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2025-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 15,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2024-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 16,
+            "bookmakerCount": 14,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          }
+        ],
+        "averageCreditsPerProbe": 10,
+        "fullSeasonCoreEstimateCredits": 10800,
+        "blockers": []
+      },
+      {
+        "sportKey": "basketball_nba",
+        "label": "NBA Basketball",
+        "providerSportKey": "basketball_nba",
+        "status": "HISTORICAL_CAPABLE_WITH_ROWS",
+        "earliestProvenTimestamp": "2024-04-01T12:00:00Z",
+        "latestProvenTimestamp": "2026-07-27T12:00:00Z",
+        "probes": [
+          {
+            "date": "2026-07-27T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 1,
+            "bookmakerCount": 5,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2026-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 9,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2025-10-15T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 42,
+            "bookmakerCount": 8,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2025-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 7,
+            "bookmakerCount": 11,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2024-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 6,
+            "bookmakerCount": 13,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          }
+        ],
+        "averageCreditsPerProbe": 10,
+        "fullSeasonCoreEstimateCredits": 10800,
+        "blockers": []
+      },
+      {
+        "sportKey": "mma_ufc",
+        "label": "UFC",
+        "providerSportKey": "mma_mixed_martial_arts",
+        "status": "HISTORICAL_CAPABLE_WITH_ROWS",
+        "earliestProvenTimestamp": "2024-04-01T12:00:00Z",
+        "latestProvenTimestamp": "2026-07-27T12:00:00Z",
+        "probes": [
+          {
+            "date": "2026-07-27T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 32,
+            "bookmakerCount": 8,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2026-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 56,
+            "bookmakerCount": 8,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2025-10-15T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 98,
+            "bookmakerCount": 8,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2025-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 86,
+            "bookmakerCount": 7,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          },
+          {
+            "date": "2024-04-01T12:00:00Z",
+            "httpStatus": 200,
+            "ok": true,
+            "requestsLast": 10,
+            "events": 63,
+            "bookmakerCount": 12,
+            "markets": [
+              "h2h"
+            ],
+            "error": null
+          }
+        ],
+        "averageCreditsPerProbe": 10,
+        "fullSeasonCoreEstimateCredits": 10800,
+        "blockers": []
+      }
+    ],
+    "planObserved": [
+      {
+        "label": "catalog_credit_read",
+        "sportKey": null,
+        "endpoint": "/sports?all=true",
+        "historicalTimestamp": null,
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 173,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "historical_core_baseball_mlb",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/historical/sports/baseball_mlb/odds?regions=us&markets=h2h&oddsFormat=american&date=2026-07-27T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-07-27T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 12,
+        "requestsRemaining": 19913,
+        "requestsUsed": 87,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_baseball_mlb",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/historical/sports/baseball_mlb/odds?regions=us&markets=h2h&oddsFormat=american&date=2026-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 15,
+        "requestsRemaining": 19903,
+        "requestsUsed": 97,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_baseball_mlb",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/historical/sports/baseball_mlb/odds?regions=us&markets=h2h&oddsFormat=american&date=2025-10-15T12%3A00%3A00Z",
+        "historicalTimestamp": "2025-10-15T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 2,
+        "requestsRemaining": 19893,
+        "requestsUsed": 107,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_baseball_mlb",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/historical/sports/baseball_mlb/odds?regions=us&markets=h2h&oddsFormat=american&date=2025-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2025-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 13,
+        "requestsRemaining": 19883,
+        "requestsUsed": 117,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_baseball_mlb",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/historical/sports/baseball_mlb/odds?regions=us&markets=h2h&oddsFormat=american&date=2024-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2024-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 14,
+        "requestsRemaining": 19873,
+        "requestsUsed": 127,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_americanfootball_nfl",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/historical/sports/americanfootball_nfl/odds?regions=us&markets=h2h&oddsFormat=american&date=2026-07-27T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-07-27T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 75,
+        "requestsRemaining": 19863,
+        "requestsUsed": 137,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_americanfootball_nfl",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/historical/sports/americanfootball_nfl/odds?regions=us&markets=h2h&oddsFormat=american&date=2026-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19853,
+        "requestsUsed": 147,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_americanfootball_nfl",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/historical/sports/americanfootball_nfl/odds?regions=us&markets=h2h&oddsFormat=american&date=2025-10-15T12%3A00%3A00Z",
+        "historicalTimestamp": "2025-10-15T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 28,
+        "requestsRemaining": 19843,
+        "requestsUsed": 157,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_americanfootball_nfl",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/historical/sports/americanfootball_nfl/odds?regions=us&markets=h2h&oddsFormat=american&date=2025-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2025-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19833,
+        "requestsUsed": 167,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_americanfootball_nfl",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/historical/sports/americanfootball_nfl/odds?regions=us&markets=h2h&oddsFormat=american&date=2024-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2024-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19823,
+        "requestsUsed": 177,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_icehockey_nhl",
+        "sportKey": "icehockey_nhl",
+        "endpoint": "/historical/sports/icehockey_nhl/odds?regions=us&markets=h2h&oddsFormat=american&date=2026-07-27T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-07-27T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 32,
+        "requestsRemaining": 19813,
+        "requestsUsed": 187,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_icehockey_nhl",
+        "sportKey": "icehockey_nhl",
+        "endpoint": "/historical/sports/icehockey_nhl/odds?regions=us&markets=h2h&oddsFormat=american&date=2026-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 3,
+        "requestsRemaining": 19803,
+        "requestsUsed": 197,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_icehockey_nhl",
+        "sportKey": "icehockey_nhl",
+        "endpoint": "/historical/sports/icehockey_nhl/odds?regions=us&markets=h2h&oddsFormat=american&date=2025-10-15T12%3A00%3A00Z",
+        "historicalTimestamp": "2025-10-15T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 4,
+        "requestsRemaining": 19793,
+        "requestsUsed": 207,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_icehockey_nhl",
+        "sportKey": "icehockey_nhl",
+        "endpoint": "/historical/sports/icehockey_nhl/odds?regions=us&markets=h2h&oddsFormat=american&date=2025-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2025-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 15,
+        "requestsRemaining": 19783,
+        "requestsUsed": 217,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_icehockey_nhl",
+        "sportKey": "icehockey_nhl",
+        "endpoint": "/historical/sports/icehockey_nhl/odds?regions=us&markets=h2h&oddsFormat=american&date=2024-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2024-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 16,
+        "requestsRemaining": 19773,
+        "requestsUsed": 227,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_basketball_nba",
+        "sportKey": "basketball_nba",
+        "endpoint": "/historical/sports/basketball_nba/odds?regions=us&markets=h2h&oddsFormat=american&date=2026-07-27T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-07-27T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 1,
+        "requestsRemaining": 19763,
+        "requestsUsed": 237,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_basketball_nba",
+        "sportKey": "basketball_nba",
+        "endpoint": "/historical/sports/basketball_nba/odds?regions=us&markets=h2h&oddsFormat=american&date=2026-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 9,
+        "requestsRemaining": 19753,
+        "requestsUsed": 247,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_basketball_nba",
+        "sportKey": "basketball_nba",
+        "endpoint": "/historical/sports/basketball_nba/odds?regions=us&markets=h2h&oddsFormat=american&date=2025-10-15T12%3A00%3A00Z",
+        "historicalTimestamp": "2025-10-15T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 42,
+        "requestsRemaining": 19743,
+        "requestsUsed": 257,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_basketball_nba",
+        "sportKey": "basketball_nba",
+        "endpoint": "/historical/sports/basketball_nba/odds?regions=us&markets=h2h&oddsFormat=american&date=2025-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2025-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 7,
+        "requestsRemaining": 19733,
+        "requestsUsed": 267,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_basketball_nba",
+        "sportKey": "basketball_nba",
+        "endpoint": "/historical/sports/basketball_nba/odds?regions=us&markets=h2h&oddsFormat=american&date=2024-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2024-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 6,
+        "requestsRemaining": 19723,
+        "requestsUsed": 277,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_mma_ufc",
+        "sportKey": "mma_ufc",
+        "endpoint": "/historical/sports/mma_mixed_martial_arts/odds?regions=us&markets=h2h&oddsFormat=american&date=2026-07-27T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-07-27T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 32,
+        "requestsRemaining": 19713,
+        "requestsUsed": 287,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_mma_ufc",
+        "sportKey": "mma_ufc",
+        "endpoint": "/historical/sports/mma_mixed_martial_arts/odds?regions=us&markets=h2h&oddsFormat=american&date=2026-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2026-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 56,
+        "requestsRemaining": 19703,
+        "requestsUsed": 297,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_mma_ufc",
+        "sportKey": "mma_ufc",
+        "endpoint": "/historical/sports/mma_mixed_martial_arts/odds?regions=us&markets=h2h&oddsFormat=american&date=2025-10-15T12%3A00%3A00Z",
+        "historicalTimestamp": "2025-10-15T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 98,
+        "requestsRemaining": 19693,
+        "requestsUsed": 307,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_mma_ufc",
+        "sportKey": "mma_ufc",
+        "endpoint": "/historical/sports/mma_mixed_martial_arts/odds?regions=us&markets=h2h&oddsFormat=american&date=2025-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2025-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 86,
+        "requestsRemaining": 19683,
+        "requestsUsed": 317,
+        "requestsLast": 10,
+        "error": null
+      },
+      {
+        "label": "historical_core_mma_ufc",
+        "sportKey": "mma_ufc",
+        "endpoint": "/historical/sports/mma_mixed_martial_arts/odds?regions=us&markets=h2h&oddsFormat=american&date=2024-04-01T12%3A00%3A00Z",
+        "historicalTimestamp": "2024-04-01T12:00:00Z",
+        "markets": [
+          "h2h"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 63,
+        "requestsRemaining": 19673,
+        "requestsUsed": 327,
+        "requestsLast": 10,
+        "error": null
+      }
+    ],
+    "blockers": []
+  }
+}
