@@ -5,7 +5,7 @@
   "certifiedPlatformTag": "v1.0-platform-certified",
   "certifiedPlatformCommit": "eb15613efd81ff1a8e57797e11feb7254c1b604a",
   "status": "in_progress",
-  "updatedAt": "2026-07-28T03:58:00.000Z",
+  "updatedAt": "2026-07-28T04:08:00.000Z",
   "authorization": {
     "boundedProviderCallsAuthorized": true,
     "boundedProductionWritesAuthorized": true,
@@ -167,7 +167,8 @@
     {
       "checkpointId": "D",
       "name": "NHL_PREVIEW_PREDICTION_LIFECYCLE",
-      "status": "completed_pending_commit",
+      "status": "completed_pushed",
+      "commit": "8f97779ec66ee20e9e751aac7f789c982c76e5a0",
       "artifacts": [
         "scripts/multi-sport-unlock-v1-checkpoint-d-nhl.mjs",
         "docs/NHL_PREVIEW_PREDICTION_LIFECYCLE_V1.md",
@@ -209,6 +210,66 @@
         "officialPickPolicyChanged": false
       },
       "nextCheckpoint": "E_SOCCER_COMPETITION_ACTIVATION"
+    },
+    {
+      "checkpointId": "E",
+      "name": "SOCCER_COMPETITION_ACTIVATION_GATE",
+      "status": "completed_pending_push",
+      "artifacts": [
+        "scripts/multi-sport-unlock-v1-checkpoint-e-soccer.mjs",
+        "docs/SOCCER_COMPETITION_ACTIVATION_GATE_V1.md",
+        "docs/soccer-competition-activation-gate-v1.json"
+      ],
+      "validation": {
+        "fixtureCommand": "node scripts/multi-sport-unlock-v1-checkpoint-e-soccer.mjs --validate",
+        "fixtureStatus": "passed",
+        "fixtureChecks": 4,
+        "dryRunCommand": "node --loader ./scripts/local-ts-loader.mjs scripts/multi-sport-unlock-v1-checkpoint-e-soccer.mjs",
+        "dryRunStatus": "SOCCER_COMPETITION_PREVIEW_BLOCKED",
+        "gatesPassed": 6,
+        "gatesTotal": 15
+      },
+      "liveExecution": {
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0,
+        "productionMutationsMade": 0,
+        "predictionsPersisted": 0
+      },
+      "storedEvidence": {
+        "activeProviderCompetitionKeys": 67,
+        "storedOddsRows": 260,
+        "distinctOddsEventIds": 8,
+        "storedCompetitionKeys": [
+          "soccer",
+          "soccer_generic"
+        ],
+        "providerEventMappings": 0,
+        "canonicalEvents": 0,
+        "completedResults": 0
+      },
+      "blockers": [
+        "SOCCER_STORED_COMPETITION_SCOPE_NOT_CERTIFIED",
+        "SOCCER_CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED",
+        "SOCCER_CANONICAL_EVENTS_EMPTY",
+        "SOCCER_FUTURE_CANONICAL_EVENTS_EMPTY",
+        "SOCCER_COMPLETED_RESULTS_EMPTY",
+        "SOCCER_FEATURES_PARTIAL_ONLY",
+        "SOCCER_PERSISTENCE_DISABLED_BY_DESIGN",
+        "SOCCER_SETTLEMENT_INPUTS_EMPTY",
+        "SOCCER_SETTLED_LEARNING_SAMPLE_EMPTY"
+      ],
+      "safety": {
+        "previewActivated": false,
+        "productionActivated": false,
+        "recommendationEligible": false,
+        "retrospectivePredictionsGenerated": 0,
+        "probabilityChanged": false,
+        "confidenceChanged": false,
+        "trustFormulaChanged": false,
+        "learningBrainWeightsChanged": false,
+        "officialPickPolicyChanged": false
+      },
+      "nextCheckpoint": "F_TENNIS_UFC_EVENT_LIFECYCLE"
     }
   ],
   "certificationMarkers": [
@@ -223,6 +284,11 @@
     "NHL_PREVIEW_PREDICTION_LIFECYCLE_BLOCKED_TRUTHFUL_PASS",
     "NHL_NO_RETROSPECTIVE_PREDICTION_PASS",
     "NHL_NO_PRODUCTION_PROMOTION_PASS",
+    "SOCCER_COMPETITION_ACTIVATION_BLOCKED_TRUTHFUL_PASS",
+    "SOCCER_COMPETITION_SCOPE_ENFORCED_PASS",
+    "SOCCER_NO_GLOBAL_COVERAGE_OVERCLAIM_PASS",
+    "SOCCER_NO_RETROSPECTIVE_PREDICTION_PASS",
+    "SOCCER_NO_PRODUCTION_PROMOTION_PASS",
     "PROVIDER_QUOTA_SAFETY_PASS",
     "NO_RETROSPECTIVE_PREDICTION_PASS",
     "NO_PROBABILITY_CHANGE_PASS",

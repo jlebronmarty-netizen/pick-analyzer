@@ -1,0 +1,468 @@
+{
+  "generatedAt": "2026-07-28T03:53:11.396Z",
+  "commit": "8f97779ec66ee20e9e751aac7f789c982c76e5a0",
+  "checkpoint": "SOCCER_COMPETITION_ACTIVATION_GATE_V1",
+  "result": {
+    "success": true,
+    "status": "SOCCER_COMPETITION_PREVIEW_BLOCKED",
+    "generatedAt": "2026-07-28T03:53:11.396Z",
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 0,
+    "catalog": {
+      "active": true,
+      "directCatalogMatch": false,
+      "catalogKeys": [
+        "soccer_africa_cup_of_nations",
+        "soccer_argentina_primera_division",
+        "soccer_australia_aleague",
+        "soccer_austria_bundesliga",
+        "soccer_belgium_first_div",
+        "soccer_brazil_campeonato",
+        "soccer_brazil_serie_b",
+        "soccer_chile_campeonato",
+        "soccer_china_superleague",
+        "soccer_concacaf_gold_cup",
+        "soccer_concacaf_leagues_cup",
+        "soccer_conmebol_copa_america",
+        "soccer_conmebol_copa_libertadores",
+        "soccer_conmebol_copa_sudamericana",
+        "soccer_denmark_superliga",
+        "soccer_efl_champ",
+        "soccer_england_efl_cup",
+        "soccer_england_league1",
+        "soccer_england_league2",
+        "soccer_epl",
+        "soccer_fa_cup",
+        "soccer_fifa_club_world_cup",
+        "soccer_fifa_world_cup",
+        "soccer_fifa_world_cup_qualifiers_europe",
+        "soccer_fifa_world_cup_qualifiers_south_america",
+        "soccer_fifa_world_cup_winner",
+        "soccer_fifa_world_cup_womens",
+        "soccer_finland_veikkausliiga",
+        "soccer_france_coupe_de_france",
+        "soccer_france_ligue_one",
+        "soccer_france_ligue_two",
+        "soccer_germany_bundesliga",
+        "soccer_germany_bundesliga2",
+        "soccer_germany_bundesliga_women",
+        "soccer_germany_dfb_pokal",
+        "soccer_germany_liga3",
+        "soccer_greece_super_league",
+        "soccer_italy_coppa_italia",
+        "soccer_italy_serie_a",
+        "soccer_italy_serie_b",
+        "soccer_japan_j_league",
+        "soccer_korea_kleague1",
+        "soccer_league_of_ireland",
+        "soccer_mexico_ligamx",
+        "soccer_netherlands_eredivisie",
+        "soccer_norway_eliteserien",
+        "soccer_poland_ekstraklasa",
+        "soccer_portugal_primeira_liga",
+        "soccer_russia_premier_league",
+        "soccer_saudi_arabia_pro_league",
+        "soccer_spain_copa_del_rey",
+        "soccer_spain_la_liga",
+        "soccer_spain_segunda_division",
+        "soccer_spl",
+        "soccer_sweden_allsvenskan",
+        "soccer_sweden_superettan",
+        "soccer_switzerland_superleague",
+        "soccer_turkey_super_league",
+        "soccer_uefa_champs_league",
+        "soccer_uefa_champs_league_qualification",
+        "soccer_uefa_champs_league_women",
+        "soccer_uefa_euro_qualification",
+        "soccer_uefa_europa_conference_league",
+        "soccer_uefa_europa_league",
+        "soccer_uefa_european_championship",
+        "soccer_uefa_nations_league",
+        "soccer_usa_mls"
+      ],
+      "aggregateScoreHttpStatus": 404,
+      "aggregateEndpoint": "/sports/soccer/scores?daysFrom=3"
+    },
+    "stored": {
+      "events": {
+        "count": 0,
+        "error": null
+      },
+      "futureEvents": {
+        "count": 0,
+        "error": null
+      },
+      "odds": {
+        "count": 260,
+        "error": null
+      },
+      "mappings": {
+        "count": 0,
+        "error": null
+      },
+      "results": {
+        "count": 0,
+        "error": null
+      },
+      "predictions": {
+        "count": 0,
+        "error": null
+      },
+      "settledPredictions": {
+        "count": 0,
+        "error": null
+      },
+      "teams": {
+        "count": 0,
+        "error": null
+      },
+      "teamStats": {
+        "count": 0,
+        "error": null
+      },
+      "gameStats": {
+        "count": 0,
+        "error": null
+      },
+      "playerStats": {
+        "count": 0,
+        "error": null
+      },
+      "sampledOddsRows": 260,
+      "distinctOddsEventIds": 8,
+      "distinctCompetitionKeys": [
+        "soccer",
+        "soccer_generic"
+      ],
+      "distinctMarkets": [
+        "moneyline",
+        "spread",
+        "total"
+      ],
+      "distinctBookmakers": [
+        "betmgm",
+        "betonlineag",
+        "betrivers",
+        "betus",
+        "bovada",
+        "draftkings",
+        "fanduel",
+        "lowvig"
+      ],
+      "distinctSeasons": [
+        "2026"
+      ]
+    },
+    "engine": {
+      "success": true,
+      "status": "partial",
+      "summary": {
+        "predictionsGenerated": 10,
+        "recommended": 0,
+        "markets": [
+          "1x2",
+          "1x2",
+          "double_chance",
+          "draw_no_bet",
+          "total",
+          "both_teams_to_score",
+          "first_half_1x2",
+          "first_half_total",
+          "qualification",
+          "asian_handicap_contract"
+        ],
+        "averageFeatureQuality": 40,
+        "averageDataSufficiency": 10,
+        "noLeakage": true,
+        "persisted": false,
+        "productionRecommendations": false,
+        "confidenceCap": 62
+      },
+      "compatibility": {
+        "usesSharedSportPredictionSdkUtilities": true,
+        "usesFeatureStoreSnapshot": true,
+        "usesPredictionSafetyContracts": true,
+        "usesSettlementCoreContracts": true,
+        "usesRawProviderPayloads": false,
+        "requiresMigration": false,
+        "persistenceEnabled": false
+      },
+      "missingSportSpecificDomains": [
+        "draw_aware_context",
+        "league_strength_context",
+        "confirmed_lineup_context",
+        "injury_context",
+        "expected_goals_context"
+      ]
+    },
+    "health": {
+      "status": "partial",
+      "checks": {
+        "threeWaySum": 100,
+        "noNegativeProbabilities": true,
+        "featureSnapshotNoLeakage": true,
+        "persistenceEnabled": false,
+        "productionReady": false,
+        "confidenceCapped": true,
+        "realDataValidationPending": true,
+        "historicalCalibrationPending": true
+      },
+      "warnings": [
+        "Soccer draw-aware feature extensions are not yet registered.",
+        "Soccer Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.",
+        "Draw-aware features, league strength, lineup context and injury context are not fully available in Feature Store Core V1.",
+        "Unavailable soccer-specific context must degrade confidence or block later prediction engines instead of being fabricated.",
+        "Soccer Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+        "Predictions are not persisted and are not production betting recommendations.",
+        "Draw-aware context, league strength, lineups, injuries and expected-goals inputs are unavailable and not fabricated.",
+        "Asian handicap is exposed as a contract only until normalized market support is finalized.",
+        "Qualification is treated separately from match winner.",
+        "Real-data validation and historical calibration are pending.",
+        "Stale-data warning fixture: market movement and lineup timestamps are unavailable.",
+        "Missing lineup/injury warning fixture: lineups and injuries are unavailable.",
+        "Data sufficiency is below soccer engine threshold after critical-domain penalties."
+      ]
+    },
+    "validation": {
+      "success": true,
+      "summary": {
+        "checks": 14,
+        "passed": 14,
+        "predictionsGenerated": 10,
+        "markets": [
+          "1x2",
+          "1x2",
+          "double_chance",
+          "draw_no_bet",
+          "total",
+          "both_teams_to_score",
+          "first_half_1x2",
+          "first_half_total",
+          "qualification",
+          "asian_handicap_contract"
+        ],
+        "threeWaySum": 100,
+        "averageFeatureQuality": 40,
+        "averageDataSufficiency": 10,
+        "status": "partial"
+      },
+      "checks": {
+        "threeWaySumsToOne": true,
+        "noNegativeProbabilities": true,
+        "fairOddsCalculation": true,
+        "doubleChanceDerivation": true,
+        "drawNoBetDerivation": true,
+        "totalsComplementarity": true,
+        "bttsComplementarity": true,
+        "firstHalfCalculations": true,
+        "staleDataWarning": true,
+        "missingLineupInjuryWarning": true,
+        "insufficientDataBehavior": true,
+        "noLeakage": true,
+        "noPersistence": true,
+        "zeroProviderCalls": true
+      }
+    },
+    "featureStatus": {
+      "status": "partial",
+      "summary": {
+        "soccerDefinitions": 5,
+        "featureSets": 1,
+        "readyFeatureSets": 0,
+        "partialFeatureSets": 1,
+        "previewQuality": 40,
+        "previewSufficiency": 40,
+        "previewNoLeakage": true,
+        "storedTeamsRows": 0,
+        "storedEventsRows": 0,
+        "storedOddsRows": 260,
+        "storedPredictionRows": 0
+      },
+      "missingSportSpecificDomains": [
+        "draw_aware_context",
+        "league_strength_context",
+        "confirmed_lineup_context",
+        "injury_context"
+      ]
+    },
+    "crosswalk": {
+      "sportKey": "soccer",
+      "label": "Soccer",
+      "providerSportKey": "soccer",
+      "state": "FOUNDATION",
+      "coverage": {
+        "oddsRows": 260,
+        "oddsEvents": 8,
+        "currentOddsCoverage": {
+          "numerator": 8,
+          "denominator": 8,
+          "pct": 100
+        },
+        "providerEventMappings": 0,
+        "canonicalEventMappings": 0,
+        "eventCrosswalkCoverage": {
+          "numerator": 0,
+          "denominator": 8,
+          "pct": 0
+        },
+        "resultRows": 0,
+        "resultCrosswalkCoverage": {
+          "numerator": 0,
+          "denominator": 8,
+          "pct": 0
+        },
+        "canonicalEvents": 0,
+        "completedCanonicalEvents": 0,
+        "predictionRows": 0,
+        "settledPredictionRows": 0
+      },
+      "markets": [
+        "moneyline",
+        "spread",
+        "total"
+      ],
+      "bookmakers": [
+        "betmgm",
+        "betonlineag",
+        "betrivers",
+        "betus",
+        "bovada",
+        "draftkings",
+        "fanduel",
+        "lowvig"
+      ],
+      "classifications": {
+        "exact": 0,
+        "deterministicAlias": 0,
+        "timeWindowWithIdentity": 0,
+        "ambiguous": 0,
+        "unresolved": 8,
+        "conflict": 0
+      },
+      "readiness": {
+        "exactEventMapping": false,
+        "completedResults": false,
+        "deterministicSettlementInputs": false,
+        "learningSample": false,
+        "previewPredictionEligible": false,
+        "productionPredictionEligible": false,
+        "recommendationEligible": false
+      },
+      "blockers": [
+        "CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED",
+        "COMPLETED_RESULT_ROWS_NOT_AVAILABLE",
+        "ODDS_CANONICAL_RESULT_CHAIN_NOT_CERTIFIED",
+        "NO_EXISTING_PREVIEW_OR_PRODUCTION_PREDICTIONS",
+        "NO_SETTLED_PREDICTION_SAMPLE"
+      ],
+      "nextAction": "CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED"
+    },
+    "gates": [
+      {
+        "name": "Competition-scoped provider catalog",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Aggregate soccer endpoint rejected for lifecycle activation",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Stored soccer odds",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Stored odds expose event identifiers",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Stored odds expose competition scope",
+        "passed": false,
+        "blocker": "SOCCER_STORED_COMPETITION_SCOPE_NOT_CERTIFIED"
+      },
+      {
+        "name": "Exact event identity",
+        "passed": false,
+        "blocker": "SOCCER_CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED"
+      },
+      {
+        "name": "Canonical soccer events",
+        "passed": false,
+        "blocker": "SOCCER_CANONICAL_EVENTS_EMPTY"
+      },
+      {
+        "name": "Scheduled future starts",
+        "passed": false,
+        "blocker": "SOCCER_FUTURE_CANONICAL_EVENTS_EMPTY"
+      },
+      {
+        "name": "Historical results",
+        "passed": false,
+        "blocker": "SOCCER_COMPLETED_RESULTS_EMPTY"
+      },
+      {
+        "name": "Competition feature readiness",
+        "passed": false,
+        "blocker": "SOCCER_FEATURES_PARTIAL_ONLY"
+      },
+      {
+        "name": "Cutoff safety",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Persistence enabled for real preview rows",
+        "passed": false,
+        "blocker": "SOCCER_PERSISTENCE_DISABLED_BY_DESIGN"
+      },
+      {
+        "name": "Settlement inputs",
+        "passed": false,
+        "blocker": "SOCCER_SETTLEMENT_INPUTS_EMPTY"
+      },
+      {
+        "name": "Learning labels",
+        "passed": false,
+        "blocker": "SOCCER_SETTLED_LEARNING_SAMPLE_EMPTY"
+      },
+      {
+        "name": "Preview/production separation",
+        "passed": true,
+        "blocker": null
+      }
+    ],
+    "summary": {
+      "gatesPassed": 6,
+      "gatesTotal": 15,
+      "previewActivated": false,
+      "productionActivated": false,
+      "recommendationEligible": false
+    },
+    "blockers": [
+      "SOCCER_STORED_COMPETITION_SCOPE_NOT_CERTIFIED",
+      "SOCCER_CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED",
+      "SOCCER_CANONICAL_EVENTS_EMPTY",
+      "SOCCER_FUTURE_CANONICAL_EVENTS_EMPTY",
+      "SOCCER_COMPLETED_RESULTS_EMPTY",
+      "SOCCER_FEATURES_PARTIAL_ONLY",
+      "SOCCER_PERSISTENCE_DISABLED_BY_DESIGN",
+      "SOCCER_SETTLEMENT_INPUTS_EMPTY",
+      "SOCCER_SETTLED_LEARNING_SAMPLE_EMPTY"
+    ],
+    "certifications": [
+      "SOCCER_COMPETITION_ACTIVATION_BLOCKED_TRUTHFUL_PASS",
+      "SOCCER_COMPETITION_SCOPE_ENFORCED_PASS",
+      "SOCCER_NO_GLOBAL_COVERAGE_OVERCLAIM_PASS",
+      "SOCCER_NO_RETROSPECTIVE_PREDICTION_PASS",
+      "SOCCER_NO_PRODUCTION_PROMOTION_PASS",
+      "NO_PROVIDER_CALL_E_PASS",
+      "NO_REMOTE_MUTATION_E_PASS",
+      "NO_PROBABILITY_CHANGE_PASS",
+      "NO_CONFIDENCE_CHANGE_PASS"
+    ]
+  }
+}
