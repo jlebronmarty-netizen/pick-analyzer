@@ -1114,6 +1114,12 @@ There are 359 `src/app/api/**/route.ts` files.
 
 Primary project focus remains controlled expansion from evidence. For MLB provider work, use `/api/providers/sportsdataio/discovery` to choose the next narrowly scoped verification before spending quota. Do not promote V7, change official-pick thresholds, alter settlement policy, mutate champion rows or expose unsupported markets without a new explicit major project.
 
+## Latest Update - 2026-07-28
+
+- Multi-Sport Results, Settlement & Preview Prediction Unlock V1 Checkpoint A is implemented and live-probed. Added read-only `/api/data-foundation/results-crosswalk`, shared `multi-sport-results-crosswalk-foundation.service.ts`, a bounded checkpoint runner and evidence docs. The live score probe made 5 The Odds API calls with the 2,000-credit reserve preserved (`19521 -> 19515` requests remaining), inserted 12 exact completed UFC/MMA score rows into `game_results`, updated 0 rows, and wrote one sync-job evidence row. No predictions, recommendations, model weights, thresholds, epochs, feature rebuilds or Learning Brain weights changed.
+- Checkpoint A result: NBA returned 0 score events and still has 0 stored The Odds API odds / 0 result rows; NFL returned 75 score events but 0 completed rows and has no canonical events; NHL returned 32 score events but 0 completed rows and has no canonical events; soccer aggregate score endpoint returned 404 and requires competition-specific score discovery; UFC returned 44 score events and 12 completed rows, but remains blocked because canonical event crosswalk is not certified. Provider-native mappings are explicitly not treated as certified canonical crosswalks.
+- Next resumable checkpoint: NBA Preview Prediction Lifecycle. Current evidence blocks NBA activation until current pregame odds, completed results, exact event/result crosswalk and feature-settlement gates are available. Do not generate retrospective NBA predictions.
+
 ## Handoff Notes
 
 - Read `AGENTS.md`, this file and `docs/MASTER_ROADMAP.md` before autonomous work.

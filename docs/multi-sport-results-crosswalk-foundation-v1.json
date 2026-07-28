@@ -1,0 +1,407 @@
+{
+  "generatedAt": "2026-07-28T03:34:01.101Z",
+  "commit": "c0af0c7578b0f6f9bd190e3d5c834650cc0bb318",
+  "checkpoint": "MULTI_SPORT_RESULTS_CROSSWALK_FOUNDATION_V1",
+  "result": {
+    "success": true,
+    "status": "MULTI_SPORT_RESULTS_CROSSWALK_FOUNDATION_COMPLETE",
+    "generatedAt": "2026-07-28T03:34:01.101Z",
+    "provider": "the-odds-api",
+    "persist": true,
+    "providerCallsMade": 5,
+    "productionMutationsMade": 13,
+    "remoteMutationsMade": 13,
+    "rowsInserted": 12,
+    "rowsUpdated": 0,
+    "rowsReused": 0,
+    "creditReserve": 2000,
+    "requestsRemainingBefore": 19521,
+    "requestsRemainingAfter": 19515,
+    "requestsUsedObserved": 6,
+    "sports": [
+      {
+        "sportKey": "basketball_nba",
+        "label": "NBA",
+        "providerSportKey": "basketball_nba",
+        "daysFrom": 3,
+        "competition": "nba",
+        "httpStatus": 200,
+        "eventsReturned": 0,
+        "completedRows": 0,
+        "rowsInserted": 0,
+        "rowsUpdated": 0,
+        "rowsReused": 0,
+        "stored": {
+          "odds": {
+            "count": 0,
+            "error": null
+          },
+          "mappings": {
+            "count": 0,
+            "error": null
+          },
+          "canonicalEvents": {
+            "count": 14,
+            "error": null
+          },
+          "results": {
+            "count": 0,
+            "error": null
+          },
+          "predictions": {
+            "count": 27,
+            "error": null
+          }
+        },
+        "storedBefore": {
+          "odds": {
+            "count": 0,
+            "error": null
+          },
+          "mappings": {
+            "count": 0,
+            "error": null
+          },
+          "canonicalEvents": {
+            "count": 14,
+            "error": null
+          },
+          "results": {
+            "count": 0,
+            "error": null
+          },
+          "predictions": {
+            "count": 27,
+            "error": null
+          }
+        },
+        "lifecycleState": "BLOCKED_NO_STORED_ODDS_FOUNDATION",
+        "blockers": [
+          "STORED_ODDS_EMPTY",
+          "COMPLETED_RESULTS_EMPTY",
+          "EXACT_CANONICAL_CROSSWALK_NOT_PROVEN"
+        ]
+      },
+      {
+        "sportKey": "americanfootball_nfl",
+        "label": "NFL",
+        "providerSportKey": "americanfootball_nfl",
+        "daysFrom": 3,
+        "competition": "nfl",
+        "httpStatus": 200,
+        "eventsReturned": 75,
+        "completedRows": 0,
+        "rowsInserted": 0,
+        "rowsUpdated": 0,
+        "rowsReused": 0,
+        "stored": {
+          "odds": {
+            "count": 1978,
+            "error": null
+          },
+          "mappings": {
+            "count": 75,
+            "error": null
+          },
+          "canonicalEvents": {
+            "count": 0,
+            "error": null
+          },
+          "results": {
+            "count": 0,
+            "error": null
+          },
+          "predictions": {
+            "count": 190,
+            "error": null
+          }
+        },
+        "storedBefore": {
+          "odds": {
+            "count": 1978,
+            "error": null
+          },
+          "mappings": {
+            "count": 75,
+            "error": null
+          },
+          "canonicalEvents": {
+            "count": 0,
+            "error": null
+          },
+          "results": {
+            "count": 0,
+            "error": null
+          },
+          "predictions": {
+            "count": 190,
+            "error": null
+          }
+        },
+        "lifecycleState": "FOUNDATION_BLOCKED_BY_RESULT_OR_CANONICAL_CROSSWALK",
+        "blockers": [
+          "CANONICAL_EVENTS_EMPTY",
+          "COMPLETED_RESULTS_EMPTY",
+          "EXACT_CANONICAL_CROSSWALK_NOT_PROVEN"
+        ]
+      },
+      {
+        "sportKey": "icehockey_nhl",
+        "label": "NHL",
+        "providerSportKey": "icehockey_nhl",
+        "daysFrom": 3,
+        "competition": "nhl",
+        "httpStatus": 200,
+        "eventsReturned": 32,
+        "completedRows": 0,
+        "rowsInserted": 0,
+        "rowsUpdated": 0,
+        "rowsReused": 0,
+        "stored": {
+          "odds": {
+            "count": 426,
+            "error": null
+          },
+          "mappings": {
+            "count": 32,
+            "error": null
+          },
+          "canonicalEvents": {
+            "count": 0,
+            "error": null
+          },
+          "results": {
+            "count": 0,
+            "error": null
+          },
+          "predictions": {
+            "count": 0,
+            "error": null
+          }
+        },
+        "storedBefore": {
+          "odds": {
+            "count": 426,
+            "error": null
+          },
+          "mappings": {
+            "count": 32,
+            "error": null
+          },
+          "canonicalEvents": {
+            "count": 0,
+            "error": null
+          },
+          "results": {
+            "count": 0,
+            "error": null
+          },
+          "predictions": {
+            "count": 0,
+            "error": null
+          }
+        },
+        "lifecycleState": "FOUNDATION_BLOCKED_BY_RESULT_OR_CANONICAL_CROSSWALK",
+        "blockers": [
+          "CANONICAL_EVENTS_EMPTY",
+          "COMPLETED_RESULTS_EMPTY",
+          "EXACT_CANONICAL_CROSSWALK_NOT_PROVEN"
+        ]
+      },
+      {
+        "sportKey": "soccer",
+        "label": "Soccer aggregate",
+        "providerSportKey": "soccer",
+        "daysFrom": 3,
+        "competition": "soccer_aggregate",
+        "httpStatus": 404,
+        "eventsReturned": 0,
+        "completedRows": 0,
+        "rowsInserted": 0,
+        "rowsUpdated": 0,
+        "rowsReused": 0,
+        "stored": {
+          "odds": {
+            "count": 260,
+            "error": null
+          },
+          "mappings": {
+            "count": 0,
+            "error": null
+          },
+          "canonicalEvents": {
+            "count": 0,
+            "error": null
+          },
+          "results": {
+            "count": 0,
+            "error": null
+          },
+          "predictions": {
+            "count": 0,
+            "error": null
+          }
+        },
+        "storedBefore": {
+          "odds": {
+            "count": 260,
+            "error": null
+          },
+          "mappings": {
+            "count": 0,
+            "error": null
+          },
+          "canonicalEvents": {
+            "count": 0,
+            "error": null
+          },
+          "results": {
+            "count": 0,
+            "error": null
+          },
+          "predictions": {
+            "count": 0,
+            "error": null
+          }
+        },
+        "lifecycleState": "FOUNDATION_BLOCKED_BY_RESULT_OR_CANONICAL_CROSSWALK",
+        "blockers": [
+          "CANONICAL_EVENTS_EMPTY",
+          "COMPLETED_RESULTS_EMPTY",
+          "EXACT_CANONICAL_CROSSWALK_NOT_PROVEN"
+        ]
+      },
+      {
+        "sportKey": "mma_ufc",
+        "label": "UFC/MMA",
+        "providerSportKey": "mma_mixed_martial_arts",
+        "daysFrom": 3,
+        "competition": "ufc",
+        "httpStatus": 200,
+        "eventsReturned": 44,
+        "completedRows": 12,
+        "rowsInserted": 12,
+        "rowsUpdated": 0,
+        "rowsReused": 0,
+        "stored": {
+          "odds": {
+            "count": 360,
+            "error": null
+          },
+          "mappings": {
+            "count": 32,
+            "error": null
+          },
+          "canonicalEvents": {
+            "count": 0,
+            "error": null
+          },
+          "results": {
+            "count": 12,
+            "error": null
+          },
+          "predictions": {
+            "count": 0,
+            "error": null
+          }
+        },
+        "storedBefore": {
+          "odds": {
+            "count": 360,
+            "error": null
+          },
+          "mappings": {
+            "count": 32,
+            "error": null
+          },
+          "canonicalEvents": {
+            "count": 0,
+            "error": null
+          },
+          "results": {
+            "count": 0,
+            "error": null
+          },
+          "predictions": {
+            "count": 0,
+            "error": null
+          }
+        },
+        "lifecycleState": "FOUNDATION_BLOCKED_BY_RESULT_OR_CANONICAL_CROSSWALK",
+        "blockers": [
+          "CANONICAL_EVENTS_EMPTY",
+          "EXACT_CANONICAL_CROSSWALK_NOT_PROVEN"
+        ]
+      }
+    ],
+    "planObserved": [
+      {
+        "sportKey": "basketball_nba",
+        "competition": "nba",
+        "endpoint": "/sports/basketball_nba/scores?daysFrom=3",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 0,
+        "requestsRemaining": 19521,
+        "requestsUsed": 479,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "sportKey": "americanfootball_nfl",
+        "competition": "nfl",
+        "endpoint": "/sports/americanfootball_nfl/scores?daysFrom=3",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 75,
+        "requestsRemaining": 19519,
+        "requestsUsed": 481,
+        "requestsLast": 2,
+        "error": null
+      },
+      {
+        "sportKey": "icehockey_nhl",
+        "competition": "nhl",
+        "endpoint": "/sports/icehockey_nhl/scores?daysFrom=3",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 32,
+        "requestsRemaining": 19517,
+        "requestsUsed": 483,
+        "requestsLast": 2,
+        "error": null
+      },
+      {
+        "sportKey": "soccer",
+        "competition": "soccer_aggregate",
+        "endpoint": "/sports/soccer/scores?daysFrom=3",
+        "httpStatus": 404,
+        "ok": false,
+        "rows": 0,
+        "requestsRemaining": 19517,
+        "requestsUsed": 483,
+        "requestsLast": 0,
+        "error": "{\"message\":\"Unknown sport\",\"error_code\":\"UNKNOWN_SPORT\",\"details_url\":\"https://the-odds-api.com/liveapi/guides/v4/api-error-codes.html#unknown-sport\"}"
+      },
+      {
+        "sportKey": "mma_ufc",
+        "competition": "ufc",
+        "endpoint": "/sports/mma_mixed_martial_arts/scores?daysFrom=3",
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 44,
+        "requestsRemaining": 19515,
+        "requestsUsed": 485,
+        "requestsLast": 2,
+        "error": null
+      }
+    ],
+    "stopReason": null,
+    "blockers": [
+      "STORED_ODDS_EMPTY",
+      "COMPLETED_RESULTS_EMPTY",
+      "EXACT_CANONICAL_CROSSWALK_NOT_PROVEN",
+      "CANONICAL_EVENTS_EMPTY"
+    ]
+  }
+}

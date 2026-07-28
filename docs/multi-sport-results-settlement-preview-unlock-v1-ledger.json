@@ -1,0 +1,88 @@
+{
+  "program": "MULTI_SPORT_RESULTS_SETTLEMENT_PREVIEW_PREDICTION_UNLOCK_V1",
+  "repository": "C:\\Projects\\pick-analyzer",
+  "startingCommit": "c0af0c7578b0f6f9bd190e3d5c834650cc0bb318",
+  "certifiedPlatformTag": "v1.0-platform-certified",
+  "certifiedPlatformCommit": "eb15613efd81ff1a8e57797e11feb7254c1b604a",
+  "status": "in_progress",
+  "updatedAt": "2026-07-28T03:34:01.101Z",
+  "authorization": {
+    "boundedProviderCallsAuthorized": true,
+    "boundedProductionWritesAuthorized": true,
+    "commitAndPushAuthorized": true,
+    "retrospectivePredictionsAuthorized": false,
+    "modelFormulaChangesAuthorized": false,
+    "learningBrainWeightChangesAuthorized": false,
+    "epochActivationAuthorized": false
+  },
+  "checkpoints": [
+    {
+      "checkpointId": "A",
+      "name": "MULTI_SPORT_RESULT_AND_EVENT_CROSSWALK_FOUNDATION",
+      "status": "completed_pending_commit",
+      "artifacts": [
+        "src/services/multi-sport-results-crosswalk-foundation.service.ts",
+        "src/app/api/data-foundation/results-crosswalk/route.ts",
+        "scripts/multi-sport-results-crosswalk-foundation-v1.mjs",
+        "docs/MULTI_SPORT_RESULTS_CROSSWALK_FOUNDATION_V1.md",
+        "docs/multi-sport-results-crosswalk-foundation-v1.json"
+      ],
+      "validation": {
+        "fixtureCommand": "node scripts/multi-sport-results-crosswalk-foundation-v1.mjs --validate",
+        "fixtureStatus": "passed",
+        "fixtureChecks": 5,
+        "buildCommand": "npm.cmd run build",
+        "buildStatus": "passed",
+        "staticPages": 392
+      },
+      "liveExecution": {
+        "provider": "the-odds-api",
+        "providerCallsMade": 5,
+        "requestsRemainingBefore": 19521,
+        "requestsRemainingAfter": 19515,
+        "requestsUsedObserved": 6,
+        "creditReserve": 2000,
+        "rowsInserted": 12,
+        "rowsUpdated": 0,
+        "sportsSyncJobsInserted": 1,
+        "productionMutationsMade": 13
+      },
+      "sportOutcomes": {
+        "basketball_nba": "BLOCKED_NO_STORED_ODDS_FOUNDATION",
+        "americanfootball_nfl": "FOUNDATION_BLOCKED_BY_RESULT_OR_CANONICAL_CROSSWALK",
+        "icehockey_nhl": "FOUNDATION_BLOCKED_BY_RESULT_OR_CANONICAL_CROSSWALK",
+        "soccer": "FOUNDATION_BLOCKED_BY_COMPETITION_SPECIFIC_SCORE_DISCOVERY",
+        "mma_ufc": "FOUNDATION_WITH_RESULTS_BLOCKED_BY_CANONICAL_CROSSWALK"
+      },
+      "safety": {
+        "predictionsGenerated": 0,
+        "retrospectivePredictionsGenerated": 0,
+        "settlementsExecuted": 0,
+        "learningLabelsCreated": 0,
+        "featureRebuildsExecuted": 0,
+        "sqlApplied": 0,
+        "epochActivated": false,
+        "probabilityChanged": false,
+        "confidenceChanged": false,
+        "trustFormulaChanged": false,
+        "learningBrainWeightsChanged": false,
+        "officialPickPolicyChanged": false
+      },
+      "nextCheckpoint": "B_NBA_PREVIEW_PREDICTION_LIFECYCLE"
+    }
+  ],
+  "certificationMarkers": [
+    "MULTI_SPORT_RESULTS_FOUNDATION_PASS",
+    "MULTI_SPORT_SCORE_RESULT_PASS",
+    "PROVIDER_QUOTA_SAFETY_PASS",
+    "NO_RETROSPECTIVE_PREDICTION_PASS",
+    "NO_PROBABILITY_CHANGE_PASS",
+    "NO_CONFIDENCE_CHANGE_PASS",
+    "NO_TRUST_FORMULA_CHANGE_PASS",
+    "NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS",
+    "NO_OFFICIAL_PICK_POLICY_CHANGE_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "NO_SECRET_EXPOSURE_PASS",
+    "NO_CERTIFIED_PLATFORM_REGRESSION_PASS"
+  ]
+}
