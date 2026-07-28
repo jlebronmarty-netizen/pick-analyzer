@@ -12,6 +12,8 @@ const checkpoint2 = fs.readFileSync('src/services/multi-sport-data-expansion-che
 const checkpoint2Route = fs.readFileSync('src/app/api/data-coverage/expansion-checkpoint2/route.ts', 'utf8')
 const checkpoint3 = fs.readFileSync('src/services/multi-sport-data-expansion-checkpoint3.service.ts', 'utf8')
 const checkpoint3Route = fs.readFileSync('src/app/api/data-coverage/expansion-checkpoint3/route.ts', 'utf8')
+const finalCertification = fs.readFileSync('src/services/multi-sport-data-expansion-final.service.ts', 'utf8')
+const finalRoute = fs.readFileSync('src/app/api/data-coverage/final-certification/route.ts', 'utf8')
 
 const checks = [
   ['inventory service exists', service.includes('getDataCoverageInventoryV1')],
@@ -40,10 +42,15 @@ const checks = [
   ['soccer competition scoped', checkpoint3.includes('competition_specific_only')],
   ['tennis ufc event scoped', checkpoint3.includes('event_driven_tournament_scope') && checkpoint3.includes('event_and_bout_scope')],
   ['checkpoint 3 route exposes validation', checkpoint3Route.includes("validate') === 'true'")],
+  ['final certification service exists', finalCertification.includes('getMultiSportDataExpansionFinalCertificationV1')],
+  ['postgame contract avoids causal certainty', finalCertification.includes('causalCertaintyClaimed: false')],
+  ['learning weights unchanged', finalCertification.includes('learningBrainWeightsChanged: false')],
+  ['final route exposes validation', finalRoute.includes("validate') === 'true'")],
   ['docs include certification marker', docs.includes('DATA_INVENTORY_EXACTNESS_PASS')],
   ['docs include provider audit marker', docs.includes('PROVIDER_ENTITLEMENT_AUDIT_PASS')],
   ['docs include historical checkpoint marker', docs.includes('HISTORICAL_IMPORT_CHECKPOINT_PASS')],
   ['docs include feature readiness marker', docs.includes('MULTI_SPORT_FEATURE_READINESS_PASS')],
+  ['docs include postgame no causal marker', docs.includes('POSTGAME_NO_CAUSAL_FABRICATION_PASS')],
 ]
 
 const failed = checks.filter(([, pass]) => !pass).map(([name]) => name)

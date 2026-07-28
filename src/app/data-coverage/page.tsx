@@ -5,6 +5,7 @@ import { getDataCoverageInventoryV1 } from '@/services/data-coverage-inventory.s
 import { getMultiSportProviderEntitlementAuditV1 } from '@/services/multi-sport-provider-entitlement-audit.service'
 import { getMultiSportDataExpansionCheckpoint2V1 } from '@/services/multi-sport-data-expansion-checkpoint2.service'
 import { getMultiSportDataExpansionCheckpoint3V1 } from '@/services/multi-sport-data-expansion-checkpoint3.service'
+import { getMultiSportDataExpansionFinalCertificationV1 } from '@/services/multi-sport-data-expansion-final.service'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,11 +27,12 @@ function Metric({ label, value, detail }: { label: string; value: string | numbe
 }
 
 export default async function DataCoveragePage() {
-  const [inventory, providerAudit, checkpoint2, checkpoint3] = await Promise.all([
+  const [inventory, providerAudit, checkpoint2, checkpoint3, finalCertification] = await Promise.all([
     getDataCoverageInventoryV1(),
     getMultiSportProviderEntitlementAuditV1(),
     getMultiSportDataExpansionCheckpoint2V1(),
     getMultiSportDataExpansionCheckpoint3V1(),
+    getMultiSportDataExpansionFinalCertificationV1(),
   ])
 
   return (
@@ -155,6 +157,26 @@ export default async function DataCoveragePage() {
         </div>
         <a href="/api/data-coverage/expansion-checkpoint3" className="mt-4 inline-flex rounded-full border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-950/30">
           Open Checkpoint 3 API
+        </a>
+      </DashboardSection>
+
+      <DashboardSection
+        title="Final Program Certification"
+        description="The program records truthful partial completion where provider entitlement, source provenance or readiness gates block execution."
+      >
+        <div className="grid gap-4 md:grid-cols-4">
+          <Metric label="Status" value={finalCertification.programStatus} />
+          <Metric label="Active Prediction Sports" value={finalCertification.activePredictionSports.length} />
+          <Metric label="Active Recommendation Sports" value={finalCertification.activeRecommendationSports.length} />
+          <Metric label="Mutations" value={finalCertification.productionMutationsMade} />
+        </div>
+        <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900/70 p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Postgame Explanation</p>
+          <p className="mt-2 text-lg font-black text-white">{finalCertification.postgameExplanationEngine.status}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-400">Causal certainty is not claimed; no explanation rows were fabricated or persisted.</p>
+        </div>
+        <a href="/api/data-coverage/final-certification" className="mt-4 inline-flex rounded-full border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-950/30">
+          Open Final Certification API
         </a>
       </DashboardSection>
     </DashboardShell>
