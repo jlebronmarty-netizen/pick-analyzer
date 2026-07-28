@@ -5,7 +5,7 @@
   "certifiedPlatformTag": "v1.0-platform-certified",
   "certifiedPlatformCommit": "eb15613efd81ff1a8e57797e11feb7254c1b604a",
   "status": "in_progress",
-  "updatedAt": "2026-07-28T03:44:00.000Z",
+  "updatedAt": "2026-07-28T03:58:00.000Z",
   "authorization": {
     "boundedProviderCallsAuthorized": true,
     "boundedProductionWritesAuthorized": true,
@@ -74,7 +74,8 @@
     {
       "checkpointId": "B",
       "name": "NBA_PREVIEW_PREDICTION_LIFECYCLE",
-      "status": "completed_pending_commit",
+      "status": "completed_pushed",
+      "commit": "a792d9d868a2cc7f641c6a3da80c306559d855d6",
       "artifacts": [
         "scripts/multi-sport-unlock-v1-checkpoint-b-nba.mjs",
         "docs/NBA_PREVIEW_PREDICTION_LIFECYCLE_V1.md",
@@ -119,7 +120,8 @@
     {
       "checkpointId": "C",
       "name": "NFL_PREVIEW_PREDICTION_LIFECYCLE",
-      "status": "completed_pending_commit",
+      "status": "completed_pushed",
+      "commit": "3ae259e24afd676871f648db45c6f73248cadbce",
       "artifacts": [
         "scripts/multi-sport-unlock-v1-checkpoint-c-nfl.mjs",
         "docs/NFL_PREVIEW_PREDICTION_LIFECYCLE_V1.md",
@@ -161,6 +163,52 @@
         "officialPickPolicyChanged": false
       },
       "nextCheckpoint": "D_NHL_PREVIEW_PREDICTION_LIFECYCLE"
+    },
+    {
+      "checkpointId": "D",
+      "name": "NHL_PREVIEW_PREDICTION_LIFECYCLE",
+      "status": "completed_pending_commit",
+      "artifacts": [
+        "scripts/multi-sport-unlock-v1-checkpoint-d-nhl.mjs",
+        "docs/NHL_PREVIEW_PREDICTION_LIFECYCLE_V1.md",
+        "docs/nhl-preview-prediction-lifecycle-v1.json"
+      ],
+      "validation": {
+        "fixtureCommand": "node scripts/multi-sport-unlock-v1-checkpoint-d-nhl.mjs --validate",
+        "fixtureStatus": "passed",
+        "fixtureChecks": 4,
+        "dryRunCommand": "node --loader ./scripts/local-ts-loader.mjs scripts/multi-sport-unlock-v1-checkpoint-d-nhl.mjs",
+        "dryRunStatus": "NHL_PREVIEW_BLOCKED",
+        "gatesPassed": 3,
+        "gatesTotal": 10
+      },
+      "liveExecution": {
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0,
+        "productionMutationsMade": 0,
+        "predictionsPersisted": 0
+      },
+      "blockers": [
+        "NHL_CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED",
+        "NHL_CANONICAL_EVENTS_EMPTY",
+        "NHL_FUTURE_CANONICAL_EVENTS_EMPTY",
+        "NHL_COMPLETED_RESULTS_EMPTY",
+        "NHL_PERSISTENCE_DISABLED_BY_DESIGN",
+        "NHL_SETTLEMENT_INPUTS_EMPTY",
+        "NHL_SETTLED_LEARNING_SAMPLE_EMPTY"
+      ],
+      "safety": {
+        "previewActivated": false,
+        "productionActivated": false,
+        "recommendationEligible": false,
+        "retrospectivePredictionsGenerated": 0,
+        "probabilityChanged": false,
+        "confidenceChanged": false,
+        "trustFormulaChanged": false,
+        "learningBrainWeightsChanged": false,
+        "officialPickPolicyChanged": false
+      },
+      "nextCheckpoint": "E_SOCCER_COMPETITION_ACTIVATION"
     }
   ],
   "certificationMarkers": [
@@ -172,6 +220,9 @@
     "NFL_PREVIEW_PREDICTION_LIFECYCLE_BLOCKED_TRUTHFUL_PASS",
     "NFL_NO_RETROSPECTIVE_PREDICTION_PASS",
     "NFL_NO_PRODUCTION_PROMOTION_PASS",
+    "NHL_PREVIEW_PREDICTION_LIFECYCLE_BLOCKED_TRUTHFUL_PASS",
+    "NHL_NO_RETROSPECTIVE_PREDICTION_PASS",
+    "NHL_NO_PRODUCTION_PROMOTION_PASS",
     "PROVIDER_QUOTA_SAFETY_PASS",
     "NO_RETROSPECTIVE_PREDICTION_PASS",
     "NO_PROBABILITY_CHANGE_PASS",
