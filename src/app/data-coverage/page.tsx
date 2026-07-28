@@ -120,12 +120,13 @@ export default async function DataCoveragePage() {
           <Metric label="Provider Calls" value={oddsApiCoverage.providerCallsMade} />
           <Metric label="Remote Mutations" value={oddsApiCoverage.remoteMutationsMade} />
         </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-4">
+        <div className="mt-4 grid gap-3 md:grid-cols-5">
           {[
             ['/api/providers/the-odds-api/catalog', 'Catalog'],
             ['/api/providers/the-odds-api/quota', 'Quota'],
             ['/api/providers/the-odds-api/capability', 'Capability'],
             ['/api/providers/the-odds-api/coverage', 'Coverage'],
+            ['/api/providers/the-odds-api/current-odds', 'Current Odds'],
           ].map(([href, label]) => (
             <a key={href} href={href} className="inline-flex justify-center rounded-full border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-950/30">
               {label}

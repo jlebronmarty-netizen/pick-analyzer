@@ -1,0 +1,320 @@
+{
+  "generatedAt": "2026-07-28T02:54:39.204Z",
+  "commit": "837aec6d25bb9eb5f91c1f3a054f17717c94e6c9",
+  "checkpoint": "THE_ODDS_API_CURRENT_ODDS_ACQUISITION_V1",
+  "retryNote": {
+    "creditsConsumed": 15,
+    "providerCallsMade": null,
+    "productionMutationsMade": 0,
+    "reason": "First Checkpoint 2 attempt failed before persistence on an oversized Supabase ID-preflight read; batching was reduced before the successful rerun."
+  },
+  "result": {
+    "success": true,
+    "mode": "the_odds_api_current_odds_acquisition_v1",
+    "status": "LIVE_ACQUISITION_PERSISTED",
+    "generatedAt": "2026-07-28T02:54:39.204Z",
+    "provider": "the-odds-api",
+    "live": true,
+    "persist": true,
+    "providerCallsMade": 11,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 8416,
+    "rowsFetched": 4128,
+    "rowsAccepted": 4128,
+    "rowsRejected": 0,
+    "rowsInserted": 4128,
+    "rowsUpdated": 4128,
+    "rowsSkipped": 0,
+    "mappingsUpserted": 159,
+    "idempotentRowsUpdated": 4128,
+    "eventsFetched": 159,
+    "sportsAttempted": [
+      {
+        "sportKey": "baseball_mlb",
+        "label": "MLB Baseball",
+        "providerSportKey": "baseball_mlb",
+        "eventsFetched": 20,
+        "futureEvents": 15,
+        "oddsEventsReturned": 20,
+        "rowsAccepted": 1104,
+        "rowsRejected": 0,
+        "bookmakerCount": 11,
+        "markets": [
+          "moneyline",
+          "spread",
+          "total"
+        ]
+      },
+      {
+        "sportKey": "americanfootball_nfl",
+        "label": "NFL Football",
+        "providerSportKey": "americanfootball_nfl",
+        "eventsFetched": 75,
+        "futureEvents": 75,
+        "oddsEventsReturned": 75,
+        "rowsAccepted": 1978,
+        "rowsRejected": 0,
+        "bookmakerCount": 11,
+        "markets": [
+          "moneyline",
+          "spread",
+          "total"
+        ]
+      },
+      {
+        "sportKey": "icehockey_nhl",
+        "label": "NHL Hockey",
+        "providerSportKey": "icehockey_nhl",
+        "eventsFetched": 32,
+        "futureEvents": 32,
+        "oddsEventsReturned": 32,
+        "rowsAccepted": 426,
+        "rowsRejected": 0,
+        "bookmakerCount": 7,
+        "markets": [
+          "moneyline",
+          "spread",
+          "total"
+        ]
+      },
+      {
+        "sportKey": "soccer",
+        "label": "Soccer",
+        "providerSportKey": "soccer",
+        "eventsFetched": 0,
+        "futureEvents": 0,
+        "oddsEventsReturned": 8,
+        "rowsAccepted": 260,
+        "rowsRejected": 0,
+        "bookmakerCount": 8,
+        "markets": [
+          "moneyline",
+          "spread",
+          "total"
+        ]
+      },
+      {
+        "sportKey": "mma_ufc",
+        "label": "UFC",
+        "providerSportKey": "mma_mixed_martial_arts",
+        "eventsFetched": 32,
+        "futureEvents": 32,
+        "oddsEventsReturned": 32,
+        "rowsAccepted": 360,
+        "rowsRejected": 0,
+        "bookmakerCount": 8,
+        "markets": [
+          "moneyline",
+          "total"
+        ]
+      }
+    ],
+    "duplicateIds": 0,
+    "creditReserve": 2000,
+    "requestsRemainingBefore": 19938,
+    "requestsRemainingAfter": 19923,
+    "requestsUsedObserved": 15,
+    "planObserved": [
+      {
+        "label": "catalog_credit_read",
+        "sportKey": null,
+        "endpoint": "/sports?all=true",
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 173,
+        "requestsRemaining": 19938,
+        "requestsUsed": 62,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "events_baseball_mlb",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/events",
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 20,
+        "requestsRemaining": 19938,
+        "requestsUsed": 62,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "core_odds_baseball_mlb",
+        "sportKey": "baseball_mlb",
+        "endpoint": "/sports/baseball_mlb/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "markets": [
+          "h2h",
+          "spreads",
+          "totals"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 20,
+        "requestsRemaining": 19935,
+        "requestsUsed": 65,
+        "requestsLast": 3,
+        "error": null
+      },
+      {
+        "label": "events_americanfootball_nfl",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/events",
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 75,
+        "requestsRemaining": 19935,
+        "requestsUsed": 65,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "core_odds_americanfootball_nfl",
+        "sportKey": "americanfootball_nfl",
+        "endpoint": "/sports/americanfootball_nfl/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "markets": [
+          "h2h",
+          "spreads",
+          "totals"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 75,
+        "requestsRemaining": 19932,
+        "requestsUsed": 68,
+        "requestsLast": 3,
+        "error": null
+      },
+      {
+        "label": "events_icehockey_nhl",
+        "sportKey": "icehockey_nhl",
+        "endpoint": "/sports/icehockey_nhl/events",
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 32,
+        "requestsRemaining": 19932,
+        "requestsUsed": 68,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "core_odds_icehockey_nhl",
+        "sportKey": "icehockey_nhl",
+        "endpoint": "/sports/icehockey_nhl/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "markets": [
+          "h2h",
+          "spreads",
+          "totals"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 32,
+        "requestsRemaining": 19929,
+        "requestsUsed": 71,
+        "requestsLast": 3,
+        "error": null
+      },
+      {
+        "label": "events_soccer",
+        "sportKey": "soccer",
+        "endpoint": "/sports/soccer/events",
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 0,
+        "requestsRemaining": 19929,
+        "requestsUsed": 71,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "core_odds_soccer",
+        "sportKey": "soccer",
+        "endpoint": "/sports/soccer/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "markets": [
+          "h2h",
+          "spreads",
+          "totals"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 8,
+        "requestsRemaining": 19926,
+        "requestsUsed": 74,
+        "requestsLast": 3,
+        "error": null
+      },
+      {
+        "label": "events_mma_ufc",
+        "sportKey": "mma_ufc",
+        "endpoint": "/sports/mma_mixed_martial_arts/events",
+        "markets": [],
+        "regions": [],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 32,
+        "requestsRemaining": 19926,
+        "requestsUsed": 74,
+        "requestsLast": 0,
+        "error": null
+      },
+      {
+        "label": "core_odds_mma_ufc",
+        "sportKey": "mma_ufc",
+        "endpoint": "/sports/mma_mixed_martial_arts/odds?regions=us&markets=h2h%2Cspreads%2Ctotals&oddsFormat=american",
+        "markets": [
+          "h2h",
+          "spreads",
+          "totals"
+        ],
+        "regions": [
+          "us"
+        ],
+        "httpStatus": 200,
+        "ok": true,
+        "rows": 32,
+        "requestsRemaining": 19923,
+        "requestsUsed": 77,
+        "requestsLast": 3,
+        "error": null
+      }
+    ],
+    "blockers": [],
+    "warnings": [
+      "Provider event mappings use provider-native internal_id pending canonical crosswalk; canonical sport_events are not overwritten.",
+      "Only h2h, spreads and totals are acquired in Checkpoint 2."
+    ]
+  },
+  "validation": {
+    "success": true,
+    "mode": "the_odds_api_current_odds_acquisition_v1_validation",
+    "checks": 7,
+    "passed": 7,
+    "failed": 0,
+    "failedChecks": [],
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 0
+  }
+}
