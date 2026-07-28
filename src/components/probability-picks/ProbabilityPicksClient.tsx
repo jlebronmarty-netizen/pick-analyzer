@@ -592,7 +592,7 @@ export default function ProbabilityPicksClient() {
             {!parlaysData?.parlays.length && (
               <EmptyState
                 title="No projection-only parlay combinations"
-                detail={(parlaysData?.presentation?.aggregateBlockers ?? [parlaysData?.presentation?.emptyState ?? 'No sufficiently independent combination meets the current parlay requirements.']).join(' ')}
+                detail={`sport eligibility and correlation limits apply. ${(parlaysData?.presentation?.aggregateBlockers ?? [parlaysData?.presentation?.emptyState ?? 'No sufficiently independent combination meets the current parlay requirements.']).join(' ')}`}
               />
             )}
             {parlaysData?.parlays.map((parlay) => <ParlayCard key={parlay.id} parlay={parlay} />)}

@@ -1,6 +1,23 @@
 # Project Status
 
-Last updated: 2026-07-28 00:00:00Z
+Last updated: 2026-07-28 20:05:00Z
+
+## 2026-07-28 Product Stabilization And Intelligence Consolidation V1
+
+- Added `scripts/product-stabilization-v1-audit.mjs`, `docs/PRODUCT_STABILIZATION_AND_INTELLIGENCE_CONSOLIDATION_V1.md` and `docs/product-stabilization-v1-audit.json` as the certification-first product consistency audit.
+- Refreshed stale product inventory evidence: current app tree has 28 page routes and 428 API routes, with 70 read-only diagnostic APIs, 321 read-mostly APIs and 37 mutation/protected APIs by conservative path classification.
+- Repaired product evidence drift by refreshing `docs/PRODUCT_ROUTE_INVENTORY_V1.md`, `docs/product-route-inventory-v1.json` and `docs/product-readiness-matrix-v1.json` so newer product pages are represented consistently.
+- Static stabilization audit now scores page/API/status/sport consistency at 100 with no current blockers. This is a documentation and evidence-consistency result, not a claim that the betting engine is certified for real-money recommendations.
+- No product modules, dashboard pages, prediction engines, settlement logic, Learning Brain behavior, scheduler behavior, provider adapters, SQL, Historical Replay, epoch activation, provider calls or production mutations were added or changed.
+
+## 2026-07-28 Core Prediction Certification Roadmap V1
+
+- Product direction has shifted to certification before expansion. New dashboards, utilities, administration modules and cosmetic surfaces are deferred unless required to certify the core betting engine.
+- Added `docs/CORE_PREDICTION_CERTIFICATION_ROADMAP_V1.md` and refreshed `docs/certified-prediction-epoch-mlb-readiness-audit-v1.json` from a read-only production audit.
+- MLB audit result: 1,194 prediction rows reviewed, 100 valid-but-pre-certification pregame rows, 0 certified live pregame rows, 0 production-eligible rows, 0 epoch-linked rows, 386 odds-freshness-unverified rows, 90 post-start rows, 54 post-final rows and 5 EV mismatch findings.
+- Current status: Pick Analyzer has the components of a betting engine, but it is not certified to recommend real-money bets. Valid rows remain shadow/pre-certification evidence only until the certified epoch, shadow observation, replay safety and Official Pick gates pass.
+- Priority order is reset to Core Production Stability, Prediction Certification, Shadow Observation, Certified Epoch, Historical Walk Forward Replay, Official Pick Certification and Multi-Sport Production Certification.
+- No Historical Replay, epoch activation, 5-minute production refresh, production eligibility promotion, probability change, confidence/quality change, Official Pick policy change, Learning Brain change, provider call or production mutation was executed by this audit.
 
 ## 2026-07-28 Prediction Epoch Shadow Readiness V1
 

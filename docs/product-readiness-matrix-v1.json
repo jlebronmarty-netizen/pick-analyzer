@@ -1,144 +1,30 @@
 {
-  "generatedAt": "2026-07-27T17:40:00Z",
+  "generatedAt": "2026-07-28T20:19:50.860Z",
   "providerCallsMade": 0,
   "remoteMutationsMade": 0,
   "productionMutationsMade": 0,
   "screens": [
     {
-      "route": "/dashboard",
-      "productArea": "HOME",
-      "primaryPurpose": "Current product status, current board and operational summaries",
-      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
-      "dataStatus": "CURRENT_STORED",
-      "sportCoverage": "MLB production surfaces plus multi-sport diagnostics",
-      "modelCertification": "MLB production/certified limited; other sports vary",
-      "freshness": "Panel-level timestamps and warnings",
-      "userUsefulness": "High",
-      "knownBlockers": ["dense navigation", "operator details exposed in advanced panels"],
+      "route": "/admin/historical-diagnostics",
+      "productArea": "ADMINISTRATION",
+      "primaryPurpose": "Historical import and data-foundation diagnostics",
+      "currentStatus": "MIGRATION_PENDING",
+      "dataStatus": "MIGRATION_PENDING",
+      "sportCoverage": "Multi-sport foundation",
+      "modelCertification": "Not an active prediction surface",
+      "freshness": "Readiness diagnostics",
+      "userUsefulness": "High for administrators",
+      "knownBlockers": [
+        "DATA_FOUNDATION_V2_EPOCH inactive",
+        "seed unapplied"
+      ],
       "p0Issues": [],
       "p1Issues": [],
-      "p2Issues": ["separate consumer and operator hierarchy"],
-      "recommendedNextAction": "Split primary Today view from Operations/Admin diagnostics",
-      "productionReadiness": "PRODUCTION_READY_WITH_WARNINGS"
-    },
-    {
-      "route": "/probability-picks",
-      "productArea": "PICKS",
-      "primaryPurpose": "Projection-only probability ranking and informational parlays",
-      "currentStatus": "LIMITED",
-      "dataStatus": "MODEL_GENERATED",
-      "sportCoverage": "MLB ranking eligible; uncertified sports excluded",
-      "modelCertification": "MLB_PROJECTION_ONLY_LIMITED",
-      "freshness": "Generated timestamp visible",
-      "userUsefulness": "High when MLB rows qualify",
-      "knownBlockers": ["multi-sport certification not complete", "no value or recommendation logic by design"],
-      "p0Issues": [],
-      "p1Issues": [],
-      "p2Issues": ["add richer per-sport empty states after more engines are certified"],
-      "recommendedNextAction": "Plan Probability Picks V2 after DATA_FOUNDATION_V2_EPOCH gates",
-      "productionReadiness": "LIMITED"
-    },
-    {
-      "route": "/player-projections",
-      "productArea": "PROJECTIONS",
-      "primaryPurpose": "MLB player and pitcher projection review",
-      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
-      "dataStatus": "MODEL_GENERATED",
-      "sportCoverage": "MLB",
-      "modelCertification": "MLB player projection certified limited",
-      "freshness": "Generated and cutoff timestamps visible",
-      "userUsefulness": "High",
-      "knownBlockers": ["same-event prop overlap limited", "provider entitlement for broader props"],
-      "p0Issues": [],
-      "p1Issues": [],
-      "p2Issues": ["more explicit provider-updated timestamps when prop rows exist"],
-      "recommendedNextAction": "Expand only after certified prop ingestion and identity overlap",
-      "productionReadiness": "PRODUCTION_READY_WITH_WARNINGS"
-    },
-    {
-      "route": "/most-likely",
-      "productArea": "PICKS",
-      "primaryPurpose": "Highest probability stored opportunities",
-      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
-      "dataStatus": "CURRENT_STORED",
-      "sportCoverage": "Current Board eligible sports",
-      "modelCertification": "Depends on Current Board policy",
-      "freshness": "Stored board freshness",
-      "userUsefulness": "High",
-      "knownBlockers": ["requires current stored prediction and market coverage"],
-      "p0Issues": [],
-      "p1Issues": [],
-      "p2Issues": ["continue reducing internal reason-code language"],
-      "recommendedNextAction": "Keep as consumer-facing pick discovery surface",
-      "productionReadiness": "PRODUCTION_READY_WITH_WARNINGS"
-    },
-    {
-      "route": "/best-value",
-      "productArea": "PICKS",
-      "primaryPurpose": "Policy-gated value opportunity review",
-      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
-      "dataStatus": "CURRENT_STORED",
-      "sportCoverage": "Current Board eligible sports with verified pricing",
-      "modelCertification": "Depends on Current Board and market price quality",
-      "freshness": "Stored board and market freshness",
-      "userUsefulness": "Medium to high when prices exist",
-      "knownBlockers": ["market coverage gaps"],
-      "p0Issues": [],
-      "p1Issues": [],
-      "p2Issues": ["make missing price freshness more prominent"],
-      "recommendedNextAction": "Prioritize market freshness labels",
-      "productionReadiness": "PRODUCTION_READY_WITH_WARNINGS"
-    },
-    {
-      "route": "/arbitrage",
-      "productArea": "MARKETS",
-      "primaryPurpose": "Verified multi-book arbitrage scanner",
-      "currentStatus": "BLOCKED",
-      "dataStatus": "BLOCKED",
-      "sportCoverage": "Requires multi-book markets",
-      "modelCertification": "Not model-driven",
-      "freshness": "Unavailable without verified multi-book feed",
-      "userUsefulness": "Low until provider data exists",
-      "knownBlockers": ["multi-book coverage unavailable"],
-      "p0Issues": [],
-      "p1Issues": [],
-      "p2Issues": ["keep blocked label prominent"],
-      "recommendedNextAction": "Do not promote until verified multi-book data exists",
-      "productionReadiness": "BLOCKED"
-    },
-    {
-      "route": "/betting-workbench",
-      "productArea": "MARKETS",
-      "primaryPurpose": "Stored market review workspace",
-      "currentStatus": "LIMITED",
-      "dataStatus": "CURRENT_STORED",
-      "sportCoverage": "Current Board eligible sports",
-      "modelCertification": "Depends on source module",
-      "freshness": "Stored market timestamps where available",
-      "userUsefulness": "High for advanced/operator workflows",
-      "knownBlockers": ["technical language", "market depth"],
-      "p0Issues": [],
-      "p1Issues": [],
-      "p2Issues": ["label as advanced workspace"],
-      "recommendedNextAction": "Keep under Markets/Advanced",
-      "productionReadiness": "LIMITED"
-    },
-    {
-      "route": "/performance",
-      "productArea": "PERFORMANCE",
-      "primaryPurpose": "Model accountability, trust and prediction history",
-      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
-      "dataStatus": "CURRENT_STORED",
-      "sportCoverage": "Stored settled history",
-      "modelCertification": "Production rows only by default",
-      "freshness": "Settled and generated timestamps",
-      "userUsefulness": "High",
-      "knownBlockers": ["needs enough settled samples for trend claims"],
-      "p0Issues": [],
-      "p1Issues": [],
-      "p2Issues": ["plain-English glossary links"],
-      "recommendedNextAction": "Keep trust and probability language distinct",
-      "productionReadiness": "PRODUCTION_READY_WITH_WARNINGS"
+      "p2Issues": [
+        "keep clearly administrative"
+      ],
+      "recommendedNextAction": "Use for Gate 2/Gate 3 readiness only after approval",
+      "productionReadiness": "INTERNAL_ONLY"
     },
     {
       "route": "/ai-operations",
@@ -150,29 +36,356 @@
       "modelCertification": "Diagnostic",
       "freshness": "Operations timestamps",
       "userUsefulness": "High for operators",
-      "knownBlockers": ["developer-oriented language"],
+      "knownBlockers": [
+        "developer-oriented language"
+      ],
       "p0Issues": [],
       "p1Issues": [],
-      "p2Issues": ["hide from primary consumer nav"],
+      "p2Issues": [
+        "hide from primary consumer nav"
+      ],
       "recommendedNextAction": "Move under Operations/Admin grouping",
       "productionReadiness": "INTERNAL_ONLY"
     },
     {
-      "route": "/admin/historical-diagnostics",
-      "productArea": "ADMINISTRATION",
-      "primaryPurpose": "Historical import and data-foundation diagnostics",
-      "currentStatus": "MIGRATION_PENDING",
-      "dataStatus": "MIGRATION_PENDING",
-      "sportCoverage": "Multi-sport foundation",
-      "modelCertification": "Not an active prediction surface",
-      "freshness": "Readiness diagnostics",
-      "userUsefulness": "High for administrators",
-      "knownBlockers": ["DATA_FOUNDATION_V2_EPOCH inactive", "seed unapplied"],
+      "route": "/arbitrage",
+      "productArea": "MARKETS",
+      "primaryPurpose": "Verified multi-book arbitrage scanner",
+      "currentStatus": "BLOCKED",
+      "dataStatus": "BLOCKED",
+      "sportCoverage": "Requires multi-book markets",
+      "modelCertification": "Not model-driven",
+      "freshness": "Unavailable without verified multi-book feed",
+      "userUsefulness": "Low until provider data exists",
+      "knownBlockers": [
+        "multi-book coverage unavailable"
+      ],
       "p0Issues": [],
       "p1Issues": [],
-      "p2Issues": ["keep clearly administrative"],
-      "recommendedNextAction": "Use for Gate 2/Gate 3 readiness only after approval",
+      "p2Issues": [
+        "keep blocked label prominent"
+      ],
+      "recommendedNextAction": "Do not promote until verified multi-book data exists",
+      "productionReadiness": "BLOCKED"
+    },
+    {
+      "route": "/autonomous-daily-ai",
+      "productArea": "OPERATIONS",
+      "primaryPurpose": "Autonomous Daily AI product surface.",
+      "currentStatus": "INTERNAL_ONLY",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "Multi-sport where certified",
+      "modelCertification": "Read-only or limited; no new certification claim",
+      "freshness": "Uses underlying page/API freshness evidence where available",
+      "userUsefulness": "High for operators",
+      "knownBlockers": [
+        "Certification-first roadmap may block promotion claims"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "Keep status language aligned with certification evidence"
+      ],
+      "recommendedNextAction": "Keep under stabilization/certification review; do not expand capabilities before core prediction certification.",
       "productionReadiness": "INTERNAL_ONLY"
+    },
+    {
+      "route": "/best-value",
+      "productArea": "PICKS",
+      "primaryPurpose": "Policy-gated value opportunity review",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "Current Board eligible sports with verified pricing",
+      "modelCertification": "Depends on Current Board and market price quality",
+      "freshness": "Stored board and market freshness",
+      "userUsefulness": "Medium to high when prices exist",
+      "knownBlockers": [
+        "market coverage gaps"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "make missing price freshness more prominent"
+      ],
+      "recommendedNextAction": "Prioritize market freshness labels",
+      "productionReadiness": "PRODUCTION_READY_WITH_WARNINGS"
+    },
+    {
+      "route": "/betting-workbench",
+      "productArea": "MARKETS",
+      "primaryPurpose": "Stored market review workspace",
+      "currentStatus": "LIMITED",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "Current Board eligible sports",
+      "modelCertification": "Depends on source module",
+      "freshness": "Stored market timestamps where available",
+      "userUsefulness": "High for advanced/operator workflows",
+      "knownBlockers": [
+        "technical language",
+        "market depth"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "label as advanced workspace"
+      ],
+      "recommendedNextAction": "Keep under Markets/Advanced",
+      "productionReadiness": "LIMITED"
+    },
+    {
+      "route": "/closing-line-intelligence",
+      "productArea": "MARKETS",
+      "primaryPurpose": "Closing Line Intelligence product surface.",
+      "currentStatus": "LIMITED",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "Multi-sport where certified",
+      "modelCertification": "Read-only or limited; no new certification claim",
+      "freshness": "Uses underlying page/API freshness evidence where available",
+      "userUsefulness": "High when source evidence exists",
+      "knownBlockers": [
+        "Certification-first roadmap may block promotion claims"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "Keep status language aligned with certification evidence"
+      ],
+      "recommendedNextAction": "Keep under stabilization/certification review; do not expand capabilities before core prediction certification.",
+      "productionReadiness": "LIMITED"
+    },
+    {
+      "route": "/dashboard",
+      "productArea": "HOME",
+      "primaryPurpose": "Current product status, current board and operational summaries",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "MLB production surfaces plus multi-sport diagnostics",
+      "modelCertification": "MLB production/certified limited; other sports vary",
+      "freshness": "Panel-level timestamps and warnings",
+      "userUsefulness": "High",
+      "knownBlockers": [
+        "dense navigation",
+        "operator details exposed in advanced panels"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "separate consumer and operator hierarchy"
+      ],
+      "recommendedNextAction": "Split primary Today view from Operations/Admin diagnostics",
+      "productionReadiness": "PRODUCTION_READY_WITH_WARNINGS"
+    },
+    {
+      "route": "/data-coverage",
+      "productArea": "ADMINISTRATION",
+      "primaryPurpose": "Data Coverage product surface.",
+      "currentStatus": "INTERNAL_ONLY",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "Multi-sport where certified",
+      "modelCertification": "Read-only or limited; no new certification claim",
+      "freshness": "Uses underlying page/API freshness evidence where available",
+      "userUsefulness": "High for operators",
+      "knownBlockers": [
+        "Certification-first roadmap may block promotion claims"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "Keep status language aligned with certification evidence"
+      ],
+      "recommendedNextAction": "Keep under stabilization/certification review; do not expand capabilities before core prediction certification.",
+      "productionReadiness": "INTERNAL_ONLY"
+    },
+    {
+      "route": "/market-intelligence",
+      "productArea": "MARKETS",
+      "primaryPurpose": "Market Intelligence product surface.",
+      "currentStatus": "LIMITED",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "Multi-sport where certified",
+      "modelCertification": "Read-only or limited; no new certification claim",
+      "freshness": "Uses underlying page/API freshness evidence where available",
+      "userUsefulness": "High when source evidence exists",
+      "knownBlockers": [
+        "Certification-first roadmap may block promotion claims"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "Keep status language aligned with certification evidence"
+      ],
+      "recommendedNextAction": "Keep under stabilization/certification review; do not expand capabilities before core prediction certification.",
+      "productionReadiness": "LIMITED"
+    },
+    {
+      "route": "/mlb-operations",
+      "productArea": "OPERATIONS",
+      "primaryPurpose": "MLB Operations product surface.",
+      "currentStatus": "INTERNAL_ONLY",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "MLB",
+      "modelCertification": "Read-only or limited; no new certification claim",
+      "freshness": "Uses underlying page/API freshness evidence where available",
+      "userUsefulness": "High for operators",
+      "knownBlockers": [
+        "Certification-first roadmap may block promotion claims"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "Keep status language aligned with certification evidence"
+      ],
+      "recommendedNextAction": "Keep under stabilization/certification review; do not expand capabilities before core prediction certification.",
+      "productionReadiness": "INTERNAL_ONLY"
+    },
+    {
+      "route": "/model",
+      "productArea": "PERFORMANCE",
+      "primaryPurpose": "Model Health product surface.",
+      "currentStatus": "INTERNAL_ONLY",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "Multi-sport where certified",
+      "modelCertification": "Read-only or limited; no new certification claim",
+      "freshness": "Uses underlying page/API freshness evidence where available",
+      "userUsefulness": "High for operators",
+      "knownBlockers": [
+        "Certification-first roadmap may block promotion claims"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "Keep status language aligned with certification evidence"
+      ],
+      "recommendedNextAction": "Keep under stabilization/certification review; do not expand capabilities before core prediction certification.",
+      "productionReadiness": "INTERNAL_ONLY"
+    },
+    {
+      "route": "/most-likely",
+      "productArea": "PICKS",
+      "primaryPurpose": "Highest probability stored opportunities",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "Current Board eligible sports",
+      "modelCertification": "Depends on Current Board policy",
+      "freshness": "Stored board freshness",
+      "userUsefulness": "High",
+      "knownBlockers": [
+        "requires current stored prediction and market coverage"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "continue reducing internal reason-code language"
+      ],
+      "recommendedNextAction": "Keep as consumer-facing pick discovery surface",
+      "productionReadiness": "PRODUCTION_READY_WITH_WARNINGS"
+    },
+    {
+      "route": "/performance",
+      "productArea": "PERFORMANCE",
+      "primaryPurpose": "Model accountability, trust and prediction history",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "Stored settled history",
+      "modelCertification": "Production rows only by default",
+      "freshness": "Settled and generated timestamps",
+      "userUsefulness": "High",
+      "knownBlockers": [
+        "needs enough settled samples for trend claims"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "plain-English glossary links"
+      ],
+      "recommendedNextAction": "Keep trust and probability language distinct",
+      "productionReadiness": "PRODUCTION_READY_WITH_WARNINGS"
+    },
+    {
+      "route": "/player-projections",
+      "productArea": "PROJECTIONS",
+      "primaryPurpose": "MLB player and pitcher projection review",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "MODEL_GENERATED",
+      "sportCoverage": "MLB",
+      "modelCertification": "MLB player projection certified limited",
+      "freshness": "Generated and cutoff timestamps visible",
+      "userUsefulness": "High",
+      "knownBlockers": [
+        "same-event prop overlap limited",
+        "provider entitlement for broader props"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "more explicit provider-updated timestamps when prop rows exist"
+      ],
+      "recommendedNextAction": "Expand only after certified prop ingestion and identity overlap",
+      "productionReadiness": "PRODUCTION_READY_WITH_WARNINGS"
+    },
+    {
+      "route": "/portfolio-intelligence",
+      "productArea": "MARKETS",
+      "primaryPurpose": "Portfolio Intelligence product surface.",
+      "currentStatus": "LIMITED",
+      "dataStatus": "MODEL_GENERATED",
+      "sportCoverage": "Multi-sport where certified",
+      "modelCertification": "Read-only or limited; no new certification claim",
+      "freshness": "Uses underlying page/API freshness evidence where available",
+      "userUsefulness": "High when source evidence exists",
+      "knownBlockers": [
+        "Certification-first roadmap may block promotion claims"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "Keep status language aligned with certification evidence"
+      ],
+      "recommendedNextAction": "Keep under stabilization/certification review; do not expand capabilities before core prediction certification.",
+      "productionReadiness": "LIMITED"
+    },
+    {
+      "route": "/probability-picks",
+      "productArea": "PICKS",
+      "primaryPurpose": "Projection-only probability ranking and informational parlays",
+      "currentStatus": "LIMITED",
+      "dataStatus": "MODEL_GENERATED",
+      "sportCoverage": "MLB ranking eligible; uncertified sports excluded",
+      "modelCertification": "MLB_PROJECTION_ONLY_LIMITED",
+      "freshness": "Generated timestamp visible",
+      "userUsefulness": "High when MLB rows qualify",
+      "knownBlockers": [
+        "multi-sport certification not complete",
+        "no value or recommendation logic by design"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "add richer per-sport empty states after more engines are certified"
+      ],
+      "recommendedNextAction": "Plan Probability Picks V2 after DATA_FOUNDATION_V2_EPOCH gates",
+      "productionReadiness": "LIMITED"
+    },
+    {
+      "route": "/sports-center",
+      "productArea": "HOME",
+      "primaryPurpose": "Sports Center product surface.",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "CURRENT_STORED",
+      "sportCoverage": "Multi-sport where certified",
+      "modelCertification": "Read-only or limited; no new certification claim",
+      "freshness": "Uses underlying page/API freshness evidence where available",
+      "userUsefulness": "High when source evidence exists",
+      "knownBlockers": [
+        "Certification-first roadmap may block promotion claims"
+      ],
+      "p0Issues": [],
+      "p1Issues": [],
+      "p2Issues": [
+        "Keep status language aligned with certification evidence"
+      ],
+      "recommendedNextAction": "Keep under stabilization/certification review; do not expand capabilities before core prediction certification.",
+      "productionReadiness": "LIMITED"
     }
   ],
   "certificationMarkers": [
@@ -180,6 +393,7 @@
     "PRODUCT_DATA_TRUST_AUDIT_V1_PASS",
     "PRODUCT_EMPTY_STATE_PASS",
     "PRODUCT_STALE_STATE_PASS",
-    "PRODUCT_BLOCKER_STATE_PASS"
+    "PRODUCT_BLOCKER_STATE_PASS",
+    "PRODUCT_READINESS_MATRIX_REFRESHED_BY_STABILIZATION_V1"
   ]
 }

@@ -16,7 +16,40 @@ The certified platform baseline freezes the current production architecture, ope
 
 ## Dependency Reasoning
 
-MLB is now production stable and in maintenance mode. The primary roadmap focus is BSN, basketball intelligence, basketball prediction readiness after data maturity, AI market intelligence expansion and then additional sports. MLB work should remain limited to maintenance unless a future explicit major project authorizes architecture or model changes.
+Product direction is now certification-first. MLB is no longer treated as mere maintenance until the betting engine is certified end to end. New dashboards, utilities, administration modules, market surfaces and cosmetic expansion are deferred unless they are required to certify the core betting engine.
+
+Primary mission: become a trustworthy sports betting intelligence platform that continuously ingests real sports data, generates statistically grounded pregame predictions, learns from completed events and identifies betting opportunities with positive expected value.
+
+Current certification answer: Pick Analyzer has many required components, but it is not yet certified to recommend real-money bets. The read-only MLB certification audit reviewed 1,194 prediction rows and found 0 certified live pregame rows, 0 production-eligible rows and 0 epoch-linked rows. Valid pregame rows remain shadow/pre-certification evidence only.
+
+## Certification-First Priorities
+
+1. Core Production Stability.
+2. Prediction Certification.
+3. Shadow Observation.
+4. Certified Epoch.
+5. Historical Walk Forward Replay.
+6. Official Pick Certification.
+7. Multi-Sport Production Certification.
+
+Deferred until those are complete: new product modules, additional dashboard experiences, cosmetic expansion, Portfolio Intelligence expansion, Player Prop EV expansion and unsupported-market recommendation UX.
+
+Certification evidence: `docs/CORE_PREDICTION_CERTIFICATION_ROADMAP_V1.md` and `docs/certified-prediction-epoch-mlb-readiness-audit-v1.json`.
+
+## Product Stabilization Gate
+
+Product Stabilization And Intelligence Consolidation V1 is the active cleanup posture before any new product capability. It refreshes current product inventory evidence, checks page/API/status/sport consistency and blocks capability expansion unless a defect is proven.
+
+Current stabilization evidence:
+
+- 28 page routes.
+- 428 API routes.
+- 70 read-only diagnostic APIs.
+- 321 read-mostly APIs.
+- 37 mutation/protected APIs by conservative path classification.
+- Sports Center, AI Briefing, Dashboard, Performance, Current Board, Probability Picks, Portfolio Intelligence, Market Intelligence, Closing Line Intelligence, Player Projections, Autonomous Daily AI, Data Coverage, Providers, AI Operations, Model Health, Validation, Governance and Diagnostics remain represented by existing routes and docs.
+
+Evidence: `docs/PRODUCT_STABILIZATION_AND_INTELLIGENCE_CONSOLIDATION_V1.md`, `docs/product-stabilization-v1-audit.json`, `docs/PRODUCT_ROUTE_INVENTORY_V1.md`, `docs/product-route-inventory-v1.json` and `docs/product-readiness-matrix-v1.json`.
 
 ## Active Local Run
 

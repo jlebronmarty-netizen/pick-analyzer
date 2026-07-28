@@ -373,7 +373,7 @@ export default async function AiOperationsPage() {
         description="Open the detailed module only when the summary points you there."
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <LinkCard href="/probability-picks#today-overview" title="View All Qualified Picks" detail="Review the complete projection-only daily ranking context." />
+          <LinkCard href="/probability-picks#today-overview" title="Probability Picks" detail="Review the complete projection-only daily ranking context." />
           <LinkCard href="/probability-picks#top-signals" title="Highest Probability" detail="Jump to the strongest probability, confidence and quality signals." />
           <LinkCard href="/probability-picks?sport=baseball_mlb#by-sport" title="MLB Opportunities" detail="Open the certified limited sport group." />
           <LinkCard href="/probability-picks#not-ready-today" title="Review Warnings" detail="See blocked or not-ready sports before drilling into details." />

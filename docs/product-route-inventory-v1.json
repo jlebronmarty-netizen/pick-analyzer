@@ -1,114 +1,126 @@
 {
-  "generatedAt": "2026-07-27T17:03:36.545Z",
-  "startingCommit": "f193d356a861c97bb82d69e7412d8026ed653f8a",
+  "generatedAt": "2026-07-28T20:19:50.860Z",
+  "startingCommit": "963eefee1b91104f1be92d8382dd53681266a93f",
   "counts": {
-    "pageRoutes": 20,
-    "apiRoutes": 409,
-    "readOnlyDiagnosticApiRoutes": 69,
-    "readMostlyApiRoutes": 299,
-    "mutationOrProtectedApiRoutes": 41
+    "pageRoutes": 28,
+    "apiRoutes": 428,
+    "readOnlyDiagnosticApiRoutes": 70,
+    "readMostlyApiRoutes": 321,
+    "mutationOrProtectedApiRoutes": 37
   },
   "discovered": {
     "pages": [
       {
         "route": "/",
-        "file": "src\\app\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\page.tsx"
       },
       {
         "route": "/admin/historical-diagnostics",
-        "file": "src\\app\\admin\\historical-diagnostics\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\admin\\historical-diagnostics\\page.tsx"
       },
       {
         "route": "/ai-bet-finder",
-        "file": "src\\app\\ai-bet-finder\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\ai-bet-finder\\page.tsx"
       },
       {
         "route": "/ai-operations",
-        "file": "src\\app\\ai-operations\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\ai-operations\\page.tsx"
       },
       {
         "route": "/arbitrage",
-        "file": "src\\app\\arbitrage\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\arbitrage\\page.tsx"
+      },
+      {
+        "route": "/autonomous-daily-ai",
+        "file": "src\\app\\autonomous-daily-ai\\page.tsx"
       },
       {
         "route": "/best-value",
-        "file": "src\\app\\best-value\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\best-value\\page.tsx"
       },
       {
         "route": "/betting-workbench",
-        "file": "src\\app\\betting-workbench\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\betting-workbench\\page.tsx"
+      },
+      {
+        "route": "/closing-line-intelligence",
+        "file": "src\\app\\closing-line-intelligence\\page.tsx"
       },
       {
         "route": "/dashboard",
-        "file": "src\\app\\dashboard\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\dashboard\\page.tsx"
+      },
+      {
+        "route": "/data-coverage",
+        "file": "src\\app\\data-coverage\\page.tsx"
+      },
+      {
+        "route": "/data-coverage/[sport]",
+        "file": "src\\app\\data-coverage\\[sport]\\page.tsx"
       },
       {
         "route": "/game-intelligence",
-        "file": "src\\app\\game-intelligence\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\game-intelligence\\page.tsx"
       },
       {
         "route": "/game-intelligence/[eventId]",
-        "file": "src\\app\\game-intelligence\\[eventId]\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\game-intelligence\\[eventId]\\page.tsx"
       },
       {
         "route": "/login",
-        "file": "src\\app\\login\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\login\\page.tsx"
+      },
+      {
+        "route": "/market-intelligence",
+        "file": "src\\app\\market-intelligence\\page.tsx"
       },
       {
         "route": "/mlb-operations",
-        "file": "src\\app\\mlb-operations\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\mlb-operations\\page.tsx"
       },
       {
         "route": "/model",
-        "file": "src\\app\\model\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\model\\page.tsx"
       },
       {
         "route": "/most-likely",
-        "file": "src\\app\\most-likely\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\most-likely\\page.tsx"
       },
       {
         "route": "/performance",
-        "file": "src\\app\\performance\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\performance\\page.tsx"
       },
       {
         "route": "/player-projections",
-        "file": "src\\app\\player-projections\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\player-projections\\page.tsx"
       },
       {
         "route": "/player-projections/[projectionId]",
-        "file": "src\\app\\player-projections\\[projectionId]\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\player-projections\\[projectionId]\\page.tsx"
+      },
+      {
+        "route": "/portfolio-intelligence",
+        "file": "src\\app\\portfolio-intelligence\\page.tsx"
       },
       {
         "route": "/probability-picks",
-        "file": "src\\app\\probability-picks\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\probability-picks\\page.tsx"
       },
       {
         "route": "/projections",
-        "file": "src\\app\\projections\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\projections\\page.tsx"
       },
       {
         "route": "/register",
-        "file": "src\\app\\register\\page.tsx",
-        "inlineApiDependencies": []
+        "file": "src\\app\\register\\page.tsx"
+      },
+      {
+        "route": "/sports-center",
+        "file": "src\\app\\sports-center\\page.tsx"
+      },
+      {
+        "route": "/sports-center/[sport]",
+        "file": "src\\app\\sports-center\\[sport]\\page.tsx"
       }
     ],
     "apis": [
@@ -170,6 +182,11 @@
       {
         "route": "/api/analytics/dashboard",
         "file": "src\\app\\api\\analytics\\dashboard\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/autonomous-daily-ai",
+        "file": "src\\app\\api\\autonomous-daily-ai\\route.ts",
         "classification": "READ_MOSTLY"
       },
       {
@@ -493,6 +510,36 @@
         "classification": "READ_MOSTLY"
       },
       {
+        "route": "/api/data-coverage/expansion-checkpoint2",
+        "file": "src\\app\\api\\data-coverage\\expansion-checkpoint2\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-coverage/expansion-checkpoint3",
+        "file": "src\\app\\api\\data-coverage\\expansion-checkpoint3\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-coverage/final-certification",
+        "file": "src\\app\\api\\data-coverage\\final-certification\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-coverage/health",
+        "file": "src\\app\\api\\data-coverage\\health\\route.ts",
+        "classification": "READ_ONLY_DIAGNOSTIC"
+      },
+      {
+        "route": "/api/data-coverage/inventory",
+        "file": "src\\app\\api\\data-coverage\\inventory\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-coverage/provider-audit",
+        "file": "src\\app\\api\\data-coverage\\provider-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
         "route": "/api/data-foundation/bsn",
         "file": "src\\app\\api\\data-foundation\\bsn\\route.ts",
         "classification": "READ_MOSTLY"
@@ -525,7 +572,7 @@
       {
         "route": "/api/data-foundation/import-orchestrator",
         "file": "src\\app\\api\\data-foundation\\import-orchestrator\\route.ts",
-        "classification": "MUTATION_OR_PROTECTED"
+        "classification": "READ_MOSTLY"
       },
       {
         "route": "/api/data-foundation/legacy-metrics",
@@ -565,6 +612,11 @@
       {
         "route": "/api/data-foundation/reconciliation",
         "file": "src\\app\\api\\data-foundation\\reconciliation\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/data-foundation/results-crosswalk",
+        "file": "src\\app\\api\\data-foundation\\results-crosswalk\\route.ts",
         "classification": "READ_MOSTLY"
       },
       {
@@ -725,6 +777,11 @@
       {
         "route": "/api/market-intelligence",
         "file": "src\\app\\api\\market-intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/market-intelligence/movement",
+        "file": "src\\app\\api\\market-intelligence\\movement\\route.ts",
         "classification": "READ_MOSTLY"
       },
       {
@@ -1305,7 +1362,7 @@
       {
         "route": "/api/nba/predictions/settlement-backlog",
         "file": "src\\app\\api\\nba\\predictions\\settlement-backlog\\route.ts",
-        "classification": "MUTATION_OR_PROTECTED"
+        "classification": "READ_MOSTLY"
       },
       {
         "route": "/api/nba/predictions/validate",
@@ -1493,6 +1550,16 @@
         "classification": "READ_ONLY_DIAGNOSTIC"
       },
       {
+        "route": "/api/operations/odds-change-refresh-readiness",
+        "file": "src\\app\\api\\operations\\odds-change-refresh-readiness\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/operations/pregame-odds-refresh-sla",
+        "file": "src\\app\\api\\operations\\pregame-odds-refresh-sla\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
         "route": "/api/operations/provider-budget-forecast",
         "file": "src\\app\\api\\operations\\provider-budget-forecast\\route.ts",
         "classification": "READ_MOSTLY"
@@ -1598,6 +1665,11 @@
         "classification": "READ_MOSTLY"
       },
       {
+        "route": "/api/portfolio-intelligence",
+        "file": "src\\app\\api\\portfolio-intelligence\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
         "route": "/api/portfolio/ai-v2",
         "file": "src\\app\\api\\portfolio\\ai-v2\\route.ts",
         "classification": "READ_MOSTLY"
@@ -1605,6 +1677,16 @@
       {
         "route": "/api/prediction-engine/v4",
         "file": "src\\app\\api\\prediction-engine\\v4\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/prediction-epoch/activation-readiness",
+        "file": "src\\app\\api\\prediction-epoch\\activation-readiness\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/prediction-epoch/shadow-readiness",
+        "file": "src\\app\\api\\prediction-epoch\\shadow-readiness\\route.ts",
         "classification": "READ_MOSTLY"
       },
       {
@@ -1873,8 +1955,28 @@
         "classification": "READ_ONLY_DIAGNOSTIC"
       },
       {
+        "route": "/api/providers/the-odds-api/capability",
+        "file": "src\\app\\api\\providers\\the-odds-api\\capability\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
         "route": "/api/providers/the-odds-api/capability-audit",
         "file": "src\\app\\api\\providers\\the-odds-api\\capability-audit\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/the-odds-api/catalog",
+        "file": "src\\app\\api\\providers\\the-odds-api\\catalog\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/the-odds-api/coverage",
+        "file": "src\\app\\api\\providers\\the-odds-api\\coverage\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/the-odds-api/current-odds",
+        "file": "src\\app\\api\\providers\\the-odds-api\\current-odds\\route.ts",
         "classification": "READ_MOSTLY"
       },
       {
@@ -1885,6 +1987,11 @@
       {
         "route": "/api/providers/the-odds-api/pitcher-identity",
         "file": "src\\app\\api\\providers\\the-odds-api\\pitcher-identity\\route.ts",
+        "classification": "READ_MOSTLY"
+      },
+      {
+        "route": "/api/providers/the-odds-api/quota",
+        "file": "src\\app\\api\\providers\\the-odds-api\\quota\\route.ts",
         "classification": "READ_MOSTLY"
       },
       {
@@ -1925,12 +2032,12 @@
       {
         "route": "/api/settlement/core",
         "file": "src\\app\\api\\settlement\\core\\route.ts",
-        "classification": "MUTATION_OR_PROTECTED"
+        "classification": "READ_MOSTLY"
       },
       {
         "route": "/api/settlement/reconciliation",
         "file": "src\\app\\api\\settlement\\reconciliation\\route.ts",
-        "classification": "MUTATION_OR_PROTECTED"
+        "classification": "READ_MOSTLY"
       },
       {
         "route": "/api/sharp-money",
@@ -2161,366 +2268,214 @@
   },
   "majorRouteMatrix": [
     {
-      "route": "/",
-      "navigationLabel": "Home",
+      "route": "/sports-center",
+      "navigationLabel": "Sports Center",
       "section": "HOME",
-      "primaryPurpose": "Entry point and product launch surface.",
       "apiDependencies": [],
-      "sportScope": "multi-sport overview",
-      "dataSource": "page shell",
-      "classification": "PREVIEW",
-      "emptyStateBehavior": "Static shell or redirect-style product entry.",
-      "currentUsefulness": "Useful as a starting point only.",
-      "knownBlockers": [
-        "Primary daily workflows live under Dashboard and Probability Picks."
-      ]
+      "classification": "CURRENT_STORED",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "currentUsefulness": "High",
+      "knownBlockers": []
+    },
+    {
+      "route": "/ai-operations",
+      "navigationLabel": "AI Briefing",
+      "section": "OPERATIONS",
+      "apiDependencies": [
+        "/api/ai-operations/lifecycle",
+        "/api/operations/status",
+        "/api/operations/validation"
+      ],
+      "classification": "CURRENT_STORED",
+      "currentStatus": "INTERNAL_ONLY",
+      "currentUsefulness": "High",
+      "knownBlockers": []
     },
     {
       "route": "/dashboard",
       "navigationLabel": "Dashboard",
       "section": "HOME",
-      "primaryPurpose": "Current product status, current board, operations and advanced data panels.",
       "apiDependencies": [
         "/api/dashboard",
-        "/api/dashboard/today",
-        "/api/system/version"
+        "/api/current-board"
       ],
-      "sportScope": "multi-sport with MLB production surfaces and many diagnostic panels",
-      "dataSource": "current stored data, model-generated summaries and operations diagnostics",
       "classification": "CURRENT_STORED",
-      "emptyStateBehavior": "Shows panel-level unavailable states and warnings.",
-      "currentUsefulness": "High, but dense and mixes product and operator concerns.",
-      "knownBlockers": [
-        "Navigation density",
-        "some advanced panels expose technical states to normal users"
-      ]
-    },
-    {
-      "route": "/probability-picks",
-      "navigationLabel": "Probability Picks",
-      "section": "PICKS",
-      "primaryPurpose": "Projection-only ranking of valid pregame probability rows and informational parlay combinations.",
-      "apiDependencies": [
-        "/api/probability-picks",
-        "/api/probability-picks/parlays"
-      ],
-      "sportScope": "currently MLB-certified limited; other sports must not rank until certified",
-      "dataSource": "prediction_history and MLB pitcher projection preview",
-      "classification": "MODEL_GENERATED",
-      "emptyStateBehavior": "Projection-only empty states; should include sport eligibility detail.",
-      "currentUsefulness": "High when MLB rows exist; needs explicit eligibility labeling.",
-      "knownBlockers": [
-        "non-MLB future rows can be accepted before sport certification unless filtered"
-      ]
-    },
-    {
-      "route": "/most-likely",
-      "navigationLabel": "Most Likely",
-      "section": "PICKS",
-      "primaryPurpose": "Highest-probability informational opportunities from Current Board scan.",
-      "apiDependencies": [
-        "/api/market-opportunities/most-likely"
-      ],
-      "sportScope": "current board eligible sports",
-      "dataSource": "stored prediction and market opportunity data",
-      "classification": "CURRENT_STORED",
-      "emptyStateBehavior": "Explains when Current Board has no active official candidates.",
-      "currentUsefulness": "High for scanning likely outcomes.",
-      "knownBlockers": [
-        "depends on stored current-board coverage and aligned markets"
-      ]
-    },
-    {
-      "route": "/best-value",
-      "navigationLabel": "Best Value",
-      "section": "PICKS",
-      "primaryPurpose": "Positive value and policy-gated market opportunities.",
-      "apiDependencies": [
-        "/api/market-opportunities/best-value"
-      ],
-      "sportScope": "current board eligible sports",
-      "dataSource": "stored prediction and market opportunity data",
-      "classification": "CURRENT_STORED",
-      "emptyStateBehavior": "Explains missing value or market blockers.",
-      "currentUsefulness": "Useful when stored prices and policy gates are available.",
-      "knownBlockers": [
-        "market coverage gaps"
-      ]
-    },
-    {
-      "route": "/arbitrage",
-      "navigationLabel": "Arbitrage",
-      "section": "MARKETS",
-      "primaryPurpose": "Arbitrage scan that requires verified multi-book prices.",
-      "apiDependencies": [
-        "/api/market-opportunities/arbitrage"
-      ],
-      "sportScope": "markets with multi-book support",
-      "dataSource": "stored market intelligence",
-      "classification": "BLOCKED",
-      "emptyStateBehavior": "States that consensus-only prices cannot prove arbitrage.",
-      "currentUsefulness": "Limited until multi-book data is present.",
-      "knownBlockers": [
-        "multi-book provider coverage unavailable"
-      ]
-    },
-    {
-      "route": "/ai-bet-finder",
-      "navigationLabel": "AI Bet Finder",
-      "section": "MARKETS",
-      "primaryPurpose": "Deterministic assistant over existing board and market intelligence.",
-      "apiDependencies": [
-        "/api/ai-bet-finder"
-      ],
-      "sportScope": "current board eligible sports",
-      "dataSource": "stored Current Board and market opportunity data",
-      "classification": "CURRENT_STORED",
-      "emptyStateBehavior": "Explains when no active candidates exist.",
-      "currentUsefulness": "Useful as an explanation and triage surface.",
-      "knownBlockers": [
-        "depends on stored board coverage"
-      ]
-    },
-    {
-      "route": "/projections",
-      "navigationLabel": "Team Projections",
-      "section": "PROJECTIONS",
-      "primaryPurpose": "Team/game projection overview.",
-      "apiDependencies": [
-        "/api/projections",
-        "/api/mlb/projections"
-      ],
-      "sportScope": "MLB plus universal projection surfaces",
-      "dataSource": "stored/model-generated projections",
-      "classification": "MODEL_GENERATED",
-      "emptyStateBehavior": "Projection unavailable states.",
-      "currentUsefulness": "Useful where stored projection rows exist.",
-      "knownBlockers": [
-        "sport-specific maturity varies"
-      ]
-    },
-    {
-      "route": "/player-projections",
-      "navigationLabel": "Player Projections",
-      "section": "PROJECTIONS",
-      "primaryPurpose": "MLB pitcher projection board and player prop comparison empty states.",
-      "apiDependencies": [
-        "/api/mlb/player-projections",
-        "/api/mlb/player-props"
-      ],
-      "sportScope": "MLB",
-      "dataSource": "MLB pitcher projection engine and stored player-prop rows",
-      "classification": "MODEL_GENERATED",
-      "emptyStateBehavior": "Projection Only and No prop available states.",
-      "currentUsefulness": "High for pitcher workload analysis; market comparison is limited by prop coverage.",
-      "knownBlockers": [
-        "player-prop ingestion entitlement and identity overlap"
-      ]
-    },
-    {
-      "route": "/betting-workbench",
-      "navigationLabel": "Betting Workbench",
-      "section": "MARKETS",
-      "primaryPurpose": "Market review workspace for stored opportunities.",
-      "apiDependencies": [
-        "/api/current-board",
-        "/api/market-intelligence"
-      ],
-      "sportScope": "current board eligible sports",
-      "dataSource": "stored board and market intelligence",
-      "classification": "CURRENT_STORED",
-      "emptyStateBehavior": "Workbench unavailable or empty-state messaging.",
-      "currentUsefulness": "Useful for operators and advanced users.",
-      "knownBlockers": [
-        "market depth and technical language"
-      ]
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "currentUsefulness": "High",
+      "knownBlockers": []
     },
     {
       "route": "/performance",
       "navigationLabel": "Performance",
       "section": "PERFORMANCE",
-      "primaryPurpose": "Historical product performance, trust, calibration and prediction history.",
       "apiDependencies": [
         "/api/performance",
-        "/api/performance/trust"
+        "/api/performance/validation"
       ],
-      "sportScope": "multi-sport stored history",
-      "dataSource": "stored settled prediction history",
       "classification": "CURRENT_STORED",
-      "emptyStateBehavior": "Insufficient comparison states when history is missing.",
-      "currentUsefulness": "High for model accountability.",
-      "knownBlockers": [
-        "requires settled rows and clear distinction between product and diagnostic rows"
-      ]
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "currentUsefulness": "High",
+      "knownBlockers": []
     },
     {
-      "route": "/ai-operations",
-      "navigationLabel": "AI Operations",
-      "section": "OPERATIONS",
-      "primaryPurpose": "Operational evidence for autonomous daily operations.",
+      "route": "/probability-picks",
+      "navigationLabel": "Probability Picks",
+      "section": "PICKS",
       "apiDependencies": [
-        "/api/ai-operations/lifecycle",
-        "/api/autonomous-daily-operations/status"
+        "/api/probability-picks",
+        "/api/probability-picks/validation"
       ],
-      "sportScope": "multi-sport operations",
-      "dataSource": "operations diagnostics",
-      "classification": "INTERNAL_ONLY",
-      "emptyStateBehavior": "Temporarily unavailable panel state.",
-      "currentUsefulness": "High for operators, not a primary consumer screen.",
-      "knownBlockers": [
-        "developer-oriented language"
-      ]
+      "classification": "MODEL_GENERATED",
+      "currentStatus": "LIMITED",
+      "currentUsefulness": "High",
+      "knownBlockers": []
+    },
+    {
+      "route": "/portfolio-intelligence",
+      "navigationLabel": "Portfolio Intelligence",
+      "section": "MARKETS",
+      "apiDependencies": [
+        "/api/portfolio-intelligence"
+      ],
+      "classification": "MODEL_GENERATED",
+      "currentStatus": "LIMITED",
+      "currentUsefulness": "High",
+      "knownBlockers": []
+    },
+    {
+      "route": "/market-intelligence",
+      "navigationLabel": "Market Intelligence",
+      "section": "MARKETS",
+      "apiDependencies": [
+        "/api/market-intelligence/movement"
+      ],
+      "classification": "CURRENT_STORED",
+      "currentStatus": "LIMITED",
+      "currentUsefulness": "High",
+      "knownBlockers": []
+    },
+    {
+      "route": "/closing-line-intelligence",
+      "navigationLabel": "Closing Line Intelligence",
+      "section": "MARKETS",
+      "apiDependencies": [
+        "/api/closing-line/intelligence"
+      ],
+      "classification": "CURRENT_STORED",
+      "currentStatus": "LIMITED",
+      "currentUsefulness": "High",
+      "knownBlockers": []
+    },
+    {
+      "route": "/player-projections",
+      "navigationLabel": "Player Projections",
+      "section": "PROJECTIONS",
+      "apiDependencies": [
+        "/api/mlb/player-projections",
+        "/api/mlb/player-props"
+      ],
+      "classification": "MODEL_GENERATED",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "currentUsefulness": "High",
+      "knownBlockers": []
+    },
+    {
+      "route": "/autonomous-daily-ai",
+      "navigationLabel": "Autonomous Daily AI",
+      "section": "OPERATIONS",
+      "apiDependencies": [
+        "/api/autonomous-daily-ai"
+      ],
+      "classification": "CURRENT_STORED",
+      "currentStatus": "INTERNAL_ONLY",
+      "currentUsefulness": "High",
+      "knownBlockers": []
+    },
+    {
+      "route": "/data-coverage",
+      "navigationLabel": "Data Coverage",
+      "section": "ADMINISTRATION",
+      "apiDependencies": [
+        "/api/data-coverage/inventory",
+        "/api/data-coverage/health",
+        "/api/data-coverage/provider-audit"
+      ],
+      "classification": "CURRENT_STORED",
+      "currentStatus": "INTERNAL_ONLY",
+      "currentUsefulness": "High",
+      "knownBlockers": []
     },
     {
       "route": "/model",
-      "navigationLabel": "Model",
+      "navigationLabel": "Model Health",
       "section": "PERFORMANCE",
-      "primaryPurpose": "Model status, versions, learning, calibration and rollback diagnostics.",
       "apiDependencies": [
         "/api/model/status",
-        "/api/model/versions",
         "/api/model/metrics"
       ],
-      "sportScope": "multi-sport model operations",
-      "dataSource": "stored model diagnostics",
-      "classification": "INTERNAL_ONLY",
-      "emptyStateBehavior": "Panel-level unavailable states.",
-      "currentUsefulness": "High for governance and operators.",
-      "knownBlockers": [
-        "should remain clearly administrative"
-      ]
+      "classification": "CURRENT_STORED",
+      "currentStatus": "INTERNAL_ONLY",
+      "currentUsefulness": "High",
+      "knownBlockers": []
     },
     {
       "route": "/mlb-operations",
       "navigationLabel": "MLB Operations",
       "section": "OPERATIONS",
-      "primaryPurpose": "MLB provider, starters, projections and market operations.",
       "apiDependencies": [
-        "/api/mlb/operations-center",
-        "/api/mlb/starters/health",
-        "/api/mlb/player-props/health"
+        "/api/mlb/operations-center"
       ],
-      "sportScope": "MLB",
-      "dataSource": "stored MLB operational diagnostics",
       "classification": "CURRENT_STORED",
-      "emptyStateBehavior": "Blocked and readiness states for unavailable provider capabilities.",
-      "currentUsefulness": "High for operators.",
-      "knownBlockers": [
-        "provider contracts and market coverage"
-      ]
+      "currentStatus": "INTERNAL_ONLY",
+      "currentUsefulness": "High",
+      "knownBlockers": []
     },
     {
-      "route": "/game-intelligence",
-      "navigationLabel": "Game Intelligence",
-      "section": "PROJECTIONS",
-      "primaryPurpose": "Game-level intelligence list and drilldown.",
+      "route": "/most-likely",
+      "navigationLabel": "Most Likely",
+      "section": "PICKS",
       "apiDependencies": [
-        "/api/mlb/game-intelligence"
+        "/api/market-opportunities/most-likely"
       ],
-      "sportScope": "MLB",
-      "dataSource": "stored/model-generated MLB game intelligence",
-      "classification": "MODEL_GENERATED",
-      "emptyStateBehavior": "Unavailable or no event intelligence state.",
-      "currentUsefulness": "Useful for MLB game review.",
-      "knownBlockers": [
-        "event coverage and current stored data availability"
-      ]
+      "classification": "CURRENT_STORED",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "currentUsefulness": "High",
+      "knownBlockers": []
     },
     {
-      "route": "/admin/historical-diagnostics",
-      "navigationLabel": "Historical Diagnostics",
-      "section": "ADMINISTRATION",
-      "primaryPurpose": "Historical import and data-foundation diagnostics.",
+      "route": "/best-value",
+      "navigationLabel": "Best Value",
+      "section": "PICKS",
       "apiDependencies": [
-        "/api/historical-import/health",
-        "/api/data-foundation/readiness"
+        "/api/market-opportunities/best-value"
       ],
-      "sportScope": "multi-sport data foundation",
-      "dataSource": "migration readiness and import diagnostics",
-      "classification": "MIGRATION_PENDING",
-      "emptyStateBehavior": "Migration-pending and diagnostic states.",
-      "currentUsefulness": "High for administrators only.",
-      "knownBlockers": [
-        "DATA_FOUNDATION_V2_EPOCH inactive and seed unapplied"
-      ]
+      "classification": "CURRENT_STORED",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "currentUsefulness": "High",
+      "knownBlockers": []
+    },
+    {
+      "route": "/betting-workbench",
+      "navigationLabel": "Betting Workbench",
+      "section": "MARKETS",
+      "apiDependencies": [
+        "/api/current-board"
+      ],
+      "classification": "CURRENT_STORED",
+      "currentStatus": "LIMITED",
+      "currentUsefulness": "High",
+      "knownBlockers": []
     }
   ],
   "localSmoke": {
-    "skipped": false,
-    "ready": {
-      "route": "/api/system/version",
-      "status": 200,
-      "ok": true,
-      "bytes": 232
-    },
-    "checks": [
-      {
-        "route": "/",
-        "status": 200,
-        "ok": true,
-        "bytes": 7721
-      },
-      {
-        "route": "/dashboard",
-        "status": 200,
-        "ok": true,
-        "bytes": 25537
-      },
-      {
-        "route": "/probability-picks",
-        "status": 200,
-        "ok": true,
-        "bytes": 8451
-      },
-      {
-        "route": "/player-projections",
-        "status": 200,
-        "ok": true,
-        "bytes": 6053
-      },
-      {
-        "route": "/performance",
-        "status": 200,
-        "ok": true,
-        "bytes": 6315
-      },
-      {
-        "route": "/model",
-        "status": 200,
-        "ok": true,
-        "bytes": 5935
-      },
-      {
-        "route": "/mlb-operations",
-        "status": 200,
-        "ok": true,
-        "bytes": 125487
-      },
-      {
-        "route": "/api/probability-picks/validation",
-        "status": 200,
-        "ok": true,
-        "bytes": 205
-      },
-      {
-        "route": "/api/data-foundation/readiness",
-        "status": 0,
-        "ok": false,
-        "error": "This operation was aborted"
-      }
-    ],
-    "providerCallsMade": 0,
-    "remoteMutationsMade": 0,
-    "logs": [
-      "> pick-analyzer@0.1.0 start\n> next start -p 3037 -H 127.0.0.1",
-      "Failed to start server",
-      "Error: listen EADDRINUSE: address already in use 127.0.0.1:3037\n    at <unknown> (Error: listen EADDRINUSE: address already in use 127.0.0.1:3037) {\n  code: 'EADDRINUSE',\n  errno: -4091,\n  syscall: 'listen',\n  address: '127.0.0.1',\n  port: 3037\n}"
-    ]
+    "skipped": true,
+    "reason": "Product Stabilization V1 uses static inventory only. Runtime smoke remains separate because prior combined harnesses had lifecycle hangs."
   },
   "certification": {
     "PRODUCT_ROUTE_INVENTORY_PASS": true,
-    "PRODUCT_VISUAL_AUDIT_PASS": true,
-    "PRODUCT_FUNCTIONAL_AUDIT_PASS": true,
+    "PRODUCT_ROUTE_INVENTORY_REFRESHED_BY_STABILIZATION_V1": true,
+    "PRODUCT_VISUAL_AUDIT_PASS": false,
+    "PRODUCT_FUNCTIONAL_AUDIT_PASS": false,
     "providerCallsMade": 0,
     "remoteMutationsMade": 0
   }

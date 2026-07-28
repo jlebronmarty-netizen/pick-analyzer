@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-28T19:20:29.504Z",
+  "generatedAt": "2026-07-28T20:03:32.290Z",
   "mode": "certified_prediction_epoch_mlb_promotion_readiness_design_v1",
   "mutationSafety": {
     "providerCallsMade": 0,
@@ -609,7 +609,7 @@
         "moneyline",
         "h2h"
       ],
-      "historicalOddsRows": 17985,
+      "historicalOddsRows": 17987,
       "oddsTimestampRange": {
         "start": "2026-03-26T17:14:49.000Z",
         "end": "2026-07-28T15:18:03.000Z"
@@ -634,7 +634,7 @@
         "sportsdataio",
         "the-odds-api"
       ],
-      "featureRows": 702,
+      "featureRows": 704,
       "featureAvailabilityBeforeGameTime": "REQUIRES_EVENT_BY_EVENT_CUTOFF_AUDIT",
       "settledPredictionRows": 727,
       "leakageRisk": "MUST_BE_PROVEN_BY_WALK_FORWARD_CLOCK",
@@ -646,7 +646,7 @@
         "run_line",
         "spread"
       ],
-      "historicalOddsRows": 17801,
+      "historicalOddsRows": 17800,
       "oddsTimestampRange": {
         "start": "2026-03-26T17:14:49.000Z",
         "end": "2026-07-28T15:18:03.000Z"
@@ -683,7 +683,7 @@
         "total",
         "totals"
       ],
-      "historicalOddsRows": 17988,
+      "historicalOddsRows": 17987,
       "oddsTimestampRange": {
         "start": "2026-03-26T17:14:49.000Z",
         "end": "2026-07-28T15:18:03.000Z"
@@ -708,7 +708,7 @@
         "sportsdataio",
         "the-odds-api"
       ],
-      "featureRows": 710,
+      "featureRows": 708,
       "featureAvailabilityBeforeGameTime": "REQUIRES_EVENT_BY_EVENT_CUTOFF_AUDIT",
       "settledPredictionRows": 180,
       "leakageRisk": "MUST_BE_PROVEN_BY_WALK_FORWARD_CLOCK",

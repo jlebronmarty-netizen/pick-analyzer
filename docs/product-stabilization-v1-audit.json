@@ -1,0 +1,468 @@
+{
+  "generatedAt": "2026-07-28T20:19:50.860Z",
+  "mode": "product_stabilization_intelligence_consolidation_v1",
+  "head": "963eefee1b91104f1be92d8382dd53681266a93f",
+  "branch": "main",
+  "mutationSafety": {
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 0,
+    "sqlApplied": 0,
+    "historicalReplayExecuted": false,
+    "epochActivated": false,
+    "schedulerChanged": false,
+    "predictionLogicChanged": false,
+    "officialPickPolicyChanged": false,
+    "learningBrainWeightsChanged": false
+  },
+  "inventory": {
+    "pageRoutes": 28,
+    "apiRoutes": 428,
+    "readOnlyDiagnosticApiRoutes": 70,
+    "readMostlyApiRoutes": 321,
+    "mutationOrProtectedApiRoutes": 37,
+    "oldRouteInventoryCounts": {
+      "pageRoutes": 28,
+      "apiRoutes": 428,
+      "readOnlyDiagnosticApiRoutes": 70,
+      "readMostlyApiRoutes": 321,
+      "mutationOrProtectedApiRoutes": 37
+    },
+    "oldRouteInventoryStale": false
+  },
+  "productPages": [
+    {
+      "route": "/sports-center",
+      "area": "Sports Center",
+      "productArea": "HOME",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "LIMITED",
+      "requiredApis": [],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/ai-operations",
+      "area": "AI Briefing",
+      "productArea": "OPERATIONS",
+      "currentStatus": "INTERNAL_ONLY",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "INTERNAL_ONLY",
+      "requiredApis": [
+        "/api/ai-operations/lifecycle",
+        "/api/operations/status",
+        "/api/operations/validation"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/dashboard",
+      "area": "Dashboard",
+      "productArea": "HOME",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "PRODUCTION_READY_WITH_WARNINGS",
+      "requiredApis": [
+        "/api/dashboard",
+        "/api/current-board"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/performance",
+      "area": "Performance",
+      "productArea": "PERFORMANCE",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "PRODUCTION_READY_WITH_WARNINGS",
+      "requiredApis": [
+        "/api/performance",
+        "/api/performance/validation"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/probability-picks",
+      "area": "Probability Picks",
+      "productArea": "PICKS",
+      "currentStatus": "LIMITED",
+      "dataStatus": "MODEL_GENERATED",
+      "readiness": "LIMITED",
+      "requiredApis": [
+        "/api/probability-picks",
+        "/api/probability-picks/validation"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/portfolio-intelligence",
+      "area": "Portfolio Intelligence",
+      "productArea": "MARKETS",
+      "currentStatus": "LIMITED",
+      "dataStatus": "MODEL_GENERATED",
+      "readiness": "LIMITED",
+      "requiredApis": [
+        "/api/portfolio-intelligence"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/market-intelligence",
+      "area": "Market Intelligence",
+      "productArea": "MARKETS",
+      "currentStatus": "LIMITED",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "LIMITED",
+      "requiredApis": [
+        "/api/market-intelligence/movement"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/closing-line-intelligence",
+      "area": "Closing Line Intelligence",
+      "productArea": "MARKETS",
+      "currentStatus": "LIMITED",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "LIMITED",
+      "requiredApis": [
+        "/api/closing-line/intelligence"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/player-projections",
+      "area": "Player Projections",
+      "productArea": "PROJECTIONS",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "MODEL_GENERATED",
+      "readiness": "PRODUCTION_READY_WITH_WARNINGS",
+      "requiredApis": [
+        "/api/mlb/player-projections",
+        "/api/mlb/player-props"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/autonomous-daily-ai",
+      "area": "Autonomous Daily AI",
+      "productArea": "OPERATIONS",
+      "currentStatus": "INTERNAL_ONLY",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "INTERNAL_ONLY",
+      "requiredApis": [
+        "/api/autonomous-daily-ai"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/data-coverage",
+      "area": "Data Coverage",
+      "productArea": "ADMINISTRATION",
+      "currentStatus": "INTERNAL_ONLY",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "INTERNAL_ONLY",
+      "requiredApis": [
+        "/api/data-coverage/inventory",
+        "/api/data-coverage/health",
+        "/api/data-coverage/provider-audit"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/model",
+      "area": "Model Health",
+      "productArea": "PERFORMANCE",
+      "currentStatus": "INTERNAL_ONLY",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "INTERNAL_ONLY",
+      "requiredApis": [
+        "/api/model/status",
+        "/api/model/metrics"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/mlb-operations",
+      "area": "MLB Operations",
+      "productArea": "OPERATIONS",
+      "currentStatus": "INTERNAL_ONLY",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "INTERNAL_ONLY",
+      "requiredApis": [
+        "/api/mlb/operations-center"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/most-likely",
+      "area": "Most Likely",
+      "productArea": "PICKS",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "PRODUCTION_READY_WITH_WARNINGS",
+      "requiredApis": [
+        "/api/market-opportunities/most-likely"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/best-value",
+      "area": "Best Value",
+      "productArea": "PICKS",
+      "currentStatus": "PRODUCTION_READY_WITH_WARNINGS",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "PRODUCTION_READY_WITH_WARNINGS",
+      "requiredApis": [
+        "/api/market-opportunities/best-value"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "route": "/betting-workbench",
+      "area": "Betting Workbench",
+      "productArea": "MARKETS",
+      "currentStatus": "LIMITED",
+      "dataStatus": "CURRENT_STORED",
+      "readiness": "LIMITED",
+      "requiredApis": [
+        "/api/current-board"
+      ],
+      "pageExists": true,
+      "missingApis": [],
+      "score": 100,
+      "status": "CONSISTENT"
+    }
+  ],
+  "sports": [
+    {
+      "key": "mlb",
+      "sportKey": "baseball_mlb",
+      "expectedStatus": "Production",
+      "keyPresent": true,
+      "sportKeyPresent": true,
+      "statusPresent": true,
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "key": "nba",
+      "sportKey": "basketball_nba",
+      "expectedStatus": "Foundation",
+      "keyPresent": true,
+      "sportKeyPresent": true,
+      "statusPresent": true,
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "key": "nfl",
+      "sportKey": "americanfootball_nfl",
+      "expectedStatus": "Blocked",
+      "keyPresent": true,
+      "sportKeyPresent": true,
+      "statusPresent": true,
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "key": "soccer",
+      "sportKey": "soccer",
+      "expectedStatus": "Planning",
+      "keyPresent": true,
+      "sportKeyPresent": true,
+      "statusPresent": true,
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "key": "bsn",
+      "sportKey": "basketball_bsn",
+      "expectedStatus": "Preview",
+      "keyPresent": true,
+      "sportKeyPresent": true,
+      "statusPresent": true,
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "key": "nhl",
+      "sportKey": "icehockey_nhl",
+      "expectedStatus": "Blocked",
+      "keyPresent": true,
+      "sportKeyPresent": true,
+      "statusPresent": true,
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "key": "tennis",
+      "sportKey": "tennis",
+      "expectedStatus": "Blocked",
+      "keyPresent": true,
+      "sportKeyPresent": true,
+      "statusPresent": true,
+      "score": 100,
+      "status": "CONSISTENT"
+    },
+    {
+      "key": "ufc",
+      "sportKey": "mma_ufc",
+      "expectedStatus": "Blocked",
+      "keyPresent": true,
+      "sportKeyPresent": true,
+      "statusPresent": true,
+      "score": 100,
+      "status": "CONSISTENT"
+    }
+  ],
+  "productStatusSystem": [
+    {
+      "status": "Production",
+      "present": true
+    },
+    {
+      "status": "Certified",
+      "present": true
+    },
+    {
+      "status": "Foundation",
+      "present": true
+    },
+    {
+      "status": "Preview",
+      "present": true
+    },
+    {
+      "status": "Planning",
+      "present": true
+    },
+    {
+      "status": "Unavailable",
+      "present": true
+    },
+    {
+      "status": "Blocked",
+      "present": true
+    },
+    {
+      "status": "Pending",
+      "present": true
+    },
+    {
+      "status": "Deprecated",
+      "present": true
+    }
+  ],
+  "dataSourceCoverage": {
+    "sportsCenterNoProviderCalls": true,
+    "sportsCenterNoRemoteMutations": true,
+    "sportsCenterNoProductionMutations": true
+  },
+  "validationCoverage": [
+    {
+      "script": "scripts/sports-center-v1-validate.mjs",
+      "exists": true
+    },
+    {
+      "script": "scripts/ai-briefing-v2-validate.mjs",
+      "exists": true
+    },
+    {
+      "script": "scripts/probability-picks-v2-validate.mjs",
+      "exists": true
+    },
+    {
+      "script": "scripts/portfolio-intelligence-v1-validate.mjs",
+      "exists": true
+    },
+    {
+      "script": "scripts/market-intelligence-v1-validate.mjs",
+      "exists": true
+    },
+    {
+      "script": "scripts/closing-line-intelligence-v1-validate.mjs",
+      "exists": true
+    },
+    {
+      "script": "scripts/autonomous-daily-ai-v1-validate.mjs",
+      "exists": true
+    },
+    {
+      "script": "scripts/product-navigation-freshness-v1-validate.mjs",
+      "exists": true
+    },
+    {
+      "script": "scripts/prediction-epoch-shadow-readiness-v1-validate.mjs",
+      "exists": true
+    },
+    {
+      "script": "scripts/certified-prediction-epoch-mlb-readiness-audit-v1.mjs",
+      "exists": true
+    }
+  ],
+  "readinessMatrix": {
+    "exists": true,
+    "screenCount": 18,
+    "missingCurrentProductPages": []
+  },
+  "duplicateServiceNames": [],
+  "blockers": [],
+  "scores": {
+    "overallProductScore": 100,
+    "averagePageScore": 100,
+    "averageSportScore": 100,
+    "inventoryFreshnessScore": 100
+  },
+  "recommendations": [
+    "Refresh product route inventory evidence from the current app tree.",
+    "Expand the readiness matrix to include newer product pages before claiming full product consistency.",
+    "Do not remove duplicate-looking services without import-graph proof that they are unused.",
+    "Keep certification-first roadmap active until MLB has certified live pregame rows and Official Pick eligibility evidence."
+  ]
+}

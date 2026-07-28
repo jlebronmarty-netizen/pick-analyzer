@@ -31,7 +31,7 @@ check('shared status banner helper present', helper.includes('ProductStatusBanne
 check('shared timestamp helper present', helper.includes('productDateTime'))
 check('sport readiness helper present', helper.includes('sportReadinessLabel'))
 
-check('probability projection-only banner', probability.includes('Projection Only') && probability.includes('does not attach sportsbook lines'))
+check('probability projection-only banner', probability.includes('Projection Only') && (probability.includes('does not attach sportsbook lines') || probability.includes('does not attach market prices')))
 check('probability empty state explains why', probability.includes('Why: either no eligible MLB row meets the selected thresholds'))
 check('parlay empty state explains filters', probability.includes('sport eligibility and correlation limits'))
 check('probability timestamps use helper', probability.includes('productDateTime(pick.generatedAt)'))
