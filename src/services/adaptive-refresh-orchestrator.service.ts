@@ -83,6 +83,13 @@ type SettlementBacklogEventRow = {
   updated_at: string | null
 }
 
+type SettlementBacklogResultRow = {
+  game_id: string | null
+  home_score: number | null
+  away_score: number | null
+  created_at: string | null
+}
+
 type LifecycleEventRow = {
   action: string | null
   status: string | null
@@ -669,6 +676,10 @@ function isFinalScoredEvent(event: SettlementBacklogEventRow | undefined) {
   )
 }
 
+function isAuthoritativeSettlementResult(result: SettlementBacklogResultRow | undefined) {
+  return Boolean(result && result.game_id && result.home_score !== null && result.away_score !== null)
+}
+
 async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
   const today = localDate(now)
   const startDate = new Date(`${today}T00:00:00.000Z`)
@@ -687,18 +698,18 @@ async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
 
   const pending = ((data ?? []) as SettlementBacklogPredictionRow[]).filter(isPendingPrediction)
   const eventIds = Array.from(new Set(pending.map((row) => row.game_id).filter(Boolean))) as string[]
-  const events: SettlementBacklogEventRow[] = []
+  const results: SettlementBacklogResultRow[] = []
   for (let index = 0; index < eventIds.length; index += 100) {
-    const { data: eventRows, error: eventError } = await supabaseAdmin
-      .from('sport_events')
-      .select('id, start_time, status, home_score, away_score, updated_at')
-      .in('id', eventIds.slice(index, index + 100))
-    if (eventError) throw new Error(`Settlement backlog event read failed: ${eventError.message}`)
-    events.push(...((eventRows ?? []) as SettlementBacklogEventRow[]))
+    const { data: resultRows, error: resultError } = await supabaseAdmin
+      .from('game_results')
+      .select('game_id, home_score, away_score, created_at')
+      .in('game_id', eventIds.slice(index, index + 100))
+    if (resultError) throw new Error(`Settlement backlog result read failed: ${resultError.message}`)
+    results.push(...((resultRows ?? []) as SettlementBacklogResultRow[]))
   }
 
-  const eventsById = new Map(events.map((event) => [event.id, event]))
-  const eligible = pending.filter((row) => isFinalScoredEvent(row.game_id ? eventsById.get(row.game_id) : undefined))
+  const resultsByGameId = new Map(results.map((result) => [result.game_id, result]))
+  const eligible = pending.filter((row) => isAuthoritativeSettlementResult(row.game_id ? resultsByGameId.get(row.game_id) : undefined))
   const awaitingResult = pending.length - eligible.length
   const dates = eligible
     .map((row) => puertoRicoLocalDateFromUtc(row.commence_time ?? ''))
@@ -709,7 +720,7 @@ async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
     return counts
   }, {})
   const latestResultUpdatedAt = eligible
-    .map((row) => row.game_id ? eventsById.get(row.game_id)?.updated_at ?? null : null)
+    .map((row) => row.game_id ? resultsByGameId.get(row.game_id)?.created_at ?? null : null)
     .filter(Boolean)
     .sort()
     .at(-1) ?? null
@@ -722,6 +733,61 @@ async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
     newestReadyDate: dates.at(-1) ?? null,
     readyRowsByDate: rowsByDate,
     latestResultUpdatedAt,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  }
+}
+
+export function validateResultEvidenceReconciliationFixtures() {
+  const completedSportEvent: SettlementBacklogEventRow = {
+    id: 'event-1',
+    start_time: '2026-07-26T23:20:00.000Z',
+    status: 'completed',
+    home_score: 11,
+    away_score: 4,
+    updated_at: '2026-07-28T02:04:12.790Z',
+  }
+  const authoritativeGameResult: SettlementBacklogResultRow = {
+    game_id: 'event-1',
+    home_score: 11,
+    away_score: 4,
+    created_at: '2026-07-28T02:04:12.790Z',
+  }
+  const staleMissingResult = undefined
+  const mismatchedGameResult: SettlementBacklogResultRow = {
+    game_id: 'other-event',
+    home_score: 11,
+    away_score: 4,
+    created_at: '2026-07-28T02:04:12.790Z',
+  }
+  const incompleteResult: SettlementBacklogResultRow = {
+    game_id: 'event-1',
+    home_score: 11,
+    away_score: null,
+    created_at: '2026-07-28T02:04:12.790Z',
+  }
+  const resultsByGameId = new Map<string | null, SettlementBacklogResultRow>([
+    [authoritativeGameResult.game_id, authoritativeGameResult],
+    [mismatchedGameResult.game_id, mismatchedGameResult],
+  ])
+  const checks = [
+    ['completed sport_event alone is not settlement-ready', isFinalScoredEvent(completedSportEvent) && !isAuthoritativeSettlementResult(staleMissingResult)],
+    ['authoritative game_result is settlement-ready', isAuthoritativeSettlementResult(authoritativeGameResult)],
+    ['conflicting or incomplete score is not settlement-ready', !isAuthoritativeSettlementResult(incompleteResult)],
+    ['mismatched event id does not satisfy canonical lookup', !isAuthoritativeSettlementResult(resultsByGameId.get('missing-event'))],
+    ['unresolved provider mapping remains awaiting result', !isAuthoritativeSettlementResult(resultsByGameId.get(null))],
+    ['backlog classification uses game_results by canonical event id', isAuthoritativeSettlementResult(resultsByGameId.get('event-1'))],
+    ['settlement eligibility consistency requires canonical result evidence', !isAuthoritativeSettlementResult(staleMissingResult)],
+    ['idempotent reconciliation leaves already missing result unresolved', !isAuthoritativeSettlementResult(staleMissingResult)],
+  ] as const
+  const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
+  return {
+    success: failedChecks.length === 0,
+    mode: 'mlb_result_evidence_reconciliation_fixtures_v1',
+    checks: checks.length,
+    passed: checks.length - failedChecks.length,
+    failed: failedChecks.length,
+    failedChecks,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }

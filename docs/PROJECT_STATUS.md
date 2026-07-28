@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-07-28 21:16:00Z
+Last updated: 2026-07-28 21:47:00Z
+
+## 2026-07-28 MLB Result Evidence Reconciliation V1
+
+- Reconciled settlement backlog readiness with the canonical operating-day settlement engine. The inconsistent rows were three July 26 MLB preview predictions for NYY @ PHI (`baseball_mlb:mlb:sportsdataio:event:78870`) where `sport_events` had completed-score evidence but `game_results` had no authoritative result row.
+- Root cause: adaptive scheduler backlog detection treated completed/scored `sport_events` evidence as settlement-ready, while `settleOperatingDay` correctly requires aligned `game_results` evidence. The `sport_events` evidence came from a quarantined SportsDataIO discovery import and was not sufficient settlement provenance on its own.
+- Minimal repair: settlement backlog readiness now uses canonical `game_results` rows keyed by prediction `game_id` and complete scores. Completed `sport_events` alone no longer makes a prediction settlement-ready.
+- Outcome B certified locally: scheduler settlement-ready rows moved from 3 to 0, awaiting-result rows moved to 87, and the three NYY @ PHI rows remain unresolved with blocker `GAME_RESULT_ROW_MISSING`. No result rows were inserted, no settlement was executed, no provider calls were made and no prediction outcomes were changed.
+- Added `scripts/mlb-result-evidence-reconciliation-v1-validate.mjs` and deterministic fixtures covering completed event without game result, authoritative game result, incomplete score, mismatched event ID, unresolved mapping, backlog classification, eligibility consistency and idempotent unresolved behavior.
 
 ## 2026-07-28 MLB Operating-Day Odds Recovery V1
 
