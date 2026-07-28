@@ -3,6 +3,7 @@ import DashboardShell from '@/components/dashboard/DashboardShell'
 import { ProductStatusBadge } from '@/components/product/ProductStatus'
 import { getDataCoverageInventoryV1 } from '@/services/data-coverage-inventory.service'
 import { getMultiSportProviderEntitlementAuditV1 } from '@/services/multi-sport-provider-entitlement-audit.service'
+import { getMultiSportDataExpansionCheckpoint2V1 } from '@/services/multi-sport-data-expansion-checkpoint2.service'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,9 +25,10 @@ function Metric({ label, value, detail }: { label: string; value: string | numbe
 }
 
 export default async function DataCoveragePage() {
-  const [inventory, providerAudit] = await Promise.all([
+  const [inventory, providerAudit, checkpoint2] = await Promise.all([
     getDataCoverageInventoryV1(),
     getMultiSportProviderEntitlementAuditV1(),
+    getMultiSportDataExpansionCheckpoint2V1(),
   ])
 
   return (
@@ -99,6 +101,34 @@ export default async function DataCoveragePage() {
         </div>
         <a href="/api/data-coverage/provider-audit" className="mt-4 inline-flex rounded-full border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-950/30">
           Open Provider Audit API
+        </a>
+      </DashboardSection>
+
+      <DashboardSection
+        title="Expansion Checkpoint 2"
+        description="MLB, NBA and NFL expansion manifests are planned with entitlement gates. No imports or production mutations execute from this surface."
+      >
+        <div className="grid gap-4 md:grid-cols-4">
+          <Metric label="Sports" value={checkpoint2.summary.sportsAudited} />
+          <Metric label="Dry-run Ready" value={checkpoint2.summary.dryRunReadySports} />
+          <Metric label="Partial Entitlement" value={checkpoint2.summary.partialEntitlementSports} />
+          <Metric label="Imports Executed" value={checkpoint2.summary.importsExecuted} />
+        </div>
+        <div className="mt-4 grid gap-4 lg:grid-cols-3">
+          {checkpoint2.sports.map((sport) => (
+            <div key={sport.key} className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <h3 className="text-xl font-black text-white">{sport.label}</h3>
+                <ProductStatusBadge tone={sport.executionReadiness === 'DRY_RUN_READY' ? 'green' : sport.executionReadiness === 'PARTIAL_ENTITLEMENT' ? 'yellow' : 'gray'}>
+                  {sport.executionReadiness}
+                </ProductStatusBadge>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-400">{sport.importPlan.checkpoints} dry-run checkpoints; {sport.importPlan.estimatedProviderCalls} estimated provider calls if a future execution gate is approved.</p>
+            </div>
+          ))}
+        </div>
+        <a href="/api/data-coverage/expansion-checkpoint2" className="mt-4 inline-flex rounded-full border border-emerald-500/30 px-4 py-2 text-xs font-bold text-emerald-200 hover:bg-emerald-950/30">
+          Open Checkpoint 2 API
         </a>
       </DashboardSection>
     </DashboardShell>

@@ -8,6 +8,8 @@ const docs = fs.readFileSync('docs/MULTI_SPORT_DATA_EXPANSION_V1.md', 'utf8')
 const providerAudit = fs.readFileSync('src/services/multi-sport-provider-entitlement-audit.service.ts', 'utf8')
 const providerRoute = fs.readFileSync('src/app/api/data-coverage/provider-audit/route.ts', 'utf8')
 const healthRoute = fs.readFileSync('src/app/api/data-coverage/health/route.ts', 'utf8')
+const checkpoint2 = fs.readFileSync('src/services/multi-sport-data-expansion-checkpoint2.service.ts', 'utf8')
+const checkpoint2Route = fs.readFileSync('src/app/api/data-coverage/expansion-checkpoint2/route.ts', 'utf8')
 
 const checks = [
   ['inventory service exists', service.includes('getDataCoverageInventoryV1')],
@@ -27,8 +29,13 @@ const checks = [
   ['provider audit uses The Odds dry-run', providerAudit.includes('runTheOddsApiCapabilityAudit({ dryRun: true })')],
   ['provider audit route exposes validation', providerRoute.includes("validate') === 'true'")],
   ['provider audit reports zero live calls by default', providerAudit.includes('liveProviderProbeExecuted: false')],
+  ['checkpoint 2 service exists', checkpoint2.includes('getMultiSportDataExpansionCheckpoint2V1')],
+  ['checkpoint 2 includes MLB NBA NFL', checkpoint2.includes("key: 'mlb'") && checkpoint2.includes("key: 'nba'") && checkpoint2.includes("key: 'nfl'")],
+  ['checkpoint 2 does not execute imports', checkpoint2.includes('importsExecuted: 0')],
+  ['checkpoint 2 route exposes validation', checkpoint2Route.includes("validate') === 'true'")],
   ['docs include certification marker', docs.includes('DATA_INVENTORY_EXACTNESS_PASS')],
   ['docs include provider audit marker', docs.includes('PROVIDER_ENTITLEMENT_AUDIT_PASS')],
+  ['docs include historical checkpoint marker', docs.includes('HISTORICAL_IMPORT_CHECKPOINT_PASS')],
 ]
 
 const failed = checks.filter(([, pass]) => !pass).map(([name]) => name)

@@ -39,6 +39,17 @@ The provider audit composes:
 
 It distinguishes documented support, entitlement, runtime credential availability, quota status and live-ingestion readiness. The default audit performs no live provider probes and does not treat support metadata as proof of entitlement.
 
+## Checkpoint 2: MLB, NBA And NFL Data Expansion
+
+Status: locally implemented as read-only expansion readiness and dry-run import planning.
+
+Surface:
+
+- `/api/data-coverage/expansion-checkpoint2`
+- `/api/data-coverage/expansion-checkpoint2?validate=true`
+
+Checkpoint 2 consolidates existing MLB, NBA and NFL completion contracts with dry-run historical import manifests and provider entitlement evidence. It does not execute provider calls, imports, SQL, feature rebuilds, prediction generation, settlement, learning or recommendation activation. Domains that are not fully entitled remain blocked or partial rather than silently executed.
+
 Safety:
 
 - Provider calls: 0
@@ -55,6 +66,8 @@ Certification markers:
 - DATA_INVENTORY_EXACTNESS_PASS
 - DATA_HEALTH_CENTER_V1_PASS
 - PROVIDER_ENTITLEMENT_AUDIT_PASS
+- HISTORICAL_IMPORT_CHECKPOINT_PASS
+- PROVIDER_QUOTA_SAFETY_PASS
 - NO_RETROSPECTIVE_PREDICTION_PASS
 - NO_FORCED_RECOMMENDATION_PASS
 - NO_PROBABILITY_CHANGE_PASS
