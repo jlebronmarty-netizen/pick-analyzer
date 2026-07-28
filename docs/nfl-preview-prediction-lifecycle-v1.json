@@ -1,0 +1,287 @@
+{
+  "generatedAt": "2026-07-28T03:43:15.008Z",
+  "commit": "a792d9d868a2cc7f641c6a3da80c306559d855d6",
+  "checkpoint": "NFL_PREVIEW_PREDICTION_LIFECYCLE_V1",
+  "result": {
+    "success": true,
+    "status": "NFL_PREVIEW_BLOCKED",
+    "generatedAt": "2026-07-28T03:43:15.008Z",
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 0,
+    "stored": {
+      "events": {
+        "count": 0,
+        "error": null
+      },
+      "futureEvents": {
+        "count": 0,
+        "error": null
+      },
+      "odds": {
+        "count": 1978,
+        "error": null
+      },
+      "mappings": {
+        "count": 75,
+        "error": null
+      },
+      "results": {
+        "count": 0,
+        "error": null
+      },
+      "predictions": {
+        "count": 190,
+        "error": null
+      },
+      "settledPredictions": {
+        "count": 0,
+        "error": null
+      },
+      "teamStats": {
+        "count": 0,
+        "error": null
+      },
+      "gameStats": {
+        "count": 0,
+        "error": null
+      },
+      "playerStats": {
+        "count": 0,
+        "error": null
+      }
+    },
+    "engine": {
+      "success": true,
+      "status": "partial",
+      "summary": {
+        "predictionsGenerated": 4,
+        "recommended": 0,
+        "markets": [
+          "moneyline",
+          "spread",
+          "total",
+          "first_half"
+        ],
+        "averageFeatureQuality": 40,
+        "averageDataSufficiency": 40,
+        "noLeakage": true,
+        "persisted": false,
+        "productionRecommendations": false
+      },
+      "compatibility": {
+        "usesSharedSportPredictionSdk": true,
+        "usesFeatureStoreSnapshot": true,
+        "usesRawProviderPayloads": false,
+        "requiresMigration": false,
+        "persistenceEnabled": false,
+        "settlementCompatible": true
+      },
+      "missingSportSpecificDomains": [
+        "Quarterback impact, injury impact, weather and rest/travel context are not fully available in Feature Store Core V1."
+      ]
+    },
+    "health": {
+      "status": "partial",
+      "checks": {
+        "sharedSdkReady": true,
+        "featureSnapshotNoLeakage": true,
+        "supportedMarkets": 4,
+        "unsupportedPreviewMarkets": 0,
+        "persistenceEnabled": false,
+        "productionReady": false,
+        "realDataValidationPending": true,
+        "historicalCalibrationPending": true
+      },
+      "warnings": [
+        "NFL position-impact feature extensions are not yet registered.",
+        "NFL Feature Store Integration V1 is architecture-only and does not claim predictive accuracy.",
+        "Quarterback impact, injury impact, weather and rest/travel context are not fully available in Feature Store Core V1.",
+        "Unavailable NFL-specific context must degrade confidence or block later prediction engines instead of being fabricated.",
+        "NFL Prediction Engine V1 is architecture-only and deterministic-fixture validated.",
+        "Predictions are not persisted and are not production betting recommendations.",
+        "Quarterback impact, injury impact, weather and rest/travel inputs are unavailable and not fabricated.",
+        "Real-data validation and historical calibration are pending."
+      ]
+    },
+    "validation": {
+      "success": true,
+      "summary": {
+        "checks": 9,
+        "passed": 9,
+        "predictionsGenerated": 4,
+        "markets": [
+          "moneyline",
+          "spread",
+          "total",
+          "first_half"
+        ],
+        "averageFeatureQuality": 40,
+        "averageDataSufficiency": 40,
+        "status": "partial"
+      },
+      "checks": {
+        "generatedPreviewPredictions": true,
+        "zeroProviderCalls": true,
+        "noLeakage": true,
+        "noPersistence": true,
+        "noRawProviderPayloads": true,
+        "sdkCompatible": true,
+        "settlementCompatible": true,
+        "realDataPending": true,
+        "historicalCalibrationPending": true
+      }
+    },
+    "crosswalk": {
+      "sportKey": "americanfootball_nfl",
+      "label": "NFL Football",
+      "providerSportKey": "americanfootball_nfl",
+      "state": "FOUNDATION",
+      "coverage": {
+        "oddsRows": 1977,
+        "oddsEvents": 75,
+        "currentOddsCoverage": {
+          "numerator": 75,
+          "denominator": 75,
+          "pct": 100
+        },
+        "providerEventMappings": 75,
+        "canonicalEventMappings": 0,
+        "eventCrosswalkCoverage": {
+          "numerator": 0,
+          "denominator": 75,
+          "pct": 0
+        },
+        "resultRows": 0,
+        "resultCrosswalkCoverage": {
+          "numerator": 0,
+          "denominator": 75,
+          "pct": 0
+        },
+        "canonicalEvents": 0,
+        "completedCanonicalEvents": 0,
+        "predictionRows": 190,
+        "settledPredictionRows": 0
+      },
+      "markets": [
+        "moneyline",
+        "spread",
+        "total"
+      ],
+      "bookmakers": [
+        "betmgm",
+        "betonlineag",
+        "betrivers",
+        "betus",
+        "bovada",
+        "draftkings",
+        "fanatics",
+        "fanduel",
+        "lowvig",
+        "mybookieag",
+        "williamhill_us"
+      ],
+      "classifications": {
+        "exact": 0,
+        "deterministicAlias": 0,
+        "timeWindowWithIdentity": 0,
+        "ambiguous": 0,
+        "unresolved": 75,
+        "conflict": 0
+      },
+      "readiness": {
+        "exactEventMapping": false,
+        "completedResults": false,
+        "deterministicSettlementInputs": false,
+        "learningSample": false,
+        "previewPredictionEligible": false,
+        "productionPredictionEligible": false,
+        "recommendationEligible": false
+      },
+      "blockers": [
+        "CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED",
+        "COMPLETED_RESULT_ROWS_NOT_AVAILABLE",
+        "ODDS_CANONICAL_RESULT_CHAIN_NOT_CERTIFIED",
+        "NO_SETTLED_PREDICTION_SAMPLE"
+      ],
+      "nextAction": "CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED"
+    },
+    "gates": [
+      {
+        "name": "Exact event identity",
+        "passed": false,
+        "blocker": "NFL_CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED"
+      },
+      {
+        "name": "Participant identity",
+        "passed": false,
+        "blocker": "NFL_CANONICAL_EVENTS_EMPTY"
+      },
+      {
+        "name": "Scheduled future starts",
+        "passed": false,
+        "blocker": "NFL_FUTURE_CANONICAL_EVENTS_EMPTY"
+      },
+      {
+        "name": "Historical results",
+        "passed": false,
+        "blocker": "NFL_COMPLETED_RESULTS_EMPTY"
+      },
+      {
+        "name": "Pregame odds",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Cutoff safety",
+        "passed": true,
+        "blocker": null
+      },
+      {
+        "name": "Persistence enabled for real preview rows",
+        "passed": false,
+        "blocker": "NFL_PERSISTENCE_DISABLED_BY_DESIGN"
+      },
+      {
+        "name": "Settlement inputs",
+        "passed": false,
+        "blocker": "NFL_SETTLEMENT_INPUTS_EMPTY"
+      },
+      {
+        "name": "Learning labels",
+        "passed": false,
+        "blocker": "NFL_SETTLED_LEARNING_SAMPLE_EMPTY"
+      },
+      {
+        "name": "Preview/production separation",
+        "passed": true,
+        "blocker": null
+      }
+    ],
+    "summary": {
+      "gatesPassed": 3,
+      "gatesTotal": 10,
+      "previewActivated": false,
+      "productionActivated": false,
+      "recommendationEligible": false
+    },
+    "blockers": [
+      "NFL_CANONICAL_EVENT_CROSSWALK_NOT_CERTIFIED",
+      "NFL_CANONICAL_EVENTS_EMPTY",
+      "NFL_FUTURE_CANONICAL_EVENTS_EMPTY",
+      "NFL_COMPLETED_RESULTS_EMPTY",
+      "NFL_PERSISTENCE_DISABLED_BY_DESIGN",
+      "NFL_SETTLEMENT_INPUTS_EMPTY",
+      "NFL_SETTLED_LEARNING_SAMPLE_EMPTY"
+    ],
+    "certifications": [
+      "NFL_PREVIEW_PREDICTION_LIFECYCLE_BLOCKED_TRUTHFUL_PASS",
+      "NFL_NO_RETROSPECTIVE_PREDICTION_PASS",
+      "NFL_NO_PRODUCTION_PROMOTION_PASS",
+      "NO_PROVIDER_CALL_C_PASS",
+      "NO_REMOTE_MUTATION_C_PASS",
+      "NO_PROBABILITY_CHANGE_PASS",
+      "NO_CONFIDENCE_CHANGE_PASS"
+    ]
+  }
+}
