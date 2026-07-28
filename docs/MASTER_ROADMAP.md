@@ -2796,7 +2796,7 @@ Completion criteria: `UNIVERSAL_EVENT_IDENTITY_ENGINE_V1_PASS`, `UNIVERSAL_EVENT
 
 Objective: Activate genuine Preview-only prediction lifecycle coverage for NFL and NHL after canonical event identity was certified.
 
-Status: Checkpoints A and B complete for NFL and NHL. Final certification pending.
+Status: Complete through final certification.
 
 Backend scope: `stored-preview-prediction-lifecycle.service.ts` adds a shared stored-data adapter that reuses canonical events, stored odds snapshots, Feature Store Core, Shared Sport Prediction SDK, `historical_feature_snapshots`, `prediction_history` and Settlement Reconciliation V2. NFL and NHL prediction routes now return real stored-data Preview lifecycle output instead of fixture-only preview output.
 
@@ -2804,9 +2804,9 @@ Persistence scope: NFL Checkpoint A persisted 776 immutable feature snapshots an
 
 Validation: NFL dry-run produced 776 predictions across moneyline, spread and total, rejected 0 cutoff rows and made 0 provider calls. NFL persist wrote 1,552 total feature/prediction rows. The post-persist dry-run reported 776 reused predictions, 0 inserted predictions and 0 remote mutations. NHL dry-run produced 258 predictions across moneyline, spread and total, rejected 0 cutoff rows and made 0 provider calls. NHL persist wrote 516 total feature/prediction rows. The post-persist dry-run reported 258 reused predictions, 0 inserted predictions and 0 remote mutations. Settlement dry-run remains read-only and classifies rows as scheduled/awaiting result until future games complete.
 
-Continuation: Run final certification for NFL and NHL together, then report that settlement, learning, performance and promotion readiness remain blocked until deterministic final results and settled Preview samples exist.
+Continuation: Wait for future NFL/NHL events to complete, ingest deterministic final scores through approved result paths, then rerun settlement reconciliation before any learning, performance or promotion review.
 
-Completion criteria: `NFL_PREVIEW_PREDICTION_ACTIVATION_PASS`, `NFL_PREGAME_FEATURE_SNAPSHOT_PASS`, `NFL_PREVIEW_ISOLATION_PASS`, `NFL_SETTLEMENT_DRY_RUN_PASS`, `NHL_PREVIEW_PREDICTION_ACTIVATION_PASS`, `NHL_PREGAME_FEATURE_SNAPSHOT_PASS`, `NHL_PREVIEW_ISOLATION_PASS`, `NHL_SETTLEMENT_DRY_RUN_PASS`, `NO_RETROSPECTIVE_PREDICTION_PASS`, `NO_POST_START_LEAKAGE_PASS`, `NO_PRODUCTION_POLLUTION_PASS` and `NO_PROVIDER_CALL_PASS` are certified for Checkpoints A-B.
+Completion criteria: `NFL_PREVIEW_PREDICTION_ACTIVATION_PASS`, `NFL_PREGAME_FEATURE_SNAPSHOT_PASS`, `NFL_PREVIEW_ISOLATION_PASS`, `NFL_SETTLEMENT_DRY_RUN_PASS`, `NHL_PREVIEW_PREDICTION_ACTIVATION_PASS`, `NHL_PREGAME_FEATURE_SNAPSHOT_PASS`, `NHL_PREVIEW_ISOLATION_PASS`, `NHL_SETTLEMENT_DRY_RUN_PASS`, `NO_RETROSPECTIVE_PREDICTION_PASS`, `NO_POST_START_LEAKAGE_PASS`, `NO_PRODUCTION_POLLUTION_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_OFFICIAL_PICK_POLICY_CHANGE_PASS`, `NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS` and `NO_SCHEDULER_DRIFT_PASS` are certified.
 # MLB Pitcher Projection Engine V1
 
 Status: PARTIAL
