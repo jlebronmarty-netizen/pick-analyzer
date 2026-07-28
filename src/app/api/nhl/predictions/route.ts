@@ -1,12 +1,14 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { generateNhlPredictionPreview } from '@/services/nhl-prediction-engine.service'
+import { runNhlStoredPreviewPredictionLifecycle } from '@/services/stored-preview-prediction-lifecycle.service'
 
 export async function GET(request: NextRequest) {
   const id = requestId(request)
 
   try {
-    return apiOk(generateNhlPredictionPreview(), id)
+    const persist = request.nextUrl.searchParams.get('persist') === 'true'
+    const limitEvents = Number(request.nextUrl.searchParams.get('limitEvents') ?? 12)
+    return apiOk(await runNhlStoredPreviewPredictionLifecycle({ persist, limitEvents }), id)
   } catch (error) {
     console.error('NHL Prediction Engine preview error:', { requestId: id, error })
 
