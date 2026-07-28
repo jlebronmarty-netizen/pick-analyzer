@@ -2,6 +2,14 @@
 
 Last updated: 2026-07-28 00:00:00Z
 
+## 2026-07-28 Prediction Epoch Shadow Readiness V1
+
+- Added shadow-only certified prediction epoch readiness contracts at `/api/prediction-epoch/shadow-readiness`, `/api/prediction-epoch/activation-readiness`, `/api/operations/pregame-odds-refresh-sla` and `/api/operations/odds-change-refresh-readiness`.
+- Added additive unapplied migration artifact `202607280001_prediction_epoch_shadow_readiness_v1.sql` for nullable future `prediction_origin`, `certification_status` and `certification_metadata` fields. It does not backfill rows, activate an epoch, run replay or mark predictions production eligible.
+- Added Pregame Odds Refresh Cadence & Freshness SLA V1 in shadow/dry-run mode only: 10-minute refresh cadence outside the final 90 minutes, 5-minute cadence inside the final 90 minutes, normal freshness target <=12 minutes and final-window target <=7 minutes.
+- Added odds-change-triggered prediction refresh readiness rules for moneyline price, run-line price/handicap, total price and total points changes without changing model formulas or activating regeneration.
+- Provider calls, remote mutations, production mutations, SQL application, epoch activation, Historical Replay, prediction probabilities, confidence/quality formulas, Official Pick thresholds and Learning Brain weights remain unchanged.
+
 ## 2026-07-28 The Odds API Maximum Utilization V1
 
 - Checkpoint 1 adds bounded The Odds API catalog, quota, capability and coverage contracts at `/api/providers/the-odds-api/catalog`, `/api/providers/the-odds-api/quota`, `/api/providers/the-odds-api/capability` and `/api/providers/the-odds-api/coverage`.

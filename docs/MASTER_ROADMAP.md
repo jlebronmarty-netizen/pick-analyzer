@@ -64,6 +64,8 @@ Autonomous Daily AI V1 is locally implemented as `/autonomous-daily-ai` and `/ap
 
 Historical Sports Data Foundation V2 and Prediction Epoch Reset V2 is in autonomous local execution. The run is governed by `docs/AUTONOMOUS_EXECUTION_V2.md` and `docs/autonomous-execution-v2.json`. It may create local commits and additive migration files, but it must not push, deploy, apply production SQL, execute historical odds, delete predictions, activate a new production epoch or enable new production cron jobs.
 
+Prediction Epoch Shadow Readiness V1 is locally implemented as the next governance step. It adds shadow-only classifier, activation-readiness, odds-cadence SLA and odds-change-refresh readiness APIs, plus an unapplied additive migration artifact for future `prediction_origin`, `certification_status` and `certification_metadata`. The phase keeps legacy MLB history quarantined, does not activate an epoch, does not mark rows `production_eligible`, does not run Historical Replay and does not change prediction formulas, Official Pick thresholds, scheduler behavior or Learning Brain weights.
+
 Phase 1 coverage audit is locally implemented at `/api/data-foundation/coverage` with zero provider calls and zero mutations. It reports MLB and NBA as stored-data ready, BSN as partial for prediction readiness, and NFL/NHL/Soccer/Tennis/UFC as blocked or empty until legitimate data adapters/contracts are added.
 
 Phase 2 season and competition governance is locally implemented at `/api/data-foundation/seasons`. It defines calendar-year MLB/BSN, cross-year NBA/NHL, NFL season-year with cross-calendar postseason, competition-specific Soccer and event-driven Tennis/UFC without requiring production SQL.
