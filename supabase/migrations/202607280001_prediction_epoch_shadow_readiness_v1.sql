@@ -9,7 +9,7 @@
 alter table if exists public.prediction_history
   add column if not exists prediction_origin text,
   add column if not exists certification_status text,
-  add column if not exists certification_metadata jsonb not null default '{}'::jsonb;
+  add column if not exists certification_metadata jsonb;
 
 do $$
 begin
@@ -58,5 +58,4 @@ comment on column public.prediction_history.certification_status is
   'Nullable future governance field. Allowed values: SHADOW_PENDING, CERTIFIED, QUARANTINED, INVALID, REJECTED. This migration does not certify or promote rows.';
 
 comment on column public.prediction_history.certification_metadata is
-  'Future isolated certification evidence metadata for lineage/readiness gates. Existing rows keep empty metadata until an approved bounded mutation plan exists.';
-
+  'Nullable future isolated certification evidence metadata for lineage/readiness gates. This migration does not backfill rows.';
