@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-07-28 22:16:00Z
+Last updated: 2026-07-28 22:36:00Z
+
+## 2026-07-28 MLB Canonical Settlement Backlog And Immutable Learning Label Closure V1
+
+- Completed the remaining canonical-ready MLB settlement backlog through the existing protected operating-day settlement path, oldest-ready-first and local-only. The closure processed `2026-07-27` then `2026-07-28`; no Vercel deployment, epoch activation, model training, probability change, confidence change, Trust change, Official Pick policy change or Learning Brain weight mutation occurred.
+- Ready inventory before closure was 36 rows: 33 on `2026-07-27` and 3 on `2026-07-28`. All 36 had authoritative `game_results` evidence, supported markets and cutoff-safe pending rows. The 67 rows without canonical result evidence remained pending and unresolved.
+- Settlement batches: `2026-07-27` checked 36, settled 33, recorded 16 wins, 17 losses, 0 pushes and skipped 3 unresolved rows; `2026-07-28` checked 48, settled 3, recorded 2 wins, 1 loss, 0 pushes and skipped 45 unresolved rows. Idempotency dry-runs after each batch reported 0 eligible and 0 repeat settlements.
+- Result-based MLB settled count now reads 944, pending reads 67, canonical-ready reads 0 and awaiting-result reads 67. The broader raw status count remains higher because older audit rows can carry settled-like statuses without deterministic `result` values; result-based counts are the certified settlement contract for this closure.
+- Learning labels are canonicalized as derived immutable evidence from settled `prediction_history` rows plus feature evidence, as exposed by AI Operations `prediction_history_settlement_v2_read_only`. The derived learning queue increased from 318 to 354 accepted samples, inserted 0 standalone label rows and changed 0 model-weight rows.
+- A broader historical accounting audit found pre-existing zero-stake/profit-mismatch rows outside the newly settled scope. Newly settled closure rows passed accounting validation; no historical rewrite was performed without a separate bounded remediation gate.
 
 ## 2026-07-28 Protected Canonical MLB Settlement And Learning Closure V1
 

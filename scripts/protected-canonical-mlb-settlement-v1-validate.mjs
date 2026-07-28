@@ -2,6 +2,7 @@ import fs from 'node:fs'
 
 const servicePath = 'src/services/operating-day.service.ts'
 const service = fs.readFileSync(servicePath, 'utf8')
+const closureScript = fs.readFileSync('scripts/mlb-canonical-settlement-backlog-closure-v1.mjs', 'utf8')
 const settleBranch = service.match(/action === 'settle'[\s\S]*?} else if \(action === 'replay'\)/)?.[0] ?? ''
 
 const checks = [
@@ -37,6 +38,33 @@ const checks = [
     name: 'settlement path does not run model learning',
     pass:
       Boolean(settleBranch) && !settleBranch.includes('runModelLearning'),
+  },
+  {
+    name: 'closure runner processes bounded oldest-ready dates',
+    pass:
+      closureScript.includes('MAX_BATCHES') &&
+      closureScript.includes('readyByDate.slice(0, MAX_BATCHES)') &&
+      closureScript.includes('sort(([a], [b]) => a.localeCompare(b))'),
+  },
+  {
+    name: 'closure runner excludes unresolved rows from settlement',
+    pass:
+      closureScript.includes('completeResult && supportedMarket && cutoffSafe') &&
+      closureScript.includes('awaiting.push(base)') &&
+      closureScript.includes('Number(idempotency.eligible ?? 0) !== 0'),
+  },
+  {
+    name: 'learning evidence remains derived without weight mutation',
+    pass:
+      closureScript.includes('prediction_history_settlement_derived_read_only_queue_v1') &&
+      closureScript.includes('getAiLearningLifecycle') &&
+      !closureScript.includes('runModelLearning'),
+  },
+  {
+    name: 'learning evidence idempotency uses deterministic keys',
+    pass:
+      closureScript.includes('duplicateDeterministicKeys') &&
+      closureScript.includes('new Set(deterministicKeys).size'),
   },
 ]
 
