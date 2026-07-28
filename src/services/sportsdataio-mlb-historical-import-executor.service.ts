@@ -10,10 +10,8 @@ import {
   resolveSportsDataIoDiscoveryLabUrl,
   validateSportsDataIoDiscoveryLabUrlFixtures,
 } from '@/services/sportsdataio-discovery-lab-url.service'
-import {
-  SportsDataIoMlbEventReference,
-  normalizeSportsDataIoMlbGameOdds,
-} from '@/services/sportsdataio-mlb-normalization.service'
+import { normalizeSportsDataIoMlbGameOdds } from '@/services/sportsdataio-mlb-normalization.service'
+import type { SportsDataIoMlbEventReference } from '@/services/sportsdataio-mlb-normalization.service'
 import { assertSportEventStatusWrite } from '@/services/mlb-event-status-mapper.service'
 
 export type SportsDataIoMlbExecutionRequest = {
@@ -923,10 +921,6 @@ function providerTeamId(game: Record<string, unknown>, side: 'home' | 'away') {
 function teamKey(game: Record<string, unknown>, side: 'home' | 'away') {
   if (side === 'home') return safeString(game.HomeTeam) || safeString(game.HomeTeamKey) || safeString(game.HomeTeamName)
   return safeString(game.AwayTeam) || safeString(game.AwayTeamKey) || safeString(game.AwayTeamName)
-}
-
-function eventStart(game: Record<string, unknown>) {
-  return normalizeSportsDataIoMlbGameDateTime(game).normalizedUtc
 }
 
 function eventStatus(value: unknown) {

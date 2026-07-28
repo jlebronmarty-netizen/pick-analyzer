@@ -1,0 +1,424 @@
+{
+  "success": true,
+  "mode": "live_multi_sport_data_acquisition_v1_checkpoint_b_mlb",
+  "checkpoint": "CHECKPOINT_B_MLB_CURRENT_HISTORICAL_COMPLETION",
+  "generatedAt": "2026-07-28T02:07:27.070Z",
+  "startingCommit": "b0ccf642e4947dc3c0206bdf5c147131c2ab829b",
+  "season": "2026",
+  "domains": [
+    "schedules",
+    "standings",
+    "team_stats",
+    "player_stats",
+    "scores",
+    "game_stats",
+    "odds"
+  ],
+  "beforeCounts": {
+    "teams": 30,
+    "players": 7389,
+    "scheduledGames": 4923,
+    "completedGames": 471,
+    "standings": 60,
+    "teamStats": 2926,
+    "playerStats": 47232,
+    "boxScores": 2926,
+    "periodScores": 4923,
+    "injuries": 0,
+    "lineupsStarters": 27,
+    "oddsSnapshots": 49289,
+    "playerProps": 11,
+    "historicalFeatures": 72541,
+    "validPregamePredictions": 1146,
+    "settlements": 921
+  },
+  "afterCounts": {
+    "teams": 30,
+    "players": 7389,
+    "scheduledGames": 4923,
+    "completedGames": 471,
+    "standings": 60,
+    "teamStats": 2926,
+    "playerStats": 47255,
+    "boxScores": 2926,
+    "periodScores": 4923,
+    "injuries": 0,
+    "lineupsStarters": 27,
+    "oddsSnapshots": 49289,
+    "playerProps": 11,
+    "historicalFeatures": 72541,
+    "validPregamePredictions": 1146,
+    "settlements": 921
+  },
+  "beforeBudget": {
+    "callsMadeToday": 16,
+    "callsMadeLastHour": 2,
+    "estimatedCallsRemaining": 834,
+    "hourlyRemaining": 10,
+    "accountingStatus": "AVAILABLE",
+    "configurationStatus": "VALID"
+  },
+  "afterBudget": {
+    "callsMadeToday": 19,
+    "callsMadeLastHour": 5,
+    "estimatedCallsRemaining": 831,
+    "hourlyRemaining": 7,
+    "accountingStatus": "AVAILABLE",
+    "configurationStatus": "VALID"
+  },
+  "initialPlan": {
+    "success": true,
+    "dryRun": true,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    },
+    "checkpointCount": 4,
+    "completedCheckpoints": 1,
+    "nextUnit": {
+      "sequence": 2,
+      "domain": "standings",
+      "endpoint": "/api/mlb/fantasy/json/Standings/2026",
+      "endpointTemplate": "/api/mlb/fantasy/json/Standings/{season}",
+      "scope": "season",
+      "date": null,
+      "estimatedCalls": 1,
+      "implementedLive": true,
+      "status": "planned",
+      "skipReason": null,
+      "checkpointKey": "sportsdataio_mlb_discovery_historical_import_v1:sportsdataio:sportsdataio_discovery_lab:baseball_mlb:mlb:2026:regular::standings:-api-mlb-fantasy-json-standings-season-"
+    },
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
+  },
+  "executions": [
+    {
+      "step": 1,
+      "prePlan": {
+        "success": true,
+        "dryRun": true,
+        "validation": {
+          "valid": true,
+          "errors": [],
+          "warnings": []
+        },
+        "checkpointCount": 4,
+        "completedCheckpoints": 1,
+        "nextUnit": {
+          "sequence": 2,
+          "domain": "standings",
+          "endpoint": "/api/mlb/fantasy/json/Standings/2026",
+          "endpointTemplate": "/api/mlb/fantasy/json/Standings/{season}",
+          "scope": "season",
+          "date": null,
+          "estimatedCalls": 1,
+          "implementedLive": true,
+          "status": "planned",
+          "skipReason": null,
+          "checkpointKey": "sportsdataio_mlb_discovery_historical_import_v1:sportsdataio:sportsdataio_discovery_lab:baseball_mlb:mlb:2026:regular::standings:-api-mlb-fantasy-json-standings-season-"
+        },
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0
+      },
+      "execution": {
+        "success": true,
+        "status": "completed",
+        "executedUnit": {
+          "sequence": 2,
+          "domain": "standings",
+          "endpoint": "/api/mlb/fantasy/json/Standings/2026",
+          "checkpointKey": "sportsdataio_mlb_discovery_historical_import_v1:sportsdataio:sportsdataio_discovery_lab:baseball_mlb:mlb:2026:regular::standings:-api-mlb-fantasy-json-standings-season-"
+        },
+        "nextUnit": {
+          "sequence": 3,
+          "domain": "team_season_stats",
+          "endpoint": "/api/mlb/odds/json/TeamSeasonStats/2026",
+          "checkpointKey": "sportsdataio_mlb_discovery_historical_import_v1:sportsdataio:sportsdataio_discovery_lab:baseball_mlb:mlb:2026:regular::team_season_stats:-api-mlb-odds-json-teamseasonstats-season-",
+          "implementedLive": true
+        },
+        "providerCallsMade": 1,
+        "counters": {
+          "providerRecordsFetched": 30,
+          "normalizedRows": 60,
+          "rowsInserted": 0,
+          "mappingsInserted": 0,
+          "inserted": 0,
+          "updated": 60,
+          "rejected": 0,
+          "unresolvedTeams": 0,
+          "unresolvedPlayers": 0,
+          "duplicateInputs": 0,
+          "providerCallsUsed": 1
+        },
+        "validation": {
+          "valid": true,
+          "unresolvedTeams": 0,
+          "unresolvedTeamIds": [],
+          "unresolvedPlayers": 0,
+          "unresolvedPlayerIds": [],
+          "duplicateInputs": 0,
+          "deterministicIds": true,
+          "nonnegativeCounters": true,
+          "productionEligibleViolations": 0,
+          "rawPayloadStored": false,
+          "idempotencyLocalReprocessing": true
+        },
+        "job": {
+          "id": "a181b7ea-899b-416c-ab4f-0c981d91cacb",
+          "status": "completed",
+          "progressPercent": 100
+        },
+        "noSecretExposure": true
+      }
+    },
+    {
+      "step": 2,
+      "prePlan": {
+        "success": true,
+        "dryRun": true,
+        "validation": {
+          "valid": true,
+          "errors": [],
+          "warnings": []
+        },
+        "checkpointCount": 4,
+        "completedCheckpoints": 2,
+        "nextUnit": {
+          "sequence": 3,
+          "domain": "team_season_stats",
+          "endpoint": "/api/mlb/odds/json/TeamSeasonStats/2026",
+          "endpointTemplate": "/api/mlb/odds/json/TeamSeasonStats/{season}",
+          "scope": "season",
+          "date": null,
+          "estimatedCalls": 1,
+          "implementedLive": true,
+          "status": "planned",
+          "skipReason": null,
+          "checkpointKey": "sportsdataio_mlb_discovery_historical_import_v1:sportsdataio:sportsdataio_discovery_lab:baseball_mlb:mlb:2026:regular::team_season_stats:-api-mlb-odds-json-teamseasonstats-season-"
+        },
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0
+      },
+      "execution": {
+        "success": true,
+        "status": "completed",
+        "executedUnit": {
+          "sequence": 3,
+          "domain": "team_season_stats",
+          "endpoint": "/api/mlb/odds/json/TeamSeasonStats/2026",
+          "checkpointKey": "sportsdataio_mlb_discovery_historical_import_v1:sportsdataio:sportsdataio_discovery_lab:baseball_mlb:mlb:2026:regular::team_season_stats:-api-mlb-odds-json-teamseasonstats-season-"
+        },
+        "nextUnit": {
+          "sequence": 4,
+          "domain": "player_season_stats",
+          "endpoint": "/api/mlb/fantasy/json/PlayerSeasonStats/2026",
+          "checkpointKey": "sportsdataio_mlb_discovery_historical_import_v1:sportsdataio:sportsdataio_discovery_lab:baseball_mlb:mlb:2026:regular::player_season_stats:-api-mlb-fantasy-json-playerseasonstats-season-",
+          "implementedLive": true
+        },
+        "providerCallsMade": 1,
+        "counters": {
+          "providerRecordsFetched": 30,
+          "normalizedRows": 30,
+          "rowsInserted": 0,
+          "mappingsInserted": 0,
+          "inserted": 0,
+          "updated": 30,
+          "rejected": 0,
+          "unresolvedTeams": 0,
+          "unresolvedPlayers": 0,
+          "duplicateInputs": 0,
+          "providerCallsUsed": 1
+        },
+        "validation": {
+          "valid": true,
+          "unresolvedTeams": 0,
+          "unresolvedTeamIds": [],
+          "unresolvedPlayers": 0,
+          "unresolvedPlayerIds": [],
+          "duplicateInputs": 0,
+          "deterministicIds": true,
+          "nonnegativeCounters": true,
+          "productionEligibleViolations": 0,
+          "rawPayloadStored": false,
+          "idempotencyLocalReprocessing": true
+        },
+        "job": {
+          "id": "df2651f4-f421-45ed-ba67-e56ac5c1c6a2",
+          "status": "completed",
+          "progressPercent": 100
+        },
+        "noSecretExposure": true
+      }
+    },
+    {
+      "step": 3,
+      "prePlan": {
+        "success": true,
+        "dryRun": true,
+        "validation": {
+          "valid": true,
+          "errors": [],
+          "warnings": []
+        },
+        "checkpointCount": 4,
+        "completedCheckpoints": 3,
+        "nextUnit": {
+          "sequence": 4,
+          "domain": "player_season_stats",
+          "endpoint": "/api/mlb/fantasy/json/PlayerSeasonStats/2026",
+          "endpointTemplate": "/api/mlb/fantasy/json/PlayerSeasonStats/{season}",
+          "scope": "season",
+          "date": null,
+          "estimatedCalls": 1,
+          "implementedLive": true,
+          "status": "planned",
+          "skipReason": null,
+          "checkpointKey": "sportsdataio_mlb_discovery_historical_import_v1:sportsdataio:sportsdataio_discovery_lab:baseball_mlb:mlb:2026:regular::player_season_stats:-api-mlb-fantasy-json-playerseasonstats-season-"
+        },
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0
+      },
+      "execution": {
+        "success": true,
+        "status": "completed",
+        "executedUnit": {
+          "sequence": 4,
+          "domain": "player_season_stats",
+          "endpoint": "/api/mlb/fantasy/json/PlayerSeasonStats/2026",
+          "checkpointKey": "sportsdataio_mlb_discovery_historical_import_v1:sportsdataio:sportsdataio_discovery_lab:baseball_mlb:mlb:2026:regular::player_season_stats:-api-mlb-fantasy-json-playerseasonstats-season-"
+        },
+        "nextUnit": null,
+        "providerCallsMade": 1,
+        "counters": {
+          "providerRecordsFetched": 1326,
+          "normalizedRows": 2678,
+          "rowsInserted": 23,
+          "mappingsInserted": 24,
+          "inserted": 47,
+          "updated": 2631,
+          "rejected": 0,
+          "unresolvedTeams": 0,
+          "unresolvedPlayers": 26,
+          "duplicateInputs": 0,
+          "providerCallsUsed": 1
+        },
+        "validation": {
+          "valid": true,
+          "unresolvedTeams": 0,
+          "unresolvedTeamIds": [],
+          "unresolvedPlayers": 26,
+          "unresolvedPlayerIds": [
+            "10000439",
+            "10000928",
+            "10001077",
+            "10003188",
+            "10003762",
+            "10006199",
+            "10006354",
+            "10006416",
+            "10006758",
+            "10007078",
+            "10007081",
+            "10007155",
+            "10007374",
+            "10008225",
+            "10008629",
+            "10008675",
+            "10008736",
+            "10008848",
+            "10009459",
+            "10009842",
+            "10010320",
+            "10010361",
+            "10010470",
+            "10010490",
+            "10010891",
+            "10011484"
+          ],
+          "duplicateInputs": 0,
+          "deterministicIds": true,
+          "nonnegativeCounters": true,
+          "productionEligibleViolations": 0,
+          "rawPayloadStored": false,
+          "idempotencyLocalReprocessing": true
+        },
+        "job": {
+          "id": "f51347f2-e8b8-402d-9394-a513ccbbcb85",
+          "status": "completed",
+          "progressPercent": 100
+        },
+        "noSecretExposure": true
+      }
+    }
+  ],
+  "finalPlan": {
+    "success": true,
+    "dryRun": true,
+    "validation": {
+      "valid": true,
+      "errors": [],
+      "warnings": []
+    },
+    "checkpointCount": 4,
+    "completedCheckpoints": 4,
+    "nextUnit": null,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
+  },
+  "providerCallsMade": 3,
+  "cumulativeProviderCallsMade": 4,
+  "remoteMutationsMade": 2768,
+  "productionMutationsMade": 2768,
+  "inserted": 47,
+  "cumulativeInserted": 49,
+  "updated": 2721,
+  "cumulativeUpdated": 7701,
+  "skipped": 0,
+  "cumulativeSkipped": 0,
+  "rejected": 0,
+  "cumulativeRejected": 0,
+  "duplicates": 0,
+  "importsExecuted": 3,
+  "featureRebuildsExecuted": 0,
+  "predictionActivationsExecuted": 0,
+  "settlementsExecuted": 0,
+  "learningLabelsCreated": 0,
+  "postgameExplanationsCreated": 0,
+  "retrospectivePredictionsGenerated": 0,
+  "status": "PARTIAL_PASS_BOUNDED_MLB_IMPORT_EXECUTED",
+  "previousReportSummary": {
+    "generatedAt": "2026-07-28T02:05:20.913Z",
+    "status": "PARTIAL_PASS_BOUNDED_MLB_IMPORT_EXECUTED",
+    "providerCallsMade": 1,
+    "inserted": 2,
+    "updated": 4980,
+    "finalNextUnit": {
+      "sequence": 2,
+      "domain": "teams_static_if_stale",
+      "endpoint": "/api/mlb/fantasy/json/Teams",
+      "endpointTemplate": "/api/mlb/fantasy/json/Teams",
+      "scope": "season",
+      "date": null,
+      "estimatedCalls": 1,
+      "implementedLive": false,
+      "status": "planned",
+      "skipReason": null,
+      "checkpointKey": "sportsdataio_mlb_discovery_historical_import_v1:sportsdataio:sportsdataio_discovery_lab:baseball_mlb:mlb:2026:regular::teams_static_if_stale:-api-mlb-fantasy-json-teams"
+    }
+  },
+  "certificationMarkers": [
+    "CURRENT_SEASON_DATA_CONTINUITY_PASS",
+    "HISTORICAL_IMPORT_EXECUTION_PASS",
+    "PROVIDER_QUOTA_SAFETY_PASS",
+    "NO_ACTION_DRIFT_PASS",
+    "NO_RETROSPECTIVE_PREDICTION_PASS",
+    "NO_PROBABILITY_CHANGE_PASS",
+    "NO_CONFIDENCE_CHANGE_PASS",
+    "NO_TRUST_FORMULA_CHANGE_PASS",
+    "NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS",
+    "NO_OFFICIAL_PICK_POLICY_CHANGE_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "NO_SECRET_EXPOSURE_PASS"
+  ]
+}

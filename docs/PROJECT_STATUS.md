@@ -7,6 +7,7 @@ Last updated: 2026-07-28 00:00:00Z
 - Checkpoint A Live Entitlement Proof and Identity Certification is implemented in `scripts/live-multi-sport-acquisition-v1-checkpoint-a.mjs` with sanitized evidence in `docs/live-multi-sport-acquisition-v1-checkpoint-a.json` and `docs/LIVE_MULTI_SPORT_DATA_ACQUISITION_V1.md`.
 - Bounded live probes made 4 provider calls: SportsDataIO MLB teams, SportsDataIO NBA teams, The Odds API sports catalog and The Odds API MLB event odds. SportsDataIO MLB/NBA and The Odds API catalog/MLB odds returned HTTP 200 with deterministic identity/sample fields captured. SportsDataIO NFL and NHL remained uncalled because no runtime credentials were configured.
 - Baseline counts, provider budgets, active prediction sports and active recommendation sports were recorded before any import. Checkpoint A performed no broad import, no feature rebuild, no prediction activation, no settlement write, no learning write, no SQL and no production data mutation.
+- Checkpoint B MLB bounded current-season acquisition executed through the existing SportsDataIO MLB Discovery import executor. Four cumulative SportsDataIO calls populated season schedule, standings, team season stats and player season stats with 49 inserts, 7,701 idempotent updates, 0 rejected rows and 0 duplicate records reported. Static teams/players were not re-run through unimplemented static live checkpoints; no feature rebuild, prediction activation, settlement, learning write, SQL or recommendation-policy change occurred.
 
 ## 2026-07-28 Multi-Sport Data Expansion V1
 
