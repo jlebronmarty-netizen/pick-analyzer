@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-27 19:30:00Z
 
+## 2026-07-27 Portfolio Intelligence V1
+
+- Portfolio Intelligence V1 is locally implemented at `/portfolio-intelligence` with read-only API `/api/portfolio-intelligence`. It reuses Probability Picks as the canonical opportunity source and Current Board only as an aligned stored-market overlay.
+- The module produces bounded 2-leg and 3-leg Combination Intelligence with deterministic shared-exposure labels, weakest-leg identification, concentration scoring, freshness evidence and the required independence warning. It does not create predictions, alter probabilities, alter confidence or quality, change Official Pick policy, calculate Kelly, size bankroll or place wagers.
+- Validation is deterministic and reports 0 provider calls, 0 remote mutations and no database mutations.
+
 ## 2026-07-27 Settlement And Learning Pipeline Recovery V1
 
 - Settlement And Learning Pipeline Recovery V1 is locally implemented. Root cause was isolated to adaptive scheduler selection: settlement-ready prior-day prediction rows were detectable by reconciliation and operating-day status, but the adaptive due-now domain list omitted settlement, allowing current-day status refresh to mask the settlement backlog.
