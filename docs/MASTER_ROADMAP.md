@@ -20,6 +20,8 @@ MLB is now production stable and in maintenance mode. The primary roadmap focus 
 
 ## Active Local Run
 
+Live Multi-Sport Data Acquisition, Feature Materialization and Prediction Activation V1 is in controlled execution from commit `ec85d06b59f87d7b319f1e10afd68401403e7e36`. Checkpoint A is locally implemented with bounded live entitlement probes and sanitized evidence. SportsDataIO MLB teams, SportsDataIO NBA teams, The Odds API sports catalog and The Odds API MLB event odds returned live HTTP 200 evidence under a 4-call cap; NFL and NHL SportsDataIO probes were skipped because no runtime credentials were configured. No import, feature rebuild, prediction activation, settlement, learning, SQL or production data mutation ran in Checkpoint A.
+
 Multi-Sport Data, Prediction And Learning Expansion Program V1 is in local autonomous execution from commit `928be40d0ebb5db65d4b4378dff1074ab08bf954`. Checkpoint 1 adds the stored-data-only Data Coverage Center at `/data-coverage`, `/data-coverage/[sport]`, `/api/data-coverage/inventory`, `/api/data-coverage/health` and `/api/data-coverage/provider-audit`, composing existing data-foundation coverage, provider capability metadata, SportsDataIO prior audit evidence and The Odds API dry-run evidence without live provider calls, imports, SQL, prediction generation, settlement writes, feature rebuilds, recommendation changes or epoch activation.
 
 Checkpoint 2 is locally implemented at `/api/data-coverage/expansion-checkpoint2` and in the Data Coverage page. It consolidates MLB, NBA and NFL expansion readiness with dry-run historical import manifests, provider entitlement gates and zero provider calls, imports, feature rebuilds, prediction generation, settlement writes or recommendation activation.

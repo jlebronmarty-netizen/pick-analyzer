@@ -1,0 +1,919 @@
+{
+  "success": true,
+  "mode": "live_multi_sport_data_acquisition_v1_checkpoint_a",
+  "checkpoint": "CHECKPOINT_A_LIVE_ENTITLEMENT_AND_IDENTITY_CERTIFICATION",
+  "status": "PARTIAL_PASS_LIVE_ENTITLEMENT_EVIDENCE_CAPTURED",
+  "generatedAt": "2026-07-28T01:58:09.531Z",
+  "startingCommit": "ec85d06b59f87d7b319f1e10afd68401403e7e36",
+  "preExecution": {
+    "envFileLoaded": true,
+    "envPresence": {
+      "supabase": {
+        "configured": true,
+        "envVarName": "NEXT_PUBLIC_SUPABASE_URL",
+        "checkedEnvVars": [
+          "NEXT_PUBLIC_SUPABASE_URL",
+          "SUPABASE_SERVICE_ROLE_KEY"
+        ]
+      },
+      "sportsdataio": {
+        "generic": {
+          "configured": false,
+          "envVarName": null,
+          "checkedEnvVars": [
+            "SPORTSDATAIO_API_KEY"
+          ]
+        },
+        "mlb": {
+          "configured": true,
+          "envVarName": "SPORTSDATAIO_MLB_API_KEY",
+          "checkedEnvVars": [
+            "SPORTSDATAIO_MLB_API_KEY"
+          ]
+        },
+        "nba": {
+          "configured": true,
+          "envVarName": "SPORTSDATAIO_NBA_API_KEY",
+          "checkedEnvVars": [
+            "SPORTSDATAIO_NBA_API_KEY"
+          ]
+        },
+        "nfl": {
+          "configured": false,
+          "envVarName": null,
+          "checkedEnvVars": [
+            "SPORTSDATAIO_NFL_API_KEY"
+          ]
+        },
+        "nhl": {
+          "configured": false,
+          "envVarName": null,
+          "checkedEnvVars": [
+            "SPORTSDATAIO_NHL_API_KEY"
+          ]
+        }
+      },
+      "theOddsApi": {
+        "configured": true,
+        "envVarName": "ODDS_API_KEY",
+        "checkedEnvVars": [
+          "ODDS_API_KEY",
+          "THE_ODDS_API_KEY"
+        ]
+      }
+    }
+  },
+  "providerBudgetBySport": {
+    "baseball_mlb": {
+      "accountingStatus": "AVAILABLE",
+      "accountingUncertain": false,
+      "configurationStatus": "VALID",
+      "callsMadeToday": 15,
+      "callsMadeLastHour": 1,
+      "hardRemaining": 985,
+      "estimatedCallsRemaining": 835,
+      "hourlyRemaining": 11,
+      "warning": null
+    },
+    "basketball_nba": {
+      "accountingStatus": "AVAILABLE",
+      "accountingUncertain": false,
+      "configurationStatus": "VALID",
+      "callsMadeToday": 15,
+      "callsMadeLastHour": 1,
+      "hardRemaining": 985,
+      "estimatedCallsRemaining": 835,
+      "hourlyRemaining": 11,
+      "warning": null
+    },
+    "americanfootball_nfl": {
+      "accountingStatus": "AVAILABLE",
+      "accountingUncertain": false,
+      "configurationStatus": "VALID",
+      "callsMadeToday": 15,
+      "callsMadeLastHour": 1,
+      "hardRemaining": 985,
+      "estimatedCallsRemaining": 835,
+      "hourlyRemaining": 11,
+      "warning": null
+    },
+    "icehockey_nhl": {
+      "accountingStatus": "AVAILABLE",
+      "accountingUncertain": false,
+      "configurationStatus": "VALID",
+      "callsMadeToday": 15,
+      "callsMadeLastHour": 1,
+      "hardRemaining": 985,
+      "estimatedCallsRemaining": 835,
+      "hourlyRemaining": 11,
+      "warning": null
+    },
+    "soccer": {
+      "accountingStatus": "AVAILABLE",
+      "accountingUncertain": false,
+      "configurationStatus": "VALID",
+      "callsMadeToday": 15,
+      "callsMadeLastHour": 1,
+      "hardRemaining": 985,
+      "estimatedCallsRemaining": 835,
+      "hourlyRemaining": 11,
+      "warning": null
+    },
+    "basketball_bsn": {
+      "accountingStatus": "AVAILABLE",
+      "accountingUncertain": false,
+      "configurationStatus": "VALID",
+      "callsMadeToday": 15,
+      "callsMadeLastHour": 1,
+      "hardRemaining": 985,
+      "estimatedCallsRemaining": 835,
+      "hourlyRemaining": 11,
+      "warning": null
+    },
+    "tennis": {
+      "accountingStatus": "AVAILABLE",
+      "accountingUncertain": false,
+      "configurationStatus": "VALID",
+      "callsMadeToday": 15,
+      "callsMadeLastHour": 1,
+      "hardRemaining": 985,
+      "estimatedCallsRemaining": 835,
+      "hourlyRemaining": 11,
+      "warning": null
+    },
+    "mma_ufc": {
+      "accountingStatus": "AVAILABLE",
+      "accountingUncertain": false,
+      "configurationStatus": "VALID",
+      "callsMadeToday": 15,
+      "callsMadeLastHour": 1,
+      "hardRemaining": 985,
+      "estimatedCallsRemaining": 835,
+      "hourlyRemaining": 11,
+      "warning": null
+    }
+  },
+  "baselineProviderAudit": {
+    "matrixSummary": {
+      "AVAILABLE_AND_ENTITLED": 58,
+      "AVAILABLE_NOT_ENTITLED": 0,
+      "NOT_SUPPORTED": 175,
+      "UNKNOWN": 49,
+      "TEMPORARILY_BLOCKED": 12,
+      "QUOTA_BLOCKED": 0
+    },
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "liveProviderProbeExecuted": false
+  },
+  "activePredictionSportsBefore": [
+    "baseball_mlb"
+  ],
+  "activeRecommendationSportsBefore": [],
+  "dataCountsBefore": [
+    {
+      "sportKey": "baseball_mlb",
+      "label": "MLB",
+      "seasons": [
+        "2026",
+        "2025"
+      ],
+      "teams": 30,
+      "players": 7389,
+      "scheduledGames": 4922,
+      "completedGames": 471,
+      "standings": 60,
+      "teamStats": 2926,
+      "playerStats": 47232,
+      "boxScores": 2926,
+      "periodScores": 4922,
+      "injuries": 0,
+      "lineupsStarters": 27,
+      "oddsSnapshots": 49289,
+      "playerProps": 11,
+      "historicalFeatures": 72541,
+      "validPregamePredictions": 1146,
+      "settlements": 921,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "basketball_nba",
+      "label": "NBA",
+      "seasons": [
+        "2025-26",
+        "2024-25"
+      ],
+      "teams": 30,
+      "players": 579,
+      "scheduledGames": 14,
+      "completedGames": 0,
+      "standings": 60,
+      "teamStats": 18,
+      "playerStats": 918,
+      "boxScores": 18,
+      "periodScores": 14,
+      "injuries": 6,
+      "lineupsStarters": 758,
+      "oddsSnapshots": 540,
+      "playerProps": 0,
+      "historicalFeatures": 47,
+      "validPregamePredictions": 27,
+      "settlements": 27,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "americanfootball_nfl",
+      "label": "NFL",
+      "seasons": [
+        "2026",
+        "2025"
+      ],
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 190,
+      "settlements": 190,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "icehockey_nhl",
+      "label": "NHL",
+      "seasons": [
+        "2025-26",
+        "2024-25"
+      ],
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "settlements": 0,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "soccer",
+      "label": "Soccer",
+      "seasons": [
+        "competition_specific",
+        "competition_specific"
+      ],
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "settlements": 0,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "basketball_bsn",
+      "label": "BSN",
+      "seasons": [
+        "2026",
+        "2025"
+      ],
+      "teams": 12,
+      "players": 25,
+      "scheduledGames": 38,
+      "completedGames": 2,
+      "standings": 12,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 38,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 8,
+      "settlements": 8,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "tennis",
+      "label": "Tennis",
+      "seasons": [
+        "event_driven_2026",
+        "event_driven_2025"
+      ],
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "settlements": 0,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "mma_ufc",
+      "label": "UFC",
+      "seasons": [
+        "event_driven_2026",
+        "event_driven_2025"
+      ],
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "settlements": 0,
+      "learningLabels": null
+    }
+  ],
+  "dataCountsAfter": [
+    {
+      "sportKey": "baseball_mlb",
+      "label": "MLB",
+      "seasons": [
+        "2026",
+        "2025"
+      ],
+      "teams": 30,
+      "players": 7389,
+      "scheduledGames": 4922,
+      "completedGames": 471,
+      "standings": 60,
+      "teamStats": 2926,
+      "playerStats": 47232,
+      "boxScores": 2926,
+      "periodScores": 4922,
+      "injuries": 0,
+      "lineupsStarters": 27,
+      "oddsSnapshots": 49289,
+      "playerProps": 11,
+      "historicalFeatures": 72541,
+      "validPregamePredictions": 1146,
+      "settlements": 921,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "basketball_nba",
+      "label": "NBA",
+      "seasons": [
+        "2025-26",
+        "2024-25"
+      ],
+      "teams": 30,
+      "players": 579,
+      "scheduledGames": 14,
+      "completedGames": 0,
+      "standings": 60,
+      "teamStats": 18,
+      "playerStats": 918,
+      "boxScores": 18,
+      "periodScores": 14,
+      "injuries": 6,
+      "lineupsStarters": 758,
+      "oddsSnapshots": 540,
+      "playerProps": 0,
+      "historicalFeatures": 47,
+      "validPregamePredictions": 27,
+      "settlements": 27,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "americanfootball_nfl",
+      "label": "NFL",
+      "seasons": [
+        "2026",
+        "2025"
+      ],
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 190,
+      "settlements": 190,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "icehockey_nhl",
+      "label": "NHL",
+      "seasons": [
+        "2025-26",
+        "2024-25"
+      ],
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "settlements": 0,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "soccer",
+      "label": "Soccer",
+      "seasons": [
+        "competition_specific",
+        "competition_specific"
+      ],
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "settlements": 0,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "basketball_bsn",
+      "label": "BSN",
+      "seasons": [
+        "2026",
+        "2025"
+      ],
+      "teams": 12,
+      "players": 25,
+      "scheduledGames": 38,
+      "completedGames": 2,
+      "standings": 12,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 38,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 8,
+      "settlements": 8,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "tennis",
+      "label": "Tennis",
+      "seasons": [
+        "event_driven_2026",
+        "event_driven_2025"
+      ],
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "settlements": 0,
+      "learningLabels": null
+    },
+    {
+      "sportKey": "mma_ufc",
+      "label": "UFC",
+      "seasons": [
+        "event_driven_2026",
+        "event_driven_2025"
+      ],
+      "teams": 0,
+      "players": 0,
+      "scheduledGames": 0,
+      "completedGames": 0,
+      "standings": 0,
+      "teamStats": 0,
+      "playerStats": 0,
+      "boxScores": 0,
+      "periodScores": 0,
+      "injuries": 0,
+      "lineupsStarters": 0,
+      "oddsSnapshots": 0,
+      "playerProps": 0,
+      "historicalFeatures": 0,
+      "validPregamePredictions": 0,
+      "settlements": 0,
+      "learningLabels": null
+    }
+  ],
+  "liveProviderEntitlementMatrix": [
+    {
+      "provider": "sportsdataio",
+      "sport": "mlb",
+      "endpointFamily": "teams_identity_sample",
+      "endpointPath": "/api/mlb/fantasy/json/Teams",
+      "credential": {
+        "configured": true,
+        "envVarName": "SPORTSDATAIO_MLB_API_KEY"
+      },
+      "classification": "ENTITLED_AND_WORKING",
+      "httpStatus": 200,
+      "rowsReturned": 30,
+      "responseShape": {
+        "topLevelType": "array",
+        "rows": 30,
+        "fields": [
+          "Active",
+          "City",
+          "Division",
+          "GlobalTeamID",
+          "Key",
+          "League",
+          "Name",
+          "PrimaryColor",
+          "QuaternaryColor",
+          "SecondaryColor",
+          "StadiumID",
+          "TeamID",
+          "TertiaryColor",
+          "WikipediaLogoUrl",
+          "WikipediaWordMarkUrl"
+        ],
+        "identityFields": [
+          "GlobalTeamID",
+          "StadiumID",
+          "TeamID"
+        ],
+        "timestampFields": []
+      },
+      "quota": {
+        "requestsRemaining": null,
+        "requestsUsed": null,
+        "requestsLast": null
+      },
+      "callsMade": 1,
+      "entitlementEvidence": "HTTP 200; 30 row(s); sanitized shape captured",
+      "freshness": null,
+      "warnings": []
+    },
+    {
+      "provider": "sportsdataio",
+      "sport": "nba",
+      "endpointFamily": "teams_identity_sample",
+      "endpointPath": "/v3/nba/scores/json/Teams",
+      "credential": {
+        "configured": true,
+        "envVarName": "SPORTSDATAIO_NBA_API_KEY"
+      },
+      "classification": "ENTITLED_AND_WORKING",
+      "httpStatus": 200,
+      "rowsReturned": 30,
+      "responseShape": {
+        "topLevelType": "array",
+        "rows": 30,
+        "fields": [
+          "Active",
+          "City",
+          "Conference",
+          "Division",
+          "GlobalTeamID",
+          "HeadCoach",
+          "Key",
+          "LeagueID",
+          "Name",
+          "NbaDotComTeamID",
+          "PrimaryColor",
+          "QuaternaryColor",
+          "SecondaryColor",
+          "StadiumID",
+          "TeamID",
+          "TertiaryColor",
+          "WikipediaLogoUrl",
+          "WikipediaWordMarkUrl"
+        ],
+        "identityFields": [
+          "GlobalTeamID",
+          "LeagueID",
+          "NbaDotComTeamID",
+          "StadiumID",
+          "TeamID"
+        ],
+        "timestampFields": []
+      },
+      "quota": {
+        "requestsRemaining": null,
+        "requestsUsed": null,
+        "requestsLast": null
+      },
+      "callsMade": 1,
+      "entitlementEvidence": "HTTP 200; 30 row(s); sanitized shape captured",
+      "freshness": null,
+      "warnings": []
+    },
+    {
+      "provider": "sportsdataio",
+      "sport": "nfl",
+      "endpointFamily": "teams_identity_sample",
+      "endpointPath": "/v3/nfl/scores/json/Teams",
+      "credential": {
+        "configured": false,
+        "envVarName": null
+      },
+      "classification": "UNKNOWN",
+      "httpStatus": null,
+      "rowsReturned": 0,
+      "responseShape": null,
+      "quota": null,
+      "callsMade": 0,
+      "entitlementEvidence": "No runtime credential available; no provider call made.",
+      "freshness": null,
+      "warnings": []
+    },
+    {
+      "provider": "sportsdataio",
+      "sport": "nhl",
+      "endpointFamily": "teams_identity_sample",
+      "endpointPath": "/v3/nhl/scores/json/Teams",
+      "credential": {
+        "configured": false,
+        "envVarName": null
+      },
+      "classification": "UNKNOWN",
+      "httpStatus": null,
+      "rowsReturned": 0,
+      "responseShape": null,
+      "quota": null,
+      "callsMade": 0,
+      "entitlementEvidence": "No runtime credential available; no provider call made.",
+      "freshness": null,
+      "warnings": []
+    },
+    {
+      "provider": "the_odds_api",
+      "sport": "all",
+      "endpointFamily": "sports_catalog",
+      "endpointPath": "/v4/sports",
+      "credential": {
+        "configured": true,
+        "envVarName": "ODDS_API_KEY"
+      },
+      "classification": "ENTITLED_AND_WORKING",
+      "httpStatus": 200,
+      "rowsReturned": 71,
+      "responseShape": {
+        "topLevelType": "array",
+        "rows": 71,
+        "fields": [
+          "active",
+          "description",
+          "group",
+          "has_outrights",
+          "key",
+          "title"
+        ],
+        "identityFields": [],
+        "timestampFields": []
+      },
+      "quota": {
+        "requestsRemaining": "19973",
+        "requestsUsed": "27",
+        "requestsLast": "0"
+      },
+      "callsMade": 1,
+      "entitlementEvidence": "HTTP 200; 71 row(s); sanitized shape captured",
+      "warnings": []
+    },
+    {
+      "provider": "the_odds_api",
+      "sport": "baseball_mlb",
+      "endpointFamily": "event_odds",
+      "endpointPath": "/v4/sports/baseball_mlb/odds?regions=us&markets=h2h,spreads,totals&oddsFormat=american",
+      "credential": {
+        "configured": true,
+        "envVarName": "ODDS_API_KEY"
+      },
+      "classification": "ENTITLED_AND_WORKING",
+      "httpStatus": 200,
+      "rowsReturned": 21,
+      "responseShape": {
+        "topLevelType": "array",
+        "rows": 21,
+        "fields": [
+          "away_team",
+          "bookmakers",
+          "commence_time",
+          "home_team",
+          "id",
+          "sport_key",
+          "sport_title"
+        ],
+        "identityFields": [
+          "away_team",
+          "home_team",
+          "id"
+        ],
+        "timestampFields": [
+          "commence_time"
+        ]
+      },
+      "quota": {
+        "requestsRemaining": "19970",
+        "requestsUsed": "30",
+        "requestsLast": "3"
+      },
+      "callsMade": 1,
+      "entitlementEvidence": "HTTP 200; 21 row(s); sanitized shape captured",
+      "warnings": []
+    }
+  ],
+  "identityCertification": [
+    {
+      "provider": "sportsdataio",
+      "sport": "mlb",
+      "endpointFamily": "teams_identity_sample",
+      "classification": "ENTITLED_AND_WORKING",
+      "deterministicIdentityFields": [
+        "GlobalTeamID",
+        "StadiumID",
+        "TeamID"
+      ],
+      "timestampFields": [],
+      "ambiguousAttachments": 0,
+      "fabricatedMappings": 0,
+      "idempotentRerunPerformed": false,
+      "broadImportAllowed": true,
+      "unresolvedIdentityQuarantineRequired": "if provider rows lack existing canonical mapping"
+    },
+    {
+      "provider": "sportsdataio",
+      "sport": "nba",
+      "endpointFamily": "teams_identity_sample",
+      "classification": "ENTITLED_AND_WORKING",
+      "deterministicIdentityFields": [
+        "GlobalTeamID",
+        "LeagueID",
+        "NbaDotComTeamID",
+        "StadiumID",
+        "TeamID"
+      ],
+      "timestampFields": [],
+      "ambiguousAttachments": 0,
+      "fabricatedMappings": 0,
+      "idempotentRerunPerformed": false,
+      "broadImportAllowed": true,
+      "unresolvedIdentityQuarantineRequired": "if provider rows lack existing canonical mapping"
+    },
+    {
+      "provider": "sportsdataio",
+      "sport": "nfl",
+      "endpointFamily": "teams_identity_sample",
+      "classification": "UNKNOWN",
+      "deterministicIdentityFields": [],
+      "timestampFields": [],
+      "ambiguousAttachments": 0,
+      "fabricatedMappings": 0,
+      "idempotentRerunPerformed": false,
+      "broadImportAllowed": false,
+      "unresolvedIdentityQuarantineRequired": "not_applicable"
+    },
+    {
+      "provider": "sportsdataio",
+      "sport": "nhl",
+      "endpointFamily": "teams_identity_sample",
+      "classification": "UNKNOWN",
+      "deterministicIdentityFields": [],
+      "timestampFields": [],
+      "ambiguousAttachments": 0,
+      "fabricatedMappings": 0,
+      "idempotentRerunPerformed": false,
+      "broadImportAllowed": false,
+      "unresolvedIdentityQuarantineRequired": "not_applicable"
+    },
+    {
+      "provider": "the_odds_api",
+      "sport": "all",
+      "endpointFamily": "sports_catalog",
+      "classification": "ENTITLED_AND_WORKING",
+      "deterministicIdentityFields": [],
+      "timestampFields": [],
+      "ambiguousAttachments": 0,
+      "fabricatedMappings": 0,
+      "idempotentRerunPerformed": false,
+      "broadImportAllowed": false,
+      "unresolvedIdentityQuarantineRequired": "if provider rows lack existing canonical mapping"
+    },
+    {
+      "provider": "the_odds_api",
+      "sport": "baseball_mlb",
+      "endpointFamily": "event_odds",
+      "classification": "ENTITLED_AND_WORKING",
+      "deterministicIdentityFields": [
+        "away_team",
+        "home_team",
+        "id"
+      ],
+      "timestampFields": [
+        "commence_time"
+      ],
+      "ambiguousAttachments": 0,
+      "fabricatedMappings": 0,
+      "idempotentRerunPerformed": false,
+      "broadImportAllowed": true,
+      "unresolvedIdentityQuarantineRequired": "if provider rows lack existing canonical mapping"
+    }
+  ],
+  "providerCallsMade": 4,
+  "remoteMutationsMade": 0,
+  "productionMutationsMade": 0,
+  "importsExecuted": 0,
+  "featureRebuildsExecuted": 0,
+  "predictionActivationsExecuted": 0,
+  "settlementsExecuted": 0,
+  "learningLabelsCreated": 0,
+  "postgameExplanationsCreated": 0,
+  "migrationsApplied": 0,
+  "nextCheckpoint": "Checkpoint B may proceed only for sports/endpoints classified ENTITLED_AND_WORKING after targeted import dry-run and idempotent write guard validation.",
+  "certificationMarkers": [
+    "LIVE_PROVIDER_ENTITLEMENT_PROBE_EXECUTED",
+    "CANONICAL_IDENTITY_SAMPLE_CERTIFICATION_RECORDED",
+    "PROVIDER_QUOTA_SAFETY_PASS",
+    "NO_ACTION_DRIFT_PASS",
+    "NO_DUPLICATE_DATA_PASS",
+    "NO_RETROSPECTIVE_PREDICTION_PASS",
+    "NO_PROBABILITY_CHANGE_PASS",
+    "NO_CONFIDENCE_CHANGE_PASS",
+    "NO_TRUST_FORMULA_CHANGE_PASS",
+    "NO_LEARNING_BRAIN_WEIGHT_CHANGE_PASS",
+    "NO_OFFICIAL_PICK_POLICY_CHANGE_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "NO_SECRET_EXPOSURE_PASS"
+  ]
+}
