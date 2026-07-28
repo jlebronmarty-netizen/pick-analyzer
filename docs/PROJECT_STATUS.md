@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-07-28 22:05:00Z
+Last updated: 2026-07-28 22:16:00Z
+
+## 2026-07-28 Protected Canonical MLB Settlement And Learning Closure V1
+
+- Executed one local protected canonical MLB settlement batch through the existing operating-day `settle` action for the oldest settlement-ready date, `2026-07-26`. The scheduler dry-run still selected `midday_refresh`, so no scheduler fallback/action drift was allowed.
+- Before execution, read-only evidence showed 484 canonical MLB `game_results`, 106 pending MLB predictions, 39 canonical-ready pending rows, 67 awaiting canonical result evidence, 905 settled MLB rows, 0 duplicate `game_results`, NFL Preview 776 and NHL Preview 258.
+- Eligibility audit for the oldest batch checked 45 July 26 operating-day prediction rows: 42 were already settled, 3 were canonical-ready, 0 unresolved and 0 rejected. The three eligible rows were NYY @ PHI (`baseball_mlb:mlb:sportsdataio:event:78870`) Total Under 8, NYY +1.5 spread and NYY moneyline, all settled as losses against canonical `game_results` evidence PHI 11, NYY 4.
+- Post-execution state: MLB pending rows are 103, canonical-ready pending rows are 36, awaiting canonical result evidence remains 67, settled MLB rows and Performance sample increased to 908, and the batch idempotency dry-run reports 45 already settled with 0 eligible/0 settled/0 duplicate settlements.
+- A settlement accounting defect was found and repaired: operating-day settlement computed profit using the default stake but did not persist that stake when stored stake was 0. `src/services/operating-day.service.ts` now persists the stake used for profit, and only the three just-settled NYY @ PHI rows were corrected from stake 0 to stake 100 while leaving their outcomes unchanged.
+- Learning closure was verified through the read-only AI learning lifecycle. `runModelLearning` was not executed because it updates model weights. Model weights remained unchanged, no Learning Brain weights changed, and no NFL/NHL Preview rows were modified.
 
 ## 2026-07-28 Canonical Result Ingestion Recovery V1
 

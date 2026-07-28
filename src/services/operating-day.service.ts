@@ -985,7 +985,7 @@ export async function settleOperatingDay(input: {
     events: Array.from(new Set(predictions.map((row) => row.game_id))).length,
     warnings: [] as string[],
   }
-  const updates: Array<{ id: string; status: string; profit: number; resultId: string; official: boolean }> = []
+  const updates: Array<{ id: string; status: string; profit: number; stake: number; resultId: string; official: boolean }> = []
   for (const prediction of predictions) {
     if (['win', 'loss', 'push'].includes(String(prediction.status))) {
       summary.alreadySettled += 1
@@ -1008,6 +1008,7 @@ export async function settleOperatingDay(input: {
       id: prediction.id,
       status: grade,
       profit: Number(profitFor(Number(prediction.odds), stake, grade).toFixed(2)),
+      stake,
       resultId: result.id,
       official,
     })
@@ -1021,6 +1022,7 @@ export async function settleOperatingDay(input: {
           status: update.status,
           result: update.status,
           profit: update.profit,
+          stake: update.stake,
           settled_at: nowIso(),
           result_id: update.resultId,
           settlement_market: 'operating_day_scoped',

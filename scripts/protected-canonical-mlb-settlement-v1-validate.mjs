@@ -1,0 +1,54 @@
+import fs from 'node:fs'
+
+const servicePath = 'src/services/operating-day.service.ts'
+const service = fs.readFileSync(servicePath, 'utf8')
+const settleBranch = service.match(/action === 'settle'[\s\S]*?} else if \(action === 'replay'\)/)?.[0] ?? ''
+
+const checks = [
+  {
+    name: 'operating-day settlement reads canonical game_results',
+    pass:
+      service.includes("from('game_results')") &&
+      service.includes(".in('game_id', eventIds)") &&
+      service.includes('const resultByGame = new Map(results.map((result) => [result.game_id, result]))'),
+  },
+  {
+    name: 'unresolved predictions are skipped instead of forced',
+    pass:
+      service.includes('if (!result)') &&
+      service.includes('summary.unresolved += 1') &&
+      service.includes('continue'),
+  },
+  {
+    name: 'settlement supports moneyline spread and total only',
+    pass:
+      service.includes("if (market === 'moneyline')") &&
+      service.includes("if (market === 'spread')") &&
+      service.includes("if (market === 'total')"),
+  },
+  {
+    name: 'settlement persists stake used for profit accounting',
+    pass:
+      service.includes('stake,') &&
+      service.includes('stake: update.stake') &&
+      service.includes('profit: update.profit'),
+  },
+  {
+    name: 'settlement path does not run model learning',
+    pass:
+      Boolean(settleBranch) && !settleBranch.includes('runModelLearning'),
+  },
+]
+
+for (const check of checks) {
+  console.log(`${check.pass ? 'PASS' : 'FAIL'} ${check.name}`)
+}
+
+const failed = checks.filter((check) => !check.pass)
+
+if (failed.length > 0) {
+  console.error(`Protected canonical MLB settlement validation failed: ${failed.map((check) => check.name).join(', ')}`)
+  process.exit(1)
+}
+
+console.log(`Protected canonical MLB settlement validation passed: ${checks.length}/${checks.length}`)
