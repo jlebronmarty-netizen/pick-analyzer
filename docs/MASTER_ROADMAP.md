@@ -42,6 +42,8 @@ Market Intelligence V1 is locally implemented as `/market-intelligence` and `/ap
 
 Closing Line Intelligence V1 is locally implemented as `/closing-line-intelligence` and `/api/closing-line/intelligence`. It defines the closing candidate as the latest valid aligned stored price before event start, calculates CLV only for valid prediction-time and closing-candidate pairs, excludes post-start prices and estimated closes, and remains read-only with zero provider calls, zero remote mutations and no prediction/model/settlement-policy changes.
 
+Autonomous Daily AI V1 is locally implemented as `/autonomous-daily-ai` and `/api/autonomous-daily-ai`. It composes existing adaptive refresh, autonomous operations health and provider budget contracts into a 17-stage daily plan with dry-run, expected-action guard, idempotency keys, provider quota visibility and completion-state classification. It does not create a new scheduler, execute provider calls in validation, mutate data, change models or alter settlement/learning policy.
+
 Historical Sports Data Foundation V2 and Prediction Epoch Reset V2 is in autonomous local execution. The run is governed by `docs/AUTONOMOUS_EXECUTION_V2.md` and `docs/autonomous-execution-v2.json`. It may create local commits and additive migration files, but it must not push, deploy, apply production SQL, execute historical odds, delete predictions, activate a new production epoch or enable new production cron jobs.
 
 Phase 1 coverage audit is locally implemented at `/api/data-foundation/coverage` with zero provider calls and zero mutations. It reports MLB and NBA as stored-data ready, BSN as partial for prediction readiness, and NFL/NHL/Soccer/Tennis/UFC as blocked or empty until legitimate data adapters/contracts are added.

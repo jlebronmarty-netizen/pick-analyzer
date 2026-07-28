@@ -20,6 +20,12 @@ Last updated: 2026-07-27 19:30:00Z
 - The canonical closing candidate is the latest valid aligned stored price before event start for the same event, market, selection and bookmaker scope. Post-start prices, cross-side attachment, cross-market attachment, invalid zero prices and estimated closing lines are excluded.
 - CLV is disclosed as `decimal_price_ratio_and_implied_probability_change` and is returned only when prediction-time and closing-candidate prices are both valid and aligned. Validation is deterministic and reports 0 provider calls, 0 remote mutations and no database mutations.
 
+## 2026-07-27 Autonomous Daily AI V1
+
+- Autonomous Daily AI V1 is locally implemented at `/autonomous-daily-ai` with read-only API `/api/autonomous-daily-ai`. It reuses adaptive refresh, autonomous daily operations health and provider budget status instead of creating another scheduler.
+- The module exposes a 17-stage daily plan, completion state, provider quota forecast, dry-run contract, expected-action guard, idempotency keys and daily dependency graph. Dry-run and validation make 0 provider calls, 0 remote mutations and 0 database mutations.
+- Scheduler behavior, prediction probabilities, confidence, Trust formulas, Official Pick policy, model services, settlement policy and Learning Brain weights remain unchanged.
+
 ## 2026-07-27 Settlement And Learning Pipeline Recovery V1
 
 - Settlement And Learning Pipeline Recovery V1 is locally implemented. Root cause was isolated to adaptive scheduler selection: settlement-ready prior-day prediction rows were detectable by reconciliation and operating-day status, but the adaptive due-now domain list omitted settlement, allowing current-day status refresh to mask the settlement backlog.

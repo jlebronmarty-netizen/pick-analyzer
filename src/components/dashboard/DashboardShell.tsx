@@ -74,6 +74,7 @@ const productNavGroups = [
     label: 'Operations',
     items: [
       { href: '/ai-operations', label: 'AI Operations', icon: 'AO' },
+      { href: '/autonomous-daily-ai', label: 'Autonomous Daily AI', icon: 'AD', badge: 'FOUNDATION' },
       { id: 'data-operations', label: 'Data Foundation', icon: 'DF', badge: 'PENDING' },
       { href: '/mlb-operations', label: 'MLB Operations', icon: 'MO' },
       { href: '/dashboard#advanced-details', label: 'Providers', icon: 'PV' },
