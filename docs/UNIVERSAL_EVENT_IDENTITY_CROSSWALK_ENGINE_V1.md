@@ -32,7 +32,7 @@ Ambiguous participant/time matches, provider collisions, soccer placeholder comp
 
 ## Coverage Snapshot
 
-Read-only audit result from `getUniversalCrosswalkCoverageAudit()`:
+Initial read-only audit result from `getUniversalCrosswalkCoverageAudit()` before materialization:
 
 | Sport | Canonical events | Provider event mappings | Provider-native mappings | Odds rows | Result rows | Identity coverage | Blockers |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -44,9 +44,19 @@ Read-only audit result from `getUniversalCrosswalkCoverageAudit()`:
 | Soccer | 0 | 0 | 0 | 260 | 0 | 0% | canonical events and provider event mappings empty |
 | UFC | 0 | 32 | 32 | 360 | 12 | 0% | canonical events empty; provider-native mappings; results not canonical-linked |
 
+Post-materialization audit:
+
+| Sport | Canonical events | Provider event mappings | Provider-native mappings | Odds rows | Result rows | Identity coverage | Blockers |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| NFL | 75 | 75 | 0 | 1978 | 0 | 100% | none for current provider-evidence identity |
+| NHL | 32 | 32 | 0 | 426 | 0 | 100% | none for current provider-evidence identity |
+| UFC | 44 | 53 | 9 | 360 | 12 | 100% | legacy/provider-native mappings remain for inspection |
+| Soccer | 0 | 0 | 0 | 260 | 0 | 0% | canonical events and provider event mappings empty |
+
 ## Validation
 
 - Universal identity fixtures: 16/16 passing.
+- Materialization idempotency dry-run: 0 odds rows and 0 result rows remaining to link.
 - Provider calls: 0.
 - Remote mutations: 0.
 - Production mutations: 0.

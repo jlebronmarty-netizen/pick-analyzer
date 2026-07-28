@@ -1,0 +1,43 @@
+{
+  "success": true,
+  "status": "DRY_RUN",
+  "generatedAt": "2026-07-28T10:22:59.571Z",
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "sports": [
+    {
+      "sportKey": "americanfootball_nfl",
+      "eventsMaterialized": 75,
+      "oddsEvents": 75,
+      "resultEvents": 0,
+      "oddsRowsLinked": 0,
+      "resultRowsLinked": 0
+    },
+    {
+      "sportKey": "icehockey_nhl",
+      "eventsMaterialized": 32,
+      "oddsEvents": 32,
+      "resultEvents": 0,
+      "oddsRowsLinked": 0,
+      "resultRowsLinked": 0
+    },
+    {
+      "sportKey": "mma_ufc",
+      "eventsMaterialized": 32,
+      "oddsEvents": 32,
+      "resultEvents": 0,
+      "oddsRowsLinked": 0,
+      "resultRowsLinked": 0
+    }
+  ],
+  "summary": {
+    "oddsRowsRead": 2764,
+    "resultRowsRead": 12,
+    "eventsMaterialized": 139,
+    "eventInserts": 0,
+    "eventUpdates": 139,
+    "mappingsUpserted": 139,
+    "oddsRowsLinked": 0,
+    "resultRowsLinked": 0
+  }
+}
