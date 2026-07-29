@@ -1,0 +1,799 @@
+{
+  "success": true,
+  "mode": "ai_training_opportunity_analysis_and_model_strategy_v1",
+  "generatedAt": "2026-07-29T02:28:16.148Z",
+  "readOnly": true,
+  "providerCallsMade": 0,
+  "databaseMutations": 0,
+  "productionMutations": 0,
+  "modelTrainingRuns": 0,
+  "modelWeightMutations": 0,
+  "epochMutations": 0,
+  "baseline": {
+    "currentTrainingReadyRows": 419,
+    "roadmapTargetRows": 1000,
+    "noModelEverTrained": true
+  },
+  "featureAnalysis": {
+    "linkedPredictionRows": 2595,
+    "linkedFeatureSnapshotIds": 1691,
+    "featureSnapshotsRead": 1691,
+    "uniqueFeatureKeysObserved": 366,
+    "categoryCounts": {
+      "market_pricing": 19404,
+      "model_output_or_label_risk": 6106,
+      "team_strength": 26107,
+      "other": 7577,
+      "mlb_pitching": 24624,
+      "schedule_context": 52632,
+      "mlb_offense": 18432,
+      "environment": 1008,
+      "roster_availability": 54
+    },
+    "bySport": {
+      "americanfootball_nfl": 776,
+      "baseball_mlb": 630,
+      "icehockey_nhl": 258,
+      "basketball_nba": 27
+    },
+    "byMarket": {
+      "total": 557,
+      "spread": 560,
+      "moneyline": 574
+    },
+    "topFeatures": [
+      {
+        "feature": "marketOdds",
+        "count": 1619,
+        "category": "market_pricing",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "marketOdds.line",
+        "count": 1619,
+        "category": "market_pricing",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "marketOdds.market",
+        "count": 1619,
+        "category": "market_pricing",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "marketOdds.price",
+        "count": 1619,
+        "category": "market_pricing",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "marketOdds.snapshotTime",
+        "count": 1619,
+        "category": "market_pricing",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "marketOdds.sportsbook",
+        "count": 1619,
+        "category": "market_pricing",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "unavailableDomains",
+        "count": 1619,
+        "category": "other",
+        "importancePotential": "unknown_until_training"
+      },
+      {
+        "feature": "eventContext",
+        "count": 1034,
+        "category": "model_output_or_label_risk",
+        "importancePotential": "exclude_or_audit_for_leakage"
+      },
+      {
+        "feature": "eventContext.awayTeam",
+        "count": 1034,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "eventContext.eventId",
+        "count": 1034,
+        "category": "model_output_or_label_risk",
+        "importancePotential": "exclude_or_audit_for_leakage"
+      },
+      {
+        "feature": "eventContext.homeTeam",
+        "count": 1034,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "eventContext.source",
+        "count": 1034,
+        "category": "model_output_or_label_risk",
+        "importancePotential": "exclude_or_audit_for_leakage"
+      },
+      {
+        "feature": "eventContext.startTime",
+        "count": 1034,
+        "category": "model_output_or_label_risk",
+        "importancePotential": "exclude_or_audit_for_leakage"
+      },
+      {
+        "feature": "eventContext.status",
+        "count": 1034,
+        "category": "model_output_or_label_risk",
+        "importancePotential": "exclude_or_audit_for_leakage"
+      },
+      {
+        "feature": "marketOdds.oddsSnapshotId",
+        "count": 1034,
+        "category": "market_pricing",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "marketOdds.outcome",
+        "count": 1034,
+        "category": "market_pricing",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "marketOdds.peerRowsInEventMarketBook",
+        "count": 1034,
+        "category": "market_pricing",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures",
+        "count": 585,
+        "category": "other",
+        "importancePotential": "unknown_until_training"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.bullpenProxy",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.bullpenProxy.available",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.bullpenProxy.fatigue",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.bullpenProxy.reason",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.bullpenProxy.sampleSize",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.bullpenProxy.workload",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.averageRunsAgainst",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.averageRunsFor",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.hotCold",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.losses",
+        "count": 585,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.runDifferential",
+        "count": 585,
+        "category": "mlb_offense",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.runsAgainst",
+        "count": 585,
+        "category": "mlb_offense",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.runsFor",
+        "count": 585,
+        "category": "mlb_offense",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.sampleSize",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.trend",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.winPct",
+        "count": 585,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last10.wins",
+        "count": 585,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.averageRunsAgainst",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.averageRunsFor",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.hotCold",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.losses",
+        "count": 585,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.runDifferential",
+        "count": 585,
+        "category": "mlb_offense",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.runsAgainst",
+        "count": 585,
+        "category": "mlb_offense",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.runsFor",
+        "count": 585,
+        "category": "mlb_offense",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.sampleSize",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.trend",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.winPct",
+        "count": 585,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last3.wins",
+        "count": 585,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.averageRunsAgainst",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.averageRunsFor",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.hotCold",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.losses",
+        "count": 585,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.runDifferential",
+        "count": 585,
+        "category": "mlb_offense",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.runsAgainst",
+        "count": 585,
+        "category": "mlb_offense",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.runsFor",
+        "count": 585,
+        "category": "mlb_offense",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.sampleSize",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.trend",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.winPct",
+        "count": 585,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.last5.wins",
+        "count": 585,
+        "category": "team_strength",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.momentum",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.momentum.defensiveTrend",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.momentum.description",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.momentum.label",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.momentum.scoringTrend",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.negativeFactors",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.positiveFactors",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.rest",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.rest.available",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.rest.backToBack",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.rest.daysSinceLastGame",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.rest.doubleheaderRecovery",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.rest.extraInningsPreviousGame",
+        "count": 585,
+        "category": "mlb_pitching",
+        "importancePotential": "high"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.rest.gamesLast3Days",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.rest.gamesLast7Days",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.rest.score",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.rest.travelProxy",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.sampleSize",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      },
+      {
+        "feature": "derivedBaseballFeatures.away.season",
+        "count": 585,
+        "category": "schedule_context",
+        "importancePotential": "medium"
+      }
+    ],
+    "redundancyAssessment": [
+      "Market price, implied probability, edge and model-output-like fields require leakage audit before training.",
+      "Team strength and recent form features may be correlated and should be regularized or grouped.",
+      "Pitching, weather and park features are likely high-value MLB differentiators but require walk-forward testing."
+    ],
+    "missingFeatureCategories": [
+      "multi-season form",
+      "closing-line evaluation only",
+      "injury/lineup confidence",
+      "travel/rest depth",
+      "market movement history"
+    ]
+  },
+  "datasetAnalysis": {
+    "currentSamples": 419,
+    "classBalance": {
+      "loss": 180,
+      "win": 168,
+      "push": 6
+    },
+    "marketSamples": {
+      "moneyline": 139,
+      "spread": 140,
+      "total": 140
+    },
+    "seasonCoverage": {
+      "2026-07": 419
+    },
+    "usableSportsNow": [],
+    "usableMarketsNow": [],
+    "trainingRisk": "below 1000 samples; one sport, one month, three markets; suitable for rehearsal and shadow design only"
+  },
+  "modelAnalysis": {
+    "modelRankingNow": [
+      "No production training now",
+      "Regularized Logistic Regression as first future champion candidate",
+      "Gradient boosted trees as future challenger after 2000+ samples",
+      "Bayesian calibration layer for uncertainty after baseline validation",
+      "Neural networks and stacking only after 5000+ samples and multi-season coverage"
+    ],
+    "suitabilityByModel": {
+      "logisticRegression": "best first candidate after 1000+ samples because it is interpretable and stable with limited data",
+      "randomForest": "future challenger; risk of overfit at 1000 samples",
+      "xgboost": "strong future challenger after 2000+ samples and leakage audit",
+      "lightgbm": "similar to XGBoost; useful if feature count grows materially",
+      "catboost": "useful if categorical feature inventory expands",
+      "neuralNetworks": "not justified before 5000+ samples and multi-season coverage",
+      "bayesianModels": "useful for uncertainty and calibration, not first production replacement",
+      "ensembles": "future V3 after multiple validated base learners",
+      "stacking": "future V4 only; sample hungry and governance-heavy",
+      "blending": "future V3/V4 after shadow validation"
+    },
+    "sportStrategy": [
+      {
+        "sport": "MLB",
+        "acceptedSamples": 419,
+        "strategy": "continue_evidence_growth_and_shadow_design",
+        "modelSuitability": {
+          "bestCandidate": "regularized_logistic_regression_shadow_only",
+          "reason": "sample is useful for schema and calibration rehearsal but below controlled candidate training threshold",
+          "blockedModels": [
+            "Random Forest",
+            "XGBoost",
+            "LightGBM",
+            "CatBoost",
+            "Neural Networks",
+            "Stacking"
+          ]
+        }
+      },
+      {
+        "sport": "NBA",
+        "acceptedSamples": 0,
+        "strategy": "blocked_until_accepted_samples_exist",
+        "modelSuitability": {
+          "bestCandidate": "no_training_candidate",
+          "reason": "no accepted samples",
+          "blockedModels": [
+            "Random Forest",
+            "XGBoost",
+            "LightGBM",
+            "CatBoost",
+            "Neural Networks",
+            "Stacking"
+          ]
+        }
+      },
+      {
+        "sport": "NFL",
+        "acceptedSamples": 0,
+        "strategy": "blocked_until_accepted_samples_exist",
+        "modelSuitability": {
+          "bestCandidate": "no_training_candidate",
+          "reason": "no accepted samples",
+          "blockedModels": [
+            "Random Forest",
+            "XGBoost",
+            "LightGBM",
+            "CatBoost",
+            "Neural Networks",
+            "Stacking"
+          ]
+        }
+      },
+      {
+        "sport": "NHL",
+        "acceptedSamples": 0,
+        "strategy": "blocked_until_accepted_samples_exist",
+        "modelSuitability": {
+          "bestCandidate": "no_training_candidate",
+          "reason": "no accepted samples",
+          "blockedModels": [
+            "Random Forest",
+            "XGBoost",
+            "LightGBM",
+            "CatBoost",
+            "Neural Networks",
+            "Stacking"
+          ]
+        }
+      },
+      {
+        "sport": "Soccer",
+        "acceptedSamples": 0,
+        "strategy": "blocked_until_accepted_samples_exist",
+        "modelSuitability": {
+          "bestCandidate": "no_training_candidate",
+          "reason": "no accepted samples",
+          "blockedModels": [
+            "Random Forest",
+            "XGBoost",
+            "LightGBM",
+            "CatBoost",
+            "Neural Networks",
+            "Stacking"
+          ]
+        }
+      },
+      {
+        "sport": "BSN",
+        "acceptedSamples": 0,
+        "strategy": "blocked_until_accepted_samples_exist",
+        "modelSuitability": {
+          "bestCandidate": "no_training_candidate",
+          "reason": "no accepted samples",
+          "blockedModels": [
+            "Random Forest",
+            "XGBoost",
+            "LightGBM",
+            "CatBoost",
+            "Neural Networks",
+            "Stacking"
+          ]
+        }
+      }
+    ],
+    "marketStrategy": [
+      {
+        "market": "moneyline",
+        "acceptedSamples": 139,
+        "strategy": "pool_with_sport_model_until_300_plus_samples"
+      },
+      {
+        "market": "spread",
+        "acceptedSamples": 140,
+        "strategy": "pool_with_sport_model_until_300_plus_samples"
+      },
+      {
+        "market": "total",
+        "acceptedSamples": 140,
+        "strategy": "pool_with_sport_model_until_300_plus_samples"
+      }
+    ],
+    "recommendedArchitecture": "MLB-first regularized champion/challenger with pooled moneyline/spread/total model until each market reaches 300+ accepted samples; per-sport models later; no global ensemble yet"
+  },
+  "expectedImprovement": [
+    {
+      "samples": 419,
+      "expectedCalibration": "unstable",
+      "expectedAccuracyLift": "low_or_not_reliable",
+      "expectedStability": "high_variance",
+      "confidence": "low"
+    },
+    {
+      "samples": 600,
+      "expectedCalibration": "unstable",
+      "expectedAccuracyLift": "low_or_not_reliable",
+      "expectedStability": "high_variance",
+      "confidence": "low"
+    },
+    {
+      "samples": 800,
+      "expectedCalibration": "usable_for_shadow",
+      "expectedAccuracyLift": "low_or_not_reliable",
+      "expectedStability": "high_variance",
+      "confidence": "low"
+    },
+    {
+      "samples": 1000,
+      "expectedCalibration": "usable_for_shadow",
+      "expectedAccuracyLift": "small_single_digit_relative_lift_possible",
+      "expectedStability": "moderate_variance",
+      "confidence": "medium_low"
+    },
+    {
+      "samples": 2000,
+      "expectedCalibration": "candidate_grade",
+      "expectedAccuracyLift": "moderate_if_feature_signal_exists",
+      "expectedStability": "improving_with_walk_forward_validation",
+      "confidence": "medium"
+    },
+    {
+      "samples": 5000,
+      "expectedCalibration": "candidate_grade",
+      "expectedAccuracyLift": "moderate_if_feature_signal_exists",
+      "expectedStability": "improving_with_walk_forward_validation",
+      "confidence": "medium_high"
+    }
+  ],
+  "evolutionRoadmap": [
+    {
+      "phase": "Training V1",
+      "gate": "1000+ accepted MLB rows",
+      "action": "regularized logistic regression shadow candidate only"
+    },
+    {
+      "phase": "Training V2",
+      "gate": "2000+ accepted rows or 300+ per market",
+      "action": "per-market calibration and gradient boosted challenger"
+    },
+    {
+      "phase": "Training V3",
+      "gate": "multi-season evidence and stable shadow lift",
+      "action": "small ensemble/blending with champion comparison"
+    },
+    {
+      "phase": "Training V4",
+      "gate": "5000+ samples and multi-sport coverage",
+      "action": "stacked meta-models under strict governance"
+    },
+    {
+      "phase": "Future RL",
+      "gate": "not suitable for prediction probabilities; maybe portfolio simulation only after separate approval",
+      "action": "research only"
+    },
+    {
+      "phase": "Future AutoML",
+      "gate": "after dataset manifests and leakage guards mature",
+      "action": "offline challenger search only"
+    }
+  ],
+  "businessImpact": {
+    "predictionQuality": "limited now; meaningful only after 1000+ accepted rows",
+    "roi": "must remain evaluation metric, not training target, until calibration is stable",
+    "brier": "primary near-term optimization/evaluation metric",
+    "calibration": "highest priority improvement target",
+    "expectedValue": "downstream policy metric after probability calibration",
+    "officialPicks": "no policy change; future model can only feed Official Picks after promotion",
+    "userConfidence": "improves through transparent shadow reports, not by claiming premature AI lift"
+  },
+  "certificationMarkers": [
+    "AI_MODEL_STRATEGY_PASS",
+    "MODEL_SELECTION_ANALYSIS_PASS",
+    "FEATURE_ANALYSIS_PASS",
+    "MODEL_EVOLUTION_ROADMAP_PASS",
+    "TRAINING_PRIORITY_MATRIX_PASS",
+    "NO_MODEL_TRAINING_PASS",
+    "NO_MODEL_WEIGHT_MUTATION_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "NO_PRODUCTION_MUTATION_PASS",
+    "NO_CERTIFIED_PLATFORM_REGRESSION_PASS"
+  ],
+  "deterministicFingerprint": "93d7a5b60b8c33d0bad00d35a938a3e700ac19acc705d73fc67b72aaa5d91c1b"
+}

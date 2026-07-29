@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-07-29 02:20:00Z
+Last updated: 2026-07-29 02:35:00Z
+
+## 2026-07-29 AI Training Opportunity Analysis And Model Strategy V1
+
+- Completed the analysis-only AI/data-science strategy phase. The read-only analyzer inspected existing training manifests plus 1,691 linked feature snapshots and observed 366 unique feature keys without provider calls, training, fitting, optimization, production mutation, model-weight mutation or epoch activation.
+- Current recommendation is no production training yet. The best future first candidate is an MLB-first regularized logistic regression challenger after 1,000+ accepted rows, using pooled moneyline/spread/total evidence until each market reaches 300+ accepted samples. Gradient boosted challengers become reasonable after roughly 2,000 accepted rows; neural networks, stacking and AutoML remain 5,000+ sample research items.
+- Feature strategy prioritizes market pricing, MLB pitching, team strength, offense, schedule and environment features while requiring leakage audits for model-output/context fields. Statistical feature importance and correlation were not computed because that would require model fitting or training-style analysis.
+- Business impact remains transparency-first at 419 rows. Expected calibration/accuracy lift is low and unstable below 1,000 rows; shadow-only calibration testing becomes plausible at 1,000, and more stable challenger comparison becomes plausible at 2,000+.
+- Provider calls, database mutations, production mutations, prediction changes, settlement changes, learning changes, model training, model-weight mutations, probability changes, confidence changes, Trust changes, Official Pick policy changes and epoch activation remained 0/not executed.
 
 ## 2026-07-29 Historical Evidence Recovery And Training Dataset Expansion V1
 
