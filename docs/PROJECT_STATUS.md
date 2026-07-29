@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-07-29 02:05:00Z
+Last updated: 2026-07-29 02:20:00Z
+
+## 2026-07-29 Historical Evidence Recovery And Training Dataset Expansion V1
+
+- Completed the read-only recovery pass over existing canonical platform evidence. The analyzer recovered 65 additional virtual learning-dataset rows, raising training-ready evidence from 354 to 419 without provider calls, historical imports, Historical Replay, feature backfill, prediction writes, settlement writes, model training, model-weight mutation or epoch activation.
+- Every recovered row already had canonical result evidence, linked feature snapshot evidence, model version evidence, canonical event mapping and cutoff-safe timing. The recovery is a dataset-manifest expansion only; it does not rewrite `prediction_history` or mark previously unsettled rows as settled.
+- Expanded MLB training evidence is now 419 rows: 139 moneyline, 140 spread/runline and 140 totals, all in 2026-07. Remaining rows needed for the 1,000-row controlled candidate-training gate are 581.
+- Remaining recovery state: 438 rows remain recoverable/reviewable under current evidence rules, 1,738 are permanently rejected under current evidence, and future approved preview/shadow review could expand the longer-term pool but remains blocked in this phase.
+- Provider calls, database mutations, production mutations, prediction writes, settlement writes, model training, model-weight mutations, probability changes, confidence changes, Trust changes, Official Pick policy changes and epoch activation remained 0/not executed.
 
 ## 2026-07-29 Historical Evidence Expansion And Training Readiness Roadmap V1
 

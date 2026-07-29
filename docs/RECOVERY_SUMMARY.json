@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "mode": "historical_evidence_recovery_summary_v1",
+  "generatedAt": "2026-07-29T02:08:34.198Z",
+  "readOnly": true,
+  "trainingReadyBefore": 354,
+  "trainingReadyAfter": 419,
+  "recoveredRows": 65,
+  "remainingRecoverableRows": 438,
+  "permanentlyRejectedRows": 1738,
+  "providerCallsMade": 0,
+  "databaseMutations": 0,
+  "productionMutations": 0,
+  "estimatedSamplesAfterFutureImports": {
+    "noImportCurrentEvidenceMaximum": 419,
+    "afterFutureApprovedPreviewShadowSettlementReview": 2055
+  },
+  "certificationMarkers": [
+    "HISTORICAL_EVIDENCE_RECOVERY_PASS",
+    "TRAINING_DATASET_EXPANSION_PASS",
+    "LEARNING_DATASET_GROWTH_PASS",
+    "CANONICAL_RECOVERY_PASS",
+    "NO_PROVIDER_CALL_PASS",
+    "NO_MODEL_TRAINING_PASS",
+    "NO_MODEL_WEIGHT_MUTATION_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "NO_PRODUCTION_PREDICTION_CHANGE_PASS",
+    "NO_SETTLEMENT_CHANGE_PASS",
+    "NO_CERTIFIED_PLATFORM_REGRESSION_PASS"
+  ],
+  "deterministicFingerprint": "bdc384fa6eb9361994e4e6bf290d0931e7cea0ee33521d0e077417aaef920f87"
+}
