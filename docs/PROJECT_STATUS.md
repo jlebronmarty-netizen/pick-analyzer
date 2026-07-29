@@ -1338,3 +1338,17 @@ Converted Feature Intelligence V1 into an executable training-only feature gover
 Current classification: 372 `TRAINING_ALLOWED`, 33 `TRAINING_ALLOWED_IF_CUTOFF_FROZEN`, 11 `TRAINING_RESEARCH_ONLY`, 14 `TRAINING_PROHIBITED_POST_FINAL`, 18 `TRAINING_PROHIBITED_MODEL_OUTPUT` and 1 `TRAINING_UNKNOWN_REVIEW_REQUIRED`. Tiering: 176 Tier A core, 196 Tier B recommended, 7 Tier C optional, 27 Tier D experimental, 11 Tier R research-only and 32 Tier X prohibited.
 
 The first future MLB logistic regression manifest contains a compact 120-feature Tier A/B candidate set. The current 419-row accepted MLB training baseline remains eligible under the field-exclusion contract; prohibited keys observed in broader linked MLB snapshots are excluded from the input matrix, not silently passed through. Provider calls, database mutations, prediction writes, settlement writes, learning writes, model training runs, model weight mutations and epoch mutations all remain 0.
+
+# 2026-07-29 - Operational Readiness, Multi-Sport Data Coverage, Odds API Completeness And Daily Autonomy Audit V1
+
+Status: COMPLETE
+
+Read-only operational audit classifies Pick Analyzer as daily-operational for MLB core workflows only, not yet a complete daily multi-sport production prediction platform. MLB is `PRODUCTION_READY` for the core loop; NFL and NHL remain `PREVIEW_READY`; NBA, Soccer, BSN and UFC remain data/contract-only or partial; Tennis remains unavailable.
+
+Stored evidence confirms The Odds API extraction is not complete across all supported sports, current seasons or previous seasons. Complete previous/current-season coverage, broad score/result coverage, competition-scoped soccer, non-MLB production settlement/learning and broad player-prop extraction remain unexecuted or uncertified. No provider calls, imports, prediction generation, settlement execution, learning writes, model training, weight changes, epoch activation or production mutations were performed.
+
+The safest future refresh policy is adaptive rather than flat 5-minute multi-sport polling: 60 minutes when more than 24 hours out, 15 minutes from 2-24 hours, 5-10 minutes under 2 hours, and stop pregame refresh after event start, pending explicit provider-budget approval.
+
+Local smoke recovery classification: `LOCAL_SMOKE_HARNESS_UNRELIABLE_ON_WINDOWS`. Two independent bounded PowerShell wrappers exceeded their hard timeouts, so this is treated as a Windows/PowerShell process-control issue rather than an application-route defect. Prior production and local smoke evidence already showed `/api/system/version` HTTP 200; this certification relies on build, validators, artifact consistency, stored operational evidence and previously certified production smoke for `/api/system/version`, dashboard, performance, operations and product routes. A separate smoke-harness repair may be created later and is out of scope for this audit.
+
+Non-server validation passed: JSON artifact validation, `node scripts/operational-readiness-multisport-audit-v1-validate.mjs`, changed-file ESLint, `git diff --check`, targeted secret scan and `npm.cmd run build` with 386 static pages. No local server smoke was run during recovery.

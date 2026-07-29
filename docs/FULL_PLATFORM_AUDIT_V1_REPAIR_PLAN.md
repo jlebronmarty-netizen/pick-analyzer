@@ -16,6 +16,7 @@ No P0 data-corruption, unsafe official recommendation, cross-event settlement, o
 2. Consolidate learning terminology around derived learning evidence unless a dedicated label table is formally added.
 3. Classify duplicate/legacy routes and pages before removal: COMPLETE in Platform Consolidation & Duplication Cleanup V1. Fourteen service candidates and seven page candidates were revalidated; approved removal candidates were 0 because every candidate was reachable, archival/script tooling, documented, admin/auth, active deep-link or still required stronger owner proof.
 4. Navigation/discoverability pass for active pages and admin diagnostics.
+5. Operational multi-sport readiness: COMPLETE as read-only audit in Operational Readiness, Multi-Sport Data Coverage, Odds API Completeness And Daily Autonomy Audit V1. MLB is production-ready for core daily operation; NFL/NHL remain preview-ready; NBA, Soccer, BSN and UFC remain partial data/contract states; Tennis remains unavailable. No provider call, production mutation, prediction write, settlement write, learning write, model training, model weight mutation, epoch activation or scheduler cadence change was performed.
 
 ## P3
 
