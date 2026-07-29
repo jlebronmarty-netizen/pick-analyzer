@@ -20,7 +20,7 @@ No P0 data-corruption, unsafe official recommendation, cross-event settlement, o
 ## P3
 
 1. Add ownership metadata for scripts and services: PARTIAL in Platform Consolidation & Duplication Cleanup V1. The Full Platform Audit unused-service candidates now have ownership classification evidence; broader repository-wide owner metadata remains future documentation work.
-2. Clean documentation drift around historical phase docs after current product state is certified.
+2. Clean documentation drift around historical phase docs after current product state is certified: PARTIAL in Historical Learning Foundation V1. The canonical learning dataset contract now distinguishes derived learning evidence and future training readiness from standalone label writes or executed model training.
 3. Retire obsolete validators only after replacement validator coverage is proven.
 
 ## Guardrails

@@ -23,6 +23,13 @@ Last updated: 2026-07-28 22:36:00Z
 - Low-discoverability pages were retained as admin diagnostics, active deep links or auth boundaries. `/login` and `/register` remained out of scope and untouched.
 - No files were removed, no callers were migrated, no routes were exposed or deleted, and no product/API behavior changed. Provider calls, database mutations and production mutations remained 0.
 
+## 2026-07-29 Historical Learning Foundation V1
+
+- Completed a read-only canonical historical learning foundation using existing `prediction_history`, `game_results`, feature snapshot references and `model_weight_history`. No new table, SQL migration, Historical Replay, historical feature backfill, retrospective prediction, model training, recalibration or epoch activation was introduced.
+- The inventory scanned 2,595 prediction rows, classified 354 as production training-ready and 2,241 as rejected or blocked with exact reasons. The deterministic readiness fingerprint is `6cd3c4f765e4decaa581b5bd1efaeca0e74796a4c63116f4df7c21a236c4c3a1`.
+- The dataset contract stores stable references and bounded samples only; it does not duplicate large feature payloads or commit full private training data. Sport/market/model/month/outcome readiness partitions are recorded in `docs/HISTORICAL_LEARNING_READINESS_V1.json`.
+- Model weight history remained 41 before and after. Provider calls, database mutations, settlement writes, prediction writes, learning-weight mutations, epoch mutations, probability changes, confidence changes, Trust changes and Official Pick policy changes remained 0/not executed.
+
 ## 2026-07-28 Historical Settled Status Reconciliation V1
 
 - Completed the targeted P1 read-only audit and query/classifier repair for divergence between raw historical settled status and deterministic result-based settled counts. Added `canonical-settlement-state.service.ts` as the shared read-only settlement-state classifier for stored outcome, deterministic canonical outcome, pending reason, lifecycle badge, Performance inclusion, learning inclusion and scheduler already-settled/pending state.
