@@ -7,7 +7,7 @@ No P0 data-corruption, unsafe official recommendation, cross-event settlement, o
 ## P1
 
 1. Performance API bounded-response repair: COMPLETE in Performance API Query Optimization V1. `/api/performance` now defaults to the canonical product summary contract, keeps full AI diagnostics explicit, preserves product-visible semantic fingerprints, and reduces local default response latency/payload without business-rule changes.
-2. Vercel build OOM continuation: continue build-memory optimization using server bundle import graph; do not change prediction behavior.
+2. Vercel build OOM continuation: COMPLETE locally in Vercel Build Memory Recovery V1. Server bundle diagnostics proved duplicated Supabase server dependency bundling and webpack single-process pressure. `@supabase/supabase-js` is now server-externalized and webpack build worker is enabled, reducing repeat clean-build peak memory from the prior Phase B final 2847.6 MB to 2414.0 MB without product or prediction behavior changes. Automatic Vercel build completion remains to be observed after push; no manual deployment was performed.
 3. Settlement/performance count contract: COMPLETE in Historical Settled Status Reconciliation V1. A shared canonical settlement-state classifier now explains stored terminal, deterministic terminal, Performance, learning and scheduler counts with explicit lifecycle exclusions and legacy compatibility. The six stored/deterministic conflicts were repaired in Six Historical Settlement Conflict Resolution V1 as an exact allowlist-only data correction, not a broad rewrite.
 
 ## P2

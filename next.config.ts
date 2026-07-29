@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['@supabase/supabase-js'],
   experimental: {
-    webpackBuildWorker: false,
+    webpackBuildWorker: true,
     webpackMemoryOptimizations: true,
     parallelServerCompiles: false,
     parallelServerBuildTraces: false,

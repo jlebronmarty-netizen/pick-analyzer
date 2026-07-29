@@ -1,0 +1,325 @@
+{
+  "generatedAt": "2026-07-29T01:00:42.671Z",
+  "mode": "build_memory_optimization_v1_import_pressure_audit",
+  "filesWithServerImports": 357,
+  "totalServerImports": 412,
+  "topImportedServices": [
+    {
+      "importPath": "@/services/bsn-platform.service",
+      "count": 13
+    },
+    {
+      "importPath": "@/services/multi-sport-resolution.service",
+      "count": 13
+    },
+    {
+      "importPath": "@/services/multi-sport-query.service",
+      "count": 13
+    },
+    {
+      "importPath": "@/services/nba-data-sync.service",
+      "count": 11
+    },
+    {
+      "importPath": "@/services/performance-product-contract.service",
+      "count": 8
+    },
+    {
+      "importPath": "@/services/mlb-player-projection-engine.service",
+      "count": 8
+    },
+    {
+      "importPath": "@/services/bsn-intelligence-engine.service",
+      "count": 7
+    },
+    {
+      "importPath": "@/services/mlb-model-platform.service",
+      "count": 7
+    },
+    {
+      "importPath": "@/services/probability-picks.service",
+      "count": 6
+    },
+    {
+      "importPath": "@/services/bankroll.service",
+      "count": 6
+    },
+    {
+      "importPath": "@/services/mlb-pitcher-projection-engine.service",
+      "count": 6
+    },
+    {
+      "importPath": "@/services/mlb-player-prop-comparison.service",
+      "count": 6
+    },
+    {
+      "importPath": "@/lib/supabase-admin",
+      "count": 5
+    },
+    {
+      "importPath": "@/services/model-learning.service",
+      "count": 5
+    },
+    {
+      "importPath": "@/services/nba-data-quality.service",
+      "count": 5
+    },
+    {
+      "importPath": "@/services/the-odds-api-maximum-utilization.service",
+      "count": 5
+    },
+    {
+      "importPath": "@/services/bsn-shadow-prediction-engine.service",
+      "count": 4
+    },
+    {
+      "importPath": "@/services/bsn.service",
+      "count": 4
+    },
+    {
+      "importPath": "@/services/data-coverage-inventory.service",
+      "count": 4
+    },
+    {
+      "importPath": "@/services/universal-event-identity.service",
+      "count": 4
+    },
+    {
+      "importPath": "@/services/universal-market-intelligence.service",
+      "count": 4
+    },
+    {
+      "importPath": "@/services/mlb-player-prop-sync.service",
+      "count": 4
+    },
+    {
+      "importPath": "@/services/mlb-starter-intelligence.service",
+      "count": 4
+    },
+    {
+      "importPath": "@/services/mlb-starter-sync.service",
+      "count": 4
+    },
+    {
+      "importPath": "@/services/prediction-epoch-shadow-readiness.service",
+      "count": 4
+    }
+  ],
+  "largestImportingFiles": [
+    {
+      "file": "src/app/data-coverage/page.tsx",
+      "imports": [
+        "@/services/data-coverage-inventory.service",
+        "@/services/multi-sport-provider-entitlement-audit.service",
+        "@/services/multi-sport-data-expansion-checkpoint2.service",
+        "@/services/multi-sport-data-expansion-checkpoint3.service",
+        "@/services/multi-sport-data-expansion-final.service",
+        "@/services/the-odds-api-maximum-utilization.service"
+      ],
+      "count": 6
+    },
+    {
+      "file": "src/app/api/predictions/settle/route.ts",
+      "imports": [
+        "@/services/prediction-settlement.service",
+        "@/services/model-learning.service",
+        "@/services/clv-analytics.service",
+        "@/services/model-calibration.service",
+        "@/services/team-stats.service"
+      ],
+      "count": 5
+    },
+    {
+      "file": "src/app/ai-operations/page.tsx",
+      "imports": [
+        "@/services/ai-learning-lifecycle.service",
+        "@/services/current-board.service",
+        "@/services/performance-product-contract.service",
+        "@/services/probability-picks.service"
+      ],
+      "count": 4
+    },
+    {
+      "file": "src/app/api/mlb/player-projections/[projectionId]/route.ts",
+      "imports": [
+        "@/lib/supabase-admin",
+        "@/services/explainable-intelligence.service",
+        "@/services/mlb-player-projection-engine.service",
+        "@/services/projection-evolution.service"
+      ],
+      "count": 4
+    },
+    {
+      "file": "src/app/api/bankroll/route.ts",
+      "imports": [
+        "@/services/bankroll.service",
+        "@/services/portfolio-builder.service",
+        "@/services/play-of-the-day.service"
+      ],
+      "count": 3
+    },
+    {
+      "file": "src/app/api/daily-report/route.ts",
+      "imports": [
+        "@/services/bankroll.service",
+        "@/services/daily-report.service",
+        "@/services/daily-report-fast.service"
+      ],
+      "count": 3
+    },
+    {
+      "file": "src/app/api/model/status/route.ts",
+      "imports": [
+        "@/services/model-learning.service",
+        "@/services/model-calibration.service",
+        "@/services/model-versioning.service"
+      ],
+      "count": 3
+    },
+    {
+      "file": "src/app/api/parlays/route.ts",
+      "imports": [
+        "@/services/parlay-generator.service",
+        "@/services/bet-slip-optimizer.service",
+        "@/services/model-only-intelligence.service"
+      ],
+      "count": 3
+    },
+    {
+      "file": "src/app/api/cron/master-sync/route.ts",
+      "imports": [
+        "@/services/master-sync.service",
+        "@/services/self-learning-engine.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/current-board/route.ts",
+      "imports": [
+        "@/services/current-board.service",
+        "@/services/best-bets-today.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/daily-report/fast/route.ts",
+      "imports": [
+        "@/services/bankroll.service",
+        "@/services/daily-report-fast.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/features/store/route.ts",
+      "imports": [
+        "@/services/feature-store-core.service",
+        "@/services/historical-feature-generation.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/features/store/validation/route.ts",
+      "imports": [
+        "@/services/feature-store-core.service",
+        "@/services/historical-feature-generation.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/hedges/route.ts",
+      "imports": [
+        "@/services/bankroll.service",
+        "@/services/hedge-builder.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/live-bets/route.ts",
+      "imports": [
+        "@/services/bankroll.service",
+        "@/services/live-betting.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/mlb/game-intelligence/route.ts",
+      "imports": [
+        "@/services/mlb-current-lineup-context.service",
+        "@/services/mlb-player-projection-engine.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/mlb/player-props/health/route.ts",
+      "imports": [
+        "@/services/mlb-player-prop-comparison.service",
+        "@/services/mlb-player-prop-sync.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/mlb/player-props/provider-audit/route.ts",
+      "imports": [
+        "@/services/mlb-player-props-readiness-audit.service",
+        "@/services/mlb-player-prop-sync.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/mlb/player-props/validation/route.ts",
+      "imports": [
+        "@/services/mlb-player-prop-comparison.service",
+        "@/services/mlb-player-prop-sync.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/picks/explain/route.ts",
+      "imports": [
+        "@/services/explainability.service",
+        "@/services/ai-pick-explainer.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/portfolio/route.ts",
+      "imports": [
+        "@/services/bankroll.service",
+        "@/services/portfolio-builder.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/predictions/by-sport/route.ts",
+      "imports": [
+        "@/services/top-picks.service",
+        "@/services/prediction-history.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/predictions/top/route.ts",
+      "imports": [
+        "@/services/best-bets-today.service",
+        "@/services/top-picks.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/providers/capabilities/route.ts",
+      "imports": [
+        "@/services/provider-intelligence.service",
+        "@/services/multi-sport-resolution.service"
+      ],
+      "count": 2
+    },
+    {
+      "file": "src/app/api/recommendation-readiness/route.ts",
+      "imports": [
+        "@/services/day1-recommendation-readiness.service",
+        "@/services/prospective-official-eligibility-gate.service"
+      ],
+      "count": 2
+    }
+  ]
+}

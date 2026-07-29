@@ -1,0 +1,125 @@
+{
+  "generatedAt": "2026-07-29T01:00:42.671Z",
+  "mode": "vercel_build_memory_recovery_v1_summary",
+  "success": true,
+  "rootCauseClassification": [
+    "HEAVY_SHARED_IMPORT_GRAPH",
+    "DUPLICATE_DEPENDENCY_BUNDLING",
+    "WEBPACK_SINGLE_PROCESS_PRESSURE"
+  ],
+  "before": {
+    "phaseABaselinePeakWorkingSetMb": 2629.6,
+    "phaseBInitialPeakWorkingSetMb": 2701.0,
+    "phaseBFinalPeakWorkingSetMb": 2847.6,
+    "generatedStaticPages": 386,
+    "prerenderRouteCount": 6,
+    "largestServerFiles": [
+      {
+        "file": ".next/server/chunks/60319.js",
+        "bytes": 1255831
+      },
+      {
+        "file": ".next/server/chunks/26218.js",
+        "bytes": 876552
+      },
+      {
+        "file": ".next/server/chunks/5139.js",
+        "bytes": 875683
+      },
+      {
+        "file": ".next/server/chunks/3445.js",
+        "bytes": 413704
+      },
+      {
+        "file": ".next/server/app/dashboard/page.js",
+        "bytes": 346375
+      }
+    ]
+  },
+  "optimization": {
+    "serverExternalPackages": [
+      "@supabase/supabase-js"
+    ],
+    "webpackBuildWorker": true,
+    "businessLogicChanged": false,
+    "renderingSemanticsChanged": false,
+    "apiContractsChanged": false
+  },
+  "after": {
+    "supabaseExternalizedPeakWorkingSetMb": 2665.3,
+    "workerPeakWorkingSetMb": 2453.9,
+    "repeatPeakWorkingSetMb": 2414.0,
+    "peakWorkingSetMb": 2414.0,
+    "generatedStaticPages": 386,
+    "prerenderRouteCount": 6,
+    "routeManifestStaticRoutes": 429,
+    "routeManifestDynamicRoutes": 30,
+    "appPageRouteCount": 30,
+    "largestServerFiles": [
+      {
+        "file": ".next/server/chunks/60319.js",
+        "bytes": 1255831
+      },
+      {
+        "file": ".next/server/chunks/3445.js",
+        "bytes": 413704
+      },
+      {
+        "file": ".next/server/app/dashboard/page.js",
+        "bytes": 346375
+      },
+      {
+        "file": ".next/server/chunks/73740.js",
+        "bytes": 341128
+      },
+      {
+        "file": ".next/server/app/performance/page.js",
+        "bytes": 219875
+      }
+    ]
+  },
+  "impact": {
+    "peakReductionFromPhaseBFinalMb": 433.6,
+    "peakReductionFromPhaseBFinalPercent": 15.23,
+    "peakReductionFromPhaseAInitialMb": 215.6,
+    "peakReductionFromPhaseAInitialPercent": 8.2,
+    "removedLargestServerChunks": [
+      ".next/server/chunks/26218.js",
+      ".next/server/chunks/5139.js"
+    ],
+    "serverBundleReductionBytesFromRemovedTopChunks": 1752235,
+    "materialImprovementGateMet": true
+  },
+  "routeParity": {
+    "generatedStaticPagesUnchanged": true,
+    "prerenderRouteCountUnchanged": true,
+    "appPageRouteCount": 30,
+    "productRouteRemoved": false,
+    "apiRouteRemoved": false
+  },
+  "safety": {
+    "providerCallsMade": 0,
+    "databaseMutations": 0,
+    "productionMutations": 0,
+    "businessLogicChanged": false,
+    "predictionLogicChanged": false,
+    "schedulerBehaviorChanged": false,
+    "officialPickPolicyChanged": false,
+    "learningBrainWeightsChanged": false,
+    "epochActivated": false,
+    "manualVercelDeployAttempted": false
+  },
+  "remainingRisk": {
+    "vercelStandardBuildRecoveryProven": false,
+    "reason": "Local build memory fell materially, but Vercel Standard compatibility can only be proven by the automatic GitHub/Vercel build after push. Manual deployment was prohibited."
+  },
+  "certificationMarkers": [
+    "VERCEL_BUILD_MEMORY_AUDIT_PASS",
+    "VERCEL_BUILD_MEMORY_OPTIMIZATION_PASS",
+    "BUILD_IMPORT_GRAPH_REDUCTION_PASS",
+    "BUILD_ROUTE_PARITY_PASS",
+    "LOCAL_CLEAN_BUILD_REPEATABILITY_PASS",
+    "NO_PRODUCT_ROUTE_REMOVAL_PASS",
+    "NO_BUSINESS_RULE_CHANGE_PASS"
+  ]
+}

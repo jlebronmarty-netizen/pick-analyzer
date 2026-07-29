@@ -1,0 +1,262 @@
+{
+  "generatedAt": "2026-07-29T01:00:42.659Z",
+  "mode": "build_memory_optimization_v1_manifest_audit",
+  "prerenderRouteCount": 6,
+  "dynamicPrerenderRouteCount": 0,
+  "routeManifestStaticRoutes": 429,
+  "routeManifestDynamicRoutes": 30,
+  "appPageRouteCount": 30,
+  "staticPrerenderRoutes": [
+    "/",
+    "/_global-error",
+    "/_not-found",
+    "/favicon.ico",
+    "/login",
+    "/register"
+  ],
+  "dynamicPrerenderRoutes": [],
+  "appPageRoutes": [
+    {
+      "page": "/page",
+      "route": "/"
+    },
+    {
+      "page": "/_global-error/page",
+      "route": "/_global-error"
+    },
+    {
+      "page": "/_not-found/page",
+      "route": "/_not-found"
+    },
+    {
+      "page": "/admin/historical-diagnostics/page",
+      "route": "/admin/historical-diagnostics"
+    },
+    {
+      "page": "/ai-bet-finder/page",
+      "route": "/ai-bet-finder"
+    },
+    {
+      "page": "/ai-operations/page",
+      "route": "/ai-operations"
+    },
+    {
+      "page": "/arbitrage/page",
+      "route": "/arbitrage"
+    },
+    {
+      "page": "/autonomous-daily-ai/page",
+      "route": "/autonomous-daily-ai"
+    },
+    {
+      "page": "/best-value/page",
+      "route": "/best-value"
+    },
+    {
+      "page": "/betting-workbench/page",
+      "route": "/betting-workbench"
+    },
+    {
+      "page": "/closing-line-intelligence/page",
+      "route": "/closing-line-intelligence"
+    },
+    {
+      "page": "/dashboard/page",
+      "route": "/dashboard"
+    },
+    {
+      "page": "/data-coverage/page",
+      "route": "/data-coverage"
+    },
+    {
+      "page": "/data-coverage/[sport]/page",
+      "route": "/data-coverage/[sport]"
+    },
+    {
+      "page": "/game-intelligence/page",
+      "route": "/game-intelligence"
+    },
+    {
+      "page": "/game-intelligence/[eventId]/page",
+      "route": "/game-intelligence/[eventId]"
+    },
+    {
+      "page": "/login/page",
+      "route": "/login"
+    },
+    {
+      "page": "/market-intelligence/page",
+      "route": "/market-intelligence"
+    },
+    {
+      "page": "/mlb-operations/page",
+      "route": "/mlb-operations"
+    },
+    {
+      "page": "/model/page",
+      "route": "/model"
+    },
+    {
+      "page": "/most-likely/page",
+      "route": "/most-likely"
+    },
+    {
+      "page": "/performance/page",
+      "route": "/performance"
+    },
+    {
+      "page": "/player-projections/page",
+      "route": "/player-projections"
+    },
+    {
+      "page": "/player-projections/[projectionId]/page",
+      "route": "/player-projections/[projectionId]"
+    },
+    {
+      "page": "/portfolio-intelligence/page",
+      "route": "/portfolio-intelligence"
+    },
+    {
+      "page": "/probability-picks/page",
+      "route": "/probability-picks"
+    },
+    {
+      "page": "/projections/page",
+      "route": "/projections"
+    },
+    {
+      "page": "/register/page",
+      "route": "/register"
+    },
+    {
+      "page": "/sports-center/page",
+      "route": "/sports-center"
+    },
+    {
+      "page": "/sports-center/[sport]/page",
+      "route": "/sports-center/[sport]"
+    }
+  ],
+  "largestServerFiles": [
+    {
+      "file": ".next/server/chunks/60319.js",
+      "bytes": 1255831
+    },
+    {
+      "file": ".next/server/chunks/3445.js",
+      "bytes": 413704
+    },
+    {
+      "file": ".next/server/app/dashboard/page.js",
+      "bytes": 346375
+    },
+    {
+      "file": ".next/server/chunks/73740.js",
+      "bytes": 341128
+    },
+    {
+      "file": ".next/server/app/performance/page.js",
+      "bytes": 219875
+    },
+    {
+      "file": ".next/server/app/probability-picks/page.js",
+      "bytes": 207609
+    },
+    {
+      "file": ".next/server/chunks/56781.js",
+      "bytes": 200504
+    },
+    {
+      "file": ".next/server/app/ai-operations/page.js",
+      "bytes": 196015
+    },
+    {
+      "file": ".next/server/app/game-intelligence/[eventId]/page.js",
+      "bytes": 186584
+    },
+    {
+      "file": ".next/server/chunks/97247.js",
+      "bytes": 168497
+    },
+    {
+      "file": ".next/server/app/player-projections/page.js",
+      "bytes": 165440
+    },
+    {
+      "file": ".next/server/app/most-likely/page.js",
+      "bytes": 164565
+    },
+    {
+      "file": ".next/server/app/betting-workbench/page.js",
+      "bytes": 163715
+    },
+    {
+      "file": ".next/server/app/player-projections/[projectionId]/page.js",
+      "bytes": 161095
+    },
+    {
+      "file": ".next/server/chunks/25739.js",
+      "bytes": 160750
+    },
+    {
+      "file": ".next/server/chunks/3112.js",
+      "bytes": 159888
+    },
+    {
+      "file": ".next/server/chunks/16967.js",
+      "bytes": 159409
+    },
+    {
+      "file": ".next/server/app/autonomous-daily-ai/page.js",
+      "bytes": 158912
+    },
+    {
+      "file": ".next/server/chunks/99429.js",
+      "bytes": 157372
+    },
+    {
+      "file": ".next/server/app/mlb-operations/page.js",
+      "bytes": 152385
+    },
+    {
+      "file": ".next/server/chunks/40840.js",
+      "bytes": 151198
+    },
+    {
+      "file": ".next/server/chunks/50730.js",
+      "bytes": 151009
+    },
+    {
+      "file": ".next/server/app/api/mlb/predictions/v6-regeneration/route.js",
+      "bytes": 147959
+    },
+    {
+      "file": ".next/server/app/api/mlb/predictions/v7-regeneration/route.js",
+      "bytes": 147959
+    },
+    {
+      "file": ".next/server/app/market-intelligence/page.js",
+      "bytes": 142739
+    },
+    {
+      "file": ".next/server/app/data-coverage/[sport]/page.js",
+      "bytes": 142310
+    },
+    {
+      "file": ".next/server/app/arbitrage/page.js",
+      "bytes": 140420
+    },
+    {
+      "file": ".next/server/app/data-coverage/page.js",
+      "bytes": 140106
+    },
+    {
+      "file": ".next/server/app/best-value/page.js",
+      "bytes": 139939
+    },
+    {
+      "file": ".next/server/app/ai-bet-finder/page.js",
+      "bytes": 139368
+    }
+  ]
+}
