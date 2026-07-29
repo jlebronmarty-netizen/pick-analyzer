@@ -2915,3 +2915,17 @@ Additive projection-only engine for MLB starter recorded outs is implemented loc
 Next phase should focus on pitcher identity hardening and synchronization, not Player Prop Market Comparison or Portfolio Intelligence.
 
 Starter Sync V1 has been added as the required bridge from current-slate starter evidence to historical pitcher logs. Portfolio Intelligence V1 remains NOT STARTED. Player Prop Market Comparison V1 remains NOT STARTED.
+
+### 54. Feature Intelligence, Signal Quality And Leakage Audit V1
+
+Objective: Understand every available stored feature key and classify future model value without training or changing production behavior.
+
+Status: Complete as a read-only analysis phase.
+
+Scope: `scripts/feature-intelligence-signal-quality-leakage-audit-v1.mjs` reads stored `historical_feature_snapshots`, calculates feature coverage, null/missing rates, constant flags, primitive distributions, numeric variance, sport/market/season coverage, redundancy groups, leakage dispositions, category priorities and first/second/future model feature-set recommendations. `scripts/feature-intelligence-signal-quality-leakage-audit-v1-validate.mjs` verifies read-only guardrails and required documentation.
+
+Evidence: 73,719 snapshots read, 449 feature keys observed, 29 critical leakage-risk keys, 7 high-governance keys, 35 cutoff-frozen market candidates and 378 candidate non-leakage keys. Recommended first model family remains Regularized Logistic Regression using cutoff-frozen odds/market fields plus pitching, team strength, batting, schedule, home/away, rest and weather context after explicit training approval and sample threshold readiness.
+
+Persistence scope: None. No training, fitting, feature-importance calculation, provider call, production mutation, prediction-engine change, probability change, confidence change, Trust change, Official Pick policy change, settlement change, Learning Brain weight change or epoch activation was performed.
+
+Completion criteria: `FEATURE_INTELLIGENCE_PASS`, `FEATURE_SIGNAL_MATRIX_PASS`, `FEATURE_LEAKAGE_AUDIT_PASS`, `FEATURE_PRIORITY_MATRIX_PASS`, `FIRST_MODEL_FEATURE_SET_PASS`, `NO_MODEL_TRAINING_PASS`, `NO_MODEL_WEIGHT_MUTATION_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_PRODUCTION_MUTATION_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS` are certified locally pending final build and push.

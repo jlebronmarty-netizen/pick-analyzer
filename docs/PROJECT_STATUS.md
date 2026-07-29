@@ -1318,3 +1318,13 @@ Implemented an additive, projection-only MLB starting pitcher outs engine with c
 Current blockers for COMPLETE status: approved/application of `mlb_pitcher_projections` migration for persistence, stronger SportsDataIO-to-Retrosheet identity bridge for certification-grade historical matching, and live slate availability of mapped probable/confirmed starters with sufficient recorded-outs history.
 
 Update: Starter Sync V1 now produces live dry-run pitcher projections from current SportsDataIO GamesByDate starter evidence. The 2026-07-26 proof generated 11 projection-safe mapped starters and 11 numeric pitcher outs projections. Persistence migrations remain unapplied.
+
+# 2026-07-29 - Feature Intelligence, Signal Quality And Leakage Audit V1
+
+Status: COMPLETE
+
+Read-only feature intelligence audited 73,719 historical feature snapshots and 449 observed feature keys across MLB, NFL, NHL and NBA snapshot evidence. The audit produced `docs/FEATURE_COVERAGE.json`, `docs/FEATURE_INTELLIGENCE_V1.md`, `docs/FEATURE_SIGNAL_MATRIX.md`, `docs/FEATURE_LEAKAGE_AUDIT.md` and `docs/FEATURE_PRIORITY_MATRIX.md`.
+
+The priority matrix keeps Odds, Market, Pitching and Team Strength as must-use future feature families with field-level cutoff and metadata exclusions; Batting, Schedule, Home/Away, Historical Performance, Weather and Rest are recommended; Roster, Opponent Quality and Streaks are optional; System and Meta fields are training-excluded. Leakage classification found 29 critical keys, 7 high-governance keys, 35 cutoff-frozen market candidates and 378 candidate non-leakage keys.
+
+No model training, model fitting, model-derived feature-importance calculation, probability change, confidence change, Trust change, Official Pick policy change, settlement change, Learning Brain weight change, epoch activation, provider call or production mutation was performed.
