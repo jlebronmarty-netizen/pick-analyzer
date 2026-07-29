@@ -22,6 +22,10 @@ Primary mission: become a trustworthy sports betting intelligence platform that 
 
 Current certification answer: Pick Analyzer has many required components, but it is not yet certified to recommend real-money bets. The read-only MLB certification audit reviewed 1,194 prediction rows and found 0 certified live pregame rows, 0 production-eligible rows and 0 epoch-linked rows. Valid pregame rows remain shadow/pre-certification evidence only.
 
+Final Completion Plan V1 is now the scope-control contract for the path to V1. The current V1 completion estimate is 78%. V1 is limited to MLB core market operation, truthful product readiness labels, adaptive refresh under provider-budget policy, canonical result -> settlement -> learning -> Performance visibility, disabled automatic model training and explicit exclusion of unsupported markets from available recommendations.
+
+Evidence: `docs/PICK_ANALYZER_FINAL_COMPLETION_PLAN_V1.md`, `docs/PICK_ANALYZER_V1_SCOPE.json`, `docs/PICK_ANALYZER_V1_PHASES.json`, `docs/PICK_ANALYZER_V1_DEFINITION_OF_DONE.md`, `docs/PICK_ANALYZER_POST_V1_BACKLOG.md` and `docs/PICK_ANALYZER_CHANGE_CONTROL_POLICY.md`.
+
 ## Certification-First Priorities
 
 1. Core Production Stability.
@@ -2975,3 +2979,17 @@ Persistence scope: None. The module adds no SQL and performs no provider calls o
 Validation: `node scripts/mlb-autonomous-operations-v1-validate.mjs`, `node scripts/operational-readiness-multisport-audit-v1-validate.mjs`, focused changed-file ESLint, `git diff --check` and `npm.cmd run build` passed. Build generated 386 static pages.
 
 Completion criteria: `MLB_AUTONOMOUS_OPERATIONS_PASS`, `ADAPTIVE_REFRESH_ENGINE_PASS`, `DAILY_CONTINUITY_PASS`, `PROVIDER_BUDGET_PASS`, `SYSTEM_HEALTH_PASS`, `NO_MODEL_TRAINING_PASS`, `NO_MODEL_WEIGHT_MUTATION_PASS`, `NO_PROBABILITY_CHANGE_PASS`, `NO_TRUST_CHANGE_PASS`, `NO_SETTLEMENT_CHANGE_PASS`, `NO_PROVIDER_WASTE_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS` are certified locally pending push.
+
+### 58. MLB First Autonomous Operating-Day Production Certification V1
+
+Objective: Certify one real MLB operating day from beginning to end using actual scheduled production executions and stored production evidence.
+
+Status: Observation in progress; full end-of-day certification not yet earned.
+
+Evidence: Production `/api/system/version` serves `e97f38900254b16bba6f1451cf384dbfad6b12c2`, and read-only production checks for autonomous operations, health, adaptive refresh, operations status, dashboard, Current Board, Performance and AI Operations returned HTTP 200. The observed MLB operating date was `2026-07-29`.
+
+Current finding: The autonomous operations endpoint reports the new `*/10 * * * *` scheduler policy and `3,33 * * * *` heartbeat policy. Production health reports scheduler `HEALTHY`, provider budget `NORMAL`, 14 provider calls today, 3 in the last hour and 836 estimated calls remaining after reserve. The operating day was still active with 9 upcoming games and 96 predictions awaiting result, so result -> settlement -> learning -> Performance closure cannot be certified yet.
+
+Persistence scope: Documentation-only observation. No provider calls, production mutations, settlement execution, model training, model-weight mutation, probability change, confidence change, Trust change, Official Pick policy change, historical replay, historical import, feature backfill or Vercel deployment was performed by certification.
+
+Next safe action: Continue production read-only observation after the final game and subsequent scheduler ticks. Do not repair unless row-level evidence proves an operational defect.

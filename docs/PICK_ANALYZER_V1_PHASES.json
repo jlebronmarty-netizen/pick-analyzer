@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "artifact": "PICK_ANALYZER_V1_PHASES",
+  "generatedAt": "2026-07-29",
+  "mode": "implementation_phase_plan",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Product scope freeze",
+      "status": "complete_with_this_artifact",
+      "exitCriteria": [
+        "final_completion_plan_created",
+        "v1_scope_json_created",
+        "definition_of_done_created",
+        "change_control_policy_created"
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "First full MLB autonomous operating-day certification",
+      "status": "remaining",
+      "exitCriteria": [
+        "pregame_refresh_evidence_present",
+        "current_board_visible",
+        "canonical_results_synced",
+        "settlement_complete_or_truthfully_blocked",
+        "learning_evidence_visible",
+        "performance_reflects_settled_scope",
+        "provider_budget_within_policy"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "Release-candidate route and artifact consistency sweep",
+      "status": "remaining",
+      "exitCriteria": [
+        "dashboard_certified",
+        "current_board_certified",
+        "probability_picks_certified",
+        "performance_certified",
+        "ai_operations_certified",
+        "operations_certified",
+        "data_coverage_certified",
+        "providers_certified",
+        "json_artifacts_valid"
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Unsupported-market and recommendation-policy lock",
+      "status": "remaining",
+      "exitCriteria": [
+        "unsupported_markets_do_not_appear_as_available_recommendations",
+        "projection_only_copy_is_consistent",
+        "official_pick_policy_boundaries_are_visible",
+        "no_non_mlb_production_recommendation_claims"
+      ]
+    },
+    {
+      "phase": 5,
+      "name": "Final validation bundle",
+      "status": "remaining",
+      "exitCriteria": [
+        "json_validation_pass",
+        "doc_link_validation_pass",
+        "operational_validators_pass",
+        "changed_file_eslint_pass_or_not_applicable",
+        "build_pass",
+        "git_diff_check_pass",
+        "secret_scan_pass"
+      ]
+    },
+    {
+      "phase": 6,
+      "name": "V1 complete declaration",
+      "status": "remaining",
+      "exitCriteria": [
+        "final_commit_recorded",
+        "production_commit_alignment_verified",
+        "certified_evidence_index_complete",
+        "remaining_blockers_are_post_v1_or_explicitly_accepted"
+      ]
+    },
+    {
+      "phase": 7,
+      "name": "Post-V1 backlog activation",
+      "status": "deferred",
+      "exitCriteria": [
+        "post_v1_backlog_ranked",
+        "feature_entry_requires_change_control",
+        "provider_calls_require_budget_approval",
+        "production_mutations_require_separate_authorization"
+      ]
+    }
+  ],
+  "certificationMarkers": [
+    "IMPLEMENTATION_PHASE_PLAN_PASS",
+    "NO_CODE_CHANGE_PASS",
+    "NO_PROVIDER_CALL_PASS",
+    "NO_PRODUCTION_MUTATION_PASS"
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "artifact": "PICK_ANALYZER_V1_SCOPE",
+  "generatedAt": "2026-07-29",
+  "mode": "product_definition_only",
+  "repository": "https://github.com/jlebronmarty-netizen/pick-analyzer.git",
+  "branch": "main",
+  "currentCompletionPercent": 78,
+  "executiveVision": "Certification-first MLB core sports intelligence with truthful readiness boundaries for every non-certified sport and market.",
+  "inScope": {
+    "primarySport": "MLB",
+    "markets": [
+      "moneyline",
+      "spread_runline",
+      "totals"
+    ],
+    "surfaces": [
+      "dashboard",
+      "current_board",
+      "probability_picks",
+      "performance",
+      "ai_operations",
+      "data_coverage",
+      "providers",
+      "operations"
+    ],
+    "operations": [
+      "github_scheduler",
+      "adaptive_due_domain_refresh",
+      "provider_budget_guard",
+      "canonical_result_sync",
+      "protected_settlement",
+      "derived_learning_evidence",
+      "performance_visibility"
+    ],
+    "recommendationPolicy": "projection_only_until_all_certification_gates_pass",
+    "training": "automatic_training_disabled"
+  },
+  "sportReadiness": [
+    {
+      "sport": "MLB",
+      "v1Status": "production_core",
+      "predictionReadiness": "production_ready_for_core_workflow",
+      "blocker": "first_full_autonomous_operating_day_certification_pending"
+    },
+    {
+      "sport": "NFL",
+      "v1Status": "preview",
+      "predictionReadiness": "preview_only",
+      "blocker": "canonical_result_settlement_learning_and_promotion_gates_incomplete"
+    },
+    {
+      "sport": "NHL",
+      "v1Status": "preview",
+      "predictionReadiness": "preview_only",
+      "blocker": "canonical_result_settlement_learning_and_promotion_gates_incomplete"
+    },
+    {
+      "sport": "NBA",
+      "v1Status": "data_only",
+      "predictionReadiness": "not_production_certified",
+      "blocker": "insufficient_end_to_end_lifecycle"
+    },
+    {
+      "sport": "Soccer",
+      "v1Status": "data_only",
+      "predictionReadiness": "not_production_certified",
+      "blocker": "competition_scoped_data_and_canonical_lifecycle_incomplete"
+    },
+    {
+      "sport": "BSN",
+      "v1Status": "data_only",
+      "predictionReadiness": "not_production_certified",
+      "blocker": "sparse_odds_features_and_incomplete_lifecycle"
+    },
+    {
+      "sport": "Tennis",
+      "v1Status": "unavailable",
+      "predictionReadiness": "not_production_certified",
+      "blocker": "no_proven_schedule_odds_result_prediction_lifecycle"
+    },
+    {
+      "sport": "UFC",
+      "v1Status": "data_only",
+      "predictionReadiness": "not_production_certified",
+      "blocker": "stored_data_without_complete_prediction_lifecycle"
+    }
+  ],
+  "outOfScope": [
+    "non_mlb_production_recommendations",
+    "player_props",
+    "pitcher_props",
+    "batter_props",
+    "team_totals",
+    "nrfi_yrfi",
+    "first_five",
+    "alternate_lines",
+    "live_betting",
+    "automatic_model_training",
+    "automl",
+    "neural_networks",
+    "stacking",
+    "multi_book_arbitrage_claims",
+    "wager_execution",
+    "payments",
+    "native_mobile_apps"
+  ],
+  "certificationMarkers": [
+    "V1_SCOPE_PASS",
+    "NO_CODE_CHANGE_PASS",
+    "NO_PROVIDER_CALL_PASS",
+    "NO_PRODUCTION_MUTATION_PASS"
+  ]
+}
