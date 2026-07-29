@@ -1,7 +1,7 @@
 {
   "success": true,
   "mode": "historical_learning_foundation_v1",
-  "generatedAt": "2026-07-29T01:12:53.759Z",
+  "generatedAt": "2026-07-29T01:56:48.329Z",
   "readOnly": true,
   "providerCallsMade": 0,
   "databaseMutations": 0,
@@ -1817,5 +1817,56 @@
     "NO_MODEL_TRAINING_PASS",
     "NO_MODEL_WEIGHT_MUTATION_PASS",
     "NO_EPOCH_ACTIVATION_PASS"
-  ]
+  ],
+  "expansionReadiness": {
+    "acceptedBySport": {
+      "baseball_mlb": 354
+    },
+    "acceptedByMarket": {
+      "moneyline": 118,
+      "spread": 118,
+      "total": 118
+    },
+    "acceptedByModelVersion": {
+      "baseball_mlb_prospective_preview_v1": 354
+    },
+    "acceptedByMonth": {
+      "2026-07": 354
+    },
+    "blockedBySport": {
+      "basketball_nba": 27,
+      "baseball_mlb": 840,
+      "icehockey_nhl": 258,
+      "americanfootball_nfl": 966,
+      "basketball_bsn": 8,
+      "americanfootball_ncaaf": 122,
+      "soccer_epl": 20
+    },
+    "blockedByMarket": {
+      "spread": 442,
+      "moneyline": 1360,
+      "total": 439
+    },
+    "recoverability": {
+      "currentTrainingReady": 354,
+      "recoverable": 596,
+      "partiallyRecoverable": 1636,
+      "permanentlyRejected": 9,
+      "unknown": 0
+    },
+    "exactCategoryCounts": {
+      "trainingReady": 354,
+      "missingCanonicalResult": 1530,
+      "missingFeatureSnapshot": 904,
+      "missingModelVersion": 904,
+      "unsupportedMarket": 0,
+      "invalidCutoff": 3,
+      "duplicate": 0,
+      "preview": 530,
+      "shadow": 1106,
+      "audit": 0,
+      "fixture": 27,
+      "legacy": 0
+    }
+  }
 }

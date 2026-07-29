@@ -1,0 +1,102 @@
+{
+  "success": true,
+  "mode": "historical_evidence_expansion_training_forecast_v1",
+  "generatedAt": "2026-07-29T01:59:50.169Z",
+  "readOnly": true,
+  "providerCallsMade": 0,
+  "databaseMutations": 0,
+  "productionMutations": 0,
+  "noTrainingExecuted": true,
+  "forecast": {
+    "currentSamples": 354,
+    "targetSamples": 1000,
+    "remainingToTarget": 646,
+    "assumptions": [
+      "No provider calls in this phase.",
+      "Normal production operation continues to create cutoff-safe predictions and settlements.",
+      "No retrospective prediction rows are fabricated.",
+      "Forecast rows become accepted only after authoritative settlement and feature linkage."
+    ],
+    "oneMonth": {
+      "worstCase": 534,
+      "expected": 894,
+      "bestCase": 1074
+    },
+    "threeMonths": {
+      "worstCase": 894,
+      "expected": 1000,
+      "bestCase": 1500
+    },
+    "sixMonths": {
+      "worstCase": 1000,
+      "expected": 1500,
+      "bestCase": 2586
+    },
+    "twelveMonths": {
+      "worstCase": 1500,
+      "expected": 2586,
+      "bestCase": 2586
+    },
+    "trainingEta": {
+      "bestCase": "about 1 month of normal production settlement or Stage B recovery success",
+      "expected": "about 2 to 3 months, or immediately after all 596 recoverable rows are certified plus 50 new accepted rows",
+      "worstCase": "about 4 to 6 months if settlement/recovery throughput is slow"
+    }
+  },
+  "roadmapSampleEstimates": [
+    {
+      "stage": "A",
+      "name": "Recover missing canonical evidence",
+      "action": "repair canonical result and provider mapping gaps using stored metadata only before considering any imports",
+      "certifiedTrainingReadyRowsAfterStage": 354,
+      "maximumReviewPoolAfterStage": 950,
+      "note": "Stage A alone does not certify rows missing feature snapshots or model versions."
+    },
+    {
+      "stage": "B",
+      "name": "Recover feature completeness",
+      "action": "link existing feature snapshots and model-version metadata where point-in-time evidence already exists",
+      "certifiedTrainingReadyRowsAfterStage": 950,
+      "maximumReviewPoolAfterStage": 950,
+      "note": "If all 596 recoverable rows can be proven cutoff-safe with features/model versions, the platform reaches 950 accepted rows."
+    },
+    {
+      "stage": "C",
+      "name": "Recover historical predictions",
+      "action": "design-only gate for future approved historical prediction reconstruction; no replay is authorized by this phase",
+      "certifiedTrainingReadyRowsAfterStage": 950,
+      "maximumReviewPoolAfterStage": 2586,
+      "note": "The 1,636 preview/shadow rows are partially recoverable only after legitimate settlement, production eligibility and contract review."
+    },
+    {
+      "stage": "D",
+      "name": "Historical imports",
+      "action": "future approval gate for historical provider/archive acquisition, feature rebuild and replay",
+      "certifiedTrainingReadyRowsAfterStage": 950,
+      "maximumReviewPoolAfterStage": 2586,
+      "note": "No provider calls, imports or feature rebuilds are authorized here."
+    },
+    {
+      "stage": "E",
+      "name": "Candidate training",
+      "action": "eligible only after accepted rows exceed 1,000 and all governance gates pass",
+      "certifiedTrainingReadyRowsAfterStage": 950,
+      "maximumReviewPoolAfterStage": 2586,
+      "note": "Training remains blocked until explicit future approval."
+    }
+  ],
+  "certificationMarkers": [
+    "HISTORICAL_EVIDENCE_EXPANSION_PASS",
+    "TRAINING_EXPANSION_ROADMAP_PASS",
+    "SPORT_READINESS_FORECAST_PASS",
+    "MARKET_READINESS_FORECAST_PASS",
+    "TRAINING_FORECAST_PASS",
+    "NO_PROVIDER_CALL_PASS",
+    "NO_MODEL_TRAINING_PASS",
+    "NO_MODEL_WEIGHT_MUTATION_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "NO_PRODUCTION_MUTATION_PASS",
+    "NO_CERTIFIED_PLATFORM_REGRESSION_PASS"
+  ],
+  "deterministicFingerprint": "9a2b545642f189e50d3c92659980e3a868470e573900486fe2cd216bbbc32ec7"
+}

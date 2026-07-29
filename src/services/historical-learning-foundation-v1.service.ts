@@ -101,6 +101,13 @@ function increment(map: Record<string, number>, key: string | null | undefined, 
   map[normalized] = (map[normalized] ?? 0) + by
 }
 
+function countRowsBy(rows: Array<Record<string, unknown>>, key: string, normalizer: (value: unknown) => string = (value) => String(value ?? 'unknown')) {
+  return rows.reduce<Record<string, number>>((counts, row) => {
+    increment(counts, normalizer(row[key]))
+    return counts
+  }, {})
+}
+
 function stableHash(value: unknown) {
   return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex')
 }
@@ -217,6 +224,9 @@ export async function getHistoricalLearningFoundationV1() {
   const rows = predictions.map((row) => classifyLearningRow(row, row.game_id ? resultByGame.get(row.game_id) : undefined))
   const accepted = rows.filter((row) => row.acceptanceStatus === 'ACCEPTED')
   const rejected = rows.filter((row) => row.acceptanceStatus === 'REJECTED')
+  const recoverableRows = rows.filter((row) => row.trainingReadinessStatus === 'BLOCKED_MISSING_EVIDENCE')
+  const partiallyRecoverableRows = rows.filter((row) => row.trainingReadinessStatus === 'RESEARCH_PREVIEW_ONLY')
+  const permanentlyRejectedRows = rows.filter((row) => row.trainingReadinessStatus === 'REJECTED_INVALID')
   const reasonCounts: Record<string, number> = {}
   const sportCounts: Record<string, number> = {}
   const marketCounts: Record<string, number> = {}
@@ -327,5 +337,34 @@ export async function getHistoricalLearningFoundationV1() {
       'NO_MODEL_WEIGHT_MUTATION_PASS',
       'NO_EPOCH_ACTIVATION_PASS',
     ],
+    expansionReadiness: {
+      acceptedBySport: countRowsBy(accepted, 'sport'),
+      acceptedByMarket: countRowsBy(accepted, 'market', lower),
+      acceptedByModelVersion: countRowsBy(accepted, 'modelVersion'),
+      acceptedByMonth: countRowsBy(accepted, 'generatedAt', (value) => monthKey(String(value ?? ''))),
+      blockedBySport: countRowsBy(rejected, 'sport'),
+      blockedByMarket: countRowsBy(rejected, 'market', lower),
+      recoverability: {
+        currentTrainingReady: accepted.length,
+        recoverable: recoverableRows.length,
+        partiallyRecoverable: partiallyRecoverableRows.length,
+        permanentlyRejected: permanentlyRejectedRows.length,
+        unknown: rows.length - accepted.length - recoverableRows.length - partiallyRecoverableRows.length - permanentlyRejectedRows.length,
+      },
+      exactCategoryCounts: {
+        trainingReady: accepted.length,
+        missingCanonicalResult: reasonCounts.MISSING_CANONICAL_RESULT ?? 0,
+        missingFeatureSnapshot: reasonCounts.MISSING_FEATURE_EVIDENCE ?? 0,
+        missingModelVersion: reasonCounts.MISSING_MODEL_VERSION ?? 0,
+        unsupportedMarket: reasonCounts.UNSUPPORTED_MARKET ?? 0,
+        invalidCutoff: reasonCounts.INVALID_CUTOFF ?? 0,
+        duplicate: reasonCounts.DUPLICATE_LOGICAL_ROW ?? 0,
+        preview: reasonCounts.PREVIEW_ROW ?? 0,
+        shadow: reasonCounts.SHADOW_ROW ?? 0,
+        audit: reasonCounts.AUDIT_ROW ?? 0,
+        fixture: reasonCounts.FIXTURE_ROW ?? 0,
+        legacy: reasonCounts.LEGACY_ROW ?? 0,
+      },
+    },
   }
 }

@@ -1,0 +1,441 @@
+{
+  "success": true,
+  "mode": "historical_evidence_expansion_data_coverage_forecast_v1",
+  "generatedAt": "2026-07-29T01:59:50.169Z",
+  "readOnly": true,
+  "sourceEvidence": [
+    "docs/HISTORICAL_LEARNING_READINESS_V1.json",
+    "docs/TRAINING_READINESS_V1.json"
+  ],
+  "sourceFingerprint": "b1d60df2f9e4b64e32260e1b5ee7c10e01823a451f5c05ecc759c478c66276e6",
+  "providerCallsMade": 0,
+  "databaseMutations": 0,
+  "productionMutations": 0,
+  "currentSamples": 354,
+  "recoverableSamples": 596,
+  "partiallyRecoverableSamples": 1636,
+  "permanentlyRejectedSamples": 9,
+  "unknownSamples": 0,
+  "maximumCurrentEvidencePool": 2586,
+  "exactCategoryCounts": {
+    "trainingReady": 354,
+    "missingCanonicalResult": 1530,
+    "missingFeatureSnapshot": 904,
+    "missingModelVersion": 904,
+    "unsupportedMarket": 0,
+    "invalidCutoff": 3,
+    "duplicate": 0,
+    "preview": 530,
+    "shadow": 1106,
+    "audit": 0,
+    "fixture": 27,
+    "legacy": 0
+  },
+  "sportReadiness": [
+    {
+      "sportKey": "baseball_mlb",
+      "label": "MLB",
+      "totalPredictionRows": 1194,
+      "acceptedTrainingRows": 354,
+      "blockedRows": 840,
+      "readinessScore": 35.4,
+      "readiness": "ARCHITECTURE_REVIEW_SAMPLE_PRESENT",
+      "existingHistoricalData": "stored prediction evidence exists",
+      "featureCoverage": 1,
+      "resultCoverage": "accepted rows have canonical result labels",
+      "predictionCoverage": 1194,
+      "estimatedFutureSamples": {
+        "oneMonth": 540,
+        "threeMonths": 646,
+        "sixMonths": 646,
+        "twelveMonths": 646
+      },
+      "minimumProviderRequirements": [
+        "continued canonical current odds/results operation",
+        "no historical provider calls required for current roadmap stage"
+      ],
+      "blockers": []
+    },
+    {
+      "sportKey": "basketball_nba",
+      "label": "NBA",
+      "totalPredictionRows": 27,
+      "acceptedTrainingRows": 0,
+      "blockedRows": 27,
+      "readinessScore": 0,
+      "readiness": "EVIDENCE_PRESENT_BLOCKED",
+      "existingHistoricalData": "stored prediction evidence exists",
+      "featureCoverage": 0,
+      "resultCoverage": "blocked or not yet settled",
+      "predictionCoverage": 27,
+      "estimatedFutureSamples": {
+        "oneMonth": 0,
+        "threeMonths": 0,
+        "sixMonths": 0,
+        "twelveMonths": 0
+      },
+      "minimumProviderRequirements": [
+        "authoritative result coverage",
+        "production feature snapshots",
+        "production prediction lifecycle approval"
+      ],
+      "blockers": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ]
+    },
+    {
+      "sportKey": "americanfootball_nfl",
+      "label": "NFL",
+      "totalPredictionRows": 966,
+      "acceptedTrainingRows": 0,
+      "blockedRows": 966,
+      "readinessScore": 0,
+      "readiness": "EVIDENCE_PRESENT_BLOCKED",
+      "existingHistoricalData": "stored prediction evidence exists",
+      "featureCoverage": 0,
+      "resultCoverage": "blocked or not yet settled",
+      "predictionCoverage": 966,
+      "estimatedFutureSamples": {
+        "oneMonth": 0,
+        "threeMonths": 0,
+        "sixMonths": 776,
+        "twelveMonths": 776
+      },
+      "minimumProviderRequirements": [
+        "authoritative result coverage",
+        "production feature snapshots",
+        "production prediction lifecycle approval"
+      ],
+      "blockers": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ]
+    },
+    {
+      "sportKey": "icehockey_nhl",
+      "label": "NHL",
+      "totalPredictionRows": 258,
+      "acceptedTrainingRows": 0,
+      "blockedRows": 258,
+      "readinessScore": 0,
+      "readiness": "EVIDENCE_PRESENT_BLOCKED",
+      "existingHistoricalData": "stored prediction evidence exists",
+      "featureCoverage": 0,
+      "resultCoverage": "blocked or not yet settled",
+      "predictionCoverage": 258,
+      "estimatedFutureSamples": {
+        "oneMonth": 0,
+        "threeMonths": 0,
+        "sixMonths": 258,
+        "twelveMonths": 258
+      },
+      "minimumProviderRequirements": [
+        "authoritative result coverage",
+        "production feature snapshots",
+        "production prediction lifecycle approval"
+      ],
+      "blockers": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ]
+    },
+    {
+      "sportKey": "soccer_epl",
+      "label": "Soccer",
+      "totalPredictionRows": 20,
+      "acceptedTrainingRows": 0,
+      "blockedRows": 20,
+      "readinessScore": 0,
+      "readiness": "EVIDENCE_PRESENT_BLOCKED",
+      "existingHistoricalData": "stored prediction evidence exists",
+      "featureCoverage": 0,
+      "resultCoverage": "blocked or not yet settled",
+      "predictionCoverage": 20,
+      "estimatedFutureSamples": {
+        "oneMonth": 0,
+        "threeMonths": 0,
+        "sixMonths": 0,
+        "twelveMonths": 0
+      },
+      "minimumProviderRequirements": [
+        "authoritative result coverage",
+        "production feature snapshots",
+        "production prediction lifecycle approval"
+      ],
+      "blockers": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ]
+    },
+    {
+      "sportKey": "basketball_bsn",
+      "label": "BSN",
+      "totalPredictionRows": 8,
+      "acceptedTrainingRows": 0,
+      "blockedRows": 8,
+      "readinessScore": 0,
+      "readiness": "EVIDENCE_PRESENT_BLOCKED",
+      "existingHistoricalData": "stored prediction evidence exists",
+      "featureCoverage": 0,
+      "resultCoverage": "blocked or not yet settled",
+      "predictionCoverage": 8,
+      "estimatedFutureSamples": {
+        "oneMonth": 0,
+        "threeMonths": 0,
+        "sixMonths": 0,
+        "twelveMonths": 0
+      },
+      "minimumProviderRequirements": [
+        "authoritative result coverage",
+        "production feature snapshots",
+        "production prediction lifecycle approval"
+      ],
+      "blockers": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ]
+    },
+    {
+      "sportKey": "tennis",
+      "label": "Tennis",
+      "totalPredictionRows": 0,
+      "acceptedTrainingRows": 0,
+      "blockedRows": 0,
+      "readinessScore": 0,
+      "readiness": "NO_STORED_TRAINING_EVIDENCE",
+      "existingHistoricalData": "no accepted production training evidence in current manifests",
+      "featureCoverage": 0,
+      "resultCoverage": "blocked or not yet settled",
+      "predictionCoverage": 0,
+      "estimatedFutureSamples": {
+        "oneMonth": 0,
+        "threeMonths": 0,
+        "sixMonths": 0,
+        "twelveMonths": 0
+      },
+      "minimumProviderRequirements": [
+        "authoritative result coverage",
+        "production feature snapshots",
+        "production prediction lifecycle approval"
+      ],
+      "blockers": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ]
+    },
+    {
+      "sportKey": "ufc",
+      "label": "UFC",
+      "totalPredictionRows": 0,
+      "acceptedTrainingRows": 0,
+      "blockedRows": 0,
+      "readinessScore": 0,
+      "readiness": "NO_STORED_TRAINING_EVIDENCE",
+      "existingHistoricalData": "no accepted production training evidence in current manifests",
+      "featureCoverage": 0,
+      "resultCoverage": "blocked or not yet settled",
+      "predictionCoverage": 0,
+      "estimatedFutureSamples": {
+        "oneMonth": 0,
+        "threeMonths": 0,
+        "sixMonths": 0,
+        "twelveMonths": 0
+      },
+      "minimumProviderRequirements": [
+        "authoritative result coverage",
+        "production feature snapshots",
+        "production prediction lifecycle approval"
+      ],
+      "blockers": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ]
+    }
+  ],
+  "marketReadiness": [
+    {
+      "marketKey": "moneyline",
+      "label": "Moneyline",
+      "acceptedRows": 118,
+      "blockedRows": 1360,
+      "totalRows": 1478,
+      "readinessScore": 39.3,
+      "readiness": "SAMPLE_PRESENT_BELOW_MARKET_THRESHOLD",
+      "futurePotential": "grow through normal production settlement and canonical evidence recovery",
+      "minimumSamples": 300
+    },
+    {
+      "marketKey": "spread",
+      "label": "Spread/Runline",
+      "acceptedRows": 118,
+      "blockedRows": 442,
+      "totalRows": 560,
+      "readinessScore": 39.3,
+      "readiness": "SAMPLE_PRESENT_BELOW_MARKET_THRESHOLD",
+      "futurePotential": "grow through normal production settlement and canonical evidence recovery",
+      "minimumSamples": 300
+    },
+    {
+      "marketKey": "total",
+      "label": "Totals",
+      "acceptedRows": 118,
+      "blockedRows": 439,
+      "totalRows": 557,
+      "readinessScore": 39.3,
+      "readiness": "SAMPLE_PRESENT_BELOW_MARKET_THRESHOLD",
+      "futurePotential": "grow through normal production settlement and canonical evidence recovery",
+      "minimumSamples": 300
+    },
+    {
+      "marketKey": "first_half",
+      "label": "First Half",
+      "acceptedRows": 0,
+      "blockedRows": 0,
+      "totalRows": 0,
+      "readinessScore": 0,
+      "readiness": "NO_ACCEPTED_SAMPLE",
+      "futurePotential": "requires market-specific ingestion, modeling, settlement and validation",
+      "minimumSamples": 300
+    },
+    {
+      "marketKey": "player_props",
+      "label": "Player Props",
+      "acceptedRows": 0,
+      "blockedRows": 0,
+      "totalRows": 0,
+      "readinessScore": 0,
+      "readiness": "NO_ACCEPTED_SAMPLE",
+      "futurePotential": "requires market-specific ingestion, modeling, settlement and validation",
+      "minimumSamples": 300
+    },
+    {
+      "marketKey": "other",
+      "label": "Others",
+      "acceptedRows": 0,
+      "blockedRows": 0,
+      "totalRows": 0,
+      "readinessScore": 0,
+      "readiness": "NO_ACCEPTED_SAMPLE",
+      "futurePotential": "requires market-specific ingestion, modeling, settlement and validation",
+      "minimumSamples": 300
+    }
+  ],
+  "seasonReadiness": [
+    {
+      "seasonKey": "2026-07",
+      "acceptedRows": 354,
+      "readinessScore": 35.4,
+      "coverage": "current season partial month only",
+      "missingPeriods": [
+        "pre-2026 accepted production rows",
+        "multi-month accepted sample",
+        "multi-season accepted sample"
+      ],
+      "providerAvailability": "not inspected live; no provider calls made"
+    }
+  ],
+  "modelReadiness": [
+    {
+      "modelVersion": "baseball_mlb_prospective_preview_v1",
+      "acceptedRows": 354,
+      "readinessScore": 35.4,
+      "readiness": "DESIGN_SAMPLE_PRESENT"
+    }
+  ],
+  "providerGaps": {
+    "supabase": "current manifests contain prediction, result, feature and model-weight metadata",
+    "sportsDataIO": "no live inspection; future gaps require approved historical result/odds availability review",
+    "theOddsApi": "no live inspection; historical odds availability remains entitlement-gated",
+    "existingCsv": "no new local archive scan in this phase; existing manifests are the evidence source",
+    "historicalImports": "not executed",
+    "storedSnapshots": "feature evidence exists for accepted rows and preview rows, but blocked rows still need linkage proof"
+  },
+  "roadmap": [
+    {
+      "stage": "A",
+      "name": "Recover missing canonical evidence",
+      "action": "repair canonical result and provider mapping gaps using stored metadata only before considering any imports",
+      "certifiedTrainingReadyRowsAfterStage": 354,
+      "maximumReviewPoolAfterStage": 950,
+      "note": "Stage A alone does not certify rows missing feature snapshots or model versions."
+    },
+    {
+      "stage": "B",
+      "name": "Recover feature completeness",
+      "action": "link existing feature snapshots and model-version metadata where point-in-time evidence already exists",
+      "certifiedTrainingReadyRowsAfterStage": 950,
+      "maximumReviewPoolAfterStage": 950,
+      "note": "If all 596 recoverable rows can be proven cutoff-safe with features/model versions, the platform reaches 950 accepted rows."
+    },
+    {
+      "stage": "C",
+      "name": "Recover historical predictions",
+      "action": "design-only gate for future approved historical prediction reconstruction; no replay is authorized by this phase",
+      "certifiedTrainingReadyRowsAfterStage": 950,
+      "maximumReviewPoolAfterStage": 2586,
+      "note": "The 1,636 preview/shadow rows are partially recoverable only after legitimate settlement, production eligibility and contract review."
+    },
+    {
+      "stage": "D",
+      "name": "Historical imports",
+      "action": "future approval gate for historical provider/archive acquisition, feature rebuild and replay",
+      "certifiedTrainingReadyRowsAfterStage": 950,
+      "maximumReviewPoolAfterStage": 2586,
+      "note": "No provider calls, imports or feature rebuilds are authorized here."
+    },
+    {
+      "stage": "E",
+      "name": "Candidate training",
+      "action": "eligible only after accepted rows exceed 1,000 and all governance gates pass",
+      "certifiedTrainingReadyRowsAfterStage": 950,
+      "maximumReviewPoolAfterStage": 2586,
+      "note": "Training remains blocked until explicit future approval."
+    }
+  ],
+  "readinessScores": {
+    "overall": 35.4,
+    "bySport": {
+      "MLB": 35.4,
+      "NBA": 0,
+      "NFL": 0,
+      "NHL": 0,
+      "Soccer": 0,
+      "BSN": 0,
+      "Tennis": 0,
+      "UFC": 0
+    },
+    "byMarket": {
+      "Moneyline": 39.3,
+      "Spread/Runline": 39.3,
+      "Totals": 39.3,
+      "First Half": 0,
+      "Player Props": 0,
+      "Others": 0
+    },
+    "byModel": {
+      "baseball_mlb_prospective_preview_v1": 35.4
+    },
+    "bySeason": {
+      "2026-07": 35.4
+    }
+  },
+  "noTrainingExecuted": true,
+  "modelWeightMutations": 0,
+  "epochMutations": 0,
+  "deterministicFingerprint": "d89bf31f6b65ea755d06d54833c78aa250acb998140c8c17a0f9d469a407b551"
+}

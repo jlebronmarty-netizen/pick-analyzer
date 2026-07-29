@@ -2,6 +2,14 @@
 
 Last updated: 2026-07-29 02:05:00Z
 
+## 2026-07-29 Historical Evidence Expansion And Training Readiness Roadmap V1
+
+- Completed the read-only expansion roadmap for growing from 354 production-quality learning rows toward the 1,000-row controlled candidate-training threshold. No historical import, replay, provider download, provider credit use, prediction creation, settlement creation, model training, weight change, epoch change or production mutation was executed.
+- Exact inventory remains 2,595 stored predictions with 354 training-ready rows and 2,241 rejected or blocked rows. Current exact reason counts include 1,530 missing canonical result, 904 missing feature snapshot, 904 missing model version, 3 invalid cutoff, 27 fixture, 530 preview, 1,106 shadow, 0 unsupported-market, 0 duplicate, 0 audit and 0 legacy rows.
+- Recoverability partitions are now documented: 596 recoverable rows, 1,636 partially recoverable preview/shadow rows, 9 permanently rejected rows and 0 unknown rows. Moneyline, spread/runline and totals each have 118 accepted rows; MLB is the only sport with accepted training rows.
+- The roadmap identifies Stage B feature/result linkage of the 596 recoverable rows as the fastest no-import path, raising accepted samples to a maximum of 950 before normal production operation or future approved historical work supplies the remaining 50 rows to reach 1,000.
+- Provider calls, database mutations, production mutations, model training, model-weight mutations and epoch activation remained 0/not executed.
+
 ## 2026-07-29 Historical Training Readiness And Controlled Model Training Design V1
 
 - Completed the design-only training architecture phase on top of Historical Learning Foundation V1. This created the future training pipeline operating manual, governance policy, dataset specification, promotion/rollback policy, checklist and machine-readable readiness manifest without running training.
