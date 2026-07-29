@@ -2,6 +2,13 @@
 
 Last updated: 2026-07-28 22:36:00Z
 
+## 2026-07-28 Six Historical Settlement Conflict Resolution V1
+
+- Completed the bounded six-row historical settlement repair approved by the stabilization program. The only eligible rows were the six allowlisted MLB prediction IDs previously classified as stored-settled/deterministic-result conflicts.
+- Root cause was stale same-team cross-event result linkage: rows for SportsDataIO events `78852` and `78860` pointed at authoritative results from earlier same-team events `78837` and `78845`. Canonical `game_results` evidence for each row's own `game_id` was present, deterministic and non-conflicting.
+- Applied exactly 6 `prediction_history` updates, setting canonical `status`, `result`, `profit`, `stake`, `result_id`, settlement source/version and settlement details under `six_historical_settlement_conflict_resolution_v1`. The post-apply dry-run is idempotent with 0 additional mutations and all six rows now classify as `STORED_SETTLED_AND_DETERMINISTIC_SETTLED`.
+- Provider calls, learning writes, model-weight mutations, probability changes, confidence changes, Trust changes, Official Pick policy changes, SQL changes, feature rebuilds, imports, epoch activation and Vercel deployment remained 0/not executed.
+
 ## 2026-07-28 Historical Settled Status Reconciliation V1
 
 - Completed the targeted P1 read-only audit and query/classifier repair for divergence between raw historical settled status and deterministic result-based settled counts. Added `canonical-settlement-state.service.ts` as the shared read-only settlement-state classifier for stored outcome, deterministic canonical outcome, pending reason, lifecycle badge, Performance inclusion, learning inclusion and scheduler already-settled/pending state.

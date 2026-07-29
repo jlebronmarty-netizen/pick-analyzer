@@ -1,0 +1,715 @@
+{
+  "success": true,
+  "mode": "six_historical_settlement_conflict_resolution_v1_dry-run",
+  "generatedAt": "2026-07-29T00:49:21.266Z",
+  "targetIds": [
+    "0cf650e1-08b8-51ff-ad79-55a6f2f595b1",
+    "583d8788-2bd5-5305-af4c-8569438d4dbc",
+    "2355ad93-3def-5e9a-8d7f-48217fc1abd3",
+    "60868978-2a82-5e1d-a35b-36ed06034e01",
+    "7d8e67e1-ba78-5b6d-a102-0fba3448d7b5",
+    "9bd2f825-fac2-590f-8b13-31c7c068bce3"
+  ],
+  "inventory": [
+    {
+      "predictionId": "0cf650e1-08b8-51ff-ad79-55a6f2f595b1",
+      "sport": "baseball_mlb",
+      "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78860",
+      "providerEventId": {
+        "awayTeamId": "2",
+        "homeTeamId": "31",
+        "globalGameId": null,
+        "sportsdataio": "78860",
+        "mlb_stats_api": 823027,
+        "mlb_stats_game_pk": 823027,
+        "sportsdataio_game_id": "78860"
+      },
+      "eventMatchup": "CIN @ STL",
+      "eventStartTime": "2026-07-25T23:15:00+00:00",
+      "predictionGeneratedAt": "2026-07-25T19:47:56.324+00:00",
+      "cutoffAt": "2026-07-25T23:05:00+00:00",
+      "market": "moneyline",
+      "line": null,
+      "selection": "CIN",
+      "storedStatus": "loss",
+      "storedResult": "loss",
+      "storedStake": 100,
+      "storedProfit": -100,
+      "existingResultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+      "existingResultGameId": "baseball_mlb:mlb:sportsdataio:event:78860",
+      "existingResultFinalScore": "CIN 0, STL 7",
+      "resultLinkageState": "CANONICAL_RESULT_ALREADY_LINKED",
+      "settledAt": "2026-07-26T02:14:14.385+00:00",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "canonicalResultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+      "canonicalFinalScore": "CIN 0, STL 7",
+      "canonicalResultProvenance": {
+        "table": "game_results",
+        "createdAt": "2026-07-26T23:45:04.029718+00:00",
+        "winner": "STL"
+      },
+      "deterministicExpectedOutcome": "loss",
+      "deterministicReason": "MONEYLINE_CANONICAL_RESULT",
+      "selectedScoreOrientation": {
+        "selectedScore": 0,
+        "opponentScore": 7,
+        "orientation": "away"
+      },
+      "featureSnapshotLinkage": "48755410-640d-41df-b5d1-eebe8bd904eb",
+      "modelVersion": "baseball_mlb_prospective_preview_v1",
+      "lifecycleState": "loss",
+      "performanceInclusion": true,
+      "learningInclusion": true,
+      "exactConflictReason": "loss_vs_loss",
+      "providerMappings": [
+        {
+          "provider": "sportsdataio",
+          "providerId": "78860",
+          "season": "2026"
+        }
+      ],
+      "classification": "STORED_OUTCOME_INCORRECT",
+      "repairGate": {
+        "exactTargetId": true,
+        "deterministicCanonicalEvent": true,
+        "authoritativeResultEvidence": true,
+        "resultProvenanceNonConflicting": true,
+        "supportedMarket": true,
+        "selectionOrientationUnambiguous": true,
+        "deterministicOutcomeReproducible": true,
+        "noDuplicateSettlement": true,
+        "cutoffKnown": true,
+        "idempotentProposal": true
+      },
+      "repairGatePassed": true,
+      "proposedUpdate": {
+        "status": "loss",
+        "result": "loss",
+        "profit": -100,
+        "stake": 100,
+        "result_id": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+        "settlement_market": "canonical_result_conflict_repair",
+        "settlement_source": "six_historical_settlement_conflict_resolution_v1",
+        "settlement_version": "six_historical_settlement_conflict_resolution_v1",
+        "settled_at": "2026-07-26T02:14:14.385+00:00",
+        "settlement_details": {
+          "six_historical_settlement_conflict_resolution_v1": {
+            "repairedAt": "2026-07-29T00:49:20.387Z",
+            "repairType": "STORED_OUTCOME_INCORRECT",
+            "originalStatus": "loss",
+            "originalResult": "loss",
+            "originalProfit": -100,
+            "originalStake": 100,
+            "canonicalResultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+            "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78860",
+            "canonicalFinalScore": {
+              "homeTeam": "STL",
+              "awayTeam": "CIN",
+              "homeScore": 7,
+              "awayScore": 0
+            },
+            "deterministicOutcome": "loss",
+            "deterministicReason": "MONEYLINE_CANONICAL_RESULT",
+            "priorClassification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+          }
+        }
+      },
+      "alreadyApplied": true
+    },
+    {
+      "predictionId": "583d8788-2bd5-5305-af4c-8569438d4dbc",
+      "sport": "baseball_mlb",
+      "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78852",
+      "providerEventId": {
+        "awayTeamId": "24",
+        "homeTeamId": "20",
+        "globalGameId": null,
+        "sportsdataio": "78852",
+        "mlb_stats_api": 823679,
+        "mlb_stats_game_pk": 823679,
+        "sportsdataio_game_id": "78852"
+      },
+      "eventMatchup": "ATH @ MIN",
+      "eventStartTime": "2026-07-25T23:10:00+00:00",
+      "predictionGeneratedAt": "2026-07-25T19:47:56.324+00:00",
+      "cutoffAt": "2026-07-25T23:00:00+00:00",
+      "market": "moneyline",
+      "line": null,
+      "selection": "ATH",
+      "storedStatus": "loss",
+      "storedResult": "loss",
+      "storedStake": 100,
+      "storedProfit": -100,
+      "existingResultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+      "existingResultGameId": "baseball_mlb:mlb:sportsdataio:event:78852",
+      "existingResultFinalScore": "ATH 0, MIN 2",
+      "resultLinkageState": "CANONICAL_RESULT_ALREADY_LINKED",
+      "settledAt": "2026-07-26T02:14:14.263+00:00",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "canonicalResultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+      "canonicalFinalScore": "ATH 0, MIN 2",
+      "canonicalResultProvenance": {
+        "table": "game_results",
+        "createdAt": "2026-07-26T23:45:04.029718+00:00",
+        "winner": "MIN"
+      },
+      "deterministicExpectedOutcome": "loss",
+      "deterministicReason": "MONEYLINE_CANONICAL_RESULT",
+      "selectedScoreOrientation": {
+        "selectedScore": 0,
+        "opponentScore": 2,
+        "orientation": "away"
+      },
+      "featureSnapshotLinkage": "e64043b3-01c0-464d-a2fd-7b958268432b",
+      "modelVersion": "baseball_mlb_prospective_preview_v1",
+      "lifecycleState": "loss",
+      "performanceInclusion": true,
+      "learningInclusion": true,
+      "exactConflictReason": "loss_vs_loss",
+      "providerMappings": [
+        {
+          "provider": "sportsdataio",
+          "providerId": "78852",
+          "season": "2026"
+        }
+      ],
+      "classification": "STORED_OUTCOME_INCORRECT",
+      "repairGate": {
+        "exactTargetId": true,
+        "deterministicCanonicalEvent": true,
+        "authoritativeResultEvidence": true,
+        "resultProvenanceNonConflicting": true,
+        "supportedMarket": true,
+        "selectionOrientationUnambiguous": true,
+        "deterministicOutcomeReproducible": true,
+        "noDuplicateSettlement": true,
+        "cutoffKnown": true,
+        "idempotentProposal": true
+      },
+      "repairGatePassed": true,
+      "proposedUpdate": {
+        "status": "loss",
+        "result": "loss",
+        "profit": -100,
+        "stake": 100,
+        "result_id": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+        "settlement_market": "canonical_result_conflict_repair",
+        "settlement_source": "six_historical_settlement_conflict_resolution_v1",
+        "settlement_version": "six_historical_settlement_conflict_resolution_v1",
+        "settled_at": "2026-07-26T02:14:14.263+00:00",
+        "settlement_details": {
+          "six_historical_settlement_conflict_resolution_v1": {
+            "repairedAt": "2026-07-29T00:49:20.389Z",
+            "repairType": "STORED_OUTCOME_INCORRECT",
+            "originalStatus": "loss",
+            "originalResult": "loss",
+            "originalProfit": -100,
+            "originalStake": 100,
+            "canonicalResultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+            "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78852",
+            "canonicalFinalScore": {
+              "homeTeam": "MIN",
+              "awayTeam": "ATH",
+              "homeScore": 2,
+              "awayScore": 0
+            },
+            "deterministicOutcome": "loss",
+            "deterministicReason": "MONEYLINE_CANONICAL_RESULT",
+            "priorClassification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+          }
+        }
+      },
+      "alreadyApplied": true
+    },
+    {
+      "predictionId": "2355ad93-3def-5e9a-8d7f-48217fc1abd3",
+      "sport": "baseball_mlb",
+      "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78860",
+      "providerEventId": {
+        "awayTeamId": "2",
+        "homeTeamId": "31",
+        "globalGameId": null,
+        "sportsdataio": "78860",
+        "mlb_stats_api": 823027,
+        "mlb_stats_game_pk": 823027,
+        "sportsdataio_game_id": "78860"
+      },
+      "eventMatchup": "CIN @ STL",
+      "eventStartTime": "2026-07-25T23:15:00+00:00",
+      "predictionGeneratedAt": "2026-07-25T19:47:56.324+00:00",
+      "cutoffAt": "2026-07-25T23:05:00+00:00",
+      "market": "spread",
+      "line": -1.5,
+      "selection": "CIN",
+      "storedStatus": "loss",
+      "storedResult": "loss",
+      "storedStake": 100,
+      "storedProfit": -100,
+      "existingResultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+      "existingResultGameId": "baseball_mlb:mlb:sportsdataio:event:78860",
+      "existingResultFinalScore": "CIN 0, STL 7",
+      "resultLinkageState": "CANONICAL_RESULT_ALREADY_LINKED",
+      "settledAt": "2026-07-26T02:14:14.421+00:00",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "canonicalResultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+      "canonicalFinalScore": "CIN 0, STL 7",
+      "canonicalResultProvenance": {
+        "table": "game_results",
+        "createdAt": "2026-07-26T23:45:04.029718+00:00",
+        "winner": "STL"
+      },
+      "deterministicExpectedOutcome": "loss",
+      "deterministicReason": "SPREAD_CANONICAL_RESULT",
+      "selectedScoreOrientation": {
+        "selectedScore": 0,
+        "opponentScore": 7,
+        "orientation": "away"
+      },
+      "featureSnapshotLinkage": "9ca5f170-dad8-495f-8bf2-4896197441b2",
+      "modelVersion": "baseball_mlb_prospective_preview_v1",
+      "lifecycleState": "loss",
+      "performanceInclusion": true,
+      "learningInclusion": true,
+      "exactConflictReason": "loss_vs_loss",
+      "providerMappings": [
+        {
+          "provider": "sportsdataio",
+          "providerId": "78860",
+          "season": "2026"
+        }
+      ],
+      "classification": "STORED_OUTCOME_INCORRECT",
+      "repairGate": {
+        "exactTargetId": true,
+        "deterministicCanonicalEvent": true,
+        "authoritativeResultEvidence": true,
+        "resultProvenanceNonConflicting": true,
+        "supportedMarket": true,
+        "selectionOrientationUnambiguous": true,
+        "deterministicOutcomeReproducible": true,
+        "noDuplicateSettlement": true,
+        "cutoffKnown": true,
+        "idempotentProposal": true
+      },
+      "repairGatePassed": true,
+      "proposedUpdate": {
+        "status": "loss",
+        "result": "loss",
+        "profit": -100,
+        "stake": 100,
+        "result_id": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+        "settlement_market": "canonical_result_conflict_repair",
+        "settlement_source": "six_historical_settlement_conflict_resolution_v1",
+        "settlement_version": "six_historical_settlement_conflict_resolution_v1",
+        "settled_at": "2026-07-26T02:14:14.421+00:00",
+        "settlement_details": {
+          "six_historical_settlement_conflict_resolution_v1": {
+            "repairedAt": "2026-07-29T00:49:20.389Z",
+            "repairType": "STORED_OUTCOME_INCORRECT",
+            "originalStatus": "loss",
+            "originalResult": "loss",
+            "originalProfit": -100,
+            "originalStake": 100,
+            "canonicalResultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+            "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78860",
+            "canonicalFinalScore": {
+              "homeTeam": "STL",
+              "awayTeam": "CIN",
+              "homeScore": 7,
+              "awayScore": 0
+            },
+            "deterministicOutcome": "loss",
+            "deterministicReason": "SPREAD_CANONICAL_RESULT",
+            "priorClassification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+          }
+        }
+      },
+      "alreadyApplied": true
+    },
+    {
+      "predictionId": "60868978-2a82-5e1d-a35b-36ed06034e01",
+      "sport": "baseball_mlb",
+      "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78852",
+      "providerEventId": {
+        "awayTeamId": "24",
+        "homeTeamId": "20",
+        "globalGameId": null,
+        "sportsdataio": "78852",
+        "mlb_stats_api": 823679,
+        "mlb_stats_game_pk": 823679,
+        "sportsdataio_game_id": "78852"
+      },
+      "eventMatchup": "ATH @ MIN",
+      "eventStartTime": "2026-07-25T23:10:00+00:00",
+      "predictionGeneratedAt": "2026-07-25T19:47:56.324+00:00",
+      "cutoffAt": "2026-07-25T23:00:00+00:00",
+      "market": "total",
+      "line": 10.5,
+      "selection": "Under",
+      "storedStatus": "win",
+      "storedResult": "win",
+      "storedStake": 100,
+      "storedProfit": 89.29,
+      "existingResultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+      "existingResultGameId": "baseball_mlb:mlb:sportsdataio:event:78852",
+      "existingResultFinalScore": "ATH 0, MIN 2",
+      "resultLinkageState": "CANONICAL_RESULT_ALREADY_LINKED",
+      "settledAt": "2026-07-26T02:14:14.338+00:00",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "canonicalResultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+      "canonicalFinalScore": "ATH 0, MIN 2",
+      "canonicalResultProvenance": {
+        "table": "game_results",
+        "createdAt": "2026-07-26T23:45:04.029718+00:00",
+        "winner": "MIN"
+      },
+      "deterministicExpectedOutcome": "win",
+      "deterministicReason": "TOTAL_UNDER_CANONICAL_RESULT",
+      "selectedScoreOrientation": {
+        "selectedScore": null,
+        "opponentScore": null,
+        "orientation": "unmatched"
+      },
+      "featureSnapshotLinkage": "792aae5b-eb3f-4298-9b81-34b455d80278",
+      "modelVersion": "baseball_mlb_prospective_preview_v1",
+      "lifecycleState": "win",
+      "performanceInclusion": true,
+      "learningInclusion": true,
+      "exactConflictReason": "win_vs_win",
+      "providerMappings": [
+        {
+          "provider": "sportsdataio",
+          "providerId": "78852",
+          "season": "2026"
+        }
+      ],
+      "classification": "STORED_OUTCOME_INCORRECT",
+      "repairGate": {
+        "exactTargetId": true,
+        "deterministicCanonicalEvent": true,
+        "authoritativeResultEvidence": true,
+        "resultProvenanceNonConflicting": true,
+        "supportedMarket": true,
+        "selectionOrientationUnambiguous": true,
+        "deterministicOutcomeReproducible": true,
+        "noDuplicateSettlement": true,
+        "cutoffKnown": true,
+        "idempotentProposal": true
+      },
+      "repairGatePassed": true,
+      "proposedUpdate": {
+        "status": "win",
+        "result": "win",
+        "profit": 89.29,
+        "stake": 100,
+        "result_id": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+        "settlement_market": "canonical_result_conflict_repair",
+        "settlement_source": "six_historical_settlement_conflict_resolution_v1",
+        "settlement_version": "six_historical_settlement_conflict_resolution_v1",
+        "settled_at": "2026-07-26T02:14:14.338+00:00",
+        "settlement_details": {
+          "six_historical_settlement_conflict_resolution_v1": {
+            "repairedAt": "2026-07-29T00:49:20.389Z",
+            "repairType": "STORED_OUTCOME_INCORRECT",
+            "originalStatus": "win",
+            "originalResult": "win",
+            "originalProfit": 89.29,
+            "originalStake": 100,
+            "canonicalResultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+            "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78852",
+            "canonicalFinalScore": {
+              "homeTeam": "MIN",
+              "awayTeam": "ATH",
+              "homeScore": 2,
+              "awayScore": 0
+            },
+            "deterministicOutcome": "win",
+            "deterministicReason": "TOTAL_UNDER_CANONICAL_RESULT",
+            "priorClassification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+          }
+        }
+      },
+      "alreadyApplied": true
+    },
+    {
+      "predictionId": "7d8e67e1-ba78-5b6d-a102-0fba3448d7b5",
+      "sport": "baseball_mlb",
+      "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78852",
+      "providerEventId": {
+        "awayTeamId": "24",
+        "homeTeamId": "20",
+        "globalGameId": null,
+        "sportsdataio": "78852",
+        "mlb_stats_api": 823679,
+        "mlb_stats_game_pk": 823679,
+        "sportsdataio_game_id": "78852"
+      },
+      "eventMatchup": "ATH @ MIN",
+      "eventStartTime": "2026-07-25T23:10:00+00:00",
+      "predictionGeneratedAt": "2026-07-25T19:47:56.324+00:00",
+      "cutoffAt": "2026-07-25T23:00:00+00:00",
+      "market": "spread",
+      "line": 1.5,
+      "selection": "ATH",
+      "storedStatus": "loss",
+      "storedResult": "loss",
+      "storedStake": 100,
+      "storedProfit": -100,
+      "existingResultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+      "existingResultGameId": "baseball_mlb:mlb:sportsdataio:event:78852",
+      "existingResultFinalScore": "ATH 0, MIN 2",
+      "resultLinkageState": "CANONICAL_RESULT_ALREADY_LINKED",
+      "settledAt": "2026-07-26T02:14:14.303+00:00",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "canonicalResultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+      "canonicalFinalScore": "ATH 0, MIN 2",
+      "canonicalResultProvenance": {
+        "table": "game_results",
+        "createdAt": "2026-07-26T23:45:04.029718+00:00",
+        "winner": "MIN"
+      },
+      "deterministicExpectedOutcome": "loss",
+      "deterministicReason": "SPREAD_CANONICAL_RESULT",
+      "selectedScoreOrientation": {
+        "selectedScore": 0,
+        "opponentScore": 2,
+        "orientation": "away"
+      },
+      "featureSnapshotLinkage": "56b3d3c4-a2ac-4b9a-8d2b-1354ba01f80d",
+      "modelVersion": "baseball_mlb_prospective_preview_v1",
+      "lifecycleState": "loss",
+      "performanceInclusion": true,
+      "learningInclusion": true,
+      "exactConflictReason": "loss_vs_loss",
+      "providerMappings": [
+        {
+          "provider": "sportsdataio",
+          "providerId": "78852",
+          "season": "2026"
+        }
+      ],
+      "classification": "STORED_OUTCOME_INCORRECT",
+      "repairGate": {
+        "exactTargetId": true,
+        "deterministicCanonicalEvent": true,
+        "authoritativeResultEvidence": true,
+        "resultProvenanceNonConflicting": true,
+        "supportedMarket": true,
+        "selectionOrientationUnambiguous": true,
+        "deterministicOutcomeReproducible": true,
+        "noDuplicateSettlement": true,
+        "cutoffKnown": true,
+        "idempotentProposal": true
+      },
+      "repairGatePassed": true,
+      "proposedUpdate": {
+        "status": "loss",
+        "result": "loss",
+        "profit": -100,
+        "stake": 100,
+        "result_id": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+        "settlement_market": "canonical_result_conflict_repair",
+        "settlement_source": "six_historical_settlement_conflict_resolution_v1",
+        "settlement_version": "six_historical_settlement_conflict_resolution_v1",
+        "settled_at": "2026-07-26T02:14:14.303+00:00",
+        "settlement_details": {
+          "six_historical_settlement_conflict_resolution_v1": {
+            "repairedAt": "2026-07-29T00:49:20.389Z",
+            "repairType": "STORED_OUTCOME_INCORRECT",
+            "originalStatus": "loss",
+            "originalResult": "loss",
+            "originalProfit": -100,
+            "originalStake": 100,
+            "canonicalResultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+            "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78852",
+            "canonicalFinalScore": {
+              "homeTeam": "MIN",
+              "awayTeam": "ATH",
+              "homeScore": 2,
+              "awayScore": 0
+            },
+            "deterministicOutcome": "loss",
+            "deterministicReason": "SPREAD_CANONICAL_RESULT",
+            "priorClassification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+          }
+        }
+      },
+      "alreadyApplied": true
+    },
+    {
+      "predictionId": "9bd2f825-fac2-590f-8b13-31c7c068bce3",
+      "sport": "baseball_mlb",
+      "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78860",
+      "providerEventId": {
+        "awayTeamId": "2",
+        "homeTeamId": "31",
+        "globalGameId": null,
+        "sportsdataio": "78860",
+        "mlb_stats_api": 823027,
+        "mlb_stats_game_pk": 823027,
+        "sportsdataio_game_id": "78860"
+      },
+      "eventMatchup": "CIN @ STL",
+      "eventStartTime": "2026-07-25T23:15:00+00:00",
+      "predictionGeneratedAt": "2026-07-25T19:47:56.324+00:00",
+      "cutoffAt": "2026-07-25T23:05:00+00:00",
+      "market": "total",
+      "line": 8,
+      "selection": "Under",
+      "storedStatus": "win",
+      "storedResult": "win",
+      "storedStake": 100,
+      "storedProfit": 92.59,
+      "existingResultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+      "existingResultGameId": "baseball_mlb:mlb:sportsdataio:event:78860",
+      "existingResultFinalScore": "CIN 0, STL 7",
+      "resultLinkageState": "CANONICAL_RESULT_ALREADY_LINKED",
+      "settledAt": "2026-07-26T02:14:14.092+00:00",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "canonicalResultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+      "canonicalFinalScore": "CIN 0, STL 7",
+      "canonicalResultProvenance": {
+        "table": "game_results",
+        "createdAt": "2026-07-26T23:45:04.029718+00:00",
+        "winner": "STL"
+      },
+      "deterministicExpectedOutcome": "win",
+      "deterministicReason": "TOTAL_UNDER_CANONICAL_RESULT",
+      "selectedScoreOrientation": {
+        "selectedScore": null,
+        "opponentScore": null,
+        "orientation": "unmatched"
+      },
+      "featureSnapshotLinkage": "9523b503-4fde-4312-a1a8-8c6a1301a4bf",
+      "modelVersion": "baseball_mlb_prospective_preview_v1",
+      "lifecycleState": "win",
+      "performanceInclusion": true,
+      "learningInclusion": true,
+      "exactConflictReason": "win_vs_win",
+      "providerMappings": [
+        {
+          "provider": "sportsdataio",
+          "providerId": "78860",
+          "season": "2026"
+        }
+      ],
+      "classification": "STORED_OUTCOME_INCORRECT",
+      "repairGate": {
+        "exactTargetId": true,
+        "deterministicCanonicalEvent": true,
+        "authoritativeResultEvidence": true,
+        "resultProvenanceNonConflicting": true,
+        "supportedMarket": true,
+        "selectionOrientationUnambiguous": true,
+        "deterministicOutcomeReproducible": true,
+        "noDuplicateSettlement": true,
+        "cutoffKnown": true,
+        "idempotentProposal": true
+      },
+      "repairGatePassed": true,
+      "proposedUpdate": {
+        "status": "win",
+        "result": "win",
+        "profit": 92.59,
+        "stake": 100,
+        "result_id": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+        "settlement_market": "canonical_result_conflict_repair",
+        "settlement_source": "six_historical_settlement_conflict_resolution_v1",
+        "settlement_version": "six_historical_settlement_conflict_resolution_v1",
+        "settled_at": "2026-07-26T02:14:14.092+00:00",
+        "settlement_details": {
+          "six_historical_settlement_conflict_resolution_v1": {
+            "repairedAt": "2026-07-29T00:49:20.389Z",
+            "repairType": "STORED_OUTCOME_INCORRECT",
+            "originalStatus": "win",
+            "originalResult": "win",
+            "originalProfit": 92.59,
+            "originalStake": 100,
+            "canonicalResultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+            "canonicalGameId": "baseball_mlb:mlb:sportsdataio:event:78860",
+            "canonicalFinalScore": {
+              "homeTeam": "STL",
+              "awayTeam": "CIN",
+              "homeScore": 7,
+              "awayScore": 0
+            },
+            "deterministicOutcome": "win",
+            "deterministicReason": "TOTAL_UNDER_CANONICAL_RESULT",
+            "priorClassification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+          }
+        }
+      },
+      "alreadyApplied": true
+    }
+  ],
+  "blocked": [],
+  "mutations": 0,
+  "afterClassifications": [
+    {
+      "id": "0cf650e1-08b8-51ff-ad79-55a6f2f595b1",
+      "status": "loss",
+      "result": "loss",
+      "profit": -100,
+      "stake": 100,
+      "resultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "classification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+    },
+    {
+      "id": "2355ad93-3def-5e9a-8d7f-48217fc1abd3",
+      "status": "loss",
+      "result": "loss",
+      "profit": -100,
+      "stake": 100,
+      "resultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "classification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+    },
+    {
+      "id": "583d8788-2bd5-5305-af4c-8569438d4dbc",
+      "status": "loss",
+      "result": "loss",
+      "profit": -100,
+      "stake": 100,
+      "resultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "classification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+    },
+    {
+      "id": "60868978-2a82-5e1d-a35b-36ed06034e01",
+      "status": "win",
+      "result": "win",
+      "profit": 89.29,
+      "stake": 100,
+      "resultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "classification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+    },
+    {
+      "id": "7d8e67e1-ba78-5b6d-a102-0fba3448d7b5",
+      "status": "loss",
+      "result": "loss",
+      "profit": -100,
+      "stake": 100,
+      "resultId": "cfd49437-d3e9-45bf-940b-12e2160c5119",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "classification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+    },
+    {
+      "id": "9bd2f825-fac2-590f-8b13-31c7c068bce3",
+      "status": "win",
+      "result": "win",
+      "profit": 92.59,
+      "stake": 100,
+      "resultId": "ca3a30a2-aa58-4ea9-b95d-92fcdea7f360",
+      "settlementSource": "six_historical_settlement_conflict_resolution_v1",
+      "classification": "STORED_SETTLED_AND_DETERMINISTIC_SETTLED"
+    }
+  ],
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "settlementWrites": 0,
+  "learningWrites": 0,
+  "modelWeightMutations": 0,
+  "mappingReadError": null
+}
