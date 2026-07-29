@@ -1,6 +1,13 @@
 # Project Status
 
-Last updated: 2026-07-28 22:36:00Z
+Last updated: 2026-07-29 02:05:00Z
+
+## 2026-07-29 Historical Training Readiness And Controlled Model Training Design V1
+
+- Completed the design-only training architecture phase on top of Historical Learning Foundation V1. This created the future training pipeline operating manual, governance policy, dataset specification, promotion/rollback policy, checklist and machine-readable readiness manifest without running training.
+- Current read-only baseline remains 354 production training-ready rows, 386 learning queue rows, 354 accepted learning rows and 41 model weight history rows. The current status is design sample present but insufficient for model training because accepted evidence is MLB-only, small and concentrated in one month.
+- The future training policy requires frozen dataset manifests, deterministic seeds, walk-forward validation, calibration and safety metrics, prospective shadow evaluation, manual promotion approval and rollback metadata. Automatic training and automatic promotion remain disabled.
+- Provider calls, database mutations, settlement writes, prediction writes, learning writes, model-weight mutations, probability changes, confidence changes, Trust changes, Official Pick policy changes and epoch activation remained 0/not executed.
 
 ## 2026-07-28 Six Historical Settlement Conflict Resolution V1
 

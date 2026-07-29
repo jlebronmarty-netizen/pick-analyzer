@@ -1,0 +1,421 @@
+{
+  "success": true,
+  "mode": "historical_training_readiness_and_controlled_model_training_design_v1",
+  "generatedAt": "2026-07-29T01:47:48.664Z",
+  "readOnly": true,
+  "sourceEvidence": "docs/HISTORICAL_LEARNING_READINESS_V1.json",
+  "sourceFingerprint": "6cd3c4f765e4decaa581b5bd1efaeca0e74796a4c63116f4df7c21a236c4c3a1",
+  "noTrainingExecuted": true,
+  "providerCallsMade": 0,
+  "databaseMutations": 0,
+  "settlementWrites": 0,
+  "predictionWrites": 0,
+  "learningWrites": 0,
+  "modelWeightMutations": 0,
+  "epochMutations": 0,
+  "baseline": {
+    "totalPredictionsScanned": 2595,
+    "productionTrainingReadyRows": 354,
+    "learningQueueRows": 386,
+    "learningAcceptedRows": 354,
+    "modelWeightHistoryRows": 41,
+    "trainingEverExecuted": false,
+    "epochPromotionEverExecuted": false
+  },
+  "inventory": {
+    "sourceTables": [
+      "prediction_history",
+      "game_results",
+      "historical_feature_snapshots",
+      "model_weight_history"
+    ],
+    "acceptedRows": 354,
+    "rejectedRows": 2241,
+    "markets": {
+      "spread": 560,
+      "moneyline": 1478,
+      "total": 557
+    },
+    "sports": {
+      "basketball_nba": 27,
+      "baseball_mlb": 1194,
+      "icehockey_nhl": 258,
+      "americanfootball_nfl": 966,
+      "basketball_bsn": 8,
+      "americanfootball_ncaaf": 122,
+      "soccer_epl": 20
+    },
+    "modelVersions": {
+      "basketball_nba_model_v1": 27,
+      "unknown": 904,
+      "baseball_mlb_prospective_preview_v1": 522,
+      "icehockey_nhl_preview_lifecycle_v1": 258,
+      "americanfootball_nfl_preview_lifecycle_v1": 776,
+      "baseball_mlb_model_v1": 45,
+      "baseball_mlb_prospective_v7": 48,
+      "baseball_mlb_prospective_v6": 15
+    },
+    "outcomes": {
+      "loss": 500,
+      "unknown": 1612,
+      "win": 477,
+      "push": 6
+    },
+    "partitions": {
+      "RESEARCH_PREVIEW_ONLY": 1636,
+      "BLOCKED_MISSING_EVIDENCE": 596,
+      "PRODUCTION_TRAINING_READY": 354,
+      "REJECTED_INVALID": 9
+    },
+    "rejectionReasons": {
+      "POST_START_PREDICTION": 331,
+      "MISSING_CANONICAL_RESULT": 1530,
+      "FIXTURE_ROW": 27,
+      "SHADOW_ROW": 1106,
+      "POST_FINAL_PREDICTION": 370,
+      "MISSING_FEATURE_EVIDENCE": 904,
+      "MISSING_MODEL_VERSION": 904,
+      "PREVIEW_ROW": 530,
+      "INVALID_CUTOFF": 3
+    }
+  },
+  "datasetQuality": {
+    "sampleCountStatus": "INSUFFICIENT_FOR_MODEL_TRAINING",
+    "reason": "354 accepted MLB rows are useful for design review but below the first candidate training threshold and concentrated in one month.",
+    "classBalance": {
+      "loss": 180,
+      "win": 168,
+      "push": 6
+    },
+    "marketsCovered": [
+      "spread",
+      "moneyline",
+      "total"
+    ],
+    "seasonCoverage": {
+      "2026-07": 2595
+    },
+    "featureCompletenessPolicy": "accepted rows require linked or embedded feature evidence; feature payloads are referenced, not duplicated",
+    "duplicatePolicy": "future dataset builder must enforce one logical row per sport/event/market/selection/model/cutoff",
+    "leakageGuards": [
+      "generated_at must be before cutoff and event start",
+      "cutoff_at must be present or classifier-approved",
+      "feature_snapshot_id or feature_snapshot_key must reference point-in-time evidence",
+      "canonical result must be used only as label after settlement",
+      "trial, scrambled, preview and shadow rows are excluded from production training"
+    ]
+  },
+  "modelStrategy": {
+    "recommendedBase": "start with interpretable regularized classifiers per sport-market after approval",
+    "incrementalLearning": "disabled until challenger governance and drift tests are approved",
+    "fullRetraining": "manual only; deterministic manifest, frozen input fingerprint and approval ticket required",
+    "globalEnsemble": "future research only after per sport-market baselines exist",
+    "deterministicSeedRequired": true,
+    "experimentTracking": "write manifest first; no training run may exist without dataset, code, config and metric fingerprints"
+  },
+  "validationStrategy": {
+    "splitPolicy": "walk-forward by event start time; no random cross-validation for time-sensitive production claims",
+    "partitions": [
+      "train",
+      "validation",
+      "test",
+      "prospective shadow"
+    ],
+    "metrics": [
+      "Brier",
+      "calibration",
+      "accuracy",
+      "log_loss",
+      "precision",
+      "recall",
+      "ROI",
+      "CLV",
+      "EV",
+      "profit_simulation",
+      "sharpe",
+      "drawdown"
+    ],
+    "promotionRequires": [
+      "minimum sample thresholds met",
+      "no leakage findings",
+      "champion comparison improves calibration without harming safety metrics",
+      "prospective shadow evaluation passes",
+      "manual promotion approval"
+    ]
+  },
+  "shadowStrategy": {
+    "championChallenger": true,
+    "productionWritesAllowed": false,
+    "candidateRowsMustBeShadowOnly": true,
+    "automaticPromotionAllowed": false,
+    "rollbackRequiredBeforePromotion": true,
+    "driftDetection": [
+      "calibration drift",
+      "feature distribution drift",
+      "market mix drift",
+      "sport status drift"
+    ]
+  },
+  "governance": {
+    "epochLifecycle": [
+      "draft",
+      "trained_candidate",
+      "validated",
+      "shadow",
+      "approved",
+      "active",
+      "rolled_back",
+      "archived"
+    ],
+    "approvals": [
+      "dataset freeze approval",
+      "training approval",
+      "shadow approval",
+      "promotion approval",
+      "rollback approval"
+    ],
+    "automaticTraining": "disabled",
+    "manualTraining": "future gated CLI/job only",
+    "minimumNewSamplesBeforeReview": 250,
+    "catastrophicRollback": "restore previous champion pointer; never delete historical predictions or candidate artifacts"
+  },
+  "sportReadiness": [
+    {
+      "sportKey": "baseball_mlb",
+      "label": "MLB",
+      "currentRowsObserved": 1194,
+      "acceptedTrainingRows": 354,
+      "dateRange": {
+        "start": "2026-07-17T15:41:55.464+00:00",
+        "end": "2026-07-28T15:18:19.332+00:00"
+      },
+      "classBalance": {
+        "loss": 180,
+        "win": 168,
+        "push": 6
+      },
+      "featureCompleteness": 1,
+      "leakageStatus": "PASS",
+      "readiness": "DESIGN_SAMPLE_PRESENT_NOT_TRAINING_READY",
+      "minimumSamples": {
+        "designReview": 250,
+        "firstCandidateTraining": 1000,
+        "sportMarketCandidate": 300,
+        "promotionShadowSettledRows": 500,
+        "multiSeasonPreferred": true
+      },
+      "missingData": [],
+      "expectedReadiness": "closest; needs larger multi-slate and preferably multi-season accepted samples before training"
+    },
+    {
+      "sportKey": "basketball_nba",
+      "label": "NBA",
+      "currentRowsObserved": 27,
+      "acceptedTrainingRows": 0,
+      "dateRange": {
+        "start": null,
+        "end": null
+      },
+      "classBalance": {},
+      "featureCompleteness": 0,
+      "leakageStatus": "PASS",
+      "readiness": "EVIDENCE_PRESENT_NOT_TRAINING_READY",
+      "minimumSamples": {
+        "designReview": 250,
+        "firstCandidateTraining": 1000,
+        "sportMarketCandidate": 300,
+        "promotionShadowSettledRows": 500,
+        "multiSeasonPreferred": true
+      },
+      "missingData": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ],
+      "expectedReadiness": "blocked until genuine production settled rows replace trial/shadow-only evidence"
+    },
+    {
+      "sportKey": "americanfootball_nfl",
+      "label": "NFL",
+      "currentRowsObserved": 966,
+      "acceptedTrainingRows": 0,
+      "dateRange": {
+        "start": null,
+        "end": null
+      },
+      "classBalance": {},
+      "featureCompleteness": 0,
+      "leakageStatus": "PASS",
+      "readiness": "EVIDENCE_PRESENT_NOT_TRAINING_READY",
+      "minimumSamples": {
+        "designReview": 250,
+        "firstCandidateTraining": 1000,
+        "sportMarketCandidate": 300,
+        "promotionShadowSettledRows": 500,
+        "multiSeasonPreferred": true
+      },
+      "missingData": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ],
+      "expectedReadiness": "preview evidence exists; blocked until future games settle with canonical results"
+    },
+    {
+      "sportKey": "icehockey_nhl",
+      "label": "NHL",
+      "currentRowsObserved": 258,
+      "acceptedTrainingRows": 0,
+      "dateRange": {
+        "start": null,
+        "end": null
+      },
+      "classBalance": {},
+      "featureCompleteness": 0,
+      "leakageStatus": "PASS",
+      "readiness": "EVIDENCE_PRESENT_NOT_TRAINING_READY",
+      "minimumSamples": {
+        "designReview": 250,
+        "firstCandidateTraining": 1000,
+        "sportMarketCandidate": 300,
+        "promotionShadowSettledRows": 500,
+        "multiSeasonPreferred": true
+      },
+      "missingData": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ],
+      "expectedReadiness": "preview evidence exists; blocked until future games settle with canonical results"
+    },
+    {
+      "sportKey": "soccer_epl",
+      "label": "Soccer",
+      "currentRowsObserved": 20,
+      "acceptedTrainingRows": 0,
+      "dateRange": {
+        "start": null,
+        "end": null
+      },
+      "classBalance": {},
+      "featureCompleteness": 0,
+      "leakageStatus": "PASS",
+      "readiness": "EVIDENCE_PRESENT_NOT_TRAINING_READY",
+      "minimumSamples": {
+        "designReview": 250,
+        "firstCandidateTraining": 1000,
+        "sportMarketCandidate": 300,
+        "promotionShadowSettledRows": 500,
+        "multiSeasonPreferred": true
+      },
+      "missingData": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ],
+      "expectedReadiness": "blocked until competition-scoped canonical events, results, odds and accepted settled rows exist"
+    },
+    {
+      "sportKey": "basketball_bsn",
+      "label": "BSN",
+      "currentRowsObserved": 8,
+      "acceptedTrainingRows": 0,
+      "dateRange": {
+        "start": null,
+        "end": null
+      },
+      "classBalance": {},
+      "featureCompleteness": 0,
+      "leakageStatus": "PASS",
+      "readiness": "EVIDENCE_PRESENT_NOT_TRAINING_READY",
+      "minimumSamples": {
+        "designReview": 250,
+        "firstCandidateTraining": 1000,
+        "sportMarketCandidate": 300,
+        "promotionShadowSettledRows": 500,
+        "multiSeasonPreferred": true
+      },
+      "missingData": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ],
+      "expectedReadiness": "blocked until production prediction and result lifecycle exists"
+    },
+    {
+      "sportKey": "tennis",
+      "label": "Tennis",
+      "currentRowsObserved": 0,
+      "acceptedTrainingRows": 0,
+      "dateRange": {
+        "start": null,
+        "end": null
+      },
+      "classBalance": {},
+      "featureCompleteness": 0,
+      "leakageStatus": "PASS",
+      "readiness": "NO_TRAINING_EVIDENCE",
+      "minimumSamples": {
+        "designReview": 250,
+        "firstCandidateTraining": 1000,
+        "sportMarketCandidate": 300,
+        "promotionShadowSettledRows": 500,
+        "multiSeasonPreferred": true
+      },
+      "missingData": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ],
+      "expectedReadiness": "blocked until production prediction persistence and settlement lifecycle exist"
+    },
+    {
+      "sportKey": "ufc",
+      "label": "UFC",
+      "currentRowsObserved": 0,
+      "acceptedTrainingRows": 0,
+      "dateRange": {
+        "start": null,
+        "end": null
+      },
+      "classBalance": {},
+      "featureCompleteness": 0,
+      "leakageStatus": "PASS",
+      "readiness": "NO_TRAINING_EVIDENCE",
+      "minimumSamples": {
+        "designReview": 250,
+        "firstCandidateTraining": 1000,
+        "sportMarketCandidate": 300,
+        "promotionShadowSettledRows": 500,
+        "multiSeasonPreferred": true
+      },
+      "missingData": [
+        "canonical production settled rows",
+        "training date range",
+        "accepted outcome class balance",
+        "complete linked feature evidence"
+      ],
+      "expectedReadiness": "blocked until production prediction persistence and settlement lifecycle exist"
+    }
+  ],
+  "certificationMarkers": [
+    "TRAINING_PIPELINE_ARCHITECTURE_PASS",
+    "TRAINING_DATASET_READINESS_PASS",
+    "MODEL_GOVERNANCE_PASS",
+    "MODEL_PROMOTION_POLICY_PASS",
+    "SHADOW_MODEL_ARCHITECTURE_PASS",
+    "TRAINING_VALIDATION_ARCHITECTURE_PASS",
+    "NO_MODEL_TRAINING_PASS",
+    "NO_MODEL_WEIGHT_MUTATION_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "NO_PRODUCTION_PREDICTION_CHANGE_PASS",
+    "NO_SETTLEMENT_CHANGE_PASS"
+  ],
+  "deterministicFingerprint": "ebb12d21558509f455e4272a5d9ec319736e825617a5e07baca1f7df0ecae71f"
+}
