@@ -2,6 +2,13 @@
 
 Last updated: 2026-07-28 22:36:00Z
 
+## 2026-07-28 Historical Settled Status Reconciliation V1
+
+- Completed the targeted P1 read-only audit and query/classifier repair for divergence between raw historical settled status and deterministic result-based settled counts. Added `canonical-settlement-state.service.ts` as the shared read-only settlement-state classifier for stored outcome, deterministic canonical outcome, pending reason, lifecycle badge, Performance inclusion, learning inclusion and scheduler already-settled/pending state.
+- Read-only row-level audit scanned 2,595 `prediction_history` rows and 423 canonical `game_results` rows. It classified 983 stored-terminal rows, 1,063 deterministic-terminal rows, 386 Performance-included rows, 354 learning-included rows, 1,082 pending rows and 1,082 awaiting-result rows. MLB specifically has 1,194 rows, 956 stored-terminal, 1,063 deterministic-terminal, 386 Performance-included, 354 learning-included and 48 pending/awaiting-result rows.
+- The divergence is now explained by lifecycle/product scope rather than an unbounded corruption finding: invalid-cutoff rows, Preview/Shadow rows, legacy/audit representations, missing canonical game results, push/void representations and six row-level stored/deterministic conflicts. No broad data rewrite was performed.
+- Performance Scope V2, AI Learning Lifecycle and Adaptive Refresh settlement backlog now delegate to the canonical classifier. No prediction probabilities, confidence, Trust, settlement scoring, learning eligibility formula, Official Pick policy, scheduler behavior, model weights, SQL, provider calls, settlement writes, learning writes, production mutations or Vercel deployment were changed.
+
 ## 2026-07-28 Performance API Query Optimization V1
 
 - Completed the targeted P1 `/api/performance` query and payload repair. The route now defaults to a compact `product_summary` response built from the canonical Performance Scope V2 product contract, while the heavyweight AI Performance Center diagnostics graph remains available only through `?diagnostics=full` or `?includeDiagnostics=full`.

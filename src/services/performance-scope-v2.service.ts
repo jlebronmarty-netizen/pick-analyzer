@@ -4,10 +4,14 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { localDateInTimeZone } from '@/services/provider-time-normalization.service'
 import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
+import {
+  canonicalEligibility,
+  canonicalLifecycleBadge,
+  canonicalPendingReason,
+  canonicalStoredOutcome,
+} from '@/services/canonical-settlement-state.service'
 
 const TIMEZONE = 'America/Puerto_Rico'
-const FINAL_RESULTS = new Set(['win', 'loss', 'push', 'void'])
-const TERMINAL_LIFECYCLE_V2 = new Set(['Legacy', 'Historical', 'Replay', 'Shadow', 'Ignored', 'Unknown', 'Cancelled', 'Voided'])
 
 type PredictionRow = {
   id: string
@@ -81,21 +85,7 @@ function astDate(value: string | null | undefined) {
 }
 
 function resultOf(row: PredictionRow) {
-  const v2 = asObject(asObject(row.settlement_details).settlement_reconciliation_v2)
-  if (v2.lifecycle === 'Legacy') return 'legacy'
-  if (v2.lifecycle === 'Historical') return 'historical'
-  if (v2.lifecycle === 'Replay') return 'replay'
-  if (v2.lifecycle === 'Shadow') return 'shadow'
-  if (v2.lifecycle === 'Ignored') return 'ignored'
-  if (v2.lifecycle === 'Unknown') return 'unknown'
-  if (v2.lifecycle === 'Cancelled') return 'cancelled'
-  if (v2.lifecycle === 'Voided') return 'void'
-  const result = normalize(row.result)
-  if (FINAL_RESULTS.has(result)) return result
-  const status = normalize(row.status)
-  if (FINAL_RESULTS.has(status)) return status
-  if (normalize(row.lifecycle_status) === 'closed') return 'unknown'
-  return 'pending'
+  return canonicalStoredOutcome(row)
 }
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -105,49 +95,7 @@ function asObject(value: unknown): Record<string, unknown> {
 }
 
 function lifecycleBadge(row: PredictionRow, event: EventRow | undefined) {
-  const cutoff = classifyPredictionCutoff(row, event)
-  if (cutoff.state === 'POST_START') return 'Post-start'
-  if (cutoff.state === 'POST_FINAL') return 'Post-final'
-  if (cutoff.state === 'INVALID_CUTOFF') return 'Invalid cutoff'
-  const v2 = asObject(asObject(row.settlement_details).settlement_reconciliation_v2)
-  if (typeof v2.badge === 'string' && v2.badge) return v2.badge
-  const result = resultOf(row)
-  if (result === 'win') return 'Settled Win'
-  if (result === 'loss') return 'Settled Loss'
-  if (result === 'push') return 'Push'
-  if (result === 'void') return 'Voided'
-  if (TERMINAL_LIFECYCLE_V2.has(String(v2.lifecycle))) return String(v2.lifecycle)
-  const reason = pendingReason(row, event)
-  if (reason === 'EVENT_NOT_FINAL' || reason === 'RESULT_NOT_IMPORTED') return 'Awaiting Result'
-  if (reason === 'LEGACY') return 'Legacy'
-  if (reason === 'EXACT_EVENT_MAPPING_MISSING') return 'Unknown'
-  return 'Scheduled'
-}
-
-function isTestFixture(row: PredictionRow) {
-  const warnings = Array.isArray(row.validation_warnings) ? row.validation_warnings.map(String) : []
-  return (
-    row.trial === true ||
-    row.scrambled === true ||
-    normalize(row.model_role) === 'shadow' ||
-    warnings.some((warning) => /trial|scrambled|fixture|quarantine/i.test(warning))
-  )
-}
-
-function isLegacy(row: PredictionRow) {
-  return (
-    !row.feature_snapshot_id &&
-    !row.odds_snapshot_id &&
-    !row.operating_day_id &&
-    !row.idempotency_key &&
-    !row.model_version &&
-    row.production_eligible !== true
-  )
-}
-
-function isPostStart(row: PredictionRow, event: EventRow | undefined) {
-  const cutoff = classifyPredictionCutoff(row, event)
-  return cutoff.state === 'POST_START' || cutoff.state === 'POST_FINAL'
+  return canonicalLifecycleBadge(row, event)
 }
 
 function cutoffExclusion(row: PredictionRow, event: EventRow | undefined) {
@@ -156,32 +104,11 @@ function cutoffExclusion(row: PredictionRow, event: EventRow | undefined) {
 }
 
 function pendingReason(row: PredictionRow, event: EventRow | undefined) {
-  if (resultOf(row) !== 'pending') return null
-  if (isTestFixture(row)) return 'TEST_FIXTURE'
-  if (isPostStart(row, event)) return 'PREDICTION_POST_START'
-  if (!event && isLegacy(row)) return 'LEGACY'
-  if (!event) return 'EXACT_EVENT_MAPPING_MISSING'
-  if (row.is_current === false) return 'DUPLICATE_SUPERSEDED'
-  const status = normalize(event.status)
-  if (['cancelled', 'canceled', 'postponed', 'suspended'].includes(status)) return 'NO_OUTCOME'
-  if (!['moneyline', 'spread', 'run_line', 'run line', 'total'].includes(normalize(row.market))) return 'MARKET_UNSUPPORTED'
-  if (status === 'completed' && event.home_score !== null && event.away_score !== null) return 'ELIGIBLE_FOR_SETTLEMENT'
-  const start = Date.parse(event.start_time ?? row.commence_time ?? '')
-  if (Number.isFinite(start) && Date.now() - start > 24 * 60 * 60 * 1000) return 'RESULT_NOT_IMPORTED'
-  return 'EVENT_NOT_FINAL'
+  return canonicalPendingReason(row, event)
 }
 
 function eligibility(row: PredictionRow, event: EventRow | undefined) {
-  const result = resultOf(row)
-  if (isTestFixture(row)) return { eligible: false, reason: 'TEST_FIXTURE' }
-  const cutoffReason = cutoffExclusion(row, event)
-  if (cutoffReason) return { eligible: false, reason: cutoffReason }
-  if (['legacy', 'historical', 'replay', 'shadow', 'ignored', 'unknown', 'cancelled', 'void'].includes(result)) return { eligible: false, reason: result.toUpperCase() }
-  if (result === 'win' || result === 'loss' || result === 'push') return { eligible: true, reason: 'ELIGIBLE' }
-  if (isLegacy(row)) return { eligible: false, reason: 'LEGACY' }
-  if (row.is_current === false) return { eligible: false, reason: 'DUPLICATE_SUPERSEDED' }
-  if (result === 'pending') return { eligible: false, reason: pendingReason(row, event) ?? 'EVENT_NOT_FINAL' }
-  return { eligible: true, reason: 'ELIGIBLE' }
+  return canonicalEligibility(row, event)
 }
 
 function metrics(rows: Array<{ row: PredictionRow; event?: EventRow }>) {

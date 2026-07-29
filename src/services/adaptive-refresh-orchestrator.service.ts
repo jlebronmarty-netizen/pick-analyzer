@@ -15,6 +15,7 @@ import {
   releaseProviderActionLock,
 } from '@/services/provider-budget.service'
 import { formatInTimeZone } from '@/services/provider-time-normalization.service'
+import { canonicalStoredOutcome } from '@/services/canonical-settlement-state.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -658,12 +659,7 @@ async function loadPredictions(eventIds: string[]) {
 }
 
 function isPendingPrediction(row: SettlementBacklogPredictionRow) {
-  const result = String(row.result ?? '').toLowerCase()
-  if (['win', 'loss', 'push', 'void'].includes(result)) return false
-  const status = String(row.status ?? '').toLowerCase()
-  if (['win', 'loss', 'push', 'void'].includes(status)) return false
-  const lifecycle = String(row.lifecycle_status ?? '').toLowerCase()
-  return !['settled', 'void', 'closed', 'skipped'].includes(lifecycle)
+  return canonicalStoredOutcome(row) === 'pending'
 }
 
 function isFinalScoredEvent(event: SettlementBacklogEventRow | undefined) {

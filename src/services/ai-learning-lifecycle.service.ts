@@ -2,7 +2,6 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getModelCalibration } from '@/services/model-calibration.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
 import { zonedUtcRange } from '@/services/provider-time-normalization.service'
-import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 import { getPregameSchedulerCoverage } from '@/services/pregame-scheduler-coverage.service'
 import { getHistoricalReplayFullStatus, getHistoricalReplayPilotStatus } from '@/services/historical-replay-pilot.service'
 import { getHistoricalShadowCalibration } from '@/services/historical-shadow-calibration.service'
@@ -12,6 +11,11 @@ import { getUniversalMarketInventory } from '@/services/universal-market-intelli
 import { getMlbPlayerPropsReadinessAudit } from '@/services/mlb-player-props-readiness-audit.service'
 import { getMlbPlayerProjectionLifecycleDiagnostics } from '@/services/mlb-player-projection-engine.service'
 import { getMlbStarterIntelligence } from '@/services/mlb-starter-intelligence.service'
+import {
+  canonicalLifecycle,
+  canonicalResultLabel,
+  isCanonicalProductionSettled,
+} from '@/services/canonical-settlement-state.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -24,6 +28,23 @@ type DbResult<T> = {
   data: T[]
   count: number | null
   error: string | null
+}
+
+type QueryResultLike = {
+  data: unknown[] | null
+  error: { message: string } | null
+  count?: number | null
+}
+
+type QueryBuilderLike = PromiseLike<QueryResultLike> & {
+  range: (...args: unknown[]) => QueryBuilderLike
+  not: (...args: unknown[]) => QueryBuilderLike
+  order: (...args: unknown[]) => QueryBuilderLike
+  limit: (...args: unknown[]) => QueryBuilderLike
+  eq: (...args: unknown[]) => QueryBuilderLike
+  gte: (...args: unknown[]) => QueryBuilderLike
+  lt: (...args: unknown[]) => QueryBuilderLike
+  like: (...args: unknown[]) => QueryBuilderLike
 }
 
 type PredictionRow = {
@@ -160,26 +181,15 @@ function uniq<T>(values: T[]) {
 }
 
 function resultLabel(row: PredictionRow) {
-  const explicit = lower(row.result)
-  if (['win', 'loss', 'push'].includes(explicit)) return explicit
-  const status = lower(row.status)
-  if (['win', 'loss', 'push'].includes(status)) return status
-  return null
+  return canonicalResultLabel(row)
 }
 
 function v2Lifecycle(row: PredictionRow) {
-  const details = asRecord(row.settlement_details)
-  const v2 = asRecord(details.settlement_reconciliation_v2)
-  return lower(v2.lifecycle ?? v2.state ?? row.lifecycle_status ?? row.status)
-}
-
-function isAuditLifecycle(row: PredictionRow) {
-  const lifecycle = v2Lifecycle(row)
-  return ['legacy', 'ignored', 'historical', 'replay', 'shadow', 'cancelled', 'canceled', 'voided', 'void', 'unknown'].includes(lifecycle)
+  return canonicalLifecycle(row)
 }
 
 function isProductionSettled(row: PredictionRow) {
-  return Boolean(resultLabel(row)) && !row.trial && !row.scrambled && !isAuditLifecycle(row) && classifyPredictionCutoff(row).eligible
+  return isCanonicalProductionSettled(row)
 }
 
 function isFinalEvent(row: EventRow) {
@@ -191,10 +201,10 @@ async function safeRows<T>(
   label: string,
   table: string,
   columns: string,
-  build?: (query: any) => any
+  build?: (query: QueryBuilderLike) => QueryBuilderLike
 ): Promise<DbResult<T>> {
   try {
-    let query = supabaseAdmin.from(table).select(columns, { count: 'exact' })
+    let query = supabaseAdmin.from(table).select(columns, { count: 'exact' }) as unknown as QueryBuilderLike
     if (build) query = build(query)
     const { data, error, count } = await query
     if (error) return { data: [], count: null, error: `${label}: ${error.message}` }
@@ -208,10 +218,10 @@ async function safeSampleRows<T>(
   label: string,
   table: string,
   columns: string,
-  build?: (query: any) => any
+  build?: (query: QueryBuilderLike) => QueryBuilderLike
 ): Promise<DbResult<T>> {
   try {
-    let query = supabaseAdmin.from(table).select(columns)
+    let query = supabaseAdmin.from(table).select(columns) as unknown as QueryBuilderLike
     if (build) query = build(query)
     const { data, error } = await query
     if (error) return { data: [], count: null, error: `${label}: ${error.message}` }
@@ -225,7 +235,7 @@ async function pagedRows<T>(
   label: string,
   table: string,
   columns: string,
-  build?: (query: any) => any,
+  build?: (query: QueryBuilderLike) => QueryBuilderLike,
   maxRows = 10000
 ): Promise<DbResult<T>> {
   const data: T[] = []
@@ -249,7 +259,7 @@ async function pagedRows<T>(
   return { data, count: exactCount, error: null }
 }
 
-async function latestTimestamp(table: string, column: string, build?: (query: any) => any) {
+async function latestTimestamp(table: string, column: string, build?: (query: QueryBuilderLike) => QueryBuilderLike) {
   const result = await safeRows<Record<string, unknown>>(
     `${table}.${column}`,
     table,
