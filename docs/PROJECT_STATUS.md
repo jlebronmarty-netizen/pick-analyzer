@@ -1328,3 +1328,13 @@ Read-only feature intelligence audited 73,719 historical feature snapshots and 4
 The priority matrix keeps Odds, Market, Pitching and Team Strength as must-use future feature families with field-level cutoff and metadata exclusions; Batting, Schedule, Home/Away, Historical Performance, Weather and Rest are recommended; Roster, Opponent Quality and Streaks are optional; System and Meta fields are training-excluded. Leakage classification found 29 critical keys, 7 high-governance keys, 35 cutoff-frozen market candidates and 378 candidate non-leakage keys.
 
 No model training, model fitting, model-derived feature-importance calculation, probability change, confidence change, Trust change, Official Pick policy change, settlement change, Learning Brain weight change, epoch activation, provider call or production mutation was performed.
+
+# 2026-07-29 - Training-Safe Feature Governance And Leakage Enforcement Contract V1
+
+Status: COMPLETE
+
+Converted Feature Intelligence V1 into an executable training-only feature governance contract. The new `training_feature_governance_v1` service classifies all 449 observed feature keys exactly once, defaults unknown future keys to review-required, resolves alias groups and enforces temporal safety for cutoff-frozen market fields without changing production prediction inputs.
+
+Current classification: 372 `TRAINING_ALLOWED`, 33 `TRAINING_ALLOWED_IF_CUTOFF_FROZEN`, 11 `TRAINING_RESEARCH_ONLY`, 14 `TRAINING_PROHIBITED_POST_FINAL`, 18 `TRAINING_PROHIBITED_MODEL_OUTPUT` and 1 `TRAINING_UNKNOWN_REVIEW_REQUIRED`. Tiering: 176 Tier A core, 196 Tier B recommended, 7 Tier C optional, 27 Tier D experimental, 11 Tier R research-only and 32 Tier X prohibited.
+
+The first future MLB logistic regression manifest contains a compact 120-feature Tier A/B candidate set. The current 419-row accepted MLB training baseline remains eligible under the field-exclusion contract; prohibited keys observed in broader linked MLB snapshots are excluded from the input matrix, not silently passed through. Provider calls, database mutations, prediction writes, settlement writes, learning writes, model training runs, model weight mutations and epoch mutations all remain 0.

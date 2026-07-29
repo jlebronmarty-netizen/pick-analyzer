@@ -1,0 +1,2183 @@
+{
+  "success": true,
+  "mode": "first_model_feature_manifest_v1",
+  "generatedAt": "2026-07-29T12:30:40.598Z",
+  "contractVersion": "training_feature_governance_v1",
+  "modelCandidate": "mlb_regularized_logistic_regression_candidate_v1",
+  "trainingExecuted": false,
+  "providerCallsMade": 0,
+  "databaseMutations": 0,
+  "maximumInitialFeatureCount": 120,
+  "compactTierPolicy": "Prefer Tier A/B features; regularize correlated rolling windows and side-relative team groups.",
+  "features": [
+    {
+      "canonicalKey": "batting.order",
+      "sourceKey": "batting_order",
+      "type": "number",
+      "category": "Batting",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last10.avg",
+      "sourceKey": "last10_avg",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last10.ops.proxy",
+      "sourceKey": "last10_ops_proxy",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last10.pa",
+      "sourceKey": "last10_pa",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last20.ops.proxy",
+      "sourceKey": "last20_ops_proxy",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "sb.attempt.rate",
+      "sourceKey": "sb_attempt_rate",
+      "type": "number",
+      "category": "Weather",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.avg",
+      "sourceKey": "season_avg",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.obp.proxy",
+      "sourceKey": "season_obp_proxy",
+      "type": "number",
+      "category": "Batting",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.ops.proxy",
+      "sourceKey": "season_ops_proxy",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.pa",
+      "sourceKey": "season_pa",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.slg.proxy",
+      "sourceKey": "season_slg_proxy",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "batting.order.coverage",
+      "sourceKey": "batting_order_coverage",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "consecutive.game.days",
+      "sourceKey": "consecutive_game_days",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "days.rest",
+      "sourceKey": "days_rest",
+      "type": "number",
+      "category": "Rest",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "days.since.last.appearance",
+      "sourceKey": "days_since_last_appearance",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "extra.inning.games.last14",
+      "sourceKey": "extra_inning_games_last14",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "high.pitch.last.start.flag",
+      "sourceKey": "high_pitch_last_start_flag",
+      "type": "boolean",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last10.run.diff.per.game",
+      "sourceKey": "last10_run_diff_per_game",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last10.win.pct",
+      "sourceKey": "last10_win_pct",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last3.start.pitch.count.avg",
+      "sourceKey": "last3_start_pitch_count_avg",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last30.days.games",
+      "sourceKey": "last30_days_games",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last5.run.diff.per.game",
+      "sourceKey": "last5_run_diff_per_game",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last5.start.outs.avg",
+      "sourceKey": "last5_start_outs_avg",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last5.start.runs.avg",
+      "sourceKey": "last5_start_runs_avg",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "last5.win.pct",
+      "sourceKey": "last5_win_pct",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "lineup.recent.ops.proxy",
+      "sourceKey": "lineup_recent_ops_proxy",
+      "type": "number",
+      "category": "Market",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "source timestamp must be <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "lineup.recent.pa.sample",
+      "sourceKey": "lineup_recent_pa_sample",
+      "type": "number",
+      "category": "Market",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "source timestamp must be <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "pitcher.batting.slot.present",
+      "sourceKey": "pitcher_batting_slot_present",
+      "type": "boolean",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "prior.starts",
+      "sourceKey": "prior_starts",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "relief.appearances.last3",
+      "sourceKey": "relief_appearances_last3",
+      "type": "number",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "relief.outs.last1",
+      "sourceKey": "relief_outs_last1",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "relief.pitchers.used.last3",
+      "sourceKey": "relief_pitchers_used_last3",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "relief.pitches.last1",
+      "sourceKey": "relief_pitches_last1",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "relief.pitches.last2",
+      "sourceKey": "relief_pitches_last2",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "relief.pitches.last3",
+      "sourceKey": "relief_pitches_last3",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.bb.rate",
+      "sourceKey": "season_bb_rate",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.era.proxy",
+      "sourceKey": "season_era_proxy",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.games",
+      "sourceKey": "season_games",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.k.rate",
+      "sourceKey": "season_k_rate",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.relief.bb.rate",
+      "sourceKey": "season_relief_bb_rate",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.relief.era.proxy",
+      "sourceKey": "season_relief_era_proxy",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.relief.k.rate",
+      "sourceKey": "season_relief_k_rate",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.runs.allowed.per.game",
+      "sourceKey": "season_runs_allowed_per_game",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.runs.for.per.game",
+      "sourceKey": "season_runs_for_per_game",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.whip.proxy",
+      "sourceKey": "season_whip_proxy",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "season.win.pct",
+      "sourceKey": "season_win_pct",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "short.rest.flag",
+      "sourceKey": "short_rest_flag",
+      "type": "boolean",
+      "category": "Rest",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "starter.count",
+      "sourceKey": "starter_count",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "marketOdds",
+      "sourceKey": "marketOdds",
+      "type": "object",
+      "category": "Odds",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "source timestamp must be <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "americanfootball_nfl",
+        "baseball_mlb",
+        "icehockey_nhl"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "marketOdds.line",
+      "sourceKey": "marketOdds.line",
+      "type": "number",
+      "category": "Odds",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "source timestamp must be <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "americanfootball_nfl",
+        "baseball_mlb",
+        "icehockey_nhl"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "marketOdds.market",
+      "sourceKey": "marketOdds.market",
+      "type": "string",
+      "category": "Odds",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "source timestamp must be <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "americanfootball_nfl",
+        "baseball_mlb",
+        "icehockey_nhl"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "marketOdds.price",
+      "sourceKey": "marketOdds.price",
+      "type": "number",
+      "category": "Odds",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "source timestamp must be <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "americanfootball_nfl",
+        "baseball_mlb",
+        "icehockey_nhl"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "marketOdds.sportsbook",
+      "sourceKey": "marketOdds.sportsbook",
+      "type": "string",
+      "category": "Odds",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "source timestamp must be <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "americanfootball_nfl",
+        "baseball_mlb",
+        "icehockey_nhl"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "extra.inning.game.rate",
+      "sourceKey": "extra_inning_game_rate",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "first.inning.run.rate",
+      "sourceKey": "first_inning_run_rate",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "late.inning.run.rate",
+      "sourceKey": "late_inning_run_rate",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "prior.games",
+      "sourceKey": "prior_games",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "prior.plate.appearances",
+      "sourceKey": "prior_plate_appearances",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "umpire.home.win.pct",
+      "sourceKey": "umpire_home_win_pct",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "venue.bb.per.game",
+      "sourceKey": "venue_bb_per_game",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "venue.games",
+      "sourceKey": "venue_games",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "venue.hits.per.game",
+      "sourceKey": "venue_hits_per_game",
+      "type": "number",
+      "category": "Batting",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "venue.hr.per.game",
+      "sourceKey": "venue_hr_per_game",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "venue.k.per.game",
+      "sourceKey": "venue_k_per_game",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "venue.runs.per.game",
+      "sourceKey": "venue_runs_per_game",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "walk.factor.vs.league",
+      "sourceKey": "walk_factor_vs_league",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "historical_mlb_feature_store"
+      ]
+    },
+    {
+      "canonicalKey": "marketOdds.providerMarket",
+      "sourceKey": "marketOdds.providerMarket",
+      "type": "string",
+      "category": "Odds",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "source timestamp must be <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "priorHistory",
+      "sourceKey": "priorHistory",
+      "type": "object",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "priorHistory.completedGamesBeforeCutoff",
+      "sourceKey": "priorHistory.completedGamesBeforeCutoff",
+      "type": "number",
+      "category": "Historical performance",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "priorHistory.last10Available",
+      "sourceKey": "priorHistory.last10Available",
+      "type": "boolean",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "priorHistory.last5Available",
+      "sourceKey": "priorHistory.last5Available",
+      "type": "boolean",
+      "category": "Schedule",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away",
+      "sourceKey": "derivedBaseballFeatures.away",
+      "type": "object",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.bullpenProxy",
+      "sourceKey": "derivedBaseballFeatures.away.bullpenProxy",
+      "type": "object",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.bullpenProxy.available",
+      "sourceKey": "derivedBaseballFeatures.away.bullpenProxy.available",
+      "type": "boolean",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.bullpenProxy.fatigue",
+      "sourceKey": "derivedBaseballFeatures.away.bullpenProxy.fatigue",
+      "type": "string",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.bullpenProxy.reason",
+      "sourceKey": "derivedBaseballFeatures.away.bullpenProxy.reason",
+      "type": "string",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.bullpenProxy.sampleSize",
+      "sourceKey": "derivedBaseballFeatures.away.bullpenProxy.sampleSize",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.bullpenProxy.workload",
+      "sourceKey": "derivedBaseballFeatures.away.bullpenProxy.workload",
+      "type": "null",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10",
+      "sourceKey": "derivedBaseballFeatures.away.last10",
+      "type": "object",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.averageRunsAgainst",
+      "sourceKey": "derivedBaseballFeatures.away.last10.averageRunsAgainst",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.averageRunsFor",
+      "sourceKey": "derivedBaseballFeatures.away.last10.averageRunsFor",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.hotCold",
+      "sourceKey": "derivedBaseballFeatures.away.last10.hotCold",
+      "type": "string",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.losses",
+      "sourceKey": "derivedBaseballFeatures.away.last10.losses",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.runDifferential",
+      "sourceKey": "derivedBaseballFeatures.away.last10.runDifferential",
+      "type": "number",
+      "category": "Team strength",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.runsAgainst",
+      "sourceKey": "derivedBaseballFeatures.away.last10.runsAgainst",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.runsFor",
+      "sourceKey": "derivedBaseballFeatures.away.last10.runsFor",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.sampleSize",
+      "sourceKey": "derivedBaseballFeatures.away.last10.sampleSize",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.trend",
+      "sourceKey": "derivedBaseballFeatures.away.last10.trend",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.winPct",
+      "sourceKey": "derivedBaseballFeatures.away.last10.winPct",
+      "type": "number",
+      "category": "Team strength",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last10.wins",
+      "sourceKey": "derivedBaseballFeatures.away.last10.wins",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3",
+      "sourceKey": "derivedBaseballFeatures.away.last3",
+      "type": "object",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.averageRunsAgainst",
+      "sourceKey": "derivedBaseballFeatures.away.last3.averageRunsAgainst",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.averageRunsFor",
+      "sourceKey": "derivedBaseballFeatures.away.last3.averageRunsFor",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.hotCold",
+      "sourceKey": "derivedBaseballFeatures.away.last3.hotCold",
+      "type": "string",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.losses",
+      "sourceKey": "derivedBaseballFeatures.away.last3.losses",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.runDifferential",
+      "sourceKey": "derivedBaseballFeatures.away.last3.runDifferential",
+      "type": "number",
+      "category": "Team strength",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.runsAgainst",
+      "sourceKey": "derivedBaseballFeatures.away.last3.runsAgainst",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.runsFor",
+      "sourceKey": "derivedBaseballFeatures.away.last3.runsFor",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.sampleSize",
+      "sourceKey": "derivedBaseballFeatures.away.last3.sampleSize",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.trend",
+      "sourceKey": "derivedBaseballFeatures.away.last3.trend",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.winPct",
+      "sourceKey": "derivedBaseballFeatures.away.last3.winPct",
+      "type": "number",
+      "category": "Team strength",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last3.wins",
+      "sourceKey": "derivedBaseballFeatures.away.last3.wins",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5",
+      "sourceKey": "derivedBaseballFeatures.away.last5",
+      "type": "object",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.averageRunsAgainst",
+      "sourceKey": "derivedBaseballFeatures.away.last5.averageRunsAgainst",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.averageRunsFor",
+      "sourceKey": "derivedBaseballFeatures.away.last5.averageRunsFor",
+      "type": "number",
+      "category": "Pitching",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.hotCold",
+      "sourceKey": "derivedBaseballFeatures.away.last5.hotCold",
+      "type": "string",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.losses",
+      "sourceKey": "derivedBaseballFeatures.away.last5.losses",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.runDifferential",
+      "sourceKey": "derivedBaseballFeatures.away.last5.runDifferential",
+      "type": "number",
+      "category": "Team strength",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.runsAgainst",
+      "sourceKey": "derivedBaseballFeatures.away.last5.runsAgainst",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.runsFor",
+      "sourceKey": "derivedBaseballFeatures.away.last5.runsFor",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.sampleSize",
+      "sourceKey": "derivedBaseballFeatures.away.last5.sampleSize",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.trend",
+      "sourceKey": "derivedBaseballFeatures.away.last5.trend",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.winPct",
+      "sourceKey": "derivedBaseballFeatures.away.last5.winPct",
+      "type": "number",
+      "category": "Team strength",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "domain_supported_but_not_model_fit_claimed",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.last5.wins",
+      "sourceKey": "derivedBaseballFeatures.away.last5.wins",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.momentum",
+      "sourceKey": "derivedBaseballFeatures.away.momentum",
+      "type": "object",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.momentum.defensiveTrend",
+      "sourceKey": "derivedBaseballFeatures.away.momentum.defensiveTrend",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.momentum.description",
+      "sourceKey": "derivedBaseballFeatures.away.momentum.description",
+      "type": "string",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.momentum.label",
+      "sourceKey": "derivedBaseballFeatures.away.momentum.label",
+      "type": "string",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.momentum.scoringTrend",
+      "sourceKey": "derivedBaseballFeatures.away.momentum.scoringTrend",
+      "type": "number",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "standardize_numeric_after_train_split_only",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    },
+    {
+      "canonicalKey": "derivedBaseballFeatures.away.negativeFactors",
+      "sourceKey": "derivedBaseballFeatures.away.negativeFactors",
+      "type": "array",
+      "category": "Home/Away",
+      "missingValueHandling": "future training-pipeline decision; do not silently invent imputation values",
+      "scalingRequirement": "encode_after_contract_review",
+      "expectedDirection": "not_specified",
+      "temporalRequirement": "feature snapshot must be captured <= prediction cutoff and before event start",
+      "aliasHandling": "resolve through FEATURE_ALIAS_MAP_V1 before matrix construction",
+      "sportApplicability": [
+        "baseball_mlb"
+      ],
+      "marketApplicability": [
+        "moneyline",
+        "spread",
+        "total"
+      ]
+    }
+  ],
+  "fingerprint": "fa595d9f7a0fb1111d5c721a999d67c5c0a80a766c89eae7db44f8db9b1ca925"
+}

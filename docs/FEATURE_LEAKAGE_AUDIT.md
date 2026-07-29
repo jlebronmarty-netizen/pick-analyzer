@@ -80,3 +80,10 @@ No model training. No production mutation.
 ## Policy
 
 Closing-line, settlement, label, prediction-output, recommendation-output and model-output fields must not be used as pregame model inputs. Odds and line fields may be used only when the stored snapshot proves the value was available before cutoff and frozen for the prediction.
+
+
+## Training-Safe Feature Governance V1 Enforcement Contract
+
+The leakage audit is now backed by `training_feature_governance_v1`. The contract classifies all 449 observed keys exactly once, resolves the 29 critical leakage-risk keys and 7 high governance-risk keys, and defaults unknown future keys to `TRAINING_UNKNOWN_REVIEW_REQUIRED`.
+
+Training consumers must exclude prohibited label, post-final, settlement, model-output and recommendation-output fields. Market fields are allowed only when cutoff-frozen timestamp and identity evidence is present. Research-only metadata can support joins, audits and traceability but cannot enter the training matrix.

@@ -68,3 +68,9 @@ A frozen future dataset manifest must include accepted row IDs, rejected counts,
 ## Current Readiness
 
 Current accepted rows: 354. Current status: insufficient for model training.
+
+## Training-Safe Feature Governance V1
+
+No model training. No production prediction changes.
+
+Future training dataset builders must apply `training_feature_governance_v1`, include only allowed or cutoff-frozen allowed features, default-deny unknown keys, isolate research-only fields and exclude prohibited label, settlement, model-output, recommendation-output, Trust, Official Pick, edge, EV, confidence and post-final fields.

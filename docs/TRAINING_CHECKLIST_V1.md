@@ -56,3 +56,14 @@ No model training. No production prediction changes.
 - Epoch activated: no.
 - Settlement changed: no.
 - Production predictions changed: no.
+
+## Training-Safe Feature Governance V1 Checklist
+
+No model training. No production prediction changes.
+
+- Confirm contract version `training_feature_governance_v1`.
+- Resolve aliases before matrix construction.
+- Exclude prohibited fields.
+- Block unknown fields by default.
+- Verify cutoff-frozen market timestamps and identities.
+- Keep labels separate from model inputs.

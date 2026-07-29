@@ -2929,3 +2929,17 @@ Evidence: 73,719 snapshots read, 449 feature keys observed, 29 critical leakage-
 Persistence scope: None. No training, fitting, feature-importance calculation, provider call, production mutation, prediction-engine change, probability change, confidence change, Trust change, Official Pick policy change, settlement change, Learning Brain weight change or epoch activation was performed.
 
 Completion criteria: `FEATURE_INTELLIGENCE_PASS`, `FEATURE_SIGNAL_MATRIX_PASS`, `FEATURE_LEAKAGE_AUDIT_PASS`, `FEATURE_PRIORITY_MATRIX_PASS`, `FIRST_MODEL_FEATURE_SET_PASS`, `NO_MODEL_TRAINING_PASS`, `NO_MODEL_WEIGHT_MUTATION_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_PRODUCTION_MUTATION_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS` are certified locally pending final build and push.
+
+### 55. Training-Safe Feature Governance And Leakage Enforcement Contract V1
+
+Objective: Convert the read-only feature leakage audit into one executable, training-safe contract for future dataset builders, trainers, backtests, challengers and shadow evaluation consumers.
+
+Status: Complete as a training-only governance layer.
+
+Scope: `src/services/training-feature-governance-v1.service.ts` provides canonical eligibility classes, quality tiers, alias grouping, temporal safety checks, default-deny handling for unknown keys and deterministic enforcement helpers. `scripts/training-safe-feature-governance-v1.mjs` generates the contract docs, first future MLB logistic regression manifest, alias map and current dataset recertification. `scripts/training-safe-feature-governance-v1-validate.mjs` validates fixtures and artifacts.
+
+Evidence: 449 observed keys classified exactly once: 372 allowed, 33 allowed only if cutoff-frozen, 11 research-only, 14 post-final prohibited, 18 model-output prohibited and 1 unknown/review-required. The 419-row accepted MLB training baseline remains eligible after prohibited fields are excluded; broader linked MLB evidence is also inspected and prohibited/metadata fields are isolated rather than silently entering the model-input matrix.
+
+Persistence scope: None. The contract references Feature Store Core and Multi-Sport Feature Registry concepts but does not replace them and does not alter live prediction feature consumption. No model training, fitting, feature-importance calculation, provider call, prediction write, settlement write, learning write, production mutation, model weight mutation, epoch activation, probability change, confidence change, Trust change or Official Pick policy change was performed.
+
+Completion criteria: `TRAINING_SAFE_FEATURE_GOVERNANCE_PASS`, `FEATURE_LEAKAGE_ENFORCEMENT_PASS`, `FEATURE_TEMPORAL_SAFETY_PASS`, `FEATURE_ALIAS_CANONICALIZATION_PASS`, `FIRST_MODEL_FEATURE_MANIFEST_PASS`, `TRAINING_DATASET_FEATURE_RECERTIFICATION_PASS`, `PROHIBITED_FEATURE_EXCLUSION_PASS`, `UNKNOWN_FEATURE_DEFAULT_DENY_PASS`, `NO_MODEL_TRAINING_PASS`, `NO_MODEL_WEIGHT_MUTATION_PASS`, `NO_EPOCH_ACTIVATION_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_PRODUCTION_MUTATION_PASS`, `NO_PRODUCTION_PREDICTION_CHANGE_PASS`, `NO_SETTLEMENT_CHANGE_PASS`, `NO_TRUST_FORMULA_CHANGE_PASS`, `NO_OFFICIAL_PICK_POLICY_CHANGE_PASS`, `NFL_PREVIEW_NON_REGRESSION_PASS`, `NHL_PREVIEW_NON_REGRESSION_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS` are certified locally pending build and push.
