@@ -14,12 +14,12 @@ No P0 data-corruption, unsafe official recommendation, cross-event settlement, o
 
 1. Extract shared canonical settlement-readiness helper used by scheduler, operating-day settlement, and reconciliation diagnostics.
 2. Consolidate learning terminology around derived learning evidence unless a dedicated label table is formally added.
-3. Classify duplicate/legacy routes and pages before removal.
+3. Classify duplicate/legacy routes and pages before removal: COMPLETE in Platform Consolidation & Duplication Cleanup V1. Fourteen service candidates and seven page candidates were revalidated; approved removal candidates were 0 because every candidate was reachable, archival/script tooling, documented, admin/auth, active deep-link or still required stronger owner proof.
 4. Navigation/discoverability pass for active pages and admin diagnostics.
 
 ## P3
 
-1. Add ownership metadata for scripts and services: ACTIVE, PREVIEW, SHADOW, EXPERIMENTAL, DEPRECATED.
+1. Add ownership metadata for scripts and services: PARTIAL in Platform Consolidation & Duplication Cleanup V1. The Full Platform Audit unused-service candidates now have ownership classification evidence; broader repository-wide owner metadata remains future documentation work.
 2. Clean documentation drift around historical phase docs after current product state is certified.
 3. Retire obsolete validators only after replacement validator coverage is proven.
 

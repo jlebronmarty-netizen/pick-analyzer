@@ -1,0 +1,615 @@
+{
+  "generatedAt": "2026-07-29T01:04:37.168Z",
+  "mode": "platform_consolidation_duplication_cleanup_v1",
+  "success": true,
+  "servicesAudited": 14,
+  "pagesAudited": 7,
+  "hotspotsAudited": 11,
+  "approvedRemovalCandidates": 0,
+  "filesRemoved": 0,
+  "callersMigrated": 0,
+  "providerCallsMade": 0,
+  "databaseMutations": 0,
+  "businessLogicChanged": false,
+  "routeContractsChanged": false,
+  "services": [
+    {
+      "file": "src/services/apis/api-sports.ts",
+      "exists": true,
+      "specifier": "@/services/apis/api-sports",
+      "referenceCount": 8,
+      "runtimeReferences": [
+        "src/services/apis/api-factory.ts",
+        "src/services/mlb-team-stats-sync.service.ts",
+        "src/services/multi-sport-provider-entitlement-audit.service.ts",
+        "src/services/multi-sport-providers.service.ts",
+        "src/services/provider-intelligence.service.ts"
+      ],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1.md",
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json"
+      ],
+      "classification": "LEGACY_BUT_REACHABLE",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/apis/odds-api.ts",
+      "exists": true,
+      "specifier": "@/services/apis/odds-api",
+      "referenceCount": 82,
+      "runtimeReferences": [
+        "src/app/api/mlb/player-props/sync/route.ts",
+        "src/app/api/odds/route.ts",
+        "src/app/api/providers/the-odds-api/capability-audit/route.ts",
+        "src/app/api/providers/the-odds-api/capability/route.ts",
+        "src/app/api/providers/the-odds-api/catalog/route.ts",
+        "src/app/api/providers/the-odds-api/coverage/route.ts",
+        "src/app/api/providers/the-odds-api/current-odds/route.ts",
+        "src/app/api/providers/the-odds-api/event-crosswalk/route.ts",
+        "src/app/api/providers/the-odds-api/pitcher-identity/route.ts",
+        "src/app/api/providers/the-odds-api/quota/route.ts",
+        "src/app/api/results/route.ts",
+        "src/app/data-coverage/page.tsx",
+        "src/services/apis/api-factory.ts",
+        "src/services/clv.service.ts",
+        "src/services/data-foundation-season-governance.service.ts",
+        "src/services/live-betting.service.ts",
+        "src/services/live-provider-verification.service.ts",
+        "src/services/mlb-player-prop-sync.service.ts",
+        "src/services/multi-sport-adapters.service.ts",
+        "src/services/multi-sport-markets.service.ts",
+        "src/services/multi-sport-provider-entitlement-audit.service.ts",
+        "src/services/multi-sport-providers.service.ts",
+        "src/services/multi-sport-registry.service.ts",
+        "src/services/multi-sport-results-crosswalk-foundation.service.ts",
+        "src/services/nba-data-sync.service.ts",
+        "src/services/prediction-capture.service.ts",
+        "src/services/provider-intelligence.service.ts",
+        "src/services/results-sync.service.ts",
+        "src/services/sync-reliability.service.ts",
+        "src/services/the-odds-api-capability-audit.service.ts",
+        "src/services/the-odds-api-current-odds-acquisition.service.ts",
+        "src/services/the-odds-api-event-crosswalk.service.ts",
+        "src/services/the-odds-api-maximum-utilization.service.ts",
+        "src/services/the-odds-api-pitcher-identity-bridge.service.ts",
+        "src/services/universal-event-identity.service.ts"
+      ],
+      "scriptReferences": [
+        "scripts/full-platform-audit-v1.mjs",
+        "scripts/live-multi-sport-acquisition-v1-checkpoint-a.mjs",
+        "scripts/multi-sport-results-crosswalk-foundation-v1.mjs",
+        "scripts/multi-sport-unlock-v1-checkpoint-b-nba.mjs",
+        "scripts/multi-sport-unlock-v1-checkpoint-c-nfl.mjs",
+        "scripts/multi-sport-unlock-v1-checkpoint-d-nhl.mjs",
+        "scripts/multi-sport-unlock-v1-checkpoint-e-soccer.mjs",
+        "scripts/multi-sport-unlock-v1-checkpoint-f-tennis-ufc.mjs",
+        "scripts/multi-sport-unlock-v1-final-certify.mjs",
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs",
+        "scripts/the-odds-api-current-odds-v1-validate.mjs",
+        "scripts/the-odds-api-current-odds-v1.mjs",
+        "scripts/the-odds-api-historical-mlb-core-import-v1.mjs",
+        "scripts/the-odds-api-historical-range-v1.mjs",
+        "scripts/the-odds-api-market-history-materialization-v1.mjs",
+        "scripts/the-odds-api-maximum-utilization-v1-checkpoint1-validate.mjs",
+        "scripts/the-odds-api-maximum-utilization-v1-checkpoint1.mjs",
+        "scripts/the-odds-api-player-props-v1.mjs",
+        "scripts/the-odds-api-scores-results-v1.mjs",
+        "scripts/universal-event-identity-materialize-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/ARCHITECTURE.md",
+        "docs/DECISION_LOG.md",
+        "docs/FULL_PLATFORM_AUDIT_V1.md",
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json",
+        "docs/HISTORICAL_DATA_COMPLETION_BASELINE_V3.md",
+        "docs/MASTER_ROADMAP.md",
+        "docs/MLB_PLAYER_STARTER_IDENTITY_V3.md",
+        "docs/PROJECT_STATUS.md",
+        "docs/THE_ODDS_API_EVENT_CROSSWALK_AND_PROP_SYNC_V1.md",
+        "docs/THE_ODDS_API_FREE_TIER_CAPABILITY_AUDIT_V1.md",
+        "docs/THE_ODDS_API_PITCHER_IDENTITY_BRIDGE_V1.md",
+        "docs/build-memory-optimization-v1-import-pressure.json",
+        "docs/build-memory-optimization-v1-phase-b-import-pressure.json",
+        "docs/build-memory-optimization-v1-phase2-import-pressure.json",
+        "docs/certified-prediction-epoch-mlb-readiness-audit-v1.json",
+        "docs/multi-sport-results-crosswalk-foundation-v1.json",
+        "docs/multi-sport-results-settlement-preview-unlock-v1-final-certification.json",
+        "docs/multi-sport-results-settlement-preview-unlock-v1-ledger.json",
+        "docs/product-route-inventory-v1.json",
+        "docs/the-odds-api-current-odds-v1.json",
+        "docs/the-odds-api-historical-mlb-core-import-v1.json",
+        "docs/the-odds-api-historical-range-v1.json",
+        "docs/the-odds-api-maximum-utilization-v1-checkpoint1.json",
+        "docs/the-odds-api-player-props-v1.json",
+        "docs/the-odds-api-scores-results-v1.json"
+      ],
+      "classification": "LEGACY_BUT_REACHABLE",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/basketball/connectors/connector-contract.ts",
+      "exists": true,
+      "specifier": "@/services/basketball/connectors/connector-contract",
+      "referenceCount": 3,
+      "runtimeReferences": [],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1.md",
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json"
+      ],
+      "classification": "ARCHIVAL_OR_SCRIPT_TOOLING",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/basketball/index.ts",
+      "exists": true,
+      "specifier": "@/services/basketball/index",
+      "referenceCount": 168,
+      "runtimeReferences": [
+        "src/app/api/mlb/game-intelligence/route.ts",
+        "src/components/dashboard/AICommandCenterPanel.tsx",
+        "src/components/dashboard/AICopilotChatPanel.tsx",
+        "src/components/dashboard/AnalyticsChartsPanel.tsx",
+        "src/components/dashboard/DashboardHeroPanel.tsx",
+        "src/components/dashboard/DashboardKPIBar.tsx",
+        "src/components/dashboard/DashboardQuickStats.tsx",
+        "src/components/dashboard/HistoricalImportEnginePanel.tsx",
+        "src/components/dashboard/LiveMarketMoversPanel.tsx",
+        "src/components/dashboard/MlbGameIntelligenceDetailClient.tsx",
+        "src/components/dashboard/MlbPlayerProjectionDetailClient.tsx",
+        "src/components/dashboard/MultiSportCoveragePanel.tsx",
+        "src/components/dashboard/NbaDataQualityPanel.tsx",
+        "src/components/dashboard/PickExplanationCard.tsx",
+        "src/components/dashboard/SettlementCorePanel.tsx",
+        "src/components/dashboard/SystemStatusPanel.tsx",
+        "src/components/dashboard/UserTodayPanel.tsx",
+        "src/components/performance/PerformanceProductClient.tsx",
+        "src/services/adaptive-refresh-orchestrator.service.ts",
+        "src/services/ai-copilot-chat.service.ts",
+        "src/services/ai-performance-center.service.ts",
+        "src/services/analytics-charts.service.ts",
+        "src/services/autonomous-daily-ai.service.ts",
+        "src/services/autonomous-daily-operations.service.ts",
+        "src/services/basketball-source-framework.service.ts",
+        "src/services/basketball/connectors/official-bsn-homepage.connector.ts",
+        "src/services/basketball/history/historical-builder.ts",
+        "src/services/basketball/normalizers/canonical.ts",
+        "src/services/best-bets-today.service.ts",
+        "src/services/bet-slip-optimizer.service.ts",
+        "src/services/bsn-intelligence-engine.service.ts",
+        "src/services/bsn-model-maturity.service.ts",
+        "src/services/current-board.service.ts",
+        "src/services/dashboard-today.service.ts",
+        "src/services/explainability.service.ts",
+        "src/services/historical-feature-generation.service.ts",
+        "src/services/historical-import-engine.service.ts",
+        "src/services/historical-replay-pilot.service.ts",
+        "src/services/legacy-prediction-provenance.service.ts",
+        "src/services/live-betting-engine.service.ts",
+        "src/services/market-opportunity-suite.service.ts",
+        "src/services/missing-canonical-events-recovery.service.ts",
+        "src/services/mlb-ai-picks-feed.service.ts",
+        "src/services/mlb-current-lineup-context.service.ts",
+        "src/services/mlb-current-season-data-quality-audit.service.ts",
+        "src/services/mlb-games-by-date-verification.service.ts",
+        "src/services/mlb-learning-brain.service.ts",
+        "src/services/mlb-market-expansion-roadmap.service.ts",
+        "src/services/mlb-pitcher-feature-builder.service.ts",
+        "src/services/mlb-pitcher-projection-engine.service.ts",
+        "src/services/mlb-player-data-excellence.service.ts",
+        "src/services/mlb-player-projection-engine.service.ts",
+        "src/services/mlb-player-prop-sync.service.ts",
+        "src/services/mlb-pregame-starter-evidence.service.ts",
+        "src/services/mlb-unresolved-player-identity.service.ts",
+        "src/services/model-only-intelligence.service.ts",
+        "src/services/monte-carlo-engine.service.ts",
+        "src/services/multi-sport-normalizers.service.ts",
+        "src/services/nba-data-quality.service.ts",
+        "src/services/nba-data-sync.service.ts",
+        "src/services/next-slate.service.ts",
+        "src/services/performance-scope-v2.service.ts",
+        "src/services/portfolio-ai-v2.service.ts",
+        "src/services/portfolio-intelligence.service.ts",
+        "src/services/prediction-cutoff-enforcement.service.ts",
+        "src/services/prediction-engine-v4.service.ts",
+        "src/services/prediction-history.service.ts",
+        "src/services/probability-picks.service.ts",
+        "src/services/retrosheet-controlled-import.service.ts",
+        "src/services/retrosheet-historical-data-lake.service.ts",
+        "src/services/retrosheet-historical-feature-store.service.ts",
+        "src/services/safe-supabase-preflight.service.ts",
+        "src/services/settlement-reconciliation.service.ts",
+        "src/services/sharp-money-intelligence.service.ts",
+        "src/services/sportsdataio-betting-normalizer.service.ts",
+        "src/services/sportsdataio-historical-import-readiness.service.ts",
+        "src/services/sportsdataio-mlb-historical-import-executor.service.ts",
+        "src/services/sportsdataio-mlb-normalization.service.ts",
+        "src/services/sportsdataio-mlb-prospective-preview.service.ts",
+        "src/services/sportsdataio-nba-integration-readiness.service.ts",
+        "src/services/sportsdataio-nba-player-stats-readiness.service.ts",
+        "src/services/sportsdataio-runtime-adapter.service.ts",
+        "src/services/stored-preview-prediction-lifecycle.service.ts",
+        "src/services/sync-reliability.service.ts",
+        "src/services/the-odds-api-current-odds-acquisition.service.ts",
+        "src/services/universal-event-identity.service.ts",
+        "src/services/weight-optimizer.service.ts"
+      ],
+      "scriptReferences": [
+        "scripts/database-io-readonly-audit.mjs",
+        "scripts/full-platform-audit-v1.mjs",
+        "scripts/historical-completion-v1-a1-baseline.mjs",
+        "scripts/historical-completion-v1-a2-matrix.mjs",
+        "scripts/historical-settled-status-reconciliation-v1.mjs",
+        "scripts/live-multi-sport-acquisition-v1-checkpoint-a.mjs",
+        "scripts/live-multi-sport-acquisition-v1-checkpoint-b-mlb.mjs",
+        "scripts/live-multi-sport-acquisition-v1-checkpoint-c-nba-nfl.mjs",
+        "scripts/live-multi-sport-acquisition-v1-final-certify.mjs",
+        "scripts/local-ts-loader.mjs",
+        "scripts/mlb-canonical-settlement-backlog-closure-v1.mjs",
+        "scripts/mlb-operating-day-recovery-v1-validate.mjs",
+        "scripts/mlb-result-evidence-reconciliation-v1-validate.mjs",
+        "scripts/multi-sport-results-crosswalk-foundation-v1.mjs",
+        "scripts/multi-sport-unlock-v1-checkpoint-b-nba.mjs",
+        "scripts/multi-sport-unlock-v1-checkpoint-c-nfl.mjs",
+        "scripts/multi-sport-unlock-v1-checkpoint-d-nhl.mjs",
+        "scripts/multi-sport-unlock-v1-checkpoint-e-soccer.mjs",
+        "scripts/multi-sport-unlock-v1-checkpoint-f-tennis-ufc.mjs",
+        "scripts/multi-sport-unlock-v1-final-certify.mjs",
+        "scripts/performance-api-query-optimization-v1-validate.mjs",
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs",
+        "scripts/player-prop-multi-market-v1-validate.mjs",
+        "scripts/retrosheet-feature-backfill.mjs",
+        "scripts/six-historical-settlement-conflict-resolution-v1.mjs",
+        "scripts/the-odds-api-current-odds-v1-validate.mjs",
+        "scripts/the-odds-api-current-odds-v1.mjs",
+        "scripts/the-odds-api-historical-mlb-core-import-v1.mjs",
+        "scripts/the-odds-api-historical-range-v1.mjs",
+        "scripts/the-odds-api-market-history-materialization-v1.mjs",
+        "scripts/the-odds-api-maximum-utilization-v1-checkpoint1.mjs",
+        "scripts/the-odds-api-player-props-v1.mjs",
+        "scripts/the-odds-api-scores-results-v1.mjs",
+        "scripts/universal-event-identity-materialize-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/ARCHITECTURE.md",
+        "docs/AUTONOMOUS_EXECUTION.md",
+        "docs/BUILD_OOM_ROOT_CAUSE_V2.md",
+        "docs/DECISION_LOG.md",
+        "docs/FULL_PLATFORM_AUDIT_V1.md",
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json",
+        "docs/MASTER_ROADMAP.md",
+        "docs/MLB_PITCHER_PROJECTION_ENGINE_V1.md",
+        "docs/PREDICTION_EPOCH_GOVERNANCE_V2.md",
+        "docs/PREDICTION_EPOCH_GOVERNANCE_V2_MIGRATION_REVIEW.md",
+        "docs/PREDICTION_EPOCH_GOVERNANCE_V2_MIGRATION_RUNBOOK.md",
+        "docs/PROJECT_STATUS.md",
+        "docs/RETROSHEET_HISTORICAL_COVERAGE_INTELLIGENCE_PHASE_1_5.md",
+        "docs/SUPABASE_DISK_IO_RECOVERY_AUDIT_V1.md",
+        "docs/WEBPACK_DEPENDENCY_GRAPH_AUDIT_V2.md",
+        "docs/historical-import-engine-core-v1.md",
+        "docs/prediction-versioning-engine-v1.md",
+        "docs/providers/sportsdataio/CAPABILITY_MATRIX.md",
+        "docs/providers/sportsdataio/README.md",
+        "docs/runtime-observability-v1.md",
+        "docs/sportsdataio-nba-integration-readiness-v1.md",
+        "docs/sportsdataio-nba-observability-integration-v1.md",
+        "docs/sportsdataio-nba-odds-readiness-v1.md",
+        "docs/sportsdataio-nba-player-stats-readiness-v1.md"
+      ],
+      "classification": "LEGACY_BUT_REACHABLE",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/bsn-core-certification.service.ts",
+      "exists": true,
+      "specifier": "@/services/bsn-core-certification.service",
+      "referenceCount": 6,
+      "runtimeReferences": [
+        "src/app/api/operations/validation/route.ts",
+        "src/lib/server-lazy-diagnostics.ts"
+      ],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1.md",
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json",
+        "docs/MASTER_ROADMAP.md"
+      ],
+      "classification": "LEGACY_BUT_REACHABLE",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/bsn-predictions.service.ts",
+      "exists": true,
+      "specifier": "@/services/bsn-predictions.service",
+      "referenceCount": 3,
+      "runtimeReferences": [],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1.md",
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json"
+      ],
+      "classification": "ARCHIVAL_OR_SCRIPT_TOOLING",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/dashboard.service.ts",
+      "exists": true,
+      "specifier": "@/services/dashboard.service",
+      "referenceCount": 4,
+      "runtimeReferences": [
+        "src/lib/server-lazy-diagnostics.ts"
+      ],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1.md",
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json"
+      ],
+      "classification": "LEGACY_BUT_REACHABLE",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/mlb-market-expansion-roadmap.service.ts",
+      "exists": true,
+      "specifier": "@/services/mlb-market-expansion-roadmap.service",
+      "referenceCount": 7,
+      "runtimeReferences": [
+        "src/lib/server-lazy-diagnostics.ts"
+      ],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1.md",
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json",
+        "docs/MASTER_ROADMAP.md",
+        "docs/MLB_MARKET_EXPANSION_PROGRAM.md",
+        "docs/MLB_MARKET_TAXONOMY.md"
+      ],
+      "classification": "LEGACY_BUT_REACHABLE",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/mlb-operations-center.service.ts",
+      "exists": true,
+      "specifier": "@/services/mlb-operations-center.service",
+      "referenceCount": 5,
+      "runtimeReferences": [
+        "src/app/mlb-operations/page.tsx",
+        "src/lib/server-lazy-diagnostics.ts"
+      ],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json",
+        "docs/MASTER_ROADMAP.md"
+      ],
+      "classification": "LEGACY_BUT_REACHABLE",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/mlb-temporal-health.service.ts",
+      "exists": true,
+      "specifier": "@/services/mlb-temporal-health.service",
+      "referenceCount": 4,
+      "runtimeReferences": [
+        "src/lib/server-lazy-diagnostics.ts"
+      ],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json",
+        "docs/MASTER_ROADMAP.md"
+      ],
+      "classification": "LEGACY_BUT_REACHABLE",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/odds.service.ts",
+      "exists": true,
+      "specifier": "@/services/odds.service",
+      "referenceCount": 2,
+      "runtimeReferences": [],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json"
+      ],
+      "classification": "ARCHIVAL_OR_SCRIPT_TOOLING",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/operations-health.service.ts",
+      "exists": true,
+      "specifier": "@/services/operations-health.service",
+      "referenceCount": 4,
+      "runtimeReferences": [
+        "src/lib/server-lazy-diagnostics.ts"
+      ],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json",
+        "docs/MASTER_ROADMAP.md"
+      ],
+      "classification": "LEGACY_BUT_REACHABLE",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/runtime-observability.service.ts",
+      "exists": true,
+      "specifier": "@/services/runtime-observability.service",
+      "referenceCount": 5,
+      "runtimeReferences": [
+        "src/lib/server-lazy-diagnostics.ts",
+        "src/services/sportsdataio-nba-integration-readiness.service.ts"
+      ],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json",
+        "docs/MASTER_ROADMAP.md"
+      ],
+      "classification": "LEGACY_BUT_REACHABLE",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    },
+    {
+      "file": "src/services/sport-top-picks.service.ts",
+      "exists": true,
+      "specifier": "@/services/sport-top-picks.service",
+      "referenceCount": 2,
+      "runtimeReferences": [],
+      "scriptReferences": [
+        "scripts/platform-consolidation-duplication-cleanup-v1.mjs"
+      ],
+      "docReferences": [
+        "docs/FULL_PLATFORM_AUDIT_V1_FINDINGS.json"
+      ],
+      "classification": "ARCHIVAL_OR_SCRIPT_TOOLING",
+      "removalAllowed": false,
+      "reason": "Reachable or operationally documented; not in approved removal class."
+    }
+  ],
+  "pages": [
+    {
+      "file": "src/app/admin/historical-diagnostics/page.tsx",
+      "route": "/admin/historical-diagnostics",
+      "exists": true,
+      "classification": "ADMIN_DIAGNOSTIC",
+      "removalAllowed": false
+    },
+    {
+      "file": "src/app/data-coverage/[sport]/page.tsx",
+      "route": "/data-coverage/[sport]",
+      "exists": true,
+      "classification": "ACTIVE_DEEP_LINK",
+      "removalAllowed": false
+    },
+    {
+      "file": "src/app/game-intelligence/[eventId]/page.tsx",
+      "route": "/game-intelligence/[eventId]",
+      "exists": true,
+      "classification": "ACTIVE_DEEP_LINK",
+      "removalAllowed": false
+    },
+    {
+      "file": "src/app/login/page.tsx",
+      "route": "/login",
+      "exists": true,
+      "classification": "AUTH_BOUNDARY_UNTOUCHED",
+      "removalAllowed": false
+    },
+    {
+      "file": "src/app/player-projections/[projectionId]/page.tsx",
+      "route": "/player-projections/[projectionId]",
+      "exists": true,
+      "classification": "ACTIVE_DEEP_LINK",
+      "removalAllowed": false
+    },
+    {
+      "file": "src/app/register/page.tsx",
+      "route": "/register",
+      "exists": true,
+      "classification": "AUTH_BOUNDARY_UNTOUCHED",
+      "removalAllowed": false
+    },
+    {
+      "file": "src/app/sports-center/[sport]/page.tsx",
+      "route": "/sports-center/[sport]",
+      "exists": true,
+      "classification": "ACTIVE_DEEP_LINK",
+      "removalAllowed": false
+    }
+  ],
+  "hotspots": [
+    {
+      "responsibility": "settlement readiness",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    },
+    {
+      "responsibility": "settlement status classification",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    },
+    {
+      "responsibility": "learning evidence",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    },
+    {
+      "responsibility": "performance aggregation",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    },
+    {
+      "responsibility": "sports registries",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    },
+    {
+      "responsibility": "operating date/timezone",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    },
+    {
+      "responsibility": "freshness calculations",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    },
+    {
+      "responsibility": "product lifecycle state",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    },
+    {
+      "responsibility": "market normalization",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    },
+    {
+      "responsibility": "provider mapping",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    },
+    {
+      "responsibility": "result readiness",
+      "classification": "REVALIDATED_NO_SAFE_DELETION",
+      "action": "retain canonical implementation and defer any caller migration until a specific duplicate implementation is proven behavior-equivalent"
+    }
+  ],
+  "certifications": [
+    "PLATFORM_DUPLICATION_REVALIDATION_PASS",
+    "NO_INTENTIONAL_WRAPPER_REMOVAL_PASS",
+    "NO_COMPATIBILITY_LAYER_REGRESSION_PASS",
+    "NO_PRODUCT_BEHAVIOR_CHANGE_PASS"
+  ]
+}

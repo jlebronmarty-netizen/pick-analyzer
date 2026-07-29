@@ -16,6 +16,13 @@ Last updated: 2026-07-28 22:36:00Z
 - Clean build measurements improved from the prior Phase B final peak of 2847.6 MB to 2453.9 MB, then 2414.0 MB on repeat: a 433.6 MB / 15.23% reduction from the Phase B final baseline. Generated static pages remained 386 and prerender routes remained 6.
 - Local clean builds passed twice. Provider calls, database mutations, production mutations, business-rule changes, prediction changes, scheduler changes, Official Pick policy changes, Learning Brain changes, epoch activation and manual Vercel deployment remained 0/not executed. Vercel Standard recovery still requires observation of the automatic build after push.
 
+## 2026-07-29 Platform Consolidation & Duplication Cleanup V1
+
+- Revalidated Full Platform Audit V1 duplication and unused-service candidates before any deletion. The phase audited 14 service candidates, 7 low-discoverability page candidates and 11 responsibility hotspots.
+- Approved removal candidates were 0. The static unused-service list was reclassified as reachable runtime services, archival/script tooling or documented operational dependencies. No candidate met the dead-code safety standard for removal.
+- Low-discoverability pages were retained as admin diagnostics, active deep links or auth boundaries. `/login` and `/register` remained out of scope and untouched.
+- No files were removed, no callers were migrated, no routes were exposed or deleted, and no product/API behavior changed. Provider calls, database mutations and production mutations remained 0.
+
 ## 2026-07-28 Historical Settled Status Reconciliation V1
 
 - Completed the targeted P1 read-only audit and query/classifier repair for divergence between raw historical settled status and deterministic result-based settled counts. Added `canonical-settlement-state.service.ts` as the shared read-only settlement-state classifier for stored outcome, deterministic canonical outcome, pending reason, lifecycle badge, Performance inclusion, learning inclusion and scheduler already-settled/pending state.
