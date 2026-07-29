@@ -1352,3 +1352,15 @@ The safest future refresh policy is adaptive rather than flat 5-minute multi-spo
 Local smoke recovery classification: `LOCAL_SMOKE_HARNESS_UNRELIABLE_ON_WINDOWS`. Two independent bounded PowerShell wrappers exceeded their hard timeouts, so this is treated as a Windows/PowerShell process-control issue rather than an application-route defect. Prior production and local smoke evidence already showed `/api/system/version` HTTP 200; this certification relies on build, validators, artifact consistency, stored operational evidence and previously certified production smoke for `/api/system/version`, dashboard, performance, operations and product routes. A separate smoke-harness repair may be created later and is out of scope for this audit.
 
 Non-server validation passed: JSON artifact validation, `node scripts/operational-readiness-multisport-audit-v1-validate.mjs`, changed-file ESLint, `git diff --check`, targeted secret scan and `npm.cmd run build` with 386 static pages. No local server smoke was run during recovery.
+
+# 2026-07-29 - MLB Adaptive Refresh, Daily Continuity And Autonomous Operations V1
+
+Status: COMPLETE
+
+MLB autonomous operations now run through the existing protected operating-day architecture without creating a second scheduler or changing betting logic. The production GitHub Actions scheduler is moved to a 10-minute cadence and still delegates to `/api/cron/operating-day`; adaptive due-domain logic controls whether provider-backed schedule, odds or result work is actually executed. A read-only heartbeat observer runs twice hourly.
+
+Added `/api/operations/mlb-autonomous-operations` plus `mlb-autonomous-operations-v1.service.ts` as the daily operations report for scheduler inventory, adaptive cadence, provider budget, recovery, pregame, postgame and health status. The policy docs are `MLB_AUTONOMOUS_OPERATIONS_V1.md`, `ADAPTIVE_REFRESH_POLICY_V1.md`, `DAILY_CONTINUITY_V1.md`, `PROVIDER_BUDGET_POLICY_V1.md` and `SYSTEM_HEALTH_POLICY_V1.md`.
+
+Certification markers earned: `MLB_AUTONOMOUS_OPERATIONS_PASS`, `ADAPTIVE_REFRESH_ENGINE_PASS`, `DAILY_CONTINUITY_PASS`, `PROVIDER_BUDGET_PASS`, `SYSTEM_HEALTH_PASS`, `NO_MODEL_TRAINING_PASS`, `NO_MODEL_WEIGHT_MUTATION_PASS`, `NO_PROBABILITY_CHANGE_PASS`, `NO_TRUST_CHANGE_PASS`, `NO_SETTLEMENT_CHANGE_PASS`, `NO_PROVIDER_WASTE_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS`. No model training, model-weight mutation, probability change, confidence change, Trust change, Official Pick policy change, settlement rule change, prediction-engine change, retrospective prediction creation, provider call or data mutation was performed during implementation.
+
+Validation passed: `node scripts/mlb-autonomous-operations-v1-validate.mjs`, `node scripts/operational-readiness-multisport-audit-v1-validate.mjs`, focused changed-file ESLint, `git diff --check` and `npm.cmd run build` with 386 static pages. No local server smoke, provider call, production mutation or Vercel deployment was run.

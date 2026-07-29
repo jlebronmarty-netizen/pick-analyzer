@@ -2961,3 +2961,17 @@ Persistence scope: None. No provider call, import, prediction write, settlement 
 Validation: JSON artifact validation, `node scripts/operational-readiness-multisport-audit-v1-validate.mjs`, changed-file ESLint, `git diff --check`, targeted secret scan and `npm.cmd run build` passed. Build generated 386 static pages. Local server smoke was not run because the smoke harness is classified unreliable on Windows.
 
 Completion criteria: `OPERATIONAL_READINESS_AUDIT_PASS`, `MULTI_SPORT_DATA_COVERAGE_AUDIT_PASS`, `CURRENT_PREVIOUS_SEASON_COVERAGE_AUDIT_PASS`, `ODDS_API_EXTRACTION_COMPLETENESS_AUDIT_PASS`, `MULTI_SPORT_PREDICTION_READINESS_AUDIT_PASS`, `DAILY_AUTONOMY_AUDIT_PASS`, `ODDS_REFRESH_FEASIBILITY_AUDIT_PASS`, `RESULT_SETTLEMENT_LEARNING_LOOP_AUDIT_PASS`, `MULTI_SPORT_PRODUCTION_READINESS_MATRIX_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_PRODUCTION_MUTATION_PASS`, `NO_PREDICTION_WRITE_PASS`, `NO_SETTLEMENT_WRITE_PASS`, `NO_MODEL_TRAINING_PASS`, `NO_MODEL_WEIGHT_MUTATION_PASS`, `NO_EPOCH_ACTIVATION_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS` are certified locally pending push.
+
+### 57. MLB Adaptive Refresh, Daily Continuity And Autonomous Operations V1
+
+Objective: Operate MLB automatically every day with the highest safe freshness while respecting provider budgets, prediction integrity and learning quality.
+
+Status: Complete locally pending push.
+
+Scope: The production GitHub Actions operating-day scheduler now runs every 10 minutes and still delegates to `/api/cron/operating-day`. Adaptive refresh remains the decision layer, so the 10-minute tick does not imply a provider call on every tick. A read-only heartbeat observer runs twice hourly. `/api/operations/mlb-autonomous-operations` reports scheduler inventory, refresh cadence, provider budget, continuity recovery, pregame readiness, postgame lifecycle and system health.
+
+Persistence scope: None. The module adds no SQL and performs no provider calls or data mutations during validation. It does not change prediction formulas, confidence, Trust, Official Pick policy, settlement rules, model weights, model training, champion rows, epoch activation or retrospective prediction behavior.
+
+Validation: `node scripts/mlb-autonomous-operations-v1-validate.mjs`, `node scripts/operational-readiness-multisport-audit-v1-validate.mjs`, focused changed-file ESLint, `git diff --check` and `npm.cmd run build` passed. Build generated 386 static pages.
+
+Completion criteria: `MLB_AUTONOMOUS_OPERATIONS_PASS`, `ADAPTIVE_REFRESH_ENGINE_PASS`, `DAILY_CONTINUITY_PASS`, `PROVIDER_BUDGET_PASS`, `SYSTEM_HEALTH_PASS`, `NO_MODEL_TRAINING_PASS`, `NO_MODEL_WEIGHT_MUTATION_PASS`, `NO_PROBABILITY_CHANGE_PASS`, `NO_TRUST_CHANGE_PASS`, `NO_SETTLEMENT_CHANGE_PASS`, `NO_PROVIDER_WASTE_PASS` and `NO_CERTIFIED_PLATFORM_REGRESSION_PASS` are certified locally pending push.
