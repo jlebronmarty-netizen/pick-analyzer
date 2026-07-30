@@ -1,12 +1,13 @@
 {
-  "success": false,
-  "status": "PARTIAL_LOCAL_REPAIR_PENDING_PRODUCTION_VERIFICATION",
+  "success": true,
+  "status": "PASS",
   "mode": "release_candidate_route_artifact_consistency_v1",
-  "generatedAt": "2026-07-30T15:35:53.693Z",
+  "generatedAt": "2026-07-30T16:38:05.446Z",
   "phase": 3,
   "phaseName": "Release-candidate route and artifact consistency sweep",
   "startingCommit": "021845d40139c73acfe838839abdda97783a9ab4",
   "productionCommitAtAudit": "021845d40139c73acfe838839abdda97783a9ab4",
+  "productionCommitAtCertification": "51cdee5b3845b313653836002066b84938f52b92",
   "readOnlyProductionEvidence": true,
   "providerCallsMade": 0,
   "remoteMutationsMade": 0,
@@ -55,10 +56,13 @@
       ]
     },
     "dataCoverage": {
-      "certified": false,
+      "certified": true,
       "partialEvidence": [
         { "id": "data_coverage_page", "status": 200, "ok": true, "bytes": 93836 },
-        { "id": "data_coverage_inventory_api", "status": 200, "ok": true, "mode": "data_coverage_inventory_v1", "providerCallsMade": 0 }
+        { "id": "data_coverage_inventory_api", "status": 200, "ok": true, "mode": "data_coverage_inventory_v1", "providerCallsMade": 0 },
+        { "id": "data_coverage_final_api_default", "status": 200, "ok": true, "durationMs": 22840, "bytes": 6802, "mode": "multi_sport_data_expansion_final_certification_summary_v1", "success": true, "programStatus": "PARTIAL", "providerCallsMade": 0, "remoteMutationsMade": 0, "productionMutationsMade": 0 },
+        { "id": "data_coverage_final_api_diagnostics_full", "status": 200, "ok": true, "durationMs": 10521, "bytes": 15284, "mode": "multi_sport_data_expansion_final_certification_v1", "success": true, "programStatus": "PARTIAL", "providerCallsMade": 0, "remoteMutationsMade": 0, "productionMutationsMade": 0 },
+        { "id": "data_coverage_health_api", "status": 200, "ok": true, "durationMs": 5787, "bytes": 8889, "mode": "data_health_center_v1", "success": true, "providerCallsMade": 0, "remoteMutationsMade": 0, "productionMutationsMade": 0 }
       ],
       "blockingEvidence": [
         { "id": "data_coverage_final_api", "ok": false, "error": "30s production read timeout before repair" },
@@ -106,16 +110,15 @@
     "performance_certified": true,
     "ai_operations_certified": true,
     "operations_certified": true,
-    "data_coverage_certified": false,
+    "data_coverage_certified": true,
     "providers_certified": true,
     "json_artifacts_valid": true
   },
-  "blockers": [
-    "Production verification of the compact data-coverage final-certification route requires this local repair commit to deploy automatically.",
-    "Do not mark Phase 3 PASS until production route evidence confirms data_coverage_certified."
-  ],
+  "blockers": [],
   "certificationMarkers": [
     "V1_PLAN_ORDER_ENFORCEMENT_PASS",
+    "V1_ROUTE_ARTIFACT_CONSISTENCY_PASS",
+    "V1_PHASE_3_PRODUCTION_CERTIFICATION_PASS",
     "V1_CHANGE_CONTROL_POLICY_PASS",
     "NO_SCOPE_EXPANSION_PASS",
     "NO_POST_V1_IMPLEMENTATION_PASS",

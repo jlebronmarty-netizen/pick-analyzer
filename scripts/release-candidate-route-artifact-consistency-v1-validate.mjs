@@ -10,12 +10,15 @@ const phase3 = phases.phases.find((phase) => phase.phase === 3)
 
 const checks = [
   ['phase 2 reconciled complete', phase2?.status === 'complete'],
-  ['phase 3 remains partial pending production verification', phase3?.status === 'partial_local_repair_pending_production_verification'],
+  ['phase 3 production certification complete', phase3?.status === 'complete'],
   ['production evidence commit recorded', artifact.productionCommitAtAudit === '021845d40139c73acfe838839abdda97783a9ab4'],
+  ['production certification commit recorded', artifact.productionCommitAtCertification === '51cdee5b3845b313653836002066b84938f52b92'],
+  ['phase 3 pass status recorded', artifact.success === true && artifact.status === 'PASS'],
   ['provider calls stayed zero', artifact.providerCallsMade === 0],
   ['production mutations stayed zero', artifact.productionMutationsMade === 0],
   ['all non-data-coverage route groups certified', ['dashboard', 'currentBoard', 'probabilityPicks', 'performance', 'aiOperations', 'operations', 'providers'].every((key) => artifact.routeEvidence[key].certified === true)],
-  ['data coverage blocker recorded truthfully', artifact.phaseExitCriteria.data_coverage_certified === false && artifact.blockers.length > 0],
+  ['data coverage certified after production verification', artifact.phaseExitCriteria.data_coverage_certified === true && artifact.routeEvidence.dataCoverage.certified === true && artifact.blockers.length === 0],
+  ['data coverage production evidence recorded', artifact.routeEvidence.dataCoverage.partialEvidence.some((entry) => entry.id === 'data_coverage_final_api_default' && entry.status === 200 && entry.providerCallsMade === 0 && entry.productionMutationsMade === 0)],
   ['json artifacts certified', artifact.phaseExitCriteria.json_artifacts_valid === true],
   ['compact default route implemented', route.includes('getMultiSportDataExpansionFinalCertificationSummaryV1') && route.includes("request.nextUrl.searchParams.get('diagnostics') === 'full'")],
   ['full diagnostics preserved behind query', route.indexOf('diagnostics') < route.indexOf('getMultiSportDataExpansionFinalCertificationV1()')],

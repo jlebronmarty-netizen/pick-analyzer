@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "artifact": "PICK_ANALYZER_V1_SCOPE",
-  "generatedAt": "2026-07-29",
+  "generatedAt": "2026-07-30",
   "mode": "product_definition_only",
   "repository": "https://github.com/jlebronmarty-netizen/pick-analyzer.git",
   "branch": "main",
-  "currentCompletionPercent": 78,
+  "currentCompletionPercent": 87,
   "executiveVision": "Certification-first MLB core sports intelligence with truthful readiness boundaries for every non-certified sport and market.",
   "inScope": {
     "primarySport": "MLB",
@@ -41,7 +41,7 @@
       "sport": "MLB",
       "v1Status": "production_core",
       "predictionReadiness": "production_ready_for_core_workflow",
-      "blocker": "first_full_autonomous_operating_day_certification_pending"
+      "blocker": "none_for_v1_core_workflow; unsupported_markets_and_official_recommendation_policy_lock_remains_phase_4"
     },
     {
       "sport": "NFL",
@@ -107,6 +107,7 @@
   ],
   "certificationMarkers": [
     "V1_SCOPE_PASS",
+    "V1_PHASE_3_PRODUCTION_CERTIFICATION_PASS",
     "NO_CODE_CHANGE_PASS",
     "NO_PROVIDER_CALL_PASS",
     "NO_PRODUCTION_MUTATION_PASS"
