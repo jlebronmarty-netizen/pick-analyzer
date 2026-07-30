@@ -1,5 +1,9 @@
 import 'server-only'
 
+import {
+  MLB_OPERATING_DAY_SCHEDULER_GRACE_MINUTES,
+  MLB_OPERATING_DAY_WRITE_SCHEDULER_INTERVAL_MINUTES,
+} from '@/config/mlb-operating-day-scheduler'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getAdaptiveRefreshStatus } from '@/services/adaptive-refresh-orchestrator.service'
 import { getCurrentBoard } from '@/services/current-board.service'
@@ -18,8 +22,8 @@ type MigrationCheck = {
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
 const TIMEZONE = ACTIVE_EVENT_TIMEZONE
-const EXTERNAL_SCHEDULER_EXPECTED_CADENCE_MINUTES = 15
-const EXTERNAL_SCHEDULER_GRACE_MINUTES = 10
+const EXTERNAL_SCHEDULER_EXPECTED_CADENCE_MINUTES = MLB_OPERATING_DAY_WRITE_SCHEDULER_INTERVAL_MINUTES
+const EXTERNAL_SCHEDULER_GRACE_MINUTES = MLB_OPERATING_DAY_SCHEDULER_GRACE_MINUTES
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}

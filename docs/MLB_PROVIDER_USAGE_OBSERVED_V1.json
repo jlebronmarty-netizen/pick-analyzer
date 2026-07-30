@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "mode": "mlb_provider_usage_observed_v1",
+  "generatedAt": "2026-07-30T12:45:18.160Z",
+  "provider": "sportsdataio",
+  "sportKey": "baseball_mlb",
+  "operatingDate": "2026-07-29",
+  "budgetMode": "NORMAL",
+  "callsMadeTodayBeforeRecoveryEvidence": 14,
+  "callsMadeLastHourBeforeRecoveryEvidence": 3,
+  "callsPlannedToday": 10,
+  "hardRemainingBeforeRecoveryEvidence": 986,
+  "estimatedCallsRemainingAfterReserve": 836,
+  "usagePercentBeforeRecoveryEvidence": 1.4,
+  "warningThresholdPercent": 80,
+  "stopThresholdPercent": 95,
+  "warningThresholdReached": false,
+  "stopThresholdReached": false,
+  "budgetWarnings": [],
+  "recoveryCertificationCalls": {
+    "sportsDataIoResultProbe": 1,
+    "mlbStatsTargetedRecovery": 1,
+    "mlbStatsIdempotencyRepeat": 1,
+    "settlement": 0,
+    "total": 3
+  },
+  "estimatedSteadyStateCallsPerDay": {
+    "tenMinuteWriteSchedulerMaximumTicks": 144,
+    "typicalMlbSlateProviderActions": "20-40 calls/day depending on slate timing, result windows and cache reuse",
+    "creditsPerDayAtTypicalRange": "20-40",
+    "creditsPerMonthAtTypicalRange": "600-1200"
+  },
+  "budgetSustainability": "SUSTAINABLE_FOR_CORE_MLB_OPERATION_WITH_CURRENT_LIMITS",
+  "certificationCausedProviderCalls": 3,
+  "certificationCausedMutations": 52
+}

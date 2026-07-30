@@ -215,6 +215,12 @@ function matchMlbStatsGameToEvent(game: MlbStatsGame, events: SportEventRow[]) {
 
   const gameDate = localDateFromUtc(game.gameDate) ?? game.officialDate ?? null
   const teams = gameTeamNames(game)
+  const exactStartMatch = events.find((event) => {
+    if (!sameStartMinute(event.start_time, game.gameDate)) return false
+    return sameTeam(event.home_team, teams.home) && sameTeam(event.away_team, teams.away)
+  })
+  if (exactStartMatch) return exactStartMatch
+
   return events.find((event) => {
     if (gameDate && localDateFromUtc(event.start_time) !== gameDate) return false
     return sameTeam(event.home_team, teams.home) && sameTeam(event.away_team, teams.away)
@@ -233,6 +239,19 @@ async function loadMlbEventsForRange(startDate: string, endDate: string) {
     .lt('start_time', endRange.utcEndExclusive)
     .order('start_time', { ascending: true })
   if (error) throw new Error(`MLB Stats API result event lookup failed: ${error.message}`)
+  return (data ?? []) as SportEventRow[]
+}
+
+async function loadMlbEventsByIds(eventIds: string[]) {
+  if (!eventIds.length) return []
+  const { data, error } = await supabaseAdmin
+    .from('sport_events')
+    .select('id, sport_key, league_key, start_time, status, home_team, away_team, provider_ids, metadata')
+    .eq('sport_key', MLB_SPORT_KEY)
+    .eq('league_key', MLB_LEAGUE_KEY)
+    .in('id', eventIds)
+    .order('start_time', { ascending: true })
+  if (error) throw new Error(`MLB Stats API targeted event lookup failed: ${error.message}`)
   return (data ?? []) as SportEventRow[]
 }
 
@@ -353,8 +372,23 @@ function sameTimestamp(a: string | null | undefined, b: string | null | undefine
   return aTime === bTime
 }
 
-async function fetchMlbStatsResults(daysFrom = 3, timeoutMs = 12000) {
-  const { startDate, endDate } = dateRangeForResults(daysFrom)
+function sameStartMinute(a: string | null | undefined, b: string | null | undefined) {
+  if (!a || !b) return false
+  const aTime = new Date(a).getTime()
+  const bTime = new Date(b).getTime()
+  if (!Number.isFinite(aTime) || !Number.isFinite(bTime)) return false
+  return Math.abs(aTime - bTime) < 60000
+}
+
+async function fetchMlbStatsResults(
+  daysFrom = 3,
+  timeoutMs = 12000,
+  options: { eventIds?: string[]; startDate?: string; endDate?: string; lockScope?: string } = {}
+) {
+  const resolvedRange = dateRangeForResults(daysFrom)
+  const startDate = options.startDate ?? resolvedRange.startDate
+  const endDate = options.endDate ?? resolvedRange.endDate
+  const targetedEventIds = new Set(options.eventIds ?? [])
   const endpoint = `/api/v1/schedule?sportId=1&startDate=${startDate}&endDate=${endDate}&hydrate=team,venue`
   const provider = 'mlb_stats_api'
   const started = nowIso()
@@ -389,7 +423,7 @@ async function fetchMlbStatsResults(daysFrom = 3, timeoutMs = 12000) {
     }
   }
 
-  const lockKey = `${provider}:${MLB_SPORT_KEY}:${startDate}:${endDate}:sync_results`
+  const lockKey = `${provider}:${MLB_SPORT_KEY}:${startDate}:${endDate}:${options.lockScope ?? 'sync_results'}`
   if (!claimProviderActionLock(lockKey)) {
     return {
       success: false,
@@ -448,7 +482,7 @@ async function fetchMlbStatsResults(daysFrom = 3, timeoutMs = 12000) {
     const games = (Array.isArray(asRecord(payload).dates)
       ? (asRecord(payload).dates as Array<Record<string, unknown>>).flatMap((day) => Array.isArray(day.games) ? day.games : [])
       : []) as MlbStatsGame[]
-    const events = await loadMlbEventsForRange(startDate, endDate)
+    const events = targetedEventIds.size ? await loadMlbEventsByIds([...targetedEventIds]) : await loadMlbEventsForRange(startDate, endDate)
     const rows: GameResultRow[] = []
     let gamesMatched = 0
     let nonFinalRowsSkipped = 0
@@ -461,6 +495,10 @@ async function fetchMlbStatsResults(daysFrom = 3, timeoutMs = 12000) {
       if (!event) {
         unmatchedEvents += 1
         if (!isMlbStatsFinal(game)) nonFinalRowsSkipped += 1
+        continue
+      }
+      if (targetedEventIds.size && !targetedEventIds.has(event.id)) {
+        unmatchedEvents += 1
         continue
       }
       gamesMatched += 1
@@ -659,54 +697,20 @@ export async function fetchCompletedResults(sportKey: string, daysFrom = 3) {
   }
 }
 
-export async function syncRecentResults(sportKey = 'baseball_mlb', daysFrom = 3) {
-  if (sportKey === MLB_SPORT_KEY) {
-    const fetched = await fetchMlbStatsResults(daysFrom)
-    if (!fetched.success) {
-      return {
-        success: false,
-        sportKey,
-        daysFrom,
-        status: fetched.status as ResultsSyncStatus,
-        provider: fetched.provider,
-        endpoint: fetched.endpoint,
-        providerCheckRequired: fetched.providerCheckRequired,
-        providerCheckAttempted: fetched.providerCheckAttempted,
-        providerCheckCompleted: fetched.providerCheckCompleted,
-        providerCallsMade: fetched.providerCallsMade,
-        rowsReceived: fetched.rowsReceived,
-        gamesRequested: fetched.rowsReceived,
-        gamesResolved: fetched.finalGamesDetected,
-        gamesUnresolved: Math.max(0, fetched.rowsReceived - fetched.finalGamesDetected),
-        gamesMatched: fetched.gamesMatched,
-        finalGamesDetected: fetched.finalGamesDetected,
-        scoreRowsInserted: fetched.scoreRowsInserted,
-        scoreRowsUpdated: fetched.scoreRowsUpdated,
-        nonFinalRowsSkipped: fetched.nonFinalRowsSkipped,
-        staleRowsSkipped: fetched.staleRowsSkipped,
-        unmatchedEvents: fetched.unmatchedEvents,
-        synced: 0,
-        inserted: 0,
-        reused: 0,
-        retryable: fetched.retryable,
-        retryAfter: null,
-        failureReason: fetched.message,
-        message: fetched.message,
-      }
-    }
-
-    const persisted = await persistResultRows(fetched.rows)
-    const changedResultIds = new Set([...persisted.insertedGameIds, ...persisted.updatedGameIds])
-    let eventRowsUpdated = 0
-    for (const eventPatch of fetched.eventPatches ?? []) {
-      if (!changedResultIds.has(eventPatch.id)) continue
-      const { error } = await supabaseAdmin.from('sport_events').update(eventPatch.patch).eq('id', eventPatch.id)
-      if (error) throw new Error(`MLB Stats API final event update failed: ${error.message}`)
-      eventRowsUpdated += 1
-    }
-
+async function persistMlbFetchedResults({
+  fetched,
+  sportKey,
+  daysFrom,
+  extra,
+}: {
+  fetched: Awaited<ReturnType<typeof fetchMlbStatsResults>>
+  sportKey: string
+  daysFrom: number
+  extra?: Record<string, unknown>
+}) {
+  if (!fetched.success) {
     return {
-      success: true,
+      success: false,
       sportKey,
       daysFrom,
       status: fetched.status as ResultsSyncStatus,
@@ -727,16 +731,88 @@ export async function syncRecentResults(sportKey = 'baseball_mlb', daysFrom = 3)
       nonFinalRowsSkipped: fetched.nonFinalRowsSkipped,
       staleRowsSkipped: fetched.staleRowsSkipped,
       unmatchedEvents: fetched.unmatchedEvents,
-      synced: fetched.rows.length,
-      inserted: persisted.inserted,
-      reused: persisted.reused,
-      updated: persisted.updated,
-      eventRowsUpdated,
-      retryable: false,
+      synced: 0,
+      inserted: 0,
+      reused: 0,
+      retryable: fetched.retryable,
       retryAfter: null,
-      failureReason: null,
+      failureReason: fetched.message,
       message: fetched.message,
+      ...(extra ?? {}),
     }
+  }
+
+  const persisted = await persistResultRows(fetched.rows)
+  const changedResultIds = new Set([...persisted.insertedGameIds, ...persisted.updatedGameIds])
+  let eventRowsUpdated = 0
+  for (const eventPatch of fetched.eventPatches ?? []) {
+    if (!changedResultIds.has(eventPatch.id)) continue
+    const { error } = await supabaseAdmin.from('sport_events').update(eventPatch.patch).eq('id', eventPatch.id)
+    if (error) throw new Error(`MLB Stats API final event update failed: ${error.message}`)
+    eventRowsUpdated += 1
+  }
+
+  return {
+    success: true,
+    sportKey,
+    daysFrom,
+    status: fetched.status as ResultsSyncStatus,
+    provider: fetched.provider,
+    endpoint: fetched.endpoint,
+    providerCheckRequired: fetched.providerCheckRequired,
+    providerCheckAttempted: fetched.providerCheckAttempted,
+    providerCheckCompleted: fetched.providerCheckCompleted,
+    providerCallsMade: fetched.providerCallsMade,
+    rowsReceived: fetched.rowsReceived,
+    gamesRequested: fetched.rowsReceived,
+    gamesResolved: fetched.finalGamesDetected,
+    gamesUnresolved: Math.max(0, fetched.rowsReceived - fetched.finalGamesDetected),
+    gamesMatched: fetched.gamesMatched,
+    finalGamesDetected: fetched.finalGamesDetected,
+    scoreRowsInserted: fetched.scoreRowsInserted,
+    scoreRowsUpdated: fetched.scoreRowsUpdated,
+    nonFinalRowsSkipped: fetched.nonFinalRowsSkipped,
+    staleRowsSkipped: fetched.staleRowsSkipped,
+    unmatchedEvents: fetched.unmatchedEvents,
+    synced: fetched.rows.length,
+    inserted: persisted.inserted,
+    reused: persisted.reused,
+    updated: persisted.updated,
+    eventRowsUpdated,
+    retryable: false,
+    retryAfter: null,
+    failureReason: null,
+    message: fetched.message,
+    ...(extra ?? {}),
+  }
+}
+
+export async function syncMlbStatsResultsForEventIds(eventIds: string[], options: { startDate: string; endDate: string; timeoutMs?: number }) {
+  const uniqueEventIds = Array.from(new Set(eventIds.map((id) => String(id).trim()).filter(Boolean)))
+  if (!uniqueEventIds.length) throw new Error('At least one event id is required for targeted MLB result sync.')
+  const fetched = await fetchMlbStatsResults(3, options.timeoutMs ?? 12000, {
+    eventIds: uniqueEventIds,
+    startDate: options.startDate,
+    endDate: options.endDate,
+    lockScope: `targeted:${uniqueEventIds.sort().join(',')}`,
+  })
+  return persistMlbFetchedResults({
+    fetched,
+    sportKey: MLB_SPORT_KEY,
+    daysFrom: 3,
+    extra: {
+      targetedEventIds: uniqueEventIds,
+      targeted: true,
+      startDate: options.startDate,
+      endDate: options.endDate,
+    },
+  })
+}
+
+export async function syncRecentResults(sportKey = 'baseball_mlb', daysFrom = 3) {
+  if (sportKey === MLB_SPORT_KEY) {
+    const fetched = await fetchMlbStatsResults(daysFrom)
+    return persistMlbFetchedResults({ fetched, sportKey, daysFrom })
   }
 
   const fetched = await fetchCompletedResults(sportKey, daysFrom)

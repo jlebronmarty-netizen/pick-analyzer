@@ -1,5 +1,9 @@
 import 'server-only'
 
+import {
+  MLB_OPERATING_DAY_HEARTBEAT_CRON,
+  MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON,
+} from '@/config/mlb-operating-day-scheduler'
 import { getAdaptiveRefreshStatus, validateAdaptiveRefreshFixtures } from '@/services/adaptive-refresh-orchestrator.service'
 import { getOperationsHealth } from '@/services/operations-health.service'
 import { getProviderBudgetStatus, validateProviderBudgetDeterministicFixtures } from '@/services/provider-budget.service'
@@ -7,8 +11,6 @@ import { getProviderBudgetStatus, validateProviderBudgetDeterministicFixtures } 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
 const TIMEZONE = 'America/Puerto_Rico'
-const WRITE_SCHEDULER_CRON = '*/10 * * * *'
-const HEARTBEAT_CRON = '3,33 * * * *'
 const DEFAULT_DAILY_CALL_BUDGET = 1000
 const DEFAULT_SOFT_RESERVE = 150
 
@@ -53,7 +55,7 @@ function schedulerInventory(): SchedulerInventoryRow[] {
     {
       id: 'github_actions_production_operating_day_scheduler',
       owner: 'GitHub Actions',
-      frequency: WRITE_SCHEDULER_CRON,
+      frequency: MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON,
       timezone: 'UTC trigger; service resolves America/Puerto_Rico operating date',
       trigger: 'scheduled plus workflow_dispatch',
       expectedAction: '/api/cron/operating-day?dryRun=false',
@@ -73,7 +75,7 @@ function schedulerInventory(): SchedulerInventoryRow[] {
     {
       id: 'github_actions_production_operating_day_heartbeat',
       owner: 'GitHub Actions',
-      frequency: HEARTBEAT_CRON,
+      frequency: MLB_OPERATING_DAY_HEARTBEAT_CRON,
       timezone: 'UTC trigger; read-only health contract reports Puerto Rico operating state',
       trigger: 'scheduled plus workflow_dispatch',
       expectedAction: '/api/operations/mlb-autonomous-operations',
@@ -175,8 +177,8 @@ export async function getMlbAutonomousOperationsV1() {
     executiveStatus: {
       mlbProductionReady: true,
       autonomousOperationEnabled: true,
-      writeSchedulerFrequency: WRITE_SCHEDULER_CRON,
-      heartbeatFrequency: HEARTBEAT_CRON,
+      writeSchedulerFrequency: MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON,
+      heartbeatFrequency: MLB_OPERATING_DAY_HEARTBEAT_CRON,
       currentWindow: adaptive.freshnessPolicy.window,
       nextAction: adaptive.nextAction,
       activeDueSteps: activeDueSteps.map((step) => step.domain),
@@ -294,7 +296,7 @@ export function validateMlbAutonomousOperationsFixtures() {
   const cadence = refreshCadence()
   const scenarios = dailyCallScenarios()
   const checks = [
-    ['primary scheduler is 10-minute cadence', schedulers[0].frequency === WRITE_SCHEDULER_CRON],
+    ['primary scheduler is 10-minute cadence', schedulers[0].frequency === MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON],
     ['heartbeat is read-only', schedulers[1].providerCalls === '0' && schedulers[1].priority === 'OBSERVER'],
     ['manual fallback is not primary', schedulers[2].priority === 'MANUAL_FALLBACK'],
     ['early cadence is 60 minutes', cadence.find((row) => row.window === '>24h')?.cadenceMinutes === 60],

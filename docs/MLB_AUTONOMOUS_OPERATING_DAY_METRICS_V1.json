@@ -1,0 +1,83 @@
+{
+  "success": true,
+  "status": "TERMINAL_RECOVERY_SETTLED",
+  "mode": "mlb_first_autonomous_operating_day_metrics_v1",
+  "generatedAt": "2026-07-30T12:45:18.160Z",
+  "expectedCommit": "9c066b00aaf0c348d9948e13af48a5f10982d40f",
+  "productionCommit": "9c066b00aaf0c348d9948e13af48a5f10982d40f",
+  "deploymentAligned": true,
+  "operatingDate": "2026-07-29",
+  "timezone": "America/Puerto_Rico",
+  "slate": {
+    "currentGames": 16,
+    "completedGames": 16,
+    "gamesWaitingForOdds": 0,
+    "validPregamePredictionCandidates": 48,
+    "currentBoardCandidates": 48,
+    "officialPicks": 0,
+    "latestObservedOddsTimestamp": "2026-07-29T21:08:30.295Z"
+  },
+  "scheduler": {
+    "policyCron": "*/10 * * * *",
+    "heartbeatCron": "3,33 * * * *",
+    "healthCadenceMinutes": 10,
+    "healthGraceMinutes": 10,
+    "latestKnownProtectedInvocationAtObservation": "2026-07-29T21:08:37.537+00:00",
+    "schedulerHealthPolicyAligned": true,
+    "legacyHealthCronTextRemoved": true,
+    "localSmokeHarnessClassification": "LOCAL_SMOKE_HARNESS_UNRELIABLE_ON_WINDOWS"
+  },
+  "providerBudget": {
+    "provider": "sportsdataio",
+    "budgetMode": "NORMAL",
+    "callsMadeTodayBeforeRecoveryEvidence": 14,
+    "hardDailyLimit": 1000,
+    "hardRemainingBeforeRecoveryEvidence": 986,
+    "usagePercentBeforeRecoveryEvidence": 1.4,
+    "warningThresholdReached": false,
+    "stopThresholdReached": false
+  },
+  "recovery": {
+    "targetEvents": 4,
+    "sportsDataIoStatusProbeCalls": 1,
+    "mlbStatsRecoveryCalls": 1,
+    "idempotencyProofCalls": 1,
+    "providerCallsUsedForRecoveryCertification": 3,
+    "gameResultsInserted": 4,
+    "sportEventsUpdated": 4,
+    "idempotency": {
+      "rowsReused": 4,
+      "eventRowsUpdated": 0
+    },
+    "rootCause": "MLB Stats fallback matching preferred same-team local-date after provider id mismatch; ATL/NYM doubleheader required exact start-minute matching before local-date fallback. Late games also needed a bounded targeted replay after the final-state window."
+  },
+  "settlement": {
+    "dryRunChecked": 48,
+    "dryRunEligible": 48,
+    "dryRunUnresolved": 0,
+    "executed": true,
+    "settled": 48,
+    "wins": 27,
+    "losses": 21,
+    "pushes": 0,
+    "officialSettled": 0,
+    "hypotheticalSettled": 48,
+    "providerCallsMade": 0,
+    "warnings": []
+  },
+  "learning": {
+    "acceptedSamples": 402,
+    "rejectedSamples": 32,
+    "trainedSamples": 0,
+    "appliedWeightUpdates": 0,
+    "automaticTraining": false,
+    "modelWeightMutation": false
+  },
+  "certificationCausedProviderCalls": 3,
+  "certificationCausedMutations": 52,
+  "fullCertificationEarned": true,
+  "blockers": [
+    "No production Official Picks existed for the day, so official-pick ROI remains not applicable.",
+    "Automatic model training remains disabled by design."
+  ]
+}

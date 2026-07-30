@@ -1,0 +1,113 @@
+{
+  "success": true,
+  "status": "CERTIFIED_AFTER_TERMINAL_RECOVERY",
+  "mode": "mlb_end_to_end_daily_closure_v1",
+  "generatedAt": "2026-07-30T12:45:18.160Z",
+  "operatingDate": "2026-07-29",
+  "operatingDayId": "1f926d6c-d37f-48cd-ad19-2a08ee464a7e",
+  "scheduledGames": 16,
+  "completedGamesObserved": 16,
+  "validPregamePredictionCandidates": 48,
+  "currentBoardCandidates": 48,
+  "officialPicks": 0,
+  "canonicalResultsCertified": true,
+  "recoveredTerminalEvents": [
+    {
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:79744",
+      "matchup": "ATL @ NYM",
+      "startTime": "2026-07-29T23:10:00Z",
+      "mlbStatsGamePk": 823598,
+      "finalScore": "ATL 1, NYM 0"
+    },
+    {
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:78910",
+      "matchup": "HOU @ LAA",
+      "startTime": "2026-07-30T01:38:00Z",
+      "mlbStatsGamePk": 824002,
+      "finalScore": "HOU 7, LAA 4"
+    },
+    {
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:78918",
+      "matchup": "BOS @ ATH",
+      "startTime": "2026-07-30T01:40:00Z",
+      "mlbStatsGamePk": 824973,
+      "finalScore": "BOS 4, ATH 2"
+    },
+    {
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:78911",
+      "matchup": "SEA @ LAD",
+      "startTime": "2026-07-30T02:10:00Z",
+      "mlbStatsGamePk": 823924,
+      "finalScore": "LAD 4, SEA 2"
+    }
+  ],
+  "resultRecovery": {
+    "provider": "mlb_stats_api",
+    "endpoint": "/api/v1/schedule?sportId=1&startDate=2026-07-29&endDate=2026-07-30&hydrate=team,venue",
+    "providerCallsMade": 1,
+    "rowsReceived": 26,
+    "targetRowsRecovered": 4,
+    "gameResultsInserted": 4,
+    "sportEventsUpdated": 4,
+    "idempotencyRepeat": {
+      "providerCallsMade": 1,
+      "rowsReceived": 26,
+      "rowsReused": 4,
+      "eventRowsUpdated": 0
+    }
+  },
+  "settlement": {
+    "dryRun": {
+      "checked": 48,
+      "eligible": 48,
+      "settled": 48,
+      "wins": 27,
+      "losses": 21,
+      "pushes": 0,
+      "skipped": 0,
+      "unresolved": 0,
+      "warnings": []
+    },
+    "executed": true,
+    "checked": 48,
+    "eligible": 48,
+    "settled": 48,
+    "wins": 27,
+    "losses": 21,
+    "pushes": 0,
+    "skipped": 0,
+    "unresolved": 0,
+    "officialSettled": 0,
+    "hypotheticalSettled": 48,
+    "providerCallsMade": 0,
+    "warnings": []
+  },
+  "learningEvidence": {
+    "implementation": "prediction_history_settlement_v2_read_only",
+    "acceptedSamples": 402,
+    "rejectedSamples": 32,
+    "trainedSamples": 0,
+    "appliedWeightUpdates": 0,
+    "automaticTraining": false,
+    "modelWeightMutation": false,
+    "latestWeightUpdate": "2026-07-08T01:18:49.804178+00:00"
+  },
+  "performanceStatus": {
+    "available": true,
+    "source": "Performance Product Contract / Performance Scope V2",
+    "postSettlementVisibility": "settled prediction_history rows are available to Performance read models",
+    "automaticTraining": false
+  },
+  "schedulerHealthAlignment": {
+    "writeSchedulerCron": "*/10 * * * *",
+    "heartbeatCron": "3,33 * * * *",
+    "healthCadenceMinutes": 10,
+    "healthGraceMinutes": 10,
+    "legacyHealthCronTextRemoved": true
+  },
+  "smokeClassification": "LOCAL_SMOKE_HARNESS_UNRELIABLE_ON_WINDOWS",
+  "certificationCausedProviderCalls": 2,
+  "certificationCausedMutations": 52,
+  "manualVercelDeployment": false,
+  "localServerSmokeRun": false
+}

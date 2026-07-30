@@ -1,6 +1,6 @@
 # MLB Autonomous Operations V1
 
-Date: 2026-07-29
+Date: 2026-07-30
 
 Status: COMPLETE
 
@@ -40,3 +40,9 @@ If the computer restarts, cron misses, network fails or a provider outage occurs
 - `NO_CERTIFIED_PLATFORM_REGRESSION_PASS`
 
 No prediction engine, settlement rule, probability, confidence, Trust, Official Pick policy, model weight or retrospective prediction behavior was changed.
+
+## First Production Certification
+
+On `2026-07-29`, production served commit `9c066b00aaf0c348d9948e13af48a5f10982d40f` and `/api/operations/mlb-autonomous-operations` reported the `*/10 * * * *` write scheduler plus `3,33 * * * *` heartbeat policy. Four late terminal results required bounded canonical recovery on `2026-07-30`; after recovery, 48 prospective prediction rows settled with 27 wins, 21 losses, 0 pushes, 0 unresolved rows, 0 settlement provider calls and no model training.
+
+The Windows local smoke harness is classified separately as `LOCAL_SMOKE_HARNESS_UNRELIABLE_ON_WINDOWS`; no local server smoke is part of this certification.

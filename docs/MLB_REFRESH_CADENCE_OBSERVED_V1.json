@@ -1,0 +1,35 @@
+{
+  "success": true,
+  "status": "RECOVERED_AND_POLICY_ALIGNED",
+  "mode": "mlb_refresh_cadence_observed_v1",
+  "generatedAt": "2026-07-30T12:45:18.160Z",
+  "operatingDate": "2026-07-29",
+  "writeSchedulerCron": "*/10 * * * *",
+  "heartbeatCron": "3,33 * * * *",
+  "healthExpectedCadenceMinutes": 10,
+  "healthGraceMinutes": 10,
+  "recommendedRefreshCadence": {
+    "writeScheduler": "10 minutes",
+    "heartbeat": "30 minutes",
+    "nearStartOdds": "5-10 minutes when budget allows",
+    "pregameOdds": "15 minutes inside normal pregame window",
+    "earlyPregameOdds": "60 minutes outside near-start windows",
+    "postStartMarkets": "disabled; results and settlement only"
+  },
+  "fiveToTenMinuteRefreshFeasible": true,
+  "feasibilityNotes": [
+    "The scheduler can invoke the protected operating-day route every 10 minutes.",
+    "Five-minute odds refresh should remain event-window and budget gated, not blanket all-day polling.",
+    "Completed and live events continue to block market refresh and allow only status/results/settlement paths."
+  ],
+  "eventWindowsAfterRecovery": [
+    { "eventId": "baseball_mlb:mlb:sportsdataio:event:79744", "matchup": "ATL @ NYM", "status": "completed", "window": "POSTGAME", "marketRefreshAllowed": false },
+    { "eventId": "baseball_mlb:mlb:sportsdataio:event:78910", "matchup": "HOU @ LAA", "status": "completed", "window": "POSTGAME", "marketRefreshAllowed": false },
+    { "eventId": "baseball_mlb:mlb:sportsdataio:event:78918", "matchup": "BOS @ ATH", "status": "completed", "window": "POSTGAME", "marketRefreshAllowed": false },
+    { "eventId": "baseball_mlb:mlb:sportsdataio:event:78911", "matchup": "SEA @ LAD", "status": "completed", "window": "POSTGAME", "marketRefreshAllowed": false }
+  ],
+  "postStartSafetyObserved": true,
+  "duplicateSnapshotCount": "not changed by terminal recovery",
+  "certificationCausedProviderCalls": 3,
+  "certificationCausedMutations": 52
+}

@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON } from '@/config/mlb-operating-day-scheduler'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { ACTIVE_EVENT_TIMEZONE, puertoRicoLocalDateFromUtc, puertoRicoUtcRange } from '@/services/active-event.service'
 import { getCurrentBoard } from '@/services/current-board.service'
@@ -880,7 +881,7 @@ function schedulerJobs(lifecycle: LifecycleEventRow[], budget: Awaited<ReturnTyp
     id: 'github_actions_production_operating_day_scheduler',
     name: 'GitHub Actions Production Operating Day Scheduler',
     path: '/api/cron/operating-day',
-    cadence: '7,22,37,52 * * * *',
+    cadence: MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON,
     active: true,
     timezone: 'UTC GitHub schedule; service resolves America/Puerto_Rico operating date',
     lastRunAt: lifecycle[0]?.created_at ?? null,
@@ -1179,7 +1180,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     },
     schedulerAudit: {
       configuredCronCount: 1,
-      configuredCrons: [{ owner: 'github_actions', path: '/api/cron/operating-day', schedule: '7,22,37,52 * * * *', dryRun: false }],
+      configuredCrons: [{ owner: 'github_actions', path: '/api/cron/operating-day', schedule: MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON, dryRun: false }],
       jobs: schedulerJobs(lifecycle, budget),
       finding: 'GitHub Actions is the single frequent write-capable scheduler; vercel.json has no operating-day cron ownership, and adaptive status remains the decision layer over execution.',
     },
