@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-07-30 Pick Analyzer V1 Final Certification
+
+- Declared final V1 verdict `PICK_ANALYZER_V1_READY` after Phases 1 through 6 passed and Phase 7 remained deferred under Post-V1 change control.
+- Added final certification, evidence index, release notes, limitations and post-release operations artifacts.
+- Official V1 completion is now 100%. Production runtime behavior remains certified at commit `901811db17cbbc6a693b1021c070ec1f52ea0911`; Phase 5 and Phase 6 changes are documentation/certification-only and do not require a runtime deployment to satisfy V1 behavior.
+- No final release tag was created because the canonical plan did not explicitly authorize a new V1 tag. Existing tag `v1.0-platform-certified` was not moved or overwritten.
+- Remaining limitations are documented: non-MLB production recommendations are Post-V1, unsupported markets remain blocked, all available Odds API data has not been downloaded, flat all-sport 5-minute polling is not certified, automatic model training is disabled, and Official Picks remain policy-gated and may be zero.
+- No local server smoke, provider calls, provider credits, production data mutations, prediction writes, result writes, settlement writes, learning writes, model training, model-weight mutation, probability change, confidence change, Trust change, Official Pick policy change, epoch activation or manual Vercel deployment was performed.
+
 ## 2026-07-30 V1 Phase 5 Final Validation Bundle
 
 - Certified Phase 5 with `docs/PICK_ANALYZER_V1_FINAL_VALIDATION_BUNDLE.md`, `docs/PICK_ANALYZER_V1_FINAL_VALIDATION_MATRIX.json`, `docs/PICK_ANALYZER_V1_DEFINITION_OF_DONE_MATRIX.json`, `docs/PICK_ANALYZER_V1_PRODUCTION_CERTIFICATION.json` and `docs/PICK_ANALYZER_V1_PROVIDER_MUTATION_ACCOUNTING.json`.

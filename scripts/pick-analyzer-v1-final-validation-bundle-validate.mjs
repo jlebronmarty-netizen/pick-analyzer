@@ -14,11 +14,13 @@ const bundle = read('docs/PICK_ANALYZER_V1_FINAL_VALIDATION_BUNDLE.md')
 const phase = (number) => phases.phases.find((item) => item.phase === number)
 const validatorFailures = matrix.validators.filter((item) => item.result === 'FAIL')
 const nonSupersededFailures = validatorFailures.filter((item) => item.result !== 'SUPERSEDED')
+const phase6Status = phase(6)?.status
+const completionPercent = scope.currentCompletionPercent
 
 const checks = [
   ['phases 1 through 5 pass', [1, 2, 3, 4, 5].every((number) => ['complete', 'complete_with_this_artifact'].includes(phase(number)?.status))],
-  ['phase 6 remains pending', phase(6)?.status === 'remaining'],
-  ['completion is 96 before final declaration', scope.currentCompletionPercent === 96],
+  ['phase 6 is pending or complete depending on declaration stage', phase6Status === 'remaining' || phase6Status === 'complete'],
+  ['completion is 96 before final declaration or 100 after declaration', completionPercent === 96 || completionPercent === 100],
   ['validation matrix pass', matrix.success === true && matrix.status === 'PASS'],
   ['no non-superseded validator failures', nonSupersededFailures.length === 0],
   ['definition of done matrix pass', dod.success === true && dod.status === 'PASS' && dod.requirements.length >= 26],

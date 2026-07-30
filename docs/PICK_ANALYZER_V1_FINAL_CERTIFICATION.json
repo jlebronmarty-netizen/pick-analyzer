@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "artifact": "PICK_ANALYZER_V1_FINAL_CERTIFICATION",
+  "generatedAt": "2026-07-30T16:10:00-04:00",
+  "timezone": "America/Puerto_Rico",
+  "verdict": "PICK_ANALYZER_V1_READY",
+  "status": "PASS",
+  "success": true,
+  "repository": "https://github.com/jlebronmarty-netizen/pick-analyzer.git",
+  "branch": "main",
+  "phase6BaseCommit": "f8d6df288108415fe93e5b8f77414627732d956a",
+  "finalCertificationCommit": "phase6_final_commit_reported_after_push",
+  "productionRuntimeCommit": "901811db17cbbc6a693b1021c070ec1f52ea0911",
+  "productionRuntimeAlignment": "V1 runtime behavior aligned; Phase 5 and Phase 6 are documentation/certification-only and do not require runtime redeployment",
+  "completionPercent": 100,
+  "phaseTable": [
+    { "phase": 1, "name": "Product scope freeze", "status": "PASS" },
+    { "phase": 2, "name": "First full MLB autonomous operating-day certification", "status": "PASS" },
+    { "phase": 3, "name": "Release-candidate route and artifact consistency sweep", "status": "PASS" },
+    { "phase": 4, "name": "Unsupported-market and recommendation-policy lock", "status": "PASS" },
+    { "phase": 5, "name": "Final validation bundle", "status": "PASS" },
+    { "phase": 6, "name": "V1 complete declaration", "status": "PASS" },
+    { "phase": 7, "name": "Post-V1 backlog activation", "status": "DEFERRED" }
+  ],
+  "scope": {
+    "primarySport": "MLB",
+    "markets": ["moneyline", "spread_runline", "totals"],
+    "recommendationPolicy": "projection_only_until_all_certification_gates_pass",
+    "training": "automatic_training_disabled"
+  },
+  "sportLifecycleMatrix": [
+    { "sport": "MLB", "v1Status": "production_core", "predictionReadiness": "production_ready_for_core_workflow", "recommendationReadiness": "policy_gated_no_forced_pick" },
+    { "sport": "NFL", "v1Status": "preview", "predictionReadiness": "preview_only", "recommendationReadiness": "blocked" },
+    { "sport": "NHL", "v1Status": "preview", "predictionReadiness": "preview_only", "recommendationReadiness": "blocked" },
+    { "sport": "NBA", "v1Status": "data_only", "predictionReadiness": "not_production_certified", "recommendationReadiness": "blocked" },
+    { "sport": "Soccer", "v1Status": "data_only", "predictionReadiness": "not_production_certified", "recommendationReadiness": "blocked" },
+    { "sport": "BSN", "v1Status": "data_only", "predictionReadiness": "not_production_certified", "recommendationReadiness": "blocked" },
+    { "sport": "Tennis", "v1Status": "unavailable", "predictionReadiness": "not_production_certified", "recommendationReadiness": "blocked" },
+    { "sport": "UFC", "v1Status": "data_only", "predictionReadiness": "not_production_certified", "recommendationReadiness": "blocked" }
+  ],
+  "marketCoverage": {
+    "v1ProductionCore": ["moneyline", "spread_runline", "totals"],
+    "unsupportedRecommendationMarkets": ["player_props", "pitcher_props", "batter_props", "team_totals", "nrfi_yrfi", "first_five", "alternate_lines", "live_betting"],
+    "multiBookArbitrage": "not_certified_beyond_stored_consensus_evidence"
+  },
+  "seasonCoverage": {
+    "mlb": ["2026", "2025"],
+    "nonMlb": "partial_current_only_empty_or_blocked_by_sport_and_provider"
+  },
+  "refreshPolicy": {
+    "flatAllSportFiveMinutePollingCertified": false,
+    "mlbAdaptiveRefreshFeasible": true,
+    "recommendedCadence": {
+      "moreThan24HoursBeforeStart": "60 minutes",
+      "twoTo24HoursBeforeStart": "15 minutes",
+      "lessThan2HoursBeforeStart": "5-10 minutes when budget allows",
+      "afterStart": "stop pregame odds refresh",
+      "afterFinal": "result sync, settlement and Performance lifecycle"
+    },
+    "estimatedCallsAndCredits": {
+      "mlbOnlyTenMinuteFullDay": { "callsPerDay": 144, "creditsPerMonth": 4320 },
+      "mlbOnlyFiveMinuteFullDay": { "callsPerDay": 288, "creditsPerMonth": 8640 },
+      "allSupportedSportsTenMinuteFullDay": { "callsPerDay": 1728, "creditsPerMonth": 51840 },
+      "allSupportedSportsFiveMinuteFullDay": { "callsPerDay": 3456, "creditsPerMonth": 103680 },
+      "adaptiveSupportedSportEstimateBeforeTuning": { "callsPerDay": 1152, "creditsPerMonth": 34560 }
+    }
+  },
+  "validationSummary": {
+    "phase5Bundle": "PASS",
+    "definitionOfDoneMatrix": "PASS",
+    "productionCertification": "PASS_WITH_DOCUMENTED_LATENCY_RISK",
+    "providerAccounting": "PASS",
+    "build": "PASS",
+    "staticPages": 386,
+    "localServerSmokeRun": false,
+    "localSmokeClassification": "LOCAL_SMOKE_HARNESS_UNRELIABLE_ON_WINDOWS"
+  },
+  "providerAccounting": {
+    "providerCallsMade": 0,
+    "providerCreditsUsed": 0,
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "modelWeightChanges": 0,
+    "epochChanges": 0
+  },
+  "officialPickStatus": "No guaranteed active Official Picks; Official Picks remain policy-gated and may be zero when eligibility gates are not met.",
+  "automaticTrainingStatus": "disabled_not_authorized_in_v1",
+  "knownLimitations": [
+    "All available Odds API data has not been downloaded.",
+    "Flat all-sport 5-minute polling is not certified.",
+    "Unsupported markets remain blocked from recommendations.",
+    "Non-MLB production recommendations are Post-V1.",
+    "Data Coverage compact route latency is variable but semantically passes.",
+    "Operations health can report DEGRADED while still serving the required health contract."
+  ],
+  "dirtyFilesExcludedFromRelease": [
+    "src/app/login/page.tsx",
+    "src/app/register/page.tsx",
+    "docs/build-memory-optimization-v1-phase-b-external-supabase.json",
+    "docs/build-memory-optimization-v1-phase-b-final.json",
+    "docs/build-memory-optimization-v1-phase-b-import-pressure.json",
+    "docs/build-memory-optimization-v1-phase-b.json"
+  ],
+  "tagAction": "NO_TAG_CREATED_CANONICAL_PLAN_DID_NOT_EXPLICITLY_AUTHORIZE_FINAL_V1_TAG",
+  "certificationMarkers": [
+    "V1_PHASE_6_PASS",
+    "V1_ALL_PHASES_PASS",
+    "V1_100_PERCENT_COMPLETE",
+    "V1_CHANGE_CONTROL_PASS",
+    "V1_POST_V1_SEPARATION_PASS",
+    "NO_SCOPE_EXPANSION_PASS",
+    "NO_NEW_FEATURES_PASS",
+    "NO_UNAUTHORIZED_PROVIDER_CALL_PASS",
+    "NO_UNAUTHORIZED_PRODUCTION_MUTATION_PASS",
+    "NO_RETROSPECTIVE_PREDICTION_PASS",
+    "NO_RESULT_FABRICATION_PASS",
+    "NO_FORCED_SETTLEMENT_PASS",
+    "NO_MODEL_WEIGHT_MUTATION_PASS",
+    "NO_EPOCH_ACTIVATION_PASS",
+    "PICK_ANALYZER_V1_READY"
+  ]
+}

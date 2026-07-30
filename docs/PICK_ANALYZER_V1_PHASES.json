@@ -73,7 +73,7 @@
     {
       "phase": 6,
       "name": "V1 complete declaration",
-      "status": "remaining",
+      "status": "complete",
       "exitCriteria": [
         "final_commit_recorded",
         "production_commit_alignment_verified",
@@ -102,6 +102,10 @@
     "V1_PRODUCTION_CERTIFICATION_PASS",
     "V1_PROVIDER_ACCOUNTING_PASS",
     "V1_PHASE_5_PASS",
+    "V1_PHASE_6_PASS",
+    "V1_ALL_PHASES_PASS",
+    "V1_100_PERCENT_COMPLETE",
+    "PICK_ANALYZER_V1_READY",
     "NO_CODE_CHANGE_PASS",
     "NO_PROVIDER_CALL_PASS",
     "NO_PRODUCTION_MUTATION_PASS"

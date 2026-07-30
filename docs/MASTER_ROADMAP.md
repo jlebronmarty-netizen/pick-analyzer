@@ -22,7 +22,7 @@ Primary mission: become a trustworthy sports betting intelligence platform that 
 
 Current certification answer: Pick Analyzer has many required components, but it is not yet certified to recommend real-money bets. The read-only MLB certification audit reviewed 1,194 prediction rows and found 0 certified live pregame rows, 0 production-eligible rows and 0 epoch-linked rows. Valid pregame rows remain shadow/pre-certification evidence only.
 
-Final Completion Plan V1 is now the scope-control contract for the path to V1. The current V1 completion estimate is 96% after Phase 5 final validation bundle certification. V1 is limited to MLB core market operation, truthful product readiness labels, adaptive refresh under provider-budget policy, canonical result -> settlement -> learning -> Performance visibility, disabled automatic model training and explicit exclusion of unsupported markets from available recommendations.
+Final Completion Plan V1 is now complete. Pick Analyzer V1 is `PICK_ANALYZER_V1_READY` at 100% completion after Phase 6 final certification. V1 is limited to MLB core market operation, truthful product readiness labels, adaptive refresh under provider-budget policy, canonical result -> settlement -> learning -> Performance visibility, disabled automatic model training and explicit exclusion of unsupported markets from available recommendations.
 
 Evidence: `docs/PICK_ANALYZER_FINAL_COMPLETION_PLAN_V1.md`, `docs/PICK_ANALYZER_V1_SCOPE.json`, `docs/PICK_ANALYZER_V1_PHASES.json`, `docs/PICK_ANALYZER_V1_DEFINITION_OF_DONE.md`, `docs/PICK_ANALYZER_POST_V1_BACKLOG.md` and `docs/PICK_ANALYZER_CHANGE_CONTROL_POLICY.md`.
 
@@ -37,6 +37,10 @@ Evidence: `docs/UNSUPPORTED_MARKET_RECOMMENDATION_POLICY_LOCK_V1.md`, `docs/UNSU
 V1 Phase 5 update on 2026-07-30: Phase 5 is PASS. The final validation bundle, validation matrix, Definition of Done matrix, production certification and provider/mutation accounting are complete. Production serves commit `901811db17cbbc6a693b1021c070ec1f52ea0911`; all required read-only production endpoints returned HTTP 200. The compact Data Coverage route has variable latency, recorded as a non-blocking operational risk rather than a V1 blocker. The next approved incomplete phase is Phase 6, V1 complete declaration.
 
 Evidence: `docs/PICK_ANALYZER_V1_FINAL_VALIDATION_BUNDLE.md`, `docs/PICK_ANALYZER_V1_FINAL_VALIDATION_MATRIX.json`, `docs/PICK_ANALYZER_V1_DEFINITION_OF_DONE_MATRIX.json`, `docs/PICK_ANALYZER_V1_PRODUCTION_CERTIFICATION.json`, `docs/PICK_ANALYZER_V1_PROVIDER_MUTATION_ACCOUNTING.json` and `scripts/pick-analyzer-v1-final-validation-bundle-validate.mjs`.
+
+V1 Phase 6 update on 2026-07-30: Phase 6 is PASS and the final verdict is `PICK_ANALYZER_V1_READY`. Production runtime behavior is certified at commit `901811db17cbbc6a693b1021c070ec1f52ea0911`; Phase 5 and Phase 6 are documentation/certification-only and do not require runtime redeployment. Post-V1 remains separate under change control, no tag was created, and `v1.0-platform-certified` was not moved.
+
+Evidence: `docs/PICK_ANALYZER_V1_FINAL_CERTIFICATION.md`, `docs/PICK_ANALYZER_V1_FINAL_CERTIFICATION.json`, `docs/PICK_ANALYZER_V1_EVIDENCE_INDEX.md`, `docs/PICK_ANALYZER_V1_RELEASE_NOTES.md`, `docs/PICK_ANALYZER_V1_LIMITATIONS.md`, `docs/PICK_ANALYZER_V1_POST_RELEASE_OPERATIONS.md` and `scripts/pick-analyzer-v1-final-certification-validate.mjs`.
 
 ## Certification-First Priorities
 

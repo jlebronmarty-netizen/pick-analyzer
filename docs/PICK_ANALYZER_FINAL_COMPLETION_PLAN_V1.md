@@ -13,9 +13,9 @@ V1 is not a promise that every sport, market, prop, model family or provider fea
 
 ## Current Completion
 
-Estimated V1 completion: **96%**.
+Estimated V1 completion: **100%**.
 
-The platform has production MLB core architecture, current product surfaces, route inventory evidence, provider-budget policy, adaptive refresh policy, settlement/learning lifecycle evidence, Performance visibility and production route evidence for key routes. Phase 2, Phase 3, Phase 4 and Phase 5 are complete. Remaining work is certification closure: V1 declaration.
+The platform has production MLB core architecture, current product surfaces, route inventory evidence, provider-budget policy, adaptive refresh policy, settlement/learning lifecycle evidence, Performance visibility and production route evidence for key routes. Phases 1 through 6 are complete. Final verdict: `PICK_ANALYZER_V1_READY`.
 
 ## V1 Scope
 
@@ -102,7 +102,7 @@ Daily MLB operation is currently possible for core workflows when credentials, p
 3. Release-candidate route and artifact consistency sweep for Dashboard, Current Board, Probability Picks, Performance, AI Operations, Operations, Data Coverage and Providers. Complete.
 4. Unsupported-market and recommendation-policy lock to ensure blocked markets cannot appear as available recommendations. Complete.
 5. Final non-server validation bundle: JSON validation, doc-link checks, validators, lint where applicable, build, diff check and secret scan. Complete.
-6. V1 declaration with exact commit, production commit alignment and certified evidence index.
+6. V1 declaration with exact commit, production commit alignment and certified evidence index. Complete.
 7. Post-V1 backlog activation under change control.
 
 ## Certification Markers
