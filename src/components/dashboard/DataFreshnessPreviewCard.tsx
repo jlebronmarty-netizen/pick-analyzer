@@ -51,6 +51,8 @@ function tone(status: string) {
   if (value === 'fresh') return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100'
   if (value === 'aging' || value === 'pending') return 'border-amber-500/30 bg-amber-500/10 text-amber-100'
   if (value === 'stale' || value === 'failed') return 'border-red-500/30 bg-red-500/10 text-red-100'
+  if (value === 'not_supported') return 'border-slate-600 bg-slate-900/80 text-slate-300'
+  if (value === 'not_available') return 'border-sky-500/30 bg-sky-500/10 text-sky-100'
   return 'border-slate-700 bg-slate-900/80 text-slate-100'
 }
 

@@ -3025,3 +3025,19 @@ Validation: `node scripts/pick-analyzer-v2-phase-a2-route-runtime-validate.mjs -
 Completion criteria: `PICK_ANALYZER_V2_PHASE_A2_ROUTE_RUNTIME_PASS`, `NO_LOCAL_SERVER_SMOKE_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_PROVIDER_CREDIT_PASS`, `NO_DATABASE_MUTATION_PASS`, `NO_PREDICTION_WRITE_PASS`, `NO_SETTLEMENT_WRITE_PASS` and `NO_LEARNING_WRITE_PASS` are certified locally pending push authorization.
 
 Next bounded phase: A3 Scheduler and Freshness Inconsistencies.
+
+### 60. Pick Analyzer V2 Phase A3 Scheduler Freshness Integrity
+
+Objective: Certify scheduler/freshness source-of-truth consistency before continuing V2 into UI state work.
+
+Status: Complete locally pending push and production certification because runtime files changed.
+
+Scope: Bounded audit of GitHub workflow schedules, Vercel cron configuration, scheduler health reporting, adaptive refresh cadence, freshness thresholds, Puerto Rico operating-date handling, read-only health routes and dashboard freshness labels.
+
+Repairs: Operations health now reports the actual scheduler ownership model: Vercel crons are disabled and GitHub Actions owns the frequent write scheduler plus heartbeat. Data Freshness preview UI now distinguishes `NOT_SUPPORTED` from `NOT_AVAILABLE` so unsupported domains are not presented as generic unknown/unavailable state.
+
+Validation: `node scripts/pick-analyzer-v2-phase-a3-scheduler-freshness-validate.mjs --timeoutMs=30000 --maxFiles=400`, `node scripts/scheduler-health-alignment-v1-validate.mjs`, `node scripts/mlb-autonomous-operations-v1-validate.mjs`, `node scripts/mlb-operating-day-recovery-v1-validate.mjs`, `node scripts/autonomous-daily-ai-v1-validate.mjs`, JSON parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` passed. Build generated 386 static pages.
+
+Completion criteria: `PICK_ANALYZER_V2_PHASE_A3_SCHEDULER_FRESHNESS_PASS`, `SCHEDULER_SOURCE_OF_TRUTH_PASS`, `FRESHNESS_SEMANTICS_PASS`, `TIMEZONE_CONTRACT_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_PROVIDER_CREDIT_PASS`, `NO_DATABASE_MUTATION_PASS`, `NO_PREDICTION_WRITE_PASS`, `NO_RESULT_WRITE_PASS`, `NO_SETTLEMENT_WRITE_PASS` and `NO_LEARNING_WRITE_PASS` are certified locally pending push and automatic deployment verification.
+
+Next bounded phase: A4 UI States, Loading States and Stale Labels. Do not start A4 until A3 production certification is complete.

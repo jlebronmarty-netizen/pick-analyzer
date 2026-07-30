@@ -1,0 +1,420 @@
+{
+  "mode": "pick_analyzer_v2_phase_a3_scheduler_freshness_audit",
+  "generatedAt": "2026-07-30T23:14:28.145Z",
+  "baselineCommit": "41315dd7d15615a9bedb856a892c59d4f0cb4762",
+  "scope": "scheduler, heartbeat, refresh cadence, freshness state, stale-state classification, timezone and scheduler health reporting",
+  "schedulerSourceOfTruthMatrix": [
+    {
+      "process": "operating-day write scheduler",
+      "sourceOfTruth": ".github/workflows/production-operating-day.yml + src/config/mlb-operating-day-scheduler.ts",
+      "configuredCadence": "*/10 * * * *",
+      "reportedCadence": "*/10 * * * *",
+      "timezone": "UTC trigger; America/Puerto_Rico operating date",
+      "lastSuccessSource": "operating_day_lifecycle_events completed_at/created_at",
+      "nextRunCalculation": "last successful protected invocation + 10 minutes",
+      "staleThreshold": "20 minutes scheduler window",
+      "degradedThreshold": "one missed interval after 20 minutes; critical at two missed intervals",
+      "disabledState": "not disabled",
+      "consumers": [
+        "/api/operations/health",
+        "/api/operations/adaptive-refresh/status",
+        "/api/operations/mlb-autonomous-operations",
+        "AdaptiveOperationsPanel"
+      ],
+      "mismatchFound": "operations-health limitation text referenced Vercel daily cron",
+      "severity": "P1",
+      "repair": "Updated operations-health limitation text to GitHub Actions ownership and empty Vercel cron state.",
+      "validationMethod": "static workflow/config/service parity validator"
+    },
+    {
+      "process": "operating-day heartbeat",
+      "sourceOfTruth": ".github/workflows/production-operating-day-heartbeat.yml + src/config/mlb-operating-day-scheduler.ts",
+      "configuredCadence": "3,33 * * * *",
+      "reportedCadence": "3,33 * * * *",
+      "timezone": "UTC trigger; America/Puerto_Rico operating state",
+      "lastSuccessSource": "read-only production observation and lifecycle status report",
+      "nextRunCalculation": "GitHub schedule minutes 3 and 33 each hour",
+      "staleThreshold": "observer-only; does not mutate stale state",
+      "degradedThreshold": "reported through operations health when protected success evidence is late",
+      "disabledState": "not disabled",
+      "consumers": [
+        "/api/operations/mlb-autonomous-operations"
+      ],
+      "mismatchFound": "",
+      "severity": "NONE",
+      "repair": "",
+      "validationMethod": "workflow/config/service parity validator"
+    },
+    {
+      "process": "MLB adaptive odds refresh",
+      "sourceOfTruth": "src/services/adaptive-refresh-orchestrator.service.ts",
+      "configuredCadence": "60 early, 15 pregame, 10 near start; budget-gated",
+      "reportedCadence": "60 early, 15 pregame, 10 near start; budget-gated",
+      "timezone": "America/Puerto_Rico operating date",
+      "lastSuccessSource": "accepted market timestamp plus completed provider check evidence",
+      "nextRunCalculation": "last accepted/provider timestamp + window policy",
+      "staleThreshold": "fresh cadence * odds aging multiplier",
+      "degradedThreshold": "AGING/DUE_SOON before STALE/DUE_NOW",
+      "disabledState": "NO_SLATE or POSTGAME market polling stopped",
+      "consumers": [
+        "/api/operations/adaptive-refresh/status",
+        "/api/operations/data-freshness",
+        "DataFreshnessPreviewCard"
+      ],
+      "mismatchFound": "UI collapsed NOT_SUPPORTED/NOT_AVAILABLE freshness states",
+      "severity": "P2",
+      "repair": "Updated UI tone mapping for NOT_SUPPORTED and NOT_AVAILABLE.",
+      "validationMethod": "static freshness-policy and UI state validator"
+    },
+    {
+      "process": "result ingestion, settlement and learning closure",
+      "sourceOfTruth": "existing operating-day service and lifecycle ledger",
+      "configuredCadence": "results every 5 live / 15 postgame when due; settlement after authoritative final results",
+      "reportedCadence": "results every 5 live / 15 postgame when due; settlement after authoritative final results",
+      "timezone": "America/Puerto_Rico operating date",
+      "lastSuccessSource": "operating_day_lifecycle_events and game_results",
+      "nextRunCalculation": "adaptive due-domain detection on next scheduler tick",
+      "staleThreshold": "results stale after postgame policy window when active",
+      "degradedThreshold": "pending/awaiting result remains visible, not healthy",
+      "disabledState": "not due before games finish",
+      "consumers": [
+        "/api/operations/health",
+        "/api/operations/mlb-autonomous-operations",
+        "Performance after settlement evidence"
+      ],
+      "mismatchFound": "",
+      "severity": "NONE",
+      "repair": "",
+      "validationMethod": "existing operating-day recovery validator plus A3 static checks"
+    }
+  ],
+  "configuredCadences": [
+    "GitHub write scheduler */10 * * * *",
+    "GitHub heartbeat 3,33 * * * *",
+    "Vercel crons disabled []",
+    "manual observer workflow_dispatch only"
+  ],
+  "reportedCadences": [
+    "MLB autonomous writeSchedulerFrequency */10 * * * *",
+    "MLB autonomous heartbeatFrequency 3,33 * * * *",
+    "adaptive status configuredCrons owner github_actions schedule */10 * * * *"
+  ],
+  "timezoneFindings": [
+    "GitHub cron expressions are UTC triggers.",
+    "Application operating date and UI timestamps use America/Puerto_Rico.",
+    "No daylight-saving conversion is introduced for Puerto Rico."
+  ],
+  "freshnessFindings": [
+    "Server freshness classifications remain authoritative.",
+    "Stale thresholds are not shorter than configured fresh cadence.",
+    "Future or missing timestamps are not classified as fresh by the existing safe-date/age logic."
+  ],
+  "healthFindings": [
+    "Operations health distinguishes last attempt from last successful protected invocation.",
+    "A late scheduler is reported as LATE/DEGRADED, not healthy.",
+    "Read-only health routes expose GET only and do not execute provider refresh routes."
+  ],
+  "uiFindings": [
+    "Data freshness UI now distinguishes NOT_SUPPORTED from NOT_AVAILABLE instead of collapsing both into a generic fallback tone.",
+    "Adaptive operations panel displays Puerto Rico-local timestamps."
+  ],
+  "defects": [
+    {
+      "severity": "P1",
+      "area": "operations-health scheduler reporting",
+      "defect": "Operations health still described a Vercel daily cron even though vercel.json contains no active crons and GitHub Actions owns the frequent scheduler.",
+      "repair": "Operations health limitation now states that Vercel crons are empty and GitHub Actions owns the write scheduler and heartbeat."
+    },
+    {
+      "severity": "P2",
+      "area": "dashboard data freshness UI",
+      "defect": "DataFreshnessPreviewCard treated NOT_SUPPORTED and NOT_AVAILABLE as generic neutral fallback states instead of preserving server freshness semantics.",
+      "repair": "DataFreshnessPreviewCard now maps NOT_SUPPORTED and NOT_AVAILABLE to distinct disabled/unavailable tones."
+    }
+  ],
+  "exactRepairs": [
+    {
+      "area": "operations-health scheduler reporting",
+      "repair": "Operations health limitation now states that Vercel crons are empty and GitHub Actions owns the write scheduler and heartbeat."
+    },
+    {
+      "area": "dashboard data freshness UI",
+      "repair": "DataFreshnessPreviewCard now maps NOT_SUPPORTED and NOT_AVAILABLE to distinct disabled/unavailable tones."
+    }
+  ],
+  "productionEvidence": [
+    {
+      "path": "/api/system/version",
+      "httpStatus": 200,
+      "latencyMs": 1224,
+      "productionCommit": "41315dd7d15615a9bedb856a892c59d4f0cb4762",
+      "providerCallsMade": 0,
+      "remoteMutationsMade": null,
+      "statusText": null,
+      "schedulerCadence": null
+    },
+    {
+      "path": "/api/operations/health",
+      "httpStatus": 200,
+      "latencyMs": 9701,
+      "productionCommit": "41315dd7d15615a9bedb856a892c59d4f0cb4762",
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "statusText": "DEGRADED",
+      "schedulerCadence": "LATE"
+    },
+    {
+      "path": "/api/operations/adaptive-refresh/status",
+      "httpStatus": 200,
+      "latencyMs": 5079,
+      "productionCommit": null,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "statusText": "PARTIAL",
+      "schedulerCadence": null
+    },
+    {
+      "path": "/api/operations/data-freshness",
+      "httpStatus": 200,
+      "latencyMs": 5043,
+      "productionCommit": null,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "statusText": "PARTIAL",
+      "schedulerCadence": null
+    },
+    {
+      "path": "/api/operations/mlb-autonomous-operations",
+      "httpStatus": 200,
+      "latencyMs": 8547,
+      "productionCommit": null,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "statusText": "YES_MLB_CORE",
+      "schedulerCadence": "*/10 + 3,33 heartbeat"
+    },
+    {
+      "path": "/api/data-coverage/health",
+      "httpStatus": 200,
+      "latencyMs": 12809,
+      "productionCommit": null,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "statusText": null,
+      "schedulerCadence": null
+    }
+  ],
+  "safety": {
+    "providerCallsMade": 0,
+    "providerCreditsConsumed": 0,
+    "databaseReads": "production read-only endpoint observation only; local validator performs static file reads",
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "validationResults": [
+    {
+      "name": "input exists: .github/workflows/production-operating-day.yml",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: .github/workflows/production-operating-day-heartbeat.yml",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: .github/workflows/operating-day-refresh.yml",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: vercel.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/config/mlb-operating-day-scheduler.ts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/services/operations-health.service.ts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/services/adaptive-refresh-orchestrator.service.ts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/services/mlb-autonomous-operations-v1.service.ts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/dashboard/DataFreshnessPreviewCard.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/dashboard/AdaptiveOperationsPanel.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/api/operations/health/route.ts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/api/operations/adaptive-refresh/status/route.ts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/api/operations/data-freshness/route.ts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/api/operations/mlb-autonomous-operations/route.ts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/api/cron/operating-day/route.ts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: docs/PROJECT_STATUS.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: docs/MASTER_ROADMAP.md",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "branch is main",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "scheduler config write cron is canonical",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "scheduler config heartbeat cron is canonical",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "production workflow uses shared expected write cadence",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "heartbeat workflow uses shared expected observer cadence",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "manual operating-day workflow has no schedule cron",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "vercel crons are disabled",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "adaptive status reports GitHub Actions ownership",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "MLB autonomous report imports canonical cron constants",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "operations health no longer claims one Vercel daily cron",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "operations health reports GitHub Actions ownership and Vercel empty crons",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "operations health distinguishes last scheduler run and success",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "operations health exposes next expected scheduler window",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "operations health has late and critical scheduler states",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "timezone contract uses Puerto Rico active event timezone",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "freshness states include not available and not supported semantics",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "UI freshness card maps NOT_AVAILABLE and NOT_SUPPORTED distinctly",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "adaptive operations panel displays Puerto Rico timestamps",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "read-only health routes expose GET only",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "read-only health routes do not directly call provider execution routes",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "obsolete 15-minute cron text absent from active runtime files",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "no local server smoke lifecycle in A3 validator",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "remainingRisks": [
+    "Repository evidence cannot inspect GitHub Actions enablement/paused state in the GitHub UI.",
+    "Production scheduler timeliness depends on future GitHub Actions execution and stored lifecycle rows; this phase certifies reporting consistency, not future run success.",
+    "Read-only production endpoints can observe current status but cannot repair late lifecycle evidence without an authorized scheduler execution."
+  ],
+  "finalVerdict": "PASS - scheduler/freshness reporting is coherent after scoped repairs."
+}

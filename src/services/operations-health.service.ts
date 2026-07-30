@@ -320,7 +320,7 @@ export async function getOperationsHealth() {
       configuredCrons: adaptive.schedulerAudit.configuredCrons,
       lastCronInvocation: adaptive.schedulerAudit.jobs[0]?.lastRunAt ?? null,
       nextScheduledRun: adaptive.schedulerAudit.jobs[0]?.nextRunAt ?? null,
-      limitation: 'vercel.json currently defines one daily Hobby-compatible cron; intraday cadence requires external scheduler or manual protected execution.',
+      limitation: 'vercel.json defines no active crons; GitHub Actions owns the frequent operating-day scheduler and heartbeat, while manual protected execution remains a fallback.',
       schedulerEvidenceSource: lastSuccessfulProtectedInvocationAt ? 'operating_day_lifecycle_events' : 'none',
       lastExternalSchedulerInvocationAt: lastSuccessfulProtectedInvocationAt,
       lastSuccessfulProtectedInvocationAt,
