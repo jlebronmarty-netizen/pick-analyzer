@@ -1,44 +1,42 @@
 # Product Route Inventory V1
 
-Generated: 2026-07-28T20:58:20.547Z
-
-This inventory was refreshed by Product Stabilization And Intelligence Consolidation V1.
+Generated: 2026-07-30T22:39:32.781Z
 
 ## Summary
 
 - User-facing page routes scanned: 28
-- API routes scanned: 428
-- Read-only diagnostic API routes: 70
-- Read-mostly API routes: 321
-- Mutation/protected API routes by path: 37
-- Runtime smoke: skipped by policy; use the fixed single-endpoint lifecycle harness for endpoint-specific checks.
-- Provider calls during inventory: 0
-- Remote mutations during inventory: 0
+- API routes scanned: 425
+- Major product routes classified: 16
+- API routes marked mutation/protected by path: 41
+- Bounded local smoke: skipped (LOCAL_SMOKE_HARNESS_UNRELIABLE_ON_WINDOWS; inventory generation is source-only and does not spawn a Next.js server.)
+- Provider calls during audit: 0
+- Remote mutations during audit: 0
 
 ## Major Route Matrix
 
-| Route | Label | Section | Data State | Current Status | Usefulness |
+| Route | Label | Section | Data State | Current Usefulness | Known Blockers |
 | --- | --- | --- | --- | --- | --- |
-| `/sports-center` | Sports Center | HOME | CURRENT_STORED | PRODUCTION_READY_WITH_WARNINGS | High |
-| `/ai-operations` | AI Briefing | OPERATIONS | CURRENT_STORED | INTERNAL_ONLY | High |
-| `/dashboard` | Dashboard | HOME | CURRENT_STORED | PRODUCTION_READY_WITH_WARNINGS | High |
-| `/performance` | Performance | PERFORMANCE | CURRENT_STORED | PRODUCTION_READY_WITH_WARNINGS | High |
-| `/probability-picks` | Probability Picks | PICKS | MODEL_GENERATED | LIMITED | High |
-| `/portfolio-intelligence` | Portfolio Intelligence | MARKETS | MODEL_GENERATED | LIMITED | High |
-| `/market-intelligence` | Market Intelligence | MARKETS | CURRENT_STORED | LIMITED | High |
-| `/closing-line-intelligence` | Closing Line Intelligence | MARKETS | CURRENT_STORED | LIMITED | High |
-| `/player-projections` | Player Projections | PROJECTIONS | MODEL_GENERATED | PRODUCTION_READY_WITH_WARNINGS | High |
-| `/autonomous-daily-ai` | Autonomous Daily AI | OPERATIONS | CURRENT_STORED | INTERNAL_ONLY | High |
-| `/data-coverage` | Data Coverage | ADMINISTRATION | CURRENT_STORED | INTERNAL_ONLY | High |
-| `/model` | Model Health | PERFORMANCE | CURRENT_STORED | INTERNAL_ONLY | High |
-| `/mlb-operations` | MLB Operations | OPERATIONS | CURRENT_STORED | INTERNAL_ONLY | High |
-| `/most-likely` | Most Likely | PICKS | CURRENT_STORED | PRODUCTION_READY_WITH_WARNINGS | High |
-| `/best-value` | Best Value | PICKS | CURRENT_STORED | PRODUCTION_READY_WITH_WARNINGS | High |
-| `/betting-workbench` | Betting Workbench | MARKETS | CURRENT_STORED | LIMITED | High |
+| `/` | Home | HOME | PREVIEW | Useful as a starting point only. | Primary daily workflows live under Dashboard and Probability Picks. |
+| `/dashboard` | Dashboard | HOME | CURRENT_STORED | High, but dense and mixes product and operator concerns. | Navigation density; some advanced panels expose technical states to normal users |
+| `/probability-picks` | Probability Picks | PICKS | MODEL_GENERATED | High when MLB rows exist; needs explicit eligibility labeling. | non-MLB future rows can be accepted before sport certification unless filtered |
+| `/most-likely` | Most Likely | PICKS | CURRENT_STORED | High for scanning likely outcomes. | depends on stored current-board coverage and aligned markets |
+| `/best-value` | Best Value | PICKS | CURRENT_STORED | Useful when stored prices and policy gates are available. | market coverage gaps |
+| `/arbitrage` | Arbitrage | MARKETS | BLOCKED | Limited until multi-book data is present. | multi-book provider coverage unavailable |
+| `/ai-bet-finder` | AI Bet Finder | MARKETS | CURRENT_STORED | Useful as an explanation and triage surface. | depends on stored board coverage |
+| `/projections` | Team Projections | PROJECTIONS | MODEL_GENERATED | Useful where stored projection rows exist. | sport-specific maturity varies |
+| `/player-projections` | Player Projections | PROJECTIONS | MODEL_GENERATED | High for pitcher workload analysis; market comparison is limited by prop coverage. | player-prop ingestion entitlement and identity overlap |
+| `/betting-workbench` | Betting Workbench | MARKETS | CURRENT_STORED | Useful for operators and advanced users. | market depth and technical language |
+| `/performance` | Performance | PERFORMANCE | CURRENT_STORED | High for model accountability. | requires settled rows and clear distinction between product and diagnostic rows |
+| `/ai-operations` | AI Operations | OPERATIONS | INTERNAL_ONLY | High for operators, not a primary consumer screen. | developer-oriented language |
+| `/model` | Model | PERFORMANCE | INTERNAL_ONLY | High for governance and operators. | should remain clearly administrative |
+| `/mlb-operations` | MLB Operations | OPERATIONS | CURRENT_STORED | High for operators. | provider contracts and market coverage |
+| `/game-intelligence` | Game Intelligence | PROJECTIONS | MODEL_GENERATED | Useful for MLB game review. | event coverage and current stored data availability |
+| `/admin/historical-diagnostics` | Historical Diagnostics | ADMINISTRATION | MIGRATION_PENDING | High for administrators only. | DATA_FOUNDATION_V2_EPOCH inactive and seed unapplied |
+
+## API Inventory
+
+The machine-readable inventory in `docs/product-route-inventory-v1.json` includes every discovered `src/app/api/**/route.ts` file with a conservative path-based read-only/protected classification.
 
 ## Certification
 
 PRODUCT_ROUTE_INVENTORY_PASS
-PRODUCT_ROUTE_INVENTORY_REFRESHED_BY_STABILIZATION_V1
-NO_PROVIDER_CALLS_PASS
-NO_REMOTE_MUTATIONS_PASS

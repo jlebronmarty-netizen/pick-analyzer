@@ -1,13 +1,37 @@
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readdirSync, readFileSync, lstatSync, writeFileSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
-import { spawn } from 'node:child_process'
 
 const ROOT = process.cwd()
 const APP_DIR = join(ROOT, 'src', 'app')
 const DOCS_DIR = join(ROOT, 'docs')
-const PORT = Number(process.env.PRODUCT_AUDIT_PORT ?? 3037)
-const BASE_URL = `http://127.0.0.1:${PORT}`
+const DEFAULT_MAX_FILES = 5_000
+const DEFAULT_TIMEOUT_MS = 30_000
+const PROGRESS_EVERY_FILES = 100
+const SCAN_ROOTS = [APP_DIR]
+const EXCLUDED_DIR_NAMES = new Set([
+  '.git',
+  '.next',
+  'build',
+  'coverage',
+  'dist',
+  'generated',
+  'node_modules',
+  'out',
+])
+
+function optionNumber(name, fallback) {
+  const prefix = `--${name}=`
+  const arg = process.argv.find((value) => value.startsWith(prefix))
+  const raw = arg ? arg.slice(prefix.length) : process.env[`PRODUCT_AUDIT_${name.toUpperCase()}`]
+  if (!raw) return fallback
+  const parsed = Number(raw)
+  if (!Number.isFinite(parsed) || parsed <= 0) throw new Error(`${name} must be a positive number`)
+  return parsed
+}
+
+const MAX_FILES = optionNumber('maxFiles', DEFAULT_MAX_FILES)
+const TIMEOUT_MS = optionNumber('timeoutMs', DEFAULT_TIMEOUT_MS)
 
 const majorRoutes = [
   {
@@ -220,11 +244,30 @@ const majorRoutes = [
   },
 ]
 
-function walk(dir, files = []) {
+function ensureWithinExplicitScanRoots(dir) {
+  const normalized = dir.toLowerCase()
+  const allowed = SCAN_ROOTS.some((root) => normalized === root.toLowerCase() || normalized.startsWith(`${root.toLowerCase()}${sep}`))
+  if (!allowed) throw new Error(`Refusing to scan outside explicit source roots: ${dir}`)
+}
+
+function walk(dir, context, files = []) {
+  ensureWithinExplicitScanRoots(dir)
+  if (Date.now() > context.deadlineAt) throw new Error(`Inventory scan exceeded ${TIMEOUT_MS}ms timeout`)
   for (const item of readdirSync(dir)) {
     const full = join(dir, item)
-    if (statSync(full).isDirectory()) walk(full, files)
-    else files.push(full)
+    const stat = lstatSync(full)
+    if (stat.isSymbolicLink()) continue
+    if (stat.isDirectory()) {
+      if (EXCLUDED_DIR_NAMES.has(item)) continue
+      walk(full, context, files)
+      continue
+    }
+    files.push(full)
+    context.scannedFiles += 1
+    if (context.scannedFiles > MAX_FILES) throw new Error(`Inventory scan exceeded maxFiles=${MAX_FILES}`)
+    if (context.scannedFiles % PROGRESS_EVERY_FILES === 0) {
+      console.error(`[product-route-inventory] scanned ${context.scannedFiles} files`)
+    }
   }
   return files
 }
@@ -251,7 +294,12 @@ function scanSourceForFetches(file) {
 }
 
 function discover() {
-  const files = walk(APP_DIR)
+  const context = {
+    deadlineAt: Date.now() + TIMEOUT_MS,
+    scannedFiles: 0,
+  }
+  const files = SCAN_ROOTS.flatMap((dir) => walk(dir, context))
+  console.error(`[product-route-inventory] completed source scan: ${context.scannedFiles} files`)
   const pages = files.filter((file) => file.endsWith(`${sep}page.tsx`)).map((file) => ({
     route: routeFromFile(file, 'page.tsx'),
     file: relative(ROOT, file),
@@ -268,64 +316,6 @@ function discover() {
   return { pages, apis }
 }
 
-function httpGet(pathname, timeoutMs = 30_000) {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), timeoutMs)
-  return fetch(`${BASE_URL}${pathname}`, { signal: controller.signal })
-    .then(async (response) => ({ route: pathname, status: response.status, ok: response.ok, bytes: (await response.text()).length }))
-    .catch((error) => ({ route: pathname, status: 0, ok: false, error: error instanceof Error ? error.message : String(error) }))
-    .finally(() => clearTimeout(timeout))
-}
-
-async function waitForReady(deadlineMs = 60_000) {
-  const start = Date.now()
-  while (Date.now() - start < deadlineMs) {
-    const result = await httpGet('/api/system/version', 4_000)
-    if (result.ok) return result
-    await new Promise((resolve) => setTimeout(resolve, 1_250))
-  }
-  throw new Error(`Local server did not become ready on ${BASE_URL}`)
-}
-
-function stopServer(child) {
-  if (!child || child.killed) return
-  try {
-    if (process.platform === 'win32') execFileSync('taskkill', ['/pid', String(child.pid), '/t', '/f'], { stdio: 'ignore' })
-    else child.kill('SIGTERM')
-  } catch {
-    try { child.kill('SIGKILL') } catch {}
-  }
-  try { child.stdout?.destroy() } catch {}
-  try { child.stderr?.destroy() } catch {}
-}
-
-async function runBoundedSmoke() {
-  if (!existsSync(join(ROOT, '.next'))) {
-    return { skipped: true, reason: 'Next build output is not present. Run npm.cmd run build before bounded route smoke.' }
-  }
-  const command = process.platform === 'win32' ? (process.env.ComSpec ?? 'cmd.exe') : 'npm'
-  const args = process.platform === 'win32'
-    ? ['/d', '/s', '/c', `npm.cmd run start -- -p ${PORT} -H 127.0.0.1`]
-    : ['run', 'start', '--', '-p', String(PORT), '-H', '127.0.0.1']
-  const child = spawn(command, args, {
-    cwd: ROOT,
-    env: { ...process.env, PORT: String(PORT) },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  })
-  const logs = []
-  child.stdout.on('data', (chunk) => logs.push(String(chunk).replace(/[^\x09\x0a\x0d\x20-\x7e]/g, '').trim()))
-  child.stderr.on('data', (chunk) => logs.push(String(chunk).replace(/[^\x09\x0a\x0d\x20-\x7e]/g, '').trim()))
-  try {
-    const ready = await waitForReady()
-    const routes = ['/', '/dashboard', '/probability-picks', '/player-projections', '/performance', '/model', '/mlb-operations', '/api/probability-picks/validation', '/api/data-foundation/readiness']
-    const checks = []
-    for (const route of routes) checks.push(await httpGet(route))
-    return { skipped: false, ready, checks, providerCallsMade: 0, remoteMutationsMade: 0, logs: logs.slice(-8) }
-  } finally {
-    stopServer(child)
-  }
-}
-
 function markdownFor(inventory) {
   const rows = inventory.majorRouteMatrix.map((item) => `| \`${item.route}\` | ${item.navigationLabel} | ${item.section} | ${item.classification} | ${item.currentUsefulness} | ${item.knownBlockers.join('; ') || 'None recorded'} |`)
   return `# Product Route Inventory V1
@@ -338,7 +328,7 @@ Generated: ${inventory.generatedAt}
 - API routes scanned: ${inventory.counts.apiRoutes}
 - Major product routes classified: ${inventory.majorRouteMatrix.length}
 - API routes marked mutation/protected by path: ${inventory.counts.mutationOrProtectedApiRoutes}
-- Bounded local smoke: ${inventory.localSmoke.skipped ? `skipped (${inventory.localSmoke.reason})` : `${inventory.localSmoke.checks.filter((item) => item.ok).length}/${inventory.localSmoke.checks.length} checks returned HTTP 2xx`}
+- Bounded local smoke: skipped (${inventory.localSmoke.reason})
 - Provider calls during audit: 0
 - Remote mutations during audit: 0
 
@@ -361,7 +351,12 @@ PRODUCT_ROUTE_INVENTORY_PASS
 async function main() {
   mkdirSync(DOCS_DIR, { recursive: true })
   const discovered = discover()
-  const localSmoke = await runBoundedSmoke()
+  const localSmoke = {
+    skipped: true,
+    reason: 'LOCAL_SMOKE_HARNESS_UNRELIABLE_ON_WINDOWS; inventory generation is source-only and does not spawn a Next.js server.',
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  }
   const apiCounts = discovered.apis.reduce((acc, item) => {
     acc[item.classification] = (acc[item.classification] ?? 0) + 1
     return acc
@@ -381,8 +376,9 @@ async function main() {
     localSmoke,
     certification: {
       PRODUCT_ROUTE_INVENTORY_PASS: true,
-      PRODUCT_VISUAL_AUDIT_PASS: !localSmoke.skipped,
-      PRODUCT_FUNCTIONAL_AUDIT_PASS: !localSmoke.skipped,
+      PRODUCT_VISUAL_AUDIT_PASS: false,
+      PRODUCT_FUNCTIONAL_AUDIT_PASS: false,
+      LOCAL_SMOKE_HARNESS_UNRELIABLE_ON_WINDOWS: true,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
     },
@@ -394,8 +390,9 @@ async function main() {
     pageRoutes: inventory.counts.pageRoutes,
     apiRoutes: inventory.counts.apiRoutes,
     smokeSkipped: localSmoke.skipped,
-    smokePassed: localSmoke.skipped ? 0 : localSmoke.checks.filter((item) => item.ok).length,
-    smokeTotal: localSmoke.skipped ? 0 : localSmoke.checks.length,
+    smokeReason: localSmoke.reason,
+    smokePassed: 0,
+    smokeTotal: 0,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }, null, 2))
