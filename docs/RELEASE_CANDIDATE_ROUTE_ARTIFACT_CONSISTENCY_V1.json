@@ -1,0 +1,126 @@
+{
+  "success": false,
+  "status": "PARTIAL_LOCAL_REPAIR_PENDING_PRODUCTION_VERIFICATION",
+  "mode": "release_candidate_route_artifact_consistency_v1",
+  "generatedAt": "2026-07-30T15:35:53.693Z",
+  "phase": 3,
+  "phaseName": "Release-candidate route and artifact consistency sweep",
+  "startingCommit": "021845d40139c73acfe838839abdda97783a9ab4",
+  "productionCommitAtAudit": "021845d40139c73acfe838839abdda97783a9ab4",
+  "readOnlyProductionEvidence": true,
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "productionMutationsMade": 0,
+  "routeEvidence": {
+    "dashboard": {
+      "certified": true,
+      "routes": [
+        { "id": "dashboard_page", "status": 200, "ok": true, "bytes": 31435 },
+        { "id": "dashboard_api", "status": 200, "ok": true, "mode": "dashboard_today_contract_v1", "providerCallsMade": 0 }
+      ]
+    },
+    "currentBoard": {
+      "certified": true,
+      "routes": [
+        { "id": "current_board_api", "status": 200, "ok": true, "mode": "current_board_intelligence_engine_v1" }
+      ]
+    },
+    "probabilityPicks": {
+      "certified": true,
+      "routes": [
+        { "id": "probability_picks_page", "status": 200, "ok": true, "bytes": 11496 },
+        { "id": "probability_picks_api", "status": 200, "ok": true, "mode": "probability_picks_v1", "providerCallsMade": 0 }
+      ]
+    },
+    "performance": {
+      "certified": true,
+      "routes": [
+        { "id": "performance_page", "status": 200, "ok": true, "bytes": 6315 },
+        { "id": "performance_api", "status": 200, "ok": true, "mode": "performance_api_v1", "providerCallsMade": 0 }
+      ]
+    },
+    "aiOperations": {
+      "certified": true,
+      "routes": [
+        { "id": "ai_operations_page", "status": 200, "ok": true, "bytes": 264800 },
+        { "id": "ai_operations_api", "status": 200, "ok": true, "mode": "ai_learning_lifecycle_v1", "providerCallsMade": 0 }
+      ]
+    },
+    "operations": {
+      "certified": true,
+      "routes": [
+        { "id": "operations_mlb_api", "status": 200, "ok": true, "mode": "mlb_autonomous_operations_v1" },
+        { "id": "operations_health_api", "status": 200, "ok": true, "mode": "operations_health_v1" },
+        { "id": "operations_status_api", "status": 200, "ok": true, "mode": "adaptive_refresh_orchestrator_v1" }
+      ]
+    },
+    "dataCoverage": {
+      "certified": false,
+      "partialEvidence": [
+        { "id": "data_coverage_page", "status": 200, "ok": true, "bytes": 93836 },
+        { "id": "data_coverage_inventory_api", "status": 200, "ok": true, "mode": "data_coverage_inventory_v1", "providerCallsMade": 0 }
+      ],
+      "blockingEvidence": [
+        { "id": "data_coverage_final_api", "ok": false, "error": "30s production read timeout before repair" },
+        { "id": "data_coverage_final_api_retry", "ok": false, "error": "60s production read timeout before repair" },
+        { "id": "data_coverage_health_api", "ok": false, "error": "60s production read timeout during retry window" }
+      ],
+      "repair": {
+        "implementedLocally": true,
+        "description": "Default /api/data-coverage/final-certification now returns compact summary; full payload remains behind ?diagnostics=full.",
+        "localServiceValidation": {
+          "success": true,
+          "mode": "multi_sport_data_expansion_final_certification_summary_v1",
+          "programStatus": "PARTIAL",
+          "providerCallsMade": 0,
+          "productionMutationsMade": 0,
+          "activePredictionSports": ["baseball_mlb"],
+          "activeRecommendationSports": []
+        }
+      }
+    },
+    "providers": {
+      "certified": true,
+      "routes": [
+        { "id": "providers_capabilities_api", "status": 200, "ok": true, "mode": "provider_capability_registry_v1" },
+        { "id": "providers_budget_api", "status": 200, "ok": true, "mode": "provider_budget_status_v1", "providerCallsMade": 0 }
+      ]
+    },
+    "jsonArtifacts": {
+      "certified": true,
+      "validatedArtifacts": [
+        "docs/PICK_ANALYZER_V1_SCOPE.json",
+        "docs/PICK_ANALYZER_V1_PHASES.json",
+        "docs/MLB_AUTONOMOUS_OPERATING_DAY_METRICS_V1.json",
+        "docs/MLB_END_TO_END_DAILY_CLOSURE_V1.json",
+        "docs/OPERATIONAL_READINESS_MULTI_SPORT_AUDIT_V1.json",
+        "docs/MULTI_SPORT_CURRENT_PREVIOUS_SEASON_COVERAGE_V1.json",
+        "docs/MULTI_SPORT_PRODUCTION_READINESS_MATRIX_V1.json"
+      ]
+    }
+  },
+  "phaseExitCriteria": {
+    "dashboard_certified": true,
+    "current_board_certified": true,
+    "probability_picks_certified": true,
+    "performance_certified": true,
+    "ai_operations_certified": true,
+    "operations_certified": true,
+    "data_coverage_certified": false,
+    "providers_certified": true,
+    "json_artifacts_valid": true
+  },
+  "blockers": [
+    "Production verification of the compact data-coverage final-certification route requires this local repair commit to deploy automatically.",
+    "Do not mark Phase 3 PASS until production route evidence confirms data_coverage_certified."
+  ],
+  "certificationMarkers": [
+    "V1_PLAN_ORDER_ENFORCEMENT_PASS",
+    "V1_CHANGE_CONTROL_POLICY_PASS",
+    "NO_SCOPE_EXPANSION_PASS",
+    "NO_POST_V1_IMPLEMENTATION_PASS",
+    "NO_UNAUTHORIZED_PROVIDER_CALL_PASS",
+    "NO_UNAUTHORIZED_PRODUCTION_MUTATION_PASS",
+    "NO_CERTIFIED_PLATFORM_REGRESSION_PASS"
+  ]
+}

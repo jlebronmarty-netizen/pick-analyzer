@@ -18,7 +18,7 @@
     {
       "phase": 2,
       "name": "First full MLB autonomous operating-day certification",
-      "status": "remaining",
+      "status": "complete",
       "exitCriteria": [
         "pregame_refresh_evidence_present",
         "current_board_visible",
@@ -32,7 +32,7 @@
     {
       "phase": 3,
       "name": "Release-candidate route and artifact consistency sweep",
-      "status": "remaining",
+      "status": "partial_local_repair_pending_production_verification",
       "exitCriteria": [
         "dashboard_certified",
         "current_board_certified",

@@ -229,6 +229,42 @@ export async function getMultiSportDataExpansionFinalCertificationV1() {
   }
 }
 
+export async function getMultiSportDataExpansionFinalCertificationSummaryV1() {
+  const certification = await getMultiSportDataExpansionFinalCertificationV1()
+  return {
+    success: certification.success,
+    mode: 'multi_sport_data_expansion_final_certification_summary_v1',
+    generatedAt: certification.generatedAt,
+    programStatus: certification.programStatus,
+    readOnly: certification.readOnly,
+    providerCallsMade: certification.providerCallsMade,
+    remoteMutationsMade: certification.remoteMutationsMade,
+    productionMutationsMade: certification.productionMutationsMade,
+    sqlApplied: certification.sqlApplied,
+    importsExecuted: certification.importsExecuted,
+    featureRebuildsExecuted: certification.featureRebuildsExecuted,
+    retrospectivePredictionsGenerated: certification.retrospectivePredictionsGenerated,
+    activePredictionSports: certification.activePredictionSports,
+    activeRecommendationSports: certification.activeRecommendationSports,
+    inventorySummary: certification.inventory.after,
+    providerEntitlementMatrix: certification.providerEntitlementMatrix,
+    predictionReadinessBySport: certification.predictionReadinessBySport,
+    recommendationReadinessBySport: certification.recommendationReadinessBySport,
+    postgameExplanationEngine: {
+      status: certification.postgameExplanationEngine.status,
+      causalCertaintyClaimed: certification.postgameExplanationEngine.causalCertaintyClaimed,
+      persistedRowsCreated: certification.postgameExplanationEngine.persistedRowsCreated,
+    },
+    learningExpansion: certification.learningExpansion,
+    remainingBlockers: certification.remainingBlockers.slice(0, 20),
+    certificationMarkers: certification.certificationMarkers,
+    diagnostics: {
+      fullDiagnosticsAvailable: true,
+      query: '?diagnostics=full',
+    },
+  }
+}
+
 export function validateMultiSportDataExpansionFinalCertificationV1Fixtures() {
   const checks = [
     ['learning dimensions present', LEARNING_DIMENSIONS.length >= 10],

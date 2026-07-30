@@ -26,6 +26,10 @@ Final Completion Plan V1 is now the scope-control contract for the path to V1. T
 
 Evidence: `docs/PICK_ANALYZER_FINAL_COMPLETION_PLAN_V1.md`, `docs/PICK_ANALYZER_V1_SCOPE.json`, `docs/PICK_ANALYZER_V1_PHASES.json`, `docs/PICK_ANALYZER_V1_DEFINITION_OF_DONE.md`, `docs/PICK_ANALYZER_POST_V1_BACKLOG.md` and `docs/PICK_ANALYZER_CHANGE_CONTROL_POLICY.md`.
 
+V1 phase-order update on 2026-07-30: Phase 2 is complete after the July 29 MLB autonomous operating-day terminal recovery and protected settlement. Phase 3 is in progress and partially repaired locally. Production read-only route evidence passed for Dashboard, Current Board, Probability Picks, Performance, AI Operations, Operations and Providers; Data Coverage final-certification timed out in production and was repaired locally with a compact default response plus `?diagnostics=full` for the full payload. Phase 3 remains pending production verification after deployment of that repair.
+
+Evidence: `docs/RELEASE_CANDIDATE_ROUTE_ARTIFACT_CONSISTENCY_V1.md`, `docs/RELEASE_CANDIDATE_ROUTE_ARTIFACT_CONSISTENCY_V1.json` and `scripts/release-candidate-route-artifact-consistency-v1-validate.mjs`.
+
 ## Certification-First Priorities
 
 1. Core Production Stability.
