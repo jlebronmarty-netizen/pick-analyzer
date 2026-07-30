@@ -163,6 +163,13 @@ const productNavGroups = [
   },
 ]
 
+function navBadgeTone(badge: string) {
+  if (badge === 'BLOCKED') return 'red'
+  if (badge === 'PENDING' || badge === 'LIMITED' || badge === 'PREVIEW') return 'yellow'
+  if (badge === 'FOUNDATION') return 'blue'
+  return 'gray'
+}
+
 export default function DashboardShell({
   children,
 }: {
@@ -215,12 +222,7 @@ export default function DashboardShell({
 
                           {'badge' in item && item.badge ? (
                             <ProductStatusBadge
-                              tone={
-                                item.badge === 'BLOCKED' ||
-                                item.badge === 'PENDING'
-                                  ? 'yellow'
-                                  : 'green'
-                              }
+                              tone={navBadgeTone(item.badge)}
                             >
                               {item.badge}
                             </ProductStatusBadge>

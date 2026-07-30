@@ -3041,3 +3041,19 @@ Validation: `node scripts/pick-analyzer-v2-phase-a3-scheduler-freshness-validate
 Completion criteria: `PICK_ANALYZER_V2_PHASE_A3_SCHEDULER_FRESHNESS_PASS`, `SCHEDULER_SOURCE_OF_TRUTH_PASS`, `FRESHNESS_SEMANTICS_PASS`, `TIMEZONE_CONTRACT_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_PROVIDER_CREDIT_PASS`, `NO_DATABASE_MUTATION_PASS`, `NO_PREDICTION_WRITE_PASS`, `NO_RESULT_WRITE_PASS`, `NO_SETTLEMENT_WRITE_PASS` and `NO_LEARNING_WRITE_PASS` are certified locally pending push and automatic deployment verification.
 
 Next bounded phase: A4 UI States, Loading States and Stale Labels. Do not start A4 until A3 production certification is complete.
+
+### 61. Pick Analyzer V2 Phase A4 Product UI State Integrity
+
+Objective: Certify product-facing loading, empty, stale, unavailable, unsupported, degraded, error, retry and lifecycle-label states before continuing V2 into API/database performance work.
+
+Status: Complete locally pending push and production certification because a runtime UI file changed.
+
+Scope: Bounded static and read-only production-evidence audit of dashboard navigation, Dashboard Today, Data Freshness, Adaptive Operations, Probability Picks, Most Likely, Best Value, Performance, AI Operations, Autonomous Daily AI, MLB Operations, Data Coverage, Sports Center, Market Intelligence, Portfolio Intelligence and Closing Line Intelligence.
+
+Repair: Dashboard navigation lifecycle badges now use explicit semantic tones. Foundation is blue, Preview/Limited/Pending are yellow, Blocked is red and unknown badges are gray. This prevents Foundation, Preview and Limited surfaces from visually inheriting production-green semantics.
+
+Validation: `node scripts/pick-analyzer-v2-phase-a4-ui-state-validate.mjs --timeoutMs=30000 --maxFiles=300`, A2 route/runtime validation, A3 scheduler/freshness validation, unsupported-market policy validation, navigation freshness validation, JSON parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` passed. Build generated 386 static pages.
+
+Completion criteria: `PICK_ANALYZER_V2_PHASE_A4_UI_STATE_PASS`, `UI_LIFECYCLE_LABEL_PASS`, `LOADING_EMPTY_ERROR_STATE_PASS`, `UNSUPPORTED_MARKET_UI_GUARD_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_PROVIDER_CREDIT_PASS`, `NO_DATABASE_MUTATION_PASS`, `NO_PREDICTION_WRITE_PASS`, `NO_RESULT_WRITE_PASS`, `NO_SETTLEMENT_WRITE_PASS` and `NO_LEARNING_WRITE_PASS` are certified locally pending push and automatic deployment verification.
+
+Next bounded phase: A5 Database-query and API performance. Do not start A5 until A4 production certification is complete.

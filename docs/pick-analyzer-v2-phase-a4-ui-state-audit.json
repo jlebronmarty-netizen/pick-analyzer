@@ -1,0 +1,674 @@
+{
+  "mode": "pick_analyzer_v2_phase_a4_ui_state_audit",
+  "generatedAt": "2026-07-30T23:28:47.019Z",
+  "baselineCommit": "0704679be3325082131e8952d8766cac5af64ee7",
+  "boundedScope": "product-facing UI states, shared status labels, read-only page/API evidence and deterministic static checks",
+  "pagesComponentsReviewed": [
+    "Dashboard/UserTodayPanel",
+    "DashboardShell navigation",
+    "DataFreshnessPreviewCard",
+    "ProbabilityPicksClient",
+    "MostLikelyTool",
+    "BestValueTool",
+    "PerformanceProductClient",
+    "AI Operations / Autonomous Daily AI / MLB Operations / Data Coverage / Sports Center"
+  ],
+  "uiStateMatrix": [
+    {
+      "pageComponent": "Dashboard/UserTodayPanel",
+      "dataSource": "/api/dashboard/today plus optional read-only intelligence APIs",
+      "loadingState": "slow-loading message plus structured shell",
+      "emptyState": "explicit no-official-pick/no-visible-slate states",
+      "staleState": "Refresh overdue / Data Aging / No Stored Odds labels",
+      "unavailableState": "Today temporarily unavailable",
+      "unsupportedState": "unsupported markets remain gated by copy",
+      "degradedState": "partial warnings list",
+      "errorState": "error EmptyState",
+      "retryBehavior": "automatic interval/focus refetch only, no mutation retry",
+      "lastUpdatedDisplay": "timeText/timestampText",
+      "lifecycleLabel": "official/pass/watch/model/avoid states",
+      "currentDefect": "",
+      "severity": "NONE",
+      "repair": "",
+      "validationMethod": "static component and production page HTTP evidence",
+      "classification": "PASS"
+    },
+    {
+      "pageComponent": "DashboardShell navigation",
+      "dataSource": "static productNavGroups",
+      "loadingState": "not applicable",
+      "emptyState": "not applicable",
+      "staleState": "not applicable",
+      "unavailableState": "badge-driven",
+      "unsupportedState": "badge-driven",
+      "degradedState": "badge-driven",
+      "errorState": "not applicable",
+      "retryBehavior": "not applicable",
+      "lastUpdatedDisplay": "not applicable",
+      "lifecycleLabel": "Foundation/Preview/Limited/Blocked badges",
+      "currentDefect": "Preview/Foundation/Limited badges inherited green production tone",
+      "severity": "P2",
+      "repair": "navBadgeTone maps lifecycle badges to blue/yellow/red/gray",
+      "validationMethod": "A4 validator static check",
+      "classification": "PASS"
+    },
+    {
+      "pageComponent": "DataFreshnessPreviewCard",
+      "dataSource": "/api/operations/data-freshness",
+      "loadingState": "returns null until data exists",
+      "emptyState": "returns null when no items",
+      "staleState": "server status rendered with relative time",
+      "unavailableState": "NOT_AVAILABLE blue unavailable tone",
+      "unsupportedState": "NOT_SUPPORTED gray disabled tone",
+      "degradedState": "partial status inherited from API",
+      "errorState": "silent card omission for optional dashboard preview",
+      "retryBehavior": "single no-store fetch; no mutation retry",
+      "lastUpdatedDisplay": "lastUpdated/fetchedAt plus next refresh",
+      "lifecycleLabel": "canonical freshness status",
+      "currentDefect": "",
+      "severity": "NONE",
+      "repair": "A3 distinct state mapping retained",
+      "validationMethod": "A4 validator static check",
+      "classification": "PASS"
+    },
+    {
+      "pageComponent": "ProbabilityPicksClient",
+      "dataSource": "/api/probability-picks and /api/probability-picks/parlays",
+      "loadingState": "setLoading true and finally false",
+      "emptyState": "eligible-row threshold explanation",
+      "staleState": "freshness summary from API",
+      "unavailableState": "error message",
+      "unsupportedState": "sport eligibility exclusion copy",
+      "degradedState": "warnings and blockers",
+      "errorState": "catch sets error",
+      "retryBehavior": "filter change refetch; no mutation retry",
+      "lastUpdatedDisplay": "productDateTime helpers",
+      "lifecycleLabel": "Projection Only",
+      "currentDefect": "",
+      "severity": "NONE",
+      "repair": "",
+      "validationMethod": "static component check",
+      "classification": "PASS"
+    },
+    {
+      "pageComponent": "MostLikelyTool",
+      "dataSource": "/api/market-opportunities/most-likely",
+      "loadingState": "fetch effect with error path",
+      "emptyState": "no supported outcome footer",
+      "staleState": "currentHistoricalPreviewLabel and warnings",
+      "unavailableState": "data temporarily unavailable copy",
+      "unsupportedState": "unavailable market list",
+      "degradedState": "blocked/warning factors",
+      "errorState": "error panel",
+      "retryBehavior": "sort/mode refetch; no mutation retry",
+      "lastUpdatedDisplay": "not central",
+      "lifecycleLabel": "not recommendation when informational",
+      "currentDefect": "",
+      "severity": "NONE",
+      "repair": "",
+      "validationMethod": "static component check",
+      "classification": "PASS"
+    },
+    {
+      "pageComponent": "BestValueTool",
+      "dataSource": "/api/market-opportunities/best-value",
+      "loadingState": "fetch effect with error path",
+      "emptyState": "No positive-value opportunities today",
+      "staleState": "warning mentions fresher odds",
+      "unavailableState": "Data temporarily unavailable",
+      "unsupportedState": "informational warning / no unsupported CTA",
+      "degradedState": "scan incomplete panel",
+      "errorState": "safe message details",
+      "retryBehavior": "no mutation retry",
+      "lastUpdatedDisplay": "not central",
+      "lifecycleLabel": "Official/value/pass separation",
+      "currentDefect": "",
+      "severity": "NONE",
+      "repair": "",
+      "validationMethod": "static component check",
+      "classification": "PASS"
+    },
+    {
+      "pageComponent": "PerformanceProductClient",
+      "dataSource": "/api/performance and /api/performance/history",
+      "loadingState": "skeleton while data missing",
+      "emptyState": "no settled production predictions explanation",
+      "staleState": "last update from API",
+      "unavailableState": "temporarily unavailable",
+      "unsupportedState": "sport readiness labels",
+      "degradedState": "trust/readiness blockers",
+      "errorState": "error screen",
+      "retryBehavior": "reload button only; no mutation endpoint",
+      "lastUpdatedDisplay": "dateTime/productDateTime",
+      "lifecycleLabel": "Production/Preview sport readiness",
+      "currentDefect": "",
+      "severity": "NONE",
+      "repair": "",
+      "validationMethod": "static component check",
+      "classification": "PASS"
+    },
+    {
+      "pageComponent": "AI Operations / Autonomous Daily AI / MLB Operations / Data Coverage / Sports Center",
+      "dataSource": "read-only operational APIs/services",
+      "loadingState": "bounded or server-rendered states",
+      "emptyState": "blocked/no-data sections",
+      "staleState": "freshness and scheduler labels",
+      "unavailableState": "temporarily unavailable/readiness copy",
+      "unsupportedState": "sports and providers gated",
+      "degradedState": "warnings/errors sections",
+      "errorState": "safe message panels",
+      "retryBehavior": "no unsafe retry control found",
+      "lastUpdatedDisplay": "productDateTime/timezone labels",
+      "lifecycleLabel": "Production/Foundation/Preview/Blocked",
+      "currentDefect": "",
+      "severity": "NONE",
+      "repair": "",
+      "validationMethod": "static component and production page HTTP evidence",
+      "classification": "PASS"
+    }
+  ],
+  "loadingFindings": [
+    "Core sampled client pages terminate loading on success/error where statically provable.",
+    "No persistent local server smoke was used."
+  ],
+  "emptyStateFindings": [
+    "Valid empty recommendations remain distinct from failures.",
+    "Probability, Most Likely, Best Value and Performance include explanatory empty copy."
+  ],
+  "staleDelayedFindings": [
+    "Freshness preview consumes server-provided statuses and clamps relative time to avoid negative values.",
+    "Stale/refresh-overdue labels remain visible on Dashboard Today."
+  ],
+  "unavailableUnsupportedFindings": [
+    "NOT_SUPPORTED and NOT_AVAILABLE remain distinct.",
+    "Unsupported market recommendation policy remains locked by existing validator.",
+    "Sports Center copy keeps only MLB production-ready."
+  ],
+  "degradedErrorFindings": [
+    "Partial/degraded API states are not shown as complete success on repaired surfaces.",
+    "Core error states avoid stack exposure."
+  ],
+  "retryFindings": [
+    "No audited retry control targets known mutation routes.",
+    "Performance retry reloads the page rather than invoking generation/settlement/sync."
+  ],
+  "lifecycleLabelFindings": [
+    "Dashboard navigation lifecycle badge tones now match ProductStatus semantics.",
+    "Foundation and Preview no longer inherit green production color."
+  ],
+  "accessibilityFindings": [
+    "Repaired badge states carry visible text, not color alone.",
+    "Existing controls use accessible labels where sampled selects/buttons expose labels."
+  ],
+  "defects": [
+    {
+      "severity": "P2",
+      "area": "dashboard navigation lifecycle badges",
+      "defect": "Dashboard navigation mapped every non-blocked/non-pending badge to green, so Foundation, Preview and Limited surfaces could read as production-ready by color.",
+      "repair": "Added navBadgeTone so Foundation is blue, Preview/Limited/Pending are yellow, Blocked is red and unknown badges are gray."
+    }
+  ],
+  "exactRepairs": [
+    {
+      "area": "dashboard navigation lifecycle badges",
+      "repair": "Added navBadgeTone so Foundation is blue, Preview/Limited/Pending are yellow, Blocked is red and unknown badges are gray."
+    }
+  ],
+  "productionEvidence": [
+    {
+      "path": "/dashboard",
+      "httpStatus": 200,
+      "latencyMs": 423,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/probability-picks",
+      "httpStatus": 200,
+      "latencyMs": 391,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/most-likely",
+      "httpStatus": 200,
+      "latencyMs": 401,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/best-value",
+      "httpStatus": 200,
+      "latencyMs": 403,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/performance",
+      "httpStatus": 200,
+      "latencyMs": 462,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/ai-operations",
+      "httpStatus": 200,
+      "latencyMs": 18339,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/autonomous-daily-ai",
+      "httpStatus": 200,
+      "latencyMs": 12201,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/mlb-operations",
+      "httpStatus": 200,
+      "latencyMs": 6484,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/data-coverage",
+      "httpStatus": 200,
+      "latencyMs": 6932,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/sports-center",
+      "httpStatus": 200,
+      "latencyMs": 401,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/market-intelligence",
+      "httpStatus": 200,
+      "latencyMs": 2003,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/portfolio-intelligence",
+      "httpStatus": 200,
+      "latencyMs": 1316,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/closing-line-intelligence",
+      "httpStatus": 200,
+      "latencyMs": 332,
+      "semanticState": "page_available",
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/api/system/version",
+      "httpStatus": 200,
+      "latencyMs": 437,
+      "semanticState": "0704679be3325082131e8952d8766cac5af64ee7",
+      "providerCallsMade": 0,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/api/dashboard/today",
+      "httpStatus": 200,
+      "latencyMs": 3207,
+      "semanticState": "AVAILABLE",
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0
+    },
+    {
+      "path": "/api/operations/data-freshness",
+      "httpStatus": 200,
+      "latencyMs": 8753,
+      "semanticState": "PARTIAL",
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0
+    },
+    {
+      "path": "/api/performance",
+      "httpStatus": 200,
+      "latencyMs": 5693,
+      "semanticState": true,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0
+    },
+    {
+      "path": "/api/market-opportunities/most-likely",
+      "httpStatus": 200,
+      "latencyMs": 7025,
+      "semanticState": true,
+      "providerCallsMade": null,
+      "remoteMutationsMade": null
+    },
+    {
+      "path": "/api/market-opportunities/best-value",
+      "httpStatus": 200,
+      "latencyMs": 1399,
+      "semanticState": true,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0
+    }
+  ],
+  "safety": {
+    "providerCallsMade": 0,
+    "providerCreditsConsumed": 0,
+    "databaseReads": "production read-only page/API observation only; local validator performs static file reads",
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "validationResults": [
+    {
+      "name": "input exists: docs/product-route-inventory-v1.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: docs/pick-analyzer-v2-phase-a2-route-runtime-audit.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: docs/pick-analyzer-v2-phase-a3-scheduler-freshness-audit.json",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/dashboard/DashboardShell.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/product/ProductStatus.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/config/product-status.ts",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/dashboard/UserTodayPanel.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/dashboard/DataFreshnessPreviewCard.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/dashboard/AdaptiveOperationsPanel.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/probability-picks/ProbabilityPicksClient.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/market-opportunities/MostLikelyTool.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/market-opportunities/BestValueTool.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/components/performance/PerformanceProductClient.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/ai-operations/page.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/autonomous-daily-ai/page.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/mlb-operations/page.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/data-coverage/page.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/sports-center/page.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/market-intelligence/page.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/portfolio-intelligence/page.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: src/app/closing-line-intelligence/page.tsx",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "input exists: scripts/unsupported-market-recommendation-policy-lock-v1-validate.mjs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "A1 route inventory is certified",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "A2 route runtime audit passed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "A3 scheduler freshness audit passed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "product status config keeps Preview/Foundation/Unavailable distinct",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "dashboard navigation has badge tone helper",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "dashboard Foundation badge is not green",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "dashboard Preview and Limited badges are caution states",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "dashboard Blocked badge is red",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "data freshness keeps NOT_SUPPORTED distinct",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "data freshness keeps NOT_AVAILABLE distinct",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "data freshness relative times cannot go negative",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "shared product datetime has invalid fallback",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Probability Picks loading terminates",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Probability Picks has empty state copy",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Probability Picks separates projection from recommendation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Most Likely handles fetch errors",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Most Likely explains data unavailable state",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Best Value handles fetch errors",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Best Value separates no value from data unavailable",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Performance handles main and history errors",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Performance retry does not call mutation API",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Dashboard Today handles loading and errors",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Dashboard Today preserves stale/no-odds labels",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Adaptive operations handles loading and errors",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "AI Operations has bounded evidence timeout",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Autonomous Daily AI has explicit blocked state",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "MLB Operations surfaces section errors",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Data Coverage maps Foundation/Preview away from production green",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Sports Center states only MLB production-ready",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Market Intelligence route has unavailable/empty state text",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Portfolio Intelligence route has unavailable/empty state text",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Closing Line route has unavailable/empty state text",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "no unsupported market actionable CTA in audited product files",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "retry controls do not target known mutation routes",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "core product surfaces avoid raw stack display",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "remainingRisks": [
+    "Static validation cannot prove every possible browser interaction without a server or browser smoke harness.",
+    "Some optional dashboard preview cards intentionally omit themselves when read-only preview data is unavailable.",
+    "PowerShell Invoke-WebRequest is unreliable in this shell for page evidence; curl.exe was used for page HTTP evidence."
+  ],
+  "finalVerdict": "PASS - product UI states are semantically coherent after scoped repair."
+}
