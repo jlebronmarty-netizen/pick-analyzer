@@ -1,0 +1,989 @@
+{
+  "mode": "pick_analyzer_v2_phase_a2_route_runtime_audit",
+  "generatedAt": "2026-07-30T22:51:37.187Z",
+  "baselineCommit": "048b6dbf812f6c6968c10f991572f657d685c9a8",
+  "scope": {
+    "phase": "V2 Phase A2 - Broken Routes and Runtime Errors",
+    "localServerSmokeRun": false,
+    "persistentServerStarted": false,
+    "providerCallsAllowed": false,
+    "dataMutationAllowed": false
+  },
+  "counts": {
+    "pageRoutesReviewed": 22,
+    "apiRoutesReviewed": 48,
+    "navigationTargetsReviewed": 20,
+    "filesScanned": 1137,
+    "totalInventoryPageRoutes": 28,
+    "totalInventoryApiRoutes": 425
+  },
+  "criticalRoutesReviewed": [
+    "/",
+    "/dashboard",
+    "/sports-center",
+    "/ai-operations",
+    "/data-coverage",
+    "/probability-picks",
+    "/most-likely",
+    "/best-value",
+    "/performance",
+    "/model",
+    "/mlb-operations",
+    "/autonomous-daily-ai",
+    "/portfolio-intelligence",
+    "/market-intelligence",
+    "/closing-line-intelligence",
+    "/betting-workbench",
+    "/player-projections",
+    "/game-intelligence",
+    "/projections",
+    "/arbitrage",
+    "/ai-bet-finder",
+    "/admin/historical-diagnostics",
+    "/api/dashboard",
+    "/api/dashboard/today",
+    "/api/system/version",
+    "/api/probability-picks",
+    "/api/probability-picks/parlays",
+    "/api/probability-picks/validation",
+    "/api/current-board",
+    "/api/market-opportunities/most-likely",
+    "/api/market-opportunities/best-value",
+    "/api/market-opportunities/arbitrage",
+    "/api/performance",
+    "/api/performance/trust",
+    "/api/performance/readiness",
+    "/api/performance/validation",
+    "/api/model/status",
+    "/api/model/versions",
+    "/api/model/metrics",
+    "/api/ai-operations/lifecycle",
+    "/api/autonomous-daily-operations/status",
+    "/api/operations/status",
+    "/api/operations/health",
+    "/api/operations/validation",
+    "/api/operations/data-freshness",
+    "/api/operations/refresh-plan",
+    "/api/mlb/operations-center",
+    "/api/mlb/starters/health",
+    "/api/mlb/player-props/health",
+    "/api/providers/capabilities",
+    "/api/providers/intelligence",
+    "/api/providers/route-plan",
+    "/api/providers/budget/status",
+    "/api/providers/sdk",
+    "/api/providers/sdk/validation",
+    "/api/providers/sportsdataio/status",
+    "/api/providers/sportsdataio/capabilities",
+    "/api/providers/sportsdataio/contract",
+    "/api/providers/sportsdataio/validation",
+    "/api/providers/the-odds-api/capability",
+    "/api/providers/the-odds-api/coverage",
+    "/api/providers/the-odds-api/quota",
+    "/api/data-coverage/final-certification",
+    "/api/data-coverage/health",
+    "/api/data-coverage/inventory",
+    "/api/data-coverage/provider-audit",
+    "/api/production-readiness/audit",
+    "/api/recommendation-readiness",
+    "/api/historical-import/health",
+    "/api/data-foundation/readiness"
+  ],
+  "routeMatrix": [
+    {
+      "route": "/",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/dashboard",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": "Model Health navigation now targets existing advanced-details section."
+    },
+    {
+      "route": "/sports-center",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/ai-operations",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/data-coverage",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/probability-picks",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/most-likely",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/best-value",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/performance",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/model",
+      "type": "page",
+      "navigationVisibility": "active-inventory",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/mlb-operations",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/autonomous-daily-ai",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/portfolio-intelligence",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/market-intelligence",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/closing-line-intelligence",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/betting-workbench",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/player-projections",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/game-intelligence",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/projections",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/arbitrage",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/ai-bet-finder",
+      "type": "page",
+      "navigationVisibility": "linked-or-entry",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/admin/historical-diagnostics",
+      "type": "page",
+      "navigationVisibility": "active-inventory",
+      "criticality": "core-product",
+      "validationMethod": "static file existence, server/client boundary scan, build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/dashboard",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/dashboard/today",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/system/version",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/probability-picks",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/probability-picks/parlays",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/probability-picks/validation",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/current-board",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/market-opportunities/most-likely",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/market-opportunities/best-value",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/market-opportunities/arbitrage",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/performance",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/performance/trust",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/performance/readiness",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/performance/validation",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/model/status",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/model/versions",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/model/metrics",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/ai-operations/lifecycle",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/autonomous-daily-operations/status",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/operations/status",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/operations/health",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/operations/validation",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/operations/data-freshness",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/operations/refresh-plan",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/mlb/operations-center",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/mlb/starters/health",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/mlb/player-props/health",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/capabilities",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/intelligence",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/route-plan",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/budget/status",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/sdk",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/sdk/validation",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/sportsdataio/status",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/sportsdataio/capabilities",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/sportsdataio/contract",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/sportsdataio/validation",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/the-odds-api/capability",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/the-odds-api/coverage",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/providers/the-odds-api/quota",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/data-coverage/final-certification",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/data-coverage/health",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/data-coverage/inventory",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/data-coverage/provider-audit",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/production-readiness/audit",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/recommendation-readiness",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/historical-import/health",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    },
+    {
+      "route": "/api/data-foundation/readiness",
+      "type": "API",
+      "navigationVisibility": "supporting-api",
+      "criticality": "core-support",
+      "validationMethod": "static route handler contract scan and build",
+      "result": "PASS",
+      "defectFound": "",
+      "repairMade": ""
+    }
+  ],
+  "defects": [
+    {
+      "severity": "P2",
+      "route": "/dashboard#model-center",
+      "defect": "Dashboard navigation previously pointed Model Health at a missing #model-center hash target.",
+      "repair": "Model Health now links to the existing /dashboard#advanced-details section."
+    }
+  ],
+  "repairsMade": [
+    {
+      "file": "src/components/dashboard/DashboardShell.tsx",
+      "route": "/dashboard#advanced-details",
+      "description": "Changed Model Health navigation from missing #model-center hash to existing advanced-details dashboard section."
+    },
+    {
+      "file": "scripts/pick-analyzer-v2-phase-a2-route-runtime-validate.mjs",
+      "route": "validation",
+      "description": "Added bounded no-server route/runtime validator for A2."
+    }
+  ],
+  "routesNotFullyTestable": [
+    {
+      "route": "/api/providers/*",
+      "reason": "Provider-backed capability routes were statically contract-validated only; no provider calls or credit-consuming probes were made."
+    },
+    {
+      "route": "/api/data-coverage/*",
+      "reason": "Routes can depend on stored operational data; A2 validates route existence and JSON handler contracts without database mutation."
+    },
+    {
+      "route": "/api/performance/*",
+      "reason": "Historical performance completeness depends on stored settled rows; A2 validates contracts and build safety only."
+    }
+  ],
+  "externalDependencies": [
+    "Supabase stored data",
+    "provider status metadata",
+    "Vercel runtime environment variables"
+  ],
+  "safety": {
+    "providerCallsMade": 0,
+    "providerCreditsConsumed": 0,
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "validationResults": [
+    {
+      "name": "Phase A1 inventory certification present",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Phase A1 smoke classified as Windows harness unreliable",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "No local server lifecycle in A2 validator",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /ai-bet-finder",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /ai-operations",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /arbitrage",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /autonomous-daily-ai",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /best-value",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /betting-workbench",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /closing-line-intelligence",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /dashboard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /dashboard#advanced-details",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /data-coverage",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /game-intelligence",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /market-intelligence",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /mlb-operations",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /most-likely",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /performance",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /player-projections",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /portfolio-intelligence",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /probability-picks",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /projections",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "navigation target exists: /sports-center",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "dashboard advanced-details target exists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "dashboard today target exists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "stale model-center hash removed from product nav",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "no local server lifecycle in scoped APIs",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "scoped APIs avoid unsafe bare request.json parsing",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "remainingA2Risks": [
+    "Static validation plus production build cannot prove every database-backed route latency without invoking deployed or local HTTP handlers.",
+    "Provider-backed routes remain contract-validated only because A2 forbids provider calls.",
+    "No local server smoke was run because the Windows smoke harness is classified unreliable."
+  ],
+  "verdict": "PASS - scoped route/runtime integrity certified with no local server smoke."
+}

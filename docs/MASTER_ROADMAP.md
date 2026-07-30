@@ -3009,3 +3009,19 @@ Current finding: The autonomous operations endpoint reports the new `*/10 * * * 
 Persistence scope: Documentation-only observation. No provider calls, production mutations, settlement execution, model training, model-weight mutation, probability change, confidence change, Trust change, Official Pick policy change, historical replay, historical import, feature backfill or Vercel deployment was performed by certification.
 
 Next safe action: Continue production read-only observation after the final game and subsequent scheduler ticks. Do not repair unless row-level evidence proves an operational defect.
+
+### 59. Pick Analyzer V2 Phase A2 Route Runtime Integrity
+
+Objective: Certify active and navigation-linked route/runtime integrity before continuing V2 into scheduler and freshness work.
+
+Status: Complete locally; do not start Phase A3 until this A2 commit is reviewed or explicitly continued.
+
+Scope: Bounded static and build-backed validation of core page routes, supporting API routes, dashboard navigation targets and shared route utilities. The phase did not start a local server, did not run the unreliable Windows smoke harness, did not call providers and did not mutate data.
+
+Repair: Model Health navigation no longer points to missing `#model-center`; it now targets the existing `/dashboard#advanced-details` section.
+
+Validation: `node scripts/pick-analyzer-v2-phase-a2-route-runtime-validate.mjs --timeoutMs=30000 --maxFiles=2000`, `node scripts/product-audit-v1-route-inventory.mjs --timeoutMs=30000 --maxFiles=5000`, JSON artifact parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` passed. Build generated 386 static pages.
+
+Completion criteria: `PICK_ANALYZER_V2_PHASE_A2_ROUTE_RUNTIME_PASS`, `NO_LOCAL_SERVER_SMOKE_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_PROVIDER_CREDIT_PASS`, `NO_DATABASE_MUTATION_PASS`, `NO_PREDICTION_WRITE_PASS`, `NO_SETTLEMENT_WRITE_PASS` and `NO_LEARNING_WRITE_PASS` are certified locally pending push authorization.
+
+Next bounded phase: A3 Scheduler and Freshness Inconsistencies.

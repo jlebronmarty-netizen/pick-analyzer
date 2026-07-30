@@ -114,7 +114,7 @@ const productNavGroups = [
     label: 'Performance',
     items: [
       { href: '/performance', label: 'Performance', icon: 'PF' },
-      { id: 'model-center', label: 'Model Health', icon: 'MH' },
+      { href: '/dashboard#advanced-details', label: 'Model Health', icon: 'MH' },
     ],
   },
   {
