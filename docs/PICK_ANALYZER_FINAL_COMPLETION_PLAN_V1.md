@@ -13,9 +13,9 @@ V1 is not a promise that every sport, market, prop, model family or provider fea
 
 ## Current Completion
 
-Estimated V1 completion: **91%**.
+Estimated V1 completion: **96%**.
 
-The platform has production MLB core architecture, current product surfaces, route inventory evidence, provider-budget policy, adaptive refresh policy, settlement/learning lifecycle evidence, Performance visibility and production route evidence for key routes. Phase 2, Phase 3 and Phase 4 are complete. Remaining work is certification closure: final validation bundle and V1 declaration.
+The platform has production MLB core architecture, current product surfaces, route inventory evidence, provider-budget policy, adaptive refresh policy, settlement/learning lifecycle evidence, Performance visibility and production route evidence for key routes. Phase 2, Phase 3, Phase 4 and Phase 5 are complete. Remaining work is certification closure: V1 declaration.
 
 ## V1 Scope
 
@@ -46,7 +46,7 @@ The following are explicitly deferred:
 
 | Sport | V1 status | Prediction readiness | Main blocker |
 | --- | --- | --- | --- |
-| MLB | Production core | Production-ready for certified core workflow | None for V1 core workflow; unsupported-market and official recommendation policy lock remains Phase 4 |
+| MLB | Production core | Production-ready for certified core workflow | None for V1 core workflow |
 | NFL | Preview | Preview-ready only | Canonical result, settlement, learning and promotion gates incomplete |
 | NHL | Preview | Preview-ready only | Canonical result, settlement, learning and promotion gates incomplete |
 | NBA | Data only | Not production-certified | Insufficient stored end-to-end schedule/result/settlement/learning lifecycle |
@@ -101,7 +101,7 @@ Daily MLB operation is currently possible for core workflows when credentials, p
 2. First full MLB autonomous operating-day certification from pregame through settlement and Performance visibility. Complete.
 3. Release-candidate route and artifact consistency sweep for Dashboard, Current Board, Probability Picks, Performance, AI Operations, Operations, Data Coverage and Providers. Complete.
 4. Unsupported-market and recommendation-policy lock to ensure blocked markets cannot appear as available recommendations. Complete.
-5. Final non-server validation bundle: JSON validation, doc-link checks, validators, lint where applicable, build, diff check and secret scan.
+5. Final non-server validation bundle: JSON validation, doc-link checks, validators, lint where applicable, build, diff check and secret scan. Complete.
 6. V1 declaration with exact commit, production commit alignment and certified evidence index.
 7. Post-V1 backlog activation under change control.
 

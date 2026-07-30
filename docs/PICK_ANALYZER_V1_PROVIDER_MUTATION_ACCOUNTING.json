@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "artifact": "PICK_ANALYZER_V1_PROVIDER_MUTATION_ACCOUNTING",
+  "generatedAt": "2026-07-30T20:05:00.000Z",
+  "phase": 5,
+  "status": "PASS",
+  "providerCallsMade": 0,
+  "providerCreditsUsed": 0,
+  "databaseReads": "read-only validators and production GET responses only",
+  "databaseMutations": 0,
+  "remoteMutationsMade": 0,
+  "productionMutationsMade": 0,
+  "predictionWrites": 0,
+  "resultWrites": 0,
+  "settlementWrites": 0,
+  "learningWrites": 0,
+  "modelTrainingRuns": 0,
+  "modelWeightChanges": 0,
+  "epochChanges": 0,
+  "retrospectivePredictionsGenerated": 0,
+  "manualVercelDeployment": false,
+  "localServerSmokeRun": false,
+  "certificationMarkers": [
+    "V1_PROVIDER_ACCOUNTING_PASS",
+    "NO_UNAUTHORIZED_PROVIDER_CALL_PASS",
+    "NO_UNAUTHORIZED_PRODUCTION_MUTATION_PASS",
+    "NO_RETROSPECTIVE_PREDICTION_PASS",
+    "NO_FORCED_SETTLEMENT_PASS",
+    "NO_MODEL_WEIGHT_MUTATION_PASS",
+    "NO_EPOCH_ACTIVATION_PASS"
+  ]
+}

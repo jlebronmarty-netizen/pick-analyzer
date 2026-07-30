@@ -59,7 +59,7 @@
     {
       "phase": 5,
       "name": "Final validation bundle",
-      "status": "remaining",
+      "status": "complete",
       "exitCriteria": [
         "json_validation_pass",
         "doc_link_validation_pass",
@@ -97,6 +97,11 @@
     "IMPLEMENTATION_PHASE_PLAN_PASS",
     "V1_PHASE_3_PRODUCTION_CERTIFICATION_PASS",
     "UNSUPPORTED_MARKET_POLICY_LOCK_PASS",
+    "V1_FINAL_VALIDATION_BUNDLE_PASS",
+    "V1_DEFINITION_OF_DONE_MATRIX_PASS",
+    "V1_PRODUCTION_CERTIFICATION_PASS",
+    "V1_PROVIDER_ACCOUNTING_PASS",
+    "V1_PHASE_5_PASS",
     "NO_CODE_CHANGE_PASS",
     "NO_PROVIDER_CALL_PASS",
     "NO_PRODUCTION_MUTATION_PASS"

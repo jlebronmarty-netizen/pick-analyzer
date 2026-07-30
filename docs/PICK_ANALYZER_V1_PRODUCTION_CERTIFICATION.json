@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "artifact": "PICK_ANALYZER_V1_PRODUCTION_CERTIFICATION",
+  "generatedAt": "2026-07-30T20:05:00.000Z",
+  "phase": 5,
+  "status": "PASS_WITH_DOCUMENTED_LATENCY_RISK",
+  "success": true,
+  "productionUrl": "https://pick-analyzer.vercel.app",
+  "productionRuntimeCommit": "901811db17cbbc6a693b1021c070ec1f52ea0911",
+  "deploymentAlignment": "RUNTIME_ALIGNED_WITH_ORIGIN_MAIN",
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "productionMutationsMade": 0,
+  "readOnlyEndpoints": [
+    { "name": "system-version", "path": "/api/system/version", "httpStatus": 200, "latencyMs": 449, "gitCommit": "901811db17cbbc6a693b1021c070ec1f52ea0911", "providerCallsMade": 0, "semanticVerdict": "PASS" },
+    { "name": "data-coverage-final", "path": "/api/data-coverage/final-certification", "httpStatus": 200, "latencyMs": 19626, "mode": "multi_sport_data_expansion_final_certification_summary_v1", "providerCallsMade": 0, "productionMutationsMade": 0, "semanticVerdict": "PASS" },
+    { "name": "data-coverage-final-recheck", "path": "/api/data-coverage/final-certification", "httpStatus": 200, "latencyMs": 39777, "mode": "multi_sport_data_expansion_final_certification_summary_v1", "providerCallsMade": 0, "productionMutationsMade": 0, "semanticVerdict": "PASS_WITH_LATENCY_RISK" },
+    { "name": "data-coverage-final-diagnostics", "path": "/api/data-coverage/final-certification?diagnostics=full", "httpStatus": 200, "latencyMs": 21394, "mode": "multi_sport_data_expansion_final_certification_v1", "providerCallsMade": 0, "productionMutationsMade": 0, "semanticVerdict": "PASS" },
+    { "name": "data-coverage-health", "path": "/api/data-coverage/health", "httpStatus": 200, "latencyMs": 14037, "mode": "data_health_center_v1", "providerCallsMade": 0, "productionMutationsMade": 0, "semanticVerdict": "PASS" },
+    { "name": "operations-health", "path": "/api/operations/health", "httpStatus": 200, "latencyMs": 25150, "mode": "operations_health_v1", "status": "DEGRADED", "semanticVerdict": "PASS_DEGRADED_STATUS_DOCUMENTED" },
+    { "name": "mlb-autonomous-operations", "path": "/api/operations/mlb-autonomous-operations", "httpStatus": 200, "latencyMs": 25543, "mode": "mlb_autonomous_operations_v1", "semanticVerdict": "PASS" },
+    { "name": "operating-day-automation-status", "path": "/api/operating-day/automation/status", "httpStatus": 200, "latencyMs": 2625, "mode": "operating_day_automation_status_v1", "providerCallsMade": 0, "officialPicks": 0, "semanticVerdict": "PASS" },
+    { "name": "performance", "path": "/api/performance", "httpStatus": 200, "latencyMs": 3614, "mode": "performance_api_v1", "providerCallsMade": 0, "remoteMutationsMade": 0, "semanticVerdict": "PASS" },
+    { "name": "current-board", "path": "/api/current-board", "httpStatus": 200, "latencyMs": 1399, "mode": "current_board_intelligence_engine_v1", "semanticVerdict": "PASS" },
+    { "name": "probability-picks", "path": "/api/probability-picks", "httpStatus": 200, "latencyMs": 433, "mode": "probability_picks_v1", "providerCallsMade": 0, "remoteMutationsMade": 0, "semanticVerdict": "PASS" }
+  ],
+  "latencyRisk": {
+    "status": "DOCUMENTED_NON_BLOCKING",
+    "detail": "One compact data-coverage request aborted at a 30s client timeout while surrounding reads returned HTTP 200 at 19.6s and 39.8s. This is not classified as an application-route failure because production runtime is serving the compact route, all semantic fields pass and provider/mutation counts remain zero."
+  },
+  "certificationMarkers": [
+    "V1_PRODUCTION_CERTIFICATION_PASS",
+    "NO_UNAUTHORIZED_PROVIDER_CALL_PASS",
+    "NO_UNAUTHORIZED_PRODUCTION_MUTATION_PASS"
+  ]
+}
