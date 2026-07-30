@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "artifact": "UNSUPPORTED_MARKET_RECOMMENDATION_POLICY_LOCK_V1",
+  "generatedAt": "2026-07-30T16:45:00.000Z",
+  "phase": 4,
+  "phaseName": "Unsupported-market and recommendation-policy lock",
+  "status": "PASS",
+  "success": true,
+  "mode": "unsupported_market_recommendation_policy_lock_v1",
+  "readOnlySourceAudit": true,
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "productionMutationsMade": 0,
+  "businessRuleChangesMade": 0,
+  "recommendationPolicy": {
+    "policyService": "src/services/recommendation-eligibility-policy.service.ts",
+    "officialRecommendationStatuses": [
+      "QUALIFIED",
+      "BEST_BET_CANDIDATE",
+      "PLAY_OF_DAY_CANDIDATE"
+    ],
+    "supportedRecommendationMarkets": [
+      "moneyline",
+      "spread",
+      "run_line",
+      "total"
+    ],
+    "unsupportedMarketBlocker": "UNSUPPORTED_MARKET",
+    "automaticProductionApproval": false
+  },
+  "unsupportedMarketsLocked": [
+    "player_props",
+    "pitcher_props",
+    "batter_props",
+    "team_totals",
+    "nrfi_yrfi",
+    "first_five",
+    "alternate_lines",
+    "live_betting"
+  ],
+  "sourceEvidence": {
+    "topPicks": {
+      "file": "src/services/top-picks.service.ts",
+      "usesCentralPolicy": true,
+      "filtersOfficialStatuses": true,
+      "requiresProductionEligibleRows": true
+    },
+    "universalMarketInventory": {
+      "file": "src/services/universal-market-intelligence.service.ts",
+      "unsupportedMarketsOfficialPickEligibleFalse": true,
+      "unsupportedActivationBlockedDiagnostic": true
+    },
+    "scope": {
+      "file": "docs/PICK_ANALYZER_V1_SCOPE.json",
+      "nonMlbProductionRecommendationsOutOfScope": true,
+      "unsupportedMarketsOutOfScope": true
+    },
+    "productCopy": {
+      "probabilityPicksProjectionOnly": true,
+      "dashboardOfficialPickBoundaryVisible": true,
+      "mostLikelyBoundaryVisible": true,
+      "aiBetFinderBoundaryVisible": true
+    }
+  },
+  "phaseExitCriteria": {
+    "unsupported_markets_do_not_appear_as_available_recommendations": true,
+    "projection_only_copy_is_consistent": true,
+    "official_pick_policy_boundaries_are_visible": true,
+    "no_non_mlb_production_recommendation_claims": true
+  },
+  "remainingBlockers": [
+    "Unsupported markets remain Post-V1 until ingestion, modeling, validation, settlement, replay, dashboard support and recommendation policy approval are complete.",
+    "Non-MLB production recommendations remain Post-V1 until sport-specific canonical result, settlement, learning, calibration and promotion gates pass.",
+    "Automatic model training remains disabled and outside V1."
+  ],
+  "nextApprovedPhase": "Phase 5 - Final validation bundle",
+  "certificationMarkers": [
+    "UNSUPPORTED_MARKET_POLICY_LOCK_PASS",
+    "NO_UNSUPPORTED_MARKET_RECOMMENDATION_PASS",
+    "PROJECTION_ONLY_COPY_PASS",
+    "OFFICIAL_PICK_BOUNDARY_PASS",
+    "NO_NON_MLB_PRODUCTION_RECOMMENDATION_PASS",
+    "NO_PROVIDER_CALL_PASS",
+    "NO_PRODUCTION_MUTATION_PASS",
+    "NO_BUSINESS_RULE_CHANGE_PASS"
+  ]
+}

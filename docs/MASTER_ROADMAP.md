@@ -22,13 +22,17 @@ Primary mission: become a trustworthy sports betting intelligence platform that 
 
 Current certification answer: Pick Analyzer has many required components, but it is not yet certified to recommend real-money bets. The read-only MLB certification audit reviewed 1,194 prediction rows and found 0 certified live pregame rows, 0 production-eligible rows and 0 epoch-linked rows. Valid pregame rows remain shadow/pre-certification evidence only.
 
-Final Completion Plan V1 is now the scope-control contract for the path to V1. The current V1 completion estimate is 87% after Phase 3 production certification. V1 is limited to MLB core market operation, truthful product readiness labels, adaptive refresh under provider-budget policy, canonical result -> settlement -> learning -> Performance visibility, disabled automatic model training and explicit exclusion of unsupported markets from available recommendations.
+Final Completion Plan V1 is now the scope-control contract for the path to V1. The current V1 completion estimate is 91% after Phase 4 unsupported-market and recommendation-policy certification. V1 is limited to MLB core market operation, truthful product readiness labels, adaptive refresh under provider-budget policy, canonical result -> settlement -> learning -> Performance visibility, disabled automatic model training and explicit exclusion of unsupported markets from available recommendations.
 
 Evidence: `docs/PICK_ANALYZER_FINAL_COMPLETION_PLAN_V1.md`, `docs/PICK_ANALYZER_V1_SCOPE.json`, `docs/PICK_ANALYZER_V1_PHASES.json`, `docs/PICK_ANALYZER_V1_DEFINITION_OF_DONE.md`, `docs/PICK_ANALYZER_POST_V1_BACKLOG.md` and `docs/PICK_ANALYZER_CHANGE_CONTROL_POLICY.md`.
 
 V1 phase-order update on 2026-07-30: Phase 2 is complete after the July 29 MLB autonomous operating-day terminal recovery and protected settlement. Phase 3 is PASS after production served commit `51cdee5b3845b313653836002066b84938f52b92`: `/api/system/version` reported the exact commit with provider calls 0, the compact `/api/data-coverage/final-certification` route returned HTTP 200 in 22,840 ms, `?diagnostics=full` remained available and semantically complete, and `/api/data-coverage/health` returned HTTP 200. The next approved incomplete phase is Phase 4, Unsupported-market and recommendation-policy lock.
 
 Evidence: `docs/RELEASE_CANDIDATE_ROUTE_ARTIFACT_CONSISTENCY_V1.md`, `docs/RELEASE_CANDIDATE_ROUTE_ARTIFACT_CONSISTENCY_V1.json` and `scripts/release-candidate-route-artifact-consistency-v1-validate.mjs`.
+
+V1 Phase 4 update on 2026-07-30: Phase 4 is PASS. The central recommendation policy remains limited to MLB core full-game markets, unsupported markets still emit `UNSUPPORTED_MARKET` or readiness blockers, Top Picks filters through production eligibility and official recommendation status, and product copy preserves projection-only and Official Pick boundaries. The next approved incomplete phase is Phase 5, Final validation bundle.
+
+Evidence: `docs/UNSUPPORTED_MARKET_RECOMMENDATION_POLICY_LOCK_V1.md`, `docs/UNSUPPORTED_MARKET_RECOMMENDATION_POLICY_LOCK_V1.json` and `scripts/unsupported-market-recommendation-policy-lock-v1-validate.mjs`.
 
 ## Certification-First Priorities
 

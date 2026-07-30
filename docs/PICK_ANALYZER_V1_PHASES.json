@@ -48,7 +48,7 @@
     {
       "phase": 4,
       "name": "Unsupported-market and recommendation-policy lock",
-      "status": "remaining",
+      "status": "complete",
       "exitCriteria": [
         "unsupported_markets_do_not_appear_as_available_recommendations",
         "projection_only_copy_is_consistent",
@@ -96,6 +96,7 @@
   "certificationMarkers": [
     "IMPLEMENTATION_PHASE_PLAN_PASS",
     "V1_PHASE_3_PRODUCTION_CERTIFICATION_PASS",
+    "UNSUPPORTED_MARKET_POLICY_LOCK_PASS",
     "NO_CODE_CHANGE_PASS",
     "NO_PROVIDER_CALL_PASS",
     "NO_PRODUCTION_MUTATION_PASS"

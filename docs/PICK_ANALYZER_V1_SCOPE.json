@@ -5,7 +5,7 @@
   "mode": "product_definition_only",
   "repository": "https://github.com/jlebronmarty-netizen/pick-analyzer.git",
   "branch": "main",
-  "currentCompletionPercent": 87,
+  "currentCompletionPercent": 91,
   "executiveVision": "Certification-first MLB core sports intelligence with truthful readiness boundaries for every non-certified sport and market.",
   "inScope": {
     "primarySport": "MLB",
@@ -108,6 +108,7 @@
   "certificationMarkers": [
     "V1_SCOPE_PASS",
     "V1_PHASE_3_PRODUCTION_CERTIFICATION_PASS",
+    "UNSUPPORTED_MARKET_POLICY_LOCK_PASS",
     "NO_CODE_CHANGE_PASS",
     "NO_PROVIDER_CALL_PASS",
     "NO_PRODUCTION_MUTATION_PASS"

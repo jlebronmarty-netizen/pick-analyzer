@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-30 16:38:05Z
 
+## 2026-07-30 V1 Phase 4 Unsupported-Market And Recommendation-Policy Lock
+
+- Certified Phase 4 by static source/artifact validation. The central recommendation policy still limits official recommendation markets to `moneyline`, `spread`, `run_line` and `total`, emits `UNSUPPORTED_MARKET` for unsupported markets, and leaves automatic production approval disabled.
+- Verified Top Picks still uses the central policy, requires production-eligible rows and filters Official Pick rows through `isOfficialRecommendationStatus`.
+- Verified Team Totals, First Five, NRFI/YRFI, alternate lines, pitcher props and batter props remain blocked from official-pick eligibility in Universal Market Intelligence and stay out of V1 scope.
+- Verified product copy boundaries remain visible across Probability Picks, Most Likely, AI Bet Finder and Dashboard: projection-only intelligence is separate from Official Picks, high probability is not promoted into a recommendation, and non-MLB production recommendations remain blocked.
+- Phase 4 is `PASS`. The official V1 completion estimate is now 91% by applying the remaining-certification linear method from the original 78% baseline. The next approved incomplete V1 phase is Phase 5, Final validation bundle.
+- No local server smoke, provider calls, data mutations, business-rule changes, prediction changes, settlement changes, learning changes, model training, model-weight mutation, probability change, confidence change, Trust change, Official Pick policy change, epoch activation or manual Vercel deployment was performed.
+
 ## 2026-07-30 V1 Phase 3 Release-Candidate Route And Artifact Consistency
 
 - Reconciled the official V1 phase order after the July 29 MLB operating-day recovery. Phase 2 is complete: pregame refresh evidence, Current Board visibility, canonical result sync, protected settlement, learning evidence, Performance visibility and provider budget policy are all documented.
