@@ -22,6 +22,8 @@ This is the highest-level documentation index for Pick Analyzer V2. It governs p
 - [Release 02 Product Integration Certification](../CERTIFICATION/RELEASE_02_PRODUCT_INTEGRATION_CERTIFICATION.md)
 - [Release 02A Scheduler Topology](../OPERATIONS/RELEASE_02A_SCHEDULER_TOPOLOGY.md)
 - [Release 02A Scheduler Freshness Certification](../CERTIFICATION/RELEASE_02A_SCHEDULER_FRESHNESS_CERTIFICATION.md)
+- [Release 03 Production Hardening Report](../OPERATIONS/PRODUCTION_HARDENING_REPORT.md)
+- [Release 03 Production Hardening Certification](../CERTIFICATION/RELEASE_03_PRODUCTION_HARDENING.md)
 - [Release 01 Execution Plan](../RELEASES/RELEASE_01_EXECUTION_PLAN.md)
 - [Release 01 Backlog](../RELEASES/RELEASE_01_BACKLOG.md)
 - [Release 01 Progress](../RELEASES/RELEASE_01_PROGRESS.md)

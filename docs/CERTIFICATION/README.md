@@ -12,6 +12,8 @@ Current V2 certification documents:
 - [Release 02 Certification JSON](release-02-product-integration-certification.json)
 - [Release 02A Scheduler Freshness Certification](RELEASE_02A_SCHEDULER_FRESHNESS_CERTIFICATION.md)
 - [Release 02A Certification JSON](release-02a-scheduler-freshness-certification.json)
+- [Release 03 Production Hardening Certification](RELEASE_03_PRODUCTION_HARDENING.md)
+- [Release 03 Certification JSON](release-03-production-hardening.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 
