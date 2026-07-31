@@ -1,0 +1,100 @@
+{
+  "phase": "V2_PHASE_B2_TODAY_PAGE_SHELL_AND_CRITICAL_HIERARCHY",
+  "generatedAt": "2026-07-31T00:00:00.000Z",
+  "baselineCommit": "8fad0ebaa5c84d4e2782f9bee230a910132ba7c2",
+  "productObjective": "Make /dashboard a focused daily decision cockpit that answers whether to bet today and what the best available opportunity is if the user reviews anyway.",
+  "filesChanged": [
+    "src/app/dashboard/page.tsx",
+    "src/components/dashboard/AdvancedEvidenceDisclosure.tsx",
+    "src/components/dashboard/DashboardShell.tsx",
+    "src/components/dashboard/TodayDecisionPanel.tsx",
+    "docs/PICK_ANALYZER_V2_PHASE_B2_TODAY_EXPERIENCE.md",
+    "docs/pick-analyzer-v2-phase-b2-today-experience.json",
+    "scripts/pick-analyzer-v2-phase-b2-today-experience-validate.mjs"
+  ],
+  "dataSources": [
+    {
+      "name": "Today contract",
+      "source": "/api/dashboard/today",
+      "usage": "Primary read-only dashboard decision data, including official pick count, freshness, canonical selectors, warnings, grounded opportunity counts and update timestamps."
+    },
+    {
+      "name": "Dashboard canonical view model",
+      "source": "TodayResponse.viewModel.selectors",
+      "usage": "Best available B2 opportunity source, preferring existing official picks, best value, highest ranked priced market, most likely summary, highest projected outcome and grounded opportunities."
+    }
+  ],
+  "verdictDerivation": {
+    "allowedLabels": ["BET", "REVIEW", "WAIT", "PASS"],
+    "bet": "officialPicks > 0",
+    "wait": "no official picks and stale freshness or games waiting for odds",
+    "review": "no official picks and an existing best available opportunity is visible",
+    "pass": "no official picks and no eligible supported opportunity is visible",
+    "policyChange": false,
+    "newModelMath": false
+  },
+  "bestOpportunitySource": {
+    "order": [
+      "sections.officialPicks.data[0] when officialPicks > 0",
+      "viewModel.selectors.bestAvailableValue",
+      "viewModel.selectors.highestRankedPricedMarket",
+      "viewModel.selectors.mostLikelySummary.selector",
+      "viewModel.selectors.highestProjectedOutcome",
+      "sections.groundedOpportunities.data[0]"
+    ],
+    "fabricatesOpportunity": false,
+    "officialDistinction": "Official Pick and Best Available - Not Official are separate visible labels."
+  },
+  "advancedEvidence": {
+    "strategy": "Collapsed AdvancedEvidenceDisclosure",
+    "collapsedByDefault": true,
+    "rendersChildrenOnlyWhenOpened": true,
+    "preservesExistingDashboardDeveloperGroups": true
+  },
+  "navigation": {
+    "primaryConcepts": ["Today", "Opportunities", "Performance", "Sports", "More"],
+    "existingUrlsPreserved": true,
+    "routeDeletion": false,
+    "redirectsAdded": false,
+    "deferred": "Full unified Opportunities shell is deferred to B4 and operations/admin separation is deferred to B8."
+  },
+  "stateHandling": {
+    "loading": "Decision-shell skeleton with aria-busy and no fake recommendation.",
+    "noOfficialPick": "Verdict is REVIEW, WAIT or PASS and Best Opportunity remains visible when existing data supports it.",
+    "noEligibleOpportunity": "Truthful no-opportunity card with no fabricated selection.",
+    "stale": "WAIT verdict path and visible freshness context.",
+    "providerUnavailable": "Stored Today API state is shown without live-provider claims.",
+    "error": "Safe degraded message and Operations link without stack traces."
+  },
+  "presentationShells": {
+    "aiConviction": "B2 shell only; no numeric score or new formula.",
+    "actionability": "B2 shell backed by verdict/freshness only.",
+    "officialPickReadiness": "B2 shell showing Official/Not Official and blocker context only; structured gates deferred to B3."
+  },
+  "informationGraphics": [
+    "compact probability versus implied probability fields",
+    "compact edge and expected value fields",
+    "freshness/update status card",
+    "verdict status strip"
+  ],
+  "safety": {
+    "providerCallsMade": 0,
+    "providerCreditsConsumed": 0,
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "businessRuleChanges": 0,
+    "officialPickPolicyChanged": false
+  },
+  "deferredWork": {
+    "B3": "Normalize Best Opportunity and implement structured Official Pick Readiness gates.",
+    "B4": "Build unified Opportunities tabs and taxonomy.",
+    "B5": "Add AI explanation, Conviction, Actionability and What Would Change My Mind presentation models.",
+    "B6": "Mobile decision experience refinement.",
+    "B7": "Performance trust integration.",
+    "B8": "Operations/admin separation."
+  },
+  "finalVerdict": "PENDING_LOCAL_VALIDATION"
+}

@@ -6,42 +6,23 @@ import { SportProvider } from '@/context/SportContext'
 import SportSelector from '@/components/dashboard/SportSelector'
 import { ProductStatusBadge } from '@/components/product/ProductStatus'
 
-const navItems = [
-  { id: 'overview', label: 'Overview', icon: '⌁' },
-  { id: 'multi-sport', label: 'Sport Engine', icon: '◎' },
-  { id: 'nba-adapter', label: 'NBA Adapter', icon: '🏀' },
-  { id: 'daily-report', label: 'Daily Report', icon: '◈' },
-  { id: 'prediction-v4', label: 'AI Rating', icon: '◆' },
-  { id: 'top-picks', label: 'Top Picks', icon: '★' },
-  { id: 'bet-slip', label: 'Bet Slip', icon: '◇' },
-  { id: 'risk-lab', label: 'Risk Lab', icon: '△' },
-  { id: 'sharp-money', label: 'Market', icon: '↯' },
-  { id: 'closing-line', label: 'Closing Line', icon: '⌛' },
-  { id: 'live-betting', label: 'Live AI', icon: '●' },
-  { id: 'portfolio', label: 'Portfolio', icon: '▣' },
-  { id: 'ai-coach', label: 'AI Coach', icon: '♟' },
-  { id: 'learning', label: 'Learning', icon: '↗' },
-  { id: 'model-center', label: 'AI Model', icon: '◉' },
-  { id: 'sports-brain', label: 'Sports Brain', icon: '✦' },
-]
-
 const productNavGroups = [
   {
-    label: 'Home',
+    label: 'Primary',
     items: [
-      { href: '/dashboard', label: 'Dashboard', icon: 'DB' },
-      { href: '/sports-center', label: 'Sports Center', icon: 'SC' },
-      { href: '/ai-operations', label: 'AI Briefing', icon: 'AI' },
+      { href: '/dashboard', label: 'Today', icon: 'TD' },
+      { href: '/most-likely', label: 'Opportunities', icon: 'OP' },
+      { href: '/performance', label: 'Performance', icon: 'PF' },
+      { href: '/sports-center', label: 'Sports', icon: 'SP' },
       {
-        href: '/data-coverage',
-        label: 'Data Coverage',
-        icon: 'DC',
-        badge: 'FOUNDATION',
+        href: '/dashboard#advanced-details',
+        label: 'More',
+        icon: 'MR',
       },
     ],
   },
   {
-    label: 'Picks',
+    label: 'Opportunities',
     items: [
       {
         href: '/probability-picks',
@@ -49,34 +30,20 @@ const productNavGroups = [
         icon: 'PR',
         badge: 'LIMITED',
       },
-      { id: 'today', label: 'Current Board', icon: 'CB' },
       { href: '/most-likely', label: 'Most Likely', icon: 'ML' },
       { href: '/best-value', label: 'Best Value', icon: 'BV' },
+      { href: '/betting-workbench', label: 'Betting Workbench', icon: 'BW' },
+      { href: '/game-intelligence', label: 'Game Intelligence', icon: 'GI' },
     ],
   },
   {
-    label: 'Projections',
+    label: 'Analysis',
     items: [
       { href: '/projections', label: 'Team Projections', icon: 'TP' },
       {
         href: '/player-projections',
         label: 'Player Projections',
         icon: 'PP',
-      },
-      {
-        href: '/game-intelligence',
-        label: 'Game Intelligence',
-        icon: 'GI',
-      },
-    ],
-  },
-  {
-    label: 'Markets',
-    items: [
-      {
-        href: '/betting-workbench',
-        label: 'Betting Workbench',
-        icon: 'BW',
       },
       {
         href: '/portfolio-intelligence',
@@ -95,11 +62,6 @@ const productNavGroups = [
         label: 'Closing Line Intelligence',
         icon: 'CL',
         badge: 'FOUNDATION',
-      },
-      {
-        href: '/dashboard#advanced-details',
-        label: 'Market Comparison',
-        icon: 'MC',
       },
       {
         href: '/arbitrage',
@@ -146,9 +108,12 @@ const productNavGroups = [
     ],
   },
   {
-    label: 'Administration',
+    label: 'More',
     items: [
-      { id: 'advanced', label: 'Validation', icon: 'VA' },
+      { href: '/ai-operations', label: 'AI Briefing', icon: 'AI' },
+      { id: 'today', label: 'Current Board', icon: 'CB' },
+      { href: '/dashboard#advanced-details', label: 'Market Comparison', icon: 'MC' },
+      { href: '/dashboard#advanced-details', label: 'Validation', icon: 'VA' },
       {
         href: '/dashboard#advanced-details',
         label: 'Governance',
@@ -188,7 +153,7 @@ export default function DashboardShell({
               <h1 className="mt-2 text-2xl font-black">AI Briefing</h1>
 
               <p className="mt-2 text-sm leading-6 text-slate-400">
-                A clear daily answer to whether there is a bet worth making.
+                A daily decision cockpit for the best available betting signal.
               </p>
             </div>
 
@@ -259,7 +224,7 @@ export default function DashboardShell({
                   </p>
 
                   <h2 className="text-xl font-black text-white">
-                    Today&apos;s Betting Briefing
+                    Today&apos;s Decision
                   </h2>
                 </div>
 

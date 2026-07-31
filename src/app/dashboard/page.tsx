@@ -1,7 +1,8 @@
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import DashboardSection from '@/components/dashboard/DashboardSection'
-import UserTodayPanel from '@/components/dashboard/UserTodayPanel'
+import TodayDecisionPanel from '@/components/dashboard/TodayDecisionPanel'
 import DashboardDeveloperGroups from '@/components/dashboard/DashboardDeveloperGroups'
+import AdvancedEvidenceDisclosure from '@/components/dashboard/AdvancedEvidenceDisclosure'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -11,13 +12,15 @@ export default function DashboardPage() {
     <DashboardShell>
       <DashboardSection
         id="today"
-        eyebrow="User Mode"
+        eyebrow="Decision Cockpit"
         title="Today"
-        description="A simple betting briefing built for a 10-second read."
+        description="A focused daily answer: should you bet today, and what is the strongest available opportunity if you review anyway?"
       >
-        <UserTodayPanel />
+        <TodayDecisionPanel />
       </DashboardSection>
-      <DashboardDeveloperGroups />
+      <AdvancedEvidenceDisclosure>
+        <DashboardDeveloperGroups />
+      </AdvancedEvidenceDisclosure>
     </DashboardShell>
   )
 }
