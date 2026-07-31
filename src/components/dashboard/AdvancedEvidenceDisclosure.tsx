@@ -10,9 +10,9 @@ export default function AdvancedEvidenceDisclosure({
   const [opened, setOpened] = useState(false)
 
   return (
-    <section id="advanced-details" className="scroll-mt-24">
+    <section id="advanced-details" className="scroll-mt-24 pb-6 md:pb-0" data-b6-mobile-advanced-evidence="true">
       <details
-        className="rounded-lg border border-slate-800 bg-slate-950/70 p-5"
+        className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 md:p-5"
         onToggle={(event) => setOpened((event.currentTarget as HTMLDetailsElement).open)}
       >
         <summary className="cursor-pointer list-none rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-sky-300">
@@ -21,7 +21,7 @@ export default function AdvancedEvidenceDisclosure({
               <p className="text-xs font-black uppercase tracking-[0.24em] text-sky-300">
                 Advanced Evidence
               </p>
-              <h2 className="mt-2 text-2xl font-black text-white">
+              <h2 className="mt-2 text-xl font-black text-white md:text-2xl">
                 Model, data, provider and operations detail
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">

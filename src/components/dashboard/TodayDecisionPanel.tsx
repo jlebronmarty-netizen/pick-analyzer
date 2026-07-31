@@ -10,6 +10,7 @@ import {
 } from '@/components/dashboard/today-opportunity-readiness'
 import {
   buildAiDecisionPresentation,
+  type ActionabilityPresentation,
   type ActionabilityState,
   type AiDecisionPresentation,
   type ConvictionLabel,
@@ -17,6 +18,7 @@ import {
 
 type Tone = 'green' | 'yellow' | 'blue' | 'red' | 'gray'
 type Verdict = 'BET' | 'REVIEW' | 'WAIT' | 'PASS'
+type DecisionDetailTab = 'why' | 'risks' | 'readiness'
 
 type PerformanceSnapshot = {
   trustLabel: string
@@ -173,6 +175,12 @@ const actionabilityTone: Record<ActionabilityState, Tone> = {
   'DO NOT ACT': 'red',
   UNAVAILABLE: 'gray',
 }
+
+const decisionDetailTabs: Array<{ id: DecisionDetailTab; label: string }> = [
+  { id: 'why', label: 'Why' },
+  { id: 'risks', label: 'Risks' },
+  { id: 'readiness', label: 'Readiness' },
+]
 
 function Badge({ children, tone = 'gray' }: { children: ReactNode; tone?: Tone }) {
   return <span className={`inline-flex max-w-full items-center rounded-full border px-3 py-1 text-xs font-black uppercase ${toneClasses[tone]}`}>{children}</span>
@@ -512,11 +520,11 @@ function ReadinessRows({ readiness }: { readiness: OfficialPickReadiness }) {
   )
 }
 
-function InsightGrid({ title, items, tone }: { title: string; items: ReturnType<typeof compactCards>; tone: Tone }) {
+function InsightGrid({ title, items, tone, compact = false }: { title: string; items: ReturnType<typeof compactCards>; tone: Tone; compact?: boolean }) {
   return (
-    <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b4-insight-section={title.toLowerCase()}>
-      <h2 className="text-xl font-black text-white">{title}</h2>
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
+    <article className={`rounded-lg border border-slate-800 bg-slate-900/80 ${compact ? 'p-4' : 'p-5'}`} data-b4-insight-section={title.toLowerCase()}>
+      <h2 className={`${compact ? 'text-lg' : 'text-xl'} font-black text-white`}>{title}</h2>
+      <div className={`mt-4 grid gap-3 ${compact ? '' : 'md:grid-cols-3'}`}>
         {items.map((item) => (
           <div key={item.key} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
             <div className="flex items-center gap-3">
@@ -537,43 +545,123 @@ function DecisionStatusCards({ decision }: { decision: AiDecisionPresentation })
   const conviction = decision.conviction
   const actionability = decision.actionability
   return (
-    <div className="grid gap-4 lg:grid-cols-2" data-b5-conviction-actionability="true">
-      <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b2-conviction-shell="true" data-b5-conviction-card="true">
+    <div className="grid gap-3 md:gap-4 lg:grid-cols-2" data-b5-conviction-actionability="true" data-b6-compact-conviction-actionability="true">
+      <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-4 md:p-5" data-b2-conviction-shell="true" data-b5-conviction-card="true">
         <p className="sr-only">B2 does not create a new conviction formula. B5 keeps Conviction categorical and presentation-only.</p>
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-200">AI Conviction</p>
-            <h3 className="mt-2 text-3xl font-black text-white">{conviction.label}</h3>
+            <h3 className="mt-2 text-2xl font-black text-white md:text-3xl">{conviction.label}</h3>
           </div>
           <Badge tone={convictionTone[conviction.label]}>Categorical</Badge>
         </div>
         <div className="mt-4 h-2 rounded-full bg-slate-800" aria-label={`AI Conviction is ${conviction.label}`}>
           <div className={`h-2 rounded-full ${convictionTone[conviction.label] === 'green' ? 'bg-violet-300' : convictionTone[conviction.label] === 'yellow' ? 'bg-amber-300' : convictionTone[conviction.label] === 'red' ? 'bg-rose-400' : 'bg-slate-500'}`} />
         </div>
-        <p className="mt-4 text-sm leading-6 text-slate-300">{conviction.rationale}</p>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-300 md:mt-4 md:line-clamp-none">{conviction.rationale}</p>
+        <div className="mt-3 flex flex-wrap gap-2 md:mt-4">
           {conviction.evidence.map((item) => <Badge key={item} tone="blue">{item}</Badge>)}
         </div>
-        <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Limiting factor</p>
-        <p className="mt-1 text-sm leading-6 text-slate-400">{conviction.limitingFactor}</p>
+        <details className="mt-3 md:mt-4">
+          <summary className="cursor-pointer text-xs font-bold uppercase tracking-[0.14em] text-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-sky-300">Limiting factor</summary>
+          <p className="mt-2 text-sm leading-6 text-slate-400">{conviction.limitingFactor}</p>
+        </details>
       </article>
 
-      <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b2-actionability-shell="true" data-b5-actionability-card="true">
+      <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-4 md:p-5" data-b2-actionability-shell="true" data-b5-actionability-card="true">
         <p className="sr-only">This state is backed by verdict and freshness context plus existing B3 readiness evidence.</p>
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-200">Actionability</p>
-            <h3 className="mt-2 text-3xl font-black text-white">{actionability.state}</h3>
+            <h3 className="mt-2 text-2xl font-black text-white md:text-3xl">{actionability.state}</h3>
           </div>
           <Badge tone={actionabilityTone[actionability.state]}>Now</Badge>
         </div>
-        <p className="mt-4 text-sm leading-6 text-slate-300">{actionability.rationale}</p>
-        <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Primary blocker</p>
-        <p className="mt-1 text-sm leading-6 text-slate-400">{actionability.primaryBlocker}</p>
-        <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Next review</p>
-        <p className="mt-1 text-sm leading-6 text-slate-400">{actionability.nextReviewAt ? dateTime(actionability.nextReviewAt) : 'No specific review time exposed.'}</p>
+        <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-300 md:mt-4 md:line-clamp-none">{actionability.rationale}</p>
+        <details className="mt-3 md:mt-4">
+          <summary className="cursor-pointer text-xs font-bold uppercase tracking-[0.14em] text-slate-500 outline-none focus-visible:ring-2 focus-visible:ring-sky-300">Action detail</summary>
+          <p className="mt-2 text-sm leading-6 text-slate-400">Primary blocker: {actionability.primaryBlocker}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">Next review: {actionability.nextReviewAt ? dateTime(actionability.nextReviewAt) : 'No specific review time exposed.'}</p>
+        </details>
       </article>
     </div>
+  )
+}
+
+function StickyVerdictStrip({ verdict, status, tone }: { verdict: Verdict; status: string; tone: Tone }) {
+  return (
+    <div
+      className={`sticky top-[73px] z-10 rounded-lg border px-3 py-2 shadow-lg shadow-slate-950/20 md:hidden ${toneClasses[tone]}`}
+      data-b6-sticky-verdict-strip="true"
+      style={{ marginTop: 'calc(env(safe-area-inset-top, 0px) * 0)' }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-300">Today</p>
+          <p className="truncate text-lg font-black text-white">{verdict}</p>
+        </div>
+        <p className="min-w-0 flex-1 text-right text-xs font-bold leading-5 text-slate-100">{status}</p>
+      </div>
+    </div>
+  )
+}
+
+function MobileDecisionDetails({
+  activeTab,
+  onTabChange,
+  whyCards,
+  riskCards,
+  readiness,
+  actionability,
+}: {
+  activeTab: DecisionDetailTab
+  onTabChange: (tab: DecisionDetailTab) => void
+  whyCards: ReturnType<typeof compactCards>
+  riskCards: ReturnType<typeof compactCards>
+  readiness: OfficialPickReadiness
+  actionability: ActionabilityPresentation
+}) {
+  const urgentRisk = actionability.state === 'DO NOT ACT' || actionability.state === 'WAIT'
+  return (
+    <section className="rounded-lg border border-slate-800 bg-slate-900/80 p-4 md:hidden" data-b6-mobile-decision-segments="true">
+      {urgentRisk ? (
+        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm leading-6 text-amber-100" data-b6-risk-summary="true">
+          {actionability.primaryBlocker}
+        </div>
+      ) : null}
+      <div className="grid grid-cols-3 gap-1" role="tablist" aria-label="Decision details">
+        {decisionDetailTabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-controls={`decision-detail-${tab.id}`}
+            className={`min-h-11 rounded-lg px-2 text-sm font-black outline-none focus-visible:ring-2 focus-visible:ring-sky-300 ${activeTab === tab.id ? 'bg-sky-500/20 text-white' : 'bg-slate-950 text-slate-300'}`}
+            onClick={() => onTabChange(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+      <div className="mt-4">
+        {activeTab === 'why' ? (
+          <div id="decision-detail-why" role="tabpanel" aria-labelledby="Why">
+            <InsightGrid title="Why" items={whyCards} tone="green" compact />
+          </div>
+        ) : null}
+        {activeTab === 'risks' ? (
+          <div id="decision-detail-risks" role="tabpanel" aria-labelledby="Risks">
+            <InsightGrid title="Risks" items={riskCards} tone="yellow" compact />
+          </div>
+        ) : null}
+        {activeTab === 'readiness' ? (
+          <div id="decision-detail-readiness" role="tabpanel" aria-labelledby="Readiness">
+            <ReadinessProgress readiness={readiness} compact />
+          </div>
+        ) : null}
+      </div>
+    </section>
   )
 }
 
@@ -590,12 +678,12 @@ function AiExplanationCard({ decision }: { decision: AiDecisionPresentation }) {
 
 function ChangeMindPanel({ decision }: { decision: AiDecisionPresentation }) {
   return (
-    <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b5-change-mind="true">
+    <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-4 md:p-5" data-b5-change-mind="true" data-b6-change-mind-compact="true">
       <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">What Would Change My Mind?</p>
-      <h2 className="mt-2 text-2xl font-black text-white">Observable conditions</h2>
-      <div className="mt-4 space-y-3" role="list" aria-label="Evidence-backed conditions that could change the decision">
+      <h2 className="mt-2 text-xl font-black text-white md:text-2xl">Observable conditions</h2>
+      <div className="mt-4 space-y-2 md:space-y-3" role="list" aria-label="Evidence-backed conditions that could change the decision">
         {decision.changeConditions.map((condition) => (
-          <div key={condition.conditionId} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4" role="listitem">
+          <div key={condition.conditionId} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3 md:p-4" role="listitem">
             <p className="text-sm font-black text-white">{condition.currentState}</p>
             <p className="mt-2 text-sm leading-6 text-slate-300">{condition.possibleChange} {condition.expectedEffect}</p>
             <p className="mt-2 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{condition.qualifier}</p>
@@ -606,24 +694,24 @@ function ChangeMindPanel({ decision }: { decision: AiDecisionPresentation }) {
   )
 }
 
-function ReadinessProgress({ readiness }: { readiness: OfficialPickReadiness }) {
+function ReadinessProgress({ readiness, compact = false }: { readiness: OfficialPickReadiness; compact?: boolean }) {
   const percent = readinessPercent(readiness)
   return (
-    <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b4-readiness-progress="true">
+    <article className={`rounded-lg border border-slate-800 bg-slate-900/80 ${compact ? 'p-4' : 'p-5'}`} data-b4-readiness-progress="true">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200">Readiness</p>
-          <h2 className="mt-2 text-2xl font-black text-white">Requirements</h2>
+          <h2 className={`${compact ? 'mt-1 text-xl' : 'mt-2 text-2xl'} font-black text-white`}>Requirements</h2>
         </div>
-        <p className="text-3xl font-black text-white">{readiness.requirementsMet} / {readiness.knownApplicableRequirements}</p>
+        <p className={`${compact ? 'text-2xl' : 'text-3xl'} font-black text-white`}>{readiness.requirementsMet} / {readiness.knownApplicableRequirements}</p>
       </div>
       <div className="mt-4 h-3 rounded-full bg-slate-800" aria-label={`${readiness.requirementsMet} of ${readiness.knownApplicableRequirements} known readiness requirements passed`}>
         <div className="h-3 rounded-full bg-emerald-400" style={{ width: `${percent}%` }} />
       </div>
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div className={`mt-4 grid gap-2 ${compact ? '' : 'sm:grid-cols-2 xl:grid-cols-4'}`}>
         {readiness.rows.slice(0, 8).map((row) => (
-          <div key={row.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
-            <span className="truncate text-xs font-bold text-slate-300">{row.label}</span>
+          <div key={row.id} className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-xs font-bold text-slate-300">{row.label}</span>
             <Badge tone={readinessTone[row.state]}>{row.state}</Badge>
           </div>
         ))}
@@ -633,12 +721,12 @@ function ReadinessProgress({ readiness }: { readiness: OfficialPickReadiness }) 
   )
 }
 
-function PremiumMetric({ label, value, detail, tone = 'gray' }: { label: string; value: string; detail?: string; tone?: Tone }) {
+function PremiumMetric({ label, value, detail, tone = 'gray', priority = false }: { label: string; value: string; detail?: string; tone?: Tone; priority?: boolean }) {
   return (
-    <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
-      <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{label}</p>
-      <div className="mt-3 flex items-end justify-between gap-3">
-        <p className="text-2xl font-black text-white">{value}</p>
+    <article className={`rounded-lg border border-slate-800 bg-slate-950/70 ${priority ? 'p-3 md:p-4' : 'p-4'}`}>
+      <p className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500 md:text-xs md:tracking-[0.14em]">{label}</p>
+      <div className="mt-2 flex items-end justify-between gap-3 md:mt-3">
+        <p className={`${priority ? 'text-lg md:text-2xl' : 'text-2xl'} break-words font-black text-white`}>{value}</p>
         <span className={`h-2.5 w-2.5 rounded-full ${tone === 'green' ? 'bg-emerald-400' : tone === 'yellow' ? 'bg-amber-300' : tone === 'red' ? 'bg-rose-400' : tone === 'blue' ? 'bg-sky-400' : 'bg-slate-500'}`} />
       </div>
       {detail ? <p className="mt-2 text-xs leading-5 text-slate-400">{detail}</p> : null}
@@ -659,9 +747,9 @@ function AlternativesPreview({ cards }: { cards: AlternativeCard[] }) {
           <a href="/best-value" className="rounded-full border border-slate-700 px-3 py-2 text-xs font-black text-slate-200 hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-sky-300">Best Value - View All</a>
         </div>
       </div>
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
+      <div className="mt-4 grid gap-3 md:grid-cols-3" data-b6-mobile-alternatives-preview="true">
         {cards.slice(0, 6).map((card, index) => (
-          <a key={`${card.label}-${index}-${card.title}`} href={card.href} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 outline-none hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-300">
+          <a key={`${card.label}-${index}-${card.title}`} href={card.href} className={`${index > 2 ? 'hidden md:block' : ''} rounded-lg border border-slate-800 bg-slate-950/70 p-4 outline-none hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-300`}>
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{card.label}</p>
               <Badge tone={card.label === 'Best Value' ? 'green' : 'blue'}>{card.badge}</Badge>
@@ -699,15 +787,15 @@ function PerformanceSnapshotCard({ snapshot }: { snapshot: PerformanceSnapshot |
 
 function Skeleton() {
   return (
-    <section className="space-y-5" aria-busy="true" aria-label="Loading today's decision">
-      <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-6">
+    <section className="space-y-4 pb-6 md:space-y-5" aria-busy="true" aria-label="Loading today's decision" data-b6-mobile-loading-state="true">
+      <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4 md:p-6">
         <p className="text-xs font-black uppercase tracking-[0.24em] text-slate-500">Today</p>
-        <div className="mt-4 h-10 max-w-md rounded bg-slate-800" />
+        <div className="mt-4 h-8 max-w-md rounded bg-slate-800 md:h-10" />
         <div className="mt-3 h-4 max-w-2xl rounded bg-slate-800" />
       </div>
       <div className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
-        <div className="h-80 rounded-lg border border-slate-800 bg-slate-900/70" />
-        <div className="h-80 rounded-lg border border-slate-800 bg-slate-900/70" />
+        <div className="h-56 rounded-lg border border-slate-800 bg-slate-900/70 md:h-80" />
+        <div className="h-40 rounded-lg border border-slate-800 bg-slate-900/70 md:h-80" />
       </div>
     </section>
   )
@@ -718,6 +806,7 @@ export default function TodayDecisionPanel() {
   const [performance, setPerformance] = useState<PerformanceSnapshot | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [activeDetailTab, setActiveDetailTab] = useState<DecisionDetailTab>('why')
 
   useEffect(() => {
     let active = true
@@ -782,9 +871,9 @@ export default function TodayDecisionPanel() {
   if (loading) return <Skeleton />
   if (error || !data || !verdict || !decisionPresentation) {
     return (
-      <section className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-6 text-amber-100">
+      <section className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-amber-100 md:p-6" data-b6-mobile-error-state="true">
         <p className="text-xs font-black uppercase tracking-[0.24em]">Today unavailable</p>
-        <h1 className="mt-2 text-3xl font-black text-white">The daily decision shell could not load.</h1>
+        <h1 className="mt-2 text-2xl font-black text-white md:text-3xl">The daily decision shell could not load.</h1>
         <p className="mt-2 text-sm leading-6">{error ?? 'The Today contract did not return usable data.'}</p>
         <a href="/ai-operations" className="mt-4 inline-flex rounded-lg border border-amber-300/40 px-4 py-2 text-sm font-black text-amber-50 outline-none hover:bg-amber-500/10 focus-visible:ring-2 focus-visible:ring-amber-200">Open Operations</a>
       </section>
@@ -804,13 +893,15 @@ export default function TodayDecisionPanel() {
   ].slice(0, 6)
 
   return (
-    <section className="space-y-6" data-b2-today-shell="true" data-b3-best-opportunity-readiness="true" data-b4-decision-cockpit="true">
-      <div className={`rounded-lg border p-6 md:p-8 ${toneClasses[verdictTone]}`} data-b2-verdict-label={verdict.label} data-b4-verdict-hero="true">
+    <section className="space-y-4 pb-4 md:space-y-6" data-b2-today-shell="true" data-b3-best-opportunity-readiness="true" data-b4-decision-cockpit="true" data-b6-mobile-decision-experience="true">
+      <StickyVerdictStrip verdict={verdict.label} status={decisionPresentation.actionability.state} tone={verdictTone} />
+
+      <div className={`rounded-lg border p-4 md:p-8 ${toneClasses[verdictTone]}`} data-b2-verdict-label={verdict.label} data-b4-verdict-hero="true" data-b6-mobile-verdict-hero="true">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.24em] text-slate-300">Today&apos;s Verdict</p>
-            <h1 className="mt-3 text-6xl font-black tracking-normal text-white md:text-7xl">{verdict.label}</h1>
-            <p className="mt-4 max-w-3xl text-lg font-semibold leading-8 text-slate-100">{verdict.detail}</p>
+            <h1 className="mt-2 text-4xl font-black tracking-normal text-white sm:text-6xl md:mt-3 md:text-7xl">{verdict.label}</h1>
+            <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-slate-100 md:mt-4 md:text-lg md:leading-8">{verdict.detail}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Badge tone={verdictTone}>{verdict.officialStatus}</Badge>
@@ -822,21 +913,21 @@ export default function TodayDecisionPanel() {
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1.45fr_0.55fr]">
-        <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-6 md:p-7" data-b2-best-opportunity="true" data-b4-best-opportunity-hero="true">
+      <div className="grid gap-4 xl:grid-cols-[1.45fr_0.55fr]">
+        <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-4 md:p-7" data-b2-best-opportunity="true" data-b4-best-opportunity-hero="true" data-b6-mobile-best-opportunity-hero="true">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.24em] text-sky-300">Today&apos;s Best Opportunity</p>
               {opportunity ? (
                 <>
-                  <h2 className="mt-4 text-4xl font-black text-white md:text-5xl">{opportunity.selection}</h2>
-                  <p className="mt-3 text-lg font-bold text-slate-200">{opportunity.sport} / {opportunity.event}</p>
+                  <h2 className="mt-3 break-words text-3xl font-black text-white md:mt-4 md:text-5xl">{opportunity.selection}</h2>
+                  <p className="mt-3 break-words text-base font-bold text-slate-200 md:text-lg">{opportunity.sport} / {opportunity.event}</p>
                   <p className="mt-2 text-base font-semibold text-sky-100">{opportunity.market} / {odds(opportunity.odds)}</p>
-                  <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-400">{opportunity.reason}</p>
+                  <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400 md:mt-4">{opportunity.reason}</p>
                 </>
               ) : (
                 <>
-                  <h2 className="mt-4 text-4xl font-black text-white md:text-5xl">No eligible opportunity visible.</h2>
+                  <h2 className="mt-3 text-3xl font-black text-white md:mt-4 md:text-5xl">No eligible opportunity visible.</h2>
                   <p className="mt-2 text-sm leading-6 text-slate-400">
                     The Today contract did not expose a supported market opportunity. This state does not fabricate a pick.
                   </p>
@@ -848,22 +939,22 @@ export default function TodayDecisionPanel() {
             </Badge>
           </div>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4" data-b4-compact-metrics="true">
+          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-2 md:mt-7 md:gap-3 xl:grid-cols-4" data-b4-compact-metrics="true" data-b6-primary-metrics="true">
+            <PremiumMetric label="Probability" value={pct(opportunity?.modelProbability)} tone="green" priority />
+            <PremiumMetric label="Implied" value={pct(opportunity?.impliedProbability)} tone="blue" priority />
+            <PremiumMetric label="Edge" value={signedPct(opportunity?.edge)} tone={Number(opportunity?.edge) > 0 ? 'green' : 'gray'} priority />
+            <PremiumMetric label="EV" value={signedPct(opportunity?.expectedValue)} tone={Number(opportunity?.expectedValue) > 0 ? 'green' : 'gray'} priority />
+            <PremiumMetric label="Confidence" value={pct(opportunity?.confidence)} tone="yellow" priority />
+            <PremiumMetric label="Freshness" value={opportunity?.freshness ?? freshness} detail={relativeTime(opportunity?.updatedAt)} tone="yellow" priority />
             <PremiumMetric label="Current Odds" value={odds(opportunity?.odds)} detail={opportunity?.sportsbook} tone="blue" />
-            <PremiumMetric label="Model Probability" value={pct(opportunity?.modelProbability)} tone="green" />
-            <PremiumMetric label="Implied Probability" value={pct(opportunity?.impliedProbability)} tone="blue" />
-            <PremiumMetric label="Confidence" value={pct(opportunity?.confidence)} tone="yellow" />
-            <PremiumMetric label="Edge" value={signedPct(opportunity?.edge)} tone={Number(opportunity?.edge) > 0 ? 'green' : 'gray'} />
-            <PremiumMetric label="Expected Value" value={signedPct(opportunity?.expectedValue)} tone={Number(opportunity?.expectedValue) > 0 ? 'green' : 'gray'} />
-            <PremiumMetric label="Freshness" value={opportunity?.freshness ?? freshness} detail={relativeTime(opportunity?.updatedAt)} tone="yellow" />
             <PremiumMetric label="Data Quality" value={opportunity?.dataQuality ?? 'Not yet available'} tone="blue" />
           </div>
-          <div className="mt-5">
+          <div className="mt-5 hidden md:block">
             <EvidenceGraphics opportunity={normalizedOpportunity} />
           </div>
         </article>
 
-        <aside className="grid gap-4">
+        <aside className="hidden gap-4 md:grid">
           <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b2-readiness-shell="true">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200">Official Pick Readiness</p>
             <h3 className="mt-2 text-2xl font-black text-white">{readiness.status === 'OFFICIAL' ? 'Official' : readiness.status === 'NO_OPPORTUNITY' ? 'No Opportunity' : 'Not Official'}</h3>
@@ -881,16 +972,27 @@ export default function TodayDecisionPanel() {
         </aside>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
         <AiExplanationCard decision={decisionPresentation} />
         <DecisionStatusCards decision={decisionPresentation} />
       </div>
 
-      <InsightGrid title="Why" items={whyCards} tone="green" />
-      <InsightGrid title="Risks" items={riskCards} tone="yellow" />
-      <ReadinessProgress readiness={readiness} />
+      <MobileDecisionDetails
+        activeTab={activeDetailTab}
+        onTabChange={setActiveDetailTab}
+        whyCards={whyCards}
+        riskCards={riskCards}
+        readiness={readiness}
+        actionability={decisionPresentation.actionability}
+      />
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+      <div className="hidden space-y-6 md:block" data-b6-desktop-decision-details="true">
+        <InsightGrid title="Why" items={whyCards} tone="green" />
+        <InsightGrid title="Risks" items={riskCards} tone="yellow" />
+        <ReadinessProgress readiness={readiness} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
         <ChangeMindPanel decision={decisionPresentation} />
         <AlternativesPreview cards={opportunityAlternatives.length ? opportunityAlternatives : alternatives.map(([label, value, href]) => ({
           label,

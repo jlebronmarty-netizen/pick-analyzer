@@ -2,6 +2,14 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-07-31 Pick Analyzer V2 Phase B6 Mobile Decision Experience
+
+- Completed the bounded B6 mobile decision-experience refinement for Today. Mobile now leads with a compact sticky verdict strip, a tighter Best Opportunity hero, compact Conviction and Actionability cards, a two-column priority metric layout and mobile segmented Why / Risks / Readiness details.
+- The mobile order now prioritizes the user's five-second questions: should I bet today, what is the best opportunity, whether it is official, why, and whether to act, wait, review or avoid.
+- B5.1 bottom navigation remains preserved with Today, Opportunities, Performance, Sports and More. The certified Opportunities sheet remains intact.
+- Advanced Evidence stays collapsed by default with additional mobile bottom spacing. Desktop keeps the richer B4/B5 stacked decision sections.
+- No API, backend service, provider, scheduler, prediction, probability, confidence, EV, edge, Official Pick policy, B5 conviction rule, B5 actionability rule, settlement, learning or data contract changed. B7 was not started.
+
 ## 2026-07-31 Pick Analyzer V2 Phase B5.1 Mobile Opportunity Navigation
 
 - Completed the bounded B5.1 mobile discoverability repair for opportunity navigation. The mobile bottom navigation remains five primary items: Today, Opportunities, Performance, Sports and More.

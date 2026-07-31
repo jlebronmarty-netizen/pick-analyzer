@@ -1,0 +1,85 @@
+{
+  "phase": "V2_B6",
+  "title": "Mobile Decision Experience",
+  "baselineCommit": "0463d48e05423aaa3359fbbc9461d4a74596622f",
+  "status": "LOCAL_PASS_PENDING_PRODUCTION",
+  "b7Started": false,
+  "mobileIssueMatrix": [
+    {
+      "component": "Verdict hero",
+      "viewportRange": "320-430px",
+      "observedBehavior": "Desktop-scale verdict hero consumed too much first viewport.",
+      "severity": "P1",
+      "userImpact": "The user had to scroll before seeing enough decision context.",
+      "repair": "Mobile sticky verdict strip plus smaller mobile hero scale.",
+      "validationMethod": "static_source_validator"
+    },
+    {
+      "component": "Primary metrics",
+      "viewportRange": "320-430px",
+      "observedBehavior": "Eight metric cards appeared before detail sections.",
+      "severity": "P1",
+      "userImpact": "Decision evidence felt dense on one-handed mobile use.",
+      "repair": "Two-column priority metric layout.",
+      "validationMethod": "static_source_validator"
+    },
+    {
+      "component": "Why Risks Readiness",
+      "viewportRange": "320-430px",
+      "observedBehavior": "All sections stacked vertically.",
+      "severity": "P1",
+      "userImpact": "Excess scroll depth before scanning blockers.",
+      "repair": "Mobile segmented control.",
+      "validationMethod": "static_source_validator"
+    }
+  ],
+  "mobileOrder": [
+    "sticky_verdict_strip",
+    "best_opportunity_hero",
+    "conviction_actionability",
+    "primary_metrics",
+    "why_risks_readiness_segments",
+    "what_would_change_my_mind",
+    "alternatives_preview",
+    "performance_snapshot",
+    "advanced_evidence",
+    "bottom_navigation"
+  ],
+  "responsiveTargets": ["320px", "360px", "390px", "430px", "768px", "desktop"],
+  "navigationPreserved": {
+    "primaryItemCount": 5,
+    "items": ["Today", "Opportunities", "Performance", "Sports", "More"],
+    "opportunitiesSheetPreserved": true
+  },
+  "accessibility": {
+    "segmentedControl": true,
+    "semanticTabRoles": true,
+    "visibleLabels": true,
+    "focusVisible": true,
+    "safeAreaSupport": true,
+    "advancedEvidenceCollapsed": true,
+    "noColorOnlyMeaning": true
+  },
+  "safety": {
+    "apiFilesChanged": false,
+    "serviceFilesChanged": false,
+    "policyFilesChanged": false,
+    "providerCallsIntroduced": 0,
+    "providerCreditsUsed": 0,
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "officialPickPolicyChanged": false,
+    "convictionRulesChanged": false,
+    "actionabilityRulesChanged": false
+  },
+  "productionEvidence": {
+    "productionCommitBefore": "0463d48e05423aaa3359fbbc9461d4a74596622f",
+    "productionCommitAfter": null,
+    "manualDeployment": false,
+    "postDeployVerificationRequired": true
+  },
+  "manualDeviceTestStatus": "not_performed",
+  "finalVerdict": "PICK_ANALYZER_V2_PHASE_B6_MOBILE_DECISION_EXPERIENCE_PASS"
+}
