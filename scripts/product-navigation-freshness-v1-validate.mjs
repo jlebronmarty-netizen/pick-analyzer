@@ -18,11 +18,11 @@ const aiOperations = read('src/app/ai-operations/page.tsx')
 const helper = read('src/components/product/ProductStatus.tsx')
 const docs = read('docs/PRODUCT_NAVIGATION_FRESHNESS_HARDENING_V1.md')
 
-for (const label of ['Home', 'Picks', 'Projections', 'Markets', 'Performance', 'Operations', 'Administration']) {
+for (const label of ['Primary', 'Opportunities', 'Analysis', 'Performance', 'Operations', 'More']) {
   check(`navigation group ${label}`, shell.includes(`label: '${label}'`))
 }
 
-for (const route of ['/probability-picks', '/performance', '/player-projections', '/ai-operations']) {
+for (const route of ['/dashboard', '/probability-picks', '/most-likely', '/best-value', '/performance', '/sports-center', '/player-projections', '/ai-operations']) {
   check(`navigation route ${route}`, shell.includes(`href: '${route}'`))
 }
 

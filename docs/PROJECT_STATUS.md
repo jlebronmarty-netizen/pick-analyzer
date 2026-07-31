@@ -2,6 +2,13 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-07-31 Pick Analyzer V2 Phase B5.1 Mobile Opportunity Navigation
+
+- Completed the bounded B5.1 mobile discoverability repair for opportunity navigation. The mobile bottom navigation remains five primary items: Today, Opportunities, Performance, Sports and More.
+- Root cause was confirmed in `DashboardShell.tsx`: the mobile Opportunities item was a direct `/most-likely` link, so Most Likely was reachable but Probability Picks, Best Value and Current Board/Watchlist were not obvious from the visible mobile UI.
+- The mobile Opportunities item now opens an accessible navigation-only sheet with visible links for Today's Best Opportunity, Official Picks / Probability Picks, Most Likely, Best Value and Current Board / Watchlist. The standalone `/current-board` page route is not present, so the supported watchlist/current-board-adjacent destination remains the Current Board-derived Best Value view.
+- No API, backend service, provider, scheduler, prediction, probability, confidence, EV, edge, Official Pick policy, B5 conviction rule, B5 actionability rule, settlement, learning or data contract changed. B6 was not started.
+
 ## 2026-07-31 Pick Analyzer V2 Phase B5 AI Decision Explanation
 
 - Completed the bounded B5 presentation phase for Today. The decision cockpit now has deterministic AI Explanation, categorical AI Conviction, distinct Actionability and What Would Change My Mind conditions using the B3 normalized opportunity and readiness evidence.

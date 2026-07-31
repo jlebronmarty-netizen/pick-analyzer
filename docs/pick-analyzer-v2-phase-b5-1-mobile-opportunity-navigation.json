@@ -1,0 +1,88 @@
+{
+  "phase": "V2_B5_1",
+  "title": "Mobile Opportunity Navigation Discoverability Repair",
+  "baselineCommit": "fee705bebeb595e49a7e4caca8ee029228c8469c",
+  "status": "LOCAL_PASS_PENDING_PRODUCTION",
+  "b6Started": false,
+  "rootCause": {
+    "classification": "mobile_navigation_category_discoverability_defect",
+    "summary": "The mobile Opportunities item was a direct /most-likely link instead of a visible opportunity navigation group.",
+    "routeDefect": false,
+    "backendDefect": false,
+    "businessRuleDefect": false
+  },
+  "mobileNavigationBefore": [
+    { "label": "Today", "href": "/dashboard" },
+    { "label": "Opportunities", "href": "/most-likely" },
+    { "label": "Performance", "href": "/performance" },
+    { "label": "Sports", "href": "/sports-center" },
+    { "label": "More", "href": "/dashboard#advanced-details" }
+  ],
+  "mobileNavigationAfter": {
+    "primaryItemCount": 5,
+    "primaryItems": ["Today", "Opportunities", "Performance", "Sports", "More"],
+    "opportunitiesSheet": [
+      { "label": "Today's Best Opportunity", "href": "/dashboard" },
+      { "label": "Official Picks / Probability Picks", "href": "/probability-picks" },
+      { "label": "Most Likely", "href": "/most-likely" },
+      { "label": "Best Value", "href": "/best-value" },
+      { "label": "Current Board / Watchlist", "href": "/best-value", "note": "Standalone /current-board page route is not present; watchlist/current-board-derived rows are supported through Best Value." }
+    ]
+  },
+  "accessPaths": {
+    "mostLikely": ["Today", "Opportunities", "Most Likely"],
+    "bestValue": ["Today", "Opportunities", "Best Value"],
+    "officialPicks": ["Today", "Opportunities", "Official Picks / Probability Picks"],
+    "currentBoardWatchlist": ["Today", "Opportunities", "Current Board / Watchlist"],
+    "todayBestOpportunity": ["Today", "Opportunities", "Today's Best Opportunity"]
+  },
+  "existingRoutesPreserved": [
+    "/dashboard",
+    "/probability-picks",
+    "/most-likely",
+    "/best-value",
+    "/performance",
+    "/sports-center"
+  ],
+  "routeInventory": {
+    "currentBoardPageRouteExists": false,
+    "currentBoardApiRouteExists": true
+  },
+  "accessibility": {
+    "visibleTextLabels": true,
+    "iconsOnly": false,
+    "dialogRole": true,
+    "ariaModal": true,
+    "escapeCloses": true,
+    "backdropCloses": true,
+    "focusManagement": true,
+    "safeAreaSpacing": true,
+    "menuClosesAfterNavigation": true
+  },
+  "desktopNonRegression": {
+    "desktopSidebarPreserved": true,
+    "desktopHeaderPreserved": true,
+    "mobilePatternForcedOnDesktop": false
+  },
+  "safety": {
+    "apiFilesChanged": false,
+    "serviceFilesChanged": false,
+    "policyFilesChanged": false,
+    "providerCallsIntroduced": 0,
+    "providerCreditsUsed": 0,
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "officialPickPolicyChanged": false,
+    "convictionRulesChanged": false,
+    "actionabilityRulesChanged": false
+  },
+  "productionEvidence": {
+    "productionCommitBefore": "fee705bebeb595e49a7e4caca8ee029228c8469c",
+    "productionCommitAfter": null,
+    "manualDeployment": false,
+    "postDeployVerificationRequired": true
+  },
+  "finalVerdict": "PICK_ANALYZER_V2_PHASE_B5_1_MOBILE_OPPORTUNITY_NAVIGATION_PASS"
+}

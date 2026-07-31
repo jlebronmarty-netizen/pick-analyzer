@@ -1,7 +1,8 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { SportProvider } from '@/context/SportContext'
 import SportSelector from '@/components/dashboard/SportSelector'
 import { ProductStatusBadge } from '@/components/product/ProductStatus'
@@ -128,6 +129,38 @@ const productNavGroups = [
   },
 ]
 
+const mobileOpportunityLinks = [
+  {
+    href: '/dashboard',
+    label: "Today's Best Opportunity",
+    description: 'Return to the Today decision hero.',
+  },
+  {
+    href: '/probability-picks',
+    label: 'Official Picks / Probability Picks',
+    description: 'Review projection-only pick candidates and official-pick context.',
+  },
+  {
+    href: '/most-likely',
+    label: 'Most Likely',
+    description: 'Open the probability-first opportunity scanner.',
+  },
+  {
+    href: '/best-value',
+    label: 'Best Value',
+    description: 'Open the value-first opportunity scanner.',
+  },
+  {
+    href: '/best-value',
+    label: 'Current Board / Watchlist',
+    description: 'Review Current Board-derived watchlist and market-intelligence rows.',
+  },
+]
+
+const opportunityRouteSet = new Set(
+  mobileOpportunityLinks.map((item) => item.href),
+)
+
 function navBadgeTone(badge: string) {
   if (badge === 'BLOCKED') return 'red'
   if (badge === 'PENDING' || badge === 'LIMITED' || badge === 'PREVIEW') return 'yellow'
@@ -140,6 +173,29 @@ export default function DashboardShell({
 }: {
   children: ReactNode
 }) {
+  const pathname = usePathname()
+  const [opportunitiesOpen, setOpportunitiesOpen] = useState(false)
+  const firstOpportunityLinkRef = useRef<HTMLAnchorElement | null>(null)
+  const opportunityButtonRef = useRef<HTMLButtonElement | null>(null)
+
+  useEffect(() => {
+    if (!opportunitiesOpen) return
+
+    firstOpportunityLinkRef.current?.focus()
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setOpportunitiesOpen(false)
+        opportunityButtonRef.current?.focus()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [opportunitiesOpen])
+
+  const isOpportunityRoute = opportunityRouteSet.has(pathname ?? '')
+
   return (
     <SportProvider>
       <div className="min-h-screen bg-slate-950 text-white">
@@ -215,7 +271,7 @@ export default function DashboardShell({
             </div>
           </aside>
 
-          <main className="min-w-0 flex-1 overflow-x-hidden pb-24 xl:pb-0">
+          <main className="min-w-0 flex-1 overflow-x-hidden pb-32 xl:pb-0">
             <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/90 px-4 py-4 backdrop-blur md:px-8">
               <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-4">
                 <div>
@@ -286,15 +342,110 @@ export default function DashboardShell({
             </div>
           </main>
         </div>
-        <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-800 bg-slate-950/95 px-2 py-2 backdrop-blur xl:hidden" aria-label="Primary mobile navigation" data-b4-mobile-bottom-nav="true">
+        {opportunitiesOpen ? (
+          <div
+            className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm xl:hidden"
+            aria-hidden="true"
+            onClick={() => setOpportunitiesOpen(false)}
+            data-b5-1-mobile-opportunity-backdrop="true"
+          />
+        ) : null}
+
+        {opportunitiesOpen ? (
+          <section
+            id="mobile-opportunities-sheet"
+            className="fixed inset-x-3 bottom-24 z-50 mx-auto max-w-2xl rounded-lg border border-sky-400/30 bg-slate-950 p-4 shadow-2xl shadow-slate-950/60 xl:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-opportunities-title"
+            data-b5-1-mobile-opportunity-sheet="true"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-sky-200">
+                  Opportunities
+                </p>
+                <h2 id="mobile-opportunities-title" className="mt-1 text-xl font-black text-white">
+                  Find a betting signal
+                </h2>
+              </div>
+              <button
+                type="button"
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-700 bg-slate-900 text-sm font-black text-slate-200 outline-none hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-sky-300"
+                onClick={() => setOpportunitiesOpen(false)}
+                aria-label="Close opportunity navigation"
+              >
+                X
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-2" role="list" aria-label="Opportunity destinations">
+              {mobileOpportunityLinks.map((item, index) => (
+                <a
+                  key={`${item.label}-${item.href}`}
+                  ref={index === 0 ? firstOpportunityLinkRef : undefined}
+                  href={item.href}
+                  onClick={() => setOpportunitiesOpen(false)}
+                  className="rounded-lg border border-slate-800 bg-slate-900/80 px-4 py-3 text-left outline-none hover:border-sky-400 hover:bg-slate-900 focus-visible:ring-2 focus-visible:ring-sky-300"
+                  data-b5-1-mobile-opportunity-link={item.label}
+                  role="listitem"
+                >
+                  <span className="block text-sm font-black text-white">{item.label}</span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-400">{item.description}</span>
+                </a>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <nav
+          className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-800 bg-slate-950/95 px-2 pt-2 backdrop-blur xl:hidden"
+          aria-label="Primary mobile navigation"
+          data-b4-mobile-bottom-nav="true"
+          data-b5-1-mobile-bottom-nav="true"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
+        >
           <div className="mx-auto grid max-w-2xl grid-cols-5 gap-1">
             {productNavGroups[0].items.map((item) => {
-              const destination = 'href' in item ? item.href : `#${item.id}`
+              const destination =
+                'href' in item && item.href
+                  ? item.href
+                  : `#${'id' in item ? item.id : item.label}`
+              const isOpportunities = item.label === 'Opportunities'
+              const active = isOpportunities
+                ? isOpportunityRoute
+                : pathname === destination || (destination.includes('#') && pathname === destination.split('#')[0])
+              const baseClasses = 'flex min-h-14 min-w-0 flex-col items-center gap-1 rounded-lg px-2 py-2 text-center text-[11px] font-black outline-none focus-visible:ring-2 focus-visible:ring-sky-300'
+              const stateClasses = active
+                ? 'bg-sky-500/15 text-white'
+                : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+
+              if (isOpportunities) {
+                return (
+                  <button
+                    key={`mobile-${item.label}`}
+                    ref={opportunityButtonRef}
+                    type="button"
+                    className={`${baseClasses} ${stateClasses}`}
+                    onClick={() => setOpportunitiesOpen((open) => !open)}
+                    aria-haspopup="dialog"
+                    aria-expanded={opportunitiesOpen}
+                    aria-controls="mobile-opportunities-sheet"
+                    data-b5-1-mobile-opportunities-trigger="true"
+                  >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-[10px] text-emerald-300">
+                      {item.icon}
+                    </span>
+                    <span className="w-full truncate">{item.label}</span>
+                  </button>
+                )
+              }
+
               return (
                 <a
                   key={`mobile-${item.label}`}
                   href={destination}
-                  className="flex min-w-0 flex-col items-center gap-1 rounded-lg px-2 py-2 text-center text-[11px] font-black text-slate-300 outline-none hover:bg-slate-900 hover:text-white focus-visible:ring-2 focus-visible:ring-sky-300"
+                  className={`${baseClasses} ${stateClasses}`}
                 >
                   <span className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-[10px] text-emerald-300">
                     {item.icon}
