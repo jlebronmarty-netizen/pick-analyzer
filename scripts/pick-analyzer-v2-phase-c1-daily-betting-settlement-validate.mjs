@@ -9,6 +9,7 @@ const files = {
   homepage: 'src/app/page.tsx',
   homePlan: 'src/components/home/HomeBettingPlan.tsx',
   operatingDay: 'src/services/operating-day.service.ts',
+  adaptiveRefresh: 'src/services/adaptive-refresh-orchestrator.service.ts',
   settlementGuarantee: 'src/services/settlement-guarantee.service.ts',
   settlementRoute: 'src/app/api/operations/settlement-guarantee/route.ts',
   json: 'docs/pick-analyzer-v2-phase-c1-daily-betting-settlement-guarantee.json',
@@ -45,6 +46,7 @@ for (const file of Object.values(files)) check(`input exists: ${file}`, fs.exist
 const homepage = read(files.homepage)
 const homePlan = read(files.homePlan)
 const operatingDay = read(files.operatingDay)
+const adaptiveRefresh = read(files.adaptiveRefresh)
 const guarantee = read(files.settlementGuarantee)
 const route = read(files.settlementRoute)
 const artifact = JSON.parse(read(files.json))
@@ -64,6 +66,9 @@ const settleBranch = operatingDay.match(/action === 'settle'[\s\S]*?} else if \(
 check('automatic settlement is no longer prospective-only', settleBranch.includes('prospectiveOnly: false') && !settleBranch.includes('prospectiveOnly: true'))
 check('run-line settlement grades with spread semantics', operatingDay.includes("if (market === 'spread')") && operatingDay.includes("if (market === 'run_line' || market === 'run line')"))
 check('settlement summary records blocked reasons', operatingDay.includes('blockedRows') && operatingDay.includes('AUTHORITATIVE_RESULT_MISSING') && operatingDay.includes('UNSUPPORTED_OR_UNGRADABLE_MARKET') && operatingDay.includes('ODDS_MISSING_FOR_PROFIT_ACCOUNTING'))
+const effectiveNextActionBranch = adaptiveRefresh.match(/const effectiveNextAction = dueDomains\.includes\('settlement'\)[\s\S]*?const totalEstimatedProviderCalls/)?.[0] ?? ''
+const executableActionBranch = adaptiveRefresh.match(/function executableActionFromStatus[\s\S]*?function isSupportedAdaptiveAction/)?.[0] ?? ''
+check('settlement due action preempts provider-backed odds refresh', effectiveNextActionBranch.includes("? 'settle'") && executableActionBranch.indexOf("dueDomains.includes('settlement')") < executableActionBranch.indexOf("dueDomains.includes('results')"))
 check('settlement guarantee service reuses canonical classifier', guarantee.includes('classifyCanonicalSettlementState') && guarantee.includes('canonicalPendingReason'))
 check('completed rows classify settled ready or blocked', guarantee.includes("state === 'SETTLED'") && guarantee.includes("state === 'READY_FOR_SETTLEMENT'") && guarantee.includes("state.startsWith('BLOCKED:')"))
 check('silent pending is explicitly counted', guarantee.includes('silentPendingRows') && guarantee.includes('readyForSettlementRows'))

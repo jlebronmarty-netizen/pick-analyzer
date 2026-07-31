@@ -29,9 +29,16 @@ Defect repaired:
 Repair:
 
 - The automatic `settle` action now calls `settleOperatingDay` with `prospectiveOnly: false` for the selected operating date.
+- Adaptive scheduler action selection now lets deterministic settlement preempt provider-backed odds refresh when both are due.
 - Run-line markets are graded with spread semantics.
 - Settlement summaries now include explicit blocked row reasons for missing authoritative results, ungradable/unsupported markets and missing odds needed for profit accounting.
 - A new read-only monitor, `/api/operations/settlement-guarantee`, classifies recent completed-game prediction rows as SETTLED, READY_FOR_SETTLEMENT or BLOCKED with reason.
+
+Production recovery:
+
+- Production commit `a90052fa0e71d9606881e95a9be79a6f2da1e4a3` proved the monitor route no longer crashed, but it returned `ACTION_REQUIRED` because 12 recent completed predictions were still `READY_FOR_SETTLEMENT`.
+- The adaptive status route also showed 51 total settlement-ready rows while selecting `midday_refresh` because odds were stale.
+- C1 therefore adds an explicit scheduler-priority guard: already-scored settlement work runs before provider-backed market refresh so completed games cannot remain unsettled merely because live odds are stale.
 
 Learning and Performance flow:
 

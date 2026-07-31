@@ -3117,3 +3117,17 @@ Validation: `node scripts/pick-analyzer-v2-phase-a6-build-reliability-validate.m
 Completion criteria: `PICK_ANALYZER_V2_PHASE_A6_BUILD_RELIABILITY_PASS`, build-pressure matrix, no build-time provider or mutation path, no local server smoke in build, no recursive build scan, no route deletion, no dependency migration, no paid infrastructure change, passing validators, passing build and production certification after deployment.
 
 Next bounded phase: A7 Proven duplication cleanup only. Do not start A7 until A6 production certification is complete.
+
+### 64. Pick Analyzer V2 Phase C1 Daily Betting Experience And Settlement Guarantee
+
+Objective: Make the homepage the professional daily betting decision surface and guarantee completed games do not silently remain pending after authoritative stored results exist.
+
+Status: Implemented pending final production settlement certification.
+
+Scope: Homepage experience, existing Dashboard Today recommendation evidence, automatic operating-day settlement, read-only settlement guarantee monitoring, scheduler action priority and phase certification artifacts. No prediction engine, Official Pick policy, provider mapping, EV/edge/confidence/Trust formula, model weights or automatic model training are changed.
+
+Repair: `/` now renders Today's Betting Plan with Rent Play, Moneyline Bet, Parlay Builder and Today's Best Opportunity. Automatic settlement no longer limits scheduled settlement to prospective-preview rows, run-line settlement uses spread semantics, completed rows are reported as settled, ready or explicitly blocked, and adaptive refresh now prioritizes deterministic settlement over provider-backed odds refresh when both are due.
+
+Validation: `node scripts/pick-analyzer-v2-phase-c1-daily-betting-settlement-validate.mjs` passed 31/31 locally. Settlement-learning recovery, protected canonical MLB settlement, MLB operating-day recovery, scheduler-health alignment, A3 scheduler/freshness, JSON parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` passed. Build generated 386 static pages.
+
+Completion criteria: `PICK_ANALYZER_V2_PHASE_C1_DAILY_BETTING_SETTLEMENT_PASS`, homepage betting plan present, no backend prediction change, all completed games become `SETTLED`, `READY_FOR_SETTLEMENT` or `BLOCKED` with reason, scheduler selects settlement before stale odds when settlement-ready rows exist, no provider calls added, no unsupported-market promotion and production certification after automatic deployment.

@@ -17,6 +17,7 @@
       "automaticSettlementProspectiveOnly": false,
       "completedGameOutcomes": ["SETTLED", "READY_FOR_SETTLEMENT", "BLOCKED_WITH_REASON"],
       "monitoringRoute": "/api/operations/settlement-guarantee",
+      "settlementPreemptsProviderBackedOddsRefresh": true,
       "runLineSettlementSupported": true,
       "learningFlow": "settlement_derived_prediction_history",
       "performanceFlow": "performance_scope_v2"
@@ -36,8 +37,10 @@
     "automaticModelTrainingEnabled": false
   },
   "productionEvidence": {
-    "productionCommitBefore": null,
-    "productionCommitAfter": null,
+    "productionCommitBefore": "24918886e83744e6324fa58db696f03765d5d3d4",
+    "productionCommitAfter": "a90052fa0e71d9606881e95a9be79a6f2da1e4a3",
+    "postDeployFinding": "settlement guarantee route returned ACTION_REQUIRED with completed rows ready for deterministic settlement while adaptive status selected stale odds refresh",
+    "schedulerPriorityRepairRequired": true,
     "manualDeployment": false,
     "postDeployVerificationRequired": true
   },

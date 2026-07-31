@@ -1054,12 +1054,12 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
   }
   const dueDomains = refreshPlan.filter((item) => item.decision === 'DUE_NOW').map((item) => item.domain)
   const pregameOddsDue = dueDomains.includes('odds') && marketRefreshNeeded
-  const effectiveNextAction = dueDomains.includes('results')
-    ? 'sync_results'
-    : pregameOddsDue
-        ? currentGames > 0 ? 'midday_refresh' : 'morning_sync'
-        : dueDomains.includes('settlement')
-          ? 'settle'
+  const effectiveNextAction = dueDomains.includes('settlement')
+    ? 'settle'
+    : dueDomains.includes('results')
+      ? 'sync_results'
+      : pregameOddsDue
+          ? currentGames > 0 ? 'midday_refresh' : 'morning_sync'
           : dueDomains.includes('schedule')
             ? 'morning_sync'
             : String(automation?.nextAction ?? operatingDay?.nextRequiredAction ?? dashboard?.nextAction ?? 'status')
@@ -1317,9 +1317,9 @@ function executableActionFromStatus(status: Awaited<ReturnType<typeof getAdaptiv
   const pregameOddsDue =
     dueDomains.includes('odds') &&
     (status.marketRefreshEligibility?.marketRefreshNeeded === true || Number(status.gamesWaitingForOdds ?? 0) > 0)
+  if (dueDomains.includes('settlement')) return 'settle'
   if (dueDomains.includes('results')) return 'sync_results'
   if (pregameOddsDue) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
-  if (dueDomains.includes('settlement')) return 'settle'
   if (dueDomains.includes('odds')) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('schedule')) return 'morning_sync'
   if (['status_refresh', 'morning_sync', 'midday_refresh', 'final_refresh', 'sync_results', 'settle', 'lock', 'replay', 'calibrate'].includes(nextAction)) {
