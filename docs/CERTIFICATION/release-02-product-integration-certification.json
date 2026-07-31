@@ -1,0 +1,49 @@
+{
+  "release": "Release 02",
+  "name": "Product Integration and Live State Closure V1",
+  "status": "LOCAL_REPOSITORY_PASS_PRODUCTION_PENDING",
+  "runtimeBehaviorChanged": false,
+  "featuresCreated": false,
+  "businessLogicChanged": false,
+  "databaseMigrationsCreated": false,
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "runtimeDefectsFound": {
+    "p0": 0,
+    "p1": 0,
+    "p2": 3,
+    "p3": 2
+  },
+  "runtimeDefectsFixed": [],
+  "reconciliationCounts": {
+    "release01InventoryRows": 1674,
+    "release01AppApiLayoutRoutes": 455,
+    "release01ApiRoutes": 426,
+    "release01ParsedDatabaseObjects": 127,
+    "duplicateRoutes": 0,
+    "circularImportCandidatesVerifiedTypeOnly": 4
+  },
+  "certifiedInvariants": {
+    "predictionCutoffInvariant": "STATIC_PASS",
+    "noRetrospectivePredictionWrites": "STATIC_PASS",
+    "pregameCoverageAccounting": "STATIC_PASS",
+    "missedOpportunityAccounting": "DIAGNOSTIC_PASS_DURABLE_RECORD_BACKLOG",
+    "settlementIdempotency": "STATIC_PASS",
+    "learningLabelIdempotency": "STATIC_PASS",
+    "finalEventReconciliation": "STATIC_PASS",
+    "productSurfaceCanonicalCountConsistency": "STATIC_PASS",
+    "duplicateRoutes": "PASS",
+    "circularImportCandidates": "TYPE_ONLY_BACK_EDGES"
+  },
+  "productionCertification": {
+    "status": "PENDING_DEPLOYMENT_OBSERVATION",
+    "requiredRoutes": [
+      "/api/system/version",
+      "/api/dashboard/today",
+      "/api/current-board",
+      "/api/operations/settlement-guarantee?includeValidation=true",
+      "/api/performance"
+    ]
+  },
+  "release03Started": false
+}

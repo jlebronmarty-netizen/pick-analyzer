@@ -16,6 +16,10 @@ This is the highest-level documentation index for Pick Analyzer V2. It governs p
 
 ## Current Release
 
+- [Release 02 Integration Backlog](RELEASE_02_INTEGRATION_BACKLOG.md)
+- [Release 02 Core User Journey](../PRODUCT/RELEASE_02_CORE_USER_JOURNEY.md)
+- [Release 02 Live State Integration](../PRODUCT/RELEASE_02_LIVE_STATE_INTEGRATION.md)
+- [Release 02 Product Integration Certification](../CERTIFICATION/RELEASE_02_PRODUCT_INTEGRATION_CERTIFICATION.md)
 - [Release 01 Execution Plan](../RELEASES/RELEASE_01_EXECUTION_PLAN.md)
 - [Release 01 Backlog](../RELEASES/RELEASE_01_BACKLOG.md)
 - [Release 01 Progress](../RELEASES/RELEASE_01_PROGRESS.md)

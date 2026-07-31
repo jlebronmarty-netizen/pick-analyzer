@@ -4,6 +4,13 @@ Certification documentation covers validation records, readiness gates, producti
 
 ## Current Source Documents
 
+Current V2 certification documents:
+
+- [Documentation Validation](DOCUMENTATION_VALIDATION.md)
+- [Runtime Health](RUNTIME_HEALTH.md)
+- [Release 02 Product Integration Certification](RELEASE_02_PRODUCT_INTEGRATION_CERTIFICATION.md)
+- [Release 02 Certification JSON](release-02-product-integration-certification.json)
+
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 
 - `PICK_ANALYZER_V1_FINAL_CERTIFICATION.md`

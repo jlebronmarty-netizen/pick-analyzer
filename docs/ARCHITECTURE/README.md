@@ -4,6 +4,11 @@ Architecture documentation covers services, contracts, policy, runbooks, provide
 
 ## Current Source Documents
 
+Current V2 architecture inventory documents:
+
+- [Runtime Dependency Graph](RUNTIME_DEPENDENCY_GRAPH.md)
+- [Database Audit V2](DATABASE_AUDIT_V2.md)
+
 Most architecture documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 
 - `ARCHITECTURE.md`
