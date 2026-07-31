@@ -12,6 +12,14 @@ import {
 type Tone = 'green' | 'yellow' | 'blue' | 'red' | 'gray'
 type Verdict = 'BET' | 'REVIEW' | 'WAIT' | 'PASS'
 
+type PerformanceSnapshot = {
+  trustLabel: string
+  accuracy: number | null
+  recentTrend: string
+  providerCallsMade: number
+  remoteMutationsMade: number
+}
+
 type Selector = {
   status?: 'AVAILABLE' | 'EMPTY' | 'BLOCKED'
   eventId?: string | null
@@ -125,6 +133,15 @@ type Opportunity = {
   updatedAt: string | null
 }
 
+type AlternativeCard = {
+  label: string
+  title: string
+  market: string
+  probability: number | null
+  badge: string
+  href: string
+}
+
 const toneClasses: Record<Tone, string> = {
   green: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100',
   yellow: 'border-amber-500/30 bg-amber-500/10 text-amber-100',
@@ -173,6 +190,18 @@ function dateTime(value: unknown, fallback = 'Update time unavailable') {
     minute: '2-digit',
     timeZoneName: 'short',
   })
+}
+
+function relativeTime(value: unknown) {
+  if (!value) return 'Update time unavailable'
+  const parsed = new Date(String(value)).getTime()
+  if (!Number.isFinite(parsed)) return 'Update time unavailable'
+  const diffMinutes = Math.max(0, Math.round((Date.now() - parsed) / 60000))
+  if (diffMinutes < 1) return 'Updated just now'
+  if (diffMinutes < 60) return `Updated ${diffMinutes} min ago`
+  const hours = Math.round(diffMinutes / 60)
+  if (hours < 24) return `Updated ${hours} hr ago`
+  return dateTime(value)
 }
 
 function toneForVerdict(verdict: Verdict): Tone {
@@ -291,6 +320,77 @@ function reasonList(data: TodayResponse, opportunity: Opportunity | null) {
   }
 }
 
+function shortTitle(text: string, fallback: string) {
+  const trimmed = text.replace(/\.$/, '').trim()
+  if (!trimmed) return fallback
+  const words = trimmed.split(/\s+/).slice(0, 4).join(' ')
+  return words.length > 32 ? `${words.slice(0, 29)}...` : words
+}
+
+function compactCards(items: string[], kind: 'why' | 'risk') {
+  return items.slice(0, 3).map((item, index) => ({
+    key: `${kind}-${index}-${item}`,
+    icon: kind === 'why' ? `W${index + 1}` : `R${index + 1}`,
+    title: shortTitle(item, kind === 'why' ? 'Supporting signal' : 'Risk check'),
+    detail: item,
+  }))
+}
+
+function rowText(row: Record<string, unknown>, keys: string[], fallback: string) {
+  for (const key of keys) {
+    const value = row[key]
+    if (value !== null && value !== undefined && String(value).trim()) return labelize(value, fallback)
+  }
+  return fallback
+}
+
+function rowNumber(row: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    const parsed = Number(row[key])
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return null
+}
+
+function alternativesFromRows(label: string, rows: Array<Record<string, unknown>> | undefined, href: string, fallback?: Selector): AlternativeCard[] {
+  const cards = (rows ?? []).slice(0, 3).map((row, index) => ({
+    label,
+    title: rowText(row, ['selection', 'team', 'normalizedSelection'], `${label} ${index + 1}`),
+    market: rowText(row, ['marketLabel', 'market'], 'Market unavailable'),
+    probability: rowNumber(row, ['modelProbability', 'model_probability', 'probability']),
+    badge: index === 0 ? 'Top' : 'Alt',
+    href,
+  }))
+  if (cards.length || !fallback?.selection) return cards
+  return [{
+    label,
+    title: labelize(fallback.selection, `${label} 1`),
+    market: labelize(fallback.marketLabel ?? fallback.market, 'Market unavailable'),
+    probability: fallback.modelProbability ?? null,
+    badge: 'Top',
+    href,
+  }]
+}
+
+function readinessPercent(readiness: OfficialPickReadiness) {
+  if (!readiness.knownApplicableRequirements) return 0
+  return Math.round((readiness.requirementsMet / readiness.knownApplicableRequirements) * 100)
+}
+
+function performanceFromPayload(payload: unknown): PerformanceSnapshot | null {
+  if (!payload || typeof payload !== 'object') return null
+  const data = payload as Record<string, unknown>
+  const view = data.publicView && typeof data.publicView === 'object' ? data.publicView as Record<string, unknown> : {}
+  const accuracy = Number(view.accuracy)
+  return {
+    trustLabel: labelize(view.trustLabel, 'Trust unavailable'),
+    accuracy: Number.isFinite(accuracy) ? accuracy : null,
+    recentTrend: labelize(view.recentTrend, 'Trend unavailable'),
+    providerCallsMade: Number(data.providerCallsMade ?? 0),
+    remoteMutationsMade: Number(data.remoteMutationsMade ?? 0),
+  }
+}
+
 function SummaryMetric({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
     <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
@@ -388,6 +488,118 @@ function ReadinessRows({ readiness }: { readiness: OfficialPickReadiness }) {
   )
 }
 
+function InsightGrid({ title, items, tone }: { title: string; items: ReturnType<typeof compactCards>; tone: Tone }) {
+  return (
+    <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b4-insight-section={title.toLowerCase()}>
+      <h2 className="text-xl font-black text-white">{title}</h2>
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        {items.map((item) => (
+          <div key={item.key} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+            <div className="flex items-center gap-3">
+              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-xs font-black ${toneClasses[tone]}`}>
+                {item.icon}
+              </span>
+              <p className="text-sm font-black text-white">{item.title}</p>
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-400">{item.detail}</p>
+          </div>
+        ))}
+      </div>
+    </article>
+  )
+}
+
+function ReadinessProgress({ readiness }: { readiness: OfficialPickReadiness }) {
+  const percent = readinessPercent(readiness)
+  return (
+    <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b4-readiness-progress="true">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200">Readiness</p>
+          <h2 className="mt-2 text-2xl font-black text-white">Requirements</h2>
+        </div>
+        <p className="text-3xl font-black text-white">{readiness.requirementsMet} / {readiness.knownApplicableRequirements}</p>
+      </div>
+      <div className="mt-4 h-3 rounded-full bg-slate-800" aria-label={`${readiness.requirementsMet} of ${readiness.knownApplicableRequirements} known readiness requirements passed`}>
+        <div className="h-3 rounded-full bg-emerald-400" style={{ width: `${percent}%` }} />
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        {readiness.rows.slice(0, 8).map((row) => (
+          <div key={row.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
+            <span className="truncate text-xs font-bold text-slate-300">{row.label}</span>
+            <Badge tone={readinessTone[row.state]}>{row.state}</Badge>
+          </div>
+        ))}
+      </div>
+      <ReadinessRows readiness={readiness} />
+    </article>
+  )
+}
+
+function PremiumMetric({ label, value, detail, tone = 'gray' }: { label: string; value: string; detail?: string; tone?: Tone }) {
+  return (
+    <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{label}</p>
+      <div className="mt-3 flex items-end justify-between gap-3">
+        <p className="text-2xl font-black text-white">{value}</p>
+        <span className={`h-2.5 w-2.5 rounded-full ${tone === 'green' ? 'bg-emerald-400' : tone === 'yellow' ? 'bg-amber-300' : tone === 'red' ? 'bg-rose-400' : tone === 'blue' ? 'bg-sky-400' : 'bg-slate-500'}`} />
+      </div>
+      {detail ? <p className="mt-2 text-xs leading-5 text-slate-400">{detail}</p> : null}
+    </article>
+  )
+}
+
+function AlternativesPreview({ cards }: { cards: AlternativeCard[] }) {
+  return (
+    <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b4-alternatives-preview="true">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-sky-200">Alternatives</p>
+          <h2 className="mt-2 text-2xl font-black text-white">Top review paths</h2>
+        </div>
+        <div className="flex gap-2">
+          <a href="/most-likely" className="rounded-full border border-slate-700 px-3 py-2 text-xs font-black text-slate-200 hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-sky-300">Most Likely - View All</a>
+          <a href="/best-value" className="rounded-full border border-slate-700 px-3 py-2 text-xs font-black text-slate-200 hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-sky-300">Best Value - View All</a>
+        </div>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        {cards.slice(0, 6).map((card, index) => (
+          <a key={`${card.label}-${index}-${card.title}`} href={card.href} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 outline-none hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-300">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{card.label}</p>
+              <Badge tone={card.label === 'Best Value' ? 'green' : 'blue'}>{card.badge}</Badge>
+            </div>
+            <p className="mt-3 text-lg font-black text-white">{card.title}</p>
+            <p className="mt-1 text-sm font-bold text-slate-300">{card.market}</p>
+            <div className="mt-4">
+              <CompactBar label="Probability" value={card.probability} tone="green" />
+            </div>
+          </a>
+        ))}
+      </div>
+    </article>
+  )
+}
+
+function PerformanceSnapshotCard({ snapshot }: { snapshot: PerformanceSnapshot | null }) {
+  return (
+    <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b4-performance-snapshot="true">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-200">Performance Snapshot</p>
+          <h2 className="mt-2 text-2xl font-black text-white">Trust, accuracy, trend</h2>
+        </div>
+        <a href="/performance" className="rounded-full border border-violet-400/30 px-4 py-2 text-xs font-black text-violet-100 hover:bg-violet-500/10 focus-visible:ring-2 focus-visible:ring-violet-300">Open Performance -&gt;</a>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <PremiumMetric label="Trust" value={snapshot?.trustLabel ?? 'Loading'} detail="Cutoff-safe production scope" tone="blue" />
+        <PremiumMetric label="Accuracy" value={snapshot?.accuracy === null || snapshot?.accuracy === undefined ? 'N/A' : pct(snapshot.accuracy)} detail="Official performance sample" tone={snapshot?.accuracy === null || snapshot?.accuracy === undefined ? 'gray' : 'green'} />
+        <PremiumMetric label="Recent Trend" value={snapshot?.recentTrend ?? 'Loading'} detail={`Provider calls ${snapshot?.providerCallsMade ?? 0}; mutations ${snapshot?.remoteMutationsMade ?? 0}`} tone="yellow" />
+      </div>
+    </article>
+  )
+}
+
 function Skeleton() {
   return (
     <section className="space-y-5" aria-busy="true" aria-label="Loading today's decision">
@@ -406,6 +618,7 @@ function Skeleton() {
 
 export default function TodayDecisionPanel() {
   const [data, setData] = useState<TodayResponse | null>(null)
+  const [performance, setPerformance] = useState<PerformanceSnapshot | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -428,11 +641,31 @@ export default function TodayDecisionPanel() {
     }
   }, [])
 
+  useEffect(() => {
+    let active = true
+    fetch('/api/performance', { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) return null
+        return response.json()
+      })
+      .then((json) => {
+        if (active) setPerformance(performanceFromPayload(json))
+      })
+      .catch(() => {
+        if (active) setPerformance(null)
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
   const opportunity = useMemo(() => data ? bestOpportunity(data) : null, [data])
   const normalizedOpportunity = useMemo(() => data ? normalizeBestOpportunity(data) : null, [data])
   const readiness = useMemo(() => buildOfficialPickReadiness(normalizedOpportunity), [normalizedOpportunity])
   const verdict = useMemo(() => data ? verdictFor(data, opportunity) : null, [data, opportunity])
   const reasons = useMemo(() => data ? reasonList(data, opportunity) : { why: [], risks: [] }, [data, opportunity])
+  const whyCards = useMemo(() => compactCards(reasons.why, 'why'), [reasons.why])
+  const riskCards = useMemo(() => compactCards(reasons.risks, 'risk'), [reasons.risks])
 
   if (loading) return <Skeleton />
   if (error || !data || !verdict) {
@@ -453,40 +686,45 @@ export default function TodayDecisionPanel() {
     ['Best Value', data.viewModel?.selectors?.bestAvailableValue?.selection, '/best-value'],
     ['Performance', 'Trust and results', '/performance'],
   ] as const
+  const opportunityAlternatives = [
+    ...alternativesFromRows('Most Likely', data.sections?.mostLikely?.data, '/most-likely', data.viewModel?.selectors?.mostLikelySummary?.selector),
+    ...alternativesFromRows('Best Value', data.sections?.bestValue?.data, '/best-value', data.viewModel?.selectors?.bestAvailableValue),
+  ].slice(0, 6)
 
   return (
-    <section className="space-y-5" data-b2-today-shell="true" data-b3-best-opportunity-readiness="true">
-      <div className={`rounded-lg border p-5 md:p-6 ${toneClasses[verdictTone]}`} data-b2-verdict-label={verdict.label}>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <section className="space-y-6" data-b2-today-shell="true" data-b3-best-opportunity-readiness="true" data-b4-decision-cockpit="true">
+      <div className={`rounded-lg border p-6 md:p-8 ${toneClasses[verdictTone]}`} data-b2-verdict-label={verdict.label} data-b4-verdict-hero="true">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.24em] text-slate-300">Today&apos;s Verdict</p>
-            <h1 className="mt-2 text-5xl font-black tracking-normal text-white">{verdict.label}</h1>
-            <p className="mt-3 max-w-3xl text-base font-semibold leading-7 text-slate-100">{verdict.detail}</p>
+            <h1 className="mt-3 text-6xl font-black tracking-normal text-white md:text-7xl">{verdict.label}</h1>
+            <p className="mt-4 max-w-3xl text-lg font-semibold leading-8 text-slate-100">{verdict.detail}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Badge tone={verdictTone}>{verdict.officialStatus}</Badge>
             <Badge tone={opportunity?.status === 'official' ? 'green' : 'yellow'}>
               {opportunity?.status === 'official' ? 'Official Pick' : 'Best Available - Not Official'}
             </Badge>
-            <Badge tone="blue">Updated {dateTime(data.generatedAt)}</Badge>
+            <Badge tone="blue">{relativeTime(data.generatedAt)}</Badge>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1.35fr_0.65fr]">
-        <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5 md:p-6" data-b2-best-opportunity="true">
+      <div className="grid gap-5 xl:grid-cols-[1.45fr_0.55fr]">
+        <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-6 md:p-7" data-b2-best-opportunity="true" data-b4-best-opportunity-hero="true">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.24em] text-sky-300">Today&apos;s Best Opportunity</p>
               {opportunity ? (
                 <>
-                  <h2 className="mt-3 text-3xl font-black text-white md:text-4xl">{opportunity.selection}</h2>
-                  <p className="mt-2 text-base font-bold text-slate-200">{opportunity.event} / {opportunity.market}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">{opportunity.reason}</p>
+                  <h2 className="mt-4 text-4xl font-black text-white md:text-5xl">{opportunity.selection}</h2>
+                  <p className="mt-3 text-lg font-bold text-slate-200">{opportunity.sport} / {opportunity.event}</p>
+                  <p className="mt-2 text-base font-semibold text-sky-100">{opportunity.market} / {odds(opportunity.odds)}</p>
+                  <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-400">{opportunity.reason}</p>
                 </>
               ) : (
                 <>
-                  <h2 className="mt-3 text-3xl font-black text-white md:text-4xl">No eligible opportunity visible.</h2>
+                  <h2 className="mt-4 text-4xl font-black text-white md:text-5xl">No eligible opportunity visible.</h2>
                   <p className="mt-2 text-sm leading-6 text-slate-400">
                     The Today contract did not expose a supported market opportunity. This state does not fabricate a pick.
                   </p>
@@ -498,15 +736,15 @@ export default function TodayDecisionPanel() {
             </Badge>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <SummaryMetric label="Current Odds" value={odds(opportunity?.odds)} detail={opportunity?.sportsbook} />
-            <SummaryMetric label="Model Probability" value={pct(opportunity?.modelProbability)} />
-            <SummaryMetric label="Implied Probability" value={pct(opportunity?.impliedProbability)} />
-            <SummaryMetric label="Confidence" value={pct(opportunity?.confidence)} />
-            <SummaryMetric label="Edge" value={signedPct(opportunity?.edge)} />
-            <SummaryMetric label="Expected Value" value={signedPct(opportunity?.expectedValue)} />
-            <SummaryMetric label="Freshness" value={opportunity?.freshness ?? freshness} detail={dateTime(opportunity?.updatedAt, 'Odds update unavailable')} />
-            <SummaryMetric label="Data Quality" value={opportunity?.dataQuality ?? 'Not yet available'} />
+          <div className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-4" data-b4-compact-metrics="true">
+            <PremiumMetric label="Current Odds" value={odds(opportunity?.odds)} detail={opportunity?.sportsbook} tone="blue" />
+            <PremiumMetric label="Model Probability" value={pct(opportunity?.modelProbability)} tone="green" />
+            <PremiumMetric label="Implied Probability" value={pct(opportunity?.impliedProbability)} tone="blue" />
+            <PremiumMetric label="Confidence" value={pct(opportunity?.confidence)} tone="yellow" />
+            <PremiumMetric label="Edge" value={signedPct(opportunity?.edge)} tone={Number(opportunity?.edge) > 0 ? 'green' : 'gray'} />
+            <PremiumMetric label="Expected Value" value={signedPct(opportunity?.expectedValue)} tone={Number(opportunity?.expectedValue) > 0 ? 'green' : 'gray'} />
+            <PremiumMetric label="Freshness" value={opportunity?.freshness ?? freshness} detail={relativeTime(opportunity?.updatedAt)} tone="yellow" />
+            <PremiumMetric label="Data Quality" value={opportunity?.dataQuality ?? 'Not yet available'} tone="blue" />
           </div>
           <div className="mt-5">
             <EvidenceGraphics opportunity={normalizedOpportunity} />
@@ -530,6 +768,9 @@ export default function TodayDecisionPanel() {
             <p className="mt-2 text-sm leading-6 text-slate-400">
               Structured gate progress was deferred to B3 and is now shown from existing evidence. {readiness.summary}
             </p>
+            <div className="mt-4 h-3 rounded-full bg-slate-800" aria-label={`${readiness.requirementsMet} of ${readiness.knownApplicableRequirements} known readiness requirements passed`}>
+              <div className="h-3 rounded-full bg-emerald-400" style={{ width: `${readinessPercent(readiness)}%` }} />
+            </div>
             <p className="mt-2 text-sm leading-6 text-slate-300">
               Current blocker context: {readiness.blockerSummary}
             </p>
@@ -538,20 +779,9 @@ export default function TodayDecisionPanel() {
         </aside>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5">
-          <h2 className="text-xl font-black text-white">Why This Opportunity</h2>
-          <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-300">
-            {reasons.why.map((item) => <li key={item}>- {item}</li>)}
-          </ul>
-        </article>
-        <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5">
-          <h2 className="text-xl font-black text-white">Main Risks</h2>
-          <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-300">
-            {reasons.risks.map((item) => <li key={item}>- {item}</li>)}
-          </ul>
-        </article>
-      </div>
+      <InsightGrid title="Why" items={whyCards} tone="green" />
+      <InsightGrid title="Risks" items={riskCards} tone="yellow" />
+      <ReadinessProgress readiness={readiness} />
 
       <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
         <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5">
@@ -561,18 +791,16 @@ export default function TodayDecisionPanel() {
           </p>
           <p className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Next action: {labelize(data.nextAction, 'Waiting for next lifecycle update')}</p>
         </article>
-        <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5">
-          <h2 className="text-xl font-black text-white">Alternatives Preview</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            {alternatives.map(([label, value, href]) => (
-              <a key={label} href={href} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 outline-none hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-300">
-                <p className="text-sm font-black text-white">{label}</p>
-                <p className="mt-2 text-xs leading-5 text-slate-400">{labelize(value, 'Open full view')}</p>
-              </a>
-            ))}
-          </div>
-        </article>
+        <AlternativesPreview cards={opportunityAlternatives.length ? opportunityAlternatives : alternatives.map(([label, value, href]) => ({
+          label,
+          title: labelize(value, 'Open full view'),
+          market: 'Existing route',
+          probability: null,
+          badge: 'Open',
+          href,
+        }))} />
       </div>
+      <PerformanceSnapshotCard snapshot={performance} />
 
       <div className="grid gap-4 md:grid-cols-3">
         <SummaryMetric label="Freshness" value={freshness} detail={dateTime(data.latestOddsTimestamp ?? data.generatedAt)} />

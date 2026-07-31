@@ -215,7 +215,7 @@ export default function DashboardShell({
             </div>
           </aside>
 
-          <main className="min-w-0 flex-1 overflow-x-hidden">
+          <main className="min-w-0 flex-1 overflow-x-hidden pb-24 xl:pb-0">
             <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/90 px-4 py-4 backdrop-blur md:px-8">
               <div className="mx-auto flex max-w-[1800px] items-center justify-between gap-4">
                 <div>
@@ -286,6 +286,25 @@ export default function DashboardShell({
             </div>
           </main>
         </div>
+        <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-800 bg-slate-950/95 px-2 py-2 backdrop-blur xl:hidden" aria-label="Primary mobile navigation" data-b4-mobile-bottom-nav="true">
+          <div className="mx-auto grid max-w-2xl grid-cols-5 gap-1">
+            {productNavGroups[0].items.map((item) => {
+              const destination = 'href' in item ? item.href : `#${item.id}`
+              return (
+                <a
+                  key={`mobile-${item.label}`}
+                  href={destination}
+                  className="flex min-w-0 flex-col items-center gap-1 rounded-lg px-2 py-2 text-center text-[11px] font-black text-slate-300 outline-none hover:bg-slate-900 hover:text-white focus-visible:ring-2 focus-visible:ring-sky-300"
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-[10px] text-emerald-300">
+                    {item.icon}
+                  </span>
+                  <span className="w-full truncate">{item.label}</span>
+                </a>
+              )
+            })}
+          </div>
+        </nav>
       </div>
     </SportProvider>
   )

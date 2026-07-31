@@ -1,0 +1,78 @@
+{
+  "phase": "V2_PHASE_B4_DECISION_DASHBOARD_EXPERIENCE",
+  "generatedAt": "2026-07-31T00:00:00.000Z",
+  "baselineCommit": "196b0e444f5b3340239db6dcdf8d6d30bc2ca60a",
+  "productObjective": "Transform the Today page from a technical dashboard into a premium daily decision cockpit while preserving business logic and Official Pick integrity.",
+  "filesChanged": [
+    "src/components/dashboard/TodayDecisionPanel.tsx",
+    "src/components/dashboard/DashboardShell.tsx",
+    "docs/PICK_ANALYZER_V2_PHASE_B4_DECISION_DASHBOARD_EXPERIENCE.md",
+    "docs/pick-analyzer-v2-phase-b4-decision-dashboard-experience.json",
+    "scripts/pick-analyzer-v2-phase-b4-decision-dashboard-experience-validate.mjs",
+    "docs/PROJECT_STATUS.md",
+    "docs/MASTER_ROADMAP.md"
+  ],
+  "experienceSections": [
+    "todays_verdict",
+    "todays_best_opportunity",
+    "why",
+    "risks",
+    "readiness",
+    "compact_metrics",
+    "alternatives",
+    "performance_snapshot",
+    "advanced_collapsed"
+  ],
+  "designPrinciples": {
+    "premiumDecisionCockpit": true,
+    "notSportsbookStyle": true,
+    "notCasinoStyle": true,
+    "technicalInformationSecondary": true,
+    "mobileBottomNavigation": true,
+    "noWideTables": true
+  },
+  "logicSafety": {
+    "businessLogicChanged": false,
+    "recommendationLogicChanged": false,
+    "officialPickPolicyChanged": false,
+    "predictionFormulaChanged": false,
+    "probabilityFormulaChanged": false,
+    "edgeFormulaChanged": false,
+    "evFormulaChanged": false,
+    "confidenceFormulaChanged": false,
+    "newThresholdsIntroduced": false
+  },
+  "apiSafety": {
+    "apiContractChanged": false,
+    "serviceContractChanged": false,
+    "todaySource": "/api/dashboard/today",
+    "performanceSnapshotSource": "/api/performance",
+    "providerCallsIntroduced": 0,
+    "providerCreditsConsumed": 0,
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "deferredWork": {
+    "B5": "AI Conviction, Actionability and What Would Change My Mind presentation models.",
+    "B6": "Mobile decision experience refinement.",
+    "B7": "Performance trust integration.",
+    "B8": "Operations/admin separation."
+  },
+  "validation": {
+    "b4Validator": "PASS_23_OF_23",
+    "b3Validator": "PASS_26_OF_26",
+    "b2Validator": "PASS_35_OF_35",
+    "routeValidator": "PASS_A2_ROUTE_RUNTIME",
+    "accessibilityValidation": "PASS_STATIC_SEMANTIC_FOCUS_AND_NAV_CHECKS",
+    "jsonValidation": "PASS",
+    "eslint": "PASS",
+    "gitDiffCheck": "PASS",
+    "targetedSecretScan": "PASS",
+    "build": "PASS_386_STATIC_PAGES",
+    "localServerSmoke": "NOT_RUN"
+  },
+  "finalVerdict": "PICK_ANALYZER_V2_PHASE_B4_DECISION_DASHBOARD_EXPERIENCE_PASS"
+}

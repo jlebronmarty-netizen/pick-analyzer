@@ -2,6 +2,13 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-07-31 Pick Analyzer V2 Phase B4 Decision Dashboard Experience
+
+- Completed the bounded B4 product-experience phase for Today. The dashboard now presents a premium daily decision cockpit with a large semantic verdict hero, visual Best Opportunity hero, compact Why and Risks cards, readiness progress, visual metrics, limited alternatives, compact Performance Snapshot and mobile bottom navigation.
+- B4 preserves B2/B3 compatibility markers, keeps Advanced Evidence collapsed by default and continues to use existing `/api/dashboard/today` evidence plus the existing `/api/performance` product summary route for the compact performance snapshot.
+- No business logic, recommendation logic, Official Pick policy, prediction formula, probability formula, confidence formula, edge formula, EV formula, provider mapping, scheduler behavior, settlement behavior, learning behavior, model state, API contract or service contract changed.
+- Validation passed: B4 validator 23/23, B3 validator 26/26, B2 validator 35/35, A2 route/runtime validator, static accessibility checks, JSON parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` with 386 generated static pages. No local server smoke was run.
+
 ## 2026-07-31 Pick Analyzer V2 Phase B3 Best Opportunity Readiness
 
 - Completed the bounded B3 presentation phase for Today. The Best Opportunity now has a normalized view-model helper and the Official Pick Readiness panel exposes structured gate rows with `PASS`, `FAIL`, `PENDING`, `NOT_APPLICABLE` and `NOT_AVAILABLE` states.
