@@ -2,6 +2,13 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-07-31 Pick Analyzer V2 Phase B6.1 Live Freshness And Budget Audit
+
+- Completed the bounded B6.1 local repair for Today freshness semantics and provider-budget reporting. Page/API fetch time is now labeled separately from market freshness; market freshness no longer falls back to `generatedAt`; missing market timestamps stay unavailable; future market timestamps are invalid; and selector `metricValue` is displayed as EV only when the selector metric is explicitly EV/expected value.
+- Provider budget source of truth remains honest: repository evidence proves configured SportsDataIO MLB daily allowance/reserve defaults and read-only usage accounting, but not the provider account's actual monthly quota, reset date or remaining provider balance.
+- The certified scheduler still ticks every 10 minutes. B6.1 does not claim true 5-minute refresh, does not add another scheduler, and preserves post-start pregame odds blocking.
+- No provider calls, provider credits, database mutations, prediction writes, settlement writes, learning writes, formula changes, Official Pick policy changes, scheduler changes or provider-mapping changes were made. B7 was not started.
+
 ## 2026-07-31 Pick Analyzer V2 Phase B6 Mobile Decision Experience
 
 - Completed the bounded B6 mobile decision-experience refinement for Today. Mobile now leads with a compact sticky verdict strip, a tighter Best Opportunity hero, compact Conviction and Actionability cards, a two-column priority metric layout and mobile segmented Why / Risks / Readiness details.

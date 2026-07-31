@@ -1,0 +1,80 @@
+{
+  "phase": "V2_B6_1",
+  "title": "Live Odds Freshness And Provider Budget Utilization",
+  "baselineCommit": "babe6f55a3e95cf5f032578cd596445e4ddcdc23",
+  "status": "LOCAL_PASS_PENDING_PRODUCTION",
+  "b7Started": false,
+  "providerBudget": {
+    "provider": "sportsdataio",
+    "sportScope": "baseball_mlb",
+    "allowanceSource": "configured_only",
+    "dailyAllowanceCalls": 1000,
+    "reserveCalls": 150,
+    "usableDailyCallsBeforeUsage": 850,
+    "monthlyAllowanceCalls": null,
+    "creditsUsed": "requires production read-only usage endpoint",
+    "creditsRemaining": "configured remaining only unless provider quota evidence exists",
+    "resetDate": null,
+    "actualProviderQuotaProven": false
+  },
+  "cadence": {
+    "schedulerTickMinutes": 10,
+    "documentedWindows": [
+      { "window": "more_than_24h", "minutes": 60 },
+      { "window": "two_to_24h", "minutes": 15 },
+      { "window": "inside_2h", "minutes": 10 },
+      { "window": "after_start", "minutes": null, "rule": "stop_pregame_odds" }
+    ],
+    "trueFiveMinuteRefreshEnabled": false,
+    "allSportFiveMinutePollingEnabled": false,
+    "recommendedMlbCadence": "60m outside 24h, 15m from 2-24h, 10m inside 2h, stop pregame odds after start"
+  },
+  "freshnessTimestampMap": {
+    "PAGE_UPDATED": "data.generatedAt",
+    "MARKET_UPDATED": "latestOddsTimestamp or marketFreshnessSummary.latestOddsTimestamp",
+    "PREDICTION_UPDATED": "prediction or grounded row generation timestamp",
+    "SYSTEM_UPDATED": "operations diagnostics scheduler success timestamp"
+  },
+  "rootCause": [
+    "Today allowed data.generatedAt as fallback opportunity market timestamp.",
+    "Today displayed an unlabeled Updated just now badge from page/API generation time.",
+    "Best Opportunity normalization could treat generic selector metricValue as EV for non-EV selectors."
+  ],
+  "repairs": [
+    "Page/API fetch time is labeled separately from market freshness.",
+    "Market freshness primary metric uses only stored market timestamps.",
+    "Missing market timestamps remain unavailable.",
+    "Future market timestamps are invalid instead of just-now.",
+    "Selector metricValue only becomes EV for explicit expected value or EV metrics."
+  ],
+  "safeCadenceScenarios": [
+    { "name": "current_adaptive_policy", "activeHours": 12, "callsPerDay": 72, "creditsPerDay": 72, "creditsPerMonth": 2160, "risk": "low_configured_daily_monthly_unproven" },
+    { "name": "mlb_every_10_minutes_active_window", "activeHours": 12, "callsPerDay": 72, "creditsPerDay": 72, "creditsPerMonth": 2160, "risk": "low_configured_daily_monthly_unproven" },
+    { "name": "mlb_every_5_minutes_inside_2h", "activeHours": 2, "callsPerDay": 24, "creditsPerDay": 24, "creditsPerMonth": 720, "risk": "requires_scheduler_change_and_quota_proof" },
+    { "name": "mlb_every_5_minutes_all_active_pregame", "activeHours": 12, "callsPerDay": 144, "creditsPerDay": 144, "creditsPerMonth": 4320, "risk": "requires_scheduler_change_and_quota_proof" },
+    { "name": "broad_all_sport_5_minute_polling", "activeHours": 12, "callsPerDay": null, "creditsPerDay": null, "creditsPerMonth": null, "risk": "not_approved_unbounded" }
+  ],
+  "safety": {
+    "providerCallsMade": 0,
+    "providerCreditsUsed": 0,
+    "databaseReads": 0,
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "probabilityFormulaChanged": false,
+    "evFormulaChanged": false,
+    "edgeFormulaChanged": false,
+    "confidenceFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "schedulerChanged": false,
+    "providerMappingsChanged": false
+  },
+  "productionEvidence": {
+    "productionCommitBefore": "babe6f55a3e95cf5f032578cd596445e4ddcdc23",
+    "productionCommitAfter": null,
+    "manualDeployment": false,
+    "postDeployVerificationRequired": true
+  },
+  "finalVerdict": "PICK_ANALYZER_V2_PHASE_B6_1_LOCAL_PASS_PENDING_PRODUCTION"
+}

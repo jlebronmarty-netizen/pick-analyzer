@@ -220,6 +220,7 @@ function dateTime(value: unknown, fallback = 'Update time unavailable') {
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    timeZone: 'America/Puerto_Rico',
     timeZoneName: 'short',
   })
 }
@@ -228,12 +229,44 @@ function relativeTime(value: unknown) {
   if (!value) return 'Update time unavailable'
   const parsed = new Date(String(value)).getTime()
   if (!Number.isFinite(parsed)) return 'Update time unavailable'
-  const diffMinutes = Math.max(0, Math.round((Date.now() - parsed) / 60000))
+  const diffMinutes = Math.round((Date.now() - parsed) / 60000)
+  if (diffMinutes < -1) return 'Timestamp ahead of system clock'
   if (diffMinutes < 1) return 'Updated just now'
   if (diffMinutes < 60) return `Updated ${diffMinutes} min ago`
   const hours = Math.round(diffMinutes / 60)
   if (hours < 24) return `Updated ${hours} hr ago`
   return dateTime(value)
+}
+
+function numberOrNull(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function selectorExpectedValue(selector: Selector) {
+  const explicit = numberOrNull(selector.expectedValue)
+  if (explicit !== null) return explicit
+  const metricName = String(selector.metricName ?? '').toLowerCase()
+  if (metricName.includes('expected value') || metricName === 'ev' || metricName.includes(' ev')) {
+    return numberOrNull(selector.metricValue)
+  }
+  return null
+}
+
+function marketTimestampFor(data: TodayResponse) {
+  return data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? null
+}
+
+function marketFreshnessDisplay(data: TodayResponse, opportunity: Opportunity | null): { label: string; detail: string; tone: Tone } {
+  const timestamp = opportunity?.updatedAt ?? marketTimestampFor(data)
+  if (!timestamp) return { label: 'Market timestamp unavailable', detail: 'Page/API fetch time is not used as odds freshness.', tone: 'gray' }
+  const parsed = new Date(String(timestamp)).getTime()
+  if (!Number.isFinite(parsed)) return { label: 'Market timestamp invalid', detail: 'Stored odds timestamp could not be parsed.', tone: 'red' }
+  const ageMinutes = Math.round((Date.now() - parsed) / 60000)
+  if (ageMinutes < -1) return { label: 'Market timestamp invalid', detail: 'Stored odds timestamp is ahead of the system clock.', tone: 'red' }
+  if (ageMinutes <= 10) return { label: 'FRESH', detail: `Market ${relativeTime(timestamp)}`, tone: 'green' }
+  if (ageMinutes <= 60) return { label: 'AGING', detail: `Market ${relativeTime(timestamp)}`, tone: 'yellow' }
+  return { label: 'STALE', detail: `Market ${relativeTime(timestamp)}`, tone: 'red' }
 }
 
 function toneForVerdict(verdict: Verdict): Tone {
@@ -260,14 +293,14 @@ function opportunityFromSelector(source: string, selector: Selector, data: Today
     modelProbability: selector.modelProbability ?? null,
     impliedProbability: selector.impliedProbability ?? null,
     edge: selector.edge ?? null,
-    expectedValue: selector.expectedValue ?? selector.metricValue ?? null,
+    expectedValue: selectorExpectedValue(selector),
     confidence: selector.confidence ?? null,
     freshness: labelize(selector.freshness ?? selector.priceState, 'Freshness unavailable'),
     dataQuality: selector.status === 'AVAILABLE' ? 'Stored market evidence' : 'Evidence incomplete',
     reason: official
       ? 'This opportunity is marked official by the existing production policy.'
       : labelize(selector.blocker ?? selector.rankingReason ?? data.summary?.recommendation, 'Not an Official Pick under the existing production policy.'),
-    updatedAt: data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? data.generatedAt ?? null,
+    updatedAt: marketTimestampFor(data),
   }
 }
 
@@ -292,7 +325,7 @@ function bestOpportunity(data: TodayResponse): Opportunity | null {
       freshness: labelize(officialRow.freshnessStatus, 'Freshness unavailable'),
       dataQuality: 'Official Pick evidence',
       reason: 'This satisfies the existing Official Pick production policy.',
-      updatedAt: String(officialRow.timestamps && typeof officialRow.timestamps === 'object' ? (officialRow.timestamps as Record<string, unknown>).oddsSnapshotAt ?? data.generatedAt : data.generatedAt),
+      updatedAt: String(officialRow.timestamps && typeof officialRow.timestamps === 'object' ? (officialRow.timestamps as Record<string, unknown>).oddsSnapshotAt ?? '' : ''),
     }
   }
   if (selectorAvailable(selectors?.bestAvailableValue)) return opportunityFromSelector('Best Value', selectors!.bestAvailableValue!, data)
@@ -319,7 +352,7 @@ function bestOpportunity(data: TodayResponse): Opportunity | null {
     freshness: labelize(grounded.freshness, 'Freshness unavailable'),
     dataQuality: 'Stored grounded evidence',
     reason: labelize(grounded.reasonNotOfficial ?? grounded.blocker ?? grounded.why, 'Not an Official Pick under the existing production policy.'),
-    updatedAt: String(grounded.updatedAt ?? grounded.oddsTimestamp ?? data.generatedAt ?? ''),
+    updatedAt: String(grounded.updatedAt ?? grounded.oddsTimestamp ?? ''),
   }
 }
 
@@ -339,7 +372,6 @@ function reasonList(data: TodayResponse, opportunity: Opportunity | null) {
   if (opportunity?.modelProbability !== null && opportunity?.modelProbability !== undefined) why.push(`Model probability is available at ${pct(opportunity.modelProbability)}.`)
   if (opportunity?.edge !== null && opportunity?.edge !== undefined && Number(opportunity.edge) > 0) why.push(`Model edge is positive at ${signedPct(opportunity.edge)}.`)
   if (opportunity?.expectedValue !== null && opportunity?.expectedValue !== undefined && Number(opportunity.expectedValue) > 0) why.push(`Expected value is positive at ${signedPct(opportunity.expectedValue)}.`)
-  if (opportunity?.freshness && !opportunity.freshness.toLowerCase().includes('unavailable')) why.push(`Freshness state is ${opportunity.freshness}.`)
 
   if (opportunity?.status !== 'official') risks.push(opportunity?.reason ?? 'This is not an Official Pick.')
   if (String(data.freshness ?? '').toLowerCase() === 'stale') risks.push('Market evidence is stale.')
@@ -881,7 +913,7 @@ export default function TodayDecisionPanel() {
   }
 
   const verdictTone = toneForVerdict(verdict.label)
-  const freshness = labelize(data.viewModel?.selectors?.marketFreshnessSummary?.state ?? data.freshness, 'Freshness unavailable')
+  const marketFreshness = marketFreshnessDisplay(data, opportunity)
   const alternatives = [
     ['Most Likely', data.viewModel?.selectors?.mostLikelySummary?.selector?.selection, '/most-likely'],
     ['Best Value', data.viewModel?.selectors?.bestAvailableValue?.selection, '/best-value'],
@@ -908,7 +940,7 @@ export default function TodayDecisionPanel() {
             <Badge tone={opportunity?.status === 'official' ? 'green' : 'yellow'}>
               {opportunity?.status === 'official' ? 'Official Pick' : 'Best Available - Not Official'}
             </Badge>
-            <Badge tone="blue">{relativeTime(data.generatedAt)}</Badge>
+            <Badge tone="blue">Page {relativeTime(data.generatedAt)}</Badge>
           </div>
         </div>
       </div>
@@ -945,7 +977,7 @@ export default function TodayDecisionPanel() {
             <PremiumMetric label="Edge" value={signedPct(opportunity?.edge)} tone={Number(opportunity?.edge) > 0 ? 'green' : 'gray'} priority />
             <PremiumMetric label="EV" value={signedPct(opportunity?.expectedValue)} tone={Number(opportunity?.expectedValue) > 0 ? 'green' : 'gray'} priority />
             <PremiumMetric label="Confidence" value={pct(opportunity?.confidence)} tone="yellow" priority />
-            <PremiumMetric label="Freshness" value={opportunity?.freshness ?? freshness} detail={relativeTime(opportunity?.updatedAt)} tone="yellow" priority />
+            <PremiumMetric label="Market Freshness" value={marketFreshness.label} detail={marketFreshness.detail} tone={marketFreshness.tone} priority />
             <PremiumMetric label="Current Odds" value={odds(opportunity?.odds)} detail={opportunity?.sportsbook} tone="blue" />
             <PremiumMetric label="Data Quality" value={opportunity?.dataQuality ?? 'Not yet available'} tone="blue" />
           </div>
@@ -1006,7 +1038,7 @@ export default function TodayDecisionPanel() {
       <PerformanceSnapshotCard snapshot={performance} />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <SummaryMetric label="Freshness" value={freshness} detail={dateTime(data.latestOddsTimestamp ?? data.generatedAt)} />
+        <SummaryMetric label="Market Updated" value={marketFreshness.label} detail={dateTime(opportunity?.updatedAt ?? marketTimestampFor(data), 'Market update time unavailable')} />
         <SummaryMetric label="Today API" value={labelize(data.status, 'Available')} detail={`Provider calls ${data.providerCallsMade ?? 0}; mutations ${data.remoteMutationsMade ?? 0}`} />
         <SummaryMetric label="Performance Context" value="Compact Link" detail="Open Performance for results, calibration and trust history." />
       </div>

@@ -120,6 +120,16 @@ export function numberOrNull(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function selectorExpectedValue(selector: Selector) {
+  const explicit = numberOrNull(selector.expectedValue)
+  if (explicit !== null) return explicit
+  const metricName = String(selector.metricName ?? '').toLowerCase()
+  if (metricName.includes('expected value') || metricName === 'ev' || metricName.includes(' ev')) {
+    return numberOrNull(selector.metricValue)
+  }
+  return null
+}
+
 function rawText(value: unknown) {
   return String(value ?? '').trim()
 }
@@ -230,7 +240,7 @@ function normalizeRow(
     supportingReasons: supportingReasons({ modelProbability, impliedProbability, edge, expectedValue, confidence }),
     source,
     provenance: officialPick ? 'sections.officialPicks.data[0]' : 'sections.groundedOpportunities.data[0]',
-    updatedAt: freshnessTimestamp ?? (rawText(row.updatedAt ?? row.generated_at ?? data.generatedAt) || null),
+    updatedAt: freshnessTimestamp ?? (rawText(row.updatedAt ?? row.generated_at) || null),
   }
 }
 
@@ -239,10 +249,10 @@ function normalizeSelector(source: string, selector: Selector, data: TodayDecisi
   const modelProbability = numberOrNull(selector.modelProbability)
   const impliedProbability = numberOrNull(selector.impliedProbability)
   const edge = numberOrNull(selector.edge)
-  const expectedValue = numberOrNull(selector.expectedValue ?? selector.metricValue)
+  const expectedValue = selectorExpectedValue(selector)
   const confidence = numberOrNull(selector.confidence)
   const blocker = rawText(selector.blocker) || rawText(selector.rankingReason)
-  const freshnessTimestamp = data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? data.generatedAt ?? null
+  const freshnessTimestamp = data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? null
   return {
     opportunityId: idFrom([selector.eventId, selector.market, selector.selection, source]),
     sport: 'MLB',
