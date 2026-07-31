@@ -1,12 +1,6 @@
 import DashboardSection from '@/components/dashboard/DashboardSection'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import { ProductStatusBadge } from '@/components/product/ProductStatus'
-import { getDataCoverageInventoryV1 } from '@/services/data-coverage-inventory.service'
-import { getMultiSportProviderEntitlementAuditV1 } from '@/services/multi-sport-provider-entitlement-audit.service'
-import { getMultiSportDataExpansionCheckpoint2V1 } from '@/services/multi-sport-data-expansion-checkpoint2.service'
-import { getMultiSportDataExpansionCheckpoint3V1 } from '@/services/multi-sport-data-expansion-checkpoint3.service'
-import { getMultiSportDataExpansionFinalCertificationV1 } from '@/services/multi-sport-data-expansion-final.service'
-import { getTheOddsApiCoverage } from '@/services/the-odds-api-maximum-utilization.service'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,6 +22,21 @@ function Metric({ label, value, detail }: { label: string; value: string | numbe
 }
 
 export default async function DataCoveragePage() {
+  const [
+    { getDataCoverageInventoryV1 },
+    { getMultiSportProviderEntitlementAuditV1 },
+    { getMultiSportDataExpansionCheckpoint2V1 },
+    { getMultiSportDataExpansionCheckpoint3V1 },
+    { getMultiSportDataExpansionFinalCertificationV1 },
+    { getTheOddsApiCoverage },
+  ] = await Promise.all([
+    import('@/services/data-coverage-inventory.service'),
+    import('@/services/multi-sport-provider-entitlement-audit.service'),
+    import('@/services/multi-sport-data-expansion-checkpoint2.service'),
+    import('@/services/multi-sport-data-expansion-checkpoint3.service'),
+    import('@/services/multi-sport-data-expansion-final.service'),
+    import('@/services/the-odds-api-maximum-utilization.service'),
+  ])
   const [inventory, providerAudit, checkpoint2, checkpoint3, finalCertification, oddsApiCoverage] = await Promise.all([
     getDataCoverageInventoryV1(),
     getMultiSportProviderEntitlementAuditV1(),

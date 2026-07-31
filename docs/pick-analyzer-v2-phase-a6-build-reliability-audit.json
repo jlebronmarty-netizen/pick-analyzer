@@ -1,0 +1,254 @@
+{
+  "generatedAt": "2026-07-31T01:04:07.747Z",
+  "startingCommit": "ba475388c1a5932b885188f6f46aacd343b6d912",
+  "success": true,
+  "checks": 37,
+  "passed": 37,
+  "failed": 0,
+  "failedChecks": [],
+  "buildPressureMatrix": [
+    {
+      "buildStage": "dependency installation",
+      "fileRouteConfig": "package.json",
+      "staticOrDynamicBehavior": "npm install/build script only",
+      "buildTimeDataAccess": "none",
+      "largeImports": "none in script",
+      "generatedArtifactImports": "none",
+      "routeCountImpact": "none",
+      "memoryRiskEvidence": "dependencies are small; no package-manager migration",
+      "buildDurationEvidence": "A5 build passed in about 80.8s",
+      "vercelRelevance": "uses same npm build command Vercel would invoke",
+      "defect": "none",
+      "severity": "NONE",
+      "repair": "none",
+      "validationMethod": "package script audit"
+    },
+    {
+      "buildStage": "Next.js compilation",
+      "fileRouteConfig": "next.config.ts",
+      "staticOrDynamicBehavior": "Next app build with webpack worker",
+      "buildTimeDataAccess": "none from config",
+      "largeImports": "none",
+      "generatedArtifactImports": "none",
+      "routeCountImpact": "none",
+      "memoryRiskEvidence": "prior Vercel OOM during optimized production build",
+      "buildDurationEvidence": "A5 build compiled successfully in 16.1s",
+      "vercelRelevance": "memory controls apply to Vercel Standard build",
+      "defect": "none in current config",
+      "severity": "NONE",
+      "repair": "existing memory controls retained",
+      "validationMethod": "config audit and build"
+    },
+    {
+      "buildStage": "TypeScript",
+      "fileRouteConfig": "tsconfig.json",
+      "staticOrDynamicBehavior": "no emit; incremental",
+      "buildTimeDataAccess": "none",
+      "largeImports": "type checking over app graph",
+      "generatedArtifactImports": "none proven",
+      "routeCountImpact": "none",
+      "memoryRiskEvidence": "A5 TypeScript completed in 33.1s",
+      "buildDurationEvidence": "A5 TypeScript completed in 33.1s",
+      "vercelRelevance": "same type-check phase runs during Vercel build",
+      "defect": "none",
+      "severity": "NONE",
+      "repair": "none",
+      "validationMethod": "tsconfig audit and build"
+    },
+    {
+      "buildStage": "page data collection",
+      "fileRouteConfig": "src/app/data-coverage/page.tsx",
+      "staticOrDynamicBehavior": "force-dynamic page",
+      "buildTimeDataAccess": "request-time only after repair",
+      "largeImports": "six heavy data/provider certification services were top-level imports before repair",
+      "generatedArtifactImports": "none",
+      "routeCountImpact": "no route count change",
+      "memoryRiskEvidence": "tracked import-pressure audit identified data-coverage/page.tsx as largest importing page file with six service imports",
+      "buildDurationEvidence": "A5 build collected page data successfully, but Vercel OOM history remains",
+      "vercelRelevance": "reduces server route module graph at build/module evaluation time without requiring paid infra",
+      "defect": "heavy dynamic page imported six service graphs at module load",
+      "severity": "P1",
+      "repair": "move service graph behind request-time import() inside DataCoveragePage",
+      "validationMethod": "static validator, ESLint, build, production page/API checks"
+    },
+    {
+      "buildStage": "static generation",
+      "fileRouteConfig": "app routes",
+      "staticOrDynamicBehavior": "386 static pages in A5 build; live dashboards are force-dynamic",
+      "buildTimeDataAccess": "none proven on audited live pages",
+      "largeImports": "static shells only where product-safe",
+      "generatedArtifactImports": "none proven",
+      "routeCountImpact": "no route deletion or static count reduction in A6 repair",
+      "memoryRiskEvidence": "prior Phase A reduced static pages from 392 to 386",
+      "buildDurationEvidence": "A5 generated 386 static pages in 7.4s",
+      "vercelRelevance": "keeps existing static-generation concurrency controls",
+      "defect": "none newly proven",
+      "severity": "NONE",
+      "repair": "none",
+      "validationMethod": "build output and route audit"
+    },
+    {
+      "buildStage": "route manifest creation",
+      "fileRouteConfig": "docs/product-route-inventory-v1.json",
+      "staticOrDynamicBehavior": "425 API routes and 28 page routes in inventory",
+      "buildTimeDataAccess": "none",
+      "largeImports": "route count remains high",
+      "generatedArtifactImports": "route inventory is documentation, not runtime import",
+      "routeCountImpact": "none",
+      "memoryRiskEvidence": "large route surface increases build graph pressure",
+      "buildDurationEvidence": "local builds pass",
+      "vercelRelevance": "do not delete routes merely to reduce pressure",
+      "defect": "none repairable without product evidence",
+      "severity": "NONE",
+      "repair": "none",
+      "validationMethod": "inventory and no-route-deletion checks"
+    },
+    {
+      "buildStage": "bundle generation",
+      "fileRouteConfig": "src/app/data-coverage/page.tsx and next.config.ts",
+      "staticOrDynamicBehavior": "server bundle with dynamic imports",
+      "buildTimeDataAccess": "none introduced",
+      "largeImports": "data coverage services deferred",
+      "generatedArtifactImports": "none",
+      "routeCountImpact": "none",
+      "memoryRiskEvidence": "prior import pressure named data-coverage/page.tsx as fan-in hotspot",
+      "buildDurationEvidence": "post-repair build required",
+      "vercelRelevance": "server graph pressure is relevant to optimized production build OOM",
+      "defect": "top-level heavy service imports",
+      "severity": "P1",
+      "repair": "route-local runtime imports",
+      "validationMethod": "static import audit and build"
+    },
+    {
+      "buildStage": "postbuild",
+      "fileRouteConfig": "package.json",
+      "staticOrDynamicBehavior": "no postbuild script",
+      "buildTimeDataAccess": "none",
+      "largeImports": "none",
+      "generatedArtifactImports": "none",
+      "routeCountImpact": "none",
+      "memoryRiskEvidence": "no duplicate validation/build execution",
+      "buildDurationEvidence": "not applicable",
+      "vercelRelevance": "prevents surprise postbuild work",
+      "defect": "none",
+      "severity": "NONE",
+      "repair": "none",
+      "validationMethod": "script audit"
+    },
+    {
+      "buildStage": "deployment packaging",
+      "fileRouteConfig": "vercel.json and output tracing",
+      "staticOrDynamicBehavior": "Vercel default packaging",
+      "buildTimeDataAccess": "none",
+      "largeImports": "docs not imported by runtime",
+      "generatedArtifactImports": "none proven",
+      "routeCountImpact": "none",
+      "memoryRiskEvidence": "no broad output tracing root configured",
+      "buildDurationEvidence": "local build trace collection completed",
+      "vercelRelevance": "no paid infrastructure or manual deploy required",
+      "defect": "none",
+      "severity": "NONE",
+      "repair": "none",
+      "validationMethod": "config audit and deployment observation"
+    }
+  ],
+  "priorVercelOomHistory": {
+    "documented": true,
+    "summary": "Prior tracked docs state Vercel optimized production build failed from memory pressure/OOM; local builds currently pass."
+  },
+  "baselineBuildEvidence": {
+    "source": "A5 completed build plus tracked build-memory docs",
+    "command": "npm.cmd run build",
+    "result": "PASS",
+    "compileSeconds": 16.1,
+    "typeScriptSeconds": 33.1,
+    "staticGenerationSeconds": 7.4,
+    "generatedStaticPages": 386,
+    "note": "A6 did not rerun a pre-change baseline because fresh A5 build evidence was sufficient and the phase brief allowed it."
+  },
+  "localBuildResult": {
+    "command": "npm.cmd run build",
+    "result": "PASS",
+    "durationSeconds": 80.48,
+    "prerenderRouteCount": 6,
+    "generatedStaticPages": 386,
+    "appPageRouteCount": 30,
+    "largestServerFilesSample": [
+      {
+        "file": ".next/server/chunks/60319.js",
+        "bytes": 1255831
+      },
+      {
+        "file": ".next/server/app/dashboard/page.js",
+        "bytes": 346558
+      },
+      {
+        "file": ".next/server/app/data-coverage/page.js",
+        "bytes": 139853
+      }
+    ]
+  },
+  "buildTimeDataAccessFindings": [
+    "No build script provider call or mutation path was found.",
+    "Data Coverage remains force-dynamic; service execution is request-time after repair."
+  ],
+  "staticGenerationFindings": [
+    "No routes were deleted or hidden.",
+    "A6 did not add global force-dynamic.",
+    "Existing build generated 386 static pages; remaining static routes are preserved."
+  ],
+  "importPressureFindings": [
+    "Prior import-pressure audit identified data-coverage/page.tsx as page-level fan-in hotspot with six service imports.",
+    "A6 removed those top-level service imports and replaced them with request-time dynamic imports."
+  ],
+  "packagingFindings": [
+    "No output tracing root, Vercel plan, dependency or packaging migration was introduced."
+  ],
+  "configFindings": [
+    "Existing Next memory controls remain enabled.",
+    "vercel.json remains crons-only with no plan/billing change."
+  ],
+  "deterministicBuildFindings": [
+    "package.json build remains a single next build --webpack command with no prebuild/postbuild hooks.",
+    "No known recursive repository scan is part of the build command."
+  ],
+  "defects": [
+    {
+      "severity": "P1",
+      "area": "data coverage page build import pressure",
+      "defect": "Tracked import-pressure evidence identified src/app/data-coverage/page.tsx as the largest page-level server-service import fan-in; it imported six heavy data/provider certification services at module load despite being a request-time dynamic page.",
+      "repair": "Moved those services behind route-local runtime import() inside DataCoveragePage so the page module no longer eagerly imports the service graph during build/module evaluation."
+    }
+  ],
+  "exactRepairs": [
+    "src/app/data-coverage/page.tsx now imports heavy data/provider audit services inside DataCoveragePage with Promise.all runtime imports."
+  ],
+  "beforeAfterEvidence": {
+    "before": "data-coverage/page.tsx had six top-level @/services imports and was listed as largest page-level importer in tracked import-pressure audit.",
+    "after": "data-coverage/page.tsx has zero top-level @/services imports and retains six request-time import() calls inside the dynamic page."
+  },
+  "providerCallsMade": 0,
+  "providerCreditsConsumed": 0,
+  "databaseReads": "local static file reads only before production verification",
+  "databaseMutations": 0,
+  "predictionWrites": 0,
+  "resultWrites": 0,
+  "settlementWrites": 0,
+  "learningWrites": 0,
+  "remainingRisks": [
+    "Local build peak memory is not a perfect proxy for Vercel Standard peak memory.",
+    "The app still has a large route graph; route deletion is not authorized without product evidence.",
+    "Further chunk-level reduction may require deeper import-boundary work in later bounded phases."
+  ],
+  "deferredInfrastructureOptions": [
+    "Vercel paid build infrastructure remains available as an external option, but A6 does not require or enable it."
+  ],
+  "certification": {
+    "PICK_ANALYZER_V2_PHASE_A6_BUILD_RELIABILITY_PASS": true,
+    "NO_PROVIDER_CALL_PASS": true,
+    "NO_PROVIDER_CREDIT_PASS": true,
+    "NO_DATABASE_MUTATION_PASS": true,
+    "NO_ROUTE_DELETION_PASS": true,
+    "NO_PAID_INFRASTRUCTURE_PASS": true
+  }
+}

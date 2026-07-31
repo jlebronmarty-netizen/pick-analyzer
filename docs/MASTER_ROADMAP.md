@@ -3073,3 +3073,19 @@ Validation: `node scripts/pick-analyzer-v2-phase-a5-api-query-performance-valida
 Completion criteria: `PICK_ANALYZER_V2_PHASE_A5_API_QUERY_PERFORMANCE_PASS`, bounded critical-query matrix, no proven unbounded critical summary query, no proven N+1 defect on audited core paths, provider-free and mutation-free read-only routes, no speculative schema migration, passing validators, passing build and production certification after deployment.
 
 Next bounded phase: A6 Build-memory and production-build reliability. Do not start A6 until A5 production certification is complete.
+
+### 63. Pick Analyzer V2 Phase A6 Build Reliability
+
+Objective: Reduce build-memory and production-build risk on constrained Vercel infrastructure without deleting product routes, changing hosting architecture or requiring paid build infrastructure.
+
+Status: Complete locally pending push and production certification because a runtime page file changed.
+
+Scope: Bounded audit of `package.json`, `next.config.ts`, `tsconfig.json`, `vercel.json`, route inventory, prior build-memory artifacts, static/dynamic route behavior, build-time import pressure, generated artifact exposure and deterministic build scripts.
+
+Repair: `src/app/data-coverage/page.tsx` no longer imports six heavy data/provider certification service graphs at module load. The page remains `force-dynamic` and now loads those services with request-time `import()` inside `DataCoveragePage`, preserving behavior while reducing build/module-evaluation pressure.
+
+Validation: `node scripts/pick-analyzer-v2-phase-a6-build-reliability-validate.mjs --timeoutMs=30000` passed 37/37 locally. Bounded A1 route inventory, A2 route/runtime, A3 scheduler/freshness, A4 UI-state, A5 API/query performance, release-candidate route/artifact consistency, JSON parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` passed. The post-repair local build completed in 80.48 seconds with 386 generated static pages and 6 prerender routes.
+
+Completion criteria: `PICK_ANALYZER_V2_PHASE_A6_BUILD_RELIABILITY_PASS`, build-pressure matrix, no build-time provider or mutation path, no local server smoke in build, no recursive build scan, no route deletion, no dependency migration, no paid infrastructure change, passing validators, passing build and production certification after deployment.
+
+Next bounded phase: A7 Proven duplication cleanup only. Do not start A7 until A6 production certification is complete.
