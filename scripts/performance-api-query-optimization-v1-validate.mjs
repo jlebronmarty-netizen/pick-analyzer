@@ -14,7 +14,7 @@ const checks = [
   ],
   [
     'performance route still uses canonical product contract',
-    /getPerformanceProductContract\(\{ sportKey \}\)/.test(route),
+    /getPerformanceProductContract\(\{[\s\S]*sportKey,[\s\S]*includeHistoryRows:[\s\S]*maxPredictionRows:[\s\S]*\}\)/.test(route),
   ],
   [
     'performance route reports zero provider calls',
@@ -26,7 +26,7 @@ const checks = [
   ],
   [
     'scope loads scheduler coverage and rows in parallel',
-    /const \[schedulerCoverage, rows\] = await Promise\.all\(\[[\s\S]+getPregameSchedulerCoverage\(\)[\s\S]+loadRows\(sportKey\)[\s\S]+\]\)/.test(scope),
+    /const \[schedulerCoverage, rowLoad\] = await Promise\.all\(\[[\s\S]+getPregameSchedulerCoverage\(\)[\s\S]+loadRows\(sportKey, maxPredictionRows\)[\s\S]+\]\)/.test(scope),
   ],
   [
     'event lookup remains bounded at 100 ids to avoid Supabase header limits',

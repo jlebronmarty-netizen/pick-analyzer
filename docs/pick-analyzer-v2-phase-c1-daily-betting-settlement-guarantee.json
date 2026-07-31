@@ -1,0 +1,45 @@
+{
+  "phase": "V2_C1",
+  "title": "Daily Betting Experience And Automatic Settlement Guarantee",
+  "baselineCommit": "fff4dfed6dd770eb0e634f5cae96ccf19e60eadb",
+  "status": "LOCAL_PASS_PENDING_VALIDATION",
+  "goals": {
+    "homepageBettingExperience": {
+      "implemented": true,
+      "homepageRedirectRemoved": true,
+      "sections": ["Rent Play", "Moneyline Bet", "Parlay Builder", "Today's Best Opportunity"],
+      "usesExistingPredictionEngine": true,
+      "backendPredictionChanges": false,
+      "technicalDashboardMovedToTabs": true
+    },
+    "settlementGuarantee": {
+      "implemented": true,
+      "automaticSettlementProspectiveOnly": false,
+      "completedGameOutcomes": ["SETTLED", "READY_FOR_SETTLEMENT", "BLOCKED_WITH_REASON"],
+      "monitoringRoute": "/api/operations/settlement-guarantee",
+      "runLineSettlementSupported": true,
+      "learningFlow": "settlement_derived_prediction_history",
+      "performanceFlow": "performance_scope_v2"
+    }
+  },
+  "safety": {
+    "providerCallsIntroduced": 0,
+    "providerCreditsUsed": 0,
+    "databaseMutationsAddedOutsideSettlement": 0,
+    "predictionFormulaChanged": false,
+    "evFormulaChanged": false,
+    "edgeFormulaChanged": false,
+    "confidenceFormulaChanged": false,
+    "trustFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "providerMappingsChanged": false,
+    "automaticModelTrainingEnabled": false
+  },
+  "productionEvidence": {
+    "productionCommitBefore": null,
+    "productionCommitAfter": null,
+    "manualDeployment": false,
+    "postDeployVerificationRequired": true
+  },
+  "finalVerdict": "PICK_ANALYZER_V2_PHASE_C1_LOCAL_PASS_PENDING_PRODUCTION"
+}

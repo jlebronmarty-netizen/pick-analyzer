@@ -384,6 +384,14 @@ function gradePrediction(prediction: PredictionRow, result: GameResultRow): 'win
     if (margin === 0) return 'push'
     return margin > 0 ? 'win' : 'loss'
   }
+  if (market === 'run_line' || market === 'run line') {
+    const selectedHome = selection === normalize(result.home_team)
+    const selectedScore = selectedHome ? result.home_score : result.away_score
+    const otherScore = selectedHome ? result.away_score : result.home_score
+    const margin = selectedScore + line - otherScore
+    if (margin === 0) return 'push'
+    return margin > 0 ? 'win' : 'loss'
+  }
   if (market === 'total') {
     const total = result.home_score + result.away_score
     if (total === line) return 'push'
@@ -979,11 +987,13 @@ export async function settleOperatingDay(input: {
     pushes: 0,
     skipped: 0,
     unresolved: 0,
+    blocked: 0,
     alreadySettled: 0,
     officialSettled: 0,
     hypotheticalSettled: 0,
     events: Array.from(new Set(predictions.map((row) => row.game_id))).length,
     warnings: [] as string[],
+    blockedRows: [] as Array<{ id: string; gameId: string; reason: string }>,
   }
   const updates: Array<{ id: string; status: string; profit: number; stake: number; resultId: string; official: boolean }> = []
   for (const prediction of predictions) {
@@ -994,11 +1004,19 @@ export async function settleOperatingDay(input: {
     const result = resultByGame.get(prediction.game_id)
     if (!result) {
       summary.unresolved += 1
+      summary.blocked += 1
+      summary.blockedRows.push({ id: prediction.id, gameId: prediction.game_id, reason: 'AUTHORITATIVE_RESULT_MISSING' })
       continue
     }
     const grade = gradePrediction(prediction, result)
     if (!grade || prediction.odds === null) {
       summary.skipped += 1
+      summary.blocked += 1
+      summary.blockedRows.push({
+        id: prediction.id,
+        gameId: prediction.game_id,
+        reason: !grade ? 'UNSUPPORTED_OR_UNGRADABLE_MARKET' : 'ODDS_MISSING_FOR_PROFIT_ACCOUNTING',
+      })
       continue
     }
     summary.eligible += 1
@@ -1632,7 +1650,7 @@ export async function executeOperatingDay(request: ExecuteRequest) {
       warnings = [synced.message].filter(Boolean)
     }
   } else if (action === 'settle') {
-    result = await settleOperatingDay({ operatingDayId, sportKey, selectedDate: date, prospectiveOnly: true })
+    result = await settleOperatingDay({ operatingDayId, sportKey, selectedDate: date, prospectiveOnly: false })
     warnings = asStringArray(result.warnings)
   } else if (action === 'replay') {
     result = await replayReport(operatingDayId, sportKey, date, false)

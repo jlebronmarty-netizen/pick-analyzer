@@ -2,6 +2,14 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-07-31 Pick Analyzer V2 Phase C1 Daily Betting Experience And Settlement Guarantee
+
+- Implemented the C1 homepage betting-plan surface. `/` now renders Today's Betting Plan instead of redirecting to `/dashboard`, with Rent Play, Moneyline Bet, Parlay Builder and Today's Best Opportunity sections sourced from existing `/api/dashboard/today` evidence.
+- Parlay Builder is client-side only: users can enable/disable qualified legs and probability, confidence and EV update immediately without backend prediction changes or provider calls.
+- Repaired the automatic settlement path by changing the scheduler `settle` action from prospective-only settlement to selected-date settlement for all supported rows. Settlement summaries now report explicit blocked row reasons instead of silently skipping missing-result, ungradable-market or missing-odds rows.
+- Added `/api/operations/settlement-guarantee` as a read-only monitor that classifies recent completed-game prediction rows as SETTLED, READY_FOR_SETTLEMENT or BLOCKED with reason, and reports learning/performance inclusion from existing settled prediction history.
+- No provider calls, provider credits, prediction formula changes, EV/edge/confidence/Trust changes, Official Pick policy changes, provider mapping changes or automatic model training enablement were introduced.
+
 ## 2026-07-31 Pick Analyzer V2 Phase B6.1 Live Freshness And Budget Audit
 
 - Completed the bounded B6.1 local repair for Today freshness semantics and provider-budget reporting. Page/API fetch time is now labeled separately from market freshness; market freshness no longer falls back to `generatedAt`; missing market timestamps stay unavailable; future market timestamps are invalid; and selector `metricValue` is displayed as EV only when the selector metric is explicitly EV/expected value.
