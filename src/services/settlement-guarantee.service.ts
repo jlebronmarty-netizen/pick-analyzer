@@ -28,6 +28,7 @@ type EventRow = CanonicalEventLike & {
 type ResultRow = CanonicalGameResultLike & {
   id: string
   game_id: string | null
+  status?: string | null
 }
 
 function localDate(offset = 0) {
@@ -91,7 +92,7 @@ export async function getSettlementGuaranteeStatus({ lookbackDays = 2 }: { lookb
 
     const { data: resultRows, error: resultError } = await supabaseAdmin
       .from('game_results')
-      .select('id, game_id, status, home_team, away_team, home_score, away_score')
+      .select('id, game_id, home_team, away_team, home_score, away_score')
       .in('game_id', chunk)
     if (resultError) throw new Error(`Settlement guarantee result read failed: ${resultError.message}`)
     results.push(...((resultRows ?? []) as ResultRow[]))
