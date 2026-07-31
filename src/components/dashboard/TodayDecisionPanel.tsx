@@ -1,6 +1,13 @@
 'use client'
 
 import { ReactNode, useEffect, useMemo, useState } from 'react'
+import {
+  buildOfficialPickReadiness,
+  normalizeBestOpportunity,
+  type NormalizedBestOpportunity,
+  type OfficialPickReadiness,
+  type ReadinessState,
+} from '@/components/dashboard/today-opportunity-readiness'
 
 type Tone = 'green' | 'yellow' | 'blue' | 'red' | 'gray'
 type Verdict = 'BET' | 'REVIEW' | 'WAIT' | 'PASS'
@@ -294,6 +301,93 @@ function SummaryMetric({ label, value, detail }: { label: string; value: string;
   )
 }
 
+const readinessTone: Record<ReadinessState, Tone> = {
+  PASS: 'green',
+  FAIL: 'red',
+  PENDING: 'yellow',
+  NOT_APPLICABLE: 'gray',
+  NOT_AVAILABLE: 'gray',
+}
+
+function CompactBar({ label, value, max = 100, tone = 'blue' }: { label: string; value: number | null; max?: number; tone?: Tone }) {
+  const width = value === null ? 0 : Math.max(0, Math.min(100, (value / max) * 100))
+  const fill = tone === 'green' ? 'bg-emerald-400' : tone === 'yellow' ? 'bg-amber-300' : tone === 'red' ? 'bg-rose-400' : 'bg-sky-400'
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-3 text-xs font-bold text-slate-300">
+        <span>{label}</span>
+        <span>{value === null ? 'Unavailable' : pct(value)}</span>
+      </div>
+      <div className="mt-2 h-2 rounded-full bg-slate-800" aria-hidden="true">
+        <div className={`h-2 rounded-full ${fill}`} style={{ width: `${width}%` }} />
+      </div>
+    </div>
+  )
+}
+
+function EvidenceGraphics({ opportunity }: { opportunity: NormalizedBestOpportunity | null }) {
+  if (!opportunity) {
+    return (
+      <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+        <p className="text-sm font-black text-white">Evidence unavailable</p>
+        <p className="mt-2 text-xs leading-5 text-slate-400">No probability, edge, EV or freshness graphic is rendered without a normalized opportunity.</p>
+      </article>
+    )
+  }
+  const edgeTone: Tone = opportunity.edge === null ? 'gray' : opportunity.edge > 0 ? 'green' : opportunity.edge < 0 ? 'red' : 'yellow'
+  const evTone: Tone = opportunity.expectedValue === null ? 'gray' : opportunity.expectedValue > 0 ? 'green' : opportunity.expectedValue < 0 ? 'red' : 'yellow'
+  return (
+    <div className="grid gap-3 lg:grid-cols-3" data-b3-evidence-graphics="true">
+      <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+        <p className="text-sm font-black text-white">Probability vs Implied</p>
+        {opportunity.modelProbability !== null && opportunity.impliedProbability !== null ? (
+          <div className="mt-4 space-y-4" aria-label="Model probability compared with implied probability">
+            <CompactBar label="Model" value={opportunity.modelProbability} tone="green" />
+            <CompactBar label="Implied" value={opportunity.impliedProbability} />
+          </div>
+        ) : (
+          <p className="mt-2 text-xs leading-5 text-slate-400">Both probabilities are required before this comparison is shown.</p>
+        )}
+      </article>
+      <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+        <p className="text-sm font-black text-white">Edge / EV</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Badge tone={edgeTone}>Edge {signedPct(opportunity.edge)}</Badge>
+          <Badge tone={evTone}>EV {signedPct(opportunity.expectedValue)}</Badge>
+        </div>
+        <p className="mt-3 text-xs leading-5 text-slate-400">Missing values stay unavailable and are never treated as zero.</p>
+      </article>
+      <article className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+        <p className="text-sm font-black text-white">Freshness / Quality</p>
+        <p className="mt-3 text-lg font-black text-white">{opportunity.freshnessStatus}</p>
+        <p className="mt-1 text-xs leading-5 text-slate-400">{opportunity.dataQualityStatus}</p>
+      </article>
+    </div>
+  )
+}
+
+function ReadinessRows({ readiness }: { readiness: OfficialPickReadiness }) {
+  return (
+    <details className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-3" data-b3-readiness-gates="true">
+      <summary className="cursor-pointer text-sm font-black text-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-sky-300">
+        View readiness gates
+      </summary>
+      <div className="mt-4 space-y-3">
+        {readiness.rows.map((row) => (
+          <div key={row.id} className="grid gap-2 rounded-lg border border-slate-800 bg-slate-950/80 p-3 md:grid-cols-[9rem_1fr]">
+            <Badge tone={readinessTone[row.state]}>{row.state}</Badge>
+            <div>
+              <p className="text-sm font-black text-white">{row.label}</p>
+              <p className="mt-1 text-xs leading-5 text-slate-400">{row.explanation}</p>
+              <p className="mt-2 text-xs font-bold text-slate-500">Current: {row.currentValue} / Required: {row.requiredValue}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </details>
+  )
+}
+
 function Skeleton() {
   return (
     <section className="space-y-5" aria-busy="true" aria-label="Loading today's decision">
@@ -335,6 +429,8 @@ export default function TodayDecisionPanel() {
   }, [])
 
   const opportunity = useMemo(() => data ? bestOpportunity(data) : null, [data])
+  const normalizedOpportunity = useMemo(() => data ? normalizeBestOpportunity(data) : null, [data])
+  const readiness = useMemo(() => buildOfficialPickReadiness(normalizedOpportunity), [normalizedOpportunity])
   const verdict = useMemo(() => data ? verdictFor(data, opportunity) : null, [data, opportunity])
   const reasons = useMemo(() => data ? reasonList(data, opportunity) : { why: [], risks: [] }, [data, opportunity])
 
@@ -359,7 +455,7 @@ export default function TodayDecisionPanel() {
   ] as const
 
   return (
-    <section className="space-y-5" data-b2-today-shell="true">
+    <section className="space-y-5" data-b2-today-shell="true" data-b3-best-opportunity-readiness="true">
       <div className={`rounded-lg border p-5 md:p-6 ${toneClasses[verdictTone]}`} data-b2-verdict-label={verdict.label}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -412,6 +508,9 @@ export default function TodayDecisionPanel() {
             <SummaryMetric label="Freshness" value={opportunity?.freshness ?? freshness} detail={dateTime(opportunity?.updatedAt, 'Odds update unavailable')} />
             <SummaryMetric label="Data Quality" value={opportunity?.dataQuality ?? 'Not yet available'} />
           </div>
+          <div className="mt-5">
+            <EvidenceGraphics opportunity={normalizedOpportunity} />
+          </div>
         </article>
 
         <aside className="grid gap-4">
@@ -427,10 +526,14 @@ export default function TodayDecisionPanel() {
           </article>
           <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b2-readiness-shell="true">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200">Official Pick Readiness</p>
-            <h3 className="mt-2 text-2xl font-black text-white">{opportunity?.status === 'official' ? 'Official' : 'Not Official'}</h3>
+            <h3 className="mt-2 text-2xl font-black text-white">{readiness.status === 'OFFICIAL' ? 'Official' : readiness.status === 'NO_OPPORTUNITY' ? 'No Opportunity' : 'Not Official'}</h3>
             <p className="mt-2 text-sm leading-6 text-slate-400">
-              Structured gate progress is deferred to B3. Current blocker context: {opportunity?.status === 'official' ? 'all existing policy gates passed' : opportunity?.reason ?? 'no structured gate rows available'}.
+              Structured gate progress was deferred to B3 and is now shown from existing evidence. {readiness.summary}
             </p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              Current blocker context: {readiness.blockerSummary}
+            </p>
+            <ReadinessRows readiness={readiness} />
           </article>
         </aside>
       </div>

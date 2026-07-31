@@ -2,6 +2,15 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-07-31 Pick Analyzer V2 Phase B3 Best Opportunity Readiness
+
+- Completed the bounded B3 presentation phase for Today. The Best Opportunity now has a normalized view-model helper and the Official Pick Readiness panel exposes structured gate rows with `PASS`, `FAIL`, `PENDING`, `NOT_APPLICABLE` and `NOT_AVAILABLE` states.
+- Source priority remains existing evidence only: Official Pick, Best Value selector, highest ranked priced selector, Most Likely selector, highest projected selector, grounded opportunity and then no-opportunity. No pick is fabricated.
+- Readiness counts include only known applicable gates and report unavailable gates separately. B3 does not reconstruct policy thresholds in the UI when the existing contract does not prove them.
+- Added compact probability-vs-implied, edge/EV and freshness/data-quality evidence graphics. Missing edge or EV remains unavailable and is not coerced to zero.
+- Validation passed: B3 validator 26/26, B2 validator 35/35, A2-A6 validators, unsupported-market policy validator 19/19, route/artifact consistency validator 14/14, JSON parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` with 386 generated static pages. No local server smoke was run.
+- No API contract change, service contract change, provider call, provider credit, database read expansion, mutation, prediction write, result write, settlement write, learning write, model change, threshold change or Official Pick policy change was introduced.
+
 ## 2026-07-30 Pick Analyzer V1 Final Certification
 
 - Declared final V1 verdict `PICK_ANALYZER_V1_READY` after Phases 1 through 6 passed and Phase 7 remained deferred under Post-V1 change control.

@@ -1,0 +1,133 @@
+{
+  "phase": "V2_PHASE_B3_BEST_OPPORTUNITY_NORMALIZATION_AND_OFFICIAL_PICK_READINESS",
+  "generatedAt": "2026-07-31T00:00:00.000Z",
+  "baselineCommit": "8029ebae734cb53940e34389a25fe06a7f6fa702",
+  "productObjective": "Normalize the Today Best Opportunity presentation and expose structured Official Pick Readiness using only existing evidence.",
+  "filesChanged": [
+    "src/components/dashboard/TodayDecisionPanel.tsx",
+    "src/components/dashboard/today-opportunity-readiness.ts",
+    "docs/PICK_ANALYZER_V2_PHASE_B3_BEST_OPPORTUNITY_READINESS.md",
+    "docs/pick-analyzer-v2-phase-b3-best-opportunity-readiness.json",
+    "scripts/pick-analyzer-v2-phase-b3-best-opportunity-readiness-validate.mjs"
+  ],
+  "normalizedBestOpportunityContract": [
+    "opportunityId",
+    "sport",
+    "eventId",
+    "eventLabel",
+    "startTime",
+    "selection",
+    "market",
+    "side",
+    "odds",
+    "oddsFormat",
+    "sportsbook",
+    "modelProbability",
+    "impliedProbability",
+    "confidence",
+    "edge",
+    "expectedValue",
+    "freshnessStatus",
+    "freshnessTimestamp",
+    "dataQualityStatus",
+    "dataQualityScore",
+    "recommendationStatus",
+    "officialPick",
+    "officialPickReason",
+    "blockers",
+    "warnings",
+    "supportingReasons",
+    "source",
+    "provenance",
+    "updatedAt"
+  ],
+  "sourcePriority": [
+    "sections.officialPicks.data[0] when officialPicks > 0",
+    "viewModel.selectors.bestAvailableValue",
+    "viewModel.selectors.highestRankedPricedMarket",
+    "viewModel.selectors.mostLikelySummary.selector",
+    "viewModel.selectors.highestProjectedOutcome",
+    "sections.groundedOpportunities.data[0]",
+    "No opportunity"
+  ],
+  "readinessGateStates": [
+    "PASS",
+    "FAIL",
+    "PENDING",
+    "NOT_APPLICABLE",
+    "NOT_AVAILABLE"
+  ],
+  "readinessGates": [
+    "sport_certification",
+    "market_support",
+    "pregame_eligibility",
+    "odds_availability",
+    "odds_freshness",
+    "probability_availability",
+    "confidence_threshold",
+    "edge_threshold",
+    "ev_threshold",
+    "data_quality_threshold",
+    "policy_blocker_absence",
+    "official_recommendation_eligibility"
+  ],
+  "countingRules": {
+    "denominator": "Known applicable rows only: PASS, FAIL and PENDING. NOT_APPLICABLE and NOT_AVAILABLE are excluded from the known denominator.",
+    "notAvailable": "NOT_AVAILABLE rows are reported separately and never counted as PASS.",
+    "partialVerdict": "If any required policy result is unavailable from the current contract, the readiness status is partial unless the existing production policy already marks the opportunity official."
+  },
+  "graphics": {
+    "probabilityVsImplied": "Rendered only when both modelProbability and impliedProbability are available.",
+    "edgeEv": "Shows positive, neutral, negative or unavailable state; missing values are not treated as zero.",
+    "freshnessDataQuality": "Displays freshnessStatus and dataQualityStatus from normalized evidence."
+  },
+  "todayIntegration": {
+    "usesExistingApi": "/api/dashboard/today",
+    "apiContractChanged": false,
+    "serviceContractChanged": false,
+    "localServerSmoke": false,
+    "readinessRowsExpandable": true,
+    "advancedRemainsCollapsed": true
+  },
+  "validation": {
+    "b3Validator": "PASS_26_OF_26",
+    "b2Validator": "PASS_35_OF_35",
+    "a2Validator": "PASS",
+    "a3Validator": "PASS_39_OF_39",
+    "a4Validator": "PASS_57_OF_57",
+    "a5Validator": "PASS_46_OF_46",
+    "a6Validator": "PASS_37_OF_37",
+    "unsupportedMarketPolicyValidator": "PASS_19_OF_19",
+    "routeArtifactConsistencyValidator": "PASS_14_OF_14",
+    "jsonArtifactParsing": "PASS",
+    "changedFileEslint": "PASS",
+    "gitDiffCheck": "PASS",
+    "targetedSecretScan": "PASS",
+    "build": "PASS_386_STATIC_PAGES",
+    "localServerSmoke": "NOT_RUN"
+  },
+  "safety": {
+    "providerCallsMade": 0,
+    "providerCreditsConsumed": 0,
+    "databaseReadsAdded": 0,
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "businessRuleChanges": 0,
+    "officialPickPolicyChanged": false,
+    "recommendationThresholdsChanged": false,
+    "probabilityFormulaChanged": false,
+    "edgeFormulaChanged": false,
+    "evFormulaChanged": false
+  },
+  "deferredWork": {
+    "B4": "Unified Opportunities tabs and taxonomy.",
+    "B5": "AI Conviction, Actionability and What Would Change My Mind presentation models.",
+    "B6": "Mobile decision experience refinement.",
+    "B7": "Performance trust integration.",
+    "B8": "Operations/admin separation."
+  },
+  "finalVerdict": "PICK_ANALYZER_V2_PHASE_B3_BEST_OPPORTUNITY_READINESS_PASS"
+}
