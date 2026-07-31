@@ -287,7 +287,7 @@ Phase B5 adds the MLB Market Data Foundation V2 readiness contract. It preserves
 
 Status: Complete and production-certified.
 
-Evidence: `docs/releases/PLATFORM_CERTIFIED_V1.md`, `docs/PLATFORM_LOCK_POLICY.md`, `docs/PLATFORM_ROLLBACK_RUNBOOK.md`, `docs/releases/v1.0-platform-certified.json`, production `/api/system/version`, `/api/operations/status`, `/api/operations/validation`, `/api/dashboard?mode=today&includeValidation=true`, `/api/current-board?includeValidation=true`, `/api/market-opportunities/most-likely`, `/api/market-opportunities/best-value`, `/api/predictions/settle?dryRun=true`, `/api/performance`, `/api/performance/goals` and `/api/performance/validation`.
+Evidence: `docs/RELEASES/PLATFORM_CERTIFIED_V1.md`, `docs/PLATFORM_LOCK_POLICY.md`, `docs/PLATFORM_ROLLBACK_RUNBOOK.md`, `docs/RELEASES/v1.0-platform-certified.json`, production `/api/system/version`, `/api/operations/status`, `/api/operations/validation`, `/api/dashboard?mode=today&includeValidation=true`, `/api/current-board?includeValidation=true`, `/api/market-opportunities/most-likely`, `/api/market-opportunities/best-value`, `/api/predictions/settle?dryRun=true`, `/api/performance`, `/api/performance/goals` and `/api/performance/validation`.
 
 Note: Product Experience, Dashboard canonical reconciliation, Grounded Opportunities integrity, Settlement dry-run safety, Operations validation, Adaptive odds operations, Production autonomous execution and Performance product contract are complete at the certified baseline. No application behavior or model policy changed during the release-governance documentation phase.
 

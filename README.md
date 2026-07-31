@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pick Analyzer
 
-## Getting Started
+Pick Analyzer is a betting intelligence platform. Its purpose is to improve betting decisions through disciplined recommendations, transparent evidence and protected operational workflows.
 
-First, run the development server:
+Start here:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- [START_HERE.md](START_HERE.md)
+- [Master Program V2](docs/MASTER_PROGRAM/PICK_ANALYZER_MASTER_PROGRAM_V2.md)
+- [Current Release](docs/RELEASES/RELEASE_01_EXECUTION_PLAN.md)
+- [Repository Documentation](docs/README.md)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Repository Overview
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `src/app`: Next.js routes and API endpoints.
+- `src/components`: Product UI surfaces.
+- `src/services`: Decision Core, operations, provider, settlement, learning and performance services.
+- `src/config`: Shared runtime and policy configuration.
+- `scripts`: Bounded validators and operational audit utilities.
+- `docs`: Master Program, release, product, architecture, certification and history documentation.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Decision Core
 
-## Learn More
+Decision Core is the intelligence system behind Pick Analyzer. It evaluates betting opportunities, explains confidence, protects recommendation policy and feeds learning/performance evidence from settled results.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Decision Core must not be bypassed by UI shortcuts, unsupported market promotion, fabricated data or retrospective prediction changes.
