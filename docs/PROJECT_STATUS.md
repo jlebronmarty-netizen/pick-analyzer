@@ -2,6 +2,14 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-07-31 Pick Analyzer V2 Phase B5 AI Decision Explanation
+
+- Completed the bounded B5 presentation phase for Today. The decision cockpit now has deterministic AI Explanation, categorical AI Conviction, distinct Actionability and What Would Change My Mind conditions using the B3 normalized opportunity and readiness evidence.
+- Conviction labels are restricted to `VERY HIGH`, `HIGH`, `MODERATE`, `LOW`, `AVOID` and `UNAVAILABLE`. Actionability states are restricted to `ACT NOW`, `ACTIONABLE`, `REVIEW FIRST`, `WAIT`, `DO NOT ACT` and `UNAVAILABLE`.
+- ACT NOW remains restricted to fresh active Official Pick evidence. Unsupported markets, stale odds, non-positive complete value evidence, missing core evidence and non-official candidates remain conservative.
+- No numeric Conviction score, numeric Actionability score, hidden weighted model, external AI prose, provider call, API contract change, backend service contract change, business-rule change, recommendation-policy change, Official Pick threshold change, prediction formula change, settlement change, learning change or model state change was introduced.
+- Validation passed: B5 validator 27/27, B4 23/23, B3 26/26, B2 35/35, A3 39/39, A4 57/57, A5 46/46, A6 37/37, unsupported-market policy 19/19, route/artifact consistency 14/14, JSON parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` with 386 generated static pages. No local server smoke was run.
+
 ## 2026-07-31 Pick Analyzer V2 Phase B4 Decision Dashboard Experience
 
 - Completed the bounded B4 product-experience phase for Today. The dashboard now presents a premium daily decision cockpit with a large semantic verdict hero, visual Best Opportunity hero, compact Why and Risks cards, readiness progress, visual metrics, limited alternatives, compact Performance Snapshot and mobile bottom navigation.

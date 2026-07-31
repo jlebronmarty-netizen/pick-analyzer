@@ -8,6 +8,12 @@ import {
   type OfficialPickReadiness,
   type ReadinessState,
 } from '@/components/dashboard/today-opportunity-readiness'
+import {
+  buildAiDecisionPresentation,
+  type ActionabilityState,
+  type AiDecisionPresentation,
+  type ConvictionLabel,
+} from '@/components/dashboard/today-ai-decision-presentation'
 
 type Tone = 'green' | 'yellow' | 'blue' | 'red' | 'gray'
 type Verdict = 'BET' | 'REVIEW' | 'WAIT' | 'PASS'
@@ -148,6 +154,24 @@ const toneClasses: Record<Tone, string> = {
   blue: 'border-sky-500/30 bg-sky-500/10 text-sky-100',
   red: 'border-rose-500/30 bg-rose-500/10 text-rose-100',
   gray: 'border-slate-700 bg-slate-900/80 text-slate-100',
+}
+
+const convictionTone: Record<ConvictionLabel, Tone> = {
+  'VERY HIGH': 'green',
+  HIGH: 'green',
+  MODERATE: 'yellow',
+  LOW: 'yellow',
+  AVOID: 'red',
+  UNAVAILABLE: 'gray',
+}
+
+const actionabilityTone: Record<ActionabilityState, Tone> = {
+  'ACT NOW': 'green',
+  ACTIONABLE: 'green',
+  'REVIEW FIRST': 'yellow',
+  WAIT: 'yellow',
+  'DO NOT ACT': 'red',
+  UNAVAILABLE: 'gray',
 }
 
 function Badge({ children, tone = 'gray' }: { children: ReactNode; tone?: Tone }) {
@@ -509,6 +533,79 @@ function InsightGrid({ title, items, tone }: { title: string; items: ReturnType<
   )
 }
 
+function DecisionStatusCards({ decision }: { decision: AiDecisionPresentation }) {
+  const conviction = decision.conviction
+  const actionability = decision.actionability
+  return (
+    <div className="grid gap-4 lg:grid-cols-2" data-b5-conviction-actionability="true">
+      <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b2-conviction-shell="true" data-b5-conviction-card="true">
+        <p className="sr-only">B2 does not create a new conviction formula. B5 keeps Conviction categorical and presentation-only.</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-200">AI Conviction</p>
+            <h3 className="mt-2 text-3xl font-black text-white">{conviction.label}</h3>
+          </div>
+          <Badge tone={convictionTone[conviction.label]}>Categorical</Badge>
+        </div>
+        <div className="mt-4 h-2 rounded-full bg-slate-800" aria-label={`AI Conviction is ${conviction.label}`}>
+          <div className={`h-2 rounded-full ${convictionTone[conviction.label] === 'green' ? 'bg-violet-300' : convictionTone[conviction.label] === 'yellow' ? 'bg-amber-300' : convictionTone[conviction.label] === 'red' ? 'bg-rose-400' : 'bg-slate-500'}`} />
+        </div>
+        <p className="mt-4 text-sm leading-6 text-slate-300">{conviction.rationale}</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {conviction.evidence.map((item) => <Badge key={item} tone="blue">{item}</Badge>)}
+        </div>
+        <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Limiting factor</p>
+        <p className="mt-1 text-sm leading-6 text-slate-400">{conviction.limitingFactor}</p>
+      </article>
+
+      <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b2-actionability-shell="true" data-b5-actionability-card="true">
+        <p className="sr-only">This state is backed by verdict and freshness context plus existing B3 readiness evidence.</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-200">Actionability</p>
+            <h3 className="mt-2 text-3xl font-black text-white">{actionability.state}</h3>
+          </div>
+          <Badge tone={actionabilityTone[actionability.state]}>Now</Badge>
+        </div>
+        <p className="mt-4 text-sm leading-6 text-slate-300">{actionability.rationale}</p>
+        <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Primary blocker</p>
+        <p className="mt-1 text-sm leading-6 text-slate-400">{actionability.primaryBlocker}</p>
+        <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Next review</p>
+        <p className="mt-1 text-sm leading-6 text-slate-400">{actionability.nextReviewAt ? dateTime(actionability.nextReviewAt) : 'No specific review time exposed.'}</p>
+      </article>
+    </div>
+  )
+}
+
+function AiExplanationCard({ decision }: { decision: AiDecisionPresentation }) {
+  return (
+    <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b5-ai-explanation="true">
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-sky-200">AI Explanation</p>
+      <h2 className="mt-2 text-2xl font-black text-white">Decision summary</h2>
+      <p className="mt-3 text-sm leading-6 text-slate-300">{decision.explanation.verdictSummary}</p>
+      <p className="mt-4 text-sm leading-6 text-slate-400">{decision.explanation.officialStatusExplanation}</p>
+    </article>
+  )
+}
+
+function ChangeMindPanel({ decision }: { decision: AiDecisionPresentation }) {
+  return (
+    <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b5-change-mind="true">
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">What Would Change My Mind?</p>
+      <h2 className="mt-2 text-2xl font-black text-white">Observable conditions</h2>
+      <div className="mt-4 space-y-3" role="list" aria-label="Evidence-backed conditions that could change the decision">
+        {decision.changeConditions.map((condition) => (
+          <div key={condition.conditionId} className="rounded-lg border border-slate-800 bg-slate-950/70 p-4" role="listitem">
+            <p className="text-sm font-black text-white">{condition.currentState}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{condition.possibleChange} {condition.expectedEffect}</p>
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{condition.qualifier}</p>
+          </div>
+        ))}
+      </div>
+    </article>
+  )
+}
+
 function ReadinessProgress({ readiness }: { readiness: OfficialPickReadiness }) {
   const percent = readinessPercent(readiness)
   return (
@@ -662,13 +759,28 @@ export default function TodayDecisionPanel() {
   const opportunity = useMemo(() => data ? bestOpportunity(data) : null, [data])
   const normalizedOpportunity = useMemo(() => data ? normalizeBestOpportunity(data) : null, [data])
   const readiness = useMemo(() => buildOfficialPickReadiness(normalizedOpportunity), [normalizedOpportunity])
+  const decisionPresentation = useMemo(() => data ? buildAiDecisionPresentation({
+    opportunity: normalizedOpportunity,
+    readiness,
+    freshnessStatus: data.viewModel?.selectors?.marketFreshnessSummary?.state ?? data.freshness ?? 'unknown',
+    nextActionAt: data.nextActionAt,
+    warnings: data.warnings,
+  }) : null, [data, normalizedOpportunity, readiness])
   const verdict = useMemo(() => data ? verdictFor(data, opportunity) : null, [data, opportunity])
-  const reasons = useMemo(() => data ? reasonList(data, opportunity) : { why: [], risks: [] }, [data, opportunity])
+  const reasons = useMemo(() => {
+    if (decisionPresentation) {
+      return {
+        why: decisionPresentation.explanation.supportingReasons,
+        risks: decisionPresentation.explanation.risks,
+      }
+    }
+    return data ? reasonList(data, opportunity) : { why: [], risks: [] }
+  }, [data, opportunity, decisionPresentation])
   const whyCards = useMemo(() => compactCards(reasons.why, 'why'), [reasons.why])
   const riskCards = useMemo(() => compactCards(reasons.risks, 'risk'), [reasons.risks])
 
   if (loading) return <Skeleton />
-  if (error || !data || !verdict) {
+  if (error || !data || !verdict || !decisionPresentation) {
     return (
       <section className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-6 text-amber-100">
         <p className="text-xs font-black uppercase tracking-[0.24em]">Today unavailable</p>
@@ -752,16 +864,6 @@ export default function TodayDecisionPanel() {
         </article>
 
         <aside className="grid gap-4">
-          <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b2-conviction-shell="true">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-200">AI Conviction</p>
-            <h3 className="mt-2 text-2xl font-black text-white">Presentation shell</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-400">B2 does not create a new conviction formula. B5 will derive categorical conviction from certified fields.</p>
-          </article>
-          <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b2-actionability-shell="true">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-200">Actionability</p>
-            <h3 className="mt-2 text-2xl font-black text-white">{verdict.label === 'WAIT' ? 'WAIT' : verdict.label === 'BET' ? 'ACTIONABLE' : 'REVIEW FIRST'}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-400">This state is backed only by the current verdict and freshness context. Later phases will add a richer presentation model.</p>
-          </article>
           <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5" data-b2-readiness-shell="true">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-200">Official Pick Readiness</p>
             <h3 className="mt-2 text-2xl font-black text-white">{readiness.status === 'OFFICIAL' ? 'Official' : readiness.status === 'NO_OPPORTUNITY' ? 'No Opportunity' : 'Not Official'}</h3>
@@ -779,18 +881,17 @@ export default function TodayDecisionPanel() {
         </aside>
       </div>
 
+      <div className="grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
+        <AiExplanationCard decision={decisionPresentation} />
+        <DecisionStatusCards decision={decisionPresentation} />
+      </div>
+
       <InsightGrid title="Why" items={whyCards} tone="green" />
       <InsightGrid title="Risks" items={riskCards} tone="yellow" />
       <ReadinessProgress readiness={readiness} />
 
       <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
-        <article className="rounded-lg border border-slate-800 bg-slate-900/80 p-5">
-          <h2 className="text-xl font-black text-white">What Would Change My Mind?</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
-            Could improve if stored odds become fresh, missing market evidence appears, or the existing policy blockers clear. This does not promise that an Official Pick will be created.
-          </p>
-          <p className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Next action: {labelize(data.nextAction, 'Waiting for next lifecycle update')}</p>
-        </article>
+        <ChangeMindPanel decision={decisionPresentation} />
         <AlternativesPreview cards={opportunityAlternatives.length ? opportunityAlternatives : alternatives.map(([label, value, href]) => ({
           label,
           title: labelize(value, 'Open full view'),

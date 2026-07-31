@@ -1,0 +1,149 @@
+{
+  "phase": "V2_PHASE_B5_AI_DECISION_EXPLANATION",
+  "generatedAt": "2026-07-31T00:00:00.000Z",
+  "baselineCommit": "a0a4c6032d6bb28389da98f64e1f546a58b54337",
+  "productObjective": "Add deterministic AI explanation, Conviction, Actionability and What Would Change My Mind presentation systems without changing recommendation behavior.",
+  "filesChanged": [
+    "src/components/dashboard/TodayDecisionPanel.tsx",
+    "src/components/dashboard/today-ai-decision-presentation.ts",
+    "docs/PICK_ANALYZER_V2_PHASE_B5_AI_DECISION_EXPLANATION.md",
+    "docs/pick-analyzer-v2-phase-b5-ai-decision-explanation.json",
+    "scripts/pick-analyzer-v2-phase-b5-ai-decision-explanation-validate.mjs",
+    "docs/PROJECT_STATUS.md",
+    "docs/MASTER_ROADMAP.md"
+  ],
+  "inputEvidenceMatrix": [
+    "normalizedBestOpportunity.officialPick",
+    "normalizedBestOpportunity.modelProbability",
+    "normalizedBestOpportunity.impliedProbability",
+    "normalizedBestOpportunity.edge",
+    "normalizedBestOpportunity.expectedValue",
+    "normalizedBestOpportunity.confidence",
+    "normalizedBestOpportunity.freshnessStatus",
+    "normalizedBestOpportunity.dataQualityStatus",
+    "normalizedBestOpportunity.blockers",
+    "normalizedBestOpportunity.warnings",
+    "officialPickReadiness.rows",
+    "officialPickReadiness.status",
+    "today.freshness",
+    "today.nextActionAt",
+    "today.warnings"
+  ],
+  "presentationContract": {
+    "explanation": [
+      "verdictSummary",
+      "supportingReasons",
+      "risks",
+      "officialStatusExplanation"
+    ],
+    "conviction": [
+      "label",
+      "rationale",
+      "evidence",
+      "limitingFactor"
+    ],
+    "actionability": [
+      "state",
+      "rationale",
+      "primaryBlocker",
+      "nextReviewAt"
+    ],
+    "changeConditions": [
+      "conditionId",
+      "currentState",
+      "possibleChange",
+      "expectedEffect",
+      "qualifier"
+    ]
+  },
+  "allowedConvictionLabels": [
+    "VERY HIGH",
+    "HIGH",
+    "MODERATE",
+    "LOW",
+    "AVOID",
+    "UNAVAILABLE"
+  ],
+  "allowedActionabilityStates": [
+    "ACT NOW",
+    "ACTIONABLE",
+    "REVIEW FIRST",
+    "WAIT",
+    "DO NOT ACT",
+    "UNAVAILABLE"
+  ],
+  "convictionRuleOrder": [
+    "missing core evidence -> UNAVAILABLE",
+    "unsupported market or negative value -> AVOID",
+    "official pick with fresh evidence -> VERY HIGH or HIGH",
+    "official pick with freshness limitation -> HIGH",
+    "stale non-official evidence -> MODERATE",
+    "positive value plus probability advantage -> HIGH",
+    "partial positive evidence -> MODERATE",
+    "otherwise -> LOW"
+  ],
+  "actionabilityRuleOrder": [
+    "missing core evidence -> UNAVAILABLE",
+    "unsupported market, invalid pregame state or negative value -> DO NOT ACT",
+    "stale or aging evidence -> WAIT",
+    "fresh Official Pick -> ACT NOW",
+    "certified official readiness -> ACTIONABLE",
+    "otherwise -> REVIEW FIRST"
+  ],
+  "changeConditionRules": [
+    "fresh odds update could improve actionability",
+    "confidence gate clearing could improve readiness",
+    "supported price becoming available could allow value evaluation",
+    "policy blocker resolution could move review-only state stronger",
+    "non-positive value would weaken conviction",
+    "no single observed change fallback"
+  ],
+  "safety": {
+    "businessLogicChanged": false,
+    "recommendationLogicChanged": false,
+    "officialPickPolicyChanged": false,
+    "predictionFormulaChanged": false,
+    "probabilityFormulaChanged": false,
+    "edgeFormulaChanged": false,
+    "evFormulaChanged": false,
+    "confidenceFormulaChanged": false,
+    "trustFormulaChanged": false,
+    "hiddenWeightedScoreIntroduced": false,
+    "numericConvictionScoreIntroduced": false,
+    "numericActionabilityScoreIntroduced": false,
+    "externalAiApiCalls": 0,
+    "providerCallsIntroduced": 0,
+    "providerCreditsConsumed": 0,
+    "databaseReadsAdded": 0,
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "validation": {
+    "b5Validator": "PASS_27_OF_27",
+    "b4Validator": "PASS_23_OF_23",
+    "b3Validator": "PASS_26_OF_26",
+    "b2Validator": "PASS_35_OF_35",
+    "a3Validator": "PASS_39_OF_39",
+    "a4Validator": "PASS_57_OF_57",
+    "a5Validator": "PASS_46_OF_46",
+    "a6Validator": "PASS_37_OF_37",
+    "officialPickPolicyValidator": "COVERED_BY_UNSUPPORTED_MARKET_POLICY_LOCK_PASS_19_OF_19",
+    "unsupportedMarketPolicyValidator": "PASS_19_OF_19",
+    "routeArtifactConsistencyValidator": "PASS_14_OF_14",
+    "jsonValidation": "PASS",
+    "eslint": "PASS",
+    "gitDiffCheck": "PASS",
+    "targetedSecretScan": "PASS",
+    "build": "PASS_386_STATIC_PAGES",
+    "localServerSmoke": "NOT_RUN"
+  },
+  "deferredWork": {
+    "B6": "Mobile decision experience refinement.",
+    "B7": "Performance trust integration.",
+    "B8": "Operations/admin separation."
+  },
+  "finalVerdict": "PICK_ANALYZER_V2_PHASE_B5_AI_DECISION_EXPLANATION_PASS"
+}
