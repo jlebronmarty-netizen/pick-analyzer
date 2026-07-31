@@ -160,7 +160,11 @@ export async function GET(request: NextRequest) {
     const includeFullDiagnostics = request.nextUrl.searchParams.get('diagnostics') === 'full' || request.nextUrl.searchParams.get('includeDiagnostics') === 'full'
     const [data, product] = await Promise.all([
       includeFullDiagnostics ? getAiPerformanceCenterLazy({ sportKey, dryRun: true }) : Promise.resolve(null),
-      getPerformanceProductContract({ sportKey }),
+      getPerformanceProductContract({
+        sportKey,
+        includeHistoryRows: includeFullDiagnostics,
+        maxPredictionRows: includeFullDiagnostics ? 5000 : 2000,
+      }),
     ])
     const selectedReport = product.reportCards.selected
     const selectedMetrics = selectedReport.metrics
@@ -216,11 +220,12 @@ export async function GET(request: NextRequest) {
         rawDiagnostics: {
           ...(data?.aiBrain?.internalView?.rawDiagnostics ?? {}),
           responseMode: includeFullDiagnostics ? 'full_diagnostics' : 'product_summary',
-          historyPagination: data?.aiBrain?.internalView?.rawDiagnostics?.historyPagination ?? {
-            rowsRead: product.performanceScopeV2.totals.generated,
-            pagesRead: Math.ceil(product.performanceScopeV2.totals.generated / 1000),
-            capApplied: false,
-          },
+          historyPagination: data?.aiBrain?.internalView?.rawDiagnostics?.historyPagination ??
+            product.performanceScopeV2.queryDiagnostics?.predictionHistory ?? {
+              rowsRead: product.performanceScopeV2.totals.generated,
+              pagesRead: Math.ceil(product.performanceScopeV2.totals.generated / 1000),
+              capApplied: false,
+            },
           productScope: product.scopePolicy,
           userModeRawCodes: {
             selectedTrustStatus: selectedTrust.trustStatus,

@@ -307,8 +307,16 @@ function emptyMetrics(label = 'No settled production predictions'): TimelineMetr
   }
 }
 
-export async function getPerformanceProductContract({ sportKey }: { sportKey?: string | null } = {}) {
-  const scope = await getPerformanceScopeV2({ sportKey })
+export async function getPerformanceProductContract({
+  sportKey,
+  includeHistoryRows = false,
+  maxPredictionRows,
+}: {
+  sportKey?: string | null
+  includeHistoryRows?: boolean
+  maxPredictionRows?: number
+} = {}) {
+  const scope = await getPerformanceScopeV2({ sportKey, includeHistoryRows, maxPredictionRows })
   const season = scope.timeline.season
   const today = scope.timeline.today
   const selectedTrust = trustFrom(season)

@@ -1,0 +1,371 @@
+{
+  "generatedAt": "2026-07-31T00:22:08.121Z",
+  "startingCommit": "aff9f9e98f416d429c3d603ffd70139b4a803e4f",
+  "success": true,
+  "checks": 46,
+  "passed": 46,
+  "failed": 0,
+  "failedChecks": [],
+  "criticalQueryMatrix": [
+    {
+      "route": "/api/performance",
+      "service": "getPerformanceProductContract -> getPerformanceScopeV2",
+      "criticality": "P1 core product page API",
+      "dataSource": "Supabase read-only",
+      "tablesOrViews": [
+        "prediction_history",
+        "sport_events"
+      ],
+      "queryCount": "2 plus scheduler coverage helper",
+      "execution": "scheduler coverage and prediction read in parallel; event read after bounded prediction ids",
+      "selectedColumns": "explicit projection",
+      "rowBounds": "prediction_history max 2000 default; sport_events batched by unique ids",
+      "ordering": "prediction_history created_at desc",
+      "filters": "optional sport_key; product eligibility in application",
+      "pagination": "bounded default summary; full history not returned by default",
+      "aggregationLocation": "application memory over bounded rows",
+      "duplicateQueries": "none proven after compact default repair",
+      "nPlusOneRisk": "bounded batched sport_events in groups of 100; no per-row query",
+      "cacheBehavior": "no-store dynamic product API",
+      "timeoutBehavior": "bounded query count and row cap; route error returns JSON",
+      "observedProductionLatencyMs": [
+        4257,
+        4220,
+        4227
+      ],
+      "observedPayloadBytes": 717617,
+      "defect": "Default summary route read paginated prediction_history until exhaustion and returned full historyRows.",
+      "severity": "P1",
+      "repair": "Bound prediction_history reads and make full historyRows opt-in for diagnostics/full history route.",
+      "validationMethod": "static validator, build, production before/after measurement"
+    },
+    {
+      "route": "/api/performance/history",
+      "service": "getPerformanceScopeV2",
+      "criticality": "P2 paginated supporting API",
+      "dataSource": "Supabase read-only",
+      "tablesOrViews": [
+        "prediction_history",
+        "sport_events"
+      ],
+      "queryCount": "2 plus scheduler coverage helper",
+      "execution": "bounded prediction read then batched event lookup",
+      "selectedColumns": "explicit projection",
+      "rowBounds": "prediction_history max 5000; response page limit max 100",
+      "ordering": "prediction_history created_at desc",
+      "filters": "sport/category/model/status/mode/confidence filters after bounded read",
+      "pagination": "request page/limit with max 100 rows returned",
+      "aggregationLocation": "application memory over bounded rows",
+      "duplicateQueries": "none proven in route",
+      "nPlusOneRisk": "no per-row DB calls",
+      "cacheBehavior": "client fetch no-store",
+      "timeoutBehavior": "bounded query count and row cap; route error returns JSON",
+      "observedProductionLatencyMs": [
+        3586,
+        3348,
+        3360
+      ],
+      "observedPayloadBytes": 135787,
+      "defect": "History route depended on the same unbounded scope reader.",
+      "severity": "P2",
+      "repair": "Explicit 5000-row cap plus page limit max 100.",
+      "validationMethod": "static validator and build"
+    },
+    {
+      "route": "/api/dashboard/today",
+      "service": "getDashboardToday",
+      "criticality": "P1 core dashboard API",
+      "dataSource": "Supabase and stored service summaries",
+      "tablesOrViews": [
+        "sport_events",
+        "prediction_history",
+        "sports_odds_snapshots"
+      ],
+      "queryCount": "parallel dependency bundle plus bounded optional fallbacks",
+      "execution": "independent dependencies in Promise.all; optional follow-up reads timed",
+      "selectedColumns": "explicit projections",
+      "rowBounds": "current board 100, fallback slate 64, grounded predictions 200, odds snapshots 1000",
+      "ordering": "start_time or generated_at where relevant",
+      "filters": "sport, league, operating date, event ids",
+      "pagination": "summary route only",
+      "aggregationLocation": "application over bounded current slate",
+      "duplicateQueries": "none repaired in A5",
+      "nPlusOneRisk": "no per-row DB calls in audited path",
+      "cacheBehavior": "no-store",
+      "timeoutBehavior": "timed helper around critical and optional dependencies",
+      "observedProductionLatencyMs": [
+        4227,
+        3682,
+        3562
+      ],
+      "observedPayloadBytes": 541124,
+      "defect": "large payload observed, but query bounds/timeouts already present; no scoped repair made",
+      "severity": "NONE",
+      "repair": "none",
+      "validationMethod": "static query-shape audit"
+    },
+    {
+      "route": "/api/data-coverage/final-certification",
+      "service": "multi-sport final certification",
+      "criticality": "P1 operational certification API",
+      "dataSource": "stored coverage summaries",
+      "tablesOrViews": [
+        "stored data coverage inventory"
+      ],
+      "queryCount": "service-managed summary by default",
+      "execution": "default summary; diagnostics=full opt-in",
+      "selectedColumns": "service managed",
+      "rowBounds": "summary default; full diagnostics not default",
+      "ordering": "service managed",
+      "filters": "diagnostics mode",
+      "pagination": "summary default",
+      "aggregationLocation": "service",
+      "duplicateQueries": "not proven",
+      "nPlusOneRisk": "not proven",
+      "cacheBehavior": "dynamic no revalidate",
+      "timeoutBehavior": "route-level error contract",
+      "observedProductionLatencyMs": [
+        23203,
+        30155,
+        27769
+      ],
+      "observedPayloadBytes": 6802,
+      "defect": "slow production latency observed, but default route already avoids full diagnostics; no query-level defect proven without DB EXPLAIN",
+      "severity": "DEFERRED",
+      "repair": "defer specific optimization until service query evidence is available",
+      "validationMethod": "static route mode audit and production evidence"
+    },
+    {
+      "route": "/api/probability-picks",
+      "service": "getProbabilityPicks",
+      "criticality": "P1 pick-discovery API",
+      "dataSource": "stored predictions/projections",
+      "tablesOrViews": [
+        "service managed"
+      ],
+      "queryCount": "service managed",
+      "execution": "bounded route limit",
+      "selectedColumns": "service managed",
+      "rowBounds": "limit max 500",
+      "ordering": "request sort allowlist",
+      "filters": "sport/market/probability/confidence/quality/freshness/date",
+      "pagination": "bounded summary",
+      "aggregationLocation": "service",
+      "duplicateQueries": "not proven",
+      "nPlusOneRisk": "not proven",
+      "cacheBehavior": "client no-store",
+      "timeoutBehavior": "route error contract",
+      "observedProductionLatencyMs": [
+        5676,
+        1212,
+        806
+      ],
+      "observedPayloadBytes": 174993,
+      "defect": "none proven; route limit exists",
+      "severity": "NONE",
+      "repair": "none",
+      "validationMethod": "static route bound audit"
+    },
+    {
+      "route": "/api/market-opportunities/most-likely",
+      "service": "getMostLikelyOpportunities",
+      "criticality": "P1 opportunity API",
+      "dataSource": "current board service",
+      "tablesOrViews": [
+        "service managed"
+      ],
+      "queryCount": "service managed",
+      "execution": "bounded route limit",
+      "selectedColumns": "service managed",
+      "rowBounds": "limit max 100",
+      "ordering": "sort allowlist",
+      "filters": "mode allowlist",
+      "pagination": "bounded summary",
+      "aggregationLocation": "service",
+      "duplicateQueries": "not proven",
+      "nPlusOneRisk": "not proven",
+      "cacheBehavior": "client no-store",
+      "timeoutBehavior": "route error contract",
+      "observedProductionLatencyMs": [
+        6370,
+        2012,
+        1419
+      ],
+      "observedPayloadBytes": 262618,
+      "defect": "none proven; bounded route limit exists",
+      "severity": "NONE",
+      "repair": "none",
+      "validationMethod": "static route bound audit"
+    }
+  ],
+  "queryFindings": [
+    "Performance default summary had the only proven unbounded critical read in the audited scope.",
+    "Dashboard Today, probability picks, most-likely and best-value already expose bounded route/query behavior where statically provable."
+  ],
+  "latencyFindings": [
+    "Before repair, production /api/performance returned about 718 KB and took about 4.2 seconds across three reads.",
+    "Data coverage final certification remains slow in production, but the default route already uses summary mode and needs query-plan evidence before further repair."
+  ],
+  "payloadFindings": [
+    "Default performance summary carried full historyRows despite the UI using /api/performance/history for paginated rows.",
+    "The A5 repair keeps historyPreview and query diagnostics while returning no full historyRows on default summary mode."
+  ],
+  "timeoutFindings": [
+    "Dashboard Today already uses a timed helper for critical and optional dependencies.",
+    "Performance risk was unbounded work rather than a missing local server timeout; the repair creates deterministic row caps."
+  ],
+  "cacheFindings": [
+    "Audited core routes remain dynamic/no-store or client no-store; no broad cache platform was introduced."
+  ],
+  "databaseIndexFindings": [
+    "No index migration was added. A prediction_history sport_key plus created_at desc query path may be a future candidate only with EXPLAIN evidence."
+  ],
+  "defects": [
+    {
+      "severity": "P1",
+      "area": "/api/performance default product summary",
+      "defect": "Default performance summary read prediction_history until exhaustion and returned full historyRows even when diagnostics were not requested.",
+      "repair": "Added bounded prediction_history reads and compact default mode that omits full historyRows unless full diagnostics are requested."
+    },
+    {
+      "severity": "P2",
+      "area": "/api/performance/history supporting API",
+      "defect": "Paginated history route depended on the same unbounded performance scope reader.",
+      "repair": "History route now requests an explicit 5000-row read budget and keeps page size capped at 100."
+    }
+  ],
+  "providerCallsMade": 0,
+  "providerCreditsConsumed": 0,
+  "databaseReads": "production read-only endpoint observations plus local static file reads; no direct production database mutation",
+  "databaseMutations": 0,
+  "predictionWrites": 0,
+  "resultWrites": 0,
+  "settlementWrites": 0,
+  "learningWrites": 0,
+  "productionEvidence": {
+    "before": [
+      {
+        "route": "/api/dashboard/today",
+        "attempts": 3,
+        "http": 200,
+        "latencyMs": [
+          4227,
+          3682,
+          3562
+        ],
+        "bytes": 541124,
+        "semantic": "AVAILABLE",
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0
+      },
+      {
+        "route": "/api/performance",
+        "attempts": 3,
+        "http": 200,
+        "latencyMs": [
+          4257,
+          4220,
+          4227
+        ],
+        "bytes": 717617,
+        "semantic": "SUCCESS",
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0
+      },
+      {
+        "route": "/api/performance/history?limit=25&page=1",
+        "attempts": 3,
+        "http": 200,
+        "latencyMs": [
+          3586,
+          3348,
+          3360
+        ],
+        "bytes": 135787,
+        "semantic": "SUCCESS",
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0
+      },
+      {
+        "route": "/api/operations/health",
+        "attempts": 3,
+        "http": 200,
+        "latencyMs": [
+          6613,
+          15690,
+          6924
+        ],
+        "bytes": 747390,
+        "semantic": "DEGRADED",
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0
+      },
+      {
+        "route": "/api/operations/data-freshness",
+        "attempts": 3,
+        "http": 200,
+        "latencyMs": [
+          5045,
+          5000,
+          4996
+        ],
+        "bytes": 10792,
+        "semantic": "PARTIAL",
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0
+      },
+      {
+        "route": "/api/data-coverage/final-certification",
+        "attempts": 3,
+        "http": 200,
+        "latencyMs": [
+          23203,
+          30155,
+          27769
+        ],
+        "bytes": 6802,
+        "semantic": "summary",
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0
+      },
+      {
+        "route": "/api/probability-picks",
+        "attempts": 3,
+        "http": 200,
+        "latencyMs": [
+          5676,
+          1212,
+          806
+        ],
+        "bytes": 174993,
+        "semantic": "available",
+        "providerCallsMade": 0,
+        "remoteMutationsMade": 0
+      }
+    ],
+    "afterLocalStatic": {
+      "defaultPerformanceHistoryRowsReturned": 0,
+      "defaultPerformancePredictionHistoryRowLimit": 2000,
+      "fullDiagnosticsPredictionHistoryRowLimit": 5000,
+      "historyRoutePredictionHistoryRowLimit": 5000
+    }
+  },
+  "remainingRisks": [
+    "Static validation cannot prove PostgreSQL planner choices without authorized EXPLAIN access.",
+    "Several operations/data-coverage diagnostic endpoints remain slow but need narrower query evidence before repair."
+  ],
+  "deferredIndexCandidates": [
+    {
+      "table": "prediction_history",
+      "pattern": "optional sport_key filter ordered by created_at desc for performance summary/history",
+      "reasonDeferred": "No production EXPLAIN access authorized in A5; no speculative migration added."
+    }
+  ],
+  "certification": {
+    "PICK_ANALYZER_V2_PHASE_A5_API_QUERY_PERFORMANCE_PASS": true,
+    "NO_PROVIDER_CALL_PASS": true,
+    "NO_PROVIDER_CREDIT_PASS": true,
+    "NO_DATABASE_MUTATION_PASS": true,
+    "NO_SPECULATIVE_INDEX_PASS": true
+  }
+}

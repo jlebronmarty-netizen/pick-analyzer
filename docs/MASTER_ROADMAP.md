@@ -3057,3 +3057,19 @@ Validation: `node scripts/pick-analyzer-v2-phase-a4-ui-state-validate.mjs --time
 Completion criteria: `PICK_ANALYZER_V2_PHASE_A4_UI_STATE_PASS`, `UI_LIFECYCLE_LABEL_PASS`, `LOADING_EMPTY_ERROR_STATE_PASS`, `UNSUPPORTED_MARKET_UI_GUARD_PASS`, `NO_PROVIDER_CALL_PASS`, `NO_PROVIDER_CREDIT_PASS`, `NO_DATABASE_MUTATION_PASS`, `NO_PREDICTION_WRITE_PASS`, `NO_RESULT_WRITE_PASS`, `NO_SETTLEMENT_WRITE_PASS` and `NO_LEARNING_WRITE_PASS` are certified locally pending push and automatic deployment verification.
 
 Next bounded phase: A5 Database-query and API performance. Do not start A5 until A4 production certification is complete.
+
+### 62. Pick Analyzer V2 Phase A5 API Query Performance
+
+Objective: Certify bounded query behavior, compact default API responses and predictable failure handling on core read-heavy product paths before build-memory reliability work begins.
+
+Status: Complete locally pending push and production certification because runtime API/service files changed.
+
+Scope: Bounded audit of `/api/dashboard/today`, `/api/performance`, `/api/performance/history`, `/api/operations/health`, `/api/operations/data-freshness`, `/api/operations/mlb-autonomous-operations`, `/api/data-coverage/health`, `/api/data-coverage/final-certification`, `/api/probability-picks`, `/api/market-opportunities/most-likely`, `/api/market-opportunities/best-value`, `/api/current-board`, Sports Center support APIs, Model Health summary APIs and Provider summary APIs.
+
+Repair: Performance summary queries now have deterministic prediction-history row caps and compact default response behavior. Default `/api/performance` no longer materializes or returns full `historyRows` unless full diagnostics are requested. `/api/performance/history` remains paginated and explicitly bounded.
+
+Validation: `node scripts/pick-analyzer-v2-phase-a5-api-query-performance-validate.mjs --timeoutMs=30000` passed 46/46 locally. A2 route/runtime, A3 scheduler/freshness, A4 UI-state, release-candidate route/artifact consistency, unsupported-market policy, JSON parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` passed. Build generated 386 static pages.
+
+Completion criteria: `PICK_ANALYZER_V2_PHASE_A5_API_QUERY_PERFORMANCE_PASS`, bounded critical-query matrix, no proven unbounded critical summary query, no proven N+1 defect on audited core paths, provider-free and mutation-free read-only routes, no speculative schema migration, passing validators, passing build and production certification after deployment.
+
+Next bounded phase: A6 Build-memory and production-build reliability. Do not start A6 until A5 production certification is complete.

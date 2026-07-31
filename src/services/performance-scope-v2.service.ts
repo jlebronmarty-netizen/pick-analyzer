@@ -12,6 +12,14 @@ import {
 } from '@/services/canonical-settlement-state.service'
 
 const TIMEZONE = 'America/Puerto_Rico'
+const DEFAULT_MAX_PREDICTION_ROWS = 2000
+const DEFAULT_HISTORY_PREVIEW_ROWS = 200
+
+type PerformanceScopeOptions = {
+  sportKey?: string | null
+  maxPredictionRows?: number
+  includeHistoryRows?: boolean
+}
 
 type PredictionRow = {
   id: string
@@ -147,21 +155,43 @@ function metrics(rows: Array<{ row: PredictionRow; event?: EventRow }>) {
   }
 }
 
-async function loadRows(sportKey?: string | null) {
+function boundedRowLimit(value: number | null | undefined) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed)
+    ? Math.max(1, Math.min(10000, Math.floor(parsed)))
+    : DEFAULT_MAX_PREDICTION_ROWS
+}
+
+async function loadRows(sportKey?: string | null, maxRows = DEFAULT_MAX_PREDICTION_ROWS) {
   const rows: PredictionRow[] = []
-  for (let from = 0; ; from += 1000) {
+  const rowLimit = boundedRowLimit(maxRows)
+  let capApplied = false
+  for (let from = 0; from < rowLimit; from += 1000) {
+    const pageSize = Math.min(1000, rowLimit - from)
     let query = supabaseAdmin
       .from('prediction_history')
       .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, line, result, status, lifecycle_status, recommended_pick, production_eligible, trial, scrambled, validation_status, validation_warnings, model_role, model_version, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key, generated_at, created_at, cutoff_at, settled_at, settlement_details, is_current')
       .order('created_at', { ascending: false })
-      .range(from, from + 999)
+      .range(from, from + pageSize - 1)
     if (sportKey) query = query.eq('sport_key', sportKey)
     const { data, error } = await query
     if (error) throw new Error(`performance scope v2 prediction read failed: ${error.message}`)
     rows.push(...((data ?? []) as PredictionRow[]))
-    if (!data || data.length < 1000) break
+    if (!data || data.length < pageSize) break
+    if (rows.length >= rowLimit) {
+      capApplied = true
+      break
+    }
   }
-  return rows
+  return {
+    rows,
+    pagination: {
+      rowsRead: rows.length,
+      rowLimit,
+      pagesRead: Math.ceil(rows.length / 1000),
+      capApplied,
+    },
+  }
 }
 
 async function loadEvents(eventIds: string[]) {
@@ -177,16 +207,21 @@ async function loadEvents(eventIds: string[]) {
   return new Map(rows.map((event) => [event.id, event]))
 }
 
-export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | null } = {}) {
-  const [schedulerCoverage, rows] = await Promise.all([
+export async function getPerformanceScopeV2({
+  sportKey,
+  maxPredictionRows = DEFAULT_MAX_PREDICTION_ROWS,
+  includeHistoryRows = true,
+}: PerformanceScopeOptions = {}) {
+  const [schedulerCoverage, rowLoad] = await Promise.all([
     getPregameSchedulerCoverage().catch((error) => ({
       success: false,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
       error: error instanceof Error ? error.message : 'pregame scheduler coverage read failed',
     })),
-    loadRows(sportKey),
+    loadRows(sportKey, maxPredictionRows),
   ])
+  const rows = rowLoad.rows
   const events = await loadEvents(Array.from(new Set(rows.map((row) => row.game_id).filter(Boolean))) as string[])
   const joined = rows.map((row) => ({ row, event: row.game_id ? events.get(row.game_id) : undefined }))
   const productHistory = joined.filter((item) => eligibility(item.row, item.event).eligible)
@@ -221,6 +256,18 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
       pushHandling: 'pushes_count_as_settled_but_are_excluded_from_win_loss_accuracy_and_brier_scoring',
       exclusions: ['LEGACY', 'TEST_FIXTURE', 'PREDICTION_POST_START', 'DUPLICATE_SUPERSEDED'],
       separatedContexts: ['market_predictions', 'official_picks', 'model_only_predictions', 'shadow_predictions'],
+      boundedRead: {
+        source: 'prediction_history',
+        orderedBy: 'created_at_desc',
+        rowLimit: rowLoad.pagination.rowLimit,
+        capApplied: rowLoad.pagination.capApplied,
+        fullHistoryRowsReturned: includeHistoryRows,
+      },
+    },
+    queryDiagnostics: {
+      predictionHistory: rowLoad.pagination,
+      historyPreviewRows: Math.min(DEFAULT_HISTORY_PREVIEW_ROWS, productHistory.length),
+      historyRowsReturned: includeHistoryRows ? productHistory.length : 0,
     },
     totals: metrics(joined),
     exclusions: groupCount(joined, (item) => eligibility(item.row, item.event).reason),
@@ -245,7 +292,7 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
     },
     timeline: Object.fromEntries(periods.map((period) => [period.key, { label: period.label, ...metrics(period.rows) }])),
     historyEligibleIds: productHistory.map((item) => item.row.id),
-    historyRows: productHistory.map((item) => {
+    historyRows: includeHistoryRows ? productHistory.map((item) => {
       const result = resultOf(item.row)
       const badge = lifecycleBadge(item.row, item.event)
       return {
@@ -280,8 +327,8 @@ export async function getPerformanceScopeV2({ sportKey }: { sportKey?: string | 
         outcomeExplanation: badge,
         cutoff: classifyPredictionCutoff(item.row, item.event),
       }
-    }),
-    historyPreview: productHistory.slice(0, 200).map((item) => ({
+    }) : [],
+    historyPreview: productHistory.slice(0, DEFAULT_HISTORY_PREVIEW_ROWS).map((item) => ({
       id: item.row.id,
       eventDate: astDate(item.row.commence_time ?? item.event?.start_time ?? item.row.generated_at),
       matchup: `${item.event?.away_team ?? item.row.away_team ?? 'Away'} @ ${item.event?.home_team ?? item.row.home_team ?? 'Home'}`,

@@ -1,24 +1,73 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPerformanceScopeV2 } from '@/services/performance-scope-v2.service'
 
+type PerformanceHistoryRow = {
+  id?: string
+  timestamp?: string | null
+  generatedAt?: string | null
+  generated_at?: string | null
+  sport?: string | null
+  league?: string | null
+  matchup?: string | null
+  prediction?: string | null
+  probability?: number | null
+  confidence?: number | null
+  modelVersion?: string | null
+  category?: string | null
+  result?: string | null
+  lifecycleBadge?: string | null
+  actualResult?: string | null
+  correct?: boolean | null
+  probabilityError?: number | null
+  brierContribution?: number | null
+  push?: boolean | null
+  pending?: boolean | null
+  official?: boolean | null
+  shadow?: boolean | null
+  missingData?: unknown
+  settlement?: {
+    settledAt?: string | null
+    details?: {
+      source?: unknown
+      settlementSource?: unknown
+      reason?: unknown
+      settlementReason?: unknown
+      version?: unknown
+      settlementVersion?: unknown
+    } | null
+  } | null
+  outcomeExplanation?: string | null
+  featureSnapshot?: {
+    featureQualityScore?: unknown
+    feature_quality?: unknown
+    featureQuality?: unknown
+    dataSufficiencyScore?: unknown
+    data_sufficiency?: unknown
+    dataSufficiency?: unknown
+    leakageStatus?: unknown
+    leakage_status?: unknown
+    modelVersion?: unknown
+  } | null
+}
+
 function boundedInteger(value: string | null, fallback: number, min: number, max: number) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? Math.max(min, Math.min(max, Math.floor(parsed))) : fallback
 }
 
-function probabilityError(row: Record<string, any>) {
+function probabilityError(row: PerformanceHistoryRow) {
   const probability = Number(row.probability)
   if (row.correct === null || row.correct === undefined || !Number.isFinite(probability)) return null
   return Number((row.correct ? 100 - probability : probability).toFixed(2))
 }
 
-function brierContribution(row: Record<string, any>) {
+function brierContribution(row: PerformanceHistoryRow) {
   const probability = Number(row.probability)
   if (row.correct === null || row.correct === undefined || !Number.isFinite(probability)) return null
   return Number((((probability / 100) - (row.correct ? 1 : 0)) ** 2).toFixed(4))
 }
 
-function sanitizeHistoryRow(row: Record<string, any>) {
+function sanitizeHistoryRow(row: PerformanceHistoryRow) {
   return {
     id: row.id,
     timestamp: row.timestamp ?? row.generatedAt ?? row.generated_at ?? null,
@@ -79,7 +128,11 @@ export async function GET(request: NextRequest) {
     const limit = boundedInteger(request.nextUrl.searchParams.get('limit'), 50, 1, 100)
     const page = boundedInteger(request.nextUrl.searchParams.get('page'), 1, 1, 10000)
     const offset = (page - 1) * limit
-    const performanceScopeV2 = await getPerformanceScopeV2({ sportKey })
+    const performanceScopeV2 = await getPerformanceScopeV2({
+      sportKey,
+      includeHistoryRows: true,
+      maxPredictionRows: 5000,
+    })
     const active = (value: string | null) => value && value !== 'all'
     const rows = performanceScopeV2.historyRows.filter((row) => {
       if (active(category) && row.category !== category) return false
@@ -90,7 +143,7 @@ export async function GET(request: NextRequest) {
       if (Number.isFinite(maxConfidence) && Number(row.confidence ?? 0) > maxConfidence) return false
       return true
     })
-    const pageRows = rows.slice(offset, offset + limit).map((row) => sanitizeHistoryRow(row as Record<string, any>))
+    const pageRows = rows.slice(offset, offset + limit).map((row) => sanitizeHistoryRow(row))
     const totalPages = Math.max(1, Math.ceil(rows.length / limit))
     return NextResponse.json({
       success: true,
@@ -112,6 +165,7 @@ export async function GET(request: NextRequest) {
       cutoffExclusions: performanceScopeV2.cutoffExclusions,
       schedulerCoverage: performanceScopeV2.schedulerCoverage,
       timelineV2: performanceScopeV2.timeline,
+      queryDiagnostics: performanceScopeV2.queryDiagnostics,
       totalRows: rows.length,
       page,
       limit,
