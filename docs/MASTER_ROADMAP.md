@@ -3131,3 +3131,17 @@ Repair: `/` now renders Today's Betting Plan with Rent Play, Moneyline Bet, Parl
 Validation: `node scripts/pick-analyzer-v2-phase-c1-daily-betting-settlement-validate.mjs` passed 31/31 locally. Settlement-learning recovery, protected canonical MLB settlement, MLB operating-day recovery, scheduler-health alignment, A3 scheduler/freshness, JSON parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` passed. Build generated 386 static pages.
 
 Completion criteria: `PICK_ANALYZER_V2_PHASE_C1_DAILY_BETTING_SETTLEMENT_PASS`, homepage betting plan present, no backend prediction change, all completed games become `SETTLED`, `READY_FOR_SETTLEMENT` or `BLOCKED` with reason, scheduler selects settlement before stale odds when settlement-ready rows exist, no provider calls added, no unsupported-market promotion and production certification after automatic deployment.
+
+### 65. Pick Analyzer V2 Phase C1.1 External Scheduler Recovery
+
+Objective: Recover the external GitHub Actions scheduler boundary so protected operating-day execution automatically clears canonical settlement-ready rows and the settlement guarantee cannot pass while scheduler health is late or critical.
+
+Status: Implemented pending final production proof.
+
+Scope: GitHub Actions scheduler/heartbeat workflow configuration, scheduler reliability docs, settlement guarantee monitoring, C1.1 certification artifacts and validators. No C2 work is included.
+
+Repair: The write scheduler now uses isolated concurrency group `production-operating-day-writer`, UTC cadence `7-57/10 * * * *` and a 6-minute timeout. The heartbeat now uses isolated concurrency group `production-operating-day-heartbeat` and a 5-minute timeout. The settlement guarantee monitor now reports scheduler health and returns `ACTION_REQUIRED` when scheduler cadence is late or critical.
+
+Validation: `node scripts/pick-analyzer-v2-phase-c1-1-external-scheduler-recovery-validate.mjs` is the primary C1.1 validator. Required supporting validation includes C1, settlement-learning recovery, protected canonical MLB settlement, canonical settlement state, result ingestion, MLB operating-day recovery, scheduler-health alignment, A3 scheduler/freshness, autonomous daily AI, performance validation, JSON validation, changed-file ESLint, targeted secret scan, `git diff --check`, `git diff --cached --check` and `npm.cmd run build`.
+
+Completion criteria: `PICK_ANALYZER_V2_PHASE_C1_1_EXTERNAL_SCHEDULER_RECOVERY_PASS`, active external workflow evidence, successful protected workflow invocation, canonical ready rows settled, idempotency validated, learning/performance evidence present, settlement guarantee PASS, scheduler health not late/critical, final commit pushed and production serving the final commit.

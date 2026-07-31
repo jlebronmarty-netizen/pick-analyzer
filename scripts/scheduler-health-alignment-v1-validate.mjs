@@ -10,7 +10,7 @@ const checks = [
   {
     name: 'shared scheduler config defines production write cadence',
     pass:
-      schedulerConfig.includes("MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON = '*/10 * * * *'") &&
+      schedulerConfig.includes("MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON = '7-57/10 * * * *'") &&
       schedulerConfig.includes('MLB_OPERATING_DAY_WRITE_SCHEDULER_INTERVAL_MINUTES = 10'),
   },
   {

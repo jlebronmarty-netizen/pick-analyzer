@@ -5,15 +5,13 @@ Version: V1
 
 ## Vercel Cron
 
-`vercel.json` defines one production cron:
+`vercel.json` defines no active production cron:
 
 ```json
-{ "path": "/api/cron/operating-day", "schedule": "0 12 * * *" }
+{ "crons": [] }
 ```
 
-This is the safe Hobby-compatible cadence. Intraday cadence requires the external scheduler fallback or protected manual execution.
-
-Actual deployed cadence on 2026-07-19 is once daily at `0 12 * * *` UTC. Desired MLB market freshness requires intraday execution around morning slate discovery, midday market refresh and pregame refresh windows. If the current Vercel plan cannot schedule those windows directly, an external scheduler must call the protected endpoint with `Authorization: Bearer <CRON_SECRET>`.
+Intraday cadence is owned by the external GitHub Actions scheduler or protected manual fallback. Desired MLB market freshness requires intraday execution around morning slate discovery, midday market refresh, pregame refresh windows, results and settlement.
 
 Canonical consolidated scheduler method:
 
@@ -52,17 +50,20 @@ The production GitHub Actions workflow `.github/workflows/production-operating-d
 
 - `CRON_SECRET`
 
-Recommended UTC cadence: `7,22,37,52 * * * *`. This preserves four primary attempts per hour while avoiding the common `:00`, `:15`, `:30` and `:45` GitHub Actions congestion boundaries. GitHub scheduled workflows are best-effort, so exact start time is not guaranteed.
+Recommended UTC cadence: `7-57/10 * * * *`. This preserves the certified 10-minute maximum cadence while avoiding the common `:00`, `:10`, `:20`, `:30`, `:40` and `:50` GitHub Actions congestion boundaries. GitHub scheduled workflows are best-effort, so exact start time is not guaranteed.
 
-The adaptive planner decides whether status, odds, results, settlement or no work is actually due, and provider locks prevent overlapping equivalent work. GitHub Actions workflow concurrency uses one production group with `cancel-in-progress: false`.
+The adaptive planner decides whether status, odds, results, settlement or no work is actually due, and provider locks prevent overlapping equivalent work. GitHub Actions workflow concurrency uses isolated groups:
 
-Secondary safe invocation path: `.github/workflows/production-operating-day-heartbeat.yml` calls the same protected endpoint at `14,44 * * * *` with the same `CRON_SECRET`, production URL and concurrency group. This is not a second refresh engine. It is a bounded heartbeat caller into the same Adaptive Refresh, provider budget and action-lock controls.
+- writer: `production-operating-day-writer`, `cancel-in-progress: false`, timeout 6 minutes
+- heartbeat: `production-operating-day-heartbeat`, `cancel-in-progress: false`, timeout 5 minutes
+
+Secondary safe invocation path: `.github/workflows/production-operating-day-heartbeat.yml` calls the same protected endpoint at `3,33 * * * *` with the same `CRON_SECRET`, production URL and dry-run mode. This is not a second refresh engine. It is a bounded heartbeat observer into the same Adaptive Refresh, provider budget and action-lock controls.
 
 The older `.github/workflows/operating-day-refresh.yml` workflow is retained for manual fallback only. It has no scheduled triggers, avoiding duplicate unattended scheduler invocations.
 
 Operations Health scheduler cadence fields:
 
-- `expectedSchedulerIntervalMinutes`: `15`
+- `expectedSchedulerIntervalMinutes`: `10`
 - `schedulerGraceMinutes`: `10`
 - `lastSchedulerRunAgeMinutes`: age of the latest successful protected scheduler evidence
 - `missedSchedulerIntervals`: expected windows missed after interval plus grace

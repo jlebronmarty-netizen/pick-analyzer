@@ -167,9 +167,9 @@ function main() {
   const vercelCrons = Array.isArray(vercelConfig.crons) ? vercelConfig.crons : []
 
   check('branch is main', execFileSync('git', ['branch', '--show-current'], { cwd: ROOT, encoding: 'utf8' }).trim() === 'main')
-  check('scheduler config write cron is canonical', schedulerConfig.includes("MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON = '*/10 * * * *'"))
+  check('scheduler config write cron is canonical', schedulerConfig.includes("MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON = '7-57/10 * * * *'"))
   check('scheduler config heartbeat cron is canonical', schedulerConfig.includes("MLB_OPERATING_DAY_HEARTBEAT_CRON = '3,33 * * * *'"))
-  check('production workflow uses shared expected write cadence', productionCrons.length === 1 && productionCrons[0] === '*/10 * * * *')
+  check('production workflow uses shared expected write cadence', productionCrons.length === 1 && productionCrons[0] === '7-57/10 * * * *')
   check('heartbeat workflow uses shared expected observer cadence', heartbeatCrons.length === 1 && heartbeatCrons[0] === '3,33 * * * *')
   check('manual operating-day workflow has no schedule cron', extractCron(manualWorkflow).length === 0)
   check('vercel crons are disabled', vercelCrons.length === 0)

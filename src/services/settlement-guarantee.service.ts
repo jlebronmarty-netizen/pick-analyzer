@@ -8,6 +8,7 @@ import {
   type CanonicalGameResultLike,
   type CanonicalPredictionLike,
 } from '@/services/canonical-settlement-state.service'
+import { getOperationsHealth } from '@/services/operations-health.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
@@ -66,6 +67,8 @@ function settlementState(row: PredictionRow, result: ResultRow | undefined, even
 
 export async function getSettlementGuaranteeStatus({ lookbackDays = 2 }: { lookbackDays?: number } = {}) {
   const range = rangeForLookback(lookbackDays)
+  const operationsHealth = await getOperationsHealth()
+  const scheduler = operationsHealth.scheduler ?? null
   const { data: predictions, error } = await supabaseAdmin
     .from('prediction_history')
     .select('id, sport_key, game_id, commence_time, generated_at, cutoff_at, home_team, away_team, team, opponent, market, line, result, status, lifecycle_status, settlement_details, settled_at, validation_warnings, model_role, trial, scrambled, production_eligible, feature_snapshot_id, feature_snapshot_key, feature_snapshot, odds_snapshot_id, operating_day_id, idempotency_key, model_version, is_current')
@@ -128,9 +131,16 @@ export async function getSettlementGuaranteeStatus({ lookbackDays = 2 }: { lookb
     counts[reason] = (counts[reason] ?? 0) + 1
     return counts
   }, {})
+  const schedulerLate = scheduler?.schedulerLate === true || scheduler?.schedulerCritical === true
+  const actionRequiredReasons = [
+    ready.length > 0 ? 'SETTLEMENT_READY_ROWS_REMAIN' : null,
+    silentPending.length > 0 ? 'SILENT_PENDING_ROWS_REMAIN' : null,
+    schedulerLate ? 'SCHEDULER_LATE_OR_CRITICAL' : null,
+  ].filter(Boolean) as string[]
+  const success = actionRequiredReasons.length === 0
 
   return {
-    success: ready.length === 0 && silentPending.length === 0,
+    success,
     mode: 'settlement_guarantee_status_v1',
     generatedAt: new Date().toISOString(),
     sportKey: SPORT_KEY,
@@ -144,9 +154,26 @@ export async function getSettlementGuaranteeStatus({ lookbackDays = 2 }: { lookb
     silentPendingRows: silentPending.length,
     blockedReasonCounts,
     oldestReadyForSettlement: ready.map((row) => row.commenceTime).filter(Boolean).sort()[0] ?? null,
+    schedulerHealth: scheduler ? {
+      status: operationsHealth.status,
+      configured: scheduler.configured,
+      lastSuccessfulProtectedInvocationAt: scheduler.lastSuccessfulProtectedInvocationAt,
+      lastExternalSchedulerInvocationAt: scheduler.lastExternalSchedulerInvocationAt,
+      lastSchedulerRun: scheduler.lastSchedulerRun,
+      lastSchedulerSuccess: scheduler.lastSchedulerSuccess,
+      expectedSchedulerIntervalMinutes: scheduler.expectedSchedulerIntervalMinutes,
+      schedulerGraceMinutes: scheduler.schedulerGraceMinutes,
+      missedSchedulerIntervals: scheduler.missedSchedulerIntervals,
+      schedulerCadenceStatus: scheduler.schedulerCadenceStatus,
+      nextExpectedSchedulerWindow: scheduler.nextExpectedSchedulerWindow,
+      schedulerLate: scheduler.schedulerLate,
+      schedulerCritical: scheduler.schedulerCritical,
+      externalSchedulerVerified: scheduler.externalSchedulerVerified,
+    } : null,
+    actionRequiredReasons,
     readyForSettlement: ready.slice(0, 25),
     blockedWithReason: blocked.slice(0, 25),
-    guarantee: ready.length === 0 && silentPending.length === 0 ? 'PASS' : 'ACTION_REQUIRED',
+    guarantee: success ? 'PASS' : 'ACTION_REQUIRED',
     learningFlow: {
       source: 'prediction_history_settlement_derived_read_only_queue_v1',
       automaticModelTraining: false,

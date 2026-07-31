@@ -23,7 +23,7 @@ for (const doc of docs) {
   assert(text.includes('No ') || text.includes('Automatic model training remains disabled'), `${doc} must include guardrail language`)
 }
 
-assert(workflow.includes('cron: "*/10 * * * *"'), 'production scheduler must run every 10 minutes')
+assert(workflow.includes('cron: "7-57/10 * * * *"'), 'production scheduler must run every 10 minutes')
 assert(workflow.includes('/api/cron/operating-day?dryRun=${DRY_RUN}'), 'production scheduler must use operating-day route')
 assert(heartbeatWorkflow.includes('cron: "3,33 * * * *"'), 'heartbeat scheduler must run twice hourly')
 assert(heartbeatWorkflow.includes('dryRun=true'), 'heartbeat must be dry-run only')

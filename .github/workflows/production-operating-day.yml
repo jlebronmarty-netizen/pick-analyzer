@@ -8,10 +8,10 @@ on:
         required: false
         default: "false"
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "7-57/10 * * * *"
 
 concurrency:
-  group: production-operating-day-runtime
+  group: production-operating-day-writer
   cancel-in-progress: false
 
 permissions:
@@ -20,7 +20,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 6
     env:
       PICK_ANALYZER_BASE_URL: https://pick-analyzer.vercel.app
       DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}

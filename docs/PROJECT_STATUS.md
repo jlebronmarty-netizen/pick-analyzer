@@ -1530,3 +1530,11 @@ V2 Phase C1 changes the homepage from a dashboard redirect into Today's Betting 
 The settlement guarantee repair removes the automatic scheduler's prospective-only settlement limitation, adds run-line grading through spread semantics, reports explicit blocked settlement reasons and adds read-only `/api/operations/settlement-guarantee` monitoring. Production certification found commit `a90052fa0e71d9606881e95a9be79a6f2da1e4a3` still had deterministic settlement-ready rows because stale odds preempted settlement in adaptive action ordering. The follow-up repair makes stored deterministic settlement preempt provider-backed odds refresh when both are due, so completed games can flow into learning/performance before live market refresh.
 
 Validation passed: C1 validator 31/31, settlement-learning recovery 7/7, protected canonical MLB settlement 9/9, MLB operating-day recovery 6/6, scheduler-health alignment 6/6, A3 scheduler/freshness 39/39, JSON parsing, changed-file ESLint, targeted secret scan, `git diff --check` and `npm.cmd run build` with 386 static pages. No prediction formula, EV, edge, confidence, Trust, Official Pick policy, provider mapping or automatic model training changed.
+
+# 2026-07-31 - Pick Analyzer V2 Phase C1.1 External Scheduler Recovery
+
+Status: IMPLEMENTED PENDING FINAL PRODUCTION PROOF
+
+V2 Phase C1.1 repairs the remaining external scheduler reliability boundary for C1 Goal B. Public GitHub metadata proved the production writer and heartbeat workflows are active, scheduled and able to complete on commit `344a366107f14b6238e1650d1243ba321ca39164`; the scheduled writer run `30653457381` cleared the settlement backlog, and production settlement guarantee subsequently returned HTTP 200 with 60 completed rows settled, 0 ready rows, 0 blocked rows and 0 silent pending rows.
+
+The repository repair isolates writer and heartbeat concurrency groups, moves the write schedule to `7-57/10 * * * *` without increasing frequency, bounds the writer job below cadence at 6 minutes and bounds the heartbeat at 5 minutes. The settlement guarantee route now includes scheduler health and returns `ACTION_REQUIRED` if scheduler cadence is late/critical even when settlement rows are clear. No settlement rule, prediction formula, Official Pick policy, model weight, epoch, provider plan, GitHub billing or Vercel billing changed.

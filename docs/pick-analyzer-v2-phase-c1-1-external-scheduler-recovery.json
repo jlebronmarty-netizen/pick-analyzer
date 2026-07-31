@@ -1,0 +1,129 @@
+{
+  "phase": "V2_C1_1",
+  "title": "External Scheduler Recovery And Automatic Settlement Certification",
+  "baselineCommit": "344a366107f14b6238e1650d1243ba321ca39164",
+  "status": "IMPLEMENTED_PENDING_FINAL_PRODUCTION_PROOF",
+  "rootCause": {
+    "primary": "WRITER_HEARTBEAT_SHARED_CONCURRENCY_AND_BOUNDARY_CADENCE_RISK",
+    "details": [
+      "Production writer and heartbeat workflows shared production-operating-day-runtime concurrency even though heartbeat is dry-run observer work.",
+      "Writer workflow used exact */10 UTC boundary scheduling and a 10-minute job timeout on a 10-minute cadence.",
+      "Public GitHub run metadata showed the writer workflow active and successful, but sparse enough that operations health could become CRITICAL between stored lifecycle events."
+    ]
+  },
+  "workflowConfigurationBefore": {
+    "writer": {
+      "file": ".github/workflows/production-operating-day.yml",
+      "eventTriggers": ["workflow_dispatch", "schedule"],
+      "cron": "*/10 * * * *",
+      "concurrencyGroup": "production-operating-day-runtime",
+      "cancelInProgress": false,
+      "timeoutMinutes": 10,
+      "endpoint": "POST https://pick-analyzer.vercel.app/api/cron/operating-day?dryRun=false",
+      "secretReference": "secrets.CRON_SECRET"
+    },
+    "heartbeat": {
+      "file": ".github/workflows/production-operating-day-heartbeat.yml",
+      "eventTriggers": ["workflow_dispatch", "schedule"],
+      "cron": "3,33 * * * *",
+      "concurrencyGroup": "production-operating-day-runtime",
+      "cancelInProgress": false,
+      "timeoutMinutes": 10,
+      "endpoint": "POST https://pick-analyzer.vercel.app/api/cron/operating-day?dryRun=true",
+      "secretReference": "secrets.CRON_SECRET"
+    }
+  },
+  "workflowConfigurationAfter": {
+    "writer": {
+      "file": ".github/workflows/production-operating-day.yml",
+      "eventTriggers": ["workflow_dispatch", "schedule"],
+      "cron": "7-57/10 * * * *",
+      "concurrencyGroup": "production-operating-day-writer",
+      "cancelInProgress": false,
+      "timeoutMinutes": 6,
+      "endpoint": "POST https://pick-analyzer.vercel.app/api/cron/operating-day?dryRun=false",
+      "secretReference": "secrets.CRON_SECRET"
+    },
+    "heartbeat": {
+      "file": ".github/workflows/production-operating-day-heartbeat.yml",
+      "eventTriggers": ["workflow_dispatch", "schedule"],
+      "cron": "3,33 * * * *",
+      "concurrencyGroup": "production-operating-day-heartbeat",
+      "cancelInProgress": false,
+      "timeoutMinutes": 5,
+      "endpoint": "POST https://pick-analyzer.vercel.app/api/cron/operating-day?dryRun=true",
+      "secretReference": "secrets.CRON_SECRET"
+    }
+  },
+  "externalEvidence": {
+    "workflowState": "active",
+    "settingsBoundary": {
+      "githubActionsEnabled": "PROVEN_BY_PUBLIC_WORKFLOW_STATE_ACTIVE",
+      "cronScheduling": "SUPPORTED_BY_PUBLIC_SCHEDULE_RUNS",
+      "cronSecretExists": "SUPPORTED_BY_SUCCESSFUL_PROTECTED_SCHEDULE_RUN",
+      "environmentApproval": "SUPPORTED_BY_SUCCESSFUL_SCHEDULE_RUN_WITHOUT_APPROVAL",
+      "secretValue": "UNPRINTED_AND_NOT_DISCLOSED"
+    },
+    "schedulerRun": {
+      "id": 30653457381,
+      "event": "schedule",
+      "conclusion": "success",
+      "headSha": "344a366107f14b6238e1650d1243ba321ca39164",
+      "createdAt": "2026-07-31T18:00:45Z",
+      "updatedAt": "2026-07-31T18:01:14Z",
+      "url": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/30653457381"
+    },
+    "heartbeatRun": {
+      "id": 30657102597,
+      "event": "schedule",
+      "conclusion": "success",
+      "headSha": "344a366107f14b6238e1650d1243ba321ca39164",
+      "createdAt": "2026-07-31T18:55:37Z",
+      "updatedAt": "2026-07-31T18:56:00Z",
+      "url": "https://github.com/jlebronmarty-netizen/pick-analyzer/actions/runs/30657102597"
+    }
+  },
+  "productionEvidence": {
+    "productionCommitBefore": "344a366107f14b6238e1650d1243ba321ca39164",
+    "settlementGuaranteeBefore": {
+      "httpStatus": 409,
+      "guarantee": "ACTION_REQUIRED",
+      "readyForSettlementRows": 12,
+      "totalReadyRows": 51,
+      "silentPendingRows": 0
+    },
+    "settlementGuaranteeAfter": {
+      "httpStatus": 200,
+      "guarantee": "PASS",
+      "checkedPredictions": 123,
+      "completedPredictionRows": 60,
+      "settledRows": 60,
+      "readyForSettlementRows": 0,
+      "blockedRows": 0,
+      "silentPendingRows": 0,
+      "providerCallsMade": 0
+    },
+    "adaptiveRefreshAfter": {
+      "settlementReadyRows": 0,
+      "nextAction": "midday_refresh",
+      "remainingDueDomain": "odds"
+    },
+    "schedulerHealthAfterBacklogSettlement": {
+      "lastSuccessfulProtectedInvocationAt": "2026-07-31T18:01:12.418+00:00",
+      "schedulerCadenceStatus": "CRITICAL",
+      "reason": "Health still requires fresh protected lifecycle evidence; C1.1 repair tightens workflow isolation and guarantee reporting."
+    }
+  },
+  "safety": {
+    "providerCallsFromCertificationChecks": 0,
+    "providerCreditsFromCertificationChecks": 0,
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "modelWeightsChanged": false,
+    "epochMutations": 0,
+    "secretsPrinted": false,
+    "manualVercelDeploy": false,
+    "c2Started": false
+  },
+  "finalVerdict": "PICK_ANALYZER_V2_PHASE_C1_1_LOCAL_PASS_PENDING_PRODUCTION"
+}
