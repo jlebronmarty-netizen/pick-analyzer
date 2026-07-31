@@ -1,0 +1,98 @@
+{
+  "release": "Release 04",
+  "name": "Prediction Quality and Model Intelligence V1",
+  "status": "LOCAL_PASS_PRODUCTION_PENDING",
+  "startingCommit": "d9a3e08a9167272595024eef286fdb21a8ece82f",
+  "runtimeBehaviorChanged": false,
+  "predictionFormulaChanged": false,
+  "officialPickPolicyChanged": false,
+  "kellyLogicChanged": false,
+  "rankingLogicChanged": false,
+  "learningWeightsChanged": false,
+  "providerContractsChanged": false,
+  "schedulerBehaviorChanged": false,
+  "databaseSchemaChanged": false,
+  "historicalReplayStarted": false,
+  "performanceEvidence": {
+    "source": "/api/performance?diagnostics=full",
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "rowsRead": 2000,
+    "eligibleSettledRows": 485,
+    "scoredRows": 479,
+    "wins": 239,
+    "losses": 240,
+    "pushes": 6,
+    "accuracy": 49.9,
+    "brier": 0.2598,
+    "averageConfidence": 42.48,
+    "calibrationError": 7.42,
+    "calibrationBias": -7.42,
+    "settlementCoverage": 100
+  },
+  "marketEvidence": {
+    "moneyline": {
+      "rows": 183,
+      "scored": 183,
+      "wins": 88,
+      "losses": 95,
+      "pushes": 0,
+      "accuracy": 48.09,
+      "averageConfidence": 43.54,
+      "brier": 0.2507
+    },
+    "spreadOrRunLine": {
+      "rows": 151,
+      "scored": 151,
+      "wins": 72,
+      "losses": 79,
+      "pushes": 0,
+      "accuracy": 47.68,
+      "averageConfidence": 42.06,
+      "brier": 0.2517
+    },
+    "total": {
+      "rows": 151,
+      "scored": 145,
+      "wins": 79,
+      "losses": 66,
+      "pushes": 6,
+      "accuracy": 54.48,
+      "averageConfidence": 41.61,
+      "brier": 0.2799
+    }
+  },
+  "officialPickEvidence": {
+    "rows": 5,
+    "scored": 5,
+    "wins": 4,
+    "losses": 1,
+    "pushes": 0,
+    "accuracy": 80,
+    "brier": 0.1686,
+    "thresholdChangeRecommended": false
+  },
+  "localValidation": {
+    "release01Validator": "PASS_WITH_KNOWN_WARNINGS",
+    "release02Validator": "PASS",
+    "release02aValidator": "PASS",
+    "release03Validator": "PASS",
+    "release04Validator": "PASS",
+    "changedFileEslint": "PASS",
+    "build": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "requiredRoutes": [
+      "/api/system/version",
+      "/api/dashboard/today",
+      "/api/current-board",
+      "/api/performance"
+    ]
+  },
+  "release05Started": false
+}
