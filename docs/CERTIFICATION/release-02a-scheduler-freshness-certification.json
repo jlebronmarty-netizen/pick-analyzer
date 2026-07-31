@@ -1,0 +1,49 @@
+{
+  "release": "Release 02A",
+  "name": "Scheduler Freshness Recovery and Certification",
+  "status": "LOCAL_REPAIR_PENDING_PRODUCTION_SCHEDULED_OBSERVATION",
+  "rootCause": "Successful protected heartbeat dry-runs did not persist the canonical scheduler health marker used by operations health.",
+  "runtimeBehaviorChanged": true,
+  "changeScope": "operational heartbeat evidence only",
+  "predictionProbabilitiesChanged": false,
+  "rankingChanged": false,
+  "officialPickPolicyChanged": false,
+  "learningWeightsChanged": false,
+  "settlementFormulaChanged": false,
+  "providerConfigurationChanged": false,
+  "databaseMigrationCreated": false,
+  "providerCallsMadeByLocalCertification": 0,
+  "remoteMutationsMadeByLocalCertification": 0,
+  "schedulerOwnedOperationalWritesAllowedAfterDeployment": true,
+  "schedulerDefinitions": {
+    "vercelCron": {
+      "active": false,
+      "definition": "vercel.json crons empty"
+    },
+    "githubWriter": {
+      "cron": "7-57/10 * * * *",
+      "dryRun": false,
+      "endpoint": "/api/cron/operating-day?dryRun=false"
+    },
+    "githubHeartbeat": {
+      "cron": "3,33 * * * *",
+      "dryRun": true,
+      "endpoint": "/api/cron/operating-day?dryRun=true"
+    }
+  },
+  "localValidation": {
+    "release02aValidator": "PASS",
+    "release01Validator": "PASS",
+    "release02Validator": "PASS",
+    "build": "PASS",
+    "json": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "requiresScheduledExecutionAfterDeploy": true,
+    "manualHeartbeatForged": false
+  },
+  "release03Started": false
+}

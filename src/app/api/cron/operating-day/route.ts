@@ -26,6 +26,47 @@ const CRON_STATUS_HTTP: Record<string, number> = {
   configuration_error: 500,
 }
 
+type CronOperatingDayAction =
+  | 'status_refresh'
+  | 'morning_sync'
+  | 'midday_refresh'
+  | 'final_refresh'
+  | 'lock'
+  | 'sync_results'
+  | 'settle'
+  | 'replay'
+  | 'calibrate'
+  | 'complete'
+  | 'reconcile_preview'
+  | 'resolve_next_slate'
+  | 'next_slate_preview'
+  | 'prepare_next_slate'
+  | 'recommendation_lock'
+  | 'postgame_rollover'
+  | 'status'
+
+type CronAutomationStatus = {
+  selectedSlateDate: string | null
+  currentStage: string | null
+  nextAction: CronOperatingDayAction
+  nextActionReason: string | null
+  localCalendarDate: string | null
+  activeOperatingDate: string | null
+  activeSlateDate: string | null
+  providerQueryDate: string | null
+  nextSlateDate: string | null
+  dateSelectionReason: string | null
+  consecutiveSameActionCount: number | null
+  actionStuck: boolean | null
+  currentLifecycleState: string | null
+  operatingDayId: string | null
+  eventsFound: number | null
+  staleEvents: number | null
+  activeCandidates: number | null
+  officialPicks: number | null
+  latestOddsTimestamp: string | null
+}
+
 function authorized(request: NextRequest) {
   const secret = process.env.CRON_SECRET
   if (!secret) return true
@@ -73,6 +114,7 @@ async function runPostgameContinuity(dryRun: boolean, source: string) {
   let totalProviderCalls = 0
   let totalWrites = 0
   let settlementObserved = false
+  let schedulerHeartbeat: Record<string, unknown> | null = null
 
   for (let step = 0; step < 3; step += 1) {
     const adaptive = await runAdaptiveRefresh({ dryRun, source })
@@ -98,6 +140,25 @@ async function runPostgameContinuity(dryRun: boolean, source: string) {
     totalWrites += Number((dailyUpdate.automaticDailyUpdate as Record<string, unknown> | undefined)?.durableWritesMade ?? 0)
   }
 
+  if (dryRun === true && steps.every((step) => step.success)) {
+    const { recordOperatingDaySchedulerHeartbeat } = await import('@/services/operating-day.service')
+    const lastStep = (steps.at(-1) ?? {}) as Record<string, unknown>
+    schedulerHeartbeat = await recordOperatingDaySchedulerHeartbeat({
+      selectedDate: String(lastStep.selectedDate ?? ''),
+      requestId: String(lastStep.executionRunId ?? ''),
+      source,
+      status: 'SUCCESS_NO_CHANGE',
+      dryRun: true,
+      selectedAction: typeof lastStep.selectedAction === 'string' ? lastStep.selectedAction : null,
+      dueSteps: Array.isArray(lastStep.dueSteps) ? lastStep.dueSteps : [],
+      metadata: {
+        heartbeatReason: 'successful_protected_dry_run_observation',
+        heartbeatUpdatesHealthMarker: true,
+      },
+    }) as Record<string, unknown>
+    totalWrites += Number(schedulerHeartbeat.remoteMutationsMade ?? 0)
+  }
+
   const last = (steps.at(-1) ?? {}) as Record<string, unknown>
   return {
     success: steps.every((step) => step.success),
@@ -110,6 +171,7 @@ async function runPostgameContinuity(dryRun: boolean, source: string) {
     selectedAction: last.selectedAction ?? null,
     selectedDate: last.selectedDate ?? null,
     settlementObserved,
+    schedulerHeartbeat,
     dailyUpdate,
     providerCallsMade: totalProviderCalls,
     remoteMutationsMade: totalWrites,
@@ -122,7 +184,7 @@ async function handle(request: NextRequest) {
     return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized operating-day cron request.', status: 401 })
   }
   const dryRun = parseDryRun(request)
-  let status: any = {}
+  let status: Partial<CronAutomationStatus> = {}
   try {
     const adaptive = await runPostgameContinuity(
       dryRun,
@@ -155,7 +217,7 @@ async function handle(request: NextRequest) {
     )
 
     const { getOperatingDayAutomationStatus } = await import('@/services/operating-day-automation.service')
-    status = await getOperatingDayAutomationStatus()
+    status = await getOperatingDayAutomationStatus() as CronAutomationStatus
     if (!status) throw new Error('Operating-day automation status unavailable.')
     if (dryRun) {
       return apiOk({ ...status, mode: 'operating_day_consolidated_cron_dry_run_v1', dryRun: true }, id)
@@ -231,7 +293,7 @@ async function handle(request: NextRequest) {
       )
     }
     const { executeOperatingDay } = await import('@/services/operating-day.service')
-    const action = status.nextAction
+    const action = status.nextAction as CronOperatingDayAction
     const result = await executeOperatingDay({
       action,
       sportKey: 'baseball_mlb',

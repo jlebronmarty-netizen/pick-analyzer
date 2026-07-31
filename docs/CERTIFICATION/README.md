@@ -10,6 +10,8 @@ Current V2 certification documents:
 - [Runtime Health](RUNTIME_HEALTH.md)
 - [Release 02 Product Integration Certification](RELEASE_02_PRODUCT_INTEGRATION_CERTIFICATION.md)
 - [Release 02 Certification JSON](release-02-product-integration-certification.json)
+- [Release 02A Scheduler Freshness Certification](RELEASE_02A_SCHEDULER_FRESHNESS_CERTIFICATION.md)
+- [Release 02A Certification JSON](release-02a-scheduler-freshness-certification.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

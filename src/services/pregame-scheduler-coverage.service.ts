@@ -1,5 +1,9 @@
 import 'server-only'
 
+import {
+  MLB_OPERATING_DAY_HEARTBEAT_CRON,
+  MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON,
+} from '@/config/mlb-operating-day-scheduler'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
@@ -151,7 +155,7 @@ function schedulerDefinitions(now = new Date()) {
       scheduler: 'GitHub Production Operating Day Runtime',
       route: '/api/cron/operating-day?dryRun=false',
       frequency: 'four times per hour',
-      cron: '7,22,37,52 * * * *',
+      cron: MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON,
       timezone: 'UTC',
       operatingDay: 'America/Puerto_Rico MLB operating date',
       nextExecution: nextUtcForMinuteSet([7, 22, 37, 52], now),
@@ -160,13 +164,13 @@ function schedulerDefinitions(now = new Date()) {
     },
     {
       scheduler: 'GitHub Production Operating Day Heartbeat',
-      route: '/api/cron/operating-day?dryRun=false',
+      route: '/api/cron/operating-day?dryRun=true',
       frequency: 'twice per hour',
-      cron: '14,44 * * * *',
+      cron: MLB_OPERATING_DAY_HEARTBEAT_CRON,
       timezone: 'UTC',
       operatingDay: 'America/Puerto_Rico MLB operating date',
       nextExecution: nextUtcForMinuteSet([14, 44], now),
-      retryPolicy: 'Heartbeat calls the same protected endpoint and shares the same concurrency group; it is a fallback caller, not a second engine.',
+      retryPolicy: 'Heartbeat calls the same protected endpoint in dry-run mode and records a scheduler-owned health marker after successful protected observation.',
       active: true,
     },
     {

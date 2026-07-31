@@ -763,6 +763,57 @@ async function writeLifecycleEvent(input: {
   if (error) throw new Error(`Operating day audit write failed: ${error.message}`)
 }
 
+export async function recordOperatingDaySchedulerHeartbeat(input: {
+  sportKey?: string | null
+  leagueKey?: string | null
+  selectedDate?: string | null
+  requestId?: string | null
+  source?: string | null
+  status?: string | null
+  dryRun?: boolean | null
+  selectedAction?: string | null
+  dueSteps?: unknown[]
+  metadata?: Record<string, unknown>
+}) {
+  const sportKey = input.sportKey ?? SPORT_KEY
+  const leagueKey = input.leagueKey ?? LEAGUE_KEY
+  const date = selectedDate(input.selectedDate)
+  const startedAt = nowIso()
+  const day = await getOrCreateOperatingDay(sportKey, leagueKey, date, false)
+  if (!day?.id) throw new Error('Operating day heartbeat requires an operating_day row.')
+  await writeLifecycleEvent({
+    operatingDayId: String(day.id),
+    requestId: input.requestId ?? null,
+    action: 'scheduler_heartbeat',
+    status: input.status ?? 'SUCCESS_NO_CHANGE',
+    startedAt,
+    providerCallsPlanned: 0,
+    providerCallsMade: 0,
+    databaseWrites: 1,
+    reusedRecords: 0,
+    warnings: [],
+    metadata: {
+      version: 'scheduler_heartbeat_v1',
+      source: input.source ?? 'GITHUB_PRODUCTION_OPERATING_DAY_HEARTBEAT',
+      dryRun: input.dryRun !== false,
+      selectedAction: input.selectedAction ?? null,
+      dueStepCount: Array.isArray(input.dueSteps) ? input.dueSteps.length : 0,
+      schedulerOwnedOperationalWrite: true,
+      productDataMutated: false,
+      providerCallsMade: 0,
+      ...(input.metadata ?? {}),
+    },
+  })
+  return {
+    success: true,
+    mode: 'operating_day_scheduler_heartbeat_v1',
+    selectedDate: date,
+    operatingDayId: String(day.id),
+    providerCallsMade: 0,
+    remoteMutationsMade: 1,
+  }
+}
+
 async function updateOperatingDay(operatingDayId: string, action: OperatingDayAction, patch: Record<string, unknown> = {}) {
   const timestampColumn = timestampColumnForAction(action)
   const current = await supabaseAdmin
