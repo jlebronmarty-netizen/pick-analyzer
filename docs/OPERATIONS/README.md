@@ -8,3 +8,5 @@ Operations documentation covers scheduler topology, operational health, refresh 
 - [Runtime Resilience](RUNTIME_RESILIENCE.md)
 - [Error Handling Audit](ERROR_HANDLING_AUDIT.md)
 - [Production Hardening Report](PRODUCTION_HARDENING_REPORT.md)
+- [Daily Operations Summary](DAILY_OPERATIONS_SUMMARY.md)
+- [Model Memory](MODEL_MEMORY.md)

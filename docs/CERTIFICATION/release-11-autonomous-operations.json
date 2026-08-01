@@ -1,0 +1,107 @@
+{
+  "release": "Release 11",
+  "name": "Autonomous Daily Operations V1",
+  "status": "LOCAL_PASS_PRODUCTION_PENDING",
+  "startingCommit": "eba990c1c25b1647d83987a0a2ac5e157bbf8047",
+  "runtimeBehaviorChanged": false,
+  "predictionFormulaChanged": false,
+  "productionProbabilityChanged": false,
+  "probabilityCalibrationChanged": false,
+  "officialPickPolicyChanged": false,
+  "learningWeightsChanged": false,
+  "settlementChanged": false,
+  "schedulerChanged": false,
+  "providerContractsChanged": false,
+  "historicalDataChanged": false,
+  "databaseSchemaChanged": false,
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "normalOperationalBookkeepingOnly": true,
+  "autonomousWorkflow": {
+    "eventDiscovery": "VERIFIED_EXISTING_SURFACE",
+    "predictionGeneration": "VERIFIED_EXISTING_ENGINE_NO_CHANGE",
+    "predictionPersistence": "VERIFIED_VERSIONED_HISTORY",
+    "oddsRefresh": "VERIFIED_ADAPTIVE_REFRESH_BUDGET_GUARD",
+    "settlement": "VERIFIED_SETTLEMENT_GUARANTEE",
+    "learningLabels": "VERIFIED_SETTLED_ROW_EVIDENCE_NO_TRAINING",
+    "candidateEvaluation": "VERIFIED_RELEASE10_REGISTRY",
+    "dailyReports": "VERIFIED_READ_ONLY_REPORTS"
+  },
+  "dailyOperationsSummary": {
+    "created": true,
+    "canonicalEndpoint": "/api/operations/mlb-autonomous-operations",
+    "gamesDiscovered": "DYNAMIC_FROM_DASHBOARD_TODAY",
+    "predictionsGenerated": "DYNAMIC_FROM_DASHBOARD_TODAY",
+    "predictionsSkipped": "DYNAMIC_WITH_REASONS_WHEN_PRESENT",
+    "gamesSettled": "DYNAMIC_FROM_SETTLEMENT_GUARANTEE_AND_PERFORMANCE",
+    "learningLabelsCreated": "DYNAMIC_FROM_MODEL_INTELLIGENCE_AND_PERFORMANCE",
+    "optimizationCandidates": {
+      "new": 0,
+      "approved": 0,
+      "rejected": 2,
+      "waitingForMoreData": 2
+    }
+  },
+  "modelMemory": {
+    "created": true,
+    "baselineRows": 485,
+    "baselineScoredRows": 479,
+    "newSamplesInRelease": 0,
+    "segmentGrowthReport": true,
+    "bucketGrowthReport": true,
+    "marketsApproachingThresholds": [
+      "Moneyline",
+      "Spread / Run Line",
+      "Totals"
+    ],
+    "remainingSamples": {
+      "probabilityBucket50Plus": 29,
+      "mediumPlusConfidence": 40,
+      "officialPicks": 95,
+      "featureWeighting": "BLOCKED_BY_INCOMPLETE_CONTRIBUTION_EVIDENCE"
+    }
+  },
+  "idempotency": {
+    "eventDiscovery": true,
+    "predictionPersistence": true,
+    "oddsRefresh": true,
+    "settlement": true,
+    "learningLabels": true,
+    "dailyReports": true
+  },
+  "deterministicReports": true,
+  "productionMetricsUnchangedFromBaseline": true,
+  "localValidation": {
+    "release01Validator": "PASS_WITH_KNOWN_WARNINGS",
+    "release02Validator": "PASS",
+    "release02aValidator": "PASS",
+    "release03Validator": "PASS",
+    "release04Validator": "PASS_AFTER_RELEASE11_COMMIT",
+    "release05Validator": "PASS_AFTER_RELEASE11_COMMIT",
+    "release06Validator": "PASS_AFTER_RELEASE11_COMMIT",
+    "release07Validator": "PASS_AFTER_RELEASE11_COMMIT",
+    "release08Validator": "PASS_AFTER_RELEASE11_COMMIT",
+    "release09Validator": "PASS_AFTER_RELEASE11_COMMIT",
+    "release10Validator": "PASS_AFTER_RELEASE11_COMMIT",
+    "release11Validator": "PASS",
+    "build": "PASS",
+    "eslint": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "requiredRoutes": [
+      "/api/system/version",
+      "/api/operations/mlb-autonomous-operations",
+      "/api/operations/health",
+      "/api/dashboard/today",
+      "/api/model/intelligence",
+      "/api/model/segments",
+      "/api/performance"
+    ]
+  },
+  "release12Started": false
+}
