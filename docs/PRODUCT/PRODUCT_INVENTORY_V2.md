@@ -451,6 +451,10 @@ Scanned explicit repository roots: `src`, `scripts`, `docs`, `supabase`, `.githu
 | src/app/api/ufc/predictions/health/route.ts | API Route | Handles /api/ufc/predictions/health API requests. | @/lib/api-contract<br>@/services/ufc-prediction-engine.service<br>next/server | Production Surface |
 | src/app/api/ufc/predictions/route.ts | API Route | Handles /api/ufc/predictions API requests. | @/lib/api-contract<br>@/services/ufc-prediction-engine.service<br>next/server | Production Surface |
 | src/app/api/ufc/predictions/validation/route.ts | API Route | Handles /api/ufc/predictions/validation API requests. | @/lib/api-contract<br>@/services/ufc-prediction-engine.service<br>next/server | Production Surface |
+| src/app/api/user/wagers/route.ts | API Route | Authenticated personal wager ledger list and idempotent create. | @/lib/api-contract<br>@/services/user-wager-ledger.service<br>next/server | Protected |
+| src/app/api/user/wagers/[id]/route.ts | API Route | Authenticated personal wager detail, update and archive. | @/lib/api-contract<br>@/services/user-wager-ledger.service<br>next/server | Protected |
+| src/app/api/user/wagers/export/route.ts | API Route | Owner-scoped personal wager JSON or CSV export. | @/lib/api-contract<br>@/services/user-wager-ledger.service<br>next/server | Protected |
+| src/app/api/user/wagers/summary/route.ts | API Route | Read-only personal wager analytics separate from model metrics. | @/lib/api-contract<br>@/services/user-wager-ledger.service<br>next/server | Protected |
 | src/app/api/weather/seed/route.ts | API Route | Handles /api/weather/seed API requests. | @/lib/supabase-admin<br>next/server | Production Surface |
 | src/app/admin/historical-diagnostics/page.tsx | App Route | Renders /admin/historical-diagnostics page experience. | @/services/retrosheet-game-reconstruction.service<br>@/services/retrosheet-historical-feature-store.service<br>next | Experimental |
 | src/app/ai-bet-finder/page.tsx | App Route | Renders /ai-bet-finder page experience. | @/components/market-opportunities/AiBetFinderTool | Production Surface |

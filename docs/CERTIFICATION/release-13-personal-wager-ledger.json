@@ -1,0 +1,66 @@
+{
+  "release": "Release 13",
+  "name": "Personal Wager Ledger & Multi-Device Tracking V1",
+  "status": "PASS_PENDING_PRODUCTION_DEPLOYMENT_OBSERVATION",
+  "startingCommit": "4d812696f967fe9d771cc1e820f5a83839d0996c",
+  "predictionFormulaChanged": false,
+  "probabilityOutputsChanged": false,
+  "officialPickPolicyChanged": false,
+  "kellyFormulaChanged": false,
+  "learningWeightsChanged": false,
+  "schedulerChanged": false,
+  "providerContractsChanged": false,
+  "providerCallsMade": 0,
+  "predictionMutationsMade": 0,
+  "modelMutationsMade": 0,
+  "settlementMutationsMade": 0,
+  "userWagerSettlementAffectsModelSettlement": false,
+  "userWagerResultsAffectLearning": false,
+  "personalAnalyticsMixedWithModelMetrics": false,
+  "schema": {
+    "additive": true,
+    "tables": [
+      "user_wagers",
+      "user_wager_legs"
+    ],
+    "predictionTablesAffected": false,
+    "migration": "supabase/migrations/202607310001_release13_personal_wager_ledger.sql"
+  },
+  "rls": {
+    "enabled": true,
+    "ownerField": "user_id",
+    "usesAuthUid": true,
+    "serviceRoleRequiredForNormalOperations": false,
+    "anonymousCrossUserAccess": false
+  },
+  "apis": [
+    "GET /api/user/wagers",
+    "POST /api/user/wagers",
+    "GET /api/user/wagers/[id]",
+    "PATCH /api/user/wagers/[id]",
+    "DELETE /api/user/wagers/[id]",
+    "GET /api/user/wagers/summary",
+    "GET /api/user/wagers/export"
+  ],
+  "localToRemoteMigration": {
+    "localStoragePreserved": true,
+    "clientCreatedIdIdempotency": true,
+    "failedSyncPreservesLocalData": true,
+    "deduplicatesRemoteCreation": true
+  },
+  "workspace": {
+    "route": "/betting-workbench",
+    "localOnlyMode": true,
+    "authenticatedRemoteMode": true,
+    "syncStatus": true,
+    "retry": true,
+    "archive": true,
+    "manualResultEntry": true
+  },
+  "export": {
+    "json": true,
+    "csv": true,
+    "ownerScoped": true
+  },
+  "release14Started": false
+}

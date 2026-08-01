@@ -8,6 +8,7 @@ Current V2 architecture inventory documents:
 
 - [Runtime Dependency Graph](RUNTIME_DEPENDENCY_GRAPH.md)
 - [Database Audit V2](DATABASE_AUDIT_V2.md)
+- [Personal Wager Data Model](PERSONAL_WAGER_DATA_MODEL.md)
 
 Most architecture documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

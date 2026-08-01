@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 type Category = 'OFFICIAL_PICK' | 'VALUE_CANDIDATE' | 'RESEARCH_ONLY' | 'NO_BET'
 type SlipType = 'single' | 'parlay'
 type WagerStatus = 'draft' | 'placed' | 'won' | 'lost' | 'push' | 'void'
+type RemoteMode = 'checking' | 'local-only' | 'authenticated' | 'syncing' | 'synced' | 'failed'
 
 type Opportunity = {
   id: string
@@ -71,10 +73,13 @@ type UserWager = {
   result: string
   notes: string
   sourceCategory: string
+  remoteId?: string
+  syncStatus?: 'local' | 'synced' | 'failed' | 'duplicate'
+  archived?: boolean
 }
 
 const storageKey = 'pick-analyzer-release12-user-wagers-v1'
-const persistenceScope = 'LOCAL_BROWSER_STORAGE_ONLY'
+const localPersistenceScope = 'LOCAL_BROWSER_STORAGE_ONLY'
 const marketThreshold = 100
 const bucketThreshold = 50
 
@@ -324,6 +329,68 @@ function unique(list: Opportunity[]) {
   return Array.from(map.values())
 }
 
+async function sessionToken() {
+  const { data } = await supabase.auth.getSession()
+  return data.session?.access_token ?? null
+}
+
+function authHeaders(token: string | null) {
+  const headers: Record<string, string> = { 'content-type': 'application/json' }
+  if (token) headers.Authorization = `Bearer ${token}`
+  return headers
+}
+
+function sourceCategoryFor(legs: UserWager['legs']) {
+  const categories = new Set(legs.map((leg) => leg.category === 'RESEARCH_ONLY' ? 'RESEARCH_PICK' : leg.category))
+  if (categories.size > 1) return 'MIXED'
+  return categories.values().next().value ?? 'USER_ONLY'
+}
+
+function remotePayload(wager: UserWager, opportunities: Opportunity[]) {
+  return {
+    clientCreatedId: wager.id,
+    placedAt: wager.createdAt,
+    sportsbook: wager.sportsbook,
+    betType: wager.betType.toUpperCase(),
+    stake: wager.stake,
+    currency: 'USD',
+    potentialPayout: wager.potentialPayout,
+    actualPayout: wager.actualPayout,
+    status: wager.status.toUpperCase(),
+    result: wager.result,
+    notes: wager.notes,
+    sourceCategory: wager.sourceCategory,
+    modelSnapshot: {
+      release: 'Release 13',
+      workspaceStorageKey: storageKey,
+      modelDataLabel: 'decision-time snapshot only',
+    },
+    totalEnteredOdds: wager.enteredOdds[0] ?? null,
+    legs: wager.legs.map((leg) => {
+      const source = opportunities.find((item) => item.id === leg.betId)
+      return {
+        eventId: source?.eventId ?? null,
+        predictionId: source?.predictionId ?? null,
+        sport: source?.sport ?? null,
+        league: source?.league ?? null,
+        matchup: leg.matchup,
+        eventStartTime: source?.startTime ?? null,
+        market: leg.market,
+        selection: leg.selection,
+        userEnteredLine: leg.enteredLine,
+        userEnteredOdds: leg.enteredOdds,
+        canonicalLineSnapshot: source?.line ?? null,
+        canonicalOddsSnapshot: source?.odds ?? null,
+        modelProbabilitySnapshot: source?.probability ?? null,
+        confidenceSnapshot: source?.confidence ?? null,
+        evidenceGrade: source?.evidenceQuality ?? null,
+        result: null,
+        status: 'PENDING',
+      }
+    }),
+  }
+}
+
 export default function BettingDecisionWorkspace() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -346,12 +413,55 @@ export default function BettingDecisionWorkspace() {
   const [bankroll, setBankroll] = useState('1000')
   const [notes, setNotes] = useState('')
   const [summary, setSummary] = useState<Record<string, unknown>>({})
+  const [remoteMode, setRemoteMode] = useState<RemoteMode>('checking')
+  const [remoteMessage, setRemoteMessage] = useState('Checking authenticated remote ledger availability.')
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     window.localStorage.setItem(storageKey, JSON.stringify(wagers))
   }, [wagers])
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadRemote() {
+      try {
+        const token = await sessionToken()
+        if (!token) {
+          if (!cancelled) {
+            setRemoteMode('local-only')
+            setRemoteMessage(`Unauthenticated: wagers remain in local browser storage (${localPersistenceScope}) until you sign in and sync.`)
+          }
+          return
+        }
+        const response = await fetch('/api/user/wagers?limit=100', { cache: 'no-store', headers: authHeaders(token) })
+        if (response.status === 401) {
+          if (!cancelled) {
+            setRemoteMode('local-only')
+            setRemoteMessage('Session unavailable or expired: local wagers were preserved.')
+          }
+          return
+        }
+        if (!response.ok) throw new Error('Remote wager ledger is temporarily unavailable.')
+        const payload = await response.json()
+        const remoteRows = rows(payload.wagers)
+        if (!cancelled) {
+          setRemoteMode('authenticated')
+          setRemoteMessage(`Authenticated remote ledger available with ${remoteRows.length} remote wager records.`)
+        }
+      } catch (remoteError) {
+        if (!cancelled) {
+          setRemoteMode('failed')
+          setRemoteMessage(remoteError instanceof Error ? remoteError.message : 'Remote ledger check failed; local wagers were preserved.')
+        }
+      }
+    }
+    loadRemote()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -439,7 +549,48 @@ export default function BettingDecisionWorkspace() {
     setDraft((current) => ({ ...current, [id]: { ...current[id], ...patch } }))
   }
 
-  function saveWager() {
+  async function syncOne(wager: UserWager) {
+    const token = await sessionToken()
+    if (!token) throw new Error('Sign in to sync personal wagers across devices.')
+    const response = await fetch('/api/user/wagers', {
+      method: 'POST',
+      headers: authHeaders(token),
+      body: JSON.stringify(remotePayload(wager, opportunities)),
+    })
+    const payload = await response.json()
+    if (!response.ok) throw new Error(text(record(payload.error).message, 'Remote sync failed. Local wager was preserved.'))
+    return {
+      remoteId: typeof payload.wager?.id === 'string' ? payload.wager.id : undefined,
+      duplicate: Boolean(payload.idempotent),
+    }
+  }
+
+  async function syncLocalWagers() {
+    if (!wagers.length) return
+    setRemoteMode('syncing')
+    setRemoteMessage('Syncing local wagers to the authenticated remote ledger.')
+    let synced = 0
+    let duplicate = 0
+    try {
+      for (const wager of wagers) {
+        if (wager.archived || wager.syncStatus === 'synced') continue
+        const result = await syncOne(wager)
+        synced += result.duplicate ? 0 : 1
+        duplicate += result.duplicate ? 1 : 0
+        setWagers((current) => current.map((item) => item.id === wager.id ? { ...item, remoteId: result.remoteId, syncStatus: result.duplicate ? 'duplicate' : 'synced' } : item))
+      }
+      const now = new Date().toISOString()
+      setLastSyncedAt(now)
+      setRemoteMode('synced')
+      setRemoteMessage(`Sync complete: ${synced} created, ${duplicate} duplicate/idempotent, local copy retained.`)
+    } catch (syncError) {
+      setRemoteMode('failed')
+      setRemoteMessage(syncError instanceof Error ? syncError.message : 'Sync failed; local wagers were preserved.')
+      setWagers((current) => current.map((item) => item.syncStatus === 'synced' ? item : { ...item, syncStatus: item.syncStatus ?? 'failed' }))
+    }
+  }
+
+  async function saveWager() {
     if (!slip.length || ticket.invalid.length) return
     const legs = slip.map((item) => ({
       betId: item.id,
@@ -450,7 +601,7 @@ export default function BettingDecisionWorkspace() {
       enteredOdds: num(draft[item.id]?.odds),
       enteredLine: num(draft[item.id]?.line),
     }))
-    setWagers((current) => [{
+    const wager: UserWager = {
       id: `user-wager-${Date.now()}`,
       createdAt: new Date().toISOString(),
       eventIds: Array.from(new Set(slip.map((item) => item.eventId).filter(Boolean))) as string[],
@@ -465,9 +616,25 @@ export default function BettingDecisionWorkspace() {
       actualPayout: null,
       result: 'Pending user outcome',
       notes,
-      sourceCategory: Array.from(new Set(legs.map((leg) => categoryLabel(leg.category)))).join(', ') || persistenceScope,
-    }, ...current])
+      sourceCategory: sourceCategoryFor(legs),
+      syncStatus: 'local',
+    }
+    setWagers((current) => [wager, ...current])
     setNotes('')
+    if (remoteMode === 'authenticated' || remoteMode === 'synced') {
+      try {
+        setRemoteMode('syncing')
+        const result = await syncOne(wager)
+        setWagers((current) => current.map((item) => item.id === wager.id ? { ...item, remoteId: result.remoteId, syncStatus: result.duplicate ? 'duplicate' : 'synced' } : item))
+        setLastSyncedAt(new Date().toISOString())
+        setRemoteMode('synced')
+        setRemoteMessage(result.duplicate ? 'Remote ledger already had this wager; local copy retained.' : 'Wager saved locally and synced remotely.')
+      } catch (syncError) {
+        setRemoteMode('failed')
+        setRemoteMessage(syncError instanceof Error ? syncError.message : 'Remote sync failed; local wager was preserved.')
+        setWagers((current) => current.map((item) => item.id === wager.id ? { ...item, syncStatus: 'failed' } : item))
+      }
+    }
   }
 
   return (
@@ -475,11 +642,11 @@ export default function BettingDecisionWorkspace() {
       <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
         <header className="border-b border-slate-800 pb-6">
           <Link href="/" className="text-sm font-bold text-emerald-300 hover:text-emerald-200">Back to Daily Brief</Link>
-          <p className="mt-5 text-xs font-bold uppercase tracking-[0.24em] text-slate-500">Release 12</p>
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.24em] text-slate-500">Release 13</p>
           <div className="mt-2 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h1 className="text-3xl font-black sm:text-4xl">Betting Decision Workspace</h1>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">Review, compare, draft and track user-controlled wagers. User-entered wager results remain separate from model prediction settlement.</p>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">Review, compare, draft and track user-controlled wagers. Authenticated sync writes only to the personal wager ledger; prediction settlement and learning remain separate.</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-4 lg:w-[620px]">
               <Summary label="Official" value={grouped.OFFICIAL_PICK.length} />
@@ -497,6 +664,22 @@ export default function BettingDecisionWorkspace() {
           <Summary label="Model Sample" value={String(sample.sampleSize ?? 'Unavailable')} />
         </section>
 
+        <section className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Personal Wager Persistence</p>
+              <h2 className="mt-1 text-xl font-black">{remoteMode === 'local-only' ? 'local-only mode' : remoteMode === 'failed' ? 'Remote sync needs attention' : remoteMode === 'syncing' ? 'Sync in progress' : 'Remote ledger ready'}</h2>
+              <p className="mt-2 text-sm text-slate-400">{remoteMessage}</p>
+              <p className="mt-1 text-xs text-slate-500">Last synced: {when(lastSyncedAt)}. Local data is retained after successful or failed sync.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={syncLocalWagers} disabled={remoteMode === 'syncing' || !wagers.length} className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">Sync Local Wagers</button>
+              <Link href="/api/user/wagers/export?format=json" className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-black text-slate-200">Export JSON</Link>
+              <Link href="/api/user/wagers/export?format=csv" className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-black text-slate-200">Export CSV</Link>
+            </div>
+          </div>
+        </section>
+
         {loading ? <State title="Loading workspace" text="Reading Current Board, Top Picks, model intelligence, model segments and Daily Brief." /> : null}
         {error ? <State title="Workspace unavailable" text={error} tone="bad" /> : null}
         {!loading && !opportunities.length ? <State title="No opportunities available" text="No current read-only opportunity rows were returned." /> : null}
@@ -512,7 +695,7 @@ export default function BettingDecisionWorkspace() {
         {tab === 'Bet Slip' ? <SlipBuilder opportunities={filtered} slip={slip} slipIds={slipIds} draft={draft} type={slipType} setType={setSlipType} onToggle={toggleSlip} onUpdate={updateDraft} notes={notes} setNotes={setNotes} ticket={ticket} onSave={saveWager} /> : null}
         {tab === 'Risk' ? <Risk bankroll={bankroll} setBankroll={setBankroll} ticket={ticket} slip={slip} draft={draft} /> : null}
         {tab === 'Parlay Safety' ? <Parlay ticket={ticket} slip={slip} /> : null}
-        {tab === 'Personal Results' ? <Personal wagers={wagers} metrics={personal} onUpdate={(id, patch) => setWagers((current) => current.map((item) => item.id === id ? { ...item, ...patch } : item))} /> : null}
+        {tab === 'Personal Results' ? <Personal wagers={wagers} metrics={personal} onUpdate={(id, patch) => setWagers((current) => current.map((item) => item.id === id ? { ...item, ...patch, syncStatus: item.syncStatus === 'synced' ? 'local' : item.syncStatus } : item))} onArchive={(id) => setWagers((current) => current.map((item) => item.id === id ? { ...item, archived: true, syncStatus: item.syncStatus === 'synced' ? 'local' : item.syncStatus } : item))} /> : null}
       </div>
     </main>
   )
@@ -612,7 +795,7 @@ function Comparison({ item }: { item: Opportunity }) {
   return <article className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><Title item={item} /><div className="mt-4 grid grid-cols-2 gap-3"><Metric label="Evidence" value={grade} /><Metric label="Sample" value={item.segmentSample === null ? 'Unavailable' : String(item.segmentSample)} /><Metric label="Segment Accuracy" value={pct(item.segmentAccuracy)} /><Metric label="Segment Brier" value={item.segmentBrier === null ? 'Unavailable' : item.segmentBrier.toFixed(4)} /><Metric label="Calibration" value={signedPct(item.segmentCalibration)} /><Metric label="Market" value={item.segmentSample !== null && item.segmentSample >= marketThreshold ? 'Directional evidence' : 'Insufficient evidence'} /><Metric label="Starter" value="Unavailable" /><Metric label="Bullpen" value="Unavailable" /><Metric label="Weather" value="Unavailable" /><Metric label="Park" value="Unavailable" /></div>{item.segmentSample !== null && item.segmentSample < marketThreshold ? <p className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-100">Segment comparison is not decision-grade because sample size is below the Release 08 threshold.</p> : null}{item.missing.length ? <p className="mt-4 text-sm text-slate-400">Missing information: {item.missing.join(', ')}</p> : null}</article>
 }
 
-function SlipBuilder(props: { opportunities: Opportunity[]; slip: Opportunity[]; slipIds: string[]; draft: Record<string, DraftLeg>; type: SlipType; setType: (value: SlipType) => void; onToggle: (id: string) => void; onUpdate: (id: string, patch: Partial<DraftLeg>) => void; notes: string; setNotes: (value: string) => void; ticket: ReturnType<typeof ticketSummary>; onSave: () => void }) {
+function SlipBuilder(props: { opportunities: Opportunity[]; slip: Opportunity[]; slipIds: string[]; draft: Record<string, DraftLeg>; type: SlipType; setType: (value: SlipType) => void; onToggle: (id: string) => void; onUpdate: (id: string, patch: Partial<DraftLeg>) => void; notes: string; setNotes: (value: string) => void; ticket: ReturnType<typeof ticketSummary>; onSave: () => void | Promise<void> }) {
   return <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px]"><div className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><div className="flex items-center justify-between gap-3"><h2 className="text-2xl font-black">User Bet Slip</h2><select value={props.type} onChange={(event) => props.setType(event.target.value as SlipType)} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"><option value="single">Singles</option><option value="parlay">Parlay</option></select></div><p className="mt-2 text-sm text-slate-400">User-entered odds and stakes are separate from canonical stored model data.</p><div className="mt-5 grid gap-3 xl:grid-cols-2">{props.opportunities.filter((item) => item.category !== 'NO_BET').map((item) => <button key={item.id} disabled={locked(item.startTime, item.eventStatus)} onClick={() => props.onToggle(item.id)} className={`rounded-lg border p-3 text-left ${props.slipIds.includes(item.id) ? 'border-emerald-400 bg-emerald-500/10' : 'border-slate-800 bg-slate-950/60'} ${locked(item.startTime, item.eventStatus) ? 'opacity-50' : ''}`}><p className="font-black">{selection(item)}</p><p className="mt-1 text-xs text-slate-400">{categoryLabel(item.category)} | {odds(item.odds)}</p></button>)}</div></div><div className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><h3 className="text-xl font-black">Draft</h3><div className="mt-4 space-y-4">{props.slip.map((item, index) => <DraftEditor key={item.id} item={item} draft={props.draft[item.id]} parlayLocked={props.type === 'parlay' && index > 0} firstStake={props.draft[props.slip[0]?.id]?.stake ?? ''} onUpdate={props.onUpdate} />)}{!props.slip.length ? <p className="text-sm text-slate-500">No selections added.</p> : null}</div><textarea value={props.notes} onChange={(event) => props.setNotes(event.target.value)} className="mt-4 min-h-24 w-full rounded-lg border border-slate-700 bg-slate-950 p-3 text-sm" placeholder="User notes. This does not update prediction history." /><div className="mt-4 grid grid-cols-2 gap-3"><Summary label="Risk" value={money(props.ticket.maxLoss)} /><Summary label="Potential" value={money(props.ticket.payout)} /></div>{props.ticket.warnings.map((item) => <p key={item} className="mt-3 text-sm text-amber-100">{item}</p>)}{props.ticket.invalid.map((item) => <p key={item} className="mt-3 text-sm text-red-200">{item}</p>)}<button disabled={props.ticket.invalid.length > 0} onClick={props.onSave} className="mt-4 w-full rounded-lg bg-emerald-400 px-4 py-3 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">Save User Wager</button></div></section>
 }
 
@@ -633,6 +816,7 @@ function Parlay({ ticket, slip }: { ticket: ReturnType<typeof ticketSummary>; sl
   return <section className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><h2 className="text-2xl font-black">Parlay Safety</h2><p className="mt-2 text-sm text-slate-400">Combined model probability unavailable because leg dependence has not been validated.</p><div className="mt-5 grid gap-3 md:grid-cols-4"><Summary label="Legs" value={slip.length} /><Summary label="Decimal Odds" value={ticket.combinedDecimal === null ? 'Unavailable' : ticket.combinedDecimal.toFixed(3)} /><Summary label="Implied Probability" value={pct(ticket.combinedImplied)} /><Summary label="Potential" value={money(ticket.payout)} /></div><div className="mt-5 space-y-2">{[...ticket.warnings, ...ticket.invalid].map((item) => <p key={item} className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-100">{item}</p>)}{!ticket.warnings.length && !ticket.invalid.length ? <p className="text-sm text-slate-400">No duplicate-event or same-market conflicts detected from available data.</p> : null}</div></section>
 }
 
-function Personal({ wagers, metrics, onUpdate }: { wagers: UserWager[]; metrics: ReturnType<typeof personalMetrics>; onUpdate: (id: string, patch: Partial<UserWager>) => void }) {
-  return <section className="space-y-5"><div className="grid gap-3 md:grid-cols-4"><Summary label="Wagers" value={metrics.placed} /><Summary label="W-L-P" value={`${metrics.wins}-${metrics.losses}-${metrics.pushes}`} /><Summary label="Net" value={money(metrics.net)} /><Summary label="ROI" value={pct(metrics.roi)} /></div><p className="text-sm text-slate-400">Personal betting ROI is separate from model accuracy, model Brier and prediction settlement.</p><div className="grid gap-4 lg:grid-cols-2">{wagers.map((wager) => <article key={wager.id} className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><div className="flex flex-wrap gap-2"><span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-black">{wager.betType}</span><span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-black">{wager.status}</span><span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-black">{wager.sourceCategory}</span></div><p className="mt-3 text-sm text-slate-400">{when(wager.createdAt)} | {wager.sportsbook}</p><ul className="mt-4 space-y-1 text-sm text-slate-200">{wager.legs.map((leg) => <li key={`${wager.id}-${leg.betId}`}>- {leg.selection} | {leg.matchup} | {odds(leg.enteredOdds)}</li>)}</ul><div className="mt-4 grid grid-cols-3 gap-3"><Metric label="Stake" value={money(wager.stake)} /><Metric label="Potential" value={money(wager.potentialPayout)} /><Metric label="Actual" value={money(wager.actualPayout)} /></div><div className="mt-4 grid grid-cols-2 gap-3"><select value={wager.status} onChange={(event) => onUpdate(wager.id, { status: event.target.value as WagerStatus })} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"><option value="draft">Draft</option><option value="placed">Placed</option><option value="won">Won</option><option value="lost">Lost</option><option value="push">Push</option><option value="void">Void</option></select><input value={wager.actualPayout ?? ''} onChange={(event) => onUpdate(wager.id, { actualPayout: num(event.target.value) })} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="Actual payout" /></div>{wager.notes ? <p className="mt-4 text-sm text-slate-400">{wager.notes}</p> : null}</article>)}{!wagers.length ? <State title="No personal wagers recorded" text="Saved wagers live in local browser storage and never alter prediction history." /> : null}</div></section>
+function Personal({ wagers, metrics, onUpdate, onArchive }: { wagers: UserWager[]; metrics: ReturnType<typeof personalMetrics>; onUpdate: (id: string, patch: Partial<UserWager>) => void; onArchive: (id: string) => void }) {
+  const visible = wagers.filter((wager) => !wager.archived)
+  return <section className="space-y-5"><div className="grid gap-3 md:grid-cols-4"><Summary label="Wagers" value={metrics.placed} /><Summary label="W-L-P" value={`${metrics.wins}-${metrics.losses}-${metrics.pushes}`} /><Summary label="Net" value={money(metrics.net)} /><Summary label="ROI" value={pct(metrics.roi)} /></div><p className="text-sm text-slate-400">Personal betting ROI is separate from model accuracy, model Brier and prediction settlement. Result entry is user-led unless a future safe wager-line matching system is certified.</p><div className="grid gap-4 lg:grid-cols-2">{visible.map((wager) => <article key={wager.id} className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><div className="flex flex-wrap gap-2"><span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-black">{wager.betType}</span><span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-black">{wager.status}</span><span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-black">{wager.sourceCategory}</span><span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-black">{wager.syncStatus ?? 'local'}</span></div><p className="mt-3 text-sm text-slate-400">{when(wager.createdAt)} | {wager.sportsbook}</p><ul className="mt-4 space-y-1 text-sm text-slate-200">{wager.legs.map((leg) => <li key={`${wager.id}-${leg.betId}`}>- {leg.selection} | {leg.matchup} | {odds(leg.enteredOdds)}</li>)}</ul><div className="mt-4 grid grid-cols-3 gap-3"><Metric label="Stake" value={money(wager.stake)} /><Metric label="Potential" value={money(wager.potentialPayout)} /><Metric label="Actual" value={money(wager.actualPayout)} /></div><div className="mt-4 grid grid-cols-3 gap-3"><select value={wager.status} onChange={(event) => onUpdate(wager.id, { status: event.target.value as WagerStatus })} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"><option value="draft">Draft</option><option value="placed">Placed</option><option value="won">Won</option><option value="lost">Lost</option><option value="push">Push</option><option value="void">Void</option></select><input value={wager.actualPayout ?? ''} onChange={(event) => onUpdate(wager.id, { actualPayout: num(event.target.value) })} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="Actual payout" /><button onClick={() => onArchive(wager.id)} className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-black text-slate-200">Archive</button></div>{wager.notes ? <p className="mt-4 text-sm text-slate-400">{wager.notes}</p> : null}</article>)}{!visible.length ? <State title="No personal wagers recorded" text="Saved wagers live in local browser storage and never alter prediction history." /> : null}</div></section>
 }

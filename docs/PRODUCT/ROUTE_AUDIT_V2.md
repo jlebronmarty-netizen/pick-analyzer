@@ -446,6 +446,10 @@ No duplicate route files detected by normalized route and type.
 | /api/ufc/predictions/health | API Route | src/app/api/ufc/predictions/health/route.ts | Active | Handles /api/ufc/predictions/health API requests. |
 | /api/ufc/predictions | API Route | src/app/api/ufc/predictions/route.ts | Active | Handles /api/ufc/predictions API requests. |
 | /api/ufc/predictions/validation | API Route | src/app/api/ufc/predictions/validation/route.ts | Active | Handles /api/ufc/predictions/validation API requests. |
+| /api/user/wagers | API Route | src/app/api/user/wagers/route.ts | Protected | Authenticated personal wager ledger list and idempotent create. |
+| /api/user/wagers/[id] | API Route | src/app/api/user/wagers/[id]/route.ts | Protected | Authenticated personal wager detail, update and archive. |
+| /api/user/wagers/export | API Route | src/app/api/user/wagers/export/route.ts | Protected | Owner-scoped personal wager JSON or CSV export. |
+| /api/user/wagers/summary | API Route | src/app/api/user/wagers/summary/route.ts | Protected | Read-only personal wager analytics separate from model metrics. |
 | /api/weather/seed | API Route | src/app/api/weather/seed/route.ts | Active | Handles /api/weather/seed API requests. |
 | /admin/historical-diagnostics | App Route | src/app/admin/historical-diagnostics/page.tsx | Experimental | Renders /admin/historical-diagnostics page experience. |
 | /ai-bet-finder | App Route | src/app/ai-bet-finder/page.tsx | Active | Renders /ai-bet-finder page experience. |
