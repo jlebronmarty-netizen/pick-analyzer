@@ -1,0 +1,39 @@
+{
+  "release": "Release 14",
+  "name": "Account Session & Authenticated Ledger Experience V1",
+  "startingCommit": "5243922812ff3cd51d3934b6cfe423e087901dec",
+  "status": "PASS_LOCAL_PENDING_AUTHENTICATED_PRODUCTION_LIFECYCLE",
+  "scope": {
+    "authRedesign": false,
+    "workspaceAccountState": true,
+    "migrationPreview": true,
+    "sessionRecovery": true,
+    "remoteCreate": true,
+    "remoteRead": true,
+    "remoteUpdate": true,
+    "remoteArchive": true,
+    "summaryAndExport": true
+  },
+  "modelSafety": {
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "kellyLogicChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "settlementChanged": false,
+    "providerContractsChanged": false,
+    "probabilitiesChanged": false
+  },
+  "security": {
+    "tokensRendered": false,
+    "serviceRoleUsedForUserLedger": false,
+    "rlsBoundaryPreserved": true,
+    "localCopyPreservedUntilRemoteSuccess": true
+  },
+  "productionCertification": {
+    "requiresAuthenticatedSession": true,
+    "release13UpgradeRequiresLifecyclePass": true,
+    "providerCallsMade": 0,
+    "modelMetricsChanged": false
+  }
+}

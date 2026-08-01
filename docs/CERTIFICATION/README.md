@@ -38,6 +38,8 @@ Current V2 certification documents:
 - [Release 13A Certification JSON](release-13a-authenticated-wager-ledger.json)
 - [Release 13B Live Slate Certification](RELEASE_13B_LIVE_SLATE.md)
 - [Release 13B Certification JSON](release-13b-live-slate.json)
+- [Release 14 Authenticated Ledger Certification](RELEASE_14_AUTHENTICATED_LEDGER.md)
+- [Release 14 Certification JSON](release-14-authenticated-ledger.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

@@ -24,6 +24,8 @@ Current V2 product integration documents:
 - [Release 13B Live Slate Audit](RELEASE_13B_LIVE_SLATE_AUDIT.md)
 - [Live Slate Rules](LIVE_SLATE_RULES.md)
 - [Betting Workspace State Machine](BETTING_WORKSPACE_STATE_MACHINE.md)
+- [Release 14 Auth Audit](RELEASE_14_AUTH_AUDIT.md)
+- [Authenticated Ledger Workflow](AUTHENTICATED_LEDGER_WORKFLOW.md)
 
 Most product documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

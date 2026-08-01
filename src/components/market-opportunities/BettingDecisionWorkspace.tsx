@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
 type Category = 'OFFICIAL_PICK' | 'VALUE_CANDIDATE' | 'RESEARCH_ONLY' | 'NO_BET'
 type SlipType = 'single' | 'parlay'
 type WagerStatus = 'draft' | 'placed' | 'won' | 'lost' | 'push' | 'void'
-type RemoteMode = 'checking' | 'local-only' | 'authenticated' | 'syncing' | 'synced' | 'failed'
+type RemoteMode = 'checking' | 'local-only' | 'authenticated' | 'sync-pending' | 'syncing' | 'synced' | 'failed' | 'offline' | 'expired' | 'duplicate'
 
 type Opportunity = {
   id: string
@@ -80,6 +80,12 @@ type UserWager = {
   remoteId?: string
   syncStatus?: 'local' | 'synced' | 'failed' | 'duplicate'
   archived?: boolean
+}
+
+type SessionState = {
+  email: string | null
+  userId: string | null
+  expiresAt: string | null
 }
 
 const storageKey = 'pick-analyzer-release12-user-wagers-v1'
@@ -385,9 +391,22 @@ function slateEmptyState(history: Opportunity[]) {
   return { title: 'No pregame opportunities remain today.', text: 'Historical and stale snapshots are available only in History.' }
 }
 
-async function sessionToken() {
+async function sessionSnapshot() {
   const { data } = await supabase.auth.getSession()
-  return data.session?.access_token ?? null
+  const session = data.session
+  return {
+    token: session?.access_token ?? null,
+    state: {
+      email: session?.user?.email ?? null,
+      userId: session?.user?.id ?? null,
+      expiresAt: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null,
+    } satisfies SessionState,
+  }
+}
+
+async function sessionToken() {
+  const snapshot = await sessionSnapshot()
+  return snapshot.token
 }
 
 function authHeaders(token: string | null) {
@@ -447,6 +466,29 @@ function remotePayload(wager: UserWager, opportunities: Opportunity[]) {
   }
 }
 
+function remotePatchPayload(patch: Partial<UserWager>) {
+  return {
+    ...(patch.status ? { status: patch.status.toUpperCase() } : {}),
+    ...(patch.actualPayout !== undefined ? { actualPayout: patch.actualPayout } : {}),
+    ...(patch.result !== undefined ? { result: patch.result } : {}),
+    ...(patch.notes !== undefined ? { notes: patch.notes } : {}),
+    ...(patch.archived !== undefined ? { isArchived: patch.archived } : {}),
+  }
+}
+
+function remoteModeLabel(mode: RemoteMode) {
+  if (mode === 'checking') return 'Checking session'
+  if (mode === 'local-only') return 'Local Only Mode'
+  if (mode === 'authenticated') return 'Remote Ledger Active'
+  if (mode === 'sync-pending') return 'Sync pending'
+  if (mode === 'syncing') return 'Syncing'
+  if (mode === 'synced') return 'Synced'
+  if (mode === 'failed') return 'Sync failed'
+  if (mode === 'offline') return 'Offline mode'
+  if (mode === 'expired') return 'Session recovery needed'
+  return 'Duplicate ignored'
+}
+
 export default function BettingDecisionWorkspace() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [historyOpportunities, setHistoryOpportunities] = useState<Opportunity[]>([])
@@ -472,6 +514,9 @@ export default function BettingDecisionWorkspace() {
   const [summary, setSummary] = useState<Record<string, unknown>>({})
   const [remoteMode, setRemoteMode] = useState<RemoteMode>('checking')
   const [remoteMessage, setRemoteMessage] = useState('Checking authenticated remote ledger availability.')
+  const [sessionState, setSessionState] = useState<SessionState>({ email: null, userId: null, expiresAt: null })
+  const [remoteWagerCount, setRemoteWagerCount] = useState(0)
+  const [migrationPreviewOpen, setMigrationPreviewOpen] = useState(false)
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -480,45 +525,59 @@ export default function BettingDecisionWorkspace() {
     window.localStorage.setItem(storageKey, JSON.stringify(wagers))
   }, [wagers])
 
-  useEffect(() => {
-    let cancelled = false
-    async function loadRemote() {
-      try {
-        const token = await sessionToken()
-        if (!token) {
-          if (!cancelled) {
-            setRemoteMode('local-only')
-            setRemoteMessage(`Unauthenticated: wagers remain in local browser storage (${localPersistenceScope}) until you sign in and sync.`)
-          }
-          return
-        }
-        const response = await fetch('/api/user/wagers?limit=100', { cache: 'no-store', headers: authHeaders(token) })
-        if (response.status === 401) {
-          if (!cancelled) {
-            setRemoteMode('local-only')
-            setRemoteMessage('Session unavailable or expired: local wagers were preserved.')
-          }
-          return
-        }
-        if (!response.ok) throw new Error('Remote wager ledger is temporarily unavailable.')
-        const payload = await response.json()
-        const remoteRows = rows(payload.wagers)
-        if (!cancelled) {
-          setRemoteMode('authenticated')
-          setRemoteMessage(`Authenticated remote ledger available with ${remoteRows.length} remote wager records.`)
-        }
-      } catch (remoteError) {
-        if (!cancelled) {
-          setRemoteMode('failed')
-          setRemoteMessage(remoteError instanceof Error ? remoteError.message : 'Remote ledger check failed; local wagers were preserved.')
-        }
+  const refreshRemoteState = useCallback(async () => {
+    try {
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        setRemoteMode('offline')
+        setRemoteMessage('Offline mode: local wagers remain available and will be eligible for sync after reconnect.')
+        return
       }
+      const snapshot = await sessionSnapshot()
+      setSessionState(snapshot.state)
+      if (!snapshot.token) {
+        setRemoteMode('local-only')
+        setRemoteMessage(`Unauthenticated local-only mode: wagers remain in local browser storage (${localPersistenceScope}) until you sign in and sync.`)
+        return
+      }
+      const response = await fetch('/api/user/wagers?limit=100', { cache: 'no-store', headers: authHeaders(snapshot.token) })
+      if (response.status === 401) {
+        setRemoteMode('expired')
+        setRemoteMessage('Session unavailable or expired: local wagers were preserved. Sign in again or reconnect to resume sync.')
+        return
+      }
+      if (!response.ok) throw new Error('Remote wager ledger is temporarily unavailable.')
+      const payload = await response.json()
+      const remoteRows = rows(payload.wagers)
+      setRemoteWagerCount(remoteRows.length)
+      setRemoteMode(wagers.some((wager) => !wager.archived && wager.syncStatus !== 'synced' && wager.syncStatus !== 'duplicate') ? 'sync-pending' : 'authenticated')
+      setRemoteMessage(`Authenticated remote ledger available with ${remoteRows.length} remote wager records.`)
+    } catch (remoteError) {
+      setRemoteMode('failed')
+      setRemoteMessage(remoteError instanceof Error ? remoteError.message : 'Remote ledger check failed; local wagers were preserved.')
     }
-    loadRemote()
+  }, [wagers])
+
+  useEffect(() => {
+    const scheduleRefresh = () => {
+      window.setTimeout(() => void refreshRemoteState(), 0)
+    }
+    scheduleRefresh()
+    const subscription = supabase.auth.onAuthStateChange(() => {
+      scheduleRefresh()
+    }).data.subscription
+    const online = () => scheduleRefresh()
+    const offline = () => {
+      setRemoteMode('offline')
+      setRemoteMessage('Offline mode: local wagers remain available and will be eligible for sync after reconnect.')
+    }
+    window.addEventListener('online', online)
+    window.addEventListener('offline', offline)
     return () => {
-      cancelled = true
+      subscription.unsubscribe()
+      window.removeEventListener('online', online)
+      window.removeEventListener('offline', offline)
     }
-  }, [])
+  }, [refreshRemoteState])
 
   useEffect(() => {
     async function load() {
@@ -580,6 +639,12 @@ export default function BettingDecisionWorkspace() {
   const personal = personalMetrics(wagers)
   const sample = record(record(summary.intelligence).currentProductionSample)
   const emptyState = slateEmptyState(historyOpportunities)
+  const migrationPreview = useMemo(() => ({
+    unsynced: wagers.filter((wager) => !wager.archived && wager.syncStatus !== 'synced' && wager.syncStatus !== 'duplicate').length,
+    failed: wagers.filter((wager) => !wager.archived && wager.syncStatus === 'failed').length,
+    duplicate: wagers.filter((wager) => wager.syncStatus === 'duplicate').length,
+    synced: wagers.filter((wager) => wager.syncStatus === 'synced').length,
+  }), [wagers])
 
   function toggleCompare(id: string) {
     setSelectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id].slice(-4))
@@ -622,7 +687,11 @@ export default function BettingDecisionWorkspace() {
   }
 
   async function syncLocalWagers() {
-    if (!wagers.length) return
+    if (!migrationPreview.unsynced) {
+      setRemoteMode('synced')
+      setRemoteMessage('No unsynced wagers were found. Local copy remains available.')
+      return
+    }
     setRemoteMode('syncing')
     setRemoteMessage('Syncing local wagers to the authenticated remote ledger.')
     let synced = 0
@@ -637,13 +706,64 @@ export default function BettingDecisionWorkspace() {
       }
       const now = new Date().toISOString()
       setLastSyncedAt(now)
-      setRemoteMode('synced')
+      setRemoteMode(duplicate > 0 && synced === 0 ? 'duplicate' : 'synced')
+      setMigrationPreviewOpen(false)
       setRemoteMessage(`Sync complete: ${synced} created, ${duplicate} duplicate/idempotent, local copy retained.`)
     } catch (syncError) {
-      setRemoteMode('failed')
+      const message = syncError instanceof Error ? syncError.message : 'Sync failed; local wagers were preserved.'
+      setRemoteMode(message.toLowerCase().includes('sign in') || message.toLowerCase().includes('expired') ? 'expired' : 'failed')
       setRemoteMessage(syncError instanceof Error ? syncError.message : 'Sync failed; local wagers were preserved.')
       setWagers((current) => current.map((item) => item.syncStatus === 'synced' ? item : { ...item, syncStatus: item.syncStatus ?? 'failed' }))
     }
+  }
+
+  async function updateRemoteWager(wager: UserWager, patch: Partial<UserWager>) {
+    if (!wager.remoteId) return
+    const token = await sessionToken()
+    if (!token) throw new Error('Sign in to update remote personal wagers.')
+    const response = await fetch(`/api/user/wagers/${wager.remoteId}`, {
+      method: 'PATCH',
+      headers: authHeaders(token),
+      body: JSON.stringify(remotePatchPayload(patch)),
+    })
+    const payload = await response.json()
+    if (!response.ok) throw new Error(text(record(payload.error).message, 'Remote wager update failed. Local wager was preserved.'))
+  }
+
+  function updateWager(id: string, patch: Partial<UserWager>) {
+    const currentWager = wagers.find((item) => item.id === id)
+    setWagers((current) => current.map((item) => item.id === id ? { ...item, ...patch, syncStatus: item.syncStatus === 'synced' ? 'local' : item.syncStatus } : item))
+    if (!currentWager?.remoteId) return
+    void updateRemoteWager(currentWager, patch)
+      .then(() => {
+        setLastSyncedAt(new Date().toISOString())
+        setRemoteMode('synced')
+        setRemoteMessage('Remote wager update saved. Local copy retained.')
+        setWagers((current) => current.map((item) => item.id === id ? { ...item, syncStatus: 'synced' } : item))
+      })
+      .catch((syncError) => {
+        setRemoteMode('failed')
+        setRemoteMessage(syncError instanceof Error ? syncError.message : 'Remote wager update failed. Local wager was preserved.')
+        setWagers((current) => current.map((item) => item.id === id ? { ...item, syncStatus: 'failed' } : item))
+      })
+  }
+
+  function archiveWager(id: string) {
+    const currentWager = wagers.find((item) => item.id === id)
+    setWagers((current) => current.map((item) => item.id === id ? { ...item, archived: true, syncStatus: item.syncStatus === 'synced' ? 'local' : item.syncStatus } : item))
+    if (!currentWager?.remoteId) return
+    void updateRemoteWager(currentWager, { archived: true })
+      .then(() => {
+        setLastSyncedAt(new Date().toISOString())
+        setRemoteMode('synced')
+        setRemoteMessage('Remote wager archived. Local archive copy retained.')
+        setWagers((current) => current.map((item) => item.id === id ? { ...item, syncStatus: 'synced' } : item))
+      })
+      .catch((syncError) => {
+        setRemoteMode('failed')
+        setRemoteMessage(syncError instanceof Error ? syncError.message : 'Remote archive failed. Local wager was preserved.')
+        setWagers((current) => current.map((item) => item.id === id ? { ...item, archived: false, syncStatus: 'failed' } : item))
+      })
   }
 
   async function saveWager() {
@@ -721,15 +841,35 @@ export default function BettingDecisionWorkspace() {
         </section>
 
         <section className="rounded-lg border border-slate-800 bg-slate-900/70 p-5">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Personal Wager Persistence</p>
-              <h2 className="mt-1 text-xl font-black">{remoteMode === 'local-only' ? 'local-only mode' : remoteMode === 'failed' ? 'Remote sync needs attention' : remoteMode === 'syncing' ? 'Sync in progress' : 'Remote ledger ready'}</h2>
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Account And Remote Ledger</p>
+              <h2 className="mt-1 text-xl font-black">{remoteModeLabel(remoteMode)}</h2>
               <p className="mt-2 text-sm text-slate-400">{remoteMessage}</p>
-              <p className="mt-1 text-xs text-slate-500">Last synced: {when(lastSyncedAt)}. Local data is retained after successful or failed sync.</p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-4">
+                <Metric label="Connected account" value={sessionState.email ?? 'Not signed in'} />
+                <Metric label="Remote rows" value={String(remoteWagerCount)} />
+                <Metric label="Last sync" value={when(lastSyncedAt)} />
+                <Metric label="Unsynced" value={String(migrationPreview.unsynced)} tone={migrationPreview.unsynced ? 'warn' : 'good'} />
+              </div>
+              {remoteMode === 'local-only' || remoteMode === 'expired' ? (
+                <div className="mt-4 rounded-lg border border-sky-500/30 bg-sky-500/10 p-4">
+                  <h3 className="font-black text-sky-100">Local Only Mode</h3>
+                  <p className="mt-2 text-sm leading-6 text-sky-100/80">Sign in to sync wagers across devices, restore after browser refresh, use remote summary/export and keep a protected account-owned ledger. Local wagers stay in this browser until Sync Local Wagers succeeds.</p>
+                </div>
+              ) : null}
+              {migrationPreviewOpen ? (
+                <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
+                  <h3 className="font-black text-emerald-100">Migration Preview</h3>
+                  <p className="mt-2 text-sm leading-6 text-emerald-100/80">{migrationPreview.unsynced} local wager(s) are ready to migrate. {migrationPreview.failed} failed item(s) will retry. {migrationPreview.duplicate} duplicate/idempotent item(s) are already protected. The local copy remains until the remote ledger confirms success.</p>
+                </div>
+              ) : null}
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button onClick={syncLocalWagers} disabled={remoteMode === 'syncing' || !wagers.length} className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">Sync Local Wagers</button>
+            <div className="flex flex-wrap gap-2 lg:max-w-xs lg:justify-end">
+              {remoteMode === 'local-only' || remoteMode === 'expired' ? <Link href="/login" className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950">Sign In</Link> : null}
+              <button onClick={() => void refreshRemoteState()} disabled={remoteMode === 'syncing'} className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-black text-slate-200 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">Reconnect</button>
+              {!migrationPreviewOpen && migrationPreview.unsynced > 0 ? <button onClick={() => setMigrationPreviewOpen(true)} disabled={remoteMode === 'syncing' || remoteMode === 'local-only' || remoteMode === 'expired'} className="rounded-lg bg-sky-400 px-4 py-2 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">Preview Sync</button> : null}
+              {migrationPreviewOpen ? <button onClick={syncLocalWagers} disabled={remoteMode === 'syncing' || !migrationPreview.unsynced} className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">Confirm And Sync</button> : null}
               <Link href="/api/user/wagers/export?format=json" className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-black text-slate-200">Export JSON</Link>
               <Link href="/api/user/wagers/export?format=csv" className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-black text-slate-200">Export CSV</Link>
             </div>
@@ -752,7 +892,7 @@ export default function BettingDecisionWorkspace() {
         {tab === 'Risk' ? <Risk bankroll={bankroll} setBankroll={setBankroll} ticket={ticket} slip={slip} draft={draft} /> : null}
         {tab === 'Parlay Safety' ? <Parlay ticket={ticket} slip={slip} /> : null}
         {tab === 'History' ? <History opportunities={historyOpportunities} /> : null}
-        {tab === 'Personal Results' ? <Personal wagers={wagers} metrics={personal} onUpdate={(id, patch) => setWagers((current) => current.map((item) => item.id === id ? { ...item, ...patch, syncStatus: item.syncStatus === 'synced' ? 'local' : item.syncStatus } : item))} onArchive={(id) => setWagers((current) => current.map((item) => item.id === id ? { ...item, archived: true, syncStatus: item.syncStatus === 'synced' ? 'local' : item.syncStatus } : item))} /> : null}
+        {tab === 'Personal Results' ? <Personal wagers={wagers} metrics={personal} onUpdate={updateWager} onArchive={archiveWager} /> : null}
       </div>
     </main>
   )
