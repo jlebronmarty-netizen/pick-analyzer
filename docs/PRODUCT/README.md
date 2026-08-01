@@ -12,6 +12,8 @@ Current V2 product integration documents:
 - [Prediction Pipeline Audit](PREDICTION_PIPELINE_AUDIT.md)
 - [Release 02 Core User Journey](RELEASE_02_CORE_USER_JOURNEY.md)
 - [Release 02 Live State Integration](RELEASE_02_LIVE_STATE_INTEGRATION.md)
+- [AI Daily Betting Experience](AI_DAILY_EXPERIENCE.md)
+- [AI Explanation Guide](AI_EXPLANATION_GUIDE.md)
 
 Most product documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 
