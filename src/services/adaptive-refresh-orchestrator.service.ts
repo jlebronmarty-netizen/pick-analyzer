@@ -673,6 +673,12 @@ function isFinalScoredEvent(event: SettlementBacklogEventRow | undefined) {
   )
 }
 
+function isTerminalResultImportCandidate(event: SettlementBacklogEventRow | undefined) {
+  if (!event) return false
+  const status = String(event.status ?? '').toLowerCase()
+  return ['completed', 'final', 'closed', 'complete'].includes(status) || isFinalScoredEvent(event)
+}
+
 function isAuthoritativeSettlementResult(result: SettlementBacklogResultRow | undefined) {
   return Boolean(result && result.game_id && result.home_score !== null && result.away_score !== null)
 }
@@ -719,7 +725,7 @@ async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
   const eligible = pending.filter((row) => isAuthoritativeSettlementResult(row.game_id ? resultsByGameId.get(row.game_id) : undefined))
   const missingResult = pending.filter((row) => {
     if (!row.game_id || isAuthoritativeSettlementResult(resultsByGameId.get(row.game_id))) return false
-    return isFinalScoredEvent(eventsById.get(row.game_id))
+    return isTerminalResultImportCandidate(eventsById.get(row.game_id))
   })
   const awaitingResult = pending.length - eligible.length
   const dates = eligible
@@ -795,6 +801,7 @@ export function validateResultEvidenceReconciliationFixtures() {
   ])
   const checks = [
     ['completed sport_event alone is not settlement-ready', isFinalScoredEvent(completedSportEvent) && !isAuthoritativeSettlementResult(staleMissingResult)],
+    ['terminal sport_event with missing canonical result is result-sync actionable', isTerminalResultImportCandidate(completedSportEvent) && !isAuthoritativeSettlementResult(staleMissingResult)],
     ['authoritative game_result is settlement-ready', isAuthoritativeSettlementResult(authoritativeGameResult)],
     ['conflicting or incomplete score is not settlement-ready', !isAuthoritativeSettlementResult(incompleteResult)],
     ['mismatched event id does not satisfy canonical lookup', !isAuthoritativeSettlementResult(resultsByGameId.get('missing-event'))],

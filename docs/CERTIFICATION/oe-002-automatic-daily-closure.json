@@ -3,7 +3,7 @@
   "name": "Automatic Daily Closure & Operational Certification V1",
   "verdict": "CONDITIONAL_PASS",
   "baselineCommit": "829db0e2b8b9412f4bd4b6bd237c15636e6bc826",
-  "rootCause": "Completed prediction rows with final/scored sport_events but missing canonical game_results were reported by settlement guarantee as RESULT_NOT_IMPORTED, but adaptive scheduler freshness did not treat that missing-result backlog as an actionable results due condition.",
+  "rootCause": "Completed prediction rows with terminal sport_events but missing canonical game_results were reported by settlement guarantee as RESULT_NOT_IMPORTED, but adaptive scheduler freshness did not treat that missing-result backlog as an actionable results due condition.",
   "repair": {
     "file": "src/services/adaptive-refresh-orchestrator.service.ts",
     "completedMissingResultRows": true,

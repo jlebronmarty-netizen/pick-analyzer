@@ -18,7 +18,7 @@ OE-002 repaired the automatic daily closure planner so completed prediction rows
 
 The validator confirms:
 
-- missing canonical results are counted as `completedMissingResultRows`;
+- terminal events missing canonical results are counted as `completedMissingResultRows`;
 - missing-result rows force the `results` refresh plan to `DUE_NOW`;
 - `sync_results` selects `oldestMissingResultDate`;
 - settlement-ready rows still preempt direct settlement only when authoritative `game_results` exists;

@@ -8,7 +8,7 @@ Production evidence showed completed MLB prediction rows blocked by `RESULT_NOT_
 
 ## Repair
 
-`src/services/adaptive-refresh-orchestrator.service.ts` now counts pending prediction rows whose linked `sport_events` row is final/scored but has no authoritative `game_results` row. That condition makes the `results` domain `DUE_NOW` and selects `sync_results` for the oldest missing-result operating date.
+`src/services/adaptive-refresh-orchestrator.service.ts` now counts pending prediction rows whose linked `sport_events` row is terminal but has no authoritative `game_results` row. That condition makes the `results` domain `DUE_NOW` and selects `sync_results` for the oldest missing-result operating date.
 
 The repair does not infer scores, settle rows, create labels, change prediction logic, change probability, change Official Picks, change Kelly, change learning weights, or change provider contracts.
 

@@ -37,9 +37,10 @@ for (const file of required) exists(file)
 
 assertIncludes('src/services/adaptive-refresh-orchestrator.service.ts', 'completedMissingResultRows')
 assertIncludes('src/services/adaptive-refresh-orchestrator.service.ts', 'oldestMissingResultDate')
+assertIncludes('src/services/adaptive-refresh-orchestrator.service.ts', 'isTerminalResultImportCandidate')
 assertIncludes('src/services/adaptive-refresh-orchestrator.service.ts', "item.domain === 'results' && Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0")
 assertIncludes('src/services/adaptive-refresh-orchestrator.service.ts', "action === 'sync_results' && settlementBacklog.oldestMissingResultDate")
-assertIncludes('src/services/adaptive-refresh-orchestrator.service.ts', 'isFinalScoredEvent(eventsById.get(row.game_id))')
+assertIncludes('src/services/adaptive-refresh-orchestrator.service.ts', 'isTerminalResultImportCandidate(eventsById.get(row.game_id))')
 
 assertIncludes('docs/OPERATIONAL_EXCELLENCE/OE_002_AUTOMATIC_DAILY_CLOSURE.md', 'RESULT_NOT_IMPORTED')
 assertIncludes('docs/OPERATIONAL_EXCELLENCE/OE_002_RECONCILIATION.md', '78934')
