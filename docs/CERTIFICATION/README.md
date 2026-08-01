@@ -16,6 +16,8 @@ Current V2 certification documents:
 - [Release 03 Certification JSON](release-03-production-hardening.json)
 - [Release 04 Model Intelligence Certification](RELEASE_04_MODEL_INTELLIGENCE.md)
 - [Release 04 Certification JSON](release-04-model-intelligence.json)
+- [Release 05 Model Optimization Certification](RELEASE_05_MODEL_OPTIMIZATION.md)
+- [Release 05 Certification JSON](release-05-model-optimization.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

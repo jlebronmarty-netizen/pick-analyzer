@@ -1,0 +1,101 @@
+{
+  "release": "Release 05",
+  "name": "Evidence-Based Model Optimization V1",
+  "status": "LOCAL_PASS_PRODUCTION_PENDING",
+  "startingCommit": "300444109c19ec521dd9ce3f52f4c37d7f4f699c",
+  "runtimeBehaviorChanged": false,
+  "predictionFormulaChanged": false,
+  "calibrationChanged": false,
+  "officialPickThresholdsChanged": false,
+  "learningWeightsChanged": false,
+  "providerContractsChanged": false,
+  "schedulerBehaviorChanged": false,
+  "historicalReplayStarted": false,
+  "retrospectiveLabelsGenerated": false,
+  "modelChangesApplied": [],
+  "modelChangesRejected": [
+    "probability_bucket_adjustment",
+    "confidence_normalization",
+    "market_specific_calibration",
+    "sport_specific_calibration",
+    "official_pick_threshold_change",
+    "global_learning_weight_change"
+  ],
+  "performanceEvidence": {
+    "source": "/api/performance?diagnostics=full",
+    "rowsReturned": 485,
+    "rowsRead": 2718,
+    "scoredRows": 479,
+    "wins": 239,
+    "losses": 240,
+    "pushes": 6,
+    "accuracy": 49.9,
+    "brier": 0.2598,
+    "averagePredictedProbability": 38.06,
+    "averageConfidence": 42.48,
+    "calibrationError": -11.84,
+    "roiAvailable": false,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
+  },
+  "bucketEvidence": {
+    "probability": {
+      "lt50": { "rows": 464, "scored": 458, "accuracy": 49.34, "brier": 0.2612, "calibrationError": -12.22 },
+      "p50To55": { "rows": 11, "scored": 11, "accuracy": 63.64, "brier": 0.2428, "calibrationError": -11.8 },
+      "p55To60": { "rows": 4, "scored": 4, "accuracy": 25, "brier": 0.3011, "calibrationError": 32.1 },
+      "p60To65": { "rows": 0, "scored": 0, "accuracy": null, "brier": null, "calibrationError": null },
+      "p65To70": { "rows": 2, "scored": 2, "accuracy": 100, "brier": 0.1046, "calibrationError": -32.32 },
+      "p70To75": { "rows": 2, "scored": 2, "accuracy": 50, "brier": 0.3182, "calibrationError": 23.54 },
+      "p75Plus": { "rows": 2, "scored": 2, "accuracy": 100, "brier": 0.0469, "calibrationError": -21.42 }
+    },
+    "confidence": {
+      "veryLow": { "rows": 170, "scored": 169, "accuracy": 41.42, "brier": 0.2559, "calibrationError": -10.24 },
+      "low": { "rows": 305, "scored": 300, "accuracy": 54, "brier": 0.2638, "calibrationError": -12.96 },
+      "medium": { "rows": 5, "scored": 5, "accuracy": 60, "brier": 0.2489, "calibrationError": -5.53 },
+      "high": { "rows": 3, "scored": 3, "accuracy": 66.67, "brier": 0.2443, "calibrationError": 5.54 },
+      "veryHigh": { "rows": 2, "scored": 2, "accuracy": 100, "brier": 0.0551, "calibrationError": -22.98 }
+    },
+    "market": {
+      "moneyline": { "rows": 183, "scored": 183, "accuracy": 48.09, "brier": 0.2507, "calibrationError": -8.43 },
+      "spreadOrRunLine": { "rows": 151, "scored": 151, "accuracy": 47.68, "brier": 0.2517, "calibrationError": -10.18 },
+      "totals": { "rows": 151, "scored": 145, "accuracy": 54.48, "brier": 0.2799, "calibrationError": -17.79 },
+      "firstHalf": { "rows": 0, "scored": 0, "accuracy": null, "brier": null, "calibrationError": null },
+      "firstFive": { "rows": 0, "scored": 0, "accuracy": null, "brier": null, "calibrationError": null }
+    }
+  },
+  "beforeAfter": {
+    "accuracyBefore": 49.9,
+    "accuracyAfter": 49.9,
+    "brierBefore": 0.2598,
+    "brierAfter": 0.2598,
+    "calibrationErrorBefore": -11.84,
+    "calibrationErrorAfter": -11.84,
+    "confidenceBefore": 42.48,
+    "confidenceAfter": 42.48,
+    "officialPicksAdded": 0
+  },
+  "localValidation": {
+    "release01Validator": "PASS_WITH_KNOWN_WARNINGS",
+    "release02Validator": "PASS_AFTER_COMMIT",
+    "release02aValidator": "PASS_AFTER_COMMIT",
+    "release03Validator": "PASS_AFTER_COMMIT",
+    "release04Validator": "PASS",
+    "release05Validator": "PASS",
+    "changedFileEslint": "PASS",
+    "build": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "requiredRoutes": [
+      "/api/system/version",
+      "/api/dashboard/today",
+      "/api/current-board",
+      "/api/performance"
+    ]
+  },
+  "release06Started": false
+}
