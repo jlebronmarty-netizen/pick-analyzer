@@ -65,6 +65,7 @@ This is the highest-level documentation index for Pick Analyzer V2. It governs p
 - [Release 13 Personal Wager Data Model](../ARCHITECTURE/PERSONAL_WAGER_DATA_MODEL.md)
 - [Release 13 Personal Wager RLS](../SECURITY/PERSONAL_WAGER_RLS.md)
 - [Release 13 Personal Wager Ledger Certification](../CERTIFICATION/RELEASE_13_PERSONAL_WAGER_LEDGER.md)
+- [Release 13A Authenticated Wager Ledger Certification](../CERTIFICATION/RELEASE_13A_AUTHENTICATED_WAGER_LEDGER.md)
 - [Release 01 Execution Plan](../RELEASES/RELEASE_01_EXECUTION_PLAN.md)
 - [Release 01 Backlog](../RELEASES/RELEASE_01_BACKLOG.md)
 - [Release 01 Progress](../RELEASES/RELEASE_01_PROGRESS.md)

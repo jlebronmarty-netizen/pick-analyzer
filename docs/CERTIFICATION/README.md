@@ -34,6 +34,8 @@ Current V2 certification documents:
 - [Release 12 Certification JSON](release-12-betting-workspace.json)
 - [Release 13 Personal Wager Ledger Certification](RELEASE_13_PERSONAL_WAGER_LEDGER.md)
 - [Release 13 Certification JSON](release-13-personal-wager-ledger.json)
+- [Release 13A Authenticated Wager Ledger Certification](RELEASE_13A_AUTHENTICATED_WAGER_LEDGER.md)
+- [Release 13A Certification JSON](release-13a-authenticated-wager-ledger.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

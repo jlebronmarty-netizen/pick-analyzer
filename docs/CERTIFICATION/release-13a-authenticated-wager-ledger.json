@@ -1,0 +1,78 @@
+{
+  "release": "Release 13A",
+  "name": "Authenticated Wager Ledger Certification",
+  "status": "CONDITIONAL_PASS",
+  "release13UpgradedToPass": false,
+  "baselineCommit": "1d26a8dfa57c23ec3e19507412dac1b7d215bc5f",
+  "productionCommitObserved": "1d26a8dfa57c23ec3e19507412dac1b7d215bc5f",
+  "authenticatedLifecycle": {
+    "executed": false,
+    "reason": "No legitimate signed-in browser session was available through the browser connector, and credentials were not exposed or requested in logs.",
+    "create": "NOT_EXECUTED",
+    "idempotentRetry": "NOT_EXECUTED",
+    "read": "NOT_EXECUTED",
+    "update": "NOT_EXECUTED",
+    "archive": "NOT_EXECUTED",
+    "summary": "NOT_EXECUTED",
+    "export": "NOT_EXECUTED",
+    "localToRemoteSync": "NOT_EXECUTED",
+    "secondAccountIsolation": "NOT_EXECUTED"
+  },
+  "staticEvidence": {
+    "authenticatedRoutesRequireRealUser": true,
+    "ownershipField": "user_id",
+    "clientCannotOverrideUserId": true,
+    "creationIdempotentByClientCreatedId": true,
+    "readUpdateArchiveOwnershipScoped": true,
+    "rlsPoliciesExistForParentAndLegTables": true,
+    "exportOwnershipScoped": true,
+    "summaryOwnershipScoped": true,
+    "failedSyncPreservesLocalData": true,
+    "userWagerSettlementSeparateFromModelSettlement": true
+  },
+  "productionReadOnlyEvidence": {
+    "systemVersion": {
+      "httpStatus": 200,
+      "commit": "1d26a8dfa57c23ec3e19507412dac1b7d215bc5f"
+    },
+    "performance": {
+      "httpStatus": 200
+    },
+    "modelIntelligence": {
+      "httpStatus": 200,
+      "readOnly": true
+    },
+    "modelSegments": {
+      "httpStatus": 200,
+      "readOnly": true
+    },
+    "wagersUnauthenticated": {
+      "httpStatus": 401,
+      "expected": true
+    },
+    "summaryUnauthenticated": {
+      "httpStatus": 401,
+      "expected": true
+    },
+    "settlementGuarantee": {
+      "httpStatus": 409,
+      "guarantee": "ACTION_REQUIRED",
+      "readyForSettlementRows": 0,
+      "silentPendingRows": 0,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "actionRequiredReason": "SCHEDULER_LATE_OR_CRITICAL"
+    }
+  },
+  "modelIsolation": {
+    "predictionHistoryChanged": false,
+    "officialPicksChanged": false,
+    "learningChanged": false,
+    "settlementChangedByCertification": false,
+    "providerCallsMade": 0,
+    "certificationDatabaseMutations": 0
+  },
+  "tablesMutatedByCertification": [],
+  "remainingGap": "Run authenticated production create/read/update/archive/idempotency/export/local-sync lifecycle with a legitimate signed-in user session.",
+  "release14Started": false
+}
