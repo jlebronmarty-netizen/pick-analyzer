@@ -1,0 +1,47 @@
+{
+  "release": "Release 13B",
+  "name": "Live Slate & Betting Workspace Certification V1",
+  "status": "PASS_PENDING_PRODUCTION_DEPLOYMENT_OBSERVATION",
+  "startingCommit": "91acaaeeaecc565b9bebb22eabb43b40df4920b1",
+  "rootCause": "The Betting Workspace rendered all_stored_data historical current-board rows as active opportunities after mode=current returned zero candidates.",
+  "before": {
+    "activeCards": 100,
+    "officialPicks": 0,
+    "valuePicks": 0,
+    "researchPicks": 100,
+    "noBetRows": 0,
+    "source": "/api/current-board?mode=all_stored_data&limit=100",
+    "historicalRows": 100
+  },
+  "expectedAfter": {
+    "activeCardsWhenCurrentBoardEmpty": 0,
+    "officialPicks": 0,
+    "valuePicks": 0,
+    "researchPicks": 0,
+    "noBetRows": 0,
+    "historyRowsRemainReadOnly": true
+  },
+  "rules": {
+    "activeBoardUsesAllStoredFallback": false,
+    "historicalRowsSeparated": true,
+    "currentPregameOnly": true,
+    "puertoRicoOperatingDay": true,
+    "canonicalEventMarketSelection": true,
+    "liveGamesSelectable": false,
+    "finalGamesActive": false
+  },
+  "modelSafety": {
+    "predictionFormulaChanged": false,
+    "probabilityOutputsChanged": false,
+    "officialPickPolicyChanged": false,
+    "learningChanged": false,
+    "settlementChanged": false,
+    "schedulerChanged": false,
+    "providerContractsChanged": false
+  },
+  "certification": {
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "release14Started": false
+  }
+}

@@ -39,6 +39,10 @@ type Opportunity = {
   segmentAccuracy: number | null
   segmentBrier: number | null
   segmentCalibration: number | null
+  boardLabel: string
+  lastUpdate: string | null
+  risk: string
+  currentState: string
 }
 
 type DraftLeg = {
@@ -170,6 +174,25 @@ function locked(startTime: string | null, status: string) {
   return Number.isFinite(start) && Date.now() >= start
 }
 
+function localDayKey(value: Date | string | null) {
+  const date = value instanceof Date ? value : value ? new Date(value) : new Date()
+  if (Number.isNaN(date.getTime())) return 'Unavailable'
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Puerto_Rico', year: 'numeric', month: '2-digit', day: '2-digit' }).format(date)
+}
+
+function activePregameState(startTime: string | null, status: string) {
+  const lowered = status.toLowerCase()
+  if (lowered.includes('cancel') || lowered.includes('postpon')) return 'unavailable'
+  if (lowered.includes('final') || lowered.includes('complete') || lowered.includes('settled')) return 'final'
+  if (lowered.includes('live') || lowered.includes('in_progress') || lowered.includes('progress')) return 'live'
+  if (!startTime) return 'unavailable'
+  const start = new Date(startTime).getTime()
+  if (!Number.isFinite(start)) return 'unavailable'
+  if (Date.now() >= start) return 'live'
+  if (localDayKey(startTime) !== localDayKey(new Date())) return 'history'
+  return 'pregame'
+}
+
 function selection(opportunity: Opportunity) {
   if (opportunity.market === 'Total') return `${opportunity.selection} ${line(opportunity.line)} Total`
   if (opportunity.market === 'Run Line') return `${opportunity.selection} ${line(opportunity.line)} Run Line`
@@ -219,6 +242,8 @@ function mapBoardCandidate(candidate: Record<string, unknown>, segments: Record<
   const missing = [...strings(candidate.missingInformation), ...strings(candidate.blockers)]
   const startTime = typeof candidate.scheduledTime === 'string' ? candidate.scheduledTime : typeof candidate.startTime === 'string' ? candidate.startTime : null
   const eventStatus = text(candidate.eventStatus ?? candidate.status, status)
+  const boardLabel = text(candidate.boardLabel ?? candidate.source, 'Current Board')
+  const lastUpdate = typeof candidate.marketFreshnessTimestamp === 'string' ? candidate.marketFreshnessTimestamp : typeof candidate.oddsTimestamp === 'string' ? candidate.oddsTimestamp : typeof candidate.predictionGeneratedAt === 'string' ? candidate.predictionGeneratedAt : null
   const warnings = warningsFor({ category, probability, price, edge, ev, sample: segment.sample, missing, startTime, eventStatus })
   return {
     id: text(candidate.id ?? candidate.predictionId, `${text(candidate.selection ?? candidate.team, 'selection')}-${market}`),
@@ -231,7 +256,7 @@ function mapBoardCandidate(candidate: Record<string, unknown>, segments: Record<
     selection: text(candidate.selection ?? candidate.team, 'Selection'),
     startTime,
     eventStatus,
-    source: text(candidate.boardLabel ?? candidate.source, 'Current Board'),
+    source: boardLabel,
     category,
     probability,
     confidence,
@@ -250,6 +275,10 @@ function mapBoardCandidate(candidate: Record<string, unknown>, segments: Record<
     segmentAccuracy: segment.accuracy,
     segmentBrier: segment.brier,
     segmentCalibration: segment.calibration,
+    boardLabel,
+    lastUpdate,
+    risk: text(candidate.riskGrade ?? candidate.reliability ?? candidate.confidenceLabel, 'Unavailable'),
+    currentState: activePregameState(startTime, eventStatus),
   }
 }
 
@@ -263,6 +292,7 @@ function mapTopPick(pick: Record<string, unknown>, segments: Record<string, unkn
   const segment = segmentFor(segments, market)
   const startTime = typeof pick.commence_time === 'string' ? pick.commence_time : typeof pick.startTime === 'string' ? pick.startTime : null
   const eventStatus = text(pick.status, 'OFFICIAL')
+  const lastUpdate = typeof pick.generated_at === 'string' ? pick.generated_at : typeof pick.updatedAt === 'string' ? pick.updatedAt : null
   return {
     id: text(pick.id, `${text(pick.team ?? pick.selection, 'selection')}-${market}-top`),
     eventId: typeof pick.event_id === 'string' ? pick.event_id : typeof pick.eventId === 'string' ? pick.eventId : null,
@@ -293,6 +323,10 @@ function mapTopPick(pick: Record<string, unknown>, segments: Record<string, unkn
     segmentAccuracy: segment.accuracy,
     segmentBrier: segment.brier,
     segmentCalibration: segment.calibration,
+    boardLabel: 'CURRENT',
+    lastUpdate,
+    risk: 'Official policy candidate',
+    currentState: activePregameState(startTime, eventStatus),
   }
 }
 
@@ -327,6 +361,28 @@ function unique(list: Opportunity[]) {
     if (!existing || item.category === 'OFFICIAL_PICK' || item.source === 'Current Board') map.set(key, item)
   })
   return Array.from(map.values())
+}
+
+function canonicalLiveOpportunities(list: Opportunity[]) {
+  const map = new Map<string, Opportunity>()
+  for (const item of list) {
+    if (item.boardLabel.toUpperCase() === 'HISTORICAL') continue
+    if (item.currentState !== 'pregame') continue
+    const key = `${item.eventId ?? item.matchup}|${item.market}|${item.selection}|${item.line ?? 'null'}`
+    const existing = map.get(key)
+    const itemTime = item.lastUpdate ? new Date(item.lastUpdate).getTime() : 0
+    const existingTime = existing?.lastUpdate ? new Date(existing.lastUpdate).getTime() : 0
+    if (!existing || item.category === 'OFFICIAL_PICK' || itemTime >= existingTime) map.set(key, item)
+  }
+  return Array.from(map.values())
+}
+
+function slateEmptyState(history: Opportunity[]) {
+  if (!history.length) return { title: 'No pregame opportunities remain today.', text: 'The active board returned no eligible pregame opportunities for the current Puerto Rico operating day.' }
+  const states = history.map((item) => item.currentState)
+  if (states.every((state) => state === 'final')) return { title: "Today's slate has concluded.", text: 'Use Results, Performance or Tomorrow\'s slate instead of stale active picks.' }
+  if (states.every((state) => state === 'live' || state === 'final')) return { title: 'No pregame opportunities remain today.', text: 'All visible slate rows have started or finished, so the active betting board is empty.' }
+  return { title: 'No pregame opportunities remain today.', text: 'Historical and stale snapshots are available only in History.' }
 }
 
 async function sessionToken() {
@@ -393,6 +449,7 @@ function remotePayload(wager: UserWager, opportunities: Opportunity[]) {
 
 export default function BettingDecisionWorkspace() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
+  const [historyOpportunities, setHistoryOpportunities] = useState<Opportunity[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [slipIds, setSlipIds] = useState<string[]>([])
   const [draft, setDraft] = useState<Record<string, DraftLeg>>({})
@@ -468,35 +525,33 @@ export default function BettingDecisionWorkspace() {
       try {
         setLoading(true)
         setError(null)
-        const [boardResponse, topPicksResponse, intelligenceResponse, segmentsResponse, todayResponse] = await Promise.all([
+        const [boardResponse, historyResponse, topPicksResponse, intelligenceResponse, segmentsResponse, todayResponse] = await Promise.all([
           fetch('/api/current-board?mode=current&limit=100', { cache: 'no-store' }),
+          fetch('/api/current-board?mode=all_stored_data&limit=100', { cache: 'no-store' }),
           fetch('/api/predictions/top', { cache: 'no-store' }),
           fetch('/api/model/intelligence', { cache: 'no-store' }),
           fetch('/api/model/segments', { cache: 'no-store' }),
           fetch('/api/dashboard/today', { cache: 'no-store' }),
         ])
-        const [initialBoard, topPicks, intelligence, segments, today] = await Promise.all([
+        const [board, historicalBoard, topPicks, intelligence, segments, today] = await Promise.all([
           boardResponse.json(),
+          historyResponse.json(),
           topPicksResponse.json(),
           intelligenceResponse.json(),
           segmentsResponse.json(),
           todayResponse.json(),
         ])
-        let board = initialBoard
-        if (!rows(board.candidates).length) {
-          const fallbackResponse = await fetch('/api/current-board?mode=all_stored_data&limit=100', { cache: 'no-store' })
-          const fallback = await fallbackResponse.json()
-          if (rows(fallback.candidates).length) board = fallback
-        }
-        const mapped = unique([
+        const mapped = canonicalLiveOpportunities(unique([
           ...rows(board.candidates).map((item) => mapBoardCandidate(item, segments)),
           ...rows(topPicks.topEv).map((item) => mapTopPick(item, segments)),
           ...rows(topPicks.topConfidence).map((item) => mapTopPick(item, segments)),
           ...rows(topPicks.bestBets).map((item) => mapTopPick(item, segments)),
-        ])
+        ]))
+        const history = unique(rows(historicalBoard.candidates).map((item) => mapBoardCandidate(item, segments)))
         setOpportunities(mapped)
+        setHistoryOpportunities(history)
         setSelectedIds(mapped.slice(0, 3).map((item) => item.id))
-        setSummary({ today, intelligence, segments })
+        setSummary({ today, intelligence, segments, board, historicalBoard })
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Unable to load Betting Decision Workspace')
       } finally {
@@ -524,6 +579,7 @@ export default function BettingDecisionWorkspace() {
   const ticket = ticketSummary(slip, draft, slipType, num(bankroll, 0) ?? 0)
   const personal = personalMetrics(wagers)
   const sample = record(record(summary.intelligence).currentProductionSample)
+  const emptyState = slateEmptyState(historyOpportunities)
 
   function toggleCompare(id: string) {
     setSelectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id].slice(-4))
@@ -682,10 +738,10 @@ export default function BettingDecisionWorkspace() {
 
         {loading ? <State title="Loading workspace" text="Reading Current Board, Top Picks, model intelligence, model segments and Daily Brief." /> : null}
         {error ? <State title="Workspace unavailable" text={error} tone="bad" /> : null}
-        {!loading && !opportunities.length ? <State title="No opportunities available" text="No current read-only opportunity rows were returned." /> : null}
+        {!loading && !opportunities.length ? <State title={emptyState.title} text={emptyState.text} /> : null}
 
         <nav className="flex gap-2 overflow-x-auto border-y border-slate-800 py-3">
-          {['Board', 'Compare', 'Bet Slip', 'Risk', 'Parlay Safety', 'Personal Results'].map((item) => (
+          {['Board', 'Compare', 'Bet Slip', 'Risk', 'Parlay Safety', 'History', 'Personal Results'].map((item) => (
             <button key={item} onClick={() => setTab(item)} className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-black ${tab === item ? 'bg-emerald-400 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'}`}>{item}</button>
           ))}
         </nav>
@@ -695,6 +751,7 @@ export default function BettingDecisionWorkspace() {
         {tab === 'Bet Slip' ? <SlipBuilder opportunities={filtered} slip={slip} slipIds={slipIds} draft={draft} type={slipType} setType={setSlipType} onToggle={toggleSlip} onUpdate={updateDraft} notes={notes} setNotes={setNotes} ticket={ticket} onSave={saveWager} /> : null}
         {tab === 'Risk' ? <Risk bankroll={bankroll} setBankroll={setBankroll} ticket={ticket} slip={slip} draft={draft} /> : null}
         {tab === 'Parlay Safety' ? <Parlay ticket={ticket} slip={slip} /> : null}
+        {tab === 'History' ? <History opportunities={historyOpportunities} /> : null}
         {tab === 'Personal Results' ? <Personal wagers={wagers} metrics={personal} onUpdate={(id, patch) => setWagers((current) => current.map((item) => item.id === id ? { ...item, ...patch, syncStatus: item.syncStatus === 'synced' ? 'local' : item.syncStatus } : item))} onArchive={(id) => setWagers((current) => current.map((item) => item.id === id ? { ...item, archived: true, syncStatus: item.syncStatus === 'synced' ? 'local' : item.syncStatus } : item))} /> : null}
       </div>
     </main>
@@ -769,12 +826,18 @@ function State({ title, text, tone = 'neutral' }: { title: string; text: string;
 }
 
 function Board({ grouped, selected, slipIds, onCompare, onSlip }: { grouped: Record<Category, Opportunity[]>; selected: string[]; slipIds: string[]; onCompare: (id: string) => void; onSlip: (id: string) => void }) {
-  return <section className="space-y-6">{(['OFFICIAL_PICK', 'VALUE_CANDIDATE', 'RESEARCH_ONLY', 'NO_BET'] as Category[]).map((category) => <div key={category}><div className="mb-3 flex items-center justify-between"><h2 className="text-2xl font-black">{categoryLabel(category)}</h2><span className="rounded-full border border-slate-800 px-3 py-1 text-xs font-bold text-slate-400">{grouped[category].length}</span></div><div className="grid gap-4 xl:grid-cols-2">{grouped[category].map((item) => <OpportunityCard key={item.id} item={item} selected={selected.includes(item.id)} inSlip={slipIds.includes(item.id)} onCompare={onCompare} onSlip={onSlip} />)}{!grouped[category].length ? <State title={`No ${categoryLabel(category)}`} text="This category is empty for the current board." /> : null}</div></div>)}</section>
+  const emptyTitles: Record<Category, string> = {
+    OFFICIAL_PICK: 'No Official Picks Today',
+    VALUE_CANDIDATE: 'No Value Picks Today',
+    RESEARCH_ONLY: 'No Research Picks Today',
+    NO_BET: 'No No Bet Rows Today',
+  }
+  return <section className="space-y-6">{(['OFFICIAL_PICK', 'VALUE_CANDIDATE', 'RESEARCH_ONLY', 'NO_BET'] as Category[]).map((category) => <div key={category}><div className="mb-3 flex items-center justify-between"><h2 className="text-2xl font-black">{categoryLabel(category)}</h2><span className="rounded-full border border-slate-800 px-3 py-1 text-xs font-bold text-slate-400">{grouped[category].length}</span></div><div className="grid gap-4 xl:grid-cols-2">{grouped[category].map((item) => <OpportunityCard key={item.id} item={item} selected={selected.includes(item.id)} inSlip={slipIds.includes(item.id)} onCompare={onCompare} onSlip={onSlip} />)}{!grouped[category].length ? <State title={emptyTitles[category]} text="Only current Puerto Rico operating-day pregame opportunities are shown here. Historical snapshots live in History." /> : null}</div></div>)}</section>
 }
 
 function OpportunityCard({ item, selected, inSlip, onCompare, onSlip }: { item: Opportunity; selected: boolean; inSlip: boolean; onCompare: (id: string) => void; onSlip: (id: string) => void }) {
   const readOnly = item.category === 'NO_BET' || locked(item.startTime, item.eventStatus)
-  return <article className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><Title item={item} /><div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><Metric label="Probability" value={pct(item.probability)} /><Metric label="Confidence" value={pct(item.confidence)} /><Metric label="Price" value={odds(item.odds)} /><Metric label="Evidence" value={item.evidenceQuality} /><Metric label="Edge" value={signedPct(item.edge)} tone={(item.edge ?? 0) > 0 ? 'good' : 'warn'} /><Metric label="EV" value={signedPct(item.ev)} tone={(item.ev ?? 0) > 0 ? 'good' : 'warn'} /><Metric label="Freshness" value={item.freshness} /><Metric label="Model" value={item.modelVersion} /></div><p className="mt-4 text-sm leading-6 text-slate-300">{item.explanation}</p>{item.warnings.length ? <ul className="mt-4 space-y-1 text-sm text-amber-100">{item.warnings.slice(0, 4).map((warning) => <li key={warning}>- {warning}</li>)}</ul> : null}<div className="mt-4 flex gap-2"><button onClick={() => onCompare(item.id)} className={`rounded-lg px-4 py-2 text-sm font-black ${selected ? 'bg-sky-400 text-slate-950' : 'bg-slate-800 text-slate-200'}`}>Compare</button><button disabled={readOnly} onClick={() => onSlip(item.id)} className={`rounded-lg px-4 py-2 text-sm font-black ${readOnly ? 'cursor-not-allowed bg-slate-800 text-slate-500' : inSlip ? 'bg-emerald-400 text-slate-950' : 'bg-slate-800 text-slate-200'}`}>{readOnly ? 'Read Only' : inSlip ? 'In Slip' : 'Add to Slip'}</button></div></article>
+  return <article className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><Title item={item} /><div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><Metric label="Probability" value={pct(item.probability)} /><Metric label="Confidence" value={pct(item.confidence)} /><Metric label="Price" value={odds(item.odds)} /><Metric label="Evidence" value={item.evidenceQuality} /><Metric label="Risk" value={item.risk} /><Metric label="Current State" value={item.currentState} /><Metric label="Last Update" value={when(item.lastUpdate)} /><Metric label="Data Freshness" value={item.freshness} /><Metric label="Edge" value={signedPct(item.edge)} tone={(item.edge ?? 0) > 0 ? 'good' : 'warn'} /><Metric label="EV" value={signedPct(item.ev)} tone={(item.ev ?? 0) > 0 ? 'good' : 'warn'} /><Metric label="Market" value={item.market} /><Metric label="Model" value={item.modelVersion} /></div><p className="mt-4 text-sm leading-6 text-slate-300">{item.explanation}</p>{item.warnings.length ? <ul className="mt-4 space-y-1 text-sm text-amber-100">{item.warnings.slice(0, 4).map((warning) => <li key={warning}>- {warning}</li>)}</ul> : null}<div className="mt-4 flex gap-2"><button onClick={() => onCompare(item.id)} className={`rounded-lg px-4 py-2 text-sm font-black ${selected ? 'bg-sky-400 text-slate-950' : 'bg-slate-800 text-slate-200'}`}>Compare</button><button disabled={readOnly} onClick={() => onSlip(item.id)} className={`rounded-lg px-4 py-2 text-sm font-black ${readOnly ? 'cursor-not-allowed bg-slate-800 text-slate-500' : inSlip ? 'bg-emerald-400 text-slate-950' : 'bg-slate-800 text-slate-200'}`}>{readOnly ? 'Read Only' : inSlip ? 'In Slip' : 'Add to Slip'}</button></div></article>
 }
 
 function Title({ item }: { item: Opportunity }) {
@@ -788,6 +851,10 @@ function Metric({ label, value, tone = 'neutral' }: { label: string; value: stri
 
 function Compare(props: { opportunities: Opportunity[]; compared: Opportunity[]; selected: string[]; query: string; setQuery: (value: string) => void; category: Category | 'all'; setCategory: (value: Category | 'all') => void; onCompare: (id: string) => void }) {
   return <section className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]"><aside className="rounded-lg border border-slate-800 bg-slate-900/70 p-4"><h2 className="text-xl font-black">Select</h2><input value={props.query} onChange={(event) => props.setQuery(event.target.value)} className="mt-4 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm" placeholder="Search" /><select value={props.category} onChange={(event) => props.setCategory(event.target.value as Category | 'all')} className="mt-3 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm"><option value="all">All categories</option><option value="OFFICIAL_PICK">Official Picks</option><option value="VALUE_CANDIDATE">Value Candidates</option><option value="RESEARCH_ONLY">Research Picks</option><option value="NO_BET">No Bet / Avoid</option></select><div className="mt-4 max-h-[620px] space-y-2 overflow-auto">{props.opportunities.map((item) => <button key={item.id} onClick={() => props.onCompare(item.id)} className={`w-full rounded-lg border p-3 text-left ${props.selected.includes(item.id) ? 'border-sky-400 bg-sky-500/10' : 'border-slate-800 bg-slate-950/60'}`}><p className="font-black">{selection(item)}</p><p className="mt-1 text-xs text-slate-400">{categoryLabel(item.category)} | {item.matchup}</p></button>)}</div></aside><div className="grid gap-4 xl:grid-cols-2">{props.compared.map((item) => <Comparison key={item.id} item={item} />)}{!props.compared.length ? <State title="No selections" text="Select up to four opportunities for side-by-side comparison." /> : null}</div></section>
+}
+
+function History({ opportunities }: { opportunities: Opportunity[] }) {
+  return <section className="space-y-4"><div className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><h2 className="text-2xl font-black">History</h2><p className="mt-2 text-sm text-slate-400">Historical predictions and stale snapshots are read-only and never populate the active betting board.</p></div><div className="grid gap-4 xl:grid-cols-2">{opportunities.map((item) => <article key={`history-${item.id}`} className="rounded-lg border border-slate-800 bg-slate-900/70 p-5 opacity-80"><Title item={item} /><div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><Metric label="State" value={item.currentState} /><Metric label="Board" value={item.boardLabel} /><Metric label="Last Update" value={when(item.lastUpdate)} /><Metric label="Freshness" value={item.freshness} /></div></article>)}{!opportunities.length ? <State title="No history rows" text="No historical predictions were returned." /> : null}</div></section>
 }
 
 function Comparison({ item }: { item: Opportunity }) {

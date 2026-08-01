@@ -21,6 +21,9 @@ Current V2 product integration documents:
 - [Personal Wager Tracking](PERSONAL_WAGER_TRACKING.md)
 - [Release 13 Wager Ledger Audit](RELEASE_13_WAGER_LEDGER_AUDIT.md)
 - [Personal Wager Ledger](PERSONAL_WAGER_LEDGER.md)
+- [Release 13B Live Slate Audit](RELEASE_13B_LIVE_SLATE_AUDIT.md)
+- [Live Slate Rules](LIVE_SLATE_RULES.md)
+- [Betting Workspace State Machine](BETTING_WORKSPACE_STATE_MACHINE.md)
 
 Most product documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 
