@@ -1,0 +1,92 @@
+{
+  "release": "Release 06",
+  "name": "Data Intelligence Foundation V1",
+  "status": "LOCAL_PASS_PRODUCTION_PENDING",
+  "startingCommit": "3bb7f8d3eedb5d71321878c1790880ae83d76646",
+  "runtimeBehaviorChanged": true,
+  "runtimeBehaviorChangeScope": "new read-only internal APIs only",
+  "predictionFormulaChanged": false,
+  "probabilityCalibrationChanged": false,
+  "officialPickThresholdsChanged": false,
+  "learningWeightsChanged": false,
+  "providerContractsChanged": false,
+  "schedulerBehaviorChanged": false,
+  "settlementRulesChanged": false,
+  "databaseSchemaChanged": false,
+  "historicalReplayStarted": false,
+  "retrospectiveLabelsGenerated": false,
+  "newApis": [
+    "/api/model/segments",
+    "/api/model/intelligence"
+  ],
+  "readOnlyGuarantees": {
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "predictionWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "analyticalDimensions": [
+    "sport",
+    "league",
+    "season",
+    "event",
+    "eventDate",
+    "homeTeam",
+    "awayTeam",
+    "selectedTeam",
+    "homeAway",
+    "favoriteUnderdog",
+    "openingLine",
+    "closingLine",
+    "impliedProbability",
+    "predictedProbability",
+    "confidence",
+    "predictionSource",
+    "modelVersion",
+    "featureVersion",
+    "featureSnapshotCoverage",
+    "market",
+    "edge",
+    "expectedValue",
+    "settlementResult",
+    "push",
+    "void"
+  ],
+  "supportedBuckets": {
+    "probability": ["<50", "50-55", "55-60", "60-65", "65-70", "70-75", "75+"],
+    "confidence": ["Very Low", "Low", "Medium", "High", "Very High"]
+  },
+  "remainingMissingAnalyticalFields": [
+    "normalized opening line when absent from stored snapshot",
+    "normalized closing line when absent from stored snapshot",
+    "closing result",
+    "normalized per-feature contribution values",
+    "first-class learning label field"
+  ],
+  "localValidation": {
+    "release01Validator": "PASS_WITH_KNOWN_WARNINGS",
+    "release02Validator": "PASS",
+    "release02aValidator": "PASS",
+    "release03Validator": "PASS",
+    "release04Validator": "PASS_AFTER_RELEASE06_COMMIT",
+    "release05Validator": "PASS_AFTER_RELEASE06_COMMIT",
+    "release06Validator": "PASS",
+    "changedFileEslint": "PASS",
+    "build": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "requiredRoutes": [
+      "/api/system/version",
+      "/api/model/segments",
+      "/api/model/intelligence",
+      "/api/performance"
+    ]
+  },
+  "release07Started": false
+}

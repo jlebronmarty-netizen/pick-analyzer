@@ -241,11 +241,13 @@ Scanned explicit repository roots: `src`, `scripts`, `docs`, `supabase`, `.githu
 | src/app/api/mlb/temporal-health/route.ts | API Route | Handles /api/mlb/temporal-health API requests. | @/lib/api-contract<br>@/lib/server-lazy-diagnostics<br>next/server | Production Surface |
 | src/app/api/model/autotune/route.ts | API Route | Handles /api/model/autotune API requests. | @/services/model-learning.service<br>next/server | Production Surface |
 | src/app/api/model/calibration/route.ts | API Route | Handles /api/model/calibration API requests. | @/services/model-calibration.service<br>next/server | Production Surface |
+| src/app/api/model/intelligence/route.ts | API Route | Handles /api/model/intelligence read-only analytical coverage requests. | @/lib/api-contract<br>@/services/model-segments.service<br>next/server | Production Surface |
 | src/app/api/model/learning/route.ts | API Route | Handles /api/model/learning API requests. | @/services/model-learning.service<br>next/server | Production Surface |
 | src/app/api/model/metrics/route.ts | API Route | Handles /api/model/metrics API requests. | @/lib/api-contract<br>@/services/model-metrics-framework.service | Production Surface |
 | src/app/api/model/rollback/history/route.ts | API Route | Handles /api/model/rollback/history API requests. | @/lib/supabase-admin<br>next/server | Production Surface |
 | src/app/api/model/rollback/route.ts | API Route | Handles /api/model/rollback API requests. | @/services/model-learning.service<br>next/server | Production Surface |
 | src/app/api/model/self-learning/route.ts | API Route | Handles /api/model/self-learning API requests. | @/services/self-learning-engine.service<br>next/server | Production Surface |
+| src/app/api/model/segments/route.ts | API Route | Handles /api/model/segments read-only analytical segment requests. | @/lib/api-contract<br>@/services/model-segments.service<br>next/server | Production Surface |
 | src/app/api/model/shadow-calibration/route.ts | API Route | Handles /api/model/shadow-calibration API requests. | @/services/historical-shadow-calibration.service<br>next/server | Experimental |
 | src/app/api/model/status/route.ts | API Route | Handles /api/model/status API requests. | @/services/model-calibration.service<br>@/services/model-learning.service<br>@/services/model-versioning.service<br>next/server | Production Surface |
 | src/app/api/model/versions/route.ts | API Route | Handles /api/model/versions API requests. | @/services/model-versioning.service<br>next/server | Production Surface |
@@ -1339,6 +1341,7 @@ Scanned explicit repository roots: `src`, `scripts`, `docs`, `supabase`, `.githu
 | src/services/model-calibration.service.ts | Service | Provides getModelCalibration. | @/lib/supabase-admin<br>@/services/production-data-gate.service | Internal Dependency |
 | src/services/model-learning.service.ts | Service | Provides ModelFactor, getModelWeights, rollbackModelVersion, runAutoModelTuning, runModelLearning. | @/lib/supabase-admin<br>@/services/model-backtest.service<br>@/services/model-calibration.service<br>@/services/model-versioning.service<br>@/services/production-data-gate.service<br>@/services/weight-optimizer.service | Internal Dependency |
 | src/services/model-metrics-framework.service.ts | Service | Provides getModelMetricsFramework. | @/lib/supabase-admin<br>@/services/production-data-gate.service | Internal Dependency |
+| src/services/model-segments.service.ts | Service | Provides getModelSegments, getModelIntelligence, validateModelSegmentFixtures. | @/lib/supabase-admin<br>@/lib/settlement-canonical<br>@/lib/time<br>server-only | Internal Dependency |
 | src/services/model-only-intelligence.service.ts | Service | Provides getModelOnlyIntelligence, validateModelOnlyIntelligenceFixtures. | @/lib/supabase-admin | Internal Dependency |
 | src/services/model-versioning.service.ts | Service | Provides ModelVersion, getLatestModelVersion, getModelHistory, getModelVersionComparison, saveModelVersion. | @/lib/supabase-admin | Internal Dependency |
 | src/services/monte-carlo-engine.service.ts | Service | Provides runMonteCarloSimulation. | @/services/top-picks.service | Internal Dependency |

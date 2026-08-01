@@ -224,11 +224,13 @@ Generated from discovered routes, services, providers, adapters and product modu
 | /api/mlb/temporal-health | API Route | Production Surface | Yes | Yes | No | No | No | Yes | Yes | @/lib/api-contract<br>@/lib/server-lazy-diagnostics<br>next/server | 2026-07-23 |
 | /api/model/autotune | API Route | Production Surface | Yes | No | No | No | No | Yes | Yes | @/services/model-learning.service<br>next/server | 2026-07-07 |
 | /api/model/calibration | API Route | Production Surface | Yes | Yes | No | No | No | Yes | Yes | @/services/model-calibration.service<br>next/server | 2026-06-28 |
+| /api/model/intelligence | API Route | Production Surface | Yes | Yes | No | No | No | Yes | Yes | @/lib/api-contract<br>@/services/model-segments.service<br>next/server | 2026-07-31 |
 | /api/model/learning | API Route | Production Surface | Yes | No | No | No | No | Yes | Yes | @/services/model-learning.service<br>next/server | 2026-06-28 |
 | /api/model/metrics | API Route | Production Surface | Yes | Yes | No | No | No | Yes | Yes | @/lib/api-contract<br>@/services/model-metrics-framework.service | 2026-07-12 |
 | /api/model/rollback/history | API Route | Production Surface | Yes | Yes | No | No | No | Yes | Yes | @/lib/supabase-admin<br>next/server | 2026-07-07 |
 | /api/model/rollback | API Route | Production Surface | Yes | No | No | No | No | Yes | Yes | @/services/model-learning.service<br>next/server | 2026-07-07 |
 | /api/model/self-learning | API Route | Production Surface | Yes | No | No | No | No | Yes | Yes | @/services/self-learning-engine.service<br>next/server | 2026-07-08 |
+| /api/model/segments | API Route | Production Surface | Yes | Yes | No | No | No | Yes | Yes | @/lib/api-contract<br>@/services/model-segments.service<br>next/server | 2026-07-31 |
 | /api/model/shadow-calibration | API Route | Experimental | No | Yes | Yes | No | No | Yes | Yes | @/services/historical-shadow-calibration.service<br>next/server | 2026-07-24 |
 | /api/model/status | API Route | Production Surface | Yes | Yes | No | No | No | Yes | Yes | @/services/model-calibration.service<br>@/services/model-learning.service<br>@/services/model-versioning.service<br>next/server | 2026-07-07 |
 | /api/model/versions | API Route | Production Surface | Yes | Yes | No | No | No | Yes | Yes | @/services/model-versioning.service<br>next/server | 2026-07-07 |
@@ -1255,6 +1257,7 @@ Generated from discovered routes, services, providers, adapters and product modu
 | src / services / model-calibration.service | Service | Internal Dependency | No | No | No | No | No | No | No | @/lib/supabase-admin<br>@/services/production-data-gate.service | 2026-07-14 |
 | src / services / model-learning.service | Service | Internal Dependency | No | No | No | No | No | No | No | @/lib/supabase-admin<br>@/services/model-backtest.service<br>@/services/model-calibration.service<br>@/services/model-versioning.service<br>@/services/production-data-gate.service | 2026-07-14 |
 | src / services / model-metrics-framework.service | Service | Internal Dependency | No | No | No | No | No | No | No | @/lib/supabase-admin<br>@/services/production-data-gate.service | 2026-07-14 |
+| src / services / model-segments.service | Service | Internal Dependency | No | Yes | No | No | No | No | Yes | @/lib/supabase-admin<br>@/lib/settlement-canonical<br>@/lib/time<br>server-only | 2026-07-31 |
 | src / services / model-only-intelligence.service | Service | Internal Dependency | No | No | No | No | No | No | No | @/lib/supabase-admin | 2026-07-23 |
 | src / services / model-versioning.service | Service | Internal Dependency | No | No | No | No | No | No | No | @/lib/supabase-admin | 2026-07-07 |
 | src / services / monte-carlo-engine.service | Service | Internal Dependency | No | No | No | No | No | No | No | @/services/top-picks.service | 2026-07-09 |

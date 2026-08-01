@@ -223,11 +223,13 @@ Generated from static imports, route files, workflow files and database referenc
 | src/app/api/mlb/temporal-health/route.ts | /api/mlb/temporal-health | @/lib/api-contract<br>@/lib/server-lazy-diagnostics<br>next/server | None detected |
 | src/app/api/model/autotune/route.ts | /api/model/autotune | @/services/model-learning.service<br>next/server | None detected |
 | src/app/api/model/calibration/route.ts | /api/model/calibration | @/services/model-calibration.service<br>next/server | None detected |
+| src/app/api/model/intelligence/route.ts | /api/model/intelligence | @/lib/api-contract<br>@/services/model-segments.service<br>next/server | prediction_history<br>sport_events |
 | src/app/api/model/learning/route.ts | /api/model/learning | @/services/model-learning.service<br>next/server | None detected |
 | src/app/api/model/metrics/route.ts | /api/model/metrics | @/lib/api-contract<br>@/services/model-metrics-framework.service | None detected |
 | src/app/api/model/rollback/history/route.ts | /api/model/rollback/history | @/lib/supabase-admin<br>next/server | model_versions |
 | src/app/api/model/rollback/route.ts | /api/model/rollback | @/services/model-learning.service<br>next/server | None detected |
 | src/app/api/model/self-learning/route.ts | /api/model/self-learning | @/services/self-learning-engine.service<br>next/server | None detected |
+| src/app/api/model/segments/route.ts | /api/model/segments | @/lib/api-contract<br>@/services/model-segments.service<br>next/server | prediction_history<br>sport_events |
 | src/app/api/model/shadow-calibration/route.ts | /api/model/shadow-calibration | @/services/historical-shadow-calibration.service<br>next/server | None detected |
 | src/app/api/model/status/route.ts | /api/model/status | @/services/model-calibration.service<br>@/services/model-learning.service<br>@/services/model-versioning.service<br>next/server | None detected |
 | src/app/api/model/versions/route.ts | /api/model/versions | @/services/model-versioning.service<br>next/server | None detected |
@@ -1962,6 +1964,7 @@ Generated from static imports, route files, workflow files and database referenc
 | Service | src/services/model-calibration.service.ts | @/lib/supabase-admin<br>@/services/production-data-gate.service | prediction_history |
 | Service | src/services/model-learning.service.ts | @/lib/supabase-admin<br>@/services/model-backtest.service<br>@/services/model-calibration.service<br>@/services/model-versioning.service<br>@/services/production-data-gate.service<br>@/services/weight-optimizer.service | model_versions<br>model_weight_history<br>model_weights<br>prediction_history |
 | Service | src/services/model-metrics-framework.service.ts | @/lib/supabase-admin<br>@/services/production-data-gate.service | prediction_history |
+| Service | src/services/model-segments.service.ts | @/lib/supabase-admin<br>@/lib/settlement-canonical<br>@/lib/time<br>server-only | prediction_history<br>sport_events |
 | Service | src/services/model-only-intelligence.service.ts | @/lib/supabase-admin | prediction_history<br>sport_events<br>universal_projection_history |
 | Service | src/services/model-versioning.service.ts | @/lib/supabase-admin | model_versions |
 | Service | src/services/multi-sport-adapters.service.ts | @/config/sports.config<br>@/services/bsn-platform.service<br>@/services/bsn.service<br>@/services/multi-sport-normalizers.service<br>@/services/multi-sport-registry.service<br>@/services/nba-adapter.service<br>@/types/multi-sport | None detected |

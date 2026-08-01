@@ -236,11 +236,13 @@ No duplicate route files detected by normalized route and type.
 | /api/mlb/temporal-health | API Route | src/app/api/mlb/temporal-health/route.ts | Active | Handles /api/mlb/temporal-health API requests. |
 | /api/model/autotune | API Route | src/app/api/model/autotune/route.ts | Active | Handles /api/model/autotune API requests. |
 | /api/model/calibration | API Route | src/app/api/model/calibration/route.ts | Active | Handles /api/model/calibration API requests. |
+| /api/model/intelligence | API Route | src/app/api/model/intelligence/route.ts | Active | Handles /api/model/intelligence read-only analytical coverage requests. |
 | /api/model/learning | API Route | src/app/api/model/learning/route.ts | Active | Handles /api/model/learning API requests. |
 | /api/model/metrics | API Route | src/app/api/model/metrics/route.ts | Active | Handles /api/model/metrics API requests. |
 | /api/model/rollback/history | API Route | src/app/api/model/rollback/history/route.ts | Active | Handles /api/model/rollback/history API requests. |
 | /api/model/rollback | API Route | src/app/api/model/rollback/route.ts | Active | Handles /api/model/rollback API requests. |
 | /api/model/self-learning | API Route | src/app/api/model/self-learning/route.ts | Active | Handles /api/model/self-learning API requests. |
+| /api/model/segments | API Route | src/app/api/model/segments/route.ts | Active | Handles /api/model/segments read-only analytical segment requests. |
 | /api/model/shadow-calibration | API Route | src/app/api/model/shadow-calibration/route.ts | Experimental | Handles /api/model/shadow-calibration API requests. |
 | /api/model/status | API Route | src/app/api/model/status/route.ts | Active | Handles /api/model/status API requests. |
 | /api/model/versions | API Route | src/app/api/model/versions/route.ts | Active | Handles /api/model/versions API requests. |
