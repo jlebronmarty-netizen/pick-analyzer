@@ -1,0 +1,104 @@
+{
+  "release": "Release 12",
+  "name": "Betting Decision Workspace V1",
+  "status": "LOCAL_PASS_PRODUCTION_PENDING",
+  "startingCommit": "68d2482b31a4e825008cd960db56285766a704c8",
+  "runtimeBehaviorChanged": true,
+  "runtimeBehaviorChangeScope": "betting-workbench product workflow only",
+  "predictionFormulaChanged": false,
+  "probabilityCalibrationChanged": false,
+  "officialPickPolicyChanged": false,
+  "learningWeightsChanged": false,
+  "schedulerChanged": false,
+  "providerContractsChanged": false,
+  "predictionSettlementChanged": false,
+  "historicalDataChanged": false,
+  "databaseSchemaChanged": false,
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "existingComponentsReused": [
+    "/betting-workbench",
+    "/api/current-board",
+    "/api/predictions/top",
+    "/api/model/intelligence",
+    "/api/model/segments",
+    "/api/dashboard/today",
+    "existing Kelly arithmetic"
+  ],
+  "workspace": {
+    "canonicalRoute": "/betting-workbench",
+    "dailyDecisionBoard": true,
+    "officialPicks": true,
+    "valueCandidates": true,
+    "researchPicks": true,
+    "noBetAvoid": true,
+    "comparisonWorkflow": true,
+    "evidenceLabels": [
+      "decision-grade",
+      "directional",
+      "insufficient"
+    ],
+    "eventStartProtections": true
+  },
+  "betSlip": {
+    "userControlled": true,
+    "single": true,
+    "parlay": true,
+    "userEnteredOddsLabeled": true,
+    "userEnteredStakeLabeled": true,
+    "sportsbookEntry": true,
+    "notes": true,
+    "autoBetPlacement": false,
+    "evRequiresProbabilityAndPrice": true
+  },
+  "parlaySafety": {
+    "combinedDecimalOdds": true,
+    "combinedImpliedProbability": true,
+    "combinedModelProbabilityFabricated": false,
+    "sameGameWarning": true,
+    "duplicateEventWarning": true,
+    "conflictingSelectionWarning": true,
+    "lowEvidenceWarning": true
+  },
+  "userWagerTracking": {
+    "persistence": "LOCAL_BROWSER_STORAGE_ONLY",
+    "remoteApiCreated": false,
+    "databaseMutation": false,
+    "separateFromPredictionSettlement": true,
+    "retrospectivePredictionCreation": false,
+    "personalPerformanceSeparateFromModelMetrics": true
+  },
+  "localValidation": {
+    "release01Validator": "PASS_WITH_KNOWN_WARNINGS",
+    "release02Validator": "PASS",
+    "release02aValidator": "PASS",
+    "release03Validator": "PASS",
+    "release04Validator": "PASS_AFTER_RELEASE12_COMMIT",
+    "release05Validator": "PASS_AFTER_RELEASE12_COMMIT",
+    "release06Validator": "PASS_AFTER_RELEASE12_COMMIT",
+    "release07Validator": "PASS_AFTER_RELEASE12_COMMIT",
+    "release08Validator": "PASS_AFTER_RELEASE12_COMMIT",
+    "release09Validator": "PASS_AFTER_RELEASE12_COMMIT",
+    "release10Validator": "PASS_AFTER_RELEASE12_COMMIT",
+    "release11Validator": "PASS_AFTER_RELEASE12_COMMIT",
+    "release12Validator": "PASS",
+    "build": "PASS",
+    "eslint": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "requiredRoutes": [
+      "/api/system/version",
+      "/api/dashboard/today",
+      "/api/current-board",
+      "/api/model/intelligence",
+      "/api/model/segments",
+      "/betting-workbench"
+    ]
+  },
+  "release13Started": false
+}

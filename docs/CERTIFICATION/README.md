@@ -30,6 +30,8 @@ Current V2 certification documents:
 - [Release 10 Certification JSON](release-10-controlled-experimentation.json)
 - [Release 11 Autonomous Operations Certification](RELEASE_11_AUTONOMOUS_OPERATIONS.md)
 - [Release 11 Certification JSON](release-11-autonomous-operations.json)
+- [Release 12 Betting Workspace Certification](RELEASE_12_BETTING_WORKSPACE.md)
+- [Release 12 Certification JSON](release-12-betting-workspace.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

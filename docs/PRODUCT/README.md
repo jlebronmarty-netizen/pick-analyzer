@@ -15,6 +15,10 @@ Current V2 product integration documents:
 - [AI Daily Betting Experience](AI_DAILY_EXPERIENCE.md)
 - [AI Explanation Guide](AI_EXPLANATION_GUIDE.md)
 - [Model Experiment Dashboard](MODEL_EXPERIMENT_DASHBOARD.md)
+- [Release 12 Betting Workspace Audit](RELEASE_12_BETTING_WORKSPACE_AUDIT.md)
+- [Betting Decision Workspace](BETTING_DECISION_WORKSPACE.md)
+- [Bet Slip And Risk Guide](BET_SLIP_AND_RISK_GUIDE.md)
+- [Personal Wager Tracking](PERSONAL_WAGER_TRACKING.md)
 
 Most product documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 
