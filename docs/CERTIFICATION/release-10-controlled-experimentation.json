@@ -1,0 +1,108 @@
+{
+  "release": "Release 10",
+  "name": "Controlled Model Experimentation V1",
+  "status": "LOCAL_PASS_PRODUCTION_PENDING",
+  "startingCommit": "15c9ad76302a26fd92540e3fc099688bdc429567",
+  "runtimeBehaviorChanged": false,
+  "productionProbabilityChanged": false,
+  "predictionFormulaChanged": false,
+  "probabilityCalibrationChanged": false,
+  "officialPickPolicyChanged": false,
+  "settlementChanged": false,
+  "schedulerChanged": false,
+  "providerContractsChanged": false,
+  "productionLearningChanged": false,
+  "historicalDataChanged": false,
+  "databaseSchemaChanged": false,
+  "historicalReplayStarted": false,
+  "retrospectiveLabelsGenerated": false,
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "baseline": {
+    "id": "baseline-release-10-2026-08-01",
+    "rows": 485,
+    "scoredRows": 479,
+    "wins": 239,
+    "losses": 240,
+    "pushes": 6,
+    "accuracy": 49.9,
+    "brier": 0.2598,
+    "calibrationError": -11.84,
+    "averageConfidence": 42.48,
+    "officialPickScoredRows": 5,
+    "officialPickAccuracy": 80,
+    "officialPickBrier": 0.1686
+  },
+  "experiments": {
+    "registered": 4,
+    "running": 0,
+    "passed": 0,
+    "failed": 2,
+    "insufficientData": 2,
+    "approvedForRelease": 0
+  },
+  "candidateEvaluation": {
+    "pass": 0,
+    "fail": 2,
+    "insufficientData": 2,
+    "reasons": [
+      "insufficient sample",
+      "insufficient improvement",
+      "regression not disproven",
+      "confidence too low",
+      "unstable bucket"
+    ]
+  },
+  "offlineRunner": {
+    "implementedAsCertificationContract": true,
+    "readOnly": true,
+    "writesProductionPredictions": false,
+    "deterministicOutput": true,
+    "candidateAppliedToProduction": false,
+    "baselineWinsByDefault": true
+  },
+  "regressionWorkflow": {
+    "global": "REQUIRED",
+    "market": "REQUIRED",
+    "bucket": "REQUIRED",
+    "segment": "REQUIRED",
+    "officialPicks": "REQUIRED",
+    "rejectOnProtectedRegression": true
+  },
+  "dashboard": {
+    "readOnlyContractCreated": true,
+    "runningExperiments": 0,
+    "approvedExperiments": 0,
+    "waitingForData": 2,
+    "rejectedExperiments": 2
+  },
+  "localValidation": {
+    "release01Validator": "PASS_WITH_KNOWN_WARNINGS",
+    "release02Validator": "PASS",
+    "release02aValidator": "PASS",
+    "release03Validator": "PASS",
+    "release04Validator": "PASS_AFTER_RELEASE10_COMMIT",
+    "release05Validator": "PASS_AFTER_RELEASE10_COMMIT",
+    "release06Validator": "PASS_AFTER_RELEASE10_COMMIT",
+    "release07Validator": "PASS_AFTER_RELEASE10_COMMIT",
+    "release08Validator": "PASS_AFTER_RELEASE10_COMMIT",
+    "release09Validator": "PASS_AFTER_RELEASE10_COMMIT",
+    "release10Validator": "PASS",
+    "build": "PASS",
+    "eslint": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "requiredRoutes": [
+      "/api/system/version",
+      "/api/model/intelligence",
+      "/api/model/segments",
+      "/api/performance"
+    ]
+  },
+  "release11Started": false
+}

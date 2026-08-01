@@ -14,6 +14,7 @@ Current V2 product integration documents:
 - [Release 02 Live State Integration](RELEASE_02_LIVE_STATE_INTEGRATION.md)
 - [AI Daily Betting Experience](AI_DAILY_EXPERIENCE.md)
 - [AI Explanation Guide](AI_EXPLANATION_GUIDE.md)
+- [Model Experiment Dashboard](MODEL_EXPERIMENT_DASHBOARD.md)
 
 Most product documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

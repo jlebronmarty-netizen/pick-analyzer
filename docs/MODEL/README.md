@@ -12,3 +12,6 @@ Model documentation covers prediction quality, feature importance, calibration, 
 - [Model Optimization Report V1](MODEL_OPTIMIZATION_REPORT.md)
 - [Optimization Candidates](OPTIMIZATION_CANDIDATES.md)
 - [Model Evolution Workflow](MODEL_EVOLUTION_WORKFLOW.md)
+- [Experiment Registry](EXPERIMENT_REGISTRY.md)
+- [Baseline Model](BASELINE_MODEL.md)
+- [Experiment Workflow](EXPERIMENT_WORKFLOW.md)

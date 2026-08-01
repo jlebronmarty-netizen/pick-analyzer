@@ -26,6 +26,8 @@ Current V2 certification documents:
 - [Release 08 Certification JSON](release-08-statistical-evolution.json)
 - [Release 09 AI Daily Experience Certification](RELEASE_09_AI_DAILY_EXPERIENCE.md)
 - [Release 09 Certification JSON](release-09-ai-daily-experience.json)
+- [Release 10 Controlled Experimentation Certification](RELEASE_10_CONTROLLED_EXPERIMENTATION.md)
+- [Release 10 Certification JSON](release-10-controlled-experimentation.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 
