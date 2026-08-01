@@ -10,3 +10,5 @@ Model documentation covers prediction quality, feature importance, calibration, 
 - [Model Intelligence Report V1](MODEL_INTELLIGENCE_REPORT.md)
 - [Row-Level Segment Analysis V1](ROW_LEVEL_SEGMENT_ANALYSIS.md)
 - [Model Optimization Report V1](MODEL_OPTIMIZATION_REPORT.md)
+- [Optimization Candidates](OPTIMIZATION_CANDIDATES.md)
+- [Model Evolution Workflow](MODEL_EVOLUTION_WORKFLOW.md)

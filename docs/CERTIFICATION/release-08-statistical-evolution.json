@@ -1,0 +1,119 @@
+{
+  "release": "Release 08",
+  "name": "Statistical Model Evolution V1",
+  "status": "LOCAL_PASS_PRODUCTION_PENDING",
+  "startingCommit": "59f20b788ef72f655b1a4b1bdff0fcec4739d144",
+  "runtimeBehaviorChanged": false,
+  "productionProbabilityChanged": false,
+  "predictionFormulaChanged": false,
+  "probabilityCalibrationChanged": false,
+  "officialPickPolicyChanged": false,
+  "learningWeightsChanged": false,
+  "providerContractsChanged": false,
+  "schedulerBehaviorChanged": false,
+  "databaseSchemaChanged": false,
+  "historicalReplayStarted": false,
+  "retrospectiveLabelsGenerated": false,
+  "experimentalDeploymentAutomatic": false,
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "thresholds": {
+    "minimumSampleSizeMarketOrSport": 100,
+    "minimumSampleSizeBucket": 50,
+    "minimumSampleSizeGlobal": 250,
+    "minimumConfidenceLevel": 0.95,
+    "maximumExpectedRegression": 0,
+    "minimumExpectedBrierImprovement": 0.005,
+    "minimumExpectedCalibrationImprovement": 2,
+    "maximumSmallSampleGainShare": 0.35,
+    "minimumOfficialPickSample": 100
+  },
+  "candidateSummary": {
+    "generated": 6,
+    "approved": 0,
+    "rejected": 3,
+    "needsMoreData": 3
+  },
+  "candidates": [
+    {
+      "name": "probability bucket calibration",
+      "decision": "REJECTED",
+      "sampleSize": 21,
+      "riskLevel": "HIGH",
+      "reason": "Higher probability buckets are below minimum bucket sample threshold."
+    },
+    {
+      "name": "confidence calibration",
+      "decision": "REJECTED",
+      "sampleSize": 10,
+      "riskLevel": "HIGH",
+      "reason": "Medium and higher confidence buckets are too sparse."
+    },
+    {
+      "name": "market-specific calibration",
+      "decision": "NEEDS_MORE_DATA",
+      "sampleSize": 479,
+      "riskLevel": "MEDIUM",
+      "reason": "Market sample exists, but totals accuracy and Brier point in different directions."
+    },
+    {
+      "name": "sport-specific calibration",
+      "decision": "NEEDS_MORE_DATA",
+      "sampleSize": 479,
+      "riskLevel": "MEDIUM",
+      "reason": "Current production sample is MLB-only."
+    },
+    {
+      "name": "feature weighting candidate",
+      "decision": "REJECTED",
+      "sampleSize": 0,
+      "riskLevel": "HIGH",
+      "reason": "Feature coverage remains partial and contribution cannot be estimated safely."
+    },
+    {
+      "name": "confidence normalization",
+      "decision": "NEEDS_MORE_DATA",
+      "sampleSize": 479,
+      "riskLevel": "MEDIUM",
+      "reason": "Aggregate underconfidence is visible, but bucket-level stability is not proven."
+    }
+  ],
+  "offlineSimulation": {
+    "candidateModelApplied": false,
+    "accuracyBefore": 49.9,
+    "accuracyAfter": 49.9,
+    "brierBefore": 0.2598,
+    "brierAfter": 0.2598,
+    "calibrationErrorBefore": -11.84,
+    "calibrationErrorAfter": -11.84,
+    "officialPicksAdded": 0,
+    "regressionDetected": false
+  },
+  "localValidation": {
+    "release01Validator": "PASS_WITH_KNOWN_WARNINGS",
+    "release02Validator": "PASS",
+    "release02aValidator": "PASS",
+    "release03Validator": "PASS",
+    "release04Validator": "PASS_AFTER_RELEASE08_COMMIT",
+    "release05Validator": "PASS_AFTER_RELEASE08_COMMIT",
+    "release06Validator": "PASS_AFTER_RELEASE08_COMMIT",
+    "release07Validator": "PASS_AFTER_RELEASE08_COMMIT",
+    "release08Validator": "PASS",
+    "build": "PASS",
+    "eslint": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "requiredRoutes": [
+      "/api/system/version",
+      "/api/model/segments",
+      "/api/model/intelligence",
+      "/api/performance"
+    ]
+  },
+  "release09Started": false
+}
