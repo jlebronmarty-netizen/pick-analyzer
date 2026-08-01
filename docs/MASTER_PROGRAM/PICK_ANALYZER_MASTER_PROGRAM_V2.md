@@ -79,6 +79,8 @@ This is the highest-level documentation index for Pick Analyzer V2. It governs p
 - [Release 14A.1 Server Auth Bridge](../PRODUCT/RELEASE_14A1_SERVER_AUTH_BRIDGE.md)
 - [Release 14A.1 Authenticated API Session Bridge](../SECURITY/AUTHENTICATED_API_SESSION_BRIDGE.md)
 - [Release 14A.1 Server Auth Session Certification](../CERTIFICATION/RELEASE_14A1_SERVER_AUTH_SESSION.md)
+- [OE-002 Automatic Daily Closure](../OPERATIONAL_EXCELLENCE/OE_002_AUTOMATIC_DAILY_CLOSURE.md)
+- [OE-002 Automatic Daily Closure Certification](../CERTIFICATION/OE_002_AUTOMATIC_DAILY_CLOSURE.md)
 - [Release 01 Execution Plan](../RELEASES/RELEASE_01_EXECUTION_PLAN.md)
 - [Release 01 Backlog](../RELEASES/RELEASE_01_BACKLOG.md)
 - [Release 01 Progress](../RELEASES/RELEASE_01_PROGRESS.md)

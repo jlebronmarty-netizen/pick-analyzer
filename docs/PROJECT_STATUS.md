@@ -1538,3 +1538,11 @@ Status: IMPLEMENTED PENDING FINAL PRODUCTION PROOF
 V2 Phase C1.1 repairs the remaining external scheduler reliability boundary for C1 Goal B. Public GitHub metadata proved the production writer and heartbeat workflows are active, scheduled and able to complete on commit `344a366107f14b6238e1650d1243ba321ca39164`; the scheduled writer run `30653457381` cleared the settlement backlog, and production settlement guarantee subsequently returned HTTP 200 with 60 completed rows settled, 0 ready rows, 0 blocked rows and 0 silent pending rows.
 
 The repository repair isolates writer and heartbeat concurrency groups, moves the write schedule to `7-57/10 * * * *` without increasing frequency, bounds the writer job below cadence at 6 minutes and bounds the heartbeat at 5 minutes. The settlement guarantee route now includes scheduler health and returns `ACTION_REQUIRED` if scheduler cadence is late/critical even when settlement rows are clear. No settlement rule, prediction formula, Official Pick policy, model weight, epoch, provider plan, GitHub billing or Vercel billing changed.
+
+# 2026-08-01 - OE-002 Automatic Daily Closure
+
+Status: IMPLEMENTED PENDING POST-DEPLOYMENT SCHEDULER PROOF
+
+OE-002 investigated the production symptom where completed MLB rows were blocked from Performance and learning. Read-only production evidence showed settlement guarantee had 15 completed prediction rows, 12 settled rows, 0 ready rows, 3 explicitly blocked rows and 0 silent pending rows; all blocked rows were tied to `baseball_mlb:mlb:sportsdataio:event:78934` with reason `RESULT_NOT_IMPORTED`.
+
+The confirmed repair is limited to the adaptive refresh planner. Completed pending prediction rows whose linked `sport_events` row is final/scored but missing canonical `game_results` now count as `completedMissingResultRows`, force the `results` domain to `DUE_NOW`, and select `sync_results` for the oldest missing-result date. No settlement rule, prediction formula, Official Pick policy, Kelly logic, learning weight, scheduler cadence or provider contract changed.

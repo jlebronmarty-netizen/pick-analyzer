@@ -696,23 +696,45 @@ async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
   const pending = ((data ?? []) as SettlementBacklogPredictionRow[]).filter(isPendingPrediction)
   const eventIds = Array.from(new Set(pending.map((row) => row.game_id).filter(Boolean))) as string[]
   const results: SettlementBacklogResultRow[] = []
+  const events: SettlementBacklogEventRow[] = []
   for (let index = 0; index < eventIds.length; index += 100) {
+    const chunk = eventIds.slice(index, index + 100)
     const { data: resultRows, error: resultError } = await supabaseAdmin
       .from('game_results')
       .select('game_id, home_score, away_score, created_at')
-      .in('game_id', eventIds.slice(index, index + 100))
+      .in('game_id', chunk)
     if (resultError) throw new Error(`Settlement backlog result read failed: ${resultError.message}`)
     results.push(...((resultRows ?? []) as SettlementBacklogResultRow[]))
+
+    const { data: eventRows, error: eventError } = await supabaseAdmin
+      .from('sport_events')
+      .select('id, start_time, status, home_score, away_score, updated_at')
+      .in('id', chunk)
+    if (eventError) throw new Error(`Settlement backlog event read failed: ${eventError.message}`)
+    events.push(...((eventRows ?? []) as SettlementBacklogEventRow[]))
   }
 
   const resultsByGameId = new Map(results.map((result) => [result.game_id, result]))
+  const eventsById = new Map(events.map((event) => [event.id, event]))
   const eligible = pending.filter((row) => isAuthoritativeSettlementResult(row.game_id ? resultsByGameId.get(row.game_id) : undefined))
+  const missingResult = pending.filter((row) => {
+    if (!row.game_id || isAuthoritativeSettlementResult(resultsByGameId.get(row.game_id))) return false
+    return isFinalScoredEvent(eventsById.get(row.game_id))
+  })
   const awaitingResult = pending.length - eligible.length
   const dates = eligible
     .map((row) => puertoRicoLocalDateFromUtc(row.commence_time ?? ''))
     .filter((date): date is string => Boolean(date))
     .sort()
+  const missingResultDates = missingResult
+    .map((row) => puertoRicoLocalDateFromUtc(row.commence_time ?? ''))
+    .filter((date): date is string => Boolean(date))
+    .sort()
   const rowsByDate = dates.reduce<Record<string, number>>((counts, date) => {
+    counts[date] = (counts[date] ?? 0) + 1
+    return counts
+  }, {})
+  const missingRowsByDate = missingResultDates.reduce<Record<string, number>>((counts, date) => {
     counts[date] = (counts[date] ?? 0) + 1
     return counts
   }, {})
@@ -725,10 +747,14 @@ async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
   return {
     checkedRows: pending.length,
     settlementReadyRows: eligible.length,
+    completedMissingResultRows: missingResult.length,
     awaitingResultRows: awaitingResult,
     oldestReadyDate: dates[0] ?? null,
     newestReadyDate: dates.at(-1) ?? null,
+    oldestMissingResultDate: missingResultDates[0] ?? null,
+    newestMissingResultDate: missingResultDates.at(-1) ?? null,
     readyRowsByDate: rowsByDate,
+    missingResultRowsByDate: missingRowsByDate,
     latestResultUpdatedAt,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
@@ -1006,7 +1032,14 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       sourceOverride: 'sports_odds_snapshots/provider-check-ledger/current-board',
       policyOverride: policyOverrides.odds,
     }),
-    freshnessItem({ domain: 'results', lastUpdated: latestResults, available: Boolean(latestResults || finalGames > 0), activeNeed: finalGames > 0, now, policyOverride: policyOverrides.results }),
+    freshnessItem({
+      domain: 'results',
+      lastUpdated: latestResults,
+      available: Boolean(latestResults) && Number(settlementBacklog?.completedMissingResultRows ?? 0) === 0,
+      activeNeed: finalGames > 0 || Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0,
+      now,
+      policyOverride: policyOverrides.results,
+    }),
     freshnessItem({ domain: 'starters', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.starters }),
     freshnessItem({ domain: 'lineups', lastUpdated: null, available: false, activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.lineups }),
     freshnessItem({ domain: 'injuries_availability', lastUpdated: latestFeature, available: featureAvailable, activeNeed: readyForAnalysis > 0, now, policyOverride: policyOverrides.injuries_availability }),
@@ -1044,10 +1077,16 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     reason:
       item.domain === 'settlement' && Number(settlementBacklog?.settlementReadyRows ?? 0) > 0
         ? `${settlementBacklog?.settlementReadyRows ?? 0} prior prediction rows are settlement-ready from completed stored results.`
+        : item.domain === 'results' && Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0
+          ? `${settlementBacklog?.completedMissingResultRows ?? 0} completed prediction rows are blocked because canonical game_results are missing.`
         : item.domain === 'odds'
           ? marketState.reason
           : item.staleReason ?? item.userMessage,
   }))
+  const resultsPlan = refreshPlan.find((item) => item.domain === 'results')
+  if (resultsPlan && Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0) {
+    resultsPlan.decision = mode === 'EXHAUSTED' ? 'BLOCKED' : 'DUE_NOW'
+  }
   const oddsPlan = refreshPlan.find((item) => item.domain === 'odds')
   if (oddsPlan && ['CHECK_DUE', 'CHECK_OVERDUE', 'NO_MARKETS_RETURNED', 'PROVIDER_CHECK_FAILED', 'PROVIDER_DELAYED'].includes(marketState.state)) {
     oddsPlan.decision = mode === 'EXHAUSTED' ? 'BLOCKED' : 'DUE_NOW'
@@ -1231,10 +1270,14 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     settlementBacklog: settlementBacklog ?? {
       checkedRows: 0,
       settlementReadyRows: 0,
+      completedMissingResultRows: 0,
       awaitingResultRows: 0,
       oldestReadyDate: null,
       newestReadyDate: null,
+      oldestMissingResultDate: null,
+      newestMissingResultDate: null,
       readyRowsByDate: {},
+      missingResultRowsByDate: {},
       latestResultUpdatedAt: null,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
@@ -1393,6 +1436,8 @@ export async function runAdaptiveRefresh({
   const selectedDate = String(
     action === 'settle' && settlementBacklog.oldestReadyDate
       ? settlementBacklog.oldestReadyDate
+      : action === 'sync_results' && settlementBacklog.oldestMissingResultDate
+      ? settlementBacklog.oldestMissingResultDate
       : action === 'status_refresh'
       ? (status as Record<string, unknown>).providerQueryDate ?? status.activeSlateDate ?? status.operatingDate
       : actionDateResolution?.providerQueryDate ?? (status as Record<string, unknown>).providerQueryDate ?? status.activeSlateDate ?? status.nextSlateDate ?? status.operatingDate

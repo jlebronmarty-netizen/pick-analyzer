@@ -1,0 +1,40 @@
+{
+  "ticket": "OE-002",
+  "name": "Automatic Daily Closure & Operational Certification V1",
+  "verdict": "CONDITIONAL_PASS",
+  "baselineCommit": "829db0e2b8b9412f4bd4b6bd237c15636e6bc826",
+  "rootCause": "Completed prediction rows with final/scored sport_events but missing canonical game_results were reported by settlement guarantee as RESULT_NOT_IMPORTED, but adaptive scheduler freshness did not treat that missing-result backlog as an actionable results due condition.",
+  "repair": {
+    "file": "src/services/adaptive-refresh-orchestrator.service.ts",
+    "completedMissingResultRows": true,
+    "resultsDueWhenCanonicalResultMissing": true,
+    "syncResultsUsesOldestMissingResultDate": true,
+    "settlementLogicChanged": false,
+    "predictionLogicChanged": false,
+    "providerContractChanged": false
+  },
+  "productionEvidenceBeforeRepair": {
+    "date": "2026-07-31",
+    "eventsAudited": 15,
+    "predictionRows": 45,
+    "validPregamePredictionRows": 45,
+    "completedPredictionRows": 15,
+    "settledRows": 12,
+    "readyForSettlementRows": 0,
+    "blockedRows": 3,
+    "silentPendingRows": 0,
+    "blockedReason": "RESULT_NOT_IMPORTED",
+    "blockedEventId": "baseball_mlb:mlb:sportsdataio:event:78934",
+    "blockedMatchup": "NYY @ CHC"
+  },
+  "guardrails": {
+    "providerCallsDuringCertification": 0,
+    "remoteMutationsDuringCertification": 0,
+    "predictionFormulaChanged": false,
+    "officialPicksChanged": false,
+    "kellyChanged": false,
+    "probabilityChanged": false,
+    "learningWeightsChanged": false,
+    "schedulerCadenceChanged": false
+  }
+}
