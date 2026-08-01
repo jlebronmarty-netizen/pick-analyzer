@@ -20,6 +20,8 @@ export type SegmentDimension =
   | 'settlementResult'
   | 'predictionSource'
 
+type CanonicalStatus = 'complete' | 'partial' | 'missing'
+
 type SegmentFilters = {
   sport?: string | null
   league?: string | null
@@ -90,6 +92,21 @@ type EventRow = {
   away_score: number | null
 }
 
+type OddsSnapshotRow = {
+  id: string
+  sport_key: string | null
+  event_id: string | null
+  sportsbook: string | null
+  market: string | null
+  outcome: string | null
+  price: number | null
+  line: number | null
+  snapshot_time: string | null
+  is_opening: boolean | null
+  is_closing: boolean | null
+  metadata: Record<string, unknown> | null
+}
+
 export type SegmentRecord = {
   id: string
   sport: string
@@ -103,7 +120,11 @@ export type SegmentRecord = {
   homeAway: 'home' | 'away' | 'neutral_or_unknown'
   favoriteUnderdog: 'favorite' | 'underdog' | 'even_or_unknown'
   openingLine: number | null
+  openingPrice: number | null
+  openingSnapshotId: string | null
   closingLine: number | null
+  closingPrice: number | null
+  closingSnapshotId: string | null
   impliedProbability: number | null
   predictedProbability: number | null
   probabilityBucket: string
@@ -125,9 +146,23 @@ export type SegmentRecord = {
   edge: number | null
   expectedValue: number | null
   settlementResult: string
+  learningLabel: string
   closingResult: string | null
   push: boolean
   void: boolean
+  canonicalSources: {
+    openingLine: string
+    closingLine: string
+    finalSettlement: string
+    learningLabel: string
+    featureSnapshot: string
+    modelVersion: string
+    featureVersion: string
+    ev: string
+    edge: string
+    probability: string
+    confidence: string
+  }
 }
 
 function boundedLimit(value: number | null | undefined) {
@@ -213,6 +248,14 @@ function snapshotLine(snapshot: Record<string, unknown>, keys: string[]) {
   return null
 }
 
+function snapshotText(snapshot: Record<string, unknown>, keys: string[]) {
+  for (const key of keys) {
+    const value = textValue(snapshot[key])
+    if (value !== null) return value
+  }
+  return null
+}
+
 function featureCoverage(snapshot: Record<string, unknown>) {
   const starter = nestedRecord(snapshot, ['starter_context', 'starterContext'])
   const weather = nestedRecord(snapshot, ['weather_context', 'weatherContext'])
@@ -234,9 +277,80 @@ function predictionSource(row: PredictionRow) {
   return normalize(row.model_role) || normalize(row.validation_status) || 'model'
 }
 
-function toSegmentRecord(row: PredictionRow, event?: EventRow): SegmentRecord {
+function sameMarket(left: string | null | undefined, right: string | null | undefined) {
+  return normalize(left) === normalize(right)
+}
+
+function sameSelection(snapshot: OddsSnapshotRow, row: PredictionRow) {
+  const outcome = normalize(snapshot.outcome)
+  const team = normalize(row.team)
+  const opponent = normalize(row.opponent)
+  if (!outcome) return true
+  return outcome === team || outcome === opponent || outcome === normalize(row.market)
+}
+
+function validSnapshotPrice(row: OddsSnapshotRow) {
+  const price = numberValue(row.price)
+  if (price === null || price === 0) return null
+  return price
+}
+
+function alignedSnapshots(row: PredictionRow, eventSnapshots: OddsSnapshotRow[]) {
+  return eventSnapshots.filter((snapshot) => sameMarket(snapshot.market, row.market) && sameSelection(snapshot, row))
+}
+
+function openingSnapshot(row: PredictionRow, snapshots: OddsSnapshotRow[]) {
+  const aligned = alignedSnapshots(row, snapshots).filter((snapshot) => validSnapshotPrice(snapshot) !== null || numberValue(snapshot.line) !== null)
+  return (
+    aligned
+      .filter((snapshot) => snapshot.is_opening === true)
+      .sort((a, b) => String(a.snapshot_time ?? '').localeCompare(String(b.snapshot_time ?? '')))[0] ??
+    aligned.sort((a, b) => String(a.snapshot_time ?? '').localeCompare(String(b.snapshot_time ?? '')))[0] ??
+    null
+  )
+}
+
+function closingSnapshot(row: PredictionRow, snapshots: OddsSnapshotRow[], event?: EventRow) {
+  const startMs = Date.parse(event?.start_time ?? row.commence_time ?? '')
+  const aligned = alignedSnapshots(row, snapshots).filter((snapshot) => {
+    if (validSnapshotPrice(snapshot) === null && numberValue(snapshot.line) === null) return false
+    if (!Number.isFinite(startMs)) return true
+    const snapshotMs = Date.parse(snapshot.snapshot_time ?? '')
+    return Number.isFinite(snapshotMs) && snapshotMs < startMs
+  })
+  return (
+    aligned
+      .filter((snapshot) => snapshot.is_closing === true)
+      .sort((a, b) => String(b.snapshot_time ?? '').localeCompare(String(a.snapshot_time ?? '')))[0] ??
+    aligned.sort((a, b) => String(b.snapshot_time ?? '').localeCompare(String(a.snapshot_time ?? '')))[0] ??
+    null
+  )
+}
+
+function settlementLearningLabel(row: PredictionRow, settlementResult: string) {
+  const details = asRecord(row.settlement_details)
+  return (
+    snapshotText(details, ['learningLabel', 'learning_label', 'label']) ??
+    snapshotText(asRecord(details.learning_evidence_v1), ['learningLabel', 'learning_label', 'label', 'outcome']) ??
+    settlementResult
+  )
+}
+
+function canonicalSource(value: unknown, source: string, missing = 'missing') {
+  if (value === null || value === undefined || value === '') return missing
+  return source
+}
+
+function toSegmentRecord(row: PredictionRow, event?: EventRow, eventSnapshots: OddsSnapshotRow[] = []): SegmentRecord {
   const snapshot = asRecord(row.feature_snapshot)
   const settlementResult = canonicalStoredOutcome(row)
+  const opening = openingSnapshot(row, eventSnapshots)
+  const closing = closingSnapshot(row, eventSnapshots, event)
+  const openingLine = snapshotLine(snapshot, ['openingLine', 'opening_line']) ?? numberValue(opening?.line)
+  const openingPrice = numberValue(opening?.price)
+  const closingLine = snapshotLine(snapshot, ['closingLine', 'closing_line']) ?? numberValue(closing?.line)
+  const closingPrice = numberValue(closing?.price)
+  const learningLabel = settlementLearningLabel(row, settlementResult)
   return {
     id: row.id,
     sport: row.sport_key,
@@ -249,8 +363,12 @@ function toSegmentRecord(row: PredictionRow, event?: EventRow): SegmentRecord {
     selectedTeam: row.team,
     homeAway: homeAway(row, event),
     favoriteUnderdog: favoriteUnderdog(row),
-    openingLine: snapshotLine(snapshot, ['openingLine', 'opening_line']),
-    closingLine: snapshotLine(snapshot, ['closingLine', 'closing_line']),
+    openingLine,
+    openingPrice,
+    openingSnapshotId: opening?.id ?? null,
+    closingLine,
+    closingPrice,
+    closingSnapshotId: textValue(asRecord(row.settlement_details).closingSnapshotId) ?? closing?.id ?? null,
     impliedProbability: numberValue(row.implied_probability),
     predictedProbability: numberValue(row.model_probability),
     probabilityBucket: probabilityBucket(row.model_probability),
@@ -265,9 +383,23 @@ function toSegmentRecord(row: PredictionRow, event?: EventRow): SegmentRecord {
     edge: numberValue(row.edge),
     expectedValue: numberValue(row.ev),
     settlementResult,
+    learningLabel,
     closingResult: textValue(asRecord(row.settlement_details).closingResult),
     push: settlementResult === 'push',
     void: settlementResult === 'void',
+    canonicalSources: {
+      openingLine: canonicalSource(openingLine, opening?.id ? 'sports_odds_snapshots' : 'prediction_history.feature_snapshot'),
+      closingLine: canonicalSource(closingLine, closing?.id ? 'sports_odds_snapshots' : 'prediction_history.feature_snapshot'),
+      finalSettlement: canonicalSource(settlementResult, 'prediction_history.result/status/settlement_details'),
+      learningLabel: canonicalSource(learningLabel, 'derived_from_canonical_settlement'),
+      featureSnapshot: canonicalSource(row.feature_snapshot_id ?? (Object.keys(snapshot).length ? 'embedded' : null), 'prediction_history.feature_snapshot_id/feature_snapshot'),
+      modelVersion: canonicalSource(row.model_version, 'prediction_history.model_version'),
+      featureVersion: canonicalSource(row.feature_set_version, 'prediction_history.feature_set_version'),
+      ev: canonicalSource(row.ev, 'prediction_history.ev'),
+      edge: canonicalSource(row.edge, 'prediction_history.edge'),
+      probability: canonicalSource(row.model_probability, 'prediction_history.model_probability'),
+      confidence: canonicalSource(row.confidence, 'prediction_history.confidence'),
+    },
   }
 }
 
@@ -376,12 +508,67 @@ async function loadEvents(eventIds: string[]) {
   return new Map(events.map((event) => [event.id, event]))
 }
 
+async function loadOddsSnapshots(eventIds: string[]) {
+  const snapshots: OddsSnapshotRow[] = []
+  const uniqueIds = Array.from(new Set(eventIds.filter(Boolean)))
+  for (let index = 0; index < uniqueIds.length; index += 100) {
+    const { data, error } = await supabaseAdmin
+      .from('sports_odds_snapshots')
+      .select('id, sport_key, event_id, sportsbook, market, outcome, price, line, snapshot_time, is_opening, is_closing, metadata')
+      .in('event_id', uniqueIds.slice(index, index + 100))
+      .limit(5000)
+    if (error) throw new Error(`model segment odds snapshot read failed: ${error.message}`)
+    snapshots.push(...((data ?? []) as OddsSnapshotRow[]))
+  }
+  const byEvent = new Map<string, OddsSnapshotRow[]>()
+  for (const snapshot of snapshots) {
+    if (!snapshot.event_id) continue
+    byEvent.set(snapshot.event_id, [...(byEvent.get(snapshot.event_id) ?? []), snapshot])
+  }
+  return byEvent
+}
+
+function coveragePercent(rows: SegmentRecord[], predicate: (row: SegmentRecord) => boolean) {
+  if (!rows.length) return 0
+  return round((rows.filter(predicate).length / rows.length) * 100)
+}
+
+function statusForCoverage(percent: number): CanonicalStatus {
+  if (percent >= 99.5) return 'complete'
+  if (percent > 0) return 'partial'
+  return 'missing'
+}
+
+function analyticalCoverage(rows: SegmentRecord[]) {
+  const fields = {
+    openingLine: coveragePercent(rows, (row) => row.openingLine !== null || row.openingPrice !== null),
+    closingLine: coveragePercent(rows, (row) => row.closingLine !== null || row.closingPrice !== null || row.closingSnapshotId !== null),
+    settlement: coveragePercent(rows, (row) => row.settlementResult !== 'pending' && row.settlementResult !== 'unknown'),
+    learningLabel: coveragePercent(rows, (row) => Boolean(row.learningLabel && row.learningLabel !== 'pending' && row.learningLabel !== 'unknown')),
+    featureSnapshot: coveragePercent(rows, (row) => row.featureCoverage.persistedSnapshot || Boolean(row.featureSnapshotId)),
+    ev: coveragePercent(rows, (row) => row.expectedValue !== null),
+    edge: coveragePercent(rows, (row) => row.edge !== null),
+    weather: coveragePercent(rows, (row) => row.featureCoverage.weatherSnapshot),
+    park: coveragePercent(rows, (row) => row.featureCoverage.park),
+    starter: coveragePercent(rows, (row) => row.featureCoverage.starterContext),
+    market: coveragePercent(rows, (row) => Boolean(row.market)),
+    modelVersion: coveragePercent(rows, (row) => Boolean(row.modelVersion)),
+    featureVersion: coveragePercent(rows, (row) => Boolean(row.featureVersion)),
+  }
+  return {
+    fields,
+    statuses: Object.fromEntries(Object.entries(fields).map(([field, percent]) => [field, statusForCoverage(percent)])),
+    overallPercent: round(Object.values(fields).reduce((sum, value) => sum + value, 0) / Object.values(fields).length),
+  }
+}
+
 export async function getModelSegments(filters: SegmentFilters = {}) {
   const rowLoad = await loadRows(filters)
-  const events = await loadEvents(rowLoad.rows.map((row) => row.game_id).filter(Boolean) as string[])
+  const eventIds = rowLoad.rows.map((row) => row.game_id).filter(Boolean) as string[]
+  const [events, snapshotsByEvent] = await Promise.all([loadEvents(eventIds), loadOddsSnapshots(eventIds)])
   const segmentRows = rowLoad.rows
     .filter((row) => canonicalEligibility(row, row.game_id ? events.get(row.game_id) : undefined).eligible)
-    .map((row) => toSegmentRecord(row, row.game_id ? events.get(row.game_id) : undefined))
+    .map((row) => toSegmentRecord(row, row.game_id ? events.get(row.game_id) : undefined, row.game_id ? snapshotsByEvent.get(row.game_id) ?? [] : []))
   const filtered = filterRows(segmentRows, filters)
   const dimensions: SegmentDimension[] = [
     'sport',
@@ -417,6 +604,7 @@ export async function getModelSegments(filters: SegmentFilters = {}) {
     },
     queryDiagnostics: rowLoad.pagination,
     totals: metrics(filtered),
+    analyticalCoverage: analyticalCoverage(filtered),
     dimensions: Object.fromEntries(dimensions.map((dimension) => [dimension, groupBy(filtered, dimension)])),
     rows: filtered.slice(0, Math.min(200, filtered.length)),
     providerCallsMade: 0,
@@ -427,6 +615,7 @@ export async function getModelSegments(filters: SegmentFilters = {}) {
 export async function getModelIntelligence(filters: SegmentFilters = {}) {
   const segments = await getModelSegments(filters)
   const rows = segments.rows
+  const coverage = analyticalCoverage(rows)
   const featureCoverage = {
     persistedSnapshotRows: rows.filter((row) => row.featureCoverage.persistedSnapshot).length,
     weatherSnapshotRows: rows.filter((row) => row.featureCoverage.weatherSnapshot).length,
@@ -435,6 +624,12 @@ export async function getModelIntelligence(filters: SegmentFilters = {}) {
     bullpenContextRows: rows.filter((row) => row.featureCoverage.bullpenContext).length,
     teamStrengthRows: rows.filter((row) => row.featureCoverage.teamStrengthSnapshot).length,
   }
+  const missingFields = Object.entries(coverage.statuses)
+    .filter(([, status]) => status === 'missing')
+    .map(([field]) => field)
+  const partialFields = Object.entries(coverage.statuses)
+    .filter(([, status]) => status === 'partial')
+    .map(([field]) => field)
   return {
     success: true,
     mode: 'model_intelligence_v1',
@@ -446,12 +641,20 @@ export async function getModelIntelligence(filters: SegmentFilters = {}) {
     confidenceBuckets: ['Very Low', 'Low', 'Medium', 'High', 'Very High'],
     probabilityBuckets: ['<50', '50-55', '55-60', '60-65', '65-70', '70-75', '75+'],
     featureCoverage,
-    missingAnalyticalDimensions: [
-      ...(featureCoverage.persistedSnapshotRows ? [] : ['feature_snapshot_payload']),
-      ...(rows.some((row) => row.openingLine !== null) ? [] : ['opening_line']),
-      ...(rows.some((row) => row.closingLine !== null) ? [] : ['closing_line']),
-      ...(rows.some((row) => row.closingResult !== null) ? [] : ['closing_result']),
+    analyticalCoveragePercent: coverage.overallPercent,
+    canonicalCoveragePercent: coverage.overallPercent,
+    analyticalCoverage: coverage,
+    missingAnalyticalDimensions: missingFields,
+    partialAnalyticalDimensions: partialFields,
+    duplicatedAnalyticalFields: [
+      'prediction_history.odds and sports_odds_snapshots.price',
+      'prediction_history.line and sports_odds_snapshots.line',
+      'prediction_history.feature_snapshot and historical_feature_snapshots.feature_values',
+      'prediction_history.result/status and settlement_details.settlement_reconciliation_v2',
     ],
+    settlementCompleteness: coverage.fields.settlement,
+    learningCompleteness: coverage.fields.learningLabel,
+    featureCompleteness: round((coverage.fields.featureSnapshot + coverage.fields.weather + coverage.fields.park + coverage.fields.starter) / 4),
     segmentSummary: {
       sport: segments.dimensions.sport,
       market: segments.dimensions.market,

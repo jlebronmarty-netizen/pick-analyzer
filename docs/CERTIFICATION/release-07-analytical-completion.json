@@ -1,0 +1,82 @@
+{
+  "release": "Release 07",
+  "name": "Analytical Data Completion V1",
+  "status": "LOCAL_PASS_PRODUCTION_PENDING",
+  "startingCommit": "c2e23c002eadf5db7d88e131a06ffbcc20e17316",
+  "runtimeBehaviorChanged": true,
+  "runtimeBehaviorChangeScope": "read-only enrichment of /api/model/segments and /api/model/intelligence",
+  "predictionFormulaChanged": false,
+  "probabilityCalibrationChanged": false,
+  "officialPickPolicyChanged": false,
+  "learningWeightsChanged": false,
+  "providerContractsChanged": false,
+  "schedulerBehaviorChanged": false,
+  "databaseSchemaChanged": false,
+  "historicalReplayStarted": false,
+  "retrospectiveLabelsGenerated": false,
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "canonicalFields": {
+    "openingLine": "sports_odds_snapshots.line",
+    "closingLine": "sports_odds_snapshots.line",
+    "closingOddsSnapshot": "sports_odds_snapshots.id",
+    "finalSettlement": "prediction_history.result/status/settlement_details",
+    "learningLabel": "derived_from_canonical_settlement",
+    "featureSnapshot": "prediction_history.feature_snapshot_id/feature_snapshot",
+    "modelVersion": "prediction_history.model_version",
+    "featureVersion": "prediction_history.feature_set_version",
+    "ev": "prediction_history.ev",
+    "edge": "prediction_history.edge",
+    "probability": "prediction_history.model_probability",
+    "confidence": "prediction_history.confidence"
+  },
+  "newAnalyticalFieldsExposed": [
+    "openingLine",
+    "openingPrice",
+    "openingSnapshotId",
+    "closingLine",
+    "closingPrice",
+    "closingSnapshotId",
+    "learningLabel",
+    "canonicalSources",
+    "analyticalCoverage",
+    "analyticalCoveragePercent",
+    "canonicalCoveragePercent",
+    "duplicatedAnalyticalFields",
+    "settlementCompleteness",
+    "learningCompleteness",
+    "featureCompleteness"
+  ],
+  "duplicateSourcesFound": [
+    "prediction_history.odds and sports_odds_snapshots.price",
+    "prediction_history.line and sports_odds_snapshots.line",
+    "prediction_history.feature_snapshot and historical_feature_snapshots.feature_values",
+    "prediction_history.result/status and settlement_details.settlement_reconciliation_v2"
+  ],
+  "localValidation": {
+    "release01Validator": "PASS_WITH_KNOWN_WARNINGS",
+    "release02Validator": "PASS",
+    "release02aValidator": "PASS",
+    "release03Validator": "PASS",
+    "release04Validator": "PASS_AFTER_RELEASE07_COMMIT",
+    "release05Validator": "PASS_AFTER_RELEASE07_COMMIT",
+    "release06Validator": "PASS_AFTER_RELEASE07_COMMIT",
+    "release07Validator": "PASS",
+    "build": "PASS",
+    "eslint": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "requiredRoutes": [
+      "/api/system/version",
+      "/api/model/segments",
+      "/api/model/intelligence",
+      "/api/performance"
+    ]
+  },
+  "release08Started": false
+}
