@@ -451,6 +451,7 @@ Scanned explicit repository roots: `src`, `scripts`, `docs`, `supabase`, `.githu
 | src/app/api/ufc/predictions/health/route.ts | API Route | Handles /api/ufc/predictions/health API requests. | @/lib/api-contract<br>@/services/ufc-prediction-engine.service<br>next/server | Production Surface |
 | src/app/api/ufc/predictions/route.ts | API Route | Handles /api/ufc/predictions API requests. | @/lib/api-contract<br>@/services/ufc-prediction-engine.service<br>next/server | Production Surface |
 | src/app/api/ufc/predictions/validation/route.ts | API Route | Handles /api/ufc/predictions/validation API requests. | @/lib/api-contract<br>@/services/ufc-prediction-engine.service<br>next/server | Production Surface |
+| src/app/api/user/session-bridge/route.ts | API Route | Authenticated session bridge for same-origin personal wager APIs. | @/lib/api-contract<br>@/services/user-wager-ledger.service<br>next/server | Protected |
 | src/app/api/user/wagers/route.ts | API Route | Authenticated personal wager ledger list and idempotent create. | @/lib/api-contract<br>@/services/user-wager-ledger.service<br>next/server | Protected |
 | src/app/api/user/wagers/[id]/route.ts | API Route | Authenticated personal wager detail, update and archive. | @/lib/api-contract<br>@/services/user-wager-ledger.service<br>next/server | Protected |
 | src/app/api/user/wagers/export/route.ts | API Route | Owner-scoped personal wager JSON or CSV export. | @/lib/api-contract<br>@/services/user-wager-ledger.service<br>next/server | Protected |

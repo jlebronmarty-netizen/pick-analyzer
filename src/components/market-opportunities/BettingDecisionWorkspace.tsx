@@ -423,6 +423,17 @@ async function sessionToken() {
   return snapshot.token
 }
 
+async function bridgeServerSession(token: string) {
+  const response = await fetch('/api/user/session-bridge', {
+    method: 'POST',
+    cache: 'no-store',
+    credentials: 'same-origin',
+    headers: authHeaders(token),
+  })
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw remoteFailure(payload, response.status, 'AUTH_VERIFICATION_FAILED: Unable to establish authenticated API session bridge.')
+}
+
 function authHeaders(token: string | null) {
   const headers: Record<string, string> = { 'content-type': 'application/json' }
   if (token) headers.Authorization = `Bearer ${token}`
@@ -565,7 +576,8 @@ export default function BettingDecisionWorkspace() {
         setRemoteMessage(`Unauthenticated local-only mode: wagers remain in local browser storage (${localPersistenceScope}) until you sign in and sync.`)
         return
       }
-      const response = await fetch('/api/user/wagers?limit=100', { cache: 'no-store', headers: authHeaders(snapshot.token) })
+      await bridgeServerSession(snapshot.token)
+      const response = await fetch('/api/user/wagers?limit=100', { cache: 'no-store', credentials: 'same-origin', headers: authHeaders(snapshot.token) })
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) {
         const failure = remoteFailure(payload, response.status, 'Remote wager ledger read failed. Local wagers were preserved.')
@@ -704,6 +716,7 @@ export default function BettingDecisionWorkspace() {
     if (!token) throw new Error('Sign in to sync personal wagers across devices.')
     const response = await fetch('/api/user/wagers', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: authHeaders(token),
       body: JSON.stringify(remotePayload(wager, opportunities)),
     })
@@ -752,6 +765,7 @@ export default function BettingDecisionWorkspace() {
     if (!token) throw new Error('Sign in to update remote personal wagers.')
     const response = await fetch(`/api/user/wagers/${wager.remoteId}`, {
       method: 'PATCH',
+      credentials: 'same-origin',
       headers: authHeaders(token),
       body: JSON.stringify(remotePatchPayload(patch)),
     })

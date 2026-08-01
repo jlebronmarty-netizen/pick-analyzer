@@ -32,6 +32,8 @@ type AuthContext = {
 export type UserWagerErrorCode =
   | 'AUTH_REQUIRED'
   | 'SESSION_EXPIRED'
+  | 'SESSION_INVALID'
+  | 'AUTH_VERIFICATION_FAILED'
   | 'LEDGER_TABLE_UNAVAILABLE'
   | 'RLS_DENIED'
   | 'VALIDATION_FAILED'
@@ -45,6 +47,8 @@ const counters = {
   settlementMutationsMade: 0,
 }
 
+export const userWagerSessionCookieName = 'pick_analyzer_user_access'
+
 function supabaseEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -56,6 +60,22 @@ function bearer(request: Request) {
   const header = request.headers.get('authorization') ?? ''
   const match = header.match(/^Bearer\s+(.+)$/i)
   return match?.[1] ?? null
+}
+
+function cookieToken(request: Request) {
+  const cookie = request.headers.get('cookie') ?? ''
+  const found = cookie.split(';').map((item) => item.trim()).find((item) => item.startsWith(`${userWagerSessionCookieName}=`))
+  if (!found) return null
+  const value = found.slice(userWagerSessionCookieName.length + 1)
+  return value ? decodeURIComponent(value) : null
+}
+
+export function userWagerBearerToken(request: Request) {
+  return bearer(request)
+}
+
+function authToken(request: Request) {
+  return bearer(request) ?? cookieToken(request)
 }
 
 function userWagerError(code: UserWagerErrorCode, message: string, status = 500) {
@@ -85,7 +105,7 @@ function dbError(error: unknown, operation: string) {
 }
 
 export async function authenticateUserWagerRequest(request: Request): Promise<AuthContext> {
-  const token = bearer(request)
+  const token = authToken(request)
   if (!token) throw userWagerError('AUTH_REQUIRED', 'Authentication required for remote wager persistence.', 401)
   const { url, anonKey } = supabaseEnv()
   const client = createClient(url, anonKey, {
@@ -93,7 +113,8 @@ export async function authenticateUserWagerRequest(request: Request): Promise<Au
     global: { headers: { Authorization: `Bearer ${token}` } },
   })
   const { data, error } = await client.auth.getUser(token)
-  if (error || !data.user) throw userWagerError('SESSION_EXPIRED', 'Invalid or expired session.', 401)
+  if (error) throw userWagerError('SESSION_INVALID', 'Session verification failed.', 401)
+  if (!data.user) throw userWagerError('SESSION_EXPIRED', 'Invalid or expired session.', 401)
   return { userId: data.user.id, client }
 }
 

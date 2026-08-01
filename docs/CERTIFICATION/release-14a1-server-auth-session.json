@@ -1,0 +1,40 @@
+{
+  "release": "Release 14A.1",
+  "name": "Server Auth Session Bridge Recovery V1",
+  "startingCommit": "8dbf5cfbd522461fee6ba6ee9a2d1111d49045af",
+  "status": "PASS_LOCAL_PENDING_AUTHENTICATED_BROWSER_LIFECYCLE",
+  "rootCause": "The browser Supabase session was client-side only for direct API opens. The API received neither Authorization bearer header nor server-readable auth cookie, so it correctly returned AUTH_REQUIRED.",
+  "authStrategy": {
+    "primary": "Bearer-token forwarding from authenticated browser session",
+    "bridge": "Verified same-origin httpOnly cookie established by /api/user/session-bridge",
+    "serverVerification": "Supabase getUser",
+    "serviceRoleForUserFlow": false,
+    "userIdFromClientPayload": false
+  },
+  "routes": {
+    "sessionBridge": "/api/user/session-bridge",
+    "wagers": "/api/user/wagers",
+    "wagerDetail": "/api/user/wagers/[id]",
+    "summary": "/api/user/wagers/summary",
+    "export": "/api/user/wagers/export"
+  },
+  "modelSafety": {
+    "predictionFormulaChanged": false,
+    "probabilitiesChanged": false,
+    "officialPickPolicyChanged": false,
+    "kellyFormulaChanged": false,
+    "learningChanged": false,
+    "settlementChanged": false,
+    "schedulerChanged": false,
+    "providerContractsChanged": false,
+    "predictionHistoryChanged": false
+  },
+  "certification": {
+    "providerCallsMade": 0,
+    "userWagerTablesOnly": true,
+    "unauthenticatedRequestsBlocked": true,
+    "tokensLogged": false,
+    "cookiesLogged": false,
+    "localWagersPreservedOnAuthFailure": true
+  }
+}

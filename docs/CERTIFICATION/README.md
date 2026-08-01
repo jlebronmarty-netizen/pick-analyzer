@@ -42,6 +42,8 @@ Current V2 certification documents:
 - [Release 14 Certification JSON](release-14-authenticated-ledger.json)
 - [Release 14A Authenticated Wager Recovery](RELEASE_14A_AUTHENTICATED_WAGER_RECOVERY.md)
 - [Release 14A Certification JSON](release-14a-authenticated-wager-recovery.json)
+- [Release 14A.1 Server Auth Session Certification](RELEASE_14A1_SERVER_AUTH_SESSION.md)
+- [Release 14A.1 Certification JSON](release-14a1-server-auth-session.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 
