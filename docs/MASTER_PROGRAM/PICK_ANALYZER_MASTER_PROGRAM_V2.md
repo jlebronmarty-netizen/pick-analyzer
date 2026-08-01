@@ -74,6 +74,8 @@ This is the highest-level documentation index for Pick Analyzer V2. It governs p
 - [Release 14 Authenticated Ledger Workflow](../PRODUCT/AUTHENTICATED_LEDGER_WORKFLOW.md)
 - [Release 14 Session Recovery](../SECURITY/SESSION_RECOVERY.md)
 - [Release 14 Authenticated Ledger Certification](../CERTIFICATION/RELEASE_14_AUTHENTICATED_LEDGER.md)
+- [Release 14A Wager Save Recovery](../PRODUCT/RELEASE_14A_WAGER_SAVE_RECOVERY.md)
+- [Release 14A Authenticated Wager Recovery Certification](../CERTIFICATION/RELEASE_14A_AUTHENTICATED_WAGER_RECOVERY.md)
 - [Release 01 Execution Plan](../RELEASES/RELEASE_01_EXECUTION_PLAN.md)
 - [Release 01 Backlog](../RELEASES/RELEASE_01_BACKLOG.md)
 - [Release 01 Progress](../RELEASES/RELEASE_01_PROGRESS.md)

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { apiError, errorMessage, requestId } from '@/lib/api-contract'
-import { authenticateUserWagerRequest, exportUserWagers } from '@/services/user-wager-ledger.service'
+import { authenticateUserWagerRequest, exportUserWagers, userWagerErrorCode } from '@/services/user-wager-ledger.service'
 
 function status(error: unknown) {
   return typeof error === 'object' && error !== null && 'status' in error && typeof error.status === 'number' ? error.status : 500
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const httpStatus = status(error)
     return apiError({
       id,
-      code: httpStatus === 401 ? 'UNAUTHORIZED' : 'INTERNAL_ERROR',
+      code: userWagerErrorCode(error, httpStatus === 401 ? 'AUTH_REQUIRED' : 'UNKNOWN_REMOTE_ERROR'),
       message: errorMessage(error, 'Unable to export user wagers'),
       status: httpStatus,
     })

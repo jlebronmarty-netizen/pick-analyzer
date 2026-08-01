@@ -1,0 +1,47 @@
+{
+  "release": "Release 14A",
+  "name": "Authenticated Wager Save & Remote Sync Recovery V1",
+  "startingCommit": "cbf36769748cdba9a1fff4b61a7a52dba52d067a",
+  "status": "PASS_LOCAL_PENDING_PRODUCTION_GRANT_APPLICATION_AND_AUTHENTICATED_LIFECYCLE",
+  "rootCauses": {
+    "invalidStake": "Draft parsing used scattered raw Number() calls instead of one canonical input policy; Release 14A aligns validation, payout, risk and save payload around canonical stake parsing.",
+    "unavailablePayoutRisk": "Payout and max-loss calculations depended on raw draft strings and returned null/Unavailable when odds or stake were not parsed into canonical numeric values.",
+    "remoteLedgerSyncFailure": "Production ledger tables existed, but Supabase REST returned PGRST205, indicating schema-cache/role exposure was unavailable for user_wagers and user_wager_legs."
+  },
+  "productionMigrationEvidence": {
+    "user_wagers_exists": true,
+    "user_wager_legs_exists": true,
+    "restVisibilityBeforeGrantMigration": "PGRST205",
+    "grantMigrationCreated": "supabase/migrations/202608010001_release14a_user_wager_ledger_grants.sql",
+    "grantMigrationAppliedFromThisEnvironment": false,
+    "applyBlocker": "No Supabase CLI or direct database URL is available in this execution environment."
+  },
+  "normalization": {
+    "positiveAmericanOddsDisplay": "+151",
+    "positiveAmericanOddsValue": 151,
+    "negativeAmericanOddsValue": -110,
+    "stake25Value": 25,
+    "payout25AtPlus151": 62.75,
+    "rejectZeroOdds": true,
+    "rejectSub100AmericanOdds": true,
+    "rejectBlankStake": true,
+    "rejectZeroStake": true
+  },
+  "modelSafety": {
+    "predictionFormulaChanged": false,
+    "probabilitiesChanged": false,
+    "officialPickPolicyChanged": false,
+    "kellyFormulaChanged": false,
+    "learningChanged": false,
+    "settlementChanged": false,
+    "schedulerChanged": false,
+    "providerContractsChanged": false,
+    "predictionHistoryChanged": false
+  },
+  "certification": {
+    "providerCallsMade": 0,
+    "userWagerTablesOnly": true,
+    "localDataPreservedOnRemoteFailure": true,
+    "authenticatedLifecycleRequiresProductionMigrationApplication": true
+  }
+}

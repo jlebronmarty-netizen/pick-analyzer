@@ -26,6 +26,7 @@ Current V2 product integration documents:
 - [Betting Workspace State Machine](BETTING_WORKSPACE_STATE_MACHINE.md)
 - [Release 14 Auth Audit](RELEASE_14_AUTH_AUDIT.md)
 - [Authenticated Ledger Workflow](AUTHENTICATED_LEDGER_WORKFLOW.md)
+- [Release 14A Wager Save Recovery](RELEASE_14A_WAGER_SAVE_RECOVERY.md)
 
 Most product documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

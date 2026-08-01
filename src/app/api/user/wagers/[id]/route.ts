@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { archiveUserWager, authenticateUserWagerRequest, getUserWager, updateUserWager } from '@/services/user-wager-ledger.service'
+import { archiveUserWager, authenticateUserWagerRequest, getUserWager, updateUserWager, userWagerErrorCode } from '@/services/user-wager-ledger.service'
 
 function status(error: unknown) {
   return typeof error === 'object' && error !== null && 'status' in error && typeof error.status === 'number' ? error.status : 500
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     return apiOk(await getUserWager(auth, params.id), id)
   } catch (error) {
     const httpStatus = status(error)
-    return apiError({ id, code: code(httpStatus), message: errorMessage(error, 'Unable to load user wager'), status: httpStatus })
+    return apiError({ id, code: userWagerErrorCode(error, code(httpStatus)), message: errorMessage(error, 'Unable to load user wager'), status: httpStatus })
   }
 }
 
@@ -33,7 +33,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     return apiOk(await updateUserWager(auth, params.id, await request.json()), id)
   } catch (error) {
     const httpStatus = status(error)
-    return apiError({ id, code: code(httpStatus), message: errorMessage(error, 'Unable to update user wager'), status: httpStatus })
+    return apiError({ id, code: userWagerErrorCode(error, code(httpStatus)), message: errorMessage(error, 'Unable to update user wager'), status: httpStatus })
   }
 }
 
@@ -45,6 +45,6 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     return apiOk(await archiveUserWager(auth, params.id), id)
   } catch (error) {
     const httpStatus = status(error)
-    return apiError({ id, code: code(httpStatus), message: errorMessage(error, 'Unable to archive user wager'), status: httpStatus })
+    return apiError({ id, code: userWagerErrorCode(error, code(httpStatus)), message: errorMessage(error, 'Unable to archive user wager'), status: httpStatus })
   }
 }

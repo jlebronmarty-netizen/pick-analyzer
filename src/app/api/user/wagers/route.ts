@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { authenticateUserWagerRequest, createUserWager, listUserWagers } from '@/services/user-wager-ledger.service'
+import { authenticateUserWagerRequest, createUserWager, listUserWagers, userWagerErrorCode } from '@/services/user-wager-ledger.service'
 
 function status(error: unknown) {
   return typeof error === 'object' && error !== null && 'status' in error && typeof error.status === 'number' ? error.status : 500
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const httpStatus = status(error)
     return apiError({
       id,
-      code: httpStatus === 401 ? 'UNAUTHORIZED' : 'INTERNAL_ERROR',
+      code: userWagerErrorCode(error, httpStatus === 401 ? 'AUTH_REQUIRED' : 'UNKNOWN_REMOTE_ERROR'),
       message: errorMessage(error, 'Unable to list user wagers'),
       status: httpStatus,
     })
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     const httpStatus = status(error)
     return apiError({
       id,
-      code: httpStatus === 401 ? 'UNAUTHORIZED' : httpStatus === 400 ? 'BAD_REQUEST' : 'INTERNAL_ERROR',
+      code: userWagerErrorCode(error, httpStatus === 401 ? 'AUTH_REQUIRED' : httpStatus === 400 ? 'VALIDATION_FAILED' : 'UNKNOWN_REMOTE_ERROR'),
       message: errorMessage(error, 'Unable to create user wager'),
       status: httpStatus,
     })

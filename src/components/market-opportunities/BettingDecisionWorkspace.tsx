@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { normalizeAmericanOddsInput, normalizeMoneyInput, normalizeOptionalLineInput } from '@/lib/wager-input-normalization'
 
 type Category = 'OFFICIAL_PICK' | 'VALUE_CANDIDATE' | 'RESEARCH_ONLY' | 'NO_BET'
 type SlipType = 'single' | 'parlay'
@@ -108,6 +109,18 @@ function strings(value: unknown): string[] {
 function num(value: unknown, fallback: number | null = null) {
   const next = Number(value)
   return Number.isFinite(next) ? next : fallback
+}
+
+function userOdds(value: unknown) {
+  return normalizeAmericanOddsInput(value).value
+}
+
+function userStake(value: unknown, fallback = 0) {
+  return normalizeMoneyInput(value).value ?? fallback
+}
+
+function userLine(value: unknown) {
+  return normalizeOptionalLineInput(value).value
 }
 
 function text(value: unknown, fallback = 'Unavailable') {
@@ -391,11 +404,12 @@ function slateEmptyState(history: Opportunity[]) {
   return { title: 'No pregame opportunities remain today.', text: 'Historical and stale snapshots are available only in History.' }
 }
 
-async function sessionSnapshot() {
-  const { data } = await supabase.auth.getSession()
+async function sessionSnapshot(refresh = false) {
+  const { data, error } = refresh ? await supabase.auth.refreshSession() : await supabase.auth.getSession()
   const session = data.session
   return {
     token: session?.access_token ?? null,
+    error: error?.message ?? null,
     state: {
       email: session?.user?.email ?? null,
       userId: session?.user?.id ?? null,
@@ -489,6 +503,13 @@ function remoteModeLabel(mode: RemoteMode) {
   return 'Duplicate ignored'
 }
 
+function remoteFailure(payload: unknown, status: number, fallback: string) {
+  const error = record(record(payload).error)
+  const code = text(error.code, status === 401 ? 'AUTH_REQUIRED' : 'REMOTE_SYNC_FAILED')
+  const message = text(error.message, fallback)
+  return new Error(`${code}: ${message}`)
+}
+
 export default function BettingDecisionWorkspace() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [historyOpportunities, setHistoryOpportunities] = useState<Opportunity[]>([])
@@ -525,28 +546,36 @@ export default function BettingDecisionWorkspace() {
     window.localStorage.setItem(storageKey, JSON.stringify(wagers))
   }, [wagers])
 
-  const refreshRemoteState = useCallback(async () => {
+  const refreshRemoteState = useCallback(async (forceSessionRefresh = false) => {
     try {
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
         setRemoteMode('offline')
         setRemoteMessage('Offline mode: local wagers remain available and will be eligible for sync after reconnect.')
         return
       }
-      const snapshot = await sessionSnapshot()
+      const snapshot = await sessionSnapshot(forceSessionRefresh)
       setSessionState(snapshot.state)
+      if (snapshot.error) {
+        setRemoteMode('expired')
+        setRemoteMessage(`SESSION_REFRESH_FAILED: ${snapshot.error}`)
+        return
+      }
       if (!snapshot.token) {
         setRemoteMode('local-only')
         setRemoteMessage(`Unauthenticated local-only mode: wagers remain in local browser storage (${localPersistenceScope}) until you sign in and sync.`)
         return
       }
       const response = await fetch('/api/user/wagers?limit=100', { cache: 'no-store', headers: authHeaders(snapshot.token) })
-      if (response.status === 401) {
-        setRemoteMode('expired')
-        setRemoteMessage('Session unavailable or expired: local wagers were preserved. Sign in again or reconnect to resume sync.')
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        const failure = remoteFailure(payload, response.status, 'Remote wager ledger read failed. Local wagers were preserved.')
+        const message = failure.message
+        if (message.startsWith('AUTH_REQUIRED') || message.startsWith('SESSION_EXPIRED')) setRemoteMode('expired')
+        else if (message.startsWith('LEDGER_TABLE_UNAVAILABLE') || message.startsWith('RLS_DENIED')) setRemoteMode('failed')
+        else setRemoteMode('failed')
+        setRemoteMessage(message)
         return
       }
-      if (!response.ok) throw new Error('Remote wager ledger is temporarily unavailable.')
-      const payload = await response.json()
       const remoteRows = rows(payload.wagers)
       setRemoteWagerCount(remoteRows.length)
       setRemoteMode(wagers.some((wager) => !wager.archived && wager.syncStatus !== 'synced' && wager.syncStatus !== 'duplicate') ? 'sync-pending' : 'authenticated')
@@ -559,7 +588,7 @@ export default function BettingDecisionWorkspace() {
 
   useEffect(() => {
     const scheduleRefresh = () => {
-      window.setTimeout(() => void refreshRemoteState(), 0)
+      window.setTimeout(() => void refreshRemoteState(false), 0)
     }
     scheduleRefresh()
     const subscription = supabase.auth.onAuthStateChange(() => {
@@ -679,7 +708,7 @@ export default function BettingDecisionWorkspace() {
       body: JSON.stringify(remotePayload(wager, opportunities)),
     })
     const payload = await response.json()
-    if (!response.ok) throw new Error(text(record(payload.error).message, 'Remote sync failed. Local wager was preserved.'))
+    if (!response.ok) throw remoteFailure(payload, response.status, 'Remote sync failed. Local wager was preserved.')
     return {
       remoteId: typeof payload.wager?.id === 'string' ? payload.wager.id : undefined,
       duplicate: Boolean(payload.idempotent),
@@ -774,8 +803,8 @@ export default function BettingDecisionWorkspace() {
       matchup: item.matchup,
       market: item.market,
       selection: selection(item),
-      enteredOdds: num(draft[item.id]?.odds),
-      enteredLine: num(draft[item.id]?.line),
+      enteredOdds: userOdds(draft[item.id]?.odds),
+      enteredLine: userLine(draft[item.id]?.line),
     }))
     const wager: UserWager = {
       id: `user-wager-${Date.now()}`,
@@ -797,7 +826,7 @@ export default function BettingDecisionWorkspace() {
     }
     setWagers((current) => [wager, ...current])
     setNotes('')
-    if (remoteMode === 'authenticated' || remoteMode === 'synced') {
+    if (['authenticated', 'sync-pending', 'synced', 'duplicate'].includes(remoteMode)) {
       try {
         setRemoteMode('syncing')
         const result = await syncOne(wager)
@@ -867,7 +896,7 @@ export default function BettingDecisionWorkspace() {
             </div>
             <div className="flex flex-wrap gap-2 lg:max-w-xs lg:justify-end">
               {remoteMode === 'local-only' || remoteMode === 'expired' ? <Link href="/login" className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950">Sign In</Link> : null}
-              <button onClick={() => void refreshRemoteState()} disabled={remoteMode === 'syncing'} className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-black text-slate-200 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">Reconnect</button>
+              <button onClick={() => void refreshRemoteState(true)} disabled={remoteMode === 'syncing'} className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-black text-slate-200 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">Reconnect</button>
               {!migrationPreviewOpen && migrationPreview.unsynced > 0 ? <button onClick={() => setMigrationPreviewOpen(true)} disabled={remoteMode === 'syncing' || remoteMode === 'local-only' || remoteMode === 'expired'} className="rounded-lg bg-sky-400 px-4 py-2 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">Preview Sync</button> : null}
               {migrationPreviewOpen ? <button onClick={syncLocalWagers} disabled={remoteMode === 'syncing' || !migrationPreview.unsynced} className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400">Confirm And Sync</button> : null}
               <Link href="/api/user/wagers/export?format=json" className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-black text-slate-200">Export JSON</Link>
@@ -899,16 +928,16 @@ export default function BettingDecisionWorkspace() {
 }
 
 function ticketSummary(slip: Opportunity[], draft: Record<string, DraftLeg>, type: SlipType, bankroll: number) {
-  const enteredOdds = slip.map((item) => num(draft[item.id]?.odds)).filter((value): value is number => value !== null)
+  const enteredOdds = slip.map((item) => userOdds(draft[item.id]?.odds)).filter((value): value is number => value !== null)
   const allPrices = slip.length > 0 && enteredOdds.length === slip.length
-  const singleStakes = slip.map((item) => num(draft[item.id]?.stake, 0) ?? 0)
-  const totalStake = type === 'parlay' ? (num(draft[slip[0]?.id]?.stake, 0) ?? 0) : singleStakes.reduce((sum, value) => sum + value, 0)
+  const singleStakes = slip.map((item) => userStake(draft[item.id]?.stake, 0))
+  const totalStake = type === 'parlay' ? userStake(draft[slip[0]?.id]?.stake, 0) : singleStakes.reduce((sum, value) => sum + value, 0)
   const combinedDecimal = type === 'parlay' && allPrices ? enteredOdds.reduce((product, value) => product * decimalFromAmerican(value), 1) : null
   const payout = type === 'parlay'
     ? combinedDecimal === null ? null : totalStake * combinedDecimal
     : slip.reduce((sum, item) => {
-      const price = num(draft[item.id]?.odds)
-      const stake = num(draft[item.id]?.stake, 0) ?? 0
+      const price = userOdds(draft[item.id]?.odds)
+      const stake = userStake(draft[item.id]?.stake, 0)
       return sum + (price === null ? 0 : stake * decimalFromAmerican(price))
     }, 0)
   const duplicateEvents = slip.map((item) => item.eventId).filter(Boolean).filter((id, index, all) => all.indexOf(id) !== index)
@@ -918,6 +947,10 @@ function ticketSummary(slip: Opportunity[], draft: Record<string, DraftLeg>, typ
   if (slip.some((item) => item.category === 'NO_BET')) invalid.push('No Bet / Avoid selections cannot be saved.')
   if (slip.some((item) => locked(item.startTime, item.eventStatus))) invalid.push('One or more events have started or are not pregame.')
   if (!allPrices) invalid.push('Every leg needs a user-entered or persisted price.')
+  const invalidOdds = slip.map((item) => normalizeAmericanOddsInput(draft[item.id]?.odds)).find((item) => item.error && item.display)
+  if (invalidOdds) invalid.push(invalidOdds.error as string)
+  const invalidStake = slip.map((item) => normalizeMoneyInput(draft[item.id]?.stake)).find((item) => item.error && item.display)
+  if (invalidStake) invalid.push(invalidStake.error as string)
   if (totalStake <= 0) invalid.push('Stake must be greater than zero.')
   if (duplicateEvents.length) invalid.push('Duplicate event detected.')
   if (sameMarketEvents) invalid.push('Potential conflicting same-event selections detected.')
@@ -1007,14 +1040,14 @@ function SlipBuilder(props: { opportunities: Opportunity[]; slip: Opportunity[];
 }
 
 function DraftEditor({ item, draft, parlayLocked, firstStake, onUpdate }: { item: Opportunity; draft?: DraftLeg; parlayLocked: boolean; firstStake: string; onUpdate: (id: string, patch: Partial<DraftLeg>) => void }) {
-  return <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3"><p className="font-black">{selection(item)}</p><p className="mt-1 text-xs text-slate-400">{item.matchup}</p><label className="mt-3 block text-xs font-bold text-slate-400">Sportsbook<input value={draft?.sportsbook ?? ''} onChange={(event) => onUpdate(item.id, { sportsbook: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" placeholder="User entered" /></label><div className="mt-3 grid grid-cols-3 gap-2"><label className="text-xs font-bold text-slate-400">Odds<input value={draft?.odds ?? ''} onChange={(event) => onUpdate(item.id, { odds: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-sm text-white" placeholder="+120" /></label><label className="text-xs font-bold text-slate-400">Line<input value={draft?.line ?? ''} onChange={(event) => onUpdate(item.id, { line: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-sm text-white" placeholder="Optional" /></label><label className="text-xs font-bold text-slate-400">Stake<input value={parlayLocked ? firstStake : draft?.stake ?? ''} disabled={parlayLocked} onChange={(event) => onUpdate(item.id, { stake: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-sm text-white disabled:text-slate-500" placeholder="25" /></label></div></div>
+  return <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3"><p className="font-black">{selection(item)}</p><p className="mt-1 text-xs text-slate-400">{item.matchup}</p><label className="mt-3 block text-xs font-bold text-slate-400">Sportsbook<input value={draft?.sportsbook ?? ''} onChange={(event) => onUpdate(item.id, { sportsbook: event.target.value })} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" placeholder="User entered" /></label><div className="mt-3 grid grid-cols-3 gap-2"><label className="text-xs font-bold text-slate-400">Odds<input value={draft?.odds ?? ''} onChange={(event) => onUpdate(item.id, { odds: event.target.value })} onBlur={() => { const next = normalizeAmericanOddsInput(draft?.odds); if (!next.error) onUpdate(item.id, { odds: next.display }) }} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-sm text-white" placeholder="+120" /></label><label className="text-xs font-bold text-slate-400">Line<input value={draft?.line ?? ''} onChange={(event) => onUpdate(item.id, { line: event.target.value })} onBlur={() => { const next = normalizeOptionalLineInput(draft?.line); if (!next.error) onUpdate(item.id, { line: next.display }) }} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-sm text-white" placeholder="Optional" /></label><label className="text-xs font-bold text-slate-400">Stake<input value={parlayLocked ? firstStake : draft?.stake ?? ''} disabled={parlayLocked} onChange={(event) => onUpdate(item.id, { stake: event.target.value })} onBlur={() => { const next = normalizeMoneyInput(parlayLocked ? firstStake : draft?.stake); if (!next.error) onUpdate(item.id, { stake: next.display }) }} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-sm text-white disabled:text-slate-500" placeholder="25" /></label></div></div>
 }
 
 function Risk({ bankroll, setBankroll, ticket, slip, draft }: { bankroll: string; setBankroll: (value: string) => void; ticket: ReturnType<typeof ticketSummary>; slip: Opportunity[]; draft: Record<string, DraftLeg> }) {
   const bankrollValue = num(bankroll, 0) ?? 0
   const exposure = bankrollValue > 0 && ticket.totalStake ? (ticket.totalStake / bankrollValue) * 100 : null
   const first = slip[0]
-  const firstPrice = first ? num(draft[first.id]?.odds) ?? first.odds : null
+  const firstPrice = first ? userOdds(draft[first.id]?.odds) ?? first.odds : null
   const full = first ? kelly(first.probability, firstPrice) : null
   return <section className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><h2 className="text-2xl font-black">Bankroll And Stake Guidance</h2><p className="mt-2 text-sm text-slate-400">Kelly-style guidance appears only when model probability and user-entered or persisted price are valid. It is not guaranteed.</p><label className="mt-5 block text-xs font-bold text-slate-400">Entered bankroll<input value={bankroll} onChange={(event) => setBankroll(event.target.value)} className="mt-1 w-full max-w-xs rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white" /></label><div className="mt-5 grid gap-3 md:grid-cols-4"><Summary label="Stake" value={money(ticket.totalStake || null)} /><Summary label="Bankroll %" value={pct(exposure)} /><Summary label="Max Loss" value={money(ticket.maxLoss)} /><Summary label="Risk Grade" value={ticket.risk} /><Summary label="Full Kelly" value={pct(full)} /><Summary label="Half Kelly" value={pct(full === null ? null : full / 2)} /><Summary label="Quarter Kelly" value={pct(full === null ? null : full / 4)} /><Summary label="Potential" value={money(ticket.payout)} /></div>{slip.length > 1 ? <p className="mt-4 text-sm text-amber-100">Concentration warning: multiple legs increase variance. Correlation warnings only use provable event overlap.</p> : null}</section>
 }
