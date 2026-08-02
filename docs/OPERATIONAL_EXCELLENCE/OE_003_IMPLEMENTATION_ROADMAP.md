@@ -1,6 +1,6 @@
 # OE-003 Implementation Roadmap
 
-Status: roadmap plus bounded implementation evidence. OE-003A and OE-003B are production-certified. OE-003C is implemented pending production certification. OE-003D has not started.
+Status: roadmap plus bounded implementation evidence. OE-003A, OE-003B and OE-003C are production-certified. OE-003D has not started.
 
 ## OE-003A - Scheduler And Health Semantics
 
@@ -48,7 +48,7 @@ Stop condition: unknown reset semantics required for enforcement but not proven.
 
 Scope: derive a canonical event lifecycle state for event-level scheduling visibility.
 
-Status: implemented in OE-003C pending production certification.
+Status: production-certified in OE-003C.
 
 Likely files:
 

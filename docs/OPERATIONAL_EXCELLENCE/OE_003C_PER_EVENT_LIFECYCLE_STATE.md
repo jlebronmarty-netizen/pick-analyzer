@@ -1,6 +1,6 @@
 # OE-003C Per-Event Lifecycle State
 
-Status: implemented pending production certification.
+Status: production-certified.
 
 OE-003C adds a deterministic, read-only per-event lifecycle contract for operations visibility. It is observability only. It does not start event-level provider refresh, increase cadence, change scheduler cron, generate predictions, settle rows, import results, create learning labels or alter recommendation policy.
 
@@ -68,3 +68,7 @@ No migration was added. Snapshot persistence is deferred until OE-003D or a late
 The contract accepts any configured `sportKey`. MLB receives sport-specific lifecycle normalization through the existing MLB lifecycle adapter. Other sports use conservative generic status normalization and return honest empty or unknown evidence when current event data is unavailable.
 
 OE-003D was not started.
+
+## Production Certification
+
+Production served commit `d7a1077eb5fc4c4dca00082a188c5908fe0aecae` and `/api/operations/event-lifecycle?sportKey=baseball_mlb` returned HTTP 200 with 15 current-day MLB events. Observed states were `HIGH_PRIORITY` 7 and `ACTIVE_REFRESH` 8; observed priorities were `P1` 7 and `P3` 8. Lifecycle reads reported provider calls 0, provider credits 0, database mutations 0 and no prediction/result/settlement/learning writes.

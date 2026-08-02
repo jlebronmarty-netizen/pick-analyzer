@@ -1,8 +1,10 @@
 # OE-003C Per-Event Lifecycle State Certification
 
-Verdict: pending production certification.
+Verdict: PASS.
 
 Starting commit: `16a931469ac48d56f0d74002b89437c4a1994a97`
+
+Runtime commit certified: `d7a1077eb5fc4c4dca00082a188c5908fe0aecae`
 
 OE-003C adds the read-only event lifecycle contract at `/api/operations/event-lifecycle` and a compact MLB Operations Center section. It is observability only.
 
@@ -19,6 +21,24 @@ OE-003C adds the read-only event lifecycle contract at `/api/operations/event-li
 - No scheduler or refresh cadence change was made.
 - No prediction, probability, confidence, EV, edge, Official Pick, settlement, result-import, learning or provider-contract behavior was changed.
 
+## Production Evidence
+
+Observed on 2026-08-02:
+
+- `/api/system/version`: HTTP 200, commit `d7a1077eb5fc4c4dca00082a188c5908fe0aecae`, providerCallsMade 0.
+- `/api/operations/event-lifecycle?sportKey=baseball_mlb`: HTTP 200, 15 current-day MLB events.
+- `/api/operations/event-lifecycle?sportKey=baseball_mlb&limit=200`: HTTP 200, hard limit 200, current-day default true.
+- Lifecycle states observed: `HIGH_PRIORITY` 7, `ACTIVE_REFRESH` 8.
+- Priority bands observed: `P1` 7, `P3` 8.
+- Events requiring action: 15.
+- Events missing results: 0.
+- Events ready for settlement: 0.
+- Events blocked: 0.
+- Lifecycle reads reported provider calls 0, provider credits 0, database mutations 0, prediction writes 0, result writes 0, settlement writes 0 and learning writes 0.
+- `/mlb-operations`: HTTP 200 and rendered the Event Lifecycle section.
+
+The settlement guarantee route returned `ACTION_REQUIRED`/HTTP 409 because scheduler execution health was `CRITICAL` at observation time, with readyForSettlementRows 0 and silentPendingRows 0. This is an operational scheduler evidence state, not an OE-003C runtime or database-column defect.
+
 ## Production Certification Plan
 
 Read-only endpoints:
@@ -34,7 +54,7 @@ Read-only endpoints:
 - `/api/current-board?mode=current&limit=200`
 - `/mlb-operations`
 
-Expected counters:
+Certified counters:
 
 - Provider calls: 0.
 - Provider credits: 0.

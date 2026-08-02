@@ -1,8 +1,9 @@
 {
   "release": "OE-003C",
   "name": "Per-Event Lifecycle State V1",
-  "status": "IMPLEMENTED_PENDING_PRODUCTION_CERTIFICATION",
+  "status": "PASS",
   "startingCommit": "16a931469ac48d56f0d74002b89437c4a1994a97",
+  "runtimeCommitCertified": "d7a1077eb5fc4c4dca00082a188c5908fe0aecae",
   "contractVersion": "oe_003c_event_lifecycle_state_v1",
   "api": "/api/operations/event-lifecycle",
   "lifecycleStates": [
@@ -89,7 +90,49 @@
     "OE_003D_NOT_STARTED"
   ],
   "productionCertification": {
-    "status": "PENDING",
+    "status": "PASS",
+    "observedAt": "2026-08-02T15:57:25.722Z",
+    "productionCommitBefore": "009016f63b42a4f4e8a3a5adefb2c7edba0b63d3",
+    "productionCommitAfter": "d7a1077eb5fc4c4dca00082a188c5908fe0aecae",
+    "eventLifecycle": {
+      "httpStatus": 200,
+      "currentMlbEventCount": 15,
+      "eventsByLifecycleState": {
+        "HIGH_PRIORITY": 7,
+        "ACTIVE_REFRESH": 8
+      },
+      "eventsByPriority": {
+        "P1": 7,
+        "P3": 8
+      },
+      "eventsRequiringAction": 15,
+      "eventsMissingResults": 0,
+      "eventsReadyForSettlement": 0,
+      "eventsBlocked": 0,
+      "boundedApiMaximum": 200,
+      "defaultCurrentDayOnly": true,
+      "providerCallsMade": 0,
+      "providerCreditsConsumed": 0,
+      "databaseMutationsMade": 0,
+      "predictionWrites": 0,
+      "resultWrites": 0,
+      "settlementWrites": 0,
+      "learningWrites": 0
+    },
+    "mlbOperationsPage": {
+      "httpStatus": 200,
+      "eventLifecycleSectionRendered": true,
+      "runtimeError": false
+    },
+    "settlementGuarantee": {
+      "httpStatus": 409,
+      "guarantee": "ACTION_REQUIRED",
+      "readyForSettlementRows": 0,
+      "silentPendingRows": 0,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "note": "Scheduler execution health was CRITICAL during observation; no settlement backlog was present."
+    },
     "requiredEndpoints": [
       "/api/system/version",
       "/api/operations/event-lifecycle",

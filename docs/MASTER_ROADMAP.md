@@ -3186,10 +3186,10 @@ Completion criteria: `OE_003B_PROVIDER_BUDGET_LEDGER_NORMALIZATION_IMPLEMENTED`,
 
 Objective: Implement the canonical read-only per-event lifecycle contract required before event-level refresh planning.
 
-Status: Implemented pending production certification.
+Status: Production certified.
 
 Scope: Dynamic lifecycle derivation, bounded read-only operations API, provider-budget dry-run context and compact MLB Operations Center visibility. No event-level refresh planner, scheduler cadence change, provider call, prediction generation, result import, settlement execution, learning write or recommendation-policy change is included.
 
-Result: `/api/operations/event-lifecycle` derives state from stored `sport_events`, `prediction_history`, `game_results` and provider-budget evidence. Closure states outrank market refresh, terminal events missing canonical results become `RESULT_IMPORT`, settlement-ready events become `SETTLEMENT/P0`, recommendation relevance is classification-only and next actions are observational only.
+Result: Production served commit `d7a1077eb5fc4c4dca00082a188c5908fe0aecae`. `/api/operations/event-lifecycle` derives state from stored `sport_events`, `prediction_history`, `game_results` and provider-budget evidence. Closure states outrank market refresh, terminal events missing canonical results become `RESULT_IMPORT`, settlement-ready events become `SETTLEMENT/P0`, recommendation relevance is classification-only and next actions are observational only. Production observation returned 15 current-day MLB events, with `HIGH_PRIORITY` 7, `ACTIVE_REFRESH` 8, `P1` 7, `P3` 8, provider calls 0 and database mutations 0.
 
 Completion criteria: `EVENT_LIFECYCLE_CONTRACT_ADDED`, explicit lifecycle entry/exit rules, `FINAL` not inferred from elapsed time alone, missing result detection, settlement priority precedence, isolated provider-budget dry-run authorization, bounded current-day defaults, MLB Operations Center visibility, passing validation, passing build and production certification after automatic deployment.
