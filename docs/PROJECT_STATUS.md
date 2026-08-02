@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-02 OE-003E Canonical Acquisition Active Execution
+
+- Implemented `canonical_acquisition_execution_v1` for bounded SportsDataIO MLB current operating-day pregame odds acquisition. The protected adaptive scheduler can now execute per-event planner decisions with one date-level provider-efficient `GameOddsByDate` request when ACTIVE guards pass.
+- Reused `sports_odds_snapshots` for canonical market persistence and `sports_sync_jobs` for acquisition evidence. Provider market timestamps remain separate from fetch observation timestamps. Prediction, recommendation, settlement and learning outputs are unchanged.
+- The Odds API remains shadow-only because current balance/reset/cost evidence is not certified for active refresh. BSN remains observational. OE-003F was not started.
+
 ## 2026-08-02 OE-003D Event-Level Refresh Planner
 
 - Implemented `/api/operations/event-refresh-plan` as a bounded, read-only event-level refresh planner in `SHADOW` mode. It consumes OE-003C lifecycle evidence, decides per event, applies SportsDataIO MLB cadence targets, estimates provider-efficient batching and preserves exact provider-budget authorization evidence.

@@ -17,6 +17,7 @@ import {
 } from '@/services/provider-budget.service'
 import { formatInTimeZone } from '@/services/provider-time-normalization.service'
 import { canonicalStoredOutcome } from '@/services/canonical-settlement-state.service'
+import { executeCanonicalMlbMarketAcquisition } from '@/services/canonical-acquisition.service'
 import { getEventRefreshPlan } from '@/services/event-refresh-planner.service'
 
 const SPORT_KEY = 'baseball_mlb'
@@ -346,6 +347,10 @@ function mlbCadenceConfig(): MlbCadenceConfig {
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
+}
+
+function asStrings(value: unknown): string[] {
+  return Array.isArray(value) ? value.map((item) => String(item ?? '')).filter(Boolean) : []
 }
 
 function round(value: number, digits = 2) {
@@ -1010,6 +1015,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     now,
   })
   const eventWindows = eventRefreshWindows(uniqueRefreshEvents, now, cadenceConfig, latestOddsChange)
+  const eventRefreshPlan = await getEventRefreshPlan({ sportKey: SPORT_KEY, operatingDate: activeSlateDate, limit: 200 })
   const marketRefreshEvents = eventWindows.filter((event) => event.marketRefreshAllowed)
   const marketRefreshNeeded = marketRefreshEvents.length > 0 || waitingForOdds > 0
   const policyOverrides = Object.fromEntries(
@@ -1251,6 +1257,13 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       },
     },
     eventRefreshWindows: eventWindows,
+    eventRefreshPlan: {
+      mode: eventRefreshPlan.plannerMode,
+      summary: eventRefreshPlan.summary,
+      canonicalAcquisition: eventRefreshPlan.canonicalAcquisition,
+      providerBudget: eventRefreshPlan.providerBudget,
+      guardrails: eventRefreshPlan.guardrails,
+    },
     marketRefreshEligibility: {
       eligiblePregameEvents: marketRefreshEvents.length,
       waitingForOdds,
@@ -1392,7 +1405,7 @@ export async function getDataFreshnessStatus() {
 
 export async function getAdaptiveRefreshPlan() {
   const status = await getAdaptiveRefreshStatus()
-  const eventRefreshPlan = await getEventRefreshPlan({ sportKey: status.sportKey, operatingDate: status.activeSlateDate, limit: 200, mode: 'SHADOW' })
+  const eventRefreshPlan = await getEventRefreshPlan({ sportKey: status.sportKey, operatingDate: status.activeSlateDate, limit: 200 })
   return {
     success: true,
     status: status.status,
@@ -1410,6 +1423,7 @@ export async function getAdaptiveRefreshPlan() {
       providerBudget: eventRefreshPlan.providerBudget,
       nextGlobalAction: eventRefreshPlan.summary.nextGlobalAction,
       guardrails: eventRefreshPlan.guardrails,
+      canonicalAcquisition: eventRefreshPlan.canonicalAcquisition,
     },
     providerCallForecast: status.providerCallForecast,
     guardrails: status.guardrails,
@@ -1593,6 +1607,15 @@ export async function runAdaptiveRefresh({
   }
 
   if (dryRun !== false) {
+    const eventRefreshPlan = await getEventRefreshPlan({ sportKey: SPORT_KEY, operatingDate: selectedDate, limit: 200 })
+    const canonicalAcquisition = await executeCanonicalMlbMarketAcquisition({
+      dryRun: true,
+      mode: eventRefreshPlan.plannerMode,
+      operatingDate: selectedDate,
+      eventPlans: eventRefreshPlan.eventPlans,
+      source,
+      requestId: executionRunId,
+    })
     return {
       success: true,
       status: dueNow.length ? 'PLANNED' : 'NOT_DUE',
@@ -1608,6 +1631,12 @@ export async function runAdaptiveRefresh({
       dueSteps: dueNow,
       refreshPlan: status.refreshPlan,
       providerCallForecast: status.providerCallForecast,
+      eventRefreshPlan: {
+        mode: eventRefreshPlan.plannerMode,
+        summary: eventRefreshPlan.summary,
+        canonicalAcquisition: eventRefreshPlan.canonicalAcquisition,
+      },
+      canonicalAcquisition,
       message: dueNow.length
         ? 'Dry run only. Due steps were identified but not executed.'
         : 'No refresh steps are currently due.',
@@ -1639,6 +1668,110 @@ export async function runAdaptiveRefresh({
       guardrails: status.guardrails,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
+    }
+  }
+
+  const activeEventRefreshPlan = ['morning_sync', 'midday_refresh', 'final_refresh'].includes(action)
+    ? await getEventRefreshPlan({ sportKey: SPORT_KEY, operatingDate: selectedDate, limit: 200, mode: 'ACTIVE' })
+    : null
+  const activeEventPlans = activeEventRefreshPlan?.eventPlans ?? []
+  const activeMarketPlans = activeEventPlans.filter((plan) => plan.executionEnabled === true)
+  if (activeEventRefreshPlan && activeMarketPlans.length > 0) {
+    const canonicalAcquisition = await executeCanonicalMlbMarketAcquisition({
+      dryRun: false,
+      mode: 'ACTIVE',
+      operatingDate: selectedDate,
+      eventPlans: activeEventPlans,
+      source,
+      requestId: executionRunId,
+      timeoutMs: 15000,
+    })
+    const contract = asRecord(canonicalAcquisition.contract)
+    const evidence = asRecord(contract.evidence)
+    const normalizedStatus =
+      canonicalAcquisition.success && ['SUCCESS', 'PARTIAL'].includes(String(canonicalAcquisition.status))
+        ? Number(contract.persistedSnapshotCount ?? 0) > 0
+          ? 'SUCCESS_CHANGED'
+          : 'SUCCESS_NO_CHANGE'
+        : canonicalAcquisition.success
+          ? String(canonicalAcquisition.status)
+          : String(canonicalAcquisition.status ?? 'FAILED_RETRYABLE')
+    return {
+      success: canonicalAcquisition.success,
+      status: normalizedStatus,
+      mode: 'adaptive_refresh_execution_bridge_v2',
+      generatedAt: new Date().toISOString(),
+      dryRun: false,
+      executionMode: 'canonical_event_level_acquisition',
+      executionSource: source ?? 'MANUAL_PROTECTED',
+      executionRunId,
+      expectedAction: normalizedExpectedAction,
+      selectedAction: action,
+      selectedDate,
+      dateSelection: executionDateSelection,
+      dueSteps: dueNow,
+      eventRefreshPlan: {
+        mode: activeEventRefreshPlan.plannerMode,
+        summary: activeEventRefreshPlan.summary,
+        canonicalAcquisition: activeEventRefreshPlan.canonicalAcquisition,
+      },
+      canonicalAcquisition,
+      refreshPlan: status.refreshPlan,
+      providerCallForecast: {
+        ...status.providerCallForecast,
+        estimatedDueNowCalls: Number(contract.estimatedHttpRequests ?? status.providerCallForecast.estimatedDueNowCalls),
+      },
+      providerCheck: {
+        providerCheckRequired: true,
+        providerCheckAttempted: Number(canonicalAcquisition.providerCallsMade ?? 0) > 0,
+        providerCheckCompleted: canonicalAcquisition.success === true && Number(canonicalAcquisition.providerCallsMade ?? 0) > 0,
+        endpoint: asRecord(evidence.endpoint).endpoint ?? null,
+        callsMade: canonicalAcquisition.providerCallsMade ?? 0,
+        responseTimestamp: contract.providerResponseObservedAt ?? null,
+        sourceLatestTimestamp: contract.canonicalSnapshotTimestamp ?? null,
+        rowsReceived: canonicalAcquisition.rowsReceived ?? 0,
+        changesDetected: contract.persistedSnapshotCount ?? 0,
+        rowsInserted: canonicalAcquisition.rowsInserted ?? 0,
+        rowsUpdated: canonicalAcquisition.rowsUpdated ?? 0,
+        rowsSkipped: canonicalAcquisition.rowsSkipped ?? 0,
+        failureReason: canonicalAcquisition.success ? null : canonicalAcquisition.failureReason ?? asStrings(contract.errors)[0] ?? null,
+      },
+      executedSteps: [
+        {
+          domain: 'odds',
+          action: 'canonical_event_level_market_refresh',
+          provider: 'sportsdataio',
+          providerCallsMade: canonicalAcquisition.providerCallsMade ?? 0,
+          providerResultClassification: canonicalAcquisition.success ? 'PROVIDER_RETURNED_CANONICAL_MARKETS' : 'PROVIDER_CHECK_FAILED',
+          rowsReceived: canonicalAcquisition.rowsReceived ?? 0,
+          rowsInserted: canonicalAcquisition.rowsInserted ?? 0,
+          rowsUpdated: canonicalAcquisition.rowsUpdated ?? 0,
+          rowsSkipped: canonicalAcquisition.rowsSkipped ?? 0,
+        },
+      ],
+      oddsChangesDetected: contract.persistedSnapshotCount ?? 0,
+      rowsReceived: canonicalAcquisition.rowsReceived ?? 0,
+      rowsInserted: canonicalAcquisition.rowsInserted ?? 0,
+      rowsUpdated: canonicalAcquisition.rowsUpdated ?? 0,
+      rowsSkipped: canonicalAcquisition.rowsSkipped ?? 0,
+      downstreamRebuilds: {
+        predictionRows: 0,
+        currentBoard: 'read_from_canonical_sports_odds_snapshots',
+        aiBriefing: 'read_from_canonical_sports_odds_snapshots',
+      },
+      cacheInvalidations: [],
+      warnings: canonicalAcquisition.success ? [] : asStrings(contract.errors),
+      providerCallsMade: canonicalAcquisition.providerCallsMade ?? 0,
+      remoteMutationsMade: canonicalAcquisition.remoteMutationsMade ?? 0,
+      guardrails: {
+        ...status.guardrails,
+        providerCallsMade: canonicalAcquisition.providerCallsMade ?? 0,
+        remoteMutationsMade: canonicalAcquisition.remoteMutationsMade ?? 0,
+        predictionMutationsMade: 0,
+        officialThresholdsChanged: false,
+        currentBoardPolicyChanged: false,
+        settlementPolicyChanged: false,
+      },
     }
   }
 

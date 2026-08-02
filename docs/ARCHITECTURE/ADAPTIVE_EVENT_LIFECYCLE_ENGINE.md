@@ -1,10 +1,12 @@
 # Adaptive Event Lifecycle Engine
 
-Status: OE-003C read-only lifecycle contract implemented; OE-003D shadow refresh planner implemented pending production certification.
+Status: OE-003C read-only lifecycle contract implemented; OE-003D shadow refresh planner production-certified; OE-003E canonical SportsDataIO MLB active acquisition boundary implemented pending production certification.
 
 OE-003 defines the architecture for event-level operations. OE-003C implements the read-only state contract at `/api/operations/event-lifecycle`. It does not activate event-level provider refresh, new scheduler cadence or prediction math changes.
 
 OE-003D implements the read-only event refresh planner at `/api/operations/event-refresh-plan` in `SHADOW` mode. It decides per event, estimates provider-efficient batching and keeps the existing operating-day execution fallback.
+
+OE-003E adds the bounded active acquisition boundary for SportsDataIO MLB current operating-day pregame odds. Planning remains per event, while execution uses the provider-efficient `GameOddsByDate/{operatingDate}` date-level request and writes one canonical `sports_odds_snapshots` evidence set. Active execution is owned by the protected adaptive scheduler path, not by product surfaces.
 
 ## Components
 
@@ -19,6 +21,8 @@ Implemented in `src/services/event-lifecycle-state.service.ts` as dynamic deriva
 Ranks event work using explicit priority bands instead of hidden weights. It chooses the next safe action from stored state, freshness, provider budget, and settlement readiness.
 
 OE-003D implements this as a shadow planner only. Active execution remains disabled until a separate activation gate proves provider budget, deduplication, freshness improvement and no unrelated writes.
+
+OE-003E implements that activation gate for SportsDataIO MLB only. The Odds API and BSN remain shadow or observational until separately certified.
 
 ### Provider Budget Intelligence Manager
 

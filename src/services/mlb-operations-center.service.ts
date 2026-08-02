@@ -190,7 +190,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     safe('Daily Operations Status', () => getAutonomousDailyOperationsStatus({ selectedDate: date })),
     safe('Operations Health Domains', () => getOperationsHealth()),
     safe('Event Lifecycle State', () => getEventLifecycleState({ sportKey: SPORT_KEY, operatingDate: date, limit: 25 })),
-    safe('Event Refresh Plan', () => getEventRefreshPlan({ sportKey: SPORT_KEY, operatingDate: date, limit: 25, mode: 'SHADOW' })),
+    safe('Event Refresh Plan', () => getEventRefreshPlan({ sportKey: SPORT_KEY, operatingDate: date, limit: 25 })),
   ])
 
   const board = record(boardResult.data)
@@ -392,6 +392,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
       route: `/api/operations/event-refresh-plan?sportKey=${SPORT_KEY}&operatingDate=${date}&limit=25`,
       summary: record(eventRefreshPlan.summary),
       providerBudget: record(eventRefreshPlan.providerBudget),
+      canonicalAcquisition: record(eventRefreshPlan.canonicalAcquisition),
       eventPlans: records(eventRefreshPlan.eventPlans).slice(0, 10).map((plan) => ({
         eventId: text(plan.eventId, ''),
         eventLabel: text(plan.eventLabel, text(plan.eventId, 'unknown event')),
@@ -405,6 +406,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
         nextEligibleAt: text(plan.nextEligibleAt, ''),
         budgetAuthorization: text(record(plan.budgetAuthorization).result, 'UNKNOWN'),
         estimatedHttpRequests: num(plan.estimatedHttpRequests),
+        executionEnabled: bool(plan.executionEnabled),
         executionBlockers: strings(plan.executionBlockers),
         reasonCodes: strings(plan.actionReasonCodes),
       })),

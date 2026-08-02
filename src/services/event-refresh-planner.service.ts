@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { getLatestCanonicalAcquisitionEvidence } from '@/services/canonical-acquisition.service'
 import { getEventLifecycleState, type EventPriorityBand } from '@/services/event-lifecycle-state.service'
 
 const DEFAULT_SPORT_KEY = 'baseball_mlb'
@@ -52,7 +53,7 @@ function text(value: unknown, fallback = '') {
 }
 
 function normalizeMode(value: unknown): EventRefreshPlannerMode {
-  const mode = String(value ?? 'SHADOW').trim().toUpperCase()
+  const mode = String(value ?? process.env.EVENT_REFRESH_PLANNER_MODE ?? 'ACTIVE').trim().toUpperCase()
   if (mode === 'ACTIVE') return 'ACTIVE'
   if (mode === 'DRY_RUN') return 'DRY_RUN'
   return 'SHADOW'
@@ -176,6 +177,14 @@ export async function getEventRefreshPlan(input: EventRefreshPlanInput = {}) {
     priorityBand: input.priorityBand,
     limit,
   })
+  const latestAcquisition = await getLatestCanonicalAcquisitionEvidence().catch((error) => ({
+    success: false,
+    mode: 'canonical_acquisition_latest_evidence_v1',
+    latest: null,
+    error: error instanceof Error ? error.message : String(error),
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  }))
   const eventPlans = lifecycle.events.map((event) => {
     const item = record(event)
     const recommendation = record(item.recommendationRelevance)
@@ -197,12 +206,24 @@ export async function getEventRefreshPlan(input: EventRefreshPlanInput = {}) {
       providerId === 'the-odds-api' ||
       text(budgetAuthorization.evidenceLevel, 'UNKNOWN') === 'UNKNOWN' ||
       text(budgetAuthorization.costEvidenceLevel, 'UNKNOWN') === 'UNKNOWN'
+    const providerBudgetBlocked =
+      providerId === 'sportsdataio' &&
+      action.plannedAction === 'REFRESH_MARKET' &&
+      !['RESERVE_PRESERVED', 'UNKNOWN'].includes(text(budgetAuthorization.reserveImpact, 'UNKNOWN'))
     const executionBlockers = [
       mode !== 'ACTIVE' ? 'PLANNER_MODE_NOT_ACTIVE' : null,
       unsafeUnknownProvider && action.plannedAction === 'REFRESH_MARKET' ? 'UNKNOWN_PROVIDER_COST_OR_BALANCE_BLOCKS_ACTIVE_EXECUTION' : null,
+      providerBudgetBlocked ? 'PROTECTED_RESERVE_NOT_PRESERVED' : null,
       lifecycleState === 'STARTED' || lifecycleState === 'LIVE' ? 'POST_START_PREGAME_REFRESH_BLOCKED' : null,
       ...strings(item.blockers),
     ].filter(Boolean) as string[]
+    const executionEnabled =
+      mode === 'ACTIVE' &&
+      providerId === 'sportsdataio' &&
+      sportKey === 'baseball_mlb' &&
+      action.plannedAction === 'REFRESH_MARKET' &&
+      action.dueNow === true &&
+      executionBlockers.length === 0
     return {
       eventId: text(item.eventId),
       eventLabel: text(item.eventLabel, text(item.eventId)),
@@ -228,7 +249,7 @@ export async function getEventRefreshPlan(input: EventRefreshPlanInput = {}) {
       usableRemainingBefore: budgetAuthorization.usableRemainingBefore ?? null,
       usableRemainingAfter: budgetAuthorization.usableRemainingAfter ?? null,
       reserveImpact: text(budgetAuthorization.reserveImpact, 'UNKNOWN'),
-      executionEnabled: false,
+      executionEnabled,
       executionBlockers,
       warnings: strings(item.warnings),
       evidence: {
@@ -237,6 +258,7 @@ export async function getEventRefreshPlan(input: EventRefreshPlanInput = {}) {
         closureOutranksMarketRefresh: true,
         postStartPregameRefreshAllowed: false,
         canonicalSnapshotDeduplication: 'DECIDE_PER_EVENT_EXECUTE_WITH_PROVIDER_EFFICIENT_BATCHING_STORE_ONE_CANONICAL_SNAPSHOT',
+        activeExecutionRoute: executionEnabled ? '/api/cron/operating-day?dryRun=false' : null,
       },
     }
   }).filter((plan) => input.plannedAction ? plan.plannedAction === input.plannedAction : true).sort(comparePlans)
@@ -295,6 +317,28 @@ export async function getEventRefreshPlan(input: EventRefreshPlanInput = {}) {
         activeExecutionAuthorized: false,
       },
     },
+    canonicalAcquisition: {
+      contractVersion: 'canonical_acquisition_execution_v1',
+      executionBoundary: '/api/cron/operating-day?dryRun=false',
+      activeProvider: mode === 'ACTIVE' && sportKey === 'baseball_mlb' ? 'sportsdataio' : null,
+      activeSport: mode === 'ACTIVE' && sportKey === 'baseball_mlb' ? 'baseball_mlb' : null,
+      requestGranularity: 'DATE',
+      executionStatus: mode === 'ACTIVE' ? 'ACTIVE_ELIGIBLE_THROUGH_PROTECTED_SCHEDULER' : 'SHADOW_PLAN_ONLY',
+      eligibleEventCount: eventPlans.filter((plan) => plan.executionEnabled).length,
+      excludedEventCount: eventPlans.filter((plan) => !plan.executionEnabled).length,
+      deduplicationKeyTemplate: 'sportsdataio:baseball_mlb:odds_refresh:{operatingDate}:date:{boundedWindow}:current_pregame',
+      providerEfficientBatching: true,
+      actualCalls: null,
+      actualCost: null,
+      snapshotWrites: null,
+      freshnessBefore: null,
+      freshnessAfter: null,
+      latestSuccessfulActiveAcquisition: latestAcquisition.latest ?? null,
+      activationBlockers: [
+        mode !== 'ACTIVE' ? 'PLANNER_MODE_NOT_ACTIVE' : null,
+        sportKey !== 'baseball_mlb' ? 'NON_MLB_REFRESH_REMAINS_SHADOW_UNTIL_CERTIFIED' : null,
+      ].filter(Boolean),
+    },
     eventPlans,
     comparison: {
       currentSchedulerBehavior: 'slate_level_operating_day_action_selection',
@@ -315,7 +359,7 @@ export async function getEventRefreshPlan(input: EventRefreshPlanInput = {}) {
       refreshCadenceChanged: false,
       officialPickPolicyChanged: false,
       predictionFormulaChanged: false,
-      activeExecutionEnabled: false,
+      activeExecutionEnabled: mode === 'ACTIVE' && eventPlans.some((plan) => plan.executionEnabled),
     },
   }
 }

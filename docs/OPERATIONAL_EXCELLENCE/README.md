@@ -10,3 +10,4 @@ Bounded operational audits and certifications for production behavior that shoul
 - [OE-003B Provider Budget Ledger Normalization](OE_003B_PROVIDER_BUDGET_LEDGER_NORMALIZATION.md)
 - [OE-003C Per-Event Lifecycle State](OE_003C_PER_EVENT_LIFECYCLE_STATE.md)
 - [OE-003D Event-Level Refresh Planner](OE_003D_EVENT_LEVEL_REFRESH_PLANNER.md)
+- [OE-003E Canonical Acquisition Active Execution](OE_003E_CANONICAL_ACQUISITION_ACTIVE_EXECUTION.md)

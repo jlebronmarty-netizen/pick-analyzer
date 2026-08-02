@@ -89,6 +89,26 @@ Stop condition: active planner execution would increase cadence before budget pr
 
 ## OE-003E - Canonical Acquisition Deduplication
 
+Scope: activate the canonical acquisition boundary for SportsDataIO MLB current operating-day pregame odds while preserving per-event planning and provider-efficient batching.
+
+Status: implemented pending production certification.
+
+Likely files:
+
+- `src/services/canonical-acquisition.service.ts`
+- `src/services/event-refresh-planner.service.ts`
+- `src/services/adaptive-refresh-orchestrator.service.ts`
+- `src/services/mlb-operations-center.service.ts`
+- `src/app/mlb-operations/page.tsx`
+
+Migration: none required; existing `sports_odds_snapshots` and `sports_sync_jobs` are reused.
+
+Provider-call risk: bounded to one SportsDataIO MLB date-level odds request during production certification if all guards pass.
+
+Mutation risk: idempotent `sports_odds_snapshots` upsert plus `sports_sync_jobs` evidence only.
+
+Stop condition: provider credentials, budget authorization, deduplication, P0 closure, post-start guard or reserve protection blocks active execution.
+
 Scope: ensure all product surfaces read stored canonical snapshots and do not trigger separate acquisition.
 
 Likely files:

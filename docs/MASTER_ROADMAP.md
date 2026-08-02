@@ -3198,6 +3198,10 @@ Completion criteria: `EVENT_LIFECYCLE_CONTRACT_ADDED`, explicit lifecycle entry/
 
 Objective: Convert OE-003C lifecycle evidence into a deterministic event-level refresh plan without activating new provider refresh behavior.
 
+### 71. Operational Excellence OE-003E Canonical Acquisition Active Execution
+
+Objective: Activate the canonical SportsDataIO MLB acquisition boundary for current operating-day pregame market refresh while preserving per-event planning, provider-efficient date-level batching, protected budget reserve, idempotent stored odds snapshots and zero prediction/recommendation/settlement/learning behavior changes.
+
 Status: Implemented pending production certification.
 
 Scope: Shadow-mode event planner, bounded read-only API, adaptive refresh diagnostic integration and MLB Operations Center visibility. No active provider execution, scheduler cadence change, provider call, prediction generation, result import, settlement execution, learning write or recommendation-policy change is included.

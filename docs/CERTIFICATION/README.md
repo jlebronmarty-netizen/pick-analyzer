@@ -55,6 +55,8 @@ Current V2 certification documents:
 - [OE-003C Certification JSON](oe-003c-per-event-lifecycle-state.json)
 - [OE-003D Event-Level Refresh Planner](OE_003D_EVENT_LEVEL_REFRESH_PLANNER.md)
 - [OE-003D Certification JSON](oe-003d-event-level-refresh-planner.json)
+- [OE-003E Canonical Acquisition Active Execution](OE_003E_CANONICAL_ACQUISITION_ACTIVE_EXECUTION.md)
+- [OE-003E Certification JSON](oe-003e-canonical-acquisition-active-execution.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

@@ -251,10 +251,20 @@ function EventRefreshPlan({ data }: { data: OperationsData }) {
     usableRemainingBefore?: unknown
     reserveImpact?: unknown
   }
+  const acquisition = (plan.canonicalAcquisition ?? {}) as {
+    executionStatus?: unknown
+    requestGranularity?: unknown
+    eligibleEventCount?: unknown
+    latestSuccessfulActiveAcquisition?: { contract?: { completedAt?: unknown; actualHttpRequests?: unknown; persistedSnapshotCount?: unknown } } | null
+  }
+  const lastActive = acquisition.latestSuccessfulActiveAcquisition?.contract ?? null
   return (
     <Panel title="Event Refresh Planner" status={plan.plannerMode}>
       <div className="grid gap-2 md:grid-cols-4">
         <Metric label="Planner Mode" value={plan.plannerMode} tone={plan.plannerMode === 'ACTIVE' ? 'ready' : 'waiting'} />
+        <Metric label="Execution" value={fmt(acquisition.executionStatus)} tone={plan.plannerMode === 'ACTIVE' ? 'ready' : 'waiting'} />
+        <Metric label="Granularity" value={fmt(acquisition.requestGranularity)} />
+        <Metric label="Active Eligible" value={fmt(acquisition.eligibleEventCount)} tone={Number(acquisition.eligibleEventCount ?? 0) > 0 ? 'ready' : 'waiting'} />
         <Metric label="Due Now" value={summary.eventsDueNow} tone={summary.eventsDueNow ? 'partial' : 'ready'} />
         <Metric label="Deferred" value={summary.eventsDeferred} />
         <Metric label="Estimated Calls" value={summary.estimatedHttpRequests} />
@@ -262,6 +272,9 @@ function EventRefreshPlan({ data }: { data: OperationsData }) {
         <Metric label="Closure" value={summary.eventsRequiringClosure} tone={summary.eventsRequiringClosure ? 'blocked' : 'ready'} />
         <Metric label="Usable Before" value={sportsDataIo.usableRemainingBefore ?? 'UNKNOWN'} />
         <Metric label="Reserve Impact" value={sportsDataIo.reserveImpact ?? 'UNKNOWN'} />
+        <Metric label="Last Active" value={fmt(lastActive?.completedAt)} />
+        <Metric label="Actual Calls" value={fmt(lastActive?.actualHttpRequests)} />
+        <Metric label="Snapshots" value={fmt(lastActive?.persistedSnapshotCount)} />
       </div>
       <div className="mt-4 grid gap-2">
         {plan.eventPlans.length ? plan.eventPlans.map((event) => (
@@ -275,6 +288,7 @@ function EventRefreshPlan({ data }: { data: OperationsData }) {
                 <StatusPill value={event.priorityBand} tone={toneFrom(event.priorityBand === 'P0' ? 'blocked' : event.priorityBand === 'P1' ? 'partial' : 'ready')} />
                 <StatusPill value={event.plannedAction} tone={toneFrom(event.dueNow ? 'partial' : 'ready')} />
                 <StatusPill value={event.budgetAuthorization} tone={toneFrom(event.budgetAuthorization)} />
+                <StatusPill value={event.executionEnabled ? 'ACTIVE ELIGIBLE' : 'OBSERVED'} tone={event.executionEnabled ? 'ready' : 'waiting'} />
               </div>
             </div>
             <div className="mt-3 grid gap-2 text-xs text-zinc-400 md:grid-cols-4">

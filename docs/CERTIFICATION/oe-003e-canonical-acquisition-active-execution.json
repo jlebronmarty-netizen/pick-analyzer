@@ -1,0 +1,89 @@
+{
+  "release": "OE-003E",
+  "name": "Canonical Acquisition And Bounded Active Execution V1",
+  "status": "IMPLEMENTED_PENDING_PRODUCTION_CERTIFICATION",
+  "startingCommit": "562fdfa9c2f996206309217c6771bd1ef2e0a713",
+  "contractVersion": "canonical_acquisition_execution_v1",
+  "activeScope": {
+    "provider": "sportsdataio",
+    "sportKey": "baseball_mlb",
+    "action": "odds_refresh",
+    "requestGranularity": "DATE",
+    "executionBoundary": "/api/cron/operating-day?dryRun=false",
+    "maximumInitialProviderCalls": 1
+  },
+  "inactiveProviders": {
+    "theOddsApi": "SHADOW_ONLY_UNKNOWN_BALANCE_RESET_COST",
+    "bsn": "OBSERVATIONAL_PROVIDER_PATH_NOT_ACTIVE"
+  },
+  "guardrails": {
+    "predictionFormulaChanged": false,
+    "probabilityChanged": false,
+    "confidenceChanged": false,
+    "edgeChanged": false,
+    "evChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementRulesChanged": false,
+    "learningRulesChanged": false,
+    "providerMappingsChanged": false,
+    "schedulerCadenceChanged": false,
+    "refreshCadenceChanged": false,
+    "destructiveMigration": false
+  },
+  "expectedWritesDuringOneActiveAcquisition": {
+    "sports_odds_snapshots": "idempotent upsert only",
+    "sports_sync_jobs": "canonical acquisition evidence ledger",
+    "prediction_history": 0,
+    "game_results": 0,
+    "settlement": 0,
+    "learning": 0
+  },
+  "deduplication": {
+    "keyTemplate": "sportsdataio:baseball_mlb:odds_refresh:{operatingDate}:date:{boundedWindow}:current_pregame",
+    "sameWindowDuplicateBlocked": true,
+    "laterLegitimateRefreshAllowed": true
+  },
+  "completionMarkers": [
+    "CANONICAL_ACQUISITION_CONTRACT_ADDED",
+    "SPORTSDATAIO_MLB_ACTIVE_SCOPE_ONLY",
+    "DATE_LEVEL_BATCHING_PASS",
+    "DEDUPE_KEY_PASS",
+    "PROTECTED_SCHEDULER_BOUNDARY_PASS",
+    "SNAPSHOT_UPSERT_IDEMPOTENT_PASS",
+    "PROVIDER_TIMESTAMP_SEPARATED_FROM_FETCH_TIME_PASS",
+    "NO_PREDICTION_OUTPUT_CHANGE_PASS",
+    "NO_OFFICIAL_PICK_POLICY_CHANGE_PASS",
+    "NO_SETTLEMENT_OR_LEARNING_CHANGE_PASS",
+    "THE_ODDS_API_REMAINS_SHADOW_PASS",
+    "BSN_REMAINS_OBSERVATIONAL_PASS",
+    "OE_003F_NOT_STARTED"
+  ],
+  "productionCertification": {
+    "status": "PENDING",
+    "runtimeCommit": null,
+    "actualProviderCalls": null,
+    "actualQuotaCost": null,
+    "budgetBefore": null,
+    "budgetAfter": null,
+    "protectedReserve": null,
+    "snapshotsWritten": null,
+    "unchangedRows": null,
+    "freshnessBefore": null,
+    "freshnessAfter": null,
+    "freshnessImprovement": null,
+    "requiredEndpoints": [
+      "/api/system/version",
+      "/api/operations/event-lifecycle?sportKey=baseball_mlb&limit=200",
+      "/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200",
+      "/api/operations/health",
+      "/api/operations/adaptive-refresh/status",
+      "/api/operations/settlement-guarantee?includeValidation=true",
+      "/api/operations/mlb-autonomous-operations",
+      "/api/providers/budget/status?provider=sportsdataio&sportKey=baseball_mlb",
+      "/api/operations/provider-budget-forecast",
+      "/api/dashboard/today",
+      "/api/current-board?mode=current&limit=200",
+      "/mlb-operations"
+    ]
+  }
+}

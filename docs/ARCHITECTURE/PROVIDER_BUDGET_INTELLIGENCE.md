@@ -1,8 +1,10 @@
 # Provider Budget Intelligence
 
-OE-003D update: `/api/operations/event-refresh-plan` consumes the OE-003B provider authorization contract in shadow mode. SportsDataIO MLB projected refresh costs are estimated from event plans and provider-efficient batching while preserving the configured reserve. The Odds API remains shadow-only when current balance/reset/cost evidence is unknown, and BSN remains observational until a certified active provider path exists.
+OE-003E update: the canonical acquisition boundary may execute one bounded SportsDataIO MLB date-level market refresh only through the protected adaptive scheduler when budget authorization, reserve, max/action, max/hour, deduplication and pregame guards pass. `/api/operations/event-refresh-plan` still consumes the OE-003B provider authorization contract for read-only evidence. The Odds API remains shadow-only when current balance/reset/cost evidence is unknown, and BSN remains observational until a certified active provider path exists.
 
 Status: OE-003B implemented the first normalized contract. Later event-level planning remains proposed only.
+
+OE-003E does not combine provider pools. SportsDataIO active execution remains isolated from The Odds API and BSN.
 
 OE-003 separates provider budget health from market freshness. A stale market is not proof of provider exhaustion, and an available provider budget is not proof that markets are fresh.
 

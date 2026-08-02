@@ -60,8 +60,8 @@ check('current-day defaults prevent historical leakage', service.includes('defau
 check('fallback behavior remains available', adaptive.includes('eventRefreshPlan') && adaptive.includes('getAdaptiveRefreshStatus'))
 check('API route added', route.includes('getEventRefreshPlan') && route.includes('parseIntegerParam'))
 check('operations center displays planner', operationsCenter.includes('Event Refresh Plan') && operationsPage.includes('Event Refresh Planner'))
-check('active execution remains disabled', cert.activeExecutionEnabled === false && service.includes('executionEnabled: false'))
-check('OE-003E was not started', doc.includes('OE-003E was not started') && cert.completionMarkers.includes('OE_003E_NOT_STARTED'))
+check('OE-003D shadow certification is preserved', cert.plannerMode === 'SHADOW' && cert.activeExecutionEnabled === false)
+check('bounded OE-003E activation is isolated when present', service.includes("sportKey === 'baseball_mlb'") && service.includes("providerId === 'sportsdataio'") && service.includes('activeExecutionEnabled'))
 check('no secrets exposed in OE-003D artifacts', !/(SUPABASE_SERVICE_ROLE_KEY\s*=|ODDS_API_KEY\s*=|SPORTSDATAIO_MLB_API_KEY\s*=|CRON_SECRET\s*=|sk-[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._-]{20,})/.test([service, route, doc, certDoc, read(files.certJson)].join('\n')))
 
 const failed = checks.filter((item) => !item.passed)
