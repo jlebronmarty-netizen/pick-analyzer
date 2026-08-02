@@ -1,7 +1,7 @@
 {
   "mission": "MC-01",
   "name": "Operational Readiness Closure",
-  "status": "CONDITIONAL_PASS",
+  "status": "PRODUCTION_CERTIFIED",
   "startingCommit": "ed7a9d932ee3257fa7a20c84770c89edd4712d06",
   "entryCriteria": {
     "branchMain": true,
@@ -52,7 +52,7 @@
     "manualDeployment": false
   },
   "externalRecoveryObservation": {
-    "status": "RECOVERY_NOT_OBSERVED",
+    "status": "INITIAL_RECOVERY_NOT_OBSERVED",
     "observedProductionCommit": "0f02b355f19ccaf3c08682d304ac27a0a8f06027",
     "runtimeCertifiedCommit": "c337a850919e932e8b13a9024a88d52b3d1dc09b",
     "systemVersionHttp": 200,
@@ -105,20 +105,95 @@
     "providerCreditsConsumedByCertificationReads": 0,
     "remoteMutationsMadeByCertificationReads": 0,
     "githubActionsEvidence": "UNAVAILABLE_GH_CLI_NOT_INSTALLED",
-    "decision": "MC_01_REMAINS_CONDITIONAL_PASS"
+    "decision": "MC_01_INITIAL_RECOVERY_NOT_OBSERVED"
+  },
+  "manualProtectedSchedulerDiagnostic": {
+    "workflowRunId": 30770704363,
+    "trigger": "workflow_dispatch",
+    "commit": "02e9d97169d8292a10126b4a8370cec227496ca1",
+    "status": "completed",
+    "conclusion": "success",
+    "createdAt": "2026-08-02T22:42:46Z",
+    "startedAt": "2026-08-02T22:42:46Z",
+    "updatedAt": "2026-08-02T22:43:01Z",
+    "jobId": 91557236489,
+    "jobName": "refresh",
+    "jobStatus": "completed",
+    "jobConclusion": "success",
+    "jobStartedAt": "2026-08-02T22:42:50Z",
+    "jobCompletedAt": "2026-08-02T22:43:01Z",
+    "timeoutStatus": "NO_TIMEOUT_OBSERVED",
+    "concurrencyStatus": "NO_CANCELLATION_OBSERVED",
+    "logs": "UNAVAILABLE_UNAUTHENTICATED_GITHUB_LOG_DOWNLOAD_HTTP_403",
+    "protectedInvocationResponse": "NOT_DIRECTLY_AVAILABLE_FROM_LOGS",
+    "selectedOperationalAction": "NOT_EXPOSED_IN_WORKFLOW_METADATA_PRODUCTION_EFFECT_CANONICAL_MARKET_REFRESH",
+    "scheduledTriggerEvidence": {
+      "workflowRunId": 30770207492,
+      "trigger": "schedule",
+      "commit": "02e9d97169d8292a10126b4a8370cec227496ca1",
+      "conclusion": "success",
+      "startedAt": "2026-08-02T22:29:23Z",
+      "updatedAt": "2026-08-02T22:29:38Z"
+    }
+  },
+  "productionEvidenceAfterManualDiagnostic": {
+    "systemVersionHttp": 200,
+    "systemVersionCommit": "0f02b355f19ccaf3c08682d304ac27a0a8f06027",
+    "systemVersionProviderCallsMade": 0,
+    "operationsHealthStatus": "HEALTHY",
+    "schedulerExecutionStatus": "HEALTHY",
+    "schedulerCadenceStatus": "HEALTHY",
+    "schedulerRunning": true,
+    "missedSchedulerIntervals": 0,
+    "lastSuccessfulProtectedInvocationAt": "2026-08-02T22:32:02.29+00:00",
+    "lastExternalSchedulerInvocationAt": "2026-08-02T22:32:02.29+00:00",
+    "marketFreshnessStatus": "HEALTHY",
+    "adaptiveOddsStatus": "FRESH",
+    "latestOddsTimestamp": "2026-08-02T22:42:59.132Z",
+    "latestOddsSourceTimestamp": "2026-08-02T18:42:37.000Z",
+    "marketAgeMinutes": 2,
+    "productReadinessStatus": "HEALTHY",
+    "eventRefreshPlannerMode": "ACTIVE",
+    "eventRefreshPlannerActions": {
+      "STOP_PREGAME_REFRESH": 14,
+      "REFRESH_MARKET": 1
+    },
+    "estimatedHttpRequests": 1,
+    "estimatedQuotaUnits": 1,
+    "providerBudgetStatus": "HEALTHY",
+    "sportsDataIoCallsMadeToday": 11,
+    "sportsDataIoCallsMadeLastHour": 0,
+    "sportsDataIoEstimatedCallsRemaining": 839,
+    "sportsDataIoHardRemaining": 989,
+    "sportsDataIoSoftReserveRemaining": 150,
+    "sportsDataIoLastProviderCall": "2026-08-02T22:32:02.307271+00:00",
+    "settlementGuaranteeHttp": 200,
+    "settlementGuarantee": "PASS",
+    "settlementReadyRows": 0,
+    "settlementBlockedRows": 0,
+    "silentPendingRows": 0,
+    "performanceHttp": 200,
+    "performanceProviderCallsMade": 0,
+    "performanceRemoteMutationsMade": 0,
+    "dashboardTodayHttp": 200,
+    "dashboardTodayProviderCallsMade": 0,
+    "dashboardTodayRemoteMutationsMade": 0,
+    "certificationReadProviderCallsMade": 0,
+    "certificationReadProviderCreditsConsumed": 0,
+    "certificationReadRemoteMutationsMade": 0
   },
   "repairs": [
     "mission_control_runtime_state_reconciled",
     "settlement_guarantee_scheduler_warning_decoupled_from_settlement_failure"
   ],
   "operationalDomains": {
-    "schedulerExecution": "CONDITIONAL",
-    "marketFreshness": "CONDITIONAL",
+    "schedulerExecution": "PASS",
+    "marketFreshness": "PASS",
     "canonicalAcquisition": "PASS",
     "providerBudgetAuthorization": "PASS",
     "eventLifecycle": "PASS",
     "refreshPlanner": "PASS",
-    "resultImport": "CONDITIONAL",
+    "resultImport": "PASS",
     "settlementClosure": "PASS",
     "learningEvidence": "PASS",
     "performanceSynchronization": "PASS",
@@ -142,12 +217,7 @@
     "officialPickPolicyChanged": false,
     "manualDeployment": false
   },
-  "activeStopConditions": [
-    {
-      "id": "MC-STOP-005",
-      "reason": "External protected scheduler and market-freshness proof are pending."
-    }
-  ],
+  "activeStopConditions": [],
   "validation": {
     "mc01Validator": "PASS",
     "missionControlValidator": "PASS",
@@ -165,5 +235,5 @@
     "secretScan": "PASS",
     "gitDiffCheck": "PASS"
   },
-  "finalClassification": "MC_01_CONDITIONAL_PASS_EXTERNAL_SCHEDULER_PROOF_PENDING"
+  "finalClassification": "MC_01_PRODUCTION_CERTIFIED"
 }

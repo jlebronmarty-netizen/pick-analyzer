@@ -1,15 +1,15 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_01_CONDITIONAL_PASS_EXTERNAL_SCHEDULER_PROOF_PENDING",
+  "status": "MC_01_PRODUCTION_CERTIFIED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
     "id": "MC-01",
     "title": "Operational Readiness Closure",
-    "state": "CONDITIONAL_PASS",
+    "state": "PRODUCTION_CERTIFIED",
     "priority": "P1",
     "mode": "AGENT_ASSISTED",
-    "readiness": "CONDITIONAL"
+    "readiness": "COMPLETE"
   },
   "nextMission": {
     "id": "MC-02",
@@ -24,8 +24,8 @@
     "ready": 3,
     "planned": 6,
     "active": 0,
-    "conditionalPass": 1,
-    "productionCertifiedRecentCompletions": 7
+    "conditionalPass": 0,
+    "productionCertifiedRecentCompletions": 8
   },
   "taxonomies": {
     "categories": [
@@ -115,20 +115,28 @@
     "manualDeployment": false
   },
   "mc01": {
-    "status": "CONDITIONAL_PASS",
+    "status": "PRODUCTION_CERTIFIED",
     "certificationArtifact": "docs/CERTIFICATION/mc-01-operational-readiness-closure.json",
-    "activeStopCondition": "MC-STOP-005",
-    "reason": "External protected scheduler and market freshness proof remain pending.",
+    "activeStopCondition": null,
+    "reason": "External protected scheduler proof and market freshness recovery were observed.",
     "latestRecoveryObservation": {
-      "status": "RECOVERY_NOT_OBSERVED",
-      "operationsHealthStatus": "CRITICAL",
-      "schedulerExecutionStatus": "CRITICAL",
-      "schedulerRunning": false,
-      "missedSchedulerIntervals": 2,
-      "marketFreshnessStatus": "CRITICAL",
-      "latestOddsTimestamp": "2026-08-02T21:28:50.269Z",
-      "marketAgeMinutes": 40,
-      "productReadinessStatus": "CRITICAL",
+      "status": "RECOVERY_OBSERVED",
+      "workflowRunId": 30770704363,
+      "workflowTrigger": "workflow_dispatch",
+      "workflowConclusion": "success",
+      "workflowCommit": "02e9d97169d8292a10126b4a8370cec227496ca1",
+      "scheduledRunId": 30770207492,
+      "scheduledRunConclusion": "success",
+      "operationsHealthStatus": "HEALTHY",
+      "schedulerExecutionStatus": "HEALTHY",
+      "schedulerRunning": true,
+      "missedSchedulerIntervals": 0,
+      "lastSuccessfulProtectedInvocationAt": "2026-08-02T22:32:02.29+00:00",
+      "marketFreshnessStatus": "HEALTHY",
+      "adaptiveOddsStatus": "FRESH",
+      "latestOddsTimestamp": "2026-08-02T22:42:59.132Z",
+      "marketAgeMinutes": 2,
+      "productReadinessStatus": "HEALTHY",
       "settlementGuarantee": "PASS",
       "settlementReadyRows": 0,
       "settlementBlockedRows": 0,

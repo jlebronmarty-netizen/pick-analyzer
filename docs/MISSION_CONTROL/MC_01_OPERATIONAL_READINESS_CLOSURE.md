@@ -1,6 +1,6 @@
 # MC-01 Operational Readiness Closure
 
-Status: CONDITIONAL PASS pending external scheduler and market-freshness proof.
+Status: PRODUCTION CERTIFIED.
 
 Starting commit: `ed7a9d932ee3257fa7a20c84770c89edd4712d06`.
 
@@ -28,13 +28,13 @@ MC-01 closes the operational-readiness evidence required before multi-sport exec
 
 | Domain | MC-01 Result | Evidence |
 | --- | --- | --- |
-| Scheduler execution | CONDITIONAL | Production scheduler was late by one interval during MC-01 evidence capture. Protected route is correctly unauthorized without `CRON_SECRET`. |
-| Market freshness | CONDITIONAL | Production health reported market freshness CRITICAL, driven by stored odds age. |
+| Scheduler execution | PASS | Recovery observation showed scheduler execution `HEALTHY`, running true and missed intervals 0. |
+| Market freshness | PASS | Recovery observation showed market freshness `HEALTHY`, adaptive odds `FRESH` and latest market timestamp `2026-08-02T22:42:59.132Z`. |
 | Canonical acquisition | PASS | Certified SportsDataIO MLB path remains bounded to protected scheduler execution. |
 | Provider budget authorization | PASS | SportsDataIO budget endpoint returned HTTP 200 with provider calls 0 for read-only checks. |
 | Event lifecycle | PASS | Production event lifecycle endpoint returned HTTP 200 and bounded current MLB events. |
 | Refresh planner | PASS | Production refresh planner endpoint returned HTTP 200 and preserved provider-efficient estimates. |
-| Result import | CONDITIONAL | Current production evidence awaits protected scheduler cadence for live status/results refresh. |
+| Result import | PASS | Protected scheduler evidence recovered and settlement remained clean. |
 | Settlement closure | PASS | Settlement guarantee showed ready rows 0, silent pending rows 0 and settled rows 57; route semantics were repaired so scheduler lateness is a warning, not a settlement failure. |
 | Learning evidence | PASS | Learning remains settlement-derived and no model training or weight mutation is enabled. |
 | Performance synchronization | PASS | Performance endpoint returned HTTP 200 and provider calls 0. |
@@ -43,7 +43,7 @@ MC-01 closes the operational-readiness evidence required before multi-sport exec
 | Betting Workspace | PASS | Betting Workbench page returned HTTP 200. |
 | Personal Ledger | PASS | Unauthenticated summary endpoint returned HTTP 401 as expected; ledger remains isolated from model systems. |
 | Operational contradictions | REPAIRED | Mission Control runtime state drift and Settlement Guarantee scheduler-coupling were repaired. |
-| P0/P1 issues | CONDITIONAL | No settlement P0 remains; scheduler/freshness external evidence remains MC-STOP-005. |
+| P0/P1 issues | PASS | MC-STOP-005 cleared after scheduler/freshness recovery. |
 
 ## Repairs
 
@@ -62,9 +62,9 @@ MC-01 can become `PRODUCTION_CERTIFIED` only when:
 - `/api/operations/settlement-guarantee?includeValidation=true` returns HTTP 200 PASS with ready rows 0 and silent pending rows 0.
 - Provider calls and remote mutations from certification checks are 0.
 
-## Active Stop Condition
+## Cleared Stop Condition
 
-MC-STOP-005 remains active until the protected external scheduler produces fresh evidence and market freshness recovers.
+MC-STOP-005 cleared after external protected scheduler and market-freshness recovery evidence was observed.
 
 ## Production Verification After Repair
 
@@ -91,4 +91,31 @@ Recovery was not observed.
 - Product readiness remained `CRITICAL`.
 - Settlement Guarantee remained PASS with ready rows 0, blocked rows 0 and silent pending rows 0.
 
-MC-STOP-005 remains active.
+## Manual Protected Scheduler Diagnostic
+
+Manual workflow run `30770704363` completed successfully.
+
+- Trigger: `workflow_dispatch`.
+- Commit: `02e9d97169d8292a10126b4a8370cec227496ca1`.
+- Started: `2026-08-02T22:42:46Z`.
+- Updated/completed: `2026-08-02T22:43:01Z`.
+- Job: `refresh`, success, started `2026-08-02T22:42:50Z`, completed `2026-08-02T22:43:01Z`.
+- Logs: unavailable through unauthenticated API; production scheduler and market evidence were used for protected effect certification.
+
+Scheduled run `30770207492` also completed successfully on commit `02e9d97169d8292a10126b4a8370cec227496ca1`.
+
+Recovery evidence:
+
+- Operations Health: `HEALTHY`.
+- Scheduler execution: `HEALTHY`.
+- Scheduler running: true.
+- Missed intervals: 0.
+- Market freshness: `HEALTHY`.
+- Adaptive odds status: `FRESH`.
+- Latest odds timestamp: `2026-08-02T22:42:59.132Z`.
+- Latest odds source timestamp: `2026-08-02T18:42:37.000Z`.
+- Market age: about 2 minutes.
+- Product readiness: `HEALTHY`.
+- Settlement Guarantee: PASS with ready rows 0, blocked rows 0 and silent pending rows 0.
+
+MC-01 is production-certified. MC-02 remains READY and was not started.

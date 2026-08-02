@@ -58,3 +58,33 @@ Evidence:
 - Settlement Guarantee PASS with ready rows 0, blocked rows 0 and silent pending rows 0.
 
 GitHub Actions CLI was not available locally, so canonical production scheduler evidence was used. No code changes, provider calls, provider credits or data mutations were performed.
+
+## 2026-08-02 - MC-01 Manual Protected Scheduler Diagnostic
+
+MC-STOP-005 cleared.
+
+GitHub Actions evidence:
+
+- workflow run `30770704363`;
+- trigger `workflow_dispatch`;
+- commit `02e9d97169d8292a10126b4a8370cec227496ca1`;
+- conclusion `success`;
+- run start `2026-08-02T22:42:46Z`;
+- run update/end `2026-08-02T22:43:01Z`;
+- job `refresh` completed successfully from `2026-08-02T22:42:50Z` to `2026-08-02T22:43:01Z`;
+- logs were unavailable through unauthenticated GitHub API, so production scheduler evidence was used for protected invocation effect;
+- scheduled run `30770207492` also completed successfully on the same commit.
+
+Production evidence:
+
+- Operations Health `HEALTHY`;
+- scheduler execution `HEALTHY`;
+- scheduler running true;
+- missed intervals 0;
+- market freshness `HEALTHY`;
+- adaptive odds status `FRESH`;
+- latest odds timestamp `2026-08-02T22:42:59.132Z`;
+- product readiness `HEALTHY`;
+- Settlement Guarantee PASS with ready rows 0, blocked rows 0 and silent pending rows 0.
+
+MC-01 is `PRODUCTION_CERTIFIED`. MC-02 is READY but was not started.

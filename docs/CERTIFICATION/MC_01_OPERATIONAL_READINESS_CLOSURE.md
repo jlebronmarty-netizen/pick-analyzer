@@ -1,6 +1,6 @@
 # MC-01 Operational Readiness Closure Certification
 
-Status: CONDITIONAL PASS.
+Status: PRODUCTION PASS.
 
 MC-01 is partially closed with bounded runtime repairs and production evidence, but it is not marked production-certified because external scheduler and market freshness evidence were not healthy during certification.
 
@@ -38,9 +38,9 @@ MC-01 is partially closed with bounded runtime repairs and production evidence, 
 - Prediction behavior changes: 0.
 - Official Pick policy changes: 0.
 
-## Classification
+## Initial Classification
 
-MC-01 is `CONDITIONAL_PASS` until MC-STOP-005 clears through external protected scheduler and market-freshness proof.
+MC-01 was `CONDITIONAL_PASS` until MC-STOP-005 cleared through external protected scheduler and market-freshness proof.
 
 ## Production Verification After Repair
 
@@ -88,4 +88,44 @@ Latest read-only production evidence showed:
 
 GitHub Actions history was not available through local tooling because `gh` is not installed; canonical production scheduler evidence was used.
 
-MC-01 remains `CONDITIONAL_PASS`. MC-02 was not started.
+At this observation point MC-01 remained `CONDITIONAL_PASS`. MC-02 was not started.
+
+## Manual Protected Scheduler Diagnostic
+
+MC-STOP-005 cleared after manual protected scheduler diagnostic and production recovery evidence.
+
+Workflow evidence:
+
+- run ID: `30770704363`;
+- trigger: `workflow_dispatch`;
+- commit: `02e9d97169d8292a10126b4a8370cec227496ca1`;
+- conclusion: `success`;
+- run start: `2026-08-02T22:42:46Z`;
+- run update/end: `2026-08-02T22:43:01Z`;
+- job ID: `91557236489`;
+- job name: `refresh`;
+- job conclusion: `success`;
+- job start: `2026-08-02T22:42:50Z`;
+- job completion: `2026-08-02T22:43:01Z`;
+- timeout/cancel/concurrency failure: not observed.
+
+The workflow log download endpoint returned HTTP 403 without authenticated access, so the protected invocation response body was not directly available. Production evidence showed the protected writer effect.
+
+Scheduled-trigger evidence also exists: run `30770207492`, event `schedule`, commit `02e9d97169d8292a10126b4a8370cec227496ca1`, conclusion `success`.
+
+Production recovery evidence:
+
+- `/api/operations/health`: `HEALTHY`;
+- scheduler execution: `HEALTHY`;
+- scheduler running: true;
+- missed intervals: 0;
+- latest protected invocation: `2026-08-02T22:32:02.29+00:00`;
+- market freshness: `HEALTHY`;
+- adaptive odds status: `FRESH`;
+- latest odds timestamp: `2026-08-02T22:42:59.132Z`;
+- latest odds source timestamp: `2026-08-02T18:42:37.000Z`;
+- market age: about 2 minutes;
+- product readiness: `HEALTHY`;
+- Settlement Guarantee: HTTP 200 PASS with ready rows 0, blocked rows 0 and silent pending rows 0.
+
+MC-01 is `PRODUCTION_CERTIFIED`. MC-02 remains READY but was not started.
