@@ -4,9 +4,9 @@ Last updated: 2026-07-30 20:05:00Z
 
 ## 2026-08-02 Mission Control V1
 
-- Implemented Mission Control V1 as a read-only V2 command center with `/api/mission-control`, `/mission-control`, persistent `docs/MISSION_CONTROL/` artifacts, stop conditions, deterministic queue, sport readiness matrix, provider readiness matrix and certification records.
+- Implemented and production-certified Mission Control V1 as a read-only V2 command center with `/api/mission-control`, `/mission-control`, persistent `docs/MISSION_CONTROL/` artifacts, stop conditions, deterministic queue, sport readiness matrix, provider readiness matrix and certification records.
 - Mission Control composes existing OE-003A through OE-003F evidence and does not replace scheduler health, event lifecycle, refresh planner, provider budget, canonical acquisition or product freshness systems.
-- No provider calls, remote mutations, prediction writes, result writes, settlement writes, learning writes, scheduler cadence changes, refresh cadence changes, prediction formula changes, Official Pick policy changes or manual deployment actions are introduced. The next eligible mission is MC-01 Operational Readiness Closure after Mission Control production certification.
+- Production certification passed on runtime commit `868eb0c4bc712b7c193b7a2001b37494517641e0`; required read-only endpoints returned HTTP 200 with provider calls 0 and remote mutations 0. No prediction writes, result writes, settlement writes, learning writes, scheduler cadence changes, refresh cadence changes, prediction formula changes, Official Pick policy changes or manual deployment actions were introduced. The next eligible mission is MC-01 Operational Readiness Closure.
 
 ## 2026-08-02 OE-003F Product Freshness SLA
 

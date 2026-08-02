@@ -1,6 +1,6 @@
 # Mission Control V1 Certification
 
-Status: LOCAL VALIDATION PASS PENDING PRODUCTION CERTIFICATION.
+Status: PRODUCTION PASS.
 
 Baseline: `ddc79d7b4a5efa5068ff1e63bb68d95d84100e67`.
 
@@ -60,6 +60,38 @@ After the runtime commit is pushed and automatically deployed, verify read-only:
 - `/mlb-operations`
 
 Do not start the next mission until production certification is recorded.
+
+## Production Certification
+
+Production certification passed for runtime commit `868eb0c4bc712b7c193b7a2001b37494517641e0`.
+
+Read-only production checks returned HTTP 200 for:
+
+- `/api/system/version`
+- `/api/mission-control`
+- `/mission-control`
+- `/api/operations/health`
+- `/api/operations/event-lifecycle?sportKey=baseball_mlb&limit=200`
+- `/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200`
+- `/api/providers/budget/status?provider=sportsdataio&sportKey=baseball_mlb`
+- `/api/dashboard/today`
+- `/api/current-board?mode=current&limit=200`
+- `/api/performance`
+- `/mlb-operations`
+
+Production `/api/system/version` reported `gitCommit=868eb0c4bc712b7c193b7a2001b37494517641e0` and `providerCallsMade=0`.
+
+Production `/api/mission-control` reported:
+
+- program `pick_analyzer_v2_mission_control_v1`;
+- current mission `MC-00`;
+- next mission `MC-01`;
+- read-only guarantees;
+- provider calls made by Mission Control: 0;
+- remote mutations made by Mission Control: 0;
+- partial evidence errors: 0.
+
+No manual deployment was performed.
 
 ## Local Validation
 

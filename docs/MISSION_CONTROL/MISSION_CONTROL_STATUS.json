@@ -1,12 +1,12 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION",
+  "status": "PRODUCTION_CERTIFIED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
     "id": "MC-00",
     "title": "Mission Control Foundation",
-    "state": "DEPLOYED",
+    "state": "PRODUCTION_CERTIFIED",
     "priority": "P0",
     "mode": "READ_ONLY",
     "readiness": "READY"
@@ -94,6 +94,24 @@
     "learningWrites": 0,
     "manualDeployment": false,
     "localServerSmokeRun": false
+  },
+  "productionCertification": {
+    "status": "PASS",
+    "runtimeCommit": "868eb0c4bc712b7c193b7a2001b37494517641e0",
+    "systemVersionHttp": 200,
+    "missionControlApiHttp": 200,
+    "missionControlPageHttp": 200,
+    "operationsHealthHttp": 200,
+    "eventLifecycleHttp": 200,
+    "eventRefreshPlanHttp": 200,
+    "providerBudgetHttp": 200,
+    "dashboardTodayHttp": 200,
+    "currentBoardHttp": 200,
+    "performanceHttp": 200,
+    "mlbOperationsHttp": 200,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "manualDeployment": false
   },
   "runtimeSurfaces": ["/api/mission-control", "/mission-control"],
   "validationScript": "scripts/mission-control-v1-validate.mjs",

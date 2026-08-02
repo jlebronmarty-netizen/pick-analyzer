@@ -1,7 +1,7 @@
 {
   "release": "MISSION_CONTROL_V1",
   "name": "V2 Mission Control Project State Autonomous Queue And Execution Readiness",
-  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION",
+  "status": "PRODUCTION_PASS",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "runtimeSurfaces": {
     "api": "/api/mission-control",
@@ -78,7 +78,35 @@
     "build": "PASS"
   },
   "productionCertification": {
-    "status": "PENDING",
+    "status": "PASS",
+    "runtimeCommit": "868eb0c4bc712b7c193b7a2001b37494517641e0",
+    "automaticDeploymentObserved": true,
+    "manualDeployment": false,
+    "httpStatus": {
+      "systemVersion": 200,
+      "missionControlApi": 200,
+      "missionControlPage": 200,
+      "operationsHealth": 200,
+      "eventLifecycle": 200,
+      "eventRefreshPlan": 200,
+      "providerBudgetStatus": 200,
+      "dashboardToday": 200,
+      "currentBoard": 200,
+      "performance": 200,
+      "mlbOperations": 200
+    },
+    "systemVersion": {
+      "gitCommit": "868eb0c4bc712b7c193b7a2001b37494517641e0",
+      "providerCallsMade": 0
+    },
+    "missionControl": {
+      "program": "pick_analyzer_v2_mission_control_v1",
+      "currentMission": "MC-00",
+      "nextMission": "MC-01",
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "partialEvidenceErrors": 0
+    },
     "requiredEndpoints": [
       "/api/system/version",
       "/api/mission-control",
