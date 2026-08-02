@@ -1,6 +1,6 @@
 # OE-003F Product Freshness SLA Certification
 
-Final local verdict: PASS.
+Final verdict: PRODUCTION PASS.
 
 OE-003F created the canonical product freshness SLA and wired it into the decision surfaces without changing recommendation math or operational execution.
 
@@ -20,6 +20,8 @@ OE-003F created the canonical product freshness SLA and wired it into the decisi
 
 - Build: PASS.
 - OE-003F validator: PASS.
+- Production runtime commit: `f8178723bd29f26dd9e9ea581d6bb6abd89df061`.
+- Production read-only route checks: PASS.
 - Provider calls during certification: 0.
 - Remote mutations during certification: 0.
 - Prediction behavior changed: false.
@@ -27,9 +29,9 @@ OE-003F created the canonical product freshness SLA and wired it into the decisi
 - Settlement behavior changed: false.
 - Learning behavior changed: false.
 
-## Production Certification Plan
+## Production Certification Evidence
 
-After automatic deployment, verify read-only:
+Verified read-only:
 
 - `/api/system/version`
 - `/api/dashboard/today`

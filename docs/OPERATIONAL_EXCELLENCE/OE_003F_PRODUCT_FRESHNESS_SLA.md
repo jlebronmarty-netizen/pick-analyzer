@@ -1,6 +1,6 @@
 # OE-003F Product Freshness SLA
 
-Status: PASS pending production deployment.
+Status: PRODUCTION PASS.
 
 OE-003F adds a canonical read-only freshness contract for betting decision surfaces. It does not change prediction math, probability, confidence, EV, edge, Official Pick thresholds, Rent Play ranking, Moneyline ranking, Smart Parlay math, Kelly, settlement, learning, scheduler cadence, provider mappings or provider budgets.
 
@@ -66,6 +66,8 @@ Integrated services and components:
 ## Certification
 
 Local build passed with `npm.cmd run build`.
+
+Production certification passed on runtime commit `f8178723bd29f26dd9e9ea581d6bb6abd89df061`. Production read-only checks returned HTTP 200 for `/api/system/version`, `/api/dashboard/today`, `/api/current-board?mode=current&limit=200`, `/api/market-opportunities/most-likely`, `/api/market-opportunities/best-value`, `/api/ai-bet-finder`, `/api/mlb/operations-center`, `/betting-workbench`, `/most-likely` and `/best-value`.
 
 OE-003F validator: `scripts/oe003f-product-freshness-sla-validate.mjs`.
 

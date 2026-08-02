@@ -1,10 +1,11 @@
 {
   "release": "OE-003F",
   "name": "Product Freshness SLA And Decision Surface Integration",
-  "status": "PASS_PENDING_PRODUCTION_DEPLOYMENT",
+  "status": "PRODUCTION_PASS",
   "contractVersion": "product_freshness_sla_v1",
   "startingCommit": "67d12c5a6aa7b80190ec088617c7d09954dc902b",
   "certifiedRuntimeBaseline": "c04f1ad34bac43825210b1481a12d1965116115e",
+  "productionRuntimeCommit": "f8178723bd29f26dd9e9ea581d6bb6abd89df061",
   "providerCallsMade": 0,
   "remoteMutationsMade": 0,
   "predictionBehaviorChanged": false,
@@ -53,6 +54,23 @@
     "jsonValidation": "PASS",
     "markdownValidation": "PASS",
     "secretScan": "PASS",
-    "gitDiffCheck": "PASS"
+    "gitDiffCheck": "PASS",
+    "productionReadOnlyRoutes": "PASS"
+  },
+  "productionEvidence": {
+    "automaticDeploymentObserved": true,
+    "systemVersionHttp": 200,
+    "systemVersionCommit": "f8178723bd29f26dd9e9ea581d6bb6abd89df061",
+    "dashboardTodayHttp": 200,
+    "currentBoardHttp": 200,
+    "mostLikelyHttp": 200,
+    "bestValueHttp": 200,
+    "aiBetFinderHttp": 200,
+    "mlbOperationsCenterHttp": 200,
+    "bettingWorkbenchPageHttp": 200,
+    "mostLikelyPageHttp": 200,
+    "bestValuePageHttp": 200,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
   }
 }
