@@ -76,3 +76,19 @@ The runtime repairs are live:
 - `/api/operations/settlement-guarantee?includeValidation=true` returns HTTP 200 PASS with ready rows 0 and silent pending rows 0.
 
 MC-01 remains conditional because `/api/operations/health` remains `CRITICAL` and `/api/operations/adaptive-refresh/status` remains `PARTIAL`.
+
+## External Recovery Observation
+
+Recovery was not observed.
+
+- Scheduler execution remained `CRITICAL`.
+- Scheduler running was false.
+- Missed scheduler intervals increased to 2.
+- Latest protected invocation remained `2026-08-02T21:29:54.03+00:00`.
+- Market freshness remained `CRITICAL`.
+- Latest odds timestamp remained `2026-08-02T21:28:50.269Z`.
+- Market age was about 40 minutes.
+- Product readiness remained `CRITICAL`.
+- Settlement Guarantee remained PASS with ready rows 0, blocked rows 0 and silent pending rows 0.
+
+MC-STOP-005 remains active.

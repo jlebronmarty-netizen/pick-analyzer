@@ -38,3 +38,23 @@ Repairs completed:
 - Settlement Guarantee separates scheduler lateness into operational warnings instead of settlement failure when ready rows and silent pending rows are zero.
 
 MC-01 remains `CONDITIONAL_PASS` with MC-STOP-005 active until the protected external scheduler and market-freshness evidence recover.
+
+## 2026-08-02 - MC-01 External Scheduler And Freshness Observation
+
+Read-only production observation did not clear MC-STOP-005.
+
+Production served commit `0f02b355f19ccaf3c08682d304ac27a0a8f06027`, while the runtime-certified MC-01 repair commit remains `c337a850919e932e8b13a9024a88d52b3d1dc09b`.
+
+Evidence:
+
+- scheduler execution `CRITICAL`;
+- scheduler running false;
+- missed intervals 2;
+- last successful protected invocation `2026-08-02T21:29:54.03+00:00`;
+- market freshness `CRITICAL`;
+- latest odds timestamp `2026-08-02T21:28:50.269Z`;
+- market age about 40 minutes;
+- product readiness `CRITICAL`;
+- Settlement Guarantee PASS with ready rows 0, blocked rows 0 and silent pending rows 0.
+
+GitHub Actions CLI was not available locally, so canonical production scheduler evidence was used. No code changes, provider calls, provider credits or data mutations were performed.

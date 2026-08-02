@@ -61,3 +61,31 @@ Read-only production checks showed:
 - `/api/user/wagers/summary`: HTTP 401 unauthenticated, expected.
 
 No manual deployment was performed.
+
+## External Recovery Observation
+
+MC-STOP-005 did not clear.
+
+Latest read-only production evidence showed:
+
+- production commit: `0f02b355f19ccaf3c08682d304ac27a0a8f06027`;
+- runtime-certified MC-01 commit: `c337a850919e932e8b13a9024a88d52b3d1dc09b`;
+- `/api/mission-control`: HTTP 200, current mission `MC-01:CONDITIONAL_PASS`, next mission `MC-02:READY`;
+- `/api/operations/health`: HTTP 200, status `CRITICAL`;
+- scheduler execution: `CRITICAL`;
+- scheduler cadence: `CRITICAL`;
+- scheduler running: false;
+- missed intervals: 2;
+- latest protected invocation: `2026-08-02T21:29:54.03+00:00`;
+- market freshness: `CRITICAL`;
+- adaptive odds status: `STALE`;
+- latest odds timestamp: `2026-08-02T21:28:50.269Z`;
+- market age: about 40 minutes;
+- product readiness: `CRITICAL`;
+- `/api/operations/settlement-guarantee?includeValidation=true`: HTTP 200 PASS, ready rows 0, blocked rows 0, silent pending rows 0;
+- provider calls from certification reads: 0;
+- remote mutations from certification reads: 0.
+
+GitHub Actions history was not available through local tooling because `gh` is not installed; canonical production scheduler evidence was used.
+
+MC-01 remains `CONDITIONAL_PASS`. MC-02 was not started.

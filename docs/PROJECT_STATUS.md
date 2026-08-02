@@ -13,6 +13,7 @@ Last updated: 2026-07-30 20:05:00Z
 - MC-01 Operational Readiness Closure is `CONDITIONAL_PASS`. Production evidence showed provider budget, event lifecycle, refresh planner, settlement closure, Performance, Current Board, Daily Brief, Betting Workbench and Personal Ledger boundaries were operational or correctly protected.
 - Two contradictions were repaired and deployed at runtime commit `c337a850919e932e8b13a9024a88d52b3d1dc09b`: Mission Control runtime state now reflects MC-00 production certification and MC-01 conditional status, and Settlement Guarantee now treats scheduler lateness as an operational warning rather than a settlement failure when settlement-ready rows and silent pending rows are both 0.
 - MC-STOP-005 remains active because external protected scheduler proof and market-freshness recovery were pending during certification. MC-02 was not started.
+- Follow-up external recovery observation did not clear MC-STOP-005: production scheduler execution remained `CRITICAL`, scheduler running was false, missed intervals were 2, market freshness remained `CRITICAL`, product readiness remained `CRITICAL`, and Settlement Guarantee remained PASS with ready rows 0, blocked rows 0 and silent pending rows 0. MC-02 was not started.
 
 ## 2026-08-02 OE-003F Product Freshness SLA
 

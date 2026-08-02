@@ -119,6 +119,21 @@
     "certificationArtifact": "docs/CERTIFICATION/mc-01-operational-readiness-closure.json",
     "activeStopCondition": "MC-STOP-005",
     "reason": "External protected scheduler and market freshness proof remain pending.",
+    "latestRecoveryObservation": {
+      "status": "RECOVERY_NOT_OBSERVED",
+      "operationsHealthStatus": "CRITICAL",
+      "schedulerExecutionStatus": "CRITICAL",
+      "schedulerRunning": false,
+      "missedSchedulerIntervals": 2,
+      "marketFreshnessStatus": "CRITICAL",
+      "latestOddsTimestamp": "2026-08-02T21:28:50.269Z",
+      "marketAgeMinutes": 40,
+      "productReadinessStatus": "CRITICAL",
+      "settlementGuarantee": "PASS",
+      "settlementReadyRows": 0,
+      "settlementBlockedRows": 0,
+      "silentPendingRows": 0
+    },
     "runtimeRepairs": [
       "mission_control_runtime_state_reconciled",
       "settlement_guarantee_scheduler_warning_decoupled_from_settlement_failure"
