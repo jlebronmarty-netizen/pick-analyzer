@@ -74,7 +74,7 @@ checks.push(assertCheck('per-event freshness table present', audit.includes('Per
 checks.push(assertCheck('lifecycle states include settlement before learning', lifecycle.includes('SETTLEMENT') && lifecycle.includes('LEARNING')))
 checks.push(assertCheck('priority bands include P0', lifecycle.includes('P0') && lifecycle.includes('P1') && lifecycle.includes('P4')))
 checks.push(assertCheck('provider budget health contract separates freshness', budget.includes('schedulerExecution') && budget.includes('marketFreshness') && budget.includes('providerBudget')))
-checks.push(assertCheck('roadmap stops before implementation', roadmap.includes('OE-003A') && roadmap.includes('OE-003I') && roadmap.includes('roadmap only')))
+checks.push(assertCheck('roadmap remains bounded through implementation packages', roadmap.includes('OE-003A') && roadmap.includes('OE-003I') && (roadmap.includes('roadmap only') || roadmap.includes('roadmap plus bounded implementation evidence'))))
 
 const forbiddenRuntimeChangeClaims = [
   'prediction formula changed',

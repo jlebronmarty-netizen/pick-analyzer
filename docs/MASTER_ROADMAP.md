@@ -3174,10 +3174,22 @@ Completion criteria: `OE_003A_SCHEDULER_HEALTH_SEMANTICS_IMPLEMENTED`, scheduler
 
 Objective: Normalize provider-specific budget evidence so future event-level refresh planning can make deterministic acquisition decisions without merging providers or fabricating quota balances.
 
-Status: Implemented pending production certification.
+Status: Production certified.
 
 Scope: Provider-budget observability, canonical budget contract, dry-run forecast and authorization semantics only. No per-event planner, scheduler cadence, refresh cadence, provider limit, prediction formula, probability/confidence/edge/EV calculation, Official Pick policy, settlement rule, learning rule, provider mapping or provider subscription changed.
 
 Result: `provider-budget.service.ts` now exposes `provider_budget_ledger_v1`, `provider_budget_authorization_v1` and `provider_budget_dry_run_forecast_v1`. SportsDataIO, The Odds API and BSN remain isolated provider/source pools. SportsDataIO usable remaining subtracts protected reserve; The Odds API current credits/reset remain unknown unless proven; request counts and quota units are distinct.
 
 Completion criteria: `OE_003B_PROVIDER_BUDGET_LEDGER_NORMALIZATION_IMPLEMENTED`, provider isolation, unknown evidence preserved, configured-only evidence labeled, protected reserve explicit, dry-run forecast zero provider calls, exact provider-pool authorization, API compatibility preserved, passing validation, passing build and production certification after automatic deployment.
+
+### 69. Operational Excellence OE-003C Per-Event Lifecycle State
+
+Objective: Implement the canonical read-only per-event lifecycle contract required before event-level refresh planning.
+
+Status: Implemented pending production certification.
+
+Scope: Dynamic lifecycle derivation, bounded read-only operations API, provider-budget dry-run context and compact MLB Operations Center visibility. No event-level refresh planner, scheduler cadence change, provider call, prediction generation, result import, settlement execution, learning write or recommendation-policy change is included.
+
+Result: `/api/operations/event-lifecycle` derives state from stored `sport_events`, `prediction_history`, `game_results` and provider-budget evidence. Closure states outrank market refresh, terminal events missing canonical results become `RESULT_IMPORT`, settlement-ready events become `SETTLEMENT/P0`, recommendation relevance is classification-only and next actions are observational only.
+
+Completion criteria: `EVENT_LIFECYCLE_CONTRACT_ADDED`, explicit lifecycle entry/exit rules, `FINAL` not inferred from elapsed time alone, missing result detection, settlement priority precedence, isolated provider-budget dry-run authorization, bounded current-day defaults, MLB Operations Center visibility, passing validation, passing build and production certification after automatic deployment.

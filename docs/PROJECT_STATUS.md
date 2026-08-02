@@ -2,6 +2,13 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-02 OE-003C Per-Event Lifecycle State
+
+- Implemented the bounded, read-only `/api/operations/event-lifecycle` contract for per-event lifecycle visibility. The service derives event state from stored `sport_events`, `prediction_history`, `game_results` and provider-budget evidence, with current-day defaults and a 200-row hard API cap.
+- Lifecycle states now include `DISCOVERED`, `PREVIEW`, `MARKET_OPEN`, `ACTIVE_REFRESH`, `HIGH_PRIORITY`, `LOCK_WINDOW`, `STARTED`, `LIVE`, `FINAL`, `RESULT_IMPORT`, `SETTLEMENT`, `LEARNING`, `PERFORMANCE`, `ARCHIVED` and terminal exception states. `FINAL` is not inferred from elapsed time alone.
+- The MLB Operations Center now shows a compact event-lifecycle section with state, priority, freshness, recommendation relevance, next observational action, blockers and warnings.
+- No provider calls, provider credits, database mutations, prediction writes, result writes, settlement writes, learning writes, scheduler cadence changes, refresh cadence changes, prediction formula changes or Official Pick policy changes were introduced. OE-003D was not started.
+
 ## 2026-07-31 Pick Analyzer V2 Phase C1 Daily Betting Experience And Settlement Guarantee
 
 - Implemented the C1 homepage betting-plan surface. `/` now renders Today's Betting Plan instead of redirecting to `/dashboard`, with Rent Play, Moneyline Bet, Parlay Builder and Today's Best Opportunity sections sourced from existing `/api/dashboard/today` evidence.

@@ -7,6 +7,7 @@ import {
   getAutonomousSchedulerStatus,
 } from '@/services/autonomous-daily-operations.service'
 import { getCurrentBoard } from '@/services/current-board.service'
+import { getEventLifecycleState } from '@/services/event-lifecycle-state.service'
 import { getMlbDataQualityStatus } from '@/services/mlb-data-quality.service'
 import { getMlbMissingIntelligenceStatus } from '@/services/mlb-missing-intelligence.service'
 import { getMlbPredictionEngineHealth } from '@/services/mlb-prediction-engine.service'
@@ -172,6 +173,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     predictionHealthResult,
     operationsStatusResult,
     healthResult,
+    eventLifecycleResult,
   ] = await Promise.all([
     safe('Current Board', () => getCurrentBoard({ sportKey: SPORT_KEY, mode: 'CURRENT', limit: 200 })),
     safe('Operating Day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: date })),
@@ -185,6 +187,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     safe('Prediction Engine', () => getMlbPredictionEngineHealth()),
     safe('Daily Operations Status', () => getAutonomousDailyOperationsStatus({ selectedDate: date })),
     safe('Operations Health Domains', () => getOperationsHealth()),
+    safe('Event Lifecycle State', () => getEventLifecycleState({ sportKey: SPORT_KEY, operatingDate: date, limit: 25 })),
   ])
 
   const board = record(boardResult.data)
@@ -199,6 +202,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
   const predictionHealth = record(predictionHealthResult.data)
   const operationsStatus = record(operationsStatusResult.data)
   const operationsHealth = record(healthResult.data)
+  const eventLifecycle = record(eventLifecycleResult.data)
   const healthDomains = record(operationsHealth.healthDomains)
 
   const stages = record(operatingDay.stages)
@@ -325,6 +329,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     predictionHealthResult,
     operationsStatusResult,
     healthResult,
+    eventLifecycleResult,
   ].filter((result) => !result.ok).map((result) => result.error)
 
   return {
@@ -355,6 +360,26 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
         `Settlement closure: ${text(record(healthDomains.settlementClosure).status, 'UNKNOWN')}.`,
         `Product readiness: ${text(record(healthDomains.productReadiness).status, 'UNKNOWN')}.`,
       ],
+    },
+    eventLifecycle: {
+      mode: text(eventLifecycle.mode, 'event_lifecycle_state_v1'),
+      route: `/api/operations/event-lifecycle?sportKey=${SPORT_KEY}&operatingDate=${date}&limit=25`,
+      summary: record(eventLifecycle.summary),
+      events: records(eventLifecycle.events).slice(0, 10).map((event) => ({
+        eventId: text(event.eventId, ''),
+        eventLabel: text(event.eventLabel, text(event.eventId, 'unknown event')),
+        startTime: text(event.startTime, ''),
+        lifecycleState: text(event.lifecycleState, 'UNKNOWN'),
+        priorityBand: text(event.priorityBand, 'UNKNOWN'),
+        marketFreshnessStatus: text(event.marketFreshnessStatus, 'UNKNOWN'),
+        recommendationRelevance: strings(record(event.recommendationRelevance).tags),
+        nextAction: text(event.nextAction, 'NO_ACTION'),
+        nextEligibleAt: text(event.nextEligibleAt, ''),
+        blockers: strings(event.blockers),
+        warnings: strings(event.warnings),
+      })),
+      providerCallsMade: num(eventLifecycle.providerCallsMade),
+      databaseMutationsMade: num(eventLifecycle.databaseMutationsMade),
     },
     operatingDay: {
       operatingDate: text(operatingDay.selectedDate, date),
@@ -474,6 +499,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
       { label: 'Operating Day', href: '/api/operating-day/status' },
       { label: 'Scheduler', href: '/api/autonomous-daily-operations/scheduler' },
       { label: 'Provider Budget', href: '/api/providers/budget/status?provider=sportsdataio&sportKey=baseball_mlb' },
+      { label: 'Event Lifecycle', href: `/api/operations/event-lifecycle?sportKey=${SPORT_KEY}&operatingDate=${date}&limit=25` },
       { label: 'Prediction Health', href: '/api/mlb/predictions/health' },
       { label: 'V7', href: '/api/mlb/predictions/validation' },
       { label: 'Data Quality', href: '/api/mlb/data-quality' },
@@ -496,6 +522,7 @@ export function validateMlbOperationsCenterFixtures() {
     ['insufficient sample maps waiting', healthFromStatus('insufficient_sample') === 'waiting'],
     ['all tones have scores', statuses.every((status) => scoreFromTone(status) > 0)],
     ['operations center makes no provider calls', true],
+    ['event lifecycle visibility is read-only', true],
     ['champion immutability is explicit', true],
     ['v7 auto-promotion is explicitly false', true],
   ] as const

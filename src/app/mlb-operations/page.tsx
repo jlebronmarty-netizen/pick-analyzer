@@ -199,6 +199,51 @@ function HealthSemantics({ data }: { data: OperationsData }) {
   )
 }
 
+function EventLifecycle({ data }: { data: OperationsData }) {
+  const lifecycle = data.eventLifecycle
+  const summary = lifecycle.summary
+  return (
+    <Panel title="Event Lifecycle" status={summary.eventsRequiringAction ? 'partial' : 'ready'}>
+      <div className="grid gap-2 md:grid-cols-4">
+        <Metric label="Events" value={summary.totalEvents} />
+        <Metric label="Needs Action" value={summary.eventsRequiringAction} tone={summary.eventsRequiringAction ? 'partial' : 'ready'} />
+        <Metric label="Missing Results" value={summary.eventsMissingResults} tone={summary.eventsMissingResults ? 'blocked' : 'ready'} />
+        <Metric label="Ready To Settle" value={summary.eventsReadyForSettlement} tone={summary.eventsReadyForSettlement ? 'blocked' : 'ready'} />
+      </div>
+      <div className="mt-4 grid gap-2">
+        {lifecycle.events.length ? lifecycle.events.map((event) => (
+          <div key={event.eventId} className="rounded-md border border-zinc-800 bg-zinc-900/60 p-3">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="text-sm font-bold text-white">{event.eventLabel}</p>
+                <p className="mt-1 text-xs text-zinc-500">{fmt(event.startTime)}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <StatusPill value={event.lifecycleState} tone={toneFrom(event.lifecycleState)} />
+                <StatusPill value={event.priorityBand} tone={toneFrom(event.priorityBand === 'P0' ? 'blocked' : event.priorityBand === 'P1' ? 'partial' : 'ready')} />
+                <StatusPill value={event.marketFreshnessStatus} tone={toneFrom(event.marketFreshnessStatus)} />
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 text-xs text-zinc-400 md:grid-cols-3">
+              <span>Next: <strong className="text-zinc-100">{event.nextAction}</strong></span>
+              <span>Relevance: <strong className="text-zinc-100">{event.recommendationRelevance.length ? event.recommendationRelevance.join(', ') : 'NONE'}</strong></span>
+              <span>Eligible: <strong className="text-zinc-100">{fmt(event.nextEligibleAt)}</strong></span>
+            </div>
+            {event.blockers.length || event.warnings.length ? (
+              <p className="mt-2 text-xs text-amber-100">{[...event.blockers, ...event.warnings].join(', ')}</p>
+            ) : null}
+          </div>
+        )) : (
+          <p className="rounded-md border border-zinc-800 bg-zinc-900/60 p-3 text-sm text-zinc-400">No current-day MLB events were returned by the bounded lifecycle view.</p>
+        )}
+      </div>
+      <a href={lifecycle.route} className="mt-4 inline-flex rounded-md border border-cyan-400/40 px-3 py-2 text-sm font-bold text-cyan-200 hover:bg-cyan-950/30">
+        Open lifecycle API
+      </a>
+    </Panel>
+  )
+}
+
 export default async function MlbOperationsPage({
   searchParams,
 }: {
@@ -247,6 +292,8 @@ export default async function MlbOperationsPage({
         ) : null}
 
         <HealthSemantics data={data} />
+
+        <EventLifecycle data={data} />
 
         <div className="grid gap-5 xl:grid-cols-3">
           <Panel title="Operating Day" status={data.operatingDay.currentStageStatus}>

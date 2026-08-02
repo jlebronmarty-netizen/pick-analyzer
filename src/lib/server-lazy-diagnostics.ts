@@ -61,6 +61,10 @@ export async function loadOperationsHealth() {
   return import('@/services/operations-health.service')
 }
 
+export async function loadEventLifecycleState() {
+  return import('@/services/event-lifecycle-state.service')
+}
+
 export async function getProductionReadinessAuditLazy() {
   const { getProductionReadinessAudit } = await import('@/services/production-readiness-audit.service')
 

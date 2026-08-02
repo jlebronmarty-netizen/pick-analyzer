@@ -1,14 +1,16 @@
 # Adaptive Event Lifecycle Engine
 
-Status: proposed architecture only.
+Status: OE-003C read-only lifecycle contract implemented; OE-003D refresh planner not started.
 
-OE-003 defines the architecture for a later implementation. It does not activate new scheduler cadence or change prediction math.
+OE-003 defines the architecture for event-level operations. OE-003C implements the read-only state contract at `/api/operations/event-lifecycle`. It does not activate event-level provider refresh, new scheduler cadence or prediction math changes.
 
 ## Components
 
 ### Adaptive Event Lifecycle Engine
 
 Owns event state transitions and exposes a deterministic state contract for schedulers, product surfaces, and operations health.
+
+Implemented in `src/services/event-lifecycle-state.service.ts` as dynamic derivation over `sport_events`, `prediction_history`, `game_results` and provider-budget status. The implementation is read-only and returns provider calls, provider credits and database mutations as 0.
 
 ### Event Intelligence Scheduler
 
@@ -37,6 +39,8 @@ Owns provider-specific budget pools, reserves, quota-header evidence, reset sema
 | PERFORMANCE | Metrics can refresh. | ARCHIVED. | none | provider calls | daily | performance snapshots |
 | ARCHIVED | Event no longer affects current decisions. | none | none | all active refresh | none | read-only history |
 
+OE-003C also supports terminal exceptions `POSTPONED`, `CANCELLED`, `SUSPENDED`, `ABANDONED` and `UNKNOWN`. MLB terminal/live handling reuses `resolveMlbGameLifecycle`, so `FINAL` is never inferred from elapsed time alone.
+
 Post-start pregame odds refresh remains blocked unless a separately certified live-betting capability exists.
 
 ## Priority Bands
@@ -48,8 +52,12 @@ Post-start pregame odds refresh remains blocked unless a separately certified li
 | P2 | Event inside two hours. | Freshen market/status when budget allows. |
 | P3 | Same-day active event. | Standard same-day refresh. |
 | P4 | Future or informational event. | Low-cadence preview only. |
+| P5 | Archived, terminal exception or no current operational work. | No action unless audit evidence reopens the event. |
+| UNKNOWN | Insufficient or contradictory evidence. | Human review when it blocks current operation. |
 
 P0 always outranks pregame odds refresh.
+
+OE-003C exposes these bands as observation only. OE-003D may later use them for a planner, but no planner is active in OE-003C.
 
 ## Freshness SLA Proposal
 

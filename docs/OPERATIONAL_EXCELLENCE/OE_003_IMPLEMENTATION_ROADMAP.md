@@ -1,6 +1,6 @@
 # OE-003 Implementation Roadmap
 
-Status: roadmap only. OE-003A is production-certified. OE-003B is implemented pending production certification.
+Status: roadmap plus bounded implementation evidence. OE-003A and OE-003B are production-certified. OE-003C is implemented pending production certification. OE-003D has not started.
 
 ## OE-003A - Scheduler And Health Semantics
 
@@ -27,7 +27,7 @@ Stop condition: any required scheduler cadence change.
 
 Scope: provider-specific budget pools for SportsDataIO, The Odds API, MLB Stats API and BSN source classes.
 
-Status: implemented in OE-003B pending production certification.
+Status: production-certified in OE-003B.
 
 Likely files:
 
@@ -46,21 +46,25 @@ Stop condition: unknown reset semantics required for enforcement but not proven.
 
 ## OE-003C - Per-Event Lifecycle State
 
-Scope: persist or derive a canonical event lifecycle state for event-level scheduling.
+Scope: derive a canonical event lifecycle state for event-level scheduling visibility.
+
+Status: implemented in OE-003C pending production certification.
 
 Likely files:
 
+- `src/services/event-lifecycle-state.service.ts`
+- `src/app/api/operations/event-lifecycle/route.ts`
 - `src/services/mlb-game-lifecycle.service.ts`
-- `src/services/adaptive-refresh-orchestrator.service.ts`
-- `sport_events` metadata readers
+- `src/services/mlb-operations-center.service.ts`
+- `src/app/mlb-operations/page.tsx`
 
-Migration: additive only if existing metadata cannot hold lifecycle evidence.
+Migration: none required for OE-003C; lifecycle state is dynamically derived to avoid creating a second event-status source of truth.
 
 Provider-call risk: none.
 
-Mutation risk: possible lifecycle metadata writes.
+Mutation risk: none in OE-003C.
 
-Stop condition: any destructive schema change.
+Stop condition: any need to execute provider refresh, result import, settlement, learning, prediction generation, scheduler cadence change or destructive schema change.
 
 ## OE-003D - Event-Level Refresh Planner
 
