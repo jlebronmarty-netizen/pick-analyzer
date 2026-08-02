@@ -1,6 +1,6 @@
 # OE-003E Canonical Acquisition And Bounded Active Execution
 
-Status: implemented pending production certification.
+Status: production-certified.
 
 OE-003E activates the OE-003D planner boundary for one controlled path: SportsDataIO MLB current operating-day pregame market refresh. It preserves per-event planning while executing with provider-efficient date-level batching.
 
@@ -80,6 +80,8 @@ Today, Current Board, Rent Play, Moneyline Bet, Smart Parlay, Most Likely, Best 
 `/api/operations/adaptive-refresh/status` exposes the compact event refresh plan and canonical acquisition status.
 
 The MLB Operations Center shows planner mode, execution status, request granularity, active eligible events, last active acquisition, actual calls and snapshots.
+
+Production certification on commit `c04f1ad34bac43825210b1481a12d1965116115e` recorded one SportsDataIO MLB date-level request for the current operating day. The protected execution wrote 90 canonical snapshot rows for 15 eligible events, consumed 1 configured quota unit, preserved the protected reserve and improved stored market freshness from `2026-08-02T12:25:49+00:00` to `2026-08-02T12:44:28.000Z`.
 
 ## Safety
 

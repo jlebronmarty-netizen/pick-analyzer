@@ -3202,10 +3202,10 @@ Objective: Convert OE-003C lifecycle evidence into a deterministic event-level r
 
 Objective: Activate the canonical SportsDataIO MLB acquisition boundary for current operating-day pregame market refresh while preserving per-event planning, provider-efficient date-level batching, protected budget reserve, idempotent stored odds snapshots and zero prediction/recommendation/settlement/learning behavior changes.
 
-Status: Implemented pending production certification.
+Status: Production-certified in OE-003E.
 
-Scope: Shadow-mode event planner, bounded read-only API, adaptive refresh diagnostic integration and MLB Operations Center visibility. No active provider execution, scheduler cadence change, provider call, prediction generation, result import, settlement execution, learning write or recommendation-policy change is included.
+Scope: Bounded SportsDataIO MLB current operating-day active acquisition through the protected adaptive scheduler path. The Odds API remains shadow-only and BSN remains observational. No scheduler cadence change, prediction generation, result import, settlement execution, learning write or recommendation-policy change is included.
 
-Result: `/api/operations/event-refresh-plan` decides per event, applies SportsDataIO MLB target cadence bands, blocks post-start pregame refresh, keeps P0 closure above market refresh, leaves The Odds API shadow-only while balance/reset/cost are unknown, and estimates provider-efficient batching instead of treating the slate as one uniform unit.
+Result: Production commit `c04f1ad34bac43825210b1481a12d1965116115e` executed one protected SportsDataIO MLB date-level `GameOddsByDate` request for 15 eligible current-day events. The certified acquisition wrote 90 canonical odds snapshots, consumed 1 configured quota unit, preserved reserve and recorded deduplication evidence under `canonical_acquisition_execution_v1`.
 
-Completion criteria: `EVENT_LEVEL_REFRESH_PLANNER_ADDED`, shadow planner mode, independent event timing, P0 closure precedence, post-start refresh block, P1 final-30m 5-minute target, non-P1 final-30m 10-minute target, isolated provider-budget authorization, zero provider calls, zero mutations, adaptive refresh shadow integration, passing validation, passing build and production certification after automatic deployment.
+Completion criteria: `CANONICAL_ACQUISITION_ACTIVE_EXECUTION_PASS`, SportsDataIO MLB-only active scope, date-level batching, deterministic dedupe key, protected scheduler boundary, idempotent snapshot upsert, provider timestamp/fetch timestamp separation, zero prediction/result/settlement/learning writes, zero Official Pick policy change, passing validation, passing build and production certification after automatic deployment.

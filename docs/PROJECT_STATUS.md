@@ -6,6 +6,7 @@ Last updated: 2026-07-30 20:05:00Z
 
 - Implemented `canonical_acquisition_execution_v1` for bounded SportsDataIO MLB current operating-day pregame odds acquisition. The protected adaptive scheduler can now execute per-event planner decisions with one date-level provider-efficient `GameOddsByDate` request when ACTIVE guards pass.
 - Reused `sports_odds_snapshots` for canonical market persistence and `sports_sync_jobs` for acquisition evidence. Provider market timestamps remain separate from fetch observation timestamps. Prediction, recommendation, settlement and learning outputs are unchanged.
+- Production certification passed on commit `c04f1ad34bac43825210b1481a12d1965116115e`: one protected SportsDataIO MLB date-level request wrote 90 canonical odds snapshots for 15 eligible current-day events, consumed 1 configured quota unit, preserved the protected reserve and improved stored market freshness.
 - The Odds API remains shadow-only because current balance/reset/cost evidence is not certified for active refresh. BSN remains observational. OE-003F was not started.
 
 ## 2026-08-02 OE-003D Event-Level Refresh Planner
@@ -13,7 +14,7 @@ Last updated: 2026-07-30 20:05:00Z
 - Implemented `/api/operations/event-refresh-plan` as a bounded, read-only event-level refresh planner in `SHADOW` mode. It consumes OE-003C lifecycle evidence, decides per event, applies SportsDataIO MLB cadence targets, estimates provider-efficient batching and preserves exact provider-budget authorization evidence.
 - Adaptive refresh diagnostics now expose a compact `eventRefreshPlan` summary while active execution remains delegated to the existing certified operating-day pipeline. The MLB Operations Center now shows planner mode, due/deferred/blocked events, target freshness, estimated calls, budget authorization and blockers.
 - Production certification passed on commit `47bba4b9604986ca8570cfab64485915060ddbda`: `/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200` returned HTTP 200 with 15 bounded current MLB event plans, `SHADOW` planner mode, `REFRESH_MARKET=15`, `P1=8`, `P3=7`, estimated HTTP requests 1, estimated quota units 1 and zero provider calls or mutations.
-- The Odds API remains shadow-only while current balance/reset/cost are unknown; BSN remains observational. No provider calls, provider credits, database mutations, prediction writes, result writes, settlement writes, learning writes, scheduler cadence changes, refresh cadence changes, prediction formula changes or Official Pick policy changes were introduced. OE-003E was not started.
+- The Odds API remained shadow-only while current balance/reset/cost were unknown; BSN remained observational. No provider calls, provider credits, database mutations, prediction writes, result writes, settlement writes, learning writes, scheduler cadence changes, refresh cadence changes, prediction formula changes or Official Pick policy changes were introduced during OE-003D.
 
 ## 2026-08-02 OE-003C Per-Event Lifecycle State
 

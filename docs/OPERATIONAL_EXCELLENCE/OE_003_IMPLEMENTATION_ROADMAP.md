@@ -1,6 +1,6 @@
 # OE-003 Implementation Roadmap
 
-Status: roadmap plus bounded implementation evidence. OE-003A, OE-003B, OE-003C and OE-003D are production-certified. OE-003D remains shadow-only until a separate active execution phase is approved.
+Status: roadmap plus bounded implementation evidence. OE-003A, OE-003B, OE-003C, OE-003D and OE-003E are production-certified.
 
 ## OE-003A - Scheduler And Health Semantics
 
@@ -91,7 +91,7 @@ Stop condition: active planner execution would increase cadence before budget pr
 
 Scope: activate the canonical acquisition boundary for SportsDataIO MLB current operating-day pregame odds while preserving per-event planning and provider-efficient batching.
 
-Status: implemented pending production certification.
+Status: production-certified in OE-003E for SportsDataIO MLB current operating-day pregame odds.
 
 Likely files:
 

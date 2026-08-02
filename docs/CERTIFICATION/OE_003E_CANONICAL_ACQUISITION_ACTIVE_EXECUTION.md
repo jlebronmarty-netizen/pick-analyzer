@@ -1,8 +1,10 @@
 # OE-003E Canonical Acquisition Active Execution Certification
 
-Verdict: pending production certification.
+Verdict: PASS.
 
 Starting commit: `562fdfa9c2f996206309217c6771bd1ef2e0a713`
+
+Runtime commit: `c04f1ad34bac43825210b1481a12d1965116115e`
 
 Runtime target: bounded SportsDataIO MLB active acquisition through the protected adaptive scheduler path.
 
@@ -22,9 +24,9 @@ Implemented:
 
 No prediction, probability, confidence, edge, EV, Official Pick, Rent Play, Moneyline Bet, Smart Parlay, settlement, learning, provider mapping, provider subscription, scheduler cadence or sport-certification changes are included.
 
-## Production Certification Plan
+## Production Certification
 
-Read-only first:
+Read-only production checks passed against commit `c04f1ad34bac43825210b1481a12d1965116115e`:
 
 - `/api/system/version`
 - `/api/operations/event-lifecycle?sportKey=baseball_mlb&limit=200`
@@ -39,14 +41,31 @@ Read-only first:
 - `/api/current-board?mode=current&limit=200`
 - `/mlb-operations`
 
-If active guards pass, execute one protected acquisition:
+One protected acquisition executed:
 
 - route: `/api/cron/operating-day?dryRun=false`;
 - provider: SportsDataIO;
 - sport: `baseball_mlb`;
 - action source: adaptive event-level market refresh;
-- maximum initial provider calls: 1.
+- maximum initial provider calls: 1;
+- contract: `canonical_acquisition_execution_v1`;
+- acquisition id: `b1ac756e-efbb-5b42-9a0b-5c3bbd7df09b`;
+- deduplication key: `sportsdataio:baseball_mlb:odds_refresh:2026-08-02:date:2026-08-02t16_40_00.000z:current_pregame`;
+- request granularity: `DATE`;
+- actual HTTP requests: 1;
+- actual quota units: 1;
+- budget before: 839 usable requests;
+- budget after: 838 usable requests;
+- reserve impact: `RESERVE_PRESERVED`;
+- rows received: 15 provider game rows;
+- snapshots written: 90;
+- snapshots unchanged: 0;
+- freshness before: `2026-08-02T12:25:49+00:00`;
+- freshness after: `2026-08-02T12:44:28.000Z`;
+- freshness improved: true.
 
-The execution must record actual calls, actual cost where proven, budget before/after, reserve impact, snapshot writes, unchanged rows, freshness before/after and deduplication evidence.
+The acquisition updated stored market evidence only. It made no prediction, result, settlement or learning writes, and it did not change scheduler cadence, refresh cadence values, prediction formulas or Official Pick policy.
+
+The Odds API remains shadow-only. BSN remains observational.
 
 OE-003F was not started.
