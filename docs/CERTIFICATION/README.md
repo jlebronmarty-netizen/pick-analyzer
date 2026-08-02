@@ -59,6 +59,8 @@ Current V2 certification documents:
 - [OE-003E Certification JSON](oe-003e-canonical-acquisition-active-execution.json)
 - [OE-003F Product Freshness SLA](OE_003F_PRODUCT_FRESHNESS_SLA.md)
 - [OE-003F Certification JSON](oe-003f-product-freshness-sla.json)
+- [Mission Control V1](MISSION_CONTROL_V1.md)
+- [Mission Control V1 JSON](mission-control-v1.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

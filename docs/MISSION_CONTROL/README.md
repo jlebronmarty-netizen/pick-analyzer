@@ -1,0 +1,39 @@
+# Mission Control
+
+Mission Control is the Pick Analyzer V2 read-only command center.
+
+It answers:
+
+- What is the current certified project state?
+- What mission is next?
+- Which workstreams are blocked, ready or complete?
+- Which stop conditions prevent autonomous execution?
+- Which production and repository evidence supports the answer?
+
+Mission Control does not replace the Master Program, Master Roadmap, Project Status or certification artifacts.
+
+## Source Of Truth Boundaries
+
+- Master Program: product vision, rules and release methodology.
+- Master Roadmap: high-level planned direction.
+- Mission Control: current execution state, queue, stop conditions and next eligible mission.
+- Project Status: human-readable project journal.
+- Certification artifacts: proof of validation and production evidence.
+- Mission Control Log: append-only mission history.
+
+## Runtime Surfaces
+
+- `/api/mission-control`
+- `/mission-control`
+
+Both surfaces are read-only. They do not call providers, write data, start jobs, trigger deployment, settle games, generate predictions or mutate learning.
+
+## Documents
+
+- [Mission Control Program V2](MISSION_CONTROL_PROGRAM_V2.md)
+- [Mission Control Checklist](MISSION_CONTROL_CHECKLIST.md)
+- [Mission Control Status](MISSION_CONTROL_STATUS.json)
+- [Mission Control Log](MISSION_CONTROL_LOG.md)
+- [Mission Control Stop Conditions](MISSION_CONTROL_STOP_CONDITIONS.md)
+- [Mission Control Queue](MISSION_CONTROL_QUEUE.md)
+- [Mission Control Resume Guide](MISSION_CONTROL_RESUME_GUIDE.md)

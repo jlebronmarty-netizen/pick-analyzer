@@ -1,0 +1,96 @@
+{
+  "release": "MISSION_CONTROL_V1",
+  "name": "V2 Mission Control Project State Autonomous Queue And Execution Readiness",
+  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION",
+  "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
+  "runtimeSurfaces": {
+    "api": "/api/mission-control",
+    "page": "/mission-control"
+  },
+  "sourceOfTruthBoundaries": {
+    "masterProgram": "product vision, rules and release methodology",
+    "masterRoadmap": "high-level planned direction",
+    "missionControl": "current execution state and next eligible work",
+    "projectStatus": "human-readable project journal",
+    "certificationArtifacts": "proof records",
+    "missionControlLog": "append-only mission history"
+  },
+  "queue": {
+    "currentMission": "MC-00",
+    "nextMission": "MC-01",
+    "missionCount": 11,
+    "futureActiveMissions": 0
+  },
+  "recentCertifiedEvidence": [
+    "OE-003A",
+    "OE-003B",
+    "OE-003C",
+    "OE-003D",
+    "OE-003E",
+    "OE-003F"
+  ],
+  "sportReadiness": {
+    "MLB": "CERTIFIED",
+    "NBA": "DATA_FOUNDATION",
+    "NFL": "PLANNED",
+    "NHL": "PLANNED",
+    "Soccer": "PLANNED",
+    "Tennis": "PLANNED",
+    "UFC": "PLANNED",
+    "BSN": "DATA_FOUNDATION"
+  },
+  "providerReadiness": {
+    "sportsdataio": "READY_FOR_CERTIFIED_MLB_SCOPE_ONLY",
+    "theOddsApi": "SHADOW_ONLY_UNKNOWN_BALANCE_RESET_COST",
+    "bsn": "OBSERVATIONAL_MANUAL_SOURCE_CONTRACT"
+  },
+  "guardrails": {
+    "readOnly": true,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "schedulerCadenceChanged": false,
+    "refreshCadenceChanged": false,
+    "predictionBehaviorChanged": false,
+    "officialPickPolicyChanged": false,
+    "localServerSmokeRun": false,
+    "manualDeployment": false
+  },
+  "validation": {
+    "missionControlValidator": "PASS",
+    "oe003Validators": "PASS",
+    "schedulerHealthAlignment": "PASS",
+    "mlbAutonomousOperations": "PASS",
+    "settlementLearningRecovery": "PASS",
+    "protectedCanonicalMlbSettlement": "PASS",
+    "dailyBettingSettlement": "PASS",
+    "routeArtifactConsistency": "PASS",
+    "unsupportedMarketPolicy": "PASS",
+    "jsonValidation": "PASS",
+    "markdownValidation": "PASS",
+    "changedFileEslint": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS",
+    "stagedDiffCheck": "PASS",
+    "build": "PASS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "requiredEndpoints": [
+      "/api/system/version",
+      "/api/mission-control",
+      "/mission-control",
+      "/api/operations/health",
+      "/api/operations/event-lifecycle?sportKey=baseball_mlb&limit=200",
+      "/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200",
+      "/api/providers/budget/status?provider=sportsdataio&sportKey=baseball_mlb",
+      "/api/dashboard/today",
+      "/api/current-board?mode=current&limit=200",
+      "/api/performance",
+      "/mlb-operations"
+    ]
+  }
+}

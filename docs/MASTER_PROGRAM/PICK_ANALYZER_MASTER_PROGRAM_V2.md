@@ -16,6 +16,9 @@ This is the highest-level documentation index for Pick Analyzer V2. It governs p
 
 ## Current Release
 
+- [Mission Control](../MISSION_CONTROL/README.md)
+- [Mission Control Program V2](../MISSION_CONTROL/MISSION_CONTROL_PROGRAM_V2.md)
+- [Mission Control V1 Certification](../CERTIFICATION/MISSION_CONTROL_V1.md)
 - [Release 02 Integration Backlog](RELEASE_02_INTEGRATION_BACKLOG.md)
 - [Release 02 Core User Journey](../PRODUCT/RELEASE_02_CORE_USER_JOURNEY.md)
 - [Release 02 Live State Integration](../PRODUCT/RELEASE_02_LIVE_STATE_INTEGRATION.md)

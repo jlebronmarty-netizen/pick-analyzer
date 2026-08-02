@@ -60,6 +60,8 @@ Certification evidence: `docs/CORE_PREDICTION_CERTIFICATION_ROADMAP_V1.md` and `
 
 Product Stabilization And Intelligence Consolidation V1 is the active cleanup posture before any new product capability. It refreshes current product inventory evidence, checks page/API/status/sport consistency and blocks capability expansion unless a defect is proven.
 
+Mission Control V1 update on 2026-08-02: Mission Control is implemented as the current V2 execution-state source of truth. It adds `/api/mission-control`, `/mission-control`, `docs/MISSION_CONTROL/`, deterministic queueing, sport readiness, provider readiness and stop conditions while preserving zero provider calls, zero mutations and unchanged prediction, settlement, learning, scheduler, refresh cadence and Official Pick policy behavior. The next eligible mission after production certification is MC-01 Operational Readiness Closure.
+
 OE-003F update on 2026-08-02: Product Freshness SLA is locally implemented and build-certified. Decision surfaces now expose `product_freshness_sla_v1`, block future/post-start/timestampless market evidence, downgrade stale prices, and preserve zero provider calls, zero mutations and unchanged prediction/recommendation policy. OE-003G has not started.
 
 Current stabilization evidence:

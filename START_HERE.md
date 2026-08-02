@@ -40,6 +40,7 @@ The Master Program is the source of truth. If the product direction changes, upd
 ## Repository Map
 
 - [Documentation Index](docs/README.md)
+- [Mission Control](docs/MISSION_CONTROL/README.md)
 - [Release Documents](docs/RELEASES/README.md)
 - [Product Documents](docs/PRODUCT/README.md)
 - [Architecture Documents](docs/ARCHITECTURE/README.md)
@@ -54,6 +55,7 @@ The Master Program is the source of truth. If the product direction changes, upd
 - Do not bypass validation or production certification.
 - Do not commit unrelated files.
 - Do not start a future release until the current sprint or release is closed.
+- Use Mission Control for current execution state, next eligible work and stop conditions.
 
 ## Sprint 0 Rule
 

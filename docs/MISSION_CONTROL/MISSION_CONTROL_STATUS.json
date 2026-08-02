@@ -1,0 +1,101 @@
+{
+  "program": "pick_analyzer_v2_mission_control_v1",
+  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION",
+  "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
+  "documentationVersion": "mission_control_v1",
+  "currentMission": {
+    "id": "MC-00",
+    "title": "Mission Control Foundation",
+    "state": "DEPLOYED",
+    "priority": "P0",
+    "mode": "READ_ONLY",
+    "readiness": "READY"
+  },
+  "nextMission": {
+    "id": "MC-01",
+    "title": "Operational Readiness Closure",
+    "state": "READY",
+    "priority": "P1",
+    "mode": "AGENT_ASSISTED",
+    "readiness": "READY"
+  },
+  "missionCounts": {
+    "total": 11,
+    "ready": 4,
+    "planned": 6,
+    "active": 0,
+    "productionCertifiedRecentCompletions": 6
+  },
+  "taxonomies": {
+    "categories": [
+      "OPERATIONAL_READINESS",
+      "MULTI_SPORT_DATA",
+      "MULTI_SPORT_PREDICTION",
+      "SETTLEMENT_AND_LEARNING",
+      "PERFORMANCE_INTELLIGENCE",
+      "DECISION_CORE_EVOLUTION",
+      "MARKET_EXPANSION",
+      "PRODUCT_EXPERIENCE",
+      "AUTOMATION",
+      "PROVIDER_INTEGRATION",
+      "CERTIFICATION",
+      "DOCUMENTATION",
+      "TECHNICAL_DEBT",
+      "EXTERNAL_DEPENDENCY"
+    ],
+    "states": [
+      "PLANNED",
+      "READY",
+      "ACTIVE",
+      "PAUSED",
+      "BLOCKED",
+      "CONDITIONAL_PASS",
+      "LOCALLY_COMPLETE",
+      "DEPLOYED",
+      "PRODUCTION_CERTIFIED",
+      "SUPERSEDED",
+      "CANCELLED",
+      "UNKNOWN"
+    ],
+    "priorities": ["P0", "P1", "P2", "P3", "P4"],
+    "modes": [
+      "MANUAL_ONLY",
+      "AGENT_ASSISTED",
+      "AUTONOMOUS_ELIGIBLE",
+      "AUTONOMOUS_ACTIVE",
+      "EXTERNAL_WAIT",
+      "READ_ONLY"
+    ]
+  },
+  "recentCompletions": [
+    "OE-003A",
+    "OE-003B",
+    "OE-003C",
+    "OE-003D",
+    "OE-003E",
+    "OE-003F"
+  ],
+  "sportReadiness": {
+    "MLB": "CERTIFIED",
+    "NBA": "DATA_FOUNDATION",
+    "NFL": "PLANNED",
+    "NHL": "PLANNED",
+    "Soccer": "PLANNED",
+    "Tennis": "PLANNED",
+    "UFC": "PLANNED",
+    "BSN": "DATA_FOUNDATION"
+  },
+  "readOnlyGuarantees": {
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "manualDeployment": false,
+    "localServerSmokeRun": false
+  },
+  "runtimeSurfaces": ["/api/mission-control", "/mission-control"],
+  "validationScript": "scripts/mission-control-v1-validate.mjs",
+  "certificationArtifact": "docs/CERTIFICATION/mission-control-v1.json"
+}
