@@ -17,6 +17,7 @@ import {
 } from '@/services/provider-budget.service'
 import { formatInTimeZone } from '@/services/provider-time-normalization.service'
 import { canonicalStoredOutcome } from '@/services/canonical-settlement-state.service'
+import { getEventRefreshPlan } from '@/services/event-refresh-planner.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -1391,6 +1392,7 @@ export async function getDataFreshnessStatus() {
 
 export async function getAdaptiveRefreshPlan() {
   const status = await getAdaptiveRefreshStatus()
+  const eventRefreshPlan = await getEventRefreshPlan({ sportKey: status.sportKey, operatingDate: status.activeSlateDate, limit: 200, mode: 'SHADOW' })
   return {
     success: true,
     status: status.status,
@@ -1402,6 +1404,13 @@ export async function getAdaptiveRefreshPlan() {
     nextActionAt: status.nextActionAt,
     providerBudget: status.providerBudget,
     refreshPlan: status.refreshPlan,
+    eventRefreshPlan: {
+      mode: eventRefreshPlan.plannerMode,
+      summary: eventRefreshPlan.summary,
+      providerBudget: eventRefreshPlan.providerBudget,
+      nextGlobalAction: eventRefreshPlan.summary.nextGlobalAction,
+      guardrails: eventRefreshPlan.guardrails,
+    },
     providerCallForecast: status.providerCallForecast,
     guardrails: status.guardrails,
   }

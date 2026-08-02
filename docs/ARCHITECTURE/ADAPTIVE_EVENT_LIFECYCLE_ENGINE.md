@@ -1,8 +1,10 @@
 # Adaptive Event Lifecycle Engine
 
-Status: OE-003C read-only lifecycle contract implemented; OE-003D refresh planner not started.
+Status: OE-003C read-only lifecycle contract implemented; OE-003D shadow refresh planner implemented pending production certification.
 
 OE-003 defines the architecture for event-level operations. OE-003C implements the read-only state contract at `/api/operations/event-lifecycle`. It does not activate event-level provider refresh, new scheduler cadence or prediction math changes.
+
+OE-003D implements the read-only event refresh planner at `/api/operations/event-refresh-plan` in `SHADOW` mode. It decides per event, estimates provider-efficient batching and keeps the existing operating-day execution fallback.
 
 ## Components
 
@@ -15,6 +17,8 @@ Implemented in `src/services/event-lifecycle-state.service.ts` as dynamic deriva
 ### Event Intelligence Scheduler
 
 Ranks event work using explicit priority bands instead of hidden weights. It chooses the next safe action from stored state, freshness, provider budget, and settlement readiness.
+
+OE-003D implements this as a shadow planner only. Active execution remains disabled until a separate activation gate proves provider budget, deduplication, freshness improvement and no unrelated writes.
 
 ### Provider Budget Intelligence Manager
 

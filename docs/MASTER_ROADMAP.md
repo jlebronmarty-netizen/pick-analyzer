@@ -3193,3 +3193,15 @@ Scope: Dynamic lifecycle derivation, bounded read-only operations API, provider-
 Result: Production served commit `d7a1077eb5fc4c4dca00082a188c5908fe0aecae`. `/api/operations/event-lifecycle` derives state from stored `sport_events`, `prediction_history`, `game_results` and provider-budget evidence. Closure states outrank market refresh, terminal events missing canonical results become `RESULT_IMPORT`, settlement-ready events become `SETTLEMENT/P0`, recommendation relevance is classification-only and next actions are observational only. Production observation returned 15 current-day MLB events, with `HIGH_PRIORITY` 7, `ACTIVE_REFRESH` 8, `P1` 7, `P3` 8, provider calls 0 and database mutations 0.
 
 Completion criteria: `EVENT_LIFECYCLE_CONTRACT_ADDED`, explicit lifecycle entry/exit rules, `FINAL` not inferred from elapsed time alone, missing result detection, settlement priority precedence, isolated provider-budget dry-run authorization, bounded current-day defaults, MLB Operations Center visibility, passing validation, passing build and production certification after automatic deployment.
+
+### 70. Operational Excellence OE-003D Event-Level Refresh Planner
+
+Objective: Convert OE-003C lifecycle evidence into a deterministic event-level refresh plan without activating new provider refresh behavior.
+
+Status: Implemented pending production certification.
+
+Scope: Shadow-mode event planner, bounded read-only API, adaptive refresh diagnostic integration and MLB Operations Center visibility. No active provider execution, scheduler cadence change, provider call, prediction generation, result import, settlement execution, learning write or recommendation-policy change is included.
+
+Result: `/api/operations/event-refresh-plan` decides per event, applies SportsDataIO MLB target cadence bands, blocks post-start pregame refresh, keeps P0 closure above market refresh, leaves The Odds API shadow-only while balance/reset/cost are unknown, and estimates provider-efficient batching instead of treating the slate as one uniform unit.
+
+Completion criteria: `EVENT_LEVEL_REFRESH_PLANNER_ADDED`, shadow planner mode, independent event timing, P0 closure precedence, post-start refresh block, P1 final-30m 5-minute target, non-P1 final-30m 10-minute target, isolated provider-budget authorization, zero provider calls, zero mutations, adaptive refresh shadow integration, passing validation, passing build and production certification after automatic deployment.

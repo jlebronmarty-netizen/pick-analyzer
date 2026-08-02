@@ -1,0 +1,78 @@
+{
+  "release": "OE-003D",
+  "name": "Event-Level Refresh Planner V1",
+  "status": "IMPLEMENTED_PENDING_PRODUCTION_CERTIFICATION",
+  "startingCommit": "4232edd5579b09366a0aed2cc95b72c72b996d2d",
+  "contractVersion": "event_refresh_plan_v1",
+  "api": "/api/operations/event-refresh-plan",
+  "plannerMode": "SHADOW",
+  "activeExecutionEnabled": false,
+  "planningPrecedence": [
+    "P0_CLOSURE_RECOVERY",
+    "POST_START_PROTECTION",
+    "P1_ACTIONABLE_LOCK_WINDOW",
+    "P2_WITHIN_TWO_HOURS",
+    "P3_SAME_DAY_ACTIVE",
+    "P4_FUTURE_INFORMATIONAL",
+    "P5_ARCHIVED_NO_ACTION"
+  ],
+  "cadencePolicy": {
+    "sportsdataioMlb": {
+      "moreThan24hMinutes": 60,
+      "sixToTwentyFourHoursMinutes": 30,
+      "twoToSixHoursMinutes": 15,
+      "thirtyMinutesToTwoHoursMinutes": 10,
+      "finalThirtyMinutesP1Minutes": 5,
+      "finalThirtyMinutesNonP1Minutes": 10,
+      "postStartPregameRefresh": false
+    },
+    "theOddsApi": "SHADOW_ONLY_UNKNOWN_BALANCE_RESET_COST",
+    "bsn": "OBSERVATIONAL_PROVIDER_PATH_NOT_ACTIVE"
+  },
+  "guardrails": {
+    "providerCallsIntroduced": 0,
+    "providerCreditsConsumed": 0,
+    "databaseMutationsMade": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "schedulerCadenceChanged": false,
+    "refreshCadenceChanged": false,
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "activeExecutionEnabled": false
+  },
+  "completionMarkers": [
+    "EVENT_LEVEL_REFRESH_PLANNER_ADDED",
+    "PLANNER_SHADOW_MODE_PASS",
+    "P0_CLOSURE_OUTRANKS_REFRESH_PASS",
+    "POST_START_REFRESH_BLOCKED_PASS",
+    "P1_FINAL_30M_FIVE_MINUTE_TARGET_PASS",
+    "NON_P1_FINAL_30M_TEN_MINUTE_TARGET_PASS",
+    "PROVIDER_BUDGET_ISOLATION_PASS",
+    "RESERVE_PROTECTION_PASS",
+    "THE_ODDS_API_UNKNOWN_COST_BLOCKS_ACTIVE_PASS",
+    "ZERO_PROVIDER_CALLS_PASS",
+    "ZERO_MUTATIONS_PASS",
+    "ADAPTIVE_REFRESH_SHADOW_INTEGRATION_PASS",
+    "OE_003E_NOT_STARTED"
+  ],
+  "productionCertification": {
+    "status": "PENDING",
+    "requiredEndpoints": [
+      "/api/system/version",
+      "/api/operations/event-lifecycle?sportKey=baseball_mlb&limit=200",
+      "/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200",
+      "/api/operations/health",
+      "/api/operations/adaptive-refresh/status",
+      "/api/operations/settlement-guarantee?includeValidation=true",
+      "/api/operations/mlb-autonomous-operations",
+      "/api/providers/budget/status?provider=sportsdataio&sportKey=baseball_mlb",
+      "/api/operations/provider-budget-forecast",
+      "/api/dashboard/today",
+      "/api/current-board?mode=current&limit=200",
+      "/mlb-operations"
+    ]
+  }
+}

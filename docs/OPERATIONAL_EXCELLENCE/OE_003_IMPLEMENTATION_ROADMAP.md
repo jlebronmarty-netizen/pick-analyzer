@@ -1,6 +1,6 @@
 # OE-003 Implementation Roadmap
 
-Status: roadmap plus bounded implementation evidence. OE-003A, OE-003B and OE-003C are production-certified. OE-003D has not started.
+Status: roadmap plus bounded implementation evidence. OE-003A, OE-003B and OE-003C are production-certified. OE-003D is implemented pending production certification.
 
 ## OE-003A - Scheduler And Health Semantics
 
@@ -70,19 +70,22 @@ Stop condition: any need to execute provider refresh, result import, settlement,
 
 Scope: deterministic event-priority planner with P0-P4 bands.
 
+Status: implemented in OE-003D pending production certification.
+
 Likely files:
 
+- `src/services/event-refresh-planner.service.ts`
+- `src/app/api/operations/event-refresh-plan/route.ts`
 - `src/services/adaptive-refresh-orchestrator.service.ts`
-- new event planner service
-- operating-day route integration
+- `src/services/mlb-operations-center.service.ts`
 
 Migration: none expected.
 
-Provider-call risk: bounded and budget-guarded.
+Provider-call risk: none in OE-003D because planner mode is `SHADOW`.
 
-Mutation risk: existing operating-day writes only.
+Mutation risk: none in OE-003D.
 
-Stop condition: planner would increase cadence before budget proof.
+Stop condition: active planner execution would increase cadence before budget proof.
 
 ## OE-003E - Canonical Acquisition Deduplication
 

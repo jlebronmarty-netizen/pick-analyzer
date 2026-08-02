@@ -53,6 +53,8 @@ Current V2 certification documents:
 - [OE-003B Certification JSON](oe-003b-provider-budget-ledger-normalization.json)
 - [OE-003C Per-Event Lifecycle State](OE_003C_PER_EVENT_LIFECYCLE_STATE.md)
 - [OE-003C Certification JSON](oe-003c-per-event-lifecycle-state.json)
+- [OE-003D Event-Level Refresh Planner](OE_003D_EVENT_LEVEL_REFRESH_PLANNER.md)
+- [OE-003D Certification JSON](oe-003d-event-level-refresh-planner.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

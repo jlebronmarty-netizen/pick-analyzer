@@ -302,6 +302,8 @@ No duplicate route files detected by normalized route and type.
 | /api/operations/adaptive-refresh/status | API Route | src/app/api/operations/adaptive-refresh/status/route.ts | Active | Handles /api/operations/adaptive-refresh/status API requests. |
 | /api/operations/change-events | API Route | src/app/api/operations/change-events/route.ts | Active | Handles /api/operations/change-events API requests. |
 | /api/operations/data-freshness | API Route | src/app/api/operations/data-freshness/route.ts | Active | Handles /api/operations/data-freshness API requests. |
+| /api/operations/event-lifecycle | API Route | src/app/api/operations/event-lifecycle/route.ts | Active | Handles /api/operations/event-lifecycle API requests. |
+| /api/operations/event-refresh-plan | API Route | src/app/api/operations/event-refresh-plan/route.ts | Active | Handles /api/operations/event-refresh-plan API requests. |
 | /api/operations/health | API Route | src/app/api/operations/health/route.ts | Active | Handles /api/operations/health API requests. |
 | /api/operations/mlb-autonomous-operations | API Route | src/app/api/operations/mlb-autonomous-operations/route.ts | Active | Handles /api/operations/mlb-autonomous-operations API requests. |
 | /api/operations/odds-change-refresh-readiness | API Route | src/app/api/operations/odds-change-refresh-readiness/route.ts | Active | Handles /api/operations/odds-change-refresh-readiness API requests. |

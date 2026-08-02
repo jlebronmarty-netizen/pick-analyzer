@@ -7,6 +7,7 @@ import {
   getAutonomousSchedulerStatus,
 } from '@/services/autonomous-daily-operations.service'
 import { getCurrentBoard } from '@/services/current-board.service'
+import { getEventRefreshPlan } from '@/services/event-refresh-planner.service'
 import { getEventLifecycleState } from '@/services/event-lifecycle-state.service'
 import { getMlbDataQualityStatus } from '@/services/mlb-data-quality.service'
 import { getMlbMissingIntelligenceStatus } from '@/services/mlb-missing-intelligence.service'
@@ -174,6 +175,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     operationsStatusResult,
     healthResult,
     eventLifecycleResult,
+    eventRefreshPlanResult,
   ] = await Promise.all([
     safe('Current Board', () => getCurrentBoard({ sportKey: SPORT_KEY, mode: 'CURRENT', limit: 200 })),
     safe('Operating Day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: date })),
@@ -188,6 +190,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     safe('Daily Operations Status', () => getAutonomousDailyOperationsStatus({ selectedDate: date })),
     safe('Operations Health Domains', () => getOperationsHealth()),
     safe('Event Lifecycle State', () => getEventLifecycleState({ sportKey: SPORT_KEY, operatingDate: date, limit: 25 })),
+    safe('Event Refresh Plan', () => getEventRefreshPlan({ sportKey: SPORT_KEY, operatingDate: date, limit: 25, mode: 'SHADOW' })),
   ])
 
   const board = record(boardResult.data)
@@ -203,6 +206,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
   const operationsStatus = record(operationsStatusResult.data)
   const operationsHealth = record(healthResult.data)
   const eventLifecycle = record(eventLifecycleResult.data)
+  const eventRefreshPlan = record(eventRefreshPlanResult.data)
   const healthDomains = record(operationsHealth.healthDomains)
 
   const stages = record(operatingDay.stages)
@@ -330,6 +334,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     operationsStatusResult,
     healthResult,
     eventLifecycleResult,
+    eventRefreshPlanResult,
   ].filter((result) => !result.ok).map((result) => result.error)
 
   return {
@@ -380,6 +385,31 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
       })),
       providerCallsMade: num(eventLifecycle.providerCallsMade),
       databaseMutationsMade: num(eventLifecycle.databaseMutationsMade),
+    },
+    eventRefreshPlan: {
+      mode: text(eventRefreshPlan.mode, 'event_refresh_plan_v1'),
+      plannerMode: text(eventRefreshPlan.plannerMode, 'SHADOW'),
+      route: `/api/operations/event-refresh-plan?sportKey=${SPORT_KEY}&operatingDate=${date}&limit=25`,
+      summary: record(eventRefreshPlan.summary),
+      providerBudget: record(eventRefreshPlan.providerBudget),
+      eventPlans: records(eventRefreshPlan.eventPlans).slice(0, 10).map((plan) => ({
+        eventId: text(plan.eventId, ''),
+        eventLabel: text(plan.eventLabel, text(plan.eventId, 'unknown event')),
+        startTime: text(plan.startTime, ''),
+        lifecycleState: text(plan.lifecycleState, 'UNKNOWN'),
+        priorityBand: text(plan.priorityBand, 'UNKNOWN'),
+        marketAgeMinutes: plan.marketAgeMinutes === null ? null : num(plan.marketAgeMinutes),
+        targetFreshnessMinutes: plan.targetFreshnessMinutes === null ? null : num(plan.targetFreshnessMinutes),
+        plannedAction: text(plan.plannedAction, 'NO_ACTION'),
+        dueNow: bool(plan.dueNow),
+        nextEligibleAt: text(plan.nextEligibleAt, ''),
+        budgetAuthorization: text(record(plan.budgetAuthorization).result, 'UNKNOWN'),
+        estimatedHttpRequests: num(plan.estimatedHttpRequests),
+        executionBlockers: strings(plan.executionBlockers),
+        reasonCodes: strings(plan.actionReasonCodes),
+      })),
+      providerCallsMade: num(record(eventRefreshPlan.guardrails).providerCallsMade),
+      databaseMutationsMade: num(record(eventRefreshPlan.guardrails).databaseMutationsMade),
     },
     operatingDay: {
       operatingDate: text(operatingDay.selectedDate, date),
@@ -500,6 +530,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
       { label: 'Scheduler', href: '/api/autonomous-daily-operations/scheduler' },
       { label: 'Provider Budget', href: '/api/providers/budget/status?provider=sportsdataio&sportKey=baseball_mlb' },
       { label: 'Event Lifecycle', href: `/api/operations/event-lifecycle?sportKey=${SPORT_KEY}&operatingDate=${date}&limit=25` },
+      { label: 'Event Refresh Plan', href: `/api/operations/event-refresh-plan?sportKey=${SPORT_KEY}&operatingDate=${date}&limit=25` },
       { label: 'Prediction Health', href: '/api/mlb/predictions/health' },
       { label: 'V7', href: '/api/mlb/predictions/validation' },
       { label: 'Data Quality', href: '/api/mlb/data-quality' },

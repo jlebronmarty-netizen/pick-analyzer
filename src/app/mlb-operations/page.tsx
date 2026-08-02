@@ -244,6 +244,60 @@ function EventLifecycle({ data }: { data: OperationsData }) {
   )
 }
 
+function EventRefreshPlan({ data }: { data: OperationsData }) {
+  const plan = data.eventRefreshPlan
+  const summary = plan.summary
+  const sportsDataIo = (plan.providerBudget.sportsdataio ?? {}) as {
+    usableRemainingBefore?: unknown
+    reserveImpact?: unknown
+  }
+  return (
+    <Panel title="Event Refresh Planner" status={plan.plannerMode}>
+      <div className="grid gap-2 md:grid-cols-4">
+        <Metric label="Planner Mode" value={plan.plannerMode} tone={plan.plannerMode === 'ACTIVE' ? 'ready' : 'waiting'} />
+        <Metric label="Due Now" value={summary.eventsDueNow} tone={summary.eventsDueNow ? 'partial' : 'ready'} />
+        <Metric label="Deferred" value={summary.eventsDeferred} />
+        <Metric label="Estimated Calls" value={summary.estimatedHttpRequests} />
+        <Metric label="Blocked" value={summary.eventsBlocked} tone={summary.eventsBlocked ? 'partial' : 'ready'} />
+        <Metric label="Closure" value={summary.eventsRequiringClosure} tone={summary.eventsRequiringClosure ? 'blocked' : 'ready'} />
+        <Metric label="Usable Before" value={sportsDataIo.usableRemainingBefore ?? 'UNKNOWN'} />
+        <Metric label="Reserve Impact" value={sportsDataIo.reserveImpact ?? 'UNKNOWN'} />
+      </div>
+      <div className="mt-4 grid gap-2">
+        {plan.eventPlans.length ? plan.eventPlans.map((event) => (
+          <div key={event.eventId} className="rounded-md border border-zinc-800 bg-zinc-900/60 p-3">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="text-sm font-bold text-white">{event.eventLabel}</p>
+                <p className="mt-1 text-xs text-zinc-500">{fmt(event.startTime)}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <StatusPill value={event.priorityBand} tone={toneFrom(event.priorityBand === 'P0' ? 'blocked' : event.priorityBand === 'P1' ? 'partial' : 'ready')} />
+                <StatusPill value={event.plannedAction} tone={toneFrom(event.dueNow ? 'partial' : 'ready')} />
+                <StatusPill value={event.budgetAuthorization} tone={toneFrom(event.budgetAuthorization)} />
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 text-xs text-zinc-400 md:grid-cols-4">
+              <span>Age: <strong className="text-zinc-100">{fmt(event.marketAgeMinutes)}</strong></span>
+              <span>Target: <strong className="text-zinc-100">{fmt(event.targetFreshnessMinutes)}</strong></span>
+              <span>Cost: <strong className="text-zinc-100">{event.estimatedHttpRequests}</strong></span>
+              <span>Eligible: <strong className="text-zinc-100">{fmt(event.nextEligibleAt)}</strong></span>
+            </div>
+            {event.executionBlockers.length || event.reasonCodes.length ? (
+              <p className="mt-2 text-xs text-amber-100">{[...event.executionBlockers, ...event.reasonCodes].slice(0, 4).join(', ')}</p>
+            ) : null}
+          </div>
+        )) : (
+          <p className="rounded-md border border-zinc-800 bg-zinc-900/60 p-3 text-sm text-zinc-400">No event refresh plan rows were returned.</p>
+        )}
+      </div>
+      <a href={plan.route} className="mt-4 inline-flex rounded-md border border-cyan-400/40 px-3 py-2 text-sm font-bold text-cyan-200 hover:bg-cyan-950/30">
+        Open refresh plan API
+      </a>
+    </Panel>
+  )
+}
+
 export default async function MlbOperationsPage({
   searchParams,
 }: {
@@ -294,6 +348,8 @@ export default async function MlbOperationsPage({
         <HealthSemantics data={data} />
 
         <EventLifecycle data={data} />
+
+        <EventRefreshPlan data={data} />
 
         <div className="grid gap-5 xl:grid-cols-3">
           <Panel title="Operating Day" status={data.operatingDay.currentStageStatus}>

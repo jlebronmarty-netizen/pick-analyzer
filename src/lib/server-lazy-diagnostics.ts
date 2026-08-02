@@ -65,6 +65,10 @@ export async function loadEventLifecycleState() {
   return import('@/services/event-lifecycle-state.service')
 }
 
+export async function loadEventRefreshPlanner() {
+  return import('@/services/event-refresh-planner.service')
+}
+
 export async function getProductionReadinessAuditLazy() {
   const { getProductionReadinessAudit } = await import('@/services/production-readiness-audit.service')
 
