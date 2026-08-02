@@ -62,6 +62,8 @@ Product Stabilization And Intelligence Consolidation V1 is the active cleanup po
 
 Mission Control V1 update on 2026-08-02: Mission Control is implemented and production-certified as the current V2 execution-state source of truth. It adds `/api/mission-control`, `/mission-control`, `docs/MISSION_CONTROL/`, deterministic queueing, sport readiness, provider readiness and stop conditions while preserving zero provider calls, zero mutations and unchanged prediction, settlement, learning, scheduler, refresh cadence and Official Pick policy behavior. Production certification passed on runtime commit `868eb0c4bc712b7c193b7a2001b37494517641e0`. The next eligible mission is MC-01 Operational Readiness Closure.
 
+MC-01 Operational Readiness Closure update on 2026-08-02: MC-01 is `CONDITIONAL_PASS` after repairing Mission Control runtime-state drift and Settlement Guarantee scheduler-warning coupling. Provider budget, settlement closure, Current Board, Daily Brief, Performance and workspace surfaces remain operational or correctly protected. MC-STOP-005 remains active until external protected scheduler proof and market-freshness recovery are observed. MC-02 was not started.
+
 OE-003F update on 2026-08-02: Product Freshness SLA is locally implemented and build-certified. Decision surfaces now expose `product_freshness_sla_v1`, block future/post-start/timestampless market evidence, downgrade stale prices, and preserve zero provider calls, zero mutations and unchanged prediction/recommendation policy. OE-003G has not started.
 
 Current stabilization evidence:

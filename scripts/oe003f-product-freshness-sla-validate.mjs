@@ -61,7 +61,6 @@ check('Best Value UI displays SLA', bestValueTool.includes('Freshness SLA') && b
 
 const forbiddenRuntimeFiles = [
   'src/services/recommendation-eligibility-policy.service.ts',
-  'src/services/settlement-guarantee.service.ts',
   'src/services/operating-day.service.ts',
   'src/services/canonical-acquisition-execution.service.ts',
 ]

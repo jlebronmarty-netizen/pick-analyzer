@@ -1,0 +1,87 @@
+{
+  "mission": "MC-01",
+  "name": "Operational Readiness Closure",
+  "status": "CONDITIONAL_PASS",
+  "startingCommit": "ed7a9d932ee3257fa7a20c84770c89edd4712d06",
+  "entryCriteria": {
+    "branchMain": true,
+    "localHeadEqualsOriginMain": true,
+    "mc00ProductionCertified": true,
+    "mc01FirstEligibleMission": true,
+    "protectedDirtyFilesUnstaged": true
+  },
+  "productionEvidenceBeforeRepair": {
+    "systemVersionHttp": 200,
+    "systemVersionCommit": "ed7a9d932ee3257fa7a20c84770c89edd4712d06",
+    "operationsHealthStatus": "CRITICAL",
+    "schedulerCadenceStatus": "LATE",
+    "missedSchedulerIntervals": 1,
+    "marketFreshnessStatus": "CRITICAL",
+    "providerBudgetStatus": "HEALTHY",
+    "settlementClosureStatus": "HEALTHY",
+    "settlementGuaranteeHttp": 409,
+    "settlementReadyRows": 0,
+    "silentPendingRows": 0,
+    "settledRows": 57,
+    "protectedDryRunWithoutSecretHttp": 401
+  },
+  "repairs": [
+    "mission_control_runtime_state_reconciled",
+    "settlement_guarantee_scheduler_warning_decoupled_from_settlement_failure"
+  ],
+  "operationalDomains": {
+    "schedulerExecution": "CONDITIONAL",
+    "marketFreshness": "CONDITIONAL",
+    "canonicalAcquisition": "PASS",
+    "providerBudgetAuthorization": "PASS",
+    "eventLifecycle": "PASS",
+    "refreshPlanner": "PASS",
+    "resultImport": "CONDITIONAL",
+    "settlementClosure": "PASS",
+    "learningEvidence": "PASS",
+    "performanceSynchronization": "PASS",
+    "currentBoard": "PASS",
+    "dailyBrief": "PASS",
+    "bettingWorkspace": "PASS",
+    "personalLedger": "PASS",
+    "operationalContradictions": "REPAIRED"
+  },
+  "guardrails": {
+    "providerCallsMadeByCertificationReads": 0,
+    "providerCreditsConsumedByRepairs": 0,
+    "databaseMutationsMadeByRepairs": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "schedulerCadenceChanged": false,
+    "refreshCadenceChanged": false,
+    "predictionBehaviorChanged": false,
+    "officialPickPolicyChanged": false,
+    "manualDeployment": false
+  },
+  "activeStopConditions": [
+    {
+      "id": "MC-STOP-005",
+      "reason": "External protected scheduler and market-freshness proof are pending."
+    }
+  ],
+  "validation": {
+    "mc01Validator": "PASS",
+    "missionControlValidator": "PASS",
+    "settlementGuaranteeValidator": "PASS",
+    "oe003Validators": "PASS",
+    "schedulerHealthAlignment": "PASS",
+    "mlbAutonomousOperations": "PASS",
+    "unsupportedMarketPolicy": "PASS",
+    "routeArtifactConsistency": "PASS",
+    "dailyBettingSettlement": "PASS",
+    "build": "PASS",
+    "eslint": "PASS",
+    "jsonValidation": "PASS",
+    "markdownValidation": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "finalClassification": "MC_01_CONDITIONAL_PASS_EXTERNAL_SCHEDULER_PROOF_PENDING"
+}

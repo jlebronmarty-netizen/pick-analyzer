@@ -8,6 +8,7 @@ import { getProviderBudgetStatus } from '@/services/provider-budget.service'
 const DOCUMENTATION_VERSION = 'mission_control_v1'
 const PROGRAM_VERSION = 'pick_analyzer_v2_mission_control_v1'
 const BASELINE_COMMIT = 'ddc79d7b4a5efa5068ff1e63bb68d95d84100e67'
+const MC00_RUNTIME_COMMIT = '868eb0c4bc712b7c193b7a2001b37494517641e0'
 const SPORT_KEY = 'baseball_mlb'
 const PROVIDER = 'sportsdataio'
 
@@ -345,10 +346,10 @@ const queue: Mission[] = [
     id: 'MC-00',
     title: 'Mission Control Foundation',
     category: 'AUTOMATION',
-    state: 'DEPLOYED',
+    state: 'PRODUCTION_CERTIFIED',
     priority: 'P0',
     mode: 'READ_ONLY',
-    readiness: 'READY',
+    readiness: 'COMPLETE',
     owner: 'Mission Control',
     scope: 'Create a read-only command center, mission queue, stop conditions, resume guide and certification contract.',
     nextAction: 'Production-certify /api/mission-control and /mission-control after automatic deployment.',
@@ -362,15 +363,15 @@ const queue: Mission[] = [
     id: 'MC-01',
     title: 'Operational Readiness Closure',
     category: 'OPERATIONAL_READINESS',
-    state: 'READY',
+    state: 'CONDITIONAL_PASS',
     priority: 'P1',
     mode: 'AGENT_ASSISTED',
-    readiness: 'READY',
+    readiness: 'CONDITIONAL',
     owner: 'Operations',
     scope: 'Close remaining daily operating readiness evidence using stored operational proof and production read-only endpoints.',
     nextAction: 'Run a bounded operational-readiness certification mission.',
     dependencies: ['MC-00'],
-    blockers: [],
+    blockers: ['External scheduler proof and market freshness remain dependent on the protected GitHub Actions writer.'],
     evidence: ['docs/OPERATIONAL_EXCELLENCE/MORNING_OPERATIONAL_CHECKLIST.md', 'docs/PROJECT_STATUS.md'],
     stopConditions: ['MC-STOP-004', 'MC-STOP-005'],
     canStartAutomatically: false,
@@ -821,8 +822,8 @@ export async function getMissionControl() {
       },
     },
     taxonomy,
-    currentMission: queue[0],
-    nextMission: queue.find((mission) => mission.id !== 'MC-00' && mission.readiness === 'READY') ?? null,
+    currentMission: queue[1],
+    nextMission: queue.find((mission) => !['MC-00', 'MC-01'].includes(mission.id) && mission.readiness === 'READY') ?? null,
     queue,
     autonomousReadiness: {
       status: 'READY' satisfies ReadinessStatus,
@@ -847,7 +848,7 @@ export async function getMissionControl() {
       },
     },
     productionVersion: {
-      expectedCommit: BASELINE_COMMIT,
+      expectedCommit: MC00_RUNTIME_COMMIT,
       observedRuntimeCommit: runtimeCommit(),
       source: 'VERCEL_GIT_COMMIT_SHA or local baseline fallback',
     },

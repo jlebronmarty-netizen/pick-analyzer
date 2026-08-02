@@ -8,6 +8,12 @@ Last updated: 2026-07-30 20:05:00Z
 - Mission Control composes existing OE-003A through OE-003F evidence and does not replace scheduler health, event lifecycle, refresh planner, provider budget, canonical acquisition or product freshness systems.
 - Production certification passed on runtime commit `868eb0c4bc712b7c193b7a2001b37494517641e0`; required read-only endpoints returned HTTP 200 with provider calls 0 and remote mutations 0. No prediction writes, result writes, settlement writes, learning writes, scheduler cadence changes, refresh cadence changes, prediction formula changes, Official Pick policy changes or manual deployment actions were introduced. The next eligible mission is MC-01 Operational Readiness Closure.
 
+## 2026-08-02 MC-01 Operational Readiness Closure
+
+- MC-01 Operational Readiness Closure is `CONDITIONAL_PASS`. Production evidence showed provider budget, event lifecycle, refresh planner, settlement closure, Performance, Current Board, Daily Brief, Betting Workbench and Personal Ledger boundaries were operational or correctly protected.
+- Two contradictions were repaired: Mission Control runtime state now reflects MC-00 production certification and MC-01 conditional status, and Settlement Guarantee now treats scheduler lateness as an operational warning rather than a settlement failure when settlement-ready rows and silent pending rows are both 0.
+- MC-STOP-005 remains active because external protected scheduler proof and market-freshness recovery were pending during certification. MC-02 was not started.
+
 ## 2026-08-02 OE-003F Product Freshness SLA
 
 - Implemented and production-certified `product_freshness_sla_v1` as the canonical product-facing freshness and actionability contract for Today, Current Board, Rent Play, Moneyline Bet, Smart Parlay, Official Picks, Most Likely, Best Value, Betting Workbench, Game Intelligence, AI Bet Finder and MLB Operations.

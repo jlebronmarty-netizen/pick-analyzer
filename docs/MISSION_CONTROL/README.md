@@ -37,3 +37,4 @@ Both surfaces are read-only. They do not call providers, write data, start jobs,
 - [Mission Control Stop Conditions](MISSION_CONTROL_STOP_CONDITIONS.md)
 - [Mission Control Queue](MISSION_CONTROL_QUEUE.md)
 - [Mission Control Resume Guide](MISSION_CONTROL_RESUME_GUIDE.md)
+- [MC-01 Operational Readiness Closure](MC_01_OPERATIONAL_READINESS_CLOSURE.md)

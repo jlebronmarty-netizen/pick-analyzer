@@ -1,19 +1,19 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "PRODUCTION_CERTIFIED",
+  "status": "MC_01_CONDITIONAL_PASS_EXTERNAL_SCHEDULER_PROOF_PENDING",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
-    "id": "MC-00",
-    "title": "Mission Control Foundation",
-    "state": "PRODUCTION_CERTIFIED",
-    "priority": "P0",
-    "mode": "READ_ONLY",
-    "readiness": "READY"
-  },
-  "nextMission": {
     "id": "MC-01",
     "title": "Operational Readiness Closure",
+    "state": "CONDITIONAL_PASS",
+    "priority": "P1",
+    "mode": "AGENT_ASSISTED",
+    "readiness": "CONDITIONAL"
+  },
+  "nextMission": {
+    "id": "MC-02",
+    "title": "Multi-Sport Data Readiness",
     "state": "READY",
     "priority": "P1",
     "mode": "AGENT_ASSISTED",
@@ -21,10 +21,11 @@
   },
   "missionCounts": {
     "total": 11,
-    "ready": 4,
+    "ready": 3,
     "planned": 6,
     "active": 0,
-    "productionCertifiedRecentCompletions": 6
+    "conditionalPass": 1,
+    "productionCertifiedRecentCompletions": 7
   },
   "taxonomies": {
     "categories": [
@@ -112,6 +113,16 @@
     "providerCallsMade": 0,
     "remoteMutationsMade": 0,
     "manualDeployment": false
+  },
+  "mc01": {
+    "status": "CONDITIONAL_PASS",
+    "certificationArtifact": "docs/CERTIFICATION/mc-01-operational-readiness-closure.json",
+    "activeStopCondition": "MC-STOP-005",
+    "reason": "External protected scheduler and market freshness proof remain pending.",
+    "runtimeRepairs": [
+      "mission_control_runtime_state_reconciled",
+      "settlement_guarantee_scheduler_warning_decoupled_from_settlement_failure"
+    ]
   },
   "runtimeSurfaces": ["/api/mission-control", "/mission-control"],
   "validationScript": "scripts/mission-control-v1-validate.mjs",

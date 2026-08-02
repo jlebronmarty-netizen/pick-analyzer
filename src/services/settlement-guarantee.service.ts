@@ -136,6 +136,8 @@ export async function getSettlementGuaranteeStatus({ lookbackDays = 2 }: { lookb
   const actionRequiredReasons = [
     ready.length > 0 ? 'SETTLEMENT_READY_ROWS_REMAIN' : null,
     silentPending.length > 0 ? 'SILENT_PENDING_ROWS_REMAIN' : null,
+  ].filter(Boolean) as string[]
+  const operationalWarningReasons = [
     schedulerLate ? 'SCHEDULER_LATE_OR_CRITICAL' : null,
   ].filter(Boolean) as string[]
   const success = actionRequiredReasons.length === 0
@@ -196,8 +198,10 @@ export async function getSettlementGuaranteeStatus({ lookbackDays = 2 }: { lookb
       settlementClosure: ready.length > 0 || silentPending.length > 0 ? 'CRITICAL' : healthDomains.settlementClosure.status,
       productReadiness: healthDomains.productReadiness.status,
       actionRequiredCausedBy: actionRequiredReasons,
+      operationalWarnings: operationalWarningReasons,
     } : null,
     actionRequiredReasons,
+    operationalWarningReasons,
     readyForSettlement: ready.slice(0, 25),
     blockedWithReason: blocked.slice(0, 25),
     guarantee: success ? 'PASS' : 'ACTION_REQUIRED',

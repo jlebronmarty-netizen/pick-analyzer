@@ -19,3 +19,22 @@ Created Mission Control V1:
 - validator and certification artifacts.
 
 No provider calls, production data mutations, prediction changes, settlement changes, learning changes, scheduler changes, Official Pick policy changes or manual deployment actions are part of MC-00.
+
+## 2026-08-02 - MC-01 Operational Readiness Closure
+
+Starting commit: `ed7a9d932ee3257fa7a20c84770c89edd4712d06`.
+
+Production evidence confirmed MC-01 was the first eligible mission, but operational readiness remained conditional:
+
+- scheduler execution was `LATE` by one interval;
+- market freshness was `CRITICAL`;
+- provider budget was `HEALTHY`;
+- settlement closure had ready rows 0 and silent pending rows 0;
+- protected scheduler dry-run without `CRON_SECRET` returned HTTP 401 as expected.
+
+Repairs completed:
+
+- Mission Control runtime state now reflects MC-00 production certification and MC-01 conditional status.
+- Settlement Guarantee separates scheduler lateness into operational warnings instead of settlement failure when ready rows and silent pending rows are zero.
+
+MC-01 remains `CONDITIONAL_PASS` with MC-STOP-005 active until the protected external scheduler and market-freshness evidence recover.
