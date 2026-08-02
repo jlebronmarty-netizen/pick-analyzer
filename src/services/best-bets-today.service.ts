@@ -1,6 +1,7 @@
 import 'server-only'
 
 import {
+  emptyCurrentBoardProductFreshnessSla,
   getCurrentBoard,
   type CurrentBoardCandidate,
   type CurrentBoardResponse,
@@ -12,6 +13,7 @@ import {
 } from '@/services/market-intelligence-category.service'
 import { buildMarketAlignment } from '@/services/market-alignment.service'
 import { classifyMarketSemantics } from '@/services/market-semantics.service'
+import { evaluateProductFreshnessSla } from '@/services/product-freshness-sla.service'
 
 type BestBetsLabel = 'BEST BETS TODAY' | 'BEST BETS TODAY - NOT RECOMMENDED'
 type BestBetsMode = 'official_recommendations' | 'informational_not_recommended'
@@ -458,6 +460,33 @@ export async function getBestBetsToday({
 }
 
 export function validateBestBetsTodayFixtures() {
+  const fixtureFreshness = evaluateProductFreshnessSla({
+    surfaceId: 'best_opportunity',
+    eventId: 'event-1',
+    sportKey: 'baseball_mlb',
+    marketKey: 'moneyline',
+    selectionKey: 'HOM',
+    marketTimestamp: '2026-07-17T18:00:00.000Z',
+    marketObservedAt: '2026-07-17T18:00:00.000Z',
+    snapshotSource: 'sports_odds_snapshots',
+    eventStartTime: '2026-07-17T23:00:00.000Z',
+    lifecycleState: 'scheduled',
+    priceAvailable: true,
+    policyEligible: false,
+    nowMs: Date.parse('2026-07-17T18:05:00.000Z'),
+  })
+  const fixtureSurfaceFreshness = {
+    currentBoard: fixtureFreshness,
+    rentPlay: fixtureFreshness,
+    moneylineBet: fixtureFreshness,
+    smartParlay: fixtureFreshness,
+    officialPick: fixtureFreshness,
+    bestOpportunity: fixtureFreshness,
+    mostLikely: fixtureFreshness,
+    bestValue: fixtureFreshness,
+    bettingWorkspace: fixtureFreshness,
+    gameIntelligence: fixtureFreshness,
+  }
   const base = {
     predictionId: 'fixture-1',
     snapshotId: 'snapshot-1',
@@ -602,6 +631,8 @@ export function validateBestBetsTodayFixtures() {
     parkContext: { stadiumId: '10' },
     summary: 'fixture',
     logicalKey: 'fixture',
+    productFreshness: fixtureFreshness,
+    surfaceFreshness: fixtureSurfaceFreshness,
   } satisfies CurrentBoardCandidate
   const board = {
     success: true,
@@ -647,6 +678,7 @@ export function validateBestBetsTodayFixtures() {
       staleVisibleMarketCount: 0,
       freshnessTimestampSource: base.marketFreshnessSource,
     },
+    productFreshnessSla: emptyCurrentBoardProductFreshnessSla(),
     officialPickCount: 0,
     previewCount: 1,
     modeledValueCount: 1,

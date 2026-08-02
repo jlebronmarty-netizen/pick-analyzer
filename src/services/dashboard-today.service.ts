@@ -1,4 +1,5 @@
 import 'server-only'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import {
@@ -1072,6 +1073,7 @@ function mapPredictionToGroundedOpportunity(candidate: CurrentBoardCandidate) {
       : aligned
         ? 'INFORMATIONAL_PRICED'
         : 'INFORMATIONAL_MODEL'
+  const productFreshness = candidate.surfaceFreshness.bestOpportunity
   return {
     id: candidate.predictionId,
     predictionId: candidate.predictionId,
@@ -1108,6 +1110,9 @@ function mapPredictionToGroundedOpportunity(candidate: CurrentBoardCandidate) {
       edgePercentagePoints: aligned ? candidate.canonicalEv?.edge ?? null : null,
       expectedValuePercent: aligned ? candidate.canonicalEv?.expectedValue ?? null : null,
     },
+    productFreshness,
+    productFreshnessStatus: productFreshness.status,
+    productFreshnessActionability: productFreshness.actionability,
     actionability,
     statusLabel: actionability === 'ACTIONABLE' ? 'Actionable Opportunity' : aligned ? 'Grounded Priced Opportunity' : 'Grounded Model Opportunity',
     opportunityCategory: actionability === 'ACTIONABLE' ? 'grounded_actionable' : aligned ? 'grounded_priced' : 'grounded_model',
@@ -1740,6 +1745,33 @@ export async function getDashboardToday({
       maxAllowedAgeMinutes: 90,
       nextRecommendedRefreshTime: null,
     },
+    productFreshnessSla: {
+      total: 0,
+      byStatus: {},
+      byActionability: {},
+      staleOrBlocked: 0,
+      actionable: 0,
+      reviewOnly: 0,
+      missingTimestamps: 0,
+      oldestMarketAgeMinutes: null,
+      newestMarketAgeMinutes: null,
+      warnings: ['Current Board is temporarily unavailable.'],
+      surfaces: {
+        currentBoard: { total: 0, byStatus: {}, byActionability: {}, staleOrBlocked: 0, actionable: 0, reviewOnly: 0, missingTimestamps: 0, oldestMarketAgeMinutes: null, newestMarketAgeMinutes: null, warnings: [] },
+        rentPlay: { total: 0, byStatus: {}, byActionability: {}, staleOrBlocked: 0, actionable: 0, reviewOnly: 0, missingTimestamps: 0, oldestMarketAgeMinutes: null, newestMarketAgeMinutes: null, warnings: [] },
+        moneylineBet: { total: 0, byStatus: {}, byActionability: {}, staleOrBlocked: 0, actionable: 0, reviewOnly: 0, missingTimestamps: 0, oldestMarketAgeMinutes: null, newestMarketAgeMinutes: null, warnings: [] },
+        smartParlay: { total: 0, byStatus: {}, byActionability: {}, staleOrBlocked: 0, actionable: 0, reviewOnly: 0, missingTimestamps: 0, oldestMarketAgeMinutes: null, newestMarketAgeMinutes: null, warnings: [] },
+        officialPick: { total: 0, byStatus: {}, byActionability: {}, staleOrBlocked: 0, actionable: 0, reviewOnly: 0, missingTimestamps: 0, oldestMarketAgeMinutes: null, newestMarketAgeMinutes: null, warnings: [] },
+        bestOpportunity: { total: 0, byStatus: {}, byActionability: {}, staleOrBlocked: 0, actionable: 0, reviewOnly: 0, missingTimestamps: 0, oldestMarketAgeMinutes: null, newestMarketAgeMinutes: null, warnings: [] },
+        mostLikely: { total: 0, byStatus: {}, byActionability: {}, staleOrBlocked: 0, actionable: 0, reviewOnly: 0, missingTimestamps: 0, oldestMarketAgeMinutes: null, newestMarketAgeMinutes: null, warnings: [] },
+        bestValue: { total: 0, byStatus: {}, byActionability: {}, staleOrBlocked: 0, actionable: 0, reviewOnly: 0, missingTimestamps: 0, oldestMarketAgeMinutes: null, newestMarketAgeMinutes: null, warnings: [] },
+        bettingWorkspace: { total: 0, byStatus: {}, byActionability: {}, staleOrBlocked: 0, actionable: 0, reviewOnly: 0, missingTimestamps: 0, oldestMarketAgeMinutes: null, newestMarketAgeMinutes: null, warnings: [] },
+        gameIntelligence: { total: 0, byStatus: {}, byActionability: {}, staleOrBlocked: 0, actionable: 0, reviewOnly: 0, missingTimestamps: 0, oldestMarketAgeMinutes: null, newestMarketAgeMinutes: null, warnings: [] },
+      },
+      canonicalTimestampProof: 'provider_market_timestamp_not_page_generated_time',
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+    },
     boardHealth: {
       status: 'EMPTY' as const,
       warnings: ['Current Board is temporarily unavailable.'],
@@ -2186,7 +2218,14 @@ export async function getDashboardToday({
     sections: {
       core: section(
         hasCriticalError ? 'DEGRADED' : currentGames || upcomingGames || predictionCandidates ? 'AVAILABLE' : 'EMPTY',
-        { currentGames, upcomingGames, predictionCandidates, officialPicks, freshness: board.dataFreshness.status },
+        {
+          currentGames,
+          upcomingGames,
+          predictionCandidates,
+          officialPicks,
+          freshness: board.dataFreshness.status,
+          productFreshnessSla: board.productFreshnessSla,
+        },
         hasCriticalError ? 'One or more critical Today dependencies is degraded.' : null,
         generatedAt
       ),

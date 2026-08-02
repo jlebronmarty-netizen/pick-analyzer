@@ -200,6 +200,7 @@ export async function getGameIntelligence(eventId: string) {
       venue: event.venue ?? (event.metadata?.venue as string | undefined) ?? null,
       timezone: 'America/Puerto_Rico',
       dataFreshness,
+      productFreshness: topCandidate?.surfaceFreshness.gameIntelligence ?? null,
     },
     model: topCandidate ? {
       homeWinProbability: topCandidate.normalizedSelection === 'home' ? topCandidate.rawProbability : null,
@@ -244,6 +245,7 @@ export async function getGameIntelligence(eventId: string) {
         sportsbook: candidate.sportsbook,
         snapshotTime: canonicalPrice.timestamp ?? candidate.marketInputTimestamp,
         freshness: candidate.marketAlignment.freshnessStatus,
+        productFreshness: candidate.surfaceFreshness.gameIntelligence,
         impliedProbability: canonicalPrice.impliedProbability,
         snapshotEdge: canonicalEv.edge,
         snapshotEv: canonicalEv.expectedValue,
@@ -312,6 +314,12 @@ export async function getGameIntelligence(eventId: string) {
         noBettingActivation: true,
       },
       markets: candidates,
+      productFreshness: {
+        event: topCandidate?.surfaceFreshness.gameIntelligence ?? null,
+        markets: candidates.map((candidate) => candidate.surfaceFreshness.gameIntelligence),
+        providerCallsMade: 0,
+        remoteMutationsMade: 0,
+      },
       aiExplanation: {
         positiveFactors: [
           ...(topCandidate?.positiveFactors ?? []),

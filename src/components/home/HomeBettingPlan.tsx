@@ -17,6 +17,12 @@ type Selector = {
   modelProbability?: number | null
   confidence?: number | null
   priceState?: string | null
+  productFreshness?: {
+    status?: string
+    actionability?: string
+    marketTimestamp?: string | null
+    nextPlannedRefreshAt?: string | null
+  } | null
   americanOdds?: number | null
   sportsbook?: string | null
   impliedProbability?: number | null
@@ -89,6 +95,9 @@ type PlanPick = {
   ev: number | null
   freshness: string
   modelVersion: string
+  freshnessActionability?: string
+  marketTimestamp?: string | null
+  nextRefreshAt?: string | null
   evidence: string[]
   official: boolean
   qualified: boolean
@@ -166,7 +175,12 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
   const edge = numberOrNull(selector.edge)
   const probability = numberOrNull(selector.modelProbability)
   const confidence = numberOrNull(selector.confidence)
-  const qualified = selector.freshness !== 'STALE' && selector.priceState !== 'STALE_PREGAME_PRICE' && (official || probability !== null || confidence !== null)
+  const freshness = label(selector.productFreshness?.status ?? selector.freshness ?? selector.priceState, 'Freshness unavailable')
+  const freshnessActionability = label(selector.productFreshness?.actionability, 'INFORMATIONAL_ONLY')
+  const qualified = !['STALE', 'INVALID_FUTURE', 'POST_START', 'MARKET_CLOSED'].includes(freshness) &&
+    !['BLOCKED', 'WAIT_FOR_REFRESH', 'UNAVAILABLE'].includes(freshnessActionability) &&
+    selector.priceState !== 'STALE_PREGAME_PRICE' &&
+    (official || probability !== null || confidence !== null)
   return {
     id,
     label: source,
@@ -180,11 +194,14 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
     confidence,
     edge,
     ev,
-    freshness: label(selector.freshness ?? selector.priceState, 'Freshness unavailable'),
+    freshness,
     modelVersion: 'Model version unavailable',
+    freshnessActionability,
+    marketTimestamp: selector.productFreshness?.marketTimestamp ?? null,
+    nextRefreshAt: selector.productFreshness?.nextPlannedRefreshAt ?? null,
     evidence: [
       `Source: ${source}`,
-      `Freshness: ${label(selector.freshness ?? selector.priceState, 'unknown')}`,
+      `Freshness: ${freshness}`,
       edge !== null ? `Edge ${signedPct(edge)}` : 'Edge unavailable',
       ev !== null ? `EV ${signedPct(ev)}` : 'EV unavailable',
     ],
@@ -199,8 +216,11 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
   const confidence = numberOrNull(row.confidence)
   const edge = numberOrNull(row.edgePercentagePoints ?? row.edge)
   const ev = numberOrNull(row.expectedValuePercent ?? row.expectedValue ?? row.ev)
-  const freshness = label(row.freshnessStatus ?? row.freshness, 'Freshness unavailable')
-  const qualified = !/stale|avoid|do not act/i.test(`${freshness} ${row.blocker ?? ''} ${row.reasonNotOfficial ?? ''}`)
+  const productFreshness = row.productFreshness && typeof row.productFreshness === 'object' ? row.productFreshness as Record<string, unknown> : null
+  const freshness = label(productFreshness?.status ?? row.freshnessStatus ?? row.freshness, 'Freshness unavailable')
+  const freshnessActionability = label(productFreshness?.actionability, 'INFORMATIONAL_ONLY')
+  const qualified = !/stale|avoid|do not act/i.test(`${freshness} ${row.blocker ?? ''} ${row.reasonNotOfficial ?? ''}`) &&
+    !['BLOCKED', 'WAIT_FOR_REFRESH', 'UNAVAILABLE'].includes(freshnessActionability)
   const modelVersion = label(row.modelVersion ?? row.model_version, 'Model version unavailable')
   const evidence = arrayValue(row.supportingEvidence ?? row.evidence ?? row.positiveFactors)
     .map((item) => label(item, ''))
@@ -220,6 +240,9 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
     ev,
     freshness,
     modelVersion,
+    freshnessActionability,
+    marketTimestamp: typeof productFreshness?.marketTimestamp === 'string' ? productFreshness.marketTimestamp : null,
+    nextRefreshAt: typeof productFreshness?.nextPlannedRefreshAt === 'string' ? productFreshness.nextPlannedRefreshAt : null,
     evidence: [
       ...evidence.slice(0, 3),
       `Source: ${source}`,
@@ -422,6 +445,10 @@ function PickCard({
             <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
               <p className="text-xs font-bold uppercase text-slate-500">Freshness</p>
               <p className="mt-1 text-sm font-black text-white">{pick.freshness}</p>
+            </div>
+            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
+              <p className="text-xs font-bold uppercase text-slate-500">Actionability</p>
+              <p className="mt-1 text-sm font-black text-white">{pick.freshnessActionability ?? 'INFORMATIONAL_ONLY'}</p>
             </div>
           </div>
           <div className="mt-5 grid gap-4">

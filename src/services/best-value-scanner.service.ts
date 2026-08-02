@@ -147,6 +147,13 @@ export async function getBestValueOpportunities({
       officialPickCount: board.officialPickCount,
       latestOddsCapture: board.latestOddsTimestamp,
       dataFreshness: board.dataFreshness,
+      productFreshnessSla: {
+        bestValue: board.productFreshnessSla.surfaces.bestValue,
+        currentBoard: board.productFreshnessSla.surfaces.currentBoard,
+        proof: board.productFreshnessSla.canonicalTimestampProof,
+        providerCallsMade: 0,
+        remoteMutationsMade: 0,
+      },
       warning: positiveValue.length
         ? 'Positive value is aligned to fresh selected market data and remains informational until official gates qualify it.'
         : noPositiveValueWarning(sourceCandidates),
@@ -237,6 +244,8 @@ export async function getBestValueOpportunities({
         canonicalMarketState: classification.canonicalState,
         marketValueQuality: classification.valueQuality,
         marketFreshnessState: classification.freshnessState,
+        productFreshness: candidate.surfaceFreshness.bestValue,
+        surfaceFreshness: candidate.surfaceFreshness,
         primaryBlocker: classification.primaryBlocker,
         improvementPath: classification.improvementPath,
         opportunityCategory: classification.label,

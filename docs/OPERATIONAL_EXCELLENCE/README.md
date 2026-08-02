@@ -11,3 +11,4 @@ Bounded operational audits and certifications for production behavior that shoul
 - [OE-003C Per-Event Lifecycle State](OE_003C_PER_EVENT_LIFECYCLE_STATE.md)
 - [OE-003D Event-Level Refresh Planner](OE_003D_EVENT_LEVEL_REFRESH_PLANNER.md)
 - [OE-003E Canonical Acquisition Active Execution](OE_003E_CANONICAL_ACQUISITION_ACTIVE_EXECUTION.md)
+- [OE-003F Product Freshness SLA](OE_003F_PRODUCT_FRESHNESS_SLA.md)

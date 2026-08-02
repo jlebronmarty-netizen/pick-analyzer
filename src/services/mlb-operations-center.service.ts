@@ -214,6 +214,8 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
   const boardGames = records(board.games)
   const boardCandidates = records(board.candidates)
   const dataFreshness = record(board.dataFreshness)
+  const productFreshnessSla = record(board.productFreshnessSla)
+  const productFreshnessSurfaces = record(productFreshnessSla.surfaces)
   const boardHealth = record(board.boardHealth)
   const slate = record(dataQuality.slate)
   const scores = record(dataQuality.scores)
@@ -447,6 +449,18 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
       currentBoardHealth: text(boardHealth.status, 'unknown'),
       latestOddsTimestamp: text(board.latestOddsTimestamp, ''),
       freshness: text(dataFreshness.status, 'unknown'),
+      productFreshnessSla: {
+        contractVersion: 'product_freshness_sla_v1',
+        currentBoard: productFreshnessSurfaces.currentBoard ?? null,
+        rentPlay: productFreshnessSurfaces.rentPlay ?? null,
+        moneylineBet: productFreshnessSurfaces.moneylineBet ?? null,
+        smartParlay: productFreshnessSurfaces.smartParlay ?? null,
+        officialPick: productFreshnessSurfaces.officialPick ?? null,
+        bestOpportunity: productFreshnessSurfaces.bestOpportunity ?? null,
+        proof: text(productFreshnessSla.canonicalTimestampProof, 'provider_market_timestamp_not_page_generated_time'),
+        providerCallsMade: 0,
+        remoteMutationsMade: 0,
+      },
     },
     providerHealth: {
       sportsDataIO: 'configured_provider',

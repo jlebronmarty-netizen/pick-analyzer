@@ -1,4 +1,5 @@
 import 'server-only'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { getBestValueOpportunities } from '@/services/best-value-scanner.service'
 import { getCurrentBoardCached, type CurrentBoardCandidate } from '@/services/current-board.service'
@@ -139,6 +140,13 @@ function responseMeta(board: Awaited<ReturnType<typeof getCurrentBoardCached>>, 
     candidatesScanned: board.candidates.length,
     candidatesMatched: matched,
     officialPickStatus: board.officialPickCount > 0 ? `${board.officialPickCount} official picks` : 'No official picks are currently enabled.',
+    productFreshnessSla: {
+      bettingWorkspace: board.productFreshnessSla.surfaces.bettingWorkspace,
+      officialPick: board.productFreshnessSla.surfaces.officialPick,
+      proof: board.productFreshnessSla.canonicalTimestampProof,
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+    },
     previewOrQuarantined: board.candidates.some((candidate) => candidate.quarantined),
     noValidResult: matched === 0,
     providerCallsMade: 0,
@@ -193,6 +201,7 @@ function summarizeCandidate(candidate: CurrentBoardCandidate) {
     canonicalMarketState: classification.canonicalState,
     marketValueQuality: classification.valueQuality,
     marketFreshnessState: classification.freshnessState,
+    productFreshness: candidate.surfaceFreshness.bettingWorkspace,
     primaryBlocker: classification.primaryBlocker,
     improvementPath: classification.improvementPath,
     reasonNotOfficial: reasonNotOfficial(candidate),

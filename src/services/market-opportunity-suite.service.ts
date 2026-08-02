@@ -1,4 +1,5 @@
 import 'server-only'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getCurrentBoardCached, mapLegacyBoardMode, type CurrentBoardCandidate } from '@/services/current-board.service'
@@ -7,6 +8,10 @@ import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-nor
 import { getModelOnlyIntelligence } from '@/services/model-only-intelligence.service'
 import { classifyMarketSemantics } from '@/services/market-semantics.service'
 import { buildExplainableIntelligence } from '@/services/explainable-intelligence.service'
+import {
+  evaluateProductFreshnessSla,
+  type ProductFreshnessSla,
+} from '@/services/product-freshness-sla.service'
 
 type PredictionRow = {
   id: string
@@ -596,6 +601,8 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
     canonicalPrice,
     canonicalEv,
     canonicalReason: candidate.canonicalReason ?? canonicalEv.reason,
+    productFreshness: candidate.surfaceFreshness.mostLikely,
+    surfaceFreshness: candidate.surfaceFreshness,
     recommendationExplanation: candidate.recommendationExplanation,
     selectedOddsSnapshotId: canonicalPrice.oddsSnapshotId,
     selectedOddsSource: canonicalPrice.source,
@@ -607,6 +614,21 @@ function currentBoardCandidateToMostLikelyCard(candidate: CurrentBoardCandidate)
 }
 
 type CanonicalProbabilityCard = ReturnType<typeof currentBoardCandidateToMostLikelyCard>
+
+function modelOnlySurfaceFreshness(freshness: ProductFreshnessSla) {
+  return {
+    currentBoard: freshness,
+    rentPlay: freshness,
+    moneylineBet: freshness,
+    smartParlay: freshness,
+    officialPick: freshness,
+    bestOpportunity: freshness,
+    mostLikely: freshness,
+    bestValue: freshness,
+    bettingWorkspace: freshness,
+    gameIntelligence: freshness,
+  }
+}
 
 function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCard {
   const sourceProbability = Math.max(0, Math.min(100, round(Number(outcome.modelProbability ?? outcome.probability ?? 0))))
@@ -621,6 +643,21 @@ function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCar
   const probability = complementDerived ? complementProbability : sourceProbability
   const selection = complementDerived ? complementForOutcome({ market, selection: sourceSelection, matchup }) : sourceSelection
   const displayedLine = complementDerived && outcome.line !== null && outcome.line !== undefined ? -Number(outcome.line) : outcome.line ?? null
+  const eventStartTime = typeof outcome.startTime === 'string' ? outcome.startTime : null
+  const productFreshness = evaluateProductFreshnessSla({
+    surfaceId: 'most_likely',
+    eventId: String(outcome.eventId ?? ''),
+    sportKey: String(outcome.sportKey ?? 'baseball_mlb'),
+    marketKey: market,
+    selectionKey: selection,
+    marketTimestamp: null,
+    marketObservedAt: null,
+    snapshotSource: 'model_only',
+    eventStartTime,
+    lifecycleState: String(outcome.eventStatus ?? 'scheduled'),
+    priceAvailable: false,
+    policyEligible: false,
+  })
   return ({
     id: String(outcome.id ?? `${outcome.eventId ?? 'model'}:${market}:${outcome.selection ?? 'selection'}`),
     sportKey: String(outcome.sportKey ?? 'baseball_mlb'),
@@ -731,6 +768,8 @@ function modelOnlyOutcomeToMostLikelyCard(outcome: any): CanonicalProbabilityCar
       marketImpliedProbability: null,
     },
     recommendationExplanation: null,
+    productFreshness,
+    surfaceFreshness: modelOnlySurfaceFreshness(productFreshness),
     selectedOddsSnapshotId: null,
     selectedOddsSource: 'model_only',
     anomalies: [],
@@ -848,6 +887,36 @@ function mostLikelyMoneylineFrom(rows: CanonicalProbabilityCard[]) {
   }
 }
 
+function parlayFreshnessFrom(legs: CanonicalProbabilityCard[]) {
+  const blockingActionability = new Set(['BLOCKED', 'WAIT_FOR_REFRESH', 'UNAVAILABLE'])
+  const freshnessRows = legs
+    .map((leg) => leg.productFreshness)
+    .filter((freshness): freshness is ProductFreshnessSla => Boolean(freshness))
+  const ages = freshnessRows
+    .map((freshness) => freshness.marketAgeMinutes)
+    .filter((age): age is number => typeof age === 'number' && Number.isFinite(age))
+  return {
+    contractVersion: 'product_freshness_sla_v1',
+    combinedTimestampPolicy: 'stalest_required_leg_limits_parlay',
+    legCount: legs.length,
+    allLegsFresh: freshnessRows.length === legs.length && freshnessRows.every((freshness) => freshness.status === 'FRESH'),
+    actionable: freshnessRows.length === legs.length && freshnessRows.every((freshness) => !blockingActionability.has(freshness.actionability)),
+    freshestLegAgeMinutes: ages.length ? Math.min(...ages) : null,
+    stalestLegAgeMinutes: ages.length ? Math.max(...ages) : null,
+    blockingLegs: legs
+      .filter((leg) => leg.productFreshness && blockingActionability.has(leg.productFreshness.actionability))
+      .map((leg) => ({
+        eventId: leg.eventId,
+        selection: leg.selection,
+        status: leg.productFreshness.status,
+        actionability: leg.productFreshness.actionability,
+        reasonCodes: leg.productFreshness.reasonCodes,
+      })),
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  }
+}
+
 function parlayFrom(rows: CanonicalProbabilityCard[]) {
   const legs = moneylineRank(rows)
     .filter((row, index, all) => all.findIndex((candidate) => candidate.eventId === row.eventId) === index)
@@ -865,6 +934,7 @@ function parlayFrom(rows: CanonicalProbabilityCard[]) {
       correlationAdjustment: 'not_enough_eligible_legs',
       officialStatus: 'informational_only',
       blockers: ['NEEDS_TWO_DISTINCT_VALID_MONEYLINES'],
+      productFreshness: parlayFreshnessFrom(legs),
       disclaimer: 'No informational two-leg moneyline parlay is available.',
     }
   }
@@ -893,6 +963,7 @@ function parlayFrom(rows: CanonicalProbabilityCard[]) {
       'PARLAY_NOT_OFFICIAL_RECOMMENDATION',
       ...Array.from(new Set(legs.flatMap((leg) => leg.blockers))),
     ],
+    productFreshness: parlayFreshnessFrom(legs),
     disclaimer:
       'Estimated joint probability assumes independence, then applies a conservative haircut. This is informational only and may still be negative EV.',
   }
@@ -1116,9 +1187,19 @@ export async function getMostLikelyOpportunities({
         slateDate: board.slateDate,
         latestOddsTimestamp: board.latestOddsTimestamp,
         dataFreshness: board.dataFreshness,
+        productFreshnessSla: board.productFreshnessSla,
         uniqueRowsExcluded: board.excludedRowSummary.uniqueRowsExcluded,
         exclusionReasonCounts: board.excludedRowSummary.exclusionReasonCounts,
         boardHealth: board.boardHealth,
+      },
+      productFreshnessSla: {
+        mostLikely: board.productFreshnessSla.surfaces.mostLikely,
+        moneylineBet: board.productFreshnessSla.surfaces.moneylineBet,
+        smartParlay: board.productFreshnessSla.surfaces.smartParlay,
+        bestOpportunity: board.productFreshnessSla.surfaces.bestOpportunity,
+        proof: board.productFreshnessSla.canonicalTimestampProof,
+        providerCallsMade: 0,
+        remoteMutationsMade: 0,
       },
       audit: {
         rowsBeforeFiltering: board.excludedRowSummary.rowsBeforeFiltering,

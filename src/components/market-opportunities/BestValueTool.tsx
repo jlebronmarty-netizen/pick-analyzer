@@ -39,6 +39,13 @@ type Opportunity = {
   informationalWarning?: string | null
   reasonNotOfficial?: string | null
   explainableIntelligence?: ExplainableIntelligence
+  productFreshness?: {
+    status?: string
+    actionability?: string
+    marketTimestamp?: string | null
+    marketAgeMinutes?: number | null
+    nextPlannedRefreshAt?: string | null
+  }
 }
 
 type ExplanationFactor = { label: string; impact: string; status: string; evidence: string; confidenceImpact: string }
@@ -85,6 +92,18 @@ function points(value: number | null | undefined) {
   if (value === null || value === undefined || !Number.isFinite(Number(value))) return 'N/A'
   const parsed = Number(value)
   return `${parsed > 0 ? '+' : ''}${parsed.toFixed(2)} pts`
+}
+
+function time(value: string | null | undefined) {
+  if (!value) return 'N/A'
+  return new Date(value).toLocaleString([], {
+    timeZone: 'America/Puerto_Rico',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  })
 }
 
 function tone(value: number | null | undefined) {
@@ -210,7 +229,9 @@ export default function BestValueTool() {
                     <Metric label="Model" value={pct(item.canonicalDisplayProbability ?? item.rawProbability)} />
                     <Metric label="Book" value={pct(item.canonicalDisplayImpliedProbability ?? item.impliedProbability)} />
                     <Metric label="Confidence" value={pct(item.confidence)} />
-                    <Metric label="Reliability" value={item.reliability} />
+                    <Metric label="Freshness SLA" value={item.productFreshness?.status ?? item.reliability} />
+                    <Metric label="Actionability" value={item.productFreshness?.actionability ?? 'INFORMATIONAL'} />
+                    <Metric label="Market Time" value={time(item.productFreshness?.marketTimestamp ?? null)} />
                   </div>
                 </div>
                 {item.reasonNotOfficial ? (

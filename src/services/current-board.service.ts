@@ -32,6 +32,11 @@ import {
 } from '@/services/mlb-ai-picks-feed.service'
 import { classifyMarketSemantics, type MarketSemantics, type SupportedMarketType } from '@/services/market-semantics.service'
 import { normalizeStoredSportsDataIoMlbStart, zonedUtcRange } from '@/services/provider-time-normalization.service'
+import {
+  evaluateProductFreshnessSla,
+  summarizeProductFreshnessSlas,
+  type ProductFreshnessSla,
+} from '@/services/product-freshness-sla.service'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
 
@@ -207,6 +212,19 @@ export type CurrentBoardCandidate = {
     source: 'selected_stored_price' | 'unavailable'
     status: 'AVAILABLE' | 'NO_STORED_ODDS' | 'NO_OPPOSITE_PRICE' | 'STALE_MARKET' | 'MARKET_MISMATCH' | 'UNKNOWN_PUSH'
   }
+  productFreshness: ProductFreshnessSla
+  surfaceFreshness: {
+    currentBoard: ProductFreshnessSla
+    rentPlay: ProductFreshnessSla
+    moneylineBet: ProductFreshnessSla
+    smartParlay: ProductFreshnessSla
+    officialPick: ProductFreshnessSla
+    bestOpportunity: ProductFreshnessSla
+    mostLikely: ProductFreshnessSla
+    bestValue: ProductFreshnessSla
+    bettingWorkspace: ProductFreshnessSla
+    gameIntelligence: ProductFreshnessSla
+  }
   canonicalEv?: {
     edge: number | null
     expectedValue: number | null
@@ -312,6 +330,23 @@ export type CurrentBoardResponse = {
     staleVisibleMarketCount: number
     freshnessTimestampSource: CurrentBoardCandidate['marketFreshnessSource'] | null
   }
+  productFreshnessSla: ReturnType<typeof summarizeProductFreshnessSlas> & {
+    surfaces: {
+      currentBoard: ReturnType<typeof summarizeProductFreshnessSlas>
+      rentPlay: ReturnType<typeof summarizeProductFreshnessSlas>
+      moneylineBet: ReturnType<typeof summarizeProductFreshnessSlas>
+      smartParlay: ReturnType<typeof summarizeProductFreshnessSlas>
+      officialPick: ReturnType<typeof summarizeProductFreshnessSlas>
+      bestOpportunity: ReturnType<typeof summarizeProductFreshnessSlas>
+      mostLikely: ReturnType<typeof summarizeProductFreshnessSlas>
+      bestValue: ReturnType<typeof summarizeProductFreshnessSlas>
+      bettingWorkspace: ReturnType<typeof summarizeProductFreshnessSlas>
+      gameIntelligence: ReturnType<typeof summarizeProductFreshnessSlas>
+    }
+    canonicalTimestampProof: 'provider_market_timestamp_not_page_generated_time'
+    providerCallsMade: 0
+    remoteMutationsMade: 0
+  }
   officialPickExperience?: OfficialPickExperience
   aiPicksFeed?: MlbAiPicksFeed
   officialPickCount: number
@@ -404,6 +439,28 @@ export type CurrentBoardResponse = {
     expectedStarters: number
     providerCallsMade: 0
     remoteMutationsMade: 0
+  }
+}
+
+export function emptyCurrentBoardProductFreshnessSla() {
+  const empty = summarizeProductFreshnessSlas([])
+  return {
+    ...empty,
+    surfaces: {
+      currentBoard: empty,
+      rentPlay: empty,
+      moneylineBet: empty,
+      smartParlay: empty,
+      officialPick: empty,
+      bestOpportunity: empty,
+      mostLikely: empty,
+      bestValue: empty,
+      bettingWorkspace: empty,
+      gameIntelligence: empty,
+    },
+    canonicalTimestampProof: 'provider_market_timestamp_not_page_generated_time' as const,
+    providerCallsMade: 0 as const,
+    remoteMutationsMade: 0 as const,
   }
 }
 
@@ -571,6 +628,16 @@ function oddsSourceTimestamp(odds: OddsRow | null | undefined, row?: PredictionR
 function oddsFetchedAt(odds: OddsRow | null | undefined) {
   const metadata = asRecord(odds?.metadata)
   return validTimestamp(metadata.capturedAt) ?? validTimestamp(metadata.fetchedAt) ?? validTimestamp(metadata.ingestedAt)
+}
+
+function oddsAcquisitionId(odds: OddsRow | null | undefined) {
+  const metadata = asRecord(odds?.metadata)
+  return typeof metadata.canonicalAcquisitionId === 'string' ? metadata.canonicalAcquisitionId : null
+}
+
+function oddsDeduplicationKey(odds: OddsRow | null | undefined) {
+  const metadata = asRecord(odds?.metadata)
+  return typeof metadata.deduplicationKey === 'string' ? metadata.deduplicationKey : null
 }
 
 function selectedMarketFreshness(odds: OddsRow | null | undefined, row?: PredictionRow | null): {
@@ -930,6 +997,38 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
       : marketAlignment.alignmentStatus !== 'ALIGNED'
         ? marketAlignment.alignmentStatus
         : marketAlignment.actionableUnavailableReason ?? 'ALIGNED'
+  const scheduledTime = canonicalEventStart(event, row.commence_time)
+  const policyEligible = row.production_eligible === true
+  const surfaceFreshnessBase = {
+    eventId: row.game_id,
+    sportKey: row.sport_key,
+    marketKey: market,
+    selectionKey: normalizedSelection(row),
+    marketTimestamp: marketSourceTimestamp,
+    marketObservedAt: providerFetchedAt ?? oddsIngestedAt,
+    canonicalAcquisitionId: oddsAcquisitionId(odds),
+    acquisitionDeduplicationKey: oddsDeduplicationKey(odds),
+    providerId: odds?.provider ?? null,
+    snapshotSource: odds ? 'sports_odds_snapshots' as const : row.odds_timestamp ? 'prediction_history_offered_price' as const : 'unavailable' as const,
+    eventStartTime: scheduledTime,
+    lifecycleState: event?.status ?? row.status ?? 'unknown',
+    plannerMode: 'ACTIVE' as const,
+    priceAvailable: selectedOdds !== null,
+    policyEligible,
+    nowMs,
+  }
+  const surfaceFreshness = {
+    currentBoard: evaluateProductFreshnessSla({ ...surfaceFreshnessBase, surfaceId: 'current_board' }),
+    rentPlay: evaluateProductFreshnessSla({ ...surfaceFreshnessBase, surfaceId: 'rent_play' }),
+    moneylineBet: evaluateProductFreshnessSla({ ...surfaceFreshnessBase, surfaceId: 'moneyline_bet' }),
+    smartParlay: evaluateProductFreshnessSla({ ...surfaceFreshnessBase, surfaceId: 'smart_parlay' }),
+    officialPick: evaluateProductFreshnessSla({ ...surfaceFreshnessBase, surfaceId: 'official_pick' }),
+    bestOpportunity: evaluateProductFreshnessSla({ ...surfaceFreshnessBase, surfaceId: 'best_opportunity' }),
+    mostLikely: evaluateProductFreshnessSla({ ...surfaceFreshnessBase, surfaceId: 'most_likely' }),
+    bestValue: evaluateProductFreshnessSla({ ...surfaceFreshnessBase, surfaceId: 'best_value' }),
+    bettingWorkspace: evaluateProductFreshnessSla({ ...surfaceFreshnessBase, surfaceId: 'betting_workspace' }),
+    gameIntelligence: evaluateProductFreshnessSla({ ...surfaceFreshnessBase, surfaceId: 'game_intelligence' }),
+  }
 
   return {
     predictionId: row.id,
@@ -939,7 +1038,7 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     sportKey: row.sport_key,
     leagueKey: event?.league_key ?? null,
     matchup: `${event?.away_team ?? row.away_team ?? 'Away'} @ ${event?.home_team ?? row.home_team ?? 'Home'}`,
-    scheduledTime: canonicalEventStart(event, row.commence_time),
+    scheduledTime,
     eventStatus: event?.status ?? row.status ?? 'unknown',
     market,
     marketLabel: marketLabel(market),
@@ -1007,6 +1106,8 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
       source: oppositeMoreLikely ? 'unavailable' : 'selected_stored_price',
       status: oppositeMoreLikely ? 'NO_OPPOSITE_PRICE' : stale ? 'STALE_MARKET' : marketAlignment.alignmentStatus === 'ALIGNED' ? 'AVAILABLE' : 'MARKET_MISMATCH',
     },
+    productFreshness: surfaceFreshness.currentBoard,
+    surfaceFreshness,
     canonicalEv: {
       edge: oppositeMoreLikely ? null : marketAlignment.edgePercentagePoints,
       expectedValue: oppositeMoreLikely ? null : marketAlignment.expectedValuePercent,
@@ -1388,6 +1489,24 @@ export async function getCurrentBoard({
   const nextRecommendedRefreshTime = latestOddsTimestamp
     ? new Date(new Date(latestOddsTimestamp).getTime() + maxAllowedAgeMinutes * 60000).toISOString()
     : null
+  const productFreshnessSla = {
+    ...summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.productFreshness)),
+    surfaces: {
+      currentBoard: summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.surfaceFreshness.currentBoard)),
+      rentPlay: summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.surfaceFreshness.rentPlay)),
+      moneylineBet: summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.surfaceFreshness.moneylineBet)),
+      smartParlay: summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.surfaceFreshness.smartParlay)),
+      officialPick: summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.surfaceFreshness.officialPick)),
+      bestOpportunity: summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.surfaceFreshness.bestOpportunity)),
+      mostLikely: summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.surfaceFreshness.mostLikely)),
+      bestValue: summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.surfaceFreshness.bestValue)),
+      bettingWorkspace: summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.surfaceFreshness.bettingWorkspace)),
+      gameIntelligence: summarizeProductFreshnessSlas(candidates.map((candidate) => candidate.surfaceFreshness.gameIntelligence)),
+    },
+    canonicalTimestampProof: 'provider_market_timestamp_not_page_generated_time' as const,
+    providerCallsMade: 0 as const,
+    remoteMutationsMade: 0 as const,
+  }
   const gamesById = new Map<string, CurrentBoardResponse['games'][number]>()
   for (const candidate of candidates) {
     const current = gamesById.get(candidate.eventId) ?? {
@@ -1527,6 +1646,7 @@ export async function getCurrentBoard({
       staleVisibleMarketCount,
       freshnessTimestampSource: latestFreshnessSource,
     },
+    productFreshnessSla,
     officialPickExperience,
     aiPicksFeed,
     officialPickCount: officialPickExperience.picks.length,

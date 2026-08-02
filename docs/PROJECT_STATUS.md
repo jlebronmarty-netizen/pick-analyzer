@@ -2,6 +2,13 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-02 OE-003F Product Freshness SLA
+
+- Implemented `product_freshness_sla_v1` as the canonical product-facing freshness and actionability contract for Today, Current Board, Rent Play, Moneyline Bet, Smart Parlay, Official Picks, Most Likely, Best Value, Betting Workbench, Game Intelligence, AI Bet Finder and MLB Operations.
+- Market freshness now uses stored provider/source market timestamps only. Page/API fetch time and `generatedAt` are not used as market freshness; missing, future, stale and post-start market evidence is downgraded or blocked explicitly.
+- Parlay freshness is governed by the stalest required leg. Product surfaces remain stored-data readers with zero provider calls and zero remote mutations.
+- No prediction math, probability, confidence, edge, EV, Kelly, Official Pick policy, settlement, learning, scheduler cadence, refresh cadence, provider mapping or provider budget behavior changed. OE-003G was not started.
+
 ## 2026-08-02 OE-003E Canonical Acquisition Active Execution
 
 - Implemented `canonical_acquisition_execution_v1` for bounded SportsDataIO MLB current operating-day pregame odds acquisition. The protected adaptive scheduler can now execute per-event planner decisions with one date-level provider-efficient `GameOddsByDate` request when ACTIVE guards pass.

@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getCurrentBoard, type CurrentBoardCandidate } from '@/services/current-board.service'
 import { buildMarketAlignment } from '@/services/market-alignment.service'
 import { classifyMarketSemantics } from '@/services/market-semantics.service'
+import { evaluateProductFreshnessSla } from '@/services/product-freshness-sla.service'
 import {
   evaluateRecommendationEligibility,
   isOfficialRecommendationStatus,
@@ -282,6 +283,33 @@ function gateDecisionFromCandidate(candidate: CurrentBoardCandidate, now = new D
 function fixtureCandidate(overrides: Partial<CurrentBoardCandidate> = {}): CurrentBoardCandidate {
   const now = new Date('2026-07-16T15:30:00.000Z')
   const start = '2026-07-17T23:10:00.000Z'
+  const productFreshness = evaluateProductFreshnessSla({
+    surfaceId: 'official_pick',
+    eventId: 'fixture:event:excellent',
+    sportKey: 'baseball_mlb',
+    marketKey: 'moneyline',
+    selectionKey: 'AWY',
+    marketTimestamp: now.toISOString(),
+    marketObservedAt: now.toISOString(),
+    snapshotSource: 'sports_odds_snapshots',
+    eventStartTime: start,
+    lifecycleState: 'scheduled',
+    priceAvailable: true,
+    policyEligible: false,
+    nowMs: now.getTime(),
+  })
+  const surfaceFreshness = {
+    currentBoard: productFreshness,
+    rentPlay: productFreshness,
+    moneylineBet: productFreshness,
+    smartParlay: productFreshness,
+    officialPick: productFreshness,
+    bestOpportunity: productFreshness,
+    mostLikely: productFreshness,
+    bestValue: productFreshness,
+    bettingWorkspace: productFreshness,
+    gameIntelligence: productFreshness,
+  }
   const base: CurrentBoardCandidate = {
     predictionId: 'fixture:prediction:excellent',
     snapshotId: 'fixture:snapshot:excellent',
@@ -379,6 +407,8 @@ function fixtureCandidate(overrides: Partial<CurrentBoardCandidate> = {}): Curre
     missingInformation: [],
     summary: 'Fixture candidate.',
     logicalKey: 'fixture:logical:excellent',
+    productFreshness,
+    surfaceFreshness,
   }
   return { ...base, ...overrides }
 }

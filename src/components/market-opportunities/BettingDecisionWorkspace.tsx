@@ -31,6 +31,10 @@ type Opportunity = {
   ev: number | null
   explanation: string
   freshness: string
+  freshnessStatus: string
+  freshnessActionability: string
+  marketTimestamp: string | null
+  nextRefreshAt: string | null
   modelVersion: string
   featureVersion: string
   evidenceQuality: 'decision-grade' | 'directional' | 'insufficient'
@@ -262,7 +266,13 @@ function mapBoardCandidate(candidate: Record<string, unknown>, segments: Record<
   const startTime = typeof candidate.scheduledTime === 'string' ? candidate.scheduledTime : typeof candidate.startTime === 'string' ? candidate.startTime : null
   const eventStatus = text(candidate.eventStatus ?? candidate.status, status)
   const boardLabel = text(candidate.boardLabel ?? candidate.source, 'Current Board')
-  const lastUpdate = typeof candidate.marketFreshnessTimestamp === 'string' ? candidate.marketFreshnessTimestamp : typeof candidate.oddsTimestamp === 'string' ? candidate.oddsTimestamp : typeof candidate.predictionGeneratedAt === 'string' ? candidate.predictionGeneratedAt : null
+  const productFreshness = candidate.productFreshness && typeof candidate.productFreshness === 'object' ? candidate.productFreshness as Record<string, unknown> : null
+  const marketTimestamp = typeof productFreshness?.marketTimestamp === 'string'
+    ? productFreshness.marketTimestamp
+    : typeof candidate.marketFreshnessTimestamp === 'string' ? candidate.marketFreshnessTimestamp : typeof candidate.oddsTimestamp === 'string' ? candidate.oddsTimestamp : null
+  const lastUpdate = marketTimestamp ?? (typeof candidate.predictionGeneratedAt === 'string' ? candidate.predictionGeneratedAt : null)
+  const freshnessStatus = text(productFreshness?.status ?? candidate.marketFreshnessState ?? candidate.freshness ?? candidate.canonicalMarketState, 'Unavailable')
+  const freshnessActionability = text(productFreshness?.actionability, 'INFORMATIONAL_ONLY')
   const warnings = warningsFor({ category, probability, price, edge, ev, sample: segment.sample, missing, startTime, eventStatus })
   return {
     id: text(candidate.id ?? candidate.predictionId, `${text(candidate.selection ?? candidate.team, 'selection')}-${market}`),
@@ -284,7 +294,11 @@ function mapBoardCandidate(candidate: Record<string, unknown>, segments: Record<
     edge,
     ev,
     explanation: text(candidate.why ?? candidate.reason ?? candidate.summary, 'Existing board evidence is available; no extra reason was supplied.'),
-    freshness: text(candidate.marketFreshnessState ?? candidate.freshness ?? candidate.canonicalMarketState, 'Unavailable'),
+    freshness: freshnessStatus,
+    freshnessStatus,
+    freshnessActionability,
+    marketTimestamp,
+    nextRefreshAt: typeof productFreshness?.nextPlannedRefreshAt === 'string' ? productFreshness.nextPlannedRefreshAt : null,
     modelVersion: text(candidate.modelVersion, 'Unavailable'),
     featureVersion: text(candidate.featureVersion, 'Unavailable'),
     evidenceQuality: evidence(segment.sample, official, probability, price),
@@ -333,6 +347,10 @@ function mapTopPick(pick: Record<string, unknown>, segments: Record<string, unkn
     ev,
     explanation: 'Official Pick source only; recommendation policy remains owned by Top Picks.',
     freshness: 'Stored recommendation evidence',
+    freshnessStatus: 'STORED_RECOMMENDATION',
+    freshnessActionability: 'INFORMATIONAL_ONLY',
+    marketTimestamp: null,
+    nextRefreshAt: null,
     modelVersion: text(pick.model_version ?? pick.modelVersion, 'Unavailable'),
     featureVersion: text(pick.feature_version ?? pick.featureVersion, 'Unavailable'),
     evidenceQuality: evidence(segment.sample, true, probability, price),
@@ -1023,8 +1041,9 @@ function Board({ grouped, selected, slipIds, onCompare, onSlip }: { grouped: Rec
 }
 
 function OpportunityCard({ item, selected, inSlip, onCompare, onSlip }: { item: Opportunity; selected: boolean; inSlip: boolean; onCompare: (id: string) => void; onSlip: (id: string) => void }) {
-  const readOnly = item.category === 'NO_BET' || locked(item.startTime, item.eventStatus)
-  return <article className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><Title item={item} /><div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><Metric label="Probability" value={pct(item.probability)} /><Metric label="Confidence" value={pct(item.confidence)} /><Metric label="Price" value={odds(item.odds)} /><Metric label="Evidence" value={item.evidenceQuality} /><Metric label="Risk" value={item.risk} /><Metric label="Current State" value={item.currentState} /><Metric label="Last Update" value={when(item.lastUpdate)} /><Metric label="Data Freshness" value={item.freshness} /><Metric label="Edge" value={signedPct(item.edge)} tone={(item.edge ?? 0) > 0 ? 'good' : 'warn'} /><Metric label="EV" value={signedPct(item.ev)} tone={(item.ev ?? 0) > 0 ? 'good' : 'warn'} /><Metric label="Market" value={item.market} /><Metric label="Model" value={item.modelVersion} /></div><p className="mt-4 text-sm leading-6 text-slate-300">{item.explanation}</p>{item.warnings.length ? <ul className="mt-4 space-y-1 text-sm text-amber-100">{item.warnings.slice(0, 4).map((warning) => <li key={warning}>- {warning}</li>)}</ul> : null}<div className="mt-4 flex gap-2"><button onClick={() => onCompare(item.id)} className={`rounded-lg px-4 py-2 text-sm font-black ${selected ? 'bg-sky-400 text-slate-950' : 'bg-slate-800 text-slate-200'}`}>Compare</button><button disabled={readOnly} onClick={() => onSlip(item.id)} className={`rounded-lg px-4 py-2 text-sm font-black ${readOnly ? 'cursor-not-allowed bg-slate-800 text-slate-500' : inSlip ? 'bg-emerald-400 text-slate-950' : 'bg-slate-800 text-slate-200'}`}>{readOnly ? 'Read Only' : inSlip ? 'In Slip' : 'Add to Slip'}</button></div></article>
+  const freshnessBlocked = ['BLOCKED', 'WAIT_FOR_REFRESH', 'UNAVAILABLE'].includes(item.freshnessActionability)
+  const readOnly = item.category === 'NO_BET' || locked(item.startTime, item.eventStatus) || freshnessBlocked
+  return <article className="rounded-lg border border-slate-800 bg-slate-900/70 p-5"><Title item={item} /><div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><Metric label="Probability" value={pct(item.probability)} /><Metric label="Confidence" value={pct(item.confidence)} /><Metric label="Price" value={odds(item.odds)} /><Metric label="Evidence" value={item.evidenceQuality} /><Metric label="Risk" value={item.risk} /><Metric label="Current State" value={item.currentState} /><Metric label="Market Time" value={when(item.marketTimestamp ?? item.lastUpdate)} /><Metric label="Freshness SLA" value={item.freshnessStatus} /><Metric label="Actionability" value={item.freshnessActionability} /><Metric label="Next Refresh" value={when(item.nextRefreshAt)} /><Metric label="Edge" value={signedPct(item.edge)} tone={(item.edge ?? 0) > 0 ? 'good' : 'warn'} /><Metric label="EV" value={signedPct(item.ev)} tone={(item.ev ?? 0) > 0 ? 'good' : 'warn'} /><Metric label="Market" value={item.market} /><Metric label="Model" value={item.modelVersion} /></div><p className="mt-4 text-sm leading-6 text-slate-300">{item.explanation}</p>{item.warnings.length ? <ul className="mt-4 space-y-1 text-sm text-amber-100">{item.warnings.slice(0, 4).map((warning) => <li key={warning}>- {warning}</li>)}</ul> : null}<div className="mt-4 flex gap-2"><button onClick={() => onCompare(item.id)} className={`rounded-lg px-4 py-2 text-sm font-black ${selected ? 'bg-sky-400 text-slate-950' : 'bg-slate-800 text-slate-200'}`}>Compare</button><button disabled={readOnly} onClick={() => onSlip(item.id)} className={`rounded-lg px-4 py-2 text-sm font-black ${readOnly ? 'cursor-not-allowed bg-slate-800 text-slate-500' : inSlip ? 'bg-emerald-400 text-slate-950' : 'bg-slate-800 text-slate-200'}`}>{readOnly ? 'Read Only' : inSlip ? 'In Slip' : 'Add to Slip'}</button></div></article>
 }
 
 function Title({ item }: { item: Opportunity }) {

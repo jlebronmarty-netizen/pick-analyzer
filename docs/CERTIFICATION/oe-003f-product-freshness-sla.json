@@ -1,0 +1,58 @@
+{
+  "release": "OE-003F",
+  "name": "Product Freshness SLA And Decision Surface Integration",
+  "status": "PASS_PENDING_PRODUCTION_DEPLOYMENT",
+  "contractVersion": "product_freshness_sla_v1",
+  "startingCommit": "67d12c5a6aa7b80190ec088617c7d09954dc902b",
+  "certifiedRuntimeBaseline": "c04f1ad34bac43825210b1481a12d1965116115e",
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "predictionBehaviorChanged": false,
+  "officialPickPolicyChanged": false,
+  "schedulerBehaviorChanged": false,
+  "settlementBehaviorChanged": false,
+  "learningBehaviorChanged": false,
+  "timestampSemantics": "provider_market_timestamp_not_page_generated_time",
+  "surfaces": [
+    "today_homepage",
+    "rent_play",
+    "moneyline_bet",
+    "smart_parlay",
+    "official_picks",
+    "best_opportunity",
+    "current_board",
+    "probability_picks_projection_only",
+    "most_likely",
+    "best_value",
+    "betting_workbench",
+    "game_intelligence",
+    "ai_bet_finder",
+    "mlb_operations"
+  ],
+  "statuses": [
+    "FRESH",
+    "AGING",
+    "STALE",
+    "INVALID_FUTURE",
+    "UNAVAILABLE",
+    "POST_START",
+    "MARKET_CLOSED",
+    "UNKNOWN"
+  ],
+  "actionability": [
+    "ACTIONABLE",
+    "REVIEW_ONLY",
+    "WAIT_FOR_REFRESH",
+    "BLOCKED",
+    "INFORMATIONAL_ONLY",
+    "UNAVAILABLE"
+  ],
+  "validation": {
+    "build": "PASS",
+    "oe003fValidator": "PASS",
+    "jsonValidation": "PASS",
+    "markdownValidation": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS"
+  }
+}

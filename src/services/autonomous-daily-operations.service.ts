@@ -3,7 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getBestBetsToday } from '@/services/best-bets-today.service'
 import { getBestValueOpportunities } from '@/services/best-value-scanner.service'
-import { getCurrentBoard, type CurrentBoardCandidate } from '@/services/current-board.service'
+import { emptyCurrentBoardProductFreshnessSla, getCurrentBoard, type CurrentBoardCandidate } from '@/services/current-board.service'
 import { getModelCalibration } from '@/services/model-calibration.service'
 import {
   getMlbPitcherBullpenFoundations,
@@ -467,6 +467,7 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
       staleVisibleMarketCount: 0,
       freshnessTimestampSource: null,
     },
+    productFreshnessSla: emptyCurrentBoardProductFreshnessSla(),
     officialPickCount: 0,
     previewCount: 0,
     modeledValueCount: 0,

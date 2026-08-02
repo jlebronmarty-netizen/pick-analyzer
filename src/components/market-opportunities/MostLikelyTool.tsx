@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 type Opportunity = {
   id: string
@@ -62,6 +63,13 @@ type Opportunity = {
   anomalies: string[]
   canonicalReason?: string
   explainableIntelligence?: ExplainableIntelligence
+  productFreshness?: {
+    status?: string
+    actionability?: string
+    marketTimestamp?: string | null
+    marketAgeMinutes?: number | null
+    nextPlannedRefreshAt?: string | null
+  }
 }
 
 type ExplanationFactor = { label: string; impact: string; status: string; evidence: string; confidenceImpact: string }
@@ -321,7 +329,7 @@ export default function MostLikelyTool() {
             <p className="font-black text-red-50">Data temporarily unavailable.</p>
             <p className="mt-1 text-sm leading-6">Most Likely did not complete its Current Board scan.</p>
             <p className="mt-2 text-sm leading-6 text-red-50">Why: current board data could not be read. Missing: a completed stored candidate response. What could change: refreshed data access or a later board scan can restore ranked outcomes.</p>
-            <a href="/game-intelligence" className="mt-3 inline-flex rounded-lg border border-red-300/30 bg-red-300/10 px-3 py-2 text-xs font-black text-red-50 outline-none hover:bg-red-300/20 focus-visible:ring-2 focus-visible:ring-red-100">Open Game Intelligence</a>
+            <Link href="/game-intelligence" className="mt-3 inline-flex rounded-lg border border-red-300/30 bg-red-300/10 px-3 py-2 text-xs font-black text-red-50 outline-none hover:bg-red-300/20 focus-visible:ring-2 focus-visible:ring-red-100">Open Game Intelligence</Link>
           </div>
         ) : null}
 
@@ -406,7 +414,8 @@ export default function MostLikelyTool() {
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Bet Context</p>
                   <div className="mt-3 grid min-w-0 grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                     <Metric label="Odds" value={oddsContext(item)} />
-                    <Metric label="Odds Age" value={Number.isFinite(item.oddsAgeMinutes) ? `${item.oddsAgeMinutes}m` : 'N/A'} />
+                    <Metric label="Freshness SLA" value={item.productFreshness?.status ?? (Number.isFinite(item.oddsAgeMinutes) ? `${item.oddsAgeMinutes}m` : 'N/A')} />
+                    <Metric label="Actionability" value={item.productFreshness?.actionability ?? 'INFORMATIONAL'} />
                     <Metric label="Confidence" value={item.confidenceLabel} />
                     <Metric label="Reliability" value={item.reliability} />
                     <Metric label="AI Rating" value={`${stars(item.aiRating)} ${ratingLabel(item.aiRating)}`} />
@@ -421,7 +430,8 @@ export default function MostLikelyTool() {
                   <Metric label="Model Probability" value={pct(item.probability)} />
                   <Metric label="Expected Value" value={item.actionableUnavailableReason ? `N/A / ${item.actionableUnavailableReason}` : pct(item.expectedValue)} tone={Number(item.expectedValue ?? 0) > 0 ? 'good' : 'bad'} />
                   <Metric label="Reliability Score" value={String(item.reliabilityScore)} />
-                  <Metric label="Odds Time" value={time(item.oddsTimestamp)} />
+                  <Metric label="Market Time" value={time(item.productFreshness?.marketTimestamp ?? item.oddsTimestamp)} />
+                  <Metric label="Next Refresh" value={time(item.productFreshness?.nextPlannedRefreshAt ?? null)} />
                   <Metric label="Model Version" value={item.modelVersion} />
                   <Metric label="Calibration" value={item.calibrationStatus} />
                   <Metric label="Policy Status" value={item.recommendationStatus} />

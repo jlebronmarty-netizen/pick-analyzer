@@ -129,6 +129,10 @@ Stop condition: evidence shows a surface requires provider data directly.
 
 Scope: apply stale/downgrade/block behavior per surface without changing prediction math.
 
+Status: PASS pending production deployment.
+
+Implemented `product_freshness_sla_v1` across Current Board, Today/Homepage, Rent Play, Moneyline Bet, Smart Parlay, Official Picks, Most Likely, Best Value, Betting Workbench, Game Intelligence, AI Bet Finder and MLB Operations. Market freshness uses stored provider/source timestamps only; page/API fetch time and `generatedAt` are not substituted.
+
 Likely files:
 
 - homepage betting plan

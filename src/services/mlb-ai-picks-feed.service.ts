@@ -4,6 +4,7 @@ import type { CurrentBoardCandidate } from '@/services/current-board.service'
 import type { ExplainableIntelligenceContract } from '@/services/explainable-intelligence.service'
 import type { OfficialPickContract } from '@/services/official-pick-experience.service'
 import { classifyMarketSemantics } from '@/services/market-semantics.service'
+import { evaluateProductFreshnessSla } from '@/services/product-freshness-sla.service'
 
 export type MlbAiPicksFeedItemType =
   | 'OFFICIAL_PICK'
@@ -356,6 +357,33 @@ export function validateMlbAiPicksFeedFixtures() {
     fairOddsLabel: 'Model fair odds -120',
     calculationVersion: 'recommendation_explanation_v1',
   }
+  const productFreshness = evaluateProductFreshnessSla({
+    surfaceId: 'official_pick',
+    eventId: 'event-1',
+    sportKey: 'baseball_mlb',
+    marketKey: 'moneyline',
+    selectionKey: 'HOM',
+    marketTimestamp: '2026-07-20T18:00:00.000Z',
+    marketObservedAt: '2026-07-20T18:00:00.000Z',
+    snapshotSource: 'sports_odds_snapshots',
+    eventStartTime: '2026-07-20T23:00:00.000Z',
+    lifecycleState: 'scheduled',
+    priceAvailable: true,
+    policyEligible: false,
+    nowMs: Date.parse('2026-07-20T18:02:00.000Z'),
+  })
+  const surfaceFreshness = {
+    currentBoard: productFreshness,
+    rentPlay: productFreshness,
+    moneylineBet: productFreshness,
+    smartParlay: productFreshness,
+    officialPick: productFreshness,
+    bestOpportunity: productFreshness,
+    mostLikely: productFreshness,
+    bestValue: productFreshness,
+    bettingWorkspace: productFreshness,
+    gameIntelligence: productFreshness,
+  }
   const candidate = {
     predictionId: 'prediction-1',
     snapshotId: 'feature-1',
@@ -521,6 +549,8 @@ export function validateMlbAiPicksFeedFixtures() {
     parkContext: null,
     summary: 'Fixture candidate.',
     logicalKey: 'baseball_mlb|event-1|moneyline|full_game|home',
+    productFreshness,
+    surfaceFreshness,
   } as CurrentBoardCandidate
   const feed = buildMlbAiPicksFeed([candidate], '2026-07-20T18:02:00.000Z')
   const empty = buildMlbAiPicksFeed([], '2026-07-20T18:02:00.000Z')
