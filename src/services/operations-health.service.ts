@@ -356,6 +356,7 @@ function providerBudgetDomain(input: {
       providers: {
         sportsdataio: {
           status: input.adaptive.providerBudget.mode,
+          canonicalBudget: input.budget.canonicalBudget,
           allowanceClassification: 'CONFIGURED_ONLY',
           resetSemantics: 'CONFIGURED_ONLY',
           callsMadeToday: input.budget.callsMadeToday,
@@ -377,6 +378,8 @@ function providerBudgetDomain(input: {
           combinedWithTheOddsApi: false,
         },
       },
+      canonicalBudget: input.budget.canonicalBudget,
+      providerPools: input.budget.providerPools,
       independenceRule: 'Provider budget health does not use odds_not_current as an outage signal.',
     },
     blockers: exhausted ? ['provider_budget_exhausted'] : [],
@@ -764,6 +767,7 @@ export async function getOperationsHealth() {
     providerBudgets: {
       sportsdataio: {
         status: adaptive.providerBudget.mode,
+        canonicalBudget: budget.canonicalBudget,
         callsMadeToday: budget.callsMadeToday,
         callsMadeLastHour: budget.callsMadeLastHour,
         callsPlannedToday: budget.callsPlannedToday,
@@ -789,12 +793,15 @@ export async function getOperationsHealth() {
         classification: 'UNKNOWN_CURRENT_REMAINING_NOT_RECHECKED',
         configuredReserveCredits: 2000,
         combinedWithSportsDataIO: false,
+        canonicalBudget: budget.providerPools.theOddsApi,
       },
       bsn: {
         status: 'SOURCE_SPECIFIC_PREVIEW',
         providerPath: 'official_bsn_homepage_csv_manual_future_provider',
         combinedWithTheOddsApi: false,
+        canonicalBudget: budget.providerPools.bsn,
       },
+      providerPools: budget.providerPools,
     },
     healthDomains,
     componentHealth: {

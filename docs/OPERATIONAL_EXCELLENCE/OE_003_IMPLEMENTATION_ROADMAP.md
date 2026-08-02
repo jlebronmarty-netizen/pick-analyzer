@@ -1,12 +1,12 @@
 # OE-003 Implementation Roadmap
 
-Status: roadmap only. OE-003A is implemented pending production certification.
+Status: roadmap only. OE-003A is production-certified. OE-003B is implemented pending production certification.
 
 ## OE-003A - Scheduler And Health Semantics
 
 Scope: split scheduler execution health, market freshness health, provider budget health, settlement health, and product readiness.
 
-Status: implemented in OE-003A. Production certification pending after automatic deployment.
+Status: production-certified in OE-003A.
 
 Likely files:
 
@@ -27,6 +27,8 @@ Stop condition: any required scheduler cadence change.
 
 Scope: provider-specific budget pools for SportsDataIO, The Odds API, MLB Stats API and BSN source classes.
 
+Status: implemented in OE-003B pending production certification.
+
 Likely files:
 
 - `src/services/provider-budget.service.ts`
@@ -34,7 +36,7 @@ Likely files:
 - SportsDataIO services
 - optional additive budget ledger migration if no canonical source exists
 
-Migration: additive only, if needed.
+Migration: none required for OE-003B; existing `operating_day_lifecycle_events` and `sports_sync_jobs` app-ledger evidence is normalized read-only.
 
 Provider-call risk: low; live quota-header proof must be explicitly capped.
 

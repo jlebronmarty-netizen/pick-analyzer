@@ -1175,6 +1175,8 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
         'BSN_SOURCE_SEPARATE',
       ],
       evidence: {
+        canonicalBudget: budget?.canonicalBudget ?? null,
+        providerPools: budget?.providerPools ?? null,
         sportsdataio: {
           mode,
           callsMadeToday: Number(budget?.callsMadeToday ?? 0),
@@ -1274,6 +1276,8 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     providerBudget: {
       mode,
       provider: budget?.provider ?? 'sportsdataio',
+      canonicalBudget: budget?.canonicalBudget ?? null,
+      providerPools: budget?.providerPools ?? null,
       callsMadeToday: Number(budget?.callsMadeToday ?? 0),
       callsPlannedToday: Number(budget?.callsPlannedToday ?? 0),
       callsMadeLastHour: Number(budget?.callsMadeLastHour ?? 0),

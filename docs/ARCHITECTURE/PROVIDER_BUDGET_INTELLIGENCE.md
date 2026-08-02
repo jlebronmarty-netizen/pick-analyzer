@@ -1,6 +1,6 @@
 # Provider Budget Intelligence
 
-Status: proposed architecture only.
+Status: OE-003B implemented the first normalized contract. Later event-level planning remains proposed only.
 
 OE-003 separates provider budget health from market freshness. A stale market is not proof of provider exhaustion, and an available provider budget is not proof that markets are fresh.
 
@@ -34,6 +34,10 @@ Every provider pool should expose:
 - accounting certainty;
 - largest current consumer;
 - retry/fallback policy.
+
+OE-003B now exposes the additive `provider_budget_ledger_v1` contract from `provider-budget.service.ts` through `/api/providers/budget/status`. Unknown quota evidence remains `UNKNOWN` or `null`; configured-only evidence remains labeled `CONFIGURED_ONLY`; request counts and quota/credit units are distinct fields.
+
+The existing `/api/operations/provider-budget-forecast` route is the read-only dry-run forecast surface. It returns `provider_budget_dry_run_forecast_v1`, estimated HTTP requests, estimated quota units, reserve impact and `provider_budget_authorization_v1` without provider calls or mutations.
 
 ## Current SportsDataIO Model
 

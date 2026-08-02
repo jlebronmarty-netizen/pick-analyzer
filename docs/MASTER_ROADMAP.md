@@ -3162,10 +3162,22 @@ Completion criteria: `OE_003_AUDIT_PASS`, separated scheduler execution, market 
 
 Objective: Implement the first OE-003 package by separating scheduler execution, market freshness, provider budget, settlement closure and product readiness into an additive canonical health contract.
 
-Status: Implemented pending production certification.
+Status: Production certified.
 
 Scope: Observability and UI/API semantics only. No scheduler cadence, refresh cadence, provider limit, prediction formula, probability/confidence/edge/EV calculation, Official Pick policy, settlement rule, learning rule, provider mapping or provider contract changed.
 
 Result: `/api/operations/health` exposes `healthDomains.schedulerExecution`, `marketFreshness`, `providerBudget`, `settlementClosure`, `productReadiness` and `overall`. Adaptive refresh, data freshness, settlement guarantee, MLB autonomous operations, provider budget status and MLB Operations Center consume or expose the separated evidence additively while preserving legacy fields.
 
 Completion criteria: `OE_003A_SCHEDULER_HEALTH_SEMANTICS_IMPLEMENTED`, scheduler execution independent from market freshness, market freshness independent from scheduler invocation, provider budgets provider-specific, settlement closure independent from stale odds, product readiness limiting domain explained, API compatibility preserved, passing validation, passing build and production certification after automatic deployment.
+
+### 68. Operational Excellence OE-003B Provider Budget Ledger Normalization
+
+Objective: Normalize provider-specific budget evidence so future event-level refresh planning can make deterministic acquisition decisions without merging providers or fabricating quota balances.
+
+Status: Implemented pending production certification.
+
+Scope: Provider-budget observability, canonical budget contract, dry-run forecast and authorization semantics only. No per-event planner, scheduler cadence, refresh cadence, provider limit, prediction formula, probability/confidence/edge/EV calculation, Official Pick policy, settlement rule, learning rule, provider mapping or provider subscription changed.
+
+Result: `provider-budget.service.ts` now exposes `provider_budget_ledger_v1`, `provider_budget_authorization_v1` and `provider_budget_dry_run_forecast_v1`. SportsDataIO, The Odds API and BSN remain isolated provider/source pools. SportsDataIO usable remaining subtracts protected reserve; The Odds API current credits/reset remain unknown unless proven; request counts and quota units are distinct.
+
+Completion criteria: `OE_003B_PROVIDER_BUDGET_LEDGER_NORMALIZATION_IMPLEMENTED`, provider isolation, unknown evidence preserved, configured-only evidence labeled, protected reserve explicit, dry-run forecast zero provider calls, exact provider-pool authorization, API compatibility preserved, passing validation, passing build and production certification after automatic deployment.

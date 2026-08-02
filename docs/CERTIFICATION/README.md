@@ -49,6 +49,8 @@ Current V2 certification documents:
 - [OE-003 Adaptive Event Refresh Audit JSON](oe-003-adaptive-event-refresh-audit.json)
 - [OE-003A Scheduler Health Semantics](OE_003A_SCHEDULER_HEALTH_SEMANTICS.md)
 - [OE-003A Certification JSON](oe-003a-scheduler-health-semantics.json)
+- [OE-003B Provider Budget Ledger Normalization](OE_003B_PROVIDER_BUDGET_LEDGER_NORMALIZATION.md)
+- [OE-003B Certification JSON](oe-003b-provider-budget-ledger-normalization.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

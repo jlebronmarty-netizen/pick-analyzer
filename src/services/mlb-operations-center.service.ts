@@ -222,6 +222,8 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
   const replayCalibrationLearning = record(missing.replayCalibrationLearning)
   const confidenceEngine = record(missing.confidenceEngine)
   const providerConfig = record(budget.config)
+  const canonicalBudget = record(budget.canonicalBudget)
+  const providerPools = record(budget.providerPools)
   const providerWarnings = [
     text(budget.warning, ''),
     ...strings(operationsStatus.rawBlockers),
@@ -395,6 +397,12 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
       healthy: num(budget.estimatedCallsRemaining) > 0,
       callsToday: num(budget.callsMadeToday),
       remainingBudget: num(budget.estimatedCallsRemaining),
+      reserve: num(canonicalBudget.protectedReserve),
+      usableRemaining: num(canonicalBudget.usableRemaining),
+      evidenceLevel: text(canonicalBudget.evidenceLevel, 'UNKNOWN'),
+      unitType: text(canonicalBudget.unitType, 'UNKNOWN'),
+      resetSemantics: text(canonicalBudget.resetSemantics, 'UNKNOWN'),
+      nextActionAuthorized: bool(canonicalBudget.canExecuteNextAction),
       cacheHitMiss: 'stored-data-first; provider calls guarded by budget ledger',
       ttl: text(budget.nextEligibleRefresh, 'unknown'),
       lastSuccessfulProviderCall: text(budget.lastProviderCall, ''),
@@ -404,13 +412,20 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
         budget: num(providerConfig.dailyCallBudget),
         used: num(budget.callsMadeToday),
         remaining: num(budget.estimatedCallsRemaining),
+        reserve: num(canonicalBudget.protectedReserve),
+        usableRemaining: num(canonicalBudget.usableRemaining),
+        evidenceLevel: text(canonicalBudget.evidenceLevel, 'UNKNOWN'),
+        unitType: text(canonicalBudget.unitType, 'UNKNOWN'),
+        resetSemantics: text(canonicalBudget.resetSemantics, 'UNKNOWN'),
+        nextActionAuthorized: bool(canonicalBudget.canExecuteNextAction),
         hardRemaining: num(budget.hardRemaining),
         estimatedToday: num(automation.providerCallsToday),
         currentTier: 'Discovery Lab Fantasy + Odds',
-        largestConsumer: 'operating_day_or_sync_job_ledger',
+        largestConsumer: text(canonicalBudget.largestConsumer, 'operating_day_or_sync_job_ledger'),
         historicalImports: 'guarded_by_budget_policy',
         warnings: providerWarnings,
       },
+      providerPools,
     },
     coverage,
     predictionEngine,

@@ -7,3 +7,4 @@ Bounded operational audits and certifications for production behavior that shoul
 - [OE-002 Automatic Daily Closure](OE_002_AUTOMATIC_DAILY_CLOSURE.md)
 - [OE-003 Adaptive Event Refresh Provider Budget Audit](OE_003_ADAPTIVE_EVENT_REFRESH_PROVIDER_BUDGET_AUDIT.md)
 - [OE-003A Scheduler Health Semantics](OE_003A_SCHEDULER_HEALTH_SEMANTICS.md)
+- [OE-003B Provider Budget Ledger Normalization](OE_003B_PROVIDER_BUDGET_LEDGER_NORMALIZATION.md)

@@ -1557,8 +1557,16 @@ Artifacts added: `docs/OPERATIONAL_EXCELLENCE/OE_003_ADAPTIVE_EVENT_REFRESH_PROV
 
 # 2026-08-02 - OE-003A Scheduler Health Semantics
 
-Status: IMPLEMENTED PENDING PRODUCTION CERTIFICATION
+Status: PRODUCTION CERTIFIED
 
 OE-003A adds a canonical additive `healthDomains` contract to operations health, separating scheduler execution, market freshness, provider budget, settlement closure and product readiness. Scheduler execution is now based only on protected invocation/cadence evidence; stale markets no longer imply provider-budget failure or scheduler failure, and product readiness identifies its limiting domain. Compatibility fields such as `scheduler.schedulerRunning`, `missedSchedulerIntervals`, `schedulerCadenceStatus`, `refreshOperations.providerStatus`, `providerBudgets.sportsdataio`, `freshness` and `currentBoard` remain available.
 
 Runtime integration is limited to observability and display: `/api/operations/health`, adaptive refresh/data freshness status, settlement guarantee, MLB autonomous operations, provider budget status, the dashboard operations panel and `/mlb-operations`. No scheduler cron, refresh cadence, provider limit, prediction formula, probability, confidence, edge, EV, Official Pick policy, settlement rule, learning rule, provider mapping or provider contract changed.
+
+# 2026-08-02 - OE-003B Provider Budget Ledger Normalization
+
+Status: IMPLEMENTED PENDING PRODUCTION CERTIFICATION
+
+OE-003B normalizes provider-budget evidence in the existing canonical `provider-budget.service.ts` path. `/api/providers/budget/status` now exposes additive `canonicalBudget`, `providerPools`, `costModels` and provider-specific evidence levels. The existing `/api/operations/provider-budget-forecast` route now accepts provider/action dry-run inputs and returns estimated HTTP requests, estimated quota units, reserve impact and authorization state without provider calls or mutations.
+
+SportsDataIO remains configured-only for allowance/reset with app-ledger usage evidence. The Odds API remains unknown for current credits/reset unless headers or stored metadata prove otherwise. BSN remains source-specific and is not treated as covered by The Odds API. No schema migration, scheduler cadence, refresh cadence, provider limit, prediction formula, Official Pick policy, settlement rule, learning rule, provider mapping or provider subscription changed.
