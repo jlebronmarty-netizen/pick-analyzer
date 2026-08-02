@@ -46,6 +46,7 @@ Current V2 certification documents:
 - [Release 14A.1 Certification JSON](release-14a1-server-auth-session.json)
 - [OE-002 Automatic Daily Closure Certification](OE_002_AUTOMATIC_DAILY_CLOSURE.md)
 - [OE-002 Certification JSON](oe-002-automatic-daily-closure.json)
+- [OE-003 Adaptive Event Refresh Audit JSON](oe-003-adaptive-event-refresh-audit.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

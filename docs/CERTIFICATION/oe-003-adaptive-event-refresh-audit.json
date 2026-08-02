@@ -1,0 +1,126 @@
+{
+  "certification": "OE_003_ADAPTIVE_EVENT_REFRESH_PROVIDER_BUDGET_AUDIT",
+  "status": "PASS",
+  "generatedAt": "2026-08-02T14:24:58.497Z",
+  "baselineCommit": "2c202983a1311a43f361afd707b32200c85da221",
+  "scope": "audit_and_architecture_only",
+  "runtimeChanges": false,
+  "schedulerCadenceChanged": false,
+  "predictionFormulaChanged": false,
+  "officialPickPolicyChanged": false,
+  "settlementLogicChanged": false,
+  "providerContractChanged": false,
+  "productionEvidence": {
+    "systemVersion": {
+      "endpoint": "/api/system/version",
+      "http": 200,
+      "gitCommit": "2c202983a1311a43f361afd707b32200c85da221",
+      "providerCallsMade": 0
+    },
+    "operationsHealth": {
+      "endpoint": "/api/operations/health",
+      "http": 200,
+      "status": "HEALTHY",
+      "schedulerCadenceStatus": "HEALTHY",
+      "schedulerRunning": true,
+      "missedSchedulerIntervals": 0,
+      "lastSuccessfulProtectedInvocationAt": "2026-08-02T14:14:51.375Z",
+      "providerStatus": "HEALTHY",
+      "currentRefreshWindow": "PREGAME",
+      "lastOddsRefresh": "2026-08-02T14:14:51.375Z",
+      "nextRefreshDueAt": "2026-08-02T14:29:44.137Z"
+    },
+    "adaptiveRefreshStatus": {
+      "endpoint": "/api/operations/adaptive-refresh/status",
+      "http": 200,
+      "status": "SUCCESS"
+    },
+    "providerBudgetStatus": {
+      "endpoint": "/api/providers/budget/status?provider=sportsdataio&sportKey=baseball_mlb",
+      "http": 200,
+      "provider": "sportsdataio",
+      "classification": "CONFIGURED_ONLY_FOR_ALLOWANCE_AND_RESET",
+      "providerCallsMade": 0
+    },
+    "dashboardToday": {
+      "endpoint": "/api/dashboard/today",
+      "http": 200,
+      "status": "AVAILABLE"
+    },
+    "currentBoard": {
+      "endpoint": "/api/current-board?mode=current&limit=200",
+      "http": 200,
+      "marketFreshnessExample": "FRESH",
+      "providerCallsMade": 0
+    },
+    "performance": {
+      "endpoint": "/api/performance",
+      "http": 200
+    }
+  },
+  "providerCostModels": {
+    "sportsdataio": {
+      "configuredDailyBudget": 1000,
+      "configuredSoftReserve": 150,
+      "configuredMaxCallsPerAction": 3,
+      "configuredMaxRefreshCallsPerHour": 12,
+      "provenAllowance": "UNKNOWN",
+      "resetInterval": "CONFIGURED_ONLY",
+      "budgetLedger": "PROVEN_APPLICATION_LEDGER"
+    },
+    "theOddsApi": {
+      "configuredReserveCredits": 2000,
+      "hardLiveAuditCallBudget": 12,
+      "currentRemaining": "UNKNOWN_NOT_RECHECKED",
+      "resetInterval": "UNKNOWN",
+      "dryRunDefault": true,
+      "quotaHeadersSupportedByCode": [
+        "x-requests-remaining",
+        "x-requests-used",
+        "x-requests-last"
+      ]
+    },
+    "bsn": {
+      "status": "PREVIEW_SHADOW_NOT_THE_ODDS_API_CERTIFIED",
+      "currentProviderPath": "official_bsn_homepage_csv_manual_future_provider"
+    }
+  },
+  "simulations": {
+    "sportsdataioMlbBalancedCallsPerDay": "28-70 depending on slate weight",
+    "theOddsApiBalancedQuotaUnitsPerDay": "60-400 after quota proof",
+    "recommendedSportsDataIoPolicy": "BALANCED",
+    "recommendedTheOddsApiPolicy": "CONSERVATIVE_UNTIL_RESET_PROVEN"
+  },
+  "guardrails": {
+    "providerCallsMadeByAudit": 0,
+    "providerCreditsConsumedByAudit": 0,
+    "databaseMutationsMadeByAudit": 0,
+    "buildExecuted": false,
+    "localServerSmokeRun": false,
+    "manualDeploymentRun": false
+  },
+  "artifacts": [
+    "docs/OPERATIONAL_EXCELLENCE/OE_003_ADAPTIVE_EVENT_REFRESH_PROVIDER_BUDGET_AUDIT.md",
+    "docs/ARCHITECTURE/ADAPTIVE_EVENT_LIFECYCLE_ENGINE.md",
+    "docs/ARCHITECTURE/PROVIDER_BUDGET_INTELLIGENCE.md",
+    "docs/OPERATIONAL_EXCELLENCE/OE_003_IMPLEMENTATION_ROADMAP.md",
+    "docs/CERTIFICATION/oe-003-adaptive-event-refresh-audit.json",
+    "scripts/oe003-adaptive-event-refresh-audit-validate.mjs"
+  ],
+  "completionMarkers": [
+    "OE_003_AUDIT_PASS",
+    "SCHEDULER_EXECUTION_HEALTH_SEPARATED",
+    "MARKET_FRESHNESS_HEALTH_SEPARATED",
+    "PROVIDER_BUDGET_MODEL_CLASSIFIED",
+    "CANONICAL_ACQUISITION_FLOW_AUDITED",
+    "PER_EVENT_FRESHNESS_AUDITED",
+    "LIFECYCLE_ARCHITECTURE_DEFINED",
+    "PRIORITY_BANDS_DEFINED",
+    "FRESHNESS_SLA_PROPOSED",
+    "BUDGET_SIMULATION_COMPLETE",
+    "NO_PROVIDER_CALL_PASS",
+    "NO_PROVIDER_CREDIT_PASS",
+    "NO_DATABASE_MUTATION_PASS",
+    "NO_RUNTIME_CHANGE_PASS"
+  ]
+}

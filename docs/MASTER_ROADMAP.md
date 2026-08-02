@@ -3145,3 +3145,15 @@ Repair: The write scheduler now uses isolated concurrency group `production-oper
 Validation: `node scripts/pick-analyzer-v2-phase-c1-1-external-scheduler-recovery-validate.mjs` is the primary C1.1 validator. Required supporting validation includes C1, settlement-learning recovery, protected canonical MLB settlement, canonical settlement state, result ingestion, MLB operating-day recovery, scheduler-health alignment, A3 scheduler/freshness, autonomous daily AI, performance validation, JSON validation, changed-file ESLint, targeted secret scan, `git diff --check`, `git diff --cached --check` and `npm.cmd run build`.
 
 Completion criteria: `PICK_ANALYZER_V2_PHASE_C1_1_EXTERNAL_SCHEDULER_RECOVERY_PASS`, active external workflow evidence, successful protected workflow invocation, canonical ready rows settled, idempotency validated, learning/performance evidence present, settlement guarantee PASS, scheduler health not late/critical, final commit pushed and production serving the final commit.
+
+### 66. Operational Excellence OE-003 Adaptive Event Refresh Provider Budget Audit
+
+Objective: Audit scheduler execution, provider-budget semantics, odds acquisition, per-event freshness and product-surface stored-data consumption before implementing an adaptive event lifecycle scheduler.
+
+Status: Audit complete pending push.
+
+Scope: Documentation, architecture and validation only. No scheduler cadence, prediction formula, probability/confidence/edge/EV calculation, Official Pick policy, settlement rule, provider contract or product runtime behavior changed.
+
+Result: Production evidence on commit `2c202983a1311a43f361afd707b32200c85da221` showed scheduler cadence `HEALTHY`, scheduler running true, missed intervals 0, provider status `HEALTHY` and fresh current-board market evidence. The earlier critical/stale state is classified as a recovered scheduler/freshness incident, not provider exhaustion.
+
+Completion criteria: `OE_003_AUDIT_PASS`, separated scheduler execution, market freshness, provider budget, settlement and product readiness semantics, provider cost models classified, canonical acquisition flow documented, per-event freshness table captured, lifecycle states and priority bands proposed, budget simulations documented, 0 provider calls, 0 provider credits, 0 database mutations and passing OE-003 validation.
