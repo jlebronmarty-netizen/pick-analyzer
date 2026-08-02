@@ -47,6 +47,8 @@ Current V2 certification documents:
 - [OE-002 Automatic Daily Closure Certification](OE_002_AUTOMATIC_DAILY_CLOSURE.md)
 - [OE-002 Certification JSON](oe-002-automatic-daily-closure.json)
 - [OE-003 Adaptive Event Refresh Audit JSON](oe-003-adaptive-event-refresh-audit.json)
+- [OE-003A Scheduler Health Semantics](OE_003A_SCHEDULER_HEALTH_SEMANTICS.md)
+- [OE-003A Certification JSON](oe-003a-scheduler-health-semantics.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

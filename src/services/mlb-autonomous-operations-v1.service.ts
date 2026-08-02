@@ -166,6 +166,9 @@ export async function getMlbAutonomousOperationsV1() {
   const scheduler = healthRecord.scheduler && typeof healthRecord.scheduler === 'object'
     ? (healthRecord.scheduler as Record<string, unknown>)
     : {}
+  const healthDomains = healthRecord.healthDomains && typeof healthRecord.healthDomains === 'object'
+    ? (healthRecord.healthDomains as Record<string, unknown>)
+    : {}
 
   return {
     success: true,
@@ -207,6 +210,7 @@ export async function getMlbAutonomousOperationsV1() {
       dynamicThrottling: adaptive.providerBudget.mode === 'EXHAUSTED' ? 'BLOCK_PROVIDER_CALLS' : adaptive.providerBudget.mode,
       budgetWarnings: budget.budgetWarnings,
     },
+    healthDomains,
     callForecast: {
       scenarios: dailyCallScenarios(),
       estimatedDueNowCalls: adaptive.providerCallForecast.estimatedDueNowCalls,

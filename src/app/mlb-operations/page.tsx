@@ -169,6 +169,36 @@ function Readiness({ data }: { data: OperationsData }) {
   )
 }
 
+function HealthSemantics({ data }: { data: OperationsData }) {
+  const domains = [
+    ['Scheduler Execution', data.healthSemantics.schedulerExecution],
+    ['Market Freshness', data.healthSemantics.marketFreshness],
+    ['Provider Budget', data.healthSemantics.providerBudget],
+    ['Settlement Closure', data.healthSemantics.settlementClosure],
+    ['Product Readiness', data.healthSemantics.productReadiness],
+  ] as const
+  return (
+    <Panel title="Operational Health Domains" status={data.healthSemantics.overall.status}>
+      <div className="grid gap-3 md:grid-cols-5">
+        {domains.map(([label, domain]) => (
+          <div key={label} className="rounded-md border border-zinc-800 bg-zinc-900/60 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-bold text-white">{label}</p>
+              <StatusPill value={domain.status} tone={toneFrom(domain.status)} />
+            </div>
+            <p className="mt-2 text-xs leading-5 text-zinc-400">{fmt(domain.summary, 'No summary available.')}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 grid gap-2 md:grid-cols-2">
+        {data.healthSemantics.plainLanguage.map((item) => (
+          <p key={item} className="rounded-md border border-zinc-800 bg-zinc-900/60 p-2 text-sm text-zinc-300">{item}</p>
+        ))}
+      </div>
+    </Panel>
+  )
+}
+
 export default async function MlbOperationsPage({
   searchParams,
 }: {
@@ -215,6 +245,8 @@ export default async function MlbOperationsPage({
             </div>
           </Panel>
         ) : null}
+
+        <HealthSemantics data={data} />
 
         <div className="grid gap-5 xl:grid-cols-3">
           <Panel title="Operating Day" status={data.operatingDay.currentStageStatus}>

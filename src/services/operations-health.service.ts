@@ -191,6 +191,329 @@ function freshnessByDomain(adaptive: Awaited<ReturnType<typeof getAdaptiveRefres
   return adaptive.freshness.find((item) => item.domain === domain) ?? null
 }
 
+type CanonicalHealthStatus = 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'UNKNOWN'
+
+type CanonicalHealthDomain = {
+  status: CanonicalHealthStatus
+  summary: string
+  reasonCodes: string[]
+  observedAt: string
+  sourceTimestamps: Record<string, string | null>
+  evidence: Record<string, unknown>
+  blockers: string[]
+  warnings: string[]
+  nextExpectedAction: string | null
+  humanInterventionRequired: boolean
+}
+
+function severity(status: CanonicalHealthStatus) {
+  return { HEALTHY: 0, UNKNOWN: 1, DEGRADED: 2, CRITICAL: 3 }[status]
+}
+
+function schedulerDomain(input: {
+  observedAt: string
+  schedulerCadenceStatus: string
+  lastSuccessfulProtectedInvocationAt: string | null
+  lastSchedulerFailure: unknown
+  evidenceAge: number | null
+  missedSchedulerIntervals: number | null
+  nextExpectedSchedulerWindow: string | null
+  automaticMultiRefreshActive: boolean
+  failedSteps: Array<Record<string, unknown>>
+}): CanonicalHealthDomain {
+  const status: CanonicalHealthStatus =
+    input.schedulerCadenceStatus === 'CRITICAL'
+      ? 'CRITICAL'
+      : input.schedulerCadenceStatus === 'LATE'
+        ? 'DEGRADED'
+        : input.schedulerCadenceStatus === 'NO_EVIDENCE'
+          ? 'UNKNOWN'
+          : 'HEALTHY'
+  const reasonCodes = [
+    input.schedulerCadenceStatus === 'HEALTHY' ? 'SCHEDULER_CURRENT' : null,
+    input.schedulerCadenceStatus === 'IDLE' ? 'SCHEDULER_IDLE' : null,
+    input.schedulerCadenceStatus === 'LATE' ? 'SCHEDULER_LATE' : null,
+    input.schedulerCadenceStatus === 'CRITICAL' ? 'SCHEDULER_CRITICAL' : null,
+    input.schedulerCadenceStatus === 'NO_EVIDENCE' ? 'WRITER_INVOCATION_MISSING' : null,
+    input.failedSteps.length ? 'WRITER_EXECUTION_FAILED' : null,
+  ].filter(Boolean) as string[]
+  return {
+    status,
+    summary:
+      status === 'HEALTHY'
+        ? 'Scheduler execution is based on protected invocation evidence and is current.'
+        : status === 'UNKNOWN'
+          ? 'Scheduler execution evidence is unavailable.'
+          : `Scheduler execution is ${input.schedulerCadenceStatus.toLowerCase()} based only on invocation cadence evidence.`,
+    reasonCodes,
+    observedAt: input.observedAt,
+    sourceTimestamps: {
+      lastSuccessfulProtectedInvocationAt: input.lastSuccessfulProtectedInvocationAt,
+      nextExpectedSchedulerWindow: input.nextExpectedSchedulerWindow,
+    },
+    evidence: {
+      schedulerCadenceStatus: input.schedulerCadenceStatus,
+      evidenceAgeMinutes: input.evidenceAge,
+      missedSchedulerIntervals: input.missedSchedulerIntervals,
+      automaticMultiRefreshActive: input.automaticMultiRefreshActive,
+      failedSteps: input.failedSteps.length,
+      independenceRule: 'Scheduler execution health never reads odds freshness, Official Pick availability, provider data completeness, or settlement row counts.',
+    },
+    blockers: status === 'CRITICAL' ? ['scheduler_execution_critical'] : [],
+    warnings: status === 'DEGRADED' ? ['scheduler_execution_late'] : [],
+    nextExpectedAction: input.nextExpectedSchedulerWindow,
+    humanInterventionRequired: status === 'CRITICAL' || status === 'UNKNOWN',
+  }
+}
+
+function marketDomain(input: {
+  observedAt: string
+  oddsFreshness: ReturnType<typeof freshnessByDomain>
+  board: Awaited<ReturnType<typeof getCurrentBoard>>
+  adaptiveBlockers: string[]
+  nextDueAt: string | null
+}): CanonicalHealthDomain {
+  const boardFreshness = input.board.dataFreshness.status
+  const oddsStatus = String(input.oddsFreshness?.status ?? 'UNKNOWN')
+  const status: CanonicalHealthStatus =
+    oddsStatus === 'FAILED' || input.adaptiveBlockers.includes('odds_not_current') || boardFreshness === 'stale'
+      ? 'CRITICAL'
+      : ['STALE', 'PENDING'].includes(oddsStatus) || boardFreshness === 'partial'
+        ? 'DEGRADED'
+        : oddsStatus === 'NOT_AVAILABLE' || boardFreshness === 'empty'
+          ? 'UNKNOWN'
+          : 'HEALTHY'
+  const reasonCodes = [
+    status === 'HEALTHY' ? 'MARKET_FRESH' : null,
+    oddsStatus === 'PENDING' || boardFreshness === 'empty' ? 'NO_ODDS_AVAILABLE' : null,
+    oddsStatus === 'STALE' || boardFreshness === 'stale' ? 'STALE_ODDS' : null,
+    boardFreshness === 'partial' ? 'PARTIAL_MARKET_FRESHNESS' : null,
+    input.board.dataFreshness.freshnessTimestampSource === null ? 'UNKNOWN_TIMESTAMP' : null,
+  ].filter(Boolean) as string[]
+  return {
+    status,
+    summary:
+      status === 'HEALTHY'
+        ? 'Market freshness is current from stored market timestamps.'
+        : 'Market freshness is limited by stored odds age or missing market evidence, independent of scheduler execution.',
+    reasonCodes,
+    observedAt: input.observedAt,
+    sourceTimestamps: {
+      latestOddsTimestamp: input.board.latestOddsTimestamp,
+      latestOddsSourceTimestamp: input.board.latestOddsSourceTimestamp,
+      oldestVisibleMarketSnapshotTimestamp: input.board.oldestVisibleMarketSnapshotTimestamp,
+      nextRecommendedRefreshTime: input.board.dataFreshness.nextRecommendedRefreshTime,
+    },
+    evidence: {
+      adaptiveOddsStatus: oddsStatus,
+      currentBoardFreshness: boardFreshness,
+      latestOddsAgeMinutes: input.board.dataFreshness.latestOddsAgeMinutes,
+      visibleMarketCount: input.board.dataFreshness.visibleMarketCount,
+      freshVisibleMarketCount: input.board.dataFreshness.freshVisibleMarketCount,
+      staleVisibleMarketCount: input.board.dataFreshness.staleVisibleMarketCount,
+      timestampSemantics: input.board.dataFreshness.timestampSemantics,
+      independenceRule: 'Market freshness never falls back to scheduler invocation time, page fetch time, or API generatedAt.',
+    },
+    blockers: status === 'CRITICAL' ? ['market_freshness_critical'] : [],
+    warnings: status === 'DEGRADED' ? ['market_freshness_degraded'] : [],
+    nextExpectedAction: input.nextDueAt,
+    humanInterventionRequired: status === 'CRITICAL' && input.adaptiveBlockers.includes('odds_not_current'),
+  }
+}
+
+function providerBudgetDomain(input: {
+  observedAt: string
+  adaptive: Awaited<ReturnType<typeof getAdaptiveRefreshStatus>>
+  budget: Awaited<ReturnType<typeof getProviderBudgetStatus>>
+}): CanonicalHealthDomain {
+  const exhausted = input.adaptive.providerBudget.mode === 'EXHAUSTED' || input.budget.stopThresholdReached
+  const uncertain = input.budget.accountingUncertain || input.budget.configurationStatus !== 'VALID'
+  const low = input.adaptive.providerBudget.mode === 'CRITICAL' || input.adaptive.providerBudget.mode === 'CONSERVATIVE'
+  const status: CanonicalHealthStatus = exhausted ? 'CRITICAL' : uncertain ? 'UNKNOWN' : low ? 'DEGRADED' : 'HEALTHY'
+  return {
+    status,
+    summary:
+      status === 'HEALTHY'
+        ? 'Provider budget capacity is available; market freshness is reported separately.'
+        : 'Provider budget capacity needs attention; this is provider-specific and separate from market freshness.',
+    reasonCodes: [
+      status === 'HEALTHY' ? 'PROVIDER_BUDGET_AVAILABLE' : null,
+      exhausted ? 'PROVIDER_BUDGET_EXHAUSTED' : null,
+      uncertain ? 'PROVIDER_BUDGET_ACCOUNTING_UNKNOWN' : null,
+      low ? 'PROVIDER_BUDGET_LOW' : null,
+      'SPORTSDATAIO_PROVIDER_SPECIFIC',
+      'THE_ODDS_API_SEPARATE_POOL',
+      'BSN_SOURCE_SEPARATE',
+    ].filter(Boolean) as string[],
+    observedAt: input.observedAt,
+    sourceTimestamps: {
+      sportsdataioLastProviderCall: input.budget.lastProviderCall,
+      sportsdataioLocalDate: input.budget.localDate,
+      theOddsApiLastQuotaProof: null,
+      bsnLastSourceProof: null,
+    },
+    evidence: {
+      providers: {
+        sportsdataio: {
+          status: input.adaptive.providerBudget.mode,
+          allowanceClassification: 'CONFIGURED_ONLY',
+          resetSemantics: 'CONFIGURED_ONLY',
+          callsMadeToday: input.budget.callsMadeToday,
+          estimatedCallsRemaining: input.budget.estimatedCallsRemaining,
+          hardRemaining: input.budget.hardRemaining,
+          softReserve: input.budget.config.softReserve,
+          hourlyRemaining: input.budget.hourlyRemaining,
+          accountingStatus: input.budget.accountingStatus,
+        },
+        theOddsApi: {
+          status: 'UNKNOWN',
+          allowanceClassification: 'UNKNOWN_CURRENT_REMAINING_NOT_RECHECKED',
+          reserveCredits: 2000,
+          combinedWithSportsDataIO: false,
+        },
+        bsn: {
+          status: 'SOURCE_SPECIFIC_PREVIEW',
+          providerPath: 'official_bsn_homepage_csv_manual_future_provider',
+          combinedWithTheOddsApi: false,
+        },
+      },
+      independenceRule: 'Provider budget health does not use odds_not_current as an outage signal.',
+    },
+    blockers: exhausted ? ['provider_budget_exhausted'] : [],
+    warnings: [...input.budget.budgetWarnings, low ? 'provider_budget_low' : null].filter(Boolean) as string[],
+    nextExpectedAction: input.budget.nextEligibleRefresh,
+    humanInterventionRequired: exhausted || uncertain,
+  }
+}
+
+function settlementDomain(input: {
+  observedAt: string
+  adaptive: Awaited<ReturnType<typeof getAdaptiveRefreshStatus>>
+  backlogError: string | null
+  pendingPredictions: number | null
+}): CanonicalHealthDomain {
+  const settlementBacklog = input.adaptive.settlementBacklog
+  const ready = Number(settlementBacklog?.settlementReadyRows ?? 0)
+  const missingResults = Number(settlementBacklog?.completedMissingResultRows ?? 0)
+  const awaitingResults = Number(settlementBacklog?.awaitingResultRows ?? 0)
+  const status: CanonicalHealthStatus = input.backlogError
+    ? 'UNKNOWN'
+    : ready > 0 || missingResults > 0
+      ? 'CRITICAL'
+      : 'HEALTHY'
+  return {
+    status,
+    summary:
+      status === 'HEALTHY'
+        ? 'Settlement closure has no ready or missing-result backlog in the adaptive evidence.'
+        : 'Settlement closure requires action from result import or settlement readiness evidence.',
+    reasonCodes: [
+      status === 'HEALTHY' ? 'SETTLEMENT_CLOSED' : null,
+      ready > 0 ? 'SETTLEMENT_READY_ROWS_REMAIN' : null,
+      missingResults > 0 ? 'MISSING_RESULT_ROWS_REMAIN' : null,
+      input.backlogError ? 'SETTLEMENT_BACKLOG_READ_FAILED' : null,
+    ].filter(Boolean) as string[],
+    observedAt: input.observedAt,
+    sourceTimestamps: {
+      oldestReadyDate: settlementBacklog?.oldestReadyDate ?? null,
+      oldestMissingResultDate: settlementBacklog?.oldestMissingResultDate ?? null,
+      latestResultUpdatedAt: settlementBacklog?.latestResultUpdatedAt ?? null,
+    },
+    evidence: {
+      checkedRows: settlementBacklog?.checkedRows ?? 0,
+      settlementReadyRows: ready,
+      completedMissingResultRows: missingResults,
+      awaitingResultRows: awaitingResults,
+      pendingPredictions: input.pendingPredictions,
+      validationStatus: input.backlogError ? 'UNKNOWN' : 'READ_OK',
+      independenceRule: 'Settlement closure can be healthy while market odds are stale.',
+    },
+    blockers: ready > 0 || missingResults > 0 ? ['settlement_closure_action_required'] : [],
+    warnings: awaitingResults > 0 ? ['results_awaiting_final_state'] : [],
+    nextExpectedAction: missingResults > 0 ? 'sync_results' : ready > 0 ? 'settle' : null,
+    humanInterventionRequired: Boolean(input.backlogError),
+  }
+}
+
+function productReadinessDomain(input: {
+  observedAt: string
+  scheduler: CanonicalHealthDomain
+  market: CanonicalHealthDomain
+  provider: CanonicalHealthDomain
+  settlement: CanonicalHealthDomain
+  boardCandidates: number
+  officialPicks: number
+}): CanonicalHealthDomain {
+  const domains = [
+    ['schedulerExecution', input.scheduler],
+    ['marketFreshness', input.market],
+    ['providerBudget', input.provider],
+    ['settlementClosure', input.settlement],
+  ] as const
+  const limiting = domains.slice().sort((a, b) => severity(b[1].status) - severity(a[1].status))[0]
+  const hasBoard = input.boardCandidates > 0
+  const status: CanonicalHealthStatus =
+    limiting[1].status === 'CRITICAL'
+      ? 'CRITICAL'
+      : limiting[1].status === 'DEGRADED' || !hasBoard
+        ? 'DEGRADED'
+        : limiting[1].status === 'UNKNOWN'
+          ? 'UNKNOWN'
+          : 'HEALTHY'
+  const limitingDomain = !hasBoard ? 'currentBoard' : limiting[0]
+  return {
+    status,
+    summary:
+      status === 'HEALTHY'
+        ? 'Product readiness is available from current independent health domains.'
+        : `Product readiness is limited by ${limitingDomain}.`,
+    reasonCodes: [
+      status === 'HEALTHY' ? 'PRODUCT_READY' : null,
+      !hasBoard ? 'CURRENT_BOARD_NO_CANDIDATES' : null,
+      `LIMITING_DOMAIN_${String(limitingDomain).toUpperCase()}`,
+    ].filter(Boolean) as string[],
+    observedAt: input.observedAt,
+    sourceTimestamps: {
+      schedulerObservedAt: input.scheduler.observedAt,
+      marketObservedAt: input.market.observedAt,
+      providerObservedAt: input.provider.observedAt,
+      settlementObservedAt: input.settlement.observedAt,
+    },
+    evidence: {
+      limitingDomain,
+      schedulerExecution: input.scheduler.status,
+      marketFreshness: input.market.status,
+      providerBudget: input.provider.status,
+      settlementClosure: input.settlement.status,
+      currentBoardCandidates: input.boardCandidates,
+      officialPicks: input.officialPicks,
+      example: 'Scheduler can be HEALTHY while product readiness is DEGRADED by stale market freshness.',
+    },
+    blockers: status === 'CRITICAL' ? [`product_readiness_blocked_by_${limitingDomain}`] : [],
+    warnings: status === 'DEGRADED' ? [`product_readiness_degraded_by_${limitingDomain}`] : [],
+    nextExpectedAction: limiting[1].nextExpectedAction,
+    humanInterventionRequired: limiting[1].humanInterventionRequired,
+  }
+}
+
+function overallHealthDomain(domains: {
+  schedulerExecution: CanonicalHealthDomain
+  marketFreshness: CanonicalHealthDomain
+  providerBudget: CanonicalHealthDomain
+  settlementClosure: CanonicalHealthDomain
+  productReadiness: CanonicalHealthDomain
+}) {
+  const ordered = Object.entries(domains).sort((a, b) => severity(b[1].status) - severity(a[1].status))
+  const [limitingDomain, limiting] = ordered[0]
+  return {
+    status: limiting.status,
+    summary: `Overall operations health follows explicit precedence from ${limitingDomain}.`,
+    limitingDomain,
+    precedence: ['CRITICAL', 'DEGRADED', 'UNKNOWN', 'HEALTHY'],
+    reasonCodes: [`OVERALL_LIMITING_DOMAIN_${limitingDomain.toUpperCase()}`, ...limiting.reasonCodes],
+  }
+}
+
 export async function getOperationsHealth() {
   const generatedAt = new Date().toISOString()
   const [adaptive, budget, lifecycle, backlog, migrations, projections, board] = await Promise.all([
@@ -248,11 +571,13 @@ export async function getOperationsHealth() {
   const projectionBlocked = Number(projections.projectionHealth?.blocked ?? 0)
   const projectionVisible = userVisibleProjections
   const platformHealth = blockers.length || staleFreshness.length ? 'DEGRADED' : 'HEALTHY'
-  const providerHealth = adaptive.providerBudget.mode === 'EXHAUSTED'
+  const providerHealth = adaptive.providerBudget.mode === 'EXHAUSTED' || budget.stopThresholdReached
     ? 'BLOCKED'
-    : adaptive.blockers.includes('odds_not_current')
-      ? 'DEGRADED'
-      : 'HEALTHY'
+    : budget.accountingUncertain || budget.configurationStatus !== 'VALID'
+      ? 'UNKNOWN'
+      : ['CRITICAL', 'CONSERVATIVE'].includes(adaptive.providerBudget.mode)
+        ? 'DEGRADED'
+        : 'HEALTHY'
   const projectionHealth = projectionVisible > 0
     ? 'OPERATIONAL'
     : projectionBlocked > 0
@@ -303,10 +628,72 @@ export async function getOperationsHealth() {
         : adaptive.blockers.length || !automaticMultiRefreshActive || schedulerLate
         ? 'WARNING'
         : 'HEALTHY'
+  const schedulerExecutionHealth = schedulerDomain({
+    observedAt: generatedAt,
+    schedulerCadenceStatus,
+    lastSuccessfulProtectedInvocationAt,
+    lastSchedulerFailure: failedSteps[0]?.created_at ?? null,
+    evidenceAge,
+    missedSchedulerIntervals,
+    nextExpectedSchedulerWindow,
+    automaticMultiRefreshActive,
+    failedSteps,
+  })
+  const marketFreshnessHealth = marketDomain({
+    observedAt: generatedAt,
+    oddsFreshness,
+    board,
+    adaptiveBlockers: adaptive.blockers,
+    nextDueAt: oddsFreshness?.nextRecommendedRefreshAt ?? adaptive.nextActionAt,
+  })
+  const providerBudgetHealth = providerBudgetDomain({ observedAt: generatedAt, adaptive, budget })
+  const settlementClosureHealth = settlementDomain({
+    observedAt: generatedAt,
+    adaptive,
+    backlogError: backlog.error,
+    pendingPredictions: backlog.pendingPredictions,
+  })
+  const productReadinessHealth = productReadinessDomain({
+    observedAt: generatedAt,
+    scheduler: schedulerExecutionHealth,
+    market: marketFreshnessHealth,
+    provider: providerBudgetHealth,
+    settlement: settlementClosureHealth,
+    boardCandidates: board.candidates.length,
+    officialPicks: board.officialPickCount,
+  })
+  const healthDomains = {
+    contractVersion: 'operational_health_domains_v1',
+    observedAt: generatedAt,
+    schedulerExecution: schedulerExecutionHealth,
+    marketFreshness: marketFreshnessHealth,
+    providerBudget: providerBudgetHealth,
+    settlementClosure: settlementClosureHealth,
+    productReadiness: productReadinessHealth,
+    overall: overallHealthDomain({
+      schedulerExecution: schedulerExecutionHealth,
+      marketFreshness: marketFreshnessHealth,
+      providerBudget: providerBudgetHealth,
+      settlementClosure: settlementClosureHealth,
+      productReadiness: productReadinessHealth,
+    }),
+    compatibilityAliasesPreserved: [
+      'scheduler.schedulerRunning',
+      'scheduler.missedSchedulerIntervals',
+      'scheduler.schedulerCadenceStatus',
+      'refreshOperations.providerStatus',
+      'providerBudgets.sportsdataio',
+      'componentHealth',
+      'currentBoard',
+      'freshness',
+    ],
+  }
   return {
     success: true,
-    status,
+    status: healthDomains.overall.status,
+    legacyStatus: status,
     mode: 'operations_health_v1',
+    contractVersion: 'operations_health_v2_additive_domains',
     generatedAt,
     sportKey: SPORT_KEY,
     leagueKey: LEAGUE_KEY,
@@ -340,9 +727,12 @@ export async function getOperationsHealth() {
       nextExpectedSchedulerWindow,
       schedulerLate,
       schedulerCritical,
+      healthDomain: schedulerExecutionHealth,
     },
     refreshOperations: {
       providerStatus: providerHealth,
+      marketFreshnessStatus: marketFreshnessHealth.status,
+      productReadinessStatus: productReadinessHealth.status,
       currentRefreshWindow,
       health: operationalSeverity,
       lastOddsRefresh: String(latestOddsRefresh?.completed_at ?? latestOddsRefresh?.created_at ?? '') || null,
@@ -392,8 +782,21 @@ export async function getOperationsHealth() {
         budgetWarnings: budget.budgetWarnings,
         monthlyEstimateAtCurrentDailyBudget: budget.config.dailyCallBudget * 30,
         lastProviderCall: budget.lastProviderCall,
+        healthDomain: providerBudgetHealth,
+      },
+      theOddsApi: {
+        status: 'UNKNOWN',
+        classification: 'UNKNOWN_CURRENT_REMAINING_NOT_RECHECKED',
+        configuredReserveCredits: 2000,
+        combinedWithSportsDataIO: false,
+      },
+      bsn: {
+        status: 'SOURCE_SPECIFIC_PREVIEW',
+        providerPath: 'official_bsn_homepage_csv_manual_future_provider',
+        combinedWithTheOddsApi: false,
       },
     },
+    healthDomains,
     componentHealth: {
       platform: {
         status: platformHealth,
@@ -402,8 +805,23 @@ export async function getOperationsHealth() {
       },
       provider: {
         status: providerHealth,
-        blocker: adaptive.blockers.find((blocker) => blocker.includes('odds') || blocker.includes('provider')) ?? null,
-        explanation: providerHealth === 'HEALTHY' ? 'Provider budget and stored freshness are acceptable.' : 'Provider-backed market freshness is not current or provider budget is blocked.',
+        blocker: providerBudgetHealth.blockers[0] ?? null,
+        explanation: providerHealth === 'HEALTHY' ? 'Provider budget capacity is acceptable; market freshness is reported separately.' : 'Provider budget evidence is degraded, blocked or unknown.',
+      },
+      marketFreshness: {
+        status: marketFreshnessHealth.status,
+        blocker: marketFreshnessHealth.blockers[0] ?? null,
+        explanation: marketFreshnessHealth.summary,
+      },
+      settlementClosure: {
+        status: settlementClosureHealth.status,
+        blocker: settlementClosureHealth.blockers[0] ?? null,
+        explanation: settlementClosureHealth.summary,
+      },
+      productReadiness: {
+        status: productReadinessHealth.status,
+        blocker: productReadinessHealth.blockers[0] ?? productReadinessHealth.warnings[0] ?? null,
+        explanation: productReadinessHealth.summary,
       },
       projection: {
         status: projectionHealth,
@@ -458,6 +876,7 @@ export async function getOperationsHealth() {
       warnings: board.boardHealth.warnings,
     },
     settlementBacklog: backlog,
+    settlementClosure: settlementClosureHealth,
     migrations: {
       pending: missingMigrations,
       unknown: unknownMigrations,
@@ -512,10 +931,15 @@ export async function getOperationsHealth() {
     },
     certification: {
       operationsProductionReady: false,
-      closedBetaOperationsReady: blockers.length === 0 && missingMigrations.length === 0,
-      reason: blockers.length
-        ? 'Operations health has explicit blockers or stale supported data.'
-        : 'Closed beta readiness is acceptable only if protected execution is monitored; production certification remains false until intraday scheduler cadence is proven.',
+      closedBetaOperationsReady: healthDomains.overall.status === 'HEALTHY' && missingMigrations.length === 0,
+      reason: productReadinessHealth.summary,
+      domainSummary: {
+        schedulerExecution: schedulerExecutionHealth.status,
+        marketFreshness: marketFreshnessHealth.status,
+        providerBudget: providerBudgetHealth.status,
+        settlementClosure: settlementClosureHealth.status,
+        productReadiness: productReadinessHealth.status,
+      },
     },
     guardrails: {
       providerCallsMade: 0,

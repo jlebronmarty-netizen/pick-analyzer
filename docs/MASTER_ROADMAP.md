@@ -3150,10 +3150,22 @@ Completion criteria: `PICK_ANALYZER_V2_PHASE_C1_1_EXTERNAL_SCHEDULER_RECOVERY_PA
 
 Objective: Audit scheduler execution, provider-budget semantics, odds acquisition, per-event freshness and product-surface stored-data consumption before implementing an adaptive event lifecycle scheduler.
 
-Status: Audit complete pending push.
+Status: Audit complete and pushed.
 
 Scope: Documentation, architecture and validation only. No scheduler cadence, prediction formula, probability/confidence/edge/EV calculation, Official Pick policy, settlement rule, provider contract or product runtime behavior changed.
 
 Result: Production evidence on commit `2c202983a1311a43f361afd707b32200c85da221` showed scheduler cadence `HEALTHY`, scheduler running true, missed intervals 0, provider status `HEALTHY` and fresh current-board market evidence. The earlier critical/stale state is classified as a recovered scheduler/freshness incident, not provider exhaustion.
 
 Completion criteria: `OE_003_AUDIT_PASS`, separated scheduler execution, market freshness, provider budget, settlement and product readiness semantics, provider cost models classified, canonical acquisition flow documented, per-event freshness table captured, lifecycle states and priority bands proposed, budget simulations documented, 0 provider calls, 0 provider credits, 0 database mutations and passing OE-003 validation.
+
+### 67. Operational Excellence OE-003A Scheduler Health Semantics
+
+Objective: Implement the first OE-003 package by separating scheduler execution, market freshness, provider budget, settlement closure and product readiness into an additive canonical health contract.
+
+Status: Implemented pending production certification.
+
+Scope: Observability and UI/API semantics only. No scheduler cadence, refresh cadence, provider limit, prediction formula, probability/confidence/edge/EV calculation, Official Pick policy, settlement rule, learning rule, provider mapping or provider contract changed.
+
+Result: `/api/operations/health` exposes `healthDomains.schedulerExecution`, `marketFreshness`, `providerBudget`, `settlementClosure`, `productReadiness` and `overall`. Adaptive refresh, data freshness, settlement guarantee, MLB autonomous operations, provider budget status and MLB Operations Center consume or expose the separated evidence additively while preserving legacy fields.
+
+Completion criteria: `OE_003A_SCHEDULER_HEALTH_SEMANTICS_IMPLEMENTED`, scheduler execution independent from market freshness, market freshness independent from scheduler invocation, provider budgets provider-specific, settlement closure independent from stale odds, product readiness limiting domain explained, API compatibility preserved, passing validation, passing build and production certification after automatic deployment.

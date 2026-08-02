@@ -250,6 +250,34 @@ function composeProviderBudgetStatus({
     lastProviderCall: latest ? String(latest.created_at ?? latest.completed_at ?? '') : null,
     nextEligibleRefresh: hardRemaining > 0 && estimatedCallsRemaining > 0 && hourlyRemaining > 0 && !stopThresholdReached ? 'now' : hourlyRemaining <= 0 ? 'next_hour' : 'next_provider_day',
     warning: budgetWarnings[0] ?? null,
+    healthDomain: {
+      contractVersion: 'provider_budget_health_domain_v1',
+      status: stopThresholdReached || estimatedCallsRemaining <= 0 ? 'CRITICAL' : accountingWarnings.length > 0 ? 'UNKNOWN' : warningThresholdReached || hourlyRemaining <= 0 ? 'DEGRADED' : 'HEALTHY',
+      summary: 'Provider budget status is provider-specific and independent from market freshness.',
+      reasonCodes: [
+        stopThresholdReached ? 'PROVIDER_BUDGET_STOP_THRESHOLD_REACHED' : null,
+        estimatedCallsRemaining <= 0 ? 'PROVIDER_RESERVE_PROTECTED' : null,
+        hourlyRemaining <= 0 ? 'PROVIDER_HOURLY_LIMIT_REACHED' : null,
+        accountingWarnings.length > 0 ? 'PROVIDER_ACCOUNTING_UNCERTAIN' : null,
+        'SPORTSDATAIO_PROVIDER_SPECIFIC',
+      ].filter(Boolean),
+      evidence: {
+        provider,
+        sportKey,
+        allowanceClassification: 'CONFIGURED_ONLY',
+        resetSemantics: 'CONFIGURED_ONLY_LOCAL_DAY',
+        callsMadeToday,
+        estimatedCallsRemaining,
+        hardRemaining,
+        hourlyRemaining,
+        softReserve: cfg.softReserve,
+      },
+      providerPools: {
+        sportsdataio: provider === 'sportsdataio' ? 'ACTIVE_REQUESTED_POOL' : 'SEPARATE_POOL',
+        theOddsApi: 'SEPARATE_POOL_NOT_COMBINED',
+        bsn: 'SOURCE_SPECIFIC_NOT_COMBINED',
+      },
+    },
     providerCallsMade: 0,
   }
 }

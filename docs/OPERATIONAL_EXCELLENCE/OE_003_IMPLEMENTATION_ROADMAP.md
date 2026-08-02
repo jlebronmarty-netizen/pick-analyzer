@@ -1,10 +1,12 @@
 # OE-003 Implementation Roadmap
 
-Status: roadmap only. OE-003A has not started.
+Status: roadmap only. OE-003A is implemented pending production certification.
 
 ## OE-003A - Scheduler And Health Semantics
 
 Scope: split scheduler execution health, market freshness health, provider budget health, settlement health, and product readiness.
+
+Status: implemented in OE-003A. Production certification pending after automatic deployment.
 
 Likely files:
 

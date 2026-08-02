@@ -58,6 +58,14 @@ type OperationsHealth = {
       usagePercent?: number
     }
   }
+  healthDomains?: {
+    schedulerExecution: { status: string; summary: string }
+    marketFreshness: { status: string; summary: string }
+    providerBudget: { status: string; summary: string }
+    settlementClosure: { status: string; summary: string }
+    productReadiness: { status: string; summary: string }
+    overall: { status: string; summary: string; limitingDomain?: string }
+  }
   projections: {
     userVisible: number
   }
@@ -123,6 +131,18 @@ function Detail({ label, value }: { label: string; value: string | number }) {
   )
 }
 
+function HealthDomainCard({ label, status, summary }: { label: string; status: string; summary: string }) {
+  return (
+    <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-black text-white">{label}</p>
+        <span className={`inline-flex rounded-full border px-2 py-1 text-[11px] font-black uppercase ${badgeClass(status)}`}>{status}</span>
+      </div>
+      <p className="mt-3 text-xs leading-5 text-slate-400">{summary}</p>
+    </div>
+  )
+}
+
 export default function OperationsHealthPanel() {
   const [data, setData] = useState<OperationsHealth | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -178,6 +198,29 @@ export default function OperationsHealthPanel() {
         <Stat label="User Projections" value={data.projections.userVisible} />
         <Stat label="Pending Migrations" value={data.migrations.pending.length} />
       </div>
+
+      {data.healthDomains ? (
+        <div className="mt-5">
+          <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-black text-white">Separated Health Domains</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Overall follows {data.healthDomains.overall.limitingDomain ?? 'explicit domain precedence'}; stale markets do not mark scheduler execution failed.
+              </p>
+            </div>
+            <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-black uppercase ${badgeClass(data.healthDomains.overall.status)}`}>
+              {data.healthDomains.overall.status}
+            </span>
+          </div>
+          <div className="grid gap-3 md:grid-cols-5">
+            <HealthDomainCard label="Scheduler Execution" status={data.healthDomains.schedulerExecution.status} summary={data.healthDomains.schedulerExecution.summary} />
+            <HealthDomainCard label="Market Freshness" status={data.healthDomains.marketFreshness.status} summary={data.healthDomains.marketFreshness.summary} />
+            <HealthDomainCard label="Provider Budget" status={data.healthDomains.providerBudget.status} summary={data.healthDomains.providerBudget.summary} />
+            <HealthDomainCard label="Settlement Closure" status={data.healthDomains.settlementClosure.status} summary={data.healthDomains.settlementClosure.summary} />
+            <HealthDomainCard label="Product Readiness" status={data.healthDomains.productReadiness.status} summary={data.healthDomains.productReadiness.summary} />
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-5 grid gap-4 lg:grid-cols-3">
         <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4">

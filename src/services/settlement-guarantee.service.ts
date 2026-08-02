@@ -69,6 +69,7 @@ export async function getSettlementGuaranteeStatus({ lookbackDays = 2 }: { lookb
   const range = rangeForLookback(lookbackDays)
   const operationsHealth = await getOperationsHealth()
   const scheduler = operationsHealth.scheduler ?? null
+  const healthDomains = operationsHealth.healthDomains ?? null
   const { data: predictions, error } = await supabaseAdmin
     .from('prediction_history')
     .select('id, sport_key, game_id, commence_time, generated_at, cutoff_at, home_team, away_team, team, opponent, market, line, result, status, lifecycle_status, settlement_details, settled_at, validation_warnings, model_role, trial, scrambled, production_eligible, feature_snapshot_id, feature_snapshot_key, feature_snapshot, odds_snapshot_id, operating_day_id, idempotency_key, model_version, is_current')
@@ -169,6 +170,32 @@ export async function getSettlementGuaranteeStatus({ lookbackDays = 2 }: { lookb
       schedulerLate: scheduler.schedulerLate,
       schedulerCritical: scheduler.schedulerCritical,
       externalSchedulerVerified: scheduler.externalSchedulerVerified,
+    } : null,
+    healthDomains: healthDomains ? {
+      schedulerExecution: healthDomains.schedulerExecution,
+      marketFreshness: healthDomains.marketFreshness,
+      providerBudget: healthDomains.providerBudget,
+      settlementClosure: {
+        ...healthDomains.settlementClosure,
+        evidence: {
+          ...healthDomains.settlementClosure.evidence,
+          completedPredictionRows: completedRows.length,
+          settledRows: settled.length,
+          readyForSettlementRows: ready.length,
+          blockedRows: blocked.length,
+          silentPendingRows: silentPending.length,
+        },
+      },
+      productReadiness: healthDomains.productReadiness,
+      overall: healthDomains.overall,
+    } : null,
+    independentDomainSummary: healthDomains ? {
+      schedulerExecution: healthDomains.schedulerExecution.status,
+      marketFreshness: healthDomains.marketFreshness.status,
+      providerBudget: healthDomains.providerBudget.status,
+      settlementClosure: ready.length > 0 || silentPending.length > 0 ? 'CRITICAL' : healthDomains.settlementClosure.status,
+      productReadiness: healthDomains.productReadiness.status,
+      actionRequiredCausedBy: actionRequiredReasons,
     } : null,
     actionRequiredReasons,
     readyForSettlement: ready.slice(0, 25),

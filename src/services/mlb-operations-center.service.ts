@@ -12,6 +12,7 @@ import { getMlbMissingIntelligenceStatus } from '@/services/mlb-missing-intellig
 import { getMlbPredictionEngineHealth } from '@/services/mlb-prediction-engine.service'
 import { getOperatingDayAutomationStatus } from '@/services/operating-day-automation.service'
 import { getOperatingDayStatus } from '@/services/operating-day.service'
+import { getOperationsHealth } from '@/services/operations-health.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
 
 const SPORT_KEY = 'baseball_mlb'
@@ -170,6 +171,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     learningResult,
     predictionHealthResult,
     operationsStatusResult,
+    healthResult,
   ] = await Promise.all([
     safe('Current Board', () => getCurrentBoard({ sportKey: SPORT_KEY, mode: 'CURRENT', limit: 200 })),
     safe('Operating Day', () => getOperatingDayStatus({ sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY, selectedDate: date })),
@@ -182,6 +184,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     safe('Learning Report', () => getAutonomousDailyLearningReport({ selectedDate: date })),
     safe('Prediction Engine', () => getMlbPredictionEngineHealth()),
     safe('Daily Operations Status', () => getAutonomousDailyOperationsStatus({ selectedDate: date })),
+    safe('Operations Health Domains', () => getOperationsHealth()),
   ])
 
   const board = record(boardResult.data)
@@ -195,6 +198,8 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
   const learning = record(learningResult.data)
   const predictionHealth = record(predictionHealthResult.data)
   const operationsStatus = record(operationsStatusResult.data)
+  const operationsHealth = record(healthResult.data)
+  const healthDomains = record(operationsHealth.healthDomains)
 
   const stages = record(operatingDay.stages)
   const operatingGames = statusCounts(operatingDay.games)
@@ -317,6 +322,7 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     learningResult,
     predictionHealthResult,
     operationsStatusResult,
+    healthResult,
   ].filter((result) => !result.ok).map((result) => result.error)
 
   return {
@@ -332,6 +338,22 @@ export async function getMlbOperationsCenter({ selectedDate }: { selectedDate?: 
     championRowsMutated: false,
     v7Promoted: false,
     officialThresholdsChanged: false,
+    healthSemantics: {
+      contractVersion: text(healthDomains.contractVersion, 'operational_health_domains_v1'),
+      schedulerExecution: record(healthDomains.schedulerExecution),
+      marketFreshness: record(healthDomains.marketFreshness),
+      providerBudget: record(healthDomains.providerBudget),
+      settlementClosure: record(healthDomains.settlementClosure),
+      productReadiness: record(healthDomains.productReadiness),
+      overall: record(healthDomains.overall),
+      plainLanguage: [
+        `Scheduler execution: ${text(record(healthDomains.schedulerExecution).status, 'UNKNOWN')}.`,
+        `Market freshness: ${text(record(healthDomains.marketFreshness).status, 'UNKNOWN')}.`,
+        `Provider budget: ${text(record(healthDomains.providerBudget).status, 'UNKNOWN')}.`,
+        `Settlement closure: ${text(record(healthDomains.settlementClosure).status, 'UNKNOWN')}.`,
+        `Product readiness: ${text(record(healthDomains.productReadiness).status, 'UNKNOWN')}.`,
+      ],
+    },
     operatingDay: {
       operatingDate: text(operatingDay.selectedDate, date),
       currentStage: text(automation.currentStage ?? automation.currentOperatingDayStage, latestCompletedStage(stages)),

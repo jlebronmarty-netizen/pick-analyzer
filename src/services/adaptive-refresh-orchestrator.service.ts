@@ -1133,6 +1133,72 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
   ].filter(Boolean) as string[]
 
   const apiStatus: AdaptiveApiStatus = blockers.length ? 'PARTIAL' : activeNeed ? 'SUCCESS' : 'INSUFFICIENT_DATA'
+  const oddsFreshness = freshness.find((item) => item.domain === 'odds')
+  const settlementFreshness = freshness.find((item) => item.domain === 'settlement')
+  const adaptiveHealthDomains = {
+    contractVersion: 'adaptive_refresh_health_domains_v1',
+    marketFreshness: {
+      status: oddsFreshness?.status === 'FRESH'
+        ? 'HEALTHY'
+        : oddsFreshness?.status === 'STALE' || oddsFreshness?.status === 'FAILED'
+          ? 'CRITICAL'
+          : oddsFreshness?.status === 'PENDING' || oddsFreshness?.status === 'AGING'
+            ? 'DEGRADED'
+            : 'UNKNOWN',
+      summary: marketState.reason,
+      reasonCodes: [
+        marketState.state,
+        blockers.includes('odds_not_current') ? 'ODDS_NOT_CURRENT' : null,
+      ].filter(Boolean),
+      sourceTimestamps: {
+        latestOddsTimestamp: latestOddsChange,
+        lastProviderCheckAt: latestProviderCheck?.checkedAt ?? null,
+        latestSourceTimestamp: latestProviderCheck?.sourceLatestTimestamp ?? latestOddsChange,
+      },
+      evidence: {
+        marketState: marketState.state,
+        oddsStatus: oddsFreshness?.status ?? 'UNKNOWN',
+        ageMinutes: oddsFreshness?.ageMinutes ?? null,
+        timestampRule: 'Market freshness is based on stored market/provider timestamps, not scheduler invocation time.',
+      },
+    },
+    providerBudget: {
+      status: mode === 'EXHAUSTED'
+        ? 'CRITICAL'
+        : mode === 'CRITICAL' || mode === 'CONSERVATIVE'
+          ? 'DEGRADED'
+          : budget ? 'HEALTHY' : 'UNKNOWN',
+      summary: 'Provider budget is provider-specific and is evaluated independently from market freshness.',
+      reasonCodes: [
+        `SPORTSDATAIO_${mode}`,
+        'THE_ODDS_API_SEPARATE_POOL',
+        'BSN_SOURCE_SEPARATE',
+      ],
+      evidence: {
+        sportsdataio: {
+          mode,
+          callsMadeToday: Number(budget?.callsMadeToday ?? 0),
+          estimatedCallsRemaining: Number(budget?.estimatedCallsRemaining ?? 0),
+          softReserve: Number(budget?.config?.softReserve ?? 0),
+        },
+        theOddsApi: { status: 'UNKNOWN_CURRENT_REMAINING_NOT_RECHECKED', combinedWithSportsDataIO: false },
+        bsn: { status: 'SOURCE_SPECIFIC_PREVIEW', combinedWithTheOddsApi: false },
+      },
+    },
+    settlementClosure: {
+      status: Number(settlementBacklog?.settlementReadyRows ?? 0) > 0 || Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 ? 'CRITICAL' : 'HEALTHY',
+      summary: 'Settlement closure is evaluated from ready rows and missing-result rows, independent of market freshness.',
+      reasonCodes: [
+        Number(settlementBacklog?.settlementReadyRows ?? 0) > 0 ? 'SETTLEMENT_READY_ROWS_REMAIN' : 'SETTLEMENT_CLOSED',
+        Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 ? 'MISSING_RESULT_ROWS_REMAIN' : null,
+      ].filter(Boolean),
+      evidence: {
+        settlementReadyRows: Number(settlementBacklog?.settlementReadyRows ?? 0),
+        completedMissingResultRows: Number(settlementBacklog?.completedMissingResultRows ?? 0),
+        settlementFreshnessStatus: settlementFreshness?.status ?? 'UNKNOWN',
+      },
+    },
+  }
 
   return {
     success: true,
@@ -1204,6 +1270,7 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
     nextAction: effectiveNextAction,
     nextActionAt: dashboard?.nextActionAt ?? budget?.nextEligibleRefresh ?? null,
     automationStatus: String(automation?.currentLifecycleState ?? dashboard?.automationStatus ?? 'stored_data_read_only'),
+    healthDomains: adaptiveHealthDomains,
     providerBudget: {
       mode,
       provider: budget?.provider ?? 'sportsdataio',
@@ -1306,6 +1373,11 @@ export async function getDataFreshnessStatus() {
     activeSlateDate: status.activeSlateDate,
     policies: DATA_FRESHNESS_POLICIES,
     freshness: status.freshness,
+    healthDomains: {
+      marketFreshness: status.healthDomains.marketFreshness,
+      providerBudget: status.healthDomains.providerBudget,
+      settlementClosure: status.healthDomains.settlementClosure,
+    },
     warnings: status.warnings,
     blockers: status.blockers,
     providerCallsMade: 0,
