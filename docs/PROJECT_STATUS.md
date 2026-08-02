@@ -6,6 +6,7 @@ Last updated: 2026-07-30 20:05:00Z
 
 - Implemented `/api/operations/event-refresh-plan` as a bounded, read-only event-level refresh planner in `SHADOW` mode. It consumes OE-003C lifecycle evidence, decides per event, applies SportsDataIO MLB cadence targets, estimates provider-efficient batching and preserves exact provider-budget authorization evidence.
 - Adaptive refresh diagnostics now expose a compact `eventRefreshPlan` summary while active execution remains delegated to the existing certified operating-day pipeline. The MLB Operations Center now shows planner mode, due/deferred/blocked events, target freshness, estimated calls, budget authorization and blockers.
+- Production certification passed on commit `47bba4b9604986ca8570cfab64485915060ddbda`: `/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200` returned HTTP 200 with 15 bounded current MLB event plans, `SHADOW` planner mode, `REFRESH_MARKET=15`, `P1=8`, `P3=7`, estimated HTTP requests 1, estimated quota units 1 and zero provider calls or mutations.
 - The Odds API remains shadow-only while current balance/reset/cost are unknown; BSN remains observational. No provider calls, provider credits, database mutations, prediction writes, result writes, settlement writes, learning writes, scheduler cadence changes, refresh cadence changes, prediction formula changes or Official Pick policy changes were introduced. OE-003E was not started.
 
 ## 2026-08-02 OE-003C Per-Event Lifecycle State

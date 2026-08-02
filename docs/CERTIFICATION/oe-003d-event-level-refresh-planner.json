@@ -1,7 +1,7 @@
 {
   "release": "OE-003D",
   "name": "Event-Level Refresh Planner V1",
-  "status": "IMPLEMENTED_PENDING_PRODUCTION_CERTIFICATION",
+  "status": "PRODUCTION_CERTIFIED_SHADOW_MODE",
   "startingCommit": "4232edd5579b09366a0aed2cc95b72c72b996d2d",
   "contractVersion": "event_refresh_plan_v1",
   "api": "/api/operations/event-refresh-plan",
@@ -59,7 +59,75 @@
     "OE_003E_NOT_STARTED"
   ],
   "productionCertification": {
-    "status": "PENDING",
+    "status": "PASS",
+    "runtimeCommit": "47bba4b9604986ca8570cfab64485915060ddbda",
+    "plannerMode": "SHADOW",
+    "httpStatus": {
+      "systemVersion": 200,
+      "eventLifecycle": 200,
+      "eventRefreshPlan": 200,
+      "operationsHealth": 200,
+      "adaptiveRefreshStatus": 200,
+      "settlementGuarantee": 200,
+      "mlbAutonomousOperations": 200,
+      "providerBudgetStatus": 200,
+      "providerBudgetForecast": 200,
+      "dashboardToday": 200,
+      "currentBoard": 200,
+      "mlbOperations": 200
+    },
+    "observedPlan": {
+      "totalEvents": 15,
+      "eventsDueNow": 15,
+      "eventsDeferred": 0,
+      "eventsBlocked": 15,
+      "eventsPostStart": 0,
+      "eventsRequiringClosure": 0,
+      "eventsMissingResults": 0,
+      "eventsReadyForSettlement": 0,
+      "eventsByLifecycleState": {
+        "HIGH_PRIORITY": 8,
+        "ACTIVE_REFRESH": 7
+      },
+      "eventsByPriority": {
+        "P1": 8,
+        "P3": 7
+      },
+      "eventsByPlannedAction": {
+        "REFRESH_MARKET": 15
+      },
+      "estimatedHttpRequests": 1,
+      "estimatedQuotaUnits": 1
+    },
+    "observedProviderBudget": {
+      "sportsdataio": {
+        "usableRemainingBefore": 840,
+        "usableRemainingAfter": 839,
+        "reserveImpact": "RESERVE_PRESERVED"
+      },
+      "theOddsApi": {
+        "plannerStatus": "SHADOW_ONLY_UNKNOWN_BALANCE_RESET_COST",
+        "activeExecutionAuthorized": false
+      },
+      "bsn": {
+        "plannerStatus": "OBSERVATIONAL_PROVIDER_PATH_NOT_ACTIVE",
+        "activeExecutionAuthorized": false
+      }
+    },
+    "observedGuardrails": {
+      "providerCallsMade": 0,
+      "providerCreditsConsumed": 0,
+      "databaseMutationsMade": 0,
+      "predictionWrites": 0,
+      "resultWrites": 0,
+      "settlementWrites": 0,
+      "learningWrites": 0,
+      "schedulerCadenceChanged": false,
+      "refreshCadenceChanged": false,
+      "officialPickPolicyChanged": false,
+      "predictionFormulaChanged": false,
+      "activeExecutionEnabled": false
+    },
     "requiredEndpoints": [
       "/api/system/version",
       "/api/operations/event-lifecycle?sportKey=baseball_mlb&limit=200",

@@ -1,6 +1,6 @@
 # OE-003 Implementation Roadmap
 
-Status: roadmap plus bounded implementation evidence. OE-003A, OE-003B and OE-003C are production-certified. OE-003D is implemented pending production certification.
+Status: roadmap plus bounded implementation evidence. OE-003A, OE-003B, OE-003C and OE-003D are production-certified. OE-003D remains shadow-only until a separate active execution phase is approved.
 
 ## OE-003A - Scheduler And Health Semantics
 
@@ -70,7 +70,7 @@ Stop condition: any need to execute provider refresh, result import, settlement,
 
 Scope: deterministic event-priority planner with P0-P4 bands.
 
-Status: implemented in OE-003D pending production certification.
+Status: production-certified in OE-003D shadow mode.
 
 Likely files:
 

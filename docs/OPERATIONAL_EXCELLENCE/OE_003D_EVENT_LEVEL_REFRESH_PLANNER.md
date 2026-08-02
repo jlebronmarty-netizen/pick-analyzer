@@ -1,6 +1,6 @@
 # OE-003D Event-Level Refresh Planner
 
-Status: implemented pending production certification.
+Status: production certified in shadow mode.
 
 OE-003D adds a canonical event-level refresh planner in `SHADOW` mode. The planner decides per event, estimates provider-efficient batching, and reports budget authorization without executing provider calls or mutating data.
 
@@ -52,6 +52,12 @@ The planner follows:
 `DECIDE_PER_EVENT -> EXECUTE_WITH_PROVIDER_EFFICIENT_BATCHING -> STORE_ONE_CANONICAL_SNAPSHOT -> SERVE_MANY_PRODUCT_SURFACES`
 
 OE-003D does not create a second acquisition pipeline and does not make Today, Current Board, Rent Play, Best Value or Workspace call providers independently.
+
+## Production Certification
+
+Production commit `47bba4b9604986ca8570cfab64485915060ddbda` served the new planner route with HTTP 200. The bounded MLB plan returned 15 current events, all planned as `REFRESH_MARKET`, with `P1=8`, `P3=7`, estimated HTTP requests 1, estimated quota units 1, and SportsDataIO reserve preserved.
+
+Because the planner is certified in `SHADOW` mode, every due plan remains execution-blocked by `PLANNER_MODE_NOT_ACTIVE`; this is intentional and prevents provider calls or remote mutations.
 
 ## Adaptive Integration
 
