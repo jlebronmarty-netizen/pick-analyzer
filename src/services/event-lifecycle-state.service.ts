@@ -123,12 +123,9 @@ type PredictionRow = {
 type ResultRow = {
   id: string
   game_id: string | null
-  status: string | null
-  result: string | null
   home_score: number | null
   away_score: number | null
   winner: string | null
-  updated_at: string | null
   created_at: string | null
 }
 
@@ -350,7 +347,7 @@ function derive({
   const latestOddsTimestamp = latestTimestamp(predictions.map((row) => row.odds_timestamp ?? row.generated_at))
   const market = freshness(latestOddsTimestamp, now)
   const resultImported = results.length > 0
-  const resultObservedAt = latestTimestamp(results.map((row) => row.updated_at ?? row.created_at))
+  const resultObservedAt = latestTimestamp(results.map((row) => row.created_at))
   const resultStatus = resultImported ? 'IMPORTED' : game.state === 'FINAL' ? 'MISSING_CANONICAL_RESULT' : 'PENDING'
   const settledPredictionCount = predictions.filter(predictionIsSettled).length
   const blockedSettlementCount = predictions.filter(predictionBlocked).length
@@ -579,7 +576,7 @@ export async function getEventLifecycleState(input: EventLifecycleStateInput = {
     eventIds.length
       ? supabaseAdmin
           .from('game_results')
-          .select('id,game_id,status,result,home_score,away_score,winner,updated_at,created_at')
+          .select('id,game_id,home_score,away_score,winner,created_at')
           .in('game_id', eventIds)
           .limit(MAX_LIMIT * 2)
       : Promise.resolve({ data: [], error: null }),
@@ -731,7 +728,7 @@ export function validateEventLifecycleStateFixtures() {
   const settlementReady = derive({
     event: { ...base, status: 'Final' },
     predictions: [{ id: 'p1', game_id: 'event-1', generated_at: now.toISOString(), odds_timestamp: now.toISOString(), status: 'pending', result: null, lifecycle_status: null, production_eligible: true, trial: false, scrambled: false, market: 'moneyline', recommended_pick: 'Home', validation_warnings: [] }],
-    results: [{ id: 'r1', game_id: 'event-1', status: 'Final', result: 'home', home_score: 5, away_score: 3, winner: 'Home', updated_at: now.toISOString(), created_at: now.toISOString() }],
+    results: [{ id: 'r1', game_id: 'event-1', home_score: 5, away_score: 3, winner: 'Home', created_at: now.toISOString() }],
     now,
   })
   const checks = [
