@@ -68,7 +68,7 @@ MC-STOP-005 did not clear.
 
 Latest read-only production evidence showed:
 
-- production commit: `0f02b355f19ccaf3c08682d304ac27a0a8f06027`;
+- production commit: `02e9d97169d8292a10126b4a8370cec227496ca1`;
 - runtime-certified MC-01 commit: `c337a850919e932e8b13a9024a88d52b3d1dc09b`;
 - `/api/mission-control`: HTTP 200, current mission `MC-01:CONDITIONAL_PASS`, next mission `MC-02:READY`;
 - `/api/operations/health`: HTTP 200, status `CRITICAL`;
