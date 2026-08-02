@@ -65,3 +65,14 @@ MC-01 can become `PRODUCTION_CERTIFIED` only when:
 ## Active Stop Condition
 
 MC-STOP-005 remains active until the protected external scheduler produces fresh evidence and market freshness recovers.
+
+## Production Verification After Repair
+
+Runtime commit `c337a850919e932e8b13a9024a88d52b3d1dc09b` deployed automatically.
+
+The runtime repairs are live:
+
+- `/api/mission-control` reports current mission `MC-01:CONDITIONAL_PASS`.
+- `/api/operations/settlement-guarantee?includeValidation=true` returns HTTP 200 PASS with ready rows 0 and silent pending rows 0.
+
+MC-01 remains conditional because `/api/operations/health` remains `CRITICAL` and `/api/operations/adaptive-refresh/status` remains `PARTIAL`.

@@ -41,3 +41,23 @@ MC-01 is partially closed with bounded runtime repairs and production evidence, 
 ## Classification
 
 MC-01 is `CONDITIONAL_PASS` until MC-STOP-005 clears through external protected scheduler and market-freshness proof.
+
+## Production Verification After Repair
+
+Production served runtime commit `c337a850919e932e8b13a9024a88d52b3d1dc09b`.
+
+Read-only production checks showed:
+
+- `/api/system/version`: HTTP 200, provider calls 0.
+- `/api/mission-control`: HTTP 200, current mission `MC-01:CONDITIONAL_PASS`, next mission `MC-02:READY`.
+- `/api/operations/settlement-guarantee?includeValidation=true`: HTTP 200, guarantee `PASS`, ready rows 0, silent pending rows 0, operational warning `SCHEDULER_LATE_OR_CRITICAL`.
+- `/api/operations/health`: HTTP 200, status `CRITICAL`.
+- `/api/operations/adaptive-refresh/status`: HTTP 200, status `PARTIAL`.
+- `/api/providers/budget/status?provider=sportsdataio&sportKey=baseball_mlb`: HTTP 200.
+- `/api/dashboard/today`: HTTP 200, provider calls 0, mutations 0.
+- `/api/current-board?mode=current&limit=200`: HTTP 200.
+- `/api/performance`: HTTP 200, provider calls 0, mutations 0.
+- `/betting-workbench`: HTTP 200.
+- `/api/user/wagers/summary`: HTTP 401 unauthenticated, expected.
+
+No manual deployment was performed.

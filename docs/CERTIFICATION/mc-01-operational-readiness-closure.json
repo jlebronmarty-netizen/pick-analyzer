@@ -25,6 +25,32 @@
     "settledRows": 57,
     "protectedDryRunWithoutSecretHttp": 401
   },
+  "productionEvidenceAfterRepair": {
+    "systemVersionHttp": 200,
+    "systemVersionCommit": "c337a850919e932e8b13a9024a88d52b3d1dc09b",
+    "missionControlHttp": 200,
+    "missionControlCurrentMission": "MC-01",
+    "missionControlCurrentState": "CONDITIONAL_PASS",
+    "missionControlNextMission": "MC-02",
+    "operationsHealthHttp": 200,
+    "operationsHealthStatus": "CRITICAL",
+    "adaptiveRefreshHttp": 200,
+    "adaptiveRefreshStatus": "PARTIAL",
+    "settlementGuaranteeHttp": 200,
+    "settlementGuarantee": "PASS",
+    "settlementReadyRows": 0,
+    "silentPendingRows": 0,
+    "operationalWarningReasons": ["SCHEDULER_LATE_OR_CRITICAL"],
+    "providerBudgetHttp": 200,
+    "dashboardTodayHttp": 200,
+    "currentBoardHttp": 200,
+    "performanceHttp": 200,
+    "bettingWorkbenchHttp": 200,
+    "personalLedgerSummaryUnauthenticatedHttp": 401,
+    "providerCallsMadeByCertificationReads": 0,
+    "remoteMutationsMadeByCertificationReads": 0,
+    "manualDeployment": false
+  },
   "repairs": [
     "mission_control_runtime_state_reconciled",
     "settlement_guarantee_scheduler_warning_decoupled_from_settlement_failure"
