@@ -57,6 +57,7 @@ type PredictionRow = {
   created_at?: string | null
   settled_at: string | null
   settlement_details: Record<string, unknown> | null
+  skip_reason?: string | null
   is_current?: boolean | null
 }
 
@@ -121,6 +122,7 @@ function eligibility(row: PredictionRow, event: EventRow | undefined) {
 
 function metrics(rows: Array<{ row: PredictionRow; event?: EventRow }>) {
   const eligibleRows = rows.filter((item) => eligibility(item.row, item.event).eligible)
+  const nonEligibleRows = rows.filter((item) => !eligibility(item.row, item.event).eligible)
   const settled = eligibleRows.filter((item) => resultOf(item.row) !== 'pending')
   const wins = settled.filter((item) => resultOf(item.row) === 'win').length
   const losses = settled.filter((item) => resultOf(item.row) === 'loss').length
@@ -152,7 +154,37 @@ function metrics(rows: Array<{ row: PredictionRow; event?: EventRow }>) {
     brier: scored.length ? round(scored.reduce((sum, item) => sum + (item.probability - Number(item.outcome)) ** 2, 0) / scored.length, 4) : null,
     averageConfidence: confidences.length ? round(confidences.reduce((sum, value) => sum + value, 0) / confidences.length) : null,
     settlementCoverage: eligibleRows.length ? round((settled.length / eligibleRows.length) * 100) : null,
+    nonProductionExclusionReasons: groupCount(nonEligibleRows, nonProductionReason),
+    nonProductionBlockers: groupBlockers(nonEligibleRows.map((item) => item.row)),
+    validPregameNonProductionRows: nonEligibleRows.filter((item) => {
+      const cutoff = classifyPredictionCutoff(item.row, item.event)
+      return cutoff.state === 'PREGAME'
+    }).length,
   }
+}
+
+function blockerList(row: PredictionRow) {
+  return String(row.skip_reason ?? '')
+    .split(',')
+    .map((reason) => reason.trim())
+    .filter(Boolean)
+}
+
+function groupBlockers(rows: PredictionRow[]) {
+  const groups = new Map<string, number>()
+  for (const row of rows) {
+    for (const blocker of blockerList(row)) groups.set(blocker, (groups.get(blocker) ?? 0) + 1)
+  }
+  return Object.fromEntries(Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b)))
+}
+
+function nonProductionReason(item: { row: PredictionRow; event?: EventRow }) {
+  const cutoff = classifyPredictionCutoff(item.row, item.event)
+  if (!cutoff.eligible) return cutoff.state
+  const blockers = new Set(blockerList(item.row))
+  if (item.row.production_eligible !== true && blockers.has('QUARANTINED_ROW')) return 'PREGAME_VALID_QUARANTINED_PREVIEW'
+  if (item.row.production_eligible !== true && blockers.has('PRODUCTION_GATE_BLOCKED')) return 'PREGAME_VALID_PRODUCTION_GATE_BLOCKED'
+  return eligibility(item.row, item.event).reason
 }
 
 function boundedRowLimit(value: number | null | undefined) {
@@ -170,7 +202,7 @@ async function loadRows(sportKey?: string | null, maxRows = DEFAULT_MAX_PREDICTI
     const pageSize = Math.min(1000, rowLimit - from)
     let query = supabaseAdmin
       .from('prediction_history')
-      .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, line, result, status, lifecycle_status, recommended_pick, production_eligible, trial, scrambled, validation_status, validation_warnings, model_role, model_version, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key, generated_at, created_at, cutoff_at, settled_at, settlement_details, is_current')
+      .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, line, result, status, lifecycle_status, recommended_pick, production_eligible, trial, scrambled, validation_status, validation_warnings, model_role, model_version, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key, generated_at, created_at, cutoff_at, settled_at, settlement_details, skip_reason, is_current')
       .order('created_at', { ascending: false })
       .range(from, from + pageSize - 1)
     if (sportKey) query = query.eq('sport_key', sportKey)
@@ -271,6 +303,16 @@ export async function getPerformanceScopeV2({
     },
     totals: metrics(joined),
     exclusions: groupCount(joined, (item) => eligibility(item.row, item.event).reason),
+    nonProductionReconciliation: {
+      byExactReason: groupCount(joined.filter((item) => !eligibility(item.row, item.event).eligible), nonProductionReason),
+      byBlocker: groupBlockers(joined.filter((item) => !eligibility(item.row, item.event).eligible).map((item) => item.row)),
+      validPregameNonProductionRows: joined.filter((item) => {
+        const cutoff = classifyPredictionCutoff(item.row, item.event)
+        return cutoff.state === 'PREGAME' && !eligibility(item.row, item.event).eligible
+      }).length,
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+    },
     cutoffExclusions: {
       byState: groupCount(joined.filter((item) => cutoffExclusion(item.row, item.event)), (item) => cutoffExclusion(item.row, item.event)),
       rows: joined.filter((item) => cutoffExclusion(item.row, item.event)).length,
@@ -425,6 +467,7 @@ function fixturePerformanceRow(id: string, result: string, probability: number):
     created_at: '2026-07-01T20:00:00.000Z',
     settled_at: '2026-07-02T03:00:00.000Z',
     settlement_details: null,
+    skip_reason: null,
     is_current: true,
   }
 }

@@ -1,0 +1,38 @@
+{
+  "mode": "p1_1_yesterday_non_production_reconciliation_v1",
+  "date": "2026-08-02",
+  "timezone": "America/Puerto_Rico",
+  "verdict": "MIXED_CAUSES",
+  "historicalClassificationDecision": "CORRECT_NON_PRODUCTION_CLASSIFICATION",
+  "forwardFinding": "VALID_PREGAME_MODEL_ROWS_REMAINED_QUARANTINED",
+  "generatedRows": 45,
+  "productionEligibleRows": 0,
+  "productionSettledRows": 0,
+  "nonProductionRows": 45,
+  "validPregameRows": 45,
+  "postStartRows": 0,
+  "postFinalRows": 0,
+  "invalidCutoffRows": 0,
+  "eventsWithoutValidProductionPrediction": 15,
+  "rowsByExactExclusionReason": {
+    "PREGAME_VALID_QUARANTINED_PREVIEW": 45
+  },
+  "blockers": {
+    "PRODUCTION_GATE_BLOCKED": 45,
+    "QUARANTINED_ROW": 45,
+    "STALE_ODDS": 45,
+    "CALIBRATION_INSUFFICIENT": 45,
+    "LOW_CONFIDENCE": 45,
+    "LOW_MODEL_PROBABILITY": 45,
+    "LOW_EDGE": 44,
+    "NON_POSITIVE_EDGE": 42,
+    "NON_POSITIVE_EV": 42,
+    "LOW_EV": 43
+  },
+  "historicalMutations": 0,
+  "predictionWrites": 0,
+  "settlementWrites": 0,
+  "providerCallsMadeByCertification": 0,
+  "remoteMutationsMadeByCertification": 0,
+  "recommendation": "KEEP_YESTERDAY_SETTLED_AT_0"
+}

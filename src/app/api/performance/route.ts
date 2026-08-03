@@ -12,6 +12,9 @@ type TimelineSource = Record<string, {
   losses?: number
   pushes?: number
   accuracy?: number | null
+  nonProductionExclusionReasons?: Record<string, number>
+  nonProductionBlockers?: Record<string, number>
+  validPregameNonProductionRows?: number
 }>
 
 type ReportCardSource = {
@@ -37,6 +40,9 @@ function timelineRows(timeline: TimelineSource) {
     productionSettled: item.settled,
     productionPending: item.pending,
     nonProductionRows: Math.max(0, Number(item.generated ?? 0) - Number(item.eligible ?? 0)),
+    nonProductionExclusionReasons: item.nonProductionExclusionReasons ?? {},
+    nonProductionBlockers: item.nonProductionBlockers ?? {},
+    validPregameNonProductionRows: item.validPregameNonProductionRows ?? 0,
     wins: item.wins,
     losses: item.losses,
     pushes: item.pushes,

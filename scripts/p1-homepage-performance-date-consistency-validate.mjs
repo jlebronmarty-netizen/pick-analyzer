@@ -58,12 +58,17 @@ const allowed = new Set([
   'src/components/home/HomeBettingPlan.tsx',
   'src/app/api/performance/route.ts',
   'src/components/performance/PerformanceProductClient.tsx',
+  'src/services/performance-scope-v2.service.ts',
+  'src/services/performance-product-contract.service.ts',
   'scripts/p1-homepage-performance-date-consistency-validate.mjs',
+  'scripts/p1-1-yesterday-non-production-reconcile-validate.mjs',
   'scripts/mc08a-homepage-experience-validate.mjs',
   'scripts/mc08b-rent-play-experience-validate.mjs',
   'scripts/mc08c-moneyline-bet-experience-validate.mjs',
   'scripts/mc08d-smart-parlay-experience-validate.mjs',
   'scripts/mission-control-v1-validate.mjs',
+  'docs/CERTIFICATION/P1_1_YESTERDAY_NON_PRODUCTION_RECONCILIATION.md',
+  'docs/CERTIFICATION/p1-1-yesterday-non-production-reconciliation.json',
 ])
 const disallowed = changed.filter((file) => !allowed.has(file) && !file.startsWith('.p1-evidence/'))
 check('only bounded P1 repair files are modified', disallowed.length === 0, disallowed.join(', '))

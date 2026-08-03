@@ -163,6 +163,9 @@ export function validatePerformanceProductContractFixtures() {
     brier,
     averageConfidence: 61,
     settlementCoverage: 100,
+    nonProductionExclusionReasons: {},
+    nonProductionBlockers: {},
+    validPregameNonProductionRows: 0,
   })
   const achieved = goalsFrom(metric(0.2)).goals.find((goal) => goal.key === 'maximum_brier_score')
   const exact = goalsFrom(metric(0.22)).goals.find((goal) => goal.key === 'maximum_brier_score')
@@ -304,6 +307,9 @@ function emptyMetrics(label = 'No settled production predictions'): TimelineMetr
     brier: null,
     averageConfidence: null,
     settlementCoverage: null,
+    nonProductionExclusionReasons: {},
+    nonProductionBlockers: {},
+    validPregameNonProductionRows: 0,
   }
 }
 
