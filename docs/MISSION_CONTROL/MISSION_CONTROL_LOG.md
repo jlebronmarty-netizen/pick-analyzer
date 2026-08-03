@@ -177,3 +177,11 @@ The old homepage probability multiplication was removed. MC-08D does not fabrica
 Local validation passed: MC-08D validator 47/47, MC-08C validator 43/43, MC-08B validator 34/34, MC-08A validator 37/37, Mission Control validator 57/57, MC-02 validator 24/24, OE-003F validator 28/28, OE-003E validator 32/32, C1 product validator 31/31, B2 through B6.1 product validators, route/artifact consistency 14/14, unsupported-market policy lock 19/19, scheduler health alignment 6/6, changed-file ESLint, JSON validation, Markdown validation, targeted secret scan, `git diff --check` and `npm.cmd run build` with 396 generated static pages.
 
 Production certification passed on commit `f9faf649d89cd343034e935225d7215dafcc754b`. `/api/system/version`, `/`, `/api/dashboard/today`, `/api/current-board?mode=current&limit=100`, `/api/market-opportunities/most-likely`, `/api/market-opportunities/best-value`, `/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200`, `/api/operations/health`, `/betting-workbench` and `/mlb-operations` returned HTTP 200. Desktop and mobile production renders showed Smart Parlay after Moneyline Bet and before Watchlist. Desktop state was `NO_SAFE_COMBINATION` with 8 available legs and 0 default selected legs; mobile state was `NO_GAMES`. Selection/deselection passed on desktop. Provider calls, remote mutations and wager writes remained 0. MC-08E is READY but was not started.
+
+## 2026-08-03 - P1.3 Production Evaluation Policy Separation
+
+P1.3 locally implements the approved policy decision that valid pregame model predictions can be production-evaluable independently from recommendation, actionability and Official Pick gates.
+
+The implementation adds `production_evaluation_policy_v1_3` and persists the normalized policy contract inside future MLB prospective prediction snapshots. Low confidence, low edge, low EV, probationary calibration and stale price evidence remain recommendation/actionability blockers only. Data-integrity and excluded-scope blockers still prevent production evaluation.
+
+The 45 rows from 2026-08-02 remain unchanged as non-production historical evidence. P2.0 remains blocked until P1.3 is deployed and production-certified.

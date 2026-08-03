@@ -1,0 +1,33 @@
+{
+  "mode": "p1_3_production_evaluation_policy_v1",
+  "status": "LOCAL_IMPLEMENTATION_PENDING_PRODUCTION_DEPLOYMENT",
+  "policyVersion": "production_evaluation_policy_v1_3",
+  "prospectiveOnly": true,
+  "historicalRowsPromoted": false,
+  "historicalRowsRewritten": false,
+  "predictionFormulasChanged": false,
+  "recommendationThresholdsChanged": false,
+  "officialPickPolicyChanged": false,
+  "settlementRulesChanged": false,
+  "learningWeightsChanged": false,
+  "providerContractsChanged": false,
+  "schedulerCadenceChanged": false,
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "contract": {
+    "prediction_valid": "valid model output and identity",
+    "production_evaluable": "valid pregame prediction without data-integrity or excluded-scope blockers",
+    "recommendation_eligible": "recommendation policy result",
+    "actionable": "recommendation/actionability policy result",
+    "official_pick_eligible": "Official Pick policy result",
+    "production_evaluation_reasons": "data-integrity and scope reasons",
+    "recommendation_gate_reasons": "recommendation quality and policy reasons"
+  },
+  "historicalBoundary": {
+    "date": "2026-08-02",
+    "rows": 45,
+    "classification": "PREGAME_VALID_QUARANTINED_PREVIEW / LEGACY_PRE_V2",
+    "action": "UNCHANGED"
+  },
+  "validationScript": "scripts/p1-3-production-evaluation-policy-validate.mjs"
+}

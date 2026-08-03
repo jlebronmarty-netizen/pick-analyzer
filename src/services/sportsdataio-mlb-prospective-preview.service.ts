@@ -4,6 +4,7 @@ import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { createFeatureSnapshot } from '@/services/feature-store-core.service'
+import { evaluatePredictionEvaluationPolicy } from '@/services/prediction-evaluation-policy.service'
 import { evaluateRecommendationEligibility } from '@/services/recommendation-eligibility-policy.service'
 import { buildSportPrediction } from '@/services/sport-prediction-engine-sdk.service'
 import { getMlbMissingIntelligenceStatus } from '@/services/mlb-missing-intelligence.service'
@@ -13,7 +14,6 @@ import {
   type SportsDataIoMlbEventReference,
 } from '@/services/sportsdataio-mlb-normalization.service'
 import {
-  SPORTSDATAIO_DISCOVERY_LAB_ORIGIN,
   resolveSportsDataIoDiscoveryLabUrl,
 } from '@/services/sportsdataio-discovery-lab-url.service'
 import { assertSportEventStatusWrite } from '@/services/mlb-event-status-mapper.service'
@@ -25,7 +25,6 @@ const PROVIDER_VARIANT = 'sportsdataio_discovery_lab'
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
 const SEASON = '2026'
-const BASE_ORIGIN = SPORTSDATAIO_DISCOVERY_LAB_ORIGIN
 const MODE = 'sportsdataio_mlb_prospective_preview_v1'
 const INTELLIGENCE_VERSION = 'mlb_prediction_intelligence_v1'
 const V6_MODEL_VERSION = 'baseball_mlb_prospective_v6'
@@ -251,10 +250,6 @@ function providerTeamId(row: Record<string, unknown>, side: 'home' | 'away') {
 function teamKey(row: Record<string, unknown>, side: 'home' | 'away') {
   if (side === 'home') return safeString(row.HomeTeam) || safeString(row.HomeTeamKey) || safeString(row.HomeTeamName)
   return safeString(row.AwayTeam) || safeString(row.AwayTeamKey) || safeString(row.AwayTeamName)
-}
-
-function eventStart(row: Record<string, unknown>) {
-  return normalizeSportsDataIoMlbGameDateTime(row).normalizedUtc
 }
 
 function eventStatus(value: unknown) {
@@ -2092,6 +2087,40 @@ async function writeSnapshotsAndPredictions(
       data_sufficiency_score: candidate.sufficiency,
       calibrationStatus: 'probationary',
     }, { now: new Date(generatedAt), allowProbationaryPreview: true })
+    const evaluationPolicy = evaluatePredictionEvaluationPolicy({
+      id: predictionId,
+      sport_key: SPORT_KEY,
+      game_id: candidate.event.id,
+      commence_time: candidate.event.start_time,
+      home_team: candidate.event.home_team,
+      away_team: candidate.event.away_team,
+      team: selection,
+      opponent,
+      market: candidate.market,
+      sportsbook: candidate.odds.sportsbook,
+      odds: candidate.odds.price,
+      implied_probability: americanImplied(candidate.odds.price),
+      model_probability: sdk.modelProbability,
+      confidence: sdk.confidence,
+      edge: sdk.edge,
+      ev: sdk.expectedValue,
+      production_eligible: false,
+      trial: false,
+      scrambled: false,
+      status: 'pending',
+      odds_timestamp: candidate.odds.snapshot_time,
+      generated_at: generatedAt,
+      cutoff_at: cutoff,
+      model_version: modelVersion,
+      feature_snapshot_id: snapshotId,
+      feature_set_version: featureSetVersionFor(candidate.market),
+      feature_snapshot_generated_at: generatedAt,
+      data_quality_score: candidate.quality,
+      data_sufficiency_score: candidate.sufficiency,
+      calibrationStatus: 'probationary',
+      modelRole,
+      productionScope: 'prospective_prediction_evaluation_v1_3',
+    }, policy, { now: new Date(generatedAt) })
     const rating = aiRating({
       confidence: sdk.confidence,
       reliabilityScore: candidate.intelligence.reliabilityScore,
@@ -2227,6 +2256,7 @@ async function writeSnapshotsAndPredictions(
         aiGrade: aiGrade(rating),
         rankingScore: rank,
         recommendationStatus: policy.status,
+        productionEvaluationPolicy: evaluationPolicy,
         sourceOddsSnapshotId: candidate.odds.id,
         marketStability: candidate.marketStability,
         derivedBaseballFeatures: {
@@ -2304,6 +2334,7 @@ async function writeSnapshotsAndPredictions(
       missingDataWarnings: candidate.intelligence.missingDomains,
       marketStability: candidate.marketStability,
       recommendationStatus: policy.status,
+      productionEvaluationPolicy: evaluationPolicy,
       confidenceEngineV2: confidenceV2,
       blockers: policy.blockers,
       oddsTimestamp: candidate.odds.snapshot_time,

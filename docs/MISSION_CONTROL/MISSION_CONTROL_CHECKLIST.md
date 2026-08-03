@@ -65,3 +65,5 @@ Use this checklist before starting any queued mission.
 - MC-08C: `PRODUCTION_CERTIFIED`.
 - MC-08D: `PRODUCTION_CERTIFIED`.
 - MC-08E: `READY`; not started.
+- P1.3: `LOCAL_IMPLEMENTATION_PENDING_PRODUCTION_DEPLOYMENT`; separates production evaluation from recommendation gates prospectively.
+- P2.0: blocked until P1.3 production certification passes.

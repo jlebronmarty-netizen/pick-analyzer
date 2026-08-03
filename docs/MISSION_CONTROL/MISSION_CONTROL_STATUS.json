@@ -96,6 +96,24 @@
     "manualDeployment": false,
     "localServerSmokeRun": false
   },
+  "p1_3": {
+    "status": "LOCAL_IMPLEMENTATION_PENDING_PRODUCTION_DEPLOYMENT",
+    "title": "Production Evaluation Policy Separation",
+    "certificationArtifact": "docs/CERTIFICATION/p1-3-production-evaluation-policy.json",
+    "policyVersion": "production_evaluation_policy_v1_3",
+    "prospectiveOnly": true,
+    "historicalRowsPromoted": false,
+    "historicalRowsRewritten": false,
+    "predictionChanged": false,
+    "recommendationThresholdsChanged": false,
+    "officialPicksChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "nextPhase": "P2.0 Prediction Epoch V2 Activation after production certification"
+  },
   "productionCertification": {
     "status": "PASS",
     "runtimeCommit": "868eb0c4bc712b7c193b7a2001b37494517641e0",

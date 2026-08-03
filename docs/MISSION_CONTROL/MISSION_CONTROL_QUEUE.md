@@ -22,6 +22,15 @@ Next eligible mission after MC-02 certification: MC-08 Daily Betting Product Com
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
+## P1 Regression Queue
+
+| ID | Work Package | State | Notes |
+| --- | --- | --- | --- |
+| P1.1 | Yesterday Non-Production Prediction Reconciliation | CERTIFIED | Preserved the 2026-08-02 rows as non-production historical evidence. |
+| P1.2 | End-to-End System Integrity Audit | CERTIFIED | Identified the production evaluation versus recommendation-policy conflict. |
+| P1.3 | Production Evaluation Policy Separation | LOCAL_IMPLEMENTATION_PENDING_PRODUCTION_DEPLOYMENT | Separates valid model output, production evaluation, recommendation eligibility, actionability and Official Pick eligibility prospectively. |
+| P2.0 | Prediction Epoch V2 Activation | BLOCKED_ON_P1_3_PRODUCTION_CERTIFICATION | Do not start until P1.3 production certification passes. |
+
 ## MC-08 Work Packages
 
 | ID | Work Package | State | Notes |

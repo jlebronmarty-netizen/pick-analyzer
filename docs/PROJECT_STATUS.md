@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-03 P1.3 Production Evaluation Policy Separation
+
+- P1.3 is locally implemented pending production deployment. Future MLB prospective prediction snapshots now carry `production_evaluation_policy_v1_3`, separating valid model output, production-evaluable rows, recommendation eligibility, actionability and Official Pick eligibility.
+- Recommendation thresholds, Official Pick policy, prediction formulas, settlement, learning, scheduler cadence and provider contracts are unchanged.
+- The 45 rows from 2026-08-02 remain non-production historical evidence and were not rewritten or promoted.
+
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 
 - MC-08D is production-certified on commit `f9faf649d89cd343034e935225d7215dafcc754b`. The homepage Smart Parlay has been converted from C1-era client probability multiplication into a typed `smart_parlay_v1` presentation contract.
