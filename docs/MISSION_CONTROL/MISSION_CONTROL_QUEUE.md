@@ -14,10 +14,18 @@ No queued mission is ACTIVE in Mission Control V1.
 | MC-05 | Performance Intelligence | PERFORMANCE_INTELLIGENCE | P2 | PLANNED | AGENT_ASSISTED | Advance after eligible settled samples exist. |
 | MC-06 | Decision Core Evolution | DECISION_CORE_EVOLUTION | P3 | PLANNED | MANUAL_ONLY | Use controlled experimentation only. |
 | MC-07 | Market Expansion | MARKET_EXPANSION | P3 | PLANNED | AGENT_ASSISTED | Keep unsupported markets unavailable until all gates pass. |
-| MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | READY | AGENT_ASSISTED | Continue UX polish without model-policy changes. |
+| MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | ACTIVE | AGENT_ASSISTED | Complete bounded homepage subpackages without model-policy changes. |
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
 Next eligible mission after MC-02 certification: MC-08 Daily Betting Product Completion.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
+
+## MC-08 Work Packages
+
+| ID | Work Package | State | Notes |
+| --- | --- | --- | --- |
+| MC-08A | Homepage Experience | PRODUCTION_CERTIFIED | Homepage hierarchy certified. |
+| MC-08B | Rent Play Experience | LOCAL_VALIDATION_PASS_PENDING_PRODUCTION | Runtime implementation complete pending automatic deployment certification. |
+| MC-08C | Moneyline Bet Experience | PLANNED | Not started. |

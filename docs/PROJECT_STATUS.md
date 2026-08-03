@@ -8,6 +8,12 @@ Last updated: 2026-07-30 20:05:00Z
 - Technical domains such as planner, health, lifecycle, providers, budget, operations, model and diagnostics remain available but are secondary. Existing secondary tabs remain available for Most Likely, Best Value, Performance, Sports, Operations, Data Coverage and Diagnostics.
 - Production certification passed on commit `7af572ca66206780ed0c0da354d0309c72e73ef4`. No prediction formula, Official Pick policy, ranking, probability, confidence, edge, EV, Kelly, model, settlement, learning, scheduler, provider contract or budget behavior changed. MC-08B was not started.
 
+## 2026-08-02 Mission Control MC-08B Rent Play Experience
+
+- Implemented the bounded MC-08B Rent Play Experience V1. Rent Play now uses a typed `rent_play_v1` presentation contract with explicit actionability, source surface, probability, odds, implied probability, freshness, Official Pick status, Most Likely distinction, readiness gates, risks and what-would-change evidence.
+- Rent Play no longer reads as a generic pick card. If no candidate satisfies probability, value, freshness and policy requirements, the card presents an honest no-play, waiting or review-only state with the best available candidate clearly labeled as not Rent Play.
+- No prediction formula, Official Pick policy, ranking, probability, confidence, edge, EV, Kelly, model, settlement, result import, learning, scheduler cadence, refresh cadence, provider budget, provider mapping, sport certification or market certification changed. MC-08C was not started.
+
 ## 2026-08-02 Mission Control V1
 
 - Implemented and production-certified Mission Control V1 as a read-only V2 command center with `/api/mission-control`, `/mission-control`, persistent `docs/MISSION_CONTROL/` artifacts, stop conditions, deterministic queue, sport readiness matrix, provider readiness matrix and certification records.

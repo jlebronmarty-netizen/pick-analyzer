@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_02_PRODUCTION_CERTIFIED",
+  "status": "MC_08B_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -188,6 +188,22 @@
     "renderedDesktop": "PASS",
     "renderedMobile": "PASS",
     "mc08bStarted": false
+  },
+  "mc08b": {
+    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+    "title": "Rent Play Experience V1",
+    "certificationArtifact": "docs/CERTIFICATION/mc-08b-rent-play-experience.json",
+    "contractVersion": "rent_play_v1",
+    "homepageRentPlayOnly": true,
+    "reason": "Rent Play now has an explicit typed presentation contract, actionability states, readiness gates, Official Pick distinction, Most Likely distinction, risks and what-would-change evidence.",
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "predictionChanged": false,
+    "officialPicksChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "mc08cStarted": false
   },
   "runtimeSurfaces": ["/api/mission-control", "/api/mission-control/data-readiness", "/mission-control"],
   "validationScript": "scripts/mission-control-v1-validate.mjs",

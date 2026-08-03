@@ -104,6 +104,73 @@ type PlanPick = {
   reason: string
 }
 
+type RentPlayStatus =
+  | 'ACTIONABLE'
+  | 'REVIEW_ONLY'
+  | 'WAITING_FOR_FRESH_PRICE'
+  | 'NO_ELIGIBLE_PLAY'
+  | 'MARKET_UNAVAILABLE'
+  | 'POLICY_BLOCKED'
+  | 'NO_GAMES'
+  | 'UNKNOWN'
+
+type RentPlayGateStatus = 'PASS' | 'FAIL' | 'PENDING' | 'NOT_AVAILABLE'
+
+type RentPlayGate = {
+  id: string
+  label: string
+  status: RentPlayGateStatus
+  detail: string
+}
+
+type RentPlayContract = {
+  contractVersion: 'rent_play_v1'
+  status: RentPlayStatus
+  eventId: string | null
+  sportKey: string
+  eventLabel: string | null
+  startTime: string | null
+  marketKey: string | null
+  marketLabel: string | null
+  selectionKey: string | null
+  selectionLabel: string | null
+  americanOdds: number | null
+  decimalOdds: number | null
+  bookmaker: string | null
+  provider: string | null
+  modelProbability: number | null
+  impliedProbability: number | null
+  probabilityAdvantage: number | null
+  confidence: number | null
+  edge: number | null
+  expectedValue: number | null
+  marketTimestamp: string | null
+  marketAgeMinutes: number | null
+  freshnessStatus: string
+  freshnessTargetMinutes: number | null
+  nextPlannedRefreshAt: string | null
+  officialPick: boolean
+  officialPickStatus: 'OFFICIAL_PICK' | 'NOT_OFFICIAL' | 'NO_CANDIDATE'
+  actionability: string
+  eligibilityGates: RentPlayGate[]
+  passedGateCount: number
+  failedGateCount: number
+  pendingGateCount: number
+  unavailableGateCount: number
+  supportingReasons: string[]
+  riskReasons: string[]
+  blockers: string[]
+  warnings: string[]
+  whatWouldChangeTheDecision: string[]
+  sourceSurface: string
+  sourceRowId: string | null
+  canonicalAcquisitionId: string | null
+  evidence: string[]
+  observedAt: string
+  candidate: PlanPick | null
+  closestCandidate: PlanPick | null
+}
+
 const toneClasses: Record<Tone, string> = {
   green: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-50',
   yellow: 'border-amber-300/30 bg-amber-300/10 text-amber-50',
@@ -130,6 +197,23 @@ const localeFoundation = {
   es: {
     morningBrief: 'Resumen matutino de Decision Core',
     question: 'Que debo hacer hoy?',
+  },
+}
+
+const rentPlayCopy = {
+  en: {
+    label: 'Rent Play',
+    noEligible: 'No Rent Play Today',
+    waiting: 'Waiting for fresh price',
+    candidate: 'Best Available Candidate - Not Rent Play',
+    empty: 'No available wager currently satisfies probability, value, freshness and policy requirements.',
+  },
+  es: {
+    label: 'Jugada Rent',
+    noEligible: 'No hay Rent Play hoy',
+    waiting: 'Esperando precio actualizado',
+    candidate: 'Mejor candidato disponible - no Rent Play',
+    empty: 'No hay una jugada que cumpla los requisitos.',
   },
 }
 
@@ -355,6 +439,201 @@ function compactDate(value: string | null | undefined) {
   return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(date)
 }
 
+function decimalFromAmerican(value: number | null) {
+  if (value === null) return null
+  return value > 0 ? Number((1 + value / 100).toFixed(3)) : Number((1 + 100 / Math.abs(value)).toFixed(3))
+}
+
+function impliedFromAmerican(value: number | null) {
+  if (value === null) return null
+  const implied = value > 0 ? 100 / (value + 100) : Math.abs(value) / (Math.abs(value) + 100)
+  return Number((implied * 100).toFixed(2))
+}
+
+function minutesSince(value: string | null) {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return Math.max(0, Math.floor((Date.now() - date.getTime()) / 60_000))
+}
+
+function isFutureTimestamp(value: string | null) {
+  if (!value) return false
+  const date = new Date(value)
+  return !Number.isNaN(date.getTime()) && date.getTime() > Date.now() + 60_000
+}
+
+function gate(id: string, labelText: string, status: RentPlayGateStatus, detail: string): RentPlayGate {
+  return { id, label: labelText, status, detail }
+}
+
+function applicableGateCounts(gates: RentPlayGate[]) {
+  const applicable = gates.filter((item) => item.status !== 'NOT_AVAILABLE')
+  return {
+    passedGateCount: applicable.filter((item) => item.status === 'PASS').length,
+    failedGateCount: applicable.filter((item) => item.status === 'FAIL').length,
+    pendingGateCount: applicable.filter((item) => item.status === 'PENDING').length,
+    unavailableGateCount: gates.filter((item) => item.status === 'NOT_AVAILABLE').length,
+  }
+}
+
+function isFreshnessActionable(pick: PlanPick | null) {
+  if (!pick) return false
+  const freshness = pick.freshness.toUpperCase()
+  const actionability = String(pick.freshnessActionability ?? '').toUpperCase()
+  return !['STALE', 'INVALID_FUTURE', 'POST_START', 'MARKET_CLOSED', 'UNKNOWN_TIMESTAMP'].includes(freshness) &&
+    !['BLOCKED', 'WAIT_FOR_REFRESH', 'UNAVAILABLE'].includes(actionability) &&
+    !isFutureTimestamp(pick.marketTimestamp ?? null)
+}
+
+function buildRentPlayGates(pick: PlanPick | null): RentPlayGate[] {
+  if (!pick) {
+    return [
+      gate('candidate', 'Candidate evidence', 'FAIL', 'No current candidate satisfies Rent Play requirements.'),
+      gate('sport_certification', 'Sport certification', 'NOT_AVAILABLE', 'No candidate sport evidence is available.'),
+      gate('market_certification', 'Market certification', 'NOT_AVAILABLE', 'No candidate market evidence is available.'),
+      gate('pregame', 'Pregame eligibility', 'NOT_AVAILABLE', 'No candidate start-time evidence is available.'),
+      gate('probability_available', 'Probability available', 'NOT_AVAILABLE', 'No model probability is available.'),
+      gate('probability_floor', 'Probability above 50%', 'NOT_AVAILABLE', 'No model probability is available.'),
+      gate('odds_available', 'Odds available', 'NOT_AVAILABLE', 'No market price is available.'),
+      gate('market_freshness', 'Market freshness', 'NOT_AVAILABLE', 'No market timestamp is available.'),
+      gate('confidence_available', 'Confidence available', 'NOT_AVAILABLE', 'No confidence evidence is available.'),
+      gate('edge_available', 'Edge available', 'NOT_AVAILABLE', 'No edge evidence is available.'),
+      gate('positive_edge', 'Positive edge', 'NOT_AVAILABLE', 'No edge evidence is available.'),
+      gate('ev_available', 'EV available', 'NOT_AVAILABLE', 'No EV evidence is available.'),
+      gate('ev_policy', 'EV policy', 'NOT_AVAILABLE', 'No EV evidence is available.'),
+      gate('official_status', 'Official Pick status', 'NOT_AVAILABLE', 'No Official Pick candidate is available.'),
+    ]
+  }
+
+  const probability = pick.probability
+  const edge = pick.edge
+  const ev = pick.ev
+  const freshness = pick.freshness.toUpperCase()
+  const actionability = String(pick.freshnessActionability ?? '').toUpperCase()
+  const timestampFuture = isFutureTimestamp(pick.marketTimestamp ?? null)
+
+  return [
+    gate('candidate', 'Candidate evidence', 'PASS', `Candidate comes from ${pick.source}.`),
+    gate('sport_certification', 'Sport certification', 'PASS', 'Current Rent Play scope is restricted to certified stored Today evidence.'),
+    gate('market_certification', 'Market certification', /unsupported/i.test(pick.reason) ? 'FAIL' : 'PASS', /unsupported/i.test(pick.reason) ? 'Candidate includes unsupported-market evidence.' : 'Market is not marked unsupported by current evidence.'),
+    gate('pregame', 'Pregame eligibility', /post_start|POST START|started/i.test(`${freshness} ${pick.reason}`) ? 'FAIL' : 'PASS', 'Pregame status is derived from existing Today freshness/actionability evidence.'),
+    gate('probability_available', 'Probability available', probability === null ? 'NOT_AVAILABLE' : 'PASS', probability === null ? 'Model probability is unavailable.' : `Model probability is ${pct(probability)}.`),
+    gate('probability_floor', 'Probability above 50%', probability === null ? 'NOT_AVAILABLE' : probability > 50 ? 'PASS' : 'FAIL', probability === null ? 'Model probability is unavailable.' : 'Standard binary Rent Play requires probability above 50%.'),
+    gate('odds_available', 'Odds available', pick.odds === null ? 'NOT_AVAILABLE' : 'PASS', pick.odds === null ? 'Current odds are unavailable.' : `Current odds are ${odds(pick.odds)}.`),
+    gate('market_freshness', 'Market freshness', timestampFuture ? 'FAIL' : isFreshnessActionable(pick) ? 'PASS' : freshness.includes('STALE') || actionability === 'WAIT_FOR_REFRESH' ? 'PENDING' : 'FAIL', timestampFuture ? 'Market timestamp is in the future and cannot be used.' : `Freshness is ${pick.freshness}.`),
+    gate('confidence_available', 'Confidence available', pick.confidence === null ? 'NOT_AVAILABLE' : 'PASS', pick.confidence === null ? 'Confidence is unavailable.' : `Confidence is ${pct(pick.confidence)}.`),
+    gate('confidence_policy', 'Confidence policy', pick.confidence === null ? 'NOT_AVAILABLE' : pick.confidence > 0 ? 'PASS' : 'FAIL', 'Existing confidence evidence must be present and positive.'),
+    gate('edge_available', 'Edge available', edge === null ? 'NOT_AVAILABLE' : 'PASS', edge === null ? 'Edge is unavailable.' : `Edge is ${signedPct(edge)}.`),
+    gate('positive_edge', 'Positive edge requirement', edge === null ? 'NOT_AVAILABLE' : edge > 0 ? 'PASS' : 'FAIL', 'Rent Play cannot call a negative-edge candidate safest actionable.'),
+    gate('ev_available', 'EV available', ev === null ? 'NOT_AVAILABLE' : 'PASS', ev === null ? 'EV is unavailable.' : `EV is ${signedPct(ev)}.`),
+    gate('ev_policy', 'EV policy', ev === null ? 'NOT_AVAILABLE' : ev >= 0 ? 'PASS' : 'FAIL', 'EV must be non-negative or policy-compliant.'),
+    gate('data_quality', 'Data quality', /quarantined|calibration insufficient|low confidence/i.test(pick.reason) ? 'FAIL' : 'PASS', pick.reason),
+    gate('policy_blockers', 'Policy blockers', /blocked|do not act|avoid/i.test(pick.reason) ? 'FAIL' : 'PASS', pick.reason),
+    gate('official_status', 'Official Pick status', pick.official ? 'PASS' : 'PENDING', pick.official ? 'Candidate is an existing Official Pick.' : 'Candidate is not promoted to Official Pick.'),
+  ]
+}
+
+function buildRentPlayContract(plan: ReturnType<typeof pickPlan>): RentPlayContract {
+  const observedAt = new Date().toISOString()
+  const officialCandidate = plan.candidates.find((item) => item.official && item.qualified) ?? null
+  const highProbabilityCandidate = plan.candidates.find((item) => item.qualified && Number(item.probability ?? 0) > 50) ?? null
+  const waitingCandidate = plan.candidates.find((item) =>
+    Number(item.probability ?? 0) > 50 &&
+    Number(item.edge ?? 0) > 0 &&
+    item.ev !== null &&
+    (item.freshness.toUpperCase().includes('STALE') || String(item.freshnessActionability ?? '').toUpperCase() === 'WAIT_FOR_REFRESH')
+  ) ?? null
+  const candidate = officialCandidate ?? highProbabilityCandidate ?? waitingCandidate
+  const gates = buildRentPlayGates(candidate)
+  const counts = applicableGateCounts(gates)
+  const failed = gates.filter((item) => item.status === 'FAIL')
+  const pending = gates.filter((item) => item.status === 'PENDING')
+  const actionable = Boolean(candidate) && counts.failedGateCount === 0 && counts.pendingGateCount === 0 && Number(candidate?.probability ?? 0) > 50 && isFreshnessActionable(candidate)
+  const status: RentPlayStatus = !plan.candidates.length
+    ? 'NO_GAMES'
+    : actionable
+      ? 'ACTIONABLE'
+      : waitingCandidate
+        ? 'WAITING_FOR_FRESH_PRICE'
+        : failed.some((item) => item.id === 'policy_blockers' || item.id === 'official_status')
+          ? 'POLICY_BLOCKED'
+          : candidate
+            ? 'REVIEW_ONLY'
+            : 'NO_ELIGIBLE_PLAY'
+
+  const impliedProbability = candidate ? impliedFromAmerican(candidate.odds) : null
+  const modelProbability = candidate?.probability ?? null
+  const probabilityAdvantage = modelProbability !== null && impliedProbability !== null ? Number((modelProbability - impliedProbability).toFixed(2)) : null
+  const marketAgeMinutes = minutesSince(candidate?.marketTimestamp ?? null)
+  const marketAgeMinutesFromCanonicalTimestamp = marketAgeMinutes
+
+  const supportingReasons = candidate
+    ? [
+      candidate.official ? 'Existing Official Pick evidence is present.' : 'Candidate is not official and remains review-only unless all gates pass.',
+      modelProbability !== null ? `Model probability is ${pct(modelProbability)}.` : 'Model probability is unavailable.',
+      probabilityAdvantage !== null ? `Probability advantage is ${signedPct(probabilityAdvantage)}.` : 'Probability advantage is unavailable.',
+      `Source surface: ${candidate.source}.`,
+    ]
+    : ['No current candidate satisfies the Rent Play contract.']
+
+  const riskReasons = [
+    ...failed.slice(0, 4).map((item) => item.detail),
+    ...pending.slice(0, 3).map((item) => item.detail),
+  ].filter(Boolean)
+
+  return {
+    contractVersion: 'rent_play_v1',
+    status,
+    eventId: null,
+    sportKey: 'baseball_mlb',
+    eventLabel: candidate?.event ?? null,
+    startTime: null,
+    marketKey: candidate?.market ?? null,
+    marketLabel: candidate?.market ?? null,
+    selectionKey: candidate?.selection ?? null,
+    selectionLabel: candidate?.selection ?? null,
+    americanOdds: candidate?.odds ?? null,
+    decimalOdds: candidate ? decimalFromAmerican(candidate.odds) : null,
+    bookmaker: candidate?.sportsbook ?? null,
+    provider: candidate?.sportsbook ?? null,
+    modelProbability,
+    impliedProbability,
+    probabilityAdvantage,
+    confidence: candidate?.confidence ?? null,
+    edge: candidate?.edge ?? null,
+    expectedValue: candidate?.ev ?? null,
+    marketTimestamp: candidate?.marketTimestamp ?? null,
+    marketAgeMinutes: marketAgeMinutesFromCanonicalTimestamp,
+    freshnessStatus: candidate?.freshness ?? 'UNKNOWN',
+    freshnessTargetMinutes: 10,
+    nextPlannedRefreshAt: candidate?.nextRefreshAt ?? null,
+    officialPick: Boolean(candidate?.official),
+    officialPickStatus: candidate ? candidate.official ? 'OFFICIAL_PICK' : 'NOT_OFFICIAL' : 'NO_CANDIDATE',
+    actionability: actionable ? 'ACTIONABLE_NOW' : status,
+    eligibilityGates: gates,
+    ...counts,
+    supportingReasons,
+    riskReasons: riskReasons.length ? riskReasons : ['No additional risks were exposed by current stored evidence.'],
+    blockers: failed.map((item) => item.label),
+    warnings: pending.map((item) => item.label),
+    whatWouldChangeTheDecision: [
+      'Market price becomes stale or future-dated.',
+      'Model probability falls to 50% or below for a standard binary market.',
+      'Edge or EV becomes unavailable or non-positive.',
+      'Current policy blockers appear before game start.',
+      'New lineup, injury or data-quality evidence changes the stored recommendation evidence.',
+    ],
+    sourceSurface: candidate?.source ?? 'No eligible source',
+    sourceRowId: candidate?.id ?? null,
+    canonicalAcquisitionId: null,
+    evidence: candidate?.evidence ?? [],
+    observedAt,
+    candidate,
+    closestCandidate: plan.closest,
+  }
+}
+
 function dailyRecommendation(plan: ReturnType<typeof pickPlan>, data: TodayResponse | null) {
   const official = countValue(data?.officialPicks) || plan.candidates.filter((item) => item.official).length
   const valueCandidates = plan.candidates.filter((item) => item.qualified && Number(item.ev ?? 0) > 0 && Number(item.edge ?? 0) > 0).length
@@ -522,6 +801,104 @@ function MiniText({ label: metricLabel, value }: { label: string; value: string 
       <span className="block font-black uppercase text-slate-500">{metricLabel}</span>
       <span className="mt-1 block break-words">{value}</span>
     </p>
+  )
+}
+
+function gateTone(status: RentPlayGateStatus): Tone {
+  if (status === 'PASS') return 'green'
+  if (status === 'FAIL') return 'red'
+  if (status === 'PENDING') return 'yellow'
+  return 'gray'
+}
+
+function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
+  const pick = rentPlay.candidate
+  const closest = rentPlay.closestCandidate
+  const readinessDenominator = rentPlay.passedGateCount + rentPlay.failedGateCount + rentPlay.pendingGateCount
+  const readiness = readinessDenominator ? (rentPlay.passedGateCount / readinessDenominator) * 100 : null
+  const statusTone: Tone = rentPlay.status === 'ACTIONABLE'
+    ? 'green'
+    : rentPlay.status === 'WAITING_FOR_FRESH_PRICE'
+      ? 'yellow'
+      : rentPlay.status === 'NO_ELIGIBLE_PLAY' || rentPlay.status === 'NO_GAMES'
+        ? 'gray'
+        : 'red'
+
+  return (
+    <article className="rounded-lg border border-emerald-400/20 bg-slate-950/90 p-5 shadow-2xl shadow-slate-950/20 md:p-7" data-mc08b-rent-play-card="true" data-rent-play-status={rentPlay.status}>
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">{rentPlayCopy.en.label}</p>
+          <h2 className="mt-3 break-words text-3xl font-black text-white md:text-5xl">
+            {pick ? rentPlay.selectionLabel : rentPlay.status === 'WAITING_FOR_FRESH_PRICE' ? rentPlayCopy.en.waiting : rentPlayCopy.en.noEligible}
+          </h2>
+          <p className="mt-3 text-sm font-bold text-slate-300">
+            {pick ? `${rentPlay.eventLabel} / ${rentPlay.marketLabel}` : rentPlayCopy.en.empty}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2 md:justify-end">
+          <StatusChip tone={statusTone}>{rentPlay.status.replaceAll('_', ' ')}</StatusChip>
+          <StatusChip tone={rentPlay.officialPick ? 'green' : 'blue'}>{rentPlay.officialPickStatus.replaceAll('_', ' ')}</StatusChip>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MiniMetric label="Current Odds" value={odds(rentPlay.americanOdds)} />
+        <MiniMetric label="Win Probability" value={pct(rentPlay.modelProbability)} />
+        <MiniMetric label="Freshness" value={rentPlay.marketAgeMinutes === null ? rentPlay.freshnessStatus : `${rentPlay.marketAgeMinutes} min`} />
+        <MiniMetric label="Actionability" value={rentPlay.actionability.replaceAll('_', ' ')} />
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <MetricBar label="Model Probability" value={rentPlay.modelProbability} tone={rentPlay.modelProbability !== null && rentPlay.modelProbability > 50 ? 'green' : 'yellow'} />
+        <MetricBar label="Implied Probability" value={rentPlay.impliedProbability} tone="blue" />
+        <MetricBar label="Readiness Gates" value={readiness} tone={rentPlay.failedGateCount ? 'yellow' : 'green'} />
+      </div>
+
+      <p className="mt-5 text-sm leading-6 text-slate-300">{rentPlay.supportingReasons[0] ?? rentPlayCopy.en.empty}</p>
+
+      {pick ? null : closest ? (
+        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08b-best-available-not-rent-play="true">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">{rentPlayCopy.en.candidate}</p>
+          <p className="mt-2 text-lg font-black text-white">{closest.selection}</p>
+          <p className="mt-1 text-sm text-amber-50">{closest.event} / {closest.market} / {pct(closest.probability)}</p>
+          <p className="mt-2 text-sm text-slate-300">{closest.reason}</p>
+        </div>
+      ) : null}
+
+      <details className="mt-5 rounded-lg border border-slate-800 bg-slate-900/70 p-4" data-mc08b-rent-play-expanded="true">
+        <summary className="cursor-pointer text-sm font-black text-white">Why this is or is not Rent Play</summary>
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_0.9fr]">
+          <div className="grid gap-3">
+            <MiniText label="Most Likely Distinction" value="Most Likely is the highest modeled probability in its universe. Rent Play is the safest currently actionable wager only after probability, value, freshness and policy gates pass." />
+            <MiniText label="Official Pick Distinction" value={rentPlay.officialPick ? 'This Rent Play overlaps with an existing Official Pick.' : 'This candidate is not promoted into Official Picks by MC-08B.'} />
+            <MiniText label="Provider / Source" value={`${rentPlay.provider ?? 'Unavailable'} / ${rentPlay.sourceSurface}`} />
+            <MiniText label="Last Market Update" value={compactDate(rentPlay.marketTimestamp)} />
+            <MiniText label="Next Planned Refresh" value={compactDate(rentPlay.nextPlannedRefreshAt)} />
+            <MiniText label="Edge and EV" value={`Edge ${signedPct(rentPlay.edge)} / EV ${signedPct(rentPlay.expectedValue)}`} />
+            <MiniText label="Observed At" value={`${compactDate(rentPlay.observedAt)}. This is not used as market freshness.`} />
+          </div>
+          <div className="grid gap-3">
+            <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+              <p className="text-xs font-black uppercase text-slate-500">Readiness Gates</p>
+              <div className="mt-3 grid gap-2">
+                {rentPlay.eligibilityGates.map((item) => (
+                  <div key={item.id} className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900 p-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-sm font-black text-white">{item.label}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-400">{item.detail}</p>
+                    </div>
+                    <StatusChip tone={gateTone(item.status)}>{item.status}</StatusChip>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <MiniText label="Main Risks" value={rentPlay.riskReasons.join(' / ')} />
+            <MiniText label="What Would Change The Decision" value={rentPlay.whatWouldChangeTheDecision.join(' / ')} />
+          </div>
+        </div>
+      </details>
+    </article>
   )
 }
 
@@ -709,6 +1086,7 @@ export default function HomeBettingPlan() {
   }, [])
 
   const plan = useMemo(() => pickPlan(data), [data])
+  const rentPlayContract = useMemo(() => buildRentPlayContract(plan), [plan])
 
   if (error) {
     return (
@@ -743,14 +1121,7 @@ export default function HomeBettingPlan() {
         <DailyBrief data={data} plan={plan} currentBoard={currentBoard} intelligence={intelligence} performance={performance} />
 
         <div className="grid gap-4">
-          <PickCard
-            title="Rent Play"
-            icon="Primary"
-            pick={plan.rentPlay}
-            emptyTitle="No Rent Play Today"
-            emptyDetail={data.summary?.recommendation ?? 'No available pick satisfies the existing Official Pick policy with the safest confidence/probability profile.'}
-            closest={plan.closest}
-          />
+          <RentPlayCard rentPlay={rentPlayContract} />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">

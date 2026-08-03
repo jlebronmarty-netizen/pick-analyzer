@@ -40,3 +40,4 @@ Both surfaces are read-only. They do not call providers, write data, start jobs,
 - [Mission Control Resume Guide](MISSION_CONTROL_RESUME_GUIDE.md)
 - [MC-01 Operational Readiness Closure](MC_01_OPERATIONAL_READINESS_CLOSURE.md)
 - [MC-02 Multi-Sport Data Readiness](MC_02_MULTI_SPORT_DATA_READINESS.md)
+- [MC-08B Rent Play Experience](MC_08B_RENT_PLAY_EXPERIENCE.md)

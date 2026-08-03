@@ -141,3 +141,13 @@ Planner, health, lifecycle, provider, budget, operations, model and diagnostics 
 Local validation passed: MC-08A validator 37/37, Mission Control validator 57/57, C1 product validator 31/31, changed-file ESLint and `npm.cmd run build` with 396 generated static pages.
 
 Production certification passed on commit `7af572ca66206780ed0c0da354d0309c72e73ef4`: `/api/system/version` returned HTTP 200 with provider calls 0, `/` returned HTTP 200, rendered desktop and mobile homepage markers were present, no horizontal overflow was observed, `/api/dashboard/today` returned HTTP 200 with provider calls 0 and remote mutations 0, and `/api/current-board?mode=current&limit=100` returned HTTP 200. MC-08B was not started.
+
+## 2026-08-02 - MC-08B Rent Play Experience
+
+MC-08B implements the Rent Play Experience V1 contract without starting MC-08C.
+
+Rent Play now uses a typed `rent_play_v1` presentation contract over existing stored Today evidence. The card exposes actionability, model probability, current odds, implied probability, freshness, Official Pick distinction, Most Likely distinction, readiness gates, supporting reasons, risks and what would change the decision. Missing probability, EV, edge, odds and timestamps remain unavailable instead of being coerced to zero.
+
+No prediction formula, probability, confidence, edge, EV, Kelly, model weight, champion/challenger state, Official Pick policy, settlement, result import, learning, scheduler cadence, refresh cadence, provider budget, provider mapping, sport certification or market certification changed.
+
+Local validation passed: MC-08B validator 34/34, MC-08A validator 37/37, Mission Control validator 57/57, MC-02 validator 24/24, OE-003F validator 28/28, OE-003E validator 32/32, C1 product validator 31/31, changed-file ESLint and `npm.cmd run build` with 396 generated static pages. Production certification is pending automatic deployment observation.

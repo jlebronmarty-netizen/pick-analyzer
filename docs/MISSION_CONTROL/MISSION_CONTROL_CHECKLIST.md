@@ -59,4 +59,7 @@ Use this checklist before starting any queued mission.
 - MC-01: `PRODUCTION_CERTIFIED`.
 - MC-02: `PRODUCTION_CERTIFIED`.
 - MC-03: `PLANNED` and manual-only; not started.
-- Next READY mission after MC-02: MC-08 Daily Betting Product Completion.
+- MC-08: `ACTIVE` through bounded product-experience work packages.
+- MC-08A: `PRODUCTION_CERTIFIED`.
+- MC-08B: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`.
+- MC-08C: `PLANNED`; not started.
