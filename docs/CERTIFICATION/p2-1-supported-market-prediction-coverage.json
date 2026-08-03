@@ -1,6 +1,6 @@
 {
   "id": "p2_1_supported_market_prediction_coverage",
-  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+  "status": "PRODUCTION_CERTIFIED",
   "startingCommit": "d909ac9e48c3bed2c2a00c1989d57dad0d48edb5",
   "activeEpoch": {
     "epochKey": "CURRENT_V2_PRODUCTION",
@@ -58,7 +58,47 @@
     "gitDiffCheck": "PASS",
     "build": "PASS",
     "staticPages": 397,
-    "productionCertification": "PENDING"
+    "productionCertification": "PASS"
+  },
+  "productionEvidence": {
+    "runtimeCommit": "a0e6329293686fe2557949f3f30e445c7e6880b8",
+    "systemVersionHttp": 200,
+    "coverageEndpointHttp": 200,
+    "currentEvents": 8,
+    "expectedSelections": 48,
+    "predictionsCreated": 48,
+    "productionEvaluable": 48,
+    "recommendationEligible": 0,
+    "actionable": 0,
+    "officialPickEligible": 0,
+    "missedOpportunities": 0,
+    "cutoffMissed": 0,
+    "duplicateRows": 0,
+    "coveragePercentage": 100,
+    "byMarket": {
+      "moneyline": 16,
+      "spread": 16,
+      "total": 16
+    },
+    "bySelectionSide": {
+      "home": 16,
+      "away": 16,
+      "over": 8,
+      "under": 8
+    },
+    "protectedWriter": {
+      "httpStatus": 200,
+      "status": "SUCCESS_CHANGED",
+      "selectedAction": "midday_refresh",
+      "providerCallsMade": 1,
+      "remoteMutationsMade": 145,
+      "downstreamPredictionRows": 48,
+      "persistenceError": null
+    },
+    "certificationReads": {
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0
+    }
   },
   "nextPhase": "P2.2",
   "p22Started": false

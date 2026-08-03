@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_1_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_MC_08E_PAUSED",
+  "status": "P2_1_PRODUCTION_CERTIFIED_P2_2_READY_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -174,7 +174,7 @@
     "p21Started": true
   },
   "p2_1": {
-    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Comprehensive Supported-Market Prediction Coverage",
     "certificationArtifact": "docs/CERTIFICATION/p2-1-supported-market-prediction-coverage.json",
     "activeEpochKey": "CURRENT_V2_PRODUCTION",
@@ -184,6 +184,14 @@
     "supportedMarkets": ["moneyline", "spread", "total"],
     "providerCallsIntroduced": 0,
     "remoteMutationsIntroduced": 0,
+    "productionCommit": "a0e6329293686fe2557949f3f30e445c7e6880b8",
+    "expectedSelections": 48,
+    "predictionsCreated": 48,
+    "productionEvaluable": 48,
+    "missedOpportunities": 0,
+    "coveragePercentage": 100,
+    "protectedWriterProviderCalls": 1,
+    "protectedWriterRemoteMutations": 145,
     "predictionFormulaChanged": false,
     "recommendationPolicyChanged": false,
     "officialPickPolicyChanged": false,

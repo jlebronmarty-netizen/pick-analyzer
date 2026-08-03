@@ -1,6 +1,6 @@
 # P2.1 Supported-Market Prediction Coverage Certification
 
-Status: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`
+Status: `PRODUCTION_CERTIFIED`
 
 ## Scope
 
@@ -45,4 +45,28 @@ No prediction formula, Official Pick policy, recommendation threshold, Kelly log
 
 ## Production Certification
 
-Pending deployment and protected production coverage observation.
+Production-certified on commit `a0e6329293686fe2557949f3f30e445c7e6880b8`.
+
+Evidence:
+
+- `/api/system/version`: HTTP 200, commit `a0e6329293686fe2557949f3f30e445c7e6880b8`, provider calls 0.
+- `/api/operations/prediction-coverage`: HTTP 200.
+- Current MLB events: 8.
+- Expected selections: 48.
+- Predictions created: 48.
+- Production-evaluable rows: 48.
+- Recommendation eligible: 0.
+- Actionable: 0.
+- Official Pick eligible: 0.
+- Missed opportunities: 0.
+- Cutoff missed: 0.
+- Duplicate rows: 0.
+- Coverage: 100%.
+- Counts by market: moneyline 16, spread 16, total 16.
+- Counts by selection side: home 16, away 16, over 8, under 8.
+- Read-only coverage provider calls: 0.
+- Read-only coverage remote mutations: 0.
+
+One protected production writer execution after the repair returned HTTP 200 `SUCCESS_CHANGED`, selected `midday_refresh`, used 1 SportsDataIO provider call, made 145 remote mutations, and rebuilt 48 downstream prediction rows with no persistence error.
+
+P2.2 is ready to begin after this certification. MC-03 was not started. MC-08E remains paused.

@@ -31,8 +31,8 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | P1.3 | Production Evaluation Policy Separation | PRODUCTION_CERTIFIED | Separates valid model output, production evaluation, recommendation eligibility, actionability and Official Pick eligibility prospectively. |
 | P1.4 | End-to-End Production Pipeline Certification | PRODUCTION_CERTIFIED | Post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with `feature_snapshot.productionEvaluationPolicy`. |
 | P2.0 | Prediction Epoch V2 Activation | PRODUCTION_CERTIFIED | Current V2 Production activated at `2026-08-03T19:57:02.418+00:00`; historical rows preserved. |
-| P2.1 | Comprehensive Supported-Market Prediction Coverage | LOCAL_VALIDATION_PASS_PENDING_PRODUCTION | Implements expected-selection coverage; production certification pending. |
-| P2.2 | Prediction Coverage Certification Follow-Up | READY_AFTER_P2_1 | Begin only after P2.1 production certification. |
+| P2.1 | Comprehensive Supported-Market Prediction Coverage | PRODUCTION_CERTIFIED | 48/48 expected current supported MLB selections covered. |
+| P2.2 | Prediction Coverage Certification Follow-Up | READY | Begin next; MC-03 remains manual-only and not started. |
 
 ## MC-08 Work Packages
 

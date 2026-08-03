@@ -6,7 +6,7 @@ P1.3 adds the prospective Production Evaluation Policy Separation required befor
 
 P2.0 is production-certified. It introduces `CURRENT_V2_PRODUCTION` as the future-only active era and `LEGACY_PRE_V2` as preserved historical scope, with active-epoch stamping for future prediction writes and Current Era defaults for Current Board and Performance. The Current V2 Production epoch started at `2026-08-03T19:57:02.418+00:00`.
 
-P2.1 is locally validation-passed pending production certification. It expands supported MLB market prediction coverage from one preferred side per event/market to every canonical, supported, feature-sufficient, cutoff-safe selection while preserving the active epoch and all prediction/recommendation policies.
+P2.1 is production-certified on commit `a0e6329293686fe2557949f3f30e445c7e6880b8`. It expands supported MLB market prediction coverage from one preferred side per event/market to every canonical latest-line supported selection while preserving the active epoch and all prediction/recommendation policies. Production coverage is 48/48 with 0 missed opportunities and 0 duplicates.
 
 ## Platform Baseline
 

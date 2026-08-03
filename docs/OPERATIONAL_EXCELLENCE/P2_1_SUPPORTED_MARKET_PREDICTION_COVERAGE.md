@@ -1,6 +1,6 @@
 # P2.1 Supported-Market Prediction Coverage
 
-Status: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`
+Status: `PRODUCTION_CERTIFIED`
 
 ## Mission
 
@@ -44,4 +44,4 @@ Certification reads make:
 
 ## Current Next Step
 
-Deploy the bounded runtime change, then production-certify `/api/operations/prediction-coverage` and one protected writer execution if eligible Current V2 selections remain before cutoff.
+P2.1 production certification is complete. `/api/operations/prediction-coverage` reports 48 expected current supported MLB selections, 48 created, 48 production-evaluable, 0 missed, 0 cutoff-missed and 0 duplicates.
