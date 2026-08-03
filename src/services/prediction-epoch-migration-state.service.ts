@@ -26,6 +26,8 @@ type EpochProbeRow = {
   archived_at: string | null
 }
 
+const CURRENT_V2_EPOCH_KEYS = new Set(['CURRENT_V2_PRODUCTION', 'DATA_FOUNDATION_V2_EPOCH'])
+
 export type PredictionEpochMigrationProbeInput = {
   epochTable: {
     ok: boolean
@@ -73,7 +75,7 @@ export function classifyPredictionEpochMigrationState(input: PredictionEpochMigr
     if (input.epochTable.rowCount === 0) {
       migrationState = 'APPLIED_EMPTY'
     } else {
-      const activeV2Rows = input.epochTable.rows.filter((row) => row.epoch_key === 'DATA_FOUNDATION_V2_EPOCH' && String(row.status ?? '').toUpperCase() === 'ACTIVE').length
+      const activeV2Rows = input.epochTable.rows.filter((row) => CURRENT_V2_EPOCH_KEYS.has(String(row.epoch_key ?? '')) && String(row.status ?? '').toUpperCase() === 'ACTIVE').length
       migrationState = activeV2Rows > 0 ? 'APPLIED_ACTIVE' : 'APPLIED_INACTIVE'
     }
   } else if (tableMissing && columnsMissing) {
@@ -98,13 +100,13 @@ export function classifyPredictionEpochMigrationState(input: PredictionEpochMigr
     ? input.epochTable.rows.find((row) => String(row.status ?? '').toUpperCase() === 'ACTIVE') ?? null
     : null
   const activeV2Rows = tableOk
-    ? input.epochTable.rows.filter((row) => row.epoch_key === 'DATA_FOUNDATION_V2_EPOCH' && String(row.status ?? '').toUpperCase() === 'ACTIVE').length
+    ? input.epochTable.rows.filter((row) => CURRENT_V2_EPOCH_KEYS.has(String(row.epoch_key ?? '')) && String(row.status ?? '').toUpperCase() === 'ACTIVE').length
     : 0
   const legacyEpochRow = tableOk
     ? input.epochTable.rows.find((row) => row.epoch_key === 'LEGACY_EPOCH_V1') ?? null
     : null
   const v2EpochRow = tableOk
-    ? input.epochTable.rows.find((row) => row.epoch_key === 'DATA_FOUNDATION_V2_EPOCH') ?? null
+    ? input.epochTable.rows.find((row) => CURRENT_V2_EPOCH_KEYS.has(String(row.epoch_key ?? ''))) ?? null
     : null
   const legacyEpochPresent = tableOk
     ? Boolean(legacyEpochRow)

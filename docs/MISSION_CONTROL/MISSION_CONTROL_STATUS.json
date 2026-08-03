@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P1_4_PRODUCTION_CERTIFIED_P2_0_READY_MC_08E_PAUSED",
+  "status": "P2_0_PRODUCTION_CERTIFIED_P2_1_READY_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -152,16 +152,19 @@
     "p20Started": true
   },
   "p2_0": {
-    "status": "LOCAL_READY_PENDING_PRODUCTION_ACTIVATION",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Prediction Epoch V2 Activation",
     "certificationArtifact": "docs/CERTIFICATION/p2-0-prediction-epoch-v2.json",
     "currentEpochKey": "CURRENT_V2_PRODUCTION",
     "legacyEpochKey": "LEGACY_PRE_V2",
     "policyVersion": "production_evaluation_policy_v1_3",
     "productionScopeVersion": "current_v2_production_scope_v1",
+    "productionCommit": "7db3713adc60bd5cdc3810cc91640837cd4b88db",
+    "epochStartedAt": "2026-08-03T19:57:02.418+00:00",
     "historicalRowsRewritten": false,
     "predictionRowsMutatedByActivation": 0,
     "providerCallsIntroduced": 0,
+    "remoteMutationsMadeByActivation": 2,
     "modelFormulaChanged": false,
     "recommendationPolicyChanged": false,
     "officialPickPolicyChanged": false,

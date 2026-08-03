@@ -4,7 +4,7 @@ This roadmap is dependency-aware and based on repository inspection. A module is
 
 P1.3 adds the prospective Production Evaluation Policy Separation required before Prediction Epoch V2 activation. The model can now record whether a future pregame prediction is production-evaluable independently from whether it is recommended, actionable or Official Pick eligible. P1.3 is production-certified on commit `a64c876b803c93f259424389d765282a9a0a3d1a`; P1.4 is production-certified on commit `6f92b102416fa0e5b8baeefbaa8b944a63f51ca3` with 24 post-P1.3 production-evaluable MLB rows, so P2.0 is ready.
 
-P2.0 is locally ready for production activation. It introduces `CURRENT_V2_PRODUCTION` as the future-only active era and `LEGACY_PRE_V2` as preserved historical scope, with active-epoch stamping for future prediction writes and Current Era defaults for Current Board and Performance.
+P2.0 is production-certified. It introduces `CURRENT_V2_PRODUCTION` as the future-only active era and `LEGACY_PRE_V2` as preserved historical scope, with active-epoch stamping for future prediction writes and Current Era defaults for Current Board and Performance. The Current V2 Production epoch started at `2026-08-03T19:57:02.418+00:00`.
 
 ## Platform Baseline
 

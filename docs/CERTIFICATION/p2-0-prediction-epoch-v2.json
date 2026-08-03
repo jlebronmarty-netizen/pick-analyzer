@@ -1,6 +1,15 @@
 {
   "mode": "p2_0_prediction_epoch_v2_activation_certification_v1",
-  "status": "LOCAL_READY_PENDING_PRODUCTION_ACTIVATION",
+  "status": "PRODUCTION_CERTIFIED",
+  "productionCommit": "7db3713adc60bd5cdc3810cc91640837cd4b88db",
+  "activation": {
+    "httpStatus": 200,
+    "status": "ACTIVATED",
+    "epochStartedAt": "2026-08-03T19:57:02.418+00:00",
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 2,
+    "predictionRowsMutated": 0
+  },
   "currentEpochKey": "CURRENT_V2_PRODUCTION",
   "legacyEpochKey": "LEGACY_PRE_V2",
   "timezone": "America/Puerto_Rico",
@@ -32,7 +41,7 @@
     "historicalEraPreservedSeparately": true
   },
   "providerCallsMadeByCertification": 0,
-  "remoteMutationsMadeByCertification": 0,
+  "remoteMutationsMadeByCertification": 2,
   "predictionRowsMutatedByActivation": 0,
   "p21Started": false
 }

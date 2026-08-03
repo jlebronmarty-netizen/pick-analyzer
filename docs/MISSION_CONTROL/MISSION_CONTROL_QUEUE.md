@@ -30,8 +30,8 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | P1.2 | End-to-End System Integrity Audit | CERTIFIED | Identified the production evaluation versus recommendation-policy conflict. |
 | P1.3 | Production Evaluation Policy Separation | PRODUCTION_CERTIFIED | Separates valid model output, production evaluation, recommendation eligibility, actionability and Official Pick eligibility prospectively. |
 | P1.4 | End-to-End Production Pipeline Certification | PRODUCTION_CERTIFIED | Post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with `feature_snapshot.productionEvaluationPolicy`. |
-| P2.0 | Prediction Epoch V2 Activation | LOCAL_READY_PENDING_PRODUCTION_ACTIVATION | Runtime and certification artifacts prepared; production activation/certification pending. |
-| P2.1 | Comprehensive Supported-Market Prediction Coverage | BLOCKED_ON_P2_0 | Do not start until P2.0 production activation passes. |
+| P2.0 | Prediction Epoch V2 Activation | PRODUCTION_CERTIFIED | Current V2 Production activated at `2026-08-03T19:57:02.418+00:00`; historical rows preserved. |
+| P2.1 | Comprehensive Supported-Market Prediction Coverage | READY | Next eligible autonomous phase. |
 
 ## MC-08 Work Packages
 

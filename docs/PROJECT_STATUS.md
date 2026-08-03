@@ -18,10 +18,11 @@ Last updated: 2026-07-30 20:05:00Z
 
 ## 2026-08-03 P2.0 Prediction Epoch V2 Activation
 
-- P2.0 is `LOCAL_READY_PENDING_PRODUCTION_ACTIVATION`.
-- Added a protected `POST /api/data-foundation/epochs` activation path, future-only active epoch stamping for prediction writes, Current Board active-epoch filtering and Performance Current Era filtering.
+- P2.0 is `PRODUCTION_CERTIFIED`.
+- Added and executed a protected `POST /api/data-foundation/epochs` activation path, future-only active epoch stamping for prediction writes, Current Board active-epoch filtering and Performance Current Era filtering.
 - Current epoch key: `CURRENT_V2_PRODUCTION`; historical scope key: `LEGACY_PRE_V2`; timezone: `America/Puerto_Rico`.
 - Historical rows are not rewritten or deleted, P1.4 rows remain pre-activation history, and model formulas, recommendation gates and Official Pick policy are unchanged.
+- Current V2 Production started at `2026-08-03T19:57:02.418+00:00`; activation made 2 epoch-governance mutations, 0 prediction-row mutations and 0 provider calls.
 
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 

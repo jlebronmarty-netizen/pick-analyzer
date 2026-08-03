@@ -26,6 +26,7 @@ const allowed = new Set([
   'src/services/current-board.service.ts',
   'src/services/performance-scope-v2.service.ts',
   'src/services/prediction-epoch-governance-v2.service.ts',
+  'src/services/prediction-epoch-migration-state.service.ts',
   'src/app/api/data-foundation/epochs/route.ts',
   'docs/CERTIFICATION/P2_0_PREDICTION_EPOCH_V2.md',
   'docs/CERTIFICATION/p2-0-prediction-epoch-v2.json',
@@ -50,6 +51,7 @@ check('Performance defaults to Current V2 era', perf.includes('eraScopes') && pe
 check('historical rows are preserved', cert.activationRules.historicalRowsRewritten === false && cert.activationRules.historicalRowsDeleted === false)
 check('no retrospective production predictions', cert.activationRules.retrospectiveProductionPredictions === false)
 check('recommendation and Official Pick policy unchanged', cert.activationRules.recommendationPolicyChanged === false && cert.activationRules.officialPickPolicyChanged === false)
+check('production activation is recorded', cert.status === 'PRODUCTION_CERTIFIED' && cert.activation?.status === 'ACTIVATED')
 check('initial Current Era starts at zero', cert.initialCurrentEra.generated === 0 && cert.initialCurrentEra.settled === 0)
 check('documentation records N/A metrics', doc.includes('Accuracy, Brier and Calibration: N/A'))
 check('P2.1 was not started', cert.p21Started === false)
