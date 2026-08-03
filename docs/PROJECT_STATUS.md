@@ -4,9 +4,9 @@ Last updated: 2026-07-30 20:05:00Z
 
 ## 2026-08-02 Mission Control MC-08A Homepage Experience
 
-- Implemented the bounded MC-08A homepage experience. `/` now opens with Decision Core Morning Brief and answers "What should I do today?" before exposing Rent Play, Moneyline Bet, Smart Parlay, Today's Watchlist, Decision Summary and collapsed Technical Evidence.
+- Implemented and production-certified the bounded MC-08A homepage experience. `/` now opens with Decision Core Morning Brief and answers "What should I do today?" before exposing Rent Play, Moneyline Bet, Smart Parlay, Today's Watchlist, Decision Summary and collapsed Technical Evidence.
 - Technical domains such as planner, health, lifecycle, providers, budget, operations, model and diagnostics remain available but are secondary. Existing secondary tabs remain available for Most Likely, Best Value, Performance, Sports, Operations, Data Coverage and Diagnostics.
-- No prediction formula, Official Pick policy, ranking, probability, confidence, edge, EV, Kelly, model, settlement, learning, scheduler, provider contract or budget behavior changed. MC-08B was not started.
+- Production certification passed on commit `7af572ca66206780ed0c0da354d0309c72e73ef4`. No prediction formula, Official Pick policy, ranking, probability, confidence, edge, EV, Kelly, model, settlement, learning, scheduler, provider contract or budget behavior changed. MC-08B was not started.
 
 ## 2026-08-02 Mission Control V1
 

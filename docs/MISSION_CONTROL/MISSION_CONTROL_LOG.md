@@ -138,4 +138,6 @@ Homepage order is now:
 
 Planner, health, lifecycle, provider, budget, operations, model and diagnostics evidence remains available, but is secondary. No prediction formula, Official Pick policy, ranking, probability, confidence, edge, EV, Kelly, model, settlement, learning, scheduler, provider contract or budget behavior changed.
 
-Local validation passed: MC-08A validator 37/37, Mission Control validator 57/57, C1 product validator 31/31, changed-file ESLint and `npm.cmd run build` with 396 generated static pages. Production certification is pending deployment observation.
+Local validation passed: MC-08A validator 37/37, Mission Control validator 57/57, C1 product validator 31/31, changed-file ESLint and `npm.cmd run build` with 396 generated static pages.
+
+Production certification passed on commit `7af572ca66206780ed0c0da354d0309c72e73ef4`: `/api/system/version` returned HTTP 200 with provider calls 0, `/` returned HTTP 200, rendered desktop and mobile homepage markers were present, no horizontal overflow was observed, `/api/dashboard/today` returned HTTP 200 with provider calls 0 and remote mutations 0, and `/api/current-board?mode=current&limit=100` returned HTTP 200. MC-08B was not started.

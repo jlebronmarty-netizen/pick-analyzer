@@ -64,7 +64,7 @@ Mission Control V1 update on 2026-08-02: Mission Control is implemented and prod
 
 MC-01 Operational Readiness Closure update on 2026-08-02: MC-01 is `PRODUCTION_CERTIFIED` after repairing Mission Control runtime-state drift and Settlement Guarantee scheduler-warning coupling, then observing successful protected scheduler and market-freshness recovery. Provider budget, settlement closure, Current Board, Daily Brief, Performance and workspace surfaces remain operational or correctly protected. MC-STOP-005 is cleared. MC-02 is READY but was not started.
 
-MC-08A Homepage Experience update on 2026-08-02: MC-08A is locally validated pending production certification. The homepage now prioritizes Decision Core Morning Brief, Rent Play, Moneyline Bet, Smart Parlay, Today's Watchlist, Decision Summary and collapsed Technical Evidence while preserving existing data sources and all prediction, settlement, learning, scheduler and provider guardrails. MC-08B was not started.
+MC-08A Homepage Experience update on 2026-08-02: MC-08A is production-certified on commit `7af572ca66206780ed0c0da354d0309c72e73ef4`. The homepage now prioritizes Decision Core Morning Brief, Rent Play, Moneyline Bet, Smart Parlay, Today's Watchlist, Decision Summary and collapsed Technical Evidence while preserving existing data sources and all prediction, settlement, learning, scheduler and provider guardrails. MC-08B was not started.
 
 OE-003F update on 2026-08-02: Product Freshness SLA is locally implemented and build-certified. Decision surfaces now expose `product_freshness_sla_v1`, block future/post-start/timestampless market evidence, downgrade stale prices, and preserve zero provider calls, zero mutations and unchanged prediction/recommendation policy. OE-003G has not started.
 

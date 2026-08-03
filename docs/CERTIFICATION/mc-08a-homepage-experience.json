@@ -1,7 +1,7 @@
 {
   "mission": "MC-08A",
   "name": "Daily Betting Experience Homepage Experience",
-  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+  "status": "PRODUCTION_CERTIFIED",
   "startingCommit": "4faf4ced735b6fa23e86f060d662efaf8203b4c5",
   "scope": {
     "homepageOnly": true,
@@ -79,12 +79,15 @@
     "gitDiffCheck": "PASS_WITH_PRE_EXISTING_LINE_ENDING_WARNINGS"
   },
   "productionCertification": {
-    "status": "PENDING",
-    "homepageHttp": "PENDING",
-    "systemVersionHttp": "PENDING",
-    "productionCommit": "PENDING",
+    "status": "PASS",
+    "homepageHttp": 200,
+    "systemVersionHttp": 200,
+    "productionCommit": "7af572ca66206780ed0c0da354d0309c72e73ef4",
+    "renderedDesktop": "PASS",
+    "renderedMobile": "PASS",
+    "horizontalOverflow": false,
     "providerCallsMade": 0,
     "remoteMutationsMade": 0
   },
-  "finalClassification": "MC_08A_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION"
+  "finalClassification": "MC_08A_DEPLOYED_AND_CERTIFIED"
 }

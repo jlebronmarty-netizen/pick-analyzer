@@ -1,6 +1,6 @@
 # MC-08A Homepage Experience
 
-Status: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`
+Status: `PRODUCTION_CERTIFIED`
 
 MC-08A is the first bounded sub-mission inside MC-08 Daily Betting Product Completion. It transforms the homepage presentation only. It does not change prediction, Official Picks, ranking, probability, confidence, edge, EV, Kelly, model, settlement, learning, scheduler, provider contracts or budgets.
 
@@ -58,3 +58,14 @@ MC-08B was not started.
 - C1 product validator: `PASS` 31/31.
 - Changed-file ESLint: `PASS`.
 - Build: `PASS` with 396 generated static pages.
+
+## Production Certification
+
+- Production commit: `7af572ca66206780ed0c0da354d0309c72e73ef4`.
+- `/api/system/version`: HTTP 200 with provider calls `0`.
+- `/`: HTTP 200.
+- Rendered desktop homepage: `PASS`.
+- Rendered mobile homepage: `PASS`.
+- Horizontal overflow: `false`.
+- `/api/dashboard/today`: HTTP 200 with provider calls `0` and remote mutations `0`.
+- `/api/current-board?mode=current&limit=100`: HTTP 200.
