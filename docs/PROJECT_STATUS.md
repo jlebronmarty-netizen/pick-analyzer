@@ -4,9 +4,10 @@ Last updated: 2026-07-30 20:05:00Z
 
 ## 2026-08-03 P1.3 Production Evaluation Policy Separation
 
-- P1.3 is locally implemented pending production deployment. Future MLB prospective prediction snapshots now carry `production_evaluation_policy_v1_3`, separating valid model output, production-evaluable rows, recommendation eligibility, actionability and Official Pick eligibility.
+- P1.3 is production-certified on commit `a64c876b803c93f259424389d765282a9a0a3d1a`. Future MLB prospective prediction snapshots now carry `production_evaluation_policy_v1_3`, separating valid model output, production-evaluable rows, recommendation eligibility, actionability and Official Pick eligibility.
 - Recommendation thresholds, Official Pick policy, prediction formulas, settlement, learning, scheduler cadence and provider contracts are unchanged.
 - The 45 rows from 2026-08-02 remain non-production historical evidence and were not rewritten or promoted.
+- Production read-only checks for `/api/system/version`, `/`, `/api/dashboard/today`, `/api/current-board?mode=current&limit=200`, `/api/operations/health` and `/api/performance` returned HTTP 200 with provider calls 0 where reported.
 
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 

@@ -1,6 +1,6 @@
 # P1.3 Production Evaluation Policy Certification
 
-Verdict: local implementation pending production deployment.
+Verdict: PASS.
 
 ## Certification Claim
 
@@ -31,9 +31,12 @@ The 45 rows from 2026-08-02 remain non-production historical evidence. They are 
 
 ## Production Certification
 
-Production certification must confirm:
+Production certification confirmed on commit `a64c876b803c93f259424389d765282a9a0a3d1a`:
 
-- `/api/system/version` serves the P1.3 commit;
-- homepage and read-only operational routes remain available;
-- provider calls from certification reads remain 0;
-- remote mutations from certification reads remain 0.
+- `/api/system/version` served the P1.3 commit with HTTP 200 and provider calls 0;
+- `/` returned HTTP 200;
+- `/api/dashboard/today` returned HTTP 200;
+- `/api/current-board?mode=current&limit=200` returned HTTP 200;
+- `/api/operations/health` returned HTTP 200;
+- `/api/performance` returned HTTP 200 with provider calls 0;
+- certification reads performed no provider calls and no remote mutations.

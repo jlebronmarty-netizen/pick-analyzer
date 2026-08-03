@@ -12,7 +12,7 @@ It answers:
 
 Mission Control does not replace the Master Program, Master Roadmap, Project Status or certification artifacts.
 
-P1.3 adds a prospective production-evaluation policy contract. It does not start MC-03 and does not resume MC-08E. P2.0 remains blocked until P1.3 production certification passes.
+P1.3 adds a prospective production-evaluation policy contract. It does not start MC-03 and does not resume MC-08E. P2.0 is ready after P1.3 production certification.
 
 ## Source Of Truth Boundaries
 

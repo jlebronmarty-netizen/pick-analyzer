@@ -1,6 +1,6 @@
 {
   "mode": "p1_3_production_evaluation_policy_v1",
-  "status": "LOCAL_IMPLEMENTATION_PENDING_PRODUCTION_DEPLOYMENT",
+  "status": "PRODUCTION_CERTIFIED",
   "policyVersion": "production_evaluation_policy_v1_3",
   "prospectiveOnly": true,
   "historicalRowsPromoted": false,
@@ -14,6 +14,18 @@
   "schedulerCadenceChanged": false,
   "providerCallsMade": 0,
   "remoteMutationsMade": 0,
+  "runtimeCommit": "a64c876b803c93f259424389d765282a9a0a3d1a",
+  "productionCertification": {
+    "status": "PASS",
+    "systemVersionHttp": 200,
+    "homepageHttp": 200,
+    "dashboardTodayHttp": 200,
+    "currentBoardHttp": 200,
+    "operationsHealthHttp": 200,
+    "performanceHttp": 200,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
+  },
   "contract": {
     "prediction_valid": "valid model output and identity",
     "production_evaluable": "valid pregame prediction without data-integrity or excluded-scope blockers",

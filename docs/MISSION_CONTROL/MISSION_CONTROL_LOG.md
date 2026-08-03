@@ -184,4 +184,6 @@ P1.3 locally implements the approved policy decision that valid pregame model pr
 
 The implementation adds `production_evaluation_policy_v1_3` and persists the normalized policy contract inside future MLB prospective prediction snapshots. Low confidence, low edge, low EV, probationary calibration and stale price evidence remain recommendation/actionability blockers only. Data-integrity and excluded-scope blockers still prevent production evaluation.
 
-The 45 rows from 2026-08-02 remain unchanged as non-production historical evidence. P2.0 remains blocked until P1.3 is deployed and production-certified.
+The 45 rows from 2026-08-02 remain unchanged as non-production historical evidence.
+
+Production certification passed on commit `a64c876b803c93f259424389d765282a9a0a3d1a`. `/api/system/version`, `/`, `/api/dashboard/today`, `/api/current-board?mode=current&limit=200`, `/api/operations/health` and `/api/performance` returned HTTP 200. Provider calls and remote mutations from certification reads remained 0. P2.0 is READY; MC-03 remains planned/manual-only.

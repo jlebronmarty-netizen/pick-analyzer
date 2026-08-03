@@ -1,6 +1,6 @@
 # P1.3 Production Evaluation Policy Separation
 
-Status: implemented for prospective prediction writes.
+Status: production certified on commit `a64c876b803c93f259424389d765282a9a0a3d1a`.
 
 ## Decision
 
