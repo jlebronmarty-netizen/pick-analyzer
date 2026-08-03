@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_1_PRODUCTION_CERTIFIED_P2_2_READY_MC_08E_PAUSED",
+  "status": "P2_1_PRODUCTION_CERTIFIED_P2_2_WAITING_FOR_EXTERNAL_EVIDENCE_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -199,6 +199,27 @@
     "settlementChanged": false,
     "learningChanged": false,
     "p22Started": false
+  },
+  "p2_2": {
+    "status": "WAITING_FOR_EXTERNAL_EVIDENCE",
+    "title": "New-Epoch Daily Closure Certification",
+    "certificationArtifact": "docs/CERTIFICATION/p2-2-new-epoch-daily-closure.json",
+    "reason": "Current V2 production predictions exist, but current MLB events are not yet final and cannot close through result import, settlement, learning and Performance.",
+    "activeEpochKey": "CURRENT_V2_PRODUCTION",
+    "coverageExpectedSelections": 48,
+    "coveragePredictionsCreated": 48,
+    "coverageProductionEvaluable": 48,
+    "coverageMissedOpportunities": 0,
+    "eventLifecycleStates": {
+      "HIGH_PRIORITY": 1,
+      "ACTIVE_REFRESH": 7
+    },
+    "operationsHealth": "HEALTHY",
+    "providerCallsFromObservationReads": 0,
+    "remoteMutationsFromObservationReads": 0,
+    "p23Started": false,
+    "mc03Started": false,
+    "mc08eResumed": false
   },
   "productionCertification": {
     "status": "PASS",

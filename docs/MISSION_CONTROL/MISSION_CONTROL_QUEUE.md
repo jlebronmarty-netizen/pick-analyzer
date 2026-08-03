@@ -32,7 +32,8 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | P1.4 | End-to-End Production Pipeline Certification | PRODUCTION_CERTIFIED | Post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with `feature_snapshot.productionEvaluationPolicy`. |
 | P2.0 | Prediction Epoch V2 Activation | PRODUCTION_CERTIFIED | Current V2 Production activated at `2026-08-03T19:57:02.418+00:00`; historical rows preserved. |
 | P2.1 | Comprehensive Supported-Market Prediction Coverage | PRODUCTION_CERTIFIED | 48/48 expected current supported MLB selections covered. |
-| P2.2 | Prediction Coverage Certification Follow-Up | READY | Begin next; MC-03 remains manual-only and not started. |
+| P2.2 | New-Epoch Daily Closure Certification | WAITING_FOR_EXTERNAL_EVIDENCE | Current V2 events must become final, import results, settle, create learning evidence and enter Performance. |
+| P2.3 | Historical Progressive Replay V1 | BLOCKED_BY_P2_2 | Do not start until P2.2 closure evidence is available or explicitly approved. |
 
 ## MC-08 Work Packages
 

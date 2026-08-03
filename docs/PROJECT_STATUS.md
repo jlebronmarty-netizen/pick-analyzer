@@ -32,7 +32,8 @@ Last updated: 2026-07-30 20:05:00Z
 - The MLB prospective generator now preserves canonical outcome and line identity for moneyline, spread/run line and total selections.
 - `/api/operations/prediction-coverage` provides a protected read-only reconciliation endpoint with provider calls 0 and remote mutations 0.
 - Production coverage reported 8 current MLB events, 48 expected selections, 48 predictions created, 48 production-evaluable rows, 0 missed opportunities, 0 cutoff misses, 0 duplicates and 100% coverage.
-- Prediction formulas, recommendation gates, Official Pick policy, Kelly, settlement, learning, scheduler cadence and provider contracts are unchanged. P2.2 was not started.
+- Prediction formulas, recommendation gates, Official Pick policy, Kelly, settlement, learning, scheduler cadence and provider contracts are unchanged.
+- P2.2 was observed and is `WAITING_FOR_EXTERNAL_EVIDENCE` because current MLB events are not yet final. P2.3 was not started.
 
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 

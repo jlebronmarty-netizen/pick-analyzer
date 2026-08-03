@@ -1,0 +1,44 @@
+{
+  "id": "p2_2_new_epoch_daily_closure",
+  "status": "WAITING_FOR_EXTERNAL_EVIDENCE",
+  "classification": "P2_2_WAITING_FOR_EXTERNAL_EVIDENCE",
+  "productionCommitObserved": "e4652a8ce52a22f7aafab87e45b7430337bead45",
+  "activeEpoch": "CURRENT_V2_PRODUCTION",
+  "requiredSequence": [
+    "generated_before_cutoff",
+    "production_evaluable",
+    "event_final",
+    "authoritative_result_imported",
+    "settlement",
+    "learning_evidence",
+    "performance_current_era"
+  ],
+  "currentEvidence": {
+    "coverageExpectedSelections": 48,
+    "coveragePredictionsCreated": 48,
+    "coverageProductionEvaluable": 48,
+    "coverageMissedOpportunities": 0,
+    "currentMlbEvents": 8,
+    "eventLifecycleStates": {
+      "HIGH_PRIORITY": 1,
+      "ACTIVE_REFRESH": 7
+    },
+    "operationsHealth": "HEALTHY",
+    "providerCallsFromReads": 0,
+    "remoteMutationsFromReads": 0
+  },
+  "stopCondition": "Current V2 events are not yet final, so authoritative result import, settlement, learning evidence and Performance Current Era closure cannot be certified.",
+  "guards": {
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "recommendationPolicyChanged": false,
+    "settlementRuleChanged": false,
+    "learningWeightChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerContractChanged": false
+  },
+  "nextObservation": "After the current MLB games become final and the protected scheduler imports results and settles eligible Current V2 rows.",
+  "p23Started": false,
+  "mc03Started": false,
+  "mc08eResumed": false
+}

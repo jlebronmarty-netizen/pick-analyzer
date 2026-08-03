@@ -206,3 +206,5 @@ The implementation changes the MLB prospective generator from one selected odds 
 No prediction formula, probability, confidence, edge, EV, Kelly, recommendation gate, Official Pick policy, settlement, learning, scheduler cadence or provider contract changed. P2.2 was not started.
 
 Production certification completed on commit `a0e6329293686fe2557949f3f30e445c7e6880b8`. The repaired coverage endpoint reported 8 current MLB events, 48 expected selections, 48 predictions created, 48 production-evaluable rows, 0 missed opportunities, 0 cutoff misses, 0 duplicates and 100% coverage. The successful protected writer used 1 SportsDataIO provider call, made 145 remote mutations and rebuilt 48 downstream prediction rows with no persistence error. P2.2 is READY. MC-03 was not started and MC-08E remains paused.
+
+P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 Current V2 predictions exist, but current MLB events remain `HIGH_PRIORITY`/`ACTIVE_REFRESH` and are not yet final, so authoritative result import, settlement, learning evidence and Performance Current Era closure cannot be certified. P2.3 was not started.

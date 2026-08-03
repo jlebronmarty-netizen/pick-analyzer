@@ -67,6 +67,8 @@ Current V2 certification documents:
 - [P2.0 Certification JSON](p2-0-prediction-epoch-v2.json)
 - [P2.1 Supported-Market Prediction Coverage](P2_1_SUPPORTED_MARKET_PREDICTION_COVERAGE.md)
 - [P2.1 Certification JSON](p2-1-supported-market-prediction-coverage.json)
+- [P2.2 New-Epoch Daily Closure](P2_2_NEW_EPOCH_DAILY_CLOSURE.md)
+- [P2.2 Certification JSON](p2-2-new-epoch-daily-closure.json)
 - [MC-01 Operational Readiness Closure](MC_01_OPERATIONAL_READINESS_CLOSURE.md)
 - [MC-01 Operational Readiness Closure JSON](mc-01-operational-readiness-closure.json)
 - [MC-02 Multi-Sport Data Readiness](MC_02_MULTI_SPORT_DATA_READINESS.md)
