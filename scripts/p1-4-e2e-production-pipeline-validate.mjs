@@ -20,6 +20,7 @@ const changed = execFileSync('git', ['diff', '--name-only', 'HEAD'], { cwd: ROOT
   .filter(Boolean)
 const allowed = new Set([
   'docs/OPERATIONAL_EXCELLENCE/P1_4_E2E_PRODUCTION_PIPELINE_CERTIFICATION.md',
+  'docs/CERTIFICATION/README.md',
   'docs/CERTIFICATION/P1_4_E2E_PRODUCTION_PIPELINE_CERTIFICATION.md',
   'docs/CERTIFICATION/p1-4-e2e-production-pipeline.json',
   'scripts/p1-4-e2e-production-pipeline-validate.mjs',
@@ -35,19 +36,22 @@ const allowed = new Set([
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 
-check('P1.4 status is external wait not false pass', artifact.status === 'EXTERNAL_WAIT')
+check('P1.4 status is production certified', artifact.status === 'PRODUCTION_CERTIFIED')
 check('P1.3 production policy is deployed', artifact.runtimePolicyCommit === 'a64c876b803c93f259424389d765282a9a0a3d1a')
-check('post-P1.3 rows are absent', artifact.postP13PredictionRows === 0)
-check('production evaluation policy rows are absent', artifact.postP13RowsWithProductionEvaluationPolicy === 0)
-check('eligible slate exists but needs execution', artifact.eligibleFutureMlbEvents > 0 && artifact.currentDayMlbEventsNeedingRefresh > 0)
-check('scheduler wait is explicit', artifact.schedulerCadenceStatus === 'CRITICAL' && artifact.missedSchedulerIntervals > 0)
-check('market freshness wait is explicit', artifact.marketFreshnessStatus === 'CRITICAL')
+check('runtime repair commit is recorded', artifact.runtimeRepairCommit === artifact.productionCommit)
+check('protected run succeeded', artifact.protectedRun?.success === true && artifact.protectedRun?.httpStatus === 200)
+check('post-P1.3 rows exist', artifact.postP13PredictionRows > 0)
+check('production evaluation policy rows match persisted rows', artifact.postP13RowsWithProductionEvaluationPolicy === artifact.postP13PredictionRows)
+check('all post-P1.3 rows are valid and production evaluable', artifact.predictionValidRows === artifact.postP13PredictionRows && artifact.productionEvaluableRows === artifact.postP13PredictionRows)
+check('recommendation/actionability/Official Pick gates remain separate', artifact.recommendationEligibleRows === 0 && artifact.actionableRows === 0 && artifact.officialPickEligibleRows === 0)
+check('supported selections were fully generated', artifact.expectedSupportedSelections === artifact.predictionsGenerated && artifact.predictionsMissing === 0)
+check('market freshness recovered', artifact.marketFreshnessStatus === 'HEALTHY')
 check('required evidence names persisted predictions', artifact.requiredEvidence.some((item) => item.includes('persisted predictions')))
 check('P2.0 was not started', artifact.p20Started === false && certification.includes('P2.0 was not started'))
 check('certification reads made no provider calls', artifact.providerCallsMadeByCertificationReads === 0)
 check('certification reads made no mutations', artifact.remoteMutationsMadeByCertificationReads === 0)
 check('no writes were performed by certification', artifact.predictionWritesByCertification === 0 && artifact.settlementWritesByCertification === 0 && artifact.learningWritesByCertification === 0)
-check('ops doc records missing productionEvaluationPolicy evidence', ops.includes('feature_snapshot.productionEvaluationPolicy'))
+check('ops doc records productionEvaluationPolicy evidence', ops.includes('feature_snapshot.productionEvaluationPolicy') && ops.includes('24'))
 check('adaptive bridge runs stored-odds prediction generation after canonical acquisition', adaptive.includes('generateMlbProspectivePredictionsFromStoredOdds') && adaptive.includes('storedOddsPredictionGeneration'))
 check('stored-odds prediction generation makes zero provider calls', preview.includes('mlb_prospective_prediction_from_stored_odds_v1') && preview.includes('providerCallsMade: 0'))
 check('stored-odds prediction generation persists production evaluation policy', preview.includes("policyVersion: 'production_evaluation_policy_v1_3'") && preview.includes('policyContractPersisted'))

@@ -11,9 +11,10 @@ Last updated: 2026-07-30 20:05:00Z
 
 ## 2026-08-03 P1.4 End-To-End Production Pipeline Certification
 
-- P1.4 is `EXTERNAL_WAIT`. Read-only production evidence found 20 future MLB events with open cutoffs and 8 current operating-day games needing refresh, but 0 prediction rows generated after the P1.3 deployment observation and 0 rows with `feature_snapshot.productionEvaluationPolicy`.
-- Operations Health was `CRITICAL` with scheduler evidence age 136 minutes, missed scheduler intervals 12 and market freshness `CRITICAL`.
-- Required next evidence: a successful post-P1.3 protected operating-day or automatic scheduler execution that persists cutoff-safe predictions carrying the P1.3 production-evaluation contract. P2.0 was not started.
+- P1.4 is `PRODUCTION_CERTIFIED` on production commit `6f92b102416fa0e5b8baeefbaa8b944a63f51ca3`.
+- A protected production operating-day invocation returned HTTP 200 `SUCCESS_CHANGED`, selected `midday_refresh`, used 1 SportsDataIO provider call, and reported 97 remote mutations.
+- Persisted evidence after the P1.3 observation contains 24 MLB prediction rows across 8 current events and moneyline/spread/total, all with `feature_snapshot.productionEvaluationPolicy`, `prediction_valid=true` and `production_evaluable=true`.
+- Recommendation eligibility, actionability and Official Pick eligibility remain 0 by existing gates. P2.0 is ready, but was not started in the certification update.
 
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 

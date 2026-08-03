@@ -29,8 +29,8 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | P1.1 | Yesterday Non-Production Prediction Reconciliation | CERTIFIED | Preserved the 2026-08-02 rows as non-production historical evidence. |
 | P1.2 | End-to-End System Integrity Audit | CERTIFIED | Identified the production evaluation versus recommendation-policy conflict. |
 | P1.3 | Production Evaluation Policy Separation | PRODUCTION_CERTIFIED | Separates valid model output, production evaluation, recommendation eligibility, actionability and Official Pick eligibility prospectively. |
-| P1.4 | End-to-End Production Pipeline Certification | EXTERNAL_WAIT | Waiting for post-P1.3 persisted prediction rows with `feature_snapshot.productionEvaluationPolicy`. |
-| P2.0 | Prediction Epoch V2 Activation | BLOCKED_ON_P1_4 | Do not start until P1.4 production pipeline certification passes. |
+| P1.4 | End-to-End Production Pipeline Certification | PRODUCTION_CERTIFIED | Post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with `feature_snapshot.productionEvaluationPolicy`. |
+| P2.0 | Prediction Epoch V2 Activation | READY | Eligible after P1.4 certification; MC-08E remains paused and must not be resumed automatically. |
 
 ## MC-08 Work Packages
 

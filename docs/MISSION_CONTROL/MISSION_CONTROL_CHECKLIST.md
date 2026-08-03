@@ -66,5 +66,5 @@ Use this checklist before starting any queued mission.
 - MC-08D: `PRODUCTION_CERTIFIED`.
 - MC-08E: `PAUSED`; preserved in the main checkout until MC-08E-R.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
-- P1.4: `EXTERNAL_WAIT`; no post-P1.3 persisted prediction rows with production evaluation policy exist yet.
-- P2.0: blocked until P1.4 production pipeline certification passes.
+- P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
+- P2.0: `READY`; do not resume MC-08E or start MC-03 as part of P2.0 selection.

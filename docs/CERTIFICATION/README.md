@@ -61,6 +61,8 @@ Current V2 certification documents:
 - [OE-003F Certification JSON](oe-003f-product-freshness-sla.json)
 - [Mission Control V1](MISSION_CONTROL_V1.md)
 - [Mission Control V1 JSON](mission-control-v1.json)
+- [P1.4 End-To-End Production Pipeline Certification](P1_4_E2E_PRODUCTION_PIPELINE_CERTIFICATION.md)
+- [P1.4 Certification JSON](p1-4-e2e-production-pipeline.json)
 - [MC-01 Operational Readiness Closure](MC_01_OPERATIONAL_READINESS_CLOSURE.md)
 - [MC-01 Operational Readiness Closure JSON](mc-01-operational-readiness-closure.json)
 - [MC-02 Multi-Sport Data Readiness](MC_02_MULTI_SPORT_DATA_READINESS.md)
