@@ -1,6 +1,6 @@
 # P2.1A Canonical Market Prediction Granularity
 
-Status: LOCAL VALIDATION PASS PENDING PRODUCTION CERTIFICATION
+Status: PRODUCTION CERTIFIED
 
 P2.1A corrects the Current V2 MLB supported-market prediction contract from selection-level production evaluation to canonical event-market production evaluation.
 
@@ -46,6 +46,28 @@ P2.1A is not production-certified until production evidence proves:
 - Performance counts only canonical event-market predictions.
 - Settlement and learning ignore superseded selection-level preview rows.
 - P2.2 remains paused until P2.1A is certified.
+
+## Production Certification
+
+Production serves commit `8821aa7830874653cc05744ff8eaad03cf42b6b3`.
+
+Protected production coverage after the P2.1A writer execution reported:
+
+- Current MLB events: 8.
+- Provider selections available: 48.
+- Canonical markets expected: 24.
+- Canonical predictions created: 24.
+- Canonical predictions missing: 0.
+- Coverage: 100%.
+- Moneyline: 8.
+- Spread/run line: 8.
+- Total: 8.
+- Current Era eligible rows: 24.
+- Current Era unique markets: 24.
+- Non-canonical Current Era rows excluded from Performance: 27.
+- P2.1A superseded selection-level rows: 24.
+
+The protected writer selected `midday_refresh`, made 1 SportsDataIO provider call, recorded 97 remote mutations and generated 24 canonical prediction rows before cutoff. It did not perform result, settlement or learning writes.
 
 ## Local Validation
 

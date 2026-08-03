@@ -210,8 +210,9 @@ Production certification completed on commit `a0e6329293686fe2557949f3f30e445c7e
 P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 Current V2 predictions exist, but current MLB events remain `HIGH_PRIORITY`/`ACTIVE_REFRESH` and are not yet final, so authoritative result import, settlement, learning evidence and Performance Current Era closure cannot be certified. P2.3 was not started.
 # 2026-08-03 P2.1A Canonical Market-Prediction Granularity
 
-- Status: LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION.
+- Status: PRODUCTION_CERTIFIED.
 - Corrected the Current V2 supported-market contract from provider-side selection-level production evaluation to canonical event-market production evaluation.
 - Expected 8-game MLB slate output is 24 canonical model predictions: 8 moneyline, 8 spread/run line and 8 total.
 - Provider-side evidence can remain 48 contextual selections and must not be counted as 48 independent Performance or settlement-learning samples.
-- P2.2 remains paused until production certification completes.
+- P2.2 remains paused during certification and returns to `WAITING_FOR_EXTERNAL_EVIDENCE` only after production certification completes.
+- Production commit `8821aa7830874653cc05744ff8eaad03cf42b6b3` certified 48 provider selections, 24 canonical markets, 24 canonical predictions, 0 missed canonical opportunities, 24 production-evaluable rows and 27 non-canonical Current Era rows excluded from Performance. P2.2 returned to `WAITING_FOR_EXTERNAL_EVIDENCE`.

@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_1A_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION_P2_2_PAUSED_MC_08E_PAUSED",
+  "status": "P2_1A_PRODUCTION_CERTIFIED_P2_2_WAITING_FOR_EXTERNAL_EVIDENCE_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -201,7 +201,7 @@
     "p22Started": false
   },
   "p2_1a": {
-    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Canonical Market-Prediction Granularity Correction",
     "certificationArtifact": "docs/CERTIFICATION/p2-1a-canonical-market-granularity.json",
     "activeEpochKey": "CURRENT_V2_PRODUCTION",
@@ -214,6 +214,17 @@
       "total": 8
     },
     "selectionPreviewClassification": "P2_1_SELECTION_LEVEL_PREVIEW",
+    "productionCommit": "8821aa7830874653cc05744ff8eaad03cf42b6b3",
+    "currentEvents": 8,
+    "providerSelectionsAvailable": 48,
+    "canonicalMarketsExpected": 24,
+    "canonicalPredictionsCreated": 24,
+    "canonicalPredictionsMissing": 0,
+    "productionEvaluable": 24,
+    "selectionUniverseRowsExcludedFromCanonicalPerformance": 27,
+    "p21aSupersededRows": 24,
+    "protectedWriterProviderCalls": 1,
+    "protectedWriterRemoteMutations": 97,
     "predictionFormulaChanged": false,
     "recommendationPolicyChanged": false,
     "officialPickPolicyChanged": false,
@@ -221,20 +232,20 @@
     "learningChanged": false,
     "schedulerChanged": false,
     "providerContractsChanged": false,
-    "p22Paused": true,
+    "p22Paused": false,
     "p23Started": false,
     "mc03Started": false,
     "mc08eResumed": false
   },
   "p2_2": {
-    "status": "PAUSED_PENDING_P2_1A_PRODUCTION_CERTIFICATION",
+    "status": "WAITING_FOR_EXTERNAL_EVIDENCE",
     "title": "New-Epoch Daily Closure Certification",
     "certificationArtifact": "docs/CERTIFICATION/p2-2-new-epoch-daily-closure.json",
     "reason": "Current V2 production predictions exist, but current MLB events are not yet final and cannot close through result import, settlement, learning and Performance.",
     "activeEpochKey": "CURRENT_V2_PRODUCTION",
-    "coverageExpectedSelections": 48,
-    "coveragePredictionsCreated": 48,
-    "coverageProductionEvaluable": 48,
+    "coverageExpectedSelections": 24,
+    "coveragePredictionsCreated": 24,
+    "coverageProductionEvaluable": 24,
     "coverageMissedOpportunities": 0,
     "eventLifecycleStates": {
       "HIGH_PRIORITY": 1,

@@ -37,11 +37,12 @@ Last updated: 2026-07-30 20:05:00Z
 
 ## 2026-08-03 P2.1A Canonical Market Prediction Granularity
 
-- P2.1A is locally validated pending production certification.
+- P2.1A is production-certified on commit `8821aa7830874653cc05744ff8eaad03cf42b6b3`.
 - The approved Current V2 production identity is now one canonical prediction per event and supported market: 8 MLB events times moneyline, spread/run line and total equals 24 canonical predictions.
 - Provider selection evidence may still include both sides, but those sides are contextual evidence and are not automatically Performance, settlement or learning samples.
 - Existing 48 Current V2 selection-level rows are preserved non-destructively as `P2_1_SELECTION_LEVEL_PREVIEW` when superseded and are excluded from canonical evaluation eligibility.
-- Prediction formulas, recommendation gates, Official Pick policy, Kelly, settlement rules, learning weights, scheduler cadence and provider contracts are unchanged. P2.2 remains paused until P2.1A is production-certified.
+- Production coverage after protected execution reported 48 provider selections, 24 canonical markets, 24 canonical predictions, 24 production-evaluable rows, 0 missed opportunities, 0 duplicates and 100% canonical coverage. Performance Current Era reported 24 eligible unique markets and 27 non-canonical rows excluded.
+- Prediction formulas, recommendation gates, Official Pick policy, Kelly, settlement rules, learning weights, scheduler cadence and provider contracts are unchanged. P2.2 is back to `WAITING_FOR_EXTERNAL_EVIDENCE` and must use only canonical event-market rows.
 
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 

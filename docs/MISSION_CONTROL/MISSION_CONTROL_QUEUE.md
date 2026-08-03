@@ -32,8 +32,8 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | P1.4 | End-to-End Production Pipeline Certification | PRODUCTION_CERTIFIED | Post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with `feature_snapshot.productionEvaluationPolicy`. |
 | P2.0 | Prediction Epoch V2 Activation | PRODUCTION_CERTIFIED | Current V2 Production activated at `2026-08-03T19:57:02.418+00:00`; historical rows preserved. |
 | P2.1 | Comprehensive Supported-Market Prediction Coverage | PRODUCTION_CERTIFIED | 48/48 expected current supported MLB selections covered. |
-| P2.1A | Canonical Market-Prediction Granularity Correction | LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION | Corrects production-evaluable identity to one canonical event-market prediction per supported market; provider-side selections remain contextual evidence. |
-| P2.2 | New-Epoch Daily Closure Certification | WAITING_FOR_EXTERNAL_EVIDENCE | Current V2 events must become final, import results, settle, create learning evidence and enter Performance. |
+| P2.1A | Canonical Market-Prediction Granularity Correction | PRODUCTION_CERTIFIED | 48 provider selections and 24 canonical event-market predictions certified; selection-level preview rows excluded from canonical Performance. |
+| P2.2 | New-Epoch Daily Closure Certification | WAITING_FOR_EXTERNAL_EVIDENCE | Current V2 canonical rows must become final, import results, settle, create learning evidence and enter Performance. |
 | P2.3 | Historical Progressive Replay V1 | BLOCKED_BY_P2_2 | Do not start until P2.2 closure evidence is available or explicitly approved. |
 
 ## MC-08 Work Packages
