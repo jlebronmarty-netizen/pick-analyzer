@@ -63,6 +63,9 @@ type TodayResponse = {
         displayableMarkets?: number
         directlyPricedCandidates?: number
       }
+      gameCoverageSummary?: {
+        gamesToday?: number
+      }
     }
   }
   sections?: {
@@ -74,6 +77,18 @@ type TodayResponse = {
   providerCallsMade?: number
   remoteMutationsMade?: number
   totalScheduledToday?: number
+  currentGames?: number
+  lifecycleCounts?: {
+    totalScheduledToday?: number
+    upcoming?: number
+    live?: number
+    final?: number
+  }
+  schedulerCoverage?: {
+    skippedToday?: number
+    pendingToday?: number
+    gamesPendingPregameExecution?: number
+  }
   predictionCandidates?: number
   informationalCandidates?: number
 }
@@ -432,6 +447,14 @@ function signedPct(value: unknown) {
 function countValue(value: unknown) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0
+}
+
+function firstPositiveCount(...values: unknown[]) {
+  for (const value of values) {
+    const parsed = countValue(value)
+    if (parsed > 0) return parsed
+  }
+  return 0
 }
 
 function recordValue(value: unknown): Record<string, unknown> {
@@ -1358,11 +1381,24 @@ function DailyBrief({
   const perfMetrics = recordValue(recordValue(performance?.aiBrain).reportCard)
   const perfCore = recordValue(perfMetrics.metrics)
   const perfCalibration = recordValue(perfMetrics.calibration)
-  const gamesToday = countValue(data.totalScheduledToday ?? data.viewModel?.selectors?.currentBoardSummary?.candidates ?? boardCandidates)
+  const gamesToday = firstPositiveCount(
+    data.totalScheduledToday,
+    data.currentGames,
+    data.lifecycleCounts?.totalScheduledToday,
+    data.viewModel?.selectors?.gameCoverageSummary?.gamesToday,
+    data.viewModel?.selectors?.currentBoardSummary?.candidates,
+    boardCandidates,
+  )
   const predictions = countValue(data.predictionCandidates ?? boardCandidates ?? plan.candidates.length)
   const official = countValue(data.officialPicks) || plan.candidates.filter((item) => item.official).length
   const value = plan.candidates.filter((item) => item.qualified && Number(item.ev ?? 0) > 0).length
-  const skipped = Math.max(0, plan.candidates.length - plan.candidates.filter((item) => item.qualified).length)
+  const skipped = firstPositiveCount(
+    data.schedulerCoverage?.skippedToday,
+    data.schedulerCoverage?.pendingToday,
+    data.schedulerCoverage?.gamesPendingPregameExecution,
+    Math.max(0, gamesToday - predictions),
+    plan.candidates.length - plan.candidates.filter((item) => item.qualified).length,
+  )
 
   return (
     <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-r9-daily-brief="true" data-mc08a-morning-brief="true" data-language-foundation="en-es">
@@ -1823,7 +1859,7 @@ function TechnicalEvidence({
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MiniMetric label="Health" value={label(data.status, 'Today ready')} />
         <MiniMetric label="Planner" value={data.nextAction ?? 'Observational'} />
-        <MiniMetric label="Lifecycle" value={`${countValue(data.totalScheduledToday)} games`} />
+        <MiniMetric label="Lifecycle" value={`${firstPositiveCount(data.totalScheduledToday, data.currentGames, data.lifecycleCounts?.totalScheduledToday)} games`} />
         <MiniMetric label="Providers" value={`${countValue(data.providerCallsMade)} calls`} />
         <MiniMetric label="Budget" value="Stored evidence" />
         <MiniMetric label="Operations" value={`${countValue(data.remoteMutationsMade)} mutations`} />

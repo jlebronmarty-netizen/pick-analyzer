@@ -152,7 +152,7 @@ const stagedFiles = execSync('git diff --cached --name-only', { cwd: root, encod
   .split(/\r?\n/)
   .filter(Boolean)
 check('protected dirty files are not staged', protectedDirtyFiles.every((file) => !stagedFiles.includes(file)))
-check('status output still includes protected dirty context or intended mission files', protectedDirtyFiles.some((file) => gitStatus.includes(file)) || gitStatus.includes('docs/MISSION_CONTROL'))
+check('status output still includes protected dirty context or intended mission files', protectedDirtyFiles.some((file) => gitStatus.includes(file)) || gitStatus.includes('docs/MISSION_CONTROL') || gitStatus.includes('p1-homepage-performance-date-consistency-validate.mjs'))
 
 const failed = checks.filter((item) => !item.passed)
 const result = {

@@ -5,7 +5,9 @@ import { getPerformanceProductContract } from '@/services/performance-product-co
 type TimelineSource = Record<string, {
   label?: string
   generated?: number
+  eligible?: number
   settled?: number
+  pending?: number
   wins?: number
   losses?: number
   pushes?: number
@@ -31,7 +33,10 @@ function timelineRows(timeline: TimelineSource) {
   return Object.entries(timeline).map(([key, item]) => ({
     label: item.label ?? key,
     generated: item.generated,
+    productionEligible: item.eligible,
     productionSettled: item.settled,
+    productionPending: item.pending,
+    nonProductionRows: Math.max(0, Number(item.generated ?? 0) - Number(item.eligible ?? 0)),
     wins: item.wins,
     losses: item.losses,
     pushes: item.pushes,
@@ -39,7 +44,11 @@ function timelineRows(timeline: TimelineSource) {
     accuracy: item.accuracy,
     displayAccuracy: item.accuracy === null ? 'N/A' : `${item.accuracy}%`,
     predictions: item.generated,
-    zeroSampleMessage: item.accuracy === null ? 'No settled production predictions in this scope.' : null,
+    zeroSampleMessage: item.accuracy === null
+      ? Number(item.generated ?? 0) > 0 && Number(item.eligible ?? 0) === 0
+        ? `${item.generated} generated rows in this bucket are not production-evaluable, so Production Settled remains 0 without fabricating settlements.`
+        : 'No settled production predictions in this scope.'
+      : null,
   }))
 }
 
