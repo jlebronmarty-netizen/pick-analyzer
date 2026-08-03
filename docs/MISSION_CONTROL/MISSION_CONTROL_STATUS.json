@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_1_PRODUCTION_CERTIFIED_P2_2_WAITING_FOR_EXTERNAL_EVIDENCE_MC_08E_PAUSED",
+  "status": "P2_1A_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION_P2_2_PAUSED_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -200,8 +200,34 @@
     "learningChanged": false,
     "p22Started": false
   },
+  "p2_1a": {
+    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION",
+    "title": "Canonical Market-Prediction Granularity Correction",
+    "certificationArtifact": "docs/CERTIFICATION/p2-1a-canonical-market-granularity.json",
+    "activeEpochKey": "CURRENT_V2_PRODUCTION",
+    "canonicalGranularity": "event_market_v1",
+    "providerSelectionUniverseForEightGameSlate": 48,
+    "expectedCanonicalPredictionsForEightGameSlate": 24,
+    "expectedByMarket": {
+      "moneyline": 8,
+      "spread": 8,
+      "total": 8
+    },
+    "selectionPreviewClassification": "P2_1_SELECTION_LEVEL_PREVIEW",
+    "predictionFormulaChanged": false,
+    "recommendationPolicyChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "providerContractsChanged": false,
+    "p22Paused": true,
+    "p23Started": false,
+    "mc03Started": false,
+    "mc08eResumed": false
+  },
   "p2_2": {
-    "status": "WAITING_FOR_EXTERNAL_EVIDENCE",
+    "status": "PAUSED_PENDING_P2_1A_PRODUCTION_CERTIFICATION",
     "title": "New-Epoch Daily Closure Certification",
     "certificationArtifact": "docs/CERTIFICATION/p2-2-new-epoch-daily-closure.json",
     "reason": "Current V2 production predictions exist, but current MLB events are not yet final and cannot close through result import, settlement, learning and Performance.",

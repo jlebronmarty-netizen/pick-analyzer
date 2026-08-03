@@ -127,14 +127,24 @@ function productionEvaluationPolicy(row: PredictionRow) {
 
 function eligibility(row: PredictionRow, event: EventRow | undefined) {
   const policy = productionEvaluationPolicy(row)
+  const snapshot = asObject(row.feature_snapshot)
+  const canonical = asObject(snapshot.canonicalMarketPrediction)
   if (
     row.prediction_epoch_key === CURRENT_V2_EPOCH_KEY &&
     policy.production_evaluable === true &&
-    policy.prediction_valid === true
+    policy.prediction_valid === true &&
+    snapshot.canonicalPredictionGranularity === 'event_market_v1' &&
+    canonical.canonicalEvaluationEligible === true
   ) {
     return {
       eligible: true,
       reason: 'CURRENT_V2_PRODUCTION_EVALUABLE',
+    }
+  }
+  if (row.prediction_epoch_key === CURRENT_V2_EPOCH_KEY && snapshot.canonicalPredictionGranularity !== 'event_market_v1') {
+    return {
+      eligible: false,
+      reason: 'P2_1_SELECTION_LEVEL_PREVIEW_NOT_CANONICAL',
     }
   }
   return canonicalEligibility(row, event)
@@ -161,7 +171,7 @@ function metrics(rows: Array<{ row: PredictionRow; event?: EventRow }>) {
   return {
     generated: rows.length,
     eligible: eligibleRows.length,
-    uniqueMarkets: new Set(rows.map((item) => [item.row.game_id, item.row.market, item.row.team, item.row.line].join('|'))).size,
+    uniqueMarkets: new Set(rows.map((item) => [item.row.game_id, item.row.market].join('|'))).size,
     current: rows.filter((item) => item.row.is_current !== false).length,
     superseded: rows.filter((item) => item.row.is_current === false).length,
     settled: settled.length,

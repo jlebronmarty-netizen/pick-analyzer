@@ -208,3 +208,10 @@ No prediction formula, probability, confidence, edge, EV, Kelly, recommendation 
 Production certification completed on commit `a0e6329293686fe2557949f3f30e445c7e6880b8`. The repaired coverage endpoint reported 8 current MLB events, 48 expected selections, 48 predictions created, 48 production-evaluable rows, 0 missed opportunities, 0 cutoff misses, 0 duplicates and 100% coverage. The successful protected writer used 1 SportsDataIO provider call, made 145 remote mutations and rebuilt 48 downstream prediction rows with no persistence error. P2.2 is READY. MC-03 was not started and MC-08E remains paused.
 
 P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 Current V2 predictions exist, but current MLB events remain `HIGH_PRIORITY`/`ACTIVE_REFRESH` and are not yet final, so authoritative result import, settlement, learning evidence and Performance Current Era closure cannot be certified. P2.3 was not started.
+# 2026-08-03 P2.1A Canonical Market-Prediction Granularity
+
+- Status: LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION.
+- Corrected the Current V2 supported-market contract from provider-side selection-level production evaluation to canonical event-market production evaluation.
+- Expected 8-game MLB slate output is 24 canonical model predictions: 8 moneyline, 8 spread/run line and 8 total.
+- Provider-side evidence can remain 48 contextual selections and must not be counted as 48 independent Performance or settlement-learning samples.
+- P2.2 remains paused until production certification completes.

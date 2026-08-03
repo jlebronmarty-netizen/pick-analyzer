@@ -74,6 +74,21 @@ function v2Settlement(row: CanonicalPredictionLike) {
   return asObject(asObject(row.settlement_details).settlement_reconciliation_v2)
 }
 
+function canonicalMarketPrediction(row: CanonicalPredictionLike) {
+  return asObject(asObject(row.feature_snapshot).canonicalMarketPrediction)
+}
+
+function isSelectionUniverseContext(row: CanonicalPredictionLike) {
+  const snapshot = asObject(row.feature_snapshot)
+  const canonical = canonicalMarketPrediction(row)
+  return (
+    snapshot.canonicalPredictionGranularity === 'selection_universe_context_v1' ||
+    canonical.canonicalEvaluationEligible === false ||
+    canonical.performanceEligible === false ||
+    canonical.settlementLearningEligible === false
+  )
+}
+
 export function canonicalStoredOutcome(row: CanonicalPredictionLike): CanonicalSettlementOutcome {
   const v2 = v2Settlement(row)
   if (v2.lifecycle === 'Legacy') return 'legacy'
@@ -133,6 +148,7 @@ export function isCanonicalSupportedMarket(row: CanonicalPredictionLike) {
 
 export function canonicalPendingReason(row: CanonicalPredictionLike, event?: CanonicalEventLike) {
   if (canonicalStoredOutcome(row) !== 'pending') return null
+  if (isSelectionUniverseContext(row)) return 'P2_1_SELECTION_LEVEL_PREVIEW_NOT_CANONICAL'
   if (isCanonicalTestFixture(row)) return 'TEST_FIXTURE'
   const cutoff = classifyPredictionCutoff(row, event)
   if (cutoff.state === 'POST_START' || cutoff.state === 'POST_FINAL') return 'PREDICTION_POST_START'
@@ -150,6 +166,7 @@ export function canonicalPendingReason(row: CanonicalPredictionLike, event?: Can
 
 export function canonicalEligibility(row: CanonicalPredictionLike, event?: CanonicalEventLike) {
   const result = canonicalStoredOutcome(row)
+  if (isSelectionUniverseContext(row)) return { eligible: false, reason: 'P2_1_SELECTION_LEVEL_PREVIEW_NOT_CANONICAL' }
   if (isCanonicalTestFixture(row)) return { eligible: false, reason: 'TEST_FIXTURE' }
   const cutoff = classifyPredictionCutoff(row, event)
   if (!cutoff.eligible) return { eligible: false, reason: cutoff.state }
@@ -197,6 +214,7 @@ function selectedScorePair(row: CanonicalPredictionLike, result: CanonicalGameRe
 }
 
 export function canonicalDeterministicOutcome(row: CanonicalPredictionLike, result?: CanonicalGameResultLike | null) {
+  if (isSelectionUniverseContext(row)) return { outcome: null, reason: 'P2_1_SELECTION_LEVEL_PREVIEW_NOT_CANONICAL' }
   if (!result || !result.game_id || result.home_score === null || result.away_score === null) {
     return { outcome: null, reason: 'CANONICAL_RESULT_MISSING_OR_INCOMPLETE' }
   }
@@ -240,7 +258,8 @@ export function classifyCanonicalSettlementState(row: CanonicalPredictionLike, r
   const deterministicTerminal = Boolean(deterministic.outcome && FINAL_RESULTS.has(deterministic.outcome))
   const lifecycle = canonicalLifecycle(row)
   let classification = 'OTHER_PROVEN_CAUSE'
-  if (isCanonicalTestFixture(row) || lifecycle === 'shadow') classification = 'SHADOW_ROW'
+  if (isSelectionUniverseContext(row)) classification = 'P2_1_SELECTION_LEVEL_PREVIEW_NOT_CANONICAL'
+  else if (isCanonicalTestFixture(row) || lifecycle === 'shadow') classification = 'SHADOW_ROW'
   else if (AUDIT_LIFECYCLES.has(lifecycle)) classification = 'LEGACY_SETTLEMENT_REPRESENTATION'
   else if (!cutoff.eligible) classification = 'INVALID_CUTOFF_ROW'
   else if (storedTerminal && deterministicTerminal && stored === deterministic.outcome) classification = 'STORED_SETTLED_AND_DETERMINISTIC_SETTLED'

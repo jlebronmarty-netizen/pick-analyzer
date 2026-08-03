@@ -103,6 +103,15 @@ function policy(row: PredictionRow) {
   return asRecord(asRecord(row.feature_snapshot).productionEvaluationPolicy)
 }
 
+function canonicalMarket(row: PredictionRow) {
+  return asRecord(asRecord(row.feature_snapshot).canonicalMarketPrediction)
+}
+
+function isCanonicalPrediction(row: PredictionRow) {
+  return asRecord(row.feature_snapshot).canonicalPredictionGranularity === 'event_market_v1' &&
+    canonicalMarket(row).canonicalEvaluationEligible === true
+}
+
 function latestSelectionRows(events: EventRow[], oddsRows: OddsRow[]) {
   const eventsById = new Map(events.map((event) => [event.id, event]))
   const selected = new Map<string, OddsRow>()
@@ -179,25 +188,26 @@ export async function getPredictionCoverage() {
 
   const oddsRows = (oddsResult.data ?? []) as OddsRow[]
   const predictions = (predictionResult.data ?? []) as PredictionRow[]
-  const predictionsByKey = new Map<string, PredictionRow[]>()
+  const predictionsByMarket = new Map<string, PredictionRow[]>()
+  const selectionPreviewRows = predictions.filter((row) => !isCanonicalPrediction(row))
   for (const row of predictions) {
-    const key = expectedKey({
-      eventId: String(row.game_id),
-      market: marketForPrediction(row.market),
-      selection: String(row.team ?? ''),
-      line: marketForPrediction(row.market) === 'moneyline' ? null : row.line,
-    })
-    predictionsByKey.set(key, [...(predictionsByKey.get(key) ?? []), row])
+    const key = `${row.game_id}:${marketForPrediction(row.market)}`
+    predictionsByMarket.set(key, [...(predictionsByMarket.get(key) ?? []), row])
   }
 
-  const expectedSelections = latestSelectionRows(events, oddsRows).map((odds) => {
+  const providerSelections = latestSelectionRows(events, oddsRows).map((odds) => {
     const event = events.find((item) => item.id === odds.event_id)!
     const market = marketForPrediction(odds.market)
     const selection = selectionFor(event, market, String(odds.outcome))
     const line = market === 'moneyline' ? null : odds.line
     const key = expectedKey({ eventId: event.id, market, selection, line })
-    const matched = predictionsByKey.get(key) ?? []
-    const primary = matched[0] ?? null
+    const matched = predictions.filter((row) => expectedKey({
+      eventId: String(row.game_id),
+      market: marketForPrediction(row.market),
+      selection: String(row.team ?? ''),
+      line: marketForPrediction(row.market) === 'moneyline' ? null : row.line,
+    }) === key)
+    const primary = matched.find(isCanonicalPrediction) ?? matched[0] ?? null
     const evalPolicy = primary ? policy(primary) : {}
     const eventStartMs = parseMs(event.start_time)
     const cutoffAt = eventStartMs === null ? null : new Date(eventStartMs - 10 * 60 * 1000).toISOString()
@@ -256,16 +266,64 @@ export async function getPredictionCoverage() {
     }
   }).sort((a, b) => a.eventId.localeCompare(b.eventId) || a.marketKey.localeCompare(b.marketKey) || a.selectionLabel.localeCompare(b.selectionLabel))
 
-  const count = (predicate: (row: typeof expectedSelections[number]) => boolean) => expectedSelections.filter(predicate).length
-  const reasonCounts = expectedSelections.reduce<Record<string, number>>((acc, row) => {
+  const canonicalMarkets = Array.from(new Map(providerSelections.map((selection) => [
+    `${selection.eventId}:${selection.marketKey}`,
+    {
+      eventId: selection.eventId,
+      matchup: selection.matchup,
+      marketKey: selection.marketKey,
+      operatingDate,
+      expectedProviderSelections: providerSelections.filter((row) => row.eventId === selection.eventId && row.marketKey === selection.marketKey).length,
+    },
+  ])).values()).map((market) => {
+    const matched = predictionsByMarket.get(`${market.eventId}:${market.marketKey}`) ?? []
+    const canonical = matched.filter(isCanonicalPrediction)
+    const primary = canonical[0] ?? null
+    const evalPolicy = primary ? policy(primary) : {}
+    const event = events.find((item) => item.id === market.eventId)
+    const eventStartMs = parseMs(event?.start_time)
+    const cutoffAt = eventStartMs === null ? null : new Date(eventStartMs - 10 * 60 * 1000).toISOString()
+    const beforeCutoff = primary?.generated_at && cutoffAt
+      ? parseMs(primary.generated_at)! <= parseMs(cutoffAt)!
+      : Boolean(cutoffAt && parseMs(generatedAt)! <= parseMs(cutoffAt)!)
+    const coverageStatus = canonical.length > 1
+      ? 'DUPLICATE_COLLAPSED'
+      : primary
+        ? 'CANONICAL_PREDICTION_CREATED'
+        : beforeCutoff
+          ? 'MISSED_CANONICAL_PREDICTION'
+          : 'CUTOFF_MISSED'
+    const canonicalInfo = primary ? canonicalMarket(primary) : {}
+    return {
+      ...market,
+      predictionId: primary?.id ?? null,
+      selectedSelectionLabel: primary?.team ?? null,
+      selectedLine: primary?.line ?? null,
+      selectedOdds: primary ? primary.feature_snapshot ? asRecord(asRecord(primary.feature_snapshot).canonicalMarketPrediction).selectedSelection : null : null,
+      opposingSelection: canonicalInfo.opposingSelection ?? null,
+      generatedAt: primary?.generated_at ?? null,
+      cutoffAt: primary?.cutoff_at ?? cutoffAt,
+      beforeCutoff,
+      coverageStatus,
+      reasonCodes: primary ? [] : [coverageStatus],
+      productionEvaluable: Boolean(primary && evalPolicy.production_evaluable === true && isCanonicalPrediction(primary)),
+      recommendationEligible: evalPolicy.recommendation_eligible === true,
+      actionable: evalPolicy.actionable === true,
+      officialPickEligible: evalPolicy.official_pick_eligible === true,
+      duplicateCount: canonical.length,
+    }
+  }).sort((a, b) => a.eventId.localeCompare(b.eventId) || a.marketKey.localeCompare(b.marketKey))
+
+  const count = (predicate: (row: typeof canonicalMarkets[number]) => boolean) => canonicalMarkets.filter(predicate).length
+  const reasonCounts = canonicalMarkets.reduce<Record<string, number>>((acc, row) => {
     for (const reason of row.reasonCodes) acc[reason] = (acc[reason] ?? 0) + 1
     return acc
   }, {})
-  const byMarket = expectedSelections.reduce<Record<string, number>>((acc, row) => {
+  const byMarket = canonicalMarkets.reduce<Record<string, number>>((acc, row) => {
     acc[row.marketKey] = (acc[row.marketKey] ?? 0) + 1
     return acc
   }, {})
-  const bySide = expectedSelections.reduce<Record<string, number>>((acc, row) => {
+  const providerBySide = providerSelections.reduce<Record<string, number>>((acc, row) => {
     acc[row.side] = (acc[row.side] ?? 0) + 1
     return acc
   }, {})
@@ -278,34 +336,39 @@ export async function getPredictionCoverage() {
     timezone: TIMEZONE,
     activeEpoch,
     semantics: {
-      moneyline: 'home and away selections are persisted separately when both canonical selections exist.',
-      spread: 'home and away run-line selections preserve exact provider line identity.',
-      total: 'over and under selections preserve exact provider total identity.',
-      complementDerivation: 'No sportsbook selection is fabricated from a missing provider row; complements are only represented when canonical evidence exists.',
+      moneyline: 'provider evidence may include home and away selections, but only one canonical moneyline prediction is persisted per event.',
+      spread: 'provider evidence may include home and away run-line selections, but only one canonical spread prediction is persisted per event.',
+      total: 'provider evidence may include over and under selections, but only one canonical total prediction is persisted per event.',
+      complementDerivation: 'Opposing selections remain contextual provider evidence and are not independent Performance predictions.',
       threeWayMarkets: 'Three-way markets are not treated as binary.',
-      uniquenessKey: 'epoch:event:market:selection:line',
+      uniquenessKey: 'epoch:event:market:generation',
     },
     summary: {
       events: events.length,
       providerMarketsAvailable: oddsRows.length,
-      normalizedMarkets: expectedSelections.length,
-      supportedMarkets: expectedSelections.length,
-      expectedSelections: expectedSelections.length,
-      predictionsCreated: count((row) => row.coverageStatus === 'PREDICTION_CREATED'),
+      providerSelectionsAvailable: providerSelections.length,
+      normalizedMarkets: canonicalMarkets.length,
+      supportedMarkets: canonicalMarkets.length,
+      expectedSelections: providerSelections.length,
+      canonicalMarketsExpected: canonicalMarkets.length,
+      canonicalPredictionsCreated: count((row) => row.coverageStatus === 'CANONICAL_PREDICTION_CREATED'),
+      canonicalPredictionsMissing: count((row) => row.coverageStatus === 'MISSED_CANONICAL_PREDICTION'),
+      selectionUniverseRows: selectionPreviewRows.length,
+      predictionsCreated: count((row) => row.coverageStatus === 'CANONICAL_PREDICTION_CREATED'),
       productionEvaluable: count((row) => row.productionEvaluable),
       recommendationEligible: count((row) => row.recommendationEligible),
       actionable: count((row) => row.actionable),
       officialPickEligible: count((row) => row.officialPickEligible),
-      missedOpportunities: count((row) => row.coverageStatus === 'MISSED_OPPORTUNITY'),
+      missedOpportunities: count((row) => row.coverageStatus === 'MISSED_CANONICAL_PREDICTION'),
       notYetEligible: count((row) => row.coverageStatus === 'NOT_YET_ELIGIBLE'),
       cutoffMissed: count((row) => row.coverageStatus === 'CUTOFF_MISSED'),
-      duplicateRows: expectedSelections.reduce((sum, row) => sum + Math.max(0, row.duplicateCount - 1), 0),
-      coveragePercentage: expectedSelections.length ? round((count((row) => row.coverageStatus === 'PREDICTION_CREATED') / expectedSelections.length) * 100) : 100,
+      duplicateRows: canonicalMarkets.reduce((sum, row) => sum + Math.max(0, row.duplicateCount - 1), 0),
+      coveragePercentage: canonicalMarkets.length ? round((count((row) => row.coverageStatus === 'CANONICAL_PREDICTION_CREATED') / canonicalMarkets.length) * 100) : 100,
       byMarket,
-      bySelectionSide: bySide,
+      bySelectionSide: providerBySide,
       reasonCounts,
       reconciliation: {
-        expectedEqualsAccounted: expectedSelections.length === count((row) => row.coverageStatus === 'PREDICTION_CREATED') + count((row) => row.coverageStatus !== 'PREDICTION_CREATED'),
+        expectedEqualsAccounted: canonicalMarkets.length === count((row) => row.coverageStatus === 'CANONICAL_PREDICTION_CREATED') + count((row) => row.coverageStatus !== 'CANONICAL_PREDICTION_CREATED'),
         silentRemainder: 0,
       },
     },
@@ -313,11 +376,14 @@ export async function getPredictionCoverage() {
       eventId: event.id,
       matchup: `${event.away_team} @ ${event.home_team}`,
       startTime: event.start_time,
-      expectedSelections: expectedSelections.filter((row) => row.eventId === event.id).length,
-      predictionsCreated: expectedSelections.filter((row) => row.eventId === event.id && row.coverageStatus === 'PREDICTION_CREATED').length,
-      missing: expectedSelections.filter((row) => row.eventId === event.id && row.coverageStatus !== 'PREDICTION_CREATED').length,
+      providerSelections: providerSelections.filter((row) => row.eventId === event.id).length,
+      canonicalMarketsExpected: canonicalMarkets.filter((row) => row.eventId === event.id).length,
+      canonicalPredictionsCreated: canonicalMarkets.filter((row) => row.eventId === event.id && row.coverageStatus === 'CANONICAL_PREDICTION_CREATED').length,
+      missing: canonicalMarkets.filter((row) => row.eventId === event.id && row.coverageStatus !== 'CANONICAL_PREDICTION_CREATED').length,
     })),
-    selections: expectedSelections,
+    providerSelections,
+    canonicalMarkets,
+    selections: providerSelections,
     providerCallsMade: 0,
     remoteMutationsMade: 0,
   }

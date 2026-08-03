@@ -35,6 +35,14 @@ Last updated: 2026-07-30 20:05:00Z
 - Prediction formulas, recommendation gates, Official Pick policy, Kelly, settlement, learning, scheduler cadence and provider contracts are unchanged.
 - P2.2 was observed and is `WAITING_FOR_EXTERNAL_EVIDENCE` because current MLB events are not yet final. P2.3 was not started.
 
+## 2026-08-03 P2.1A Canonical Market Prediction Granularity
+
+- P2.1A is locally validated pending production certification.
+- The approved Current V2 production identity is now one canonical prediction per event and supported market: 8 MLB events times moneyline, spread/run line and total equals 24 canonical predictions.
+- Provider selection evidence may still include both sides, but those sides are contextual evidence and are not automatically Performance, settlement or learning samples.
+- Existing 48 Current V2 selection-level rows are preserved non-destructively as `P2_1_SELECTION_LEVEL_PREVIEW` when superseded and are excluded from canonical evaluation eligibility.
+- Prediction formulas, recommendation gates, Official Pick policy, Kelly, settlement rules, learning weights, scheduler cadence and provider contracts are unchanged. P2.2 remains paused until P2.1A is production-certified.
+
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 
 - MC-08D is production-certified on commit `f9faf649d89cd343034e935225d7215dafcc754b`. The homepage Smart Parlay has been converted from C1-era client probability multiplication into a typed `smart_parlay_v1` presentation contract.

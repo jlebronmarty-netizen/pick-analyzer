@@ -69,5 +69,6 @@ Use this checklist before starting any queued mission.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.
 - P2.1: `PRODUCTION_CERTIFIED`; comprehensive supported-market prediction coverage is bounded to current supported MLB markets.
+- P2.1A: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION`; canonical model prediction granularity is event-market, while provider-side selections remain contextual.
 - P2.2: `WAITING_FOR_EXTERNAL_EVIDENCE`; current games must complete and close before P2.2 can pass.
 - P2.3: `BLOCKED_BY_P2_2`; do not start.

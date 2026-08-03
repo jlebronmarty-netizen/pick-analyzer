@@ -47,6 +47,12 @@ const allowed = new Set([
   'scripts/p1-4-e2e-production-pipeline-validate.mjs',
   'scripts/p2-0-prediction-epoch-v2-validate.mjs',
   'scripts/p2-1-supported-market-coverage-validate.mjs',
+  'src/services/canonical-settlement-state.service.ts',
+  'src/services/performance-scope-v2.service.ts',
+  'docs/CERTIFICATION/P2_1A_CANONICAL_MARKET_GRANULARITY.md',
+  'docs/CERTIFICATION/p2-1a-canonical-market-granularity.json',
+  'docs/OPERATIONAL_EXCELLENCE/P2_1A_CANONICAL_MARKET_GRANULARITY.md',
+  'scripts/p2-1a-canonical-market-prediction-granularity-validate.mjs',
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 

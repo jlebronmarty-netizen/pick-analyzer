@@ -8,7 +8,9 @@ P2.0 is production-certified. It introduces `CURRENT_V2_PRODUCTION` as the futur
 
 P2.1 is production-certified on commit `a0e6329293686fe2557949f3f30e445c7e6880b8`. It expands supported MLB market prediction coverage from one preferred side per event/market to every canonical latest-line supported selection while preserving the active epoch and all prediction/recommendation policies. Production coverage is 48/48 with 0 missed opportunities and 0 duplicates.
 
-P2.2 is `WAITING_FOR_EXTERNAL_EVIDENCE`. Current V2 predictions exist, but the current MLB events must become final and pass through authoritative result import, settlement, learning evidence and Performance Current Era before closure can be certified. P2.3 is blocked by P2.2.
+P2.1A is locally validated pending production certification. It corrects the Current V2 supported-market contract to one canonical event-market prediction per supported market while preserving provider-side selection evidence as contextual only. For an 8-game MLB slate the canonical prediction target is 24, not 48. Existing selection-level rows are preserved as `P2_1_SELECTION_LEVEL_PREVIEW` and excluded from Performance, settlement and learning eligibility unless superseded by canonical event-market rows.
+
+P2.2 is `WAITING_FOR_EXTERNAL_EVIDENCE` and remains paused until P2.1A is production-certified. Current V2 predictions must become final and pass through authoritative result import, settlement, learning evidence and Performance Current Era before closure can be certified. P2.3 is blocked by P2.2.
 
 ## Platform Baseline
 

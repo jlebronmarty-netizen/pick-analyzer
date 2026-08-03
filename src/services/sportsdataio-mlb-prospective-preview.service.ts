@@ -732,13 +732,67 @@ function chooseOddsRows(events: EventRow[], odds: OddsRow[]) {
     if (start === null || ts === null) continue
     const cutoff = start - 10 * 60 * 1000
     if (ts > cutoff) continue
-    const key = `${row.event_id}:${marketForPrediction(row.market)}:${String(row.outcome).toLowerCase()}`
+    const key = `${row.event_id}:${marketForPrediction(row.market)}`
     const existing = chosen.get(key)
     if (!existing || shouldReplaceChosenOdds(row, existing)) {
       chosen.set(key, row)
     }
   }
   return Array.from(chosen.values())
+}
+
+function selectionSideForMarket(market: string, outcome: unknown) {
+  const normalized = String(outcome ?? '').toLowerCase()
+  if (market === 'total') return normalized === 'under' ? 'under' : 'over'
+  if (normalized === 'home') return 'home'
+  if (normalized === 'away') return 'away'
+  return normalized || 'unknown'
+}
+
+function oppositeSide(side: string) {
+  if (side === 'home') return 'away'
+  if (side === 'away') return 'home'
+  if (side === 'over') return 'under'
+  if (side === 'under') return 'over'
+  return 'unknown'
+}
+
+function latestOddsBySelectionSide(events: EventRow[], odds: OddsRow[]) {
+  const eventsById = new Map(events.map((event) => [event.id, event]))
+  const latest = new Map<string, OddsRow>()
+  for (const row of odds) {
+    const event = eventsById.get(row.event_id)
+    if (!event) continue
+    const market = marketForPrediction(row.market)
+    const start = parseDateMs(event.start_time)
+    const ts = parseDateMs(row.snapshot_time)
+    if (start === null || ts === null) continue
+    if (ts > start - 10 * 60 * 1000) continue
+    const side = selectionSideForMarket(market, row.outcome)
+    const key = `${row.event_id}:${market}:${side}`
+    const existing = latest.get(key)
+    if (!existing || shouldReplaceChosenOdds(row, existing)) latest.set(key, row)
+  }
+  return latest
+}
+
+function contextualSelection(event: EventRow, market: string, odds: OddsRow | undefined, modelProbability: number | null = null) {
+  if (!odds) return null
+  const selection = selectionFor(event, market, odds)
+  return {
+    selectionKey: `${odds.event_id}:${market}:${selection}:${market === 'moneyline' ? 'none' : odds.line ?? 'none'}`,
+    selectionLabel: selection,
+    side: selectionSideForMarket(market, odds.outcome),
+    line: market === 'moneyline' ? null : odds.line,
+    odds: odds.price,
+    impliedProbability: americanImplied(odds.price),
+    modelProbability,
+    oddsSnapshotId: odds.id,
+    sportsbook: odds.sportsbook,
+    marketTimestamp: odds.snapshot_time,
+    contextualOnly: true,
+    canonicalEvaluationEligible: false,
+  }
 }
 
 function predictionLogicalKey(row: {
@@ -1830,6 +1884,7 @@ async function writeSnapshotsAndPredictions(
   ])
   const verifiedByEvent = new Map((verified?.games ?? []).filter((game) => game.eventId).map((game) => [String(game.eventId), game]))
   const selectedOdds = chooseOddsRows(events, oddsRows)
+  const oddsBySelectionSide = latestOddsBySelectionSide(events, oddsRows)
   const historyCountByCutoff = new Map<string, number>()
   const existingSnapshots = selectedOdds.length
     ? await supabaseAdmin
@@ -2082,6 +2137,15 @@ async function writeSnapshotsAndPredictions(
         verifiedContext: candidate.verifiedContext,
       }),
     })
+    const selectedSide = selectionSideForMarket(candidate.market, candidate.odds.outcome)
+    const pairedOdds = oddsBySelectionSide.get(`${candidate.event.id}:${candidate.market}:${oppositeSide(selectedSide)}`)
+    const selectedContext = contextualSelection(candidate.event, candidate.market, candidate.odds, sdk.modelProbability)
+    const opposingContext = contextualSelection(
+      candidate.event,
+      candidate.market,
+      pairedOdds,
+      pairedOdds ? round(100 - Number(sdk.modelProbability), 2) : null
+    )
     const probabilityOrigin = useV6Calculation ? 'calculated' : 'calculated'
     const predictionKey = stableId([MODE, modelVersion, selectedDate, snapshotId, selection])
     const predictionId = stableUuid([MODE, modelVersion, selectedDate, snapshotId, selection])
@@ -2286,6 +2350,23 @@ async function writeSnapshotsAndPredictions(
         rankingScore: rank,
         recommendationStatus: policy.status,
         productionEvaluationPolicy: evaluationPolicy,
+        canonicalPredictionGranularity: 'event_market_v1',
+        canonicalMarketPrediction: {
+          version: 'canonical_market_prediction_v1',
+          canonicalEvaluationEligible: true,
+          providerSelectionUniverse: 'contextual_only',
+          selectedSelection: selectedContext,
+          opposingSelection: opposingContext,
+          marketSnapshotId: candidate.odds.id,
+          marketTimestamp: candidate.odds.snapshot_time,
+          engineVersion: modelVersion,
+          featureVersion: featureSetVersionFor(candidate.market),
+          policyVersion: 'production_evaluation_policy_v1_3',
+          selectionReason: 'existing_generator_selected_odds_row',
+          settlementIdentity: 'event_market_selected_outcome_exact_line',
+          performanceIdentity: 'one_settled_result_per_event_market_prediction',
+          learningIdentity: 'one_learning_sample_per_canonical_market_prediction',
+        },
         sourceOddsSnapshotId: candidate.odds.id,
         marketStability: candidate.marketStability,
         derivedBaseballFeatures: {
@@ -2523,6 +2604,9 @@ async function writeSnapshotsAndPredictions(
     const currentLogical = new Set(
       predictionRows.map((row) => predictionLogicalKey(row))
     )
+    const canonicalPredictionIdByMarket = new Map(
+      predictionRows.map((row) => [`${row.game_id}:${row.market}`, String(row.id)])
+    )
     const staleResult = persist && !immutablePredictions ? await supabaseAdmin
       .from('prediction_history')
       .select('id, game_id, market, team, line, feature_snapshot')
@@ -2543,9 +2627,26 @@ async function writeSnapshotsAndPredictions(
               ...snapshot,
               prospective_preview: false,
               supersededByFinalPregameRefresh: true,
+              canonicalPredictionGranularity: 'selection_universe_context_v1',
+              canonicalMarketPrediction: {
+                version: 'canonical_market_prediction_v1',
+                canonicalEvaluationEligible: false,
+                classification: 'P2_1_SELECTION_LEVEL_PREVIEW',
+                supersededByCanonicalPredictionId: canonicalPredictionIdByMarket.get(`${row.game_id}:${row.market}`) ?? null,
+                supersessionReason: 'P2_1A_CANONICAL_MARKET_GRANULARITY',
+                providerSelectionUniverse: 'contextual_only',
+                performanceEligible: false,
+                settlementLearningEligible: false,
+              },
+              productionEvaluationPolicy: {
+                ...asRecord(snapshot.productionEvaluationPolicy),
+                production_evaluable: false,
+                canonical_evaluation_eligible: false,
+                p21aSupersededSelectionRow: true,
+              },
             },
             validation_status: 'skipped',
-            skip_reason: 'SUPERSEDED_BY_FINAL_PREGAME_REFRESH',
+            skip_reason: 'P2_1A_SELECTION_LEVEL_PREVIEW_SUPERSEDED',
             recommended_pick: false,
             production_eligible: false,
           })

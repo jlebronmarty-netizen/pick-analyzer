@@ -1,0 +1,60 @@
+{
+  "id": "p2_1a_canonical_market_prediction_granularity",
+  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION",
+  "startingCommit": "c105001f810c82ff49becf646881d197447c699f",
+  "activeEpoch": "CURRENT_V2_PRODUCTION",
+  "canonicalGranularity": "event_market_v1",
+  "providerSelectionUniverse": 48,
+  "expectedCanonicalPredictionsForEightGameSlate": 24,
+  "expectedByMarket": {
+    "moneyline": 8,
+    "spread": 8,
+    "total": 8
+  },
+  "existing48RowBatchClassification": "P2_1_SELECTION_LEVEL_PREVIEW",
+  "selectionPreviewPolicy": {
+    "deleteExistingRows": false,
+    "rewriteHistoricalSettledRows": false,
+    "canonicalEvaluationEligible": false,
+    "performanceEligible": false,
+    "settlementLearningEligible": false,
+    "supersessionReason": "P2_1A_CANONICAL_MARKET_GRANULARITY"
+  },
+  "guards": {
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "recommendationPolicyChanged": false,
+    "kellyChanged": false,
+    "settlementRulesChanged": false,
+    "learningWeightsChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerContractsChanged": false,
+    "retrospectivePredictionsAllowed": false
+  },
+  "pausedWork": {
+    "mc08ePreserved": true,
+    "mc08eWorktree": "C:\\Projects\\pick-analyzer"
+  },
+  "p22Paused": true,
+  "p23Started": false,
+  "mc03Started": false,
+  "mc08eResumed": false,
+  "providerCallsMadeByLocalValidation": 0,
+  "remoteMutationsMadeByLocalValidation": 0,
+  "localValidation": {
+    "p2_1a_validator": "PASS",
+    "p2_1_supported_market_coverage_validator": "PASS",
+    "p2_0_prediction_epoch_validator": "PASS",
+    "p1_4_e2e_pipeline_validator": "PASS",
+    "p1_3_production_evaluation_policy_validator": "PASS",
+    "protected_canonical_mlb_settlement_validator": "PASS",
+    "performance_validator": "PASS",
+    "unsupported_market_policy_validator": "PASS",
+    "mission_control_validator": "PASS",
+    "documentation_validation": "PASS",
+    "changed_file_eslint": "PASS",
+    "targeted_secret_scan": "PASS",
+    "git_diff_check": "PASS",
+    "build": "PASS"
+  }
+}

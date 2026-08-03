@@ -43,10 +43,16 @@ const allowed = new Set([
   'scripts/p1-4-e2e-production-pipeline-validate.mjs',
   'scripts/p2-0-prediction-epoch-v2-validate.mjs',
   'scripts/performance-api-query-optimization-v1-validate.mjs',
+  'src/services/performance-scope-v2.service.ts',
+  'src/services/canonical-settlement-state.service.ts',
+  'docs/CERTIFICATION/P2_1A_CANONICAL_MARKET_GRANULARITY.md',
+  'docs/CERTIFICATION/p2-1a-canonical-market-granularity.json',
+  'docs/OPERATIONAL_EXCELLENCE/P2_1A_CANONICAL_MARKET_GRANULARITY.md',
+  'scripts/p2-1a-canonical-market-prediction-granularity-validate.mjs',
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 
-check('generator chooses by market and outcome while preserving selected line', writer.includes("String(row.outcome).toLowerCase()") && writer.includes("row.line ?? 'none'") && writer.includes('legacyReuseAllowed'))
+check('generator chooses one canonical odds row per event and market', writer.includes('const key = `${row.event_id}:${marketForPrediction(row.market)}`'))
 check('prediction logical identity includes line', writer.includes('function predictionLogicalKey') && writer.includes("market === 'moneyline' ? 'none'") && writer.includes('${row.game_id}:${market}:${row.team}:${line}'))
 check('coverage route exists', exists('src/app/api/operations/prediction-coverage/route.ts'))
 check('coverage route is protected', route.includes('CRON_SECRET') && route.includes("request.headers.get('authorization')") && !route.includes('searchParams.get'))
@@ -55,8 +61,8 @@ check('coverage service reads stored events', service.includes(".from('sport_eve
 check('coverage service reads stored odds only', service.includes(".from('sports_odds_snapshots')") && service.includes(".eq('provider', PROVIDER)") && !service.includes('fetch('))
 check('coverage service reads active epoch predictions', service.includes('getActivePredictionEpoch') && service.includes(".from('prediction_history')"))
 check('coverage semantics are explicit', service.includes('complementDerivation') && service.includes('threeWayMarkets') && service.includes('uniquenessKey'))
-check('coverage uses latest line per canonical side', service.includes('expectedSelectionBaseKey') && service.includes('selectionSide(market'))
-check('coverage states account for misses and cutoff', service.includes('PREDICTION_CREATED') && service.includes('MISSED_OPPORTUNITY') && service.includes('CUTOFF_MISSED') && service.includes('DUPLICATE_COLLAPSED'))
+check('coverage separates provider selections from canonical predictions', service.includes('providerSelectionsAvailable') && service.includes('canonicalMarketsExpected') && service.includes('canonicalPredictionsCreated'))
+check('coverage states account for canonical misses and cutoff', service.includes('CANONICAL_PREDICTION_CREATED') && service.includes('MISSED_CANONICAL_PREDICTION') && service.includes('CUTOFF_MISSED') && service.includes('DUPLICATE_COLLAPSED'))
 check('zero provider calls and mutations are declared', service.includes('providerCallsMade: 0') && service.includes('remoteMutationsMade: 0'))
 check('certification records unchanged policies', cert.guards.predictionFormulaChanged === false && cert.guards.officialPickPolicyChanged === false && cert.guards.schedulerCadenceChanged === false)
 check('certification keeps MC-08E paused', cert.pausedWork.mc08ePreserved === true)
