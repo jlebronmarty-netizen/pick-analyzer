@@ -1,0 +1,64 @@
+{
+  "mode": "p1_2_e2e_system_integrity_audit_v1",
+  "verdict": "CONDITIONAL_PASS_POLICY_DECISION_REQUIRED",
+  "startingCommit": "4f299b8f46f254ea8ecc705ed51e43e4ba073741",
+  "runtimeDiagnosticsAdded": true,
+  "protectedEndpoint": "/api/operations/e2e-integrity",
+  "endpointProtection": "CRON_SECRET bearer header or secret query parameter",
+  "canonicalPipeline": [
+    "EVENT",
+    "MARKET_DATA",
+    "FEATURES",
+    "PREDICTION_ENGINE",
+    "PREDICTION_PERSISTENCE",
+    "PRODUCT_SURFACES",
+    "AUTHORITATIVE_RESULT",
+    "SETTLEMENT",
+    "LEARNING_EVIDENCE",
+    "PERFORMANCE",
+    "MISSION_CONTROL"
+  ],
+  "p1_1_2026_08_02": {
+    "generatedRows": 45,
+    "validPregameRows": 45,
+    "productionEligibleRows": 0,
+    "productionSettledRows": 0,
+    "eventsWithoutValidProductionPrediction": 15,
+    "classification": "PREGAME_VALID_QUARANTINED_PREVIEW",
+    "historicalMutationRequired": false
+  },
+  "productionEligibilityPolicyFinding": "POLICY_CONFLICT_REQUIRES_HUMAN_APPROVAL",
+  "policyChoices": [
+    "PRODUCTION_EVALUATION_SHOULD_INCLUDE_ALL_VALID_PREGAME_PREDICTIONS",
+    "PRODUCTION_EVALUATION_REQUIRES_RECOMMENDATION_GATES"
+  ],
+  "epochV2": {
+    "readiness": "PARTIAL",
+    "activated": false,
+    "schemaDecision": "ADDITIVE_EPOCH_METADATA_REQUIRED_OR_FORMAL_SCHEMA_CAPABILITY_PROOF_REQUIRED",
+    "recommendedBoundary": "First future operating day after policy decision and deployment"
+  },
+  "historicalReplay": {
+    "readiness": "PARTIAL",
+    "started": false,
+    "productionRowsWritten": 0
+  },
+  "safety": {
+    "providerCallsMade": 0,
+    "providerCreditsUsed": 0,
+    "databaseMutations": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "historicalRowsRewritten": false,
+    "officialPickPolicyChanged": false,
+    "schedulerCadenceChanged": false,
+    "modelWeightsChanged": false
+  },
+  "mc08e": {
+    "resumed": false,
+    "preserved": true
+  },
+  "finalClassification": "P1_2_CONDITIONAL_PASS_POLICY_DECISION_REQUIRED"
+}
