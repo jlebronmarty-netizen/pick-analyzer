@@ -1,10 +1,10 @@
 {
   "mission": "MC-08B",
   "name": "Rent Play Experience V1",
-  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+  "status": "PRODUCTION_CERTIFIED",
   "startingCommit": "70f59b2dec100a4554fc0718108c22e456e18192",
-  "runtimeCommit": "PENDING",
-  "certificationCommit": "PENDING",
+  "runtimeCommit": "310b72ab0b304a1901ce598527043043087c9c83",
+  "certificationCommit": "THIS_CERTIFICATION_COMMIT",
   "rentPlayContract": {
     "before": "Generic PlanPick card selected best qualified Official Pick with closest-candidate fallback.",
     "after": "Typed rent_play_v1 presentation contract with explicit status, source, gates, risks and actionability."
@@ -67,14 +67,23 @@
     "build": "PASS_396_STATIC_PAGES"
   },
   "productionCertification": {
-    "status": "PENDING",
-    "productionCommit": "PENDING",
-    "homepageHttp": "PENDING",
-    "systemVersionHttp": "PENDING",
-    "renderedDesktop": "PENDING",
-    "renderedMobile": "PENDING",
+    "status": "PASS",
+    "productionCommit": "310b72ab0b304a1901ce598527043043087c9c83",
+    "homepageHttp": 200,
+    "systemVersionHttp": 200,
+    "dashboardTodayHttp": 200,
+    "currentBoardHttp": 200,
+    "mostLikelyHttp": 200,
+    "bestValueHttp": 200,
+    "eventRefreshPlanHttp": 200,
+    "operationsHealthHttp": 200,
+    "mlbOperationsHttp": 200,
+    "renderedDesktop": "PASS",
+    "renderedMobile": "PASS",
+    "rentPlayStatusObserved": ["NO_ELIGIBLE_PLAY", "NO_GAMES"],
+    "unavailableValuesRenderedAsUnavailable": true,
     "providerCallsMade": 0,
     "remoteMutationsMade": 0
   },
-  "finalClassification": "MC_08B_PENDING"
+  "finalClassification": "MC_08B_DEPLOYED_AND_CERTIFIED"
 }

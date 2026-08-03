@@ -1,6 +1,6 @@
 # MC-08B Rent Play Experience
 
-Status: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`
+Status: `PRODUCTION_CERTIFIED`
 
 MC-08B makes Rent Play the clearest and most trustworthy primary recommendation on the homepage. It preserves the MC-08A homepage hierarchy and changes only the Rent Play presentation and contract.
 
@@ -58,6 +58,19 @@ Most Likely remains distinct from Rent Play. Official Pick remains distinct from
 - Prediction ranking changes: `0`.
 
 MC-08C was not started.
+
+## Production Certification
+
+Production certification passed on commit `310b72ab0b304a1901ce598527043043087c9c83`.
+
+- Homepage HTTP: `200`.
+- Desktop render: `PASS`.
+- Mobile render: `PASS`.
+- Rent Play observed state: no current actionable Rent Play.
+- Missing odds, probability, edge and EV render as unavailable, not zero.
+- Provider calls: `0`.
+- Remote mutations: `0`.
+- MC-08C was not started.
 
 ## Local Validation
 

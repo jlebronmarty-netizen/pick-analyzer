@@ -12,7 +12,8 @@ Last updated: 2026-07-30 20:05:00Z
 
 - Implemented the bounded MC-08B Rent Play Experience V1. Rent Play now uses a typed `rent_play_v1` presentation contract with explicit actionability, source surface, probability, odds, implied probability, freshness, Official Pick status, Most Likely distinction, readiness gates, risks and what-would-change evidence.
 - Rent Play no longer reads as a generic pick card. If no candidate satisfies probability, value, freshness and policy requirements, the card presents an honest no-play, waiting or review-only state with the best available candidate clearly labeled as not Rent Play.
-- No prediction formula, Official Pick policy, ranking, probability, confidence, edge, EV, Kelly, model, settlement, result import, learning, scheduler cadence, refresh cadence, provider budget, provider mapping, sport certification or market certification changed. MC-08C was not started.
+- Production certification passed on commit `310b72ab0b304a1901ce598527043043087c9c83`. The homepage, Today dashboard API, current board, Most Likely, Best Value, event refresh planner, operations health and MLB operations surfaces returned HTTP 200. Desktop and mobile homepage renders showed the MC-08B Rent Play card and confirmed missing odds/probability/edge/EV render as unavailable rather than zero.
+- No prediction formula, Official Pick policy, ranking, probability, confidence, edge, EV, Kelly, model, settlement, result import, learning, scheduler cadence, refresh cadence, provider budget, provider mapping, sport certification or market certification changed. Provider calls and remote mutations remained 0. MC-08C is READY and was not started.
 
 ## 2026-08-02 Mission Control V1
 

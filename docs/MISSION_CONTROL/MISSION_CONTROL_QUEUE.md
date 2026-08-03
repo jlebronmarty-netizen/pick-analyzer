@@ -27,5 +27,5 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | ID | Work Package | State | Notes |
 | --- | --- | --- | --- |
 | MC-08A | Homepage Experience | PRODUCTION_CERTIFIED | Homepage hierarchy certified. |
-| MC-08B | Rent Play Experience | LOCAL_VALIDATION_PASS_PENDING_PRODUCTION | Runtime implementation complete pending automatic deployment certification. |
-| MC-08C | Moneyline Bet Experience | PLANNED | Not started. |
+| MC-08B | Rent Play Experience | PRODUCTION_CERTIFIED | Rent Play contract, unavailable-value handling and production render certified. |
+| MC-08C | Moneyline Bet Experience | READY | Next eligible MC-08 work package; not started. |

@@ -1,6 +1,6 @@
 # MC-08B Rent Play Experience Certification
 
-Status: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`
+Status: `PRODUCTION_CERTIFIED`
 
 MC-08B certifies the Rent Play homepage experience as a presentation-only improvement over existing stored recommendation evidence.
 
@@ -51,4 +51,18 @@ MC-08B certifies the Rent Play homepage experience as a presentation-only improv
 
 ## Production Certification
 
-Pending automatic deployment of the MC-08B runtime commit.
+Production certification passed on runtime commit `310b72ab0b304a1901ce598527043043087c9c83`.
+
+- `/api/system/version`: HTTP 200, commit `310b72ab0b304a1901ce598527043043087c9c83`, provider calls 0.
+- `/`: HTTP 200.
+- `/api/dashboard/today`: HTTP 200, provider calls 0.
+- `/api/current-board?mode=current&limit=100`: HTTP 200.
+- `/api/market-opportunities/most-likely`: HTTP 200, stored prediction history, provider calls 0.
+- `/api/market-opportunities/best-value`: HTTP 200, provider calls 0.
+- `/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200`: HTTP 200, estimated provider requests 0 and quota units 0.
+- `/api/operations/health`: HTTP 200, status `CRITICAL` from existing operational freshness/closure state.
+- `/mlb-operations`: HTTP 200.
+- Desktop render: `PASS`; Rent Play card present, status `NO_ELIGIBLE_PLAY`, no zeroed unavailable odds/probability/edge/EV.
+- Mobile render: `PASS`; Rent Play card present, status `NO_GAMES`, no zeroed unavailable odds/probability/edge/EV.
+
+Production initially exposed a display-only defect where null odds/probability could render as `0` because `Number(null)` coerced null to zero. The scoped repair preserves null, undefined and blank values as unavailable. No prediction, policy, provider, scheduler, settlement or learning behavior changed.

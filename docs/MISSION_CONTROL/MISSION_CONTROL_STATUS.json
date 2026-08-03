@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_08B_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+  "status": "MC_08B_PRODUCTION_CERTIFIED_MC_08C_READY",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -190,7 +190,7 @@
     "mc08bStarted": false
   },
   "mc08b": {
-    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Rent Play Experience V1",
     "certificationArtifact": "docs/CERTIFICATION/mc-08b-rent-play-experience.json",
     "contractVersion": "rent_play_v1",
@@ -203,6 +203,10 @@
     "settlementChanged": false,
     "learningChanged": false,
     "schedulerChanged": false,
+    "productionCommit": "310b72ab0b304a1901ce598527043043087c9c83",
+    "homepageHttp": 200,
+    "renderedDesktop": "PASS",
+    "renderedMobile": "PASS",
     "mc08cStarted": false
   },
   "runtimeSurfaces": ["/api/mission-control", "/api/mission-control/data-readiness", "/mission-control"],
