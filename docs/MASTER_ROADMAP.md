@@ -2,7 +2,7 @@
 
 This roadmap is dependency-aware and based on repository inspection. A module is marked completed only when the repository contains service/API/dashboard/persistence evidence and recent verification supports it.
 
-P1.3 adds the prospective Production Evaluation Policy Separation required before Prediction Epoch V2 activation. The model can now record whether a future pregame prediction is production-evaluable independently from whether it is recommended, actionable or Official Pick eligible. P1.3 is production-certified on commit `a64c876b803c93f259424389d765282a9a0a3d1a`; P2.0 is ready to begin.
+P1.3 adds the prospective Production Evaluation Policy Separation required before Prediction Epoch V2 activation. The model can now record whether a future pregame prediction is production-evaluable independently from whether it is recommended, actionable or Official Pick eligible. P1.3 is production-certified on commit `a64c876b803c93f259424389d765282a9a0a3d1a`; P1.4 is currently `EXTERNAL_WAIT` for post-P1.3 persisted prediction evidence, so P2.0 remains blocked.
 
 ## Platform Baseline
 

@@ -187,3 +187,13 @@ The implementation adds `production_evaluation_policy_v1_3` and persists the nor
 The 45 rows from 2026-08-02 remain unchanged as non-production historical evidence.
 
 Production certification passed on commit `a64c876b803c93f259424389d765282a9a0a3d1a`. `/api/system/version`, `/`, `/api/dashboard/today`, `/api/current-board?mode=current&limit=200`, `/api/operations/health` and `/api/performance` returned HTTP 200. Provider calls and remote mutations from certification reads remained 0. P2.0 is READY; MC-03 remains planned/manual-only.
+
+## 2026-08-03 - P1.4 End-To-End Production Pipeline Certification
+
+P1.4 was attempted after P1.3 production certification.
+
+Read-only production evidence found 20 future MLB events with open cutoffs, including 8 current operating-day games needing refresh, but found 0 prediction rows generated after the P1.3 deployment observation time and 0 rows containing `feature_snapshot.productionEvaluationPolicy`.
+
+Operations Health was `CRITICAL`: last protected scheduler invocation `2026-08-03T15:09:40Z`, scheduler evidence age 136 minutes, missed scheduler intervals 12 and market freshness `CRITICAL`.
+
+P1.4 is `EXTERNAL_WAIT`. Required evidence is a successful post-P1.3 protected operating-day or automatic scheduler execution that persists cutoff-safe predictions with the P1.3 production-evaluation contract. P2.0 was not started.

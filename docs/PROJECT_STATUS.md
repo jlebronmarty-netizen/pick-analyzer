@@ -9,6 +9,12 @@ Last updated: 2026-07-30 20:05:00Z
 - The 45 rows from 2026-08-02 remain non-production historical evidence and were not rewritten or promoted.
 - Production read-only checks for `/api/system/version`, `/`, `/api/dashboard/today`, `/api/current-board?mode=current&limit=200`, `/api/operations/health` and `/api/performance` returned HTTP 200 with provider calls 0 where reported.
 
+## 2026-08-03 P1.4 End-To-End Production Pipeline Certification
+
+- P1.4 is `EXTERNAL_WAIT`. Read-only production evidence found 20 future MLB events with open cutoffs and 8 current operating-day games needing refresh, but 0 prediction rows generated after the P1.3 deployment observation and 0 rows with `feature_snapshot.productionEvaluationPolicy`.
+- Operations Health was `CRITICAL` with scheduler evidence age 136 minutes, missed scheduler intervals 12 and market freshness `CRITICAL`.
+- Required next evidence: a successful post-P1.3 protected operating-day or automatic scheduler execution that persists cutoff-safe predictions carrying the P1.3 production-evaluation contract. P2.0 was not started.
+
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 
 - MC-08D is production-certified on commit `f9faf649d89cd343034e935225d7215dafcc754b`. The homepage Smart Parlay has been converted from C1-era client probability multiplication into a typed `smart_parlay_v1` presentation contract.

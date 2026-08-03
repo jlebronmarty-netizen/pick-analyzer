@@ -121,6 +121,24 @@
     "performanceHttp": 200,
     "nextPhase": "P2.0 Prediction Epoch V2 Activation after production certification"
   },
+  "p1_4": {
+    "status": "EXTERNAL_WAIT",
+    "title": "End-To-End Production Pipeline Certification",
+    "certificationArtifact": "docs/CERTIFICATION/p1-4-e2e-production-pipeline.json",
+    "reason": "No post-P1.3 persisted MLB prediction rows exist yet, so the production-evaluable persistence chain cannot be certified.",
+    "productionCommit": "9262613d1c4be401668a527d39769c3012e44a99",
+    "postP13PredictionRows": 0,
+    "postP13RowsWithProductionEvaluationPolicy": 0,
+    "eligibleFutureMlbEvents": 20,
+    "currentDayMlbEventsNeedingRefresh": 8,
+    "operationsHealth": "CRITICAL",
+    "schedulerCadenceStatus": "CRITICAL",
+    "missedSchedulerIntervals": 12,
+    "marketFreshnessStatus": "CRITICAL",
+    "providerCallsMadeByCertificationReads": 0,
+    "remoteMutationsMadeByCertificationReads": 0,
+    "nextRequiredEvidence": "A successful post-P1.3 protected operating-day or scheduler execution that persists cutoff-safe predictions with feature_snapshot.productionEvaluationPolicy."
+  },
   "productionCertification": {
     "status": "PASS",
     "runtimeCommit": "868eb0c4bc712b7c193b7a2001b37494517641e0",

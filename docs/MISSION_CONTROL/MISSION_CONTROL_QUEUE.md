@@ -29,7 +29,8 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | P1.1 | Yesterday Non-Production Prediction Reconciliation | CERTIFIED | Preserved the 2026-08-02 rows as non-production historical evidence. |
 | P1.2 | End-to-End System Integrity Audit | CERTIFIED | Identified the production evaluation versus recommendation-policy conflict. |
 | P1.3 | Production Evaluation Policy Separation | PRODUCTION_CERTIFIED | Separates valid model output, production evaluation, recommendation eligibility, actionability and Official Pick eligibility prospectively. |
-| P2.0 | Prediction Epoch V2 Activation | READY | May start after P1.3 certification; MC-03 remains planned/manual-only. |
+| P1.4 | End-to-End Production Pipeline Certification | EXTERNAL_WAIT | Waiting for post-P1.3 persisted prediction rows with `feature_snapshot.productionEvaluationPolicy`. |
+| P2.0 | Prediction Epoch V2 Activation | BLOCKED_ON_P1_4 | Do not start until P1.4 production pipeline certification passes. |
 
 ## MC-08 Work Packages
 
@@ -39,4 +40,4 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | MC-08B | Rent Play Experience | PRODUCTION_CERTIFIED | Rent Play contract, unavailable-value handling and production render certified. |
 | MC-08C | Moneyline Bet Experience | PRODUCTION_CERTIFIED | Moneyline contract, unavailable-value handling and production render certified. |
 | MC-08D | Smart Parlay Experience | PRODUCTION_CERTIFIED | Smart Parlay contract, selection, combined-odds and no-joint-probability behavior certified. |
-| MC-08E | Watchlist Experience | READY | Next eligible MC-08 work package; not started. |
+| MC-08E | Watchlist Experience | PAUSED | Paused work remains preserved in the main checkout; do not resume until the P1/P2 sequence allows MC-08E-R. |

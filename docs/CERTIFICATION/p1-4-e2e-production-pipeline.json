@@ -1,0 +1,29 @@
+{
+  "mode": "p1_4_e2e_production_pipeline_certification_v1",
+  "status": "EXTERNAL_WAIT",
+  "productionCommit": "9262613d1c4be401668a527d39769c3012e44a99",
+  "runtimePolicyCommit": "a64c876b803c93f259424389d765282a9a0a3d1a",
+  "p13ObservedAt": "2026-08-03T17:02:55.000Z",
+  "postP13PredictionRows": 0,
+  "postP13RowsWithProductionEvaluationPolicy": 0,
+  "eligibleFutureMlbEvents": 20,
+  "currentDayMlbEventsNeedingRefresh": 8,
+  "operationsHealth": "CRITICAL",
+  "schedulerCadenceStatus": "CRITICAL",
+  "schedulerEvidenceAgeMinutes": 136,
+  "missedSchedulerIntervals": 12,
+  "marketFreshnessStatus": "CRITICAL",
+  "requiredEvidence": [
+    "successful post-P1.3 protected operating-day or automatic scheduler execution",
+    "cutoff-safe persisted predictions for an eligible slate",
+    "feature_snapshot.productionEvaluationPolicy present on persisted rows",
+    "explicit accounting of production-evaluable predictions, missing opportunities and not-yet-eligible selections"
+  ],
+  "providerCallsMadeByCertificationReads": 0,
+  "remoteMutationsMadeByCertificationReads": 0,
+  "predictionWritesByCertification": 0,
+  "resultWritesByCertification": 0,
+  "settlementWritesByCertification": 0,
+  "learningWritesByCertification": 0,
+  "p20Started": false
+}
