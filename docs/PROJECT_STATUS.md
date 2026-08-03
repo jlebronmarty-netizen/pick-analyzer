@@ -4,9 +4,10 @@ Last updated: 2026-07-30 20:05:00Z
 
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 
-- MC-08D is active as the bounded Smart Parlay homepage package. The homepage Smart Parlay is being converted from C1-era client probability multiplication into a typed `smart_parlay_v1` presentation contract.
+- MC-08D is production-certified on commit `f9faf649d89cd343034e935225d7215dafcc754b`. The homepage Smart Parlay has been converted from C1-era client probability multiplication into a typed `smart_parlay_v1` presentation contract.
 - The new contract is user-selected, bounded to existing stored Today evidence, exposes per-leg actionability/freshness, uses mechanical combined odds only when selected canonical prices exist, and leaves joint probability unavailable when no certified method exists.
-- No prediction formula, Official Pick policy, Rent Play policy, Moneyline Bet policy, ranking, probability, confidence, edge, EV, Kelly, model, settlement, result import, learning, scheduler cadence, refresh cadence, provider budget or provider mapping behavior changed. MC-08E was not started.
+- Production render evidence showed desktop status `NO_SAFE_COMBINATION` with 8 available legs and 0 default selected legs, mobile status `NO_GAMES`, no horizontal overflow and selection/deselection passing where legs were available.
+- No prediction formula, Official Pick policy, Rent Play policy, Moneyline Bet policy, ranking, probability, confidence, edge, EV, Kelly, model, settlement, result import, learning, scheduler cadence, refresh cadence, provider budget or provider mapping behavior changed. MC-08E is READY and was not started.
 
 ## 2026-08-02 Mission Control MC-08A Homepage Experience
 

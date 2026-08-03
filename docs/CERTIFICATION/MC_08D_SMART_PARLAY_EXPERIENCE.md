@@ -1,6 +1,6 @@
 # MC-08D Smart Parlay Experience Certification
 
-Status: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`
+Status: `PRODUCTION_CERTIFIED`
 
 MC-08D certifies the Smart Parlay homepage experience as a presentation-only improvement over existing stored betting evidence.
 
@@ -56,21 +56,19 @@ MC-08D certifies the Smart Parlay homepage experience as a presentation-only imp
 
 ## Production Certification
 
-Production certification is pending automatic deployment of the MC-08D runtime commit.
+Production certification passed on runtime commit `f9faf649d89cd343034e935225d7215dafcc754b`.
 
-Required read-only checks:
+- `/api/system/version`: HTTP 200, commit `f9faf649d89cd343034e935225d7215dafcc754b`, provider calls 0.
+- `/`: HTTP 200.
+- `/api/dashboard/today`: HTTP 200, provider calls 0.
+- `/api/current-board?mode=current&limit=100`: HTTP 200.
+- `/api/market-opportunities/most-likely`: HTTP 200, provider calls 0.
+- `/api/market-opportunities/best-value`: HTTP 200, provider calls 0.
+- `/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200`: HTTP 200, provider calls 0.
+- `/api/operations/health`: HTTP 200, provider calls 0.
+- `/betting-workbench`: HTTP 200.
+- `/mlb-operations`: HTTP 200.
+- Desktop render: `PASS`; Smart Parlay present after Moneyline Bet and before Watchlist, status `NO_SAFE_COMBINATION`, available legs `8`, default selected legs `0`, selection/deselection `PASS`, no horizontal overflow.
+- Mobile render: `PASS`; Smart Parlay present after Moneyline Bet and before Watchlist, status `NO_GAMES`, available legs `0`, no horizontal overflow.
 
-- `/api/system/version`.
-- `/`.
-- `/api/dashboard/today`.
-- `/api/current-board?mode=current&limit=100`.
-- `/api/market-opportunities/most-likely`.
-- `/api/market-opportunities/best-value`.
-- `/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200`.
-- `/api/operations/health`.
-- `/betting-workbench`.
-- `/mlb-operations`.
-- Rendered desktop homepage.
-- Rendered mobile homepage.
-
-Certification must prove Smart Parlay appears after Moneyline Bet, available legs are bounded, leg selection is user-controlled, combined odds use canonical selected prices only, joint probability is not fabricated, correlation is explicit, no provider calls are made and no mutations or wager writes occur.
+Production evidence showed the honest current state: no safe selected parlay is currently actionable. Joint probability remains `NOT_CERTIFIED`, and combined odds remain unavailable until the selected legs all expose valid canonical prices.

@@ -1,6 +1,6 @@
 # MC-08D Smart Parlay Experience
 
-Status: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`
+Status: `PRODUCTION_CERTIFIED`
 
 MC-08D makes the homepage Smart Parlay a typed, user-controlled presentation contract over existing stored Today evidence. It does not change prediction, ranking, provider, scheduler, settlement, learning, Rent Play, Moneyline Bet or Official Pick behavior.
 
@@ -78,6 +78,30 @@ Same-event selections are marked `POTENTIAL` unless a direct duplicate or opposi
 - Best Value ranking changes: `0`.
 
 MC-08E was not started.
+
+## Production Certification
+
+Production certification passed on commit `f9faf649d89cd343034e935225d7215dafcc754b`.
+
+- Homepage HTTP: `200`.
+- Desktop render: `PASS`.
+- Mobile render: `PASS`.
+- Smart Parlay appears after Moneyline Bet and before Watchlist.
+- Desktop observed state: `NO_SAFE_COMBINATION`.
+- Mobile observed state: `NO_GAMES`.
+- Desktop available leg count: `8`.
+- Default selected leg count: `0`.
+- User selection and deselection: `PASS` for desktop available legs.
+- Combined odds: `UNAVAILABLE` because no selected combination had all required canonical prices.
+- Joint probability method: `NOT_CERTIFIED`.
+- Correlation status: `UNKNOWN` with no selected multi-leg combination.
+- Missing odds, joint probability and timestamps render as unavailable, not zero.
+- Provider calls: `0`.
+- Remote mutations: `0`.
+- Wager writes: `0`.
+- Horizontal overflow: `false`.
+
+MC-08E is READY but was not started.
 
 ## Local Validation
 

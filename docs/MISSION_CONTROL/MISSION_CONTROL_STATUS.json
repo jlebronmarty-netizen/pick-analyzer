@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_08D_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+  "status": "MC_08D_PRODUCTION_CERTIFIED_MC_08E_READY",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -233,12 +233,12 @@
     "mc08dStarted": true
   },
   "mc08d": {
-    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Smart Parlay Experience V1",
     "certificationArtifact": "docs/CERTIFICATION/mc-08d-smart-parlay-experience.json",
     "contractVersion": "smart_parlay_v1",
     "homepageSmartParlayOnly": true,
-    "reason": "Smart Parlay is being converted into a typed user-selected presentation contract with bounded legs, mechanical combined odds, explicit correlation and no fabricated joint probability.",
+    "reason": "Smart Parlay now uses a typed user-selected presentation contract with bounded legs, mechanical combined odds, explicit correlation and no fabricated joint probability.",
     "providerCallsIntroduced": 0,
     "remoteMutationsIntroduced": 0,
     "predictionChanged": false,
@@ -250,10 +250,10 @@
     "settlementChanged": false,
     "learningChanged": false,
     "schedulerChanged": false,
-    "productionCommit": null,
-    "homepageHttp": null,
-    "renderedDesktop": "PENDING",
-    "renderedMobile": "PENDING",
+    "productionCommit": "f9faf649d89cd343034e935225d7215dafcc754b",
+    "homepageHttp": 200,
+    "renderedDesktop": "PASS",
+    "renderedMobile": "PASS",
     "mc08eStarted": false
   },
   "runtimeSurfaces": ["/api/mission-control", "/api/mission-control/data-readiness", "/mission-control"],
