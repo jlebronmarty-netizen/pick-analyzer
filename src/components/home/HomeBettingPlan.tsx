@@ -745,7 +745,7 @@ export default function HomeBettingPlan() {
         <div className="grid gap-4">
           <PickCard
             title="Rent Play"
-            icon="Rent"
+            icon="Primary"
             pick={plan.rentPlay}
             emptyTitle="No Rent Play Today"
             emptyDetail={data.summary?.recommendation ?? 'No available pick satisfies the existing Official Pick policy with the safest confidence/probability profile.'}
@@ -756,7 +756,7 @@ export default function HomeBettingPlan() {
         <div className="grid gap-4 lg:grid-cols-2">
           <PickCard
             title="Moneyline Bet"
-            icon="ML"
+            icon="Moneyline"
             pick={plan.moneyline}
             emptyTitle="No Qualified Moneyline Today"
             emptyDetail="No stored moneyline candidate currently qualifies from existing Today evidence."
