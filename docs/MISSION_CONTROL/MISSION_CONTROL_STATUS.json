@@ -170,6 +170,21 @@
     "normalReadRemoteMutationsMade": 0,
     "mc03Started": false
   },
+  "mc08a": {
+    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+    "title": "Daily Betting Experience Homepage Experience",
+    "certificationArtifact": "docs/CERTIFICATION/mc-08a-homepage-experience.json",
+    "homepageOnly": true,
+    "reason": "Homepage now prioritizes Decision Core Morning Brief, Rent Play, Moneyline Bet, Smart Parlay, Watchlist, Decision Summary and collapsed Technical Evidence.",
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "predictionChanged": false,
+    "officialPicksChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "mc08bStarted": false
+  },
   "runtimeSurfaces": ["/api/mission-control", "/api/mission-control/data-readiness", "/mission-control"],
   "validationScript": "scripts/mission-control-v1-validate.mjs",
   "certificationArtifact": "docs/CERTIFICATION/mission-control-v1.json"

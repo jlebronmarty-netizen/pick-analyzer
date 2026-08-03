@@ -1,0 +1,90 @@
+{
+  "mission": "MC-08A",
+  "name": "Daily Betting Experience Homepage Experience",
+  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+  "startingCommit": "4faf4ced735b6fa23e86f060d662efaf8203b4c5",
+  "scope": {
+    "homepageOnly": true,
+    "missionControlRedesigned": false,
+    "operationsRedesigned": false,
+    "currentBoardRedesigned": false,
+    "performanceRedesigned": false,
+    "providersRedesigned": false,
+    "predictionChanged": false,
+    "officialPicksChanged": false,
+    "rankingChanged": false,
+    "probabilityChanged": false,
+    "confidenceCalculationChanged": false,
+    "edgeChanged": false,
+    "evChanged": false,
+    "kellyChanged": false,
+    "modelChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false
+  },
+  "homepageOrder": [
+    "Decision Core Morning Brief",
+    "Rent Play",
+    "Moneyline Bet",
+    "Smart Parlay",
+    "Today's Watchlist",
+    "Decision Summary",
+    "Expandable Technical Evidence"
+  ],
+  "secondarySurfaces": [
+    "Most Likely",
+    "Best Value",
+    "Performance",
+    "Sports",
+    "Operations",
+    "Data Coverage",
+    "Diagnostics"
+  ],
+  "evidenceMovedToSecondary": [
+    "Planner",
+    "Health",
+    "Budget",
+    "Lifecycle",
+    "Providers",
+    "Operations",
+    "Model",
+    "Diagnostics"
+  ],
+  "safety": {
+    "providerCallsIntroduced": 0,
+    "providerCreditsConsumed": 0,
+    "remoteMutationsIntroduced": 0,
+    "databaseMutationsIntroduced": 0,
+    "predictionWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "mc08bStarted": false
+  },
+  "validation": {
+    "mc08aValidator": "PASS_37_OF_37",
+    "missionControlValidator": "PASS_57_OF_57",
+    "c1ProductValidator": "PASS_31_OF_31",
+    "accessibility": "PASS_STATIC_FOUNDATION",
+    "mobile": "PASS_STATIC_RESPONSIVE_FOUNDATION",
+    "desktop": "PASS_STATIC_RESPONSIVE_FOUNDATION",
+    "dark": "PASS_STATIC_FOUNDATION",
+    "light": "PASS_NO_CONFLICTING_ONE_NOTE_PALETTE",
+    "english": "PASS",
+    "spanishFoundation": "PASS_COPY_FOUNDATION_PRESENT",
+    "build": "PASS_396_STATIC_PAGES",
+    "jsonValidation": "PASS",
+    "markdownValidation": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS_WITH_PRE_EXISTING_LINE_ENDING_WARNINGS"
+  },
+  "productionCertification": {
+    "status": "PENDING",
+    "homepageHttp": "PENDING",
+    "systemVersionHttp": "PENDING",
+    "productionCommit": "PENDING",
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
+  },
+  "finalClassification": "MC_08A_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION"
+}

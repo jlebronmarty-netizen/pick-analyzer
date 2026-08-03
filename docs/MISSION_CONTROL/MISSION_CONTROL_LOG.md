@@ -121,3 +121,21 @@ Safety evidence:
 - prediction, Official Pick, Kelly, settlement, learning, scheduler cadence and provider contracts unchanged.
 
 MC-03 remains `PLANNED` and manual-only. The next READY queue item is MC-08.
+
+## 2026-08-02 - MC-08A Homepage Experience
+
+MC-08A implements the first bounded MC-08 product-experience sub-mission without starting MC-08B.
+
+Homepage order is now:
+
+- Decision Core Morning Brief;
+- Rent Play;
+- Moneyline Bet;
+- Smart Parlay;
+- Today's Watchlist;
+- Decision Summary;
+- collapsed Technical Evidence.
+
+Planner, health, lifecycle, provider, budget, operations, model and diagnostics evidence remains available, but is secondary. No prediction formula, Official Pick policy, ranking, probability, confidence, edge, EV, Kelly, model, settlement, learning, scheduler, provider contract or budget behavior changed.
+
+Local validation passed: MC-08A validator 37/37, Mission Control validator 57/57, C1 product validator 31/31, changed-file ESLint and `npm.cmd run build` with 396 generated static pages. Production certification is pending deployment observation.

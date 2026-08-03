@@ -112,6 +112,27 @@ const toneClasses: Record<Tone, string> = {
   gray: 'border-slate-700 bg-slate-900/85 text-slate-100',
 }
 
+const actionTone: Record<string, Tone> = {
+  ACT_NOW: 'green',
+  ACTIONABLE: 'green',
+  REVIEW_FIRST: 'yellow',
+  WAIT_FOR_REFRESH: 'yellow',
+  INFORMATIONAL_ONLY: 'blue',
+  BLOCKED: 'red',
+  UNAVAILABLE: 'gray',
+}
+
+const localeFoundation = {
+  en: {
+    morningBrief: 'Decision Core Morning Brief',
+    question: 'What should I do today?',
+  },
+  es: {
+    morningBrief: 'Resumen matutino de Decision Core',
+    question: 'Que debo hacer hoy?',
+  },
+}
+
 function numberOrNull(value: unknown) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : null
@@ -302,7 +323,11 @@ function pickPlan(data: TodayResponse | null) {
     .filter((item) => item.qualified && item.probability !== null)
     .sort((left, right) => Number(right.probability ?? 0) - Number(left.probability ?? 0))
     .slice(0, 5)
-  return { candidates, rentPlay, moneyline, bestOpportunity, closest, parlayLegs }
+  const watchlist = candidates
+    .filter((item) => item.qualified && item.id !== rentPlay?.id && item.id !== moneyline?.id && item.id !== bestOpportunity?.id)
+    .sort((left, right) => Number(right.confidence ?? 0) + Number(right.probability ?? 0) - Number(left.confidence ?? 0) - Number(left.probability ?? 0))
+    .slice(0, 4)
+  return { candidates, rentPlay, moneyline, bestOpportunity, closest, parlayLegs, watchlist }
 }
 
 function MetricBar({ label: metricLabel, value, tone = 'green' }: { label: string; value: number | null; tone?: Tone }) {
@@ -364,12 +389,12 @@ function DailyBrief({
   const skipped = Math.max(0, plan.candidates.length - plan.candidates.filter((item) => item.qualified).length)
 
   return (
-    <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-r9-daily-brief="true">
+    <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-r9-daily-brief="true" data-mc08a-morning-brief="true" data-language-foundation="en-es">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-emerald-200">AI Daily Brief</p>
-          <h2 className="mt-3 text-3xl font-black text-white md:text-5xl">{recommendation.label}</h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">{recommendation.reason}</p>
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-emerald-200">{localeFoundation.en.morningBrief}</p>
+          <h2 className="mt-3 text-3xl font-black text-white md:text-5xl">Good Morning. {localeFoundation.en.question}</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Today&apos;s Betting Weather: {recommendation.label}. {recommendation.reason}</p>
         </div>
         <StatusChip tone={recommendation.tone}>{label(data.status, 'Today ready')}</StatusChip>
       </div>
@@ -380,14 +405,14 @@ function DailyBrief({
         <MiniMetric label="Predictions" value={predictions} />
         <MiniMetric label="Official Picks" value={official} />
         <MiniMetric label="Value Candidates" value={value} />
-        <MiniMetric label="Skipped" value={skipped} />
+        <MiniMetric label="Games Skipped" value={skipped} />
       </div>
 
       <div className="mt-5 grid gap-3 md:grid-cols-4">
-        <MiniMetric label="Accuracy" value={perfCore.accuracy ?? '49.90%'} />
-        <MiniMetric label="Brier" value={perfCore.brier ?? '0.2598'} />
-        <MiniMetric label="Calibration" value={perfCalibration.calibrationError ?? intelligence?.analyticalCoveragePercent ?? '62%'} />
-        <MiniMetric label="Evolution Waiting" value={countValue(recordValue(intelligence).currentProductionSample ? 3 : intelligenceSample ? 3 : 0)} />
+        <MiniMetric label="Decision Summary" value={recommendation.label} />
+        <MiniMetric label="Market Quality" value={data.summary?.marketPrices ?? label(data.freshness, 'Unknown')} />
+        <MiniMetric label="Risk" value={skipped ? 'Review first' : 'Low'} />
+        <MiniMetric label="Confidence" value={perfCore.accuracy ?? perfCalibration.calibrationError ?? intelligenceSample ? 'Measured' : 'Limited'} />
       </div>
 
       <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -500,57 +525,6 @@ function MiniText({ label: metricLabel, value }: { label: string; value: string 
   )
 }
 
-function NoBetSection({ candidates }: { candidates: PlanPick[] }) {
-  const blocked = candidates
-    .filter((item) => !item.qualified || Number(item.edge ?? 0) <= 0 || Number(item.ev ?? 0) <= 0 || /stale|missing|insufficient|conflict|avoid|do not act/i.test(item.reason))
-    .slice(0, 6)
-  return (
-    <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-r9-no-bet="true">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-200">No Bet Watch</p>
-          <h2 className="mt-3 text-2xl font-black text-white">Games to leave alone</h2>
-          <p className="mt-2 text-sm text-slate-400">Only actual blockers from stored Today evidence are shown.</p>
-        </div>
-        <StatusChip tone={blocked.length ? 'red' : 'green'}>{blocked.length ? `${blocked.length} Cautions` : 'Clean'}</StatusChip>
-      </div>
-      <div className="mt-5 grid gap-3 md:grid-cols-2">
-        {blocked.length ? blocked.map((item) => (
-          <div key={item.id} className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-            <p className="text-sm font-black text-white">{item.event}</p>
-            <p className="mt-1 text-xs font-bold uppercase text-slate-500">{item.selection} / {item.market}</p>
-            <p className="mt-3 text-sm leading-6 text-slate-300">{item.reason}</p>
-          </div>
-        )) : (
-          <p className="rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-300">No explicit no-bet blockers were exposed by the current Today evidence.</p>
-        )}
-      </div>
-    </section>
-  )
-}
-
-function EvolutionPanel({ intelligence }: { intelligence: ApiEnvelope | null }) {
-  const approved = 0
-  const rejected = 3
-  const waiting = 3
-  const sample = countValue(recordValue(intelligence?.currentProductionSample).sampleSize)
-  return (
-    <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-r9-evolution-panel="true">
-      <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-200">Model Evolution</p>
-      <h2 className="mt-3 text-2xl font-black text-white">Optimization queue</h2>
-      <div className="mt-5 grid gap-3 sm:grid-cols-4">
-        <MiniMetric label="Settled Sample" value={sample || 485} />
-        <MiniMetric label="Approved" value={approved} />
-        <MiniMetric label="Rejected" value={rejected} />
-        <MiniMetric label="Waiting" value={waiting} />
-      </div>
-      <p className="mt-4 text-sm leading-6 text-slate-400">
-        Release 08 allows no automatic model evolution. Candidates remain read-only until statistical thresholds and human approval are satisfied.
-      </p>
-    </section>
-  )
-}
-
 function ParlayBuilder({ legs }: { legs: PlanPick[] }) {
   const [enabled, setEnabled] = useState<Record<string, boolean>>({})
   const defaultEnabled = useMemo(() => Object.fromEntries(legs.map((leg, index) => [leg.id, index < 3])), [legs])
@@ -561,11 +535,11 @@ function ParlayBuilder({ legs }: { legs: PlanPick[] }) {
   const ev = selected.length ? selected.reduce((sum, leg) => sum + Number(leg.ev ?? 0), 0) : null
 
   return (
-    <article className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6">
+    <article className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-mc08a-smart-parlay="true">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">🔥 Parlay Builder</p>
-          <h2 className="mt-3 text-2xl font-black text-white md:text-3xl">Strongest Legs</h2>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Smart Parlay</p>
+          <h2 className="mt-3 text-2xl font-black text-white md:text-3xl">Suggested Legs</h2>
           <p className="mt-2 text-sm leading-6 text-slate-400">Toggle legs. The math updates instantly in the browser from existing prediction evidence.</p>
         </div>
         <StatusChip tone={selected.length >= 2 ? 'blue' : 'gray'}>{selected.length} Legs</StatusChip>
@@ -605,7 +579,98 @@ function ParlayBuilder({ legs }: { legs: PlanPick[] }) {
           <p className="mt-2 text-2xl font-black text-white">{signedPct(ev)}</p>
         </div>
       </div>
+      <details className="mt-5 rounded-lg border border-slate-800 bg-slate-900/70 p-4">
+        <summary className="cursor-pointer text-sm font-black text-white">Risk</summary>
+        <p className="mt-3 text-sm leading-6 text-slate-300">Parlay Builder math is informational. Leg independence and correlation are not promoted into Official Pick policy here.</p>
+      </details>
     </article>
+  )
+}
+
+function Watchlist({ picks }: { picks: PlanPick[] }) {
+  return (
+    <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-mc08a-watchlist="true">
+      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Today&apos;s Watchlist</p>
+      <h2 className="mt-3 text-2xl font-black text-white">Remaining strong opportunities</h2>
+      <div className="mt-5 grid gap-3 md:grid-cols-2">
+        {picks.length ? picks.map((pick) => (
+          <div key={pick.id} className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="break-words text-sm font-black text-white">{pick.selection}</p>
+                <p className="mt-1 text-xs font-bold uppercase text-slate-500">{pick.market} / {pick.event}</p>
+              </div>
+              <StatusChip tone={actionTone[(pick.freshnessActionability ?? 'INFORMATIONAL_ONLY').toUpperCase()] ?? 'blue'}>{pick.freshness}</StatusChip>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-xs font-black text-slate-400">
+              <span>{pct(pick.probability)}</span>
+              <span>{pct(pick.confidence)}</span>
+              <span>{signedPct(pick.ev)}</span>
+            </div>
+          </div>
+        )) : (
+          <p className="rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-300">No Qualified Opportunity Today. No additional strong opportunities are available.</p>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function DecisionSummary({ data, plan }: { data: TodayResponse; plan: ReturnType<typeof pickPlan> }) {
+  const recommendation = dailyRecommendation(plan, data)
+  const freshness = label(data.viewModel?.selectors?.marketFreshnessSummary?.state ?? data.freshness, 'Unknown')
+  const riskCount = plan.candidates.filter((item) => !item.qualified).length
+  const confidenceValues = plan.candidates.map((item) => item.confidence).filter((item): item is number => item !== null)
+  const confidence = confidenceValues.length ? confidenceValues.reduce((sum, item) => sum + item, 0) / confidenceValues.length : null
+  const marketQuality = freshness.toUpperCase() === 'FRESH' ? 86 : freshness.toUpperCase() === 'AGING' ? 62 : 38
+
+  return (
+    <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-mc08a-decision-summary="true">
+      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Decision Summary</p>
+      <h2 className="mt-3 text-2xl font-black text-white">Why today is {recommendation.label.toLowerCase()}</h2>
+      <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <MetricBar label="Market Quality" value={marketQuality} tone={marketQuality >= 80 ? 'green' : 'yellow'} />
+        <MetricBar label="Risk" value={riskCount ? Math.min(90, 35 + riskCount * 8) : 20} tone={riskCount ? 'yellow' : 'green'} />
+        <MetricBar label="Confidence" value={confidence} tone="blue" />
+      </div>
+      <p className="mt-5 text-sm leading-6 text-slate-300">{data.summary?.aiBriefing ?? recommendation.reason}</p>
+    </section>
+  )
+}
+
+function TechnicalEvidence({
+  data,
+  currentBoard,
+  intelligence,
+  performance,
+}: {
+  data: TodayResponse
+  currentBoard: ApiEnvelope | null
+  intelligence: ApiEnvelope | null
+  performance: ApiEnvelope | null
+}) {
+  const boardCandidates = arrayValue(currentBoard?.candidates).length || countValue(currentBoard?.candidateCount)
+  const sample = countValue(recordValue(intelligence?.currentProductionSample).sampleSize)
+  const metrics = recordValue(recordValue(recordValue(performance?.aiBrain).reportCard).metrics)
+
+  return (
+    <details className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-mc08a-technical-evidence="true">
+      <summary className="cursor-pointer text-xs font-black uppercase tracking-[0.18em] text-slate-400">Expandable Technical Evidence</summary>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MiniMetric label="Health" value={label(data.status, 'Today ready')} />
+        <MiniMetric label="Planner" value={data.nextAction ?? 'Observational'} />
+        <MiniMetric label="Lifecycle" value={`${countValue(data.totalScheduledToday)} games`} />
+        <MiniMetric label="Providers" value={`${countValue(data.providerCallsMade)} calls`} />
+        <MiniMetric label="Budget" value="Stored evidence" />
+        <MiniMetric label="Operations" value={`${countValue(data.remoteMutationsMade)} mutations`} />
+        <MiniMetric label="Model" value={sample || 'Read-only'} />
+        <MiniMetric label="Diagnostics" value={`${boardCandidates} board rows`} />
+      </div>
+      <div className="mt-5 grid gap-3 md:grid-cols-2">
+        <MiniText label="Latest market" value={compactDate(data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? null)} />
+        <MiniText label="Performance" value={JSON.stringify(metrics).slice(0, 180) || 'Performance summary unavailable.'} />
+      </div>
+    </details>
   )
 }
 
@@ -672,66 +737,39 @@ export default function HomeBettingPlan() {
     )
   }
 
-  const marketFreshness = data.viewModel?.selectors?.marketFreshnessSummary?.state ?? data.freshness ?? 'UNKNOWN'
-
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.16),_transparent_32rem),linear-gradient(180deg,#020617_0%,#0f172a_48%,#020617_100%)] px-4 py-5 text-white md:px-6 md:py-8" data-c1-home-betting-plan="true">
-      <section className="mx-auto max-w-7xl">
-        <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-emerald-200">Today&apos;s Betting Plan</p>
-            <h1 className="mt-3 text-4xl font-black tracking-normal text-white md:text-6xl">Morning betting decisions.</h1>
-            <p className="mt-4 max-w-3xl text-sm font-semibold leading-6 text-slate-300 md:text-base">
-              Daily Brief, best bets, caution spots and model evolution status from existing stored intelligence.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <StatusChip tone={marketFreshness === 'FRESH' || marketFreshness === 'fresh' ? 'green' : 'yellow'}>{label(marketFreshness)}</StatusChip>
-            <StatusChip tone="blue">Stored Market Evidence</StatusChip>
-          </div>
-        </header>
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.12),_transparent_30rem),linear-gradient(180deg,#020617_0%,#0f172a_52%,#020617_100%)] px-4 py-5 text-white md:px-6 md:py-8" data-c1-home-betting-plan="true" data-mc08a-homepage="true">
+      <section className="mx-auto grid max-w-6xl gap-5">
+        <DailyBrief data={data} plan={plan} currentBoard={currentBoard} intelligence={intelligence} performance={performance} />
 
-        <div className="mt-7">
-          <DailyBrief data={data} plan={plan} currentBoard={currentBoard} intelligence={intelligence} performance={performance} />
-        </div>
-
-        <div className="mt-7 grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4">
           <PickCard
             title="Rent Play"
-            icon="🏆"
+            icon="Rent"
             pick={plan.rentPlay}
             emptyTitle="No Rent Play Today"
             emptyDetail={data.summary?.recommendation ?? 'No available pick satisfies the existing Official Pick policy with the safest confidence/probability profile.'}
             closest={plan.closest}
           />
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
           <PickCard
             title="Moneyline Bet"
-            icon="💰"
+            icon="ML"
             pick={plan.moneyline}
             emptyTitle="No Qualified Moneyline Today"
             emptyDetail="No stored moneyline candidate currently qualifies from existing Today evidence."
             closest={plan.closest}
           />
-        </div>
-
-        <div className="mt-4 grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
           <ParlayBuilder legs={plan.parlayLegs} />
-          <PickCard
-            title="Today's Best Opportunity"
-            icon="⭐"
-            pick={plan.bestOpportunity}
-            emptyTitle="No Qualified Opportunity Today"
-            emptyDetail="Every visible candidate is blocked, stale, unsupported or insufficiently actionable under the existing evidence."
-            closest={plan.closest}
-          />
         </div>
 
-        <div className="mt-4 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-          <NoBetSection candidates={plan.candidates} />
-          <EvolutionPanel intelligence={intelligence} />
-        </div>
+        <Watchlist picks={plan.watchlist} />
+        <DecisionSummary data={data} plan={plan} />
+        <TechnicalEvidence data={data} currentBoard={currentBoard} intelligence={intelligence} performance={performance} />
 
-        <nav className="mt-6 grid gap-2 sm:grid-cols-3 lg:grid-cols-6" aria-label="Dedicated product tabs">
+        <nav className="grid gap-2 sm:grid-cols-3 lg:grid-cols-7" aria-label="Dedicated product tabs" data-mc08a-secondary-tabs="true">
           {[
             ['Most Likely', '/most-likely'],
             ['Best Value', '/best-value'],
@@ -739,6 +777,7 @@ export default function HomeBettingPlan() {
             ['Sports', '/sports-center'],
             ['Operations', '/ai-operations'],
             ['Data Coverage', '/data-coverage'],
+            ['Diagnostics', '/mission-control'],
           ].map(([name, href]) => (
             <a key={href} href={href} className="rounded-lg border border-slate-800 bg-slate-900/80 px-4 py-3 text-center text-sm font-black text-slate-100 hover:border-sky-300/40 hover:bg-sky-300/10">
               {name}
