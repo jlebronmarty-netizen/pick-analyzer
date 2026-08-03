@@ -67,4 +67,5 @@ Use this checklist before starting any queued mission.
 - MC-08E: `PAUSED`; preserved in the main checkout until MC-08E-R.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
-- P2.0: `READY`; do not resume MC-08E or start MC-03 as part of P2.0 selection.
+- P2.0: `LOCAL_READY_PENDING_PRODUCTION_ACTIVATION`; do not start P2.1 until production activation passes.
+- P2.1: `BLOCKED_ON_P2_0`.

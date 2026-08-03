@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { createFeatureSnapshot } from '@/services/feature-store-core.service'
 import { evaluatePredictionEvaluationPolicy } from '@/services/prediction-evaluation-policy.service'
+import { buildPredictionEpochStamp } from '@/services/prediction-epoch-runtime.service'
 import { evaluateRecommendationEligibility } from '@/services/recommendation-eligibility-policy.service'
 import { buildSportPrediction } from '@/services/sport-prediction-engine-sdk.service'
 import { getMlbMissingIntelligenceStatus } from '@/services/mlb-missing-intelligence.service'
@@ -2355,6 +2356,16 @@ async function writeSnapshotsAndPredictions(
   let reusedPredictions = 0
   let persistenceError: string | null = null
   if (predictionRows.length) {
+    const epochStamp = await buildPredictionEpochStamp(generatedAt)
+    if (epochStamp) {
+      for (const row of predictionRows) {
+        Object.assign(row, epochStamp.columns)
+        row.feature_snapshot = {
+          ...(asRecord(row.feature_snapshot) ?? {}),
+          predictionEpoch: epochStamp.snapshot,
+        }
+      }
+    }
     const eventIds = Array.from(new Set(predictionRows.map((row) => String(row.game_id))))
     const existingLogicalResult = eventIds.length
       ? await supabaseAdmin

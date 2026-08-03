@@ -2,6 +2,7 @@ import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getPredictionEpochMigrationState } from '@/services/prediction-epoch-migration-state.service'
+import { CURRENT_V2_EPOCH_KEY, LEGACY_PRE_V2_EPOCH_KEY } from '@/services/prediction-epoch-runtime.service'
 
 const MIGRATION_FILE = 'supabase/migrations/202607270001_prediction_epoch_governance_v2.sql'
 
@@ -9,9 +10,9 @@ function nowIso() {
   return new Date().toISOString()
 }
 
-async function countPredictions(builder?: (query: any) => any) {
-  let query: any = supabaseAdmin.from('prediction_history').select('id', { count: 'exact', head: true })
-  if (builder) query = builder(query)
+async function countPredictions(filter?: { column: string; value: string | boolean }) {
+  let query = supabaseAdmin.from('prediction_history').select('id', { count: 'exact', head: true })
+  if (filter) query = query.eq(filter.column, filter.value)
   const { count: rows, error } = await query
   if (error) return { rows: 0, error: error.message }
   return { rows: rows ?? 0, error: null }
@@ -21,12 +22,12 @@ export async function getPredictionEpochGovernanceV2() {
   const [migrationState, totalRows, currentRows, championRows, challengerRows, shadowRows, archivedRows, productionEligibleRows] = await Promise.all([
     getPredictionEpochMigrationState(),
     countPredictions(),
-    countPredictions((query) => query.eq('is_current', true)),
-    countPredictions((query) => query.eq('model_role', 'champion')),
-    countPredictions((query) => query.eq('model_role', 'challenger')),
-    countPredictions((query) => query.eq('model_role', 'shadow')),
-    countPredictions((query) => query.eq('model_role', 'archived')),
-    countPredictions((query) => query.eq('production_eligible', true)),
+    countPredictions({ column: 'is_current', value: true }),
+    countPredictions({ column: 'model_role', value: 'champion' }),
+    countPredictions({ column: 'model_role', value: 'challenger' }),
+    countPredictions({ column: 'model_role', value: 'shadow' }),
+    countPredictions({ column: 'model_role', value: 'archived' }),
+    countPredictions({ column: 'production_eligible', value: true }),
   ])
   return {
     success: true,
@@ -111,11 +112,18 @@ export async function getPredictionEpochGovernanceV2() {
       destructiveReset: false,
       automaticActivation: false,
     },
+    p20Activation: {
+      currentV2EpochKey: CURRENT_V2_EPOCH_KEY,
+      legacyPreV2EpochKey: LEGACY_PRE_V2_EPOCH_KEY,
+      currentV2Active: migrationState.activeEpochKey === CURRENT_V2_EPOCH_KEY,
+      activationScope: 'future_only_prediction_writes',
+      historicalRowsRewritten: false,
+    },
     activationRunbook: [
       'Apply additive migration after manual SQL approval.',
       'Insert LEGACY_EPOCH_V1 and DATA_FOUNDATION_V2_EPOCH rows in prediction_epochs.',
       'Backfill prediction_epoch_key for legacy rows only through an approved bounded mutation plan.',
-      'Activate DATA_FOUNDATION_V2_EPOCH only for future eligible prediction generation.',
+      `Activate ${CURRENT_V2_EPOCH_KEY} only for future eligible prediction generation.`,
       'Keep rollback_epoch_key pointing to LEGACY_EPOCH_V1.',
     ],
     warnings: [
@@ -124,7 +132,9 @@ export async function getPredictionEpochGovernanceV2() {
         : `Migration schema not fully active; current state ${migrationState.migrationState}.`,
       ...migrationState.verificationWarnings,
       'This phase does not archive, update or delete prediction_history rows.',
-      'DATA_FOUNDATION_V2_EPOCH is migration-ready only and not active.',
+      migrationState.activeEpochKey === CURRENT_V2_EPOCH_KEY
+        ? `${CURRENT_V2_EPOCH_KEY} is active for future-only production predictions.`
+        : 'Current V2 Production activation is pending.',
     ],
   }
 }

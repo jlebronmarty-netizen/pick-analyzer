@@ -10,6 +10,7 @@ import {
   canonicalPendingReason,
   canonicalStoredOutcome,
 } from '@/services/canonical-settlement-state.service'
+import { getActivePredictionEpoch } from '@/services/prediction-epoch-runtime.service'
 
 const TIMEZONE = 'America/Puerto_Rico'
 const DEFAULT_MAX_PREDICTION_ROWS = 2000
@@ -59,6 +60,8 @@ type PredictionRow = {
   settlement_details: Record<string, unknown> | null
   skip_reason?: string | null
   is_current?: boolean | null
+  prediction_epoch_id?: string | null
+  prediction_epoch_key?: string | null
 }
 
 type EventRow = {
@@ -202,7 +205,7 @@ async function loadRows(sportKey?: string | null, maxRows = DEFAULT_MAX_PREDICTI
     const pageSize = Math.min(1000, rowLimit - from)
     let query = supabaseAdmin
       .from('prediction_history')
-      .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, line, result, status, lifecycle_status, recommended_pick, production_eligible, trial, scrambled, validation_status, validation_warnings, model_role, model_version, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key, generated_at, created_at, cutoff_at, settled_at, settlement_details, skip_reason, is_current')
+      .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, line, result, status, lifecycle_status, recommended_pick, production_eligible, trial, scrambled, validation_status, validation_warnings, model_role, model_version, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key, generated_at, created_at, cutoff_at, settled_at, settlement_details, skip_reason, is_current, prediction_epoch_id, prediction_epoch_key')
       .order('created_at', { ascending: false })
       .range(from, from + pageSize - 1)
     if (sportKey) query = query.eq('sport_key', sportKey)
@@ -244,7 +247,7 @@ export async function getPerformanceScopeV2({
   maxPredictionRows = DEFAULT_MAX_PREDICTION_ROWS,
   includeHistoryRows = true,
 }: PerformanceScopeOptions = {}) {
-  const [schedulerCoverage, rowLoad] = await Promise.all([
+  const [schedulerCoverage, rowLoad, activeEpoch] = await Promise.all([
     getPregameSchedulerCoverage().catch((error) => ({
       success: false,
       providerCallsMade: 0,
@@ -252,10 +255,17 @@ export async function getPerformanceScopeV2({
       error: error instanceof Error ? error.message : 'pregame scheduler coverage read failed',
     })),
     loadRows(sportKey, maxPredictionRows),
+    getActivePredictionEpoch(),
   ])
   const rows = rowLoad.rows
   const events = await loadEvents(Array.from(new Set(rows.map((row) => row.game_id).filter(Boolean))) as string[])
-  const joined = rows.map((row) => ({ row, event: row.game_id ? events.get(row.game_id) : undefined }))
+  const allJoined = rows.map((row) => ({ row, event: row.game_id ? events.get(row.game_id) : undefined }))
+  const joined = activeEpoch
+    ? allJoined.filter((item) => item.row.prediction_epoch_key === activeEpoch.epochKey)
+    : allJoined
+  const historicalJoined = activeEpoch
+    ? allJoined.filter((item) => item.row.prediction_epoch_key !== activeEpoch.epochKey)
+    : []
   const productHistory = joined.filter((item) => eligibility(item.row, item.event).eligible)
   const pending = joined.filter((item) => resultOf(item.row) === 'pending')
   const pendingClassified = pending.map((item) => ({ ...item, reason: pendingReason(item.row, item.event) ?? 'EVENT_NOT_FINAL' }))
@@ -283,6 +293,8 @@ export async function getPerformanceScopeV2({
     sportKey: sportKey ?? null,
     timezone: TIMEZONE,
     scopePolicy: {
+      defaultEra: activeEpoch ? 'CURRENT_V2_PRODUCTION' : 'LEGACY_DEFAULT',
+      activeEpoch,
       generatedUses: 'event_start_ast_date_fallback_prediction_generated_at',
       settlementUses: 'stored_result_and_settled_at_when_available',
       pushHandling: 'pushes_count_as_settled_but_are_excluded_from_win_loss_accuracy_and_brier_scoring',
@@ -302,6 +314,20 @@ export async function getPerformanceScopeV2({
       historyRowsReturned: includeHistoryRows ? productHistory.length : 0,
     },
     totals: metrics(joined),
+    eraScopes: {
+      current: {
+        epochKey: activeEpoch?.epochKey ?? null,
+        epochStartedAt: activeEpoch?.dataWindowStart ?? null,
+        ...metrics(joined),
+      },
+      historical: {
+        scope: activeEpoch ? 'LEGACY_PRE_V2_AND_UNEPOCHED_HISTORY' : 'LEGACY_DEFAULT',
+        ...metrics(historicalJoined),
+      },
+      note: activeEpoch
+        ? 'Default Performance metrics use Current V2 Production only; historical rows remain preserved in separate scope.'
+        : 'No active Current V2 Production epoch is available; legacy default remains active.',
+    },
     exclusions: groupCount(joined, (item) => eligibility(item.row, item.event).reason),
     nonProductionReconciliation: {
       byExactReason: groupCount(joined.filter((item) => !eligibility(item.row, item.event).eligible), nonProductionReason),

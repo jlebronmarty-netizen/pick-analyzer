@@ -149,7 +149,23 @@
     "providerCallsMadeByCertificationReads": 0,
     "remoteMutationsMadeByCertificationReads": 0,
     "nextPhase": "P2.0 Prediction Epoch V2 Activation",
-    "p20Started": false
+    "p20Started": true
+  },
+  "p2_0": {
+    "status": "LOCAL_READY_PENDING_PRODUCTION_ACTIVATION",
+    "title": "Prediction Epoch V2 Activation",
+    "certificationArtifact": "docs/CERTIFICATION/p2-0-prediction-epoch-v2.json",
+    "currentEpochKey": "CURRENT_V2_PRODUCTION",
+    "legacyEpochKey": "LEGACY_PRE_V2",
+    "policyVersion": "production_evaluation_policy_v1_3",
+    "productionScopeVersion": "current_v2_production_scope_v1",
+    "historicalRowsRewritten": false,
+    "predictionRowsMutatedByActivation": 0,
+    "providerCallsIntroduced": 0,
+    "modelFormulaChanged": false,
+    "recommendationPolicyChanged": false,
+    "officialPickPolicyChanged": false,
+    "p21Started": false
   },
   "productionCertification": {
     "status": "PASS",

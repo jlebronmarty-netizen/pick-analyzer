@@ -3,6 +3,7 @@ import 'server-only'
 import { cache } from 'react'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
+import { getActivePredictionEpoch } from '@/services/prediction-epoch-runtime.service'
 import { isActiveBettingEvent } from '@/services/active-event.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
 import { getMlbCurrentLineupContext } from '@/services/mlb-current-lineup-context.service'
@@ -99,6 +100,8 @@ type PredictionRow = {
   prediction_version?: number | null
   model_role?: string | null
   prediction_group_key?: string | null
+  prediction_epoch_id?: string | null
+  prediction_epoch_key?: string | null
 }
 
 type OddsRow = {
@@ -1337,14 +1340,18 @@ export async function getCurrentBoard({
 } = {}): Promise<CurrentBoardResponse> {
   const safeLimit = Math.max(1, Math.min(limit, 200))
   const nowMs = Date.now()
-  const versioning = await probePredictionVersioningSchemaCapabilities()
+  const [versioning, activeEpoch] = await Promise.all([
+    probePredictionVersioningSchemaCapabilities(),
+    getActivePredictionEpoch(),
+  ])
   const versioningColumns = versioning.applied
     ? ', is_current, prediction_version, model_role, prediction_group_key'
     : ''
+  const epochColumns = activeEpoch ? ', prediction_epoch_id, prediction_epoch_key' : ''
   let predictionsQuery = supabaseAdmin
     .from('prediction_history')
     .select(
-      `id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, line, odds_timestamp, generated_at, cutoff_at, model_version, feature_snapshot_id, feature_set_version, validation_status, lifecycle_status, status, result, production_eligible, recommended_pick, feature_snapshot, validation_warnings, skip_reason, trial, scrambled${versioningColumns}`
+      `id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, edge, ev, confidence, line, odds_timestamp, generated_at, cutoff_at, model_version, feature_snapshot_id, feature_set_version, validation_status, lifecycle_status, status, result, production_eligible, recommended_pick, feature_snapshot, validation_warnings, skip_reason, trial, scrambled${versioningColumns}${epochColumns}`
     )
     .eq('sport_key', sportKey)
     .not('model_probability', 'is', null)
@@ -1353,6 +1360,9 @@ export async function getCurrentBoard({
     predictionsQuery = predictionsQuery.eq('model_role', modelRole)
   } else if (versioning.applied && (mode === 'CURRENT' || mode === 'UPCOMING')) {
     predictionsQuery = predictionsQuery.eq('is_current', true)
+  }
+  if (activeEpoch && (mode === 'CURRENT' || mode === 'UPCOMING')) {
+    predictionsQuery = predictionsQuery.eq('prediction_epoch_key', activeEpoch.epochKey)
   }
   if (sportKey === 'baseball_mlb' && (mode === 'CURRENT' || mode === 'UPCOMING')) {
     const range = slateDate

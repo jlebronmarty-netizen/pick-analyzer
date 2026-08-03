@@ -1,0 +1,38 @@
+{
+  "mode": "p2_0_prediction_epoch_v2_activation_certification_v1",
+  "status": "LOCAL_READY_PENDING_PRODUCTION_ACTIVATION",
+  "currentEpochKey": "CURRENT_V2_PRODUCTION",
+  "legacyEpochKey": "LEGACY_PRE_V2",
+  "timezone": "America/Puerto_Rico",
+  "policyVersion": "production_evaluation_policy_v1_3",
+  "productionScopeVersion": "current_v2_production_scope_v1",
+  "activationRules": {
+    "historicalRowsRewritten": false,
+    "historicalRowsDeleted": false,
+    "retrospectiveProductionPredictions": false,
+    "recommendationPolicyChanged": false,
+    "officialPickPolicyChanged": false,
+    "modelFormulaChanged": false
+  },
+  "initialCurrentEra": {
+    "generated": 0,
+    "productionEligible": 0,
+    "settled": 0,
+    "wins": 0,
+    "losses": 0,
+    "pushes": 0,
+    "accuracy": null,
+    "brier": null,
+    "calibration": null
+  },
+  "surfaces": {
+    "futurePredictionWritesStampEpoch": true,
+    "currentBoardDefaultsToActiveEpoch": true,
+    "performanceDefaultsToCurrentEra": true,
+    "historicalEraPreservedSeparately": true
+  },
+  "providerCallsMadeByCertification": 0,
+  "remoteMutationsMadeByCertification": 0,
+  "predictionRowsMutatedByActivation": 0,
+  "p21Started": false
+}

@@ -16,6 +16,13 @@ Last updated: 2026-07-30 20:05:00Z
 - Persisted evidence after the P1.3 observation contains 24 MLB prediction rows across 8 current events and moneyline/spread/total, all with `feature_snapshot.productionEvaluationPolicy`, `prediction_valid=true` and `production_evaluable=true`.
 - Recommendation eligibility, actionability and Official Pick eligibility remain 0 by existing gates. P2.0 is ready, but was not started in the certification update.
 
+## 2026-08-03 P2.0 Prediction Epoch V2 Activation
+
+- P2.0 is `LOCAL_READY_PENDING_PRODUCTION_ACTIVATION`.
+- Added a protected `POST /api/data-foundation/epochs` activation path, future-only active epoch stamping for prediction writes, Current Board active-epoch filtering and Performance Current Era filtering.
+- Current epoch key: `CURRENT_V2_PRODUCTION`; historical scope key: `LEGACY_PRE_V2`; timezone: `America/Puerto_Rico`.
+- Historical rows are not rewritten or deleted, P1.4 rows remain pre-activation history, and model formulas, recommendation gates and Official Pick policy are unchanged.
+
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 
 - MC-08D is production-certified on commit `f9faf649d89cd343034e935225d7215dafcc754b`. The homepage Smart Parlay has been converted from C1-era client probability multiplication into a typed `smart_parlay_v1` presentation contract.
