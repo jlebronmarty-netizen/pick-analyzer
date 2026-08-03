@@ -1,6 +1,6 @@
 # MC-08C Moneyline Bet Experience
 
-Status: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`
+Status: `PRODUCTION_CERTIFIED`
 
 MC-08C makes the homepage Moneyline Bet a typed, trustworthy presentation contract over existing stored Today evidence. It does not change prediction, ranking, provider, scheduler, settlement or learning behavior.
 
@@ -62,6 +62,24 @@ Tie-breaking uses existing surface priority and exposed fields only. MC-08C does
 - Best Value ranking changes: `0`.
 
 MC-08D was not started.
+
+## Production Certification
+
+Production certification passed on commit `b748b9f812afeaf7d8c96f561a480a49303a8cd4`.
+
+- Homepage HTTP: `200`.
+- Desktop render: `PASS`.
+- Mobile render: `PASS`.
+- Moneyline observed state: no current actionable Moneyline; desktop status `POLICY_BLOCKED`.
+- Current selection: `ARI` in `ARI @ CLE` when stored desktop evidence was available.
+- Candidate count: `3`.
+- Eligible candidate count: `0`.
+- Rank within Moneyline universe: `1`.
+- Missing odds, implied probability, edge and EV render as unavailable, not zero.
+- Moneyline appears after Rent Play and before Smart Parlay.
+- Provider calls: `0`.
+- Remote mutations: `0`.
+- MC-08D was not started.
 
 ## Local Validation
 

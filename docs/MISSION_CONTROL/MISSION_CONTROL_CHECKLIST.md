@@ -62,5 +62,5 @@ Use this checklist before starting any queued mission.
 - MC-08: `ACTIVE` through bounded product-experience work packages.
 - MC-08A: `PRODUCTION_CERTIFIED`.
 - MC-08B: `PRODUCTION_CERTIFIED`.
-- MC-08C: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`.
-- MC-08D: `PLANNED`; not started.
+- MC-08C: `PRODUCTION_CERTIFIED`.
+- MC-08D: `READY`; not started.

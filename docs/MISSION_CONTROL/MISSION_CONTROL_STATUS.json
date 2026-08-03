@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_08C_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+  "status": "MC_08C_PRODUCTION_CERTIFIED_MC_08D_READY",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -210,7 +210,7 @@
     "mc08cStarted": false
   },
   "mc08c": {
-    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Moneyline Bet Experience V1",
     "certificationArtifact": "docs/CERTIFICATION/mc-08c-moneyline-bet-experience.json",
     "contractVersion": "moneyline_bet_v1",
@@ -226,6 +226,10 @@
     "settlementChanged": false,
     "learningChanged": false,
     "schedulerChanged": false,
+    "productionCommit": "b748b9f812afeaf7d8c96f561a480a49303a8cd4",
+    "homepageHttp": 200,
+    "renderedDesktop": "PASS",
+    "renderedMobile": "PASS",
     "mc08dStarted": false
   },
   "runtimeSurfaces": ["/api/mission-control", "/api/mission-control/data-readiness", "/mission-control"],

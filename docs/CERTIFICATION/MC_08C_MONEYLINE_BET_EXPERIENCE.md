@@ -1,6 +1,6 @@
 # MC-08C Moneyline Bet Experience Certification
 
-Status: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`
+Status: `PRODUCTION_CERTIFIED`
 
 MC-08C certifies the Moneyline Bet homepage experience as a presentation-only improvement over existing stored Moneyline evidence.
 
@@ -54,4 +54,18 @@ MC-08C certifies the Moneyline Bet homepage experience as a presentation-only im
 
 ## Production Certification
 
-Pending automatic deployment of the MC-08C runtime commit.
+Production certification passed on runtime commit `b748b9f812afeaf7d8c96f561a480a49303a8cd4`.
+
+- `/api/system/version`: HTTP 200, commit `b748b9f812afeaf7d8c96f561a480a49303a8cd4`, provider calls 0.
+- `/`: HTTP 200.
+- `/api/dashboard/today`: HTTP 200, provider calls 0.
+- `/api/current-board?mode=current&limit=100`: HTTP 200.
+- `/api/market-opportunities/most-likely`: HTTP 200, stored prediction history, provider calls 0.
+- `/api/market-opportunities/best-value`: HTTP 200, provider calls 0.
+- `/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200`: HTTP 200, estimated provider requests 0 and quota units 0.
+- `/api/operations/health`: HTTP 200, status `CRITICAL` from existing operational state.
+- `/mlb-operations`: HTTP 200.
+- Desktop render: `PASS`; Moneyline card present after Rent Play and before Smart Parlay, status `POLICY_BLOCKED`, candidate `ARI`, event `ARI @ CLE`, rank 1 of 3, 0 eligible candidates, no zeroed unavailable odds/implied probability/edge/EV.
+- Mobile render: `PASS`; Moneyline card present, no horizontal overflow, no zeroed unavailable values.
+
+Production evidence showed the honest current state: no actionable Moneyline. The strongest current Moneyline candidate is blocked by existing policy/data-quality and missing price/value evidence. MC-08C did not promote it into Official Picks, Rent Play, Most Likely or Best Value.

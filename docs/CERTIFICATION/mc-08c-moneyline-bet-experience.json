@@ -1,10 +1,10 @@
 {
   "mission": "MC-08C",
   "name": "Moneyline Bet Experience V1",
-  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+  "status": "PRODUCTION_CERTIFIED",
   "startingCommit": "afcb2bb5c21a9d7e4fb08759291b971050cbfc35",
-  "runtimeCommit": "PENDING",
-  "certificationCommit": "PENDING",
+  "runtimeCommit": "b748b9f812afeaf7d8c96f561a480a49303a8cd4",
+  "certificationCommit": "THIS_CERTIFICATION_COMMIT",
   "moneylineContract": {
     "before": "Generic PlanPick card selected a qualified Moneyline candidate from local homepage plan evidence.",
     "after": "Typed moneyline_bet_v1 presentation contract with explicit universe, status, source, price, implied probability, gates, relationships, risks and actionability."
@@ -71,14 +71,27 @@
     "build": "PASS_396_STATIC_PAGES"
   },
   "productionCertification": {
-    "status": "PENDING",
-    "productionCommit": "PENDING",
-    "homepageHttp": "PENDING",
-    "systemVersionHttp": "PENDING",
-    "renderedDesktop": "PENDING",
-    "renderedMobile": "PENDING",
+    "status": "PASS",
+    "productionCommit": "b748b9f812afeaf7d8c96f561a480a49303a8cd4",
+    "homepageHttp": 200,
+    "systemVersionHttp": 200,
+    "dashboardTodayHttp": 200,
+    "currentBoardHttp": 200,
+    "mostLikelyHttp": 200,
+    "bestValueHttp": 200,
+    "eventRefreshPlanHttp": 200,
+    "operationsHealthHttp": 200,
+    "mlbOperationsHttp": 200,
+    "renderedDesktop": "PASS",
+    "renderedMobile": "PASS",
+    "moneylineStatusObserved": ["POLICY_BLOCKED", "NO_GAMES"],
+    "candidateCountObserved": 3,
+    "eligibleCandidateCountObserved": 0,
+    "rankWithinMoneylineUniverseObserved": 1,
+    "unavailableValuesRenderedAsUnavailable": true,
+    "horizontalOverflow": false,
     "providerCallsMade": 0,
     "remoteMutationsMade": 0
   },
-  "finalClassification": "MC_08C_PENDING"
+  "finalClassification": "MC_08C_DEPLOYED_AND_CERTIFIED"
 }
