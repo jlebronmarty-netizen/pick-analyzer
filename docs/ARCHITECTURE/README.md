@@ -12,6 +12,7 @@ Current V2 architecture inventory documents:
 - [Adaptive Event Lifecycle Engine](ADAPTIVE_EVENT_LIFECYCLE_ENGINE.md)
 - [Provider Budget Intelligence](PROVIDER_BUDGET_INTELLIGENCE.md)
 - [Multi-Sport Data Readiness](MULTI_SPORT_DATA_READINESS.md)
+- [Comprehensive Supported-Market Coverage](COMPREHENSIVE_SUPPORTED_MARKET_COVERAGE.md)
 
 Most architecture documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

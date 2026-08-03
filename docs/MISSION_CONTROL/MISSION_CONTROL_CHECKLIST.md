@@ -68,4 +68,5 @@ Use this checklist before starting any queued mission.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.
-- P2.1: `READY`; comprehensive supported-market prediction coverage is next.
+- P2.1: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`; comprehensive supported-market prediction coverage is bounded to current supported MLB markets.
+- P2.2: `READY_AFTER_P2_1`; do not start until P2.1 production certification passes.

@@ -25,6 +25,14 @@ Last updated: 2026-07-30 20:05:00Z
 - Current V2 Production started at `2026-08-03T19:57:02.418+00:00`; activation made 2 epoch-governance mutations, 0 prediction-row mutations and 0 provider calls.
 - The next protected writer cycle produced 24 Current V2 rows. Performance maps Current Era production eligibility from `feature_snapshot.productionEvaluationPolicy.production_evaluable`, keeping recommendation gates and Official Pick policy separate.
 
+## 2026-08-03 P2.1 Supported-Market Prediction Coverage
+
+- P2.1 is locally validation-passed pending production certification.
+- The 24-row Current V2 contract is now explained as 8 MLB events times 3 supported markets under the previous one-side-per-market selector.
+- The MLB prospective generator now preserves canonical outcome and line identity for moneyline, spread/run line and total selections.
+- `/api/operations/prediction-coverage` provides a protected read-only reconciliation endpoint with provider calls 0 and remote mutations 0.
+- Prediction formulas, recommendation gates, Official Pick policy, Kelly, settlement, learning, scheduler cadence and provider contracts are unchanged. P2.2 was not started.
+
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 
 - MC-08D is production-certified on commit `f9faf649d89cd343034e935225d7215dafcc754b`. The homepage Smart Parlay has been converted from C1-era client probability multiplication into a typed `smart_parlay_v1` presentation contract.

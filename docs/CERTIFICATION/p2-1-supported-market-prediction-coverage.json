@@ -1,0 +1,64 @@
+{
+  "id": "p2_1_supported_market_prediction_coverage",
+  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+  "startingCommit": "d909ac9e48c3bed2c2a00c1989d57dad0d48edb5",
+  "activeEpoch": {
+    "epochKey": "CURRENT_V2_PRODUCTION",
+    "startedAt": "2026-08-03T19:57:02.418+00:00"
+  },
+  "priorEvidence": {
+    "generated": 24,
+    "productionEvaluable": 24,
+    "recommendationEligible": 0,
+    "actionable": 0,
+    "officialPickEligible": 0,
+    "settled": 0
+  },
+  "current24RowContractExplanation": "The prior generator selected one preferred odds row per event and normalized market, yielding 8 events x 3 supported markets = 24 prediction rows.",
+  "canonicalMarketSemantics": {
+    "moneyline": "Home and away are separate expected selections when canonical rows exist.",
+    "spread": "Home and away run-line selections preserve exact line identity.",
+    "total": "Over and Under selections preserve exact total identity.",
+    "complementDerivation": "No missing side is fabricated from an opposite provider row.",
+    "threeWayMarkets": "Three-way markets are not treated as binary."
+  },
+  "predictionUniquenessKey": "epoch:event:market:selection:line",
+  "coverageEndpoint": "/api/operations/prediction-coverage",
+  "guards": {
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "recommendationPolicyChanged": false,
+    "kellyChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerContractChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "historicalRowsMutated": false
+  },
+  "pausedWork": {
+    "mc08ePreserved": true,
+    "mc08ePath": "C:\\Projects\\pick-analyzer"
+  },
+  "validation": {
+    "p21Validator": "PASS",
+    "p20Validator": "PASS",
+    "p14Validator": "PASS",
+    "p13Validator": "PASS",
+    "p12Validator": "PASS",
+    "missionControlValidator": "PASS",
+    "schedulerValidator": "PASS",
+    "settlementValidator": "PASS",
+    "unsupportedMarketValidator": "PASS",
+    "performanceValidator": "PASS",
+    "changedFileEslint": "PASS",
+    "jsonValidation": "PASS",
+    "markdownValidation": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS",
+    "build": "PASS",
+    "staticPages": 397,
+    "productionCertification": "PENDING"
+  },
+  "nextPhase": "P2.2",
+  "p22Started": false
+}

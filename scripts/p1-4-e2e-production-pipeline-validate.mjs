@@ -33,6 +33,18 @@ const allowed = new Set([
   'docs/MISSION_CONTROL/README.md',
   'docs/PROJECT_STATUS.md',
   'docs/MASTER_ROADMAP.md',
+  'src/services/prediction-coverage.service.ts',
+  'src/app/api/operations/prediction-coverage/route.ts',
+  'docs/ARCHITECTURE/COMPREHENSIVE_SUPPORTED_MARKET_COVERAGE.md',
+  'docs/ARCHITECTURE/E2E_PREDICTION_PIPELINE.md',
+  'docs/ARCHITECTURE/README.md',
+  'docs/OPERATIONAL_EXCELLENCE/P2_1_SUPPORTED_MARKET_PREDICTION_COVERAGE.md',
+  'docs/CERTIFICATION/P2_1_SUPPORTED_MARKET_PREDICTION_COVERAGE.md',
+  'docs/CERTIFICATION/p2-1-supported-market-prediction-coverage.json',
+  'scripts/p1-2-e2e-system-integrity-validate.mjs',
+  'scripts/p1-3-production-evaluation-policy-validate.mjs',
+  'scripts/p2-0-prediction-epoch-v2-validate.mjs',
+  'scripts/p2-1-supported-market-coverage-validate.mjs',
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 

@@ -197,3 +197,10 @@ Read-only production evidence found 20 future MLB events with open cutoffs, incl
 Operations Health was `CRITICAL`: last protected scheduler invocation `2026-08-03T15:09:40Z`, scheduler evidence age 136 minutes, missed scheduler intervals 12 and market freshness `CRITICAL`.
 
 P1.4 is `EXTERNAL_WAIT`. Required evidence is a successful post-P1.3 protected operating-day or automatic scheduler execution that persists cutoff-safe predictions with the P1.3 production-evaluation contract. P2.0 was not started.
+## 2026-08-03 - P2.1 Supported-Market Prediction Coverage
+
+P2.1 was started from commit `d909ac9e48c3bed2c2a00c1989d57dad0d48edb5` in the isolated autonomous worktree while paused MC-08E work remained preserved in the main checkout.
+
+The implementation changes the MLB prospective generator from one selected odds row per event and normalized market to canonical event, market, outcome and line identity. Prediction reuse and stale-preview checks now include line identity. A protected read-only `/api/operations/prediction-coverage` endpoint reports every expected active-epoch current-day selection as created, missed, cutoff-missed or duplicate-collapsed.
+
+No prediction formula, probability, confidence, edge, EV, Kelly, recommendation gate, Official Pick policy, settlement, learning, scheduler cadence or provider contract changed. P2.2 was not started.

@@ -732,13 +732,24 @@ function chooseOddsRows(events: EventRow[], odds: OddsRow[]) {
     if (start === null || ts === null) continue
     const cutoff = start - 10 * 60 * 1000
     if (ts > cutoff) continue
-    const key = `${row.event_id}:${marketForPrediction(row.market)}`
+    const key = `${row.event_id}:${marketForPrediction(row.market)}:${String(row.outcome).toLowerCase()}:${row.line ?? 'none'}`
     const existing = chosen.get(key)
     if (!existing || shouldReplaceChosenOdds(row, existing)) {
       chosen.set(key, row)
     }
   }
   return Array.from(chosen.values())
+}
+
+function predictionLogicalKey(row: {
+  game_id?: unknown
+  market?: unknown
+  team?: unknown
+  line?: unknown
+}) {
+  const market = String(row.market ?? '')
+  const line = market === 'moneyline' ? 'none' : String(row.line ?? 'none')
+  return `${row.game_id}:${market}:${row.team}:${line}`
 }
 
 type TeamGame = {
@@ -2379,7 +2390,7 @@ async function writeSnapshotsAndPredictions(
     }
     const existingLogical = new Map(
       (existingLogicalResult.data ?? []).map((row) => [
-        `${row.game_id}:${row.market}:${row.team}`,
+        predictionLogicalKey(row),
         String(row.id),
       ])
     )
@@ -2387,7 +2398,7 @@ async function writeSnapshotsAndPredictions(
       (existingLogicalResult.data ?? []).map((row) => {
         const snapshot = asRecord(row.feature_snapshot) ?? {}
         return [
-          `${row.game_id}:${row.market}:${row.team}`,
+          predictionLogicalKey(row),
           {
             id: row.id,
             odds: row.odds,
@@ -2407,7 +2418,7 @@ async function writeSnapshotsAndPredictions(
       })
     )
     for (const row of predictionRows) {
-      const logicalKey = `${row.game_id}:${row.market}:${row.team}`
+      const logicalKey = predictionLogicalKey(row)
       const existingId = existingLogical.get(logicalKey)
       if (existingId && !immutablePredictions) row.id = existingId
       const previous = previousByLogical.get(logicalKey)
@@ -2462,7 +2473,7 @@ async function writeSnapshotsAndPredictions(
     }
     insertedPredictions = persistenceError ? 0 : predictionRows.length - reusedPredictions
     const currentLogical = new Set(
-      predictionRows.map((row) => `${row.game_id}:${row.market}:${row.team}`)
+      predictionRows.map((row) => predictionLogicalKey(row))
     )
     const staleResult = persist && !immutablePredictions ? await supabaseAdmin
       .from('prediction_history')
@@ -2475,7 +2486,7 @@ async function writeSnapshotsAndPredictions(
     }
     for (const row of staleResult.data ?? []) {
       const snapshot = asRecord(row.feature_snapshot) ?? {}
-      const logicalKey = `${row.game_id}:${row.market}:${row.team}`
+      const logicalKey = predictionLogicalKey(row)
       if (snapshot.prospective_preview === true && !currentLogical.has(logicalKey)) {
         const updateResult = await supabaseAdmin
           .from('prediction_history')
@@ -2592,14 +2603,19 @@ function buildV6ModelComparison(
   const mode = options.mode ?? 'mlb_prediction_v6_model_comparison_v1'
   const explanationLabel = options.explanationLabel ?? 'V6'
   const championByKey = new Map(
-    existingRows.map((row) => [`${row.game_id}:${row.market}:${row.team}`, row])
+    existingRows.map((row) => [predictionLogicalKey(row), row])
   )
   const comparisons = challengerCandidates
     .map((candidate) => {
       const eventId = String(candidate.eventId ?? '')
       const market = String(candidate.market ?? '')
       const selection = String(candidate.selection ?? '')
-      const champion = championByKey.get(`${eventId}:${market}:${selection}`)
+      const champion = championByKey.get(predictionLogicalKey({
+        game_id: eventId,
+        market,
+        team: selection,
+        line: candidate.line ?? null,
+      }))
       if (!champion) return null
       const championSnapshot = asRecord(champion.feature_snapshot) ?? {}
       const challengerProbability = Number(candidate.modelProbability ?? 0)

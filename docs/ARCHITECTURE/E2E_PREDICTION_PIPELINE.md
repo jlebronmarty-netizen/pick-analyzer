@@ -50,6 +50,10 @@ EVENT -> MARKET DATA -> FEATURES -> PREDICTION ENGINE -> PREDICTION PERSISTENCE 
 
 No product surface should silently create a separate prediction truth. Specialized views may rank or summarize the canonical persisted rows, but they must label preview, shadow, replay, non-production and production scopes separately.
 
+## P2.1 Supported-Market Coverage
+
+Current V2 production prediction coverage is reconciled by expected selection, not only by event and market. The MLB prospective generator keeps canonical side and line identity for supported markets, and `/api/operations/prediction-coverage` reports every expected current operating-day selection as created, missed, cutoff-missed or duplicate-collapsed. The uniqueness key is `epoch:event:market:selection:line`.
+
 ## Policy Boundary
 
 P1.1 proved that 45 valid pregame rows from `2026-08-02` were quarantined preview rows. P1.2 does not retroactively promote them. The unresolved policy question is whether production evaluation should include all valid pregame predictions or only rows that also pass recommendation/production gates.

@@ -26,7 +26,7 @@ const checks = [
   ],
   [
     'scope loads scheduler coverage and rows in parallel',
-    /const \[schedulerCoverage, rowLoad\] = await Promise\.all\(\[[\s\S]+getPregameSchedulerCoverage\(\)[\s\S]+loadRows\(sportKey, maxPredictionRows\)[\s\S]+\]\)/.test(scope),
+    /const \[schedulerCoverage, rowLoad(?:, activeEpoch)?\] = await Promise\.all\(\[[\s\S]+getPregameSchedulerCoverage\(\)[\s\S]+loadRows\(sportKey, maxPredictionRows\)[\s\S]+\]\)/.test(scope),
   ],
   [
     'event lookup remains bounded at 100 ids to avoid Supabase header limits',
