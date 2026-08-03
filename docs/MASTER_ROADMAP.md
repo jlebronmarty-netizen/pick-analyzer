@@ -70,6 +70,8 @@ MC-08B Rent Play Experience update on 2026-08-02: MC-08B is production-certified
 
 MC-08C Moneyline Bet Experience update on 2026-08-02: MC-08C is production-certified on commit `b748b9f812afeaf7d8c96f561a480a49303a8cd4`. Moneyline Bet now uses the typed `moneyline_bet_v1` presentation contract with a Moneyline-only universe, price-implied probability, freshness, actionability, Official Pick, Rent Play and Most Likely distinctions, readiness gates, candidate rank, risks and what-would-change evidence while preserving all prediction, settlement, learning, scheduler, provider and policy guardrails. MC-08D Smart Parlay Experience is READY and was not started.
 
+MC-08D Smart Parlay Experience update on 2026-08-02: MC-08D is active. Smart Parlay is being converted to the typed `smart_parlay_v1` homepage contract with bounded available legs, local user selection, per-leg freshness and actionability, selected-price combined odds, explicit correlation status and unavailable joint probability unless a certified method exists. MC-08E was not started.
+
 OE-003F update on 2026-08-02: Product Freshness SLA is locally implemented and build-certified. Decision surfaces now expose `product_freshness_sla_v1`, block future/post-start/timestampless market evidence, downgrade stale prices, and preserve zero provider calls, zero mutations and unchanged prediction/recommendation policy. OE-003G has not started.
 
 Current stabilization evidence:

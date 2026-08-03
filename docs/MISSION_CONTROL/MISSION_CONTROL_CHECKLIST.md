@@ -63,4 +63,5 @@ Use this checklist before starting any queued mission.
 - MC-08A: `PRODUCTION_CERTIFIED`.
 - MC-08B: `PRODUCTION_CERTIFIED`.
 - MC-08C: `PRODUCTION_CERTIFIED`.
-- MC-08D: `READY`; not started.
+- MC-08D: `LOCAL_VALIDATION_PASS_PENDING_PRODUCTION`; Smart Parlay contract implementation and build validation passed.
+- MC-08E: `PLANNED`; not started.

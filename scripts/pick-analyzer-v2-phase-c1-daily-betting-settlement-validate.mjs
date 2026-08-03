@@ -56,7 +56,7 @@ check('homepage no longer redirects to dashboard', homepage.includes('<HomeBetti
 check('homepage is betting plan surface', homePlan.includes('data-c1-home-betting-plan="true"') && homePlan.includes("Today&apos;s Betting Plan"))
 check('Rent Play section exists and is Official Pick only', homePlan.includes('Rent Play') && homePlan.includes('No Rent Play Today') && homePlan.includes('item.official && item.qualified'))
 check('Moneyline section exists', homePlan.includes('Moneyline Bet') && homePlan.includes("item.market.toLowerCase().includes('moneyline')"))
-check('Parlay Builder has client toggles and live metrics', homePlan.includes('Parlay Builder') && homePlan.includes('type="checkbox"') && homePlan.includes('const probability = selected.reduce') && homePlan.includes('const confidence = selected.length') && homePlan.includes('const ev = selected.length'))
+check('Parlay Builder has client toggles and live selected-combination evaluation', homePlan.includes('Smart Parlay') && homePlan.includes('type="checkbox"') && homePlan.includes('evaluateSmartParlaySelection') && homePlan.includes("jointProbabilityMethod: 'NOT_CERTIFIED'"))
 check('Best Opportunity excludes AVOID and DO NOT ACT recommendation copy', homePlan.includes("!/avoid|do not act/i.test(item.reason)") && homePlan.includes('No Qualified Opportunity Today'))
 check('homepage uses existing Today API only', homePlan.includes("fetch('/api/dashboard/today'") && !/fetch\([^)]*(generate|execute|settle|sync|cron|refresh|provider)/i.test(homePlan))
 check('dedicated tabs move non-critical areas', ['Most Likely', 'Best Value', 'Performance', 'Sports', 'Operations', 'Data Coverage'].every((label) => homePlan.includes(label)))

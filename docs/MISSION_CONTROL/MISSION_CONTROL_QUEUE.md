@@ -2,7 +2,7 @@
 
 Status: deterministic V2 queue.
 
-No queued mission is ACTIVE in Mission Control V1.
+MC-08 is ACTIVE only for bounded Daily Betting Product Completion work packages. Gated future missions such as MC-03 remain PLANNED and inactive.
 
 | ID | Mission | Category | Priority | State | Mode | Next Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -29,4 +29,5 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | MC-08A | Homepage Experience | PRODUCTION_CERTIFIED | Homepage hierarchy certified. |
 | MC-08B | Rent Play Experience | PRODUCTION_CERTIFIED | Rent Play contract, unavailable-value handling and production render certified. |
 | MC-08C | Moneyline Bet Experience | PRODUCTION_CERTIFIED | Moneyline contract, unavailable-value handling and production render certified. |
-| MC-08D | Smart Parlay Experience | READY | Next eligible MC-08 work package; not started. |
+| MC-08D | Smart Parlay Experience | LOCALLY_COMPLETE | Local validation and build pass; pending automatic deployment and production certification. |
+| MC-08E | Watchlist Experience | PLANNED | Next candidate after MC-08D production certification; not started. |

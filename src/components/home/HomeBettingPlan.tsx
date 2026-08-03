@@ -129,6 +129,28 @@ type MoneylineBetStatus =
   | 'NO_GAMES'
   | 'UNKNOWN'
 
+type SmartParlayStatus =
+  | 'ACTIONABLE'
+  | 'REVIEW_ONLY'
+  | 'WAITING_FOR_FRESH_PRICES'
+  | 'NO_ELIGIBLE_LEGS'
+  | 'NO_SAFE_COMBINATION'
+  | 'POLICY_BLOCKED'
+  | 'NO_GAMES'
+  | 'UNKNOWN'
+
+type SmartParlayLegActionability =
+  | 'ACTIONABLE'
+  | 'REVIEW_ONLY'
+  | 'WAITING_FOR_FRESH_PRICE'
+  | 'POLICY_BLOCKED'
+  | 'MARKET_UNAVAILABLE'
+  | 'POST_START_BLOCKED'
+  | 'UNSUPPORTED'
+  | 'UNKNOWN'
+
+type SmartParlayCorrelationStatus = 'CLEAR' | 'POTENTIAL' | 'BLOCKED' | 'UNKNOWN'
+
 type RentPlayGate = {
   id: string
   label: string
@@ -182,6 +204,82 @@ type RentPlayContract = {
   observedAt: string
   candidate: PlanPick | null
   closestCandidate: PlanPick | null
+}
+
+type SmartParlayLeg = {
+  legId: string
+  eventId: string | null
+  sportKey: string
+  eventLabel: string
+  startTime: string | null
+  marketKey: string
+  marketLabel: string
+  selectionKey: string
+  selectionLabel: string
+  americanOdds: number | null
+  decimalOdds: number | null
+  bookmaker: string | null
+  provider: string | null
+  modelProbability: number | null
+  impliedProbability: number | null
+  confidence: number | null
+  edge: number | null
+  expectedValue: number | null
+  marketTimestamp: string | null
+  marketAgeMinutes: number | null
+  freshnessStatus: string
+  freshnessTargetMinutes: number | null
+  nextPlannedRefreshAt: string | null
+  actionability: SmartParlayLegActionability
+  officialPick: boolean
+  rentPlay: boolean
+  moneylineBet: boolean
+  mostLikely: boolean
+  bestValue: boolean
+  eligibilityGates: RentPlayGate[]
+  blockers: string[]
+  warnings: string[]
+  evidence: string[]
+  reason: string
+  sourceSurface: string
+  sourceRowId: string | null
+}
+
+type SmartParlaySummary = {
+  selectedLegCount: number
+  minimumLegCount: number
+  maximumLegCount: number
+  combinedAmericanOdds: number | null
+  combinedDecimalOdds: number | null
+  combinedOddsAvailable: boolean
+  jointProbability: number | null
+  jointProbabilityMethod: 'NOT_CERTIFIED' | 'UNKNOWN'
+  jointProbabilityEvidence: string[]
+  allLegsFresh: boolean
+  freshestLegId: string | null
+  stalestLegId: string | null
+  stalestLegAgeMinutes: number | null
+  allLegsActionable: boolean
+  blockingLegIds: string[]
+  correlationStatus: SmartParlayCorrelationStatus
+  correlationReasons: string[]
+  parlayActionability: SmartParlayStatus
+  recommendationSummary: string
+  supportingReasons: string[]
+  riskReasons: string[]
+  whatWouldChangeTheDecision: string[]
+}
+
+type SmartParlayContract = SmartParlaySummary & {
+  contractVersion: 'smart_parlay_v1'
+  status: SmartParlayStatus
+  mode: 'USER_SELECTED' | 'SUGGESTED' | 'EMPTY'
+  availableLegs: SmartParlayLeg[]
+  selectedLegs: SmartParlayLeg[]
+  rejectedLegs: SmartParlayLeg[]
+  providerCallsMade: 0
+  remoteMutationsMade: 0
+  observedAt: string
 }
 
 type MoneylineBetContract = {
@@ -490,6 +588,12 @@ function isMoneylineMarket(item: PlanPick) {
   return /\bmoneyline\b|^h2h$|^ml$/.test(market) && !/run line|spread|total|prop|first five|first half|team total/.test(market)
 }
 
+function isSupportedParlayMarket(item: PlanPick) {
+  const market = `${item.marketKey} ${item.market}`.toLowerCase()
+  if (/prop|pitcher|batter|first five|first half|team total|alternate|nrfi|yrfi/.test(market)) return false
+  return /\bmoneyline\b|^h2h$|^ml$|run line|spread|total/.test(market)
+}
+
 function compareMoneylineEvidence(left: PlanPick, right: PlanPick) {
   const sourceLeft = left.sourceRank < 0 ? 99 : left.sourceRank
   const sourceRight = right.sourceRank < 0 ? 99 : right.sourceRank
@@ -507,6 +611,45 @@ function compareMoneylineEvidence(left: PlanPick, right: PlanPick) {
   const evDelta = Number(right.ev ?? -999) - Number(left.ev ?? -999)
   if (evDelta) return evDelta
   return left.id.localeCompare(right.id)
+}
+
+function compareParlayEvidence(left: PlanPick, right: PlanPick) {
+  const sourceLeft = left.sourceRank < 0 ? 99 : left.sourceRank
+  const sourceRight = right.sourceRank < 0 ? 99 : right.sourceRank
+  const actionableDelta = Number(isFreshnessActionable(right) && right.qualified) - Number(isFreshnessActionable(left) && left.qualified)
+  if (actionableDelta) return actionableDelta
+  if (sourceLeft !== sourceRight) return sourceLeft - sourceRight
+  const probabilityDelta = Number(right.probability ?? -1) - Number(left.probability ?? -1)
+  if (probabilityDelta) return probabilityDelta
+  const confidenceDelta = Number(right.confidence ?? -1) - Number(left.confidence ?? -1)
+  if (confidenceDelta) return confidenceDelta
+  const edgeDelta = Number(right.edge ?? -999) - Number(left.edge ?? -999)
+  if (edgeDelta) return edgeDelta
+  const evDelta = Number(right.ev ?? -999) - Number(left.ev ?? -999)
+  if (evDelta) return evDelta
+  return left.id.localeCompare(right.id)
+}
+
+function isDirectOpposite(left: SmartParlayLeg, right: SmartParlayLeg) {
+  if (!left.eventId || left.eventId !== right.eventId) return false
+  if (left.marketKey !== right.marketKey) return false
+  if (left.selectionKey === right.selectionKey) return false
+  const market = `${left.marketKey} ${left.marketLabel}`.toLowerCase()
+  return /moneyline|h2h|ml|spread|run line|total/.test(market)
+}
+
+function isSameLeg(left: SmartParlayLeg, right: SmartParlayLeg) {
+  return left.eventId === right.eventId &&
+    left.marketKey === right.marketKey &&
+    left.selectionKey === right.selectionKey &&
+    left.bookmaker === right.bookmaker
+}
+
+function isSmartParlayLegFresh(leg: SmartParlayLeg) {
+  const freshness = leg.freshnessStatus.toUpperCase()
+  return !['STALE', 'INVALID_FUTURE', 'POST_START', 'MARKET_CLOSED', 'UNKNOWN_TIMESTAMP'].includes(freshness) &&
+    leg.actionability !== 'WAITING_FOR_FRESH_PRICE' &&
+    !isFutureTimestamp(leg.marketTimestamp)
 }
 
 function pickPlan(data: TodayResponse | null) {
@@ -712,6 +855,257 @@ function buildMoneylineBetContract(plan: ReturnType<typeof pickPlan>, rentPlay: 
   }
 }
 
+function buildSmartParlayLegGates(pick: PlanPick | null): RentPlayGate[] {
+  if (!pick) {
+    return [
+      gate('candidate', 'Leg evidence', 'FAIL', 'No current leg evidence is available.'),
+      gate('supported_market', 'Supported market', 'NOT_AVAILABLE', 'No market evidence is available.'),
+      gate('canonical_current_event', 'Canonical current event', 'NOT_AVAILABLE', 'No event identity is available.'),
+      gate('pregame', 'Pregame eligibility', 'NOT_AVAILABLE', 'No lifecycle evidence is available.'),
+      gate('probability_available', 'Probability available', 'NOT_AVAILABLE', 'No model probability is available.'),
+      gate('odds_available', 'Odds available', 'NOT_AVAILABLE', 'No selected canonical price is available.'),
+      gate('market_timestamp', 'Market timestamp', 'NOT_AVAILABLE', 'No market timestamp is available.'),
+      gate('market_freshness', 'Market freshness', 'NOT_AVAILABLE', 'No market freshness evidence is available.'),
+    ]
+  }
+
+  const freshness = pick.freshness.toUpperCase()
+  const actionability = String(pick.freshnessActionability ?? '').toUpperCase()
+  const unsupported = !isSupportedParlayMarket(pick)
+  const postStart = /post_start|post start|started|live|market_closed/i.test(`${freshness} ${actionability} ${pick.reason}`)
+  const timestampFuture = isFutureTimestamp(pick.marketTimestamp ?? null)
+
+  return [
+    gate('candidate', 'Leg evidence', 'PASS', `Leg comes from ${pick.source}.`),
+    gate('supported_market', 'Supported market', unsupported ? 'FAIL' : 'PASS', unsupported ? 'Unsupported market evidence cannot enter Smart Parlay.' : 'Market is supported by the current stored product evidence.'),
+    gate('canonical_current_event', 'Canonical current event', pick.eventId || pick.event !== 'Event pending' ? 'PASS' : 'PENDING', pick.eventId ? `Event ID ${pick.eventId}.` : 'Event label is available, event ID is not exposed.'),
+    gate('pregame', 'Pregame eligibility', postStart ? 'FAIL' : 'PASS', postStart ? 'Leg appears post-start, live or closed.' : 'Leg is not marked post-start by current evidence.'),
+    gate('probability_available', 'Probability available', pick.probability === null ? 'NOT_AVAILABLE' : 'PASS', pick.probability === null ? 'Model probability is unavailable.' : `Model probability is ${pct(pick.probability)}.`),
+    gate('odds_available', 'Odds available', pick.odds === null ? 'NOT_AVAILABLE' : 'PASS', pick.odds === null ? 'Canonical selected price is unavailable.' : `Selected price is ${odds(pick.odds)}.`),
+    gate('market_timestamp', 'Market timestamp', pick.marketTimestamp ? 'PASS' : 'NOT_AVAILABLE', pick.marketTimestamp ? `Market timestamp ${compactDate(pick.marketTimestamp)}.` : 'Market timestamp is unavailable.'),
+    gate('market_freshness', 'Market freshness', timestampFuture ? 'FAIL' : isFreshnessActionable(pick) ? 'PASS' : freshness.includes('STALE') || actionability === 'WAIT_FOR_REFRESH' ? 'PENDING' : 'FAIL', timestampFuture ? 'Market timestamp is in the future.' : `Freshness is ${pick.freshness}.`),
+    gate('policy_blockers', 'Policy blockers', /blocked|avoid|do not act|quarantined/i.test(pick.reason) ? 'FAIL' : 'PASS', pick.reason),
+  ]
+}
+
+function legActionability(pick: PlanPick, gates: RentPlayGate[]): SmartParlayLegActionability {
+  if (!isSupportedParlayMarket(pick)) return 'UNSUPPORTED'
+  if (/post_start|post start|started|live|market_closed/i.test(`${pick.freshness} ${pick.freshnessActionability ?? ''} ${pick.reason}`)) return 'POST_START_BLOCKED'
+  if (pick.odds === null) return 'MARKET_UNAVAILABLE'
+  if (gates.some((item) => item.id === 'policy_blockers' && item.status === 'FAIL')) return 'POLICY_BLOCKED'
+  if (pick.freshness.toUpperCase().includes('STALE') || String(pick.freshnessActionability ?? '').toUpperCase() === 'WAIT_FOR_REFRESH') return 'WAITING_FOR_FRESH_PRICE'
+  if (pick.qualified && isFreshnessActionable(pick) && pick.probability !== null) return 'ACTIONABLE'
+  return 'REVIEW_ONLY'
+}
+
+function planPickToParlayLeg(
+  pick: PlanPick,
+  rentPlay: RentPlayContract,
+  moneyline: MoneylineBetContract,
+): SmartParlayLeg {
+  const gates = buildSmartParlayLegGates(pick)
+  const rentPlayOverlap = Boolean(rentPlay.candidate && pick.event === rentPlay.eventLabel && pick.selection === rentPlay.selectionLabel && pick.market === rentPlay.marketLabel)
+  const moneylineOverlap = Boolean(moneyline.candidate && pick.event === moneyline.eventLabel && pick.selection === moneyline.selectionLabel && pick.marketKey === moneyline.marketKey)
+  return {
+    legId: pick.id,
+    eventId: pick.eventId,
+    sportKey: 'baseball_mlb',
+    eventLabel: pick.event,
+    startTime: null,
+    marketKey: pick.marketKey,
+    marketLabel: pick.market,
+    selectionKey: pick.selection,
+    selectionLabel: pick.selection,
+    americanOdds: pick.odds,
+    decimalOdds: decimalFromAmerican(pick.odds),
+    bookmaker: pick.sportsbook,
+    provider: pick.sportsbook,
+    modelProbability: pick.probability,
+    impliedProbability: impliedFromAmerican(pick.odds),
+    confidence: pick.confidence,
+    edge: pick.edge,
+    expectedValue: pick.ev,
+    marketTimestamp: pick.marketTimestamp ?? null,
+    marketAgeMinutes: minutesSince(pick.marketTimestamp ?? null),
+    freshnessStatus: pick.freshness,
+    freshnessTargetMinutes: 10,
+    nextPlannedRefreshAt: pick.nextRefreshAt ?? null,
+    actionability: legActionability(pick, gates),
+    officialPick: pick.official,
+    rentPlay: rentPlayOverlap,
+    moneylineBet: moneylineOverlap,
+    mostLikely: pick.source === 'Most Likely' || pick.id === 'most-likely',
+    bestValue: pick.source === 'Best Value' || pick.id === 'best-value',
+    eligibilityGates: gates,
+    blockers: gates.filter((item) => item.status === 'FAIL').map((item) => item.label),
+    warnings: gates.filter((item) => item.status === 'PENDING').map((item) => item.label),
+    evidence: pick.evidence,
+    reason: pick.reason,
+    sourceSurface: pick.source,
+    sourceRowId: pick.id,
+  }
+}
+
+function evaluateSmartParlaySelection(
+  availableLegs: SmartParlayLeg[],
+  selectedLegIds: string[],
+  minimumLegCount: number,
+  maximumLegCount: number,
+): SmartParlaySummary {
+  const selectedLegs = selectedLegIds
+    .map((id) => availableLegs.find((leg) => leg.legId === id))
+    .filter((leg): leg is SmartParlayLeg => Boolean(leg))
+    .slice(0, maximumLegCount)
+  const blockingLegs = selectedLegs.filter((leg) => leg.actionability !== 'ACTIONABLE')
+  const waitingLegs = selectedLegs.filter((leg) => leg.actionability === 'WAITING_FOR_FRESH_PRICE')
+  const hardBlockedLegs = selectedLegs.filter((leg) => ['POLICY_BLOCKED', 'MARKET_UNAVAILABLE', 'POST_START_BLOCKED', 'UNSUPPORTED', 'UNKNOWN'].includes(leg.actionability))
+  const selectedDecimals = selectedLegs.map((leg) => leg.decimalOdds)
+  const combinedOddsAvailable = selectedLegs.length >= minimumLegCount && selectedDecimals.every((value): value is number => value !== null && value > 1)
+  const combinedDecimalOdds = combinedOddsAvailable ? Number(selectedDecimals.reduce((product, value) => product * value, 1).toFixed(3)) : null
+  const combinedAmericanOdds = americanFromDecimal(combinedDecimalOdds)
+  const ages = selectedLegs
+    .filter((leg) => leg.marketAgeMinutes !== null)
+    .sort((left, right) => Number(left.marketAgeMinutes ?? 0) - Number(right.marketAgeMinutes ?? 0))
+  const freshestLegId = ages[0]?.legId ?? null
+  const stalest = ages[ages.length - 1] ?? null
+  const freshnessBlocking = selectedLegs.filter((leg) => leg.actionability === 'WAITING_FOR_FRESH_PRICE' || !isSmartParlayLegFresh(leg))
+  const duplicateBlocked = selectedLegs.some((leg, index) => selectedLegs.some((other, otherIndex) => otherIndex > index && isSameLeg(leg, other)))
+  const oppositeBlocked = selectedLegs.some((leg, index) => selectedLegs.some((other, otherIndex) => otherIndex > index && isDirectOpposite(leg, other)))
+  const sameEventPairs = selectedLegs.flatMap((leg, index) => selectedLegs.slice(index + 1).filter((other) => leg.eventId && leg.eventId === other.eventId).map((other) => `${leg.selectionLabel} with ${other.selectionLabel}`))
+  const correlationStatus: SmartParlayCorrelationStatus = duplicateBlocked || oppositeBlocked
+    ? 'BLOCKED'
+    : sameEventPairs.length
+      ? 'POTENTIAL'
+      : selectedLegs.length >= minimumLegCount
+        ? 'CLEAR'
+        : 'UNKNOWN'
+  const correlationReasons = duplicateBlocked
+    ? ['Duplicate selected leg is blocked.']
+    : oppositeBlocked
+      ? ['Direct opposite sides of the same market are blocked.']
+      : sameEventPairs.length
+        ? ['Same-event legs have potential correlation and are not treated as independent.', ...sameEventPairs.slice(0, 3)]
+        : selectedLegs.length >= minimumLegCount
+          ? ['No direct duplicate, opposite-side or same-event conflict detected in selected legs.']
+          : ['Select at least two legs before correlation can be evaluated.']
+
+  const allLegsFresh = selectedLegs.length >= minimumLegCount && freshnessBlocking.length === 0
+  const allLegsActionable = selectedLegs.length >= minimumLegCount && blockingLegs.length === 0
+  const blockingLegIds = [...new Set([...blockingLegs, ...freshnessBlocking].map((leg) => leg.legId))]
+  const parlayActionability: SmartParlayStatus = !availableLegs.length
+    ? 'NO_ELIGIBLE_LEGS'
+    : selectedLegs.length < minimumLegCount
+      ? 'NO_SAFE_COMBINATION'
+      : hardBlockedLegs.length || correlationStatus === 'BLOCKED'
+        ? 'POLICY_BLOCKED'
+        : waitingLegs.length || freshnessBlocking.length
+          ? 'WAITING_FOR_FRESH_PRICES'
+          : allLegsActionable && correlationStatus === 'CLEAR' && combinedOddsAvailable
+            ? 'ACTIONABLE'
+            : 'REVIEW_ONLY'
+
+  const recommendationSummary = parlayActionability === 'ACTIONABLE'
+    ? 'Actionable selected parlay. All selected legs pass current leg, freshness and direct-correlation checks.'
+    : parlayActionability === 'WAITING_FOR_FRESH_PRICES'
+      ? 'Parlay not actionable - one or more selected legs need fresh prices.'
+      : parlayActionability === 'POLICY_BLOCKED'
+        ? 'Blocked combination. One or more selected legs conflict, are unsupported, post-start, unavailable or policy-blocked.'
+        : parlayActionability === 'NO_ELIGIBLE_LEGS'
+          ? 'No eligible legs. No current opportunities can enter the builder.'
+          : parlayActionability === 'NO_SAFE_COMBINATION'
+            ? 'No safe combination. Select at least two supportable legs before evaluating a parlay.'
+            : 'Review selected parlay. The combination is useful for analysis but not fully actionable.'
+
+  return {
+    selectedLegCount: selectedLegs.length,
+    minimumLegCount,
+    maximumLegCount,
+    combinedAmericanOdds,
+    combinedDecimalOdds,
+    combinedOddsAvailable,
+    jointProbability: null,
+    jointProbabilityMethod: 'NOT_CERTIFIED',
+    jointProbabilityEvidence: ['No certified homepage joint-probability method is available. Leg probabilities are not multiplied because dependence and correlation are not certified.'],
+    allLegsFresh,
+    freshestLegId,
+    stalestLegId: stalest?.legId ?? null,
+    stalestLegAgeMinutes: stalest?.marketAgeMinutes ?? null,
+    allLegsActionable,
+    blockingLegIds,
+    correlationStatus,
+    correlationReasons,
+    parlayActionability,
+    recommendationSummary,
+    supportingReasons: selectedLegs.length
+      ? selectedLegs.map((leg) => leg.officialPick ? `${leg.selectionLabel} is an existing Official Pick.` : leg.rentPlay ? `${leg.selectionLabel} overlaps with Rent Play.` : leg.moneylineBet ? `${leg.selectionLabel} overlaps with Moneyline Bet.` : `${leg.selectionLabel} comes from ${leg.sourceSurface}.`).slice(0, 5)
+      : ['No legs are selected.'],
+    riskReasons: [
+      'Every selected leg must win.',
+      'Risk compounds with each added leg.',
+      combinedOddsAvailable ? 'Combined odds are mechanical price math, not model confidence.' : 'Combined odds are unavailable until every selected leg has a valid selected price.',
+      'Joint probability is unavailable because no certified dependence model is exposed for this homepage builder.',
+      correlationStatus === 'POTENTIAL' ? 'Same-event or related legs may be correlated.' : '',
+    ].filter(Boolean),
+    whatWouldChangeTheDecision: [
+      'A selected leg becomes stale, unavailable, post-start or unsupported.',
+      'A selected price changes or disappears.',
+      'The user removes the limiting leg.',
+      'A fresher or stronger eligible leg replaces a weaker selected leg.',
+      'Correlation becomes blocked by duplicate or direct-opposite evidence.',
+      'A certified joint-probability method becomes available.',
+    ],
+  }
+}
+
+function buildSmartParlayContract(
+  plan: ReturnType<typeof pickPlan>,
+  rentPlay: RentPlayContract,
+  moneyline: MoneylineBetContract,
+): SmartParlayContract {
+  const observedAt = new Date().toISOString()
+  const seen = new Set<string>()
+  const rejectedLegs: SmartParlayLeg[] = []
+  const availableLegs: SmartParlayLeg[] = []
+  const rawLegs = plan.candidates.sort(compareParlayEvidence).slice(0, 16)
+  for (const pick of rawLegs) {
+    const leg = planPickToParlayLeg(pick, rentPlay, moneyline)
+    const key = `${leg.eventId ?? leg.eventLabel}|${leg.marketKey}|${leg.selectionKey}|${leg.bookmaker ?? ''}`
+    if (seen.has(key) || !isSupportedParlayMarket(pick) || leg.actionability === 'UNSUPPORTED' || leg.actionability === 'POST_START_BLOCKED') {
+      rejectedLegs.push({
+        ...leg,
+        actionability: seen.has(key) ? 'POLICY_BLOCKED' : leg.actionability,
+        blockers: [...leg.blockers, seen.has(key) ? 'Duplicate leg identity' : 'Not eligible for Smart Parlay'],
+      })
+      continue
+    }
+    seen.add(key)
+    availableLegs.push(leg)
+    if (availableLegs.length >= 8) break
+  }
+  const suggested: SmartParlayLeg[] = []
+  for (const leg of availableLegs) {
+    if (leg.actionability !== 'ACTIONABLE') continue
+    if (suggested.some((item) => item.eventId && item.eventId === leg.eventId)) continue
+    suggested.push(leg)
+    if (suggested.length >= 3) break
+  }
+  const defaultSelected = suggested.length >= 2 ? suggested : []
+  const summary = evaluateSmartParlaySelection(availableLegs, defaultSelected.map((leg) => leg.legId), 2, 5)
+  const status: SmartParlayStatus = !plan.candidates.length ? 'NO_GAMES' : summary.parlayActionability
+  return {
+    contractVersion: 'smart_parlay_v1',
+    status,
+    mode: defaultSelected.length ? 'SUGGESTED' : 'EMPTY',
+    availableLegs,
+    selectedLegs: defaultSelected,
+    rejectedLegs,
+    ...summary,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    observedAt,
+  }
+}
+
 function MetricBar({ label: metricLabel, value, tone = 'green' }: { label: string; value: number | null; tone?: Tone }) {
   return (
     <div>
@@ -746,6 +1140,11 @@ function impliedFromAmerican(value: number | null) {
   if (value === null) return null
   const implied = value > 0 ? 100 / (value + 100) : Math.abs(value) / (Math.abs(value) + 100)
   return Number((implied * 100).toFixed(2))
+}
+
+function americanFromDecimal(value: number | null) {
+  if (value === null || value <= 1) return null
+  return value >= 2 ? Math.round((value - 1) * 100) : Math.round(-100 / (value - 1))
 }
 
 function minutesSince(value: string | null) {
@@ -1220,63 +1619,133 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
   )
 }
 
-function ParlayBuilder({ legs }: { legs: PlanPick[] }) {
-  const [enabled, setEnabled] = useState<Record<string, boolean>>({})
-  const defaultEnabled = useMemo(() => Object.fromEntries(legs.map((leg, index) => [leg.id, index < 3])), [legs])
+function smartParlayTone(status: SmartParlayStatus): Tone {
+  if (status === 'ACTIONABLE') return 'green'
+  if (status === 'WAITING_FOR_FRESH_PRICES' || status === 'REVIEW_ONLY') return 'yellow'
+  if (status === 'NO_ELIGIBLE_LEGS' || status === 'NO_SAFE_COMBINATION' || status === 'NO_GAMES') return 'gray'
+  return 'red'
+}
 
-  const selected = legs.filter((leg) => enabled[leg.id] ?? defaultEnabled[leg.id])
-  const probability = selected.reduce((product, leg) => product * Math.max(0, Math.min(1, Number(leg.probability ?? 0) / 100)), selected.length ? 1 : 0) * 100
-  const confidence = selected.length ? selected.reduce((sum, leg) => sum + Number(leg.confidence ?? 0), 0) / selected.length : null
-  const ev = selected.length ? selected.reduce((sum, leg) => sum + Number(leg.ev ?? 0), 0) : null
+function legActionTone(status: SmartParlayLegActionability): Tone {
+  if (status === 'ACTIONABLE') return 'green'
+  if (status === 'REVIEW_ONLY' || status === 'WAITING_FOR_FRESH_PRICE') return 'yellow'
+  if (status === 'UNKNOWN' || status === 'MARKET_UNAVAILABLE') return 'gray'
+  return 'red'
+}
+
+function SmartParlayBuilder({ parlay }: { parlay: SmartParlayContract }) {
+  const defaultSelectedIds = useMemo(() => parlay.selectedLegs.map((leg) => leg.legId), [parlay.selectedLegs])
+  const [selectedIds, setSelectedIds] = useState<string[]>(defaultSelectedIds)
+
+  const selectedSummary = useMemo(
+    () => evaluateSmartParlaySelection(parlay.availableLegs, selectedIds, parlay.minimumLegCount, parlay.maximumLegCount),
+    [parlay.availableLegs, parlay.maximumLegCount, parlay.minimumLegCount, selectedIds],
+  )
+  const selectedLegs = selectedSummary.selectedLegCount
+    ? selectedIds.map((id) => parlay.availableLegs.find((leg) => leg.legId === id)).filter((leg): leg is SmartParlayLeg => Boolean(leg))
+    : []
+  const displayedStatus = parlay.status === 'NO_GAMES' ? 'NO_GAMES' : selectedSummary.parlayActionability
+  const canAdd = selectedIds.length < parlay.maximumLegCount
+
+  function toggleLeg(leg: SmartParlayLeg) {
+    setSelectedIds((current) => {
+      if (current.includes(leg.legId)) return current.filter((id) => id !== leg.legId)
+      if (current.length >= parlay.maximumLegCount) return current
+      return [...current, leg.legId]
+    })
+  }
 
   return (
-    <article className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-mc08a-smart-parlay="true">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+    <article className="rounded-lg border border-violet-300/20 bg-slate-950/85 p-5 shadow-2xl shadow-slate-950/20 md:p-6" data-mc08a-smart-parlay="true" data-mc08d-smart-parlay-card="true" data-smart-parlay-status={displayedStatus}>
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Smart Parlay</p>
-          <h2 className="mt-3 text-2xl font-black text-white md:text-3xl">Suggested Legs</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-400">Toggle legs. The math updates instantly in the browser from existing prediction evidence.</p>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-violet-200">Smart Parlay</p>
+          <h2 className="mt-3 break-words text-2xl font-black text-white md:text-3xl">
+            {displayedStatus === 'NO_ELIGIBLE_LEGS' || displayedStatus === 'NO_SAFE_COMBINATION' || displayedStatus === 'NO_GAMES' ? 'No Safe Parlay Available' : 'Build A Selected Parlay'}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            Select legs to evaluate the combination. Combined odds are price math only; joint probability is unavailable until a certified method exists.
+          </p>
         </div>
-        <StatusChip tone={selected.length >= 2 ? 'blue' : 'gray'}>{selected.length} Legs</StatusChip>
+        <div className="flex flex-wrap gap-2 md:justify-end">
+          <StatusChip tone={smartParlayTone(displayedStatus)}>{displayedStatus.replaceAll('_', ' ')}</StatusChip>
+          <StatusChip tone="blue">{selectedSummary.selectedLegCount} of {parlay.maximumLegCount} selected</StatusChip>
+        </div>
       </div>
 
-      <div className="mt-5 grid gap-3">
-        {legs.length ? legs.map((leg) => (
-          <label key={leg.id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-800 bg-slate-900 p-3">
-            <input
-              type="checkbox"
-              checked={Boolean(enabled[leg.id] ?? defaultEnabled[leg.id])}
-              onChange={() => setEnabled((current) => ({ ...current, [leg.id]: !(current[leg.id] ?? defaultEnabled[leg.id]) }))}
-              className="mt-1 h-5 w-5 accent-emerald-400"
-            />
-            <span className="min-w-0 flex-1">
-              <span className="block break-words text-sm font-black text-white">{leg.selection}</span>
-              <span className="mt-1 block text-xs font-semibold text-slate-400">{leg.market} / {pct(leg.probability)} / {odds(leg.odds)}</span>
-            </span>
-            <span className="text-xs font-black text-emerald-200">{pct(leg.confidence)}</span>
-          </label>
-        )) : (
-          <div className="rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-300">No qualified parlay legs are available today.</div>
-        )}
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MiniMetric label="Available Legs" value={parlay.availableLegs.length} />
+        <MiniMetric label="Combined Odds" value={selectedSummary.combinedOddsAvailable ? odds(selectedSummary.combinedAmericanOdds) : 'Unavailable' } />
+        <MiniMetric label="Joint Probability" value="Unavailable" />
+        <MiniMetric label="Stalest Leg" value={selectedSummary.stalestLegAgeMinutes === null ? 'Unavailable' : `${selectedSummary.stalestLegAgeMinutes} min`} />
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-          <p className="text-xs font-black uppercase text-slate-500">Probability</p>
-          <p className="mt-2 text-2xl font-black text-white">{pct(probability)}</p>
+      <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900/70 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase text-slate-500">Selected Legs</p>
+            <p className="mt-1 text-sm font-bold text-slate-200">
+              {selectedLegs.length ? selectedLegs.map((leg) => leg.selectionLabel).join(' / ') : 'No legs selected.'}
+            </p>
+          </div>
+          <button type="button" onClick={() => setSelectedIds([])} className="min-h-11 rounded-lg border border-slate-700 px-4 py-2 text-sm font-black text-slate-100 outline-none hover:border-violet-200/50 hover:bg-violet-200/10 focus-visible:ring-2 focus-visible:ring-violet-200">
+            Reset
+          </button>
         </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-          <p className="text-xs font-black uppercase text-slate-500">Confidence</p>
-          <p className="mt-2 text-2xl font-black text-white">{pct(confidence)}</p>
-        </div>
-        <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-          <p className="text-xs font-black uppercase text-slate-500">EV</p>
-          <p className="mt-2 text-2xl font-black text-white">{signedPct(ev)}</p>
-        </div>
+        <p className="mt-3 text-sm leading-6 text-slate-300">{selectedSummary.recommendationSummary}</p>
       </div>
-      <details className="mt-5 rounded-lg border border-slate-800 bg-slate-900/70 p-4">
-        <summary className="cursor-pointer text-sm font-black text-white">Risk</summary>
-        <p className="mt-3 text-sm leading-6 text-slate-300">Parlay Builder math is informational. Leg independence and correlation are not promoted into Official Pick policy here.</p>
+
+      <details className="mt-5 rounded-lg border border-slate-800 bg-slate-900/70 p-4" data-mc08d-smart-parlay-builder="true">
+        <summary className="cursor-pointer text-sm font-black text-white">Open builder</summary>
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="grid gap-3">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Available Legs</p>
+            {parlay.availableLegs.length ? parlay.availableLegs.map((leg) => {
+              const selected = selectedIds.includes(leg.legId)
+              const disabled = !selected && !canAdd
+              return (
+                <label key={leg.legId} className={`flex min-w-0 cursor-pointer flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-start ${selected ? 'border-violet-300/50 bg-violet-300/10' : 'border-slate-800 bg-slate-950/70'} ${disabled ? 'opacity-60' : ''}`}>
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    disabled={disabled}
+                    onChange={() => toggleLeg(leg)}
+                    className="mt-1 h-5 w-5 accent-violet-300"
+                    aria-label={`${selected ? 'Remove' : 'Add'} ${leg.selectionLabel}`}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block break-words text-sm font-black text-white">{leg.selectionLabel}</span>
+                    <span className="mt-1 block text-xs font-semibold text-slate-400">{leg.eventLabel} / {leg.marketLabel}</span>
+                    <span className="mt-2 flex flex-wrap gap-2">
+                      <StatusChip tone={legActionTone(leg.actionability)}>{leg.actionability.replaceAll('_', ' ')}</StatusChip>
+                      {leg.rentPlay ? <StatusChip tone="green">Rent Play</StatusChip> : null}
+                      {leg.moneylineBet ? <StatusChip tone="blue">Moneyline</StatusChip> : null}
+                    </span>
+                  </span>
+                  <span className="grid gap-1 text-left text-xs font-black text-slate-300 sm:text-right">
+                    <span>{pct(leg.modelProbability)}</span>
+                    <span>{odds(leg.americanOdds)}</span>
+                    <span>{leg.marketAgeMinutes === null ? leg.freshnessStatus : `${leg.marketAgeMinutes} min`}</span>
+                  </span>
+                </label>
+              )
+            }) : (
+              <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-4 text-sm text-slate-300">No safe suggested combination is available. The user may still review eligible legs when they appear.</div>
+            )}
+          </div>
+
+          <div className="grid gap-3">
+            <MiniText label="Actionability" value={selectedSummary.parlayActionability.replaceAll('_', ' ')} />
+            <MiniText label="Combined Odds" value={selectedSummary.combinedOddsAvailable ? `${odds(selectedSummary.combinedAmericanOdds)} / decimal ${selectedSummary.combinedDecimalOdds}` : 'Unavailable until every selected leg has canonical odds.'} />
+            <MiniText label="Joint Probability" value={`${selectedSummary.jointProbabilityMethod}. ${selectedSummary.jointProbabilityEvidence.join(' ')}`} />
+            <MiniText label="Freshness" value={selectedSummary.allLegsFresh ? 'All selected legs are fresh.' : `Limited by ${selectedSummary.stalestLegId ?? 'an unavailable or stale leg'}.`} />
+            <MiniText label="Correlation" value={`${selectedSummary.correlationStatus}. ${selectedSummary.correlationReasons.join(' / ')}`} />
+            <MiniText label="Blocking Legs" value={selectedSummary.blockingLegIds.length ? selectedSummary.blockingLegIds.join(' / ') : 'None'} />
+            <MiniText label="Why These Legs" value={selectedSummary.supportingReasons.join(' / ')} />
+            <MiniText label="Main Risks" value={selectedSummary.riskReasons.join(' / ')} />
+            <MiniText label="What Would Change The Decision" value={selectedSummary.whatWouldChangeTheDecision.join(' / ')} />
+          </div>
+        </div>
       </details>
     </article>
   )
@@ -1406,6 +1875,7 @@ export default function HomeBettingPlan() {
   const plan = useMemo(() => pickPlan(data), [data])
   const rentPlayContract = useMemo(() => buildRentPlayContract(plan), [plan])
   const moneylineBetContract = useMemo(() => buildMoneylineBetContract(plan, rentPlayContract), [plan, rentPlayContract])
+  const smartParlayContract = useMemo(() => buildSmartParlayContract(plan, rentPlayContract, moneylineBetContract), [plan, rentPlayContract, moneylineBetContract])
 
   if (error) {
     return (
@@ -1445,7 +1915,7 @@ export default function HomeBettingPlan() {
 
         <div className="grid gap-4 lg:grid-cols-2">
           <MoneylineBetCard moneyline={moneylineBetContract} />
-          <ParlayBuilder legs={plan.parlayLegs} />
+          <SmartParlayBuilder parlay={smartParlayContract} />
         </div>
 
         <Watchlist picks={plan.watchlist} />

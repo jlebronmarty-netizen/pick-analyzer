@@ -69,6 +69,8 @@ Current V2 certification documents:
 - [MC-08B Rent Play Experience JSON](mc-08b-rent-play-experience.json)
 - [MC-08C Moneyline Bet Experience](MC_08C_MONEYLINE_BET_EXPERIENCE.md)
 - [MC-08C Moneyline Bet Experience JSON](mc-08c-moneyline-bet-experience.json)
+- [MC-08D Smart Parlay Experience](MC_08D_SMART_PARLAY_EXPERIENCE.md)
+- [MC-08D Smart Parlay Experience JSON](mc-08d-smart-parlay-experience.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

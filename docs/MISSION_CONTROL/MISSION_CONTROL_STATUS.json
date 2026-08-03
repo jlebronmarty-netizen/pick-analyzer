@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_08C_PRODUCTION_CERTIFIED_MC_08D_READY",
+  "status": "MC_08D_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -14,16 +14,16 @@
   "nextMission": {
     "id": "MC-08",
     "title": "Daily Betting Product Completion",
-    "state": "READY",
+    "state": "ACTIVE",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "READY"
+    "readiness": "ACTIVE"
   },
   "missionCounts": {
     "total": 11,
-    "ready": 3,
+    "ready": 2,
     "planned": 6,
-    "active": 0,
+    "active": 1,
     "conditionalPass": 0,
     "productionCertifiedRecentCompletions": 9
   },
@@ -230,7 +230,31 @@
     "homepageHttp": 200,
     "renderedDesktop": "PASS",
     "renderedMobile": "PASS",
-    "mc08dStarted": false
+    "mc08dStarted": true
+  },
+  "mc08d": {
+    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+    "title": "Smart Parlay Experience V1",
+    "certificationArtifact": "docs/CERTIFICATION/mc-08d-smart-parlay-experience.json",
+    "contractVersion": "smart_parlay_v1",
+    "homepageSmartParlayOnly": true,
+    "reason": "Smart Parlay is being converted into a typed user-selected presentation contract with bounded legs, mechanical combined odds, explicit correlation and no fabricated joint probability.",
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "predictionChanged": false,
+    "officialPicksChanged": false,
+    "rentPlayChanged": false,
+    "moneylineBetChanged": false,
+    "mostLikelyRankingChanged": false,
+    "bestValueRankingChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "productionCommit": null,
+    "homepageHttp": null,
+    "renderedDesktop": "PENDING",
+    "renderedMobile": "PENDING",
+    "mc08eStarted": false
   },
   "runtimeSurfaces": ["/api/mission-control", "/api/mission-control/data-readiness", "/mission-control"],
   "validationScript": "scripts/mission-control-v1-validate.mjs",
