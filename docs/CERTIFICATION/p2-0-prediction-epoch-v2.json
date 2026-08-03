@@ -23,9 +23,9 @@
     "officialPickPolicyChanged": false,
     "modelFormulaChanged": false
   },
-  "initialCurrentEra": {
-    "generated": 0,
-    "productionEligible": 0,
+  "currentEraProductionEvidence": {
+    "generated": 24,
+    "productionEligible": 24,
     "settled": 0,
     "wins": 0,
     "losses": 0,
@@ -38,6 +38,7 @@
     "futurePredictionWritesStampEpoch": true,
     "currentBoardDefaultsToActiveEpoch": true,
     "performanceDefaultsToCurrentEra": true,
+    "performanceEligibilityUsesProductionEvaluationPolicy": true,
     "historicalEraPreservedSeparately": true
   },
   "providerCallsMadeByCertification": 0,

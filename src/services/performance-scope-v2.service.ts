@@ -11,6 +11,7 @@ import {
   canonicalStoredOutcome,
 } from '@/services/canonical-settlement-state.service'
 import { getActivePredictionEpoch } from '@/services/prediction-epoch-runtime.service'
+import { CURRENT_V2_EPOCH_KEY } from '@/services/prediction-epoch-runtime.service'
 
 const TIMEZONE = 'America/Puerto_Rico'
 const DEFAULT_MAX_PREDICTION_ROWS = 2000
@@ -62,6 +63,7 @@ type PredictionRow = {
   is_current?: boolean | null
   prediction_epoch_id?: string | null
   prediction_epoch_key?: string | null
+  feature_snapshot?: Record<string, unknown> | null
 }
 
 type EventRow = {
@@ -119,7 +121,22 @@ function pendingReason(row: PredictionRow, event: EventRow | undefined) {
   return canonicalPendingReason(row, event)
 }
 
+function productionEvaluationPolicy(row: PredictionRow) {
+  return asObject(asObject(row.feature_snapshot).productionEvaluationPolicy)
+}
+
 function eligibility(row: PredictionRow, event: EventRow | undefined) {
+  const policy = productionEvaluationPolicy(row)
+  if (
+    row.prediction_epoch_key === CURRENT_V2_EPOCH_KEY &&
+    policy.production_evaluable === true &&
+    policy.prediction_valid === true
+  ) {
+    return {
+      eligible: true,
+      reason: 'CURRENT_V2_PRODUCTION_EVALUABLE',
+    }
+  }
   return canonicalEligibility(row, event)
 }
 
@@ -205,7 +222,7 @@ async function loadRows(sportKey?: string | null, maxRows = DEFAULT_MAX_PREDICTI
     const pageSize = Math.min(1000, rowLimit - from)
     let query = supabaseAdmin
       .from('prediction_history')
-      .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, line, result, status, lifecycle_status, recommended_pick, production_eligible, trial, scrambled, validation_status, validation_warnings, model_role, model_version, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key, generated_at, created_at, cutoff_at, settled_at, settlement_details, skip_reason, is_current, prediction_epoch_id, prediction_epoch_key')
+      .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, line, result, status, lifecycle_status, recommended_pick, production_eligible, trial, scrambled, validation_status, validation_warnings, model_role, model_version, feature_snapshot_id, odds_snapshot_id, operating_day_id, idempotency_key, generated_at, created_at, cutoff_at, settled_at, settlement_details, skip_reason, is_current, prediction_epoch_id, prediction_epoch_key, feature_snapshot')
       .order('created_at', { ascending: false })
       .range(from, from + pageSize - 1)
     if (sportKey) query = query.eq('sport_key', sportKey)
@@ -295,6 +312,7 @@ export async function getPerformanceScopeV2({
     scopePolicy: {
       defaultEra: activeEpoch ? 'CURRENT_V2_PRODUCTION' : 'LEGACY_DEFAULT',
       activeEpoch,
+      currentV2EligibilityUses: 'feature_snapshot.productionEvaluationPolicy.production_evaluable',
       generatedUses: 'event_start_ast_date_fallback_prediction_generated_at',
       settlementUses: 'stored_result_and_settled_at_when_available',
       pushHandling: 'pushes_count_as_settled_but_are_excluded_from_win_loss_accuracy_and_brier_scoring',

@@ -32,11 +32,11 @@ Future prediction writes stamp `prediction_epoch_id`, `prediction_epoch_key` and
 - Performance defaults to Current V2 Production when an active epoch exists.
 - Historical evidence remains available as a separate era.
 
-## Initial Current Era
+## Current Era Evidence
 
-Generated: 0
+Generated: 24
 
-Production Eligible: 0
+Production Eligible: 24
 
 Settled: 0
 
@@ -44,4 +44,4 @@ Wins/Losses/Pushes: 0-0-0
 
 Accuracy, Brier and Calibration: N/A
 
-Production verification showed `/api/current-board?mode=current&limit=200` returning 0 Current V2 candidates immediately after activation, and `/api/performance` defaulting to `CURRENT_V2_PRODUCTION` with 0 generated, 0 production eligible and 0 settled rows. Historical rows remain available separately.
+Production verification showed `/api/current-board?mode=current&limit=200` returning 24 Current V2 candidates after the next protected writer cycle, and `/api/performance` defaulting to `CURRENT_V2_PRODUCTION`. Performance eligibility is mapped from `feature_snapshot.productionEvaluationPolicy.production_evaluable`, not from the legacy recommendation gate. Historical rows remain available separately.

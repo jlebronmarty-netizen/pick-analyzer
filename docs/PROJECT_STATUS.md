@@ -23,6 +23,7 @@ Last updated: 2026-07-30 20:05:00Z
 - Current epoch key: `CURRENT_V2_PRODUCTION`; historical scope key: `LEGACY_PRE_V2`; timezone: `America/Puerto_Rico`.
 - Historical rows are not rewritten or deleted, P1.4 rows remain pre-activation history, and model formulas, recommendation gates and Official Pick policy are unchanged.
 - Current V2 Production started at `2026-08-03T19:57:02.418+00:00`; activation made 2 epoch-governance mutations, 0 prediction-row mutations and 0 provider calls.
+- The next protected writer cycle produced 24 Current V2 rows. Performance maps Current Era production eligibility from `feature_snapshot.productionEvaluationPolicy.production_evaluable`, keeping recommendation gates and Official Pick policy separate.
 
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 
