@@ -20,8 +20,8 @@ The expected count is computed from stored market evidence. It is not a fixed nu
 | Market | Expected selections | Identity |
 | --- | --- | --- |
 | Moneyline | home and away when both canonical rows exist | `epoch:event:moneyline:team:none` |
-| Spread / run line | home and away when both canonical rows exist | `epoch:event:spread:team:line` |
-| Total | over and under when both canonical rows exist | `epoch:event:total:Over/Under:line` |
+| Spread / run line | latest home and latest away canonical line when both canonical rows exist | `epoch:event:spread:team:line` |
+| Total | latest over and latest under canonical total when both canonical rows exist | `epoch:event:total:Over/Under:line` |
 
 Complements are not fabricated. If the provider does not store a selection row, P2.1 records the missing state instead of synthesizing it from the opposite side.
 
@@ -32,6 +32,8 @@ Three-way markets are not treated as binary markets.
 The MLB prospective generator previously selected one odds row per event and normalized market. That collapsed the side universe into a 24-row contract for 8 events and 3 markets.
 
 P2.1 changes selection to keep market, outcome and line identity. Persistence reuse keys now include line identity so same-team market rows with different lines cannot silently overwrite each other.
+
+The production writer keeps the latest canonical line for each side. Historical stale line changes from earlier snapshots are not treated as additional current production selections because the existing current-version constraint is one current row per event, market and selection.
 
 ## Coverage Endpoint
 

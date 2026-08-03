@@ -46,7 +46,7 @@ const allowed = new Set([
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 
-check('generator chooses by market, outcome and line', writer.includes("String(row.outcome).toLowerCase()") && writer.includes("row.line ?? 'none'"))
+check('generator chooses by market and outcome while preserving selected line', writer.includes("String(row.outcome).toLowerCase()") && writer.includes("row.line ?? 'none'") && writer.includes('legacyReuseAllowed'))
 check('prediction logical identity includes line', writer.includes('function predictionLogicalKey') && writer.includes("market === 'moneyline' ? 'none'") && writer.includes('${row.game_id}:${market}:${row.team}:${line}'))
 check('coverage route exists', exists('src/app/api/operations/prediction-coverage/route.ts'))
 check('coverage route is protected', route.includes('CRON_SECRET') && route.includes("request.headers.get('authorization')") && !route.includes('searchParams.get'))
@@ -55,6 +55,7 @@ check('coverage service reads stored events', service.includes(".from('sport_eve
 check('coverage service reads stored odds only', service.includes(".from('sports_odds_snapshots')") && service.includes(".eq('provider', PROVIDER)") && !service.includes('fetch('))
 check('coverage service reads active epoch predictions', service.includes('getActivePredictionEpoch') && service.includes(".from('prediction_history')"))
 check('coverage semantics are explicit', service.includes('complementDerivation') && service.includes('threeWayMarkets') && service.includes('uniquenessKey'))
+check('coverage uses latest line per canonical side', service.includes('expectedSelectionBaseKey') && service.includes('selectionSide(market'))
 check('coverage states account for misses and cutoff', service.includes('PREDICTION_CREATED') && service.includes('MISSED_OPPORTUNITY') && service.includes('CUTOFF_MISSED') && service.includes('DUPLICATE_COLLAPSED'))
 check('zero provider calls and mutations are declared', service.includes('providerCallsMade: 0') && service.includes('remoteMutationsMade: 0'))
 check('certification records unchanged policies', cert.guards.predictionFormulaChanged === false && cert.guards.officialPickPolicyChanged === false && cert.guards.schedulerCadenceChanged === false)

@@ -19,9 +19,11 @@ The prior 24-row contract came from selecting one odds row per event and normali
 
 ## Implemented Repair
 
-- Odds selection now keys by event, normalized market, outcome and line.
+- Odds selection now keys by event, normalized market and outcome, preserving the latest selected line on the row.
 - Prediction reuse/supersession identity now includes line identity.
 - New protected read-only coverage endpoint exposes expected selections and reconciliation states.
+
+After production execution exposed the existing current-version uniqueness constraint, P2.1 narrowed the production universe to the latest canonical line per side. This avoids treating stale historical line changes as separate current selections while preserving exact line identity for the selected current row.
 
 ## Certification Gates
 

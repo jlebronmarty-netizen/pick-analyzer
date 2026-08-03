@@ -89,6 +89,10 @@ function expectedKey(input: { eventId: string; market: string; selection: string
   ].join('|')
 }
 
+function expectedSelectionBaseKey(input: { eventId: string; market: string; side: string }) {
+  return [input.eventId, input.market, input.side].join('|')
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value)
     ? value as Record<string, unknown>
@@ -112,11 +116,10 @@ function latestSelectionRows(events: EventRow[], oddsRows: OddsRow[]) {
     if (startMs === null || oddsMs === null) continue
     const cutoffMs = startMs - 10 * 60 * 1000
     if (oddsMs > cutoffMs) continue
-    const key = expectedKey({
+    const key = expectedSelectionBaseKey({
       eventId: row.event_id,
       market,
-      selection: selectionFor(event, market, String(row.outcome)),
-      line: market === 'moneyline' ? null : row.line,
+      side: selectionSide(market, String(row.outcome)),
     })
     const current = selected.get(key)
     const currentMs = parseMs(current?.snapshot_time) ?? 0

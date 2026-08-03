@@ -732,7 +732,7 @@ function chooseOddsRows(events: EventRow[], odds: OddsRow[]) {
     if (start === null || ts === null) continue
     const cutoff = start - 10 * 60 * 1000
     if (ts > cutoff) continue
-    const key = `${row.event_id}:${marketForPrediction(row.market)}:${String(row.outcome).toLowerCase()}:${row.line ?? 'none'}`
+    const key = `${row.event_id}:${marketForPrediction(row.market)}:${String(row.outcome).toLowerCase()}`
     const existing = chosen.get(key)
     if (!existing || shouldReplaceChosenOdds(row, existing)) {
       chosen.set(key, row)
@@ -750,6 +750,14 @@ function predictionLogicalKey(row: {
   const market = String(row.market ?? '')
   const line = market === 'moneyline' ? 'none' : String(row.line ?? 'none')
   return `${row.game_id}:${market}:${row.team}:${line}`
+}
+
+function predictionBaseKey(row: {
+  game_id?: unknown
+  market?: unknown
+  team?: unknown
+}) {
+  return `${row.game_id}:${row.market}:${row.team}`
 }
 
 type TeamGame = {
@@ -2381,7 +2389,7 @@ async function writeSnapshotsAndPredictions(
     const existingLogicalResult = eventIds.length
       ? await supabaseAdmin
           .from('prediction_history')
-          .select('id, game_id, market, team, odds, model_probability, confidence, edge, ev, feature_snapshot_id, model_version, feature_set_version, feature_snapshot')
+          .select('id, game_id, market, team, line, odds, model_probability, confidence, edge, ev, feature_snapshot_id, model_version, feature_set_version, feature_snapshot')
           .eq('sport_key', SPORT_KEY)
           .in('game_id', eventIds)
       : { data: [], error: null }
@@ -2393,6 +2401,19 @@ async function writeSnapshotsAndPredictions(
         predictionLogicalKey(row),
         String(row.id),
       ])
+    )
+    const currentBatchBaseCounts = predictionRows.reduce((acc, row) => {
+      const key = predictionBaseKey(row)
+      acc.set(key, (acc.get(key) ?? 0) + 1)
+      return acc
+    }, new Map<string, number>())
+    const legacyNullLineLogical = new Map(
+      (existingLogicalResult.data ?? [])
+        .filter((row) => row.market !== 'moneyline' && row.line === null)
+        .map((row) => [
+          predictionBaseKey(row),
+          String(row.id),
+        ])
     )
     const previousByLogical = new Map(
       (existingLogicalResult.data ?? []).map((row) => {
@@ -2417,11 +2438,38 @@ async function writeSnapshotsAndPredictions(
         ]
       })
     )
+    const previousByLegacyNullLine = new Map(
+      (existingLogicalResult.data ?? [])
+        .filter((row) => row.market !== 'moneyline' && row.line === null)
+        .map((row) => {
+          const snapshot = asRecord(row.feature_snapshot) ?? {}
+          return [
+            predictionBaseKey(row),
+            {
+              id: row.id,
+              odds: row.odds,
+              modelProbability: row.model_probability,
+              confidence: row.confidence,
+              edge: row.edge,
+              ev: row.ev,
+              featureSnapshotId: row.feature_snapshot_id,
+              modelVersion: row.model_version,
+              featureSetVersion: row.feature_set_version,
+              aiRating: snapshot.aiRating ?? null,
+              recommendationStatus: snapshot.recommendationStatus ?? null,
+              intelligenceVersion: snapshot.intelligenceVersion ?? null,
+              rankingScore: snapshot.rankingScore ?? null,
+            },
+          ]
+        })
+    )
     for (const row of predictionRows) {
       const logicalKey = predictionLogicalKey(row)
-      const existingId = existingLogical.get(logicalKey)
+      const baseKey = predictionBaseKey(row)
+      const legacyReuseAllowed = currentBatchBaseCounts.get(baseKey) === 1
+      const existingId = existingLogical.get(logicalKey) ?? (legacyReuseAllowed ? legacyNullLineLogical.get(baseKey) : undefined)
       if (existingId && !immutablePredictions) row.id = existingId
-      const previous = previousByLogical.get(logicalKey)
+      const previous = previousByLogical.get(logicalKey) ?? (legacyReuseAllowed ? previousByLegacyNullLine.get(baseKey) : undefined)
       const snapshot = asRecord(row.feature_snapshot)
       if (predictionVersioningApplied && previous) {
         row.parent_prediction_id = previous.id
@@ -2477,7 +2525,7 @@ async function writeSnapshotsAndPredictions(
     )
     const staleResult = persist && !immutablePredictions ? await supabaseAdmin
       .from('prediction_history')
-      .select('id, game_id, market, team, feature_snapshot')
+      .select('id, game_id, market, team, line, feature_snapshot')
       .eq('sport_key', SPORT_KEY)
       .in('game_id', eventIds)
       : { data: [], error: null }
@@ -2561,7 +2609,7 @@ async function existingPredictionSummary(eventIds: string[]) {
   if (!eventIds.length) return { rows: [], protectedRows: 0, currentRows: 0, runLineAudit: [] as unknown[] }
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
-    .select('id, game_id, market, team, odds, model_probability, confidence, edge, ev, projected_line, model_version, feature_set_version, recommended_pick, production_eligible, recommendation_locked_at, status, result, feature_snapshot')
+    .select('id, game_id, market, team, line, odds, model_probability, confidence, edge, ev, projected_line, model_version, feature_set_version, recommended_pick, production_eligible, recommendation_locked_at, status, result, feature_snapshot')
     .eq('sport_key', SPORT_KEY)
     .in('game_id', eventIds)
   if (error) throw new Error(`prediction_history V6 preflight read failed: ${error.message}`)

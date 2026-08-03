@@ -11,8 +11,8 @@ The current 24-row contract is explained by prior row selection that chose one p
 P2.1 makes the expected universe explicit:
 
 - moneyline home and away;
-- spread home and away by exact line;
-- total over and under by exact total;
+- spread home and away by latest canonical exact line;
+- total over and under by latest canonical exact total;
 - only when each side exists as canonical stored provider evidence;
 - only before cutoff;
 - only for the active Current V2 epoch.
