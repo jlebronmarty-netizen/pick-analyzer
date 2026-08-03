@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_08B_PRODUCTION_CERTIFIED_MC_08C_READY",
+  "status": "MC_08C_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -208,6 +208,25 @@
     "renderedDesktop": "PASS",
     "renderedMobile": "PASS",
     "mc08cStarted": false
+  },
+  "mc08c": {
+    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION",
+    "title": "Moneyline Bet Experience V1",
+    "certificationArtifact": "docs/CERTIFICATION/mc-08c-moneyline-bet-experience.json",
+    "contractVersion": "moneyline_bet_v1",
+    "homepageMoneylineOnly": true,
+    "reason": "Moneyline Bet now has an explicit typed presentation contract, Moneyline-only universe, actionability states, readiness gates, price-implied probability, relationship distinctions and what-would-change evidence.",
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "predictionChanged": false,
+    "officialPicksChanged": false,
+    "rentPlayChanged": false,
+    "mostLikelyRankingChanged": false,
+    "bestValueRankingChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "mc08dStarted": false
   },
   "runtimeSurfaces": ["/api/mission-control", "/api/mission-control/data-readiness", "/mission-control"],
   "validationScript": "scripts/mission-control-v1-validate.mjs",

@@ -67,6 +67,8 @@ Current V2 certification documents:
 - [MC-02 Multi-Sport Data Readiness JSON](mc-02-multi-sport-data-readiness.json)
 - [MC-08B Rent Play Experience](MC_08B_RENT_PLAY_EXPERIENCE.md)
 - [MC-08B Rent Play Experience JSON](mc-08b-rent-play-experience.json)
+- [MC-08C Moneyline Bet Experience](MC_08C_MONEYLINE_BET_EXPERIENCE.md)
+- [MC-08C Moneyline Bet Experience JSON](mc-08c-moneyline-bet-experience.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

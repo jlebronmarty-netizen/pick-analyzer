@@ -68,6 +68,8 @@ MC-08A Homepage Experience update on 2026-08-02: MC-08A is production-certified 
 
 MC-08B Rent Play Experience update on 2026-08-02: MC-08B is production-certified on commit `310b72ab0b304a1901ce598527043043087c9c83`. Rent Play now uses the typed `rent_play_v1` presentation contract with explicit probability, odds, freshness, actionability, Official Pick distinction, Most Likely distinction, readiness gates, risks and what-would-change evidence while preserving all prediction, settlement, learning, scheduler, provider and policy guardrails. MC-08C Moneyline Bet Experience is READY and was not started.
 
+MC-08C Moneyline Bet Experience update on 2026-08-02: MC-08C is locally implemented pending validation and production certification. Moneyline Bet now uses the typed `moneyline_bet_v1` presentation contract with a Moneyline-only universe, price-implied probability, freshness, actionability, Official Pick, Rent Play and Most Likely distinctions, readiness gates, candidate rank, risks and what-would-change evidence while preserving all prediction, settlement, learning, scheduler, provider and policy guardrails. MC-08D was not started.
+
 OE-003F update on 2026-08-02: Product Freshness SLA is locally implemented and build-certified. Decision surfaces now expose `product_freshness_sla_v1`, block future/post-start/timestampless market evidence, downgrade stale prices, and preserve zero provider calls, zero mutations and unchanged prediction/recommendation policy. OE-003G has not started.
 
 Current stabilization evidence:

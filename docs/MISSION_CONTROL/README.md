@@ -41,3 +41,4 @@ Both surfaces are read-only. They do not call providers, write data, start jobs,
 - [MC-01 Operational Readiness Closure](MC_01_OPERATIONAL_READINESS_CLOSURE.md)
 - [MC-02 Multi-Sport Data Readiness](MC_02_MULTI_SPORT_DATA_READINESS.md)
 - [MC-08B Rent Play Experience](MC_08B_RENT_PLAY_EXPERIENCE.md)
+- [MC-08C Moneyline Bet Experience](MC_08C_MONEYLINE_BET_EXPERIENCE.md)

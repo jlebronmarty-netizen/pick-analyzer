@@ -84,9 +84,12 @@ type PlanPick = {
   id: string
   label: string
   source: string
+  sourceRank: number
+  eventId: string | null
   event: string
   selection: string
   market: string
+  marketKey: string
   odds: number | null
   sportsbook: string
   probability: number | null
@@ -115,6 +118,16 @@ type RentPlayStatus =
   | 'UNKNOWN'
 
 type RentPlayGateStatus = 'PASS' | 'FAIL' | 'PENDING' | 'NOT_AVAILABLE'
+
+type MoneylineBetStatus =
+  | 'ACTIONABLE'
+  | 'REVIEW_ONLY'
+  | 'WAITING_FOR_FRESH_PRICE'
+  | 'NO_ELIGIBLE_MONEYLINE'
+  | 'MARKET_UNAVAILABLE'
+  | 'POLICY_BLOCKED'
+  | 'NO_GAMES'
+  | 'UNKNOWN'
 
 type RentPlayGate = {
   id: string
@@ -171,6 +184,63 @@ type RentPlayContract = {
   closestCandidate: PlanPick | null
 }
 
+type MoneylineBetContract = {
+  contractVersion: 'moneyline_bet_v1'
+  status: MoneylineBetStatus
+  eventId: string | null
+  sportKey: string
+  eventLabel: string | null
+  startTime: string | null
+  teamOrParticipantId: string | null
+  teamOrParticipantLabel: string | null
+  opponentLabel: string | null
+  homeAway: string | null
+  marketKey: string | null
+  selectionKey: string | null
+  selectionLabel: string | null
+  americanOdds: number | null
+  decimalOdds: number | null
+  bookmaker: string | null
+  provider: string | null
+  modelProbability: number | null
+  impliedProbability: number | null
+  probabilityAdvantage: number | null
+  confidence: number | null
+  edge: number | null
+  expectedValue: number | null
+  marketTimestamp: string | null
+  marketAgeMinutes: number | null
+  freshnessStatus: string
+  freshnessTargetMinutes: number | null
+  nextPlannedRefreshAt: string | null
+  officialPick: boolean
+  rentPlay: boolean
+  mostLikely: boolean
+  bestValue: boolean
+  actionability: string
+  eligibilityGates: RentPlayGate[]
+  passedGateCount: number
+  failedGateCount: number
+  pendingGateCount: number
+  unavailableGateCount: number
+  selectionReasons: string[]
+  comparisonReasons: string[]
+  riskReasons: string[]
+  blockers: string[]
+  warnings: string[]
+  whatWouldChangeTheDecision: string[]
+  candidateCount: number
+  eligibleCandidateCount: number
+  rankWithinMoneylineUniverse: number | null
+  sourceSurface: string
+  sourceRowId: string | null
+  canonicalAcquisitionId: string | null
+  evidence: string[]
+  observedAt: string
+  candidate: PlanPick | null
+  closestCandidate: PlanPick | null
+}
+
 const toneClasses: Record<Tone, string> = {
   green: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-50',
   yellow: 'border-amber-300/30 bg-amber-300/10 text-amber-50',
@@ -214,6 +284,25 @@ const rentPlayCopy = {
     waiting: 'Esperando precio actualizado',
     candidate: 'Mejor candidato disponible - no Rent Play',
     empty: 'No hay una jugada que cumpla los requisitos.',
+  },
+}
+
+const moneylineCopy = {
+  en: {
+    label: 'Moneyline Bet',
+    noEligible: 'No Eligible Moneyline Bet',
+    waiting: 'Best Moneyline Candidate - Waiting for Fresh Price',
+    unavailable: 'Moneyline Market Unavailable',
+    reviewOnly: 'Review-Only Moneyline Candidate',
+    empty: 'No current Moneyline satisfies the complete probability, price, freshness, value and policy requirements.',
+  },
+  es: {
+    label: 'Apuesta Moneyline',
+    noEligible: 'No hay moneyline elegible',
+    waiting: 'Mejor candidato moneyline - esperando precio actualizado',
+    unavailable: 'Mercado moneyline no disponible',
+    reviewOnly: 'Candidato moneyline solo para revisar',
+    empty: 'No hay una moneyline actual que cumpla todos los requisitos.',
   },
 }
 
@@ -292,9 +381,12 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
     id,
     label: source,
     source,
+    sourceRank: ['Official Pick', 'Best Value', 'Priced Market', 'Most Likely', 'Highest Probability', 'Grounded Opportunity'].indexOf(source),
+    eventId: selector.eventId ?? null,
     event: label(selector.matchup, 'Event pending'),
     selection: label(selector.selection, 'Selection pending'),
     market: label(selector.marketLabel ?? selector.market, 'Market pending'),
+    marketKey: String(selector.market ?? selector.marketLabel ?? '').toLowerCase(),
     odds: numberOrNull(selector.americanOdds),
     sportsbook: label(selector.sportsbook, 'Sportsbook pending'),
     probability,
@@ -336,9 +428,12 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
     id,
     label: source,
     source,
+    sourceRank: ['Official Pick', 'Best Value', 'Priced Market', 'Most Likely', 'Highest Probability', 'Grounded Opportunity'].indexOf(source),
+    eventId: typeof row.eventId === 'string' ? row.eventId : typeof row.event_id === 'string' ? row.event_id : null,
     event: label(row.matchup ?? row.eventLabel, 'Event pending'),
     selection: label(row.selection ?? row.team, 'Selection pending'),
     market: label(row.marketLabel ?? row.market, 'Market pending'),
+    marketKey: String(row.market ?? row.marketLabel ?? '').toLowerCase(),
     odds: numberOrNull(row.americanOdds ?? row.odds),
     sportsbook: label(row.sportsbook, 'Sportsbook pending'),
     probability,
@@ -390,6 +485,30 @@ function bestBy(candidates: PlanPick[], predicate: (item: PlanPick) => boolean, 
   return candidates.filter(predicate).sort((left, right) => score(right) - score(left))[0] ?? null
 }
 
+function isMoneylineMarket(item: PlanPick) {
+  const market = `${item.marketKey} ${item.market}`.toLowerCase()
+  return /\bmoneyline\b|^h2h$|^ml$/.test(market) && !/run line|spread|total|prop|first five|first half|team total/.test(market)
+}
+
+function compareMoneylineEvidence(left: PlanPick, right: PlanPick) {
+  const sourceLeft = left.sourceRank < 0 ? 99 : left.sourceRank
+  const sourceRight = right.sourceRank < 0 ? 99 : right.sourceRank
+  const officialDelta = Number(right.official) - Number(left.official)
+  if (officialDelta) return officialDelta
+  const qualifiedDelta = Number(right.qualified) - Number(left.qualified)
+  if (qualifiedDelta) return qualifiedDelta
+  if (sourceLeft !== sourceRight) return sourceLeft - sourceRight
+  const probabilityDelta = Number(right.probability ?? -1) - Number(left.probability ?? -1)
+  if (probabilityDelta) return probabilityDelta
+  const confidenceDelta = Number(right.confidence ?? -1) - Number(left.confidence ?? -1)
+  if (confidenceDelta) return confidenceDelta
+  const edgeDelta = Number(right.edge ?? -999) - Number(left.edge ?? -999)
+  if (edgeDelta) return edgeDelta
+  const evDelta = Number(right.ev ?? -999) - Number(left.ev ?? -999)
+  if (evDelta) return evDelta
+  return left.id.localeCompare(right.id)
+}
+
 function pickPlan(data: TodayResponse | null) {
   const candidates = allCandidates(data)
   const official = candidates.filter((item) => item.official && item.qualified)
@@ -414,6 +533,183 @@ function pickPlan(data: TodayResponse | null) {
     .sort((left, right) => Number(right.confidence ?? 0) + Number(right.probability ?? 0) - Number(left.confidence ?? 0) - Number(left.probability ?? 0))
     .slice(0, 4)
   return { candidates, rentPlay, moneyline, bestOpportunity, closest, parlayLegs, watchlist }
+}
+
+function buildMoneylineGates(pick: PlanPick | null): RentPlayGate[] {
+  if (!pick) {
+    return [
+      gate('candidate', 'Moneyline candidate evidence', 'FAIL', 'No current supported Moneyline candidate satisfies the contract.'),
+      gate('sport_certification', 'Sport certification', 'NOT_AVAILABLE', 'No candidate sport evidence is available.'),
+      gate('moneyline_market_support', 'Moneyline market support', 'NOT_AVAILABLE', 'No candidate market evidence is available.'),
+      gate('canonical_current_event', 'Canonical current event', 'NOT_AVAILABLE', 'No candidate event link is available.'),
+      gate('pregame', 'Pregame eligibility', 'NOT_AVAILABLE', 'No candidate start-time evidence is available.'),
+      gate('probability_available', 'Win probability available', 'NOT_AVAILABLE', 'No model probability is available.'),
+      gate('odds_available', 'Current moneyline available', 'NOT_AVAILABLE', 'No current Moneyline price is available.'),
+      gate('canonical_timestamp', 'Canonical market timestamp', 'NOT_AVAILABLE', 'No market timestamp is available.'),
+      gate('market_freshness', 'Market freshness', 'NOT_AVAILABLE', 'No market timestamp is available.'),
+      gate('confidence_available', 'Confidence available', 'NOT_AVAILABLE', 'No confidence evidence is available.'),
+      gate('edge_available', 'Edge available', 'NOT_AVAILABLE', 'No edge evidence is available.'),
+      gate('positive_edge', 'Positive edge policy', 'NOT_AVAILABLE', 'No edge evidence is available.'),
+      gate('ev_available', 'EV available', 'NOT_AVAILABLE', 'No EV evidence is available.'),
+      gate('ev_policy', 'EV policy', 'NOT_AVAILABLE', 'No EV evidence is available.'),
+      gate('official_status', 'Official Pick status', 'NOT_AVAILABLE', 'No Official Pick candidate is available.'),
+    ]
+  }
+
+  const freshness = pick.freshness.toUpperCase()
+  const actionability = String(pick.freshnessActionability ?? '').toUpperCase()
+  const timestampFuture = isFutureTimestamp(pick.marketTimestamp ?? null)
+  const postStart = /post_start|post start|market_closed|started|live/i.test(`${freshness} ${actionability} ${pick.reason}`)
+  const unsupported = !isMoneylineMarket(pick) || /unsupported/i.test(pick.reason)
+
+  return [
+    gate('candidate', 'Moneyline candidate evidence', 'PASS', `Candidate comes from ${pick.source}.`),
+    gate('sport_certification', 'Sport certification', 'PASS', 'Moneyline Bet uses certified stored Today evidence only.'),
+    gate('moneyline_market_support', 'Moneyline market support', unsupported ? 'FAIL' : 'PASS', unsupported ? 'Candidate is not a supported Moneyline market.' : 'Candidate is recognized as a supported Moneyline market.'),
+    gate('canonical_current_event', 'Canonical current event', pick.eventId || pick.event !== 'Event pending' ? 'PASS' : 'PENDING', pick.eventId ? `Event ID ${pick.eventId}.` : 'Event label is available, event ID is not exposed to the homepage contract.'),
+    gate('pregame', 'Pregame eligibility', postStart ? 'FAIL' : 'PASS', 'Pregame eligibility is derived from existing freshness/actionability evidence.'),
+    gate('probability_available', 'Win probability available', pick.probability === null ? 'NOT_AVAILABLE' : 'PASS', pick.probability === null ? 'Model win probability is unavailable.' : `Model win probability is ${pct(pick.probability)}.`),
+    gate('odds_available', 'Current moneyline available', pick.odds === null ? 'NOT_AVAILABLE' : 'PASS', pick.odds === null ? 'Current Moneyline price is unavailable.' : `Current Moneyline is ${odds(pick.odds)}.`),
+    gate('canonical_timestamp', 'Canonical market timestamp', pick.marketTimestamp ? 'PASS' : 'NOT_AVAILABLE', pick.marketTimestamp ? `Market timestamp ${compactDate(pick.marketTimestamp)}.` : 'Market timestamp is unavailable.'),
+    gate('market_freshness', 'Market freshness', timestampFuture ? 'FAIL' : isFreshnessActionable(pick) ? 'PASS' : freshness.includes('STALE') || actionability === 'WAIT_FOR_REFRESH' ? 'PENDING' : 'FAIL', timestampFuture ? 'Market timestamp is in the future and cannot be used.' : `Freshness is ${pick.freshness}.`),
+    gate('confidence_available', 'Confidence available', pick.confidence === null ? 'NOT_AVAILABLE' : 'PASS', pick.confidence === null ? 'Confidence is unavailable.' : `Confidence is ${pct(pick.confidence)}.`),
+    gate('confidence_policy', 'Confidence policy', pick.confidence === null ? 'NOT_AVAILABLE' : pick.confidence > 0 ? 'PASS' : 'FAIL', 'Existing confidence evidence must be present and positive.'),
+    gate('edge_available', 'Edge available', pick.edge === null ? 'NOT_AVAILABLE' : 'PASS', pick.edge === null ? 'Edge is unavailable.' : `Edge is ${signedPct(pick.edge)}.`),
+    gate('positive_edge', 'Positive edge policy', pick.edge === null ? 'NOT_AVAILABLE' : pick.edge > 0 ? 'PASS' : 'FAIL', 'Moneyline Bet cannot present negative edge as positive value.'),
+    gate('ev_available', 'EV available', pick.ev === null ? 'NOT_AVAILABLE' : 'PASS', pick.ev === null ? 'EV is unavailable.' : `EV is ${signedPct(pick.ev)}.`),
+    gate('ev_policy', 'EV policy', pick.ev === null ? 'NOT_AVAILABLE' : pick.ev >= 0 ? 'PASS' : 'FAIL', 'EV must be non-negative when EV evidence is available.'),
+    gate('data_quality', 'Data quality', /quarantined|calibration insufficient|low confidence/i.test(pick.reason) ? 'FAIL' : 'PASS', pick.reason),
+    gate('policy_blockers', 'Policy blockers', /blocked|do not act|avoid/i.test(pick.reason) ? 'FAIL' : 'PASS', pick.reason),
+    gate('official_status', 'Official Pick status', pick.official ? 'PASS' : 'PENDING', pick.official ? 'Candidate is an existing Official Pick.' : 'Candidate is not promoted to Official Pick.'),
+  ]
+}
+
+function buildMoneylineBetContract(plan: ReturnType<typeof pickPlan>, rentPlay: RentPlayContract): MoneylineBetContract {
+  const observedAt = new Date().toISOString()
+  const moneylineUniverse = plan.candidates.filter(isMoneylineMarket).sort(compareMoneylineEvidence)
+  const eligibleUniverse = moneylineUniverse.filter((item) => item.qualified)
+  const actionableOfficial = eligibleUniverse.find((item) => item.official && isFreshnessActionable(item) && Number(item.edge ?? 0) > 0 && item.ev !== null && Number(item.ev) >= 0) ?? null
+  const actionableCandidate = eligibleUniverse.find((item) => isFreshnessActionable(item) && Number(item.edge ?? 0) > 0 && item.ev !== null && Number(item.ev) >= 0) ?? null
+  const waitingCandidate = moneylineUniverse.find((item) =>
+    Number(item.probability ?? 0) > 0 &&
+    item.odds !== null &&
+    (item.freshness.toUpperCase().includes('STALE') || String(item.freshnessActionability ?? '').toUpperCase() === 'WAIT_FOR_REFRESH')
+  ) ?? null
+  const reviewCandidate = moneylineUniverse[0] ?? null
+  const candidate = actionableOfficial ?? actionableCandidate ?? waitingCandidate ?? reviewCandidate
+  const gates = buildMoneylineGates(candidate)
+  const counts = applicableGateCounts(gates)
+  const failed = gates.filter((item) => item.status === 'FAIL')
+  const pending = gates.filter((item) => item.status === 'PENDING')
+  const actionable = Boolean(candidate) && counts.failedGateCount === 0 && counts.pendingGateCount === 0 && Number(candidate?.edge ?? 0) > 0 && candidate?.ev !== null && Number(candidate?.ev) >= 0 && isFreshnessActionable(candidate)
+  const status: MoneylineBetStatus = !plan.candidates.length
+    ? 'NO_GAMES'
+    : !moneylineUniverse.length
+      ? 'MARKET_UNAVAILABLE'
+      : actionable
+        ? 'ACTIONABLE'
+        : candidate === waitingCandidate
+          ? 'WAITING_FOR_FRESH_PRICE'
+          : failed.some((item) => item.id === 'policy_blockers' || item.id === 'data_quality' || item.id === 'moneyline_market_support')
+            ? 'POLICY_BLOCKED'
+            : candidate
+              ? 'REVIEW_ONLY'
+              : 'NO_ELIGIBLE_MONEYLINE'
+
+  const impliedProbability = candidate ? impliedFromAmerican(candidate.odds) : null
+  const modelProbability = candidate?.probability ?? null
+  const probabilityAdvantage = modelProbability !== null && impliedProbability !== null ? Number((modelProbability - impliedProbability).toFixed(2)) : null
+  const rank = candidate ? moneylineUniverse.findIndex((item) => item.id === candidate.id) + 1 : null
+  const rentPlayOverlap = Boolean(candidate && rentPlay.candidate && candidate.event === rentPlay.eventLabel && candidate.selection === rentPlay.selectionLabel && candidate.market === rentPlay.marketLabel)
+  const mostLikelyOverlap = candidate?.source === 'Most Likely' || candidate?.id === 'most-likely'
+  const bestValueOverlap = candidate?.source === 'Best Value' || candidate?.id === 'best-value'
+
+  const selectionReasons = candidate
+    ? [
+      candidate.official ? 'Existing actionable Official Pick evidence has first preference inside Moneyline.' : 'Selected from the existing certified Moneyline universe without creating a new ranking formula.',
+      rank ? `Rank ${rank} of ${moneylineUniverse.length} current Moneyline candidates by existing surface priority and exposed evidence.` : 'Rank unavailable.',
+      modelProbability !== null ? `Estimated win probability is ${pct(modelProbability)}.` : 'Estimated win probability is unavailable.',
+      probabilityAdvantage !== null ? `Probability advantage vs price is ${signedPct(probabilityAdvantage)}.` : 'Probability advantage is unavailable because probability or odds evidence is missing.',
+    ]
+    : ['No supported current Moneyline candidate satisfies the contract.']
+
+  const comparisonReasons = candidate
+    ? [
+      `Universe: ${moneylineUniverse.length} supported Moneyline candidates, ${eligibleUniverse.length} qualified by existing Today evidence.`,
+      'Largest favorite is not automatically selected; freshness, price, value, confidence and policy evidence must also be usable.',
+      rentPlayOverlap ? 'This Moneyline also overlaps with Rent Play.' : 'Moneyline Bet is evaluated separately from Rent Play.',
+      mostLikelyOverlap ? 'This Moneyline overlaps with Most Likely.' : 'Most Likely remains probability-first and may differ from Moneyline Bet.',
+      bestValueOverlap ? 'This Moneyline overlaps with Best Value.' : 'Best Value can choose another market when value evidence is stronger elsewhere.',
+    ]
+    : ['No comparison is available because no supported current Moneyline candidate is available.']
+
+  const riskReasons = [
+    ...failed.slice(0, 4).map((item) => item.detail),
+    ...pending.slice(0, 3).map((item) => item.detail),
+    probabilityAdvantage !== null && probabilityAdvantage <= 1 ? 'Probability advantage is small.' : '',
+    candidate?.ev === null ? 'EV is unavailable.' : '',
+  ].filter(Boolean)
+
+  return {
+    contractVersion: 'moneyline_bet_v1',
+    status,
+    eventId: candidate?.eventId ?? null,
+    sportKey: 'baseball_mlb',
+    eventLabel: candidate?.event ?? null,
+    startTime: null,
+    teamOrParticipantId: candidate?.selection ?? null,
+    teamOrParticipantLabel: candidate?.selection ?? null,
+    opponentLabel: null,
+    homeAway: null,
+    marketKey: candidate?.marketKey ?? null,
+    selectionKey: candidate?.selection ?? null,
+    selectionLabel: candidate?.selection ?? null,
+    americanOdds: candidate?.odds ?? null,
+    decimalOdds: candidate ? decimalFromAmerican(candidate.odds) : null,
+    bookmaker: candidate?.sportsbook ?? null,
+    provider: candidate?.sportsbook ?? null,
+    modelProbability,
+    impliedProbability,
+    probabilityAdvantage,
+    confidence: candidate?.confidence ?? null,
+    edge: candidate?.edge ?? null,
+    expectedValue: candidate?.ev ?? null,
+    marketTimestamp: candidate?.marketTimestamp ?? null,
+    marketAgeMinutes: minutesSince(candidate?.marketTimestamp ?? null),
+    freshnessStatus: candidate?.freshness ?? 'UNKNOWN',
+    freshnessTargetMinutes: 10,
+    nextPlannedRefreshAt: candidate?.nextRefreshAt ?? null,
+    officialPick: Boolean(candidate?.official),
+    rentPlay: rentPlayOverlap,
+    mostLikely: mostLikelyOverlap,
+    bestValue: bestValueOverlap,
+    actionability: actionable ? 'ACTIONABLE_NOW' : status,
+    eligibilityGates: gates,
+    ...counts,
+    selectionReasons,
+    comparisonReasons,
+    riskReasons: riskReasons.length ? riskReasons : ['No additional risks were exposed by current stored evidence.'],
+    blockers: failed.map((item) => item.label),
+    warnings: pending.map((item) => item.label),
+    whatWouldChangeTheDecision: [
+      'Current moneyline price changes enough to remove the existing advantage.',
+      'Market price becomes stale, future-dated, unavailable or closed.',
+      'Another Moneyline candidate becomes stronger under existing certified ranking evidence.',
+      'New injury or lineup evidence changes eligibility before game start.',
+      'Confidence, edge, EV or policy evidence no longer passes.',
+      'The event begins.',
+    ],
+    candidateCount: moneylineUniverse.length,
+    eligibleCandidateCount: eligibleUniverse.length,
+    rankWithinMoneylineUniverse: rank,
+    sourceSurface: candidate?.source ?? 'No eligible source',
+    sourceRowId: candidate?.id ?? null,
+    canonicalAcquisitionId: null,
+    evidence: candidate?.evidence ?? [],
+    observedAt,
+    candidate,
+    closestCandidate: moneylineUniverse[0] ?? plan.closest,
+  }
 }
 
 function MetricBar({ label: metricLabel, value, tone = 'green' }: { label: string; value: number | null; tone?: Tone }) {
@@ -712,87 +1008,107 @@ function MiniMetric({ label: metricLabel, value }: { label: string; value: unkno
   )
 }
 
-function PickCard({
-  title,
-  icon,
-  pick,
-  emptyTitle,
-  emptyDetail,
-  closest,
-}: {
-  title: string
-  icon: string
-  pick: PlanPick | null
-  emptyTitle: string
-  emptyDetail: string
-  closest?: PlanPick | null
-}) {
+function moneylineStatusTone(status: MoneylineBetStatus): Tone {
+  if (status === 'ACTIONABLE') return 'green'
+  if (status === 'WAITING_FOR_FRESH_PRICE' || status === 'REVIEW_ONLY') return 'yellow'
+  if (status === 'NO_ELIGIBLE_MONEYLINE' || status === 'NO_GAMES' || status === 'MARKET_UNAVAILABLE') return 'gray'
+  return 'red'
+}
+
+function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
+  const pick = moneyline.candidate
+  const closest = moneyline.closestCandidate
+  const readinessDenominator = moneyline.passedGateCount + moneyline.failedGateCount + moneyline.pendingGateCount
+  const readiness = readinessDenominator ? (moneyline.passedGateCount / readinessDenominator) * 100 : null
+  const priceFreshness = moneyline.marketAgeMinutes === null ? moneyline.freshnessStatus : `${moneyline.marketAgeMinutes} min`
+  const title = pick
+    ? moneyline.selectionLabel
+    : moneyline.status === 'WAITING_FOR_FRESH_PRICE'
+      ? moneylineCopy.en.waiting
+      : moneyline.status === 'MARKET_UNAVAILABLE'
+        ? moneylineCopy.en.unavailable
+        : moneylineCopy.en.noEligible
+
   return (
-    <article className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 shadow-2xl shadow-slate-950/20 md:p-6">
-      <div className="flex items-start justify-between gap-4">
+    <article className="rounded-lg border border-sky-300/20 bg-slate-950/85 p-5 shadow-2xl shadow-slate-950/20 md:p-6" data-mc08c-moneyline-card="true" data-moneyline-status={moneyline.status}>
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{icon} {title}</p>
-          <h2 className="mt-3 text-2xl font-black text-white md:text-3xl">{pick ? pick.selection : emptyTitle}</h2>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-200">{moneylineCopy.en.label}</p>
+          <h2 className="mt-3 break-words text-2xl font-black text-white md:text-4xl">{title}</h2>
+          <p className="mt-3 text-sm font-bold text-slate-300">
+            {pick ? `${moneyline.eventLabel} / Strongest eligible Moneyline` : moneylineCopy.en.empty}
+          </p>
         </div>
-        <StatusChip tone={pick?.official ? 'green' : pick ? 'yellow' : 'gray'}>{pick?.official ? 'Official' : pick ? 'Qualified' : 'No Bet'}</StatusChip>
+        <div className="flex flex-wrap gap-2 md:justify-end">
+          <StatusChip tone={moneylineStatusTone(moneyline.status)}>{moneyline.status.replaceAll('_', ' ')}</StatusChip>
+          <StatusChip tone={moneyline.officialPick ? 'green' : 'blue'}>{moneyline.officialPick ? 'Official Pick' : 'Not Official'}</StatusChip>
+        </div>
       </div>
-      {pick ? (
-        <>
-          <p className="mt-3 text-sm font-bold text-slate-300">{pick.event}</p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-              <p className="text-xs font-bold uppercase text-slate-500">Market</p>
-              <p className="mt-1 text-sm font-black text-white">{pick.market}</p>
-            </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-              <p className="text-xs font-bold uppercase text-slate-500">Price</p>
-              <p className="mt-1 text-sm font-black text-white">{odds(pick.odds)}</p>
-            </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-              <p className="text-xs font-bold uppercase text-slate-500">Freshness</p>
-              <p className="mt-1 text-sm font-black text-white">{pick.freshness}</p>
-            </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-              <p className="text-xs font-bold uppercase text-slate-500">Actionability</p>
-              <p className="mt-1 text-sm font-black text-white">{pick.freshnessActionability ?? 'INFORMATIONAL_ONLY'}</p>
-            </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MiniMetric label="Current Moneyline" value={odds(moneyline.americanOdds)} />
+        <MiniMetric label="Win Probability" value={pct(moneyline.modelProbability)} />
+        <MiniMetric label="Implied Probability" value={pct(moneyline.impliedProbability)} />
+        <MiniMetric label="Freshness" value={priceFreshness} />
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-4">
+        <MetricBar label="Win Probability" value={moneyline.modelProbability} tone={moneyline.modelProbability !== null && moneyline.modelProbability > 50 ? 'green' : 'yellow'} />
+        <MetricBar label="Price Implied" value={moneyline.impliedProbability} tone="blue" />
+        <MetricBar label="Advantage" value={moneyline.probabilityAdvantage} tone={moneyline.probabilityAdvantage !== null && moneyline.probabilityAdvantage > 0 ? 'green' : 'yellow'} />
+        <MetricBar label="Readiness Gates" value={readiness} tone={moneyline.failedGateCount ? 'yellow' : 'green'} />
+      </div>
+
+      <p className="mt-5 text-sm leading-6 text-slate-300">{moneyline.selectionReasons[0] ?? moneylineCopy.en.empty}</p>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <MiniText label="Candidate Rank" value={moneyline.rankWithinMoneylineUniverse ? `${moneyline.rankWithinMoneylineUniverse} of ${moneyline.candidateCount}` : 'Unavailable'} />
+        <MiniText label="Actionability" value={moneyline.actionability.replaceAll('_', ' ')} />
+        <MiniText label="Value" value={`Edge ${signedPct(moneyline.edge)} / EV ${signedPct(moneyline.expectedValue)}`} />
+      </div>
+
+      {pick ? null : closest ? (
+        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08c-review-only-candidate="true">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">{moneylineCopy.en.reviewOnly}</p>
+          <p className="mt-2 text-lg font-black text-white">{closest.selection}</p>
+          <p className="mt-1 text-sm text-amber-50">{closest.event} / {closest.market} / {pct(closest.probability)}</p>
+          <p className="mt-2 text-sm text-slate-300">{closest.reason}</p>
+        </div>
+      ) : null}
+
+      <details className="mt-5 rounded-lg border border-slate-800 bg-slate-900/70 p-4" data-mc08c-moneyline-expanded="true">
+        <summary className="cursor-pointer text-sm font-black text-white">Why this Moneyline</summary>
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_0.95fr]">
+          <div className="grid gap-3">
+            <MiniText label="Moneyline vs Rent Play" value={moneyline.rentPlay ? 'This Moneyline also overlaps with Rent Play. The product concepts remain separate.' : 'Moneyline Bet is restricted to the Moneyline universe and is not forced to match Rent Play.'} />
+            <MiniText label="Moneyline vs Most Likely" value={moneyline.mostLikely ? 'This selection overlaps with Most Likely, but Moneyline Bet still requires price, freshness and value evidence.' : 'Most Likely remains probability-first; Moneyline Bet is actionability, value and freshness-aware inside Moneyline.'} />
+            <MiniText label="Official Pick Status" value={moneyline.officialPick ? 'This selection is already an Official Pick.' : 'This selection is not promoted into Official Picks by MC-08C.'} />
+            <MiniText label="Provider / Bookmaker" value={`${moneyline.provider ?? 'Unavailable'} / ${moneyline.bookmaker ?? 'Unavailable'}`} />
+            <MiniText label="Market Timestamp" value={compactDate(moneyline.marketTimestamp)} />
+            <MiniText label="Next Scheduled Refresh" value={compactDate(moneyline.nextPlannedRefreshAt)} />
+            <MiniText label="Observed At" value={`${compactDate(moneyline.observedAt)}. This is not used as market freshness.`} />
           </div>
-          <div className="mt-5 grid gap-4">
-            <MetricBar label="Probability" value={pick.probability} tone="green" />
-            <MetricBar label="Confidence" value={pick.confidence} tone="blue" />
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-                <p className="text-xs font-bold uppercase text-slate-500">Edge</p>
-                <p className="mt-1 text-xl font-black text-emerald-200">{signedPct(pick.edge)}</p>
+          <div className="grid gap-3">
+            <MiniText label="Comparison With Other Moneylines" value={moneyline.comparisonReasons.join(' / ')} />
+            <MiniText label="Main Risks" value={moneyline.riskReasons.join(' / ')} />
+            <MiniText label="What Would Change The Decision" value={moneyline.whatWouldChangeTheDecision.join(' / ')} />
+            <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
+              <p className="text-xs font-black uppercase text-slate-500">Eligibility Gates</p>
+              <div className="mt-3 grid gap-2">
+                {moneyline.eligibilityGates.map((item) => (
+                  <div key={item.id} className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900 p-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-sm font-black text-white">{item.label}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-400">{item.detail}</p>
+                    </div>
+                    <StatusChip tone={gateTone(item.status)}>{item.status}</StatusChip>
+                  </div>
+                ))}
               </div>
-              <div className="rounded-lg border border-slate-800 bg-slate-900 p-3">
-                <p className="text-xs font-bold uppercase text-slate-500">EV</p>
-                <p className="mt-1 text-xl font-black text-emerald-200">{signedPct(pick.ev)}</p>
-              </div>
             </div>
           </div>
-          <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900/70 p-4" data-r9-ai-explanation="true">
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">AI Explanation</p>
-            <p className="mt-2 text-sm leading-6 text-slate-300">{pick.reason}</p>
-            <div className="mt-3 grid gap-2 md:grid-cols-2">
-              <MiniText label="Model" value={pick.modelVersion} />
-              <MiniText label="Evidence" value={pick.evidence.slice(0, 3).join(' / ') || 'No supporting evidence exposed by current APIs.'} />
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          <p className="mt-3 text-sm leading-6 text-slate-400">{emptyDetail}</p>
-          {closest ? (
-            <div className="mt-4 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Closest Candidate</p>
-              <p className="mt-2 text-lg font-black text-white">{closest.selection}</p>
-              <p className="mt-1 text-sm text-amber-50">{closest.event} / {closest.market}</p>
-              <p className="mt-2 text-sm text-slate-300">{closest.reason}</p>
-            </div>
-          ) : null}
-        </>
-      )}
+        </div>
+      </details>
     </article>
   )
 }
@@ -1089,6 +1405,7 @@ export default function HomeBettingPlan() {
 
   const plan = useMemo(() => pickPlan(data), [data])
   const rentPlayContract = useMemo(() => buildRentPlayContract(plan), [plan])
+  const moneylineBetContract = useMemo(() => buildMoneylineBetContract(plan, rentPlayContract), [plan, rentPlayContract])
 
   if (error) {
     return (
@@ -1127,14 +1444,7 @@ export default function HomeBettingPlan() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
-          <PickCard
-            title="Moneyline Bet"
-            icon="Moneyline"
-            pick={plan.moneyline}
-            emptyTitle="No Qualified Moneyline Today"
-            emptyDetail="No stored moneyline candidate currently qualifies from existing Today evidence."
-            closest={plan.closest}
-          />
+          <MoneylineBetCard moneyline={moneylineBetContract} />
           <ParlayBuilder legs={plan.parlayLegs} />
         </div>
 
