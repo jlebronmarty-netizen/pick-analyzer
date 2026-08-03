@@ -58,6 +58,15 @@ type V6RegenerationRequest = {
   idempotencyKey?: string | null
 }
 
+type StoredOddsPredictionRequest = {
+  dryRun?: boolean | null
+  confirmed?: boolean | null
+  selectedDate: string
+  operatingDayId?: string | null
+  source?: string | null
+  requestId?: string | null
+}
+
 type MlbModelGeneration = 'v6' | 'v7'
 
 type EndpointResult = {
@@ -2933,6 +2942,129 @@ export async function runMlbPredictionV6Regeneration(request: V6RegenerationRequ
       noOfficialPickForcing: true,
       immutablePredictionRows: true,
       settledHistoryUntouched: true,
+    },
+  }
+}
+
+export async function generateMlbProspectivePredictionsFromStoredOdds(
+  request: StoredOddsPredictionRequest
+) {
+  const generatedAt = nowIso()
+  const dryRun = request.dryRun !== false
+  const confirmed = request.confirmed === true
+  const selectedDate = request.selectedDate
+  if (!dryRun && !confirmed) {
+    return {
+      success: false,
+      mode: 'mlb_prospective_prediction_from_stored_odds_v1',
+      status: 'confirmation_required',
+      dryRun,
+      selectedDate,
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+      predictionWrites: 0,
+      warnings: ['confirmed=true is required for stored-odds prediction writes.'],
+    }
+  }
+
+  const eventsForDate = await loadEventsForDate(selectedDate)
+  const nowMs = new Date(generatedAt).getTime()
+  const eligibleEvents = eventsForDate.filter((event) => {
+    const start = parseDateMs(event.start_time)
+    const status = String(event.status ?? 'scheduled').toLowerCase()
+    return start !== null && start > nowMs && status === 'scheduled'
+  })
+  const excludedEvents = eventsForDate
+    .filter((event) => !eligibleEvents.some((eligible) => eligible.id === event.id))
+    .map((event) => ({
+      eventId: event.id,
+      matchup: `${event.away_team} @ ${event.home_team}`,
+      startTime: event.start_time,
+      status: event.status,
+      reason: (parseDateMs(event.start_time) ?? 0) <= nowMs ? 'started_or_completed' : `status_${event.status ?? 'unknown'}`,
+    }))
+  const safeOddsRows = await loadPersistedSafeOddsForDate(eligibleEvents)
+  const predictionVersioning = await probePredictionVersioningSchemaCapabilities()
+  const execution = await writeSnapshotsAndPredictions(
+    eligibleEvents,
+    safeOddsRows as OddsRow[],
+    selectedDate,
+    generatedAt,
+    request.operatingDayId ?? null,
+    {
+      persist: !dryRun,
+      immutablePredictions: false,
+      predictionVersioningApplied: predictionVersioning.applied,
+      capturePersistenceError: true,
+    }
+  )
+
+  const persistenceError = execution.predictions.persistenceError
+  let checkpointId: string | null = null
+  if (!dryRun && !persistenceError) {
+    checkpointId = await writeCheckpoint({
+      phase: 'stored_odds_prediction_generation',
+      selectedDate,
+      status: 'completed',
+      startedAt: generatedAt,
+      endpoint: null,
+      recordsFetched: execution.predictions.analyzed,
+      inserted: execution.predictions.inserted,
+      updated: execution.predictions.reused,
+      skipped: execution.predictions.rejectedByCutoff,
+      errorCount: 0,
+      providerCallsUsed: 0,
+      metadata: {
+        source: request.source ?? 'adaptive_refresh_execution_bridge_v2',
+        requestId: request.requestId ?? null,
+        operatingDayId: request.operatingDayId ?? null,
+        predictionVersioning,
+        policyVersion: 'production_evaluation_policy_v1_3',
+        providerCallsMade: 0,
+        noProviderCalls: true,
+      },
+    })
+  }
+
+  const predictionWrites = !dryRun && !persistenceError
+    ? execution.predictions.inserted + execution.predictions.reused
+    : 0
+  const snapshotWrites = !dryRun && !persistenceError
+    ? execution.snapshots.inserted
+    : 0
+
+  return {
+    success: !persistenceError,
+    mode: 'mlb_prospective_prediction_from_stored_odds_v1',
+    status: persistenceError ? 'persistence_failed' : dryRun ? 'dry_run_ready' : 'predictions_generated',
+    dryRun,
+    confirmed,
+    generatedAt,
+    selectedDate,
+    operatingDayId: request.operatingDayId ?? null,
+    source: request.source ?? null,
+    checkpointId,
+    providerCallsMade: 0,
+    remoteMutationsMade: predictionWrites + snapshotWrites,
+    predictionWrites,
+    featureSnapshotWrites: snapshotWrites,
+    eligibleEvents: eligibleEvents.length,
+    excludedEvents,
+    safeOddsRows: safeOddsRows.length,
+    predictions: execution.predictions,
+    snapshots: execution.snapshots,
+    cutoffEnforcement: execution.cutoffEnforcement,
+    persistenceError,
+    policyVersion: 'production_evaluation_policy_v1_3',
+    policyContractPersisted: execution.candidates.some((candidate) =>
+      Boolean((candidate as Record<string, unknown>).productionEvaluationPolicy)
+    ),
+    safety: {
+      providerCallsMade: 0,
+      recommendationThresholdsChanged: false,
+      officialPickPolicyChanged: false,
+      predictionFormulaChanged: false,
+      retrospectivePredictionCreated: false,
     },
   }
 }

@@ -1696,8 +1696,24 @@ export async function runAdaptiveRefresh({
         : canonicalAcquisition.success
           ? String(canonicalAcquisition.status)
           : String(canonicalAcquisition.status ?? 'FAILED_RETRYABLE')
+    let storedOddsPredictionGeneration: Record<string, unknown> | null = null
+    if (
+      canonicalAcquisition.success &&
+      Number(contract.persistedSnapshotCount ?? 0) > 0
+    ) {
+      const { generateMlbProspectivePredictionsFromStoredOdds } = await import('@/services/sportsdataio-mlb-prospective-preview.service')
+      storedOddsPredictionGeneration = await generateMlbProspectivePredictionsFromStoredOdds({
+        dryRun: false,
+        confirmed: true,
+        selectedDate,
+        source: source ?? 'adaptive_refresh_execution_bridge_v2',
+        requestId: executionRunId,
+      }) as Record<string, unknown>
+    }
+    const predictionWrites = Number(storedOddsPredictionGeneration?.predictionWrites ?? 0)
+    const predictionMutations = Number(storedOddsPredictionGeneration?.remoteMutationsMade ?? 0)
     return {
-      success: canonicalAcquisition.success,
+      success: canonicalAcquisition.success && storedOddsPredictionGeneration?.success !== false,
       status: normalizedStatus,
       mode: 'adaptive_refresh_execution_bridge_v2',
       generatedAt: new Date().toISOString(),
@@ -1716,6 +1732,7 @@ export async function runAdaptiveRefresh({
         canonicalAcquisition: activeEventRefreshPlan.canonicalAcquisition,
       },
       canonicalAcquisition,
+      storedOddsPredictionGeneration,
       refreshPlan: status.refreshPlan,
       providerCallForecast: {
         ...status.providerCallForecast,
@@ -1755,19 +1772,19 @@ export async function runAdaptiveRefresh({
       rowsUpdated: canonicalAcquisition.rowsUpdated ?? 0,
       rowsSkipped: canonicalAcquisition.rowsSkipped ?? 0,
       downstreamRebuilds: {
-        predictionRows: 0,
+        predictionRows: predictionWrites,
         currentBoard: 'read_from_canonical_sports_odds_snapshots',
         aiBriefing: 'read_from_canonical_sports_odds_snapshots',
       },
       cacheInvalidations: [],
       warnings: canonicalAcquisition.success ? [] : asStrings(contract.errors),
       providerCallsMade: canonicalAcquisition.providerCallsMade ?? 0,
-      remoteMutationsMade: canonicalAcquisition.remoteMutationsMade ?? 0,
+      remoteMutationsMade: Number(canonicalAcquisition.remoteMutationsMade ?? 0) + predictionMutations,
       guardrails: {
         ...status.guardrails,
         providerCallsMade: canonicalAcquisition.providerCallsMade ?? 0,
-        remoteMutationsMade: canonicalAcquisition.remoteMutationsMade ?? 0,
-        predictionMutationsMade: 0,
+        remoteMutationsMade: Number(canonicalAcquisition.remoteMutationsMade ?? 0) + predictionMutations,
+        predictionMutationsMade: predictionWrites,
         officialThresholdsChanged: false,
         currentBoardPolicyChanged: false,
         settlementPolicyChanged: false,
