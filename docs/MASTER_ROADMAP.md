@@ -3215,3 +3215,15 @@ Scope: Bounded SportsDataIO MLB current operating-day active acquisition through
 Result: Production commit `c04f1ad34bac43825210b1481a12d1965116115e` executed one protected SportsDataIO MLB date-level `GameOddsByDate` request for 15 eligible current-day events. The certified acquisition wrote 90 canonical odds snapshots, consumed 1 configured quota unit, preserved reserve and recorded deduplication evidence under `canonical_acquisition_execution_v1`.
 
 Completion criteria: `CANONICAL_ACQUISITION_ACTIVE_EXECUTION_PASS`, SportsDataIO MLB-only active scope, date-level batching, deterministic dedupe key, protected scheduler boundary, idempotent snapshot upsert, provider timestamp/fetch timestamp separation, zero prediction/result/settlement/learning writes, zero Official Pick policy change, passing validation, passing build and production certification after automatic deployment.
+
+### 72. Mission Control MC-02 Multi-Sport Data Readiness
+
+Objective: Certify sport-by-sport canonical data readiness before any multi-sport prediction activation.
+
+Status: Production certified.
+
+Scope: Read-only readiness contract, provider coverage matrix, sport-level blockers, Mission Control status, certification artifacts and validator. No prediction generation, model math, settlement, learning, scheduler cadence, provider contract or provider budget reserve changed.
+
+Result: `/api/mission-control/data-readiness` exposes bounded evidence for MLB, NBA, NFL, NHL, Soccer, Tennis, UFC and BSN. MLB is `DATA_READY`; NBA, NFL, NHL and Soccer are `DATA_PARTIAL`; Tennis and UFC are `DATA_FOUNDATION`; BSN is `PROVIDER_BLOCKED`. Blocked sports remain isolated and do not block independent future workstreams.
+
+Completion criteria: `MC_02_PRODUCTION_CERTIFIED`, all target sports classified, provider budgets isolated, BSN not claimed as The Odds API-covered, adapter existence not treated as readiness, normal reads provider calls 0, normal reads mutations 0, no model/settlement/learning activation, passing validation, passing build and production certification after automatic deployment.

@@ -88,3 +88,36 @@ Production evidence:
 - Settlement Guarantee PASS with ready rows 0, blocked rows 0 and silent pending rows 0.
 
 MC-01 is `PRODUCTION_CERTIFIED`. MC-02 is READY but was not started.
+
+## 2026-08-02 - MC-02 Multi-Sport Data Readiness
+
+MC-02 certified the data-readiness foundation for every configured target sport without starting MC-03.
+
+Runtime and repository updates:
+
+- added read-only `/api/mission-control/data-readiness`;
+- added canonical sport-level readiness contract;
+- mapped provider coverage across SportsDataIO, The Odds API, BSN sources and official/manual sources;
+- updated Mission Control status, queue, checklist and certification artifacts.
+
+Sport classifications:
+
+- MLB: `DATA_READY`;
+- NBA: `DATA_PARTIAL`;
+- NFL: `DATA_PARTIAL`;
+- NHL: `DATA_PARTIAL`;
+- Soccer: `DATA_PARTIAL`;
+- Tennis: `DATA_FOUNDATION`;
+- UFC: `DATA_FOUNDATION`;
+- BSN: `PROVIDER_BLOCKED`.
+
+Safety evidence:
+
+- normal readiness reads make provider calls 0;
+- normal readiness reads make remote mutations 0;
+- provider calls used during MC-02: 0;
+- provider credits used during MC-02: 0;
+- database mutations made during MC-02: 0;
+- prediction, Official Pick, Kelly, settlement, learning, scheduler cadence and provider contracts unchanged.
+
+MC-03 remains `PLANNED` and manual-only. The next READY queue item is MC-08.

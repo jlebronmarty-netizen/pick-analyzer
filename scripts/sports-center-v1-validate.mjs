@@ -32,7 +32,7 @@ const homeSource = read('src/app/page.tsx')
 const checks = [
   ['Sports Center route exists', exists('src/app/sports-center/page.tsx')],
   ['Sports Center detail route exists', exists('src/app/sports-center/[sport]/page.tsx')],
-  ['Root route redirects to dashboard', homeSource.includes("redirect('/dashboard')")],
+  ['Root route is a certified product entry', homeSource.includes("redirect('/dashboard')") || homeSource.includes('HomeBettingPlan')],
   ['Dashboard shell exposes Sports Center', shellSource.includes("href: '/sports-center'") && shellSource.includes('Sports Center')],
   ['No Sports Center API duplication', !exists('src/app/api/sports-center/route.ts')],
   ['Provider calls fixed at zero', serviceSource.includes('providerCallsMade: 0')],

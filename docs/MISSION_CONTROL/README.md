@@ -24,6 +24,7 @@ Mission Control does not replace the Master Program, Master Roadmap, Project Sta
 ## Runtime Surfaces
 
 - `/api/mission-control`
+- `/api/mission-control/data-readiness`
 - `/mission-control`
 
 Both surfaces are read-only. They do not call providers, write data, start jobs, trigger deployment, settle games, generate predictions or mutate learning.
@@ -38,3 +39,4 @@ Both surfaces are read-only. They do not call providers, write data, start jobs,
 - [Mission Control Queue](MISSION_CONTROL_QUEUE.md)
 - [Mission Control Resume Guide](MISSION_CONTROL_RESUME_GUIDE.md)
 - [MC-01 Operational Readiness Closure](MC_01_OPERATIONAL_READINESS_CLOSURE.md)
+- [MC-02 Multi-Sport Data Readiness](MC_02_MULTI_SPORT_DATA_READINESS.md)

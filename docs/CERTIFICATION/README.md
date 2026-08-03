@@ -63,6 +63,8 @@ Current V2 certification documents:
 - [Mission Control V1 JSON](mission-control-v1.json)
 - [MC-01 Operational Readiness Closure](MC_01_OPERATIONAL_READINESS_CLOSURE.md)
 - [MC-01 Operational Readiness Closure JSON](mc-01-operational-readiness-closure.json)
+- [MC-02 Multi-Sport Data Readiness](MC_02_MULTI_SPORT_DATA_READINESS.md)
+- [MC-02 Multi-Sport Data Readiness JSON](mc-02-multi-sport-data-readiness.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

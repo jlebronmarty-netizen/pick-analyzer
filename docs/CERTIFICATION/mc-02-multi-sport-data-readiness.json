@@ -1,0 +1,130 @@
+{
+  "mission": "MC-02",
+  "name": "Multi-Sport Data Readiness",
+  "status": "PRODUCTION_CERTIFIED",
+  "startingCommit": "6bc0d31ce70b7164b9311a6d1c3f082b0144371e",
+  "finalClassification": "MC_02_PRODUCTION_CERTIFIED",
+  "scope": {
+    "dataReadinessOnly": true,
+    "predictionActivation": false,
+    "settlementActivation": false,
+    "learningActivation": false,
+    "schedulerCadenceChanged": false,
+    "providerContractsChanged": false,
+    "officialPickPolicyChanged": false
+  },
+  "runtimeSurfaces": [
+    "/api/mission-control/data-readiness",
+    "/api/mission-control"
+  ],
+  "sportReadiness": [
+    {
+      "sportKey": "baseball_mlb",
+      "displayName": "MLB",
+      "readinessState": "DATA_READY",
+      "primaryProvider": "SportsDataIO",
+      "reasonCodes": ["MLB_CERTIFIED_DATA_PIPELINE", "SPORTSDATAIO_ACTIVE_SCOPE_CERTIFIED"],
+      "blockers": []
+    },
+    {
+      "sportKey": "basketball_nba",
+      "displayName": "NBA",
+      "readinessState": "DATA_PARTIAL",
+      "primaryProvider": "SportsDataIO/The Odds API gated",
+      "reasonCodes": ["NBA_STORED_FOUNDATION_EXISTS", "NBA_NOT_PRODUCTION_RECOMMENDATION_READY"],
+      "blockers": ["NBA_AUTHORITATIVE_RESULTS_NOT_READY"]
+    },
+    {
+      "sportKey": "americanfootball_nfl",
+      "displayName": "NFL",
+      "readinessState": "DATA_PARTIAL",
+      "primaryProvider": "The Odds API shadow",
+      "reasonCodes": ["THE_ODDS_API_MARKET_EVIDENCE_HISTORICAL_ONLY", "CANONICAL_EVENT_CROSSWALK_NOT_COMPLETE"],
+      "blockers": ["CANONICAL_TEAMS_EMPTY", "AUTHORITATIVE_RESULTS_EMPTY"]
+    },
+    {
+      "sportKey": "icehockey_nhl",
+      "displayName": "NHL",
+      "readinessState": "DATA_PARTIAL",
+      "primaryProvider": "The Odds API shadow",
+      "reasonCodes": ["THE_ODDS_API_MARKET_EVIDENCE_HISTORICAL_ONLY", "CANONICAL_EVENT_CROSSWALK_NOT_COMPLETE"],
+      "blockers": ["CANONICAL_TEAMS_EMPTY", "AUTHORITATIVE_RESULTS_EMPTY"]
+    },
+    {
+      "sportKey": "soccer",
+      "displayName": "Soccer",
+      "readinessState": "DATA_PARTIAL",
+      "primaryProvider": "The Odds API shadow/source-specific",
+      "reasonCodes": ["SOCCER_REQUIRES_COMPETITION_SCOPING", "AGGREGATE_SOCCER_NOT_CERTIFIED"],
+      "blockers": ["COMPETITION_SPECIFIC_SOURCE_REQUIRED"]
+    },
+    {
+      "sportKey": "tennis",
+      "displayName": "Tennis",
+      "readinessState": "DATA_FOUNDATION",
+      "primaryProvider": "The Odds API shadow",
+      "reasonCodes": ["FEATURE_ARCHITECTURE_ONLY", "REAL_EVENT_SOURCE_PENDING"],
+      "blockers": ["TOUR_EVENT_RESULT_SOURCE_NOT_CERTIFIED"]
+    },
+    {
+      "sportKey": "mma_ufc",
+      "displayName": "UFC",
+      "readinessState": "DATA_FOUNDATION",
+      "primaryProvider": "The Odds API shadow",
+      "reasonCodes": ["EVENT_DRIVEN_FOUNDATION", "CANONICAL_BOUT_CROSSWALK_PENDING"],
+      "blockers": ["FIGHT_CARD_AND_RESULT_SOURCE_NOT_CERTIFIED"]
+    },
+    {
+      "sportKey": "basketball_bsn",
+      "displayName": "BSN",
+      "readinessState": "PROVIDER_BLOCKED",
+      "primaryProvider": "BSN source-specific",
+      "reasonCodes": ["BSN_SOURCE_SPECIFIC", "NOT_THE_ODDS_API_CERTIFIED"],
+      "blockers": ["APPROVED_BSN_ODDS_PROVIDER_NOT_CERTIFIED"]
+    }
+  ],
+  "providerCoverage": {
+    "sportsdataio": {
+      "budgetPool": "isolated_http_request_pool",
+      "activeScope": "MLB current operating-day acquisition through protected scheduler only",
+      "nbaStatus": "gated",
+      "combinedWithTheOddsApi": false
+    },
+    "theOddsApi": {
+      "budgetPool": "separate_credit_pool",
+      "activeScope": "shadow/prior bounded audits only",
+      "currentQuotaResetEvidence": "UNKNOWN_ON_NORMAL_READS",
+      "combinedWithSportsDataIO": false
+    },
+    "bsn": {
+      "budgetPool": "source_specific",
+      "coveredByTheOddsApi": false,
+      "status": "PROVIDER_BLOCKED"
+    }
+  },
+  "guarantees": {
+    "normalReadProviderCallsMade": 0,
+    "normalReadProviderCreditsConsumed": 0,
+    "normalReadRemoteMutationsMade": 0,
+    "providerCallsUsedDuringMc02": 0,
+    "providerCreditsUsedDuringMc02": 0,
+    "databaseMutationsMade": 0,
+    "migrationsCreated": 0,
+    "localServerSmokeRun": false,
+    "manualDeployment": false
+  },
+  "validation": {
+    "mc02Validator": "PASS",
+    "missionControlValidator": "PASS",
+    "mc01Validator": "PASS",
+    "oe003aThroughOe003fValidators": "PASS",
+    "jsonValidation": "PASS",
+    "markdownValidation": "PASS",
+    "changedFileEslint": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS",
+    "build": "PASS"
+  },
+  "nextEligibleMission": "MC-08",
+  "mc03Status": "PLANNED_MANUAL_ONLY_NOT_STARTED"
+}

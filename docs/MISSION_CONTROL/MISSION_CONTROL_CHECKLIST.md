@@ -52,3 +52,11 @@ Use this checklist before starting any queued mission.
 - Push once.
 - Observe automatic deployment only.
 - Verify production read-only endpoints.
+
+## Latest Mission Certification
+
+- MC-00: `PRODUCTION_CERTIFIED`.
+- MC-01: `PRODUCTION_CERTIFIED`.
+- MC-02: `PRODUCTION_CERTIFIED`.
+- MC-03: `PLANNED` and manual-only; not started.
+- Next READY mission after MC-02: MC-08 Daily Betting Product Completion.

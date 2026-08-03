@@ -1,21 +1,21 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_01_PRODUCTION_CERTIFIED",
+  "status": "MC_02_PRODUCTION_CERTIFIED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
-    "id": "MC-01",
-    "title": "Operational Readiness Closure",
+    "id": "MC-02",
+    "title": "Multi-Sport Data Readiness",
     "state": "PRODUCTION_CERTIFIED",
     "priority": "P1",
     "mode": "AGENT_ASSISTED",
     "readiness": "COMPLETE"
   },
   "nextMission": {
-    "id": "MC-02",
-    "title": "Multi-Sport Data Readiness",
+    "id": "MC-08",
+    "title": "Daily Betting Product Completion",
     "state": "READY",
-    "priority": "P1",
+    "priority": "P2",
     "mode": "AGENT_ASSISTED",
     "readiness": "READY"
   },
@@ -25,7 +25,7 @@
     "planned": 6,
     "active": 0,
     "conditionalPass": 0,
-    "productionCertifiedRecentCompletions": 8
+    "productionCertifiedRecentCompletions": 9
   },
   "taxonomies": {
     "categories": [
@@ -77,14 +77,14 @@
     "OE-003F"
   ],
   "sportReadiness": {
-    "MLB": "CERTIFIED",
-    "NBA": "DATA_FOUNDATION",
-    "NFL": "PLANNED",
-    "NHL": "PLANNED",
-    "Soccer": "PLANNED",
-    "Tennis": "PLANNED",
-    "UFC": "PLANNED",
-    "BSN": "DATA_FOUNDATION"
+    "MLB": "DATA_READY",
+    "NBA": "DATA_PARTIAL",
+    "NFL": "DATA_PARTIAL",
+    "NHL": "DATA_PARTIAL",
+    "Soccer": "DATA_PARTIAL",
+    "Tennis": "DATA_FOUNDATION",
+    "UFC": "DATA_FOUNDATION",
+    "BSN": "PROVIDER_BLOCKED"
   },
   "readOnlyGuarantees": {
     "providerCallsMade": 0,
@@ -147,7 +147,30 @@
       "settlement_guarantee_scheduler_warning_decoupled_from_settlement_failure"
     ]
   },
-  "runtimeSurfaces": ["/api/mission-control", "/mission-control"],
+  "mc02": {
+    "status": "PRODUCTION_CERTIFIED",
+    "certificationArtifact": "docs/CERTIFICATION/mc-02-multi-sport-data-readiness.json",
+    "api": "/api/mission-control/data-readiness",
+    "activeStopCondition": null,
+    "reason": "Every configured target sport now has an evidence-based data-readiness classification.",
+    "sportMatrix": {
+      "baseball_mlb": "DATA_READY",
+      "basketball_nba": "DATA_PARTIAL",
+      "americanfootball_nfl": "DATA_PARTIAL",
+      "icehockey_nhl": "DATA_PARTIAL",
+      "soccer": "DATA_PARTIAL",
+      "tennis": "DATA_FOUNDATION",
+      "mma_ufc": "DATA_FOUNDATION",
+      "basketball_bsn": "PROVIDER_BLOCKED"
+    },
+    "providerCallsUsedDuringMc02": 0,
+    "providerCreditsUsedDuringMc02": 0,
+    "databaseMutationsMade": 0,
+    "normalReadProviderCallsMade": 0,
+    "normalReadRemoteMutationsMade": 0,
+    "mc03Started": false
+  },
+  "runtimeSurfaces": ["/api/mission-control", "/api/mission-control/data-readiness", "/mission-control"],
   "validationScript": "scripts/mission-control-v1-validate.mjs",
   "certificationArtifact": "docs/CERTIFICATION/mission-control-v1.json"
 }

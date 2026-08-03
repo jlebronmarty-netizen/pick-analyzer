@@ -4,6 +4,7 @@ import { getEventLifecycleState } from '@/services/event-lifecycle-state.service
 import { getEventRefreshPlan } from '@/services/event-refresh-planner.service'
 import { getOperationsHealth } from '@/services/operations-health.service'
 import { getProviderBudgetStatus } from '@/services/provider-budget.service'
+import { getMultiSportDataReadiness } from '@/services/multi-sport-data-readiness.service'
 
 const DOCUMENTATION_VERSION = 'mission_control_v1'
 const PROGRAM_VERSION = 'pick_analyzer_v2_mission_control_v1'
@@ -363,34 +364,34 @@ const queue: Mission[] = [
     id: 'MC-01',
     title: 'Operational Readiness Closure',
     category: 'OPERATIONAL_READINESS',
-    state: 'CONDITIONAL_PASS',
+    state: 'PRODUCTION_CERTIFIED',
     priority: 'P1',
     mode: 'AGENT_ASSISTED',
-    readiness: 'CONDITIONAL',
+    readiness: 'COMPLETE',
     owner: 'Operations',
     scope: 'Close remaining daily operating readiness evidence using stored operational proof and production read-only endpoints.',
-    nextAction: 'Run a bounded operational-readiness certification mission.',
+    nextAction: 'Complete; use as the operational-readiness baseline before MC-02.',
     dependencies: ['MC-00'],
-    blockers: ['External scheduler proof and market freshness remain dependent on the protected GitHub Actions writer.'],
-    evidence: ['docs/OPERATIONAL_EXCELLENCE/MORNING_OPERATIONAL_CHECKLIST.md', 'docs/PROJECT_STATUS.md'],
-    stopConditions: ['MC-STOP-004', 'MC-STOP-005'],
+    blockers: [],
+    evidence: ['docs/CERTIFICATION/mc-01-operational-readiness-closure.json', 'docs/PROJECT_STATUS.md'],
+    stopConditions: [],
     canStartAutomatically: false,
   },
   {
     id: 'MC-02',
     title: 'Multi-Sport Data Readiness',
     category: 'MULTI_SPORT_DATA',
-    state: 'READY',
+    state: 'PRODUCTION_CERTIFIED',
     priority: 'P1',
     mode: 'AGENT_ASSISTED',
-    readiness: 'READY',
+    readiness: 'COMPLETE',
     owner: 'Data Foundation',
     scope: 'Determine sport-by-sport canonical event, result, odds and feature readiness before prediction activation.',
-    nextAction: 'Begin with NBA/NFL/NHL stored-data gap evidence and provider-budget gating.',
+    nextAction: 'Complete; use sport-level readiness states before MC-03 or sport-specific data follow-ups.',
     dependencies: ['MC-01', 'OE-003B', 'OE-003C'],
-    blockers: ['Provider entitlement and canonical crosswalk gaps must remain sport-scoped.'],
-    evidence: ['docs/PROJECT_STATUS.md', 'docs/MASTER_ROADMAP.md'],
-    stopConditions: ['MC-STOP-002', 'MC-STOP-003'],
+    blockers: [],
+    evidence: ['docs/CERTIFICATION/mc-02-multi-sport-data-readiness.json', 'docs/MISSION_CONTROL/MC_02_MULTI_SPORT_DATA_READINESS.md'],
+    stopConditions: [],
     canStartAutomatically: false,
   },
   {
@@ -786,11 +787,12 @@ function buildProviderReadiness(budget: SafeResult<unknown>): ProviderReadiness[
 
 export async function getMissionControl() {
   const generatedAt = new Date().toISOString()
-  const [operationsHealth, lifecycle, refreshPlan, budget] = await Promise.all([
+  const [operationsHealth, lifecycle, refreshPlan, budget, dataReadiness] = await Promise.all([
     safe('Operations Health', () => getOperationsHealth()),
     safe('Event Lifecycle', () => getEventLifecycleState({ sportKey: SPORT_KEY, limit: 200 })),
     safe('Event Refresh Plan', () => getEventRefreshPlan({ sportKey: SPORT_KEY, limit: 200 })),
     safe('Provider Budget', () => getProviderBudgetStatus({ provider: PROVIDER, sportKey: SPORT_KEY })),
+    safe('Multi-Sport Data Readiness', () => getMultiSportDataReadiness({ limit: 100 })),
   ])
 
   const healthDomains = buildHealthDomains({ operationsHealth, lifecycle, refreshPlan, budget })
@@ -800,6 +802,7 @@ export async function getMissionControl() {
     ...(lifecycle.ok ? [] : [{ missionId: 'runtime-evidence', blocker: lifecycle.error }]),
     ...(refreshPlan.ok ? [] : [{ missionId: 'runtime-evidence', blocker: refreshPlan.error }]),
     ...(budget.ok ? [] : [{ missionId: 'runtime-evidence', blocker: budget.error }]),
+    ...(dataReadiness.ok ? [] : [{ missionId: 'runtime-evidence', blocker: dataReadiness.error }]),
   ]
 
   const lifecycleEvents = arrayRecords(record(lifecycle.data).events)
@@ -822,8 +825,8 @@ export async function getMissionControl() {
       },
     },
     taxonomy,
-    currentMission: queue[1],
-    nextMission: queue.find((mission) => !['MC-00', 'MC-01'].includes(mission.id) && mission.readiness === 'READY') ?? null,
+    currentMission: queue[2],
+    nextMission: queue.find((mission) => !['MC-00', 'MC-01', 'MC-02'].includes(mission.id) && mission.readiness === 'READY') ?? null,
     queue,
     autonomousReadiness: {
       status: 'READY' satisfies ReadinessStatus,
@@ -834,6 +837,12 @@ export async function getMissionControl() {
     },
     projectHealth: healthDomains,
     sportReadiness,
+    dataReadiness: dataReadiness.ok ? dataReadiness.data : {
+      success: false,
+      error: dataReadiness.error,
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+    },
     providerReadiness: buildProviderReadiness(budget),
     recentCompletions,
     blockers,
@@ -858,6 +867,7 @@ export async function getMissionControl() {
       runtimeEndpoints: [
         '/api/system/version',
         '/api/mission-control',
+        '/api/mission-control/data-readiness',
         '/mission-control',
         '/api/operations/health',
         '/api/operations/event-lifecycle?sportKey=baseball_mlb&limit=200',

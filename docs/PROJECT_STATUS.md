@@ -1612,3 +1612,13 @@ Status: IMPLEMENTED PENDING PRODUCTION CERTIFICATION
 OE-003B normalizes provider-budget evidence in the existing canonical `provider-budget.service.ts` path. `/api/providers/budget/status` now exposes additive `canonicalBudget`, `providerPools`, `costModels` and provider-specific evidence levels. The existing `/api/operations/provider-budget-forecast` route now accepts provider/action dry-run inputs and returns estimated HTTP requests, estimated quota units, reserve impact and authorization state without provider calls or mutations.
 
 SportsDataIO remains configured-only for allowance/reset with app-ledger usage evidence. The Odds API remains unknown for current credits/reset unless headers or stored metadata prove otherwise. BSN remains source-specific and is not treated as covered by The Odds API. No schema migration, scheduler cadence, refresh cadence, provider limit, prediction formula, Official Pick policy, settlement rule, learning rule, provider mapping or provider subscription changed.
+
+# 2026-08-02 - Mission Control MC-02 Multi-Sport Data Readiness
+
+Status: PRODUCTION CERTIFIED
+
+MC-02 adds the canonical read-only `/api/mission-control/data-readiness` surface and certifies evidence-based data-readiness classifications for every configured target sport. The mission uses repository configuration, existing certification artifacts, provider-budget profiles and bounded aggregate stored-data counts. Normal reads make 0 provider calls and 0 remote mutations.
+
+Readiness matrix: MLB `DATA_READY`; NBA `DATA_PARTIAL`; NFL `DATA_PARTIAL`; NHL `DATA_PARTIAL`; Soccer `DATA_PARTIAL`; Tennis `DATA_FOUNDATION`; UFC `DATA_FOUNDATION`; BSN `PROVIDER_BLOCKED`. SportsDataIO remains isolated and active only for certified MLB current operating-day acquisition; The Odds API remains a separate shadow/previously audited credit pool until current balance/reset/cost are proven; BSN remains source-specific and is not treated as The Odds API-covered.
+
+No prediction formula, probability, confidence, edge, EV, Official Pick policy, Kelly logic, settlement rule, learning rule, scheduler cadence, provider contract, provider budget reserve or market certification changed. MC-03 remains PLANNED and manual-only; it was not started.

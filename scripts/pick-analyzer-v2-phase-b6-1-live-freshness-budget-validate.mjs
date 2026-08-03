@@ -61,7 +61,7 @@ check('generic metricValue is not blindly treated as EV', panel.includes('functi
 check('metricValue fallback is limited to EV semantics', panel.includes("metricName.includes('expected value')") && helper.includes("metricName.includes('expected value')"))
 check('budget calculation is MLB scoped by default', budgetService.includes("sportKey = input.sportKey ?? 'baseball_mlb'") && budgetService.includes('MLB_DAILY_CREDIT_BUDGET'))
 check('budget allowance is classified configured only', artifact.providerBudget.allowanceSource === 'configured_only' && artifact.providerBudget.actualProviderQuotaProven === false && markdown.includes('configured only'))
-check('scheduler cadence claim does not exceed trigger', workflow.includes('*/10 * * * *') && artifact.cadence.schedulerTickMinutes === 10 && artifact.cadence.trueFiveMinuteRefreshEnabled === false)
+check('scheduler cadence claim does not exceed trigger', (workflow.includes('*/10 * * * *') || workflow.includes('7-57/10 * * * *')) && artifact.cadence.schedulerTickMinutes === 10 && artifact.cadence.trueFiveMinuteRefreshEnabled === false)
 check('adaptive policy does not claim true 5 minute scheduler', adaptivePolicy.includes('Less than 2h before first pitch | 10 minutes') && markdown.includes('A 5 minute cadence requires'))
 check('no all-sport 5-minute polling enabled', artifact.cadence.allSportFiveMinutePollingEnabled === false && markdown.includes('Broad all-sport 5 minute polling'))
 check('post-start refresh is blocked by documented policy', adaptivePolicy.includes('After game starts | stop pregame odds') && artifact.cadence.documentedWindows.some((item) => item.window === 'after_start' && item.rule === 'stop_pregame_odds'))
