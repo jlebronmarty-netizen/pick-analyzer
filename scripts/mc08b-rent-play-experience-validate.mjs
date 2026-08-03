@@ -50,7 +50,7 @@ check('stale price cannot be actionable', home.includes("WAIT_FOR_REFRESH") && h
 check('post-start market cannot be actionable', home.includes("POST_START") && home.includes("MARKET_CLOSED"))
 check('negative edge cannot be safest actionable', home.includes("edge > 0 ? 'PASS' : 'FAIL'") && home.includes('negative-edge candidate'))
 check('unavailable EV is not rendered as zero', home.includes("ev === null ? 'NOT_AVAILABLE'") && home.includes('signedPct(rentPlay.expectedValue)') && !home.includes('rentPlay.expectedValue ?? 0'))
-check('unavailable probability is not rendered as zero', home.includes("probability === null ? 'NOT_AVAILABLE'") && !home.includes('rentPlay.modelProbability ?? 0'))
+check('unavailable probability is not rendered as zero', home.includes("probability === null ? 'NOT_AVAILABLE'") && home.includes("value === null || value === undefined") && !home.includes('rentPlay.modelProbability ?? 0'))
 check('Most Likely remains distinct from Rent Play', home.includes('Most Likely Distinction') && home.includes('Most Likely is the highest modeled probability'))
 check('Official Pick policy remains distinct', home.includes('Official Pick Distinction') && home.includes('not promoted into Official Picks'))
 check('no new hidden ranking formula is introduced', !/rentPlayScore|safetyScore|score\s*=\s*|weighted/i.test(home))
