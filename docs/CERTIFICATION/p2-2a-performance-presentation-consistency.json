@@ -1,7 +1,9 @@
 {
   "id": "p2_2a_performance_presentation_consistency",
-  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION",
+  "status": "PRODUCTION_CERTIFIED",
   "startingCommit": "3ca9c07bff37823b141e58f3e1f41115cedd5b1f",
+  "runtimeCommit": "6aac64e4a82e27c1e7a2fdb207ed9aca2805ef1d",
+  "productionCommit": "6aac64e4a82e27c1e7a2fdb207ed9aca2805ef1d",
   "activeEpoch": "CURRENT_V2_PRODUCTION",
   "contract": "performance_presentation_metrics_v1",
   "metricDefinitions": {
@@ -34,5 +36,16 @@
     "mc08ePreserved": true,
     "p23Started": false,
     "mc08eResumed": false
+  },
+  "productionCertification": {
+    "systemVersionHttp": 200,
+    "performanceHttp": 200,
+    "performancePageDesktopHttp": 200,
+    "performancePageMobileHttp": 200,
+    "desktopHorizontalOverflow": false,
+    "mobileHorizontalOverflow": false,
+    "providerCallsFromCertificationReads": 0,
+    "remoteMutationsFromCertificationReads": 0,
+    "classification": "P2_2A_PRODUCTION_CERTIFIED"
   }
 }

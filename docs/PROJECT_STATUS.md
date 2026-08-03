@@ -46,7 +46,7 @@ Last updated: 2026-07-30 20:05:00Z
 
 ## 2026-08-03 P2.2A Performance Presentation Consistency
 
-- P2.2A is locally implemented pending production certification.
+- P2.2A is production certified at `6aac64e4a82e27c1e7a2fdb207ed9aca2805ef1d`.
 - Performance now labels Current V2 Production as 51 Total Analyzed rows, 24 Canonical Predictions, 27 Non-production Analysis rows, 0 Recommendation Eligible, 0 Actionable, 0 Official Pick Eligible and 0 Settled canonical predictions.
 - Prediction History remains canonical-only with 24 Current Era predictions.
 - Pipeline Readiness is labeled as workflow readiness, not model accuracy. Trust and Accuracy remain N/A until canonical predictions settle.

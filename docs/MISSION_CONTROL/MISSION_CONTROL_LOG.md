@@ -219,7 +219,8 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 
 # 2026-08-03 P2.2A Performance Presentation Consistency
 
-- Status: LOCAL_IMPLEMENTATION_PENDING_PRODUCTION_CERTIFICATION.
+- Status: PRODUCTION_CERTIFIED.
 - Performance presentation now separates Total Analyzed, Canonical Predictions, Non-production Analysis, Recommendation Eligible and Settled for Current V2 Production.
 - Count values and mathematics are unchanged: 51 total analyzed rows, 24 canonical predictions, 27 non-production analysis rows and 0 settled canonical predictions.
+- Production commit `6aac64e4a82e27c1e7a2fdb207ed9aca2805ef1d` returned the corrected `/api/performance` presentation contract and rendered `/performance` on desktop/mobile with no horizontal overflow.
 - P2.2 remains `WAITING_FOR_EXTERNAL_EVIDENCE`; P2.3 and MC-08E were not started.
