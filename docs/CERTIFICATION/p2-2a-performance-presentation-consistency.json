@@ -1,0 +1,38 @@
+{
+  "id": "p2_2a_performance_presentation_consistency",
+  "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION",
+  "startingCommit": "3ca9c07bff37823b141e58f3e1f41115cedd5b1f",
+  "activeEpoch": "CURRENT_V2_PRODUCTION",
+  "contract": "performance_presentation_metrics_v1",
+  "metricDefinitions": {
+    "totalAnalyzedRows": "All rows observed in the selected epoch/date scope, including canonical predictions plus preview, diagnostic, superseded or non-production evidence.",
+    "canonicalPredictionRows": "Current V2 event-market predictions eligible for canonical settlement, learning and Performance.",
+    "nonProductionAnalysisRows": "Preview, diagnostic, superseded, quarantined or other rows excluded from canonical Current Era Performance.",
+    "settledCanonicalRows": "Canonical production predictions with valid settlement."
+  },
+  "expectedCurrentEra": {
+    "totalAnalyzedRows": 51,
+    "canonicalPredictionRows": 24,
+    "nonProductionAnalysisRows": 27,
+    "recommendationEligibleRows": 0,
+    "actionableRows": 0,
+    "officialPickEligibleRows": 0,
+    "settledCanonicalRows": 0,
+    "trust": null,
+    "accuracy": null,
+    "predictionHistoryRows": 24
+  },
+  "guards": {
+    "predictionRowsMutated": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "recommendationPolicyChanged": false,
+    "officialPickPolicyChanged": false,
+    "schedulerChanged": false,
+    "providerCallsFromReadCertification": 0,
+    "databaseMutationsFromReadCertification": 0,
+    "mc08ePreserved": true,
+    "p23Started": false,
+    "mc08eResumed": false
+  }
+}

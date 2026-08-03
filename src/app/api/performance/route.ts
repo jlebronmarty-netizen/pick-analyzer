@@ -5,8 +5,15 @@ import { getPerformanceProductContract } from '@/services/performance-product-co
 type TimelineSource = Record<string, {
   label?: string
   generated?: number
+  totalAnalyzedRows?: number
   eligible?: number
+  canonicalPredictionRows?: number
+  nonProductionAnalysisRows?: number
+  recommendationEligibleRows?: number
+  actionableRows?: number
+  officialPickEligibleRows?: number
   settled?: number
+  settledCanonicalRows?: number
   pending?: number
   wins?: number
   losses?: number
@@ -33,13 +40,23 @@ type ReportCardSource = {
 }
 
 function timelineRows(timeline: TimelineSource) {
+  const totalAnalyzed = (item: TimelineSource[string]) => Number(item.totalAnalyzedRows ?? item.generated ?? 0)
+  const canonicalPredictions = (item: TimelineSource[string]) => Number(item.canonicalPredictionRows ?? item.eligible ?? 0)
+  const nonProductionAnalysis = (item: TimelineSource[string]) => Number(item.nonProductionAnalysisRows ?? Math.max(0, totalAnalyzed(item) - canonicalPredictions(item)))
   return Object.entries(timeline).map(([key, item]) => ({
     label: item.label ?? key,
     generated: item.generated,
+    totalAnalyzedRows: totalAnalyzed(item),
     productionEligible: item.eligible,
+    canonicalPredictionRows: canonicalPredictions(item),
+    nonProductionAnalysisRows: nonProductionAnalysis(item),
+    recommendationEligibleRows: item.recommendationEligibleRows ?? 0,
+    actionableRows: item.actionableRows ?? 0,
+    officialPickEligibleRows: item.officialPickEligibleRows ?? 0,
     productionSettled: item.settled,
+    settledCanonicalRows: item.settledCanonicalRows ?? item.settled ?? 0,
     productionPending: item.pending,
-    nonProductionRows: Math.max(0, Number(item.generated ?? 0) - Number(item.eligible ?? 0)),
+    nonProductionRows: nonProductionAnalysis(item),
     nonProductionExclusionReasons: item.nonProductionExclusionReasons ?? {},
     nonProductionBlockers: item.nonProductionBlockers ?? {},
     validPregameNonProductionRows: item.validPregameNonProductionRows ?? 0,
@@ -49,10 +66,10 @@ function timelineRows(timeline: TimelineSource) {
     record: `${item.wins ?? 0}-${item.losses ?? 0}-${item.pushes ?? 0}`,
     accuracy: item.accuracy,
     displayAccuracy: item.accuracy === null ? 'N/A' : `${item.accuracy}%`,
-    predictions: item.generated,
+    predictions: item.canonicalPredictionRows ?? item.eligible ?? 0,
     zeroSampleMessage: item.accuracy === null
-      ? Number(item.generated ?? 0) > 0 && Number(item.eligible ?? 0) === 0
-        ? `${item.generated} generated rows in this bucket are not production-evaluable, so Production Settled remains 0 without fabricating settlements.`
+      ? totalAnalyzed(item) > 0 && canonicalPredictions(item) === 0
+        ? `${totalAnalyzed(item)} analyzed rows in this bucket are not canonical production predictions, so Settled remains 0 without fabricating settlements.`
         : 'No settled production predictions in this scope.'
       : null,
   }))
@@ -274,7 +291,7 @@ export async function GET(request: NextRequest) {
         recentTrend: userStatus(selectedTrust.trustStatus),
         modelStatus: userStatus(selectedTrust.trustStatus),
         lastUpdate: product.generatedAt,
-        disclaimer: 'Performance is calculated from cutoff-safe production scope evidence only.',
+        disclaimer: 'Performance separates total analyzed rows from canonical Current Era predictions. Trust and accuracy use settled canonical predictions only.',
       },
       internalView: aiBrain.internalView,
       aiBrain,
@@ -300,6 +317,7 @@ export async function GET(request: NextRequest) {
         trendCalculationsUseStoredSnapshots: data?.evolutionSnapshots?.trendCalculationsUseStoredSnapshots ?? false,
       },
       performanceTimeline: productTimeline,
+      performancePresentation: product.performancePresentation,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
     })

@@ -149,7 +149,14 @@ export function validatePerformanceProductContractFixtures() {
   const metric = (brier: number): TimelineMetrics => ({
     label: 'fixture',
     generated: 3,
+    totalAnalyzedRows: 3,
     eligible: 3,
+    canonicalPredictionRows: 3,
+    nonProductionAnalysisRows: 0,
+    recommendationEligibleRows: 3,
+    actionableRows: 3,
+    officialPickEligibleRows: 3,
+    settledCanonicalRows: 3,
     uniqueMarkets: 3,
     current: 0,
     superseded: 0,
@@ -165,6 +172,7 @@ export function validatePerformanceProductContractFixtures() {
     settlementCoverage: 100,
     nonProductionExclusionReasons: {},
     nonProductionBlockers: {},
+    nonProductionBreakdown: {},
     validPregameNonProductionRows: 0,
   })
   const achieved = goalsFrom(metric(0.2)).goals.find((goal) => goal.key === 'maximum_brier_score')
@@ -196,6 +204,9 @@ export function validatePerformanceProductContractFixtures() {
 function maturityPipelineFrom(metrics: TimelineMetrics) {
   const scored = metrics.wins + metrics.losses
   const calibration = calibrationFrom(metrics)
+  const totalAnalyzedRows = Number((metrics as Record<string, unknown>).totalAnalyzedRows ?? metrics.generated ?? 0)
+  const canonicalPredictionRows = Number((metrics as Record<string, unknown>).canonicalPredictionRows ?? metrics.eligible ?? 0)
+  const nonProductionAnalysisRows = Number((metrics as Record<string, unknown>).nonProductionAnalysisRows ?? Math.max(0, totalAnalyzedRows - canonicalPredictionRows))
   const stage = (status: string, score: number, evidence: string[], blockers: string[], nextAction: string, sampleScope: string) => ({
     status,
     score,
@@ -205,7 +216,14 @@ function maturityPipelineFrom(metrics: TimelineMetrics) {
     sampleScope,
   })
   return {
-    DATA: stage('ACTIVE', metrics.generated ? 80 : 0, [`${metrics.generated} cutoff-safe production rows in scope.`], metrics.generated ? [] : ['NO_PRODUCTION_ROWS'], 'Maintain production data quality monitoring.', 'Production Sample'),
+    DATA: stage(
+      'ACTIVE',
+      canonicalPredictionRows ? 80 : 0,
+      [`${canonicalPredictionRows} canonical Current Era predictions; ${nonProductionAnalysisRows} non-production analysis rows; ${totalAnalyzedRows} total analyzed rows in scope.`],
+      canonicalPredictionRows ? [] : ['NO_CANONICAL_PRODUCTION_PREDICTIONS'],
+      'Maintain production data quality monitoring.',
+      'Canonical Production Sample'
+    ),
     BACKTESTING: stage(scored >= 100 ? 'COMPLETE' : scored > 0 ? 'ACTIVE' : 'NOT STARTED', Math.min(100, scored), [`${scored} scored Win/Loss outcomes.`], scored < 100 ? ['SETTLED_SAMPLE_BELOW_100'] : [], 'Accumulate settled production samples.', 'Production Sample'),
     CALIBRATION: stage(scored >= 30 && calibration.calibrationError !== null && calibration.calibrationError <= 8 ? 'COMPLETE' : scored ? 'LIMITED' : 'BLOCKED', calibration.confidenceReliability ?? 0, [`Calibration error ${calibration.calibrationError ?? 'N/A'} on ${calibration.sample} scored outcomes.`], scored < 30 ? ['CALIBRATION_SAMPLE_BELOW_30'] : [], 'Review reliability after more same-scope settlements.', 'Production Sample'),
     SHADOW_REPLAY: stage('SEPARATE_SCOPE', 0, ['Replay and shadow samples are intentionally excluded from production performance trust.'], [], 'Keep replay/shadow evidence labeled separately.', 'Replay/Shadow Sample'),
@@ -293,7 +311,14 @@ function emptyMetrics(label = 'No settled production predictions'): TimelineMetr
   return {
     label,
     generated: 0,
+    totalAnalyzedRows: 0,
     eligible: 0,
+    canonicalPredictionRows: 0,
+    nonProductionAnalysisRows: 0,
+    recommendationEligibleRows: 0,
+    actionableRows: 0,
+    officialPickEligibleRows: 0,
+    settledCanonicalRows: 0,
     uniqueMarkets: 0,
     current: 0,
     superseded: 0,
@@ -309,6 +334,7 @@ function emptyMetrics(label = 'No settled production predictions'): TimelineMetr
     settlementCoverage: null,
     nonProductionExclusionReasons: {},
     nonProductionBlockers: {},
+    nonProductionBreakdown: {},
     validPregameNonProductionRows: 0,
   }
 }
@@ -325,6 +351,13 @@ export async function getPerformanceProductContract({
   const scope = await getPerformanceScopeV2({ sportKey, includeHistoryRows, maxPredictionRows })
   const season = scope.timeline.season
   const today = scope.timeline.today
+  const totalAnalyzedRows = Number((season as Record<string, unknown>).totalAnalyzedRows ?? season.generated ?? 0)
+  const canonicalPredictionRows = Number((season as Record<string, unknown>).canonicalPredictionRows ?? season.eligible ?? 0)
+  const nonProductionAnalysisRows = Number((season as Record<string, unknown>).nonProductionAnalysisRows ?? Math.max(0, totalAnalyzedRows - canonicalPredictionRows))
+  const recommendationEligibleRows = Number((season as Record<string, unknown>).recommendationEligibleRows ?? 0)
+  const actionableRows = Number((season as Record<string, unknown>).actionableRows ?? 0)
+  const officialPickEligibleRows = Number((season as Record<string, unknown>).officialPickEligibleRows ?? 0)
+  const settledCanonicalRows = Number((season as Record<string, unknown>).settledCanonicalRows ?? season.settled ?? 0)
   const selectedTrust = trustFrom(season)
   const selectedCalibration = calibrationFrom(season)
   const enabledSports = getEnabledSports()
@@ -337,7 +370,7 @@ export async function getPerformanceProductContract({
       shortLabel: sport.shortLabel,
       productionReady: sport.key === 'baseball_mlb' && metrics.wins + metrics.losses > 0,
       metrics: {
-        predictions: metrics.generated,
+        predictions: Number((metrics as Record<string, unknown>).canonicalPredictionRows ?? metrics.eligible ?? 0),
         settled: metrics.settled,
         correct: metrics.wins,
         incorrect: metrics.losses,
@@ -359,7 +392,7 @@ export async function getPerformanceProductContract({
       performanceTrust: trustFrom(metrics),
       dataReadiness: { readinessScore: sport.key === 'baseball_mlb' ? 100 : 0, status: sport.key === 'baseball_mlb' ? 'READY' : 'NO_SETTLED_SAMPLE' },
       dailyReportCard: reportCardFrom(metrics),
-      readiness: { readinessScore: sport.key === 'baseball_mlb' ? 100 : 0, providerReady: sport.key === 'baseball_mlb', officialReady: metrics.wins + metrics.losses > 0, predictionReady: metrics.generated > 0, calibrationReady: calibrationFrom(metrics).calibrationError !== null },
+      readiness: { readinessScore: sport.key === 'baseball_mlb' ? 100 : 0, providerReady: sport.key === 'baseball_mlb', officialReady: metrics.wins + metrics.losses > 0, predictionReady: Number((metrics as Record<string, unknown>).canonicalPredictionRows ?? metrics.eligible ?? 0) > 0, calibrationReady: calibrationFrom(metrics).calibrationError !== null },
     }
   })
 
@@ -380,6 +413,25 @@ export async function getPerformanceProductContract({
       dailyReportCard: 'same selected reportCardFrom(season) contract',
       goals: 'same selected goalsFrom(season) contract',
       modelMaturity: 'production sample with replay/shadow explicitly labeled separate',
+    },
+    performancePresentation: {
+      contract: 'performance_presentation_metrics_v1',
+      activeEpoch: scope.scopePolicy.activeEpoch?.epochKey ?? null,
+      epochId: scope.scopePolicy.activeEpoch?.id ?? null,
+      epochName: scope.scopePolicy.activeEpoch?.epochName ?? null,
+      eraMode: scope.scopePolicy.eraMode,
+      productionScopeVersion: scope.scopePolicy.productionScopeVersion,
+      metricDefinitionsVersion: scope.scopePolicy.metricDefinitionsVersion,
+      totalAnalyzedRows,
+      canonicalPredictionRows,
+      nonProductionAnalysisRows,
+      recommendationEligibleRows,
+      actionableRows,
+      officialPickEligibleRows,
+      settledCanonicalRows,
+      trust: selectedTrust.trustScore,
+      accuracy: season.accuracy,
+      explanation: 'Pick Analyzer analyzed rows during Current Era processing. Canonical event-market predictions are used for settlement, learning and Performance; preserved preview or diagnostic evidence does not count as independent production predictions.',
     },
     performanceScopeV2: scope,
     trustScore: selectedTrust,

@@ -44,6 +44,14 @@ Last updated: 2026-07-30 20:05:00Z
 - Production coverage after protected execution reported 48 provider selections, 24 canonical markets, 24 canonical predictions, 24 production-evaluable rows, 0 missed opportunities, 0 duplicates and 100% canonical coverage. Performance Current Era reported 24 eligible unique markets and 27 non-canonical rows excluded.
 - Prediction formulas, recommendation gates, Official Pick policy, Kelly, settlement rules, learning weights, scheduler cadence and provider contracts are unchanged. P2.2 is back to `WAITING_FOR_EXTERNAL_EVIDENCE` and must use only canonical event-market rows.
 
+## 2026-08-03 P2.2A Performance Presentation Consistency
+
+- P2.2A is locally implemented pending production certification.
+- Performance now labels Current V2 Production as 51 Total Analyzed rows, 24 Canonical Predictions, 27 Non-production Analysis rows, 0 Recommendation Eligible, 0 Actionable, 0 Official Pick Eligible and 0 Settled canonical predictions.
+- Prediction History remains canonical-only with 24 Current Era predictions.
+- Pipeline Readiness is labeled as workflow readiness, not model accuracy. Trust and Accuracy remain N/A until canonical predictions settle.
+- No prediction rows, settlement rows, learning evidence, model outputs, recommendation gates, Official Pick policy, scheduler cadence or provider behavior changed. P2.2 remains `WAITING_FOR_EXTERNAL_EVIDENCE`; P2.3 and MC-08E were not started.
+
 ## 2026-08-02 Mission Control MC-08D Smart Parlay Experience
 
 - MC-08D is production-certified on commit `f9faf649d89cd343034e935225d7215dafcc754b`. The homepage Smart Parlay has been converted from C1-era client probability multiplication into a typed `smart_parlay_v1` presentation contract.

@@ -216,3 +216,10 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Provider-side evidence can remain 48 contextual selections and must not be counted as 48 independent Performance or settlement-learning samples.
 - P2.2 remains paused during certification and returns to `WAITING_FOR_EXTERNAL_EVIDENCE` only after production certification completes.
 - Production commit `8821aa7830874653cc05744ff8eaad03cf42b6b3` certified 48 provider selections, 24 canonical markets, 24 canonical predictions, 0 missed canonical opportunities, 24 production-evaluable rows and 27 non-canonical Current Era rows excluded from Performance. P2.2 returned to `WAITING_FOR_EXTERNAL_EVIDENCE`.
+
+# 2026-08-03 P2.2A Performance Presentation Consistency
+
+- Status: LOCAL_IMPLEMENTATION_PENDING_PRODUCTION_CERTIFICATION.
+- Performance presentation now separates Total Analyzed, Canonical Predictions, Non-production Analysis, Recommendation Eligible and Settled for Current V2 Production.
+- Count values and mathematics are unchanged: 51 total analyzed rows, 24 canonical predictions, 27 non-production analysis rows and 0 settled canonical predictions.
+- P2.2 remains `WAITING_FOR_EXTERNAL_EVIDENCE`; P2.3 and MC-08E were not started.

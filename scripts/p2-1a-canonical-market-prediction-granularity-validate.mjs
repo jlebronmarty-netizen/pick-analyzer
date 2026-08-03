@@ -40,6 +40,14 @@ const allowed = new Set([
   'scripts/p2-0-prediction-epoch-v2-validate.mjs',
   'scripts/p1-3-production-evaluation-policy-validate.mjs',
   'scripts/p1-4-e2e-production-pipeline-validate.mjs',
+  'src/app/api/performance/route.ts',
+  'src/components/performance/PerformanceProductClient.tsx',
+  'src/services/performance-product-contract.service.ts',
+  'docs/ARCHITECTURE/E2E_PREDICTION_PIPELINE.md',
+  'docs/CERTIFICATION/P2_2A_PERFORMANCE_PRESENTATION_CONSISTENCY.md',
+  'docs/CERTIFICATION/p2-2a-performance-presentation-consistency.json',
+  'docs/OPERATIONAL_EXCELLENCE/P2_2A_PERFORMANCE_PRESENTATION_CONSISTENCY.md',
+  'scripts/p2-2a-performance-presentation-consistency-validate.mjs',
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 

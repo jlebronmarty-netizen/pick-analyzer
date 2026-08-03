@@ -69,6 +69,8 @@ Current V2 certification documents:
 - [P2.1 Certification JSON](p2-1-supported-market-prediction-coverage.json)
 - [P2.1A Canonical Market Granularity](P2_1A_CANONICAL_MARKET_GRANULARITY.md)
 - [P2.1A Certification JSON](p2-1a-canonical-market-granularity.json)
+- [P2.2A Performance Presentation Consistency](P2_2A_PERFORMANCE_PRESENTATION_CONSISTENCY.md)
+- [P2.2A Certification JSON](p2-2a-performance-presentation-consistency.json)
 - [P2.2 New-Epoch Daily Closure](P2_2_NEW_EPOCH_DAILY_CLOSURE.md)
 - [P2.2 Certification JSON](p2-2-new-epoch-daily-closure.json)
 - [MC-01 Operational Readiness Closure](MC_01_OPERATIONAL_READINESS_CLOSURE.md)

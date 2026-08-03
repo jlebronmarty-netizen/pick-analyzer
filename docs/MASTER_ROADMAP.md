@@ -12,6 +12,8 @@ P2.1A is production-certified on commit `8821aa7830874653cc05744ff8eaad03cf42b6b
 
 P2.2 is `WAITING_FOR_EXTERNAL_EVIDENCE` using the P2.1A canonical rows. Current V2 predictions must become final and pass through authoritative result import, settlement, learning evidence and Performance Current Era before closure can be certified. P2.3 is blocked by P2.2.
 
+P2.2A is locally implemented pending production certification. It clarifies Performance presentation without changing counts or math: Current V2 defaults now separate 51 Total Analyzed rows, 24 Canonical Predictions, 27 Non-production Analysis rows, 0 Recommendation Eligible rows and 0 Settled canonical predictions. Pipeline Readiness is qualified as workflow readiness, not model accuracy.
+
 ## Platform Baseline
 
 Status: PLATFORM BASELINE CERTIFIED.

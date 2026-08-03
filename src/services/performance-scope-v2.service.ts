@@ -153,6 +153,7 @@ function eligibility(row: PredictionRow, event: EventRow | undefined) {
 function metrics(rows: Array<{ row: PredictionRow; event?: EventRow }>) {
   const eligibleRows = rows.filter((item) => eligibility(item.row, item.event).eligible)
   const nonEligibleRows = rows.filter((item) => !eligibility(item.row, item.event).eligible)
+  const eligiblePolicies = eligibleRows.map((item) => productionEvaluationPolicy(item.row))
   const settled = eligibleRows.filter((item) => resultOf(item.row) !== 'pending')
   const wins = settled.filter((item) => resultOf(item.row) === 'win').length
   const losses = settled.filter((item) => resultOf(item.row) === 'loss').length
@@ -170,11 +171,18 @@ function metrics(rows: Array<{ row: PredictionRow; event?: EventRow }>) {
     .filter((value) => Number.isFinite(value))
   return {
     generated: rows.length,
+    totalAnalyzedRows: rows.length,
     eligible: eligibleRows.length,
+    canonicalPredictionRows: eligibleRows.length,
+    nonProductionAnalysisRows: nonEligibleRows.length,
+    recommendationEligibleRows: eligiblePolicies.filter((policy) => policy.recommendation_eligible === true).length,
+    actionableRows: eligiblePolicies.filter((policy) => policy.actionable === true).length,
+    officialPickEligibleRows: eligiblePolicies.filter((policy) => policy.official_pick_eligible === true).length,
     uniqueMarkets: new Set(rows.map((item) => [item.row.game_id, item.row.market].join('|'))).size,
     current: rows.filter((item) => item.row.is_current !== false).length,
     superseded: rows.filter((item) => item.row.is_current === false).length,
     settled: settled.length,
+    settledCanonicalRows: settled.length,
     pending: eligibleRows.length - settled.length,
     wins,
     losses,
@@ -186,6 +194,7 @@ function metrics(rows: Array<{ row: PredictionRow; event?: EventRow }>) {
     settlementCoverage: eligibleRows.length ? round((settled.length / eligibleRows.length) * 100) : null,
     nonProductionExclusionReasons: groupCount(nonEligibleRows, nonProductionReason),
     nonProductionBlockers: groupBlockers(nonEligibleRows.map((item) => item.row)),
+    nonProductionBreakdown: groupCount(nonEligibleRows, nonProductionReason),
     validPregameNonProductionRows: nonEligibleRows.filter((item) => {
       const cutoff = classifyPredictionCutoff(item.row, item.event)
       return cutoff.state === 'PREGAME'
@@ -322,7 +331,19 @@ export async function getPerformanceScopeV2({
     scopePolicy: {
       defaultEra: activeEpoch ? 'CURRENT_V2_PRODUCTION' : 'LEGACY_DEFAULT',
       activeEpoch,
+      eraMode: activeEpoch ? 'CURRENT_V2_PRODUCTION_DEFAULT' : 'LEGACY_DEFAULT',
+      productionScopeVersion: 'current_v2_production_scope_v1',
+      metricDefinitionsVersion: 'performance_presentation_metrics_v1',
       currentV2EligibilityUses: 'feature_snapshot.productionEvaluationPolicy.production_evaluable',
+      metricDefinitions: {
+        totalAnalyzedRows: 'All rows observed in the selected epoch/date scope, including canonical predictions plus preview, diagnostic, superseded or non-production evidence.',
+        canonicalPredictionRows: 'Current V2 event-market predictions eligible for canonical settlement, learning and Performance.',
+        nonProductionAnalysisRows: 'Preview, diagnostic, superseded, quarantined or other rows excluded from canonical Current Era Performance.',
+        recommendationEligibleRows: 'Canonical predictions passing recommendation eligibility gates.',
+        actionableRows: 'Recommendation-eligible canonical predictions currently actionable.',
+        officialPickEligibleRows: 'Canonical predictions passing Official Pick eligibility gates.',
+        settledCanonicalRows: 'Canonical production predictions with valid settlement.',
+      },
       generatedUses: 'event_start_ast_date_fallback_prediction_generated_at',
       settlementUses: 'stored_result_and_settled_at_when_available',
       pushHandling: 'pushes_count_as_settled_but_are_excluded_from_win_loss_accuracy_and_brier_scoring',

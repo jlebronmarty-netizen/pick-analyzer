@@ -52,7 +52,11 @@ No product surface should silently create a separate prediction truth. Specializ
 
 ## P2.1 Supported-Market Coverage
 
-Current V2 production prediction coverage is reconciled by expected selection, not only by event and market. The MLB prospective generator keeps canonical side and line identity for supported markets, and `/api/operations/prediction-coverage` reports every expected current operating-day selection as created, missed, cutoff-missed or duplicate-collapsed. The uniqueness key is `epoch:event:market:selection:line`.
+P2.1A supersedes the selection-level wording for production evaluation. Current V2 production prediction coverage is reconciled by canonical event-market prediction, while provider-side selections remain contextual evidence. For the certified eight-game MLB slate, `/api/operations/prediction-coverage` separates 48 provider selections from 24 canonical predictions.
+
+## P2.2A Performance Presentation
+
+Performance presentation uses `performance_presentation_metrics_v1` to avoid treating total analyzed rows as canonical predictions. Current Era defaults show Total Analyzed, Canonical Predictions, Non-production Analysis, Recommendation Eligible and Settled separately. Historical evidence remains separate from Current V2 defaults.
 
 ## Policy Boundary
 

@@ -33,6 +33,7 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | P2.0 | Prediction Epoch V2 Activation | PRODUCTION_CERTIFIED | Current V2 Production activated at `2026-08-03T19:57:02.418+00:00`; historical rows preserved. |
 | P2.1 | Comprehensive Supported-Market Prediction Coverage | PRODUCTION_CERTIFIED | 48/48 expected current supported MLB selections covered. |
 | P2.1A | Canonical Market-Prediction Granularity Correction | PRODUCTION_CERTIFIED | 48 provider selections and 24 canonical event-market predictions certified; selection-level preview rows excluded from canonical Performance. |
+| P2.2A | Performance Presentation Consistency | LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION | Clarify Current Era Performance labels without changing counts, math, settlement, learning or predictions. |
 | P2.2 | New-Epoch Daily Closure Certification | WAITING_FOR_EXTERNAL_EVIDENCE | Current V2 canonical rows must become final, import results, settle, create learning evidence and enter Performance. |
 | P2.3 | Historical Progressive Replay V1 | BLOCKED_BY_P2_2 | Do not start until P2.2 closure evidence is available or explicitly approved. |
 

@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_1A_PRODUCTION_CERTIFIED_P2_2_WAITING_FOR_EXTERNAL_EVIDENCE_MC_08E_PAUSED",
+  "status": "P2_2A_LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION_P2_2_WAITING_FOR_EXTERNAL_EVIDENCE_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -235,6 +235,27 @@
     "p22Paused": false,
     "p23Started": false,
     "mc03Started": false,
+    "mc08eResumed": false
+  },
+  "p2_2a": {
+    "status": "LOCAL_VALIDATION_PASS_PENDING_PRODUCTION_CERTIFICATION",
+    "title": "Performance Presentation Consistency",
+    "certificationArtifact": "docs/CERTIFICATION/p2-2a-performance-presentation-consistency.json",
+    "activeEpochKey": "CURRENT_V2_PRODUCTION",
+    "presentationContract": "performance_presentation_metrics_v1",
+    "totalAnalyzedRows": 51,
+    "canonicalPredictionRows": 24,
+    "nonProductionAnalysisRows": 27,
+    "recommendationEligibleRows": 0,
+    "actionableRows": 0,
+    "officialPickEligibleRows": 0,
+    "settledCanonicalRows": 0,
+    "predictionRowsMutated": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "performanceMathChanged": false,
+    "p22Status": "WAITING_FOR_EXTERNAL_EVIDENCE",
+    "p23Started": false,
     "mc08eResumed": false
   },
   "p2_2": {
