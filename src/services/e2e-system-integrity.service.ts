@@ -74,11 +74,8 @@ type PredictionRow = {
 type GameResultRow = {
   id: string
   game_id: string | null
-  status: string | null
   home_score: number | null
   away_score: number | null
-  updated_at?: string | null
-  result_date?: string | null
 }
 
 type SafeResult<T> = {
@@ -355,7 +352,7 @@ async function readResults(eventIds: string[], limit: number) {
   if (!eventIds.length) return []
   const { data, error } = await supabaseAdmin
     .from('game_results')
-    .select('id, game_id, status, home_score, away_score, updated_at, result_date')
+    .select('id, game_id, home_score, away_score')
     .in('game_id', eventIds)
     .limit(limit)
   if (error) throw new Error(`result read failed: ${error.message}`)
