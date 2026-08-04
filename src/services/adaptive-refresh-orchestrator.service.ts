@@ -1812,11 +1812,15 @@ export async function runAdaptiveRefresh({
     }
   }
 
+  const internalAction = ['settle', 'lock', 'replay', 'calibrate'].includes(String(action))
+  const requestedProviderCalls = internalAction
+    ? 0
+    : Math.max(estimatedCalls, action === 'final_refresh' ? 1 : action === 'sync_results' ? 1 : 0)
   const budget = await checkProviderBudget({
     provider: providerForAction(action),
     sportKey: SPORT_KEY,
     action: `adaptive_refresh:${action}`,
-    requestedCalls: Math.max(estimatedCalls, action === 'final_refresh' ? 1 : action === 'sync_results' ? 1 : 0),
+    requestedCalls: requestedProviderCalls,
     dryRun: false,
   })
   if (!budget.allowed) {
@@ -1894,6 +1898,8 @@ export async function runAdaptiveRefresh({
     const normalizedStatus =
       result.success && providerBackedDue && !providerCheckAttempted && providerCallsMade === 0 && remoteMutationsMade === 0 && !verifiedNoChangeStatuses.some((status) => executionStatus.toLowerCase().includes(status))
         ? 'MISSED_REFRESH'
+        : result.success && remoteMutationsMade > 0
+          ? 'SUCCESS_CHANGED'
         : result.success && providerBackedDue && delegatedRefreshStatus
           ? delegatedRefreshStatus
         : result.success && providerBackedDue && providerCheckCompleted && oddsChangesDetected > 0

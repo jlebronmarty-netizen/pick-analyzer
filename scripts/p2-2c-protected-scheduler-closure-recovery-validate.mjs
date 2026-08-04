@@ -15,6 +15,7 @@ const changed = execFileSync('git', ['diff', '--name-only', 'HEAD'], { cwd: ROOT
   .filter(Boolean)
 
 const allowed = new Set([
+  'src/services/adaptive-refresh-orchestrator.service.ts',
   'src/services/provider-budget.service.ts',
   'scripts/p2-2c-protected-scheduler-closure-recovery-validate.mjs',
   'scripts/p2-2b-current-era-closure-investigation-validate.mjs',
@@ -69,6 +70,16 @@ check(
   'concurrency lock remains enabled',
   orchestrator.includes('claimProviderActionLock(lockKey, 8 * 60 * 1000)') &&
     orchestrator.includes('duplicate_or_overlapping_run_blocked')
+)
+check(
+  'internal settlement action does not inherit provider-call budget demand',
+  orchestrator.includes("const internalAction = ['settle', 'lock', 'replay', 'calibrate'].includes(String(action))") &&
+    orchestrator.includes('requestedCalls: requestedProviderCalls')
+)
+check(
+  'successful write-producing execution continues as changed work',
+  orchestrator.includes('result.success && remoteMutationsMade > 0') &&
+    orchestrator.includes("? 'SUCCESS_CHANGED'")
 )
 check(
   'settlement eligibility still requires authoritative game_results',
