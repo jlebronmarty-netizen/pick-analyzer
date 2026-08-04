@@ -263,4 +263,4 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Current Era evidence remains 69 canonical predictions, 24 settled and 45 pending.
 - Replay evidence remains 30 replay predictions and 30 replay settled rows.
 - Provider calls, remote mutations, prediction changes, settlement changes, learning changes and scheduler changes remain 0.
-- Production certification is pending automatic deployment. MC-08E and MC-03 were not started.
+- Production certification completed at 6a3debf9eb2286a9736706d98c0672366b917821. E2E surfaceConsistency returned PASS with no stale surfaces or unexplained differences. MC-08E-R is next eligible. MC-08E and MC-03 were not started.

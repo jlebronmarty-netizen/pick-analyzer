@@ -1,6 +1,6 @@
 # P2.4 Cross-Surface Epoch And Performance Consistency
 
-Status: PASS pending production deployment.
+Status: PRODUCTION CERTIFIED.
 
 P2.4 closes the product consistency gap between current-day surfaces, Current Era Performance and Historical Replay. The repository now exposes one bounded read-only E2E integrity contract named surfaceConsistency.
 

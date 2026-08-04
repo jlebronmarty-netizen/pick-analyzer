@@ -79,6 +79,6 @@ Use this checklist before starting any queued mission.
 - [x] Local validator created.
 - [x] E2E integrity exposes `surfaceConsistency`.
 - [x] Current Era and Replay equations are explicit.
-- [ ] Production deployment certification complete.
+- [x] Production deployment certification complete.
 - [x] MC-08E remains paused.
 - [x] MC-03 was not started.

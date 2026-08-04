@@ -1,6 +1,6 @@
 # P2.4 Cross-Surface Epoch Consistency Certification
 
-Verdict: PASS pending production deployment.
+Verdict: PASS - production certified.
 
 Starting commit: f297b456cdb378b4f5dd5d5e6b63f81a5f871176.
 
@@ -26,6 +26,6 @@ P2.4 verifies that Homepage, Dashboard, Current Board, Most Likely, Best Value, 
 
 ## Classification
 
-P2_4_LOCAL_PASS_PENDING_PRODUCTION_DEPLOYMENT
+P2_4_PRODUCTION_CERTIFIED
 
-After production certification, MC-08E-R is the next eligible work item. MC-08E-R, MC-03 and any later mission were not started.
+Production served runtime commit 6a3debf9eb2286a9736706d98c0672366b917821. E2E surface consistency returned PASS with 0 unexplained differences, 0 stale surfaces, Current Era 69 canonical / 24 settled / 45 pending, Replay 30 / 30 settled, providerCallsMade 0 and remoteMutationsMade 0. MC-08E-R is the next eligible work item. MC-08E-R, MC-03 and any later mission were not started.

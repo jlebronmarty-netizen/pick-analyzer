@@ -60,7 +60,7 @@ check('safety forbids business-rule changes', cert.safety.predictionFormulaChang
 check('read path exposes zero provider calls', service.includes('providerCallsMade: 0') && cert.safety.providerCallsIntroduced === 0)
 check('read path exposes zero mutations', service.includes('remoteMutationsMade: 0') && cert.safety.remoteMutationsIntroduced === 0)
 check('fixture validator passes', fixture.success === true)
-check('Mission Control points to P2.4', status.p2_4?.status === 'PASS_PENDING_PRODUCTION_DEPLOYMENT' && status.nextEligiblePhase?.id === 'P2.4')
+check('Mission Control records P2.4 and the next eligible phase', ['PASS_PENDING_PRODUCTION_DEPLOYMENT', 'PRODUCTION_CERTIFIED'].includes(status.p2_4?.status) && ['P2.4', 'MC-08E-R'].includes(status.nextEligiblePhase?.id))
 check('MC-08E and MC-03 were not started', cert.mc08eResumed === false && cert.mc03Started === false)
 check('expected Current Era counts are documented', cert.expectedCounts.currentEra.canonicalPredictionRows === 69 && cert.expectedCounts.currentEra.settledCanonicalRows === 24)
 check('expected Replay counts are documented', cert.expectedCounts.replay.replayPredictionRows === 30 && cert.expectedCounts.replay.replaySettledRows === 30)

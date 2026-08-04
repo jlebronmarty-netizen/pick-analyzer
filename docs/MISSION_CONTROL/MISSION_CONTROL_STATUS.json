@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_4_LOCAL_PASS_PENDING_PRODUCTION_DEPLOYMENT_MC_08E_PAUSED",
+  "status": "P2_4_PRODUCTION_CERTIFIED_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -497,9 +497,9 @@
   "validationScript": "scripts/mission-control-v1-validate.mjs",
   "certificationArtifact": "docs/CERTIFICATION/mission-control-v1.json",
   "nextEligiblePhase": {
-    "id": "P2.4",
-    "title": "Cross-Surface Epoch And Performance Consistency",
-    "state": "PASS_PENDING_PRODUCTION_DEPLOYMENT"
+    "id": "MC-08E-R",
+    "title": "Resume Watchlist Experience After P2.4 Certification",
+    "state": "READY"
   },
   "p2_3": {
     "status": "PRODUCTION_CERTIFIED",
@@ -528,7 +528,7 @@
     "productionCommit": "6c85106cbf35b62b85ec15c3bfbefaedbfd52462"
   },
   "p2_4": {
-    "status": "PASS_PENDING_PRODUCTION_DEPLOYMENT",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Cross-Surface Epoch And Performance Consistency",
     "certificationArtifact": "docs/CERTIFICATION/p2-4-cross-surface-epoch-consistency.json",
     "runtimeContract": "/api/operations/e2e-integrity.surfaceConsistency",
@@ -549,6 +549,13 @@
     "learningChanged": false,
     "schedulerChanged": false,
     "mc08eResumed": false,
-    "mc03Started": false
+    "mc03Started": false,
+    "classification": "P2_4_PRODUCTION_CERTIFIED",
+    "runtimeCommit": "6a3debf9eb2286a9736706d98c0672366b917821",
+    "productionCommit": "6a3debf9eb2286a9736706d98c0672366b917821",
+    "surfaceConsistencyStatus": "PASS",
+    "unexplainedDifferences": 0,
+    "staleSurfaces": 0,
+    "nextEligibleMissionAfterCertification": "MC-08E-R"
   }
 }

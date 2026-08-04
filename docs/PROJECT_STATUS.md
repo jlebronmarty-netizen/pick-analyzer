@@ -1711,6 +1711,6 @@ Certification evidence: one-event replay inserted 3 settled replay rows; rerun i
 
 # 2026-08-04 - P2.4 Cross-Surface Epoch And Performance Consistency
 
-P2.4 adds a read-only cross-surface consistency contract to `/api/operations/e2e-integrity`. Homepage, Dashboard, Current Board, recommendation surfaces, Performance, Mission Control, Prediction Coverage and Historical Replay now have explicit scope labels and count equations for current operating day, Current V2 Production and Replay.
+P2.4 production certified a read-only cross-surface consistency contract on `/api/operations/e2e-integrity`. Homepage, Dashboard, Current Board, recommendation surfaces, Performance, Mission Control, Prediction Coverage and Historical Replay now have explicit scope labels and count equations for current operating day, Current V2 Production and Replay.
 
-Current Era remains 69 canonical predictions, 24 settled and 45 pending. Replay remains 30 predictions and 30 settled rows, isolated from Current Era. No prediction formulas, recommendations, Official Pick policy, settlement, learning, scheduler cadence, provider budgets, provider calls or remote data mutations changed. Production certification is pending automatic deployment.
+Current Era remains 69 canonical predictions, 24 settled and 45 pending. Replay remains 30 predictions and 30 settled rows, isolated from Current Era. No prediction formulas, recommendations, Official Pick policy, settlement, learning, scheduler cadence, provider budgets, provider calls or remote data mutations changed. Production served 6a3debf9eb2286a9736706d98c0672366b917821 and surfaceConsistency returned PASS.

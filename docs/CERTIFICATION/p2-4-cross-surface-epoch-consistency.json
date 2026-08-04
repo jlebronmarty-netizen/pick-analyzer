@@ -1,8 +1,8 @@
 {
   "phase": "P2.4",
   "title": "Cross-Surface Epoch And Performance Consistency",
-  "status": "PASS_PENDING_PRODUCTION_DEPLOYMENT",
-  "classification": "P2_4_LOCAL_PASS_PENDING_PRODUCTION_DEPLOYMENT",
+  "status": "PRODUCTION_CERTIFIED",
+  "classification": "P2_4_PRODUCTION_CERTIFIED",
   "startingCommit": "f297b456cdb378b4f5dd5d5e6b63f81a5f871176",
   "activeEpochKey": "CURRENT_V2_PRODUCTION",
   "legacyScope": "LEGACY_PRE_V2",
@@ -57,11 +57,35 @@
     "scripts/p2-4-cross-surface-epoch-consistency-validate.mjs"
   ],
   "productionCertification": {
-    "status": "PENDING_AUTOMATIC_DEPLOYMENT",
-    "productionCommit": null
+    "status": "PRODUCTION_CERTIFIED",
+    "productionCommit": "6a3debf9eb2286a9736706d98c0672366b917821",
+    "systemVersionHttp": 200,
+    "homepageHttp": 200,
+    "dashboardTodayHttp": 200,
+    "currentBoardHttp": 200,
+    "performanceHttp": 200,
+    "e2eIntegrityHttp": 200,
+    "predictionCoverageHttp": 200,
+    "historicalReplayHttp": 200,
+    "settlementGuaranteeHttp": 200,
+    "operationsHealthHttp": 200,
+    "mlbOperationsHttp": 200,
+    "missionControlHttp": 200,
+    "surfaceConsistencyStatus": "PASS",
+    "activeEpochKey": "CURRENT_V2_PRODUCTION",
+    "currentEraCanonicalPredictions": 69,
+    "currentEraSettled": 24,
+    "currentEraPending": 45,
+    "replayPredictions": 30,
+    "replaySettled": 30,
+    "unexplainedDifferences": 0,
+    "staleSurfaces": 0,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
   },
   "nextEligibleMissionAfterCertification": "MC-08E-R",
   "mc08eResumed": false,
   "mc03Started": false,
-  "generatedAt": "2026-08-04T16:48:44.179Z"
+  "generatedAt": "2026-08-04T17:31:17.681Z",
+  "runtimeCommit": "6a3debf9eb2286a9736706d98c0672366b917821"
 }
