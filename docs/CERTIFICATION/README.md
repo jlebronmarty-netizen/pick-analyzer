@@ -103,3 +103,6 @@ Move certification docs here only when links are updated and validation passes.
 
 - [MC-08F Personalization Experience](MC_08F_PERSONALIZATION_EXPERIENCE.md)
 - [MC-08F Personalization Experience JSON](mc-08f-personalization-experience.json)
+
+- [MC-08G Product Coherence Review](MC_08G_PRODUCT_COHERENCE_REVIEW.md)
+- [MC-08G Product Coherence Review JSON](mc-08g-product-coherence-review.json)

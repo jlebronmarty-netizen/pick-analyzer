@@ -1,0 +1,97 @@
+{
+  "certification": "mc-08g-product-coherence-review",
+  "status": "LOCALLY_COMPLETE",
+  "baselineCommit": "8cf160fe0b3e6db382e06f06ac9f4f3eb40a9a13",
+  "runtimeCommit": null,
+  "productionCommit": null,
+  "pagesReviewed": [
+    "/",
+    "/performance",
+    "/most-likely",
+    "/best-value",
+    "/betting-workbench",
+    "/game-intelligence",
+    "/mission-control",
+    "/mlb-operations",
+    "/settings",
+    "/dashboard",
+    "/ai-operations",
+    "/admin/historical-diagnostics"
+  ],
+  "issuesFound": {
+    "critical": 0,
+    "high": 0,
+    "medium": 2,
+    "low": 4,
+    "cosmetic": 0
+  },
+  "issuesRepaired": [
+    "homepage timezone labels clarified",
+    "settings persistence state humanized",
+    "settings preview labels renamed as examples",
+    "decision-tool back navigation aligned to Daily Brief",
+    "Most Likely unavailable price copy clarified",
+    "Betting Workbench average confidence label expanded"
+  ],
+  "issuesDeferred": [
+    "internal diagnostic pages retain technical terminology by design",
+    "full Spanish translation coverage remains a future localization package",
+    "deep admin pages can receive dedicated hierarchy polish later"
+  ],
+  "behaviorChanges": {
+    "predictionFormula": false,
+    "probability": false,
+    "confidence": false,
+    "ranking": false,
+    "officialPickPolicy": false,
+    "rentPlayPolicy": false,
+    "moneylinePolicy": false,
+    "smartParlayLogic": false,
+    "kelly": false,
+    "settlement": false,
+    "learning": false,
+    "scheduler": false,
+    "providerContracts": false,
+    "providerBudgets": false
+  },
+  "scopeGuards": {
+    "currentEraMathChanged": false,
+    "replayBehaviorChanged": false,
+    "performanceMathChanged": false,
+    "missionControlRedesigned": false,
+    "operationsRedesigned": false,
+    "currentBoardRedesigned": false
+  },
+  "certificationReads": {
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "localValidation": [
+    "mc08g-product-coherence-validate: PASS (20/20)",
+    "mc08a-homepage-experience-validate: PASS (37/37)",
+    "mc08b-rent-play-experience-validate: PASS (34/34)",
+    "mc08c-moneyline-bet-experience-validate: PASS (43/43)",
+    "mc08d-smart-parlay-experience-validate: PASS (47/47)",
+    "mc08e-watchlist-experience-validate: PASS (48/48)",
+    "mc08f-personalization-experience-validate: PASS (20/20)",
+    "mission-control-v1-validate: PASS (57/57)",
+    "JSON validation: PASS",
+    "Markdown changed-doc link validation: PASS",
+    "changed-file ESLint: PASS",
+    "targeted secret scan: PASS",
+    "git diff --check: PASS",
+    "npm.cmd run build: PASS (398 static pages)"
+  ],
+  "validatorNotes": [
+    "p2-2a-performance-presentation-consistency-validate is scoped to P2.2A changed files and is not applicable to MC-08G.",
+    "p2-3 and p2-4 direct service validators could not execute in the local Node environment because server-only is not installed as a standalone package; MC-08G did not change replay, E2E integrity, Performance math, Current Era math or related services."
+  ],
+  "productionValidation": [],
+  "mc08hStarted": false,
+  "mc03Started": false,
+  "updatedAt": "2026-08-04T21:51:00.000Z"
+}

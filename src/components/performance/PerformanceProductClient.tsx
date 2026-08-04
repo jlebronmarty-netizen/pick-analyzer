@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { sportReadinessLabel } from '@/components/product/ProductStatus'
 import { CANONICAL_OPERATING_TIMEZONE, formatDateTimeValue, readStoredPreferences, usePersonalization } from '@/context/PersonalizationContext'
@@ -155,7 +156,7 @@ export default function PerformanceProductClient() {
   const presentation = data?.performancePresentation
 
   if (error) return <main className="min-h-screen overflow-x-hidden bg-slate-950 p-6 text-red-100"><p className="font-black">Performance is temporarily unavailable.</p><p className="mt-2 text-sm">{error}</p><button className="mt-4 rounded-lg border border-red-400/30 px-4 py-2 text-sm font-bold" onClick={() => window.location.reload()}>Retry</button></main>
-  if (!data || !trust) return <main className="min-h-screen overflow-x-hidden bg-slate-950 p-6"><div className="mx-auto max-w-7xl space-y-4"><a href="/dashboard" className="inline-flex rounded-lg border border-slate-700 px-4 py-2 text-sm font-bold text-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Back to Dashboard</a><div className="h-56 animate-pulse rounded-lg bg-slate-900" /><div className="grid gap-4 md:grid-cols-3"><div className="h-40 animate-pulse rounded-lg bg-slate-900" /><div className="h-40 animate-pulse rounded-lg bg-slate-900" /><div className="h-40 animate-pulse rounded-lg bg-slate-900" /></div></div></main>
+  if (!data || !trust) return <main className="min-h-screen overflow-x-hidden bg-slate-950 p-6"><div className="mx-auto max-w-7xl space-y-4"><Link href="/" className="inline-flex rounded-lg border border-slate-700 px-4 py-2 text-sm font-bold text-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Back to Daily Brief</Link><div className="h-56 animate-pulse rounded-lg bg-slate-900" /><div className="grid gap-4 md:grid-cols-3"><div className="h-40 animate-pulse rounded-lg bg-slate-900" /><div className="h-40 animate-pulse rounded-lg bg-slate-900" /><div className="h-40 animate-pulse rounded-lg bg-slate-900" /></div></div></main>
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-slate-950 text-slate-100" data-mc08f-performance-personalized="true" data-language={preferences.language} data-odds-format={preferences.oddsFormat} data-display-timezone={preferences.timezone} data-canonical-timezone={CANONICAL_OPERATING_TIMEZONE}>

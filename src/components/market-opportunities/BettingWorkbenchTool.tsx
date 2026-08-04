@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 
 type WorkbenchBet = {
@@ -234,7 +235,16 @@ function safeArray(value: unknown): Record<string, unknown>[] {
 
 export default function BettingWorkbenchTool() {
   const [bets, setBets] = useState<WorkbenchBet[]>([])
-  const [saved, setSaved] = useState<SavedBet[]>([])
+  const [saved, setSaved] = useState<SavedBet[]>(() => {
+    if (typeof window === 'undefined') return []
+    const stored = window.localStorage.getItem(storageKey)
+    if (!stored) return []
+    try {
+      return JSON.parse(stored) as SavedBet[]
+    } catch {
+      return []
+    }
+  })
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [ticketIds, setTicketIds] = useState<string[]>([])
   const [draftMode, setDraftMode] = useState<DraftMode>('preview')
@@ -244,17 +254,6 @@ export default function BettingWorkbenchTool() {
   const [sort, setSort] = useState<SortMode>('rating')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(storageKey)
-    if (stored) {
-      try {
-        setSaved(JSON.parse(stored) as SavedBet[])
-      } catch {
-        setSaved([])
-      }
-    }
-  }, [])
 
   useEffect(() => {
     window.localStorage.setItem(storageKey, JSON.stringify(saved))
@@ -270,10 +269,11 @@ export default function BettingWorkbenchTool() {
           fetch('/api/predictions/top', { cache: 'no-store' }),
         ])
 
-        let [board, topPicks] = await Promise.all([
+        const [boardJson, topPicks] = await Promise.all([
           boardResponse.json(),
           topPicksResponse.json(),
         ])
+        let board = boardJson
         if (!safeArray(board.candidates).length) {
           const fallbackResponse = await fetch('/api/current-board?mode=all_stored_data&limit=100', { cache: 'no-store' })
           const fallback = await fallbackResponse.json()
@@ -340,7 +340,7 @@ export default function BettingWorkbenchTool() {
     <main className="min-h-screen overflow-x-hidden bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
         <header className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
-          <a href="/dashboard" className="text-sm font-bold text-emerald-300 hover:text-emerald-200">Back to Dashboard</a>
+          <Link href="/" className="text-sm font-bold text-emerald-300 hover:text-emerald-200">Back to Daily Brief</Link>
           <p className="mt-5 text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Betting Workspace</p>
           <div className="mt-2 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
@@ -418,7 +418,7 @@ export default function BettingWorkbenchTool() {
               </div>
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <Summary label="Legs" value={ticket.length} />
-                <Summary label="Avg Conf." value={ticket.length ? pct(ticket.reduce((sum, bet) => sum + bet.confidence, 0) / ticket.length) : 'N/A'} />
+                <Summary label="Average Confidence" value={ticket.length ? pct(ticket.reduce((sum, bet) => sum + bet.confidence, 0) / ticket.length) : 'N/A'} />
               </div>
             </div>
           </section>

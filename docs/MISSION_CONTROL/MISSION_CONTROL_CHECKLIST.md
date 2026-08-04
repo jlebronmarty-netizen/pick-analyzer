@@ -66,6 +66,7 @@ Use this checklist before starting any queued mission.
 - MC-08D: `PRODUCTION_CERTIFIED`.
 - MC-08E-R: `PRODUCTION_CERTIFIED`; preserved paused work recovered, deployed and production-render certified.
 - MC-08F: `PRODUCTION_CERTIFIED`; personalization is display-only. MC-08G requires explicit instruction and MC-03 remains manual-only.
+- MC-08G: `ACTIVE`; product polish and coherence review is bounded to presentation clarity. MC-08H and MC-03 are not started.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.
@@ -91,4 +92,13 @@ Use this checklist before starting any queued mission.
 - [x] Homepage and Performance read display preferences only.
 - [x] Production deployment certification complete.
 - [x] MC-08G was not started.
+- [x] MC-03 was not started.
+
+## MC-08G Product Polish And Coherence Review
+
+- [x] Product surfaces reviewed for wording, hierarchy, navigation and state clarity.
+- [x] Low-risk copy and navigation coherence repairs applied.
+- [x] Prediction, recommendation, settlement, learning, scheduler, provider, Replay and Current Era behavior unchanged.
+- [ ] Production deployment certification complete.
+- [x] MC-08H was not started.
 - [x] MC-03 was not started.

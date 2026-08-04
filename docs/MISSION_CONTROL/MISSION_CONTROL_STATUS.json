@@ -17,11 +17,11 @@
     "state": "ACTIVE",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "MC-08G READY AFTER USER APPROVAL"
+    "readiness": "MC-08G ACTIVE"
   },
   "missionCounts": {
     "total": 11,
-    "ready": 2,
+    "ready": 1,
     "planned": 6,
     "active": 1,
     "conditionalPass": 0,
@@ -667,7 +667,7 @@
     "learningChanged": false,
     "schedulerChanged": false,
     "refreshCadenceChanged": false,
-    "mc08gStarted": false,
+    "mc08gStarted": true,
     "mc03Started": false,
     "productionCommit": "fabe9768cdcad2aca02773741ee44596945c7c59",
     "finalClassification": "MC_08F_DEPLOYED_AND_CERTIFIED",
@@ -698,5 +698,79 @@
       "/betting-workbench HTTP 200",
       "/game-intelligence HTTP 200"
     ]
+  },
+  "mc08g": {
+    "status": "LOCALLY_COMPLETE",
+    "title": "Product Polish And Coherence Review",
+    "certificationArtifact": "docs/CERTIFICATION/mc-08g-product-coherence-review.json",
+    "missionArtifact": "docs/MISSION_CONTROL/MC_08G_PRODUCT_COHERENCE_REVIEW.md",
+    "pagesReviewed": [
+      "/",
+      "/performance",
+      "/most-likely",
+      "/best-value",
+      "/betting-workbench",
+      "/game-intelligence",
+      "/mission-control",
+      "/mlb-operations",
+      "/settings",
+      "/dashboard",
+      "/ai-operations",
+      "/admin/historical-diagnostics"
+    ],
+    "issuesFound": {
+      "critical": 0,
+      "high": 0,
+      "medium": 2,
+      "low": 4,
+      "cosmetic": 0
+    },
+    "issuesRepaired": [
+      "homepage timezone labels clarified",
+      "settings persistence state humanized",
+      "settings preview labels renamed as examples",
+      "decision-tool back navigation aligned to Daily Brief",
+      "Most Likely unavailable price copy clarified",
+      "Betting Workbench average confidence label expanded"
+    ],
+    "issuesDeferred": [
+      "internal diagnostic pages retain technical terminology by design",
+      "full Spanish translation coverage remains a future localization package",
+      "deep admin pages can receive dedicated hierarchy polish later"
+    ],
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "predictionChanged": false,
+    "officialPicksChanged": false,
+    "rentPlayPolicyChanged": false,
+    "moneylineBetPolicyChanged": false,
+    "smartParlayPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "refreshCadenceChanged": false,
+    "replayBehaviorChanged": false,
+    "currentEraMathChanged": false,
+    "mc08hStarted": false,
+    "mc03Started": false,
+    "runtimeCommit": null,
+    "productionCommit": null,
+    "validation": {
+      "mc08gValidator": "PASS",
+      "mc08aValidator": "PASS",
+      "mc08bValidator": "PASS",
+      "mc08cValidator": "PASS",
+      "mc08dValidator": "PASS",
+      "mc08eValidator": "PASS",
+      "mc08fValidator": "PASS",
+      "missionControlValidator": "PASS",
+      "changedFileEslint": "PASS",
+      "jsonValidation": "PASS",
+      "markdownValidation": "PASS",
+      "secretScan": "PASS",
+      "gitDiffCheck": "PASS",
+      "build": "PASS"
+    },
+    "finalClassification": "MC_08G_LOCALLY_COMPLETE"
   }
 }

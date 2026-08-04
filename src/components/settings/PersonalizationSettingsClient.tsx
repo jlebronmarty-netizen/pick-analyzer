@@ -28,6 +28,13 @@ function applyTeam(list: PreferredTeam[], teamId: string) {
   return [...list, team].slice(0, 12)
 }
 
+function persistenceLabel(value: string) {
+  if (value === 'LOCAL_PERSISTED') return 'Saved on this device'
+  if (value === 'LOCAL_UNAVAILABLE') return 'Local storage unavailable'
+  if (value === 'RESET') return 'Defaults restored'
+  return 'Default local settings'
+}
+
 export default function PersonalizationSettingsClient() {
   const { preferences, setPreferences, resetPreferences, t, formatDateTime, formatOdds } = usePersonalization()
   const [draft, setDraft] = useState<PersonalizationContract>(preferences)
@@ -51,7 +58,7 @@ export default function PersonalizationSettingsClient() {
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <Mini label={t('canonicalTimezone')} value={CANONICAL_OPERATING_TIMEZONE} />
             <Mini label={t('userDisplayTimezone')} value={draft.timezone} />
-            <Mini label={t('localOnly')} value={draft.persistenceStatus} />
+            <Mini label={t('localOnly')} value={persistenceLabel(draft.persistenceStatus)} />
           </div>
         </div>
 
@@ -71,8 +78,8 @@ export default function PersonalizationSettingsClient() {
             <div className="mt-4 grid gap-4">
               <Select label={t('homepageDensity')} value={draft.homepageDensity} onChange={(homepageDensity) => update({ homepageDensity: homepageDensity as PersonalizationContract['homepageDensity'] })} options={[["COMFORTABLE", t('comfortable')], ["COMPACT", t('compact')]]} />
               <Toggle label={t('showAdvancedEvidence')} checked={draft.showAdvancedEvidence} onChange={(showAdvancedEvidence) => update({ showAdvancedEvidence })} />
-              <Mini label="Preview time" value={formatDateTime(new Date().toISOString())} />
-              <Mini label="Preview odds" value={formatOdds(-125)} />
+              <Mini label="Example time" value={formatDateTime(new Date().toISOString())} />
+              <Mini label="Example odds" value={formatOdds(-125)} />
             </div>
           </section>
         </div>

@@ -204,13 +204,6 @@ function time(value: string | null) {
   })
 }
 
-function recommendationClass(value: string) {
-  if (value === 'MODELED VALUE') return 'border-emerald-500/40 bg-emerald-950/20 text-emerald-200'
-  if (value === 'WATCH' || value === 'NOT OFFICIALLY ELIGIBLE') return 'border-amber-500/40 bg-amber-950/20 text-amber-200'
-  if (value === 'STALE' || value === 'QUARANTINED' || value === 'UNCALIBRATED') return 'border-orange-500/40 bg-orange-950/20 text-orange-200'
-  return 'border-slate-700 bg-slate-900 text-slate-300'
-}
-
 function opportunityClass(item: Opportunity) {
   if (item.opportunityCategory === 'Official') return 'border-emerald-500/40 bg-emerald-950/20 text-emerald-200'
   if (item.opportunityCategory === 'Watchlist') return 'border-sky-500/40 bg-sky-950/20 text-sky-200'
@@ -259,7 +252,7 @@ function evValue(item: Opportunity) {
 }
 
 function oddsContext(item: Opportunity) {
-  if (item.odds === null) return 'Price N/A / Reason No aligned market'
+  if (item.odds === null) return 'Price unavailable - no aligned market'
   return `${odds(item.odds)} ${item.sportsbook ?? 'Unavailable'}`.trim()
 }
 
@@ -289,9 +282,9 @@ export default function MostLikelyTool() {
       <div className="mx-auto max-w-7xl space-y-8 p-4 md:p-8">
         <header className="flex min-w-0 flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-900/60 p-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <a href="/dashboard" className="text-sm font-bold text-emerald-300 hover:text-emerald-200">
-              Back to Dashboard
-            </a>
+            <Link href="/" className="text-sm font-bold text-emerald-300 hover:text-emerald-200">
+              Back to Daily Brief
+            </Link>
             <p className="mt-5 text-xs font-bold uppercase tracking-[0.3em] text-slate-500">
               Optional Tool
             </p>

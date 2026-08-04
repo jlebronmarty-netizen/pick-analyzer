@@ -2396,8 +2396,8 @@ export default function HomeBettingPlan() {
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-xs font-black uppercase tracking-[0.14em] text-slate-300" data-mc08f-homepage-preferences="true">
           <span>Language {preferences.language}</span>
           <span>Odds {preferences.oddsFormat}</span>
-          <span>Display TZ {preferences.timezone}</span>
-          <span>Canonical TZ {CANONICAL_OPERATING_TIMEZONE}</span>
+          <span>Display timezone {preferences.timezone}</span>
+          <span>Operating timezone {CANONICAL_OPERATING_TIMEZONE}</span>
           {isPreferredSport('baseball_mlb') ? <span>MLB preferred</span> : null}
           <a className="rounded-md border border-slate-700 px-3 py-2 text-slate-100 outline-none hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-300" href="/settings">{t('settings')}</a>
         </div>

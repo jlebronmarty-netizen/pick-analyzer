@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-04 Mission Control MC-08G Product Polish And Coherence Review
+
+- MC-08G is in local certification. The bounded product review found no critical or high product defects and repaired low-risk clarity issues across Homepage, Settings, Most Likely, Best Value, Betting Workbench and Performance loading navigation.
+- Repairs are presentation-only: timezone labels, local persistence wording, example labels, Daily Brief navigation, unavailable-price copy and average-confidence wording.
+- No prediction formula, probability, confidence, ranking, Official Pick policy, Rent Play policy, Moneyline policy, Smart Parlay logic, settlement, learning, scheduler, provider, Replay or Current Era behavior changed. MC-08H and MC-03 were not started.
+
 ## 2026-08-03 P1.3 Production Evaluation Policy Separation
 
 - P1.3 is production-certified on commit `a64c876b803c93f259424389d765282a9a0a3d1a`. Future MLB prospective prediction snapshots now carry `production_evaluation_policy_v1_3`, separating valid model output, production-evaluable rows, recommendation eligibility, actionability and Official Pick eligibility.

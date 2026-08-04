@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 type Opportunity = {
@@ -153,7 +154,7 @@ export default function BestValueTool() {
       <div className="mx-auto max-w-7xl space-y-8 p-4 md:p-8">
         <header className="flex min-w-0 flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-900/60 p-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <a href="/dashboard" className="text-sm font-bold text-emerald-300 hover:text-emerald-200">Back to Dashboard</a>
+            <Link href="/" className="text-sm font-bold text-emerald-300 hover:text-emerald-200">Back to Daily Brief</Link>
             <p className="mt-5 text-xs font-bold uppercase tracking-[0.3em] text-slate-500">Premium Tool</p>
             <h1 className="mt-2 break-words text-3xl font-black sm:text-4xl">Best Value</h1>
             <p className="mt-3 max-w-[18rem] break-words text-sm leading-6 text-slate-400 sm:max-w-3xl">
