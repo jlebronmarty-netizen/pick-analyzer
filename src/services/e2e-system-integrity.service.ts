@@ -73,7 +73,7 @@ type PredictionRow = {
 
 type GameResultRow = {
   id: string
-  event_id: string | null
+  game_id: string | null
   status: string | null
   home_score: number | null
   away_score: number | null
@@ -355,8 +355,8 @@ async function readResults(eventIds: string[], limit: number) {
   if (!eventIds.length) return []
   const { data, error } = await supabaseAdmin
     .from('game_results')
-    .select('id, event_id, status, home_score, away_score, updated_at, result_date')
-    .in('event_id', eventIds)
+    .select('id, game_id, status, home_score, away_score, updated_at, result_date')
+    .in('game_id', eventIds)
     .limit(limit)
   if (error) throw new Error(`result read failed: ${error.message}`)
   return (data ?? []) as GameResultRow[]
@@ -417,7 +417,7 @@ function marketCoverage(events: EventRow[], odds: OddsRow[], predictions: Predic
 }
 
 function closure(events: EventRow[], predictions: PredictionRow[], results: GameResultRow[]) {
-  const resultEvents = new Set(results.map((row) => row.event_id).filter(Boolean))
+  const resultEvents = new Set(results.map((row) => row.game_id).filter(Boolean))
   const terminalEvents = new Set(events.filter((event) => isTerminal(event.status) || resultEvents.has(event.id)).map((event) => event.id))
   const productionEligibleCompleted = predictions.filter((row) => row.production_eligible === true && row.game_id && terminalEvents.has(row.game_id))
   const settled = productionEligibleCompleted.filter(isSettled)
