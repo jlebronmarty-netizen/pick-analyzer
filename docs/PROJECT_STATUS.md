@@ -1718,3 +1718,9 @@ Current Era remains 69 canonical predictions, 24 settled and 45 pending. Replay 
 # 2026-08-04 - MC-08E-R Evidence-First Watchlist Experience
 
 MC-08E-R is production certified. Paused MC-08E work was preserved on recovery branch `recovery/mc-08e-paused-2026-08-04` at commit `84083538f4a2932b24c09c98aa3138817c9116c6` and external patch SHA256 `0BAA406D265C307743E6E40D2A4F97E1EFBED9C4021161D3BD491A4359926397`. The clean P2.4 integration adds the homepage `watchlist_v1` evidence-first presentation contract with bounded current-day items, explicit states, promotion/removal conditions and honest unavailable/no-evidence empty states. No provider calls, remote mutations, prediction behavior, recommendation policies, settlement, learning, scheduler cadence or refresh cadence changed. Production served commit `17c44f35081f199d61094704d29bc8b897850c87`; rendered desktop and mobile homepage checks passed with no horizontal overflow. MC-08F and MC-03 were not started.
+
+## 2026-08-04 Mission Control MC-08F Personalization Experience
+
+- MC-08F is locally implemented pending validation and production certification. It adds the display-only `personalization_v1` contract, `/settings`, homepage preference rendering, Performance display preference support, localStorage persistence, EN/ES language foundation, appearance preference, display timezone, odds format, preferred sports, preferred teams, homepage density and advanced evidence visibility.
+- Authenticated profile persistence was not added because no reliable existing profile-settings persistence was found. Local preferences do not affect wagering data and can be reset safely.
+- Prediction formulas, probabilities, confidence, rankings, Official Picks, Kelly, Rent Play, Moneyline, Smart Parlay, settlement, learning, scheduler, providers and budgets are unchanged. MC-08G and MC-03 were not started.

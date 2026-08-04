@@ -32,3 +32,46 @@ body {
 .text-slate-600 {
   color: #94a3b8;
 }
+
+/* MC-08F personalization theme: presentation only. */
+html.pa-light {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+html.pa-dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+}
+
+html.pa-light body {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+html.pa-light main {
+  filter: saturate(0.96) brightness(1.06);
+}
+
+html.pa-light .bg-slate-950,
+html.pa-light .bg-slate-950\/80,
+html.pa-light .bg-slate-950\/70,
+html.pa-light .bg-slate-950\/60 {
+  background-color: rgba(248, 250, 252, 0.96);
+}
+
+html.pa-light .bg-slate-900,
+html.pa-light .bg-slate-900\/80,
+html.pa-light .bg-slate-900\/70 {
+  background-color: rgba(241, 245, 249, 0.94);
+}
+
+html.pa-light .text-white,
+html.pa-light .text-slate-100 {
+  color: #0f172a;
+}
+
+html.pa-light .text-slate-300,
+html.pa-light .text-slate-400 {
+  color: #334155;
+}

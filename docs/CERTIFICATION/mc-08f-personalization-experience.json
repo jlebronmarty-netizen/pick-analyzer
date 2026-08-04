@@ -1,0 +1,78 @@
+{
+  "certification": "mc-08f-personalization-experience",
+  "status": "LOCAL_VALIDATION_PASS_DEPLOYMENT_PENDING",
+  "contractVersion": "personalization_v1",
+  "baselineCommit": "14444eceb5891e98d26afe8a12ee71fa0351faff",
+  "productionCommit": null,
+  "localStorageKey": "pick-analyzer.personalization.v1",
+  "features": {
+    "language": [
+      "EN",
+      "ES"
+    ],
+    "appearance": [
+      "SYSTEM",
+      "LIGHT",
+      "DARK"
+    ],
+    "defaultTimezone": "America/Puerto_Rico",
+    "oddsFormat": [
+      "AMERICAN",
+      "DECIMAL"
+    ],
+    "preferredSports": true,
+    "preferredTeams": true,
+    "homepageDensity": [
+      "COMPACT",
+      "COMFORTABLE"
+    ],
+    "showAdvancedEvidence": true
+  },
+  "persistence": {
+    "authenticatedProfilePersistence": "NOT_IMPLEMENTED_EXISTING_RELIABLE_PROFILE_SETTINGS_NOT_FOUND",
+    "localStorage": "ACTIVE"
+  },
+  "behaviorChanges": {
+    "predictionFormula": false,
+    "probability": false,
+    "confidence": false,
+    "ranking": false,
+    "officialPickPolicy": false,
+    "rentPlayPolicy": false,
+    "moneylinePolicy": false,
+    "smartParlayLogic": false,
+    "kelly": false,
+    "settlement": false,
+    "learning": false,
+    "scheduler": false,
+    "providerContracts": false,
+    "providerBudgets": false
+  },
+  "certificationReads": {
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "localValidation": [
+    "mc08f-personalization-experience-validate: PASS (20/20)",
+    "mc08a-homepage-experience-validate: PASS (37/37)",
+    "mc08b-rent-play-experience-validate: PASS (34/34)",
+    "mc08c-moneyline-bet-experience-validate: PASS (43/43)",
+    "mc08d-smart-parlay-experience-validate: PASS (47/47)",
+    "mc08e-watchlist-experience-validate: PASS (48/48)",
+    "mission-control-v1-validate: PASS (57/57)",
+    "changed-file ESLint: PASS",
+    "JSON validation: PASS",
+    "Markdown changed-doc link validation: PASS",
+    "targeted secret scan: PASS",
+    "git diff --check: PASS",
+    "npm.cmd run build: PASS (398 static pages)"
+  ],
+  "productionValidation": [],
+  "mc08gStarted": false,
+  "mc03Started": false,
+  "updatedAt": "2026-08-04T21:21:02.439Z"
+}

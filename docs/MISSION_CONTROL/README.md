@@ -12,7 +12,7 @@ It answers:
 
 Mission Control does not replace the Master Program, Master Roadmap, Project Status or certification artifacts.
 
-Mission Control is current through P2.4 production certification. MC-08E-R is locally complete after safe paused-work preservation and clean P2.4 integration. This does not start MC-03 or MC-08F.
+Mission Control is current through MC-08E-R production certification. MC-08F Personalization Experience is in local validation as a display-only package. This does not start MC-08G or MC-03.
 
 ## Source Of Truth Boundaries
 
@@ -45,3 +45,6 @@ Both surfaces are read-only. They do not call providers, write data, start jobs,
 - [MC-08B Rent Play Experience](MC_08B_RENT_PLAY_EXPERIENCE.md)
 - [MC-08C Moneyline Bet Experience](MC_08C_MONEYLINE_BET_EXPERIENCE.md)
 - [MC-08D Smart Parlay Experience](MC_08D_SMART_PARLAY_EXPERIENCE.md)
+
+- [MC-08E-R Watchlist Experience](MC_08E_WATCHLIST_EXPERIENCE.md)
+- [MC-08F Personalization Experience](MC_08F_PERSONALIZATION_EXPERIENCE.md)

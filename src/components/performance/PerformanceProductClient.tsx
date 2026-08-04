@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { productDateTime, sportReadinessLabel } from '@/components/product/ProductStatus'
+import { sportReadinessLabel } from '@/components/product/ProductStatus'
+import { CANONICAL_OPERATING_TIMEZONE, formatDateTimeValue, readStoredPreferences, usePersonalization } from '@/context/PersonalizationContext'
 
 type TrustComponent = { key: string; label: string; value?: number | null; normalizedScore: number | null; weight: number; contribution?: number; availability: string; explanation?: string }
 type HistoryRow = { id?: string; timestamp: string | null; sport: string; league: string | null; matchup: string | null; prediction: string | null; probability: number | null; confidence: number | null; modelVersion: string | null; category: string; result: string; lifecycleBadge?: string; actualResult?: string | null; correct: boolean | null; probabilityError?: number | null; probabilityErrorLabel?: string; brierContribution?: number | null; brierContributionLabel?: string; push: boolean; pending: boolean; official: boolean; shadow: boolean; featureSnapshot?: Record<string, unknown> | null; missingData?: string[]; settlement?: { settledAt?: string | null; details?: Record<string, unknown> | null }; outcomeExplanation?: string }
@@ -34,8 +35,8 @@ const DEFAULT_SPORTS = [['all', 'All Sports'], ['baseball_mlb', 'MLB'], ['basket
 
 function sportAlias(value: string | null) { const normalized = String(value ?? 'all').toLowerCase(); if (normalized === 'mlb') return 'baseball_mlb'; if (normalized === 'bsn') return 'basketball_bsn'; if (normalized === 'nba') return 'basketball_nba'; if (normalized === 'nfl') return 'americanfootball_nfl'; return normalized || 'all' }
 function displayNumber(value: number | null | undefined, suffix = '') { return value === null || value === undefined || !Number.isFinite(Number(value)) ? 'N/A' : `${value}${suffix}` }
-function dateTime(value: string | null | undefined) { return productDateTime(value) }
-function dateOnly(value: string | null | undefined) { return productDateTime(value) }
+function dateTime(value: string | null | undefined) { return formatDateTimeValue(value) }
+function dateOnly(value: string | null | undefined) { return formatDateTimeValue(value) }
 function width(value: number | null | undefined) { const parsed = Number(value ?? 0); return `${Math.max(0, Math.min(100, Number.isFinite(parsed) ? parsed : 0))}%` }
 function labelize(value: string) {
   const normalized = String(value ?? '').replaceAll('_', ' ').trim().toLowerCase()
@@ -71,10 +72,13 @@ function absoluteProbabilityError(row: HistoryRow) { if (row.probabilityError !=
 function brierContribution(row: HistoryRow) { if (row.brierContribution !== undefined) return row.brierContribution; if (row.correct === null || row.probability === null) return null; return Number((((row.probability / 100) - (row.correct ? 1 : 0)) ** 2).toFixed(4)) }
 
 export default function PerformanceProductClient() {
+  const { preferences, t } = usePersonalization()
   const [sportKey, setSportKey] = useState(() => {
     if (typeof window === 'undefined') return 'all'
     const params = new URLSearchParams(window.location.search)
-    return sportAlias(params.get('sport') ?? params.get('sportKey'))
+    const explicitSport = params.get('sport') ?? params.get('sportKey')
+    if (explicitSport) return sportAlias(explicitSport)
+    return sportAlias(readStoredPreferences().preferredSports[0] ?? 'all')
   })
   const [data, setData] = useState<ApiData | null>(null)
   const [history, setHistory] = useState<HistoryResponse | null>(null)
@@ -154,7 +158,7 @@ export default function PerformanceProductClient() {
   if (!data || !trust) return <main className="min-h-screen overflow-x-hidden bg-slate-950 p-6"><div className="mx-auto max-w-7xl space-y-4"><a href="/dashboard" className="inline-flex rounded-lg border border-slate-700 px-4 py-2 text-sm font-bold text-slate-100 outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">Back to Dashboard</a><div className="h-56 animate-pulse rounded-lg bg-slate-900" /><div className="grid gap-4 md:grid-cols-3"><div className="h-40 animate-pulse rounded-lg bg-slate-900" /><div className="h-40 animate-pulse rounded-lg bg-slate-900" /><div className="h-40 animate-pulse rounded-lg bg-slate-900" /></div></div></main>
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-slate-950 text-slate-100">
+    <main className="min-h-screen overflow-x-hidden bg-slate-950 text-slate-100" data-mc08f-performance-personalized="true" data-language={preferences.language} data-odds-format={preferences.oddsFormat} data-display-timezone={preferences.timezone} data-canonical-timezone={CANONICAL_OPERATING_TIMEZONE}>
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
         <nav className="mb-5 flex flex-wrap items-center gap-2 text-sm" aria-label="Primary">
           <TopLink href="/dashboard">Today</TopLink>
@@ -162,6 +166,7 @@ export default function PerformanceProductClient() {
           <TopLink href="/mlb-operations">MLB</TopLink>
           <TopLink href="/dashboard#data-operations">BSN</TopLink>
           <TopLink href="/dashboard#advanced-details">Advanced</TopLink>
+          <TopLink href="/settings">{t('settings')}</TopLink>
         </nav>
 
         <section className="rounded-lg border border-emerald-500/20 bg-slate-900/80 p-5 md:p-6">

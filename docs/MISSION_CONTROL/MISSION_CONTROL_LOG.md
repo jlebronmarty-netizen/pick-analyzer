@@ -264,3 +264,11 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Replay evidence remains 30 replay predictions and 30 replay settled rows.
 - Provider calls, remote mutations, prediction changes, settlement changes, learning changes and scheduler changes remain 0.
 - Production certification completed at 6a3debf9eb2286a9736706d98c0672366b917821. E2E surfaceConsistency returned PASS with no stale surfaces or unexplained differences. MC-08E-R is next eligible. MC-08E and MC-03 were not started.
+
+# 2026-08-04 MC-08F Personalization Experience
+
+- Status: LOCAL_VALIDATION_PENDING.
+- Added the display-only `personalization_v1` contract, local settings route, homepage preference summary, Performance display preference markers and localStorage persistence.
+- Authenticated profile persistence remains out of scope because no reliable existing profile-settings persistence was found; local persistence is documented honestly.
+- No prediction formula, probability, confidence, ranking, Official Pick policy, Rent Play policy, Moneyline policy, Smart Parlay logic, Kelly, settlement, learning, scheduler, provider contract or provider budget behavior changed.
+- MC-08G and MC-03 were not started.

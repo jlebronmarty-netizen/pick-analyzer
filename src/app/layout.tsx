@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 import { DashboardProvider } from '@/context/DashboardContext'
+import { PersonalizationProvider } from '@/context/PersonalizationContext'
 
 export const metadata: Metadata = {
   title: 'Pick Analyzer',
@@ -21,12 +22,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col">
-        <DashboardProvider>
-          {children}
-        </DashboardProvider>
+        <PersonalizationProvider>
+          <DashboardProvider>
+            {children}
+          </DashboardProvider>
+        </PersonalizationProvider>
       </body>
     </html>
   )

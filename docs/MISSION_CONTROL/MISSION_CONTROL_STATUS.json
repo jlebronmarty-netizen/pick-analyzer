@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_08E_R_PRODUCTION_CERTIFIED",
+  "status": "MC_08F_LOCAL_VALIDATION_PASS_DEPLOYMENT_PENDING",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -17,7 +17,7 @@
     "state": "ACTIVE",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "MC-08F READY"
+    "readiness": "MC-08F DEPLOYMENT_PENDING"
   },
   "missionCounts": {
     "total": 11,
@@ -498,8 +498,8 @@
   "certificationArtifact": "docs/CERTIFICATION/mission-control-v1.json",
   "nextEligiblePhase": {
     "id": "MC-08F",
-    "title": "Decision Summary Experience",
-    "state": "READY"
+    "title": "Personalization Experience",
+    "state": "DEPLOYMENT_PENDING"
   },
   "p2_3": {
     "status": "PRODUCTION_CERTIFIED",
@@ -593,7 +593,7 @@
     "learningChanged": false,
     "schedulerChanged": false,
     "refreshCadenceChanged": false,
-    "mc08fStarted": false,
+    "mc08fStarted": true,
     "mc03Started": false,
     "runtimeCommit": "17c44f35081f199d61094704d29bc8b897850c87",
     "productionCommit": "17c44f35081f199d61094704d29bc8b897850c87",
@@ -643,6 +643,48 @@
       "providerCallsMade": 0,
       "remoteMutationsMade": 0,
       "wagerWritesMade": 0
+    }
+  },
+  "mc08f": {
+    "status": "LOCAL_VALIDATION_PASS_DEPLOYMENT_PENDING",
+    "title": "Personalization Experience",
+    "certificationArtifact": "docs/CERTIFICATION/mc-08f-personalization-experience.json",
+    "contractVersion": "personalization_v1",
+    "settingsRoute": "/settings",
+    "homepagePersonalized": true,
+    "performancePersonalized": true,
+    "persistence": "localStorage",
+    "authenticatedProfilePersistence": false,
+    "defaultTimezone": "America/Puerto_Rico",
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "predictionChanged": false,
+    "officialPicksChanged": false,
+    "rentPlayPolicyChanged": false,
+    "moneylineBetPolicyChanged": false,
+    "smartParlayPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "refreshCadenceChanged": false,
+    "mc08gStarted": false,
+    "mc03Started": false,
+    "productionCommit": null,
+    "finalClassification": "MC_08F_LOCAL_VALIDATION_PASS_DEPLOYMENT_PENDING",
+    "validation": {
+      "mc08fValidator": "PASS",
+      "mc08aValidator": "PASS",
+      "mc08bValidator": "PASS",
+      "mc08cValidator": "PASS",
+      "mc08dValidator": "PASS",
+      "mc08eValidator": "PASS",
+      "missionControlValidator": "PASS",
+      "changedFileEslint": "PASS",
+      "jsonValidation": "PASS",
+      "markdownValidation": "PASS",
+      "secretScan": "PASS",
+      "gitDiffCheck": "PASS",
+      "build": "PASS"
     }
   }
 }

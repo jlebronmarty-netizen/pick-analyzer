@@ -100,3 +100,6 @@ Move certification docs here only when links are updated and validation passes.
 
 - [MC-08E-R Evidence-First Watchlist Experience](MC_08E_WATCHLIST_EXPERIENCE.md)
 - [MC-08E-R Certification JSON](mc-08e-watchlist-experience.json)
+
+- [MC-08F Personalization Experience](MC_08F_PERSONALIZATION_EXPERIENCE.md)
+- [MC-08F Personalization Experience JSON](mc-08f-personalization-experience.json)

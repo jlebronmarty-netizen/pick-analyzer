@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { CANONICAL_OPERATING_TIMEZONE, formatDateTimeValue, formatOddsValue, usePersonalization } from '@/context/PersonalizationContext'
 
 type Tone = 'green' | 'yellow' | 'blue' | 'red' | 'gray'
 
@@ -551,9 +552,8 @@ function arrayValue(value: unknown): unknown[] {
 }
 
 function odds(value: unknown) {
-  const parsed = numberOrNull(value)
-  if (parsed === null) return 'Odds N/A'
-  return parsed > 0 ? `+${parsed}` : `${parsed}`
+  if (value === null || value === undefined) return 'Odds N/A'
+  return formatOddsValue(numberOrNull(value))
 }
 
 function width(value: number | null, fallback = 8) {
@@ -1494,10 +1494,7 @@ function StatusChip({ children, tone = 'gray' }: { children: ReactNode; tone?: T
 }
 
 function compactDate(value: string | null | undefined) {
-  if (!value) return 'Unavailable'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return label(value)
-  return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(date)
+  return formatDateTimeValue(value)
 }
 
 function decimalFromAmerican(value: number | null) {
@@ -2155,7 +2152,7 @@ function watchlistActionTone(status: WatchlistActionability): Tone {
   return 'blue'
 }
 
-function Watchlist({ watchlist }: { watchlist: WatchlistContract }) {
+function Watchlist({ watchlist, isPreferredTeamLabel }: { watchlist: WatchlistContract; isPreferredTeamLabel: ReturnType<typeof usePersonalization>['isPreferredTeamLabel'] }) {
   return (
     <section
       className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6"
@@ -2197,6 +2194,7 @@ function Watchlist({ watchlist }: { watchlist: WatchlistContract }) {
                 <StatusChip tone={watchlistPriorityTone(item.priority)}>{item.priority}</StatusChip>
                 <StatusChip tone={watchlistActionTone(item.evidenceFirstStatus)}>{item.evidenceFirstStatus.replaceAll('_', ' ')}</StatusChip>
                 {item.researchOnly ? <StatusChip tone="yellow">Research Only</StatusChip> : null}
+                {isPreferredTeamLabel(`${item.selectionLabel} ${item.eventLabel}`) ? <StatusChip tone="blue">Favorite</StatusChip> : null}
               </div>
             </div>
 
@@ -2288,11 +2286,13 @@ function TechnicalEvidence({
   currentBoard,
   intelligence,
   performance,
+  advancedOpen,
 }: {
   data: TodayResponse
   currentBoard: ApiEnvelope | null
   intelligence: ApiEnvelope | null
   performance: ApiEnvelope | null
+  advancedOpen: boolean
 }) {
   const boardCandidates = arrayValue(currentBoard?.candidates).length || countValue(currentBoard?.candidateCount)
   const sample = countValue(recordValue(intelligence?.currentProductionSample).sampleSize)
@@ -2310,6 +2310,7 @@ function TechnicalEvidence({
         <MiniMetric label="Operations" value={`${countValue(data.remoteMutationsMade)} mutations`} />
         <MiniMetric label="Model" value={sample || 'Read-only'} />
         <MiniMetric label="Diagnostics" value={`${boardCandidates} board rows`} />
+        <MiniMetric label="Evidence Preference" value={advancedOpen ? 'Expanded' : 'Collapsed'} />
       </div>
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         <MiniText label="Latest market" value={compactDate(data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? null)} />
@@ -2320,6 +2321,7 @@ function TechnicalEvidence({
 }
 
 export default function HomeBettingPlan() {
+  const { preferences, t, isPreferredSport, isPreferredTeamLabel } = usePersonalization()
   const [data, setData] = useState<TodayResponse | null>(null)
   const [currentBoard, setCurrentBoard] = useState<ApiEnvelope | null>(null)
   const [intelligence, setIntelligence] = useState<ApiEnvelope | null>(null)
@@ -2387,9 +2389,18 @@ export default function HomeBettingPlan() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.12),_transparent_30rem),linear-gradient(180deg,#020617_0%,#0f172a_52%,#020617_100%)] px-4 py-5 text-white md:px-6 md:py-8" data-c1-home-betting-plan="true" data-mc08a-homepage="true">
+    <main className={`min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.12),_transparent_30rem),linear-gradient(180deg,#020617_0%,#0f172a_52%,#020617_100%)] px-4 text-white md:px-6 ${preferences.homepageDensity === 'COMPACT' ? 'py-3 md:py-5' : 'py-5 md:py-8'}`} data-c1-home-betting-plan="true" data-mc08a-homepage="true" data-mc08f-homepage-personalized="true" data-language={preferences.language} data-odds-format={preferences.oddsFormat} data-display-timezone={preferences.timezone} data-canonical-timezone={CANONICAL_OPERATING_TIMEZONE}>
       <section className="mx-auto grid max-w-6xl gap-5">
         <DailyBrief data={data} plan={plan} currentBoard={currentBoard} intelligence={intelligence} performance={performance} />
+
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-xs font-black uppercase tracking-[0.14em] text-slate-300" data-mc08f-homepage-preferences="true">
+          <span>Language {preferences.language}</span>
+          <span>Odds {preferences.oddsFormat}</span>
+          <span>Display TZ {preferences.timezone}</span>
+          <span>Canonical TZ {CANONICAL_OPERATING_TIMEZONE}</span>
+          {isPreferredSport('baseball_mlb') ? <span>MLB preferred</span> : null}
+          <a className="rounded-md border border-slate-700 px-3 py-2 text-slate-100 outline-none hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-emerald-300" href="/settings">{t('settings')}</a>
+        </div>
 
         <div className="grid gap-4">
           <RentPlayCard rentPlay={rentPlayContract} />
@@ -2400,15 +2411,16 @@ export default function HomeBettingPlan() {
           <SmartParlayBuilder parlay={smartParlayContract} />
         </div>
 
-        <Watchlist watchlist={watchlistContract} />
+        <Watchlist watchlist={watchlistContract} isPreferredTeamLabel={isPreferredTeamLabel} />
         <DecisionSummary data={data} plan={plan} watchlist={watchlistContract} />
-        <TechnicalEvidence data={data} currentBoard={currentBoard} intelligence={intelligence} performance={performance} />
+        <TechnicalEvidence data={data} currentBoard={currentBoard} intelligence={intelligence} performance={performance} advancedOpen={preferences.showAdvancedEvidence} />
 
         <nav className="grid gap-2 sm:grid-cols-3 lg:grid-cols-7" aria-label="Dedicated product tabs" data-mc08a-secondary-tabs="true">
           {[
             ['Most Likely', '/most-likely'],
             ['Best Value', '/best-value'],
             ['Performance', '/performance'],
+            [t('settings'), '/settings'],
             ['Sports', '/sports-center'],
             ['Operations', '/ai-operations'],
             ['Data Coverage', '/data-coverage'],
