@@ -3272,3 +3272,6 @@ Result: MC-08E-R preserves the paused MC-08E work on recovery branch `recovery/m
 
 
 MC-08F Personalization Experience update on 2026-08-04: MC-08F is locally implemented pending validation and production certification. It introduces the display-only `personalization_v1` contract, `/settings`, localStorage persistence, EN/ES language foundation, appearance, display timezone, odds format, preferred sports, preferred teams, homepage density and advanced-evidence visibility. No prediction, ranking, Official Pick, Kelly, settlement, learning, scheduler, provider or budget behavior changed. MC-08G and MC-03 were not started.
+
+
+MC-08F production certification on 2026-08-04: production served commit `fabe9768cdcad2aca02773741ee44596945c7c59`; homepage/settings/performance personalization render checks passed, required read-only routes returned HTTP 200, and no provider or mutation behavior changed. MC-08G requires explicit instruction; MC-03 remains manual-only.

@@ -1,9 +1,9 @@
 {
   "certification": "mc-08f-personalization-experience",
-  "status": "LOCAL_VALIDATION_PASS_DEPLOYMENT_PENDING",
+  "status": "PRODUCTION_CERTIFIED",
   "contractVersion": "personalization_v1",
   "baselineCommit": "14444eceb5891e98d26afe8a12ee71fa0351faff",
-  "productionCommit": null,
+  "productionCommit": "fabe9768cdcad2aca02773741ee44596945c7c59",
   "localStorageKey": "pick-analyzer.personalization.v1",
   "features": {
     "language": [
@@ -71,8 +71,19 @@
     "git diff --check: PASS",
     "npm.cmd run build: PASS (398 static pages)"
   ],
-  "productionValidation": [],
+  "productionValidation": [
+    "/api/system/version HTTP 200 commit fabe976 providerCallsMade 0",
+    "/ HTTP 200 rendered MC-08F homepage marker desktop/mobile/light with no overflow",
+    "/settings HTTP 200 rendered language/display/sports/team settings markers with no overflow",
+    "/performance HTTP 200 rendered MC-08F performance marker with no overflow",
+    "/api/dashboard/today HTTP 200 providerCallsMade 0 remoteMutationsMade 0",
+    "/api/current-board?mode=current&limit=200 HTTP 200",
+    "/most-likely HTTP 200",
+    "/best-value HTTP 200",
+    "/betting-workbench HTTP 200",
+    "/game-intelligence HTTP 200"
+  ],
   "mc08gStarted": false,
   "mc03Started": false,
-  "updatedAt": "2026-08-04T21:21:02.439Z"
+  "updatedAt": "2026-08-04T21:27:13.485Z"
 }

@@ -65,7 +65,7 @@ Use this checklist before starting any queued mission.
 - MC-08C: `PRODUCTION_CERTIFIED`.
 - MC-08D: `PRODUCTION_CERTIFIED`.
 - MC-08E-R: `PRODUCTION_CERTIFIED`; preserved paused work recovered, deployed and production-render certified.
-- MC-08F: `LOCAL_VALIDATION_PENDING`; personalization is display-only and must not start MC-08G or MC-03.
+- MC-08F: `PRODUCTION_CERTIFIED`; personalization is display-only. MC-08G requires explicit instruction and MC-03 remains manual-only.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.
@@ -89,6 +89,6 @@ Use this checklist before starting any queued mission.
 - [x] Typed `personalization_v1` contract created.
 - [x] Settings route created at `/settings`.
 - [x] Homepage and Performance read display preferences only.
-- [ ] Production deployment certification pending.
+- [x] Production deployment certification complete.
 - [x] MC-08G was not started.
 - [x] MC-03 was not started.

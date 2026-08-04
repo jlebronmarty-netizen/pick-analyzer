@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_08F_LOCAL_VALIDATION_PASS_DEPLOYMENT_PENDING",
+  "status": "MC_08F_PRODUCTION_CERTIFIED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -17,7 +17,7 @@
     "state": "ACTIVE",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "MC-08F DEPLOYMENT_PENDING"
+    "readiness": "MC-08G READY AFTER USER APPROVAL"
   },
   "missionCounts": {
     "total": 11,
@@ -25,7 +25,7 @@
     "planned": 6,
     "active": 1,
     "conditionalPass": 0,
-    "productionCertifiedRecentCompletions": 9
+    "productionCertifiedRecentCompletions": 10
   },
   "taxonomies": {
     "categories": [
@@ -497,9 +497,9 @@
   "validationScript": "scripts/mission-control-v1-validate.mjs",
   "certificationArtifact": "docs/CERTIFICATION/mission-control-v1.json",
   "nextEligiblePhase": {
-    "id": "MC-08F",
-    "title": "Personalization Experience",
-    "state": "DEPLOYMENT_PENDING"
+    "id": "MC-08G",
+    "title": "Next Daily Betting Product Completion package",
+    "state": "READY_REQUIRES_EXPLICIT_INSTRUCTION"
   },
   "p2_3": {
     "status": "PRODUCTION_CERTIFIED",
@@ -646,7 +646,7 @@
     }
   },
   "mc08f": {
-    "status": "LOCAL_VALIDATION_PASS_DEPLOYMENT_PENDING",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Personalization Experience",
     "certificationArtifact": "docs/CERTIFICATION/mc-08f-personalization-experience.json",
     "contractVersion": "personalization_v1",
@@ -669,8 +669,8 @@
     "refreshCadenceChanged": false,
     "mc08gStarted": false,
     "mc03Started": false,
-    "productionCommit": null,
-    "finalClassification": "MC_08F_LOCAL_VALIDATION_PASS_DEPLOYMENT_PENDING",
+    "productionCommit": "fabe9768cdcad2aca02773741ee44596945c7c59",
+    "finalClassification": "MC_08F_DEPLOYED_AND_CERTIFIED",
     "validation": {
       "mc08fValidator": "PASS",
       "mc08aValidator": "PASS",
@@ -685,6 +685,18 @@
       "secretScan": "PASS",
       "gitDiffCheck": "PASS",
       "build": "PASS"
-    }
+    },
+    "productionValidation": [
+      "/api/system/version HTTP 200 commit fabe976 providerCallsMade 0",
+      "/ HTTP 200 rendered MC-08F homepage marker desktop/mobile/light with no overflow",
+      "/settings HTTP 200 rendered language/display/sports/team settings markers with no overflow",
+      "/performance HTTP 200 rendered MC-08F performance marker with no overflow",
+      "/api/dashboard/today HTTP 200 providerCallsMade 0 remoteMutationsMade 0",
+      "/api/current-board?mode=current&limit=200 HTTP 200",
+      "/most-likely HTTP 200",
+      "/best-value HTTP 200",
+      "/betting-workbench HTTP 200",
+      "/game-intelligence HTTP 200"
+    ]
   }
 }

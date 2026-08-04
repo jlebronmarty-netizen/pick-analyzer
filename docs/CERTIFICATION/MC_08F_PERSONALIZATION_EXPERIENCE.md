@@ -1,6 +1,6 @@
 # MC-08F Personalization Experience Certification
 
-Status: LOCAL VALIDATION PASS - DEPLOYMENT PENDING
+Status: PRODUCTION CERTIFIED
 
 ## Certification Summary
 
@@ -22,7 +22,7 @@ Local validation passed:
 
 ## Production Evidence
 
-Pending deployment and read-only certification.
+Production certification passed on commit `fabe9768cdcad2aca02773741ee44596945c7c59`. Read-only checks returned HTTP 200 for the required production surfaces, rendered homepage/settings/performance MC-08F markers, and observed zero provider calls where reported.
 
 Required production surfaces:
 
@@ -45,3 +45,15 @@ Remote mutations during certification: 0 expected.
 Prediction writes, result writes, settlement writes and learning writes: 0 expected.
 
 No model, policy, scheduler or provider behavior changed.
+
+## Production Certification
+
+- Production commit: `fabe9768cdcad2aca02773741ee44596945c7c59`
+- Homepage desktop/mobile/dark/light render: PASS
+- Settings mobile/light render: PASS
+- Performance desktop render: PASS
+- Horizontal overflow: none observed
+- Provider calls from certification reads: 0 where reported
+- Remote mutations from certification reads: 0 where reported
+- MC-08G: not started
+- MC-03: not started

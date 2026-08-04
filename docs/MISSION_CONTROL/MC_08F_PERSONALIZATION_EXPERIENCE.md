@@ -1,6 +1,6 @@
 # MC-08F Personalization Experience V1
 
-Status: LOCAL VALIDATION PASS - DEPLOYMENT PENDING
+Status: PRODUCTION CERTIFIED
 
 ## Scope
 
@@ -29,3 +29,15 @@ Preferred sports and teams are display and prioritization hints only. They do no
 ## Certification Plan
 
 Local certification requires the MC-08F validator, product validators, ESLint, JSON validation, Markdown validation, targeted secret scan, git diff check and build. Production certification requires read-only verification of `/api/system/version`, homepage, Performance, Current Board, Today, Most Likely, Best Value, Betting Workbench and Game Intelligence.
+
+## Production Certification
+
+- Production commit: `fabe9768cdcad2aca02773741ee44596945c7c59`
+- Homepage desktop/mobile/dark/light render: PASS
+- Settings mobile/light render: PASS
+- Performance desktop render: PASS
+- Horizontal overflow: none observed
+- Provider calls from certification reads: 0 where reported
+- Remote mutations from certification reads: 0 where reported
+- MC-08G: not started
+- MC-03: not started

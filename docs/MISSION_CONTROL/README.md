@@ -12,7 +12,7 @@ It answers:
 
 Mission Control does not replace the Master Program, Master Roadmap, Project Status or certification artifacts.
 
-Mission Control is current through MC-08E-R production certification. MC-08F Personalization Experience is in local validation as a display-only package. This does not start MC-08G or MC-03.
+Mission Control is current through MC-08F production certification. MC-08G requires explicit instruction and MC-03 remains planned/manual-only.
 
 ## Source Of Truth Boundaries
 

@@ -18,7 +18,7 @@ MC-08 is ACTIVE only for bounded Daily Betting Product Completion work packages.
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
-Next eligible mission: MC-08F Personalization Experience is in local validation. Do not start MC-08G or MC-03.
+Next eligible mission: MC-08G is ready only after explicit instruction. MC-08F is production-certified. MC-03 remains planned/manual-only.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
@@ -47,5 +47,5 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | MC-08C | Moneyline Bet Experience | PRODUCTION_CERTIFIED | Moneyline contract, unavailable-value handling and production render certified. |
 | MC-08D | Smart Parlay Experience | PRODUCTION_CERTIFIED | Smart Parlay contract, selection, combined-odds and no-joint-probability behavior certified. |
 | MC-08E-R | Evidence-First Watchlist Experience | PRODUCTION_CERTIFIED | Paused work preserved, clean P2.4 integration deployed and production-render certified. |
-| MC-08F | Personalization Experience | LOCAL_VALIDATION_PENDING | Display-only personalization contract, settings route and homepage/Performance integration. |
+| MC-08F | Personalization Experience | PRODUCTION_CERTIFIED | Display-only personalization contract, settings route and homepage/Performance integration certified. |
 | MC-08G | Next Daily Betting Product Completion package | PLANNED | Do not start until MC-08F is production-certified. |

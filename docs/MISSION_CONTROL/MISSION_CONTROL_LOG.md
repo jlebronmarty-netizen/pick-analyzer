@@ -272,3 +272,11 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Authenticated profile persistence remains out of scope because no reliable existing profile-settings persistence was found; local persistence is documented honestly.
 - No prediction formula, probability, confidence, ranking, Official Pick policy, Rent Play policy, Moneyline policy, Smart Parlay logic, Kelly, settlement, learning, scheduler, provider contract or provider budget behavior changed.
 - MC-08G and MC-03 were not started.
+
+# 2026-08-04 MC-08F Production Certification
+
+- Status: PRODUCTION_CERTIFIED.
+- Production served commit `fabe9768cdcad2aca02773741ee44596945c7c59`.
+- Read-only production checks passed for system version, homepage, settings, Performance, Today, Current Board, Most Likely, Best Value, Betting Workbench and Game Intelligence.
+- Rendered desktop/mobile/light/dark evidence showed MC-08F markers and no horizontal overflow.
+- Provider calls and remote mutations remained 0 where reported. MC-08G and MC-03 were not started.

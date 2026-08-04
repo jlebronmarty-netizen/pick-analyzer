@@ -1724,3 +1724,8 @@ MC-08E-R is production certified. Paused MC-08E work was preserved on recovery b
 - MC-08F is locally implemented pending validation and production certification. It adds the display-only `personalization_v1` contract, `/settings`, homepage preference rendering, Performance display preference support, localStorage persistence, EN/ES language foundation, appearance preference, display timezone, odds format, preferred sports, preferred teams, homepage density and advanced evidence visibility.
 - Authenticated profile persistence was not added because no reliable existing profile-settings persistence was found. Local preferences do not affect wagering data and can be reset safely.
 - Prediction formulas, probabilities, confidence, rankings, Official Picks, Kelly, Rent Play, Moneyline, Smart Parlay, settlement, learning, scheduler, providers and budgets are unchanged. MC-08G and MC-03 were not started.
+
+## 2026-08-04 MC-08F Production Certification
+
+- MC-08F is production-certified on commit `fabe9768cdcad2aca02773741ee44596945c7c59`. Homepage, Settings and Performance render checks passed on production, and required read-only product routes returned HTTP 200.
+- Provider calls and remote mutations remained 0 where reported. No prediction, ranking, Official Pick, Kelly, settlement, learning, scheduler, provider or budget behavior changed. MC-08G and MC-03 were not started.
