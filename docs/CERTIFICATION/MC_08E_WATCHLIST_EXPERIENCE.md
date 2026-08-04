@@ -1,6 +1,6 @@
 # MC-08E-R Evidence-First Watchlist Experience Certification
 
-Status: LOCALLY_COMPLETE
+Status: PRODUCTION_CERTIFIED
 
 MC-08E-R resumes the paused MC-08E work after P2.4 production certification and creates the `watchlist_v1` homepage presentation contract.
 
@@ -31,12 +31,12 @@ Rent Play and Moneyline unavailable states use evidence-first labels: `Best Rent
 
 ## Local Evidence
 
-Pending final local validation.
+MC-08A, MC-08B, MC-08C, MC-08D, MC-08E-R and Mission Control validators passed. JSON validation, Markdown validation, changed-file ESLint, targeted secret scan, git diff --check and production build passed.
 
 ## Production Evidence
 
-Pending automatic deployment and read-only production certification.
+Production serves commit `17c44f35081f199d61094704d29bc8b897850c87`. Read-only certification returned HTTP 200 for `/api/system/version`, `/`, `/api/dashboard/today`, `/api/current-board?mode=current&limit=200`, `/api/market-opportunities/most-likely`, `/api/market-opportunities/best-value`, `/api/operations/event-refresh-plan?sportKey=baseball_mlb&limit=200`, `/api/operations/health`, `/betting-workbench`, `/game-intelligence` and `/mlb-operations`. Rendered desktop and mobile homepage checks passed with `watchlist_v1`, five observed Watchlist items and no horizontal overflow.
 
 ## Final Classification
 
-Pending production certification.
+MC_08E_R_DEPLOYED_AND_CERTIFIED.

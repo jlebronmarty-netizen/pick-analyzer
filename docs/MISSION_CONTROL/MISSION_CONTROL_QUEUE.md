@@ -18,7 +18,7 @@ MC-08 is ACTIVE only for bounded Daily Betting Product Completion work packages.
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
-Next eligible mission: MC-08E-R Evidence-First Watchlist Experience until production certification completes.
+Next eligible mission: MC-08F Decision Summary Experience. Do not start automatically without explicit instruction.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
@@ -46,5 +46,5 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | MC-08B | Rent Play Experience | PRODUCTION_CERTIFIED | Rent Play contract, unavailable-value handling and production render certified. |
 | MC-08C | Moneyline Bet Experience | PRODUCTION_CERTIFIED | Moneyline contract, unavailable-value handling and production render certified. |
 | MC-08D | Smart Parlay Experience | PRODUCTION_CERTIFIED | Smart Parlay contract, selection, combined-odds and no-joint-probability behavior certified. |
-| MC-08E-R | Evidence-First Watchlist Experience | LOCALLY_COMPLETE | Paused work preserved on recovery branch; clean P2.4 integration complete pending production certification. |
-| MC-08F | Decision Summary Experience | READY_AFTER_MC_08E_PRODUCTION_CERTIFICATION | Do not start during MC-08E-R. |
+| MC-08E-R | Evidence-First Watchlist Experience | PRODUCTION_CERTIFIED | Paused work preserved, clean P2.4 integration deployed and production-render certified. |
+| MC-08F | Decision Summary Experience | READY | Do not start until explicitly instructed. |

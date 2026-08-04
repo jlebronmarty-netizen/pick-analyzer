@@ -1,8 +1,8 @@
 # MC-08E-R Evidence-First Watchlist Experience
 
-Status: LOCALLY_COMPLETE
+Status: PRODUCTION_CERTIFIED
 
-MC-08E-R safely resumes the paused MC-08E work from a preserved recovery branch and ports only the bounded Watchlist Experience onto the P2.4-certified baseline.
+MC-08E-R safely resumed the paused MC-08E work from a preserved recovery branch and ports only the bounded Watchlist Experience onto the P2.4-certified baseline. Production certification passed on the automatic Vercel deployment for commit `17c44f35081f199d61094704d29bc8b897850c87`.
 
 ## Scope
 

@@ -64,7 +64,7 @@ Use this checklist before starting any queued mission.
 - MC-08B: `PRODUCTION_CERTIFIED`.
 - MC-08C: `PRODUCTION_CERTIFIED`.
 - MC-08D: `PRODUCTION_CERTIFIED`.
-- MC-08E-R: `LOCALLY_COMPLETE`; preserved paused work recovered and clean P2.4 integration pending production certification.
+- MC-08E-R: `PRODUCTION_CERTIFIED`; preserved paused work recovered, deployed and production-render certified.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.

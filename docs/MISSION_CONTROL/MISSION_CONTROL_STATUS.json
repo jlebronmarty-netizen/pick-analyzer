@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_08E_R_LOCALLY_COMPLETE",
+  "status": "MC_08E_R_PRODUCTION_CERTIFIED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -17,7 +17,7 @@
     "state": "ACTIVE",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "MC-08E-R LOCALLY_COMPLETE"
+    "readiness": "MC-08F READY"
   },
   "missionCounts": {
     "total": 11,
@@ -499,7 +499,7 @@
   "nextEligiblePhase": {
     "id": "MC-08F",
     "title": "Decision Summary Experience",
-    "state": "READY_AFTER_MC_08E_PRODUCTION_CERTIFICATION"
+    "state": "READY"
   },
   "p2_3": {
     "status": "PRODUCTION_CERTIFIED",
@@ -559,7 +559,7 @@
     "nextEligibleMissionAfterCertification": "MC-08E-R"
   },
   "mc08e": {
-    "status": "LOCALLY_COMPLETE",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Evidence-First Watchlist Experience Resume",
     "resumeMission": "MC-08E-R",
     "certificationArtifact": "docs/CERTIFICATION/mc-08e-watchlist-experience.json",
@@ -595,11 +595,11 @@
     "refreshCadenceChanged": false,
     "mc08fStarted": false,
     "mc03Started": false,
-    "runtimeCommit": null,
-    "productionCommit": null,
-    "renderedDesktop": null,
-    "renderedMobile": null,
-    "finalClassification": "PENDING_PRODUCTION_CERTIFICATION",
+    "runtimeCommit": "17c44f35081f199d61094704d29bc8b897850c87",
+    "productionCommit": "17c44f35081f199d61094704d29bc8b897850c87",
+    "renderedDesktop": "PASS",
+    "renderedMobile": "PASS",
+    "finalClassification": "MC_08E_R_DEPLOYED_AND_CERTIFIED",
     "validation": {
       "mc08eValidator": "PASS",
       "mc08dValidator": "PASS",
@@ -613,6 +613,36 @@
       "secretScan": "PASS",
       "gitDiffCheck": "PASS",
       "build": "PASS"
+    },
+    "productionCertification": {
+      "status": "PASS",
+      "productionCommit": "17c44f35081f199d61094704d29bc8b897850c87",
+      "systemVersionHttp": 200,
+      "homepageHttp": 200,
+      "dashboardTodayHttp": 200,
+      "currentBoardHttp": 200,
+      "mostLikelyHttp": 200,
+      "bestValueHttp": 200,
+      "eventRefreshPlanHttp": 200,
+      "operationsHealthHttp": 200,
+      "bettingWorkbenchHttp": 200,
+      "gameIntelligenceHttp": 200,
+      "mlbOperationsHttp": 200,
+      "renderedDesktop": "PASS",
+      "renderedMobile": "PASS",
+      "horizontalOverflow": false,
+      "watchlistStatusObserved": "AVAILABLE",
+      "watchlistItemCountObserved": 5,
+      "watchlistEvidenceStatusesObserved": [
+        "UNAVAILABLE",
+        "BEST_AVAILABLE_RESEARCH",
+        "BLOCKED",
+        "UNAVAILABLE",
+        "UNAVAILABLE"
+      ],
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "wagerWritesMade": 0
     }
   }
 }
