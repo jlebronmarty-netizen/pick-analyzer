@@ -25,6 +25,7 @@ const allowed = new Set([
   'docs/CERTIFICATION/p1-4-e2e-production-pipeline.json',
   'scripts/p1-4-e2e-production-pipeline-validate.mjs',
   'src/services/adaptive-refresh-orchestrator.service.ts',
+  'src/services/provider-budget.service.ts',
   'src/services/sportsdataio-mlb-prospective-preview.service.ts',
   'docs/MISSION_CONTROL/MISSION_CONTROL_STATUS.json',
   'docs/MISSION_CONTROL/MISSION_CONTROL_QUEUE.md',
@@ -62,6 +63,7 @@ const allowed = new Set([
   'scripts/p2-2a-performance-presentation-consistency-validate.mjs',
   'scripts/p2-2-new-epoch-daily-closure-validate.mjs',
   'scripts/p2-2b-current-era-closure-investigation-validate.mjs',
+  'scripts/p2-2c-protected-scheduler-closure-recovery-validate.mjs',
   'docs/CERTIFICATION/P2_2B_CURRENT_ERA_CLOSURE_INVESTIGATION.md',
   'docs/CERTIFICATION/p2-2b-current-era-closure-investigation.json',
 ])

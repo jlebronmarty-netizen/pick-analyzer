@@ -64,8 +64,10 @@ const allowed = new Set([
   'scripts/p2-0-prediction-epoch-v2-validate.mjs',
   'scripts/p1-4-e2e-production-pipeline-validate.mjs',
   'src/services/adaptive-refresh-orchestrator.service.ts',
+  'src/services/provider-budget.service.ts',
   'scripts/p2-2-new-epoch-daily-closure-validate.mjs',
   'scripts/p2-2b-current-era-closure-investigation-validate.mjs',
+  'scripts/p2-2c-protected-scheduler-closure-recovery-validate.mjs',
   'docs/CERTIFICATION/P2_2B_CURRENT_ERA_CLOSURE_INVESTIGATION.md',
   'docs/CERTIFICATION/p2-2b-current-era-closure-investigation.json',
 ])

@@ -110,6 +110,22 @@ function providerProfile(provider: string, sportKey: string, cfg: BudgetConfig):
       supportsHeaders: false,
     }
   }
+  if (normalized === 'mlb-stats-api') {
+    return {
+      providerId: 'mlb-stats-api',
+      providerDisplayName: 'MLB Stats API',
+      coveredSports: ['baseball_mlb'],
+      periodType: 'DAILY',
+      unitType: 'HTTP_REQUEST',
+      limit: cfg.dailyCallBudget,
+      protectedReserve: cfg.softReserve,
+      resetSemantics: 'CONFIGURED_ONLY_LOCAL_DAY',
+      evidenceLevel: 'CONFIGURED_ONLY',
+      evidenceSource: 'provider-budget.service config plus app lifecycle ledgers for bounded MLB result sync',
+      largestConsumer: 'operating_day_result_sync',
+      supportsHeaders: false,
+    }
+  }
   if (normalized === 'the-odds-api') {
     return {
       providerId: 'the-odds-api',
@@ -173,8 +189,10 @@ function endpointCostModel(provider: string, action?: string | null, input?: Par
   const markets = input?.markets?.filter(Boolean) ?? []
   const regions = input?.regions?.filter(Boolean) ?? []
   const bookmakers = input?.bookmakers?.filter(Boolean) ?? []
-  if (normalized === 'sportsdataio') {
+  if (normalized === 'sportsdataio' || normalized === 'mlb-stats-api') {
     const requestEstimate = ['odds_refresh', 'midday_refresh', 'final_refresh', 'event_discovery', 'slate_discovery', 'results_sync', 'player_roster_sync', 'historical_import'].includes(actionKey)
+      || actionKey.includes('sync_results')
+      || actionKey.includes('status_refresh')
       ? Math.max(1, Math.min(3, Math.ceil(Math.max(1, eventCount) / 15)))
       : 1
     return {
