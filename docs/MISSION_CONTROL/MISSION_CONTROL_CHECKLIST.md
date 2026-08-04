@@ -64,7 +64,7 @@ Use this checklist before starting any queued mission.
 - MC-08B: `PRODUCTION_CERTIFIED`.
 - MC-08C: `PRODUCTION_CERTIFIED`.
 - MC-08D: `PRODUCTION_CERTIFIED`.
-- MC-08E: `PAUSED`; preserved in the main checkout until MC-08E-R.
+- MC-08E-R: `LOCALLY_COMPLETE`; preserved paused work recovered and clean P2.4 integration pending production certification.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.
@@ -80,5 +80,5 @@ Use this checklist before starting any queued mission.
 - [x] E2E integrity exposes `surfaceConsistency`.
 - [x] Current Era and Replay equations are explicit.
 - [x] Production deployment certification complete.
-- [x] MC-08E remains paused.
+- [x] MC-08E was safely resumed as MC-08E-R after paused-work preservation.
 - [x] MC-03 was not started.

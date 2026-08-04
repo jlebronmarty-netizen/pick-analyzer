@@ -3263,3 +3263,9 @@ Completion criteria: `P2_3_HISTORICAL_PROGRESSIVE_REPLAY_CERTIFIED`, one-event r
 Status: Production certified. Certification: `P2_4_PRODUCTION_CERTIFIED`.
 
 Result: P2.4 introduces `/api/operations/e2e-integrity.surfaceConsistency` as the read-only authority for reconciling Homepage, Dashboard, Current Board, recommendation surfaces, Performance, Mission Control, Prediction Coverage and Historical Replay. Current V2 Production remains separate from Legacy and Replay scopes. MC-08E-R is next eligible after production PASS; MC-03 was not started.
+
+### 75. Mission Control MC-08E-R Evidence-First Watchlist Experience
+
+Status: Locally complete pending production certification.
+
+Result: MC-08E-R preserves the paused MC-08E work on recovery branch `recovery/mc-08e-paused-2026-08-04` at commit `84083538f4a2932b24c09c98aa3138817c9116c6`, records external patch SHA256 `0BAA406D265C307743E6E40D2A4F97E1EFBED9C4021161D3BD491A4359926397`, and ports only the bounded Watchlist Experience onto the P2.4-certified baseline. The homepage Watchlist now uses the typed `watchlist_v1` evidence-first contract with states `ACTIONABLE`, `BEST_AVAILABLE_RESEARCH`, `WATCH`, `BLOCKED`, `UNAVAILABLE` and `NO_CURRENT_EVIDENCE`. No prediction, settlement, learning, scheduler, provider, Official Pick, Rent Play, Moneyline, Smart Parlay, ranking or model behavior changed. MC-08F and MC-03 were not started.

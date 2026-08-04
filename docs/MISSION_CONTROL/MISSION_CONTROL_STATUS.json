@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_4_PRODUCTION_CERTIFIED_MC_08E_PAUSED",
+  "status": "MC_08E_R_LOCALLY_COMPLETE",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -17,7 +17,7 @@
     "state": "ACTIVE",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "ACTIVE"
+    "readiness": "MC-08E-R LOCALLY_COMPLETE"
   },
   "missionCounts": {
     "total": 11,
@@ -487,7 +487,7 @@
     "homepageHttp": 200,
     "renderedDesktop": "PASS",
     "renderedMobile": "PASS",
-    "mc08eStarted": false
+    "mc08eStarted": true
   },
   "runtimeSurfaces": [
     "/api/mission-control",
@@ -497,9 +497,9 @@
   "validationScript": "scripts/mission-control-v1-validate.mjs",
   "certificationArtifact": "docs/CERTIFICATION/mission-control-v1.json",
   "nextEligiblePhase": {
-    "id": "MC-08E-R",
-    "title": "Resume Watchlist Experience After P2.4 Certification",
-    "state": "READY"
+    "id": "MC-08F",
+    "title": "Decision Summary Experience",
+    "state": "READY_AFTER_MC_08E_PRODUCTION_CERTIFICATION"
   },
   "p2_3": {
     "status": "PRODUCTION_CERTIFIED",
@@ -548,7 +548,7 @@
     "settlementChanged": false,
     "learningChanged": false,
     "schedulerChanged": false,
-    "mc08eResumed": false,
+    "mc08eResumed": true,
     "mc03Started": false,
     "classification": "P2_4_PRODUCTION_CERTIFIED",
     "runtimeCommit": "6a3debf9eb2286a9736706d98c0672366b917821",
@@ -557,5 +557,62 @@
     "unexplainedDifferences": 0,
     "staleSurfaces": 0,
     "nextEligibleMissionAfterCertification": "MC-08E-R"
+  },
+  "mc08e": {
+    "status": "LOCALLY_COMPLETE",
+    "title": "Evidence-First Watchlist Experience Resume",
+    "resumeMission": "MC-08E-R",
+    "certificationArtifact": "docs/CERTIFICATION/mc-08e-watchlist-experience.json",
+    "contractVersion": "watchlist_v1",
+    "homepageWatchlistOnly": true,
+    "evidenceFirstStates": [
+      "ACTIONABLE",
+      "BEST_AVAILABLE_RESEARCH",
+      "WATCH",
+      "BLOCKED",
+      "UNAVAILABLE",
+      "NO_CURRENT_EVIDENCE"
+    ],
+    "activeEpochKey": "CURRENT_V2_PRODUCTION",
+    "preservation": {
+      "recoveryBranch": "recovery/mc-08e-paused-2026-08-04",
+      "recoveryCommit": "84083538f4a2932b24c09c98aa3138817c9116c6",
+      "recoveryPatchPath": "C:\\Users\\jlebr\\AppData\\Local\\Temp\\pick-analyzer-mc08e-recovery\\mc-08e-paused-8408353.patch",
+      "recoveryPatchSha256": "0BAA406D265C307743E6E40D2A4F97E1EFBED9C4021161D3BD491A4359926397",
+      "pausedWorkPreserved": true,
+      "originalCheckoutDestructiveCommandsUsed": false
+    },
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "predictionChanged": false,
+    "officialPicksChanged": false,
+    "rentPlayPolicyChanged": false,
+    "moneylineBetPolicyChanged": false,
+    "smartParlayPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "refreshCadenceChanged": false,
+    "mc08fStarted": false,
+    "mc03Started": false,
+    "runtimeCommit": null,
+    "productionCommit": null,
+    "renderedDesktop": null,
+    "renderedMobile": null,
+    "finalClassification": "PENDING_PRODUCTION_CERTIFICATION",
+    "validation": {
+      "mc08eValidator": "PASS",
+      "mc08dValidator": "PASS",
+      "mc08cValidator": "PASS",
+      "mc08bValidator": "PASS",
+      "mc08aValidator": "PASS",
+      "missionControlValidator": "PASS",
+      "jsonValidation": "PASS",
+      "markdownValidation": "PASS",
+      "changedFileEslint": "PASS",
+      "secretScan": "PASS",
+      "gitDiffCheck": "PASS",
+      "build": "PASS"
+    }
   }
 }

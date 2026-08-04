@@ -97,3 +97,6 @@ Move certification docs here only when links are updated and validation passes.
 
 - [P2.4 Cross-Surface Epoch Consistency](P2_4_CROSS_SURFACE_EPOCH_CONSISTENCY.md)
 - [P2.4 Certification JSON](p2-4-cross-surface-epoch-consistency.json)
+
+- [MC-08E-R Evidence-First Watchlist Experience](MC_08E_WATCHLIST_EXPERIENCE.md)
+- [MC-08E-R Certification JSON](mc-08e-watchlist-experience.json)

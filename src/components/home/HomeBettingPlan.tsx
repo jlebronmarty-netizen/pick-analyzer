@@ -297,6 +297,101 @@ type SmartParlayContract = SmartParlaySummary & {
   observedAt: string
 }
 
+type WatchlistStatus =
+  | 'AVAILABLE'
+  | 'LIMITED'
+  | 'EMPTY'
+  | 'NO_GAMES'
+  | 'MARKET_UNAVAILABLE'
+  | 'STALE'
+  | 'UNKNOWN'
+
+type WatchlistPriority = 'HIGH' | 'MEDIUM' | 'LOW' | 'UNKNOWN'
+
+type WatchlistActionability =
+  | 'ACTIONABLE'
+  | 'BEST_AVAILABLE_RESEARCH'
+  | 'WATCH'
+  | 'BLOCKED'
+  | 'UNAVAILABLE'
+  | 'NO_CURRENT_EVIDENCE'
+
+type WatchlistReason =
+  | 'NEAR_RENT_PLAY'
+  | 'NEAR_MONEYLINE'
+  | 'NEAR_OFFICIAL_PICK'
+  | 'MOST_LIKELY_MONITOR'
+  | 'BEST_VALUE_MONITOR'
+  | 'PRICE_MONITORING'
+  | 'FRESHNESS_PENDING'
+  | 'VALUE_PENDING'
+  | 'CONFIDENCE_PENDING'
+  | 'EVIDENCE_PENDING'
+  | 'POLICY_BLOCKED'
+  | 'INFORMATIONAL'
+
+type WatchlistItem = {
+  itemId: string
+  eventId: string | null
+  eventLabel: string
+  marketKey: string
+  marketLabel: string
+  selectionLabel: string
+  americanOdds: number | null
+  modelProbability: number | null
+  confidence: number | null
+  edge: number | null
+  expectedValue: number | null
+  freshnessStatus: string
+  freshnessActionability: string
+  marketTimestamp: string | null
+  marketAgeMinutes: number | null
+  nextPlannedRefreshAt: string | null
+  reason: WatchlistReason
+  priority: WatchlistPriority
+  actionability: WatchlistActionability
+  evidenceFirstStatus: WatchlistActionability
+  researchOnly: boolean
+  watchReason: string
+  currentEpoch: 'CURRENT_V2_PRODUCTION'
+  sourceSurface: string
+  sourceRowId: string | null
+  officialPick: boolean
+  rentPlay: boolean
+  moneylineBet: boolean
+  smartParlayEligible: boolean
+  mostLikely: boolean
+  bestValue: boolean
+  supportingEvidence: string[]
+  limitingEvidence: string[]
+  promotionConditions: string[]
+  removalConditions: string[]
+  eligibilityGates: RentPlayGate[]
+  candidate: PlanPick
+}
+
+type WatchlistContract = {
+  contractVersion: 'watchlist_v1'
+  status: WatchlistStatus
+  evidenceFirstStatus: WatchlistActionability
+  researchOnly: boolean
+  currentEpoch: 'CURRENT_V2_PRODUCTION'
+  maximumItemCount: 5
+  itemCount: number
+  totalCandidateCount: number
+  eligibleCandidateCount: number
+  excludedCandidateCount: number
+  staleCandidateCount: number
+  blockedCandidateCount: number
+  unavailableMarketCount: number
+  items: WatchlistItem[]
+  emptyReason: string | null
+  summary: string
+  observedAt: string
+  providerCallsMade: 0
+  remoteMutationsMade: 0
+}
+
 type MoneylineBetContract = {
   contractVersion: 'moneyline_bet_v1'
   status: MoneylineBetStatus
@@ -362,16 +457,6 @@ const toneClasses: Record<Tone, string> = {
   gray: 'border-slate-700 bg-slate-900/85 text-slate-100',
 }
 
-const actionTone: Record<string, Tone> = {
-  ACT_NOW: 'green',
-  ACTIONABLE: 'green',
-  REVIEW_FIRST: 'yellow',
-  WAIT_FOR_REFRESH: 'yellow',
-  INFORMATIONAL_ONLY: 'blue',
-  BLOCKED: 'red',
-  UNAVAILABLE: 'gray',
-}
-
 const localeFoundation = {
   en: {
     morningBrief: 'Decision Core Morning Brief',
@@ -386,9 +471,9 @@ const localeFoundation = {
 const rentPlayCopy = {
   en: {
     label: 'Rent Play',
-    noEligible: 'No Rent Play Today',
+    noEligible: 'No Current Rent Play Evidence',
     waiting: 'Waiting for fresh price',
-    candidate: 'Best Available Candidate - Not Rent Play',
+    candidate: 'Best Rent Play Candidate',
     empty: 'No available wager currently satisfies probability, value, freshness and policy requirements.',
   },
   es: {
@@ -406,7 +491,7 @@ const moneylineCopy = {
     noEligible: 'No Eligible Moneyline Bet',
     waiting: 'Best Moneyline Candidate - Waiting for Fresh Price',
     unavailable: 'Moneyline Market Unavailable',
-    reviewOnly: 'Review-Only Moneyline Candidate',
+    reviewOnly: 'Best Moneyline Candidate',
     empty: 'No current Moneyline satisfies the complete probability, price, freshness, value and policy requirements.',
   },
   es: {
@@ -1129,6 +1214,267 @@ function buildSmartParlayContract(
   }
 }
 
+function isUnsupportedWatchlistMarket(item: PlanPick) {
+  const market = `${item.marketKey} ${item.market}`.toLowerCase()
+  return /prop|pitcher|batter|first five|first half|team total|alternate|nrfi|yrfi/.test(market)
+}
+
+function isPostStartOrClosed(item: PlanPick) {
+  return /post_start|post start|started|live|market_closed|closed|cancelled|canceled|final|settled/i.test(`${item.freshness} ${item.freshnessActionability ?? ''} ${item.reason}`)
+}
+
+function isLowInformationCandidate(item: PlanPick) {
+  return item.probability === null &&
+    item.confidence === null &&
+    item.edge === null &&
+    item.ev === null &&
+    item.odds === null &&
+    item.evidence.length <= 2
+}
+
+function watchlistGateStatus(item: PlanPick, id: string): RentPlayGateStatus {
+  if (id === 'supported_market') return isUnsupportedWatchlistMarket(item) ? 'FAIL' : 'PASS'
+  if (id === 'pregame') return isPostStartOrClosed(item) ? 'FAIL' : 'PASS'
+  if (id === 'current_price') return item.odds === null ? 'NOT_AVAILABLE' : 'PASS'
+  if (id === 'freshness') {
+    if (isFutureTimestamp(item.marketTimestamp ?? null)) return 'FAIL'
+    if (isFreshnessActionable(item)) return 'PASS'
+    if (item.freshness.toUpperCase().includes('STALE') || String(item.freshnessActionability ?? '').toUpperCase() === 'WAIT_FOR_REFRESH') return 'PENDING'
+    return 'NOT_AVAILABLE'
+  }
+  if (id === 'model_probability') return item.probability === null ? 'NOT_AVAILABLE' : 'PASS'
+  if (id === 'confidence') return item.confidence === null ? 'NOT_AVAILABLE' : 'PASS'
+  if (id === 'value') return item.edge === null && item.ev === null ? 'NOT_AVAILABLE' : Number(item.edge ?? 0) > 0 || Number(item.ev ?? -1) >= 0 ? 'PASS' : 'PENDING'
+  if (id === 'policy') return /blocked|avoid|do not act|quarantined/i.test(item.reason) ? 'FAIL' : 'PASS'
+  return 'PENDING'
+}
+
+function buildWatchlistGates(item: PlanPick): RentPlayGate[] {
+  return [
+    gate('supported_market', 'Supported market', watchlistGateStatus(item, 'supported_market'), isUnsupportedWatchlistMarket(item) ? 'Unsupported markets are not shown in the homepage Watchlist.' : 'Market is supported by existing product evidence.'),
+    gate('pregame', 'Pregame event', watchlistGateStatus(item, 'pregame'), isPostStartOrClosed(item) ? 'Post-start, closed, cancelled or terminal events are excluded.' : 'Candidate is not marked post-start or terminal.'),
+    gate('current_price', 'Current price', watchlistGateStatus(item, 'current_price'), item.odds === null ? 'Current odds are unavailable and remain unavailable.' : `Current odds are ${odds(item.odds)}.`),
+    gate('freshness', 'Freshness', watchlistGateStatus(item, 'freshness'), `Freshness is ${item.freshness}; observedAt is not used as market freshness.`),
+    gate('model_probability', 'Model probability', watchlistGateStatus(item, 'model_probability'), item.probability === null ? 'Model probability is unavailable.' : `Model probability is ${pct(item.probability)}.`),
+    gate('confidence', 'Confidence', watchlistGateStatus(item, 'confidence'), item.confidence === null ? 'Confidence is unavailable.' : `Confidence is ${pct(item.confidence)}.`),
+    gate('value', 'Value evidence', watchlistGateStatus(item, 'value'), `Edge ${signedPct(item.edge)} / EV ${signedPct(item.ev)}.`),
+    gate('policy', 'Policy blockers', watchlistGateStatus(item, 'policy'), item.reason),
+  ]
+}
+
+function watchlistActionability(item: PlanPick, gates: RentPlayGate[]): WatchlistActionability {
+  if (item.odds === null) return 'UNAVAILABLE'
+  if (gates.some((gateItem) => gateItem.id === 'policy' && gateItem.status === 'FAIL')) return 'BLOCKED'
+  if (item.freshness.toUpperCase().includes('STALE') || String(item.freshnessActionability ?? '').toUpperCase() === 'WAIT_FOR_REFRESH') return 'WATCH'
+  if (item.qualified && isFreshnessActionable(item) && Number(item.edge ?? 0) > 0 && item.ev !== null && Number(item.ev) >= 0) return 'ACTIONABLE'
+  if (item.probability !== null || item.confidence !== null || item.edge !== null || item.ev !== null) return 'BEST_AVAILABLE_RESEARCH'
+  return 'NO_CURRENT_EVIDENCE'
+}
+
+function watchlistReason(
+  item: PlanPick,
+  rentPlay: RentPlayContract,
+  moneyline: MoneylineBetContract,
+  parlay: SmartParlayContract,
+  actionability: WatchlistActionability,
+): WatchlistReason {
+  const rentOverlap = Boolean(rentPlay.candidate && item.event === rentPlay.eventLabel && item.selection === rentPlay.selectionLabel && item.market === rentPlay.marketLabel)
+  const moneylineOverlap = Boolean(moneyline.candidate && item.event === moneyline.eventLabel && item.selection === moneyline.selectionLabel && item.marketKey === moneyline.marketKey)
+  const parlayOverlap = parlay.availableLegs.some((leg) => leg.eventLabel === item.event && leg.selectionLabel === item.selection && leg.marketKey === item.marketKey)
+  if (rentOverlap && actionability !== 'ACTIONABLE') return 'NEAR_RENT_PLAY'
+  if (moneylineOverlap && actionability !== 'ACTIONABLE') return 'NEAR_MONEYLINE'
+  if (item.official && actionability !== 'ACTIONABLE') return 'NEAR_OFFICIAL_PICK'
+  if (actionability === 'WATCH') return 'FRESHNESS_PENDING'
+  if (actionability === 'UNAVAILABLE') return 'PRICE_MONITORING'
+  if (actionability === 'BLOCKED') return 'POLICY_BLOCKED'
+  if (item.source === 'Best Value' || item.id === 'best-value') return 'BEST_VALUE_MONITOR'
+  if (item.source === 'Most Likely' || item.id === 'most-likely') return 'MOST_LIKELY_MONITOR'
+  if (item.confidence === null || Number(item.confidence) <= 0) return 'CONFIDENCE_PENDING'
+  if ((item.edge === null && item.ev === null) || Number(item.edge ?? 0) <= 0 || Number(item.ev ?? -1) < 0) return 'VALUE_PENDING'
+  if (!parlayOverlap && item.probability === null) return 'EVIDENCE_PENDING'
+  return 'INFORMATIONAL'
+}
+
+function watchlistPriority(reason: WatchlistReason, actionability: WatchlistActionability): WatchlistPriority {
+  if (['NEAR_RENT_PLAY', 'NEAR_MONEYLINE', 'NEAR_OFFICIAL_PICK', 'FRESHNESS_PENDING'].includes(reason)) return 'HIGH'
+  if (actionability === 'ACTIONABLE' || ['BEST_VALUE_MONITOR', 'MOST_LIKELY_MONITOR', 'PRICE_MONITORING'].includes(reason)) return 'MEDIUM'
+  if (reason === 'INFORMATIONAL' || actionability === 'NO_CURRENT_EVIDENCE') return 'LOW'
+  return 'MEDIUM'
+}
+
+function planPickToWatchlistItem(
+  item: PlanPick,
+  rentPlay: RentPlayContract,
+  moneyline: MoneylineBetContract,
+  parlay: SmartParlayContract,
+): WatchlistItem {
+  const gates = buildWatchlistGates(item)
+  const actionability = watchlistActionability(item, gates)
+  const reason = watchlistReason(item, rentPlay, moneyline, parlay, actionability)
+  const priority = watchlistPriority(reason, actionability)
+  const rentOverlap = Boolean(rentPlay.candidate && item.event === rentPlay.eventLabel && item.selection === rentPlay.selectionLabel && item.market === rentPlay.marketLabel)
+  const moneylineOverlap = Boolean(moneyline.candidate && item.event === moneyline.eventLabel && item.selection === moneyline.selectionLabel && item.marketKey === moneyline.marketKey)
+  const parlayOverlap = parlay.availableLegs.some((leg) => leg.eventLabel === item.event && leg.selectionLabel === item.selection && leg.marketKey === item.marketKey)
+  const supportingEvidence = [
+    `Source: ${item.source}`,
+    item.probability !== null ? `Model probability ${pct(item.probability)}` : '',
+    item.confidence !== null ? `Confidence ${pct(item.confidence)}` : '',
+    item.odds !== null ? `Current price ${odds(item.odds)}` : '',
+    item.edge !== null ? `Edge ${signedPct(item.edge)}` : '',
+    item.ev !== null ? `EV ${signedPct(item.ev)}` : '',
+    item.official ? 'Existing Official Pick evidence is present.' : '',
+    ...item.evidence.slice(0, 2),
+  ].filter(Boolean)
+  const limitingEvidence = [
+    item.odds === null ? 'Current odds are unavailable.' : '',
+    item.marketTimestamp ? '' : 'Canonical market timestamp is unavailable.',
+    item.freshness.toUpperCase().includes('STALE') || String(item.freshnessActionability ?? '').toUpperCase() === 'WAIT_FOR_REFRESH' ? 'Fresh price is required before action.' : '',
+    item.confidence === null ? 'Confidence is unavailable.' : '',
+    item.edge === null ? 'Edge is unavailable.' : Number(item.edge) <= 0 ? 'Edge is not positive.' : '',
+    item.ev === null ? 'EV is unavailable.' : Number(item.ev) < 0 ? 'EV is negative.' : '',
+    /blocked|avoid|do not act|quarantined/i.test(item.reason) ? item.reason : '',
+  ].filter(Boolean)
+  return {
+    itemId: item.id,
+    eventId: item.eventId,
+    eventLabel: item.event,
+    marketKey: item.marketKey,
+    marketLabel: item.market,
+    selectionLabel: item.selection,
+    americanOdds: item.odds,
+    modelProbability: item.probability,
+    confidence: item.confidence,
+    edge: item.edge,
+    expectedValue: item.ev,
+    freshnessStatus: item.freshness,
+    freshnessActionability: item.freshnessActionability ?? 'INFORMATIONAL_ONLY',
+    marketTimestamp: item.marketTimestamp ?? null,
+    marketAgeMinutes: minutesSince(item.marketTimestamp ?? null),
+    nextPlannedRefreshAt: item.nextRefreshAt ?? null,
+    reason,
+    priority,
+    actionability,
+    evidenceFirstStatus: actionability,
+    researchOnly: actionability !== 'ACTIONABLE',
+    watchReason: reason,
+    currentEpoch: 'CURRENT_V2_PRODUCTION',
+    sourceSurface: item.source,
+    sourceRowId: item.id,
+    officialPick: item.official,
+    rentPlay: rentOverlap,
+    moneylineBet: moneylineOverlap,
+    smartParlayEligible: parlayOverlap,
+    mostLikely: item.source === 'Most Likely' || item.id === 'most-likely',
+    bestValue: item.source === 'Best Value' || item.id === 'best-value',
+    supportingEvidence: supportingEvidence.length ? supportingEvidence : ['Stored Today evidence exists, but detailed support is limited.'],
+    limitingEvidence: limitingEvidence.length ? limitingEvidence : ['No limiting evidence was exposed by the current stored candidate.'],
+    promotionConditions: [
+      'Fresh canonical market price is available before start.',
+      'No policy, data quality or supported-market blocker is present.',
+      'Probability, confidence, edge and EV evidence satisfy the existing recommendation policy.',
+      'The existing Official Pick, Rent Play, Moneyline or Smart Parlay surface independently promotes it.',
+    ],
+    removalConditions: [
+      'The event starts, closes, cancels or becomes terminal.',
+      'The market becomes unsupported or unavailable.',
+      'Freshness, odds, confidence, edge or EV evidence deteriorates.',
+      'A stronger current candidate replaces it inside existing stored Today evidence.',
+    ],
+    eligibilityGates: gates,
+    candidate: item,
+  }
+}
+
+function buildWatchlistContract(
+  plan: ReturnType<typeof pickPlan>,
+  rentPlay: RentPlayContract,
+  moneyline: MoneylineBetContract,
+  parlay: SmartParlayContract,
+): WatchlistContract {
+  const observedAt = new Date().toISOString()
+  const seen = new Set<string>()
+  const excluded = plan.candidates.filter((item) => isUnsupportedWatchlistMarket(item) || isPostStartOrClosed(item) || isLowInformationCandidate(item))
+  const rawItems = plan.candidates
+    .filter((item) => !isUnsupportedWatchlistMarket(item) && !isPostStartOrClosed(item) && !isLowInformationCandidate(item))
+    .sort((left, right) => {
+      const leftPriority = left.official ? 100 : 0
+      const rightPriority = right.official ? 100 : 0
+      const sourceLeft = left.sourceRank < 0 ? 50 : 50 - left.sourceRank
+      const sourceRight = right.sourceRank < 0 ? 50 : 50 - right.sourceRank
+      return (rightPriority + sourceRight + Number(right.confidence ?? 0) + Number(right.probability ?? 0)) -
+        (leftPriority + sourceLeft + Number(left.confidence ?? 0) + Number(left.probability ?? 0))
+    })
+
+  const items: WatchlistItem[] = []
+  for (const candidate of rawItems) {
+    const key = `${candidate.eventId ?? candidate.event}|${candidate.marketKey}|${candidate.selection}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    const item = planPickToWatchlistItem(candidate, rentPlay, moneyline, parlay)
+    items.push(item)
+    if (items.length >= 5) break
+  }
+
+  const staleCandidateCount = plan.candidates.filter((item) => item.freshness.toUpperCase().includes('STALE') || String(item.freshnessActionability ?? '').toUpperCase() === 'WAIT_FOR_REFRESH').length
+  const blockedCandidateCount = plan.candidates.filter((item) => /blocked|avoid|do not act|quarantined/i.test(item.reason)).length
+  const unavailableMarketCount = plan.candidates.filter((item) => item.odds === null).length
+  const status: WatchlistStatus = !plan.candidates.length
+    ? 'NO_GAMES'
+    : items.length
+      ? staleCandidateCount >= items.length && items.every((item) => item.actionability === 'WATCH')
+        ? 'STALE'
+        : items.length < 3
+          ? 'LIMITED'
+          : 'AVAILABLE'
+      : unavailableMarketCount >= plan.candidates.length
+        ? 'MARKET_UNAVAILABLE'
+        : excluded.length
+          ? 'EMPTY'
+          : 'UNKNOWN'
+  const evidenceFirstStatus: WatchlistActionability = items.some((item) => item.actionability === 'ACTIONABLE')
+    ? 'ACTIONABLE'
+    : items.some((item) => item.actionability === 'WATCH')
+      ? 'WATCH'
+      : items.some((item) => item.actionability === 'BEST_AVAILABLE_RESEARCH')
+        ? 'BEST_AVAILABLE_RESEARCH'
+        : items.some((item) => item.actionability === 'BLOCKED')
+          ? 'BLOCKED'
+          : items.some((item) => item.actionability === 'UNAVAILABLE')
+            ? 'UNAVAILABLE'
+            : 'NO_CURRENT_EVIDENCE'
+
+  const emptyReason = items.length
+    ? null
+    : status === 'NO_GAMES'
+      ? 'No current games are available in stored Today evidence.'
+      : status === 'MARKET_UNAVAILABLE'
+        ? 'Markets are unavailable or missing canonical prices.'
+        : 'No remaining current candidate is useful enough for the homepage Watchlist.'
+  return {
+    contractVersion: 'watchlist_v1',
+    status,
+    evidenceFirstStatus,
+    researchOnly: evidenceFirstStatus !== 'ACTIONABLE',
+    currentEpoch: 'CURRENT_V2_PRODUCTION',
+    maximumItemCount: 5,
+    itemCount: items.length,
+    totalCandidateCount: plan.candidates.length,
+    eligibleCandidateCount: rawItems.length,
+    excludedCandidateCount: Math.max(0, plan.candidates.length - rawItems.length),
+    staleCandidateCount,
+    blockedCandidateCount,
+    unavailableMarketCount,
+    items,
+    emptyReason,
+    summary: items.length
+      ? `${items.length} current opportunities need monitoring before they can become primary decisions.`
+      : emptyReason ?? 'No Watchlist summary is available.',
+    observedAt,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  }
+}
+
 function MetricBar({ label: metricLabel, value, tone = 'green' }: { label: string; value: number | null; tone?: Tone }) {
   return (
     <div>
@@ -1787,36 +2133,132 @@ function SmartParlayBuilder({ parlay }: { parlay: SmartParlayContract }) {
   )
 }
 
-function Watchlist({ picks }: { picks: PlanPick[] }) {
+function watchlistStatusTone(status: WatchlistStatus): Tone {
+  if (status === 'AVAILABLE') return 'green'
+  if (status === 'LIMITED' || status === 'STALE') return 'yellow'
+  if (status === 'EMPTY' || status === 'NO_GAMES' || status === 'MARKET_UNAVAILABLE') return 'gray'
+  return 'blue'
+}
+
+function watchlistPriorityTone(priority: WatchlistPriority): Tone {
+  if (priority === 'HIGH') return 'green'
+  if (priority === 'MEDIUM') return 'yellow'
+  if (priority === 'LOW') return 'blue'
+  return 'gray'
+}
+
+function watchlistActionTone(status: WatchlistActionability): Tone {
+  if (status === 'ACTIONABLE') return 'green'
+  if (status === 'BEST_AVAILABLE_RESEARCH' || status === 'WATCH') return 'yellow'
+  if (status === 'UNAVAILABLE' || status === 'NO_CURRENT_EVIDENCE') return 'gray'
+  if (status === 'BLOCKED') return 'red'
+  return 'blue'
+}
+
+function Watchlist({ watchlist }: { watchlist: WatchlistContract }) {
   return (
-    <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-mc08a-watchlist="true">
-      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Today&apos;s Watchlist</p>
-      <h2 className="mt-3 text-2xl font-black text-white">Remaining strong opportunities</h2>
-      <div className="mt-5 grid gap-3 md:grid-cols-2">
-        {picks.length ? picks.map((pick) => (
-          <div key={pick.id} className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="break-words text-sm font-black text-white">{pick.selection}</p>
-                <p className="mt-1 text-xs font-bold uppercase text-slate-500">{pick.market} / {pick.event}</p>
+    <section
+      className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6"
+      data-mc08a-watchlist="true"
+      data-mc08e-watchlist="true"
+      data-watchlist-status={watchlist.status}
+      data-watchlist-contract={watchlist.contractVersion}
+    >
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Today&apos;s Watchlist</p>
+          <h2 className="mt-3 text-2xl font-black text-white">Monitor what could matter next</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">{watchlist.summary}</p>
+        </div>
+        <div className="flex flex-wrap gap-2 md:justify-end">
+          <StatusChip tone={watchlistStatusTone(watchlist.status)}>{watchlist.status.replaceAll('_', ' ')}</StatusChip>
+          <StatusChip tone={watchlistActionTone(watchlist.evidenceFirstStatus)}>{watchlist.evidenceFirstStatus.replaceAll('_', ' ')}</StatusChip>
+          <StatusChip tone="blue">{watchlist.itemCount} of {watchlist.maximumItemCount}</StatusChip>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MiniMetric label="Watch Items" value={watchlist.itemCount} />
+        <MiniMetric label="Candidates Reviewed" value={watchlist.totalCandidateCount} />
+        <MiniMetric label="Stale Or Waiting" value={watchlist.staleCandidateCount} />
+        <MiniMetric label="Markets Missing" value={watchlist.unavailableMarketCount} />
+      </div>
+
+      <div className="mt-5 grid gap-3 lg:grid-cols-2">
+        {watchlist.items.length ? watchlist.items.map((item, index) => (
+          <article key={item.itemId} className="rounded-lg border border-slate-800 bg-slate-900 p-4" data-mc08e-watchlist-item="true" data-watchlist-priority={item.priority} data-watchlist-reason={item.reason} data-watchlist-evidence-first-status={item.evidenceFirstStatus} data-watchlist-research-only={item.researchOnly}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">#{index + 1} / {item.sourceSurface}</p>
+                <h3 className="mt-2 break-words text-lg font-black text-white">{item.selectionLabel}</h3>
+                <p className="mt-1 text-xs font-bold uppercase text-slate-500">{item.marketLabel} / {item.eventLabel}</p>
               </div>
-              <StatusChip tone={actionTone[(pick.freshnessActionability ?? 'INFORMATIONAL_ONLY').toUpperCase()] ?? 'blue'}>{pick.freshness}</StatusChip>
+              <div className="flex flex-wrap gap-2 sm:justify-end">
+                <StatusChip tone={watchlistPriorityTone(item.priority)}>{item.priority}</StatusChip>
+                <StatusChip tone={watchlistActionTone(item.evidenceFirstStatus)}>{item.evidenceFirstStatus.replaceAll('_', ' ')}</StatusChip>
+                {item.researchOnly ? <StatusChip tone="yellow">Research Only</StatusChip> : null}
+              </div>
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2 text-xs font-black text-slate-400">
-              <span>{pct(pick.probability)}</span>
-              <span>{pct(pick.confidence)}</span>
-              <span>{signedPct(pick.ev)}</span>
+
+            <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-black text-slate-300 sm:grid-cols-4">
+              <MiniText label="Probability" value={pct(item.modelProbability)} />
+              <MiniText label="Confidence" value={pct(item.confidence)} />
+              <MiniText label="Odds" value={odds(item.americanOdds)} />
+              <MiniText label="Freshness" value={item.marketAgeMinutes === null ? item.freshnessStatus : `${item.marketAgeMinutes} min`} />
             </div>
-          </div>
+
+            <details className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-3" data-mc08e-watchlist-item-expanded="true">
+              <summary className="cursor-pointer text-sm font-black text-white">Why it is on the Watchlist</summary>
+              <div className="mt-4 grid gap-3">
+                <MiniText label="Watch Reason" value={item.watchReason.replaceAll('_', ' ')} />
+                <MiniText label="Current Epoch" value={item.currentEpoch.replaceAll('_', ' ')} />
+                <MiniText label="Positive Evidence" value={item.supportingEvidence.join(' / ')} />
+                <MiniText label="Limiting Evidence" value={item.limitingEvidence.join(' / ')} />
+                <MiniText label="Promotion Conditions" value={item.promotionConditions.join(' / ')} />
+                <MiniText label="Removal Conditions" value={item.removalConditions.join(' / ')} />
+                <MiniText label="Relationships" value={[
+                  item.officialPick ? 'Official Pick' : '',
+                  item.rentPlay ? 'Rent Play' : '',
+                  item.moneylineBet ? 'Moneyline Bet' : '',
+                  item.smartParlayEligible ? 'Smart Parlay eligible' : '',
+                  item.mostLikely ? 'Most Likely' : '',
+                  item.bestValue ? 'Best Value' : '',
+                ].filter(Boolean).join(' / ') || 'No primary-surface overlap.'} />
+                <MiniText label="Market Timestamp" value={compactDate(item.marketTimestamp)} />
+                <MiniText label="Next Planned Refresh" value={compactDate(item.nextPlannedRefreshAt)} />
+                <div className="grid gap-2">
+                  {item.eligibilityGates.map((gateItem) => (
+                    <div key={gateItem.id} className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900 p-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-sm font-black text-white">{gateItem.label}</p>
+                        <p className="mt-1 text-xs leading-5 text-slate-400">{gateItem.detail}</p>
+                      </div>
+                      <StatusChip tone={gateTone(gateItem.status)}>{gateItem.status}</StatusChip>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </details>
+          </article>
         )) : (
-          <p className="rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-300">No Qualified Opportunity Today. No additional strong opportunities are available.</p>
+          <div className="rounded-lg border border-slate-800 bg-slate-900 p-4 text-sm text-slate-300" data-mc08e-watchlist-empty="true">
+            <p className="text-lg font-black text-white">No Current Watchlist Evidence</p>
+            <p className="mt-2 leading-6">{watchlist.emptyReason ?? 'No additional current opportunity is strong enough to monitor.'}</p>
+            <p className="mt-3 text-xs font-black uppercase tracking-[0.14em] text-slate-500">Nothing is promoted by filler. Watchlist only uses current stored evidence.</p>
+          </div>
         )}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <a href="/most-likely" className="rounded-lg border border-slate-800 bg-slate-900/80 px-4 py-3 text-sm font-black text-slate-100 hover:border-sky-300/40 hover:bg-sky-300/10">Most Likely</a>
+        <a href="/best-value" className="rounded-lg border border-slate-800 bg-slate-900/80 px-4 py-3 text-sm font-black text-slate-100 hover:border-sky-300/40 hover:bg-sky-300/10">Best Value</a>
+        <a href="/betting-workbench" className="rounded-lg border border-slate-800 bg-slate-900/80 px-4 py-3 text-sm font-black text-slate-100 hover:border-sky-300/40 hover:bg-sky-300/10">Betting Workbench</a>
       </div>
     </section>
   )
 }
 
-function DecisionSummary({ data, plan }: { data: TodayResponse; plan: ReturnType<typeof pickPlan> }) {
+function DecisionSummary({ data, plan, watchlist }: { data: TodayResponse; plan: ReturnType<typeof pickPlan>; watchlist: WatchlistContract }) {
   const recommendation = dailyRecommendation(plan, data)
   const freshness = label(data.viewModel?.selectors?.marketFreshnessSummary?.state ?? data.freshness, 'Unknown')
   const riskCount = plan.candidates.filter((item) => !item.qualified).length
@@ -1834,6 +2276,9 @@ function DecisionSummary({ data, plan }: { data: TodayResponse; plan: ReturnType
         <MetricBar label="Confidence" value={confidence} tone="blue" />
       </div>
       <p className="mt-5 text-sm leading-6 text-slate-300">{data.summary?.aiBriefing ?? recommendation.reason}</p>
+      <p className="mt-3 text-sm leading-6 text-slate-400" data-mc08e-watchlist-summary-reference="true">
+        Watchlist: {watchlist.itemCount ? `${watchlist.itemCount} current monitor ${watchlist.itemCount === 1 ? 'item' : 'items'} with ${watchlist.status.toLowerCase().replaceAll('_', ' ')} status.` : watchlist.emptyReason ?? 'No current watch items.'}
+      </p>
     </section>
   )
 }
@@ -1912,6 +2357,7 @@ export default function HomeBettingPlan() {
   const rentPlayContract = useMemo(() => buildRentPlayContract(plan), [plan])
   const moneylineBetContract = useMemo(() => buildMoneylineBetContract(plan, rentPlayContract), [plan, rentPlayContract])
   const smartParlayContract = useMemo(() => buildSmartParlayContract(plan, rentPlayContract, moneylineBetContract), [plan, rentPlayContract, moneylineBetContract])
+  const watchlistContract = useMemo(() => buildWatchlistContract(plan, rentPlayContract, moneylineBetContract, smartParlayContract), [plan, rentPlayContract, moneylineBetContract, smartParlayContract])
 
   if (error) {
     return (
@@ -1954,8 +2400,8 @@ export default function HomeBettingPlan() {
           <SmartParlayBuilder parlay={smartParlayContract} />
         </div>
 
-        <Watchlist picks={plan.watchlist} />
-        <DecisionSummary data={data} plan={plan} />
+        <Watchlist watchlist={watchlistContract} />
+        <DecisionSummary data={data} plan={plan} watchlist={watchlistContract} />
         <TechnicalEvidence data={data} currentBoard={currentBoard} intelligence={intelligence} performance={performance} />
 
         <nav className="grid gap-2 sm:grid-cols-3 lg:grid-cols-7" aria-label="Dedicated product tabs" data-mc08a-secondary-tabs="true">
