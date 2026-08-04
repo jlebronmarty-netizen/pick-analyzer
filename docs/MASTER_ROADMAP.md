@@ -86,7 +86,7 @@ MC-08D Smart Parlay Experience update on 2026-08-02: MC-08D is production-certif
 
 MC-08G Product Polish And Coherence Review update on 2026-08-04: MC-08G is production-certified on runtime commit `6122dd7477f3121e9f5bfbbc7353d984862a449b`. It clarifies user-facing copy and navigation across Homepage, Settings, Most Likely, Best Value, Betting Workbench and Performance loading states while preserving prediction, recommendation, settlement, learning, scheduler, provider, Replay and Current Era behavior. MC-08H is READY but not started. MC-03 was not started.
 
-MC-08H Production Readiness Certification update on 2026-08-04: MC-08H is blocked by current production operations. The final product audit scored overall readiness at 72% and returned Production Ready: NO because scheduler execution, market freshness and product readiness are all CRITICAL in production. Production Pilot Week is not ready. MC-03 was not started.
+MC-08H Production Readiness Certification update on 2026-08-04: MC-08H is blocked by current production operations. The final product audit scored overall readiness at 74% and returned Production Ready: NO because market freshness, settlement closure and product readiness are CRITICAL in production. Production Pilot Week is not ready. MC-03 was not started.
 
 OE-003F update on 2026-08-02: Product Freshness SLA is locally implemented and build-certified. Decision surfaces now expose `product_freshness_sla_v1`, block future/post-start/timestampless market evidence, downgrade stale prices, and preserve zero provider calls, zero mutations and unchanged prediction/recommendation policy. OE-003G has not started.
 

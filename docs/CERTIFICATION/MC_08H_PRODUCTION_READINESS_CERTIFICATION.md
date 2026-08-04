@@ -12,9 +12,10 @@ The application has a coherent daily betting product experience, certified Curre
 
 - `/api/system/version`: HTTP 200, commit `c9463bbf412d1639e0d14322be0c3e81db7170cf`, provider calls 0.
 - `/api/operations/health`: HTTP 200, status `CRITICAL`.
-- Scheduler cadence: `CRITICAL`, missed intervals 8.
+- Scheduler cadence: `HEALTHY`, missed intervals 0 after the latest production observation.
 - Market freshness: `CRITICAL`, latest odds age about 633 minutes.
 - Product readiness: `CRITICAL`.
+- Settlement closure: `CRITICAL`.
 - `/api/operations/settlement-guarantee?includeValidation=true`: HTTP 200, guarantee `PASS`.
 - Settlement ready rows: 0.
 - Silent pending rows: 0.
@@ -32,7 +33,7 @@ The application has a coherent daily betting product experience, certified Curre
 ## Issue Counts
 
 - Critical: 3
-- High: 4
+- High: 5
 - Medium: 3
 - Low: 1
 - Cosmetic: 0
@@ -41,6 +42,7 @@ The application has a coherent daily betting product experience, certified Curre
 
 - Mission Control top-level status updated from stale MC-08F wording to MC-08H readiness-blocked wording.
 - Mission Control queue updated so MC-08H is blocked instead of ready.
+- Mission Control API now exposes the status artifact and MC-08H evidence as a read-only overlay.
 - MC-08H certification artifacts and validator added.
 
 ## Production Readiness Scores
@@ -49,7 +51,7 @@ The application has a coherent daily betting product experience, certified Curre
 | --- | ---: |
 | Prediction Engine | 82 |
 | Prediction Quality | 58 |
-| Scheduler | 35 |
+| Scheduler | 70 |
 | Settlement | 75 |
 | Learning | 70 |
 | Performance | 80 |
@@ -67,7 +69,7 @@ The application has a coherent daily betting product experience, certified Curre
 | Documentation | 88 |
 | Developer Experience | 80 |
 | Architecture | 84 |
-| Overall Readiness | 72 |
+| Overall Readiness | 74 |
 
 ## Final Decision
 

@@ -4,44 +4,44 @@
   "baselineCommit": "c9463bbf412d1639e0d14322be0c3e81db7170cf",
   "productionCommitObserved": "c9463bbf412d1639e0d14322be0c3e81db7170cf",
   "productionReady": false,
-  "productionReadinessPercent": 72,
+  "productionReadinessPercent": 74,
   "dailyUseRecommendation": "OBSERVATION_AND_RESEARCH_ONLY",
   "wouldTrustForOwnDailyBettingDecisions": false,
   "issueCounts": {
     "critical": 3,
-    "high": 4,
+    "high": 5,
     "medium": 3,
-    "low": 1,
+    "low": 0,
     "cosmetic": 0
   },
   "criticalIssues": [
-    "scheduler_execution_critical",
     "market_freshness_critical",
+    "settlement_closure_critical",
     "product_readiness_critical"
   ],
   "highIssues": [
     "operations_production_ready_false",
     "closed_beta_operations_ready_false",
     "active_slate_odds_stale_due_now",
-    "older_missing_result_rows_remain"
+    "older_missing_result_rows_remain",
+    "mission_control_api_status_overlay_missing_before_repair"
   ],
   "mediumIssues": [
     "prediction_quality_sample_gated_24_settled_current_era_rows",
     "official_picks_zero_by_policy",
     "localization_foundation_only"
   ],
-  "lowIssues": [
-    "mission_control_top_level_status_was_stale_before_mc08h_repair"
-  ],
+  "lowIssues": [],
   "repairsMade": [
     "mission_control_top_level_status_updated",
     "mission_control_queue_updated",
+    "mission_control_api_status_overlay_added",
     "mc08h_certification_artifacts_added"
   ],
   "scores": {
     "predictionEngine": 82,
     "predictionQuality": 58,
-    "scheduler": 35,
+    "scheduler": 70,
     "settlement": 75,
     "learning": 70,
     "performance": 80,
@@ -59,7 +59,7 @@
     "documentation": 88,
     "developerExperience": 80,
     "architecture": 84,
-    "overallReadiness": 72
+    "overallReadiness": 74
   },
   "productionEvidence": {
     "systemVersionHttp": 200,
@@ -67,9 +67,10 @@
     "systemVersionProviderCallsMade": 0,
     "operationsHealthHttp": 200,
     "operationsHealthStatus": "CRITICAL",
-    "schedulerCadenceStatus": "CRITICAL",
-    "missedSchedulerIntervals": 8,
+    "schedulerCadenceStatus": "HEALTHY",
+    "missedSchedulerIntervals": 0,
     "marketFreshnessStatus": "CRITICAL",
+    "settlementClosureStatus": "CRITICAL",
     "productReadinessStatus": "CRITICAL",
     "providerBudgetStatus": "HEALTHY",
     "settlementGuaranteeHttp": 200,
@@ -130,5 +131,5 @@
   "mc08Complete": false,
   "mc03Started": false,
   "productionPilotWeekReady": false,
-  "updatedAt": "2026-08-04T22:20:00.000Z"
+  "updatedAt": "2026-08-04T22:30:00.000Z"
 }

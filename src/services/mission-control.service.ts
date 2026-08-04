@@ -1,5 +1,8 @@
 import 'server-only'
 
+import fs from 'node:fs'
+import path from 'node:path'
+
 import { getEventLifecycleState } from '@/services/event-lifecycle-state.service'
 import { getEventRefreshPlan } from '@/services/event-refresh-planner.service'
 import { getOperationsHealth } from '@/services/operations-health.service'
@@ -138,6 +141,48 @@ function record(value: unknown): Record<string, unknown> {
 
 function arrayRecords(value: unknown): Array<Record<string, unknown>> {
   return Array.isArray(value) ? (value.filter((item) => item && typeof item === 'object') as Array<Record<string, unknown>>) : []
+}
+
+function loadStatusArtifact(): Record<string, unknown> {
+  const statusPath = path.join(process.cwd(), 'docs', 'MISSION_CONTROL', 'MISSION_CONTROL_STATUS.json')
+  try {
+    if (!fs.existsSync(statusPath)) return {}
+    return record(JSON.parse(fs.readFileSync(statusPath, 'utf8')))
+  } catch {
+    return {}
+  }
+}
+
+function missionFromStatus(value: unknown, fallback: Mission): Mission {
+  const source = record(value)
+  const id = typeof source.id === 'string' ? source.id : fallback.id
+  const title = typeof source.title === 'string' ? source.title : fallback.title
+  const state = typeof source.state === 'string' ? source.state as MissionState : fallback.state
+  const priority = typeof source.priority === 'string' ? source.priority as MissionPriority : fallback.priority
+  const mode = typeof source.mode === 'string' ? source.mode as MissionMode : fallback.mode
+  const readiness = typeof source.readiness === 'string' ? source.readiness as ReadinessStatus : fallback.readiness
+  return {
+    ...fallback,
+    id,
+    title,
+    category: id === 'MC-08H' ? 'CERTIFICATION' : fallback.category,
+    state,
+    priority,
+    mode,
+    readiness,
+    owner: id === 'MC-08H' ? 'Product Certification' : fallback.owner,
+    scope: id === 'MC-08H'
+      ? 'Determine whether the daily betting product is ready for real-user production operation.'
+      : fallback.scope,
+    nextAction: id === 'MC-08H'
+      ? 'Clear production operations blockers before opening Production Pilot Week.'
+      : fallback.nextAction,
+    blockers: id === 'MC-08H' ? ['production_readiness_blocked'] : fallback.blockers,
+    evidence: id === 'MC-08H'
+      ? ['docs/CERTIFICATION/mc-08h-production-readiness-certification.json', 'docs/MISSION_CONTROL/MC_08H_PRODUCTION_READINESS_CERTIFICATION.md']
+      : fallback.evidence,
+    canStartAutomatically: false,
+  }
 }
 
 function num(value: unknown, fallback = 0) {
@@ -807,8 +852,14 @@ export async function getMissionControl() {
 
   const lifecycleEvents = arrayRecords(record(lifecycle.data).events)
   const refreshPlans = arrayRecords(record(refreshPlan.data).plans)
+  const statusArtifact = loadStatusArtifact()
+  const artifactCurrentMission = missionFromStatus(statusArtifact.currentMission, queue[2])
+  const artifactNextMission = record(statusArtifact.mc08h).productionPilotWeekReady === false
+    ? null
+    : (queue.find((mission) => !['MC-00', 'MC-01', 'MC-02'].includes(mission.id) && mission.readiness === 'READY') ?? null)
 
   return {
+    status: typeof statusArtifact.status === 'string' ? statusArtifact.status : 'UNKNOWN',
     program: {
       id: PROGRAM_VERSION,
       name: 'Pick Analyzer V2 Mission Control',
@@ -825,8 +876,11 @@ export async function getMissionControl() {
       },
     },
     taxonomy,
-    currentMission: queue[2],
-    nextMission: queue.find((mission) => !['MC-00', 'MC-01', 'MC-02'].includes(mission.id) && mission.readiness === 'READY') ?? null,
+    currentMission: artifactCurrentMission,
+    nextMission: artifactNextMission,
+    missionControlStatus: statusArtifact,
+    mc08h: record(statusArtifact.mc08h),
+    readOnlyGuarantees: record(statusArtifact.readOnlyGuarantees),
     queue,
     autonomousReadiness: {
       status: 'READY' satisfies ReadinessStatus,

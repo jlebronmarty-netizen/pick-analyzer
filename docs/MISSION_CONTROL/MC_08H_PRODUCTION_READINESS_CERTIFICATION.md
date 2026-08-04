@@ -18,8 +18,8 @@ I would use it as a read-only research and monitoring assistant, but I would not
 
 ## Critical Blockers
 
-- Scheduler execution is `CRITICAL`.
 - Market freshness is `CRITICAL`.
+- Settlement closure is `CRITICAL`.
 - Product readiness is `CRITICAL`.
 
 ## High Blockers
@@ -28,6 +28,7 @@ I would use it as a read-only research and monitoring assistant, but I would not
 - Closed beta operations readiness is false.
 - Active slate odds are stale and due now.
 - Some older completed rows still require result import evidence before closure can be considered fully clean.
+- Mission Control API did not expose the MC-08H status artifact before the repair.
 
 ## Medium Issues
 

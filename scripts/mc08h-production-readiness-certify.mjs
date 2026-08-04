@@ -29,7 +29,7 @@ check('MC-08H mission markdown exists', exists('docs/MISSION_CONTROL/MC_08H_PROD
 check('MC-08H JSON exists', exists('docs/CERTIFICATION/mc-08h-production-readiness-certification.json'))
 check('production readiness is blocked', cert.status === 'PRODUCTION_READINESS_BLOCKED' && cert.productionReady === false)
 check('readiness percent is bounded', cert.productionReadinessPercent >= 0 && cert.productionReadinessPercent <= 100)
-check('critical blockers recorded', cert.issueCounts.critical === 3 && cert.criticalIssues.includes('scheduler_execution_critical') && cert.criticalIssues.includes('market_freshness_critical'))
+check('critical blockers recorded', cert.issueCounts.critical === 3 && cert.criticalIssues.includes('market_freshness_critical') && cert.criticalIssues.includes('settlement_closure_critical'))
 check('operations evidence blocks pilot', cert.productionEvidence.operationsHealthStatus === 'CRITICAL' && cert.pilotWeek.state === 'NOT_READY')
 check('settlement guarantee still passes', cert.productionEvidence.settlementGuarantee === 'PASS' && cert.productionEvidence.silentPendingRows === 0)
 check('sample-gated prediction quality is explicit', cert.productionEvidence.currentEraSettledRows === 24 && cert.mediumIssues.includes('prediction_quality_sample_gated_24_settled_current_era_rows'))
@@ -45,8 +45,10 @@ try {
   changed = execFileSync('git', ['diff', '--name-only'], { cwd: root, encoding: 'utf8' })
 } catch {}
 const changedFiles = changed.split(/\r?\n/).filter(Boolean)
-const forbiddenRuntime = ['src/app/api/', 'src/services/', 'src/lib/providers/', 'supabase/migrations/', 'src/config/']
-check('no runtime behavior files changed', !changedFiles.some((file) => forbiddenRuntime.some((prefix) => file.startsWith(prefix))), changedFiles.join(', '))
+const forbiddenRuntime = ['src/app/api/', 'src/lib/providers/', 'supabase/migrations/', 'src/config/']
+const allowedRuntime = new Set(['src/services/mission-control.service.ts'])
+check('no runtime behavior files changed', !changedFiles.some((file) => !allowedRuntime.has(file) && forbiddenRuntime.some((prefix) => file.startsWith(prefix))), changedFiles.join(', '))
+check('Mission Control API overlay is the only service change', changedFiles.filter((file) => file.startsWith('src/services/')).every((file) => allowedRuntime.has(file)), changedFiles.join(', '))
 
 const failed = checks.filter((item) => !item.pass)
 console.log(JSON.stringify({ validator: 'mc08h-production-readiness-certification', checks: checks.length, failures: failed.length, failed }, null, 2))

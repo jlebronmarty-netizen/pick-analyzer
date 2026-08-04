@@ -11,7 +11,7 @@ Last updated: 2026-07-30 20:05:00Z
 ## 2026-08-04 Mission Control MC-08H Production Readiness Certification
 
 - MC-08H final product audit is `PRODUCTION_READINESS_BLOCKED`. The product shell, Current Era separation, Replay separation, settlement guarantee and product routes are certified, but production operations are not healthy enough for daily betting decisions.
-- Production evidence: `/api/operations/health` is `CRITICAL`, scheduler cadence is `CRITICAL` with 8 missed intervals, market freshness is `CRITICAL`, product readiness is `CRITICAL`, and Operations reports `operationsProductionReady: false`.
+- Production evidence: `/api/operations/health` is `CRITICAL`; scheduler cadence recovered to `HEALTHY` with 0 missed intervals in the latest observation, but market freshness is `CRITICAL`, settlement closure is `CRITICAL`, product readiness is `CRITICAL`, and Operations reports `operationsProductionReady: false`.
 - Settlement guarantee remains PASS with 0 settlement-ready rows and 0 silent pending rows. Current Era Performance reports 69 canonical rows, 24 settled rows, 45 pending rows, 60.87% current-era accuracy on 24 settled rows, trust `LIMITED` and overall grade `F`.
 - Production Ready: NO. Production Pilot Week is NOT READY. MC-03 was not started.
 
