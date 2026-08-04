@@ -102,7 +102,7 @@ const protectedDirtyFiles = [
 
 check('status baseline commit is current baseline', status.baselineCommit === 'ddc79d7b4a5efa5068ff1e63bb68d95d84100e67')
 check('certification baseline commit is current baseline', certification.baselineCommit === status.baselineCommit)
-check('current mission is MC-00 or later Mission Control mission', ['MC-00', 'MC-01', 'MC-02'].includes(status.currentMission?.id))
+check('current mission is MC-00 or later Mission Control mission', ['MC-00', 'MC-01', 'MC-02', 'MC-08H'].includes(status.currentMission?.id))
 check('next mission is deterministic', ['MC-01', 'MC-02', 'MC-08'].includes(status.nextMission?.id))
 check('only MC-08 bounded product package may be active in status', status.missionCounts?.active === 0 || (status.missionCounts?.active === 1 && status.nextMission?.id === 'MC-08' && status.nextMission?.state === 'ACTIVE'))
 check('mission count covers MC-00 through MC-10', status.missionCounts?.total === 11)

@@ -1,0 +1,134 @@
+{
+  "certification": "mc-08h-production-readiness-certification",
+  "status": "PRODUCTION_READINESS_BLOCKED",
+  "baselineCommit": "c9463bbf412d1639e0d14322be0c3e81db7170cf",
+  "productionCommitObserved": "c9463bbf412d1639e0d14322be0c3e81db7170cf",
+  "productionReady": false,
+  "productionReadinessPercent": 72,
+  "dailyUseRecommendation": "OBSERVATION_AND_RESEARCH_ONLY",
+  "wouldTrustForOwnDailyBettingDecisions": false,
+  "issueCounts": {
+    "critical": 3,
+    "high": 4,
+    "medium": 3,
+    "low": 1,
+    "cosmetic": 0
+  },
+  "criticalIssues": [
+    "scheduler_execution_critical",
+    "market_freshness_critical",
+    "product_readiness_critical"
+  ],
+  "highIssues": [
+    "operations_production_ready_false",
+    "closed_beta_operations_ready_false",
+    "active_slate_odds_stale_due_now",
+    "older_missing_result_rows_remain"
+  ],
+  "mediumIssues": [
+    "prediction_quality_sample_gated_24_settled_current_era_rows",
+    "official_picks_zero_by_policy",
+    "localization_foundation_only"
+  ],
+  "lowIssues": [
+    "mission_control_top_level_status_was_stale_before_mc08h_repair"
+  ],
+  "repairsMade": [
+    "mission_control_top_level_status_updated",
+    "mission_control_queue_updated",
+    "mc08h_certification_artifacts_added"
+  ],
+  "scores": {
+    "predictionEngine": 82,
+    "predictionQuality": 58,
+    "scheduler": 35,
+    "settlement": 75,
+    "learning": 70,
+    "performance": 80,
+    "replay": 88,
+    "homepage": 84,
+    "ux": 83,
+    "navigation": 86,
+    "accessibility": 78,
+    "localization": 62,
+    "settings": 80,
+    "missionControl": 76,
+    "currentEra": 78,
+    "crossSurfaceConsistency": 87,
+    "operations": 45,
+    "documentation": 88,
+    "developerExperience": 80,
+    "architecture": 84,
+    "overallReadiness": 72
+  },
+  "productionEvidence": {
+    "systemVersionHttp": 200,
+    "systemVersionCommit": "c9463bbf412d1639e0d14322be0c3e81db7170cf",
+    "systemVersionProviderCallsMade": 0,
+    "operationsHealthHttp": 200,
+    "operationsHealthStatus": "CRITICAL",
+    "schedulerCadenceStatus": "CRITICAL",
+    "missedSchedulerIntervals": 8,
+    "marketFreshnessStatus": "CRITICAL",
+    "productReadinessStatus": "CRITICAL",
+    "providerBudgetStatus": "HEALTHY",
+    "settlementGuaranteeHttp": 200,
+    "settlementGuarantee": "PASS",
+    "settlementReadyRows": 0,
+    "silentPendingRows": 0,
+    "completedPredictionRows": 97,
+    "settledRows": 97,
+    "currentEraCanonicalRows": 69,
+    "currentEraSettledRows": 24,
+    "currentEraPendingRows": 45,
+    "currentEraAccuracy": 60.87,
+    "currentEraTrustLabel": "LIMITED",
+    "overallAiGrade": "F",
+    "dashboardTodayHttp": 200,
+    "currentBoardHttp": 200,
+    "currentBoardCandidates": 45,
+    "historicalReplayHttp": 200,
+    "missionControlHttp": 200
+  },
+  "localValidation": [
+    "mc08h-production-readiness-certify: PASS (16/16)",
+    "mission-control-v1-validate: PASS (57/57)",
+    "mc08a-homepage-experience-validate: PASS (37/37)",
+    "mc08b-rent-play-experience-validate: PASS (34/34)",
+    "mc08c-moneyline-bet-experience-validate: PASS (43/43)",
+    "mc08d-smart-parlay-experience-validate: PASS (47/47)",
+    "mc08e-watchlist-experience-validate: PASS (48/48)",
+    "mc08f-personalization-experience-validate: PASS (20/20)",
+    "JSON validation: PASS",
+    "Markdown changed-doc link validation: PASS",
+    "changed-script ESLint: PASS",
+    "targeted secret scan: PASS",
+    "git diff --check: PASS",
+    "npm.cmd run build: PASS (398 static pages)"
+  ],
+  "validatorNotes": [
+    "mc08g-product-coherence-validate is scoped to MC-08G changed files and reports dirty MC-08H docs/scripts as out of scope before the MC-08H commit.",
+    "p2-2a and p2-2d historical validators are scoped to their original phase changed files; p2-2d also contains now-superseded MC-08E-paused assumptions."
+  ],
+  "pilotWeek": {
+    "state": "NOT_READY",
+    "duration": "5-7 days",
+    "purpose": "Real-world validation before Multi-Sport Expansion",
+    "reason": "Production operations are currently critical."
+  },
+  "guardrails": {
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "rankingChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "providerCallsFromCertificationReads": 0,
+    "remoteMutationsFromCertificationReads": 0
+  },
+  "mc08Complete": false,
+  "mc03Started": false,
+  "productionPilotWeekReady": false,
+  "updatedAt": "2026-08-04T22:20:00.000Z"
+}

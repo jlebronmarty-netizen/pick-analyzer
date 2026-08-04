@@ -12,7 +12,7 @@ It answers:
 
 Mission Control does not replace the Master Program, Master Roadmap, Project Status or certification artifacts.
 
-Mission Control is current through MC-08G production certification. MC-08H is ready but not started; MC-03 remains planned/manual-only.
+Mission Control is current through MC-08H production-readiness audit. MC-08H is blocked by live operations evidence; Production Pilot Week is not ready; MC-03 remains planned/manual-only.
 
 ## Source Of Truth Boundaries
 
@@ -49,3 +49,4 @@ Both surfaces are read-only. They do not call providers, write data, start jobs,
 - [MC-08E-R Watchlist Experience](MC_08E_WATCHLIST_EXPERIENCE.md)
 - [MC-08F Personalization Experience](MC_08F_PERSONALIZATION_EXPERIENCE.md)
 - [MC-08G Product Coherence Review](MC_08G_PRODUCT_COHERENCE_REVIEW.md)
+- [MC-08H Production Readiness Certification](MC_08H_PRODUCTION_READINESS_CERTIFICATION.md)

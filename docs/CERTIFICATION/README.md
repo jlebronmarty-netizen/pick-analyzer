@@ -106,3 +106,6 @@ Move certification docs here only when links are updated and validation passes.
 
 - [MC-08G Product Coherence Review](MC_08G_PRODUCT_COHERENCE_REVIEW.md)
 - [MC-08G Product Coherence Review JSON](mc-08g-product-coherence-review.json)
+
+- [MC-08H Production Readiness Certification](MC_08H_PRODUCTION_READINESS_CERTIFICATION.md)
+- [MC-08H Production Readiness Certification JSON](mc-08h-production-readiness-certification.json)

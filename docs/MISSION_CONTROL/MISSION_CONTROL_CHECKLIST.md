@@ -66,7 +66,8 @@ Use this checklist before starting any queued mission.
 - MC-08D: `PRODUCTION_CERTIFIED`.
 - MC-08E-R: `PRODUCTION_CERTIFIED`; preserved paused work recovered, deployed and production-render certified.
 - MC-08F: `PRODUCTION_CERTIFIED`; personalization is display-only. MC-08G requires explicit instruction and MC-03 remains manual-only.
-- MC-08G: `PRODUCTION_CERTIFIED`; product polish and coherence review is complete. MC-08H is READY but not started. MC-03 remains manual-only.
+- MC-08G: `PRODUCTION_CERTIFIED`; product polish and coherence review is complete.
+- MC-08H: `PRODUCTION_READINESS_BLOCKED`; production pilot is not ready because production operations are currently critical. MC-03 remains manual-only.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.
@@ -101,4 +102,12 @@ Use this checklist before starting any queued mission.
 - [x] Prediction, recommendation, settlement, learning, scheduler, provider, Replay and Current Era behavior unchanged.
 - [x] Production deployment certification complete.
 - [x] MC-08H was not started.
+- [x] MC-03 was not started.
+
+## MC-08H Production Readiness Certification
+
+- [x] Final product audit completed from repository and production evidence.
+- [x] Critical operations blockers identified.
+- [x] Production Ready decision recorded as NO.
+- [x] Production Pilot Week recorded as NOT READY.
 - [x] MC-03 was not started.
