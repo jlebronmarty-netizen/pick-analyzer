@@ -208,6 +208,16 @@ No prediction formula, probability, confidence, edge, EV, Kelly, recommendation 
 Production certification completed on commit `a0e6329293686fe2557949f3f30e445c7e6880b8`. The repaired coverage endpoint reported 8 current MLB events, 48 expected selections, 48 predictions created, 48 production-evaluable rows, 0 missed opportunities, 0 cutoff misses, 0 duplicates and 100% coverage. The successful protected writer used 1 SportsDataIO provider call, made 145 remote mutations and rebuilt 48 downstream prediction rows with no persistence error. P2.2 is READY. MC-03 was not started and MC-08E remains paused.
 
 P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 Current V2 predictions exist, but current MLB events remain `HIGH_PRIORITY`/`ACTIVE_REFRESH` and are not yet final, so authoritative result import, settlement, learning evidence and Performance Current Era closure cannot be certified. P2.3 was not started.
+
+# 2026-08-04 P2.2C Protected Scheduler 409 Diagnostic
+
+- Status: REPAIR_DEPLOYED_EXTERNAL_SETTLE_PENDING.
+- The protected scheduler HTTP 409 was proven as `BUDGET_BLOCKED`, not a concurrency lock.
+- Root cause: `sync_results` mapped to `mlb_stats_api`, but the provider budget service treated MLB Stats API as an unknown provider with unknown cost.
+- Repairs: added a bounded MLB Stats API HTTP budget profile/cost model, prevented internal settlement from inheriting provider-call budget demand, and ensured mutation-producing result sync reports changed work.
+- One post-repair protected execution succeeded with HTTP 200, selected `sync_results`, made 1 provider call, received 53 rows and made 12 remote mutations.
+- Aug 3 events moved to `SETTLEMENT`; Current Era remains 69 canonical / 0 settled / 69 pending until the external writer executes `settle`.
+- P2.3 was not started. MC-08E remains paused.
 # 2026-08-03 P2.1A Canonical Market-Prediction Granularity
 
 - Status: PRODUCTION_CERTIFIED.

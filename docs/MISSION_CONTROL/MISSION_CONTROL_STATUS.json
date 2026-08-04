@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_2A_PRODUCTION_CERTIFIED_P2_2_WAITING_FOR_EXTERNAL_EVIDENCE_MC_08E_PAUSED",
+  "status": "P2_2C_REPAIR_DEPLOYED_EXTERNAL_SETTLE_PENDING_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -261,25 +261,39 @@
     "productionCommit": "6aac64e4a82e27c1e7a2fdb207ed9aca2805ef1d"
   },
   "p2_2": {
-    "status": "WAITING_FOR_EXTERNAL_EVIDENCE",
+    "status": "EXTERNAL_WAIT_SETTLEMENT_EXECUTION",
     "title": "New-Epoch Daily Closure Certification",
     "certificationArtifact": "docs/CERTIFICATION/p2-2-new-epoch-daily-closure.json",
-    "reason": "Current V2 production predictions exist, but current MLB events are not yet final and cannot close through result import, settlement, learning and Performance.",
+    "reason": "P2.2C repaired the protected scheduler 409 budget defect and imported Aug 3 results; Current Era closure is pending external settlement execution.",
     "activeEpochKey": "CURRENT_V2_PRODUCTION",
     "coverageExpectedSelections": 24,
     "coveragePredictionsCreated": 24,
     "coverageProductionEvaluable": 24,
     "coverageMissedOpportunities": 0,
     "eventLifecycleStates": {
-      "HIGH_PRIORITY": 1,
-      "ACTIVE_REFRESH": 7
+      "SETTLEMENT": 8
     },
-    "operationsHealth": "HEALTHY",
+    "operationsHealth": "CRITICAL",
     "providerCallsFromObservationReads": 0,
     "remoteMutationsFromObservationReads": 0,
     "p23Started": false,
     "mc03Started": false,
-    "mc08eResumed": false
+    "mc08eResumed": false,
+    "p2_2c": {
+      "status": "REPAIR_DEPLOYED_EXTERNAL_SETTLE_PENDING",
+      "certificationArtifact": "docs/CERTIFICATION/p2-2c-protected-scheduler-closure-recovery.json",
+      "runtimeCommit": "16f55c6571c8241aab57333245a30a11ef819f21",
+      "rootCause": "mlb_stats_api had unknown budget and cost model, causing BUDGET_BLOCKED HTTP 409 for sync_results",
+      "protectedExecutionSelectedAction": "sync_results",
+      "protectedExecutionProviderCallsMade": 1,
+      "protectedExecutionRemoteMutationsMade": 12,
+      "nextAction": "settle",
+      "currentEraCanonicalPredictions": 69,
+      "currentEraSettled": 0,
+      "currentEraPending": 69,
+      "aug3EventsReadyForSettlement": 8,
+      "p23Started": false
+    }
   },
   "productionCertification": {
     "status": "PASS",

@@ -1,0 +1,58 @@
+{
+  "status": "REPAIR_DEPLOYED_EXTERNAL_SETTLE_PENDING",
+  "classification": "EXTERNAL_WAIT_SETTLEMENT_EXECUTION",
+  "runtimeCommit": "16f55c6571c8241aab57333245a30a11ef819f21",
+  "priorRuntimeCommit": "9cfa84e134d12015b8fede4afa4016afa3e1c091",
+  "startingCommit": "04822b8096c157423f768fd5ec939bbfc98cd896",
+  "rootCause": "sync_results mapped to mlb_stats_api but provider-budget.service lacked a known MLB Stats API budget profile and cost model",
+  "http409": {
+    "status": "BUDGET_BLOCKED",
+    "classification": "BUDGET_DENIED",
+    "selectedAction": "sync_results",
+    "selectedDate": "2026-07-27",
+    "blockedReason": "MLB_STATS_API_AUTHORIZATION_POOL, UNKNOWN_COST_MODEL, UNKNOWN_BUDGET_FAILS_CLOSED"
+  },
+  "repairs": [
+    "add_bounded_mlb_stats_api_provider_budget_profile",
+    "add_mlb_stats_api_sync_results_cost_model",
+    "zero_provider_budget_demand_for_internal_settlement_actions",
+    "classify_mutation_producing_execution_as_success_changed"
+  ],
+  "protectedExecution": {
+    "attempts": 1,
+    "httpStatus": 200,
+    "selectedAction": "sync_results",
+    "selectedDate": "2026-07-27",
+    "providerCallsMade": 1,
+    "remoteMutationsMade": 12,
+    "rowsReceived": 53,
+    "settlementObserved": false
+  },
+  "postExecutionState": {
+    "nextAction": "settle",
+    "currentEraCanonicalPredictions": 69,
+    "currentEraSettled": 0,
+    "currentEraPending": 69,
+    "aug3Events": 8,
+    "aug3EventsReadyForSettlement": 8,
+    "aug3CanonicalPredictionsExpected": 24,
+    "settlementReadyRowsTotal": 130,
+    "settlementReadyRowsByDate": {
+      "2026-08-01": 33,
+      "2026-08-02": 45,
+      "2026-08-03": 52
+    },
+    "missingResultRowsRemaining": 9
+  },
+  "guards": {
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementEligibilityChanged": false,
+    "learningWeightsChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerContractsChanged": false,
+    "manualResultsFabricated": false,
+    "manualSettlementInserted": false
+  },
+  "nextSafeAction": "Allow the external protected scheduler to execute settle, then certify Aug 3 canonical settlement and Current Era Performance."
+}

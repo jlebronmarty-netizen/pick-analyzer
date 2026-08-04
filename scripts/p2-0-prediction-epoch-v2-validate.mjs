@@ -70,6 +70,8 @@ const allowed = new Set([
   'scripts/p2-2-new-epoch-daily-closure-validate.mjs',
   'scripts/p2-2b-current-era-closure-investigation-validate.mjs',
   'scripts/p2-2c-protected-scheduler-closure-recovery-validate.mjs',
+  'docs/CERTIFICATION/P2_2C_PROTECTED_SCHEDULER_CLOSURE_RECOVERY.md',
+  'docs/CERTIFICATION/p2-2c-protected-scheduler-closure-recovery.json',
   'docs/CERTIFICATION/P2_2B_CURRENT_ERA_CLOSURE_INVESTIGATION.md',
   'docs/CERTIFICATION/p2-2b-current-era-closure-investigation.json',
   'scripts/p2-2a-performance-presentation-consistency-validate.mjs',

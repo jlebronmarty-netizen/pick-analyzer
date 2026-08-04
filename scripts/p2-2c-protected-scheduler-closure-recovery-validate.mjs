@@ -28,6 +28,11 @@ const allowed = new Set([
   'scripts/p1-3-production-evaluation-policy-validate.mjs',
   'scripts/p1-2-e2e-system-integrity-validate.mjs',
   'scripts/mission-control-v1-validate.mjs',
+  'docs/CERTIFICATION/P2_2C_PROTECTED_SCHEDULER_CLOSURE_RECOVERY.md',
+  'docs/CERTIFICATION/p2-2c-protected-scheduler-closure-recovery.json',
+  'docs/MISSION_CONTROL/MISSION_CONTROL_STATUS.json',
+  'docs/MISSION_CONTROL/MISSION_CONTROL_QUEUE.md',
+  'docs/MISSION_CONTROL/MISSION_CONTROL_LOG.md',
 ])
 
 const checks = []

@@ -34,7 +34,7 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | P2.1 | Comprehensive Supported-Market Prediction Coverage | PRODUCTION_CERTIFIED | 48/48 expected current supported MLB selections covered. |
 | P2.1A | Canonical Market-Prediction Granularity Correction | PRODUCTION_CERTIFIED | 48 provider selections and 24 canonical event-market predictions certified; selection-level preview rows excluded from canonical Performance. |
 | P2.2A | Performance Presentation Consistency | PRODUCTION_CERTIFIED | Clarify Current Era Performance labels without changing counts, math, settlement, learning or predictions. |
-| P2.2 | New-Epoch Daily Closure Certification | WAITING_FOR_EXTERNAL_EVIDENCE | Current V2 canonical rows must become final, import results, settle, create learning evidence and enter Performance. |
+| P2.2 | New-Epoch Daily Closure Certification | EXTERNAL_WAIT_SETTLEMENT_EXECUTION | P2.2C repaired the 409 budget defect and imported Aug 3 results; current next action is `settle`, with Current Era still 69 pending / 0 settled until the external writer executes settlement. |
 | P2.3 | Historical Progressive Replay V1 | BLOCKED_BY_P2_2 | Do not start until P2.2 closure evidence is available or explicitly approved. |
 
 ## MC-08 Work Packages
