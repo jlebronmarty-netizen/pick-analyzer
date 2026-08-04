@@ -1,6 +1,6 @@
 # MC-08G Product Polish And Coherence Review
 
-Status: LOCALLY COMPLETE
+Status: PRODUCTION CERTIFIED
 
 ## Mission
 
@@ -48,4 +48,4 @@ No prediction formulas, recommendation policy, Official Picks, Rent Play policy,
 
 ## Next
 
-After production certification, MC-08H may become ready. MC-03 remains manual-only and was not started.
+MC-08H is ready after MC-08G production certification. MC-03 remains manual-only and was not started.

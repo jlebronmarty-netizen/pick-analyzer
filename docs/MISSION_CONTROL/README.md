@@ -12,7 +12,7 @@ It answers:
 
 Mission Control does not replace the Master Program, Master Roadmap, Project Status or certification artifacts.
 
-Mission Control is current through MC-08G local certification. MC-08G is bounded to product polish and coherence; MC-08H and MC-03 remain not started.
+Mission Control is current through MC-08G production certification. MC-08H is ready but not started; MC-03 remains planned/manual-only.
 
 ## Source Of Truth Boundaries
 

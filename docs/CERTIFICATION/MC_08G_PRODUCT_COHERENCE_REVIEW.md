@@ -1,6 +1,6 @@
 # MC-08G Product Polish And Coherence Review Certification
 
-Status: LOCALLY COMPLETE
+Status: PRODUCTION CERTIFIED
 
 ## Certification Summary
 
@@ -51,3 +51,19 @@ Remote mutations during certification: 0 expected.
 Prediction writes, result writes, settlement writes and learning writes: 0 expected.
 
 No model, recommendation, Official Pick, settlement, learning, scheduler, provider, replay or Current Era behavior changed.
+
+## Production Certification
+
+- Runtime commit: `6122dd7477f3121e9f5bfbbc7353d984862a449b`
+- `/api/system/version`: HTTP 200, commit `6122dd7477f3121e9f5bfbbc7353d984862a449b`, provider calls 0
+- Public product routes: `/`, `/performance`, `/settings`, `/most-likely`, `/best-value`, `/betting-workbench`, `/game-intelligence`, `/mission-control`, `/dashboard`, `/mlb-operations`, `/admin/historical-diagnostics` returned HTTP 200
+- Read-only APIs: `/api/dashboard/today`, `/api/current-board?mode=current&limit=200`, `/api/operations/historical-replay`, `/api/performance` returned HTTP 200
+- Desktop dark render: PASS
+- Mobile light render: PASS
+- Spanish saved-preference foundation: PASS
+- Horizontal overflow: none observed
+- Old copy signals removed: `Display TZ`, `Canonical TZ`, `Price N/A / Reason`, `Avg Conf.`, raw persistence states
+- Provider calls from certification reads: 0 where reported
+- Remote mutations from certification reads: 0 expected
+- MC-08H: READY, not started
+- MC-03: not started

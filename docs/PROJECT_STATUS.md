@@ -4,9 +4,9 @@ Last updated: 2026-07-30 20:05:00Z
 
 ## 2026-08-04 Mission Control MC-08G Product Polish And Coherence Review
 
-- MC-08G is in local certification. The bounded product review found no critical or high product defects and repaired low-risk clarity issues across Homepage, Settings, Most Likely, Best Value, Betting Workbench and Performance loading navigation.
+- MC-08G is production-certified on runtime commit `6122dd7477f3121e9f5bfbbc7353d984862a449b`. The bounded product review found no critical or high product defects and repaired low-risk clarity issues across Homepage, Settings, Most Likely, Best Value, Betting Workbench and Performance loading navigation.
 - Repairs are presentation-only: timezone labels, local persistence wording, example labels, Daily Brief navigation, unavailable-price copy and average-confidence wording.
-- No prediction formula, probability, confidence, ranking, Official Pick policy, Rent Play policy, Moneyline policy, Smart Parlay logic, settlement, learning, scheduler, provider, Replay or Current Era behavior changed. MC-08H and MC-03 were not started.
+- Production read-only certification passed for the primary product routes, desktop dark render, mobile light render and Spanish saved-preference foundation. No prediction formula, probability, confidence, ranking, Official Pick policy, Rent Play policy, Moneyline policy, Smart Parlay logic, settlement, learning, scheduler, provider, Replay or Current Era behavior changed. MC-08H is READY but not started. MC-03 was not started.
 
 ## 2026-08-03 P1.3 Production Evaluation Policy Separation
 

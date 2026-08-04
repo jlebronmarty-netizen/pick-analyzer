@@ -17,11 +17,11 @@
     "state": "ACTIVE",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "MC-08G ACTIVE"
+    "readiness": "MC-08H READY AFTER MC-08G CERTIFICATION"
   },
   "missionCounts": {
     "total": 11,
-    "ready": 1,
+    "ready": 2,
     "planned": 6,
     "active": 1,
     "conditionalPass": 0,
@@ -700,7 +700,7 @@
     ]
   },
   "mc08g": {
-    "status": "LOCALLY_COMPLETE",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Product Polish And Coherence Review",
     "certificationArtifact": "docs/CERTIFICATION/mc-08g-product-coherence-review.json",
     "missionArtifact": "docs/MISSION_CONTROL/MC_08G_PRODUCT_COHERENCE_REVIEW.md",
@@ -753,8 +753,8 @@
     "currentEraMathChanged": false,
     "mc08hStarted": false,
     "mc03Started": false,
-    "runtimeCommit": null,
-    "productionCommit": null,
+    "runtimeCommit": "6122dd7477f3121e9f5bfbbc7353d984862a449b",
+    "productionCommit": "6122dd7477f3121e9f5bfbbc7353d984862a449b",
     "validation": {
       "mc08gValidator": "PASS",
       "mc08aValidator": "PASS",
@@ -771,6 +771,33 @@
       "gitDiffCheck": "PASS",
       "build": "PASS"
     },
-    "finalClassification": "MC_08G_LOCALLY_COMPLETE"
+    "productionCertification": {
+      "status": "PASS",
+      "productionCommit": "6122dd7477f3121e9f5bfbbc7353d984862a449b",
+      "systemVersionHttp": 200,
+      "homepageHttp": 200,
+      "performanceHttp": 200,
+      "settingsHttp": 200,
+      "mostLikelyHttp": 200,
+      "bestValueHttp": 200,
+      "bettingWorkbenchHttp": 200,
+      "gameIntelligenceHttp": 200,
+      "missionControlHttp": 200,
+      "dashboardHttp": 200,
+      "mlbOperationsHttp": 200,
+      "historicalDiagnosticsHttp": 200,
+      "dashboardTodayHttp": 200,
+      "currentBoardHttp": 200,
+      "historicalReplayHttp": 200,
+      "apiPerformanceHttp": 200,
+      "desktopDarkRender": "PASS",
+      "mobileLightRender": "PASS",
+      "spanishSavedPreferenceFoundation": "PASS",
+      "horizontalOverflow": false,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0
+    },
+    "mc08hReady": true,
+    "finalClassification": "MC_08G_DEPLOYED_AND_CERTIFIED"
   }
 }

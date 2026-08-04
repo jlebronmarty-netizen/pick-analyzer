@@ -1,9 +1,9 @@
 {
   "certification": "mc-08g-product-coherence-review",
-  "status": "LOCALLY_COMPLETE",
+  "status": "PRODUCTION_CERTIFIED",
   "baselineCommit": "8cf160fe0b3e6db382e06f06ac9f4f3eb40a9a13",
-  "runtimeCommit": null,
-  "productionCommit": null,
+  "runtimeCommit": "6122dd7477f3121e9f5bfbbc7353d984862a449b",
+  "productionCommit": "6122dd7477f3121e9f5bfbbc7353d984862a449b",
   "pagesReviewed": [
     "/",
     "/performance",
@@ -90,8 +90,31 @@
     "p2-2a-performance-presentation-consistency-validate is scoped to P2.2A changed files and is not applicable to MC-08G.",
     "p2-3 and p2-4 direct service validators could not execute in the local Node environment because server-only is not installed as a standalone package; MC-08G did not change replay, E2E integrity, Performance math, Current Era math or related services."
   ],
-  "productionValidation": [],
+  "productionValidation": [
+    "/api/system/version HTTP 200 commit 6122dd7 providerCallsMade 0",
+    "/ HTTP 200",
+    "/performance HTTP 200",
+    "/settings HTTP 200",
+    "/most-likely HTTP 200",
+    "/best-value HTTP 200",
+    "/betting-workbench HTTP 200",
+    "/game-intelligence HTTP 200",
+    "/mission-control HTTP 200",
+    "/dashboard HTTP 200",
+    "/mlb-operations HTTP 200",
+    "/admin/historical-diagnostics HTTP 200",
+    "/api/dashboard/today HTTP 200",
+    "/api/current-board?mode=current&limit=200 HTTP 200",
+    "/api/operations/historical-replay HTTP 200",
+    "/api/performance HTTP 200",
+    "desktop dark render PASS",
+    "mobile light render PASS",
+    "Spanish saved-preference foundation PASS",
+    "horizontal overflow false",
+    "old copy signals removed"
+  ],
+  "mc08hReady": true,
   "mc08hStarted": false,
   "mc03Started": false,
-  "updatedAt": "2026-08-04T21:51:00.000Z"
+  "updatedAt": "2026-08-04T22:03:00.000Z"
 }

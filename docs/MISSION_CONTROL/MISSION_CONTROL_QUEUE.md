@@ -48,5 +48,5 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | MC-08D | Smart Parlay Experience | PRODUCTION_CERTIFIED | Smart Parlay contract, selection, combined-odds and no-joint-probability behavior certified. |
 | MC-08E-R | Evidence-First Watchlist Experience | PRODUCTION_CERTIFIED | Paused work preserved, clean P2.4 integration deployed and production-render certified. |
 | MC-08F | Personalization Experience | PRODUCTION_CERTIFIED | Display-only personalization contract, settings route and homepage/Performance integration certified. |
-| MC-08G | Product Polish And Coherence Review | ACTIVE | Review and repair bounded product coherence issues after MC-08F. |
-| MC-08H | Next Daily Betting Product Completion package | PLANNED | Do not start until MC-08G is production-certified. |
+| MC-08G | Product Polish And Coherence Review | PRODUCTION_CERTIFIED | Product coherence repairs deployed and certified. |
+| MC-08H | Next Daily Betting Product Completion package | READY | Do not start until explicitly instructed. |
