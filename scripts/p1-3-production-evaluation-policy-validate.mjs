@@ -72,6 +72,11 @@ const allowed = new Set([
   'docs/CERTIFICATION/p2-2c-protected-scheduler-closure-recovery.json',
   'docs/CERTIFICATION/P2_2B_CURRENT_ERA_CLOSURE_INVESTIGATION.md',
   'docs/CERTIFICATION/p2-2b-current-era-closure-investigation.json',
+  'docs/CERTIFICATION/P2_2D_CURRENT_ERA_SETTLEMENT_CLOSURE.md',
+  'docs/CERTIFICATION/p2-2d-current-era-settlement-closure.json',
+  'scripts/p2-2d-current-era-settlement-closure-validate.mjs',
+  'docs/CERTIFICATION/P2_2_NEW_EPOCH_DAILY_CLOSURE.md',
+  'docs/CERTIFICATION/p2-2-new-epoch-daily-closure.json',
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 

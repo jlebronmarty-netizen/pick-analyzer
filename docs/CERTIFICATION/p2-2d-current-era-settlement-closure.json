@@ -1,0 +1,188 @@
+{
+  "id": "p2_2d_current_era_settlement_closure",
+  "status": "PASS",
+  "classification": "P2_2D_CURRENT_ERA_SETTLEMENT_CLOSED",
+  "startingCommit": "a9b58d88c154d204f8096060c29e1e3fe665a175",
+  "productionCommitObserved": "a9b58d88c154d204f8096060c29e1e3fe665a175",
+  "activeEpoch": "CURRENT_V2_PRODUCTION",
+  "protectedExecution": {
+    "trigger": "manual_protected_scheduler_post",
+    "dryRun": false,
+    "httpStatus": 200,
+    "durationMs": 40990,
+    "status": "SUCCESS_CHANGED",
+    "selectedAction": "settle",
+    "invocationIds": [
+      "12156a20-227a-4666-8946-081d48f21536",
+      "2bbde3a0-b172-4219-b5aa-c4dff9dc5b76",
+      "246e9091-b4bb-48e4-881f-3e5b49747e6c"
+    ],
+    "selectedDates": [
+      "2026-08-01",
+      "2026-08-02",
+      "2026-08-03"
+    ],
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 38,
+    "settlementWrites": 130,
+    "learningWrites": 0,
+    "learningEvidenceType": "derived_from_settled_prediction_history",
+    "predictionWrites": 0,
+    "resultWrites": 0
+  },
+  "aug3CanonicalReconciliation": {
+    "operatingDate": "2026-08-03",
+    "events": 8,
+    "authoritativeResultsImported": true,
+    "expectedCanonicalPredictions": 24,
+    "settled": 24,
+    "wins": 14,
+    "losses": 9,
+    "pushes": 1,
+    "blocked": 0,
+    "explicitPending": 0,
+    "silentPending": 0,
+    "duplicateSettlementIdentities": 0,
+    "byMarket": {
+      "moneyline": {
+        "expected": 8,
+        "settled": 8,
+        "wins": 5,
+        "losses": 3,
+        "pushes": 0,
+        "blocked": 0,
+        "pending": 0
+      },
+      "spread": {
+        "expected": 8,
+        "settled": 8,
+        "wins": 5,
+        "losses": 3,
+        "pushes": 0,
+        "blocked": 0,
+        "pending": 0
+      },
+      "total": {
+        "expected": 8,
+        "settled": 8,
+        "wins": 4,
+        "losses": 3,
+        "pushes": 1,
+        "blocked": 0,
+        "pending": 0
+      }
+    },
+    "nonProductionRowsExcluded": 28,
+    "nonProductionReasons": {
+      "P2_1A_SELECTION_LEVEL_PREVIEW_SUPERSEDED": 26,
+      "SUPERSEDED_BY_FINAL_PREGAME_REFRESH": 2
+    }
+  },
+  "learningClosure": {
+    "settledCanonicalPredictions": 24,
+    "derivedLearningSamples": 24,
+    "learningMissing": 0,
+    "learningDuplicates": 0,
+    "previewRowLearning": 0,
+    "modelWeightPromotion": false,
+    "championChange": false,
+    "epochAssignment": "CURRENT_V2_PRODUCTION"
+  },
+  "performanceClosure": {
+    "totalAnalyzedRows": 103,
+    "canonicalPredictionRows": 69,
+    "nonProductionAnalysisRows": 34,
+    "recommendationEligibleRows": 0,
+    "actionableRows": 0,
+    "officialPickEligibleRows": 0,
+    "settledCanonicalRows": 24,
+    "pendingCanonicalRows": 45,
+    "wins": 14,
+    "losses": 9,
+    "pushes": 1,
+    "accuracy": 60.87,
+    "brier": 0.3116,
+    "calibration": null,
+    "trust": 24.56,
+    "settlementCoverage": 34.78
+  },
+  "crossSurface": {
+    "systemVersion": {
+      "httpStatus": 200,
+      "providerCallsMade": 0
+    },
+    "performance": {
+      "httpStatus": 200,
+      "apiStatus": "SUCCESS",
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0
+    },
+    "settlementGuarantee": {
+      "httpStatus": 200,
+      "success": true,
+      "checkedPredictions": 148,
+      "completedPredictionRows": 97,
+      "settledRows": 97,
+      "readyForSettlementRows": 0,
+      "blockedRows": 0,
+      "silentPendingRows": 0,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0
+    },
+    "eventLifecycleAug3": {
+      "httpStatus": 200,
+      "events": 8,
+      "state": "ARCHIVED",
+      "priority": "P1",
+      "missingResults": 0,
+      "readyForSettlement": 0,
+      "providerCallsMade": 0
+    },
+    "adaptiveRefresh": {
+      "httpStatus": 200,
+      "nextAction": "sync_results",
+      "settlementReadyRows": 0,
+      "completedMissingResultRows": 9,
+      "providerCallsMade": 0
+    },
+    "predictionCoverage": {
+      "httpStatus": 200,
+      "canonicalPredictionsCreated": 45,
+      "canonicalPredictionsMissing": 0,
+      "coveragePercentage": 100,
+      "providerCallsMade": 0
+    },
+    "dashboardToday": {
+      "httpStatus": 200,
+      "operatingDate": "2026-08-04",
+      "currentGames": 15,
+      "providerCallsMade": 0
+    },
+    "currentBoard": {
+      "httpStatus": 200,
+      "operatingDate": "2026-08-04",
+      "gameCount": 15
+    },
+    "pages": {
+      "performance": 200,
+      "mlbOperations": 200,
+      "missionControl": 200
+    }
+  },
+  "guards": {
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "recommendationPolicyChanged": false,
+    "settlementRuleChanged": false,
+    "learningWeightChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerContractChanged": false,
+    "historicalReplayStarted": false
+  },
+  "p22Passed": true,
+  "p23Started": false,
+  "mc03Started": false,
+  "mc08eResumed": false,
+  "providerCallsMadeByCertificationReads": 0,
+  "remoteMutationsMadeByCertificationReads": 0
+}

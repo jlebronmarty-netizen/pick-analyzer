@@ -42,17 +42,20 @@ const allowed = new Set([
   'scripts/p1-4-e2e-production-pipeline-validate.mjs',
   'scripts/p1-3-production-evaluation-policy-validate.mjs',
   'scripts/p1-2-e2e-system-integrity-validate.mjs',
+  'docs/CERTIFICATION/P2_2D_CURRENT_ERA_SETTLEMENT_CLOSURE.md',
+  'docs/CERTIFICATION/p2-2d-current-era-settlement-closure.json',
+  'scripts/p2-2d-current-era-settlement-closure-validate.mjs',
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 
-check('P2.2 is waiting, not falsely passed', cert.status === 'WAITING_FOR_EXTERNAL_EVIDENCE' && doc.includes('WAITING_FOR_EXTERNAL_EVIDENCE'))
+check('P2.2 is production certified after P2.2D', cert.status === 'PASS' && cert.classification === 'P2_2_PRODUCTION_CERTIFIED' && doc.includes('PRODUCTION_CERTIFIED'))
 check('required closure sequence is explicit', cert.requiredSequence.includes('event_final') && cert.requiredSequence.includes('settlement') && cert.requiredSequence.includes('performance_current_era'))
-check('P2.1 coverage prerequisite is satisfied', cert.currentEvidence.coverageExpectedSelections === 48 && cert.currentEvidence.coveragePredictionsCreated === 48 && cert.currentEvidence.coverageMissedOpportunities === 0)
-check('external wait root cause is documented', cert.stopCondition.includes('not yet final') && doc.includes('No Current V2 event has yet completed'))
+check('P2.1A canonical coverage prerequisite is satisfied', cert.currentEvidence.coverageExpectedSelections === 24 && cert.currentEvidence.coveragePredictionsCreated === 24 && cert.currentEvidence.coverageMissedOpportunities === 0)
+check('Current Era closure evidence is documented', cert.stopCondition === null && cert.currentEvidence.currentEraSettled === 24 && cert.currentEvidence.silentPending === 0 && doc.includes('Aug 3 settled canonical predictions: 24'))
 check('read-only observation made no provider calls', cert.currentEvidence.providerCallsFromReads === 0)
 check('read-only observation made no mutations', cert.currentEvidence.remoteMutationsFromReads === 0)
 check('business rules unchanged', Object.values(cert.guards).every((value) => value === false))
-check('P2.3 and MC-03 not started', cert.p23Started === false && cert.mc03Started === false)
+check('P2.3 and MC-03 not started', cert.p23Started === false && cert.mc03Started === false && cert.p2_2d.status === 'PASS')
 check('MC-08E remains paused', cert.mc08eResumed === false)
 check('certification docs exist', exists('docs/CERTIFICATION/P2_2_NEW_EPOCH_DAILY_CLOSURE.md'))
 check('only bounded P2.2 files changed', disallowed.length === 0, disallowed.join(', '))

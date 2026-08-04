@@ -234,3 +234,14 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Count values and mathematics are unchanged: 51 total analyzed rows, 24 canonical predictions, 27 non-production analysis rows and 0 settled canonical predictions.
 - Production commit `6aac64e4a82e27c1e7a2fdb207ed9aca2805ef1d` returned the corrected `/api/performance` presentation contract and rendered `/performance` on desktop/mobile with no horizontal overflow.
 - P2.2 remains `WAITING_FOR_EXTERNAL_EVIDENCE`; P2.3 and MC-08E were not started.
+
+# 2026-08-04 P2.2D Current Era Settlement Closure
+
+- Status: PRODUCTION_CERTIFIED.
+- Executed exactly one protected production scheduler call with `dryRun=false`; selected action was `settle` and HTTP status was 200.
+- The protected run made 0 provider calls, settled stored eligible rows for 2026-08-01 through 2026-08-03, and made 38 remote settlement mutations.
+- Aug 3 Current Era reconciliation closed: 24 canonical predictions, 24 settled, 14 wins, 9 losses, 1 push, 0 blocked, 0 explicit pending and 0 silent pending.
+- Learning evidence is derived from the 24 settled canonical rows; no model weights were promoted and no champion changed.
+- Current Era Performance now reports 69 canonical predictions, 24 settled, 45 pending, accuracy 60.87%, Brier 0.3116, Trust 24.56 and settlement coverage 34.78%.
+- Settlement Guarantee returned PASS with 0 ready rows and 0 silent pending rows. Older missing-result rows from 2026-07-27 and 2026-07-28 remain outside the P2.2 Current Era closure scope.
+- P2.3 is READY but was not started. MC-08E remains paused.

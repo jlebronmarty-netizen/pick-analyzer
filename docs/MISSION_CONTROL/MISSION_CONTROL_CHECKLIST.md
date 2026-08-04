@@ -70,6 +70,6 @@ Use this checklist before starting any queued mission.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.
 - P2.1: `PRODUCTION_CERTIFIED`; comprehensive supported-market prediction coverage is bounded to current supported MLB markets.
 - P2.1A: `PRODUCTION_CERTIFIED`; canonical model prediction granularity is event-market, while provider-side selections remain contextual.
-- P2.2A: `LOCAL_IMPLEMENTATION_PENDING_PRODUCTION_CERTIFICATION`; Performance presentation labels total analyzed rows separately from canonical predictions.
+- P2.2A: `PRODUCTION_CERTIFIED`; Performance presentation labels total analyzed rows separately from canonical predictions.
 - P2.2: `WAITING_FOR_EXTERNAL_EVIDENCE`; current canonical rows must complete and close before P2.2 can pass.
 - P2.3: `BLOCKED_BY_P2_2`; do not start.

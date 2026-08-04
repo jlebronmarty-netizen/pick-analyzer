@@ -34,6 +34,11 @@ const allowed = new Set([
   'scripts/p1-4-e2e-production-pipeline-validate.mjs',
   'scripts/p1-3-production-evaluation-policy-validate.mjs',
   'scripts/p1-2-e2e-system-integrity-validate.mjs',
+  'docs/CERTIFICATION/P2_2D_CURRENT_ERA_SETTLEMENT_CLOSURE.md',
+  'docs/CERTIFICATION/p2-2d-current-era-settlement-closure.json',
+  'scripts/p2-2d-current-era-settlement-closure-validate.mjs',
+  'docs/CERTIFICATION/P2_2_NEW_EPOCH_DAILY_CLOSURE.md',
+  'docs/CERTIFICATION/p2-2-new-epoch-daily-closure.json',
 ])
 
 const checks = []

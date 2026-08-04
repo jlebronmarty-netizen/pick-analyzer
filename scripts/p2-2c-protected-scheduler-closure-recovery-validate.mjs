@@ -33,6 +33,12 @@ const allowed = new Set([
   'docs/MISSION_CONTROL/MISSION_CONTROL_STATUS.json',
   'docs/MISSION_CONTROL/MISSION_CONTROL_QUEUE.md',
   'docs/MISSION_CONTROL/MISSION_CONTROL_LOG.md',
+  'docs/CERTIFICATION/P2_2D_CURRENT_ERA_SETTLEMENT_CLOSURE.md',
+  'docs/CERTIFICATION/p2-2d-current-era-settlement-closure.json',
+  'scripts/p2-2d-current-era-settlement-closure-validate.mjs',
+  'docs/CERTIFICATION/P2_2_NEW_EPOCH_DAILY_CLOSURE.md',
+  'docs/CERTIFICATION/p2-2-new-epoch-daily-closure.json',
+  'docs/MISSION_CONTROL/MISSION_CONTROL_CHECKLIST.md',
 ])
 
 const checks = []

@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_2C_REPAIR_DEPLOYED_EXTERNAL_SETTLE_PENDING_MC_08E_PAUSED",
+  "status": "P2_2_PRODUCTION_CERTIFIED_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -58,7 +58,13 @@
       "CANCELLED",
       "UNKNOWN"
     ],
-    "priorities": ["P0", "P1", "P2", "P3", "P4"],
+    "priorities": [
+      "P0",
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
     "modes": [
       "MANUAL_ONLY",
       "AGENT_ASSISTED",
@@ -181,7 +187,11 @@
     "coverageEndpoint": "/api/operations/prediction-coverage",
     "current24RowContractExplanation": "Prior odds selection collapsed to one preferred side per event and normalized market.",
     "predictionUniquenessKey": "epoch:event:market:selection:line",
-    "supportedMarkets": ["moneyline", "spread", "total"],
+    "supportedMarkets": [
+      "moneyline",
+      "spread",
+      "total"
+    ],
     "providerCallsIntroduced": 0,
     "remoteMutationsIntroduced": 0,
     "productionCommit": "a0e6329293686fe2557949f3f30e445c7e6880b8",
@@ -261,19 +271,19 @@
     "productionCommit": "6aac64e4a82e27c1e7a2fdb207ed9aca2805ef1d"
   },
   "p2_2": {
-    "status": "EXTERNAL_WAIT_SETTLEMENT_EXECUTION",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "New-Epoch Daily Closure Certification",
     "certificationArtifact": "docs/CERTIFICATION/p2-2-new-epoch-daily-closure.json",
-    "reason": "P2.2C repaired the protected scheduler 409 budget defect and imported Aug 3 results; Current Era closure is pending external settlement execution.",
+    "reason": "P2.2D executed the protected settle action and certified Aug 3 Current Era settlement, learning evidence and Performance closure.",
     "activeEpochKey": "CURRENT_V2_PRODUCTION",
     "coverageExpectedSelections": 24,
     "coveragePredictionsCreated": 24,
     "coverageProductionEvaluable": 24,
     "coverageMissedOpportunities": 0,
     "eventLifecycleStates": {
-      "SETTLEMENT": 8
+      "ARCHIVED": 8
     },
-    "operationsHealth": "CRITICAL",
+    "operationsHealth": "CRITICAL_WITH_OLDER_MISSING_RESULT_ROWS",
     "providerCallsFromObservationReads": 0,
     "remoteMutationsFromObservationReads": 0,
     "p23Started": false,
@@ -292,6 +302,30 @@
       "currentEraSettled": 0,
       "currentEraPending": 69,
       "aug3EventsReadyForSettlement": 8,
+      "p23Started": false
+    },
+    "currentEraCanonicalPredictions": 69,
+    "currentEraSettled": 24,
+    "currentEraPending": 45,
+    "aug3CanonicalPredictions": 24,
+    "aug3Settled": 24,
+    "aug3Wins": 14,
+    "aug3Losses": 9,
+    "aug3Pushes": 1,
+    "silentPending": 0,
+    "learningSamples": 24,
+    "performanceStatus": "SUCCESS",
+    "p2_2d": {
+      "status": "PASS",
+      "certificationArtifact": "docs/CERTIFICATION/p2-2d-current-era-settlement-closure.json",
+      "protectedExecutionSelectedAction": "settle",
+      "protectedExecutionProviderCallsMade": 0,
+      "protectedExecutionRemoteMutationsMade": 38,
+      "settlementWrites": 130,
+      "aug3CanonicalPredictions": 24,
+      "aug3Settled": 24,
+      "currentEraSettled": 24,
+      "currentEraPending": 45,
       "p23Started": false
     }
   },
@@ -455,7 +489,16 @@
     "renderedMobile": "PASS",
     "mc08eStarted": false
   },
-  "runtimeSurfaces": ["/api/mission-control", "/api/mission-control/data-readiness", "/mission-control"],
+  "runtimeSurfaces": [
+    "/api/mission-control",
+    "/api/mission-control/data-readiness",
+    "/mission-control"
+  ],
   "validationScript": "scripts/mission-control-v1-validate.mjs",
-  "certificationArtifact": "docs/CERTIFICATION/mission-control-v1.json"
+  "certificationArtifact": "docs/CERTIFICATION/mission-control-v1.json",
+  "nextEligiblePhase": {
+    "id": "P2.3",
+    "title": "Historical Progressive Replay V1",
+    "state": "READY_NOT_STARTED"
+  }
 }
