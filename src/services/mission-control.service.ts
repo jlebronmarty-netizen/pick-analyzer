@@ -854,7 +854,8 @@ export async function getMissionControl() {
   const refreshPlans = arrayRecords(record(refreshPlan.data).plans)
   const statusArtifact = loadStatusArtifact()
   const artifactCurrentMission = missionFromStatus(statusArtifact.currentMission, queue[2])
-  const artifactNextMission = record(statusArtifact.mc08h).productionPilotWeekReady === false
+  const or01Artifact = record(statusArtifact.or01)
+  const artifactNextMission = or01Artifact.productionReady === false || record(statusArtifact.mc08h).productionPilotWeekReady === false
     ? null
     : (queue.find((mission) => !['MC-00', 'MC-01', 'MC-02'].includes(mission.id) && mission.readiness === 'READY') ?? null)
 
@@ -879,6 +880,7 @@ export async function getMissionControl() {
     currentMission: artifactCurrentMission,
     nextMission: artifactNextMission,
     missionControlStatus: statusArtifact,
+    or01: or01Artifact,
     mc08h: record(statusArtifact.mc08h),
     readOnlyGuarantees: record(statusArtifact.readOnlyGuarantees),
     queue,

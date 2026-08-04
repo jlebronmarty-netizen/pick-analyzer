@@ -7,6 +7,7 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8')
 
 const orchestrator = read('src/services/adaptive-refresh-orchestrator.service.ts')
 const health = read('src/services/operations-health.service.ts')
+const missionControlService = read('src/services/mission-control.service.ts')
 const status = read('docs/MISSION_CONTROL/MISSION_CONTROL_STATUS.json')
 const certification = read('docs/CERTIFICATION/OR_01_OPERATIONAL_READINESS_RECOVERY.md')
 const certificationJson = JSON.parse(read('docs/CERTIFICATION/or-01-operational-readiness-recovery.json'))
@@ -17,6 +18,7 @@ const changed = execFileSync('git', ['diff', '--name-only', 'HEAD'], { cwd: ROOT
 
 const allowed = new Set([
   'src/services/adaptive-refresh-orchestrator.service.ts',
+  'src/services/mission-control.service.ts',
   'scripts/or01-operational-readiness-recovery-validate.mjs',
   'docs/CERTIFICATION/OR_01_OPERATIONAL_READINESS_RECOVERY.md',
   'docs/CERTIFICATION/or-01-operational-readiness-recovery.json',
@@ -87,6 +89,11 @@ check(
   'Mission Control status records OR-01 recovery state',
   status.includes('"or01"') &&
     status.includes('"repositoryRepair": "COMPLETE"')
+)
+check(
+  'Mission Control API exposes OR-01 overlay',
+  missionControlService.includes('const or01Artifact = record(statusArtifact.or01)') &&
+    missionControlService.includes('or01: or01Artifact')
 )
 check(
   'certification JSON is valid OR-01 artifact',
