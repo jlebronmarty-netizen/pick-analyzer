@@ -1,0 +1,67 @@
+{
+  "phase": "P2.4",
+  "title": "Cross-Surface Epoch And Performance Consistency",
+  "status": "PASS_PENDING_PRODUCTION_DEPLOYMENT",
+  "classification": "P2_4_LOCAL_PASS_PENDING_PRODUCTION_DEPLOYMENT",
+  "startingCommit": "f297b456cdb378b4f5dd5d5e6b63f81a5f871176",
+  "activeEpochKey": "CURRENT_V2_PRODUCTION",
+  "legacyScope": "LEGACY_PRE_V2",
+  "replayScope": "REPLAY",
+  "expectedCounts": {
+    "currentEra": {
+      "canonicalPredictionRows": 69,
+      "settledCanonicalRows": 24,
+      "pendingCanonicalRows": 45,
+      "blockedCanonicalRows": 0,
+      "equation": "canonicalPredictionRows = settledCanonicalRows + pendingCanonicalRows + blockedCanonicalRows"
+    },
+    "replay": {
+      "replayPredictionRows": 30,
+      "replaySettledRows": 30,
+      "replayPendingRows": 0,
+      "equation": "replayPredictionRows = replaySettledRows + replayPendingRows"
+    }
+  },
+  "surfaces": [
+    "Homepage",
+    "Dashboard",
+    "Current Board",
+    "Most Likely",
+    "Best Value",
+    "AI Bet Finder",
+    "Betting Workbench",
+    "Game Intelligence",
+    "Performance",
+    "MLB Operations",
+    "Mission Control",
+    "Prediction Coverage",
+    "E2E Integrity",
+    "Historical Replay"
+  ],
+  "runtimeContract": "/api/operations/e2e-integrity.surfaceConsistency",
+  "safety": {
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "predictionFormulaChanged": false,
+    "confidenceChanged": false,
+    "evChanged": false,
+    "kellyChanged": false,
+    "recommendationPolicyChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "replayPromotedToCurrentEra": false
+  },
+  "validators": [
+    "scripts/p2-4-cross-surface-epoch-consistency-validate.mjs"
+  ],
+  "productionCertification": {
+    "status": "PENDING_AUTOMATIC_DEPLOYMENT",
+    "productionCommit": null
+  },
+  "nextEligibleMissionAfterCertification": "MC-08E-R",
+  "mc08eResumed": false,
+  "mc03Started": false,
+  "generatedAt": "2026-08-04T16:48:44.179Z"
+}

@@ -255,3 +255,12 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Bounded sample processed 10 events and 30 settled replay predictions: 14 wins, 16 losses, 0 pushes, 46.67% accuracy, 0.2508 Brier, 4.96 calibration error and -6.11 ROI.
 - Provider calls 0; Current Era writes 0; historical mutations 0; production settlement writes 0; production learning writes 0.
 - Production served runtime commit `6c85106cbf35b62b85ec15c3bfbefaedbfd52462`; P2.4 is next eligible. MC-03 was not started. MC-08E remains paused.
+
+# 2026-08-04 P2.4 Cross-Surface Epoch And Performance Consistency
+
+- Added a bounded read-only `surfaceConsistency` contract to E2E integrity.
+- Current operating-day surfaces, Current Era Performance and Historical Replay are reconciled by explicit scope.
+- Current Era evidence remains 69 canonical predictions, 24 settled and 45 pending.
+- Replay evidence remains 30 replay predictions and 30 replay settled rows.
+- Provider calls, remote mutations, prediction changes, settlement changes, learning changes and scheduler changes remain 0.
+- Production certification is pending automatic deployment. MC-08E and MC-03 were not started.

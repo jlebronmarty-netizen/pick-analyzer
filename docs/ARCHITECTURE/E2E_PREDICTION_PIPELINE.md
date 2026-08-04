@@ -71,3 +71,7 @@ Changing the answer would alter Performance history and must be handled as a sep
 ## P2.3 Historical Progressive Replay Addendum
 
 P2.3 replay is not production prediction history. It reads stored historical validation predictions, linked odds snapshots and linked feature snapshots, then writes replay-only `universal_projection_history` rows with `projection_family = historical_progressive_replay_v1`. Current Era, Official Picks, Current Board, production settlement, production learning, scheduler cadence and provider budgets are not changed. Replay Performance is exposed separately from Current Era.
+
+## P2.4 Cross-Surface Epoch Consistency
+
+P2.4 adds the `/api/operations/e2e-integrity.surfaceConsistency` contract. The contract reconciles current operating-day surfaces, Current Era Performance and Historical Replay by explicit scope instead of implicit row counts. Current V2 rows remain in `CURRENT_V2_PRODUCTION`, legacy rows remain `LEGACY_PRE_V2`, and replay rows remain `REPLAY` only.

@@ -1708,3 +1708,9 @@ Status: PRODUCTION CERTIFIED.
 P2.3 adds an isolated bounded historical progressive replay engine over stored non-production historical validation rows. It selects events chronologically, links stored pre-cutoff odds and feature snapshots, rejects leakage-risk rows, writes only replay-scoped `universal_projection_history` rows and exposes read-only replay status through `/api/operations/historical-replay`. `/api/performance` exposes Replay separately as `replayPerformance`; Current Era trust and accuracy remain unchanged.
 
 Certification evidence: one-event replay inserted 3 settled replay rows; rerun inserted 0 and reused 3; bounded sample completed 10 events and 30 settled replay predictions with 14 wins, 16 losses, 0 pushes, 46.67% accuracy, 0.2508 Brier and 0 leakage failures. Provider calls, provider credits, Current Era writes, historical mutations, production settlement writes and production learning writes were 0. Production served commit `6c85106cbf35b62b85ec15c3bfbefaedbfd52462`; P2.4 is next. MC-03 and MC-08E were not started.
+
+# 2026-08-04 - P2.4 Cross-Surface Epoch And Performance Consistency
+
+P2.4 adds a read-only cross-surface consistency contract to `/api/operations/e2e-integrity`. Homepage, Dashboard, Current Board, recommendation surfaces, Performance, Mission Control, Prediction Coverage and Historical Replay now have explicit scope labels and count equations for current operating day, Current V2 Production and Replay.
+
+Current Era remains 69 canonical predictions, 24 settled and 45 pending. Replay remains 30 predictions and 30 settled rows, isolated from Current Era. No prediction formulas, recommendations, Official Pick policy, settlement, learning, scheduler cadence, provider budgets, provider calls or remote data mutations changed. Production certification is pending automatic deployment.

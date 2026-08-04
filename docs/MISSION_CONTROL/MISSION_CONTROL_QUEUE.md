@@ -36,7 +36,7 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | P2.2A | Performance Presentation Consistency | PRODUCTION_CERTIFIED | Clarify Current Era Performance labels without changing counts, math, settlement, learning or predictions. |
 | P2.2 | New-Epoch Daily Closure Certification | PRODUCTION_CERTIFIED | P2.2D executed the protected `settle` action and certified Aug 3 Current Era closure: 24 canonical settled, 24 learning samples, 45 current-day pending, 0 silent pending. |
 | P2.3 | Historical Progressive Replay V1 | PRODUCTION_CERTIFIED | Bounded replay processed 10 events / 30 replay predictions with zero provider calls and separate Replay Performance. |
-| P2.4 | Next bounded Mission Control phase | READY | Next eligible phase; not started in P2.3. |
+| P2.4 | Cross-Surface Epoch And Performance Consistency | PASS_PENDING_PRODUCTION_DEPLOYMENT | Adds explicit current-day, Current Era and Replay reconciliation through E2E integrity; production certification pending. |
 
 ## MC-08 Work Packages
 

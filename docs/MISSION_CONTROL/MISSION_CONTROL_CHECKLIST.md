@@ -73,3 +73,12 @@ Use this checklist before starting any queued mission.
 - P2.2A: `PRODUCTION_CERTIFIED`; Performance presentation labels total analyzed rows separately from canonical predictions.
 - P2.2: `WAITING_FOR_EXTERNAL_EVIDENCE`; current canonical rows must complete and close before P2.2 can pass.
 - P2.3: `BLOCKED_BY_P2_2`; do not start.
+
+## P2.4 Cross-Surface Epoch And Performance Consistency
+
+- [x] Local validator created.
+- [x] E2E integrity exposes `surfaceConsistency`.
+- [x] Current Era and Replay equations are explicit.
+- [ ] Production deployment certification complete.
+- [x] MC-08E remains paused.
+- [x] MC-03 was not started.

@@ -3257,3 +3257,9 @@ Status: Production certified.
 Result: P2.3 replay uses `historical_progressive_replay_v1`, max 10 events per execution and max 3 canonical markets per event. One-event certification and idempotency passed; the bounded sample processed 10 events and 30 settled replay predictions with zero provider calls and zero production writes. Replay Performance is exposed separately from Current Era.
 
 Completion criteria: `P2_3_HISTORICAL_PROGRESSIVE_REPLAY_CERTIFIED`, one-event replay, idempotency rerun, bounded sample, leakage validation, separate Replay Performance, passing validation, passing build and production certification after automatic deployment.
+
+### 74. Mission Control P2.4 Cross-Surface Epoch And Performance Consistency
+
+Status: Local PASS pending production deployment. Certification: `P2_4_LOCAL_PASS_PENDING_PRODUCTION_DEPLOYMENT`.
+
+Result: P2.4 introduces `/api/operations/e2e-integrity.surfaceConsistency` as the read-only authority for reconciling Homepage, Dashboard, Current Board, recommendation surfaces, Performance, Mission Control, Prediction Coverage and Historical Replay. Current V2 Production remains separate from Legacy and Replay scopes. MC-08E-R is next eligible only after production PASS; MC-03 was not started.

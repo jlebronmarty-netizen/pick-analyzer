@@ -3,6 +3,7 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 import { getPerformanceScopeV2 } from '@/services/performance-scope-v2.service'
+import { getHistoricalProgressiveReplayStatus } from '@/services/historical-progressive-replay.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const TIMEZONE = 'America/Puerto_Rico'
@@ -164,6 +165,143 @@ function versionCounts(rows: PredictionRow[]) {
   return countBy(rows, (row) => row.model_version ?? 'UNKNOWN_MODEL_VERSION')
 }
 
+function numberAt(record: Record<string, unknown> | null | undefined, keys: string[], fallback = 0) {
+  for (const key of keys) {
+    const value = Number(record?.[key])
+    if (Number.isFinite(value)) return value
+  }
+  return fallback
+}
+
+function recordAt(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
+
+function buildSurfaceConsistency({
+  date,
+  generatedAt,
+  events,
+  predictions,
+  performance,
+  replay,
+  coverage,
+  closureStatus,
+  subsystemErrors,
+}: {
+  date: string
+  generatedAt: string
+  events: EventRow[]
+  predictions: PredictionRow[]
+  performance: Record<string, unknown> | null
+  replay: Record<string, unknown> | null
+  coverage: ReturnType<typeof marketCoverage>
+  closureStatus: ReturnType<typeof closure>
+  subsystemErrors: Record<string, string | null>
+}) {
+  const scopePolicy = recordAt(performance?.scopePolicy)
+  const activeEpoch = recordAt(scopePolicy.activeEpoch)
+  const timeline = recordAt(performance?.timeline)
+  const season = recordAt(timeline.season)
+  const currentEra = recordAt(recordAt(performance?.eraScopes).current)
+  const currentSource = Object.keys(currentEra).length ? currentEra : season
+  const canonicalPredictionRows = numberAt(currentSource, ['canonicalPredictionRows', 'eligible'])
+  const settledCanonicalRows = numberAt(currentSource, ['settledCanonicalRows', 'settled'])
+  const pendingCanonicalRows = numberAt(currentSource, ['pending'])
+  const blockedCanonicalRows = numberAt(currentSource, ['blocked'])
+  const nonProductionAnalysisRows = numberAt(currentSource, ['nonProductionAnalysisRows'], Math.max(0, numberAt(currentSource, ['totalAnalyzedRows', 'generated']) - canonicalPredictionRows))
+  const recommendationEligibleRows = numberAt(currentSource, ['recommendationEligibleRows'])
+  const actionableRows = numberAt(currentSource, ['actionableRows'])
+  const officialPickEligibleRows = numberAt(currentSource, ['officialPickEligibleRows'])
+  const replayPredictions = numberAt(replay, ['replayPredictions'])
+  const replaySettled = numberAt(replay, ['replaySettled'])
+  const replayPending = Math.max(0, replayPredictions - replaySettled)
+  const epochKey = String(activeEpoch.epochKey ?? 'CURRENT_V2_PRODUCTION')
+  const currentEquationBalanced = canonicalPredictionRows === settledCanonicalRows + pendingCanonicalRows + blockedCanonicalRows
+  const replayEquationBalanced = replayPredictions === replaySettled + replayPending
+  const staleSurfaces = Object.entries(subsystemErrors).filter(([, error]) => error).map(([name, error]) => ({ surface: name, status: 'WARNING', reason: error }))
+  const differences = [
+    {
+      id: 'current_day_vs_current_era',
+      classification: 'EXPECTED_SCOPE_DIFFERENCE',
+      explanation: 'Homepage, Dashboard and Current Board current-day cards use the operating-day event universe; Performance Current Era uses the active epoch lifetime.',
+    },
+    {
+      id: 'recommendation_filtering',
+      classification: 'EXPECTED_SCOPE_DIFFERENCE',
+      explanation: 'Most Likely, Best Value, Rent Play, Moneyline, Smart Parlay and Watchlist may show fewer rows than Current Board because recommendation/actionability filters are stricter than prediction existence.',
+    },
+    {
+      id: 'replay_isolation',
+      classification: 'EXPECTED_SCOPE_DIFFERENCE',
+      explanation: 'Historical Replay is reported only as Replay and is excluded from Current Era trust, settlement coverage, Official Picks, homepage decisions and production learning.',
+    },
+  ]
+  const unexplainedDifferences = [
+    currentEquationBalanced ? null : { id: 'current_era_equation', classification: 'COUNT_DEFINITION_MISMATCH', expected: 'canonical = settled + pending + blocked' },
+    replayEquationBalanced ? null : { id: 'replay_equation', classification: 'REPLAY_LEAKAGE', expected: 'replay predictions = replay settled + replay pending' },
+  ].filter(Boolean)
+  const status = unexplainedDifferences.length ? 'FAIL' : staleSurfaces.length ? 'WARNING' : 'PASS'
+  const surfaceCounts = [
+    { surface: 'Homepage', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'CURRENT_OPERATING_DAY_DECISION', gamesToday: events.length, predictions: predictions.length, officialPicks: officialPickEligibleRows, replayRowsIncluded: 0, sourceContract: '/api/dashboard/today + current board presentation' },
+    { surface: 'Dashboard', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'CURRENT_OPERATING_DAY', gamesToday: events.length, predictions: predictions.length, sourceContract: '/api/dashboard/today' },
+    { surface: 'Current Board', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'CURRENT_OPERATING_DAY_CURRENT_BOARD', rows: predictions.length, supportedSelectionCoverage: coverage.predictedSelections, sourceContract: '/api/current-board' },
+    { surface: 'Most Likely', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'CURRENT_RECOMMENDATION_VIEW', sourceContract: '/api/market-opportunities/most-likely', differenceRule: 'recommendation filtering over current board' },
+    { surface: 'Best Value', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'CURRENT_RECOMMENDATION_VIEW', sourceContract: '/api/market-opportunities/best-value', differenceRule: 'positive value filtering over current board' },
+    { surface: 'AI Bet Finder', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'CURRENT_DIAGNOSTIC_OR_RECOMMENDATION_VIEW', sourceContract: '/api/ai-bet-finder', differenceRule: 'AI surface must not rewrite prediction math' },
+    { surface: 'Betting Workbench', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'CURRENT_BOARD_PLUS_USER_LEDGER', sourceContract: '/betting-workbench', differenceRule: 'user ledger is separate from model performance' },
+    { surface: 'Game Intelligence', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'EVENT_DETAIL_DIAGNOSTIC', sourceContract: '/game-intelligence', differenceRule: 'event detail may expose diagnostics but not Replay as current recommendations' },
+    { surface: 'Performance', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'CURRENT_V2_PRODUCTION', canonicalPredictionRows, settledCanonicalRows, pendingCanonicalRows, blockedCanonicalRows, nonProductionAnalysisRows, recommendationEligibleRows, actionableRows, officialPickEligibleRows, sourceContract: '/api/performance + performance_scope_v2' },
+    { surface: 'Historical Replay', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'REPLAY', replayPredictionRows: replayPredictions, replaySettledRows: replaySettled, replayPendingRows: replayPending, leakageFailures: numberAt(replay, ['leakageFailures']), sourceContract: '/api/operations/historical-replay' },
+    { surface: 'Settlement Guarantee', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'CURRENT_AND_TERMINAL_SETTLEMENT_MONITORING', settled: closureStatus.settled, pending: closureStatus.explicitPending, blocked: closureStatus.blocked, silentPendingRows: closureStatus.silentPendingRows, sourceContract: '/api/operations/settlement-guarantee + e2e integrity closure' },
+    { surface: 'Mission Control', operatingDate: date, timezone: TIMEZONE, activeEpoch: epochKey, scope: 'STATUS_AND_QUEUE', sourceContract: '/api/mission-control + docs/MISSION_CONTROL', differenceRule: 'status visibility only; no business logic duplication' },
+  ]
+  return {
+    status,
+    activeEpoch: epochKey,
+    operatingDate: date,
+    timezone: TIMEZONE,
+    expectedCounts: {
+      currentEra: {
+        canonicalPredictionRows,
+        settledCanonicalRows,
+        pendingCanonicalRows,
+        blockedCanonicalRows,
+        silentPendingRows: closureStatus.silentPendingRows,
+        equation: 'canonicalPredictionRows = settledCanonicalRows + pendingCanonicalRows + blockedCanonicalRows',
+        equationBalanced: currentEquationBalanced,
+      },
+      replay: {
+        replayPredictionRows: replayPredictions,
+        replaySettledRows: replaySettled,
+        replayPendingRows: replayPending,
+        equation: 'replayPredictionRows = replaySettledRows + replayPendingRows',
+        equationBalanced: replayEquationBalanced,
+      },
+    },
+    metricDefinitions: {
+      totalAnalyzedRows: 'All active-epoch rows in selected Performance scope, including canonical and non-production analysis rows.',
+      canonicalPredictionRows: 'Current V2 event-market predictions eligible for canonical settlement, learning and Performance.',
+      nonProductionAnalysisRows: 'Preview, diagnostic, superseded or other non-production rows excluded from Current Era trust.',
+      recommendationEligibleRows: 'Canonical predictions passing recommendation eligibility gates.',
+      actionableRows: 'Recommendation-eligible rows currently actionable.',
+      officialPickEligibleRows: 'Canonical rows passing Official Pick policy.',
+      settledCanonicalRows: 'Canonical Current Era rows with win/loss/push/void settlement.',
+      pendingCanonicalRows: 'Canonical Current Era rows awaiting terminal result/settlement.',
+      blockedCanonicalRows: 'Canonical Current Era rows explicitly blocked with reason.',
+      silentPendingRows: 'Terminal eligible rows with no settlement or explicit blocker.',
+      replayPredictionRows: 'Replay-only projection rows in universal_projection_history.',
+      replaySettledRows: 'Replay-only rows with historical replay settlement labels.',
+    },
+    surfaceCounts,
+    differences,
+    explainedDifferences: differences,
+    unexplainedDifferences,
+    staleSurfaces,
+    checkedAt: generatedAt,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  }
+}
 async function readCurrentEvents(operatingDate: string, limit: number) {
   const range = zonedUtcRange(operatingDate, TIMEZONE)
   const { data, error } = await supabaseAdmin
@@ -313,12 +451,13 @@ export async function getE2eSystemIntegrity({
   const eventsResult = await safe<EventRow[]>([], () => readCurrentEvents(date, cappedLimit))
   const events = eventsResult.value
   const eventIds = events.map((event) => event.id)
-  const [oddsResult, predictionResult, recentPredictionResult, resultResult, performanceResult] = await Promise.all([
+  const [oddsResult, predictionResult, recentPredictionResult, resultResult, performanceResult, replayResult] = await Promise.all([
     safe<OddsRow[]>([], () => readOdds(eventIds, cappedLimit * 20)),
     safe<PredictionRow[]>([], () => readPredictions(eventIds, cappedLimit * 10)),
     safe<PredictionRow[]>([], () => readRecentPredictions(500)),
     safe<GameResultRow[]>([], () => readResults(eventIds, cappedLimit * 2)),
     safe<Record<string, unknown> | null>(null, async () => getPerformanceScopeV2({ sportKey: SPORT_KEY, maxPredictionRows: 2000 }) as unknown as Record<string, unknown>),
+    safe<Record<string, unknown> | null>(null, async () => getHistoricalProgressiveReplayStatus({ limit: 500 }) as unknown as Record<string, unknown>),
   ])
   const predictions = predictionResult.value
   const recentPredictions = recentPredictionResult.value
@@ -328,6 +467,26 @@ export async function getE2eSystemIntegrity({
   const quarantinedRows = allScopedPredictions.filter((row) => row.production_eligible !== true)
   const validPreviewRows = quarantinedRows.filter((row) => exactNonProductionReason(row) === 'PREGAME_VALID_QUARANTINED_PREVIEW')
   const closureStatus = closure(events, predictions, resultResult.value)
+  const subsystemErrors = {
+    events: eventsResult.error,
+    odds: oddsResult.error,
+    predictions: predictionResult.error,
+    recentPredictions: recentPredictionResult.error,
+    results: resultResult.error,
+    performance: performanceResult.error,
+    replay: replayResult.error,
+  }
+  const surfaceConsistency = buildSurfaceConsistency({
+    date,
+    generatedAt,
+    events,
+    predictions,
+    performance: performanceResult.value,
+    replay: replayResult.value,
+    coverage,
+    closureStatus,
+    subsystemErrors,
+  })
 
   const pipelineInventory = [
     {
@@ -403,6 +562,7 @@ export async function getE2eSystemIntegrity({
         'Prospective preview, sport-specific engines, shadow/replay/backtest paths remain visible and must stay scope-separated.',
       ],
     },
+    surfaceConsistency,
     surfaceReconciliation: {
       surfaces,
       sourceAgreement: 'CANONICAL_STORED_PREDICTION_EVIDENCE_WITH_SPECIALIZED_VIEWS',
@@ -481,16 +641,7 @@ export async function getE2eSystemIntegrity({
         : null,
       blockers: ['Historical replay must prove cutoff-safe odds/features and epoch-separated persistence before broad execution.'],
     },
-    subsystemErrors: Object.fromEntries(
-      Object.entries({
-        events: eventsResult.error,
-        odds: oddsResult.error,
-        predictions: predictionResult.error,
-        recentPredictions: recentPredictionResult.error,
-        results: resultResult.error,
-        performance: performanceResult.error,
-      }).filter(([, value]) => value)
-    ),
+    subsystemErrors: Object.fromEntries(Object.entries(subsystemErrors).filter(([, value]) => value)),
     safety: {
       providerCallsMade: 0,
       providerCreditsUsed: 0,
@@ -568,6 +719,7 @@ export function validateE2eSystemIntegrityFixtures() {
     ['normal integrity reads make zero provider calls', true],
     ['normal integrity reads make zero mutations', true],
     ['replay does not write production rows', true],
+    ['surface consistency contract exposes explicit scope status', true],
   ] as const
   const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
   return {

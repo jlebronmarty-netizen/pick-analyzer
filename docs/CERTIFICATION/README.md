@@ -94,3 +94,6 @@ Most certification documents still live at the root of `docs/` and will be migra
 ## Migration Policy
 
 Move certification docs here only when links are updated and validation passes.
+
+- [P2.4 Cross-Surface Epoch Consistency](P2_4_CROSS_SURFACE_EPOCH_CONSISTENCY.md)
+- [P2.4 Certification JSON](p2-4-cross-surface-epoch-consistency.json)
