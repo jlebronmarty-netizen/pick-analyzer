@@ -1127,8 +1127,16 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
   }
   const dueDomains = refreshPlan.filter((item) => item.decision === 'DUE_NOW').map((item) => item.domain)
   const pregameOddsDue = dueDomains.includes('odds') && marketRefreshNeeded
+  const activeMarketRefreshPreemptsHistoricalResultRecovery =
+    pregameOddsDue &&
+    Number(settlementBacklog?.settlementReadyRows ?? 0) === 0 &&
+    Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 &&
+    Boolean(settlementBacklog?.oldestMissingResultDate) &&
+    String(settlementBacklog?.oldestMissingResultDate) < String(activeSlateDate)
   const effectiveNextAction = dueDomains.includes('settlement')
     ? 'settle'
+    : activeMarketRefreshPreemptsHistoricalResultRecovery
+      ? currentGames > 0 ? 'midday_refresh' : 'morning_sync'
     : dueDomains.includes('results')
       ? 'sync_results'
       : pregameOddsDue
@@ -1379,6 +1387,13 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       currentBoardPolicyChanged: false,
       settlementPolicyChanged: false,
     },
+    orchestrationPolicy: {
+      activeMarketRefreshPreemptsHistoricalResultRecovery,
+      rule: 'When no settlement-ready rows exist, active market refresh may preempt older missing-result recovery so current betting surfaces are not starved by historical result import.',
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+      settlementEligibilityChanged: false,
+    },
     settlementBacklog: settlementBacklog ?? {
       checkedRows: 0,
       settlementReadyRows: 0,
@@ -1486,7 +1501,15 @@ function executableActionFromStatus(status: Awaited<ReturnType<typeof getAdaptiv
   const pregameOddsDue =
     dueDomains.includes('odds') &&
     (status.marketRefreshEligibility?.marketRefreshNeeded === true || Number(status.gamesWaitingForOdds ?? 0) > 0)
+  const settlementBacklog = status.settlementBacklog
+  const activeMarketRefreshPreemptsHistoricalResultRecovery =
+    pregameOddsDue &&
+    Number(settlementBacklog?.settlementReadyRows ?? 0) === 0 &&
+    Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 &&
+    Boolean(settlementBacklog?.oldestMissingResultDate) &&
+    String(settlementBacklog?.oldestMissingResultDate) < String(status.activeSlateDate ?? status.operatingDate)
   if (dueDomains.includes('settlement')) return 'settle'
+  if (activeMarketRefreshPreemptsHistoricalResultRecovery) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('results')) return 'sync_results'
   if (pregameOddsDue) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('odds')) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
@@ -2007,6 +2030,24 @@ export function validateAdaptiveRefreshFixtures() {
   const unsupported = freshnessItem({ domain: 'lineups', lastUpdated: null, available: false, activeNeed: true, now })
   const exhaustedDecision = domainDecision(stale, 'EXHAUSTED')
   const normalDecision = domainDecision(stale, 'NORMAL')
+  const fixtureStatus = {
+    nextAction: 'sync_results',
+    operatingDate: '2026-08-04',
+    activeSlateDate: '2026-08-04',
+    currentGames: 10,
+    gamesWaitingForOdds: 0,
+    marketRefreshEligibility: { marketRefreshNeeded: true },
+    refreshPlan: [
+      { domain: 'odds', decision: 'DUE_NOW' },
+      { domain: 'results', decision: 'DUE_NOW' },
+    ],
+    settlementBacklog: {
+      settlementReadyRows: 0,
+      completedMissingResultRows: 9,
+      oldestMissingResultDate: '2026-07-27',
+    },
+  } as unknown as Awaited<ReturnType<typeof getAdaptiveRefreshStatus>>
+  const starvationSafeAction = executableActionFromStatus(fixtureStatus)
   const previousPregame = process.env.MLB_ODDS_REFRESH_MINUTES_PREGAME
   process.env.MLB_ODDS_REFRESH_MINUTES_PREGAME = '12'
   const cfg = mlbCadenceConfig()
@@ -2021,6 +2062,7 @@ export function validateAdaptiveRefreshFixtures() {
     ['unsupported lineups classify not supported', unsupported.status === 'NOT_SUPPORTED'],
     ['exhausted budget blocks provider-backed stale refresh', exhaustedDecision === 'BLOCKED'],
     ['normal budget marks stale odds due now', normalDecision === 'DUE_NOW'],
+    ['active market refresh preempts historical result recovery starvation', starvationSafeAction === 'midday_refresh'],
     ['MLB pregame cadence config is applied', windowPolicy.freshMinutes === 12 && windowPolicy.staleMinutes === 24],
     ['status reads make no provider calls', true],
     ['prediction mutations remain zero', true],
@@ -2035,7 +2077,7 @@ export function validateAdaptiveRefreshFixtures() {
     passed: checks.length - failedChecks.length,
     failed: failedChecks.length,
     failedChecks,
-    fixtures: { fresh, aging, stale, pending, unsupported, exhaustedDecision, normalDecision },
+    fixtures: { fresh, aging, stale, pending, unsupported, exhaustedDecision, normalDecision, starvationSafeAction },
     providerCallsMade: 0,
     remoteMutationsMade: 0,
     predictionMutationsMade: 0,

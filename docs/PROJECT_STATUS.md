@@ -2,6 +2,10 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-04 OR-01 Operational Readiness Recovery
+
+- OR-01 repository recovery is complete but production readiness is not certified yet. Production evidence showed scheduler cadence CRITICAL, market freshness CRITICAL, settlement closure CRITICAL and product readiness CRITICAL. The proven repository defect was adaptive scheduler-action starvation: older missing-result recovery could keep active market acquisition from being selected when both were due. The repair allows active market refresh to preempt older missing-result recovery only when no settlement-ready rows exist. Settlement eligibility, prediction logic, Official Pick policy, provider contracts, scheduler cadence, learning and model behavior were unchanged. Production Pilot Week remains NOT_READY until post-deploy writer evidence recovers Operations Health and MC-08H is rerun.
+
 ## 2026-08-04 Mission Control MC-08G Product Polish And Coherence Review
 
 - MC-08G is production-certified on runtime commit `6122dd7477f3121e9f5bfbbc7353d984862a449b`. The bounded product review found no critical or high product defects and repaired low-risk clarity issues across Homepage, Settings, Most Likely, Best Value, Betting Workbench and Performance loading navigation.

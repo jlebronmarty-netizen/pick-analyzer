@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "MC_08H_PRODUCTION_READINESS_BLOCKED",
+  "status": "OR_01_REPOSITORY_RECOVERY_DEPLOYMENT_REQUIRED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -9,7 +9,7 @@
     "state": "BLOCKED",
     "priority": "P2",
     "mode": "READ_ONLY",
-    "readiness": "PRODUCTION_READINESS_BLOCKED"
+    "readiness": "PRODUCTION_READINESS_BLOCKED_OR01_REPAIR_PENDING_PRODUCTION_PROOF"
   },
   "nextMission": {
     "id": "MC-08",
@@ -17,7 +17,7 @@
     "state": "ACTIVE",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "NO_NEXT_MISSION_UNTIL_OPERATIONS_RECOVER"
+    "readiness": "NO_NEXT_MISSION_UNTIL_OR01_PRODUCTION_PROOF"
   },
   "missionCounts": {
     "total": 11,
@@ -102,6 +102,25 @@
     "learningWrites": 0,
     "manualDeployment": false,
     "localServerSmokeRun": false
+  },
+  "or01": {
+    "status": "REPOSITORY_RECOVERY_DEPLOYMENT_REQUIRED",
+    "title": "Operational Readiness Recovery",
+    "certificationArtifact": "docs/CERTIFICATION/or-01-operational-readiness-recovery.json",
+    "repositoryRepair": "COMPLETE",
+    "productionReady": false,
+    "marketFreshness": "REQUIRES_POST_DEPLOY_WRITER_PROOF",
+    "operationalHealth": "REQUIRES_POST_DEPLOY_WRITER_PROOF",
+    "productReadiness": "REQUIRES_POST_DEPLOY_WRITER_PROOF",
+    "rootCauseRepaired": "active_market_refresh_preempts_historical_result_recovery_starvation",
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "productionPilotWeek": "NOT_READY",
+    "mc03": "PLANNED_MANUAL_ONLY_NOT_STARTED"
   },
   "p1_3": {
     "status": "PRODUCTION_CERTIFIED",

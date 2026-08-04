@@ -1,0 +1,72 @@
+{
+  "id": "or_01_operational_readiness_recovery",
+  "date": "2026-08-04",
+  "startingCommit": "1cdfe1061453a738cbf019acbcd123479362cc05",
+  "classification": "OR_01_REPOSITORY_RECOVERY_DEPLOYMENT_REQUIRED",
+  "repositoryRepair": "COMPLETE",
+  "productionReady": false,
+  "rootCauses": [
+    {
+      "id": "scheduler_action_starvation",
+      "status": "REPAIRED",
+      "summary": "Active-market refresh could be starved by older missing-result recovery when both were due."
+    },
+    {
+      "id": "market_freshness_critical",
+      "status": "REQUIRES_POST_DEPLOY_WRITER_PROOF",
+      "summary": "Latest visible market snapshot was stale and no fresh visible markets were present."
+    },
+    {
+      "id": "scheduler_cadence_critical",
+      "status": "REQUIRES_EXTERNAL_SCHEDULER_PROOF",
+      "summary": "Latest protected writer evidence was outside the configured cadence tolerance."
+    },
+    {
+      "id": "settlement_missing_results",
+      "status": "REMAINS_VISIBLE",
+      "summary": "Nine older completed prediction rows still lack canonical game_results; settlement eligibility was not weakened."
+    }
+  ],
+  "productionEvidenceBeforeRepair": {
+    "operationsHealth": {
+      "status": "CRITICAL",
+      "schedulerExecution": "CRITICAL",
+      "marketFreshness": "CRITICAL",
+      "providerBudget": "HEALTHY",
+      "settlementClosure": "CRITICAL",
+      "productReadiness": "CRITICAL"
+    },
+    "adaptiveRefresh": {
+      "status": "PARTIAL",
+      "selectedActionBeforeRepair": "sync_results",
+      "due": [
+        "odds:STALE:10:1",
+        "results:PENDING:25:1"
+      ],
+      "missingResultRows": 9,
+      "oldestMissingResultDate": "2026-07-27"
+    },
+    "currentBoard": {
+      "games": 10,
+      "candidates": 30,
+      "latestOddsTimestamp": "2026-08-04T11:41:18.639Z",
+      "freshVisibleMarketCount": 0,
+      "staleVisibleMarketCount": 30
+    }
+  },
+  "guardrails": {
+    "predictionChanged": false,
+    "officialPickPolicyChanged": false,
+    "rankingChanged": false,
+    "settlementEligibilityChanged": false,
+    "learningChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerContractChanged": false
+  },
+  "providerCallsMade": 0,
+  "remoteMutationsMade": 0,
+  "predictionWrites": 0,
+  "resultWrites": 0,
+  "settlementWrites": 0,
+  "learningWrites": 0
+}

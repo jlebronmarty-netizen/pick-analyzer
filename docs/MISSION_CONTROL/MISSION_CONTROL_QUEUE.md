@@ -2,7 +2,7 @@
 
 Status: deterministic V2 queue.
 
-MC-08 remains ACTIVE because the final production-readiness audit is blocked by live operations. Gated future missions such as MC-03 remain PLANNED and inactive.
+MC-08 remains ACTIVE because the final production-readiness audit is blocked by live operations. OR-01 repository recovery is complete, but production proof is still required. Gated future missions such as MC-03 remain PLANNED and inactive.
 
 | ID | Mission | Category | Priority | State | Mode | Next Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -14,11 +14,11 @@ MC-08 remains ACTIVE because the final production-readiness audit is blocked by 
 | MC-05 | Performance Intelligence | PERFORMANCE_INTELLIGENCE | P2 | PLANNED | AGENT_ASSISTED | Advance after eligible settled samples exist. |
 | MC-06 | Decision Core Evolution | DECISION_CORE_EVOLUTION | P3 | PLANNED | MANUAL_ONLY | Use controlled experimentation only. |
 | MC-07 | Market Expansion | MARKET_EXPANSION | P3 | PLANNED | AGENT_ASSISTED | Keep unsupported markets unavailable until all gates pass. |
-| MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | ACTIVE | AGENT_ASSISTED | Clear MC-08H production-readiness blockers before pilot. |
+| MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | ACTIVE | AGENT_ASSISTED | Observe OR-01 production recovery proof, then rerun MC-08H before pilot. |
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
-Next eligible mission: none. MC-08H is blocked by production operations. Production Pilot Week is not ready. MC-03 remains planned/manual-only.
+Next eligible mission: none. OR-01 repaired the scheduler-action starvation defect but needs post-deploy protected-writer proof. Production Pilot Week is not ready. MC-03 remains planned/manual-only.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
@@ -50,4 +50,5 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | MC-08F | Personalization Experience | PRODUCTION_CERTIFIED | Display-only personalization contract, settings route and homepage/Performance integration certified. |
 | MC-08G | Product Polish And Coherence Review | PRODUCTION_CERTIFIED | Product coherence repairs deployed and certified. |
 | MC-08H | Production Readiness Certification | BLOCKED | Production readiness is blocked by scheduler execution, market freshness and product readiness CRITICAL evidence. |
+| OR-01 | Operational Readiness Recovery | REPOSITORY_RECOVERY_DEPLOYMENT_REQUIRED | Active market refresh now preempts older missing-result recovery when no settlement-ready rows exist; production writer proof is required. |
 | Production Pilot Week | Real-world validation before Multi-Sport Expansion | NOT_READY | Requires MC-08H Production Ready YES. |
