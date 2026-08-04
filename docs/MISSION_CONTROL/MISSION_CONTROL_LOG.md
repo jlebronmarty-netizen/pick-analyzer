@@ -248,10 +248,10 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 
 # 2026-08-04 P2.3 Historical Progressive Replay
 
-- Status: PASS_PENDING_PRODUCTION_DEPLOYMENT.
+- Status: PRODUCTION_CERTIFIED.
 - Implemented isolated `/api/operations/historical-replay` status/execution routes and job diagnostics.
 - Replay scope is `REPLAY`; Current Era, Official Picks, Current Board, production settlement and production learning are excluded.
 - One-event certification inserted 3 replay rows; rerun inserted 0 and reused 3.
 - Bounded sample processed 10 events and 30 settled replay predictions: 14 wins, 16 losses, 0 pushes, 46.67% accuracy, 0.2508 Brier, 4.96 calibration error and -6.11 ROI.
 - Provider calls 0; Current Era writes 0; historical mutations 0; production settlement writes 0; production learning writes 0.
-- P2.4 is next eligible after production certification. MC-03 was not started. MC-08E remains paused.
+- Production served runtime commit `6c85106cbf35b62b85ec15c3bfbefaedbfd52462`; P2.4 is next eligible. MC-03 was not started. MC-08E remains paused.

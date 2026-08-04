@@ -1,94 +1,101 @@
 {
-    "phase":  "P2.3",
-    "p24Started":  false,
-    "classification":  "P2_3_HISTORICAL_PROGRESSIVE_REPLAY_CERTIFIED",
-    "mc03Started":  false,
-    "idempotencyRerun":  {
-                             "jobId":  "e937f4b4-88e5-467b-b001-6202ee55b225",
-                             "events":  1,
-                             "inserted":  0,
-                             "predictions":  3,
-                             "reused":  3
-                         },
-    "startingCommit":  "88da4dcc813236b326469df03a913bbd4d8782bf",
-    "status":  "PASS",
-    "mc08eResumed":  false,
-    "boundedSample":  {
-                          "jobId":  "27702a27-a8ef-4d42-9b2a-af1a5c319b83",
-                          "losses":  16,
-                          "reused":  3,
-                          "predictions":  30,
-                          "roi":  -6.11,
-                          "inserted":  27,
-                          "brier":  0.2508,
-                          "wins":  14,
-                          "pushes":  0,
-                          "settled":  30,
-                          "accuracy":  46.67,
-                          "events":  10,
-                          "calibration":  4.96
-                      },
-    "generatedAt":  "2026-08-04T15:53:05.283Z",
-    "leakageChecks":  {
-                          "marketTimestampBeforeCutoff":  "PASS",
-                          "finalResultExcludedFromFeatures":  "PASS",
-                          "featureTimestampBeforeCutoff":  "PASS",
-                          "currentProductionEpochNotUsedAsProductionInput":  "PASS",
-                          "engineVersionFrozen":  "PASS",
-                          "deterministicOrdering":  "PASS",
-                          "failures":  0,
-                          "replayWritesIsolated":  "PASS",
-                          "futureRowsExcluded":  "PASS"
-                      },
-    "nextPhase":  "P2.4",
-    "safety":  {
-                   "historicalMutations":  0,
-                   "modelPromotion":  0,
-                   "currentEraWrites":  0,
-                   "providerCallsMade":  0,
-                   "productionLearningWrites":  0,
-                   "recommendationChanges":  0,
-                   "officialPickChanges":  0,
-                   "productionSettlementWrites":  0,
-                   "schedulerCadenceChanges":  0,
-                   "providerCreditsUsed":  0
-               },
-    "replayContract":  {
-                           "forbiddenScopes":  [
-                                                   "CURRENT_V2_PRODUCTION",
-                                                   "LEGACY_PRE_V2"
-                                               ],
-                           "projectionFamily":  "historical_progressive_replay_v1",
-                           "featureVersion":  "historical_prediction_snapshot_lineage_pilot_v1",
-                           "engineVersion":  "historical_progressive_replay_v1",
-                           "maxEventsPerRun":  10,
-                           "scope":  "REPLAY",
-                           "policyVersion":  "p2_3_frozen_engine_replay_policy_v1",
-                           "maxCanonicalPredictionsPerEvent":  3
-                       },
-    "oneEventCertification":  {
-                                  "jobId":  "18819039-7eaf-4ec1-97f1-9f1955ef30ee",
-                                  "losses":  0,
-                                  "reused":  0,
-                                  "predictions":  3,
-                                  "roi":  109.7,
-                                  "inserted":  3,
-                                  "brier":  0.3382,
-                                  "wins":  3,
-                                  "pushes":  0,
-                                  "settled":  3,
-                                  "accuracy":  100,
-                                  "events":  1,
-                                  "calibration":  58.15
-                              },
-    "productionCertification":  {
-                                    "status":  "PENDING_AUTOMATIC_DEPLOYMENT",
-                                    "endpoints":  [
-                                                      "/api/system/version",
-                                                      "/api/operations/historical-replay",
-                                                      "/api/operations/historical-replay/jobs/27702a27-a8ef-4d42-9b2a-af1a5c319b83",
-                                                      "/api/performance"
-                                                  ]
-                                },
-    "title":  "Historical Progressive Replay V1"
+  "phase": "P2.3",
+  "p24Started": false,
+  "classification": "P2_3_PRODUCTION_CERTIFIED",
+  "mc03Started": false,
+  "idempotencyRerun": {
+    "jobId": "e937f4b4-88e5-467b-b001-6202ee55b225",
+    "events": 1,
+    "inserted": 0,
+    "predictions": 3,
+    "reused": 3
+  },
+  "startingCommit": "88da4dcc813236b326469df03a913bbd4d8782bf",
+  "status": "PASS",
+  "mc08eResumed": false,
+  "boundedSample": {
+    "jobId": "27702a27-a8ef-4d42-9b2a-af1a5c319b83",
+    "losses": 16,
+    "reused": 3,
+    "predictions": 30,
+    "roi": -6.11,
+    "inserted": 27,
+    "brier": 0.2508,
+    "wins": 14,
+    "pushes": 0,
+    "settled": 30,
+    "accuracy": 46.67,
+    "events": 10,
+    "calibration": 4.96
+  },
+  "generatedAt": "2026-08-04T15:53:05.283Z",
+  "leakageChecks": {
+    "marketTimestampBeforeCutoff": "PASS",
+    "finalResultExcludedFromFeatures": "PASS",
+    "featureTimestampBeforeCutoff": "PASS",
+    "currentProductionEpochNotUsedAsProductionInput": "PASS",
+    "engineVersionFrozen": "PASS",
+    "deterministicOrdering": "PASS",
+    "failures": 0,
+    "replayWritesIsolated": "PASS",
+    "futureRowsExcluded": "PASS"
+  },
+  "nextPhase": "P2.4",
+  "safety": {
+    "historicalMutations": 0,
+    "modelPromotion": 0,
+    "currentEraWrites": 0,
+    "providerCallsMade": 0,
+    "productionLearningWrites": 0,
+    "recommendationChanges": 0,
+    "officialPickChanges": 0,
+    "productionSettlementWrites": 0,
+    "schedulerCadenceChanges": 0,
+    "providerCreditsUsed": 0
+  },
+  "replayContract": {
+    "forbiddenScopes": [
+      "CURRENT_V2_PRODUCTION",
+      "LEGACY_PRE_V2"
+    ],
+    "projectionFamily": "historical_progressive_replay_v1",
+    "featureVersion": "historical_prediction_snapshot_lineage_pilot_v1",
+    "engineVersion": "historical_progressive_replay_v1",
+    "maxEventsPerRun": 10,
+    "scope": "REPLAY",
+    "policyVersion": "p2_3_frozen_engine_replay_policy_v1",
+    "maxCanonicalPredictionsPerEvent": 3
+  },
+  "oneEventCertification": {
+    "jobId": "18819039-7eaf-4ec1-97f1-9f1955ef30ee",
+    "losses": 0,
+    "reused": 0,
+    "predictions": 3,
+    "roi": 109.7,
+    "inserted": 3,
+    "brier": 0.3382,
+    "wins": 3,
+    "pushes": 0,
+    "settled": 3,
+    "accuracy": 100,
+    "events": 1,
+    "calibration": 58.15
+  },
+  "productionCertification": {
+    "status": "PRODUCTION_CERTIFIED",
+    "productionCommitBefore": "88da4dcc813236b326469df03a913bbd4d8782bf",
+    "productionCommitAfter": "6c85106cbf35b62b85ec15c3bfbefaedbfd52462",
+    "systemVersionHttp": 200,
+    "historicalReplayHttp": 200,
+    "historicalReplayJobHttp": 200,
+    "performanceHttp": 200,
+    "replayPredictions": 30,
+    "replaySettled": 30,
+    "currentEraCanonicalPredictions": 69,
+    "currentEraSettled": 24,
+    "providerCallsMade": 0,
+    "remoteMutationsMadeByReads": 0
+  },
+  "title": "Historical Progressive Replay V1",
+  "runtimeCommit": "6c85106cbf35b62b85ec15c3bfbefaedbfd52462"
 }

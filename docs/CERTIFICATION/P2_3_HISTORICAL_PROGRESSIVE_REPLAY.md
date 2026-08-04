@@ -1,6 +1,6 @@
 # P2.3 Historical Progressive Replay Certification
 
-Verdict: PASS pending production deployment observation.
+Verdict: PASS - production certified.
 
 Starting commit: `88da4dcc813236b326469df03a913bbd4d8782bf`.
 
@@ -42,4 +42,4 @@ Final bounded replay metrics: 14 wins, 16 losses, 0 pushes, 46.67% accuracy, 0.2
 
 `P2_3_HISTORICAL_PROGRESSIVE_REPLAY_CERTIFIED`
 
-P2.4 is next eligible after production certification. P2.4, MC-03 and MC-08E were not started.
+P2.4 is next eligible. P2.4, MC-03 and MC-08E were not started.

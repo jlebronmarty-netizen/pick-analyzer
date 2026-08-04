@@ -1,6 +1,6 @@
 # P2.3 Historical Progressive Replay
 
-Status: production certification pending deployment.
+Status: production certified.
 
 P2.3 implements a bounded, isolated replay engine over stored historical validation evidence. It does not run a broad season replay and does not call providers.
 
@@ -34,4 +34,4 @@ Replay rows are non-production analysis artifacts. They are not Current Era pred
 
 ## Next Action
 
-Deploy and production-certify the runtime endpoints. After P2.3 certification, P2.4 becomes the next eligible phase. MC-03 and MC-08E remain paused/not started.
+P2.4 is the next eligible phase. MC-03 and MC-08E remain paused/not started.

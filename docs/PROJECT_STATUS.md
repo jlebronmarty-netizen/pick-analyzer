@@ -1703,8 +1703,8 @@ No prediction formula, probability, confidence, edge, EV, Official Pick policy, 
 
 # 2026-08-04 - P2.3 Historical Progressive Replay
 
-Status: PASS pending production deployment observation.
+Status: PRODUCTION CERTIFIED.
 
 P2.3 adds an isolated bounded historical progressive replay engine over stored non-production historical validation rows. It selects events chronologically, links stored pre-cutoff odds and feature snapshots, rejects leakage-risk rows, writes only replay-scoped `universal_projection_history` rows and exposes read-only replay status through `/api/operations/historical-replay`. `/api/performance` exposes Replay separately as `replayPerformance`; Current Era trust and accuracy remain unchanged.
 
-Certification evidence: one-event replay inserted 3 settled replay rows; rerun inserted 0 and reused 3; bounded sample completed 10 events and 30 settled replay predictions with 14 wins, 16 losses, 0 pushes, 46.67% accuracy, 0.2508 Brier and 0 leakage failures. Provider calls, provider credits, Current Era writes, historical mutations, production settlement writes and production learning writes were 0. P2.4 is next after production certification; MC-03 and MC-08E were not started.
+Certification evidence: one-event replay inserted 3 settled replay rows; rerun inserted 0 and reused 3; bounded sample completed 10 events and 30 settled replay predictions with 14 wins, 16 losses, 0 pushes, 46.67% accuracy, 0.2508 Brier and 0 leakage failures. Provider calls, provider credits, Current Era writes, historical mutations, production settlement writes and production learning writes were 0. Production served commit `6c85106cbf35b62b85ec15c3bfbefaedbfd52462`; P2.4 is next. MC-03 and MC-08E were not started.

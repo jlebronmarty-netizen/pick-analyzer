@@ -3252,7 +3252,7 @@ Completion criteria: `MC_02_PRODUCTION_CERTIFIED`, all target sports classified,
 
 Objective: Create a bounded, isolated replay engine that processes stored historical validation evidence chronologically without contaminating Current Era, Official Picks, Current Board, production settlement or production learning.
 
-Status: Pass pending production deployment observation.
+Status: Production certified.
 
 Result: P2.3 replay uses `historical_progressive_replay_v1`, max 10 events per execution and max 3 canonical markets per event. One-event certification and idempotency passed; the bounded sample processed 10 events and 30 settled replay predictions with zero provider calls and zero production writes. Replay Performance is exposed separately from Current Era.
 

@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_3_PRODUCTION_CERTIFICATION_PENDING_MC_08E_PAUSED",
+  "status": "P2_3_PRODUCTION_CERTIFIED_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -499,10 +499,10 @@
   "nextEligiblePhase": {
     "id": "P2.4",
     "title": "Next bounded Mission Control phase",
-    "state": "READY_AFTER_P2_3_PRODUCTION_CERTIFICATION"
+    "state": "READY"
   },
   "p2_3": {
-    "status": "PASS_PENDING_PRODUCTION_DEPLOYMENT",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Historical Progressive Replay V1",
     "certificationArtifact": "docs/CERTIFICATION/p2-3-historical-progressive-replay.json",
     "replayScope": "REPLAY",
@@ -523,6 +523,8 @@
     "performanceMode": "replayPerformance separate from Current Era",
     "p24Started": false,
     "mc03Started": false,
-    "mc08eResumed": false
+    "mc08eResumed": false,
+    "runtimeCommit": "6c85106cbf35b62b85ec15c3bfbefaedbfd52462",
+    "productionCommit": "6c85106cbf35b62b85ec15c3bfbefaedbfd52462"
   }
 }
