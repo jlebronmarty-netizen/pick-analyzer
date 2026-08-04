@@ -685,6 +685,16 @@ function isTerminalResultImportCandidate(event: SettlementBacklogEventRow | unde
   return ['completed', 'final', 'closed', 'complete'].includes(status) || isFinalScoredEvent(event)
 }
 
+function isPriorDateResultImportCandidate(event: SettlementBacklogEventRow | undefined, now: Date) {
+  if (!event?.start_time) return false
+  if (isTerminalResultImportCandidate(event)) return true
+  const eventDate = puertoRicoLocalDateFromUtc(event.start_time)
+  const currentDate = localDate(now)
+  const startMs = Date.parse(event.start_time)
+  if (!eventDate || eventDate >= currentDate || !Number.isFinite(startMs)) return false
+  return startMs < now.getTime()
+}
+
 function isAuthoritativeSettlementResult(result: SettlementBacklogResultRow | undefined) {
   return Boolean(result && result.game_id && result.home_score !== null && result.away_score !== null)
 }
@@ -731,7 +741,7 @@ async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
   const eligible = pending.filter((row) => isAuthoritativeSettlementResult(row.game_id ? resultsByGameId.get(row.game_id) : undefined))
   const missingResult = pending.filter((row) => {
     if (!row.game_id || isAuthoritativeSettlementResult(resultsByGameId.get(row.game_id))) return false
-    return isTerminalResultImportCandidate(eventsById.get(row.game_id))
+    return isPriorDateResultImportCandidate(eventsById.get(row.game_id), now)
   })
   const awaitingResult = pending.length - eligible.length
   const dates = eligible
@@ -801,6 +811,15 @@ export function validateResultEvidenceReconciliationFixtures() {
     away_score: null,
     created_at: '2026-07-28T02:04:12.790Z',
   }
+  const stalePriorDateScheduledEvent: SettlementBacklogEventRow = {
+    id: 'event-2',
+    start_time: '2026-08-03T22:40:00.000Z',
+    status: 'scheduled',
+    home_score: null,
+    away_score: null,
+    updated_at: '2026-08-03T18:17:33.000Z',
+  }
+  const priorDateNow = new Date('2026-08-04T12:30:00.000Z')
   const resultsByGameId = new Map<string | null, SettlementBacklogResultRow>([
     [authoritativeGameResult.game_id, authoritativeGameResult],
     [mismatchedGameResult.game_id, mismatchedGameResult],
@@ -808,6 +827,7 @@ export function validateResultEvidenceReconciliationFixtures() {
   const checks = [
     ['completed sport_event alone is not settlement-ready', isFinalScoredEvent(completedSportEvent) && !isAuthoritativeSettlementResult(staleMissingResult)],
     ['terminal sport_event with missing canonical result is result-sync actionable', isTerminalResultImportCandidate(completedSportEvent) && !isAuthoritativeSettlementResult(staleMissingResult)],
+    ['prior-date scheduled event is result-sync actionable but not settlement-ready', isPriorDateResultImportCandidate(stalePriorDateScheduledEvent, priorDateNow) && !isAuthoritativeSettlementResult(staleMissingResult)],
     ['authoritative game_result is settlement-ready', isAuthoritativeSettlementResult(authoritativeGameResult)],
     ['conflicting or incomplete score is not settlement-ready', !isAuthoritativeSettlementResult(incompleteResult)],
     ['mismatched event id does not satisfy canonical lookup', !isAuthoritativeSettlementResult(resultsByGameId.get('missing-event'))],

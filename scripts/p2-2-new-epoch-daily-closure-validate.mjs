@@ -27,6 +27,16 @@ const allowed = new Set([
   'docs/PROJECT_STATUS.md',
   'docs/MASTER_ROADMAP.md',
   'scripts/p2-2-new-epoch-daily-closure-validate.mjs',
+  'src/services/adaptive-refresh-orchestrator.service.ts',
+  'scripts/p2-2b-current-era-closure-investigation-validate.mjs',
+  'docs/CERTIFICATION/P2_2B_CURRENT_ERA_CLOSURE_INVESTIGATION.md',
+  'docs/CERTIFICATION/p2-2b-current-era-closure-investigation.json',
+  'scripts/p2-2a-performance-presentation-consistency-validate.mjs',
+  'scripts/p2-1a-canonical-market-prediction-granularity-validate.mjs',
+  'scripts/p2-1-supported-market-coverage-validate.mjs',
+  'scripts/p2-0-prediction-epoch-v2-validate.mjs',
+  'scripts/p1-4-e2e-production-pipeline-validate.mjs',
+  'scripts/p1-3-production-evaluation-policy-validate.mjs',
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 

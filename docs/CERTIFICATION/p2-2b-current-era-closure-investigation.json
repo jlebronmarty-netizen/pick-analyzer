@@ -1,0 +1,50 @@
+{
+  "id": "p2_2b_current_era_closure_investigation",
+  "status": "LOCAL_REPAIR_PENDING_PRODUCTION_CERTIFICATION",
+  "startingCommit": "7fc05e7f6960b92972e9e426bea78fd0af42ee34",
+  "productionCommitBeforeRepair": "7fc05e7f6960b92972e9e426bea78fd0af42ee34",
+  "activeEpoch": "CURRENT_V2_PRODUCTION",
+  "observedCurrentEra": {
+    "totalAnalyzedRows": 103,
+    "canonicalPredictionRows": 69,
+    "nonProductionAnalysisRows": 34,
+    "settledCanonicalRows": 0,
+    "recommendationEligibleRows": 0,
+    "actionableRows": 0,
+    "officialPickEligibleRows": 0
+  },
+  "slates": {
+    "2026-08-03": {
+      "events": 8,
+      "canonicalPredictions": 24,
+      "storedStatus": "scheduled",
+      "lifecycleState": "STARTED",
+      "resultStatus": "PENDING",
+      "settlementReadyRowsBeforeRepair": 0
+    },
+    "2026-08-04": {
+      "events": 15,
+      "canonicalPredictions": 45,
+      "storedStatus": "scheduled",
+      "resultStatus": "PENDING"
+    }
+  },
+  "rootCause": "prior_date_started_events_with_stale_scheduled_status_not_result_sync_actionable",
+  "repair": "classify_prior_date_post_start_events_without_authoritative_game_results_as_result_sync_actionable_only",
+  "guards": {
+    "fabricatedResults": false,
+    "manualSettlement": false,
+    "predictionFormulaChanged": false,
+    "recommendationPolicyChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementEligibilityWeakened": false,
+    "learningWeightsChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerContractsChanged": false,
+    "previewRowsSettled": false,
+    "mc08eTouched": false
+  },
+  "providerCallsFromInvestigationReads": 0,
+  "remoteMutationsFromInvestigationReads": 0,
+  "finalClassification": "P2_2B_LOCAL_REPAIR_PENDING_PRODUCTION_CERTIFICATION"
+}

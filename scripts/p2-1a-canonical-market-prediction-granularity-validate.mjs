@@ -48,6 +48,12 @@ const allowed = new Set([
   'docs/CERTIFICATION/p2-2a-performance-presentation-consistency.json',
   'docs/OPERATIONAL_EXCELLENCE/P2_2A_PERFORMANCE_PRESENTATION_CONSISTENCY.md',
   'scripts/p2-2a-performance-presentation-consistency-validate.mjs',
+  'src/services/adaptive-refresh-orchestrator.service.ts',
+  'scripts/p2-2-new-epoch-daily-closure-validate.mjs',
+  'scripts/p2-2b-current-era-closure-investigation-validate.mjs',
+  'docs/CERTIFICATION/P2_2B_CURRENT_ERA_CLOSURE_INVESTIGATION.md',
+  'docs/CERTIFICATION/p2-2b-current-era-closure-investigation.json',
+  'scripts/p2-2a-performance-presentation-consistency-validate.mjs',
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 
