@@ -1700,3 +1700,11 @@ MC-02 adds the canonical read-only `/api/mission-control/data-readiness` surface
 Readiness matrix: MLB `DATA_READY`; NBA `DATA_PARTIAL`; NFL `DATA_PARTIAL`; NHL `DATA_PARTIAL`; Soccer `DATA_PARTIAL`; Tennis `DATA_FOUNDATION`; UFC `DATA_FOUNDATION`; BSN `PROVIDER_BLOCKED`. SportsDataIO remains isolated and active only for certified MLB current operating-day acquisition; The Odds API remains a separate shadow/previously audited credit pool until current balance/reset/cost are proven; BSN remains source-specific and is not treated as The Odds API-covered.
 
 No prediction formula, probability, confidence, edge, EV, Official Pick policy, Kelly logic, settlement rule, learning rule, scheduler cadence, provider contract, provider budget reserve or market certification changed. MC-03 remains PLANNED and manual-only; it was not started.
+
+# 2026-08-04 - P2.3 Historical Progressive Replay
+
+Status: PASS pending production deployment observation.
+
+P2.3 adds an isolated bounded historical progressive replay engine over stored non-production historical validation rows. It selects events chronologically, links stored pre-cutoff odds and feature snapshots, rejects leakage-risk rows, writes only replay-scoped `universal_projection_history` rows and exposes read-only replay status through `/api/operations/historical-replay`. `/api/performance` exposes Replay separately as `replayPerformance`; Current Era trust and accuracy remain unchanged.
+
+Certification evidence: one-event replay inserted 3 settled replay rows; rerun inserted 0 and reused 3; bounded sample completed 10 events and 30 settled replay predictions with 14 wins, 16 losses, 0 pushes, 46.67% accuracy, 0.2508 Brier and 0 leakage failures. Provider calls, provider credits, Current Era writes, historical mutations, production settlement writes and production learning writes were 0. P2.4 is next after production certification; MC-03 and MC-08E were not started.

@@ -35,7 +35,8 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | P2.1A | Canonical Market-Prediction Granularity Correction | PRODUCTION_CERTIFIED | 48 provider selections and 24 canonical event-market predictions certified; selection-level preview rows excluded from canonical Performance. |
 | P2.2A | Performance Presentation Consistency | PRODUCTION_CERTIFIED | Clarify Current Era Performance labels without changing counts, math, settlement, learning or predictions. |
 | P2.2 | New-Epoch Daily Closure Certification | PRODUCTION_CERTIFIED | P2.2D executed the protected `settle` action and certified Aug 3 Current Era closure: 24 canonical settled, 24 learning samples, 45 current-day pending, 0 silent pending. |
-| P2.3 | Historical Progressive Replay V1 | READY | Next eligible phase after P2.2 certification; not started in P2.2D. |
+| P2.3 | Historical Progressive Replay V1 | PASS_PENDING_PRODUCTION | Bounded replay processed 10 events / 30 replay predictions with zero provider calls; production endpoint certification pending. |
+| P2.4 | Next bounded Mission Control phase | READY_AFTER_P2_3 | Do not start until P2.3 production certification is observed. |
 
 ## MC-08 Work Packages
 

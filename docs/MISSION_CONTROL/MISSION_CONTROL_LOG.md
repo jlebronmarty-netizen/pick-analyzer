@@ -245,3 +245,13 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Current Era Performance now reports 69 canonical predictions, 24 settled, 45 pending, accuracy 60.87%, Brier 0.3116, Trust 24.56 and settlement coverage 34.78%.
 - Settlement Guarantee returned PASS with 0 ready rows and 0 silent pending rows. Older missing-result rows from 2026-07-27 and 2026-07-28 remain outside the P2.2 Current Era closure scope.
 - P2.3 is READY but was not started. MC-08E remains paused.
+
+# 2026-08-04 P2.3 Historical Progressive Replay
+
+- Status: PASS_PENDING_PRODUCTION_DEPLOYMENT.
+- Implemented isolated `/api/operations/historical-replay` status/execution routes and job diagnostics.
+- Replay scope is `REPLAY`; Current Era, Official Picks, Current Board, production settlement and production learning are excluded.
+- One-event certification inserted 3 replay rows; rerun inserted 0 and reused 3.
+- Bounded sample processed 10 events and 30 settled replay predictions: 14 wins, 16 losses, 0 pushes, 46.67% accuracy, 0.2508 Brier, 4.96 calibration error and -6.11 ROI.
+- Provider calls 0; Current Era writes 0; historical mutations 0; production settlement writes 0; production learning writes 0.
+- P2.4 is next eligible after production certification. MC-03 was not started. MC-08E remains paused.

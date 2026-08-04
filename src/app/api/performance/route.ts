@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAiPerformanceCenterLazy } from '@/lib/server-lazy-diagnostics'
 import { getPerformanceProductContract } from '@/services/performance-product-contract.service'
+import { getHistoricalProgressiveReplayStatus } from '@/services/historical-progressive-replay.service'
 
 type TimelineSource = Record<string, {
   label?: string
@@ -190,13 +191,20 @@ export async function GET(request: NextRequest) {
   try {
     const sportKey = request.nextUrl.searchParams.get('sportKey')
     const includeFullDiagnostics = request.nextUrl.searchParams.get('diagnostics') === 'full' || request.nextUrl.searchParams.get('includeDiagnostics') === 'full'
-    const [data, product] = await Promise.all([
+    const [data, product, replay] = await Promise.all([
       includeFullDiagnostics ? getAiPerformanceCenterLazy({ sportKey, dryRun: true }) : Promise.resolve(null),
       getPerformanceProductContract({
         sportKey,
         includeHistoryRows: includeFullDiagnostics,
         maxPredictionRows: includeFullDiagnostics ? 5000 : 2000,
       }),
+      getHistoricalProgressiveReplayStatus({ limit: 200 }).catch((error) => ({
+        success: false,
+        mode: 'p2_3_historical_progressive_replay_unavailable',
+        error: error instanceof Error ? error.message : 'Replay status unavailable',
+        providerCallsMade: 0,
+        remoteMutationsMade: 0,
+      })),
     ])
     const selectedReport = product.reportCards.selected
     const selectedMetrics = selectedReport.metrics
@@ -318,6 +326,7 @@ export async function GET(request: NextRequest) {
       },
       performanceTimeline: productTimeline,
       performancePresentation: product.performancePresentation,
+      replayPerformance: replay,
       providerCallsMade: 0,
       remoteMutationsMade: 0,
     })

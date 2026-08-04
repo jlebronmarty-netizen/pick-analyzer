@@ -3247,3 +3247,13 @@ Scope: Read-only readiness contract, provider coverage matrix, sport-level block
 Result: `/api/mission-control/data-readiness` exposes bounded evidence for MLB, NBA, NFL, NHL, Soccer, Tennis, UFC and BSN. MLB is `DATA_READY`; NBA, NFL, NHL and Soccer are `DATA_PARTIAL`; Tennis and UFC are `DATA_FOUNDATION`; BSN is `PROVIDER_BLOCKED`. Blocked sports remain isolated and do not block independent future workstreams.
 
 Completion criteria: `MC_02_PRODUCTION_CERTIFIED`, all target sports classified, provider budgets isolated, BSN not claimed as The Odds API-covered, adapter existence not treated as readiness, normal reads provider calls 0, normal reads mutations 0, no model/settlement/learning activation, passing validation, passing build and production certification after automatic deployment.
+
+### 73. Mission Control P2.3 Historical Progressive Replay
+
+Objective: Create a bounded, isolated replay engine that processes stored historical validation evidence chronologically without contaminating Current Era, Official Picks, Current Board, production settlement or production learning.
+
+Status: Pass pending production deployment observation.
+
+Result: P2.3 replay uses `historical_progressive_replay_v1`, max 10 events per execution and max 3 canonical markets per event. One-event certification and idempotency passed; the bounded sample processed 10 events and 30 settled replay predictions with zero provider calls and zero production writes. Replay Performance is exposed separately from Current Era.
+
+Completion criteria: `P2_3_HISTORICAL_PROGRESSIVE_REPLAY_CERTIFIED`, one-event replay, idempotency rerun, bounded sample, leakage validation, separate Replay Performance, passing validation, passing build and production certification after automatic deployment.

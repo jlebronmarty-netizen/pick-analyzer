@@ -67,3 +67,7 @@ Current repository evidence supports this finding:
 `POLICY_CONFLICT_REQUIRES_HUMAN_APPROVAL`
 
 Changing the answer would alter Performance history and must be handled as a separate approved policy phase.
+
+## P2.3 Historical Progressive Replay Addendum
+
+P2.3 replay is not production prediction history. It reads stored historical validation predictions, linked odds snapshots and linked feature snapshots, then writes replay-only `universal_projection_history` rows with `projection_family = historical_progressive_replay_v1`. Current Era, Official Picks, Current Board, production settlement, production learning, scheduler cadence and provider budgets are not changed. Replay Performance is exposed separately from Current Era.

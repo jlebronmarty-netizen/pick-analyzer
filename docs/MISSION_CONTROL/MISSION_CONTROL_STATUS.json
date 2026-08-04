@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "P2_2_PRODUCTION_CERTIFIED_MC_08E_PAUSED",
+  "status": "P2_3_PRODUCTION_CERTIFICATION_PENDING_MC_08E_PAUSED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -497,8 +497,32 @@
   "validationScript": "scripts/mission-control-v1-validate.mjs",
   "certificationArtifact": "docs/CERTIFICATION/mission-control-v1.json",
   "nextEligiblePhase": {
-    "id": "P2.3",
+    "id": "P2.4",
+    "title": "Next bounded Mission Control phase",
+    "state": "READY_AFTER_P2_3_PRODUCTION_CERTIFICATION"
+  },
+  "p2_3": {
+    "status": "PASS_PENDING_PRODUCTION_DEPLOYMENT",
     "title": "Historical Progressive Replay V1",
-    "state": "READY_NOT_STARTED"
+    "certificationArtifact": "docs/CERTIFICATION/p2-3-historical-progressive-replay.json",
+    "replayScope": "REPLAY",
+    "engineVersion": "historical_progressive_replay_v1",
+    "featureVersion": "historical_prediction_snapshot_lineage_pilot_v1",
+    "policyVersion": "p2_3_frozen_engine_replay_policy_v1",
+    "oneEventPredictions": 3,
+    "oneEventIdempotentRerunInserted": 0,
+    "boundedSampleEvents": 10,
+    "boundedSamplePredictions": 30,
+    "boundedSampleSettled": 30,
+    "leakageFailures": 0,
+    "providerCallsMade": 0,
+    "currentEraWrites": 0,
+    "historicalMutations": 0,
+    "productionSettlementWrites": 0,
+    "productionLearningWrites": 0,
+    "performanceMode": "replayPerformance separate from Current Era",
+    "p24Started": false,
+    "mc03Started": false,
+    "mc08eResumed": false
   }
 }

@@ -62,7 +62,7 @@ check('settlement guarantee passed with no ready or silent pending rows', cert.c
 check('event lifecycle archived Aug 3 events after settlement', cert.crossSurface.eventLifecycleAug3.events === 8 && cert.crossSurface.eventLifecycleAug3.state === 'ARCHIVED')
 check('non-production rows remain excluded', cert.aug3CanonicalReconciliation.nonProductionRowsExcluded === 28 && cert.performanceClosure.nonProductionAnalysisRows === 34)
 check('P2.2 parent certification is passed', p22.status === 'PASS' && p22.classification === 'P2_2_PRODUCTION_CERTIFIED')
-check('Mission Control marks P2.2 certified and P2.3 ready', status.p2_2.status === 'PRODUCTION_CERTIFIED' && status.nextEligiblePhase?.id === 'P2.3' && queue.includes('| P2.3 | Historical Progressive Replay V1 | READY |'))
+check('Mission Control marks P2.2 certified and P2.3 ready or certified', status.p2_2.status === 'PRODUCTION_CERTIFIED' && ((status.nextEligiblePhase?.id === 'P2.3' && queue.includes('| P2.3 | Historical Progressive Replay V1 | READY |')) || (status.p2_3?.status && status.nextEligiblePhase?.id === 'P2.4' && queue.includes('| P2.3 | Historical Progressive Replay V1 | PASS_PENDING_PRODUCTION |'))))
 check('P2.3 and MC-03 not started', cert.p23Started === false && cert.mc03Started === false && p22.p23Started === false && p22.mc03Started === false)
 check('MC-08E remains paused', cert.mc08eResumed === false && p22.mc08eResumed === false && checklist.includes('MC-08E: `PAUSED`') && log.includes('MC-08E remains paused'))
 check('guardrails unchanged', Object.values(cert.guards).every((value) => value === false))
