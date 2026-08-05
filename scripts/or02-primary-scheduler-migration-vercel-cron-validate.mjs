@@ -26,7 +26,7 @@ check('provider action lock remains active', cronRoute.includes('provider_action
 check('adaptive status reports primary/fallback crons', adaptive.includes("owner: 'vercel_cron_primary'") && adaptive.includes("owner: 'github_actions_fallback'"))
 check('operations health reports primary/fallback source', health.includes("primaryScheduler: 'VERCEL_OPERATING_DAY_CRON_PRIMARY'") && health.includes('lastVercelPrimarySuccessAt'))
 check('Mission Control maps OR-02 metadata', mission.includes("id === 'OR-02'") && mission.includes('Migrate primary protected operating-day scheduling to Vercel Cron'))
-check('Mission Control status is OR-02 gated', status.currentMission?.id === 'OR-02' && status.status === 'OR_02_EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF')
+check('Mission Control status is OR-02 gated or OR-02A follow-up gated', (status.currentMission?.id === 'OR-02' && status.status === 'OR_02_EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF') || (status.currentMission?.id === 'OR-02A' && status.status === 'OR_02A_DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF'))
 check('required production proof remains incomplete before observation', cert.requiredProductionProof.threeConsecutiveVercelAutomaticExecutions === false)
 check('prediction and policy safety recorded', cert.safety.predictionChanged === false && cert.safety.officialPickPolicyChanged === false && cert.safety.kellyChanged === false)
 check('settlement learning and provider budgets unchanged', cert.safety.settlementChanged === false && cert.safety.learningChanged === false && cert.safety.providerBudgetChanged === false)

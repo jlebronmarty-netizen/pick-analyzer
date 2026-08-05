@@ -164,22 +164,25 @@ function missionFromStatus(value: unknown, fallback: Mission): Mission {
   const isMc08h = id === 'MC-08H'
   const isOr01h = id === 'OR-01H'
   const isOr02 = id === 'OR-02'
+  const isOr02a = id === 'OR-02A'
   return {
     ...fallback,
     id,
     title,
-    category: isMc08h ? 'CERTIFICATION' : isOr01h || isOr02 ? 'AUTOMATION' : fallback.category,
+    category: isMc08h ? 'CERTIFICATION' : isOr01h || isOr02 || isOr02a ? 'AUTOMATION' : fallback.category,
     state,
     priority,
     mode,
     readiness,
-    owner: isMc08h ? 'Product Certification' : isOr01h || isOr02 ? 'Operations Architecture' : fallback.owner,
+    owner: isMc08h ? 'Product Certification' : isOr01h || isOr02 || isOr02a ? 'Operations Architecture' : fallback.owner,
     scope: isMc08h
       ? 'Determine whether the daily betting product is ready for real-user production operation.'
       : isOr01h
         ? 'Decide and certify the primary/fallback scheduler architecture required for sustained protected operating-day execution.'
         : isOr02
           ? 'Migrate primary protected operating-day scheduling to Vercel Cron while retaining GitHub Actions as fallback.'
+          : isOr02a
+            ? 'Recover active market refresh execution under Vercel primary scheduling and restore Product Freshness readiness.'
       : fallback.scope,
     nextAction: isMc08h
       ? 'Clear production operations blockers before opening Production Pilot Week.'
@@ -187,6 +190,8 @@ function missionFromStatus(value: unknown, fallback: Mission): Mission {
         ? 'Verify the Vercel project plan and Cron Jobs settings in the dashboard before approving a primary scheduler migration.'
         : isOr02
           ? 'Observe three consecutive automatic Vercel Cron executions, then rerun MC-08H readiness certification.'
+          : isOr02a
+            ? 'Deploy the action-selection repair, prove market refresh execution under Vercel primary, then rerun MC-08H only if all operational gates pass.'
       : fallback.nextAction,
     blockers: isMc08h
       ? ['production_readiness_blocked']
@@ -194,6 +199,8 @@ function missionFromStatus(value: unknown, fallback: Mission): Mission {
         ? ['human_vercel_plan_and_cron_settings_check_required']
         : isOr02
           ? ['three_consecutive_vercel_primary_executions_required']
+          : isOr02a
+            ? ['market_freshness_and_product_readiness_recovery_required']
         : fallback.blockers,
     evidence: isMc08h
       ? ['docs/CERTIFICATION/mc-08h-production-readiness-certification.json', 'docs/MISSION_CONTROL/MC_08H_PRODUCTION_READINESS_CERTIFICATION.md']
@@ -201,6 +208,8 @@ function missionFromStatus(value: unknown, fallback: Mission): Mission {
         ? ['docs/CERTIFICATION/or-01h-primary-scheduler-architecture.json', 'docs/CERTIFICATION/OR_01H_PRIMARY_SCHEDULER_ARCHITECTURE.md']
         : isOr02
           ? ['docs/CERTIFICATION/or-02-primary-scheduler-migration-vercel-cron.json', 'docs/CERTIFICATION/OR_02_PRIMARY_SCHEDULER_MIGRATION_VERCEL_CRON.md']
+          : isOr02a
+            ? ['docs/CERTIFICATION/or-02a-vercel-market-refresh-recovery.json', 'docs/CERTIFICATION/OR_02A_VERCEL_MARKET_REFRESH_RECOVERY.md']
       : fallback.evidence,
     canStartAutomatically: false,
   }

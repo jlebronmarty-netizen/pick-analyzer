@@ -1127,9 +1127,15 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
   }
   const dueDomains = refreshPlan.filter((item) => item.decision === 'DUE_NOW').map((item) => item.domain)
   const pregameOddsDue = dueDomains.includes('odds') && marketRefreshNeeded
+  const historicalResultDebtBehindActiveSlate =
+    Number(settlementBacklog?.settlementReadyRows ?? 0) === 0 &&
+    Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 &&
+    Boolean(settlementBacklog?.oldestMissingResultDate && activeSlateDate) &&
+    String(settlementBacklog?.oldestMissingResultDate) < String(activeSlateDate)
+  const activeMarketRefreshPreemptsHistoricalResultDebt = pregameOddsDue && historicalResultDebtBehindActiveSlate
   const effectiveNextAction = dueDomains.includes('settlement')
     ? 'settle'
-    : dueDomains.includes('results')
+    : dueDomains.includes('results') && !activeMarketRefreshPreemptsHistoricalResultDebt
       ? 'sync_results'
       : pregameOddsDue
           ? currentGames > 0 ? 'midday_refresh' : 'morning_sync'
@@ -1387,8 +1393,10 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       settlementPolicyChanged: false,
     },
     orchestrationPolicy: {
-      resultRecoveryPreemptsActiveMarketRefresh: dueDomains.includes('results') && pregameOddsDue,
-      rule: 'When canonical result recovery is due, sync_results outranks active market refresh; the protected writer still permits at most one provider-backed action before recomputing for safe internal settlement.',
+      resultRecoveryPreemptsActiveMarketRefresh: dueDomains.includes('results') && pregameOddsDue && !activeMarketRefreshPreemptsHistoricalResultDebt,
+      activeMarketRefreshPreemptsHistoricalResultDebt,
+      historicalResultDebtBehindActiveSlate,
+      rule: 'Settlement-ready rows outrank market refresh. When only older missing-result recovery debt is due and the current active slate has stale eligible pregame markets, current-slate market refresh runs before historical result recovery to prevent product freshness starvation.',
       providerCallsMade: 0,
       remoteMutationsMade: 0,
       settlementEligibilityChanged: false,
@@ -1500,8 +1508,14 @@ function executableActionFromStatus(status: Awaited<ReturnType<typeof getAdaptiv
   const pregameOddsDue =
     dueDomains.includes('odds') &&
     (status.marketRefreshEligibility?.marketRefreshNeeded === true || Number(status.gamesWaitingForOdds ?? 0) > 0)
+  const settlementBacklog = status.settlementBacklog as Record<string, unknown> | null | undefined
+  const historicalResultDebtBehindActiveSlate =
+    Number(settlementBacklog?.settlementReadyRows ?? 0) === 0 &&
+    Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 &&
+    Boolean(settlementBacklog?.oldestMissingResultDate && status.activeSlateDate) &&
+    String(settlementBacklog?.oldestMissingResultDate) < String(status.activeSlateDate)
   if (dueDomains.includes('settlement')) return 'settle'
-  if (dueDomains.includes('results')) return 'sync_results'
+  if (dueDomains.includes('results') && !(pregameOddsDue && historicalResultDebtBehindActiveSlate)) return 'sync_results'
   if (pregameOddsDue) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('odds')) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('schedule')) return 'morning_sync'
@@ -2551,7 +2565,7 @@ export function validateAdaptiveRefreshFixtures() {
     ['unsupported lineups classify not supported', unsupported.status === 'NOT_SUPPORTED'],
     ['exhausted budget blocks provider-backed stale refresh', exhaustedDecision === 'BLOCKED'],
     ['normal budget marks stale odds due now', normalDecision === 'DUE_NOW'],
-    ['historical result recovery outranks active market refresh', resultRecoveryAction === 'sync_results'],
+    ['active market refresh preempts older historical result debt', resultRecoveryAction === 'midday_refresh'],
     ['MLB pregame cadence config is applied', windowPolicy.freshMinutes === 12 && windowPolicy.staleMinutes === 24],
     ['status reads make no provider calls', true],
     ['prediction mutations remain zero', true],

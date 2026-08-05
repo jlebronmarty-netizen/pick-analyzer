@@ -1,0 +1,92 @@
+{
+  "mission": "OR-02A",
+  "title": "Vercel Primary Market Refresh Execution And Freshness Recovery",
+  "status": "DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF",
+  "startingCommit": "c74656af083b36349032cee5141da7ebe15c9750",
+  "vercelRunsReconstructed": [
+    {
+      "completedAt": "2026-08-05T20:18:05.741+00:00",
+      "schedulerSource": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+      "selectedAction": "sync_results",
+      "providerCallsMade": 0,
+      "reason": "Historical missing-result recovery outranked active stale market refresh."
+    },
+    {
+      "completedAt": "2026-08-05T20:27:59.661+00:00",
+      "schedulerSource": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+      "selectedAction": "sync_results",
+      "providerCallsMade": 0,
+      "reason": "Historical missing-result recovery outranked active stale market refresh."
+    },
+    {
+      "completedAt": "2026-08-05T20:37:58.936+00:00",
+      "schedulerSource": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+      "selectedAction": "sync_results",
+      "providerCallsMade": 0,
+      "reason": "Historical missing-result recovery outranked active stale market refresh."
+    }
+  ],
+  "before": {
+    "productionCommit": "c74656af083b36349032cee5141da7ebe15c9750",
+    "schedulerExecution": "HEALTHY",
+    "missedIntervals": 0,
+    "marketFreshness": "CRITICAL",
+    "settlementClosure": "HEALTHY",
+    "productReadiness": "CRITICAL",
+    "operationalHealth": "CRITICAL",
+    "canonicalSelectedAction": "sync_results",
+    "zeroProviderCallReason": "SYNC_RESULTS_SELECTED_FOR_OLD_RESULT_DEBT_WHILE_ODDS_DUE",
+    "currentEvents": 15,
+    "eligibleRefreshEvents": 11,
+    "excludedPostStartEvents": 4,
+    "completedMissingResultRows": 6,
+    "missingResultDate": "2026-07-28",
+    "activeSlateDate": "2026-08-05",
+    "latestMarketTimestamp": "2026-08-05T16:16:39.658Z",
+    "providerCallsToday": 0,
+    "providerCallsLastHour": 0
+  },
+  "rootCauseClassification": "RESULT_RECOVERY_STARVATION_OF_ACTIVE_MARKET_REFRESH",
+  "providerAcquisition": {
+    "provider": "sportsdataio",
+    "endpoint": "GameOddsByDate",
+    "acquisitionGranularity": "date_level_provider_efficient_batch",
+    "estimatedHttpRequests": 1,
+    "estimatedQuotaUnits": 1,
+    "authorizationState": "BUDGET_AVAILABLE",
+    "protectedReservePreserved": true
+  },
+  "timestampPolicy": {
+    "certifiedFreshnessSource": "stored_provider_source_market_timestamp",
+    "generatedAtCanEstablishFreshness": false,
+    "fetchedAtCanEstablishFreshness": false,
+    "heartbeatCanEstablishFreshness": false
+  },
+  "safety": {
+    "predictionChanged": false,
+    "officialPickPolicyChanged": false,
+    "recommendationGatesChanged": false,
+    "kellyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerInfrastructureChanged": false,
+    "schedulerCadenceChanged": false,
+    "fallbackCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "freshnessThresholdsChanged": false,
+    "postStartRefreshChanged": false,
+    "deduplicationChanged": false,
+    "currentEraChanged": false,
+    "replayChanged": false
+  },
+  "certificationReads": {
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
+  },
+  "validation": {
+    "primaryValidator": "scripts/or02a-vercel-market-refresh-recovery-validate.mjs",
+    "status": "PENDING",
+    "build": "PENDING"
+  },
+  "finalClassification": "OR_02A_DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF"
+}

@@ -19,9 +19,9 @@ check(
     && adaptive.includes("if (dueDomains.includes('settlement')) return 'settle'"),
 )
 check(
-  'planner prioritizes result recovery before active odds refresh',
-  adaptive.includes(": dueDomains.includes('results')\n      ? 'sync_results'\n      : pregameOddsDue")
-    && adaptive.includes("if (dueDomains.includes('results')) return 'sync_results'\n  if (pregameOddsDue)"),
+  'planner prioritizes result recovery unless OR-02A active market preemption applies',
+  adaptive.includes("dueDomains.includes('results') && !activeMarketRefreshPreemptsHistoricalResultDebt")
+    && adaptive.includes("if (dueDomains.includes('results') && !(pregameOddsDue && historicalResultDebtBehindActiveSlate)) return 'sync_results'"),
 )
 check(
   'old active-market preemption guard is removed',
@@ -32,8 +32,8 @@ check(
   adaptive.includes("plannerRepair: 'or01g_result_recovery_priority_repair'"),
 )
 check(
-  'deterministic fixture expects sync_results for stale odds plus missing results',
-  adaptive.includes("['historical result recovery outranks active market refresh', resultRecoveryAction === 'sync_results']"),
+  'deterministic fixture expects active refresh for stale current odds plus older missing results',
+  adaptive.includes("['active market refresh preempts older historical result debt', resultRecoveryAction === 'midday_refresh']"),
 )
 check(
   'sync_results uses oldest missing result date when available',

@@ -12,7 +12,7 @@ It answers:
 
 Mission Control does not replace the Master Program, Master Roadmap, Project Status or certification artifacts.
 
-Mission Control is current through OR-02 primary-scheduler migration. Vercel Pro is active, Vercel Cron is configured as the primary protected operating-day scheduler, and GitHub Actions remains fallback through the same endpoint with a primary-success lease. MC-08H and Production Pilot Week remain blocked until three consecutive automatic Vercel primary executions prove Scheduler, Market Freshness, Settlement, Product Readiness and Operations health.
+Mission Control is current through OR-02A Vercel primary market-refresh recovery. Vercel Cron primary cadence is healthy, but active current-slate market refresh was starved by older missing-result recovery debt. MC-08H and Production Pilot Week remain blocked until the deployed repair proves Market Freshness, Product Readiness and Operations health.
 
 ## Source Of Truth Boundaries
 
@@ -53,3 +53,4 @@ Both surfaces are read-only. They do not call providers, write data, start jobs,
 - [OR-01 Operational Readiness Recovery](OR_01_OPERATIONAL_READINESS_RECOVERY.md)
 - [OR-01H Primary Scheduler Architecture](../CERTIFICATION/OR_01H_PRIMARY_SCHEDULER_ARCHITECTURE.md)
 - [OR-02 Primary Scheduler Migration - Vercel Cron](../CERTIFICATION/OR_02_PRIMARY_SCHEDULER_MIGRATION_VERCEL_CRON.md)
+- [OR-02A Vercel Market Refresh Recovery](../CERTIFICATION/OR_02A_VERCEL_MARKET_REFRESH_RECOVERY.md)

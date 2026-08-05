@@ -127,5 +127,7 @@ Move certification docs here only when links are updated and validation passes.
 - [OR-01H Primary Scheduler Architecture JSON](or-01h-primary-scheduler-architecture.json)
 - [OR-02 Primary Scheduler Migration - Vercel Cron](OR_02_PRIMARY_SCHEDULER_MIGRATION_VERCEL_CRON.md)
 - [OR-02 Primary Scheduler Migration - Vercel Cron JSON](or-02-primary-scheduler-migration-vercel-cron.json)
+- [OR-02A Vercel Market Refresh Recovery](OR_02A_VERCEL_MARKET_REFRESH_RECOVERY.md)
+- [OR-02A Vercel Market Refresh Recovery JSON](or-02a-vercel-market-refresh-recovery.json)
 - [PR-01 Final Production Readiness Audit](PR_01_FINAL_PRODUCTION_READINESS_AUDIT.md)
 - [PR-01 Final Production Readiness Audit JSON](pr-01-final-production-readiness-audit.json)

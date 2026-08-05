@@ -2,7 +2,7 @@
 
 Status: deterministic V2 queue.
 
-MC-08 remains blocked at final readiness. OR-02 migrates the approved primary scheduler to Vercel Cron and keeps GitHub Actions as fallback through the same protected endpoint. Production Pilot Week is NOT READY until three consecutive automatic Vercel primary executions prove scheduler, freshness, settlement, product readiness and operations health. MC-03 remains PLANNED and manual-only.
+MC-08 remains blocked at final readiness. OR-02 migrated the approved primary scheduler to Vercel Cron and kept GitHub Actions as fallback through the same protected endpoint. OR-02A is active because Vercel primary cadence is healthy but historical result-recovery debt still starved current-slate market refresh. Production Pilot Week is NOT READY until market freshness, product readiness and operations health recover. MC-03 remains PLANNED and manual-only.
 
 | ID | Mission | Category | Priority | State | Mode | Next Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -18,7 +18,7 @@ MC-08 remains blocked at final readiness. OR-02 migrates the approved primary sc
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
-Next eligible phase: none. OR-02 requires external production proof from automatic Vercel Cron executions before MC-08H can be rerun to PASS. MC-03 remains PLANNED and manual-only.
+Next eligible phase: none. OR-02A requires deployment and production proof that active current-slate market refresh executes under Vercel primary when due. MC-08H can be rerun only after all operational gates pass. MC-03 remains PLANNED and manual-only.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
@@ -59,5 +59,6 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | OR-01F | Bounded Planner Continuity | PRODUCTION_CERTIFIED | `planner_continuity_v1` is deployed and proof-certified: max 3 actions, max 1 provider action, repeated-action guard, planner recomputation, and safe internal `settle` continuation only. |
 | OR-01H | Primary Scheduler Architecture Decision | HUMAN_DECISION_REQUIRED | Vercel Cron is disabled in `vercel.json`; current Vercel plan evidence is unavailable; GitHub schedule runs succeeded but do not provide three consecutive automatic primary executions at the required cadence. |
 | OR-02 | Primary Scheduler Migration - Vercel Cron | EXTERNAL_WAIT | Vercel Cron is configured as primary; GitHub Actions is fallback with primary-success lease; final PASS requires three consecutive automatic Vercel primary executions. |
+| OR-02A | Vercel Primary Market Refresh Recovery | DEPLOYMENT_PENDING | Repairs action selection so older missing-result debt cannot starve active current-slate market refresh when no settlement-ready rows exist. |
 | PR-01 | Final Production Readiness Audit | CERTIFIED_NOT_READY | Performance header mapping repaired; Current Era and Replay equations balance; Pilot Week remains blocked by scheduler/market freshness/result-import evidence. |
 | Production Pilot Week | Real-world validation before Multi-Sport Expansion | NOT_READY | Requires stable OR-01D cadence and MC-08H Production Ready YES. |

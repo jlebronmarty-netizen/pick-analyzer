@@ -1,15 +1,15 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "OR_02_EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF",
+  "status": "OR_02A_DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
-    "id": "OR-02",
-    "title": "Primary Scheduler Migration - Vercel Cron",
+    "id": "OR-02A",
+    "title": "Vercel Primary Market Refresh Execution And Freshness Recovery",
     "state": "BLOCKED",
     "priority": "P1",
     "mode": "RUNTIME",
-    "readiness": "EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF"
+    "readiness": "DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF"
   },
   "nextMission": null,
   "missionCounts": {
@@ -1217,5 +1217,28 @@
     "productionPilotWeek": "NOT_READY",
     "mc03": "NOT_STARTED",
     "finalClassification": "OR_02_EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF"
+  },
+  "or02a": {
+    "status": "DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF",
+    "title": "Vercel Primary Market Refresh Execution And Freshness Recovery",
+    "certificationArtifact": "docs/CERTIFICATION/or-02a-vercel-market-refresh-recovery.json",
+    "missionArtifact": "docs/CERTIFICATION/OR_02A_VERCEL_MARKET_REFRESH_RECOVERY.md",
+    "rootCauseClassification": "RESULT_RECOVERY_STARVATION_OF_ACTIVE_MARKET_REFRESH",
+    "primaryScheduler": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+    "repair": "active_current_slate_market_refresh_preempts_older_missing_result_debt_when_no_settlement_ready_rows_exist",
+    "requiredProof": {
+      "marketRefreshSelectedWhenDue": false,
+      "providerCallWhenDue": false,
+      "storedProviderTimestampAdvanced": false,
+      "threePostRepairVercelExecutions": false,
+      "marketFreshnessHealthy": false,
+      "productReadinessHealthy": false,
+      "operationsHealthy": false,
+      "mc08hRerun": false,
+      "productionReady": false
+    },
+    "productionPilotWeek": "NOT_READY",
+    "mc03": "NOT_STARTED",
+    "finalClassification": "OR_02A_DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF"
   }
 }

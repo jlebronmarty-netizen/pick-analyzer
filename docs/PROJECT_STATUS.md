@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-05 OR-02A Vercel Primary Market Refresh Recovery
+
+- OR-02A traced why three successful Vercel primary invocations made zero provider calls while Market Freshness and Product Readiness stayed CRITICAL. Production evidence showed `sync_results` was selected because 6 old `2026-07-28` missing-result rows were due, even though the active `2026-08-05` slate had 11 stale pregame events eligible for a single SportsDataIO date-level market refresh.
+- The repair preserves settlement priority but prevents older missing-result debt from starving current active-slate market refresh when settlement-ready rows are 0. No scheduler infrastructure, cadence, provider budget, freshness threshold, prediction formula, recommendation gate, Official Pick policy, settlement rule, learning rule, Current Era or Replay behavior changed.
+- Final OR-02A PASS still requires deployment proof, a correct market-refresh action when due, stored provider/source market timestamp advancement, three post-repair automatic Vercel primary executions, and healthy Market Freshness, Product Readiness and Operations evidence. Production Pilot Week remains NOT_READY and MC-03 was not started.
+
 ## 2026-08-05 OR-02 Primary Scheduler Migration - Vercel Cron
 
 - OR-02 implements the approved scheduler migration now that Vercel Pro is active. Vercel Cron is configured as the primary protected operating-day scheduler for `/api/cron/operating-day` at `7-57/10 * * * *`; GitHub Actions remains fallback through the same endpoint with `scheduler=github-fallback`.
