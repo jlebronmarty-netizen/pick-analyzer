@@ -8,6 +8,8 @@ Evidence collected on `2026-08-05` from production commit `931fa81543feb1fad4192
 
 OR-01H does not activate a new primary scheduler.
 
+Post-deploy Mission Control API verification exposed and repaired one runtime metadata mapping issue: unknown status IDs fell back to the MC-02 queue entry. `OR-01H` is now mapped to its own automation-category metadata, owner, scope, blocker and evidence without changing scheduler cadence or writer behavior.
+
 The repository requires a protected operating-day writer at the certified 10-minute cadence:
 
 - writer cron: `7-57/10 * * * *`

@@ -105,6 +105,7 @@ check('certification baseline commit is current baseline', certification.baselin
 check('current mission is MC-00 or later Mission Control mission', ['MC-00', 'MC-01', 'MC-02', 'MC-08H', 'OR-01H'].includes(status.currentMission?.id))
 check('next mission is deterministic', status.nextMission === null || ['MC-01', 'MC-02', 'MC-08', 'OR-01D', 'OR-01H', 'PRODUCTION-PILOT-WEEK'].includes(status.nextMission?.id))
 check('only MC-08 bounded product package or scheduler decision gates may be active/ready in status', status.missionCounts?.active === 0 || (status.missionCounts?.active === 1 && status.nextMission?.id === 'MC-08' && status.nextMission?.state === 'ACTIVE') || (status.nextMission?.id === 'OR-01D' && status.nextMission?.state === 'EXTERNAL_WAIT') || status.currentMission?.id === 'OR-01H' || (status.nextMission?.id === 'PRODUCTION-PILOT-WEEK' && status.nextMission?.state === 'READY'))
+check('OR-01H status overlay has mission-specific metadata', service.includes("isOr01h ? 'AUTOMATION'") && service.includes('Operations Architecture') && service.includes('human_vercel_plan_and_cron_settings_check_required'))
 check('mission count covers MC-00 through MC-10', status.missionCounts?.total === 11)
 check('all required categories documented', requiredCategories.every((item) => status.taxonomies?.categories?.includes(item) && service.includes(item)))
 check('all required states documented', requiredStates.every((item) => status.taxonomies?.states?.includes(item) && service.includes(item)))

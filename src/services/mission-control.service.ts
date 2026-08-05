@@ -161,25 +161,37 @@ function missionFromStatus(value: unknown, fallback: Mission): Mission {
   const priority = typeof source.priority === 'string' ? source.priority as MissionPriority : fallback.priority
   const mode = typeof source.mode === 'string' ? source.mode as MissionMode : fallback.mode
   const readiness = typeof source.readiness === 'string' ? source.readiness as ReadinessStatus : fallback.readiness
+  const isMc08h = id === 'MC-08H'
+  const isOr01h = id === 'OR-01H'
   return {
     ...fallback,
     id,
     title,
-    category: id === 'MC-08H' ? 'CERTIFICATION' : fallback.category,
+    category: isMc08h ? 'CERTIFICATION' : isOr01h ? 'AUTOMATION' : fallback.category,
     state,
     priority,
     mode,
     readiness,
-    owner: id === 'MC-08H' ? 'Product Certification' : fallback.owner,
-    scope: id === 'MC-08H'
+    owner: isMc08h ? 'Product Certification' : isOr01h ? 'Operations Architecture' : fallback.owner,
+    scope: isMc08h
       ? 'Determine whether the daily betting product is ready for real-user production operation.'
+      : isOr01h
+        ? 'Decide and certify the primary/fallback scheduler architecture required for sustained protected operating-day execution.'
       : fallback.scope,
-    nextAction: id === 'MC-08H'
+    nextAction: isMc08h
       ? 'Clear production operations blockers before opening Production Pilot Week.'
+      : isOr01h
+        ? 'Verify the Vercel project plan and Cron Jobs settings in the dashboard before approving a primary scheduler migration.'
       : fallback.nextAction,
-    blockers: id === 'MC-08H' ? ['production_readiness_blocked'] : fallback.blockers,
-    evidence: id === 'MC-08H'
+    blockers: isMc08h
+      ? ['production_readiness_blocked']
+      : isOr01h
+        ? ['human_vercel_plan_and_cron_settings_check_required']
+        : fallback.blockers,
+    evidence: isMc08h
       ? ['docs/CERTIFICATION/mc-08h-production-readiness-certification.json', 'docs/MISSION_CONTROL/MC_08H_PRODUCTION_READINESS_CERTIFICATION.md']
+      : isOr01h
+        ? ['docs/CERTIFICATION/or-01h-primary-scheduler-architecture.json', 'docs/CERTIFICATION/OR_01H_PRIMARY_SCHEDULER_ARCHITECTURE.md']
       : fallback.evidence,
     canStartAutomatically: false,
   }
