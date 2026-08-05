@@ -369,3 +369,13 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Aug 4 balances: 45 canonical predictions = 0 settled + 45 valid pending + 0 blocked; silent pending is 0. First missing step is result import: events remain `scheduled` and no `game_results` rows exist for the Aug 4 event IDs.
 - Repaired one presentation-only Performance defect: Pipeline Readiness no longer mirrors Trust and now uses the pipeline readiness score.
 - MC-08H was not rerun to PASS because current production is not stable enough: scheduler cadence was late and market/product readiness degraded during the audit window. Production Pilot Week remains NOT READY. MC-03 was not started.
+
+# 2026-08-05 OR-01H Primary Scheduler Architecture Decision
+
+- Status: HUMAN_SCHEDULER_ARCHITECTURE_DECISION_REQUIRED.
+- Production serves commit `931fa81543feb1fad4192b0344e555eee7ddf4c5`; `/api/system/version` returned HTTP 200 with provider calls 0.
+- Vercel Cron remains disabled by repository configuration: `vercel.json` contains an empty `crons` array.
+- The current Vercel project plan and Cron Jobs dashboard settings are not available from local repository or production read-only evidence, so Vercel cannot be promoted to primary without a human dashboard check.
+- GitHub Actions remains the current scheduler path. Runs `31032206383` and `31037920501` were scheduled successes on commit `931fa81543feb1fad4192b0344e555eee7ddf4c5`, but three consecutive automatic primary executions at the required cadence are not proven.
+- No paid scheduler was activated, no workflow cadence changed, no provider budget changed, no prediction, Official Pick, settlement or learning behavior changed, and no local server smoke was run.
+- Production Pilot Week remains NOT_READY. MC-08H remains blocked. MC-03 was not started.

@@ -1,24 +1,17 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "PR_01_CERTIFIED_PRODUCTION_PILOT_NOT_READY",
+  "status": "OR_01H_HUMAN_SCHEDULER_ARCHITECTURE_DECISION_REQUIRED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
-    "id": "MC-08H",
-    "title": "Production Readiness Certification",
+    "id": "OR-01H",
+    "title": "Primary Scheduler Architecture Decision",
     "state": "BLOCKED",
-    "priority": "P2",
+    "priority": "P1",
     "mode": "READ_ONLY",
-    "readiness": "PRODUCTION_READINESS_BLOCKED_SCHEDULER_AND_PLANNER_CONTINUITY"
+    "readiness": "HUMAN_VERCEL_PLAN_AND_CRON_SETTINGS_CHECK_REQUIRED"
   },
-  "nextMission": {
-    "id": "OR-01D",
-    "title": "GitHub Scheduled Trigger Recovery",
-    "state": "EXTERNAL_WAIT",
-    "priority": "P2",
-    "mode": "AGENT_ASSISTED",
-    "readiness": "WAIT_FOR_STABLE_GITHUB_SCHEDULE_DELIVERY_AND_PLANNER_CONTINUITY_DECISION"
-  },
+  "nextMission": null,
   "missionCounts": {
     "total": 11,
     "ready": 2,
@@ -364,6 +357,43 @@
       "performance_header_pipeline_readiness_mapping"
     ],
     "finalClassification": "PR_01_PRODUCTION_PILOT_NOT_READY"
+  },
+  "or01h": {
+    "status": "HUMAN_SCHEDULER_ARCHITECTURE_DECISION_REQUIRED",
+    "title": "Primary Scheduler Architecture Decision",
+    "certificationArtifact": "docs/CERTIFICATION/or-01h-primary-scheduler-architecture.json",
+    "missionArtifact": "docs/CERTIFICATION/OR_01H_PRIMARY_SCHEDULER_ARCHITECTURE.md",
+    "startingCommit": "931fa81543feb1fad4192b0344e555eee7ddf4c5",
+    "productionCommit": "931fa81543feb1fad4192b0344e555eee7ddf4c5",
+    "requiredCadenceMinutes": 10,
+    "primarySchedulerActivated": false,
+    "currentWriter": "github_actions_production_operating_day_scheduler",
+    "fallbackCandidate": "github_actions_production_operating_day_scheduler_after_primary_proof",
+    "vercelCronEnabledInRepository": false,
+    "vercelPlanEvidenceAvailable": false,
+    "githubLatestScheduledRuns": [
+      31037920501,
+      31032206383
+    ],
+    "threeConsecutiveAutomaticPrimaryRunsAtCadence": false,
+    "operationsHealth": "CRITICAL",
+    "schedulerCadenceStatus": "HEALTHY",
+    "marketFreshness": "CRITICAL",
+    "productReadiness": "CRITICAL",
+    "requiredUserAction": "Verify Vercel plan, Cron Jobs enabled state, production branch, deployment protection and CRON_SECRET in the Vercel dashboard before approving a Vercel primary scheduler.",
+    "paidServiceActivated": false,
+    "workflowCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "predictionChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "productionPilotWeek": "NOT_READY",
+    "mc08h": "BLOCKED",
+    "mc03": "NOT_STARTED",
+    "finalClassification": "HUMAN_SCHEDULER_ARCHITECTURE_DECISION_REQUIRED"
   },
   "p1_3": {
     "status": "PRODUCTION_CERTIFIED",

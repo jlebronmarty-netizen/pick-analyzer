@@ -12,7 +12,7 @@ It answers:
 
 Mission Control does not replace the Master Program, Master Roadmap, Project Status or certification artifacts.
 
-Mission Control is current through OR-01E adaptive-planner audit. MC-08H remains blocked because scheduler delivery is irregular and the current planner route continues only after `sync_results` or `settle`, not after market refresh actions. Production Pilot Week is not ready; MC-03 remains planned/manual-only.
+Mission Control is current through OR-01H primary-scheduler architecture decision. MC-08H remains blocked because the required production scheduler primary/fallback architecture cannot be certified from repository evidence alone: Vercel Cron is disabled in `vercel.json`, the Vercel plan is not visible to this repository, and GitHub Actions has not provided three consecutive automatic primary executions at the required cadence. Production Pilot Week is not ready; MC-03 remains planned/manual-only.
 
 ## Source Of Truth Boundaries
 
@@ -51,3 +51,4 @@ Both surfaces are read-only. They do not call providers, write data, start jobs,
 - [MC-08G Product Coherence Review](MC_08G_PRODUCT_COHERENCE_REVIEW.md)
 - [MC-08H Production Readiness Certification](MC_08H_PRODUCTION_READINESS_CERTIFICATION.md)
 - [OR-01 Operational Readiness Recovery](OR_01_OPERATIONAL_READINESS_RECOVERY.md)
+- [OR-01H Primary Scheduler Architecture](../CERTIFICATION/OR_01H_PRIMARY_SCHEDULER_ARCHITECTURE.md)

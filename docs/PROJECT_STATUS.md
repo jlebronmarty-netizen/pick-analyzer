@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-05 OR-01H Primary Scheduler Architecture Decision
+
+- OR-01H is `HUMAN_SCHEDULER_ARCHITECTURE_DECISION_REQUIRED`. Production serves `931fa81543feb1fad4192b0344e555eee7ddf4c5`, GitHub scheduled writer runs `31032206383` and `31037920501` succeeded on that commit, and Operations Health reported scheduler cadence `HEALTHY` in the latest read, but market freshness and product readiness remained `CRITICAL`.
+- Repository evidence cannot prove the current Vercel project plan. `vercel.json` has no active Cron Jobs, and local Vercel project metadata/token evidence is unavailable. Official Vercel docs show Hobby cron cannot meet the 10-minute cadence, while Pro/Enterprise can; the Vercel dashboard must be checked before Vercel can be promoted to primary.
+- No paid service was activated, no scheduler cadence was changed, no duplicate writer was introduced, and no prediction, Official Pick, settlement, learning, provider budget or model behavior changed. Production Pilot Week remains NOT_READY; MC-03 was not started.
+
 ## 2026-08-05 OR-01B Scheduler Workflow Ledger Reconciliation
 
 - OR-01B identified the reason GitHub scheduled runs could report success while app-side scheduler health remained stale: the workflow validated HTTP status only, while the protected route recorded no scheduler heartbeat for successful live no-product-mutation invocations. The repair adds workflow JSON response validation and records heartbeat evidence for live no-write successes. Scheduler cadence, provider budgets, prediction logic, settlement and learning remain unchanged. One post-deploy protected scheduler proof is required before MC-08H can be rerun.

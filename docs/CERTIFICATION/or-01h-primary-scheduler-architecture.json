@@ -1,0 +1,198 @@
+{
+  "mission": "OR-01H",
+  "title": "Primary Scheduler Architecture Decision And Reliability Certification",
+  "status": "HUMAN_SCHEDULER_ARCHITECTURE_DECISION_REQUIRED",
+  "startingCommit": "931fa81543feb1fad4192b0344e555eee7ddf4c5",
+  "productionCommitObserved": "931fa81543feb1fad4192b0344e555eee7ddf4c5",
+  "decision": {
+    "primarySchedulerActivated": false,
+    "reason": "Current Vercel plan and Cron Jobs dashboard state are not available from repository or production read-only evidence.",
+    "requiredCadenceMinutes": 10,
+    "githubCurrentWriterCadence": "7-57/10 * * * *",
+    "githubHeartbeatCadence": "3,33 * * * *",
+    "protectedEndpoint": "/api/cron/operating-day?dryRun=false",
+    "sharedSecret": "CRON_SECRET",
+    "manualCountsAsSustainedProof": false,
+    "requiredPrimaryAutomaticRuns": 3
+  },
+  "vercelAudit": {
+    "vercelJsonCrons": [],
+    "vercelCronCurrentlyEnabledInRepository": false,
+    "localVercelProjectMetadataAvailable": false,
+    "vercelCliAvailable": false,
+    "vercelTokenAvailable": false,
+    "vercelOrgIdAvailable": false,
+    "vercelProjectIdAvailable": false,
+    "planEvidenceAvailable": false,
+    "officialDocs": {
+      "hobbyMinimumInterval": "once_per_day",
+      "hobbyPrecision": "hourly_plus_or_minus_59_minutes",
+      "proMinimumInterval": "once_per_minute",
+      "proPrecision": "per_minute",
+      "enterpriseMinimumInterval": "once_per_minute",
+      "enterprisePrecision": "per_minute",
+      "hobbyFrequentCronDeploymentFailure": true,
+      "cronSecretAuthorizationHeaderSupported": true,
+      "automaticRetryOnFailure": false,
+      "sources": [
+        "https://vercel.com/docs/cron-jobs/usage-and-pricing",
+        "https://vercel.com/docs/cron-jobs/manage-cron-jobs",
+        "https://vercel.com/docs/cron-jobs",
+        "https://vercel.com/docs/pricing/manage-and-optimize-usage"
+      ]
+    },
+    "decision": "DO_NOT_ACTIVATE_VERCEL_PRIMARY_WITHOUT_DASHBOARD_PLAN_PROOF"
+  },
+  "githubAudit": {
+    "currentWriter": ".github/workflows/production-operating-day.yml",
+    "writerSchedule": "7-57/10 * * * *",
+    "writerConcurrencyGroup": "production-operating-day-writer",
+    "writerTimeoutMinutes": 6,
+    "heartbeat": ".github/workflows/production-operating-day-heartbeat.yml",
+    "heartbeatSchedule": "3,33 * * * *",
+    "heartbeatEndpoint": "/api/cron/operating-day?dryRun=true",
+    "manualFallback": ".github/workflows/operating-day-refresh.yml",
+    "latestRuns": [
+      {
+        "runId": 31037920501,
+        "event": "schedule",
+        "commit": "931fa81543feb1fad4192b0344e555eee7ddf4c5",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-08-05T19:06:58Z",
+        "updatedAt": "2026-08-05T19:07:28Z"
+      },
+      {
+        "runId": 31032206383,
+        "event": "schedule",
+        "commit": "931fa81543feb1fad4192b0344e555eee7ddf4c5",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-08-05T17:54:34Z",
+        "updatedAt": "2026-08-05T17:54:58Z"
+      }
+    ],
+    "threeConsecutiveAutomaticPrimaryRunsAtCadence": false,
+    "sustainedProofStatus": "NOT_PROVEN"
+  },
+  "productionEvidence": {
+    "systemVersion": {
+      "http": 200,
+      "gitCommit": "931fa81543feb1fad4192b0344e555eee7ddf4c5",
+      "providerCallsMade": 0
+    },
+    "operationsHealth": {
+      "http": 200,
+      "status": "CRITICAL",
+      "schedulerCadenceStatus": "HEALTHY",
+      "schedulerRunning": true,
+      "missedSchedulerIntervals": 0,
+      "lastSuccessfulProtectedInvocationAt": "2026-08-05T19:07:25.608+00:00",
+      "marketFreshnessStatus": "CRITICAL",
+      "productReadinessStatus": "CRITICAL"
+    },
+    "adaptiveRefreshStatus": {
+      "http": 200,
+      "status": "PARTIAL",
+      "operatingDate": "2026-08-05",
+      "currentGames": 15,
+      "upcomingGames": 11,
+      "predictionCandidates": 33,
+      "latestOddsTimestamp": "2026-08-05T16:16:39.658Z"
+    },
+    "eventRefreshPlan": {
+      "http": 200,
+      "totalEvents": 15,
+      "eventsDueNow": 15,
+      "eventsByPlannedAction": {
+        "STOP_PREGAME_REFRESH": 4,
+        "REFRESH_MARKET": 11
+      },
+      "estimatedHttpRequests": 1,
+      "estimatedQuotaUnits": 1
+    },
+    "providerBudget": {
+      "http": 200,
+      "status": "HEALTHY",
+      "callsMadeToday": 0,
+      "providerCallsMadeByCertificationReads": 0
+    },
+    "performance": {
+      "http": 200,
+      "currentEraCanonicalPredictions": 114,
+      "currentEraSettled": 69,
+      "currentEraPending": 45
+    },
+    "missionControl": {
+      "http": 200,
+      "status": "PR_01_CERTIFIED_PRODUCTION_PILOT_NOT_READY",
+      "currentMission": "MC-08H"
+    }
+  },
+  "fallbackContract": {
+    "githubFallbackAllowedAfterPrimaryProof": true,
+    "blindParallelWritersAllowed": false,
+    "sameProtectedEndpointRequired": true,
+    "sameSecretRequired": true,
+    "sameProviderLocksRequired": true,
+    "missedTicksAreNotReplayed": true,
+    "duplicateSuppression": [
+      "provider_action_lock",
+      "operating_day_lifecycle_events",
+      "canonical odds snapshot ids",
+      "game_results upsert",
+      "already-settled prediction guard"
+    ]
+  },
+  "healthContract": {
+    "primaryScheduler": "UNDECIDED",
+    "currentWriter": "github_actions_production_operating_day_scheduler",
+    "fallbackScheduler": "manual_protected_operating_day_dispatch",
+    "preferredFutureFallback": "github_actions_production_operating_day_scheduler",
+    "primaryProofRequired": "3 consecutive automatic primary executions at the configured cadence",
+    "marketFreshnessRequiredForFullGate": "HEALTHY"
+  },
+  "safety": {
+    "paidServiceActivated": false,
+    "vercelCronActivated": false,
+    "workflowCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "schedulerCadenceWeakened": false,
+    "predictionChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
+    "localServerSmokeRun": false,
+    "productionPilotWeekStarted": false,
+    "mc03Started": false
+  },
+  "requiredUserAction": [
+    "Verify Vercel team/project plan in the Vercel dashboard.",
+    "Verify Cron Jobs are enabled for the Pick Analyzer project.",
+    "Verify production branch is main.",
+    "Verify CRON_SECRET exists in the Production environment without exposing it.",
+    "If Pro or Enterprise is already active, authorize a bounded Vercel primary cron configuration change.",
+    "If Hobby is active, approve or reject the paid Vercel upgrade before Vercel can meet the required intraday cadence."
+  ],
+  "validation": {
+    "primaryValidator": "scripts/or01h-primary-scheduler-architecture-validate.mjs",
+    "status": "PASS",
+    "or01hValidator": "PASS",
+    "or01gValidator": "PASS",
+    "or01fValidator": "PASS",
+    "or01eValidator": "PASS",
+    "pr01Validator": "PASS",
+    "missionControlValidator": "PASS",
+    "schedulerHealthAlignmentValidator": "PASS",
+    "mlbAutonomousOperationsValidator": "PASS",
+    "protectedCanonicalSettlementValidator": "PASS",
+    "settlementLearningRecoveryValidator": "PASS",
+    "providerBudgetValidator": "PASS",
+    "productFreshnessSlaValidator": "PASS",
+    "legacyScopeValidators": "PENDING_CLEAN_WORKTREE_RERUN_AFTER_CERTIFICATION_COMMIT",
+    "build": "NOT_RUN_NO_RUNTIME_OR_WORKFLOW_CHANGE"
+  },
+  "finalClassification": "HUMAN_SCHEDULER_ARCHITECTURE_DECISION_REQUIRED"
+}

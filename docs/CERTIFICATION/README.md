@@ -123,5 +123,7 @@ Move certification docs here only when links are updated and validation passes.
 - [OR-01E Adaptive Planner Behavioral Audit JSON](or-01e-adaptive-planner-behavior.json)
 - [OR-01F Bounded Planner Continuity](OR_01F_BOUNDED_PLANNER_CONTINUITY.md)
 - [OR-01F Bounded Planner Continuity JSON](or-01f-bounded-planner-continuity.json)
+- [OR-01H Primary Scheduler Architecture](OR_01H_PRIMARY_SCHEDULER_ARCHITECTURE.md)
+- [OR-01H Primary Scheduler Architecture JSON](or-01h-primary-scheduler-architecture.json)
 - [PR-01 Final Production Readiness Audit](PR_01_FINAL_PRODUCTION_READINESS_AUDIT.md)
 - [PR-01 Final Production Readiness Audit JSON](pr-01-final-production-readiness-audit.json)
