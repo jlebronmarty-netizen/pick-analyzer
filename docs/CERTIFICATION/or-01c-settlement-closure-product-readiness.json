@@ -2,7 +2,7 @@
   "id": "or_01c_settlement_closure_product_readiness",
   "date": "2026-08-05",
   "startingCommit": "3b5de6c726df6745371a50c350b059ffb40c8e41",
-  "classification": "OR_01C_REPAIR_DEPLOYMENT_REQUIRED",
+  "classification": "OR_01C_REPAIR_DEPLOYED_PENDING_SCHEDULER_TRIGGER_PROOF",
   "rootCause": "SETTLEMENT_SCOPE_AGGREGATION_DEFECT_AND_WRITER_HEARTBEAT_GAP",
   "settlementClosureBefore": "CRITICAL",
   "productReadinessBefore": "CRITICAL",
@@ -47,6 +47,18 @@
   "resultWrites": 0,
   "settlementWrites": 0,
   "learningWrites": 0,
-  "deployment": "PENDING",
-  "productionProof": "PENDING"
+  "deployment": "DEPLOYED",
+  "productionCommit": "e4cb2284db80be62d8f5beda8884e92e6f7d0152",
+  "settlementClosureAfter": "HEALTHY",
+  "productReadinessAfter": "CRITICAL_SCHEDULER_EXECUTION",
+  "operationalHealthAfter": "CRITICAL_SCHEDULER_EXECUTION",
+  "latestObservedWorkflowRun": {
+    "id": 31003990142,
+    "event": "schedule",
+    "headSha": "9af43b2d553ef3401883ebb7b8c736c58fc1fef8",
+    "conclusion": "success",
+    "createdAt": "2026-08-05T12:03:30Z",
+    "note": "No newer automatic run observed after e4cb228 deployment during OR-01C observation window."
+  },
+  "productionProof": "PARTIAL_SETTLEMENT_HEALTH_REPAIRED_SCHEDULER_TRIGGER_PROOF_PENDING"
 }

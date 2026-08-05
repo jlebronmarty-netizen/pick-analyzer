@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "OR_01C_SETTLEMENT_SCOPE_REPAIR_DEPLOYMENT_REQUIRED",
+  "status": "OR_01C_REPAIR_DEPLOYED_PENDING_SCHEDULER_TRIGGER_PROOF",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -9,7 +9,7 @@
     "state": "BLOCKED",
     "priority": "P2",
     "mode": "READ_ONLY",
-    "readiness": "PRODUCTION_READINESS_BLOCKED_OR01C_DEPLOYMENT_REQUIRED"
+    "readiness": "PRODUCTION_READINESS_BLOCKED_OR01C_SCHEDULER_TRIGGER_PROOF_PENDING"
   },
   "nextMission": {
     "id": "MC-08",
@@ -201,7 +201,7 @@
     "mc03": "NOT_STARTED"
   },
   "or01c": {
-    "status": "SETTLEMENT_SCOPE_REPAIR_DEPLOYMENT_REQUIRED",
+    "status": "REPAIR_DEPLOYED_PENDING_SCHEDULER_TRIGGER_PROOF",
     "title": "Settlement Closure and Product Readiness Recovery",
     "certificationArtifact": "docs/CERTIFICATION/or-01c-settlement-closure-product-readiness.json",
     "rootCause": "SETTLEMENT_SCOPE_AGGREGATION_DEFECT_AND_WRITER_HEARTBEAT_GAP",
@@ -225,8 +225,12 @@
     "resultWrites": 0,
     "settlementWrites": 0,
     "learningWrites": 0,
-    "productionProof": "PENDING",
-    "or01a": "BLOCKED_PENDING_OR01C_DEPLOYMENT",
+    "productionProof": "PARTIAL_SETTLEMENT_HEALTH_REPAIRED_SCHEDULER_TRIGGER_PROOF_PENDING",
+    "productionCommit": "e4cb2284db80be62d8f5beda8884e92e6f7d0152",
+    "settlementClosureAfter": "HEALTHY",
+    "productReadinessAfter": "CRITICAL_SCHEDULER_EXECUTION",
+    "latestObservedWorkflowRun": 31003990142,
+    "or01a": "BLOCKED_PENDING_SCHEDULER_TRIGGER_PROOF",
     "mc08hRerun": false,
     "productionPilotWeek": "NOT_READY",
     "mc03": "NOT_STARTED"

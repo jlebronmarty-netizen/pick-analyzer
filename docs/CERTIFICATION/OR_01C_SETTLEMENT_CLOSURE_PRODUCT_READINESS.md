@@ -6,7 +6,7 @@ Starting commit: `3b5de6c726df6745371a50c350b059ffb40c8e41`
 
 ## Verdict
 
-`OR_01C_REPAIR_DEPLOYMENT_REQUIRED`
+`OR_01C_REPAIR_DEPLOYED_PENDING_SCHEDULER_TRIGGER_PROOF`
 
 OR-01C found a settlement health scope aggregation defect and a protected-writer heartbeat gap. Settlement-ready rows must remain blocking, but prior-date scheduled events that need result recovery must remain visible as recovery debt instead of forcing current Product Readiness to CRITICAL when no completed Current Era rows are ready, silently pending, or missing canonical results. Successful protected writer executions must also record scheduler health evidence even when they mutate product data.
 
@@ -40,10 +40,20 @@ OR-01C found a settlement health scope aggregation defect and a protected-writer
 
 ## Production Certification Required
 
-Deploy the runtime repair and verify:
+Runtime repairs are deployed at `e4cb2284db80be62d8f5beda8884e92e6f7d0152`.
+
+Verified:
 
 - Settlement Closure: HEALTHY.
-- Product Readiness: HEALTHY.
-- Overall Operational Health: non-critical / HEALTHY under the canonical contract.
+- Ready rows: 0.
+- Silent pending rows: 0.
 - Older recovery debt remains visible as warning evidence.
 - Current Board and Product Freshness SLA difference remains explicitly classified.
+
+Still required:
+
+- Product Readiness: HEALTHY.
+- Overall Operational Health: non-critical / HEALTHY under the canonical contract.
+- Automatic scheduled workflow proof on the repaired commit.
+
+Latest observed GitHub Actions run for `production-operating-day.yml` remained `31003990142`, event `schedule`, commit `9af43b2d553ef3401883ebb7b8c736c58fc1fef8`, conclusion `success`, created at `2026-08-05T12:03:30Z`. No newer automatic run was observed after the `e4cb228` deployment during the OR-01C observation window.
