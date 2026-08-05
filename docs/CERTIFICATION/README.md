@@ -119,3 +119,5 @@ Move certification docs here only when links are updated and validation passes.
 - [OR-01B Scheduler Workflow Ledger Reconciliation JSON](or-01b-scheduler-workflow-ledger-reconciliation.json)
 - [OR-01C Settlement Closure and Product Readiness](OR_01C_SETTLEMENT_CLOSURE_PRODUCT_READINESS.md)
 - [OR-01C Settlement Closure and Product Readiness JSON](or-01c-settlement-closure-product-readiness.json)
+- [OR-01E Adaptive Planner Behavioral Audit](OR_01E_ADAPTIVE_PLANNER_BEHAVIOR.md)
+- [OR-01E Adaptive Planner Behavioral Audit JSON](or-01e-adaptive-planner-behavior.json)

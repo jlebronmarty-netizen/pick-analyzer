@@ -1762,3 +1762,9 @@ MC-08E-R is production certified. Paused MC-08E work was preserved on recovery b
 ## 2026-08-05 OR-01D Operational Readiness
 
 OR-01D observed automatic GitHub scheduled run `31015257795`, but sustained scheduled cadence did not continue. Scheduler Execution returned to CRITICAL in final evidence, so OR-01A and MC-08H remain blocked. Production Pilot Week is NOT READY. MC-03 remains manual-only and was not started.
+
+## 2026-08-05 OR-01E Adaptive Planner Behavioral Audit
+
+OR-01E is certified as `MIXED_SCHEDULER_AND_PLANNER_DEFECT`. The audit found that `runAdaptiveRefresh` selects one global action from the adaptive status snapshot and the protected `/api/cron/operating-day` route only chains additional work after `sync_results` or `settle`; market refresh actions such as `midday_refresh` stop after one action and require another external scheduler tick. This policy is bounded and intentional, but it is incompatible with the observed 1-3 hour GitHub scheduled-delivery gaps.
+
+The phase adds protected read-only `/api/operations/planner-trace` evidence and certification docs. It does not change scheduler cadence, provider budgets, provider contracts, prediction formulas, recommendation policies, Official Pick policy, settlement rules, learning rules or model behavior. Production Pilot Week remains NOT_READY, MC-08H remains BLOCKED and MC-03 remains NOT_STARTED.

@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "OR_01D_AUTOMATIC_PROOF_OBSERVED_SUSTAINED_CADENCE_BLOCKED",
+  "status": "OR_01E_MIXED_SCHEDULER_AND_PLANNER_DEFECT",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -9,7 +9,7 @@
     "state": "BLOCKED",
     "priority": "P2",
     "mode": "READ_ONLY",
-    "readiness": "PRODUCTION_READINESS_BLOCKED_SCHEDULER_CADENCE"
+    "readiness": "PRODUCTION_READINESS_BLOCKED_SCHEDULER_AND_PLANNER_CONTINUITY"
   },
   "nextMission": {
     "id": "OR-01D",
@@ -17,7 +17,7 @@
     "state": "EXTERNAL_WAIT",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "WAIT_FOR_STABLE_GITHUB_SCHEDULE_DELIVERY"
+    "readiness": "WAIT_FOR_STABLE_GITHUB_SCHEDULE_DELIVERY_AND_PLANNER_CONTINUITY_DECISION"
   },
   "missionCounts": {
     "total": 11,
@@ -256,6 +256,34 @@
     "productReadiness": "CRITICAL",
     "operationalHealth": "CRITICAL",
     "or01a": "BLOCKED",
+    "mc08h": "BLOCKED",
+    "productionPilotWeek": "NOT_READY",
+    "mc03": "NOT_STARTED"
+  },
+  "or01e": {
+    "status": "CERTIFIED_MIXED_DEFECT",
+    "title": "Adaptive Planner Behavioral Audit",
+    "certificationArtifact": "docs/CERTIFICATION/or-01e-adaptive-planner-behavior.json",
+    "traceEndpoint": "/api/operations/planner-trace",
+    "rootCauseClassification": "MIXED_SCHEDULER_AND_PLANNER",
+    "finalClassification": "MIXED_SCHEDULER_AND_PLANNER_DEFECT",
+    "plannerPolicy": "INTENTIONAL_BUT_INCOMPATIBLE_WITH_REQUIRED_CADENCE",
+    "routeMaxActionsPerInvocation": 3,
+    "continuationEligibleActions": [
+      "sync_results",
+      "settle"
+    ],
+    "marketRefreshContinuationEligible": false,
+    "recentActionSequenceFinding": "Repeated midday_refresh protected selections were observed; market refresh does not continue to downstream planner actions in the same invocation.",
+    "schedulerDeliveryStillRequired": true,
+    "boundedPlannerRepairMade": false,
+    "schedulerCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "predictionChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "providerCallsIntroduced": 0,
+    "remoteMutationsIntroduced": 0,
     "mc08h": "BLOCKED",
     "productionPilotWeek": "NOT_READY",
     "mc03": "NOT_STARTED"

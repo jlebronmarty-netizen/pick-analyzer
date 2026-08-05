@@ -12,7 +12,7 @@ It answers:
 
 Mission Control does not replace the Master Program, Master Roadmap, Project Status or certification artifacts.
 
-Mission Control is current through OR-01 operational-readiness recovery. MC-08H remains blocked until post-deploy protected-writer evidence proves scheduler cadence and market freshness recovered; Production Pilot Week is not ready; MC-03 remains planned/manual-only.
+Mission Control is current through OR-01E adaptive-planner audit. MC-08H remains blocked because scheduler delivery is irregular and the current planner route continues only after `sync_results` or `settle`, not after market refresh actions. Production Pilot Week is not ready; MC-03 remains planned/manual-only.
 
 ## Source Of Truth Boundaries
 

@@ -1,0 +1,95 @@
+{
+  "mission": "OR-01E",
+  "title": "Adaptive Planner Behavioral Audit",
+  "status": "CERTIFIED_MIXED_DEFECT",
+  "startingCommit": "52942fd141f55823903220eeaf1340435792cfb5",
+  "classification": "MIXED_SCHEDULER_AND_PLANNER",
+  "finalClassification": "MIXED_SCHEDULER_AND_PLANNER_DEFECT",
+  "plannerPolicy": {
+    "selectionFunction": "src/services/adaptive-refresh-orchestrator.service.ts executableActionFromStatus",
+    "selectsOneGlobalActionPerRunAdaptiveRefreshCall": true,
+    "routeMaxActionsPerInvocation": 3,
+    "continuationEligibleActions": [
+      "sync_results",
+      "settle"
+    ],
+    "marketRefreshContinuationEligible": false,
+    "oneActionPolicyClassification": "INTENTIONAL_BUT_INCOMPATIBLE_WITH_REQUIRED_CADENCE"
+  },
+  "actionsInventoried": [
+    "status_refresh",
+    "morning_sync",
+    "midday_refresh",
+    "pregame_refresh",
+    "final_refresh",
+    "sync_results",
+    "settle",
+    "learning",
+    "performance",
+    "prewarm",
+    "no_action"
+  ],
+  "recentEvidence": {
+    "newestAutomaticProofRun": 31015257795,
+    "newestAutomaticProofInvocationId": "2b3900d1-4789-414d-9116-3bd151e07ae5",
+    "newestAutomaticProofSelectedAction": "midday_refresh",
+    "newestAutomaticProofCompletedAt": "2026-08-05T14:27:33.731+00:00",
+    "sustainedCadenceProven": false,
+    "repeatedMiddayRefreshObserved": true
+  },
+  "starvationFindings": [
+    "active_market_refresh_can_defer_older_missing_result_recovery_when_no_settlement_ready_rows_exist",
+    "market_refresh_actions_do_not_recompute_and_continue_inside_the_same_invocation",
+    "learning_and_performance_are_not_standalone_planner_actions"
+  ],
+  "closureEstimates": {
+    "tenMinuteCadence": "40-50 minutes for a five-step lifecycle requiring separate external ticks",
+    "observedGithubCadence": "5-15 hours for the same sequence under 1-3 hour delivery gaps"
+  },
+  "actionTraceApi": {
+    "path": "/api/operations/planner-trace",
+    "protected": true,
+    "authorization": "Bearer CRON_SECRET header only",
+    "bounded": true,
+    "acceptsQueryStringSecret": false,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
+  },
+  "behaviorChanges": {
+    "schedulerCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "predictionChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "modelChanged": false,
+    "plannerPriorityChanged": false
+  },
+  "readOnlyGuarantees": {
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "manualProtectedWriterExecutions": 0,
+    "manualDeployment": false,
+    "localServerSmokeRun": false
+  },
+  "missionControl": {
+    "mc08h": "PRODUCTION_READINESS_BLOCKED",
+    "productionPilotWeek": "NOT_READY",
+    "mc03": "NOT_STARTED",
+    "recommendedNextStep": "Human architecture decision: repair bounded planner continuity for safe internal/postgame actions or migrate scheduler delivery; do not begin Production Pilot Week."
+  },
+  "validation": {
+    "primaryValidator": "scripts/or01e-adaptive-planner-behavior-validate.mjs",
+    "status": "PASS",
+    "build": "PASS",
+    "jsonValidation": "PASS",
+    "changedFileEslint": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS",
+    "missionControlValidator": "PASS"
+  }
+}

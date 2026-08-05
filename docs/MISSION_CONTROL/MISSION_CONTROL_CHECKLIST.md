@@ -73,6 +73,7 @@ Use this checklist before starting any queued mission.
 - OR-01B: workflow/app-ledger reconciliation is certified by scheduled run `31003990142` and durable heartbeat invocation `cf420831-ad95-4943-83a7-326d9fdad5d7`.
 - OR-01C: `PRODUCTION_CERTIFIED`; settlement scope repair is deployed and older result-recovery debt is non-blocking.
 - OR-01D: automatic scheduled run `31015257795` was observed, but sustained cadence is blocked by missing subsequent ticks.
+- OR-01E: `MIXED_SCHEDULER_AND_PLANNER_DEFECT`; `/api/operations/planner-trace` documents the planner/route policy, and Production Pilot Week remains NOT READY.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.
@@ -115,4 +116,14 @@ Use this checklist before starting any queued mission.
 - [x] Critical operations blockers identified.
 - [x] Production Ready decision recorded as NO.
 - [x] Production Pilot Week recorded as NOT READY.
+- [x] MC-03 was not started.
+
+## OR-01E Adaptive Planner Behavioral Audit
+
+- [x] Planner action inventory documented.
+- [x] Route loop policy documented.
+- [x] Starvation scenarios classified.
+- [x] Protected read-only planner trace route added.
+- [x] Scheduler cadence, provider budgets, prediction, settlement and learning behavior unchanged.
+- [x] Production Pilot Week remains NOT READY.
 - [x] MC-03 was not started.

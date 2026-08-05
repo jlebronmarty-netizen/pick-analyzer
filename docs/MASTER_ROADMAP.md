@@ -3283,3 +3283,9 @@ MC-08F production certification on 2026-08-04: production served commit `fabe976
 ## OR-01D Operational Readiness Update
 
 One automatic GitHub scheduled execution was observed, but sustained cadence is not certified. Production Pilot Week is NOT READY; do not begin MC-03 without explicit approval.
+
+## OR-01E Adaptive Planner Behavioral Audit
+
+OR-01E is certified as `MIXED_SCHEDULER_AND_PLANNER_DEFECT`. Scheduler delivery remains irregular, and planner continuity is also constrained because the protected operating-day route only continues after `sync_results` or `settle`; market refresh actions stop after one action and wait for another external invocation. The new protected `/api/operations/planner-trace` contract exposes the action inventory, selection policy, route loop caps, recent invocation summaries, starvation warnings and simulations with zero provider calls and zero mutations.
+
+Production Pilot Week remains NOT_READY. MC-08H remains blocked. MC-03 remains not started. The next decision is a human architecture choice between scheduler delivery migration and a separately approved bounded planner-continuity repair.

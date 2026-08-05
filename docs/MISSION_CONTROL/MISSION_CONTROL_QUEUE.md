@@ -2,7 +2,7 @@
 
 Status: deterministic V2 queue.
 
-MC-08 remains blocked at final readiness. OR-01D proved one automatic GitHub scheduled execution, but sustained cadence did not continue and Scheduler Execution returned to CRITICAL. Production Pilot Week is NOT READY. MC-03 remains PLANNED and manual-only.
+MC-08 remains blocked at final readiness. OR-01E proved a mixed scheduler/planner blocker: GitHub scheduled delivery remains irregular, and the protected operating-day route only continues inside one invocation after `sync_results` or `settle`, not after market refresh actions. Production Pilot Week is NOT READY. MC-03 remains PLANNED and manual-only.
 
 | ID | Mission | Category | Priority | State | Mode | Next Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -14,11 +14,11 @@ MC-08 remains blocked at final readiness. OR-01D proved one automatic GitHub sch
 | MC-05 | Performance Intelligence | PERFORMANCE_INTELLIGENCE | P2 | PLANNED | AGENT_ASSISTED | Advance after eligible settled samples exist. |
 | MC-06 | Decision Core Evolution | DECISION_CORE_EVOLUTION | P3 | PLANNED | MANUAL_ONLY | Use controlled experimentation only. |
 | MC-07 | Market Expansion | MARKET_EXPANSION | P3 | PLANNED | AGENT_ASSISTED | Keep unsupported markets unavailable until all gates pass. |
-| MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | BLOCKED | AGENT_ASSISTED | Wait for stable OR-01D scheduler cadence before pilot. |
+| MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | BLOCKED | AGENT_ASSISTED | Wait for scheduler delivery and planner-continuity architecture decision before pilot. |
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
-Next eligible phase: none. OR-01D is waiting for stable scheduled cadence. MC-03 remains PLANNED and manual-only.
+Next eligible phase: none. OR-01E requires a human architecture decision: scheduler migration or bounded planner-continuity repair. MC-03 remains PLANNED and manual-only.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
@@ -55,4 +55,5 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | OR-01B | Scheduler Workflow Ledger Reconciliation | CERTIFIED | Workflow success now maps to durable protected heartbeat evidence; scheduled run `31003990142` persisted invocation `cf420831-ad95-4943-83a7-326d9fdad5d7`. |
 | OR-01C | Settlement Closure and Product Readiness Recovery | PRODUCTION_CERTIFIED | Settlement Closure is healthy; older result-recovery debt remains visible as non-blocking warning when current rows are clean. |
 | OR-01D | GitHub Scheduled Trigger Recovery | EXTERNAL_WAIT | Automatic scheduled run `31015257795` occurred, but subsequent expected ticks did not arrive. |
+| OR-01E | Adaptive Planner Behavioral Audit | CERTIFIED | `MIXED_SCHEDULER_AND_PLANNER_DEFECT`: planner selects one global action per `runAdaptiveRefresh`; route chains only `sync_results`/`settle`; market refresh requires another scheduler tick. |
 | Production Pilot Week | Real-world validation before Multi-Sport Expansion | NOT_READY | Requires stable OR-01D cadence and MC-08H Production Ready YES. |
