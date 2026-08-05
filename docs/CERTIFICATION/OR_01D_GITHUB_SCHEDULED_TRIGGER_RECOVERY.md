@@ -2,11 +2,11 @@
 
 Date: 2026-08-05
 
-Status: PRODUCTION CERTIFIED
+Status: AUTOMATIC PROOF OBSERVED / SUSTAINED CADENCE BLOCKED
 
 ## Verdict
 
-OR-01D proved that the production scheduler workflow is active on the default branch and that an automatic `schedule` run reached production after the OR-01C repairs.
+OR-01D proved that the production scheduler workflow is active on the default branch and that one automatic `schedule` run reached production after the OR-01C repairs. It did not prove sustained 10-minute cadence delivery; subsequent expected ticks were not created during the observation window.
 
 ## Schedule Contract
 
@@ -34,18 +34,20 @@ OR-01D proved that the production scheduler workflow is active on the default br
 
 ## Production Recovery
 
-- Scheduler Execution: HEALTHY
-- Missed intervals: 0
+- Scheduler Execution after proof: HEALTHY
+- Final Scheduler Execution after extended observation: CRITICAL
+- Final missed intervals: 3
 - Market Freshness: HEALTHY
 - Current Board: 45 fresh / 0 stale visible markets
 - Provider Budget: HEALTHY
 - Settlement Closure: HEALTHY
-- Product Readiness: HEALTHY
-- Overall Operational Health: HEALTHY
+- Product Readiness after proof: HEALTHY
+- Final Product Readiness: CRITICAL, limited by scheduler execution
+- Final Overall Operational Health: CRITICAL
 - Historical result recovery debt remains visible and non-blocking.
 
 ## Classification
 
-The earlier missing run window is classified as `GITHUB_SCHEDULE_DELAY`; no disabled workflow, invalid cron, branch mismatch, job condition, secret failure, or concurrency suppression was proven.
+The missing run windows are classified as `GITHUB_SCHEDULE_DELAY` / schedule-delivery instability. No disabled workflow, invalid cron, branch mismatch, job condition, secret failure, or concurrency suppression was proven from repository evidence.
 
-OR-01A is production-certified from this evidence. MC-08H was rerun from current evidence and is production-certified with Production Pilot Week marked READY.
+OR-01A remains blocked because sustained scheduler health did not hold. MC-08H was not rerun to PASS. Production Pilot Week remains NOT READY.

@@ -1761,4 +1761,4 @@ MC-08E-R is production certified. Paused MC-08E work was preserved on recovery b
 - Provider calls and remote mutations remained 0 where reported. No prediction, ranking, Official Pick, Kelly, settlement, learning, scheduler, provider or budget behavior changed. MC-08G and MC-03 were not started.
 ## 2026-08-05 OR-01D Operational Readiness
 
-OR-01D is `PRODUCTION_CERTIFIED`. Automatic GitHub scheduled run `31015257795` restored protected scheduler evidence and production health. OR-01A and MC-08H are certified; Production Pilot Week is READY for 5-7 days of monitored validation. MC-03 remains manual-only and was not started.
+OR-01D observed automatic GitHub scheduled run `31015257795`, but sustained scheduled cadence did not continue. Scheduler Execution returned to CRITICAL in final evidence, so OR-01A and MC-08H remain blocked. Production Pilot Week is NOT READY. MC-03 remains manual-only and was not started.

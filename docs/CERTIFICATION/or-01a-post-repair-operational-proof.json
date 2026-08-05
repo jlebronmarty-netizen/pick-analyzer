@@ -2,8 +2,8 @@
   "id": "or_01a_post_repair_operational_proof",
   "date": "2026-08-05",
   "productionCommit": "42439dee8e4b42f2302ef466df16a39fb40d235b",
-  "classification": "OR_01A_PRODUCTION_CERTIFIED",
-  "reason": "OR-01D proved an automatic scheduled GitHub run reached production and restored all operational health domains.",
+  "classification": "OR_01A_BLOCKED_SUSTAINED_SCHEDULER_CADENCE",
+  "reason": "OR-01D proved one automatic scheduled GitHub run reached production, but subsequent expected ticks did not arrive and Scheduler Execution returned to CRITICAL.",
   "automaticProofRun": {
     "runId": 31015257795,
     "event": "schedule",
@@ -17,13 +17,13 @@
     "heartbeatRecordedAt": "2026-08-05T14:27:33.731+00:00"
   },
   "after": {
-    "schedulerExecution": "HEALTHY",
+    "schedulerExecution": "CRITICAL",
     "marketFreshness": "HEALTHY",
     "providerBudget": "HEALTHY",
     "settlementClosure": "HEALTHY",
-    "productReadiness": "HEALTHY",
-    "operationalHealth": "HEALTHY",
-    "missedSchedulerIntervals": 0,
+    "productReadiness": "CRITICAL",
+    "operationalHealth": "CRITICAL",
+    "missedSchedulerIntervals": 3,
     "freshVisibleMarkets": 45,
     "staleVisibleMarkets": 0,
     "latestOddsTimestamp": "2026-08-05T14:27:24.843Z",
@@ -33,10 +33,10 @@
     "historicalRecoveryDebtRows": 59
   },
   "mc08h": {
-    "rerun": true,
-    "classification": "MC_08H_PRODUCTION_CERTIFIED"
+    "rerun": false,
+    "classification": "MC_08H_BLOCKED_BY_SCHEDULER_CADENCE"
   },
-  "productionPilotWeek": "READY",
+  "productionPilotWeek": "NOT_READY",
   "mc03": "NOT_STARTED",
   "providerCallsMadeByCertificationReads": 0,
   "remoteMutationsMadeByCertificationReads": 0,

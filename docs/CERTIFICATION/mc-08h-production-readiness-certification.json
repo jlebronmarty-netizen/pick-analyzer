@@ -1,20 +1,22 @@
 {
   "certification": "mc-08h-production-readiness-certification",
-  "status": "PRODUCTION_CERTIFIED",
+  "status": "PRODUCTION_READINESS_BLOCKED",
   "baselineCommit": "42439dee8e4b42f2302ef466df16a39fb40d235b",
   "productionCommitObserved": "42439dee8e4b42f2302ef466df16a39fb40d235b",
-  "productionReady": true,
-  "productionReadinessPercent": 88,
-  "dailyUseRecommendation": "PRODUCTION_PILOT_READY_MONITORED_DAILY_USE",
-  "wouldTrustForOwnDailyBettingDecisions": true,
+  "productionReady": false,
+  "productionReadinessPercent": 82,
+  "dailyUseRecommendation": "WAIT_FOR_STABLE_SCHEDULER_CADENCE",
+  "wouldTrustForOwnDailyBettingDecisions": false,
   "issueCounts": {
-    "critical": 0,
+    "critical": 1,
     "high": 0,
     "medium": 3,
     "low": 1,
     "cosmetic": 0
   },
-  "criticalIssues": [],
+  "criticalIssues": [
+    "sustained_scheduler_cadence_not_proven"
+  ],
   "highIssues": [],
   "mediumIssues": [
     "prediction_quality_sample_gated_limited_current_era_rows",
@@ -27,7 +29,7 @@
   "scores": {
     "predictionEngine": 82,
     "predictionQuality": 62,
-    "scheduler": 92,
+    "scheduler": 58,
     "settlement": 88,
     "learning": 78,
     "performance": 82,
@@ -41,20 +43,20 @@
     "missionControl": 88,
     "currentEra": 82,
     "crossSurfaceConsistency": 88,
-    "operations": 92,
+    "operations": 62,
     "documentation": 90,
     "developerExperience": 82,
     "architecture": 86,
-    "overallReadiness": 88
+    "overallReadiness": 82
   },
   "productionEvidence": {
     "systemVersionHttp": 200,
     "systemVersionCommit": "42439dee8e4b42f2302ef466df16a39fb40d235b",
     "systemVersionProviderCallsMade": 0,
     "operationsHealthHttp": 200,
-    "operationsHealthStatus": "HEALTHY",
-    "schedulerCadenceStatus": "HEALTHY",
-    "missedSchedulerIntervals": 0,
+    "operationsHealthStatus": "CRITICAL",
+    "schedulerCadenceStatus": "CRITICAL",
+    "missedSchedulerIntervals": 3,
     "lastSuccessfulProtectedInvocationAt": "2026-08-05T14:27:33.731+00:00",
     "automaticProofRunId": 31015257795,
     "automaticProofEvent": "schedule",
@@ -63,7 +65,7 @@
     "freshVisibleMarkets": 45,
     "staleVisibleMarkets": 0,
     "settlementClosureStatus": "HEALTHY",
-    "productReadinessStatus": "HEALTHY",
+    "productReadinessStatus": "CRITICAL",
     "providerBudgetStatus": "HEALTHY",
     "settlementGuaranteeHttp": 200,
     "settlementGuarantee": "PASS",
@@ -87,12 +89,12 @@
     "remoteMutationsFromCertificationReads": 0
   },
   "pilotWeek": {
-    "state": "READY",
+    "state": "NOT_READY",
     "duration": "5-7 days",
     "purpose": "Real-world validation before Multi-Sport Expansion"
   },
-  "mc08Complete": true,
+  "mc08Complete": false,
   "mc03Started": false,
-  "productionPilotWeekReady": true,
+  "productionPilotWeekReady": false,
   "updatedAt": "2026-08-05T14:45:00.000Z"
 }

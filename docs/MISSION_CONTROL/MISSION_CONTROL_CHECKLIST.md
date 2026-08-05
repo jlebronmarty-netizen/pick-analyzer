@@ -67,12 +67,12 @@ Use this checklist before starting any queued mission.
 - MC-08E-R: `PRODUCTION_CERTIFIED`; preserved paused work recovered, deployed and production-render certified.
 - MC-08F: `PRODUCTION_CERTIFIED`; personalization is display-only. MC-08G requires explicit instruction and MC-03 remains manual-only.
 - MC-08G: `PRODUCTION_CERTIFIED`; product polish and coherence review is complete.
-- MC-08H: `PRODUCTION_CERTIFIED`; production pilot is ready for 5-7 days of monitored validation. MC-03 remains manual-only.
+- MC-08H: `PRODUCTION_READINESS_BLOCKED`; production pilot is not ready until sustained scheduler cadence is proven. MC-03 remains manual-only.
 - OR-01: `PRODUCTION_CERTIFIED`; operational readiness recovery is closed.
-- OR-01A: `PRODUCTION_CERTIFIED`; all operational health domains are healthy.
+- OR-01A: blocked by sustained scheduler cadence.
 - OR-01B: workflow/app-ledger reconciliation is certified by scheduled run `31003990142` and durable heartbeat invocation `cf420831-ad95-4943-83a7-326d9fdad5d7`.
 - OR-01C: `PRODUCTION_CERTIFIED`; settlement scope repair is deployed and older result-recovery debt is non-blocking.
-- OR-01D: `PRODUCTION_CERTIFIED`; automatic scheduled run `31015257795` restored scheduler, market freshness and Product Readiness.
+- OR-01D: automatic scheduled run `31015257795` was observed, but sustained cadence is blocked by missing subsequent ticks.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.

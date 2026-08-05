@@ -1,32 +1,32 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "PRODUCTION_PILOT_WEEK_READY",
+  "status": "OR_01D_AUTOMATIC_PROOF_OBSERVED_SUSTAINED_CADENCE_BLOCKED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
     "id": "MC-08H",
     "title": "Production Readiness Certification",
-    "state": "PRODUCTION_CERTIFIED",
+    "state": "BLOCKED",
     "priority": "P2",
     "mode": "READ_ONLY",
-    "readiness": "PRODUCTION_READINESS_CERTIFIED"
+    "readiness": "PRODUCTION_READINESS_BLOCKED_SCHEDULER_CADENCE"
   },
   "nextMission": {
-    "id": "PRODUCTION-PILOT-WEEK",
-    "title": "Production Pilot Week",
-    "state": "READY",
+    "id": "OR-01D",
+    "title": "GitHub Scheduled Trigger Recovery",
+    "state": "EXTERNAL_WAIT",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "READY_5_TO_7_DAY_MONITORED_VALIDATION"
+    "readiness": "WAIT_FOR_STABLE_GITHUB_SCHEDULE_DELIVERY"
   },
   "missionCounts": {
     "total": 11,
-    "ready": 3,
+    "ready": 2,
     "planned": 6,
     "active": 1,
-    "blocked": 0,
+    "blocked": 1,
     "conditionalPass": 0,
-    "productionCertifiedRecentCompletions": 13
+    "productionCertifiedRecentCompletions": 12
   },
   "taxonomies": {
     "categories": [
@@ -104,7 +104,7 @@
     "localServerSmokeRun": false
   },
   "or01": {
-    "status": "PRODUCTION_CERTIFIED",
+    "status": "BLOCKED_SUSTAINED_SCHEDULER_CADENCE",
     "title": "Operational Readiness Recovery",
     "certificationArtifact": "docs/CERTIFICATION/or-01-operational-readiness-recovery.json",
     "repositoryRepair": "COMPLETE",
@@ -127,7 +127,7 @@
     "title": "Post-Repair Operational Proof",
     "certificationArtifact": "docs/CERTIFICATION/or-01a-post-repair-operational-proof.json",
     "or01RuntimeLive": true,
-    "productionProof": "AUTOMATIC_SCHEDULED_TRIGGER_AND_ALL_HEALTH_DOMAINS_CERTIFIED",
+    "productionProof": "AUTOMATIC_TRIGGER_OBSERVED_BUT_SUSTAINED_CADENCE_BLOCKED",
     "manualProtectedWriterExecutions": 1,
     "postRepairWorkflowEvidence": [
       {
@@ -157,14 +157,14 @@
     ],
     "githubLogsAvailable": false,
     "applicationLedgerLastSuccessfulProtectedInvocationAt": "2026-08-05T14:27:33.731+00:00",
-    "schedulerExecution": "HEALTHY",
+    "schedulerExecution": "CRITICAL",
     "marketFreshness": "HEALTHY",
-    "operationalHealth": "HEALTHY",
-    "productReadiness": "HEALTHY",
-    "limitingDomain": null,
-    "productionReady": true,
-    "mc08hRerun": true,
-    "productionPilotWeek": "READY",
+    "operationalHealth": "CRITICAL",
+    "productReadiness": "CRITICAL",
+    "limitingDomain": "schedulerExecution",
+    "productionReady": false,
+    "mc08hRerun": false,
+    "productionPilotWeek": "NOT_READY",
     "mc03": "NOT_STARTED"
   },
   "or01b": {
@@ -230,13 +230,13 @@
     "settlementClosureAfter": "HEALTHY",
     "productReadinessAfter": "HEALTHY",
     "latestObservedWorkflowRun": 31015257795,
-    "or01a": "PRODUCTION_CERTIFIED",
-    "mc08hRerun": true,
-    "productionPilotWeek": "READY",
+    "or01a": "BLOCKED_SUSTAINED_SCHEDULER_CADENCE",
+    "mc08hRerun": false,
+    "productionPilotWeek": "NOT_READY",
     "mc03": "NOT_STARTED"
   },
   "or01d": {
-    "status": "PRODUCTION_CERTIFIED",
+    "status": "AUTOMATIC_PROOF_OBSERVED_SUSTAINED_CADENCE_BLOCKED",
     "title": "GitHub Scheduled Trigger Recovery",
     "certificationArtifact": "docs/CERTIFICATION/or-01d-github-scheduled-trigger-recovery.json",
     "rootCauseClassification": "GITHUB_SCHEDULE_DELAY",
@@ -248,16 +248,16 @@
     "invocationId": "2b3900d1-4789-414d-9116-3bd151e07ae5",
     "selectedAction": "midday_refresh",
     "heartbeatRecorded": true,
-    "schedulerExecution": "HEALTHY",
-    "missedIntervals": 0,
+    "schedulerExecution": "CRITICAL",
+    "missedIntervals": 3,
     "marketFreshness": "HEALTHY",
     "settlementClosure": "HEALTHY",
     "providerBudget": "HEALTHY",
-    "productReadiness": "HEALTHY",
-    "operationalHealth": "HEALTHY",
-    "or01a": "PRODUCTION_CERTIFIED",
-    "mc08h": "PRODUCTION_CERTIFIED",
-    "productionPilotWeek": "READY",
+    "productReadiness": "CRITICAL",
+    "operationalHealth": "CRITICAL",
+    "or01a": "BLOCKED",
+    "mc08h": "BLOCKED",
+    "productionPilotWeek": "NOT_READY",
     "mc03": "NOT_STARTED"
   },
   "p1_3": {
@@ -959,29 +959,31 @@
     "finalClassification": "MC_08G_DEPLOYED_AND_CERTIFIED"
   },
   "productionPilotWeek": {
-    "state": "READY",
+    "state": "NOT_READY",
     "duration": "5-7 days",
     "purpose": "Real-world validation before Multi-Sport Expansion",
     "started": false,
     "mc03Started": false
   },
   "mc08h": {
-    "status": "PRODUCTION_CERTIFIED",
+    "status": "PRODUCTION_READINESS_BLOCKED",
     "title": "Production Readiness Certification",
     "certificationArtifact": "docs/CERTIFICATION/mc-08h-production-readiness-certification.json",
     "missionArtifact": "docs/MISSION_CONTROL/MC_08H_PRODUCTION_READINESS_CERTIFICATION.md",
-    "productionReady": true,
-    "productionReadinessPercent": 88,
-    "dailyUseRecommendation": "PRODUCTION_PILOT_READY_MONITORED_DAILY_USE",
-    "wouldTrustForOwnDailyBettingDecisions": true,
+    "productionReady": false,
+    "productionReadinessPercent": 82,
+    "dailyUseRecommendation": "WAIT_FOR_STABLE_SCHEDULER_CADENCE",
+    "wouldTrustForOwnDailyBettingDecisions": false,
     "issueCounts": {
-      "critical": 0,
+      "critical": 1,
       "high": 0,
       "medium": 3,
       "low": 1,
       "cosmetic": 0
     },
-    "criticalIssues": [],
+    "criticalIssues": [
+      "sustained_scheduler_cadence_not_proven"
+    ],
     "highIssues": [],
     "repairsMade": [
       "mission_control_top_level_status_updated",
@@ -993,7 +995,7 @@
     "scores": {
       "predictionEngine": 82,
       "predictionQuality": 58,
-      "scheduler": 92,
+      "scheduler": 58,
       "settlement": 88,
       "learning": 78,
       "performance": 80,
@@ -1007,24 +1009,24 @@
       "missionControl": 88,
       "currentEra": 82,
       "crossSurfaceConsistency": 88,
-      "operations": 92,
+      "operations": 62,
       "documentation": 90,
       "developerExperience": 82,
       "architecture": 86,
-      "overallReadiness": 88
+      "overallReadiness": 82
     },
     "productionEvidence": {
       "productionCommitObserved": "42439dee8e4b42f2302ef466df16a39fb40d235b",
       "systemVersionHttp": 200,
-      "operationsHealthStatus": "HEALTHY",
-      "schedulerCadenceStatus": "HEALTHY",
-      "missedSchedulerIntervals": 0,
+      "operationsHealthStatus": "CRITICAL",
+      "schedulerCadenceStatus": "CRITICAL",
+      "missedSchedulerIntervals": 3,
       "lastSuccessfulProtectedInvocationAt": "2026-08-05T14:27:33.731+00:00",
       "automaticProofRunId": 31015257795,
       "automaticProofEvent": "schedule",
       "marketFreshnessStatus": "HEALTHY",
       "settlementClosureStatus": "HEALTHY",
-      "productReadinessStatus": "HEALTHY",
+      "productReadinessStatus": "CRITICAL",
       "providerBudgetStatus": "HEALTHY",
       "settlementGuarantee": "PASS",
       "settlementReadyRows": 0,
@@ -1041,14 +1043,14 @@
       "providerCallsMade": 0,
       "remoteMutationsMade": 0
     },
-    "productionPilotWeekReady": true,
+    "productionPilotWeekReady": false,
     "productionPilotWeek": {
-      "state": "READY",
+      "state": "NOT_READY",
       "duration": "5-7 days",
       "purpose": "Real-world validation before Multi-Sport Expansion"
     },
-    "mc08Complete": true,
+    "mc08Complete": false,
     "mc03Started": false,
-    "finalClassification": "MC_08H_PRODUCTION_CERTIFIED"
+    "finalClassification": "MC_08H_PRODUCTION_READINESS_BLOCKED"
   }
 }

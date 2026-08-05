@@ -326,12 +326,13 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 
 # 2026-08-05 OR-01D GitHub Scheduled Trigger Recovery
 
-- Status: PRODUCTION_CERTIFIED.
+- Status: AUTOMATIC_PROOF_OBSERVED_SUSTAINED_CADENCE_BLOCKED.
 - GitHub workflow `Production Operating Day Scheduler` is active on default branch `main` with cron `7-57/10 * * * *`.
 - Automatic scheduled run `31015257795` executed on commit `42439dee8e4b42f2302ef466df16a39fb40d235b` and concluded success.
 - App ledger recorded heartbeat `2b3900d1-4789-414d-9116-3bd151e07ae5` at `2026-08-05T14:27:33.731+00:00` with selected action `midday_refresh`.
-- Production health recovered: Scheduler, Market Freshness, Provider Budget, Settlement Closure, Product Readiness and Overall Health are HEALTHY.
-- OR-01A and MC-08H are production-certified. Production Pilot Week is READY. MC-03 was not started.
+- Production health briefly recovered after the proof run, but subsequent expected ticks did not arrive and Scheduler Execution returned to CRITICAL.
+- Market Freshness, Provider Budget and Settlement Closure remained healthy in final evidence, but Product Readiness was limited by Scheduler Execution.
+- OR-01A remains blocked. MC-08H remains blocked. Production Pilot Week is NOT READY. MC-03 was not started.
 
 # 2026-08-04 MC-08F Personalization Experience
 

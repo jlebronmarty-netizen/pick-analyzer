@@ -60,7 +60,7 @@ check('certification reads make zero provider calls', cert.safety.providerCallsF
 check('certification reads make zero mutations', cert.safety.remoteMutationsFromCertificationReads === 0)
 check('operations health reads protected invocation evidence', operationsHealth.includes('lastSuccessfulProtectedInvocationAt'))
 check('settlement guarantee remains independent', settlementHealth.includes('silentPendingRows'))
-check('Mission Control records OR-01D and Production Pilot Week readiness', status.or01d?.status === 'PRODUCTION_CERTIFIED' && status.productionPilotWeek?.state === 'READY')
+check('Mission Control records OR-01D external wait and keeps Production Pilot Week blocked', status.or01d?.status === 'AUTOMATIC_PROOF_OBSERVED_SUSTAINED_CADENCE_BLOCKED' && status.productionPilotWeek?.state === 'NOT_READY')
 check('only bounded OR-01D files changed', disallowed.length === 0, disallowed.join(', '))
 
 const failedChecks = checks.filter((entry) => !entry.passed)
