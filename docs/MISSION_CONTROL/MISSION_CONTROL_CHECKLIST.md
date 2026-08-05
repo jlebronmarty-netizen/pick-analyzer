@@ -67,7 +67,7 @@ Use this checklist before starting any queued mission.
 - MC-08E-R: `PRODUCTION_CERTIFIED`; preserved paused work recovered, deployed and production-render certified.
 - MC-08F: `PRODUCTION_CERTIFIED`; personalization is display-only. MC-08G requires explicit instruction and MC-03 remains manual-only.
 - MC-08G: `PRODUCTION_CERTIFIED`; product polish and coherence review is complete.
-- MC-08H: `PRODUCTION_READINESS_BLOCKED`; production pilot is not ready until sustained scheduler cadence is proven. MC-03 remains manual-only.
+- MC-08H: `PRODUCTION_READY`; production pilot is ready after OR-02A proved Vercel primary scheduler, market freshness, product readiness and operations health. MC-03 remains manual-only.
 - OR-01: `PRODUCTION_CERTIFIED`; operational readiness recovery is closed.
 - OR-01A: blocked by sustained scheduler cadence.
 - OR-01B: workflow/app-ledger reconciliation is certified by scheduled run `31003990142` and durable heartbeat invocation `cf420831-ad95-4943-83a7-326d9fdad5d7`.
@@ -139,4 +139,17 @@ Use this checklist before starting any queued mission.
 - [x] Safe internal continuation limited to `settle`.
 - [x] Scheduler cadence, provider budgets, prediction, settlement and learning math unchanged.
 - [x] Production Pilot Week remains NOT READY.
+- [x] MC-03 was not started.
+
+## Production Pilot Week Day 1
+
+- [x] Production Pilot Week marked ACTIVE.
+- [x] Current pilot day recorded as 1.
+- [x] Days Completed remains 0 until Day 1 certification is accepted.
+- [x] Day 1 baseline report created.
+- [x] Day 1 certification JSON created.
+- [x] Homepage/current-board no-bet state recorded as safe and honest.
+- [x] Current Board coverage recorded as 6 of 6 remaining current supported markets.
+- [x] Prior-day settlement closure recorded as 45 of 45 canonical predictions settled.
+- [x] Scheduler, market freshness, provider budget, product readiness and operations recorded as healthy.
 - [x] MC-03 was not started.

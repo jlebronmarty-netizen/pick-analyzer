@@ -13,6 +13,15 @@ const adaptive = read('src/services/adaptive-refresh-orchestrator.service.ts')
 const health = read('src/services/operations-health.service.ts')
 const mission = read('src/services/mission-control.service.ts')
 const status = json('docs/MISSION_CONTROL/MISSION_CONTROL_STATUS.json')
+const pilotIsReadyOrActive =
+  status.currentMission?.id === 'PRODUCTION-PILOT-WEEK' &&
+  ['PRODUCTION_PILOT_WEEK_READY', 'PRODUCTION_PILOT_WEEK_ACTIVE'].includes(status.status)
+const pilotStateIsReadyOrActive =
+  cert.requiredProductionProof.productionPilotWeekReady === true &&
+  (
+    (status.productionPilotWeek?.state === 'READY' && status.productionPilotWeek?.started === false) ||
+    (status.productionPilotWeek?.state === 'ACTIVE' && status.productionPilotWeek?.started === true && status.productionPilotWeek?.currentPilotDay >= 1)
+  )
 
 check('Vercel Pro approval is recorded', cert.humanDecision.vercelProActive === true && cert.humanDecision.vercelCronPrimaryApproved === true)
 check('vercel.json registers primary cron', Array.isArray(vercel.crons) && vercel.crons.some((cron) => cron.path === '/api/cron/operating-day' && cron.schedule === '7-57/10 * * * *'))
@@ -26,12 +35,12 @@ check('provider action lock remains active', cronRoute.includes('provider_action
 check('adaptive status reports primary/fallback crons', adaptive.includes("owner: 'vercel_cron_primary'") && adaptive.includes("owner: 'github_actions_fallback'"))
 check('operations health reports primary/fallback source', health.includes("primaryScheduler: 'VERCEL_OPERATING_DAY_CRON_PRIMARY'") && health.includes('lastVercelPrimarySuccessAt'))
 check('Mission Control maps OR-02 metadata', mission.includes("id === 'OR-02'") && mission.includes('Migrate primary protected operating-day scheduling to Vercel Cron'))
-check('Mission Control status moves to Production Pilot Week after OR-02 proof', status.currentMission?.id === 'PRODUCTION-PILOT-WEEK' && status.status === 'PRODUCTION_PILOT_WEEK_READY')
+check('Mission Control status moves to Production Pilot Week after OR-02 proof', pilotIsReadyOrActive)
 check('required production proof is complete after observation', cert.requiredProductionProof.threeConsecutiveVercelAutomaticExecutions === true && cert.requiredProductionProof.operationsHealthy === true)
 check('prediction and policy safety recorded', cert.safety.predictionChanged === false && cert.safety.officialPickPolicyChanged === false && cert.safety.kellyChanged === false)
 check('settlement learning and provider budgets unchanged', cert.safety.settlementChanged === false && cert.safety.learningChanged === false && cert.safety.providerBudgetChanged === false)
 check('local server smoke not run', cert.safety.localServerSmokeRun === false)
-check('Production Pilot Week ready but not started after proof', cert.requiredProductionProof.productionPilotWeekReady === true && status.productionPilotWeek?.state === 'READY' && status.productionPilotWeek?.started === false)
+check('Production Pilot Week ready or active after proof', pilotStateIsReadyOrActive)
 
 const failedChecks = checks.filter((item) => !item.passed)
 

@@ -23,6 +23,9 @@ const cert = JSON.parse(read('docs/CERTIFICATION/mc-08h-production-readiness-cer
 const status = JSON.parse(read('docs/MISSION_CONTROL/MISSION_CONTROL_STATUS.json'))
 const queue = read('docs/MISSION_CONTROL/MISSION_CONTROL_QUEUE.md')
 const certMd = read('docs/CERTIFICATION/MC_08H_PRODUCTION_READINESS_CERTIFICATION.md')
+const pilotStartedOrReady =
+  (status.productionPilotWeek?.state === 'READY' && status.productionPilotWeek?.started === false) ||
+  (status.productionPilotWeek?.state === 'ACTIVE' && status.productionPilotWeek?.started === true && status.productionPilotWeek?.currentPilotDay >= 1)
 
 check('MC-08H certification markdown exists', exists('docs/CERTIFICATION/MC_08H_PRODUCTION_READINESS_CERTIFICATION.md'))
 check('MC-08H mission markdown exists', exists('docs/MISSION_CONTROL/MC_08H_PRODUCTION_READINESS_CERTIFICATION.md'))
@@ -34,9 +37,9 @@ check('operations evidence opens pilot', cert.productionEvidence.operationsHealt
 check('settlement guarantee still passes', cert.productionEvidence.settlementGuarantee === 'PASS' && cert.productionEvidence.silentPendingRows === 0)
 check('sample-gated prediction quality is explicit', cert.mediumIssues.includes('prediction_quality_sample_gated_limited_current_era_rows'))
 check('Mission Control records MC-08H production readiness', status.mc08h?.status === 'PRODUCTION_READY')
-check('Mission Control marks pilot ready but not started', status.mc08h?.productionPilotWeekReady === true && status.productionPilotWeek?.state === 'READY' && status.productionPilotWeek?.started === false)
+check('Mission Control marks pilot ready or active', status.mc08h?.productionPilotWeekReady === true && pilotStartedOrReady)
 check('MC-03 not started', cert.mc03Started === false && status.mc08h?.mc03Started === false)
-check('Queue marks Production Pilot Week ready', queue.includes('| Production Pilot Week | Real-world validation before Multi-Sport Expansion | READY |'))
+check('Queue marks Production Pilot Week ready or active', queue.includes('| Production Pilot Week | Real-world validation before Multi-Sport Expansion | READY |') || queue.includes('| Production Pilot Week | Real-world validation before Multi-Sport Expansion | ACTIVE |'))
 check('certification explains YES decision', certMd.includes('Production Ready: YES') && certMd.includes('Daily Use Recommendation'))
 check('guardrails unchanged', Object.entries(cert.guardrails).filter(([key]) => !key.includes('CertificationReads')).every(([, value]) => value === false || value === 0))
 

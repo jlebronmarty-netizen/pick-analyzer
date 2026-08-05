@@ -1,15 +1,15 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "PRODUCTION_PILOT_WEEK_READY",
+  "status": "PRODUCTION_PILOT_WEEK_ACTIVE",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
     "id": "PRODUCTION-PILOT-WEEK",
     "title": "Production Pilot Week",
-    "state": "READY",
+    "state": "ACTIVE",
     "priority": "P1",
     "mode": "MANUAL_ONLY",
-    "readiness": "READY"
+    "readiness": "DAY_1_ACTIVE"
   },
   "nextMission": null,
   "missionCounts": {
@@ -1095,10 +1095,15 @@
     "finalClassification": "MC_08G_DEPLOYED_AND_CERTIFIED"
   },
   "productionPilotWeek": {
-    "state": "READY",
+    "state": "ACTIVE",
     "duration": "5-7 days",
     "purpose": "Real-world validation before Multi-Sport Expansion",
-    "started": false,
+    "started": true,
+    "currentPilotDay": 1,
+    "daysCompleted": 0,
+    "day1Status": "DAY_1_PASS_WITH_MONITORING",
+    "day1CertificationArtifact": "docs/CERTIFICATION/production-pilot-day-01.json",
+    "latestReport": "docs/PRODUCTION_PILOT/DAY_01_REPORT.md",
     "mc03Started": false
   },
   "mc08h": {

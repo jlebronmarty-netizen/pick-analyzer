@@ -2,7 +2,7 @@
 
 Status: deterministic V2 queue.
 
-MC-08 is production certified after OR-02A proved Vercel primary market refresh, provider-call accounting, Market Freshness, Product Readiness and Operations health. Production Pilot Week is READY for a 5-7 day monitored pilot and has not started. MC-03 remains PLANNED and manual-only.
+MC-08 is production certified after OR-02A proved Vercel primary market refresh, provider-call accounting, Market Freshness, Product Readiness and Operations health. Production Pilot Week is ACTIVE on Day 1. MC-03 remains PLANNED and manual-only.
 
 | ID | Mission | Category | Priority | State | Mode | Next Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -18,7 +18,7 @@ MC-08 is production certified after OR-02A proved Vercel primary market refresh,
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
-Next eligible phase: Production Pilot Week. It is READY, manual-only and must run 5-7 days before any Multi-Sport Expansion decision. MC-03 remains PLANNED and manual-only.
+Next eligible phase: Production Pilot Week Day 2 after Day 1 observation is accepted. The pilot is manual-only and must run 5-7 days before any Multi-Sport Expansion decision. MC-03 remains PLANNED and manual-only.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
@@ -61,4 +61,4 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | OR-02 | Primary Scheduler Migration - Vercel Cron | PRODUCTION_CERTIFIED | Vercel Cron is primary; GitHub Actions remains safe fallback through the primary-success lease. |
 | OR-02A | Vercel Primary Market Refresh Recovery | PRODUCTION_CERTIFIED | Active current-slate market refresh and provider-call accounting are certified under automatic Vercel primary execution. |
 | PR-01 | Final Production Readiness Audit | CERTIFIED_NOT_READY | Performance header mapping repaired; Current Era and Replay equations balance; Pilot Week remains blocked by scheduler/market freshness/result-import evidence. |
-| Production Pilot Week | Real-world validation before Multi-Sport Expansion | READY | Manual-only 5-7 day monitored pilot; not started. |
+| Production Pilot Week | Real-world validation before Multi-Sport Expansion | ACTIVE | Day 1 baseline report is recorded as `DAY_1_PASS_WITH_MONITORING`; Days Completed remains 0 until Day 1 certification is accepted and Day 2 is explicitly started. |

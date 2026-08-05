@@ -379,3 +379,16 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - GitHub Actions remains the current scheduler path. Runs `31032206383` and `31037920501` were scheduled successes on commit `931fa81543feb1fad4192b0344e555eee7ddf4c5`, but three consecutive automatic primary executions at the required cadence are not proven.
 - No paid scheduler was activated, no workflow cadence changed, no provider budget changed, no prediction, Official Pick, settlement or learning behavior changed, and no local server smoke was run.
 - Production Pilot Week remains NOT_READY. MC-08H remains blocked. MC-03 was not started.
+
+# 2026-08-05 Production Pilot Week Day 1 Baseline
+
+- Status: DAY_1_PASS_WITH_MONITORING.
+- Production served commit `27e9e06e287841c1f593e56555fef47482b3c00e`; `/api/system/version` returned HTTP 200 with provider calls 0.
+- Operating date was `2026-08-05` in `America/Puerto_Rico`.
+- Product state was honest no-bet: 15 MLB games on the operating day, 2 remaining pregame Current Board games, 6 Current Board candidates, 0 Official Picks, 0 recommendation-eligible rows and 0 actionable rows.
+- Current Board coverage was complete for the remaining active slate: 2 moneyline, 2 run line/spread and 2 total candidates.
+- Scheduler Execution, Market Freshness, Provider Budget, Product Readiness and Operations Health were all HEALTHY with 0 missed intervals.
+- Prior-day Current Era closure was complete: 45 canonical predictions, 45 settled, 16 wins, 28 losses, 1 push and 0 silent pending rows.
+- Current Era Performance balanced: 114 canonical predictions = 69 settled + 45 pending + 0 blocked.
+- Two monitoring items remain: dashboard/current-board scope differences and ingestion freshness versus provider source timestamp SLA semantics.
+- Production Pilot Week is ACTIVE Day 1. Days Completed remains 0 until Day 1 certification is accepted. MC-03 was not started.
