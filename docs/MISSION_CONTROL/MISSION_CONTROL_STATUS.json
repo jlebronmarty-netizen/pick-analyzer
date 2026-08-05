@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "OR_01F_PRODUCTION_CERTIFIED_SCHEDULER_DECISION_PENDING",
+  "status": "PR_01_CERTIFIED_PRODUCTION_PILOT_NOT_READY",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -333,6 +333,37 @@
     "productionPilotWeek": "NOT_READY",
     "mc03": "NOT_STARTED",
     "nextRecommendation": "OR-01G scheduler primary/fallback architecture decision if sustained cadence remains unhealthy"
+  },
+  "pr01": {
+    "status": "CERTIFIED_NOT_READY",
+    "title": "Final Production Readiness Audit",
+    "certificationArtifact": "docs/CERTIFICATION/pr-01-final-production-readiness-audit.json",
+    "missionArtifact": "docs/CERTIFICATION/PR_01_FINAL_PRODUCTION_READINESS_AUDIT.md",
+    "productionCommit": "7e5e594302c490500b48aec82cb2746116256beb",
+    "productionReady": false,
+    "productionReadinessPercent": 78,
+    "mc08hRerun": false,
+    "productionPilotWeek": "NOT_READY",
+    "mc03": "NOT_STARTED",
+    "currentEra": {
+      "canonicalPredictionRows": 114,
+      "settledCanonicalRows": 24,
+      "pendingCanonicalRows": 90,
+      "blockedCanonicalRows": 0,
+      "silentPendingRows": 0
+    },
+    "aug4Reconciliation": {
+      "canonicalPredictions": 45,
+      "settled": 0,
+      "validPending": 45,
+      "blocked": 0,
+      "silentPending": 0,
+      "firstMissingStep": "RESULT_IMPORT"
+    },
+    "repairsMade": [
+      "performance_header_pipeline_readiness_mapping"
+    ],
+    "finalClassification": "PR_01_PRODUCTION_PILOT_NOT_READY"
   },
   "p1_3": {
     "status": "PRODUCTION_CERTIFIED",

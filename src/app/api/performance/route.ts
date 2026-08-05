@@ -187,6 +187,19 @@ function userModeValue(value: unknown): unknown {
   return value
 }
 
+function selectedPipelineReadiness(product: Awaited<ReturnType<typeof getPerformanceProductContract>>, sportKey: string | null) {
+  const selectedSport = sportKey
+    ? product.sports.find((sport) => sport.sportKey === sportKey)
+    : product.sports.find((sport) => sport.sportKey === 'baseball_mlb')
+  return Number(selectedSport?.readiness.readinessScore ?? 0)
+}
+
+function pipelineReadinessStatus(score: number) {
+  if (score >= 80) return 'READY'
+  if (score >= 50) return 'LIMITED'
+  return 'BLOCKED'
+}
+
 export async function GET(request: NextRequest) {
   try {
     const sportKey = request.nextUrl.searchParams.get('sportKey')
@@ -209,6 +222,7 @@ export async function GET(request: NextRequest) {
     const selectedReport = product.reportCards.selected
     const selectedMetrics = selectedReport.metrics
     const selectedTrust = product.trustScore
+    const pipelineReadinessScore = selectedPipelineReadiness(product, sportKey)
     const productTimeline = timelineRows(product.performanceScopeV2.timeline)
     const publicTrustScore = userModeValue(selectedTrust)
     const publicGoals = userModeValue(product.goals)
@@ -227,8 +241,8 @@ export async function GET(request: NextRequest) {
         calibrationStatus: selectedReport.calibration.calibrationError === null ? 'Insufficient data' : 'Available',
         blockers: selectedTrust.blockers.map(userStatus),
         readiness: {
-          score: selectedTrust.trustScore,
-          status: userStatus(selectedTrust.trustStatus),
+          score: pipelineReadinessScore,
+          status: userStatus(pipelineReadinessStatus(pipelineReadinessScore)),
         },
         trustScore: publicTrustScore,
       },

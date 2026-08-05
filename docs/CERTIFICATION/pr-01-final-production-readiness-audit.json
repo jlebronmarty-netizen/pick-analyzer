@@ -1,0 +1,108 @@
+{
+  "mission": "PR-01",
+  "title": "Final Production Readiness Audit",
+  "status": "PRODUCTION_READINESS_NOT_READY",
+  "classification": "PR_01_PRODUCTION_PILOT_NOT_READY",
+  "generatedAt": "2026-08-05T16:45:00.000Z",
+  "productionCommit": "7e5e594302c490500b48aec82cb2746116256beb",
+  "mc08hRerun": false,
+  "productionReady": false,
+  "productionReadinessPercent": 78,
+  "productionPilotWeekReady": false,
+  "mc03Started": false,
+  "providerCallsMadeByAuditReads": 0,
+  "remoteMutationsMadeByAuditReads": 0,
+  "runtimeRepair": {
+    "performanceHeaderPipelineReadinessMapping": "REPAIRED_PRESENTATION_ONLY",
+    "trustRecalculated": false,
+    "performanceMathChanged": false,
+    "predictionChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "providerChanged": false
+  },
+  "operationalEvidence": {
+    "systemVersionHttp": 200,
+    "operationsHealthHttp": 200,
+    "operationsHealthStatus": "DEGRADED",
+    "schedulerExecution": "DEGRADED",
+    "schedulerCadenceStatus": "LATE",
+    "missedSchedulerIntervals": 1,
+    "marketFreshness": "CRITICAL_OR_DEGRADED_DURING_AUDIT_WINDOW",
+    "providerBudget": "HEALTHY",
+    "settlementClosure": "HEALTHY",
+    "productReadiness": "NOT_PRODUCTION_READY",
+    "settlementGuarantee": "PASS",
+    "readyForSettlementRows": 0,
+    "blockedRows": 0,
+    "silentPendingRows": 0
+  },
+  "currentEra": {
+    "activeEpoch": "CURRENT_V2_PRODUCTION",
+    "canonicalPredictionRows": 114,
+    "settledCanonicalRows": 24,
+    "pendingCanonicalRows": 90,
+    "blockedCanonicalRows": 0,
+    "silentPendingRows": 0,
+    "equation": "114 = 24 + 90 + 0",
+    "equationBalanced": true,
+    "totalAnalyzedRows": 161,
+    "nonProductionAnalysisRows": 47,
+    "totalAnalyzedEquation": "161 = 114 + 47",
+    "timelineDateBucket": "America/Puerto_Rico event date with prediction timestamp fallback"
+  },
+  "aug4Reconciliation": {
+    "operatingDate": "2026-08-04",
+    "events": 15,
+    "canonicalPredictions": 45,
+    "settled": 0,
+    "blocked": 0,
+    "validPending": 45,
+    "silentPending": 0,
+    "resultRowsImported": 0,
+    "firstMissingStep": "RESULT_IMPORT",
+    "equation": "45 = 0 + 0 + 45",
+    "equationBalanced": true
+  },
+  "replay": {
+    "isolated": true,
+    "replayPredictionRows": 30,
+    "replaySettledRows": 30,
+    "replayPendingRows": 0,
+    "includedInCurrentEraTrust": false,
+    "includedInHomepageDecisions": false,
+    "includedInOfficialPicks": false
+  },
+  "homepage": {
+    "operatingDate": "2026-08-05",
+    "gamesToday": 15,
+    "dashboardGamesToday": 15,
+    "currentBoardCandidates": 45,
+    "officialPicks": 0,
+    "scopeDifferenceExplained": true
+  },
+  "missionControl": {
+    "mc08hStatus": "PRODUCTION_READINESS_BLOCKED",
+    "canStartAutomatically": false,
+    "notRerunReason": "Intentional human certification gate plus current operational evidence is not stable enough for PASS.",
+    "repositoryDefectFound": false
+  },
+  "issues": {
+    "critical": [
+      "scheduler_cadence_not_stably_healthy",
+      "market_freshness_degraded_or_critical_during_audit_window",
+      "aug4_results_not_imported"
+    ],
+    "high": [],
+    "medium": [
+      "performance_header_pipeline_readiness_mapping_was_trust_before_pr01_repair",
+      "mission_control_mc08h_artifact_is_static_until_rerun"
+    ],
+    "low": [
+      "localization_foundation_not_full_translation"
+    ],
+    "cosmetic": []
+  },
+  "finalRecommendation": "Do not begin Production Pilot Week. Observe scheduler/market freshness through repeated expected windows, close Aug 4 result import through normal protected scheduler execution, then rerun MC-08H."
+}

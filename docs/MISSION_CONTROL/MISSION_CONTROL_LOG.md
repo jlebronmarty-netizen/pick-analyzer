@@ -360,3 +360,12 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Scheduler cadence, GitHub workflows, provider budgets, prediction formulas, Official Pick policy, settlement math, learning math, Current Era and Replay remain unchanged.
 - Production proof on commit `00a3badc308059811139d7c1734d1cee8cb885bf` executed one protected invocation. It selected `midday_refresh`, made 0 provider calls, wrote 1 scheduler heartbeat, stopped with `NO_MATERIAL_CHANGE`, and did not continue because no material downstream internal action was due.
 - Production Pilot Week remains NOT READY because sustained scheduler delivery is still not proven. MC-08H remains blocked. MC-03 was not started.
+
+# 2026-08-05 PR-01 Final Production Readiness Audit
+
+- Status: CERTIFIED_NOT_READY.
+- Current production evidence was collected read-only from commit `7e5e594302c490500b48aec82cb2746116256beb`.
+- Current Era balances: 114 canonical predictions = 24 settled + 90 pending + 0 blocked; silent pending is 0.
+- Aug 4 balances: 45 canonical predictions = 0 settled + 45 valid pending + 0 blocked; silent pending is 0. First missing step is result import: events remain `scheduled` and no `game_results` rows exist for the Aug 4 event IDs.
+- Repaired one presentation-only Performance defect: Pipeline Readiness no longer mirrors Trust and now uses the pipeline readiness score.
+- MC-08H was not rerun to PASS because current production is not stable enough: scheduler cadence was late and market/product readiness degraded during the audit window. Production Pilot Week remains NOT READY. MC-03 was not started.
