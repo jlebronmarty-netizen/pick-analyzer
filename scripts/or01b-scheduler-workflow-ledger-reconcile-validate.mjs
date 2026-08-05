@@ -44,6 +44,13 @@ const allowed = new Set([
   'docs/OPERATIONAL_EXCELLENCE/OR_01F_BOUNDED_PLANNER_CONTINUITY.md',
   'docs/PROJECT_STATUS.md',
   'docs/MASTER_ROADMAP.md',
+  'vercel.json',
+  'src/services/mission-control.service.ts',
+  'scripts/mission-control-v1-validate.mjs',
+  'scripts/or01h-primary-scheduler-architecture-validate.mjs',
+  'scripts/or02-primary-scheduler-migration-vercel-cron-validate.mjs',
+  'docs/CERTIFICATION/OR_02_PRIMARY_SCHEDULER_MIGRATION_VERCEL_CRON.md',
+  'docs/CERTIFICATION/or-02-primary-scheduler-migration-vercel-cron.json',
 ])
 
 const checks = []
@@ -69,7 +76,7 @@ check('route normalizes live no-product heartbeat to successful health status', 
 check('route dry-run heartbeat remains supported', route.includes('successful_protected_dry_run_observation'))
 check('operations health counts protected heartbeat evidence as successful invocation', operationsHealth.includes('successfulSchedulerHeartbeat') && operationsHealth.includes('metadata.protectedInvocationRecorded === true') && operationsHealth.includes('metadata.heartbeatUpdatesHealthMarker === true'))
 check('scheduler cadence unchanged', schedulerConfig.includes("export const MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON = '7-57/10 * * * *'") || workflow.includes('7-57/10 * * * *'))
-check('concurrency remains single writer', workflow.includes('group: production-operating-day-writer') && workflow.includes('cancel-in-progress: false'))
+check('concurrency remains single writer/fallback', (workflow.includes('group: production-operating-day-writer') || workflow.includes('group: production-operating-day-fallback')) && workflow.includes('cancel-in-progress: false'))
 check('OR-01B certification records root cause', cert.includes('transport-level workflow success was not reconciled to app-side scheduler health evidence'))
 check('OR-01B JSON records zero validation provider calls', json.providerCallsMadeByValidation === 0 && json.remoteMutationsMadeByValidation === 0)
 check('Mission Control records OR-01B state', status.includes('"or01b"') && (status.includes('WORKFLOW_LEDGER_RECONCILIATION_REPAIR_DEPLOYMENT_REQUIRED') || status.includes('WORKFLOW_LEDGER_RECONCILIATION_CERTIFIED')))

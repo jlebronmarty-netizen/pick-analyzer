@@ -87,7 +87,7 @@ const requiredStates = [
   'CANCELLED',
   'UNKNOWN',
 ]
-const requiredModes = ['MANUAL_ONLY', 'AGENT_ASSISTED', 'AUTONOMOUS_ELIGIBLE', 'AUTONOMOUS_ACTIVE', 'EXTERNAL_WAIT', 'READ_ONLY']
+const requiredModes = ['MANUAL_ONLY', 'AGENT_ASSISTED', 'AUTONOMOUS_ELIGIBLE', 'AUTONOMOUS_ACTIVE', 'EXTERNAL_WAIT', 'READ_ONLY', 'RUNTIME']
 const requiredSports = ['MLB', 'NBA', 'NFL', 'NHL', 'Soccer', 'Tennis', 'UFC', 'BSN']
 const requiredStops = ['HARD_STOP', 'MISSION_BLOCK', 'SPORT_BLOCK', 'PROVIDER_BLOCK', 'EXTERNAL_WAIT', 'HUMAN_APPROVAL']
 const protectedDirtyFiles = [
@@ -102,10 +102,10 @@ const protectedDirtyFiles = [
 
 check('status baseline commit is current baseline', status.baselineCommit === 'ddc79d7b4a5efa5068ff1e63bb68d95d84100e67')
 check('certification baseline commit is current baseline', certification.baselineCommit === status.baselineCommit)
-check('current mission is MC-00 or later Mission Control mission', ['MC-00', 'MC-01', 'MC-02', 'MC-08H', 'OR-01H'].includes(status.currentMission?.id))
-check('next mission is deterministic', status.nextMission === null || ['MC-01', 'MC-02', 'MC-08', 'OR-01D', 'OR-01H', 'PRODUCTION-PILOT-WEEK'].includes(status.nextMission?.id))
-check('only MC-08 bounded product package or scheduler decision gates may be active/ready in status', status.missionCounts?.active === 0 || (status.missionCounts?.active === 1 && status.nextMission?.id === 'MC-08' && status.nextMission?.state === 'ACTIVE') || (status.nextMission?.id === 'OR-01D' && status.nextMission?.state === 'EXTERNAL_WAIT') || status.currentMission?.id === 'OR-01H' || (status.nextMission?.id === 'PRODUCTION-PILOT-WEEK' && status.nextMission?.state === 'READY'))
-check('OR-01H status overlay has mission-specific metadata', service.includes("isOr01h ? 'AUTOMATION'") && service.includes('Operations Architecture') && service.includes('human_vercel_plan_and_cron_settings_check_required'))
+check('current mission is MC-00 or later Mission Control mission', ['MC-00', 'MC-01', 'MC-02', 'MC-08H', 'OR-01H', 'OR-02'].includes(status.currentMission?.id))
+check('next mission is deterministic', status.nextMission === null || ['MC-01', 'MC-02', 'MC-08', 'OR-01D', 'OR-01H', 'OR-02', 'PRODUCTION-PILOT-WEEK'].includes(status.nextMission?.id))
+check('only MC-08 bounded product package or scheduler decision gates may be active/ready in status', status.missionCounts?.active === 0 || (status.missionCounts?.active === 1 && status.nextMission?.id === 'MC-08' && status.nextMission?.state === 'ACTIVE') || (status.nextMission?.id === 'OR-01D' && status.nextMission?.state === 'EXTERNAL_WAIT') || status.currentMission?.id === 'OR-01H' || status.currentMission?.id === 'OR-02' || (status.nextMission?.id === 'PRODUCTION-PILOT-WEEK' && status.nextMission?.state === 'READY'))
+check('OR-01H and OR-02 status overlays have mission-specific metadata', service.includes('Operations Architecture') && service.includes('human_vercel_plan_and_cron_settings_check_required') && service.includes("id === 'OR-02'") && service.includes('three_consecutive_vercel_primary_executions_required'))
 check('mission count covers MC-00 through MC-10', status.missionCounts?.total === 11)
 check('all required categories documented', requiredCategories.every((item) => status.taxonomies?.categories?.includes(item) && service.includes(item)))
 check('all required states documented', requiredStates.every((item) => status.taxonomies?.states?.includes(item) && service.includes(item)))
@@ -153,7 +153,7 @@ const stagedFiles = execSync('git diff --cached --name-only', { cwd: root, encod
   .split(/\r?\n/)
   .filter(Boolean)
 check('protected dirty files are not staged', protectedDirtyFiles.every((file) => !stagedFiles.includes(file)))
-check('status output is clean isolated worktree or includes protected dirty context/intended mission files', gitStatus.trim() === '' || protectedDirtyFiles.some((file) => gitStatus.includes(file)) || gitStatus.includes('docs/MISSION_CONTROL') || gitStatus.includes('docs/CERTIFICATION') || gitStatus.includes('or01d-github-scheduled-trigger-recovery-validate.mjs') || gitStatus.includes('p1-homepage-performance-date-consistency-validate.mjs') || gitStatus.includes('p2-2c-protected-scheduler-closure-recovery-validate.mjs') || gitStatus.includes('src/services/provider-budget.service.ts'))
+check('status output is clean isolated worktree or includes protected dirty context/intended mission files', gitStatus.trim() === '' || protectedDirtyFiles.some((file) => gitStatus.includes(file)) || gitStatus.includes('docs/MISSION_CONTROL') || gitStatus.includes('docs/CERTIFICATION') || gitStatus.includes('or01d-github-scheduled-trigger-recovery-validate.mjs') || gitStatus.includes('or02-primary-scheduler-migration-vercel-cron-validate.mjs') || gitStatus.includes('p1-homepage-performance-date-consistency-validate.mjs') || gitStatus.includes('p2-2c-protected-scheduler-closure-recovery-validate.mjs') || gitStatus.includes('src/services/provider-budget.service.ts') || gitStatus.includes('src/app/api/cron/operating-day/route.ts') || gitStatus.includes('src/services/adaptive-refresh-orchestrator.service.ts') || gitStatus.includes('src/services/operations-health.service.ts') || gitStatus.includes('vercel.json') || gitStatus.includes('.github/workflows/production-operating-day.yml'))
 
 const failed = checks.filter((item) => !item.passed)
 const result = {

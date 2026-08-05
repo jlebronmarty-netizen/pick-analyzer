@@ -552,7 +552,7 @@ export async function getOperationsHealth() {
   const predictionFreshness = freshnessByDomain(adaptive, 'prediction')
   const recommendationFreshness = freshnessByDomain(adaptive, 'recommendation')
   const resultsFreshness = freshnessByDomain(adaptive, 'results')
-  const latestSuccessfulProtected = (lifecycle.rows as Array<Record<string, unknown>>).find((row) => {
+  const successfulProtectedRow = (row: Record<string, unknown>) => {
     const status = String(row.status ?? '')
     const metadata = asRecord(row.metadata)
     const successfulSchedulerHeartbeat =
@@ -561,9 +561,21 @@ export async function getOperationsHealth() {
       metadata.heartbeatUpdatesHealthMarker === true &&
       metadata.productDataMutated === false
     return successfulSchedulerHeartbeat || ['SUCCESS_CHANGED', 'SUCCESS_NO_CHANGE', 'completed', 'morning_synced', 'midday_refreshed', 'results_synced'].some((needle) => status.includes(needle))
+  }
+  const sourceOf = (row: Record<string, unknown> | null | undefined) => {
+    const metadata = asRecord(row?.metadata)
+    return String(metadata.source ?? metadata.schedulerSource ?? '')
+  }
+  const latestSuccessfulProtected = (lifecycle.rows as Array<Record<string, unknown>>).find((row) => {
+    return successfulProtectedRow(row)
   })
+  const latestVercelPrimary = lifecycleRows.find((row) => successfulProtectedRow(row) && sourceOf(row) === 'VERCEL_OPERATING_DAY_CRON_PRIMARY')
+  const latestGithubFallback = lifecycleRows.find((row) => successfulProtectedRow(row) && sourceOf(row) === 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_FALLBACK')
   const lastSuccessfulProtectedInvocationAt = String(latestSuccessfulProtected?.completed_at ?? latestSuccessfulProtected?.created_at ?? '') || null
+  const lastVercelPrimarySuccessAt = String(latestVercelPrimary?.completed_at ?? latestVercelPrimary?.created_at ?? '') || null
+  const lastGithubFallbackSuccessAt = String(latestGithubFallback?.completed_at ?? latestGithubFallback?.created_at ?? '') || null
   const evidenceAge = ageMinutes(lastSuccessfulProtectedInvocationAt)
+  const vercelPrimaryEvidenceAge = ageMinutes(lastVercelPrimarySuccessAt)
   const externalSchedulerVerified = Boolean(lastSuccessfulProtectedInvocationAt)
   const automaticMultiRefreshActive = externalSchedulerVerified && evidenceAge !== null && evidenceAge <= EXTERNAL_SCHEDULER_EXPECTED_CADENCE_MINUTES * 3
   const failedSteps = lifecycle.rows.filter((row: Record<string, unknown>) => {
@@ -721,12 +733,18 @@ export async function getOperationsHealth() {
     scheduler: {
       configured: adaptive.schedulerAudit.configuredCronCount > 0,
       configuredCrons: adaptive.schedulerAudit.configuredCrons,
+      primaryScheduler: 'VERCEL_OPERATING_DAY_CRON_PRIMARY',
+      fallbackScheduler: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_FALLBACK',
+      primaryFallbackContract: 'GitHub fallback uses the same protected endpoint and exits without provider calls when Vercel primary lease evidence is current.',
       lastCronInvocation: adaptive.schedulerAudit.jobs[0]?.lastRunAt ?? null,
       nextScheduledRun: adaptive.schedulerAudit.jobs[0]?.nextRunAt ?? null,
-      limitation: 'vercel.json defines no active crons; GitHub Actions owns the frequent operating-day scheduler and heartbeat, while manual protected execution remains a fallback.',
+      limitation: 'Vercel Cron owns the frequent operating-day scheduler. GitHub Actions remains fallback through the same protected endpoint and primary-success lease.',
       schedulerEvidenceSource: lastSuccessfulProtectedInvocationAt ? 'operating_day_lifecycle_events' : 'none',
       lastExternalSchedulerInvocationAt: lastSuccessfulProtectedInvocationAt,
       lastSuccessfulProtectedInvocationAt,
+      lastVercelPrimarySuccessAt,
+      lastGithubFallbackSuccessAt,
+      vercelPrimaryEvidenceAgeMinutes: vercelPrimaryEvidenceAge,
       externalSchedulerVerified,
       automaticMultiRefreshActive,
       evidenceAgeMinutes: evidenceAge,

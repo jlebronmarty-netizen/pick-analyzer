@@ -1,3 +1,8 @@
 {
-  "crons": []
+  "crons": [
+    {
+      "path": "/api/cron/operating-day",
+      "schedule": "7-57/10 * * * *"
+    }
+  ]
 }

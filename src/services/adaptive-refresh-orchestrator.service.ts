@@ -1334,10 +1334,13 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       nextEligibleRefresh: budget?.nextEligibleRefresh ?? null,
     },
     schedulerAudit: {
-      configuredCronCount: 1,
-      configuredCrons: [{ owner: 'github_actions', path: '/api/cron/operating-day', schedule: MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON, dryRun: false }],
+      configuredCronCount: 2,
+      configuredCrons: [
+        { owner: 'vercel_cron_primary', path: '/api/cron/operating-day', schedule: MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON, dryRun: false },
+        { owner: 'github_actions_fallback', path: '/api/cron/operating-day', schedule: MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON, dryRun: false, fallbackLease: 'primary_scheduler_recent_success_lease' },
+      ],
       jobs: schedulerJobs(lifecycle, budget),
-      finding: 'GitHub Actions is the single frequent write-capable scheduler; vercel.json has no operating-day cron ownership, and adaptive status remains the decision layer over execution.',
+      finding: 'Vercel Cron is the primary frequent scheduler; GitHub Actions remains fallback through the same protected endpoint and exits safely when primary scheduler lease evidence is current.',
     },
     freshness,
     refreshPlan,

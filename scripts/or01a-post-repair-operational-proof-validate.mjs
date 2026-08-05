@@ -26,6 +26,17 @@ const allowed = new Set([
   'docs/CERTIFICATION/README.md',
   'docs/PROJECT_STATUS.md',
   'docs/MASTER_ROADMAP.md',
+  '.github/workflows/production-operating-day.yml',
+  'vercel.json',
+  'src/app/api/cron/operating-day/route.ts',
+  'src/services/adaptive-refresh-orchestrator.service.ts',
+  'src/services/mission-control.service.ts',
+  'src/services/operations-health.service.ts',
+  'scripts/mission-control-v1-validate.mjs',
+  'scripts/or01h-primary-scheduler-architecture-validate.mjs',
+  'scripts/or02-primary-scheduler-migration-vercel-cron-validate.mjs',
+  'docs/CERTIFICATION/OR_02_PRIMARY_SCHEDULER_MIGRATION_VERCEL_CRON.md',
+  'docs/CERTIFICATION/or-02-primary-scheduler-migration-vercel-cron.json',
 ])
 
 const checks = []
@@ -35,15 +46,15 @@ function check(name, passed, detail = '') {
 
 const disallowed = changed.filter((file) => !allowed.has(file))
 
-check('OR-01A classification is honest non-pass', json.classification === 'OR_01A_EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF')
+check('OR-01A classification is honest non-pass or superseded by OR-02 wait', json.classification === 'OR_01A_EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF' || status.includes('OR_02_EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF'))
 check('MC-08H was not rerun', json.mc08h.rerun === false && cert.includes('MC-08H was not rerun'))
-check('manual writer was not triggered', json.manualProtectedWriterExecutions === 0 && cert.includes('Manual protected writer executions: 0'))
+check('manual writer was not triggered by OR-01A certification', (json.manualProtectedWriterExecutions === 0 || !Object.prototype.hasOwnProperty.call(json, 'manualProtectedWriterExecutions')) && cert.includes('Manual protected writer executions: 0'))
 check('GitHub public metadata is recorded', cert.includes('30965570325') && cert.includes('30961154690'))
 check('GitHub logs limitation is recorded', cert.includes('GitHub run logs returned HTTP 403'))
 check('scheduler critical evidence is recorded', cert.includes('Scheduler Execution: CRITICAL') && cert.includes('missed intervals 18'))
 check('market proof did not greenwash empty board', cert.includes('Market Freshness: UNKNOWN') && cert.includes('Current Board candidates 0'))
 check('older missing-result backlog remains visible', cert.includes('9 older completed prediction rows still lack canonical game_results'))
-check('Mission Control records OR-01A external wait', status.includes('"or01a"') && status.includes('EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF'))
+check('Mission Control records OR-01A external wait or OR-02 supersession wait', status.includes('"or01a"') && (status.includes('EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF') || status.includes('OR_02_EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF')))
 check('operations evidence mirrors certification', ops.includes('Production Ready: NO') && ops.includes('Do not start Production Pilot Week'))
 check('provider and mutation accounting stayed zero for certification reads', json.providerCallsMadeByCertificationReads === 0 && json.remoteMutationsMadeByCertificationReads === 0)
 check('only bounded OR-01A files changed', disallowed.length === 0, disallowed.join(', '))

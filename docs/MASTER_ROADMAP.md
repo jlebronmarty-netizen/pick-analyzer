@@ -91,6 +91,8 @@ OR-01C update on 2026-08-05: remaining Settlement Closure CRITICAL evidence was 
 
 OR-01H update on 2026-08-05: the primary scheduler architecture decision is blocked on human Vercel dashboard evidence. `vercel.json` defines no active Cron Jobs; GitHub Actions remains the current protected scheduler path with successful scheduled runs on `931fa81543feb1fad4192b0344e555eee7ddf4c5`, but three consecutive automatic primary executions at the required 10-minute cadence are not proven. Vercel Cron cannot be promoted until the project plan and Cron Jobs settings are verified. Production Pilot Week remains NOT_READY; MC-03 was not started.
 
+OR-02 update on 2026-08-05: Vercel Pro is active and Vercel Cron is approved as the primary protected operating-day scheduler. `vercel.json` now schedules `/api/cron/operating-day` every 10 minutes, GitHub Actions remains fallback through the same protected endpoint with a primary-success lease, and Mission Control reports the primary/fallback ownership model. Final OR-02 PASS still requires three consecutive automatic Vercel primary executions plus Scheduler, Market Freshness, Settlement, Product Readiness, Operations and MC-08H readiness proof. Production Pilot Week remains NOT_READY until that proof exists; MC-03 was not started.
+
 OE-003F update on 2026-08-02: Product Freshness SLA is locally implemented and build-certified. Decision surfaces now expose `product_freshness_sla_v1`, block future/post-start/timestampless market evidence, downgrade stale prices, and preserve zero provider calls, zero mutations and unchanged prediction/recommendation policy. OE-003G has not started.
 
 Current stabilization evidence:

@@ -1,8 +1,19 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
+import {
+  MLB_OPERATING_DAY_SCHEDULER_GRACE_MINUTES,
+  MLB_OPERATING_DAY_WRITE_SCHEDULER_INTERVAL_MINUTES,
+} from '@/config/mlb-operating-day-scheduler'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+
+const VERCEL_PRIMARY_SOURCE = 'VERCEL_OPERATING_DAY_CRON_PRIMARY'
+const GITHUB_FALLBACK_SOURCE = 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_FALLBACK'
+const MANUAL_SOURCE = 'MANUAL_PROTECTED_OPERATING_DAY_DISPATCH'
+const PRIMARY_LEASE_TOLERANCE_MINUTES =
+  MLB_OPERATING_DAY_WRITE_SCHEDULER_INTERVAL_MINUTES + MLB_OPERATING_DAY_SCHEDULER_GRACE_MINUTES
 
 const CRON_STATUS_HTTP: Record<string, number> = {
   SUCCESS: 200,
@@ -80,32 +91,178 @@ function parseDryRun(request: NextRequest) {
   return false
 }
 
-function schedulerOwner(request: NextRequest, dryRun: boolean) {
+function schedulerSource(request: NextRequest, dryRun: boolean) {
+  if (dryRun) return 'NONE_DRY_RUN'
+  if (request.nextUrl.searchParams.get('scheduler') === 'github-fallback') return GITHUB_FALLBACK_SOURCE
+  if (request.nextUrl.searchParams.get('scheduler') === 'manual') return MANUAL_SOURCE
+  return request.method === 'GET' ? VERCEL_PRIMARY_SOURCE : GITHUB_FALLBACK_SOURCE
+}
+
+function schedulerOwner(requestMethod: string, dryRun: boolean, source: string) {
+  const writeOwner = dryRun ? 'NONE_DRY_RUN' : source
   return {
-    writeOwner: dryRun ? 'NONE_DRY_RUN' : 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER',
+    writeOwner,
+    primaryScheduler: 'VERCEL_OPERATING_DAY_CRON_PRIMARY',
+    fallbackScheduler: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_FALLBACK',
     runtimeOwner: 'adaptive_refresh_execution_bridge_v2',
     observerSchedulers: ['GITHUB_PRODUCTION_OPERATING_DAY_HEARTBEAT_MANUAL', 'GITHUB_OPERATING_DAY_REFRESH_MANUAL'],
-    disabledSchedulers: ['VERCEL_OPERATING_DAY_CRON'],
+    disabledSchedulers: [],
     responsibilities: {
-      eventStatusPersistence: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER',
-      resultsSync: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER',
-      settlement: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER',
+      eventStatusPersistence: 'VERCEL_OPERATING_DAY_CRON_PRIMARY',
+      resultsSync: 'VERCEL_OPERATING_DAY_CRON_PRIMARY',
+      settlement: 'VERCEL_OPERATING_DAY_CRON_PRIMARY',
       learningLabels: 'SETTLEMENT_DERIVED_PREDICTION_HISTORY_LABELS',
-      performanceRefresh: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER_AFTER_SETTLEMENT',
-      dailySnapshot: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER_AFTER_SETTLEMENT',
+      performanceRefresh: 'VERCEL_OPERATING_DAY_CRON_PRIMARY_AFTER_SETTLEMENT',
+      dailySnapshot: 'VERCEL_OPERATING_DAY_CRON_PRIMARY_AFTER_SETTLEMENT',
       providerBudgetEnforcement: 'APPLICATION_PROVIDER_BUDGET_SERVICE',
-      postgameReconciliation: 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER',
+      postgameReconciliation: 'VERCEL_OPERATING_DAY_CRON_PRIMARY',
     },
     duplicateProtection: [
+      'primary_scheduler_recent_success_lease',
       'provider_action_lock',
       'operating_day_unique_date',
       'game_results_upsert',
       'prediction_status_already_settled_guard',
       'ai_performance_snapshots_idempotency_key',
     ],
-    requestMethod: request.method,
+    requestMethod,
     dryRun,
   }
+}
+
+function successfulSchedulerStatus(status: unknown) {
+  return ['SUCCESS', 'SUCCESS_CHANGED', 'SUCCESS_NO_CHANGE', 'NOT_DUE', 'PLANNED'].includes(String(status ?? ''))
+}
+
+function ageMinutes(value: string | null) {
+  if (!value) return null
+  const ms = Date.now() - new Date(value).getTime()
+  return Number.isFinite(ms) ? Math.max(0, Math.round(ms / 60000)) : null
+}
+
+async function recentPrimarySchedulerLease() {
+  const { data, error } = await supabaseAdmin
+    .from('operating_day_lifecycle_events')
+    .select('request_id,action,status,completed_at,created_at,metadata')
+    .order('created_at', { ascending: false })
+    .limit(40)
+  if (error) {
+    return {
+      available: false,
+      primaryRecent: false,
+      error: error.message,
+      lastPrimarySuccessAt: null,
+      lastPrimaryRequestId: null,
+      lastPrimaryStatus: null,
+      ageMinutes: null,
+    }
+  }
+  const primary = (data ?? []).find((row) => {
+    const metadata = row.metadata && typeof row.metadata === 'object' ? row.metadata as Record<string, unknown> : {}
+    return String(metadata.source ?? metadata.schedulerSource ?? '') === VERCEL_PRIMARY_SOURCE && successfulSchedulerStatus(row.status)
+  })
+  const lastPrimarySuccessAt = String(primary?.completed_at ?? primary?.created_at ?? '') || null
+  const age = ageMinutes(lastPrimarySuccessAt)
+  return {
+    available: true,
+    primaryRecent: age !== null && age <= PRIMARY_LEASE_TOLERANCE_MINUTES,
+    error: null,
+    lastPrimarySuccessAt,
+    lastPrimaryRequestId: String(primary?.request_id ?? '') || null,
+    lastPrimaryStatus: primary?.status ?? null,
+    ageMinutes: age,
+  }
+}
+
+function fallbackLeaseSkipResponse({
+  id,
+  dryRun,
+  source,
+  lease,
+}: {
+  id: string
+  dryRun: boolean
+  source: string
+  lease: Awaited<ReturnType<typeof recentPrimarySchedulerLease>>
+}) {
+  const executionRunId = crypto.randomUUID()
+  return apiOk(
+    {
+      success: true,
+      status: 'SUCCESS_NO_CHANGE',
+      mode: 'operating_day_consolidated_cron_execution_v2',
+      delegatedMode: 'primary_scheduler_lease_v1',
+      dryRun,
+      source,
+      steps: [
+        {
+          success: true,
+          status: 'SUCCESS_NO_CHANGE',
+          mode: 'primary_scheduler_lease_v1',
+          dryRun,
+          executionMode: 'fallback_skipped_primary_recent_success',
+          executionRunId,
+          selectedAction: 'fallback_skip',
+          selectedDate: null,
+          providerCallsMade: 0,
+          remoteMutationsMade: 0,
+          primaryScheduler: VERCEL_PRIMARY_SOURCE,
+          fallbackScheduler: GITHUB_FALLBACK_SOURCE,
+          lease,
+        },
+      ],
+      selectedAction: 'fallback_skip',
+      selectedDate: null,
+      settlementObserved: false,
+      schedulerHeartbeat: {
+        success: true,
+        mode: 'primary_scheduler_lease_v1',
+        remoteMutationsMade: 0,
+        primarySchedulerRecent: true,
+        lastPrimarySuccessAt: lease.lastPrimarySuccessAt,
+      },
+      continuityPolicy: PLANNER_CONTINUITY_POLICY,
+      actionChain: {
+        actionsAttempted: 0,
+        actionsCompleted: 0,
+        providerActionsCompleted: 0,
+        actionSequence: ['fallback_skip'],
+        reasonPerAction: [{ action: 'fallback_skip', status: 'SUCCESS_NO_CHANGE', stopReason: 'PRIMARY_RECENT_SUCCESS_LEASE' }],
+        stateChangePerAction: [{ action: 'fallback_skip', stateChange: 'NO_MATERIAL_CHANGE' }],
+        providerCallsPerAction: [{ action: 'fallback_skip', providerCallsMade: 0 }],
+        mutationsPerAction: [{ action: 'fallback_skip', remoteMutationsMade: 0 }],
+        plannerRecomputedAfterEachAction: [],
+        plannerRecomputations: 0,
+        stopReason: 'PRIMARY_RECENT_SUCCESS_LEASE',
+        nextExternalAction: null,
+        durationMs: 0,
+        capsReached: {
+          maxActions: false,
+          maxProviderActions: false,
+          maxMutations: false,
+          maxDuration: false,
+        },
+        repeatedActionGuardTriggered: false,
+      },
+      schedulerContract: {
+        route: '/api/cron/operating-day',
+        executionEngine: 'adaptive_refresh_execution_bridge_v2',
+        overlapProtection: 'primary_scheduler_recent_success_lease + provider_action_lock',
+        providerBudgetGuarded: true,
+        refreshWindowGuarded: true,
+        providerCallsMadeByDryRun: dryRun ? 0 : undefined,
+        legacyAutomationShortCircuitBypassed: true,
+        schedulerOwnership: schedulerOwner('POST', dryRun, source),
+        dryRunDefault: 'false_for_production_continuity',
+        lease,
+      },
+      providerCallsMade: 0,
+      remoteMutationsMade: 0,
+      writes: 0,
+    },
+    id,
+    { status: 200 }
+  )
 }
 
 const PLANNER_CONTINUITY_POLICY = {
@@ -358,11 +515,16 @@ async function handle(request: NextRequest) {
     return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized operating-day cron request.', status: 401 })
   }
   const dryRun = parseDryRun(request)
+  const source = schedulerSource(request, dryRun)
+  if (source === GITHUB_FALLBACK_SOURCE && dryRun === false) {
+    const lease = await recentPrimarySchedulerLease()
+    if (lease.primaryRecent) return fallbackLeaseSkipResponse({ id, dryRun, source, lease })
+  }
   let status: Partial<CronAutomationStatus> = {}
   try {
     const adaptive = await runPostgameContinuity(
       dryRun,
-      request.method === 'POST' ? 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_SCHEDULER' : 'MANUAL_OR_VERCEL_READ_ONLY_CALLER'
+      source
     )
     const adaptiveRecord = adaptive as Record<string, unknown>
     const adaptiveStatus = String(adaptiveRecord.status ?? (adaptive.success ? 'SUCCESS' : 'FAILED_RETRYABLE'))
@@ -382,7 +544,7 @@ async function handle(request: NextRequest) {
           refreshWindowGuarded: true,
           providerCallsMadeByDryRun: dryRun ? 0 : undefined,
           legacyAutomationShortCircuitBypassed: true,
-          schedulerOwnership: schedulerOwner(request, dryRun),
+          schedulerOwnership: schedulerOwner(request.method, dryRun, source),
           dryRunDefault: 'false_for_production_continuity',
         },
       },

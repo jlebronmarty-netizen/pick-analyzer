@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-05 OR-02 Primary Scheduler Migration - Vercel Cron
+
+- OR-02 implements the approved scheduler migration now that Vercel Pro is active. Vercel Cron is configured as the primary protected operating-day scheduler for `/api/cron/operating-day` at `7-57/10 * * * *`; GitHub Actions remains fallback through the same endpoint with `scheduler=github-fallback`.
+- The fallback path checks a recent Vercel-primary success lease and exits with `SUCCESS_NO_CHANGE`, 0 provider calls and 0 remote mutations when primary execution is current. Both paths retain the same protected endpoint, adaptive planner, planner-continuity caps, provider-budget guard and provider action lock.
+- Final OR-02 PASS still requires three consecutive automatic Vercel primary executions and healthy Scheduler, Market Freshness, Settlement, Product Readiness and Operations evidence. MC-08H was not rerun to PASS, Production Pilot Week remains NOT_READY and MC-03 was not started.
+
 ## 2026-08-05 OR-01H Primary Scheduler Architecture Decision
 
 - OR-01H is `HUMAN_SCHEDULER_ARCHITECTURE_DECISION_REQUIRED`. Production serves `931fa81543feb1fad4192b0344e555eee7ddf4c5`, GitHub scheduled writer runs `31032206383` and `31037920501` succeeded on that commit, and Operations Health reported scheduler cadence `HEALTHY` in the latest read, but market freshness and product readiness remained `CRITICAL`.

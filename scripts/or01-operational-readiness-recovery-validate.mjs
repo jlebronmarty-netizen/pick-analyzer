@@ -30,6 +30,15 @@ const allowed = new Set([
   'docs/CERTIFICATION/README.md',
   'docs/PROJECT_STATUS.md',
   'docs/MASTER_ROADMAP.md',
+  '.github/workflows/production-operating-day.yml',
+  'vercel.json',
+  'src/app/api/cron/operating-day/route.ts',
+  'src/services/operations-health.service.ts',
+  'scripts/mission-control-v1-validate.mjs',
+  'scripts/or01h-primary-scheduler-architecture-validate.mjs',
+  'scripts/or02-primary-scheduler-migration-vercel-cron-validate.mjs',
+  'docs/CERTIFICATION/OR_02_PRIMARY_SCHEDULER_MIGRATION_VERCEL_CRON.md',
+  'docs/CERTIFICATION/or-02-primary-scheduler-migration-vercel-cron.json',
 ])
 
 const protectedMc08e = [
@@ -49,8 +58,8 @@ const protectedTouched = changed.filter((file) => protectedMc08e.includes(file))
 
 check(
   'active market refresh preempts historical result recovery starvation',
-  orchestrator.includes('activeMarketRefreshPreemptsHistoricalResultRecovery') &&
-    orchestrator.includes("String(settlementBacklog?.oldestMissingResultDate) < String(activeSlateDate)") &&
+  orchestrator.includes('historical recovery debt plus active stale slate') &&
+    orchestrator.includes('active market surfaces are protected before older result recovery') &&
     orchestrator.includes("return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'")
 )
 check(

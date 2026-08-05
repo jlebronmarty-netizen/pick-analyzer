@@ -9,6 +9,13 @@ const check = (name, passed, detail = '') => {
 }
 
 const cert = json('docs/CERTIFICATION/or-01h-primary-scheduler-architecture.json')
+const or02 = exists('docs/CERTIFICATION/or-02-primary-scheduler-migration-vercel-cron.json')
+  ? json('docs/CERTIFICATION/or-02-primary-scheduler-migration-vercel-cron.json')
+  : null
+const or02SupersedesDisabledCron =
+  or02?.humanDecision?.vercelProActive === true &&
+  or02?.humanDecision?.vercelCronPrimaryApproved === true &&
+  or02?.architecture?.primaryScheduler === 'VERCEL_OPERATING_DAY_CRON_PRIMARY'
 const md = read('docs/CERTIFICATION/OR_01H_PRIMARY_SCHEDULER_ARCHITECTURE.md')
 const vercel = json('vercel.json')
 const writer = read('.github/workflows/production-operating-day.yml')
@@ -21,14 +28,14 @@ check('OR-01H certification JSON exists', exists('docs/CERTIFICATION/or-01h-prim
 check('OR-01H certification markdown exists', exists('docs/CERTIFICATION/OR_01H_PRIMARY_SCHEDULER_ARCHITECTURE.md'))
 check('final classification requires human scheduler architecture decision', cert.finalClassification === 'HUMAN_SCHEDULER_ARCHITECTURE_DECISION_REQUIRED')
 check('primary scheduler was not activated without plan proof', cert.decision.primarySchedulerActivated === false)
-check('Vercel cron remains disabled in repository', Array.isArray(vercel.crons) && vercel.crons.length === 0)
+check('Vercel cron remains disabled unless OR-02 supersedes OR-01H', (Array.isArray(vercel.crons) && vercel.crons.length === 0) || or02SupersedesDisabledCron)
 check('cert records Vercel cron disabled', cert.vercelAudit.vercelCronCurrentlyEnabledInRepository === false)
 check('cert records missing plan evidence', cert.vercelAudit.planEvidenceAvailable === false)
 check('cert blocks Vercel primary until dashboard proof', cert.vercelAudit.decision === 'DO_NOT_ACTIVATE_VERCEL_PRIMARY_WITHOUT_DASHBOARD_PLAN_PROOF')
 check('required cadence remains 10 minutes', cert.decision.requiredCadenceMinutes === 10)
 check('scheduler config write cadence remains 10 minutes', schedulerConfig.includes('MLB_OPERATING_DAY_SCHEDULER_GRACE_MINUTES = 10') && schedulerConfig.includes('MLB_OPERATING_DAY_WRITE_SCHEDULER_INTERVAL_MINUTES = 10'))
-check('GitHub writer cadence unchanged', writer.includes('7-57/10 * * * *') && writer.includes('production-operating-day-writer'))
-check('GitHub writer calls protected endpoint', writer.includes('/api/cron/operating-day?dryRun=${DRY_RUN}') && writer.includes('Authorization: Bearer ${CRON_SECRET}'))
+check('GitHub writer/fallback cadence unchanged', writer.includes('7-57/10 * * * *') && (writer.includes('production-operating-day-writer') || writer.includes('production-operating-day-fallback')))
+check('GitHub writer/fallback calls protected endpoint', writer.includes('/api/cron/operating-day?dryRun=${DRY_RUN}') && writer.includes('Authorization: Bearer ${CRON_SECRET}'))
 check('GitHub writer validates app-side invocation evidence', writer.includes('appInvocationId') && writer.includes('schedulerHeartbeat'))
 check('GitHub heartbeat remains observer cadence', heartbeat.includes('3,33 * * * *') && heartbeat.includes('/api/cron/operating-day?dryRun=true'))
 check('manual workflow has no schedule trigger', manual.includes('workflow_dispatch') && !manual.includes('schedule:'))
@@ -48,7 +55,7 @@ check('production commit evidence is current', cert.productionCommitObserved ===
 check('system version provider calls are zero', cert.productionEvidence.systemVersion.providerCallsMade === 0)
 check('scheduler health and market freshness are separate', cert.productionEvidence.operationsHealth.schedulerCadenceStatus === 'HEALTHY' && cert.productionEvidence.operationsHealth.marketFreshnessStatus === 'CRITICAL')
 check('required user action is explicit', cert.requiredUserAction.length >= 6 && cert.requiredUserAction.some((item) => item.includes('Verify Vercel team/project plan')))
-check('Mission Control runtime overlay maps OR-01H metadata', missionControlService.includes("isOr01h ? 'AUTOMATION'") && missionControlService.includes('Operations Architecture') && missionControlService.includes('human_vercel_plan_and_cron_settings_check_required'))
+check('Mission Control runtime overlay maps OR-01H/OR-02 metadata', missionControlService.includes('Operations Architecture') && missionControlService.includes('human_vercel_plan_and_cron_settings_check_required') && (!or02SupersedesDisabledCron || missionControlService.includes("id === 'OR-02'")))
 check('Production Pilot Week not started', cert.safety.productionPilotWeekStarted === false)
 check('MC-03 not started', cert.safety.mc03Started === false)
 check('local server smoke was not run', cert.safety.localServerSmokeRun === false)

@@ -1,0 +1,70 @@
+{
+  "mission": "OR-02",
+  "title": "Primary Scheduler Migration - Vercel Cron",
+  "status": "DEPLOYMENT_PENDING",
+  "startingCommit": "448948450fbf099eae63a49cdb7b9f4d084baae1",
+  "humanDecision": {
+    "vercelProActive": true,
+    "vercelCronPrimaryApproved": true,
+    "githubActionsFallbackApproved": true
+  },
+  "architecture": {
+    "primaryScheduler": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+    "primaryMethod": "GET",
+    "primaryPath": "/api/cron/operating-day",
+    "primarySchedule": "7-57/10 * * * *",
+    "fallbackScheduler": "GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_FALLBACK",
+    "fallbackMethod": "POST",
+    "fallbackPath": "/api/cron/operating-day?dryRun=false&scheduler=github-fallback",
+    "fallbackSchedule": "7-57/10 * * * *",
+    "protectedEndpointShared": true,
+    "plannerShared": true,
+    "plannerContinuityShared": true,
+    "providerBudgetShared": true,
+    "fallbackLease": "primary_scheduler_recent_success_lease"
+  },
+  "duplicateSuppression": {
+    "githubFallbackSkipsWhenPrimaryRecent": true,
+    "leaseToleranceMinutes": 20,
+    "fallbackSkipProviderCalls": 0,
+    "fallbackSkipRemoteMutations": 0,
+    "providerActionLockStillActive": true,
+    "canonicalUpsertGuardsStillActive": true,
+    "settlementIdempotencyStillActive": true
+  },
+  "runtimeSurfaces": {
+    "vercelJsonCronEnabled": true,
+    "operationsHealthReportsPrimary": true,
+    "missionControlReportsOr02": true,
+    "adaptiveStatusReportsPrimaryFallback": true
+  },
+  "requiredProductionProof": {
+    "threeConsecutiveVercelAutomaticExecutions": false,
+    "schedulerHealthy": false,
+    "marketFreshnessHealthy": false,
+    "settlementHealthy": false,
+    "productReadinessHealthy": false,
+    "operationsHealthy": false,
+    "mc08hPass": false,
+    "productionReady": false,
+    "productionPilotWeekReady": false
+  },
+  "safety": {
+    "predictionChanged": false,
+    "officialPickPolicyChanged": false,
+    "kellyChanged": false,
+    "plannerLogicChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "providerBudgetChanged": false,
+    "providerContractChanged": false,
+    "manualDeployment": false,
+    "localServerSmokeRun": false
+  },
+  "validation": {
+    "primaryValidator": "scripts/or02-primary-scheduler-migration-vercel-cron-validate.mjs",
+    "status": "PENDING",
+    "build": "PENDING"
+  },
+  "finalClassification": "EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF"
+}

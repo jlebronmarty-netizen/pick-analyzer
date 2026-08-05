@@ -1,15 +1,15 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "OR_01H_HUMAN_SCHEDULER_ARCHITECTURE_DECISION_REQUIRED",
+  "status": "OR_02_EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
-    "id": "OR-01H",
-    "title": "Primary Scheduler Architecture Decision",
+    "id": "OR-02",
+    "title": "Primary Scheduler Migration - Vercel Cron",
     "state": "BLOCKED",
     "priority": "P1",
-    "mode": "READ_ONLY",
-    "readiness": "HUMAN_VERCEL_PLAN_AND_CRON_SETTINGS_CHECK_REQUIRED"
+    "mode": "RUNTIME",
+    "readiness": "EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF"
   },
   "nextMission": null,
   "missionCounts": {
@@ -65,7 +65,8 @@
       "AUTONOMOUS_ELIGIBLE",
       "AUTONOMOUS_ACTIVE",
       "EXTERNAL_WAIT",
-      "READ_ONLY"
+      "READ_ONLY",
+      "RUNTIME"
     ]
   },
   "recentCompletions": [
@@ -1187,5 +1188,34 @@
     "mc08Complete": false,
     "mc03Started": false,
     "finalClassification": "MC_08H_PRODUCTION_READINESS_BLOCKED"
+  },
+  "or02": {
+    "status": "EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF",
+    "title": "Primary Scheduler Migration - Vercel Cron",
+    "certificationArtifact": "docs/CERTIFICATION/or-02-primary-scheduler-migration-vercel-cron.json",
+    "missionArtifact": "docs/CERTIFICATION/OR_02_PRIMARY_SCHEDULER_MIGRATION_VERCEL_CRON.md",
+    "humanDecision": {
+      "vercelProActive": true,
+      "vercelCronPrimaryApproved": true,
+      "githubActionsFallbackApproved": true
+    },
+    "primaryScheduler": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+    "fallbackScheduler": "GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_FALLBACK",
+    "sharedProtectedEndpoint": "/api/cron/operating-day",
+    "schedule": "7-57/10 * * * *",
+    "fallbackLease": "primary_scheduler_recent_success_lease",
+    "requiredProof": {
+      "threeConsecutiveVercelAutomaticExecutions": false,
+      "schedulerHealthy": false,
+      "marketFreshnessHealthy": false,
+      "settlementHealthy": false,
+      "productReadinessHealthy": false,
+      "operationsHealthy": false,
+      "mc08hRerun": false,
+      "productionReady": false
+    },
+    "productionPilotWeek": "NOT_READY",
+    "mc03": "NOT_STARTED",
+    "finalClassification": "OR_02_EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF"
   }
 }

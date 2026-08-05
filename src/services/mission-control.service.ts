@@ -47,7 +47,7 @@ export type MissionState =
   | 'UNKNOWN'
 
 export type MissionPriority = 'P0' | 'P1' | 'P2' | 'P3' | 'P4'
-export type MissionMode = 'MANUAL_ONLY' | 'AGENT_ASSISTED' | 'AUTONOMOUS_ELIGIBLE' | 'AUTONOMOUS_ACTIVE' | 'EXTERNAL_WAIT' | 'READ_ONLY'
+export type MissionMode = 'MANUAL_ONLY' | 'AGENT_ASSISTED' | 'AUTONOMOUS_ELIGIBLE' | 'AUTONOMOUS_ACTIVE' | 'EXTERNAL_WAIT' | 'READ_ONLY' | 'RUNTIME'
 export type ReadinessStatus = 'NOT_READY' | 'CONDITIONAL' | 'READY' | 'ACTIVE' | 'PAUSED' | 'BLOCKED' | 'COMPLETE'
 export type StopConditionType = 'HARD_STOP' | 'MISSION_BLOCK' | 'SPORT_BLOCK' | 'PROVIDER_BLOCK' | 'EXTERNAL_WAIT' | 'HUMAN_APPROVAL'
 export type SportMaturity =
@@ -163,35 +163,44 @@ function missionFromStatus(value: unknown, fallback: Mission): Mission {
   const readiness = typeof source.readiness === 'string' ? source.readiness as ReadinessStatus : fallback.readiness
   const isMc08h = id === 'MC-08H'
   const isOr01h = id === 'OR-01H'
+  const isOr02 = id === 'OR-02'
   return {
     ...fallback,
     id,
     title,
-    category: isMc08h ? 'CERTIFICATION' : isOr01h ? 'AUTOMATION' : fallback.category,
+    category: isMc08h ? 'CERTIFICATION' : isOr01h || isOr02 ? 'AUTOMATION' : fallback.category,
     state,
     priority,
     mode,
     readiness,
-    owner: isMc08h ? 'Product Certification' : isOr01h ? 'Operations Architecture' : fallback.owner,
+    owner: isMc08h ? 'Product Certification' : isOr01h || isOr02 ? 'Operations Architecture' : fallback.owner,
     scope: isMc08h
       ? 'Determine whether the daily betting product is ready for real-user production operation.'
       : isOr01h
         ? 'Decide and certify the primary/fallback scheduler architecture required for sustained protected operating-day execution.'
+        : isOr02
+          ? 'Migrate primary protected operating-day scheduling to Vercel Cron while retaining GitHub Actions as fallback.'
       : fallback.scope,
     nextAction: isMc08h
       ? 'Clear production operations blockers before opening Production Pilot Week.'
       : isOr01h
         ? 'Verify the Vercel project plan and Cron Jobs settings in the dashboard before approving a primary scheduler migration.'
+        : isOr02
+          ? 'Observe three consecutive automatic Vercel Cron executions, then rerun MC-08H readiness certification.'
       : fallback.nextAction,
     blockers: isMc08h
       ? ['production_readiness_blocked']
       : isOr01h
         ? ['human_vercel_plan_and_cron_settings_check_required']
+        : isOr02
+          ? ['three_consecutive_vercel_primary_executions_required']
         : fallback.blockers,
     evidence: isMc08h
       ? ['docs/CERTIFICATION/mc-08h-production-readiness-certification.json', 'docs/MISSION_CONTROL/MC_08H_PRODUCTION_READINESS_CERTIFICATION.md']
       : isOr01h
         ? ['docs/CERTIFICATION/or-01h-primary-scheduler-architecture.json', 'docs/CERTIFICATION/OR_01H_PRIMARY_SCHEDULER_ARCHITECTURE.md']
+        : isOr02
+          ? ['docs/CERTIFICATION/or-02-primary-scheduler-migration-vercel-cron.json', 'docs/CERTIFICATION/OR_02_PRIMARY_SCHEDULER_MIGRATION_VERCEL_CRON.md']
       : fallback.evidence,
     canStartAutomatically: false,
   }
@@ -246,7 +255,7 @@ const taxonomy = {
     'UNKNOWN',
   ] satisfies MissionState[],
   priorities: ['P0', 'P1', 'P2', 'P3', 'P4'] satisfies MissionPriority[],
-  modes: ['MANUAL_ONLY', 'AGENT_ASSISTED', 'AUTONOMOUS_ELIGIBLE', 'AUTONOMOUS_ACTIVE', 'EXTERNAL_WAIT', 'READ_ONLY'] satisfies MissionMode[],
+  modes: ['MANUAL_ONLY', 'AGENT_ASSISTED', 'AUTONOMOUS_ELIGIBLE', 'AUTONOMOUS_ACTIVE', 'EXTERNAL_WAIT', 'READ_ONLY', 'RUNTIME'] satisfies MissionMode[],
 }
 
 const stopConditions: StopCondition[] = [
