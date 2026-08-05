@@ -53,3 +53,58 @@ jobs:
           if [ "${status_code}" -lt 200 ] || [ "${status_code}" -ge 300 ]; then
             exit 1
           fi
+
+          node - "${response_file}" <<'NODE'
+          const fs = require('fs')
+          const file = process.argv[2]
+          const text = fs.readFileSync(file, 'utf8')
+          let body
+          try {
+            body = JSON.parse(text)
+          } catch (error) {
+            console.error(`Operating-day response was not valid JSON: ${error.message}`)
+            process.exit(1)
+          }
+
+          const failedStatuses = new Set([
+            'BUDGET_BLOCKED',
+            'BLOCKED',
+            'MISSED_REFRESH',
+            'FAILED_RETRYABLE',
+            'configuration_error',
+            'provider_error',
+            'partial',
+            'quota_blocked',
+          ])
+          const steps = Array.isArray(body.steps) ? body.steps : []
+          const appInvocationId = steps.map((step) => step && step.executionRunId).find(Boolean)
+          const writes = Number(body.writes ?? body.remoteMutationsMade ?? 0)
+          const heartbeat = body.schedulerHeartbeat && body.schedulerHeartbeat.success === true
+
+          if (body.success !== true) {
+            console.error('Operating-day response success was not true.')
+            process.exit(1)
+          }
+          if (failedStatuses.has(String(body.status ?? ''))) {
+            console.error(`Operating-day response status is not a successful scheduler contract: ${body.status}`)
+            process.exit(1)
+          }
+          if (!body.requestId) {
+            console.error('Operating-day response did not include requestId.')
+            process.exit(1)
+          }
+          if (!Object.prototype.hasOwnProperty.call(body, 'selectedAction')) {
+            console.error('Operating-day response did not include selectedAction.')
+            process.exit(1)
+          }
+          if (!appInvocationId) {
+            console.error('Operating-day response did not include an adaptive executionRunId.')
+            process.exit(1)
+          }
+          if (writes === 0 && !heartbeat) {
+            console.error('Operating-day no-write success did not include scheduler heartbeat evidence.')
+            process.exit(1)
+          }
+
+          console.log(`Validated operating-day response: requestId=${body.requestId} appInvocationId=${appInvocationId} selectedAction=${body.selectedAction} status=${body.status}`)
+          NODE

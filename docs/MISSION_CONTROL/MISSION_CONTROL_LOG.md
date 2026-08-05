@@ -2,6 +2,27 @@
 
 This log is append-only. Add entries at mission boundaries only.
 
+## 2026-08-05 - OR-01B Scheduler Workflow Ledger Reconciliation
+
+Starting commit: `5558ab21908d1a41274170a9f1f78a203dc6b9ea`.
+
+OR-01B audited GitHub scheduled-run success versus app-side scheduler health evidence.
+
+Findings:
+
+- `.github/workflows/production-operating-day.yml` used canonical production URL `https://pick-analyzer.vercel.app`.
+- The workflow failed on non-2xx HTTP status but did not validate the JSON response body.
+- A transport-level 2xx could therefore mask application `success:false`, `MISSED_REFRESH`, missing request ID, missing adaptive invocation ID, or missing heartbeat evidence.
+- The protected app route recorded scheduler heartbeat evidence for dry-run success only; a live `SUCCESS_NO_CHANGE` could return HTTP 200 without advancing the scheduler-health ledger.
+
+Repairs:
+
+- workflow response validation now requires JSON body success, safe application status, request ID, adaptive execution ID, selected action field and heartbeat evidence for no-write success;
+- protected route now records heartbeat evidence for successful live no-product-mutation invocations;
+- scheduler cadence, provider budgets, prediction behavior, settlement and learning remain unchanged.
+
+Classification: `WORKFLOW_LEDGER_RECONCILIATION_REPAIR_DEPLOYMENT_REQUIRED`.
+
 ## 2026-08-05 - OR-01A Post-Repair Operational Proof
 
 Starting commit: `21f8d135f665fcf39cf2db6d64462ca9251d348e`.

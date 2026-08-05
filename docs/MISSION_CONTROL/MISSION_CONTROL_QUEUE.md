@@ -2,7 +2,7 @@
 
 Status: deterministic V2 queue.
 
-MC-08 remains ACTIVE because the final production-readiness audit is blocked by live operations. OR-01 repository recovery is complete, but OR-01A production proof remains external-wait: scheduler cadence is CRITICAL and the current active-market window has passed. Gated future missions such as MC-03 remain PLANNED and inactive.
+MC-08 remains ACTIVE because the final production-readiness audit is blocked by live operations. OR-01B repaired the workflow/app-ledger success reconciliation defect and requires one post-deploy protected scheduler proof. Gated future missions such as MC-03 remain PLANNED and inactive.
 
 | ID | Mission | Category | Priority | State | Mode | Next Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -18,7 +18,7 @@ MC-08 remains ACTIVE because the final production-readiness audit is blocked by 
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
-Next eligible mission: none. OR-01A requires GitHub scheduler log review or next pregame writer proof before MC-08H can be rerun. Production Pilot Week is not ready. MC-03 remains planned/manual-only.
+Next eligible mission: none. OR-01B requires one post-deploy protected scheduler proof before MC-08H can be rerun. Production Pilot Week is not ready. MC-03 remains planned/manual-only.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
@@ -52,4 +52,5 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | MC-08H | Production Readiness Certification | BLOCKED | Production readiness is blocked by scheduler execution, market freshness and product readiness CRITICAL evidence. |
 | OR-01 | Operational Readiness Recovery | REPOSITORY_RECOVERY_DEPLOYMENT_REQUIRED | Active market refresh now preempts older missing-result recovery when no settlement-ready rows exist; production writer proof is required. |
 | OR-01A | Post-Repair Operational Proof | EXTERNAL_WAIT | Public GitHub scheduled runs succeeded on `21f8d13`, but app-side scheduler cadence remains CRITICAL and active-market proof must wait for logs or the next pregame window. |
+| OR-01B | Scheduler Workflow Ledger Reconciliation | REPAIR_DEPLOYMENT_REQUIRED | Workflow response validation and app-side no-write heartbeat semantics repaired; production proof pending. |
 | Production Pilot Week | Real-world validation before Multi-Sport Expansion | NOT_READY | Requires MC-08H Production Ready YES. |

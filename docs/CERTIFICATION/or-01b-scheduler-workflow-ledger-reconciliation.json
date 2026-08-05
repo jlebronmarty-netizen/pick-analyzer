@@ -1,0 +1,30 @@
+{
+  "id": "or_01b_scheduler_workflow_ledger_reconciliation",
+  "date": "2026-08-05",
+  "startingCommit": "5558ab21908d1a41274170a9f1f78a203dc6b9ea",
+  "classification": "OR_01B_WORKFLOW_LEDGER_RECONCILIATION_REPAIR_DEPLOYMENT_REQUIRED",
+  "githubRunsAudited": [
+    30961154690,
+    30965570325
+  ],
+  "workflowFile": ".github/workflows/production-operating-day.yml",
+  "falseSuccessDefect": "Workflow validated HTTP status only and app route did not record live no-write success heartbeat evidence.",
+  "productionUrlFinding": "Workflow uses canonical https://pick-analyzer.vercel.app URL.",
+  "httpHandlingFinding": "Non-2xx HTTP status already failed; 2xx application failure status needed JSON validation.",
+  "responseValidationFinding": "Workflow now requires success true, non-failure status, requestId, adaptive executionRunId, selectedAction field and heartbeat evidence for no-write success.",
+  "ledgerFinding": "Successful non-dry-run no-product-mutation invocation now records scheduler heartbeat evidence.",
+  "repairs": [
+    "workflow_json_response_validation",
+    "workflow_app_invocation_id_required",
+    "workflow_no_write_heartbeat_required",
+    "protected_route_live_no_write_heartbeat"
+  ],
+  "schedulerCadenceChanged": false,
+  "providerBudgetChanged": false,
+  "predictionChanged": false,
+  "settlementChanged": false,
+  "learningChanged": false,
+  "providerCallsMadeByValidation": 0,
+  "remoteMutationsMadeByValidation": 0,
+  "productionProof": "PENDING"
+}

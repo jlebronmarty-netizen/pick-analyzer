@@ -140,26 +140,39 @@ async function runPostgameContinuity(dryRun: boolean, source: string) {
     totalWrites += Number((dailyUpdate.automaticDailyUpdate as Record<string, unknown> | undefined)?.durableWritesMade ?? 0)
   }
 
-  if (dryRun === true && steps.every((step) => step.success)) {
+  const last = (steps.at(-1) ?? {}) as Record<string, unknown>
+  const shouldRecordSchedulerHeartbeat =
+    steps.every((step) => step.success) &&
+    (
+      dryRun === true ||
+      totalWrites === 0 ||
+      ['NOT_DUE', 'SUCCESS_NO_CHANGE'].includes(String(last.status ?? ''))
+    )
+
+  if (shouldRecordSchedulerHeartbeat) {
     const { recordOperatingDaySchedulerHeartbeat } = await import('@/services/operating-day.service')
     const lastStep = (steps.at(-1) ?? {}) as Record<string, unknown>
     schedulerHeartbeat = await recordOperatingDaySchedulerHeartbeat({
       selectedDate: String(lastStep.selectedDate ?? ''),
       requestId: String(lastStep.executionRunId ?? ''),
       source,
-      status: 'SUCCESS_NO_CHANGE',
-      dryRun: true,
+      status: dryRun === true ? 'SUCCESS_NO_CHANGE' : String(lastStep.status ?? 'SUCCESS_NO_CHANGE'),
+      dryRun,
       selectedAction: typeof lastStep.selectedAction === 'string' ? lastStep.selectedAction : null,
       dueSteps: Array.isArray(lastStep.dueSteps) ? lastStep.dueSteps : [],
       metadata: {
-        heartbeatReason: 'successful_protected_dry_run_observation',
+        heartbeatReason: dryRun === true
+          ? 'successful_protected_dry_run_observation'
+          : 'successful_protected_writer_no_product_mutation_observation',
         heartbeatUpdatesHealthMarker: true,
+        appInvocationId: String(lastStep.executionRunId ?? ''),
+        protectedInvocationRecorded: true,
+        workflowSuccessRequiresInvocationEvidence: true,
       },
     }) as Record<string, unknown>
     totalWrites += Number(schedulerHeartbeat.remoteMutationsMade ?? 0)
   }
 
-  const last = (steps.at(-1) ?? {}) as Record<string, unknown>
   return {
     success: steps.every((step) => step.success),
     status: String(last.status ?? (steps.every((step) => step.success) ? 'SUCCESS' : 'FAILED_RETRYABLE')),

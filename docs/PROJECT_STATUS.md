@@ -2,6 +2,10 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-05 OR-01B Scheduler Workflow Ledger Reconciliation
+
+- OR-01B identified the reason GitHub scheduled runs could report success while app-side scheduler health remained stale: the workflow validated HTTP status only, while the protected route recorded no scheduler heartbeat for successful live no-product-mutation invocations. The repair adds workflow JSON response validation and records heartbeat evidence for live no-write successes. Scheduler cadence, provider budgets, prediction logic, settlement and learning remain unchanged. One post-deploy protected scheduler proof is required before MC-08H can be rerun.
+
 ## 2026-08-05 OR-01A Post-Repair Operational Proof
 
 - OR-01A is `EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF`. Production serves `21f8d135f665fcf39cf2db6d64462ca9251d348e`, and public GitHub metadata shows scheduled writer runs `30961154690` and `30965570325` completed successfully on that commit. GitHub run logs were HTTP 403 from this environment, while production Operations Health still reports scheduler execution `CRITICAL`, missed intervals 18 and application-side last successful protected invocation `2026-08-04T23:35:22.311+00:00`. Current Board is empty and the active market window has passed, so no manual `midday_refresh` was forced. MC-08H was not rerun; Production Pilot Week remains NOT_READY; MC-03 was not started.

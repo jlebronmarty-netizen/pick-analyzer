@@ -113,3 +113,5 @@ Move certification docs here only when links are updated and validation passes.
 - [OR-01 Operational Readiness Recovery JSON](or-01-operational-readiness-recovery.json)
 - [OR-01A Post-Repair Operational Proof](OR_01A_POST_REPAIR_OPERATIONAL_PROOF.md)
 - [OR-01A Post-Repair Operational Proof JSON](or-01a-post-repair-operational-proof.json)
+- [OR-01B Scheduler Workflow Ledger Reconciliation](OR_01B_SCHEDULER_WORKFLOW_LEDGER_RECONCILIATION.md)
+- [OR-01B Scheduler Workflow Ledger Reconciliation JSON](or-01b-scheduler-workflow-ledger-reconciliation.json)
