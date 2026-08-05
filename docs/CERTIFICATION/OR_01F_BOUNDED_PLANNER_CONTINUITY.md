@@ -1,12 +1,14 @@
 # OR-01F Bounded Planner Continuity Certification
 
-Status: `LOCALLY_COMPLETE_PENDING_PRODUCTION_PROOF`.
+Status: `PRODUCTION_CERTIFIED`.
 
 Starting commit: `f6cae3ec6bb20b02ca9e4898783ac8d2f49b73c5`
 
 ## Verdict
 
-OR-01F implements the approved bounded planner-continuity repair. The protected operating-day writer can now recompute planner state after a material action and continue only to immediately due internal closure work. It cannot execute a second provider action, cannot repeat the same action identity and cannot loop without caps. Production proof is required after deployment before final certification.
+OR-01F implements the approved bounded planner-continuity repair. The protected operating-day writer can now recompute planner state after a material action and continue only to immediately due internal closure work. It cannot execute a second provider action, cannot repeat the same action identity and cannot loop without caps.
+
+Production proof on commit `00a3badc308059811139d7c1734d1cee8cb885bf` executed exactly one protected invocation. The invocation selected `midday_refresh`, made 0 provider calls, wrote only scheduler heartbeat evidence, stopped with `NO_MATERIAL_CHANGE`, and did not require downstream continuation because no material product state changed.
 
 ## Continuity Policy
 

@@ -1,7 +1,7 @@
 {
   "mission": "OR-01F",
   "title": "Bounded Planner Continuity",
-  "status": "LOCALLY_COMPLETE_PENDING_PRODUCTION_PROOF",
+  "status": "PRODUCTION_CERTIFIED",
   "startingCommit": "f6cae3ec6bb20b02ca9e4898783ac8d2f49b73c5",
   "finalClassification": "PLANNER_REPAIR_REDUCES_RISK_BUT_PRIMARY_SCHEDULER_STILL_REQUIRED",
   "continuityPolicy": {
@@ -177,8 +177,27 @@
     "localServerSmokeRun": false
   },
   "proof": {
-    "status": "PENDING_PRODUCTION_PROOF",
-    "manualProtectedWriterExecutionsAllowed": 1
+    "status": "PASS",
+    "productionCommit": "00a3badc308059811139d7c1734d1cee8cb885bf",
+    "manualProtectedWriterExecutionsAllowed": 1,
+    "manualProtectedWriterExecutionsUsed": 1,
+    "httpStatus": 200,
+    "success": true,
+    "selectedInitialAction": "midday_refresh",
+    "selectedDate": "2026-08-05",
+    "actionSequence": [
+      "midday_refresh"
+    ],
+    "providerActionsCompleted": 1,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 1,
+    "plannerRecomputations": 0,
+    "stopReason": "NO_MATERIAL_CHANGE",
+    "nextExternalAction": null,
+    "repeatedActionGuardTriggered": false,
+    "durationMs": 9583,
+    "downstreamInternalContinuation": "NOT_DUE_NO_MATERIAL_CHANGE",
+    "duplicateWritesObserved": false
   },
   "missionControl": {
     "or01f": "PRODUCTION_CERTIFIED",

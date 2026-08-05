@@ -352,10 +352,11 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 
 # 2026-08-05 OR-01F Bounded Planner Continuity
 
-- Status: ACTIVE pending production proof.
+- Status: PRODUCTION_CERTIFIED.
 - Added `planner_continuity_v1` to the protected operating-day writer.
 - The writer remains capped at 3 actions and now allows at most 1 provider-backed action per invocation.
 - After material work, the writer recomputes planner state with a read-only preview and continues only to safe internal `settle` work.
 - Second provider actions, repeated action identities, no material changes, failures, mutation caps and duration caps stop the chain explicitly.
 - Scheduler cadence, GitHub workflows, provider budgets, prediction formulas, Official Pick policy, settlement math, learning math, Current Era and Replay remain unchanged.
-- Production Pilot Week remains NOT READY. MC-08H remains blocked. MC-03 was not started.
+- Production proof on commit `00a3badc308059811139d7c1734d1cee8cb885bf` executed one protected invocation. It selected `midday_refresh`, made 0 provider calls, wrote 1 scheduler heartbeat, stopped with `NO_MATERIAL_CHANGE`, and did not continue because no material downstream internal action was due.
+- Production Pilot Week remains NOT READY because sustained scheduler delivery is still not proven. MC-08H remains blocked. MC-03 was not started.

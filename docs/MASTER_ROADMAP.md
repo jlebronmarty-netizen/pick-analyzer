@@ -3292,6 +3292,6 @@ Production Pilot Week remains NOT_READY. MC-08H remains blocked. MC-03 remains n
 
 ## OR-01F Bounded Planner Continuity
 
-OR-01F implements the approved bounded planner-continuity repair without migrating scheduler infrastructure. The protected operating-day writer now uses `planner_continuity_v1`: max 3 actions, max 1 provider-backed action, read-only planner recomputation after material work, repeated-action guard, duration/mutation caps and safe internal `settle` continuation only.
+OR-01F is production-certified on runtime commit `00a3badc308059811139d7c1734d1cee8cb885bf`. It implements the approved bounded planner-continuity repair without migrating scheduler infrastructure. The protected operating-day writer now uses `planner_continuity_v1`: max 3 actions, max 1 provider-backed action, read-only planner recomputation after material work, repeated-action guard, duration/mutation caps and safe internal `settle` continuation only.
 
-This reduces dependence on repeated external scheduler ticks for internal closure, but sustained market freshness still depends on reliable scheduler delivery. Production Pilot Week remains NOT_READY, MC-08H remains blocked and MC-03 remains not started.
+The single protected proof invocation selected `midday_refresh`, made 0 provider calls, wrote 1 scheduler heartbeat, stopped with `NO_MATERIAL_CHANGE`, and did not continue because no material downstream internal action was due. This reduces dependence on repeated external scheduler ticks for internal closure, but sustained market freshness still depends on reliable scheduler delivery. Production Pilot Week remains NOT_READY, MC-08H remains blocked and MC-03 remains not started.

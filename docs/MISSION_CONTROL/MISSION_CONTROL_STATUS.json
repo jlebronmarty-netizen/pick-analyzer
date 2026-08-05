@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "OR_01F_BOUNDED_PLANNER_CONTINUITY_ACTIVE",
+  "status": "OR_01F_PRODUCTION_CERTIFIED_SCHEDULER_DECISION_PENDING",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -289,7 +289,7 @@
     "mc03": "NOT_STARTED"
   },
   "or01f": {
-    "status": "ACTIVE",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Bounded Planner Continuity",
     "certificationArtifact": "docs/CERTIFICATION/or-01f-bounded-planner-continuity.json",
     "architectureArtifact": "docs/ARCHITECTURE/BOUNDED_PLANNER_CONTINUITY_V1.md",
@@ -308,6 +308,19 @@
     "marketRefreshMayContinueToInternalClosureOnly": true,
     "secondProviderActionStopsChain": true,
     "repeatedActionGuard": "REPEATED_ACTION_GUARD",
+    "productionCommit": "00a3badc308059811139d7c1734d1cee8cb885bf",
+    "proofInvocation": {
+      "selectedInitialAction": "midday_refresh",
+      "selectedDate": "2026-08-05",
+      "actionSequence": [
+        "midday_refresh"
+      ],
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 1,
+      "plannerRecomputations": 0,
+      "stopReason": "NO_MATERIAL_CHANGE",
+      "downstreamInternalContinuation": "NOT_DUE_NO_MATERIAL_CHANGE"
+    },
     "schedulerCadenceChanged": false,
     "providerBudgetChanged": false,
     "predictionChanged": false,
