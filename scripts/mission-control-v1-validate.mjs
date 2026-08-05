@@ -103,8 +103,8 @@ const protectedDirtyFiles = [
 check('status baseline commit is current baseline', status.baselineCommit === 'ddc79d7b4a5efa5068ff1e63bb68d95d84100e67')
 check('certification baseline commit is current baseline', certification.baselineCommit === status.baselineCommit)
 check('current mission is MC-00 or later Mission Control mission', ['MC-00', 'MC-01', 'MC-02', 'MC-08H'].includes(status.currentMission?.id))
-check('next mission is deterministic', ['MC-01', 'MC-02', 'MC-08'].includes(status.nextMission?.id))
-check('only MC-08 bounded product package may be active in status', status.missionCounts?.active === 0 || (status.missionCounts?.active === 1 && status.nextMission?.id === 'MC-08' && status.nextMission?.state === 'ACTIVE'))
+check('next mission is deterministic', ['MC-01', 'MC-02', 'MC-08', 'PRODUCTION-PILOT-WEEK'].includes(status.nextMission?.id))
+check('only MC-08 bounded product package or Production Pilot Week may be active/ready in status', status.missionCounts?.active === 0 || (status.missionCounts?.active === 1 && status.nextMission?.id === 'MC-08' && status.nextMission?.state === 'ACTIVE') || (status.nextMission?.id === 'PRODUCTION-PILOT-WEEK' && status.nextMission?.state === 'READY'))
 check('mission count covers MC-00 through MC-10', status.missionCounts?.total === 11)
 check('all required categories documented', requiredCategories.every((item) => status.taxonomies?.categories?.includes(item) && service.includes(item)))
 check('all required states documented', requiredStates.every((item) => status.taxonomies?.states?.includes(item) && service.includes(item)))
@@ -128,7 +128,7 @@ check('service does not expose mutation executors', !/\b(insert|upsert|delete|ex
 check('certification says local server smoke was not run', certification.guardrails.localServerSmokeRun === false)
 check('certification says manual deployment was not run', certification.guardrails.manualDeployment === false)
 check('resume guide contains reusable prompt', resume.includes('Reusable Continuation Prompt') && resume.includes('Use Mission Control to identify the next READY mission'))
-check('queue doc keeps future gated missions inactive', queueDoc.includes('MC-03 remains PLANNED') && queueDoc.includes('MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | ACTIVE'))
+check('queue doc keeps future gated missions inactive', queueDoc.includes('MC-03 remains PLANNED') && (queueDoc.includes('MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | ACTIVE') || queueDoc.includes('MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | PRODUCTION_CERTIFIED')))
 check('program documents source boundaries', program.includes('Source Boundaries') && program.includes('Mission Control owns only current execution state'))
 check('project status updated for Mission Control', projectStatus.includes('Mission Control V1') && projectStatus.includes('MC-01 Operational Readiness Closure'))
 check('master roadmap updated for Mission Control', roadmap.includes('Mission Control V1 update') && roadmap.includes('MC-01 Operational Readiness Closure'))
@@ -152,7 +152,7 @@ const stagedFiles = execSync('git diff --cached --name-only', { cwd: root, encod
   .split(/\r?\n/)
   .filter(Boolean)
 check('protected dirty files are not staged', protectedDirtyFiles.every((file) => !stagedFiles.includes(file)))
-check('status output is clean isolated worktree or includes protected dirty context/intended mission files', gitStatus.trim() === '' || protectedDirtyFiles.some((file) => gitStatus.includes(file)) || gitStatus.includes('docs/MISSION_CONTROL') || gitStatus.includes('p1-homepage-performance-date-consistency-validate.mjs') || gitStatus.includes('p2-2c-protected-scheduler-closure-recovery-validate.mjs') || gitStatus.includes('src/services/provider-budget.service.ts'))
+check('status output is clean isolated worktree or includes protected dirty context/intended mission files', gitStatus.trim() === '' || protectedDirtyFiles.some((file) => gitStatus.includes(file)) || gitStatus.includes('docs/MISSION_CONTROL') || gitStatus.includes('docs/CERTIFICATION') || gitStatus.includes('or01d-github-scheduled-trigger-recovery-validate.mjs') || gitStatus.includes('p1-homepage-performance-date-consistency-validate.mjs') || gitStatus.includes('p2-2c-protected-scheduler-closure-recovery-validate.mjs') || gitStatus.includes('src/services/provider-budget.service.ts'))
 
 const failed = checks.filter((item) => !item.passed)
 const result = {

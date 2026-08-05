@@ -67,11 +67,12 @@ Use this checklist before starting any queued mission.
 - MC-08E-R: `PRODUCTION_CERTIFIED`; preserved paused work recovered, deployed and production-render certified.
 - MC-08F: `PRODUCTION_CERTIFIED`; personalization is display-only. MC-08G requires explicit instruction and MC-03 remains manual-only.
 - MC-08G: `PRODUCTION_CERTIFIED`; product polish and coherence review is complete.
-- MC-08H: `PRODUCTION_READINESS_BLOCKED`; production pilot is not ready because production operations are currently critical. MC-03 remains manual-only.
-- OR-01: repository recovery complete for scheduler-action starvation; production writer proof is required before rerunning MC-08H.
-- OR-01A: post-repair proof remains blocked because settlement closure and Product Readiness are CRITICAL; MC-08H was not rerun.
+- MC-08H: `PRODUCTION_CERTIFIED`; production pilot is ready for 5-7 days of monitored validation. MC-03 remains manual-only.
+- OR-01: `PRODUCTION_CERTIFIED`; operational readiness recovery is closed.
+- OR-01A: `PRODUCTION_CERTIFIED`; all operational health domains are healthy.
 - OR-01B: workflow/app-ledger reconciliation is certified by scheduled run `31003990142` and durable heartbeat invocation `cf420831-ad95-4943-83a7-326d9fdad5d7`.
-- OR-01C: settlement scope repair is pending deployment; older result-recovery debt must remain visible but must not overblock current Product Readiness when ready rows are zero.
+- OR-01C: `PRODUCTION_CERTIFIED`; settlement scope repair is deployed and older result-recovery debt is non-blocking.
+- OR-01D: `PRODUCTION_CERTIFIED`; automatic scheduled run `31015257795` restored scheduler, market freshness and Product Readiness.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.

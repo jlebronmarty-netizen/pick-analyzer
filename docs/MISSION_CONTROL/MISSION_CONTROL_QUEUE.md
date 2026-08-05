@@ -2,7 +2,7 @@
 
 Status: deterministic V2 queue.
 
-MC-08 remains ACTIVE because the final production-readiness audit is blocked by live operations. OR-01C has a bounded settlement scope repair pending deployment; OR-01A and MC-08H remain blocked until production proves Settlement Closure and Product Readiness are healthy. Gated future missions such as MC-03 remain PLANNED and inactive.
+MC-08 is PRODUCTION_CERTIFIED. OR-01D proved automatic GitHub scheduled execution, restored operational health, certified OR-01A and allowed MC-08H to pass. Production Pilot Week is READY for 5-7 days of monitored validation. MC-03 remains PLANNED and manual-only.
 
 | ID | Mission | Category | Priority | State | Mode | Next Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -14,11 +14,11 @@ MC-08 remains ACTIVE because the final production-readiness audit is blocked by 
 | MC-05 | Performance Intelligence | PERFORMANCE_INTELLIGENCE | P2 | PLANNED | AGENT_ASSISTED | Advance after eligible settled samples exist. |
 | MC-06 | Decision Core Evolution | DECISION_CORE_EVOLUTION | P3 | PLANNED | MANUAL_ONLY | Use controlled experimentation only. |
 | MC-07 | Market Expansion | MARKET_EXPANSION | P3 | PLANNED | AGENT_ASSISTED | Keep unsupported markets unavailable until all gates pass. |
-| MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | ACTIVE | AGENT_ASSISTED | Observe OR-01 production recovery proof, then rerun MC-08H before pilot. |
+| MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | PRODUCTION_CERTIFIED | AGENT_ASSISTED | Complete; Production Pilot Week is ready. |
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
-Next eligible mission: none. OR-01C requires deployment and production proof before OR-01A can pass and MC-08H can be rerun. Production Pilot Week is not ready. MC-03 remains planned/manual-only.
+Next eligible phase: Production Pilot Week. Do not start it automatically. MC-03 remains planned/manual-only.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
@@ -49,9 +49,10 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | MC-08E-R | Evidence-First Watchlist Experience | PRODUCTION_CERTIFIED | Paused work preserved, clean P2.4 integration deployed and production-render certified. |
 | MC-08F | Personalization Experience | PRODUCTION_CERTIFIED | Display-only personalization contract, settings route and homepage/Performance integration certified. |
 | MC-08G | Product Polish And Coherence Review | PRODUCTION_CERTIFIED | Product coherence repairs deployed and certified. |
-| MC-08H | Production Readiness Certification | BLOCKED | Production readiness is blocked by scheduler execution, market freshness and product readiness CRITICAL evidence. |
-| OR-01 | Operational Readiness Recovery | REPOSITORY_RECOVERY_DEPLOYMENT_REQUIRED | Active market refresh now preempts older missing-result recovery when no settlement-ready rows exist; production writer proof is required. |
-| OR-01A | Post-Repair Operational Proof | BLOCKED | Scheduler/ledger reconciliation is proven, but settlement closure and Product Readiness remain CRITICAL. |
+| MC-08H | Production Readiness Certification | PRODUCTION_CERTIFIED | Production Ready YES after OR-01D automatic schedule proof restored all operational domains. |
+| OR-01 | Operational Readiness Recovery | PRODUCTION_CERTIFIED | Active market refresh, scheduler heartbeat, settlement scope and product readiness recovery are certified. |
+| OR-01A | Post-Repair Operational Proof | PRODUCTION_CERTIFIED | All operational domains are healthy after automatic scheduled proof. |
 | OR-01B | Scheduler Workflow Ledger Reconciliation | CERTIFIED | Workflow success now maps to durable protected heartbeat evidence; scheduled run `31003990142` persisted invocation `cf420831-ad95-4943-83a7-326d9fdad5d7`. |
-| OR-01C | Settlement Closure and Product Readiness Recovery | REPAIR_DEPLOYMENT_REQUIRED | Settlement-ready rows remain blocking; older result-recovery debt remains visible as non-blocking warning when current rows are clean. |
-| Production Pilot Week | Real-world validation before Multi-Sport Expansion | NOT_READY | Requires MC-08H Production Ready YES. |
+| OR-01C | Settlement Closure and Product Readiness Recovery | PRODUCTION_CERTIFIED | Settlement Closure is healthy; older result-recovery debt remains visible as non-blocking warning when current rows are clean. |
+| OR-01D | GitHub Scheduled Trigger Recovery | PRODUCTION_CERTIFIED | Automatic scheduled run `31015257795` on commit `42439de` restored Scheduler, Market Freshness and Product Readiness to HEALTHY. |
+| Production Pilot Week | Real-world validation before Multi-Sport Expansion | READY | 5-7 day monitored validation phase; do not start automatically. |

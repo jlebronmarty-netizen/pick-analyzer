@@ -1,70 +1,42 @@
 {
   "id": "or_01a_post_repair_operational_proof",
   "date": "2026-08-05",
-  "startingCommit": "21f8d135f665fcf39cf2db6d64462ca9251d348e",
-  "productionCommit": "21f8d135f665fcf39cf2db6d64462ca9251d348e",
-  "classification": "OR_01A_EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF",
-  "or01RuntimeLive": true,
-  "manualProtectedWriterExecutions": 0,
-  "githubActions": {
-    "publicMetadataAvailable": true,
-    "logsAvailable": false,
-    "logsLimitation": "GitHub run logs returned HTTP 403 from this environment.",
-    "postRepairRuns": [
-      {
-        "runId": 30961154690,
-        "trigger": "schedule",
-        "commit": "21f8d135f665fcf39cf2db6d64462ca9251d348e",
-        "startedAt": "2026-08-04T23:47:12Z",
-        "updatedAt": "2026-08-04T23:47:33Z",
-        "conclusion": "success"
-      },
-      {
-        "runId": 30965570325,
-        "trigger": "schedule",
-        "commit": "21f8d135f665fcf39cf2db6d64462ca9251d348e",
-        "startedAt": "2026-08-05T01:09:51Z",
-        "updatedAt": "2026-08-05T01:10:09Z",
-        "conclusion": "success"
-      }
-    ]
-  },
-  "before": {
-    "adaptiveStatus": "SUCCESS",
-    "nextAction": "sync_results",
-    "activeMarketRefreshPreemptsHistoricalResultRecovery": false,
-    "currentBoardCandidates": 0,
-    "latestOddsTimestamp": null,
-    "marketFreshness": "empty",
-    "schedulerStatus": "CRITICAL",
-    "missedSchedulerIntervals": 18,
-    "lastSuccessfulProtectedInvocationAt": "2026-08-04T23:35:22.311+00:00",
-    "operationalHealth": "CRITICAL",
-    "productReadiness": "CRITICAL"
+  "productionCommit": "42439dee8e4b42f2302ef466df16a39fb40d235b",
+  "classification": "OR_01A_PRODUCTION_CERTIFIED",
+  "reason": "OR-01D proved an automatic scheduled GitHub run reached production and restored all operational health domains.",
+  "automaticProofRun": {
+    "runId": 31015257795,
+    "event": "schedule",
+    "commit": "42439dee8e4b42f2302ef466df16a39fb40d235b",
+    "conclusion": "success",
+    "startedAt": "2026-08-05T14:27:12Z",
+    "completedAt": "2026-08-05T14:27:35Z",
+    "requestId": "2b3900d1-4789-414d-9116-3bd151e07ae5",
+    "invocationId": "2b3900d1-4789-414d-9116-3bd151e07ae5",
+    "selectedAction": "midday_refresh",
+    "heartbeatRecordedAt": "2026-08-05T14:27:33.731+00:00"
   },
   "after": {
-    "marketFreshness": "UNKNOWN",
-    "operationalHealth": "CRITICAL",
-    "productReadiness": "CRITICAL",
-    "schedulerExecution": "CRITICAL",
+    "schedulerExecution": "HEALTHY",
+    "marketFreshness": "HEALTHY",
     "providerBudget": "HEALTHY",
-    "settlementClosure": "CRITICAL"
-  },
-  "settlement": {
-    "checkedPredictions": 148,
-    "completedPredictionRows": 97,
-    "settledRows": 97,
-    "readyRows": 0,
+    "settlementClosure": "HEALTHY",
+    "productReadiness": "HEALTHY",
+    "operationalHealth": "HEALTHY",
+    "missedSchedulerIntervals": 0,
+    "freshVisibleMarkets": 45,
+    "staleVisibleMarkets": 0,
+    "latestOddsTimestamp": "2026-08-05T14:27:24.843Z",
+    "settlementReadyRows": 0,
     "blockedRows": 0,
     "silentPendingRows": 0,
-    "olderMissingResultRows": 9,
-    "currentDayImpactOfOlderBacklog": "VISIBLE_RECOVERY_BACKLOG_NOT_CLEARED_DO_NOT_HIDE"
+    "historicalRecoveryDebtRows": 59
   },
   "mc08h": {
-    "rerun": false,
-    "reason": "OR-01A did not pass Market Freshness, Scheduler Execution, Operational Health or Product Readiness gates."
+    "rerun": true,
+    "classification": "MC_08H_PRODUCTION_CERTIFIED"
   },
-  "productionPilotWeek": "NOT_READY",
+  "productionPilotWeek": "READY",
   "mc03": "NOT_STARTED",
   "providerCallsMadeByCertificationReads": 0,
   "remoteMutationsMadeByCertificationReads": 0,

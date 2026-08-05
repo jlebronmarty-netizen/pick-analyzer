@@ -77,6 +77,8 @@ Current V2 certification documents:
 - [MC-01 Operational Readiness Closure JSON](mc-01-operational-readiness-closure.json)
 - [MC-02 Multi-Sport Data Readiness](MC_02_MULTI_SPORT_DATA_READINESS.md)
 - [MC-02 Multi-Sport Data Readiness JSON](mc-02-multi-sport-data-readiness.json)
+- [OR-01D GitHub Scheduled Trigger Recovery](OR_01D_GITHUB_SCHEDULED_TRIGGER_RECOVERY.md)
+- [OR-01D GitHub Scheduled Trigger Recovery JSON](or-01d-github-scheduled-trigger-recovery.json)
 - [MC-08B Rent Play Experience](MC_08B_RENT_PLAY_EXPERIENCE.md)
 - [MC-08B Rent Play Experience JSON](mc-08b-rent-play-experience.json)
 - [MC-08C Moneyline Bet Experience](MC_08C_MONEYLINE_BET_EXPERIENCE.md)

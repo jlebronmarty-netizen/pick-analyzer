@@ -3280,3 +3280,6 @@ MC-08F Personalization Experience update on 2026-08-04: MC-08F is locally implem
 
 
 MC-08F production certification on 2026-08-04: production served commit `fabe9768cdcad2aca02773741ee44596945c7c59`; homepage/settings/performance personalization render checks passed, required read-only routes returned HTTP 200, and no provider or mutation behavior changed. MC-08G requires explicit instruction; MC-03 remains manual-only.
+## OR-01D Operational Readiness Update
+
+Automatic GitHub scheduled execution is certified. Production Pilot Week is READY; do not begin MC-03 without explicit approval.

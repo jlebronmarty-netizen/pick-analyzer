@@ -1,0 +1,122 @@
+{
+  "id": "or_01d_github_scheduled_trigger_recovery",
+  "date": "2026-08-05",
+  "classification": "OR_01D_PRODUCTION_CERTIFIED",
+  "startingCommit": "42439dee8e4b42f2302ef466df16a39fb40d235b",
+  "certificationCommit": "PENDING",
+  "productionCommit": "42439dee8e4b42f2302ef466df16a39fb40d235b",
+  "defaultBranch": "main",
+  "workflowFile": ".github/workflows/production-operating-day.yml",
+  "workflowName": "Production Operating Day Scheduler",
+  "workflowState": "active",
+  "cronExpressions": [
+    "7-57/10 * * * *"
+  ],
+  "expectedScheduleUtc": [
+    "HH:07",
+    "HH:17",
+    "HH:27",
+    "HH:37",
+    "HH:47",
+    "HH:57"
+  ],
+  "expectedSchedulePuertoRico": [
+    "UTC-4 HH:07",
+    "UTC-4 HH:17",
+    "UTC-4 HH:27",
+    "UTC-4 HH:37",
+    "UTC-4 HH:47",
+    "UTC-4 HH:57"
+  ],
+  "triggerRootCause": "GITHUB_SCHEDULE_DELAY_AFTER_DEPLOYMENT_PLUS_PRIOR_WRITER_HEARTBEAT_GAP",
+  "rootCauseClassification": "GITHUB_SCHEDULE_DELAY",
+  "githubUiActionRequired": false,
+  "repositoryRepair": "NO_NEW_REPOSITORY_REPAIR_IN_OR_01D",
+  "concurrency": {
+    "group": "production-operating-day-writer",
+    "cancelInProgress": false,
+    "finding": "Single-writer safety is preserved; no evidence of concurrency suppression."
+  },
+  "recentRuns": [
+    {
+      "id": 31015257795,
+      "event": "schedule",
+      "headSha": "42439dee8e4b42f2302ef466df16a39fb40d235b",
+      "status": "completed",
+      "conclusion": "success",
+      "createdAt": "2026-08-05T14:27:10Z",
+      "startedAt": "2026-08-05T14:27:12Z",
+      "completedAt": "2026-08-05T14:27:35Z"
+    },
+    {
+      "id": 31003990142,
+      "event": "schedule",
+      "headSha": "9af43b2d553ef3401883ebb7b8c736c58fc1fef8",
+      "status": "completed",
+      "conclusion": "success",
+      "createdAt": "2026-08-05T12:03:30Z"
+    }
+  ],
+  "expectedRunsMissing": [
+    "Expected ticks after 42439de deployment were delayed until 2026-08-05T14:27:10Z; no disabled workflow or repository condition was proven."
+  ],
+  "automaticProof": {
+    "runId": 31015257795,
+    "event": "schedule",
+    "commit": "42439dee8e4b42f2302ef466df16a39fb40d235b",
+    "expectedRunTime": "2026-08-05T14:27:00Z",
+    "actualRunTime": "2026-08-05T14:27:10Z",
+    "conclusion": "success",
+    "requestId": "2b3900d1-4789-414d-9116-3bd151e07ae5",
+    "invocationId": "2b3900d1-4789-414d-9116-3bd151e07ae5",
+    "selectedAction": "midday_refresh",
+    "heartbeatRecorded": true,
+    "ledgerBefore": "2026-08-05T12:03:42.730+00:00",
+    "ledgerAfter": "2026-08-05T14:27:33.731+00:00",
+    "providerCalls": "bounded provider refresh occurred during protected scheduler execution",
+    "remoteMutations": "bounded market refresh and scheduler heartbeat mutations occurred"
+  },
+  "workflowDispatchCanCertifySchedule": false,
+  "productionAfter": {
+    "operationalHealth": "HEALTHY",
+    "schedulerStatus": "HEALTHY",
+    "missedIntervals": 0,
+    "marketFreshness": "HEALTHY",
+    "latestOddsTimestamp": "2026-08-05T14:27:24.843Z",
+    "freshMarkets": 45,
+    "staleMarkets": 0,
+    "providerBudget": "HEALTHY",
+    "settlementClosure": "HEALTHY",
+    "historicalRecoveryDebtRows": 59,
+    "productReadiness": "HEALTHY",
+    "activeMarketWindow": "PREGAME"
+  },
+  "or01a": {
+    "verdict": "PRODUCTION_CERTIFIED",
+    "reason": "All operational domains are healthy/non-critical after automatic scheduled proof."
+  },
+  "mc08h": {
+    "rerun": true,
+    "verdict": "PRODUCTION_CERTIFIED",
+    "productionReady": true,
+    "productionReadinessPercent": 88,
+    "criticalIssues": 0,
+    "highIssues": 0
+  },
+  "productionPilotWeek": {
+    "state": "READY",
+    "duration": "5-7 days",
+    "purpose": "Real-world validation before Multi-Sport Expansion"
+  },
+  "schedulerCadenceChanged": false,
+  "safety": {
+    "predictionLogicChanged": false,
+    "recommendationLogicChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementRulesChanged": false,
+    "modelLogicChanged": false,
+    "providerBudgetChanged": false,
+    "providerCallsFromCertificationReads": 0,
+    "remoteMutationsFromCertificationReads": 0
+  }
+}

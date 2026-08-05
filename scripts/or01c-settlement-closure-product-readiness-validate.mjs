@@ -30,6 +30,13 @@ const allowed = new Set([
   'docs/CERTIFICATION/README.md',
   'docs/PROJECT_STATUS.md',
   'docs/MASTER_ROADMAP.md',
+  'docs/CERTIFICATION/OR_01D_GITHUB_SCHEDULED_TRIGGER_RECOVERY.md',
+  'docs/CERTIFICATION/or-01d-github-scheduled-trigger-recovery.json',
+  'docs/CERTIFICATION/or-01a-post-repair-operational-proof.json',
+  'docs/CERTIFICATION/MC_08H_PRODUCTION_READINESS_CERTIFICATION.md',
+  'docs/CERTIFICATION/mc-08h-production-readiness-certification.json',
+  'scripts/or01d-github-scheduled-trigger-recovery-validate.mjs',
+  'scripts/mission-control-v1-validate.mjs',
 ])
 
 const checks = []

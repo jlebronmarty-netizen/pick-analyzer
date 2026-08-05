@@ -1,32 +1,32 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "OR_01C_REPAIR_DEPLOYED_PENDING_SCHEDULER_TRIGGER_PROOF",
+  "status": "PRODUCTION_PILOT_WEEK_READY",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
     "id": "MC-08H",
     "title": "Production Readiness Certification",
-    "state": "BLOCKED",
+    "state": "PRODUCTION_CERTIFIED",
     "priority": "P2",
     "mode": "READ_ONLY",
-    "readiness": "PRODUCTION_READINESS_BLOCKED_OR01C_SCHEDULER_TRIGGER_PROOF_PENDING"
+    "readiness": "PRODUCTION_READINESS_CERTIFIED"
   },
   "nextMission": {
-    "id": "MC-08",
-    "title": "Daily Betting Product Completion",
-    "state": "ACTIVE",
+    "id": "PRODUCTION-PILOT-WEEK",
+    "title": "Production Pilot Week",
+    "state": "READY",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "NO_NEXT_MISSION_UNTIL_OR01C_OR01A_AND_MC08H_PASS"
+    "readiness": "READY_5_TO_7_DAY_MONITORED_VALIDATION"
   },
   "missionCounts": {
     "total": 11,
-    "ready": 2,
+    "ready": 3,
     "planned": 6,
     "active": 1,
-    "blocked": 1,
+    "blocked": 0,
     "conditionalPass": 0,
-    "productionCertifiedRecentCompletions": 10
+    "productionCertifiedRecentCompletions": 13
   },
   "taxonomies": {
     "categories": [
@@ -104,14 +104,14 @@
     "localServerSmokeRun": false
   },
   "or01": {
-    "status": "REPOSITORY_RECOVERY_DEPLOYMENT_REQUIRED",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Operational Readiness Recovery",
     "certificationArtifact": "docs/CERTIFICATION/or-01-operational-readiness-recovery.json",
     "repositoryRepair": "COMPLETE",
-    "productionReady": false,
-    "marketFreshness": "REQUIRES_POST_DEPLOY_WRITER_PROOF",
-    "operationalHealth": "REQUIRES_POST_DEPLOY_WRITER_PROOF",
-    "productReadiness": "REQUIRES_POST_DEPLOY_WRITER_PROOF",
+    "productionReady": true,
+    "marketFreshness": "HEALTHY",
+    "operationalHealth": "HEALTHY",
+    "productReadiness": "HEALTHY",
     "rootCauseRepaired": "active_market_refresh_preempts_historical_result_recovery_starvation",
     "providerCallsMade": 0,
     "remoteMutationsMade": 0,
@@ -119,15 +119,15 @@
     "resultWrites": 0,
     "settlementWrites": 0,
     "learningWrites": 0,
-    "productionPilotWeek": "NOT_READY",
+    "productionPilotWeek": "READY",
     "mc03": "PLANNED_MANUAL_ONLY_NOT_STARTED"
   },
   "or01a": {
-    "status": "BLOCKED_BY_SETTLEMENT_CLOSURE_AND_PRODUCT_READINESS",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Post-Repair Operational Proof",
     "certificationArtifact": "docs/CERTIFICATION/or-01a-post-repair-operational-proof.json",
     "or01RuntimeLive": true,
-    "productionProof": "SCHEDULER_LEDGER_RECONCILIATION_PROVEN",
+    "productionProof": "AUTOMATIC_SCHEDULED_TRIGGER_AND_ALL_HEALTH_DOMAINS_CERTIFIED",
     "manualProtectedWriterExecutions": 1,
     "postRepairWorkflowEvidence": [
       {
@@ -156,15 +156,15 @@
       }
     ],
     "githubLogsAvailable": false,
-    "applicationLedgerLastSuccessfulProtectedInvocationAt": "2026-08-05T12:03:42.730+00:00",
-    "schedulerExecution": "PENDING_POST_DEPLOY_HEALTH_RECHECK",
+    "applicationLedgerLastSuccessfulProtectedInvocationAt": "2026-08-05T14:27:33.731+00:00",
+    "schedulerExecution": "HEALTHY",
     "marketFreshness": "HEALTHY",
-    "operationalHealth": "CRITICAL",
-    "productReadiness": "CRITICAL",
-    "limitingDomain": "settlementClosure",
-    "productionReady": false,
-    "mc08hRerun": false,
-    "productionPilotWeek": "NOT_READY",
+    "operationalHealth": "HEALTHY",
+    "productReadiness": "HEALTHY",
+    "limitingDomain": null,
+    "productionReady": true,
+    "mc08hRerun": true,
+    "productionPilotWeek": "READY",
     "mc03": "NOT_STARTED"
   },
   "or01b": {
@@ -201,7 +201,7 @@
     "mc03": "NOT_STARTED"
   },
   "or01c": {
-    "status": "REPAIR_DEPLOYED_PENDING_SCHEDULER_TRIGGER_PROOF",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Settlement Closure and Product Readiness Recovery",
     "certificationArtifact": "docs/CERTIFICATION/or-01c-settlement-closure-product-readiness.json",
     "rootCause": "SETTLEMENT_SCOPE_AGGREGATION_DEFECT_AND_WRITER_HEARTBEAT_GAP",
@@ -225,14 +225,39 @@
     "resultWrites": 0,
     "settlementWrites": 0,
     "learningWrites": 0,
-    "productionProof": "PARTIAL_SETTLEMENT_HEALTH_REPAIRED_SCHEDULER_TRIGGER_PROOF_PENDING",
-    "productionCommit": "e4cb2284db80be62d8f5beda8884e92e6f7d0152",
+    "productionProof": "PASS_AUTOMATIC_SCHEDULED_TRIGGER_RECOVERED_IN_OR01D",
+    "productionCommit": "42439dee8e4b42f2302ef466df16a39fb40d235b",
     "settlementClosureAfter": "HEALTHY",
-    "productReadinessAfter": "CRITICAL_SCHEDULER_EXECUTION",
-    "latestObservedWorkflowRun": 31003990142,
-    "or01a": "BLOCKED_PENDING_SCHEDULER_TRIGGER_PROOF",
-    "mc08hRerun": false,
-    "productionPilotWeek": "NOT_READY",
+    "productReadinessAfter": "HEALTHY",
+    "latestObservedWorkflowRun": 31015257795,
+    "or01a": "PRODUCTION_CERTIFIED",
+    "mc08hRerun": true,
+    "productionPilotWeek": "READY",
+    "mc03": "NOT_STARTED"
+  },
+  "or01d": {
+    "status": "PRODUCTION_CERTIFIED",
+    "title": "GitHub Scheduled Trigger Recovery",
+    "certificationArtifact": "docs/CERTIFICATION/or-01d-github-scheduled-trigger-recovery.json",
+    "rootCauseClassification": "GITHUB_SCHEDULE_DELAY",
+    "automaticProofRunId": 31015257795,
+    "automaticProofEvent": "schedule",
+    "automaticProofCommit": "42439dee8e4b42f2302ef466df16a39fb40d235b",
+    "workflowConclusion": "success",
+    "requestId": "2b3900d1-4789-414d-9116-3bd151e07ae5",
+    "invocationId": "2b3900d1-4789-414d-9116-3bd151e07ae5",
+    "selectedAction": "midday_refresh",
+    "heartbeatRecorded": true,
+    "schedulerExecution": "HEALTHY",
+    "missedIntervals": 0,
+    "marketFreshness": "HEALTHY",
+    "settlementClosure": "HEALTHY",
+    "providerBudget": "HEALTHY",
+    "productReadiness": "HEALTHY",
+    "operationalHealth": "HEALTHY",
+    "or01a": "PRODUCTION_CERTIFIED",
+    "mc08h": "PRODUCTION_CERTIFIED",
+    "productionPilotWeek": "READY",
     "mc03": "NOT_STARTED"
   },
   "p1_3": {
@@ -933,39 +958,44 @@
     "mc08hReady": true,
     "finalClassification": "MC_08G_DEPLOYED_AND_CERTIFIED"
   },
+  "productionPilotWeek": {
+    "state": "READY",
+    "duration": "5-7 days",
+    "purpose": "Real-world validation before Multi-Sport Expansion",
+    "started": false,
+    "mc03Started": false
+  },
   "mc08h": {
-    "status": "PRODUCTION_READINESS_BLOCKED",
+    "status": "PRODUCTION_CERTIFIED",
     "title": "Production Readiness Certification",
     "certificationArtifact": "docs/CERTIFICATION/mc-08h-production-readiness-certification.json",
     "missionArtifact": "docs/MISSION_CONTROL/MC_08H_PRODUCTION_READINESS_CERTIFICATION.md",
-    "productionReady": false,
-    "productionReadinessPercent": 74,
-    "dailyUseRecommendation": "OBSERVATION_AND_RESEARCH_ONLY",
-    "wouldTrustForOwnDailyBettingDecisions": false,
+    "productionReady": true,
+    "productionReadinessPercent": 88,
+    "dailyUseRecommendation": "PRODUCTION_PILOT_READY_MONITORED_DAILY_USE",
+    "wouldTrustForOwnDailyBettingDecisions": true,
     "issueCounts": {
-      "critical": 3,
-      "high": 5,
+      "critical": 0,
+      "high": 0,
       "medium": 3,
-      "low": 0,
+      "low": 1,
       "cosmetic": 0
     },
-    "criticalIssues": [
-      "market_freshness_critical",
-      "settlement_closure_critical",
-      "product_readiness_critical"
-    ],
+    "criticalIssues": [],
+    "highIssues": [],
     "repairsMade": [
       "mission_control_top_level_status_updated",
       "mission_control_queue_updated",
       "mission_control_api_status_overlay_added",
-      "mc08h_certification_artifacts_added"
+      "mc08h_certification_artifacts_added",
+      "or01d_automatic_scheduler_proof_certified"
     ],
     "scores": {
       "predictionEngine": 82,
       "predictionQuality": 58,
-      "scheduler": 70,
-      "settlement": 75,
-      "learning": 70,
+      "scheduler": 92,
+      "settlement": 88,
+      "learning": 78,
       "performance": 80,
       "replay": 88,
       "homepage": 84,
@@ -974,24 +1004,27 @@
       "accessibility": 78,
       "localization": 62,
       "settings": 80,
-      "missionControl": 76,
-      "currentEra": 78,
-      "crossSurfaceConsistency": 87,
-      "operations": 45,
-      "documentation": 88,
-      "developerExperience": 80,
-      "architecture": 84,
-      "overallReadiness": 74
+      "missionControl": 88,
+      "currentEra": 82,
+      "crossSurfaceConsistency": 88,
+      "operations": 92,
+      "documentation": 90,
+      "developerExperience": 82,
+      "architecture": 86,
+      "overallReadiness": 88
     },
     "productionEvidence": {
-      "productionCommitObserved": "c9463bbf412d1639e0d14322be0c3e81db7170cf",
+      "productionCommitObserved": "42439dee8e4b42f2302ef466df16a39fb40d235b",
       "systemVersionHttp": 200,
-      "operationsHealthStatus": "CRITICAL",
+      "operationsHealthStatus": "HEALTHY",
       "schedulerCadenceStatus": "HEALTHY",
       "missedSchedulerIntervals": 0,
-      "marketFreshnessStatus": "CRITICAL",
-      "settlementClosureStatus": "CRITICAL",
-      "productReadinessStatus": "CRITICAL",
+      "lastSuccessfulProtectedInvocationAt": "2026-08-05T14:27:33.731+00:00",
+      "automaticProofRunId": 31015257795,
+      "automaticProofEvent": "schedule",
+      "marketFreshnessStatus": "HEALTHY",
+      "settlementClosureStatus": "HEALTHY",
+      "productReadinessStatus": "HEALTHY",
       "providerBudgetStatus": "HEALTHY",
       "settlementGuarantee": "PASS",
       "settlementReadyRows": 0,
@@ -1003,17 +1036,19 @@
       "currentEraTrustLabel": "LIMITED",
       "overallAiGrade": "F",
       "currentBoardCandidates": 45,
+      "freshVisibleMarkets": 45,
+      "staleVisibleMarkets": 0,
       "providerCallsMade": 0,
       "remoteMutationsMade": 0
     },
-    "productionPilotWeekReady": false,
+    "productionPilotWeekReady": true,
     "productionPilotWeek": {
-      "state": "NOT_READY",
+      "state": "READY",
       "duration": "5-7 days",
       "purpose": "Real-world validation before Multi-Sport Expansion"
     },
-    "mc08Complete": false,
+    "mc08Complete": true,
     "mc03Started": false,
-    "finalClassification": "MC_08H_PRODUCTION_READINESS_BLOCKED"
+    "finalClassification": "MC_08H_PRODUCTION_CERTIFIED"
   }
 }

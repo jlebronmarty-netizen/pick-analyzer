@@ -324,6 +324,15 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Provider calls, remote mutations, prediction changes, settlement changes, learning changes and scheduler changes remain 0.
 - Production certification completed at 6a3debf9eb2286a9736706d98c0672366b917821. E2E surfaceConsistency returned PASS with no stale surfaces or unexplained differences. MC-08E-R is next eligible. MC-08E and MC-03 were not started.
 
+# 2026-08-05 OR-01D GitHub Scheduled Trigger Recovery
+
+- Status: PRODUCTION_CERTIFIED.
+- GitHub workflow `Production Operating Day Scheduler` is active on default branch `main` with cron `7-57/10 * * * *`.
+- Automatic scheduled run `31015257795` executed on commit `42439dee8e4b42f2302ef466df16a39fb40d235b` and concluded success.
+- App ledger recorded heartbeat `2b3900d1-4789-414d-9116-3bd151e07ae5` at `2026-08-05T14:27:33.731+00:00` with selected action `midday_refresh`.
+- Production health recovered: Scheduler, Market Freshness, Provider Budget, Settlement Closure, Product Readiness and Overall Health are HEALTHY.
+- OR-01A and MC-08H are production-certified. Production Pilot Week is READY. MC-03 was not started.
+
 # 2026-08-04 MC-08F Personalization Experience
 
 - Status: LOCAL_VALIDATION_PENDING.

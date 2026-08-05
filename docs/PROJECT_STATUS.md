@@ -1759,3 +1759,6 @@ MC-08E-R is production certified. Paused MC-08E work was preserved on recovery b
 
 - MC-08F is production-certified on commit `fabe9768cdcad2aca02773741ee44596945c7c59`. Homepage, Settings and Performance render checks passed on production, and required read-only product routes returned HTTP 200.
 - Provider calls and remote mutations remained 0 where reported. No prediction, ranking, Official Pick, Kelly, settlement, learning, scheduler, provider or budget behavior changed. MC-08G and MC-03 were not started.
+## 2026-08-05 OR-01D Operational Readiness
+
+OR-01D is `PRODUCTION_CERTIFIED`. Automatic GitHub scheduled run `31015257795` restored protected scheduler evidence and production health. OR-01A and MC-08H are certified; Production Pilot Week is READY for 5-7 days of monitored validation. MC-03 remains manual-only and was not started.
