@@ -1,7 +1,7 @@
 {
   "mission": "OR-02A",
   "title": "Vercel Primary Market Refresh Execution And Freshness Recovery",
-  "status": "DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF",
+  "status": "PRODUCTION_CERTIFIED",
   "startingCommit": "c74656af083b36349032cee5141da7ebe15c9750",
   "vercelRunsReconstructed": [
     {
@@ -54,7 +54,12 @@
     "estimatedHttpRequests": 1,
     "estimatedQuotaUnits": 1,
     "authorizationState": "BUDGET_AVAILABLE",
-    "protectedReservePreserved": true
+    "protectedReservePreserved": true,
+    "actualHttpRequests": 1,
+    "actualQuotaUnits": 1,
+    "providerRowsReceived": 15,
+    "normalizedMarkets": 66,
+    "snapshotsWritten": 66
   },
   "timestampPolicy": {
     "certifiedFreshnessSource": "stored_provider_source_market_timestamp",
@@ -85,8 +90,64 @@
   },
   "validation": {
     "primaryValidator": "scripts/or02a-vercel-market-refresh-recovery-validate.mjs",
-    "status": "PENDING",
-    "build": "PENDING"
+    "status": "PASS",
+    "build": "PASS"
   },
-  "finalClassification": "OR_02A_DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF"
+  "finalClassification": "OR_02A_PRODUCTION_CERTIFIED",
+  "runtimeCommit": "af5c1d284cd482154ddf56daf1f9c52af73e8509",
+  "accountingRepairCommit": "9540e4750a38fa7a8869c4846ca755350ff54776",
+  "productionCommit": "9540e4750a38fa7a8869c4846ca755350ff54776",
+  "after": {
+    "productionCommit": "9540e4750a38fa7a8869c4846ca755350ff54776",
+    "schedulerExecution": "HEALTHY",
+    "missedIntervals": 0,
+    "marketFreshness": "HEALTHY",
+    "settlementClosure": "HEALTHY",
+    "productReadiness": "HEALTHY",
+    "operationalHealth": "HEALTHY",
+    "canonicalSelectedAction": "midday_refresh",
+    "currentEvents": 15,
+    "eligibleRefreshEvents": 11,
+    "excludedPostStartEvents": 4,
+    "latestMarketTimestampBeforeProof": "2026-08-05T16:16:39.658Z",
+    "latestProviderTimestampAfterProof": "2026-08-05T18:06:59.000Z",
+    "latestVisibleMarketSnapshotAfterProof": "2026-08-05T22:07:28.383Z",
+    "providerCallsToday": 3,
+    "providerCallsLastHour": 3,
+    "currentBoardCandidates": 33,
+    "freshVisibleMarketCount": 33,
+    "staleVisibleMarketCount": 0
+  },
+  "accountingRepair": {
+    "rootCauseClassification": "PROVIDER_CALL_ACCOUNTING_DEFECT",
+    "repair": "canonical_acquisition_sports_sync_jobs_metadata_externalCallsUsed_records_actualHttpRequests",
+    "providerBudgetCallsTodayBefore": 0,
+    "providerBudgetCallsTodayAfter": 3
+  },
+  "automaticVercelProofRuns": [
+    {
+      "completedAt": "2026-08-05T21:47:41.306+00:00",
+      "schedulerSource": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+      "selectedAction": "midday_refresh",
+      "providerCallsMade": 1,
+      "budgetLedgerCallsToday": 1,
+      "health": "HEALTHY"
+    },
+    {
+      "completedAt": "2026-08-05T21:57:44.621+00:00",
+      "schedulerSource": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+      "selectedAction": "midday_refresh",
+      "providerCallsMade": 2,
+      "budgetLedgerCallsToday": 2,
+      "health": "HEALTHY"
+    },
+    {
+      "completedAt": "2026-08-05T22:07:41.276+00:00",
+      "schedulerSource": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+      "selectedAction": "midday_refresh",
+      "providerCallsMade": 3,
+      "budgetLedgerCallsToday": 3,
+      "health": "HEALTHY"
+    }
+  ]
 }

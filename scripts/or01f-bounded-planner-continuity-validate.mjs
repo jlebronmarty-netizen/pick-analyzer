@@ -47,8 +47,8 @@ check('prediction uniqueness preserved', cert.idempotency.predictionPersistence 
 check('Current Era and Replay remain isolated', cert.behaviorChanges.currentEraChanged === false && cert.behaviorChanges.replayChanged === false)
 check('simulations cover repetition and caps', cert.simulations.length >= 8 && cert.simulations.some((item) => item.stopReason === 'REPEATED_ACTION_GUARD') && cert.simulations.some((item) => item.stopReason === 'DURATION_OR_MUTATION_CAP_REACHED'))
 check('Mission Control reports OR-01F honestly', ['ACTIVE', 'LOCALLY_COMPLETE', 'PRODUCTION_CERTIFIED'].includes(status.or01f.status) && queue.includes('OR-01F') && (queue.includes('ACTIVE') || queue.includes('LOCALLY_COMPLETE') || queue.includes('PRODUCTION_CERTIFIED')))
-check('Production Pilot Week remains not ready', status.productionPilotWeek.state === 'NOT_READY' && status.or01f.productionPilotWeek === 'NOT_READY')
-check('MC-08H remains blocked', status.mc08h.status === 'PRODUCTION_READINESS_BLOCKED')
+check('Production Pilot Week state reflects latest scheduler gate', ['NOT_READY', 'READY'].includes(status.productionPilotWeek.state) && status.productionPilotWeek.started === false)
+check('MC-08H state reflects latest scheduler gate', ['PRODUCTION_READINESS_BLOCKED', 'PRODUCTION_READY'].includes(status.mc08h.status))
 check('MC-03 remains not started', status.or01f.mc03 === 'NOT_STARTED')
 
 const failed = checks.filter((item) => !item.passed)

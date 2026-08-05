@@ -1,25 +1,25 @@
 # MC-08H Production Readiness Certification
 
-Status: PRODUCTION READINESS BLOCKED
+Status: PRODUCTION READY
 
 ## Certification Summary
 
-MC-08H was reconsidered after OR-01D proved one automatic GitHub scheduler delivery. It remains blocked because sustained scheduled cadence was not proven and Scheduler Execution returned to CRITICAL during extended observation.
+MC-08H was rerun after OR-02A proved Vercel Cron primary execution, market refresh, provider-call accounting and product freshness recovery in production.
 
-Pick Analyzer is not ready for Production Pilot Week until scheduler cadence remains healthy across repeated expected windows.
+Pick Analyzer is ready for a monitored Production Pilot Week. Scheduler execution, market freshness, provider budget, settlement closure, Product Readiness and Operations are healthy in production.
 
 ## Production Evidence
 
-- `/api/system/version`: HTTP 200, commit `42439dee8e4b42f2302ef466df16a39fb40d235b`, provider calls 0.
-- Automatic scheduler run: `31015257795`, event `schedule`, conclusion `success`.
-- Protected invocation heartbeat: `2026-08-05T14:27:33.731+00:00`.
-- `/api/operations/health`: HTTP 200, final status `CRITICAL`.
-- Scheduler cadence: final `CRITICAL`, missed intervals 3.
+- `/api/system/version`: HTTP 200, commit `9540e4750a38fa7a8869c4846ca755350ff54776`, provider calls 0.
+- Automatic Vercel primary proof runs: `2026-08-05T21:47:41Z`, `2026-08-05T21:57:44Z`, `2026-08-05T22:07:41Z`.
+- Protected invocation heartbeat: `2026-08-05T22:07:41.276+00:00`.
+- `/api/operations/health`: HTTP 200, final status `HEALTHY`.
+- Scheduler cadence: `HEALTHY`, missed intervals 0.
 - Market freshness: `HEALTHY`.
-- Current Board: 45 fresh visible markets, 0 stale.
-- Product readiness: final `CRITICAL`.
+- Provider budget: `HEALTHY`, calls today `3`, calls last hour `3`.
+- Current Board: 33 fresh visible markets, 0 stale.
+- Product readiness: `HEALTHY`.
 - Settlement closure: `HEALTHY`.
-- Provider budget: `HEALTHY`.
 - Settlement guarantee: PASS, ready rows 0, silent pending rows 0.
 - Historical recovery debt: visible and non-blocking.
 - `/api/dashboard/today`: HTTP 200.
@@ -28,7 +28,7 @@ Pick Analyzer is not ready for Production Pilot Week until scheduler cadence rem
 
 ## Issue Counts
 
-- Critical: 1
+- Critical: 0
 - High: 0
 - Medium: 3
 - Low: 1
@@ -43,12 +43,12 @@ Pick Analyzer is not ready for Production Pilot Week until scheduler cadence rem
 
 ## Production Readiness
 
-Production Ready: NO.
+Production Ready: YES.
 
-Production Readiness: 82%.
+Production Readiness: 91%.
 
-Daily Use Recommendation: wait for stable scheduler cadence.
+Daily Use Recommendation: monitored Production Pilot Week is ready.
 
-Production Pilot Week: NOT READY.
+Production Pilot Week: READY, not started.
 
 MC-03 was not started.

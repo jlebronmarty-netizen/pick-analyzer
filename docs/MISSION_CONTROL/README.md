@@ -12,7 +12,7 @@ It answers:
 
 Mission Control does not replace the Master Program, Master Roadmap, Project Status or certification artifacts.
 
-Mission Control is current through OR-02A Vercel primary market-refresh recovery. Vercel Cron primary cadence is healthy, but active current-slate market refresh was starved by older missing-result recovery debt. MC-08H and Production Pilot Week remain blocked until the deployed repair proves Market Freshness, Product Readiness and Operations health.
+Mission Control is current through OR-02A Vercel primary market-refresh recovery. Vercel Cron is the primary scheduler, GitHub Actions remains fallback, active current-slate market refresh is certified, provider-call accounting is visible in the budget ledger, and Production Pilot Week is READY but not started.
 
 ## Source Of Truth Boundaries
 

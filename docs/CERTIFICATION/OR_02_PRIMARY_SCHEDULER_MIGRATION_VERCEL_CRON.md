@@ -1,6 +1,6 @@
 # OR-02 Primary Scheduler Migration - Vercel Cron
 
-Status: `DEPLOYMENT_PENDING`
+Status: `PRODUCTION_CERTIFIED`
 
 Starting commit: `448948450fbf099eae63a49cdb7b9f4d084baae1`
 
@@ -51,12 +51,12 @@ GitHub Actions
 - Planner logic unchanged except scheduler-source ownership and fallback lease.
 - No second provider writer is introduced.
 
-## Certification Gate
+## Production Certification
 
-OR-02 cannot reach final PASS until production proves:
+Production now proves:
 
-1. Three consecutive automatic Vercel primary executions.
-2. Scheduler `HEALTHY`.
+1. Three consecutive automatic Vercel primary executions after the OR-02A repair: `2026-08-05T21:47:41Z`, `2026-08-05T21:57:44Z`, `2026-08-05T22:07:41Z`.
+2. Scheduler `HEALTHY`, missed intervals `0`.
 3. Market Freshness `HEALTHY`.
 4. Settlement `HEALTHY`.
 5. Product Readiness `HEALTHY`.
@@ -66,6 +66,6 @@ OR-02 cannot reach final PASS until production proves:
 
 ## Current Classification
 
-`EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF`
+`OR_02_PRODUCTION_CERTIFIED`
 
 Production Pilot Week was not started. MC-03 was not started.

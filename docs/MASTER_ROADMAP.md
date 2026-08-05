@@ -3305,3 +3305,5 @@ The single protected proof invocation selected `midday_refresh`, made 0 provider
 ## PR-01 Final Production Readiness Audit
 
 PR-01 is certified as not ready for Production Pilot Week. Current Era and Replay counts balance, and the Performance Header pipeline-readiness mapping was repaired as presentation-only. Pilot Week remains blocked by current scheduler/market freshness instability and Aug 4 result-import pending evidence. MC-08H was not rerun to PASS and MC-03 was not started.
+
+- OR-02A certified Vercel Cron as primary scheduler with GitHub fallback and visible provider-call accounting. Next phase: Production Pilot Week, READY for 5-7 days of monitored real-world validation; MC-03 remains manual-only and not started.

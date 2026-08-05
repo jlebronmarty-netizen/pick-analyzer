@@ -2,7 +2,7 @@
 
 Status: deterministic V2 queue.
 
-MC-08 remains blocked at final readiness. OR-02 migrated the approved primary scheduler to Vercel Cron and kept GitHub Actions as fallback through the same protected endpoint. OR-02A is active because Vercel primary cadence is healthy but historical result-recovery debt still starved current-slate market refresh. Production Pilot Week is NOT READY until market freshness, product readiness and operations health recover. MC-03 remains PLANNED and manual-only.
+MC-08 is production certified after OR-02A proved Vercel primary market refresh, provider-call accounting, Market Freshness, Product Readiness and Operations health. Production Pilot Week is READY for a 5-7 day monitored pilot and has not started. MC-03 remains PLANNED and manual-only.
 
 | ID | Mission | Category | Priority | State | Mode | Next Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -14,11 +14,11 @@ MC-08 remains blocked at final readiness. OR-02 migrated the approved primary sc
 | MC-05 | Performance Intelligence | PERFORMANCE_INTELLIGENCE | P2 | PLANNED | AGENT_ASSISTED | Advance after eligible settled samples exist. |
 | MC-06 | Decision Core Evolution | DECISION_CORE_EVOLUTION | P3 | PLANNED | MANUAL_ONLY | Use controlled experimentation only. |
 | MC-07 | Market Expansion | MARKET_EXPANSION | P3 | PLANNED | AGENT_ASSISTED | Keep unsupported markets unavailable until all gates pass. |
-| MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | BLOCKED | AGENT_ASSISTED | Wait for human scheduler architecture decision and sustained primary proof before pilot. |
+| MC-08 | Daily Betting Product Completion | PRODUCT_EXPERIENCE | P2 | PRODUCTION_CERTIFIED | AGENT_ASSISTED | Complete; Production Pilot Week is ready but not started. |
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
-Next eligible phase: none. OR-02A requires deployment and production proof that active current-slate market refresh executes under Vercel primary when due. MC-08H can be rerun only after all operational gates pass. MC-03 remains PLANNED and manual-only.
+Next eligible phase: Production Pilot Week. It is READY, manual-only and must run 5-7 days before any Multi-Sport Expansion decision. MC-03 remains PLANNED and manual-only.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
@@ -49,16 +49,16 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | MC-08E-R | Evidence-First Watchlist Experience | PRODUCTION_CERTIFIED | Paused work preserved, clean P2.4 integration deployed and production-render certified. |
 | MC-08F | Personalization Experience | PRODUCTION_CERTIFIED | Display-only personalization contract, settings route and homepage/Performance integration certified. |
 | MC-08G | Product Polish And Coherence Review | PRODUCTION_CERTIFIED | Product coherence repairs deployed and certified. |
-| MC-08H | Production Readiness Certification | BLOCKED | One automatic schedule proof was observed, but sustained cadence failed and scheduler health returned to CRITICAL. |
+| MC-08H | Production Readiness Certification | PRODUCTION_CERTIFIED | OR-02A proof cleared scheduler, freshness, provider accounting and product-readiness blockers. |
 | OR-01 | Operational Readiness Recovery | PRODUCTION_CERTIFIED | Active market refresh, scheduler heartbeat, settlement scope and product readiness recovery are certified. |
-| OR-01A | Post-Repair Operational Proof | BLOCKED | Sustained scheduler cadence is not proven; Product Readiness is blocked by scheduler execution. |
+| OR-01A | Post-Repair Operational Proof | PRODUCTION_CERTIFIED | Vercel primary sustained cadence and market freshness are proven; Product Readiness is healthy. |
 | OR-01B | Scheduler Workflow Ledger Reconciliation | CERTIFIED | Workflow success now maps to durable protected heartbeat evidence; scheduled run `31003990142` persisted invocation `cf420831-ad95-4943-83a7-326d9fdad5d7`. |
 | OR-01C | Settlement Closure and Product Readiness Recovery | PRODUCTION_CERTIFIED | Settlement Closure is healthy; older result-recovery debt remains visible as non-blocking warning when current rows are clean. |
 | OR-01D | GitHub Scheduled Trigger Recovery | EXTERNAL_WAIT | Automatic scheduled run `31015257795` occurred, but subsequent expected ticks did not arrive. |
 | OR-01E | Adaptive Planner Behavioral Audit | CERTIFIED | `MIXED_SCHEDULER_AND_PLANNER_DEFECT`: planner selects one global action per `runAdaptiveRefresh`; route chains only `sync_results`/`settle`; market refresh requires another scheduler tick. |
 | OR-01F | Bounded Planner Continuity | PRODUCTION_CERTIFIED | `planner_continuity_v1` is deployed and proof-certified: max 3 actions, max 1 provider action, repeated-action guard, planner recomputation, and safe internal `settle` continuation only. |
 | OR-01H | Primary Scheduler Architecture Decision | HUMAN_DECISION_REQUIRED | Vercel Cron is disabled in `vercel.json`; current Vercel plan evidence is unavailable; GitHub schedule runs succeeded but do not provide three consecutive automatic primary executions at the required cadence. |
-| OR-02 | Primary Scheduler Migration - Vercel Cron | EXTERNAL_WAIT | Vercel Cron is configured as primary; GitHub Actions is fallback with primary-success lease; final PASS requires three consecutive automatic Vercel primary executions. |
-| OR-02A | Vercel Primary Market Refresh Recovery | DEPLOYMENT_PENDING | Repairs action selection so older missing-result debt cannot starve active current-slate market refresh when no settlement-ready rows exist. |
+| OR-02 | Primary Scheduler Migration - Vercel Cron | PRODUCTION_CERTIFIED | Vercel Cron is primary; GitHub Actions remains safe fallback through the primary-success lease. |
+| OR-02A | Vercel Primary Market Refresh Recovery | PRODUCTION_CERTIFIED | Active current-slate market refresh and provider-call accounting are certified under automatic Vercel primary execution. |
 | PR-01 | Final Production Readiness Audit | CERTIFIED_NOT_READY | Performance header mapping repaired; Current Era and Replay equations balance; Pilot Week remains blocked by scheduler/market freshness/result-import evidence. |
-| Production Pilot Week | Real-world validation before Multi-Sport Expansion | NOT_READY | Requires stable OR-01D cadence and MC-08H Production Ready YES. |
+| Production Pilot Week | Real-world validation before Multi-Sport Expansion | READY | Manual-only 5-7 day monitored pilot; not started. |

@@ -38,8 +38,8 @@ check('no model/recommendation changes', cert.safety.predictionChanged === false
 check('settlement remains healthy by evidence', cert.before.settlementClosure === 'HEALTHY')
 check('Current Era and Replay unchanged', cert.safety.currentEraChanged === false && cert.safety.replayChanged === false)
 check('certification reads made zero provider calls and mutations', cert.certificationReads.providerCallsMade === 0 && cert.certificationReads.remoteMutationsMade === 0)
-check('OR-02 migration remains deployed but not final pass', or02.status === 'DEPLOYMENT_PENDING' || or02.finalClassification === 'EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF')
-check('Mission Control records OR-02A gated state', status.or02a?.status === 'DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF')
+check('OR-02 migration is production certified after OR-02A proof', or02.status === 'PRODUCTION_CERTIFIED' && or02.finalClassification === 'OR_02_PRODUCTION_CERTIFIED')
+check('Mission Control records OR-02A production certification', status.or02a?.status === 'PRODUCTION_CERTIFIED' && status.or02a?.requiredProof?.providerCallWhenDue === true)
 
 const failedChecks = checks.filter((item) => !item.passed)
 

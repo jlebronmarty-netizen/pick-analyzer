@@ -21,7 +21,14 @@ check('Aug 4 equation balances without silent pending', cert.aug4Reconciliation?
 check('Aug 4 first missing step is result import', cert.aug4Reconciliation?.firstMissingStep === 'RESULT_IMPORT')
 check('Replay remains isolated', cert.replay?.isolated === true && cert.replay?.includedInCurrentEraTrust === false)
 check('Homepage scope difference documented', cert.homepage?.scopeDifferenceExplained === true)
-check('Mission Control auto-run remains disabled by gate', ['MC-08H', 'OR-01H', 'OR-02', 'OR-02A'].includes(status.currentMission?.id) && status.mc08h?.productionPilotWeekReady === false)
+check('Mission Control state may advance after later OR-02A proof', (
+  ['MC-08H', 'OR-01H', 'OR-02', 'OR-02A'].includes(status.currentMission?.id) &&
+  status.mc08h?.productionPilotWeekReady === false
+) || (
+  status.currentMission?.id === 'PRODUCTION-PILOT-WEEK' &&
+  status.productionPilotWeek?.state === 'READY' &&
+  status.productionPilotWeek?.started === false
+))
 check('Performance route exposes selected pipeline readiness helper', route.includes('function selectedPipelineReadiness('))
 check('Performance header no longer maps readiness score to selectedTrust.trustScore', !route.includes('score: selectedTrust.trustScore'))
 check('Performance readiness status is derived from pipeline score', route.includes('pipelineReadinessStatus(pipelineReadinessScore)'))

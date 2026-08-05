@@ -26,12 +26,12 @@ check('provider action lock remains active', cronRoute.includes('provider_action
 check('adaptive status reports primary/fallback crons', adaptive.includes("owner: 'vercel_cron_primary'") && adaptive.includes("owner: 'github_actions_fallback'"))
 check('operations health reports primary/fallback source', health.includes("primaryScheduler: 'VERCEL_OPERATING_DAY_CRON_PRIMARY'") && health.includes('lastVercelPrimarySuccessAt'))
 check('Mission Control maps OR-02 metadata', mission.includes("id === 'OR-02'") && mission.includes('Migrate primary protected operating-day scheduling to Vercel Cron'))
-check('Mission Control status is OR-02 gated or OR-02A follow-up gated', (status.currentMission?.id === 'OR-02' && status.status === 'OR_02_EXTERNAL_WAIT_VERCEL_PRIMARY_SUSTAINED_PROOF') || (status.currentMission?.id === 'OR-02A' && status.status === 'OR_02A_DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF'))
-check('required production proof remains incomplete before observation', cert.requiredProductionProof.threeConsecutiveVercelAutomaticExecutions === false)
+check('Mission Control status moves to Production Pilot Week after OR-02 proof', status.currentMission?.id === 'PRODUCTION-PILOT-WEEK' && status.status === 'PRODUCTION_PILOT_WEEK_READY')
+check('required production proof is complete after observation', cert.requiredProductionProof.threeConsecutiveVercelAutomaticExecutions === true && cert.requiredProductionProof.operationsHealthy === true)
 check('prediction and policy safety recorded', cert.safety.predictionChanged === false && cert.safety.officialPickPolicyChanged === false && cert.safety.kellyChanged === false)
 check('settlement learning and provider budgets unchanged', cert.safety.settlementChanged === false && cert.safety.learningChanged === false && cert.safety.providerBudgetChanged === false)
 check('local server smoke not run', cert.safety.localServerSmokeRun === false)
-check('Production Pilot Week not ready before proof', cert.requiredProductionProof.productionPilotWeekReady === false)
+check('Production Pilot Week ready but not started after proof', cert.requiredProductionProof.productionPilotWeekReady === true && status.productionPilotWeek?.state === 'READY' && status.productionPilotWeek?.started === false)
 
 const failedChecks = checks.filter((item) => !item.passed)
 

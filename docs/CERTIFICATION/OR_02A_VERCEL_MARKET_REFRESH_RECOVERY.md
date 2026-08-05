@@ -1,6 +1,6 @@
 # OR-02A Vercel Market Refresh Recovery
 
-Status: `DEPLOYMENT_PENDING_MARKET_REFRESH_PROOF`
+Status: `PRODUCTION_CERTIFIED`
 
 Starting commit: `c74656af083b36349032cee5141da7ebe15c9750`
 
@@ -41,16 +41,22 @@ No scheduler infrastructure changed. Vercel Cron remains primary and GitHub Acti
 - Generated/page timestamps do not establish freshness.
 - Post-start pregame refresh remains blocked.
 
-## Certification Gate
+## Final Production Proof
 
-OR-02A cannot reach final PASS until production proves:
+Production proved:
 
-1. The deployed planner selects market refresh when current eligible stale pregame events are due.
-2. A real provider call occurs only when market refresh is due.
-3. Stored provider/source market timestamps advance.
-4. Market Freshness becomes `HEALTHY`.
-5. Product Readiness becomes `HEALTHY`.
-6. Operations become non-critical.
-7. Three consecutive post-repair automatic Vercel primary invocations are observed.
+1. The deployed planner selects `midday_refresh` when current eligible stale pregame events are due.
+2. Real provider calls occur when market refresh is due and are counted by the provider budget ledger.
+3. Stored provider/source market timestamps advanced from `2026-08-05T16:16:39.658Z` to `2026-08-05T18:06:59.000Z`.
+4. The visible Current Board market snapshot advanced to `2026-08-05T22:07:28.383Z`.
+5. Market Freshness is `HEALTHY`.
+6. Product Readiness is `HEALTHY`.
+7. Operations are `HEALTHY`.
+8. Three consecutive post-repair automatic Vercel primary invocations were observed at `21:47:41Z`, `21:57:44Z` and `22:07:41Z`.
+9. Provider budget calls advanced from `0` to `3` after the accounting repair.
+
+## Accounting Repair
+
+The second bounded runtime repair records canonical acquisition `actualHttpRequests` as `sports_sync_jobs.metadata.externalCallsUsed`, which is an existing provider-budget accounting source. This fixes the provider-call accounting defect without changing provider limits, cadence, planner logic, prediction behavior, settlement, learning or recommendation policy.
 
 Production Pilot Week was not started. MC-03 was not started.
