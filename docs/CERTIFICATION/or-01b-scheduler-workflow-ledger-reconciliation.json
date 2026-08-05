@@ -2,22 +2,26 @@
   "id": "or_01b_scheduler_workflow_ledger_reconciliation",
   "date": "2026-08-05",
   "startingCommit": "5558ab21908d1a41274170a9f1f78a203dc6b9ea",
-  "classification": "OR_01B_WORKFLOW_LEDGER_RECONCILIATION_REPAIR_DEPLOYMENT_REQUIRED",
+  "classification": "OR_01B_WORKFLOW_LEDGER_RECONCILIATION_CERTIFIED",
   "githubRunsAudited": [
     30961154690,
-    30965570325
+    30965570325,
+    31003827953,
+    31003990142
   ],
   "workflowFile": ".github/workflows/production-operating-day.yml",
-  "falseSuccessDefect": "Workflow validated HTTP status only and app route did not record live no-write success heartbeat evidence.",
+  "falseSuccessDefect": "Workflow validated HTTP status only and app route did not record live no-write success heartbeat evidence. Final proof also exposed that a live heartbeat persisted as SKIPPED was not counted by Operations Health.",
   "productionUrlFinding": "Workflow uses canonical https://pick-analyzer.vercel.app URL.",
   "httpHandlingFinding": "Non-2xx HTTP status already failed; 2xx application failure status needed JSON validation.",
   "responseValidationFinding": "Workflow now requires success true, non-failure status, requestId, adaptive executionRunId, selectedAction field and heartbeat evidence for no-write success.",
-  "ledgerFinding": "Successful non-dry-run no-product-mutation invocation now records scheduler heartbeat evidence.",
+  "ledgerFinding": "Successful non-dry-run no-product-mutation invocation now records scheduler heartbeat evidence and Operations Health counts protected heartbeat metadata as successful scheduler evidence.",
   "repairs": [
     "workflow_json_response_validation",
     "workflow_app_invocation_id_required",
     "workflow_no_write_heartbeat_required",
-    "protected_route_live_no_write_heartbeat"
+    "protected_route_live_no_write_heartbeat",
+    "protected_heartbeat_success_status_normalization",
+    "operations_health_protected_heartbeat_success_recognition"
   ],
   "schedulerCadenceChanged": false,
   "providerBudgetChanged": false,
@@ -26,5 +30,29 @@
   "learningChanged": false,
   "providerCallsMadeByValidation": 0,
   "remoteMutationsMadeByValidation": 0,
-  "productionProof": "PENDING"
+  "productionProof": "PASS",
+  "proof": {
+    "manualWorkflowRunId": 31003827953,
+    "scheduledWorkflowRunId": 31003990142,
+    "trigger": "schedule",
+    "branch": "main",
+    "commit": "9af43b2d553ef3401883ebb7b8c736c58fc1fef8",
+    "conclusion": "success",
+    "ledgerTimestampBefore": "2026-08-05T03:24:41.208+00:00",
+    "ledgerTimestampAfter": "2026-08-05T12:03:42.730+00:00",
+    "requestId": "cf420831-ad95-4943-83a7-326d9fdad5d7",
+    "invocationId": "cf420831-ad95-4943-83a7-326d9fdad5d7",
+    "selectedAction": "midday_refresh",
+    "heartbeatRecorded": true,
+    "productDataMutated": false,
+    "providerCallsMade": 0,
+    "databaseWrites": 1,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "or01aStatus": "BLOCKED_BY_SETTLEMENT_CLOSURE_AND_PRODUCT_READINESS",
+  "mc08hRerun": false,
+  "productionPilotWeek": "NOT_READY"
 }

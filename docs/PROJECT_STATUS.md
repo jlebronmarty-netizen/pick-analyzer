@@ -5,6 +5,7 @@ Last updated: 2026-07-30 20:05:00Z
 ## 2026-08-05 OR-01B Scheduler Workflow Ledger Reconciliation
 
 - OR-01B identified the reason GitHub scheduled runs could report success while app-side scheduler health remained stale: the workflow validated HTTP status only, while the protected route recorded no scheduler heartbeat for successful live no-product-mutation invocations. The repair adds workflow JSON response validation and records heartbeat evidence for live no-write successes. Scheduler cadence, provider budgets, prediction logic, settlement and learning remain unchanged. One post-deploy protected scheduler proof is required before MC-08H can be rerun.
+- Final proof observed manual run `31003827953` and scheduled run `31003990142` on `9af43b2d553ef3401883ebb7b8c736c58fc1fef8`. Scheduled run `31003990142` persisted durable heartbeat invocation `cf420831-ad95-4943-83a7-326d9fdad5d7` at `2026-08-05T12:03:42.730+00:00`. A follow-up health reconciliation fix counts protected heartbeat metadata as successful scheduler evidence. OR-01A remains blocked by settlement closure and Product Readiness CRITICAL evidence; MC-08H was not rerun.
 
 ## 2026-08-05 OR-01A Post-Repair Operational Proof
 

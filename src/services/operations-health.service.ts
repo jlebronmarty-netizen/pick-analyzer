@@ -547,7 +547,13 @@ export async function getOperationsHealth() {
   const resultsFreshness = freshnessByDomain(adaptive, 'results')
   const latestSuccessfulProtected = (lifecycle.rows as Array<Record<string, unknown>>).find((row) => {
     const status = String(row.status ?? '')
-    return ['SUCCESS_CHANGED', 'SUCCESS_NO_CHANGE', 'completed', 'morning_synced', 'midday_refreshed', 'results_synced'].some((needle) => status.includes(needle))
+    const metadata = asRecord(row.metadata)
+    const successfulSchedulerHeartbeat =
+      String(row.action ?? '') === 'scheduler_heartbeat' &&
+      metadata.protectedInvocationRecorded === true &&
+      metadata.heartbeatUpdatesHealthMarker === true &&
+      metadata.productDataMutated === false
+    return successfulSchedulerHeartbeat || ['SUCCESS_CHANGED', 'SUCCESS_NO_CHANGE', 'completed', 'morning_synced', 'midday_refreshed', 'results_synced'].some((needle) => status.includes(needle))
   })
   const lastSuccessfulProtectedInvocationAt = String(latestSuccessfulProtected?.completed_at ?? latestSuccessfulProtected?.created_at ?? '') || null
   const evidenceAge = ageMinutes(lastSuccessfulProtectedInvocationAt)

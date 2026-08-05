@@ -69,8 +69,8 @@ Use this checklist before starting any queued mission.
 - MC-08G: `PRODUCTION_CERTIFIED`; product polish and coherence review is complete.
 - MC-08H: `PRODUCTION_READINESS_BLOCKED`; production pilot is not ready because production operations are currently critical. MC-03 remains manual-only.
 - OR-01: repository recovery complete for scheduler-action starvation; production writer proof is required before rerunning MC-08H.
-- OR-01A: post-repair proof remains external-wait because public GitHub run metadata and application-side scheduler ledger disagree; MC-08H was not rerun.
-- OR-01B: workflow/app-ledger reconciliation defect repaired; one post-deploy protected scheduler proof is required before MC-08H can be rerun.
+- OR-01A: post-repair proof remains blocked because settlement closure and Product Readiness are CRITICAL; MC-08H was not rerun.
+- OR-01B: workflow/app-ledger reconciliation is certified by scheduled run `31003990142` and durable heartbeat invocation `cf420831-ad95-4943-83a7-326d9fdad5d7`.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.

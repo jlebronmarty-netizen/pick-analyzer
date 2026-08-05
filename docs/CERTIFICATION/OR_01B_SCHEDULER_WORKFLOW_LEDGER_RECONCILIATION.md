@@ -6,9 +6,9 @@ Starting commit: `5558ab21908d1a41274170a9f1f78a203dc6b9ea`
 
 ## Verdict
 
-`OR_01B_WORKFLOW_LEDGER_RECONCILIATION_REPAIR_DEPLOYMENT_REQUIRED`
+`OR_01B_WORKFLOW_LEDGER_RECONCILIATION_CERTIFIED`
 
-OR-01B found a bounded workflow/app-ledger reconciliation defect and repaired it. Production proof is required after deployment.
+OR-01B found a bounded workflow/app-ledger reconciliation defect, repaired it, and captured production proof that a GitHub scheduler success corresponds to durable app-side heartbeat/ledger evidence.
 
 ## Findings
 
@@ -51,6 +51,25 @@ The app route also recorded scheduler heartbeat evidence only for successful dry
   - no-write success lacks scheduler heartbeat evidence.
 - The protected route now records a scheduler heartbeat for successful protected writer invocations that produce no product-data mutation.
 - The heartbeat metadata includes the adaptive invocation ID and marks the invocation as protected scheduler evidence.
+- Live no-product-mutation heartbeat rows now normalize scheduler-only `SKIPPED` / `NOT_DUE` outcomes to `SUCCESS_NO_CHANGE` for cadence health.
+- Operations Health now counts durable `scheduler_heartbeat` rows with protected-invocation metadata as successful scheduler evidence, even when an already-persisted row used the pre-normalized `SKIPPED` status.
+
+## Production Proof
+
+- Runtime commit deployed for original repair: `9af43b2d553ef3401883ebb7b8c736c58fc1fef8`.
+- Manual workflow run: `31003827953`, trigger `workflow_dispatch`, branch `main`, commit `9af43b2d553ef3401883ebb7b8c736c58fc1fef8`, conclusion `success`.
+- Scheduled workflow proof run: `31003990142`, trigger `schedule`, branch `main`, commit `9af43b2d553ef3401883ebb7b8c736c58fc1fef8`, conclusion `success`.
+- Matched durable ledger row: `533d8b1e-a420-4c11-934f-02e01f3e8e0f`, action `scheduler_heartbeat`, completed at `2026-08-05T12:03:42.730+00:00`.
+- Durable request/invocation ID: `cf420831-ad95-4943-83a7-326d9fdad5d7`.
+- Selected action: `midday_refresh`.
+- Provider calls: 0.
+- Product data mutated: false.
+- Database writes: 1 scheduler-owned operational heartbeat row.
+- GitHub log download remained unavailable from this environment: HTTP 403.
+
+## Remaining OR-01A Blockers
+
+OR-01B is certified, but OR-01A and MC-08H do not pass yet. Production Operations Health still reported settlement closure `CRITICAL` and Product Readiness `CRITICAL` during final proof because completed prediction rows remain blocked by missing canonical result rows. MC-08H was not rerun.
 
 ## Guardrails
 
@@ -60,10 +79,6 @@ The app route also recorded scheduler heartbeat evidence only for successful dry
 - No provider calls were made by validation.
 - No data mutations were made by validation.
 
-## Production Proof Required
+## Final Gate
 
-After deployment, observe exactly one protected scheduler execution.
-
-If the proof occurs outside an active market window, certify workflow/ledger reconciliation only and keep MC-08H blocked until the next pregame active-market window.
-
-If the proof occurs inside an active market window, verify market acquisition and then re-evaluate MC-08H only if freshness, scheduler execution, operational health and product readiness pass.
+Production Pilot Week remains NOT READY until OR-01A passes all operational domains and MC-08H returns Production Ready: YES.

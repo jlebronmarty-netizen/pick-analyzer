@@ -23,6 +23,14 @@ Repairs:
 
 Classification: `WORKFLOW_LEDGER_RECONCILIATION_REPAIR_DEPLOYMENT_REQUIRED`.
 
+## 2026-08-05 - OR-01B Final Proof
+
+Scheduled GitHub workflow run `31003990142` executed on `main` at commit `9af43b2d553ef3401883ebb7b8c736c58fc1fef8` and concluded success. Durable app-side scheduler heartbeat evidence was written at `2026-08-05T12:03:42.730+00:00` with request/invocation ID `cf420831-ad95-4943-83a7-326d9fdad5d7`, selected action `midday_refresh`, provider calls `0`, product data mutated `false`, and one scheduler-owned heartbeat write.
+
+The proof exposed a final reconciliation gap: the live heartbeat row used status `SKIPPED`, so Operations Health did not count it as successful cadence evidence. The follow-up repair normalizes future live no-product heartbeat rows to `SUCCESS_NO_CHANGE` and counts protected heartbeat metadata as successful scheduler evidence. OR-01A remains blocked by settlement closure and Product Readiness CRITICAL evidence; MC-08H was not rerun.
+
+Classification: `WORKFLOW_LEDGER_RECONCILIATION_CERTIFIED`.
+
 ## 2026-08-05 - OR-01A Post-Repair Operational Proof
 
 Starting commit: `21f8d135f665fcf39cf2db6d64462ca9251d348e`.

@@ -152,11 +152,16 @@ async function runPostgameContinuity(dryRun: boolean, source: string) {
   if (shouldRecordSchedulerHeartbeat) {
     const { recordOperatingDaySchedulerHeartbeat } = await import('@/services/operating-day.service')
     const lastStep = (steps.at(-1) ?? {}) as Record<string, unknown>
+    const heartbeatStatus = dryRun === true
+      ? 'SUCCESS_NO_CHANGE'
+      : ['SKIPPED', 'NOT_DUE', 'SUCCESS_NO_CHANGE'].includes(String(lastStep.status ?? ''))
+        ? 'SUCCESS_NO_CHANGE'
+        : String(lastStep.status ?? 'SUCCESS_NO_CHANGE')
     schedulerHeartbeat = await recordOperatingDaySchedulerHeartbeat({
       selectedDate: String(lastStep.selectedDate ?? ''),
       requestId: String(lastStep.executionRunId ?? ''),
       source,
-      status: dryRun === true ? 'SUCCESS_NO_CHANGE' : String(lastStep.status ?? 'SUCCESS_NO_CHANGE'),
+      status: heartbeatStatus,
       dryRun,
       selectedAction: typeof lastStep.selectedAction === 'string' ? lastStep.selectedAction : null,
       dueSteps: Array.isArray(lastStep.dueSteps) ? lastStep.dueSteps : [],

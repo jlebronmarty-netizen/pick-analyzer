@@ -7,6 +7,7 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8')
 
 const workflow = read('.github/workflows/production-operating-day.yml')
 const route = read('src/app/api/cron/operating-day/route.ts')
+const operationsHealth = read('src/services/operations-health.service.ts')
 const schedulerConfig = read('src/config/mlb-operating-day-scheduler.ts')
 const cert = read('docs/CERTIFICATION/OR_01B_SCHEDULER_WORKFLOW_LEDGER_RECONCILIATION.md')
 const json = JSON.parse(read('docs/CERTIFICATION/or-01b-scheduler-workflow-ledger-reconciliation.json'))
@@ -19,6 +20,7 @@ const changed = execFileSync('git', ['diff', '--name-only', 'HEAD'], { cwd: ROOT
 const allowed = new Set([
   '.github/workflows/production-operating-day.yml',
   'src/app/api/cron/operating-day/route.ts',
+  'src/services/operations-health.service.ts',
   'scripts/or01b-scheduler-workflow-ledger-reconcile-validate.mjs',
   'docs/CERTIFICATION/OR_01B_SCHEDULER_WORKFLOW_LEDGER_RECONCILIATION.md',
   'docs/CERTIFICATION/or-01b-scheduler-workflow-ledger-reconciliation.json',
@@ -51,12 +53,14 @@ check('workflow requires selectedAction field', workflow.includes("hasOwnPropert
 check('workflow requires heartbeat for no-write success', workflow.includes('writes === 0 && !heartbeat') && workflow.includes('scheduler heartbeat evidence'))
 check('route records heartbeat for live no-write protected writer', route.includes('successful_protected_writer_no_product_mutation_observation') && route.includes('protectedInvocationRecorded: true'))
 check('route includes correlation ID in heartbeat metadata', route.includes('appInvocationId: String(lastStep.executionRunId') && route.includes('workflowSuccessRequiresInvocationEvidence: true'))
+check('route normalizes live no-product heartbeat to successful health status', route.includes("['SKIPPED', 'NOT_DUE', 'SUCCESS_NO_CHANGE'].includes") && route.includes("status: heartbeatStatus"))
 check('route dry-run heartbeat remains supported', route.includes('successful_protected_dry_run_observation'))
+check('operations health counts protected heartbeat evidence as successful invocation', operationsHealth.includes('successfulSchedulerHeartbeat') && operationsHealth.includes('metadata.protectedInvocationRecorded === true') && operationsHealth.includes('metadata.heartbeatUpdatesHealthMarker === true'))
 check('scheduler cadence unchanged', schedulerConfig.includes("export const MLB_OPERATING_DAY_WRITE_SCHEDULER_CRON = '7-57/10 * * * *'") || workflow.includes('7-57/10 * * * *'))
 check('concurrency remains single writer', workflow.includes('group: production-operating-day-writer') && workflow.includes('cancel-in-progress: false'))
 check('OR-01B certification records root cause', cert.includes('transport-level workflow success was not reconciled to app-side scheduler health evidence'))
 check('OR-01B JSON records zero validation provider calls', json.providerCallsMadeByValidation === 0 && json.remoteMutationsMadeByValidation === 0)
-check('Mission Control records OR-01B state', status.includes('"or01b"') && status.includes('WORKFLOW_LEDGER_RECONCILIATION_REPAIR_DEPLOYMENT_REQUIRED'))
+check('Mission Control records OR-01B state', status.includes('"or01b"') && (status.includes('WORKFLOW_LEDGER_RECONCILIATION_REPAIR_DEPLOYMENT_REQUIRED') || status.includes('WORKFLOW_LEDGER_RECONCILIATION_CERTIFIED')))
 check('only bounded OR-01B files changed', disallowed.length === 0, disallowed.join(', '))
 
 const failedChecks = checks.filter((entry) => !entry.passed)
