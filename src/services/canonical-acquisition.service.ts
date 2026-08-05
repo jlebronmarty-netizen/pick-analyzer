@@ -340,6 +340,7 @@ async function writeSyncJob(input: {
       acquisitionId: input.contract.acquisitionId,
       deduplicationKey: input.contract.deduplicationKey,
       idempotencyKey: input.contract.idempotencyKey,
+      externalCallsUsed: Number(input.contract.actualHttpRequests ?? 0),
       canonicalAcquisition: input.contract,
       endpoint: input.endpoint,
       noSecretExposure: true,
