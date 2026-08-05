@@ -1,0 +1,201 @@
+{
+  "mission": "OR-01F",
+  "title": "Bounded Planner Continuity",
+  "status": "LOCALLY_COMPLETE_PENDING_PRODUCTION_PROOF",
+  "startingCommit": "f6cae3ec6bb20b02ca9e4898783ac8d2f49b73c5",
+  "finalClassification": "PLANNER_REPAIR_REDUCES_RISK_BUT_PRIMARY_SCHEDULER_STILL_REQUIRED",
+  "continuityPolicy": {
+    "version": "planner_continuity_v1",
+    "maxActionsPerInvocation": 3,
+    "maxProviderActionsPerInvocation": 1,
+    "maxRepeatedSameAction": 1,
+    "maxDurationMs": 300000,
+    "maxMutationsPerInvocation": 500,
+    "safeInternalContinuationActions": [
+      "settle"
+    ],
+    "providerActions": [
+      "status_refresh",
+      "morning_sync",
+      "midday_refresh",
+      "final_refresh",
+      "sync_results"
+    ]
+  },
+  "actionClassification": [
+    {
+      "action": "morning_sync",
+      "class": "PROVIDER_ACQUISITION",
+      "safeContinuation": "stop before second provider action; continue only to settle if immediately due"
+    },
+    {
+      "action": "midday_refresh",
+      "class": "PROVIDER_ACQUISITION",
+      "safeContinuation": "stop before second provider action; continue only to settle if immediately due"
+    },
+    {
+      "action": "final_refresh",
+      "class": "PROVIDER_ACQUISITION",
+      "safeContinuation": "stop before second provider action"
+    },
+    {
+      "action": "sync_results",
+      "class": "PROVIDER_ACQUISITION",
+      "safeContinuation": "settle"
+    },
+    {
+      "action": "settle",
+      "class": "INTERNAL_CLOSURE",
+      "safeContinuation": "derived learning/performance only"
+    },
+    {
+      "action": "learning",
+      "class": "INTERNAL_CLOSURE",
+      "safeContinuation": "derived from settlement, no standalone planner action"
+    },
+    {
+      "action": "performance",
+      "class": "INTERNAL_CLOSURE",
+      "safeContinuation": "derived after settlement, no standalone planner action"
+    },
+    {
+      "action": "no_action",
+      "class": "WAIT_TERMINAL",
+      "safeContinuation": "none"
+    }
+  ],
+  "stateChangeContract": [
+    "PRODUCT_DATA_CHANGED",
+    "SCHEDULER_EVIDENCE_CHANGED",
+    "INTERNAL_STATE_CHANGED",
+    "NO_MATERIAL_CHANGE",
+    "UNKNOWN"
+  ],
+  "simulations": [
+    {
+      "case": "stale odds + predictions missing",
+      "expectedSequence": [
+        "midday_refresh",
+        "prediction_generation_inside_market_action",
+        "stop_before_second_provider_action"
+      ],
+      "stopReason": "SECOND_PROVIDER_ACTION_REQUIRED"
+    },
+    {
+      "case": "stale odds + predictions already current",
+      "expectedSequence": [
+        "midday_refresh",
+        "recompute",
+        "stop"
+      ],
+      "stopReason": "NO_MATERIAL_CHANGE"
+    },
+    {
+      "case": "final events + results missing",
+      "expectedSequence": [
+        "sync_results",
+        "settle",
+        "learning",
+        "performance"
+      ],
+      "stopReason": "NO_NEXT_ACTION"
+    },
+    {
+      "case": "results already imported + settlement ready",
+      "expectedSequence": [
+        "settle",
+        "learning",
+        "performance"
+      ],
+      "stopReason": "NO_NEXT_ACTION",
+      "providerCalls": 0
+    },
+    {
+      "case": "same refresh remains selected after execution",
+      "expectedSequence": [
+        "midday_refresh",
+        "recompute",
+        "guard"
+      ],
+      "stopReason": "REPEATED_ACTION_GUARD"
+    },
+    {
+      "case": "next action requires external time/window",
+      "expectedSequence": [
+        "current_action",
+        "recompute",
+        "stop"
+      ],
+      "stopReason": "SECOND_PROVIDER_ACTION_REQUIRED"
+    },
+    {
+      "case": "provider budget denied",
+      "expectedSequence": [
+        "no_provider_execution",
+        "stop"
+      ],
+      "stopReason": "ACTION_FAILED"
+    },
+    {
+      "case": "duration or mutation cap reached",
+      "expectedSequence": [
+        "current_action",
+        "bounded_stop"
+      ],
+      "stopReason": "DURATION_OR_MUTATION_CAP_REACHED"
+    }
+  ],
+  "idempotency": {
+    "settlement": "IDEMPOTENT_CANONICAL_SCOPE",
+    "learningEvidence": "IDEMPOTENT_DERIVED",
+    "performanceSynchronization": "IDEMPOTENT_DERIVED",
+    "predictionPersistence": "UNCHANGED_UNIQUE_KEYS",
+    "resultImport": "UNCHANGED_CANONICAL_UPSERT",
+    "duplicateActionExecution": "BLOCKED_BY_ACTION_IDENTITY"
+  },
+  "behaviorChanges": {
+    "schedulerCadenceChanged": false,
+    "githubWorkflowChanged": false,
+    "providerBudgetChanged": false,
+    "predictionChanged": false,
+    "featureMathChanged": false,
+    "recommendationGateChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementMathChanged": false,
+    "learningMathChanged": false,
+    "currentEraChanged": false,
+    "replayChanged": false,
+    "healthThresholdChanged": false
+  },
+  "readOnlyGuarantees": {
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "localServerSmokeRun": false
+  },
+  "proof": {
+    "status": "PENDING_PRODUCTION_PROOF",
+    "manualProtectedWriterExecutionsAllowed": 1
+  },
+  "missionControl": {
+    "or01f": "PRODUCTION_CERTIFIED",
+    "or01a": "BLOCKED",
+    "mc08h": "BLOCKED",
+    "productionPilotWeek": "NOT_READY",
+    "mc03": "NOT_STARTED",
+    "nextRecommendation": "OR-01G scheduler primary/fallback architecture decision if sustained cadence remains unhealthy"
+  },
+  "validation": {
+    "primaryValidator": "scripts/or01f-bounded-planner-continuity-validate.mjs",
+    "status": "PASS",
+    "build": "PASS",
+    "jsonValidation": "PASS",
+    "changedFileEslint": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS",
+    "missionControlValidator": "PASS"
+  }
+}

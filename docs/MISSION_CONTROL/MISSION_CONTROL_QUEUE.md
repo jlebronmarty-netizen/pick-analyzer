@@ -2,7 +2,7 @@
 
 Status: deterministic V2 queue.
 
-MC-08 remains blocked at final readiness. OR-01E proved a mixed scheduler/planner blocker: GitHub scheduled delivery remains irregular, and the protected operating-day route only continues inside one invocation after `sync_results` or `settle`, not after market refresh actions. Production Pilot Week is NOT READY. MC-03 remains PLANNED and manual-only.
+MC-08 remains blocked at final readiness. OR-01F is the bounded planner-continuity repair approved after OR-01E: one protected invocation may run at most one provider action, then continue only through safe internal closure work. Production Pilot Week is NOT READY. MC-03 remains PLANNED and manual-only.
 
 | ID | Mission | Category | Priority | State | Mode | Next Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -56,4 +56,5 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | OR-01C | Settlement Closure and Product Readiness Recovery | PRODUCTION_CERTIFIED | Settlement Closure is healthy; older result-recovery debt remains visible as non-blocking warning when current rows are clean. |
 | OR-01D | GitHub Scheduled Trigger Recovery | EXTERNAL_WAIT | Automatic scheduled run `31015257795` occurred, but subsequent expected ticks did not arrive. |
 | OR-01E | Adaptive Planner Behavioral Audit | CERTIFIED | `MIXED_SCHEDULER_AND_PLANNER_DEFECT`: planner selects one global action per `runAdaptiveRefresh`; route chains only `sync_results`/`settle`; market refresh requires another scheduler tick. |
+| OR-01F | Bounded Planner Continuity | ACTIVE | Adds `planner_continuity_v1`: max 3 actions, max 1 provider action, repeated-action guard, planner recomputation, and safe internal `settle` continuation only. |
 | Production Pilot Week | Real-world validation before Multi-Sport Expansion | NOT_READY | Requires stable OR-01D cadence and MC-08H Production Ready YES. |

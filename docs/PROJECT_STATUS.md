@@ -1768,3 +1768,9 @@ OR-01D observed automatic GitHub scheduled run `31015257795`, but sustained sche
 OR-01E is certified as `MIXED_SCHEDULER_AND_PLANNER_DEFECT`. The audit found that `runAdaptiveRefresh` selects one global action from the adaptive status snapshot and the protected `/api/cron/operating-day` route only chains additional work after `sync_results` or `settle`; market refresh actions such as `midday_refresh` stop after one action and require another external scheduler tick. This policy is bounded and intentional, but it is incompatible with the observed 1-3 hour GitHub scheduled-delivery gaps.
 
 The phase adds protected read-only `/api/operations/planner-trace` evidence and certification docs. It does not change scheduler cadence, provider budgets, provider contracts, prediction formulas, recommendation policies, Official Pick policy, settlement rules, learning rules or model behavior. Production Pilot Week remains NOT_READY, MC-08H remains BLOCKED and MC-03 remains NOT_STARTED.
+
+## 2026-08-05 OR-01F Bounded Planner Continuity
+
+OR-01F implements `planner_continuity_v1` in the protected operating-day writer. One invocation remains bounded to 3 actions, may execute at most 1 provider-backed action, recomputes planner state after material work, and continues only to safe internal `settle` closure when immediately due. Second provider actions, repeated action identities, no material changes, failures, duration caps and mutation caps stop the chain with explicit reasons.
+
+Scheduler cadence, GitHub workflows, provider budgets, provider contracts, prediction formulas, recommendation gates, Official Pick policy, settlement math, learning math, Current Era and Replay remain unchanged. Production Pilot Week remains NOT_READY, MC-08H remains BLOCKED and MC-03 remains NOT_STARTED pending production proof and the remaining scheduler architecture decision.

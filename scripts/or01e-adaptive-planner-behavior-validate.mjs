@@ -37,8 +37,8 @@ for (const action of requiredActions) {
 }
 
 check('selection function remains explicit', service.includes('function executableActionFromStatus') && service.includes('priorityOrder'))
-check('route loop max remains three', cronRoute.includes('step < 3'))
-check('route continuation explicitly limited to sync_results and settle', cronRoute.includes("['sync_results', 'settle'].includes(selectedAction)"))
+check('route loop max remains three', cronRoute.includes('step < 3') || (cronRoute.includes('maxActionsPerInvocation: 3') && cronRoute.includes('step < PLANNER_CONTINUITY_POLICY.maxActionsPerInvocation')))
+check('route continuation remains bounded to certified actions', cronRoute.includes("['sync_results', 'settle'].includes(selectedAction)") || (cronRoute.includes("safeInternalContinuationActions: ['settle']") && cronRoute.includes('SECOND_PROVIDER_ACTION_REQUIRED')))
 check('market refresh does not become unbounded continuation', service.includes('marketRefreshContinuationEligible: false'))
 check('bounded continuation option has hard caps', service.includes('maxProviderActionsPerInvocation: 1') && service.includes('maxRepeatedSameAction: 0'))
 check('starvation scenarios are modeled', service.includes('ADAPTIVE_PLANNER_STARVATION_SCENARIOS') && service.includes('historical recovery debt plus active stale slate'))

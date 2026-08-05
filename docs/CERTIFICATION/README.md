@@ -121,3 +121,5 @@ Move certification docs here only when links are updated and validation passes.
 - [OR-01C Settlement Closure and Product Readiness JSON](or-01c-settlement-closure-product-readiness.json)
 - [OR-01E Adaptive Planner Behavioral Audit](OR_01E_ADAPTIVE_PLANNER_BEHAVIOR.md)
 - [OR-01E Adaptive Planner Behavioral Audit JSON](or-01e-adaptive-planner-behavior.json)
+- [OR-01F Bounded Planner Continuity](OR_01F_BOUNDED_PLANNER_CONTINUITY.md)
+- [OR-01F Bounded Planner Continuity JSON](or-01f-bounded-planner-continuity.json)

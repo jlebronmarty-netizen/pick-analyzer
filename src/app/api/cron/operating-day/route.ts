@@ -108,29 +108,159 @@ function schedulerOwner(request: NextRequest, dryRun: boolean) {
   }
 }
 
+const PLANNER_CONTINUITY_POLICY = {
+  version: 'planner_continuity_v1',
+  maxActionsPerInvocation: 3,
+  maxProviderActionsPerInvocation: 1,
+  maxRepeatedSameAction: 1,
+  maxDurationMs: 5 * 60 * 1000,
+  maxMutationsPerInvocation: 500,
+  safeInternalContinuationActions: ['settle'],
+  providerActions: ['status_refresh', 'morning_sync', 'midday_refresh', 'final_refresh', 'sync_results'],
+  stopReasons: [
+    'DRY_RUN_PLAN_ONLY',
+    'ACTION_FAILED',
+    'NO_MATERIAL_CHANGE',
+    'NO_NEXT_ACTION',
+    'SECOND_PROVIDER_ACTION_REQUIRED',
+    'UNSAFE_INTERNAL_CONTINUATION',
+    'REPEATED_ACTION_GUARD',
+    'MUTATION_CAP_REACHED',
+    'DURATION_CAP_REACHED',
+    'MAX_ACTIONS_REACHED',
+  ],
+}
+
+function isProviderPlannerAction(action: string | null) {
+  return Boolean(action && PLANNER_CONTINUITY_POLICY.providerActions.includes(action))
+}
+
+function isSafeInternalContinuationAction(action: string | null) {
+  return Boolean(action && PLANNER_CONTINUITY_POLICY.safeInternalContinuationActions.includes(action))
+}
+
+function actionIdentity(action: string | null, selectedDate: unknown) {
+  return `${action ?? 'none'}:${String(selectedDate ?? 'unknown')}:baseball_mlb`
+}
+
+function stateChangeForAction(record: Record<string, unknown>) {
+  const status = String(record.status ?? '')
+  const action = typeof record.selectedAction === 'string' ? record.selectedAction : null
+  const mutations = Number(record.remoteMutationsMade ?? 0)
+  if (mutations <= 0 || ['NOT_DUE', 'SUCCESS_NO_CHANGE', 'SKIPPED'].includes(status)) return 'NO_MATERIAL_CHANGE'
+  if (isProviderPlannerAction(action)) return 'PRODUCT_DATA_CHANGED'
+  if (isSafeInternalContinuationAction(action)) return 'INTERNAL_STATE_CHANGED'
+  return 'UNKNOWN'
+}
+
 async function runPostgameContinuity(dryRun: boolean, source: string) {
   const { runAdaptiveRefresh } = await import('@/services/adaptive-refresh-orchestrator.service')
   const steps = []
+  const actionTrace = []
+  const startedAt = Date.now()
+  const actionIdentities = new Set<string>()
   let totalProviderCalls = 0
   let totalWrites = 0
   let settlementObserved = false
   let schedulerHeartbeat: Record<string, unknown> | null = null
+  let providerActionsCompleted = 0
+  let plannerRecomputations = 0
+  let stopReason = 'MAX_ACTIONS_REACHED'
+  let nextExternalAction: string | null = null
+  let repeatedActionGuardTriggered = false
 
-  for (let step = 0; step < 3; step += 1) {
+  for (let step = 0; step < PLANNER_CONTINUITY_POLICY.maxActionsPerInvocation; step += 1) {
     const adaptive = await runAdaptiveRefresh({ dryRun, source })
     const record = adaptive as Record<string, unknown>
     const selectedAction = String(record.selectedAction ?? '')
+    const selectedDate = record.selectedDate ?? null
+    const identity = actionIdentity(selectedAction || null, selectedDate)
+    const providerAction = isProviderPlannerAction(selectedAction)
+    const stateChange = stateChangeForAction(record)
     steps.push(adaptive)
     totalProviderCalls += Number(record.providerCallsMade ?? 0)
     totalWrites += Number(record.remoteMutationsMade ?? 0)
+    if (providerAction) providerActionsCompleted += 1
+    actionIdentities.add(identity)
     if (selectedAction === 'settle') settlementObserved = true
     const status = String(record.status ?? '')
-    const shouldContinue =
-      dryRun === false &&
-      adaptive.success === true &&
-      ['sync_results', 'settle'].includes(selectedAction) &&
-      !['NOT_DUE', 'SUCCESS_NO_CHANGE'].includes(status)
-    if (!shouldContinue) break
+    actionTrace.push({
+      step: step + 1,
+      action: selectedAction || null,
+      selectedDate,
+      actionIdentity: identity,
+      providerAction,
+      providerCallsMade: Number(record.providerCallsMade ?? 0),
+      remoteMutationsMade: Number(record.remoteMutationsMade ?? 0),
+      stateChange,
+      status,
+      success: adaptive.success === true,
+      plannerRecomputedAfterAction: false,
+      stopReason: null as string | null,
+    })
+    const currentTrace = actionTrace[actionTrace.length - 1]
+    if (dryRun === true) {
+      stopReason = 'DRY_RUN_PLAN_ONLY'
+      currentTrace.stopReason = stopReason
+      break
+    }
+    if (adaptive.success !== true) {
+      stopReason = 'ACTION_FAILED'
+      currentTrace.stopReason = stopReason
+      break
+    }
+    if (Date.now() - startedAt >= PLANNER_CONTINUITY_POLICY.maxDurationMs) {
+      stopReason = 'DURATION_CAP_REACHED'
+      currentTrace.stopReason = stopReason
+      break
+    }
+    if (totalWrites >= PLANNER_CONTINUITY_POLICY.maxMutationsPerInvocation) {
+      stopReason = 'MUTATION_CAP_REACHED'
+      currentTrace.stopReason = stopReason
+      break
+    }
+    if (stateChange === 'NO_MATERIAL_CHANGE' || ['NOT_DUE', 'SUCCESS_NO_CHANGE'].includes(status)) {
+      stopReason = 'NO_MATERIAL_CHANGE'
+      currentTrace.stopReason = stopReason
+      break
+    }
+    const preview = await runAdaptiveRefresh({ dryRun: true, source: `${source}_CONTINUITY_PREVIEW` })
+    plannerRecomputations += 1
+    currentTrace.plannerRecomputedAfterAction = true
+    const previewRecord = preview as Record<string, unknown>
+    const nextAction = typeof previewRecord.selectedAction === 'string' ? previewRecord.selectedAction : null
+    const nextDate = previewRecord.selectedDate ?? selectedDate
+    const nextIdentity = actionIdentity(nextAction, nextDate)
+    if (!nextAction) {
+      stopReason = 'NO_NEXT_ACTION'
+      currentTrace.stopReason = stopReason
+      break
+    }
+    if (actionIdentities.has(nextIdentity)) {
+      stopReason = 'REPEATED_ACTION_GUARD'
+      repeatedActionGuardTriggered = true
+      nextExternalAction = nextAction
+      currentTrace.stopReason = stopReason
+      break
+    }
+    if (isProviderPlannerAction(nextAction)) {
+      stopReason = 'SECOND_PROVIDER_ACTION_REQUIRED'
+      nextExternalAction = nextAction
+      currentTrace.stopReason = stopReason
+      break
+    }
+    if (!isSafeInternalContinuationAction(nextAction)) {
+      stopReason = 'UNSAFE_INTERNAL_CONTINUATION'
+      nextExternalAction = nextAction
+      currentTrace.stopReason = stopReason
+      break
+    }
+    if (providerActionsCompleted > PLANNER_CONTINUITY_POLICY.maxProviderActionsPerInvocation) {
+      stopReason = 'SECOND_PROVIDER_ACTION_REQUIRED'
+      nextExternalAction = nextAction
+      currentTrace.stopReason = stopReason
+      break
+    }
   }
 
   let dailyUpdate: Record<string, unknown> | null = null
@@ -194,6 +324,29 @@ async function runPostgameContinuity(dryRun: boolean, source: string) {
     settlementObserved,
     schedulerHeartbeat,
     dailyUpdate,
+    continuityPolicy: PLANNER_CONTINUITY_POLICY,
+    actionChain: {
+      actionsAttempted: actionTrace.length,
+      actionsCompleted: actionTrace.filter((item) => item.success).length,
+      providerActionsCompleted,
+      actionSequence: actionTrace.map((item) => item.action).filter(Boolean),
+      reasonPerAction: actionTrace.map((item) => ({ action: item.action, status: item.status, stopReason: item.stopReason })),
+      stateChangePerAction: actionTrace.map((item) => ({ action: item.action, stateChange: item.stateChange })),
+      providerCallsPerAction: actionTrace.map((item) => ({ action: item.action, providerCallsMade: item.providerCallsMade })),
+      mutationsPerAction: actionTrace.map((item) => ({ action: item.action, remoteMutationsMade: item.remoteMutationsMade })),
+      plannerRecomputedAfterEachAction: actionTrace.map((item) => ({ action: item.action, plannerRecomputedAfterAction: item.plannerRecomputedAfterAction })),
+      plannerRecomputations,
+      stopReason,
+      nextExternalAction,
+      durationMs: Date.now() - startedAt,
+      capsReached: {
+        maxActions: actionTrace.length >= PLANNER_CONTINUITY_POLICY.maxActionsPerInvocation,
+        maxProviderActions: providerActionsCompleted >= PLANNER_CONTINUITY_POLICY.maxProviderActionsPerInvocation,
+        maxMutations: totalWrites >= PLANNER_CONTINUITY_POLICY.maxMutationsPerInvocation,
+        maxDuration: Date.now() - startedAt >= PLANNER_CONTINUITY_POLICY.maxDurationMs,
+      },
+      repeatedActionGuardTriggered,
+    },
     providerCallsMade: totalProviderCalls,
     remoteMutationsMade: totalWrites,
   }

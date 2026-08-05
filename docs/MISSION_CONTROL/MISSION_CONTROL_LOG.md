@@ -349,3 +349,13 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Read-only production checks passed for system version, homepage, settings, Performance, Today, Current Board, Most Likely, Best Value, Betting Workbench and Game Intelligence.
 - Rendered desktop/mobile/light/dark evidence showed MC-08F markers and no horizontal overflow.
 - Provider calls and remote mutations remained 0 where reported. MC-08G and MC-03 were not started.
+
+# 2026-08-05 OR-01F Bounded Planner Continuity
+
+- Status: ACTIVE pending production proof.
+- Added `planner_continuity_v1` to the protected operating-day writer.
+- The writer remains capped at 3 actions and now allows at most 1 provider-backed action per invocation.
+- After material work, the writer recomputes planner state with a read-only preview and continues only to safe internal `settle` work.
+- Second provider actions, repeated action identities, no material changes, failures, mutation caps and duration caps stop the chain explicitly.
+- Scheduler cadence, GitHub workflows, provider budgets, prediction formulas, Official Pick policy, settlement math, learning math, Current Era and Replay remain unchanged.
+- Production Pilot Week remains NOT READY. MC-08H remains blocked. MC-03 was not started.

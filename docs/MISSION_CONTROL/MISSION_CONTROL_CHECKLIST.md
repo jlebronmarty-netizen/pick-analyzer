@@ -74,6 +74,7 @@ Use this checklist before starting any queued mission.
 - OR-01C: `PRODUCTION_CERTIFIED`; settlement scope repair is deployed and older result-recovery debt is non-blocking.
 - OR-01D: automatic scheduled run `31015257795` was observed, but sustained cadence is blocked by missing subsequent ticks.
 - OR-01E: `MIXED_SCHEDULER_AND_PLANNER_DEFECT`; `/api/operations/planner-trace` documents the planner/route policy, and Production Pilot Week remains NOT READY.
+- OR-01F: `ACTIVE`; bounded planner-continuity repair limits each invocation to one provider action and safe internal closure continuation only.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.
@@ -125,5 +126,17 @@ Use this checklist before starting any queued mission.
 - [x] Starvation scenarios classified.
 - [x] Protected read-only planner trace route added.
 - [x] Scheduler cadence, provider budgets, prediction, settlement and learning behavior unchanged.
+- [x] Production Pilot Week remains NOT READY.
+- [x] MC-03 was not started.
+
+## OR-01F Bounded Planner Continuity
+
+- [x] `planner_continuity_v1` policy added.
+- [x] Max actions remain 3.
+- [x] Max provider actions per invocation is 1.
+- [x] Repeated action guard added.
+- [x] Planner recomputation after material action added.
+- [x] Safe internal continuation limited to `settle`.
+- [x] Scheduler cadence, provider budgets, prediction, settlement and learning math unchanged.
 - [x] Production Pilot Week remains NOT READY.
 - [x] MC-03 was not started.

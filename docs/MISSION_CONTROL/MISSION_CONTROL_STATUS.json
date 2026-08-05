@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "OR_01E_MIXED_SCHEDULER_AND_PLANNER_DEFECT",
+  "status": "OR_01F_BOUNDED_PLANNER_CONTINUITY_ACTIVE",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -287,6 +287,39 @@
     "mc08h": "BLOCKED",
     "productionPilotWeek": "NOT_READY",
     "mc03": "NOT_STARTED"
+  },
+  "or01f": {
+    "status": "ACTIVE",
+    "title": "Bounded Planner Continuity",
+    "certificationArtifact": "docs/CERTIFICATION/or-01f-bounded-planner-continuity.json",
+    "architectureArtifact": "docs/ARCHITECTURE/BOUNDED_PLANNER_CONTINUITY_V1.md",
+    "operationalArtifact": "docs/OPERATIONAL_EXCELLENCE/OR_01F_BOUNDED_PLANNER_CONTINUITY.md",
+    "continuityPolicy": "planner_continuity_v1",
+    "maxActionsPerInvocation": 3,
+    "maxProviderActionsPerInvocation": 1,
+    "maxRepeatedSameAction": 1,
+    "maxDurationMs": 300000,
+    "maxMutationsPerInvocation": 500,
+    "safeInternalContinuationActions": [
+      "settle"
+    ],
+    "providerActionsCanRepeat": false,
+    "plannerRecomputesAfterMaterialAction": true,
+    "marketRefreshMayContinueToInternalClosureOnly": true,
+    "secondProviderActionStopsChain": true,
+    "repeatedActionGuard": "REPEATED_ACTION_GUARD",
+    "schedulerCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "predictionChanged": false,
+    "settlementMathChanged": false,
+    "learningMathChanged": false,
+    "currentEraChanged": false,
+    "replayChanged": false,
+    "or01a": "BLOCKED",
+    "mc08h": "BLOCKED",
+    "productionPilotWeek": "NOT_READY",
+    "mc03": "NOT_STARTED",
+    "nextRecommendation": "OR-01G scheduler primary/fallback architecture decision if sustained cadence remains unhealthy"
   },
   "p1_3": {
     "status": "PRODUCTION_CERTIFIED",

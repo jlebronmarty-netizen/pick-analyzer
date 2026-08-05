@@ -3289,3 +3289,9 @@ One automatic GitHub scheduled execution was observed, but sustained cadence is 
 OR-01E is certified as `MIXED_SCHEDULER_AND_PLANNER_DEFECT`. Scheduler delivery remains irregular, and planner continuity is also constrained because the protected operating-day route only continues after `sync_results` or `settle`; market refresh actions stop after one action and wait for another external invocation. The new protected `/api/operations/planner-trace` contract exposes the action inventory, selection policy, route loop caps, recent invocation summaries, starvation warnings and simulations with zero provider calls and zero mutations.
 
 Production Pilot Week remains NOT_READY. MC-08H remains blocked. MC-03 remains not started. The next decision is a human architecture choice between scheduler delivery migration and a separately approved bounded planner-continuity repair.
+
+## OR-01F Bounded Planner Continuity
+
+OR-01F implements the approved bounded planner-continuity repair without migrating scheduler infrastructure. The protected operating-day writer now uses `planner_continuity_v1`: max 3 actions, max 1 provider-backed action, read-only planner recomputation after material work, repeated-action guard, duration/mutation caps and safe internal `settle` continuation only.
+
+This reduces dependence on repeated external scheduler ticks for internal closure, but sustained market freshness still depends on reliable scheduler delivery. Production Pilot Week remains NOT_READY, MC-08H remains blocked and MC-03 remains not started.
