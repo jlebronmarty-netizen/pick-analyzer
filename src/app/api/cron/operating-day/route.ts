@@ -145,6 +145,7 @@ async function runPostgameContinuity(dryRun: boolean, source: string) {
     steps.every((step) => step.success) &&
     (
       dryRun === true ||
+      dryRun === false ||
       totalWrites === 0 ||
       ['NOT_DUE', 'SUCCESS_NO_CHANGE'].includes(String(last.status ?? ''))
     )
@@ -168,7 +169,9 @@ async function runPostgameContinuity(dryRun: boolean, source: string) {
       metadata: {
         heartbeatReason: dryRun === true
           ? 'successful_protected_dry_run_observation'
-          : 'successful_protected_writer_no_product_mutation_observation',
+          : totalWrites > 0
+            ? 'successful_protected_writer_product_mutation_observation'
+            : 'successful_protected_writer_no_product_mutation_observation',
         heartbeatUpdatesHealthMarker: true,
         appInvocationId: String(lastStep.executionRunId ?? ''),
         protectedInvocationRecorded: true,

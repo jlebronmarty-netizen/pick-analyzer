@@ -7,6 +7,7 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8')
 
 const operationsHealth = read('src/services/operations-health.service.ts')
 const adaptive = read('src/services/adaptive-refresh-orchestrator.service.ts')
+const cronRoute = read('src/app/api/cron/operating-day/route.ts')
 const currentBoard = read('src/services/current-board.service.ts')
 const productFreshness = read('src/services/product-freshness-sla.service.ts')
 const status = read('docs/MISSION_CONTROL/MISSION_CONTROL_STATUS.json')
@@ -18,6 +19,7 @@ const changed = execFileSync('git', ['diff', '--name-only', 'HEAD'], { cwd: ROOT
 const allowed = new Set([
   'src/services/operations-health.service.ts',
   'src/services/adaptive-refresh-orchestrator.service.ts',
+  'src/app/api/cron/operating-day/route.ts',
   'scripts/or01c-settlement-closure-product-readiness-validate.mjs',
   'docs/CERTIFICATION/OR_01C_SETTLEMENT_CLOSURE_PRODUCT_READINESS.md',
   'docs/CERTIFICATION/or-01c-settlement-closure-product-readiness.json',
@@ -47,6 +49,7 @@ check('Current Era and Legacy are not mixed by settlement readiness critical pat
 check('Replay is excluded by existing settlement guarantee and Current Board scope', true)
 check('settlement guarantee and health differences are explained', operationsHealth.includes('historical result recovery debt remains visible'))
 check('health cache is current dynamic route evidence', operationsHealth.includes('generatedAt = new Date().toISOString()'))
+check('successful protected writer updates scheduler health evidence', cronRoute.includes('successful_protected_writer_product_mutation_observation') && cronRoute.includes('dryRun === false'))
 check('no threshold was weakened', !operationsHealth.includes('ready >= 0') && !adaptive.includes('settlementReadyRows ?? -1'))
 check('no settlement rule changed', !operationsHealth.includes('classifyCanonicalSettlementState') && !adaptive.includes('classifyCanonicalSettlementState'))
 check('no fabricated result or settlement', !operationsHealth.includes('insert(') && !adaptive.includes("from('game_results').insert"))
