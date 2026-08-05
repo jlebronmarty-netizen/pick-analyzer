@@ -2,6 +2,10 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-05 OR-01A Post-Repair Operational Proof
+
+- OR-01A is `EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF`. Production serves `21f8d135f665fcf39cf2db6d64462ca9251d348e`, and public GitHub metadata shows scheduled writer runs `30961154690` and `30965570325` completed successfully on that commit. GitHub run logs were HTTP 403 from this environment, while production Operations Health still reports scheduler execution `CRITICAL`, missed intervals 18 and application-side last successful protected invocation `2026-08-04T23:35:22.311+00:00`. Current Board is empty and the active market window has passed, so no manual `midday_refresh` was forced. MC-08H was not rerun; Production Pilot Week remains NOT_READY; MC-03 was not started.
+
 ## 2026-08-04 OR-01 Operational Readiness Recovery
 
 - OR-01 repository recovery is complete but production readiness is not certified yet. Production evidence showed scheduler cadence CRITICAL, market freshness CRITICAL, settlement closure CRITICAL and product readiness CRITICAL. The proven repository defect was adaptive scheduler-action starvation: older missing-result recovery could keep active market acquisition from being selected when both were due. The repair allows active market refresh to preempt older missing-result recovery only when no settlement-ready rows exist. Settlement eligibility, prediction logic, Official Pick policy, provider contracts, scheduler cadence, learning and model behavior were unchanged. Production Pilot Week remains NOT_READY until post-deploy writer evidence recovers Operations Health and MC-08H is rerun.

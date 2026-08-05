@@ -1,0 +1,75 @@
+{
+  "id": "or_01a_post_repair_operational_proof",
+  "date": "2026-08-05",
+  "startingCommit": "21f8d135f665fcf39cf2db6d64462ca9251d348e",
+  "productionCommit": "21f8d135f665fcf39cf2db6d64462ca9251d348e",
+  "classification": "OR_01A_EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF",
+  "or01RuntimeLive": true,
+  "manualProtectedWriterExecutions": 0,
+  "githubActions": {
+    "publicMetadataAvailable": true,
+    "logsAvailable": false,
+    "logsLimitation": "GitHub run logs returned HTTP 403 from this environment.",
+    "postRepairRuns": [
+      {
+        "runId": 30961154690,
+        "trigger": "schedule",
+        "commit": "21f8d135f665fcf39cf2db6d64462ca9251d348e",
+        "startedAt": "2026-08-04T23:47:12Z",
+        "updatedAt": "2026-08-04T23:47:33Z",
+        "conclusion": "success"
+      },
+      {
+        "runId": 30965570325,
+        "trigger": "schedule",
+        "commit": "21f8d135f665fcf39cf2db6d64462ca9251d348e",
+        "startedAt": "2026-08-05T01:09:51Z",
+        "updatedAt": "2026-08-05T01:10:09Z",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "before": {
+    "adaptiveStatus": "SUCCESS",
+    "nextAction": "sync_results",
+    "activeMarketRefreshPreemptsHistoricalResultRecovery": false,
+    "currentBoardCandidates": 0,
+    "latestOddsTimestamp": null,
+    "marketFreshness": "empty",
+    "schedulerStatus": "CRITICAL",
+    "missedSchedulerIntervals": 18,
+    "lastSuccessfulProtectedInvocationAt": "2026-08-04T23:35:22.311+00:00",
+    "operationalHealth": "CRITICAL",
+    "productReadiness": "CRITICAL"
+  },
+  "after": {
+    "marketFreshness": "UNKNOWN",
+    "operationalHealth": "CRITICAL",
+    "productReadiness": "CRITICAL",
+    "schedulerExecution": "CRITICAL",
+    "providerBudget": "HEALTHY",
+    "settlementClosure": "CRITICAL"
+  },
+  "settlement": {
+    "checkedPredictions": 148,
+    "completedPredictionRows": 97,
+    "settledRows": 97,
+    "readyRows": 0,
+    "blockedRows": 0,
+    "silentPendingRows": 0,
+    "olderMissingResultRows": 9,
+    "currentDayImpactOfOlderBacklog": "VISIBLE_RECOVERY_BACKLOG_NOT_CLEARED_DO_NOT_HIDE"
+  },
+  "mc08h": {
+    "rerun": false,
+    "reason": "OR-01A did not pass Market Freshness, Scheduler Execution, Operational Health or Product Readiness gates."
+  },
+  "productionPilotWeek": "NOT_READY",
+  "mc03": "NOT_STARTED",
+  "providerCallsMadeByCertificationReads": 0,
+  "remoteMutationsMadeByCertificationReads": 0,
+  "predictionWrites": 0,
+  "resultWrites": 0,
+  "settlementWrites": 0,
+  "learningWrites": 0
+}

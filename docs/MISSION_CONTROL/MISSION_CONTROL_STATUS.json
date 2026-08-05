@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "OR_01_REPOSITORY_RECOVERY_DEPLOYMENT_REQUIRED",
+  "status": "OR_01A_EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -121,6 +121,38 @@
     "learningWrites": 0,
     "productionPilotWeek": "NOT_READY",
     "mc03": "PLANNED_MANUAL_ONLY_NOT_STARTED"
+  },
+  "or01a": {
+    "status": "EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF",
+    "title": "Post-Repair Operational Proof",
+    "certificationArtifact": "docs/CERTIFICATION/or-01a-post-repair-operational-proof.json",
+    "or01RuntimeLive": true,
+    "productionProof": "INCOMPLETE",
+    "manualProtectedWriterExecutions": 0,
+    "postRepairWorkflowEvidence": [
+      {
+        "runId": 30961154690,
+        "trigger": "schedule",
+        "commit": "21f8d135f665fcf39cf2db6d64462ca9251d348e",
+        "conclusion": "success"
+      },
+      {
+        "runId": 30965570325,
+        "trigger": "schedule",
+        "commit": "21f8d135f665fcf39cf2db6d64462ca9251d348e",
+        "conclusion": "success"
+      }
+    ],
+    "githubLogsAvailable": false,
+    "applicationLedgerLastSuccessfulProtectedInvocationAt": "2026-08-04T23:35:22.311+00:00",
+    "schedulerExecution": "CRITICAL",
+    "marketFreshness": "UNKNOWN",
+    "operationalHealth": "CRITICAL",
+    "productReadiness": "CRITICAL",
+    "productionReady": false,
+    "mc08hRerun": false,
+    "productionPilotWeek": "NOT_READY",
+    "mc03": "NOT_STARTED"
   },
   "p1_3": {
     "status": "PRODUCTION_CERTIFIED",

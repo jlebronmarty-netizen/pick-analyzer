@@ -2,6 +2,26 @@
 
 This log is append-only. Add entries at mission boundaries only.
 
+## 2026-08-05 - OR-01A Post-Repair Operational Proof
+
+Starting commit: `21f8d135f665fcf39cf2db6d64462ca9251d348e`.
+
+OR-01A observed the deployed OR-01 repair and did not make runtime changes.
+
+Evidence:
+
+- production `/api/system/version` served `21f8d135f665fcf39cf2db6d64462ca9251d348e`;
+- public GitHub Actions metadata showed scheduled writer runs `30961154690` and `30965570325` completed successfully on `21f8d135f665fcf39cf2db6d64462ca9251d348e`;
+- GitHub run logs returned HTTP 403 from this environment;
+- application-side Operations Health still reported scheduler execution `CRITICAL`, missed intervals 18 and last successful protected invocation `2026-08-04T23:35:22.311+00:00`;
+- Current Board was empty with 0 candidates and no latest odds timestamp;
+- event refresh planning reported 15 `STOP_PREGAME_REFRESH` actions and 0 market-refresh-enabled events;
+- settlement guarantee remained read-safe with ready rows 0, blocked rows 0 and silent pending rows 0 while the older 9-row missing-result backlog stayed visible.
+
+No manual protected writer execution was performed because the canonical current action was `sync_results`, not active-market refresh, and the active market window had passed.
+
+OR-01A classification: `EXTERNAL_WAIT_CADENCE_AND_NEXT_MARKET_WINDOW_PROOF`. MC-08H was not rerun. Production Pilot Week remains NOT_READY. MC-03 was not started.
+
 ## 2026-08-02 - MC-00 Mission Control Foundation
 
 Baseline: `ddc79d7b4a5efa5068ff1e63bb68d95d84100e67`.

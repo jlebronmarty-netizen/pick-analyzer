@@ -111,3 +111,5 @@ Move certification docs here only when links are updated and validation passes.
 - [MC-08H Production Readiness Certification JSON](mc-08h-production-readiness-certification.json)
 - [OR-01 Operational Readiness Recovery](OR_01_OPERATIONAL_READINESS_RECOVERY.md)
 - [OR-01 Operational Readiness Recovery JSON](or-01-operational-readiness-recovery.json)
+- [OR-01A Post-Repair Operational Proof](OR_01A_POST_REPAIR_OPERATIONAL_PROOF.md)
+- [OR-01A Post-Repair Operational Proof JSON](or-01a-post-repair-operational-proof.json)
