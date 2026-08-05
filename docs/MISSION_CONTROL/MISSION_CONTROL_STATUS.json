@@ -1,6 +1,6 @@
 {
   "program": "pick_analyzer_v2_mission_control_v1",
-  "status": "OR_01B_CERTIFIED_OR01A_BLOCKED_BY_SETTLEMENT_CLOSURE",
+  "status": "OR_01C_SETTLEMENT_SCOPE_REPAIR_DEPLOYMENT_REQUIRED",
   "baselineCommit": "ddc79d7b4a5efa5068ff1e63bb68d95d84100e67",
   "documentationVersion": "mission_control_v1",
   "currentMission": {
@@ -9,7 +9,7 @@
     "state": "BLOCKED",
     "priority": "P2",
     "mode": "READ_ONLY",
-    "readiness": "PRODUCTION_READINESS_BLOCKED_OR01A_SETTLEMENT_CLOSURE_CRITICAL"
+    "readiness": "PRODUCTION_READINESS_BLOCKED_OR01C_DEPLOYMENT_REQUIRED"
   },
   "nextMission": {
     "id": "MC-08",
@@ -17,7 +17,7 @@
     "state": "ACTIVE",
     "priority": "P2",
     "mode": "AGENT_ASSISTED",
-    "readiness": "NO_NEXT_MISSION_UNTIL_OR01A_AND_MC08H_PASS"
+    "readiness": "NO_NEXT_MISSION_UNTIL_OR01C_OR01A_AND_MC08H_PASS"
   },
   "missionCounts": {
     "total": 11,
@@ -197,6 +197,35 @@
       "providerCallsMade": 0,
       "databaseWrites": 1
     },
+    "productionPilotWeek": "NOT_READY",
+    "mc03": "NOT_STARTED"
+  },
+  "or01c": {
+    "status": "SETTLEMENT_SCOPE_REPAIR_DEPLOYMENT_REQUIRED",
+    "title": "Settlement Closure and Product Readiness Recovery",
+    "certificationArtifact": "docs/CERTIFICATION/or-01c-settlement-closure-product-readiness.json",
+    "rootCause": "SETTLEMENT_SCOPE_AGGREGATION_DEFECT",
+    "settlementClosureBefore": "CRITICAL",
+    "productReadinessBefore": "CRITICAL",
+    "currentEraCanonicalPredictions": 48,
+    "currentEraSettled": 0,
+    "currentEraValidPending": 48,
+    "currentEraBlocked": 0,
+    "readyForSettlement": 0,
+    "silentPending": 0,
+    "olderMissingResultRows": 59,
+    "olderBacklogClassification": "HISTORICAL_RECOVERY_DEBT_VISIBLE_NON_BLOCKING",
+    "productFreshnessSlaFinding": "EXPECTED_SCOPE_DIFFERENCE",
+    "protectedWriterRun": "NOT_RUN_BY_OR_01C",
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "productionProof": "PENDING",
+    "or01a": "BLOCKED_PENDING_OR01C_DEPLOYMENT",
+    "mc08hRerun": false,
     "productionPilotWeek": "NOT_READY",
     "mc03": "NOT_STARTED"
   },

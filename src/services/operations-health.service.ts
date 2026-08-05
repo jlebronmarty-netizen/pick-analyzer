@@ -401,19 +401,21 @@ function settlementDomain(input: {
   const awaitingResults = Number(settlementBacklog?.awaitingResultRows ?? 0)
   const status: CanonicalHealthStatus = input.backlogError
     ? 'UNKNOWN'
-    : ready > 0 || missingResults > 0
+    : ready > 0
       ? 'CRITICAL'
       : 'HEALTHY'
   return {
     status,
     summary:
       status === 'HEALTHY'
-        ? 'Settlement closure has no ready or missing-result backlog in the adaptive evidence.'
-        : 'Settlement closure requires action from result import or settlement readiness evidence.',
+        ? missingResults > 0
+          ? 'Settlement closure is clean for settlement-ready rows; historical result recovery debt remains visible as a non-blocking warning.'
+          : 'Settlement closure has no ready backlog in the adaptive evidence.'
+        : 'Settlement closure requires action from settlement readiness evidence.',
     reasonCodes: [
       status === 'HEALTHY' ? 'SETTLEMENT_CLOSED' : null,
       ready > 0 ? 'SETTLEMENT_READY_ROWS_REMAIN' : null,
-      missingResults > 0 ? 'MISSING_RESULT_ROWS_REMAIN' : null,
+      missingResults > 0 ? 'HISTORICAL_RESULT_RECOVERY_DEBT_VISIBLE' : null,
       input.backlogError ? 'SETTLEMENT_BACKLOG_READ_FAILED' : null,
     ].filter(Boolean) as string[],
     observedAt: input.observedAt,
@@ -426,13 +428,18 @@ function settlementDomain(input: {
       checkedRows: settlementBacklog?.checkedRows ?? 0,
       settlementReadyRows: ready,
       completedMissingResultRows: missingResults,
+      historicalRecoveryDebtRows: missingResults,
+      historicalRecoveryDebtBlocksProductReadiness: false,
       awaitingResultRows: awaitingResults,
       pendingPredictions: input.pendingPredictions,
       validationStatus: input.backlogError ? 'UNKNOWN' : 'READ_OK',
       independenceRule: 'Settlement closure can be healthy while market odds are stale.',
     },
-    blockers: ready > 0 || missingResults > 0 ? ['settlement_closure_action_required'] : [],
-    warnings: awaitingResults > 0 ? ['results_awaiting_final_state'] : [],
+    blockers: ready > 0 ? ['settlement_closure_action_required'] : [],
+    warnings: [
+      awaitingResults > 0 ? 'results_awaiting_final_state' : null,
+      missingResults > 0 ? 'historical_result_recovery_debt_visible' : null,
+    ].filter(Boolean) as string[],
     nextExpectedAction: missingResults > 0 ? 'sync_results' : ready > 0 ? 'settle' : null,
     humanInterventionRequired: Boolean(input.backlogError),
   }

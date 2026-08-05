@@ -2,7 +2,7 @@
 
 Status: deterministic V2 queue.
 
-MC-08 remains ACTIVE because the final production-readiness audit is blocked by live operations. OR-01B workflow/app-ledger reconciliation is certified, but OR-01A remains blocked by settlement closure and Product Readiness CRITICAL evidence. Gated future missions such as MC-03 remain PLANNED and inactive.
+MC-08 remains ACTIVE because the final production-readiness audit is blocked by live operations. OR-01C has a bounded settlement scope repair pending deployment; OR-01A and MC-08H remain blocked until production proves Settlement Closure and Product Readiness are healthy. Gated future missions such as MC-03 remain PLANNED and inactive.
 
 | ID | Mission | Category | Priority | State | Mode | Next Action |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -18,7 +18,7 @@ MC-08 remains ACTIVE because the final production-readiness audit is blocked by 
 | MC-09 | Autonomous Operations | AUTOMATION | P2 | PLANNED | EXTERNAL_WAIT | Observe scheduler and provider evidence. |
 | MC-10 | Final Certification | CERTIFICATION | P4 | PLANNED | MANUAL_ONLY | Certify after prior missions close. |
 
-Next eligible mission: none. OR-01A requires settlement closure and Product Readiness recovery before MC-08H can be rerun. Production Pilot Week is not ready. MC-03 remains planned/manual-only.
+Next eligible mission: none. OR-01C requires deployment and production proof before OR-01A can pass and MC-08H can be rerun. Production Pilot Week is not ready. MC-03 remains planned/manual-only.
 
 MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 
@@ -53,4 +53,5 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | OR-01 | Operational Readiness Recovery | REPOSITORY_RECOVERY_DEPLOYMENT_REQUIRED | Active market refresh now preempts older missing-result recovery when no settlement-ready rows exist; production writer proof is required. |
 | OR-01A | Post-Repair Operational Proof | BLOCKED | Scheduler/ledger reconciliation is proven, but settlement closure and Product Readiness remain CRITICAL. |
 | OR-01B | Scheduler Workflow Ledger Reconciliation | CERTIFIED | Workflow success now maps to durable protected heartbeat evidence; scheduled run `31003990142` persisted invocation `cf420831-ad95-4943-83a7-326d9fdad5d7`. |
+| OR-01C | Settlement Closure and Product Readiness Recovery | REPAIR_DEPLOYMENT_REQUIRED | Settlement-ready rows remain blocking; older result-recovery debt remains visible as non-blocking warning when current rows are clean. |
 | Production Pilot Week | Real-world validation before Multi-Sport Expansion | NOT_READY | Requires MC-08H Production Ready YES. |

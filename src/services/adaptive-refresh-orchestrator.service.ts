@@ -1223,15 +1223,19 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       },
     },
     settlementClosure: {
-      status: Number(settlementBacklog?.settlementReadyRows ?? 0) > 0 || Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 ? 'CRITICAL' : 'HEALTHY',
-      summary: 'Settlement closure is evaluated from ready rows and missing-result rows, independent of market freshness.',
+      status: Number(settlementBacklog?.settlementReadyRows ?? 0) > 0 ? 'CRITICAL' : 'HEALTHY',
+      summary: Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0
+        ? 'Settlement closure is clean for ready rows; historical result recovery debt remains visible separately.'
+        : 'Settlement closure is evaluated from ready rows, independent of market freshness.',
       reasonCodes: [
         Number(settlementBacklog?.settlementReadyRows ?? 0) > 0 ? 'SETTLEMENT_READY_ROWS_REMAIN' : 'SETTLEMENT_CLOSED',
-        Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 ? 'MISSING_RESULT_ROWS_REMAIN' : null,
+        Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 ? 'HISTORICAL_RESULT_RECOVERY_DEBT_VISIBLE' : null,
       ].filter(Boolean),
       evidence: {
         settlementReadyRows: Number(settlementBacklog?.settlementReadyRows ?? 0),
         completedMissingResultRows: Number(settlementBacklog?.completedMissingResultRows ?? 0),
+        historicalRecoveryDebtRows: Number(settlementBacklog?.completedMissingResultRows ?? 0),
+        historicalRecoveryDebtBlocksProductReadiness: false,
         settlementFreshnessStatus: settlementFreshness?.status ?? 'UNKNOWN',
       },
     },

@@ -31,6 +31,16 @@ The proof exposed a final reconciliation gap: the live heartbeat row used status
 
 Classification: `WORKFLOW_LEDGER_RECONCILIATION_CERTIFIED`.
 
+## 2026-08-05 - OR-01C Settlement Closure and Product Readiness Recovery
+
+OR-01C traced the remaining CRITICAL operational status after OR-01B. Production showed Scheduler Execution HEALTHY, Market Freshness HEALTHY and Provider Budget HEALTHY, but Settlement Closure and Product Readiness remained CRITICAL.
+
+Read-only reconciliation found zero settlement-ready rows, zero silent pending rows and no completed Current Era rows missing canonical results. The blocking count came from older prior-date result-recovery debt that must remain visible but should not force current settlement closure CRITICAL when no row is ready for settlement.
+
+Repair: settlement-ready rows remain the CRITICAL condition; older missing-result recovery rows are preserved as visible non-blocking warnings. Product Freshness SLA versus Current Board freshness is classified as `EXPECTED_SCOPE_DIFFERENCE`.
+
+Classification: `SETTLEMENT_SCOPE_REPAIR_DEPLOYMENT_REQUIRED`.
+
 ## 2026-08-05 - OR-01A Post-Repair Operational Proof
 
 Starting commit: `21f8d135f665fcf39cf2db6d64462ca9251d348e`.

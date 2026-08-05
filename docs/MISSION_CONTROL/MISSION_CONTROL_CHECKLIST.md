@@ -71,6 +71,7 @@ Use this checklist before starting any queued mission.
 - OR-01: repository recovery complete for scheduler-action starvation; production writer proof is required before rerunning MC-08H.
 - OR-01A: post-repair proof remains blocked because settlement closure and Product Readiness are CRITICAL; MC-08H was not rerun.
 - OR-01B: workflow/app-ledger reconciliation is certified by scheduled run `31003990142` and durable heartbeat invocation `cf420831-ad95-4943-83a7-326d9fdad5d7`.
+- OR-01C: settlement scope repair is pending deployment; older result-recovery debt must remain visible but must not overblock current Product Readiness when ready rows are zero.
 - P1.3: `PRODUCTION_CERTIFIED`; separates production evaluation from recommendation gates prospectively.
 - P1.4: `PRODUCTION_CERTIFIED`; post-P1.3 protected production execution persisted 24 production-evaluable MLB rows with production evaluation policy.
 - P2.0: `PRODUCTION_CERTIFIED`; Current V2 Production is active.

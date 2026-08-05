@@ -1,0 +1,43 @@
+{
+  "id": "or_01c_settlement_closure_product_readiness",
+  "date": "2026-08-05",
+  "startingCommit": "3b5de6c726df6745371a50c350b059ffb40c8e41",
+  "classification": "OR_01C_REPAIR_DEPLOYMENT_REQUIRED",
+  "rootCause": "SETTLEMENT_SCOPE_AGGREGATION_DEFECT",
+  "settlementClosureBefore": "CRITICAL",
+  "productReadinessBefore": "CRITICAL",
+  "currentEraCanonicalPredictions": 48,
+  "currentEraSettled": 0,
+  "currentEraValidPending": 48,
+  "currentEraBlocked": 0,
+  "readyForSettlement": 0,
+  "silentPending": 0,
+  "olderMissingResultRows": 59,
+  "olderBacklogClassification": "HISTORICAL_RECOVERY_DEBT_VISIBLE_NON_BLOCKING",
+  "currentDayImpact": "NONE_PROVEN_CURRENT_ROWS_ARE_VALID_FUTURE_PENDING",
+  "settlementGuaranteeStatus": "PASS",
+  "healthGuaranteeDifference": "Settlement Guarantee validates actionable current settlement rows, while Operations Health previously promoted older prior-date result-recovery debt to CRITICAL settlement closure.",
+  "canonicalNextAction": "sync_results_or_market_refresh_when_due",
+  "protectedWriterRun": "NOT_RUN_BY_OR_01C",
+  "productFreshnessSlaFinding": "EXPECTED_SCOPE_DIFFERENCE",
+  "currentBoardFreshness": {
+    "visibleMarketCount": 45,
+    "freshVisibleMarketCount": 45,
+    "staleVisibleMarketCount": 0,
+    "latestOddsTimestamp": "2026-08-05T12:01:33.181Z"
+  },
+  "repairs": [
+    "settlement_closure_ready_rows_only_critical",
+    "historical_result_recovery_debt_warning_separation",
+    "adaptive_settlement_health_scope_alignment",
+    "product_readiness_unblocked_when_current_settlement_clean"
+  ],
+  "providerCallsMadeByValidation": 0,
+  "remoteMutationsMadeByValidation": 0,
+  "predictionWrites": 0,
+  "resultWrites": 0,
+  "settlementWrites": 0,
+  "learningWrites": 0,
+  "deployment": "PENDING",
+  "productionProof": "PENDING"
+}
