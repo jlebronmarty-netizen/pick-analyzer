@@ -28,6 +28,10 @@ const allowed = new Set([
   'docs/MASTER_ROADMAP.md',
   'scripts/or02-primary-scheduler-migration-vercel-cron-validate.mjs',
   'scripts/mc08h-production-readiness-certify.mjs',
+  'scripts/production-pilot-pi-01-validate.mjs',
+  'scripts/production-pilot-day-01-validate.mjs',
+  'docs/PRODUCTION_PILOT/INCIDENT_PI_01_GITHUB_FALLBACK_TIMEOUT.md',
+  'docs/CERTIFICATION/production-pilot-pi-01.json',
 ])
 const disallowed = changed.filter((file) => !allowed.has(file))
 
@@ -35,8 +39,8 @@ check('Day 1 docs exist', exists('docs/PRODUCTION_PILOT/README.md') && exists('d
 check('Day 1 certification JSON exists', exists('docs/CERTIFICATION/production-pilot-day-01.json'))
 check('only Day 1 reporting/status files changed', disallowed.length === 0, disallowed.join(', '))
 check('Day 1 verdict is monitoring pass', cert.status === 'DAY_1_PASS_WITH_MONITORING')
-check('Production Pilot Week is active day 1', status.productionPilotWeek?.state === 'ACTIVE' && status.productionPilotWeek?.currentPilotDay === 1)
-check('days completed remains zero before Day 1 certification is deployed', status.productionPilotWeek?.daysCompleted === 0)
+check('Production Pilot Week is active and has reached at least day 1', status.productionPilotWeek?.state === 'ACTIVE' && status.productionPilotWeek?.currentPilotDay >= 1)
+check('Day 1 remains recorded as pass with monitoring', status.productionPilotWeek?.day1Status === 'DAY_1_PASS_WITH_MONITORING')
 check('MC-03 not started', cert.pilotWeek.mc03Started === false && status.productionPilotWeek?.mc03Started === false)
 check('scheduler and operations healthy', cert.operations.schedulerExecution === 'HEALTHY' && cert.operations.operationsHealth === 'HEALTHY' && cert.operations.missedIntervals === 0)
 check('market, provider, product and settlement healthy', cert.operations.marketFreshness === 'HEALTHY' && cert.operations.providerBudget === 'HEALTHY' && cert.operations.productReadiness === 'HEALTHY' && cert.operations.settlementClosure === 'HEALTHY')

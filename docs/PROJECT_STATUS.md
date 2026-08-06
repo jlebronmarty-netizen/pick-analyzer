@@ -1806,3 +1806,9 @@ PR-01 repaired only the Performance Header presentation mapping so Pipeline Read
 Production Pilot Week is ACTIVE on Day 1 with status `DAY_1_PASS_WITH_MONITORING`. Production evidence from commit `27e9e06e287841c1f593e56555fef47482b3c00e` showed a safe no-bet day: 15 MLB games on the operating day, 2 remaining pregame Current Board games, 6 covered candidates, 0 Official Picks, 0 recommendation-eligible rows and 0 actionable rows.
 
 Operations were healthy: Vercel primary scheduler healthy, missed intervals 0, Market Freshness/Product Readiness/Provider Budget/Operations Health all HEALTHY, and certification reads made 0 provider calls and 0 mutations. Prior-day closure was complete with 45 of 45 canonical predictions settled and 0 silent pending rows. MC-03 remains not started.
+
+## 2026-08-06 Production Pilot Incident PI-01
+
+PI-01 classified two abnormal GitHub fallback runs as pre-step workflow cancellations. Runs #236 and #237 failed after about 15 minutes, but GitHub jobs API returned no steps, so the fallback shell step, curl and Pick Analyzer protected endpoint did not run. No app-side provider calls, duplicate writes, predictions, results, settlements or learning mutations were caused by the incident.
+
+No runtime or workflow repair was made because repository/app timeouts did not execute and no app defect was proven. Day 2 ordinary pilot certification remains paused until PI-01 is accepted; Day 3 and MC-03 were not started.

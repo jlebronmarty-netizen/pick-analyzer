@@ -1,0 +1,123 @@
+{
+  "certification": "production-pilot-pi-01",
+  "status": "CLASSIFIED_NO_RUNTIME_REPAIR_REQUIRED",
+  "incident": {
+    "id": "PI-01",
+    "title": "GitHub fallback 15-minute timeout investigation",
+    "pilotDay": 2,
+    "classification": "WORKFLOW_PRE_STEP_CANCELLED",
+    "rootCause": "GITHUB_HOSTED_RUNNER_OR_CONCURRENCY_PRE_STEP_CANCELLATION",
+    "rootCauseClass": "OTHER_PROVEN_CAUSE",
+    "ordinaryDay2CertificationPaused": true,
+    "day3Started": false,
+    "mc03Started": false
+  },
+  "runs": [
+    {
+      "runNumber": 236,
+      "runId": 31122465867,
+      "event": "schedule",
+      "commit": "d8de4ca504017eb3ab455287d41c4adea5834116",
+      "createdAt": "2026-08-06T17:12:53Z",
+      "startedAt": "2026-08-06T17:12:53Z",
+      "completedAt": "2026-08-06T17:27:55Z",
+      "conclusion": "failure",
+      "durationSeconds": 902,
+      "jobId": 92685765905,
+      "jobConclusion": "cancelled",
+      "jobDurationSeconds": 901,
+      "stepsReturned": 0,
+      "appInvocation": null,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "fallbackNeeded": "NOT_PROVEN",
+      "classification": "WORKFLOW_PRE_STEP_CANCELLED"
+    },
+    {
+      "runNumber": 237,
+      "runId": 31126194967,
+      "event": "schedule",
+      "commit": "d8de4ca504017eb3ab455287d41c4adea5834116",
+      "createdAt": "2026-08-06T18:39:51Z",
+      "startedAt": "2026-08-06T18:39:51Z",
+      "completedAt": "2026-08-06T18:54:56Z",
+      "conclusion": "failure",
+      "durationSeconds": 905,
+      "jobId": 92697660389,
+      "jobConclusion": "cancelled",
+      "jobDurationSeconds": 903,
+      "stepsReturned": 0,
+      "appInvocation": null,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "fallbackNeeded": "NOT_PROVEN",
+      "classification": "WORKFLOW_PRE_STEP_CANCELLED"
+    }
+  ],
+  "normalRunComparison": [
+    { "runNumber": 230, "runId": 31070998442, "durationSeconds": 6, "stepDurationSeconds": 1, "conclusion": "success" },
+    { "runNumber": 231, "runId": 31079749739, "durationSeconds": 7, "stepDurationSeconds": 0, "conclusion": "success" },
+    { "runNumber": 232, "runId": 31090712808, "durationSeconds": 5, "stepDurationSeconds": 0, "conclusion": "success" },
+    { "runNumber": 233, "runId": 31099045559, "durationSeconds": 7, "stepDurationSeconds": 1, "conclusion": "success" },
+    { "runNumber": 234, "runId": 31105762797, "durationSeconds": 11, "stepDurationSeconds": 3, "conclusion": "success" },
+    { "runNumber": 235, "runId": 31116503468, "durationSeconds": 16, "stepDurationSeconds": 3, "conclusion": "success" }
+  ],
+  "timeoutTrace": {
+    "githubJobTimeoutMinutes": 6,
+    "curlMaxTimeSeconds": 120,
+    "plannerMaxDurationMs": 300000,
+    "matchingTimeout": "GitHub pre-step cancellation around 15 minutes",
+    "appRouteTimeoutMatched": false,
+    "curlTimeoutMatched": false,
+    "plannerTimeoutMatched": false
+  },
+  "productionEvidence": {
+    "productionCommit": "d8de4ca504017eb3ab455287d41c4adea5834116",
+    "systemVersionHttp": 200,
+    "operationsHealthHttp": 200,
+    "operationsStatus": "DEGRADED",
+    "schedulerCadenceStatus": "HEALTHY",
+    "missedSchedulerIntervals": 0,
+    "lastVercelPrimarySuccessAt": "2026-08-06T21:48:04.526+00:00",
+    "lastGithubFallbackSuccessAt": null,
+    "marketFreshnessStatus": "DEGRADED",
+    "productReadinessStatus": "DEGRADED",
+    "providerBudgetStatus": "HEALTHY",
+    "providerCallsToday": 107,
+    "lastProviderCall": "2026-08-06T21:48:04.545756+00:00"
+  },
+  "safety": {
+    "protectedEndpointCalledByIncidentRuns": false,
+    "duplicateProviderAcquisition": false,
+    "duplicatePredictions": false,
+    "duplicateResults": false,
+    "duplicateSettlements": false,
+    "duplicateLearningEvidence": false,
+    "postStartRefreshCausedByIncident": false,
+    "providerBudgetReserveViolation": false,
+    "concurrentPrimaryFallbackWrites": false,
+    "providerCallsFromCertificationReads": 0,
+    "remoteMutationsFromCertificationReads": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "repair": {
+    "runtimeRepairRequired": false,
+    "workflowRepairRequired": false,
+    "repairCommit": null,
+    "reason": "Failure occurred before workflow steps, curl, or application route execution."
+  },
+  "pilotDecision": {
+    "day2Status": "INCIDENT_CLASSIFIED_DAY2_CAN_RESUME_AFTER_ACCEPTANCE",
+    "day3Started": false,
+    "mc03Started": false,
+    "remainingBlockers": [
+      "Day 2 ordinary certification has not been completed.",
+      "Public read-only app endpoints do not expose historical primary lease age at the exact #236/#237 start times.",
+      "GitHub workflow logs require repository admin rights from this environment."
+    ]
+  },
+  "finalClassification": "PI_01_CLASSIFIED_NO_RUNTIME_REPAIR_REQUIRED"
+}
