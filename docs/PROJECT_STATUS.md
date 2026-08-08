@@ -1812,3 +1812,11 @@ Operations were healthy: Vercel primary scheduler healthy, missed intervals 0, M
 PI-01 classified two abnormal GitHub fallback runs as pre-step workflow cancellations. Runs #236 and #237 failed after about 15 minutes, but GitHub jobs API returned no steps, so the fallback shell step, curl and Pick Analyzer protected endpoint did not run. No app-side provider calls, duplicate writes, predictions, results, settlements or learning mutations were caused by the incident.
 
 No runtime or workflow repair was made because repository/app timeouts did not execute and no app defect was proven. Day 2 ordinary pilot certification remains paused until PI-01 is accepted; Day 3 and MC-03 were not started.
+
+## 2026-08-08 Production Pilot Incident PI-02
+
+PI-02 is certified as `PI_02_PASS_WITH_MONITORING`. Production evidence on `ff741bb9ee8748e3bd18c67f38070854656190fd` showed that current snapshot capture timestamps and provider/source market timestamps are distinct contracts. Snapshot evidence was current, but Product Freshness SLA used provider market evidence and correctly marked all 45 current candidates as `STALE` / `WAIT_FOR_REFRESH`.
+
+The latest Vercel primary acquisition made 1 SportsDataIO call, fetched 15 provider records, normalized 90 rows and inserted 90 snapshots. The provider source timestamp improved to `2026-08-08T14:07:23Z`, but still exceeded betting-actionability SLA by the observation time. No stale evidence became actionable and no Official Pick, Rent Play or Smart Parlay safety gate was bypassed.
+
+Prior-day Performance reconciled as 42 canonical predictions = 24 settled + 18 valid pending + 0 blocked. The remaining 18 belong to six late events still classified as `STARTED`/`scheduled` with no imported authoritative result; first missing step is result import. Silent pending remained 0. No runtime repair was made, Production Pilot Week remains ACTIVE with monitoring and MC-03 was not started.

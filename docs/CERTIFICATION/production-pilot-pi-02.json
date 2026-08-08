@@ -1,0 +1,130 @@
+{
+  "certification": "production_pilot_pi_02_market_freshness_lineage",
+  "status": "PI_02_PASS_WITH_MONITORING",
+  "observationTimeAst": "2026-08-08 14:08 AST",
+  "timezone": "America/Puerto_Rico",
+  "startingCommit": "ff741bb9ee8748e3bd18c67f38070854656190fd",
+  "runtimeCommit": null,
+  "certificationCommit": null,
+  "productionCommit": "ff741bb9ee8748e3bd18c67f38070854656190fd",
+  "productionPilotWeek": "ACTIVE",
+  "mc03Started": false,
+  "freshness": {
+    "rootCause": [
+      "EXPECTED_DUAL_FRESHNESS_CONTRACT",
+      "CAPTURE_TIME_VS_SOURCE_TIME",
+      "PRESENTATION_ONLY_LABEL_DEFECT"
+    ],
+    "exactMarket": {
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:79050",
+      "matchup": "HOU @ SD",
+      "market": "total",
+      "selection": "Under",
+      "line": 8,
+      "odds": -115,
+      "predictionId": "7478f70f-c09b-533f-a301-bca586ebe9b6",
+      "oddsSnapshotId": "baseball_mlb:mlb:sportsdataio:game_odds:79050:22:36145622:total:under:8:2026-08-08t14_07_23.000z",
+      "snapshotCaptureTimestamp": "2026-08-08T18:07:39.265Z",
+      "providerSourceTimestamp": "2026-08-08T14:07:23.000Z",
+      "sourceAgeMinutesAtObservation": 241,
+      "snapshotAgeMinutesAtObservation": 1,
+      "legacyFreshness": "FRESH",
+      "productFreshnessStatus": "STALE",
+      "productFreshnessActionability": "WAIT_FOR_REFRESH"
+    },
+    "currentBoard": {
+      "operatingDate": "2026-08-08",
+      "games": 15,
+      "candidates": 45,
+      "latestOddsTimestamp": "2026-08-08T18:07:39.265Z",
+      "latestOddsSourceTimestamp": "2026-08-08T14:07:23.000Z",
+      "productFreshnessByStatus": {
+        "FRESH": 0,
+        "AGING": 0,
+        "STALE": 45,
+        "INVALID_FUTURE": 0,
+        "UNAVAILABLE": 0,
+        "POST_START": 0,
+        "MARKET_CLOSED": 0,
+        "UNKNOWN": 0
+      },
+      "productFreshnessByActionability": {
+        "ACTIONABLE": 0,
+        "REVIEW_ONLY": 0,
+        "WAIT_FOR_REFRESH": 45,
+        "BLOCKED": 0,
+        "INFORMATIONAL_ONLY": 0,
+        "UNAVAILABLE": 0
+      },
+      "differenceCounts": {
+        "CAPTURE_TIME_VS_SOURCE_TIME": 44,
+        "MATCH": 1
+      }
+    },
+    "acquisition": {
+      "source": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+      "startedAt": "2026-08-08T18:07:38.856Z",
+      "completedAt": "2026-08-08T18:07:39.474Z",
+      "providerEndpoint": "/api/mlb/odds/json/GameOddsByDate/2026-08-08",
+      "actualHttpRequests": 1,
+      "actualQuotaUnits": 1,
+      "providerRecordsFetched": 15,
+      "normalizedRowsProduced": 90,
+      "rowsInserted": 90,
+      "rowsUpdated": 0,
+      "rowsSkipped": 0,
+      "freshnessBefore": "2026-08-08T01:47:31Z",
+      "freshnessAfter": "2026-08-08T14:07:23Z",
+      "snapshotsWithNewerSourceEvidence": 90,
+      "snapshotsWithUnchangedSourceEvidence": 0,
+      "snapshotsMissingSourceTimestamp": 0
+    },
+    "staleEvidenceActionable": false,
+    "staleOfficialPicks": 0,
+    "safetyVerdict": "PASS"
+  },
+  "priorDay": {
+    "operatingDate": "2026-08-07",
+    "canonicalPredictions": 42,
+    "settledBefore": 24,
+    "remainingBefore": 18,
+    "settledAfter": 24,
+    "wins": 13,
+    "losses": 11,
+    "pushes": 0,
+    "blocked": 0,
+    "validPending": 18,
+    "silentPending": 0,
+    "resultsMissing": 18,
+    "settlementReady": 0,
+    "settlementBlocked": 0,
+    "firstMissingPipelineStep": "RESULT_IMPORT",
+    "classificationCounts": {
+      "VALID_PENDING_EVENT_NOT_FINAL": 18
+    },
+    "pendingEvents": [
+      "TOR @ PHI",
+      "ATL @ NYY",
+      "HOU @ SD",
+      "LAD @ ARI",
+      "TB @ SEA",
+      "DET @ SF"
+    ],
+    "equation": "42 = 24 settled + 18 valid pending + 0 blocked"
+  },
+  "readOnlyCertification": {
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0,
+    "predictionWrites": 0,
+    "resultWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "localWindowsSmokeRun": false,
+    "manualProviderCallMade": false
+  },
+  "validation": {
+    "script": "scripts/production-pilot-pi-02-validate.mjs",
+    "buildRequired": false
+  }
+}
+

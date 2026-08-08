@@ -1103,11 +1103,42 @@
     "daysCompleted": 1,
     "day1Status": "DAY_1_PASS_WITH_MONITORING",
     "day1CertificationArtifact": "docs/CERTIFICATION/production-pilot-day-01.json",
-    "activeIncident": "PI-01",
-    "day2Status": "INCIDENT_CLASSIFIED_DAY2_CAN_RESUME_AFTER_ACCEPTANCE",
-    "latestIncidentArtifact": "docs/CERTIFICATION/production-pilot-pi-01.json",
+    "activeIncident": "PI-02",
+    "day2Status": "PI_02_PASS_WITH_MONITORING",
+    "latestIncidentArtifact": "docs/CERTIFICATION/production-pilot-pi-02.json",
     "latestReport": "docs/PRODUCTION_PILOT/DAY_01_REPORT.md",
-    "mc03Started": false
+    "latestIncidentReport": "docs/PRODUCTION_PILOT/INCIDENT_PI_02_MARKET_FRESHNESS_LINEAGE.md",
+    "mc03Started": false,
+    "pi02": {
+      "status": "PI_02_PASS_WITH_MONITORING",
+      "classification": "EXPECTED_DUAL_FRESHNESS_CONTRACT_AND_VALID_PENDING_RESULTS",
+      "productionCommit": "ff741bb9ee8748e3bd18c67f38070854656190fd",
+      "exactMarketTraced": "baseball_mlb:mlb:sportsdataio:event:79050 total Under 8 -115",
+      "currentCandidates": 45,
+      "productFreshness": {
+        "fresh": 0,
+        "stale": 45,
+        "waitForRefresh": 45,
+        "staleEvidenceActionable": false
+      },
+      "latestAcquisition": {
+        "providerCalls": 1,
+        "snapshotsWritten": 90,
+        "sourceTimestampBefore": "2026-08-08T01:47:31Z",
+        "sourceTimestampAfter": "2026-08-08T14:07:23Z"
+      },
+      "priorDay": {
+        "canonicalPredictions": 42,
+        "settled": 24,
+        "validPending": 18,
+        "blocked": 0,
+        "silentPending": 0,
+        "firstMissingStep": "RESULT_IMPORT"
+      },
+      "runtimeRepair": false,
+      "pilotCanContinue": true,
+      "mc03Started": false
+    }
   },
   "mc08h": {
     "status": "PRODUCTION_READY",

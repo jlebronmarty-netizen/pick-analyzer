@@ -401,3 +401,13 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - The matching timeout is a pre-step GitHub hosted-runner/concurrency/platform cancellation around 15 minutes, not curl `--max-time`, app planner duration, Vercel function timeout, provider timeout or database wait.
 - Production after the incident served `d8de4ca504017eb3ab455287d41c4adea5834116`; scheduler cadence was HEALTHY with last Vercel primary success `2026-08-06T21:48:04.526+00:00` and missed intervals 0.
 - No duplicate provider acquisition, prediction, result, settlement or learning writes were caused by the incident. Day 2 ordinary certification remains paused until PI-01 is accepted. Day 3 and MC-03 were not started.
+
+# 2026-08-08 Production Pilot Incident PI-02
+
+- Status: PI_02_PASS_WITH_MONITORING.
+- Production served `ff741bb9ee8748e3bd18c67f38070854656190fd`; `/api/system/version` returned provider calls 0.
+- Freshness lineage reconciled: snapshot capture evidence was current at `2026-08-08T18:07:39Z`, while provider market source evidence was `2026-08-08T14:07:23Z` and Product Freshness SLA marked all 45 current candidates `STALE` / `WAIT_FOR_REFRESH`.
+- The latest Vercel primary acquisition made 1 SportsDataIO request, fetched 15 provider records, normalized 90 rows and inserted 90 snapshots; the provider source timestamp improved from `2026-08-08T01:47:31Z` to `2026-08-08T14:07:23Z`, but remained stale for actionability at observation.
+- Stale source evidence did not become actionable, Official Pick, Rent Play actionable or Smart Parlay safe-leg evidence.
+- Prior-day reconciliation balanced: 42 canonical predictions = 24 settled + 18 valid pending + 0 blocked; silent pending remained 0. The 18 pending rows belong to six `STARTED`/`scheduled` late events without imported authoritative results. First missing step is result import.
+- No runtime repair was made. Production Pilot Week remains ACTIVE with monitoring. MC-03 was not started.
