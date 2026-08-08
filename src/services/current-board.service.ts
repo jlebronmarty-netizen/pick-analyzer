@@ -212,9 +212,23 @@ export type CurrentBoardCandidate = {
     sportsbook: string | null
     oddsSnapshotId: string | null
     timestamp: string | null
-    source: 'selected_stored_price' | 'unavailable'
+    source: 'selected_stored_price' | 'complement_provider_price' | 'unavailable'
+    bindingMode?: 'DIRECT' | 'COMPLEMENT' | 'UNAVAILABLE'
+    sourceMarketIdentity?: {
+      eventId: string
+      market: string | null
+      selection: string | null
+      normalizedSelection: string | null
+      line: number | null
+      sportsbook: string | null
+      provider: string | null
+      oddsSnapshotId: string | null
+      sourceTimestamp: string | null
+      snapshotCaptureTimestamp: string | null
+    } | null
     status: 'AVAILABLE' | 'NO_STORED_ODDS' | 'NO_OPPOSITE_PRICE' | 'STALE_MARKET' | 'MARKET_MISMATCH' | 'UNKNOWN_PUSH'
   }
+  canonicalMarketAlignment?: MarketAlignmentContract | null
   productFreshness: ProductFreshnessSla
   surfaceFreshness: {
     currentBoard: ProductFreshnessSla
@@ -833,6 +847,72 @@ function oddsMatchesPrediction(odds: OddsRow, row: PredictionRow) {
   return Math.abs(predictionLine - oddsLine) < 0.001
 }
 
+function normalizedComplementSelection(row: PredictionRow) {
+  const market = canonicalPredictionMarket(row.market)
+  const current = normalizedSelection(row)
+  if (market === 'total') return current === 'under' ? 'over' : current === 'over' ? 'under' : null
+  if (current === 'home') return 'away'
+  if (current === 'away') return 'home'
+  return null
+}
+
+function complementLine(row: PredictionRow) {
+  const market = canonicalPredictionMarket(row.market)
+  const line = numberValue(row.line)
+  if (market === 'moneyline') return null
+  if (line === null) return null
+  if (market === 'spread') return -line
+  if (market === 'total') return line
+  return null
+}
+
+function oddsMatchesComplement(odds: OddsRow, row: PredictionRow, directOdds: OddsRow | null | undefined) {
+  if (canonicalOddsMarket(row.market) !== canonicalOddsMarket(odds.market)) return false
+  if (directOdds?.provider && odds.provider !== directOdds.provider) return false
+  if (directOdds?.sportsbook && odds.sportsbook !== directOdds.sportsbook) return false
+  if (!directOdds?.sportsbook && row.sportsbook && odds.sportsbook !== row.sportsbook) return false
+  const expectedSelection = normalizedComplementSelection(row)
+  if (!expectedSelection) return false
+  const oddsOutcome = String(odds.outcome ?? '').toLowerCase()
+  if (oddsOutcome !== expectedSelection) return false
+  const expectedLine = complementLine(row)
+  const oddsLine = numberValue(odds.line)
+  if (canonicalPredictionMarket(row.market) === 'moneyline') return oddsLine === null
+  if (expectedLine === null || oddsLine === null) return false
+  return Math.abs(expectedLine - oddsLine) < 0.001
+}
+
+function complementOddsReasons(
+  row: PredictionRow,
+  odds: OddsRow,
+  event: EventRow | undefined,
+  nowMs: number,
+  mode: CurrentBoardMode
+) {
+  const reasons = new Set<CurrentBoardReasonCode>()
+  const metadata = asRecord(odds.metadata)
+  const market = canonicalPredictionMarket(row.market)
+  const price = numberValue(odds.price)
+  const line = complementLine(row)
+  const sourceTimestamp = odds.snapshot_time ?? row.odds_timestamp
+  const freshnessTimestamp = selectedMarketFreshness(odds, row).timestamp ?? sourceTimestamp
+  const snapshotMs = sourceTimestamp ? new Date(sourceTimestamp).getTime() : Number.NaN
+  const startTime = canonicalEventStart(event, row.commence_time)
+  const startMs = startTime ? new Date(startTime).getTime() : Number.NaN
+  const cutoffMs = row.cutoff_at ? new Date(row.cutoff_at).getTime() : Number.POSITIVE_INFINITY
+
+  validateMarketLine({ ...row, line }, price, line).forEach((reason) => reasons.add(reason))
+  if (!freshnessTimestamp || !Number.isFinite(new Date(freshnessTimestamp).getTime())) reasons.add('STALE_ODDS')
+  if (Number.isFinite(startMs) && Number.isFinite(snapshotMs) && snapshotMs >= startMs) reasons.add('EVENT_STARTED')
+  if (Number.isFinite(cutoffMs) && Number.isFinite(snapshotMs) && snapshotMs > cutoffMs) reasons.add('POST_CUTOFF_ODDS')
+  if (metadata.isLive === true || metadata.live === true || String(metadata.marketType ?? '').toLowerCase() === 'live') reasons.add('LIVE_ODDS')
+  if (metadata.isAlternate === true || metadata.alternate === true || String(metadata.marketType ?? '').toLowerCase().includes('alternate')) {
+    reasons.add('ALTERNATE_MARKET')
+  }
+  if (ageMinutes(freshnessTimestamp, nowMs) > maxAgeFor(row.sport_key, market, mode)) reasons.add('STALE_ODDS')
+  return reasons
+}
+
 function latestSafeOdds(row: PredictionRow, oddsRows: OddsRow[], event: EventRow | undefined, nowMs: number, mode: CurrentBoardMode) {
   const candidates = oddsRows
     .filter((odds) => odds.event_id === row.game_id)
@@ -846,6 +926,37 @@ function latestSafeOdds(row: PredictionRow, oddsRows: OddsRow[], event: EventRow
     })
   return candidates[0] ?? null
 }
+
+function latestSafeComplementOdds(row: PredictionRow, oddsRows: OddsRow[], directOdds: OddsRow | null, event: EventRow | undefined, nowMs: number, mode: CurrentBoardMode) {
+  const candidates = oddsRows
+    .filter((odds) => odds.event_id === row.game_id)
+    .filter((odds) => oddsMatchesComplement(odds, row, directOdds))
+    .map((odds) => ({ odds, reasons: complementOddsReasons(row, odds, event, nowMs, mode) }))
+    .filter(({ reasons }) => reasons.size === 0)
+    .sort((left, right) => {
+      const rightFreshness = selectedMarketFreshness(right.odds, row).timestamp ?? right.odds.snapshot_time ?? ''
+      const leftFreshness = selectedMarketFreshness(left.odds, row).timestamp ?? left.odds.snapshot_time ?? ''
+      return new Date(rightFreshness).getTime() - new Date(leftFreshness).getTime()
+    })
+  return candidates[0] ?? null
+}
+
+function oddsMarketIdentity(odds: OddsRow | null | undefined, row: PredictionRow) {
+  if (!odds) return null
+  return {
+    eventId: odds.event_id,
+    market: odds.market,
+    selection: odds.outcome,
+    normalizedSelection: odds.outcome ? String(odds.outcome).toLowerCase() : null,
+    line: numberValue(odds.line),
+    sportsbook: odds.sportsbook ?? null,
+    provider: odds.provider ?? null,
+    oddsSnapshotId: odds.id,
+    sourceTimestamp: oddsSourceTimestamp(odds, row),
+    snapshotCaptureTimestamp: selectedMarketFreshness(odds, row).timestamp,
+  }
+}
+
 
 function qualityLabel(value: number | null) {
   if (value === null) return 'Unknown'
@@ -910,7 +1021,14 @@ function canonicalMlbDataQuality(snapshot: Record<string, unknown>, baseFeatureQ
   }
 }
 
-function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow | undefined, nowMs: number, mode: CurrentBoardMode): CurrentBoardCandidate {
+function toCandidate(
+  row: PredictionRow,
+  odds: OddsRow | null,
+  event: EventRow | undefined,
+  nowMs: number,
+  mode: CurrentBoardMode,
+  oddsRows: OddsRow[] = []
+): CurrentBoardCandidate {
   const snapshot = asRecord(row.feature_snapshot)
   const market = canonicalPredictionMarket(row.market) as CurrentBoardCandidate['market']
   const selectedOdds = numberValue(odds?.price) ?? numberValue(row.odds)
@@ -921,6 +1039,9 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
   const marketSemantics = classifyMarketSemantics({ market, line: row.line })
   const oppositeProbability = marketSemantics.pushCapable ? null : round(100 - boundedProbability)
   const oppositeMoreLikely = oppositeProbability !== null && oppositeProbability > boundedProbability
+  const complementOdds = oppositeMoreLikely
+    ? latestSafeComplementOdds(row, oddsRows, odds, event, nowMs, mode)?.odds ?? null
+    : null
   const confidence = numberValue(row.confidence) ?? 0
   const reliabilityScore = numberValue(snapshot.reliabilityScore) ?? Math.min(100, Math.max(0, confidence))
   const aiRating = numberValue(snapshot.aiRating) ?? round(rawProbability * 0.34 + confidence * 0.22 + reliabilityScore * 0.18)
@@ -967,6 +1088,40 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
     recommendationCategory: String(snapshot.recommendationStatus ?? 'ANALYZED_ONLY'),
     reasonCodes: [...Array.from(reasons), ...String(row.skip_reason ?? '').split(',').map((item) => item.trim()).filter(Boolean)],
   })
+  const complementFreshness = selectedMarketFreshness(complementOdds, row)
+  const complementSourceTimestamp = oddsSourceTimestamp(complementOdds, row)
+  const complementFetchedAt = oddsFetchedAt(complementOdds)
+  const complementIngestedAt = validTimestamp(complementOdds?.created_at) ?? validTimestamp(complementOdds?.updated_at) ?? complementFetchedAt
+  const complementOddsTimestamp = complementFreshness.timestamp
+  const complementOddsPrice = numberValue(complementOdds?.price)
+  const complementAlignment = complementOdds
+    ? buildMarketAlignment({
+        eventId: row.game_id,
+        predictionId: row.id,
+        oddsSnapshotId: complementOdds.id,
+        marketType: market,
+        period: marketPeriod(row),
+        selection: opposite,
+        normalizedSelection: normalizedComplementSelection(row),
+        oddsOutcome: complementOdds.outcome ?? normalizedComplementSelection(row),
+        line: complementLine(row),
+        oddsLine: complementOdds.line,
+        americanOdds: complementOddsPrice,
+        sportsbook: complementOdds.sportsbook ?? row.sportsbook ?? 'Unknown',
+        modelProbability: oppositeProbability,
+        calibratedProbability: null,
+        marketInputTimestamp: complementOddsTimestamp,
+        providerSourceTimestamp: complementSourceTimestamp,
+        oddsIngestedAt: complementIngestedAt,
+        marketAgeMinutes: ageMinutes(complementOddsTimestamp, nowMs),
+        providerSourceAgeMinutes: ageMinutes(complementSourceTimestamp, nowMs),
+        snapshotIngestionAgeMinutes: ageMinutes(complementIngestedAt, nowMs),
+        maxAllowedAgeMinutes: displayMaxOddsAgeMinutes(),
+        confidence,
+        recommendationCategory: String(snapshot.recommendationStatus ?? 'ANALYZED_ONLY'),
+        reasonCodes: [...Array.from(complementOddsReasons(row, complementOdds, event, nowMs, mode)), 'COMPLEMENT_PRICE_BINDING'],
+      })
+    : null
   const edge = marketAlignment.edgePercentagePoints ?? 0
   const expectedValue = marketAlignment.expectedValuePercent ?? 0
   const calibrationStatus = String(snapshot.calibrationStatus ?? snapshot.calibration_status ?? row.validation_status ?? 'probationary')
@@ -1101,24 +1256,35 @@ function toCandidate(row: PredictionRow, odds: OddsRow | null, event: EventRow |
       probabilityBasis: marketSemantics.pushCapable ? 'push_capable_selected_side' : oppositeMoreLikely ? 'binary_complement' : 'stored_selection',
     },
     canonicalPrice: {
-      americanOdds: oppositeMoreLikely ? null : selectedOdds,
-      impliedProbability: oppositeMoreLikely ? null : marketAlignment.marketImpliedProbability,
-      sportsbook: oppositeMoreLikely ? null : odds?.sportsbook ?? row.sportsbook ?? 'Unknown',
-      oddsSnapshotId: oppositeMoreLikely ? null : odds?.id ?? null,
-      timestamp: oppositeMoreLikely ? null : oddsTimestamp,
-      source: oppositeMoreLikely ? 'unavailable' : 'selected_stored_price',
-      status: oppositeMoreLikely ? 'NO_OPPOSITE_PRICE' : stale ? 'STALE_MARKET' : marketAlignment.alignmentStatus === 'ALIGNED' ? 'AVAILABLE' : 'MARKET_MISMATCH',
+      americanOdds: oppositeMoreLikely ? complementOddsPrice : selectedOdds,
+      impliedProbability: oppositeMoreLikely ? complementAlignment?.marketImpliedProbability ?? null : marketAlignment.marketImpliedProbability,
+      sportsbook: oppositeMoreLikely ? complementOdds?.sportsbook ?? null : odds?.sportsbook ?? row.sportsbook ?? 'Unknown',
+      oddsSnapshotId: oppositeMoreLikely ? complementOdds?.id ?? null : odds?.id ?? null,
+      timestamp: oppositeMoreLikely ? complementOddsTimestamp : oddsTimestamp,
+      source: oppositeMoreLikely ? (complementOdds ? 'complement_provider_price' : 'unavailable') : 'selected_stored_price',
+      bindingMode: oppositeMoreLikely ? (complementOdds ? 'COMPLEMENT' : 'UNAVAILABLE') : 'DIRECT',
+      sourceMarketIdentity: oppositeMoreLikely ? oddsMarketIdentity(complementOdds, row) : oddsMarketIdentity(odds, row),
+      status: oppositeMoreLikely
+        ? complementOdds
+          ? complementAlignment?.freshnessStatus === 'STALE' || complementAlignment?.freshnessStatus === 'EXPIRED'
+            ? 'STALE_MARKET'
+            : complementAlignment?.alignmentStatus === 'ALIGNED'
+              ? 'AVAILABLE'
+              : 'MARKET_MISMATCH'
+          : 'NO_OPPOSITE_PRICE'
+        : stale ? 'STALE_MARKET' : marketAlignment.alignmentStatus === 'ALIGNED' ? 'AVAILABLE' : 'MARKET_MISMATCH',
     },
+    canonicalMarketAlignment: complementAlignment,
     productFreshness: surfaceFreshness.currentBoard,
     surfaceFreshness,
     canonicalEv: {
-      edge: oppositeMoreLikely ? null : marketAlignment.edgePercentagePoints,
-      expectedValue: oppositeMoreLikely ? null : marketAlignment.expectedValuePercent,
-      actionableEdge: oppositeMoreLikely ? null : marketAlignment.actionableEdgePercentagePoints,
-      actionableExpectedValue: oppositeMoreLikely ? null : marketAlignment.actionableExpectedValuePercent,
-      reason: oppositeMoreLikely ? 'NO_OPPOSITE_PRICE' : baseCanonicalReason,
+      edge: oppositeMoreLikely ? complementAlignment?.edgePercentagePoints ?? null : marketAlignment.edgePercentagePoints,
+      expectedValue: oppositeMoreLikely ? complementAlignment?.expectedValuePercent ?? null : marketAlignment.expectedValuePercent,
+      actionableEdge: oppositeMoreLikely ? complementAlignment?.actionableEdgePercentagePoints ?? null : marketAlignment.actionableEdgePercentagePoints,
+      actionableExpectedValue: oppositeMoreLikely ? complementAlignment?.actionableExpectedValuePercent ?? null : marketAlignment.actionableExpectedValuePercent,
+      reason: oppositeMoreLikely ? complementAlignment?.actionableUnavailableReason ?? (complementOdds ? 'ALIGNED' : 'NO_OPPOSITE_PRICE') : baseCanonicalReason,
     },
-    canonicalReason: oppositeMoreLikely ? 'NO_OPPOSITE_PRICE' : baseCanonicalReason,
+    canonicalReason: oppositeMoreLikely ? complementAlignment?.actionableUnavailableReason ?? (complementOdds ? 'ALIGNED' : 'NO_OPPOSITE_PRICE') : baseCanonicalReason,
     calibratedProbability: numberValue(snapshot.calibratedProbability),
     confidence,
     confidenceLabel: String(snapshot.confidenceLabel ?? (confidence >= 70 ? 'High' : confidence >= 60 ? 'Medium' : 'Low')),
@@ -1296,22 +1462,24 @@ function attachCanonicalOutcomeContracts(candidates: CurrentBoardCandidate[]) {
     return {
       ...candidate,
       canonicalPrice: {
-        americanOdds: null,
-        impliedProbability: null,
-        sportsbook: null,
-        oddsSnapshotId: null,
-        timestamp: null,
-        source: 'unavailable',
-        status: 'NO_OPPOSITE_PRICE',
+        ...candidate.canonicalPrice!,
+        status:
+          candidate.canonicalPrice?.bindingMode === 'COMPLEMENT' && candidate.canonicalMarketAlignment?.freshnessStatus !== 'STALE' && candidate.canonicalMarketAlignment?.freshnessStatus !== 'EXPIRED'
+            ? candidate.canonicalMarketAlignment?.alignmentStatus === 'ALIGNED'
+              ? 'AVAILABLE'
+              : 'MARKET_MISMATCH'
+            : candidate.canonicalPrice?.bindingMode === 'COMPLEMENT'
+              ? 'STALE_MARKET'
+              : 'NO_OPPOSITE_PRICE',
       },
       canonicalEv: {
-        edge: null,
-        expectedValue: null,
-        actionableEdge: null,
-        actionableExpectedValue: null,
-        reason: 'NO_OPPOSITE_PRICE',
+        edge: candidate.canonicalMarketAlignment?.edgePercentagePoints ?? null,
+        expectedValue: candidate.canonicalMarketAlignment?.expectedValuePercent ?? null,
+        actionableEdge: candidate.canonicalMarketAlignment?.actionableEdgePercentagePoints ?? null,
+        actionableExpectedValue: candidate.canonicalMarketAlignment?.actionableExpectedValuePercent ?? null,
+        reason: candidate.canonicalMarketAlignment?.actionableUnavailableReason ?? (candidate.canonicalPrice?.bindingMode === 'COMPLEMENT' ? 'ALIGNED' : 'NO_OPPOSITE_PRICE'),
       },
-      canonicalReason: 'NO_OPPOSITE_PRICE',
+      canonicalReason: candidate.canonicalMarketAlignment?.actionableUnavailableReason ?? (candidate.canonicalPrice?.bindingMode === 'COMPLEMENT' ? 'ALIGNED' : 'NO_OPPOSITE_PRICE'),
     } satisfies CurrentBoardCandidate
   })
 }
@@ -1432,7 +1600,7 @@ export async function getCurrentBoard({
 
   const latestByKey = new Map<string, { item: (typeof included)[number]; candidate: CurrentBoardCandidate }>()
   for (const item of slateScoped) {
-    const candidate = toCandidate(item.row, item.odds, item.event, nowMs, mode)
+    const candidate = toCandidate(item.row, item.odds, item.event, nowMs, mode, oddsRows)
     const existing = latestByKey.get(candidate.logicalKey)
     const existingTime = existing?.candidate.oddsTimestamp ?? existing?.item.row.generated_at ?? ''
     const candidateTime = candidate.oddsTimestamp ?? item.row.generated_at ?? ''

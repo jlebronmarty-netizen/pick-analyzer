@@ -1771,7 +1771,7 @@ function DailyBrief({
       </div>
 
       <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-        Latest odds: {compactDate(data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? null)}
+        Snapshot captured: {compactDate(data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? null)}
       </p>
     </section>
   )
@@ -2297,6 +2297,8 @@ function TechnicalEvidence({
   const boardCandidates = arrayValue(currentBoard?.candidates).length || countValue(currentBoard?.candidateCount)
   const sample = countValue(recordValue(intelligence?.currentProductionSample).sampleSize)
   const metrics = recordValue(recordValue(recordValue(performance?.aiBrain).reportCard).metrics)
+  const marketEvidenceValue = recordValue(currentBoard?.dataFreshness).latestSourceTimestamp
+  const marketEvidenceTimestamp = typeof marketEvidenceValue === 'string' && marketEvidenceValue.trim() ? marketEvidenceValue : null
 
   return (
     <details className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-mc08a-technical-evidence="true">
@@ -2313,7 +2315,8 @@ function TechnicalEvidence({
         <MiniMetric label="Evidence Preference" value={advancedOpen ? 'Expanded' : 'Collapsed'} />
       </div>
       <div className="mt-5 grid gap-3 md:grid-cols-2">
-        <MiniText label="Latest market" value={compactDate(data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? null)} />
+        <MiniText label="Snapshot captured" value={compactDate(data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? null)} />
+        <MiniText label="Market evidence" value={compactDate(marketEvidenceTimestamp)} />
         <MiniText label="Performance" value={JSON.stringify(metrics).slice(0, 180) || 'Performance summary unavailable.'} />
       </div>
     </details>

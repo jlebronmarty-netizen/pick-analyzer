@@ -1,0 +1,111 @@
+{
+  "certification": "production-pilot-pi-03",
+  "version": "1.0",
+  "status": "PASS_WITH_HIGH_LINKAGE_REPAIR_PLAN",
+  "classification": "PI_03_PASS_WITH_HIGH_LINKAGE_REPAIR_PLAN",
+  "startingCommit": "bf6db22c26d0b2ee5e251921aeb8ef90b153f1ac",
+  "productionCommit": "bf6db22c26d0b2ee5e251921aeb8ef90b153f1ac",
+  "productionPilotWeek": "ACTIVE",
+  "providerCallsFromAudit": 0,
+  "databaseMutationsFromAudit": 0,
+  "predictionWritesFromAudit": 0,
+  "resultWritesFromAudit": 0,
+  "settlementWritesFromAudit": 0,
+  "learningWritesFromAudit": 0,
+  "canonicalPredictionEngine": {
+    "store": "prediction_history",
+    "currentSelection": "is_current + active prediction_epoch_key",
+    "currentBoardService": "src/services/current-board.service.ts",
+    "performanceScope": "src/services/performance-scope-v2.service.ts"
+  },
+  "productionEvidence": {
+    "currentGames": 15,
+    "currentBoardCandidates": 36,
+    "officialPicks": 0,
+    "recommendationEligible": 0,
+    "actionable": 0,
+    "currentEraCanonicalPredictions": 234,
+    "currentEraSettled": 171,
+    "todayCanonicalPredictions": 45,
+    "todaySettled": 0,
+    "yesterdayCanonicalPredictions": 42,
+    "yesterdaySettled": 24,
+    "yesterdayPending": 18,
+    "yesterdayWins": 13,
+    "yesterdayLosses": 11,
+    "silentPending": 0,
+    "latestOddsTimestamp": "2026-08-08T20:37:19.390Z",
+    "latestOddsSourceTimestamp": "2026-08-08T16:37:01.000Z"
+  },
+  "exactMarketTraces": [
+    {
+      "label": "ARI Run Line Odds N/A",
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:79041",
+      "matchup": "LAD @ ARI",
+      "market": "spread",
+      "displaySelection": "ARI",
+      "displayLine": 1.5,
+      "displayOdds": null,
+      "sourceSelection": "LAD",
+      "sourceLine": -1.5,
+      "sourceOdds": 111,
+      "classification": "PRICE_EXISTS_DIFFERENT_SIDE",
+      "whyOddsNA": "Complement-derived canonical outcome does not perform opposite-side price rebinding."
+    },
+    {
+      "label": "HOU/TOR priced total representative",
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:79044",
+      "matchup": "TOR @ PHI",
+      "market": "total",
+      "displaySelection": "Under",
+      "displayLine": 10,
+      "displayOdds": -117,
+      "classification": "IDENTITY_MATCH"
+    },
+    {
+      "label": "ARI Moneyline Odds N/A",
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:79041",
+      "matchup": "LAD @ ARI",
+      "market": "moneyline",
+      "displaySelection": "ARI",
+      "displayLine": null,
+      "displayOdds": null,
+      "sourceSelection": "LAD",
+      "sourceLine": null,
+      "sourceOdds": -199,
+      "classification": "PRICE_EXISTS_DIFFERENT_SIDE",
+      "whyOddsNA": "Complement-derived canonical outcome does not perform opposite-side price rebinding."
+    }
+  ],
+  "freshnessContracts": {
+    "displayFreshness": "snapshot capture/ingestion timestamp can report FRESH",
+    "actionabilityFreshness": "Product Freshness SLA uses provider market timestamp",
+    "staleEvidenceActionable": false
+  },
+  "findings": {
+    "critical": [],
+    "high": [
+      "Complement-derived canonical outcomes can show Odds N/A even when opposite/source market price exists."
+    ],
+    "medium": [
+      "Display freshness and actionability freshness are separate and can be confusing without explicit labels.",
+      "Protected planner/e2e trace endpoints require authorization for full external audit."
+    ],
+    "low": [
+      "Large legacy/preview engine surface remains and should stay fenced from production actionability."
+    ]
+  },
+  "immediateRepairsPerformed": [],
+  "followUpRepair": {
+    "id": "PI-03R",
+    "status": "LOCAL_VALIDATION_COMPLETE_PRODUCTION_PROOF_PENDING",
+    "artifact": "docs/PRODUCTION_PILOT/INCIDENT_PI_03R_COMPLEMENT_PRICE_REBINDING.md"
+  },
+  "recommendedRepairPlan": [
+    "Add bounded complement-side price rebinding in Current Board.",
+    "Rename presentation labels to distinguish snapshot captured time from market evidence age.",
+    "Keep Official Pick and Product Freshness SLA gates unchanged."
+  ],
+  "canPilotContinueSafely": true,
+  "humanApprovalRequired": true
+}

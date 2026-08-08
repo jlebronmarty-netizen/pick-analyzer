@@ -1,0 +1,62 @@
+{
+  "certification": "production-pilot-pi-03r",
+  "version": "1.0",
+  "status": "LOCAL_VALIDATION_COMPLETE_PRODUCTION_PROOF_PENDING",
+  "classification": "PI_03R_LOCAL_PASS_PENDING_PRODUCTION",
+  "startingCommit": "bf6db22c26d0b2ee5e251921aeb8ef90b153f1ac",
+  "runtimeCommit": null,
+  "productionCommit": null,
+  "productionPilotWeek": "ACTIVE",
+  "repairScope": [
+    "Current Board complement-side price rebinding",
+    "Homepage freshness label clarity"
+  ],
+  "protectedInvariants": {
+    "predictionProbabilitiesChanged": false,
+    "confidenceChanged": false,
+    "rankingFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "kellyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "freshnessThresholdChanged": false
+  },
+  "complementContract": {
+    "moneyline": "home_away_no_line",
+    "spread": "opposite_side_exact_negated_line",
+    "total": "over_under_same_exact_line",
+    "crossLineBindingAllowed": false,
+    "syntheticOddsAllowed": false
+  },
+  "runtimeEvidence": {
+    "directLookupFirst": true,
+    "complementLookupOnlyWhenDirectDisplayPriceAbsent": true,
+    "requiresExactEvent": true,
+    "requiresExactMarketFamily": true,
+    "requiresExactComplementSelection": true,
+    "requiresExactLineComplement": true,
+    "requiresSameProviderBookScope": true,
+    "recordsBindingMode": true,
+    "usesExistingMarketAlignmentFunctions": true
+  },
+  "freshnessEvidence": {
+    "snapshotCaptureLabel": "Snapshot captured",
+    "marketEvidenceLabel": "Market evidence",
+    "staleEvidenceActionable": false,
+    "freshnessThresholdChanged": false
+  },
+  "providerCallsFromCertification": 0,
+  "databaseMutationsFromCertification": 0,
+  "predictionWritesFromCertification": 0,
+  "resultWritesFromCertification": 0,
+  "settlementWritesFromCertification": 0,
+  "learningWritesFromCertification": 0,
+  "productionProof": {
+    "required": true,
+    "complementCandidateVerified": false,
+    "directCandidateVerified": false
+  }
+}
+
