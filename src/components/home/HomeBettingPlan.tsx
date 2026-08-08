@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { CANONICAL_OPERATING_TIMEZONE, formatDateTimeValue, formatOddsValue, usePersonalization } from '@/context/PersonalizationContext'
+import { getTimeOfDayGreeting } from '@/lib/time-of-day-greeting'
 
 type Tone = 'green' | 'yellow' | 'blue' | 'red' | 'gray'
 
@@ -1778,12 +1779,14 @@ function DailyBrief({
   currentBoard,
   intelligence,
   performance,
+  greeting,
 }: {
   data: TodayResponse
   plan: ReturnType<typeof pickPlan>
   currentBoard: ApiEnvelope | null
   intelligence: ApiEnvelope | null
   performance: ApiEnvelope | null
+  greeting: string
 }) {
   const recommendation = dailyRecommendation(plan, data)
   const boardCandidates = countValue(currentBoard?.candidates ? arrayValue(currentBoard.candidates).length : currentBoard?.candidateCount)
@@ -1815,7 +1818,7 @@ function DailyBrief({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-emerald-200">{localeFoundation.en.morningBrief}</p>
-          <h2 className="mt-3 text-3xl font-black text-white md:text-5xl">Good Morning. {localeFoundation.en.question}</h2>
+          <h2 className="mt-3 text-3xl font-black text-white md:text-5xl" suppressHydrationWarning>{greeting} {localeFoundation.en.question}</h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Today&apos;s Betting Weather: {recommendation.label}. {recommendation.reason}</p>
         </div>
         <StatusChip tone={recommendation.tone}>{label(data.status, 'Today ready')}</StatusChip>
@@ -2399,11 +2402,19 @@ function TechnicalEvidence({
 
 export default function HomeBettingPlan() {
   const { preferences, t, isPreferredSport, isPreferredTeamLabel } = usePersonalization()
+  const [greetingNow, setGreetingNow] = useState(() => new Date())
   const [data, setData] = useState<TodayResponse | null>(null)
   const [currentBoard, setCurrentBoard] = useState<ApiEnvelope | null>(null)
   const [intelligence, setIntelligence] = useState<ApiEnvelope | null>(null)
   const [performance, setPerformance] = useState<ApiEnvelope | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const updateGreetingClock = () => setGreetingNow(new Date())
+    updateGreetingClock()
+    const timer = window.setInterval(updateGreetingClock, 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -2437,6 +2448,11 @@ export default function HomeBettingPlan() {
   const moneylineBetContract = useMemo(() => buildMoneylineBetContract(plan, rentPlayContract), [plan, rentPlayContract])
   const smartParlayContract = useMemo(() => buildSmartParlayContract(plan, rentPlayContract, moneylineBetContract), [plan, rentPlayContract, moneylineBetContract])
   const watchlistContract = useMemo(() => buildWatchlistContract(plan, rentPlayContract, moneylineBetContract, smartParlayContract), [plan, rentPlayContract, moneylineBetContract, smartParlayContract])
+  const greeting = useMemo(() => getTimeOfDayGreeting({
+    date: greetingNow,
+    timeZone: preferences.timezone,
+    locale: preferences.language,
+  }).greeting, [greetingNow, preferences.language, preferences.timezone])
 
   if (error) {
     return (
@@ -2468,7 +2484,7 @@ export default function HomeBettingPlan() {
   return (
     <main className={`min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.12),_transparent_30rem),linear-gradient(180deg,#020617_0%,#0f172a_52%,#020617_100%)] px-4 text-white md:px-6 ${preferences.homepageDensity === 'COMPACT' ? 'py-3 md:py-5' : 'py-5 md:py-8'}`} data-c1-home-betting-plan="true" data-mc08a-homepage="true" data-mc08f-homepage-personalized="true" data-language={preferences.language} data-odds-format={preferences.oddsFormat} data-display-timezone={preferences.timezone} data-canonical-timezone={CANONICAL_OPERATING_TIMEZONE}>
       <section className="mx-auto grid max-w-6xl gap-5">
-        <DailyBrief data={data} plan={plan} currentBoard={currentBoard} intelligence={intelligence} performance={performance} />
+        <DailyBrief data={data} plan={plan} currentBoard={currentBoard} intelligence={intelligence} performance={performance} greeting={greeting} />
 
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 p-3 text-xs font-black uppercase tracking-[0.14em] text-slate-300" data-mc08f-homepage-preferences="true">
           <span>Language {preferences.language}</span>

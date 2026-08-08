@@ -1,0 +1,51 @@
+{
+  "certification": "ux-01-dynamic-time-of-day-greeting",
+  "version": "1.0",
+  "status": "LOCAL_IMPLEMENTATION_COMPLETE_PRODUCTION_PROOF_PENDING",
+  "classification": "UX_01_LOCAL_PASS_PENDING_PRODUCTION",
+  "startingCommit": "44983a5f569c34a8742aee2237a2543e9fe667d9",
+  "runtimeCommit": null,
+  "productionCommit": null,
+  "productionPilotWeek": "ACTIVE",
+  "scope": [
+    "Homepage Daily Brief greeting",
+    "Display timezone preference",
+    "Hydration-safe current-time presentation"
+  ],
+  "greetingContract": {
+    "displayTimezoneFallback": "America/Puerto_Rico",
+    "morning": "00:00 through 11:59",
+    "afternoon": "12:00 through 17:59",
+    "evening": "18:00 through 23:59",
+    "usesOperatingTimezone": false,
+    "usesServerLocalTimezone": false,
+    "usesBuildTime": false
+  },
+  "protectedInvariants": {
+    "operatingTimezoneChanged": false,
+    "predictionLogicChanged": false,
+    "probabilityChanged": false,
+    "confidenceChanged": false,
+    "recommendationPolicyChanged": false,
+    "officialPickPolicyChanged": false,
+    "performanceBehaviorChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "providerBudgetChanged": false,
+    "currentEraChanged": false,
+    "replayChanged": false
+  },
+  "validation": {
+    "boundaryTests": "PASS_LOCAL",
+    "alternateTimezoneTest": "PASS_LOCAL",
+    "providerCallsFromCertification": 0,
+    "databaseMutationsFromCertification": 0
+  },
+  "productionProof": {
+    "required": true,
+    "systemVersionVerified": false,
+    "homepageRenderedGreetingVerified": false,
+    "productMetricsUnchanged": false
+  }
+}
