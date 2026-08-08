@@ -1,0 +1,110 @@
+{
+  "certification": "odds-01-market-freshness-provider-audit",
+  "status": "PASS_WITH_PROVIDER_ARCHITECTURE_RECOMMENDATION",
+  "date": "2026-08-08",
+  "startingCommit": "a9879543a94fc5817cfe1d1da82a16e7c2c2ca3a",
+  "productionCommit": "a9879543a94fc5817cfe1d1da82a16e7c2c2ca3a",
+  "productionPilotWeek": "ACTIVE",
+  "currentOddsProvider": "SportsDataIO",
+  "currentEndpoint": "/api/mlb/odds/json/GameOddsByDate/{date}",
+  "currentSubscriptionTier": "UNKNOWN",
+  "currentEndpointCapability": {
+    "requestGranularity": "DATE",
+    "markets": ["moneyline", "run_line", "total"],
+    "pregameOdds": true,
+    "liveOddsUsedByCurrentAcquisition": false,
+    "lineMovementUsedByCurrentAcquisition": false,
+    "playerPropsUsedByCurrentAcquisition": false
+  },
+  "productionEvidence": {
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0,
+    "latestAcquisitionTime": "2026-08-08T23:27:28.555Z",
+    "latestProviderSourceTime": "2026-08-08T19:27:11.000Z",
+    "sourceLagMinutes": 240,
+    "medianSourceLagMinutes": 240,
+    "maximumSourceLagMinutes": 240,
+    "actualHttpRequests": 1,
+    "actualQuotaUnits": 1,
+    "providerRecordsFetched": 15,
+    "pregameOddsFlattened": 2,
+    "normalizedRowsProduced": 12,
+    "snapshotsInserted": 12,
+    "snapshotsUpdated": 0,
+    "multiCallHistoryExposedByPublicReadOnlyEndpoints": false,
+    "naturalAcquisitionsObservedDuringAudit": 2,
+    "visibleCurrentCandidateCount": 6,
+    "sportsbooksReturnedInVisibleCandidates": ["Consensus"],
+    "individualBooksReturnedInVisibleCandidates": [],
+    "allVisibleStaleCandidatesBlocked": true
+  },
+  "providerBudget": {
+    "provider": "sportsdataio",
+    "dailyCallBudget": 1000,
+    "protectedReserve": 150,
+    "callsMadeToday": 117,
+    "usableRemaining": 733,
+    "hourlyRemaining": 6,
+    "evidenceLevel": "CONFIGURED_ONLY"
+  },
+  "adaptivePollingEconomics": {
+    "currentGranularity": "DATE",
+    "tenGameSlateRequestsPerDay": "37-43 under date-level acquisition",
+    "fifteenGameSlateRequestsPerDay": "37-43 under date-level acquisition",
+    "tenGameEventLevelEquivalent": "370-430",
+    "fifteenGameEventLevelEquivalent": "555-645",
+    "budgetCouldSupportCurrentDateLevelModel": true,
+    "pollingAloneFixesCurrentLag": false
+  },
+  "findings": {
+    "sportsDataIoFreshnessFinding": "Recent successful acquisition returned source evidence approximately 240 minutes older than capture time.",
+    "sportsDataIoPropsCapability": "Official documentation shows props/products exist, but current entitlement and runtime path do not prove production props readiness.",
+    "normalizationFinding": "NO_NORMALIZATION_LOSS",
+    "consensusSelectionFinding": "CONSENSUS_ROW_STALE",
+    "staleEvidenceActionable": false,
+    "productionPilotSafety": "CAN_CONTINUE_WITH_STALE_ACTIONABILITY_BLOCKS"
+  },
+  "rootCauseClassification": [
+    "PROVIDER_SOURCE_DELAY",
+    "CONSENSUS_ROW_STALE",
+    "PROVIDER_DATA_NOT_REAL_TIME_FOR_CURRENT_PATH"
+  ],
+  "notProven": [
+    "FRESHER_BOOK_ROWS_DISCARDED",
+    "NORMALIZATION_DEFECT",
+    "LATEST_ROW_SELECTION_DEFECT",
+    "APPLICATION_POLLING_TOO_SLOW_AS_PRIMARY_CAUSE"
+  ],
+  "providerAssessment": {
+    "theOddsApi": {
+      "assessment": "Recommended specialized current odds provider subject to account approval and certification.",
+      "strengths": ["bookmaker-specific MLB core markets", "bookmaker last_update timestamps", "documented US bookmakers", "player props on Business tier", "historical odds on paid tiers"],
+      "estimatedRecurringCost": "Professional public pricing $29/month for core markets; Business public pricing $99/month for props and historical archive at audit time"
+    },
+    "sportradar": {
+      "assessment": "Strong commercial alternative with sportsbook and props feeds, likely higher integration/commercial lift.",
+      "strengths": ["bookmaker coverage", "player props", "change-log style feeds"],
+      "estimatedRecurringCost": "UNKNOWN_PUBLIC_SELF_SERVE_NOT_PROVEN"
+    },
+    "sportsDataIoCurrent": {
+      "assessment": "Keep for stats/results/status; not recommended as sole live betting-price source without entitlement proof.",
+      "estimatedRecurringCost": "UNKNOWN_CURRENT_SUBSCRIPTION_NOT_EXPOSED"
+    }
+  },
+  "recommendedProviderArchitecture": "OPTION_B_SPORTSDATAIO_STATS_RESULTS_PLUS_SPECIALIZED_ODDS_PROVIDER",
+  "recommendedPrimaryOddsProvider": "The Odds API, pending human account decision and production certification",
+  "recommendedStatsResultsProvider": "SportsDataIO",
+  "recommendedPricePolicy": "CERTIFIED_BOOK_SET_OR_BEST_AVAILABLE_FRESH_BOOK_FOR_EDGE_EV_WITH_CONSENSUS_AS_CONTEXT",
+  "guardrailsUnchanged": {
+    "providerMigrationPerformed": false,
+    "schedulerCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "predictionLogicChanged": false,
+    "recommendationGatesChanged": false,
+    "freshnessThresholdChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false
+  },
+  "finalClassification": "ODDS_01_PASS_WITH_PROVIDER_ARCHITECTURE_RECOMMENDATION"
+}
