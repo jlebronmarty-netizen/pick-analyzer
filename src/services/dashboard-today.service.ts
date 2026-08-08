@@ -163,6 +163,7 @@ export type DashboardMarketAvailability =
 
 export type DashboardCanonicalSelector = {
   status: 'AVAILABLE' | 'EMPTY' | 'BLOCKED'
+  predictionId?: string | null
   eventId: string | null
   matchup: string | null
   market: string | null
@@ -174,6 +175,13 @@ export type DashboardCanonicalSelector = {
   modelProbability: number | null
   confidence: number | null
   directlyStoredPrice: boolean
+  priceBindingMode?: 'DIRECT' | 'COMPLEMENT' | 'UNAVAILABLE'
+  priceSourceMarket?: string | null
+  priceSourceSelection?: string | null
+  priceSourceLine?: number | null
+  priceSourceSnapshotId?: string | null
+  providerSourceTimestamp?: string | null
+  snapshotCapturedAt?: string | null
   priceState: 'AVAILABLE' | 'NO_OPPOSITE_PRICE' | 'NO_STORED_ODDS' | 'STALE_MARKET' | 'MARKET_MISMATCH' | 'UNKNOWN_PUSH' | 'UNAVAILABLE'
   americanOdds: number | null
   sportsbook: string | null
@@ -182,6 +190,9 @@ export type DashboardCanonicalSelector = {
   edge: number | null
   expectedValue: number | null
   freshness: 'FRESH' | 'AGING' | 'STALE' | 'UNKNOWN_TIMESTAMP'
+  productFreshness?: CurrentBoardCandidate['productFreshness'] | null
+  marketEvidenceFreshness?: string | null
+  snapshotRecencyTimestamp?: string | null
   blocker: string | null
   candidateUniverseSize: number
   rankingReason: string
@@ -960,6 +971,7 @@ function freshnessState(candidate: CurrentBoardCandidate): DashboardCanonicalSel
 function emptySelector(metricName: string, blocker: string, candidateUniverseSize: number): DashboardCanonicalSelector {
   return {
     status: 'EMPTY',
+    predictionId: null,
     eventId: null,
     matchup: null,
     market: null,
@@ -1050,18 +1062,28 @@ function groundedLifecycle(candidate: CurrentBoardCandidate) {
   return candidate.pregameSafe && candidate.boardLabel !== 'HISTORICAL' ? 'PREGAME' : 'BETTING_LOCKED'
 }
 
+function hasCanonicalPriceEvidence(candidate: CurrentBoardCandidate | null | undefined) {
+  const price = candidate?.canonicalPrice
+  return Boolean(
+    price &&
+      price.status === 'AVAILABLE' &&
+      price.americanOdds !== null &&
+      price.americanOdds !== undefined
+  )
+}
+
 function groundedPriceState(candidate: CurrentBoardCandidate) {
   const price = candidate.canonicalPrice
-  const aligned = price?.source === 'selected_stored_price' && price.americanOdds !== null && price.americanOdds !== undefined
+  const aligned = hasCanonicalPriceEvidence(candidate)
   if (!aligned) return price?.status ?? 'NO_ALIGNED_PRICE'
   if (isTerminalOrStartedStatus(candidate.eventStatus) || !candidate.pregameSafe) return 'EXPIRED_PREGAME_PRICE'
-  if (candidate.stale || price.status === 'STALE_MARKET') return 'STALE_PREGAME_PRICE'
+  if (candidate.stale || price?.status === 'STALE_MARKET') return 'STALE_PREGAME_PRICE'
   return 'ACTIVE_PREGAME_PRICE'
 }
 
 function mapPredictionToGroundedOpportunity(candidate: CurrentBoardCandidate) {
   const price = candidate.canonicalPrice
-  const aligned = price?.source === 'selected_stored_price' && price.americanOdds !== null && price.americanOdds !== undefined
+  const aligned = hasCanonicalPriceEvidence(candidate)
   const modelProbability = canonicalProbability(candidate)
   const confidence = canonicalConfidence(candidate)
   const priceState = groundedPriceState(candidate)
@@ -1379,11 +1401,12 @@ function selectorFromCandidate(
 ): DashboardCanonicalSelector {
   if (!candidate) return emptySelector(metricName, 'NO_ELIGIBLE_CANDIDATE', candidateUniverseSize)
   const price = candidate.canonicalPrice
-  const directlyStoredPrice = price?.source === 'selected_stored_price'
-  const alignedPrice = directlyStoredPrice && price?.americanOdds !== null && price?.americanOdds !== undefined
+  const directlyStoredPrice = price?.bindingMode === 'DIRECT' || (!price?.bindingMode && price?.source === 'selected_stored_price')
+  const alignedPrice = hasCanonicalPriceEvidence(candidate)
   const priceState = alignedPrice ? 'AVAILABLE' : price?.status ?? 'UNAVAILABLE'
   return {
     status: 'AVAILABLE',
+    predictionId: candidate.predictionId,
     eventId: candidate.eventId,
     matchup: candidate.matchup,
     market: candidate.market,
@@ -1394,7 +1417,14 @@ function selectorFromCandidate(
     metricValue,
     modelProbability: canonicalProbability(candidate),
     confidence: canonicalConfidence(candidate),
-    directlyStoredPrice: alignedPrice,
+    directlyStoredPrice,
+    priceBindingMode: price?.bindingMode ?? (alignedPrice ? 'DIRECT' : 'UNAVAILABLE'),
+    priceSourceMarket: price?.sourceMarketIdentity?.market ?? null,
+    priceSourceSelection: price?.sourceMarketIdentity?.selection ?? null,
+    priceSourceLine: price?.sourceMarketIdentity?.line ?? null,
+    priceSourceSnapshotId: price?.sourceMarketIdentity?.oddsSnapshotId ?? null,
+    providerSourceTimestamp: price?.sourceMarketIdentity?.sourceTimestamp ?? candidate.marketSourceTimestamp ?? null,
+    snapshotCapturedAt: price?.sourceMarketIdentity?.snapshotCaptureTimestamp ?? candidate.marketFreshnessTimestamp ?? null,
     priceState,
     americanOdds: alignedPrice ? price?.americanOdds ?? null : null,
     sportsbook: alignedPrice ? price?.sportsbook ?? null : null,
@@ -1403,6 +1433,9 @@ function selectorFromCandidate(
     edge: alignedPrice ? candidate.canonicalEv?.edge ?? null : null,
     expectedValue: alignedPrice ? candidate.canonicalEv?.expectedValue ?? null : null,
     freshness: freshnessState(candidate),
+    productFreshness: candidate.productFreshness ?? null,
+    marketEvidenceFreshness: candidate.productFreshness?.status ?? null,
+    snapshotRecencyTimestamp: price?.sourceMarketIdentity?.snapshotCaptureTimestamp ?? candidate.marketFreshnessTimestamp ?? null,
     blocker: alignedPrice ? null : priceState,
     candidateUniverseSize,
     rankingReason,
@@ -1447,13 +1480,7 @@ function buildDashboardCanonicalViewModel(input: {
     .slice()
     .sort((left, right) => (canonicalConfidence(right) ?? -1) - (canonicalConfidence(left) ?? -1))[0]
   const priced = candidates.filter((candidate) => {
-    const price = candidate.canonicalPrice
-    return Boolean(
-      price &&
-        price.source === 'selected_stored_price' &&
-        price.americanOdds !== null &&
-        price.americanOdds !== undefined
-    )
+    return hasCanonicalPriceEvidence(candidate)
   })
   const highestRankedPriced = priced.slice().sort((left, right) => Number(right.rankingScore ?? 0) - Number(left.rankingScore ?? 0))[0]
   const positiveEvCandidates = priced.filter((candidate) => (
@@ -1483,7 +1510,7 @@ function buildDashboardCanonicalViewModel(input: {
     const displayableMarketCount = eventCandidates.filter((candidate) => candidate.canonicalOutcome).length || finiteNumber(game.displayableMarketCount) || 0
     const storedOddsCount = finiteNumber(game.storedOddsCount) ?? eventCandidates.filter((candidate) => candidate.americanOdds !== null && candidate.americanOdds !== undefined).length
     const validPregamePredictionCount = eventCandidates.length || finiteNumber(game.validPregamePredictionCount) || 0
-    const alignedPriceCount = eventCandidates.filter((candidate) => candidate.canonicalPrice?.source === 'selected_stored_price' && candidate.canonicalPrice?.americanOdds !== null && candidate.canonicalPrice?.americanOdds !== undefined).length
+    const alignedPriceCount = eventCandidates.filter(hasCanonicalPriceEvidence).length
     const presentationLifecycle = presentationLifecycleFor(game)
     const marketAvailability = marketAvailabilityFor({
       presentationLifecycle,
@@ -1525,13 +1552,8 @@ function buildDashboardCanonicalViewModel(input: {
   const complementPriceViolations = candidates.filter((candidate) => (
     candidate.canonicalOutcome?.complementDerived &&
     (
-      candidate.canonicalPrice?.americanOdds !== null ||
-      candidate.canonicalPrice?.impliedProbability !== null ||
-      candidate.canonicalPrice?.sportsbook !== null ||
-      candidate.canonicalPrice?.oddsSnapshotId !== null ||
-      candidate.canonicalEv?.edge !== null ||
-      candidate.canonicalEv?.expectedValue !== null ||
-      candidate.canonicalPrice?.status !== 'NO_OPPOSITE_PRICE'
+      candidate.canonicalPrice?.bindingMode === 'DIRECT' ||
+      (candidate.canonicalPrice?.bindingMode !== 'COMPLEMENT' && candidate.canonicalPrice?.status !== 'NO_OPPOSITE_PRICE')
     )
   )).length
   const invalidTotalLineSigns = candidates.filter((candidate) => (
@@ -2011,8 +2033,7 @@ export async function getDashboardToday({
     .slice(0, 10)
   const boardBestValueData = displayCandidates
     .filter((candidate) => (
-      candidate.canonicalPrice?.source === 'selected_stored_price' &&
-      candidate.canonicalPrice?.status === 'AVAILABLE' &&
+      hasCanonicalPriceEvidence(candidate) &&
       candidate.marketAlignment?.freshnessStatus !== 'STALE' &&
       Number(candidate.canonicalEv?.edge ?? Number.NEGATIVE_INFINITY) > 0 &&
       Number(candidate.canonicalEv?.expectedValue ?? Number.NEGATIVE_INFINITY) > 0

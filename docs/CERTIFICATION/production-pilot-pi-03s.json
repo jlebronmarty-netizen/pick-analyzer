@@ -1,0 +1,59 @@
+{
+  "certification": "production-pilot-pi-03s",
+  "version": "1.0",
+  "status": "LOCAL_VALIDATION_COMPLETE_PRODUCTION_PROOF_PENDING",
+  "classification": "PI_03S_LOCAL_PASS_PENDING_PRODUCTION",
+  "startingCommit": "e38c95ee1030529b1b9fadcc91170ee786bc4aa3",
+  "runtimeCommit": null,
+  "productionCommit": null,
+  "productionPilotWeek": "ACTIVE",
+  "repairScope": [
+    "Dashboard Today canonical price availability",
+    "Homepage decision surface canonical evidence propagation",
+    "Freshness label clarity for decision cards"
+  ],
+  "canonicalEvidenceContract": {
+    "source": "Current Board canonicalPrice/canonicalEv/productFreshness",
+    "acceptedBindingModes": [
+      "DIRECT",
+      "COMPLEMENT"
+    ],
+    "syntheticOddsAllowed": false,
+    "providerCallsAdded": false,
+    "databaseWritesAdded": false
+  },
+  "surfaces": {
+    "rentPlay": "CANONICAL_CURRENT_BOARD_VIA_DASHBOARD_TODAY",
+    "moneylineBet": "CANONICAL_CURRENT_BOARD_VIA_DASHBOARD_TODAY",
+    "watchlist": "CANONICAL_CURRENT_BOARD_VIA_DASHBOARD_TODAY",
+    "smartParlay": "CANONICAL_CURRENT_BOARD_VIA_DASHBOARD_TODAY",
+    "mostLikely": "CANONICAL_CURRENT_BOARD",
+    "bestValue": "CANONICAL_CURRENT_BOARD",
+    "bettingWorkbench": "CANONICAL_CURRENT_BOARD",
+    "gameIntelligence": "CANONICAL_CURRENT_BOARD"
+  },
+  "protectedInvariants": {
+    "predictionProbabilityChanged": false,
+    "confidenceChanged": false,
+    "rankingChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "performanceDenominatorChanged": false,
+    "schedulerChanged": false,
+    "freshnessThresholdChanged": false
+  },
+  "validation": {
+    "build": "PASS_WITH_DUMMY_NON_SECRET_SUPABASE_PLACEHOLDERS",
+    "providerCallsFromCertification": 0,
+    "databaseMutationsFromCertification": 0,
+    "staleActionable": 0
+  },
+  "productionProof": {
+    "required": true,
+    "complementCandidateVerified": false,
+    "directCandidateVerified": false,
+    "homepageRentPlayVerified": false
+  }
+}
+

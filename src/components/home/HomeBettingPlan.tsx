@@ -8,6 +8,7 @@ type Tone = 'green' | 'yellow' | 'blue' | 'red' | 'gray'
 
 type Selector = {
   status?: 'AVAILABLE' | 'EMPTY' | 'BLOCKED'
+  predictionId?: string | null
   eventId?: string | null
   matchup?: string | null
   market?: string | null
@@ -24,6 +25,15 @@ type Selector = {
     marketTimestamp?: string | null
     nextPlannedRefreshAt?: string | null
   } | null
+  priceBindingMode?: 'DIRECT' | 'COMPLEMENT' | 'UNAVAILABLE'
+  priceSourceMarket?: string | null
+  priceSourceSelection?: string | null
+  priceSourceLine?: number | null
+  priceSourceSnapshotId?: string | null
+  providerSourceTimestamp?: string | null
+  snapshotCapturedAt?: string | null
+  marketEvidenceFreshness?: string | null
+  snapshotRecencyTimestamp?: string | null
   americanOdds?: number | null
   sportsbook?: string | null
   impliedProbability?: number | null
@@ -98,6 +108,7 @@ type ApiEnvelope = Record<string, unknown>
 
 type PlanPick = {
   id: string
+  predictionId: string | null
   label: string
   source: string
   sourceRank: number
@@ -107,6 +118,11 @@ type PlanPick = {
   market: string
   marketKey: string
   odds: number | null
+  priceBindingMode?: 'DIRECT' | 'COMPLEMENT' | 'UNAVAILABLE'
+  priceSourceMarket?: string | null
+  priceSourceSelection?: string | null
+  priceSourceLine?: number | null
+  priceSourceSnapshotId?: string | null
   sportsbook: string
   probability: number | null
   confidence: number | null
@@ -116,6 +132,8 @@ type PlanPick = {
   modelVersion: string
   freshnessActionability?: string
   marketTimestamp?: string | null
+  providerSourceTimestamp?: string | null
+  snapshotCapturedAt?: string | null
   nextRefreshAt?: string | null
   evidence: string[]
   official: boolean
@@ -186,6 +204,11 @@ type RentPlayContract = {
   selectionKey: string | null
   selectionLabel: string | null
   americanOdds: number | null
+  priceBindingMode?: 'DIRECT' | 'COMPLEMENT' | 'UNAVAILABLE'
+  priceSourceMarket?: string | null
+  priceSourceSelection?: string | null
+  priceSourceLine?: number | null
+  priceSourceSnapshotId?: string | null
   decimalOdds: number | null
   bookmaker: string | null
   provider: string | null
@@ -196,6 +219,8 @@ type RentPlayContract = {
   edge: number | null
   expectedValue: number | null
   marketTimestamp: string | null
+  providerSourceTimestamp?: string | null
+  snapshotCapturedAt?: string | null
   marketAgeMinutes: number | null
   freshnessStatus: string
   freshnessTargetMinutes: number | null
@@ -233,6 +258,7 @@ type SmartParlayLeg = {
   selectionKey: string
   selectionLabel: string
   americanOdds: number | null
+  priceBindingMode?: 'DIRECT' | 'COMPLEMENT' | 'UNAVAILABLE'
   decimalOdds: number | null
   bookmaker: string | null
   provider: string | null
@@ -242,6 +268,8 @@ type SmartParlayLeg = {
   edge: number | null
   expectedValue: number | null
   marketTimestamp: string | null
+  providerSourceTimestamp?: string | null
+  snapshotCapturedAt?: string | null
   marketAgeMinutes: number | null
   freshnessStatus: string
   freshnessTargetMinutes: number | null
@@ -339,6 +367,7 @@ type WatchlistItem = {
   marketLabel: string
   selectionLabel: string
   americanOdds: number | null
+  priceBindingMode?: 'DIRECT' | 'COMPLEMENT' | 'UNAVAILABLE'
   modelProbability: number | null
   confidence: number | null
   edge: number | null
@@ -346,6 +375,8 @@ type WatchlistItem = {
   freshnessStatus: string
   freshnessActionability: string
   marketTimestamp: string | null
+  providerSourceTimestamp?: string | null
+  snapshotCapturedAt?: string | null
   marketAgeMinutes: number | null
   nextPlannedRefreshAt: string | null
   reason: WatchlistReason
@@ -408,6 +439,11 @@ type MoneylineBetContract = {
   selectionKey: string | null
   selectionLabel: string | null
   americanOdds: number | null
+  priceBindingMode?: 'DIRECT' | 'COMPLEMENT' | 'UNAVAILABLE'
+  priceSourceMarket?: string | null
+  priceSourceSelection?: string | null
+  priceSourceLine?: number | null
+  priceSourceSnapshotId?: string | null
   decimalOdds: number | null
   bookmaker: string | null
   provider: string | null
@@ -418,6 +454,8 @@ type MoneylineBetContract = {
   edge: number | null
   expectedValue: number | null
   marketTimestamp: string | null
+  providerSourceTimestamp?: string | null
+  snapshotCapturedAt?: string | null
   marketAgeMinutes: number | null
   freshnessStatus: string
   freshnessTargetMinutes: number | null
@@ -584,7 +622,8 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
     selector.priceState !== 'STALE_PREGAME_PRICE' &&
     (official || probability !== null || confidence !== null)
   return {
-    id,
+    id: selector.predictionId ?? id,
+    predictionId: selector.predictionId ?? null,
     label: source,
     source,
     sourceRank: ['Official Pick', 'Best Value', 'Priced Market', 'Most Likely', 'Highest Probability', 'Grounded Opportunity'].indexOf(source),
@@ -594,6 +633,11 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
     market: label(selector.marketLabel ?? selector.market, 'Market pending'),
     marketKey: String(selector.market ?? selector.marketLabel ?? '').toLowerCase(),
     odds: numberOrNull(selector.americanOdds),
+    priceBindingMode: selector.priceBindingMode,
+    priceSourceMarket: selector.priceSourceMarket ?? null,
+    priceSourceSelection: selector.priceSourceSelection ?? null,
+    priceSourceLine: numberOrNull(selector.priceSourceLine),
+    priceSourceSnapshotId: selector.priceSourceSnapshotId ?? null,
     sportsbook: label(selector.sportsbook, 'Sportsbook pending'),
     probability,
     confidence,
@@ -603,6 +647,8 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
     modelVersion: 'Model version unavailable',
     freshnessActionability,
     marketTimestamp: selector.productFreshness?.marketTimestamp ?? null,
+    providerSourceTimestamp: selector.providerSourceTimestamp ?? null,
+    snapshotCapturedAt: selector.snapshotCapturedAt ?? selector.snapshotRecencyTimestamp ?? null,
     nextRefreshAt: selector.productFreshness?.nextPlannedRefreshAt ?? null,
     evidence: [
       `Source: ${source}`,
@@ -632,6 +678,7 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
     .filter(Boolean)
   return {
     id,
+    predictionId: typeof row.predictionId === 'string' ? row.predictionId : typeof row.id === 'string' ? row.id : null,
     label: source,
     source,
     sourceRank: ['Official Pick', 'Best Value', 'Priced Market', 'Most Likely', 'Highest Probability', 'Grounded Opportunity'].indexOf(source),
@@ -641,6 +688,11 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
     market: label(row.marketLabel ?? row.market, 'Market pending'),
     marketKey: String(row.market ?? row.marketLabel ?? '').toLowerCase(),
     odds: numberOrNull(row.americanOdds ?? row.odds),
+    priceBindingMode: (row.canonicalPrice && typeof row.canonicalPrice === 'object' ? (row.canonicalPrice as Record<string, unknown>).bindingMode : row.priceBindingMode) as PlanPick['priceBindingMode'],
+    priceSourceMarket: null,
+    priceSourceSelection: null,
+    priceSourceLine: null,
+    priceSourceSnapshotId: typeof row.oddsSnapshotId === 'string' ? row.oddsSnapshotId : null,
     sportsbook: label(row.sportsbook, 'Sportsbook pending'),
     probability,
     confidence,
@@ -650,6 +702,8 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
     modelVersion,
     freshnessActionability,
     marketTimestamp: typeof productFreshness?.marketTimestamp === 'string' ? productFreshness.marketTimestamp : null,
+    providerSourceTimestamp: typeof productFreshness?.marketTimestamp === 'string' ? productFreshness.marketTimestamp : null,
+    snapshotCapturedAt: null,
     nextRefreshAt: typeof productFreshness?.nextPlannedRefreshAt === 'string' ? productFreshness.nextPlannedRefreshAt : null,
     evidence: [
       ...evidence.slice(0, 3),
@@ -916,6 +970,11 @@ function buildMoneylineBetContract(plan: ReturnType<typeof pickPlan>, rentPlay: 
     selectionKey: candidate?.selection ?? null,
     selectionLabel: candidate?.selection ?? null,
     americanOdds: candidate?.odds ?? null,
+    priceBindingMode: candidate?.priceBindingMode,
+    priceSourceMarket: candidate?.priceSourceMarket ?? null,
+    priceSourceSelection: candidate?.priceSourceSelection ?? null,
+    priceSourceLine: candidate?.priceSourceLine ?? null,
+    priceSourceSnapshotId: candidate?.priceSourceSnapshotId ?? null,
     decimalOdds: candidate ? decimalFromAmerican(candidate.odds) : null,
     bookmaker: candidate?.sportsbook ?? null,
     provider: candidate?.sportsbook ?? null,
@@ -926,6 +985,8 @@ function buildMoneylineBetContract(plan: ReturnType<typeof pickPlan>, rentPlay: 
     edge: candidate?.edge ?? null,
     expectedValue: candidate?.ev ?? null,
     marketTimestamp: candidate?.marketTimestamp ?? null,
+    providerSourceTimestamp: candidate?.providerSourceTimestamp ?? null,
+    snapshotCapturedAt: candidate?.snapshotCapturedAt ?? null,
     marketAgeMinutes: minutesSince(candidate?.marketTimestamp ?? null),
     freshnessStatus: candidate?.freshness ?? 'UNKNOWN',
     freshnessTargetMinutes: 10,
@@ -1025,6 +1086,7 @@ function planPickToParlayLeg(
     selectionKey: pick.selection,
     selectionLabel: pick.selection,
     americanOdds: pick.odds,
+    priceBindingMode: pick.priceBindingMode,
     decimalOdds: decimalFromAmerican(pick.odds),
     bookmaker: pick.sportsbook,
     provider: pick.sportsbook,
@@ -1034,6 +1096,8 @@ function planPickToParlayLeg(
     edge: pick.edge,
     expectedValue: pick.ev,
     marketTimestamp: pick.marketTimestamp ?? null,
+    providerSourceTimestamp: pick.providerSourceTimestamp ?? null,
+    snapshotCapturedAt: pick.snapshotCapturedAt ?? null,
     marketAgeMinutes: minutesSince(pick.marketTimestamp ?? null),
     freshnessStatus: pick.freshness,
     freshnessTargetMinutes: 10,
@@ -1342,6 +1406,7 @@ function planPickToWatchlistItem(
     marketLabel: item.market,
     selectionLabel: item.selection,
     americanOdds: item.odds,
+    priceBindingMode: item.priceBindingMode,
     modelProbability: item.probability,
     confidence: item.confidence,
     edge: item.edge,
@@ -1349,6 +1414,8 @@ function planPickToWatchlistItem(
     freshnessStatus: item.freshness,
     freshnessActionability: item.freshnessActionability ?? 'INFORMATIONAL_ONLY',
     marketTimestamp: item.marketTimestamp ?? null,
+    providerSourceTimestamp: item.providerSourceTimestamp ?? null,
+    snapshotCapturedAt: item.snapshotCapturedAt ?? null,
     marketAgeMinutes: minutesSince(item.marketTimestamp ?? null),
     nextPlannedRefreshAt: item.nextRefreshAt ?? null,
     reason,
@@ -1827,7 +1894,7 @@ function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
         <MiniMetric label="Current Moneyline" value={odds(moneyline.americanOdds)} />
         <MiniMetric label="Win Probability" value={pct(moneyline.modelProbability)} />
         <MiniMetric label="Implied Probability" value={pct(moneyline.impliedProbability)} />
-        <MiniMetric label="Freshness" value={priceFreshness} />
+        <MiniMetric label="Market Evidence" value={priceFreshness} />
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-4">
@@ -1841,6 +1908,8 @@ function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <MiniText label="Candidate Rank" value={moneyline.rankWithinMoneylineUniverse ? `${moneyline.rankWithinMoneylineUniverse} of ${moneyline.candidateCount}` : 'Unavailable'} />
+        <MiniText label="Price Binding" value={moneyline.priceBindingMode ?? 'UNAVAILABLE'} />
+        <MiniText label="Snapshot Captured" value={compactDate(moneyline.snapshotCapturedAt ?? null)} />
         <MiniText label="Actionability" value={moneyline.actionability.replaceAll('_', ' ')} />
         <MiniText label="Value" value={`Edge ${signedPct(moneyline.edge)} / EV ${signedPct(moneyline.expectedValue)}`} />
       </div>
@@ -1941,7 +2010,7 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <MiniMetric label="Current Odds" value={odds(rentPlay.americanOdds)} />
         <MiniMetric label="Win Probability" value={pct(rentPlay.modelProbability)} />
-        <MiniMetric label="Freshness" value={rentPlay.marketAgeMinutes === null ? rentPlay.freshnessStatus : `${rentPlay.marketAgeMinutes} min`} />
+        <MiniMetric label="Market Evidence" value={rentPlay.marketAgeMinutes === null ? rentPlay.freshnessStatus : `${rentPlay.marketAgeMinutes} min`} />
         <MiniMetric label="Actionability" value={rentPlay.actionability.replaceAll('_', ' ')} />
       </div>
 
@@ -1969,10 +2038,12 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
             <MiniText label="Most Likely Distinction" value="Most Likely is the highest modeled probability in its universe. Rent Play is the safest currently actionable wager only after probability, value, freshness and policy gates pass." />
             <MiniText label="Official Pick Distinction" value={rentPlay.officialPick ? 'This Rent Play overlaps with an existing Official Pick.' : 'This candidate is not promoted into Official Picks by MC-08B.'} />
             <MiniText label="Provider / Source" value={`${rentPlay.provider ?? 'Unavailable'} / ${rentPlay.sourceSurface}`} />
-            <MiniText label="Last Market Update" value={compactDate(rentPlay.marketTimestamp)} />
+            <MiniText label="Price Binding" value={rentPlay.priceBindingMode ?? 'UNAVAILABLE'} />
+            <MiniText label="Market Evidence Time" value={compactDate(rentPlay.providerSourceTimestamp ?? rentPlay.marketTimestamp)} />
+            <MiniText label="Snapshot Captured" value={compactDate(rentPlay.snapshotCapturedAt ?? null)} />
             <MiniText label="Next Planned Refresh" value={compactDate(rentPlay.nextPlannedRefreshAt)} />
             <MiniText label="Edge and EV" value={`Edge ${signedPct(rentPlay.edge)} / EV ${signedPct(rentPlay.expectedValue)}`} />
-            <MiniText label="Observed At" value={`${compactDate(rentPlay.observedAt)}. This is not used as market freshness.`} />
+            <MiniText label="Observed At" value={`${compactDate(rentPlay.observedAt)}. This is not used as market evidence freshness.`} />
           </div>
           <div className="grid gap-3">
             <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
@@ -2056,7 +2127,7 @@ function SmartParlayBuilder({ parlay }: { parlay: SmartParlayContract }) {
         <MiniMetric label="Available Legs" value={parlay.availableLegs.length} />
         <MiniMetric label="Combined Odds" value={selectedSummary.combinedOddsAvailable ? odds(selectedSummary.combinedAmericanOdds) : 'Unavailable' } />
         <MiniMetric label="Joint Probability" value="Unavailable" />
-        <MiniMetric label="Stalest Leg" value={selectedSummary.stalestLegAgeMinutes === null ? 'Unavailable' : `${selectedSummary.stalestLegAgeMinutes} min`} />
+        <MiniMetric label="Stalest Market Evidence" value={selectedSummary.stalestLegAgeMinutes === null ? 'Unavailable' : `${selectedSummary.stalestLegAgeMinutes} min`} />
       </div>
 
       <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900/70 p-4">
@@ -2105,6 +2176,7 @@ function SmartParlayBuilder({ parlay }: { parlay: SmartParlayContract }) {
                     <span>{pct(leg.modelProbability)}</span>
                     <span>{odds(leg.americanOdds)}</span>
                     <span>{leg.marketAgeMinutes === null ? leg.freshnessStatus : `${leg.marketAgeMinutes} min`}</span>
+                    <span>{leg.priceBindingMode ?? 'UNAVAILABLE'}</span>
                   </span>
                 </label>
               )
@@ -2117,7 +2189,7 @@ function SmartParlayBuilder({ parlay }: { parlay: SmartParlayContract }) {
             <MiniText label="Actionability" value={selectedSummary.parlayActionability.replaceAll('_', ' ')} />
             <MiniText label="Combined Odds" value={selectedSummary.combinedOddsAvailable ? `${odds(selectedSummary.combinedAmericanOdds)} / decimal ${selectedSummary.combinedDecimalOdds}` : 'Unavailable until every selected leg has canonical odds.'} />
             <MiniText label="Joint Probability" value={`${selectedSummary.jointProbabilityMethod}. ${selectedSummary.jointProbabilityEvidence.join(' ')}`} />
-            <MiniText label="Freshness" value={selectedSummary.allLegsFresh ? 'All selected legs are fresh.' : `Limited by ${selectedSummary.stalestLegId ?? 'an unavailable or stale leg'}.`} />
+            <MiniText label="Market Evidence" value={selectedSummary.allLegsFresh ? 'All selected legs have actionable market evidence.' : `Limited by ${selectedSummary.stalestLegId ?? 'an unavailable or stale leg'}.`} />
             <MiniText label="Correlation" value={`${selectedSummary.correlationStatus}. ${selectedSummary.correlationReasons.join(' / ')}`} />
             <MiniText label="Blocking Legs" value={selectedSummary.blockingLegIds.length ? selectedSummary.blockingLegIds.join(' / ') : 'None'} />
             <MiniText label="Why These Legs" value={selectedSummary.supportingReasons.join(' / ')} />
@@ -2202,7 +2274,7 @@ function Watchlist({ watchlist, isPreferredTeamLabel }: { watchlist: WatchlistCo
               <MiniText label="Probability" value={pct(item.modelProbability)} />
               <MiniText label="Confidence" value={pct(item.confidence)} />
               <MiniText label="Odds" value={odds(item.americanOdds)} />
-              <MiniText label="Freshness" value={item.marketAgeMinutes === null ? item.freshnessStatus : `${item.marketAgeMinutes} min`} />
+              <MiniText label="Market Evidence" value={item.marketAgeMinutes === null ? item.freshnessStatus : `${item.marketAgeMinutes} min`} />
             </div>
 
             <details className="mt-4 rounded-lg border border-slate-800 bg-slate-950/70 p-3" data-mc08e-watchlist-item-expanded="true">
@@ -2222,7 +2294,9 @@ function Watchlist({ watchlist, isPreferredTeamLabel }: { watchlist: WatchlistCo
                   item.mostLikely ? 'Most Likely' : '',
                   item.bestValue ? 'Best Value' : '',
                 ].filter(Boolean).join(' / ') || 'No primary-surface overlap.'} />
-                <MiniText label="Market Timestamp" value={compactDate(item.marketTimestamp)} />
+                <MiniText label="Price Binding" value={item.priceBindingMode ?? 'UNAVAILABLE'} />
+                <MiniText label="Market Evidence Time" value={compactDate(item.providerSourceTimestamp ?? item.marketTimestamp)} />
+                <MiniText label="Snapshot Captured" value={compactDate(item.snapshotCapturedAt ?? null)} />
                 <MiniText label="Next Planned Refresh" value={compactDate(item.nextPlannedRefreshAt)} />
                 <div className="grid gap-2">
                   {item.eligibilityGates.map((gateItem) => (
