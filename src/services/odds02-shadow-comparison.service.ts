@@ -127,6 +127,9 @@ type ShadowSnapshot = {
   scope: 'SHADOW'
   providerEventId: string
   canonicalEventId: string | null
+  homeTeam: string | null
+  awayTeam: string | null
+  commenceTime: string | null
   mappingStatus: 'MAPPED' | 'AMBIGUOUS' | 'UNMAPPED'
   mappingReason: string
   matchup: string
@@ -142,8 +145,46 @@ type ShadowSnapshot = {
   captureTimestamp: string
 }
 
+type FullMarketEvidenceRow = {
+  eventId: string
+  canonicalEventId: string | null
+  providerEventId: string
+  homeTeam: string | null
+  awayTeam: string | null
+  commenceTime: string | null
+  bookmakerKey: string
+  bookmaker: string
+  market: ShadowSnapshot['market']
+  providerMarket: string
+  selection: string
+  line: number | null
+  price: number
+  providerSourceTimestamp: string | null
+  capturedAt: string
+  mappingStatus: ShadowSnapshot['mappingStatus']
+  mappingReason: string
+  freshnessStatus: 'FRESH' | 'AGING' | 'STALE' | 'UNKNOWN'
+  sourceAgeMinutes: number | null
+}
+
 function nowIso() {
   return new Date().toISOString()
+}
+
+function ageMinutesAt(timestamp: string | null, now: string) {
+  if (!timestamp) return null
+  const then = Date.parse(timestamp)
+  const at = Date.parse(now)
+  if (!Number.isFinite(then) || !Number.isFinite(at)) return null
+  return Math.max(0, Math.round((at - then) / 60000))
+}
+
+function evidenceFreshnessStatus(timestamp: string | null, capturedAt: string): FullMarketEvidenceRow['freshnessStatus'] {
+  const age = ageMinutesAt(timestamp, capturedAt)
+  if (age === null) return 'UNKNOWN'
+  if (age <= 15) return 'FRESH'
+  if (age <= 30) return 'AGING'
+  return 'STALE'
 }
 
 function shadowApiKey() {
@@ -370,6 +411,9 @@ function normalizeSnapshots(events: ProviderEvent[], candidates: CurrentBoardCan
             scope: 'SHADOW',
             providerEventId: event.id,
             canonicalEventId: mapped.eventId,
+            homeTeam: typeof event.home_team === 'string' ? event.home_team : null,
+            awayTeam: typeof event.away_team === 'string' ? event.away_team : null,
+            commenceTime: validIso(event.commence_time),
             mappingStatus: mapped.status,
             mappingReason: mapped.reason,
             matchup: mapped.matchup,
@@ -389,6 +433,30 @@ function normalizeSnapshots(events: ProviderEvent[], candidates: CurrentBoardCan
     }
   }
   return { snapshots, mappings: Array.from(mappings.values()) }
+}
+
+function fullMarketEvidenceRows(snapshots: ShadowSnapshot[]): FullMarketEvidenceRow[] {
+  return snapshots.map((snapshot) => ({
+    eventId: snapshot.canonicalEventId ?? snapshot.providerEventId,
+    canonicalEventId: snapshot.canonicalEventId,
+    providerEventId: snapshot.providerEventId,
+    homeTeam: snapshot.homeTeam,
+    awayTeam: snapshot.awayTeam,
+    commenceTime: snapshot.commenceTime,
+    bookmakerKey: snapshot.bookmakerKey,
+    bookmaker: snapshot.bookmaker,
+    market: snapshot.market,
+    providerMarket: snapshot.providerMarket,
+    selection: snapshot.selection,
+    line: snapshot.line,
+    price: snapshot.price,
+    providerSourceTimestamp: snapshot.sourceTimestamp,
+    capturedAt: snapshot.captureTimestamp,
+    mappingStatus: snapshot.mappingStatus,
+    mappingReason: snapshot.mappingReason,
+    freshnessStatus: evidenceFreshnessStatus(snapshot.sourceTimestamp, snapshot.captureTimestamp),
+    sourceAgeMinutes: ageMinutesAt(snapshot.sourceTimestamp, snapshot.captureTimestamp),
+  }))
 }
 
 function priceRank(price: number) {
@@ -643,6 +711,7 @@ export async function runOdds02ShadowComparison(options: RunOptions = {}) {
   const ages = sourceAges(candidates, snapshots, captureTimestamp)
   const requestsUsed = calls.reduce((sum, call) => sum + (call.requestsLast ?? 1), 0)
   const coverageSummary = coverage(snapshots)
+  const fullMarketEvidence = fullMarketEvidenceRows(snapshots)
   const ariCaseStudy = comparisons.find((item) => item.matchup === 'LAD @ ARI' && item.market === 'spread' && String(item.selection).includes('ARI')) ??
     comparisons.find((item) => item.exactShadowMatches > 0) ?? null
 
@@ -672,6 +741,34 @@ export async function runOdds02ShadowComparison(options: RunOptions = {}) {
     ambiguousEvents: ambiguousEvents.size,
     mappings,
     shadowSnapshots: snapshots.length,
+    fullMarketEvidenceContract: {
+      version: 'odds_full_market_evidence_v1',
+      scope: 'PROTECTED_SHADOW_ONLY',
+      rowCount: fullMarketEvidence.length,
+      fields: [
+        'eventId',
+        'canonicalEventId',
+        'providerEventId',
+        'homeTeam',
+        'awayTeam',
+        'commenceTime',
+        'bookmaker',
+        'market',
+        'selection',
+        'line',
+        'price',
+        'providerSourceTimestamp',
+        'capturedAt',
+        'mappingStatus',
+        'mappingReason',
+        'freshnessStatus',
+        'sourceAgeMinutes',
+      ],
+      secretsIncluded: false,
+      rawRequestMetadataIncluded: false,
+      productionAuthorityChanged: false,
+    },
+    fullMarketEvidence,
     storage: {
       scope: 'IN_MEMORY_CERTIFICATION_ARTIFACT_ONLY',
       provider: PROVIDER,

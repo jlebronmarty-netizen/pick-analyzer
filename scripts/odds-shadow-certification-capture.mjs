@@ -105,8 +105,152 @@ function validateTopLevelApiOkPayload(payload, { live = false } = {}) {
     for (const field of ['eventsReturned', 'eventsMapped', 'eventsUnmapped', 'ambiguousEvents', 'shadowSnapshots', 'comparisons', 'coverage', 'calls']) {
       if (!(field in object)) errors.push(`${field} missing`)
     }
+    if ('fullMarketEvidence' in object && !Array.isArray(object.fullMarketEvidence)) errors.push('fullMarketEvidence must be an array when present')
+    if ('fullMarketEvidenceContract' in object) {
+      const contract = object.fullMarketEvidenceContract
+      if (!contract || typeof contract !== 'object') errors.push('fullMarketEvidenceContract must be object when present')
+      if (contract?.secretsIncluded !== false) errors.push('fullMarketEvidenceContract.secretsIncluded must be false')
+      if (contract?.rawRequestMetadataIncluded !== false) errors.push('fullMarketEvidenceContract.rawRequestMetadataIncluded must be false')
+      if (contract?.productionAuthorityChanged !== false) errors.push('fullMarketEvidenceContract.productionAuthorityChanged must be false')
+    }
   }
   return { ok: errors.length === 0, errors }
+}
+
+function sameLine(left, right) {
+  if (left === null && right === null) return true
+  if (left === null || right === null) return false
+  return Math.abs(Number(left) - Number(right)) < 0.001
+}
+
+function lineKey(value) {
+  return value === null || value === undefined ? 'null' : Number(value).toFixed(3)
+}
+
+function identityKey(row) {
+  return [
+    row.provider ?? 'the-odds-api',
+    row.canonicalEventId ?? row.providerEventId ?? row.eventId ?? 'unmapped',
+    row.bookmakerKey ?? row.bookmaker ?? 'unknown_book',
+    row.market ?? 'unknown_market',
+    row.selection ?? 'unknown_selection',
+    lineKey(row.line),
+  ].join('|')
+}
+
+function fresh(row) {
+  return row.freshnessStatus === 'FRESH' || row.freshnessStatus === 'AGING'
+}
+
+function americanValue(price) {
+  const value = Number(price)
+  if (!Number.isFinite(value) || value === 0) return null
+  return value > 0 ? 1 + value / 100 : 1 + 100 / Math.abs(value)
+}
+
+function bestFreshExactLinePrice(rows, target) {
+  const exact = rows.filter((row) => (
+    fresh(row) &&
+    row.canonicalEventId === target.eventId &&
+    row.market === target.market &&
+    row.selection === target.selection &&
+    sameLine(row.line, target.line)
+  ))
+  const ranked = exact
+    .map((row) => ({ row, value: americanValue(row.price) }))
+    .filter((item) => item.value !== null)
+    .sort((left, right) => right.value - left.value)
+  const best = ranked[0]?.row ?? null
+  return best
+    ? {
+        status: 'FOUND',
+        bookmaker: best.bookmaker,
+        price: best.price,
+        line: best.line,
+        providerSourceTimestamp: best.providerSourceTimestamp,
+        freshnessStatus: best.freshnessStatus,
+      }
+    : { status: 'NO_FRESH_EXACT_LINE_PRICE' }
+}
+
+function classifyLineMovement(predictionLine, currentLines) {
+  const lines = Array.from(new Set(currentLines.filter((value) => Number.isFinite(Number(value))).map(Number))).sort((a, b) => a - b)
+  if (!lines.length) return { classification: 'NO_CURRENT_MARKET', direction: 'UNKNOWN', currentLines: lines, closestLine: null, delta: null }
+  if (!Number.isFinite(Number(predictionLine))) return { classification: 'UNKNOWN', direction: 'UNKNOWN', currentLines: lines, closestLine: null, delta: null }
+  const line = Number(predictionLine)
+  if (lines.some((value) => sameLine(value, line))) return { classification: 'EXACT_LINE_AVAILABLE', direction: 'UNCHANGED', currentLines: lines, closestLine: line, delta: 0 }
+  const closestLine = lines.reduce((best, value) => Math.abs(value - line) < Math.abs(best - line) ? value : best, lines[0])
+  const delta = closestLine - line
+  const abs = Math.abs(delta)
+  const classification = abs === 0.5 ? 'HALF_POINT_MOVE' : abs === 1 ? 'FULL_POINT_MOVE' : abs > 1 ? 'MULTI_POINT_MOVE' : 'ALTERNATE_LINES_AVAILABLE'
+  return { classification, direction: delta > 0 ? 'UP' : 'DOWN', currentLines: lines, closestLine, delta }
+}
+
+function marketEvidenceMetrics(rows, predictions = []) {
+  const mapped = rows.filter((row) => row.mappingStatus === 'MAPPED' && row.canonicalEventId)
+  const events = Array.from(new Set(mapped.map((row) => row.canonicalEventId)))
+  const books = Array.from(new Set(mapped.map((row) => row.bookmaker))).sort()
+  const byMarket = (market) => mapped.filter((row) => row.market === market)
+  const hasMarket = (eventId, market) => mapped.some((row) => row.canonicalEventId === eventId && row.market === market)
+  const exactCoverage = (market) => predictions.filter((prediction) => prediction.market === market).filter((prediction) => (
+    mapped.some((row) => (
+      row.canonicalEventId === prediction.eventId &&
+      row.market === prediction.market &&
+      row.selection === prediction.selection &&
+      sameLine(row.line, prediction.line)
+    ))
+  )).length
+  const lineMovement = predictions.map((prediction) => {
+    const lines = mapped
+      .filter((row) => row.canonicalEventId === prediction.eventId && row.market === prediction.market && row.selection === prediction.selection)
+      .map((row) => row.line)
+    return { ...prediction, ...classifyLineMovement(prediction.line, lines) }
+  })
+  return {
+    rowCount: rows.length,
+    identityCount: new Set(rows.map(identityKey)).size,
+    mappedRows: mapped.length,
+    eventsReturned: new Set(rows.map((row) => row.providerEventId ?? row.eventId)).size,
+    eventsMapped: events.length,
+    books,
+    moneylineBettableCoverage: events.filter((eventId) => hasMarket(eventId, 'moneyline')).length,
+    runLineBettableCoverage: events.filter((eventId) => hasMarket(eventId, 'spread')).length,
+    totalBettableCoverage: events.filter((eventId) => hasMarket(eventId, 'total')).length,
+    runLineExactLineCoverage: exactCoverage('spread'),
+    totalExactLineCoverage: exactCoverage('total'),
+    marketRows: {
+      moneyline: byMarket('moneyline').length,
+      spread: byMarket('spread').length,
+      total: byMarket('total').length,
+    },
+    freshnessByMarket: ['moneyline', 'spread', 'total'].reduce((acc, market) => {
+      const rowsForMarket = byMarket(market)
+      acc[market] = {
+        fresh: rowsForMarket.filter((row) => row.freshnessStatus === 'FRESH').length,
+        aging: rowsForMarket.filter((row) => row.freshnessStatus === 'AGING').length,
+        stale: rowsForMarket.filter((row) => row.freshnessStatus === 'STALE').length,
+        unknown: rowsForMarket.filter((row) => row.freshnessStatus === 'UNKNOWN').length,
+      }
+      return acc
+    }, {}),
+    priceDispersion: predictions.map((prediction) => {
+      const prices = mapped
+        .filter((row) => row.canonicalEventId === prediction.eventId && row.market === prediction.market && row.selection === prediction.selection && sameLine(row.line, prediction.line))
+        .map((row) => Number(row.price))
+        .filter(Number.isFinite)
+      return {
+        predictionId: prediction.predictionId ?? null,
+        eventId: prediction.eventId,
+        market: prediction.market,
+        selection: prediction.selection,
+        line: prediction.line,
+        count: prices.length,
+        min: prices.length ? Math.min(...prices) : null,
+        max: prices.length ? Math.max(...prices) : null,
+      }
+    }),
+    lineMovement,
+  }
 }
 
 function extractCertificationMetrics(payload) {
@@ -125,6 +269,8 @@ function extractCertificationMetrics(payload) {
     eventsUnmapped: payload.eventsUnmapped ?? null,
     ambiguousEvents: payload.ambiguousEvents ?? null,
     shadowSnapshots: payload.shadowSnapshots ?? null,
+    fullMarketEvidenceRows: Array.isArray(payload.fullMarketEvidence) ? payload.fullMarketEvidence.length : null,
+    fullMarketEvidenceContract: payload.fullMarketEvidenceContract ?? null,
     bookmakers: payload.coverage?.bookmakers ?? [],
     comparisons: Array.isArray(payload.comparisons) ? payload.comparisons.length : null,
     sourceAges: payload.sourceAges ?? null,
@@ -200,7 +346,10 @@ if (import.meta.url === `file://${process.argv[1].replaceAll('\\', '/')}` || pro
 export {
   DEFAULT_CAPTURE_DIR,
   assertSecretSafe,
+  bestFreshExactLinePrice,
+  classifyLineMovement,
   extractCertificationMetrics,
+  marketEvidenceMetrics,
   parseCapturedJson,
   validateTopLevelApiOkPayload,
   writeCapture,
