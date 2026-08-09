@@ -411,3 +411,11 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - Stale source evidence did not become actionable, Official Pick, Rent Play actionable or Smart Parlay safe-leg evidence.
 - Prior-day reconciliation balanced: 42 canonical predictions = 24 settled + 18 valid pending + 0 blocked; silent pending remained 0. The 18 pending rows belong to six `STARTED`/`scheduled` late events without imported authoritative results. First missing step is result import.
 - No runtime repair was made. Production Pilot Week remains ACTIVE with monitoring. MC-03 was not started.
+
+# 2026-08-09 ODDS-02G Full-Market Wide Sample
+
+- Status: ODDS_02G_WIDE_SAMPLE_CAPTURED_MORE_SHADOW_EVIDENCE_REQUIRED.
+- One authorized protected production shadow request was executed against commit `6104dc3e9b73ec528d1aa0faef6f5f1885f6276a`.
+- The capture returned 966 full-market evidence rows, 13 mapped Current Board events, 2 extra unmapped provider events and 0 ambiguous mappings.
+- Moneyline, Run Line and Total bettable event coverage were 100%; Total exact-line coverage was 15.38% because 11 Total predictions had moved lines.
+- SportsDataIO remains production odds authority. The Odds API remains shadow-only. ODDS-03 and MC-03 were not started.

@@ -32,3 +32,4 @@ Production Pilot Week is the monitored real-world validation period after MC-08H
 - [HR-03: Calibration Shadow Validation](HR_03_CALIBRATION_SHADOW_VALIDATION.md)
 - [ODDS-02E: Total Line Contract And Pregame Re-Prediction](ODDS_02E_TOTAL_LINE_REPREDICTION.md)
 - [ODDS-02F: Full Market Evidence Capture Contract](ODDS_02F_FULL_MARKET_EVIDENCE_CAPTURE.md)
+- [ODDS-02G: Full-Market Wide Sample](ODDS_02G_FULL_MARKET_WIDE_SAMPLE.md)

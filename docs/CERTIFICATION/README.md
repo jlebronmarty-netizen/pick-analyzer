@@ -92,6 +92,7 @@ Current V2 certification documents:
 - [HR-03 Calibration Shadow JSON](hr-03-calibration-shadow.json)
 - [ODDS-02E Total Line Re-Prediction JSON](odds-02e-total-line-reprediction.json)
 - [ODDS-02F Full Market Evidence Capture JSON](odds-02f-full-market-evidence-capture.json)
+- [ODDS-02G Full-Market Wide Sample JSON](odds-02g-full-market-wide-sample.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

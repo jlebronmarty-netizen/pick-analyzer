@@ -1,0 +1,193 @@
+{
+  "certification": "ODDS_02G_FULL_MARKET_WIDE_SAMPLE",
+  "status": "ODDS_02G_WIDE_SAMPLE_CAPTURED_MORE_SHADOW_EVIDENCE_REQUIRED",
+  "startingCommit": "6104dc3e9b73ec528d1aa0faef6f5f1885f6276a",
+  "runtimeCommit": "6104dc3e9b73ec528d1aa0faef6f5f1885f6276a",
+  "observationTime": "2026-08-09T16:50:21.005Z",
+  "capturePath": ".tmp/odds-shadow-certification/2026-08-09T16-50-04-351Z-live-885417de.body.json",
+  "preflight": {
+    "headEqualsOriginMain": true,
+    "productionServedOdd02FCommit": true,
+    "theOddsApiKeyPresent": true,
+    "cronSecretPresent": true,
+    "fullMarketContractDeployed": true
+  },
+  "usefulSlateGate": {
+    "status": "PASS",
+    "currentBoardCandidates": 39,
+    "currentBoardUniqueEventIds": 13,
+    "eventLifecycleRows": 15,
+    "pregameLifecycleRows": 15,
+    "startedLifecycleRows": 0,
+    "finalLifecycleRows": 0,
+    "minimumExpectedMappableEvents": 5
+  },
+  "requestAccounting": {
+    "phaseProviderCallsMade": 1,
+    "requestsAuthorized": 1,
+    "requestsConsumed": 1,
+    "remoteMutationsMade": 0,
+    "productionMutationsMade": 0,
+    "requestsUsedReportedByResponse": 3,
+    "creditsUsedReportedByResponse": 3,
+    "creditsRemainingReportedByResponse": 19985
+  },
+  "capture": {
+    "eventsReturned": 15,
+    "eventsMapped": 13,
+    "eventsUnmapped": 2,
+    "ambiguousEvents": 0,
+    "shadowSnapshots": 966,
+    "fullMarketEvidenceRows": 966,
+    "mappedRows": 852,
+    "unmappedEvents": [
+      {
+        "matchup": "CIN @ WSH",
+        "reason": "NO_TEAM_TIME_MATCH"
+      },
+      {
+        "matchup": "TB @ SEA",
+        "reason": "NO_TEAM_TIME_MATCH"
+      }
+    ],
+    "bookmakers": [
+      "BetMGM",
+      "BetOnline.ag",
+      "BetRivers",
+      "BetUS",
+      "Bovada",
+      "Caesars",
+      "DraftKings",
+      "FanDuel",
+      "Fanatics",
+      "LowVig.ag",
+      "MyBookie.ag"
+    ]
+  },
+  "marketCoverage": {
+    "expectedEvents": 13,
+    "moneyline": {
+      "bettableEvents": 13,
+      "bettablePct": 100,
+      "exactLinePredictions": 13,
+      "exactLinePct": 100,
+      "movedLinePredictions": 0
+    },
+    "runLine": {
+      "bettableEvents": 13,
+      "bettablePct": 100,
+      "exactLinePredictions": 13,
+      "exactLinePct": 100,
+      "movedLinePredictions": 0
+    },
+    "total": {
+      "bettableEvents": 13,
+      "bettablePct": 100,
+      "exactLinePredictions": 2,
+      "exactLinePct": 15.38,
+      "movedLinePredictions": 11,
+      "noCurrentSideMarketPredictions": 0,
+      "classification": "TOTAL_MARKET_PRESENT_BUT_LINES_MOVED"
+    }
+  },
+  "coreBookCoverage": {
+    "FanDuel": {
+      "rows": 78,
+      "events": 13,
+      "moneylineEvents": 13,
+      "runLineEvents": 13,
+      "totalEvents": 13,
+      "medianAgeMinutes": 0
+    },
+    "DraftKings": {
+      "rows": 78,
+      "events": 13,
+      "moneylineEvents": 13,
+      "runLineEvents": 13,
+      "totalEvents": 13,
+      "medianAgeMinutes": 0
+    },
+    "BetMGM": {
+      "rows": 74,
+      "events": 13,
+      "moneylineEvents": 13,
+      "runLineEvents": 11,
+      "totalEvents": 13,
+      "medianAgeMinutes": 1
+    },
+    "Caesars": {
+      "rows": 78,
+      "events": 13,
+      "moneylineEvents": 13,
+      "runLineEvents": 13,
+      "totalEvents": 13,
+      "medianAgeMinutes": 2
+    }
+  },
+  "freshness": {
+    "sportsDataIoLatestSourceTime": "2026-08-09T12:47:04.000Z",
+    "theOddsApiLatestEvidenceTime": "2026-08-09T16:50:20.000Z",
+    "sportsDataIoSourceAgeMinutes": 243,
+    "theOddsApiEvidenceAgeMinutes": 0,
+    "freshnessImprovementMinutes": 243,
+    "theOddsApiRows": {
+      "fresh": 852,
+      "aging": 0,
+      "stale": 0,
+      "unknown": 0,
+      "medianAgeMinutes": 0,
+      "maxAgeMinutes": 2
+    }
+  },
+  "exactMarketExample": {
+    "predictionId": "0f3ada4e-609f-5d53-9213-4cee3c3578bb",
+    "eventId": "baseball_mlb:mlb:sportsdataio:event:79052",
+    "matchup": "ATH @ BOS",
+    "market": "moneyline",
+    "selection": "BOS",
+    "line": null,
+    "productionModelProbability": 74.27,
+    "sportsDataIoPrice": -237,
+    "sportsDataIoTimestamp": "2026-08-09T12:47:04.000Z",
+    "sportsDataIoFreshness": "STALE",
+    "bestShadowBook": "DraftKings",
+    "bestShadowPrice": -223,
+    "bestShadowTimestamp": "2026-08-09T16:49:56.000Z",
+    "shadowImpliedProbability": 69.04,
+    "shadowEdge": 5.23,
+    "shadowEv": 7.57
+  },
+  "edgeEvShift": {
+    "exactFreshComparisons": 28,
+    "sameDirection": 26,
+    "positiveToNegative": 2,
+    "negativeToPositive": 0,
+    "materialShiftAtLeastTwoPoints": 20
+  },
+  "safety": {
+    "sportsDataIoAuthorityChanged": false,
+    "theOddsApiShadowOnly": true,
+    "productionCurrentBoardChanged": false,
+    "productionOfficialPicksChanged": false,
+    "productionPerformanceChanged": false,
+    "staleEvidenceActionable": false,
+    "officialPickPolicyChanged": false,
+    "rentPlayChanged": false,
+    "moneylineChanged": false,
+    "smartParlayChanged": false,
+    "predictionProbabilityChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false,
+    "providerBudgetChanged": false,
+    "odds03Started": false,
+    "sportsDataIoCancelled": false,
+    "hr04Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false
+  },
+  "cutoverDecision": "MORE_SHADOW_EVIDENCE_REQUIRED",
+  "sportsDataIoOddsAuthorityRecommendation": "KEEP_AS_PRODUCTION_AUTHORITY_UNTIL_ODDS03_APPROVAL",
+  "nextRecommendedPhase": "ODDS-03_READINESS_REVIEW_AFTER_LINE_MOVEMENT_AND_CUTOVER_GATES",
+  "finalClassification": "ODDS_02G_WIDE_SAMPLE_CAPTURED_MORE_SHADOW_EVIDENCE_REQUIRED"
+}

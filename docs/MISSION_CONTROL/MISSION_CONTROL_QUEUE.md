@@ -61,4 +61,4 @@ MC-03 remains PLANNED and manual-only. MC-03 was not started during MC-02.
 | OR-02 | Primary Scheduler Migration - Vercel Cron | PRODUCTION_CERTIFIED | Vercel Cron is primary; GitHub Actions remains safe fallback through the primary-success lease. |
 | OR-02A | Vercel Primary Market Refresh Recovery | PRODUCTION_CERTIFIED | Active current-slate market refresh and provider-call accounting are certified under automatic Vercel primary execution. |
 | PR-01 | Final Production Readiness Audit | CERTIFIED_NOT_READY | Performance header mapping repaired; Current Era and Replay equations balance; Pilot Week remains blocked by scheduler/market freshness/result-import evidence. |
-| Production Pilot Week | Real-world validation before Multi-Sport Expansion | ACTIVE | Day 1 baseline report is recorded as `DAY_1_PASS_WITH_MONITORING`; Days Completed remains 0 until Day 1 certification is accepted and Day 2 is explicitly started. |
+| Production Pilot Week | Real-world validation before Multi-Sport Expansion | ACTIVE | Day 2 includes ODDS-02G shadow wide-sample evidence; SportsDataIO remains production odds authority and MC-03 remains not started. |
