@@ -1,0 +1,157 @@
+{
+  "mode": "sdio_exit_03c_canonical_lifecycle_repair_v1",
+  "status": "SDIO_EXIT_03C_REPAIR_READY_FOR_NATURAL_PROOF",
+  "startingCommit": "db0947b066e215a0aec313554717a40d5d9400f2",
+  "baseline": {
+    "naturalRunsObserved": 2,
+    "runs": [
+      {
+        "startedAt": "2026-08-09T23:27:51Z",
+        "source": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+        "action": "midday_refresh",
+        "mlbStatsApiCalls": 1,
+        "scheduleGamesReturned": 15,
+        "scheduleGamesMapped": 13,
+        "unmappedEvents": 2,
+        "ambiguousEvents": 0,
+        "duplicateEvents": 0,
+        "probableStartersReturned": 26,
+        "probableStartersMapped": 26
+      },
+      {
+        "startedAt": "2026-08-09T23:37:52Z",
+        "source": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+        "action": "midday_refresh",
+        "mlbStatsApiCalls": 1,
+        "scheduleGamesReturned": 15,
+        "scheduleGamesMapped": 13,
+        "unmappedEvents": 2,
+        "ambiguousEvents": 0,
+        "duplicateEvents": 0,
+        "probableStartersReturned": 26,
+        "probableStartersMapped": 26
+      }
+    ],
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0
+  },
+  "offlineVsProductionMappingDifference": {
+    "rootCause": "PROVIDER_IDS_GAMEPK_NOT_USED_AS_MATCH_SOURCE",
+    "offlineFixturePath": "exact team/date/start fixture mapping",
+    "productionPath": "natural shadow mapper read provider_entity_mappings then fallback matching",
+    "missingProductionSource": "sport_events.provider_ids.mlb_stats_api and sport_events.provider_ids.mlb_stats_game_pk were not used as deterministic gamePk evidence",
+    "canonicalEventQueryScope": "America/Puerto_Rico operating-day sport_events range",
+    "currentEventUniverseCount": 15
+  },
+  "unmappedBeforeRepair": [
+    {
+      "gamePk": "824078",
+      "event": "Chicago Cubs @ Kansas City Royals",
+      "officialStart": "2026-08-09T18:10:00Z",
+      "canonicalEventId": "baseball_mlb:mlb:sportsdataio:event:79060",
+      "canonicalTeams": "CHC @ KC",
+      "canonicalStart": "2026-08-09T18:10:00+00:00",
+      "embeddedProviderGamePk": "824078",
+      "naturalMapperMethodBefore": "no_start_time_candidate",
+      "rootCause": "PROVIDER_IDS_GAMEPK_NOT_USED_AS_MATCH_SOURCE",
+      "repair": "existing_sport_event_provider_ids_gamepk"
+    },
+    {
+      "gamePk": "823104",
+      "event": "Tampa Bay Rays @ Seattle Mariners",
+      "officialStart": "2026-08-09T20:10:00Z",
+      "canonicalEventId": "baseball_mlb:mlb:sportsdataio:event:79066",
+      "canonicalTeams": "TB @ SEA",
+      "canonicalStart": "2026-08-09T20:10:00+00:00",
+      "embeddedProviderGamePk": "823104",
+      "naturalMapperMethodBefore": "no_start_time_candidate",
+      "rootCause": "PROVIDER_IDS_GAMEPK_NOT_USED_AS_MATCH_SOURCE",
+      "repair": "existing_sport_event_provider_ids_gamepk"
+    }
+  ],
+  "repair": {
+    "runtimeCodeChanged": true,
+    "files": [
+      "src/services/mlb-official-replacement.service.ts"
+    ],
+    "deterministicHierarchy": [
+      "existing_official_gamepk_crosswalk",
+      "existing_sport_event_provider_ids_gamepk",
+      "exact_home_away_team_aliases",
+      "exact_operating_date",
+      "game_number_when_available",
+      "bounded_start_time_tolerance",
+      "fail_closed_ambiguity"
+    ],
+    "providerIdsGamePkPathAdded": true,
+    "multipleProviderIdMatchesFailClosed": true,
+    "teamDateOnlyAllowed": false,
+    "doubleheaderSafety": true,
+    "sameStartSafety": true,
+    "sameMatchupAdjacentDateSafety": true,
+    "canonicalEventOverwrite": false,
+    "productionAuthorityPromoted": false
+  },
+  "expectedPostDeployNaturalProof": {
+    "expectedMappable": 15,
+    "mappedTarget": 15,
+    "mappingRateTarget": 1,
+    "ambiguousEventsTarget": 0,
+    "duplicateEventsTarget": 0,
+    "chcAtKcTarget": "mapped",
+    "tbAtSeaTarget": "mapped"
+  },
+  "statusDiscrepancies": {
+    "before": 12,
+    "rootCause": "SPORTSDATAIO_STATUS_STALE_WHILE_MLB_OFFICIAL_SHADOW_IS_NON_AUTHORITATIVE",
+    "completedOfficialScheduledCanonicalCount": 12,
+    "classificationAdded": true,
+    "allowedClassifications": [
+      "CANONICAL_STATUS_LAG_FINAL_NON_ACTIONABLE",
+      "CANONICAL_STATUS_LAG_LIVE_NON_ACTIONABLE",
+      "CANONICAL_STATUS_LAG_TERMINAL_NON_ACTIONABLE"
+    ],
+    "blockingClassification": "REQUIRES_REVIEW",
+    "unsafeStatusMismatches": 0,
+    "postStartPredictionRisk": false,
+    "statusWritePromoted": false
+  },
+  "safetyVeto": {
+    "required": false,
+    "implemented": false,
+    "reason": "Existing canonical start_time and cutoff guards already prevent normal post-start pregame prediction generation; MLB official remains shadow safety evidence until primary promotion.",
+    "officialEvidenceCanPermitPostStartPrediction": false
+  },
+  "starterParity": {
+    "starterRowsEvaluated": 26,
+    "starterMappingsPersistedInShadow": 26,
+    "starterMappingFailures": 0,
+    "crossTeamStarterErrors": 0,
+    "regressionExpected": false
+  },
+  "resultIdentity": {
+    "mappedCompletedGamesResolveToCanonicalEvent": true,
+    "unmappedCompletedGamesBeforeRepair": 2,
+    "incorrectResultAttachmentObserved": false,
+    "settlementPolicyChanged": false
+  },
+  "safety": {
+    "mlbOfficialPrimaryPromoted": false,
+    "sportsDataIoDisabled": false,
+    "sportsDataIoCancelled": false,
+    "oddsAuthorityPromoted": false,
+    "predictionPolicyChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0
+  },
+  "promotion": {
+    "verdict": "MLB_OFFICIAL_SHADOW_PASS_MORE_OBSERVATION_REQUIRED",
+    "authorizationRequired": true,
+    "reason": "Runtime repair is locally certified but requires at least two post-deploy natural MLB official shadow executions before parity review."
+  },
+  "finalClassification": "MLB_OFFICIAL_SHADOW_PASS_MORE_OBSERVATION_REQUIRED"
+}
+

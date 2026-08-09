@@ -1,6 +1,6 @@
 # MLB Official Data Provider V1
 
-Status: `SDIO_EXIT_03B_MAPPING_STATUS_PARITY_REPAIR_READY_FOR_NATURAL_PROOF`
+Status: `SDIO_EXIT_03C_CANONICAL_LIFECYCLE_REPAIR_READY_FOR_NATURAL_PROOF`
 
 The MLB official data provider centralizes public MLB Stats API access for SDIO-EXIT-03. It does not replace SportsDataIO in production by itself, does not promote The Odds API, and does not change prediction formulas.
 
@@ -69,6 +69,10 @@ SDIO-EXIT-03B tightens official MLB event matching after natural shadow proof fo
 6. fail-closed ambiguity when multiple candidates remain.
 
 Team+date alone is not a valid mapping for MLB official promotion. Same-team doubleheaders, same-start adjacent games, rescheduled games and same-matchup adjacent dates must stay distinct. The repair adds full-name-to-abbreviation aliases for MLB teams, including `Chicago Cubs -> CHC`, `Kansas City Royals -> KC`, `Tampa Bay Rays -> TB` and `Seattle Mariners -> SEA`, while preserving `ATH/OAK` lineage. It does not write canonical `sport_events` statuses from official shadow evidence.
+
+SDIO-EXIT-03C repairs the remaining production divergence where the canonical `sport_events` rows already contained exact `provider_ids.mlb_stats_api` / `provider_ids.mlb_stats_game_pk` values for CHC @ KC and TB @ SEA, but the natural shadow mapper consulted only the separate `provider_entity_mappings` crosswalk before fallback matching. The matcher now treats exact embedded `sport_events.provider_ids` gamePk values as deterministic identity evidence immediately after the durable crosswalk. Multiple canonical rows claiming the same gamePk fail closed as ambiguous.
+
+SDIO-EXIT-03C also classifies official-vs-canonical status differences in shadow metadata. Official final/live/terminal statuses paired with canonical pregame statuses remain non-authoritative during `DUAL_READ`, but are visible as safety evidence and do not promote official status writes into canonical `sport_events`.
 
 ## Safety
 

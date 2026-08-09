@@ -175,11 +175,35 @@ function metadataGameNumber(event: StoredEventRow) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function eventProviderGamePk(event: StoredEventRow) {
+  const providerIds = event.provider_ids ?? {}
+  const value = providerIds.mlb_stats_api ?? providerIds.mlb_stats_game_pk ?? null
+  return value === null || value === undefined ? null : String(value)
+}
+
+function statusDifferenceClassification(officialStatus: string | null, canonicalStatus: string | null) {
+  const official = String(officialStatus ?? '').toLowerCase()
+  const canonical = String(canonicalStatus ?? '').toLowerCase()
+  const canonicalPregame = canonical === 'scheduled' || canonical === 'pregame'
+  if ((official === 'completed' || official === 'final') && canonicalPregame) return 'CANONICAL_STATUS_LAG_FINAL_NON_ACTIONABLE'
+  if ((official === 'live' || official === 'in_progress') && canonicalPregame) return 'CANONICAL_STATUS_LAG_LIVE_NON_ACTIONABLE'
+  if ((official === 'postponed' || official === 'cancelled' || official === 'canceled' || official === 'suspended') && canonicalPregame) return 'CANONICAL_STATUS_LAG_TERMINAL_NON_ACTIONABLE'
+  return 'REQUIRES_REVIEW'
+}
+
 function matchOfficialGameToStoredEvent(game: MlbOfficialScheduleGame, events: StoredEventRow[], existingGamePkMappings: Map<string, string> = new Map()) {
   const mappedEventId = existingGamePkMappings.get(game.gamePk)
   if (mappedEventId) {
     const mappedEvent = events.find((event) => event.id === mappedEventId) ?? null
     if (mappedEvent) return { event: mappedEvent, ambiguous: false, method: 'existing_official_gamepk_crosswalk' }
+  }
+
+  const providerIdMatches = events.filter((event) => eventProviderGamePk(event) === game.gamePk)
+  if (providerIdMatches.length === 1) {
+    return { event: providerIdMatches[0], ambiguous: false, method: 'existing_sport_event_provider_ids_gamepk' }
+  }
+  if (providerIdMatches.length > 1) {
+    return { event: null, ambiguous: true, method: 'multiple_sport_event_provider_ids_gamepk_matches' }
   }
 
   const home = canonicalTeamIdentity(game.home.abbreviation ?? game.home.name)
@@ -503,6 +527,8 @@ export async function executeMlbOfficialShadowAcquisition({
         officialStatus: game.status.canonicalSportEventStatus,
         canonicalStatus: match.event.status,
         lifecycle: game.status.lifecycle,
+        classification: statusDifferenceClassification(game.status.canonicalSportEventStatus, match.event.status),
+        unsafePredictionRisk: false,
       })
     }
     const season = game.officialDate?.slice(0, 4) ?? game.gameDate?.slice(0, 4) ?? ''
@@ -720,7 +746,7 @@ export function validateMlbOfficialMappingStatusParityFixtures() {
       home_team: 'KC',
       away_team: 'CHC',
       status: 'scheduled',
-      provider_ids: { sportsdataio: '79060' },
+      provider_ids: { sportsdataio: '79060', mlb_stats_api: 824078, mlb_stats_game_pk: 824078 },
       metadata: {},
     },
     {
@@ -738,7 +764,7 @@ export function validateMlbOfficialMappingStatusParityFixtures() {
       home_team: 'SEA',
       away_team: 'TB',
       status: 'scheduled',
-      provider_ids: { sportsdataio: '79066' },
+      provider_ids: { sportsdataio: '79066', mlb_stats_api: 823104, mlb_stats_game_pk: 823104 },
       metadata: {},
     },
     {
@@ -830,6 +856,8 @@ export function validateMlbOfficialMappingStatusParityFixtures() {
   const checks = [
     ['CHC @ KC maps by full-name alias to canonical abbreviation event', resolutions[0]?.event?.id === 'baseball_mlb:mlb:sportsdataio:event:79060'],
     ['TB @ SEA maps by full-name alias to canonical abbreviation event', resolutions[1]?.event?.id === 'baseball_mlb:mlb:sportsdataio:event:79066'],
+    ['CHC @ KC production provider_ids gamePk path is deterministic', resolutions[0]?.method === 'existing_sport_event_provider_ids_gamepk'],
+    ['TB @ SEA production provider_ids gamePk path is deterministic', resolutions[1]?.method === 'existing_sport_event_provider_ids_gamepk'],
     ['doubleheader game 1 remains distinct', resolutions[2]?.event?.id === 'doubleheader-game-1'],
     ['doubleheader game 2 remains distinct', resolutions[3]?.event?.id === 'doubleheader-game-2'],
     ['no ambiguous fixture mappings remain', resolutions.every((item) => item.ambiguous === false)],

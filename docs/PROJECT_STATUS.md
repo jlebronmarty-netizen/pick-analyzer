@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-09 SDIO-EXIT-03C Canonical Mapping And Lifecycle Repair
+
+- SDIO-EXIT-03C repairs the production-only gap left after SDIO-EXIT-03B: CHC @ KC and TB @ SEA were no longer ambiguous, but natural Vercel shadow runs still mapped only 13/15 because the mapper did not use exact `sport_events.provider_ids.mlb_stats_api` / `mlb_stats_game_pk` values when the separate `provider_entity_mappings` crosswalk was missing.
+- The repair adds exact embedded gamePk matching before team/date/start fallback, fails closed if multiple canonical rows claim the same gamePk, and classifies official-vs-canonical status lag as shadow safety evidence only. SportsDataIO remains MLB production authority and rollback; MLB Official remains shadow/non-authoritative; The Odds API remains shadow-only. Natural post-deploy proof is still required before parity review.
+
 ## 2026-08-09 SDIO-EXIT-03B MLB Official Mapping And Status Parity
 
 - SDIO-EXIT-03B repairs the local MLB official shadow mapper after natural Vercel runs on `5c56bbf206c1fd035bfed2413efbf8a4dd6ed4e8` returned 15 schedule games, 13 mapped games, 2 ambiguous games, 0 duplicate canonical events and 12 official-vs-canonical status differences. The two ambiguous games were CHC @ KC and TB @ SEA, both caused by missing full-name-to-abbreviation aliases combined with broad same-start fallback matching.
