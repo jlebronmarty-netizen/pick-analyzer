@@ -1,0 +1,95 @@
+{
+  "certification": "ODDS_02D_EVENT_ALIAS_TOTAL_LINE_RECONCILIATION",
+  "status": "ALIAS_REPAIRED_TOTAL_CONTRACT_GAP_DOCUMENTED",
+  "startingCommit": "6dca6e85d45b1023a0004d2f025d8455ff1eb4f1",
+  "providerCalls": 0,
+  "databaseMutations": 0,
+  "capturedOdds02cPayloadReused": true,
+  "capturePath": ".tmp/odds-shadow-certification/2026-08-09T15-35-30-388Z-live-fa3d85f1.body.json",
+  "athOak": {
+    "rootCause": "ODDS_02_SHADOW_ALIAS_DIVERGED_FROM_CANONICAL_CROSSWALK",
+    "repair": "oaklandathletics/athletics/oak normalize to ATH in odds02 shadow comparison service",
+    "deterministic": true,
+    "crossTeamAliasCollision": false,
+    "mappingBefore": {
+      "expected": 14,
+      "mapped": 13,
+      "unmappedExpected": 1,
+      "ambiguous": 0,
+      "mappingRate": 0.9286
+    },
+    "mappingAfter": {
+      "expected": 14,
+      "mapped": 14,
+      "unmappedExpected": 0,
+      "ambiguous": 0,
+      "mappingRate": 1
+    }
+  },
+  "totalCoverage": {
+    "totalGamesExpected": 14,
+    "gamesWithAnyTotalMarketProven": 13,
+    "gamesWithExactPredictedTotalLine": 2,
+    "gamesWithMovedTotalLineProven": 0,
+    "gamesWithNoTotalMarketProven": 0,
+    "gamesWithTotalMarketButExactLineUnknown": 12,
+    "bettableTotalCoverageLowerBound": 0.9286,
+    "exactLineTotalCoverage": 0.1429,
+    "rootCause": "RESPONSE_CONTRACT_LIMITATION_FOR_NON_EXACT_TOTAL_LINES",
+    "classifications": {
+      "EXACT_LINE_AVAILABLE": 2,
+      "PROVIDER_TOTAL_PRESENT_EXACT_LINE_UNKNOWN": 12,
+      "PROVIDER_TOTAL_MISSING": 0,
+      "EXACT_LINE_MOVED": 0,
+      "HALF_POINT_MOVED": 0,
+      "FULL_POINT_MOVED": 0
+    },
+    "coreBookExactCoverage": {
+      "FanDuel": 2,
+      "DraftKings": 1,
+      "BetMGM": 1,
+      "Caesars": 1
+    }
+  },
+  "marketCoverage": {
+    "moneyline": {
+      "bettable": 14,
+      "exactLine": 14,
+      "expected": 14
+    },
+    "runLine": {
+      "bettable": 14,
+      "exactLine": 14,
+      "expected": 14
+    },
+    "total": {
+      "bettableLowerBound": 13,
+      "exactLine": 2,
+      "expected": 14
+    }
+  },
+  "lineMovementPolicy": {
+    "recommended": "PRICE_FOR_PREDICTED_LINE_UNAVAILABLE_UNLESS_EXACT_LINE_MATCH",
+    "predictionLineSeparateFromCurrentBettableLine": true,
+    "crossLineProbabilityReuseAllowed": false,
+    "pregameRePredictionRequired": true,
+    "lineAdjustmentModelImplemented": false
+  },
+  "architectureRecommendation": "Versioned cutoff-safe pregame predictions when market line identity changes; immutable original prediction lineage; settlement by exact event/market/selection/line.",
+  "theOddsApiOddsReplacementReadiness": "MORE_ODDS_REPAIR_REQUIRED",
+  "sportsDataIoOddsAuthorityRecommendation": "KEEP_SPORTSDATAIO_AS_PRODUCTION_ODDS_AUTHORITY_UNTIL_TOTAL_LINE_CONTRACT_AND_LINE_MOVEMENT_REFRESH_ARE_REPAIRED",
+  "productionIsolation": {
+    "probabilitiesChanged": false,
+    "officialPickPolicyChanged": false,
+    "rentPlayPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "hr03Changed": false,
+    "currentEraChanged": false,
+    "replayChanged": false,
+    "odds03Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false
+  },
+  "finalClassification": "ODDS_02D_ALIAS_REPAIRED_TOTAL_CONTRACT_GAP_DOCUMENTED"
+}
