@@ -2,6 +2,8 @@
 
 This roadmap is dependency-aware and based on repository inspection. A module is marked completed only when the repository contains service/API/dashboard/persistence evidence and recent verification supports it.
 
+SDIO-EXIT-03B is locally repaired and pending natural production proof. The MLB official shadow path now has deterministic gamePk/team/date/game-number/start-time matching for the two previously ambiguous natural-run cases, CHC @ KC and TB @ SEA, while SportsDataIO remains production authority and The Odds API remains shadow-only. MLB official primary promotion remains blocked until post-deploy natural runs prove 0 ambiguous mappings, 0 duplicate canonical events and safe status parity.
+
 P1.3 adds the prospective Production Evaluation Policy Separation required before Prediction Epoch V2 activation. The model can now record whether a future pregame prediction is production-evaluable independently from whether it is recommended, actionable or Official Pick eligible. P1.3 is production-certified on commit `a64c876b803c93f259424389d765282a9a0a3d1a`; P1.4 is production-certified on commit `6f92b102416fa0e5b8baeefbaa8b944a63f51ca3` with 24 post-P1.3 production-evaluable MLB rows, so P2.0 is ready.
 
 P2.0 is production-certified. It introduces `CURRENT_V2_PRODUCTION` as the future-only active era and `LEGACY_PRE_V2` as preserved historical scope, with active-epoch stamping for future prediction writes and Current Era defaults for Current Board and Performance. The Current V2 Production epoch started at `2026-08-03T19:57:02.418+00:00`.

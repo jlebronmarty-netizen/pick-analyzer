@@ -59,6 +59,7 @@ Current V2 certification documents:
 - [OE-003E Certification JSON](oe-003e-canonical-acquisition-active-execution.json)
 - [OE-003F Product Freshness SLA](OE_003F_PRODUCT_FRESHNESS_SLA.md)
 - [OE-003F Certification JSON](oe-003f-product-freshness-sla.json)
+- [SDIO-EXIT-03B Mapping Status Parity JSON](sdio-exit-03b-mapping-status-parity.json)
 - [Mission Control V1](MISSION_CONTROL_V1.md)
 - [Mission Control V1 JSON](mission-control-v1.json)
 - [P1.4 End-To-End Production Pipeline Certification](P1_4_E2E_PRODUCTION_PIPELINE_CERTIFICATION.md)

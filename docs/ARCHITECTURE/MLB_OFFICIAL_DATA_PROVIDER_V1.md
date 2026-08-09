@@ -1,6 +1,6 @@
 # MLB Official Data Provider V1
 
-Status: `SDIO_EXIT_03A_REPOSITORY_REPAIR_READY_FOR_NATURAL_PROOF`
+Status: `SDIO_EXIT_03B_MAPPING_STATUS_PARITY_REPAIR_READY_FOR_NATURAL_PROOF`
 
 The MLB official data provider centralizes public MLB Stats API access for SDIO-EXIT-03. It does not replace SportsDataIO in production by itself, does not promote The Odds API, and does not change prediction formulas.
 
@@ -58,6 +58,17 @@ Default: `DUAL_READ`.
 The current SDIO-EXIT-03 deployment is shadow/dry-run oriented. It exposes row builders and validation fixtures, but does not disable SportsDataIO and does not write production rows from the read-only status route.
 
 SDIO-EXIT-03A wires the official MLB path into natural protected scheduler execution for eligible `morning_sync`, `midday_refresh` and `final_refresh` actions. Under `DUAL_READ`, the path remains shadow-only: it records additive `provider_entity_mappings` and a `sports_sync_jobs` audit row with `job_type = sdio_exit_03a_mlb_official_shadow_v1`, while leaving canonical `sport_events`, predictions, Official Picks, settlement, learning and Performance unchanged.
+
+SDIO-EXIT-03B tightens official MLB event matching after natural shadow proof found 13/15 mapped games, 2 ambiguous games and 12 official-vs-canonical status differences. The matcher now applies this deterministic hierarchy:
+
+1. existing `mlb_stats_api` gamePk crosswalk;
+2. exact canonical team identity aliases for both home and away teams;
+3. exact operating date;
+4. game number when canonical doubleheader metadata exists;
+5. bounded start-time tolerance;
+6. fail-closed ambiguity when multiple candidates remain.
+
+Team+date alone is not a valid mapping for MLB official promotion. Same-team doubleheaders, same-start adjacent games, rescheduled games and same-matchup adjacent dates must stay distinct. The repair adds full-name-to-abbreviation aliases for MLB teams, including `Chicago Cubs -> CHC`, `Kansas City Royals -> KC`, `Tampa Bay Rays -> TB` and `Seattle Mariners -> SEA`, while preserving `ATH/OAK` lineage. It does not write canonical `sport_events` statuses from official shadow evidence.
 
 ## Safety
 

@@ -40,3 +40,4 @@ Production Pilot Week is the monitored real-world validation period after MC-08H
 - [SDIO-EXIT-02: Full MLB SportsDataIO Replacement](SDIO_EXIT_02_FULL_MLB_REPLACEMENT.md)
 - [SDIO-EXIT-03: MLB Official Replacement](SDIO_EXIT_03_MLB_OFFICIAL_REPLACEMENT.md)
 - [SDIO-EXIT-03A: Natural MLB Official Shadow Proof](SDIO_EXIT_03A_NATURAL_SHADOW_PROOF.md)
+- [SDIO-EXIT-03B: Mapping And Status Parity](SDIO_EXIT_03B_MAPPING_STATUS_PARITY.md)

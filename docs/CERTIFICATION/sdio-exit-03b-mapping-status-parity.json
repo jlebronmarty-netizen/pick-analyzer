@@ -1,0 +1,142 @@
+{
+  "mode": "sdio_exit_03b_mapping_status_parity_v1",
+  "status": "SDIO_EXIT_03B_REPAIR_READY_FOR_NATURAL_PROOF",
+  "startingCommit": "5c56bbf206c1fd035bfed2413efbf8a4dd6ed4e8",
+  "baseline": {
+    "naturalRunsObserved": 2,
+    "runs": [
+      {
+        "startedAt": "2026-08-09T22:57:27Z",
+        "source": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+        "action": "midday_refresh",
+        "mlbStatsApiCalls": 1,
+        "scheduleGamesReturned": 15,
+        "scheduleGamesMapped": 13,
+        "ambiguousEvents": 2,
+        "duplicateEvents": 0,
+        "probableStartersReturned": 26
+      },
+      {
+        "startedAt": "2026-08-09T23:07:27Z",
+        "source": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+        "action": "midday_refresh",
+        "mlbStatsApiCalls": 1,
+        "scheduleGamesReturned": 15,
+        "scheduleGamesMapped": 13,
+        "ambiguousEvents": 2,
+        "duplicateEvents": 0,
+        "probableStartersReturned": 26
+      }
+    ],
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0
+  },
+  "ambiguousEventsBefore": [
+    {
+      "gamePk": "824078",
+      "event": "Chicago Cubs @ Kansas City Royals",
+      "startTime": "2026-08-09T18:10:00Z",
+      "gameNumber": 1,
+      "doubleHeader": "N",
+      "canonicalEventId": "baseball_mlb:mlb:sportsdataio:event:79060",
+      "sportsDataIoId": "79060",
+      "theOddsApiId": "d9bb4855e4ed5d8ae038db62356ed74f",
+      "rootCause": "START_TIME_TOLERANCE_TOO_WIDE",
+      "secondaryCause": "MISSING_FULL_NAME_TO_ABBREVIATION_ALIAS"
+    },
+    {
+      "gamePk": "823104",
+      "event": "Tampa Bay Rays @ Seattle Mariners",
+      "startTime": "2026-08-09T20:10:00Z",
+      "gameNumber": 1,
+      "doubleHeader": "N",
+      "canonicalEventId": "baseball_mlb:mlb:sportsdataio:event:79066",
+      "sportsDataIoId": "79066",
+      "theOddsApiId": "aaff9f9ccf0ff2965b6e7fa5604c211d",
+      "rootCause": "START_TIME_TOLERANCE_TOO_WIDE",
+      "secondaryCause": "MISSING_FULL_NAME_TO_ABBREVIATION_ALIAS"
+    }
+  ],
+  "repair": {
+    "runtimeCodeChanged": true,
+    "files": [
+      "src/services/mlb-official-replacement.service.ts"
+    ],
+    "deterministicHierarchy": [
+      "existing_official_gamepk_crosswalk",
+      "exact_home_away_team_aliases",
+      "exact_operating_date",
+      "game_number_when_available",
+      "bounded_start_time_tolerance",
+      "fail_closed_ambiguity"
+    ],
+    "teamDateOnlyAllowed": false,
+    "doubleheaderSafety": true,
+    "sameStartSafety": true,
+    "sameMatchupAdjacentDateSafety": true,
+    "canonicalEventOverwrite": false,
+    "productionAuthorityPromoted": false
+  },
+  "offlineRemapAfterRepair": {
+    "expectedMappable": 15,
+    "mapped": 15,
+    "mappingRate": 1,
+    "ambiguousEvents": 0,
+    "duplicateEvents": 0
+  },
+  "statusDiscrepancies": {
+    "before": 12,
+    "byClassification": {
+      "CANONICAL_STATUS_LAG_FINAL_NON_ACTIONABLE": 11,
+      "CANONICAL_STATUS_LAG_LIVE_NON_ACTIONABLE": 1
+    },
+    "unsafeStatusMismatches": 0,
+    "postStartPredictionRisk": false,
+    "statusWritePromoted": false
+  },
+  "officialStatusMapping": {
+    "scheduledPreviewPregameWarmup": "scheduled",
+    "inProgress": "live",
+    "delayed": "postponed",
+    "suspended": "postponed",
+    "postponed": "postponed",
+    "cancelled": "cancelled",
+    "finalCompletedEarly": "completed",
+    "unknown": "scheduled_status_unconfirmed_fail_closed"
+  },
+  "starterParity": {
+    "starterRowsEvaluated": 26,
+    "starterMappingsPersistedInShadow": 26,
+    "starterMatches": null,
+    "starterDifferences": null,
+    "starterMappingFailures": 0,
+    "crossTeamStarterErrors": 0,
+    "followUp": "natural proof should compare official person IDs against stored SportsDataIO-era starter evidence before primary promotion"
+  },
+  "providerCrosswalk": {
+    "sportsDataIoEventIdsPreserved": true,
+    "theOddsApiEventIdsPreserved": true,
+    "mlbOfficialGamePkShadowMappingReady": true,
+    "sportsDataIoStillProductionAuthority": true,
+    "theOddsApiStillShadowOnly": true,
+    "playerMappingsShadowOnly": true
+  },
+  "safety": {
+    "mlbOfficialPrimaryPromoted": false,
+    "sportsDataIoDisabled": false,
+    "sportsDataIoCancelled": false,
+    "oddsAuthorityPromoted": false,
+    "predictionPolicyChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0
+  },
+  "promotion": {
+    "verdict": "MLB_OFFICIAL_SHADOW_PASS_MORE_OBSERVATION_REQUIRED",
+    "authorizationRequired": true,
+    "reason": "Deterministic mapping repair is local/offline-certified but needs at least two post-deploy natural shadow runs before parity review."
+  },
+  "finalClassification": "MLB_OFFICIAL_SHADOW_PASS_MORE_OBSERVATION_REQUIRED"
+}

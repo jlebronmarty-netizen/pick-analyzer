@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-09 SDIO-EXIT-03B MLB Official Mapping And Status Parity
+
+- SDIO-EXIT-03B repairs the local MLB official shadow mapper after natural Vercel runs on `5c56bbf206c1fd035bfed2413efbf8a4dd6ed4e8` returned 15 schedule games, 13 mapped games, 2 ambiguous games, 0 duplicate canonical events and 12 official-vs-canonical status differences. The two ambiguous games were CHC @ KC and TB @ SEA, both caused by missing full-name-to-abbreviation aliases combined with broad same-start fallback matching.
+- The repair keeps SportsDataIO as MLB production authority and The Odds API shadow-only, adds deterministic official gamePk/team/date/game-number/start-time matching, preserves doubleheader safety, and records status differences as shadow parity evidence only. No prediction formula, Official Pick policy, settlement, learning, scheduler cadence, provider budget or authority promotion changed. Final parity still requires post-deploy natural proof.
+
 ## 2026-08-05 OR-02A Vercel Primary Market Refresh Recovery
 
 - OR-02A traced why three successful Vercel primary invocations made zero provider calls while Market Freshness and Product Readiness stayed CRITICAL. Production evidence showed `sync_results` was selected because 6 old `2026-07-28` missing-result rows were due, even though the active `2026-08-05` slate had 11 stale pregame events eligible for a single SportsDataIO date-level market refresh.

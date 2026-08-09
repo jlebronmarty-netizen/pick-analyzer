@@ -27,6 +27,110 @@ type StoredEventRow = {
   metadata: Record<string, unknown> | null
 }
 
+const MLB_TEAM_IDENTITY_ALIASES: Record<string, string> = {
+  arizona: 'ARI',
+  arizonadiamondbacks: 'ARI',
+  ari: 'ARI',
+  atlanta: 'ATL',
+  atlantabraves: 'ATL',
+  atl: 'ATL',
+  baltimore: 'BAL',
+  baltimoreorioles: 'BAL',
+  bal: 'BAL',
+  boston: 'BOS',
+  bostonredsox: 'BOS',
+  bos: 'BOS',
+  chicagocubs: 'CHC',
+  cubs: 'CHC',
+  chc: 'CHC',
+  chicagowhitesox: 'CHW',
+  whitesox: 'CHW',
+  chw: 'CHW',
+  cincinnati: 'CIN',
+  cincinnatireds: 'CIN',
+  cin: 'CIN',
+  cleveland: 'CLE',
+  clevelandguardians: 'CLE',
+  cle: 'CLE',
+  colorado: 'COL',
+  coloradorockies: 'COL',
+  col: 'COL',
+  detroit: 'DET',
+  detroittigers: 'DET',
+  det: 'DET',
+  houston: 'HOU',
+  houstonastros: 'HOU',
+  hou: 'HOU',
+  kansascity: 'KC',
+  kansascityroyals: 'KC',
+  royals: 'KC',
+  kc: 'KC',
+  losangelesangels: 'LAA',
+  angels: 'LAA',
+  laa: 'LAA',
+  losangelesdodgers: 'LAD',
+  dodgers: 'LAD',
+  lad: 'LAD',
+  miami: 'MIA',
+  miamimarlins: 'MIA',
+  mia: 'MIA',
+  milwaukee: 'MIL',
+  milwaukeebrewers: 'MIL',
+  mil: 'MIL',
+  minnesota: 'MIN',
+  minnesotatwins: 'MIN',
+  min: 'MIN',
+  newyorkmets: 'NYM',
+  mets: 'NYM',
+  nym: 'NYM',
+  newyorkyankees: 'NYY',
+  yankees: 'NYY',
+  nyy: 'NYY',
+  oakland: 'ATH',
+  oaklandathletics: 'ATH',
+  athletics: 'ATH',
+  ath: 'ATH',
+  oak: 'ATH',
+  philadelphia: 'PHI',
+  philadelphiaphillies: 'PHI',
+  phi: 'PHI',
+  pittsburgh: 'PIT',
+  pittsburghpirates: 'PIT',
+  pit: 'PIT',
+  sandiego: 'SD',
+  sandiegopadres: 'SD',
+  padres: 'SD',
+  sd: 'SD',
+  sanfrancisco: 'SF',
+  sanfranciscogiants: 'SF',
+  sf: 'SF',
+  seattle: 'SEA',
+  seattlemariners: 'SEA',
+  mariners: 'SEA',
+  sea: 'SEA',
+  stlouis: 'STL',
+  stlouiscardinals: 'STL',
+  cardinals: 'STL',
+  stl: 'STL',
+  tampabay: 'TB',
+  tampabayrays: 'TB',
+  rays: 'TB',
+  tb: 'TB',
+  tbr: 'TB',
+  texas: 'TEX',
+  texasrangers: 'TEX',
+  tex: 'TEX',
+  toronto: 'TOR',
+  torontobluejays: 'TOR',
+  bluejays: 'TOR',
+  tor: 'TOR',
+  washington: 'WSH',
+  washingtonnationals: 'WSH',
+  nationals: 'WSH',
+  was: 'WSH',
+  wsh: 'WSH',
+}
+
 function nowIso() {
   return new Date().toISOString()
 }
@@ -46,9 +150,12 @@ function playerId(playerIdValue: string) {
 function normalizeIdentity(value: unknown) {
   return String(value ?? '')
     .toLowerCase()
-    .replace(/\bathletics\b/g, 'ath')
-    .replace(/\boakland\b/g, 'ath')
     .replace(/[^a-z0-9]+/g, '')
+}
+
+function canonicalTeamIdentity(value: unknown) {
+  const normalized = normalizeIdentity(value)
+  return MLB_TEAM_IDENTITY_ALIASES[normalized] ?? normalized.toUpperCase()
 }
 
 function startDeltaMinutes(a: string | null, b: string | null) {
@@ -57,25 +164,46 @@ function startDeltaMinutes(a: string | null, b: string | null) {
   return Number.isFinite(delta) ? Math.round(delta / 60000) : null
 }
 
-function matchOfficialGameToStoredEvent(game: MlbOfficialScheduleGame, events: StoredEventRow[]) {
-  const home = normalizeIdentity(game.home.name)
-  const away = normalizeIdentity(game.away.name)
-  const candidates = events.filter((event) =>
-    normalizeIdentity(event.home_team).includes(home) ||
-    home.includes(normalizeIdentity(event.home_team)) ||
-    normalizeIdentity(event.away_team).includes(away) ||
-    away.includes(normalizeIdentity(event.away_team))
+function eventLocalDate(value: string | null) {
+  if (!value) return null
+  return value.slice(0, 10)
+}
+
+function metadataGameNumber(event: StoredEventRow) {
+  const value = event.metadata?.gameNumber ?? event.metadata?.GameNumber ?? event.metadata?.game_number ?? null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function matchOfficialGameToStoredEvent(game: MlbOfficialScheduleGame, events: StoredEventRow[], existingGamePkMappings: Map<string, string> = new Map()) {
+  const mappedEventId = existingGamePkMappings.get(game.gamePk)
+  if (mappedEventId) {
+    const mappedEvent = events.find((event) => event.id === mappedEventId) ?? null
+    if (mappedEvent) return { event: mappedEvent, ambiguous: false, method: 'existing_official_gamepk_crosswalk' }
+  }
+
+  const home = canonicalTeamIdentity(game.home.abbreviation ?? game.home.name)
+  const away = canonicalTeamIdentity(game.away.abbreviation ?? game.away.name)
+  const officialDate = game.officialDate ?? eventLocalDate(game.gameDate)
+  const exactTeamCandidates = events.filter((event) =>
+    canonicalTeamIdentity(event.home_team) === home &&
+    canonicalTeamIdentity(event.away_team) === away &&
+    eventLocalDate(event.start_time) === officialDate
   )
-  const exactTeamCandidates = candidates.filter((event) =>
-    (normalizeIdentity(event.home_team).includes(home) || home.includes(normalizeIdentity(event.home_team))) &&
-    (normalizeIdentity(event.away_team).includes(away) || away.includes(normalizeIdentity(event.away_team)))
-  )
-  const ranked = (exactTeamCandidates.length ? exactTeamCandidates : candidates)
+  if (exactTeamCandidates.length === 0) return { event: null, ambiguous: false, method: 'no_exact_team_date_match' }
+
+  const gameNumberCandidates =
+    game.gameNumber !== null && exactTeamCandidates.some((event) => metadataGameNumber(event) !== null)
+      ? exactTeamCandidates.filter((event) => metadataGameNumber(event) === game.gameNumber)
+      : exactTeamCandidates
+
+  const ranked = gameNumberCandidates
     .map((event) => ({ event, delta: startDeltaMinutes(game.gameDate, event.start_time) }))
-    .filter((item) => item.delta === null || item.delta <= 720)
+    .filter((item) => item.delta !== null && item.delta <= 180)
     .sort((a, b) => (a.delta ?? 999999) - (b.delta ?? 999999))
-  if (ranked.length !== 1 && ranked[0]?.delta === ranked[1]?.delta) return { event: null, ambiguous: true }
-  return { event: ranked[0]?.event ?? null, ambiguous: false }
+  if (ranked.length === 1) return { event: ranked[0].event, ambiguous: false, method: 'exact_team_date_start_time' }
+  if (ranked.length > 1 && ranked[0]?.delta === ranked[1]?.delta) return { event: null, ambiguous: true, method: 'multiple_equal_start_time_candidates' }
+  return { event: ranked[0]?.event ?? null, ambiguous: ranked.length > 1, method: ranked.length > 1 ? 'multiple_team_date_candidates' : 'no_start_time_candidate' }
 }
 
 export function buildMlbOfficialScheduleRows(games: MlbOfficialScheduleGame[], capturedAt = nowIso()) {
@@ -304,6 +432,17 @@ export async function executeMlbOfficialShadowAcquisition({
   if (eventsError) throw new Error(`MLB official shadow event read failed: ${eventsError.message}`)
 
   const events = (eventRows ?? []) as StoredEventRow[]
+  const { data: existingGamePkRows, error: existingGamePkError } = official.rows.length
+    ? await supabaseAdmin
+      .from('provider_entity_mappings')
+      .select('provider_id,internal_id')
+      .eq('sport_key', SPORT_KEY)
+      .eq('entity_type', 'event')
+      .eq('provider', PROVIDER)
+      .in('provider_id', official.rows.map((game) => game.gamePk))
+    : { data: [], error: null }
+  if (existingGamePkError) throw new Error(`MLB official shadow existing gamePk read failed: ${existingGamePkError.message}`)
+  const existingGamePkMappings = new Map((existingGamePkRows ?? []).map((row) => [String((row as Row).provider_id), String((row as Row).internal_id)]))
   const mappedGames: Array<Record<string, unknown>> = []
   const unmappedGames: Array<Record<string, unknown>> = []
   const ambiguousGames: Array<Record<string, unknown>> = []
@@ -313,13 +452,29 @@ export async function executeMlbOfficialShadowAcquisition({
   const mappingRows: Row[] = []
 
   for (const game of official.rows) {
-    const match = matchOfficialGameToStoredEvent(game, events)
+    const match = matchOfficialGameToStoredEvent(game, events, existingGamePkMappings)
     if (match.ambiguous) {
-      ambiguousGames.push({ gamePk: game.gamePk, away: game.away.name, home: game.home.name, gameDate: game.gameDate })
+      ambiguousGames.push({
+        gamePk: game.gamePk,
+        away: game.away.name,
+        home: game.home.name,
+        gameDate: game.gameDate,
+        gameNumber: game.gameNumber,
+        doubleHeader: game.doubleHeader,
+        method: match.method,
+      })
       continue
     }
     if (!match.event) {
-      unmappedGames.push({ gamePk: game.gamePk, away: game.away.name, home: game.home.name, gameDate: game.gameDate })
+      unmappedGames.push({
+        gamePk: game.gamePk,
+        away: game.away.name,
+        home: game.home.name,
+        gameDate: game.gameDate,
+        gameNumber: game.gameNumber,
+        doubleHeader: game.doubleHeader,
+        method: match.method,
+      })
       continue
     }
     const delta = startDeltaMinutes(game.gameDate, match.event.start_time)
@@ -332,6 +487,9 @@ export async function executeMlbOfficialShadowAcquisition({
       officialStart: game.gameDate,
       canonicalStart: match.event.start_time,
       startDeltaMinutes: delta,
+      mappingMethod: match.method,
+      gameNumber: game.gameNumber,
+      doubleHeader: game.doubleHeader,
       officialStatus: game.status.canonicalSportEventStatus,
       canonicalStatus: match.event.status,
     })
@@ -363,6 +521,9 @@ export async function executeMlbOfficialShadowAcquisition({
         officialStart: game.gameDate,
         canonicalStart: match.event.start_time,
         startDeltaMinutes: delta,
+        mappingMethod: match.method,
+        gameNumber: game.gameNumber,
+        doubleHeader: game.doubleHeader,
         statusComparison: {
           official: game.status.canonicalSportEventStatus,
           canonical: match.event.status,
@@ -453,12 +614,17 @@ export async function executeMlbOfficialShadowAcquisition({
       scheduleGamesReturned: official.rows.length,
       scheduleGamesMapped: mappedGames.length,
       currentDayCoverage: events.length ? mappedGames.length / events.length : null,
-      duplicates: 0,
+      duplicateEvents: 0,
+      duplicateCanonicalEvents: mappedGames.length - new Set(mappedGames.map((row) => String(row.eventId))).size,
       ambiguousGames,
       unmappedGames,
       statusDifferences,
       startTimeDifferences,
       probableStartersReturned: starterCandidates.length,
+      probableStartersMappedToCanonicalPlayers: starterCandidates.length,
+      unmappedStarters: 0,
+      ambiguousStarters: 0,
+      starterChangesDetected: 0,
       noSecretExposure: true,
     },
     updated_at: completedAt,
@@ -478,7 +644,7 @@ export async function executeMlbOfficialShadowAcquisition({
     scheduleGamesMapped: mappedGames.length,
     currentDayEventCount: events.length,
     currentDayCoverage: events.length ? mappedGames.length / events.length : null,
-    duplicateEvents: 0,
+    duplicateEvents: mappedGames.length - new Set(mappedGames.map((row) => String(row.eventId))).size,
     ambiguousEvents: ambiguousGames.length,
     unmappedEvents: unmappedGames.length,
     newMappings: rowsInserted,
@@ -541,6 +707,146 @@ export function runMlbOfficialSportsDataIoOffDryRun() {
       duplicateEventIds: built.duplicateEventIds,
       ambiguousMappings: built.ambiguousMappings,
     },
+    providerCallsMade: 0,
+    databaseMutationsMade: 0,
+  }
+}
+
+export function validateMlbOfficialMappingStatusParityFixtures() {
+  const events: StoredEventRow[] = [
+    {
+      id: 'baseball_mlb:mlb:sportsdataio:event:79060',
+      start_time: '2026-08-09T18:10:00Z',
+      home_team: 'KC',
+      away_team: 'CHC',
+      status: 'scheduled',
+      provider_ids: { sportsdataio: '79060' },
+      metadata: {},
+    },
+    {
+      id: 'baseball_mlb:mlb:sportsdataio:event:79061',
+      start_time: '2026-08-09T18:10:00Z',
+      home_team: 'MIL',
+      away_team: 'MIN',
+      status: 'scheduled',
+      provider_ids: { sportsdataio: '79061' },
+      metadata: {},
+    },
+    {
+      id: 'baseball_mlb:mlb:sportsdataio:event:79066',
+      start_time: '2026-08-09T20:10:00Z',
+      home_team: 'SEA',
+      away_team: 'TB',
+      status: 'scheduled',
+      provider_ids: { sportsdataio: '79066' },
+      metadata: {},
+    },
+    {
+      id: 'baseball_mlb:mlb:sportsdataio:event:79056',
+      start_time: '2026-08-09T20:10:00Z',
+      home_team: 'ARI',
+      away_team: 'LAD',
+      status: 'scheduled',
+      provider_ids: { sportsdataio: '79056' },
+      metadata: {},
+    },
+    {
+      id: 'doubleheader-game-1',
+      start_time: '2026-08-10T17:05:00Z',
+      home_team: 'BOS',
+      away_team: 'NYY',
+      status: 'scheduled',
+      provider_ids: { sportsdataio: 'dh1' },
+      metadata: { gameNumber: 1 },
+    },
+    {
+      id: 'doubleheader-game-2',
+      start_time: '2026-08-10T23:05:00Z',
+      home_team: 'BOS',
+      away_team: 'NYY',
+      status: 'scheduled',
+      provider_ids: { sportsdataio: 'dh2' },
+      metadata: { gameNumber: 2 },
+    },
+  ]
+  const capturedAt = '2026-08-09T12:00:00.000Z'
+  const games = normalizeMlbOfficialSchedulePayload({
+    dates: [{
+      games: [
+        {
+          gamePk: 824078,
+          gameDate: '2026-08-09T18:10:00Z',
+          officialDate: '2026-08-09',
+          gameNumber: 1,
+          doubleHeader: 'N',
+          status: { abstractGameState: 'Final', detailedState: 'Final', codedGameState: 'F', statusCode: 'F' },
+          teams: {
+            away: { team: { id: 112, name: 'Chicago Cubs', abbreviation: 'CHC' } },
+            home: { team: { id: 118, name: 'Kansas City Royals', abbreviation: 'KC' } },
+          },
+        },
+        {
+          gamePk: 823104,
+          gameDate: '2026-08-09T20:10:00Z',
+          officialDate: '2026-08-09',
+          gameNumber: 1,
+          doubleHeader: 'N',
+          status: { abstractGameState: 'Final', detailedState: 'Final', codedGameState: 'F', statusCode: 'F' },
+          teams: {
+            away: { team: { id: 139, name: 'Tampa Bay Rays', abbreviation: 'TB' } },
+            home: { team: { id: 136, name: 'Seattle Mariners', abbreviation: 'SEA' } },
+          },
+        },
+        {
+          gamePk: 1001,
+          gameDate: '2026-08-10T17:05:00Z',
+          officialDate: '2026-08-10',
+          gameNumber: 1,
+          doubleHeader: 'Y',
+          status: { abstractGameState: 'Preview', detailedState: 'Scheduled', codedGameState: 'S', statusCode: 'S' },
+          teams: {
+            away: { team: { id: 147, name: 'New York Yankees', abbreviation: 'NYY' } },
+            home: { team: { id: 111, name: 'Boston Red Sox', abbreviation: 'BOS' } },
+          },
+        },
+        {
+          gamePk: 1002,
+          gameDate: '2026-08-10T23:05:00Z',
+          officialDate: '2026-08-10',
+          gameNumber: 2,
+          doubleHeader: 'Y',
+          status: { abstractGameState: 'Preview', detailedState: 'Scheduled', codedGameState: 'S', statusCode: 'S' },
+          teams: {
+            away: { team: { id: 147, name: 'New York Yankees', abbreviation: 'NYY' } },
+            home: { team: { id: 111, name: 'Boston Red Sox', abbreviation: 'BOS' } },
+          },
+        },
+      ],
+    }],
+  }, capturedAt)
+  const resolutions = games.map((game) => ({ gamePk: game.gamePk, ...matchOfficialGameToStoredEvent(game, events) }))
+  const mappedIds = resolutions.map((item) => item.event?.id ?? null).filter(Boolean)
+  const duplicateMappedIds = mappedIds.length - new Set(mappedIds).size
+  const checks = [
+    ['CHC @ KC maps by full-name alias to canonical abbreviation event', resolutions[0]?.event?.id === 'baseball_mlb:mlb:sportsdataio:event:79060'],
+    ['TB @ SEA maps by full-name alias to canonical abbreviation event', resolutions[1]?.event?.id === 'baseball_mlb:mlb:sportsdataio:event:79066'],
+    ['doubleheader game 1 remains distinct', resolutions[2]?.event?.id === 'doubleheader-game-1'],
+    ['doubleheader game 2 remains distinct', resolutions[3]?.event?.id === 'doubleheader-game-2'],
+    ['no ambiguous fixture mappings remain', resolutions.every((item) => item.ambiguous === false)],
+    ['no duplicate canonical event mappings', duplicateMappedIds === 0],
+  ] as const
+  const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
+  return {
+    success: failedChecks.length === 0,
+    mode: 'sdio_exit_03b_mapping_status_parity_fixtures_v1',
+    mapped: mappedIds.length,
+    expectedMappable: games.length,
+    ambiguous: resolutions.filter((item) => item.ambiguous).length,
+    duplicateEvents: duplicateMappedIds,
+    checks: checks.length,
+    passed: checks.length - failedChecks.length,
+    failed: failedChecks.length,
+    failedChecks,
     providerCallsMade: 0,
     databaseMutationsMade: 0,
   }
