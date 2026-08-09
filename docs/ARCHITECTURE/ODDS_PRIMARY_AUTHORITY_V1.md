@@ -71,7 +71,13 @@ The ODDS-03 local validator executes this contract in fixtures and confirms no w
 
 ## Scheduler Integration
 
-The event refresh planner now reports `oddsPrimaryAuthority` metadata and The Odds API certified book configuration. Active execution behavior is unchanged until a later promotion gate. The Vercel primary scheduler continues using the existing protected endpoint and does not create a competing scheduler.
+The event refresh planner reports `oddsPrimaryAuthority` metadata and The Odds API certified book configuration. ODDS-03A wires `STAGE_1_DUAL_READ` into the existing protected Vercel operating-day scheduler path:
+
+`Vercel Cron -> /api/cron/operating-day -> adaptive refresh -> SportsDataIO canonical acquisition -> The Odds API shadow dual-read`
+
+The dual-read branch is bounded to one league-wide MLB odds request after a SportsDataIO canonical refresh selects eligible market-refresh events. The Odds API rows are stored with `authorityStatus = SHADOW_NON_AUTHORITATIVE`, `productPriceAuthority = false`, and `production_eligible = false`. Current product surfaces remain filtered to the configured product authority provider, so Stage 1 cannot replace SportsDataIO prices.
+
+The Vercel primary scheduler continues using the existing protected endpoint and does not create a competing scheduler.
 
 ## Rollback
 

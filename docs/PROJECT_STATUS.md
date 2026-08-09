@@ -1826,3 +1826,7 @@ Prior-day Performance reconciled as 42 canonical predictions = 24 settled + 18 v
 ODDS-02 is locally certified as `PASS_SHADOW_ONLY`. The integration uses only `THE_ODDS_API_KEY`, does not read or modify `ODDS_API_KEY`, and leaves SportsDataIO as production odds authority. The first bounded shadow acquisition made 1 The Odds API request, consumed 3 credits, returned 24 MLB events, 11 sportsbooks and h2h/spread/total coverage. Exact event matching found LAD @ ARI and TB @ SEA production Current Board matches. Shadow prices are certification evidence only and cannot feed production recommendations.
 
 No prediction formula, confidence, edge/EV formula, Official Pick policy, Rent Play, Moneyline, Smart Parlay, Watchlist, settlement, learning, scheduler cadence or provider budget changed. ODDS-03, Historical Replay, Player Props and MC-03 were not started.
+
+## 2026-08-09 ODDS-03A Natural Dual-Read Repair
+
+ODDS-03A traced `STAGE_1_DUAL_READ` and found it was metadata-only in the natural scheduler path: active refresh still executed only the SportsDataIO canonical acquisition. The bounded repair wires one league-wide The Odds API MLB shadow call after SportsDataIO refresh, records separate provider accounting, stores rows as non-authoritative shadow evidence and filters Current Board product pricing to the configured product authority. SportsDataIO remains product odds authority; The Odds API remains shadow-only. Production proof still requires a natural Vercel scheduler execution after deployment.

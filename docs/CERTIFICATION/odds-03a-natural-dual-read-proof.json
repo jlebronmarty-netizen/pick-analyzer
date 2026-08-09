@@ -1,0 +1,61 @@
+{
+  "mode": "odds_03a_natural_dual_read_proof_v1",
+  "status": "ODDS_03A_REPOSITORY_REPAIR_READY_FOR_NATURAL_SCHEDULER_PROOF",
+  "startingCommit": "f0717682c2e66da435029f90a25d3b8e065fa912",
+  "authorityStage": "STAGE_1_DUAL_READ",
+  "productAuthority": "SPORTSDATAIO",
+  "rootCause": "STAGE_1_DUAL_READ was metadata-only in the natural scheduler path; active market refresh executed SportsDataIO canonical acquisition but did not invoke The Odds API.",
+  "repair": {
+    "schedulerPath": "Vercel Cron -> protected operating-day endpoint -> adaptive refresh -> SportsDataIO canonical acquisition -> The Odds API shadow dual-read",
+    "theOddsApiActiveExecutionAuthorized": true,
+    "requestGranularity": "ONE_LEAGUE_WIDE_MLB_CALL_AFTER_SPORTSDATAIO_CANONICAL_REFRESH",
+    "credentialVariable": "THE_ODDS_API_KEY",
+    "legacyOddsApiKeyPreserved": true,
+    "currentBoardProductProviderFilter": true,
+    "shadowOnly": true,
+    "sportsDataIoProductAuthorityPreserved": true
+  },
+  "providerAccounting": {
+    "sportsDataIoPoolSeparate": true,
+    "theOddsApiPoolSeparate": true,
+    "theOddsApiSyncJobProvider": "the-odds-api",
+    "theOddsApiSyncJobType": "odds03a_natural_dual_read_v1",
+    "externalCallsUsedRecorded": true,
+    "providerCreditsConsumedRecorded": true
+  },
+  "safety": {
+    "predictionFormulaChanged": false,
+    "modelWeightsChanged": false,
+    "officialPickThresholdsChanged": false,
+    "kellyChanged": false,
+    "rentPlayPolicyChanged": false,
+    "moneylinePolicyChanged": false,
+    "smartParlayPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "hr03Changed": false,
+    "currentEraChanged": false,
+    "replayChanged": false,
+    "odds03PromotionPerformed": false,
+    "sportsDataIoCancelled": false,
+    "sportsDataIoDisabled": false,
+    "odds03Started": false,
+    "hr04Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false
+  },
+  "localValidation": {
+    "typescript": "PASS",
+    "providerCallsMade": 0,
+    "databaseMutationsMade": 0
+  },
+  "productionProof": {
+    "requiredAfterDeployment": true,
+    "naturalSchedulerExecutionObserved": false,
+    "theOddsApiNaturalCallsObserved": 0,
+    "classificationUntilObserved": "ODDS_03A_REPAIR_DEPLOYED_AWAITING_NATURAL_SCHEDULER_PROOF"
+  },
+  "finalClassification": "ODDS_03A_REPOSITORY_REPAIR_READY_FOR_NATURAL_SCHEDULER_PROOF"
+}

@@ -112,7 +112,7 @@ const TEAM_ALIASES: Record<string, string> = {
   wsh: 'WSH',
 }
 
-function normalizeTeam(value: string) {
+export function normalizeOddsAuthorityTeam(value: string) {
   const compact = value.toLowerCase().replace(/[^a-z0-9]+/g, '')
   return TEAM_ALIASES[compact] ?? value.trim().toUpperCase()
 }
@@ -179,6 +179,7 @@ export function getOddsPrimaryAuthorityRuntimeStatus(stage: OddsPrimaryAuthority
     rollbackAuthority: ODDS_PRIMARY_AUTHORITY_CONFIG.rollbackAuthority,
     rollbackRequiresCodeDeployment: false,
     credentialVariable: ODDS_PRIMARY_AUTHORITY_CONFIG.credentialVariable,
+    credentialPresent: Boolean(process.env.THE_ODDS_API_KEY?.trim()),
     legacyCredentialVariablePreserved: ODDS_PRIMARY_AUTHORITY_CONFIG.legacyCredentialVariable,
     certifiedBookSet: CERTIFIED_BOOK_SET_V1.map((book) => book.displayName),
     sourceTimestampPolicy: ODDS_PRIMARY_AUTHORITY_CONFIG.sourceTimestampPolicy,
@@ -201,15 +202,15 @@ export function mapOddsApiEventToLifecycleEvent({
   lifecycleEvents: OddsAuthorityLifecycleEvent[]
   toleranceMinutes?: number
 }) {
-  const home = normalizeTeam(providerEvent.homeTeam)
-  const away = normalizeTeam(providerEvent.awayTeam)
+  const home = normalizeOddsAuthorityTeam(providerEvent.homeTeam)
+  const away = normalizeOddsAuthorityTeam(providerEvent.awayTeam)
   const crosswalkMatches = lifecycleEvents.filter((event) => {
     const providerIds = event.providerIds ?? {}
     return Object.values(providerIds).some((value) => String(value) === providerEvent.providerEventId)
   })
   const teamTimeMatches = lifecycleEvents.filter((event) => (
-    normalizeTeam(event.homeTeam) === home &&
-    normalizeTeam(event.awayTeam) === away &&
+    normalizeOddsAuthorityTeam(event.homeTeam) === home &&
+    normalizeOddsAuthorityTeam(event.awayTeam) === away &&
     timeDeltaMinutes(event.startTime, providerEvent.commenceTime) <= toleranceMinutes
   ))
   const matches = crosswalkMatches.length ? crosswalkMatches : teamTimeMatches

@@ -1,8 +1,14 @@
 import 'server-only'
 
-import { createHash } from 'crypto'
+import { createHash, randomUUID } from 'crypto'
 import { SPORTS, getEnabledSports } from '@/config/sports.config'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { puertoRicoUtcRange } from '@/services/active-event.service'
+import {
+  getOddsPrimaryAuthorityRuntimeStatus,
+  mapOddsApiEventToLifecycleEvent,
+  normalizeOddsAuthorityTeam,
+} from '@/services/odds-primary-authority.service'
 
 const PROVIDER = 'the-odds-api'
 const BASE_URL = 'https://api.the-odds-api.com/v4'
@@ -97,6 +103,27 @@ type OddsRow = {
   updated_at: string
 }
 
+type LifecycleEventRow = {
+  id: string
+  sport_key: string
+  league_key: string | null
+  season: string | null
+  start_time: string
+  status: string | null
+  home_team: string | null
+  away_team: string | null
+  provider_ids?: Record<string, unknown> | null
+}
+
+type DualReadOptions = {
+  dryRun?: boolean
+  operatingDate: string
+  eventPlans?: Array<Record<string, unknown>>
+  source?: string | null
+  requestId?: string | null
+  timeoutMs?: number | null
+}
+
 type MappingRow = {
   sport_key: string
   entity_type: string
@@ -185,6 +212,13 @@ function leagueKeyForSport(sportKey: string) {
 function canonicalMarket(providerMarket: string) {
   if (providerMarket === 'h2h') return 'moneyline'
   if (providerMarket === 'spreads') return 'spread'
+  if (providerMarket === 'totals') return 'total'
+  return providerMarket
+}
+
+function storedMlbMarket(providerMarket: string) {
+  if (providerMarket === 'h2h') return 'moneyline'
+  if (providerMarket === 'spreads') return 'run_line'
   if (providerMarket === 'totals') return 'total'
   return providerMarket
 }
@@ -400,6 +434,423 @@ function dryRunResponse() {
     planObserved: [],
     blockers: apiKey() ? [] : ['THE_ODDS_API_KEY_NOT_PRESENT'],
     warnings: ['Dry-run mode makes zero provider calls and zero database mutations.'],
+  }
+}
+
+function text(value: unknown, fallback = '') {
+  return typeof value === 'string' && value.length > 0 ? value : fallback
+}
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
+
+function boolFromEnv(name: string, fallback: boolean) {
+  const raw = process.env[name]
+  if (raw === undefined || raw === null || raw === '') return fallback
+  return ['1', 'true', 'yes', 'on'].includes(String(raw).trim().toLowerCase())
+}
+
+function numberFromEnv(name: string, fallback: number) {
+  const parsed = Number(process.env[name])
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+
+function selectedEventIds(eventPlans: Array<Record<string, unknown>> = []) {
+  return Array.from(new Set(
+    eventPlans
+      .filter((plan) => plan.executionEnabled === true || plan.plannedAction === 'REFRESH_MARKET')
+      .map((plan) => text(plan.eventId))
+      .filter(Boolean)
+  )).sort()
+}
+
+function tenMinuteDedupeWindow(value: string) {
+  const date = new Date(value)
+  if (!Number.isFinite(date.getTime())) return value.slice(0, 16)
+  date.setUTCMinutes(Math.floor(date.getUTCMinutes() / 10) * 10, 0, 0)
+  return date.toISOString()
+}
+
+async function loadMlbLifecycleEvents(operatingDate: string) {
+  const range = puertoRicoUtcRange(operatingDate)
+  const result = await supabaseAdmin
+    .from('sport_events')
+    .select('id, sport_key, league_key, season, start_time, status, home_team, away_team, provider_ids')
+    .eq('sport_key', 'baseball_mlb')
+    .eq('league_key', 'mlb')
+    .gte('start_time', range.utcStart)
+    .lt('start_time', range.utcEndExclusive)
+    .order('start_time', { ascending: true })
+    .limit(200)
+  if (result.error) throw new Error(`the odds api dual-read sport_events read failed: ${result.error.message}`)
+  return (result.data ?? []) as LifecycleEventRow[]
+}
+
+function normalizeDualReadOutcome({
+  providerMarket,
+  outcome,
+  event,
+}: {
+  providerMarket: string
+  outcome: ProviderOutcome
+  event: LifecycleEventRow
+}) {
+  const raw = String(outcome.name ?? '').trim()
+  if (providerMarket === 'totals') {
+    const lower = raw.toLowerCase()
+    if (lower.includes('over')) return 'over'
+    if (lower.includes('under')) return 'under'
+    return lower
+  }
+  const normalized = normalizeOddsAuthorityTeam(raw)
+  if (normalized === normalizeOddsAuthorityTeam(event.home_team ?? '')) return 'home'
+  if (normalized === normalizeOddsAuthorityTeam(event.away_team ?? '')) return 'away'
+  return normalized.toLowerCase()
+}
+
+function normalizeMlbDualReadRows({
+  providerEvents,
+  lifecycleEvents,
+  operatingDate,
+  acquisitionId,
+  observedAt,
+  deduplicationKey,
+}: {
+  providerEvents: ProviderEvent[]
+  lifecycleEvents: LifecycleEventRow[]
+  operatingDate: string
+  acquisitionId: string
+  observedAt: string
+  deduplicationKey: string
+}) {
+  const rows: OddsRow[] = []
+  const mappings: MappingRow[] = []
+  const unmappedEvents: string[] = []
+  const ambiguousEvents: string[] = []
+  let rowsRejected = 0
+
+  for (const providerEvent of providerEvents) {
+    const commenceTime = validIso(providerEvent.commence_time)
+    if (!providerEvent.id || !commenceTime) {
+      rowsRejected += 1
+      continue
+    }
+    const mapping = mapOddsApiEventToLifecycleEvent({
+      providerEvent: {
+        providerEventId: providerEvent.id,
+        homeTeam: providerEvent.home_team ?? '',
+        awayTeam: providerEvent.away_team ?? '',
+        commenceTime,
+      },
+      lifecycleEvents: lifecycleEvents.map((event) => ({
+        eventId: event.id,
+        homeTeam: event.home_team ?? '',
+        awayTeam: event.away_team ?? '',
+        startTime: event.start_time,
+        providerIds: event.provider_ids,
+        lifecycleState: event.status,
+      })),
+    })
+    if (mapping.status === 'UNMAPPED') {
+      unmappedEvents.push(providerEvent.id)
+      continue
+    }
+    if (mapping.status === 'AMBIGUOUS' || !mapping.canonicalEventId) {
+      ambiguousEvents.push(providerEvent.id)
+      continue
+    }
+    const canonicalEvent = lifecycleEvents.find((event) => event.id === mapping.canonicalEventId)
+    if (!canonicalEvent) {
+      unmappedEvents.push(providerEvent.id)
+      continue
+    }
+    const season = canonicalEvent.season ?? seasonFromDate(commenceTime)
+    mappings.push({
+      sport_key: 'baseball_mlb',
+      entity_type: 'event',
+      internal_id: canonicalEvent.id,
+      provider: PROVIDER,
+      provider_id: providerEvent.id,
+      season: season ?? '',
+      metadata: {
+        checkpoint: 'odds03a_natural_dual_read_v1',
+        mappingStatus: mapping.status,
+        mappingReason: mapping.reason,
+        providerSportKey: providerEvent.sport_key ?? 'baseball_mlb',
+        operatingDate,
+        commenceTime,
+        homeTeam: providerEvent.home_team ?? null,
+        awayTeam: providerEvent.away_team ?? null,
+      },
+      updated_at: observedAt,
+    })
+
+    for (const bookmaker of providerEvent.bookmakers ?? []) {
+      const sportsbook = bookmaker.key || slug(bookmaker.title ?? 'unknown_bookmaker')
+      for (const market of bookmaker.markets ?? []) {
+        const providerMarket = market.key
+        const snapshotTime = validIso(market.last_update ?? bookmaker.last_update)
+        if (!providerMarket || !snapshotTime || !CORE_MARKETS.includes(providerMarket as typeof CORE_MARKETS[number])) {
+          rowsRejected += market.outcomes?.length ?? 1
+          continue
+        }
+        if (Date.parse(snapshotTime) >= Date.parse(canonicalEvent.start_time)) {
+          rowsRejected += market.outcomes?.length ?? 1
+          continue
+        }
+        for (const outcome of market.outcomes ?? []) {
+          const price = typeof outcome.price === 'number' && Number.isFinite(outcome.price) && outcome.price !== 0 ? outcome.price : null
+          const line = typeof outcome.point === 'number' && Number.isFinite(outcome.point) ? outcome.point : null
+          const outcomeKey = normalizeDualReadOutcome({ providerMarket, outcome, event: canonicalEvent })
+          if (!outcomeKey || price === null) {
+            rowsRejected += 1
+            continue
+          }
+          const minute = snapshotTime.slice(0, 16)
+          const id = `oddsapi_shadow_${hash(['odds03a', canonicalEvent.id, sportsbook, providerMarket, outcomeKey, line, minute])}`
+          rows.push({
+            id,
+            sport_key: 'baseball_mlb',
+            league_key: 'mlb',
+            season,
+            event_id: canonicalEvent.id,
+            provider: PROVIDER,
+            sportsbook,
+            market: storedMlbMarket(providerMarket),
+            outcome: outcomeKey,
+            price,
+            line,
+            snapshot_time: snapshotTime,
+            is_opening: false,
+            is_closing: false,
+            metadata: {
+              checkpoint: 'odds03a_natural_dual_read_v1',
+              authorityStatus: 'SHADOW_NON_AUTHORITATIVE',
+              oddsPrimaryAuthorityStage: 'STAGE_1_DUAL_READ',
+              productPriceAuthority: false,
+              productionAuthority: false,
+              providerSportKey: providerEvent.sport_key ?? 'baseball_mlb',
+              providerEventId: providerEvent.id,
+              providerMarketKey: providerMarket,
+              canonicalMarket: canonicalMarket(providerMarket),
+              bookmakerTitle: bookmaker.title ?? null,
+              bookmakerKey: bookmaker.key ?? null,
+              providerTimestamp: snapshotTime,
+              capturedAt: observedAt,
+              fetchObservedAt: observedAt,
+              canonicalAcquisitionId: acquisitionId,
+              deduplicationKey,
+              mappingReason: mapping.reason,
+              source: 'odds03a_natural_dual_read_v1',
+              oddsClassification: 'shadow_pregame',
+              validation_status: 'shadow',
+              production_eligible: false,
+            },
+            updated_at: observedAt,
+          })
+        }
+      }
+    }
+  }
+
+  return {
+    rows,
+    mappings,
+    rowsRejected,
+    mappedEvents: new Set(rows.map((row) => row.event_id)).size,
+    unmappedEvents,
+    ambiguousEvents,
+    bookmakerCount: new Set(rows.map((row) => row.sportsbook)).size,
+    markets: Array.from(new Set(rows.map((row) => row.market))).sort(),
+  }
+}
+
+async function existingDualReadJob(deduplicationKey: string) {
+  const result = await supabaseAdmin
+    .from('sports_sync_jobs')
+    .select('id, completed_at, status, metadata')
+    .eq('provider', PROVIDER)
+    .eq('sport_key', 'baseball_mlb')
+    .eq('job_type', 'odds03a_natural_dual_read_v1')
+    .in('status', ['completed', 'partial'])
+    .order('completed_at', { ascending: false })
+    .limit(25)
+  if (result.error) throw new Error(`the odds api dual-read dedupe read failed: ${result.error.message}`)
+  return (result.data ?? []).find((row) => asRecord(row.metadata).deduplicationKey === deduplicationKey) ?? null
+}
+
+export async function executeTheOddsApiMlbDualReadAcquisition(input: DualReadOptions) {
+  const requestedAt = nowIso()
+  const authority = getOddsPrimaryAuthorityRuntimeStatus()
+  const selectedIds = selectedEventIds(input.eventPlans)
+  const source = input.source ?? 'adaptive_refresh_execution_bridge_v2'
+  const dedupeWindow = tenMinuteDedupeWindow(requestedAt)
+  const deduplicationKey = hash([PROVIDER, 'baseball_mlb', 'odds03a_dual_read', input.operatingDate, selectedIds.join(','), dedupeWindow])
+  const acquisitionId = `odds03a_${hash([deduplicationKey, input.requestId ?? requestedAt])}`
+  const base = {
+    mode: 'odds03a_natural_dual_read_acquisition_v1',
+    generatedAt: requestedAt,
+    provider: PROVIDER,
+    sportKey: 'baseball_mlb',
+    leagueKey: 'mlb',
+    operatingDate: input.operatingDate,
+    authorityStage: authority.stage,
+    productAuthority: authority.productAuthority,
+    theOddsApiShadowOnly: true,
+    sportsDataIoRemainsProductAuthority: authority.productAuthority === 'SPORTSDATAIO',
+    acquisitionId,
+    deduplicationKey,
+    selectedEventIds: selectedIds,
+    providerCallsMade: 0,
+    providerCreditsConsumed: 0,
+    remoteMutationsMade: 0,
+    productionMutationsMade: 0,
+    predictionWrites: 0,
+    settlementWrites: 0,
+    learningWrites: 0,
+  }
+  if (input.dryRun) {
+    return { ...base, success: true, status: 'DRY_RUN', warnings: ['Dry run made zero provider calls and zero mutations.'] }
+  }
+  if (authority.stage !== 'STAGE_1_DUAL_READ') {
+    return { ...base, success: true, status: 'SKIPPED_STAGE_NOT_DUAL_READ', warnings: [`Current stage is ${authority.stage}.`] }
+  }
+  if (authority.productAuthority !== 'SPORTSDATAIO') {
+    return { ...base, success: false, status: 'BLOCKED_PRODUCT_AUTHORITY_NOT_SPORTSDATAIO', warnings: ['ODDS-03A only wires shadow dual-read while SportsDataIO remains product authority.'] }
+  }
+  if (!boolFromEnv('THE_ODDS_API_DUAL_READ_ENABLED', true)) {
+    return { ...base, success: true, status: 'SKIPPED_DUAL_READ_DISABLED', warnings: ['THE_ODDS_API_DUAL_READ_ENABLED disables natural dual-read.'] }
+  }
+  if (!apiKey()) {
+    return { ...base, success: false, status: 'BLOCKED_MISSING_API_KEY', warnings: ['THE_ODDS_API_KEY is not present in runtime.'] }
+  }
+  if (!selectedIds.length) {
+    return { ...base, success: true, status: 'SKIPPED_NO_ELIGIBLE_EVENTS', warnings: ['No eligible market-refresh events were selected.'] }
+  }
+  const duplicate = await existingDualReadJob(deduplicationKey)
+  if (duplicate) {
+    return {
+      ...base,
+      success: true,
+      status: 'SKIPPED_DUPLICATE_WINDOW',
+      duplicateJobId: duplicate.id,
+      duplicateCompletedAt: duplicate.completed_at,
+      warnings: ['A matching The Odds API dual-read job already completed for this bounded window.'],
+    }
+  }
+
+  const lifecycleEvents = await loadMlbLifecycleEvents(input.operatingDate)
+  const endpoint = `/sports/baseball_mlb/odds`
+  const state: FetchState = { calls: [], maxCalls: 1, stop: false, stopReason: null, remaining: null }
+  const oddsResult = await fetchProviderJson(state, 'odds03a_mlb_dual_read', 'baseball_mlb', endpoint, {
+    regions: 'us',
+    markets: CORE_MARKETS.join(','),
+    oddsFormat: 'american',
+  })
+  const observedAt = nowIso()
+  const providerEvents = Array.isArray(oddsResult.payload) ? oddsResult.payload as ProviderEvent[] : []
+  const normalized = normalizeMlbDualReadRows({
+    providerEvents,
+    lifecycleEvents,
+    operatingDate: input.operatingDate,
+    acquisitionId,
+    observedAt,
+    deduplicationKey,
+  })
+  const existingOdds = await existingIdCount('sports_odds_snapshots', normalized.rows.map((row) => row.id))
+  const existingMappings = await existingIdCount('provider_entity_mappings', normalized.mappings.map((row) => row.provider_id))
+  if (normalized.mappings.length) {
+    const { error } = await supabaseAdmin
+      .from('provider_entity_mappings')
+      .upsert(normalized.mappings, { onConflict: 'sport_key,entity_type,provider,provider_id,season' })
+    if (error) throw new Error(`the odds api dual-read provider_entity_mappings upsert failed: ${error.message}`)
+  }
+  if (normalized.rows.length) {
+    const { error } = await supabaseAdmin
+      .from('sports_odds_snapshots')
+      .upsert(normalized.rows, { onConflict: 'id' })
+    if (error) throw new Error(`the odds api dual-read sports_odds_snapshots upsert failed: ${error.message}`)
+  }
+  const firstCall = state.calls[0] ?? null
+  const creditsUsed = firstCall?.requestsLast ?? numberFromEnv('THE_ODDS_API_DUAL_READ_DEFAULT_CREDIT_COST', CORE_MARKETS.length)
+  const completedAt = nowIso()
+  const rowsInserted = Math.max(0, normalized.rows.length - existingOdds)
+  const rowsUpdated = Math.min(existingOdds, normalized.rows.length)
+  const jobStatus = firstCall?.ok === false || normalized.ambiguousEvents.length ? 'partial' : 'completed'
+  const { error: jobError } = await supabaseAdmin.from('sports_sync_jobs').insert({
+    id: randomUUID(),
+    job_type: 'odds03a_natural_dual_read_v1',
+    sport_key: 'baseball_mlb',
+    league_key: 'mlb',
+    provider: PROVIDER,
+    season: String(new Date(`${input.operatingDate}T00:00:00.000Z`).getUTCFullYear()),
+    started_at: requestedAt,
+    completed_at: completedAt,
+    status: jobStatus,
+    records_fetched: normalized.rows.length + normalized.rowsRejected,
+    records_inserted: rowsInserted,
+    records_updated: rowsUpdated,
+    records_skipped: normalized.rowsRejected,
+    error_count: normalized.ambiguousEvents.length + normalized.unmappedEvents.length,
+    metadata: {
+      checkpoint: 'odds03a_natural_dual_read_v1',
+      provider: PROVIDER,
+      sportKey: 'baseball_mlb',
+      externalCallsUsed: state.calls.length,
+      providerCallsMade: state.calls.length,
+      providerCreditsConsumed: creditsUsed,
+      requestsLast: firstCall?.requestsLast ?? null,
+      requestsRemaining: firstCall?.requestsRemaining ?? null,
+      deduplicationKey,
+      acquisitionId,
+      source,
+      requestId: input.requestId ?? null,
+      authorityStage: authority.stage,
+      productAuthority: authority.productAuthority,
+      shadowOnly: true,
+      productPriceAuthority: false,
+      endpoint: firstCall?.endpoint ?? null,
+      selectedEventCount: selectedIds.length,
+      providerEventsReturned: providerEvents.length,
+      mappedEvents: normalized.mappedEvents,
+      unmappedEvents: normalized.unmappedEvents,
+      ambiguousEvents: normalized.ambiguousEvents,
+      bookmakerCount: normalized.bookmakerCount,
+      markets: normalized.markets,
+      noSecretExposure: true,
+    },
+    updated_at: completedAt,
+  })
+  if (jobError) throw new Error(`the odds api dual-read sports_sync_jobs insert failed: ${jobError.message}`)
+
+  return {
+    ...base,
+    success: state.calls.length === 1 && firstCall?.ok !== false && normalized.ambiguousEvents.length === 0,
+    status: jobStatus === 'completed' ? 'LIVE_SHADOW_ACQUISITION_PERSISTED' : 'LIVE_SHADOW_ACQUISITION_PARTIAL',
+    providerCallsMade: state.calls.length,
+    providerCreditsConsumed: creditsUsed,
+    remoteMutationsMade: normalized.rows.length + normalized.mappings.length + 1,
+    productionMutationsMade: 0,
+    providerEventsReturned: providerEvents.length,
+    mappedEvents: normalized.mappedEvents,
+    unmappedEvents: normalized.unmappedEvents.length,
+    ambiguousEvents: normalized.ambiguousEvents.length,
+    rowsAccepted: normalized.rows.length,
+    rowsRejected: normalized.rowsRejected,
+    rowsInserted,
+    rowsUpdated,
+    mappingsUpserted: normalized.mappings.length,
+    mappingsExistingBefore: existingMappings,
+    bookmakerCount: normalized.bookmakerCount,
+    markets: normalized.markets,
+    planObserved: state.calls,
+    warnings: [
+      'The Odds API rows are persisted as shadow/non-authoritative evidence only.',
+      'Current Board product pricing remains filtered to the configured product authority provider.',
+      ...normalized.unmappedEvents.map((id) => `UNMAPPED_EVENT:${id}`),
+      ...normalized.ambiguousEvents.map((id) => `AMBIGUOUS_EVENT:${id}`),
+    ],
   }
 }
 

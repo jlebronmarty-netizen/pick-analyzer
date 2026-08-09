@@ -36,3 +36,4 @@ Production Pilot Week is the monitored real-world validation period after MC-08H
 - [ODDS-03R: Primary Odds Cutover Readiness Review](ODDS_03R_CUTOVER_READINESS_REVIEW.md)
 - [SDIO-EXIT-01: SportsDataIO Dependency Audit](SDIO_EXIT_01_DEPENDENCY_AUDIT.md)
 - [ODDS-03 / SDIO-EXIT-02: Primary Odds Cutover](ODDS_03_PRIMARY_CUTOVER.md)
+- [ODDS-03A: Natural Dual-Read Proof](ODDS_03A_NATURAL_DUAL_READ_PROOF.md)

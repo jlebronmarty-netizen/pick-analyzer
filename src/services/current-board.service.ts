@@ -38,6 +38,7 @@ import {
   summarizeProductFreshnessSlas,
   type ProductFreshnessSla,
 } from '@/services/product-freshness-sla.service'
+import { getOddsPrimaryAuthorityRuntimeStatus } from '@/services/odds-primary-authority.service'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
 
@@ -553,6 +554,11 @@ function canonicalEventStart(event: EventRow | undefined, fallback: string | nul
   return normalizeStoredSportsDataIoMlbStart({ startTime: event.start_time ?? fallback, metadata: event.metadata }).canonicalUtc
 }
 
+function productOddsProviderForCurrentBoard() {
+  const status = getOddsPrimaryAuthorityRuntimeStatus()
+  return status.productAuthority === 'THE_ODDS_API' ? 'the-odds-api' : 'sportsdataio'
+}
+
 async function readOddsForEvents({
   sportKey,
   eventIds,
@@ -570,6 +576,10 @@ async function readOddsForEvents({
     mode === 'HISTORICAL_EXPLORER' || mode === 'ALL_STORED_ADVANCED'
       ? null
       : new Date(nowMs - CURRENT_BOARD_FRESHNESS_POLICY.baseball_mlb.defaultMaxOddsAgeMinutes * 60000).toISOString()
+  const productOddsProvider =
+    mode === 'HISTORICAL_EXPLORER' || mode === 'ALL_STORED_ADVANCED'
+      ? null
+      : productOddsProviderForCurrentBoard()
   for (const chunk of chunks(uniqueIds, 50)) {
     if (!chunk.length) continue
     let query = supabaseAdmin
@@ -580,6 +590,7 @@ async function readOddsForEvents({
       .in('market', ['moneyline', 'run_line', 'total'])
       .order('snapshot_time', { ascending: false })
       .limit(1000)
+    if (productOddsProvider) query = query.eq('provider', productOddsProvider)
     if (currentWindowStart) query = query.gte('snapshot_time', currentWindowStart)
     const result = await query
     if (result.error) throw new Error(`current board odds read failed: ${result.error.message}`)

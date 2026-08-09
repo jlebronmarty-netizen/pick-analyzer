@@ -96,6 +96,7 @@ Current V2 certification documents:
 - [ODDS-03R Primary Odds Cutover Readiness JSON](odds-03r-cutover-readiness.json)
 - [SDIO-EXIT-01 SportsDataIO Dependency Audit JSON](sdio-exit-01-dependency-audit.json)
 - [ODDS-03 Primary Cutover JSON](odds-03-primary-cutover.json)
+- [ODDS-03A Natural Dual-Read Proof JSON](odds-03a-natural-dual-read-proof.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

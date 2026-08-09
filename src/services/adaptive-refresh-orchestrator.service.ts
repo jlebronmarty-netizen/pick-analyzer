@@ -19,6 +19,7 @@ import { formatInTimeZone } from '@/services/provider-time-normalization.service
 import { canonicalStoredOutcome } from '@/services/canonical-settlement-state.service'
 import { executeCanonicalMlbMarketAcquisition } from '@/services/canonical-acquisition.service'
 import { getEventRefreshPlan } from '@/services/event-refresh-planner.service'
+import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api-current-odds-acquisition.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -2256,10 +2257,26 @@ export async function runAdaptiveRefresh({
         requestId: executionRunId,
       }) as Record<string, unknown>
     }
+    const theOddsApiDualReadAcquisition = await executeTheOddsApiMlbDualReadAcquisition({
+      dryRun: false,
+      operatingDate: selectedDate,
+      eventPlans: activeEventPlans as Array<Record<string, unknown>>,
+      source: source ?? 'adaptive_refresh_execution_bridge_v2',
+      requestId: executionRunId,
+      timeoutMs: 15000,
+    }) as Record<string, unknown>
     const predictionWrites = Number(storedOddsPredictionGeneration?.predictionWrites ?? 0)
     const predictionMutations = Number(storedOddsPredictionGeneration?.remoteMutationsMade ?? 0)
+    const sportsDataIoProviderCalls = Number(canonicalAcquisition.providerCallsMade ?? 0)
+    const theOddsApiProviderCalls = Number(theOddsApiDualReadAcquisition.providerCallsMade ?? 0)
+    const totalProviderCallsMade = sportsDataIoProviderCalls + theOddsApiProviderCalls
+    const totalRemoteMutations =
+      Number(canonicalAcquisition.remoteMutationsMade ?? 0) +
+      Number(theOddsApiDualReadAcquisition.remoteMutationsMade ?? 0) +
+      predictionMutations
+    const dualReadSucceeded = theOddsApiDualReadAcquisition.success !== false
     return {
-      success: canonicalAcquisition.success && storedOddsPredictionGeneration?.success !== false,
+      success: canonicalAcquisition.success && storedOddsPredictionGeneration?.success !== false && dualReadSucceeded,
       status: normalizedStatus,
       mode: 'adaptive_refresh_execution_bridge_v2',
       generatedAt: new Date().toISOString(),
@@ -2278,6 +2295,7 @@ export async function runAdaptiveRefresh({
         canonicalAcquisition: activeEventRefreshPlan.canonicalAcquisition,
       },
       canonicalAcquisition,
+      theOddsApiDualReadAcquisition,
       storedOddsPredictionGeneration,
       refreshPlan: status.refreshPlan,
       providerCallForecast: {
@@ -2304,12 +2322,26 @@ export async function runAdaptiveRefresh({
           domain: 'odds',
           action: 'canonical_event_level_market_refresh',
           provider: 'sportsdataio',
-          providerCallsMade: canonicalAcquisition.providerCallsMade ?? 0,
+          providerCallsMade: sportsDataIoProviderCalls,
           providerResultClassification: canonicalAcquisition.success ? 'PROVIDER_RETURNED_CANONICAL_MARKETS' : 'PROVIDER_CHECK_FAILED',
           rowsReceived: canonicalAcquisition.rowsReceived ?? 0,
           rowsInserted: canonicalAcquisition.rowsInserted ?? 0,
           rowsUpdated: canonicalAcquisition.rowsUpdated ?? 0,
           rowsSkipped: canonicalAcquisition.rowsSkipped ?? 0,
+        },
+        {
+          domain: 'odds',
+          action: 'odds03a_shadow_dual_read_market_refresh',
+          provider: 'the-odds-api',
+          providerCallsMade: theOddsApiProviderCalls,
+          providerCreditsConsumed: Number(theOddsApiDualReadAcquisition.providerCreditsConsumed ?? 0),
+          providerResultClassification: dualReadSucceeded ? String(theOddsApiDualReadAcquisition.status ?? 'SHADOW_DUAL_READ_OK') : String(theOddsApiDualReadAcquisition.status ?? 'SHADOW_DUAL_READ_FAILED'),
+          rowsReceived: Number(theOddsApiDualReadAcquisition.rowsAccepted ?? 0) + Number(theOddsApiDualReadAcquisition.rowsRejected ?? 0),
+          rowsInserted: Number(theOddsApiDualReadAcquisition.rowsInserted ?? 0),
+          rowsUpdated: Number(theOddsApiDualReadAcquisition.rowsUpdated ?? 0),
+          rowsSkipped: Number(theOddsApiDualReadAcquisition.rowsRejected ?? 0),
+          productAuthorityChanged: false,
+          shadowOnly: true,
         },
       ],
       oddsChangesDetected: contract.persistedSnapshotCount ?? 0,
@@ -2324,12 +2356,12 @@ export async function runAdaptiveRefresh({
       },
       cacheInvalidations: [],
       warnings: canonicalAcquisition.success ? [] : asStrings(contract.errors),
-      providerCallsMade: canonicalAcquisition.providerCallsMade ?? 0,
-      remoteMutationsMade: Number(canonicalAcquisition.remoteMutationsMade ?? 0) + predictionMutations,
+      providerCallsMade: totalProviderCallsMade,
+      remoteMutationsMade: totalRemoteMutations,
       guardrails: {
         ...status.guardrails,
-        providerCallsMade: canonicalAcquisition.providerCallsMade ?? 0,
-        remoteMutationsMade: Number(canonicalAcquisition.remoteMutationsMade ?? 0) + predictionMutations,
+        providerCallsMade: totalProviderCallsMade,
+        remoteMutationsMade: totalRemoteMutations,
         predictionMutationsMade: predictionWrites,
         officialThresholdsChanged: false,
         currentBoardPolicyChanged: false,

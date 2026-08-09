@@ -312,11 +312,13 @@ export async function getEventRefreshPlan(input: EventRefreshPlanInput = {}) {
       },
       theOddsApi: {
         plannerStatus: oddsAuthority.stage === 'STAGE_1_DUAL_READ'
-          ? 'DUAL_READ_CONFIGURED_PRODUCT_AUTHORITY_REMAINS_SPORTSDATAIO'
+          ? 'DUAL_READ_ACTIVE_SHADOW_ACQUISITION_PRODUCT_AUTHORITY_REMAINS_SPORTSDATAIO'
           : oddsAuthority.stage,
-        activeExecutionAuthorized: false,
+        activeExecutionAuthorized: oddsAuthority.stage === 'STAGE_1_DUAL_READ' && oddsAuthority.productAuthority === 'SPORTSDATAIO',
         productAuthority: oddsAuthority.productAuthority,
         certifiedBookSet: oddsAuthority.certifiedBookSet,
+        requestGranularity: oddsAuthority.stage === 'STAGE_1_DUAL_READ' ? 'ONE_LEAGUE_WIDE_MLB_CALL_AFTER_SPORTSDATAIO_CANONICAL_REFRESH' : 'NOT_ACTIVE',
+        shadowOnly: oddsAuthority.productAuthority !== 'THE_ODDS_API',
       },
       bsn: {
         plannerStatus: 'OBSERVATIONAL_PROVIDER_PATH_NOT_ACTIVE',
