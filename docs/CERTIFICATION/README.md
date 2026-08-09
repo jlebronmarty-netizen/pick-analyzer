@@ -86,6 +86,7 @@ Current V2 certification documents:
 - [MC-08D Smart Parlay Experience](MC_08D_SMART_PARLAY_EXPERIENCE.md)
 - [MC-08D Smart Parlay Experience JSON](mc-08d-smart-parlay-experience.json)
 - [ODDS-02 The Odds API Shadow Integration JSON](odds-02-the-odds-api-shadow-integration.json)
+- [ODDS-02A Event Mapping And Multi-Market Certification JSON](odds-02a-event-mapping-multi-market.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

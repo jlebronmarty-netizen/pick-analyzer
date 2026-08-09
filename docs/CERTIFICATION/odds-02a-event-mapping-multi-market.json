@@ -1,0 +1,177 @@
+{
+  "certification": "ODDS_02A_EVENT_MAPPING_MULTI_MARKET",
+  "status": "WAIT_FOR_USEFUL_SHADOW_WINDOW",
+  "startingCommit": "aaa1c45c7de027ae5a5ce6e6248712f371f70145",
+  "productionCommitAtObservation": "aaa1c45c7de027ae5a5ce6e6248712f371f70145",
+  "observedAt": "2026-08-09T00:35:51Z",
+  "productionPilotWeek": "ACTIVE",
+  "odds02Baseline": {
+    "classification": "ODDS_02_PRODUCTION_SHADOW_CERTIFIED",
+    "sportsDataIoProductionAuthority": true,
+    "theOddsApiShadowOnly": true,
+    "authorizedTotalRequests": 3,
+    "requestsConsumedBeforeOdds02A": 2,
+    "creditsConsumedBeforeOdds02A": 6,
+    "remainingAuthorizedRequestsBeforeOdds02A": 1
+  },
+  "credentialPresence": {
+    "theOddsApiKeyPresentLocal": true,
+    "cronSecretPresentLocal": true,
+    "secretValuesExposed": false
+  },
+  "currentSlateGate": {
+    "productionReadOnlyEndpointsUsed": [
+      "/api/system/version",
+      "/api/current-board?mode=current&limit=200",
+      "/api/operations/event-lifecycle?sportKey=baseball_mlb&limit=200",
+      "/api/performance"
+    ],
+    "currentBoardCandidates": 3,
+    "uniqueCurrentBoardEvents": 1,
+    "expectedMappableCurrentEvents": 1,
+    "minimumUsefulExpectedMappableEvents": 3,
+    "preferredUsefulExpectedMappableEvents": 5,
+    "finalRequestConsumed": false,
+    "gateDecision": "DO_NOT_CONSUME_FINAL_REQUEST"
+  },
+  "currentBoardEvents": [
+    {
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:79051",
+      "matchup": "TB @ SEA",
+      "candidateCount": 3,
+      "markets": [
+        "moneyline",
+        "spread",
+        "total"
+      ],
+      "marketSourceTimestamp": "2026-08-08T20:27:15.000Z"
+    }
+  ],
+  "priorProductionShadowEvidence": {
+    "eventsReturned": 24,
+    "expectedMappable": 1,
+    "actuallyMapped": 1,
+    "rawReturnedMappingRate": 0.0417,
+    "expectedMappableMappingRate": 1,
+    "unmapped": 23,
+    "ambiguousEvents": 0,
+    "shadowSnapshots": 1168,
+    "sportsDataIoFresh": 0,
+    "sportsDataIoAging": 0,
+    "sportsDataIoStale": 3,
+    "theOddsApiFresh": 21,
+    "theOddsApiAging": 3,
+    "theOddsApiStale": 0,
+    "sourcePayloadPersisted": false,
+    "rowLevelReconstructionAvailable": false,
+    "retentionGap": "PRIOR_RAW_EVENT_PAYLOAD_NOT_PERSISTED"
+  },
+  "priorUnmappedClassificationCounts": {
+    "EXACT_CURRENT_BOARD_MATCH": 1,
+    "RAW_PROVIDER_EVENTS_NOT_PERSISTED_FOR_INDIVIDUAL_RECONSTRUCTION": 23
+  },
+  "mappingContract": {
+    "strategy": "NORMALIZED_HOME_AWAY_TEAMS_PLUS_BOUNDED_START_TIME_TOLERANCE",
+    "startTimeToleranceMinutes": 15,
+    "ambiguousAutomaticMappingsAllowed": false,
+    "sameTeamsDifferentStartExcluded": true,
+    "rawReturnedCoverageMustNotBeUsedAsReliabilityRate": true,
+    "expectedMappableCoverageIsCutoverMetric": true,
+    "teamAliasesAudited": [
+      "ATH/OAK",
+      "CHW",
+      "KC",
+      "SD",
+      "SF",
+      "TB",
+      "WSH"
+    ]
+  },
+  "rootCause": {
+    "classifications": [
+      "OPERATING_WINDOW_SCOPE_DIFFERENCE",
+      "PRIOR_RAW_EVENT_PAYLOAD_NOT_PERSISTED"
+    ],
+    "mappingDefectProven": false,
+    "mappingRepairRequired": false,
+    "mappingRepairPerformed": false
+  },
+  "finalShadowRequest": {
+    "consumed": false,
+    "reason": "Only one expected-mappable current event was available; minimum useful ODDS-02A final acquisition requires at least three.",
+    "eventsReturned": null,
+    "expectedMappable": null,
+    "eventsMapped": null,
+    "mappingRate": null,
+    "ambiguousEvents": null,
+    "moneylineCoverage": null,
+    "runLineCoverage": null,
+    "totalCoverage": null
+  },
+  "requestAccounting": {
+    "cumulativeRequestsUsed": 2,
+    "cumulativeCreditsUsed": 6,
+    "remainingAuthorizedRequests": 1,
+    "maximumCumulativeRequests": 3,
+    "maximumAdditionalRequests": 1
+  },
+  "pricePolicyRecommendation": "BEST_FRESH_WITH_USER_BOOK_PREFERENCE",
+  "creditEconomics": {
+    "observedCreditsPerLeagueWideRequest": 3,
+    "tenGameSlate": {
+      "requestsPerDay": "30-37",
+      "creditsPerDay": "90-111"
+    },
+    "fifteenGameSlate": {
+      "requestsPerDay": "37-43",
+      "creditsPerDay": "111-129"
+    },
+    "thirtyDayCreditEstimate": "2700-3870"
+  },
+  "propsMappingReadiness": {
+    "eventMappingReusable": true,
+    "additionalIdentityRequired": [
+      "player_id",
+      "player_name_normalization",
+      "team",
+      "event",
+      "market",
+      "line"
+    ],
+    "propsRequested": false,
+    "propsImplemented": false
+  },
+  "productionIsolation": {
+    "sportsDataIoRemainsProductionAuthority": true,
+    "theOddsApiRemainsShadowOnly": true,
+    "currentBoardProductionPriceChanged": false,
+    "officialPickPolicyChanged": false,
+    "rentPlayPolicyChanged": false,
+    "moneylinePolicyChanged": false,
+    "smartParlayPolicyChanged": false,
+    "watchlistPolicyChanged": false,
+    "predictionProbabilityChanged": false,
+    "confidenceChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "performanceChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "odds03Started": false,
+    "historicalReplayStarted": false,
+    "playerPropsStarted": false,
+    "mc03Started": false
+  },
+  "certificationReads": {
+    "providerCallsMade": 0,
+    "databaseMutationsMade": 0,
+    "predictionWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "cutoverDecision": "MORE_SHADOW_EVIDENCE_REQUIRED",
+  "odds03Recommended": false,
+  "canPilotContinue": true,
+  "finalClassification": "ODDS_02A_WAIT_FOR_USEFUL_SHADOW_WINDOW"
+}
+
