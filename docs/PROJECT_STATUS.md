@@ -1830,3 +1830,7 @@ No prediction formula, confidence, edge/EV formula, Official Pick policy, Rent P
 ## 2026-08-09 ODDS-03A Natural Dual-Read Repair
 
 ODDS-03A traced `STAGE_1_DUAL_READ` and found it was metadata-only in the natural scheduler path: active refresh still executed only the SportsDataIO canonical acquisition. The bounded repair wires one league-wide The Odds API MLB shadow call after SportsDataIO refresh, records separate provider accounting, stores rows as non-authoritative shadow evidence and filters Current Board product pricing to the configured product authority. SportsDataIO remains product odds authority; The Odds API remains shadow-only. Production proof still requires a natural Vercel scheduler execution after deployment.
+
+## 2026-08-09 SDIO-EXIT-02 Full MLB Replacement
+
+SDIO-EXIT-02 is locally certified as `SDIO_EXIT_02_PARTIAL_CRITICAL_DEPENDENCIES_REMAIN`. Historical replay and MLB result/status closure are already independent of SportsDataIO through stored historical assets and MLB Stats API result/status paths. Full MLB SportsDataIO exit remains blocked by production odds authority pending ODDS-03C, slate discovery/morning sync, starter evidence, player identity and team/player stat feature parity. The phase made 0 SportsDataIO calls, 0 manual The Odds API calls, 0 MLB Stats API calls and 0 database mutations, and did not cancel SportsDataIO, promote odds authority, change prediction formulas, alter Official Pick policy, change settlement or start MC-03.
