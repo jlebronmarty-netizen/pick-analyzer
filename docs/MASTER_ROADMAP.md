@@ -3317,3 +3317,7 @@ ODDS-02 is locally certified as `PASS_SHADOW_ONLY`. It adds an isolated The Odds
 ## SDIO-EXIT-02 Full MLB SportsDataIO Replacement
 
 Status: Locally certified partial. SDIO-EXIT-02 reconfirmed the complete MLB SportsDataIO dependency graph and documents the replacement gates needed before cancellation. Historical MLB replay assets are independent; MLB status and result closure use MLB Stats API; settlement consumes canonical results. Full MLB exit remains blocked by ODDS-03C promotion proof, schedule/slate discovery replacement, starter identity persistence, player roster mapping and team/player stat feature parity. SportsDataIO stays enabled and product-authoritative for odds; The Odds API stays shadow-only; Production Pilot Week stays ACTIVE; MC-03 remains not started.
+
+## SDIO-EXIT-03 MLB Official Replacement
+
+Status: Locally implemented partial. SDIO-EXIT-03 adds the official MLB Stats API replacement foundation for schedule, event status and probable starters, including additive canonical row builders and read-only `/api/operations/mlb-official-replacement` evidence. The phase is ready for shadow observation only: SportsDataIO is not cancelled, odds authority is not promoted, model formulas and recommendation policy are unchanged, and cancellation remains blocked by real-slate shadow proof, ODDS-03C promotion, stat parity and a SportsDataIO-off operating window. HR-04, Player Props and MC-03 remain not started.

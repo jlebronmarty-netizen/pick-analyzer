@@ -20,6 +20,7 @@ Current V2 architecture inventory documents:
 - [Odds Primary Authority V1](ODDS_PRIMARY_AUTHORITY_V1.md)
 - [SportsDataIO Exit Architecture V1](SPORTSDATAIO_EXIT_ARCHITECTURE_V1.md)
 - [MLB Provider Independence V1](MLB_PROVIDER_INDEPENDENCE_V1.md)
+- [MLB Official Data Provider V1](MLB_OFFICIAL_DATA_PROVIDER_V1.md)
 - [MLB Calibration Shadow V1](MLB_CALIBRATION_SHADOW_V1.md)
 
 Most architecture documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:

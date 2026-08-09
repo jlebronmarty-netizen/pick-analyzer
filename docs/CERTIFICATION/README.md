@@ -98,6 +98,7 @@ Current V2 certification documents:
 - [ODDS-03 Primary Cutover JSON](odds-03-primary-cutover.json)
 - [ODDS-03A Natural Dual-Read Proof JSON](odds-03a-natural-dual-read-proof.json)
 - [SDIO-EXIT-02 Full MLB Replacement JSON](sdio-exit-02-full-mlb-replacement.json)
+- [SDIO-EXIT-03 MLB Official Replacement JSON](sdio-exit-03-mlb-official-replacement.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

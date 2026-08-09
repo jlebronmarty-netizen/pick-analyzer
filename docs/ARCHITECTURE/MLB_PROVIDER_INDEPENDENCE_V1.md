@@ -1,12 +1,14 @@
 # MLB Provider Independence V1
 
-Status: `SDIO_EXIT_02_PARTIAL_CRITICAL_DEPENDENCIES_REMAIN`
+Status: `SDIO_EXIT_03_PARTIAL_READY_FOR_SHADOW_OBSERVATION`
 
 Observation date: 2026-08-09
 
 Starting commit: `c604758d38077770cc9d7954db826778ad037c42`
 
-This document records the SDIO-EXIT-02 MLB-only provider independence audit. It does not cancel SportsDataIO, does not promote The Odds API, does not change model formulas and does not make provider calls. The goal is to identify which MLB runtime domains can already run without SportsDataIO, which can degrade from stored data, and which remain cancellation blockers.
+This document records the SDIO-EXIT-02 MLB-only provider independence audit and the SDIO-EXIT-03 official MLB replacement implementation. It does not cancel SportsDataIO, does not promote The Odds API, does not change model formulas and does not make provider calls. The goal is to identify which MLB runtime domains can already run without SportsDataIO, which can degrade from stored data, and which remain cancellation blockers.
+
+SDIO-EXIT-03 update: `src/services/mlb-official-data-provider.service.ts` centralizes MLB Stats API schedule/status/probable-pitcher normalization, `src/services/mlb-official-replacement.service.ts` builds additive canonical event/team/player/starter mapping rows, and `/api/operations/mlb-official-replacement` exposes read-only replacement status. This makes schedule, event identity and starter replacement ready for shadow observation, but full cancellation remains blocked by natural shadow proof, ODDS-03C promotion, team/player stat feature parity and one SportsDataIO-off operating window.
 
 ## Executive Verdict
 
@@ -117,4 +119,3 @@ Recommended future staged config:
 - ODDS authority promotion: not performed.
 - HR-03 calibration mode: remains shadow only.
 - MC-03: not started.
-
