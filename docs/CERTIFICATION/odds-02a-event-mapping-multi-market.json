@@ -1,9 +1,9 @@
 {
   "certification": "ODDS_02A_EVENT_MAPPING_MULTI_MARKET",
-  "status": "WAIT_FOR_USEFUL_SHADOW_WINDOW",
-  "startingCommit": "aaa1c45c7de027ae5a5ce6e6248712f371f70145",
-  "productionCommitAtObservation": "aaa1c45c7de027ae5a5ce6e6248712f371f70145",
-  "observedAt": "2026-08-09T00:35:51Z",
+  "status": "FINAL_REQUEST_CONSUMED_CERTIFICATION_INCOMPLETE",
+  "startingCommit": "6e8e31c6b949cc698674ba4a915c55455a3c5b85",
+  "productionCommitAtObservation": "6e8e31c6b949cc698674ba4a915c55455a3c5b85",
+  "observedAt": "2026-08-09T15:08:15Z",
   "productionPilotWeek": "ACTIVE",
   "odds02Baseline": {
     "classification": "ODDS_02_PRODUCTION_SHADOW_CERTIFIED",
@@ -26,27 +26,17 @@
       "/api/operations/event-lifecycle?sportKey=baseball_mlb&limit=200",
       "/api/performance"
     ],
-    "currentBoardCandidates": 3,
-    "uniqueCurrentBoardEvents": 1,
-    "expectedMappableCurrentEvents": 1,
+    "operatingDate": "2026-08-09",
+    "currentBoardGames": 14,
+    "currentBoardCandidates": 42,
+    "uniqueCurrentBoardEvents": 14,
+    "expectedMappableCurrentEvents": 14,
     "minimumUsefulExpectedMappableEvents": 3,
     "preferredUsefulExpectedMappableEvents": 5,
-    "finalRequestConsumed": false,
-    "gateDecision": "DO_NOT_CONSUME_FINAL_REQUEST"
+    "finalRequestConsumed": true,
+    "gateDecision": "CONSUME_FINAL_REQUEST"
   },
-  "currentBoardEvents": [
-    {
-      "eventId": "baseball_mlb:mlb:sportsdataio:event:79051",
-      "matchup": "TB @ SEA",
-      "candidateCount": 3,
-      "markets": [
-        "moneyline",
-        "spread",
-        "total"
-      ],
-      "marketSourceTimestamp": "2026-08-08T20:27:15.000Z"
-    }
-  ],
+  "currentBoardEvents": [],
   "priorProductionShadowEvidence": {
     "eventsReturned": 24,
     "expectedMappable": 1,
@@ -97,23 +87,34 @@
     "mappingRepairPerformed": false
   },
   "finalShadowRequest": {
-    "consumed": false,
-    "reason": "Only one expected-mappable current event was available; minimum useful ODDS-02A final acquisition requires at least three.",
+    "consumed": true,
+    "reason": "The useful slate gate passed and the protected route returned HTTP 200, but the certification client parsed the flat apiOk response as a nested data payload, so the live shadow payload was not captured in certifiable form.",
     "eventsReturned": null,
-    "expectedMappable": null,
+    "expectedMappable": 14,
     "eventsMapped": null,
     "mappingRate": null,
+    "unmappedExpectedEvents": null,
     "ambiguousEvents": null,
     "moneylineCoverage": null,
     "runLineCoverage": null,
-    "totalCoverage": null
+    "totalCoverage": null,
+    "fanDuelCoverage": null,
+    "draftKingsCoverage": null,
+    "betMgmCoverage": null,
+    "caesarsCoverage": null,
+    "freshnessComparisonCaptured": false,
+    "priceComparisonCaptured": false,
+    "modelValueComparisonCaptured": false,
+    "officialPickComparisonCaptured": false
   },
   "requestAccounting": {
-    "cumulativeRequestsUsed": 2,
+    "cumulativeRequestsUsed": 3,
     "cumulativeCreditsUsed": 6,
-    "remainingAuthorizedRequests": 1,
+    "cumulativeCreditsUsedExpected": 9,
+    "remainingAuthorizedRequests": 0,
     "maximumCumulativeRequests": 3,
-    "maximumAdditionalRequests": 1
+    "maximumAdditionalRequests": 0,
+    "fourthRequestAuthorized": false
   },
   "pricePolicyRecommendation": "BEST_FRESH_WITH_USER_BOOK_PREFERENCE",
   "creditEconomics": {
@@ -162,6 +163,48 @@
     "playerPropsStarted": false,
     "mc03Started": false
   },
+  "protectedRequest": {
+    "endpoint": "/api/operations/odds-shadow-comparison",
+    "method": "POST",
+    "confirmation": "ODDS_02_SHADOW",
+    "maxCalls": 1,
+    "httpStatus": 200,
+    "secretValuesExposed": false,
+    "responseEnvelopeExpectedByClient": "data",
+    "actualRepositoryApiOkContract": "flat_payload_with_requestId",
+    "payloadCaptured": false,
+    "captureFailure": "PAYLOAD_NOT_CAPTURED_FLAT_ENVELOPE_MISMATCH"
+  },
+  "postRequestReadOnlyEvidence": {
+    "systemVersion": {
+      "httpStatus": 200,
+      "gitCommit": "6e8e31c6b949cc698674ba4a915c55455a3c5b85",
+      "providerCallsMade": 0
+    },
+    "shadowCredentialIsolation": {
+      "httpStatus": 200,
+      "success": true,
+      "credentialVariable": "THE_ODDS_API_KEY",
+      "legacyVariablePreserved": "ODDS_API_KEY",
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0
+    },
+    "shadowDryRun": {
+      "httpStatus": 200,
+      "status": "DRY_RUN",
+      "credentialPresent": true,
+      "currentBoardCandidates": 42,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0,
+      "productionCurrentBoardChanged": false,
+      "productionOfficialPicksChanged": false,
+      "productionPerformanceChanged": false
+    },
+    "missionControl": {
+      "httpStatus": 200,
+      "status": "PRODUCTION_PILOT_WEEK_ACTIVE"
+    }
+  },
   "certificationReads": {
     "providerCallsMade": 0,
     "databaseMutationsMade": 0,
@@ -169,9 +212,17 @@
     "settlementWrites": 0,
     "learningWrites": 0
   },
-  "cutoverDecision": "MORE_SHADOW_EVIDENCE_REQUIRED",
+  "cutoverDecision": "DO_NOT_CUTOVER",
   "odds03Recommended": false,
+  "criticalFindings": [
+    "CERTIFICATION_CLIENT_RESPONSE_CAPTURE_DEFECT"
+  ],
+  "highFindings": [
+    "FINAL_USEFUL_SLATE_SHADOW_PAYLOAD_NOT_CERTIFIED"
+  ],
+  "mediumFindings": [
+    "PROVIDER_REQUEST_BUDGET_EXHAUSTED_FOR_ODDS_02A"
+  ],
   "canPilotContinue": true,
-  "finalClassification": "ODDS_02A_WAIT_FOR_USEFUL_SHADOW_WINDOW"
+  "finalClassification": "ODDS_02A_FINAL_REQUEST_CONSUMED_CERTIFICATION_INCOMPLETE"
 }
-

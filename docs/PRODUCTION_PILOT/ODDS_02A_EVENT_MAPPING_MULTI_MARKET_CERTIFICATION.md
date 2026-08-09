@@ -1,31 +1,71 @@
 # ODDS-02A Event Mapping And Multi-Market Shadow Certification
 
-Status: `ODDS_02A_WAIT_FOR_USEFUL_SHADOW_WINDOW`
+Status: `ODDS_02A_FINAL_REQUEST_CONSUMED_CERTIFICATION_INCOMPLETE`
 
-Observation time: `2026-08-09T00:35:51Z` UTC.
+Observation time: `2026-08-09T15:08:15Z` UTC.
 
-Starting commit: `aaa1c45c7de027ae5a5ce6e6248712f371f70145`.
+Starting commit: `6e8e31c6b949cc698674ba4a915c55455a3c5b85`.
 
-Production commit observed: `aaa1c45c7de027ae5a5ce6e6248712f371f70145`.
+Production commit observed: `6e8e31c6b949cc698674ba4a915c55455a3c5b85`.
 
 ## Verdict
 
-ODDS-02A did not consume the final authorized The Odds API request. Production read-only evidence showed only one unique Current Board event with three current candidates at the certification moment, below the required minimum of three expected-mappable current events.
+ODDS-02A cannot be certified as PASS.
 
-The prior raw 24-event ODDS-02 provider response was not persisted in committed certification artifacts. The committed and production evidence preserves aggregate event counts, mapped-event counts, exact matched case studies, sportsbook coverage and freshness results, but not a row-level inventory of all 24 provider events. This is an evidence-retention gap for ODDS-02A, not proof of an event-mapping defect.
+The final useful-slate gate passed. Production exposed 14 Current Board MLB events, 42 current candidates, and 15 lifecycle events on operating date `2026-08-09`. The final authorized The Odds API shadow request was then executed through the protected production route.
+
+The protected route returned HTTP 200, but the local certification client parsed the response as a nested `data` payload even though the repository `apiOk` contract returns the service payload at the top level. Because the final request budget is now consumed, the live shadow payload cannot be safely reacquired without exceeding the approved ODDS-02/02A provider limit.
+
+This is not evidence of a provider, mapping, model, or production isolation defect. It is a certification evidence-capture failure.
 
 ## Current Slate Gate
 
 | Item | Result |
 | --- | ---: |
-| Current Board candidates | 3 |
-| Unique Current Board events | 1 |
-| Current expected-mappable events | 1 |
+| Operating date | `2026-08-09` |
+| Current Board events | 14 |
+| Current Board candidates | 42 |
+| Current expected-mappable events | 14 |
+| Lifecycle events | 15 |
+| Active-refresh lifecycle events | 14 |
 | Minimum useful final acquisition | 3 |
 | Preferred useful final acquisition | 5+ |
-| Final request consumed | No |
+| Gate decision | `CONSUME_FINAL_REQUEST` |
+| Final request consumed | Yes |
 
-The only current Current Board event was `baseball_mlb:mlb:sportsdataio:event:79051` (`TB @ SEA`) with moneyline, spread and total candidates.
+The useful-window requirement was satisfied before the protected request was made.
+
+## Protected Request Evidence
+
+| Item | Result |
+| --- | --- |
+| Endpoint | `/api/operations/odds-shadow-comparison` |
+| Method | `POST` |
+| Confirmation | `ODDS_02_SHADOW` |
+| Max calls | 1 |
+| HTTP status | 200 |
+| Secret values exposed | No |
+| Client parser result | `PAYLOAD_NOT_CAPTURED_FLAT_ENVELOPE_MISMATCH` |
+
+The failed local extraction expected `$response.data`, but `src/lib/api-contract.ts` flattens successful payloads through `apiOk(payload, requestId)`. The parser therefore produced null certification fields even though the protected route returned HTTP 200.
+
+## Request Accounting
+
+| Item | Result |
+| --- | ---: |
+| Authorized ODDS-02/02A requests | 3 |
+| Requests used before final ODDS-02A attempt | 2 |
+| Final ODDS-02A request consumed | 1 |
+| Cumulative requests used | 3 |
+| Remaining authorized requests | 0 |
+| Prior observed credits/request | 3 |
+| Cumulative expected credits | 9 |
+
+No fourth request is authorized.
+
+## Certification Coverage
+
+The following ODDS-02A final proof items remain uncertified because the live response payload was not captured: events returned, expected events mapped, unmapped expected events, ambiguous events, moneyline coverage, run line coverage, total coverage, core-book coverage, freshness comparison, price comparison, shadow edge / EV impact and Official Pick shadow comparison.
 
 ## Prior ODDS-02 Evidence
 
@@ -95,11 +135,11 @@ The current slate gate confirms the one expected-mappable event has three produc
 
 | Market | Expected current candidates | Final request measurement |
 | --- | ---: | --- |
-| Moneyline | 1 | Not run; useful-window gate failed |
-| Run line | 1 | Not run; useful-window gate failed |
-| Total | 1 | Not run; useful-window gate failed |
+| Moneyline | 14 | Final response payload not captured |
+| Run line | 14 | Final response payload not captured |
+| Total | 14 | Final response payload not captured |
 
-The final multi-event, multi-market coverage certification remains pending a useful window with at least three expected-mappable current events.
+The final multi-event, multi-market coverage certification remains incomplete because the final response payload was not captured. A new acquisition is not authorized under ODDS-02A because the request budget is exhausted.
 
 ## Price Policy Recommendation
 
@@ -141,6 +181,6 @@ No player props request was made and no player props implementation was started.
 - Certification reads made zero database mutations.
 - ODDS-03, Historical Replay, Player Props and MC-03 were not started.
 
-## Next Useful Window
+## Next Step
 
-Use the remaining final authorized request only when production Current Board exposes at least three expected-mappable MLB events, preferably five or more, before or near the actionable market window. The request should be one league-wide MLB shadow request for `h2h,spreads,totals`.
+Do not perform ODDS-03 from this evidence. Any future The Odds API cutover work needs a new explicit provider-call authorization and a capture-safe certification command that preserves sanitized aggregate response evidence before consuming the final request in that budget.
