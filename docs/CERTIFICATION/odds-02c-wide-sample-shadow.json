@@ -1,0 +1,221 @@
+{
+  "certification": "ODDS_02C_WIDE_SAMPLE_SHADOW",
+  "status": "WIDE_SAMPLE_CAPTURED_DO_NOT_CUTOVER",
+  "startingCommit": "4da24afd4299d3e0d1362eab9b03f68ac2a0c1c0",
+  "productionCommit": "4da24afd4299d3e0d1362eab9b03f68ac2a0c1c0",
+  "capturedAt": "2026-08-09T15:35:30Z",
+  "captureHarness": "scripts/odds-shadow-certification-capture.mjs",
+  "captureDirectory": ".tmp/odds-shadow-certification/",
+  "captureDirectoryGitignored": true,
+  "rawPayloadCommitted": false,
+  "secretsCaptured": false,
+  "authorizationHeaderCaptured": false,
+  "usefulSlateGate": {
+    "operatingDate": "2026-08-09",
+    "gamesToday": 14,
+    "currentBoardCandidates": 42,
+    "lifecycleEvents": 15,
+    "expectedMappableCurrentEvents": 14,
+    "minimumUsefulExpectedMappableEvents": 3,
+    "preferredUsefulExpectedMappableEvents": 5,
+    "gateDecision": "CONSUME_ONE_ODDS_02C_REQUEST"
+  },
+  "requestAccounting": {
+    "odds02cAuthorizedRequests": 1,
+    "requestConsumed": true,
+    "remainingOdds02cRequests": 0,
+    "httpStatus": 200,
+    "providerCallsMade": 1,
+    "creditsUsed": 3,
+    "creditsRemaining": 19988,
+    "automaticRetry": false
+  },
+  "mapping": {
+    "eventsReturned": 15,
+    "expectedMappableCurrentEvents": 14,
+    "expectedEventsMapped": 13,
+    "unmappedExpectedEvents": 1,
+    "outsideCurrentScope": 1,
+    "ambiguousEvents": 0,
+    "expectedMappingRate": 0.9286,
+    "unmappedExpected": [
+      {
+        "providerMatchup": "OAK @ BOS",
+        "canonicalMatchup": "ATH @ BOS",
+        "classification": "TEAM_ALIAS_MISMATCH"
+      }
+    ],
+    "outsideCurrentScopeEvents": [
+      {
+        "providerMatchup": "TB @ SEA",
+        "classification": "CURRENT_PROVIDER_EVENT_NOT_IN_CURRENT_BOARD"
+      }
+    ]
+  },
+  "marketCoverage": {
+    "moneyline": {
+      "expected": 14,
+      "available": 13,
+      "coverage": 0.9286
+    },
+    "runLine": {
+      "expected": 14,
+      "available": 13,
+      "coverage": 0.9286
+    },
+    "total": {
+      "expected": 14,
+      "available": 2,
+      "coverage": 0.1429
+    }
+  },
+  "bookmakerCoverage": {
+    "observedBooks": [
+      "BetMGM",
+      "BetOnline.ag",
+      "BetRivers",
+      "BetUS",
+      "Bovada",
+      "Caesars",
+      "DraftKings",
+      "FanDuel",
+      "Fanatics",
+      "LowVig.ag",
+      "MyBookie.ag"
+    ],
+    "coreBooks": {
+      "FanDuel": {
+        "events": 13,
+        "moneyline": 13,
+        "runLine": 12,
+        "total": 2,
+        "fresh": 27,
+        "aging": 0,
+        "stale": 0
+      },
+      "DraftKings": {
+        "events": 13,
+        "moneyline": 13,
+        "runLine": 13,
+        "total": 1,
+        "fresh": 27,
+        "aging": 0,
+        "stale": 0
+      },
+      "BetMGM": {
+        "events": 13,
+        "moneyline": 13,
+        "runLine": 11,
+        "total": 1,
+        "fresh": 25,
+        "aging": 0,
+        "stale": 0
+      },
+      "Caesars": {
+        "events": 13,
+        "moneyline": 13,
+        "runLine": 13,
+        "total": 1,
+        "fresh": 27,
+        "aging": 0,
+        "stale": 0
+      }
+    }
+  },
+  "freshness": {
+    "sportsDataIoLatestSourceTime": "2026-08-09T11:27:42.000Z",
+    "theOddsApiLatestEvidenceTime": "2026-08-09T15:35:45.000Z",
+    "sportsDataIoMedianSourceAgeMinutes": 248,
+    "theOddsApiMedianSourceAgeMinutes": 0,
+    "medianFreshnessImprovementMinutes": 248,
+    "sportsDataIo": {
+      "fresh": 0,
+      "aging": 0,
+      "stale": 42
+    },
+    "theOddsApi": {
+      "fresh": 295,
+      "aging": 0,
+      "stale": 0
+    }
+  },
+  "priceComparison": {
+    "exactComparisons": 28,
+    "priceDeltaCount": 28,
+    "priceDeltaMin": 1,
+    "priceDeltaMax": 12,
+    "priceDeltaAverage": 6.75
+  },
+  "representativeMarketComparisons": [
+    {
+      "matchup": "LAD @ ARI",
+      "market": "runLine",
+      "selection": "ARI",
+      "line": 1.5,
+      "sportsDataIoPrice": -137,
+      "sportsDataIoFreshness": "STALE",
+      "bestFreshPrice": -129,
+      "bestFreshBook": "LowVig.ag",
+      "modelProbability": 73.37,
+      "sportsDataIoEv": 26.92,
+      "shadowEv": 30.25
+    },
+    {
+      "matchup": "LAD @ ARI",
+      "market": "moneyline",
+      "selection": "ARI",
+      "line": null,
+      "sportsDataIoPrice": 123,
+      "sportsDataIoFreshness": "STALE",
+      "bestFreshPrice": 132,
+      "bestFreshBook": "FanDuel",
+      "modelProbability": 69.26,
+      "sportsDataIoEv": 54.45,
+      "shadowEv": 60.68
+    }
+  ],
+  "shadowValueImpact": {
+    "sameSign": 25,
+    "positiveToNegative": 0,
+    "negativeToPositive": 1,
+    "materialEdgeChange": 1,
+    "materialEvChange": 21,
+    "sportsDataIoMissingToShadowAvailable": 0,
+    "sportsDataIoStaleToShadowFresh": 295
+  },
+  "officialPicks": {
+    "currentOfficialPickCount": 0,
+    "comparison": "CANNOT_COMPARE",
+    "changed": false
+  },
+  "productionIsolation": {
+    "sportsDataIoRemainsProductionAuthority": true,
+    "theOddsApiRemainsShadowOnly": true,
+    "currentBoardProductionPriceChanged": false,
+    "probabilityChanged": false,
+    "officialPickPolicyChanged": false,
+    "rentPlayPolicyChanged": false,
+    "moneylinePolicyChanged": false,
+    "smartParlayPolicyChanged": false,
+    "rankingsChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "performanceChanged": false,
+    "currentEraChanged": false,
+    "hr03Changed": false,
+    "schedulerCadenceChanged": false
+  },
+  "productionMutations": 0,
+  "cutoverDecision": "DO_NOT_CUTOVER",
+  "odds03Recommended": false,
+  "oddsProviderReplacementSignal": "MODERATE",
+  "criticalFindings": [],
+  "highFindings": [
+    "ATH_OAK_TEAM_ALIAS_MAPPING_DEFECT"
+  ],
+  "mediumFindings": [
+    "TOTAL_EXACT_LINE_COVERAGE_LOW"
+  ],
+  "productionPilotWeek": "ACTIVE",
+  "finalClassification": "ODDS_02C_WIDE_SAMPLE_CAPTURED_DO_NOT_CUTOVER"
+}
