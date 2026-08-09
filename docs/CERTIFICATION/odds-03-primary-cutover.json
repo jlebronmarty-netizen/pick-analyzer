@@ -1,0 +1,141 @@
+{
+  "mode": "odds_03_primary_cutover_certification_v1",
+  "status": "DUAL_READ_IMPLEMENTED_NOT_PRODUCT_PROMOTED",
+  "startingCommit": "dc47be3ba0102b29fa68c78f9e3b1dd2a74d0797",
+  "authorityBefore": "SPORTSDATAIO",
+  "authorityAfterLocalImplementation": "STAGE_1_DUAL_READ",
+  "productAuthorityAfterLocalImplementation": "SPORTSDATAIO",
+  "theOddsApiRole": "PRIMARY_ODDS_CANDIDATE_INTERNAL_COMPARISON",
+  "sportsDataIoRetainedForRollback": true,
+  "sportsDataIoCancelled": false,
+  "sportsDataIoDisabled": false,
+  "sportsDataIoFullCancellationReady": false,
+  "sportsDataIoOddsExitReady": false,
+  "credentialPolicy": {
+    "theOddsApiCredential": "THE_ODDS_API_KEY",
+    "legacyOddsApiKeyPreserved": true,
+    "noSecretValuesStored": true
+  },
+  "lifecycleMapping": {
+    "status": "PASS_FIXTURE_CERTIFIED",
+    "scope": "sport_events lifecycle universe",
+    "mappingHierarchy": [
+      "existing provider crosswalk",
+      "canonical team identity",
+      "bounded start-time tolerance",
+      "operating/lifecycle scope"
+    ],
+    "cinAtWsh": "MAPPED",
+    "tbAtSea": "MAPPED",
+    "athOak": "MAPPED",
+    "normalCurrentEvent": "MAPPED",
+    "futureEvent": "MAPPED",
+    "startedEvent": "MAPPED_NO_POST_START_PREDICTION",
+    "finalEvent": "MAPPED_NO_MARKET_REFRESH_PROMOTION",
+    "ambiguousEvents": 0
+  },
+  "certifiedBookSetV1": [
+    "FanDuel",
+    "DraftKings",
+    "BetMGM",
+    "Caesars"
+  ],
+  "marketEvidence": {
+    "allBooksPreserved": true,
+    "allMoneylinePreserved": true,
+    "allRunLineLinesPreserved": true,
+    "allTotalLinesPreserved": true,
+    "earlyLineCollapse": false,
+    "exactLineIdentity": [
+      "event",
+      "market",
+      "selection",
+      "line"
+    ]
+  },
+  "bestFreshPricePolicy": "BEST_FRESH_WITH_USER_BOOK_PREFERENCE",
+  "exactLineSafety": "PASS",
+  "crossLineProbabilityReuse": false,
+  "lineMovementDetection": "PASS_FIXTURE_CERTIFIED",
+  "reprediction": {
+    "executable": true,
+    "executionMode": "EXECUTABLE_GATED",
+    "cutoffSafe": true,
+    "deduplicated": true,
+    "originalPredictionsPreserved": true,
+    "productionPredictionCreatedDuringCertification": false,
+    "supersessionReason": "MARKET_LINE_CHANGED"
+  },
+  "currentVersionSelection": {
+    "rule": "latest valid cutoff-safe prediction for current exact bettable line",
+    "missingCurrentLinePredictionStatus": "WAITING_FOR_CURRENT_LINE_PREDICTION",
+    "oldLineProbabilityWithNewLineOddsAllowed": false
+  },
+  "performanceExposurePolicy": {
+    "predictionEvidenceSeparatedFromProductRecommendationExposure": true,
+    "defaultPerformanceScopeChanged": false,
+    "historicalPerformanceRewritten": false
+  },
+  "settlementSafety": {
+    "lineSpecificSettlement": true,
+    "moneyline": "winner",
+    "runLine": "final margin vs exact line",
+    "total": "final runs vs exact total",
+    "pushesHandled": true
+  },
+  "hr03": {
+    "status": "SHADOW_ONLY",
+    "productionProbabilityAuthorityChanged": false
+  },
+  "freshnessAuthority": {
+    "authorityTimestamp": "THE_ODDS_API_SOURCE_TIMESTAMP",
+    "captureTimestampCanSubstitute": false,
+    "staleEvidenceActionable": false
+  },
+  "failurePolicy": {
+    "theOddsApiUnavailable": "NO_FRESH_PRICE",
+    "rateLimited": "NO_FRESH_PRICE",
+    "quotaExhausted": "NO_FRESH_PRICE",
+    "sportsDataIoAutomaticFallback": "FALLBACK_CONTEXT_ONLY",
+    "emergencyRollbackAuthority": "SPORTSDATAIO"
+  },
+  "providerBudget": {
+    "sportsDataIoPoolSeparate": true,
+    "theOddsApiPoolSeparate": true,
+    "creditsNotMixedWithSportsDataIoUnits": true
+  },
+  "schedulerIntegration": {
+    "existingProtectedEndpointUsed": true,
+    "competingSchedulerCreated": false,
+    "plannerMetadataAdded": true,
+    "activeExecutionBehaviorChanged": false
+  },
+  "rollback": {
+    "configurationSwitch": "ODDS_PRIMARY_AUTHORITY_STAGE",
+    "rollbackRequiresCodeDeployment": false,
+    "defaultRollbackAuthority": "SPORTSDATAIO"
+  },
+  "promotion": {
+    "productionPromotionAuthorized": false,
+    "promotionTarget": "THE_ODDS_API_PRIMARY_PRODUCT",
+    "gate": "HUMAN_APPROVAL_REQUIRED_AFTER_PRODUCTION_EVIDENCE"
+  },
+  "safety": {
+    "predictionFormulaChanged": false,
+    "modelWeightsChanged": false,
+    "officialPickThresholdsChanged": false,
+    "kellyChanged": false,
+    "settlementSemanticsChangedOutsideLineIdentity": false,
+    "learningWeightsChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "odds03ProductionPromotionPerformed": false,
+    "sdioExit03Started": false,
+    "hr04Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false
+  },
+  "providerCallsDuringCertification": 0,
+  "databaseMutationsDuringCertification": 0,
+  "finalClassification": "ODDS_03_DUAL_READ_IMPLEMENTED_AWAITING_PRODUCTION_PROMOTION_AUTHORIZATION"
+}

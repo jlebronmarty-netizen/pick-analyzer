@@ -17,6 +17,7 @@ Current V2 architecture inventory documents:
 - [Pregame Market Line Versioning V1](PREGAME_MARKET_LINE_VERSIONING_V1.md)
 - [Odds Full Market Evidence Contract V1](ODDS_FULL_MARKET_EVIDENCE_CONTRACT_V1.md)
 - [Odds Primary Cutover Readiness V1](ODDS_PRIMARY_CUTOVER_READINESS_V1.md)
+- [Odds Primary Authority V1](ODDS_PRIMARY_AUTHORITY_V1.md)
 - [SportsDataIO Exit Architecture V1](SPORTSDATAIO_EXIT_ARCHITECTURE_V1.md)
 - [MLB Calibration Shadow V1](MLB_CALIBRATION_SHADOW_V1.md)
 

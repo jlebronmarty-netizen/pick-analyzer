@@ -117,7 +117,7 @@ function bool(value: unknown) {
 }
 
 function apiKey() {
-  return process.env.ODDS_API_KEY?.trim() ?? process.env.THE_ODDS_API_KEY?.trim() ?? ''
+  return process.env.THE_ODDS_API_KEY?.trim() ?? ''
 }
 
 function headerNumber(headers: Headers, name: string) {
@@ -398,7 +398,7 @@ function dryRunResponse() {
     requestsRemainingAfter: null,
     requestsUsedObserved: null,
     planObserved: [],
-    blockers: apiKey() ? [] : ['ODDS_API_KEY_NOT_PRESENT'],
+    blockers: apiKey() ? [] : ['THE_ODDS_API_KEY_NOT_PRESENT'],
     warnings: ['Dry-run mode makes zero provider calls and zero database mutations.'],
   }
 }
@@ -498,7 +498,7 @@ export async function runTheOddsApiCurrentOddsAcquisition(options: AcquisitionOp
       ...dryRunResponse(),
       success: false,
       status: 'BLOCKED_MISSING_API_KEY',
-      warnings: ['The Odds API key is not present in runtime.'],
+      warnings: ['THE_ODDS_API_KEY is not present in runtime.'],
     }
   }
 

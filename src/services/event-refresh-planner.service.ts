@@ -2,6 +2,7 @@ import 'server-only'
 
 import { getLatestCanonicalAcquisitionEvidence } from '@/services/canonical-acquisition.service'
 import { getEventLifecycleState, type EventPriorityBand } from '@/services/event-lifecycle-state.service'
+import { getOddsPrimaryAuthorityRuntimeStatus } from '@/services/odds-primary-authority.service'
 
 const DEFAULT_SPORT_KEY = 'baseball_mlb'
 const DEFAULT_LIMIT = 50
@@ -170,6 +171,7 @@ export async function getEventRefreshPlan(input: EventRefreshPlanInput = {}) {
   const mode = normalizeMode(input.mode)
   const sportKey = input.sportKey ?? DEFAULT_SPORT_KEY
   const limit = clampLimit(input.limit)
+  const oddsAuthority = getOddsPrimaryAuthorityRuntimeStatus()
   const lifecycle = await getEventLifecycleState({
     sportKey,
     operatingDate: input.operatingDate,
@@ -309,8 +311,12 @@ export async function getEventRefreshPlan(input: EventRefreshPlanInput = {}) {
         reserveImpact: sportsDataIo?.reserveImpact ?? 'UNKNOWN',
       },
       theOddsApi: {
-        plannerStatus: 'SHADOW_ONLY_UNKNOWN_BALANCE_RESET_COST',
+        plannerStatus: oddsAuthority.stage === 'STAGE_1_DUAL_READ'
+          ? 'DUAL_READ_CONFIGURED_PRODUCT_AUTHORITY_REMAINS_SPORTSDATAIO'
+          : oddsAuthority.stage,
         activeExecutionAuthorized: false,
+        productAuthority: oddsAuthority.productAuthority,
+        certifiedBookSet: oddsAuthority.certifiedBookSet,
       },
       bsn: {
         plannerStatus: 'OBSERVATIONAL_PROVIDER_PATH_NOT_ACTIVE',
@@ -339,6 +345,7 @@ export async function getEventRefreshPlan(input: EventRefreshPlanInput = {}) {
         sportKey !== 'baseball_mlb' ? 'NON_MLB_REFRESH_REMAINS_SHADOW_UNTIL_CERTIFIED' : null,
       ].filter(Boolean),
     },
+    oddsPrimaryAuthority: oddsAuthority,
     eventPlans,
     comparison: {
       currentSchedulerBehavior: 'slate_level_operating_day_action_selection',
