@@ -29,3 +29,4 @@ Production Pilot Week is the monitored real-world validation period after MC-08H
 - [ODDS-02A: Event Mapping And Multi-Market Shadow Certification](ODDS_02A_EVENT_MAPPING_MULTI_MARKET_CERTIFICATION.md)
 - [HR-01: Full-Scale MLB Historical Replay](HR_01_FULL_SCALE_HISTORICAL_REPLAY.md)
 - [HR-02: Historical Calibration Review](HR_02_HISTORICAL_CALIBRATION_REVIEW.md)
+- [HR-03: Calibration Shadow Validation](HR_03_CALIBRATION_SHADOW_VALIDATION.md)

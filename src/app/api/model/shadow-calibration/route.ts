@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getHistoricalShadowCalibration } from '@/services/historical-shadow-calibration.service'
+import { getMlbCalibrationShadowV1 } from '@/services/mlb-calibration-shadow-v1.service'
 
 export async function GET() {
   try {
-    return NextResponse.json(await getHistoricalShadowCalibration())
+    return NextResponse.json(await getMlbCalibrationShadowV1())
   } catch (error) {
     return NextResponse.json(
       {

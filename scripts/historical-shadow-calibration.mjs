@@ -13,8 +13,8 @@ function loadEnvFile(path = '.env.local') {
 
 loadEnvFile()
 
-const { getHistoricalShadowCalibration } = await import('../src/services/historical-shadow-calibration.service.ts')
+const { getMlbCalibrationShadowV1 } = await import('../src/services/mlb-calibration-shadow-v1.service.ts')
 
-const result = await getHistoricalShadowCalibration()
+const result = await getMlbCalibrationShadowV1()
 
 console.log(JSON.stringify(result, null, 2))

@@ -1,0 +1,192 @@
+{
+  "certification": "HR_03_CALIBRATION_SHADOW_VALIDATION",
+  "status": "PASS",
+  "finalClassification": "CALIBRATION_SHADOW_PASS_MORE_CURRENT_ERA_EVIDENCE_REQUIRED",
+  "startingCommit": "1721f2e9504b8b3a73896ae91d41d1de0325354c",
+  "calibrationVersion": "mlb_market_calibration_shadow_v1",
+  "shadowOnly": true,
+  "productionPilotWeek": "ACTIVE",
+  "odds02aStatus": "ODDS_02A_WAIT_FOR_USEFUL_SHADOW_WINDOW",
+  "remainingOdds02aRequests": 1,
+  "replayDataset": {
+    "rows": 7290,
+    "scoredRows": 7260,
+    "pushRows": 30,
+    "events": 2430,
+    "moneyline": 2425,
+    "runLine": 2430,
+    "total": 2405,
+    "replayRowsMutated": false
+  },
+  "trainingSupport": {
+    "moneyline": {
+      "sampleSize": 2425,
+      "marketFamily": "moneyline",
+      "selectionSide": "unknown",
+      "lineScope": "none",
+      "classification": "SUPPORTED_MARKET_FAMILY"
+    },
+    "runLine": {
+      "sampleSize": 2430,
+      "marketFamily": "run_line",
+      "selectionSide": "home_minus_1_5",
+      "lineScope": "-1.5",
+      "classification": "EXPECTED_FROZEN_REPLAY_SCOPE_HOME_MINUS_1_5_ONLY"
+    },
+    "total": {
+      "sampleSize": 2405,
+      "marketFamily": "total",
+      "selectionSide": "over",
+      "lineScope": "observed totals only",
+      "classification": "EXPECTED_FROZEN_REPLAY_SCOPE_OVER_ONLY"
+    }
+  },
+  "primaryChronologicalValidation": {
+    "training": {
+      "sample": 5445,
+      "start": "2025-03-18T00:00:00+00:00",
+      "end": "2025-08-15T00:00:00+00:00"
+    },
+    "validation": {
+      "sample": 1815,
+      "start": "2025-08-15T00:00:00+00:00",
+      "end": "2025-09-28T00:00:00+00:00"
+    }
+  },
+  "methodsEvaluated": [
+    "NO_CALIBRATION",
+    "PLATT_LOGISTIC",
+    "ISOTONIC",
+    "BETA_CALIBRATION",
+    "SIMPLE_SHRINKAGE",
+    "MARKET_SHRINKAGE"
+  ],
+  "marketResults": {
+    "global": {
+      "selectedMethod": "NO_CALIBRATION",
+      "rawBrier": 0.2414,
+      "shadowBrier": 0.2414,
+      "brierImprovement": 0,
+      "rawCalibrationError": 2.32,
+      "shadowCalibrationError": 2.32,
+      "calibrationImprovement": 0
+    },
+    "moneyline": {
+      "selectedMethod": "NO_CALIBRATION",
+      "rawBrier": 0.2458,
+      "shadowBrier": 0.2458,
+      "brierImprovement": 0,
+      "rawCalibrationError": 3.81,
+      "shadowCalibrationError": 3.81,
+      "calibrationImprovement": 0
+    },
+    "runLine": {
+      "selectedMethod": "ISOTONIC",
+      "rawBrier": 0.2283,
+      "shadowBrier": 0.225,
+      "brierImprovement": 0.0033,
+      "rawCalibrationError": 6.63,
+      "shadowCalibrationError": 0.07,
+      "calibrationImprovement": 6.56
+    },
+    "total": {
+      "selectedMethod": "ISOTONIC",
+      "rawBrier": 0.2501,
+      "shadowBrier": 0.2494,
+      "brierImprovement": 0.0007,
+      "rawCalibrationError": 4.16,
+      "shadowCalibrationError": 0.25,
+      "calibrationImprovement": 3.91
+    }
+  },
+  "chronologicalFolds": [
+    { "id": "fold_1", "brierImprovement": -0.0032, "calibrationImprovement": -2.27 },
+    { "id": "fold_2", "brierImprovement": -0.003, "calibrationImprovement": -1.31 },
+    { "id": "fold_3", "brierImprovement": -0.0032, "calibrationImprovement": 1.54 }
+  ],
+  "currentEraShadow": {
+    "rowsRead": 483,
+    "supported": 270,
+    "unsupported": 213,
+    "unsupportedReasons": {
+      "TOTAL_UNDER_UNSUPPORTED_BY_OVER_ONLY_REPLAY": 126,
+      "RUN_LINE_OUTSIDE_MINUS_1_5_TRAINING_SUPPORT": 87
+    },
+    "settledDiagnostic": {
+      "rawSample": 392,
+      "rawBrier": 0.2582,
+      "rawCalibrationError": 10.87,
+      "shadowSupportedSample": 216,
+      "shadowSupportedBrier": 0.2392,
+      "shadowSupportedCalibrationError": 4.27,
+      "confidence": "DIRECTIONAL"
+    }
+  },
+  "recommendationImpactSimulation": {
+    "pricedRows": 483,
+    "rawEligible": 16,
+    "shadowEligible": 10,
+    "wouldRemainEligible": 10,
+    "wouldLoseEligibility": 6,
+    "wouldNewlyBecomeEligible": 0,
+    "simulationOnly": true
+  },
+  "caseStudy": {
+    "predictionId": "54ee89fb-7a78-534c-bcdf-435a6a6827bf",
+    "eventId": "baseball_mlb:mlb:sportsdataio:event:79036",
+    "market": "total",
+    "selection": "Over",
+    "line": 8,
+    "odds": -121,
+    "rawProbability": 50.66,
+    "calibratedProbability": 47.65,
+    "delta": -3.01,
+    "impliedProbability": 54.75,
+    "rawEdge": -4.09,
+    "shadowEdge": -7.1,
+    "rawEv": -0.0747,
+    "shadowEv": -0.1296
+  },
+  "promotionGates": {
+    "positiveOutOfSampleBrierImprovement": true,
+    "positiveCalibrationImprovement": false,
+    "stableChronologicalFolds": false,
+    "noMarketIdentityDefect": false,
+    "trainingSupportMatchesProductionUse": false,
+    "currentEraDoesNotContradictReplay": false,
+    "rawProbabilityRetained": true,
+    "calibrationVersionExplicit": true,
+    "rollbackPossible": true
+  },
+  "runtime": {
+    "service": "src/services/mlb-calibration-shadow-v1.service.ts",
+    "operationsEndpoint": "/api/operations/calibration-shadow",
+    "modelEndpoint": "/api/model/shadow-calibration"
+  },
+  "safety": {
+    "productionProbabilityChanged": false,
+    "officialPickPolicyChanged": false,
+    "rentPlayChanged": false,
+    "moneylineBetChanged": false,
+    "smartParlayChanged": false,
+    "rankingsChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "performanceDenominatorChanged": false,
+    "providerCalls": 0,
+    "sportsDataIoCalls": 0,
+    "theOddsApiCalls": 0,
+    "remoteMutations": 0,
+    "predictionWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "odds02aFinalRequestConsumed": false,
+    "hr04Started": false,
+    "odds03Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false
+  },
+  "decision": "CALIBRATION_SHADOW_PASS_MORE_CURRENT_ERA_EVIDENCE_REQUIRED",
+  "productionPromotionRecommendation": "NOT_RECOMMENDED_YET",
+  "nextRecommendedPhase": "Continue shadow observation; HR-04 only after support and Current Era evidence improve."
+}
