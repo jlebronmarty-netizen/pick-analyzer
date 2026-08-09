@@ -419,3 +419,11 @@ P2.2 was then observed read-only. It is `WAITING_FOR_EXTERNAL_EVIDENCE`: the 48 
 - The capture returned 966 full-market evidence rows, 13 mapped Current Board events, 2 extra unmapped provider events and 0 ambiguous mappings.
 - Moneyline, Run Line and Total bettable event coverage were 100%; Total exact-line coverage was 15.38% because 11 Total predictions had moved lines.
 - SportsDataIO remains production odds authority. The Odds API remains shadow-only. ODDS-03 and MC-03 were not started.
+
+# 2026-08-09 ODDS-03R Primary Odds Cutover Readiness Review
+
+- Status: CUTOVER_READY_AFTER_BOUNDED_REPAIR.
+- No provider calls were made. Production remained on `2a238b6946147237734cba7b165b6a3f9dfb76f6` during preflight.
+- CIN @ WSH and TB @ SEA were classified as Current Board scope mapping gaps, not team-alias defects; primary odds ingestion must map against lifecycle events before recommendation visibility.
+- Total exact-line matching was repaired to compare total points by absolute value while preserving signed spread/run-line identity.
+- ODDS-03 was not performed, SportsDataIO remains production odds authority, The Odds API remains shadow-only and MC-03 was not started.

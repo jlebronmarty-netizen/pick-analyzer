@@ -33,3 +33,4 @@ Production Pilot Week is the monitored real-world validation period after MC-08H
 - [ODDS-02E: Total Line Contract And Pregame Re-Prediction](ODDS_02E_TOTAL_LINE_REPREDICTION.md)
 - [ODDS-02F: Full Market Evidence Capture Contract](ODDS_02F_FULL_MARKET_EVIDENCE_CAPTURE.md)
 - [ODDS-02G: Full-Market Wide Sample](ODDS_02G_FULL_MARKET_WIDE_SAMPLE.md)
+- [ODDS-03R: Primary Odds Cutover Readiness Review](ODDS_03R_CUTOVER_READINESS_REVIEW.md)

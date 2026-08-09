@@ -469,6 +469,14 @@ function sameLine(left: number | null, right: number | null) {
   return Math.abs(left - right) < 0.001
 }
 
+function comparableLine(market: ShadowSnapshot['market'], value: number | null) {
+  return typeof value === 'number' && Number.isFinite(value) && market === 'total' ? Math.abs(value) : value
+}
+
+function sameMarketLine(market: ShadowSnapshot['market'], left: number | null, right: number | null) {
+  return sameLine(comparableLine(market, left), comparableLine(market, right))
+}
+
 function candidateSelection(candidate: CurrentBoardCandidate) {
   return candidate.canonicalOutcome?.selection ?? candidate.selection
 }
@@ -486,7 +494,7 @@ function compareCandidates(candidates: CurrentBoardCandidate[], snapshots: Shado
       snapshot.canonicalEventId === candidate.eventId &&
       snapshot.market === candidate.market &&
       snapshot.selection === selection &&
-      sameLine(snapshot.line, line)
+      sameMarketLine(snapshot.market, snapshot.line, line)
     ))
     const evaluated = exact.map((snapshot) => {
       const freshness = evaluateProductFreshnessSla({

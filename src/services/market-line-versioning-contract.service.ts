@@ -53,6 +53,15 @@ function sameLine(left: number | null | undefined, right: number | null | undefi
   return Math.abs(left - right) < 0.001
 }
 
+function comparableLine(market: MarketLineKind, value: number | null | undefined) {
+  if (!finiteLine(value)) return value
+  return market === 'total' ? Math.abs(value) : value
+}
+
+function sameMarketLine(market: MarketLineKind, left: number | null | undefined, right: number | null | undefined) {
+  return sameLine(comparableLine(market, left), comparableLine(market, right))
+}
+
 function parseTime(value: string | null | undefined) {
   if (!value) return null
   const parsed = Date.parse(value)
@@ -60,7 +69,8 @@ function parseTime(value: string | null | undefined) {
 }
 
 export function marketLineIdentityKey(input: Omit<MarketLineEvidence, 'price' | 'sourceTimestamp' | 'capturedAt'>) {
-  const line = finiteLine(input.line) ? input.line.toFixed(3) : 'null'
+  const normalizedLine = comparableLine(input.market, input.line)
+  const line = finiteLine(normalizedLine) ? normalizedLine.toFixed(3) : 'null'
   return [
     input.provider,
     input.eventId,
@@ -76,15 +86,17 @@ export function filterExactLineEvidence(prediction: PredictionLineIdentity, evid
     row.eventId === prediction.eventId &&
     row.market === prediction.market &&
     row.selection === prediction.selection &&
-    sameLine(row.line, prediction.line)
+    sameMarketLine(prediction.market, row.line, prediction.line)
   ))
 }
 
 export function classifyLineMovement(predictionLine: number | null, evidence: MarketLineEvidence[]) {
+  const market = evidence.find((row) => row.market)?.market ?? 'total'
   const currentLines = Array.from(new Set(
-    evidence.map((row) => row.line).filter(finiteLine),
+    evidence.map((row) => comparableLine(market, row.line)).filter(finiteLine),
   )).sort((left, right) => left - right)
 
+  const comparablePredictionLine = comparableLine(market, predictionLine)
   if (!currentLines.length) {
     return {
       classification: 'NO_CURRENT_MARKET' as MarketLineMovementClassification,
@@ -96,7 +108,7 @@ export function classifyLineMovement(predictionLine: number | null, evidence: Ma
     }
   }
 
-  if (!finiteLine(predictionLine)) {
+  if (!finiteLine(comparablePredictionLine)) {
     return {
       classification: 'UNKNOWN' as MarketLineMovementClassification,
       direction: 'UNKNOWN' as MarketLineDirection,
@@ -107,21 +119,21 @@ export function classifyLineMovement(predictionLine: number | null, evidence: Ma
     }
   }
 
-  if (currentLines.some((line) => sameLine(line, predictionLine))) {
+  if (currentLines.some((line) => sameLine(line, comparablePredictionLine))) {
     return {
       classification: 'EXACT_LINE_AVAILABLE' as MarketLineMovementClassification,
       direction: 'UNCHANGED' as MarketLineDirection,
       predictionLine,
       currentLines,
-      closestLine: predictionLine,
+      closestLine: comparablePredictionLine,
       delta: 0,
     }
   }
 
   const closestLine = currentLines.reduce((best, line) => (
-    Math.abs(line - predictionLine) < Math.abs(best - predictionLine) ? line : best
+    Math.abs(line - comparablePredictionLine) < Math.abs(best - comparablePredictionLine) ? line : best
   ), currentLines[0])
-  const delta = closestLine - predictionLine
+  const delta = closestLine - comparablePredictionLine
   const absoluteDelta = Math.abs(delta)
   const classification: MarketLineMovementClassification = absoluteDelta === 0.5
     ? 'HALF_POINT_MOVE'

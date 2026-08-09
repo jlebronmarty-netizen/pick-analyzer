@@ -123,6 +123,14 @@ function sameLine(left, right) {
   return Math.abs(Number(left) - Number(right)) < 0.001
 }
 
+function comparableLine(market, value) {
+  return market === 'total' && Number.isFinite(Number(value)) ? Math.abs(Number(value)) : value
+}
+
+function sameMarketLine(market, left, right) {
+  return sameLine(comparableLine(market, left), comparableLine(market, right))
+}
+
 function lineKey(value) {
   return value === null || value === undefined ? 'null' : Number(value).toFixed(3)
 }
@@ -154,7 +162,7 @@ function bestFreshExactLinePrice(rows, target) {
     row.canonicalEventId === target.eventId &&
     row.market === target.market &&
     row.selection === target.selection &&
-    sameLine(row.line, target.line)
+    sameMarketLine(row.market, row.line, target.line)
   ))
   const ranked = exact
     .map((row) => ({ row, value: americanValue(row.price) }))
@@ -173,11 +181,14 @@ function bestFreshExactLinePrice(rows, target) {
     : { status: 'NO_FRESH_EXACT_LINE_PRICE' }
 }
 
-function classifyLineMovement(predictionLine, currentLines) {
-  const lines = Array.from(new Set(currentLines.filter((value) => Number.isFinite(Number(value))).map(Number))).sort((a, b) => a - b)
+function classifyLineMovement(predictionLine, currentLines, market = null) {
+  const lines = Array.from(new Set(currentLines
+    .filter((value) => Number.isFinite(Number(value)))
+    .map(Number)
+    .map((value) => market === 'total' ? Math.abs(value) : value))).sort((a, b) => a - b)
   if (!lines.length) return { classification: 'NO_CURRENT_MARKET', direction: 'UNKNOWN', currentLines: lines, closestLine: null, delta: null }
   if (!Number.isFinite(Number(predictionLine))) return { classification: 'UNKNOWN', direction: 'UNKNOWN', currentLines: lines, closestLine: null, delta: null }
-  const line = Number(predictionLine)
+  const line = market === 'total' ? Math.abs(Number(predictionLine)) : Number(predictionLine)
   if (lines.some((value) => sameLine(value, line))) return { classification: 'EXACT_LINE_AVAILABLE', direction: 'UNCHANGED', currentLines: lines, closestLine: line, delta: 0 }
   const closestLine = lines.reduce((best, value) => Math.abs(value - line) < Math.abs(best - line) ? value : best, lines[0])
   const delta = closestLine - line
@@ -197,14 +208,14 @@ function marketEvidenceMetrics(rows, predictions = []) {
       row.canonicalEventId === prediction.eventId &&
       row.market === prediction.market &&
       row.selection === prediction.selection &&
-      sameLine(row.line, prediction.line)
+      sameMarketLine(row.market, row.line, prediction.line)
     ))
   )).length
   const lineMovement = predictions.map((prediction) => {
     const lines = mapped
       .filter((row) => row.canonicalEventId === prediction.eventId && row.market === prediction.market && row.selection === prediction.selection)
       .map((row) => row.line)
-    return { ...prediction, ...classifyLineMovement(prediction.line, lines) }
+    return { ...prediction, ...classifyLineMovement(prediction.line, lines, prediction.market) }
   })
   return {
     rowCount: rows.length,
@@ -336,7 +347,8 @@ async function main() {
   console.log(JSON.stringify({ ok: true, capture, httpStatus: result.status, metrics: extractCertificationMetrics(parsed.payload) }, null, 2))
 }
 
-if (import.meta.url === `file://${process.argv[1].replaceAll('\\', '/')}` || process.argv[1]?.endsWith('odds-shadow-certification-capture.mjs')) {
+const invokedScript = process.argv[1] ?? ''
+if (import.meta.url === `file://${invokedScript.replaceAll('\\', '/')}` || invokedScript.endsWith('odds-shadow-certification-capture.mjs')) {
   main().catch((error) => {
     console.error(JSON.stringify({ ok: false, error: error instanceof Error ? error.message : String(error) }, null, 2))
     process.exit(1)

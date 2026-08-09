@@ -1,0 +1,178 @@
+{
+  "certification": "ODDS_03R_PRIMARY_ODDS_CUTOVER_READINESS",
+  "status": "CUTOVER_READY_AFTER_BOUNDED_REPAIR",
+  "startingCommit": "2a238b6946147237734cba7b165b6a3f9dfb76f6",
+  "productionCommitObserved": "2a238b6946147237734cba7b165b6a3f9dfb76f6",
+  "providerCalls": {
+    "theOddsApi": 0,
+    "sportsDataIo": 0,
+    "otherExternalProviders": 0
+  },
+  "databaseMutations": 0,
+  "odds02gReconstruction": {
+    "returnedEvents": 15,
+    "currentBoardExpectedMappableEvents": 13,
+    "currentBoardMapped": 13,
+    "unmappedProviderEvents": 2,
+    "ambiguousEvents": 0,
+    "fullMarketRows": 966,
+    "mappedRows": 852
+  },
+  "unmappedEvents": {
+    "cinAtWsh": {
+      "rootCause": "CURRENT_BOARD_SCOPE_MAPPING_DEFECT",
+      "providerMatchup": "Cincinnati Reds @ Washington Nationals",
+      "providerCommenceTime": "2026-08-09T16:16:00.000Z",
+      "canonicalEventId": "baseball_mlb:mlb:sportsdataio:event:79053",
+      "canonicalLabel": "CIN @ WSH",
+      "canonicalStartTime": "2026-08-09T16:15:00.000Z",
+      "canonicalLifecycleState": "STARTED",
+      "teamAliasDefect": false,
+      "startTimeMismatch": false,
+      "repair": "LIFECYCLE_SCOPED_MAPPING_REQUIRED_BEFORE_CUTOVER"
+    },
+    "tbAtSea": {
+      "rootCause": "CURRENT_BOARD_SCOPE_MAPPING_DEFECT",
+      "providerMatchup": "Tampa Bay Rays @ Seattle Mariners",
+      "providerCommenceTime": "2026-08-09T20:11:00.000Z",
+      "canonicalEventId": "baseball_mlb:mlb:sportsdataio:event:79066",
+      "canonicalLabel": "TB @ SEA",
+      "canonicalStartTime": "2026-08-09T20:10:00.000Z",
+      "canonicalLifecycleState": "ACTIVE_REFRESH",
+      "teamAliasDefect": false,
+      "startTimeMismatch": false,
+      "repair": "LIFECYCLE_SCOPED_MAPPING_REQUIRED_BEFORE_CUTOVER"
+    }
+  },
+  "offlineMapping": {
+    "rawReturned": 15,
+    "currentBoardExpectedMappable": 13,
+    "currentBoardMapped": 13,
+    "currentBoardMappingRate": 100,
+    "lifecycleExpectedMappableAfterRequiredRepair": 15,
+    "mappedAfterRequiredLifecycleRepair": 15,
+    "ambiguousEvents": 0
+  },
+  "totalLineMovement": {
+    "originalOdds02gExactLineCount": 2,
+    "originalOdds02gMovedLineCount": 11,
+    "correctedExactLineCount": 10,
+    "correctedMovedLineCount": 3,
+    "distribution": {
+      "EXACT_LINE_AVAILABLE": 10,
+      "HALF_POINT_MOVE": 2,
+      "FULL_POINT_MOVE": 1,
+      "MULTI_POINT_MOVE": 0,
+      "NO_CURRENT_TOTAL": 0
+    },
+    "directions": {
+      "UNCHANGED": 10,
+      "UP": 1,
+      "DOWN": 2
+    },
+    "repair": "TOTAL_LINES_COMPARE_BY_ABSOLUTE_POINT_VALUE"
+  },
+  "repredictionContract": {
+    "status": "DESIGNED_BUT_NOT_EXECUTABLE",
+    "productionExecutable": false,
+    "currentMode": "DRY_RUN_ONLY",
+    "requiredBeforeCutover": true
+  },
+  "safety": {
+    "crossLineProbabilitySafety": "PASS",
+    "crossLinePriceSafety": "PASS_AFTER_ODDS_03R_TOTAL_LINE_NORMALIZATION_REPAIR",
+    "eventMarketSelectionLineRequired": true,
+    "officialPickThresholdsChanged": false,
+    "hr03CalibrationShadowOnly": true,
+    "sportsDataIoProductionAuthorityChanged": false,
+    "theOddsApiShadowOnly": true,
+    "odds03Performed": false,
+    "sportsDataIoCancelled": false,
+    "hr04Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false
+  },
+  "certifiedBookSetV1": [
+    "FanDuel",
+    "DraftKings",
+    "BetMGM",
+    "Caesars"
+  ],
+  "freshnessAuthority": {
+    "authorityTimestamp": "THE_ODDS_API_SOURCE_TIMESTAMP",
+    "captureTimestampCanSubstitute": false,
+    "noFreshExactLinePriceState": "WAIT_FOR_REFRESH",
+    "lineMovedNoCurrentPredictionState": "WAITING_FOR_CURRENT_LINE_PREDICTION",
+    "stalePriceActionable": false
+  },
+  "providerFailurePolicy": {
+    "sportsDataIoFallback": "FALLBACK_CONTEXT_ONLY",
+    "unavailable": "NO_FRESH_PRICE",
+    "rateLimited": "NO_FRESH_PRICE",
+    "stale": "NO_FRESH_PRICE",
+    "quotaExhausted": "NO_FRESH_PRICE"
+  },
+  "pollingEconomics": {
+    "observedLeagueWideCreditCost": 3,
+    "tenGameSlate": {
+      "requestsPerDay": 37,
+      "creditsPerDay": 111,
+      "credits30Day": 3330
+    },
+    "fifteenGameSlate": {
+      "requestsPerDay": 37,
+      "creditsPerDay": 111,
+      "credits30Day": 3330
+    },
+    "recommendedCadence": {
+      "moreThanSixHours": "60_MINUTES",
+      "twoToSixHours": "15_MINUTES",
+      "thirtyMinutesToTwoHours": "10_MINUTES",
+      "underThirtyMinutes": "5_MINUTES",
+      "afterCutoff": "STOP"
+    }
+  },
+  "lineMovementRepredictionPolicy": {
+    "materialIdentityChange": "NEW_EXACT_MARKET_LINE",
+    "dedupeKey": "event+market+selection+line",
+    "repeatSameLineCreatesPrediction": false,
+    "lineReturnsToPreviousValue": "REUSE_ONLY_IF_FEATURE_SNAPSHOT_AND_CUTOFF_CONTEXT_REMAIN_VALID_OTHERWISE_NEW_VERSION"
+  },
+  "settlementPerformanceLearningPolicy": {
+    "settlement": "LINE_SPECIFIC",
+    "performance": "RECOMMENDATION_EXPOSURE_AWARE",
+    "learning": "ELIGIBLE_SETTLED_PREDICTION_EVIDENCE_WITH_EXPOSURE_SEPARATION",
+    "recommendationExposure": "ONLY_ACTUAL_PRODUCT_RECOMMENDATIONS_COUNT_AS_RECOMMENDATION_PERFORMANCE"
+  },
+  "sportsDataIoExit": {
+    "oddsExitDecision": "SPORTSDATAIO_ODDS_EXIT_READY_AFTER_REPAIR",
+    "fullSubscriptionExitReady": false,
+    "nonOddsDependencies": [
+      "schedule",
+      "event_status",
+      "results",
+      "team_stats",
+      "player_stats",
+      "starting_pitchers",
+      "injuries",
+      "lineups",
+      "historical_sync",
+      "settlement_result_source"
+    ]
+  },
+  "currentProductionSafety": {
+    "productionPilotWeek": "ACTIVE",
+    "staleEvidenceActionable": false,
+    "sportsDataIoStillAuthority": true
+  },
+  "cutoverDecision": "CUTOVER_READY_AFTER_BOUNDED_REPAIR",
+  "odds03Recommended": true,
+  "requiredRepairsBeforeOdds03": [
+    "LIFECYCLE_SCOPED_EVENT_MAPPING",
+    "EXECUTABLE_PREGAME_LINE_VERSIONED_PREDICTION",
+    "PRODUCTION_FEATURE_FLAG_AND_ROLLBACK",
+    "CERTIFIED_BOOK_SET_CONFIGURATION",
+    "RECOMMENDATION_EXPOSURE_AWARE_PERFORMANCE_POLICY"
+  ],
+  "finalClassification": "ODDS_03R_CUTOVER_READY_AFTER_BOUNDED_REPAIR"
+}

@@ -1189,6 +1189,35 @@
     "cutoverDecision": "MORE_SHADOW_EVIDENCE_REQUIRED",
     "finalClassification": "ODDS_02G_WIDE_SAMPLE_CAPTURED_MORE_SHADOW_EVIDENCE_REQUIRED"
   },
+  "odds03r": {
+    "status": "CUTOVER_READY_AFTER_BOUNDED_REPAIR",
+    "title": "Primary Odds Cutover Readiness Review",
+    "certificationArtifact": "docs/CERTIFICATION/odds-03r-cutover-readiness.json",
+    "architectureArtifact": "docs/ARCHITECTURE/ODDS_PRIMARY_CUTOVER_READINESS_V1.md",
+    "pilotReport": "docs/PRODUCTION_PILOT/ODDS_03R_CUTOVER_READINESS_REVIEW.md",
+    "startingCommit": "2a238b6946147237734cba7b165b6a3f9dfb76f6",
+    "providerCallsMade": 0,
+    "databaseMutations": 0,
+    "cinAtWshRootCause": "CURRENT_BOARD_SCOPE_MAPPING_DEFECT",
+    "tbAtSeaRootCause": "CURRENT_BOARD_SCOPE_MAPPING_DEFECT",
+    "totalLineIdentityRepair": "TOTAL_LINES_COMPARE_BY_ABSOLUTE_POINT_VALUE",
+    "repredictionContractStatus": "DESIGNED_BUT_NOT_EXECUTABLE",
+    "certifiedBookSetV1": [
+      "FanDuel",
+      "DraftKings",
+      "BetMGM",
+      "Caesars"
+    ],
+    "sportsDataIoOddsExitDecision": "SPORTSDATAIO_ODDS_EXIT_READY_AFTER_REPAIR",
+    "sportsDataIoProductionAuthorityChanged": false,
+    "theOddsApiShadowOnly": true,
+    "odds03Performed": false,
+    "sportsDataIoCancelled": false,
+    "hr04Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false,
+    "finalClassification": "ODDS_03R_CUTOVER_READY_AFTER_BOUNDED_REPAIR"
+  },
   "odds02": {
     "status": "PASS_SHADOW_ONLY",
     "title": "The Odds API Shadow Integration",
