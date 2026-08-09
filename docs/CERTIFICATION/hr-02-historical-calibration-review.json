@@ -1,0 +1,210 @@
+{
+  "certification": "HR_02_HISTORICAL_CALIBRATION_REVIEW",
+  "status": "PASS",
+  "finalClassification": "HR_02_CALIBRATION_IMPLEMENTATION_RECOMMENDED_ANALYSIS_ONLY",
+  "startingCommit": "f68b52c54de598148b566926f9ebffc9967d92ad",
+  "productionPilotWeek": "ACTIVE",
+  "odds02aStatus": "ODDS_02A_WAIT_FOR_USEFUL_SHADOW_WINDOW",
+  "remainingOdds02aRequests": 1,
+  "dataset": {
+    "replayEvents": 2430,
+    "replayPredictions": 7290,
+    "settledReplayPredictions": 7290,
+    "moneylineSample": 2430,
+    "runLineSample": 2430,
+    "totalSample": 2430,
+    "leakageFailures": 0,
+    "duplicateReplayRows": 0,
+    "replayChanged": false
+  },
+  "rawMetrics": {
+    "sample": 7290,
+    "wins": 3344,
+    "losses": 3916,
+    "pushes": 30,
+    "accuracy": 46.06,
+    "brier": 0.2508,
+    "calibrationError": 1.74,
+    "calibrationBias": 1.74,
+    "logLoss": 0.7011
+  },
+  "marketClassifications": {
+    "moneyline": {
+      "classification": "MILD_UNDERCONFIDENCE",
+      "sample": 2430,
+      "accuracy": 54.31,
+      "brier": 0.2545,
+      "calibrationError": 4.25,
+      "calibrationBias": -4.25
+    },
+    "runLine": {
+      "classification": "MATERIAL_OVERCONFIDENCE",
+      "sample": 2430,
+      "accuracy": 35.56,
+      "brier": 0.2387,
+      "calibrationError": 6.48,
+      "calibrationBias": 6.48,
+      "rootCause": "SELECTION_BIAS_HOME_MINUS_1_5_ONLY_WITH_MARKET_CALIBRATION_DEFECT"
+    },
+    "total": {
+      "classification": "WELL_CALIBRATED_AGGREGATE_OVER_ONLY_LIMITATION",
+      "sample": 2430,
+      "accuracy": 48.36,
+      "brier": 0.2592,
+      "calibrationError": 2.99,
+      "calibrationBias": 2.99
+    }
+  },
+  "highProbability": {
+    "minimumStrongSample": 100,
+    "overconfidenceThreshold": "60-65 overall, material by 65-70",
+    "largestStrongGap": {
+      "scope": "all",
+      "bucket": "65-70",
+      "sample": 196,
+      "averagePredictedProbability": 67.02,
+      "observedWinRate": 52.55,
+      "gap": 14.47
+    }
+  },
+  "reliabilityBuckets": {
+    "all": {
+      "0-30": { "sample": 356, "avgProbability": 23.55, "observedWinRate": 44.57, "difference": -21.02, "brier": 0.2954 },
+      "30-35": { "sample": 383, "avgProbability": 32.81, "observedWinRate": 35.08, "difference": -2.27, "brier": 0.2278 },
+      "35-40": { "sample": 822, "avgProbability": 37.69, "observedWinRate": 39.9, "difference": -2.22, "brier": 0.2411 },
+      "40-45": { "sample": 1240, "avgProbability": 42.66, "observedWinRate": 40.06, "difference": 2.6, "brier": 0.2406 },
+      "45-50": { "sample": 1503, "avgProbability": 47.45, "observedWinRate": 47.26, "difference": 0.19, "brier": 0.2496 },
+      "50-55": { "sample": 1329, "avgProbability": 52.27, "observedWinRate": 48.67, "difference": 3.6, "brier": 0.2508 },
+      "55-60": { "sample": 865, "avgProbability": 57.34, "observedWinRate": 51.97, "difference": 5.37, "brier": 0.2528 },
+      "60-65": { "sample": 397, "avgProbability": 62.08, "observedWinRate": 56.93, "difference": 5.15, "brier": 0.2474 },
+      "65-70": { "sample": 196, "avgProbability": 67.02, "observedWinRate": 52.55, "difference": 14.47, "brier": 0.2666 },
+      "70-75": { "sample": 99, "avgProbability": 71.57, "observedWinRate": 51.02, "difference": 20.55, "brier": 0.2923 },
+      "75-80": { "sample": 48, "avgProbability": 76.78, "observedWinRate": 43.75, "difference": 33.03, "brier": 0.3565 },
+      "80+": { "sample": 52, "avgProbability": 88.48, "observedWinRate": 63.46, "difference": 25.02, "brier": 0.3062 }
+    }
+  },
+  "chronologicalValidation": {
+    "methodology": "time_ordered_75_25_train_validation",
+    "cohorts": [
+      { "cohort": "Q1", "sample": 1824, "accuracy": 47.54, "brier": 0.2696, "calibrationError": 0.03, "bias": 0.03 },
+      { "cohort": "Q2", "sample": 1824, "accuracy": 43.01, "brier": 0.2451, "calibrationError": 5.03, "bias": 5.03 },
+      { "cohort": "Q3", "sample": 1824, "accuracy": 48.19, "brier": 0.2472, "calibrationError": 0.48, "bias": -0.48 },
+      { "cohort": "Q4", "sample": 1818, "accuracy": 45.5, "brier": 0.2413, "calibrationError": 2.37, "bias": 2.37 }
+    ],
+    "stability": "REGIME_SENSITIVE",
+    "largestDeterioration": "Q2"
+  },
+  "methodComparison": {
+    "global": {
+      "bestMethod": "NO_CALIBRATION",
+      "brierBefore": 0.2413,
+      "brierAfter": 0.2413,
+      "calibrationErrorBefore": 2.39,
+      "calibrationErrorAfter": 2.39,
+      "accuracy": 45.49,
+      "note": "Global calibrators reduce calibration error but worsen out-of-sample Brier."
+    },
+    "moneyline": {
+      "bestMethod": "BETA_CALIBRATION",
+      "brierBefore": 0.2458,
+      "brierAfter": 0.2454,
+      "calibrationErrorBefore": 3.81,
+      "calibrationErrorAfter": 1.01,
+      "accuracy": 53.38
+    },
+    "runLine": {
+      "bestMethod": "BETA_CALIBRATION",
+      "brierBefore": 0.2279,
+      "brierAfter": 0.2239,
+      "calibrationErrorBefore": 6.73,
+      "calibrationErrorAfter": 1.23,
+      "accuracy": 34.87
+    },
+    "total": {
+      "bestMethod": "BETA_CALIBRATION",
+      "brierBefore": 0.2502,
+      "brierAfter": 0.2481,
+      "calibrationErrorBefore": 4.32,
+      "calibrationErrorAfter": 1.05,
+      "accuracy": 48.18
+    }
+  },
+  "deepDives": {
+    "runLine": {
+      "minusOnePointFiveSample": 2430,
+      "plusOnePointFiveSample": 0,
+      "marketIdentityDefectProven": false,
+      "settlementDefectProven": false,
+      "rootCause": "Selection bias and market calibration weakness; full replay run line is home -1.5 only."
+    },
+    "moneyline": {
+      "middleBandsReliable": true,
+      "lowProbabilityUnderdogsUnderestimated": true,
+      "extremeBucketsNeedMoreEvidence": true
+    },
+    "total": {
+      "overSample": 2430,
+      "underSample": 0,
+      "overOnlyLimitation": true
+    }
+  },
+  "confidence": {
+    "low": { "sample": 1561, "accuracy": 39.77, "bias": -6.47 },
+    "medium": { "sample": 4072, "accuracy": 45.52, "bias": 2.04 },
+    "high": { "sample": 1657, "accuracy": 53.29, "bias": 8.71 },
+    "finding": "Confidence adds signal but high-confidence rows are overconfident."
+  },
+  "currentEraComparison": {
+    "mergedWithReplay": false,
+    "currentEra": {
+      "sample": 447,
+      "settled": 399,
+      "accuracy": 47.96,
+      "brier": 0.2582,
+      "calibrationError": 10.87,
+      "calibrationBias": -10.87
+    },
+    "replay": {
+      "sample": 7290,
+      "accuracy": 46.06,
+      "brier": 0.2508,
+      "calibrationError": 1.74,
+      "calibrationBias": 1.74
+    },
+    "conclusion": "Current Era sample is smaller and currently underconfident, so direct replay-to-production replacement is not justified."
+  },
+  "recommendationImpact": {
+    "fullHistoricalEvSimulationAvailable": false,
+    "largeEdgesLikelyInflatedByOverconfidence": true,
+    "officialPickPolicyChanged": false,
+    "thresholdsChanged": false
+  },
+  "recommendedArchitecture": {
+    "rawProbabilityPreserved": true,
+    "calibratedProbabilityStoredSeparately": true,
+    "engineVersionUnchanged": true,
+    "calibrationVersionExplicit": true,
+    "recommendedScope": "MARKET_SPECIFIC_BETA_CALIBRATION_FIRST",
+    "runLineGuardrailsRequired": true
+  },
+  "safety": {
+    "productionCalibrationApplied": false,
+    "modelWeightsChanged": false,
+    "learningWeightsChanged": false,
+    "currentEraMutated": false,
+    "replayRowsMutated": false,
+    "providerCalls": 0,
+    "sportsDataIoCalls": 0,
+    "theOddsApiCalls": 0,
+    "productionLearningWrites": 0,
+    "officialPickPolicyChanged": false,
+    "odds02aFinalRequestConsumed": false,
+    "odds03Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false,
+    "hr03Started": false
+  },
+  "decision": "CALIBRATION_IMPLEMENTATION_RECOMMENDED",
+  "nextRecommendedPhase": "HR-03 CALIBRATION IMPLEMENTATION DESIGN AND SHADOW VALIDATION"
+}
+

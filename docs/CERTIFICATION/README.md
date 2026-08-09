@@ -88,6 +88,7 @@ Current V2 certification documents:
 - [ODDS-02 The Odds API Shadow Integration JSON](odds-02-the-odds-api-shadow-integration.json)
 - [ODDS-02A Event Mapping And Multi-Market Certification JSON](odds-02a-event-mapping-multi-market.json)
 - [HR-01 Full-Scale Historical Replay JSON](hr-01-full-scale-historical-replay.json)
+- [HR-02 Historical Calibration Review JSON](hr-02-historical-calibration-review.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 
