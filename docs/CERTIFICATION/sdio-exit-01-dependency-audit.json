@@ -1,0 +1,154 @@
+{
+  "certification": "SDIO_EXIT_01_SPORTSDATAIO_DEPENDENCY_AUDIT",
+  "status": "CANCELLATION_BLOCKED_CRITICAL_DEPENDENCIES_REMAIN",
+  "startingCommit": "ceac2139e0b2b11b3c96c8e84f08e76fd14f20d1",
+  "productionCommitObserved": "ceac2139e0b2b11b3c96c8e84f08e76fd14f20d1",
+  "providerCalls": {
+    "sportsDataIo": 0,
+    "theOddsApi": 0,
+    "mlbStatsApi": 0,
+    "otherExternalProviders": 0
+  },
+  "databaseMutations": 0,
+  "productionPilotWeek": "ACTIVE",
+  "odds03r": "ODDS_03R_CUTOVER_READY_AFTER_BOUNDED_REPAIR",
+  "sportsDataIoProductionOddsAuthority": true,
+  "theOddsApiShadowOnly": true,
+  "hr03": "SHADOW_ONLY",
+  "runtimeConsumers": [
+    "canonical-acquisition.service.ts",
+    "sportsdataio-mlb-normalization.service.ts",
+    "sportsdataio-discovery-lab-url.service.ts",
+    "mlb-games-by-date-verification.service.ts",
+    "mlb-starter-sync.service.ts",
+    "sportsdataio-mlb-historical-import-executor.service.ts",
+    "sportsdataio-runtime-adapter.service.ts",
+    "sportsdataio-historical-import-readiness.service.ts",
+    "live-provider-verification.service.ts",
+    "mlb-missing-intelligence.service.ts",
+    "sportsdataio-subscription-maximization-audit.service.ts",
+    "src/app/api/providers/sportsdataio/**",
+    "src/app/api/nba/sync/**"
+  ],
+  "dataDomains": {
+    "odds": "SPORTSDATAIO_ODDS_EXIT_READY_AFTER_ODDS03_REPAIR",
+    "schedule": "BLOCKED_REPLACEMENT_REQUIRED",
+    "gameIdentity": "BLOCKED_REPLACEMENT_REQUIRED",
+    "eventStartTime": "BLOCKED_REPLACEMENT_REQUIRED",
+    "eventStatus": "BLOCKED_REPLACEMENT_REQUIRED",
+    "results": "PARTIAL_MLB_READY_WITH_MLB_STATS_API",
+    "settlement": "PARTIAL_RESULTS_READY_STATUS_DEPENDENCY_REMAINS",
+    "standings": "OPTIONAL_REPLACEMENT_REQUIRED_IF_USED",
+    "teamStats": "BLOCKED_FOR_FUTURE_FEATURE_REFRESH",
+    "teamGameStats": "BLOCKED_FOR_FUTURE_FEATURE_REFRESH",
+    "playerRoster": "BLOCKED_FOR_PROPS_AND_STARTERS",
+    "playerStats": "BLOCKED_FOR_PROPS_AND_PLAYER_MODELS",
+    "startingPitchers": "CRITICAL_REPLACEMENT_REQUIRED",
+    "bullpenData": "STORED_HISTORICAL_PARTIAL_CURRENT_REPLACEMENT_REQUIRED",
+    "injuries": "FOUNDATION_OR_FUTURE_REPLACEMENT_REQUIRED",
+    "lineups": "FOUNDATION_OR_FUTURE_REPLACEMENT_REQUIRED",
+    "historicalFeatures": "HISTORICAL_DEPENDENCY_REMOVED",
+    "playerProps": "NOT_PRODUCTION_READY_REPLACEMENT_REQUIRED",
+    "providerMappings": "RETAIN_INDEFINITELY"
+  },
+  "persistedHistoricalData": {
+    "historicalGames": 2430,
+    "historicalFeatureSnapshots": 70470,
+    "fullReplayPredictions": 7290,
+    "futureSportsDataIoRequiredToPreserve": false,
+    "classification": "HISTORICAL_DEPENDENCY_REMOVED"
+  },
+  "cancellationImpact": {
+    "morningSync": "BLOCKED_OR_STALE_FOR_SPORTSDATAIO_SCHEDULE_STAT_STARTER_PATHS",
+    "currentSlate": "DEGRADES_FROM_STORED_DATA_UNTIL_SCHEDULE_REPLACED",
+    "predictions": "BLOCK_CURRENT_GENERATION_IF_REQUIRED_LIVE_INPUTS_MISSING",
+    "oddsRefresh": "BLOCKED_UNTIL_ODDS03",
+    "results": "CONTINUES_FOR_MLB_THROUGH_MLB_STATS_API",
+    "settlement": "CONTINUES_WHEN_GAME_RESULTS_EXIST",
+    "learning": "CONTINUES_AFTER_SETTLEMENT",
+    "performance": "CONTINUES_FROM_STORED_PREDICTION_AND_SETTLEMENT_ROWS",
+    "officialPicks": "NO_NEW_OFFICIAL_PICK_FROM_MISSING_OR_STALE_DATA",
+    "historicalReplay": "CONTINUES_FROM_STORED_DATA",
+    "props": "BLOCKED"
+  },
+  "replacementRecommendations": {
+    "odds": "THE_ODDS_API_AFTER_ODDS03",
+    "schedule": "MLB_STATS_API_OR_CERTIFIED_PUBLIC_MLB_SCHEDULE",
+    "status": "MLB_STATS_API_STATUS_WITH_POSTPONED_CANCELLED_SUSPENDED_HANDLING",
+    "results": "MLB_STATS_API_WITH_SUSTAINED_PROOF",
+    "starters": "MLB_PUBLIC_PROBABLE_PITCHER_FEED_OR_LOWER_COST_STATS_PROVIDER",
+    "teamStats": "MLB_PUBLIC_STATS_OR_LOWER_COST_STATS_PROVIDER",
+    "playerStats": "MLB_PUBLIC_STATS_OR_LOWER_COST_STATS_PROVIDER",
+    "injuries": "ALTERNATE_INJURY_SOURCE_OR_FEATURE_DISABLE",
+    "lineups": "MLB_PUBLIC_LINEUP_FEED_OR_LOWER_COST_PROVIDER",
+    "props": "THE_ODDS_API_BUSINESS_FOR_PROP_ODDS_ONLY"
+  },
+  "costOptions": {
+    "optionA": {
+      "name": "Keep SportsDataIO plus The Odds API",
+      "sportsDataIoDiscoveryLab": "$99-$149/month published Discovery Lab range",
+      "theOddsApi": "$29/month Pro or $99/month Business",
+      "risk": "LOW_ENGINEERING_HIGH_COST"
+    },
+    "optionB": {
+      "name": "The Odds API plus public MLB data",
+      "theOddsApi": "$29/month Pro or $99/month Business",
+      "publicMlbData": "UNKNOWN_CONTRACT_COST",
+      "risk": "MEDIUM_ENGINEERING_MEDIUM_OPERATIONAL"
+    },
+    "optionC": {
+      "name": "The Odds API plus lower-cost stats provider",
+      "cost": "UNKNOWN",
+      "risk": "MEDIUM_VENDOR_AND_ENGINEERING"
+    }
+  },
+  "minimumCancellationGates": [
+    "ODDS_REPLACED",
+    "SCHEDULE_REPLACED",
+    "STATUS_REPLACED",
+    "RESULTS_REPLACED",
+    "STARTERS_REPLACED_OR_NOT_REQUIRED",
+    "TEAM_STATS_REPLACED_OR_STORED",
+    "PLAYER_STATS_REPLACED_OR_STORED",
+    "INJURIES_LINEUPS_CLASSIFIED",
+    "MULTI_SPORT_IMPACT_RESOLVED",
+    "DAILY_AUTONOMY_PROVEN",
+    "ROLLBACK_PLAN_READY"
+  ],
+  "migrationPhases": [
+    "SDIO-EXIT-02 / ODDS-03 primary odds cutover",
+    "SDIO-EXIT-03 schedule and event-status replacement",
+    "SDIO-EXIT-04 results and settlement replacement hardening",
+    "SDIO-EXIT-05 starters stats injuries and lineups replacement or stored-only certification",
+    "SDIO-EXIT-06 SportsDataIO disabled shadow observation",
+    "SDIO-EXIT-07 cancellation certification"
+  ],
+  "retentionPolicy": {
+    "deleteSportsDataIoCodeImmediately": false,
+    "retainProviderLineage": true,
+    "recommendedWindow": "one full MLB operating cycle plus one historical replay audit cycle after disabled-shadow pass"
+  },
+  "multiSportImpact": {
+    "mlbKeySpecific": true,
+    "genericSportsDataIoReferencesExist": true,
+    "nbaSportsDataIoPathsExist": true,
+    "nflNhlSoccerCatalogReferencesExist": true,
+    "mc03Started": false
+  },
+  "safety": {
+    "sportsDataIoCancelled": false,
+    "sportsDataIoDisabled": false,
+    "odds03Performed": false,
+    "hr04Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false,
+    "predictionChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerChanged": false
+  },
+  "canSportsDataIoBeCancelledToday": false,
+  "earliestSafeCancellationPoint": "after SDIO-EXIT-07 cancellation certification",
+  "finalClassification": "SDIO_EXIT_01_CANCELLATION_BLOCKED_CRITICAL_DEPENDENCIES_REMAIN"
+}

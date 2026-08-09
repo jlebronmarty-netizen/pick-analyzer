@@ -1218,6 +1218,34 @@
     "mc03Started": false,
     "finalClassification": "ODDS_03R_CUTOVER_READY_AFTER_BOUNDED_REPAIR"
   },
+  "sdioExit01": {
+    "status": "CANCELLATION_BLOCKED_CRITICAL_DEPENDENCIES_REMAIN",
+    "title": "SportsDataIO Dependency And Cancellation Readiness Audit",
+    "certificationArtifact": "docs/CERTIFICATION/sdio-exit-01-dependency-audit.json",
+    "architectureArtifact": "docs/ARCHITECTURE/SPORTSDATAIO_EXIT_ARCHITECTURE_V1.md",
+    "pilotReport": "docs/PRODUCTION_PILOT/SDIO_EXIT_01_DEPENDENCY_AUDIT.md",
+    "startingCommit": "ceac2139e0b2b11b3c96c8e84f08e76fd14f20d1",
+    "sportsDataIoCanBeCancelledToday": false,
+    "sportsDataIoOddsExitDecision": "SPORTSDATAIO_ODDS_EXIT_READY_AFTER_ODDS03_REPAIR",
+    "historicalDependency": "HISTORICAL_DEPENDENCY_REMOVED",
+    "criticalRemainingDependencies": [
+      "SCHEDULE",
+      "EVENT_STATUS",
+      "STARTING_PITCHERS",
+      "TEAM_STATS",
+      "PLAYER_STATS",
+      "MULTI_SPORT_IMPACT"
+    ],
+    "providerCallsMade": 0,
+    "databaseMutations": 0,
+    "sportsDataIoCancelled": false,
+    "sportsDataIoDisabled": false,
+    "odds03Performed": false,
+    "hr04Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false,
+    "finalClassification": "SDIO_EXIT_01_CANCELLATION_BLOCKED_CRITICAL_DEPENDENCIES_REMAIN"
+  },
   "odds02": {
     "status": "PASS_SHADOW_ONLY",
     "title": "The Odds API Shadow Integration",
