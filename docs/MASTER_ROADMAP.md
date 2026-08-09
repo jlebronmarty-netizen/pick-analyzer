@@ -3321,3 +3321,7 @@ Status: Locally certified partial. SDIO-EXIT-02 reconfirmed the complete MLB Spo
 ## SDIO-EXIT-03 MLB Official Replacement
 
 Status: Locally implemented partial. SDIO-EXIT-03 adds the official MLB Stats API replacement foundation for schedule, event status and probable starters, including additive canonical row builders and read-only `/api/operations/mlb-official-replacement` evidence. The phase is ready for shadow observation only: SportsDataIO is not cancelled, odds authority is not promoted, model formulas and recommendation policy are unchanged, and cancellation remains blocked by real-slate shadow proof, ODDS-03C promotion, stat parity and a SportsDataIO-off operating window. HR-04, Player Props and MC-03 remain not started.
+
+## SDIO-EXIT-03A Natural MLB Official Shadow Proof
+
+Status: Repository repair ready for natural proof. SDIO-EXIT-03A wires `DUAL_READ` into the protected operating-day scheduler so eligible market-refresh actions also run a bounded official MLB Stats API schedule/status/probable-starter shadow acquisition. Evidence is additive and non-authoritative; canonical events, predictions, settlement, learning, odds authority and SportsDataIO rollback are unchanged. Final readiness waits for at least two consecutive eligible natural official shadow runs after deployment.

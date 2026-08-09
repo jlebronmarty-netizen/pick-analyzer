@@ -1,0 +1,54 @@
+{
+  "mode": "sdio_exit_03a_natural_shadow_proof_v1",
+  "status": "SDIO_EXIT_03A_REPOSITORY_REPAIR_READY_FOR_NATURAL_PROOF",
+  "startingCommit": "3e160349b9a4ededd6e48466a28d14d11282ba21",
+  "rootCause": "MLB_OFFICIAL_NOT_WIRED",
+  "mlbDataSourceMode": "DUAL_READ",
+  "expectedDualReadBehavior": {
+    "sportsDataIo": "PRODUCT_AUTHORITY_AND_ROLLBACK_RETAINED",
+    "theOddsApi": "STAGE_1_DUAL_READ_SHADOW_NON_AUTHORITATIVE",
+    "mlbStatsApi": "SCHEDULE_STATUS_STARTER_SHADOW_COMPARISON",
+    "canonicalOverwrite": false,
+    "predictionWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  },
+  "repair": {
+    "required": true,
+    "performed": true,
+    "schedulerIntegration": "runAdaptiveRefresh eligible market-refresh branch invokes executeMlbOfficialShadowAcquisition",
+    "providerAccounting": "sports_sync_jobs job_type sdio_exit_03a_mlb_official_shadow_v1 with provider mlb_stats_api",
+    "shadowStorage": [
+      "provider_entity_mappings additive event mappings",
+      "provider_entity_mappings additive player mappings",
+      "sports_sync_jobs shadow run evidence"
+    ],
+    "boundedCalls": {
+      "scheduleEndpoint": "one date-level MLB Stats API schedule request",
+      "perEventFanout": false,
+      "timeoutMs": 12000
+    }
+  },
+  "naturalProof": {
+    "observedBeforeRepair": false,
+    "requiredConsecutiveEligibleRuns": 2,
+    "observedAfterLocalRepair": false,
+    "classification": "MLB_OFFICIAL_SHADOW_PASS_MORE_OBSERVATION_REQUIRED"
+  },
+  "safety": {
+    "sportsDataIoDisabled": false,
+    "sportsDataIoCancelled": false,
+    "mlbOfficialPrimaryPromoted": false,
+    "oddsAuthorityPromoted": false,
+    "predictionPolicyChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementPolicyChanged": false,
+    "learningChanged": false,
+    "hr04Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false,
+    "certificationProviderCalls": 0,
+    "certificationDatabaseMutations": 0
+  },
+  "finalClassification": "MLB_OFFICIAL_SHADOW_PASS_MORE_OBSERVATION_REQUIRED"
+}

@@ -1,6 +1,6 @@
 # MLB Official Data Provider V1
 
-Status: `SDIO_EXIT_03_READY_FOR_SHADOW`
+Status: `SDIO_EXIT_03A_REPOSITORY_REPAIR_READY_FOR_NATURAL_PROOF`
 
 The MLB official data provider centralizes public MLB Stats API access for SDIO-EXIT-03. It does not replace SportsDataIO in production by itself, does not promote The Odds API, and does not change prediction formulas.
 
@@ -56,6 +56,8 @@ Default: `DUAL_READ`.
 - `sport_lineups` for probable starting pitchers.
 
 The current SDIO-EXIT-03 deployment is shadow/dry-run oriented. It exposes row builders and validation fixtures, but does not disable SportsDataIO and does not write production rows from the read-only status route.
+
+SDIO-EXIT-03A wires the official MLB path into natural protected scheduler execution for eligible `morning_sync`, `midday_refresh` and `final_refresh` actions. Under `DUAL_READ`, the path remains shadow-only: it records additive `provider_entity_mappings` and a `sports_sync_jobs` audit row with `job_type = sdio_exit_03a_mlb_official_shadow_v1`, while leaving canonical `sport_events`, predictions, Official Picks, settlement, learning and Performance unchanged.
 
 ## Safety
 

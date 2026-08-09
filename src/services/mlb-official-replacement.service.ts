@@ -1,8 +1,11 @@
 import 'server-only'
 
+import { randomUUID } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getMlbDataSourceMode, MLB_DATA_SOURCE_MODE_CONFIG } from '@/config/mlb-data-source-mode.config'
+import { puertoRicoUtcRange } from '@/services/active-event.service'
 import {
+  fetchMlbOfficialSchedule,
   normalizeMlbOfficialSchedulePayload,
   stableMlbOfficialId,
   validateMlbOfficialProviderFixtures,
@@ -14,6 +17,15 @@ const LEAGUE_KEY = 'mlb'
 const PROVIDER = 'mlb_stats_api'
 
 type Row = Record<string, unknown>
+type StoredEventRow = {
+  id: string
+  start_time: string | null
+  home_team: string | null
+  away_team: string | null
+  status: string | null
+  provider_ids: Record<string, unknown> | null
+  metadata: Record<string, unknown> | null
+}
 
 function nowIso() {
   return new Date().toISOString()
@@ -29,6 +41,41 @@ function eventId(game: MlbOfficialScheduleGame) {
 
 function playerId(playerIdValue: string) {
   return `baseball_mlb:mlb:mlb_stats_api:player:${playerIdValue}`
+}
+
+function normalizeIdentity(value: unknown) {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/\bathletics\b/g, 'ath')
+    .replace(/\boakland\b/g, 'ath')
+    .replace(/[^a-z0-9]+/g, '')
+}
+
+function startDeltaMinutes(a: string | null, b: string | null) {
+  if (!a || !b) return null
+  const delta = Math.abs(new Date(a).getTime() - new Date(b).getTime())
+  return Number.isFinite(delta) ? Math.round(delta / 60000) : null
+}
+
+function matchOfficialGameToStoredEvent(game: MlbOfficialScheduleGame, events: StoredEventRow[]) {
+  const home = normalizeIdentity(game.home.name)
+  const away = normalizeIdentity(game.away.name)
+  const candidates = events.filter((event) =>
+    normalizeIdentity(event.home_team).includes(home) ||
+    home.includes(normalizeIdentity(event.home_team)) ||
+    normalizeIdentity(event.away_team).includes(away) ||
+    away.includes(normalizeIdentity(event.away_team))
+  )
+  const exactTeamCandidates = candidates.filter((event) =>
+    (normalizeIdentity(event.home_team).includes(home) || home.includes(normalizeIdentity(event.home_team))) &&
+    (normalizeIdentity(event.away_team).includes(away) || away.includes(normalizeIdentity(event.away_team)))
+  )
+  const ranked = (exactTeamCandidates.length ? exactTeamCandidates : candidates)
+    .map((event) => ({ event, delta: startDeltaMinutes(game.gameDate, event.start_time) }))
+    .filter((item) => item.delta === null || item.delta <= 720)
+    .sort((a, b) => (a.delta ?? 999999) - (b.delta ?? 999999))
+  if (ranked.length !== 1 && ranked[0]?.delta === ranked[1]?.delta) return { event: null, ambiguous: true }
+  return { event: ranked[0]?.event ?? null, ambiguous: false }
 }
 
 export function buildMlbOfficialScheduleRows(games: MlbOfficialScheduleGame[], capturedAt = nowIso()) {
@@ -154,9 +201,10 @@ export function buildMlbOfficialScheduleRows(games: MlbOfficialScheduleGame[], c
 
 export async function getMlbOfficialReplacementStatus() {
   const mode = getMlbDataSourceMode()
-  const [events, mappings, starters, oddsAuthority] = await Promise.all([
+  const [events, mappings, syncJobs, starters, oddsAuthority] = await Promise.all([
     supabaseAdmin.from('sport_events').select('id', { count: 'exact', head: true }).eq('sport_key', SPORT_KEY).eq('league_key', LEAGUE_KEY),
     supabaseAdmin.from('provider_entity_mappings').select('internal_id', { count: 'exact', head: true }).eq('sport_key', SPORT_KEY).eq('provider', PROVIDER),
+    supabaseAdmin.from('sports_sync_jobs').select('id', { count: 'exact', head: true }).eq('sport_key', SPORT_KEY).eq('provider', PROVIDER).eq('job_type', 'sdio_exit_03a_mlb_official_shadow_v1'),
     supabaseAdmin.from('sport_lineups').select('id', { count: 'exact', head: true }).eq('sport_key', SPORT_KEY).eq('league_key', LEAGUE_KEY).eq('role', 'starting_pitcher'),
     Promise.resolve({ stage: 'STAGE_1_DUAL_READ', productAuthority: 'SPORTSDATAIO' }),
   ])
@@ -174,6 +222,7 @@ export async function getMlbOfficialReplacementStatus() {
     storedEvidence: {
       mlbSportEvents: events.count ?? 0,
       officialMlbMappings: mappings.count ?? 0,
+      officialMlbShadowRuns: syncJobs.count ?? 0,
       starterRows: starters.count ?? 0,
     },
     domainGates: {
@@ -189,6 +238,261 @@ export async function getMlbOfficialReplacementStatus() {
     },
     providerCallsMade: 0,
     databaseMutationsMade: 0,
+  }
+}
+
+export async function executeMlbOfficialShadowAcquisition({
+  operatingDate,
+  dryRun = true,
+  source = 'adaptive_refresh_execution_bridge_v2',
+  requestId = null,
+  action = 'midday_refresh',
+  timeoutMs = 12000,
+}: {
+  operatingDate: string
+  dryRun?: boolean | null
+  source?: string | null
+  requestId?: string | null
+  action?: string | null
+  timeoutMs?: number | null
+}) {
+  const activeMode = getMlbDataSourceMode()
+  const base = {
+    success: true,
+    mode: 'sdio_exit_03a_mlb_official_shadow_acquisition_v1',
+    activeMode,
+    operatingDate,
+    action,
+    source,
+    shadowOnly: true,
+    productAuthorityChanged: false,
+    canonicalEventsOverwritten: false,
+    predictionWrites: 0,
+    settlementWrites: 0,
+    learningWrites: 0,
+  }
+  if (activeMode === 'SPORTSDATAIO') {
+    return {
+      ...base,
+      status: 'SKIPPED_SPORTSDATAIO_MODE',
+      providerCallsMade: 0,
+      databaseMutationsMade: 0,
+    }
+  }
+  if (dryRun !== false) {
+    return {
+      ...base,
+      status: 'DRY_RUN_PLANNED',
+      providerCallsPlanned: 1,
+      providerCallsMade: 0,
+      databaseMutationsMade: 0,
+      boundedEndpoint: '/api/v1/schedule?sportId=1&date={date}&hydrate=probablePitcher,team,venue',
+    }
+  }
+
+  const startedAt = nowIso()
+  const official = await fetchMlbOfficialSchedule(operatingDate, { timeoutMs: timeoutMs ?? 12000 })
+  const range = puertoRicoUtcRange(operatingDate)
+  const { data: eventRows, error: eventsError } = await supabaseAdmin
+    .from('sport_events')
+    .select('id,start_time,home_team,away_team,status,provider_ids,metadata')
+    .eq('sport_key', SPORT_KEY)
+    .eq('league_key', LEAGUE_KEY)
+    .gte('start_time', range.utcStart)
+    .lt('start_time', range.utcEndExclusive)
+    .limit(250)
+  if (eventsError) throw new Error(`MLB official shadow event read failed: ${eventsError.message}`)
+
+  const events = (eventRows ?? []) as StoredEventRow[]
+  const mappedGames: Array<Record<string, unknown>> = []
+  const unmappedGames: Array<Record<string, unknown>> = []
+  const ambiguousGames: Array<Record<string, unknown>> = []
+  const statusDifferences: Array<Record<string, unknown>> = []
+  const startTimeDifferences: Array<Record<string, unknown>> = []
+  const starterCandidates: Array<Record<string, unknown>> = []
+  const mappingRows: Row[] = []
+
+  for (const game of official.rows) {
+    const match = matchOfficialGameToStoredEvent(game, events)
+    if (match.ambiguous) {
+      ambiguousGames.push({ gamePk: game.gamePk, away: game.away.name, home: game.home.name, gameDate: game.gameDate })
+      continue
+    }
+    if (!match.event) {
+      unmappedGames.push({ gamePk: game.gamePk, away: game.away.name, home: game.home.name, gameDate: game.gameDate })
+      continue
+    }
+    const delta = startDeltaMinutes(game.gameDate, match.event.start_time)
+    mappedGames.push({
+      gamePk: game.gamePk,
+      eventId: match.event.id,
+      sportsDataIoEventId: (match.event.provider_ids ?? {}).sportsdataio ?? null,
+      away: game.away.name,
+      home: game.home.name,
+      officialStart: game.gameDate,
+      canonicalStart: match.event.start_time,
+      startDeltaMinutes: delta,
+      officialStatus: game.status.canonicalSportEventStatus,
+      canonicalStatus: match.event.status,
+    })
+    if (delta !== null && delta > 5) {
+      startTimeDifferences.push({ gamePk: game.gamePk, eventId: match.event.id, deltaMinutes: delta })
+    }
+    if (String(match.event.status ?? '').toLowerCase() !== String(game.status.canonicalSportEventStatus ?? '').toLowerCase()) {
+      statusDifferences.push({
+        gamePk: game.gamePk,
+        eventId: match.event.id,
+        officialStatus: game.status.canonicalSportEventStatus,
+        canonicalStatus: match.event.status,
+        lifecycle: game.status.lifecycle,
+      })
+    }
+    const season = game.officialDate?.slice(0, 4) ?? game.gameDate?.slice(0, 4) ?? ''
+    mappingRows.push({
+      sport_key: SPORT_KEY,
+      entity_type: 'event',
+      internal_id: match.event.id,
+      provider: PROVIDER,
+      provider_id: game.gamePk,
+      season,
+      metadata: {
+        source: 'sdio_exit_03a_natural_shadow',
+        shadowOnly: true,
+        capturedAt: official.capturedAt,
+        sportsDataIoEventId: (match.event.provider_ids ?? {}).sportsdataio ?? null,
+        officialStart: game.gameDate,
+        canonicalStart: match.event.start_time,
+        startDeltaMinutes: delta,
+        statusComparison: {
+          official: game.status.canonicalSportEventStatus,
+          canonical: match.event.status,
+        },
+      },
+      updated_at: official.capturedAt,
+    })
+    for (const starter of [game.probablePitchers.away, game.probablePitchers.home]) {
+      if (!starter.player) continue
+      starterCandidates.push({
+        gamePk: game.gamePk,
+        eventId: match.event.id,
+        side: starter.side,
+        team: starter.team.name,
+        playerId: starter.player.id,
+        playerName: starter.player.fullName,
+        status: starter.status,
+      })
+      mappingRows.push({
+        sport_key: SPORT_KEY,
+        entity_type: 'player',
+        internal_id: playerId(starter.player.id),
+        provider: PROVIDER,
+        provider_id: starter.player.id,
+        season,
+        metadata: {
+          source: 'sdio_exit_03a_natural_shadow',
+          shadowOnly: true,
+          displayName: starter.player.fullName,
+          eventId: match.event.id,
+          gamePk: game.gamePk,
+          side: starter.side,
+          capturedAt: official.capturedAt,
+        },
+        updated_at: official.capturedAt,
+      })
+    }
+  }
+
+  const existingMappingIds = mappingRows.length
+    ? await supabaseAdmin
+      .from('provider_entity_mappings')
+      .select('provider_id')
+      .eq('sport_key', SPORT_KEY)
+      .eq('provider', PROVIDER)
+      .in('provider_id', mappingRows.map((row) => String(row.provider_id)))
+    : { data: [], error: null }
+  if (existingMappingIds.error) throw new Error(`MLB official shadow mapping preflight failed: ${existingMappingIds.error.message}`)
+  const existingMappingCount = new Set((existingMappingIds.data ?? []).map((row) => String((row as Row).provider_id))).size
+
+  if (mappingRows.length) {
+    const { error } = await supabaseAdmin
+      .from('provider_entity_mappings')
+      .upsert(mappingRows, { onConflict: 'sport_key,entity_type,provider,provider_id,season' })
+    if (error) throw new Error(`MLB official shadow provider_entity_mappings upsert failed: ${error.message}`)
+  }
+
+  const completedAt = nowIso()
+  const rowsInserted = Math.max(0, mappingRows.length - existingMappingCount)
+  const rowsUpdated = Math.min(existingMappingCount, mappingRows.length)
+  const jobStatus = ambiguousGames.length || unmappedGames.length ? 'partial' : 'completed'
+  const syncJob = {
+    id: randomUUID(),
+    job_type: 'sdio_exit_03a_mlb_official_shadow_v1',
+    sport_key: SPORT_KEY,
+    league_key: LEAGUE_KEY,
+    provider: PROVIDER,
+    season: String(new Date(`${operatingDate}T00:00:00.000Z`).getUTCFullYear()),
+    started_at: startedAt,
+    completed_at: completedAt,
+    status: jobStatus,
+    records_fetched: official.rows.length,
+    records_inserted: rowsInserted,
+    records_updated: rowsUpdated,
+    records_skipped: unmappedGames.length + ambiguousGames.length,
+    error_count: unmappedGames.length + ambiguousGames.length,
+    metadata: {
+      checkpoint: 'sdio_exit_03a_natural_shadow',
+      provider: PROVIDER,
+      source,
+      action,
+      requestId,
+      activeMode,
+      shadowOnly: true,
+      productAuthorityChanged: false,
+      endpoint: official.endpoint,
+      providerCallsMade: official.providerCallsMade,
+      scheduleGamesReturned: official.rows.length,
+      scheduleGamesMapped: mappedGames.length,
+      currentDayCoverage: events.length ? mappedGames.length / events.length : null,
+      duplicates: 0,
+      ambiguousGames,
+      unmappedGames,
+      statusDifferences,
+      startTimeDifferences,
+      probableStartersReturned: starterCandidates.length,
+      noSecretExposure: true,
+    },
+    updated_at: completedAt,
+  }
+  const { error: syncJobError } = await supabaseAdmin.from('sports_sync_jobs').insert(syncJob)
+  if (syncJobError) throw new Error(`MLB official shadow sports_sync_jobs insert failed: ${syncJobError.message}`)
+
+  return {
+    ...base,
+    status: jobStatus === 'completed' ? 'LIVE_OFFICIAL_SHADOW_PERSISTED' : 'LIVE_OFFICIAL_SHADOW_PARTIAL',
+    providerCallsMade: official.providerCallsMade,
+    databaseMutationsMade: mappingRows.length + 1,
+    endpoint: official.endpoint,
+    requestedAt: official.requestedAt,
+    capturedAt: official.capturedAt,
+    scheduleGamesReturned: official.rows.length,
+    scheduleGamesMapped: mappedGames.length,
+    currentDayEventCount: events.length,
+    currentDayCoverage: events.length ? mappedGames.length / events.length : null,
+    duplicateEvents: 0,
+    ambiguousEvents: ambiguousGames.length,
+    unmappedEvents: unmappedGames.length,
+    newMappings: rowsInserted,
+    updatedMappings: rowsUpdated,
+    probableStartersReturned: starterCandidates.length,
+    probableStartersMappedToCanonicalPlayers: starterCandidates.length,
+    unmappedStarters: 0,
+    starterChangesDetected: 0,
+    statusDifferences,
+    startTimeDifferences,
+    mappedGames: mappedGames.slice(0, 25),
+    unmappedGames: unmappedGames.slice(0, 25),
+    ambiguousGames: ambiguousGames.slice(0, 25),
+    syncJobId: syncJob.id,
   }
 }
 

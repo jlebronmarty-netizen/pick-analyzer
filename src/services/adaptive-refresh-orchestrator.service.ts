@@ -20,6 +20,7 @@ import { canonicalStoredOutcome } from '@/services/canonical-settlement-state.se
 import { executeCanonicalMlbMarketAcquisition } from '@/services/canonical-acquisition.service'
 import { getEventRefreshPlan } from '@/services/event-refresh-planner.service'
 import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api-current-odds-acquisition.service'
+import { executeMlbOfficialShadowAcquisition } from '@/services/mlb-official-replacement.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -2265,18 +2266,29 @@ export async function runAdaptiveRefresh({
       requestId: executionRunId,
       timeoutMs: 15000,
     }) as Record<string, unknown>
+    const mlbOfficialShadowAcquisition = await executeMlbOfficialShadowAcquisition({
+      dryRun: false,
+      operatingDate: selectedDate,
+      source: source ?? 'adaptive_refresh_execution_bridge_v2',
+      requestId: executionRunId,
+      action,
+      timeoutMs: 12000,
+    }) as Record<string, unknown>
     const predictionWrites = Number(storedOddsPredictionGeneration?.predictionWrites ?? 0)
     const predictionMutations = Number(storedOddsPredictionGeneration?.remoteMutationsMade ?? 0)
     const sportsDataIoProviderCalls = Number(canonicalAcquisition.providerCallsMade ?? 0)
     const theOddsApiProviderCalls = Number(theOddsApiDualReadAcquisition.providerCallsMade ?? 0)
-    const totalProviderCallsMade = sportsDataIoProviderCalls + theOddsApiProviderCalls
+    const mlbStatsApiProviderCalls = Number(mlbOfficialShadowAcquisition.providerCallsMade ?? 0)
+    const totalProviderCallsMade = sportsDataIoProviderCalls + theOddsApiProviderCalls + mlbStatsApiProviderCalls
     const totalRemoteMutations =
       Number(canonicalAcquisition.remoteMutationsMade ?? 0) +
       Number(theOddsApiDualReadAcquisition.remoteMutationsMade ?? 0) +
+      Number(mlbOfficialShadowAcquisition.databaseMutationsMade ?? 0) +
       predictionMutations
     const dualReadSucceeded = theOddsApiDualReadAcquisition.success !== false
+    const mlbOfficialShadowSucceeded = mlbOfficialShadowAcquisition.success !== false
     return {
-      success: canonicalAcquisition.success && storedOddsPredictionGeneration?.success !== false && dualReadSucceeded,
+      success: canonicalAcquisition.success && storedOddsPredictionGeneration?.success !== false && dualReadSucceeded && mlbOfficialShadowSucceeded,
       status: normalizedStatus,
       mode: 'adaptive_refresh_execution_bridge_v2',
       generatedAt: new Date().toISOString(),
@@ -2296,6 +2308,7 @@ export async function runAdaptiveRefresh({
       },
       canonicalAcquisition,
       theOddsApiDualReadAcquisition,
+      mlbOfficialShadowAcquisition,
       storedOddsPredictionGeneration,
       refreshPlan: status.refreshPlan,
       providerCallForecast: {
@@ -2340,6 +2353,19 @@ export async function runAdaptiveRefresh({
           rowsInserted: Number(theOddsApiDualReadAcquisition.rowsInserted ?? 0),
           rowsUpdated: Number(theOddsApiDualReadAcquisition.rowsUpdated ?? 0),
           rowsSkipped: Number(theOddsApiDualReadAcquisition.rowsRejected ?? 0),
+          productAuthorityChanged: false,
+          shadowOnly: true,
+        },
+        {
+          domain: 'schedule_status_starters',
+          action: 'sdio_exit_03a_official_mlb_shadow_refresh',
+          provider: 'mlb_stats_api',
+          providerCallsMade: mlbStatsApiProviderCalls,
+          providerResultClassification: mlbOfficialShadowSucceeded ? String(mlbOfficialShadowAcquisition.status ?? 'OFFICIAL_SHADOW_OK') : String(mlbOfficialShadowAcquisition.status ?? 'OFFICIAL_SHADOW_FAILED'),
+          rowsReceived: Number(mlbOfficialShadowAcquisition.scheduleGamesReturned ?? 0),
+          rowsInserted: Number(mlbOfficialShadowAcquisition.newMappings ?? 0),
+          rowsUpdated: Number(mlbOfficialShadowAcquisition.updatedMappings ?? 0),
+          rowsSkipped: Number(mlbOfficialShadowAcquisition.unmappedEvents ?? 0) + Number(mlbOfficialShadowAcquisition.ambiguousEvents ?? 0),
           productAuthorityChanged: false,
           shadowOnly: true,
         },
