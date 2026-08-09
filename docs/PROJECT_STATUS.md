@@ -1820,3 +1820,9 @@ PI-02 is certified as `PI_02_PASS_WITH_MONITORING`. Production evidence on `ff74
 The latest Vercel primary acquisition made 1 SportsDataIO call, fetched 15 provider records, normalized 90 rows and inserted 90 snapshots. The provider source timestamp improved to `2026-08-08T14:07:23Z`, but still exceeded betting-actionability SLA by the observation time. No stale evidence became actionable and no Official Pick, Rent Play or Smart Parlay safety gate was bypassed.
 
 Prior-day Performance reconciled as 42 canonical predictions = 24 settled + 18 valid pending + 0 blocked. The remaining 18 belong to six late events still classified as `STARTED`/`scheduled` with no imported authoritative result; first missing step is result import. Silent pending remained 0. No runtime repair was made, Production Pilot Week remains ACTIVE with monitoring and MC-03 was not started.
+
+## 2026-08-08 ODDS-02 The Odds API Shadow Integration
+
+ODDS-02 is locally certified as `PASS_SHADOW_ONLY`. The integration uses only `THE_ODDS_API_KEY`, does not read or modify `ODDS_API_KEY`, and leaves SportsDataIO as production odds authority. The first bounded shadow acquisition made 1 The Odds API request, consumed 3 credits, returned 24 MLB events, 11 sportsbooks and h2h/spread/total coverage. Exact event matching found LAD @ ARI and TB @ SEA production Current Board matches. Shadow prices are certification evidence only and cannot feed production recommendations.
+
+No prediction formula, confidence, edge/EV formula, Official Pick policy, Rent Play, Moneyline, Smart Parlay, Watchlist, settlement, learning, scheduler cadence or provider budget changed. ODDS-03, Historical Replay, Player Props and MC-03 were not started.

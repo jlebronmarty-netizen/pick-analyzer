@@ -1,0 +1,169 @@
+{
+  "certification": "ODDS_02_THE_ODDS_API_SHADOW_INTEGRATION",
+  "status": "PASS_SHADOW_ONLY",
+  "startingCommit": "44764f928b6c5b20cf15a83453615ad06d55b66d",
+  "productionCommitAtObservation": "44764f928b6c5b20cf15a83453615ad06d55b66d",
+  "observedAt": "2026-08-09T00:07:30.084Z",
+  "credential": {
+    "shadowVariable": "THE_ODDS_API_KEY",
+    "shadowCredentialPresent": true,
+    "legacyVariable": "ODDS_API_KEY",
+    "legacyVariableUntouched": true,
+    "fallbackToLegacyVariable": false,
+    "secretValuesExposed": false
+  },
+  "runtime": {
+    "route": "/api/operations/odds-shadow-comparison",
+    "dryRunProviderCalls": 0,
+    "liveRequiresProtectedSecret": true,
+    "liveConfirmation": "ODDS_02_SHADOW",
+    "maximumAuthorizedCertificationRequests": 3,
+    "requestsUsedByCertification": 1,
+    "requestsRemainingInOdss02Cap": 2,
+    "productionAuthority": "sportsdataio",
+    "shadowProvider": "the-odds-api",
+    "storage": "IN_MEMORY_CERTIFICATION_ARTIFACT_ONLY"
+  },
+  "shadowAcquisition": {
+    "endpoint": "/v4/sports/baseball_mlb/odds?regions=us&markets=h2h,spreads,totals&oddsFormat=american",
+    "httpStatus": 200,
+    "ok": true,
+    "providerCallsMade": 1,
+    "creditsUsed": 3,
+    "creditsRemaining": 19997,
+    "eventsReturned": 24,
+    "bookmakersObserved": [
+      "BetMGM",
+      "BetOnline.ag",
+      "BetRivers",
+      "BetUS",
+      "Bovada",
+      "Caesars",
+      "DraftKings",
+      "FanDuel",
+      "Fanatics",
+      "LowVig.ag",
+      "MyBookie.ag"
+    ],
+    "bookmakerCount": 11,
+    "marketRows": {
+      "h2h": 190,
+      "spreads": 194,
+      "totals": 196
+    },
+    "outcomesObserved": 1160,
+    "latestSourceTimestamp": "2026-08-09T00:07:44Z"
+  },
+  "exactEventMatches": [
+    {
+      "productionEventId": "baseball_mlb:mlb:sportsdataio:event:79041",
+      "providerEventId": "30fc735653380dfae5b9de10acf8b5f6",
+      "matchup": "LAD @ ARI",
+      "productionStart": "2026-08-09T00:10:00.000Z",
+      "providerStart": "2026-08-09T00:11:00Z",
+      "startDeltaMinutes": 1,
+      "bookmakers": 11
+    },
+    {
+      "productionEventId": "baseball_mlb:mlb:sportsdataio:event:79051",
+      "providerEventId": "79a0c1e324175df9d0c7f93de8d4dc44",
+      "matchup": "TB @ SEA",
+      "productionStart": "2026-08-09T01:50:00.000Z",
+      "providerStart": "2026-08-09T01:50:00Z",
+      "startDeltaMinutes": 0,
+      "bookmakers": 11
+    }
+  ],
+  "caseStudies": [
+    {
+      "predictionId": "51ad15d4-f618-5d0e-9e64-8c67e6d9bcf5",
+      "matchup": "LAD @ ARI",
+      "market": "moneyline",
+      "selection": "ARI",
+      "line": null,
+      "sportsDataIoPrice": 170,
+      "sportsDataIoSourceTimestamp": "2026-08-08T20:07:22.000Z",
+      "sportsDataIoActionability": "WAIT_FOR_REFRESH",
+      "bestShadowBook": "Caesars",
+      "bestShadowPrice": 183,
+      "bestShadowSourceTimestamp": "2026-08-09T00:06:54Z",
+      "modelProbability": 70.97,
+      "shadowImpliedProbability": 35.34,
+      "shadowEdgePercentagePoints": 35.63,
+      "shadowExpectedValuePercent": 100.85
+    },
+    {
+      "predictionId": "2b218372-e4e2-5a15-a5e7-2fd49074d96d",
+      "matchup": "LAD @ ARI",
+      "market": "spread",
+      "selection": "LAD",
+      "line": -1.5,
+      "sportsDataIoPrice": -117,
+      "sportsDataIoSourceTimestamp": "2026-08-08T20:07:22.000Z",
+      "sportsDataIoActionability": "WAIT_FOR_REFRESH",
+      "bestShadowBook": "FanDuel",
+      "bestShadowPrice": -114,
+      "bestShadowSourceTimestamp": "2026-08-09T00:07:44Z",
+      "modelProbability": 50.36,
+      "shadowImpliedProbability": 53.27,
+      "shadowEdgePercentagePoints": -2.91,
+      "shadowExpectedValuePercent": -5.46
+    },
+    {
+      "predictionId": "62037c5b-4aad-595d-9f90-82f7a10554c6",
+      "matchup": "TB @ SEA",
+      "market": "moneyline",
+      "selection": "SEA",
+      "line": null,
+      "sportsDataIoPrice": -121,
+      "sportsDataIoSourceTimestamp": "2026-08-08T20:07:23.000Z",
+      "sportsDataIoActionability": "WAIT_FOR_REFRESH",
+      "bestShadowBook": "LowVig.ag",
+      "bestShadowPrice": -115,
+      "bestShadowSourceTimestamp": "2026-08-09T00:07:22Z",
+      "modelProbability": 55.04,
+      "shadowImpliedProbability": 53.49,
+      "shadowEdgePercentagePoints": 1.55,
+      "shadowExpectedValuePercent": 2.9
+    }
+  ],
+  "safety": {
+    "sportsDataIoRemainsProductionAuthority": true,
+    "productionOddsTablesWritten": false,
+    "productionCurrentBoardChanged": false,
+    "officialPicksChanged": false,
+    "rentPlayPolicyChanged": false,
+    "moneylinePolicyChanged": false,
+    "smartParlayPolicyChanged": false,
+    "watchlistPolicyChanged": false,
+    "predictionFormulaChanged": false,
+    "confidenceFormulaChanged": false,
+    "edgeEvFormulaChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "schedulerCadenceChanged": false,
+    "providerBudgetChanged": false,
+    "staleEvidenceActionable": false,
+    "playerPropsRuntimeImplemented": false,
+    "historicalReplayStarted": false,
+    "mc03Started": false
+  },
+  "economics": {
+    "creditsPerAcquisition": 3,
+    "estimatedAcquisitionsPerDay": {
+      "conservative": 37,
+      "aggressive": 43
+    },
+    "estimatedCreditsPerDay": {
+      "conservative": 111,
+      "aggressive": 129
+    },
+    "estimatedCreditsPerMonth": {
+      "conservative30Day": 3330,
+      "aggressive30Day": 3870
+    }
+  },
+  "cutoverDecision": "MORE_SHADOW_EVIDENCE_REQUIRED",
+  "productionPilotWeek": "ACTIVE",
+  "finalClassification": "ODDS_02_PASS_SHADOW_ONLY"
+}

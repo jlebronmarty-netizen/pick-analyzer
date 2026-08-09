@@ -3311,3 +3311,5 @@ PR-01 is certified as not ready for Production Pilot Week. Current Era and Repla
 ## Production Pilot Week
 
 Production Pilot Week Day 1 is active and recorded as `DAY_1_PASS_WITH_MONITORING`. The Day 1 baseline confirms an honest no-bet product state, complete remaining current-board market coverage, healthy scheduler/freshness/provider/operations domains, prior-day settlement closure and balanced Current Era Performance. Day 2 requires explicit continuation after Day 1 acceptance; MC-03 remains manual-only and not started.
+
+ODDS-02 is locally certified as `PASS_SHADOW_ONLY`. It adds an isolated The Odds API MLB core-market shadow comparison path using `THE_ODDS_API_KEY` only, keeps `ODDS_API_KEY` untouched, preserves SportsDataIO as the production odds authority, and records one bounded shadow acquisition with 1 request, 3 credits, 24 events and 11 sportsbooks. No production recommendation, prediction, settlement, learning, provider-budget, scheduler or Official Pick behavior changed. ODDS-03, Historical Replay, Player Props and MC-03 were not started.

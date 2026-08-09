@@ -25,3 +25,4 @@ Production Pilot Week is the monitored real-world validation period after MC-08H
 - [Day 1 Report](DAY_01_REPORT.md)
 - [Incident PI-01: GitHub Fallback Timeout](INCIDENT_PI_01_GITHUB_FALLBACK_TIMEOUT.md)
 - [Incident PI-02: Market Freshness Lineage And Prior-Day Closure](INCIDENT_PI_02_MARKET_FRESHNESS_LINEAGE.md)
+- [ODDS-02: The Odds API Shadow Integration](ODDS_02_THE_ODDS_API_SHADOW_INTEGRATION.md)
