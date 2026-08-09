@@ -90,6 +90,7 @@ Current V2 certification documents:
 - [HR-01 Full-Scale Historical Replay JSON](hr-01-full-scale-historical-replay.json)
 - [HR-02 Historical Calibration Review JSON](hr-02-historical-calibration-review.json)
 - [HR-03 Calibration Shadow JSON](hr-03-calibration-shadow.json)
+- [ODDS-02E Total Line Re-Prediction JSON](odds-02e-total-line-reprediction.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

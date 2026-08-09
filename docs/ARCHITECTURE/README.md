@@ -14,6 +14,7 @@ Current V2 architecture inventory documents:
 - [Multi-Sport Data Readiness](MULTI_SPORT_DATA_READINESS.md)
 - [Comprehensive Supported-Market Coverage](COMPREHENSIVE_SUPPORTED_MARKET_COVERAGE.md)
 - [The Odds API Shadow Provider V1](THE_ODDS_API_SHADOW_PROVIDER_V1.md)
+- [Pregame Market Line Versioning V1](PREGAME_MARKET_LINE_VERSIONING_V1.md)
 - [MLB Calibration Shadow V1](MLB_CALIBRATION_SHADOW_V1.md)
 
 Most architecture documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
