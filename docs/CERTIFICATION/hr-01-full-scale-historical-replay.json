@@ -1,0 +1,197 @@
+{
+  "certification": "HR_01_FULL_SCALE_HISTORICAL_REPLAY",
+  "status": "PASS",
+  "finalClassification": "HR_01_COMPLETE_READY_FOR_CALIBRATION_REVIEW",
+  "startingCommit": "4ec873187a4870bafb8dc4f655aa43802ca34bb3",
+  "productionCommitAtObservation": "4ec873187a4870bafb8dc4f655aa43802ca34bb3",
+  "certifiedAt": "2026-08-09T00:55:56Z",
+  "productionPilotWeek": "ACTIVE",
+  "odds02aStatus": "ODDS_02A_WAIT_FOR_USEFUL_SHADOW_WINDOW",
+  "remainingOdds02aRequests": 1,
+  "engines": {
+    "boundedP23Engine": "historical_progressive_replay_v1",
+    "boundedP23FeatureVersion": "historical_prediction_snapshot_lineage_pilot_v1",
+    "boundedP23PolicyVersion": "p2_3_frozen_engine_replay_policy_v1",
+    "fullReplayEngine": "retrosheet_historical_replay_phase_2b_v1",
+    "fullReplayFamily": "retrosheet_historical_replay_phase_2b_v1",
+    "fullReplaySource": "retrosheet_full_historical_replay",
+    "fullReplayCheckpoint": "retrosheet_historical_replay_phase_2b_v1:full_scope",
+    "productionEngineUsed": false,
+    "modelPromotion": false
+  },
+  "eligibility": {
+    "historicalEventsAvailable": 2430,
+    "historicalFeatureSnapshots": 70470,
+    "eventsWithValidPregameLineage": 2430,
+    "eventsWithValidFinalResult": 2430,
+    "eventsWithSufficientMoneylineFeatures": 2430,
+    "eventsWithSufficientRunLineFeatures": 2430,
+    "eventsWithSufficientTotalFeatures": 2430,
+    "eligibleHistoricalEvents": 2430,
+    "excludedHistoricalEvents": 0,
+    "exclusionReasons": {
+      "MISSING_FEATURE_SNAPSHOT": 0,
+      "MISSING_RESULT": 0,
+      "INVALID_EVENT_IDENTITY": 0,
+      "INSUFFICIENT_PREGAME_LINEAGE": 0,
+      "UNSUPPORTED_MARKET": 0,
+      "LEAKAGE_RISK": 0,
+      "DUPLICATE": 0,
+      "OTHER": 0
+    },
+    "featureAvailabilityGaps": {
+      "teamFormUnavailable": 0,
+      "starterInformationUnavailable": 0,
+      "bullpenEvidenceUnavailable": 0,
+      "marketEvidenceUnavailable": 0,
+      "parkUnavailable": 0,
+      "gameStateUnavailable": 0
+    }
+  },
+  "execution": {
+    "statusBeforeHr01": "completed",
+    "replayEventsBefore": 2430,
+    "replayEventsAddedDuringHr01": 0,
+    "replayEventsTotal": 2430,
+    "expectedReplayPredictions": 7290,
+    "replayPredictionsGenerated": 7290,
+    "replayPredictionsReused": 7290,
+    "replayPredictionsSettled": 7290,
+    "moneylinePredictions": 2430,
+    "runLinePredictions": 2430,
+    "totalPredictions": 2430,
+    "checkpointCount": 49,
+    "batchSize": 50,
+    "snapshotLookups": 211410,
+    "dryRunIdempotency": {
+      "startedAt": "2026-08-09T00:54:07.658Z",
+      "finishedAt": "2026-08-09T00:55:56.822Z",
+      "attempted": 7290,
+      "inserted": 0,
+      "reused": 7290,
+      "duplicateIds": 0,
+      "databaseWrites": 0,
+      "remoteMutationsMade": 0
+    },
+    "resourceSafety": {
+      "durationMs": 109164,
+      "averageDurationMsPerGame": 44.92,
+      "estimatedRemaining": 0,
+      "unsafeDatabasePressureObserved": false,
+      "memoryConcernObserved": false
+    }
+  },
+  "metrics": {
+    "wins": 3344,
+    "losses": 3916,
+    "pushes": 30,
+    "accuracy": 46.06,
+    "brier": 0.2508,
+    "calibrationError": 1.74,
+    "calibrationBias": 1.74,
+    "roi": null,
+    "roiNote": "Full-scope ROI is not certified because historical price/stake evidence is incomplete for this full Retrosheet replay family.",
+    "averageConfidence": 48.43
+  },
+  "marketMetrics": {
+    "moneyline": {
+      "sample": 2430,
+      "wins": 1317,
+      "losses": 1108,
+      "pushes": 5,
+      "accuracy": 54.31,
+      "brier": 0.2545,
+      "calibrationError": 4.25,
+      "calibrationBias": -4.25,
+      "averageConfidence": 50.52
+    },
+    "runLine": {
+      "sample": 2430,
+      "wins": 864,
+      "losses": 1566,
+      "pushes": 0,
+      "accuracy": 35.56,
+      "brier": 0.2387,
+      "calibrationError": 6.48,
+      "calibrationBias": 6.48,
+      "averageConfidence": 43.34
+    },
+    "total": {
+      "sample": 2430,
+      "wins": 1163,
+      "losses": 1242,
+      "pushes": 25,
+      "accuracy": 48.36,
+      "brier": 0.2592,
+      "calibrationError": 2.99,
+      "calibrationBias": 2.99,
+      "averageConfidence": 51.43
+    }
+  },
+  "probabilityBuckets": {
+    "<40": { "sample": 1561, "wins": 618, "losses": 936, "pushes": 7, "accuracy": 39.77, "averagePredictedProbability": 36.42, "calibrationDifference": -6.47 },
+    "40-45": { "sample": 1240, "wins": 496, "losses": 742, "pushes": 2, "accuracy": 40.06, "averagePredictedProbability": 42.66, "calibrationDifference": 2.6 },
+    "45-50": { "sample": 1503, "wins": 706, "losses": 788, "pushes": 9, "accuracy": 47.26, "averagePredictedProbability": 47.45, "calibrationDifference": 0.19 },
+    "50-55": { "sample": 1329, "wins": 642, "losses": 677, "pushes": 10, "accuracy": 48.67, "averagePredictedProbability": 52.28, "calibrationDifference": 3.6 },
+    "55-60": { "sample": 865, "wins": 449, "losses": 415, "pushes": 1, "accuracy": 51.97, "averagePredictedProbability": 57.34, "calibrationDifference": 5.37 },
+    "60-65": { "sample": 397, "wins": 226, "losses": 171, "pushes": 0, "accuracy": 56.93, "averagePredictedProbability": 62.08, "calibrationDifference": 5.15 },
+    "65-70": { "sample": 196, "wins": 103, "losses": 93, "pushes": 0, "accuracy": 52.55, "averagePredictedProbability": 67.02, "calibrationDifference": 14.47 },
+    "70+": { "sample": 199, "wins": 104, "losses": 94, "pushes": 1, "accuracy": 52.53, "averagePredictedProbability": 76.04, "calibrationDifference": 24.75 }
+  },
+  "chronologicalCohorts": [
+    { "cohort": "Q1", "events": 608, "predictions": 1824, "wins": 860, "losses": 949, "pushes": 15, "accuracy": 47.54, "brier": 0.2696, "calibrationError": 0.03, "calibrationBias": 0.03 },
+    { "cohort": "Q2", "events": 608, "predictions": 1824, "wins": 781, "losses": 1035, "pushes": 8, "accuracy": 43.01, "brier": 0.2451, "calibrationError": 5.03, "calibrationBias": 5.03 },
+    { "cohort": "Q3", "events": 608, "predictions": 1824, "wins": 878, "losses": 944, "pushes": 2, "accuracy": 48.19, "brier": 0.2472, "calibrationError": 0.48, "calibrationBias": -0.48 },
+    { "cohort": "Q4", "events": 606, "predictions": 1818, "wins": 825, "losses": 988, "pushes": 5, "accuracy": 45.5, "brier": 0.2413, "calibrationError": 2.37, "calibrationBias": 2.37 }
+  ],
+  "isolation": {
+    "leakageFailures": 0,
+    "skippedEvents": 0,
+    "failedEvents": 0,
+    "duplicateReplayRows": 0,
+    "providerCalls": 0,
+    "sportsDataIoCalls": 0,
+    "theOddsApiCalls": 0,
+    "databaseMutationsDuringHr01Certification": 0,
+    "currentEraWrites": 0,
+    "productionLearningWrites": 0,
+    "productionSettlementWrites": 0,
+    "performanceDefaultExcludesReplay": true,
+    "replayScopeIsolated": true
+  },
+  "currentEra": {
+    "before": {
+      "currentEraCanonicalPredictions": 406,
+      "predictionHistoryRows": 1813,
+      "currentProductionPredictions": 0,
+      "learningWeights": 41
+    },
+    "after": {
+      "currentEraCanonicalPredictions": 406,
+      "predictionHistoryRows": 1813,
+      "currentProductionPredictions": 0,
+      "learningWeights": 41
+    },
+    "changed": false
+  },
+  "coverage": {
+    "replayCoveragePercent": 100,
+    "calibrationReadiness": "READY_FOR_CALIBRATION_REVIEW"
+  },
+  "findings": {
+    "critical": [],
+    "high": [],
+    "medium": [
+      "High-probability replay buckets are materially overconfident and require HR-02 calibration review before any production model change.",
+      "Run-line accuracy materially trails moneyline and total performance, despite lower Brier."
+    ]
+  },
+  "safety": {
+    "odds03Started": false,
+    "playerPropsStarted": false,
+    "mc03Started": false,
+    "hr02Started": false,
+    "productionPilotWeekCanContinue": true
+  },
+  "nextRecommendedPhase": "HR-02 HISTORICAL CALIBRATION REVIEW"
+}
