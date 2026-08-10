@@ -1,0 +1,96 @@
+{
+  "certification": "ODDS-03C-R2",
+  "verdict": "PASS",
+  "finalClassification": "ODDS_03C_R2_REPREDICTION_WRITER_READY_FOR_DEPLOYMENT",
+  "startingCommit": "e5fc8b4f4bf73cac5e98d40dba177299c09c66d2",
+  "runtimeCommit": null,
+  "certificationCommit": null,
+  "canonicalWriterReused": true,
+  "predictionEngineUsed": "buildSportPrediction",
+  "newLineProbabilityGeneration": {
+    "oldLineProbabilityReused": false,
+    "engineEvaluatesNewLine": true,
+    "lineInterpolationModelIntroduced": false
+  },
+  "featureContextSafety": {
+    "usesPregameFeatureContext": true,
+    "postStartDataAllowed": false,
+    "regenerateProviderInputs": false,
+    "sourceLineagePersisted": true
+  },
+  "exactLineIdentity": [
+    "event",
+    "market",
+    "selection",
+    "line"
+  ],
+  "safetyRechecks": {
+    "cutoffRecheck": true,
+    "startStateRecheck": true,
+    "freshnessRecheck": true,
+    "sourceTimestampFutureCheck": true,
+    "featureContextRecheck": true,
+    "dedupeRecheck": true
+  },
+  "supersessionLineage": {
+    "originalPredictionPreserved": true,
+    "newPredictionParentLink": "parent_prediction_id",
+    "oldPredictionForwardLink": "superseded_by_prediction_id",
+    "reason": "MARKET_LINE_CHANGED"
+  },
+  "deduplication": {
+    "deterministicId": true,
+    "idempotencyKey": "event + market + selection + line",
+    "repeatedInvocationDeduped": true,
+    "concurrentDuplicatePrevented": true
+  },
+  "returnToPriorLinePolicy": "CREATE_NEW_VERSION_IF_FEATURE_OR_TIME_CONTEXT_CHANGED",
+  "currentVersionSelection": {
+    "exactLineOnly": true,
+    "missingPredictionState": "WAITING_FOR_CURRENT_LINE_PREDICTION",
+    "writerFailedState": "CURRENT_LINE_PREDICTION_UNAVAILABLE"
+  },
+  "settlementSafety": {
+    "lineSpecific": true,
+    "exampleOverEightPushOverEightAndHalfLoss": true,
+    "settlementFormulaChanged": false
+  },
+  "learningSafety": {
+    "learningWeightsChanged": false,
+    "duplicateLearningExposurePrevented": true,
+    "recommendationExposureSeparated": true
+  },
+  "stageBehavior": {
+    "stage1": "NON_PERSISTENT_SHADOW_EXECUTION",
+    "futurePrimary": "PERSISTENT_PRIMARY_WRITER",
+    "sportsDataIoAuthorityChanged": false,
+    "theOddsApiPromoted": false
+  },
+  "naturalMovedLineCasesExercised": 5,
+  "wouldCreateCount": 4,
+  "wouldDedupeCount": 1,
+  "wouldBlockCount": 0,
+  "providerCallsMade": 0,
+  "productionDatabaseMutations": 0,
+  "productionPredictionWrites": 0,
+  "operationsHealthImpact": "NO_NEW_HEALTH_DEGRADATION_EXPECTED; existing odds_not_current is SportsDataIO product-freshness related",
+  "sportsDataIoAuthority": "PRODUCT_AUTHORITY_RETAINED",
+  "theOddsApiStage": "STAGE_1_DUAL_READ",
+  "hr03CalibrationStatus": "SHADOW_ONLY",
+  "officialPickThresholdsChanged": false,
+  "rollbackReadiness": true,
+  "writerDeploymentReady": "REPREDICTION_WRITER_READY_FOR_DEPLOYMENT",
+  "oddsPrimaryPromotionReadyAfterDeployment": false,
+  "pushAuthorizationRequired": true,
+  "nextRecommendedPhase": "ODDS-03C-R2_PRODUCTION_DEPLOYMENT_CERTIFICATION",
+  "forbiddenActions": {
+    "oddsPromotionPerformed": false,
+    "sportsDataIoDisabled": false,
+    "mlbDataSourceModeChanged": false,
+    "sdioExit05Started": false,
+    "historicalMarketExpansionStarted": false,
+    "playerPropsStarted": false,
+    "hr03Promoted": false,
+    "mc03Started": false
+  }
+}

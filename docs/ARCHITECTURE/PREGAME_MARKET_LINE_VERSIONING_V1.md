@@ -1,6 +1,6 @@
 # Pregame Market Line Versioning V1
 
-Status: `ODDS_02E_TOTAL_LINE_CONTRACT_READY_FOR_CUTOVER_DESIGN`
+Status: `ODDS_03C_R2_LINE_VERSIONED_WRITER_READY_FOR_DEPLOYMENT`
 
 Provider calls: `0`.
 
@@ -47,7 +47,17 @@ Moneyline has no numeric line identity. Run line and total markets do.
 - `buildSupersessionLineageDraft`
 - `lineSpecificTotalSettlement`
 
-This is server-only. It does not call providers, write predictions, change odds authority, or expose provider payloads.
+This is server-only. It does not call providers, change odds authority, or
+expose provider payloads.
+
+ODDS-03C-R2 adds:
+
+- `executeLineVersionedRepredictionWriter`
+- `validateLineVersionedRepredictionWriterFixtures`
+
+The writer consumes already-acquired odds evidence and existing pregame feature
+context. Stage 1 remains non-persistent; future primary stages can persist only
+after all write gates pass.
 
 ## Line Movement Classification
 
@@ -65,7 +75,9 @@ Direction is `UP`, `DOWN`, `UNCHANGED`, or `UNKNOWN`.
 
 ## Pregame Re-Prediction Eligibility
 
-ODDS-02E implements only deterministic dry-run eligibility. It creates no production predictions.
+ODDS-03C-R2 implements deterministic writer eligibility and a bounded writer
+path. Stage 1 creates no production predictions because The Odds API is still
+shadow-only.
 
 A future production re-prediction for a changed line is eligible only when:
 
@@ -118,8 +130,18 @@ If current line evidence exists but no prediction exists for that exact line, th
 
 The UI must not fabricate edge or EV by mixing old-line probability with new-line odds.
 
+## Return-To-Prior-Line Policy
+
+If a market moves from `8.0` to `8.5` and later returns to `8.0`, the writer
+does not blindly reactivate an old prediction. The deterministic policy is:
+
+`CREATE_NEW_VERSION_IF_FEATURE_OR_TIME_CONTEXT_CHANGED`
+
+The original row remains auditable. A new row must carry its own generated time,
+feature context, odds snapshot, exact line, idempotency key and lineage.
+
 ## ODDS-03 Readiness
 
-ODDS-03 is not authorized by this document.
-
-The Odds API cutover design is closer, but provider replacement still requires a future capture contract that preserves raw/current line evidence by event, book, market, side, and line for certification.
+ODDS-03C-R2 makes the re-prediction writer deployable, but it does not promote
+The Odds API. Promotion still requires explicit human authorization and
+production certification of the writer in the intended authority stage.

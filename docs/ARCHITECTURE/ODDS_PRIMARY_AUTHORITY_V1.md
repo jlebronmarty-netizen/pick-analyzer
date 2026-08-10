@@ -56,7 +56,7 @@ If the preferred certified book has a fresh exact-line price, use it. Otherwise 
 
 ## Re-Prediction
 
-Line-versioned re-prediction is now represented by an executable gated command contract:
+Line-versioned re-prediction is represented by an executable gated command contract:
 
 - event must be pregame;
 - now must be before cutoff;
@@ -67,15 +67,39 @@ Line-versioned re-prediction is now represented by an executable gated command c
 - original prediction remains preserved;
 - lineage records `supersedeReason = MARKET_LINE_CHANGED`.
 
-The ODDS-03 local validator executes this contract in fixtures and confirms no write occurs during validation.
+ODDS-03C-R2 adds the bounded writer service:
+
+`src/services/line-versioned-reprediction-writer.service.ts`
+
+The writer reuses the existing shared sport prediction SDK and recommendation
+policy gates. It does not interpolate an old-line probability. For a line move
+it derives the underlying pregame projection context from the prior prediction,
+passes the new exact line into `buildSportPrediction`, and produces a new
+versioned prediction identity.
+
+Stage behavior is explicit:
+
+| Stage | Writer behavior |
+| --- | --- |
+| `STAGE_1_DUAL_READ` | Non-persistent shadow execution / would-write certification only |
+| `STAGE_2_THE_ODDS_API_PRIMARY_INTERNAL` | Non-product internal candidate behavior until separately promoted |
+| `STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT` | Persistent writer may create cutoff-safe exact-line prediction rows |
+| `STAGE_4_SPORTSDATAIO_ODDS_DISABLED_ROLLBACK_AVAILABLE` | Persistent writer may create cutoff-safe exact-line prediction rows while SportsDataIO remains rollback |
+
+The writer never changes Official Pick thresholds, HR-03 calibration state,
+settlement logic, learning weights, or provider authority.
 
 ## Scheduler Integration
 
 The event refresh planner reports `oddsPrimaryAuthority` metadata and The Odds API certified book configuration. ODDS-03A wires `STAGE_1_DUAL_READ` into the existing protected Vercel operating-day scheduler path:
 
-`Vercel Cron -> /api/cron/operating-day -> adaptive refresh -> SportsDataIO canonical acquisition -> The Odds API shadow dual-read`
+`Vercel Cron -> /api/cron/operating-day -> adaptive refresh -> SportsDataIO canonical acquisition -> The Odds API shadow dual-read -> line-versioned re-prediction writer`
 
 The dual-read branch is bounded to one league-wide MLB odds request after a SportsDataIO canonical refresh selects eligible market-refresh events. The Odds API rows are stored with `authorityStatus = SHADOW_NON_AUTHORITATIVE`, `productPriceAuthority = false`, and `production_eligible = false`. Current product surfaces remain filtered to the configured product authority provider, so Stage 1 cannot replace SportsDataIO prices.
+
+Under Stage 1, the line-versioned writer records no prediction writes. It
+reports moved-line eligibility, dedupe, blocked cases, and would-create counts
+from already-acquired market evidence.
 
 The Vercel primary scheduler continues using the existing protected endpoint and does not create a competing scheduler.
 

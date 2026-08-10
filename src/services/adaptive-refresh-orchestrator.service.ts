@@ -20,6 +20,7 @@ import { canonicalStoredOutcome } from '@/services/canonical-settlement-state.se
 import { executeCanonicalMlbMarketAcquisition } from '@/services/canonical-acquisition.service'
 import { getEventRefreshPlan } from '@/services/event-refresh-planner.service'
 import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api-current-odds-acquisition.service'
+import { executeLineVersionedRepredictionWriter } from '@/services/line-versioned-reprediction-writer.service'
 import { executeMlbOfficialShadowAcquisition } from '@/services/mlb-official-replacement.service'
 
 const SPORT_KEY = 'baseball_mlb'
@@ -2266,6 +2267,13 @@ export async function runAdaptiveRefresh({
       requestId: executionRunId,
       timeoutMs: 15000,
     }) as Record<string, unknown>
+    const lineVersionedReprediction = await executeLineVersionedRepredictionWriter({
+      dryRun: false,
+      operatingDate: selectedDate,
+      source: source ?? 'adaptive_refresh_execution_bridge_v2',
+      requestId: executionRunId,
+      maxCases: 50,
+    }) as Record<string, unknown>
     const mlbOfficialShadowAcquisition = await executeMlbOfficialShadowAcquisition({
       dryRun: false,
       operatingDate: selectedDate,
@@ -2283,6 +2291,7 @@ export async function runAdaptiveRefresh({
     const totalRemoteMutations =
       Number(canonicalAcquisition.remoteMutationsMade ?? 0) +
       Number(theOddsApiDualReadAcquisition.remoteMutationsMade ?? 0) +
+      Number(lineVersionedReprediction.databaseMutationsMade ?? 0) +
       Number(mlbOfficialShadowAcquisition.databaseMutationsMade ?? 0) +
       predictionMutations
     const dualReadSucceeded = theOddsApiDualReadAcquisition.success !== false
@@ -2357,6 +2366,19 @@ export async function runAdaptiveRefresh({
           shadowOnly: true,
         },
         {
+          domain: 'prediction',
+          action: 'line_versioned_reprediction_writer',
+          provider: 'the-odds-api',
+          providerCallsMade: 0,
+          providerResultClassification: String(lineVersionedReprediction.status ?? 'SHADOW_EXECUTION_WOULD_WRITE'),
+          rowsReceived: Number(lineVersionedReprediction.movedLineCases ?? 0),
+          rowsInserted: Number(lineVersionedReprediction.productionPredictionWrites ?? 0),
+          rowsUpdated: 0,
+          rowsSkipped: Number(lineVersionedReprediction.wouldBlockCount ?? 0) + Number(lineVersionedReprediction.wouldDedupeCount ?? 0),
+          productAuthorityChanged: false,
+          shadowOnly: String(lineVersionedReprediction.stageBehavior ?? '').includes('SHADOW'),
+        },
+        {
           domain: 'schedule_status_starters',
           action: 'sdio_exit_03a_official_mlb_shadow_refresh',
           provider: 'mlb_stats_api',
@@ -2377,6 +2399,7 @@ export async function runAdaptiveRefresh({
       rowsSkipped: canonicalAcquisition.rowsSkipped ?? 0,
       downstreamRebuilds: {
         predictionRows: predictionWrites,
+        lineVersionedReprediction,
         currentBoard: 'read_from_canonical_sports_odds_snapshots',
         aiBriefing: 'read_from_canonical_sports_odds_snapshots',
       },
