@@ -11,6 +11,7 @@ import {
   validateMlbOfficialProviderFixtures,
   type MlbOfficialScheduleGame,
 } from '@/services/mlb-official-data-provider.service'
+import { syncMlbStatsResultsFromOfficialGames } from '@/services/results-sync.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -474,6 +475,7 @@ export async function executeMlbOfficialShadowAcquisition({
   const startTimeDifferences: Array<Record<string, unknown>> = []
   const starterCandidates: Array<Record<string, unknown>> = []
   const mappingRows: Row[] = []
+  const resultGamePkToEventId: Record<string, string> = {}
 
   for (const game of official.rows) {
     const match = matchOfficialGameToStoredEvent(game, events, existingGamePkMappings)
@@ -502,6 +504,7 @@ export async function executeMlbOfficialShadowAcquisition({
       continue
     }
     const delta = startDeltaMinutes(game.gameDate, match.event.start_time)
+    resultGamePkToEventId[String(game.gamePk)] = match.event.id
     mappedGames.push({
       gamePk: game.gamePk,
       eventId: match.event.id,
@@ -607,10 +610,20 @@ export async function executeMlbOfficialShadowAcquisition({
     if (error) throw new Error(`MLB official shadow provider_entity_mappings upsert failed: ${error.message}`)
   }
 
+  const resultSync = await syncMlbStatsResultsFromOfficialGames(official.rows, {
+    operatingDate,
+    endpoint: official.endpoint,
+    capturedAt: official.capturedAt,
+    source: source ?? 'adaptive_refresh_execution_bridge_v2',
+    requestId: requestId ?? null,
+    gamePkToEventId: resultGamePkToEventId,
+  }) as Record<string, unknown>
+
   const completedAt = nowIso()
   const rowsInserted = Math.max(0, mappingRows.length - existingMappingCount)
   const rowsUpdated = Math.min(existingMappingCount, mappingRows.length)
-  const jobStatus = ambiguousGames.length || unmappedGames.length ? 'partial' : 'completed'
+  const resultSyncSuccess = resultSync.success !== false
+  const jobStatus = ambiguousGames.length || unmappedGames.length || !resultSyncSuccess ? 'partial' : 'completed'
   const syncJob = {
     id: randomUUID(),
     job_type: 'sdio_exit_03a_mlb_official_shadow_v1',
@@ -646,6 +659,20 @@ export async function executeMlbOfficialShadowAcquisition({
       unmappedGames,
       statusDifferences,
       startTimeDifferences,
+      resultClosure: {
+        status: resultSync.status ?? null,
+        resultSourceAuthority: 'MLB_OFFICIAL_RESULT_SOURCE_DUAL_READ',
+        providerCallsMade: resultSync.providerCallsMade ?? 0,
+        rowsReceived: resultSync.rowsReceived ?? 0,
+        gamesMatched: resultSync.gamesMatched ?? 0,
+        finalGamesDetected: resultSync.finalGamesDetected ?? 0,
+        inserted: resultSync.inserted ?? 0,
+        updated: resultSync.updated ?? 0,
+        reused: resultSync.reused ?? 0,
+        eventRowsUpdated: resultSync.eventRowsUpdated ?? 0,
+        failureReason: resultSync.failureReason ?? null,
+        exactGamePkIdentityRequired: true,
+      },
       probableStartersReturned: starterCandidates.length,
       probableStartersMappedToCanonicalPlayers: starterCandidates.length,
       unmappedStarters: 0,
@@ -662,7 +689,6 @@ export async function executeMlbOfficialShadowAcquisition({
     ...base,
     status: jobStatus === 'completed' ? 'LIVE_OFFICIAL_SHADOW_PERSISTED' : 'LIVE_OFFICIAL_SHADOW_PARTIAL',
     providerCallsMade: official.providerCallsMade,
-    databaseMutationsMade: mappingRows.length + 1,
     endpoint: official.endpoint,
     requestedAt: official.requestedAt,
     capturedAt: official.capturedAt,
@@ -675,6 +701,11 @@ export async function executeMlbOfficialShadowAcquisition({
     unmappedEvents: unmappedGames.length,
     newMappings: rowsInserted,
     updatedMappings: rowsUpdated,
+    resultSync,
+    resultRowsInserted: Number(resultSync.inserted ?? 0),
+    resultRowsUpdated: Number(resultSync.updated ?? 0),
+    resultRowsReused: Number(resultSync.reused ?? 0),
+    resultEventRowsUpdated: Number(resultSync.eventRowsUpdated ?? 0),
     probableStartersReturned: starterCandidates.length,
     probableStartersMappedToCanonicalPlayers: starterCandidates.length,
     unmappedStarters: 0,
@@ -685,6 +716,7 @@ export async function executeMlbOfficialShadowAcquisition({
     unmappedGames: unmappedGames.slice(0, 25),
     ambiguousGames: ambiguousGames.slice(0, 25),
     syncJobId: syncJob.id,
+    databaseMutationsMade: mappingRows.length + 1 + Number(resultSync.remoteMutationsMade ?? 0),
   }
 }
 

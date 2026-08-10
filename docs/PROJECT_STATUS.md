@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-09 SDIO-EXIT-03E Result Closure
+
+- SDIO-EXIT-03E repairs the result-closure gap left after SDIO-EXIT-03D: natural MLB Official shadow runs proved exact `gamePk` mapping and final statuses, but those completed rows stayed shadow-only and never entered the canonical `game_results` write path.
+- The repair reuses the existing MLB result persistence contract, lets the already-fetched official shadow payload close final scores by exact `gamePk -> sport_event` identity during `DUAL_READ`, and records inserted/updated/reused result evidence separately. SportsDataIO remains enabled and authoritative for rollback, MLB Official is only promoted as a bounded result source for exact final rows, The Odds API remains shadow-only, and natural post-deploy proof is still required.
+
 ## 2026-08-09 SDIO-EXIT-03C Canonical Mapping And Lifecycle Repair
 
 - SDIO-EXIT-03C repairs the production-only gap left after SDIO-EXIT-03B: CHC @ KC and TB @ SEA were no longer ambiguous, but natural Vercel shadow runs still mapped only 13/15 because the mapper did not use exact `sport_events.provider_ids.mlb_stats_api` / `mlb_stats_game_pk` values when the separate `provider_entity_mappings` crosswalk was missing.

@@ -1,0 +1,99 @@
+{
+  "mode": "sdio_exit_03e_result_closure_v1",
+  "status": "SDIO_EXIT_03E_REPAIR_READY_FOR_NATURAL_PROOF",
+  "startingCommit": "fd861f6ca0a4b4afc0c73c1a1de8cc002c19c66e",
+  "baseline": {
+    "productionCommit": "fd861f6ca0a4b4afc0c73c1a1de8cc002c19c66e",
+    "mlbDataSourceMode": "DUAL_READ",
+    "sportsDataIoStatus": "ENABLED_PRODUCTION_AUTHORITY_ROLLBACK",
+    "mlbOfficialStatus": "SHADOW_NON_AUTHORITATIVE",
+    "oddsAuthority": "THE_ODDS_API_STAGE_1_DUAL_READ_SHADOW_ONLY",
+    "officialCompletedGames": 14,
+    "canonicalResultsBeforeFinalObservation": 0,
+    "missingResultsBeforeFinalObservation": 14,
+    "canonicalResultsAfterFinalObservation": 14,
+    "missingResultsAfterFinalObservation": 1,
+    "settledPredictionsAfterFinalObservation": 81,
+    "remainingPendingAfterFinalObservation": 8,
+    "pendingPredictionsBefore": 89,
+    "chcAtKc": {
+      "gamePk": "824078",
+      "canonicalEventId": "baseball_mlb:mlb:sportsdataio:event:79060",
+      "pendingPredictions": 6,
+      "resultBefore": "missing"
+    },
+    "tbAtSea": {
+      "gamePk": "823104",
+      "canonicalEventId": "baseball_mlb:mlb:sportsdataio:event:79066",
+      "pendingPredictions": 4,
+      "resultBefore": "missing"
+    },
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0
+  },
+  "pipelineTrace": {
+    "scheduler": "Vercel operating-day scheduler",
+    "planner": "adaptive-refresh-orchestrator",
+    "selectedNaturalPath": "canonical_event_level_acquisition",
+    "mlbOfficialFunction": "executeMlbOfficialShadowAcquisition",
+    "existingResultFunction": "syncRecentResults / MLB Stats game_results persistence",
+    "preRepairResultStatus": "WRITE_PATH_NOT_EXECUTED",
+    "postRepairResultStatus": "RUNTIME_WIRED_FOR_NATURAL_SHADOW_PAYLOAD_OR_REUSE",
+    "providerCallsAdded": 0
+  },
+  "rootCause": {
+    "classification": "RESULT_CLOSURE_SHADOW_WRITE_PATH_NOT_EXECUTED",
+    "lifecycleDeadlock": false,
+    "resultEligibilityDefect": "Official completed rows remained shadow metadata during market-refresh shadow acquisition while canonical events waited for the separate result-sync path.",
+    "schedulerWiringDefect": "Natural event-level refresh called MLB Official shadow acquisition but did not call result persistence in that same window.",
+    "writePathDefect": "Existing game_results write path existed and later closed production rows, but was not executed for natural MLB Official final rows inside the shadow acquisition.",
+    "blockedByProviderMode": false,
+    "brokenIdentityLookup": false
+  },
+  "repair": {
+    "runtimeCodeChanged": true,
+    "files": [
+      "src/services/results-sync.service.ts",
+      "src/services/mlb-official-replacement.service.ts"
+    ],
+    "resultHelper": "syncMlbStatsResultsFromOfficialGames",
+    "resultSourceAuthority": "MLB_OFFICIAL_RESULT_SOURCE_DUAL_READ",
+    "usesExistingGameResultsContract": true,
+    "exactGamePkIdentityRequired": true,
+    "canonicalFinalLifecyclePatchedWhenResultChanges": true,
+    "idempotentByGameId": true,
+    "newProviderCalls": 0,
+    "settlementFormulaChanged": false,
+    "learningFormulaChanged": false,
+    "predictionWrites": 0,
+    "retrospectivePredictionsCreated": 0,
+    "postStartPredictionsCreated": 0
+  },
+  "expectedPostDeployNaturalProof": {
+    "canonicalResultsAfterTarget": "approaches_100_percent_for_official_completed_games",
+    "missingResultsAfterTarget": 0,
+    "chcAtKcTarget": "RESULT_CLOSED_BY_EXACT_GAMEPK",
+    "tbAtSeaTarget": "RESULT_CLOSED_BY_EXACT_GAMEPK",
+    "wrongEventResultsTarget": 0,
+    "duplicateResultsTarget": 0,
+    "wrongEventSettlementsTarget": 0,
+    "duplicateLearningWritesTarget": 0
+  },
+  "safety": {
+    "mlbOfficialPrimaryPromoted": false,
+    "sportsDataIoDisabled": false,
+    "sportsDataIoCancelled": false,
+    "oddsAuthorityPromoted": false,
+    "officialPickPolicyChanged": false,
+    "hr03RemainsShadowOnly": true,
+    "rollbackReadiness": "PASS",
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0
+  },
+  "promotion": {
+    "verdict": "MLB_RESULT_CLOSURE_PASS_MORE_OBSERVATION_REQUIRED",
+    "authorizationRequired": true,
+    "nextRecommendedPhase": "Post-deploy natural scheduler observation for SDIO-EXIT-03E result closure"
+  },
+  "finalClassification": "MLB_RESULT_CLOSURE_PASS_MORE_OBSERVATION_REQUIRED"
+}

@@ -102,6 +102,7 @@ Current V2 certification documents:
 - [SDIO-EXIT-03 MLB Official Replacement JSON](sdio-exit-03-mlb-official-replacement.json)
 - [SDIO-EXIT-03A Natural MLB Official Shadow Proof JSON](sdio-exit-03a-natural-shadow-proof.json)
 - [SDIO-EXIT-03C Canonical Lifecycle Repair JSON](sdio-exit-03c-canonical-lifecycle-repair.json)
+- [SDIO-EXIT-03E Result Closure JSON](sdio-exit-03e-result-closure.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

@@ -1,6 +1,6 @@
 # MLB Official Data Provider V1
 
-Status: `SDIO_EXIT_03C_CANONICAL_LIFECYCLE_REPAIR_READY_FOR_NATURAL_PROOF`
+Status: `SDIO_EXIT_03E_RESULT_CLOSURE_REPAIR_READY_FOR_NATURAL_PROOF`
 
 The MLB official data provider centralizes public MLB Stats API access for SDIO-EXIT-03. It does not replace SportsDataIO in production by itself, does not promote The Odds API, and does not change prediction formulas.
 
@@ -74,10 +74,26 @@ SDIO-EXIT-03C repairs the remaining production divergence where the canonical `s
 
 SDIO-EXIT-03C also classifies official-vs-canonical status differences in shadow metadata. Official final/live/terminal statuses paired with canonical pregame statuses remain non-authoritative during `DUAL_READ`, but are visible as safety evidence and do not promote official status writes into canonical `sport_events`.
 
+SDIO-EXIT-03E activates natural result closure from the already-fetched MLB Official schedule payload when exact `gamePk -> sport_event` identity is proven. This is a bounded result-source authority during `DUAL_READ`, not broad `MLB_OFFICIAL_PRIMARY` promotion. The path reuses `src/services/results-sync.service.ts` to normalize final scores into the existing `game_results` contract, update the matched canonical `sport_events` row to completed, and leave settlement/learning formulas unchanged.
+
+The result-source contract is:
+
+1. natural Vercel scheduler executes the existing operating-day protected endpoint;
+2. event-level market refresh invokes the MLB Official shadow acquisition;
+3. the shadow acquisition maps official `gamePk` to canonical `sport_event` by exact crosswalk or embedded provider ID;
+4. final official rows with scores are handed to the existing MLB result persistence helper;
+5. `game_results` is inserted, updated, or reused idempotently by `game_id`;
+6. canonical final lifecycle fields are patched only for rows whose result evidence changed;
+7. existing settlement and learning close from canonical result evidence.
+
+This avoids the previous lifecycle deadlock where canonical status stayed `scheduled`, result sync was not naturally selected, and official completed games remained visible only as shadow status differences.
+
 ## Safety
 
 - Unknown status is not treated as safely pregame.
 - Final/live/postponed/cancelled statuses use the existing MLB status mapper.
+- Final result writes require exact MLB `gamePk` identity and final score evidence.
+- Repeated official result closure reuses existing `game_results` rows and does not duplicate settlement or learning labels.
 - Probable pitcher identity uses official MLB player ID when available.
 - Missing starter remains unavailable; no name-only permanent identity is created when official ID exists.
 - Team and player stats are not declared complete until feature parity is proven.

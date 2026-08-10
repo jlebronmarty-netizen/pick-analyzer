@@ -42,7 +42,7 @@ type SportEventRow = {
   metadata: Record<string, unknown> | null
 }
 
-type MlbStatsGame = {
+export type MlbStatsGame = {
   gamePk?: number | string
   gameDate?: string
   officialDate?: string
@@ -56,6 +56,22 @@ type MlbStatsGame = {
     away?: { team?: { name?: string; abbreviation?: string }; score?: number }
     home?: { team?: { name?: string; abbreviation?: string }; score?: number }
   }
+}
+
+type MlbOfficialResultGame = {
+  gamePk?: number | string
+  gameDate?: string | null
+  officialDate?: string | null
+  status?: {
+    abstractGameState?: string | null
+    detailedState?: string | null
+    codedGameState?: string | null
+    statusCode?: string | null
+  } | null
+  teams?: MlbStatsGame['teams']
+  home?: { name?: string | null; abbreviation?: string | null }
+  away?: { name?: string | null; abbreviation?: string | null }
+  scores?: { home?: number | null; away?: number | null }
 }
 
 export type ResultsSyncStatus =
@@ -203,6 +219,38 @@ function gameTeamNames(game: MlbStatsGame) {
   return {
     home: game.teams?.home?.team?.abbreviation ?? game.teams?.home?.team?.name ?? '',
     away: game.teams?.away?.team?.abbreviation ?? game.teams?.away?.team?.name ?? '',
+  }
+}
+
+function asMlbStatsResultGame(game: MlbOfficialResultGame): MlbStatsGame {
+  return {
+    gamePk: game.gamePk,
+    gameDate: game.gameDate ?? undefined,
+    officialDate: game.officialDate ?? undefined,
+    status: game.status
+      ? {
+          abstractGameState: game.status.abstractGameState ?? undefined,
+          detailedState: game.status.detailedState ?? undefined,
+          codedGameState: game.status.codedGameState ?? undefined,
+          statusCode: game.status.statusCode ?? undefined,
+        }
+      : undefined,
+    teams: {
+      away: {
+        team: {
+          name: game.teams?.away?.team?.name ?? game.away?.name ?? undefined,
+          abbreviation: game.teams?.away?.team?.abbreviation ?? game.away?.abbreviation ?? undefined,
+        },
+        score: game.teams?.away?.score ?? game.scores?.away ?? undefined,
+      },
+      home: {
+        team: {
+          name: game.teams?.home?.team?.name ?? game.home?.name ?? undefined,
+          abbreviation: game.teams?.home?.team?.abbreviation ?? game.home?.abbreviation ?? undefined,
+        },
+        score: game.teams?.home?.score ?? game.scores?.home ?? undefined,
+      },
+    },
   }
 }
 
@@ -779,6 +827,7 @@ async function persistMlbFetchedResults({
     reused: persisted.reused,
     updated: persisted.updated,
     eventRowsUpdated,
+    remoteMutationsMade: persisted.inserted + persisted.updated + eventRowsUpdated,
     retryable: false,
     retryAfter: null,
     failureReason: null,
@@ -805,6 +854,158 @@ export async function syncMlbStatsResultsForEventIds(eventIds: string[], options
       targeted: true,
       startDate: options.startDate,
       endDate: options.endDate,
+    },
+  })
+}
+
+export async function syncMlbStatsResultsFromOfficialGames(
+  games: MlbOfficialResultGame[],
+  options: {
+    operatingDate: string
+    endpoint?: string | null
+    capturedAt?: string | null
+    source?: string | null
+    requestId?: string | null
+    gamePkToEventId?: Record<string, string>
+  }
+) {
+  const endpoint = options.endpoint ?? 'mlb_official_shadow_schedule_payload'
+  const started = options.capturedAt ?? nowIso()
+  const events = await loadMlbEventsForRange(options.operatingDate, options.operatingDate)
+  const explicitGamePkToEventId = options.gamePkToEventId ?? {}
+  const rows: GameResultRow[] = []
+  const eventPatches: Array<{ id: string; patch: Record<string, unknown> }> = []
+  let gamesMatched = 0
+  let nonFinalRowsSkipped = 0
+  let staleRowsSkipped = 0
+  let unmatchedEvents = 0
+
+  for (const rawGame of games) {
+    const game = asMlbStatsResultGame(rawGame)
+    const gamePk = String(game.gamePk ?? '')
+    const explicitEventId = gamePk ? explicitGamePkToEventId[gamePk] : null
+    const event = explicitEventId
+      ? events.find((candidate) => candidate.id === explicitEventId) ?? null
+      : matchMlbStatsGameToEvent(game, events)
+    if (!event) {
+      unmatchedEvents += 1
+      if (!isMlbStatsFinal(game)) nonFinalRowsSkipped += 1
+      continue
+    }
+    gamesMatched += 1
+    if (!isMlbStatsFinal(game)) {
+      nonFinalRowsSkipped += 1
+      continue
+    }
+    const metadata = asRecord(event.metadata)
+    const previous = asRecord(metadata.mlbStatsResult)
+    const previousFetchedAt = String(previous.fetchedAt ?? '')
+    if (previousFetchedAt && previousFetchedAt > started) {
+      staleRowsSkipped += 1
+      continue
+    }
+    const teams = gameTeamNames(game)
+    const homeScore = scoreNumber(game.teams?.home?.score)
+    const awayScore = scoreNumber(game.teams?.away?.score)
+    if (homeScore === null || awayScore === null) {
+      nonFinalRowsSkipped += 1
+      continue
+    }
+    const commenceTime = game.gameDate ?? event.start_time ?? started
+    rows.push({
+      sport_key: MLB_SPORT_KEY,
+      game_id: event.id,
+      home_team: event.home_team ?? teams.home,
+      away_team: event.away_team ?? teams.away,
+      home_score: homeScore,
+      away_score: awayScore,
+      winner: getMlbWinner(event.home_team ?? teams.home, event.away_team ?? teams.away, homeScore, awayScore),
+      commence_time: commenceTime,
+    })
+    eventPatches.push({
+      id: event.id,
+      patch: {
+        status: assertSportEventStatusWrite({
+          provider: 'mlb_stats_api',
+          functionName: 'syncMlbStatsResultsFromOfficialGames',
+          file: 'src/services/results-sync.service.ts',
+          line: 823,
+          eventId: event.id,
+          providerEventId: game.gamePk ?? null,
+          rawProviderStatus: game.status ?? null,
+          mappedStatus: 'completed',
+          dbStatus: 'completed',
+        }),
+        home_score: homeScore,
+        away_score: awayScore,
+        updated_at: started,
+        provider_ids: {
+          ...asRecord(event.provider_ids),
+          mlb_stats_api: game.gamePk ?? null,
+          mlb_stats_game_pk: game.gamePk ?? null,
+        },
+        metadata: {
+          ...metadata,
+          mlbStatsResult: {
+            provider: 'mlb_stats_api',
+            endpoint,
+            gamePk: game.gamePk ?? null,
+            mappedSportEventStatus: 'completed',
+            detailedState: game.status?.detailedState ?? null,
+            abstractGameState: game.status?.abstractGameState ?? null,
+            latestSourceTimestamp: game.gameDate ?? null,
+            fetchedAt: started,
+            source: options.source ?? 'sdio_exit_03e_official_shadow_result_closure',
+            requestId: options.requestId ?? null,
+            exactGamePkIdentity: Boolean(explicitEventId),
+          },
+        },
+      },
+    })
+  }
+
+  const existing = await existingResultRows(rows)
+  let scoreRowsInserted = 0
+  let scoreRowsUpdated = 0
+  for (const row of rows) {
+    const existingRow = existing.get(row.game_id)
+    if (!existingRow) scoreRowsInserted += 1
+    else if (!sameResultRow(row, existingRow)) scoreRowsUpdated += 1
+  }
+
+  return persistMlbFetchedResults({
+    fetched: {
+      success: true,
+      status: rows.length ? ('synced' as const) : ('no_results' as const),
+      retryable: false,
+      provider: 'mlb_stats_api',
+      endpoint,
+      providerCheckRequired: false,
+      providerCheckAttempted: false,
+      providerCheckCompleted: true,
+      providerCallsMade: 0,
+      rows,
+      eventPatches,
+      rowsReceived: games.length,
+      gamesMatched,
+      finalGamesDetected: rows.length,
+      scoreRowsInserted,
+      scoreRowsUpdated,
+      nonFinalRowsSkipped,
+      staleRowsSkipped,
+      unmatchedEvents,
+      message: rows.length
+        ? 'MLB Official shadow payload contained final results for canonical game_results.'
+        : 'MLB Official shadow payload contained no final games with scores for canonical game_results.',
+    },
+    sportKey: MLB_SPORT_KEY,
+    daysFrom: 0,
+    extra: {
+      source: options.source ?? 'sdio_exit_03e_official_shadow_result_closure',
+      requestId: options.requestId ?? null,
+      operatingDate: options.operatingDate,
+      exactGamePkIdentityRequired: true,
+      resultSourceAuthority: 'MLB_OFFICIAL_RESULT_SOURCE_DUAL_READ',
     },
   })
 }

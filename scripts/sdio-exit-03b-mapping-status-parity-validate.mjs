@@ -60,6 +60,7 @@ check('promotion remains gated', cert.promotion.verdict === 'MLB_OFFICIAL_SHADOW
 
 const allowedRuntime = new Set([
   'src/services/mlb-official-replacement.service.ts',
+  'src/services/results-sync.service.ts',
 ])
 const forbiddenRuntime = changedFiles.filter((path) => path.startsWith('src/') && !allowedRuntime.has(path))
 check('only bounded runtime file changed', forbiddenRuntime.length === 0, forbiddenRuntime.join(', '))

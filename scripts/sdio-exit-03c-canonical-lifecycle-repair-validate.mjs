@@ -55,7 +55,10 @@ check('rollback retained', cert.safety.sportsDataIoDisabled === false && cert.sa
 check('promotion remains gated for natural proof', cert.promotion.verdict === 'MLB_OFFICIAL_SHADOW_PASS_MORE_OBSERVATION_REQUIRED' && cert.promotion.authorizationRequired === true)
 
 const changedFiles = execSync('git diff --name-only HEAD', { encoding: 'utf8' }).split(/\r?\n/).filter(Boolean).map((path) => path.replaceAll('\\', '/'))
-const allowedRuntime = new Set(['src/services/mlb-official-replacement.service.ts'])
+const allowedRuntime = new Set([
+  'src/services/mlb-official-replacement.service.ts',
+  'src/services/results-sync.service.ts',
+])
 const forbiddenRuntime = changedFiles.filter((path) => path.startsWith('src/') && !allowedRuntime.has(path))
 check('only bounded runtime file changed', forbiddenRuntime.length === 0, forbiddenRuntime.join(', '))
 
