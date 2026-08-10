@@ -43,3 +43,4 @@ Production Pilot Week is the monitored real-world validation period after MC-08H
 - [SDIO-EXIT-03B: Mapping And Status Parity](SDIO_EXIT_03B_MAPPING_STATUS_PARITY.md)
 - [SDIO-EXIT-03C: Canonical Mapping And Lifecycle Repair](SDIO_EXIT_03C_CANONICAL_LIFECYCLE_REPAIR.md)
 - [SDIO-EXIT-03E: Result Closure](SDIO_EXIT_03E_RESULT_CLOSURE.md)
+- [SDIO-EXIT-04: Stats Parity And SportsDataIO-Off Window](SDIO_EXIT_04_STATS_PARITY_OFF_WINDOW.md)

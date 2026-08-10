@@ -1,10 +1,10 @@
 # MLB Provider Independence V1
 
-Status: `SDIO_EXIT_03_PARTIAL_READY_FOR_SHADOW_OBSERVATION`
+Status: `SDIO_EXIT_04_STATS_PARITY_PASS_OFF_WINDOW_BLOCKED_BY_ODDS_AUTHORITY`
 
-Observation date: 2026-08-09
+Observation date: 2026-08-10
 
-Starting commit: `c604758d38077770cc9d7954db826778ad037c42`
+Starting commit: `72e82e21db15a60032d0f06e479ee2b2eceec662`
 
 This document records the SDIO-EXIT-02 MLB-only provider independence audit and the SDIO-EXIT-03 official MLB replacement implementation. It does not cancel SportsDataIO, does not promote The Odds API, does not change model formulas and does not make provider calls. The goal is to identify which MLB runtime domains can already run without SportsDataIO, which can degrade from stored data, and which remain cancellation blockers.
 

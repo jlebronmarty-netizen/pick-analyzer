@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-10 SDIO-EXIT-04 Stats Parity And SportsDataIO-Off Window
+
+- SDIO-EXIT-04 is locally certified as `SDIO_EXIT_04_STATS_PARITY_PASS_OFF_WINDOW_BLOCKED_BY_ODDS_AUTHORITY`. MLB Official schedule/status/results/starter identity are ready for parity review, while current production-critical stats/player/bullpen/lineup/injury domains do not require routine SportsDataIO calls.
+- The final SportsDataIO-off operating window was not executed because product odds authority remains SportsDataIO at `ODDS_PRIMARY_AUTHORITY_STAGE=STAGE_1_DUAL_READ`. SportsDataIO remains enabled and not cancelled, The Odds API remains shadow-only, and the exact next gate is explicit odds promotion/off-window authorization. MC-03 was not started.
+
 ## 2026-08-09 SDIO-EXIT-03E Result Closure
 
 - SDIO-EXIT-03E repairs the result-closure gap left after SDIO-EXIT-03D: natural MLB Official shadow runs proved exact `gamePk` mapping and final statuses, but those completed rows stayed shadow-only and never entered the canonical `game_results` write path.

@@ -1,8 +1,10 @@
 # SportsDataIO Exit Architecture V1
 
-Status: `SDIO_EXIT_03_PARTIAL_READY_FOR_SHADOW_OBSERVATION`
+Status: `SDIO_EXIT_04_STATS_PARITY_PASS_OFF_WINDOW_BLOCKED_BY_ODDS_AUTHORITY`
 
 SDIO-EXIT-03 update: the MLB replacement program now includes an official MLB Stats API adapter, additive canonical schedule/event/starter row builders and a read-only replacement status route. Historical replay and MLB result/status closure remain non-SportsDataIO, while full MLB cancellation readiness still waits for natural official-MLB shadow proof, ODDS-03C promotion, player/team stat feature parity and a SportsDataIO-off operating window. See [MLB Provider Independence V1](MLB_PROVIDER_INDEPENDENCE_V1.md), [MLB Official Data Provider V1](MLB_OFFICIAL_DATA_PROVIDER_V1.md) and [SDIO-EXIT-03 MLB Official Replacement](../PRODUCTION_PILOT/SDIO_EXIT_03_MLB_OFFICIAL_REPLACEMENT.md).
+
+SDIO-EXIT-04 update: schedule/status/results/starter identity are ready for MLB Official parity review and current production-critical team/player/bullpen/lineup/injury stats do not block SportsDataIO exit. The production off-window was not executed because `ODDS_PRIMARY_AUTHORITY_STAGE=STAGE_1_DUAL_READ` still leaves SportsDataIO as product odds authority. Cancellation readiness is `YES_AFTER_ODDS_PROMOTION_AND_OFF_WINDOW`, not immediate cancellation. See [MLB Final Provider Map V1](MLB_FINAL_PROVIDER_MAP_V1.md) and [SDIO-EXIT-04](../PRODUCTION_PILOT/SDIO_EXIT_04_STATS_PARITY_OFF_WINDOW.md).
 
 SDIO-EXIT-01 audits whether Pick Analyzer can safely cancel SportsDataIO after ODDS-03R certified that The Odds API can become the primary odds provider only after bounded repair. The answer is intentionally split by data domain: odds can move after ODDS-03, but full SportsDataIO cancellation is not safe today because non-odds live/future dependencies remain.
 

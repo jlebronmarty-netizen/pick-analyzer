@@ -1,0 +1,181 @@
+{
+  "mode": "sdio_exit_04_stats_parity_off_window_v1",
+  "status": "SDIO_EXIT_04_STATS_PARITY_PASS_OFF_WINDOW_BLOCKED_BY_ODDS_AUTHORITY",
+  "observationTimeUtc": "2026-08-10T19:52:00.000Z",
+  "startingCommit": "72e82e21db15a60032d0f06e479ee2b2eceec662",
+  "originMain": "72e82e21db15a60032d0f06e479ee2b2eceec662",
+  "productionCommit": "72e82e21db15a60032d0f06e479ee2b2eceec662",
+  "productionPilotWeek": "ACTIVE",
+  "entryGate": {
+    "sdioExit03fVerdict": "MLB_RESULT_CLOSURE_PASS_READY_FOR_PARITY_REVIEW",
+    "resultClosureProof": {
+      "gamePk": "823268",
+      "canonicalEvent": "baseball_mlb:mlb:sportsdataio:event:79065",
+      "score": "HOU 2 - SD 7",
+      "persistenceMode": "NEW_INSERT",
+      "fullSlateResultsCoverage": "15/15",
+      "settledPredictions": 89,
+      "remainingPending": 0
+    }
+  },
+  "runtimeState": {
+    "mlbDataSourceMode": "DUAL_READ",
+    "sportsDataIoEnabled": true,
+    "sportsDataIoCancelled": false,
+    "mlbOfficialAuthority": "SHADOW_NON_AUTHORITATIVE",
+    "oddsAuthorityStage": "STAGE_1_DUAL_READ",
+    "sportsDataIoProductOddsAuthority": true,
+    "theOddsApiStatus": "SHADOW_NON_AUTHORITATIVE",
+    "hr03Status": "SHADOW_ONLY"
+  },
+  "criticalActiveFeatures": [
+    { "feature": "event_identity", "classification": "CRITICAL_ACTIVE", "replacement": "MLB_OFFICIAL_GAMEPK_MAPPING", "sportsDataIoRequired": false },
+    { "feature": "start_time_cutoff", "classification": "CRITICAL_ACTIVE", "replacement": "MLB_OFFICIAL_GAME_DATE", "sportsDataIoRequired": false },
+    { "feature": "event_status", "classification": "CRITICAL_ACTIVE", "replacement": "MLB_OFFICIAL_STATUS_MAPPER", "sportsDataIoRequired": false },
+    { "feature": "final_score_result", "classification": "CRITICAL_ACTIVE", "replacement": "MLB_OFFICIAL_RESULT_SYNC", "sportsDataIoRequired": false },
+    { "feature": "market_exact_line", "classification": "CRITICAL_ACTIVE", "replacement": "THE_ODDS_API_AFTER_PROMOTION", "sportsDataIoRequired": true },
+    { "feature": "current_price", "classification": "CRITICAL_ACTIVE", "replacement": "THE_ODDS_API_AFTER_PROMOTION", "sportsDataIoRequired": true },
+    { "feature": "model_probability", "classification": "CRITICAL_ACTIVE", "replacement": "PERSISTED_PREDICTION_HISTORY", "sportsDataIoRequired": false },
+    { "feature": "starter_identity", "classification": "ACTIVE_OPTIONAL", "replacement": "MLB_OFFICIAL_PROBABLE_PITCHER", "sportsDataIoRequired": false },
+    { "feature": "team_aggregate_form", "classification": "ACTIVE_OPTIONAL", "replacement": "INTERNAL_RESULTS_AND_STORED_TEAM_STATS", "sportsDataIoRequired": false },
+    { "feature": "player_stats", "classification": "FOUNDATION_ONLY", "replacement": "STORED_OR_FUTURE_OFFICIAL_SOURCE", "sportsDataIoRequired": false },
+    { "feature": "bullpen_workload", "classification": "FOUNDATION_ONLY", "replacement": "GRACEFUL_DEGRADE_OR_FUTURE_DERIVED", "sportsDataIoRequired": false }
+  ],
+  "parity": {
+    "teamGameStats": "PASS_FOR_CURRENT_PRODUCTION",
+    "teamAggregateStats": "PASS_FROM_STORED_OR_INTERNAL",
+    "playerStats": "NOT_REQUIRED_FOR_CURRENT_PRODUCTION",
+    "playerGameStats": "NOT_REQUIRED_FOR_CURRENT_PRODUCTION",
+    "bullpen": "GRACEFUL_DEGRADE_FOUNDATION_ONLY",
+    "starterFeature": "PASS_FOR_PARITY_REVIEW",
+    "rosterIdentity": "PASS_FOR_STARTER_SCOPE",
+    "lineupRequirement": "NOT_REQUIRED_FOR_CURRENT_PRODUCTION_EXCEPT_STARTERS",
+    "injuryRequirement": "NOT_REQUIRED_FOR_CURRENT_PRODUCTION",
+    "standingsRequirement": "UI_ONLY_OR_DERIVABLE"
+  },
+  "featureContractCoverage": {
+    "requiredFields": 7,
+    "availableWithoutSportsDataIoAfterOddsPromotion": 7,
+    "blockedBeforeOddsPromotion": ["current_price", "market_exact_line"],
+    "coverage": "PARTIAL_UNTIL_ODDS_PROMOTION"
+  },
+  "sportsDataIoOffSimulation": {
+    "schedule": "PASS_WITH_MLB_OFFICIAL_AFTER_MODE_PROMOTION",
+    "status": "PASS_WITH_MLB_OFFICIAL",
+    "starters": "PASS_WITH_MLB_OFFICIAL_PARITY_REVIEW_READY",
+    "stats": "PASS_FROM_STORED_OR_INTERNAL_FOR_CURRENT_PRODUCTION",
+    "predictionPrerequisites": "PARTIAL_BLOCKED_BY_PRICE_AUTHORITY",
+    "results": "PASS_WITH_MLB_OFFICIAL",
+    "settlement": "PASS_FROM_CANONICAL_RESULTS",
+    "learning": "PASS_FROM_SETTLED_PREDICTIONS",
+    "criticalBlocks": ["ODDS_PRODUCT_AUTHORITY_STILL_SPORTSDATAIO"]
+  },
+  "routineSportsDataIoMlbCalls": {
+    "before": {
+      "localDayStartUtc": "2026-08-10T04:00:00.000Z",
+      "sportsDataIoJobs": 100,
+      "sportsDataIoProviderCalls": 50,
+      "canonicalAcquisitionJobs": 50,
+      "canonicalAcquisitionCalls": 50,
+      "storedOddsPredictionJobs": 50,
+      "storedOddsPredictionProviderCalls": 0
+    },
+    "after": "NOT_EXECUTED_BLOCKED_BY_ODDS_AUTHORITY",
+    "targetAfterAuthorizedOffWindow": 0
+  },
+  "productionOffWindow": {
+    "executed": false,
+    "duration": null,
+    "naturalSchedulerCycles": 0,
+    "reasonNotExecuted": "ODDS_PRIMARY_AUTHORITY_STAGE remains STAGE_1_DUAL_READ with SportsDataIO as product price authority.",
+    "configChangeAuthorizationRequired": true,
+    "requiredConfigChanges": [
+      "Promote ODDS_PRIMARY_AUTHORITY_STAGE to a certified The Odds API product-primary stage.",
+      "Set MLB_DATA_SOURCE_MODE=MLB_OFFICIAL_PRIMARY for non-odds MLB domains."
+    ]
+  },
+  "productionReadEvidence": {
+    "systemVersion": { "http": 200, "providerCallsMade": 0 },
+    "mlbOfficialReplacement": {
+      "activeMode": "DUAL_READ",
+      "sportsDataIoDisabled": false,
+      "sportsDataIoCancelled": false,
+      "schedule": "READY_FOR_SHADOW",
+      "status": "READY_FOR_MLB_OFFICIAL_PRIMARY",
+      "results": "READY_FOR_MLB_OFFICIAL_PRIMARY",
+      "settlement": "READY_FROM_CANONICAL_RESULTS",
+      "providerCallsMade": 0,
+      "databaseMutationsMade": 0
+    },
+    "oddsPrimaryAuthority": {
+      "stage": "STAGE_1_DUAL_READ",
+      "productAuthority": "SPORTSDATAIO",
+      "theOddsApiShadowOnly": true,
+      "credentialPresent": true,
+      "providerCallsMade": 0,
+      "databaseMutationsMade": 0
+    },
+    "operationsHealth": {
+      "schedulerExecution": "HEALTHY",
+      "marketFreshness": "DEGRADED",
+      "providerBudget": "HEALTHY",
+      "settlementClosure": "HEALTHY",
+      "productReadiness": "DEGRADED",
+      "sportsDataIoCallsToday": 95
+    },
+    "settlementGuarantee": {
+      "guarantee": "PASS",
+      "readyForSettlementRows": 0,
+      "blockedRows": 0,
+      "silentPendingRows": 0,
+      "providerCallsMade": 0,
+      "remoteMutationsMade": 0
+    },
+    "performance": {
+      "currentEraCanonicalPredictions": 309,
+      "currentEraSettled": 279,
+      "currentEraPending": 30,
+      "settlementCoverage": 90.29
+    }
+  },
+  "cancellationGates": {
+    "HISTORICAL_INDEPENDENCE": "PASS",
+    "ODDS_INDEPENDENCE": "PARTIAL_ODDS_AUTHORITY_STAGE_1",
+    "SCHEDULE_INDEPENDENCE": "PASS_FOR_PARITY_REVIEW",
+    "STATUS_INDEPENDENCE": "PASS",
+    "RESULTS_INDEPENDENCE": "PASS",
+    "SETTLEMENT_INDEPENDENCE": "PASS",
+    "STARTER_INDEPENDENCE": "PASS_FOR_PARITY_REVIEW",
+    "TEAM_STATS_INDEPENDENCE": "PASS_FOR_CURRENT_PRODUCTION",
+    "PLAYER_STATS_INDEPENDENCE": "NOT_REQUIRED_FOR_CURRENT_PRODUCTION",
+    "BULLPEN_INDEPENDENCE": "NOT_REQUIRED_FOR_CURRENT_PRODUCTION",
+    "LINEUPS_NOT_REQUIRED_OR_REPLACED": "NOT_REQUIRED_FOR_CURRENT_PRODUCTION_EXCEPT_STARTERS_PASS",
+    "INJURIES_NOT_REQUIRED_OR_REPLACED": "NOT_REQUIRED_FOR_CURRENT_PRODUCTION",
+    "DAILY_AUTONOMY": "PARTIAL_ODDS_BLOCKED",
+    "SPORTSDATAIO_MLB_CALLS_ZERO": "BLOCKED_NOT_EXECUTED",
+    "FAIL_CLOSED": "PASS",
+    "ROLLBACK_READY": "PASS"
+  },
+  "subscriptionDecision": {
+    "sportsDataIoMlbSubscriptionCancellationReady": "YES_AFTER_ODDS_PROMOTION_AND_OFF_WINDOW",
+    "recommendedRollbackRetentionWindow": "3-7 MLB operating days after zero-call off-window PASS",
+    "sportsDataIoCancelled": false
+  },
+  "safety": {
+    "manualSportsDataIoCalls": 0,
+    "manualTheOddsApiCalls": 0,
+    "manualMlbStatsApiCalls": 0,
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0,
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "sportsDataIoDisabled": false,
+    "oddsAuthorityPromoted": false,
+    "mlbOfficialPrimaryPromoted": false,
+    "mc03Started": false
+  },
+  "nextMlbMasterBlock": "ODDS_PROMOTION_OR_OFF_WINDOW_AUTHORIZATION",
+  "finalClassification": "SDIO_EXIT_04_STATS_PARITY_PASS_OFF_WINDOW_BLOCKED_BY_ODDS_AUTHORITY"
+}
