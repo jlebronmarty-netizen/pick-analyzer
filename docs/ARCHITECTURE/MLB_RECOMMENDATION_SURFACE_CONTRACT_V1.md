@@ -22,11 +22,18 @@ Qualified recommendation surfaces:
 
 Review surfaces:
 
+- Best Available Review Option
 - Best review-only Rent Play candidate
 - Best review-only Moneyline candidate
 - Smart Parlay builder
 - Watchlist
 - Value Signals
+
+## Best Available Review Option
+
+`BEST AVAILABLE REVIEW OPTION` is the strongest sufficiently evidenced review-only candidate selected from existing certified candidates and ranking signals. It is always labeled `NOT A RECOMMENDATION`, must not create a new scoring model, and must not promote a candidate into Rent Play, Moneyline Bet, Smart Parlay or Official Pick status.
+
+The review option should prefer a candidate with probability, odds, implied probability, edge, EV and evidence time over an N/A-heavy candidate when such evidence exists. If no sufficiently evidenced candidate exists, the surface says so instead of filling with meaningless data.
 
 ## Gate States
 

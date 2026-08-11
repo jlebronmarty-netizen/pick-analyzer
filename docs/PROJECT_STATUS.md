@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-11 MLB-FINAL-00 Current Era Readiness
+
+- MLB-FINAL-00 is locally implemented as `MLB_CURRENT_ERA_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed Current Board and Dashboard Today still contained Current Era MLB probabilities, exact-line odds, edge/EV and grounded prediction evidence; the bounded defect was fallback presentation, not missing model evidence.
+- `HomeBettingPlan` now exposes a shared `BEST_AVAILABLE_REVIEW_OPTION` contract for Rent Play and Moneyline fallbacks, labels it `NOT A RECOMMENDATION`, and avoids meaningless N/A-heavy fallback candidates when a better evidenced review-only candidate exists. No provider refresh was required; SportsDataIO remained rollback-only with 0 routine MLB calls.
+
 ## 2026-08-11 MLB Recommendation Surface Semantics Finalization
 
 - MLB Recommendation Surface Semantics Finalization is locally implemented as `MLB_RECOMMENDATION_SURFACE_REPAIR_READY_FOR_DEPLOYMENT`. The bounded repair prevents blocked or incomplete Rent Play and Moneyline candidates from rendering as qualified primary bets, treats unavailable required hard gates as blocking, separates Smart Parlay builder availability from parlay recommendation actionability, and keeps Watchlist as a research layer.

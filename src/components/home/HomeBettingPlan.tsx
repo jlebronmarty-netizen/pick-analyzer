@@ -151,6 +151,17 @@ type PlanPick = {
   reason: string
 }
 
+type BestAvailableReviewOption = {
+  contractVersion: 'best_available_review_option_v1'
+  label: 'BEST AVAILABLE REVIEW OPTION'
+  notRecommendation: true
+  candidate: PlanPick | null
+  evidenceCompleteness: number
+  sufficientEvidence: boolean
+  rankingSource: string
+  blockers: string[]
+}
+
 type RentPlayStatus =
   | 'ACTIONABLE'
   | 'REVIEW_ONLY'
@@ -255,6 +266,7 @@ type RentPlayContract = {
   observedAt: string
   candidate: PlanPick | null
   closestCandidate: PlanPick | null
+  bestAvailableReviewOption: BestAvailableReviewOption
 }
 
 type SmartParlayLeg = {
@@ -496,6 +508,7 @@ type MoneylineBetContract = {
   observedAt: string
   candidate: PlanPick | null
   closestCandidate: PlanPick | null
+  bestAvailableReviewOption: BestAvailableReviewOption
 }
 
 const toneClasses: Record<Tone, string> = {
@@ -794,6 +807,76 @@ function isSupportedParlayMarket(item: PlanPick) {
   return /\bmoneyline\b|^h2h$|^ml$|run line|spread|total/.test(market)
 }
 
+function reviewEvidenceCompleteness(item: PlanPick) {
+  const fields = [
+    item.eventId,
+    item.market,
+    item.selection,
+    item.probability,
+    item.confidence,
+    item.odds,
+    item.edge,
+    item.ev,
+    item.marketTimestamp,
+    item.snapshotCapturedAt ?? item.providerSourceTimestamp,
+  ]
+  const present = fields.filter((value) => value !== null && value !== undefined && value !== '').length
+  return Math.round((present / fields.length) * 100)
+}
+
+function isSupportedReviewMarket(item: PlanPick) {
+  return isMoneylineMarket(item) || isSupportedParlayMarket(item)
+}
+
+function bestAvailableReviewOption(
+  candidates: PlanPick[],
+  predicate: (item: PlanPick) => boolean = isSupportedReviewMarket,
+): BestAvailableReviewOption {
+  const ranked = candidates
+    .filter((item) => predicate(item))
+    .filter((item) => !isLowInformationCandidate(item))
+    .sort((left, right) => {
+      const rightCompleteness = reviewEvidenceCompleteness(right)
+      const leftCompleteness = reviewEvidenceCompleteness(left)
+      const sourceLeft = left.sourceRank < 0 ? 99 : left.sourceRank
+      const sourceRight = right.sourceRank < 0 ? 99 : right.sourceRank
+      return (
+        Number(right.qualified) - Number(left.qualified) ||
+        Number(right.probability !== null && right.odds !== null) - Number(left.probability !== null && left.odds !== null) ||
+        rightCompleteness - leftCompleteness ||
+        sourceLeft - sourceRight ||
+        Number(right.ev ?? Number.NEGATIVE_INFINITY) - Number(left.ev ?? Number.NEGATIVE_INFINITY) ||
+        Number(right.edge ?? Number.NEGATIVE_INFINITY) - Number(left.edge ?? Number.NEGATIVE_INFINITY) ||
+        Number(right.confidence ?? Number.NEGATIVE_INFINITY) - Number(left.confidence ?? Number.NEGATIVE_INFINITY) ||
+        Number(right.probability ?? Number.NEGATIVE_INFINITY) - Number(left.probability ?? Number.NEGATIVE_INFINITY)
+      )
+    })
+  const candidate = ranked[0] ?? null
+  const evidenceCompleteness = candidate ? reviewEvidenceCompleteness(candidate) : 0
+  const blockers = candidate
+    ? uniqueList([
+      'NOT A RECOMMENDATION',
+      candidate.reason,
+      candidate.probability === null ? 'Model probability unavailable.' : '',
+      candidate.odds === null ? 'Exact-line odds unavailable.' : '',
+      candidate.edge === null ? 'Edge unavailable.' : Number(candidate.edge) <= 0 ? 'Edge is not positive.' : '',
+      candidate.ev === null ? 'EV unavailable.' : Number(candidate.ev) < 0 ? 'EV is negative.' : '',
+      isPostStartOrClosed(candidate) ? 'Pregame betting window closed.' : '',
+      isFreshnessActionable(candidate) ? '' : 'Fresh actionable market evidence is not certified for recommendation.',
+    ])
+    : ['No sufficiently evidenced review candidate is available.']
+  return {
+    contractVersion: 'best_available_review_option_v1',
+    label: 'BEST AVAILABLE REVIEW OPTION',
+    notRecommendation: true,
+    candidate,
+    evidenceCompleteness,
+    sufficientEvidence: Boolean(candidate && evidenceCompleteness >= 50 && (candidate.probability !== null || candidate.odds !== null || candidate.edge !== null || candidate.ev !== null)),
+    rankingSource: candidate?.source ?? 'No eligible source',
+    blockers,
+  }
+}
+
 function compareMoneylineEvidence(left: PlanPick, right: PlanPick) {
   const sourceLeft = left.sourceRank < 0 ? 99 : left.sourceRank
   const sourceRight = right.sourceRank < 0 ? 99 : right.sourceRank
@@ -938,7 +1021,8 @@ function buildMoneylineBetContract(plan: ReturnType<typeof pickPlan>, rentPlay: 
     item.odds !== null &&
     (item.freshness.toUpperCase().includes('STALE') || String(item.freshnessActionability ?? '').toUpperCase() === 'WAIT_FOR_REFRESH')
   ) ?? null
-  const reviewCandidate = moneylineUniverse[0] ?? null
+  const bestReview = bestAvailableReviewOption(moneylineUniverse, isMoneylineMarket)
+  const reviewCandidate = bestReview.sufficientEvidence ? bestReview.candidate : moneylineUniverse[0] ?? null
   const candidate = actionableOfficial ?? actionableCandidate ?? waitingCandidate ?? reviewCandidate
   const gates = buildMoneylineGates(candidate)
   const counts = applicableGateCounts(gates)
@@ -1054,6 +1138,7 @@ function buildMoneylineBetContract(plan: ReturnType<typeof pickPlan>, rentPlay: 
     observedAt,
     candidate,
     closestCandidate: moneylineUniverse[0] ?? plan.closest,
+    bestAvailableReviewOption: bestReview,
   }
 }
 
@@ -1760,7 +1845,9 @@ function buildRentPlayContract(plan: ReturnType<typeof pickPlan>): RentPlayContr
     item.ev !== null &&
     (item.freshness.toUpperCase().includes('STALE') || String(item.freshnessActionability ?? '').toUpperCase() === 'WAIT_FOR_REFRESH')
   ) ?? null
-  const candidate = officialCandidate ?? highProbabilityCandidate ?? waitingCandidate
+  const bestReview = bestAvailableReviewOption(plan.candidates)
+  const reviewCandidate = bestReview.sufficientEvidence ? bestReview.candidate : null
+  const candidate = officialCandidate ?? highProbabilityCandidate ?? waitingCandidate ?? reviewCandidate
   const gates = buildRentPlayGates(candidate)
   const counts = applicableGateCounts(gates)
   const failed = gates.filter((item) => item.status === 'FAIL')
@@ -1843,6 +1930,7 @@ function buildRentPlayContract(plan: ReturnType<typeof pickPlan>): RentPlayContr
     observedAt,
     candidate,
     closestCandidate: plan.closest,
+    bestAvailableReviewOption: bestReview,
   }
 }
 
@@ -1979,6 +2067,7 @@ function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
   const pick = moneyline.candidate
   const primaryPick = moneyline.status === 'ACTIONABLE' ? pick : null
   const reviewPick = moneyline.status === 'ACTIONABLE' ? null : pick ?? moneyline.closestCandidate
+  const bestReview = moneyline.bestAvailableReviewOption
   const closest = moneyline.closestCandidate
   const readinessDenominator = moneyline.passedGateCount + moneyline.failedGateCount + moneyline.pendingGateCount + moneyline.unavailableGateCount
   const readiness = readinessDenominator ? (moneyline.passedGateCount / readinessDenominator) * 100 : null
@@ -2032,15 +2121,22 @@ function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
       </div>
 
       {reviewPick ? (
-        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08c-review-only-candidate="true">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Best Review-Only Moneyline Candidate</p>
+        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08c-review-only-candidate="true" data-best-available-review-option="true" data-not-recommendation="true">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Best Review-Only Moneyline Candidate / Best Available Review Option - Not A Recommendation</p>
           <p className="mt-2 text-lg font-black text-white">{reviewPick.selection}</p>
           <p className="mt-1 text-sm text-amber-50">{reviewPick.event} / {reviewPick.market} / {pct(reviewPick.probability)}</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <MiniText label="Odds" value={odds(reviewPick.odds)} />
+            <MiniText label="Implied" value={pct(impliedFromAmerican(reviewPick.odds))} />
+            <MiniText label="Edge / EV" value={`${signedPct(reviewPick.edge)} / ${signedPct(reviewPick.ev)}`} />
+            <MiniText label="Evidence Time" value={compactDate(reviewPick.providerSourceTimestamp ?? reviewPick.marketTimestamp)} />
+          </div>
           <p className="mt-2 text-sm text-slate-300">{reviewPick.reason}</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-100">Blocked Because: {bestReview.blockers.slice(0, 3).join(' / ')}</p>
         </div>
       ) : !primaryPick && closest ? (
-        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08c-review-only-candidate="true">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Closest Review Candidate</p>
+        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08c-review-only-candidate="true" data-best-available-review-option="false" data-not-recommendation="true">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">No Sufficiently Evidenced Review Candidate</p>
           <p className="mt-2 text-lg font-black text-white">{closest.selection}</p>
           <p className="mt-1 text-sm text-amber-50">{closest.event} / {closest.market} / {pct(closest.probability)}</p>
           <p className="mt-2 text-sm text-slate-300">{closest.reason}</p>
@@ -2105,6 +2201,7 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
   const pick = rentPlay.candidate
   const primaryPick = rentPlay.status === 'ACTIONABLE' ? pick : null
   const reviewPick = rentPlay.status === 'ACTIONABLE' ? null : pick ?? rentPlay.closestCandidate
+  const bestReview = rentPlay.bestAvailableReviewOption
   const closest = rentPlay.closestCandidate
   const readinessDenominator = rentPlay.passedGateCount + rentPlay.failedGateCount + rentPlay.pendingGateCount + rentPlay.unavailableGateCount
   const readiness = readinessDenominator ? (rentPlay.passedGateCount / readinessDenominator) * 100 : null
@@ -2150,15 +2247,22 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
       <p className="mt-5 text-sm leading-6 text-slate-300">{primaryPick ? rentPlay.supportingReasons[0] ?? rentPlayCopy.en.empty : 'The strongest Rent Play evidence remains review-only until probability, odds, freshness, value and policy gates all pass.'}</p>
 
       {reviewPick ? (
-        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08b-best-available-not-rent-play="true">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Best Review-Only Candidate - Not Rent Play</p>
+        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08b-best-available-not-rent-play="true" data-best-available-review-option="true" data-not-recommendation="true">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Best Review-Only Candidate - Not Rent Play / Best Available Review Option - Not A Recommendation</p>
           <p className="mt-2 text-lg font-black text-white">{reviewPick.selection}</p>
           <p className="mt-1 text-sm text-amber-50">{reviewPick.event} / {reviewPick.market} / {pct(reviewPick.probability)}</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <MiniText label="Odds" value={odds(reviewPick.odds)} />
+            <MiniText label="Implied" value={pct(impliedFromAmerican(reviewPick.odds))} />
+            <MiniText label="Edge / EV" value={`${signedPct(reviewPick.edge)} / ${signedPct(reviewPick.ev)}`} />
+            <MiniText label="Evidence Time" value={compactDate(reviewPick.providerSourceTimestamp ?? reviewPick.marketTimestamp)} />
+          </div>
           <p className="mt-2 text-sm text-slate-300">{reviewPick.reason}</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-100">Blocked Because: {bestReview.blockers.slice(0, 3).join(' / ')}</p>
         </div>
       ) : !primaryPick && closest ? (
-        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08b-best-available-not-rent-play="true">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Closest Review Candidate - Not Rent Play</p>
+        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08b-best-available-not-rent-play="true" data-best-available-review-option="false" data-not-recommendation="true">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">No Sufficiently Evidenced Review Candidate</p>
           <p className="mt-2 text-lg font-black text-white">{closest.selection}</p>
           <p className="mt-1 text-sm text-amber-50">{closest.event} / {closest.market} / {pct(closest.probability)}</p>
           <p className="mt-2 text-sm text-slate-300">{closest.reason}</p>

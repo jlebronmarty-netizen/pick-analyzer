@@ -1,0 +1,137 @@
+{
+  "artifact": "mlb-final-00-current-era-readiness",
+  "version": 1,
+  "createdAt": "2026-08-11T23:40:02.242Z",
+  "startingCommit": "d264d7883834fadf255c2549aed233c0a04c18bf",
+  "classification": "MLB_CURRENT_ERA_REPAIR_READY_FOR_DEPLOYMENT",
+  "runtimeScope": [
+    "src/components/home/HomeBettingPlan.tsx"
+  ],
+  "runtimeCodeChanged": true,
+  "providerArchitecture": {
+    "oddsPrimaryAuthorityStage": "STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT",
+    "productOddsAuthority": "THE_ODDS_API",
+    "mlbDataSourceMode": "MLB_OFFICIAL_PRIMARY",
+    "sportsDataIoMode": "ROLLBACK_ONLY",
+    "sportsDataIoRoutineMlbCalls": 0
+  },
+  "refresh": {
+    "required": false,
+    "mlbOfficialCalls": 0,
+    "theOddsApiCalls": 0,
+    "theOddsApiCredits": 0,
+    "sportsDataIoCalls": 0,
+    "reason": "Stored Current Board and Dashboard Today evidence answered the audit; Current Board had fresh The Odds API product evidence."
+  },
+  "currentSlate": {
+    "gamesToday": 15,
+    "lifecycleCounts": {
+      "STARTED": 8,
+      "LOCK_WINDOW": 1,
+      "HIGH_PRIORITY": 4,
+      "ACTIVE_REFRESH": 2
+    },
+    "nextEligiblePregameEvents": 7
+  },
+  "predictions": {
+    "dashboardPredictionRows": 55,
+    "groundedRows": 54,
+    "currentBoardCandidates": 17,
+    "moneylineCoverage": 7,
+    "runLineCoverage": 7,
+    "totalCoverage": 3,
+    "officialPicks": 0,
+    "previewPredictions": 17
+  },
+  "evidence": {
+    "candidatesWithValidProbability": 17,
+    "candidatesWithValidOdds": 17,
+    "candidatesWithValidEdge": 17,
+    "candidatesWithValidEv": 17,
+    "candidatesWithValidFreshness": 17,
+    "candidatesWithFeatureSnapshot": 17,
+    "groundedModelOpportunities": 54,
+    "groundedRowsMissingProbability": 0,
+    "groundedRowsMissingAlignedPrice": 52
+  },
+  "rootCause": {
+    "primary": "LIVE_LOCK_PRESENTATION_AND_BEST_AVAILABLE_REVIEW_SELECTION",
+    "evidenceLost": false,
+    "currentBoardStrictActionabilityPreserved": true,
+    "dashboardGroundedEvidencePreserved": true
+  },
+  "bestAvailableReviewOption": {
+    "contractVersion": "best_available_review_option_v1",
+    "implemented": true,
+    "notRecommendation": true,
+    "usesExistingCandidates": true,
+    "usesExistingRankingSignals": true,
+    "requiresUsefulEvidence": true,
+    "avoidsMeaninglessNaCandidateWhenBetterEvidenceExists": true
+  },
+  "postStartSafety": {
+    "newPostStartPredictions": 0,
+    "newPostStartR2Writes": 0,
+    "newPostStartRecommendations": 0,
+    "storedPregameEvidenceVisibleAsReviewOnly": true
+  },
+  "policyChanges": {
+    "predictionFormulaChanged": false,
+    "probabilityChanged": false,
+    "evFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "thresholdChanged": false,
+    "providerAuthorityChanged": false,
+    "schedulerChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "hr03Promoted": false
+  },
+  "operations": {
+    "currentBoard": "HEALTHY",
+    "scheduler": "HEALTHY",
+    "settlement": "PASS",
+    "learning": "PASS",
+    "performance": "PASS",
+    "providerBudget": "HEALTHY",
+    "operationsHealth": "HEALTHY"
+  },
+  "rollbackWindow": {
+    "day1": "2026-08-11",
+    "cleanDaysCompleted": 0,
+    "cleanDaysRemaining": 3,
+    "cancellationReadiness": "YES_AFTER_ROLLBACK_WINDOW"
+  },
+  "certificationAccounting": {
+    "providerCallsFromCertification": 0,
+    "databaseMutationsFromCertification": 0,
+    "productionDbMutations": 0
+  },
+  "validation": {
+    "mlbFinal00": "PASS",
+    "recommendationSurfaceFinalization": "PASS",
+    "homeClientState": "PASS",
+    "mlbProductEvidence": "PASS",
+    "marketFreshnessSeverity": "PASS",
+    "mlbFinalCloseout": "PASS",
+    "currentBoardPerformance": "PASS",
+    "productFreshnessSla": "PASS",
+    "odds03d": "PASS",
+    "r2": "PASS",
+    "r2UuidSafety": "PASS",
+    "sdioExit05r": "PASS",
+    "scheduler": "PASS",
+    "missionControl": "PASS",
+    "providerBudget": "PASS",
+    "settlement": "PASS",
+    "settlementLearning": "PASS",
+    "performance": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "changedFileEslint": "PASS",
+    "secretScan": "PASS",
+    "gitDiffCheck": "PASS",
+    "build": "PASS",
+    "legacyChangedFileGuardValidators": "NON_BLOCKING_SCOPE_GUARD_ONLY"
+  }
+}
