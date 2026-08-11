@@ -1,0 +1,105 @@
+{
+  "mode": "sdio_exit_05r_sportsdataio_odds_suppression_v1",
+  "status": "SDIO_EXIT_05R_REPAIR_LOCAL_PASS_PUSH_REQUIRED",
+  "startingCommit": "1eda943ef4b482774d04f55b87f9e529718f8ffc",
+  "rootCause": "LEGACY_CANONICAL_SPORTSDATAIO_ODDS_ACQUISITION_STILL_ACTIVE",
+  "legacyCaller": {
+    "scheduler": "Vercel protected operating-day scheduler",
+    "orchestrator": "src/services/adaptive-refresh-orchestrator.service.ts",
+    "legacyFunction": "executeCanonicalMlbMarketAcquisition",
+    "legacyProviderService": "src/services/canonical-acquisition.service.ts",
+    "legacyEndpoint": "/api/mlb/odds/json/GameOddsByDate/{date}",
+    "provenProductionCallDomain": "ODDS"
+  },
+  "repair": {
+    "authorityAwareSuppression": true,
+    "stage3SportsDataIoBehaviorBefore": "ROUTINE_ODDS_HTTP_EXECUTED",
+    "stage3SportsDataIoBehaviorAfter": "SKIPPED_AUTHORITY_NOT_SPORTSDATAIO",
+    "stage3TheOddsApiBehavior": "PRODUCT_PRIMARY_ACQUISITION_EXECUTES",
+    "canonicalAcquisitionDependencyRepair": "SportsDataIO provider fetch is no longer a hidden prerequisite when The Odds API is product authority.",
+    "currentBoardRegression": false,
+    "r2WriterRegression": false,
+    "failClosedPreserved": true,
+    "providerAccounting": "SportsDataIO skip is recorded as zero external calls; The Odds API accounting remains separate.",
+    "rollbackConfigOnly": true
+  },
+  "stageMatrix": {
+    "STAGE_0_SPORTSDATAIO_AUTHORITY": {
+      "sportsDataIoOddsHttp": true,
+      "theOddsApiHttp": false,
+      "productAuthority": "SPORTSDATAIO",
+      "r2WriterMode": "EXISTING_BEHAVIOR",
+      "rollbackState": "NOT_ROLLBACK"
+    },
+    "STAGE_1_DUAL_READ": {
+      "sportsDataIoOddsHttp": true,
+      "theOddsApiHttp": true,
+      "productAuthority": "SPORTSDATAIO",
+      "r2WriterMode": "NON_PERSISTENT_SHADOW_OR_WOULD_WRITE",
+      "rollbackState": "PRIMARY_LEGACY_AUTHORITY"
+    },
+    "STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT": {
+      "sportsDataIoOddsHttp": false,
+      "theOddsApiHttp": true,
+      "productAuthority": "THE_ODDS_API",
+      "r2WriterMode": "PERSISTENT_CAPABLE",
+      "rollbackState": "SPORTSDATAIO_ROLLBACK_ONLY"
+    }
+  },
+  "otherMlbSportsDataIoRuntimeCallers": [
+    {
+      "caller": "src/services/canonical-acquisition.service.ts",
+      "domain": "ODDS",
+      "classification": "SUPPRESSED_IN_STAGE_3_ROLLBACK_ONLY"
+    },
+    {
+      "caller": "src/services/sportsdataio-mlb-prospective-preview.service.ts",
+      "domain": "STORED_ODDS_PREDICTION_GENERATION",
+      "classification": "NO_PROVIDER_CALL_STORED_EVIDENCE"
+    },
+    {
+      "caller": "src/services/live-provider-verification.service.ts",
+      "domain": "MANUAL_PROVIDER_VERIFICATION",
+      "classification": "MANUAL_ONLY"
+    },
+    {
+      "caller": "src/services/mlb-games-by-date-verification.service.ts",
+      "domain": "MANUAL_GAMES_BY_DATE_VERIFICATION",
+      "classification": "MANUAL_ONLY"
+    },
+    {
+      "caller": "src/services/mlb-missing-intelligence.service.ts",
+      "domain": "MANUAL_MISSING_INTELLIGENCE",
+      "classification": "MANUAL_ONLY"
+    },
+    {
+      "caller": "historical import/readiness services",
+      "domain": "HISTORICAL_OR_READINESS",
+      "classification": "MANUAL_OR_NON_ROUTINE"
+    }
+  ],
+  "remainingRoutineSportsDataIoMlbCallers": 0,
+  "expectedSportsDataIoMlbCallsAfterDeployment": 0,
+  "guardrails": {
+    "vercelConfigChanged": false,
+    "sportsDataIoCredentialRemoved": false,
+    "sportsDataIoCancelled": false,
+    "predictionFormulaChanged": false,
+    "modelWeightsChanged": false,
+    "officialPickThresholdsChanged": false,
+    "hr03Changed": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "mlbDataSourceModeChanged": false,
+    "oddsPrimaryAuthorityStageChanged": false
+  },
+  "localCertification": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0,
+    "build": "PASS",
+    "validators": "PASS"
+  },
+  "zeroSdioRetestReady": true,
+  "pushAuthorizationRequired": true,
+  "finalClassification": "SDIO_EXIT_05R_REPAIR_LOCAL_PASS_PUSH_REQUIRED"
+}

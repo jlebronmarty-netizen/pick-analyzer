@@ -22,6 +22,7 @@ import { getEventRefreshPlan } from '@/services/event-refresh-planner.service'
 import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api-current-odds-acquisition.service'
 import { executeLineVersionedRepredictionWriter } from '@/services/line-versioned-reprediction-writer.service'
 import { executeMlbOfficialShadowAcquisition } from '@/services/mlb-official-replacement.service'
+import { productAuthorityForStage, readOddsPrimaryAuthorityStage } from '@/config/odds-primary-authority.config'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -372,6 +373,94 @@ function ageMinutes(value: string | null | undefined, now = new Date()) {
   const parsed = safeDate(value)
   if (!parsed) return null
   return Math.max(0, round((now.getTime() - parsed.getTime()) / 60000, 1))
+}
+
+function shouldSuppressSportsDataIoOddsAcquisition() {
+  const stage = readOddsPrimaryAuthorityStage()
+  return {
+    suppress: productAuthorityForStage(stage) === 'THE_ODDS_API',
+    stage,
+    productAuthority: productAuthorityForStage(stage),
+  }
+}
+
+function skippedSportsDataIoOddsAcquisition({
+  operatingDate,
+  source,
+  requestId,
+  selectedEventCount,
+}: {
+  operatingDate: string
+  source: string | null | undefined
+  requestId: string
+  selectedEventCount: number
+}) {
+  const generatedAt = new Date().toISOString()
+  const authority = shouldSuppressSportsDataIoOddsAcquisition()
+  const contract = {
+    contractVersion: 'canonical_acquisition_execution_v1',
+    status: 'SKIPPED_AUTHORITY_NOT_SPORTSDATAIO',
+    requestedAt: generatedAt,
+    completedAt: generatedAt,
+    operatingDate,
+    executionMode: 'SUPPRESSED',
+    providerId: 'sportsdataio',
+    sportKey: SPORT_KEY,
+    acquisitionId: `sportsdataio_suppressed_${requestId}`,
+    deduplicationKey: `sportsdataio:baseball_mlb:odds_refresh:${operatingDate}:suppressed:${authority.stage}`,
+    idempotencyKey: `canonical_acquisition_active_execution_v1:sportsdataio_suppressed:${operatingDate}:${requestId}`,
+    plannedEventCount: selectedEventCount,
+    eligibleEventCount: 0,
+    excludedEventCount: selectedEventCount,
+    estimatedHttpRequests: 0,
+    estimatedQuotaUnits: 0,
+    actualHttpRequests: 0,
+    actualQuotaUnits: 0,
+    persistedSnapshotCount: 0,
+    updatedEventCount: 0,
+    unchangedEventCount: 0,
+    canonicalSnapshotTimestamp: null,
+    providerResponseObservedAt: null,
+    reasonCodes: [
+      'SKIPPED_AUTHORITY_NOT_SPORTSDATAIO',
+      'THE_ODDS_API_PRODUCT_PRIMARY',
+      'SPORTSDATAIO_ROLLBACK_ONLY',
+    ],
+    warnings: [
+      'SportsDataIO routine MLB odds acquisition is suppressed while The Odds API is product odds authority.',
+      'SportsDataIO remains available through explicit rollback configuration only.',
+    ],
+    evidence: {
+      source: source ?? 'adaptive_refresh_execution_bridge_v2',
+      endpoint: null,
+      authorityStage: authority.stage,
+      productAuthority: authority.productAuthority,
+      sportsDataIoRole: 'ROLLBACK_ONLY',
+      noSportsDataIoHttpRequest: true,
+      noSilentFallback: true,
+      currentBoardAuthority: 'THE_ODDS_API',
+      rollbackPath: 'Set ODDS_PRIMARY_AUTHORITY_STAGE to STAGE_1_DUAL_READ or SPORTSDATAIO authority before SportsDataIO odds acquisition may execute.',
+      schedulerCadenceChanged: false,
+      predictionOutputsChanged: false,
+      officialPickPolicyChanged: false,
+    },
+  }
+  return {
+    success: true,
+    status: 'SKIPPED_AUTHORITY_NOT_SPORTSDATAIO',
+    contract,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+    rowsReceived: 0,
+    rowsInserted: 0,
+    rowsUpdated: 0,
+    rowsSkipped: selectedEventCount,
+    failureReason: null,
+    latestSourceTimestamp: null,
+    lastProviderCheckAt: null,
+    freshnessBefore: null,
+    freshnessAfter: null,
+  }
 }
 
 function addMinutes(value: string | null | undefined, minutes: number | null) {
@@ -2226,18 +2315,26 @@ export async function runAdaptiveRefresh({
   const activeEventPlans = activeEventRefreshPlan?.eventPlans ?? []
   const activeMarketPlans = activeEventPlans.filter((plan) => plan.executionEnabled === true)
   if (activeEventRefreshPlan && activeMarketPlans.length > 0) {
-    const canonicalAcquisition = await executeCanonicalMlbMarketAcquisition({
-      dryRun: false,
-      mode: 'ACTIVE',
-      operatingDate: selectedDate,
-      eventPlans: activeEventPlans,
-      source,
-      requestId: executionRunId,
-      timeoutMs: 15000,
-    })
+    const sportsDataIoSuppression = shouldSuppressSportsDataIoOddsAcquisition()
+    const canonicalAcquisition = sportsDataIoSuppression.suppress
+      ? skippedSportsDataIoOddsAcquisition({
+        operatingDate: selectedDate,
+        source,
+        requestId: executionRunId,
+        selectedEventCount: activeMarketPlans.length,
+      })
+      : await executeCanonicalMlbMarketAcquisition({
+        dryRun: false,
+        mode: 'ACTIVE',
+        operatingDate: selectedDate,
+        eventPlans: activeEventPlans,
+        source,
+        requestId: executionRunId,
+        timeoutMs: 15000,
+      })
     const contract = asRecord(canonicalAcquisition.contract)
     const evidence = asRecord(contract.evidence)
-    const normalizedStatus =
+    let normalizedStatus =
       canonicalAcquisition.success && ['SUCCESS', 'PARTIAL'].includes(String(canonicalAcquisition.status))
         ? Number(contract.persistedSnapshotCount ?? 0) > 0
           ? 'SUCCESS_CHANGED'
@@ -2267,6 +2364,13 @@ export async function runAdaptiveRefresh({
       requestId: executionRunId,
       timeoutMs: 15000,
     }) as Record<string, unknown>
+    if (sportsDataIoSuppression.suppress) {
+      normalizedStatus = theOddsApiDualReadAcquisition.success === false
+        ? String(theOddsApiDualReadAcquisition.status ?? 'FAILED_RETRYABLE')
+        : Number(theOddsApiDualReadAcquisition.rowsInserted ?? 0) + Number(theOddsApiDualReadAcquisition.rowsUpdated ?? 0) > 0
+          ? 'SUCCESS_CHANGED'
+          : 'SUCCESS_NO_CHANGE'
+    }
     const lineVersionedReprediction = await executeLineVersionedRepredictionWriter({
       dryRun: false,
       operatingDate: selectedDate,
@@ -2325,7 +2429,7 @@ export async function runAdaptiveRefresh({
         estimatedDueNowCalls: Number(contract.estimatedHttpRequests ?? status.providerCallForecast.estimatedDueNowCalls),
       },
       providerCheck: {
-        providerCheckRequired: true,
+        providerCheckRequired: !sportsDataIoSuppression.suppress,
         providerCheckAttempted: Number(canonicalAcquisition.providerCallsMade ?? 0) > 0,
         providerCheckCompleted: canonicalAcquisition.success === true && Number(canonicalAcquisition.providerCallsMade ?? 0) > 0,
         endpoint: asRecord(evidence.endpoint).endpoint ?? null,
@@ -2345,11 +2449,15 @@ export async function runAdaptiveRefresh({
           action: 'canonical_event_level_market_refresh',
           provider: 'sportsdataio',
           providerCallsMade: sportsDataIoProviderCalls,
-          providerResultClassification: canonicalAcquisition.success ? 'PROVIDER_RETURNED_CANONICAL_MARKETS' : 'PROVIDER_CHECK_FAILED',
+          providerResultClassification: sportsDataIoSuppression.suppress
+            ? 'SKIPPED_AUTHORITY_NOT_SPORTSDATAIO'
+            : canonicalAcquisition.success ? 'PROVIDER_RETURNED_CANONICAL_MARKETS' : 'PROVIDER_CHECK_FAILED',
           rowsReceived: canonicalAcquisition.rowsReceived ?? 0,
           rowsInserted: canonicalAcquisition.rowsInserted ?? 0,
           rowsUpdated: canonicalAcquisition.rowsUpdated ?? 0,
           rowsSkipped: canonicalAcquisition.rowsSkipped ?? 0,
+          productAuthorityChanged: false,
+          rollbackOnly: sportsDataIoSuppression.suppress,
         },
         {
           domain: 'odds',
