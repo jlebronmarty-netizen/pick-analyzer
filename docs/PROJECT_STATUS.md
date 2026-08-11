@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-11 Multi-Sport Handoff Preparation
+
+- Multi-Sport Handoff Preparation is locally certified as `MULTI_SPORT_HANDOFF_PASS` on baseline commit `28c188cd1db7e131cedd4b38bc6642b5911d4d7b`. NBA is selected as the next sport because it has the strongest existing repository foundation across data sync, feature store, prediction, validation, settlement, calibration and data-quality services.
+- No new sport was activated, no provider calls or database mutations were made, and SportsDataIO remains rollback-only for MLB during the rollback window. The first recommended executable block is `NBA-01_DATA_FOUNDATION_PROVIDER_INDEPENDENCE_AND_HISTORICAL_READINESS`; NBA production activation is not authorized by this handoff.
+
 ## 2026-08-11 Market Freshness Severity Reconciliation
 
 - Market Freshness Severity Reconciliation is locally implemented as `MARKET_FRESHNESS_SEVERITY_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed Current Board with 38 candidates, 37 fresh rows and 1 stale fail-closed Total row while Operations Health escalated to `CRITICAL`.

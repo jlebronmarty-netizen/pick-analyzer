@@ -2,6 +2,8 @@
 
 This roadmap is dependency-aware and based on repository inspection. A module is marked completed only when the repository contains service/API/dashboard/persistence evidence and recent verification supports it.
 
+Multi-Sport Handoff Preparation is locally certified as `MULTI_SPORT_HANDOFF_PASS` on baseline commit `28c188cd1db7e131cedd4b38bc6642b5911d4d7b`. The audited priority order is NBA, BSN, NFL, NHL, Soccer, UFC and Tennis. NBA is selected as the next sport, with `NBA-01_DATA_FOUNDATION_PROVIDER_INDEPENDENCE_AND_HISTORICAL_READINESS` as the first executable block. No NBA production activation, provider call, database mutation, SportsDataIO reactivation or historical replay was performed.
+
 MLB Final Closeout is locally certified as `MLB_FINAL_CLOSEOUT_PASS_WITH_FUTURE_MARKETS` at commit `4fb06cb795a9fad00cd60b4e3f5b134c69701444`. The Odds API is product odds authority, MLB Official is primary for non-odds MLB data, SportsDataIO is rollback-only and not cancelled, and core full-game markets remain the only production-supported MLB betting markets. Historical replay and HR-03 calibration remain isolated; player props and derivative markets are future gated work. Next master phase: multi-sport handoff preparation using `SPORT_ONBOARDING_TEMPLATE_V1`; MC-03 was not started.
 
 MLB Product Evidence Reconciliation is locally implemented as a bounded repair after production showed Current Board product price evidence while the Today service still emitted legacy sportsbook-refresh blockers. The repair reconciles Today per-game odds coverage with Current Board canonical product price evidence and clarifies homepage evidence counts without changing prediction formulas, Official Pick policy, provider authority, settlement, learning or HR-03.

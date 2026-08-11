@@ -9,6 +9,7 @@ This template captures the evidence gates required before any new sport can leav
 | Gate | Requirement |
 | --- | --- |
 | Provider authority | Identify odds, schedule/status, results and stat providers separately. |
+| Provider exit / rollback | Document how paid or legacy providers can be disabled, retained for rollback, or proven unnecessary without hidden fallback calls. |
 | Entity identity | Canonical team/player/event IDs must be mapped with collision checks. |
 | Current odds | Exact event/market/selection/line prices must be fresh and timestamped. |
 | Schedule/status | Pregame, live, final, postponed and cancelled states must be normalized. |
@@ -21,6 +22,8 @@ This template captures the evidence gates required before any new sport can leav
 | Scheduler | Natural protected scheduler operation must be proven without duplicate writers. |
 | Provider budget | Provider calls must have explicit ledgers and no hidden fallback spend. |
 | Product safety | Stale, unsupported or missing evidence must never become actionable. |
+| Home evidence semantics | Games, predictions, candidates, positive-EV evidence, recommendation eligibility, Official Picks and skipped events must remain separate product concepts. |
+| Coverage-aware operations health | Partial fail-closed evidence loss is degraded; systemic outage, no fresh critical coverage, scheduler failure or unsafe state is critical. |
 | Rollback | Provider and model rollback must be config-only or explicitly documented. |
 
 ## Recommended Sequence
@@ -36,6 +39,14 @@ This template captures the evidence gates required before any new sport can leav
 9. Shadow calibration.
 10. Pilot-week natural scheduler proof.
 11. Promotion review.
+
+## MLB Lessons Added 2026-08-11
+
+- Do not treat "not recommended" as "no event" or "skipped event".
+- Do not let a stale row become actionable through another surface.
+- Do not bind a current price to an old-line probability.
+- Do not let one fail-closed stale row automatically imply a systemic outage.
+- Keep provider authority and provider budget ledgers separated by source.
 
 ## Current Next-Sport Ranking
 
