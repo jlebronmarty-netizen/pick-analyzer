@@ -599,6 +599,15 @@ function arrayValue(value: unknown): unknown[] {
   return Array.isArray(value) ? value : []
 }
 
+function textOrNull(value: unknown) {
+  const text = String(value ?? '').trim()
+  return text && text !== 'null' && text !== 'undefined' ? text : null
+}
+
+function sourceRank(source: string) {
+  return ['Official Pick', 'Best Value', 'Priced Market', 'Current Board', 'Most Likely', 'Highest Probability', 'Grounded Opportunity'].indexOf(source)
+}
+
 function odds(value: unknown) {
   if (value === null || value === undefined) return 'Odds N/A'
   return formatOddsValue(numberOrNull(value))
@@ -636,7 +645,7 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
     predictionId: selector.predictionId ?? null,
     label: source,
     source,
-    sourceRank: ['Official Pick', 'Best Value', 'Priced Market', 'Most Likely', 'Highest Probability', 'Grounded Opportunity'].indexOf(source),
+    sourceRank: sourceRank(source),
     eventId: selector.eventId ?? null,
     event: label(selector.matchup, 'Event pending'),
     selection: label(selector.selection, 'Selection pending'),
@@ -673,37 +682,53 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
 }
 
 function fromRow(id: string, source: string, row: Record<string, unknown>, official = false): PlanPick {
+  const canonicalEv = recordValue(row.canonicalEv)
+  const canonicalPrice = recordValue(row.canonicalPrice)
   const probability = numberOrNull(row.modelProbability ?? row.model_probability ?? row.probability)
   const confidence = numberOrNull(row.confidence)
-  const edge = numberOrNull(row.edgePercentagePoints ?? row.edge)
-  const ev = numberOrNull(row.expectedValuePercent ?? row.expectedValue ?? row.ev)
+  const edge = numberOrNull(row.edgePercentagePoints ?? row.edge ?? canonicalEv.edge)
+  const ev = numberOrNull(row.expectedValuePercent ?? row.expectedValue ?? row.ev ?? canonicalEv.expectedValue)
   const productFreshness = row.productFreshness && typeof row.productFreshness === 'object' ? row.productFreshness as Record<string, unknown> : null
   const freshness = label(productFreshness?.status ?? row.freshnessStatus ?? row.freshness, 'Freshness unavailable')
   const freshnessActionability = label(productFreshness?.actionability, 'INFORMATIONAL_ONLY')
-  const qualified = !/stale|avoid|do not act/i.test(`${freshness} ${row.blocker ?? ''} ${row.reasonNotOfficial ?? ''}`) &&
+  const officialEligibility = textOrNull(row.officialEligibility ?? row.official_pick_status ?? row.recommendationPolicyStatus)
+  const blockerText = [
+    ...arrayValue(row.blockers).map((item) => label(item, '')),
+    label(row.reasonNotOfficial ?? row.blocker ?? row.why ?? officialEligibility, ''),
+  ].filter(Boolean)
+  const policyEligible = official || ['ELIGIBLE', 'OFFICIAL_ELIGIBLE', 'OFFICIAL_ELIGIBLE_CANDIDATE', 'OFFICIAL_PICK'].includes(String(officialEligibility ?? '').toUpperCase())
+  const policyBlockedReason = !policyEligible && source === 'Current Board'
+    ? `Policy blocked: ${label(row.reasonNotOfficial ?? row.blocker ?? officialEligibility, 'Not officially eligible under existing policy.')}`
+    : null
+  const freshEnough = !/stale|avoid|do not act|post start|post_start|market closed/i.test(`${freshness} ${blockerText.join(' ')}`) &&
     !['BLOCKED', 'WAIT_FOR_REFRESH', 'UNAVAILABLE'].includes(freshnessActionability)
+  const hasCurrentEvidence = probability !== null || confidence !== null || edge !== null || ev !== null || numberOrNull(row.americanOdds ?? row.odds) !== null
+  const qualified = official || (freshEnough && hasCurrentEvidence)
   const modelVersion = label(row.modelVersion ?? row.model_version, 'Model version unavailable')
   const evidence = arrayValue(row.supportingEvidence ?? row.evidence ?? row.positiveFactors)
     .map((item) => label(item, ''))
     .filter(Boolean)
+  const marketTimestamp = textOrNull(productFreshness?.marketTimestamp ?? row.providerSourceTimestamp ?? row.marketTimestamp ?? row.sourceTimestamp)
+  const providerSourceTimestamp = textOrNull(row.providerSourceTimestamp ?? productFreshness?.marketTimestamp ?? row.sourceTimestamp ?? row.marketTimestamp)
+  const snapshotCapturedAt = textOrNull(row.snapshotCapturedAt ?? row.snapshotRecencyTimestamp ?? row.capturedAt ?? row.updatedAt)
   return {
     id,
     predictionId: typeof row.predictionId === 'string' ? row.predictionId : typeof row.id === 'string' ? row.id : null,
     label: source,
     source,
-    sourceRank: ['Official Pick', 'Best Value', 'Priced Market', 'Most Likely', 'Highest Probability', 'Grounded Opportunity'].indexOf(source),
+    sourceRank: sourceRank(source),
     eventId: typeof row.eventId === 'string' ? row.eventId : typeof row.event_id === 'string' ? row.event_id : null,
     event: label(row.matchup ?? row.eventLabel, 'Event pending'),
     selection: label(row.selection ?? row.team, 'Selection pending'),
     market: label(row.marketLabel ?? row.market, 'Market pending'),
     marketKey: String(row.market ?? row.marketLabel ?? '').toLowerCase(),
-    odds: numberOrNull(row.americanOdds ?? row.odds),
-    priceBindingMode: (row.canonicalPrice && typeof row.canonicalPrice === 'object' ? (row.canonicalPrice as Record<string, unknown>).bindingMode : row.priceBindingMode) as PlanPick['priceBindingMode'],
-    priceSourceMarket: null,
-    priceSourceSelection: null,
-    priceSourceLine: null,
-    priceSourceSnapshotId: typeof row.oddsSnapshotId === 'string' ? row.oddsSnapshotId : null,
-    sportsbook: label(row.sportsbook, 'Sportsbook pending'),
+    odds: numberOrNull(row.americanOdds ?? row.odds ?? canonicalPrice.americanOdds),
+    priceBindingMode: (canonicalPrice.bindingMode ?? row.priceBindingMode) as PlanPick['priceBindingMode'],
+    priceSourceMarket: textOrNull(canonicalPrice.sourceMarket ?? row.priceSourceMarket),
+    priceSourceSelection: textOrNull(canonicalPrice.sourceSelection ?? row.priceSourceSelection),
+    priceSourceLine: numberOrNull(canonicalPrice.sourceLine ?? row.priceSourceLine),
+    priceSourceSnapshotId: textOrNull(row.oddsSnapshotId ?? canonicalPrice.snapshotId),
+    sportsbook: label(row.sportsbook ?? canonicalPrice.bookmaker ?? canonicalPrice.provider, 'Sportsbook pending'),
     probability,
     confidence,
     edge,
@@ -711,9 +736,9 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
     freshness,
     modelVersion,
     freshnessActionability,
-    marketTimestamp: typeof productFreshness?.marketTimestamp === 'string' ? productFreshness.marketTimestamp : null,
-    providerSourceTimestamp: typeof productFreshness?.marketTimestamp === 'string' ? productFreshness.marketTimestamp : null,
-    snapshotCapturedAt: null,
+    marketTimestamp,
+    providerSourceTimestamp,
+    snapshotCapturedAt,
     nextRefreshAt: typeof productFreshness?.nextPlannedRefreshAt === 'string' ? productFreshness.nextPlannedRefreshAt : null,
     evidence: [
       ...evidence.slice(0, 3),
@@ -723,15 +748,15 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
     ],
     official,
     qualified,
-    reason: official ? 'Passed the existing Official Pick policy.' : label(row.reasonNotOfficial ?? row.blocker ?? row.why, 'Informational candidate from stored evidence.'),
+    reason: official ? 'Passed the existing Official Pick policy.' : policyBlockedReason ?? label(row.reasonNotOfficial ?? row.blocker ?? row.why, 'Informational candidate from stored evidence.'),
   }
 }
 
-function allCandidates(data: TodayResponse | null) {
-  if (!data) return []
-  const selectors = data.viewModel?.selectors
+function allCandidates(data: TodayResponse | null, currentBoard?: ApiEnvelope | null) {
+  if (!data && !currentBoard) return []
+  const selectors = data?.viewModel?.selectors
   const rows: PlanPick[] = []
-  const officialRows = data.sections?.officialPicks?.data ?? []
+  const officialRows = data?.sections?.officialPicks?.data ?? []
   officialRows.forEach((row, index) => rows.push(fromRow(`official-${index}`, 'Official Pick', row as Record<string, unknown>, true)))
   const selectorRows = [
     fromSelector('best-value', 'Best Value', selectors?.bestAvailableValue),
@@ -740,12 +765,15 @@ function allCandidates(data: TodayResponse | null) {
     fromSelector('projected', 'Highest Probability', selectors?.highestProjectedOutcome),
   ].filter((item): item is PlanPick => Boolean(item))
   rows.push(...selectorRows)
-  ;(data.sections?.groundedOpportunities?.data ?? []).slice(0, 8).forEach((row, index) => {
+  ;(data?.sections?.groundedOpportunities?.data ?? []).slice(0, 8).forEach((row, index) => {
     rows.push(fromRow(`grounded-${index}`, 'Grounded Opportunity', row))
+  })
+  arrayValue(currentBoard?.candidates).forEach((row, index) => {
+    if (row && typeof row === 'object') rows.push(fromRow(`current-board-${index}`, 'Current Board', row as Record<string, unknown>))
   })
   const unique = new Map<string, PlanPick>()
   for (const item of rows) {
-    const key = `${item.event}|${item.market}|${item.selection}|${item.sportsbook}`
+    const key = `${item.eventId ?? item.event}|${item.marketKey}|${item.selection}|${item.priceSourceLine ?? ''}|${item.sportsbook}`
     if (!unique.has(key)) unique.set(key, item)
   }
   return Array.from(unique.values())
@@ -824,8 +852,8 @@ function isSmartParlayLegFresh(leg: SmartParlayLeg) {
     !isFutureTimestamp(leg.marketTimestamp)
 }
 
-function pickPlan(data: TodayResponse | null) {
-  const candidates = allCandidates(data)
+function pickPlan(data: TodayResponse | null, currentBoard?: ApiEnvelope | null) {
+  const candidates = allCandidates(data, currentBoard)
   const official = candidates.filter((item) => item.official && item.qualified)
   const rentPlay = bestBy(official, () => true, (item) => Number(item.confidence ?? 0) + Number(item.probability ?? 0))
   const moneyline = bestBy(
@@ -1799,10 +1827,18 @@ function DailyBrief({
 }) {
   const recommendation = dailyRecommendation(plan, data)
   const boardCandidates = countValue(currentBoard?.candidates ? arrayValue(currentBoard.candidates).length : currentBoard?.candidateCount)
+  const boardPositiveEvCandidates = arrayValue(currentBoard?.candidates).filter((row) => {
+    if (!row || typeof row !== 'object') return false
+    const record = row as Record<string, unknown>
+    const canonicalEv = recordValue(record.canonicalEv)
+    return Number(numberOrNull(record.ev ?? record.expectedValue ?? canonicalEv.expectedValue) ?? 0) > 0 &&
+      Number(numberOrNull(record.edge ?? record.edgePercentagePoints ?? canonicalEv.edge) ?? 0) > 0
+  }).length
   const intelligenceSample = countValue(recordValue(intelligence?.currentProductionSample).sampleSize)
   const perfMetrics = recordValue(recordValue(performance?.aiBrain).reportCard)
   const perfCore = recordValue(perfMetrics.metrics)
   const perfCalibration = recordValue(perfMetrics.calibration)
+  const boardFreshness = recordValue(currentBoard?.dataFreshness)
   const gamesToday = firstPositiveCount(
     data.totalScheduledToday,
     data.currentGames,
@@ -1811,10 +1847,17 @@ function DailyBrief({
     data.viewModel?.selectors?.currentBoardSummary?.candidates,
     boardCandidates,
   )
-  const predictions = countValue(data.predictionCandidates ?? boardCandidates ?? plan.candidates.length)
+  const predictions = firstPositiveCount(
+    data.predictionCandidates,
+    data.viewModel?.selectors?.gameCoverageSummary?.marketsPredicted,
+    data.viewModel?.selectors?.gameCoverageSummary?.currentBoardCandidates,
+    boardCandidates,
+    plan.candidates.length,
+  )
   const official = countValue(data.officialPicks) || plan.candidates.filter((item) => item.official).length
   const value = firstPositiveCount(
     data.viewModel?.selectors?.bestValueSemantics?.candidatesWithPositiveEv,
+    boardPositiveEvCandidates,
     currentBoard?.modeledValueCount,
     plan.candidates.filter((item) => Number(item.ev ?? 0) > 0 && Number(item.edge ?? 0) > 0).length,
   )
@@ -1835,6 +1878,7 @@ function DailyBrief({
       : data.summary?.marketPrices ?? label(data.freshness, 'Unknown')
   const snapshotCapturedAt = data.latestOddsTimestamp ??
     data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ??
+    textOrNull(boardFreshness.latestSnapshotTimestamp ?? boardFreshness.latestOddsTimestamp ?? boardFreshness.latestSourceTimestamp) ??
     null
 
   return (
@@ -2467,7 +2511,7 @@ export default function HomeBettingPlan() {
     }
   }, [])
 
-  const plan = useMemo(() => pickPlan(data), [data])
+  const plan = useMemo(() => pickPlan(data, currentBoard), [data, currentBoard])
   const rentPlayContract = useMemo(() => buildRentPlayContract(plan), [plan])
   const moneylineBetContract = useMemo(() => buildMoneylineBetContract(plan, rentPlayContract), [plan, rentPlayContract])
   const smartParlayContract = useMemo(() => buildSmartParlayContract(plan, rentPlayContract, moneylineBetContract), [plan, rentPlayContract, moneylineBetContract])

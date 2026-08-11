@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-11 Home Client-State Card Mapping Reconciliation
+
+- Home Client-State Card Mapping Reconciliation is locally implemented as `HOME_CLIENT_STATE_RECONCILIATION_REPAIR_READY_FOR_DEPLOYMENT`. The bounded repair addresses a rendered homepage defect where Current Board had current MLB candidates but Rent Play, Moneyline, Smart Parlay and Watchlist could still render `NO_GAMES` because the client card plan ignored fetched Current Board state.
+- `HomeBettingPlan` now feeds Current Board candidates into the existing homepage card contract, uses Current Board evidence for zero/missing Predictions, Value Candidates and Snapshot fields, and marks non-official board rows as policy-blocked/review-only. No prediction formula, Official Pick policy, odds authority, MLB data-source mode, settlement, learning, provider calls or Vercel config changed.
+
 ## 2026-08-11 MLB Product Evidence Reconciliation
 
 - MLB Product Evidence Reconciliation is locally implemented as `MLB_PRODUCT_EVIDENCE_RECONCILIATION_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed 15 games, 39 Current Board candidates, 45 Performance canonical predictions, 28 positive-EV evidence rows and 0 Official Picks, while Today still reported sportsbook-refresh blockers from legacy odds diagnostics.

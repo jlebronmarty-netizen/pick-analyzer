@@ -1,0 +1,72 @@
+{
+  "artifact": "home-client-state-card-mapping-reconciliation",
+  "version": 1,
+  "createdAt": "2026-08-11T00:00:00.000Z",
+  "startingCommit": "2a557c6a1b59725111f581bd5ab8fc731d1ae868",
+  "runtimeCommit": "LOCAL_COMMIT_REPORTED_IN_FINAL_RESPONSE",
+  "classification": "HOME_CLIENT_STATE_RECONCILIATION_REPAIR_READY_FOR_DEPLOYMENT",
+  "productionSymptom": {
+    "gamesToday": 15,
+    "currentBoardCandidates": 38,
+    "officialPicks": 0,
+    "renderedPredictionsBefore": 0,
+    "renderedRentPlayBefore": "NO_GAMES",
+    "renderedMoneylineBefore": "NO_GAMES",
+    "renderedSmartParlayBefore": "NO_GAMES",
+    "renderedWatchlistBefore": "NO_GAMES",
+    "renderedSnapshotBefore": "Unavailable"
+  },
+  "rootCause": {
+    "classification": "CLIENT_PLAN_IGNORED_CURRENT_BOARD",
+    "description": "The homepage fetched Current Board state but built pickPlan and card contracts only from dashboard/today selectors and sections. When Today scalar or selector fields were sparse, rendered cards could ignore current stored board evidence."
+  },
+  "repair": {
+    "runtimeFiles": [
+      "src/components/home/HomeBettingPlan.tsx"
+    ],
+    "summary": [
+      "pickPlan now accepts Current Board client state.",
+      "Current Board candidates are normalized into PlanPick rows for homepage cards.",
+      "Daily Brief Predictions, Value Candidates, and Snapshot captured use Current Board evidence when Today fields are zero or missing.",
+      "Non-official Current Board rows remain explicitly policy-blocked/review-only."
+    ],
+    "policySafety": "Current Board evidence can populate cards but cannot bypass existing Official Pick or recommendation gates."
+  },
+  "expectedAfterDeployment": {
+    "falseNoGamesCards": false,
+    "predictionsCanRemainZeroWhenCurrentBoardCandidatesExist": false,
+    "snapshotCanRemainUnavailableWhenCurrentBoardFreshnessExists": false,
+    "reviewOnlyCandidatesPromotedToOfficial": false,
+    "staleEvidenceActionable": false
+  },
+  "protectedInvariants": {
+    "predictionFormulaChanged": false,
+    "probabilityChanged": false,
+    "officialPickPolicyChanged": false,
+    "recommendationThresholdChanged": false,
+    "kellyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "oddsAuthorityChanged": false,
+    "mlbDataSourceModeChanged": false,
+    "providerContractChanged": false,
+    "vercelConfigChanged": false
+  },
+  "safety": {
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0,
+    "manualProviderCalls": 0,
+    "productionDatabaseMutations": 0
+  },
+  "validation": {
+    "validator": "scripts/home-client-state-card-mapping-validate.mjs",
+    "build": "PASS",
+    "eslint": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "secretScan": "PASS",
+    "diffCheck": "PASS",
+    "legacyValidators": "PASS except older release changed-file guards that intentionally reject this bounded homepage file"
+  },
+  "nextRecommendedPhase": "Publish the bounded homepage client-state repair, deploy, and perform read-only production certification that rendered homepage cards no longer show false no-games states when Current Board evidence exists."
+}
