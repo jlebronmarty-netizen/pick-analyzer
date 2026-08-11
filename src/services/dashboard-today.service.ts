@@ -1917,7 +1917,11 @@ export async function getDashboardToday({
   const upcomingGames = nextSlateDate ? nextSlate.eventsFound : Math.max(0, currentScheduled)
   const currentGamesWaitingForOdds = currentCards.filter((card) => {
     const coverage = oddsCoverageByEvent.get(card.eventId)
-    return (card.lifecycle === 'PREGAME' || card.lifecycle === 'STARTING_SOON') && Number(coverage?.oddsRowsNormalized ?? 0) === 0
+    const productPriceRows = board.candidates.filter((candidate) => (
+      candidate.eventId === card.eventId && hasCanonicalPriceEvidence(candidate)
+    )).length
+    return (card.lifecycle === 'PREGAME' || card.lifecycle === 'STARTING_SOON') &&
+      Math.max(Number(coverage?.oddsRowsNormalized ?? 0), productPriceRows) === 0
   }).length
   const nextSlateWaitingForOdds = nextSlate.waitingForOdds
   const gamesWaitingForOdds = currentGamesWaitingForOdds
@@ -2050,7 +2054,10 @@ export async function getDashboardToday({
     eventStatus: card.lifecycle,
     settlementState: card.settlementState,
     ...((board.games as Array<Record<string, any>>).find((game) => String(game.eventId ?? '') === card.eventId) ?? {}),
-    storedOddsCount: Number(oddsCoverageByEvent.get(card.eventId)?.oddsRowsNormalized ?? 0),
+    storedOddsCount: Math.max(
+      Number(oddsCoverageByEvent.get(card.eventId)?.oddsRowsNormalized ?? 0),
+      board.candidates.filter((candidate) => candidate.eventId === card.eventId && hasCanonicalPriceEvidence(candidate)).length
+    ),
     validPregamePredictionCount: Number(oddsCoverageByEvent.get(card.eventId)?.predictionCount ?? 0),
     displayableMarketCount: Number(oddsCoverageByEvent.get(card.eventId)?.oddsMarketsFound?.length ?? 0),
   }))

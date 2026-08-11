@@ -75,8 +75,17 @@ type TodayResponse = {
         displayableMarkets?: number
         directlyPricedCandidates?: number
       }
+      bestValueSemantics?: {
+        candidatesWithPositiveEv?: number
+        candidatesPassingPolicy?: number
+        primaryRejectionReason?: string | null
+      }
       gameCoverageSummary?: {
         gamesToday?: number
+        gamesWithValidPregamePredictions?: number
+        gamesWithDisplayableCurrentBoardMarket?: number
+        marketsPredicted?: number
+        currentBoardCandidates?: number
       }
     }
   }
@@ -1804,14 +1813,29 @@ function DailyBrief({
   )
   const predictions = countValue(data.predictionCandidates ?? boardCandidates ?? plan.candidates.length)
   const official = countValue(data.officialPicks) || plan.candidates.filter((item) => item.official).length
-  const value = plan.candidates.filter((item) => item.qualified && Number(item.ev ?? 0) > 0).length
+  const value = firstPositiveCount(
+    data.viewModel?.selectors?.bestValueSemantics?.candidatesWithPositiveEv,
+    currentBoard?.modeledValueCount,
+    plan.candidates.filter((item) => Number(item.ev ?? 0) > 0 && Number(item.edge ?? 0) > 0).length,
+  )
+  const analyzedGames = firstPositiveCount(
+    data.viewModel?.selectors?.gameCoverageSummary?.gamesWithDisplayableCurrentBoardMarket,
+    data.viewModel?.selectors?.gameCoverageSummary?.gamesWithValidPregamePredictions,
+    gamesToday > 0 && predictions > 0 ? gamesToday : 0,
+  )
   const skipped = firstPositiveCount(
     data.schedulerCoverage?.skippedToday,
     data.schedulerCoverage?.pendingToday,
     data.schedulerCoverage?.gamesPendingPregameExecution,
-    Math.max(0, gamesToday - predictions),
-    plan.candidates.length - plan.candidates.filter((item) => item.qualified).length,
+    Math.max(0, gamesToday - analyzedGames),
   )
+  const marketQuality = data.summary?.marketPrices === 'Waiting for sportsbook refresh.' &&
+    firstPositiveCount(data.viewModel?.selectors?.currentBoardSummary?.displayableMarkets, boardCandidates) > 0
+      ? 'Current market evidence available'
+      : data.summary?.marketPrices ?? label(data.freshness, 'Unknown')
+  const snapshotCapturedAt = data.latestOddsTimestamp ??
+    data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ??
+    null
 
   return (
     <section className="rounded-lg border border-slate-800 bg-slate-950/80 p-5 md:p-6" data-r9-daily-brief="true" data-mc08a-morning-brief="true" data-language-foundation="en-es">
@@ -1835,13 +1859,13 @@ function DailyBrief({
 
       <div className="mt-5 grid gap-3 md:grid-cols-4">
         <MiniMetric label="Decision Summary" value={recommendation.label} />
-        <MiniMetric label="Market Quality" value={data.summary?.marketPrices ?? label(data.freshness, 'Unknown')} />
+        <MiniMetric label="Market Quality" value={marketQuality} />
         <MiniMetric label="Risk" value={skipped ? 'Review first' : 'Low'} />
         <MiniMetric label="Confidence" value={perfCore.accuracy ?? perfCalibration.calibrationError ?? intelligenceSample ? 'Measured' : 'Limited'} />
       </div>
 
       <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-        Snapshot captured: {compactDate(data.latestOddsTimestamp ?? data.viewModel?.selectors?.marketFreshnessSummary?.latestOddsTimestamp ?? null)}
+        Snapshot captured: {compactDate(snapshotCapturedAt)}
       </p>
     </section>
   )

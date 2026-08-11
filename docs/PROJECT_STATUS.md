@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-11 MLB Product Evidence Reconciliation
+
+- MLB Product Evidence Reconciliation is locally implemented as `MLB_PRODUCT_EVIDENCE_RECONCILIATION_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed 15 games, 39 Current Board candidates, 45 Performance canonical predictions, 28 positive-EV evidence rows and 0 Official Picks, while Today still reported sportsbook-refresh blockers from legacy odds diagnostics.
+- The bounded repair lets Today count Current Board canonical product price evidence as current market evidence, keeps Official Pick policy unchanged, and clarifies homepage Value Candidates and Games Skipped semantics. No provider calls, prediction formulas, settlement, learning, odds authority, MLB data-source mode, HR-03 or SportsDataIO rollback behavior changed.
+
 ## 2026-08-11 MLB Final Closeout
 
 - MLB Final Closeout is locally certified as `MLB_FINAL_CLOSEOUT_PASS_WITH_FUTURE_MARKETS` on baseline commit `4fb06cb795a9fad00cd60b4e3f5b134c69701444`. Production evidence reports The Odds API as product odds authority, MLB Official as primary non-odds data source, Operations Health `HEALTHY`, Settlement Guarantee `PASS`, and SportsDataIO MLB routine use at 0 while retained for rollback.

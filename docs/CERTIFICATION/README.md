@@ -104,6 +104,7 @@ Current V2 certification documents:
 - [SDIO-EXIT-03C Canonical Lifecycle Repair JSON](sdio-exit-03c-canonical-lifecycle-repair.json)
 - [SDIO-EXIT-03E Result Closure JSON](sdio-exit-03e-result-closure.json)
 - [SDIO-EXIT-04 Stats Parity And SportsDataIO-Off Window JSON](sdio-exit-04-stats-parity-off-window.json)
+- [MLB Product Evidence And Eligibility Reconciliation JSON](mlb-product-evidence-eligibility-reconciliation.json)
 
 Most certification documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:
 

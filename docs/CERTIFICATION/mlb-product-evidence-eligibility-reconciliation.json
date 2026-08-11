@@ -1,0 +1,112 @@
+{
+  "artifact": "mlb-product-evidence-eligibility-reconciliation",
+  "version": 1,
+  "createdAt": "2026-08-11T00:00:00.000Z",
+  "startingCommit": "fec381683f832ddffeb9052abec4c5f614edf94c",
+  "runtimeCommit": "LOCAL_COMMIT_REPORTED_IN_FINAL_RESPONSE",
+  "classification": "MLB_PRODUCT_EVIDENCE_RECONCILIATION_REPAIR_READY_FOR_DEPLOYMENT",
+  "productionEvidence": {
+    "observationDate": "2026-08-11",
+    "productionCommit": "fec381683f832ddffeb9052abec4c5f614edf94c",
+    "dashboardToday": {
+      "currentGames": 15,
+      "predictionCandidates": 39,
+      "informationalCandidates": 39,
+      "officialPicks": 0,
+      "schedulerSkippedToday": 0,
+      "summaryMarketPricesBeforeRepair": "Waiting for sportsbook refresh.",
+      "blockerBeforeRepair": "market_prices_not_refreshed"
+    },
+    "currentBoard": {
+      "games": 15,
+      "candidates": 39,
+      "eventCoverage": 15,
+      "markets": {
+        "moneyline": 15,
+        "runLine": 15,
+        "total": 9
+      },
+      "officialPickCount": 0,
+      "modeledValueCount": 2
+    },
+    "dashboardSelectors": {
+      "positiveEvCandidates": 28,
+      "candidatesPassingPolicy": 0,
+      "primaryRejectionReason": "OFFICIAL_POLICY_NOT_SATISFIED",
+      "marketFreshnessState": "AGING",
+      "freshStaleContradictions": 1,
+      "latestOddsTimestamp": "2026-08-11T19:17:35.157Z"
+    },
+    "operationsHealth": {
+      "status": "HEALTHY",
+      "scheduler": "HEALTHY",
+      "currentBoard": "READY",
+      "sportsDataIoRoutineMlbCallsToday": 0
+    },
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0
+  },
+  "rootCause": {
+    "homepageCurrentDayContract": "PARTIAL_RUNTIME_AGGREGATION_DEFECT",
+    "description": "The Today service counted legacy odds-coverage diagnostics as the only stored-odds evidence for several per-game operational fields. Under The Odds API product-primary mode, Current Board candidates already carried canonical price evidence, but the Today summary still emitted market_prices_not_refreshed and sportsbook-refresh copy.",
+    "notRootCause": [
+      "event discovery",
+      "prediction generation",
+      "official pick policy",
+      "provider authority",
+      "model probability calculation",
+      "settlement",
+      "learning"
+    ]
+  },
+  "repair": {
+    "runtimeFiles": [
+      "src/services/dashboard-today.service.ts",
+      "src/components/home/HomeBettingPlan.tsx"
+    ],
+    "summary": [
+      "Reconciled games-waiting-for-odds and per-game stored-odds status with Current Board canonical product price evidence.",
+      "Kept legacy odds diagnostics available as technical evidence, but no longer allowed them to override product-priced Current Board evidence.",
+      "Updated homepage Value Candidates to show evidence-first positive EV counts separately from official-policy eligibility.",
+      "Updated homepage Games Skipped to use analyzed-game coverage instead of policy-qualified candidate count.",
+      "Added a fail-safe homepage label for market quality when stale summary copy conflicts with displayable Current Board markets."
+    ],
+    "noPolicyChange": true
+  },
+  "reconciliation": {
+    "gamesToday": 15,
+    "sportsActive": 1,
+    "performanceCanonicalPredictions": 45,
+    "currentBoardCandidates": 39,
+    "officialPicks": 0,
+    "valueEvidenceCandidates": 28,
+    "policyEligibleValueCandidates": 0,
+    "gamesSkippedAfterRepair": 0,
+    "denominatorExplanation": "Performance counts canonical market-level prediction rows. Current Board counts current exact-line product-priced candidates. Official Picks count only rows passing production recommendation policy."
+  },
+  "protectedInvariants": {
+    "predictionFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "kellyChanged": false,
+    "rankingFormulaChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "hr03StatusChanged": false,
+    "oddsAuthorityChanged": false,
+    "mlbDataSourceModeChanged": false,
+    "sportsDataIoReactivated": false,
+    "providerCallsAdded": false,
+    "databaseSchemaChanged": false,
+    "retrospectivePredictionsCreated": false
+  },
+  "validation": {
+    "validator": "scripts/mlb-product-evidence-eligibility-reconciliation-validate.mjs",
+    "build": "PASS",
+    "eslint": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "secretScan": "PASS",
+    "diffCheck": "PASS"
+  },
+  "nextRecommendedPhase": "Publish bounded repair, deploy, and perform read-only production certification that /api/dashboard/today no longer reports sportsbook refresh missing when Current Board product price evidence exists."
+}
