@@ -3335,3 +3335,7 @@ Status: Repository repair ready for natural proof. SDIO-EXIT-03A wires `DUAL_REA
 ## Production Stability Repair ODDS-03C-R2A + Scheduler Health
 
 Status: Local certification PASS, push required. The repair keeps The Odds API as Stage 3 product odds authority and MLB Official as primary non-odds source, fixes the R2 UUID persistence defect, and aligns `/api/operations/health` with real Vercel primary Stage 3 execution evidence without weakening scheduler thresholds or hiding fallback status. Next step: publish the bounded repair, deploy, then rerun SDIO-EXIT-05 zero-SportsDataIO operating-window proof.
+
+## Health Current Board Timeout Repair
+
+Status: Local certification PASS, push required. Health now treats Current Board as bounded supplemental product context instead of a hard dependency that can 500 the operations endpoint. Settlement guarantee remains focused on canonical result/prediction closure and records operations-health unavailability as a warning. Next step: publish, deploy, then re-certify health, settlement guarantee and SDIO-EXIT-05.

@@ -1866,3 +1866,7 @@ SDIO-EXIT-03A found and repaired the wiring gap that left `MLB_DATA_SOURCE_MODE=
 ## 2026-08-11 Production Stability Repair ODDS-03C-R2A + Scheduler Health
 
 ODDS-03C-R2A and Scheduler Health Reconciliation are locally certified pending push. The bounded runtime repair prevents line-versioned re-prediction composite identifiers from entering UUID columns by requiring a valid existing `feature_snapshot_id` UUID FK and keeping logical identities in text key fields. Operations health now reconciles protected lifecycle evidence with successful Stage 3 Vercel primary `sports_sync_jobs` evidence while keeping GitHub fallback health separate. Build and targeted validators pass. No provider authority, Vercel config, prediction formula, Official Pick threshold, settlement, learning, HR-03 status, or MLB data-source mode changed.
+
+## 2026-08-11 Health Current Board Timeout Repair
+
+Health Current Board Timeout Repair is locally certified pending push. The bounded repair prevents `/api/operations/health` and settlement guarantee from returning HTTP 500 when supplemental Current Board context times out. Health now uses a bounded no-MLB-context Current Board summary and reports `CURRENT_BOARD_READ_FAILED` explicitly if the board read fails. Settlement guarantee proceeds with canonical settlement reconciliation and records operations-health unavailability as a warning. No provider calls, production mutations, provider authority, prediction policy, settlement formula, learning, HR-03, or data-source mode changed.

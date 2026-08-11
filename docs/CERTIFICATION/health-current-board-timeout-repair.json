@@ -1,0 +1,44 @@
+{
+  "mode": "health_current_board_timeout_repair_v1",
+  "status": "HEALTH_CURRENT_BOARD_TIMEOUT_REPAIR_LOCAL_PASS",
+  "startingCommit": "9ff536c8d02adf11c9173d5671ad2419e7b8f86f",
+  "timeoutRootCause": "HEALTH_REQUIRED_FULL_CURRENT_BOARD_READ",
+  "failingService": "src/services/current-board.service.ts readOddsForEvents via getOperationsHealth",
+  "failingEndpoint": "/api/operations/health",
+  "secondaryEndpoint": "/api/operations/settlement-guarantee?includeValidation=true",
+  "queryScopeBefore": {
+    "caller": "getOperationsHealth",
+    "currentBoardLimit": 100,
+    "mlbContext": true,
+    "failureBehavior": "throw HTTP 500"
+  },
+  "queryScopeAfter": {
+    "caller": "safeCurrentBoardHealthSummary",
+    "currentBoardLimit": 25,
+    "mlbContext": false,
+    "authorityFilter": "existing Current Board product authority resolver",
+    "failureBehavior": "explicit degraded health evidence"
+  },
+  "settlementGuaranteeDependency": {
+    "fullBoardRequiredForSettlementMath": false,
+    "operationsHealthSupplemental": true,
+    "decoupled": true,
+    "failureBehavior": "settlement reconciliation proceeds with operational warning"
+  },
+  "safety": {
+    "stage3AuthorityFilteringPreserved": true,
+    "stage1RollbackCompatibilityPreserved": true,
+    "exactLineSemanticsChanged": false,
+    "failClosedStaleBehaviorChanged": false,
+    "healthReportsRealFailures": true,
+    "settlementSemanticsPreserved": true,
+    "sportsDataIoZeroCallDesignPreserved": true,
+    "r2Regression": "PASS",
+    "theOddsApiPrimaryRegression": "PASS",
+    "mlbOfficialPrimaryRegression": "PASS"
+  },
+  "providerCallsFromCertification": 0,
+  "productionDbMutationsFromCertification": 0,
+  "pushAuthorizationRequired": true,
+  "finalClassification": "HEALTH_CURRENT_BOARD_TIMEOUT_REPAIR_LOCAL_PASS_PUSH_REQUIRED"
+}

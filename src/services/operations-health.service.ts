@@ -88,6 +88,61 @@ async function latestPrimarySchedulerSyncJobs() {
   return { rows: data ?? [], error: null }
 }
 
+type CurrentBoardHealthSummary = Pick<Awaited<ReturnType<typeof getCurrentBoard>>,
+  | 'candidates'
+  | 'officialPickCount'
+  | 'latestOddsTimestamp'
+  | 'latestOddsSourceTimestamp'
+  | 'latestVisibleMarketSnapshotTimestamp'
+  | 'oldestVisibleMarketSnapshotTimestamp'
+  | 'dataFreshness'
+  | 'boardHealth'
+>
+
+async function safeCurrentBoardHealthSummary(): Promise<CurrentBoardHealthSummary & { readError: string | null }> {
+  try {
+    const board = await getCurrentBoard({
+      sportKey: SPORT_KEY,
+      mode: 'CURRENT',
+      limit: 25,
+      includeMlbContext: false,
+    })
+    return { ...board, readError: null }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown current board read failure'
+    return {
+      candidates: [],
+      officialPickCount: 0,
+      latestOddsTimestamp: null,
+      latestOddsSourceTimestamp: null,
+      latestVisibleMarketSnapshotTimestamp: null,
+      oldestVisibleMarketSnapshotTimestamp: null,
+      dataFreshness: {
+        status: 'empty',
+        latestOddsTimestamp: null,
+        latestOddsAgeMinutes: null,
+        maxAllowedAgeMinutes: 0,
+        nextRecommendedRefreshTime: null,
+        timestampSemantics: 'selected_visible_market_snapshot',
+        latestSourceTimestamp: null,
+        latestVisibleMarketSnapshotTimestamp: null,
+        oldestVisibleMarketSnapshotTimestamp: null,
+        visibleMarketCount: 0,
+        freshVisibleMarketCount: 0,
+        staleVisibleMarketCount: 0,
+        freshnessTimestampSource: null,
+      },
+      boardHealth: {
+        status: 'DEGRADED',
+        warnings: [`CURRENT_BOARD_READ_FAILED:${message}`],
+        providerCallsMade: 0,
+        remoteMutationsMade: 0,
+      },
+      readError: message,
+    }
+  }
+}
+
 async function settlementBacklog() {
   const { count, error } = await supabaseAdmin
     .from('prediction_history')
@@ -285,7 +340,7 @@ function schedulerDomain(input: {
 function marketDomain(input: {
   observedAt: string
   oddsFreshness: ReturnType<typeof freshnessByDomain>
-  board: Awaited<ReturnType<typeof getCurrentBoard>>
+  board: CurrentBoardHealthSummary
   adaptiveBlockers: string[]
   nextDueAt: string | null
 }): CanonicalHealthDomain {
@@ -301,6 +356,7 @@ function marketDomain(input: {
           : 'HEALTHY'
   const reasonCodes = [
     status === 'HEALTHY' ? 'MARKET_FRESH' : null,
+    input.board.boardHealth.warnings.some((warning) => warning.startsWith('CURRENT_BOARD_READ_FAILED')) ? 'CURRENT_BOARD_READ_FAILED' : null,
     oddsStatus === 'PENDING' || boardFreshness === 'empty' ? 'NO_ODDS_AVAILABLE' : null,
     oddsStatus === 'STALE' || boardFreshness === 'stale' ? 'STALE_ODDS' : null,
     boardFreshness === 'partial' ? 'PARTIAL_MARKET_FRESHNESS' : null,
@@ -331,7 +387,10 @@ function marketDomain(input: {
       independenceRule: 'Market freshness never falls back to scheduler invocation time, page fetch time, or API generatedAt.',
     },
     blockers: status === 'CRITICAL' ? ['market_freshness_critical'] : [],
-    warnings: status === 'DEGRADED' ? ['market_freshness_degraded'] : [],
+    warnings: [
+      ...(status === 'DEGRADED' ? ['market_freshness_degraded'] : []),
+      ...input.board.boardHealth.warnings.filter((warning) => warning.startsWith('CURRENT_BOARD_READ_FAILED')),
+    ],
     nextExpectedAction: input.nextDueAt,
     humanInterventionRequired: status === 'CRITICAL' && input.adaptiveBlockers.includes('odds_not_current'),
   }
@@ -557,7 +616,7 @@ export async function getOperationsHealth() {
       tableExists('provider_entity_mappings'),
     ]),
     getUniversalProjectionEngine({ sportKey: SPORT_KEY, date: undefined, dryRun: true }),
-    getCurrentBoard({ sportKey: SPORT_KEY, mode: 'CURRENT', limit: 100 }),
+    safeCurrentBoardHealthSummary(),
   ])
   const statusRefresh = await statusRefreshEvidence(lifecycle.rows as Array<Record<string, unknown>>)
   const lifecycleRows = lifecycle.rows as Array<Record<string, unknown>>
@@ -634,6 +693,7 @@ export async function getOperationsHealth() {
     lifecycle.error ? `lifecycle_ledger_read_failed:${lifecycle.error}` : null,
     primarySyncJobs.error ? `primary_scheduler_sync_jobs_read_failed:${primarySyncJobs.error}` : null,
     backlog.error ? `settlement_backlog_read_failed:${backlog.error}` : null,
+    board.readError ? `current_board_read_failed:${board.readError}` : null,
   ].filter(Boolean) as string[]
   const projectionBlocked = Number(projections.projectionHealth?.blocked ?? 0)
   const projectionVisible = userVisibleProjections

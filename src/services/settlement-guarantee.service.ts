@@ -67,7 +67,12 @@ function settlementState(row: PredictionRow, result: ResultRow | undefined, even
 
 export async function getSettlementGuaranteeStatus({ lookbackDays = 2 }: { lookbackDays?: number } = {}) {
   const range = rangeForLookback(lookbackDays)
-  const operationsHealth = await getOperationsHealth()
+  const operationsHealth = await getOperationsHealth().catch((error) => ({
+    status: 'UNKNOWN',
+    scheduler: null,
+    healthDomains: null,
+    error: error instanceof Error ? error.message : 'unknown operations health failure',
+  }))
   const scheduler = operationsHealth.scheduler ?? null
   const healthDomains = operationsHealth.healthDomains ?? null
   const { data: predictions, error } = await supabaseAdmin
@@ -139,6 +144,7 @@ export async function getSettlementGuaranteeStatus({ lookbackDays = 2 }: { lookb
   ].filter(Boolean) as string[]
   const operationalWarningReasons = [
     schedulerLate ? 'SCHEDULER_LATE_OR_CRITICAL' : null,
+    'error' in operationsHealth && operationsHealth.error ? `OPERATIONS_HEALTH_UNAVAILABLE:${operationsHealth.error}` : null,
   ].filter(Boolean) as string[]
   const success = actionRequiredReasons.length === 0
 
