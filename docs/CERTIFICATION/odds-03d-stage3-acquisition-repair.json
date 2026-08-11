@@ -1,0 +1,67 @@
+{
+  "certification": "ODDS_03D_STAGE3_ACQUISITION_REPAIR",
+  "status": "ODDS_03D_STAGE3_ACQUISITION_REPAIR_READY_FOR_DEPLOYMENT",
+  "startingCommit": "89c7a653d8da3a52e6250d8033a86c42cd6f4935",
+  "rollback": {
+    "stage": "STAGE_1_DUAL_READ",
+    "certified": true,
+    "productionCommit": "89c7a653d8da3a52e6250d8033a86c42cd6f4935",
+    "productAuthority": "SPORTSDATAIO",
+    "theOddsApiShadowOnly": true,
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0
+  },
+  "rootCause": "STAGE_3_AUTHORITY_NOT_WIRED_TO_ACQUISITION",
+  "repair": {
+    "sharedAcquisitionPrimitive": true,
+    "stage1JobType": "odds03a_natural_dual_read_v1",
+    "stage3JobType": "odds03d_stage3_product_primary_v1",
+    "stage1ShadowSemanticsPreserved": true,
+    "stage3ProductPrimaryExecutable": true,
+    "stage3SkippedDueToStage1Guard": false,
+    "oneLeagueWideRequestPerDedupeWindow": true,
+    "perEventFanout": false,
+    "perBookFanout": false,
+    "certifiedMarkets": ["h2h", "spreads", "totals"],
+    "providerAccountingSeparated": true,
+    "sourceTimestampsRetained": true,
+    "exactLineSafetyPreserved": true,
+    "failClosedPreserved": true
+  },
+  "stageMatrix": {
+    "STAGE_0_SPORTSDATAIO_AUTHORITY": {
+      "sportsDataIoExecutes": true,
+      "theOddsApiExecutes": false,
+      "productAuthority": "SPORTSDATAIO",
+      "writerPersistence": "NON_PERSISTENT"
+    },
+    "STAGE_1_DUAL_READ": {
+      "sportsDataIoExecutes": true,
+      "theOddsApiExecutes": true,
+      "productAuthority": "SPORTSDATAIO",
+      "theOddsApiAuthorityStatus": "SHADOW_NON_AUTHORITATIVE",
+      "writerPersistence": "NON_PERSISTENT"
+    },
+    "STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT": {
+      "sportsDataIoExecutes": true,
+      "sportsDataIoRole": "ROLLBACK_CONTEXT_ONLY",
+      "theOddsApiExecutes": true,
+      "productAuthority": "THE_ODDS_API",
+      "theOddsApiAuthorityStatus": "PRODUCT_AUTHORITATIVE",
+      "writerPersistence": "PERSISTENT_CAPABLE"
+    }
+  },
+  "guardrails": {
+    "stage3RePromoted": false,
+    "sportsDataIoDisabled": false,
+    "mlbDataSourceModeChanged": false,
+    "officialPickThresholdsChanged": false,
+    "hr03CalibrationStatus": "SHADOW_ONLY",
+    "settlementChanged": false,
+    "learningChanged": false,
+    "predictionFormulaChanged": false,
+    "providerCallsDuringLocalValidation": 0,
+    "productionDatabaseMutationsDuringCertificationReads": 0
+  },
+  "nextPhase": "ODDS_03D_STAGE3_REPROMOTION_PROOF_AFTER_EXPLICIT_AUTHORIZATION"
+}

@@ -101,6 +101,25 @@ Under Stage 1, the line-versioned writer records no prediction writes. It
 reports moved-line eligibility, dedupe, blocked cases, and would-create counts
 from already-acquired market evidence.
 
+ODDS-03D repairs the Stage 3 scheduler wiring by keeping one shared The Odds
+API league-wide acquisition primitive and making the persisted authority
+semantics stage-specific:
+
+| Stage | The Odds API acquisition | Product price authority | Persisted odds metadata | R2 writer |
+| --- | --- | --- | --- | --- |
+| `STAGE_0_SPORTSDATAIO_AUTHORITY` | Skipped | SportsDataIO | n/a | Non-persistent |
+| `STAGE_1_DUAL_READ` | Executes once per eligible dedupe window | SportsDataIO | `SHADOW_NON_AUTHORITATIVE`, `productPriceAuthority = false` | Non-persistent would-write |
+| `STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT` | Executes once per eligible dedupe window | The Odds API | `PRODUCT_AUTHORITATIVE`, `productPriceAuthority = true` | Persistent-capable when gates pass |
+
+The Stage 3 path no longer relies on a Stage 1-only guard. Provider logic,
+event mapping, market normalization, exact-line identity, certified-book
+filtering, source timestamp retention, and quota accounting remain shared.
+Stage 3 writes a distinct `sports_sync_jobs.job_type` of
+`odds03d_stage3_product_primary_v1` so product-primary acquisition can be
+audited separately from Stage 1 shadow acquisition. SportsDataIO may continue
+temporarily as rollback/context evidence until SDIO-EXIT-05, but it must not
+override The Odds API product price selection while Stage 3 is active.
+
 The Vercel primary scheduler continues using the existing protected endpoint and does not create a competing scheduler.
 
 ## Rollback

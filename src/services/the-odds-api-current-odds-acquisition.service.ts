@@ -16,6 +16,12 @@ const CONFIRMATION = 'ODDS_API_CURRENT_ODDS_V1'
 const CREDIT_RESERVE = 2000
 const HARD_CALL_BUDGET = 18
 const CORE_MARKETS = ['h2h', 'spreads', 'totals'] as const
+const STAGE1_SHADOW_ACCOUNTING = {
+  job_type: 'odds03a_natural_dual_read_v1',
+  productPriceAuthority: false,
+  production_eligible: false,
+} as const
+const STAGE3_PRODUCT_PRIMARY_JOB_TYPE = 'odds03d_stage3_product_primary_v1'
 
 type ProviderSport = {
   key: string
@@ -516,6 +522,8 @@ function normalizeMlbDualReadRows({
   acquisitionId,
   observedAt,
   deduplicationKey,
+  authority,
+  jobType,
 }: {
   providerEvents: ProviderEvent[]
   lifecycleEvents: LifecycleEventRow[]
@@ -523,6 +531,8 @@ function normalizeMlbDualReadRows({
   acquisitionId: string
   observedAt: string
   deduplicationKey: string
+  authority: ReturnType<typeof getOddsPrimaryAuthorityRuntimeStatus>
+  jobType: string
 }) {
   const rows: OddsRow[] = []
   const mappings: MappingRow[] = []
@@ -608,6 +618,10 @@ function normalizeMlbDualReadRows({
             continue
           }
           const minute = snapshotTime.slice(0, 16)
+          const authorityStatus = authority.productAuthority === 'THE_ODDS_API'
+            ? 'PRODUCT_AUTHORITATIVE'
+            : 'SHADOW_NON_AUTHORITATIVE'
+          const productPriceAuthority = authority.productAuthority === 'THE_ODDS_API'
           const id = `oddsapi_shadow_${hash(['odds03a', canonicalEvent.id, sportsbook, providerMarket, outcomeKey, line, minute])}`
           rows.push({
             id,
@@ -625,11 +639,11 @@ function normalizeMlbDualReadRows({
             is_opening: false,
             is_closing: false,
             metadata: {
-              checkpoint: 'odds03a_natural_dual_read_v1',
-              authorityStatus: 'SHADOW_NON_AUTHORITATIVE',
-              oddsPrimaryAuthorityStage: 'STAGE_1_DUAL_READ',
-              productPriceAuthority: false,
-              productionAuthority: false,
+              checkpoint: jobType,
+              authorityStatus,
+              oddsPrimaryAuthorityStage: authority.stage,
+              productPriceAuthority: productPriceAuthority ? true : STAGE1_SHADOW_ACCOUNTING.productPriceAuthority,
+              productionAuthority: productPriceAuthority,
               providerSportKey: providerEvent.sport_key ?? 'baseball_mlb',
               providerEventId: providerEvent.id,
               providerMarketKey: providerMarket,
@@ -642,10 +656,10 @@ function normalizeMlbDualReadRows({
               canonicalAcquisitionId: acquisitionId,
               deduplicationKey,
               mappingReason: mapping.reason,
-              source: 'odds03a_natural_dual_read_v1',
-              oddsClassification: 'shadow_pregame',
-              validation_status: 'shadow',
-              production_eligible: false,
+              source: jobType,
+              oddsClassification: productPriceAuthority ? 'product_primary_pregame' : 'shadow_pregame',
+              validation_status: productPriceAuthority ? 'product_primary' : 'shadow',
+              production_eligible: productPriceAuthority ? true : STAGE1_SHADOW_ACCOUNTING.production_eligible,
             },
             updated_at: observedAt,
           })
@@ -672,7 +686,6 @@ async function existingDualReadJob(deduplicationKey: string) {
     .select('id, completed_at, status, metadata')
     .eq('provider', PROVIDER)
     .eq('sport_key', 'baseball_mlb')
-    .eq('job_type', 'odds03a_natural_dual_read_v1')
     .in('status', ['completed', 'partial'])
     .order('completed_at', { ascending: false })
     .limit(25)
@@ -683,13 +696,17 @@ async function existingDualReadJob(deduplicationKey: string) {
 export async function executeTheOddsApiMlbDualReadAcquisition(input: DualReadOptions) {
   const requestedAt = nowIso()
   const authority = getOddsPrimaryAuthorityRuntimeStatus()
+  const productPrimary = authority.productAuthority === 'THE_ODDS_API'
+  const stageAllowsAcquisition = authority.stage === 'STAGE_1_DUAL_READ' || authority.stage === 'STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT'
+  const jobType = productPrimary ? STAGE3_PRODUCT_PRIMARY_JOB_TYPE : STAGE1_SHADOW_ACCOUNTING.job_type
+  const checkpoint = jobType
   const selectedIds = selectedEventIds(input.eventPlans)
   const source = input.source ?? 'adaptive_refresh_execution_bridge_v2'
   const dedupeWindow = tenMinuteDedupeWindow(requestedAt)
-  const deduplicationKey = hash([PROVIDER, 'baseball_mlb', 'odds03a_dual_read', input.operatingDate, selectedIds.join(','), dedupeWindow])
+  const deduplicationKey = hash([PROVIDER, 'baseball_mlb', jobType, input.operatingDate, selectedIds.join(','), dedupeWindow])
   const acquisitionId = `odds03a_${hash([deduplicationKey, input.requestId ?? requestedAt])}`
   const base = {
-    mode: 'odds03a_natural_dual_read_acquisition_v1',
+    mode: productPrimary ? 'odds03d_stage3_product_primary_acquisition_v1' : 'odds03a_natural_dual_read_acquisition_v1',
     generatedAt: requestedAt,
     provider: PROVIDER,
     sportKey: 'baseball_mlb',
@@ -697,8 +714,10 @@ export async function executeTheOddsApiMlbDualReadAcquisition(input: DualReadOpt
     operatingDate: input.operatingDate,
     authorityStage: authority.stage,
     productAuthority: authority.productAuthority,
-    theOddsApiShadowOnly: true,
+    theOddsApiShadowOnly: !productPrimary,
     sportsDataIoRemainsProductAuthority: authority.productAuthority === 'SPORTSDATAIO',
+    productPriceAuthority: productPrimary,
+    jobType,
     acquisitionId,
     deduplicationKey,
     selectedEventIds: selectedIds,
@@ -713,11 +732,11 @@ export async function executeTheOddsApiMlbDualReadAcquisition(input: DualReadOpt
   if (input.dryRun) {
     return { ...base, success: true, status: 'DRY_RUN', warnings: ['Dry run made zero provider calls and zero mutations.'] }
   }
-  if (authority.stage !== 'STAGE_1_DUAL_READ') {
-    return { ...base, success: true, status: 'SKIPPED_STAGE_NOT_DUAL_READ', warnings: [`Current stage is ${authority.stage}.`] }
+  if (!stageAllowsAcquisition) {
+    return { ...base, success: true, status: 'SKIPPED_STAGE_NOT_ACQUISITION_ENABLED', warnings: [`Current stage is ${authority.stage}.`] }
   }
-  if (authority.productAuthority !== 'SPORTSDATAIO') {
-    return { ...base, success: false, status: 'BLOCKED_PRODUCT_AUTHORITY_NOT_SPORTSDATAIO', warnings: ['ODDS-03A only wires shadow dual-read while SportsDataIO remains product authority.'] }
+  if (!productPrimary && authority.productAuthority !== 'SPORTSDATAIO') {
+    return { ...base, success: false, status: 'BLOCKED_UNSUPPORTED_STAGE_AUTHORITY_COMBINATION', warnings: ['Stage 1 shadow acquisition requires SportsDataIO product authority.'] }
   }
   if (!boolFromEnv('THE_ODDS_API_DUAL_READ_ENABLED', true)) {
     return { ...base, success: true, status: 'SKIPPED_DUAL_READ_DISABLED', warnings: ['THE_ODDS_API_DUAL_READ_ENABLED disables natural dual-read.'] }
@@ -757,6 +776,8 @@ export async function executeTheOddsApiMlbDualReadAcquisition(input: DualReadOpt
     acquisitionId,
     observedAt,
     deduplicationKey,
+    authority,
+    jobType,
   })
   const existingOdds = await existingIdCount('sports_odds_snapshots', normalized.rows.map((row) => row.id))
   const existingMappings = await existingIdCount('provider_entity_mappings', normalized.mappings.map((row) => row.provider_id))
@@ -780,7 +801,7 @@ export async function executeTheOddsApiMlbDualReadAcquisition(input: DualReadOpt
   const jobStatus = firstCall?.ok === false || normalized.ambiguousEvents.length ? 'partial' : 'completed'
   const { error: jobError } = await supabaseAdmin.from('sports_sync_jobs').insert({
     id: randomUUID(),
-    job_type: 'odds03a_natural_dual_read_v1',
+    job_type: jobType,
     sport_key: 'baseball_mlb',
     league_key: 'mlb',
     provider: PROVIDER,
@@ -794,7 +815,7 @@ export async function executeTheOddsApiMlbDualReadAcquisition(input: DualReadOpt
     records_skipped: normalized.rowsRejected,
     error_count: normalized.ambiguousEvents.length + normalized.unmappedEvents.length,
     metadata: {
-      checkpoint: 'odds03a_natural_dual_read_v1',
+      checkpoint,
       provider: PROVIDER,
       sportKey: 'baseball_mlb',
       externalCallsUsed: state.calls.length,
@@ -808,8 +829,11 @@ export async function executeTheOddsApiMlbDualReadAcquisition(input: DualReadOpt
       requestId: input.requestId ?? null,
       authorityStage: authority.stage,
       productAuthority: authority.productAuthority,
-      shadowOnly: true,
-      productPriceAuthority: false,
+      shadowOnly: !productPrimary,
+      productPriceAuthority: productPrimary,
+      authorityStatus: productPrimary ? 'PRODUCT_AUTHORITATIVE' : 'SHADOW_NON_AUTHORITATIVE',
+      stageSemantics: productPrimary ? 'THE_ODDS_API_PRODUCT_PRIMARY' : 'SPORTSDATAIO_PRODUCT_THE_ODDS_API_SHADOW',
+      sportsDataIoRole: productPrimary ? 'ROLLBACK_CONTEXT_ONLY' : 'PRODUCT_PRICE_AUTHORITY',
       endpoint: firstCall?.endpoint ?? null,
       selectedEventCount: selectedIds.length,
       providerEventsReturned: providerEvents.length,
@@ -827,7 +851,9 @@ export async function executeTheOddsApiMlbDualReadAcquisition(input: DualReadOpt
   return {
     ...base,
     success: state.calls.length === 1 && firstCall?.ok !== false && normalized.ambiguousEvents.length === 0,
-    status: jobStatus === 'completed' ? 'LIVE_SHADOW_ACQUISITION_PERSISTED' : 'LIVE_SHADOW_ACQUISITION_PARTIAL',
+    status: productPrimary
+      ? jobStatus === 'completed' ? 'LIVE_PRODUCT_PRIMARY_ACQUISITION_PERSISTED' : 'LIVE_PRODUCT_PRIMARY_ACQUISITION_PARTIAL'
+      : jobStatus === 'completed' ? 'LIVE_SHADOW_ACQUISITION_PERSISTED' : 'LIVE_SHADOW_ACQUISITION_PARTIAL',
     providerCallsMade: state.calls.length,
     providerCreditsConsumed: creditsUsed,
     remoteMutationsMade: normalized.rows.length + normalized.mappings.length + 1,
@@ -846,7 +872,9 @@ export async function executeTheOddsApiMlbDualReadAcquisition(input: DualReadOpt
     markets: normalized.markets,
     planObserved: state.calls,
     warnings: [
-      'The Odds API rows are persisted as shadow/non-authoritative evidence only.',
+      productPrimary
+        ? 'The Odds API rows are persisted as product-primary evidence for exact-line product selection.'
+        : 'The Odds API rows are persisted as shadow/non-authoritative evidence only.',
       'Current Board product pricing remains filtered to the configured product authority provider.',
       ...normalized.unmappedEvents.map((id) => `UNMAPPED_EVENT:${id}`),
       ...normalized.ambiguousEvents.map((id) => `AMBIGUOUS_EVENT:${id}`),
