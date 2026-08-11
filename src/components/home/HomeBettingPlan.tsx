@@ -161,7 +161,7 @@ type RentPlayStatus =
   | 'NO_GAMES'
   | 'UNKNOWN'
 
-type RentPlayGateStatus = 'PASS' | 'FAIL' | 'PENDING' | 'NOT_AVAILABLE'
+type RentPlayGateStatus = 'PASS' | 'FAIL' | 'PENDING' | 'NOT_AVAILABLE' | 'OPTIONAL'
 
 type MoneylineBetStatus =
   | 'ACTIONABLE'
@@ -944,7 +944,8 @@ function buildMoneylineBetContract(plan: ReturnType<typeof pickPlan>, rentPlay: 
   const counts = applicableGateCounts(gates)
   const failed = gates.filter((item) => item.status === 'FAIL')
   const pending = gates.filter((item) => item.status === 'PENDING')
-  const actionable = Boolean(candidate) && counts.failedGateCount === 0 && counts.pendingGateCount === 0 && Number(candidate?.edge ?? 0) > 0 && candidate?.ev !== null && Number(candidate?.ev) >= 0 && isFreshnessActionable(candidate)
+  const blockingGates = blockingRecommendationGates(gates)
+  const actionable = Boolean(candidate) && blockingGates.length === 0 && Number(candidate?.edge ?? 0) > 0 && candidate?.ev !== null && Number(candidate?.ev) >= 0 && isFreshnessActionable(candidate)
   const status: MoneylineBetStatus = !plan.candidates.length
     ? 'NO_GAMES'
     : !moneylineUniverse.length
@@ -956,14 +957,14 @@ function buildMoneylineBetContract(plan: ReturnType<typeof pickPlan>, rentPlay: 
           : failed.some((item) => item.id === 'policy_blockers' || item.id === 'data_quality' || item.id === 'moneyline_market_support')
             ? 'POLICY_BLOCKED'
             : candidate
-              ? 'REVIEW_ONLY'
+              ? 'NO_ELIGIBLE_MONEYLINE'
               : 'NO_ELIGIBLE_MONEYLINE'
 
   const impliedProbability = candidate ? impliedFromAmerican(candidate.odds) : null
   const modelProbability = candidate?.probability ?? null
   const probabilityAdvantage = modelProbability !== null && impliedProbability !== null ? Number((modelProbability - impliedProbability).toFixed(2)) : null
   const rank = candidate ? moneylineUniverse.findIndex((item) => item.id === candidate.id) + 1 : null
-  const rentPlayOverlap = Boolean(candidate && rentPlay.candidate && candidate.event === rentPlay.eventLabel && candidate.selection === rentPlay.selectionLabel && candidate.market === rentPlay.marketLabel)
+  const rentPlayOverlap = rentPlay.status === 'ACTIONABLE' && Boolean(candidate && rentPlay.candidate && candidate.event === rentPlay.eventLabel && candidate.selection === rentPlay.selectionLabel && candidate.market === rentPlay.marketLabel)
   const mostLikelyOverlap = candidate?.source === 'Most Likely' || candidate?.id === 'most-likely'
   const bestValueOverlap = candidate?.source === 'Best Value' || candidate?.id === 'best-value'
 
@@ -986,12 +987,13 @@ function buildMoneylineBetContract(plan: ReturnType<typeof pickPlan>, rentPlay: 
     ]
     : ['No comparison is available because no supported current Moneyline candidate is available.']
 
-  const riskReasons = [
+  const riskReasons = uniqueList([
     ...failed.slice(0, 4).map((item) => item.detail),
     ...pending.slice(0, 3).map((item) => item.detail),
+    ...gates.filter((item) => item.status === 'NOT_AVAILABLE').slice(0, 4).map((item) => item.detail),
     probabilityAdvantage !== null && probabilityAdvantage <= 1 ? 'Probability advantage is small.' : '',
     candidate?.ev === null ? 'EV is unavailable.' : '',
-  ].filter(Boolean)
+  ])
 
   return {
     contractVersion: 'moneyline_bet_v1',
@@ -1041,14 +1043,7 @@ function buildMoneylineBetContract(plan: ReturnType<typeof pickPlan>, rentPlay: 
     riskReasons: riskReasons.length ? riskReasons : ['No additional risks were exposed by current stored evidence.'],
     blockers: failed.map((item) => item.label),
     warnings: pending.map((item) => item.label),
-    whatWouldChangeTheDecision: [
-      'Current moneyline price changes enough to remove the existing advantage.',
-      'Market price becomes stale, future-dated, unavailable or closed.',
-      'Another Moneyline candidate becomes stronger under existing certified ranking evidence.',
-      'New injury or lineup evidence changes eligibility before game start.',
-      'Confidence, edge, EV or policy evidence no longer passes.',
-      'The event begins.',
-    ],
+    whatWouldChangeTheDecision: buildStateAwareDecisionCopy('moneyline', actionable, gates),
     candidateCount: moneylineUniverse.length,
     eligibleCandidateCount: eligibleUniverse.length,
     rankWithinMoneylineUniverse: rank,
@@ -1111,8 +1106,8 @@ function planPickToParlayLeg(
   moneyline: MoneylineBetContract,
 ): SmartParlayLeg {
   const gates = buildSmartParlayLegGates(pick)
-  const rentPlayOverlap = Boolean(rentPlay.candidate && pick.event === rentPlay.eventLabel && pick.selection === rentPlay.selectionLabel && pick.market === rentPlay.marketLabel)
-  const moneylineOverlap = Boolean(moneyline.candidate && pick.event === moneyline.eventLabel && pick.selection === moneyline.selectionLabel && pick.marketKey === moneyline.marketKey)
+  const rentPlayOverlap = rentPlay.status === 'ACTIONABLE' && Boolean(rentPlay.candidate && pick.event === rentPlay.eventLabel && pick.selection === rentPlay.selectionLabel && pick.market === rentPlay.marketLabel)
+  const moneylineOverlap = moneyline.status === 'ACTIONABLE' && Boolean(moneyline.candidate && pick.event === moneyline.eventLabel && pick.selection === moneyline.selectionLabel && pick.marketKey === moneyline.marketKey)
   return {
     legId: pick.id,
     eventId: pick.eventId,
@@ -1380,8 +1375,8 @@ function watchlistReason(
   parlay: SmartParlayContract,
   actionability: WatchlistActionability,
 ): WatchlistReason {
-  const rentOverlap = Boolean(rentPlay.candidate && item.event === rentPlay.eventLabel && item.selection === rentPlay.selectionLabel && item.market === rentPlay.marketLabel)
-  const moneylineOverlap = Boolean(moneyline.candidate && item.event === moneyline.eventLabel && item.selection === moneyline.selectionLabel && item.marketKey === moneyline.marketKey)
+  const rentOverlap = rentPlay.status === 'ACTIONABLE' && Boolean(rentPlay.candidate && item.event === rentPlay.eventLabel && item.selection === rentPlay.selectionLabel && item.market === rentPlay.marketLabel)
+  const moneylineOverlap = moneyline.status === 'ACTIONABLE' && Boolean(moneyline.candidate && item.event === moneyline.eventLabel && item.selection === moneyline.selectionLabel && item.marketKey === moneyline.marketKey)
   const parlayOverlap = parlay.availableLegs.some((leg) => leg.eventLabel === item.event && leg.selectionLabel === item.selection && leg.marketKey === item.marketKey)
   if (rentOverlap && actionability !== 'ACTIONABLE') return 'NEAR_RENT_PLAY'
   if (moneylineOverlap && actionability !== 'ACTIONABLE') return 'NEAR_MONEYLINE'
@@ -1414,8 +1409,8 @@ function planPickToWatchlistItem(
   const actionability = watchlistActionability(item, gates)
   const reason = watchlistReason(item, rentPlay, moneyline, parlay, actionability)
   const priority = watchlistPriority(reason, actionability)
-  const rentOverlap = Boolean(rentPlay.candidate && item.event === rentPlay.eventLabel && item.selection === rentPlay.selectionLabel && item.market === rentPlay.marketLabel)
-  const moneylineOverlap = Boolean(moneyline.candidate && item.event === moneyline.eventLabel && item.selection === moneyline.selectionLabel && item.marketKey === moneyline.marketKey)
+  const rentOverlap = rentPlay.status === 'ACTIONABLE' && Boolean(rentPlay.candidate && item.event === rentPlay.eventLabel && item.selection === rentPlay.selectionLabel && item.market === rentPlay.marketLabel)
+  const moneylineOverlap = moneyline.status === 'ACTIONABLE' && Boolean(moneyline.candidate && item.event === moneyline.eventLabel && item.selection === moneyline.selectionLabel && item.marketKey === moneyline.marketKey)
   const parlayOverlap = parlay.availableLegs.some((leg) => leg.eventLabel === item.event && leg.selectionLabel === item.selection && leg.marketKey === item.marketKey)
   const supportingEvidence = [
     `Source: ${item.source}`,
@@ -1636,7 +1631,7 @@ function gate(id: string, labelText: string, status: RentPlayGateStatus, detail:
 }
 
 function applicableGateCounts(gates: RentPlayGate[]) {
-  const applicable = gates.filter((item) => item.status !== 'NOT_AVAILABLE')
+  const applicable = gates.filter((item) => item.status !== 'OPTIONAL')
   return {
     passedGateCount: applicable.filter((item) => item.status === 'PASS').length,
     failedGateCount: applicable.filter((item) => item.status === 'FAIL').length,
@@ -1645,13 +1640,66 @@ function applicableGateCounts(gates: RentPlayGate[]) {
   }
 }
 
+function blockingRecommendationGates(gates: RentPlayGate[]) {
+  return gates.filter((item) => item.status === 'FAIL' || item.status === 'PENDING' || item.status === 'NOT_AVAILABLE')
+}
+
+function uniqueList(values: Array<string | null | undefined>) {
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const value of values) {
+    const normalized = String(value ?? '').trim()
+    if (!normalized) continue
+    const key = normalized.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    result.push(normalized)
+  }
+  return result
+}
+
 function isFreshnessActionable(pick: PlanPick | null) {
   if (!pick) return false
   const freshness = pick.freshness.toUpperCase()
   const actionability = String(pick.freshnessActionability ?? '').toUpperCase()
+  if (!pick.marketTimestamp) return false
+  if (/UNAVAILABLE|UNKNOWN|PENDING/.test(freshness)) return false
   return !['STALE', 'INVALID_FUTURE', 'POST_START', 'MARKET_CLOSED', 'UNKNOWN_TIMESTAMP'].includes(freshness) &&
     !['BLOCKED', 'WAIT_FOR_REFRESH', 'UNAVAILABLE'].includes(actionability) &&
     !isFutureTimestamp(pick.marketTimestamp ?? null)
+}
+
+function buildStateAwareDecisionCopy(surface: 'rent' | 'moneyline' | 'parlay', actionable: boolean, gates: RentPlayGate[]) {
+  if (actionable) {
+    if (surface === 'parlay') {
+      return [
+        'A selected leg becomes stale, unavailable, post-start or unsupported.',
+        'A selected price changes or disappears.',
+        'Correlation becomes blocked by duplicate or direct-opposite evidence.',
+        'A certified joint-probability method becomes available and changes the risk view.',
+      ]
+    }
+    return [
+      'Current price changes enough to remove the existing advantage.',
+      'Market evidence becomes stale, future-dated, unavailable or closed.',
+      'Confidence, edge, EV or policy evidence no longer passes.',
+      'The event begins.',
+    ]
+  }
+
+  const blocking = blockingRecommendationGates(gates)
+  const improvements = blocking.map((item) => {
+    if (/fresh/i.test(item.label)) return 'Fresh exact-line market evidence becomes available before start.'
+    if (/odds|price|moneyline/i.test(item.label)) return 'Current exact-line sportsbook odds become available.'
+    if (/probability/i.test(item.label)) return 'Model probability evidence is available for the same market identity.'
+    if (/confidence/i.test(item.label)) return 'Confidence evidence clears the existing policy requirement.'
+    if (/edge/i.test(item.label)) return 'Positive edge is established from the existing formula.'
+    if (/\bEV\b|ev policy|value/i.test(item.label)) return 'EV becomes available and policy-compliant.'
+    if (/official|policy|data quality|calibration/i.test(item.label)) return 'Production policy, calibration or data-quality blockers clear.'
+    if (/pregame|event/i.test(item.label)) return 'The event remains pregame and cutoff-safe.'
+    return item.detail
+  })
+  return uniqueList(improvements).slice(0, 6)
 }
 
 function buildRentPlayGates(pick: PlanPick | null): RentPlayGate[] {
@@ -1717,7 +1765,8 @@ function buildRentPlayContract(plan: ReturnType<typeof pickPlan>): RentPlayContr
   const counts = applicableGateCounts(gates)
   const failed = gates.filter((item) => item.status === 'FAIL')
   const pending = gates.filter((item) => item.status === 'PENDING')
-  const actionable = Boolean(candidate) && counts.failedGateCount === 0 && counts.pendingGateCount === 0 && Number(candidate?.probability ?? 0) > 50 && isFreshnessActionable(candidate)
+  const blockingGates = blockingRecommendationGates(gates)
+  const actionable = Boolean(candidate) && blockingGates.length === 0 && Number(candidate?.probability ?? 0) > 50 && Number(candidate?.edge ?? 0) > 0 && candidate?.ev !== null && Number(candidate?.ev) >= 0 && isFreshnessActionable(candidate)
   const status: RentPlayStatus = !plan.candidates.length
     ? 'NO_GAMES'
     : actionable
@@ -1727,7 +1776,7 @@ function buildRentPlayContract(plan: ReturnType<typeof pickPlan>): RentPlayContr
         : failed.some((item) => item.id === 'policy_blockers' || item.id === 'official_status')
           ? 'POLICY_BLOCKED'
           : candidate
-            ? 'REVIEW_ONLY'
+            ? 'NO_ELIGIBLE_PLAY'
             : 'NO_ELIGIBLE_PLAY'
 
   const impliedProbability = candidate ? impliedFromAmerican(candidate.odds) : null
@@ -1745,10 +1794,11 @@ function buildRentPlayContract(plan: ReturnType<typeof pickPlan>): RentPlayContr
     ]
     : ['No current candidate satisfies the Rent Play contract.']
 
-  const riskReasons = [
+  const riskReasons = uniqueList([
     ...failed.slice(0, 4).map((item) => item.detail),
     ...pending.slice(0, 3).map((item) => item.detail),
-  ].filter(Boolean)
+    ...gates.filter((item) => item.status === 'NOT_AVAILABLE').slice(0, 4).map((item) => item.detail),
+  ])
 
   return {
     contractVersion: 'rent_play_v1',
@@ -1785,13 +1835,7 @@ function buildRentPlayContract(plan: ReturnType<typeof pickPlan>): RentPlayContr
     riskReasons: riskReasons.length ? riskReasons : ['No additional risks were exposed by current stored evidence.'],
     blockers: failed.map((item) => item.label),
     warnings: pending.map((item) => item.label),
-    whatWouldChangeTheDecision: [
-      'Market price becomes stale or future-dated.',
-      'Model probability falls to 50% or below for a standard binary market.',
-      'Edge or EV becomes unavailable or non-positive.',
-      'Current policy blockers appear before game start.',
-      'New lineup, injury or data-quality evidence changes the stored recommendation evidence.',
-    ],
+    whatWouldChangeTheDecision: buildStateAwareDecisionCopy('rent', actionable, gates),
     sourceSurface: candidate?.source ?? 'No eligible source',
     sourceRowId: candidate?.id ?? null,
     canonicalAcquisitionId: null,
@@ -1897,7 +1941,7 @@ function DailyBrief({
         <MiniMetric label="Sports Active" value={gamesToday > 0 ? 1 : 0} />
         <MiniMetric label="Predictions" value={predictions} />
         <MiniMetric label="Official Picks" value={official} />
-        <MiniMetric label="Value Candidates" value={value} />
+        <MiniMetric label="Value Signals" value={value} />
         <MiniMetric label="Games Skipped" value={skipped} />
       </div>
 
@@ -1909,7 +1953,7 @@ function DailyBrief({
       </div>
 
       <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-        Snapshot captured: {compactDate(snapshotCapturedAt)}
+        Market evidence: {compactDate(snapshotCapturedAt)}
       </p>
     </section>
   )
@@ -1933,17 +1977,19 @@ function moneylineStatusTone(status: MoneylineBetStatus): Tone {
 
 function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
   const pick = moneyline.candidate
+  const primaryPick = moneyline.status === 'ACTIONABLE' ? pick : null
+  const reviewPick = moneyline.status === 'ACTIONABLE' ? null : pick ?? moneyline.closestCandidate
   const closest = moneyline.closestCandidate
-  const readinessDenominator = moneyline.passedGateCount + moneyline.failedGateCount + moneyline.pendingGateCount
+  const readinessDenominator = moneyline.passedGateCount + moneyline.failedGateCount + moneyline.pendingGateCount + moneyline.unavailableGateCount
   const readiness = readinessDenominator ? (moneyline.passedGateCount / readinessDenominator) * 100 : null
   const priceFreshness = moneyline.marketAgeMinutes === null ? moneyline.freshnessStatus : `${moneyline.marketAgeMinutes} min`
-  const title = pick
+  const title = primaryPick
     ? moneyline.selectionLabel
     : moneyline.status === 'WAITING_FOR_FRESH_PRICE'
       ? moneylineCopy.en.waiting
       : moneyline.status === 'MARKET_UNAVAILABLE'
         ? moneylineCopy.en.unavailable
-        : moneylineCopy.en.noEligible
+        : 'No Qualified Moneyline Bet'
 
   return (
     <article className="rounded-lg border border-sky-300/20 bg-slate-950/85 p-5 shadow-2xl shadow-slate-950/20 md:p-6" data-mc08c-moneyline-card="true" data-moneyline-status={moneyline.status}>
@@ -1952,7 +1998,7 @@ function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
           <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-200">{moneylineCopy.en.label}</p>
           <h2 className="mt-3 break-words text-2xl font-black text-white md:text-4xl">{title}</h2>
           <p className="mt-3 text-sm font-bold text-slate-300">
-            {pick ? `${moneyline.eventLabel} / Strongest eligible Moneyline` : moneylineCopy.en.empty}
+            {primaryPick ? `${moneyline.eventLabel} / Qualified Moneyline recommendation` : 'No current Moneyline passes the full probability, price, freshness, value and policy contract.'}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 md:justify-end">
@@ -1972,22 +2018,29 @@ function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
         <MetricBar label="Win Probability" value={moneyline.modelProbability} tone={moneyline.modelProbability !== null && moneyline.modelProbability > 50 ? 'green' : 'yellow'} />
         <MetricBar label="Price Implied" value={moneyline.impliedProbability} tone="blue" />
         <MetricBar label="Advantage" value={moneyline.probabilityAdvantage} tone={moneyline.probabilityAdvantage !== null && moneyline.probabilityAdvantage > 0 ? 'green' : 'yellow'} />
-        <MetricBar label="Readiness Gates" value={readiness} tone={moneyline.failedGateCount ? 'yellow' : 'green'} />
+        <MetricBar label="Required Gates Passed" value={readiness} tone={moneyline.failedGateCount || moneyline.pendingGateCount || moneyline.unavailableGateCount ? 'yellow' : 'green'} />
       </div>
 
-      <p className="mt-5 text-sm leading-6 text-slate-300">{moneyline.selectionReasons[0] ?? moneylineCopy.en.empty}</p>
+      <p className="mt-5 text-sm leading-6 text-slate-300">{primaryPick ? moneyline.selectionReasons[0] ?? moneylineCopy.en.empty : 'The strongest Moneyline evidence remains review-only until every required gate passes.'}</p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <MiniText label="Candidate Rank" value={moneyline.rankWithinMoneylineUniverse ? `${moneyline.rankWithinMoneylineUniverse} of ${moneyline.candidateCount}` : 'Unavailable'} />
         <MiniText label="Price Binding" value={moneyline.priceBindingMode ?? 'UNAVAILABLE'} />
-        <MiniText label="Snapshot Captured" value={compactDate(moneyline.snapshotCapturedAt ?? null)} />
+        <MiniText label="Analysis Snapshot" value={compactDate(moneyline.snapshotCapturedAt ?? null)} />
         <MiniText label="Actionability" value={moneyline.actionability.replaceAll('_', ' ')} />
         <MiniText label="Value" value={`Edge ${signedPct(moneyline.edge)} / EV ${signedPct(moneyline.expectedValue)}`} />
       </div>
 
-      {pick ? null : closest ? (
+      {reviewPick ? (
         <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08c-review-only-candidate="true">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">{moneylineCopy.en.reviewOnly}</p>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Best Review-Only Moneyline Candidate</p>
+          <p className="mt-2 text-lg font-black text-white">{reviewPick.selection}</p>
+          <p className="mt-1 text-sm text-amber-50">{reviewPick.event} / {reviewPick.market} / {pct(reviewPick.probability)}</p>
+          <p className="mt-2 text-sm text-slate-300">{reviewPick.reason}</p>
+        </div>
+      ) : !primaryPick && closest ? (
+        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08c-review-only-candidate="true">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Closest Review Candidate</p>
           <p className="mt-2 text-lg font-black text-white">{closest.selection}</p>
           <p className="mt-1 text-sm text-amber-50">{closest.event} / {closest.market} / {pct(closest.probability)}</p>
           <p className="mt-2 text-sm text-slate-300">{closest.reason}</p>
@@ -2009,7 +2062,7 @@ function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
           <div className="grid gap-3">
             <MiniText label="Comparison With Other Moneylines" value={moneyline.comparisonReasons.join(' / ')} />
             <MiniText label="Main Risks" value={moneyline.riskReasons.join(' / ')} />
-            <MiniText label="What Would Change The Decision" value={moneyline.whatWouldChangeTheDecision.join(' / ')} />
+            <MiniText label={moneyline.status === 'ACTIONABLE' ? 'What Would Change The Decision' : 'What Would Make This Eligible'} value={moneyline.whatWouldChangeTheDecision.join(' / ')} />
             <div className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
               <p className="text-xs font-black uppercase text-slate-500">Eligibility Gates</p>
               <div className="mt-3 grid gap-2">
@@ -2044,13 +2097,16 @@ function gateTone(status: RentPlayGateStatus): Tone {
   if (status === 'PASS') return 'green'
   if (status === 'FAIL') return 'red'
   if (status === 'PENDING') return 'yellow'
+  if (status === 'OPTIONAL') return 'blue'
   return 'gray'
 }
 
 function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
   const pick = rentPlay.candidate
+  const primaryPick = rentPlay.status === 'ACTIONABLE' ? pick : null
+  const reviewPick = rentPlay.status === 'ACTIONABLE' ? null : pick ?? rentPlay.closestCandidate
   const closest = rentPlay.closestCandidate
-  const readinessDenominator = rentPlay.passedGateCount + rentPlay.failedGateCount + rentPlay.pendingGateCount
+  const readinessDenominator = rentPlay.passedGateCount + rentPlay.failedGateCount + rentPlay.pendingGateCount + rentPlay.unavailableGateCount
   const readiness = readinessDenominator ? (rentPlay.passedGateCount / readinessDenominator) * 100 : null
   const statusTone: Tone = rentPlay.status === 'ACTIONABLE'
     ? 'green'
@@ -2066,10 +2122,10 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200">{rentPlayCopy.en.label}</p>
           <h2 className="mt-3 break-words text-3xl font-black text-white md:text-5xl">
-            {pick ? rentPlay.selectionLabel : rentPlay.status === 'WAITING_FOR_FRESH_PRICE' ? rentPlayCopy.en.waiting : rentPlayCopy.en.noEligible}
+            {primaryPick ? rentPlay.selectionLabel : rentPlay.status === 'WAITING_FOR_FRESH_PRICE' ? rentPlayCopy.en.waiting : 'No Qualified Rent Play'}
           </h2>
           <p className="mt-3 text-sm font-bold text-slate-300">
-            {pick ? `${rentPlay.eventLabel} / ${rentPlay.marketLabel}` : rentPlayCopy.en.empty}
+            {primaryPick ? `${rentPlay.eventLabel} / ${rentPlay.marketLabel}` : 'No candidate currently passes every Rent Play hard gate. Review candidates stay below.'}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 md:justify-end">
@@ -2088,14 +2144,21 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
       <div className="mt-5 grid gap-4 md:grid-cols-3">
         <MetricBar label="Model Probability" value={rentPlay.modelProbability} tone={rentPlay.modelProbability !== null && rentPlay.modelProbability > 50 ? 'green' : 'yellow'} />
         <MetricBar label="Implied Probability" value={rentPlay.impliedProbability} tone="blue" />
-        <MetricBar label="Readiness Gates" value={readiness} tone={rentPlay.failedGateCount ? 'yellow' : 'green'} />
+        <MetricBar label="Required Gates Passed" value={readiness} tone={rentPlay.failedGateCount || rentPlay.pendingGateCount || rentPlay.unavailableGateCount ? 'yellow' : 'green'} />
       </div>
 
-      <p className="mt-5 text-sm leading-6 text-slate-300">{rentPlay.supportingReasons[0] ?? rentPlayCopy.en.empty}</p>
+      <p className="mt-5 text-sm leading-6 text-slate-300">{primaryPick ? rentPlay.supportingReasons[0] ?? rentPlayCopy.en.empty : 'The strongest Rent Play evidence remains review-only until probability, odds, freshness, value and policy gates all pass.'}</p>
 
-      {pick ? null : closest ? (
+      {reviewPick ? (
         <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08b-best-available-not-rent-play="true">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">{rentPlayCopy.en.candidate}</p>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Best Review-Only Candidate - Not Rent Play</p>
+          <p className="mt-2 text-lg font-black text-white">{reviewPick.selection}</p>
+          <p className="mt-1 text-sm text-amber-50">{reviewPick.event} / {reviewPick.market} / {pct(reviewPick.probability)}</p>
+          <p className="mt-2 text-sm text-slate-300">{reviewPick.reason}</p>
+        </div>
+      ) : !primaryPick && closest ? (
+        <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08b-best-available-not-rent-play="true">
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Closest Review Candidate - Not Rent Play</p>
           <p className="mt-2 text-lg font-black text-white">{closest.selection}</p>
           <p className="mt-1 text-sm text-amber-50">{closest.event} / {closest.market} / {pct(closest.probability)}</p>
           <p className="mt-2 text-sm text-slate-300">{closest.reason}</p>
@@ -2111,7 +2174,7 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
             <MiniText label="Provider / Source" value={`${rentPlay.provider ?? 'Unavailable'} / ${rentPlay.sourceSurface}`} />
             <MiniText label="Price Binding" value={rentPlay.priceBindingMode ?? 'UNAVAILABLE'} />
             <MiniText label="Market Evidence Time" value={compactDate(rentPlay.providerSourceTimestamp ?? rentPlay.marketTimestamp)} />
-            <MiniText label="Snapshot Captured" value={compactDate(rentPlay.snapshotCapturedAt ?? null)} />
+            <MiniText label="Analysis Snapshot" value={compactDate(rentPlay.snapshotCapturedAt ?? null)} />
             <MiniText label="Next Planned Refresh" value={compactDate(rentPlay.nextPlannedRefreshAt)} />
             <MiniText label="Edge and EV" value={`Edge ${signedPct(rentPlay.edge)} / EV ${signedPct(rentPlay.expectedValue)}`} />
             <MiniText label="Observed At" value={`${compactDate(rentPlay.observedAt)}. This is not used as market evidence freshness.`} />
@@ -2132,7 +2195,7 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
               </div>
             </div>
             <MiniText label="Main Risks" value={rentPlay.riskReasons.join(' / ')} />
-            <MiniText label="What Would Change The Decision" value={rentPlay.whatWouldChangeTheDecision.join(' / ')} />
+            <MiniText label={rentPlay.status === 'ACTIONABLE' ? 'What Would Change The Decision' : 'What Would Make This Eligible'} value={rentPlay.whatWouldChangeTheDecision.join(' / ')} />
           </div>
         </div>
       </details>
@@ -2166,6 +2229,8 @@ function SmartParlayBuilder({ parlay }: { parlay: SmartParlayContract }) {
     ? selectedIds.map((id) => parlay.availableLegs.find((leg) => leg.legId === id)).filter((leg): leg is SmartParlayLeg => Boolean(leg))
     : []
   const displayedStatus = parlay.status === 'NO_GAMES' ? 'NO_GAMES' : selectedSummary.parlayActionability
+  const builderStatus = parlay.availableLegs.length ? 'BUILDER_AVAILABLE' : 'NO_ELIGIBLE_LEGS'
+  const certifiedLegCount = parlay.availableLegs.filter((leg) => leg.actionability === 'ACTIONABLE').length
   const canAdd = selectedIds.length < parlay.maximumLegCount
 
   function toggleLeg(leg: SmartParlayLeg) {
@@ -2189,16 +2254,17 @@ function SmartParlayBuilder({ parlay }: { parlay: SmartParlayContract }) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2 md:justify-end">
-          <StatusChip tone={smartParlayTone(displayedStatus)}>{displayedStatus.replaceAll('_', ' ')}</StatusChip>
+          <StatusChip tone={builderStatus === 'BUILDER_AVAILABLE' ? 'blue' : 'gray'}>{builderStatus.replaceAll('_', ' ')}</StatusChip>
+          <StatusChip tone={smartParlayTone(displayedStatus)}>{displayedStatus === 'ACTIONABLE' ? 'PARLAY ACTIONABLE' : displayedStatus.replaceAll('_', ' ')}</StatusChip>
           <StatusChip tone="blue">{selectedSummary.selectedLegCount} of {parlay.maximumLegCount} selected</StatusChip>
         </div>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MiniMetric label="Available Legs" value={parlay.availableLegs.length} />
+        <MiniMetric label="Browsable Legs" value={parlay.availableLegs.length} />
+        <MiniMetric label="Certified Legs" value={certifiedLegCount} />
         <MiniMetric label="Combined Odds" value={selectedSummary.combinedOddsAvailable ? odds(selectedSummary.combinedAmericanOdds) : 'Unavailable' } />
         <MiniMetric label="Joint Probability" value="Unavailable" />
-        <MiniMetric label="Stalest Market Evidence" value={selectedSummary.stalestLegAgeMinutes === null ? 'Unavailable' : `${selectedSummary.stalestLegAgeMinutes} min`} />
       </div>
 
       <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900/70 p-4">
@@ -2257,7 +2323,8 @@ function SmartParlayBuilder({ parlay }: { parlay: SmartParlayContract }) {
           </div>
 
           <div className="grid gap-3">
-            <MiniText label="Actionability" value={selectedSummary.parlayActionability.replaceAll('_', ' ')} />
+            <MiniText label="Builder Status" value={builderStatus.replaceAll('_', ' ')} />
+            <MiniText label="Recommendation Status" value={selectedSummary.parlayActionability === 'ACTIONABLE' ? 'PARLAY ACTIONABLE' : selectedSummary.parlayActionability.replaceAll('_', ' ')} />
             <MiniText label="Combined Odds" value={selectedSummary.combinedOddsAvailable ? `${odds(selectedSummary.combinedAmericanOdds)} / decimal ${selectedSummary.combinedDecimalOdds}` : 'Unavailable until every selected leg has canonical odds.'} />
             <MiniText label="Joint Probability" value={`${selectedSummary.jointProbabilityMethod}. ${selectedSummary.jointProbabilityEvidence.join(' ')}`} />
             <MiniText label="Market Evidence" value={selectedSummary.allLegsFresh ? 'All selected legs have actionable market evidence.' : `Limited by ${selectedSummary.stalestLegId ?? 'an unavailable or stale leg'}.`} />
@@ -2265,7 +2332,13 @@ function SmartParlayBuilder({ parlay }: { parlay: SmartParlayContract }) {
             <MiniText label="Blocking Legs" value={selectedSummary.blockingLegIds.length ? selectedSummary.blockingLegIds.join(' / ') : 'None'} />
             <MiniText label="Why These Legs" value={selectedSummary.supportingReasons.join(' / ')} />
             <MiniText label="Main Risks" value={selectedSummary.riskReasons.join(' / ')} />
-            <MiniText label="What Would Change The Decision" value={selectedSummary.whatWouldChangeTheDecision.join(' / ')} />
+            <MiniText label={selectedSummary.parlayActionability === 'ACTIONABLE' ? 'What Would Change The Decision' : 'What Would Make This Eligible'} value={(selectedSummary.parlayActionability === 'ACTIONABLE' ? selectedSummary.whatWouldChangeTheDecision : uniqueList([
+              selectedSummary.selectedLegCount < parlay.minimumLegCount ? 'Select at least two supportable legs.' : '',
+              selectedSummary.blockingLegIds.length ? 'Remove or replace blocked, stale, unavailable or unsupported legs.' : '',
+              selectedSummary.combinedOddsAvailable ? '' : 'Every selected leg needs a valid canonical price.',
+              selectedSummary.correlationStatus === 'BLOCKED' ? 'Remove duplicate or direct-opposite legs.' : '',
+              'A certified joint-probability method is required before probability-certified parlay guidance exists.',
+            ])).join(' / ')} />
           </div>
         </div>
       </details>

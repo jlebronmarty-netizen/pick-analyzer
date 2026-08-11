@@ -1,0 +1,101 @@
+{
+  "artifact": "mlb-recommendation-surface-semantics-finalization",
+  "version": 1,
+  "createdAt": "2026-08-11T00:00:00.000Z",
+  "startingCommit": "b50a6395733f32b544f412cc06370c7e4854e72a",
+  "classification": "MLB_RECOMMENDATION_SURFACE_REPAIR_READY_FOR_DEPLOYMENT",
+  "runtimeScope": [
+    "src/components/home/HomeBettingPlan.tsx"
+  ],
+  "runtimeCodeChanged": true,
+  "policyChanges": {
+    "predictionFormulaChanged": false,
+    "probabilityChanged": false,
+    "evFormulaChanged": false,
+    "officialPickPolicyChanged": false,
+    "thresholdChanged": false,
+    "providerAuthorityChanged": false,
+    "schedulerChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false
+  },
+  "rentPlay": {
+    "qualifiedSurfaceRequiresAllHardGates": true,
+    "blockedCandidatePrimaryPromotionPrevented": true,
+    "reviewOnlyCandidatePreserved": true,
+    "unavailableRequiredEvidenceBlocks": true,
+    "freshnessUnavailableCannotPass": true,
+    "stateAwareExplanation": true
+  },
+  "moneyline": {
+    "qualifiedSurfaceRequiresAllHardGates": true,
+    "blockedCandidatePrimaryPromotionPrevented": true,
+    "negativeEvBlockedFromQualifiedRecommendation": true,
+    "reviewOnlyCandidatePreserved": true,
+    "complementBindingDocumented": true
+  },
+  "smartParlay": {
+    "builderAvailableDistinctFromActionable": true,
+    "jointProbabilityNotCertified": true,
+    "noNewJointProbabilityMethod": true
+  },
+  "watchlist": {
+    "researchLayerPreserved": true,
+    "primaryRecommendationLeakagePrevented": true
+  },
+  "value": {
+    "finalDefinition": "POSITIVE_EV_EVIDENCE",
+    "notRecommendationEligibleByItself": true
+  },
+  "timestamps": {
+    "analysisSnapshotDistinct": true,
+    "marketEvidenceTimeDistinct": true,
+    "observedAtNotFreshness": true,
+    "missingMarketEvidenceNotFilledBySnapshot": true
+  },
+  "safety": {
+    "providerCallsFromCertification": 0,
+    "databaseMutationsFromCertification": 0,
+    "sportsDataIoRoutineMlbCalls": 0,
+    "sportsDataIoReactivated": false,
+    "nbaImplementationStarted": false
+  },
+  "rollbackWindow": {
+    "day1": "2026-08-11",
+    "cleanDaysCompleted": 0,
+    "cleanDaysRemaining": 3,
+    "cancellationReadiness": "NOT_YET"
+  },
+  "validation": {
+    "mlbRecommendationSurfaceSemantics": "PASS",
+    "homeClientState": "PASS",
+    "mlbProductEvidence": "PASS",
+    "marketFreshnessSeverity": "PASS",
+    "mlbFinalCloseout": "PASS",
+    "currentBoardPerformance": "PASS",
+    "productFreshnessSla": "PASS",
+    "odds03d": "PASS",
+    "sdioExit05r": "PASS",
+    "schedulerHealth": "PASS",
+    "missionControl": "PASS",
+    "providerBudget": "PASS",
+    "settlement": "PASS",
+    "settlementLearning": "PASS",
+    "performance": "PASS",
+    "predictionCoverage": "PASS_WITH_LEGACY_CHANGED_FILE_GUARD",
+    "e2eIntegrity": "PASS_WITH_LEGACY_CHANGED_FILE_GUARD",
+    "json": "PASS",
+    "markdown": "PASS",
+    "eslint": "PASS",
+    "secretScan": "PASS",
+    "diffCheck": "PASS",
+    "build": "PASS"
+  },
+  "validationNotes": [
+    "P1.2, P1.4, P2.1 and P2.1A validators passed behavioral/provider/mutation checks but failed historical allowed-changed-file guards because this phase intentionally edits HomeBettingPlan.tsx and docs.",
+    "Changed-file ESLint passed for HomeBettingPlan.tsx and the new validator.",
+    "Full Next.js build passed."
+  ],
+  "pushAuthorizationRequired": true,
+  "nextRecommendedPhase": "MLB-FINAL-01_COMPLETE_HISTORICAL_MARKET_EXPANSION_AND_FORWARD_DATA_FOUNDATION"
+}

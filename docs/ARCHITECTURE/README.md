@@ -25,6 +25,7 @@ Current V2 architecture inventory documents:
 - [MLB Final Provider Map V1](MLB_FINAL_PROVIDER_MAP_V1.md)
 - [MLB Market Matrix V1](MLB_MARKET_MATRIX_V1.md)
 - [MLB Player Props V1](MLB_PLAYER_PROPS_V1.md)
+- [MLB Recommendation Surface Contract V1](MLB_RECOMMENDATION_SURFACE_CONTRACT_V1.md)
 - [Sport Onboarding Template V1](SPORT_ONBOARDING_TEMPLATE_V1.md)
 
 Most architecture documents still live at the root of `docs/` and will be migrated in bounded batches. Examples include:

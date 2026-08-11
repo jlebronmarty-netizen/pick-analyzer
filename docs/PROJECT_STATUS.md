@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-11 MLB Recommendation Surface Semantics Finalization
+
+- MLB Recommendation Surface Semantics Finalization is locally implemented as `MLB_RECOMMENDATION_SURFACE_REPAIR_READY_FOR_DEPLOYMENT`. The bounded repair prevents blocked or incomplete Rent Play and Moneyline candidates from rendering as qualified primary bets, treats unavailable required hard gates as blocking, separates Smart Parlay builder availability from parlay recommendation actionability, and keeps Watchlist as a research layer.
+- The repair is limited to homepage recommendation presentation semantics plus docs/certification. No prediction formula, probability, EV formula, threshold, Official Pick policy, provider authority, Vercel config, scheduler, settlement, learning, SportsDataIO rollback behavior, production database schema or NBA implementation changed.
+
 ## 2026-08-11 Multi-Sport Handoff Preparation
 
 - Multi-Sport Handoff Preparation is locally certified as `MULTI_SPORT_HANDOFF_PASS` on baseline commit `28c188cd1db7e131cedd4b38bc6642b5911d4d7b`. NBA is selected as the next sport because it has the strongest existing repository foundation across data sync, feature store, prediction, validation, settlement, calibration and data-quality services.
