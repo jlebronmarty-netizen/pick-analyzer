@@ -1,0 +1,191 @@
+{
+  "artifact": "market-freshness-severity-reconciliation",
+  "version": 1,
+  "createdAt": "2026-08-11T00:00:00.000Z",
+  "startingCommit": "da4b97e0bc4cd832597ef8b74ec5af13c07ada52",
+  "runtimeCommit": "LOCAL_COMMIT_REPORTED_IN_FINAL_RESPONSE",
+  "certificationCommit": "LOCAL_COMMIT_REPORTED_IN_FINAL_RESPONSE",
+  "productionCommit": "da4b97e0bc4cd832597ef8b74ec5af13c07ada52",
+  "classification": "MARKET_FRESHNESS_SEVERITY_REPAIR_READY_FOR_DEPLOYMENT",
+  "configuration": {
+    "oddsPrimaryAuthorityStage": "STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT",
+    "mlbDataSourceMode": "MLB_OFFICIAL_PRIMARY",
+    "oddsProductAuthority": "THE_ODDS_API",
+    "mlbNonOddsPrimarySource": "MLB_OFFICIAL",
+    "sportsDataIoMode": "ROLLBACK_ONLY"
+  },
+  "currentState": {
+    "gamesToday": 15,
+    "currentBoardCandidates": 38,
+    "freshRows": 37,
+    "agingRows": 0,
+    "staleRows": 1,
+    "failClosedRows": 1,
+    "freshCoveragePercent": 97.37,
+    "staleCoveragePercent": 2.63,
+    "schedulerHealth": "HEALTHY",
+    "missedIntervals": 0,
+    "settlement": "PASS",
+    "sportsDataIoRoutineMlbCalls": 0
+  },
+  "staleRow": {
+    "predictionId": "ae6b6158-3952-5cac-8b7b-fbeeac9ed0ec",
+    "event": "TB @ ATH",
+    "eventId": "baseball_mlb:mlb:sportsdataio:event:79090",
+    "market": "Total",
+    "selection": "Under",
+    "line": 10,
+    "odds": -111,
+    "priceSource": "Consensus",
+    "sourceTimestamp": "2026-08-10T22:07:18.000Z",
+    "capturedTimestamp": "2026-08-10T22:07:18.000Z",
+    "freshnessClassification": "STALE",
+    "actionability": "WAIT_FOR_REFRESH",
+    "reasonCodes": [
+      "MARKET_AGE_EXCEEDS_SURFACE_SLA"
+    ],
+    "officialEligibility": "NOT_OFFICIALLY_ELIGIBLE",
+    "recommendationPolicyStatus": "ANALYZED_ONLY",
+    "identityClassification": "STALE_EXACT_LINE_NO_ALTERNATIVE",
+    "sameEventHasOtherFreshMarkets": true,
+    "alternativeFreshExactLinePrice": false
+  },
+  "coverage": {
+    "gamesWithFreshEvidence": 15,
+    "gamesPartiallyFresh": 1,
+    "gamesWithNoFreshEvidence": 0,
+    "moneylineFreshCoverage": "15/15",
+    "runLineFreshCoverage": "15/15",
+    "totalFreshCoverage": "7/8"
+  },
+  "severityBefore": {
+    "currentBoard": "DEGRADED",
+    "marketFreshness": "CRITICAL",
+    "operations": "CRITICAL",
+    "latestProductionRead": "HEALTHY_DUE_TO_LIMIT_25_STALE_ROW_OMISSION",
+    "rootCause": "ODDS_NOT_CURRENT_PROMOTED_TO_CRITICAL_DESPITE_PARTIAL_FAIL_CLOSED_FRESH_COVERAGE_AND_HEALTH_READ_COULD_MISS_STALE_ROWS"
+  },
+  "severityAfter": {
+    "currentBoard": "DEGRADED",
+    "marketFreshness": "DEGRADED",
+    "operations": "DEGRADED_UNLESS_ANOTHER_DOMAIN_LIMITS",
+    "staleRowActionability": "WAIT_FOR_REFRESH"
+  },
+  "healthDefinitions": {
+    "healthy": "Current product market evidence is fresh for the visible board scope and scheduler/provider status does not indicate an outage.",
+    "degraded": "Partial stale or missing product evidence exists, but fresh coverage remains and stale evidence is fail-closed.",
+    "critical": "Product market evidence is unavailable, all visible evidence is stale, provider acquisition failed, scheduler missed tolerance, or stale evidence can become actionable."
+  },
+  "scenarioMatrix": {
+    "allFresh": {
+      "currentBoard": "READY",
+      "marketFreshness": "HEALTHY",
+      "operations": "HEALTHY_UNLESS_OTHER_DOMAIN_LIMITS",
+      "actionability": "NORMAL_POLICY_GATES"
+    },
+    "oneStaleFailClosed": {
+      "currentBoard": "DEGRADED",
+      "marketFreshness": "DEGRADED",
+      "operations": "DEGRADED_UNLESS_OTHER_DOMAIN_LIMITS",
+      "actionability": "STALE_ROW_WAIT_FOR_REFRESH"
+    },
+    "severalStale": {
+      "currentBoard": "DEGRADED",
+      "marketFreshness": "DEGRADED_WHILE_FRESH_COVERAGE_REMAINS",
+      "operations": "DEGRADED_UNLESS_OTHER_DOMAIN_LIMITS",
+      "actionability": "STALE_ROWS_FAIL_CLOSED"
+    },
+    "oneEventUnavailable": {
+      "currentBoard": "DEGRADED",
+      "marketFreshness": "DEGRADED_WHILE_OTHER_FRESH_COVERAGE_REMAINS",
+      "operations": "DEGRADED_UNLESS_REQUIRED_SURFACE_UNAVAILABLE",
+      "actionability": "MISSING_MARKETS_FAIL_CLOSED"
+    },
+    "severalEventsUnavailable": {
+      "currentBoard": "DEGRADED",
+      "marketFreshness": "DEGRADED_OR_CRITICAL_DEPENDING_ON_SYSTEMIC_FRESH_COVERAGE",
+      "operations": "LIMITED_BY_MARKET_FRESHNESS_DOMAIN",
+      "actionability": "MISSING_MARKETS_FAIL_CLOSED"
+    },
+    "allStale": {
+      "currentBoard": "DEGRADED_OR_STALE",
+      "marketFreshness": "CRITICAL",
+      "operations": "CRITICAL",
+      "actionability": "NO_STALE_ROW_ACTIONABLE"
+    },
+    "providerFailure": {
+      "currentBoard": "DEGRADED_OR_UNKNOWN",
+      "marketFreshness": "CRITICAL",
+      "operations": "CRITICAL",
+      "actionability": "FAIL_CLOSED"
+    },
+    "schedulerFailure": {
+      "currentBoard": "ANY",
+      "marketFreshness": "UNCHANGED_BY_ITSELF",
+      "operations": "CRITICAL",
+      "actionability": "FAIL_CLOSED_WHEN_FRESHNESS_CANNOT_BE_TRUSTED"
+    }
+  },
+  "repair": {
+    "runtimeFiles": [
+      "src/services/operations-health.service.ts"
+    ],
+    "validator": "scripts/market-freshness-severity-reconciliation-validate.mjs",
+    "summary": [
+      "Market freshness CRITICAL now requires provider failure, all visible evidence stale, stale board state, or odds_not_current with no fresh coverage.",
+      "Partial stale evidence with fresh coverage is DEGRADED and includes explicit coverage evidence.",
+      "Health summary reads the full bounded Current Board scope with limit 200 and no MLB context expansion."
+    ]
+  },
+  "protectedInvariants": {
+    "predictionFormulaChanged": false,
+    "probabilityChanged": false,
+    "rankingChanged": false,
+    "officialPickPolicyChanged": false,
+    "rentPlayPolicyChanged": false,
+    "smartParlayPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "providerAuthorityChanged": false,
+    "vercelConfigChanged": false,
+    "mlbDataSourceModeChanged": false,
+    "sportsDataIoReactivated": false
+  },
+  "safety": {
+    "staleEvidenceActionable": false,
+    "exactLineSafetyPreserved": true,
+    "failClosedSafetyPreserved": true,
+    "officialPickLeakage": false,
+    "rentPlayLeakage": false,
+    "smartParlayLeakage": false,
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0,
+    "manualProviderCalls": 0,
+    "productionDatabaseMutations": 0
+  },
+  "validation": {
+    "marketFreshnessSeverityReconciliation": "PASS",
+    "homeClientStateCardMapping": "PASS",
+    "mlbProductEvidenceReconciliation": "PASS",
+    "mlbFinalCloseout": "PASS",
+    "currentBoardQueryPerformance": "PASS",
+    "productFreshnessSla": "PASS",
+    "schedulerHealth": "PASS",
+    "missionControl": "PASS",
+    "providerBudget": "PASS",
+    "settlement": "PASS",
+    "settlementLearning": "PASS",
+    "performance": "PASS",
+    "predictionCoverage": "PASS_BEHAVIORAL_CHECKS_WITH_CHANGED_FILE_GUARD_ONLY",
+    "odds03d": "PASS",
+    "sdioExit05": "NO_STANDALONE_VALIDATOR_FOUND_SDIO_EXIT_05R_PASS",
+    "sdioExit05r": "PASS",
+    "json": "PASS",
+    "markdown": "PASS",
+    "eslint": "PASS",
+    "secretScan": "PASS",
+    "diffCheck": "PASS",
+    "build": "PASS"
+  },
+  "nextRecommendedPhase": "Publish the bounded market freshness severity repair, deploy, and read-only certify that Operations reports DEGRADED rather than CRITICAL for partial fail-closed stale evidence while all full-outage cases remain CRITICAL."
+}

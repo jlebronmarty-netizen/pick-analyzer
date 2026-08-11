@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-11 Market Freshness Severity Reconciliation
+
+- Market Freshness Severity Reconciliation is locally implemented as `MARKET_FRESHNESS_SEVERITY_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed Current Board with 38 candidates, 37 fresh rows and 1 stale fail-closed Total row while Operations Health escalated to `CRITICAL`.
+- The bounded repair keeps Current Board `DEGRADED`, keeps stale evidence non-actionable, and changes Operations market freshness severity to coverage-aware `DEGRADED` for partial fail-closed staleness while preserving `CRITICAL` for all-stale evidence, provider failure or scheduler failure. No model, recommendation, provider authority, MLB data-source, settlement, learning or Vercel config changed.
+
 ## 2026-08-11 Home Client-State Card Mapping Reconciliation
 
 - Home Client-State Card Mapping Reconciliation is locally implemented as `HOME_CLIENT_STATE_RECONCILIATION_REPAIR_READY_FOR_DEPLOYMENT`. The bounded repair addresses a rendered homepage defect where Current Board had current MLB candidates but Rent Play, Moneyline, Smart Parlay and Watchlist could still render `NO_GAMES` because the client card plan ignored fetched Current Board state.

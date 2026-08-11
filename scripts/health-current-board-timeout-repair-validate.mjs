@@ -31,7 +31,7 @@ const r2 = read('src/services/line-versioned-reprediction-writer.service.ts')
 
 check('timeout query path identified', cert.timeoutRootCause === 'HEALTH_REQUIRED_FULL_CURRENT_BOARD_READ' && report.includes('readOddsForEvents'))
 check('expensive portion classified', cert.failingService.includes('readOddsForEvents') && report.includes('sports_odds_snapshots'))
-check('Current Board health scope bounded', health.includes('safeCurrentBoardHealthSummary') && health.includes('limit: 25') && health.includes('includeMlbContext: false'))
+check('Current Board health scope bounded', health.includes('safeCurrentBoardHealthSummary') && health.includes('limit: 200') && health.includes('includeMlbContext: false'))
 check('Stage 3 authority filtering preserved', board.includes('productOddsProviderForCurrentBoard') && oddsAuthority.includes('THE_ODDS_API'))
 check('Stage 1 rollback compatibility preserved', board.includes("status.productAuthority === 'THE_ODDS_API' ? 'the-odds-api' : 'sportsdataio'"))
 check('exact-line semantics unchanged', board.includes('oddsMatchesPrediction') && board.includes('Math.abs(expectedLine - oddsLine) < 0.001'))

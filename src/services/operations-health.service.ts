@@ -104,7 +104,7 @@ async function safeCurrentBoardHealthSummary(): Promise<CurrentBoardHealthSummar
     const board = await getCurrentBoard({
       sportKey: SPORT_KEY,
       mode: 'CURRENT',
-      limit: 25,
+      limit: 200,
       includeMlbContext: false,
     })
     return { ...board, readError: null }
@@ -346,20 +346,29 @@ function marketDomain(input: {
 }): CanonicalHealthDomain {
   const boardFreshness = input.board.dataFreshness.status
   const oddsStatus = String(input.oddsFreshness?.status ?? 'UNKNOWN')
+  const visibleMarketCount = Number(input.board.dataFreshness.visibleMarketCount ?? 0)
+  const freshVisibleMarketCount = Number(input.board.dataFreshness.freshVisibleMarketCount ?? 0)
+  const staleVisibleMarketCount = Number(input.board.dataFreshness.staleVisibleMarketCount ?? 0)
+  const hasFreshCoverage = freshVisibleMarketCount > 0
+  const hasStaleCoverage = staleVisibleMarketCount > 0
+  const allVisibleMarketsStale = visibleMarketCount > 0 && staleVisibleMarketCount >= visibleMarketCount
+  const oddsNotCurrent = input.adaptiveBlockers.includes('odds_not_current')
   const status: CanonicalHealthStatus =
-    oddsStatus === 'FAILED' || input.adaptiveBlockers.includes('odds_not_current') || boardFreshness === 'stale'
+    oddsStatus === 'FAILED' || boardFreshness === 'stale' || allVisibleMarketsStale || (oddsNotCurrent && !hasFreshCoverage)
       ? 'CRITICAL'
-      : ['STALE', 'PENDING'].includes(oddsStatus) || boardFreshness === 'partial'
+      : ['STALE', 'PENDING'].includes(oddsStatus) || boardFreshness === 'partial' || hasStaleCoverage || oddsNotCurrent
         ? 'DEGRADED'
-        : oddsStatus === 'NOT_AVAILABLE' || boardFreshness === 'empty'
-          ? 'UNKNOWN'
-          : 'HEALTHY'
+      : oddsStatus === 'NOT_AVAILABLE' || boardFreshness === 'empty'
+        ? 'UNKNOWN'
+        : 'HEALTHY'
   const reasonCodes = [
     status === 'HEALTHY' ? 'MARKET_FRESH' : null,
     input.board.boardHealth.warnings.some((warning) => warning.startsWith('CURRENT_BOARD_READ_FAILED')) ? 'CURRENT_BOARD_READ_FAILED' : null,
     oddsStatus === 'PENDING' || boardFreshness === 'empty' ? 'NO_ODDS_AVAILABLE' : null,
     oddsStatus === 'STALE' || boardFreshness === 'stale' ? 'STALE_ODDS' : null,
     boardFreshness === 'partial' ? 'PARTIAL_MARKET_FRESHNESS' : null,
+    hasStaleCoverage && hasFreshCoverage ? 'PARTIAL_FAIL_CLOSED_MARKET_STALENESS' : null,
+    oddsNotCurrent && hasFreshCoverage ? 'ODDS_NOT_CURRENT_WITH_PARTIAL_FRESH_COVERAGE' : null,
     input.board.dataFreshness.freshnessTimestampSource === null ? 'UNKNOWN_TIMESTAMP' : null,
   ].filter(Boolean) as string[]
   return {
@@ -380,9 +389,12 @@ function marketDomain(input: {
       adaptiveOddsStatus: oddsStatus,
       currentBoardFreshness: boardFreshness,
       latestOddsAgeMinutes: input.board.dataFreshness.latestOddsAgeMinutes,
-      visibleMarketCount: input.board.dataFreshness.visibleMarketCount,
-      freshVisibleMarketCount: input.board.dataFreshness.freshVisibleMarketCount,
-      staleVisibleMarketCount: input.board.dataFreshness.staleVisibleMarketCount,
+      visibleMarketCount,
+      freshVisibleMarketCount,
+      staleVisibleMarketCount,
+      freshCoveragePercent: visibleMarketCount > 0 ? Number(((freshVisibleMarketCount / visibleMarketCount) * 100).toFixed(2)) : null,
+      staleCoveragePercent: visibleMarketCount > 0 ? Number(((staleVisibleMarketCount / visibleMarketCount) * 100).toFixed(2)) : null,
+      failClosedStaleMarkets: staleVisibleMarketCount,
       timestampSemantics: input.board.dataFreshness.timestampSemantics,
       independenceRule: 'Market freshness never falls back to scheduler invocation time, page fetch time, or API generatedAt.',
     },
@@ -392,7 +404,7 @@ function marketDomain(input: {
       ...input.board.boardHealth.warnings.filter((warning) => warning.startsWith('CURRENT_BOARD_READ_FAILED')),
     ],
     nextExpectedAction: input.nextDueAt,
-    humanInterventionRequired: status === 'CRITICAL' && input.adaptiveBlockers.includes('odds_not_current'),
+    humanInterventionRequired: status === 'CRITICAL' && oddsNotCurrent && !hasFreshCoverage,
   }
 }
 
