@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-11 MLB Final Closeout
+
+- MLB Final Closeout is locally certified as `MLB_FINAL_CLOSEOUT_PASS_WITH_FUTURE_MARKETS` on baseline commit `4fb06cb795a9fad00cd60b4e3f5b134c69701444`. Production evidence reports The Odds API as product odds authority, MLB Official as primary non-odds data source, Operations Health `HEALTHY`, Settlement Guarantee `PASS`, and SportsDataIO MLB routine use at 0 while retained for rollback.
+- Historical replay remains 7,290 settled replay-only rows, HR-03 remains shadow-only, Current Era remains separate, and no unsupported market or player prop was activated. Player props are classified `PLAYER_PROPS_FOUNDATION_ONLY` with 18 audited props, 0 current prop odds-ready props and 0 production-ready props. Next recommended master phase is multi-sport handoff preparation, not MC-03.
+
 ## 2026-08-10 SDIO-EXIT-04 Stats Parity And SportsDataIO-Off Window
 
 - SDIO-EXIT-04 is locally certified as `SDIO_EXIT_04_STATS_PARITY_PASS_OFF_WINDOW_BLOCKED_BY_ODDS_AUTHORITY`. MLB Official schedule/status/results/starter identity are ready for parity review, while current production-critical stats/player/bullpen/lineup/injury domains do not require routine SportsDataIO calls.

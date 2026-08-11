@@ -1,0 +1,126 @@
+{
+  "mode": "mlb_final_closeout_v1",
+  "status": "MLB_FINAL_CLOSEOUT_PASS_WITH_FUTURE_MARKETS",
+  "startingCommit": "4fb06cb795a9fad00cd60b4e3f5b134c69701444",
+  "productionCommitObserved": "4fb06cb795a9fad00cd60b4e3f5b134c69701444",
+  "observationTimeUtc": "2026-08-11T17:18:09Z",
+  "productionPilotWeek": "ACTIVE",
+  "providerAuthority": {
+    "oddsPrimaryAuthorityStage": "STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT",
+    "productOddsAuthority": "THE_ODDS_API",
+    "mlbDataSourceMode": "MLB_OFFICIAL_PRIMARY",
+    "sportsDataIoStatus": "ROLLBACK_ONLY_NOT_CANCELLED",
+    "sportsDataIoRoutineMlbCallsExpected": 0
+  },
+  "productionEvidence": {
+    "systemVersion": {
+      "http": 200,
+      "providerCallsMade": 0
+    },
+    "operationsHealth": {
+      "overall": "HEALTHY",
+      "schedulerExecution": "HEALTHY",
+      "marketFreshness": "HEALTHY",
+      "providerBudget": "HEALTHY",
+      "settlementClosure": "HEALTHY",
+      "productReadiness": "HEALTHY",
+      "operationsProductionReady": false,
+      "closedBetaOperationsReady": true
+    },
+    "currentBoard": {
+      "operatingDate": "2026-08-11",
+      "games": 15,
+      "candidates": 39,
+      "markets": ["Moneyline", "Run Line", "Total"],
+      "officialPicks": 0,
+      "modeledValueCandidates": 2,
+      "fresh": 38,
+      "stale": 1,
+      "actionable": 0,
+      "reviewOnly": 38
+    },
+    "performance": {
+      "currentV2GeneratedRows": 601,
+      "currentV2CanonicalRows": 354,
+      "settledCanonicalRows": 291,
+      "pendingCanonicalRows": 63,
+      "wins": 141,
+      "losses": 146,
+      "pushes": 4,
+      "accuracy": 49.13,
+      "brier": 0.2575,
+      "settlementCoverage": 82.2
+    },
+    "settlementGuarantee": {
+      "guarantee": "PASS",
+      "checkedPredictions": 202,
+      "completedPredictionRows": 113,
+      "settledRows": 113,
+      "readyForSettlementRows": 0,
+      "blockedRows": 0,
+      "silentPendingRows": 0
+    }
+  },
+  "historicalReplay": {
+    "status": "HR_01_COMPLETE_READY_FOR_CALIBRATION_REVIEW",
+    "events": 2430,
+    "featureSnapshots": 70470,
+    "predictions": 7290,
+    "settled": 7290,
+    "providerCalls": 0,
+    "leakageFailures": 0,
+    "markets": ["moneyline", "run_line_minus_1_5_replay_scope", "total_over_replay_scope"]
+  },
+  "calibration": {
+    "status": "CALIBRATION_SHADOW_PASS_MORE_CURRENT_ERA_EVIDENCE_REQUIRED",
+    "shadowOnly": true,
+    "productionProbabilityChanged": false,
+    "officialPickPolicyChanged": false,
+    "unsupportedCurrentEraReasons": {
+      "TOTAL_UNDER_UNSUPPORTED_BY_OVER_ONLY_REPLAY": 125,
+      "RUN_LINE_OUTSIDE_MINUS_1_5_TRAINING_SUPPORT": 85
+    },
+    "promotionAuthorized": false
+  },
+  "marketMatrix": {
+    "productionSupported": ["moneyline", "run_line", "game_total"],
+    "futureMarkets": ["team_total", "alternate_run_line", "alternate_total", "first_five", "nrfi", "yrfi", "pitcher_props", "batter_props"],
+    "newMarketsActivated": 0,
+    "unsupportedMarketsActionable": false
+  },
+  "playerProps": {
+    "status": "PLAYER_PROPS_FOUNDATION_ONLY",
+    "propsAudited": 18,
+    "settlementReadyProps": 18,
+    "currentOddsReadyProps": 0,
+    "productionReadyProps": 0,
+    "historicalPropOddsRows": 11,
+    "currentPropOddsRows": 0,
+    "openingPropOddsRows": 0,
+    "closingPropOddsRows": 0,
+    "officialPickEligible": false
+  },
+  "safety": {
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0,
+    "manualProviderCallsMade": 0,
+    "productionDbMigrationMade": false,
+    "sportsDataIoCancelled": false,
+    "sportsDataIoDisabled": false,
+    "officialPickPolicyChanged": false,
+    "predictionFormulaChanged": false,
+    "modelWeightsChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "hr03Promoted": false,
+    "newSportStarted": false,
+    "mc03Started": false
+  },
+  "nextSport": {
+    "recommendedFirst": "NBA",
+    "reason": "Existing NBA readiness and player-stat services make it the strongest next candidate after MLB closeout.",
+    "newSportStarted": false
+  },
+  "pushAuthorizationRequired": true,
+  "finalClassification": "MLB_FINAL_CLOSEOUT_PASS_WITH_FUTURE_MARKETS"
+}
