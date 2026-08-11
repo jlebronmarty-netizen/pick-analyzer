@@ -39,6 +39,7 @@ import {
   type ProductFreshnessSla,
 } from '@/services/product-freshness-sla.service'
 import { getOddsPrimaryAuthorityRuntimeStatus } from '@/services/odds-primary-authority.service'
+import { CERTIFIED_BOOK_SET_V1 } from '@/config/odds-primary-authority.config'
 
 export type CurrentBoardMode = 'CURRENT' | 'UPCOMING' | 'HISTORICAL_EXPLORER' | 'ALL_STORED_ADVANCED'
 
@@ -519,8 +520,11 @@ export const CURRENT_BOARD_FRESHNESS_POLICY = {
 } as const
 
 const DEFAULT_CURRENT_BOARD_DISPLAY_ODDS_STALE_MINUTES = 30
+const CURRENT_BOARD_PRODUCT_ODDS_RECENCY_MULTIPLIER = 3
 const CURRENT_BOARD_LOOKBACK_HOURS = 2
 const CURRENT_BOARD_LOOKAHEAD_DAYS = 14
+const CURRENT_BOARD_PRODUCT_ODDS_MARKETS = ['moneyline', 'run_line', 'total'] as const
+const CURRENT_BOARD_CERTIFIED_BOOK_KEYS = CERTIFIED_BOOK_SET_V1.map((book) => book.key)
 
 function emptyReasonCounts() {
   return Object.fromEntries(ALL_REASON_CODES.map((code) => [code, 0])) as Record<CurrentBoardReasonCode, number>
@@ -559,6 +563,13 @@ function productOddsProviderForCurrentBoard() {
   return status.productAuthority === 'THE_ODDS_API' ? 'the-odds-api' : 'sportsdataio'
 }
 
+function currentBoardProductOddsRecencyMinutes() {
+  return Math.max(
+    displayMaxOddsAgeMinutes() * CURRENT_BOARD_PRODUCT_ODDS_RECENCY_MULTIPLIER,
+    DEFAULT_CURRENT_BOARD_DISPLAY_ODDS_STALE_MINUTES * CURRENT_BOARD_PRODUCT_ODDS_RECENCY_MULTIPLIER
+  )
+}
+
 async function readOddsForEvents({
   sportKey,
   eventIds,
@@ -575,22 +586,27 @@ async function readOddsForEvents({
   const currentWindowStart =
     mode === 'HISTORICAL_EXPLORER' || mode === 'ALL_STORED_ADVANCED'
       ? null
-      : new Date(nowMs - CURRENT_BOARD_FRESHNESS_POLICY.baseball_mlb.defaultMaxOddsAgeMinutes * 60000).toISOString()
+      : new Date(nowMs - currentBoardProductOddsRecencyMinutes() * 60000).toISOString()
   const productOddsProvider =
     mode === 'HISTORICAL_EXPLORER' || mode === 'ALL_STORED_ADVANCED'
       ? null
       : productOddsProviderForCurrentBoard()
-  for (const chunk of chunks(uniqueIds, 50)) {
+  const certifiedBookScope =
+    productOddsProvider === 'the-odds-api'
+      ? CURRENT_BOARD_CERTIFIED_BOOK_KEYS
+      : null
+  for (const chunk of chunks(uniqueIds, 10)) {
     if (!chunk.length) continue
     let query = supabaseAdmin
       .from('sports_odds_snapshots')
       .select('id, sport_key, league_key, season, event_id, provider, sportsbook, market, outcome, price, line, snapshot_time, provider_timestamp, created_at, updated_at, metadata')
       .eq('sport_key', sportKey)
       .in('event_id', chunk)
-      .in('market', ['moneyline', 'run_line', 'total'])
+      .in('market', [...CURRENT_BOARD_PRODUCT_ODDS_MARKETS])
       .order('snapshot_time', { ascending: false })
-      .limit(1000)
+      .limit(2500)
     if (productOddsProvider) query = query.eq('provider', productOddsProvider)
+    if (certifiedBookScope) query = query.in('sportsbook', certifiedBookScope)
     if (currentWindowStart) query = query.gte('snapshot_time', currentWindowStart)
     const result = await query
     if (result.error) throw new Error(`current board odds read failed: ${result.error.message}`)
