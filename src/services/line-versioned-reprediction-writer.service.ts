@@ -135,6 +135,23 @@ function stableUuid(parts: unknown[]) {
   ].join('-')
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+export function isDbUuid(value: unknown): value is string {
+  return typeof value === 'string' && UUID_RE.test(value)
+}
+
+function dbUuidOrNull(value: unknown) {
+  return isDbUuid(value) ? value : null
+}
+
+function assertDbUuidOrNull(value: unknown, field: string) {
+  if (value === null || value === undefined) return
+  if (!isDbUuid(value)) {
+    throw new Error(`line-versioned DB type guard failed: ${field} must be uuid or null`)
+  }
+}
+
 function parseMs(value: string | null | undefined) {
   if (!value) return null
   const parsed = Date.parse(value)
@@ -212,12 +229,14 @@ function bookmakerKey(row: OddsRow) {
 
 function featureSnapshotFrom(row: PredictionRow, generatedAt: string, cutoffAt: string, event: EventRow, market: OddsAuthorityMarket): FeatureSnapshot | null {
   const source = row.feature_snapshot
+  const sourceSnapshotId = dbUuidOrNull(row.feature_snapshot_id)
+  if (!sourceSnapshotId) return null
   if (!source) return null
   const quality = Number(source.featureQualityScore ?? source.quality ?? 0)
   const sufficiency = Number(source.dataSufficiencyScore ?? source.sufficiency ?? 0)
   if (!Number.isFinite(quality) || !Number.isFinite(sufficiency) || quality <= 0 || sufficiency <= 0) return null
   return {
-    id: stableId([MODE, row.id, market, generatedAt]),
+    id: sourceSnapshotId,
     sportKey: SPORT_KEY,
     leagueKey: LEAGUE_KEY,
     eventId: event.id,
@@ -386,6 +405,13 @@ function statusFromBlockers(blockers: string[]): LineVersionedRepredictionStatus
 
 async function persistPredictionRow(row: Record<string, unknown>, oldPredictionId: string, now: string, dryRun: boolean) {
   if (dryRun) return { status: 'WOULD_CREATE' as const, predictionWrites: 0, databaseMutations: 0 }
+  assertDbUuidOrNull(row.id, 'prediction_history.id')
+  assertDbUuidOrNull(row.feature_snapshot_id, 'prediction_history.feature_snapshot_id')
+  assertDbUuidOrNull(row.operating_day_id, 'prediction_history.operating_day_id')
+  assertDbUuidOrNull(row.parent_prediction_id, 'prediction_history.parent_prediction_id')
+  assertDbUuidOrNull(row.challenger_of_prediction_id, 'prediction_history.challenger_of_prediction_id')
+  assertDbUuidOrNull(row.superseded_by_prediction_id, 'prediction_history.superseded_by_prediction_id')
+  assertDbUuidOrNull(oldPredictionId, 'prediction_history.supersedes_prediction_id')
   const existing = await supabaseAdmin
     .from('prediction_history')
     .select('id')
@@ -507,6 +533,8 @@ export async function executeLineVersionedRepredictionWriter(request: LineVersio
         projection,
       })
       const predictionId = stableUuid([MODE, prediction.id, event.id, market, teamSelection, newLine, sourceTimestamp(bestEvidence)])
+      const dbFeatureSnapshotId = dbUuidOrNull(featureSnapshot.id)
+      const operatingDayId = dbUuidOrNull(prediction.operating_day_id)
       const idempotencyKey = stableId([MODE, event.id, market, teamSelection, newLine])
       const policy = evaluateRecommendationEligibility({
         id: predictionId,
@@ -533,7 +561,7 @@ export async function executeLineVersionedRepredictionWriter(request: LineVersio
         generated_at: generatedAt,
         cutoff_at: prediction.cutoff_at,
         model_version: MODEL_VERSION,
-        feature_snapshot_id: featureSnapshot.id,
+        feature_snapshot_id: dbFeatureSnapshotId,
         feature_set_version: FEATURE_SET_VERSION,
         data_quality_score: featureSnapshot.featureQualityScore,
         data_sufficiency_score: featureSnapshot.dataSufficiencyScore,
@@ -564,7 +592,7 @@ export async function executeLineVersionedRepredictionWriter(request: LineVersio
         generated_at: generatedAt,
         cutoff_at: prediction.cutoff_at,
         model_version: MODEL_VERSION,
-        feature_snapshot_id: featureSnapshot.id,
+        feature_snapshot_id: dbFeatureSnapshotId,
         feature_set_version: FEATURE_SET_VERSION,
         feature_snapshot_generated_at: generatedAt,
         data_quality_score: featureSnapshot.featureQualityScore,
@@ -576,7 +604,7 @@ export async function executeLineVersionedRepredictionWriter(request: LineVersio
       newPrediction = {
         id: predictionId,
         sport_key: SPORT_KEY,
-        operating_day_id: prediction.operating_day_id,
+        operating_day_id: operatingDayId,
         game_id: event.id,
         home_team: event.home_team,
         away_team: event.away_team,
@@ -615,8 +643,8 @@ export async function executeLineVersionedRepredictionWriter(request: LineVersio
         odds_snapshot_id: bestEvidence.id,
         model_version: MODEL_VERSION,
         feature_set_version: FEATURE_SET_VERSION,
-        feature_snapshot_id: featureSnapshot.id,
-        feature_snapshot_key: stableId([MODE, prediction.id, newLine]),
+        feature_snapshot_id: dbFeatureSnapshotId,
+        feature_snapshot_key: stableId([MODE, prediction.id, market, generatedAt, newLine]),
         feature_snapshot_generated_at: generatedAt,
         is_current: true,
         prediction_version: Number(prediction.prediction_version ?? 1) + 1,
@@ -770,7 +798,7 @@ export function validateLineVersionedRepredictionWriterFixtures() {
     model_role: 'champion',
     model_version: 'fixture',
     feature_set_version: 'fixture',
-    feature_snapshot_id: 'feature-1',
+    feature_snapshot_id: '11111111-1111-4111-8111-111111111111',
     feature_snapshot_key: 'feature-key-1',
     feature_snapshot_generated_at: '2026-08-10T20:00:00.000Z',
     feature_snapshot: { featureQualityScore: 80, dataSufficiencyScore: 80, noLeakage: true, warnings: [], values: [], invalidationKeys: [] },

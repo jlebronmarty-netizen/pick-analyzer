@@ -72,6 +72,22 @@ async function latestLifecycleEvents() {
   return { rows: data ?? [], error: null }
 }
 
+async function latestPrimarySchedulerSyncJobs() {
+  const { data, error } = await supabaseAdmin
+    .from('sports_sync_jobs')
+    .select('id,job_type,status,started_at,completed_at,provider,records_fetched,records_inserted,records_updated,error_count,metadata,created_at')
+    .eq('sport_key', SPORT_KEY)
+    .in('job_type', [
+      'odds03d_stage3_product_primary_v1',
+      'odds03a_natural_dual_read_v1',
+      'sdio_exit_03a_mlb_official_shadow_v1',
+    ])
+    .order('created_at', { ascending: false })
+    .limit(40)
+  if (error) return { rows: [], error: error.message }
+  return { rows: data ?? [], error: null }
+}
+
 async function settlementBacklog() {
   const { count, error } = await supabaseAdmin
     .from('prediction_history')
@@ -526,10 +542,11 @@ function overallHealthDomain(domains: {
 
 export async function getOperationsHealth() {
   const generatedAt = new Date().toISOString()
-  const [adaptive, budget, lifecycle, backlog, migrations, projections, board] = await Promise.all([
+  const [adaptive, budget, lifecycle, primarySyncJobs, backlog, migrations, projections, board] = await Promise.all([
     getAdaptiveRefreshStatus(),
     getProviderBudgetStatus({ provider: 'sportsdataio', sportKey: SPORT_KEY }),
     latestLifecycleEvents(),
+    latestPrimarySchedulerSyncJobs(),
     settlementBacklog(),
     Promise.all([
       tableExists('universal_projection_history'),
@@ -566,14 +583,35 @@ export async function getOperationsHealth() {
     const metadata = asRecord(row?.metadata)
     return String(metadata.source ?? metadata.schedulerSource ?? '')
   }
+  const successfulPrimarySyncJob = (row: Record<string, unknown>) => {
+    const metadata = asRecord(row.metadata)
+    const status = String(row.status ?? '').toLowerCase()
+    const source = String(metadata.source ?? metadata.schedulerSource ?? '')
+    const providerCalls = Number(metadata.providerCallsMade ?? metadata.externalCallsUsed ?? 0)
+    return (
+      source === 'VERCEL_OPERATING_DAY_CRON_PRIMARY' &&
+      ['completed', 'success_changed', 'success_no_change'].includes(status) &&
+      providerCalls >= 0
+    )
+  }
+  const timestampOf = (row: Record<string, unknown> | null | undefined) => String(row?.completed_at ?? row?.created_at ?? '') || null
+  const newerTimestamp = (left: string | null, right: string | null) => {
+    if (!left) return right
+    if (!right) return left
+    return new Date(left).getTime() >= new Date(right).getTime() ? left : right
+  }
   const latestSuccessfulProtected = (lifecycle.rows as Array<Record<string, unknown>>).find((row) => {
     return successfulProtectedRow(row)
   })
   const latestVercelPrimary = lifecycleRows.find((row) => successfulProtectedRow(row) && sourceOf(row) === 'VERCEL_OPERATING_DAY_CRON_PRIMARY')
   const latestGithubFallback = lifecycleRows.find((row) => successfulProtectedRow(row) && sourceOf(row) === 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_FALLBACK')
-  const lastSuccessfulProtectedInvocationAt = String(latestSuccessfulProtected?.completed_at ?? latestSuccessfulProtected?.created_at ?? '') || null
-  const lastVercelPrimarySuccessAt = String(latestVercelPrimary?.completed_at ?? latestVercelPrimary?.created_at ?? '') || null
-  const lastGithubFallbackSuccessAt = String(latestGithubFallback?.completed_at ?? latestGithubFallback?.created_at ?? '') || null
+  const latestVercelPrimarySyncJob = (primarySyncJobs.rows as Array<Record<string, unknown>>).find(successfulPrimarySyncJob)
+  const lastLifecycleProtectedSuccessAt = timestampOf(latestSuccessfulProtected)
+  const lastLifecycleVercelPrimarySuccessAt = timestampOf(latestVercelPrimary)
+  const lastVercelPrimarySyncJobSuccessAt = timestampOf(latestVercelPrimarySyncJob)
+  const lastVercelPrimarySuccessAt = newerTimestamp(lastLifecycleVercelPrimarySuccessAt, lastVercelPrimarySyncJobSuccessAt)
+  const lastGithubFallbackSuccessAt = timestampOf(latestGithubFallback)
+  const lastSuccessfulProtectedInvocationAt = lastVercelPrimarySuccessAt ?? lastLifecycleProtectedSuccessAt
   const evidenceAge = ageMinutes(lastSuccessfulProtectedInvocationAt)
   const vercelPrimaryEvidenceAge = ageMinutes(lastVercelPrimarySuccessAt)
   const externalSchedulerVerified = Boolean(lastSuccessfulProtectedInvocationAt)
@@ -594,6 +632,7 @@ export async function getOperationsHealth() {
     ...adaptive.blockers,
     ...missingMigrations.map((migration) => `migration_${migration.table}_${migration.status.toLowerCase()}`),
     lifecycle.error ? `lifecycle_ledger_read_failed:${lifecycle.error}` : null,
+    primarySyncJobs.error ? `primary_scheduler_sync_jobs_read_failed:${primarySyncJobs.error}` : null,
     backlog.error ? `settlement_backlog_read_failed:${backlog.error}` : null,
   ].filter(Boolean) as string[]
   const projectionBlocked = Number(projections.projectionHealth?.blocked ?? 0)
@@ -739,11 +778,22 @@ export async function getOperationsHealth() {
       lastCronInvocation: adaptive.schedulerAudit.jobs[0]?.lastRunAt ?? null,
       nextScheduledRun: adaptive.schedulerAudit.jobs[0]?.nextRunAt ?? null,
       limitation: 'Vercel Cron owns the frequent operating-day scheduler. GitHub Actions remains fallback through the same protected endpoint and primary-success lease.',
-      schedulerEvidenceSource: lastSuccessfulProtectedInvocationAt ? 'operating_day_lifecycle_events' : 'none',
+      schedulerEvidenceSource: lastVercelPrimarySyncJobSuccessAt
+        ? 'sports_sync_jobs_stage3_primary'
+        : lastSuccessfulProtectedInvocationAt ? 'operating_day_lifecycle_events' : 'none',
       lastExternalSchedulerInvocationAt: lastSuccessfulProtectedInvocationAt,
       lastSuccessfulProtectedInvocationAt,
+      lastLifecycleProtectedSuccessAt,
+      lastLifecycleVercelPrimarySuccessAt,
+      lastVercelPrimarySyncJobSuccessAt,
       lastVercelPrimarySuccessAt,
       lastGithubFallbackSuccessAt,
+      fallbackHealth: {
+        lastSuccessAt: lastGithubFallbackSuccessAt,
+        lastFailureAt: failedSteps.find((row) => sourceOf(row) === 'GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_FALLBACK')?.created_at ?? null,
+        status: lastGithubFallbackSuccessAt ? 'AVAILABLE' : 'NO_RECENT_SUCCESS_EVIDENCE',
+        affectsPrimarySchedulerHealth: false,
+      },
       vercelPrimaryEvidenceAgeMinutes: vercelPrimaryEvidenceAge,
       externalSchedulerVerified,
       automaticMultiRefreshActive,

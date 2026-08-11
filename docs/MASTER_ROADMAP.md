@@ -3331,3 +3331,7 @@ Status: Locally implemented partial. SDIO-EXIT-03 adds the official MLB Stats AP
 ## SDIO-EXIT-03A Natural MLB Official Shadow Proof
 
 Status: Repository repair ready for natural proof. SDIO-EXIT-03A wires `DUAL_READ` into the protected operating-day scheduler so eligible market-refresh actions also run a bounded official MLB Stats API schedule/status/probable-starter shadow acquisition. Evidence is additive and non-authoritative; canonical events, predictions, settlement, learning, odds authority and SportsDataIO rollback are unchanged. Final readiness waits for at least two consecutive eligible natural official shadow runs after deployment.
+
+## Production Stability Repair ODDS-03C-R2A + Scheduler Health
+
+Status: Local certification PASS, push required. The repair keeps The Odds API as Stage 3 product odds authority and MLB Official as primary non-odds source, fixes the R2 UUID persistence defect, and aligns `/api/operations/health` with real Vercel primary Stage 3 execution evidence without weakening scheduler thresholds or hiding fallback status. Next step: publish the bounded repair, deploy, then rerun SDIO-EXIT-05 zero-SportsDataIO operating-window proof.

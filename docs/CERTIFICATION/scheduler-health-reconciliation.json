@@ -1,0 +1,44 @@
+{
+  "mode": "scheduler_health_reconciliation_v1",
+  "status": "SCHEDULER_HEALTH_RECONCILIATION_LOCAL_PASS",
+  "startingCommit": "836d6c11363b945d5e2f69d6caf8fb7467223b6d",
+  "rootCause": "HEALTH_QUERY_STALE_SOURCE",
+  "reportedLastInvocationBefore": "2026-08-11T11:51:47Z",
+  "actualPrimaryInvocations": [
+    "2026-08-11T12:07:49Z",
+    "2026-08-11T12:17:47Z"
+  ],
+  "healthSourceRepair": {
+    "operatingDayLifecycleEventsRetained": true,
+    "sportsSyncJobsStage3PrimaryRecognized": true,
+    "stage3JobType": "odds03d_stage3_product_primary_v1",
+    "primarySourceRequired": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+    "evidenceSelection": "newest successful Vercel primary lifecycle or Stage 3 sync-job evidence",
+    "cadenceThresholdsChanged": false
+  },
+  "primaryFallbackSeparation": {
+    "primaryScheduler": "VERCEL_OPERATING_DAY_CRON_PRIMARY",
+    "fallbackScheduler": "GITHUB_ACTIONS_PRODUCTION_OPERATING_DAY_FALLBACK",
+    "fallbackFailureAffectsPrimaryHealth": false,
+    "fallbackHealthExposedSeparately": true
+  },
+  "missedIntervalSemantics": {
+    "expectedIntervalMinutes": "existing config",
+    "graceMinutes": "existing config",
+    "genuinePrimaryMissStillDetectable": true,
+    "thresholdsWeakened": false
+  },
+  "regressions": {
+    "sportsDataIoZeroRoutineCalls": "UNCHANGED",
+    "theOddsApiPrimary": "UNCHANGED",
+    "mlbOfficialPrimary": "UNCHANGED",
+    "r2Writer": "UNCHANGED",
+    "settlement": "UNCHANGED",
+    "learning": "UNCHANGED",
+    "performance": "UNCHANGED"
+  },
+  "providerCallsFromCertification": 0,
+  "productionDbMutationsFromCertification": 0,
+  "pushAuthorizationRequired": true,
+  "finalClassification": "SCHEDULER_HEALTH_RECONCILIATION_LOCAL_PASS_PUSH_REQUIRED"
+}

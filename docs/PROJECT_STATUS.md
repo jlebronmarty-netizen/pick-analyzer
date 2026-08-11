@@ -1862,3 +1862,7 @@ SDIO-EXIT-03 is locally implemented as `SDIO_EXIT_03_PARTIAL_READY_FOR_SHADOW_OB
 ## 2026-08-09 SDIO-EXIT-03A Natural MLB Official Shadow Proof
 
 SDIO-EXIT-03A found and repaired the wiring gap that left `MLB_DATA_SOURCE_MODE=DUAL_READ` informational only. Eligible protected scheduler market-refresh actions now execute one bounded MLB Stats API schedule/status/probable-starter shadow acquisition after the existing SportsDataIO and The Odds API dual-read steps. Official MLB evidence remains non-authoritative and additive through `provider_entity_mappings` and `sports_sync_jobs`; SportsDataIO remains enabled, The Odds API remains shadow-only, `MLB_OFFICIAL_PRIMARY` is not promoted, and natural proof still requires two consecutive eligible post-deploy official shadow runs.
+
+## 2026-08-11 Production Stability Repair ODDS-03C-R2A + Scheduler Health
+
+ODDS-03C-R2A and Scheduler Health Reconciliation are locally certified pending push. The bounded runtime repair prevents line-versioned re-prediction composite identifiers from entering UUID columns by requiring a valid existing `feature_snapshot_id` UUID FK and keeping logical identities in text key fields. Operations health now reconciles protected lifecycle evidence with successful Stage 3 Vercel primary `sports_sync_jobs` evidence while keeping GitHub fallback health separate. Build and targeted validators pass. No provider authority, Vercel config, prediction formula, Official Pick threshold, settlement, learning, HR-03 status, or MLB data-source mode changed.

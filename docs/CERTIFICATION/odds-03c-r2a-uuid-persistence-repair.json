@@ -1,0 +1,51 @@
+{
+  "mode": "odds_03c_r2a_uuid_persistence_repair_v1",
+  "status": "ODDS_03C_R2A_UUID_PERSISTENCE_REPAIR_LOCAL_PASS",
+  "startingCommit": "836d6c11363b945d5e2f69d6caf8fb7467223b6d",
+  "rootCause": "COMPOSITE_FEATURE_SNAPSHOT_IDENTIFIER_WRITTEN_TO_UUID_COLUMN",
+  "incidentReplay": {
+    "oldPredictionId": "50c7066e-b954-589a-82d5-235dbf9d9826",
+    "market": "total",
+    "timestampContext": "2026-08-11T11:55:18.789Z",
+    "invalidValue": "line_versioned_reprediction_writer_v1:50c7066e-b954-589a-82d5-235dbf9d9826:total:2026-08-11t11_55_18.789z",
+    "result": "NO_UUID_PARSE_ERROR"
+  },
+  "targetDbColumn": "prediction_history.feature_snapshot_id",
+  "targetDbType": "uuid",
+  "repair": {
+    "featureSnapshotIdPolicy": "valid existing UUID FK only; otherwise block feature reuse",
+    "logicalCompositeIdentityField": "prediction_history.feature_snapshot_key",
+    "rawCompositeStringWrittenToUuidColumn": false,
+    "dbTypeGuardAdded": true,
+    "canonicalPredictionPersistenceConventionsReused": true,
+    "predictionIdDeterministicUuid": true
+  },
+  "idempotency": {
+    "sameLogicalIdentity": "same deterministic UUID and idempotency key",
+    "differentExactLine": "different deterministic UUID",
+    "concurrentInvocation": "one insert or existing-row reuse",
+    "returnToPriorLinePolicy": "CREATE_NEW_VERSION_IF_FEATURE_OR_TIME_CONTEXT_CHANGED"
+  },
+  "supersession": {
+    "supersedesPredictionId": "real prediction UUID",
+    "supersededByPredictionId": "real prediction UUID",
+    "reason": "MARKET_LINE_CHANGED",
+    "originalPredictionPreserved": true
+  },
+  "regressions": {
+    "predictionFormula": "UNCHANGED",
+    "modelWeights": "UNCHANGED",
+    "officialPickThresholds": "UNCHANGED",
+    "settlement": "UNCHANGED",
+    "learning": "UNCHANGED",
+    "hr03": "SHADOW_ONLY",
+    "oddsAuthority": "UNCHANGED",
+    "mlbDataSourceMode": "UNCHANGED"
+  },
+  "stage3R2PersistentBehaviorRetained": true,
+  "stage1R2BehaviorRetained": true,
+  "providerCallsFromCertification": 0,
+  "productionDbMutationsFromCertification": 0,
+  "pushAuthorizationRequired": true,
+  "finalClassification": "ODDS_03C_R2A_UUID_PERSISTENCE_REPAIR_LOCAL_PASS_PUSH_REQUIRED"
+}
