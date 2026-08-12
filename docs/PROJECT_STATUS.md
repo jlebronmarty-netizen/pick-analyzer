@@ -1916,3 +1916,9 @@ Health Current Board Timeout Repair is locally certified pending push. The bound
 MLB-FINAL-01 is locally certified as `MLB_FINAL_CERTIFIED_WITH_FORWARD_MARKETS`. The phase adds the final MLB reference architecture, certifies the existing 2,430-event / 7,290-row full-game historical model replay as complete and preserves the distinction between model replay and price-aware replay.
 
 No additional historical market rows were generated because opposite-side moneyline, alternate run lines, Total Under, Team Totals, First Five, NRFI/YRFI and player props do not yet have certified direct model, exact historical sportsbook line/price, settlement replay and calibration support. Provider calls, production database mutations, Current Era writes, settlement writes and learning writes remain 0 for certification. The Odds API remains MLB product odds authority, MLB Official remains primary non-odds source, SportsDataIO remains rollback-only and NBA/MC-03 were not started.
+
+## 2026-08-11 NBA-01 Data Foundation Provider Independence
+
+NBA-01 is locally certified as `NBA_DATA_FOUNDATION_PARTIAL_MORE_IMPORT_REQUIRED`. The phase audits and preserves the existing NBA Data Sync, Prediction Engine, Settlement, Model Health, Backtesting/Calibration and Feature Store work, while keeping NBA production activation blocked.
+
+Stored NBA evidence remains a partial/trial foundation: 30 teams, 579 players, 14 event sample, 13 completed-game sample, 918 player-stat rows, 758 lineup rows, 27 trial predictions, 27 settled trial predictions and 47 trial feature snapshots. Official/free non-odds NBA source access requires external review before bulk historical import. The Odds API is the target NBA odds provider but no NBA odds calls were made. SportsDataIO NBA remains legacy/trial only and was not expanded.

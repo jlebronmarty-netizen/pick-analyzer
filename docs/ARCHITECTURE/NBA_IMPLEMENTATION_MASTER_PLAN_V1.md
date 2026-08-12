@@ -1,6 +1,6 @@
 # NBA Implementation Master Plan V1
 
-Status: READY_FOR_AUTHORIZATION
+Status: NBA_01_FOUNDATION_PARTIAL_MORE_IMPORT_REQUIRED
 
 Selected by: Multi-Sport Handoff V1
 
@@ -40,6 +40,8 @@ No implementation is started by this plan.
 Preconditions: current MLB production remains stable; no SportsDataIO reactivation.
 
 Output: NBA source map, dependency audit, official/free source contract, read-only data inventory, SportsDataIO dependency removal plan.
+
+NBA-01 result: `NBA_DATA_FOUNDATION_PARTIAL_MORE_IMPORT_REQUIRED`. Existing NBA work is reusable, but full historical replay remains blocked by incomplete target-season schedule/results/stats/period-score history and unapproved official/free source import.
 
 Provider calls required: no, unless explicitly authorized for bounded source proof.
 

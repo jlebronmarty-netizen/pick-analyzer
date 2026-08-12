@@ -3363,3 +3363,11 @@ Status: Local certification PASS, push required.
 Result: MLB is certified as the reference sport with full-game Moneyline, Run Line `home -1.5` and Total Over historical model replay complete across 2,430 events and 7,290 settled replay rows. The phase intentionally activates 0 new market families because the remaining markets require real historical line/price evidence, market-specific model support, settlement replay and calibration before price-aware replay can be claimed.
 
 Next: `MLB-FINAL-02_COMPLETE_HISTORICAL_MARKET_DATA_COLLECTION_OR_NBA_01_PREP`. Do not start NBA implementation, Historical Market Expansion spend, Player Props, HR-03 promotion or MC-03 without explicit approval.
+
+## NBA-01 Data Foundation Provider Independence
+
+Status: Local certification PARTIAL, push required.
+
+Result: Existing NBA subsystems are preserved and classified for reuse. NBA has a useful partial/trial data foundation, but historical replay is not ready because full target-season schedule/results/stat/period-score coverage and official/free source import authorization are still missing. No provider calls, database mutations, NBA production activation, historical predictions or SportsDataIO expansion were performed.
+
+Next: review/authorize official/free NBA historical source import, then `NBA-02_COMPLETE_HISTORICAL_FEATURE_RECONSTRUCTION_AND_REPLAY` after import coverage is sufficient.
