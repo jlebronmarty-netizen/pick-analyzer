@@ -3355,3 +3355,11 @@ Status: Local certification PASS, push required. The repair keeps The Odds API a
 ## Health Current Board Timeout Repair
 
 Status: Local certification PASS, push required. Health now treats Current Board as bounded supplemental product context instead of a hard dependency that can 500 the operations endpoint. Settlement guarantee remains focused on canonical result/prediction closure and records operations-health unavailability as a warning. Next step: publish, deploy, then re-certify health, settlement guarantee and SDIO-EXIT-05.
+
+## MLB-FINAL-01 Complete Historical Market Expansion
+
+Status: Local certification PASS, push required.
+
+Result: MLB is certified as the reference sport with full-game Moneyline, Run Line `home -1.5` and Total Over historical model replay complete across 2,430 events and 7,290 settled replay rows. The phase intentionally activates 0 new market families because the remaining markets require real historical line/price evidence, market-specific model support, settlement replay and calibration before price-aware replay can be claimed.
+
+Next: `MLB-FINAL-02_COMPLETE_HISTORICAL_MARKET_DATA_COLLECTION_OR_NBA_01_PREP`. Do not start NBA implementation, Historical Market Expansion spend, Player Props, HR-03 promotion or MC-03 without explicit approval.

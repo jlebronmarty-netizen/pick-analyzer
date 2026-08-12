@@ -1910,3 +1910,9 @@ ODDS-03C-R2A and Scheduler Health Reconciliation are locally certified pending p
 ## 2026-08-11 Health Current Board Timeout Repair
 
 Health Current Board Timeout Repair is locally certified pending push. The bounded repair prevents `/api/operations/health` and settlement guarantee from returning HTTP 500 when supplemental Current Board context times out. Health now uses a bounded no-MLB-context Current Board summary and reports `CURRENT_BOARD_READ_FAILED` explicitly if the board read fails. Settlement guarantee proceeds with canonical settlement reconciliation and records operations-health unavailability as a warning. No provider calls, production mutations, provider authority, prediction policy, settlement formula, learning, HR-03, or data-source mode changed.
+
+## 2026-08-11 MLB-FINAL-01 Historical Market Expansion
+
+MLB-FINAL-01 is locally certified as `MLB_FINAL_CERTIFIED_WITH_FORWARD_MARKETS`. The phase adds the final MLB reference architecture, certifies the existing 2,430-event / 7,290-row full-game historical model replay as complete and preserves the distinction between model replay and price-aware replay.
+
+No additional historical market rows were generated because opposite-side moneyline, alternate run lines, Total Under, Team Totals, First Five, NRFI/YRFI and player props do not yet have certified direct model, exact historical sportsbook line/price, settlement replay and calibration support. Provider calls, production database mutations, Current Era writes, settlement writes and learning writes remain 0 for certification. The Odds API remains MLB product odds authority, MLB Official remains primary non-odds source, SportsDataIO remains rollback-only and NBA/MC-03 were not started.

@@ -4,11 +4,14 @@ Status: `MLB_MARKET_MATRIX_CERTIFIED`
 
 This matrix separates production-supported MLB markets from future market families. A market is production-supported only when real odds, exact market identity, prediction generation, settlement, learning compatibility, calibration/readiness evidence and product safety are all present.
 
+MLB-FINAL-01 adds the historical replay boundary: existing replay is `MODEL_REPLAY`, not `PRICE_AWARE_REPLAY`. Expanded markets require real historical sportsbook line and price evidence before price-aware replay or calibration can be claimed.
+
 ## Current Production Markets
 
 | Market | Production | Historical Replay | HR-03 Calibration | Product Notes |
 | --- | --- | --- | --- | --- |
 | Moneyline | `YES` | 2,430 replay rows | Supported, selected method `NO_CALIBRATION` | Current Board production market |
+| Moneyline opposite side | `NO` as separate historical replay row | 0 direct opposite-side replay rows | Not certified as independent replay side | Requires direct side contract or certified complement policy |
 | Run Line / Spread | `YES` for current exact-line rows | 2,430 replay rows, frozen `-1.5` support | Supported only for replay-trained `-1.5`; `+1.5` unsupported by HR-03 | Exact line identity required |
 | Game Total Over | `YES` when current exact line exists | 2,430 replay rows, Over-only | Supported for Over replay regime | Exact line identity required |
 | Game Total Under | `YES` as raw production prediction when generated | 0 Under replay rows | Unsupported by HR-03 because replay was Over-only | No inherited calibrated probability |
@@ -41,4 +44,4 @@ ODDS-03C-R2 implemented the line-versioned re-prediction writer, and ODDS-03C-R2
 
 ## Historical Market Expansion Decision
 
-No additional historical market was activated in this closeout. Historical evidence supports calibration review for existing full-game core markets only. Expansion markets require their own odds history, settlement labels, replay, calibration and shadow validation.
+No additional historical market was activated in MLB-FINAL-01. Historical evidence supports calibration review for existing full-game core markets only. Expansion markets require their own odds history, settlement labels, replay, calibration and shadow validation.

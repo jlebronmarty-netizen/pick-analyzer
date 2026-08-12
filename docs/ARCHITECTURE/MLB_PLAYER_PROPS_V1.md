@@ -4,6 +4,8 @@ Status: `PLAYER_PROPS_FOUNDATION_ONLY`
 
 Observation time: `2026-08-11T17:18Z`
 
+MLB-FINAL-01 reconfirms this status. Player-stat and appearance data provide a future foundation, but player props are not production markets until current, opening and closing prop odds are stored and a prop-specific prediction, settlement, replay and calibration path is certified.
+
 Production endpoints:
 
 - `/api/mlb/player-props/readiness`
@@ -59,6 +61,8 @@ All certification reads reported `providerCallsMade=0` and `remoteMutationsMade=
 Player props remain unavailable for production recommendations.
 
 No player-prop prediction rows, Official Picks, learning labels, calibration rows, sportsbook-price substitutions or settlement automation were activated by MLB Final Closeout.
+
+MLB-FINAL-01 also made 0 player-prop replay rows, 0 prop recommendation rows and 0 prop learning labels.
 
 ## Recommended Future Epic
 

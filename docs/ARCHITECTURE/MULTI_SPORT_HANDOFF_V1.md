@@ -1,6 +1,6 @@
 # Multi-Sport Handoff V1
 
-Status: MULTI_SPORT_HANDOFF_PREPARATION
+Status: MULTI_SPORT_HANDOFF_READY_AFTER_MLB_FINAL
 
 Date: 2026-08-11
 
@@ -9,6 +9,8 @@ Starting commit: `28c188cd1db7e131cedd4b38bc6642b5911d4d7b`
 ## Scope
 
 This audit prepares the post-MLB multi-sport handoff. It does not activate a new sport, call providers, import history, create predictions, change provider authority, change scheduler configuration, change model formulas, or mutate production data.
+
+MLB-FINAL-01 certifies MLB as the reference sport with full-game core historical replay complete and unsupported markets kept forward-only. No new sport is started by this handoff update.
 
 MLB remains the reference architecture:
 

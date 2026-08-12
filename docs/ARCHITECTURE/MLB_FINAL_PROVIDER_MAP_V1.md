@@ -2,9 +2,9 @@
 
 Status: `MLB_FINAL_PROVIDER_MAP_CERTIFIED`
 
-Observation commit: `4fb06cb795a9fad00cd60b4e3f5b134c69701444`
+Observation commit: `71380918b2b9e5db7e538be2b2077e7f4a5df540`
 
-Observation time: `2026-08-11T17:18:09Z`
+Observation time: `2026-08-12T00:46:47Z`
 
 ## Provider Authority
 
@@ -19,7 +19,7 @@ Observation time: `2026-08-11T17:18:09Z`
 
 ## Production State
 
-Production `/api/system/version` returned HTTP 200 for commit `4fb06cb795a9fad00cd60b4e3f5b134c69701444` with `providerCallsMade=0`.
+Production `/api/system/version` returned HTTP 200 for commit `71380918b2b9e5db7e538be2b2077e7f4a5df540` with `providerCallsMade=0`.
 
 Production health reported:
 
@@ -47,3 +47,5 @@ Manual rollback or manual diagnostics require explicit human authorization.
 ## Certification Boundaries
 
 This provider map made no prediction, settlement, learning, scheduler, provider-budget or Official Pick policy changes.
+
+MLB-FINAL-01 keeps this provider map unchanged in authority terms: The Odds API is the MLB product odds authority, MLB Official is the primary non-odds MLB source and SportsDataIO remains rollback-only.

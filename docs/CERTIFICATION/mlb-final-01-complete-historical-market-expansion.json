@@ -1,0 +1,157 @@
+{
+  "mode": "mlb_final_01_complete_historical_market_expansion_v1",
+  "status": "MLB_FINAL_CERTIFIED_WITH_FORWARD_MARKETS",
+  "startingCommit": "71380918b2b9e5db7e538be2b2077e7f4a5df540",
+  "productionCommitObserved": "71380918b2b9e5db7e538be2b2077e7f4a5df540",
+  "observationTimeUtc": "2026-08-12T00:46:47.631Z",
+  "canonicalProductionUrl": "https://pick-analyzer.vercel.app",
+  "productionPilotWeek": "ACTIVE",
+  "currentEra": {
+    "oddsPrimaryAuthorityStage": "STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT",
+    "productOddsAuthority": "THE_ODDS_API",
+    "mlbDataSourceMode": "MLB_OFFICIAL_PRIMARY",
+    "sportsDataIoMode": "ROLLBACK_ONLY",
+    "sportsDataIoRoutineMlbCallsExpected": 0,
+    "operationsHealth": "HEALTHY",
+    "systemVersionProviderCallsMade": 0
+  },
+  "historicalDataset": {
+    "events": 2430,
+    "featureSnapshotsCertified": 70470,
+    "featureSnapshotsObserved": 80771,
+    "replayRowsBefore": 7290,
+    "replayRowsAdded": 0,
+    "replayRowsAfter": 7290,
+    "settledReplayRows": 7290,
+    "pendingReplayRows": 0,
+    "voidReplayRows": 0,
+    "leakageFailures": 0,
+    "duplicateReplayRows": 0
+  },
+  "historicalReplay": {
+    "type": "MODEL_REPLAY",
+    "priceAwareReplay": false,
+    "priceAwareReplayReason": "Real historical sportsbook line and price evidence was not certified for expanded market families.",
+    "providerCalls": 0,
+    "sportsDataIoCalls": 0,
+    "theOddsApiCalls": 0,
+    "mlbOfficialCalls": 0,
+    "currentEraWrites": 0,
+    "productionSettlementWrites": 0,
+    "productionLearningWrites": 0,
+    "currentBoardWrites": 0,
+    "performanceDefaultContamination": 0
+  },
+  "marketReplayCoverage": {
+    "moneylineHome": {
+      "modelReplay": "CERTIFIED",
+      "rows": 2430,
+      "settled": 2430,
+      "priceAwareReplay": "NOT_CERTIFIED"
+    },
+    "moneylineOpposite": {
+      "modelReplay": "BLOCKED",
+      "rowsAdded": 0,
+      "reason": "No certified direct opposite-side historical replay contract or authorized complement policy."
+    },
+    "runLineHomeMinusOnePointFive": {
+      "modelReplay": "CERTIFIED",
+      "rows": 2430,
+      "settled": 2430,
+      "priceAwareReplay": "NOT_CERTIFIED"
+    },
+    "runLinePlusOnePointFiveOrAwaySpread": {
+      "modelReplay": "BLOCKED",
+      "rowsAdded": 0,
+      "reason": "HR-03 replay support is frozen to home -1.5; current-era outside-line support remains shadow unsupported."
+    },
+    "totalOver": {
+      "modelReplay": "CERTIFIED",
+      "rows": 2430,
+      "settled": 2430,
+      "priceAwareReplay": "NOT_CERTIFIED"
+    },
+    "totalUnder": {
+      "modelReplay": "BLOCKED",
+      "rowsAdded": 0,
+      "reason": "HR-03 records Total Under as unsupported by Over-only replay."
+    },
+    "teamTotals": {
+      "classification": "FOUNDATION_ONLY",
+      "rowsAdded": 0,
+      "reason": "No certified real team-total lines/prices or prediction model support."
+    },
+    "firstFive": {
+      "classification": "FOUNDATION_ONLY",
+      "rowsAdded": 0,
+      "reason": "No certified First Five odds, model, settlement replay and starter-change policy."
+    },
+    "nrfiYrfi": {
+      "classification": "FORWARD_ONLY",
+      "rowsAdded": 0,
+      "reason": "No certified first-inning odds, model, settlement labels or calibration."
+    },
+    "playerProps": {
+      "classification": "FOUNDATION_ONLY",
+      "rowsAdded": 0,
+      "propsAudited": 18,
+      "productionReadyProps": 0,
+      "currentPropOddsRows": 0,
+      "openingPropOddsRows": 0,
+      "closingPropOddsRows": 0
+    }
+  },
+  "calibration": {
+    "hr03Status": "CALIBRATION_SHADOW_PASS_MORE_CURRENT_ERA_EVIDENCE_REQUIRED",
+    "shadowOnly": true,
+    "promotionAuthorized": false,
+    "productionProbabilityChanged": false,
+    "unsupportedCurrentEraReasons": {
+      "TOTAL_UNDER_UNSUPPORTED_BY_OVER_ONLY_REPLAY": 126,
+      "RUN_LINE_OUTSIDE_MINUS_1_5_TRAINING_SUPPORT": 87
+    }
+  },
+  "forwardDataFoundation": {
+    "requiredFields": [
+      "event_identity",
+      "market_identity",
+      "selection_identity",
+      "exact_line",
+      "book_or_consensus_source",
+      "source_market_timestamp",
+      "capture_timestamp",
+      "feature_snapshot_lineage",
+      "settlement_label",
+      "replay_isolation_flag",
+      "recommendation_exposure_flag"
+    ],
+    "unsupportedMarketsActionable": false,
+    "newMarketFamiliesActivated": 0,
+    "historicalPricesFabricated": false,
+    "historicalPredictionsFabricated": false
+  },
+  "safety": {
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0,
+    "manualProviderCallsMade": 0,
+    "productionDbMigrationMade": false,
+    "sportsDataIoCancelled": false,
+    "sportsDataIoDisabled": false,
+    "sportsDataIoReactivated": false,
+    "officialPickPolicyChanged": false,
+    "predictionFormulaChanged": false,
+    "modelWeightsChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "hr03Promoted": false,
+    "newSportStarted": false,
+    "nbaStarted": false,
+    "mc03Started": false
+  },
+  "nextPhase": {
+    "recommended": "MLB-FINAL-02_COMPLETE_HISTORICAL_MARKET_DATA_COLLECTION_OR_NBA_01_PREP",
+    "nbaImplementationStarted": false
+  },
+  "pushAuthorizationRequired": true,
+  "finalClassification": "MLB_FINAL_CERTIFIED_WITH_FORWARD_MARKETS"
+}

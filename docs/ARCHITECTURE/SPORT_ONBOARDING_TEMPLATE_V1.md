@@ -19,6 +19,7 @@ This template captures the evidence gates required before any new sport can leav
 | Learning | Learning labels must be deduplicated and separated from recommendation exposure. |
 | Performance | Default production scope must exclude replay, legacy and preview rows. |
 | Calibration | Calibration starts shadow-only and requires out-of-sample validation. |
+| Historical replay type | Distinguish model replay from price-aware replay; do not claim price-aware replay without real historical line and price evidence. |
 | Scheduler | Natural protected scheduler operation must be proven without duplicate writers. |
 | Provider budget | Provider calls must have explicit ledgers and no hidden fallback spend. |
 | Product safety | Stale, unsupported or missing evidence must never become actionable. |
@@ -47,6 +48,8 @@ This template captures the evidence gates required before any new sport can leav
 - Do not bind a current price to an old-line probability.
 - Do not let one fail-closed stale row automatically imply a systemic outage.
 - Keep provider authority and provider budget ledgers separated by source.
+- A model replay can certify feature/outcome behavior without certifying historical sportsbook price behavior.
+- Do not create opposite-side, alternate-line or Under-market replay rows unless the prediction engine and settlement contract directly support that exact market identity.
 
 ## Current Next-Sport Ranking
 
