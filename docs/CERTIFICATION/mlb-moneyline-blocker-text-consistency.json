@@ -1,0 +1,43 @@
+{
+  "certification": "mlb-moneyline-blocker-text-consistency",
+  "status": "MLB_MONEYLINE_BLOCKER_REPAIR_READY_FOR_DEPLOYMENT",
+  "startingCommit": "3bc113340c38c6667f48f713168156e34d3f991c",
+  "rootCause": {
+    "classification": "WRONG_CANDIDATE_BINDING",
+    "summary": "The rendered Moneyline review card could display one candidate while the blocker summary used a separate best-review candidate's blocker bundle."
+  },
+  "repair": {
+    "scope": "UI blocker derivation only",
+    "sameVersionConsistency": true,
+    "displayedCandidateOwnsBlockers": true,
+    "staleNonPositiveEdgeFilteredWhenCurrentEdgePositive": true,
+    "staleNonPositiveEvFilteredWhenCurrentEvPositive": true,
+    "reviewOnlyStatusPreserved": true
+  },
+  "ariMoneylineProductionEvidenceBefore": {
+    "probability": 69.5,
+    "odds": -166,
+    "impliedProbability": 62.4,
+    "edge": 7.08,
+    "expectedValue": 11.35,
+    "incorrectBlocker": "EDGE IS NOT POSITIVE"
+  },
+  "policyChanges": {
+    "probabilityChanged": false,
+    "evMathChanged": false,
+    "rankingChanged": false,
+    "thresholdChanged": false,
+    "officialPickPolicyChanged": false,
+    "recommendationEligibilityChanged": false
+  },
+  "providerSafety": {
+    "sportsDataIoRoutineMlbCalls": 0,
+    "sportsDataIoReactivated": false,
+    "theOddsApiAuthorityChanged": false,
+    "mlbDataSourceModeChanged": false
+  },
+  "certificationAccounting": {
+    "providerCallsFromCertification": 0,
+    "databaseMutationsFromCertification": 0
+  }
+}

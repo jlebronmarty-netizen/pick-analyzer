@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-11 MLB Moneyline Blocker Text Consistency
+
+- MLB Moneyline Blocker Text Consistency is locally implemented as `MLB_MONEYLINE_BLOCKER_REPAIR_READY_FOR_DEPLOYMENT`. The bounded UI repair fixes a post-deploy MLB-FINAL-00 issue where the Moneyline review card could display one candidate's positive edge/EV while the short blocker summary used a separate best-review candidate's negative-edge blocker.
+- Review-only status, Official Pick policy, recommendation thresholds, probability, EV math, ranking, provider authority, SportsDataIO rollback-only behavior, settlement and learning remain unchanged.
+
 ## 2026-08-11 MLB-FINAL-00 Current Era Readiness
 
 - MLB-FINAL-00 is locally implemented as `MLB_CURRENT_ERA_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed Current Board and Dashboard Today still contained Current Era MLB probabilities, exact-line odds, edge/EV and grounded prediction evidence; the bounded defect was fallback presentation, not missing model evidence.

@@ -854,16 +854,7 @@ function bestAvailableReviewOption(
   const candidate = ranked[0] ?? null
   const evidenceCompleteness = candidate ? reviewEvidenceCompleteness(candidate) : 0
   const blockers = candidate
-    ? uniqueList([
-      'NOT A RECOMMENDATION',
-      candidate.reason,
-      candidate.probability === null ? 'Model probability unavailable.' : '',
-      candidate.odds === null ? 'Exact-line odds unavailable.' : '',
-      candidate.edge === null ? 'Edge unavailable.' : Number(candidate.edge) <= 0 ? 'Edge is not positive.' : '',
-      candidate.ev === null ? 'EV unavailable.' : Number(candidate.ev) < 0 ? 'EV is negative.' : '',
-      isPostStartOrClosed(candidate) ? 'Pregame betting window closed.' : '',
-      isFreshnessActionable(candidate) ? '' : 'Fresh actionable market evidence is not certified for recommendation.',
-    ])
+    ? reviewOnlyDisplayBlockers(candidate)
     : ['No sufficiently evidenced review candidate is available.']
   return {
     contractVersion: 'best_available_review_option_v1',
@@ -875,6 +866,54 @@ function bestAvailableReviewOption(
     rankingSource: candidate?.source ?? 'No eligible source',
     blockers,
   }
+}
+
+function normalizedPolicyBlockersForCurrentEvidence(candidate: PlanPick) {
+  const reason = candidate.reason.toUpperCase()
+  const edge = candidate.edge
+  const ev = candidate.ev
+  const rawCodes = reason
+    .split(/[^A-Z0-9_]+/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+  const codes = rawCodes.filter((code) => {
+    if (code === 'NON_POSITIVE_EDGE' && edge !== null && edge > 0) return false
+    if (code === 'NON_POSITIVE_EV' && ev !== null && ev > 0) return false
+    return true
+  })
+  const mapped = codes.map((code) => {
+    if (code === 'PRODUCTION_GATE_BLOCKED') return 'Production gate blocked.'
+    if (code === 'QUARANTINED_ROW') return 'Candidate remains quarantined.'
+    if (code === 'CALIBRATION_INSUFFICIENT') return 'Calibration evidence is insufficient.'
+    if (code === 'LOW_CONFIDENCE') return 'Confidence is below the existing policy threshold.'
+    if (code === 'LOW_MODEL_PROBABILITY') return 'Model probability is below the existing policy threshold.'
+    if (code === 'LOW_EDGE') return 'Edge is below the existing Official Pick threshold.'
+    if (code === 'LOW_EV') return 'EV is below the existing Official Pick threshold.'
+    if (code === 'NON_POSITIVE_EDGE') return 'Edge is not positive.'
+    if (code === 'NON_POSITIVE_EV') return 'EV is not positive.'
+    if (code === 'STALE_ODDS') return 'Market evidence is stale for recommendation.'
+    if (code === 'LINE_VERSIONED_REPREDICTION_EVIDENCE_ONLY') return 'Line-versioned evidence remains review-only.'
+    return ''
+  }).filter(Boolean)
+
+  if (mapped.length) return mapped
+  if (/blocked|quarantined|calibration|low confidence|official|policy|not eligible/i.test(candidate.reason)) {
+    return [candidate.reason]
+  }
+  return ['Existing recommendation policy did not certify this candidate.']
+}
+
+function reviewOnlyDisplayBlockers(candidate: PlanPick) {
+  return uniqueList([
+    'NOT A RECOMMENDATION',
+    ...normalizedPolicyBlockersForCurrentEvidence(candidate),
+    candidate.probability === null ? 'Model probability unavailable.' : '',
+    candidate.odds === null ? 'Exact-line odds unavailable.' : '',
+    candidate.edge === null ? 'Edge unavailable.' : Number(candidate.edge) <= 0 ? 'Edge is not positive.' : '',
+    candidate.ev === null ? 'EV unavailable.' : Number(candidate.ev) <= 0 ? 'EV is not positive.' : '',
+    isPostStartOrClosed(candidate) ? 'Pregame betting window closed.' : '',
+    isFreshnessActionable(candidate) ? '' : 'Fresh actionable market evidence is not certified for recommendation.',
+  ])
 }
 
 function compareMoneylineEvidence(left: PlanPick, right: PlanPick) {
@@ -2069,6 +2108,7 @@ function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
   const reviewPick = moneyline.status === 'ACTIONABLE' ? null : pick ?? moneyline.closestCandidate
   const bestReview = moneyline.bestAvailableReviewOption
   const closest = moneyline.closestCandidate
+  const reviewBlockers = reviewPick ? reviewOnlyDisplayBlockers(reviewPick) : bestReview.blockers
   const readinessDenominator = moneyline.passedGateCount + moneyline.failedGateCount + moneyline.pendingGateCount + moneyline.unavailableGateCount
   const readiness = readinessDenominator ? (moneyline.passedGateCount / readinessDenominator) * 100 : null
   const priceFreshness = moneyline.marketAgeMinutes === null ? moneyline.freshnessStatus : `${moneyline.marketAgeMinutes} min`
@@ -2132,7 +2172,7 @@ function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
             <MiniText label="Evidence Time" value={compactDate(reviewPick.providerSourceTimestamp ?? reviewPick.marketTimestamp)} />
           </div>
           <p className="mt-2 text-sm text-slate-300">{reviewPick.reason}</p>
-          <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-100">Blocked Because: {bestReview.blockers.slice(0, 3).join(' / ')}</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-100">Blocked Because: {reviewBlockers.slice(0, 3).join(' / ')}</p>
         </div>
       ) : !primaryPick && closest ? (
         <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08c-review-only-candidate="true" data-best-available-review-option="false" data-not-recommendation="true">
@@ -2203,6 +2243,7 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
   const reviewPick = rentPlay.status === 'ACTIONABLE' ? null : pick ?? rentPlay.closestCandidate
   const bestReview = rentPlay.bestAvailableReviewOption
   const closest = rentPlay.closestCandidate
+  const reviewBlockers = reviewPick ? reviewOnlyDisplayBlockers(reviewPick) : bestReview.blockers
   const readinessDenominator = rentPlay.passedGateCount + rentPlay.failedGateCount + rentPlay.pendingGateCount + rentPlay.unavailableGateCount
   const readiness = readinessDenominator ? (rentPlay.passedGateCount / readinessDenominator) * 100 : null
   const statusTone: Tone = rentPlay.status === 'ACTIONABLE'
@@ -2258,7 +2299,7 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
             <MiniText label="Evidence Time" value={compactDate(reviewPick.providerSourceTimestamp ?? reviewPick.marketTimestamp)} />
           </div>
           <p className="mt-2 text-sm text-slate-300">{reviewPick.reason}</p>
-          <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-100">Blocked Because: {bestReview.blockers.slice(0, 3).join(' / ')}</p>
+          <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-100">Blocked Because: {reviewBlockers.slice(0, 3).join(' / ')}</p>
         </div>
       ) : !primaryPick && closest ? (
         <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08b-best-available-not-rent-play="true" data-best-available-review-option="false" data-not-recommendation="true">

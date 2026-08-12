@@ -2,6 +2,8 @@
 
 This roadmap is dependency-aware and based on repository inspection. A module is marked completed only when the repository contains service/API/dashboard/persistence evidence and recent verification supports it.
 
+MLB Moneyline Blocker Text Consistency is locally implemented as `MLB_MONEYLINE_BLOCKER_REPAIR_READY_FOR_DEPLOYMENT`. It keeps MLB-FINAL-00 review-only behavior but ensures the Moneyline card's displayed edge/EV and short blocker summary are derived from the same candidate evidence bundle. No recommendation eligibility, Official Pick threshold, model, provider, settlement or learning behavior changed.
+
 MLB-FINAL-00 Current Era Readiness is locally implemented as `MLB_CURRENT_ERA_REPAIR_READY_FOR_DEPLOYMENT`. Current Era evidence remains present across Current Board and Dashboard Today, and the bounded repair adds a `BEST_AVAILABLE_REVIEW_OPTION` homepage fallback that is explicitly not a recommendation. No model, threshold, provider authority, SportsDataIO, scheduler, settlement, learning or replay behavior changed. After deployment certification, the next phase is `MLB-FINAL-01_COMPLETE_HISTORICAL_MARKET_EXPANSION_AND_FORWARD_DATA_FOUNDATION`.
 
 MLB Recommendation Surface Semantics Finalization is locally implemented as `MLB_RECOMMENDATION_SURFACE_REPAIR_READY_FOR_DEPLOYMENT`. It fixes homepage recommendation presentation semantics so blocked Rent Play/Moneyline evidence is review-only, unavailable required gates block recommendations, Smart Parlay builder availability is distinct from parlay actionability, Watchlist remains research-only, and Value Signals are not confused with Official Picks. No model, probability, EV, threshold, Official Pick, provider authority, scheduler, settlement or learning behavior changed.
