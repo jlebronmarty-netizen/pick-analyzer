@@ -2342,20 +2342,6 @@ export async function runAdaptiveRefresh({
         : canonicalAcquisition.success
           ? String(canonicalAcquisition.status)
           : String(canonicalAcquisition.status ?? 'FAILED_RETRYABLE')
-    let storedOddsPredictionGeneration: Record<string, unknown> | null = null
-    if (
-      canonicalAcquisition.success &&
-      Number(contract.persistedSnapshotCount ?? 0) > 0
-    ) {
-      const { generateMlbProspectivePredictionsFromStoredOdds } = await import('@/services/sportsdataio-mlb-prospective-preview.service')
-      storedOddsPredictionGeneration = await generateMlbProspectivePredictionsFromStoredOdds({
-        dryRun: false,
-        confirmed: true,
-        selectedDate,
-        source: source ?? 'adaptive_refresh_execution_bridge_v2',
-        requestId: executionRunId,
-      }) as Record<string, unknown>
-    }
     const theOddsApiDualReadAcquisition = await executeTheOddsApiMlbDualReadAcquisition({
       dryRun: false,
       operatingDate: selectedDate,
@@ -2370,6 +2356,21 @@ export async function runAdaptiveRefresh({
         : Number(theOddsApiDualReadAcquisition.rowsInserted ?? 0) + Number(theOddsApiDualReadAcquisition.rowsUpdated ?? 0) > 0
           ? 'SUCCESS_CHANGED'
           : 'SUCCESS_NO_CHANGE'
+    }
+    let storedOddsPredictionGeneration: Record<string, unknown> | null = null
+    const sportsDataIoRowsChanged = canonicalAcquisition.success && Number(contract.persistedSnapshotCount ?? 0) > 0
+    const theOddsApiRowsChanged =
+      theOddsApiDualReadAcquisition.success !== false &&
+      Number(theOddsApiDualReadAcquisition.rowsInserted ?? 0) + Number(theOddsApiDualReadAcquisition.rowsUpdated ?? 0) > 0
+    if (sportsDataIoRowsChanged || theOddsApiRowsChanged) {
+      const { generateMlbProspectivePredictionsFromStoredOdds } = await import('@/services/sportsdataio-mlb-prospective-preview.service')
+      storedOddsPredictionGeneration = await generateMlbProspectivePredictionsFromStoredOdds({
+        dryRun: false,
+        confirmed: true,
+        selectedDate,
+        source: source ?? 'adaptive_refresh_execution_bridge_v2',
+        requestId: executionRunId,
+      }) as Record<string, unknown>
     }
     const lineVersionedReprediction = await executeLineVersionedRepredictionWriter({
       dryRun: false,

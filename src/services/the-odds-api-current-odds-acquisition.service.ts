@@ -103,8 +103,10 @@ type OddsRow = {
   price: number | null
   line: number | null
   snapshot_time: string
+  provider_timestamp: string
   is_opening: boolean
   is_closing: boolean
+  odds_classification: string
   metadata: Record<string, unknown>
   updated_at: string
 }
@@ -387,8 +389,10 @@ function normalizeOddsRows(sportKey: string, providerSportKey: string, events: P
             price,
             line,
             snapshot_time: snapshotTime,
+            provider_timestamp: snapshotTime,
             is_opening: false,
             is_closing: false,
+            odds_classification: 'current_odds_pregame',
             metadata: {
               checkpoint: 'the_odds_api_current_odds_v1',
               providerSportKey,
@@ -636,8 +640,10 @@ function normalizeMlbDualReadRows({
             price,
             line,
             snapshot_time: snapshotTime,
+            provider_timestamp: snapshotTime,
             is_opening: false,
             is_closing: false,
+            odds_classification: productPriceAuthority ? 'product_primary_pregame' : 'shadow_pregame',
             metadata: {
               checkpoint: jobType,
               authorityStatus,

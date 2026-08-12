@@ -1,0 +1,39 @@
+{
+  "certification": "MLB_AUG12_MORNING_PIPELINE_RECOVERY",
+  "status": "LOCAL_RUNTIME_REPAIR_COMPLETE_PUSH_REQUIRED",
+  "operatingDate": "2026-08-12",
+  "timezone": "America/Puerto_Rico",
+  "rootCause": "STAGE3_THE_ODDS_API_ROWS_DID_NOT_TRIGGER_STORED_ODDS_PREDICTION_GENERATION",
+  "evidence": {
+    "gamesToday": 15,
+    "pregameGames": 15,
+    "cutoffEligibleGames": 15,
+    "theOddsApiCoverage": {
+      "eventsWithOdds": 15,
+      "moneylineEvents": 15,
+      "runLineEvents": 15,
+      "totalEvents": 15
+    },
+    "featureReadyEventsBeforeRepair": 0,
+    "predictionsBeforeRepair": 0,
+    "sportsDataIoMlbRoutineCalls": 0
+  },
+  "repair": {
+    "providerTimestampColumn": "sports_odds_snapshots.provider_timestamp",
+    "predictionWriter": "generateMlbProspectivePredictionsFromStoredOdds",
+    "orchestrator": "runAdaptiveRefresh",
+    "stage3Behavior": "The Odds API product-primary row changes trigger the existing stored-odds prediction writer.",
+    "sportsDataIoBehavior": "Rollback-only behavior preserved; routine MLB odds calls remain suppressed in Stage 3."
+  },
+  "safety": {
+    "providerCallsFromCertification": 0,
+    "productionDatabaseMutationsFromCertification": 0,
+    "predictionFormulaChanged": false,
+    "modelWeightsChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementPolicyChanged": false,
+    "learningPolicyChanged": false,
+    "providerAuthorityChanged": false
+  },
+  "classification": "MLB_AUG12_RECOVERY_PASS_AUTONOMY_REPAIR_READY_FOR_DEPLOYMENT"
+}

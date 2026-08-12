@@ -10,6 +10,7 @@ import { evaluateRecommendationEligibility } from '@/services/recommendation-eli
 import { buildSportPrediction } from '@/services/sport-prediction-engine-sdk.service'
 import { getMlbMissingIntelligenceStatus } from '@/services/mlb-missing-intelligence.service'
 import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-weather-stadium-intelligence.service'
+import { getOddsPrimaryAuthorityRuntimeStatus } from '@/services/odds-primary-authority.service'
 import {
   normalizeSportsDataIoMlbGameOdds,
   type SportsDataIoMlbEventReference,
@@ -22,6 +23,7 @@ import { normalizeSportsDataIoMlbGameDateTime, zonedUtcRange } from '@/services/
 import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 
 const PROVIDER = 'sportsdataio'
+const THE_ODDS_API_PROVIDER = 'the-odds-api'
 const PROVIDER_VARIANT = 'sportsdataio_discovery_lab'
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -100,12 +102,14 @@ type EventRow = {
 type OddsRow = {
   id: string
   event_id: string
+  provider?: string | null
   sportsbook: string
   market: 'moneyline' | 'run_line' | 'total'
   outcome: string
   price: number
   line: number | null
   snapshot_time: string
+  provider_timestamp?: string | null
   metadata: Record<string, unknown> | null
 }
 
@@ -657,30 +661,49 @@ async function loadCompletedCheckpoint(
 async function loadPersistedSafeOddsForDate(events: EventRow[]) {
   const eventIds = events.map((event) => event.id)
   if (!eventIds.length) return [] as OddsRow[]
+  const authority = getOddsPrimaryAuthorityRuntimeStatus()
+  const useTheOddsApiProductRows = authority.productAuthority === 'THE_ODDS_API'
+  const provider = useTheOddsApiProductRows ? THE_ODDS_API_PROVIDER : PROVIDER
+  const earliestStart = events.map((event) => event.start_time).sort()[0] ?? null
+  const latestStart = events.map((event) => event.start_time).sort().at(-1) ?? null
+  const oddsWindowStart = earliestStart
+    ? new Date(Math.max(0, (parseDateMs(earliestStart) ?? 0) - 24 * 60 * 60 * 1000)).toISOString()
+    : null
+  const oddsWindowEnd = latestStart
+    ? new Date((parseDateMs(latestStart) ?? Date.now()) + 60 * 60 * 1000).toISOString()
+    : null
   const result = await supabaseAdmin
     .from('sports_odds_snapshots')
-    .select('id, event_id, sportsbook, market, outcome, price, line, snapshot_time, metadata')
+    .select('id, event_id, provider, sportsbook, market, outcome, price, line, snapshot_time, provider_timestamp, metadata')
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
     .eq('season', SEASON)
     .in('event_id', eventIds)
-    .eq('provider', PROVIDER)
-    .order('snapshot_time', { ascending: true })
-    .limit(1000)
+    .eq('provider', provider)
+    .gte('snapshot_time', oddsWindowStart ?? '1970-01-01T00:00:00.000Z')
+    .lt('snapshot_time', oddsWindowEnd ?? '2999-01-01T00:00:00.000Z')
+    .order('snapshot_time', { ascending: false })
+    .limit(useTheOddsApiProductRows ? 10000 : 1000)
   if (result.error) throw new Error(`persisted odds read failed: ${result.error.message}`)
   const eventById = new Map(events.map((event) => [event.id, event]))
   return ((result.data ?? []) as OddsRow[]).filter((row) => {
     const event = eventById.get(row.event_id)
     const eventStart = parseDateMs(event?.start_time)
-    const timestamp = parseDateMs(row.snapshot_time)
     const metadata = row.metadata ?? {}
-    return (
-      eventStart !== null &&
-      timestamp !== null &&
-      timestamp < eventStart &&
-      metadata.production_eligible === false &&
-      metadata.validation_status === 'quarantined'
-    )
+    const sourceTimestamp = useTheOddsApiProductRows
+      ? row.provider_timestamp ?? safeString(metadata.providerTimestamp) ?? row.snapshot_time
+      : row.snapshot_time
+    const timestamp = parseDateMs(sourceTimestamp)
+    if (eventStart === null || timestamp === null || timestamp >= eventStart) return false
+    if (useTheOddsApiProductRows) {
+      return (
+        metadata.productPriceAuthority === true &&
+        metadata.productionAuthority === true &&
+        metadata.validation_status === 'product_primary' &&
+        String(metadata.oddsPrimaryAuthorityStage ?? '') === 'STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT'
+      )
+    }
+    return metadata.production_eligible === false && metadata.validation_status === 'quarantined'
   })
 }
 
@@ -1993,7 +2016,8 @@ async function writeSnapshotsAndPredictions(
       } : {}),
     })
     const deterministicSnapshotId = useV6Calculation ? stableUuid(['historical_feature_snapshot', key]) : null
-    const existingId = existingByKey.get(key) ?? deterministicSnapshotId
+    const dryRunSnapshotId = !persist ? stableUuid(['dry_run_historical_feature_snapshot', key]) : null
+    const existingId = existingByKey.get(key) ?? deterministicSnapshotId ?? dryRunSnapshotId
     if (useV6Calculation && deterministicSnapshotId) existingByKey.set(key, deterministicSnapshotId)
     candidates.push({
       key,
@@ -2095,7 +2119,7 @@ async function writeSnapshotsAndPredictions(
   const predictionRows: Record<string, unknown>[] = []
   const previewCandidates = []
   for (const candidate of candidates) {
-    const snapshotId = existingByKey.get(candidate.key)
+    const snapshotId = existingByKey.get(candidate.key) ?? candidate.snapshotId
     if (!snapshotId) continue
     const selection = candidate.selection
     const opponent = candidate.opponent
