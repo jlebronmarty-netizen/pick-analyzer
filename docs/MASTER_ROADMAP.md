@@ -3371,3 +3371,11 @@ Status: Local certification PARTIAL, push required.
 Result: Existing NBA subsystems are preserved and classified for reuse. NBA has a useful partial/trial data foundation, but historical replay is not ready because full target-season schedule/results/stat/period-score coverage and official/free source import authorization are still missing. No provider calls, database mutations, NBA production activation, historical predictions or SportsDataIO expansion were performed.
 
 Next: review/authorize official/free NBA historical source import, then `NBA-02_COMPLETE_HISTORICAL_FEATURE_RECONSTRUCTION_AND_REPLAY` after import coverage is sufficient.
+
+## NBA-01A Historical Source Bootstrap
+
+Status: Local certification pending push.
+
+Result: NBA historical provider strategy is defined. The Odds API is the NBA core and historical price source candidate with a conservative historical cost model. NBA Stats public endpoints are selected as the non-odds schedule/status/results/boxscore/team-stat/player-stat candidate, pending access and terms approval. No provider calls, historical imports, NBA production activation, SportsDataIO expansion or bulk replay were performed.
+
+Next: authorize NBA Stats public endpoint bulk import terms/access and, separately, approve The Odds API historical budget before price-aware import. Then run `NBA-02_COMPLETE_HISTORICAL_FEATURE_RECONSTRUCTION_AND_REPLAY` after the 2024-25 foundation is imported.

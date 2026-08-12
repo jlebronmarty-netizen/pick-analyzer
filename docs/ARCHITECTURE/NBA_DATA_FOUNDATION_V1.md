@@ -57,3 +57,20 @@ Production settlement and replay must not use name-only identity. Exact provider
 NBA-01 identifies official/free NBA sources as the target non-odds strategy but does not bulk import from them because public access, rate behavior and terms must be reviewed before historical ingestion.
 
 No new paid subscription is required or added in NBA-01.
+
+## NBA-01A Bootstrap Addendum
+
+NBA-01A does not change the stored row counts. It adds a deterministic path to convert the partial foundation into a replay-ready foundation:
+
+| Area | NBA-01A Result |
+| --- | --- |
+| Stat source | NBA Stats public endpoint family selected as primary candidate pending access/terms review |
+| Historical odds | The Odds API selected for core price history pending explicit credit budget |
+| Initial season | 2024-25 regular season |
+| Core markets | Moneyline, Spread, Total |
+| First-half markets | deferred until period-score and provider market coverage are certified |
+| Props | deferred; no historical prop backfill recommended |
+| Import status | no import executed in NBA-01A |
+| Production activation | still inactive |
+
+The foundation remains `PARTIAL_MORE_IMPORT_REQUIRED` until a full target-season schedule, result, period-score, boxscore, team-stat and player-stat import is authorized and completed.

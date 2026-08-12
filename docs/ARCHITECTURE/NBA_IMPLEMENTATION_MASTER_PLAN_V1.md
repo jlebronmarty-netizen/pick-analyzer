@@ -1,6 +1,6 @@
 # NBA Implementation Master Plan V1
 
-Status: NBA_01_FOUNDATION_PARTIAL_MORE_IMPORT_REQUIRED
+Status: NBA_01A_BOOTSTRAP_READY_PENDING_STAT_SOURCE_ACCESS
 
 Selected by: Multi-Sport Handoff V1
 
@@ -42,6 +42,8 @@ Preconditions: current MLB production remains stable; no SportsDataIO reactivati
 Output: NBA source map, dependency audit, official/free source contract, read-only data inventory, SportsDataIO dependency removal plan.
 
 NBA-01 result: `NBA_DATA_FOUNDATION_PARTIAL_MORE_IMPORT_REQUIRED`. Existing NBA work is reusable, but full historical replay remains blocked by incomplete target-season schedule/results/stats/period-score history and unapproved official/free source import.
+
+NBA-01A result: `NBA_HISTORICAL_BOOTSTRAP_READY_PENDING_STAT_SOURCE_ACCESS`. The Odds API NBA historical coverage and conservative cost model are documented; NBA Stats public endpoints are selected as the primary non-odds stat-source candidate pending access/terms approval; NBA-02 replay scope is deterministic but no import or replay was executed.
 
 Provider calls required: no, unless explicitly authorized for bounded source proof.
 

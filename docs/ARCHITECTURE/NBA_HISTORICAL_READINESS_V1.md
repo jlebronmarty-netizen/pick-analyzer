@@ -67,3 +67,16 @@ Recommended first replay scope after import:
 | First-half markets | Block until period-score coverage and feature contract pass |
 | Replay type | `MODEL_REPLAY` first; `PRICE_AWARE_REPLAY` only after legitimate historical odds are approved |
 | Batch strategy | dry-run, season/date cursor, checkpoint/resume, idempotent deterministic keys |
+
+## NBA-01A Replay Cohort Update
+
+NBA-01A separates replay into two cohorts:
+
+| Cohort | Requirement | Current Status |
+| --- | --- | --- |
+| `MODEL_REPLAY` | complete schedule/results/team stats/player stats/boxscores with pregame-safe feature reconstruction | blocked by stat-source access/import |
+| `PRICE_AWARE_REPLAY` | model replay plus legitimate pregame historical odds snapshots | blocked by odds budget/import |
+
+The first deterministic target is 2024-25 regular-season `MODEL_REPLAY` for Moneyline, Spread and Total. `PRICE_AWARE_REPLAY` should begin with a one-daily-card-snapshot strategy only after explicit The Odds API historical budget approval.
+
+NBA-02 must not use final result, target-game boxscore, target-game player stat, post-start odds, current injuries or future lineups as pregame inputs. Feature snapshots must be versioned and checkpointed by season, event, market, prediction cutoff, model version and feature-set version.

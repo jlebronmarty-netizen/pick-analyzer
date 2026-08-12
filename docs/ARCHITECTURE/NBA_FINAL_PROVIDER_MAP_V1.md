@@ -1,6 +1,6 @@
 # NBA Final Provider Map V1
 
-Status: `NBA_PROVIDER_MAP_PARTIAL_CERTIFIED`
+Status: `NBA_PROVIDER_MAP_NBA_01A_BOOTSTRAP_PENDING_ACCESS`
 
 Certification commit: `bf89777ad5f97f8e7fb40ac1835b29424182ca20`
 
@@ -40,3 +40,17 @@ NBA-01 defines the target NBA provider architecture without activating NBA produ
 | The Odds API | Future NBA odds authority | `FUTURE_ODDS_DEPENDENCY` | Explicit credit budget before live calls |
 
 NBA normal non-odds runtime target is official/free. NBA odds runtime target is The Odds API under existing product strategy.
+
+## NBA-01A Domain Authority Update
+
+NBA-01A refines the map without activating runtime:
+
+| Domain | Authority | Bootstrap Status |
+| --- | --- | --- |
+| Core odds | The Odds API | approved target; production NBA inactive |
+| Historical core prices | The Odds API historical odds | budget authorization required |
+| Schedule/status/results/stats | NBA Stats public endpoints through approved client contract | provider access/terms review required |
+| Paid stat fallback | BALLDONTLIE or equivalent | not authorized; evaluate only after explicit approval |
+| SportsDataIO NBA | none for normal NBA runtime | legacy/trial evidence only |
+
+The combined strategy is domain-specific, not one-provider-for-everything. The Odds API is the NBA odds authority candidate; NBA Stats is the non-odds source candidate; owned canonical tables remain the internal authority after import and validation.

@@ -1,0 +1,175 @@
+{
+  "mode": "nba_01a_historical_source_bootstrap_v1",
+  "status": "NBA_HISTORICAL_BOOTSTRAP_READY_PENDING_STAT_SOURCE_ACCESS",
+  "startingCommit": "20c970799e11a07a4b098045d22c5918fd2bd05c",
+  "runtimeCommits": [],
+  "historicalStatImportCommits": [],
+  "historicalOddsImportCommits": [],
+  "productionCommitObserved": "20c970799e11a07a4b098045d22c5918fd2bd05c",
+  "providerStrategy": {
+    "nbaStatSourcePrimary": "NBA_STATS_PUBLIC_ENDPOINTS_PENDING_ACCESS_REVIEW",
+    "nbaStatSourceSecondary": "BALLDONTLIE_OR_EQUIVALENT_PAID_SOURCE_ONLY_IF_AUTHORIZED",
+    "theOddsApiRole": "NBA_CORE_ODDS_AND_HISTORICAL_PRICE_PROVIDER",
+    "sportsDataIoRole": "LEGACY_TRIAL_ONLY_DO_NOT_EXPAND",
+    "scheduleAuthority": "NBA_STATS_PUBLIC_ENDPOINTS_PENDING_ACCESS_REVIEW",
+    "statusAuthority": "NBA_STATS_PUBLIC_ENDPOINTS_PENDING_ACCESS_REVIEW",
+    "resultsAuthority": "NBA_STATS_PUBLIC_ENDPOINTS_PENDING_ACCESS_REVIEW",
+    "boxscoreAuthority": "NBA_STATS_PUBLIC_ENDPOINTS_PENDING_ACCESS_REVIEW",
+    "teamStatsAuthority": "NBA_STATS_PUBLIC_ENDPOINTS_PENDING_ACCESS_REVIEW",
+    "playerStatsAuthority": "NBA_STATS_PUBLIC_ENDPOINTS_PENDING_ACCESS_REVIEW",
+    "oddsAuthority": "THE_ODDS_API_FUTURE_NBA_AUTHORITY",
+    "historicalPriceAuthority": "THE_ODDS_API_BUDGET_GATED"
+  },
+  "theOddsApiHistorical": {
+    "nbaSportKey": "basketball_nba",
+    "coreHistoricalStartDate": "MID_2020_OR_2020_06_CLASS",
+    "additionalMarketHistoricalStartDate": "MAY_2023_CLASS",
+    "snapshotSemantics": "CLOSEST_AVAILABLE_SNAPSHOT_EQUAL_TO_OR_BEFORE_REQUESTED_TIMESTAMP",
+    "selectedSnapshotStrategy": "ONE_DAILY_CARD_SNAPSHOT_FIRST_THEN_OPTIONAL_EVENT_NEAR_CLOSE",
+    "markets": ["h2h", "spreads", "totals"],
+    "books": ["fanduel", "draftkings", "betmgm", "caesars"],
+    "creditsPerRequest": 30,
+    "creditFormula": "10 x markets x regions x requested timestamps",
+    "plannedHistoricalRequests": {
+      "oneSeasonDailyCard": 170,
+      "oneSeasonTwoDailySnapshots": 340,
+      "oneSeasonThreeDailySnapshots": 510,
+      "oneSeasonPerGameNearClose": 1230
+    },
+    "estimatedCredits": {
+      "oneSeasonDailyCard": 5100,
+      "oneSeasonTwoDailySnapshots": 10200,
+      "oneSeasonThreeDailySnapshots": 15300,
+      "oneSeasonPerGameNearClose": 36900
+    },
+    "actualHistoricalRequests": 0,
+    "actualCredits": 0,
+    "remainingCreditsRequired": "EXPLICIT_BUDGET_AUTHORIZATION_REQUIRED"
+  },
+  "historicalTarget": {
+    "modelReplaySeasons": ["2024-25_REGULAR_SEASON_FIRST"],
+    "priceAwareReplaySeasons": ["2024-25_REGULAR_SEASON_AFTER_ODDS_BUDGET"],
+    "expectedGames": 1230,
+    "eventsOwned": 14,
+    "eventsImported": 0,
+    "eventsTotal": 14,
+    "results": "13_SAMPLE_COMPLETED_NOT_FULL_SEASON",
+    "quarterScores": "PARTIAL_SAMPLE",
+    "boxscores": "PARTIAL_SAMPLE",
+    "teamStats": "PARTIAL_SAMPLE",
+    "playerStats": 918,
+    "lineups": 758,
+    "injuries": 6
+  },
+  "priceHistory": {
+    "moneylinePriceCoverage": "BUDGET_GATED",
+    "spreadPriceCoverage": "BUDGET_GATED",
+    "totalPriceCoverage": "BUDGET_GATED",
+    "firstHalfPriceCoverage": "DEFERRED_MARKET_VALIDATION_REQUIRED",
+    "certifiedBooks": ["FanDuel", "DraftKings", "BetMGM", "Caesars"],
+    "medianPregameSnapshotTime": "NOT_IMPORTED",
+    "priceAwareEvents": 0
+  },
+  "canonicalIdentity": {
+    "teamsTotal": 30,
+    "teamsMapped": 30,
+    "teamsAmbiguous": 0,
+    "playersTotal": 579,
+    "playersMapped": "PARTIAL_SAMPLE",
+    "playersAmbiguous": "REQUIRES_FULL_IMPORT_AUDIT",
+    "playersUnmapped": "REQUIRES_FULL_IMPORT_AUDIT",
+    "eventsTotal": 14,
+    "eventsExactMapped": "SAMPLE_ONLY",
+    "eventsAmbiguous": "NOT_CERTIFIED_BY_FULL_IMPORT",
+    "eventsUnmapped": "NOT_CERTIFIED_BY_FULL_IMPORT",
+    "duplicateEvents": "NOT_CERTIFIED_BY_FULL_IMPORT"
+  },
+  "featureFoundation": {
+    "requiredFeatures": ["team_form", "rest_context", "home_away", "market_line", "market_price", "recent_team_stats", "player_availability_optional"],
+    "historicalReconstructibleFeatures": ["team_form", "rest_context", "home_away", "market_line_when_price_imported", "recent_team_stats_after_stat_import"],
+    "partialFeatures": ["player_stats", "lineups", "injuries"],
+    "blockedFeatures": ["full_target_season_results", "full_target_season_boxscores", "period_scores_for_first_half"],
+    "forwardOnlyFeatures": ["current_injuries", "current_lineups"],
+    "historicalFeatureSnapshotsExisting": 47,
+    "historicalFeatureSnapshotsPlannedAdded": 0,
+    "leakageFailures": 0
+  },
+  "dryRun": {
+    "moneyline": "PLANNED_AFTER_IMPORT",
+    "spread": "PLANNED_AFTER_IMPORT",
+    "total": "PLANNED_AFTER_IMPORT",
+    "firstHalf": "BLOCKED_BY_PERIOD_SCORE_AND_MARKET_VALIDATION",
+    "priceBindingSafety": "NO_PRICE_BINDING_WITHOUT_IMPORTED_PREGAME_SNAPSHOT",
+    "settlementSafety": "EXISTING_CONTRACT_READY_FOR_CORE_MARKETS",
+    "identitySafety": "SAMPLE_SAFE_FULL_IMPORT_PENDING",
+    "leakageSafety": "POLICY_DEFINED_NOT_EXECUTED"
+  },
+  "replayCohorts": {
+    "modelReplayEligibleEvents": 0,
+    "priceAwareReplayEligibleEvents": 0,
+    "firstHalfEligibleEvents": 0,
+    "excludedEvents": "TARGET_SEASON_NOT_IMPORTED",
+    "exclusionReasons": ["PROVIDER_ACCESS_AUTHORIZATION_REQUIRED", "HISTORICAL_IMPORT_NOT_EXECUTED", "ODDS_BUDGET_NOT_AUTHORIZED"]
+  },
+  "nba02Target": {
+    "targetSeasons": ["2024-25_REGULAR_SEASON"],
+    "targetEvents": 1230,
+    "coreMarkets": ["moneyline", "spread", "total"],
+    "expectedPredictions": 3690,
+    "expectedFeatureSnapshots": 3690,
+    "expectedSettlementRows": 3690,
+    "modelVersion": "basketball_nba_model_v1_or_current_shadow_version",
+    "featureVersion": "basketball_nba_feature_set_v1",
+    "asOfPolicy": "STRICT_PREGAME_CHRONOLOGICAL",
+    "batchSize": 25,
+    "checkpointStrategy": "season_date_cursor_idempotent_resume"
+  },
+  "playerProps": {
+    "historicalPropBackfillRecommendation": "NOT_RECOMMENDED_FOR_INITIAL_BACKFILL",
+    "forwardPropCollectionRecommendation": "DEFER_UNTIL_CORE_NBA_PRODUCTION_STABLE",
+    "estimatedPropCredits": "HIGH_EVENT_MARKET_SCOPED_COST_REQUIRES_SEPARATE_MODEL",
+    "propBudgetAuthorizationRequired": true
+  },
+  "futureCurrentEra": {
+    "coreOddsProvider": "The Odds API",
+    "statProvider": "NBA Stats public endpoints pending access approval",
+    "expectedCoreDailyCredits": "current odds cost = markets x regions x refreshes; exact cadence not activated",
+    "expectedCoreMonthlyCredits": "requires NBA scheduler design after NBA-02",
+    "forwardSnapshotPolicy": "product refresh plus optional replay checkpoints",
+    "lineupStrategy": "soft context only until source certified",
+    "injuryStrategy": "soft context only until source certified"
+  },
+  "sportsDataIo": {
+    "nbaRuntimeCalls": 0,
+    "nbaRuntimeDependency": "NO_ACTIVE_RUNTIME_DEPENDENCY",
+    "nbaHistoricalDependency": "LEGACY_HISTORICAL_ONLY",
+    "sharedMlbRollbackDependency": "PRESERVE_UNTIL_MLB_ROLLBACK_WINDOW_CLOSED",
+    "finalNbaSportsDataIoStatus": "LEGACY_ONLY_DO_NOT_EXPAND"
+  },
+  "mlbRegression": {
+    "mlbFinalStatus": "MLB_FINAL_CERTIFIED_WITH_FORWARD_MARKETS",
+    "mlbCurrentBoard": "UNCHANGED",
+    "mlbScheduler": "UNCHANGED",
+    "mlbSettlement": "UNCHANGED",
+    "mlbSportsDataIoCalls": 0
+  },
+  "accounting": {
+    "theOddsApiCalls": 0,
+    "theOddsApiCredits": 0,
+    "statProviderCalls": 0,
+    "sportsDataIoCalls": 0,
+    "databaseMutations": 0,
+    "currentEraNbaPredictionWrites": 0
+  },
+  "certification": {
+    "build": "NOT_RUN_DOCS_ONLY",
+    "validators": ["NBA-01A", "NBA-01"],
+    "pushAuthorizationRequired": true,
+    "providerAccessAuthorizationRequired": true,
+    "historicalOddsBudgetAuthorizationRequired": true,
+    "dbMigrationAuthorizationRequired": false,
+    "remainingBlockers": ["PROVIDER_ACCESS_AUTHORIZATION_REQUIRED", "EXPLICIT_BUDGET_AUTHORIZATION_REQUIRED"],
+    "nextPhase": "NBA-02_COMPLETE_HISTORICAL_FEATURE_RECONSTRUCTION_AND_REPLAY_AFTER_IMPORT"
+  },
+  "finalClassification": "NBA_HISTORICAL_BOOTSTRAP_READY_PENDING_STAT_SOURCE_ACCESS"
+}

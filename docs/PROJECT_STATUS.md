@@ -1922,3 +1922,9 @@ No additional historical market rows were generated because opposite-side moneyl
 NBA-01 is locally certified as `NBA_DATA_FOUNDATION_PARTIAL_MORE_IMPORT_REQUIRED`. The phase audits and preserves the existing NBA Data Sync, Prediction Engine, Settlement, Model Health, Backtesting/Calibration and Feature Store work, while keeping NBA production activation blocked.
 
 Stored NBA evidence remains a partial/trial foundation: 30 teams, 579 players, 14 event sample, 13 completed-game sample, 918 player-stat rows, 758 lineup rows, 27 trial predictions, 27 settled trial predictions and 47 trial feature snapshots. Official/free non-odds NBA source access requires external review before bulk historical import. The Odds API is the target NBA odds provider but no NBA odds calls were made. SportsDataIO NBA remains legacy/trial only and was not expanded.
+
+## 2026-08-11 NBA-01A Historical Source Bootstrap
+
+NBA-01A is locally certified as `NBA_HISTORICAL_BOOTSTRAP_READY_PENDING_STAT_SOURCE_ACCESS`. The phase documents The Odds API NBA historical coverage, conservative credit formulas and initial price-history strategies without making provider calls or importing data.
+
+The selected non-odds primary candidate is NBA Stats public endpoints, pending explicit access/terms approval for bounded bulk import. The first replay target remains 2024-25 regular-season Moneyline, Spread and Total. Historical price import is budget-gated: one daily 2024-25 core-market card snapshot is estimated at roughly 170 requests and 5,100 credits; per-game near-close is roughly 1,230 requests and 36,900 credits. SportsDataIO NBA remains legacy/trial only.
