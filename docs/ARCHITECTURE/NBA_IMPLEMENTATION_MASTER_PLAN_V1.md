@@ -45,6 +45,8 @@ NBA-01 result: `NBA_DATA_FOUNDATION_PARTIAL_MORE_IMPORT_REQUIRED`. Existing NBA 
 
 NBA-01A result: `NBA_HISTORICAL_BOOTSTRAP_READY_PENDING_STAT_SOURCE_ACCESS`. The Odds API NBA historical coverage and conservative cost model are documented; NBA Stats public endpoints are selected as the primary non-odds stat-source candidate pending access/terms approval; NBA-02 replay scope is deterministic but no import or replay was executed.
 
+NBA-01C-PREP result: `BALLDONTLIE_GOAT_TRIAL_EXTRACTION_READY`. BallDontLie is prepared as the candidate NBA non-odds source with a GOAT 48-hour historical bootstrap plan, 4 req/min trial-safe profile, durable raw payload manifest, checkpoint/resume contract and START boundary. No trial was activated, no API key was required, no provider call was made, no import or replay was executed and production NBA inactive remains the operating state.
+
 Provider calls required: no, unless explicitly authorized for bounded source proof.
 
 DB migration required: no.

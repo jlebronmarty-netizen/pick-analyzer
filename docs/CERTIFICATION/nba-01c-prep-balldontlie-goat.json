@@ -1,0 +1,620 @@
+{
+  "generatedAt": "2026-08-12T15:02:23.467Z",
+  "status": "BALLDONTLIE_GOAT_TRIAL_EXTRACTION_READY",
+  "startingCommit": "72864b24c3bc094f9d2f941b78c3ac89b71e5378",
+  "providerCallsMade": 0,
+  "databaseMutationsMade": 0,
+  "productionActivation": false,
+  "providerPlan": {
+    "ballDontLieLongTermCandidateTier": "ALL_STAR_EXPECTED_AFTER_GOAT_BOOTSTRAP",
+    "theOddsApiRole": "NBA_MARKET_PRICE_AUTHORITY_ML_SPREAD_TOTAL",
+    "ballDontLieAllStarRole": "ONGOING_NON_ODDS_GAMES_PLAYERS_STATS_ACTIVE_PLAYERS_INJURIES_CANDIDATE",
+    "goatBootstrapRole": "ONE_TIME_HIGH_VALUE_HISTORICAL_STATS_AND_BOX_CONTEXT_CAPTURE",
+    "sportsDataIoRole": "LEGACY_TRIAL_ONLY_NO_EXPANSION",
+    "p0Endpoints": [
+      {
+        "endpoint": "Teams",
+        "whyRequired": "Identity dimension required before games, stats and event crosswalks.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 3,
+        "estimatedTime": "1 minutes"
+      },
+      {
+        "endpoint": "Players",
+        "whyRequired": "Canonical player identity and stat ownership; obtainable after downgrade but needed early for mappings.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 150,
+        "estimatedTime": "38 minutes"
+      },
+      {
+        "endpoint": "Games",
+        "whyRequired": "Canonical schedule, final score and quarter-score carrier when available.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 39,
+        "estimatedTime": "10 minutes"
+      },
+      {
+        "endpoint": "Game Player Stats",
+        "whyRequired": "Core player-game box stat foundation; period filter supports future quarter-safe research after certification.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 900,
+        "estimatedTime": "225 minutes"
+      },
+      {
+        "endpoint": "Box Scores",
+        "whyRequired": "P0 GOAT endpoint because it can combine game, team and player boxscore context efficiently if schema matches docs.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 150,
+        "estimatedTime": "38 minutes"
+      },
+      {
+        "endpoint": "Game Advanced Stats V2",
+        "whyRequired": "Advanced stat research store only until NBA model feature promotion is separately certified.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 900,
+        "estimatedTime": "225 minutes"
+      }
+    ],
+    "p1Endpoints": [
+      {
+        "endpoint": "Lineups",
+        "whyRequired": "Lineup granularity must be verified at START; not assumed to mean starting lineup.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 150,
+        "estimatedTime": "38 minutes"
+      },
+      {
+        "endpoint": "Team Season Averages",
+        "whyRequired": "Full-season averages are not historical pregame-safe without as-of semantics.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 3,
+        "estimatedTime": "1 minutes"
+      },
+      {
+        "endpoint": "Season Averages",
+        "whyRequired": "Retrospective season averages cannot feed earlier historical games.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 18,
+        "estimatedTime": "5 minutes"
+      },
+      {
+        "endpoint": "Team Standings",
+        "whyRequired": "Useful for validation/current state; final standings are not pregame replay features.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 3,
+        "estimatedTime": "1 minutes"
+      }
+    ],
+    "optionalEndpoints": [
+      {
+        "endpoint": "Active Players",
+        "whyRequired": "Forward roster context; not a substitute for historical roster state.",
+        "seasonsPlanned": [
+          "current"
+        ],
+        "estimatedRequests": 6,
+        "estimatedTime": "2 minutes"
+      },
+      {
+        "endpoint": "Player Injuries",
+        "whyRequired": "Treat as forward-only unless START proves historical timestamp coverage.",
+        "seasonsPlanned": [
+          "current"
+        ],
+        "estimatedRequests": 5,
+        "estimatedTime": "2 minutes"
+      },
+      {
+        "endpoint": "Plays",
+        "whyRequired": "Potentially high research value but request/storage expensive; skip until P0/P1 complete.",
+        "seasonsPlanned": [
+          "2024",
+          "2023",
+          "2022"
+        ],
+        "estimatedRequests": 150,
+        "estimatedTime": "38 minutes"
+      },
+      {
+        "endpoint": "Leaders",
+        "whyRequired": "Derived from imported player stats; low trial priority.",
+        "seasonsPlanned": [
+          "current"
+        ],
+        "estimatedRequests": 0,
+        "estimatedTime": "0 minutes"
+      },
+      {
+        "endpoint": "Team/Player Contracts",
+        "whyRequired": "Research-only; no current engine dependency.",
+        "seasonsPlanned": [
+          "current"
+        ],
+        "estimatedRequests": 0,
+        "estimatedTime": "0 minutes"
+      },
+      {
+        "endpoint": "BallDontLie Betting Odds",
+        "whyRequired": "The Odds API remains market authority; use only as coverage validation after stat domains complete.",
+        "seasonsPlanned": [
+          "current"
+        ],
+        "estimatedRequests": 0,
+        "estimatedTime": "0 minutes"
+      },
+      {
+        "endpoint": "Player Props",
+        "whyRequired": "Player props are explicitly deferred; schema audit only.",
+        "seasonsPlanned": [
+          "current"
+        ],
+        "estimatedRequests": 0,
+        "estimatedTime": "0 minutes"
+      }
+    ]
+  },
+  "trialConfiguration": {
+    "trialRateLimit": "5 requests/minute",
+    "configuredSafeRate": "4 requests/minute",
+    "trialDuration": "48 hours",
+    "reserveDuration": "4 hours",
+    "theoreticalRequests": 14400,
+    "safePlannedRequests": 2477,
+    "estimatedQueueHours": 10.32,
+    "capacityClassification": "FITS_COMFORTABLY_IN_48H"
+  },
+  "endpointHistoricalDepth": [
+    {
+      "endpoint": "Teams",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [],
+      "tier": "FREE",
+      "priority": "P0",
+      "replaySafety": "REPLAY_SAFE"
+    },
+    {
+      "endpoint": "Players",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "search",
+        "first_name",
+        "last_name"
+      ],
+      "tier": "ALL_STAR",
+      "priority": "P0",
+      "replaySafety": "REPLAY_SAFE"
+    },
+    {
+      "endpoint": "Active Players",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "search",
+        "first_name",
+        "last_name",
+        "team_ids",
+        "player_ids"
+      ],
+      "tier": "ALL_STAR",
+      "priority": "P2",
+      "replaySafety": "FORWARD_ONLY"
+    },
+    {
+      "endpoint": "Games",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "dates",
+        "seasons",
+        "team_ids",
+        "postseason",
+        "start_date",
+        "end_date"
+      ],
+      "tier": "FREE",
+      "priority": "P0",
+      "replaySafety": "REPLAY_SAFE"
+    },
+    {
+      "endpoint": "Game Player Stats",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "player_ids",
+        "game_ids",
+        "dates",
+        "seasons",
+        "postseason",
+        "start_date",
+        "end_date",
+        "period"
+      ],
+      "tier": "ALL_STAR",
+      "priority": "P0",
+      "replaySafety": "REPLAY_SAFE"
+    },
+    {
+      "endpoint": "Box Scores",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "dates",
+        "game_ids"
+      ],
+      "tier": "GOAT",
+      "priority": "P0",
+      "replaySafety": "REPLAY_SAFE"
+    },
+    {
+      "endpoint": "Game Advanced Stats V2",
+      "earliestSeason": 1996,
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "player_ids",
+        "game_ids",
+        "dates",
+        "seasons",
+        "postseason",
+        "start_date",
+        "end_date",
+        "period"
+      ],
+      "tier": "GOAT",
+      "priority": "P0",
+      "replaySafety": "REPLAY_SAFE"
+    },
+    {
+      "endpoint": "Lineups",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "game_ids",
+        "dates",
+        "seasons"
+      ],
+      "tier": "GOAT",
+      "priority": "P1",
+      "replaySafety": "REPLAY_SAFE"
+    },
+    {
+      "endpoint": "Team Season Averages",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "season_type",
+        "season",
+        "team_ids",
+        "cursor",
+        "per_page"
+      ],
+      "tier": "GOAT",
+      "priority": "P1",
+      "replaySafety": "VALIDATION_ONLY"
+    },
+    {
+      "endpoint": "Season Averages",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "season",
+        "player_ids",
+        "cursor",
+        "per_page"
+      ],
+      "tier": "GOAT",
+      "priority": "P1",
+      "replaySafety": "VALIDATION_ONLY"
+    },
+    {
+      "endpoint": "Team Standings",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "season",
+        "cursor",
+        "per_page"
+      ],
+      "tier": "GOAT",
+      "priority": "P1",
+      "replaySafety": "VALIDATION_ONLY"
+    },
+    {
+      "endpoint": "Player Injuries",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "team_ids",
+        "player_ids"
+      ],
+      "tier": "ALL_STAR",
+      "priority": "P2",
+      "replaySafety": "FORWARD_ONLY"
+    },
+    {
+      "endpoint": "Plays",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "game_ids",
+        "dates",
+        "seasons"
+      ],
+      "tier": "GOAT",
+      "priority": "P2",
+      "replaySafety": "RESEARCH_ONLY"
+    },
+    {
+      "endpoint": "Leaders",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "season",
+        "stat_type",
+        "cursor",
+        "per_page"
+      ],
+      "tier": "GOAT",
+      "priority": "P3",
+      "replaySafety": "RESEARCH_ONLY"
+    },
+    {
+      "endpoint": "Team/Player Contracts",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "player_ids",
+        "team_ids"
+      ],
+      "tier": "GOAT",
+      "priority": "P3",
+      "replaySafety": "RESEARCH_ONLY"
+    },
+    {
+      "endpoint": "BallDontLie Betting Odds",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "dates",
+        "game_ids"
+      ],
+      "tier": "GOAT",
+      "priority": "P3",
+      "replaySafety": "RESEARCH_ONLY"
+    },
+    {
+      "endpoint": "Player Props",
+      "earliestSeason": "UNKNOWN",
+      "latestSeason": "CURRENT",
+      "pagination": "cursor",
+      "maxPageSize": 100,
+      "historicalFilters": [
+        "cursor",
+        "per_page",
+        "game_ids",
+        "dates",
+        "player_ids"
+      ],
+      "tier": "GOAT",
+      "priority": "P3",
+      "replaySafety": "RESEARCH_ONLY"
+    }
+  ],
+  "importOrder": [
+    "Phase 0: API key presence, tier/access, raw storage, DB connectivity, one no-mutation fixture validation.",
+    "Phase 1: teams, games and player identity for 2024-25.",
+    "Phase 2: 2024-25 player game stats and box scores.",
+    "Phase 3: 2024-25 advanced stats and lineup payloads if schema is useful.",
+    "Phase 4: repeat P0 for 2023-24 and 2022-23.",
+    "Phase 5: P1 validation-only standings and season averages.",
+    "Phase 6: gap fill, coverage certification and subscription recommendation."
+  ],
+  "normalization": {
+    "teams": "READY",
+    "players": "READY",
+    "games": "READY",
+    "results": "READY",
+    "quarterScores": "READY",
+    "gamePlayerStats": "READY",
+    "boxScores": "READY_SHAPE_PRESERVING",
+    "advancedStats": "READY_SHAPE_PRESERVING",
+    "lineups": "READY_SHAPE_PRESERVING_GRANULARITY_VERIFY_AT_START",
+    "standings": "VALIDATION_ONLY",
+    "plays": "RESEARCH_ONLY_NOT_REQUIRED_FOR_P0",
+    "injuries": "FORWARD_ONLY_UNLESS_HISTORICAL_TIMESTAMPS_PROVEN"
+  },
+  "canonicalCrosswalk": {
+    "ballDontLieTeamMapping": "provider_entity_mappings sport_key/entity_type/provider/provider_id/season",
+    "ballDontLiePlayerMappingStrategy": "provider player id plus name/team metadata; ambiguous names fail closed",
+    "ballDontLieEventMapping": "provider game id plus home/away team ids, date and season; exact provider ID preferred",
+    "theOddsApiCrosswalk": "join to existing 1,196 price-aware event foundation through canonical sport_event after games import"
+  },
+  "persistence": {
+    "rawPayloadDurability": "data/imports/balldontlie/nba is gitignored and written before normalization/DB persistence",
+    "requestManifest": "PLANNED/FETCHING/FETCHED/DURABLE/NORMALIZED/DB_PERSISTED/FAILED/SKIPPED/REUSED",
+    "dbChunkSize": 100,
+    "idempotency": "provider id natural keys and deterministic local request IDs",
+    "resume": "cursor/page/season/endpoint manifest resume without repeated fetched pages",
+    "processRestart": "manifest + raw payload path continuation",
+    "dbFailureRecovery": "retry failed DB chunk from durable raw payload; no provider refetch",
+    "rateLimitRecovery": "429 Retry-After pauses global queue; no parallel bypass"
+  },
+  "database": {
+    "existingSchemaReady": true,
+    "dbMigrationRequired": false,
+    "exactMigrationIfRequired": null,
+    "estimatedNewRows": {
+      "events": 3690,
+      "playerGameStats": 90000,
+      "advancedStats": 90000,
+      "boxScores": 3690,
+      "playerMappings": 5000
+    },
+    "estimatedRawStorage": "2-8 GB depending on Box Scores, Advanced Stats and Plays scope; verify disk before START",
+    "supabaseIoRisk": "MEDIUM mitigated by 100-row chunks and raw payload recovery"
+  },
+  "commands": {
+    "start": "node --loader ./scripts/local-ts-loader.mjs scripts/nba-01c-balldontlie-goat-prep.mjs --start",
+    "phase0": "node --loader ./scripts/local-ts-loader.mjs scripts/nba-01c-balldontlie-goat-prep.mjs --phase0",
+    "status": "node --loader ./scripts/local-ts-loader.mjs scripts/nba-01c-balldontlie-goat-prep.mjs --status",
+    "resume": "node --loader ./scripts/local-ts-loader.mjs scripts/nba-01c-balldontlie-goat-prep.mjs --resume",
+    "stop": "node --loader ./scripts/local-ts-loader.mjs scripts/nba-01c-balldontlie-goat-prep.mjs --stop",
+    "validate": "node scripts/nba-01c-prep-balldontlie-goat-validate.mjs"
+  },
+  "replayTarget": {
+    "existingPriceAwareEvents": 1196,
+    "firstHistoricalStatSeason": "2024-25",
+    "initialReplaySeasons": [
+      "2024-25",
+      "2023-24",
+      "2022-23"
+    ],
+    "coreReplayMarkets": [
+      "Moneyline",
+      "Spread",
+      "Total"
+    ],
+    "expectedNba02Cohort": "Join 1,196 price-aware events first, then extend model-only history after stats coverage passes."
+  },
+  "postTrialPlan": {
+    "allStarSufficiencyExpectation": "LIKELY_SUFFICIENT_AFTER_GOAT_BOOTSTRAP",
+    "goatRetentionCriteria": "Keep GOAT only if live advanced stats/box scores/lineups materially improve certified NBA model readiness.",
+    "allStarDowngradeCriteria": "Downgrade if ongoing games, players, stats, active players and injuries cover Current Era safely.",
+    "playerPropsPlan": "DEFERRED; no prop backfill or production prop activation in NBA-01C."
+  },
+  "safety": {
+    "ballDontLieProviderCallsDuringPrep": 0,
+    "theOddsApiHistoricalCallsDuringPrep": 0,
+    "sportsDataIoCalls": 0,
+    "nbaCurrentEraWrites": 0,
+    "databaseMutationsFromCertification": 0,
+    "mlbRegression": "NO_MLB_ARCHITECTURE_CHANGE",
+    "nbaHistoricalOddsRegression": "PRESERVED_1196_PRICE_AWARE_EVENTS_29214_ROWS"
+  },
+  "sourceDocs": {
+    "ballDontLieDocs": "https://docs.balldontlie.io/",
+    "ballDontLieAccountPlans": "https://www.balldontlie.io/account/"
+  },
+  "fixture": {
+    "gamesNormalized": true,
+    "resultsNormalized": true,
+    "quarterScoresNormalized": true,
+    "manifestPlanned": true,
+    "p0Present": true,
+    "restartSafe": true,
+    "rateLimitSafe": true,
+    "dbFailureRecoveryReady": true,
+    "processRestartReady": true,
+    "providerCallsMade": 0,
+    "databaseMutationsMade": 0
+  },
+  "manifestSummary": {
+    "entries": 35,
+    "p0": 18,
+    "p1": 12,
+    "p2": 5,
+    "p3": 0
+  },
+  "certification": {
+    "apiKeyRequiredNow": false,
+    "trialActivationRequiredNow": false,
+    "dbMigrationAuthorizationRequired": false,
+    "remainingPrepBlockers": [],
+    "startBoundaryPreserved": true
+  }
+}

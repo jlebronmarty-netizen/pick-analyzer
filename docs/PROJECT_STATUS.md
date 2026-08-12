@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-12 NBA-01C-PREP BallDontLie GOAT Extraction Readiness
+
+- NBA-01C-PREP is locally implemented as `BALLDONTLIE_GOAT_TRIAL_EXTRACTION_READY`. It prepares a BallDontLie NBA provider adapter, 4 req/min trial-safe limiter, durable raw payload manifest, checkpoint/resume contract, fixture normalizers, request estimates and START/STATUS/RESUME/STOP command boundary without requiring an API key or starting the 48-hour GOAT trial.
+- The Odds API remains NBA odds authority with the 1,196-event price-aware foundation preserved; BallDontLie is the candidate non-odds stat provider; SportsDataIO NBA remains legacy/trial only. No BallDontLie calls, The Odds API historical calls, SportsDataIO calls, NBA production activation, bulk replay, player props, MLB architecture changes or production database mutations were performed.
+
 ## 2026-08-11 MLB Moneyline Blocker Text Consistency
 
 - MLB Moneyline Blocker Text Consistency is locally implemented as `MLB_MONEYLINE_BLOCKER_REPAIR_READY_FOR_DEPLOYMENT`. The bounded UI repair fixes a post-deploy MLB-FINAL-00 issue where the Moneyline review card could display one candidate's positive edge/EV while the short blocker summary used a separate best-review candidate's negative-edge blocker.

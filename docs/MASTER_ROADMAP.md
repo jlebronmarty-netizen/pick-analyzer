@@ -2,6 +2,8 @@
 
 This roadmap is dependency-aware and based on repository inspection. A module is marked completed only when the repository contains service/API/dashboard/persistence evidence and recent verification supports it.
 
+NBA-01C-PREP is locally implemented as `BALLDONTLIE_GOAT_TRIAL_EXTRACTION_READY` from commit `72864b24c3bc094f9d2f941b78c3ac89b71e5378`. It prepares the BallDontLie GOAT 48-hour extraction adapter, endpoint matrix, rate limiter, raw payload manifest, checkpoint/resume contract and START boundary without starting the trial, requiring a key, making provider calls, activating NBA production or changing MLB. Next phase after commit/publish authorization: `NBA-01C-START_BALLDONTLIE_GOAT_48H_EXTRACTION`.
+
 MLB Moneyline Blocker Text Consistency is locally implemented as `MLB_MONEYLINE_BLOCKER_REPAIR_READY_FOR_DEPLOYMENT`. It keeps MLB-FINAL-00 review-only behavior but ensures the Moneyline card's displayed edge/EV and short blocker summary are derived from the same candidate evidence bundle. No recommendation eligibility, Official Pick threshold, model, provider, settlement or learning behavior changed.
 
 MLB-FINAL-00 Current Era Readiness is locally implemented as `MLB_CURRENT_ERA_REPAIR_READY_FOR_DEPLOYMENT`. Current Era evidence remains present across Current Board and Dashboard Today, and the bounded repair adds a `BEST_AVAILABLE_REVIEW_OPTION` homepage fallback that is explicitly not a recommendation. No model, threshold, provider authority, SportsDataIO, scheduler, settlement, learning or replay behavior changed. After deployment certification, the next phase is `MLB-FINAL-01_COMPLETE_HISTORICAL_MARKET_EXPANSION_AND_FORWARD_DATA_FOUNDATION`.

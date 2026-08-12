@@ -54,3 +54,16 @@ NBA-01A refines the map without activating runtime:
 | SportsDataIO NBA | none for normal NBA runtime | legacy/trial evidence only |
 
 The combined strategy is domain-specific, not one-provider-for-everything. The Odds API is the NBA odds authority candidate; NBA Stats is the non-odds source candidate; owned canonical tables remain the internal authority after import and validation.
+
+## NBA-01C BallDontLie Candidate Update
+
+NBA-01C-PREP adds BallDontLie as the current candidate non-odds NBA stat provider without making provider calls or activating NBA production.
+
+| Domain | NBA-01C candidate | Status |
+| --- | --- | --- |
+| Games / results / players / player stats / active players / injuries | BallDontLie ALL-STAR | Candidate ongoing non-odds source after GOAT bootstrap; production NBA inactive. |
+| Box scores / advanced stats / lineups / standings / season averages | BallDontLie GOAT 48-hour bootstrap | Prep ready; capture only after explicit trial START. |
+| Odds / historical prices | The Odds API | Remains NBA market authority; no additional historical odds spend in NBA-01C-PREP. |
+| SportsDataIO NBA | Legacy/trial only | Not expanded. |
+
+The expected post-trial minimum architecture is The Odds API plus BallDontLie ALL-STAR plus owned GOAT bootstrap history, unless replay proves GOAT-only live domains are materially required.

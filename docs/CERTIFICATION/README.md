@@ -6,6 +6,7 @@ Certification documentation covers validation records, readiness gates, producti
 
 Current V2 certification documents:
 
+- [NBA-01C-PREP BallDontLie GOAT Certification JSON](nba-01c-prep-balldontlie-goat.json)
 - [Documentation Validation](DOCUMENTATION_VALIDATION.md)
 - [Runtime Health](RUNTIME_HEALTH.md)
 - [Release 02 Product Integration Certification](RELEASE_02_PRODUCT_INTEGRATION_CERTIFICATION.md)
