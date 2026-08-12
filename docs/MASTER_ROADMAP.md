@@ -3387,3 +3387,11 @@ Status: Local partial/resumable certification pending push.
 Result: The Odds API historical-first path discovered and persisted 1,221 NBA 2024-25 historical event foundation rows plus event provider mappings, with SportsDataIO calls 0 and NBA production still inactive. The odds-row persistence step failed on a Supabase/Cloudflare 520, so price-aware replay coverage remains 0 until a bounded persistence recovery is authorized.
 
 Next: repair/resume NBA historical odds persistence without repeating paid successful historical requests unless explicitly authorized; stat-source access remains separately blocked.
+
+## NBA-01B-R Historical Odds Persistence Recovery
+
+Status: Local certification PASS, push required.
+
+Result: The failed persistence root cause is certified as a single giant post-fetch `sports_odds_snapshots` upsert with no durable paid-payload checkpoint. The repaired importer durably checkpoints provider responses before DB writes, uses 50-row retryable odds chunks and persisted 29,214 The Odds API NBA historical odds rows from 159 bounded recovery requests. Coverage is now 1,196 price-aware 2024-25 NBA events across Moneyline, Spread and Total. SportsDataIO calls, NBA production activation, Current Era NBA prediction writes and bulk replay remained 0.
+
+Next: resolve/certify NBA non-odds stat source access for results, quarter scores, boxscores, team stats, player stats and players before NBA replay.

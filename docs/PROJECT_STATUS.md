@@ -1934,3 +1934,9 @@ The selected non-odds primary candidate is NBA Stats public endpoints, pending e
 NBA-01B is locally classified as `NBA_ODDS_HISTORICAL_BACKFILL_PARTIAL_RESUMABLE`. The authorized The Odds API daily-card historical backfill executed 174 historical requests for 2024-25 NBA core markets, inferred at 5,220 credits from the 30-credit request contract. The run persisted 1,221 historical NBA event rows and 1,221 The Odds API event mappings, then stopped on a Supabase/Cloudflare 520 during `sports_odds_snapshots` upsert.
 
 No historical odds rows, replay predictions, Current Era NBA predictions or SportsDataIO calls were created. Price-aware replay remains blocked until odds persistence is resumed without repeating already paid successful requests unless explicitly authorized.
+
+## 2026-08-12 NBA-01B-R Historical Odds Persistence Recovery
+
+NBA-01B-R is locally certified as `NBA_ODDS_PERSISTENCE_RECOVERY_PASS_STATS_PENDING`. The 520 root cause was a single all-season post-fetch `sports_odds_snapshots` upsert after paid payloads were held only in memory. The repaired path writes durable ignored payload checkpoints before DB persistence and upserts odds in 50-row retryable chunks.
+
+No lost payloads were recoverable locally, so the bounded recovery used the remaining authorization for 159 high-yield The Odds API historical requests, 4,770 additional credits and 29,214 persisted historical odds rows. Coverage is 1,196 price-aware events across Moneyline, Spread and Total, with 663 DB chunks, 0 DB write failures, 0 post-start persisted rows, 0 SportsDataIO calls, 0 NBA Current Era writes and no NBA production activation. NBA replay remains blocked by missing stat/results/boxscore/player/team-stat source access.
