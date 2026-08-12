@@ -3379,3 +3379,11 @@ Status: Local certification pending push.
 Result: NBA historical provider strategy is defined. The Odds API is the NBA core and historical price source candidate with a conservative historical cost model. NBA Stats public endpoints are selected as the non-odds schedule/status/results/boxscore/team-stat/player-stat candidate, pending access and terms approval. No provider calls, historical imports, NBA production activation, SportsDataIO expansion or bulk replay were performed.
 
 Next: authorize NBA Stats public endpoint bulk import terms/access and, separately, approve The Odds API historical budget before price-aware import. Then run `NBA-02_COMPLETE_HISTORICAL_FEATURE_RECONSTRUCTION_AND_REPLAY` after the 2024-25 foundation is imported.
+
+## NBA-01B The Odds API Historical-First Backfill
+
+Status: Local partial/resumable certification pending push.
+
+Result: The Odds API historical-first path discovered and persisted 1,221 NBA 2024-25 historical event foundation rows plus event provider mappings, with SportsDataIO calls 0 and NBA production still inactive. The odds-row persistence step failed on a Supabase/Cloudflare 520, so price-aware replay coverage remains 0 until a bounded persistence recovery is authorized.
+
+Next: repair/resume NBA historical odds persistence without repeating paid successful historical requests unless explicitly authorized; stat-source access remains separately blocked.

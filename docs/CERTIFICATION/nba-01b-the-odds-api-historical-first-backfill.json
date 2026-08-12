@@ -1,0 +1,93 @@
+{
+  "generatedAt": "2026-08-12T12:55:00.000Z",
+  "commit": "70f386054f4a6c1ed15d2933f31baf416dd773d6",
+  "status": "NBA_ODDS_HISTORICAL_BACKFILL_PARTIAL_RESUMABLE",
+  "provider": "the-odds-api",
+  "sportKey": "basketball_nba",
+  "season": "2024-25",
+  "strategy": "DAILY_CARD_SNAPSHOT_22Z_CORE_BOOKS",
+  "manifest": {
+    "planned": 174,
+    "executed": 174,
+    "reused": 0,
+    "empty": 0,
+    "failed": 0,
+    "skipped": 0,
+    "rows": [
+      {
+        "summary": "Detailed per-request response headers were held in process memory and lost when Supabase returned a 520 during odds persistence. The manifest is therefore certified as partial/resumable, not pass."
+      }
+    ]
+  },
+  "budget": {
+    "authorizedCredits": 10000,
+    "creditsUsed": 5220,
+    "creditsUsedBasis": "INFERRED_FROM_174_EXECUTED_REQUESTS_AT_30_CREDITS_EACH_AFTER_PROVIDER_LOOP_REACHED_DATABASE_PERSISTENCE",
+    "creditsRemainingUnderAuthorization": 4780,
+    "providerRequestsRemaining": "NOT_CAPTURED_AFTER_PROCESS_ABORT",
+    "providerRequestsUsed": "NOT_CAPTURED_AFTER_PROCESS_ABORT"
+  },
+  "coverage": {
+    "historicalEventsDiscovered": 1221,
+    "uniqueHistoricalEvents": 1221,
+    "moneylinePriceAwareEvents": 0,
+    "spreadPriceAwareEvents": 0,
+    "totalPriceAwareEvents": 0,
+    "fullCorePriceAwareEvents": 0,
+    "bookCoverage": {
+      "fanduel": 0,
+      "draftkings": 0,
+      "betmgm": 0,
+      "caesars": 0
+    },
+    "rowsAdded": 0,
+    "rowsReused": 0,
+    "duplicateRows": 0,
+    "postStartRowsRejected": 0
+  },
+  "timing": {
+    "medianMinutesBeforeTip": null,
+    "p10": null,
+    "p90": null,
+    "min": null,
+    "max": null,
+    "quality": "NOT_CERTIFIED_BECAUSE_ODDS_ROWS_DID_NOT_PERSIST"
+  },
+  "databaseMutations": {
+    "eventsPersisted": 1221,
+    "eventMappingsPersisted": 1221,
+    "oddsInserted": 0,
+    "jobRowsInserted": 0,
+    "failure": "sports_odds_snapshots upsert failed with Supabase/Cloudflare 520"
+  },
+  "providerEventCrosswalkStatus": "EVENT_FOUNDATION_PERSISTED_ODDS_ROWS_MISSING",
+  "remainingStatDataRequired": [
+    "final_results",
+    "quarter_scores",
+    "boxscores",
+    "team_game_stats",
+    "player_game_stats",
+    "players"
+  ],
+  "modelReplayStatus": "STATS_PENDING",
+  "priceAwareReplayStatus": "PRICE_ROWS_NOT_PERSISTED",
+  "accounting": {
+    "sportsDataIoCalls": 0,
+    "currentEraNbaPredictionWrites": 0,
+    "bulkReplayPredictions": 0,
+    "providerCalls": 174,
+    "theOddsApiCredits": 5220,
+    "databaseMutationTables": [
+      "sport_events",
+      "provider_entity_mappings"
+    ]
+  },
+  "mlbRegression": "UNCHANGED_READ_ONLY_CONFIRM_SEPARATE",
+  "blockers": [
+    "ODDS_PERSISTENCE_DB_520",
+    "PER_REQUEST_HEADER_ACCOUNTING_LOST_ON_PROCESS_ABORT",
+    "ODDS_ROWS_NOT_PERSISTED",
+    "STAT_SOURCE_ACCESS_STILL_BLOCKED"
+  ],
+  "nextRequiredAction": "Repair/resume persistence using existing event foundation and an odds-row chunked persistence strategy. Do not repeat already paid successful historical requests without explicit authorization."
+}

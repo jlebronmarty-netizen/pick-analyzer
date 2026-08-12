@@ -1928,3 +1928,9 @@ Stored NBA evidence remains a partial/trial foundation: 30 teams, 579 players, 1
 NBA-01A is locally certified as `NBA_HISTORICAL_BOOTSTRAP_READY_PENDING_STAT_SOURCE_ACCESS`. The phase documents The Odds API NBA historical coverage, conservative credit formulas and initial price-history strategies without making provider calls or importing data.
 
 The selected non-odds primary candidate is NBA Stats public endpoints, pending explicit access/terms approval for bounded bulk import. The first replay target remains 2024-25 regular-season Moneyline, Spread and Total. Historical price import is budget-gated: one daily 2024-25 core-market card snapshot is estimated at roughly 170 requests and 5,100 credits; per-game near-close is roughly 1,230 requests and 36,900 credits. SportsDataIO NBA remains legacy/trial only.
+
+## 2026-08-12 NBA-01B The Odds API Historical-First Backfill
+
+NBA-01B is locally classified as `NBA_ODDS_HISTORICAL_BACKFILL_PARTIAL_RESUMABLE`. The authorized The Odds API daily-card historical backfill executed 174 historical requests for 2024-25 NBA core markets, inferred at 5,220 credits from the 30-credit request contract. The run persisted 1,221 historical NBA event rows and 1,221 The Odds API event mappings, then stopped on a Supabase/Cloudflare 520 during `sports_odds_snapshots` upsert.
+
+No historical odds rows, replay predictions, Current Era NBA predictions or SportsDataIO calls were created. Price-aware replay remains blocked until odds persistence is resumed without repeating already paid successful requests unless explicitly authorized.
