@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-13 MLB Final Market Freshness Freeze
+
+- MLB Final Market Freshness Freeze is locally implemented as `MLB_FINAL_MARKET_FRESHNESS_RUNTIME_REPAIR_READY_FOR_DEPLOYMENT`. Production settlement closure is certified (`PASS`, ready 0, silent 0), but the natural scheduler kept selecting `settle` because adaptive settlement backlog counted three `PREDICTION_POST_START` rows as settlement-ready.
+- The bounded repair aligns adaptive backlog readiness with the settlement writer cutoff gate, preserving blocked-row evidence while allowing legitimate pregame market refresh to proceed. No model, probability, recommendation, settlement formula, learning, provider authority, SportsDataIO rollback-only, MLB data-source mode or NBA historical foundation behavior changed.
+
 ## 2026-08-13 MLB Product Candidate Selection Integrity
 
 - MLB Product Candidate Selection Integrity is locally implemented as `MLB_PRODUCT_CANDIDATE_SELECTION_INTEGRITY_REPAIR_READY_FOR_DEPLOYMENT`. The audit confirmed Current Board probability binding remained 27/27, but homepage review fallback copy implied "best available" while the comparator is evidence-completeness, and integer-total rows could surface unknown EV as `0.00%` through a top-level default.

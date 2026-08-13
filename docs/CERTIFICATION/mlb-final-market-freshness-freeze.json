@@ -1,0 +1,77 @@
+{
+  "classification": "MLB_FINAL_MARKET_FRESHNESS_RUNTIME_REPAIR_READY_FOR_DEPLOYMENT",
+  "date": "2026-08-13",
+  "startingCommit": "469002068677a282ce7da47efb4e16f3b47a101e",
+  "scope": "bounded MLB market freshness and current-board health restoration",
+  "productionEvidenceBeforeRepair": {
+    "productionCommit": "469002068677a282ce7da47efb4e16f3b47a101e",
+    "observationTimeUtc": "2026-08-13T21:24:06.999Z",
+    "settlementGuarantee": "PASS",
+    "settlementReady": 0,
+    "silentPending": 0,
+    "settlementBlocked": 3,
+    "settlementBlockedReason": "PREDICTION_POST_START",
+    "schedulerHealth": "HEALTHY",
+    "providerBudgetHealth": "HEALTHY",
+    "marketFreshnessHealth": "CRITICAL",
+    "currentBoardHealth": "DEGRADED",
+    "operationsHealth": "CRITICAL",
+    "currentBoardGames": 3,
+    "currentBoardCandidates": 9,
+    "eligiblePregameMarketRefreshGames": 3,
+    "latestOddsRefresh": "2026-08-13T20:18:23.158+00:00",
+    "naturalSchedulerObservedAt": "2026-08-13T21:18:12.233+00:00",
+    "naturalSchedulerSelectedAction": "settle",
+    "naturalSchedulerProviderCalls": 0,
+    "theOddsApiCallsIncreased": false
+  },
+  "currentLifecycleScope": {
+    "gamesToday": 9,
+    "pregameCutoffSafe": 3,
+    "pregameCutoffPassed": 0,
+    "live": 2,
+    "final": 4,
+    "postponed": 0,
+    "cancelled": 0
+  },
+  "rootCause": {
+    "classification": "SETTLEMENT_BACKLOG_CUTOFF_GATE_MISMATCH_STARVED_MARKET_REFRESH",
+    "service": "src/services/adaptive-refresh-orchestrator.service.ts",
+    "details": "Adaptive settlement backlog counted any pending prediction with an authoritative result as settlement-ready without applying the cutoff/start safety gate used by the settlement writer and settlement guarantee."
+  },
+  "repair": {
+    "runtimeFiles": [
+      "src/services/adaptive-refresh-orchestrator.service.ts"
+    ],
+    "description": "Load generated_at, cutoff_at and created_at in the adaptive settlement backlog and require classifyPredictionCutoff(...).eligible before a row contributes to settlementReadyRows.",
+    "cutoffBlockedRowsRemainVisible": true,
+    "cutoffBlockedRowsNoLongerPreemptMarketRefresh": true,
+    "settlementWriterChanged": false,
+    "healthThresholdsWeakened": false,
+    "providerAuthorityChanged": false
+  },
+  "safety": {
+    "predictionFormulaChanged": false,
+    "probabilitiesChanged": false,
+    "candidateSelectionLogicChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementFormulaChanged": false,
+    "learningPolicyChanged": false,
+    "providerAuthorityChanged": false,
+    "nbaHistoricalFoundationTouched": false,
+    "sportsDataIoReactivated": false,
+    "postStartPredictionWrites": 0,
+    "postCutoffPredictionWrites": 0,
+    "duplicatePredictionWrites": 0,
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0
+  },
+  "postDeployRequiredProof": [
+    "production version advances to repair commit",
+    "adaptive planner selects market refresh when odds are due and only cutoff-blocked settlement rows remain",
+    "The Odds API product-primary refresh executes for eligible pregame games",
+    "SportsDataIO MLB routine calls remain 0",
+    "Current Board reflects lifecycle-scoped current opportunity state",
+    "Settlement Guarantee remains PASS"
+  ]
+}

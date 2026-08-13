@@ -2,6 +2,8 @@
 
 This roadmap is dependency-aware and based on repository inspection. A module is marked completed only when the repository contains service/API/dashboard/persistence evidence and recent verification supports it.
 
+MLB Final Market Freshness Freeze is locally implemented as `MLB_FINAL_MARKET_FRESHNESS_RUNTIME_REPAIR_READY_FOR_DEPLOYMENT`. The final freeze remains pending deployment proof because production natural scheduler executions were selecting false settlement debt from post-start blocked rows instead of the due pregame market refresh. The repair aligns adaptive settlement backlog readiness with cutoff eligibility so market refresh can proceed while blocked settlement evidence remains visible.
+
 MLB Product Candidate Selection Integrity is locally implemented as `MLB_PRODUCT_CANDIDATE_SELECTION_INTEGRITY_REPAIR_READY_FOR_DEPLOYMENT`. It documents Moneyline, Run Line and Total complement semantics, clarifies Rent Play and Moneyline review fallback ranking as evidence-completeness rather than highest probability, maps Analysis Snapshot timestamps into homepage cards, preserves exact-line identity and prevents null EV from rendering as zero. No model, ranking formula, recommendation threshold, provider authority, settlement, learning, NBA historical foundation or MLB data-source behavior changed.
 
 MLB Settlement Closure Debt Finalization is locally implemented as `MLB_SETTLEMENT_CLOSURE_DEBT_RUNTIME_REPAIR_READY_FOR_DEPLOYMENT`. The bounded repair fixes an operating-day settlement linkage short-circuit so the writer can settle same-local-date predictions with canonical final results while preserving cutoff/start safety. Production remains on the pre-repair commit until this is published and protected settlement is rerun.

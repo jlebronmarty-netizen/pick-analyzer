@@ -6,6 +6,8 @@ Certification documentation covers validation records, readiness gates, producti
 
 Current V2 certification documents:
 
+- [MLB Final Market Freshness Freeze](MLB_FINAL_MARKET_FRESHNESS_FREEZE.md)
+- [MLB Final Market Freshness Freeze JSON](mlb-final-market-freshness-freeze.json)
 - [MLB Settlement Closure Debt Finalization](MLB_SETTLEMENT_CLOSURE_DEBT_FINALIZATION.md)
 - [MLB Settlement Closure Debt Finalization JSON](mlb-settlement-closure-debt-finalization.json)
 - [NBA-01C Recover BallDontLie GOAT Extraction JSON](nba-01c-recover-balldontlie-goat-extraction.json)

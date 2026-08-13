@@ -23,6 +23,7 @@ import { executeTheOddsApiMlbDualReadAcquisition } from '@/services/the-odds-api
 import { executeLineVersionedRepredictionWriter } from '@/services/line-versioned-reprediction-writer.service'
 import { executeMlbOfficialShadowAcquisition } from '@/services/mlb-official-replacement.service'
 import { productAuthorityForStage, readOddsPrimaryAuthorityStage } from '@/config/odds-primary-authority.config'
+import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -77,6 +78,9 @@ type SettlementBacklogPredictionRow = {
   id: string
   game_id: string | null
   commence_time: string | null
+  generated_at?: string | null
+  cutoff_at?: string | null
+  created_at?: string | null
   status: string | null
   result: string | null
   lifecycle_status: string | null
@@ -799,7 +803,7 @@ async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
   const end = puertoRicoUtcRange(today).utcEndExclusive
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
-    .select('id, game_id, commence_time, status, result, lifecycle_status')
+    .select('id, game_id, commence_time, generated_at, cutoff_at, created_at, status, result, lifecycle_status')
     .eq('sport_key', SPORT_KEY)
     .gte('commence_time', start)
     .lt('commence_time', end)
@@ -830,7 +834,20 @@ async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
 
   const resultsByGameId = new Map(results.map((result) => [result.game_id, result]))
   const eventsById = new Map(events.map((event) => [event.id, event]))
-  const eligible = pending.filter((row) => isAuthoritativeSettlementResult(row.game_id ? resultsByGameId.get(row.game_id) : undefined))
+  const classified = pending.map((row) => {
+    const event = row.game_id ? eventsById.get(row.game_id) : undefined
+    const hasAuthoritativeResult = isAuthoritativeSettlementResult(row.game_id ? resultsByGameId.get(row.game_id) : undefined)
+    const cutoff = classifyPredictionCutoff(row, event)
+    return { row, event, hasAuthoritativeResult, cutoff }
+  })
+  const eligible = classified
+    .filter((item) => item.hasAuthoritativeResult && item.cutoff.eligible)
+    .map((item) => item.row)
+  const cutoffBlocked = classified.filter((item) => item.hasAuthoritativeResult && !item.cutoff.eligible)
+  const cutoffBlockedByReason = cutoffBlocked.reduce<Record<string, number>>((counts, item) => {
+    counts[item.cutoff.state] = (counts[item.cutoff.state] ?? 0) + 1
+    return counts
+  }, {})
   const missingResult = pending.filter((row) => {
     if (!row.game_id || isAuthoritativeSettlementResult(resultsByGameId.get(row.game_id))) return false
     return isPriorDateResultImportCandidate(eventsById.get(row.game_id), now)
@@ -863,6 +880,8 @@ async function loadSettlementBacklog(now = new Date(), lookbackDays = 7) {
     settlementReadyRows: eligible.length,
     completedMissingResultRows: missingResult.length,
     awaitingResultRows: awaitingResult,
+    cutoffBlockedRows: cutoffBlocked.length,
+    cutoffBlockedRowsByReason: cutoffBlockedByReason,
     oldestReadyDate: dates[0] ?? null,
     newestReadyDate: dates.at(-1) ?? null,
     oldestMissingResultDate: missingResultDates[0] ?? null,
