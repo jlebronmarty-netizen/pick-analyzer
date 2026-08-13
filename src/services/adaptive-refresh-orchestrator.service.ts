@@ -1219,15 +1219,20 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
   }
   const dueDomains = refreshPlan.filter((item) => item.decision === 'DUE_NOW').map((item) => item.domain)
   const pregameOddsDue = dueDomains.includes('odds') && marketRefreshNeeded
-  const historicalResultDebtBehindActiveSlate =
-    Number(settlementBacklog?.settlementReadyRows ?? 0) === 0 &&
-    Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 &&
-    Boolean(settlementBacklog?.oldestMissingResultDate && activeSlateDate) &&
-    String(settlementBacklog?.oldestMissingResultDate) < String(activeSlateDate)
-  const activeMarketRefreshPreemptsHistoricalResultDebt = pregameOddsDue && historicalResultDebtBehindActiveSlate
-  const effectiveNextAction = dueDomains.includes('settlement')
+  const closureDebtBehindActiveSlate = Boolean(activeSlateDate) && (
+    Boolean(settlementBacklog?.oldestReadyDate && String(settlementBacklog.oldestReadyDate) < String(activeSlateDate)) ||
+    Boolean(settlementBacklog?.oldestMissingResultDate && String(settlementBacklog.oldestMissingResultDate) < String(activeSlateDate))
+  )
+  const activeMarketRefreshPreemptsClosureDebt =
+    pregameOddsDue &&
+    closureDebtBehindActiveSlate &&
+    currentGames > 0 &&
+    waitingForOdds > 0
+  const effectiveNextAction = activeMarketRefreshPreemptsClosureDebt
+    ? currentGames > 0 ? 'midday_refresh' : 'morning_sync'
+    : dueDomains.includes('settlement')
     ? 'settle'
-    : dueDomains.includes('results') && !activeMarketRefreshPreemptsHistoricalResultDebt
+    : dueDomains.includes('results') && !activeMarketRefreshPreemptsClosureDebt
       ? 'sync_results'
       : pregameOddsDue
           ? currentGames > 0 ? 'midday_refresh' : 'morning_sync'
@@ -1485,10 +1490,12 @@ export async function getAdaptiveRefreshStatus({ now = new Date() }: { now?: Dat
       settlementPolicyChanged: false,
     },
     orchestrationPolicy: {
-      resultRecoveryPreemptsActiveMarketRefresh: dueDomains.includes('results') && pregameOddsDue && !activeMarketRefreshPreemptsHistoricalResultDebt,
-      activeMarketRefreshPreemptsHistoricalResultDebt,
-      historicalResultDebtBehindActiveSlate,
-      rule: 'Settlement-ready rows outrank market refresh. When only older missing-result recovery debt is due and the current active slate has stale eligible pregame markets, current-slate market refresh runs before historical result recovery to prevent product freshness starvation.',
+      resultRecoveryPreemptsActiveMarketRefresh: dueDomains.includes('results') && pregameOddsDue && !activeMarketRefreshPreemptsClosureDebt,
+      activeMarketRefreshPreemptsHistoricalResultDebt: activeMarketRefreshPreemptsClosureDebt,
+      activeMarketRefreshPreemptsClosureDebt,
+      historicalResultDebtBehindActiveSlate: closureDebtBehindActiveSlate,
+      closureDebtBehindActiveSlate,
+      rule: 'Current-day pregame market bootstrap preempts older result or settlement closure debt when games are waiting for odds. Same-day settlement remains protected, and older closure debt resumes after current slate odds/prediction continuity is restored.',
       providerCallsMade: 0,
       remoteMutationsMade: 0,
       settlementEligibilityChanged: false,
@@ -1601,13 +1608,18 @@ function executableActionFromStatus(status: Awaited<ReturnType<typeof getAdaptiv
     dueDomains.includes('odds') &&
     (status.marketRefreshEligibility?.marketRefreshNeeded === true || Number(status.gamesWaitingForOdds ?? 0) > 0)
   const settlementBacklog = status.settlementBacklog as Record<string, unknown> | null | undefined
-  const historicalResultDebtBehindActiveSlate =
-    Number(settlementBacklog?.settlementReadyRows ?? 0) === 0 &&
-    Number(settlementBacklog?.completedMissingResultRows ?? 0) > 0 &&
-    Boolean(settlementBacklog?.oldestMissingResultDate && status.activeSlateDate) &&
-    String(settlementBacklog?.oldestMissingResultDate) < String(status.activeSlateDate)
+  const closureDebtBehindActiveSlate = Boolean(status.activeSlateDate) && (
+    Boolean(settlementBacklog?.oldestReadyDate && String(settlementBacklog.oldestReadyDate) < String(status.activeSlateDate)) ||
+    Boolean(settlementBacklog?.oldestMissingResultDate && String(settlementBacklog.oldestMissingResultDate) < String(status.activeSlateDate))
+  )
+  const activeMarketRefreshPreemptsClosureDebt =
+    pregameOddsDue &&
+    closureDebtBehindActiveSlate &&
+    Number(status.currentGames ?? 0) > 0 &&
+    Number(status.gamesWaitingForOdds ?? 0) > 0
+  if (pregameOddsDue && activeMarketRefreshPreemptsClosureDebt) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('settlement')) return 'settle'
-  if (dueDomains.includes('results') && !(pregameOddsDue && historicalResultDebtBehindActiveSlate)) return 'sync_results'
+  if (dueDomains.includes('results') && !activeMarketRefreshPreemptsClosureDebt) return 'sync_results'
   if (pregameOddsDue) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('odds')) return status.currentGames > 0 ? 'midday_refresh' : 'morning_sync'
   if (dueDomains.includes('schedule')) return 'morning_sync'

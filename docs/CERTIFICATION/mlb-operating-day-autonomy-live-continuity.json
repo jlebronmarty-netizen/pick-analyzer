@@ -1,0 +1,46 @@
+{
+  "status": "LOCAL_REPAIR_READY_FOR_DEPLOYMENT",
+  "classification": "MLB_OPERATING_DAY_AUTONOMY_LIVE_CONTINUITY_REPAIR_READY_FOR_DEPLOYMENT",
+  "startingCommit": "db6794c21565c083192f7ba0f498ed705b77975b",
+  "productionCommit": "72864b24c3bc094f9d2f941b78c3ac89b71e5378",
+  "observation": {
+    "observedAt": "2026-08-13T14:05:46.308Z",
+    "timezone": "America/Puerto_Rico",
+    "operatingDate": "2026-08-13",
+    "gamesToday": 9,
+    "pregame": 9,
+    "live": 0,
+    "final": 0,
+    "predictions": 0,
+    "currentBoardCandidates": 0,
+    "gamesWaitingForOdds": 9,
+    "schedulerHealth": "HEALTHY",
+    "operationsHealth": "CRITICAL"
+  },
+  "rootCause": "PRIOR_DAY_CLOSURE_DEBT_STARVED_CURRENT_DAY_PREGAME_MARKET_BOOTSTRAP",
+  "repair": {
+    "plannerPriorityChanged": true,
+    "currentPregameMarketBootstrapPreemptsOlderClosureDebt": true,
+    "sameDaySettlementProtected": true,
+    "olderClosureDebtResumesAfterCurrentSlateBootstrap": true,
+    "vercelConfigChanged": false
+  },
+  "guardrails": {
+    "sportsDataIoRoutineMlbCallsExpected": 0,
+    "theOddsApiMarketAuthorityUnchanged": true,
+    "mlbOfficialPrimaryUnchanged": true,
+    "predictionFormulaChanged": false,
+    "officialPickThresholdsChanged": false,
+    "modelWeightsChanged": false,
+    "settlementFormulaChanged": false,
+    "learningWeightsChanged": false,
+    "nbaHistoricalDataModified": false,
+    "nbaCurrentEraActivated": false
+  },
+  "certification": {
+    "providerCallsFromCertification": 0,
+    "databaseMutationsFromCertification": 0,
+    "currentDayRecoveryPerformed": false,
+    "reasonCurrentDayRecoveryNotPerformed": "local repair not deployed; execute after publish/deployment through normal protected scheduler or explicitly authorized protected invocation"
+  }
+}
