@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-13 MLB Official Pick + MC-08B Integrity
+
+- MLB Official Pick + MC-08B Integrity is locally implemented as `MLB_OFFICIAL_PICK_MC08B_INTEGRITY_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed the `MIL @ LAD` moneyline review candidate had fresh complement-bound FanDuel `-140` evidence, model probability `60.59%`, edge `+2.26%` and EV `+3.87%`, but legitimately failed Official Pick policy because confidence was `42.62%` versus the `65%` official threshold, edge/EV were below official thresholds, calibration was insufficient and production/quarantine blockers were present.
+- The bounded repair updates homepage Rent Play/Moneyline/Smart Parlay explainability so deterministic Official Pick policy rejections surface the underlying blockers instead of vague `PENDING` / not-promoted copy. No Official Pick promotion, threshold, model, probability, confidence, edge/EV, provider authority, settlement, learning, NBA historical foundation or MLB source-mode behavior changed.
+
 ## 2026-08-13 MLB Final Market Freshness Freeze
 
 - MLB Final Market Freshness Freeze is locally implemented as `MLB_FINAL_MARKET_FRESHNESS_RUNTIME_REPAIR_READY_FOR_DEPLOYMENT`. Production settlement closure is certified (`PASS`, ready 0, silent 0), but the natural scheduler kept selecting `settle` because adaptive settlement backlog counted three `PREDICTION_POST_START` rows as settlement-ready.

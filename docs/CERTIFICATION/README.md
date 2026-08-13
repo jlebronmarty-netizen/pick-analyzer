@@ -6,6 +6,8 @@ Certification documentation covers validation records, readiness gates, producti
 
 Current V2 certification documents:
 
+- [MLB Official Pick + MC-08B Integrity](MLB_OFFICIAL_PICK_MC08B_INTEGRITY.md)
+- [MLB Official Pick + MC-08B Integrity JSON](mlb-official-pick-mc08b-integrity.json)
 - [MLB Final Market Freshness Freeze](MLB_FINAL_MARKET_FRESHNESS_FREEZE.md)
 - [MLB Final Market Freshness Freeze JSON](mlb-final-market-freshness-freeze.json)
 - [MLB Settlement Closure Debt Finalization](MLB_SETTLEMENT_CLOSURE_DEBT_FINALIZATION.md)

@@ -1,0 +1,118 @@
+{
+  "status": "MLB_OFFICIAL_PICK_MC08B_INTEGRITY_REPAIR_READY_FOR_DEPLOYMENT",
+  "startingCommit": "920d8017e2e9cbbe3b567b6ff394024e15c737c0",
+  "productionCommit": "920d8017e2e9cbbe3b567b6ff394024e15c737c0",
+  "productionEvidenceTime": "2026-08-13T22:16:53.083Z",
+  "implementation": {
+    "homepage": "src/components/home/HomeBettingPlan.tsx",
+    "canonicalPolicyFunction": "evaluateRecommendationEligibility",
+    "policyFile": "src/services/recommendation-eligibility-policy.service.ts",
+    "officialPickContract": "src/services/official-pick-experience.service.ts",
+    "currentBoardSource": "src/services/current-board.service.ts",
+    "topPicksSource": "src/services/top-picks.service.ts"
+  },
+  "thresholds": {
+    "minimumModelProbability": 52,
+    "minimumOfficialConfidence": 65,
+    "minimumOfficialEdge": 5,
+    "minimumOfficialEv": 5,
+    "maximumOddsAgeMinutes": 120,
+    "calibrationRequirement": "acceptable_or_mature",
+    "productionGate": "production_eligible_true_non_quarantined",
+    "timing": "future_event_before_cutoff_unsettled"
+  },
+  "ladTrace": {
+    "event": "MIL @ LAD",
+    "market": "moneyline",
+    "selection": "MIL",
+    "line": null,
+    "predictionId": "acaa6368-7697-5cc9-8db6-b5555b7df847",
+    "probability": 60.59,
+    "confidence": 42.62,
+    "sportsbook": "fanduel",
+    "odds": -140,
+    "impliedProbability": 58.33,
+    "edge": 2.26,
+    "expectedValue": 3.87,
+    "marketEvidenceTime": "2026-08-13T22:06:45.000Z",
+    "freshness": "FRESH",
+    "priceBinding": "COMPLEMENT",
+    "directlyAlignedDisplayedPrice": false,
+    "exactEventMatch": true,
+    "exactMarketMatch": true,
+    "exactSelectionMatch": false,
+    "exactLineMatch": true,
+    "exactSportsbookSnapshotMatch": true,
+    "eligibleAtTheTime": false,
+    "rejectionReasons": [
+      "PRODUCTION_GATE_BLOCKED",
+      "QUARANTINED_ROW",
+      "CALIBRATION_INSUFFICIENT",
+      "LOW_CONFIDENCE",
+      "LOW_EDGE",
+      "LOW_EV"
+    ]
+  },
+  "currentDay": {
+    "canonicalPredictions": 9,
+    "currentBoardCandidates": 9,
+    "mc08bEvaluated": 9,
+    "analyticalGatesPassed": 7,
+    "priceFreshnessPassed": 7,
+    "calibrationDataQualityPassed": 0,
+    "officialPickEligible": 0,
+    "promoted": 0,
+    "persistedOfficialPicks": 0
+  },
+  "rejectionDistribution": {
+    "PRODUCTION_GATE_BLOCKED": 9,
+    "QUARANTINED_ROW": 9,
+    "CALIBRATION_INSUFFICIENT": 9,
+    "LOW_CONFIDENCE": 9,
+    "LOW_MODEL_PROBABILITY": 9,
+    "LOW_EDGE": 9,
+    "LOW_EV": 9,
+    "NON_POSITIVE_EDGE_after_canonical_filter": 2,
+    "NON_POSITIVE_EV_after_canonical_filter": 2
+  },
+  "bestNearMiss": {
+    "event": "TEX @ LAA",
+    "market": "moneyline",
+    "probability": 60.9,
+    "confidence": 42.45,
+    "odds": 138,
+    "edge": 18.88,
+    "expectedValue": 44.94,
+    "freshness": "FRESH",
+    "binding": "COMPLEMENT",
+    "failedGates": [
+      "PRODUCTION_GATE_BLOCKED",
+      "QUARANTINED_ROW",
+      "CALIBRATION_INSUFFICIENT",
+      "LOW_CONFIDENCE",
+      "LOW_MODEL_PROBABILITY",
+      "LOW_EDGE",
+      "LOW_EV"
+    ]
+  },
+  "circularity": {
+    "officialPickIs": "OUTPUT",
+    "rentPlayRequiresOfficialPick": true,
+    "moneylineRequiresOfficialPick": true,
+    "mc08bRequiresRentPlayEligibility": false,
+    "mc08bRequiresRecommendationEligibility": true,
+    "recommendationEligibilityRequiresOfficialPick": false,
+    "circularDependency": false
+  },
+  "repair": {
+    "category": "HOMEPAGE_GATE_MAPPING_REPAIR",
+    "promotionLogicChanged": false,
+    "thresholdsChanged": false,
+    "formulasChanged": false,
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0,
+    "sportsDataIoRoutineCallsChanged": false,
+    "nbaHistoricalFoundationTouched": false
+  }
+}
+

@@ -148,6 +148,7 @@ type PlanPick = {
   snapshotCapturedAt?: string | null
   nextRefreshAt?: string | null
   evidence: string[]
+  policyBlockers: string[]
   official: boolean
   qualified: boolean
   reason: string
@@ -690,6 +691,7 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
       edge !== null ? `Edge ${signedPct(edge)}` : 'Edge unavailable',
       ev !== null ? `EV ${signedPct(ev)}` : 'EV unavailable',
     ],
+    policyBlockers: [],
     official,
     qualified,
     reason: label(selector.blocker ?? selector.rankingReason, qualified ? 'Qualified from existing Today evidence.' : 'Evidence is incomplete or stale.'),
@@ -708,13 +710,15 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
   const freshness = label(productFreshness?.status ?? row.freshnessStatus ?? row.freshness, 'Freshness unavailable')
   const freshnessActionability = label(productFreshness?.actionability, 'INFORMATIONAL_ONLY')
   const officialEligibility = textOrNull(row.officialEligibility ?? row.official_pick_status ?? row.recommendationPolicyStatus)
-  const blockerText = [
-    ...arrayValue(row.blockers).map((item) => label(item, '')),
-    label(row.reasonNotOfficial ?? row.blocker ?? row.why ?? officialEligibility, ''),
-  ].filter(Boolean)
+  const rawPolicyBlockers = [
+    ...arrayValue(row.blockers).map((item) => String(item ?? '').trim()).filter(Boolean),
+    textOrNull(row.reasonNotOfficial ?? row.blocker ?? row.why ?? officialEligibility),
+  ].filter(Boolean) as string[]
+  const blockerText = rawPolicyBlockers.map((item) => label(item, '')).filter(Boolean)
   const policyEligible = official || ['ELIGIBLE', 'OFFICIAL_ELIGIBLE', 'OFFICIAL_ELIGIBLE_CANDIDATE', 'OFFICIAL_PICK'].includes(String(officialEligibility ?? '').toUpperCase())
+  const policyBlockers = normalizedPolicyBlockerCodes(rawPolicyBlockers, { edge, ev })
   const policyBlockedReason = !policyEligible && source === 'Current Board'
-    ? `Policy blocked: ${label(row.reasonNotOfficial ?? row.blocker ?? officialEligibility, 'Not officially eligible under existing policy.')}`
+    ? `Policy blocked: ${policyBlockers.length ? humanPolicyBlockers(policyBlockers).join(' ') : label(row.reasonNotOfficial ?? row.blocker ?? officialEligibility, 'Not officially eligible under existing policy.')}`
     : null
   const freshEnough = !/stale|avoid|do not act|post start|post_start|market closed/i.test(`${freshness} ${blockerText.join(' ')}`) &&
     !['BLOCKED', 'WAIT_FOR_REFRESH', 'UNAVAILABLE'].includes(freshnessActionability)
@@ -763,6 +767,7 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
       confidence !== null ? `Confidence ${pct(confidence)}` : 'Confidence unavailable',
       edge !== null ? `Edge ${signedPct(edge)}` : 'Edge unavailable',
     ],
+    policyBlockers,
     official,
     qualified,
     reason: official ? 'Passed the existing Official Pick policy.' : policyBlockedReason ?? label(row.reasonNotOfficial ?? row.blocker ?? row.why, 'Informational candidate from stored evidence.'),
@@ -872,20 +877,21 @@ function bestAvailableReviewOption(
   }
 }
 
-function normalizedPolicyBlockersForCurrentEvidence(candidate: PlanPick) {
-  const reason = candidate.reason.toUpperCase()
-  const edge = candidate.edge
-  const ev = candidate.ev
-  const rawCodes = reason
+function normalizedPolicyBlockerCodes(values: string[], evidence: { edge: number | null; ev: number | null }) {
+  const rawCodes = values.join(' ')
+    .toUpperCase()
     .split(/[^A-Z0-9_]+/)
     .map((item) => item.trim())
     .filter(Boolean)
-  const codes = rawCodes.filter((code) => {
-    if (code === 'NON_POSITIVE_EDGE' && edge !== null && edge > 0) return false
-    if (code === 'NON_POSITIVE_EV' && ev !== null && ev > 0) return false
+  return Array.from(new Set(rawCodes.filter((code) => {
+    if (code === 'NON_POSITIVE_EDGE' && evidence.edge !== null && evidence.edge > 0) return false
+    if (code === 'NON_POSITIVE_EV' && evidence.ev !== null && evidence.ev > 0) return false
     return true
-  })
-  const mapped = codes.map((code) => {
+  })))
+}
+
+function humanPolicyBlockers(codes: string[]) {
+  return codes.map((code) => {
     if (code === 'PRODUCTION_GATE_BLOCKED') return 'Production gate blocked.'
     if (code === 'QUARANTINED_ROW') return 'Candidate remains quarantined.'
     if (code === 'CALIBRATION_INSUFFICIENT') return 'Calibration evidence is insufficient.'
@@ -899,12 +905,29 @@ function normalizedPolicyBlockersForCurrentEvidence(candidate: PlanPick) {
     if (code === 'LINE_VERSIONED_REPREDICTION_EVIDENCE_ONLY') return 'Line-versioned evidence remains review-only.'
     return ''
   }).filter(Boolean)
+}
 
+function normalizedPolicyBlockersForCurrentEvidence(candidate: PlanPick) {
+  const codes = candidate.policyBlockers.length
+    ? candidate.policyBlockers
+    : normalizedPolicyBlockerCodes([candidate.reason], { edge: candidate.edge, ev: candidate.ev })
+  const mapped = humanPolicyBlockers(codes)
   if (mapped.length) return mapped
   if (/blocked|quarantined|calibration|low confidence|official|policy|not eligible/i.test(candidate.reason)) {
     return [candidate.reason]
   }
   return ['Existing recommendation policy did not certify this candidate.']
+}
+
+function policyGateDetail(candidate: PlanPick) {
+  return normalizedPolicyBlockersForCurrentEvidence(candidate).join(' ')
+}
+
+function deterministicPolicyRejected(candidate: PlanPick) {
+  return !candidate.official && (
+    candidate.policyBlockers.length > 0 ||
+    /blocked|quarantined|calibration|low confidence|low edge|low ev|policy|not eligible/i.test(candidate.reason)
+  )
 }
 
 function reviewOnlyDisplayBlockers(candidate: PlanPick) {
@@ -1030,6 +1053,8 @@ function buildMoneylineGates(pick: PlanPick | null): RentPlayGate[] {
   const timestampFuture = isFutureTimestamp(pick.marketTimestamp ?? null)
   const postStart = /post_start|post start|market_closed|started|live/i.test(`${freshness} ${actionability} ${pick.reason}`)
   const unsupported = !isMoneylineMarket(pick) || /unsupported/i.test(pick.reason)
+  const policyDetail = policyGateDetail(pick)
+  const policyRejected = deterministicPolicyRejected(pick)
 
   return [
     gate('candidate', 'Moneyline candidate evidence', 'PASS', `Candidate comes from ${pick.source}.`),
@@ -1047,9 +1072,9 @@ function buildMoneylineGates(pick: PlanPick | null): RentPlayGate[] {
     gate('positive_edge', 'Positive edge policy', pick.edge === null ? 'NOT_AVAILABLE' : pick.edge > 0 ? 'PASS' : 'FAIL', 'Moneyline Bet cannot present negative edge as positive value.'),
     gate('ev_available', 'EV available', pick.ev === null ? 'NOT_AVAILABLE' : 'PASS', pick.ev === null ? 'EV is unavailable.' : `EV is ${signedPct(pick.ev)}.`),
     gate('ev_policy', 'EV policy', pick.ev === null ? 'NOT_AVAILABLE' : pick.ev >= 0 ? 'PASS' : 'FAIL', 'EV must be non-negative when EV evidence is available.'),
-    gate('data_quality', 'Data quality', /quarantined|calibration insufficient|low confidence/i.test(pick.reason) ? 'FAIL' : 'PASS', pick.reason),
-    gate('policy_blockers', 'Policy blockers', /blocked|do not act|avoid/i.test(pick.reason) ? 'FAIL' : 'PASS', pick.reason),
-    gate('official_status', 'Official Pick status', pick.official ? 'PASS' : 'PENDING', pick.official ? 'Candidate is an existing Official Pick.' : 'Candidate is not promoted to Official Pick.'),
+    gate('data_quality', 'Data quality', /QUARANTINED_ROW|CALIBRATION_INSUFFICIENT|LOW_DATA_QUALITY|LOW_DATA_SUFFICIENCY|LOW_CONFIDENCE/.test(pick.policyBlockers.join(' ')) ? 'FAIL' : 'PASS', policyRejected ? policyDetail : pick.reason),
+    gate('policy_blockers', 'Official Pick policy blockers', policyRejected ? 'FAIL' : /blocked|do not act|avoid/i.test(pick.reason) ? 'FAIL' : 'PASS', policyRejected ? policyDetail : pick.reason),
+    gate('official_status', 'Official Pick eligibility', pick.official ? 'PASS' : policyRejected ? 'FAIL' : 'PENDING', pick.official ? 'Candidate is an existing Official Pick.' : policyRejected ? `Rejected by current Official Pick policy: ${policyDetail}` : 'Candidate has not been promoted to Official Pick.'),
   ]
 }
 
@@ -1204,6 +1229,8 @@ function buildSmartParlayLegGates(pick: PlanPick | null): RentPlayGate[] {
   const unsupported = !isSupportedParlayMarket(pick)
   const postStart = /post_start|post start|started|live|market_closed/i.test(`${freshness} ${actionability} ${pick.reason}`)
   const timestampFuture = isFutureTimestamp(pick.marketTimestamp ?? null)
+  const policyDetail = policyGateDetail(pick)
+  const policyRejected = deterministicPolicyRejected(pick)
 
   return [
     gate('candidate', 'Leg evidence', 'PASS', `Leg comes from ${pick.source}.`),
@@ -1214,7 +1241,7 @@ function buildSmartParlayLegGates(pick: PlanPick | null): RentPlayGate[] {
     gate('odds_available', 'Odds available', pick.odds === null ? 'NOT_AVAILABLE' : 'PASS', pick.odds === null ? 'Canonical selected price is unavailable.' : `Selected price is ${odds(pick.odds)}.`),
     gate('market_timestamp', 'Market timestamp', pick.marketTimestamp ? 'PASS' : 'NOT_AVAILABLE', pick.marketTimestamp ? `Market timestamp ${compactDate(pick.marketTimestamp)}.` : 'Market timestamp is unavailable.'),
     gate('market_freshness', 'Market freshness', timestampFuture ? 'FAIL' : isFreshnessActionable(pick) ? 'PASS' : freshness.includes('STALE') || actionability === 'WAIT_FOR_REFRESH' ? 'PENDING' : 'FAIL', timestampFuture ? 'Market timestamp is in the future.' : `Freshness is ${pick.freshness}.`),
-    gate('policy_blockers', 'Policy blockers', /blocked|avoid|do not act|quarantined/i.test(pick.reason) ? 'FAIL' : 'PASS', pick.reason),
+    gate('policy_blockers', 'Official Pick policy blockers', policyRejected ? 'FAIL' : /blocked|avoid|do not act|quarantined/i.test(pick.reason) ? 'FAIL' : 'PASS', policyRejected ? policyDetail : pick.reason),
   ]
 }
 
@@ -1856,6 +1883,8 @@ function buildRentPlayGates(pick: PlanPick | null): RentPlayGate[] {
   const freshness = pick.freshness.toUpperCase()
   const actionability = String(pick.freshnessActionability ?? '').toUpperCase()
   const timestampFuture = isFutureTimestamp(pick.marketTimestamp ?? null)
+  const policyDetail = policyGateDetail(pick)
+  const policyRejected = deterministicPolicyRejected(pick)
 
   return [
     gate('candidate', 'Candidate evidence', 'PASS', `Candidate comes from ${pick.source}.`),
@@ -1872,9 +1901,9 @@ function buildRentPlayGates(pick: PlanPick | null): RentPlayGate[] {
     gate('positive_edge', 'Positive edge requirement', edge === null ? 'NOT_AVAILABLE' : edge > 0 ? 'PASS' : 'FAIL', 'Rent Play cannot call a negative-edge candidate safest actionable.'),
     gate('ev_available', 'EV available', ev === null ? 'NOT_AVAILABLE' : 'PASS', ev === null ? 'EV is unavailable.' : `EV is ${signedPct(ev)}.`),
     gate('ev_policy', 'EV policy', ev === null ? 'NOT_AVAILABLE' : ev >= 0 ? 'PASS' : 'FAIL', 'EV must be non-negative or policy-compliant.'),
-    gate('data_quality', 'Data quality', /quarantined|calibration insufficient|low confidence/i.test(pick.reason) ? 'FAIL' : 'PASS', pick.reason),
-    gate('policy_blockers', 'Policy blockers', /blocked|do not act|avoid/i.test(pick.reason) ? 'FAIL' : 'PASS', pick.reason),
-    gate('official_status', 'Official Pick status', pick.official ? 'PASS' : 'PENDING', pick.official ? 'Candidate is an existing Official Pick.' : 'Candidate is not promoted to Official Pick.'),
+    gate('data_quality', 'Data quality', /QUARANTINED_ROW|CALIBRATION_INSUFFICIENT|LOW_DATA_QUALITY|LOW_DATA_SUFFICIENCY|LOW_CONFIDENCE/.test(pick.policyBlockers.join(' ')) ? 'FAIL' : 'PASS', policyRejected ? policyDetail : pick.reason),
+    gate('policy_blockers', 'Official Pick policy blockers', policyRejected ? 'FAIL' : /blocked|do not act|avoid/i.test(pick.reason) ? 'FAIL' : 'PASS', policyRejected ? policyDetail : pick.reason),
+    gate('official_status', 'Official Pick eligibility', pick.official ? 'PASS' : policyRejected ? 'FAIL' : 'PENDING', pick.official ? 'Candidate is an existing Official Pick.' : policyRejected ? `Rejected by current Official Pick policy: ${policyDetail}` : 'Candidate has not been promoted to Official Pick.'),
   ]
 }
 
