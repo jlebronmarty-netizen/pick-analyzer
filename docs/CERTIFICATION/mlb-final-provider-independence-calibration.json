@@ -1,0 +1,221 @@
+{
+  "mode": "mlb_final_provider_independence_calibration_v1",
+  "status": "MLB_FINAL_PROVIDER_INDEPENDENCE_CALIBRATION_REPAIR_READY_FOR_DEPLOYMENT",
+  "providerVerdict": "MLB_SPORTSDATAIO_ZERO_RUNTIME_REPAIR_READY_FOR_DEPLOYMENT",
+  "calibrationVerdict": "MLB_CALIBRATION_EVIDENCE_QUANTIFIED_NO_REPAIR_REQUIRED",
+  "mlbFinalFreezeDecision": "MLB_FINAL_FREEZE_WAIT_PROVIDER_OBSERVATION",
+  "startingCommit": "dca83ad9074aaca6b17f32d0ab5e54b8aa3a70e3",
+  "productionCommitObserved": "dca83ad9074aaca6b17f32d0ab5e54b8aa3a70e3",
+  "observationDate": "2026-08-13",
+  "providerAuthority": {
+    "oddsPrimaryAuthorityStage": "STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT",
+    "theOddsApiRole": "MLB_PRODUCT_ODDS_AUTHORITY",
+    "mlbOfficialRole": "PRIMARY_NON_ODDS_MLB_SOURCE",
+    "sportsDataIoRole": "ROLLBACK_ONLY",
+    "routineFallbackExistsAfterRepair": false,
+    "rollbackActivation": "explicit authority-stage rollback only"
+  },
+  "sportsDataIo": {
+    "reportedToday": 6,
+    "realHttpCalls": 6,
+    "accountingOnlyEvents": 0,
+    "routineAutomaticCalls": 6,
+    "protectedAuthorizedCalls": 0,
+    "healthProbeCalls": 0,
+    "unknownCalls": 0,
+    "lastUnintendedCallTimestamp": "2026-08-13T22:47:53.563493Z",
+    "rootCause": "LEGACY_SPORTSDATAIO_PROSPECTIVE_PREVIEW_SERVICE_STILL_ACTIVE_UNDER_STAGE_3",
+    "repairApplied": "sportsdataio-mlb-prospective-preview.service now suppresses before endpoint planning when product authority is not SportsDataIO",
+    "callsAfterLocalRepair": 0,
+    "postDeploymentObservationRequired": true,
+    "cancellationReadiness": "SPORTSDATAIO_CANCELLATION_WAIT_FOR_OBSERVATION",
+    "realCalls": [
+      {
+        "timestamp": "2026-08-13T20:18:18.583525Z",
+        "caller": "src/services/operating-day.service.ts -> runSportsDataIoMlbProspectivePreview",
+        "operation": "operating_day_slate_discovery",
+        "trigger": "natural operating-day refresh",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2026-AUG-13",
+        "rowsFetched": 9,
+        "classification": "ROUTINE_AUTOMATIC_PRE_REPAIR"
+      },
+      {
+        "timestamp": "2026-08-13T20:18:19.343198Z",
+        "caller": "src/services/operating-day.service.ts -> runSportsDataIoMlbProspectivePreview",
+        "operation": "operating_day_odds_capture",
+        "trigger": "natural operating-day refresh",
+        "endpoint": "/api/mlb/odds/json/GameOddsByDate/2026-08-13",
+        "rowsFetched": 9,
+        "classification": "ROUTINE_AUTOMATIC_PRE_REPAIR"
+      },
+      {
+        "timestamp": "2026-08-13T20:18:19.634909Z",
+        "caller": "src/services/operating-day.service.ts -> runSportsDataIoMlbProspectivePreview",
+        "operation": "operating_day_projections_availability",
+        "trigger": "natural operating-day refresh",
+        "endpoint": "/api/mlb/fantasy/json/PlayerGameProjectionStatsByDate/2026-AUG-13",
+        "rowsFetched": 1059,
+        "classification": "ROUTINE_AUTOMATIC_PRE_REPAIR"
+      },
+      {
+        "timestamp": "2026-08-13T21:57:11.131364Z",
+        "caller": "src/services/operating-day.service.ts -> runSportsDataIoMlbProspectivePreview",
+        "operation": "operating_day_odds_capture",
+        "trigger": "natural operating-day refresh",
+        "endpoint": "/api/mlb/odds/json/GameOddsByDate/2026-08-13",
+        "rowsFetched": 9,
+        "classification": "ROUTINE_AUTOMATIC_PRE_REPAIR"
+      },
+      {
+        "timestamp": "2026-08-13T22:27:15.245621Z",
+        "caller": "src/services/operating-day.service.ts -> runSportsDataIoMlbProspectivePreview",
+        "operation": "operating_day_odds_capture",
+        "trigger": "natural operating-day refresh",
+        "endpoint": "/api/mlb/odds/json/GameOddsByDate/2026-08-13",
+        "rowsFetched": 9,
+        "classification": "ROUTINE_AUTOMATIC_PRE_REPAIR"
+      },
+      {
+        "timestamp": "2026-08-13T22:47:53.563493Z",
+        "caller": "src/services/operating-day.service.ts -> runSportsDataIoMlbProspectivePreview",
+        "operation": "operating_day_odds_capture",
+        "trigger": "natural operating-day refresh",
+        "endpoint": "/api/mlb/odds/json/GameOddsByDate/2026-08-13",
+        "rowsFetched": 9,
+        "classification": "ROUTINE_AUTOMATIC_PRE_REPAIR"
+      }
+    ]
+  },
+  "calibrationPolicy": {
+    "policyFile": "src/services/recommendation-eligibility-policy.service.ts",
+    "policyFunction": "evaluateRecommendationEligibility",
+    "aggregateFile": "src/services/model-calibration.service.ts",
+    "aggregateFunction": "getModelCalibration",
+    "structure": "GLOBAL_RECOMMENDED_PRODUCTION_ROWS_PLUS_ROW_LEVEL_CALIBRATION_STATUS",
+    "insufficientDefinition": "row calibrationStatus is not acceptable or mature, or aggregate recommended production settled sample is below evidence threshold",
+    "acceptableDefinition": "row calibrationStatus equals acceptable and other recommendation gates pass",
+    "matureDefinition": "row calibrationStatus equals mature and play-of-day quality gates can additionally pass",
+    "minimumCalibrationSample": 250,
+    "maximumCalibrationError": 8,
+    "brierRole": "DIAGNOSTIC_ONLY_FOR_CURRENT_OFFICIAL_POLICY",
+    "accuracyRole": "DIAGNOSTIC_ONLY_FOR_CURRENT_OFFICIAL_POLICY",
+    "confidenceRelationship": "INDEPENDENT"
+  },
+  "currentEraCalibration": {
+    "currentEraPredictions": 795,
+    "currentEraSettled": 781,
+    "currentEraCalibrationEligible": 0,
+    "currentEraExcluded": 795,
+    "eligibleSamples": 0,
+    "requiredForAcceptable": 250,
+    "requiredForMature": 250,
+    "samplesRemainingToAcceptable": 250,
+    "samplesRemainingToMature": 250,
+    "accuracy": 48.24,
+    "brier": 0.2559,
+    "calibrationError": 10.92,
+    "marketBreakdown": {
+      "moneyline": {
+        "currentEraRows": 244,
+        "settled": 240,
+        "calibrationEligible": 0
+      },
+      "runLine": {
+        "currentEraRows": 257,
+        "settled": 252,
+        "calibrationEligible": 0
+      },
+      "total": {
+        "currentEraRows": 294,
+        "settled": 289,
+        "calibrationEligible": 0
+      }
+    },
+    "exclusions": {
+      "UNSETTLED": 14,
+      "QUARANTINED": 795,
+      "SHADOW_OR_TRIAL": 0,
+      "POST_START_OR_INVALID": 0
+    }
+  },
+  "historicalReplay": {
+    "expectedPredictions": 7290,
+    "expectedSettled": 7290,
+    "productionCalibrationEligible": 0,
+    "shadowResearchEligible": 7290,
+    "countsTowardOfficialCalibration": "NO",
+    "reason": "HR-03 remains shadow-only and replay rows are excluded from Current Era Performance and production Official Pick calibration"
+  },
+  "quarantineProductionGate": {
+    "calibrationInsufficientCausesQuarantine": "NO",
+    "calibrationAcceptableWouldClearQuarantine": "NO",
+    "calibrationAcceptableWouldClearProductionGate": "NO",
+    "otherRequirements": [
+      "production_eligible=true",
+      "not trial",
+      "not scrambled",
+      "valid event and participants",
+      "fresh offered odds",
+      "feature snapshot and model version",
+      "confidence >= 65",
+      "model probability >= 52",
+      "edge >= 5",
+      "EV >= 5"
+    ]
+  },
+  "bestNearMiss": {
+    "eventId": "baseball_mlb:mlb:sportsdataio:event:79110",
+    "market": "moneyline",
+    "selection": "MIL",
+    "line": null,
+    "probability": 39.41,
+    "confidence": 42.62,
+    "edge": -3.69,
+    "ev": -8.57,
+    "freshness": "not used to override failed value gates",
+    "binding": "canonical row evidence",
+    "calibration": "skipped/probationary",
+    "quarantine": true,
+    "productionGate": "blocked",
+    "ifCalibrationAcceptableRemainingFailedGates": [
+      "LOW_MODEL_PROBABILITY",
+      "LOW_CONFIDENCE",
+      "NON_POSITIVE_EDGE",
+      "NON_POSITIVE_EV",
+      "LOW_EDGE",
+      "LOW_EV",
+      "QUARANTINED_ROW",
+      "PRODUCTION_GATE_BLOCKED"
+    ]
+  },
+  "homepageMissionControl": {
+    "calibrationProgressExposure": "RECOMMENDED",
+    "whereExposed": "Mission Control preferred; Homepage only if backed by canonical bounded aggregate",
+    "noExpensiveHomeQueryIntroduced": true
+  },
+  "safety": {
+    "calibrationThresholdsChanged": false,
+    "confidenceThresholdChanged": false,
+    "edgeThresholdChanged": false,
+    "evThresholdChanged": false,
+    "replayAddedToCurrentEraPerformance": false,
+    "replayAddedToProductionCalibration": false,
+    "quarantineManuallyCleared": false,
+    "productionGateManuallyCleared": false,
+    "officialPicksManuallyPromoted": false,
+    "retrospectivePredictionsCreated": false,
+    "postStartPredictionsCreated": false,
+    "postCutoffPredictionsCreated": false,
+    "historicalReplayReclassifiedAsCurrentEra": false,
+    "providerAuthorityChanged": false,
+    "nbaFoundationTouched": false
+  },
+  "certificationAccounting": {
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0,
+    "sportsDataIoCallsCausedByCertification": 0,
+    "theOddsApiCallsCausedByCertification": 0,
+    "mlbOfficialCallsCausedByCertification": 0
+  },
+  "next": "publish exact repair, align production, observe natural scheduler cycles, prove zero new routine SportsDataIO calls, then final freeze"
+}

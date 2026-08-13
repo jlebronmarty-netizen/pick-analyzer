@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { createHash } from 'crypto'
+import { productAuthorityForStage, readOddsPrimaryAuthorityStage } from '@/config/odds-primary-authority.config'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { createFeatureSnapshot } from '@/services/feature-store-core.service'
@@ -3532,8 +3533,54 @@ export async function runSportsDataIoMlbProspectivePreview(request: Request = {}
   const operatingDayId = safeString(request.operatingDayId) || null
   const maximumRequests = Math.min(Number(request.maximumRequests ?? MAX_CALLS) || MAX_CALLS, MAX_CALLS)
   const timeoutMs = Number(request.timeoutMs ?? DEFAULT_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS
+  const requestedDate = request.selectedDate || null
+  const authorityStage = readOddsPrimaryAuthorityStage()
+  const productAuthority = productAuthorityForStage(authorityStage)
+
+  if (productAuthority !== 'SPORTSDATAIO') {
+    return {
+      success: true,
+      mode: MODE,
+      status: 'SKIPPED_AUTHORITY_NOT_SPORTSDATAIO',
+      dryRun,
+      confirmed,
+      generatedAt,
+      selectedDate: requestedDate,
+      operatingDayId,
+      authorityStage,
+      productAuthority,
+      sportsDataIoRole: 'ROLLBACK_ONLY',
+      providerCallsPlanned: 0,
+      providerCallsMade: 0,
+      providerUsage: {
+        externalProviderCallsMade: 0,
+        source: 'sportsdataio_authority_suppression',
+      },
+      providerCheck: providerCheckEvidence({
+        providerCheckRequired: false,
+        providerCheckAttempted: false,
+        providerCheckCompleted: false,
+        endpoint: null,
+        callsMade: 0,
+        failureReason: 'SKIPPED_AUTHORITY_NOT_SPORTSDATAIO',
+      }),
+      plannedEndpoints: [],
+      caps: { maximumRequests, concurrency: 1, retries: 0, timeoutMs },
+      message:
+        'SportsDataIO MLB prospective preview is suppressed while The Odds API is product odds authority. Set ODDS_PRIMARY_AUTHORITY_STAGE to a SportsDataIO authority stage for explicit rollback execution.',
+      rollbackCapabilityPreserved: true,
+      safety: {
+        noSportsDataIoHttpRequest: true,
+        noSilentFallback: true,
+        productAuthorityChanged: false,
+        officialPickPolicyChanged: false,
+        predictionFormulaChanged: false,
+      },
+    }
+  }
+
   const futureEvents = await loadFutureEvents()
-  const selectedDate = request.selectedDate || selectedDateFromEvents(futureEvents, new Date(generatedAt))
+  const selectedDate = requestedDate || selectedDateFromEvents(futureEvents, new Date(generatedAt))
 
   if (!selectedDate) {
     return {

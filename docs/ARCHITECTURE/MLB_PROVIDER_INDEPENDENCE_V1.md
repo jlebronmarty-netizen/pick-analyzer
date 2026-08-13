@@ -1,10 +1,35 @@
 # MLB Provider Independence V1
 
-Status: `SDIO_EXIT_04_STATS_PARITY_PASS_OFF_WINDOW_BLOCKED_BY_ODDS_AUTHORITY`
+Status: `MLB_PROVIDER_INDEPENDENCE_ZERO_RUNTIME_REPAIR_READY_FOR_DEPLOYMENT`
 
-Observation date: 2026-08-10
+Observation date: 2026-08-13
 
-Starting commit: `72e82e21db15a60032d0f06e479ee2b2eceec662`
+Starting commit: `dca83ad9074aaca6b17f32d0ab5e54b8aa3a70e3`
+
+## 2026-08-13 Final Provider Independence Audit
+
+Production was aligned to `dca83ad9074aaca6b17f32d0ab5e54b8aa3a70e3` with:
+
+- `ODDS_PRIMARY_AUTHORITY_STAGE=STAGE_3_THE_ODDS_API_PRIMARY_PRODUCT`.
+- `MLB_DATA_SOURCE_MODE=MLB_OFFICIAL_PRIMARY`.
+- SportsDataIO retained as rollback-only.
+
+Provider ledger evidence for the 2026-08-13 Puerto Rico operating day showed six real SportsDataIO MLB HTTP calls before this repair:
+
+| Timestamp UTC | Caller | Operation | Endpoint | Rows | Classification |
+| --- | --- | --- | --- | ---: | --- |
+| 2026-08-13T20:18:18Z | `runSportsDataIoMlbProspectivePreview` via `executeOperatingDay` | Slate discovery | `/api/mlb/odds/json/GamesByDate/2026-AUG-13` | 9 | `ROUTINE_AUTOMATIC_PRE_REPAIR` |
+| 2026-08-13T20:18:19Z | `runSportsDataIoMlbProspectivePreview` via `executeOperatingDay` | Odds capture | `/api/mlb/odds/json/GameOddsByDate/2026-08-13` | 9 | `ROUTINE_AUTOMATIC_PRE_REPAIR` |
+| 2026-08-13T20:18:19Z | `runSportsDataIoMlbProspectivePreview` via `executeOperatingDay` | Projection availability | `/api/mlb/fantasy/json/PlayerGameProjectionStatsByDate/2026-AUG-13` | 1059 | `ROUTINE_AUTOMATIC_PRE_REPAIR` |
+| 2026-08-13T21:57:11Z | `runSportsDataIoMlbProspectivePreview` via `executeOperatingDay` | Odds capture | `/api/mlb/odds/json/GameOddsByDate/2026-08-13` | 9 | `ROUTINE_AUTOMATIC_PRE_REPAIR` |
+| 2026-08-13T22:27:15Z | `runSportsDataIoMlbProspectivePreview` via `executeOperatingDay` | Odds capture | `/api/mlb/odds/json/GameOddsByDate/2026-08-13` | 9 | `ROUTINE_AUTOMATIC_PRE_REPAIR` |
+| 2026-08-13T22:47:53Z | `runSportsDataIoMlbProspectivePreview` via `executeOperatingDay` | Odds capture | `/api/mlb/odds/json/GameOddsByDate/2026-08-13` | 9 | `ROUTINE_AUTOMATIC_PRE_REPAIR` |
+
+Root cause: the legacy prospective-preview service still made HTTP calls when invoked by the operating-day path. The adaptive-refresh canonical acquisition path was already suppressed under Stage 3, but `src/services/operating-day.service.ts` can still invoke `runSportsDataIoMlbProspectivePreview` for `morning_sync`, `midday_refresh`, `final_refresh`, and `prepare_next_slate`.
+
+Repair: `src/services/sportsdataio-mlb-prospective-preview.service.ts` now reads the odds authority stage at the service boundary. If product authority is not SportsDataIO, it returns `SKIPPED_AUTHORITY_NOT_SPORTSDATAIO` with `providerCallsMade=0`, `externalProviderCallsMade=0`, no planned endpoints, and explicit rollback evidence. This makes every caller fail closed without deleting the rollback adapter.
+
+Rollback contract: SportsDataIO MLB calls are allowed only when product authority is explicitly returned to a SportsDataIO stage, such as `STAGE_0_SPORTSDATAIO_AUTHORITY` or `STAGE_1_DUAL_READ`. Normal Stage 3 operation cannot silently fall back to SportsDataIO.
 
 This document records the SDIO-EXIT-02 MLB-only provider independence audit and the SDIO-EXIT-03 official MLB replacement implementation. It does not cancel SportsDataIO, does not promote The Odds API, does not change model formulas and does not make provider calls. The goal is to identify which MLB runtime domains can already run without SportsDataIO, which can degrade from stored data, and which remain cancellation blockers.
 

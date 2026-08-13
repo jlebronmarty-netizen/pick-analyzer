@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-13 MLB Provider Independence + Calibration Audit
+
+- MLB Provider Independence + Calibration is locally implemented as `MLB_FINAL_PROVIDER_INDEPENDENCE_CALIBRATION_REPAIR_READY_FOR_DEPLOYMENT`. Production on `dca83ad9074aaca6b17f32d0ab5e54b8aa3a70e3` showed six real pre-repair SportsDataIO MLB calls from the legacy prospective-preview operating-day path despite Stage 3 The Odds API product authority.
+- The bounded repair suppresses `runSportsDataIoMlbProspectivePreview` at the service boundary whenever SportsDataIO is not product authority, preserving explicit rollback stages. Calibration evidence is quantified: Current Era has 795 rows and 781 settled rows, but 0 production-calibration-eligible rows because all remain quarantined; HR-03 replay remains shadow-only. Post-deploy natural scheduler observation is required before final zero-runtime-call freeze.
+
 ## 2026-08-13 MLB Official Pick + MC-08B Integrity
 
 - MLB Official Pick + MC-08B Integrity is locally implemented as `MLB_OFFICIAL_PICK_MC08B_INTEGRITY_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed the `MIL @ LAD` moneyline review candidate had fresh complement-bound FanDuel `-140` evidence, model probability `60.59%`, edge `+2.26%` and EV `+3.87%`, but legitimately failed Official Pick policy because confidence was `42.62%` versus the `65%` official threshold, edge/EV were below official thresholds, calibration was insufficient and production/quarantine blockers were present.
