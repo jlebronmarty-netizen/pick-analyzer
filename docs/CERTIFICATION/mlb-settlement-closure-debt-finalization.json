@@ -1,0 +1,82 @@
+{
+  "phase": "MLB_SETTLEMENT_CLOSURE_DEBT_FINALIZATION",
+  "status": "MLB_SETTLEMENT_CLOSURE_DEBT_RUNTIME_REPAIR_READY_FOR_DEPLOYMENT",
+  "generatedAt": "2026-08-13T20:30:27Z",
+  "startingCommit": "da91fc66c4dce49c2f94c653ed7a3c464c141dd4",
+  "productionCommitAtAudit": "da91fc66c4dce49c2f94c653ed7a3c464c141dd4",
+  "rootCause": "OPERATING_DAY_SETTLEMENT_LINKAGE_SHORT_CIRCUIT",
+  "repair": {
+    "file": "src/services/operating-day.service.ts",
+    "summary": "Operating-day settlement now merges operating_day_id-linked predictions with same-local-date MLB predictions and rechecks cutoff/start safety before any settlement write.",
+    "providerCallsAdded": 0,
+    "predictionFormulaChanged": false,
+    "candidateSelectionChanged": false,
+    "officialPickPolicyChanged": false,
+    "marketAuthorityChanged": false,
+    "schedulerArchitectureChanged": false,
+    "nbaHistoricalFoundationChanged": false
+  },
+  "productionEvidenceBeforeRepairDeployment": {
+    "settlementGuarantee": "ACTION_REQUIRED",
+    "checkedPredictions": 144,
+    "completedPredictionRows": 69,
+    "settledRows": 58,
+    "readyForSettlementRows": 6,
+    "blockedRows": 5,
+    "silentPendingRows": 0,
+    "blockedReasonCounts": {
+      "P2_1_SELECTION_LEVEL_PREVIEW_NOT_CANONICAL": 2,
+      "PREDICTION_POST_START": 3
+    },
+    "resultsPresentForReadyRows": 6,
+    "resultsRecovered": 0,
+    "providerCallsMadeByRead": 0,
+    "remoteMutationsMadeByRead": 0
+  },
+  "localDryRunAfterRepair": {
+    "selectedDate": "2026-08-13",
+    "checked": 30,
+    "eligible": 6,
+    "wouldSettle": 6,
+    "wins": 3,
+    "losses": 3,
+    "pushes": 0,
+    "postStartRowsBlocked": 3,
+    "authoritativeResultMissingRows": 21,
+    "providerCallsMade": 0,
+    "remoteMutationsMade": 0
+  },
+  "healthEvidenceBeforeRepairDeployment": {
+    "operationsHealth": "CRITICAL",
+    "schedulerHealth": "HEALTHY",
+    "marketFreshnessHealth": "HEALTHY",
+    "providerBudgetHealth": "HEALTHY",
+    "settlementHealth": "CRITICAL",
+    "limitingDomain": "settlementClosure"
+  },
+  "validation": {
+    "build": "PASS",
+    "focusedValidator": "PASS",
+    "protectedCanonicalMlbSettlement": "PASS",
+    "settlementLearning": "PASS",
+    "mlbOperatingDayAutonomyLiveContinuity": "PASS",
+    "mlbProductCandidateSelectionIntegrity": "PASS",
+    "mlbCurrentBoardModelProbabilityBinding": "PASS",
+    "mlbFinal00": "PASS",
+    "mlbFinal01": "PASS",
+    "mlbFinalCloseout": "PASS",
+    "marketFreshnessSeverity": "PASS",
+    "schedulerHealthReconciliation": "PASS",
+    "schedulerHealthAlignment": "PASS",
+    "providerBudget": "PASS",
+    "performance": "PASS",
+    "missionControl": "PASS"
+  },
+  "postDeployRequiredActions": [
+    "Publish repair commit.",
+    "Rerun protected operating-day settle for 2026-08-13.",
+    "Re-read settlement guarantee and operations health.",
+    "Confirm ready rows are zero or reduced only by legitimate not-final blockers."
+  ],
+  "finalClassification": "MLB_SETTLEMENT_CLOSURE_DEBT_RUNTIME_REPAIR_READY_FOR_DEPLOYMENT"
+}

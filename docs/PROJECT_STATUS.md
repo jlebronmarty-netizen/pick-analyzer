@@ -7,6 +7,11 @@ Last updated: 2026-07-30 20:05:00Z
 - MLB Product Candidate Selection Integrity is locally implemented as `MLB_PRODUCT_CANDIDATE_SELECTION_INTEGRITY_REPAIR_READY_FOR_DEPLOYMENT`. The audit confirmed Current Board probability binding remained 27/27, but homepage review fallback copy implied "best available" while the comparator is evidence-completeness, and integer-total rows could surface unknown EV as `0.00%` through a top-level default.
 - The bounded repair maps analysis snapshots into homepage cards, preserves exact line/source-market identity, labels review fallbacks as most evidence-complete review candidates, and preserves null EV for push-capable markets. No prediction formula, probability value, confidence, edge/EV formula, Official Pick policy, settlement, learning, provider authority, NBA historical foundation or MLB data-source mode changed.
 
+## 2026-08-13 MLB Settlement Closure Debt Finalization
+
+- MLB Settlement Closure Debt Finalization is locally implemented as `MLB_SETTLEMENT_CLOSURE_DEBT_RUNTIME_REPAIR_READY_FOR_DEPLOYMENT`. Production Settlement Guarantee on `da91fc66c4dce49c2f94c653ed7a3c464c141dd4` reported 6 ready rows, 5 explicit blockers and 0 silent pending rows; the six ready rows already had deterministic final result evidence.
+- The bounded repair fixes the operating-day settlement linkage short-circuit by merging linked and same-local-date predictions, deduping rows, and rechecking cutoff/start safety before settlement writes. Local dry-run found 6 eligible rows, left 3 post-start rows blocked and added 0 provider calls. Post-deploy protected settlement execution is still required.
+
 ## 2026-08-13 MLB Current Board Model Probability Binding
 
 - MLB Current Board Model Probability Binding is locally implemented as `MLB_MODEL_PROBABILITY_EVIDENCE_BINDING_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed 27 current MLB candidates with valid stored `rawProbability` / `marketAlignment.modelProbability`, but the top-level Current Board DTO omitted `modelProbability` and `winProbability`, causing homepage cards to render probability as `N/A`.

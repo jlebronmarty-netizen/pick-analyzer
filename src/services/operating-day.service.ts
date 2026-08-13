@@ -16,6 +16,7 @@ import { optimizeBetSlip } from '@/services/bet-slip-optimizer.service'
 import { getDay1RecommendationReadiness } from '@/services/day1-recommendation-readiness.service'
 import { assertSportEventStatusWrite, isSportEventCanonicalStatus, mapMlbStatsGameToSportEventStatus, validateSportEventStatusWriteTracingFixtures } from '@/services/mlb-event-status-mapper.service'
 import { resolveMlbOperatingDate } from '@/services/mlb-operating-date-resolution.service'
+import { classifyPredictionCutoff } from '@/services/prediction-cutoff-enforcement.service'
 import { localDateInTimeZone, zonedUtcRange } from '@/services/provider-time-normalization.service'
 
 const SPORT_KEY = 'baseball_mlb'
@@ -96,6 +97,9 @@ type PredictionRow = {
   line: number | null
   odds_timestamp: string | null
   odds_snapshot_id?: string | null
+  generated_at?: string | null
+  created_at?: string | null
+  cutoff_at?: string | null
   status: string | null
   result: string | null
   stake: number | null
@@ -114,6 +118,15 @@ type GameResultRow = {
   commence_time: string | null
   home_team: string
   away_team: string
+  home_score: number | null
+  away_score: number | null
+}
+
+type SettlementEventRow = {
+  id: string
+  start_time: string | null
+  status: string | null
+  updated_at: string | null
   home_score: number | null
   away_score: number | null
 }
@@ -908,23 +921,27 @@ async function refreshIntelligenceSurfaceSummary(sportKey: string) {
 
 async function loadPredictionsForDay(operatingDayId: string, sportKey: string, date: string) {
   const range = dateRange(date)
+  const select = 'id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, edge, ev, line, odds_timestamp, odds_snapshot_id, generated_at, created_at, cutoff_at, status, result, stake, production_eligible, recommended_pick, official_pick_at_lock, feature_snapshot, validation_warnings, skip_reason'
   const byOperatingDay = await supabaseAdmin
     .from('prediction_history')
-    .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, edge, ev, line, odds_timestamp, odds_snapshot_id, status, result, stake, production_eligible, recommended_pick, official_pick_at_lock, feature_snapshot, validation_warnings, skip_reason')
+    .select(select)
     .eq('operating_day_id', operatingDayId)
     .order('odds_timestamp', { ascending: false })
   if (byOperatingDay.error) throw new Error(`Operating day prediction read failed: ${byOperatingDay.error.message}`)
-  if ((byOperatingDay.data ?? []).length) return (byOperatingDay.data ?? []) as PredictionRow[]
 
   const byDate = await supabaseAdmin
     .from('prediction_history')
-    .select('id, sport_key, game_id, commence_time, home_team, away_team, team, opponent, market, sportsbook, odds, implied_probability, model_probability, confidence, edge, ev, line, odds_timestamp, odds_snapshot_id, status, result, stake, production_eligible, recommended_pick, official_pick_at_lock, feature_snapshot, validation_warnings, skip_reason')
+    .select(select)
     .eq('sport_key', sportKey)
     .gte('commence_time', range.start)
     .lt('commence_time', range.end)
     .order('odds_timestamp', { ascending: false })
   if (byDate.error) throw new Error(`Operating day dated prediction read failed: ${byDate.error.message}`)
-  return (byDate.data ?? []) as PredictionRow[]
+
+  const merged = new Map<string, PredictionRow>()
+  for (const row of (byOperatingDay.data ?? []) as PredictionRow[]) merged.set(row.id, row)
+  for (const row of (byDate.data ?? []) as PredictionRow[]) merged.set(row.id, row)
+  return Array.from(merged.values())
 }
 
 async function loadProspectivePredictionsForDate(sportKey: string, date: string) {
@@ -1014,6 +1031,17 @@ async function loadResultsForPredictions(predictions: PredictionRow[]) {
   return (data ?? []) as GameResultRow[]
 }
 
+async function loadEventsForPredictions(predictions: PredictionRow[]) {
+  const eventIds = Array.from(new Set(predictions.map((prediction) => prediction.game_id).filter(Boolean)))
+  if (!eventIds.length) return []
+  const { data, error } = await supabaseAdmin
+    .from('sport_events')
+    .select('id, start_time, status, updated_at, home_score, away_score')
+    .in('id', eventIds)
+  if (error) throw new Error(`Operating day event read failed: ${error.message}`)
+  return (data ?? []) as SettlementEventRow[]
+}
+
 export async function settleOperatingDay(input: {
   operatingDayId: string
   sportKey?: string | null
@@ -1027,8 +1055,12 @@ export async function settleOperatingDay(input: {
   let predictions = await loadPredictionsForDay(input.operatingDayId, sportKey, date)
   if (input.officialOnly === true) predictions = predictions.filter((row) => row.recommended_pick === true || row.official_pick_at_lock === true)
   if (input.prospectiveOnly !== false) predictions = predictions.filter((row) => asRecord(row.feature_snapshot).prospective_preview === true)
-  const results = await loadResultsForPredictions(predictions)
+  const [results, events] = await Promise.all([
+    loadResultsForPredictions(predictions),
+    loadEventsForPredictions(predictions),
+  ])
   const resultByGame = new Map(results.map((result) => [result.game_id, result]))
+  const eventByGame = new Map(events.map((event) => [event.id, event]))
   const summary = {
     checked: predictions.length,
     eligible: 0,
@@ -1050,6 +1082,13 @@ export async function settleOperatingDay(input: {
   for (const prediction of predictions) {
     if (['win', 'loss', 'push'].includes(String(prediction.status))) {
       summary.alreadySettled += 1
+      continue
+    }
+    const cutoff = classifyPredictionCutoff(prediction, eventByGame.get(prediction.game_id) ?? null)
+    if (!cutoff.eligible) {
+      summary.skipped += 1
+      summary.blocked += 1
+      summary.blockedRows.push({ id: prediction.id, gameId: prediction.game_id, reason: cutoff.state })
       continue
     }
     const result = resultByGame.get(prediction.game_id)

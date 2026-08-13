@@ -6,6 +6,8 @@ Certification documentation covers validation records, readiness gates, producti
 
 Current V2 certification documents:
 
+- [MLB Settlement Closure Debt Finalization](MLB_SETTLEMENT_CLOSURE_DEBT_FINALIZATION.md)
+- [MLB Settlement Closure Debt Finalization JSON](mlb-settlement-closure-debt-finalization.json)
 - [NBA-01C Recover BallDontLie GOAT Extraction JSON](nba-01c-recover-balldontlie-goat-extraction.json)
 - [NBA-01C-PREP BallDontLie GOAT Certification JSON](nba-01c-prep-balldontlie-goat.json)
 - [Documentation Validation](DOCUMENTATION_VALIDATION.md)
