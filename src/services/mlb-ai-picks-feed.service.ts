@@ -470,6 +470,12 @@ export function validateMlbAiPicksFeedFixtures() {
     anomalyReasons: [],
     currentLatest: true,
     rawProbability: 58,
+    modelProbability: 58,
+    winProbability: 58,
+    probability: 58,
+    edgePercentagePoints: 5.62,
+    expectedValuePercent: 10.73,
+    analysisSnapshotTimestamp: '2026-07-20T18:01:00.000Z',
     outcomeCompleteness: {
       marketSemantics: classifyMarketSemantics({ market: 'moneyline', line: null }),
       storedSelectionProbability: 58,

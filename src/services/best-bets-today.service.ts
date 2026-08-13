@@ -552,6 +552,12 @@ export function validateBestBetsTodayFixtures() {
     anomalyReasons: [],
     currentLatest: true,
     rawProbability: 58,
+    modelProbability: 58,
+    winProbability: 58,
+    probability: 58,
+    edgePercentagePoints: 2.45,
+    expectedValuePercent: 4.1,
+    analysisSnapshotTimestamp: '2026-07-17T18:00:00.000Z',
     outcomeCompleteness: {
       marketSemantics: classifyMarketSemantics({ market: 'moneyline', line: null }),
       storedSelectionProbability: 58,

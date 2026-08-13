@@ -1,0 +1,65 @@
+{
+  "certification": "mlb-current-board-model-probability-binding",
+  "status": "MLB_MODEL_PROBABILITY_EVIDENCE_BINDING_REPAIR_READY_FOR_DEPLOYMENT",
+  "startingCommit": "a3ba40cd0f6e1efc23ce8f7b75181f914fa4861a",
+  "rootCause": {
+    "classification": "CURRENT_BOARD_FIELD_NOT_MAPPED",
+    "summary": "Current Board exposed valid rawProbability and marketAlignment.modelProbability, but omitted top-level modelProbability/winProbability fields consumed by the homepage card adapter."
+  },
+  "productionEvidenceBefore": {
+    "observationDate": "2026-08-13",
+    "systemVersionCommit": "a3ba40cd0f6e1efc23ce8f7b75181f914fa4861a",
+    "operatingDate": "2026-08-13",
+    "currentBoardCandidates": 27,
+    "dashboardCurrentGames": 9,
+    "dashboardPredictionCandidates": 27,
+    "defectObserved": true,
+    "example": {
+      "event": "CLE @ DET",
+      "market": "spread",
+      "selection": "CLE",
+      "line": -1.5,
+      "rawProbability": 22.37,
+      "modelProbability": null,
+      "winProbability": null,
+      "marketAlignmentModelProbability": 22.37,
+      "americanOdds": 135,
+      "marketAlignmentImpliedProbability": 42.55,
+      "marketAlignmentEdge": -20.18,
+      "marketAlignmentExpectedValue": -47.43
+    }
+  },
+  "repair": {
+    "scope": "Current Board DTO evidence binding",
+    "topLevelModelProbabilityMapped": true,
+    "topLevelWinProbabilityMapped": true,
+    "topLevelProbabilityAliasMapped": true,
+    "topLevelEdgeMappedFromSameSelectionAlignment": true,
+    "topLevelExpectedValueMappedFromSameSelectionAlignment": true,
+    "analysisSnapshotTimestampMapped": true,
+    "canonicalComplementEvidencePreserved": true,
+    "homepageAdapterCompatibilityRestored": true
+  },
+  "protectedInvariants": {
+    "predictionFormulaChanged": false,
+    "modelProbabilityChanged": false,
+    "confidenceChanged": false,
+    "evFormulaChanged": false,
+    "rankingChanged": false,
+    "officialPickPolicyChanged": false,
+    "recommendationThresholdChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "hr03StatusChanged": false,
+    "oddsAuthorityChanged": false,
+    "mlbDataSourceModeChanged": false,
+    "nbaHistoricalFoundationChanged": false
+  },
+  "certificationAccounting": {
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0,
+    "predictionWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0
+  }
+}

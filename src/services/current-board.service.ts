@@ -184,6 +184,12 @@ export type CurrentBoardCandidate = {
   anomalyReasons: CurrentBoardReasonCode[]
   currentLatest: boolean
   rawProbability: number
+  modelProbability: number
+  winProbability: number
+  probability: number
+  edgePercentagePoints: number | null
+  expectedValuePercent: number | null
+  analysisSnapshotTimestamp: string | null
   outcomeCompleteness?: {
     marketSemantics: MarketSemantics
     storedSelectionProbability: number
@@ -1258,6 +1264,12 @@ function toCandidate(
     anomalyReasons: Array.from(reasons).filter((reason) => ['INVALID_PRICE', 'INVALID_LINE', 'LIVE_ODDS', 'ALTERNATE_MARKET', 'POST_CUTOFF_ODDS'].includes(reason)),
     currentLatest: true,
     rawProbability,
+    modelProbability: rawProbability,
+    winProbability: rawProbability,
+    probability: rawProbability,
+    edgePercentagePoints: marketAlignment.edgePercentagePoints,
+    expectedValuePercent: marketAlignment.expectedValuePercent,
+    analysisSnapshotTimestamp: row.generated_at,
     outcomeCompleteness: {
       marketSemantics,
       storedSelectionProbability: round(boundedProbability),

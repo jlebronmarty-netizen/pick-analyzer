@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-13 MLB Current Board Model Probability Binding
+
+- MLB Current Board Model Probability Binding is locally implemented as `MLB_MODEL_PROBABILITY_EVIDENCE_BINDING_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed 27 current MLB candidates with valid stored `rawProbability` / `marketAlignment.modelProbability`, but the top-level Current Board DTO omitted `modelProbability` and `winProbability`, causing homepage cards to render probability as `N/A`.
+- The bounded repair maps product-level probability and same-selection edge/EV aliases from existing stored prediction and market-alignment evidence. No prediction formula, model probability value, EV math, Official Pick policy, provider authority, settlement, learning, HR-03 status, NBA historical foundation or MLB data-source mode changed.
+
 ## 2026-08-13 NBA-01C-RECOVER BallDontLie GOAT Extraction
 
 - NBA-01C-RECOVER is locally completed as `BALLDONTLIE_GOAT_HISTORICAL_EXTRACTION_RECOVERY_PASS` with `PC_RESTART_RECOVERY_PASS`. The durable manifest recovered after restart, the one failed advanced-stat DB page was persisted from raw with 0 provider refetches, and the remaining advanced-stat cursor chains completed.
