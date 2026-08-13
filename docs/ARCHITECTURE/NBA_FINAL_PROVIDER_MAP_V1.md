@@ -67,3 +67,18 @@ NBA-01C-PREP adds BallDontLie as the current candidate non-odds NBA stat provide
 | SportsDataIO NBA | Legacy/trial only | Not expanded. |
 
 The expected post-trial minimum architecture is The Odds API plus BallDontLie ALL-STAR plus owned GOAT bootstrap history, unless replay proves GOAT-only live domains are materially required.
+
+## NBA-01C Final Recovery Update
+
+NBA-01C-RECOVER completed the GOAT historical bootstrap from durable manifest state after PC/network restart. The owned foundation now contains 3,710 BallDontLie canonical games/results, 5,612 player identities, 128,353 normal player-game stat rows and 358,195 advanced-stat rows across 2022-23, 2023-24 and 2024-25. All completed provider pages were preserved, failed DB persistence was retried from raw payload without provider refetch, and NBA production remains inactive.
+
+| Domain | Certified role after NBA-01C-RECOVER | Status |
+| --- | --- | --- |
+| Odds / market prices | The Odds API | NBA odds authority candidate; historical price foundation preserved. |
+| Games / results / player stats | BallDontLie | Historical sports-data foundation certified; forward runtime candidate. |
+| Advanced stats | BallDontLie GOAT | Historical bootstrap captured; shadow feature candidates for NBA-02. |
+| Box scores | BallDontLie GOAT | Endpoint returned 0 rows with current request shape; non-core gap. |
+| Lineups / plays / props | Deferred | Not imported; not required for NBA-02 core replay entry. |
+| SportsDataIO NBA | Legacy/trial only | Not expanded. |
+
+Subscription recommendation: `DOWNGRADE_TO_ALL_STAR_RECOMMENDED`. GOAT live usage is not currently required unless NBA-02 or later production certification proves a GOAT-only domain is necessary.

@@ -2,6 +2,8 @@
 
 This roadmap is dependency-aware and based on repository inspection. A module is marked completed only when the repository contains service/API/dashboard/persistence evidence and recent verification supports it.
 
+NBA-01C-RECOVER is locally completed as `BALLDONTLIE_GOAT_HISTORICAL_EXTRACTION_RECOVERY_PASS`. BallDontLie GOAT historical bootstrap recovered from durable ignored raw payloads after PC/network restart and completed 5,116 manifest tasks with 0 failed tasks. The NBA historical sports-data foundation is `NBA_HISTORICAL_FOUNDATION_CERTIFIED_READY_FOR_REPLAY`: 3,710 canonical games/results, 5,612 players, 128,353 normal player-game stat rows and 358,195 advanced-stat rows across 2022-23, 2023-24 and 2024-25. NBA production remains inactive. Next phase: `NBA-02_COMPLETE_HISTORICAL_FEATURE_RECONSTRUCTION_AND_REPLAY`.
+
 NBA-01C-PREP is locally implemented as `BALLDONTLIE_GOAT_TRIAL_EXTRACTION_READY` from commit `72864b24c3bc094f9d2f941b78c3ac89b71e5378`. It prepares the BallDontLie GOAT 48-hour extraction adapter, endpoint matrix, rate limiter, raw payload manifest, checkpoint/resume contract and START boundary without starting the trial, requiring a key, making provider calls, activating NBA production or changing MLB. Next phase after commit/publish authorization: `NBA-01C-START_BALLDONTLIE_GOAT_48H_EXTRACTION`.
 
 MLB Moneyline Blocker Text Consistency is locally implemented as `MLB_MONEYLINE_BLOCKER_REPAIR_READY_FOR_DEPLOYMENT`. It keeps MLB-FINAL-00 review-only behavior but ensures the Moneyline card's displayed edge/EV and short blocker summary are derived from the same candidate evidence bundle. No recommendation eligibility, Official Pick threshold, model, provider, settlement or learning behavior changed.

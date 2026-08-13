@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-13 NBA-01C-RECOVER BallDontLie GOAT Extraction
+
+- NBA-01C-RECOVER is locally completed as `BALLDONTLIE_GOAT_HISTORICAL_EXTRACTION_RECOVERY_PASS` with `PC_RESTART_RECOVERY_PASS`. The durable manifest recovered after restart, the one failed advanced-stat DB page was persisted from raw with 0 provider refetches, and the remaining advanced-stat cursor chains completed.
+- Final owned foundation: 3,710 BallDontLie canonical games/results, 5,612 players, 128,353 normal player-game stat rows, 358,195 advanced-stat rows and 0 unbound advanced-stat rows across 2022-23 through 2024-25. NBA production, NBA scheduler, NBA Current Era predictions, bulk replay, SportsDataIO expansion and MLB behavior remain unchanged. Next recommended phase is `NBA-02_COMPLETE_HISTORICAL_FEATURE_RECONSTRUCTION_AND_REPLAY`.
+
 ## 2026-08-12 NBA-01C-PREP BallDontLie GOAT Extraction Readiness
 
 - NBA-01C-PREP is locally implemented as `BALLDONTLIE_GOAT_TRIAL_EXTRACTION_READY`. It prepares a BallDontLie NBA provider adapter, 4 req/min trial-safe limiter, durable raw payload manifest, checkpoint/resume contract, fixture normalizers, request estimates and START/STATUS/RESUME/STOP command boundary without requiring an API key or starting the 48-hour GOAT trial.

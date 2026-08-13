@@ -1,0 +1,155 @@
+{
+  "mode": "nba_01c_recover_balldontlie_goat_extraction_v1",
+  "status": "BALLDONTLIE_GOAT_HISTORICAL_EXTRACTION_RECOVERY_PASS",
+  "pcRestartRecovery": "PC_RESTART_RECOVERY_PASS",
+  "historicalFoundationVerdict": "NBA_HISTORICAL_FOUNDATION_CERTIFIED_READY_FOR_REPLAY",
+  "startingCommit": "db6794c21565c083192f7ba0f498ed705b77975b",
+  "mlbPrerequisite": "MLB_OPERATING_DAY_AUTONOMY_LIVE_CONTINUITY_DEPLOYMENT_PASS",
+  "recoveryRuntimeCommit": "0ed6a9d",
+  "productionCommit": "1ab2e8464084021f8a43b02de64d5139aca85f44",
+  "manifest": {
+    "path": "data/imports/balldontlie/nba/nba-01c-start-manifest.json",
+    "taskCount": 5116,
+    "dbPersistedTasks": 5116,
+    "plannedTasks": 0,
+    "failedTasks": 0,
+    "durablePendingTasks": 0,
+    "completedProviderPagesRefetched": 0,
+    "providerCallsMade": 5116,
+    "databaseMutationsMade": 1294643,
+    "completed": true
+  },
+  "rawPayloads": {
+    "directory": "data/imports/balldontlie/nba",
+    "gitignored": true,
+    "files": 5121,
+    "bytes": 2292067988,
+    "accidentallyTracked": 0,
+    "orphanPayloads": 4,
+    "orphanPayloadClassification": "PHASE0_PROBE_PAYLOADS"
+  },
+  "trial": {
+    "trialStartedAt": "2026-08-12T15:26:40.924Z",
+    "expectedTrialEndAt": "2026-08-14T15:26:40.924Z",
+    "source": "LOCAL_PHASE0_METADATA_ESTIMATE",
+    "safeRate": "4 requests/minute",
+    "hardRate": "5 requests/minute"
+  },
+  "providerAccounting": {
+    "ballDontLieRequestsTotal": 5116,
+    "successful": 5116,
+    "failed": 0,
+    "retriedFromRawWithoutProvider": 1,
+    "sportsDataIoCalls": 0,
+    "theOddsApiHistoricalCallsDuringRecovery": 0
+  },
+  "extraction": {
+    "seasonsAttempted": ["2022-23", "2023-24", "2024-25"],
+    "seasonsCompleted": ["2022-23", "2023-24", "2024-25"],
+    "gamesObserved": 3710,
+    "gamesCanonicallyMapped": 3710,
+    "playersObserved": 5612,
+    "playersCanonicallyMapped": 5612,
+    "playersAmbiguous": 0,
+    "playersUnmapped": 0,
+    "gamePlayerStatRows": 128353,
+    "advancedStatRows": 358195,
+    "boxScoreRows": 0,
+    "lineupRows": 0,
+    "seasonAverageRows": 0,
+    "teamSeasonAverageRows": 0,
+    "standingsRows": 0,
+    "playRows": 0
+  },
+  "perSeasonCoverage": {
+    "2022-23": {
+      "games": 1236,
+      "results": 1236,
+      "playerStats": 41129,
+      "advancedStats": 118690,
+      "teamGameStats": 2472,
+      "boxScores": 0,
+      "lineups": 0,
+      "coverage": "CORE_READY"
+    },
+    "2023-24": {
+      "games": 1237,
+      "results": 1237,
+      "playerStats": 43615,
+      "advancedStats": 118443,
+      "teamGameStats": 2474,
+      "boxScores": 0,
+      "lineups": 0,
+      "coverage": "CORE_READY"
+    },
+    "2024-25": {
+      "games": 1237,
+      "results": 1237,
+      "playerStats": 43609,
+      "advancedStats": 121062,
+      "teamGameStats": 2474,
+      "boxScores": 0,
+      "lineups": 0,
+      "coverage": "CORE_READY"
+    }
+  },
+  "persistence": {
+    "dbWriteFailuresFinal": 0,
+    "dbRetries": 1,
+    "advancedRowsEventBound": 358195,
+    "unresolvedEventBindings": 0,
+    "boundedEventBindingRepairRows": 100,
+    "supabaseHealth": "HEALTHY"
+  },
+  "theOddsApiCrosswalk": {
+    "historicalPriceAwareEvents": 1221,
+    "priceSnapshotRows": 29754,
+    "ballDontLieEventsMatchedToPriceAwareEvents": "TO_BE_COMPUTED_IN_NBA_02",
+    "priceAwareResultsReady": "EXPECTED_AFTER_NBA_02_CROSSWALK",
+    "priceAwarePlayerStatsReady": "EXPECTED_AFTER_NBA_02_CROSSWALK",
+    "priceAwareAdvancedStatsReady": "EXPECTED_AFTER_NBA_02_CROSSWALK"
+  },
+  "replayReadiness": {
+    "modelReplayCandidateEvents": 3710,
+    "priceAwareReplayCandidateEvents": "bounded_by_1221_odds_api_mappings_and_nba_02_feature_crosswalk",
+    "moneylineFoundation": "READY",
+    "spreadFoundation": "READY_WITH_PRICE_CROSSWALK",
+    "totalFoundation": "READY_WITH_PRICE_CROSSWALK",
+    "firstHalfFoundation": "PARTIAL_QUARTER_SCORE_FIELDS_FROM_GAMES",
+    "bulkReplayPredictionsCreated": 0
+  },
+  "dataQualityGrades": {
+    "games": "A",
+    "results": "A",
+    "quarterScores": "B",
+    "playerStats": "A",
+    "advancedStats": "A",
+    "boxScores": "D",
+    "lineups": "D",
+    "historicalOdds": "B",
+    "crosswalk": "B",
+    "playerIdentity": "A"
+  },
+  "subscriptionDecision": {
+    "recommendedBallDontLieTier": "DOWNGRADE_TO_ALL_STAR_RECOMMENDED",
+    "goatTrialStillNeeded": "NO",
+    "freeTierSufficiency": "NO",
+    "allStarSufficiency": "LIKELY_FOR_FORWARD_CORE_DATA",
+    "billingActionPerformed": false
+  },
+  "providerArchitecture": {
+    "theOddsApiRole": "PRIMARY_NBA_ODDS_MARKET_AUTHORITY_CANDIDATE",
+    "ballDontLieRole": "PRIMARY_NBA_SPORTS_DATA_CANDIDATE",
+    "sportsDataIoRole": "LEGACY_TRIAL_ONLY_NOT_EXPANDED",
+    "nbaStatsPublicEndpointStatus": "NOT_RELIABLE_FROM_CURRENT_EXECUTION_ENVIRONMENT"
+  },
+  "safety": {
+    "nbaProductionActivation": false,
+    "nbaCurrentEraWrites": 0,
+    "nbaSchedulerActivation": false,
+    "sportsDataIoExpansion": false,
+    "mlbRegression": "UNCHANGED_AFTER_P0_PASS",
+    "nba02Started": false
+  },
+  "next": "NBA-02_COMPLETE_HISTORICAL_FEATURE_RECONSTRUCTION_AND_REPLAY"
+}
