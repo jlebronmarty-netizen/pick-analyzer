@@ -32,6 +32,10 @@ function candidateTitle(candidate: CurrentBoardCandidate) {
   return `${candidate.selection}${candidate.line === null ? '' : ` ${candidate.line}`} ${candidate.marketLabel}`
 }
 
+function candidateEv(candidate: CurrentBoardCandidate) {
+  return candidate.expectedValue ?? Number.NEGATIVE_INFINITY
+}
+
 function detectAction(input: Input): AiBetFinderAction {
   if (input.action) return input.action
   const q = normalized(input.query)
@@ -83,10 +87,11 @@ function applyFilters(candidates: CurrentBoardCandidate[], query: string) {
     if (filters.market && candidate.market !== filters.market) return false
     if (filters.underdog && Number(candidate.americanOdds ?? 0) <= 0) return false
     if (filters.favorite && Number(candidate.americanOdds ?? 0) >= 0) return false
-    if (filters.positiveEv && (candidate.expectedValue <= 0 || candidate.edge <= 0)) return false
+    const ev = candidateEv(candidate)
+    if (filters.positiveEv && (ev <= 0 || candidate.edge <= 0)) return false
     if (filters.lowRisk && (candidate.confidence < 50 || candidate.reliabilityScore < 70)) return false
     if (filters.highConfidence && candidate.confidence < 55) return false
-    if (filters.minEv !== null && candidate.expectedValue < filters.minEv) return false
+    if (filters.minEv !== null && ev < filters.minEv) return false
     if (filters.minEdge !== null && candidate.edge < filters.minEdge) return false
     if (filters.minProbability !== null && candidate.rawProbability < filters.minProbability) return false
     if (filters.oddsMin !== null && Number(candidate.americanOdds ?? 0) < filters.oddsMin) return false
@@ -176,7 +181,7 @@ function reasonNotOfficial(candidate: CurrentBoardCandidate) {
 }
 
 function summarizeCandidate(candidate: CurrentBoardCandidate) {
-  const price = candidate.edge > 0 && candidate.expectedValue > 0 ? 'ATTRACTIVE PRICE' : 'POOR PRICE'
+  const price = candidate.edge > 0 && candidateEv(candidate) > 0 ? 'ATTRACTIVE PRICE' : 'POOR PRICE'
   const official = candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE'
   const classification = classifyMarketIntelligence(candidate)
   const action = official ? 'Official' : classification.display
@@ -306,9 +311,9 @@ async function compare(input: Input) {
   const [a, b] = unique
   const conclusions = [
     a.rawProbability > b.rawProbability ? `${candidateTitle(a)} has higher probability.` : `${candidateTitle(b)} has higher probability.`,
-    a.expectedValue > b.expectedValue ? `${candidateTitle(a)} offers better modeled value.` : `${candidateTitle(b)} offers better modeled value.`,
+    candidateEv(a) > candidateEv(b) ? `${candidateTitle(a)} offers better modeled value.` : `${candidateTitle(b)} offers better modeled value.`,
     unique.every((candidate) => candidate.officialEligibility !== 'OFFICIAL_ELIGIBLE_CANDIDATE') ? 'Neither is officially eligible.' : 'At least one candidate may be official-eligible for review.',
-    unique.every((candidate) => candidate.expectedValue <= 0 || candidate.edge <= 0) ? 'Neither offers positive modeled value.' : 'At least one candidate has positive modeled value.',
+    unique.every((candidate) => candidateEv(candidate) <= 0 || candidate.edge <= 0) ? 'Neither offers positive modeled value.' : 'At least one candidate has positive modeled value.',
   ]
   return {
     success: true,
@@ -360,7 +365,7 @@ async function explain(input: Input) {
     }
   }
   const price =
-    candidate.expectedValue > 0 && candidate.edge > 0
+    candidateEv(candidate) > 0 && candidate.edge > 0
       ? 'The price is attractive versus the stored model probability.'
       : 'The price is poor because sportsbook implied probability is higher than the stored model probability.'
   const plainAnswer =
@@ -402,7 +407,7 @@ async function buildTicket(input: Input) {
       ticket: optimizer,
     }
   }
-  const positive = candidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0 && !candidate.stale)
+  const positive = candidates.filter((candidate) => candidateEv(candidate) > 0 && candidate.edge > 0 && !candidate.stale)
   const legs = positive.slice(0, normalized(input.query).includes('parlay') ? 4 : 1)
   const rejectedReasons = [
     ...(candidates.length < 2 ? ['Parlay requires at least two legs.'] : []),

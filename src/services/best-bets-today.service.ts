@@ -36,7 +36,7 @@ export type BestBetsTodayCandidate = {
   impliedProbability: number
   fairOdds: number | null
   edge: number
-  expectedValue: number
+  expectedValue: number | null
   confidence: number
   reliabilityScore: number
   featureQuality: number | null
@@ -179,9 +179,9 @@ function dataScore(candidate: CurrentBoardCandidate) {
 }
 
 function valueScore(candidate: CurrentBoardCandidate) {
-  const ev = clamp((candidate.expectedValue + 20) * 2.2)
+  const ev = clamp(((candidate.expectedValue as number) + 20) * 2.2)
   const edge = clamp((candidate.edge + 15) * 2.4)
-  const positiveBonus = candidate.expectedValue > 0 && candidate.edge > 0 ? 15 : 0
+  const positiveBonus = candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0 ? 15 : 0
   return clamp(ev * 0.45 + edge * 0.4 + positiveBonus)
 }
 
@@ -195,7 +195,7 @@ function marketFreshnessScore(candidate: CurrentBoardCandidate) {
 
 function penaltyScore(candidate: CurrentBoardCandidate) {
   let penalty = 0
-  if (candidate.expectedValue <= 0) penalty += 14
+  if (candidate.expectedValue === null || candidate.expectedValue <= 0) penalty += 14
   if (candidate.edge <= 0) penalty += 12
   if (candidate.stale) penalty += 18
   if (candidate.anomalous) penalty += 20
@@ -209,7 +209,7 @@ function penaltyScore(candidate: CurrentBoardCandidate) {
 
 function drivers(candidate: CurrentBoardCandidate, score: BestBetsTodayCandidate['scoreComponents']) {
   const items: string[] = []
-  if (candidate.expectedValue > 0 && candidate.edge > 0) items.push('Positive modeled edge and EV.')
+  if (candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0) items.push('Positive modeled edge and EV.')
   if (candidate.rawProbability >= 50) items.push('Above coin-flip model probability.')
   if ((candidate.calibratedProbability ?? 0) > 0) items.push('Calibrated probability is available.')
   if ((candidate.featureQuality ?? 0) >= 70) items.push('Feature quality is usable.')
@@ -223,7 +223,7 @@ function drivers(candidate: CurrentBoardCandidate, score: BestBetsTodayCandidate
 
 function risks(candidate: CurrentBoardCandidate) {
   const items = new Set<string>()
-  if (candidate.expectedValue <= 0) items.add('Negative or zero expected value.')
+  if (candidate.expectedValue === null || candidate.expectedValue <= 0) items.add('Negative or zero expected value.')
   if (candidate.edge <= 0) items.add('Market price is not better than model probability.')
   if (candidate.officialEligibility !== 'OFFICIAL_ELIGIBLE_CANDIDATE') items.add('Not officially eligible.')
   if (!OFFICIAL_STATUSES.has(candidate.recommendationPolicyStatus)) items.add('Recommendation policy did not approve official status.')
@@ -240,6 +240,7 @@ function isOfficialBestBet(candidate: CurrentBoardCandidate) {
     !['fallback', 'unavailable'].includes(candidate.probabilityOrigin) &&
     candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE' &&
     OFFICIAL_STATUSES.has(candidate.recommendationPolicyStatus) &&
+    candidate.expectedValue !== null &&
     candidate.expectedValue > 0 &&
     candidate.edge > 0 &&
     !candidate.stale &&
@@ -363,7 +364,7 @@ export function buildBestBetsTodayFromBoard(board: CurrentBoardResponse): BestBe
     const rightScore = scoreCandidate(right).score
     return (
       rightScore - leftScore ||
-      right.expectedValue - left.expectedValue ||
+      (right.expectedValue as number) - (left.expectedValue as number) ||
       right.edge - left.edge ||
       right.rawProbability - left.rawProbability ||
       right.confidence - left.confidence
@@ -386,9 +387,9 @@ export function buildBestBetsTodayFromBoard(board: CurrentBoardResponse): BestBe
   const informationalBestBets = ranked.slice(0, 5).map((candidate, index) =>
     toBestBetCandidate(candidate, index + 1, 'BEST BETS TODAY - NOT RECOMMENDED', 'informational_not_recommended')
   )
-  const bestValueSource = [...ranked].filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0).sort((left, right) =>
-    Number(right.expectedValue > 0 && right.edge > 0) - Number(left.expectedValue > 0 && left.edge > 0) ||
-    right.expectedValue - left.expectedValue ||
+  const bestValueSource = [...ranked].filter((candidate) => candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0).sort((left, right) =>
+    Number(right.expectedValue !== null && right.expectedValue > 0 && right.edge > 0) - Number(left.expectedValue !== null && left.expectedValue > 0 && left.edge > 0) ||
+    (right.expectedValue as number) - (left.expectedValue as number) ||
     right.edge - left.edge
   )[0]
 
@@ -414,7 +415,7 @@ export function buildBestBetsTodayFromBoard(board: CurrentBoardResponse): BestBe
       officialCandidateCount: officialBestBets.length,
       informationalCandidateCount: informationalBestBets.length,
       returnedCount: bestBets.length,
-      positiveValueCount: validCandidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0).length,
+      positiveValueCount: validCandidates.filter((candidate) => candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0).length,
       latestOddsTimestamp: board.latestOddsTimestamp,
       dataFreshnessStatus: board.dataFreshness.status,
       officialPicksRemain: board.officialPickCount,

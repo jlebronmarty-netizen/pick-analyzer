@@ -44,12 +44,14 @@ export const MATERIAL_NEGATIVE_EV_THRESHOLD = -20
 export const MATERIAL_NEGATIVE_EDGE_THRESHOLD = -15
 
 function firstReason(candidate: CurrentBoardCandidate) {
-  return candidate.blockers[0] ??
-    candidate.missingInformation[0] ??
-    (candidate.expectedValue < 0 ? 'Negative EV at the current stored price.' : null) ??
-    (candidate.edge < 0 ? 'Market price is weaker than model probability.' : null) ??
-    (candidate.confidence < 60 ? 'Confidence below production threshold.' : null) ??
-    'Did not satisfy Pick Analyzer production recommendation policy.'
+  const expectedValue = candidate.expectedValue
+  if (candidate.blockers[0]) return candidate.blockers[0]
+  if (candidate.missingInformation[0]) return candidate.missingInformation[0]
+  if (expectedValue === null) return 'Expected value is unavailable at the current stored price.'
+  if (expectedValue < 0) return 'Negative EV at the current stored price.'
+  if (candidate.edge < 0) return 'Market price is weaker than model probability.'
+  if (candidate.confidence < 60) return 'Confidence below production threshold.'
+  return 'Did not satisfy Pick Analyzer production recommendation policy.'
 }
 
 function hasMarketOrContextPath(candidate: CurrentBoardCandidate) {
@@ -60,7 +62,7 @@ function hasMarketOrContextPath(candidate: CurrentBoardCandidate) {
 function valueQuality(candidate: CurrentBoardCandidate): MarketIntelligenceClassification['valueQuality'] {
   const ev = candidate.marketAlignment?.snapshotExpectedValuePercent ?? candidate.expectedValue
   const edge = candidate.marketAlignment?.snapshotEdgePercentagePoints ?? candidate.edge
-  if (!Number.isFinite(ev) || !Number.isFinite(edge)) return 'UNAVAILABLE'
+  if (typeof ev !== 'number' || !Number.isFinite(ev) || !Number.isFinite(edge)) return 'UNAVAILABLE'
   if (ev <= MATERIAL_NEGATIVE_EV_THRESHOLD || edge <= MATERIAL_NEGATIVE_EDGE_THRESHOLD) return 'MATERIAL_NEGATIVE'
   if (ev < 0 || edge < 0) return 'NEGATIVE'
   if (ev === 0 || edge === 0) return 'NEUTRAL'
@@ -72,7 +74,8 @@ function improvementPath(candidate: CurrentBoardCandidate) {
   const alignment = candidate.marketAlignment
   if (!alignment || alignment.alignmentStatus !== 'ALIGNED') return 'needs exact aligned market price'
   if (alignment.actionableUnavailableReason) return 'needs fresher market input'
-  if ((alignment.snapshotExpectedValuePercent ?? candidate.expectedValue) <= 0 || (alignment.snapshotEdgePercentagePoints ?? candidate.edge) <= 0) return 'needs better price or stronger model probability'
+  const expectedValue = alignment.snapshotExpectedValuePercent ?? candidate.expectedValue
+  if (expectedValue === null || expectedValue <= 0 || (alignment.snapshotEdgePercentagePoints ?? candidate.edge) <= 0) return 'needs better price or stronger model probability'
   if (candidate.confidence < 60) return 'needs confidence closer to policy threshold'
   if (candidate.missingInformation[0]) return `needs ${candidate.missingInformation[0].replaceAll('_', ' ')}`
   return null
@@ -236,7 +239,7 @@ export function classifyMarketIntelligence(candidate: CurrentBoardCandidate): Ma
   const modelSignal =
     candidate.modeledValueStatus === 'MODELED_VALUE' ||
     candidate.edge > 0 ||
-    candidate.expectedValue > 0 ||
+    (candidate.expectedValue !== null && candidate.expectedValue > 0) ||
     (candidate.rawProbability >= 45 && candidate.confidence >= 45)
 
   const clearAvoid = candidate.confidence < 40

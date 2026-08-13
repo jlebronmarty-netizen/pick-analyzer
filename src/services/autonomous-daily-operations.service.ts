@@ -141,7 +141,7 @@ function timeLabel(value: string | null | undefined) {
 function publicBetStatus(candidate: CurrentBoardCandidate | null | undefined) {
   if (!candidate) return 'UNAVAILABLE'
   if (candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE') return 'OFFICIAL'
-  if (candidate.expectedValue > 0 && candidate.edge > 0) return 'WATCH'
+  if (candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0) return 'WATCH'
   if (candidate.recommendationPolicyStatus === 'WATCH') return 'WATCH'
   if (candidate.rawProbability >= 55) return 'INFORMATIONAL'
   if (candidate.modeledValueStatus === 'NO_MODELED_VALUE') return 'NO VALUE'
@@ -212,7 +212,7 @@ function productHealth(value: unknown) {
 function recommendationCopy(candidate: CurrentBoardCandidate | null | undefined, official: boolean) {
   if (official) return 'Official recommendation available.'
   if (!candidate) return 'No eligible market is ready yet.'
-  if (candidate.expectedValue <= 0) return 'Likely price is not attractive enough.'
+  if (candidate.expectedValue === null || candidate.expectedValue <= 0) return 'Likely price is not attractive enough.'
   if (candidate.edge <= 0) return 'The market price does not beat the model.'
   return 'Informational only. Official gates did not clear it.'
 }
@@ -228,14 +228,14 @@ function tag(label: string, active: boolean, note?: string) {
 function opportunityTitle(candidate: CurrentBoardCandidate | null | undefined, official: boolean) {
   if (!candidate) return 'No Attractive Bet Available'
   if (official) return 'Official Pick'
-  if (candidate.expectedValue > 0 && candidate.edge > 0) return 'Best Available Opportunity'
+  if (candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0) return 'Best Available Opportunity'
   return 'Highest Ranked Informational Opportunity'
 }
 
 function opportunityStatus(candidate: CurrentBoardCandidate | null | undefined, official: boolean) {
   if (!candidate) return 'UNAVAILABLE'
   if (official) return 'OFFICIAL'
-  if (candidate.expectedValue > 0 && candidate.edge > 0) return 'WATCH'
+  if (candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0) return 'WATCH'
   return 'INFORMATIONAL'
 }
 
@@ -502,11 +502,11 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
 
   const topOfficial = board.candidates.find((candidate) => candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE') ?? null
   const rankedInformational = topBy(board.candidates, (candidate) =>
-    candidate.expectedValue * 2 + candidate.edge + candidate.confidence * 0.4 + candidate.reliabilityScore * 0.2
+    (candidate.expectedValue as number) * 2 + candidate.edge + candidate.confidence * 0.4 + candidate.reliabilityScore * 0.2
   )
   const positiveValueCandidate = topBy(
-    board.candidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0),
-    (candidate) => candidate.expectedValue + candidate.edge
+    board.candidates.filter((candidate) => candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0),
+    (candidate) => (candidate.expectedValue as number) + candidate.edge
   )
   const mostLikelyRaw = topBy(board.candidates, (candidate) => candidate.rawProbability)
   const moneylineRaw = topBy(board.candidates.filter((candidate) => candidate.market === 'moneyline'), (candidate) => candidate.rawProbability)
@@ -684,7 +684,7 @@ export async function getAutonomousDailyOperationsStatus({ selectedDate }: { sel
       const gameCandidates = board.candidates.filter((candidate) => candidate.eventId === game.eventId)
       const recommendation =
         gameCandidates.find((candidate) => candidate.officialEligibility === 'OFFICIAL_ELIGIBLE_CANDIDATE') ??
-        topBy(gameCandidates, (candidate) => candidate.expectedValue + candidate.rawProbability * 0.1) ??
+        topBy(gameCandidates, (candidate) => (candidate.expectedValue as number) + candidate.rawProbability * 0.1) ??
         null
       return {
         ...game,

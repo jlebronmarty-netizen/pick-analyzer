@@ -78,7 +78,7 @@ function findCandidate(candidates: CurrentBoardCandidate[], query: string) {
     if (team && !normalized(`${candidate.selection} ${candidate.matchup}`).includes(team)) return false
     if (market && candidate.market !== market) return false
     return true
-  }) ?? candidates.find((candidate) => candidate.expectedValue > 0 && candidate.edge > 0) ?? candidates[0] ?? null
+  }) ?? candidates.find((candidate) => candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0) ?? candidates[0] ?? null
 }
 
 export async function getMlbAiCoach({ query = '', date = '2026-07-17' }: { query?: string | null; date?: string | null } = {}) {
@@ -97,8 +97,8 @@ export async function getMlbAiCoach({ query = '', date = '2026-07-17' }: { query
   const q = normalized(query)
   const readyFor = gamesPayloadAudit.normalizationDecision.readyFor
   const positiveValue = board.candidates
-    .filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0)
-    .sort((left, right) => right.expectedValue - left.expectedValue)
+    .filter((candidate) => candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0)
+    .sort((left, right) => (right.expectedValue as number) - (left.expectedValue as number))
   const target = findCandidate(board.candidates, query ?? '')
   let answerType = 'no_bet'
   let answer = 'No official MLB bet is enabled. Current candidates are preview-only because production, calibration and critical data gates remain blocked.'

@@ -1,0 +1,61 @@
+{
+  "certification": "mlb-product-candidate-selection-integrity",
+  "status": "MLB_PRODUCT_CANDIDATE_SELECTION_INTEGRITY_REPAIR_READY_FOR_DEPLOYMENT",
+  "startingCommit": "d3e7749ebfad51ce74480b3fac2e5c7ee47eb17b",
+  "productionCommit": "d3e7749ebfad51ce74480b3fac2e5c7ee47eb17b",
+  "rootCauses": {
+    "rentPlaySelection": "REVIEW_FALLBACK_COMPARATOR_LABEL_AMBIGUOUS",
+    "moneylineSelection": "REVIEW_FALLBACK_COMPARATOR_LABEL_AMBIGUOUS",
+    "totalSelectionProbability": "INTEGER_TOTAL_PUSH_CAPABLE_NO_UNSAFE_AUTO_COMPLEMENT",
+    "evZero": "NULL_EV_COERCED_BY_TOP_LEVEL_EXPECTED_VALUE_DEFAULT",
+    "analysisSnapshot": "HOMEPAGE_ADAPTER_DID_NOT_READ_ANALYSIS_SNAPSHOT_TIMESTAMP",
+    "freshness": "CURRENT_MARKET_EVIDENCE_STALE_UNRELATED_TO_BINDING_REPAIR"
+  },
+  "currentDayEvidence": {
+    "operatingDate": "2026-08-13",
+    "canonicalPredictions": 27,
+    "moneyline": 9,
+    "runLine": 9,
+    "total": 9,
+    "currentBoardCandidates": 27,
+    "currentBoardProbabilityCoverage": "27/27",
+    "currentBoardAnalysisSnapshotCoverage": "27/27"
+  },
+  "marketSemantics": {
+    "moneylineOppositeProbability": "CERTIFIED_COMPLEMENT",
+    "runLineOppositeProbability": "CERTIFIED_COMPLEMENT_FOR_FRACTIONAL_EXACT_OPPOSITE_LINE",
+    "totalOppositeProbability": "CERTIFIED_COMPLEMENT_FOR_FRACTIONAL_TOTALS_ONLY",
+    "integerTotalPushHandling": "PUSH_CAPABLE_UNKNOWN_PUSH_PROBABILITY_NO_COMPLEMENT",
+    "unsafeAutoFlipAllowed": false
+  },
+  "repair": {
+    "analysisSnapshotMappedToHomepage": true,
+    "marketEvidenceTimestampPreserved": true,
+    "exactLineDedupePreserved": true,
+    "sourceMarketIdentityNestedFieldsRead": true,
+    "reviewFallbackLabelClarified": true,
+    "nullEvPreserved": true,
+    "expectedValueDefaultZeroRemoved": true,
+    "downstreamNullEvGatesFailClosed": true
+  },
+  "protectedInvariants": {
+    "predictionFormulaChanged": false,
+    "probabilityValuesRecalculated": false,
+    "confidenceFormulaChanged": false,
+    "edgeFormulaChanged": false,
+    "evFormulaChanged": false,
+    "kellyChanged": false,
+    "mostLikelyRankingChanged": false,
+    "officialPickPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "providerAuthorityChanged": false,
+    "nbaHistoricalFoundationChanged": false
+  },
+  "certificationAccounting": {
+    "providerCallsFromCertification": 0,
+    "databaseMutationsFromCertification": 0,
+    "sportsDataIoMlbCalls": 0,
+    "nbaMutations": 0
+  }
+}

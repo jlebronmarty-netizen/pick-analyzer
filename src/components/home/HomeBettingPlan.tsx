@@ -31,6 +31,7 @@ type Selector = {
   priceSourceSelection?: string | null
   priceSourceLine?: number | null
   priceSourceSnapshotId?: string | null
+  analysisSnapshotTimestamp?: string | null
   providerSourceTimestamp?: string | null
   snapshotCapturedAt?: string | null
   marketEvidenceFreshness?: string | null
@@ -127,6 +128,7 @@ type PlanPick = {
   selection: string
   market: string
   marketKey: string
+  line?: number | null
   odds: number | null
   priceBindingMode?: 'DIRECT' | 'COMPLEMENT' | 'UNAVAILABLE'
   priceSourceMarket?: string | null
@@ -153,7 +155,7 @@ type PlanPick = {
 
 type BestAvailableReviewOption = {
   contractVersion: 'best_available_review_option_v1'
-  label: 'BEST AVAILABLE REVIEW OPTION'
+  label: 'MOST EVIDENCE-COMPLETE REVIEW OPTION'
   notRecommendation: true
   candidate: PlanPick | null
   evidenceCompleteness: number
@@ -680,7 +682,7 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
     freshnessActionability,
     marketTimestamp: selector.productFreshness?.marketTimestamp ?? null,
     providerSourceTimestamp: selector.providerSourceTimestamp ?? null,
-    snapshotCapturedAt: selector.snapshotCapturedAt ?? selector.snapshotRecencyTimestamp ?? null,
+    snapshotCapturedAt: selector.analysisSnapshotTimestamp ?? selector.snapshotCapturedAt ?? selector.snapshotRecencyTimestamp ?? null,
     nextRefreshAt: selector.productFreshness?.nextPlannedRefreshAt ?? null,
     evidence: [
       `Source: ${source}`,
@@ -697,10 +699,11 @@ function fromSelector(id: string, source: string, selector: Selector | undefined
 function fromRow(id: string, source: string, row: Record<string, unknown>, official = false): PlanPick {
   const canonicalEv = recordValue(row.canonicalEv)
   const canonicalPrice = recordValue(row.canonicalPrice)
+  const sourceMarketIdentity = recordValue(canonicalPrice.sourceMarketIdentity)
   const probability = numberOrNull(row.modelProbability ?? row.model_probability ?? row.probability)
   const confidence = numberOrNull(row.confidence)
   const edge = numberOrNull(row.edgePercentagePoints ?? row.edge ?? canonicalEv.edge)
-  const ev = numberOrNull(row.expectedValuePercent ?? row.expectedValue ?? row.ev ?? canonicalEv.expectedValue)
+  const ev = numberOrNull(row.expectedValuePercent ?? row.ev ?? canonicalEv.expectedValue)
   const productFreshness = row.productFreshness && typeof row.productFreshness === 'object' ? row.productFreshness as Record<string, unknown> : null
   const freshness = label(productFreshness?.status ?? row.freshnessStatus ?? row.freshness, 'Freshness unavailable')
   const freshnessActionability = label(productFreshness?.actionability, 'INFORMATIONAL_ONLY')
@@ -723,7 +726,7 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
     .filter(Boolean)
   const marketTimestamp = textOrNull(productFreshness?.marketTimestamp ?? row.providerSourceTimestamp ?? row.marketTimestamp ?? row.sourceTimestamp)
   const providerSourceTimestamp = textOrNull(row.providerSourceTimestamp ?? productFreshness?.marketTimestamp ?? row.sourceTimestamp ?? row.marketTimestamp)
-  const snapshotCapturedAt = textOrNull(row.snapshotCapturedAt ?? row.snapshotRecencyTimestamp ?? row.capturedAt ?? row.updatedAt)
+  const snapshotCapturedAt = textOrNull(row.analysisSnapshotTimestamp ?? row.predictionGeneratedAt ?? row.generated_at ?? row.snapshotCapturedAt ?? row.snapshotRecencyTimestamp ?? row.capturedAt ?? row.updatedAt)
   return {
     id,
     predictionId: typeof row.predictionId === 'string' ? row.predictionId : typeof row.id === 'string' ? row.id : null,
@@ -735,12 +738,13 @@ function fromRow(id: string, source: string, row: Record<string, unknown>, offic
     selection: label(row.selection ?? row.team, 'Selection pending'),
     market: label(row.marketLabel ?? row.market, 'Market pending'),
     marketKey: String(row.market ?? row.marketLabel ?? '').toLowerCase(),
+    line: numberOrNull(row.line ?? sourceMarketIdentity.line),
     odds: numberOrNull(row.americanOdds ?? row.odds ?? canonicalPrice.americanOdds),
     priceBindingMode: (canonicalPrice.bindingMode ?? row.priceBindingMode) as PlanPick['priceBindingMode'],
-    priceSourceMarket: textOrNull(canonicalPrice.sourceMarket ?? row.priceSourceMarket),
-    priceSourceSelection: textOrNull(canonicalPrice.sourceSelection ?? row.priceSourceSelection),
-    priceSourceLine: numberOrNull(canonicalPrice.sourceLine ?? row.priceSourceLine),
-    priceSourceSnapshotId: textOrNull(row.oddsSnapshotId ?? canonicalPrice.snapshotId),
+    priceSourceMarket: textOrNull(sourceMarketIdentity.market ?? canonicalPrice.sourceMarket ?? row.priceSourceMarket),
+    priceSourceSelection: textOrNull(sourceMarketIdentity.selection ?? canonicalPrice.sourceSelection ?? row.priceSourceSelection),
+    priceSourceLine: numberOrNull(sourceMarketIdentity.line ?? canonicalPrice.sourceLine ?? row.priceSourceLine ?? row.line),
+    priceSourceSnapshotId: textOrNull(sourceMarketIdentity.oddsSnapshotId ?? row.oddsSnapshotId ?? canonicalPrice.snapshotId),
     sportsbook: label(row.sportsbook ?? canonicalPrice.bookmaker ?? canonicalPrice.provider, 'Sportsbook pending'),
     probability,
     confidence,
@@ -786,7 +790,7 @@ function allCandidates(data: TodayResponse | null, currentBoard?: ApiEnvelope | 
   })
   const unique = new Map<string, PlanPick>()
   for (const item of rows) {
-    const key = `${item.eventId ?? item.event}|${item.marketKey}|${item.selection}|${item.priceSourceLine ?? ''}|${item.sportsbook}`
+    const key = `${item.eventId ?? item.event}|${item.marketKey}|${item.selection}|${item.line ?? item.priceSourceLine ?? ''}|${item.sportsbook}`
     if (!unique.has(key)) unique.set(key, item)
   }
   return Array.from(unique.values())
@@ -858,7 +862,7 @@ function bestAvailableReviewOption(
     : ['No sufficiently evidenced review candidate is available.']
   return {
     contractVersion: 'best_available_review_option_v1',
-    label: 'BEST AVAILABLE REVIEW OPTION',
+    label: 'MOST EVIDENCE-COMPLETE REVIEW OPTION',
     notRecommendation: true,
     candidate,
     evidenceCompleteness,
@@ -2162,14 +2166,15 @@ function MoneylineBetCard({ moneyline }: { moneyline: MoneylineBetContract }) {
 
       {reviewPick ? (
         <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08c-review-only-candidate="true" data-best-available-review-option="true" data-not-recommendation="true">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Best Review-Only Moneyline Candidate / Best Available Review Option - Not A Recommendation</p>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Most Evidence-Complete Moneyline Review Candidate - Not A Recommendation</p>
           <p className="mt-2 text-lg font-black text-white">{reviewPick.selection}</p>
           <p className="mt-1 text-sm text-amber-50">{reviewPick.event} / {reviewPick.market} / {pct(reviewPick.probability)}</p>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
             <MiniText label="Odds" value={odds(reviewPick.odds)} />
             <MiniText label="Implied" value={pct(impliedFromAmerican(reviewPick.odds))} />
             <MiniText label="Edge / EV" value={`${signedPct(reviewPick.edge)} / ${signedPct(reviewPick.ev)}`} />
             <MiniText label="Evidence Time" value={compactDate(reviewPick.providerSourceTimestamp ?? reviewPick.marketTimestamp)} />
+            <MiniText label="Analysis Snapshot" value={compactDate(reviewPick.snapshotCapturedAt ?? null)} />
           </div>
           <p className="mt-2 text-sm text-slate-300">{reviewPick.reason}</p>
           <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-100">Blocked Because: {reviewBlockers.slice(0, 3).join(' / ')}</p>
@@ -2289,14 +2294,15 @@ function RentPlayCard({ rentPlay }: { rentPlay: RentPlayContract }) {
 
       {reviewPick ? (
         <div className="mt-5 rounded-lg border border-amber-300/20 bg-amber-300/10 p-4" data-mc08b-best-available-not-rent-play="true" data-best-available-review-option="true" data-not-recommendation="true">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Best Review-Only Candidate - Not Rent Play / Best Available Review Option - Not A Recommendation</p>
+          <p className="text-xs font-black uppercase tracking-[0.16em] text-amber-100">Most Evidence-Complete Review Candidate - Not Rent Play / Not A Recommendation</p>
           <p className="mt-2 text-lg font-black text-white">{reviewPick.selection}</p>
           <p className="mt-1 text-sm text-amber-50">{reviewPick.event} / {reviewPick.market} / {pct(reviewPick.probability)}</p>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
             <MiniText label="Odds" value={odds(reviewPick.odds)} />
             <MiniText label="Implied" value={pct(impliedFromAmerican(reviewPick.odds))} />
             <MiniText label="Edge / EV" value={`${signedPct(reviewPick.edge)} / ${signedPct(reviewPick.ev)}`} />
             <MiniText label="Evidence Time" value={compactDate(reviewPick.providerSourceTimestamp ?? reviewPick.marketTimestamp)} />
+            <MiniText label="Analysis Snapshot" value={compactDate(reviewPick.snapshotCapturedAt ?? null)} />
           </div>
           <p className="mt-2 text-sm text-slate-300">{reviewPick.reason}</p>
           <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-100">Blocked Because: {reviewBlockers.slice(0, 3).join(' / ')}</p>

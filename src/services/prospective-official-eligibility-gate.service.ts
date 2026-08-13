@@ -55,7 +55,7 @@ type GateDecision = {
   recommendationStatus: RecommendationStatus
   calibrationMaturity: string
   edge: number
-  ev: number
+  ev: number | null
   confidence: number
   reliability: number
   featureQuality: number | null
@@ -99,13 +99,13 @@ function asRecord(value: unknown): Record<string, unknown> {
 
 function publicReasons(candidate: {
   edge: number
-  ev: number
+  ev: number | null
   calibrationStatus: string
   stale?: boolean
   missingInformation?: string[]
 }) {
   const reasons: string[] = []
-  if (candidate.edge <= 0 || candidate.ev <= 0) reasons.push('The current price does not offer positive modeled value.')
+  if (candidate.edge <= 0 || candidate.ev === null || candidate.ev <= 0) reasons.push('The current price does not offer positive modeled value.')
   if (!['acceptable', 'mature', 'VALIDATED'].includes(candidate.calibrationStatus)) {
     reasons.push('Calibration is not mature enough for official use.')
   }
@@ -212,7 +212,7 @@ function gateDecisionFromCandidate(candidate: CurrentBoardCandidate, now = new D
     ['supported_market', ['moneyline', 'spread', 'total'].includes(candidate.market), 'unsupported market'],
     ['valid_model_probability', candidate.rawProbability > 0 && candidate.rawProbability < 100, 'invalid model probability'],
     ['meaningfully_positive_edge', candidate.edge >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialEdge, 'edge is not meaningfully positive'],
-    ['meaningfully_positive_ev', candidate.expectedValue >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialEv, 'EV is not meaningfully positive'],
+    ['meaningfully_positive_ev', candidate.expectedValue !== null && candidate.expectedValue >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialEv, 'EV is not meaningfully positive'],
     ['confidence_threshold', candidate.confidence >= RECOMMENDATION_THRESHOLDS_V1.minimumOfficialConfidence, 'confidence below official threshold'],
     ['reliability_threshold', candidate.reliabilityScore >= 70, 'reliability below solid threshold'],
     ['feature_quality_threshold', finite(candidate.featureQuality) >= RECOMMENDATION_THRESHOLDS_V1.minimumFeatureQuality, 'feature quality below threshold'],

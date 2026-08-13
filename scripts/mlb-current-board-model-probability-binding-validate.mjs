@@ -39,7 +39,7 @@ assert(service.includes('modelProbability: oppositeProbability'), 'canonical com
 assert(service.includes('canonicalMarketAlignment: complementAlignment'), 'canonical complement evidence must remain separate')
 assert(home.includes('row.modelProbability ?? row.model_probability ?? row.probability'), 'homepage adapter must consume top-level modelProbability')
 assert(home.includes('row.edgePercentagePoints ?? row.edge ?? canonicalEv.edge'), 'homepage adapter must prefer same-selection edge before canonical fallback')
-assert(home.includes('row.expectedValuePercent ?? row.expectedValue ?? row.ev ?? canonicalEv.expectedValue'), 'homepage adapter must prefer same-selection EV before canonical fallback')
+assert(home.includes('row.expectedValuePercent ?? row.ev ?? canonicalEv.expectedValue'), 'homepage adapter must preserve null EV instead of falling back to top-level default zero')
 assert(!service.includes('ODDS_PRIMARY_AUTHORITY_STAGE='), 'repair must not hardcode odds authority')
 assert(!service.includes('MLB_DATA_SOURCE_MODE='), 'repair must not hardcode MLB data source mode')
 assert(!service.includes('THE_ODDS_API_KEY'), 'repair must not touch provider credentials')

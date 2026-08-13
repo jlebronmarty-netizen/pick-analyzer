@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-13 MLB Product Candidate Selection Integrity
+
+- MLB Product Candidate Selection Integrity is locally implemented as `MLB_PRODUCT_CANDIDATE_SELECTION_INTEGRITY_REPAIR_READY_FOR_DEPLOYMENT`. The audit confirmed Current Board probability binding remained 27/27, but homepage review fallback copy implied "best available" while the comparator is evidence-completeness, and integer-total rows could surface unknown EV as `0.00%` through a top-level default.
+- The bounded repair maps analysis snapshots into homepage cards, preserves exact line/source-market identity, labels review fallbacks as most evidence-complete review candidates, and preserves null EV for push-capable markets. No prediction formula, probability value, confidence, edge/EV formula, Official Pick policy, settlement, learning, provider authority, NBA historical foundation or MLB data-source mode changed.
+
 ## 2026-08-13 MLB Current Board Model Probability Binding
 
 - MLB Current Board Model Probability Binding is locally implemented as `MLB_MODEL_PROBABILITY_EVIDENCE_BINDING_REPAIR_READY_FOR_DEPLOYMENT`. Production evidence showed 27 current MLB candidates with valid stored `rawProbability` / `marketAlignment.modelProbability`, but the top-level Current Board DTO omitted `modelProbability` and `winProbability`, causing homepage cards to render probability as `N/A`.

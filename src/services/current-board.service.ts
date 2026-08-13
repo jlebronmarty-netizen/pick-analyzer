@@ -274,7 +274,7 @@ export type CurrentBoardCandidate = {
   featureSetVersion: string
   calibrationStatus: string
   edge: number
-  expectedValue: number
+  expectedValue: number | null
   modeledValueStatus: 'MODELED_VALUE' | 'NO_MODELED_VALUE' | 'STALE' | 'UNCALIBRATED'
   semanticLabel: 'MODELED VALUE' | 'NO MODELED VALUE' | 'STALE' | 'UNCALIBRATED'
   probabilityOrigin: 'calculated' | 'calibrated' | 'fallback' | 'unavailable' | 'unknown'
@@ -406,7 +406,7 @@ export type CurrentBoardResponse = {
       canonicalReason?: string
       market: string
       edge: number
-      expectedValue: number
+      expectedValue: number | null
       confidence: number
       reliabilityScore: number
       dataQuality: number | null
@@ -1156,13 +1156,13 @@ function toCandidate(
       })
     : null
   const edge = marketAlignment.edgePercentagePoints ?? 0
-  const expectedValue = marketAlignment.expectedValuePercent ?? 0
+  const expectedValue = marketAlignment.expectedValuePercent
   const calibrationStatus = String(snapshot.calibrationStatus ?? snapshot.calibration_status ?? row.validation_status ?? 'probationary')
   const modeledValueStatus = stale
     ? 'STALE'
     : calibrationStatus.toLowerCase().includes('uncalibrated')
       ? 'UNCALIBRATED'
-      : edge > 0 && expectedValue > 0
+      : edge > 0 && expectedValue !== null && expectedValue > 0
         ? 'MODELED_VALUE'
         : 'NO_MODELED_VALUE'
   const positiveFactors = Array.isArray(snapshot.positiveFactors) ? snapshot.positiveFactors.map(String) : []

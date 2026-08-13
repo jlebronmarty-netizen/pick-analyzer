@@ -95,7 +95,7 @@ function blockerText(code: string) {
 }
 
 function primaryBlocker(candidate: CurrentBoardCandidate) {
-  if (candidate.expectedValue <= 0) return 'Expected value is not positive.'
+  if (candidate.expectedValue === null || candidate.expectedValue <= 0) return 'Expected value is not positive.'
   if (candidate.edge <= 0) return 'The model does not beat the market price.'
   if (candidate.confidence < 65) return 'Model confidence is below the official-pick requirement.'
   if (candidate.missingInformation.some((item) => item.includes('lineup'))) return 'Confirmed lineup data is unavailable.'

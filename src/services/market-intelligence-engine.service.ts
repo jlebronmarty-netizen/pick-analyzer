@@ -83,7 +83,7 @@ function marketStability(candidate: CurrentBoardCandidate) {
 
 function marketScore(candidate: CurrentBoardCandidate) {
   const positiveEdge = Math.max(0, candidate.edge)
-  const positiveEv = Math.max(0, candidate.expectedValue)
+  const positiveEv = Math.max(0, candidate.expectedValue as number)
   const policyBoost = ['QUALIFIED', 'BEST_BET_CANDIDATE', 'PLAY_OF_DAY_CANDIDATE'].includes(candidate.recommendationPolicyStatus)
     ? 10
     : candidate.recommendationPolicyStatus === 'WATCH'
@@ -105,7 +105,7 @@ function marketScore(candidate: CurrentBoardCandidate) {
 
 function classify(candidate: CurrentBoardCandidate, score: number): MarketIntelligenceRecommendation {
   const officialReady = ['QUALIFIED', 'BEST_BET_CANDIDATE', 'PLAY_OF_DAY_CANDIDATE'].includes(candidate.recommendationPolicyStatus)
-  if (officialReady && score >= 80 && candidate.expectedValue > 0 && candidate.edge > 0) return 'Elite'
+  if (officialReady && score >= 80 && candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0) return 'Elite'
   if (candidate.modeledValueStatus === 'MODELED_VALUE' && score >= 70) return 'Strong Value'
   if (candidate.recommendationPolicyStatus === 'WATCH' || (candidate.modeledValueStatus === 'MODELED_VALUE' && score >= 58)) return 'Watch'
   return 'Pass'
@@ -128,7 +128,7 @@ function reasonFor(candidate: CurrentBoardCandidate, recommendation: MarketIntel
   if (recommendation === 'Elite') return 'Top market signal with official policy eligibility and positive modeled value.'
   if (recommendation === 'Strong Value') return 'Positive edge and expected value with enough supporting model signal to deserve attention.'
   if (recommendation === 'Watch') return 'Interesting model signal, but at least one official or market-quality condition is not ready.'
-  return candidate.expectedValue <= 0 || candidate.edge <= 0
+  return candidate.expectedValue === null || candidate.expectedValue <= 0 || candidate.edge <= 0
     ? 'No modeled value at the current stored price.'
     : 'Recommendation policy, calibration or data quality is not strong enough.'
 }
@@ -146,7 +146,7 @@ function explain(candidate: CurrentBoardCandidate, recommendation: MarketIntelli
     whyAccepted: recommendation === 'Pass' ? null : reasonFor(candidate, recommendation),
     whyRejected: recommendation === 'Pass' ? reasonFor(candidate, recommendation) : null,
     missingInformation: missingInformation(candidate),
-    noValue: candidate.expectedValue <= 0 || candidate.edge <= 0,
+    noValue: candidate.expectedValue === null || candidate.expectedValue <= 0 || candidate.edge <= 0,
   }
 }
 

@@ -24,7 +24,7 @@ function readinessScore(candidate: CurrentBoardCandidate) {
   return round(
     candidate.rawProbability * 0.12 +
       Math.max(0, candidate.edge) * 1.15 +
-      Math.max(0, candidate.expectedValue) * 1.1 +
+      Math.max(0, candidate.expectedValue as number) * 1.1 +
       candidate.confidence * 0.16 +
       candidate.reliabilityScore * 0.15 +
       candidate.aiRating * 0.12 +
@@ -37,7 +37,7 @@ function readinessScore(candidate: CurrentBoardCandidate) {
 function explainRecommendation(candidate: CurrentBoardCandidate) {
   const reasons: string[] = []
   if (candidate.edge <= 0) reasons.push('sportsbook price is higher than the stored model probability supports')
-  if (candidate.expectedValue <= 0) reasons.push('expected value is not positive at the selected odds')
+  if (candidate.expectedValue === null || candidate.expectedValue <= 0) reasons.push('expected value is not positive at the selected odds')
   if (candidate.confidence < RECOMMENDATION_THRESHOLDS_V1.minimumOfficialConfidence) reasons.push('confidence is below the official-pick threshold')
   if (candidate.calibrationStatus !== 'acceptable' && candidate.calibrationStatus !== 'mature') reasons.push('calibration is still probationary')
   if (!candidate.productionEligible) reasons.push('the row is quarantined and not production eligible')
@@ -209,7 +209,7 @@ export async function getDay1RecommendationReadiness() {
     simulated.input.trial === false &&
     simulated.input.scrambled === false
 
-  const modeledValueCandidates = board.candidates.filter((candidate) => candidate.expectedValue > 0 && candidate.edge > 0)
+  const modeledValueCandidates = board.candidates.filter((candidate) => candidate.expectedValue !== null && candidate.expectedValue > 0 && candidate.edge > 0)
   const marketScanner = {
     marketsScanned: board.candidates.length + 13,
     supported: board.candidates.length,

@@ -27,7 +27,7 @@ check('starter evidence audited', architecture.includes('Starter') || architectu
 check('gates fully classified', architecture.includes('| Gate | Surface | Hard/Soft | Source | Lock Behavior | User Meaning |'))
 check('N/A used only when unavailable', source.includes('No Sufficiently Evidenced Review Candidate') && source.includes('isLowInformationCandidate'))
 check('live-lock not confused with missing data', architecture.includes('Actionability and evidence visibility are separate'))
-check('best available review option supported', source.includes('best_available_review_option_v1') && source.includes('BEST AVAILABLE REVIEW OPTION'))
+check('best available review option supported', source.includes('best_available_review_option_v1') && source.includes('MOST EVIDENCE-COMPLETE REVIEW OPTION'))
 check('blocked option clearly not recommendation', source.includes('data-not-recommendation=\"true\"') && cert.bestAvailableReviewOption.notRecommendation === true)
 check('Rent Play contract preserved', source.includes("contractVersion: 'rent_play_v1'") && source.includes('No Qualified Rent Play'))
 check('Moneyline contract preserved', source.includes("contractVersion: 'moneyline_bet_v1'") && source.includes('No Qualified Moneyline Bet'))
