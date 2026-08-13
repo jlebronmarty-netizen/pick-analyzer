@@ -1,0 +1,62 @@
+{
+  "success": true,
+  "verdict": "BALLDONTLIE_GOAT_HISTORICAL_EXTRACTION_IN_PROGRESS_RESUMABLE",
+  "mode": "RESUME",
+  "startedAt": "2026-08-13T14:46:32.685Z",
+  "completedAt": "2026-08-13T14:46:34.512Z",
+  "processedTasksThisRun": 1,
+  "maxRequestsPerRun": 1,
+  "safeRate": "4 requests/minute",
+  "manifestPath": "data\\imports\\balldontlie\\nba\\nba-01c-start-manifest.json",
+  "taskCount": 5010,
+  "completedTasks": 5007,
+  "failedTasks": 0,
+  "byState": {
+    "DB_PERSISTED": 5007,
+    "PLANNED": 3
+  },
+  "byEndpoint": {
+    "teams": {
+      "tasks": 1,
+      "completed": 1,
+      "rows": 45
+    },
+    "players": {
+      "tasks": 57,
+      "completed": 57,
+      "rows": 5612
+    },
+    "games": {
+      "tasks": 39,
+      "completed": 39,
+      "rows": 3710
+    },
+    "stats": {
+      "tasks": 1286,
+      "completed": 1286,
+      "rows": 128353
+    },
+    "advanced_stats_v2": {
+      "tasks": 3477,
+      "completed": 3474,
+      "rows": 347400
+    },
+    "box_scores": {
+      "tasks": 150,
+      "completed": 150,
+      "rows": 0
+    }
+  },
+  "providerCallsMade": 5007,
+  "databaseMutationsMade": 1283848,
+  "completed": false,
+  "stopReason": null,
+  "persistence": {
+    "rawPayloads": 0,
+    "rawPayloadFailures": 0,
+    "dbRowsInsertedOrReused": 100,
+    "dbWriteChunks": 1,
+    "dbWriteFailures": 0
+  },
+  "next": "RUN_RESUME"
+}
