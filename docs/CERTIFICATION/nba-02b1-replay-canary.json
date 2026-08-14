@@ -1,8 +1,8 @@
 {
-  "status": "NBA_02B1_REPLAY_CANARY_DB_MIGRATION_AUTHORIZATION_REQUIRED",
-  "generatedAt": "2026-08-14T19:36:45.584Z",
-  "startingCommit": "70d9d8055c203af6189e7a2bdc219142c87e609d",
-  "productionCommit": "70d9d8055c203af6189e7a2bdc219142c87e609d",
+  "status": "NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY",
+  "generatedAt": "2026-08-14T21:02:55.196Z",
+  "startingCommit": "7851003ee139bfda243c62004babb00ecaa8bf7a",
+  "productionCommit": "7851003ee139bfda243c62004babb00ecaa8bf7a",
   "versions": {
     "model": "nba_prediction_engine_v1",
     "feature": "nba_historical_pregame_feature_set_v1",
@@ -291,14 +291,14 @@
     "regimeField": "prediction_origin",
     "certificationStatusField": "certification_status",
     "certificationMetadataField": "certification_metadata",
-    "selectable": false,
-    "error": "column prediction_history.prediction_origin does not exist"
+    "selectable": true,
+    "error": null
   },
   "persistenceDecision": {
-    "safeToPersist": false,
+    "safeToPersist": true,
     "persistenceRequested": false,
     "persistencePerformed": false,
-    "reason": "prediction_history.prediction_origin is missing in production schema; replay rows cannot be safely isolated by the certified regime field.",
+    "reason": "No-write R4 certification: canary rows require a conditional odds-nullability migration because legitimate model-only replay rows carry odds/implied_probability/edge/ev as null.",
     "chunks": 0,
     "readbackCount": 0,
     "wrongOriginCount": 0
@@ -310,6 +310,8 @@
     "updated": 0,
     "failed": 0,
     "modelOnly": 72,
+    "modelOnlyNullOdds": 72,
+    "priceAwareNullOdds": 0,
     "duplicateLogicalPredictions": 0,
     "moneyline": 24,
     "spread": 24,
@@ -333,6 +335,7 @@
   },
   "priceAware": {
     "predictions": 24,
+    "requiresOdds": true,
     "moneyline": 8,
     "spread": 8,
     "total": 8,
@@ -341,6 +344,8 @@
     "historicalPriceRowsUsed": 24,
     "postStartPriceRowsUsed": 0,
     "missingPrice": 48,
+    "modelOnlyNullOdds": 72,
+    "priceAwareNullOdds": 0,
     "ambiguousBinding": 0,
     "moneylineBindingFailures": 0,
     "spreadBindingFailures": 0,
@@ -548,7 +553,30 @@
     "replaySettlementRowsWritten": 0,
     "replaySettlementRowsReused": 0,
     "settlementWriteFailures": 0,
-    "reason": "Persistence blocked by missing certified replay regime column; settlement remains preview-only."
+    "reason": "Prediction persistence blocked by odds nullability contract; settlement remains preview-only."
+  },
+  "oddsNullabilityContract": {
+    "currentOddsType": "integer",
+    "currentOddsNullability": "NOT NULL",
+    "currentEraRequiresOdds": true,
+    "officialPickRequiresOdds": true,
+    "priceAwareReplayRequiresOdds": true,
+    "modelOnlyReplayMayLackOdds": true,
+    "migrationRequired": true,
+    "migrationFile": "supabase/migrations/202608140002_nba_replay_model_only_odds_nullability_v1.sql",
+    "recommendedConstraint": "prediction_history_replay_model_only_odds_check",
+    "otherNotNullReplayBlockers": [],
+    "valueMathNullSafety": {
+      "impliedProbabilityNullWhenOddsNull": true,
+      "edgeNullWhenOddsNull": true,
+      "evNullWhenOddsNull": true,
+      "noFakeOdds": true
+    },
+    "dryRun": {
+      "wouldInsert": 96,
+      "wouldFail": 0,
+      "failureReasons": []
+    }
   },
   "metrics": {
     "modelReplayCanary": {
@@ -799,9 +827,9 @@
     "resumeStrategy": "idempotency_key plus replay version checkpoints"
   },
   "bulkPhaseRecommendation": {
-    "recommendedNext": "NBA-02B1_R_REPLAY_ISOLATION_SCHEMA_MIGRATION",
+    "recommendedNext": "NBA-02B1_R4_APPLY_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION",
     "nba02b2BulkAuthorizationRecommended": false,
-    "reason": "Additive replay isolation schema column is required before any persisted bulk replay."
+    "reason": "Conditional model-only odds-nullability migration is required before replay canary persistence can safely proceed."
   },
   "subscription": {
     "ballDontLieAllStarSufficientForFutureRuntime": "UNKNOWN_PENDING_FORWARD_RUNTIME_CERTIFICATION",

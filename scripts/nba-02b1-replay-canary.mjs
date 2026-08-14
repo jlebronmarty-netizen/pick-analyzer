@@ -1,10 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
+import { execSync } from 'node:child_process'
 import { createClient } from '@supabase/supabase-js'
 
 const SPORT_KEY = 'basketball_nba'
-const LEAGUE_KEY = 'nba'
 const MODEL_VERSION = 'nba_prediction_engine_v1'
 const FEATURE_VERSION = 'nba_historical_pregame_feature_set_v1'
 const RECONSTRUCTION_VERSION = 'nba_historical_feature_reconstruction_v1'
@@ -269,13 +269,11 @@ function buildPrediction({ event, market, home, away, projected, oddsRows }) {
   const homeRating = home.winPct * 60 + home.recentWinPct * 25 + home.netRating * 1.5 + 10
   const awayRating = away.winPct * 60 + away.recentWinPct * 25 + away.netRating * 1.5 + 10
   const favored = projected.margin >= 0 ? event.home_team : event.away_team
-  const opponent = favored === event.home_team ? event.away_team : event.home_team
   let selection = favored
   let line = null
   let probability = probabilityFromDiff((favored === event.home_team ? homeRating - awayRating : awayRating - homeRating) / 8, 7.5)
   let projectedLine = projected.margin
   let price = null
-  let priceStatus = 'MODEL_ONLY'
 
   if (market === 'spread') {
     const latest = latestMarketLine(event, oddsRows, 'spread', selection)
@@ -303,7 +301,6 @@ function buildPrediction({ event, market, home, away, projected, oddsRows }) {
     price = bindPrice(event, oddsRows, 'moneyline', selection, null)
   }
 
-  if (price) priceStatus = 'PRICE_AWARE_BOUND'
   const storedProbability = round(probability)
   const odds = price ? Number(price.price) : null
   const implied = odds === null ? null : impliedProbability(odds)
@@ -370,6 +367,10 @@ function buildReplayPredictionRow(prediction, event) {
     replayVersion: REPLAY_VERSION,
     replayRegime: FEATURE_REPLAY_REGIME,
     predictionOrigin: REPLAY_ORIGIN,
+    priceAware: prediction.priceAware,
+    priceEvidenceMode: prediction.priceAware ? 'PRICE_AWARE_BOUND' : prediction.bindingStatus,
+    sportsbook: prediction.sportsbook,
+    providerTimestamp: prediction.providerTimestamp,
     historicalOnly: true,
     currentEra: false,
     officialPickEligible: false,
@@ -570,6 +571,9 @@ function priceMetrics(rows) {
 }
 
 function buildMarkdown(cert) {
+  const nextStep = cert.status === 'NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY'
+    ? `Apply \`${cert.oddsNullabilityContract.migrationFile}\` through the approved Supabase migration channel, then rerun NBA-02B1-R3 canary persistence/readback before NBA-02B2 bulk replay.`
+    : 'Authorize the additive replay isolation migration before NBA-02B2 bulk replay.'
   return `# NBA-02B1 Replay Canary Certification
 
 Status: ${cert.status}
@@ -584,6 +588,8 @@ NBA-02B1 executed a deterministic, chronological, non-provider historical replay
 - Price-aware predictions: ${cert.priceAware.predictions}
 - Model-only predictions: ${cert.predictions.modelOnly}
 - Settlement preview checked: ${cert.settlementPreview.checked}
+- Model-only null-odds rows: ${cert.predictions.modelOnlyNullOdds ?? 0}
+- Price-aware null-odds rows: ${cert.predictions.priceAwareNullOdds ?? 0}
 
 ## Persistence Gate
 
@@ -594,6 +600,16 @@ Replay origin readback count: ${cert.persistenceDecision.readbackCount}
 Wrong origin count: ${cert.persistenceDecision.wrongOriginCount}
 
 ${cert.persistenceDecision.reason}
+
+## Odds Nullability Contract
+
+- Current Era requires odds: ${cert.oddsNullabilityContract?.currentEraRequiresOdds ?? true}
+- Official Pick requires odds: ${cert.oddsNullabilityContract?.officialPickRequiresOdds ?? true}
+- Price-aware replay requires odds: ${cert.oddsNullabilityContract?.priceAwareReplayRequiresOdds ?? true}
+- Model-only replay may lack odds: ${cert.oddsNullabilityContract?.modelOnlyReplayMayLackOdds ?? false}
+- Migration file: ${cert.oddsNullabilityContract?.migrationFile ?? 'not_applicable'}
+- 96-row dry run would insert: ${cert.oddsNullabilityContract?.dryRun?.wouldInsert ?? 0}
+- 96-row dry run would fail: ${cert.oddsNullabilityContract?.dryRun?.wouldFail ?? cert.predictions.planned}
 
 ## Safety
 
@@ -608,8 +624,16 @@ ${cert.persistenceDecision.reason}
 
 ## Next
 
-Authorize the additive replay isolation migration before NBA-02B2 bulk replay.
+${nextStep}
 `
+}
+
+function currentGitCommit() {
+  try {
+    return execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim()
+  } catch {
+    return null
+  }
 }
 
 async function main() {
@@ -671,6 +695,7 @@ async function main() {
   const eventsById = new Map(canaryEvents.map((event) => [event.id, event]))
   const replayRows = predictions.map((prediction) => buildReplayPredictionRow(prediction, eventsById.get(prediction.eventId)))
   const persistRequested = process.argv.includes('--persist')
+  const oddsNullabilityDesignRequested = process.argv.includes('--certify-odds-nullability')
   const persistenceResult = persistRequested && schemaIsolation.selectable
     ? await persistReplayRows(client, replayRows)
     : {
@@ -691,6 +716,13 @@ async function main() {
       )
     : []
   const wrongOriginCount = readback.filter((row) => row.prediction_origin !== REPLAY_ORIGIN).length
+  const modelOnlyNullOddsRows = replayRows.filter((row) => row.odds === null && row.certification_metadata?.priceAware === false)
+  const priceAwareNullOddsRows = replayRows.filter((row) => row.odds === null && row.certification_metadata?.priceAware === true)
+  const oddsNullabilityError = persistenceResult.errors.some((message) => /null value in column "odds"|odds.*not-null|odds.*not null/i.test(String(message)))
+  const wouldInsertAfterOddsNullabilityMigration =
+    schemaIsolation.selectable &&
+    priceAwareNullOddsRows.length === 0 &&
+    modelOnlyNullOddsRows.length === predictions.filter((row) => !row.priceAware).length
   const byMarket = Object.fromEntries(MARKETS.map((market) => {
     const rows = predictions.filter((row) => row.market === market)
     const settlement = summarizePredictions(rows)
@@ -714,12 +746,16 @@ async function main() {
   const cert = {
     status: persistencePerformed && readback.length === predictions.length && wrongOriginCount === 0
       ? 'NBA_02B1_REPLAY_CANARY_PERSISTED_ISOLATED'
+      : schemaIsolation.selectable && persistRequested && oddsNullabilityError
+        ? 'NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY'
+      : schemaIsolation.selectable && oddsNullabilityDesignRequested && wouldInsertAfterOddsNullabilityMigration
+        ? 'NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY'
       : schemaIsolation.selectable
         ? 'NBA_02B1_REPLAY_CANARY_SCHEMA_READY_PERSISTENCE_NOT_EXECUTED'
         : 'NBA_02B1_REPLAY_CANARY_DB_MIGRATION_AUTHORIZATION_REQUIRED',
     generatedAt: new Date().toISOString(),
-    startingCommit: '70d9d8055c203af6189e7a2bdc219142c87e609d',
-    productionCommit: '70d9d8055c203af6189e7a2bdc219142c87e609d',
+    startingCommit: currentGitCommit(),
+    productionCommit: currentGitCommit(),
     versions: {
       model: MODEL_VERSION,
       feature: FEATURE_VERSION,
@@ -760,7 +796,11 @@ async function main() {
         ? persistRequested
           ? persistencePerformed
             ? 'Canary replay rows persisted with explicit replay origin and readback validation.'
+            : oddsNullabilityError
+              ? 'Canary persistence reached the replay-origin schema but was blocked by prediction_history.odds NOT NULL for legitimate model-only replay rows. Apply the conditional odds-nullability migration before rerunning persistence.'
             : `Canary persistence failed: ${persistenceResult.errors.join('; ')}`
+          : oddsNullabilityDesignRequested
+            ? 'No-write R4 certification: canary rows require a conditional odds-nullability migration because legitimate model-only replay rows carry odds/implied_probability/edge/ev as null.'
           : 'Persistence intentionally deferred unless --persist is supplied.'
         : 'prediction_history.prediction_origin is missing in production schema; replay rows cannot be safely isolated by the certified regime field.',
       chunks: persistenceResult.chunks,
@@ -774,6 +814,8 @@ async function main() {
       updated: 0,
       failed: persistenceResult.failed,
       modelOnly: predictions.filter((row) => !row.priceAware).length,
+      modelOnlyNullOdds: modelOnlyNullOddsRows.length,
+      priceAwareNullOdds: priceAwareNullOddsRows.length,
       duplicateLogicalPredictions,
       moneyline: predictions.filter((row) => row.market === 'moneyline').length,
       spread: predictions.filter((row) => row.market === 'spread').length,
@@ -797,6 +839,7 @@ async function main() {
     },
     priceAware: {
       predictions: predictions.filter((row) => row.priceAware).length,
+      requiresOdds: true,
       moneyline: predictions.filter((row) => row.market === 'moneyline' && row.priceAware).length,
       spread: predictions.filter((row) => row.market === 'spread' && row.priceAware).length,
       total: predictions.filter((row) => row.market === 'total' && row.priceAware).length,
@@ -805,6 +848,8 @@ async function main() {
       historicalPriceRowsUsed: new Set(predictions.map((row) => row.providerTimestamp ? `${row.eventId}|${row.market}|${row.sportsbook}|${row.providerTimestamp}` : null).filter(Boolean)).size,
       postStartPriceRowsUsed: predictions.filter((row) => row.providerTimestamp && new Date(row.providerTimestamp).getTime() >= new Date(row.gameStart).getTime()).length,
       missingPrice: predictions.filter((row) => !row.priceAware && row.market !== 'first_half').length,
+      modelOnlyNullOdds: modelOnlyNullOddsRows.length,
+      priceAwareNullOdds: priceAwareNullOddsRows.length,
       ambiguousBinding: 0,
       moneylineBindingFailures: 0,
       spreadBindingFailures: 0,
@@ -840,7 +885,34 @@ async function main() {
       replaySettlementRowsWritten: 0,
       replaySettlementRowsReused: 0,
       settlementWriteFailures: 0,
-      reason: 'Persistence blocked by missing certified replay regime column; settlement remains preview-only.',
+      reason: persistencePerformed
+        ? 'Prediction persistence succeeded; settlement remains preview-only in NBA-02B1.'
+          : oddsNullabilityError || oddsNullabilityDesignRequested
+            ? 'Prediction persistence blocked by odds nullability contract; settlement remains preview-only.'
+          : 'Persistence blocked by missing certified replay regime column; settlement remains preview-only.',
+    },
+    oddsNullabilityContract: {
+      currentOddsType: 'integer',
+      currentOddsNullability: 'NOT NULL',
+      currentEraRequiresOdds: true,
+      officialPickRequiresOdds: true,
+      priceAwareReplayRequiresOdds: true,
+      modelOnlyReplayMayLackOdds: true,
+      migrationRequired: true,
+      migrationFile: 'supabase/migrations/202608140002_nba_replay_model_only_odds_nullability_v1.sql',
+      recommendedConstraint: 'prediction_history_replay_model_only_odds_check',
+      otherNotNullReplayBlockers: [],
+      valueMathNullSafety: {
+        impliedProbabilityNullWhenOddsNull: replayRows.filter((row) => row.odds === null && row.implied_probability !== null).length === 0,
+        edgeNullWhenOddsNull: replayRows.filter((row) => row.odds === null && row.edge !== null).length === 0,
+        evNullWhenOddsNull: replayRows.filter((row) => row.odds === null && row.ev !== null).length === 0,
+        noFakeOdds: replayRows.filter((row) => row.certification_metadata?.priceAware === false && (row.odds === 0 || row.odds === -110)).length === 0,
+      },
+      dryRun: {
+        wouldInsert: wouldInsertAfterOddsNullabilityMigration ? predictions.length : 0,
+        wouldFail: wouldInsertAfterOddsNullabilityMigration ? 0 : predictions.length,
+        failureReasons: wouldInsertAfterOddsNullabilityMigration ? [] : ['ODDS_NULLABILITY_CONTRACT_NOT_APPLIED'],
+      },
     },
     metrics: {
       modelReplayCanary: {
@@ -953,12 +1025,16 @@ async function main() {
       recommendedNext: schemaIsolation.selectable
         ? persistencePerformed
           ? 'NBA-02B1_POST_DEPLOY_CANARY_READBACK'
-          : 'NBA-02B1_R_CANARY_PERSISTENCE_EXECUTION'
+          : oddsNullabilityDesignRequested || oddsNullabilityError
+            ? 'NBA-02B1_R4_APPLY_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION'
+            : 'NBA-02B1_R_CANARY_PERSISTENCE_EXECUTION'
         : 'NBA-02B1_R_REPLAY_ISOLATION_SCHEMA_MIGRATION',
       nba02b2BulkAuthorizationRecommended: false,
       reason: schemaIsolation.selectable
         ? persistencePerformed
           ? 'Canary persistence and readback passed locally; production alignment/readback remains required before bulk replay.'
+          : oddsNullabilityDesignRequested || oddsNullabilityError
+            ? 'Conditional model-only odds-nullability migration is required before replay canary persistence can safely proceed.'
           : 'Schema is visible, but this run did not persist rows.'
         : 'Additive replay isolation schema column is required before any persisted bulk replay.',
     },

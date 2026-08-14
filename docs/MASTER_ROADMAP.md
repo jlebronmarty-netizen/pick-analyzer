@@ -3437,3 +3437,11 @@ Status: Local migration/runtime support prepared; production migration applicati
 Result: NBA-02B1-R adds a forward-safe migration file for nullable replay-origin governance on `prediction_history`, selecting generic `HISTORICAL_REPLAY_SHADOW` as the explicit replay origin while preserving existing origin values and avoiding defaults/backfills. The canary runner now supports explicit `--persist` mode and would write deterministic non-current shadow rows only, with Official Pick, product, Current Era, production learning, production calibration and settlement-debt flags closed. No migration was applied and no replay rows were inserted because this environment has no Supabase CLI, `psql`, direct database URL or protected SQL execution route.
 
 Next: apply `supabase/migrations/202608140001_nba_replay_isolation_prediction_origin_v1.sql` through an approved Supabase migration channel, rerun NBA-02B1-R with canary persistence/readback, then consider NBA-02B2 only after 96-row isolation and idempotency pass.
+
+## NBA-02B1-R4 Model-Only Odds Nullability
+
+Status: Additive odds-nullability migration prepared; production migration application required before persistence retry.
+
+Result: NBA-02B1-R4 audits `prediction_history.odds` as an integer column still physically `NOT NULL` after replay isolation fields became available. The 96-row canary legitimately includes 72 model-only replay rows with no certified sportsbook price and 24 price-aware rows with bound odds. The prepared migration drops the physical `NOT NULL` and adds an explicit check constraint permitting null odds only for isolated `HISTORICAL_REPLAY_SHADOW` model-only rows with product, Current Era, Official Pick, production learning and production calibration flags closed. Current Era, Official Pick and price-aware replay rows continue to require odds.
+
+Next: apply `supabase/migrations/202608140002_nba_replay_model_only_odds_nullability_v1.sql` through an approved Supabase migration channel, rerun NBA-02B1 canary persistence/readback/idempotency, then consider NBA-02B2 only after the 96-row canary persists cleanly.

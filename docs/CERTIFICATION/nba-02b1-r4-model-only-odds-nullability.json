@@ -1,0 +1,62 @@
+{
+  "status": "NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY",
+  "generatedAt": "2026-08-14T21:02:55.196Z",
+  "startingCommit": "7851003ee139bfda243c62004babb00ecaa8bf7a",
+  "productionCommit": "7851003ee139bfda243c62004babb00ecaa8bf7a",
+  "migration": {
+    "file": "supabase/migrations/202608140002_nba_replay_model_only_odds_nullability_v1.sql",
+    "applied": false,
+    "existingRowsModified": 0,
+    "rlsChanged": false,
+    "dropsNotNull": ["prediction_history.odds"],
+    "addsConstraint": "prediction_history_replay_model_only_odds_check",
+    "constraintSummary": "odds must be non-null unless the row is HISTORICAL_REPLAY_SHADOW, non-current, non-production, non-official, model_role=shadow and certification metadata explicitly says priceAware=false with a certified no-price replay mode."
+  },
+  "oddsAudit": {
+    "type": "integer",
+    "currentNullability": "NOT NULL",
+    "currentEraRequiresOdds": true,
+    "officialPickRequiresOdds": true,
+    "priceAwareReplayRequiresOdds": true,
+    "modelOnlyReplayMayLackOdds": true,
+    "otherNotNullReplayBlockers": []
+  },
+  "canary": {
+    "games": 24,
+    "predictions": 96,
+    "priceAwarePredictions": 24,
+    "modelOnlyPredictions": 72,
+    "modelOnlyNullOddsRows": 72,
+    "priceAwareNullOddsRows": 0,
+    "wouldInsertAfterMigration": 96,
+    "wouldFailAfterMigration": 0,
+    "settlementPreview": {
+      "checked": 96,
+      "wins": 52,
+      "losses": 44,
+      "pushes": 0,
+      "blocked": 0
+    }
+  },
+  "safety": {
+    "fabricatedOdds": 0,
+    "nullOddsImpliedProbabilityRows": 0,
+    "nullOddsEdgeRows": 0,
+    "nullOddsEvRows": 0,
+    "currentEraWrites": 0,
+    "officialPickWrites": 0,
+    "productionLearningWrites": 0,
+    "productionCalibrationWrites": 0,
+    "replaySettlementWrites": 0,
+    "providerCalls": 0,
+    "productionDbMutations": 0,
+    "nbaCurrentEraStatus": "INACTIVE",
+    "nbaSchedulerStatus": "INACTIVE",
+    "mlbRuntimeChanges": 0
+  },
+  "decision": {
+    "bulkReplayAuthorized": false,
+    "nextRecommendedPhase": "Apply the odds-nullability migration through an approved Supabase migration channel, then rerun NBA-02B1-R3 canary persistence/readback.",
+    "finalClassification": "NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY"
+  }
+}

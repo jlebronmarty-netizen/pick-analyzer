@@ -1,7 +1,9 @@
 import fs from 'node:fs'
 
 const migrationPath = 'supabase/migrations/202608140001_nba_replay_isolation_prediction_origin_v1.sql'
+const oddsNullabilityMigrationPath = 'supabase/migrations/202608140002_nba_replay_model_only_odds_nullability_v1.sql'
 const certPath = 'docs/CERTIFICATION/nba-02b1-replay-isolation-schema.json'
+const oddsNullabilityCertPath = 'docs/CERTIFICATION/nba-02b1-r4-model-only-odds-nullability.json'
 const canaryCertPath = 'docs/CERTIFICATION/nba-02b1-replay-canary.json'
 const servicePath = 'src/services/nba-replay-canary.service.ts'
 const runnerPath = 'scripts/nba-02b1-replay-canary.mjs'
@@ -12,7 +14,9 @@ function read(path) {
 }
 
 const migration = read(migrationPath)
+const oddsNullabilityMigration = read(oddsNullabilityMigrationPath)
 const cert = JSON.parse(read(certPath))
+const oddsNullabilityCert = JSON.parse(read(oddsNullabilityCertPath))
 const canary = JSON.parse(read(canaryCertPath))
 const service = read(servicePath)
 const runner = read(runnerPath)
@@ -33,12 +37,21 @@ check('migration preserves legacy origin values', ['LIVE_PREGAME', 'HISTORICAL_W
 check('replay origin explicit only', !/default\s+'HISTORICAL_REPLAY_SHADOW'/i.test(migration))
 check('RLS unchanged', !/enable row level security|create policy|drop policy|alter policy/i.test(migration))
 check('bounded replay index exists', migration.includes('prediction_history_replay_origin_lookup_idx') && migration.includes("where prediction_origin = 'HISTORICAL_REPLAY_SHADOW'"))
+check('odds nullability migration exists', oddsNullabilityMigration.includes('prediction_history_replay_model_only_odds_check'))
+check('odds nullability drops only physical not null', /alter\s+column\s+odds\s+drop\s+not\s+null/i.test(oddsNullabilityMigration) && !/drop\s+column|drop\s+table|truncate|delete\s+from|update\s+public\.prediction_history/i.test(oddsNullabilityMigration))
+check('odds nullability is replay conditional', oddsNullabilityMigration.includes("coalesce(prediction_origin, '') = 'HISTORICAL_REPLAY_SHADOW'") && oddsNullabilityMigration.includes("coalesce(certification_metadata ->> 'priceAware', '') = 'false'"))
+check('odds nullability preserves current/product safety', ['production_eligible', 'recommended_pick', 'is_current', 'model_role', 'officialPickEligible', 'productionCalibrationEligible', 'productionLearningEligible', 'productSurfaceVisible'].every((token) => oddsNullabilityMigration.includes(token)))
+check('odds nullability migration RLS unchanged', !/enable row level security|create policy|drop policy|alter policy/i.test(oddsNullabilityMigration))
+check('odds nullability cert is ready', oddsNullabilityCert.status === 'NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY' && oddsNullabilityCert.migration.applied === false)
 check('cert records migration blocked', cert.status === 'NBA_02B1_REPLAY_ISOLATION_MIGRATION_BLOCKED' && cert.migration.applied === false)
 check('cert records no existing row mutation', cert.migration.existingRowsMutatedBySql === 0)
 check('cert records no RLS change', cert.migration.rlsChanged === false)
 check('selected origin is generic replay shadow', cert.schemaAudit.selectedReplayOrigin === 'HISTORICAL_REPLAY_SHADOW')
 check('canary remains bounded', canary.canary.games === 24 && canary.predictions.planned === 96)
-check('canary persistence blocked by schema', canary.schemaIsolation.selectable === false && canary.predictions.persisted === 0)
+check('canary schema selectable', canary.schemaIsolation.selectable === true && canary.predictions.persisted === 0)
+check('canary odds nullability gate recorded', canary.status === 'NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY' && canary.oddsNullabilityContract.migrationRequired === true)
+check('canary model-only odds contract', canary.predictions.modelOnlyNullOdds === 72 && canary.predictions.priceAwareNullOdds === 0)
+check('canary dry run passes proposed odds contract', canary.oddsNullabilityContract.dryRun.wouldInsert === 96 && canary.oddsNullabilityContract.dryRun.wouldFail === 0)
 check('canary readback not fabricated', canary.persistenceDecision.readbackCount === 0 && canary.persistenceDecision.wrongOriginCount === 0)
 check('writer supports explicit persist mode', runner.includes('--persist') && runner.includes('persistReplayRows'))
 check('writer sets replay origin', runner.includes("prediction_origin: REPLAY_ORIGIN") && runner.includes("const REPLAY_ORIGIN = 'HISTORICAL_REPLAY_SHADOW'"))
