@@ -20,7 +20,7 @@ function check(name, passed) {
   console.log(`${passed ? 'PASS' : 'FAIL'} ${name}`)
 }
 
-check('final status is odds-nullability migration gate', cert.status === 'NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY')
+check('final status is persisted-isolated canary', cert.status === 'NBA_02B1_REPLAY_CANARY_PERSISTED_ISOLATED')
 check('canary game count bounded', cert.canary.games > 0 && cert.canary.games <= 36)
 check('prediction count bounded', cert.predictions.planned > 0 && cert.predictions.planned <= 144)
 check('deterministic selection recorded', cert.canary.deterministicSelection === true && cert.canary.selectionRule.includes('before outcome evaluation'))
@@ -50,7 +50,7 @@ check('Current Era requires odds', cert.oddsNullabilityContract.currentEraRequir
 check('Official Pick requires odds', cert.oddsNullabilityContract.officialPickRequiresOdds === true)
 check('null odds value math unavailable', cert.oddsNullabilityContract.valueMathNullSafety.impliedProbabilityNullWhenOddsNull === true && cert.oddsNullabilityContract.valueMathNullSafety.edgeNullWhenOddsNull === true && cert.oddsNullabilityContract.valueMathNullSafety.evNullWhenOddsNull === true)
 check('no fabricated model-only odds', cert.oddsNullabilityContract.valueMathNullSafety.noFakeOdds === true)
-check('96 row dry run passes proposed contract', cert.oddsNullabilityContract.dryRun.wouldInsert === 96 && cert.oddsNullabilityContract.dryRun.wouldFail === 0)
+check('96 row contract passes', cert.oddsNullabilityContract.dryRun.wouldInsert === 96 && cert.oddsNullabilityContract.dryRun.wouldFail === 0)
 check('target isolation passed', cert.featureSafety.acceptedLeakageViolations === 0)
 check('settlement preview passed', cert.settlementPreview.checked === 96 && cert.settlementPreview.blocked === 0 && cert.settlementPreview.identityMismatches === 0)
 check('settlement remains preview only', cert.settlementWrites.previewOnly === true && cert.settlementWrites.replaySettlementRowsWritten === 0)
@@ -60,13 +60,13 @@ check('settlement debt delta zero', cert.isolationDeltas.replayInducedSettlement
 check('duplicate logical predictions zero', cert.predictions.duplicateLogicalPredictions === 0)
 check('idempotency rerun simulated pass', cert.idempotency.secondRunPredictionsInserted === 0 && cert.idempotency.secondRunPredictionsReused === cert.predictions.planned)
 check('provider calls zero', cert.providers.ballDontLieCalls === 0 && cert.providers.theOddsApiHistoricalCalls === 0 && cert.providers.sportsDataIoCalls === 0)
-check('database mutations zero', Object.values(cert.databaseMutations).every((value) => Array.isArray(value) ? value.length === 0 : value === 0))
+check('database mutations bounded to replay prediction canary', cert.databaseMutations.tablesMutated.every((value) => value === 'prediction_history') && cert.databaseMutations.currentEraMutations === 0 && cert.databaseMutations.officialPickMutations === 0 && cert.databaseMutations.productionLearningMutations === 0 && cert.databaseMutations.productionCalibrationMutations === 0 && cert.databaseMutations.mlbMutationsFromNbaCanary === 0)
 check('bulk estimate generated', cert.bulkEstimate.expectedFullModelReplayPredictions === 14840 && cert.bulkEstimate.estimatedDbWriteChunks > 0)
 check('NBA Current Era inactive', cert.operations.nbaCurrentEraStatus === 'INACTIVE' && cert.operations.nbaSchedulerStatus === 'INACTIVE')
 check('schema blocker resolved', cert.schemaIsolation.selectable === true && cert.schemaIsolation.error === null)
 check('service exposes deterministic idempotency', service.includes('buildNba02b1PredictionIdempotencyKey') && service.includes('NBA_02B1_REPLAY_VERSION'))
 check('runner performs no provider calls', !runner.includes('api.the-odds-api.com') && !runner.includes('api.balldontlie.io') && !runner.includes('sportsdata.io'))
-check('doc records odds-nullability gate', doc.includes('NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY') && doc.includes('Model-only replay may lack odds'))
+check('doc records persisted-isolated canary', doc.includes('NBA_02B1_REPLAY_CANARY_PERSISTED_ISOLATED') && doc.includes('Replay origin readback count: 96'))
 
 const failed = checks.filter((item) => !item.passed)
 console.log(`\nnba_02b1_replay_canary_validate_v1 ${failed.length ? 'FAIL' : 'PASS'} ${checks.length - failed.length}/${checks.length}`)

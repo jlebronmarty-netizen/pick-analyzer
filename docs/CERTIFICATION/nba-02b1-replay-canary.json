@@ -1,8 +1,8 @@
 {
-  "status": "NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY",
-  "generatedAt": "2026-08-14T21:02:55.196Z",
-  "startingCommit": "7851003ee139bfda243c62004babb00ecaa8bf7a",
-  "productionCommit": "7851003ee139bfda243c62004babb00ecaa8bf7a",
+  "status": "NBA_02B1_REPLAY_CANARY_PERSISTED_ISOLATED",
+  "generatedAt": "2026-08-14T22:09:11.471Z",
+  "startingCommit": "a6dde36a2aa03cd5155de7bcfc7b249514f66ffa",
+  "productionCommit": "a6dde36a2aa03cd5155de7bcfc7b249514f66ffa",
   "versions": {
     "model": "nba_prediction_engine_v1",
     "feature": "nba_historical_pregame_feature_set_v1",
@@ -296,17 +296,17 @@
   },
   "persistenceDecision": {
     "safeToPersist": true,
-    "persistenceRequested": false,
-    "persistencePerformed": false,
-    "reason": "No-write R4 certification: canary rows require a conditional odds-nullability migration because legitimate model-only replay rows carry odds/implied_probability/edge/ev as null.",
-    "chunks": 0,
-    "readbackCount": 0,
+    "persistenceRequested": true,
+    "persistencePerformed": true,
+    "reason": "Canary replay rows persisted with explicit replay origin and readback validation.",
+    "chunks": 4,
+    "readbackCount": 96,
     "wrongOriginCount": 0
   },
   "predictions": {
     "planned": 96,
     "persisted": 0,
-    "reused": 0,
+    "reused": 96,
     "updated": 0,
     "failed": 0,
     "modelOnly": 72,
@@ -553,16 +553,16 @@
     "replaySettlementRowsWritten": 0,
     "replaySettlementRowsReused": 0,
     "settlementWriteFailures": 0,
-    "reason": "Prediction persistence blocked by odds nullability contract; settlement remains preview-only."
+    "reason": "Prediction persistence succeeded; settlement remains preview-only in NBA-02B1."
   },
   "oddsNullabilityContract": {
     "currentOddsType": "integer",
-    "currentOddsNullability": "NOT NULL",
+    "currentOddsNullability": "NULLABLE_WITH_REPLAY_MODEL_ONLY_CHECK",
     "currentEraRequiresOdds": true,
     "officialPickRequiresOdds": true,
     "priceAwareReplayRequiresOdds": true,
     "modelOnlyReplayMayLackOdds": true,
-    "migrationRequired": true,
+    "migrationRequired": false,
     "migrationFile": "supabase/migrations/202608140002_nba_replay_model_only_odds_nullability_v1.sql",
     "recommendedConstraint": "prediction_history_replay_model_only_odds_check",
     "otherNotNullReplayBlockers": [],
@@ -788,10 +788,12 @@
     "secondRunPredictionsReused": 96,
     "duplicateLogicalPredictions": 0,
     "settlementDuplicateWrites": 0,
-    "idempotencyMode": "SIMULATED_BY_DETERMINISTIC_KEYS_OR_BLOCKED_SCHEMA"
+    "idempotencyMode": "PERSISTED_BY_DETERMINISTIC_UUID_AND_IDEMPOTENCY_KEY"
   },
   "databaseMutations": {
-    "tablesMutated": [],
+    "tablesMutated": [
+      "prediction_history"
+    ],
     "replayPredictionInserts": 0,
     "replayPredictionUpdates": 0,
     "replaySettlementInserts": 0,
@@ -827,9 +829,9 @@
     "resumeStrategy": "idempotency_key plus replay version checkpoints"
   },
   "bulkPhaseRecommendation": {
-    "recommendedNext": "NBA-02B1_R4_APPLY_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION",
-    "nba02b2BulkAuthorizationRecommended": false,
-    "reason": "Conditional model-only odds-nullability migration is required before replay canary persistence can safely proceed."
+    "recommendedNext": "NBA-02B2_BULK_MODEL_REPLAY",
+    "nba02b2BulkAuthorizationRecommended": true,
+    "reason": "Canary persistence, readback and idempotency passed; NBA-02B2 bulk replay requires separate explicit authorization."
   },
   "subscription": {
     "ballDontLieAllStarSufficientForFutureRuntime": "UNKNOWN_PENDING_FORWARD_RUNTIME_CERTIFICATION",

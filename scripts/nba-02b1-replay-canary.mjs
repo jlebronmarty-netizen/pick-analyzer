@@ -572,8 +572,10 @@ function priceMetrics(rows) {
 
 function buildMarkdown(cert) {
   const nextStep = cert.status === 'NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY'
-    ? `Apply \`${cert.oddsNullabilityContract.migrationFile}\` through the approved Supabase migration channel, then rerun NBA-02B1-R3 canary persistence/readback before NBA-02B2 bulk replay.`
-    : 'Authorize the additive replay isolation migration before NBA-02B2 bulk replay.'
+    ? `Apply \`${cert.oddsNullabilityContract.migrationFile}\` through the approved Supabase migration channel, then rerun NBA-02B1-R5 canary persistence/readback before NBA-02B2 bulk replay.`
+    : cert.status === 'NBA_02B1_REPLAY_CANARY_PERSISTED_ISOLATED'
+      ? 'NBA-02B2 bulk model replay is eligible for explicit authorization; do not start it automatically.'
+      : 'Authorize the additive replay isolation migration before NBA-02B2 bulk replay.'
   return `# NBA-02B1 Replay Canary Certification
 
 Status: ${cert.status}
@@ -893,12 +895,12 @@ async function main() {
     },
     oddsNullabilityContract: {
       currentOddsType: 'integer',
-      currentOddsNullability: 'NOT NULL',
+      currentOddsNullability: persistencePerformed ? 'NULLABLE_WITH_REPLAY_MODEL_ONLY_CHECK' : 'NOT NULL',
       currentEraRequiresOdds: true,
       officialPickRequiresOdds: true,
       priceAwareReplayRequiresOdds: true,
       modelOnlyReplayMayLackOdds: true,
-      migrationRequired: true,
+      migrationRequired: !persistencePerformed,
       migrationFile: 'supabase/migrations/202608140002_nba_replay_model_only_odds_nullability_v1.sql',
       recommendedConstraint: 'prediction_history_replay_model_only_odds_check',
       otherNotNullReplayBlockers: [],
@@ -1024,15 +1026,15 @@ async function main() {
     bulkPhaseRecommendation: {
       recommendedNext: schemaIsolation.selectable
         ? persistencePerformed
-          ? 'NBA-02B1_POST_DEPLOY_CANARY_READBACK'
+          ? 'NBA-02B2_BULK_MODEL_REPLAY'
           : oddsNullabilityDesignRequested || oddsNullabilityError
             ? 'NBA-02B1_R4_APPLY_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION'
             : 'NBA-02B1_R_CANARY_PERSISTENCE_EXECUTION'
         : 'NBA-02B1_R_REPLAY_ISOLATION_SCHEMA_MIGRATION',
-      nba02b2BulkAuthorizationRecommended: false,
+      nba02b2BulkAuthorizationRecommended: persistencePerformed && readback.length === predictions.length && wrongOriginCount === 0,
       reason: schemaIsolation.selectable
         ? persistencePerformed
-          ? 'Canary persistence and readback passed locally; production alignment/readback remains required before bulk replay.'
+          ? 'Canary persistence, readback and idempotency passed; NBA-02B2 bulk replay requires separate explicit authorization.'
           : oddsNullabilityDesignRequested || oddsNullabilityError
             ? 'Conditional model-only odds-nullability migration is required before replay canary persistence can safely proceed.'
           : 'Schema is visible, but this run did not persist rows.'

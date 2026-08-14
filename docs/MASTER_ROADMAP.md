@@ -3445,3 +3445,11 @@ Status: Additive odds-nullability migration prepared; production migration appli
 Result: NBA-02B1-R4 audits `prediction_history.odds` as an integer column still physically `NOT NULL` after replay isolation fields became available. The 96-row canary legitimately includes 72 model-only replay rows with no certified sportsbook price and 24 price-aware rows with bound odds. The prepared migration drops the physical `NOT NULL` and adds an explicit check constraint permitting null odds only for isolated `HISTORICAL_REPLAY_SHADOW` model-only rows with product, Current Era, Official Pick, production learning and production calibration flags closed. Current Era, Official Pick and price-aware replay rows continue to require odds.
 
 Next: apply `supabase/migrations/202608140002_nba_replay_model_only_odds_nullability_v1.sql` through an approved Supabase migration channel, rerun NBA-02B1 canary persistence/readback/idempotency, then consider NBA-02B2 only after the 96-row canary persists cleanly.
+
+## NBA-02B1-R5 Replay Canary Persistence
+
+Status: Canary persistence/readback/idempotency passed; bulk replay requires explicit authorization.
+
+Result: After the R4 migration was applied externally, NBA-02B1-R5 persisted the exact certified 24-game / 96-prediction replay canary as isolated `HISTORICAL_REPLAY_SHADOW` rows. The first run inserted 96 replay predictions and the second run inserted 0 while reusing all 96 deterministic rows. Readback found 96 replay rows, 72 model-only null-odds rows, 24 price-aware rows with real odds, 0 non-replay null-odds rows, 0 wrong-origin rows, 0 duplicate logical rows and 0 Current Era identity collisions. Settlement remained preview-only with 52 wins, 44 losses, 0 pushes and 0 blockers. NBA Current Era, Official Picks, production learning, production calibration, Current Era Performance, settlement debt and product surfaces remained isolated.
+
+Next: `NBA-02B2_BULK_MODEL_REPLAY` is ready for explicit authorization. Do not start bulk replay automatically.

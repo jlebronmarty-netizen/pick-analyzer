@@ -1,6 +1,6 @@
 # NBA-02B1 Replay Canary Certification
 
-Status: NBA_02B1_MODEL_ONLY_ODDS_NULLABILITY_MIGRATION_READY
+Status: NBA_02B1_REPLAY_CANARY_PERSISTED_ISOLATED
 
 NBA-02B1 executed a deterministic, chronological, non-provider historical replay canary using stored NBA evidence only.
 
@@ -18,12 +18,12 @@ NBA-02B1 executed a deterministic, chronological, non-provider historical replay
 ## Persistence Gate
 
 Schema selectable: true
-Persistence requested: false
-Persistence performed: false
-Replay origin readback count: 0
+Persistence requested: true
+Persistence performed: true
+Replay origin readback count: 96
 Wrong origin count: 0
 
-No-write R4 certification: canary rows require a conditional odds-nullability migration because legitimate model-only replay rows carry odds/implied_probability/edge/ev as null.
+Canary replay rows persisted with explicit replay origin and readback validation.
 
 ## Odds Nullability Contract
 
@@ -48,4 +48,4 @@ No-write R4 certification: canary rows require a conditional odds-nullability mi
 
 ## Next
 
-Apply `supabase/migrations/202608140002_nba_replay_model_only_odds_nullability_v1.sql` through the approved Supabase migration channel, then rerun NBA-02B1-R3 canary persistence/readback before NBA-02B2 bulk replay.
+NBA-02B2 bulk model replay is eligible for explicit authorization; do not start it automatically.

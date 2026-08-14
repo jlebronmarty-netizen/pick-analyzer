@@ -1,0 +1,168 @@
+{
+  "status": "NBA_02B1_R5_REPLAY_CANARY_PERSISTENCE_PASS_READY_FOR_BULK",
+  "generatedAt": "2026-08-14T22:12:00.000Z",
+  "repository": "C:\\Projects\\pick-analyzer",
+  "productionCommit": "a6dde36a2aa03cd5155de7bcfc7b249514f66ffa",
+  "schemaPrevalidation": {
+    "predictionHistoryRowsBefore": 3573,
+    "predictionHistoryRowsAfter": 3669,
+    "schemaValidRows": 96,
+    "schemaInvalidRows": 0,
+    "modelOnlyNullOddsValid": 72,
+    "priceAwareNonNullOddsValid": 24,
+    "remainingNotNullBlockers": 0,
+    "remainingCheckConstraintBlockers": 0,
+    "oddsType": "integer",
+    "oddsNullable": true,
+    "constraint": "prediction_history_replay_model_only_odds_check"
+  },
+  "canary": {
+    "games": 24,
+    "predictionsPlanned": 96,
+    "bySeason": {
+      "2022-23": 8,
+      "2023-24": 8,
+      "2024-25": 8
+    },
+    "moneyline": 24,
+    "spread": 24,
+    "total": 24,
+    "firstHalf": 24,
+    "priceAwareRows": 24,
+    "modelOnlyRows": 72
+  },
+  "firstRun": {
+    "planned": 96,
+    "inserted": 96,
+    "reused": 0,
+    "updated": 0,
+    "failed": 0,
+    "writeChunks": 4,
+    "failureReasons": []
+  },
+  "secondRun": {
+    "newLogicalPredictions": 0,
+    "inserted": 0,
+    "reused": 96,
+    "updated": 0,
+    "failed": 0,
+    "duplicateLogicalPredictions": 0
+  },
+  "readback": {
+    "replayRowsExpected": 96,
+    "replayRowsFound": 96,
+    "missingRows": 0,
+    "wrongOrigin": 0,
+    "wrongSport": 0,
+    "wrongModelVersion": 0,
+    "wrongFeatureVersion": 0,
+    "wrongRegime": 0,
+    "duplicateLogicalRows": 0,
+    "currentEraIdentityCollisions": 0
+  },
+  "nullOddsSafety": {
+    "allNullOddsRows": 72,
+    "nullOddsReplayShadowRows": 72,
+    "nullOddsNonReplayRows": 0,
+    "nullOddsCurrentEraRows": 0,
+    "nullOddsOfficialPickRows": 0,
+    "nullOddsPriceAwareReplayRows": 0,
+    "modelOnlyValueMathMismatches": 0,
+    "fakeZeroOddsRows": 0,
+    "fakeMinus110ModelOnlyRows": 0
+  },
+  "priceAwareReadback": {
+    "rows": 24,
+    "nullOdds": 0,
+    "postStartPrices": 0,
+    "identityMismatches": 0,
+    "historicalPriceIdentityRetained": true
+  },
+  "settlementPreview": {
+    "checked": 96,
+    "wins": 52,
+    "losses": 44,
+    "pushes": 0,
+    "blocked": 0,
+    "byMarket": {
+      "moneyline": {
+        "checked": 24,
+        "wins": 14,
+        "losses": 10,
+        "pushes": 0,
+        "blocked": 0
+      },
+      "spread": {
+        "checked": 24,
+        "wins": 13,
+        "losses": 11,
+        "pushes": 0,
+        "blocked": 0
+      },
+      "total": {
+        "checked": 24,
+        "wins": 13,
+        "losses": 11,
+        "pushes": 0,
+        "blocked": 0
+      },
+      "firstHalf": {
+        "checked": 24,
+        "wins": 12,
+        "losses": 12,
+        "pushes": 0,
+        "blocked": 0
+      }
+    }
+  },
+  "isolation": {
+    "replaySettlementWrites": 0,
+    "nbaCurrentEraDelta": 0,
+    "officialPickDelta": 0,
+    "productionLearningDelta": 0,
+    "productionCalibrationDelta": 0,
+    "currentEraPerformanceDelta": 0,
+    "settlementDebtDelta": 0,
+    "productSurfaceReplayVisibility": 0,
+    "nbaCurrentEraStatus": "INACTIVE",
+    "nbaSchedulerStatus": "INACTIVE"
+  },
+  "providers": {
+    "ballDontLieCalls": 0,
+    "theOddsApiHistoricalCalls": 0,
+    "sportsDataIoCalls": 0
+  },
+  "mlbParallelStatus": {
+    "mlbProductionCommit": "a6dde36a2aa03cd5155de7bcfc7b249514f66ffa",
+    "bootstrapMarkedPredictions": 49,
+    "bootstrapSettledPredictions": 0,
+    "calibrationEligibleSettledSamples": 0,
+    "calibrationRequired": 250,
+    "calibrationStatus": "INSUFFICIENT_DATA",
+    "mlbFirstBootstrapSettlementConfirmed": false,
+    "sportsDataIoRoutineExternalCalls": 0,
+    "mlbHealth": "HEALTHY"
+  },
+  "health": {
+    "scheduler": "HEALTHY",
+    "providerBudget": "HEALTHY",
+    "settlement": "HEALTHY",
+    "marketFreshness": "HEALTHY",
+    "currentBoard": "PASS",
+    "operations": "HEALTHY"
+  },
+  "databaseMutations": {
+    "replayPredictionInserts": 96,
+    "replayPredictionReuses": 96,
+    "replayPredictionUpdates": 0,
+    "replayPredictionFailures": 0,
+    "currentEraMutations": 0,
+    "officialPickMutations": 0,
+    "productionLearningMutations": 0,
+    "productionCalibrationMutations": 0,
+    "mlbMutationsFromNbaWork": 0
+  },
+  "bulkModelReplayAuthorizationRecommended": true,
+  "nextRecommendedPhase": "NBA-02B2_BULK_MODEL_REPLAY",
+  "finalClassification": "NBA_02B1_R5_REPLAY_CANARY_PERSISTENCE_PASS_READY_FOR_BULK"
+}
