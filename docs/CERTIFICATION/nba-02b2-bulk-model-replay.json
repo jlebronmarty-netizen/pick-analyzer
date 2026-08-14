@@ -1,0 +1,441 @@
+{
+  "status": "NBA_02B2_BULK_MODEL_REPLAY_PASS_READY_FOR_PRICE_AWARE_EVALUATION",
+  "generatedAt": "2026-08-14T22:49:58.023Z",
+  "command": "resume",
+  "startingCommit": "dc4e56eee09b2168709944df63e75a8cdec8110f",
+  "productionCommit": "dc4e56eee09b2168709944df63e75a8cdec8110f",
+  "versions": {
+    "model": "nba_prediction_engine_v1",
+    "feature": "nba_historical_pregame_feature_set_v1",
+    "reconstruction": "nba_historical_feature_reconstruction_v1",
+    "replay": "NBA_MODEL_REPLAY_V1",
+    "regime": "NBA_HISTORICAL_REPLAY_SHADOW",
+    "predictionOrigin": "HISTORICAL_REPLAY_SHADOW"
+  },
+  "execution": {
+    "startTime": "2026-08-14T22:48:49.290Z",
+    "endTime": "2026-08-14T22:49:58.015Z",
+    "durationMs": 68725,
+    "durationMinutes": 1.15,
+    "eventsPerMinute": 3239,
+    "predictionsPerMinute": 12955.98,
+    "readBatchSize": 1000,
+    "writeBatchSize": 100,
+    "checkpointIntervalEvents": 250,
+    "dbChunks": 0,
+    "retries": 0,
+    "observedMemoryMb": 191.5
+  },
+  "preBulkInventory": {
+    "replayReadyEvents": 3710,
+    "expectedLogicalPredictions": 14840,
+    "existingReplayPredictions": 96,
+    "existingCanaryPredictions": 96,
+    "currentReplayPredictionsAtCertification": 14840,
+    "remainingLogicalPredictionsToCreate": 14744,
+    "duplicateLogicalPredictionsBeforeBulk": 0
+  },
+  "deterministicOrder": {
+    "order": [
+      "season",
+      "game start timestamp",
+      "event id",
+      "market ordering"
+    ],
+    "oldestEvent": "nba_bdl_857355",
+    "newestEvent": "nba_bdl_18423251",
+    "outcomeOrdered": false
+  },
+  "manifest": {
+    "path": ".codex\\nba-02b2-bulk-model-replay\\manifest.json",
+    "gitignored": true,
+    "total": 14840,
+    "completed": 14840,
+    "persisted": 14744,
+    "reused": 96,
+    "failed": 0,
+    "blocked": 0,
+    "plannedRemaining": 0,
+    "byStatus": {
+      "PLANNED": 0,
+      "GENERATED": 0,
+      "PERSISTED": 14744,
+      "REUSED": 96,
+      "FAILED": 0,
+      "BLOCKED": 0
+    }
+  },
+  "markets": {
+    "supported": [
+      "moneyline",
+      "spread",
+      "total",
+      "first_half"
+    ],
+    "count": 4,
+    "byMarket": {
+      "moneyline": {
+        "planned": 3710,
+        "priceAware": 1112,
+        "modelOnly": 2598,
+        "oddsNull": 2598,
+        "probability": {
+          "count": 3710,
+          "min": 31.62,
+          "p10": 47.91,
+          "p25": 53.81,
+          "median": 61.8,
+          "p75": 69.3,
+          "p90": 75.16,
+          "max": 84.61,
+          "distinct": 2359
+        },
+        "confidence": {
+          "count": 3710,
+          "min": 41.38,
+          "p10": 50.97,
+          "p25": 54.44,
+          "median": 59.29,
+          "p75": 63.67,
+          "p90": 67.23,
+          "max": 97.34,
+          "distinct": 1861
+        }
+      },
+      "spread": {
+        "planned": 3710,
+        "priceAware": 1112,
+        "modelOnly": 2598,
+        "oddsNull": 2598,
+        "probability": {
+          "count": 3710,
+          "min": 15.43,
+          "p10": 28.85,
+          "p25": 42.42,
+          "median": 54.18,
+          "p75": 69.29,
+          "p90": 78.96,
+          "max": 84.99,
+          "distinct": 242
+        },
+        "confidence": {
+          "count": 3710,
+          "min": 31.99,
+          "p10": 39.77,
+          "p25": 47.64,
+          "median": 54.46,
+          "p75": 63.78,
+          "p90": 69.43,
+          "max": 90.37,
+          "distinct": 364
+        }
+      },
+      "total": {
+        "planned": 3710,
+        "priceAware": 1112,
+        "modelOnly": 2598,
+        "oddsNull": 2598,
+        "probability": {
+          "count": 3710,
+          "min": 50,
+          "p10": 53.92,
+          "p25": 59.39,
+          "median": 67.52,
+          "p75": 75.49,
+          "p90": 80.27,
+          "max": 84.87,
+          "distinct": 193
+        },
+        "confidence": {
+          "count": 3710,
+          "min": 52.04,
+          "p10": 54.56,
+          "p25": 58.19,
+          "median": 63.81,
+          "p75": 69.19,
+          "p90": 74.38,
+          "max": 89.88,
+          "distinct": 490
+        }
+      },
+      "first_half": {
+        "planned": 3710,
+        "priceAware": 0,
+        "modelOnly": 3710,
+        "oddsNull": 3710,
+        "probability": {
+          "count": 3710,
+          "min": 50,
+          "p10": 53.49,
+          "p25": 57.58,
+          "median": 64.48,
+          "p75": 71.59,
+          "p90": 76.95,
+          "max": 84.49,
+          "distinct": 106
+        },
+        "confidence": {
+          "count": 3710,
+          "min": 52.04,
+          "p10": 54.06,
+          "p25": 56.44,
+          "median": 60.44,
+          "p75": 64.56,
+          "p90": 67.67,
+          "max": 72.05,
+          "distinct": 106
+        }
+      }
+    }
+  },
+  "seasons": {
+    "2022-23": {
+      "events": 1236,
+      "predictions": 4944,
+      "priceAware": 0,
+      "modelOnly": 4944
+    },
+    "2023-24": {
+      "events": 1237,
+      "predictions": 4948,
+      "priceAware": 0,
+      "modelOnly": 4948
+    },
+    "2024-25": {
+      "events": 1237,
+      "predictions": 4948,
+      "priceAware": 3336,
+      "modelOnly": 1612
+    }
+  },
+  "featureSafety": {
+    "featureAsOfBeforeStartViolations": 0,
+    "oddsTimestampPregameViolations": 0,
+    "acceptedLeakageViolations": 0,
+    "source": "certified NBA-02A historical reconstructed evidence",
+    "finalResultUsedInInference": false
+  },
+  "persistence": {
+    "predictionHistoryInserts": 14744,
+    "predictionHistoryReuses": 96,
+    "predictionHistoryUpdates": 0,
+    "commandInserted": 0,
+    "commandReused": 14840,
+    "bulkRowsCreatedByNba02b2": 14744,
+    "replayFailures": 0,
+    "errors": [],
+    "canaryRowsReusedDuringBulk": 96
+  },
+  "completeness": {
+    "plannedLogicalPredictions": 14840,
+    "found": 14840,
+    "persistedOrReused": 14840,
+    "blocked": 0,
+    "failed": 0,
+    "missing": 0,
+    "duplicates": 0,
+    "wrongOrigin": 0,
+    "wrongSport": 0,
+    "wrongModelVersion": 0,
+    "wrongFeatureVersion": 0,
+    "wrongReplayVersion": 0
+  },
+  "nullOddsAudit": {
+    "allNbaReplayRows": 14840,
+    "replayRowsCurrentEraContaminated": 0,
+    "replayRowsWithOddsNull": 11504,
+    "replayRowsWithOddsNonNull": 3336,
+    "nonReplayRowsWithOddsNull": 0,
+    "currentEraRowsWithOddsNull": 0,
+    "officialPickRowsWithOddsNull": 0,
+    "priceAwareReplayRowsWithOddsNull": 0,
+    "modelOnlyReplayRowsWithOddsNull": 11504
+  },
+  "sanity": {
+    "nanProbability": 0,
+    "probabilityBelowZero": 0,
+    "probabilityAboveHundred": 0,
+    "missingSelection": 0,
+    "invalidConfidence": 0,
+    "impossibleLines": 0,
+    "probabilityDistribution": {
+      "count": 14840,
+      "min": 15.43,
+      "p10": 46.51,
+      "p25": 54.18,
+      "median": 63.24,
+      "p75": 71.7,
+      "p90": 78.17,
+      "max": 84.99,
+      "distinct": 2641
+    },
+    "confidenceDistribution": {
+      "count": 14840,
+      "min": 31.99,
+      "p10": 50.02,
+      "p25": 54.56,
+      "median": 60.08,
+      "p75": 65.52,
+      "p90": 69.6,
+      "max": 97.34,
+      "distinct": 2346
+    },
+    "constantOutputDetected": false,
+    "collapsedConfidenceDetected": false,
+    "modelBehaviorClassification": "MECHANICALLY_VALID_READY_FOR_PRICE_AWARE_EVALUATION"
+  },
+  "settlementPreview": {
+    "previewOnly": true,
+    "replaySettlementWrites": 0,
+    "canary": {
+      "checked": 96,
+      "wins": 52,
+      "losses": 44,
+      "pushes": 0,
+      "blocked": 0,
+      "accuracy": 54.17,
+      "averageProbability": 64.33,
+      "averageConfidence": 61.64
+    }
+  },
+  "productIsolation": {
+    "homepage": 0,
+    "currentBoard": 0,
+    "mostLikelyCurrent": 0,
+    "bestValueCurrent": 0,
+    "watchlist": 0,
+    "rentPlay": 0,
+    "officialPicks": 0,
+    "totalVisible": 0
+  },
+  "currentEraPerformance": {
+    "before": null,
+    "after": null,
+    "replayInducedDelta": 0
+  },
+  "settlementDebt": {
+    "currentSettlementReadyBefore": null,
+    "currentSettlementReadyAfter": null,
+    "replayInducedDelta": 0,
+    "silentPendingDelta": 0
+  },
+  "learning": {
+    "productionLearningReplayInducedDelta": 0,
+    "duplicateLearningLabels": 0
+  },
+  "calibration": {
+    "productionCalibrationReplayInducedDelta": 0
+  },
+  "officialPicks": {
+    "nbaOfficialPickDelta": 0,
+    "historicalReplayOfficialPicks": 0
+  },
+  "providers": {
+    "ballDontLieHistoricalCalls": 0,
+    "theOddsApiHistoricalCalls": 0,
+    "sportsDataIoCalls": 0,
+    "totalProviderCalls": 0
+  },
+  "nbaCurrentEra": {
+    "status": "INACTIVE",
+    "scheduler": "INACTIVE",
+    "currentDayProductionPredictionsCaused": 0
+  },
+  "mlbParallelObservation": {
+    "mlbProductionCommit": null,
+    "bootstrapMarkedPredictions": null,
+    "bootstrapSettledPredictions": null,
+    "calibrationEligibleSettledSamples": null,
+    "calibrationRequired": null,
+    "calibrationStatus": "READ_ONLY_FINAL_CHECK_REQUIRED",
+    "firstBootstrapSettlementConfirmed": null,
+    "sportsDataIoRoutineExternalCalls": null,
+    "mlbHealth": "READ_ONLY_FINAL_CHECK_REQUIRED"
+  },
+  "idempotency": {
+    "fullLogicalDryRunNewNeeded": 0,
+    "resumePass": true,
+    "canaryRowsReused": 96
+  },
+  "performancePrep": {
+    "cohortsPreparedOnly": true,
+    "modelReplayBySeason": {
+      "2022-23": {
+        "events": 1236,
+        "predictions": 4944,
+        "priceAware": 0,
+        "modelOnly": 4944
+      },
+      "2023-24": {
+        "events": 1237,
+        "predictions": 4948,
+        "priceAware": 0,
+        "modelOnly": 4948
+      },
+      "2024-25": {
+        "events": 1237,
+        "predictions": 4948,
+        "priceAware": 3336,
+        "modelOnly": 1612
+      }
+    },
+    "priceAwareReplayByMarket": {
+      "moneyline": 1112,
+      "spread": 1112,
+      "total": 1112,
+      "first_half": 0
+    },
+    "probabilityBuckets": [
+      "0-40",
+      "40-50",
+      "50-60",
+      "60-70",
+      "70-80",
+      "80-100"
+    ],
+    "confidenceBuckets": [
+      "0-40",
+      "40-55",
+      "55-70",
+      "70-85",
+      "85-100"
+    ]
+  },
+  "nba02b3Handoff": {
+    "priceAwareEvents": 1112,
+    "moneylineCandidates": 1112,
+    "spreadCandidates": 1112,
+    "totalCandidates": 1112,
+    "firstHalfCandidates": 0,
+    "modelOnlyRows": 11504
+  },
+  "mutationAccounting": {
+    "predictionHistoryInserts": 14744,
+    "predictionHistoryReuses": 96,
+    "predictionHistoryUpdates": 0,
+    "commandInserted": 0,
+    "commandReused": 14840,
+    "replayFailures": 0,
+    "manifestAuditWrites": 1,
+    "currentEraWrites": 0,
+    "officialPickWrites": 0,
+    "productionLearningWrites": 0,
+    "productionCalibrationWrites": 0,
+    "mlbWritesCausedByNbaBulk": 0
+  },
+  "databaseMutations": {
+    "tablesMutated": [
+      "prediction_history"
+    ],
+    "replayPredictionInserts": 14744,
+    "replayPredictionUpdates": 0,
+    "replaySettlementInserts": 0,
+    "replaySettlementUpdates": 0,
+    "currentEraMutations": 0,
+    "officialPickMutations": 0,
+    "productionLearningMutations": 0,
+    "productionCalibrationMutations": 0,
+    "mlbMutationsFromNbaWork": 0
+  },
+  "nextRecommendedPhase": "NBA-02B3_PRICE_AWARE_HISTORICAL_EVALUATION"
+}

@@ -3453,3 +3453,13 @@ Status: Canary persistence/readback/idempotency passed; bulk replay requires exp
 Result: After the R4 migration was applied externally, NBA-02B1-R5 persisted the exact certified 24-game / 96-prediction replay canary as isolated `HISTORICAL_REPLAY_SHADOW` rows. The first run inserted 96 replay predictions and the second run inserted 0 while reusing all 96 deterministic rows. Readback found 96 replay rows, 72 model-only null-odds rows, 24 price-aware rows with real odds, 0 non-replay null-odds rows, 0 wrong-origin rows, 0 duplicate logical rows and 0 Current Era identity collisions. Settlement remained preview-only with 52 wins, 44 losses, 0 pushes and 0 blockers. NBA Current Era, Official Picks, production learning, production calibration, Current Era Performance, settlement debt and product surfaces remained isolated.
 
 Next: `NBA-02B2_BULK_MODEL_REPLAY` is ready for explicit authorization. Do not start bulk replay automatically.
+
+## NBA-02B2 Bulk Model Replay
+
+Status: Local certification PASS, push required.
+
+Result: NBA-02B2 completed the authorized full historical model replay from stored evidence only. The phase processed 3,710 certified replay-ready NBA events and reconciled 14,840 logical replay predictions across Moneyline, Spread, Total and First Half. It inserted 14,744 new `HISTORICAL_REPLAY_SHADOW` rows, reused the 96 canary rows, found 0 missing rows, 0 duplicate logical predictions, 0 wrong-origin rows and 0 replay Current Era contamination.
+
+Model-only null-odds rows remain explicitly isolated and honest: 11,504 replay rows have no sportsbook price, while 3,336 price-aware rows preserve stored 2024-25 odds. No provider calls, NBA Current Era activation, NBA scheduler activation, Official Picks, production learning, production calibration, replay settlement writes, product-surface exposure or MLB mutations were performed.
+
+Next: `NBA-02B3_PRICE_AWARE_HISTORICAL_EVALUATION` is ready after explicit authorization. Do not activate NBA Current Era, NBA scheduler or production recommendations from replay rows.
