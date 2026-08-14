@@ -11,6 +11,7 @@ import {
 import { buildSportPrediction } from '@/services/sport-prediction-engine-sdk.service'
 import { evaluateRecommendationEligibility } from '@/services/recommendation-eligibility-policy.service'
 import { evaluatePredictionEvaluationPolicy } from '@/services/prediction-evaluation-policy.service'
+import { buildProductionCalibrationBootstrapMetadata } from '@/services/mlb-production-calibration-bootstrap.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -601,6 +602,22 @@ export async function executeLineVersionedRepredictionWriter(request: LineVersio
         modelRole: 'champion',
         productionScope: 'line_versioned_reprediction_writer_v1',
       }, policy, { now: new Date(generatedAt) })
+      const productionCalibrationBootstrap = buildProductionCalibrationBootstrapMetadata({
+        sportKey: SPORT_KEY,
+        market,
+        generatedAt,
+        cutoffAt: prediction.cutoff_at,
+        commenceTime: event.start_time,
+        featureSnapshotId: dbFeatureSnapshotId,
+        oddsSnapshotId: bestEvidence.id,
+        oddsTimestamp: sourceTimestamp(bestEvidence),
+        modelVersion: MODEL_VERSION,
+        featureSetVersion: FEATURE_SET_VERSION,
+        trial: false,
+        scrambled: false,
+        modelRole: 'champion',
+        productionEvaluationPolicy: evaluationPolicy,
+      })
       newPrediction = {
         id: predictionId,
         sport_key: SPORT_KEY,
@@ -678,7 +695,9 @@ export async function executeLineVersionedRepredictionWriter(request: LineVersio
             sourceTimestamp: sourceTimestamp(bestEvidence),
             capturedAt: capturedAt(bestEvidence),
             policy: evaluationPolicy,
+            productionCalibrationBootstrap,
           },
+          productionCalibrationBootstrap,
         },
       }
       const persisted = await persistPredictionRow(newPrediction, prediction.id, generatedAt, dryRun)

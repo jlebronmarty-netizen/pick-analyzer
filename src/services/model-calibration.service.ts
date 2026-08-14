@@ -3,8 +3,13 @@ import {
   PRODUCTION_DATA_GATE_V1_POLICY,
   isProductionEligibleRow,
 } from '@/services/production-data-gate.service'
+import {
+  MLB_PRODUCTION_CALIBRATION_BOOTSTRAP_V1,
+  hasProductionCalibrationBootstrapEligibility,
+} from '@/services/mlb-production-calibration-bootstrap.service'
 
 type PredictionRow = {
+  id: string
   sport_key: string
   model_probability: number | null
   confidence: number | null
@@ -15,6 +20,7 @@ type PredictionRow = {
   production_eligible?: boolean | null
   trial?: boolean | null
   scrambled?: boolean | null
+  feature_snapshot?: Record<string, unknown> | null
 }
 
 type CalibrationBucket = {
@@ -163,11 +169,12 @@ function calculateOverallCalibration(buckets: CalibrationBucket[]) {
 }
 
 export async function getModelCalibration() {
+  const selectColumns =
+    'id, sport_key, model_probability, confidence, result, status, recommended_pick, odds, production_eligible, trial, scrambled, feature_snapshot'
+
   const { data, error } = await supabaseAdmin
     .from('prediction_history')
-    .select(
-      'sport_key, model_probability, confidence, result, status, recommended_pick, odds, production_eligible, trial, scrambled'
-    )
+    .select(selectColumns)
     .eq('production_eligible', true)
     .neq('status', 'pending')
 
@@ -175,19 +182,47 @@ export async function getModelCalibration() {
     throw new Error(error.message)
   }
 
+  const { data: bootstrapData, error: bootstrapError } = await supabaseAdmin
+    .from('prediction_history')
+    .select(selectColumns)
+    .contains('feature_snapshot', {
+      productionCalibrationBootstrap: {
+        mode: MLB_PRODUCTION_CALIBRATION_BOOTSTRAP_V1.mode,
+        state: MLB_PRODUCTION_CALIBRATION_BOOTSTRAP_V1.state,
+        eligible: true,
+        calibrationCohortEligible: true,
+      },
+    })
+    .neq('status', 'pending')
+
+  if (bootstrapError) {
+    throw new Error(bootstrapError.message)
+  }
+
   const rows = ((data ?? []) as PredictionRow[]).filter(
     (row) => isProductionEligibleRow(row) && ['win', 'loss', 'push'].includes(getResult(row))
   )
 
-  const recommendedRows = rows.filter((row) => row.recommended_pick === true)
+  const bootstrapRows = ((bootstrapData ?? []) as PredictionRow[]).filter(
+    (row) =>
+      row.trial !== true &&
+      row.scrambled !== true &&
+      hasProductionCalibrationBootstrapEligibility(row.feature_snapshot) &&
+      ['win', 'loss', 'push'].includes(getResult(row))
+  )
+  const legacyRecommendedRows = rows.filter((row) => row.recommended_pick === true)
+  const calibrationRowsById = new Map<string, PredictionRow>()
+  for (const row of legacyRecommendedRows) calibrationRowsById.set(row.id, row)
+  for (const row of bootstrapRows) calibrationRowsById.set(row.id, row)
+  const calibrationRows = [...calibrationRowsById.values()]
 
   const buckets = [
-    buildBucket(recommendedRows, 0, 49),
-    buildBucket(recommendedRows, 50, 59),
-    buildBucket(recommendedRows, 60, 69),
-    buildBucket(recommendedRows, 70, 79),
-    buildBucket(recommendedRows, 80, 89),
-    buildBucket(recommendedRows, 90, 100),
+    buildBucket(calibrationRows, 0, 49),
+    buildBucket(calibrationRows, 50, 59),
+    buildBucket(calibrationRows, 60, 69),
+    buildBucket(calibrationRows, 70, 79),
+    buildBucket(calibrationRows, 80, 89),
+    buildBucket(calibrationRows, 90, 100),
   ]
 
   const overall = calculateOverallCalibration(buckets)
@@ -197,8 +232,13 @@ export async function getModelCalibration() {
     generatedAt: new Date().toISOString(),
     sample: {
       productionGateMode: PRODUCTION_DATA_GATE_V1_POLICY.mode,
-      settledRows: rows.length,
-      recommendedSettledRows: recommendedRows.length,
+      calibrationBootstrapMode: MLB_PRODUCTION_CALIBRATION_BOOTSTRAP_V1.mode,
+      settledRows: calibrationRows.length,
+      legacyProductionGateRows: rows.length,
+      recommendedSettledRows: legacyRecommendedRows.length,
+      calibrationCohortRows: calibrationRows.length,
+      legacyRecommendedCalibrationRows: legacyRecommendedRows.length,
+      probationaryCalibrationRows: bootstrapRows.length,
     },
     overall,
     buckets,

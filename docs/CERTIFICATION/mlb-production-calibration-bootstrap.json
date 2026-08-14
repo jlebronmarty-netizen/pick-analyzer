@@ -1,0 +1,130 @@
+{
+  "mode": "mlb_production_calibration_bootstrap_v1",
+  "status": "MLB_PRODUCTION_CALIBRATION_BOOTSTRAP_REPAIR_READY_FOR_DEPLOYMENT",
+  "startingCommit": "caaffd00df3f12d314129938eb3ad266c4dd1eb2",
+  "productionCommitObserved": "caaffd00df3f12d314129938eb3ad266c4dd1eb2",
+  "observationTime": "2026-08-14T14:57:01.046Z",
+  "legacyFlags": {
+    "recommendedPickCanonicalMeaning": "overloaded legacy flag used by calibration, official/recommendation surfaces and performance-style readers",
+    "recommendedPickOverloaded": true,
+    "productionEligibleCanonicalMeaning": "overloaded legacy flag used by production gate, Current Board official eligibility and recommendation/performance readers",
+    "productionEligibleOverloaded": true
+  },
+  "calibrationContract": {
+    "legacyCohortLogic": "settled production-gate-valid rows with recommended_pick=true",
+    "newCohortLogic": "settled future rows with feature_snapshot.productionCalibrationBootstrap eligible=true and calibrationCohortEligible=true",
+    "dbMigrationRequired": false,
+    "requiredSamples": 250,
+    "currentEligibleSamples": 0,
+    "historicalReplayAvailable": 7290,
+    "historicalReplayProductionEligible": 0
+  },
+  "bootstrap": {
+    "activationBoundary": "future_rows_written_by_deployed_mlb_production_calibration_bootstrap_v1_runtime",
+    "probationaryState": "PRODUCTION_CALIBRATION_PROBATION",
+    "eligibleSport": "baseball_mlb",
+    "eligibleMarkets": ["moneyline", "run_line", "spread", "total"],
+    "futureOnly": true,
+    "existingRowsModified": 0,
+    "historicalReplayModified": 0,
+    "canCalibrationInsufficientRowCountTowardCalibration": true,
+    "canSameRowBeOfficialPickWhileCalibrationInsufficient": false,
+    "recommendedPickForProbationaryRows": false,
+    "productionEligibleLegacyFlagForProbationaryRows": false,
+    "sampleOneReachable": true,
+    "autonomousSampleAccumulation": true
+  },
+  "hou": {
+    "currentBoardMember": true,
+    "currentBoardMembershipExplanation": "present as an aligned canonical Current Board outcome derived from the stored SEA source row",
+    "mostLikelyUniverse": "current_board_rankings probability-first surface over canonical Current Board candidates",
+    "rentPlayUniverseMembership": true,
+    "qualifiedRentPlay": false,
+    "regime": "MODEL_ONLY_PREVIEW",
+    "modelVersion": "baseball_mlb_prospective_preview_v1",
+    "featureSetVersion": "baseball_mlb_moneyline_prospective_feature_set_v2",
+    "predictionId": "e00bb4e6-a3d2-53b6-826c-1d4648f1acef",
+    "eventId": "baseball_mlb:mlb:sportsdataio:event:79122",
+    "event": "SEA @ HOU",
+    "selection": "HOU",
+    "sourceSelection": "SEA",
+    "market": "moneyline",
+    "line": null,
+    "probability": 72.78,
+    "confidence": 35.91,
+    "odds": -122,
+    "impliedProbability": 54.95,
+    "edge": 17.83,
+    "ev": 32.44,
+    "freshness": "FRESH",
+    "priceBinding": "COMPLEMENT",
+    "calibration": "skipped",
+    "productionState": "ANALYZED_ONLY_NOT_OFFICIALLY_ELIGIBLE",
+    "missingData": ["starting_pitcher", "confirmed_lineup", "injury_diagnosis", "weather", "bullpen_context", "bullpenProxy"],
+    "mc08bFailedGates": ["PRODUCTION_GATE_BLOCKED", "QUARANTINED_ROW", "CALIBRATION_INSUFFICIENT", "LOW_CONFIDENCE", "LOW_MODEL_PROBABILITY", "NON_POSITIVE_EDGE", "NON_POSITIVE_EV", "LOW_EDGE", "LOW_EV"],
+    "whyRentPlayDoesNotSelectHou": "Rent Play requires qualified/currently actionable evidence and MC-08B policy gates; HOU is preview/model-only with low confidence and calibration/production gates blocked."
+  },
+  "universeReconciliation": {
+    "mostLikelyRowsEvaluated": 42,
+    "currentBoardCandidates": 42,
+    "dashboardGroundedOpportunityRows": 59,
+    "currentBoardPredictionsEvaluated": 59,
+    "currentBoardRowsReturned": 42,
+    "excludedRows": 17,
+    "excludedReasonCounts": {
+      "SUPERSEDED": 17
+    },
+    "unexplained": 0
+  },
+  "providerIdentity": {
+    "gameIntelligenceEventIdentity": "baseball_mlb:mlb:sportsdataio:event:79122",
+    "sportsdataioIdentityMeaning": "LEGACY_MAPPING_IDENTITY",
+    "houProviderEvidence": "the-odds-api",
+    "sportsDataIoExternalCallsUsedByHouEvidence": 0
+  },
+  "safety": {
+    "providerCallsFromCertificationReads": 0,
+    "sportsDataIoExternalCallsFromCertification": 0,
+    "theOddsApiCallsFromCertification": 0,
+    "mlbOfficialCallsFromCertification": 0,
+    "databaseMutationsFromCertification": 0,
+    "postStartPredictionWrites": 0,
+    "postCutoffPredictionWrites": 0,
+    "retrospectiveCalibrationReclassification": 0,
+    "retrospectiveOfficialPickPromotions": 0,
+    "replayAddedToCurrentEraPerformance": false,
+    "probationaryRowsAddedToOfficialPickPerformance": false,
+    "nbaCurrentEraWrites": 0,
+    "nbaReplayWrites": 0
+  },
+  "health": {
+    "sportsDataIoIndependence": "PASS",
+    "schedulerHealth": "HEALTHY",
+    "marketFreshnessHealth": "HEALTHY",
+    "currentBoardHealth": "PASS",
+    "settlementHealth": "PASS",
+    "providerBudgetHealth": "HEALTHY",
+    "calibrationBootstrapHealth": "READY_FOR_DEPLOYMENT",
+    "officialPickPolicyHealth": "UNCHANGED"
+  },
+  "files": {
+    "created": [
+      "src/services/mlb-production-calibration-bootstrap.service.ts",
+      "docs/PRODUCTION_PILOT/MLB_PRODUCTION_CALIBRATION_BOOTSTRAP.md",
+      "docs/CERTIFICATION/mlb-production-calibration-bootstrap.json",
+      "scripts/mlb-production-calibration-bootstrap-validate.mjs"
+    ],
+    "modified": [
+      "src/services/model-calibration.service.ts",
+      "src/services/sportsdataio-mlb-prospective-preview.service.ts",
+      "src/services/line-versioned-reprediction-writer.service.ts",
+      "docs/CERTIFICATION/README.md",
+      "docs/PRODUCTION_PILOT/README.md"
+    ],
+    "dbMigrationFilesCreated": false
+  },
+  "finalBootstrapClassification": "MLB_PRODUCTION_CALIBRATION_BOOTSTRAP_REPAIR_READY_FOR_DEPLOYMENT",
+  "finalHouClassification": "HOU_MODEL_ONLY_EXCLUDED_CORRECTLY",
+  "finalMlbFreezeDecision": "MLB_FINAL_FREEZE_WAIT_BOOTSTRAP_DEPLOYMENT",
+  "nextRecommendedPhase": "publish, align production, verify first naturally generated future probationary calibration rows"
+}

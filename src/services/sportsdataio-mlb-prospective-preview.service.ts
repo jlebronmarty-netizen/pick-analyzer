@@ -5,6 +5,7 @@ import { productAuthorityForStage, readOddsPrimaryAuthorityStage } from '@/confi
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { createFeatureSnapshot } from '@/services/feature-store-core.service'
+import { buildProductionCalibrationBootstrapMetadata } from '@/services/mlb-production-calibration-bootstrap.service'
 import { evaluatePredictionEvaluationPolicy } from '@/services/prediction-evaluation-policy.service'
 import { buildPredictionEpochStamp } from '@/services/prediction-epoch-runtime.service'
 import { evaluateRecommendationEligibility } from '@/services/recommendation-eligibility-policy.service'
@@ -2239,6 +2240,22 @@ async function writeSnapshotsAndPredictions(
       modelRole,
       productionScope: 'prospective_prediction_evaluation_v1_3',
     }, policy, { now: new Date(generatedAt) })
+    const productionCalibrationBootstrap = buildProductionCalibrationBootstrapMetadata({
+      sportKey: SPORT_KEY,
+      market: candidate.market,
+      generatedAt,
+      cutoffAt: cutoff,
+      commenceTime: candidate.event.start_time,
+      featureSnapshotId: snapshotId,
+      oddsSnapshotId: candidate.odds.id,
+      oddsTimestamp: candidate.odds.snapshot_time,
+      modelVersion,
+      featureSetVersion: featureSetVersionFor(candidate.market),
+      trial: false,
+      scrambled: false,
+      modelRole,
+      productionEvaluationPolicy: evaluationPolicy,
+    })
     const rating = aiRating({
       confidence: sdk.confidence,
       reliabilityScore: candidate.intelligence.reliabilityScore,
@@ -2375,6 +2392,7 @@ async function writeSnapshotsAndPredictions(
         rankingScore: rank,
         recommendationStatus: policy.status,
         productionEvaluationPolicy: evaluationPolicy,
+        productionCalibrationBootstrap,
         canonicalPredictionGranularity: 'event_market_v1',
         canonicalMarketPrediction: {
           version: 'canonical_market_prediction_v1',

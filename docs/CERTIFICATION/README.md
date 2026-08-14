@@ -7,6 +7,7 @@ Certification documentation covers validation records, readiness gates, producti
 Current V2 certification documents:
 
 - [MLB Final Calibration Bootstrap Reachability JSON](mlb-final-calibration-bootstrap-reachability.json)
+- [MLB Production Calibration Bootstrap JSON](mlb-production-calibration-bootstrap.json)
 - [MLB Final Provider Independence + Calibration JSON](mlb-final-provider-independence-calibration.json)
 - [MLB Official Pick + MC-08B Integrity](MLB_OFFICIAL_PICK_MC08B_INTEGRITY.md)
 - [MLB Official Pick + MC-08B Integrity JSON](mlb-official-pick-mc08b-integrity.json)
