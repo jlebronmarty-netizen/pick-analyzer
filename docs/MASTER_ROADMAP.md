@@ -3411,3 +3411,13 @@ Status: Local certification PASS, push required.
 Result: The failed persistence root cause is certified as a single giant post-fetch `sports_odds_snapshots` upsert with no durable paid-payload checkpoint. The repaired importer durably checkpoints provider responses before DB writes, uses 50-row retryable odds chunks and persisted 29,214 The Odds API NBA historical odds rows from 159 bounded recovery requests. Coverage is now 1,196 price-aware 2024-25 NBA events across Moneyline, Spread and Total. SportsDataIO calls, NBA production activation, Current Era NBA prediction writes and bulk replay remained 0.
 
 Next: resolve/certify NBA non-odds stat source access for results, quarter scores, boxscores, team stats, player stats and players before NBA replay.
+
+## NBA-02A Historical Feature Reconstruction
+
+Status: Local certification PASS, push required.
+
+Result: NBA historical replay inputs are now formally reconstructed and certified as leakage-safe. The current NBA model contract supports Moneyline, Spread, Total and First Half; required team/event/scoring features are reconstructable from prior-only stored history with certified early-season fallbacks. Injuries and lineups are not required for replay and remain unavailable/degraded rather than inferred from postgame participation. Box-score D grade is not a blocker because current-engine required features are covered by team-game, player-game and advanced stat rows.
+
+Replay scope is quantified as 3,710 model-replay-ready canonical games and 1,196 2024-25 full-core price-aware games for Moneyline, Spread and Total. First-half price-aware replay remains unavailable. NBA-02A made 0 provider calls, 0 database writes, 0 replay predictions and 0 NBA Current Era changes.
+
+Next: `NBA-02B1_REPLAY_CANARY`. Do not begin bulk replay until canary inference, persistence, settlement preview, regime isolation and resume/idempotency pass.

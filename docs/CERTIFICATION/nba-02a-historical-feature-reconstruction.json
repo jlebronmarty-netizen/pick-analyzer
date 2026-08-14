@@ -1,0 +1,311 @@
+{
+  "mode": "nba_02a_historical_feature_reconstruction_v1",
+  "status": "NBA_02A_HISTORICAL_FEATURE_RECONSTRUCTION_PASS_READY_FOR_REPLAY_CANARY",
+  "generatedAt": "2026-08-14T18:31:58.287Z",
+  "startingCommit": "a39ce4899180f40f2e8b055149a085784ffb8f93",
+  "productionCommit": "a39ce4899180f40f2e8b055149a085784ffb8f93",
+  "providerCalls": {
+    "ballDontLie": 0,
+    "theOddsApiHistorical": 0,
+    "sportsDataIo": 0
+  },
+  "productionWrites": {
+    "featureSnapshotsPersisted": 0,
+    "predictionWrites": 0,
+    "officialPickWrites": 0,
+    "currentEraWrites": 0,
+    "productionCalibrationWrites": 0,
+    "productionLearningWrites": 0
+  },
+  "foundation": {
+    "seasons": ["2022-23", "2023-24", "2024-25"],
+    "canonicalGames": 3710,
+    "finalResults": 3710,
+    "sportEventsTotal": 4945,
+    "historicalSeasonEventsRead": 4931,
+    "historicalOddsProviderEvents": 1221,
+    "teamGameStats": 7420,
+    "teamGameStatEvents": 3710,
+    "quarterScoreRows": 7420,
+    "players": 6191,
+    "playerStatsTotal": 487466,
+    "playerGameStatsCertified": 128353,
+    "advancedStatsCertified": 358195,
+    "boxScores": 0,
+    "lineups": 758,
+    "historicalOddsRowsTotal": 29754,
+    "historicalOddsRowsAudited": 29214,
+    "historicalOddsEvents": 1196,
+    "fullCorePriceAwareEvents": 1196,
+    "eventMappings": 4945,
+    "providerMappingsTotal": 12922,
+    "duplicateCanonicalEventGroups": 0,
+    "duplicateAllProviderEventGroups": 1136,
+    "duplicateAllProviderEventGroupClassification": "EXPECTED_CANONICAL_PLUS_ODDS_PROVIDER_EVENT_ROWS_NOT_REPLAY_DUPLICATES",
+    "orphanResults": 0,
+    "unresolvedEventBindings": 0
+  },
+  "seasonCoverage": {
+    "2022-23": {
+      "games": 1236,
+      "finalResults": 1236,
+      "teamGameStats": 2472,
+      "quarterScoreRows": 2472,
+      "playerGameStatsCertified": 41129,
+      "advancedStatsCertified": 118690,
+      "historicalOddsEvents": 0,
+      "fullCorePriceAwareEvents": 0,
+      "modelReplayReady": 1236
+    },
+    "2023-24": {
+      "games": 1237,
+      "finalResults": 1237,
+      "teamGameStats": 2474,
+      "quarterScoreRows": 2474,
+      "playerGameStatsCertified": 43615,
+      "advancedStatsCertified": 118443,
+      "historicalOddsEvents": 0,
+      "fullCorePriceAwareEvents": 0,
+      "modelReplayReady": 1237
+    },
+    "2024-25": {
+      "games": 1237,
+      "finalResults": 1237,
+      "teamGameStats": 2474,
+      "quarterScoreRows": 2474,
+      "playerGameStatsCertified": 43609,
+      "advancedStatsCertified": 121062,
+      "historicalOddsEvents": 1196,
+      "fullCorePriceAwareEvents": 1196,
+      "modelReplayReady": 1237
+    }
+  },
+  "modelContract": {
+    "modelVersion": "nba_prediction_engine_v1",
+    "featureVersion": "nba_historical_pregame_feature_set_v1",
+    "reconstructionVersion": "nba_historical_feature_reconstruction_v1",
+    "supportedMarkets": ["moneyline", "spread", "total", "first_half"],
+    "requiredFeatures": [
+      "event_context",
+      "team_record_to_date",
+      "recent_form_last_10",
+      "home_away_splits",
+      "scoring_profile"
+    ],
+    "optionalFeatures": [
+      "first_half_scoring_context",
+      "injury_context",
+      "lineup_context",
+      "player_stats_context",
+      "market_odds"
+    ],
+    "boxScoresRequired": false,
+    "lineupsRequired": false,
+    "injuriesRequired": false,
+    "firstHalfSupported": "PARTIAL"
+  },
+  "featureReconstruction": {
+    "historicalFeatureSnapshotsPlanned": 11130,
+    "historicalFeatureSnapshotsPersisted": 0,
+    "historicalFeatureSnapshotsReused": 0,
+    "historicalFeatureSnapshotsFailed": 0,
+    "complete": 3710,
+    "partialButModelSupported": 3710,
+    "blocked": 0,
+    "identityBlocked": 0,
+    "leakageProtectedRejections": 738,
+    "persistenceDecision": "DRY_RUN_ONLY_NO_FEATURE_SNAPSHOT_WRITES_IN_NBA_02A"
+  },
+  "featureCoverage": [
+    {
+      "name": "event_context",
+      "required": true,
+      "coverage": "3710/3710 canonical games",
+      "fallback": "block if incomplete",
+      "missing": 0,
+      "blocking": false
+    },
+    {
+      "name": "team_record_to_date",
+      "required": true,
+      "coverage": "3710/3710 reconstructable from prior games",
+      "fallback": "season opener neutral fallback",
+      "missing": 0,
+      "blocking": false
+    },
+    {
+      "name": "recent_form_last_10",
+      "required": true,
+      "coverage": "3710/3710 with early-season fallback",
+      "fallback": "season-to-date or neutral 0.500",
+      "missing": 0,
+      "blocking": false
+    },
+    {
+      "name": "home_away_splits",
+      "required": true,
+      "coverage": "3710/3710 with early-season fallback",
+      "fallback": "overall season-to-date or neutral 0.500",
+      "missing": 0,
+      "blocking": false
+    },
+    {
+      "name": "scoring_profile",
+      "required": true,
+      "coverage": "3710/3710 reconstructable from prior team-game stats with opener fallback",
+      "fallback": "current engine defaults 114/114 neutral net rating",
+      "missing": 0,
+      "blocking": false
+    },
+    {
+      "name": "first_half_scoring_context",
+      "required": false,
+      "coverage": "7420 team-game rows with quarter/half evidence",
+      "fallback": "current engine 0.49 projected split",
+      "missing": 0,
+      "blocking": false
+    },
+    {
+      "name": "injury_context",
+      "required": false,
+      "coverage": "not certified historically",
+      "fallback": "unavailable warning/penalty only",
+      "missing": "historical pregame injuries",
+      "blocking": false
+    },
+    {
+      "name": "lineup_context",
+      "required": false,
+      "coverage": "not certified historically",
+      "fallback": "unavailable warning/penalty only",
+      "missing": "historical pregame lineups",
+      "blocking": false
+    },
+    {
+      "name": "market_odds",
+      "required": false,
+      "coverage": "1196 full-core 2024-25 events",
+      "fallback": "model replay without price-aware evaluation",
+      "missing": "2022-23 and 2023-24 prices",
+      "blocking": false
+    }
+  ],
+  "leakage": {
+    "sameGameStatLeakageFailures": 0,
+    "futureGameLeakageFailures": 0,
+    "fullSeasonLeakageFailures": 0,
+    "playerParticipationLeakageFailures": 0,
+    "tradeTeamLeakageFailures": 0,
+    "quarterScoreLeakageFailures": 0,
+    "oddsPostStartLeakageFailures": 0,
+    "leakageProtectedRejections": 738,
+    "representativeProofs": [
+      {
+        "season": "2022-23",
+        "period": "early",
+        "contract": "feature_as_of before game_start; prior games only; season opener neutral fallback where prior sample absent"
+      },
+      {
+        "season": "2023-24",
+        "period": "mid",
+        "contract": "rolling team features use completed games before current start_time only"
+      },
+      {
+        "season": "2024-25",
+        "period": "late",
+        "contract": "price-aware rows require snapshot_time before game start; post-start odds rejected"
+      }
+    ]
+  },
+  "odds": {
+    "rowsAudited": 29214,
+    "pregameAccepted": 29214,
+    "postStartRejected": 738,
+    "missingTimestamp": 0,
+    "ambiguousTiming": 0,
+    "priceAwareEventsLostDueTimingSafety": 25,
+    "moneylineEvents": 1196,
+    "spreadEvents": 1196,
+    "totalEvents": 1196,
+    "firstHalfEvents": 0,
+    "fullCoreEvents": 1196,
+    "bookCoverage": {
+      "fanduel": { "events": 1172, "rows": 9119 },
+      "draftkings": { "events": 1192, "rows": 12115 },
+      "betmgm": { "events": 1172, "rows": 7980 },
+      "caesars": { "events": 0, "rows": 0 },
+      "other": { "events": 0, "rows": 0 }
+    }
+  },
+  "identity": {
+    "playerExact": 6191,
+    "playerAmbiguous": 0,
+    "playerUnmapped": 0,
+    "teamExact": 30,
+    "teamAmbiguous": 0,
+    "teamUnmapped": 0,
+    "eventExact": 3710,
+    "eventAmbiguous": 0,
+    "eventUnmapped": 0,
+    "oddsEventExact": 1196,
+    "oddsEventAmbiguous": 0,
+    "oddsEventUnmapped": 25
+  },
+  "replayReadiness": {
+    "modelReplayReadyEvents": 3710,
+    "modelReplayReadyWithCertifiedFallback": 3710,
+    "modelReplayBlocked": 0,
+    "priceAwareMoneylineReady": 1196,
+    "priceAwareSpreadReady": 1196,
+    "priceAwareTotalReady": 1196,
+    "priceAwareFullCoreReady": 1196,
+    "priceAwareFirstHalfReady": 0,
+    "priceAwareNotAvailable": 2514,
+    "expectedModelReplayPredictions": 14840,
+    "expectedPriceAwareMoneylineEvaluations": 1196,
+    "expectedPriceAwareSpreadEvaluations": 1196,
+    "expectedPriceAwareTotalEvaluations": 1196,
+    "expectedPriceAwareFirstHalfEvaluations": 0
+  },
+  "replayIsolation": {
+    "historicalReplayRegime": "NBA_HISTORICAL_REPLAY_SHADOW",
+    "currentEraWrites": 0,
+    "officialPickWrites": 0,
+    "productionCalibrationWrites": 0,
+    "productionLearningWrites": 0,
+    "futurePredictionTable": "prediction_history",
+    "futureFeatureSnapshotTable": "historical_feature_snapshots",
+    "predictionIdempotencyKey": "basketball_nba|event|market|selection|line|model|feature|replay_version"
+  },
+  "subscriptionDecision": {
+    "ballDontLieHistoricalRequirement": "BALLDONTLIE_GOAT_ONLY_NEEDED_FOR_HISTORICAL_BOOTSTRAP",
+    "ballDontLieFutureRuntimeRequirement": "BALLDONTLIE_ALL_STAR_SUFFICIENT_FOR_FORWARD_CORE_DATA_PENDING_RUNTIME_CERTIFICATION",
+    "recommendedTier": "ALL_STAR_OR_LOWER_FOR_FORWARD_RUNTIME_AFTER_HISTORICAL_BOOTSTRAP_ARCHIVE",
+    "goatStillRequired": false,
+    "allStarSufficient": true,
+    "theOddsApiRole": "NBA_ODDS_AUTHORITY_FOR_PRICE_AWARE_REPLAY_AND_FUTURE_MARKETS"
+  },
+  "persistence": {
+    "dbTablesMutated": [],
+    "rowsInserted": 0,
+    "rowsReused": 0,
+    "rowsUpdated": 0,
+    "rowsFailed": 0,
+    "writeChunks": 0,
+    "retries": 0,
+    "idempotency": "DETERMINISTIC_FEATURE_SNAPSHOT_KEY_DEFINED_NO_WRITES_EXECUTED",
+    "resumeStatus": "NBA_02B_CANARY_RESUMABLE_BY_SEASON_EVENT_MARKET_REPLAY_VERSION"
+  },
+  "mlbParallelStatus": {
+    "productionCommit": "a39ce4899180f40f2e8b055149a085784ffb8f93",
+    "bootstrapRows": 49,
+    "bootstrapSettled": 0,
+    "calibrationEligibleSamples": 0,
+    "calibrationRequired": 250,
+    "calibrationStatus": "INSUFFICIENT_DATA",
+    "firstBootstrapSettlementObserved": false,
+    "sportsDataIoRoutineExternalCalls": 0,
+    "health": "HEALTHY"
+  },
+  "nextPhase": "NBA-02B1_REPLAY_CANARY"
+}
