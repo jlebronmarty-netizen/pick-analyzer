@@ -46,3 +46,4 @@ Production Pilot Week is the monitored real-world validation period after MC-08H
 - [SDIO-EXIT-04: Stats Parity And SportsDataIO-Off Window](SDIO_EXIT_04_STATS_PARITY_OFF_WINDOW.md)
 - [MLB Final Closeout](MLB_FINAL_CLOSEOUT.md)
 - [MLB Product Evidence And Eligibility Reconciliation](MLB_PRODUCT_EVIDENCE_RECONCILIATION.md)
+- [MLB Final Calibration Bootstrap Reachability](MLB_FINAL_CALIBRATION_BOOTSTRAP_REACHABILITY.md)

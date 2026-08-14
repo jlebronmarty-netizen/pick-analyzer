@@ -1,0 +1,104 @@
+{
+  "mode": "mlb_final_calibration_bootstrap_reachability_v1",
+  "status": "MLB_CALIBRATION_BOOTSTRAP_HUMAN_CERTIFICATION_REQUIRED",
+  "productionCommitObserved": "034073d7bd7aace9543b448d58be4a95675238c2",
+  "observationDate": "2026-08-14",
+  "providerIndependence": {
+    "sportsDataIoProviderIndependenceCertified": true,
+    "sportsDataIoRoutineCallsReopened": false,
+    "theOddsApiProductAuthority": true,
+    "mlbOfficialPrimary": true
+  },
+  "calibrationEndpoint": {
+    "endpoint": "/api/model/calibration",
+    "settledRows": 0,
+    "recommendedSettledRows": 0,
+    "modelStatus": "INSUFFICIENT_DATA"
+  },
+  "performanceEvidence": {
+    "endpoint": "/api/performance",
+    "currentEraGenerated": 747,
+    "canonicalPredictionRows": 468,
+    "settledCanonicalRows": 423,
+    "recommendationEligibleRows": 0,
+    "officialPickEligibleRows": 0,
+    "currentV2EligibilityUses": "feature_snapshot.productionEvaluationPolicy.production_evaluable"
+  },
+  "databaseEvidence": {
+    "activeEpochStart": "2026-08-03T19:57:02.418+00:00",
+    "queriedRows": 733,
+    "settledRows": 674,
+    "legacyProductionEligibleRows": 0,
+    "legacyRecommendedPickRows": 0,
+    "legacyCalibrationEligibleRows": 0,
+    "productionEvaluablePolicyRows": 446,
+    "settledProductionEvaluablePolicyRows": 401,
+    "recommendationEligiblePolicyRows": 0,
+    "officialPickEligiblePolicyRows": 0,
+    "primaryExclusionCounts": {
+      "NON_PRODUCTION_OR_QUARANTINED": 674,
+      "NO_SETTLEMENT": 59
+    },
+    "policyWarnings": {
+      "STALE_PRICE_EVIDENCE": 584,
+      "LOW_CONFIDENCE_IS_RECOMMENDATION_ONLY": 723,
+      "LOW_EDGE_IS_RECOMMENDATION_ONLY": 717,
+      "LOW_EV_IS_RECOMMENDATION_ONLY": 709,
+      "CALIBRATION_IS_RECOMMENDATION_ONLY": 723,
+      "PRODUCTION_ELIGIBLE_LEGACY_FLAG_NOT_REQUIRED_FOR_EVALUATION": 723
+    }
+  },
+  "runtimeContracts": {
+    "calibrationAggregateFile": "src/services/model-calibration.service.ts",
+    "calibrationAggregateRequiresProductionEligible": true,
+    "calibrationAggregateRequiresRecommendedPickForBuckets": true,
+    "recommendationPolicyFile": "src/services/recommendation-eligibility-policy.service.ts",
+    "automaticProductionApproval": false,
+    "minimumCalibrationSample": 250,
+    "maximumCalibrationError": 8,
+    "minimumOfficialConfidence": 65,
+    "minimumModelProbability": 52,
+    "minimumOfficialEdge": 5,
+    "minimumOfficialEv": 5
+  },
+  "writerTrace": {
+    "prospectivePreviewWriterProductionEligible": false,
+    "lineVersionedRepredictionWriterProductionEligible": false,
+    "lineVersionedRepredictionWriterRecommendedPick": false,
+    "theOddsApiStage3OddsSnapshotsCanBeProductAuthoritative": true,
+    "theOddsApiStage3OddsSnapshotsDoNotPromotePredictionRows": true
+  },
+  "transition": {
+    "automaticTransitionExists": false,
+    "manualQuarantineClearAuthorized": false,
+    "productionPromotionPerformed": false,
+    "requiredHumanArtifact": "MLB_PRODUCTION_CALIBRATION_BOOTSTRAP_AUTHORIZATION",
+    "requiredFutureImplementation": "bounded production prediction bootstrap writer or mode that creates future cutoff-safe production_eligible prediction rows and handles probationary recommended_pick seeding without threshold changes",
+    "pathReachableAfterAuthorization": true,
+    "pathReachableInCurrentRuntimeWithoutAuthorization": false
+  },
+  "historicalReplay": {
+    "settledReplayRows": 7290,
+    "productionCalibrationEligible": 0,
+    "shadowOnly": true,
+    "replayContaminatesCurrentEra": false
+  },
+  "safety": {
+    "providerCallsFromCertificationReads": 0,
+    "databaseMutationsFromCertificationReads": 0,
+    "calibrationThresholdsChanged": false,
+    "confidenceThresholdChanged": false,
+    "edgeThresholdChanged": false,
+    "evThresholdChanged": false,
+    "officialPickPolicyChanged": false,
+    "replayAddedToCurrentEraPerformance": false,
+    "replayAddedToProductionCalibration": false,
+    "quarantineManuallyCleared": false,
+    "productionGateManuallyCleared": false,
+    "retrospectivePredictionsCreated": false,
+    "postStartPredictionsCreated": false,
+    "sportsDataIoIndependenceReopened": false
+  },
+  "mlbFinalFreezeDecision": "MLB_FINAL_FREEZE_NOT_READY_CALIBRATION_BOOTSTRAP_HUMAN_CERTIFICATION_REQUIRED",
+  "next": "MLB_PRODUCTION_CALIBRATION_BOOTSTRAP_AUTHORIZATION"
+}
