@@ -8,6 +8,7 @@ import {
 } from '@/services/nba-historical-feature-reconstruction.service'
 
 export const NBA_02B1_REPLAY_VERSION = 'NBA_MODEL_REPLAY_V1'
+export const NBA_02B1_REPLAY_ORIGIN = 'HISTORICAL_REPLAY_SHADOW'
 export const NBA_02B1_CANARY_VERSION = 'nba_02b1_replay_canary_v1'
 export const NBA_02B1_MAX_GAMES = 36
 export const NBA_02B1_TARGET_GAMES = 24
@@ -23,6 +24,7 @@ export function buildNba02b1PredictionIdempotencyKey(input: {
 }) {
   return [
     'basketball_nba',
+    NBA_02B1_REPLAY_ORIGIN,
     NBA_02B1_REPLAY_VERSION,
     NBA_02A_MODEL_VERSION,
     NBA_02A_FEATURE_VERSION,
@@ -84,6 +86,7 @@ export function validateNba02b1ReplayCanaryContract() {
     success:
       NBA_02B1_MARKETS.length === 4 &&
       NBA_02B1_TARGET_GAMES <= NBA_02B1_MAX_GAMES &&
+      idempotencyKey.includes(NBA_02B1_REPLAY_ORIGIN) &&
       identity.replayRegime === NBA_02A_REPLAY_REGIME &&
       identity.modelVersion === NBA_02A_MODEL_VERSION &&
       identity.featureVersion === NBA_02A_FEATURE_VERSION &&
@@ -101,6 +104,7 @@ export function validateNba02b1ReplayCanaryContract() {
     idempotencyKey,
     markets: NBA_02B1_MARKETS,
     replayVersion: NBA_02B1_REPLAY_VERSION,
+    replayOrigin: NBA_02B1_REPLAY_ORIGIN,
     safe,
     unsafe,
   }

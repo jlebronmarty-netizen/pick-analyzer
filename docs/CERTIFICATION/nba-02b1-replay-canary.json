@@ -1,6 +1,6 @@
 {
   "status": "NBA_02B1_REPLAY_CANARY_DB_MIGRATION_AUTHORIZATION_REQUIRED",
-  "generatedAt": "2026-08-14T19:24:12.691Z",
+  "generatedAt": "2026-08-14T19:36:45.584Z",
   "startingCommit": "70d9d8055c203af6189e7a2bdc219142c87e609d",
   "productionCommit": "70d9d8055c203af6189e7a2bdc219142c87e609d",
   "versions": {
@@ -8,7 +8,8 @@
     "feature": "nba_historical_pregame_feature_set_v1",
     "reconstruction": "nba_historical_feature_reconstruction_v1",
     "replay": "NBA_MODEL_REPLAY_V1",
-    "regime": "NBA_HISTORICAL_REPLAY_SHADOW"
+    "regime": "NBA_HISTORICAL_REPLAY_SHADOW",
+    "predictionOrigin": "HISTORICAL_REPLAY_SHADOW"
   },
   "canary": {
     "games": 24,
@@ -295,8 +296,12 @@
   },
   "persistenceDecision": {
     "safeToPersist": false,
+    "persistenceRequested": false,
     "persistencePerformed": false,
-    "reason": "prediction_history.prediction_origin is missing in production schema; replay rows cannot be safely isolated by the certified regime field."
+    "reason": "prediction_history.prediction_origin is missing in production schema; replay rows cannot be safely isolated by the certified regime field.",
+    "chunks": 0,
+    "readbackCount": 0,
+    "wrongOriginCount": 0
   },
   "predictions": {
     "planned": 96,
@@ -716,6 +721,7 @@
   },
   "regimeIsolation": {
     "historicalReplayRegime": "NBA_HISTORICAL_REPLAY_SHADOW",
+    "predictionOrigin": "HISTORICAL_REPLAY_SHADOW",
     "nbaCurrentEraPredictionsCreated": 0,
     "nbaCurrentEraSettlementsCreated": 0,
     "nbaCurrentEraLearningWrites": 0,
@@ -754,7 +760,7 @@
     "secondRunPredictionsReused": 96,
     "duplicateLogicalPredictions": 0,
     "settlementDuplicateWrites": 0,
-    "idempotencyMode": "SIMULATED_BY_DETERMINISTIC_KEYS_BECAUSE_DB_PERSISTENCE_BLOCKED"
+    "idempotencyMode": "SIMULATED_BY_DETERMINISTIC_KEYS_OR_BLOCKED_SCHEMA"
   },
   "databaseMutations": {
     "tablesMutated": [],
@@ -793,7 +799,7 @@
     "resumeStrategy": "idempotency_key plus replay version checkpoints"
   },
   "bulkPhaseRecommendation": {
-    "recommendedNext": "NBA-02B1A_REPLAY_ISOLATION_SCHEMA_MIGRATION",
+    "recommendedNext": "NBA-02B1_R_REPLAY_ISOLATION_SCHEMA_MIGRATION",
     "nba02b2BulkAuthorizationRecommended": false,
     "reason": "Additive replay isolation schema column is required before any persisted bulk replay."
   },

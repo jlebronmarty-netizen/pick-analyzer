@@ -3429,3 +3429,11 @@ Status: Local certification blocked on additive replay-isolation schema authoriz
 Result: NBA-02B1 selected a deterministic 24-game canary across 2022-23, 2023-24 and 2024-25, generated 96 preview predictions for Moneyline, Spread, Total and First Half, bound 24 stored 2024-25 price-aware Moneyline/Spread/Total odds rows and preview-settled all 96 predictions with 52 wins, 44 losses, 0 pushes and 0 blockers. All work used stored evidence only with 0 BallDontLie calls, 0 The Odds API historical calls, 0 SportsDataIO calls, 0 replay writes, 0 Current Era writes and 0 product contamination.
 
 The canary stopped before persistence because production `prediction_history.prediction_origin` is not selectable, preventing certified separation of `NBA_HISTORICAL_REPLAY_SHADOW` rows from Current Era/product rows. Next: authorize additive replay isolation schema migration, then rerun the NBA-02B1 persistence/idempotency gate before NBA-02B2 bulk replay.
+
+## NBA-02B1-R Replay Isolation Schema
+
+Status: Local migration/runtime support prepared; production migration application blocked by missing local DDL channel.
+
+Result: NBA-02B1-R adds a forward-safe migration file for nullable replay-origin governance on `prediction_history`, selecting generic `HISTORICAL_REPLAY_SHADOW` as the explicit replay origin while preserving existing origin values and avoiding defaults/backfills. The canary runner now supports explicit `--persist` mode and would write deterministic non-current shadow rows only, with Official Pick, product, Current Era, production learning, production calibration and settlement-debt flags closed. No migration was applied and no replay rows were inserted because this environment has no Supabase CLI, `psql`, direct database URL or protected SQL execution route.
+
+Next: apply `supabase/migrations/202608140001_nba_replay_isolation_prediction_origin_v1.sql` through an approved Supabase migration channel, rerun NBA-02B1-R with canary persistence/readback, then consider NBA-02B2 only after 96-row isolation and idempotency pass.

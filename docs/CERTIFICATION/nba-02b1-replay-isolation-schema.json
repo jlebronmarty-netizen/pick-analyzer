@@ -1,0 +1,108 @@
+{
+  "status": "NBA_02B1_REPLAY_ISOLATION_MIGRATION_BLOCKED",
+  "generatedAt": "2026-08-14T19:36:45.584Z",
+  "startingCommit": "884bc4d2237fb9d1dd07a0ff406dd44dd40183c7",
+  "productionCommit": "70d9d8055c203af6189e7a2bdc219142c87e609d",
+  "migration": {
+    "file": "supabase/migrations/202608140001_nba_replay_isolation_prediction_origin_v1.sql",
+    "applied": false,
+    "applyBlockedReason": "Local environment has no Supabase CLI, no psql, no direct database URL, and no existing protected SQL execution RPC/route. DDL was not applied from this environment.",
+    "nonDestructive": true,
+    "existingRowsMutatedBySql": 0,
+    "columnsAddedIfMissing": [
+      "prediction_history.prediction_origin text nullable",
+      "prediction_history.certification_status text nullable",
+      "prediction_history.certification_metadata jsonb nullable"
+    ],
+    "checkConstraints": [
+      "prediction_history_prediction_origin_check includes HISTORICAL_REPLAY_SHADOW",
+      "prediction_history_certification_status_check preserves SHADOW_PENDING/CERTIFIED/QUARANTINED/INVALID/REJECTED"
+    ],
+    "indexesAdded": [
+      "prediction_history_replay_origin_lookup_idx partial on HISTORICAL_REPLAY_SHADOW",
+      "prediction_history_certification_lookup_idx",
+      "prediction_history_certification_metadata_idx"
+    ],
+    "rlsChanged": false,
+    "rollbackConsiderations": "Forward-safe rollback can drop the new indexes and nullable metadata columns only if no replay rows exist. If HISTORICAL_REPLAY_SHADOW rows exist, rollback requires archiving/deleting those replay rows first; otherwise removing the origin from the check constraint would be unsafe."
+  },
+  "schemaAudit": {
+    "targetTable": "prediction_history",
+    "livePredictionOriginSelectable": false,
+    "liveSchemaError": "column prediction_history.prediction_origin does not exist",
+    "existingOriginValuesEnumerated": false,
+    "existingOriginValuesReason": "origin column is not present/selectable in production",
+    "validExistingOriginsFromRepositoryContract": [
+      "LIVE_PREGAME",
+      "HISTORICAL_WALK_FORWARD_REPLAY",
+      "LEGACY_PRE_CERTIFICATION"
+    ],
+    "selectedReplayOrigin": "HISTORICAL_REPLAY_SHADOW",
+    "targetOriginRationale": "Generic replay-shadow origin is reusable across sports and is safer than a sport-specific schema column because sport_key already scopes NBA."
+  },
+  "writerSupport": {
+    "canaryRunnerUpdated": true,
+    "persistMode": "--persist explicit only",
+    "defaultWrites": 0,
+    "deterministicIdIncludesOrigin": true,
+    "productionFlagsFalse": true,
+    "officialPickFalse": true,
+    "currentEraFalse": true,
+    "modelRole": "shadow",
+    "isCurrent": false,
+    "result": "pending",
+    "settlementPreviewOnly": true
+  },
+  "canary": {
+    "games": 24,
+    "predictionsPlanned": 96,
+    "predictionsInserted": 0,
+    "predictionsReused": 0,
+    "predictionsFailed": 0,
+    "duplicateLogicalPredictions": 0,
+    "readbackCount": 0,
+    "wrongOriginCount": 0,
+    "persistenceBlockedReason": "migration not applied; prediction_origin remains unavailable"
+  },
+  "contamination": {
+    "nbaCurrentEraPredictionDelta": 0,
+    "nbaOfficialPickDelta": 0,
+    "productionLearningDelta": 0,
+    "productionCalibrationDelta": 0,
+    "currentEraPerformanceDelta": 0,
+    "settlementDebtDelta": 0,
+    "productSurfaceReplayVisibilityCount": 0,
+    "mlbRowsChangedFromNbaWork": 0
+  },
+  "settlementPreview": {
+    "wins": 52,
+    "losses": 44,
+    "pushes": 0,
+    "blocked": 0,
+    "replaySettlementWrites": 0
+  },
+  "providers": {
+    "ballDontLieCalls": 0,
+    "theOddsApiHistoricalCalls": 0,
+    "sportsDataIoCalls": 0
+  },
+  "operations": {
+    "nbaCurrentEraStatus": "INACTIVE",
+    "nbaSchedulerStatus": "INACTIVE",
+    "mlbRegression": "PASS",
+    "mlbHealthObservation": {
+      "status": "HEALTHY",
+      "scheduler": "HEALTHY",
+      "marketFreshness": "HEALTHY",
+      "providerBudget": "HEALTHY",
+      "settlement": "HEALTHY",
+      "productReadiness": "HEALTHY",
+      "providerCallsToday": 0,
+      "mutationsToday": 0
+    }
+  },
+  "decision": {
+    "finalClassification": "NBA_02B1_REPLAY_ISOLATION_MIGRATION_BLOCKED",
+    "nextRecommendedPhase": "Apply the additive migration through an approved Supabase migration channel, then rerun NBA-02B1-R canary persistence/readback."
+  }
+}

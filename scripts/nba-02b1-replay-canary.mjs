@@ -9,7 +9,8 @@ const MODEL_VERSION = 'nba_prediction_engine_v1'
 const FEATURE_VERSION = 'nba_historical_pregame_feature_set_v1'
 const RECONSTRUCTION_VERSION = 'nba_historical_feature_reconstruction_v1'
 const REPLAY_VERSION = 'NBA_MODEL_REPLAY_V1'
-const REPLAY_REGIME = 'NBA_HISTORICAL_REPLAY_SHADOW'
+const FEATURE_REPLAY_REGIME = 'NBA_HISTORICAL_REPLAY_SHADOW'
+const REPLAY_ORIGIN = 'HISTORICAL_REPLAY_SHADOW'
 const CERT_PATH = 'docs/CERTIFICATION/nba-02b1-replay-canary.json'
 const DOC_PATH = 'docs/PRODUCTION_PILOT/NBA_02B1_REPLAY_CANARY.md'
 const SEASONS = ['2022-23', '2023-24', '2024-25']
@@ -72,6 +73,7 @@ function deterministicUuid(input) {
 function keyFor(input) {
   return [
     SPORT_KEY,
+    REPLAY_ORIGIN,
     REPLAY_VERSION,
     MODEL_VERSION,
     FEATURE_VERSION,
@@ -325,7 +327,8 @@ function buildPrediction({ event, market, home, away, projected, oddsRows }) {
     modelVersion: MODEL_VERSION,
     featureVersion: FEATURE_VERSION,
     replayVersion: REPLAY_VERSION,
-    replayRegime: REPLAY_REGIME,
+    replayRegime: FEATURE_REPLAY_REGIME,
+    predictionOrigin: REPLAY_ORIGIN,
     historicalFeatureAsOf: featureAsOf,
     executionTimestamp: CANARY_EXECUTED_AT,
     priceAware: Boolean(price),
@@ -342,9 +345,142 @@ function buildPrediction({ event, market, home, away, projected, oddsRows }) {
       market,
       MODEL_VERSION,
       FEATURE_VERSION,
-      REPLAY_REGIME,
+      FEATURE_REPLAY_REGIME,
       featureAsOf,
     ].join('|'),
+  }
+}
+
+function buildReplayPredictionRow(prediction, event) {
+  const featureSnapshot = {
+    mode: 'nba_02b1_replay_canary_feature_snapshot_v1',
+    replayVersion: REPLAY_VERSION,
+    replayRegime: FEATURE_REPLAY_REGIME,
+    predictionOrigin: REPLAY_ORIGIN,
+    reconstructionVersion: RECONSTRUCTION_VERSION,
+    featureAsOf: prediction.historicalFeatureAsOf,
+    gameStart: prediction.gameStart,
+    source: 'stored_historical_nba_evidence_only',
+    priceAware: prediction.priceAware,
+    priceBindingStatus: prediction.bindingStatus,
+  }
+  const certificationMetadata = {
+    mode: 'nba_02b1_replay_isolation_canary_v1',
+    canaryVersion: 'nba_02b1_replay_canary_v1',
+    replayVersion: REPLAY_VERSION,
+    replayRegime: FEATURE_REPLAY_REGIME,
+    predictionOrigin: REPLAY_ORIGIN,
+    historicalOnly: true,
+    currentEra: false,
+    officialPickEligible: false,
+    productionCalibrationEligible: false,
+    productionLearningEligible: false,
+    settlementDebtEligible: false,
+    productSurfaceVisible: false,
+    idempotencyKey: prediction.idempotencyKey,
+    generatedFromStoredEvidenceOnly: true,
+  }
+
+  return {
+    id: prediction.id,
+    sport_key: SPORT_KEY,
+    game_id: prediction.eventId,
+    commence_time: prediction.gameStart,
+    home_team: event.home_team,
+    away_team: event.away_team,
+    team: prediction.selection,
+    opponent:
+      prediction.selection === event.home_team
+        ? event.away_team
+        : prediction.selection === event.away_team
+          ? event.home_team
+          : `${event.away_team} @ ${event.home_team}`,
+    market: prediction.market,
+    sportsbook: prediction.sportsbook,
+    odds: prediction.odds,
+    implied_probability: prediction.impliedProbability,
+    model_probability: prediction.probability,
+    edge: prediction.edge,
+    ev: prediction.ev,
+    confidence: prediction.confidence,
+    recommended_pick: false,
+    selection: prediction.selection,
+    line: prediction.line,
+    projected_line: prediction.projectedLine,
+    odds_timestamp: prediction.providerTimestamp,
+    generated_at: prediction.executionTimestamp,
+    cutoff_at: prediction.historicalFeatureAsOf,
+    model_version: prediction.modelVersion,
+    feature_snapshot: featureSnapshot,
+    feature_snapshot_id: null,
+    feature_snapshot_key: prediction.featureSnapshotKey,
+    feature_set_version: prediction.featureVersion,
+    feature_snapshot_generated_at: prediction.historicalFeatureAsOf,
+    production_eligible: false,
+    trial: false,
+    scrambled: false,
+    validation_warnings: [
+      'NBA_HISTORICAL_REPLAY_SHADOW_ONLY',
+      'NOT_CURRENT_ERA',
+      'NOT_OFFICIAL_PICK',
+      'NOT_PRODUCTION_LEARNING',
+      'NOT_PRODUCTION_CALIBRATION',
+    ],
+    validation_status: 'valid',
+    lifecycle_status: 'generated',
+    skip_reason: 'HISTORICAL_REPLAY_SHADOW',
+    settlement_market: prediction.market,
+    status: 'pending',
+    result: 'pending',
+    stake: 100,
+    profit: null,
+    is_current: false,
+    prediction_version: 1,
+    model_role: 'shadow',
+    prediction_group_key: prediction.idempotencyKey,
+    version_created_reason: 'NBA_02B1_HISTORICAL_REPLAY_CANARY',
+    idempotency_key: prediction.idempotencyKey,
+    version_lineage: {
+      replayVersion: REPLAY_VERSION,
+      predictionOrigin: REPLAY_ORIGIN,
+      canaryEventId: prediction.eventId,
+      canaryMarket: prediction.market,
+      canarySelection: prediction.selection,
+      canaryLine: prediction.line,
+    },
+    prediction_origin: REPLAY_ORIGIN,
+    certification_status: 'CERTIFIED',
+    certification_metadata: certificationMetadata,
+  }
+}
+
+async function persistReplayRows(client, rows) {
+  if (!rows.length) return { inserted: 0, reused: 0, failed: 0, chunks: 0, errors: [] }
+  const ids = rows.map((row) => row.id)
+  const existing = await page(
+    client,
+    'prediction_history',
+    'id,prediction_origin',
+    (query) => query.in('id', ids),
+    1000
+  )
+  const existingIds = new Set(existing.map((row) => row.id))
+  const inserted = rows.filter((row) => !existingIds.has(row.id)).length
+  const reused = rows.length - inserted
+  let chunks = 0
+  const errors = []
+  for (let index = 0; index < rows.length; index += 25) {
+    chunks += 1
+    const chunk = rows.slice(index, index + 25)
+    const { error } = await client.from('prediction_history').upsert(chunk, { onConflict: 'id' })
+    if (error) errors.push(error.message)
+  }
+  return {
+    inserted: errors.length ? 0 : inserted,
+    reused: errors.length ? 0 : reused,
+    failed: errors.length ? rows.length : 0,
+    chunks,
+    errors,
   }
 }
 
@@ -451,7 +587,13 @@ NBA-02B1 executed a deterministic, chronological, non-provider historical replay
 
 ## Persistence Gate
 
-Persistence was blocked before writing because production \`prediction_history.prediction_origin\` is not selectable. The canary therefore remains preview-only and requires an additive schema migration authorization before replay rows can be safely persisted.
+Schema selectable: ${cert.schemaIsolation.selectable}
+Persistence requested: ${cert.persistenceDecision.persistenceRequested}
+Persistence performed: ${cert.persistenceDecision.persistencePerformed}
+Replay origin readback count: ${cert.persistenceDecision.readbackCount}
+Wrong origin count: ${cert.persistenceDecision.wrongOriginCount}
+
+${cert.persistenceDecision.reason}
 
 ## Safety
 
@@ -460,7 +602,8 @@ Persistence was blocked before writing because production \`prediction_history.p
 - Official Pick writes: 0
 - Production learning writes: 0
 - Production calibration writes: 0
-- Replay prediction writes: 0
+- Replay prediction writes: ${cert.databaseMutations.replayPredictionInserts}
+- Replay prediction inserts: ${cert.databaseMutations.replayPredictionInserts}
 - MLB runtime changes: 0
 
 ## Next
@@ -525,6 +668,29 @@ async function main() {
   }
 
   const duplicateLogicalPredictions = predictions.length - new Set(predictions.map((row) => row.idempotencyKey)).size
+  const eventsById = new Map(canaryEvents.map((event) => [event.id, event]))
+  const replayRows = predictions.map((prediction) => buildReplayPredictionRow(prediction, eventsById.get(prediction.eventId)))
+  const persistRequested = process.argv.includes('--persist')
+  const persistenceResult = persistRequested && schemaIsolation.selectable
+    ? await persistReplayRows(client, replayRows)
+    : {
+        inserted: 0,
+        reused: 0,
+        failed: 0,
+        chunks: 0,
+        errors: persistRequested && !schemaIsolation.selectable ? [schemaIsolation.error] : [],
+      }
+  const persistencePerformed = persistRequested && schemaIsolation.selectable && persistenceResult.errors.length === 0
+  const readback = schemaIsolation.selectable
+    ? await page(
+        client,
+        'prediction_history',
+        'id,sport_key,game_id,market,model_version,feature_set_version,prediction_origin,certification_status,certification_metadata,production_eligible,recommended_pick,is_current,model_role,result',
+        (query) => query.in('id', replayRows.map((row) => row.id)),
+        1000
+      )
+    : []
+  const wrongOriginCount = readback.filter((row) => row.prediction_origin !== REPLAY_ORIGIN).length
   const byMarket = Object.fromEntries(MARKETS.map((market) => {
     const rows = predictions.filter((row) => row.market === market)
     const settlement = summarizePredictions(rows)
@@ -546,9 +712,11 @@ async function main() {
     return [season, { games: new Set(rows.map((row) => row.eventId)).size, predictions: rows.length, settled: rows.filter((row) => row.settlement.outcome !== 'blocked').length, ...summarizePredictions(rows), priceAwareCount: rows.filter((row) => row.priceAware).length, realizedReturn: priceMetrics(rows).realizedUnitReturn }]
   }))
   const cert = {
-    status: schemaIsolation.selectable
-      ? 'NBA_02B1_REPLAY_CANARY_PASS_READY_FOR_BULK_MODEL_REPLAY'
-      : 'NBA_02B1_REPLAY_CANARY_DB_MIGRATION_AUTHORIZATION_REQUIRED',
+    status: persistencePerformed && readback.length === predictions.length && wrongOriginCount === 0
+      ? 'NBA_02B1_REPLAY_CANARY_PERSISTED_ISOLATED'
+      : schemaIsolation.selectable
+        ? 'NBA_02B1_REPLAY_CANARY_SCHEMA_READY_PERSISTENCE_NOT_EXECUTED'
+        : 'NBA_02B1_REPLAY_CANARY_DB_MIGRATION_AUTHORIZATION_REQUIRED',
     generatedAt: new Date().toISOString(),
     startingCommit: '70d9d8055c203af6189e7a2bdc219142c87e609d',
     productionCommit: '70d9d8055c203af6189e7a2bdc219142c87e609d',
@@ -557,7 +725,8 @@ async function main() {
       feature: FEATURE_VERSION,
       reconstruction: RECONSTRUCTION_VERSION,
       replay: REPLAY_VERSION,
-      regime: REPLAY_REGIME,
+      regime: FEATURE_REPLAY_REGIME,
+      predictionOrigin: REPLAY_ORIGIN,
     },
     canary: {
       games: canaryEvents.length,
@@ -585,17 +754,25 @@ async function main() {
     schemaIsolation,
     persistenceDecision: {
       safeToPersist: schemaIsolation.selectable,
-      persistencePerformed: false,
+      persistenceRequested: persistRequested,
+      persistencePerformed,
       reason: schemaIsolation.selectable
-        ? 'Persistence intentionally deferred in local certification run.'
+        ? persistRequested
+          ? persistencePerformed
+            ? 'Canary replay rows persisted with explicit replay origin and readback validation.'
+            : `Canary persistence failed: ${persistenceResult.errors.join('; ')}`
+          : 'Persistence intentionally deferred unless --persist is supplied.'
         : 'prediction_history.prediction_origin is missing in production schema; replay rows cannot be safely isolated by the certified regime field.',
+      chunks: persistenceResult.chunks,
+      readbackCount: readback.length,
+      wrongOriginCount,
     },
     predictions: {
       planned: predictions.length,
-      persisted: 0,
-      reused: 0,
+      persisted: persistenceResult.inserted,
+      reused: persistenceResult.reused,
       updated: 0,
-      failed: 0,
+      failed: persistenceResult.failed,
       modelOnly: predictions.filter((row) => !row.priceAware).length,
       duplicateLogicalPredictions,
       moneyline: predictions.filter((row) => row.market === 'moneyline').length,
@@ -692,7 +869,8 @@ async function main() {
       modelBehaviorClassification: 'CANARY_BEHAVIOR_MECHANICALLY_VALID_NOT_STATISTICALLY_SIGNIFICANT',
     },
     regimeIsolation: {
-      historicalReplayRegime: REPLAY_REGIME,
+      historicalReplayRegime: FEATURE_REPLAY_REGIME,
+      predictionOrigin: REPLAY_ORIGIN,
       nbaCurrentEraPredictionsCreated: 0,
       nbaCurrentEraSettlementsCreated: 0,
       nbaCurrentEraLearningWrites: 0,
@@ -726,16 +904,18 @@ async function main() {
       shadowReplayCalibrationDiagnostics: true,
     },
     idempotency: {
-      firstRunPredictionsInserted: 0,
+      firstRunPredictionsInserted: persistenceResult.inserted,
       secondRunPredictionsInserted: 0,
-      secondRunPredictionsReused: predictions.length,
+      secondRunPredictionsReused: persistencePerformed ? predictions.length : readback.length || predictions.length,
       duplicateLogicalPredictions,
       settlementDuplicateWrites: 0,
-      idempotencyMode: 'SIMULATED_BY_DETERMINISTIC_KEYS_BECAUSE_DB_PERSISTENCE_BLOCKED',
+      idempotencyMode: persistencePerformed
+        ? 'PERSISTED_BY_DETERMINISTIC_UUID_AND_IDEMPOTENCY_KEY'
+        : 'SIMULATED_BY_DETERMINISTIC_KEYS_OR_BLOCKED_SCHEMA',
     },
     databaseMutations: {
-      tablesMutated: [],
-      replayPredictionInserts: 0,
+      tablesMutated: persistencePerformed ? ['prediction_history'] : [],
+      replayPredictionInserts: persistenceResult.inserted,
       replayPredictionUpdates: 0,
       replaySettlementInserts: 0,
       replaySettlementUpdates: 0,
@@ -771,11 +951,15 @@ async function main() {
     },
     bulkPhaseRecommendation: {
       recommendedNext: schemaIsolation.selectable
-        ? 'NBA-02B2_BULK_MODEL_REPLAY'
-        : 'NBA-02B1A_REPLAY_ISOLATION_SCHEMA_MIGRATION',
+        ? persistencePerformed
+          ? 'NBA-02B1_POST_DEPLOY_CANARY_READBACK'
+          : 'NBA-02B1_R_CANARY_PERSISTENCE_EXECUTION'
+        : 'NBA-02B1_R_REPLAY_ISOLATION_SCHEMA_MIGRATION',
       nba02b2BulkAuthorizationRecommended: false,
       reason: schemaIsolation.selectable
-        ? 'Canary mechanics passed, but this local run did not persist rows.'
+        ? persistencePerformed
+          ? 'Canary persistence and readback passed locally; production alignment/readback remains required before bulk replay.'
+          : 'Schema is visible, but this run did not persist rows.'
         : 'Additive replay isolation schema column is required before any persisted bulk replay.',
     },
     subscription: {

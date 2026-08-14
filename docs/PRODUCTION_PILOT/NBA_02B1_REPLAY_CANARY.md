@@ -15,7 +15,13 @@ NBA-02B1 executed a deterministic, chronological, non-provider historical replay
 
 ## Persistence Gate
 
-Persistence was blocked before writing because production `prediction_history.prediction_origin` is not selectable. The canary therefore remains preview-only and requires an additive schema migration authorization before replay rows can be safely persisted.
+Schema selectable: false
+Persistence requested: false
+Persistence performed: false
+Replay origin readback count: 0
+Wrong origin count: 0
+
+prediction_history.prediction_origin is missing in production schema; replay rows cannot be safely isolated by the certified regime field.
 
 ## Safety
 
@@ -25,6 +31,7 @@ Persistence was blocked before writing because production `prediction_history.pr
 - Production learning writes: 0
 - Production calibration writes: 0
 - Replay prediction writes: 0
+- Replay prediction inserts: 0
 - MLB runtime changes: 0
 
 ## Next
