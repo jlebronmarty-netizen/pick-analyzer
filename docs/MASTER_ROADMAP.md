@@ -3463,3 +3463,13 @@ Result: NBA-02B2 completed the authorized full historical model replay from stor
 Model-only null-odds rows remain explicitly isolated and honest: 11,504 replay rows have no sportsbook price, while 3,336 price-aware rows preserve stored 2024-25 odds. No provider calls, NBA Current Era activation, NBA scheduler activation, Official Picks, production learning, production calibration, replay settlement writes, product-surface exposure or MLB mutations were performed.
 
 Next: `NBA-02B3_PRICE_AWARE_HISTORICAL_EVALUATION` is ready after explicit authorization. Do not activate NBA Current Era, NBA scheduler or production recommendations from replay rows.
+
+## NBA-02B3 Price-Aware Historical Evaluation
+
+Status: Local certification PASS, push required.
+
+Result: NBA-02B3 completed historical shadow price-aware evaluation from stored evidence only. The certified universe remains 3,710 historical events and 14,840 `HISTORICAL_REPLAY_SHADOW` predictions; 1,112 events and 3,336 Moneyline/Spread/Total rows have certified pregame historical prices. First Half remains model-only with 0 price-aware rows.
+
+The prior 1,196 full-core estimate is reconciled: 1,112 provider events map into replay-exact price-aware rows and 84 provider-event rows are classified as `EVENT_MAPPING_MISMATCH`, with 0 unexplained. Price-aware shadow settlement produced 1,797 wins, 1,505 losses, 34 pushes, 54.42% accuracy, Brier 0.2615, calibration error 9.88 and -6.57% ROI. The result is diagnostic, not a production pick or profitability claim. Replay evaluation metadata is persisted only on isolated replay rows, final idempotency created 0 new settlements, and NBA Current Era, scheduler, Official Picks, production learning/calibration, product surfaces, provider calls and MLB mutations remain at 0.
+
+Next: `NBA-02C_HISTORICAL_MODEL_DIAGNOSTICS_AND_CURRENT_ERA_READINESS`. Do not tune the model, activate NBA Current Era, enable NBA scheduler or create Official Picks without a separate authorization.
