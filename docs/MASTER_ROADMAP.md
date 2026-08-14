@@ -3421,3 +3421,11 @@ Result: NBA historical replay inputs are now formally reconstructed and certifie
 Replay scope is quantified as 3,710 model-replay-ready canonical games and 1,196 2024-25 full-core price-aware games for Moneyline, Spread and Total. First-half price-aware replay remains unavailable. NBA-02A made 0 provider calls, 0 database writes, 0 replay predictions and 0 NBA Current Era changes.
 
 Next: `NBA-02B1_REPLAY_CANARY`. Do not begin bulk replay until canary inference, persistence, settlement preview, regime isolation and resume/idempotency pass.
+
+## NBA-02B1 Replay Canary
+
+Status: Local certification blocked on additive replay-isolation schema authorization.
+
+Result: NBA-02B1 selected a deterministic 24-game canary across 2022-23, 2023-24 and 2024-25, generated 96 preview predictions for Moneyline, Spread, Total and First Half, bound 24 stored 2024-25 price-aware Moneyline/Spread/Total odds rows and preview-settled all 96 predictions with 52 wins, 44 losses, 0 pushes and 0 blockers. All work used stored evidence only with 0 BallDontLie calls, 0 The Odds API historical calls, 0 SportsDataIO calls, 0 replay writes, 0 Current Era writes and 0 product contamination.
+
+The canary stopped before persistence because production `prediction_history.prediction_origin` is not selectable, preventing certified separation of `NBA_HISTORICAL_REPLAY_SHADOW` rows from Current Era/product rows. Next: authorize additive replay isolation schema migration, then rerun the NBA-02B1 persistence/idempotency gate before NBA-02B2 bulk replay.
