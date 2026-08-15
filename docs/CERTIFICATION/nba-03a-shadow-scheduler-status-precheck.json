@@ -1,0 +1,100 @@
+{
+  "status": "NBA_03A_SHADOW_SCHEDULER_STATUS_PRECHECK_CERTIFIED_READY_FOR_PUBLICATION",
+  "phase": "NBA-03A shadow scheduler status precheck",
+  "createdAt": "2026-08-15",
+  "startingCommit": "ff7cb902358fb1e9083449a0f6a289b867cdb231",
+  "route": {
+    "path": "/api/cron/nba-current-era-shadow",
+    "statusModes": [
+      "GET ?status=precheck",
+      "GET ?mode=status",
+      "POST ?status=precheck",
+      "POST ?mode=status"
+    ],
+    "authentication": "CRON_SECRET",
+    "unauthenticatedStatus": 401
+  },
+  "contract": {
+    "readOnly": true,
+    "providerCalls": 0,
+    "currentDataSyncInvocations": 0,
+    "predictionWrites": 0,
+    "runCounterMutations": 0,
+    "auditJobWrites": 0,
+    "schedulerLockAcquisitions": 0,
+    "cronActivated": false,
+    "naturalSchedulerRunActivated": false
+  },
+  "fields": [
+    "schedulerMode",
+    "schedulerEnabled",
+    "environmentFlagObserved",
+    "schedulerVersion",
+    "policyVersion",
+    "completedCanaryRuns",
+    "canaryInsertedRows",
+    "reviewRequired",
+    "hardLimitReached",
+    "pendingCurrentEraShadowRows",
+    "pendingGuardLimit",
+    "pendingGuardReached",
+    "activeSchedulerLock",
+    "lockStatus",
+    "perRunWriteCap",
+    "reviewAfterRuns",
+    "hardMaxRuns",
+    "totalCanaryRowCap",
+    "providerBudget",
+    "currentEraShadowCount",
+    "finalClassification"
+  ],
+  "classifications": [
+    "SCHEDULER_PRECHECK_READY",
+    "SCHEDULER_PRECHECK_DISABLED",
+    "SCHEDULER_PRECHECK_REVIEW_REQUIRED",
+    "SCHEDULER_PRECHECK_HARD_LIMIT",
+    "SCHEDULER_PRECHECK_PENDING_GUARD",
+    "SCHEDULER_PRECHECK_LOCK_ACTIVE"
+  ],
+  "canaryBounds": {
+    "perRunWriteCap": 3,
+    "reviewAfterRuns": 2,
+    "hardMaxRuns": 4,
+    "totalCanaryRowCap": 12,
+    "pendingGuardLimit": 75
+  },
+  "providerBudget": {
+    "provider": "the-odds-api",
+    "sportKey": "basketball_nba",
+    "maxCallsPerRun": 2,
+    "maxCallsPerHour": 4,
+    "maxCallsPerDay": 48,
+    "sportsDataIoCalls": 0,
+    "historicalOddsCalls": 0
+  },
+  "testMatrix": {
+    "unauthenticated": "UNAUTHORIZED",
+    "disabled": "SCHEDULER_PRECHECK_DISABLED",
+    "enabled": "SCHEDULER_PRECHECK_READY",
+    "reviewRequired": "SCHEDULER_PRECHECK_REVIEW_REQUIRED",
+    "hardLimit": "SCHEDULER_PRECHECK_HARD_LIMIT",
+    "pendingGuard": "SCHEDULER_PRECHECK_PENDING_GUARD",
+    "activeLock": "SCHEDULER_PRECHECK_LOCK_ACTIVE",
+    "repeatedStatusRequest": "NO_COUNTER_CHANGE",
+    "providerSpy": 0,
+    "predictionPersistenceSpy": 0,
+    "currentDataSyncSpy": 0
+  },
+  "productionCertification": {
+    "providerCalls": 0,
+    "databaseMutations": 0,
+    "currentEraWrites": 0,
+    "officialPickWrites": 0,
+    "productExposureWrites": 0,
+    "historicalReplayMutations": 0,
+    "mlbMutations": 0
+  },
+  "cronState": "NBA_SHADOW_CRON_NOT_ADDED",
+  "statusPrecheckReady": true,
+  "finalClassification": "NBA_03A_SHADOW_SCHEDULER_STATUS_PRECHECK_CERTIFIED_READY_FOR_PUBLICATION"
+}

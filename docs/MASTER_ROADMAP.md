@@ -3561,3 +3561,11 @@ Result: NBA-03A now has a protected runnable scheduler harness for a future NBA 
 The harness reuses existing components rather than creating a separate scheduler framework: provider-action lock, The Odds API NBA odds sync, Safe Canary, cross-event policy V1, deterministic `write-one` persistence, provider budget guard and `sports_sync_jobs` audit telemetry. Runtime bounds are 3 rows/run, review after 2 completed runs, hard max 4 runs, total canary cap 12 and pending guard 75. Vercel cron declaration remains deferred so deployment alone cannot start natural NBA scheduler runs.
 
 Next: publish/deploy the harness, confirm production alignment and separately authorize the two-natural-run activation canary. Do not enable continuous operation, NBA Official Picks, product exposure, learning, calibration, bankroll or notifications.
+
+## NBA-03A Shadow Scheduler Status Precheck
+
+Status: `NBA_03A_SHADOW_SCHEDULER_STATUS_PRECHECK_CERTIFIED_READY_FOR_PUBLICATION`
+
+Result: NBA-03A now has a protected read-only status/precheck mode on `/api/cron/nba-current-era-shadow`. The mode reuses `CRON_SECRET`, reports whether `NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED` is observed, and reads canary guard state without calling providers, syncing current data, writing predictions, mutating run counters, creating audit jobs or acquiring the active scheduler lock.
+
+Next: publish/deploy this precheck, confirm production reports `schedulerEnabled=true` with review/hard-limit/pending/lock guards clear, then separately add the NBA Vercel Cron entry for the already-authorized two-natural-run activation canary. Do not enable indefinite continuous operation.

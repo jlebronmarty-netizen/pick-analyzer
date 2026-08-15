@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { runNbaCurrentEraShadowSchedulerCanary } from '@/services/nba-current-era-shadow-scheduler.service'
+import {
+  getNbaCurrentEraShadowSchedulerPrecheckStatus,
+  runNbaCurrentEraShadowSchedulerCanary,
+} from '@/services/nba-current-era-shadow-scheduler.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -24,6 +27,21 @@ async function handle(request: NextRequest) {
   }
 
   try {
+    const mode = request.nextUrl.searchParams.get('mode')
+    const status = request.nextUrl.searchParams.get('status')
+    if (mode === 'status' || status === 'precheck') {
+      const result = await getNbaCurrentEraShadowSchedulerPrecheckStatus()
+      return apiOk(
+        {
+          ...result,
+          route: '/api/cron/nba-current-era-shadow',
+          providerCallsFromCertificationReads: 0,
+          databaseMutationsFromCertificationReads: 0,
+        },
+        id
+      )
+    }
+
     const result = await runNbaCurrentEraShadowSchedulerCanary()
     return apiOk(
       {

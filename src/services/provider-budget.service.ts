@@ -788,6 +788,17 @@ export function claimProviderActionLock(key: string, ttlMs = 10 * 60 * 1000) {
   return true
 }
 
+export function getProviderActionLockStatus(key: string) {
+  const now = Date.now()
+  const expiresAt = localLocks.get(key) ?? 0
+  return {
+    key,
+    active: expiresAt > now,
+    expiresAt: expiresAt > now ? new Date(expiresAt).toISOString() : null,
+    millisecondsRemaining: expiresAt > now ? expiresAt - now : 0,
+  }
+}
+
 export function releaseProviderActionLock(key: string) {
   localLocks.delete(key)
 }
