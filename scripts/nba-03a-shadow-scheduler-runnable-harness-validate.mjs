@@ -3,13 +3,30 @@ import fs from 'node:fs'
 const servicePath = 'src/services/nba-current-era-shadow-scheduler.service.ts'
 const routePath = 'src/app/api/cron/nba-current-era-shadow/route.ts'
 const certPath = 'docs/CERTIFICATION/nba-03a-shadow-scheduler-runnable-harness.json'
+const activationCertPath = 'docs/CERTIFICATION/nba-03a-shadow-scheduler-activation-cron.json'
 const docPath = 'docs/PRODUCTION_PILOT/NBA_03A_SHADOW_SCHEDULER_RUNNABLE_HARNESS.md'
 
 const service = fs.readFileSync(servicePath, 'utf8')
 const route = fs.readFileSync(routePath, 'utf8')
 const cert = JSON.parse(fs.readFileSync(certPath, 'utf8'))
+const activationCert = fs.existsSync(activationCertPath) ? JSON.parse(fs.readFileSync(activationCertPath, 'utf8')) : null
 const doc = fs.readFileSync(docPath, 'utf8')
 const vercel = JSON.parse(fs.readFileSync('vercel.json', 'utf8'))
+const nbaCron = (vercel.crons ?? []).find((cron) => cron.path === '/api/cron/nba-current-era-shadow')
+const activationCronCertified =
+  activationCert?.status === 'NBA_03A_SHADOW_SCHEDULER_CRON_ACTIVATION_CERTIFIED_FOR_CANARY' &&
+  activationCert?.cron?.path === '/api/cron/nba-current-era-shadow' &&
+  activationCert?.cron?.schedule === '*/30 * * * *' &&
+  activationCert?.activationLimits?.naturalCompletedRunsBeforeReview === 2 &&
+  activationCert?.activationLimits?.hardMaximumRuns === 4 &&
+  activationCert?.activationLimits?.maxNewRowsPerRun === 3 &&
+  activationCert?.activationLimits?.maxNewRowsAcrossCanary === 12 &&
+  activationCert?.activationLimits?.pendingGuard === 75 &&
+  activationCert?.providerBudget?.theOddsApiMaxCallsPerRun === 2 &&
+  activationCert?.providerBudget?.theOddsApiMaxCallsPerHour === 4 &&
+  activationCert?.providerBudget?.theOddsApiMaxCallsPerDay === 48 &&
+  activationCert?.providerBudget?.sportsDataIoCalls === 0 &&
+  activationCert?.providerBudget?.historicalOddsCalls === 0
 
 process.env.NEXT_PUBLIC_SUPABASE_URL ??= 'https://example.supabase.co'
 process.env.SUPABASE_SERVICE_ROLE_KEY ??= 'fixture-service-role-key'
@@ -38,7 +55,11 @@ check('route supports GET and POST', route.includes('export async function GET')
 check('unauthorized request rejected in fixtures', result('unauthorized')?.classification === 'UNAUTHORIZED_REJECTED' && result('unauthorized')?.httpStatus === 401)
 check('scheduler enable flag consumed by runtime', service.includes('NBA_SHADOW_SCHEDULER_ENABLED_ENV') && service.includes('schedulerEnabled()'))
 check('disabled default no-op before provider', result('disabled')?.classification === 'SCHEDULER_DISABLED_NO_OP' && result('disabled')?.providerCalls === 0 && result('disabled')?.writes === 0)
-check('vercel cron not activated', !JSON.stringify(vercel).includes('nba-current-era-shadow') && cert.scheduler.cronDeclaration === 'DEFERRED')
+check(
+  'vercel cron activation state is phase-aware',
+  (!nbaCron && cert.scheduler.cronDeclaration === 'DEFERRED') ||
+    (nbaCron?.schedule === '*/30 * * * *' && activationCronCertified)
+)
 check('single future authority documented', cert.scheduler.authority === 'Vercel Cron future primary' && !fs.existsSync('.github/workflows/nba-current-era-shadow.yml'))
 check('lock key exact', service.includes("NBA_SHADOW_SCHEDULER_LOCK_KEY = 'nba_current_era_shadow_scheduler'") && cert.scheduler.lockKey === 'nba_current_era_shadow_scheduler')
 check('lock conflict no provider and no writes', result('lockConflict')?.classification === 'LOCK_CONFLICT_NO_OP' && result('lockConflict')?.providerCalls === 0 && result('lockConflict')?.writes === 0)

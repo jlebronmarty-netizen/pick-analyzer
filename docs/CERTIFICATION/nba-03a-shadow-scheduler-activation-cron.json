@@ -1,0 +1,56 @@
+{
+  "status": "NBA_03A_SHADOW_SCHEDULER_CRON_ACTIVATION_CERTIFIED_FOR_CANARY",
+  "phase": "NBA-03A shadow scheduler cron activation canary",
+  "createdAt": "2026-08-15",
+  "startingCommit": "1a57cd01233cfbe98bfcc364a0e8b74d27fdde32",
+  "cron": {
+    "path": "/api/cron/nba-current-era-shadow",
+    "schedule": "*/30 * * * *",
+    "authority": "Vercel Cron",
+    "continuousOperationAuthorized": false
+  },
+  "preservedCronEntries": [
+    {
+      "path": "/api/cron/operating-day",
+      "schedule": "7-57/10 * * * *"
+    }
+  ],
+  "precheckRequiredBeforeNaturalRuns": true,
+  "activationLimits": {
+    "naturalCompletedRunsBeforeReview": 2,
+    "hardMaximumRuns": 4,
+    "maxNewRowsPerRun": 3,
+    "maxNewRowsAcrossCanary": 12,
+    "pendingGuard": 75
+  },
+  "providerBudget": {
+    "theOddsApiMaxCallsPerRun": 2,
+    "theOddsApiMaxCallsPerHour": 4,
+    "theOddsApiMaxCallsPerDay": 48,
+    "sportsDataIoCalls": 0,
+    "historicalOddsCalls": 0
+  },
+  "requiredRuntimeContracts": {
+    "route": "/api/cron/nba-current-era-shadow",
+    "auth": "CRON_SECRET",
+    "statusPrecheck": true,
+    "schedulerEnabledEnv": "NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED",
+    "lockKey": "nba_current_era_shadow_scheduler",
+    "policyVersion": "NBA_03A_CROSS_EVENT_SHADOW_ACCUMULATION_POLICY_V1",
+    "deterministicPersistence": true
+  },
+  "safety": {
+    "officialPicksActivated": false,
+    "productRecommendationsActivated": false,
+    "settlementActivated": false,
+    "learningActivated": false,
+    "calibrationActivated": false,
+    "bankrollActivated": false,
+    "notificationsActivated": false,
+    "mlbModified": false,
+    "historicalReplayModified": false
+  },
+  "expectedReviewGuardAfterRunTwo": "CANARY_REVIEW_REQUIRED_NO_OP",
+  "precheckClassificationBeforeCron": "SCHEDULER_PRECHECK_READY",
+  "finalClassification": "NBA_03A_SHADOW_SCHEDULER_CRON_ACTIVATION_CERTIFIED_FOR_CANARY"
+}

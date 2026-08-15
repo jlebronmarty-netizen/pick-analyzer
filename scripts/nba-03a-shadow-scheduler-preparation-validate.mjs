@@ -3,12 +3,24 @@ import fs from 'node:fs'
 const servicePath = 'src/services/nba-shadow-scheduler-preparation.service.ts'
 const docPath = 'docs/PRODUCTION_PILOT/NBA_03A_SHADOW_SCHEDULER_PREPARATION.md'
 const certPath = 'docs/CERTIFICATION/nba-03a-shadow-scheduler-preparation.json'
+const activationCertPath = 'docs/CERTIFICATION/nba-03a-shadow-scheduler-activation-cron.json'
 const vercelPath = 'vercel.json'
 
 const service = fs.readFileSync(servicePath, 'utf8')
 const doc = fs.readFileSync(docPath, 'utf8')
 const cert = JSON.parse(fs.readFileSync(certPath, 'utf8'))
+const activationCert = fs.existsSync(activationCertPath) ? JSON.parse(fs.readFileSync(activationCertPath, 'utf8')) : null
 const vercel = JSON.parse(fs.readFileSync(vercelPath, 'utf8'))
+const nbaCron = (vercel.crons ?? []).find((cron) => cron.path === '/api/cron/nba-current-era-shadow')
+const activationCronCertified =
+  activationCert?.status === 'NBA_03A_SHADOW_SCHEDULER_CRON_ACTIVATION_CERTIFIED_FOR_CANARY' &&
+  activationCert?.cron?.path === '/api/cron/nba-current-era-shadow' &&
+  activationCert?.cron?.schedule === '*/30 * * * *' &&
+  activationCert?.activationLimits?.naturalCompletedRunsBeforeReview === 2 &&
+  activationCert?.activationLimits?.hardMaximumRuns === 4 &&
+  activationCert?.activationLimits?.maxNewRowsPerRun === 3 &&
+  activationCert?.activationLimits?.maxNewRowsAcrossCanary === 12 &&
+  activationCert?.activationLimits?.pendingGuard === 75
 const { runNbaShadowSchedulerPreparationFixtures } = await import('../src/services/nba-shadow-scheduler-preparation.service.ts')
 const fixture = runNbaShadowSchedulerPreparationFixtures()
 const byName = Object.fromEntries(fixture.results.map((item) => [item.name, item.result]))
@@ -27,8 +39,8 @@ check('database mutations zero in preparation', cert.databaseMutations === 0)
 check('mode is NBA current era shadow', cert.scheduler.mode === 'NBA_CURRENT_ERA_SHADOW' && service.includes("NBA_SHADOW_SCHEDULER_MODE = 'NBA_CURRENT_ERA_SHADOW'"))
 check('default enabled false', cert.scheduler.enabledByDefault === false && service.includes('defaultEnabled: false'))
 check('kill switch env documented', cert.scheduler.enableFlag === 'NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED' && doc.includes('NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED'))
-check('current Vercel cron remains operating-day only', Array.isArray(vercel.crons) && vercel.crons.length === 1 && vercel.crons[0].path === '/api/cron/operating-day')
-check('proposed cron documented but not activated', cert.scheduler.proposedCron === '*/30 * * * *' && !JSON.stringify(vercel).includes('NBA_CURRENT_ERA_SHADOW'))
+check('Vercel cron state is phase-aware', (Array.isArray(vercel.crons) && vercel.crons.length === 1 && vercel.crons[0].path === '/api/cron/operating-day') || (nbaCron?.schedule === '*/30 * * * *' && activationCronCertified))
+check('proposed cron documented or activation certified', cert.scheduler.proposedCron === '*/30 * * * *' && (!nbaCron || activationCronCertified))
 check('provider budget per run bounded at 2', cert.providerBudget.maxProviderCallsPerRun === 2)
 check('sportsdataio remains zero', cert.providerBudget.sportsDataIoCalls === 0)
 check('historical calls remain zero', cert.providerBudget.historicalProviderCalls === 0)

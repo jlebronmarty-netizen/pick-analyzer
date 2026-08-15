@@ -4,14 +4,24 @@ const servicePath = 'src/services/nba-current-era-shadow-scheduler.service.ts'
 const routePath = 'src/app/api/cron/nba-current-era-shadow/route.ts'
 const providerBudgetPath = 'src/services/provider-budget.service.ts'
 const certPath = 'docs/CERTIFICATION/nba-03a-shadow-scheduler-status-precheck.json'
+const activationCertPath = 'docs/CERTIFICATION/nba-03a-shadow-scheduler-activation-cron.json'
 const docPath = 'docs/PRODUCTION_PILOT/NBA_03A_SHADOW_SCHEDULER_STATUS_PRECHECK.md'
 
 const service = fs.readFileSync(servicePath, 'utf8')
 const route = fs.readFileSync(routePath, 'utf8')
 const providerBudget = fs.readFileSync(providerBudgetPath, 'utf8')
 const cert = JSON.parse(fs.readFileSync(certPath, 'utf8'))
+const activationCert = fs.existsSync(activationCertPath) ? JSON.parse(fs.readFileSync(activationCertPath, 'utf8')) : null
 const doc = fs.readFileSync(docPath, 'utf8')
 const vercel = JSON.parse(fs.readFileSync('vercel.json', 'utf8'))
+const nbaCron = (vercel.crons ?? []).find((cron) => cron.path === '/api/cron/nba-current-era-shadow')
+const activationCronCertified =
+  activationCert?.status === 'NBA_03A_SHADOW_SCHEDULER_CRON_ACTIVATION_CERTIFIED_FOR_CANARY' &&
+  activationCert?.cron?.path === '/api/cron/nba-current-era-shadow' &&
+  activationCert?.cron?.schedule === '*/30 * * * *' &&
+  activationCert?.activationLimits?.naturalCompletedRunsBeforeReview === 2 &&
+  activationCert?.activationLimits?.maxNewRowsPerRun === 3 &&
+  activationCert?.activationLimits?.maxNewRowsAcrossCanary === 12
 
 process.env.NEXT_PUBLIC_SUPABASE_URL ??= 'https://example.supabase.co'
 process.env.SUPABASE_SERVICE_ROLE_KEY ??= 'fixture-service-role-key'
@@ -66,7 +76,7 @@ check('lock acquisitions zero', Object.values(fixtures.results).every((item) => 
 check('required payload fields documented', cert.fields.includes('schedulerEnabled') && cert.fields.includes('completedCanaryRuns') && cert.fields.includes('activeSchedulerLock'))
 check('provider budget bounds preserved', cert.providerBudget.maxCallsPerRun === 2 && cert.providerBudget.maxCallsPerHour === 4 && cert.providerBudget.maxCallsPerDay === 48)
 check('canary bounds preserved', cert.canaryBounds.perRunWriteCap === 3 && cert.canaryBounds.reviewAfterRuns === 2 && cert.canaryBounds.pendingGuardLimit === 75)
-check('cron still not activated', !JSON.stringify(vercel).includes('nba-current-era-shadow') && cert.cronState === 'NBA_SHADOW_CRON_NOT_ADDED')
+check('cron state is phase-aware', (!nbaCron && cert.cronState === 'NBA_SHADOW_CRON_NOT_ADDED') || (nbaCron?.schedule === '*/30 * * * *' && activationCronCertified))
 check('documentation states zero side effects', doc.includes('Zero-Side-Effect Contract') && doc.includes('scheduler lock acquisitions'))
 check('status precheck ready true', cert.statusPrecheckReady === true)
 

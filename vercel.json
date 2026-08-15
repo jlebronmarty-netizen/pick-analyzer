@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/operating-day",
       "schedule": "7-57/10 * * * *"
+    },
+    {
+      "path": "/api/cron/nba-current-era-shadow",
+      "schedule": "*/30 * * * *"
     }
   ]
 }

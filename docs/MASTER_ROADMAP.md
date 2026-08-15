@@ -3569,3 +3569,11 @@ Status: `NBA_03A_SHADOW_SCHEDULER_STATUS_PRECHECK_CERTIFIED_READY_FOR_PUBLICATIO
 Result: NBA-03A now has a protected read-only status/precheck mode on `/api/cron/nba-current-era-shadow`. The mode reuses `CRON_SECRET`, reports whether `NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED` is observed, and reads canary guard state without calling providers, syncing current data, writing predictions, mutating run counters, creating audit jobs or acquiring the active scheduler lock.
 
 Next: publish/deploy this precheck, confirm production reports `schedulerEnabled=true` with review/hard-limit/pending/lock guards clear, then separately add the NBA Vercel Cron entry for the already-authorized two-natural-run activation canary. Do not enable indefinite continuous operation.
+
+## NBA-03A Shadow Scheduler Cron Activation Canary
+
+Status: `NBA_03A_SHADOW_SCHEDULER_CRON_ACTIVATION_CERTIFIED_FOR_CANARY`
+
+Result: NBA-03A now has a certified Vercel Cron activation artifact for the first bounded Current Era Shadow scheduler canary. The artifact adds only `/api/cron/nba-current-era-shadow` at `*/30 * * * *`, keeps `/api/cron/operating-day` unchanged and preserves the two-run review boundary, 3-row per-run cap, 12-row hard cap, pending guard 75 and provider budget limits.
+
+Next: publish/deploy the cron activation commit, verify protected precheck readiness in production, then observe exactly two natural Vercel Cron runs before review. Do not authorize continuous scheduler operation automatically.
