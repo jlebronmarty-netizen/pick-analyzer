@@ -102,10 +102,13 @@ function failed<T>(
 }
 
 async function fetchOddsApiGames(sportKey: SportKey) {
-  const apiKey = process.env.ODDS_API_KEY
+  const apiKey =
+    process.env.THE_ODDS_API_KEY?.trim() ??
+    process.env.ODDS_API_KEY?.trim() ??
+    ''
 
   if (!apiKey) {
-    throw new Error('Missing ODDS_API_KEY')
+    throw new Error('Missing THE_ODDS_API_KEY or ODDS_API_KEY')
   }
 
   const url = new URL(
@@ -292,14 +295,14 @@ class OddsApiSportAdapter implements SportAdapter {
   async healthCheck(): Promise<AdapterHealth> {
     const startedAt = Date.now()
 
-    if (!process.env.ODDS_API_KEY) {
+    if (!process.env.THE_ODDS_API_KEY?.trim() && !process.env.ODDS_API_KEY?.trim()) {
       return {
         adapterId: this.id,
         sportKey: this.sportKey,
         status: 'unavailable',
         latencyMs: elapsed(startedAt),
         lastFailure: new Date().toISOString(),
-        errorMessage: 'Missing ODDS_API_KEY',
+        errorMessage: 'Missing THE_ODDS_API_KEY or ODDS_API_KEY',
         coverage: this.features,
       }
     }

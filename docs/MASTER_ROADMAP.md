@@ -3507,3 +3507,11 @@ The canary keeps the normal historical replay path unchanged while isolating Cur
 The current production-connected dry-run is a safe no-op because no legitimate future NBA event is stored. No Current Era rows, Official Picks, product-surface changes, learning/calibration writes, historical replay mutations, MLB mutations, provider calls or dry-run database mutations occurred.
 
 Next: authorize a bounded current NBA schedule and The Odds API price-sync step. Do not create the first `CURRENT_ERA_SHADOW` row until legitimate future NBA event and real timestamped pregame price evidence exist and a separate first-shadow write is explicitly authorized.
+
+## NBA-03A Current Data Sync
+
+Status: Local certification PASS, push required.
+
+Result: NBA-03A current data acquisition reused the existing NBA multi-sport adapter and canonical `nba-data-sync` persistence. A narrow runtime repair lets the adapter resolve `THE_ODDS_API_KEY` first while preserving `ODDS_API_KEY` as legacy fallback. The bounded execution made 2 The Odds API `basketball_nba` current odds calls and 0 SportsDataIO calls, then persisted/read back 41 future NBA events and 608 current/future odds rows across Moneyline, Spread and Total.
+
+The Safe Canary remained dry-run only and found 362 eligible real-price candidates with 0 `CURRENT_ERA_SHADOW` rows written. Official Picks, product visibility, learning, calibration, historical replay and MLB all remained unchanged. Next: publish this certification, then request a separate explicit first-shadow write authorization for one bounded eligible candidate. Do not enable NBA production, NBA scheduler, recommendations, bankroll, notifications or learning/calibration from this evidence.

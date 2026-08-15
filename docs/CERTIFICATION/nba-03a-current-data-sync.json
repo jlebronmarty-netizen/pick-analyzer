@@ -1,0 +1,145 @@
+{
+  "artifact": "nba-03a-current-data-sync",
+  "status": "NBA_03A_CURRENT_DATA_SYNC_PASS_READY_FOR_FIRST_SHADOW_AUTHORIZATION",
+  "generatedAt": "2026-08-15T02:11:24.329Z",
+  "repository": {
+    "startingCommit": "3e2a3865bbc0cb15e2ccf30819d74fef978b321b",
+    "originMain": "3e2a3865bbc0cb15e2ccf30819d74fef978b321b",
+    "worktreeInitiallyClean": true
+  },
+  "providerArchitecture": {
+    "scheduleAuthority": "The Odds API basketball_nba current odds endpoint via existing multi-sport NBA adapter",
+    "oddsAuthority": "The Odds API basketball_nba current odds endpoint via existing multi-sport NBA adapter",
+    "adapterReused": "src/services/multi-sport-adapters.service.ts",
+    "persistenceReused": "src/services/nba-data-sync.service.ts",
+    "credentialVariables": {
+      "primary": "THE_ODDS_API_KEY",
+      "legacyFallbackPreserved": "ODDS_API_KEY"
+    },
+    "sportsDataIoUsed": false
+  },
+  "providerCalls": {
+    "theOddsApi": {
+      "count": 2,
+      "endpoints": [
+        "/v4/sports/basketball_nba/odds",
+        "/v4/sports/basketball_nba/odds"
+      ],
+      "purposes": [
+        "schedule normalization",
+        "odds normalization"
+      ],
+      "success": true,
+      "quotaHeadersCaptured": false
+    },
+    "sportsDataIo": {
+      "count": 0
+    }
+  },
+  "scheduleSync": {
+    "providerEventsFound": 41,
+    "validFutureEvents": 41,
+    "recordsFetched": 41,
+    "recordsInserted": 0,
+    "recordsUpdated": 82,
+    "recordsSkipped": 0,
+    "mappingFailures": 0,
+    "storedFutureNbaEventsAfterSync": 41,
+    "firstEvent": {
+      "id": "26b036ff107f3c658258eaf4a6f26228",
+      "startTime": "2026-10-20T19:00:00+00:00",
+      "homeTeam": "Detroit Pistons",
+      "awayTeam": "Boston Celtics",
+      "status": "scheduled",
+      "provider": "the-odds-api"
+    }
+  },
+  "oddsSync": {
+    "recordsFetched": 304,
+    "recordsInserted": 0,
+    "recordsUpdated": 608,
+    "eventsWithOdds": 41,
+    "snapshotsStored": 608,
+    "storedCurrentFutureOddsAfterSync": 608,
+    "bookmakers": [
+      "BetMGM",
+      "BetOnline.ag",
+      "BetRivers",
+      "Bovada",
+      "Caesars",
+      "DraftKings",
+      "FanDuel",
+      "Fanatics",
+      "LowVig.ag"
+    ],
+    "supportedMarkets": [
+      "moneyline",
+      "spread",
+      "total"
+    ],
+    "staleInvalidSnapshotsRejected": 0
+  },
+  "dataIntegrity": {
+    "duplicateEvents": 0,
+    "duplicateInvalidSnapshots": 0,
+    "fakeFallbackOdds": 0,
+    "trialSportsDataIoEvidenceUsed": 0,
+    "temporalViolationsInStoredReadback": 0
+  },
+  "safeCanaryDryRun": {
+    "canaryVersion": "NBA_CURRENT_ERA_SHADOW_CANARY_V1",
+    "mode": "dry-run",
+    "providerCalls": 0,
+    "databaseMutationsFromDryRun": 0,
+    "currentEventsConsidered": 25,
+    "marketsConsidered": 362,
+    "fullyEligible": 362,
+    "skipped": 0,
+    "skipReasons": {},
+    "earliestEligibleEvent": {
+      "eventId": "26b036ff107f3c658258eaf4a6f26228",
+      "eventStartTime": "2026-10-20T19:00:00+00:00",
+      "market": "spread",
+      "selection": "Detroit Pistons",
+      "line": -1.5,
+      "sportsbook": "FanDuel",
+      "oddsTimestamp": "2026-08-15T02:10:56+00:00",
+      "priceAgeMinutes": 0,
+      "cutoffAt": "2026-10-20T18:50:00.000Z"
+    },
+    "classification": "NBA_03A_BLOCK5_SAFE_CANARY_CERTIFIED_READY_FOR_FIRST_SHADOW"
+  },
+  "isolation": {
+    "currentEraShadowBefore": 0,
+    "currentEraShadowAfter": 0,
+    "currentEraShadowDelta": 0,
+    "officialPickDelta": 0,
+    "productVisibilityDelta": 0,
+    "alertDelta": 0,
+    "historicalReplayShadowBefore": 14840,
+    "historicalReplayShadowAfter": 14840,
+    "historicalReplayShadowDelta": 0,
+    "learningDelta": 0,
+    "calibrationDelta": 0,
+    "mlbEventsDelta": 0,
+    "mlbOddsDelta": 0,
+    "mlbMutationDelta": 0
+  },
+  "runtimeCost": {
+    "durationMs": 5063,
+    "providerCalls": 2,
+    "avoidableCalls": 0,
+    "rateLimitConcern": false,
+    "recurringImpact": "Run only as a bounded NBA current-data sync until NBA scheduler activation is separately authorized."
+  },
+  "commitPolicy": {
+    "currentEraShadowPredictionsWritten": false,
+    "nbaProductionActivated": false,
+    "pushAuthorizationRequired": true,
+    "deploymentRequired": true
+  },
+  "next": {
+    "readyForFirstShadowAuthorization": true,
+    "recommendedInstruction": "Authorize the first NBA CURRENT_ERA_SHADOW Safe Canary write for one bounded eligible candidate, with write mode still isolated from Official Picks and product recommendations."
+  }
+}
