@@ -1,0 +1,65 @@
+{
+  "status": "NBA_03A_SHADOW_SCHEDULER_RUN2_CARDINALITY_REPAIR_CERTIFIED_READY_FOR_PUBLICATION",
+  "phase": "NBA-03A Scheduler Run 2 Persistence Cardinality Repair",
+  "startingCommit": "5d569b4e72f7fd4efc2572e95770ceffc257061c",
+  "rootCause": "WRITE_ONE_REVALIDATION_TREATED_EXACT_ALREADY_EXISTS_AS_CARDINALITY_FAILURE",
+  "failedProductionJobId": "4dc3c613-b53b-45c4-b52f-146ec97a7e9c",
+  "failedProductionClassification": "PERSISTENCE_FAILURE_BLOCKED",
+  "failedProductionError": "WRITE_CARDINALITY_NOT_ONE",
+  "failedProductionSelectedCount": 3,
+  "failedProductionCandidateKeysAvailable": false,
+  "architecture": {
+    "schedulerMaySelectUpTo": 3,
+    "writerCardinality": "exactly_one_candidate_key_per_write_operation",
+    "batchStrategy": "bounded_loop_over_selected_candidate_keys",
+    "unsafeBulkWriterAccessible": false,
+    "writeOneWeakened": false
+  },
+  "bounds": {
+    "perRunCap": 3,
+    "persistenceAttemptsPerRunMax": 3,
+    "newLogicalRowsPerRunMax": 3,
+    "reviewAfterSuccessfulRuns": 2,
+    "hardMaxRuns": 4,
+    "totalRowCap": 12
+  },
+  "partialFailurePolicy": {
+    "successfulPriorWritesRemain": true,
+    "failedCandidateReportedSeparately": true,
+    "runClassification": "PERSISTENCE_FAILURE_BLOCKED",
+    "failedRunsIncrementCompletedCanaryRuns": false,
+    "rerunIdempotency": "CREATED rows become ALREADY_EXISTS on repeat"
+  },
+  "auditAccounting": {
+    "selectedCandidateKeysRecordedForNewRuns": true,
+    "persistenceResultsRecordedForNewRuns": true,
+    "selectedCandidateReuseSeparatedFromUpstreamAlreadyExists": true,
+    "historicalAuditRowsRewritten": false
+  },
+  "providerBudget": {
+    "theOddsApiMaxCallsPerRun": 2,
+    "theOddsApiMaxCallsPerHour": 4,
+    "theOddsApiMaxCallsPerDay": 48,
+    "sportsDataIoCalls": 0,
+    "historicalOddsCalls": 0,
+    "authorizationModeUnchanged": "bounded_canary_unknown_balance"
+  },
+  "isolation": {
+    "officialPickDelta": 0,
+    "productVisibilityDelta": 0,
+    "learningDelta": 0,
+    "calibrationDelta": 0,
+    "bankrollDelta": 0,
+    "notificationDelta": 0,
+    "historicalReplayDelta": 0,
+    "mlbMutationDelta": 0
+  },
+  "accounting": {
+    "providerCallsFromCertification": 0,
+    "productionDatabaseMutations": 0,
+    "manualSchedulerInvocations": 0,
+    "productionCurrentEraShadowWrites": 0
+  },
+  "run2RetryReady": true,
+  "finalClassification": "NBA_03A_SHADOW_SCHEDULER_RUN2_CARDINALITY_REPAIR_CERTIFIED_READY_FOR_PUBLICATION"
+}

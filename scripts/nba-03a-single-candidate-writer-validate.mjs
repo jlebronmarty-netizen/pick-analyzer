@@ -29,7 +29,7 @@ check('default mode remains dry-run', runner.includes(": 'dry-run'") && cert.can
 check('generic all-candidate write mode removed', !runner.includes("'write'") && !service.includes("mode === 'write'") && cert.canary.writeMode === 'write-one')
 check('write-one exists and requires candidate key', runner.includes("'write-one'") && runner.includes('--candidate-key=') && runner.includes('WRITE_CARDINALITY_NOT_ONE'))
 check('explicit stable candidate key exists', service.includes('buildNbaCurrentEraShadowCandidateKey') && service.includes('oddsId') && cert.writer.selector.includes('candidateKey'))
-check('cardinality guard is shared and testable', service.includes('selectNbaCurrentEraShadowWriteCandidate') && service.includes("selected.length === 1 ? 'SELECTED' : 'WRITE_CARDINALITY_NOT_ONE'"))
+check('cardinality guard is shared and testable', service.includes('selectNbaCurrentEraShadowWriteCandidate') && service.includes("singleCandidate.writeEligible") && service.includes("'WRITE_CARDINALITY_NOT_ONE'"))
 check('savePredictionHistory receives exactly one row in write-one path', service.includes('savePredictionHistory([buildNbaCurrentEraShadowPredictionRow'))
 check('model match is required', service.includes('MODEL_OUTPUT_MISSING') && service.includes('findNbaCurrentEraShadowModelPrediction') && cert.writer.modelOutputRequired === true)
 check('model identity excludes sportsbook', service.includes('prediction.gameId === candidate.eventId') && service.includes('prediction.market === candidate.market') && service.includes('prediction.team === candidate.selection') && !service.includes('prediction.sportsbook === candidate.sportsbook'))

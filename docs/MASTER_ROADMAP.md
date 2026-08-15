@@ -3587,3 +3587,15 @@ Result: NBA-03A now reconciles protected precheck with the live scheduler execut
 Global provider-budget protection remains fail-closed. The scoped allowance applies only to `NBA_CURRENT_ERA_SHADOW`, `the-odds-api`, `basketball_nba`, max 2 calls/run, max 4/hour, max 48/day, with SportsDataIO and historical odds fixed at 0. No provider calls, Current Era writes, product exposure, settlement, learning, calibration, Historical Replay or MLB behavior changed.
 
 Next: publish/deploy this repair, verify protected precheck reports provider-budget readiness instead of a false-ready/budget-409 mismatch, then resume natural Vercel Cron observation. Do not manually invoke the scheduler.
+
+## NBA-03A Shadow Scheduler Run 2 Cardinality Repair
+
+Status: `NBA_03A_SHADOW_SCHEDULER_RUN2_CARDINALITY_REPAIR_CERTIFIED_READY_FOR_PUBLICATION`
+
+Result: NBA-03A Run 2 persistence cardinality is repaired without weakening the certified single-candidate writer. Natural Run 2 selected three bounded candidates, but a later `write-one` revalidation could report `WRITE_CARDINALITY_NOT_ONE` when the exact candidate key was present only as an idempotent `ALREADY_EXISTS` row rather than a fresh `writeEligible` row.
+
+The repair keeps `write-one` strict: zero matching keys and multiple matching keys still block as cardinality failures. The scheduler continues to loop over at most three selected candidate keys and invoke one-key write semantics independently. New audit rows now record selected candidate keys, persistence attempt count and per-candidate statuses so future Run 2 evidence can distinguish selected-candidate reuse from upstream already-persisted exclusions.
+
+No provider-budget, scheduler cadence, Official Pick, product visibility, learning, calibration, settlement, Historical Replay, MLB or continuous-operation behavior changed. Certification used fixtures and local validators only: 0 provider calls, 0 production DB mutations and 0 production Current Era Shadow writes.
+
+Next: publish/deploy this bounded repair, verify production alignment and protected precheck, then observe the next natural Vercel Cron execution under the repaired commit as the real Run 2 retry. Do not invoke the scheduler manually.

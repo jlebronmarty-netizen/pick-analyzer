@@ -247,9 +247,17 @@ export function selectNbaCurrentEraShadowWriteCandidate({
   candidates: NbaCurrentEraShadowCandidate[]
   candidateKey: string | null
 }) {
-  const selected = candidates.filter((candidate) => candidate.writeEligible && candidate.candidateKey === candidateKey)
+  const selected = candidates.filter((candidate) => candidate.candidateKey === candidateKey)
+  const singleCandidate = selected.length === 1 ? selected[0]! : null
+  const status = singleCandidate
+    ? singleCandidate.writeEligible
+      ? 'SELECTED'
+      : singleCandidate.skipReasons.includes('ALREADY_EXISTS')
+        ? 'ALREADY_EXISTS'
+        : singleCandidate.skipReasons[0] ?? 'WRITE_CANDIDATE_NOT_ELIGIBLE'
+    : 'WRITE_CARDINALITY_NOT_ONE'
   return {
-    status: selected.length === 1 ? 'SELECTED' : 'WRITE_CARDINALITY_NOT_ONE',
+    status,
     selected,
   }
 }
@@ -706,9 +714,7 @@ export async function runNbaCurrentEraShadowCanary({
   if (mode === 'write-one') {
     const selection = selectNbaCurrentEraShadowWriteCandidate({ candidates, candidateKey })
     writeStatus = selection.status
-    if (selection.status !== 'SELECTED') {
-      writeStatus = selection.status
-    } else {
+    if (selection.status === 'SELECTED') {
       const candidate = selection.selected[0]!
       const event = currentEvents.find((item) => item.id === candidate.eventId)!
       const oddsRow = (oddsByEvent.get(candidate.eventId) ?? []).find(
@@ -734,8 +740,10 @@ export async function runNbaCurrentEraShadowCanary({
         inserted = save.saved ?? 0
         writeStatus = inserted > 0 ? 'CREATED' : 'ALREADY_EXISTS'
       }
+    } else if (selection.status === 'ALREADY_EXISTS') {
+      reused = 1
     }
-    reused = candidates.filter((candidate) => candidate.skipReasons.includes('ALREADY_EXISTS')).length
+    if (writeStatus === 'ALREADY_EXISTS') reused = Math.max(1, reused)
   }
 
   const after = mode === 'write-one'

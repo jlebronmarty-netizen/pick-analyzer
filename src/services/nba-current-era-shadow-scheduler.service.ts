@@ -88,6 +88,15 @@ export type NbaShadowSchedulerIsolation = {
   mlbMutationDelta: 0
 }
 
+export type NbaShadowSchedulerCandidatePersistenceResult = {
+  candidateKey: string
+  status: string | null
+  inserted: number
+  reused: number
+  success: boolean
+  classification: string
+}
+
 export type NbaShadowSchedulerResult = {
   success: boolean
   runId: string
@@ -117,6 +126,8 @@ export type NbaShadowSchedulerResult = {
   currentEraBefore: number | null
   currentEraAfter: number | null
   isolation: NbaShadowSchedulerIsolation
+  persistenceAttempts: number
+  persistenceResults: NbaShadowSchedulerCandidatePersistenceResult[]
   finalClassification: NbaShadowSchedulerClassification
   error: string | null
   auditJobId: string | null
@@ -401,8 +412,10 @@ function baseResult(input: {
   skippedReasons?: Record<string, number>
   currentEraAfter?: number | null
   auditJobId?: string | null
+  persistenceResults?: NbaShadowSchedulerCandidatePersistenceResult[]
 }): NbaShadowSchedulerResult {
   const completedAt = nowIso()
+  const persistenceResults = input.persistenceResults ?? []
   return {
     success: input.success ?? input.classification === 'NBA_CURRENT_ERA_SHADOW_SCHEDULER_SUCCESS',
     runId: input.runId,
@@ -432,6 +445,8 @@ function baseResult(input: {
     currentEraBefore: input.counts?.currentEraRows ?? null,
     currentEraAfter: input.currentEraAfter ?? input.counts?.currentEraRows ?? null,
     isolation: isolationZero,
+    persistenceAttempts: persistenceResults.length,
+    persistenceResults,
     finalClassification: input.classification,
     error: input.error ?? null,
     auditJobId: input.auditJobId ?? null,
@@ -645,6 +660,9 @@ async function finishAuditJob(jobId: string | null, result: NbaShadowSchedulerRe
         modelMatches: result.modelMatches,
         eligibleCandidates: result.eligibleCandidates,
         selectedCount: result.selectedCount,
+        persistenceAttempts: result.persistenceAttempts,
+        persistenceResults: result.persistenceResults,
+        selectedCandidateKeys: result.persistenceResults.map((item) => item.candidateKey),
         reusedCount: result.reusedCount,
         skippedReasons: result.skippedReasons,
         currentEraBefore: result.currentEraBefore,
@@ -776,12 +794,22 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
     }
 
     const writes: NbaCurrentEraShadowCanaryResult[] = []
+    const persistenceResults: NbaShadowSchedulerCandidatePersistenceResult[] = []
     for (const candidate of selection.selected.slice(0, NBA_SHADOW_SCHEDULER_PER_RUN_CAP)) {
       if (!candidate.candidateKey) continue
       const write = await withTemporaryWriteAuthorization(() =>
         runNbaCurrentEraShadowCanary({ mode: 'write-one', limit: 25, candidateKey: candidate.candidateKey })
       )
       writes.push(write)
+      const persistenceResult: NbaShadowSchedulerCandidatePersistenceResult = {
+        candidateKey: candidate.candidateKey,
+        status: write.writeStatus ?? null,
+        inserted: write.inserted,
+        reused: write.reused,
+        success: write.success && (!write.writeStatus || ['CREATED', 'ALREADY_EXISTS'].includes(write.writeStatus)),
+        classification: write.classification,
+      }
+      persistenceResults.push(persistenceResult)
       if (!write.success || (write.writeStatus && !['CREATED', 'ALREADY_EXISTS'].includes(write.writeStatus))) {
         const failed = baseResult({
           runId,
@@ -800,6 +828,7 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
           selectedCount: selection.selected.length,
           insertedCount: writes.reduce((sum, item) => sum + item.inserted, 0),
           reusedCount: writes.reduce((sum, item) => sum + item.reused, 0),
+          persistenceResults,
           classification: 'PERSISTENCE_FAILURE_BLOCKED',
           error: write.writeStatus ?? write.classification,
           skippedReasons: dryRun.skipReasons,
@@ -828,6 +857,7 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
       selectedCount: Math.min(selection.selected.length, NBA_SHADOW_SCHEDULER_PER_RUN_CAP),
       insertedCount: inserted,
       reusedCount: writes.reduce((sum, item) => sum + item.reused, 0),
+      persistenceResults,
       currentEraAfter: after.currentEraRows,
       skippedReasons: dryRun.skipReasons,
       classification: 'NBA_CURRENT_ERA_SHADOW_SCHEDULER_SUCCESS',
@@ -877,6 +907,53 @@ export type NbaShadowSchedulerPrecheckFixtureInput = {
   pendingRows: number
   currentEraRows?: number
   providerBudgetAllowed?: boolean
+}
+
+export type NbaShadowSchedulerBatchPersistenceFixtureInput = {
+  selectedCandidateKeys: string[]
+  outcomes: Array<'CREATED' | 'ALREADY_EXISTS' | 'WRITE_CARDINALITY_NOT_ONE' | 'STALE_ODDS'>
+  completedRuns: number
+  totalInsertedRows: number
+}
+
+export function simulateNbaShadowSchedulerBatchPersistence(input: NbaShadowSchedulerBatchPersistenceFixtureInput) {
+  const selectedCandidateKeys = input.selectedCandidateKeys.slice(0, NBA_SHADOW_SCHEDULER_PER_RUN_CAP)
+  const persistenceResults: NbaShadowSchedulerCandidatePersistenceResult[] = []
+  for (const [index, candidateKey] of selectedCandidateKeys.entries()) {
+    const status = input.outcomes[index] ?? 'WRITE_CARDINALITY_NOT_ONE'
+    const result = {
+      candidateKey,
+      status,
+      inserted: status === 'CREATED' ? 1 : 0,
+      reused: status === 'ALREADY_EXISTS' ? 1 : 0,
+      success: ['CREATED', 'ALREADY_EXISTS'].includes(status),
+      classification: 'NBA_03A_BLOCK5_SINGLE_CANDIDATE_WRITER_CERTIFIED_READY_FOR_FIRST_SHADOW',
+    } satisfies NbaShadowSchedulerCandidatePersistenceResult
+    persistenceResults.push(result)
+    if (!result.success) break
+  }
+  const failed = persistenceResults.find((item) => !item.success)
+  const inserted = persistenceResults.reduce((sum, item) => sum + item.inserted, 0)
+  const reused = persistenceResults.reduce((sum, item) => sum + item.reused, 0)
+  const successfulRun = !failed && selectedCandidateKeys.length > 0
+  return {
+    selectedCount: selectedCandidateKeys.length,
+    persistenceAttempts: persistenceResults.length,
+    selectedCandidateKeys,
+    persistenceResults,
+    inserted,
+    reused,
+    failed: failed ?? null,
+    successfulPriorWritesRemain: true,
+    completedRunsAfter: successfulRun ? input.completedRuns + 1 : input.completedRuns,
+    totalInsertedRowsAfter: successfulRun ? input.totalInsertedRows + inserted : input.totalInsertedRows + inserted,
+    reviewRequiredAfter: successfulRun ? input.completedRuns + 1 >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS : false,
+    classification: failed
+      ? 'PERSISTENCE_FAILURE_BLOCKED'
+      : selectedCandidateKeys.length === 0
+        ? 'NO_ELIGIBLE_CANDIDATE_NO_OP'
+        : 'NBA_CURRENT_ERA_SHADOW_SCHEDULER_SUCCESS',
+  }
 }
 
 export function simulateNbaShadowSchedulerPrecheck(input: NbaShadowSchedulerPrecheckFixtureInput) {

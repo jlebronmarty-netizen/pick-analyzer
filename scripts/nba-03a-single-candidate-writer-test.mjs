@@ -142,6 +142,7 @@ const candidateKey = buildNbaCurrentEraShadowCandidateKey({
 })
 assert.equal(candidate.candidateKey, candidateKey)
 assert.equal(selectNbaCurrentEraShadowWriteCandidate({ candidates: [candidate], candidateKey }).status, 'SELECTED')
+assert.equal(selectNbaCurrentEraShadowWriteCandidate({ candidates: [duplicateCandidate], candidateKey }).status, 'ALREADY_EXISTS')
 assert.equal(selectNbaCurrentEraShadowWriteCandidate({ candidates: [candidate], candidateKey: 'missing' }).status, 'WRITE_CARDINALITY_NOT_ONE')
 assert.equal(selectNbaCurrentEraShadowWriteCandidate({ candidates: [candidate, candidate], candidateKey }).status, 'WRITE_CARDINALITY_NOT_ONE')
 
