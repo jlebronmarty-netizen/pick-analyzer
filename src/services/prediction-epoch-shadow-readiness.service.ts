@@ -3,7 +3,12 @@ import 'server-only'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { getPredictionEpochMigrationState } from '@/services/prediction-epoch-migration-state.service'
 
-export type PredictionOriginV1 = 'LIVE_PREGAME' | 'HISTORICAL_WALK_FORWARD_REPLAY' | 'LEGACY_PRE_CERTIFICATION'
+export type PredictionOriginV1 =
+  | 'LIVE_PREGAME'
+  | 'HISTORICAL_WALK_FORWARD_REPLAY'
+  | 'HISTORICAL_REPLAY_SHADOW'
+  | 'LEGACY_PRE_CERTIFICATION'
+  | 'CURRENT_ERA_SHADOW'
 export type CertificationStatusV1 = 'SHADOW_PENDING' | 'CERTIFIED' | 'QUARANTINED' | 'INVALID' | 'REJECTED'
 export type ReadinessLevelV1 = 'READY' | 'SHADOW_READY' | 'BLOCKED' | 'UNKNOWN'
 
@@ -92,6 +97,8 @@ function gate(name: string, passed: boolean, actual: unknown, required: unknown)
 function inferOrigin(row: PredictionRow): PredictionOriginV1 {
   const snapshot = asRecord(row.feature_snapshot)
   const origin = String(snapshot.prediction_origin ?? snapshot.predictionOrigin ?? '').toUpperCase()
+  if (origin === 'CURRENT_ERA_SHADOW') return 'CURRENT_ERA_SHADOW'
+  if (origin === 'HISTORICAL_REPLAY_SHADOW') return 'HISTORICAL_REPLAY_SHADOW'
   if (origin === 'HISTORICAL_WALK_FORWARD_REPLAY') return 'HISTORICAL_WALK_FORWARD_REPLAY'
   if (origin === 'LIVE_PREGAME') return 'LIVE_PREGAME'
   if (row.prediction_epoch_key && row.model_role !== 'shadow') return 'LIVE_PREGAME'

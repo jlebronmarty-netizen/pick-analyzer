@@ -3485,3 +3485,13 @@ The Moneyline accuracy/ROI contradiction is explained by favorite price tax: 64.
 Stake policy research used a chronological event-level discovery/validation split within 2024-25 because 2022-23 and 2023-24 are model-only. Several predefined stake policies improved validation ROI in the held-out slice, but the result remains `RESEARCH_ONLY_NOT_PRODUCTION_READY` until forward Current Era evidence and production calibration exist. A future bankroll engine should begin as `RISK-01_BANKROLL_STAKE_ENGINE_SHADOW`; actionable notifications are deferred until Current Era, Official Pick, calibration, stake, freshness and dedupe gates are separately certified.
 
 Next: `NBA-03A_CURRENT_ERA_SHADOW_FOUNDATION` after explicit authorization. If forward samples justify it, follow with `NBA-03B_ONLINE_CALIBRATION_OR_LEARNING_CHALLENGER`; keep any generic stake engine shadow-only until separately certified.
+
+## NBA-03A-R1 Current Era Shadow Origin
+
+Status: Local migration package ready; manual Supabase application required.
+
+Result: NBA-03A-R1 prepares the additive schema/runtime contract required for `CURRENT_ERA_SHADOW`, a generic origin for real forward pregame shadow predictions. The new origin is separate from `LIVE_PREGAME`, `HISTORICAL_WALK_FORWARD_REPLAY`, `HISTORICAL_REPLAY_SHADOW` and `LEGACY_PRE_CERTIFICATION`, preserving the distinction between current-era evidence and user-facing production recommendation eligibility.
+
+The migration package extends the origin check constraint and adds one partial current-era shadow lookup index. It does not mutate existing rows, backfill origins, change defaults or broaden RLS. The current read-only inventory has 0 existing `CURRENT_ERA_SHADOW` rows and all null-odds rows remain isolated to `HISTORICAL_REPLAY_SHADOW`; Current Era Shadow rows require real current pregame odds for core markets. Runtime typing now allows future NBA-03A writer code to pass `prediction_origin`, `certification_status` and `certification_metadata` explicitly.
+
+Next: publish `NBA-03A-R1`, manually apply `supabase/migrations/202608150001_current_era_shadow_origin_v1.sql` through the approved Supabase SQL Editor workflow, verify 0 existing `CURRENT_ERA_SHADOW` rows after application, then resume `NBA-03A_CURRENT_ERA_SHADOW_FOUNDATION` from Block 5.

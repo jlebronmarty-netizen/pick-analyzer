@@ -1,0 +1,121 @@
+{
+  "status": "NBA_03A_CURRENT_ERA_SHADOW_ORIGIN_MIGRATION_READY",
+  "generatedAt": "2026-08-15T01:16:54.134Z",
+  "startingCommit": "c52618378c074819cd3c6521f888faf67415a95a",
+  "runtimeCommit": "pending-local-commit",
+  "certificationCommit": "pending-local-commit",
+  "productionCommit": "c52618378c074819cd3c6521f888faf67415a95a",
+  "chosenOrigin": "CURRENT_ERA_SHADOW",
+  "genericOrNbaSpecific": "GENERIC",
+  "reason": "sport_key already provides sport identity. The origin describes a reusable regime: real forward pregame predictions that remain shadow-only and excluded from product, Official Picks, production calibration and production learning.",
+  "migration": {
+    "required": true,
+    "file": "supabase/migrations/202608150001_current_era_shadow_origin_v1.sql",
+    "applied": false,
+    "manualSupabaseApplicationRequired": true,
+    "existingRowsModified": 0,
+    "rlsChanged": false,
+    "defaultChanged": false,
+    "backfill": false,
+    "indexesAddedOrPlanned": [
+      "prediction_history_current_era_shadow_lookup_idx"
+    ],
+    "summary": "Extends prediction_history_prediction_origin_check to include CURRENT_ERA_SHADOW and adds one partial lookup index for current-era shadow readback/settlement diagnostics."
+  },
+  "originSemantics": {
+    "LIVE_PREGAME": "Certified live production-era pregame prediction rows; too close to production semantics for NBA current-era shadow.",
+    "HISTORICAL_WALK_FORWARD_REPLAY": "Historical walk-forward replay rows; not a real future prediction regime.",
+    "HISTORICAL_REPLAY_SHADOW": "Quarantined historical replay diagnostics; not current/future evidence.",
+    "LEGACY_PRE_CERTIFICATION": "Legacy rows without certified regime separation; not suitable for new current-era writes.",
+    "CURRENT_ERA_SHADOW": "Real forward pregame predictions generated from current evidence, explicitly shadow-only."
+  },
+  "existingOriginDistribution": {
+    "predictionHistoryTotal": 18414,
+    "CURRENT_ERA_SHADOW": 0,
+    "HISTORICAL_REPLAY_SHADOW": 14840,
+    "LIVE_PREGAME": 0,
+    "HISTORICAL_WALK_FORWARD_REPLAY": 0,
+    "LEGACY_PRE_CERTIFICATION": 0,
+    "NULL": 3574,
+    "nullOddsTotal": 11504,
+    "nullOddsHistoricalReplay": 11504,
+    "officialPickRows": 172,
+    "productionEligibleRows": 0
+  },
+  "currentEraShadowContract": {
+    "prediction_origin": "CURRENT_ERA_SHADOW",
+    "production_eligible": false,
+    "recommended_pick": false,
+    "model_role": "shadow",
+    "certification_status": "SHADOW_PENDING",
+    "certification_metadata": {
+      "currentEra": true,
+      "officialPickEligible": false,
+      "productionCalibrationEligible": false,
+      "productionLearningEligible": false,
+      "productSurfaceVisible": false
+    },
+    "oddsRequired": true,
+    "cutoffSafetyRequired": true,
+    "naturalSettlementCompatible": true,
+    "productVisible": false,
+    "officialPickEligible": false,
+    "productionCalibrationEligible": false,
+    "productionLearningEligible": false
+  },
+  "oddsContract": {
+    "currentEraShadowOddsRequired": true,
+    "legitimateNoOddsCase": null,
+    "historicalReplayNullOddsContractPreserved": true,
+    "nullOddsExceptionOrigin": "HISTORICAL_REPLAY_SHADOW",
+    "coreMarkets": [
+      "moneyline",
+      "spread",
+      "total"
+    ],
+    "firstHalf": "deferred_until_current_provider_coverage_certified"
+  },
+  "fixture": {
+    "validFixturePassesStaticContract": true,
+    "invalidFixturesBlocked": {
+      "postStartTimestamp": true,
+      "productionEligibleTrue": true,
+      "recommendedPickTrue": true,
+      "productSurfaceVisibleTrue": true,
+      "productionLearningEligibleTrue": true,
+      "productionCalibrationEligibleTrue": true,
+      "missingRequiredOdds": true,
+      "historicalReplayMislabeledCurrentEra": true
+    }
+  },
+  "cohorts": {
+    "historicalReplay": "NBA_HISTORICAL_REPLAY",
+    "currentEraShadow": "NBA_CURRENT_ERA_SHADOW",
+    "currentEraProduction": "NBA_CURRENT_ERA_PRODUCTION"
+  },
+  "futureCompatibility": {
+    "settlement": "Current Era Shadow rows are real forward rows and can later settle naturally using canonical NBA settlement while remaining production-performance isolated.",
+    "stakeEngine": "Probability, confidence, odds, implied probability, edge, EV, market, selection, line, freshness and price-binding lineage remain preservable for RISK-01 shadow stake simulation.",
+    "continuousLearning": "Rows can later feed shadow evaluation and challenger analysis after settlement, with no automatic retraining or promotion."
+  },
+  "providerPlan": {
+    "theOddsApiRuntimeRole": "current sportsbook odds authority for NBA Current Era Shadow",
+    "ballDontLieRuntimeRole": "candidate schedule/status/results/team/player/stat source only for endpoints proven required and tier-supported",
+    "ballDontLieTierAssessment": "MORE_ENDPOINT_CERTIFICATION_REQUIRED",
+    "sportsDataIoRole": "do_not_expand_legacy_trial_only"
+  },
+  "manualSql": {
+    "preMigration": "select count(*) as prediction_history_rows from public.prediction_history; select coalesce(prediction_origin, 'NULL') as prediction_origin, count(*) from public.prediction_history group by 1 order by 1; select conname, pg_get_constraintdef(oid) as definition from pg_constraint where conrelid = 'public.prediction_history'::regclass and conname = 'prediction_history_prediction_origin_check'; select indexname, indexdef from pg_indexes where schemaname = 'public' and tablename = 'prediction_history' and indexname like '%origin%';",
+    "postMigration": "select count(*) as prediction_history_rows from public.prediction_history; select coalesce(prediction_origin, 'NULL') as prediction_origin, count(*) from public.prediction_history group by 1 order by 1; select conname, pg_get_constraintdef(oid) as definition from pg_constraint where conrelid = 'public.prediction_history'::regclass and conname = 'prediction_history_prediction_origin_check'; select count(*) as current_era_shadow_existing_rows from public.prediction_history where prediction_origin = 'CURRENT_ERA_SHADOW'; select indexname, indexdef from pg_indexes where schemaname = 'public' and tablename = 'prediction_history' and indexname in ('prediction_history_current_era_shadow_lookup_idx', 'prediction_history_replay_origin_lookup_idx', 'prediction_history_certification_lookup_idx');"
+  },
+  "accounting": {
+    "providerCalls": 0,
+    "dbMutations": 0,
+    "nbaCurrentEraWrites": 0,
+    "nbaOfficialPicks": 0,
+    "productionLearningWrites": 0,
+    "productionCalibrationWrites": 0,
+    "mlbMutations": 0
+  },
+  "next": "publish migration package -> manually apply through Supabase SQL Editor -> post-check -> resume NBA-03A from Block 5"
+}

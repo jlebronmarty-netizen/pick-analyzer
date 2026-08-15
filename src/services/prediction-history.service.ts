@@ -49,6 +49,9 @@ export type PredictionHistoryInput = {
   result?: string
   stake?: number
   profit?: number | null
+  prediction_origin?: 'LIVE_PREGAME' | 'HISTORICAL_WALK_FORWARD_REPLAY' | 'HISTORICAL_REPLAY_SHADOW' | 'LEGACY_PRE_CERTIFICATION' | 'CURRENT_ERA_SHADOW' | null
+  certification_status?: 'SHADOW_PENDING' | 'CERTIFIED' | 'QUARANTINED' | 'INVALID' | 'REJECTED' | null
+  certification_metadata?: Record<string, unknown> | null
 }
 
 type HistoricalReplayRow = PredictionHistoryInput & {
