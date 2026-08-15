@@ -3551,3 +3551,13 @@ Result: NBA-03A now has a bounded future scheduler contract for `NBA_CURRENT_ERA
 The fixture harness simulates the scheduler path without provider calls or production writes, including disabled mode, lock conflict, exhausted budget, no events, stale odds, valid candidates, all-already-persisted candidates, provider failure and deterministic reruns. Settlement, learning, calibration, Official Picks, bankroll, notifications and product recommendation exposure stay closed. Performance promotion remains blocked until enough Current Era Shadow rows settle; current readiness is `INSUFFICIENT_CURRENT_ERA_SETTLED_SAMPLE`.
 
 Next: publish/deploy the scheduler-preparation commit, then run a separate activation review. Do not enable `NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED`, add NBA cron automation or create scheduler-driven shadow rows without explicit authorization.
+
+## NBA-03A Shadow Scheduler Runnable Harness
+
+Status: `NBA_03A_SHADOW_SCHEDULER_RUNNABLE_HARNESS_CERTIFIED_READY_FOR_ACTIVATION_CANARY`
+
+Result: NBA-03A now has a protected runnable scheduler harness for a future NBA Current Era Shadow activation canary. The route `/api/cron/nba-current-era-shadow` uses the same `CRON_SECRET` convention as existing protected cron routes, consumes the default-off `NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED` flag and stops before lock, provider calls or writes when disabled.
+
+The harness reuses existing components rather than creating a separate scheduler framework: provider-action lock, The Odds API NBA odds sync, Safe Canary, cross-event policy V1, deterministic `write-one` persistence, provider budget guard and `sports_sync_jobs` audit telemetry. Runtime bounds are 3 rows/run, review after 2 completed runs, hard max 4 runs, total canary cap 12 and pending guard 75. Vercel cron declaration remains deferred so deployment alone cannot start natural NBA scheduler runs.
+
+Next: publish/deploy the harness, confirm production alignment and separately authorize the two-natural-run activation canary. Do not enable continuous operation, NBA Official Picks, product exposure, learning, calibration, bankroll or notifications.

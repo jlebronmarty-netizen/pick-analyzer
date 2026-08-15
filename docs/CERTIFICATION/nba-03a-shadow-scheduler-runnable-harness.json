@@ -1,0 +1,113 @@
+{
+  "status": "NBA_03A_SHADOW_SCHEDULER_RUNNABLE_HARNESS_CERTIFIED_READY_FOR_ACTIVATION_CANARY",
+  "phase": "NBA-03A Shadow Scheduler Runnable Canary Harness",
+  "startingCommit": "e726be02598999090d0ba3973de197f4ebda8dc8",
+  "schedulerActivated": false,
+  "cronActivated": false,
+  "productionCurrentEraWrites": 0,
+  "providerCalls": 0,
+  "databaseMutations": 0,
+  "route": {
+    "path": "/api/cron/nba-current-era-shadow",
+    "methods": ["GET", "POST"],
+    "protectedBy": "CRON_SECRET",
+    "defaultOff": true,
+    "enableFlag": "NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED"
+  },
+  "scheduler": {
+    "mode": "NBA_CURRENT_ERA_SHADOW",
+    "version": "NBA_03A_SHADOW_SCHEDULER_PREPARATION_V1",
+    "authority": "Vercel Cron future primary",
+    "cronDeclaration": "DEFERRED",
+    "lockKey": "nba_current_era_shadow_scheduler",
+    "jobType": "nba_current_era_shadow_scheduler_canary_v1",
+    "policyVersion": "NBA_03A_CROSS_EVENT_SHADOW_ACCUMULATION_POLICY_V1"
+  },
+  "bounds": {
+    "perRunCap": 3,
+    "reviewAfterRuns": 2,
+    "hardMaxRuns": 4,
+    "totalRowCap": 12,
+    "pendingGuard": 75
+  },
+  "providerBudget": {
+    "provider": "the-odds-api",
+    "sportKey": "basketball_nba",
+    "maxProviderCallsPerRun": 2,
+    "maxProviderCallsPerHour": 4,
+    "maxProviderCallsPerDay": 48,
+    "sportsDataIoCalls": 0,
+    "historicalProviderCalls": 0,
+    "exhaustedBehavior": "PROVIDER_BUDGET_NO_OP"
+  },
+  "pipeline": [
+    "request/auth",
+    "verify enable flag",
+    "acquire nba_current_era_shadow_scheduler lock",
+    "verify canary/run bounds",
+    "verify pending-row guard",
+    "provider-budget check",
+    "bounded NBA odds sync",
+    "Safe Canary eligibility",
+    "existing-row exclusion",
+    "cross-event policy V1",
+    "per-run cap",
+    "write-one deterministic persistence",
+    "runtime summary/readback",
+    "sports_sync_jobs audit",
+    "release lock"
+  ],
+  "failClosedOutcomes": [
+    "SCHEDULER_DISABLED_NO_OP",
+    "LOCK_CONFLICT_NO_OP",
+    "CANARY_REVIEW_REQUIRED_NO_OP",
+    "CANARY_HARD_LIMIT_REACHED_NO_OP",
+    "PENDING_GUARD_NO_OP",
+    "PROVIDER_BUDGET_NO_OP",
+    "NO_CURRENT_EVENT_NO_OP",
+    "NO_ELIGIBLE_CANDIDATE_NO_OP",
+    "PROVIDER_FAILURE_BLOCKED",
+    "PERSISTENCE_FAILURE_BLOCKED"
+  ],
+  "isolation": {
+    "officialPickDelta": 0,
+    "productVisibilityDelta": 0,
+    "learningDelta": 0,
+    "calibrationDelta": 0,
+    "bankrollDelta": 0,
+    "notificationDelta": 0,
+    "historicalReplayDelta": 0,
+    "mlbMutationDelta": 0
+  },
+  "currentState": {
+    "currentEraShadow": 31,
+    "pending": 31,
+    "settled": 0,
+    "officialPicks": 0,
+    "productVisibleRows": 0,
+    "historicalReplayShadow": 14840,
+    "mlbCurrentEraShadow": 0,
+    "performanceReadiness": "INSUFFICIENT_CURRENT_ERA_SETTLED_SAMPLE"
+  },
+  "testMatrix": {
+    "unauthorized": "UNAUTHORIZED_REJECTED",
+    "disabled": "SCHEDULER_DISABLED_NO_OP",
+    "enabled": "NBA_CURRENT_ERA_SHADOW_SCHEDULER_SUCCESS",
+    "lockConflict": "LOCK_CONFLICT_NO_OP",
+    "pendingGuard": "PENDING_GUARD_NO_OP",
+    "budgetExceeded": "PROVIDER_BUDGET_NO_OP",
+    "noEvents": "NO_CURRENT_EVENT_NO_OP",
+    "noEligible": "NO_ELIGIBLE_CANDIDATE_NO_OP",
+    "validOverCap": "NBA_CURRENT_ERA_SHADOW_SCHEDULER_SUCCESS",
+    "repeatedEvidence": "NO_ELIGIBLE_CANDIDATE_NO_OP",
+    "runOne": "NBA_CURRENT_ERA_SHADOW_SCHEDULER_SUCCESS",
+    "runTwo": "NBA_CURRENT_ERA_SHADOW_SCHEDULER_SUCCESS",
+    "afterRunTwo": "CANARY_REVIEW_REQUIRED_NO_OP",
+    "hardLimitRuns": "CANARY_HARD_LIMIT_REACHED_NO_OP",
+    "hardLimitRows": "CANARY_HARD_LIMIT_REACHED_NO_OP",
+    "providerFailure": "PROVIDER_FAILURE_BLOCKED",
+    "persistenceFailure": "PERSISTENCE_FAILURE_BLOCKED"
+  },
+  "activationCanaryReady": true,
+  "finalClassification": "NBA_03A_SHADOW_SCHEDULER_RUNNABLE_HARNESS_CERTIFIED_READY_FOR_ACTIVATION_CANARY"
+}
