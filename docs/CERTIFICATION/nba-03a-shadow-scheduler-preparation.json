@@ -1,0 +1,92 @@
+{
+  "status": "NBA_03A_SHADOW_SCHEDULER_PREPARATION_CERTIFIED_READY_FOR_ACTIVATION_REVIEW",
+  "phase": "NBA-03A Shadow Scheduler Preparation",
+  "startingCommit": "e5d03563358378a22d48a89aded30c49a1cf02d2",
+  "schedulerActivated": false,
+  "productionCurrentEraWrites": 0,
+  "providerCalls": 0,
+  "databaseMutations": 0,
+  "currentState": {
+    "currentEraShadow": 31,
+    "pending": 31,
+    "settled": 0,
+    "officialPicks": 0,
+    "productVisibleRows": 0,
+    "historicalReplayShadow": 14840,
+    "mlbCurrentEraShadow": 0,
+    "performanceReadiness": "INSUFFICIENT_CURRENT_ERA_SETTLED_SAMPLE"
+  },
+  "scheduler": {
+    "mode": "NBA_CURRENT_ERA_SHADOW",
+    "version": "NBA_03A_SHADOW_SCHEDULER_PREPARATION_V1",
+    "enabledByDefault": false,
+    "enableFlag": "NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED",
+    "futureAuthority": "Vercel Cron",
+    "proposedCron": "*/30 * * * *",
+    "currentAuthorityState": "DISABLED_PREPARATION_ONLY"
+  },
+  "cadence": {
+    "recommendation": "every 30 minutes only while future NBA events exist inside the monitored pregame window",
+    "projectedProviderCallsPerHour": 4,
+    "projectedProviderCallsPerDay": 48
+  },
+  "providerBudget": {
+    "provider": "the-odds-api",
+    "sportKey": "basketball_nba",
+    "maxProviderCallsPerRun": 2,
+    "maxRunsPerHour": 2,
+    "maxRunsPerDay": 24,
+    "maxProviderCallsPerDay": 48,
+    "sportsDataIoCalls": 0,
+    "historicalProviderCalls": 0,
+    "exhaustedBehavior": "PROVIDER_BUDGET_EXHAUSTED_NO_OP"
+  },
+  "caps": {
+    "initialPerRunWriteCap": 5,
+    "manualCertificationBatchCap": 10,
+    "maxPerEventPerSlate": 3,
+    "maxPerEventMarketPerSlate": 2,
+    "maxSlateRowsPerDay": 50
+  },
+  "lock": {
+    "lockKey": "nba_current_era_shadow_scheduler",
+    "primitive": "provider_action_lock / scheduler ledger pattern used by protected operating-day runtime",
+    "conflictBehavior": "LOCK_CONFLICT_NO_OP"
+  },
+  "isolation": {
+    "officialPickDelta": 0,
+    "productVisibilityDelta": 0,
+    "learningDelta": 0,
+    "calibrationDelta": 0,
+    "bankrollDelta": 0,
+    "notificationDelta": 0,
+    "historicalReplayDelta": 0,
+    "mlbMutationDelta": 0
+  },
+  "fixtures": {
+    "schedulerDisabled": "DISABLED_NO_OP",
+    "lockAcquired": "SIMULATED_BATCH_READY",
+    "lockConflict": "LOCK_CONFLICT_NO_OP",
+    "providerBudgetExhausted": "PROVIDER_BUDGET_EXHAUSTED_NO_OP",
+    "noCurrentEvents": "NO_CURRENT_EVENTS_NO_OP",
+    "staleOdds": "STALE_ODDS_NO_OP",
+    "validCandidates": "SIMULATED_BATCH_READY",
+    "allCandidatesAlreadyPersisted": "ALL_CANDIDATES_ALREADY_PERSISTED_NO_OP",
+    "providerFailure": "PROVIDER_FAILURE_FAIL_CLOSED",
+    "batchWriteSimulated": "SIMULATED_BATCH_READY",
+    "deterministicRerun": true
+  },
+  "activationGate": [
+    "scheduler prep validator PASS",
+    "lock/concurrency PASS",
+    "provider budget PASS",
+    "policy cap PASS",
+    "fail-closed PASS",
+    "idempotency PASS",
+    "isolation PASS",
+    "kill switch PASS",
+    "production deployment aligned",
+    "explicit user authorization"
+  ],
+  "finalClassification": "NBA_03A_SHADOW_SCHEDULER_PREPARATION_CERTIFIED_READY_FOR_ACTIVATION_REVIEW"
+}

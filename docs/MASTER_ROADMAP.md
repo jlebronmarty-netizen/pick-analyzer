@@ -3541,3 +3541,13 @@ Result: NBA-03A now has a deterministic non-recommendation selection policy for 
 The policy is designed for representative forward evidence, not betting optimization. It does not use probability, confidence, EV, edge, sportsbook preference, favorite/underdog status or settlement results. Stored-data dry-run showed the next 10 candidates improve from 2 events under old ordering to 10 events under the certified policy, with 0 provider calls and 0 database mutations.
 
 Next: after explicit authorization, run one bounded cross-event accumulation batch using this policy. Keep NBA scheduler automation, Official Picks, product exposure, learning, calibration, bankroll and notifications inactive.
+
+## NBA-03A Shadow Scheduler Preparation
+
+Status: `NBA_03A_SHADOW_SCHEDULER_PREPARATION_CERTIFIED_READY_FOR_ACTIVATION_REVIEW`
+
+Result: NBA-03A now has a bounded future scheduler contract for `NBA_CURRENT_ERA_SHADOW`, but the scheduler remains disabled. The preparation defines a default-off environment flag, Vercel-primary authority proposal, 30-minute cadence proposal, The Odds API budget envelope, lock/concurrency behavior, per-run/per-slate caps, audit trail, fail-closed states and rollback-by-config plan.
+
+The fixture harness simulates the scheduler path without provider calls or production writes, including disabled mode, lock conflict, exhausted budget, no events, stale odds, valid candidates, all-already-persisted candidates, provider failure and deterministic reruns. Settlement, learning, calibration, Official Picks, bankroll, notifications and product recommendation exposure stay closed. Performance promotion remains blocked until enough Current Era Shadow rows settle; current readiness is `INSUFFICIENT_CURRENT_ERA_SETTLED_SAMPLE`.
+
+Next: publish/deploy the scheduler-preparation commit, then run a separate activation review. Do not enable `NBA_CURRENT_ERA_SHADOW_SCHEDULER_ENABLED`, add NBA cron automation or create scheduler-driven shadow rows without explicit authorization.
