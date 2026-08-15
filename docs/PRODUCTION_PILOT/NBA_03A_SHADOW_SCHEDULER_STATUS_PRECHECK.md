@@ -35,7 +35,28 @@ The precheck reports:
 - hard max runs
 - total canary row cap
 - provider budget limits
+- provider-budget readiness for the exact execution request
+- provider-budget authorization mode
+- provider-budget evidence status and reason codes
+- bounded canary authorization state
 - machine-readable precheck classification
+
+## Provider Budget Truthfulness
+
+The precheck now evaluates the same provider-budget authorization required by the execution path for exactly two The Odds API `basketball_nba` current-odds calls. It must not report `SCHEDULER_PRECHECK_READY` if the execution route would immediately return `PROVIDER_BUDGET_NO_OP`.
+
+The global provider-budget policy remains fail-closed for unknown external balances. NBA-03A adds only a narrow activation-canary allowance:
+
+- scheduler mode: `NBA_CURRENT_ERA_SHADOW`
+- provider: `the-odds-api`
+- sport: `basketball_nba`
+- max calls per run: `2`
+- max calls per hour: `4`
+- max calls per day: `48`
+- SportsDataIO calls: `0`
+- historical odds calls: `0`
+
+When external balance remains unknown but internal canary caps pass, the response labels readiness as `bounded_canary_unknown_balance`. This is an explicit canary risk decision, not proof of unlimited quota.
 
 ## Zero-Side-Effect Contract
 
@@ -58,6 +79,7 @@ It does not add the NBA Vercel Cron entry, enable cron, activate continuous oper
 - `SCHEDULER_PRECHECK_HARD_LIMIT`
 - `SCHEDULER_PRECHECK_PENDING_GUARD`
 - `SCHEDULER_PRECHECK_LOCK_ACTIVE`
+- `SCHEDULER_PRECHECK_PROVIDER_BUDGET_BLOCKED`
 
 ## Next Step
 

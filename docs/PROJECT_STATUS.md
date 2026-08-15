@@ -2093,4 +2093,10 @@ The precheck uses the same `CRON_SECRET` auth as the cron route and returns expl
 
 NBA-03A shadow scheduler cron activation is certified for the bounded two-natural-run canary as `NBA_03A_SHADOW_SCHEDULER_CRON_ACTIVATION_CERTIFIED_FOR_CANARY`. The activation artifact adds only `/api/cron/nba-current-era-shadow` at `*/30 * * * *`, preserves `/api/cron/operating-day`, and requires protected precheck readiness before natural runs are observed.
 
+## 2026-08-15 NBA-03A Shadow Scheduler Provider-Budget Gate Repair
+
+NBA-03A scheduler provider-budget/precheck reconciliation is locally certified as `NBA_03A_SHADOW_SCHEDULER_PROVIDER_BUDGET_GATE_REPAIR_CERTIFIED_READY_FOR_PUBLICATION`. Natural Vercel Cron execution was proven by a `vercel-cron/1.0` request, but the execution path returned `PROVIDER_BUDGET_NO_OP` because The Odds API external balance remains unknown and the old precheck did not evaluate the live budget gate.
+
+The repair adds shared precheck/execution authorization for the exact 2-call NBA shadow scheduler request. Global provider-budget fail-closed behavior is preserved; only this activation canary can proceed under `bounded_canary_unknown_balance` when internal caps pass: 2 calls/run, 4/hour, 48/day, SportsDataIO 0 and historical odds 0. No provider calls, production database mutations, Current Era writes, Official Pick/product exposure, learning, calibration, settlement, Historical Replay or MLB changes were performed.
+
 The activation remains canary-only, not continuous operation. Runtime bounds remain 3 new rows per run, review after 2 completed runs, hard max 4 runs, total canary row cap 12, pending guard 75, The Odds API max 2 calls/run, SportsDataIO 0 and historical odds 0. Official Picks, product exposure, settlement, learning, calibration, bankroll, notifications, Historical Replay and MLB remain isolated.

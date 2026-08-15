@@ -53,6 +53,29 @@ export type NbaShadowSchedulerPrecheckClassification =
   | 'SCHEDULER_PRECHECK_HARD_LIMIT'
   | 'SCHEDULER_PRECHECK_PENDING_GUARD'
   | 'SCHEDULER_PRECHECK_LOCK_ACTIVE'
+  | 'SCHEDULER_PRECHECK_PROVIDER_BUDGET_BLOCKED'
+
+export type NbaShadowSchedulerProviderBudgetAuthorizationMode =
+  | 'provider_budget'
+  | 'bounded_canary_unknown_balance'
+  | 'denied'
+  | 'not_evaluated'
+
+export type NbaShadowSchedulerProviderBudgetReadiness = {
+  requestedCalls: number
+  allowed: boolean
+  authorizationMode: NbaShadowSchedulerProviderBudgetAuthorizationMode
+  evidenceStatus: string
+  externalBalanceKnown: boolean
+  reasonCodes: string[]
+  hourlyUsed: number
+  hourlyRemaining: number
+  dailyUsed: number
+  dailyRemaining: number
+  canaryAuthorized: boolean
+  blockedReason: string | null
+  providerBudget: Record<string, unknown> | null
+}
 
 export type NbaShadowSchedulerIsolation = {
   officialPickDelta: 0
@@ -148,6 +171,18 @@ export type NbaShadowSchedulerPrecheckStatus = {
   runCounterMutations: 0
   auditJobWrites: 0
   schedulerLockAcquisitions: 0
+  providerBudgetRequestedCalls: number
+  providerBudgetAllowed: boolean
+  providerBudgetAuthorizationMode: NbaShadowSchedulerProviderBudgetAuthorizationMode
+  providerBudgetEvidenceStatus: string
+  providerBudgetExternalBalanceKnown: boolean
+  providerBudgetReasonCodes: string[]
+  providerBudgetHourlyUsed: number
+  providerBudgetHourlyRemaining: number
+  providerBudgetDailyUsed: number
+  providerBudgetDailyRemaining: number
+  providerBudgetCanaryAuthorized: boolean
+  providerBudgetBlockedReason: string | null
   finalClassification: NbaShadowSchedulerPrecheckClassification
 }
 
@@ -168,6 +203,180 @@ function nowIso() {
 
 function schedulerEnabled() {
   return String(process.env[NBA_SHADOW_SCHEDULER_ENABLED_ENV] ?? '').toLowerCase() === 'true'
+}
+
+function numberValue(value: unknown, fallback = 0) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function recordValue(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
+
+function stringArray(value: unknown) {
+  return Array.isArray(value) ? value.map((item) => String(item)) : []
+}
+
+export function authorizeNbaShadowSchedulerProviderBudgetSnapshot(input: {
+  requestedCalls: number
+  budgetAllowed: boolean
+  blockedReason?: string | null
+  status?: Record<string, unknown> | null
+  authorization?: Record<string, unknown> | null
+  providerBudget?: Record<string, unknown> | null
+}): NbaShadowSchedulerProviderBudgetReadiness {
+  const requestedCalls = Math.max(0, Math.floor(input.requestedCalls))
+  const status = recordValue(input.status)
+  const authorization = recordValue(input.authorization)
+  const canonicalBudget = recordValue(status.canonicalBudget)
+  const reasonCodes = [
+    ...stringArray(authorization.reasonCodes),
+    ...stringArray(canonicalBudget.reasonCodes),
+  ]
+  const hourlyUsed = numberValue(status.callsMadeLastHour)
+  const dailyUsed = numberValue(status.callsMadeToday)
+  const hourlyRemaining = Math.max(0, NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_HOUR - hourlyUsed)
+  const dailyRemaining = Math.max(0, NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_DAY - dailyUsed)
+  const evidenceStatus = String(canonicalBudget.evidenceLevel ?? authorization.evidenceLevel ?? 'UNKNOWN')
+  const externalBalanceKnown = evidenceStatus !== 'UNKNOWN' && canonicalBudget.usableRemaining !== null && canonicalBudget.usableRemaining !== undefined
+  const authorizationResult = String(authorization.result ?? '')
+  const accountingUncertain = Boolean(status.accountingUncertain)
+  const configurationValid = String(status.configurationStatus ?? 'VALID') === 'VALID'
+  const providerId = String(status.providerId ?? canonicalBudget.providerId ?? NBA_SHADOW_SCHEDULER_PROVIDER)
+  const sportKey = String(status.sportKey ?? NBA_SHADOW_SCHEDULER_SPORT_KEY)
+  const internalCapsPass =
+    requestedCalls > 0 &&
+    requestedCalls <= NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN &&
+    requestedCalls <= hourlyRemaining &&
+    requestedCalls <= dailyRemaining
+  const scopedCanaryAllowed =
+    providerId === NBA_SHADOW_SCHEDULER_PROVIDER &&
+    sportKey === NBA_SHADOW_SCHEDULER_SPORT_KEY &&
+    !accountingUncertain &&
+    configurationValid &&
+    evidenceStatus === 'UNKNOWN' &&
+    authorizationResult === 'DENY_UNKNOWN_BUDGET' &&
+    internalCapsPass
+
+  if (input.budgetAllowed) {
+    return {
+      requestedCalls,
+      allowed: true,
+      authorizationMode: 'provider_budget',
+      evidenceStatus,
+      externalBalanceKnown,
+      reasonCodes: [...new Set([...reasonCodes, 'PROVIDER_BUDGET_AUTHORIZED'])],
+      hourlyUsed,
+      hourlyRemaining,
+      dailyUsed,
+      dailyRemaining,
+      canaryAuthorized: false,
+      blockedReason: null,
+      providerBudget: input.providerBudget ?? null,
+    }
+  }
+
+  if (scopedCanaryAllowed) {
+    return {
+      requestedCalls,
+      allowed: true,
+      authorizationMode: 'bounded_canary_unknown_balance',
+      evidenceStatus,
+      externalBalanceKnown: false,
+      reasonCodes: [
+        ...new Set([
+          ...reasonCodes,
+          'NBA_03A_BOUNDED_CANARY_AUTHORIZED_UNKNOWN_BALANCE',
+          'NBA_03A_INTERNAL_PROVIDER_CAPS_PASS',
+        ]),
+      ],
+      hourlyUsed,
+      hourlyRemaining,
+      dailyUsed,
+      dailyRemaining,
+      canaryAuthorized: true,
+      blockedReason: null,
+      providerBudget: input.providerBudget ?? null,
+    }
+  }
+
+  return {
+    requestedCalls,
+    allowed: false,
+    authorizationMode: 'denied',
+    evidenceStatus,
+    externalBalanceKnown,
+    reasonCodes: [
+      ...new Set([
+        ...reasonCodes,
+        requestedCalls > NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN ? 'NBA_03A_CANARY_RUN_CAP_EXCEEDED' : null,
+        requestedCalls > hourlyRemaining ? 'NBA_03A_CANARY_HOURLY_CAP_EXCEEDED' : null,
+        requestedCalls > dailyRemaining ? 'NBA_03A_CANARY_DAILY_CAP_EXCEEDED' : null,
+        accountingUncertain ? 'NBA_03A_CANARY_ACCOUNTING_UNCERTAIN' : null,
+        !configurationValid ? 'NBA_03A_CANARY_CONFIG_INVALID' : null,
+      ].filter(Boolean) as string[]),
+    ],
+    hourlyUsed,
+    hourlyRemaining,
+    dailyUsed,
+    dailyRemaining,
+    canaryAuthorized: false,
+    blockedReason: input.blockedReason ?? (authorizationResult || 'PROVIDER_BUDGET_DENIED'),
+    providerBudget: input.providerBudget ?? null,
+  }
+}
+
+async function authorizeNbaShadowSchedulerProviderBudget() {
+  const budget = await checkProviderBudget({
+    provider: NBA_SHADOW_SCHEDULER_PROVIDER,
+    sportKey: NBA_SHADOW_SCHEDULER_SPORT_KEY,
+    action: 'current_odds_refresh',
+    requestedCalls: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
+    estimatedCost: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
+    dryRun: false,
+    urgency: 'scheduler_canary',
+    operationalClass: 'current_era_shadow_generation',
+  })
+  const budgetRecord = budget as unknown as Record<string, unknown>
+  const readiness = authorizeNbaShadowSchedulerProviderBudgetSnapshot({
+    requestedCalls: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
+    budgetAllowed: budget.allowed,
+    blockedReason: budget.blockedReason,
+    status: budget.status as unknown as Record<string, unknown>,
+    authorization: budget.authorization as unknown as Record<string, unknown>,
+    providerBudget: {
+      ...budgetRecord,
+      nba03aCanaryAuthorization: {
+        scope: NBA_SHADOW_SCHEDULER_MODE,
+        authorizationMode: budget.allowed ? 'provider_budget' : 'bounded_canary_unknown_balance',
+        requestedCalls: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
+        maxCallsPerRun: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
+        maxCallsPerHour: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_HOUR,
+        maxCallsPerDay: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_DAY,
+        sportsDataIoCalls: 0,
+        historicalOddsCalls: 0,
+      },
+    },
+  })
+  if (readiness.providerBudget) {
+    readiness.providerBudget = {
+      ...readiness.providerBudget,
+      nba03aCanaryAuthorization: {
+        ...(recordValue(readiness.providerBudget.nba03aCanaryAuthorization)),
+        allowed: readiness.allowed,
+        authorizationMode: readiness.authorizationMode,
+        externalBalanceKnown: readiness.externalBalanceKnown,
+        evidenceStatus: readiness.evidenceStatus,
+        reasonCodes: readiness.reasonCodes,
+        hourlyUsed: readiness.hourlyUsed,
+        hourlyRemaining: readiness.hourlyRemaining,
+        dailyUsed: readiness.dailyUsed,
+        dailyRemaining: readiness.dailyRemaining,
+      },
+    }
+  }
+  return readiness
 }
 
 function baseResult(input: {
@@ -277,6 +486,7 @@ function classifyPrecheck(input: {
   state: CanaryState
   counts: CountState
   activeLock: boolean
+  providerBudgetAllowed?: boolean
 }): NbaShadowSchedulerPrecheckClassification {
   if (!input.enabled) return 'SCHEDULER_PRECHECK_DISABLED'
   if (input.activeLock) return 'SCHEDULER_PRECHECK_LOCK_ACTIVE'
@@ -288,6 +498,7 @@ function classifyPrecheck(input: {
   }
   if (input.state.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS) return 'SCHEDULER_PRECHECK_REVIEW_REQUIRED'
   if (input.counts.pendingRows >= NBA_SHADOW_SCHEDULER_PENDING_GUARD) return 'SCHEDULER_PRECHECK_PENDING_GUARD'
+  if (input.providerBudgetAllowed === false) return 'SCHEDULER_PRECHECK_PROVIDER_BUDGET_BLOCKED'
   return 'SCHEDULER_PRECHECK_READY'
 }
 
@@ -300,6 +511,24 @@ export async function getNbaCurrentEraShadowSchedulerPrecheckStatus(): Promise<N
     canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_HARD_MAX_RUNS ||
     canaryState.totalInsertedRows >= NBA_SHADOW_SCHEDULER_TOTAL_ROW_CAP
   const pendingGuardReached = counts.pendingRows >= NBA_SHADOW_SCHEDULER_PENDING_GUARD
+  const shouldEvaluateBudget = enabled && !lockStatus.active && !reviewRequired && !hardLimitReached && !pendingGuardReached
+  const providerBudgetReadiness = shouldEvaluateBudget
+    ? await authorizeNbaShadowSchedulerProviderBudget()
+    : {
+        requestedCalls: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
+        allowed: false,
+        authorizationMode: 'not_evaluated' as const,
+        evidenceStatus: 'NOT_EVALUATED',
+        externalBalanceKnown: false,
+        reasonCodes: [],
+        hourlyUsed: 0,
+        hourlyRemaining: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_HOUR,
+        dailyUsed: 0,
+        dailyRemaining: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_DAY,
+        canaryAuthorized: false,
+        blockedReason: null,
+        providerBudget: null,
+      }
   return {
     success: true,
     readOnly: true,
@@ -338,11 +567,24 @@ export async function getNbaCurrentEraShadowSchedulerPrecheckStatus(): Promise<N
     runCounterMutations: 0,
     auditJobWrites: 0,
     schedulerLockAcquisitions: 0,
+    providerBudgetRequestedCalls: providerBudgetReadiness.requestedCalls,
+    providerBudgetAllowed: providerBudgetReadiness.allowed,
+    providerBudgetAuthorizationMode: providerBudgetReadiness.authorizationMode,
+    providerBudgetEvidenceStatus: providerBudgetReadiness.evidenceStatus,
+    providerBudgetExternalBalanceKnown: providerBudgetReadiness.externalBalanceKnown,
+    providerBudgetReasonCodes: providerBudgetReadiness.reasonCodes,
+    providerBudgetHourlyUsed: providerBudgetReadiness.hourlyUsed,
+    providerBudgetHourlyRemaining: providerBudgetReadiness.hourlyRemaining,
+    providerBudgetDailyUsed: providerBudgetReadiness.dailyUsed,
+    providerBudgetDailyRemaining: providerBudgetReadiness.dailyRemaining,
+    providerBudgetCanaryAuthorized: providerBudgetReadiness.canaryAuthorized,
+    providerBudgetBlockedReason: providerBudgetReadiness.blockedReason,
     finalClassification: classifyPrecheck({
       enabled,
       state: canaryState,
       counts,
       activeLock: lockStatus.active,
+      providerBudgetAllowed: shouldEvaluateBudget ? providerBudgetReadiness.allowed : undefined,
     }),
   }
 }
@@ -449,18 +691,13 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
       return baseResult({ runId, startedAt, enabled, lock: 'released', canaryState, counts, classification: 'PENDING_GUARD_NO_OP' })
     }
 
-    const budget = await checkProviderBudget({
-      provider: NBA_SHADOW_SCHEDULER_PROVIDER,
-      sportKey: NBA_SHADOW_SCHEDULER_SPORT_KEY,
-      action: 'current_odds_refresh',
-      requestedCalls: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
-      estimatedCost: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
-      dryRun: false,
-      urgency: 'scheduler_canary',
-      operationalClass: 'current_era_shadow_generation',
-    })
-    const budgetRecord = budget as unknown as Record<string, unknown>
-    if (!budget.allowed) {
+    const budgetReadiness = await authorizeNbaShadowSchedulerProviderBudget()
+    const budgetRecord = budgetReadiness.providerBudget ?? {
+      allowed: budgetReadiness.allowed,
+      blockedReason: budgetReadiness.blockedReason,
+      nba03aCanaryAuthorization: budgetReadiness,
+    }
+    if (!budgetReadiness.allowed) {
       return baseResult({
         runId,
         startedAt,
@@ -639,6 +876,7 @@ export type NbaShadowSchedulerPrecheckFixtureInput = {
   totalInsertedRows: number
   pendingRows: number
   currentEraRows?: number
+  providerBudgetAllowed?: boolean
 }
 
 export function simulateNbaShadowSchedulerPrecheck(input: NbaShadowSchedulerPrecheckFixtureInput) {
@@ -656,6 +894,7 @@ export function simulateNbaShadowSchedulerPrecheck(input: NbaShadowSchedulerPrec
     state,
     counts,
     activeLock: input.activeLock,
+    providerBudgetAllowed: input.providerBudgetAllowed,
   })
   return {
     schedulerEnabled: input.schedulerEnabled,
@@ -674,6 +913,7 @@ export function simulateNbaShadowSchedulerPrecheck(input: NbaShadowSchedulerPrec
     runCounterMutations: 0,
     auditJobWrites: 0,
     schedulerLockAcquisitions: 0,
+    providerBudgetAllowed: input.providerBudgetAllowed ?? null,
     finalClassification,
   }
 }
@@ -778,12 +1018,135 @@ export function runNbaShadowSchedulerPrecheckFixtures() {
     pendingGuard: { schedulerEnabled: true, activeLock: false, completedRuns: 0, totalInsertedRows: 0, pendingRows: 75 },
     lockActive: { schedulerEnabled: true, activeLock: true, completedRuns: 0, totalInsertedRows: 0, pendingRows: 31 },
     repeated: { schedulerEnabled: true, activeLock: false, completedRuns: 0, totalInsertedRows: 0, pendingRows: 31 },
+    budgetBlocked: { schedulerEnabled: true, activeLock: false, completedRuns: 0, totalInsertedRows: 0, pendingRows: 31, providerBudgetAllowed: false },
   }
   const results = Object.fromEntries(Object.entries(cases).map(([name, input]) => [name, simulateNbaShadowSchedulerPrecheck(input)]))
+  const budgetSnapshots = {
+    knownBalanceSufficient: authorizeNbaShadowSchedulerProviderBudgetSnapshot({
+      requestedCalls: 2,
+      budgetAllowed: true,
+      status: {
+        providerId: NBA_SHADOW_SCHEDULER_PROVIDER,
+        sportKey: NBA_SHADOW_SCHEDULER_SPORT_KEY,
+        callsMadeLastHour: 0,
+        callsMadeToday: 0,
+        configurationStatus: 'VALID',
+        accountingUncertain: false,
+        canonicalBudget: { evidenceLevel: 'CONFIGURED_ONLY', usableRemaining: 20, reasonCodes: ['CONFIGURED_ONLY_LIMIT'] },
+      },
+      authorization: { result: 'ALLOW', reasonCodes: ['THE_ODDS_API_AUTHORIZATION_POOL'] },
+    }),
+    knownBalanceInsufficient: authorizeNbaShadowSchedulerProviderBudgetSnapshot({
+      requestedCalls: 2,
+      budgetAllowed: false,
+      blockedReason: 'DENY_RESERVE_PROTECTED',
+      status: {
+        providerId: NBA_SHADOW_SCHEDULER_PROVIDER,
+        sportKey: NBA_SHADOW_SCHEDULER_SPORT_KEY,
+        callsMadeLastHour: 0,
+        callsMadeToday: 0,
+        configurationStatus: 'VALID',
+        accountingUncertain: false,
+        canonicalBudget: { evidenceLevel: 'CONFIGURED_ONLY', usableRemaining: 0, reasonCodes: ['PROTECTED_RESERVE_APPLIED'] },
+      },
+      authorization: { result: 'DENY_RESERVE_PROTECTED', reasonCodes: ['NO_USABLE_REMAINING_AFTER_RESERVE'] },
+    }),
+    unknownBalanceNoScopedAuthorizationOtherSport: authorizeNbaShadowSchedulerProviderBudgetSnapshot({
+      requestedCalls: 2,
+      budgetAllowed: false,
+      blockedReason: 'DENY_UNKNOWN_BUDGET',
+      status: {
+        providerId: NBA_SHADOW_SCHEDULER_PROVIDER,
+        sportKey: 'americanfootball_nfl',
+        callsMadeLastHour: 0,
+        callsMadeToday: 0,
+        configurationStatus: 'VALID',
+        accountingUncertain: false,
+        canonicalBudget: { evidenceLevel: 'UNKNOWN', usableRemaining: null, reasonCodes: ['UNKNOWN_CURRENT_BALANCE'] },
+      },
+      authorization: { result: 'DENY_UNKNOWN_BUDGET', reasonCodes: ['UNKNOWN_BUDGET_FAILS_CLOSED'] },
+    }),
+    unknownBalanceValidCanary: authorizeNbaShadowSchedulerProviderBudgetSnapshot({
+      requestedCalls: 2,
+      budgetAllowed: false,
+      blockedReason: 'DENY_UNKNOWN_BUDGET',
+      status: {
+        providerId: NBA_SHADOW_SCHEDULER_PROVIDER,
+        sportKey: NBA_SHADOW_SCHEDULER_SPORT_KEY,
+        callsMadeLastHour: 0,
+        callsMadeToday: 0,
+        configurationStatus: 'VALID',
+        accountingUncertain: false,
+        canonicalBudget: { evidenceLevel: 'UNKNOWN', usableRemaining: null, reasonCodes: ['UNKNOWN_CURRENT_BALANCE'] },
+      },
+      authorization: { result: 'DENY_UNKNOWN_BUDGET', reasonCodes: ['UNKNOWN_BUDGET_FAILS_CLOSED'] },
+    }),
+    requestedCallsThree: authorizeNbaShadowSchedulerProviderBudgetSnapshot({
+      requestedCalls: 3,
+      budgetAllowed: false,
+      blockedReason: 'DENY_UNKNOWN_BUDGET',
+      status: {
+        providerId: NBA_SHADOW_SCHEDULER_PROVIDER,
+        sportKey: NBA_SHADOW_SCHEDULER_SPORT_KEY,
+        callsMadeLastHour: 0,
+        callsMadeToday: 0,
+        configurationStatus: 'VALID',
+        accountingUncertain: false,
+        canonicalBudget: { evidenceLevel: 'UNKNOWN', usableRemaining: null, reasonCodes: ['UNKNOWN_CURRENT_BALANCE'] },
+      },
+      authorization: { result: 'DENY_UNKNOWN_BUDGET', reasonCodes: ['UNKNOWN_BUDGET_FAILS_CLOSED'] },
+    }),
+    hourlyCapExceeded: authorizeNbaShadowSchedulerProviderBudgetSnapshot({
+      requestedCalls: 2,
+      budgetAllowed: false,
+      blockedReason: 'DENY_UNKNOWN_BUDGET',
+      status: {
+        providerId: NBA_SHADOW_SCHEDULER_PROVIDER,
+        sportKey: NBA_SHADOW_SCHEDULER_SPORT_KEY,
+        callsMadeLastHour: 3,
+        callsMadeToday: 0,
+        configurationStatus: 'VALID',
+        accountingUncertain: false,
+        canonicalBudget: { evidenceLevel: 'UNKNOWN', usableRemaining: null, reasonCodes: ['UNKNOWN_CURRENT_BALANCE'] },
+      },
+      authorization: { result: 'DENY_UNKNOWN_BUDGET', reasonCodes: ['UNKNOWN_BUDGET_FAILS_CLOSED'] },
+    }),
+    dailyCapExceeded: authorizeNbaShadowSchedulerProviderBudgetSnapshot({
+      requestedCalls: 2,
+      budgetAllowed: false,
+      blockedReason: 'DENY_UNKNOWN_BUDGET',
+      status: {
+        providerId: NBA_SHADOW_SCHEDULER_PROVIDER,
+        sportKey: NBA_SHADOW_SCHEDULER_SPORT_KEY,
+        callsMadeLastHour: 0,
+        callsMadeToday: 47,
+        configurationStatus: 'VALID',
+        accountingUncertain: false,
+        canonicalBudget: { evidenceLevel: 'UNKNOWN', usableRemaining: null, reasonCodes: ['UNKNOWN_CURRENT_BALANCE'] },
+      },
+      authorization: { result: 'DENY_UNKNOWN_BUDGET', reasonCodes: ['UNKNOWN_BUDGET_FAILS_CLOSED'] },
+    }),
+    sportsDataIoNotAuthorized: authorizeNbaShadowSchedulerProviderBudgetSnapshot({
+      requestedCalls: 2,
+      budgetAllowed: false,
+      blockedReason: 'DENY_UNKNOWN_BUDGET',
+      status: {
+        providerId: 'sportsdataio',
+        sportKey: NBA_SHADOW_SCHEDULER_SPORT_KEY,
+        callsMadeLastHour: 0,
+        callsMadeToday: 0,
+        configurationStatus: 'VALID',
+        accountingUncertain: false,
+        canonicalBudget: { evidenceLevel: 'UNKNOWN', usableRemaining: null, reasonCodes: ['UNKNOWN_CURRENT_BALANCE'] },
+      },
+      authorization: { result: 'DENY_UNKNOWN_BUDGET', reasonCodes: ['UNKNOWN_BUDGET_FAILS_CLOSED'] },
+    }),
+  }
   return {
     route: NBA_SHADOW_SCHEDULER_ROUTE,
     enabledEnv: NBA_SHADOW_SCHEDULER_ENABLED_ENV,
     results,
+    budgetSnapshots,
     productionProviderCalls: 0,
     productionDatabaseMutations: 0,
   }

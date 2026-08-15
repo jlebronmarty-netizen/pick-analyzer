@@ -3577,3 +3577,13 @@ Status: `NBA_03A_SHADOW_SCHEDULER_CRON_ACTIVATION_CERTIFIED_FOR_CANARY`
 Result: NBA-03A now has a certified Vercel Cron activation artifact for the first bounded Current Era Shadow scheduler canary. The artifact adds only `/api/cron/nba-current-era-shadow` at `*/30 * * * *`, keeps `/api/cron/operating-day` unchanged and preserves the two-run review boundary, 3-row per-run cap, 12-row hard cap, pending guard 75 and provider budget limits.
 
 Next: publish/deploy the cron activation commit, verify protected precheck readiness in production, then observe exactly two natural Vercel Cron runs before review. Do not authorize continuous scheduler operation automatically.
+
+## NBA-03A Shadow Scheduler Provider-Budget Gate Repair
+
+Status: `NBA_03A_SHADOW_SCHEDULER_PROVIDER_BUDGET_GATE_REPAIR_CERTIFIED_READY_FOR_PUBLICATION`
+
+Result: NBA-03A now reconciles protected precheck with the live scheduler execution budget gate. The natural Vercel Cron invocation proved the route was called but returned `PROVIDER_BUDGET_NO_OP` before provider access because The Odds API external balance evidence is unknown. The repair makes precheck evaluate the exact same 2-call authorization as execution and labels any unknown-balance canary allowance as `bounded_canary_unknown_balance`.
+
+Global provider-budget protection remains fail-closed. The scoped allowance applies only to `NBA_CURRENT_ERA_SHADOW`, `the-odds-api`, `basketball_nba`, max 2 calls/run, max 4/hour, max 48/day, with SportsDataIO and historical odds fixed at 0. No provider calls, Current Era writes, product exposure, settlement, learning, calibration, Historical Replay or MLB behavior changed.
+
+Next: publish/deploy this repair, verify protected precheck reports provider-budget readiness instead of a false-ready/budget-409 mismatch, then resume natural Vercel Cron observation. Do not manually invoke the scheduler.

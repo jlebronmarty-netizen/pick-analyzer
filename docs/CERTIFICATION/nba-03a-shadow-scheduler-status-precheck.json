@@ -45,6 +45,18 @@
     "hardMaxRuns",
     "totalCanaryRowCap",
     "providerBudget",
+    "providerBudgetRequestedCalls",
+    "providerBudgetAllowed",
+    "providerBudgetAuthorizationMode",
+    "providerBudgetEvidenceStatus",
+    "providerBudgetExternalBalanceKnown",
+    "providerBudgetReasonCodes",
+    "providerBudgetHourlyUsed",
+    "providerBudgetHourlyRemaining",
+    "providerBudgetDailyUsed",
+    "providerBudgetDailyRemaining",
+    "providerBudgetCanaryAuthorized",
+    "providerBudgetBlockedReason",
     "currentEraShadowCount",
     "finalClassification"
   ],
@@ -54,7 +66,8 @@
     "SCHEDULER_PRECHECK_REVIEW_REQUIRED",
     "SCHEDULER_PRECHECK_HARD_LIMIT",
     "SCHEDULER_PRECHECK_PENDING_GUARD",
-    "SCHEDULER_PRECHECK_LOCK_ACTIVE"
+    "SCHEDULER_PRECHECK_LOCK_ACTIVE",
+    "SCHEDULER_PRECHECK_PROVIDER_BUDGET_BLOCKED"
   ],
   "canaryBounds": {
     "perRunWriteCap": 3,
@@ -80,10 +93,36 @@
     "hardLimit": "SCHEDULER_PRECHECK_HARD_LIMIT",
     "pendingGuard": "SCHEDULER_PRECHECK_PENDING_GUARD",
     "activeLock": "SCHEDULER_PRECHECK_LOCK_ACTIVE",
+    "providerBudgetBlocked": "SCHEDULER_PRECHECK_PROVIDER_BUDGET_BLOCKED",
     "repeatedStatusRequest": "NO_COUNTER_CHANGE",
     "providerSpy": 0,
     "predictionPersistenceSpy": 0,
-    "currentDataSyncSpy": 0
+    "currentDataSyncSpy": 0,
+    "knownBalanceSufficient": "ALLOWED_PROVIDER_BUDGET",
+    "knownBalanceInsufficient": "DENIED",
+    "unknownBalanceNoScopedAuthorization": "DENIED",
+    "unknownBalanceValidCanary": "ALLOWED_BOUNDED_CANARY",
+    "requestedCallsThree": "DENIED",
+    "hourlyCapExceeded": "DENIED",
+    "dailyCapExceeded": "DENIED",
+    "sportsDataIo": "DENIED"
+  },
+  "providerBudgetReadinessContract": {
+    "precheckEvaluatesExecutionBudgetGate": true,
+    "executionAndPrecheckUseSharedAuthorizationHelper": true,
+    "globalUnknownBalancePolicyWeakened": false,
+    "boundedUnknownBalanceCanaryAuthorization": {
+      "enabled": true,
+      "scope": "NBA_CURRENT_ERA_SHADOW",
+      "provider": "the-odds-api",
+      "sportKey": "basketball_nba",
+      "requestedCallsMax": 2,
+      "hourlyInternalCap": 4,
+      "dailyInternalCap": 48,
+      "sportsDataIoCalls": 0,
+      "historicalOddsCalls": 0,
+      "authorizationMode": "bounded_canary_unknown_balance"
+    }
   },
   "productionCertification": {
     "providerCalls": 0,
