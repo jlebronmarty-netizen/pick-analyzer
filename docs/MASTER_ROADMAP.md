@@ -3473,3 +3473,15 @@ Result: NBA-02B3 completed historical shadow price-aware evaluation from stored 
 The prior 1,196 full-core estimate is reconciled: 1,112 provider events map into replay-exact price-aware rows and 84 provider-event rows are classified as `EVENT_MAPPING_MISMATCH`, with 0 unexplained. Price-aware shadow settlement produced 1,797 wins, 1,505 losses, 34 pushes, 54.42% accuracy, Brier 0.2615, calibration error 9.88 and -6.57% ROI. The result is diagnostic, not a production pick or profitability claim. Replay evaluation metadata is persisted only on isolated replay rows, final idempotency created 0 new settlements, and NBA Current Era, scheduler, Official Picks, production learning/calibration, product surfaces, provider calls and MLB mutations remain at 0.
 
 Next: `NBA-02C_HISTORICAL_MODEL_DIAGNOSTICS_AND_CURRENT_ERA_READINESS`. Do not tune the model, activate NBA Current Era, enable NBA scheduler or create Official Picks without a separate authorization.
+
+## NBA-02C Historical Diagnostics And Stake Policy Research
+
+Status: Local certification PASS, push required.
+
+Result: NBA-02C completed historical model diagnostics, Current Era shadow readiness review, predefined stake-policy research, bankroll-engine design and notification-readiness design from stored `HISTORICAL_REPLAY_SHADOW` evidence only. The certified price-aware universe remains 3,336 rows over 1,112 2024-25 events; provider calls, NBA Current Era writes, Official Picks, production learning, production calibration and MLB mutations remained 0.
+
+The Moneyline accuracy/ROI contradiction is explained by favorite price tax: 64.3% Moneyline accuracy did not clear the 69.39% average implied break-even rate at an average selected price of -345.41. The official-like quantitative cohort remains isolated at 908 rows and was unprofitable at -5.62% flat ROI.
+
+Stake policy research used a chronological event-level discovery/validation split within 2024-25 because 2022-23 and 2023-24 are model-only. Several predefined stake policies improved validation ROI in the held-out slice, but the result remains `RESEARCH_ONLY_NOT_PRODUCTION_READY` until forward Current Era evidence and production calibration exist. A future bankroll engine should begin as `RISK-01_BANKROLL_STAKE_ENGINE_SHADOW`; actionable notifications are deferred until Current Era, Official Pick, calibration, stake, freshness and dedupe gates are separately certified.
+
+Next: `NBA-03A_CURRENT_ERA_SHADOW_FOUNDATION` after explicit authorization. If forward samples justify it, follow with `NBA-03B_ONLINE_CALIBRATION_OR_LEARNING_CHALLENGER`; keep any generic stake engine shadow-only until separately certified.
