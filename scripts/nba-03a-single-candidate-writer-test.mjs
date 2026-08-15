@@ -18,6 +18,11 @@ function loadEnvFile(filePath) {
 loadEnvFile(path.join(process.cwd(), '.env.local'))
 
 const {
+  buildPredictionHistoryDeterministicId,
+  buildPredictionHistoryLogicalIdentity,
+} = await import('../src/services/prediction-history.service.ts')
+
+const {
   buildNbaCurrentEraShadowCandidateKey,
   buildNbaCurrentEraShadowModelMatchKey,
   buildNbaCurrentEraShadowPredictionRow,
@@ -141,7 +146,33 @@ assert.equal(selectNbaCurrentEraShadowWriteCandidate({ candidates: [candidate], 
 assert.equal(selectNbaCurrentEraShadowWriteCandidate({ candidates: [candidate, candidate], candidateKey }).status, 'WRITE_CARDINALITY_NOT_ONE')
 
 const row = buildNbaCurrentEraShadowPredictionRow({ event, odds, generatedAt, modelPrediction })
+const expectedIdentity = buildPredictionHistoryLogicalIdentity({
+  sport_key: 'basketball_nba',
+  game_id: event.id,
+  market: odds.market,
+  team: odds.outcome,
+  selection: odds.outcome,
+  line: odds.line,
+  sportsbook: odds.sportsbook,
+  prediction_origin: 'CURRENT_ERA_SHADOW',
+  model_version: 'nba_prediction_engine_v1',
+})
 assert.equal(row.prediction_origin, 'CURRENT_ERA_SHADOW')
+assert.equal(row.id, buildPredictionHistoryDeterministicId({
+  sport_key: 'basketball_nba',
+  game_id: event.id,
+  market: odds.market,
+  team: odds.outcome,
+  selection: odds.outcome,
+  line: odds.line,
+  sportsbook: odds.sportsbook,
+  prediction_origin: 'CURRENT_ERA_SHADOW',
+  model_version: 'nba_prediction_engine_v1',
+}))
+assert.equal(row.idempotency_key, expectedIdentity)
+assert.equal(row.prediction_group_key, expectedIdentity)
+assert.equal(row.model_role, 'shadow')
+assert.equal(row.is_current, false)
 assert.equal(row.recommended_pick, false)
 assert.equal(row.production_eligible, false)
 assert.equal(row.sport_key, 'basketball_nba')
@@ -161,6 +192,67 @@ assert.equal(row.certification_metadata.candidateKey, candidateKey)
 assert.equal(row.certification_metadata.priceEvidenceProvider, 'the-odds-api')
 assert.equal(row.feature_snapshot.modelMatchKey, candidate.modelMatchKey)
 
+const differentLineId = buildPredictionHistoryDeterministicId({
+  sport_key: 'basketball_nba',
+  game_id: event.id,
+  market: odds.market,
+  team: odds.outcome,
+  selection: odds.outcome,
+  line: -2.5,
+  sportsbook: odds.sportsbook,
+  prediction_origin: 'CURRENT_ERA_SHADOW',
+  model_version: 'nba_prediction_engine_v1',
+})
+const differentSelectionId = buildPredictionHistoryDeterministicId({
+  sport_key: 'basketball_nba',
+  game_id: event.id,
+  market: odds.market,
+  team: 'Boston Celtics',
+  selection: 'Boston Celtics',
+  line: 1.5,
+  sportsbook: odds.sportsbook,
+  prediction_origin: 'CURRENT_ERA_SHADOW',
+  model_version: 'nba_prediction_engine_v1',
+})
+const differentSportsbookId = buildPredictionHistoryDeterministicId({
+  sport_key: 'basketball_nba',
+  game_id: event.id,
+  market: odds.market,
+  team: odds.outcome,
+  selection: odds.outcome,
+  line: odds.line,
+  sportsbook: 'DraftKings',
+  prediction_origin: 'CURRENT_ERA_SHADOW',
+  model_version: 'nba_prediction_engine_v1',
+})
+const differentOriginId = buildPredictionHistoryDeterministicId({
+  sport_key: 'basketball_nba',
+  game_id: event.id,
+  market: odds.market,
+  team: odds.outcome,
+  selection: odds.outcome,
+  line: odds.line,
+  sportsbook: odds.sportsbook,
+  prediction_origin: 'HISTORICAL_REPLAY_SHADOW',
+  model_version: 'nba_prediction_engine_v1',
+})
+const differentModelVersionId = buildPredictionHistoryDeterministicId({
+  sport_key: 'basketball_nba',
+  game_id: event.id,
+  market: odds.market,
+  team: odds.outcome,
+  selection: odds.outcome,
+  line: odds.line,
+  sportsbook: odds.sportsbook,
+  prediction_origin: 'CURRENT_ERA_SHADOW',
+  model_version: 'nba_prediction_engine_v2',
+})
+assert.notEqual(row.id, differentLineId, 'different line must produce a distinct persisted identity')
+assert.notEqual(row.id, differentSelectionId, 'different selection must produce a distinct persisted identity')
+assert.notEqual(row.id, differentSportsbookId, 'different sportsbook must produce a distinct persisted identity')
+assert.notEqual(row.id, differentOriginId, 'different prediction origin must produce a distinct persisted identity')
+assert.notEqual(row.id, differentModelVersionId, 'different model version must produce a distinct persisted identity')
+
 console.log(JSON.stringify({
   status: 'PASS',
   tests: {
@@ -172,6 +264,12 @@ console.log(JSON.stringify({
     realMinus110: 'PASS',
     fallbackMinus110: 'PASS',
     duplicateInvocation: 'PASS',
+    deterministicPrimaryKey: 'PASS',
+    lineCollisionAvoided: 'PASS',
+    selectionCollisionAvoided: 'PASS',
+    sportsbookCollisionAvoided: 'PASS',
+    originCollisionAvoided: 'PASS',
+    modelVersionCollisionAvoided: 'PASS',
     sportsbookPriceAttachedToCanonicalPrediction: 'PASS',
     lineMismatchRejected: 'PASS',
     officialPickIsolation: 'PASS',

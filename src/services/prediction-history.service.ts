@@ -1,3 +1,4 @@
+import { createHash } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import {
   evaluateProductionDataGate,
@@ -9,6 +10,7 @@ import { getMlbStarterWeatherStadiumIntelligence } from '@/services/mlb-starter-
 import { classifyPredictionCutoff, type CutoffEventLike } from '@/services/prediction-cutoff-enforcement.service'
 
 export type PredictionHistoryInput = {
+  id?: string
   sport_key: string
   game_id: string
   commence_time: string
@@ -52,6 +54,13 @@ export type PredictionHistoryInput = {
   prediction_origin?: 'LIVE_PREGAME' | 'HISTORICAL_WALK_FORWARD_REPLAY' | 'HISTORICAL_REPLAY_SHADOW' | 'LEGACY_PRE_CERTIFICATION' | 'CURRENT_ERA_SHADOW' | null
   certification_status?: 'SHADOW_PENDING' | 'CERTIFIED' | 'QUARANTINED' | 'INVALID' | 'REJECTED' | null
   certification_metadata?: Record<string, unknown> | null
+  is_current?: boolean
+  prediction_version?: number
+  model_role?: 'champion' | 'challenger' | 'shadow' | 'archived' | 'rollback' | string
+  prediction_group_key?: string | null
+  version_created_reason?: string | null
+  idempotency_key?: string | null
+  version_lineage?: Record<string, unknown> | null
 }
 
 type HistoricalReplayRow = PredictionHistoryInput & {
@@ -133,6 +142,46 @@ function asStringArray(value: unknown) {
 
 function round(value: number, digits = 2) {
   return Number(value.toFixed(digits))
+}
+
+function stablePart(value: unknown) {
+  return String(value ?? 'null').trim().toLowerCase()
+}
+
+function stableId(parts: unknown[]) {
+  return parts.map(stablePart).join('|')
+}
+
+export function stablePredictionHistoryUuid(parts: unknown[]) {
+  const hex = createHash('sha256').update(stableId(parts)).digest('hex')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-5${hex.slice(13, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`
+}
+
+export function buildPredictionHistoryLogicalIdentity(row: {
+  sport_key: string
+  game_id: string
+  market?: string | null
+  team: string
+  selection?: string | null
+  line?: number | null
+  sportsbook?: string | null
+  prediction_origin?: string | null
+  model_version?: string | null
+}) {
+  return stableId([
+    row.sport_key,
+    row.game_id,
+    row.market ?? 'unknown_market',
+    row.team || row.selection || 'unknown_selection',
+    row.line ?? 'no_line',
+    row.sportsbook ?? 'unknown_sportsbook',
+    row.prediction_origin ?? 'legacy_unspecified_origin',
+    row.model_version ?? 'unknown_model_version',
+  ])
+}
+
+export function buildPredictionHistoryDeterministicId(row: Parameters<typeof buildPredictionHistoryLogicalIdentity>[0]) {
+  return stablePredictionHistoryUuid(['prediction_history', buildPredictionHistoryLogicalIdentity(row)])
 }
 
 function numberOrNull(value: unknown) {
@@ -403,14 +452,31 @@ export async function savePredictionHistory(rows: PredictionHistoryInput[]) {
     }
   }).filter(Boolean) as PredictionHistoryInput[]
 
-  const { error } = await supabaseAdmin
-    .from('prediction_history')
-    .upsert(gatedRows, {
-      onConflict: 'sport_key,game_id,team,market,sportsbook',
-    })
+  const deterministicCurrentEraRows = gatedRows.filter((row) => row.prediction_origin === 'CURRENT_ERA_SHADOW' && Boolean(row.id))
+  const legacyRows = gatedRows.filter((row) => !(row.prediction_origin === 'CURRENT_ERA_SHADOW' && Boolean(row.id)))
 
-  if (error) {
-    throw new Error(error.message)
+  if (deterministicCurrentEraRows.length > 0) {
+    const { error } = await supabaseAdmin
+      .from('prediction_history')
+      .upsert(deterministicCurrentEraRows, {
+        onConflict: 'id',
+      })
+
+    if (error) {
+      throw new Error(error.message)
+    }
+  }
+
+  if (legacyRows.length > 0) {
+    const { error } = await supabaseAdmin
+      .from('prediction_history')
+      .upsert(legacyRows, {
+        onConflict: 'sport_key,game_id,team,market,sportsbook',
+      })
+
+    if (error) {
+      throw new Error(error.message)
+    }
   }
 
   return {

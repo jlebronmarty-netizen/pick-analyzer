@@ -3523,3 +3523,11 @@ Status: Local certification PASS, push required.
 Result: NBA-03A Block 5 now bounds the first Current Era Shadow write by construction. The certified canary supports `dry-run` and `write-one`; the generic all-candidate write path is disabled. `write-one` requires a stable candidate key from dry-run output and refuses persistence unless the selector resolves to exactly one write-eligible candidate.
 
 The model/price identity repair keeps the existing NBA prediction engine as the only source of probability and confidence. Canonical model matching uses event, market, selection and exact line; sportsbook, odds, odds snapshot ID and source timestamp are attached price evidence. The dry-run found 362 price candidates and 133 safe model/price matches, with 0 production writes and 0 provider calls. Next: publish this repair, then authorize exactly one real `CURRENT_ERA_SHADOW` canary write by explicit candidate key.
+
+## NBA-03A First Shadow Persistence Repair
+
+Status: Code-only repair certified locally, push required.
+
+Result: The first real `write-one` attempt was blocked by the shared `prediction_history` upsert contract, not by candidate eligibility. `savePredictionHistory` used a broad five-column conflict target that production does not enforce and that would collide legitimate different lines/model versions. The repair gives `CURRENT_ERA_SHADOW` rows a deterministic UUID primary key from the certified logical identity: sport, event, market, selection/team, exact line, sportsbook, prediction origin and model version.
+
+Historical replay remains isolated at 14,840 rows, and the existing historical replay `id`/`idempotency_key` behavior is unchanged. No migration, provider call, production DB mutation or first-shadow retry was performed. Next: publish/deploy the repair, confirm alignment, then revalidate current price evidence before authorizing exactly one shadow write.

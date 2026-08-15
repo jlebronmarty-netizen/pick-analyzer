@@ -1,0 +1,111 @@
+{
+  "status": "NBA_03A_FIRST_SHADOW_PERSISTENCE_REPAIR_CERTIFIED_CODE_ONLY",
+  "phase": "NBA-03A first shadow persistence/idempotency repair",
+  "startingCommit": "1738ebff20054ae0159435843db7fdebb5f40132",
+  "rootCause": {
+    "currentConflictTarget": "sport_key,game_id,team,market,sportsbook",
+    "failure": "PostgreSQL cannot execute ON CONFLICT because production has no matching unique or exclusion constraint for the broad target.",
+    "integrityFinding": "The broad target is not the canonical logical identity and would collide legitimate rows."
+  },
+  "productionCatalog": {
+    "catalogViewsExposed": false,
+    "evidence": "Supabase PostgREST did not expose pg_indexes, pg_constraint, or information_schema.table_constraints. The live write failure proves the broad conflict target is not backed by a usable production constraint."
+  },
+  "canonicalIdentity": {
+    "modelPredictionIdentity": [
+      "sport_key",
+      "game_id",
+      "market",
+      "selection/team",
+      "line",
+      "model_version"
+    ],
+    "priceEvidenceIdentity": [
+      "provider",
+      "sportsbook",
+      "odds",
+      "odds_snapshot_id",
+      "source/capture timestamps"
+    ],
+    "persistedLogicalIdentity": [
+      "sport_key",
+      "game_id",
+      "market",
+      "selection/team",
+      "line",
+      "sportsbook",
+      "prediction_origin",
+      "model_version"
+    ],
+    "dbUniquenessIdentity": "prediction_history.id"
+  },
+  "collisionAnalysis": {
+    "differentSelection": "coexists",
+    "differentLine": "coexists",
+    "differentSportsbook": "coexists",
+    "differentPredictionOrigin": "coexists",
+    "differentModelVersion": "coexists"
+  },
+  "duplicateAudit": {
+    "totalRows": 18457,
+    "historicalReplayShadowRows": 14840,
+    "currentEraShadowRows": 0,
+    "badConflictTarget": {
+      "fields": [
+        "sport_key",
+        "game_id",
+        "team",
+        "market",
+        "sportsbook"
+      ],
+      "duplicateGroups": 114,
+      "duplicateRows": 231,
+      "maxDuplicateGroupSize": 3,
+      "sports": {
+        "baseball_mlb": 231
+      }
+    },
+    "proposedCanonicalKey": {
+      "fields": [
+        "sport_key",
+        "game_id",
+        "market",
+        "team",
+        "line",
+        "sportsbook",
+        "prediction_origin",
+        "model_version"
+      ],
+      "duplicateGroups": 0,
+      "duplicateRows": 0,
+      "maxDuplicateGroupSize": 0
+    }
+  },
+  "repair": {
+    "applicationChanged": true,
+    "migrationAdded": false,
+    "description": "CURRENT_ERA_SHADOW rows now carry a deterministic UUID primary key derived from the persisted logical identity. savePredictionHistory routes only deterministic CURRENT_ERA_SHADOW rows through ON CONFLICT(id), preserving the legacy shared-writer path for all other rows."
+  },
+  "migration": {
+    "required": false,
+    "rowsModified": 0,
+    "manualSupabaseApplicationRequired": false
+  },
+  "historicalReplayCompatibility": {
+    "rowCount": 14840,
+    "expectedMutationDelta": 0,
+    "modelOnlyNullOddsPreserved": true
+  },
+  "currentEraWriterCompatibility": {
+    "duplicateBoundary": "deterministic primary key",
+    "sameLogicalPredictionSecondAttempt": "upsert reuses the same id",
+    "firstShadowRetriedInThisTask": false
+  },
+  "safety": {
+    "providerCalls": 0,
+    "productionMutations": 0,
+    "officialPicksActivated": false,
+    "nbaProductionActivated": false,
+    "mlbChanged": false
+  }
+}

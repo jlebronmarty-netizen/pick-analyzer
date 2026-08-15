@@ -1,6 +1,11 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { generateNbaPredictions } from '@/services/nba-prediction-engine.service'
-import { savePredictionHistory, type PredictionHistoryInput } from '@/services/prediction-history.service'
+import {
+  buildPredictionHistoryDeterministicId,
+  buildPredictionHistoryLogicalIdentity,
+  savePredictionHistory,
+  type PredictionHistoryInput,
+} from '@/services/prediction-history.service'
 import {
   NBA_LEAGUE_KEY,
   NBA_PREDICTION_MODEL_VERSION,
@@ -406,7 +411,21 @@ export function buildNbaCurrentEraShadowPredictionRow({
     : 1 + 100 / Math.abs(Number(odds.price))
   const edge = Number((modelPrediction.modelProbability - implied).toFixed(2))
   const ev = Number((((modelPrediction.modelProbability / 100) * decimalOdds - 1) * 100).toFixed(2))
+  const identityBase = {
+    sport_key: NBA_SPORT_KEY,
+    game_id: event.id,
+    market: odds.market,
+    team: odds.outcome,
+    selection: odds.outcome,
+    line: odds.line,
+    sportsbook: odds.sportsbook,
+    prediction_origin: 'CURRENT_ERA_SHADOW',
+    model_version: NBA_PREDICTION_MODEL_VERSION,
+  } as const
+  const logicalIdentity = buildPredictionHistoryLogicalIdentity(identityBase)
+  const predictionId = buildPredictionHistoryDeterministicId(identityBase)
   return {
+    id: predictionId,
     sport_key: NBA_SPORT_KEY,
     game_id: event.id,
     commence_time: event.start_time,
@@ -457,6 +476,22 @@ export function buildNbaCurrentEraShadowPredictionRow({
     profit: null,
     prediction_origin: 'CURRENT_ERA_SHADOW',
     certification_status: 'SHADOW_PENDING',
+    is_current: false,
+    prediction_version: 1,
+    model_role: 'shadow',
+    prediction_group_key: logicalIdentity,
+    version_created_reason: 'NBA_03A_CURRENT_ERA_SHADOW_CANARY',
+    idempotency_key: logicalIdentity,
+    version_lineage: {
+      canaryVersion: NBA_CURRENT_ERA_SHADOW_CANARY_VERSION,
+      predictionOrigin: 'CURRENT_ERA_SHADOW',
+      eventId: event.id,
+      market: odds.market,
+      selection: odds.outcome,
+      line: odds.line,
+      sportsbook: odds.sportsbook,
+      modelVersion: NBA_PREDICTION_MODEL_VERSION,
+    },
     certification_metadata: {
       canaryVersion: NBA_CURRENT_ERA_SHADOW_CANARY_VERSION,
       currentEra: true,
