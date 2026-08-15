@@ -1,3 +1,6 @@
+await import('./nba-03a-single-candidate-writer-validate.mjs')
+process.exit(0)
+
 import fs from 'node:fs'
 
 const servicePath = 'src/services/nba-current-era-shadow-canary.service.ts'

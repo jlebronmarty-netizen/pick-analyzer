@@ -1,10 +1,11 @@
 {
-  "status": "NBA_03A_BLOCK5_SAFE_CANARY_CERTIFIED_WAITING_FOR_CURRENT_DATA",
-  "generatedAt": "2026-08-15T02:03:52.011Z",
+  "status": "NBA_03A_BLOCK5_SINGLE_CANDIDATE_WRITER_CERTIFIED_READY_FOR_FIRST_SHADOW",
+  "generatedAt": "2026-08-15T02:37:04.827Z",
   "canary": {
     "version": "NBA_CURRENT_ERA_SHADOW_CANARY_V1",
     "modeDefault": "dry-run",
-    "writeMode": "requires_explicit_NBA_CURRENT_ERA_SHADOW_WRITE_AUTHORIZED_true",
+    "writeMode": "write-one",
+    "writeModeAuthorization": "requires_explicit_NBA_CURRENT_ERA_SHADOW_WRITE_AUTHORIZED_true_and_candidate_key",
     "sportKey": "basketball_nba",
     "leagueKey": "nba",
     "predictionOrigin": "CURRENT_ERA_SHADOW",
@@ -18,13 +19,51 @@
   },
   "rootCause": {
     "priorPathUnsafe": true,
+    "currentRepairReason": "The previously certified canary exposed a generic write path that could persist every eligible candidate, and its model matching treated sportsbook evidence as part of model identity even though the canonical NBA engine emits one logical prediction per event, market, selection and exact line.",
     "details": [
       "The existing NBA prediction engine may substitute -110 when no odds row exists.",
       "Spread and total markets may substitute default lines when no stored price row exists.",
       "First-half output may use projected split without provider first-half odds.",
       "The generic NBA generator does not stamp CURRENT_ERA_SHADOW isolation metadata."
     ],
-    "repair": "Add a bounded Current Era Shadow canary gate that scans stored future NBA events and real stored odds only, defaults to dry-run, and refuses write mode unless explicit authorization plus all temporal, price and identity gates pass."
+    "repair": "Bound Current Era Shadow persistence to write-one with an explicit stable candidate key, exact one-candidate cardinality, canonical model output verification by event/market/selection/line, and sportsbook/odds preserved as attached price evidence."
+  },
+  "identity": {
+    "modelPrediction": [
+      "sport_key",
+      "event_id",
+      "market",
+      "selection",
+      "line",
+      "model_version"
+    ],
+    "priceEvidence": [
+      "provider",
+      "sportsbook",
+      "odds",
+      "oddsSnapshotId",
+      "providerTimestamp",
+      "snapshotTime"
+    ],
+    "persistedLogicalPrediction": [
+      "sport_key",
+      "game_id",
+      "market",
+      "selection",
+      "line",
+      "sportsbook",
+      "prediction_origin",
+      "model_version"
+    ]
+  },
+  "writer": {
+    "selector": "candidateKey",
+    "mode": "write-one",
+    "allCandidateWriteDisabled": true,
+    "cardinalityGuard": "WRITE_CARDINALITY_NOT_ONE",
+    "modelOutputRequired": true,
+    "priceEligibleRequired": true,
+    "modelMatchedRequired": true
   },
   "predictionEngine": {
     "canonicalWriterReused": true,
@@ -55,6 +94,7 @@
   "safety": {
     "fallbackOddsAllowed": false,
     "fakeMinus110Allowed": false,
+    "realMinus110AllowedWithTimestamp": true,
     "defaultLineAllowed": false,
     "syntheticOddsAllowed": false,
     "historicalTrialOddsAllowed": false,
@@ -88,19 +128,35 @@
   },
   "productionDryRun": {
     "mode": "dry-run",
-    "futureEvents": 0,
-    "candidates": 0,
-    "eligible": 0,
-    "skipped": 0,
+    "futureEvents": 25,
+    "priceCandidates": 362,
+    "priceEligible": 362,
+    "modelMatched": 133,
+    "writeEligible": 133,
+    "candidates": 362,
+    "eligible": 133,
+    "skipped": 229,
     "skipReasons": {
-      "NO_CURRENT_EVENT": 1
+      "MODEL_OUTPUT_MISSING": 229
     },
     "currentEraShadowBefore": 0,
     "inserts": 0,
     "reused": 0,
     "currentEraShadowAfter": 0,
     "duplicates": 0,
-    "classification": "NBA_03A_BLOCK5_SAFE_CANARY_CERTIFIED_WAITING_FOR_CURRENT_DATA"
+    "firstWriteEligible": {
+      "candidateKey": "basketball_nba|26b036ff107f3c658258eaf4a6f26228|spread|detroit_pistons|-2|betonline.ag|26b036ff107f3c658258eaf4a6f26228_betonline_ag_spread_detroit_pistons_110_2_2026_08_15t02_10",
+      "eventId": "26b036ff107f3c658258eaf4a6f26228",
+      "market": "spread",
+      "selection": "Detroit Pistons",
+      "line": -2,
+      "sportsbook": "BetOnline.ag",
+      "price": -110,
+      "oddsTimestamp": "2026-08-15T02:10:56+00:00",
+      "priceAgeMinutes": 26,
+      "modelMatchKey": "basketball_nba|26b036ff107f3c658258eaf4a6f26228|spread|detroit_pistons|-2|nba_prediction_engine_v1"
+    },
+    "classification": "NBA_03A_BLOCK5_SINGLE_CANDIDATE_WRITER_CERTIFIED_READY_FOR_FIRST_SHADOW"
   },
   "historicalReplay": {
     "behaviorChanged": false,
@@ -118,7 +174,10 @@
   "validation": {
     "commands": [
       "node --loader ./scripts/local-ts-loader.mjs scripts/nba-03a-current-era-shadow-canary.mjs --mode=dry-run",
-      "node scripts/nba-03a-current-era-shadow-canary-validate.mjs",
+      "node --loader ./scripts/local-ts-loader.mjs scripts/nba-03a-single-candidate-writer-test.mjs",
+      "node scripts/nba-03a-single-candidate-writer-validate.mjs",
+      "node --loader ./scripts/local-ts-loader.mjs scripts/nba-03a-single-candidate-dry-run-summary.mjs",
+      "node --loader ./scripts/local-ts-loader.mjs scripts/nba-03a-single-candidate-isolation-readback.mjs",
       "node scripts/nba-03a-current-era-shadow-origin-validate.mjs",
       "node scripts/nba-02c-historical-diagnostics-stake-policy-validate.mjs",
       "npm.cmd run build",
@@ -128,9 +187,9 @@
     "status": "PASS"
   },
   "nextStep": {
-    "implementationBlocker": "none_after_canary_certification",
-    "missingCurrentData": true,
-    "providerSyncDependency": "bounded_current_nba_schedule_and_the_odds_api_price_sync",
-    "authorizationDependency": "first live CURRENT_ERA_SHADOW write requires explicit follow-up authorization"
+    "implementationBlocker": "none_after_single_candidate_writer_certification",
+    "missingCurrentData": false,
+    "providerSyncDependency": "none_current_data_present",
+    "authorizationDependency": "first live CURRENT_ERA_SHADOW write requires explicit follow-up authorization for exactly one candidate key"
   }
 }

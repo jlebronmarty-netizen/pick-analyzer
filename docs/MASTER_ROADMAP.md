@@ -3515,3 +3515,11 @@ Status: Local certification PASS, push required.
 Result: NBA-03A current data acquisition reused the existing NBA multi-sport adapter and canonical `nba-data-sync` persistence. A narrow runtime repair lets the adapter resolve `THE_ODDS_API_KEY` first while preserving `ODDS_API_KEY` as legacy fallback. The bounded execution made 2 The Odds API `basketball_nba` current odds calls and 0 SportsDataIO calls, then persisted/read back 41 future NBA events and 608 current/future odds rows across Moneyline, Spread and Total.
 
 The Safe Canary remained dry-run only and found 362 eligible real-price candidates with 0 `CURRENT_ERA_SHADOW` rows written. Official Picks, product visibility, learning, calibration, historical replay and MLB all remained unchanged. Next: publish this certification, then request a separate explicit first-shadow write authorization for one bounded eligible candidate. Do not enable NBA production, NBA scheduler, recommendations, bankroll, notifications or learning/calibration from this evidence.
+
+## NBA-03A Single-Candidate Shadow Writer
+
+Status: Local certification PASS, push required.
+
+Result: NBA-03A Block 5 now bounds the first Current Era Shadow write by construction. The certified canary supports `dry-run` and `write-one`; the generic all-candidate write path is disabled. `write-one` requires a stable candidate key from dry-run output and refuses persistence unless the selector resolves to exactly one write-eligible candidate.
+
+The model/price identity repair keeps the existing NBA prediction engine as the only source of probability and confidence. Canonical model matching uses event, market, selection and exact line; sportsbook, odds, odds snapshot ID and source timestamp are attached price evidence. The dry-run found 362 price candidates and 133 safe model/price matches, with 0 production writes and 0 provider calls. Next: publish this repair, then authorize exactly one real `CURRENT_ERA_SHADOW` canary write by explicit candidate key.
