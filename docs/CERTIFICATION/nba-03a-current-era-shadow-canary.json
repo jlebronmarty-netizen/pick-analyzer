@@ -1,0 +1,136 @@
+{
+  "status": "NBA_03A_BLOCK5_SAFE_CANARY_CERTIFIED_WAITING_FOR_CURRENT_DATA",
+  "generatedAt": "2026-08-15T02:03:52.011Z",
+  "canary": {
+    "version": "NBA_CURRENT_ERA_SHADOW_CANARY_V1",
+    "modeDefault": "dry-run",
+    "writeMode": "requires_explicit_NBA_CURRENT_ERA_SHADOW_WRITE_AUTHORIZED_true",
+    "sportKey": "basketball_nba",
+    "leagueKey": "nba",
+    "predictionOrigin": "CURRENT_ERA_SHADOW",
+    "modelVersion": "nba_prediction_engine_v1",
+    "featureVersion": "nba_current_era_shadow_canary_feature_set_v1"
+  },
+  "dryRun": {
+    "defaultMode": true,
+    "mutatesPredictionHistory": false,
+    "providerCalls": 0
+  },
+  "rootCause": {
+    "priorPathUnsafe": true,
+    "details": [
+      "The existing NBA prediction engine may substitute -110 when no odds row exists.",
+      "Spread and total markets may substitute default lines when no stored price row exists.",
+      "First-half output may use projected split without provider first-half odds.",
+      "The generic NBA generator does not stamp CURRENT_ERA_SHADOW isolation metadata."
+    ],
+    "repair": "Add a bounded Current Era Shadow canary gate that scans stored future NBA events and real stored odds only, defaults to dry-run, and refuses write mode unless explicit authorization plus all temporal, price and identity gates pass."
+  },
+  "predictionEngine": {
+    "canonicalWriterReused": true,
+    "canonicalNbaEngineRequiredForWrite": true,
+    "placeholderProbabilityAllowed": false,
+    "exactMarketIdentityRequired": true
+  },
+  "providerAuthority": {
+    "odds": "the-odds-api",
+    "scheduleStatusResults": "unresolved_forward_authority_BallDontLie_or_official_free_candidate",
+    "sportsDataIoNba": "legacy_trial_only_not_current_era_authority",
+    "providerCallsMade": 0
+  },
+  "eligibilityGates": {
+    "sportKey": "basketball_nba",
+    "statusPregameRequired": true,
+    "cutoffMinutesBeforeStart": 10,
+    "realOddsRequired": true,
+    "allowedOddsProvider": "the-odds-api",
+    "oddsTimestampRequired": true,
+    "maxOddsAgeMinutes": 30,
+    "supportedMarkets": ["moneyline", "spread", "total"],
+    "historicalTrialOddsExcluded": true,
+    "fallbackOddsAllowed": false,
+    "modelOnlyNullOddsAllowed": false,
+    "predictionOriginRequired": "CURRENT_ERA_SHADOW"
+  },
+  "safety": {
+    "fallbackOddsAllowed": false,
+    "fakeMinus110Allowed": false,
+    "defaultLineAllowed": false,
+    "syntheticOddsAllowed": false,
+    "historicalTrialOddsAllowed": false,
+    "postStartPredictionAllowed": false,
+    "officialPickCreationAllowed": false,
+    "productVisibilityAllowed": false,
+    "alertAllowed": false
+  },
+  "isolation": {
+    "officialPickDelta": 0,
+    "productVisibilityDelta": 0,
+    "alertDelta": 0,
+    "productionLearningDelta": 0,
+    "productionCalibrationDelta": 0,
+    "historicalReplayDelta": 0,
+    "mlbMutationDelta": 0
+  },
+  "idempotency": {
+    "logicalIdentity": [
+      "sport_key",
+      "game_id",
+      "market",
+      "selection",
+      "line",
+      "sportsbook",
+      "prediction_origin",
+      "model_version"
+    ],
+    "dryRunNoEventDeterministic": true,
+    "duplicateLogicalPredictionCount": 0
+  },
+  "productionDryRun": {
+    "mode": "dry-run",
+    "futureEvents": 0,
+    "candidates": 0,
+    "eligible": 0,
+    "skipped": 0,
+    "skipReasons": {
+      "NO_CURRENT_EVENT": 1
+    },
+    "currentEraShadowBefore": 0,
+    "inserts": 0,
+    "reused": 0,
+    "currentEraShadowAfter": 0,
+    "duplicates": 0,
+    "classification": "NBA_03A_BLOCK5_SAFE_CANARY_CERTIFIED_WAITING_FOR_CURRENT_DATA"
+  },
+  "historicalReplay": {
+    "behaviorChanged": false,
+    "historicalFallbackPreserved": true,
+    "currentEraNullOddsAllowed": false
+  },
+  "accounting": {
+    "providerCalls": 0,
+    "databaseMutationsFromDryRun": 0,
+    "productionDatabaseWrites": 0,
+    "nbaCurrentEraWrites": 0,
+    "nbaOfficialPickWrites": 0,
+    "mlbMutations": 0
+  },
+  "validation": {
+    "commands": [
+      "node --loader ./scripts/local-ts-loader.mjs scripts/nba-03a-current-era-shadow-canary.mjs --mode=dry-run",
+      "node scripts/nba-03a-current-era-shadow-canary-validate.mjs",
+      "node scripts/nba-03a-current-era-shadow-origin-validate.mjs",
+      "node scripts/nba-02c-historical-diagnostics-stake-policy-validate.mjs",
+      "npm.cmd run build",
+      "npm.cmd run lint -- src/services/nba-current-era-shadow-canary.service.ts",
+      "git diff --check"
+    ],
+    "status": "PASS"
+  },
+  "nextStep": {
+    "implementationBlocker": "none_after_canary_certification",
+    "missingCurrentData": true,
+    "providerSyncDependency": "bounded_current_nba_schedule_and_the_odds_api_price_sync",
+    "authorizationDependency": "first live CURRENT_ERA_SHADOW write requires explicit follow-up authorization"
+  }
+}

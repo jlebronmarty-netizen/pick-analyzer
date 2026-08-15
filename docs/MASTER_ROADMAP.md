@@ -3495,3 +3495,15 @@ Result: NBA-03A-R1 prepares the additive schema/runtime contract required for `C
 The migration package extends the origin check constraint and adds one partial current-era shadow lookup index. It does not mutate existing rows, backfill origins, change defaults or broaden RLS. The current read-only inventory has 0 existing `CURRENT_ERA_SHADOW` rows and all null-odds rows remain isolated to `HISTORICAL_REPLAY_SHADOW`; Current Era Shadow rows require real current pregame odds for core markets. Runtime typing now allows future NBA-03A writer code to pass `prediction_origin`, `certification_status` and `certification_metadata` explicitly.
 
 Next: publish `NBA-03A-R1`, manually apply `supabase/migrations/202608150001_current_era_shadow_origin_v1.sql` through the approved Supabase SQL Editor workflow, verify 0 existing `CURRENT_ERA_SHADOW` rows after application, then resume `NBA-03A_CURRENT_ERA_SHADOW_FOUNDATION` from Block 5.
+
+## NBA-03A Block 5 Current Era Shadow Canary
+
+Status: Local certification PASS, push required.
+
+Result: NBA-03A Block 5 implements the first bounded Current Era Shadow mechanism without forcing a live prediction. `NBA_CURRENT_ERA_SHADOW_CANARY_V1` scans stored future NBA events and stored odds evidence, defaults to dry-run, and refuses persistence unless explicit write authorization plus all safety gates pass.
+
+The canary keeps the normal historical replay path unchanged while isolating Current Era Shadow from the unsafe legacy NBA production-generator fallbacks. Current Era Shadow now requires real stored The Odds API price evidence, timestamp/freshness validation, cutoff-safe pregame event state, exact market/selection/line identity, non-trial evidence and duplicate protection. Future rows will use `prediction_origin = CURRENT_ERA_SHADOW`, `certification_status = SHADOW_PENDING`, `production_eligible = false`, `recommended_pick = false` and certification metadata that keeps product, Official Pick, learning and calibration eligibility closed.
+
+The current production-connected dry-run is a safe no-op because no legitimate future NBA event is stored. No Current Era rows, Official Picks, product-surface changes, learning/calibration writes, historical replay mutations, MLB mutations, provider calls or dry-run database mutations occurred.
+
+Next: authorize a bounded current NBA schedule and The Odds API price-sync step. Do not create the first `CURRENT_ERA_SHADOW` row until legitimate future NBA event and real timestamped pregame price evidence exist and a separate first-shadow write is explicitly authorized.
