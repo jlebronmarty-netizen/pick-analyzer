@@ -3531,3 +3531,13 @@ Status: Code-only repair certified locally, push required.
 Result: The first real `write-one` attempt was blocked by the shared `prediction_history` upsert contract, not by candidate eligibility. `savePredictionHistory` used a broad five-column conflict target that production does not enforce and that would collide legitimate different lines/model versions. The repair gives `CURRENT_ERA_SHADOW` rows a deterministic UUID primary key from the certified logical identity: sport, event, market, selection/team, exact line, sportsbook, prediction origin and model version.
 
 Historical replay remains isolated at 14,840 rows, and the existing historical replay `id`/`idempotency_key` behavior is unchanged. No migration, provider call, production DB mutation or first-shadow retry was performed. Next: publish/deploy the repair, confirm alignment, then revalidate current price evidence before authorizing exactly one shadow write.
+
+## NBA-03A Cross-Event Shadow Accumulation Policy
+
+Status: `NBA_03A_CROSS_EVENT_SHADOW_ACCUMULATION_POLICY_CERTIFIED`
+
+Result: NBA-03A now has a deterministic non-recommendation selection policy for controlled Current Era Shadow accumulation. The policy preserves every existing eligibility gate, excludes already-persisted logical rows, and round-robins eligible candidates across events with explicit event, event/market and model-identity caps.
+
+The policy is designed for representative forward evidence, not betting optimization. It does not use probability, confidence, EV, edge, sportsbook preference, favorite/underdog status or settlement results. Stored-data dry-run showed the next 10 candidates improve from 2 events under old ordering to 10 events under the certified policy, with 0 provider calls and 0 database mutations.
+
+Next: after explicit authorization, run one bounded cross-event accumulation batch using this policy. Keep NBA scheduler automation, Official Picks, product exposure, learning, calibration, bankroll and notifications inactive.

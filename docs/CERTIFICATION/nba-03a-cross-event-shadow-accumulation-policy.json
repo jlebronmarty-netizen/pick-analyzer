@@ -1,0 +1,117 @@
+{
+  "status": "NBA_03A_CROSS_EVENT_SHADOW_ACCUMULATION_POLICY_CERTIFIED",
+  "phase": "NBA-03A cross-event shadow accumulation policy",
+  "policy": {
+    "policyVersion": "NBA_03A_CROSS_EVENT_SHADOW_ACCUMULATION_POLICY_V1",
+    "eventCap": "max(2, ceil(batchSize / 5))",
+    "eventMarketCap": "max(1, ceil(eventCap / 2))",
+    "modelIdentityCap": "max(1, ceil(batchSize / 25))",
+    "ordering": [
+      "existing Safe Canary eligible ordering",
+      "first-seen event order",
+      "round-robin across events",
+      "existing within-event candidate order",
+      "event/event-market/model-identity caps"
+    ],
+    "notUsed": [
+      "probability ranking",
+      "confidence ranking",
+      "edge ranking",
+      "EV ranking",
+      "sportsbook preference",
+      "favorite/underdog preference",
+      "settlement result"
+    ]
+  },
+  "currentEraRowsBefore": 11,
+  "currentEraRowsAfter": 11,
+  "providerCalls": 0,
+  "databaseMutations": 0,
+  "dryRun": {
+    "eventsScanned": 25,
+    "priceCandidates": 1000,
+    "priceEligible": 706,
+    "modelMatched": 371,
+    "writeEligible": 246,
+    "skipped": 754,
+    "skipReasons": {
+      "ALREADY_EXISTS": 31,
+      "MODEL_OUTPUT_MISSING": 460,
+      "STALE_ODDS": 272
+    }
+  },
+  "simulations": {
+    "10": {
+      "old": {
+        "rows": 10,
+        "uniqueEvents": 2,
+        "uniqueModelIdentities": 4,
+        "sportsbookVariants": 6,
+        "largestEventShare": 0.8,
+        "largestEventMarketShare": 0.4,
+        "averageRowsPerEvent": 5
+      },
+      "proposed": {
+        "rows": 10,
+        "uniqueEvents": 10,
+        "uniqueModelIdentities": 10,
+        "sportsbookVariants": 0,
+        "largestEventShare": 0.1,
+        "largestEventMarketShare": 0.1,
+        "averageRowsPerEvent": 1
+      }
+    },
+    "25": {
+      "old": {
+        "rows": 25,
+        "uniqueEvents": 2,
+        "uniqueModelIdentities": 5,
+        "sportsbookVariants": 20,
+        "largestEventShare": 0.68,
+        "largestEventMarketShare": 0.56,
+        "averageRowsPerEvent": 12.5
+      },
+      "proposed": {
+        "rows": 25,
+        "uniqueEvents": 25,
+        "uniqueModelIdentities": 25,
+        "sportsbookVariants": 0,
+        "largestEventShare": 0.04,
+        "largestEventMarketShare": 0.04,
+        "averageRowsPerEvent": 1
+      }
+    },
+    "50": {
+      "old": {
+        "rows": 50,
+        "uniqueEvents": 3,
+        "uniqueModelIdentities": 8,
+        "sportsbookVariants": 42,
+        "largestEventShare": 0.48,
+        "largestEventMarketShare": 0.28,
+        "averageRowsPerEvent": 16.67
+      },
+      "proposed": {
+        "rows": 50,
+        "uniqueEvents": 25,
+        "uniqueModelIdentities": 50,
+        "sportsbookVariants": 0,
+        "largestEventShare": 0.04,
+        "largestEventMarketShare": 0.02,
+        "averageRowsPerEvent": 2
+      }
+    }
+  },
+  "isolation": {
+    "currentEraShadowDelta": 0,
+    "officialPickDelta": 0,
+    "productVisibilityDelta": 0,
+    "learningDelta": 0,
+    "calibrationDelta": 0,
+    "bankrollDelta": 0,
+    "notificationDelta": 0,
+    "historicalReplayDelta": 0,
+    "mlbMutationDelta": 0
+  },
+  "finalClassification": "NBA_03A_CROSS_EVENT_SHADOW_ACCUMULATION_POLICY_CERTIFIED"
+}

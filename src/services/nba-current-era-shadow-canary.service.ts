@@ -254,6 +254,98 @@ export function selectNbaCurrentEraShadowWriteCandidate({
   }
 }
 
+export type NbaCurrentEraShadowAccumulationPolicy = {
+  batchSize: number
+  eventCap: number
+  eventMarketCap: number
+  modelIdentityCap: number
+  policyVersion: 'NBA_03A_CROSS_EVENT_SHADOW_ACCUMULATION_POLICY_V1'
+}
+
+export type NbaCurrentEraShadowAccumulationSelection = {
+  policy: NbaCurrentEraShadowAccumulationPolicy
+  selected: NbaCurrentEraShadowCandidate[]
+  skippedEligible: number
+}
+
+function modelIdentityKey(candidate: NbaCurrentEraShadowCandidate) {
+  return [
+    candidate.eventId,
+    candidate.market ?? '',
+    candidate.selection ?? '',
+    candidate.line ?? 'null',
+    candidate.modelVersion,
+  ].join('|')
+}
+
+function eventMarketKey(candidate: NbaCurrentEraShadowCandidate) {
+  return [candidate.eventId, candidate.market ?? ''].join('|')
+}
+
+export function buildNbaCurrentEraShadowAccumulationPolicy(batchSize: number): NbaCurrentEraShadowAccumulationPolicy {
+  return {
+    batchSize,
+    eventCap: Math.max(2, Math.ceil(batchSize / 5)),
+    eventMarketCap: Math.max(1, Math.ceil(Math.max(2, Math.ceil(batchSize / 5)) / 2)),
+    modelIdentityCap: Math.max(1, Math.ceil(batchSize / 25)),
+    policyVersion: 'NBA_03A_CROSS_EVENT_SHADOW_ACCUMULATION_POLICY_V1',
+  }
+}
+
+export function selectNbaCurrentEraShadowAccumulationBatch({
+  candidates,
+  batchSize,
+}: {
+  candidates: NbaCurrentEraShadowCandidate[]
+  batchSize: number
+}): NbaCurrentEraShadowAccumulationSelection {
+  const policy = buildNbaCurrentEraShadowAccumulationPolicy(batchSize)
+  const eligible = candidates.filter((candidate) => candidate.writeEligible && candidate.candidateKey)
+  const eventOrder = Array.from(new Set(eligible.map((candidate) => candidate.eventId)))
+  const byEvent = new Map<string, NbaCurrentEraShadowCandidate[]>()
+  for (const candidate of eligible) {
+    byEvent.set(candidate.eventId, [...(byEvent.get(candidate.eventId) ?? []), candidate])
+  }
+
+  const selected: NbaCurrentEraShadowCandidate[] = []
+  const selectedKeys = new Set<string>()
+  const eventCounts = new Map<string, number>()
+  const eventMarketCounts = new Map<string, number>()
+  const modelIdentityCounts = new Map<string, number>()
+
+  while (selected.length < batchSize) {
+    let selectedThisRound = false
+    for (const eventId of eventOrder) {
+      if (selected.length >= batchSize) break
+      const eventCount = eventCounts.get(eventId) ?? 0
+      if (eventCount >= policy.eventCap) continue
+
+      const next = (byEvent.get(eventId) ?? []).find((candidate) => {
+        const candidateKey = candidate.candidateKey ?? ''
+        if (!candidateKey || selectedKeys.has(candidateKey)) return false
+        if ((eventMarketCounts.get(eventMarketKey(candidate)) ?? 0) >= policy.eventMarketCap) return false
+        if ((modelIdentityCounts.get(modelIdentityKey(candidate)) ?? 0) >= policy.modelIdentityCap) return false
+        return true
+      })
+      if (!next?.candidateKey) continue
+
+      selected.push(next)
+      selectedKeys.add(next.candidateKey)
+      eventCounts.set(eventId, eventCount + 1)
+      eventMarketCounts.set(eventMarketKey(next), (eventMarketCounts.get(eventMarketKey(next)) ?? 0) + 1)
+      modelIdentityCounts.set(modelIdentityKey(next), (modelIdentityCounts.get(modelIdentityKey(next)) ?? 0) + 1)
+      selectedThisRound = true
+    }
+    if (!selectedThisRound) break
+  }
+
+  return {
+    policy,
+    selected,
+    skippedEligible: Math.max(0, eligible.length - selected.length),
+  }
+}
+
 export function evaluateNbaCurrentEraShadowCandidate({
   event,
   odds,
