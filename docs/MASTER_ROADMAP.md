@@ -3599,3 +3599,15 @@ The repair keeps `write-one` strict: zero matching keys and multiple matching ke
 No provider-budget, scheduler cadence, Official Pick, product visibility, learning, calibration, settlement, Historical Replay, MLB or continuous-operation behavior changed. Certification used fixtures and local validators only: 0 provider calls, 0 production DB mutations and 0 production Current Era Shadow writes.
 
 Next: publish/deploy this bounded repair, verify production alignment and protected precheck, then observe the next natural Vercel Cron execution under the repaired commit as the real Run 2 retry. Do not invoke the scheduler manually.
+
+## NBA-03A Two-Run Canary Review Continuation
+
+Status: `NBA_03A_REPAIRED_RUNTIME_VERIFICATION_CONTINUATION_CERTIFIED_READY_FOR_PUBLICATION`
+
+Result: The two completed natural activation-canary runs are accepted as operationally valid automation evidence. They inserted 6 total `CURRENT_ERA_SHADOW` rows across two Vercel Cron executions, stayed within 2 The Odds API calls/run and preserved all product, Official Pick, learning, calibration, bankroll, notification, Historical Replay and MLB isolation boundaries.
+
+Because the second successful run occurred before the Run 2 cardinality repair was deployed, one repaired-code natural verification run is still required before continuous shadow scheduler readiness can be considered. The continuation mechanism is additive and default-off: `NBA_CURRENT_ERA_SHADOW_REPAIRED_VERIFICATION_ENABLED=true` permits exactly one `REPAIRED_RUNTIME_VERIFICATION_RUN` after the two-run review pause, then the scheduler returns to review-required no-op.
+
+The original canary history is retained. Current Era rows are not reset or deleted, and historical scheduler audit rows are not rewritten. No provider calls, production DB mutations, Current Era writes or continuous scheduling activation occurred during certification.
+
+Next: publish/deploy this continuation mechanism, verify production alignment and protected precheck, then separately authorize the one-run repaired-runtime verification flag before observing the next natural Vercel Cron execution.

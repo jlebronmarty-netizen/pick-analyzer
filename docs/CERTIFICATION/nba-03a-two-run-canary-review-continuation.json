@@ -1,0 +1,57 @@
+{
+  "status": "NBA_03A_REPAIRED_RUNTIME_VERIFICATION_CONTINUATION_CERTIFIED_READY_FOR_PUBLICATION",
+  "phase": "NBA-03A Two-Run Canary Review And Repaired Runtime Verification Continuation",
+  "startingCommit": "800a8ed44b9b804141c515440e67887479217172",
+  "existingTwoRunCanary": {
+    "operationallyValid": true,
+    "completedRuns": 2,
+    "insertedRows": 6,
+    "currentEraShadowRows": 37,
+    "run1JobId": "afb17790-7375-44d4-a130-15d66d1a6dc6",
+    "run2JobId": "99261433-a5b2-43f5-b473-549f2e7c7a5f",
+    "providerCallsPerRun": 2,
+    "isolationPass": true
+  },
+  "failedOldCodeAttempt": {
+    "jobId": "4dc3c613-b53b-45c4-b52f-146ec97a7e9c",
+    "classification": "PERSISTENCE_FAILURE_BLOCKED",
+    "error": "WRITE_CARDINALITY_NOT_ONE",
+    "repairRequired": true
+  },
+  "repairedRuntimeVerificationRequired": true,
+  "continuation": {
+    "envFlag": "NBA_CURRENT_ERA_SHADOW_REPAIRED_VERIFICATION_ENABLED",
+    "runPurpose": "REPAIRED_RUNTIME_VERIFICATION_RUN",
+    "defaultEnabled": false,
+    "maxSuccessfulRuns": 1,
+    "preservesOriginalCanaryHistory": true,
+    "resetsCurrentEraRows": false,
+    "rewritesHistoricalAuditRows": false,
+    "afterOneVerificationRun": "SCHEDULER_PRECHECK_REVIEW_REQUIRED"
+  },
+  "bounds": {
+    "maxNewRows": 3,
+    "maxTheOddsApiCalls": 2,
+    "sportsDataIoCalls": 0,
+    "historicalOddsCalls": 0,
+    "pendingGuard": 75
+  },
+  "isolation": {
+    "officialPickDelta": 0,
+    "productVisibilityDelta": 0,
+    "learningDelta": 0,
+    "calibrationDelta": 0,
+    "bankrollDelta": 0,
+    "notificationDelta": 0,
+    "historicalReplayDelta": 0,
+    "mlbMutationDelta": 0
+  },
+  "accounting": {
+    "providerCallsFromCertification": 0,
+    "productionDatabaseMutations": 0,
+    "manualSchedulerInvocations": 0,
+    "productionCurrentEraShadowWrites": 0
+  },
+  "continuousShadowSchedulerReady": false,
+  "finalClassification": "NBA_03A_REPAIRED_RUNTIME_VERIFICATION_CONTINUATION_CERTIFIED_READY_FOR_PUBLICATION"
+}

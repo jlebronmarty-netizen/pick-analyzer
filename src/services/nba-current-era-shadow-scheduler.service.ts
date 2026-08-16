@@ -32,6 +32,9 @@ export const NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_DAY = 48
 export const NBA_SHADOW_SCHEDULER_PROVIDER = 'the-odds-api'
 export const NBA_SHADOW_SCHEDULER_SPORT_KEY = 'basketball_nba'
 export const NBA_SHADOW_SCHEDULER_LEAGUE_KEY = 'nba'
+export const NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_ENABLED_ENV = 'NBA_CURRENT_ERA_SHADOW_REPAIRED_VERIFICATION_ENABLED'
+export const NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_PURPOSE = 'REPAIRED_RUNTIME_VERIFICATION_RUN'
+export const NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_LIMIT = 1
 
 export type NbaShadowSchedulerClassification =
   | 'SCHEDULER_DISABLED_NO_OP'
@@ -100,6 +103,7 @@ export type NbaShadowSchedulerCandidatePersistenceResult = {
 export type NbaShadowSchedulerResult = {
   success: boolean
   runId: string
+  runPurpose: string | null
   schedulerMode: typeof NBA_SHADOW_SCHEDULER_MODE
   schedulerVersion: typeof NBA_SHADOW_SCHEDULER_VERSION
   policyVersion: typeof NBA_SHADOW_SCHEDULER_POLICY_VERSION
@@ -137,6 +141,7 @@ type CanaryState = {
   completedRuns: number
   totalInsertedRows: number
   lastRunId: string | null
+  repairedVerificationRuns: number
 }
 
 type CountState = {
@@ -195,6 +200,10 @@ export type NbaShadowSchedulerPrecheckStatus = {
   providerBudgetCanaryAuthorized: boolean
   providerBudgetBlockedReason: string | null
   finalClassification: NbaShadowSchedulerPrecheckClassification
+  repairedVerificationEnabled: boolean
+  repairedVerificationRuns: number
+  repairedVerificationRunLimit: typeof NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_LIMIT
+  repairedVerificationReady: boolean
 }
 
 const isolationZero: NbaShadowSchedulerIsolation = {
@@ -214,6 +223,22 @@ function nowIso() {
 
 function schedulerEnabled() {
   return String(process.env[NBA_SHADOW_SCHEDULER_ENABLED_ENV] ?? '').toLowerCase() === 'true'
+}
+
+function repairedVerificationEnabled() {
+  return String(process.env[NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_ENABLED_ENV] ?? '').toLowerCase() === 'true'
+}
+
+function canRunRepairedVerificationWithFlag(state: CanaryState, enabled: boolean) {
+  return (
+    enabled &&
+    state.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS &&
+    state.repairedVerificationRuns < NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_LIMIT
+  )
+}
+
+function canRunRepairedVerification(state: CanaryState) {
+  return canRunRepairedVerificationWithFlag(state, repairedVerificationEnabled())
 }
 
 function numberValue(value: unknown, fallback = 0) {
@@ -413,12 +438,14 @@ function baseResult(input: {
   currentEraAfter?: number | null
   auditJobId?: string | null
   persistenceResults?: NbaShadowSchedulerCandidatePersistenceResult[]
+  runPurpose?: string | null
 }): NbaShadowSchedulerResult {
   const completedAt = nowIso()
   const persistenceResults = input.persistenceResults ?? []
   return {
     success: input.success ?? input.classification === 'NBA_CURRENT_ERA_SHADOW_SCHEDULER_SUCCESS',
     runId: input.runId,
+    runPurpose: input.runPurpose ?? null,
     schedulerMode: NBA_SHADOW_SCHEDULER_MODE,
     schedulerVersion: NBA_SHADOW_SCHEDULER_VERSION,
     policyVersion: NBA_SHADOW_SCHEDULER_POLICY_VERSION,
@@ -489,10 +516,15 @@ async function loadCanaryState(): Promise<CanaryState> {
     const metadata = row.metadata && typeof row.metadata === 'object' ? row.metadata as Record<string, unknown> : {}
     return row.status === 'completed' && metadata.schedulerVersion === NBA_SHADOW_SCHEDULER_VERSION
   })
+  const repairedVerificationRuns = completed.filter((row) => {
+    const metadata = row.metadata && typeof row.metadata === 'object' ? row.metadata as Record<string, unknown> : {}
+    return metadata.runPurpose === NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_PURPOSE
+  }).length
   return {
     completedRuns: completed.length,
     totalInsertedRows: completed.reduce((sum, row) => sum + (Number(row.records_inserted) || 0), 0),
     lastRunId: String(completed[0]?.id ?? '') || null,
+    repairedVerificationRuns,
   }
 }
 
@@ -502,6 +534,7 @@ function classifyPrecheck(input: {
   counts: CountState
   activeLock: boolean
   providerBudgetAllowed?: boolean
+  repairedVerificationEnabled?: boolean
 }): NbaShadowSchedulerPrecheckClassification {
   if (!input.enabled) return 'SCHEDULER_PRECHECK_DISABLED'
   if (input.activeLock) return 'SCHEDULER_PRECHECK_LOCK_ACTIVE'
@@ -511,7 +544,12 @@ function classifyPrecheck(input: {
   ) {
     return 'SCHEDULER_PRECHECK_HARD_LIMIT'
   }
-  if (input.state.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS) return 'SCHEDULER_PRECHECK_REVIEW_REQUIRED'
+  if (
+    input.state.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS &&
+    !canRunRepairedVerificationWithFlag(input.state, input.repairedVerificationEnabled ?? repairedVerificationEnabled())
+  ) {
+    return 'SCHEDULER_PRECHECK_REVIEW_REQUIRED'
+  }
   if (input.counts.pendingRows >= NBA_SHADOW_SCHEDULER_PENDING_GUARD) return 'SCHEDULER_PRECHECK_PENDING_GUARD'
   if (input.providerBudgetAllowed === false) return 'SCHEDULER_PRECHECK_PROVIDER_BUDGET_BLOCKED'
   return 'SCHEDULER_PRECHECK_READY'
@@ -522,11 +560,13 @@ export async function getNbaCurrentEraShadowSchedulerPrecheckStatus(): Promise<N
   const [canaryState, counts] = await Promise.all([loadCanaryState(), countRows()])
   const lockStatus = getProviderActionLockStatus(NBA_SHADOW_SCHEDULER_LOCK_KEY)
   const reviewRequired = canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS
+  const repairedVerificationReady = canRunRepairedVerification(canaryState)
   const hardLimitReached =
     canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_HARD_MAX_RUNS ||
     canaryState.totalInsertedRows >= NBA_SHADOW_SCHEDULER_TOTAL_ROW_CAP
   const pendingGuardReached = counts.pendingRows >= NBA_SHADOW_SCHEDULER_PENDING_GUARD
-  const shouldEvaluateBudget = enabled && !lockStatus.active && !reviewRequired && !hardLimitReached && !pendingGuardReached
+  const effectiveReviewRequired = reviewRequired && !repairedVerificationReady
+  const shouldEvaluateBudget = enabled && !lockStatus.active && !effectiveReviewRequired && !hardLimitReached && !pendingGuardReached
   const providerBudgetReadiness = shouldEvaluateBudget
     ? await authorizeNbaShadowSchedulerProviderBudget()
     : {
@@ -555,7 +595,7 @@ export async function getNbaCurrentEraShadowSchedulerPrecheckStatus(): Promise<N
     environmentFlagObserved: enabled ? 'true' : 'false_or_unset',
     completedCanaryRuns: canaryState.completedRuns,
     canaryInsertedRows: canaryState.totalInsertedRows,
-    reviewRequired,
+    reviewRequired: effectiveReviewRequired,
     hardLimitReached,
     pendingCurrentEraShadowRows: counts.pendingRows,
     pendingGuardLimit: NBA_SHADOW_SCHEDULER_PENDING_GUARD,
@@ -600,11 +640,16 @@ export async function getNbaCurrentEraShadowSchedulerPrecheckStatus(): Promise<N
       counts,
       activeLock: lockStatus.active,
       providerBudgetAllowed: shouldEvaluateBudget ? providerBudgetReadiness.allowed : undefined,
+      repairedVerificationEnabled: repairedVerificationEnabled(),
     }),
+    repairedVerificationEnabled: repairedVerificationEnabled(),
+    repairedVerificationRuns: canaryState.repairedVerificationRuns,
+    repairedVerificationRunLimit: NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_LIMIT,
+    repairedVerificationReady,
   }
 }
 
-async function startAuditJob(runId: string, state: CanaryState) {
+async function startAuditJob(runId: string, state: CanaryState, runPurpose: string | null = null) {
   const { data, error } = await supabaseAdmin
     .from('sports_sync_jobs')
     .insert({
@@ -619,8 +664,10 @@ async function startAuditJob(runId: string, state: CanaryState) {
         schedulerMode: NBA_SHADOW_SCHEDULER_MODE,
         schedulerVersion: NBA_SHADOW_SCHEDULER_VERSION,
         policyVersion: NBA_SHADOW_SCHEDULER_POLICY_VERSION,
+        runPurpose,
         canaryCompletedRunsBefore: state.completedRuns,
         canaryTotalInsertedBefore: state.totalInsertedRows,
+        repairedVerificationRunsBefore: state.repairedVerificationRuns,
       },
     })
     .select('id')
@@ -645,6 +692,7 @@ async function finishAuditJob(jobId: string | null, result: NbaShadowSchedulerRe
       duration_ms: result.durationMs,
       metadata: {
         runId: result.runId,
+        runPurpose: result.runPurpose,
         schedulerMode: result.schedulerMode,
         schedulerVersion: result.schedulerVersion,
         policyVersion: result.policyVersion,
@@ -653,6 +701,9 @@ async function finishAuditJob(jobId: string | null, result: NbaShadowSchedulerRe
         canaryCompletedRunsBefore: result.canaryCompletedRunsBefore,
         canaryTotalInsertedBefore: result.canaryTotalInsertedBefore,
         canaryTotalInsertedAfter: result.canaryTotalInsertedAfter,
+        repairedVerificationRunsBefore: result.runPurpose === NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_PURPOSE
+          ? Math.max(0, result.canaryCompletedRunsBefore - NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS)
+          : undefined,
         pendingBefore: result.pendingBefore,
         providerCalls: result.providerCalls,
         providerBudget: result.providerBudget,
@@ -700,7 +751,9 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
     if (canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_HARD_MAX_RUNS || canaryState.totalInsertedRows >= NBA_SHADOW_SCHEDULER_TOTAL_ROW_CAP) {
       return baseResult({ runId, startedAt, enabled, lock: 'released', canaryState, classification: 'CANARY_HARD_LIMIT_REACHED_NO_OP' })
     }
-    if (canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS) {
+    const repairedVerificationReady = canRunRepairedVerification(canaryState)
+    const runPurpose = repairedVerificationReady ? NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_PURPOSE : null
+    if (canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS && !repairedVerificationReady) {
       return baseResult({ runId, startedAt, enabled, lock: 'released', canaryState, classification: 'CANARY_REVIEW_REQUIRED_NO_OP' })
     }
 
@@ -728,7 +781,7 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
       })
     }
 
-    auditJobId = await startAuditJob(runId, canaryState)
+    auditJobId = await startAuditJob(runId, canaryState, runPurpose)
     const sync = await syncNbaOdds({ mode: 'live' })
     if (!sync.success) {
       const blocked = baseResult({
@@ -739,6 +792,7 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
         canaryState,
         counts,
         auditJobId,
+        runPurpose,
         providerBudget: budgetRecord,
         providerCalls: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
         classification: 'PROVIDER_FAILURE_BLOCKED',
@@ -758,6 +812,7 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
         canaryState,
         counts,
         auditJobId,
+        runPurpose,
         providerBudget: budgetRecord,
         providerCalls: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
         classification: 'NO_CURRENT_EVENT_NO_OP',
@@ -780,6 +835,7 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
         canaryState,
         counts,
         auditJobId,
+        runPurpose,
         providerBudget: budgetRecord,
         providerCalls: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
         eventsFetched: dryRun.eventsScanned,
@@ -819,6 +875,7 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
           canaryState,
           counts,
           auditJobId,
+          runPurpose,
           providerBudget: budgetRecord,
           providerCalls: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
           eventsFetched: dryRun.eventsScanned,
@@ -848,6 +905,7 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
       canaryState,
       counts,
       auditJobId,
+      runPurpose,
       providerBudget: budgetRecord,
       providerCalls: NBA_SHADOW_SCHEDULER_PROVIDER_CALLS_PER_RUN,
       eventsFetched: dryRun.eventsScanned,
@@ -907,6 +965,8 @@ export type NbaShadowSchedulerPrecheckFixtureInput = {
   pendingRows: number
   currentEraRows?: number
   providerBudgetAllowed?: boolean
+  repairedVerificationEnabled?: boolean
+  repairedVerificationRuns?: number
 }
 
 export type NbaShadowSchedulerBatchPersistenceFixtureInput = {
@@ -961,6 +1021,7 @@ export function simulateNbaShadowSchedulerPrecheck(input: NbaShadowSchedulerPrec
     completedRuns: Math.max(0, input.completedRuns),
     totalInsertedRows: Math.max(0, input.totalInsertedRows),
     lastRunId: null,
+    repairedVerificationRuns: Math.max(0, input.repairedVerificationRuns ?? 0),
   }
   const counts = {
     currentEraRows: Math.max(0, input.currentEraRows ?? input.pendingRows),
@@ -972,12 +1033,14 @@ export function simulateNbaShadowSchedulerPrecheck(input: NbaShadowSchedulerPrec
     counts,
     activeLock: input.activeLock,
     providerBudgetAllowed: input.providerBudgetAllowed,
+    repairedVerificationEnabled: input.repairedVerificationEnabled,
   })
+  const repairedVerificationReady = canRunRepairedVerificationWithFlag(state, Boolean(input.repairedVerificationEnabled))
   return {
     schedulerEnabled: input.schedulerEnabled,
     completedCanaryRuns: state.completedRuns,
     canaryInsertedRows: state.totalInsertedRows,
-    reviewRequired: state.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS,
+    reviewRequired: state.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS && !repairedVerificationReady,
     hardLimitReached:
       state.completedRuns >= NBA_SHADOW_SCHEDULER_HARD_MAX_RUNS ||
       state.totalInsertedRows >= NBA_SHADOW_SCHEDULER_TOTAL_ROW_CAP,
@@ -991,6 +1054,9 @@ export function simulateNbaShadowSchedulerPrecheck(input: NbaShadowSchedulerPrec
     auditJobWrites: 0,
     schedulerLockAcquisitions: 0,
     providerBudgetAllowed: input.providerBudgetAllowed ?? null,
+    repairedVerificationEnabled: Boolean(input.repairedVerificationEnabled),
+    repairedVerificationRuns: state.repairedVerificationRuns,
+    repairedVerificationReady,
     finalClassification,
   }
 }
@@ -1090,6 +1156,8 @@ export function runNbaShadowSchedulerPrecheckFixtures() {
     disabled: { schedulerEnabled: false, activeLock: false, completedRuns: 0, totalInsertedRows: 0, pendingRows: 31 },
     ready: { schedulerEnabled: true, activeLock: false, completedRuns: 0, totalInsertedRows: 0, pendingRows: 31 },
     reviewRequired: { schedulerEnabled: true, activeLock: false, completedRuns: 2, totalInsertedRows: 6, pendingRows: 37 },
+    repairedVerificationReady: { schedulerEnabled: true, activeLock: false, completedRuns: 2, totalInsertedRows: 6, pendingRows: 37, repairedVerificationEnabled: true, repairedVerificationRuns: 0 },
+    repairedVerificationComplete: { schedulerEnabled: true, activeLock: false, completedRuns: 3, totalInsertedRows: 9, pendingRows: 40, repairedVerificationEnabled: true, repairedVerificationRuns: 1 },
     hardLimitRuns: { schedulerEnabled: true, activeLock: false, completedRuns: 4, totalInsertedRows: 9, pendingRows: 40 },
     hardLimitRows: { schedulerEnabled: true, activeLock: false, completedRuns: 1, totalInsertedRows: 12, pendingRows: 43 },
     pendingGuard: { schedulerEnabled: true, activeLock: false, completedRuns: 0, totalInsertedRows: 0, pendingRows: 75 },
