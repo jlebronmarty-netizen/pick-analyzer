@@ -1,0 +1,104 @@
+{
+  "status": "NBA_03A_CONTINUOUS_SHADOW_OPERATING_POLICY_CERTIFIED_READY_FOR_PUBLICATION",
+  "phase": "NBA-03A Continuous Shadow Scheduler Operating Policy Review",
+  "productionCommitAudited": "2e04275da2d471473bfc626776accd675a3d3ef7",
+  "currentSample": {
+    "currentEraShadowRows": 40,
+    "pending": 40,
+    "settled": 0,
+    "uniqueEvents": 10,
+    "largestEventRows": 16,
+    "markets": {
+      "moneyline": 12,
+      "spread": 13,
+      "total": 15
+    },
+    "sportsbooks": 9,
+    "eventDates": {
+      "2026-10-20": 21,
+      "2026-10-21": 13,
+      "2026-10-22": 6
+    }
+  },
+  "futureEventHorizon": {
+    "storedFutureEvents": 41,
+    "earliestEvent": "2026-10-20T19:00:00+00:00",
+    "latestEvent": "2026-12-26T03:30:00+00:00",
+    "status": "scheduled"
+  },
+  "policy": {
+    "cronCadence": "*/30 * * * *",
+    "schedulerWakeupCadenceChanged": false,
+    "continuousEnabledEnv": "NBA_CURRENT_ERA_SHADOW_CONTINUOUS_ENABLED",
+    "continuousDefaultEnabled": false,
+    "repairedVerificationEnvIsNotContinuous": true,
+    "perRunCap": 3,
+    "dailyNewRowCap": 3,
+    "dailyProviderCallCap": 2,
+    "pendingHardGuard": 75,
+    "pendingSoftPause": 60,
+    "eventRowCap": 6,
+    "eventMarketRowCap": 3,
+    "runPurpose": "CONTINUOUS_SHADOW_EVIDENCE_RUN",
+    "providerAuthorization": "explicit_continuous_shadow_flag_plus_internal_daily_caps",
+    "noOpBeforeProvider": [
+      "review or continuous mode check",
+      "hard pending guard",
+      "continuous soft pending pause",
+      "daily new-row cap",
+      "daily provider-call cap"
+    ]
+  },
+  "simulation": {
+    "naiveThirtyMinuteThreeRowsPerRun": {
+      "runsPerDay": 48,
+      "newRowsPerDay": 144,
+      "providerCallsPerDay": 96,
+      "pendingGuardImpact": "would reach the 75-row pending guard within one day from the current 40-row state"
+    },
+    "proposedPolicy": {
+      "providerConsumingRunsPerDay": 1,
+      "providerCallsPerDay": 2,
+      "newRowsPerDay": 3,
+      "oneDay": {
+        "providerCalls": 2,
+        "newRows": 3,
+        "projectedPending": 43
+      },
+      "threeDays": {
+        "providerCalls": 6,
+        "newRows": 9,
+        "projectedPending": 49
+      },
+      "sevenDays": {
+        "providerCalls": 14,
+        "newRows": 21,
+        "projectedPending": 61,
+        "softPauseExpected": true
+      }
+    }
+  },
+  "isolation": {
+    "predictionOrigin": "CURRENT_ERA_SHADOW",
+    "modelRole": "shadow",
+    "isCurrent": false,
+    "recommendedPick": false,
+    "productionEligible": false,
+    "officialPickDelta": 0,
+    "productVisibilityDelta": 0,
+    "learningDelta": 0,
+    "calibrationDelta": 0,
+    "bankrollDelta": 0,
+    "notificationDelta": 0,
+    "historicalReplayDelta": 0,
+    "mlbMutationDelta": 0
+  },
+  "accounting": {
+    "providerCallsFromReview": 0,
+    "databaseMutationsFromReview": 0,
+    "currentEraWritesFromReview": 0
+  },
+  "performanceReadiness": "INSUFFICIENT_CURRENT_ERA_SETTLED_SAMPLE",
+  "continuousShadowActivationReady": false,
+  "nextGate": "publish policy guard, align production, reset repaired-verification flag, then separately authorize NBA_CURRENT_ERA_SHADOW_CONTINUOUS_ENABLED=true if human review accepts the policy"
+}

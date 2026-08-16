@@ -2116,3 +2116,10 @@ NBA-03A two-run canary review is locally certified as `NBA_03A_REPAIRED_RUNTIME_
 The successful second run occurred before the Run 2 cardinality repair was deployed, so repaired-runtime natural evidence remains required. The continuation mechanism preserves the original two-run history and adds a default-off one-run extension controlled by `NBA_CURRENT_ERA_SHADOW_REPAIRED_VERIFICATION_ENABLED=true`. When separately authorized and deployed, it permits exactly one natural `REPAIRED_RUNTIME_VERIFICATION_RUN` under the repaired code path, then automatically returns to `SCHEDULER_PRECHECK_REVIEW_REQUIRED`.
 
 No Current Era rows were reset or deleted, no scheduler audit history was rewritten and no continuous scheduling was activated. Certification used read-only production evidence plus local fixtures only: 0 provider calls, 0 production DB mutations and 0 production `CURRENT_ERA_SHADOW` writes. Next: publish/deploy the continuation mechanism, then separately authorize setting the repaired-verification flag and observing one natural Vercel Cron run.
+## 2026-08-15 NBA-03A Continuous Shadow Operating Policy
+
+Status: `NBA_03A_CONTINUOUS_SHADOW_OPERATING_POLICY_CERTIFIED_READY_FOR_PUBLICATION`
+
+After the repaired natural runtime verification passed, the NBA Current Era shadow scheduler was reviewed for continuous operation. The current 40-row sample is still fully shadow-only and pending, with 0 Official Picks, 0 product-visible rows, 0 learning/calibration activation and 0 MLB/Historical Replay mutation. Because the sample is already concentrated in one future event and the stored NBA horizon starts on 2026-10-20, continuous collection now needs rate control rather than execution repair.
+
+Implemented a default-off continuous policy guard with `NBA_CURRENT_ERA_SHADOW_CONTINUOUS_ENABLED`, 3 rows/run, 3 rows/day, 2 The Odds API calls/day, soft pause at 60 pending rows, hard pending guard preserved at 75, and event/event-market caps. The repaired-verification flag remains separate and must not authorize continuous operation.

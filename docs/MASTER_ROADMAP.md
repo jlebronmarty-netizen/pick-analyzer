@@ -3611,3 +3611,8 @@ Because the second successful run occurred before the Run 2 cardinality repair w
 The original canary history is retained. Current Era rows are not reset or deleted, and historical scheduler audit rows are not rewritten. No provider calls, production DB mutations, Current Era writes or continuous scheduling activation occurred during certification.
 
 Next: publish/deploy this continuation mechanism, verify production alignment and protected precheck, then separately authorize the one-run repaired-runtime verification flag before observing the next natural Vercel Cron execution.
+## NBA-03A Continuous Shadow Operating Policy
+
+Status: `NBA_03A_CONTINUOUS_SHADOW_OPERATING_POLICY_CERTIFIED_READY_FOR_PUBLICATION`
+
+Continuous NBA Current Era shadow scheduling is not activated automatically. The next gate is publication and production alignment of the default-off continuous guard, then explicit human authorization for `NBA_CURRENT_ERA_SHADOW_CONTINUOUS_ENABLED=true` only if the reviewed policy is accepted. Initial continuous collection remains shadow-only, capped at 3 rows/day and 2 The Odds API calls/day, with soft pause at 60 pending rows and hard guard at 75.

@@ -35,6 +35,13 @@ export const NBA_SHADOW_SCHEDULER_LEAGUE_KEY = 'nba'
 export const NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_ENABLED_ENV = 'NBA_CURRENT_ERA_SHADOW_REPAIRED_VERIFICATION_ENABLED'
 export const NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_PURPOSE = 'REPAIRED_RUNTIME_VERIFICATION_RUN'
 export const NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_LIMIT = 1
+export const NBA_SHADOW_SCHEDULER_CONTINUOUS_ENABLED_ENV = 'NBA_CURRENT_ERA_SHADOW_CONTINUOUS_ENABLED'
+export const NBA_SHADOW_SCHEDULER_CONTINUOUS_RUN_PURPOSE = 'CONTINUOUS_SHADOW_EVIDENCE_RUN'
+export const NBA_SHADOW_SCHEDULER_CONTINUOUS_DAILY_NEW_ROW_CAP = 3
+export const NBA_SHADOW_SCHEDULER_CONTINUOUS_DAILY_PROVIDER_CALL_CAP = 2
+export const NBA_SHADOW_SCHEDULER_CONTINUOUS_PENDING_SOFT_PAUSE = 60
+export const NBA_SHADOW_SCHEDULER_CONTINUOUS_EVENT_ROW_CAP = 6
+export const NBA_SHADOW_SCHEDULER_CONTINUOUS_EVENT_MARKET_ROW_CAP = 3
 
 export type NbaShadowSchedulerClassification =
   | 'SCHEDULER_DISABLED_NO_OP'
@@ -42,6 +49,7 @@ export type NbaShadowSchedulerClassification =
   | 'CANARY_REVIEW_REQUIRED_NO_OP'
   | 'CANARY_HARD_LIMIT_REACHED_NO_OP'
   | 'PENDING_GUARD_NO_OP'
+  | 'CONTINUOUS_SHADOW_GUARD_NO_OP'
   | 'PROVIDER_BUDGET_NO_OP'
   | 'NO_CURRENT_EVENT_NO_OP'
   | 'NO_ELIGIBLE_CANDIDATE_NO_OP'
@@ -55,6 +63,7 @@ export type NbaShadowSchedulerPrecheckClassification =
   | 'SCHEDULER_PRECHECK_REVIEW_REQUIRED'
   | 'SCHEDULER_PRECHECK_HARD_LIMIT'
   | 'SCHEDULER_PRECHECK_PENDING_GUARD'
+  | 'SCHEDULER_PRECHECK_CONTINUOUS_GUARD'
   | 'SCHEDULER_PRECHECK_LOCK_ACTIVE'
   | 'SCHEDULER_PRECHECK_PROVIDER_BUDGET_BLOCKED'
 
@@ -142,11 +151,16 @@ type CanaryState = {
   totalInsertedRows: number
   lastRunId: string | null
   repairedVerificationRuns: number
+  continuousRunsToday: number
+  continuousProviderCallsToday: number
 }
 
 type CountState = {
   currentEraRows: number
   pendingRows: number
+  rowsCreatedToday: number
+  eventRows: Record<string, number>
+  eventMarketRows: Record<string, number>
 }
 
 export type NbaShadowSchedulerPrecheckStatus = {
@@ -204,6 +218,19 @@ export type NbaShadowSchedulerPrecheckStatus = {
   repairedVerificationRuns: number
   repairedVerificationRunLimit: typeof NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_LIMIT
   repairedVerificationReady: boolean
+  continuousEnabled: boolean
+  continuousReady: boolean
+  continuousRunPurpose: typeof NBA_SHADOW_SCHEDULER_CONTINUOUS_RUN_PURPOSE
+  continuousDailyNewRowCap: typeof NBA_SHADOW_SCHEDULER_CONTINUOUS_DAILY_NEW_ROW_CAP
+  continuousDailyProviderCallCap: typeof NBA_SHADOW_SCHEDULER_CONTINUOUS_DAILY_PROVIDER_CALL_CAP
+  continuousPendingSoftPause: typeof NBA_SHADOW_SCHEDULER_CONTINUOUS_PENDING_SOFT_PAUSE
+  continuousEventRowCap: typeof NBA_SHADOW_SCHEDULER_CONTINUOUS_EVENT_ROW_CAP
+  continuousEventMarketRowCap: typeof NBA_SHADOW_SCHEDULER_CONTINUOUS_EVENT_MARKET_ROW_CAP
+  continuousRowsCreatedToday: number
+  continuousRunsToday: number
+  continuousProviderCallsToday: number
+  continuousGuardAllowed: boolean
+  continuousGuardReason: string | null
 }
 
 const isolationZero: NbaShadowSchedulerIsolation = {
@@ -229,6 +256,10 @@ function repairedVerificationEnabled() {
   return String(process.env[NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_ENABLED_ENV] ?? '').toLowerCase() === 'true'
 }
 
+function continuousEnabled() {
+  return String(process.env[NBA_SHADOW_SCHEDULER_CONTINUOUS_ENABLED_ENV] ?? '').toLowerCase() === 'true'
+}
+
 function canRunRepairedVerificationWithFlag(state: CanaryState, enabled: boolean) {
   return (
     enabled &&
@@ -239,6 +270,40 @@ function canRunRepairedVerificationWithFlag(state: CanaryState, enabled: boolean
 
 function canRunRepairedVerification(state: CanaryState) {
   return canRunRepairedVerificationWithFlag(state, repairedVerificationEnabled())
+}
+
+function canRunContinuousWithFlag(state: CanaryState, enabled: boolean) {
+  return (
+    enabled &&
+    state.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS &&
+    state.repairedVerificationRuns >= NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_LIMIT
+  )
+}
+
+function canRunContinuous(state: CanaryState) {
+  return canRunContinuousWithFlag(state, continuousEnabled())
+}
+
+function utcDayStartIso(now = new Date()) {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString()
+}
+
+function eventMarketCountKey(eventId: string, market: string | null) {
+  return [eventId, market ?? ''].join('|')
+}
+
+function continuousGuard(state: CanaryState, counts: CountState, ready: boolean) {
+  if (!ready) return { allowed: false, reason: 'CONTINUOUS_MODE_NOT_READY' }
+  if (counts.pendingRows >= NBA_SHADOW_SCHEDULER_CONTINUOUS_PENDING_SOFT_PAUSE) {
+    return { allowed: false, reason: 'CONTINUOUS_PENDING_SOFT_PAUSE' }
+  }
+  if (counts.rowsCreatedToday >= NBA_SHADOW_SCHEDULER_CONTINUOUS_DAILY_NEW_ROW_CAP) {
+    return { allowed: false, reason: 'CONTINUOUS_DAILY_ROW_CAP' }
+  }
+  if (state.continuousProviderCallsToday >= NBA_SHADOW_SCHEDULER_CONTINUOUS_DAILY_PROVIDER_CALL_CAP) {
+    return { allowed: false, reason: 'CONTINUOUS_DAILY_PROVIDER_CALL_CAP' }
+  }
+  return { allowed: true, reason: null }
 }
 
 function numberValue(value: unknown, fallback = 0) {
@@ -481,7 +546,8 @@ function baseResult(input: {
 }
 
 async function countRows(): Promise<CountState> {
-  const [total, settled] = await Promise.all([
+  const todayStart = utcDayStartIso()
+  const [total, settled, todayRows, currentRows] = await Promise.all([
     supabaseAdmin
       .from('prediction_history')
       .select('id', { count: 'exact', head: true })
@@ -493,13 +559,39 @@ async function countRows(): Promise<CountState> {
       .eq('sport_key', NBA_SHADOW_SCHEDULER_SPORT_KEY)
       .eq('prediction_origin', 'CURRENT_ERA_SHADOW')
       .in('result', ['win', 'loss', 'push']),
+    supabaseAdmin
+      .from('prediction_history')
+      .select('id', { count: 'exact', head: true })
+      .eq('sport_key', NBA_SHADOW_SCHEDULER_SPORT_KEY)
+      .eq('prediction_origin', 'CURRENT_ERA_SHADOW')
+      .gte('created_at', todayStart),
+    supabaseAdmin
+      .from('prediction_history')
+      .select('game_id,market')
+      .eq('sport_key', NBA_SHADOW_SCHEDULER_SPORT_KEY)
+      .eq('prediction_origin', 'CURRENT_ERA_SHADOW')
+      .limit(1000),
   ])
   if (total.error) throw new Error(`NBA shadow current-era count failed: ${total.error.message}`)
   if (settled.error) throw new Error(`NBA shadow settled count failed: ${settled.error.message}`)
+  if (todayRows.error) throw new Error(`NBA shadow daily row count failed: ${todayRows.error.message}`)
+  if (currentRows.error) throw new Error(`NBA shadow event distribution read failed: ${currentRows.error.message}`)
   const currentEraRows = total.count ?? 0
+  const eventRows: Record<string, number> = {}
+  const eventMarketRows: Record<string, number> = {}
+  for (const row of currentRows.data ?? []) {
+    const eventId = String(row.game_id ?? '')
+    if (!eventId) continue
+    eventRows[eventId] = (eventRows[eventId] ?? 0) + 1
+    const key = eventMarketCountKey(eventId, String(row.market ?? ''))
+    eventMarketRows[key] = (eventMarketRows[key] ?? 0) + 1
+  }
   return {
     currentEraRows,
     pendingRows: Math.max(0, currentEraRows - (settled.count ?? 0)),
+    rowsCreatedToday: todayRows.count ?? 0,
+    eventRows,
+    eventMarketRows,
   }
 }
 
@@ -520,11 +612,21 @@ async function loadCanaryState(): Promise<CanaryState> {
     const metadata = row.metadata && typeof row.metadata === 'object' ? row.metadata as Record<string, unknown> : {}
     return metadata.runPurpose === NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_PURPOSE
   }).length
+  const todayStart = utcDayStartIso()
+  const continuousToday = completed.filter((row) => {
+    const metadata = row.metadata && typeof row.metadata === 'object' ? row.metadata as Record<string, unknown> : {}
+    return metadata.runPurpose === NBA_SHADOW_SCHEDULER_CONTINUOUS_RUN_PURPOSE && String(row.started_at ?? '') >= todayStart
+  })
   return {
     completedRuns: completed.length,
     totalInsertedRows: completed.reduce((sum, row) => sum + (Number(row.records_inserted) || 0), 0),
     lastRunId: String(completed[0]?.id ?? '') || null,
     repairedVerificationRuns,
+    continuousRunsToday: continuousToday.length,
+    continuousProviderCallsToday: continuousToday.reduce((sum, row) => {
+      const metadata = row.metadata && typeof row.metadata === 'object' ? row.metadata as Record<string, unknown> : {}
+      return sum + numberValue(metadata.providerCalls)
+    }, 0),
   }
 }
 
@@ -535,22 +637,30 @@ function classifyPrecheck(input: {
   activeLock: boolean
   providerBudgetAllowed?: boolean
   repairedVerificationEnabled?: boolean
+  continuousEnabled?: boolean
 }): NbaShadowSchedulerPrecheckClassification {
+  const continuousReady = canRunContinuousWithFlag(input.state, input.continuousEnabled ?? continuousEnabled())
+  const continuous = continuousGuard(input.state, input.counts, continuousReady)
   if (!input.enabled) return 'SCHEDULER_PRECHECK_DISABLED'
   if (input.activeLock) return 'SCHEDULER_PRECHECK_LOCK_ACTIVE'
   if (
-    input.state.completedRuns >= NBA_SHADOW_SCHEDULER_HARD_MAX_RUNS ||
-    input.state.totalInsertedRows >= NBA_SHADOW_SCHEDULER_TOTAL_ROW_CAP
+    !continuousReady &&
+    (
+      input.state.completedRuns >= NBA_SHADOW_SCHEDULER_HARD_MAX_RUNS ||
+      input.state.totalInsertedRows >= NBA_SHADOW_SCHEDULER_TOTAL_ROW_CAP
+    )
   ) {
     return 'SCHEDULER_PRECHECK_HARD_LIMIT'
   }
   if (
     input.state.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS &&
-    !canRunRepairedVerificationWithFlag(input.state, input.repairedVerificationEnabled ?? repairedVerificationEnabled())
+    !canRunRepairedVerificationWithFlag(input.state, input.repairedVerificationEnabled ?? repairedVerificationEnabled()) &&
+    !continuousReady
   ) {
     return 'SCHEDULER_PRECHECK_REVIEW_REQUIRED'
   }
   if (input.counts.pendingRows >= NBA_SHADOW_SCHEDULER_PENDING_GUARD) return 'SCHEDULER_PRECHECK_PENDING_GUARD'
+  if (continuousReady && !continuous.allowed) return 'SCHEDULER_PRECHECK_CONTINUOUS_GUARD'
   if (input.providerBudgetAllowed === false) return 'SCHEDULER_PRECHECK_PROVIDER_BUDGET_BLOCKED'
   return 'SCHEDULER_PRECHECK_READY'
 }
@@ -561,12 +671,21 @@ export async function getNbaCurrentEraShadowSchedulerPrecheckStatus(): Promise<N
   const lockStatus = getProviderActionLockStatus(NBA_SHADOW_SCHEDULER_LOCK_KEY)
   const reviewRequired = canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS
   const repairedVerificationReady = canRunRepairedVerification(canaryState)
+  const continuousReady = canRunContinuous(canaryState)
+  const continuous = continuousGuard(canaryState, counts, continuousReady)
   const hardLimitReached =
-    canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_HARD_MAX_RUNS ||
-    canaryState.totalInsertedRows >= NBA_SHADOW_SCHEDULER_TOTAL_ROW_CAP
+    !continuousReady &&
+    (canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_HARD_MAX_RUNS ||
+      canaryState.totalInsertedRows >= NBA_SHADOW_SCHEDULER_TOTAL_ROW_CAP)
   const pendingGuardReached = counts.pendingRows >= NBA_SHADOW_SCHEDULER_PENDING_GUARD
-  const effectiveReviewRequired = reviewRequired && !repairedVerificationReady
-  const shouldEvaluateBudget = enabled && !lockStatus.active && !effectiveReviewRequired && !hardLimitReached && !pendingGuardReached
+  const effectiveReviewRequired = reviewRequired && !repairedVerificationReady && !continuousReady
+  const shouldEvaluateBudget =
+    enabled &&
+    !lockStatus.active &&
+    !effectiveReviewRequired &&
+    !hardLimitReached &&
+    !pendingGuardReached &&
+    (!continuousReady || continuous.allowed)
   const providerBudgetReadiness = shouldEvaluateBudget
     ? await authorizeNbaShadowSchedulerProviderBudget()
     : {
@@ -641,11 +760,25 @@ export async function getNbaCurrentEraShadowSchedulerPrecheckStatus(): Promise<N
       activeLock: lockStatus.active,
       providerBudgetAllowed: shouldEvaluateBudget ? providerBudgetReadiness.allowed : undefined,
       repairedVerificationEnabled: repairedVerificationEnabled(),
+      continuousEnabled: continuousEnabled(),
     }),
     repairedVerificationEnabled: repairedVerificationEnabled(),
     repairedVerificationRuns: canaryState.repairedVerificationRuns,
     repairedVerificationRunLimit: NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_LIMIT,
     repairedVerificationReady,
+    continuousEnabled: continuousEnabled(),
+    continuousReady,
+    continuousRunPurpose: NBA_SHADOW_SCHEDULER_CONTINUOUS_RUN_PURPOSE,
+    continuousDailyNewRowCap: NBA_SHADOW_SCHEDULER_CONTINUOUS_DAILY_NEW_ROW_CAP,
+    continuousDailyProviderCallCap: NBA_SHADOW_SCHEDULER_CONTINUOUS_DAILY_PROVIDER_CALL_CAP,
+    continuousPendingSoftPause: NBA_SHADOW_SCHEDULER_CONTINUOUS_PENDING_SOFT_PAUSE,
+    continuousEventRowCap: NBA_SHADOW_SCHEDULER_CONTINUOUS_EVENT_ROW_CAP,
+    continuousEventMarketRowCap: NBA_SHADOW_SCHEDULER_CONTINUOUS_EVENT_MARKET_ROW_CAP,
+    continuousRowsCreatedToday: counts.rowsCreatedToday,
+    continuousRunsToday: canaryState.continuousRunsToday,
+    continuousProviderCallsToday: canaryState.continuousProviderCallsToday,
+    continuousGuardAllowed: continuous.allowed,
+    continuousGuardReason: continuous.reason,
   }
 }
 
@@ -748,18 +881,40 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
   let auditJobId: string | null = null
   try {
     const canaryState = await loadCanaryState()
-    if (canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_HARD_MAX_RUNS || canaryState.totalInsertedRows >= NBA_SHADOW_SCHEDULER_TOTAL_ROW_CAP) {
+    const repairedVerificationReady = canRunRepairedVerification(canaryState)
+    const continuousReady = canRunContinuous(canaryState)
+    if (
+      !continuousReady &&
+      (canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_HARD_MAX_RUNS || canaryState.totalInsertedRows >= NBA_SHADOW_SCHEDULER_TOTAL_ROW_CAP)
+    ) {
       return baseResult({ runId, startedAt, enabled, lock: 'released', canaryState, classification: 'CANARY_HARD_LIMIT_REACHED_NO_OP' })
     }
-    const repairedVerificationReady = canRunRepairedVerification(canaryState)
-    const runPurpose = repairedVerificationReady ? NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_PURPOSE : null
-    if (canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS && !repairedVerificationReady) {
+    const runPurpose = repairedVerificationReady
+      ? NBA_SHADOW_SCHEDULER_REPAIRED_VERIFICATION_RUN_PURPOSE
+      : continuousReady
+        ? NBA_SHADOW_SCHEDULER_CONTINUOUS_RUN_PURPOSE
+        : null
+    if (canaryState.completedRuns >= NBA_SHADOW_SCHEDULER_REVIEW_AFTER_RUNS && !repairedVerificationReady && !continuousReady) {
       return baseResult({ runId, startedAt, enabled, lock: 'released', canaryState, classification: 'CANARY_REVIEW_REQUIRED_NO_OP' })
     }
 
     const counts = await countRows()
     if (counts.pendingRows >= NBA_SHADOW_SCHEDULER_PENDING_GUARD) {
       return baseResult({ runId, startedAt, enabled, lock: 'released', canaryState, counts, classification: 'PENDING_GUARD_NO_OP' })
+    }
+    const continuous = continuousGuard(canaryState, counts, continuousReady)
+    if (continuousReady && !continuous.allowed) {
+      return baseResult({
+        runId,
+        startedAt,
+        enabled,
+        lock: 'released',
+        canaryState,
+        counts,
+        runPurpose,
+        classification: 'CONTINUOUS_SHADOW_GUARD_NO_OP',
+        error: continuous.reason,
+      })
     }
 
     const budgetReadiness = await authorizeNbaShadowSchedulerProviderBudget()
@@ -822,8 +977,18 @@ export async function runNbaCurrentEraShadowSchedulerCanary(): Promise<NbaShadow
       return noEvent
     }
 
+    const policyCandidates = runPurpose === NBA_SHADOW_SCHEDULER_CONTINUOUS_RUN_PURPOSE
+      ? dryRun.candidates.filter((candidate) => {
+          const eventRows = counts.eventRows[candidate.eventId] ?? 0
+          const eventMarketRows = counts.eventMarketRows[eventMarketCountKey(candidate.eventId, candidate.market)] ?? 0
+          return (
+            eventRows < NBA_SHADOW_SCHEDULER_CONTINUOUS_EVENT_ROW_CAP &&
+            eventMarketRows < NBA_SHADOW_SCHEDULER_CONTINUOUS_EVENT_MARKET_ROW_CAP
+          )
+        })
+      : dryRun.candidates
     const selection = selectNbaCurrentEraShadowAccumulationBatch({
-      candidates: dryRun.candidates,
+      candidates: policyCandidates,
       batchSize: NBA_SHADOW_SCHEDULER_PER_RUN_CAP,
     })
     if (!selection.selected.length) {
@@ -967,6 +1132,10 @@ export type NbaShadowSchedulerPrecheckFixtureInput = {
   providerBudgetAllowed?: boolean
   repairedVerificationEnabled?: boolean
   repairedVerificationRuns?: number
+  continuousEnabled?: boolean
+  continuousRunsToday?: number
+  continuousProviderCallsToday?: number
+  rowsCreatedToday?: number
 }
 
 export type NbaShadowSchedulerBatchPersistenceFixtureInput = {
@@ -1022,10 +1191,15 @@ export function simulateNbaShadowSchedulerPrecheck(input: NbaShadowSchedulerPrec
     totalInsertedRows: Math.max(0, input.totalInsertedRows),
     lastRunId: null,
     repairedVerificationRuns: Math.max(0, input.repairedVerificationRuns ?? 0),
+    continuousRunsToday: Math.max(0, input.continuousRunsToday ?? 0),
+    continuousProviderCallsToday: Math.max(0, input.continuousProviderCallsToday ?? 0),
   }
   const counts = {
     currentEraRows: Math.max(0, input.currentEraRows ?? input.pendingRows),
     pendingRows: Math.max(0, input.pendingRows),
+    rowsCreatedToday: Math.max(0, input.rowsCreatedToday ?? 0),
+    eventRows: {},
+    eventMarketRows: {},
   }
   const finalClassification = classifyPrecheck({
     enabled: input.schedulerEnabled,
@@ -1034,8 +1208,11 @@ export function simulateNbaShadowSchedulerPrecheck(input: NbaShadowSchedulerPrec
     activeLock: input.activeLock,
     providerBudgetAllowed: input.providerBudgetAllowed,
     repairedVerificationEnabled: input.repairedVerificationEnabled,
+    continuousEnabled: input.continuousEnabled,
   })
   const repairedVerificationReady = canRunRepairedVerificationWithFlag(state, Boolean(input.repairedVerificationEnabled))
+  const continuousReady = canRunContinuousWithFlag(state, Boolean(input.continuousEnabled))
+  const continuous = continuousGuard(state, counts, continuousReady)
   return {
     schedulerEnabled: input.schedulerEnabled,
     completedCanaryRuns: state.completedRuns,
@@ -1057,6 +1234,13 @@ export function simulateNbaShadowSchedulerPrecheck(input: NbaShadowSchedulerPrec
     repairedVerificationEnabled: Boolean(input.repairedVerificationEnabled),
     repairedVerificationRuns: state.repairedVerificationRuns,
     repairedVerificationReady,
+    continuousEnabled: Boolean(input.continuousEnabled),
+    continuousReady,
+    continuousRowsCreatedToday: counts.rowsCreatedToday,
+    continuousRunsToday: state.continuousRunsToday,
+    continuousProviderCallsToday: state.continuousProviderCallsToday,
+    continuousGuardAllowed: continuous.allowed,
+    continuousGuardReason: continuous.reason,
     finalClassification,
   }
 }
@@ -1158,6 +1342,10 @@ export function runNbaShadowSchedulerPrecheckFixtures() {
     reviewRequired: { schedulerEnabled: true, activeLock: false, completedRuns: 2, totalInsertedRows: 6, pendingRows: 37 },
     repairedVerificationReady: { schedulerEnabled: true, activeLock: false, completedRuns: 2, totalInsertedRows: 6, pendingRows: 37, repairedVerificationEnabled: true, repairedVerificationRuns: 0 },
     repairedVerificationComplete: { schedulerEnabled: true, activeLock: false, completedRuns: 3, totalInsertedRows: 9, pendingRows: 40, repairedVerificationEnabled: true, repairedVerificationRuns: 1 },
+    continuousReady: { schedulerEnabled: true, activeLock: false, completedRuns: 3, totalInsertedRows: 9, pendingRows: 40, repairedVerificationRuns: 1, continuousEnabled: true, rowsCreatedToday: 0 },
+    continuousDailyCap: { schedulerEnabled: true, activeLock: false, completedRuns: 3, totalInsertedRows: 9, pendingRows: 40, repairedVerificationRuns: 1, continuousEnabled: true, rowsCreatedToday: 3 },
+    continuousSoftPause: { schedulerEnabled: true, activeLock: false, completedRuns: 3, totalInsertedRows: 9, pendingRows: 60, repairedVerificationRuns: 1, continuousEnabled: true, rowsCreatedToday: 0 },
+    continuousProviderCap: { schedulerEnabled: true, activeLock: false, completedRuns: 3, totalInsertedRows: 9, pendingRows: 40, repairedVerificationRuns: 1, continuousEnabled: true, rowsCreatedToday: 0, continuousProviderCallsToday: 2 },
     hardLimitRuns: { schedulerEnabled: true, activeLock: false, completedRuns: 4, totalInsertedRows: 9, pendingRows: 40 },
     hardLimitRows: { schedulerEnabled: true, activeLock: false, completedRuns: 1, totalInsertedRows: 12, pendingRows: 43 },
     pendingGuard: { schedulerEnabled: true, activeLock: false, completedRuns: 0, totalInsertedRows: 0, pendingRows: 75 },
