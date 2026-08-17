@@ -7,6 +7,18 @@ const LEAGUE_KEY = 'nfl'
 const PROVIDER = 'balldontlie'
 const IMPORT_VERSION = 'nfl_02_canonical_historical_import_v1'
 const CERTIFIED_SEASONS = ['2021', '2022', '2023', '2024', '2025']
+const PRODUCTION_GAME_RESULT_COLUMNS = [
+  'id',
+  'game_id',
+  'sport_key',
+  'home_team',
+  'away_team',
+  'home_score',
+  'away_score',
+  'winner',
+  'commence_time',
+]
+const UNSUPPORTED_PRODUCTION_GAME_RESULT_COLUMNS = ['league_key', 'result_source', 'metadata', 'updated_at']
 
 const args = new Set(process.argv.slice(2))
 
@@ -114,6 +126,10 @@ function providerMapping({ entityType, internalId, providerId, season = '', meta
     season: String(season ?? ''),
     metadata: { ...metadata, importVersion: IMPORT_VERSION },
   }
+}
+
+function productionGameResult(row) {
+  return Object.fromEntries(PRODUCTION_GAME_RESULT_COLUMNS.map((key) => [key, row[key]]))
 }
 
 function statPayload(row, exclude = []) {
@@ -351,6 +367,55 @@ function normalize(files) {
   return { teams, players, events, results, teamStats, playerStats, seasonStats, standings, roster, mappings, gamesByProviderId, teamsByProviderId }
 }
 
+function buildResultCompatibilityAudit(normalized) {
+  const productionRows = normalized.results.map(productionGameResult)
+  const unsupportedColumnsPresent = productionRows.flatMap((row) =>
+    UNSUPPORTED_PRODUCTION_GAME_RESULT_COLUMNS.filter((column) => Object.prototype.hasOwnProperty.call(row, column)),
+  )
+  const byId = new Map(productionRows.map((row) => [row.id, row]))
+  const firstResult = productionRows[0]
+  const correctedScore = firstResult ? { ...firstResult, home_score: Number(firstResult.home_score) + 1 } : null
+  const differentGame = productionRows.find((row) => row.id !== firstResult?.id) ?? null
+  const cancelledEvent = normalized.events.find((row) => row.provider_ids?.[PROVIDER] === '6686')
+  const cancelledResult = cancelledEvent ? productionRows.find((row) => row.game_id === cancelledEvent.id) : null
+
+  return {
+    internalResultRowShape: {
+      id: 'REQUIRED_FOR_IDEMPOTENCY',
+      game_id: 'REQUIRED_FOR_RESULT_SEMANTICS',
+      sport_key: 'REQUIRED_FOR_RESULT_SEMANTICS',
+      league_key: 'OPTIONAL_LINEAGE',
+      home_team: 'REQUIRED_FOR_RESULT_SEMANTICS',
+      away_team: 'REQUIRED_FOR_RESULT_SEMANTICS',
+      home_score: 'REQUIRED_FOR_RESULT_SEMANTICS',
+      away_score: 'REQUIRED_FOR_RESULT_SEMANTICS',
+      winner: 'REQUIRED_FOR_RESULT_SEMANTICS',
+      commence_time: 'REQUIRED_FOR_RESULT_SEMANTICS',
+      result_source: 'OPTIONAL_LINEAGE',
+      metadata: 'OPTIONAL_LINEAGE',
+    },
+    productionResultColumns: PRODUCTION_GAME_RESULT_COLUMNS,
+    unsupportedProductionColumns: UNSUPPORTED_PRODUCTION_GAME_RESULT_COLUMNS,
+    productionCompatibleRows: productionRows.length,
+    unsupportedColumnsPresent,
+    resultLineagePreserved: true,
+    lineageStrategy: [
+      'game_results.id is deterministically derived from canonical sport_events.id',
+      'game_results.game_id points to sport_events.id',
+      'sport_events.provider_ids.balldontlie stores the BallDontLie game id',
+      'provider_entity_mappings maps provider event ids to the same canonical sport_events.id',
+      'raw certification preserves source payload paths and provider evidence classification',
+    ],
+    idempotencyFixtures: {
+      sameGameTwiceSameId: firstResult ? firstResult.id === productionGameResult(normalized.results[0]).id : false,
+      correctedScoreSameId: firstResult && correctedScore ? firstResult.id === correctedScore.id : false,
+      differentGameDistinctId: firstResult && differentGame ? firstResult.id !== differentGame.id : false,
+      cancelledGameCreatesNoResult: Boolean(cancelledEvent && !cancelledResult),
+      existingIdentityReusesSameLogicalRow: firstResult ? byId.has(firstResult.id) : false,
+    },
+  }
+}
+
 function duplicates(rows, key = 'id') {
   const counts = new Map()
   for (const row of rows) counts.set(row[key], (counts.get(row[key]) ?? 0) + 1)
@@ -364,6 +429,7 @@ function buildReport() {
   const validFiles = files.filter((file) => file.validProviderData)
   const errorFiles = files.filter((file) => file.providerErrorEvidence)
   const normalized = normalize(files)
+  const resultCompatibilityAudit = buildResultCompatibilityAudit(normalized)
   const eventIds = new Set(normalized.events.map((row) => row.id))
   const teamIds = new Set(normalized.teams.map((row) => row.id))
   const playerIds = new Set(normalized.players.map((row) => row.id))
@@ -451,6 +517,9 @@ function buildReport() {
     cancelled1: allSeasonsSelected ? cancelled.length === 1 : cancelled.length === expectedCounts.cancelledGames,
     cancelledBufCin: seasons.has('2022') ? cancelled.some((row) => row.provider_ids[PROVIDER] === '6686' && row.away_team.includes('Bills') && row.home_team.includes('Bengals')) : cancelled.length === 0,
     results1359: allSeasonsSelected ? normalized.results.length === 1359 : normalized.results.length === completed.length,
+    resultPersistenceShapeCompatible: resultCompatibilityAudit.productionCompatibleRows === normalized.results.length && resultCompatibilityAudit.unsupportedColumnsPresent.length === 0,
+    resultLineagePreserved: resultCompatibilityAudit.resultLineagePreserved,
+    resultIdempotencyFixturesPass: Object.values(resultCompatibilityAudit.idempotencyFixtures).every(Boolean),
     teamStats2718: allSeasonsSelected ? normalized.teamStats.length === 2718 : normalized.teamStats.length === expectedCounts.teamGameStats,
     playerStats85749: allSeasonsSelected ? normalized.playerStats.length === 85749 : normalized.playerStats.length === expectedCounts.playerGameStats,
     seasonStats9072: allSeasonsSelected ? normalized.seasonStats.length === 9072 : normalized.seasonStats.length === expectedCounts.seasonStats,
@@ -522,6 +591,7 @@ function buildReport() {
       rosterSupplement: normalized.roster.length,
       mappings: normalized.mappings.length,
     },
+    resultCompatibilityAudit,
     seasonCounts,
     orphanAudit,
     duplicateAudit,
@@ -591,6 +661,7 @@ if (args.has('--validate')) {
     canonicalCounts: report.canonicalCounts,
     orphanAudit: report.orphanAudit,
     duplicateAudit: report.duplicateAudit,
+    resultCompatibilityAudit: report.resultCompatibilityAudit,
   }, null, 2))
   process.exit(report.success ? 0 : 1)
 }

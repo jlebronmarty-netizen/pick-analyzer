@@ -44,6 +44,24 @@ NFL-02 reuses existing shared Pick Analyzer tables:
 | `sport_lineups` | READY_FOR_FORWARD_ONLY_ROSTER_SUPPLEMENT | 2025 roster supplement |
 | `provider_entity_mappings` | READY | Deterministic provider lineage |
 
+## Game Results Production Compatibility
+
+Production `game_results` currently supports the lean canonical result shape:
+
+`id`, `game_id`, `sport_key`, `home_team`, `away_team`, `home_score`,
+`away_score`, `winner`, `commence_time`.
+
+NFL-02 keeps richer internal result lineage during normalization, but the
+production persistence payload intentionally omits unsupported optional fields:
+
+`league_key`, `result_source`, `metadata`, `updated_at`.
+
+Result lineage remains preserved because each result ID is derived from the
+canonical `sport_events.id`, `game_results.game_id` points to that event, the
+event stores `provider_ids.balldontlie`, and `provider_entity_mappings` maps
+BallDontLie event IDs back to the same canonical event. No schema migration is
+required for NFL-02.
+
 ## Temporal Contract
 
 Future NFL feature builders must use only prior completed games before a target
@@ -67,6 +85,7 @@ PASS:
 - Completed games: 1,359
 - Canceled games: 1
 - Game results: 1,359
+- Production-compatible result payloads: 1,359
 - Team game stats: 2,718
 - Player game stats: 85,749
 - Season stats: 9,072
@@ -74,6 +93,7 @@ PASS:
 - Roster supplement: 3,408
 - Orphans: 0
 - Duplicate canonical IDs: 0
+- Unsupported production result columns: 0
 - Provider calls: 0
 - Production database mutations: 0
 

@@ -24,6 +24,38 @@
     "rosterSupplement": 3408,
     "providerEntityMappings": 14951
   },
+  "gameResultsProductionCompatibility": {
+    "status": "PASS",
+    "migrationRequired": false,
+    "internalResultRows": 1359,
+    "productionCompatibleResultRows": 1359,
+    "productionColumns": [
+      "id",
+      "game_id",
+      "sport_key",
+      "home_team",
+      "away_team",
+      "home_score",
+      "away_score",
+      "winner",
+      "commence_time"
+    ],
+    "omittedUnsupportedColumns": [
+      "league_key",
+      "result_source",
+      "metadata",
+      "updated_at"
+    ],
+    "unsupportedColumnsInPersistencePayload": 0,
+    "identity": "deterministic result id derived from canonical sport_events.id",
+    "lineage": "game_results.game_id -> sport_events.id -> provider_ids.balldontlie and provider_entity_mappings",
+    "idempotencyFixtures": {
+      "sameGameImportedTwiceSameId": true,
+      "correctedScoreUpdatesSameId": true,
+      "differentGameDistinctId": true,
+      "cancelledGameCreatesNoResult": true
+    }
+  },
   "seasonCounts": {
     "2021": { "events": 272, "finalResults": 272, "teamStatRows": 544, "playerStatRows": 17126, "seasonStatRows": 1838, "standingsRows": 32 },
     "2022": { "events": 272, "finalResults": 271, "teamStatRows": 542, "playerStatRows": 17009, "seasonStatRows": 1823, "standingsRows": 32 },

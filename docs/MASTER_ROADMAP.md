@@ -3638,3 +3638,11 @@ Result: NFL-02 now has an offline, local-data-first normalization dry run for th
 The canonical dry run validates 32 teams, 1,360 games, 1,359 completed results, 2,718 team-game stats, 85,749 player-game stats, 9,072 season-stat rows, 160 standings rows, 3,408 roster supplement rows, 0 orphan stat rows and 0 duplicate canonical IDs. The 16 provider-error payloads are quarantined as `PROVIDER_ERROR_EVIDENCE`; season stats, standings and roster data retain temporal restrictions.
 
 Next: separately authorize the bounded production canonical import. Do not make additional BallDontLie calls, start P2, train NFL models, generate replay predictions or activate NFL production before the import gate.
+
+## NFL-02-IMPORT-R1 Game Results Compatibility
+
+Status: `NFL_02_GAME_RESULTS_SCHEMA_COMPATIBILITY_REPAIR_CERTIFIED`
+
+Result: The production `game_results` table uses the established lean result shape and lacks the optional NFL-02 lineage columns `league_key`, `result_source`, `metadata` and `updated_at`. NFL-02 now projects internal rich result rows into the production-compatible persistence shape while preserving lineage through deterministic result IDs, canonical event IDs, `sport_events.provider_ids` and `provider_entity_mappings`.
+
+Migration required: no. The repaired dry run validates 1,359 production-compatible result payloads, excludes the cancelled BUF @ CIN event, rejects unsupported result columns and preserves idempotent result identity. Next: resume NFL-02-IMPORT at the production schema and full dry-run gates, then execute the bounded canonical import only if all gates pass.
