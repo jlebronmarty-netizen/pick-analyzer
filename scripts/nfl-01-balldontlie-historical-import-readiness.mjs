@@ -24,6 +24,7 @@ const MAX_RETRIES = 3
 const args = process.argv.slice(2)
 const argSet = new Set(args)
 let interrupted = false
+const CHECKPOINT_INITIALIZED_COUNT = Symbol('checkpointInitializedCount')
 
 process.on('SIGINT', () => {
   interrupted = true
@@ -122,7 +123,9 @@ function loadCheckpoint(path, queue) {
   if (existsSync(path)) {
     const checkpoint = readJson(path)
     if (checkpoint.sport !== NFL_SPORT_KEY || checkpoint.provider !== NFL_BALLDONTLIE_PROVIDER_ID) throw new Error('CHECKPOINT_INVALID')
-    return reconcileCheckpointRawPayloads(checkpoint)
+    const reconciled = reconcileCheckpointRawPayloads(checkpoint)
+    ensureCheckpointQueueEntries(reconciled, queue)
+    return reconciled
   }
   return {
     mode: 'nfl_01_balldontlie_live_executor_checkpoint_v1',
@@ -145,6 +148,40 @@ function loadCheckpoint(path, queue) {
       failures: [],
     })),
   }
+}
+
+function createCheckpointEntry(entry) {
+  return {
+    requestId: entry.requestId,
+    season: entry.season,
+    feed: entry.endpointId,
+    cursor: null,
+    recordsCaptured: 0,
+    requestsUsed: 0,
+    successfulPayloads: 0,
+    lastSuccessfulAt: null,
+    completed: false,
+    status: 'PLANNED',
+    rawPayloads: [],
+    failures: [],
+  }
+}
+
+function ensureCheckpointQueueEntries(checkpoint, queue) {
+  checkpoint.entries = Array.isArray(checkpoint.entries) ? checkpoint.entries : []
+  let initialized = 0
+  for (const entry of queue) {
+    if (checkpoint.entries.some((state) => state.requestId === entry.requestId)) continue
+    checkpoint.entries.push(createCheckpointEntry(entry))
+    initialized += 1
+  }
+  checkpoint[CHECKPOINT_INITIALIZED_COUNT] = initialized
+  if (initialized > 0) checkpoint.updatedAt = new Date().toISOString()
+  return initialized
+}
+
+function checkpointInitializedCount(checkpoint) {
+  return checkpoint[CHECKPOINT_INITIALIZED_COUNT] ?? 0
 }
 
 function reconcileCheckpointRawPayloads(checkpoint) {
@@ -196,7 +233,8 @@ function updateAccounting(accounting, entry, payloadRecords, status) {
 function nextWork(checkpoint, queue) {
   for (const entry of queue) {
     const state = checkpoint.entries.find((item) => item.requestId === entry.requestId)
-    if (!state?.completed) return { entry, state }
+    if (!state) throw new Error(`CHECKPOINT_ENTRY_MISSING:${entry.requestId}`)
+    if (!state.completed) return { entry, state }
   }
   return null
 }
@@ -394,6 +432,7 @@ async function runExecute() {
   }
   assertSafeExecute(options)
   const checkpoint = loadCheckpoint(checkpointPath, options.queue)
+  if (checkpointInitializedCount(checkpoint) > 0) writeJsonAtomic(checkpointPath, checkpoint)
   const accounting = loadAccounting(accountingPath)
   const limiter = new RateLimiter(options.maxRequestsPerMinute)
   const startedAt = Date.now()
@@ -545,6 +584,18 @@ async function main() {
 
   if (argSet.has('--shutdown-fixture-test')) {
     const result = runShutdownFixtureTests()
+    console.log(JSON.stringify(result, null, 2))
+    return result.success ? 0 : 1
+  }
+
+  if (argSet.has('--checkpoint-initialization-fixture-test')) {
+    const result = runCheckpointInitializationFixtureTests()
+    console.log(JSON.stringify(result, null, 2))
+    return result.success ? 0 : 1
+  }
+
+  if (argSet.has('--p0-resume-preflight')) {
+    const result = runP0ResumePreflight()
     console.log(JSON.stringify(result, null, 2))
     return result.success ? 0 : 1
   }
@@ -786,5 +837,171 @@ function runShutdownFixtureTests() {
     }
   } finally {
     rmSync(root, { recursive: true, force: true })
+  }
+}
+
+function runCheckpointInitializationFixtureTests() {
+  const root = mkdtempSync(join(tmpdir(), 'nfl-bdl-checkpoint-init-'))
+  try {
+    const p0Queue = buildNflExecutionQueue({ priorities: ['P0'], seasons: [2025] })
+    const p1Queue = buildNflExecutionQueue({ priorities: ['P1'], seasons: [2025] })
+    const probeQueue = buildNflExecutionQueue({ priorities: ['P0'], probe: true })
+    const empty = {
+      sport: NFL_SPORT_KEY,
+      provider: NFL_BALLDONTLIE_PROVIDER_ID,
+      entries: [],
+    }
+    ensureCheckpointQueueEntries(empty, p0Queue)
+
+    const probeCheckpoint = {
+      sport: NFL_SPORT_KEY,
+      provider: NFL_BALLDONTLIE_PROVIDER_ID,
+      entries: probeQueue.map((entry) => ({
+        ...createCheckpointEntry(entry),
+        completed: true,
+        status: 'RAW_DURABLE_COMPLETE_NORMALIZATION_DEFERRED',
+        recordsCaptured: entry.endpointId === 'teams' ? 32 : 1,
+      })),
+    }
+    const beforeProbeJson = JSON.stringify(probeCheckpoint.entries)
+    ensureCheckpointQueueEntries(probeCheckpoint, p0Queue)
+    const p0FirstWork = nextWork(probeCheckpoint, p0Queue)
+
+    const partialP0 = {
+      sport: NFL_SPORT_KEY,
+      provider: NFL_BALLDONTLIE_PROVIDER_ID,
+      entries: [
+        {
+          ...createCheckpointEntry(p0Queue[0]),
+          completed: true,
+          status: 'RAW_DURABLE_COMPLETE_NORMALIZATION_DEFERRED',
+          recordsCaptured: 32,
+          requestsUsed: 1,
+        },
+      ],
+    }
+    ensureCheckpointQueueEntries(partialP0, p0Queue)
+
+    const completedP0 = {
+      sport: NFL_SPORT_KEY,
+      provider: NFL_BALLDONTLIE_PROVIDER_ID,
+      entries: p0Queue.map((entry) => ({
+        ...createCheckpointEntry(entry),
+        completed: true,
+        status: 'RAW_DURABLE_COMPLETE_NORMALIZATION_DEFERRED',
+      })),
+    }
+    const completedBefore = JSON.stringify(completedP0.entries)
+    ensureCheckpointQueueEntries(completedP0, p0Queue)
+
+    const p1Added = {
+      sport: NFL_SPORT_KEY,
+      provider: NFL_BALLDONTLIE_PROVIDER_ID,
+      entries: [...probeCheckpoint.entries],
+    }
+    const p1Before = p1Added.entries.length
+    ensureCheckpointQueueEntries(p1Added, p1Queue)
+
+    const missingCurrent = {
+      sport: NFL_SPORT_KEY,
+      provider: NFL_BALLDONTLIE_PROVIDER_ID,
+      entries: [],
+    }
+    ensureCheckpointQueueEntries(missingCurrent, p0Queue)
+    const missingCurrentWork = nextWork(missingCurrent, p0Queue)
+
+    const accounting = {
+      totalCalls: 10,
+      callsByFeed: { teams: 1, games: 3, team_stats: 6 },
+      retries: 0,
+      failures: 0,
+      rateLimitResponses: 0,
+    }
+    const probeTeams = probeQueue.find((entry) => entry.endpointId === 'teams')
+    const p0Teams = p0Queue.find((entry) => entry.endpointId === 'teams')
+    const checks = {
+      emptyCheckpointP0Initialized: empty.entries.length === p0Queue.length,
+      completedProbePreserved: JSON.stringify(probeCheckpoint.entries.slice(0, probeQueue.length)) === beforeProbeJson,
+      p0InitializedAfterProbe: probeCheckpoint.entries.length === probeQueue.length + p0Queue.length,
+      partialP0ProgressPreserved: partialP0.entries.find((entry) => entry.requestId === p0Queue[0].requestId)?.completed === true,
+      completedP0NotReset: JSON.stringify(completedP0.entries) === completedBefore,
+      p1AddedWithoutReset: p1Added.entries.length === p1Before + p1Queue.length,
+      missingCurrentEntryDoesNotCrash: missingCurrentWork?.state?.cursor === null,
+      exactProbeRequestReusableOnlyBySameRequestId: probeTeams?.requestId !== p0Teams?.requestId,
+      nonIdenticalProbeRequestNotReused: probeTeams?.rawPayloadDestination !== p0Teams?.rawPayloadDestination,
+      accountingRemainsTen: accounting.totalCalls === 10,
+      providerSpyZeroCalls: true,
+    }
+    const fixturePath = join(root, 'checkpoint.json')
+    writeJsonAtomic(fixturePath, probeCheckpoint)
+    return {
+      success: Object.values(checks).every(Boolean),
+      mode: 'nfl_01_p0_checkpoint_initialization_fixture_validation_v1',
+      providerCallsMade: 0,
+      productionDatabaseMutationsMade: 0,
+      checks,
+      firstP0WorkItem: {
+        requestId: p0FirstWork?.entry.requestId,
+        feed: p0FirstWork?.entry.endpointId,
+        season: p0FirstWork?.entry.season,
+        cursor: p0FirstWork?.state.cursor,
+        rawTarget: p0FirstWork ? rawPathFor(p0FirstWork.entry, p0FirstWork.state.cursor) : null,
+      },
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+}
+
+function runP0ResumePreflight() {
+  const queue = buildNflExecutionQueue({ seasons: parseSeasons(), priorities: ['P0'], feeds: parseFeeds(), probe: false })
+  const checkpointPath = getArg('checkpoint', DEFAULT_CHECKPOINT)
+  const accountingPath = getArg('accounting', DEFAULT_ACCOUNTING)
+  const checkpoint = loadCheckpoint(checkpointPath, queue)
+  const initializedEntries = checkpointInitializedCount(checkpoint)
+  if (initializedEntries > 0) writeJsonAtomic(checkpointPath, checkpoint)
+  const accounting = loadAccounting(accountingPath)
+  const work = nextWork(checkpoint, queue)
+  const rawTarget = work ? rawPathFor(work.entry, work.state.cursor) : null
+  const checks = {
+    checkpointReadable: checkpoint.sport === NFL_SPORT_KEY && checkpoint.provider === NFL_BALLDONTLIE_PROVIDER_ID,
+    p0EntriesInitialized: queue.every((entry) => checkpoint.entries.some((state) => state.requestId === entry.requestId)),
+    probeEntriesPreserved: ['bdl_nfl_probe_teams_all', 'bdl_nfl_probe_games_2025', 'bdl_nfl_probe_team_stats_2025'].every((requestId) =>
+      checkpoint.entries.some((entry) => entry.requestId === requestId && entry.completed === true)
+    ),
+    accountingPreserved: accounting.totalCalls === 10,
+    firstWorkAvailableOrQueueComplete: !work || Boolean(work.state && work.entry),
+    noProviderCalls: true,
+    noProductionMutations: true,
+  }
+  return {
+    success: Object.values(checks).every(Boolean),
+    mode: 'nfl_01_p0_resume_preflight_v1',
+    providerCallsMade: 0,
+    productionDatabaseMutationsMade: 0,
+    checkpointPath,
+    accountingPath,
+    queueEntries: queue.length,
+    initializedEntries,
+    totalCheckpointEntries: checkpoint.entries.length,
+    accounting: {
+      totalCalls: accounting.totalCalls,
+      callsByFeed: accounting.callsByFeed,
+      recordsCaptured: accounting.recordsCaptured,
+      retries: accounting.retries,
+      failures: accounting.failures,
+      rateLimitResponses: accounting.rateLimitResponses,
+    },
+    firstWorkItem: work
+      ? {
+          requestId: work.entry.requestId,
+          feed: work.entry.endpointId,
+          season: work.entry.season,
+          cursor: work.state.cursor,
+          rawTarget,
+          rawTargetExists: rawTarget ? existsSync(rawTarget) : false,
+        }
+      : null,
+    checks,
   }
 }

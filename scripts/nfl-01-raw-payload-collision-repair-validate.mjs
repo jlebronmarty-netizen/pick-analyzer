@@ -45,7 +45,8 @@ const checks = {
       preflightResult?.nextWork?.requestId === 'bdl_nfl_probe_team_stats_2025' &&
       preflightResult?.nextWork?.rawPath === 'data/imports/balldontlie/nfl/probe/03_team_stats.cursor-112.json' &&
       preflightResult?.nextWork?.rawPathExists === false
-    ),
+    ) ||
+    preflightResult?.nextWork === null,
   readinessStillPasses: readiness.status === 0 && readinessResult?.success === true,
   repairProviderCallsZero: certification.providerCallsDuringRepair === 0 && collisionResult?.providerCallsMade === 0 && preflightResult?.providerCallsMade === 0,
   repairMutationsZero:

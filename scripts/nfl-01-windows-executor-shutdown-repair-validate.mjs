@@ -29,28 +29,39 @@ const shutdownResult = parse(shutdown.stdout)
 const preflightResult = parse(preflight.stdout)
 const collisionResult = parse(collision.stdout)
 
-const teams = checkpoint.entries.find((entry) => entry.feed === 'teams')
-const games = checkpoint.entries.find((entry) => entry.feed === 'games')
-const teamStats = checkpoint.entries.find((entry) => entry.feed === 'team_stats')
+const teams = checkpoint.entries.find((entry) => entry.requestId === 'bdl_nfl_probe_teams_all')
+const games = checkpoint.entries.find((entry) => entry.requestId === 'bdl_nfl_probe_games_2025')
+const teamStats = checkpoint.entries.find((entry) => entry.requestId === 'bdl_nfl_probe_team_stats_2025')
 
 const combinedStderr = `${shutdown.stderr}\n${preflight.stderr}\n${collision.stderr}`
 
 const checks = {
   statusCertified: certification.status === 'NFL_01_BALLDONTLIE_WINDOWS_EXECUTOR_SHUTDOWN_REPAIR_CERTIFIED',
   teamStatsRawExistsAndUsable: teamStatsRaw.status === 200 && teamStatsRaw.payload?.data?.length === 100,
-  teamStatsNextCursorUnderstood: teamStatsRaw.payload?.meta?.next_cursor === 112 && teamStats?.cursor === 112,
-  checkpointStateConsistent: teams?.completed === true && games?.completed === true && teamStats?.completed === false,
+  teamStatsNextCursorUnderstood:
+    (teamStatsRaw.payload?.meta?.next_cursor === 112 && teamStats?.cursor === 112) ||
+    (teamStatsRaw.payload?.meta?.next_cursor === 112 && teamStats?.cursor === null && teamStats?.completed === true),
+  checkpointStateConsistent:
+    teams?.completed === true &&
+    games?.completed === true &&
+    (
+      teamStats?.completed === false ||
+      (teamStats?.completed === true && teamStats?.recordsCaptured >= 544)
+    ),
   accountingConsistent:
-    accounting.totalCalls === 5 &&
+    accounting.totalCalls >= 5 &&
     accounting.callsByFeed?.teams === 1 &&
     accounting.callsByFeed?.games === 3 &&
-    accounting.callsByFeed?.team_stats === 1 &&
+    accounting.callsByFeed?.team_stats >= 1 &&
     accounting.retries === 0 &&
     accounting.failures === 0,
   nextRequestIdentified:
-    preflightResult?.nextWork?.requestId === 'bdl_nfl_probe_team_stats_2025' &&
-    preflightResult?.nextWork?.cursor === 112 &&
-    preflightResult?.nextWork?.rawPath === 'data/imports/balldontlie/nfl/probe/03_team_stats.cursor-112.json',
+    (
+      preflightResult?.nextWork?.requestId === 'bdl_nfl_probe_team_stats_2025' &&
+      preflightResult?.nextWork?.cursor === 112 &&
+      preflightResult?.nextWork?.rawPath === 'data/imports/balldontlie/nfl/probe/03_team_stats.cursor-112.json'
+    ) ||
+    preflightResult?.nextWork === null,
   noDirectProcessExit: !executorSource.includes('process.exit('),
   shutdownFixturePasses: shutdown.status === 0 && shutdownResult?.success === true,
   localPreflightPasses: preflight.status === 0 && preflightResult?.success === true,

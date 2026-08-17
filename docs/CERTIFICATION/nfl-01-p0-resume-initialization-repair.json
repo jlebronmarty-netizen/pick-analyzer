@@ -1,0 +1,68 @@
+{
+  "status": "NFL_01_BALLDONTLIE_P0_RESUME_INITIALIZATION_REPAIR_CERTIFIED",
+  "repository": "C:\\Projects\\pick-analyzer",
+  "startingCommit": "1a9f1a5438f6773bb7f7dcc5a8a881c1457f1393",
+  "rootCause": "P0_RESUME_CHECKPOINT_NAMESPACE_INITIALIZATION_DEFECT",
+  "runtimeError": "Cannot read properties of undefined (reading 'cursor')",
+  "failurePath": {
+    "file": "scripts/nfl-01-balldontlie-historical-import-readiness.mjs",
+    "functions": [
+      "runExecute",
+      "nextWork",
+      "reuseExistingRawPayloadIfAvailable"
+    ],
+    "expression": "state.cursor",
+    "missingRequestId": "bdl_nfl_teams_all"
+  },
+  "checkpointBeforeRepair": {
+    "entries": 3,
+    "probeEntries": [
+      "bdl_nfl_probe_teams_all",
+      "bdl_nfl_probe_games_2025",
+      "bdl_nfl_probe_team_stats_2025"
+    ],
+    "remainingProbeEntries": 0
+  },
+  "initializationSemantics": {
+    "preserveExistingEntries": true,
+    "initializeMissingQueueEntriesOnly": true,
+    "preserveProbeCheckpoint": true,
+    "preserveAccounting": true,
+    "atomicCheckpointWrite": true
+  },
+  "checkpointAfterRepairPreflight": {
+    "totalEntries": 24,
+    "probeEntriesPreserved": 3,
+    "p0EntriesInitialized": 21,
+    "firstP0WorkItem": {
+      "requestId": "bdl_nfl_teams_all",
+      "feed": "teams",
+      "season": "all",
+      "cursor": null,
+      "rawTarget": "data/imports/balldontlie/nfl/identity/teams.json",
+      "rawTargetExists": false
+    }
+  },
+  "reuseDecision": {
+    "probeTeamsToP0Teams": "DO_NOT_REUSE_DIFFERENT_REQUEST_ID_AND_RAW_NAMESPACE",
+    "probeGames2025ToP0Games2025": "DO_NOT_REUSE_DIFFERENT_REQUEST_ID_AND_RAW_NAMESPACE",
+    "probeTeamStats2025ToP0TeamStats2025": "DO_NOT_REUSE_DIFFERENT_REQUEST_ID_AND_RAW_NAMESPACE",
+    "rule": "Reuse only exact checkpoint/request identity and raw payload identity; do not copy probe calls into P0 per-entry accounting."
+  },
+  "accountingPreservation": {
+    "totalCalls": 10,
+    "callsByFeed": {
+      "teams": 1,
+      "games": 3,
+      "team_stats": 6
+    },
+    "recordsCaptured": 848,
+    "retries": 0,
+    "failures": 0,
+    "rateLimitResponses": 0
+  },
+  "providerCallsDuringRepair": 0,
+  "productionDatabaseMutationsDuringRepair": 0,
+  "p0ResumeReady": true,
+  "p0ResumeCommand": "$env:NFL_BALLDONTLIE_TRIAL_ACTIVE='true'; $env:NFL_BALLDONTLIE_HISTORICAL_EXECUTION_AUTHORIZED='true'; node --loader ./scripts/local-ts-loader.mjs scripts/nfl-01-balldontlie-historical-import-readiness.mjs --execute --p0 --all-certified-seasons --resume --maxCalls=1200 --maxRuntimeMinutes=1440 --maxRequestsPerMinute=4"
+}

@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-16 NFL-01 P0 Resume Initialization Repair
+
+- NFL-01 P0 resume initialization repair is locally implemented as `NFL_01_BALLDONTLIE_P0_RESUME_INITIALIZATION_REPAIR_CERTIFIED`. The failed P0 launch made 0 provider calls and was traced to a checkpoint namespace mismatch: the live checkpoint contained completed probe request IDs while the P0 queue introduced new IDs such as `bdl_nfl_teams_all`, leaving `state` undefined before `state.cursor` was read.
+- The repair safely merges missing queue entries into the existing checkpoint while preserving completed probe entries, raw probe payloads and cumulative request accounting. Local P0 preflight initialized 21 P0 entries beside the 3 completed probe entries, preserved total trial calls at 10, selected `bdl_nfl_teams_all` as the first P0 work item, made 0 provider calls and made 0 production database mutations. P0 is ready to resume after publication/authorization.
+
 ## 2026-08-16 NFL-01 Windows Executor Shutdown Repair
 
 - NFL-01 Windows executor shutdown repair is locally implemented as `NFL_01_BALLDONTLIE_WINDOWS_EXECUTOR_SHUTDOWN_REPAIR_CERTIFIED`. The latest active-trial probe resume durably wrote `data/imports/balldontlie/nfl/probe/03_team_stats.json` with 100 records and `next_cursor=112`, so `remainingEntries=1` is expected because team_stats pagination is not complete.
