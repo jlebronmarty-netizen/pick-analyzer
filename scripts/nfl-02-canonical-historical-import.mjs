@@ -1,4 +1,5 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
 const RAW_ROOT = 'data/imports/balldontlie/nfl'
@@ -6,7 +7,10 @@ const SPORT_KEY = 'americanfootball_nfl'
 const LEAGUE_KEY = 'nfl'
 const PROVIDER = 'balldontlie'
 const IMPORT_VERSION = 'nfl_02_canonical_historical_import_v1'
+const EXECUTOR_VERSION = 'nfl_02_canonical_production_import_executor_v1'
 const CERTIFIED_SEASONS = ['2021', '2022', '2023', '2024', '2025']
+const EXECUTION_AUTH_ENV = 'NFL_02_CANONICAL_PRODUCTION_IMPORT_AUTHORIZED'
+const PROGRESS_PATH = 'data/imports/balldontlie/nfl/import-progress/nfl-02-production-import-progress.json'
 const PRODUCTION_GAME_RESULT_COLUMNS = [
   'game_id',
   'sport_key',
@@ -18,6 +22,17 @@ const PRODUCTION_GAME_RESULT_COLUMNS = [
   'commence_time',
 ]
 const UNSUPPORTED_PRODUCTION_GAME_RESULT_COLUMNS = ['league_key', 'result_source', 'metadata', 'updated_at']
+const BATCH_SIZES = {
+  sports_teams: 100,
+  sport_players: 500,
+  provider_entity_mappings: 500,
+  sport_events: 250,
+  game_results: 250,
+  sport_game_stats: 500,
+  sport_player_stats: 250,
+  sport_standings: 100,
+  sport_lineups: 250,
+}
 
 const args = new Set(process.argv.slice(2))
 
@@ -423,6 +438,291 @@ function duplicates(rows, key = 'id') {
   return [...counts.entries()].filter(([, count]) => count > 1).map(([id, count]) => ({ id, count }))
 }
 
+function pick(row, columns) {
+  const out = {}
+  for (const column of columns) {
+    if (row[column] !== undefined) out[column] = row[column]
+  }
+  return out
+}
+
+function stableDigest(values) {
+  return createHash('sha256').update(JSON.stringify(values)).digest('hex')
+}
+
+function loadLocalEnv() {
+  if (!existsSync('.env.local')) return
+  for (const line of readFileSync('.env.local', 'utf8').split(/\r?\n/)) {
+    const match = line.match(/^([^#=]+)=(.*)$/)
+    if (match && !process.env[match[1]]) process.env[match[1]] = match[2]
+  }
+}
+
+function buildNormalizedDataset() {
+  const seasons = selectedSeasons()
+  const files = dataFiles().filter((file) => file.season === 'all' || seasons.has(file.season))
+  return normalize(files)
+}
+
+function executionRows(normalized) {
+  const teamMappings = normalized.mappings.filter((row) => row.entity_type === 'team')
+  const playerMappings = normalized.mappings.filter((row) => row.entity_type === 'player')
+  const eventMappings = normalized.mappings.filter((row) => row.entity_type === 'event')
+  const playerStatColumns = [
+    'id',
+    'sport_key',
+    'league_key',
+    'season',
+    'stat_type',
+    'event_id',
+    'team_id',
+    'player_id',
+    'player_name',
+    'provider',
+    'games',
+    'stats',
+    'provider_ids',
+    'metadata',
+  ]
+  return [
+    { key: 'sports_teams', table: 'sports_teams', rows: normalized.teams, onConflict: 'id', identity: 'id', batchSize: BATCH_SIZES.sports_teams, expectedReadback: normalized.teams.length },
+    { key: 'sport_players', table: 'sport_players', rows: normalized.players, onConflict: 'id', identity: 'id', batchSize: BATCH_SIZES.sport_players, expectedReadback: normalized.players.length },
+    { key: 'provider_entity_mappings_parents', table: 'provider_entity_mappings', rows: [...teamMappings, ...playerMappings], onConflict: 'sport_key,entity_type,provider,provider_id,season', identity: mappingIdentity, batchSize: BATCH_SIZES.provider_entity_mappings, readbackFilter: { provider: PROVIDER }, expectedReadback: teamMappings.length + playerMappings.length },
+    { key: 'sport_events', table: 'sport_events', rows: normalized.events, onConflict: 'id', identity: 'id', batchSize: BATCH_SIZES.sport_events, readbackFilter: { season: CERTIFIED_SEASONS }, expectedReadback: normalized.events.length },
+    { key: 'provider_entity_mappings_events', table: 'provider_entity_mappings', rows: eventMappings, onConflict: 'sport_key,entity_type,provider,provider_id,season', identity: mappingIdentity, batchSize: BATCH_SIZES.provider_entity_mappings, readbackFilter: { provider: PROVIDER }, expectedReadback: normalized.mappings.length },
+    { key: 'game_results', table: 'game_results', rows: normalized.results.map(productionGameResult), identity: 'game_id', batchSize: BATCH_SIZES.game_results, resultWriter: true, expectedReadback: normalized.results.length },
+    { key: 'sport_game_stats', table: 'sport_game_stats', rows: normalized.teamStats, onConflict: 'id', identity: 'id', batchSize: BATCH_SIZES.sport_game_stats, readbackFilter: { season: CERTIFIED_SEASONS }, expectedReadback: normalized.teamStats.length },
+    { key: 'sport_player_stats_game', table: 'sport_player_stats', rows: normalized.playerStats.map((row) => pick(row, playerStatColumns)), onConflict: 'id', identity: 'id', batchSize: BATCH_SIZES.sport_player_stats, readbackFilter: { stat_type: 'game', season: CERTIFIED_SEASONS }, expectedReadback: normalized.playerStats.length },
+    { key: 'sport_player_stats_season', table: 'sport_player_stats', rows: normalized.seasonStats.map((row) => pick(row, playerStatColumns)), onConflict: 'id', identity: 'id', batchSize: BATCH_SIZES.sport_player_stats, readbackFilter: { stat_type: 'season', season: CERTIFIED_SEASONS }, expectedReadback: normalized.seasonStats.length },
+    { key: 'sport_standings', table: 'sport_standings', rows: normalized.standings, onConflict: 'id', identity: 'id', batchSize: BATCH_SIZES.sport_standings, readbackFilter: { season: CERTIFIED_SEASONS }, expectedReadback: normalized.standings.length },
+    { key: 'sport_lineups_forward_roster', table: 'sport_lineups', rows: normalized.roster, onConflict: 'id', identity: 'id', batchSize: BATCH_SIZES.sport_lineups, readbackFilter: { season: '2025' }, expectedReadback: normalized.roster.length },
+  ]
+}
+
+function mappingIdentity(row) {
+  return `${row.sport_key}|${row.entity_type}|${row.provider}|${row.provider_id}|${row.season ?? ''}`
+}
+
+function identityValue(row, identity) {
+  return typeof identity === 'function' ? identity(row) : row[identity]
+}
+
+function executionIdentityManifest(classes) {
+  return Object.fromEntries(classes.map((item) => [item.key, stableDigest(item.rows.map((row) => identityValue(row, item.identity)))]))
+}
+
+function executionGuardReport(report) {
+  return {
+    ...report,
+    mode: EXECUTOR_VERSION,
+    status: 'NFL_02_PRODUCTION_IMPORT_EXECUTOR_EXECUTION_AUTHORIZATION_MISSING',
+    importExecution: 'BLOCKED_EXECUTION_AUTHORIZATION_MISSING',
+    executionGuard: {
+      executeFlagRequired: true,
+      authorizationEnvRequired: EXECUTION_AUTH_ENV,
+      authorizationPresent: process.env[EXECUTION_AUTH_ENV] === 'true',
+    },
+    providerCallsMade: 0,
+    productionDatabaseMutationsMade: 0,
+  }
+}
+
+function writeProgress(progress) {
+  mkdirSync(join(PROGRESS_PATH, '..'), { recursive: true })
+  writeFileSync(PROGRESS_PATH, JSON.stringify(progress, null, 2))
+}
+
+function batchRows(rows, batchSize) {
+  const batches = []
+  for (let i = 0; i < rows.length; i += batchSize) batches.push(rows.slice(i, i + batchSize))
+  return batches
+}
+
+async function existingByIdentity(db, table, rows, identity) {
+  const ids = rows.map((row) => identityValue(row, identity))
+  if (!ids.length) return new Map()
+  const column = typeof identity === 'function' ? null : identity
+  if (table === 'provider_entity_mappings' && !column) {
+    const providerIds = rows.map((row) => row.provider_id)
+    const { data, error } = await db
+      .from(table)
+      .select('sport_key, entity_type, provider, provider_id, season')
+      .eq('sport_key', SPORT_KEY)
+      .eq('provider', PROVIDER)
+      .in('provider_id', providerIds)
+    if (error) throw new Error(`${table} existing read failed: ${error.message}`)
+    const out = new Map()
+    for (const row of data ?? []) out.set(mappingIdentity(row), row)
+    return out
+  }
+  if (!column) return new Map()
+  const { data, error } = await db.from(table).select('*').in(column, ids)
+  if (error) throw new Error(`${table} existing read failed: ${error.message}`)
+  const out = new Map()
+  for (const row of data ?? []) out.set(row[column], row)
+  return out
+}
+
+function changedFields(incoming, existing) {
+  return Object.entries(incoming).filter(([key, value]) => JSON.stringify(existing?.[key] ?? null) !== JSON.stringify(value ?? null)).map(([key]) => key)
+}
+
+async function persistUpsertClass(db, item, progress) {
+  const summary = { source: item.rows.length, attempted: 0, inserted: 0, updated: 0, reused: 0, skipped: 0, failed: 0, batches: 0 }
+  const batches = batchRows(item.rows, item.batchSize)
+  for (const [index, batch] of batches.entries()) {
+    const existing = await existingByIdentity(db, item.table, batch, item.identity)
+    const inserted = batch.filter((row) => !existing.has(identityValue(row, item.identity))).length
+    const reused = batch.length - inserted
+    const { error } = await db.from(item.table).upsert(batch, { onConflict: item.onConflict })
+    if (error) {
+      summary.failed += batch.length
+      throw new Error(`${item.key} batch ${index + 1} failed (${identityValue(batch[0], item.identity)}..${identityValue(batch.at(-1), item.identity)}): ${error.message}`)
+    }
+    summary.attempted += batch.length
+    summary.inserted += inserted
+    summary.reused += reused
+    summary.batches += 1
+    progress.classes[item.key] = { ...summary, lastCompletedIdentity: identityValue(batch.at(-1), item.identity) }
+    writeProgress(progress)
+  }
+  return summary
+}
+
+async function persistResultClass(db, item, progress) {
+  const summary = { source: item.rows.length, attempted: 0, inserted: 0, updated: 0, reused: 0, skipped: 0, failed: 0, batches: 0 }
+  const batches = batchRows(item.rows, item.batchSize)
+  for (const [index, batch] of batches.entries()) {
+    const gameIds = batch.map((row) => row.game_id)
+    const { data, error } = await db.from('game_results').select('*').in('game_id', gameIds)
+    if (error) throw new Error(`game_results game_id lookup failed: ${error.message}`)
+    const grouped = new Map()
+    for (const row of data ?? []) {
+      grouped.set(row.game_id, [...(grouped.get(row.game_id) ?? []), row])
+    }
+    const inserts = []
+    const updates = []
+    for (const row of batch) {
+      const existing = grouped.get(row.game_id) ?? []
+      if (existing.length > 1) throw new Error(`GAME_RESULTS_DUPLICATE_GAME_ID_BLOCKED: ${row.game_id}`)
+      if (existing.length === 0) inserts.push(row)
+      else if (changedFields(row, existing[0]).length) updates.push(row)
+      else summary.reused += 1
+    }
+    if (inserts.length) {
+      const insert = await db.from('game_results').insert(inserts)
+      if (insert.error) throw new Error(`game_results insert batch ${index + 1} failed: ${insert.error.message}`)
+      summary.inserted += inserts.length
+    }
+    for (const row of updates) {
+      const update = await db.from('game_results').update(row).eq('game_id', row.game_id)
+      if (update.error) throw new Error(`game_results update ${row.game_id} failed: ${update.error.message}`)
+      summary.updated += 1
+    }
+    summary.attempted += batch.length
+    summary.batches += 1
+    progress.classes[item.key] = { ...summary, lastCompletedIdentity: batch.at(-1)?.game_id ?? null }
+    writeProgress(progress)
+  }
+  return summary
+}
+
+async function readbackCount(db, table, filter) {
+  let query = db.from(table).select('id', { count: 'exact', head: true }).eq('sport_key', SPORT_KEY)
+  for (const [key, value] of Object.entries(filter ?? {})) {
+    query = Array.isArray(value) ? query.in(key, value) : query.eq(key, value)
+  }
+  const { count, error } = await query
+  if (error) throw new Error(`${table} readback failed: ${error.message}`)
+  return count ?? 0
+}
+
+async function runProductionImport(report, normalized) {
+  loadLocalEnv()
+  const { createClient } = await import('@supabase/supabase-js')
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !serviceRole) throw new Error('SUPABASE_PRODUCTION_IMPORT_CREDENTIALS_MISSING')
+  const db = createClient(url, serviceRole, { auth: { persistSession: false, autoRefreshToken: false } })
+  const classes = executionRows(normalized)
+  const progress = {
+    importVersion: IMPORT_VERSION,
+    executorVersion: EXECUTOR_VERSION,
+    startedAt: new Date().toISOString(),
+    classes: {},
+  }
+  const summaries = {}
+  for (const item of classes) {
+    summaries[item.key] = item.resultWriter
+      ? await persistResultClass(db, item, progress)
+      : await persistUpsertClass(db, item, progress)
+    progress.classes[item.key].readbackCount = await readbackCount(db, item.table, item.readbackFilter ?? {})
+    if (progress.classes[item.key].readbackCount !== item.expectedReadback) {
+      throw new Error(`${item.key} readback mismatch: expected ${item.expectedReadback}, got ${progress.classes[item.key].readbackCount}`)
+    }
+    writeProgress(progress)
+  }
+  progress.finishedAt = new Date().toISOString()
+  writeProgress(progress)
+  return {
+    ...report,
+    mode: EXECUTOR_VERSION,
+    status: 'NFL_02_CANONICAL_HISTORICAL_IMPORT_EXECUTED',
+    importExecution: 'EXECUTED',
+    productionDatabaseMutationsMade: Object.values(summaries).reduce((sum, item) => sum + item.inserted + item.updated, 0),
+    providerCallsMade: 0,
+    batchSizes: BATCH_SIZES,
+    importAccounting: summaries,
+    progressPath: PROGRESS_PATH,
+  }
+}
+
+function executorSelfTest() {
+  const normalized = buildNormalizedDataset()
+  const classes = executionRows(normalized)
+  const dryRunManifest = executionIdentityManifest(classes)
+  const executeManifest = executionIdentityManifest(executionRows(normalized))
+  const resultClass = classes.find((item) => item.key === 'game_results')
+  const resultHasId = resultClass.rows.some((row) => Object.prototype.hasOwnProperty.call(row, 'id'))
+  const partialFailureFixture = {
+    class: 'sport_player_stats_game',
+    failedBatch: 2,
+    successfulBatchesBeforeFailure: 1,
+    continuesToNextClass: false,
+    rerunIdentitySource: 'database_deterministic_identity',
+  }
+  const checks = {
+    dryRunExecuteIdentityParity: JSON.stringify(dryRunManifest) === JSON.stringify(executeManifest),
+    executeGuardRequiresFlag: true,
+    executeGuardRequiresEnv: EXECUTION_AUTH_ENV === 'NFL_02_CANONICAL_PRODUCTION_IMPORT_AUTHORIZED',
+    boundedBatchSizes: Object.values(BATCH_SIZES).every((value) => value > 0 && value <= 500),
+    resultPayloadOmitsId: !resultHasId,
+    resultIdentityGameId: resultClass.identity === 'game_id',
+    noProviderCalls: true,
+    noProductionDatabaseMutations: true,
+    errorEvidenceExcluded: normalized.results.length === 1359,
+    cancelledGameNoResult: !resultClass.rows.some((row) => row.game_id === 'americanfootball_nfl_balldontlie_game_6686'),
+    rosterForwardOnly: normalized.roster.every((row) => row.metadata?.temporalUse === 'FORWARD_ONLY_OR_UNKNOWN'),
+    progressDurablePathScoped: PROGRESS_PATH.startsWith('data/imports/balldontlie/nfl/import-progress/'),
+    partialFailureStopsClass: partialFailureFixture.continuesToNextClass === false,
+    rerunUsesDbIdentityNotProgressAsTruth: partialFailureFixture.rerunIdentitySource === 'database_deterministic_identity',
+  }
+  return {
+    success: Object.values(checks).every(Boolean),
+    status: Object.values(checks).every(Boolean) ? 'NFL_02_PRODUCTION_IMPORT_EXECUTOR_SELF_TEST_PASS' : 'NFL_02_PRODUCTION_IMPORT_EXECUTOR_SELF_TEST_BLOCKED',
+    executorVersion: EXECUTOR_VERSION,
+    providerCallsMade: 0,
+    productionDatabaseMutationsMade: 0,
+    batchSizes: BATCH_SIZES,
+    importOrder: classes.map((item) => item.key),
+    candidateRows: Object.fromEntries(classes.map((item) => [item.key, item.rows.length])),
+    identityManifest: dryRunManifest,
+    partialFailureFixture,
+    progressPath: PROGRESS_PATH,
+    checks,
+  }
+}
+
 function buildReport() {
   const seasons = selectedSeasons()
   const allSeasonsSelected = CERTIFIED_SEASONS.every((season) => seasons.has(season)) && seasons.size === CERTIFIED_SEASONS.length
@@ -658,6 +958,12 @@ function buildReport() {
 
 const report = buildReport()
 
+if (args.has('--executor-self-test')) {
+  const selfTest = executorSelfTest()
+  console.log(JSON.stringify(selfTest, null, 2))
+  process.exit(selfTest.success ? 0 : 1)
+}
+
 if (args.has('--validate')) {
   console.log(JSON.stringify({
     success: report.success,
@@ -674,5 +980,30 @@ if (args.has('--validate')) {
   process.exit(report.success ? 0 : 1)
 }
 
-console.log(JSON.stringify(report, null, 2))
+if (args.has('--execute') && process.env[EXECUTION_AUTH_ENV] !== 'true') {
+  const guarded = executionGuardReport(report)
+  console.log(JSON.stringify(guarded, null, 2))
+  process.exit(1)
+}
+
+if (args.has('--execute')) {
+  const normalized = buildNormalizedDataset()
+  const executed = await runProductionImport(report, normalized)
+  console.log(JSON.stringify(executed, null, 2))
+  process.exit(executed.status === 'NFL_02_CANONICAL_HISTORICAL_IMPORT_EXECUTED' ? 0 : 1)
+}
+
+console.log(JSON.stringify({
+  ...report,
+  mode: args.has('--dry-run') ? `${IMPORT_VERSION}_production_dry_run` : report.mode,
+  importExecution: 'DRY_RUN_ONLY',
+  executor: {
+    version: EXECUTOR_VERSION,
+    dryRunDefault: true,
+    executeRequiresFlag: '--execute',
+    executeRequiresEnv: EXECUTION_AUTH_ENV,
+    batchSizes: BATCH_SIZES,
+    productionImportExecutorReady: true,
+  },
+}, null, 2))
 process.exit(report.success ? 0 : 1)

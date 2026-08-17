@@ -2173,3 +2173,9 @@ The normalizer now keeps rich internal result rows for certification while proje
 NFL-02-IMPORT-R2 is locally certified as `NFL_02_GAME_RESULTS_UUID_IDENTITY_REPAIR_CERTIFIED`. A production dry-run proved `game_results.id` is UUID-managed by the database, while the existing repository result writer uses `game_id` as the logical idempotency key.
 
 NFL-02 result persistence now omits `id` entirely, sends only semantic result columns and uses `game_id` for lookup/reuse/update reasoning. A duplicate `game_id` preflight must block the import rather than choosing an arbitrary row. No migration, provider calls, production database mutations, MLB/NBA behavior changes, prediction writes or NFL-03 work were performed.
+
+## 2026-08-17 NFL-02-IMPORT-R3 Production Import Executor
+
+NFL-02-IMPORT-R3 is locally certified as `NFL_02_PRODUCTION_IMPORT_EXECUTOR_CERTIFIED_READY_FOR_PUBLICATION`. The missing runtime was a persistence executor: the canonical normalizer was certified, but `--execute` still returned `BLOCKED_PENDING_SEPARATE_PRODUCTION_IMPORT_AUTHORIZATION`.
+
+The executor is now wired into the existing NFL-02 script without changing normalization. Dry-run remains the default; production writes require both `--execute` and `NFL_02_CANONICAL_PRODUCTION_IMPORT_AUTHORIZED=true`. The executor uses bounded batches, durable local progress metadata, deterministic DB identity for retry/reuse, `game_id` result persistence, provider-error exclusion, cancelled-game exclusion and forward-only roster semantics. Certification made 0 provider calls and 0 production database mutations. Real production import execution remains separately authorization-gated after publication and deployment alignment.

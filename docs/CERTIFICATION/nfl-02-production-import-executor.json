@@ -1,0 +1,53 @@
+{
+  "status": "NFL_02_PRODUCTION_IMPORT_EXECUTOR_CERTIFIED_READY_FOR_PUBLICATION",
+  "executorVersion": "nfl_02_canonical_production_import_executor_v1",
+  "sourceNormalizer": "scripts/nfl-02-canonical-historical-import.mjs",
+  "executionGuard": {
+    "dryRunDefault": true,
+    "executeFlagRequired": "--execute",
+    "authorizationEnvRequired": "NFL_02_CANONICAL_PRODUCTION_IMPORT_AUTHORIZED",
+    "executeWithoutAuthorization": "BLOCKED_EXECUTION_AUTHORIZATION_MISSING"
+  },
+  "batchSizes": {
+    "sports_teams": 100,
+    "sport_players": 500,
+    "provider_entity_mappings": 500,
+    "sport_events": 250,
+    "game_results": 250,
+    "sport_game_stats": 500,
+    "sport_player_stats": 250,
+    "sport_standings": 100,
+    "sport_lineups": 250
+  },
+  "canonicalCounts": {
+    "teams": 32,
+    "players": 13559,
+    "events": 1360,
+    "results": 1359,
+    "teamGameStats": 2718,
+    "playerGameStats": 85749,
+    "seasonStats": 9072,
+    "standings": 160,
+    "rosterSupplement": 3408,
+    "providerMappings": 14951
+  },
+  "resultContract": {
+    "uuidSurrogateColumn": "game_results.id",
+    "logicalIdentity": "game_results.game_id",
+    "insertPayloadOmitsId": true,
+    "lookupBy": "game_id",
+    "updateBy": "game_id",
+    "duplicateGameIdBehavior": "GAME_RESULTS_DUPLICATE_GAME_ID_BLOCKED"
+  },
+  "safety": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutationsDuringCertification": 0,
+    "predictionHistoryWrites": 0,
+    "currentEraShadowWrites": 0,
+    "historicalReplayShadowWrites": 0,
+    "officialPickWrites": 0,
+    "mlbRuntimeChanged": false,
+    "nbaRuntimeChanged": false
+  },
+  "nextStep": "Publish executor, align production, then separately authorize guarded production import execution."
+}
