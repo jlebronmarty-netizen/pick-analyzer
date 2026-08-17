@@ -1,0 +1,102 @@
+{
+  "phase": "NFL-01 P1 Failure Contract Repair / Descope Audit",
+  "status": "NFL_01_P1_TARGETED_REPAIR_READY_FOR_LIVE_PROBE",
+  "generatedAt": "2026-08-17T21:50:13Z",
+  "providerCallsMade": 0,
+  "productionDatabaseMutationsMade": 0,
+  "sourceCommit": "c314e528c1a80c881d31ecad94353b6e8247ad2e",
+  "accounting": {
+    "totalCalls": 1712,
+    "successfulPayloads": 1696,
+    "failures": 16,
+    "rateLimitResponses": 0
+  },
+  "failedPayloads": {
+    "advanced_passing_stats": {
+      "seasons": [2021, 2022, 2023, 2024, 2025],
+      "httpStatus": 404,
+      "body": { "error": "Route not found" },
+      "classification": "ALREADY_COVERED_BY_P0_AND_UNSUPPORTED_BY_OBSERVED_PROVIDER_ROUTE",
+      "targetedRetryRecommended": false
+    },
+    "advanced_rushing_stats": {
+      "seasons": [2021, 2022, 2023, 2024, 2025],
+      "httpStatus": 404,
+      "body": { "error": "Route not found" },
+      "classification": "ALREADY_COVERED_BY_P0_AND_UNSUPPORTED_BY_OBSERVED_PROVIDER_ROUTE",
+      "targetedRetryRecommended": false
+    },
+    "advanced_receiving_stats": {
+      "seasons": [2021, 2022, 2023, 2024, 2025],
+      "httpStatus": 404,
+      "body": { "error": "Route not found" },
+      "classification": "ALREADY_COVERED_BY_P0_AND_UNSUPPORTED_BY_OBSERVED_PROVIDER_ROUTE",
+      "targetedRetryRecommended": false
+    },
+    "team_roster": {
+      "season": 2025,
+      "httpStatus": 400,
+      "body": { "errors": [{ "param": "id", "error": "Invalid value" }] },
+      "classification": "REPAIRABLE_WITH_CAPTURED_TEAM_IDS_BUT_TEMPORAL_VALUE_FORWARD_OR_UNKNOWN",
+      "targetedRetryRecommended": true
+    }
+  },
+  "p0CoreStatsOverlap": {
+    "passing": [
+      "passing_attempts",
+      "passing_completions",
+      "passing_yards",
+      "passing_touchdowns",
+      "passing_interceptions",
+      "sacks",
+      "qbr",
+      "qb_rating",
+      "yards_per_pass_attempt"
+    ],
+    "rushing": [
+      "rushing_attempts",
+      "rushing_yards",
+      "rushing_touchdowns",
+      "long_rushing",
+      "yards_per_rush_attempt"
+    ],
+    "receiving": [
+      "receiving_targets",
+      "receptions",
+      "receiving_yards",
+      "receiving_touchdowns",
+      "long_reception",
+      "yards_per_reception"
+    ]
+  },
+  "targetedRetryQueue": {
+    "feeds": ["team_roster"],
+    "season": 2025,
+    "entries": 32,
+    "estimatedCalls": 32,
+    "firstRequest": {
+      "requestId": "bdl_nfl_team_roster_2025_team_1",
+      "endpoint": "/nfl/v1/teams/1/roster",
+      "params": { "per_page": 100, "season": 2025 },
+      "rawTarget": "data/imports/balldontlie/nfl/2025/rosters/1.json"
+    }
+  },
+  "errorPayloadQuarantine": {
+    "classification": "PROVIDER_ERROR_EVIDENCE",
+    "normalizationEligible": false,
+    "rawPayloadsPreserved": true,
+    "historicalAccountingPreserved": true
+  },
+  "checkpointFailureSemantics": {
+    "non2xxCompleted": false,
+    "existingProviderErrorStopReason": "PROVIDER_ERROR_EVIDENCE_REQUIRES_REVIEW",
+    "newProviderErrorStopReason": "PROVIDER_ERROR_RAW_DURABLE_REQUIRES_REVIEW",
+    "successfulTerminalPayloadStatus": "RAW_DURABLE_COMPLETE_NORMALIZATION_DEFERRED"
+  },
+  "trialDecision": {
+    "targetedTrialRepairRecommended": true,
+    "p2DownloadRecommended": false,
+    "nfl02CoreDataReady": true,
+    "nextPhase": "NFL-01 targeted roster live probe or NFL-02 raw normalization if roster is deferred"
+  }
+}

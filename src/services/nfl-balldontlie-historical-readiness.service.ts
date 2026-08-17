@@ -50,6 +50,7 @@ export type NflExecutionQueueEntry = NflTrialManifestEntry & {
   cursor: number | null
   completed: boolean
   p0Required: boolean
+  providerTeamId?: number
 }
 
 export const RECOMMENDED_NFL_HISTORICAL_SEASONS = [2021, 2022, 2023, 2024, 2025]
@@ -431,6 +432,28 @@ export function buildNflExecutionQueue(options: {
       rawPayloadDestination: options.probe
         ? `${NFL_BALLDONTLIE_RAW_ROOT}/probe/${String(index + 1).padStart(2, '0')}_${entry.endpointId}.json`
         : entry.rawPayloadDestination,
+    }))
+}
+
+export function buildNflTeamRosterRepairQueue(teamIds: number[], season = 2025): NflExecutionQueueEntry[] {
+  const endpoint = NFL_BALLDONTLIE_ENDPOINTS.find((item) => item.id === 'team_roster')
+  if (!endpoint) return []
+
+  return [...new Set(teamIds)]
+    .filter((teamId) => Number.isInteger(teamId) && teamId > 0)
+    .sort((a, b) => a - b)
+    .map((teamId) => ({
+      ...buildManifestEntry(endpoint, season, endpoint.estimatedRowsPerSeason / NFL_TEAMS, 1, 'team-season'),
+      requestId: `bdl_nfl_team_roster_${season}_team_${teamId}`,
+      estimatedRows: Math.ceil(endpoint.estimatedRowsPerSeason / NFL_TEAMS),
+      estimatedRequests: 1,
+      endpointPath: endpoint.path.replaceAll('{teamId}', String(teamId)),
+      rawPayloadDestination: endpoint.rawDestination.replaceAll('{season}', String(season)).replaceAll('{teamId}', String(teamId)),
+      params: { per_page: 100, season },
+      cursor: null,
+      completed: false,
+      p0Required: false,
+      providerTeamId: teamId,
     }))
 }
 

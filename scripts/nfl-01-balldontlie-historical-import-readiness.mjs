@@ -12,6 +12,7 @@ import {
   NFL_SPORT_KEY,
   RECOMMENDED_NFL_HISTORICAL_SEASONS,
   buildNflExecutionQueue,
+  buildNflTeamRosterRepairQueue,
   getNflTrialExecutionCommands,
   summarizeNflBallDontLieHistoricalReadiness,
   validateNflBallDontLieHistoricalReadiness,
@@ -74,6 +75,11 @@ function parseFeeds() {
   return feed ? feed.split(',').map((value) => value.trim()).filter(Boolean) : null
 }
 
+function buildExecutionQueue() {
+  if (argSet.has('--p1-targeted-repair')) return buildP1TargetedRepairQueue()
+  return buildNflExecutionQueue({ seasons: parseSeasons(), priorities: parsePriorities(), feeds: parseFeeds(), probe: argSet.has('--probe') })
+}
+
 function writeJsonAtomic(path, value) {
   mkdirSync(dirname(path), { recursive: true })
   const temp = `${path}.tmp`
@@ -112,7 +118,8 @@ function sanitizeHeaders(headers) {
 
 function rawPathFor(entry, cursor) {
   const cursorLabel = cursor === null || cursor === undefined ? 'start' : `cursor-${cursor}`
-  const target = entry.rawPayloadDestination.replaceAll('*', cursorLabel).replaceAll('{teamId}', 'resolved-later')
+  const teamId = entry.providerTeamId ?? entry.params?.team_id ?? entry.params?.teamId ?? 'resolved-later'
+  const target = entry.rawPayloadDestination.replaceAll('*', cursorLabel).replaceAll('{teamId}', String(teamId))
   if (!entry.rawPayloadDestination.includes('*') && cursor !== null && cursor !== undefined) {
     return target.replace(/\.json$/u, `.${cursorLabel}.json`)
   }
@@ -191,6 +198,12 @@ function reconcileCheckpointRawPayloads(checkpoint) {
     if (!latest?.path || !existsSync(latest.path)) continue
     const envelope = readJson(latest.path)
     const cursor = nextCursor(envelope.payload)
+    if (Number(envelope.status) >= 400) {
+      state.cursor = cursor
+      state.completed = false
+      state.status = 'PROVIDER_ERROR_EVIDENCE'
+      continue
+    }
     state.cursor = cursor
     state.completed = cursor === null
     if (state.completed && state.status === 'RAW_DURABLE_NORMALIZATION_DEFERRED') state.status = 'RAW_DURABLE_COMPLETE_NORMALIZATION_DEFERRED'
@@ -334,10 +347,11 @@ function reuseExistingRawPayloadIfAvailable(entry, state) {
   if (!existsSync(rawPath)) return null
   const existing = readExistingRawPayload(rawPath, entry, state.cursor)
   const payloadRecords = recordsIn(existing.envelope.payload)
-  state.status = 'RAW_DURABLE_REUSED_NORMALIZATION_DEFERRED'
+  const providerError = Number(existing.envelope.status) >= 400
+  state.status = providerError ? 'PROVIDER_ERROR_EVIDENCE' : 'RAW_DURABLE_REUSED_NORMALIZATION_DEFERRED'
   state.recordsCaptured = Math.max(state.recordsCaptured ?? 0, payloadRecords)
-  state.successfulPayloads = Math.max(state.successfulPayloads ?? 0, 1)
-  state.lastSuccessfulAt = state.lastSuccessfulAt ?? new Date().toISOString()
+  state.successfulPayloads = providerError ? state.successfulPayloads ?? 0 : Math.max(state.successfulPayloads ?? 0, 1)
+  state.lastSuccessfulAt = providerError ? state.lastSuccessfulAt : state.lastSuccessfulAt ?? new Date().toISOString()
   state.rawPayloads = Array.isArray(state.rawPayloads) ? state.rawPayloads : []
   if (!state.rawPayloads.some((payload) => payload.path === rawPath)) {
     state.rawPayloads.push({
@@ -348,12 +362,13 @@ function reuseExistingRawPayloadIfAvailable(entry, state) {
     })
   }
   state.cursor = nextCursor(existing.envelope.payload)
-  state.completed = state.cursor === null
+  state.completed = !providerError && state.cursor === null
   state.updatedAt = new Date().toISOString()
   return {
     rawPath,
     payloadRecords,
     cursor: state.cursor,
+    providerError,
   }
 }
 
@@ -382,7 +397,8 @@ class RateLimiter {
 
 async function fetchProviderPage(entry, state, apiKey, limiter) {
   await limiter.wait()
-  const url = new URL(`${NFL_BALLDONTLIE_BASE_URL}${entry.endpointPath}`)
+  const endpointPath = entry.providerTeamId ? entry.endpointPath.replaceAll('{teamId}', String(entry.providerTeamId)) : entry.endpointPath
+  const url = new URL(`${NFL_BALLDONTLIE_BASE_URL}${endpointPath}`)
   appendParams(url, entry.params, state.cursor)
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 25_000)
@@ -425,7 +441,7 @@ async function runExecute() {
   const accountingPath = getArg('accounting', DEFAULT_ACCOUNTING)
   const options = {
     execute: argSet.has('--execute'),
-    queue: buildNflExecutionQueue({ seasons: parseSeasons(), priorities: parsePriorities(), feeds: parseFeeds(), probe }),
+    queue: buildExecutionQueue(),
     maxCalls: numberArg('maxCalls', probe ? 3 : 25),
     maxRuntimeMinutes: numberArg('maxRuntimeMinutes', probe ? 5 : 30),
     maxRequestsPerMinute: numberArg('maxRequestsPerMinute', NFL_BALLDONTLIE_SAFE_TRIAL_REQUESTS_PER_MINUTE),
@@ -459,6 +475,10 @@ async function runExecute() {
       checkpoint.updatedAt = new Date().toISOString()
       writeJsonAtomic(checkpointPath, checkpoint)
       writeJsonAtomic(accountingPath, accounting)
+      if (reused.providerError) {
+        stopReason = 'PROVIDER_ERROR_EVIDENCE_REQUIRES_REVIEW'
+        break
+      }
       continue
     }
     let response = null
@@ -517,13 +537,23 @@ async function runExecute() {
       stopReason = 'PROVIDER_ERROR_STREAK'
       break
     }
+    if (!response.ok) {
+      stopReason = 'PROVIDER_ERROR_RAW_DURABLE_REQUIRES_REVIEW'
+      break
+    }
   }
 
   if (!stopReason && callsThisRun >= options.maxCalls) stopReason = 'MAX_CALLS_REACHED'
   writeJsonAtomic(checkpointPath, checkpoint)
   writeJsonAtomic(accountingPath, accounting)
+  const blockingStopReasons = [
+    'AUTH_OR_TIER_FAILURE',
+    'PROVIDER_ERROR_STREAK',
+    'PROVIDER_ERROR_EVIDENCE_REQUIRES_REVIEW',
+    'PROVIDER_ERROR_RAW_DURABLE_REQUIRES_REVIEW',
+  ]
   return {
-    success: !['AUTH_OR_TIER_FAILURE', 'PROVIDER_ERROR_STREAK'].includes(stopReason),
+    success: !blockingStopReasons.includes(stopReason),
     mode: 'nfl_01_balldontlie_live_executor_v1',
     stopReason,
     providerCallsMade: callsThisRun,
@@ -538,7 +568,7 @@ async function runExecute() {
 }
 
 function dryRun() {
-  const queue = buildNflExecutionQueue({ seasons: parseSeasons(), priorities: parsePriorities(), feeds: parseFeeds(), probe: argSet.has('--probe') })
+  const queue = buildExecutionQueue()
   return {
     ...summarizeNflBallDontLieHistoricalReadiness(),
     executionReadiness: validateNflTrialExecutionReadiness().summary,
@@ -552,6 +582,111 @@ function dryRun() {
     },
     providerCallsMade: 0,
     productionDatabaseMutationsMade: 0,
+  }
+}
+
+function loadCapturedNflTeamIds() {
+  const candidates = [
+    join(NFL_BALLDONTLIE_RAW_ROOT, 'identity', 'teams.json'),
+    join(NFL_BALLDONTLIE_RAW_ROOT, 'probe', '01_teams.json'),
+  ]
+  const teamIds = []
+  for (const path of candidates) {
+    if (!existsSync(path)) continue
+    const envelope = readJson(path)
+    for (const team of envelope.payload?.data ?? []) {
+      if (Number.isInteger(Number(team.id))) teamIds.push(Number(team.id))
+    }
+    if (teamIds.length > 0) break
+  }
+  return [...new Set(teamIds)].sort((a, b) => a - b)
+}
+
+function buildP1TargetedRepairQueue() {
+  return buildNflTeamRosterRepairQueue(loadCapturedNflTeamIds(), 2025)
+}
+
+function runP1FailureContractAudit() {
+  const checkpointPath = getArg('checkpoint', DEFAULT_CHECKPOINT)
+  const accountingPath = getArg('accounting', DEFAULT_ACCOUNTING)
+  const checkpoint = loadCheckpoint(checkpointPath, [])
+  const accounting = loadAccounting(accountingPath)
+  const p1Feeds = new Set(['season_stats', 'standings', 'advanced_passing_stats', 'advanced_rushing_stats', 'advanced_receiving_stats', 'team_roster'])
+  const p1Entries = (checkpoint.entries ?? []).filter((entry) => p1Feeds.has(entry.feed))
+  const failed = []
+  const coreStatsFields = new Set()
+
+  for (const entry of checkpoint.entries ?? []) {
+    for (const payload of entry.rawPayloads ?? []) {
+      if (!existsSync(payload.path)) continue
+      const envelope = readJson(payload.path)
+      if (entry.feed === 'stats') {
+        for (const row of envelope.payload?.data ?? []) {
+          for (const key of Object.keys(row)) coreStatsFields.add(key)
+        }
+      }
+      if (p1Feeds.has(entry.feed) && Number(envelope.status) >= 400) {
+        failed.push({
+          requestId: entry.requestId,
+          feed: entry.feed,
+          season: entry.season,
+          endpointPath: envelope.endpointPath,
+          params: envelope.params,
+          cursor: envelope.cursor ?? null,
+          rawPath: payload.path,
+          httpStatus: envelope.status,
+          payload: envelope.payload,
+          completed: entry.completed,
+          status: entry.status,
+          classification: entry.feed === 'team_roster' ? 'TEAM_ROSTER_REQUEST_CONSTRUCTION_DEFECT' : 'UNSUPPORTED_BY_OBSERVED_PROVIDER_ROUTE',
+        })
+      }
+    }
+  }
+
+  const advancedOverlap = {
+    passing: ['passing_attempts', 'passing_completions', 'passing_yards', 'passing_touchdowns', 'passing_interceptions', 'sacks', 'qbr', 'qb_rating', 'yards_per_pass_attempt'].filter((field) => coreStatsFields.has(field)),
+    rushing: ['rushing_attempts', 'rushing_yards', 'rushing_touchdowns', 'long_rushing', 'yards_per_rush_attempt'].filter((field) => coreStatsFields.has(field)),
+    receiving: ['receiving_targets', 'receptions', 'receiving_yards', 'receiving_touchdowns', 'long_reception', 'yards_per_reception'].filter((field) => coreStatsFields.has(field)),
+  }
+  const rosterQueue = buildP1TargetedRepairQueue()
+  const checks = {
+    allP1EntriesPresent: p1Entries.length === 26,
+    failedPayloadsClassified: failed.length === 16,
+    advancedErrorsAreRouteNotFound: failed.filter((item) => item.feed.startsWith('advanced_')).every((item) => item.httpStatus === 404 && item.payload?.error === 'Route not found'),
+    rosterErrorIdentified: failed.some((item) => item.feed === 'team_roster' && item.httpStatus === 400),
+    coreStatsOverlapPresent: advancedOverlap.passing.length >= 6 && advancedOverlap.rushing.length >= 4 && advancedOverlap.receiving.length >= 5,
+    rosterRepairQueueUsesCapturedTeams: rosterQueue.length === 32 && rosterQueue.every((entry) => Number.isInteger(entry.providerTeamId)),
+    noProviderCalls: true,
+    noProductionMutations: true,
+  }
+
+  return {
+    success: Object.values(checks).every(Boolean),
+    mode: 'nfl_01_p1_failure_contract_repair_audit_v1',
+    providerCallsMade: 0,
+    productionDatabaseMutationsMade: 0,
+    accounting: {
+      totalCalls: accounting.totalCalls,
+      successfulPayloads: accounting.successfulPayloads,
+      failures: accounting.failures,
+      rateLimitResponses: accounting.rateLimitResponses,
+    },
+    failed,
+    advancedOverlap,
+    advancedDecision: {
+      advanced_passing_stats: 'ALREADY_COVERED_BY_P0_AND_UNSUPPORTED_BY_OBSERVED_PROVIDER_ROUTE',
+      advanced_rushing_stats: 'ALREADY_COVERED_BY_P0_AND_UNSUPPORTED_BY_OBSERVED_PROVIDER_ROUTE',
+      advanced_receiving_stats: 'ALREADY_COVERED_BY_P0_AND_UNSUPPORTED_BY_OBSERVED_PROVIDER_ROUTE',
+    },
+    rosterDecision: 'REPAIRABLE_WITH_CAPTURED_TEAM_IDS_BUT_TEMPORAL_VALUE_FORWARD_OR_UNKNOWN',
+    rosterQueue: {
+      entries: rosterQueue.length,
+      estimatedCalls: rosterQueue.reduce((sum, entry) => sum + entry.estimatedRequests, 0),
+      first: rosterQueue[0] ?? null,
+      sample: rosterQueue.slice(0, 5),
+    },
+    checks,
   }
 }
 
@@ -596,6 +731,12 @@ async function main() {
 
   if (argSet.has('--p0-resume-preflight')) {
     const result = runP0ResumePreflight()
+    console.log(JSON.stringify(result, null, 2))
+    return result.success ? 0 : 1
+  }
+
+  if (argSet.has('--p1-failure-contract-audit')) {
+    const result = runP1FailureContractAudit()
     console.log(JSON.stringify(result, null, 2))
     return result.success ? 0 : 1
   }
