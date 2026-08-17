@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-16 NFL-01 Raw Payload Collision Repair
+
+- NFL-01 raw payload collision repair is locally implemented as `NFL_01_BALLDONTLIE_RAW_PAYLOAD_COLLISION_REPAIR_CERTIFIED_READY_FOR_PROBE`. The attempted live probe left a valid BallDontLie NFL teams payload at `data/imports/balldontlie/nfl/probe/01_teams.json`, but the executor treated missing `meta.next_cursor` as cursor `0`, so the completed teams request stayed incomplete and retried against the same file.
+- The bounded repair makes null/missing cursors terminal, reconciles checkpoint raw payloads before selecting work, reuses valid existing raw payloads without another provider call, hashes stable provider/request/payload identity separately from volatile capture metadata, preserves true collision blocking and uses atomic raw writes. Repair certification made 0 BallDontLie calls, 0 The Odds API calls, 0 production database mutations, did not start P0, and did not change MLB/NBA runtime behavior. Next: retry only the bounded 1-3 call probe after publication.
+
 ## 2026-08-16 NFL-01-START BallDontLie Live Executor Readiness
 
 - NFL-01-START is locally implemented as `NFL_01_BALLDONTLIE_TRIAL_EXECUTION_READY`. The existing NFL-01 readiness checkpoint was published at `4b7be6270d0398cc3ce33f492599fa2334d7b173`, and the follow-on local package prepares the live BallDontLie NFL historical executor without activating the trial.

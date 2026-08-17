@@ -1,0 +1,53 @@
+{
+  "mode": "nfl_01_raw_payload_collision_repair_v1",
+  "status": "NFL_01_BALLDONTLIE_RAW_PAYLOAD_COLLISION_REPAIR_CERTIFIED_READY_FOR_PROBE",
+  "startingCommit": "566d8c3038d3ac3e7c9196dbcb1b9eb63ace9e0c",
+  "providerCallsDuringRepair": 0,
+  "productionDatabaseMutationsDuringRepair": 0,
+  "collision": {
+    "function": "preserveRawPayload",
+    "file": "scripts/nfl-01-balldontlie-historical-import-readiness.mjs",
+    "targetRawPath": "data/imports/balldontlie/nfl/probe/01_teams.json",
+    "checkpointPath": "data/imports/balldontlie/nfl/nfl-01-start-checkpoint.json",
+    "accountingPath": "data/imports/balldontlie/nfl/nfl-01-request-accounting.json",
+    "classification": "CHECKPOINT_CURSOR_SEMANTICS_AND_VOLATILE_ENVELOPE_HASH_DEFECT"
+  },
+  "existingData": {
+    "type": "legitimate_provider_payload",
+    "provider": "balldontlie",
+    "sport": "americanfootball_nfl",
+    "endpoint": "/nfl/v1/teams",
+    "status": 200,
+    "records": 32,
+    "deleted": false
+  },
+  "repair": {
+    "nullCursorTerminal": true,
+    "checkpointRawPayloadReconciliation": true,
+    "validExistingRawPayloadReuse": true,
+    "stablePayloadContentChecksum": true,
+    "volatileEnvelopeMetadataExcludedFromIdempotency": true,
+    "differentContentStillBlocks": true,
+    "atomicRawWrites": true,
+    "cursorSpecificRawPaths": true
+  },
+  "localStoragePreflight": {
+    "success": true,
+    "existingRawPayloadsValid": true,
+    "completedRawRowsSkipped": true,
+    "nextWork": "bdl_nfl_probe_games_2025",
+    "nextRawPath": "data/imports/balldontlie/nfl/probe/02_games.json",
+    "nextRawPathExists": false,
+    "providerCallsMade": 0,
+    "productionDatabaseMutationsMade": 0
+  },
+  "safety": {
+    "ballDontLieCallsDuringRepair": 0,
+    "theOddsApiCalls": 0,
+    "productionDbMutations": 0,
+    "p0Started": false,
+    "mlbChanged": false,
+    "nbaChanged": false
+  },
+  "probeRetryReady": true
+}

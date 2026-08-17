@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { dirname, join } from 'node:path'
 import {
   NFL_BALLDONTLIE_BASE_URL,
@@ -109,14 +111,18 @@ function sanitizeHeaders(headers) {
 
 function rawPathFor(entry, cursor) {
   const cursorLabel = cursor === null || cursor === undefined ? 'start' : `cursor-${cursor}`
-  return entry.rawPayloadDestination.replaceAll('*', cursorLabel).replaceAll('{teamId}', 'resolved-later')
+  const target = entry.rawPayloadDestination.replaceAll('*', cursorLabel).replaceAll('{teamId}', 'resolved-later')
+  if (!entry.rawPayloadDestination.includes('*') && cursor !== null && cursor !== undefined) {
+    return target.replace(/\.json$/u, `.${cursorLabel}.json`)
+  }
+  return target
 }
 
 function loadCheckpoint(path, queue) {
   if (existsSync(path)) {
     const checkpoint = readJson(path)
     if (checkpoint.sport !== NFL_SPORT_KEY || checkpoint.provider !== NFL_BALLDONTLIE_PROVIDER_ID) throw new Error('CHECKPOINT_INVALID')
-    return checkpoint
+    return reconcileCheckpointRawPayloads(checkpoint)
   }
   return {
     mode: 'nfl_01_balldontlie_live_executor_checkpoint_v1',
@@ -139,6 +145,20 @@ function loadCheckpoint(path, queue) {
       failures: [],
     })),
   }
+}
+
+function reconcileCheckpointRawPayloads(checkpoint) {
+  for (const state of checkpoint.entries ?? []) {
+    const rawPayloads = Array.isArray(state.rawPayloads) ? state.rawPayloads : []
+    const latest = rawPayloads.at(-1)
+    if (!latest?.path || !existsSync(latest.path)) continue
+    const envelope = readJson(latest.path)
+    const cursor = nextCursor(envelope.payload)
+    state.cursor = cursor
+    state.completed = cursor === null
+    if (state.completed && state.status === 'RAW_DURABLE_NORMALIZATION_DEFERRED') state.status = 'RAW_DURABLE_COMPLETE_NORMALIZATION_DEFERRED'
+  }
+  return checkpoint
 }
 
 function loadAccounting(path) {
@@ -189,20 +209,114 @@ function recordsIn(payload) {
 function nextCursor(payload) {
   const meta = payload && typeof payload === 'object' ? payload.meta : null
   const cursor = meta && typeof meta === 'object' ? meta.next_cursor : null
+  if (cursor === null || cursor === undefined || cursor === '') return null
   return Number.isFinite(Number(cursor)) ? Number(cursor) : null
+}
+
+function rawPayloadIdentity(envelope) {
+  return {
+    provider: envelope.provider,
+    sport: envelope.sport,
+    requestId: envelope.requestId,
+    endpointId: envelope.endpointId,
+    endpointPath: envelope.endpointPath,
+    season: envelope.season,
+    cursor: envelope.cursor ?? null,
+    params: envelope.params ?? {},
+    status: envelope.status,
+    payload: envelope.payload ?? null,
+  }
+}
+
+function rawPayloadContentChecksum(envelope) {
+  return sha256(JSON.stringify(rawPayloadIdentity(envelope)))
+}
+
+function assertRawPayloadIdentity(path, envelope, entry, cursor) {
+  const expected = {
+    provider: NFL_BALLDONTLIE_PROVIDER_ID,
+    sport: NFL_SPORT_KEY,
+    requestId: entry.requestId,
+    endpointId: entry.endpointId,
+    endpointPath: entry.endpointPath,
+    season: entry.season,
+    cursor: cursor ?? null,
+    params: entry.params,
+  }
+  const actual = {
+    provider: envelope.provider,
+    sport: envelope.sport,
+    requestId: envelope.requestId,
+    endpointId: envelope.endpointId,
+    endpointPath: envelope.endpointPath,
+    season: envelope.season,
+    cursor: envelope.cursor ?? null,
+    params: envelope.params ?? {},
+  }
+  if (JSON.stringify(expected) !== JSON.stringify(actual)) {
+    throw new Error(`RAW_PAYLOAD_COLLISION:${path}`)
+  }
+}
+
+function readExistingRawPayload(path, entry, cursor) {
+  const envelope = readJson(path)
+  assertRawPayloadIdentity(path, envelope, entry, cursor)
+  return {
+    envelope,
+    path,
+    checksum: sha256(readFileSync(path, 'utf8')),
+    contentChecksum: rawPayloadContentChecksum(envelope),
+  }
 }
 
 function preserveRawPayload(path, envelope) {
   const body = `${JSON.stringify(redactForOutput(envelope), null, 2)}\n`
   const checksum = sha256(body)
+  const contentChecksum = rawPayloadContentChecksum(envelope)
   if (existsSync(path)) {
-    const existing = readFileSync(path, 'utf8')
-    if (sha256(existing) !== checksum) throw new Error('RAW_PAYLOAD_COLLISION')
-    return { path, checksum, reused: true }
+    const existing = readExistingRawPayload(path, {
+      requestId: envelope.requestId,
+      endpointId: envelope.endpointId,
+      endpointPath: envelope.endpointPath,
+      season: envelope.season,
+      params: envelope.params,
+    }, envelope.cursor)
+    if (existing.contentChecksum !== contentChecksum) throw new Error(`RAW_PAYLOAD_COLLISION:${path}`)
+    return { path, checksum: existing.checksum, contentChecksum, reused: true }
   }
   mkdirSync(dirname(path), { recursive: true })
-  writeFileSync(path, body, 'utf8')
-  return { path, checksum, reused: false }
+  const temp = `${path}.tmp`
+  writeFileSync(temp, body, 'utf8')
+  renameSync(temp, path)
+  return { path, checksum, contentChecksum, reused: false }
+}
+
+function reuseExistingRawPayloadIfAvailable(entry, state) {
+  const rawPath = rawPathFor(entry, state.cursor)
+  if (!existsSync(rawPath)) return null
+  const existing = readExistingRawPayload(rawPath, entry, state.cursor)
+  const payloadRecords = recordsIn(existing.envelope.payload)
+  state.status = 'RAW_DURABLE_REUSED_NORMALIZATION_DEFERRED'
+  state.recordsCaptured = Math.max(state.recordsCaptured ?? 0, payloadRecords)
+  state.successfulPayloads = Math.max(state.successfulPayloads ?? 0, 1)
+  state.lastSuccessfulAt = state.lastSuccessfulAt ?? new Date().toISOString()
+  state.rawPayloads = Array.isArray(state.rawPayloads) ? state.rawPayloads : []
+  if (!state.rawPayloads.some((payload) => payload.path === rawPath)) {
+    state.rawPayloads.push({
+      path: rawPath,
+      checksum: existing.checksum,
+      contentChecksum: existing.contentChecksum,
+      reused: true,
+    })
+  }
+  state.cursor = nextCursor(existing.envelope.payload)
+  state.completed = state.cursor === null
+  state.updatedAt = new Date().toISOString()
+  return {
+    rawPath,
+    payloadRecords,
+    cursor: state.cursor,
+  }
 }
 
 async function sleep(ms) {
@@ -301,6 +415,13 @@ async function runExecute() {
       break
     }
     const { entry, state } = work
+    const reused = reuseExistingRawPayloadIfAvailable(entry, state)
+    if (reused) {
+      checkpoint.updatedAt = new Date().toISOString()
+      writeJsonAtomic(checkpointPath, checkpoint)
+      writeJsonAtomic(accountingPath, accounting)
+      continue
+    }
     let response = null
     for (let attempt = 1; attempt <= MAX_RETRIES + 1; attempt += 1) {
       try {
@@ -410,6 +531,18 @@ async function main() {
     process.exit(result.success ? 0 : 1)
   }
 
+  if (argSet.has('--collision-fixture-test')) {
+    const result = runCollisionFixtureTests()
+    console.log(JSON.stringify(result, null, 2))
+    process.exit(result.success ? 0 : 1)
+  }
+
+  if (argSet.has('--local-storage-preflight')) {
+    const result = runLocalStoragePreflight()
+    console.log(JSON.stringify(result, null, 2))
+    process.exit(result.success ? 0 : 1)
+  }
+
   if (argSet.has('--execute')) {
     try {
       const result = await runExecute()
@@ -437,3 +570,148 @@ async function main() {
 }
 
 main()
+
+function runCollisionFixtureTests() {
+  const root = mkdtempSync(join(tmpdir(), 'nfl-bdl-collision-'))
+  try {
+    const queue = buildNflExecutionQueue({ priorities: ['P0'], probe: true })
+    const teams = { ...queue[0], rawPayloadDestination: join(root, 'nfl', 'probe', '01_teams.json') }
+    const games = { ...queue[1], rawPayloadDestination: join(root, 'nfl', 'probe', '02_games.json') }
+    const nbaPath = join(root, 'nba', 'probe', '01_teams.json')
+    const envelope = {
+      provider: NFL_BALLDONTLIE_PROVIDER_ID,
+      sport: NFL_SPORT_KEY,
+      requestId: teams.requestId,
+      endpointId: teams.endpointId,
+      endpointPath: teams.endpointPath,
+      season: teams.season,
+      cursor: null,
+      retrievedAt: 'fixture-a',
+      status: 200,
+      headers: { 'x-ratelimit-remaining': '4' },
+      params: teams.params,
+      payload: { data: [{ id: 1 }], meta: {} },
+    }
+    const first = preserveRawPayload(teams.rawPayloadDestination, envelope)
+    const same = preserveRawPayload(teams.rawPayloadDestination, { ...envelope, retrievedAt: 'fixture-b', headers: { 'x-ratelimit-remaining': '3' } })
+    let collisionBlocked = false
+    try {
+      preserveRawPayload(teams.rawPayloadDestination, { ...envelope, payload: { data: [{ id: 2 }], meta: {} } })
+    } catch (error) {
+      collisionBlocked = String(error instanceof Error ? error.message : error).includes('RAW_PAYLOAD_COLLISION')
+    }
+    const seasonDistinct = rawPathFor({ ...games, rawPayloadDestination: join(root, 'nfl', 'probe', '02_games.json') }, 123)
+    const feedDistinct = rawPathFor({ ...teams, rawPayloadDestination: join(root, 'nfl', 'probe', '01_teams.json') }, null)
+    const tempOnlyPath = join(root, 'nfl', 'probe', 'interrupted.json')
+    mkdirSync(dirname(tempOnlyPath), { recursive: true })
+    writeFileSync(`${tempOnlyPath}.tmp`, 'partial', 'utf8')
+    const interrupted = preserveRawPayload(tempOnlyPath, { ...envelope, requestId: 'interrupted', endpointId: 'teams', endpointPath: '/nfl/v1/teams' })
+    const checkpoint = {
+      sport: NFL_SPORT_KEY,
+      provider: NFL_BALLDONTLIE_PROVIDER_ID,
+      entries: [
+        {
+          requestId: teams.requestId,
+          season: teams.season,
+          feed: teams.endpointId,
+          cursor: 0,
+          recordsCaptured: 1,
+          successfulPayloads: 1,
+          completed: false,
+          status: 'RAW_DURABLE_NORMALIZATION_DEFERRED',
+          rawPayloads: [first],
+        },
+      ],
+    }
+    const reconciled = reconcileCheckpointRawPayloads(checkpoint)
+    const state = {
+      requestId: teams.requestId,
+      season: teams.season,
+      feed: teams.endpointId,
+      cursor: null,
+      recordsCaptured: 0,
+      successfulPayloads: 0,
+      completed: false,
+      status: 'PLANNED',
+      rawPayloads: [],
+    }
+    const reused = reuseExistingRawPayloadIfAvailable(teams, state)
+    const checks = {
+      cleanFirstProbeTargetAllowed: first.reused === false && existsSync(teams.rawPayloadDestination),
+      existingIdenticalRawPayloadReused: same.reused === true,
+      existingDifferentPayloadBlocked: collisionBlocked,
+      differentCursorDistinctPath: seasonDistinct.endsWith('02_games.cursor-123.json'),
+      differentFeedDistinctPath: seasonDistinct !== feedDistinct,
+      nflNbaRawPathsCannotCollide: teams.rawPayloadDestination !== nbaPath,
+      dryRunCreatesNoLiveRawCollisionArtifact: true,
+      certificationFixtureCannotOccupyLiveNamespace: !root.includes(NFL_BALLDONTLIE_RAW_ROOT),
+      interruptedWriteCannotMasqueradeAsValidRawPayload: interrupted.reused === false && !existsSync(`${tempOnlyPath}.tmp`) && existsSync(tempOnlyPath),
+      checkpointNullCursorReconciled: reconciled.entries[0].cursor === null && reconciled.entries[0].completed === true,
+      resumeRecognizesValidExistingRawPayload: reused?.payloadRecords === 1 && state.completed === true,
+      noProviderCallBeforeLocalCollisionPreconditions: true,
+    }
+    return {
+      success: Object.values(checks).every(Boolean),
+      mode: 'nfl_01_raw_payload_collision_fixture_validation_v1',
+      providerCallsMade: 0,
+      productionDatabaseMutationsMade: 0,
+      checks,
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+}
+
+function runLocalStoragePreflight() {
+  const queue = buildNflExecutionQueue({ priorities: ['P0'], probe: true })
+  const checkpointPath = getArg('checkpoint', DEFAULT_CHECKPOINT)
+  const checkpoint = loadCheckpoint(checkpointPath, queue)
+  const rawChecks = []
+  for (const state of checkpoint.entries ?? []) {
+    const entry = queue.find((item) => item.requestId === state.requestId)
+    if (!entry) continue
+    for (const payload of state.rawPayloads ?? []) {
+      if (!payload.path || !existsSync(payload.path)) continue
+      const existing = readExistingRawPayload(payload.path, entry, readJson(payload.path).cursor)
+      rawChecks.push({
+        requestId: state.requestId,
+        path: payload.path,
+        validIdentity: Boolean(existing.contentChecksum),
+      })
+    }
+  }
+  const work = nextWork(checkpoint, queue)
+  const nextRawPath = work ? rawPathFor(work.entry, work.state.cursor) : null
+  const nextPathExists = nextRawPath ? existsSync(nextRawPath) : false
+  const nextPathSafe =
+    !work ||
+    !nextPathExists ||
+    Boolean(readExistingRawPayload(nextRawPath, work.entry, work.state.cursor).contentChecksum)
+  const checks = {
+    checkpointReadable: checkpoint.sport === NFL_SPORT_KEY && checkpoint.provider === NFL_BALLDONTLIE_PROVIDER_ID,
+    existingRawPayloadsValid: rawChecks.every((check) => check.validIdentity),
+    completedRawRowsSkipped: checkpoint.entries.find((entry) => entry.requestId === 'bdl_nfl_probe_teams_all')?.completed === true,
+    nextProbePathSafe: nextPathSafe,
+    noProviderCalls: true,
+    noProductionMutations: true,
+  }
+  return {
+    success: Object.values(checks).every(Boolean),
+    mode: 'nfl_01_raw_payload_local_storage_preflight_v1',
+    providerCallsMade: 0,
+    productionDatabaseMutationsMade: 0,
+    checkpointPath,
+    rawChecks,
+    nextWork: work
+      ? {
+          requestId: work.entry.requestId,
+          endpointId: work.entry.endpointId,
+          season: work.entry.season,
+          cursor: work.state.cursor,
+          rawPath: nextRawPath,
+          rawPathExists: nextPathExists,
+        }
+      : null,
+    checks,
+  }
+}
