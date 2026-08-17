@@ -30,7 +30,6 @@
     "internalResultRows": 1359,
     "productionCompatibleResultRows": 1359,
     "productionColumns": [
-      "id",
       "game_id",
       "sport_key",
       "home_team",
@@ -41,19 +40,22 @@
       "commence_time"
     ],
     "omittedUnsupportedColumns": [
+      "id",
       "league_key",
       "result_source",
       "metadata",
       "updated_at"
     ],
     "unsupportedColumnsInPersistencePayload": 0,
-    "identity": "deterministic result id derived from canonical sport_events.id",
+    "identity": "game_id is the deterministic logical identity; game_results.id is a database-generated UUID surrogate key",
     "lineage": "game_results.game_id -> sport_events.id -> provider_ids.balldontlie and provider_entity_mappings",
     "idempotencyFixtures": {
-      "sameGameImportedTwiceSameId": true,
-      "correctedScoreUpdatesSameId": true,
-      "differentGameDistinctId": true,
-      "cancelledGameCreatesNoResult": true
+      "sameGameImportedTwiceSameGameId": true,
+      "correctedScoreUpdatesSameGameId": true,
+      "differentGameDistinctGameId": true,
+      "cancelledGameCreatesNoResult": true,
+      "duplicateGameIdBlocksImport": true,
+      "deterministicTextSentToUuidId": false
     }
   },
   "seasonCounts": {

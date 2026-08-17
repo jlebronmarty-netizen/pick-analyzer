@@ -2167,3 +2167,9 @@ The 16 historical provider-error payloads remain `PROVIDER_ERROR_EVIDENCE` and p
 NFL-02-IMPORT-R1 is locally certified as `NFL_02_GAME_RESULTS_SCHEMA_COMPATIBILITY_REPAIR_CERTIFIED`. The production import audit found that `game_results` supports the lean canonical result contract (`id`, `game_id`, `sport_key`, teams, scores, winner and `commence_time`) and does not expose the optional NFL-02 lineage columns `league_key`, `result_source`, `metadata` or `updated_at`.
 
 The normalizer now keeps rich internal result rows for certification while projecting a production-compatible result persistence payload with 1,359 rows and 0 unsupported columns. Result lineage remains available through deterministic result IDs, `game_results.game_id`, `sport_events.provider_ids.balldontlie` and `provider_entity_mappings`. Migration required: no. Provider calls and production database mutations during repair certification: 0.
+
+## 2026-08-17 NFL-02-IMPORT-R2 Game Results UUID Identity
+
+NFL-02-IMPORT-R2 is locally certified as `NFL_02_GAME_RESULTS_UUID_IDENTITY_REPAIR_CERTIFIED`. A production dry-run proved `game_results.id` is UUID-managed by the database, while the existing repository result writer uses `game_id` as the logical idempotency key.
+
+NFL-02 result persistence now omits `id` entirely, sends only semantic result columns and uses `game_id` for lookup/reuse/update reasoning. A duplicate `game_id` preflight must block the import rather than choosing an arbitrary row. No migration, provider calls, production database mutations, MLB/NBA behavior changes, prediction writes or NFL-03 work were performed.

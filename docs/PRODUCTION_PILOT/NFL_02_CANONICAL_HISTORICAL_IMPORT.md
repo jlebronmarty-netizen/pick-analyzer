@@ -48,19 +48,23 @@ NFL-02 reuses existing shared Pick Analyzer tables:
 
 Production `game_results` currently supports the lean canonical result shape:
 
-`id`, `game_id`, `sport_key`, `home_team`, `away_team`, `home_score`,
+`game_id`, `sport_key`, `home_team`, `away_team`, `home_score`,
 `away_score`, `winner`, `commence_time`.
+
+`game_results.id` is a database-managed UUID surrogate key and is not supplied
+by the NFL-02 import payload. Result idempotency follows the established
+production writer contract in `src/services/results-sync.service.ts`: lookup,
+reuse and update are keyed by `game_id`.
 
 NFL-02 keeps richer internal result lineage during normalization, but the
 production persistence payload intentionally omits unsupported optional fields:
 
-`league_key`, `result_source`, `metadata`, `updated_at`.
+`id`, `league_key`, `result_source`, `metadata`, `updated_at`.
 
-Result lineage remains preserved because each result ID is derived from the
-canonical `sport_events.id`, `game_results.game_id` points to that event, the
-event stores `provider_ids.balldontlie`, and `provider_entity_mappings` maps
-BallDontLie event IDs back to the same canonical event. No schema migration is
-required for NFL-02.
+Result lineage remains preserved because `game_results.game_id` points to the
+canonical `sport_events.id`, the event stores `provider_ids.balldontlie`, and
+`provider_entity_mappings` maps BallDontLie event IDs back to the same
+canonical event. No schema migration is required for NFL-02.
 
 ## Temporal Contract
 

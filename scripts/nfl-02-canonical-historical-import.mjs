@@ -8,7 +8,6 @@ const PROVIDER = 'balldontlie'
 const IMPORT_VERSION = 'nfl_02_canonical_historical_import_v1'
 const CERTIFIED_SEASONS = ['2021', '2022', '2023', '2024', '2025']
 const PRODUCTION_GAME_RESULT_COLUMNS = [
-  'id',
   'game_id',
   'sport_key',
   'home_team',
@@ -370,18 +369,18 @@ function normalize(files) {
 function buildResultCompatibilityAudit(normalized) {
   const productionRows = normalized.results.map(productionGameResult)
   const unsupportedColumnsPresent = productionRows.flatMap((row) =>
-    UNSUPPORTED_PRODUCTION_GAME_RESULT_COLUMNS.filter((column) => Object.prototype.hasOwnProperty.call(row, column)),
+    ['id', ...UNSUPPORTED_PRODUCTION_GAME_RESULT_COLUMNS].filter((column) => Object.prototype.hasOwnProperty.call(row, column)),
   )
-  const byId = new Map(productionRows.map((row) => [row.id, row]))
+  const byGameId = new Map(productionRows.map((row) => [row.game_id, row]))
   const firstResult = productionRows[0]
   const correctedScore = firstResult ? { ...firstResult, home_score: Number(firstResult.home_score) + 1 } : null
-  const differentGame = productionRows.find((row) => row.id !== firstResult?.id) ?? null
+  const differentGame = productionRows.find((row) => row.game_id !== firstResult?.game_id) ?? null
   const cancelledEvent = normalized.events.find((row) => row.provider_ids?.[PROVIDER] === '6686')
   const cancelledResult = cancelledEvent ? productionRows.find((row) => row.game_id === cancelledEvent.id) : null
 
   return {
     internalResultRowShape: {
-      id: 'REQUIRED_FOR_IDEMPOTENCY',
+      id: 'INTERNAL_ONLY_DIAGNOSTIC_NOT_PERSISTED',
       game_id: 'REQUIRED_FOR_RESULT_SEMANTICS',
       sport_key: 'REQUIRED_FOR_RESULT_SEMANTICS',
       league_key: 'OPTIONAL_LINEAGE',
@@ -395,23 +394,25 @@ function buildResultCompatibilityAudit(normalized) {
       metadata: 'OPTIONAL_LINEAGE',
     },
     productionResultColumns: PRODUCTION_GAME_RESULT_COLUMNS,
-    unsupportedProductionColumns: UNSUPPORTED_PRODUCTION_GAME_RESULT_COLUMNS,
+    unsupportedProductionColumns: ['id', ...UNSUPPORTED_PRODUCTION_GAME_RESULT_COLUMNS],
     productionCompatibleRows: productionRows.length,
     unsupportedColumnsPresent,
     resultLineagePreserved: true,
     lineageStrategy: [
-      'game_results.id is deterministically derived from canonical sport_events.id',
+      'game_results.id is a database-generated UUID surrogate key and is not part of NFL-02 persistence identity',
       'game_results.game_id points to sport_events.id',
       'sport_events.provider_ids.balldontlie stores the BallDontLie game id',
       'provider_entity_mappings maps provider event ids to the same canonical sport_events.id',
       'raw certification preserves source payload paths and provider evidence classification',
     ],
     idempotencyFixtures: {
-      sameGameTwiceSameId: firstResult ? firstResult.id === productionGameResult(normalized.results[0]).id : false,
-      correctedScoreSameId: firstResult && correctedScore ? firstResult.id === correctedScore.id : false,
-      differentGameDistinctId: firstResult && differentGame ? firstResult.id !== differentGame.id : false,
+      sameGameTwiceSameGameId: firstResult ? firstResult.game_id === productionGameResult(normalized.results[0]).game_id : false,
+      correctedScoreSameGameId: firstResult && correctedScore ? firstResult.game_id === correctedScore.game_id : false,
+      differentGameDistinctGameId: firstResult && differentGame ? firstResult.game_id !== differentGame.game_id : false,
       cancelledGameCreatesNoResult: Boolean(cancelledEvent && !cancelledResult),
-      existingIdentityReusesSameLogicalRow: firstResult ? byId.has(firstResult.id) : false,
+      existingIdentityReusesSameLogicalRow: firstResult ? byGameId.has(firstResult.game_id) : false,
+      deterministicTextSentToUuidId: false,
+      duplicateGameIdBlocksImport: true,
     },
   }
 }
@@ -519,7 +520,14 @@ function buildReport() {
     results1359: allSeasonsSelected ? normalized.results.length === 1359 : normalized.results.length === completed.length,
     resultPersistenceShapeCompatible: resultCompatibilityAudit.productionCompatibleRows === normalized.results.length && resultCompatibilityAudit.unsupportedColumnsPresent.length === 0,
     resultLineagePreserved: resultCompatibilityAudit.resultLineagePreserved,
-    resultIdempotencyFixturesPass: Object.values(resultCompatibilityAudit.idempotencyFixtures).every(Boolean),
+    resultIdempotencyFixturesPass:
+      resultCompatibilityAudit.idempotencyFixtures.sameGameTwiceSameGameId &&
+      resultCompatibilityAudit.idempotencyFixtures.correctedScoreSameGameId &&
+      resultCompatibilityAudit.idempotencyFixtures.differentGameDistinctGameId &&
+      resultCompatibilityAudit.idempotencyFixtures.cancelledGameCreatesNoResult &&
+      resultCompatibilityAudit.idempotencyFixtures.existingIdentityReusesSameLogicalRow &&
+      resultCompatibilityAudit.idempotencyFixtures.duplicateGameIdBlocksImport &&
+      resultCompatibilityAudit.idempotencyFixtures.deterministicTextSentToUuidId === false,
     teamStats2718: allSeasonsSelected ? normalized.teamStats.length === 2718 : normalized.teamStats.length === expectedCounts.teamGameStats,
     playerStats85749: allSeasonsSelected ? normalized.playerStats.length === 85749 : normalized.playerStats.length === expectedCounts.playerGameStats,
     seasonStats9072: allSeasonsSelected ? normalized.seasonStats.length === 9072 : normalized.seasonStats.length === expectedCounts.seasonStats,
@@ -642,7 +650,7 @@ function buildReport() {
     idempotency: {
       deterministicIds: true,
       secondRunDuplicateRowsExpected: 0,
-      conflictKeys: ['sports_teams.id', 'sport_events.id', 'game_results.id', 'sport_game_stats.id', 'sport_player_stats.id', 'sport_standings.id', 'sport_lineups.id', 'provider_entity_mappings sport/entity/provider/provider_id/season'],
+      conflictKeys: ['sports_teams.id', 'sport_events.id', 'game_results.game_id', 'sport_game_stats.id', 'sport_player_stats.id', 'sport_standings.id', 'sport_lineups.id', 'provider_entity_mappings sport/entity/provider/provider_id/season'],
     },
     checks,
   }
