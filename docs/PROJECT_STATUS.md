@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-17 NBA-03A Current Era Shadow Settlement Preparation
+
+- NBA-03A Current Era Shadow Settlement Preparation is locally implemented as `NBA_03A_CURRENT_ERA_SHADOW_SETTLEMENT_PREPARATION_CERTIFIED_READY_FOR_ACTIVATION_REVIEW`. The additive preparation service scopes settlement to `basketball_nba` rows with `prediction_origin = CURRENT_ERA_SHADOW`, pending/unsettled state and supported full-game markets only.
+- Authoritative settlement requires final canonical `sport_events` status plus matching `game_results` final scores; Moneyline, Spread and Total use the original stored prediction line/selection and support push behavior. Current production dry-run found 43 shadow rows across 10 future games, 0 settlement-eligible rows, 0 provider calls and 0 database mutations. Settlement activation remains separately authorization-gated.
+
 ## 2026-08-13 MLB Provider Independence + Calibration Audit
 
 - MLB Provider Independence + Calibration is locally implemented as `MLB_FINAL_PROVIDER_INDEPENDENCE_CALIBRATION_REPAIR_READY_FOR_DEPLOYMENT`. Production on `dca83ad9074aaca6b17f32d0ab5e54b8aa3a70e3` showed six real pre-repair SportsDataIO MLB calls from the legacy prospective-preview operating-day path despite Stage 3 The Odds API product authority.

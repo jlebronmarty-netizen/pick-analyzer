@@ -1,0 +1,87 @@
+{
+  "status": "NBA_03A_CURRENT_ERA_SHADOW_SETTLEMENT_PREPARATION_CERTIFIED_READY_FOR_ACTIVATION_REVIEW",
+  "phase": "NBA-03A_CURRENT_ERA_SHADOW_NATURAL_SETTLEMENT_PREPARATION",
+  "repositoryCommitAtStart": "60953041be459be3a832c685d3b75707aa5a50c3",
+  "settlement": {
+    "service": "src/services/nba-current-era-shadow-settlement.service.ts",
+    "version": "nba_current_era_shadow_settlement_preparation_v1",
+    "scope": {
+      "sportKey": "basketball_nba",
+      "predictionOrigin": "CURRENT_ERA_SHADOW",
+      "pendingOnly": true,
+      "supportedMarkets": ["moneyline", "spread", "total"]
+    },
+    "authoritativeResultRequirement": {
+      "finalEventStatus": true,
+      "canonicalEventMatch": true,
+      "gameResultsRowRequired": true,
+      "homeAwayScoresRequired": true,
+      "provisionalScoresAllowed": false,
+      "oddsDerivedScoresAllowed": false
+    },
+    "storedLineImmutable": true,
+    "storedOddsUsedForResearchProfitOnly": true,
+    "bankrollActivated": false,
+    "learningActivated": false,
+    "calibrationActivated": false,
+    "officialPickActivated": false,
+    "productVisibilityActivated": false
+  },
+  "productionDryRun": {
+    "currentEraShadowRows": 43,
+    "uniqueGames": 10,
+    "pending": 43,
+    "settled": 0,
+    "productionEligible": 0,
+    "recommendedPick": 0,
+    "officialPicks": 0,
+    "marketDistribution": {
+      "moneyline": 14,
+      "spread": 14,
+      "total": 15
+    },
+    "earliestGameStart": "2026-10-20T19:00:00+00:00",
+    "latestGameStart": "2026-10-22T00:40:00+00:00",
+    "notStarted": 43,
+    "startedNotFinal": 0,
+    "finalResultAvailable": 0,
+    "settlementEligible": 0,
+    "providerCalls": 0,
+    "databaseMutations": 0
+  },
+  "fixtures": {
+    "futureGame": "EVENT_NOT_STARTED",
+    "startedButNotFinal": "EVENT_NOT_FINAL",
+    "moneylineWin": "win",
+    "moneylineLoss": "loss",
+    "spreadWin": "win",
+    "spreadLoss": "loss",
+    "spreadPush": "push",
+    "totalOver": "win",
+    "totalUnder": "win",
+    "totalPush": "push",
+    "missingFinalScore": "MISSING_FINAL_SCORE",
+    "alreadySettled": "ALREADY_SETTLED",
+    "repeatedSettlementRun": "ALREADY_SETTLED",
+    "historicalReplayTouched": false,
+    "officialPickProductAction": false,
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "mlbWrites": 0
+  },
+  "schedulerRecommendation": {
+    "activateNow": false,
+    "recommendedMode": "NBA_CURRENT_ERA_SHADOW_SETTLEMENT",
+    "separateFromGeneration": true,
+    "eventAwareCadence": true,
+    "providerCallsRequiredForSettlement": 0,
+    "lockKey": "nba_current_era_shadow_settlement",
+    "explicitAuthorizationRequired": true
+  },
+  "accounting": {
+    "providerCallsFromCertification": 0,
+    "databaseMutationsFromCertification": 0,
+    "productionSettlementWrites": 0
+  },
+  "activationReviewReady": true
+}
