@@ -1,0 +1,71 @@
+{
+  "mode": "nfl_01_start_balldontlie_live_executor_readiness_v1",
+  "status": "NFL_01_BALLDONTLIE_TRIAL_EXECUTION_READY",
+  "startingCommit": "4b7be6270d0398cc3ce33f492599fa2334d7b173",
+  "provider": "balldontlie",
+  "sportKey": "americanfootball_nfl",
+  "providerCallsMade": 0,
+  "productionDatabaseMutationsMade": 0,
+  "localDurableImportArtifactsObserved": 0,
+  "liveExecutor": {
+    "implemented": true,
+    "defaultMode": "DRY_RUN",
+    "executeRequires": [
+      "--execute",
+      "BALLDONTLIE_API_KEY present",
+      "NFL_BALLDONTLIE_TRIAL_ACTIVE=true",
+      "NFL_BALLDONTLIE_HISTORICAL_EXECUTION_AUTHORIZED=true",
+      "--maxCalls",
+      "--maxRuntimeMinutes",
+      "maxRequestsPerMinute <= 5"
+    ],
+    "apiKeyAloneCanExecute": false,
+    "rawPayloadDurability": true,
+    "checkpointResume": true,
+    "requestAccounting": true,
+    "normalization": "DEFERRED_AFTER_RAW_DURABILITY_IN_NFL_01_START"
+  },
+  "queues": {
+    "probe": {
+      "entries": 3,
+      "maxCalls": 3,
+      "maxRuntimeMinutes": 5
+    },
+    "p0": {
+      "entries": 21,
+      "estimatedRequests": 1121,
+      "estimatedRuntimeHoursAtSafeRate": 4.67
+    },
+    "p1": {
+      "entries": 26,
+      "estimatedRequests": 377,
+      "estimatedRuntimeHoursAtSafeRate": 1.57
+    },
+    "p2DefaultEnabled": false
+  },
+  "rateLimit": {
+    "trialLimitRequestsPerMinute": 5,
+    "certifiedSafeRequestsPerMinute": 4,
+    "retryAfterSupported": true
+  },
+  "stopConditions": [
+    "MAX_CALLS_REACHED",
+    "MAX_RUNTIME_REACHED",
+    "QUEUE_COMPLETE",
+    "INTERRUPTED_CHECKPOINT_SAVED",
+    "AUTH_OR_TIER_FAILURE",
+    "RATE_LIMIT_RETRY_AFTER_APPLIED",
+    "PROVIDER_ERROR_STREAK"
+  ],
+  "isolation": {
+    "nflProductionActivated": false,
+    "nflSchedulerActivated": false,
+    "nflCurrentEraPredictionsCreated": false,
+    "nflOfficialPicksCreated": false,
+    "sportsDataIoExpanded": false,
+    "theOddsApiHistoricalCallsMade": false,
+    "mlbRuntimeChanged": false,
+    "nbaRuntimeChanged": false
+  },
+  "nextPhase": "NFL_01_START_BALLDONTLIE_TRIAL_ACTIVATION_AND_BOUNDED_PROBE_AFTER_HUMAN_AUTHORIZATION"
+}

@@ -100,7 +100,15 @@ The NFL-01 CLI is disabled by default:
 node --loader ./scripts/local-ts-loader.mjs scripts/nfl-01-balldontlie-historical-import-readiness.mjs --dry-run
 ```
 
-The `--execute` path is intentionally blocked in NFL-01 unless future START authorization supplies all gates. It still performs 0 provider calls in this phase.
+The `--execute` path is now live-capable but remains blocked unless future START authorization supplies all gates:
+
+- `BALLDONTLIE_API_KEY` present;
+- `NFL_BALLDONTLIE_TRIAL_ACTIVE=true`;
+- `NFL_BALLDONTLIE_HISTORICAL_EXECUTION_AUTHORIZED=true`;
+- explicit request/runtime caps;
+- safe request rate at or below the trial contract.
+
+It performs 0 provider calls in this certification phase.
 
 ## Trial Activation Checklist
 

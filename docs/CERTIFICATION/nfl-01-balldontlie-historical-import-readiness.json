@@ -27,10 +27,16 @@
   },
   "hardGuard": {
     "defaultMode": "DRY_RUN",
-    "executeImplemented": false,
+    "executeImplemented": true,
     "providerCallsAllowedByDefault": false,
     "schedulerActivated": false,
-    "requiresExplicitTrialActivation": true
+    "requiresExplicitTrialActivation": true,
+    "requiredLiveEnv": [
+      "BALLDONTLIE_API_KEY",
+      "NFL_BALLDONTLIE_TRIAL_ACTIVE=true",
+      "NFL_BALLDONTLIE_HISTORICAL_EXECUTION_AUTHORIZED=true"
+    ],
+    "requiresHardCaps": true
   },
   "checks": {
     "existingNflArchitectureInventoried": true,

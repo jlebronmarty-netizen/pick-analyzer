@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-16 NFL-01-START BallDontLie Live Executor Readiness
+
+- NFL-01-START is locally implemented as `NFL_01_BALLDONTLIE_TRIAL_EXECUTION_READY`. The existing NFL-01 readiness checkpoint was published at `4b7be6270d0398cc3ce33f492599fa2334d7b173`, and the follow-on local package prepares the live BallDontLie NFL historical executor without activating the trial.
+- The executor is disabled by default and requires `--execute`, `BALLDONTLIE_API_KEY`, `NFL_BALLDONTLIE_TRIAL_ACTIVE=true`, `NFL_BALLDONTLIE_HISTORICAL_EXECUTION_AUTHORIZED=true`, explicit call/runtime caps and a safe request rate. Prepared queues are a 3-call probe, 21-entry P0 queue estimated at 1121 requests and 26-entry P1 queue estimated at 377 requests. This phase made 0 provider calls, 0 production database mutations, 0 durable local raw import artifacts, 0 NFL production activation, 0 SportsDataIO expansion and no MLB/NBA runtime changes.
+
 ## 2026-08-16 NFL-01 BallDontLie Historical Import Readiness
 
 - NFL-01 is locally implemented as `NFL_01_BALLDONTLIE_HISTORICAL_IMPORT_READINESS_CERTIFIED_WAITING_FOR_TRIAL`. The phase inventories existing NFL support, classifies the old SportsDataIO NFL material as legacy/non-authoritative, and establishes BallDontLie NFL as the sports/statistical source with The Odds API as `americanfootball_nfl` betting-market authority.

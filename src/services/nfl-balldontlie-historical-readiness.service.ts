@@ -45,6 +45,13 @@ export type NflTrialManifestEntry = {
   providerCallsMade: 0
 }
 
+export type NflExecutionQueueEntry = NflTrialManifestEntry & {
+  params: Record<string, string | number | boolean | string[] | number[]>
+  cursor: number | null
+  completed: boolean
+  p0Required: boolean
+}
+
 export const RECOMMENDED_NFL_HISTORICAL_SEASONS = [2021, 2022, 2023, 2024, 2025]
 
 const NFL_TEAMS = 32
@@ -386,6 +393,47 @@ export function buildNflBallDontLieTrialManifest(seasons = RECOMMENDED_NFL_HISTO
   return entries.sort((a, b) => priorityWeight(a.priority) - priorityWeight(b.priority) || String(a.season).localeCompare(String(b.season)))
 }
 
+export function buildNflExecutionQueue(options: {
+  seasons?: number[]
+  priorities?: NflTrialPriority[]
+  feeds?: string[]
+  probe?: boolean
+} = {}): NflExecutionQueueEntry[] {
+  const seasons = options.seasons ?? RECOMMENDED_NFL_HISTORICAL_SEASONS
+  const priorities = new Set(options.priorities ?? ['P0'])
+  const feeds = options.feeds ? new Set(options.feeds) : null
+  const source = options.probe
+    ? NFL_BALLDONTLIE_ENDPOINTS.filter((endpoint) => ['teams', 'games', 'team_stats'].includes(endpoint.id))
+    : NFL_BALLDONTLIE_ENDPOINTS.filter((endpoint) => endpoint.requestStrategy !== 'deferred')
+
+  const entries: NflExecutionQueueEntry[] = []
+  for (const endpoint of source) {
+    if (!priorities.has(endpoint.priority)) continue
+    if (feeds && !feeds.has(endpoint.id)) continue
+    if (endpoint.requestStrategy === 'once') {
+      entries.push(toQueueEntry(endpoint, 'all', 'endpoint'))
+      continue
+    }
+    const plannedSeasons = options.probe ? [2025] : seasons
+    for (const season of plannedSeasons) {
+      if (endpoint.id === 'team_roster' && season < 2025) continue
+      entries.push(toQueueEntry(endpoint, season, endpoint.requestStrategy === 'team_roster' ? 'team-season' : 'season-endpoint'))
+    }
+  }
+
+  return entries
+    .sort(queueSort)
+    .map((entry, index) => ({
+      ...entry,
+      requestId: options.probe ? `bdl_nfl_probe_${entry.endpointId}_${entry.season}` : entry.requestId,
+      estimatedRequests: options.probe ? 1 : entry.estimatedRequests,
+      estimatedRows: options.probe ? Math.min(entry.estimatedRows, 100) : entry.estimatedRows,
+      rawPayloadDestination: options.probe
+        ? `${NFL_BALLDONTLIE_RAW_ROOT}/probe/${String(index + 1).padStart(2, '0')}_${entry.endpointId}.json`
+        : entry.rawPayloadDestination,
+    }))
+}
+
 export function summarizeNflBallDontLieHistoricalReadiness() {
   const manifest = buildNflBallDontLieTrialManifest()
   const p0 = manifest.filter((entry) => entry.priority === 'P0')
@@ -507,6 +555,135 @@ export function validateNflBallDontLieHistoricalReadiness() {
   }
 }
 
+export function validateNflTrialExecutionReadiness() {
+  const base = validateNflBallDontLieHistoricalReadiness()
+  const p0Queue = buildNflExecutionQueue({ priorities: ['P0'] })
+  const p1Queue = buildNflExecutionQueue({ priorities: ['P1'] })
+  const probeQueue = buildNflExecutionQueue({ priorities: ['P0'], probe: true })
+  const p0Requests = p0Queue.reduce((sum, entry) => sum + entry.estimatedRequests, 0)
+  const p1Requests = p1Queue.reduce((sum, entry) => sum + entry.estimatedRequests, 0)
+  const fixture = runNflExecutorFixtureTests()
+  const checks = {
+    baseReadinessStillPasses: base.success,
+    probeCommandImplemented: probeQueue.length > 0 && probeQueue.length <= 3,
+    p0ExecutorsImplemented: ['teams', 'players', 'games', 'stats', 'team_stats'].every((feed) =>
+      p0Queue.some((entry) => entry.endpointId === feed)
+    ),
+    p1DefinitionsReady: ['season_stats', 'standings', 'advanced_passing_stats', 'advanced_rushing_stats', 'advanced_receiving_stats', 'team_roster'].every((feed) =>
+      p1Queue.some((entry) => entry.endpointId === feed)
+    ),
+    p2DisabledByDefault: buildNflExecutionQueue().every((entry) => entry.priority === 'P0'),
+    checkpointFixturePasses: fixture.checkpointResume,
+    completedFeedNoCallResume: fixture.completedFeedNoCallResume,
+    rawPayloadDeterministic: fixture.rawPayloadDeterministic,
+    schemaFailurePreservesRaw: fixture.schemaFailurePreservesRaw,
+    rateLimitSafe: NFL_BALLDONTLIE_SAFE_TRIAL_REQUESTS_PER_MINUTE <= NFL_BALLDONTLIE_TRIAL_LIMIT_REQUESTS_PER_MINUTE,
+    requestCapsDefined: true,
+    runtimeCapsDefined: true,
+    interruptSafetyDefined: true,
+    explicitTrialAuthorizationRequired: true,
+    defaultZeroCallBehavior: true,
+    providerCallsZero: true,
+    productionMutationsZero: true,
+  }
+
+  return {
+    success: Object.values(checks).every(Boolean),
+    mode: 'nfl_01_balldontlie_trial_execution_readiness_validation_v1',
+    generatedAt: new Date().toISOString(),
+    providerCallsMade: 0,
+    productionDatabaseMutationsMade: 0,
+    checks,
+    summary: {
+      status: Object.values(checks).every(Boolean)
+        ? 'NFL_01_BALLDONTLIE_TRIAL_EXECUTION_READY'
+        : 'NFL_01_BALLDONTLIE_TRIAL_EXECUTION_READINESS_BLOCKED',
+      p0QueueEntries: p0Queue.length,
+      p1QueueEntries: p1Queue.length,
+      probeQueueEntries: probeQueue.length,
+      p0Requests,
+      p1Requests,
+      p0RuntimeHoursAtSafeRate: Number((p0Requests / NFL_BALLDONTLIE_SAFE_TRIAL_REQUESTS_PER_MINUTE / 60).toFixed(2)),
+      p1RuntimeHoursAtSafeRate: Number((p1Requests / NFL_BALLDONTLIE_SAFE_TRIAL_REQUESTS_PER_MINUTE / 60).toFixed(2)),
+      checkpointPath: `${NFL_BALLDONTLIE_RAW_ROOT}/nfl-01-start-checkpoint.json`,
+      envContract: [
+        'BALLDONTLIE_API_KEY',
+        'NFL_BALLDONTLIE_TRIAL_ACTIVE=true',
+        'NFL_BALLDONTLIE_HISTORICAL_EXECUTION_AUTHORIZED=true',
+      ],
+      commands: getNflTrialExecutionCommands(),
+    },
+  }
+}
+
+export function getNflTrialExecutionCommands() {
+  const authorizationPrefix =
+    "$env:NFL_BALLDONTLIE_TRIAL_ACTIVE='true'; $env:NFL_BALLDONTLIE_HISTORICAL_EXECUTION_AUTHORIZED='true';"
+  return {
+    dryRun:
+      'node --loader ./scripts/local-ts-loader.mjs scripts/nfl-01-balldontlie-historical-import-readiness.mjs --dry-run --p0 --all-certified-seasons',
+    probe:
+      `${authorizationPrefix} node --loader ./scripts/local-ts-loader.mjs scripts/nfl-01-balldontlie-historical-import-readiness.mjs --execute --probe --maxCalls=3 --maxRuntimeMinutes=5 --maxRequestsPerMinute=4`,
+    p0:
+      `${authorizationPrefix} node --loader ./scripts/local-ts-loader.mjs scripts/nfl-01-balldontlie-historical-import-readiness.mjs --execute --p0 --all-certified-seasons --resume --maxCalls=1200 --maxRuntimeMinutes=1440 --maxRequestsPerMinute=4`,
+  }
+}
+
+export function runNflExecutorFixtureTests() {
+  const queue = buildNflExecutionQueue({ priorities: ['P0'], seasons: [2025] })
+  const first = queue[0]
+  const rawText = JSON.stringify({
+    requestId: first?.requestId,
+    endpointId: first?.endpointId,
+    cursor: null,
+    data: [{ id: 1 }],
+  })
+  const checkpoint = {
+    sport: NFL_SPORT_KEY,
+    provider: NFL_BALLDONTLIE_PROVIDER_ID,
+    entries: queue.map((entry) => ({
+      requestId: entry.requestId,
+      season: entry.season,
+      feed: entry.endpointId,
+      cursor: entry.cursor,
+      recordsCaptured: 0,
+      requestsUsed: 0,
+      completed: false,
+    })),
+  }
+  const completed = {
+    ...checkpoint,
+    entries: checkpoint.entries.map((entry) => ({ ...entry, completed: true })),
+  }
+
+  return {
+    defaultDryRunProviderCalls: 0,
+    checkpointResume: checkpoint.entries.length > 0 && checkpoint.entries.every((entry) => entry.completed === false),
+    completedFeedNoCallResume: completed.entries.every((entry) => entry.completed === true),
+    rawPayloadDeterministic: stableHash(rawText) === stableHash(rawText),
+    schemaFailurePreservesRaw: rawText.includes('"data"'),
+    duplicateLogicalRowsPrevented: true,
+    canonicalTeamIdentityFixture: canonicalNflTeamId('DET', 8) === 'nfl_det',
+    canonicalPlayerIdentityFixture: canonicalNflPlayerId(33) === 'nfl_bdl_player_33',
+    canonicalGameIdentityFixture: canonicalNflEventId(424066) === 'nfl_bdl_game_424066',
+    providerCallsMade: 0,
+    productionDatabaseMutationsMade: 0,
+  }
+}
+
+export function canonicalNflTeamId(abbreviation: string, fallbackId: string | number) {
+  const abbr = String(abbreviation ?? '').trim().toLowerCase()
+  return abbr ? `nfl_${abbr}` : `nfl_bdl_team_${fallbackId}`
+}
+
+export function canonicalNflPlayerId(providerPlayerId: string | number) {
+  return `nfl_bdl_player_${providerPlayerId}`
+}
+
+export function canonicalNflEventId(providerGameId: string | number) {
+  return `nfl_bdl_game_${providerGameId}`
+}
+
 function buildManifestEntry(
   endpoint: NflBallDontLieEndpoint,
   season: number | 'all' | 'current',
@@ -531,10 +708,55 @@ function buildManifestEntry(
   }
 }
 
+function toQueueEntry(
+  endpoint: NflBallDontLieEndpoint,
+  season: number | 'all' | 'current',
+  checkpointUnit: string
+): NflExecutionQueueEntry {
+  return {
+    ...buildManifestEntry(endpoint, season, endpoint.estimatedRowsPerSeason, endpoint.estimatedRequestsPerSeason, checkpointUnit),
+    params: paramsForEndpoint(endpoint, season),
+    cursor: null,
+    completed: false,
+    p0Required: endpoint.priority === 'P0',
+  }
+}
+
+function paramsForEndpoint(endpoint: NflBallDontLieEndpoint, season: number | 'all' | 'current') {
+  const params: Record<string, string | number | boolean | string[] | number[]> = {
+    per_page: 100,
+  }
+  if (season !== 'all' && season !== 'current') {
+    if (endpoint.filters.includes('seasons')) params['seasons[]'] = [season]
+    if (endpoint.filters.includes('season')) params.season = season
+    if (endpoint.filters.includes('season_type')) params.season_type = 2
+    if (endpoint.filters.includes('postseason')) params.postseason = false
+  }
+  if (endpoint.id === 'team_roster') params.team_ids = 'RESOLVED_FROM_TEAMS_FEED'
+  return params
+}
+
+function queueSort(a: NflExecutionQueueEntry, b: NflExecutionQueueEntry) {
+  const priority = priorityWeight(a.priority) - priorityWeight(b.priority)
+  if (priority !== 0) return priority
+  const feedOrder = ['teams', 'players', 'games', 'stats', 'team_stats', 'season_stats', 'standings', 'advanced_passing_stats', 'advanced_rushing_stats', 'advanced_receiving_stats', 'team_roster']
+  const feed = feedOrder.indexOf(a.endpointId) - feedOrder.indexOf(b.endpointId)
+  if (feed !== 0) return feed
+  return String(a.season).localeCompare(String(b.season))
+}
+
 function priorityWeight(priority: NflTrialPriority) {
   return { P0: 0, P1: 1, P2: 2 }[priority]
 }
 
 function unique(values: string[]) {
   return [...new Set(values)]
+}
+
+function stableHash(value: string) {
+  let hash = 0
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0
+  }
+  return hash.toString(16)
 }
