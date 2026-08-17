@@ -2153,3 +2153,11 @@ Status: `NBA_03A_CONTINUOUS_SHADOW_OPERATING_POLICY_CERTIFIED_READY_FOR_PUBLICAT
 After the repaired natural runtime verification passed, the NBA Current Era shadow scheduler was reviewed for continuous operation. The current 40-row sample is still fully shadow-only and pending, with 0 Official Picks, 0 product-visible rows, 0 learning/calibration activation and 0 MLB/Historical Replay mutation. Because the sample is already concentrated in one future event and the stored NBA horizon starts on 2026-10-20, continuous collection now needs rate control rather than execution repair.
 
 Implemented a default-off continuous policy guard with `NBA_CURRENT_ERA_SHADOW_CONTINUOUS_ENABLED`, 3 rows/run, 3 rows/day, 2 The Odds API calls/day, soft pause at 60 pending rows, hard pending guard preserved at 75, and event/event-market caps. The repaired-verification flag remains separate and must not authorize continuous operation.
+
+## 2026-08-17 NFL-02 Canonical Historical Import Readiness
+
+NFL-02 raw normalization and canonical historical import readiness is locally certified as `NFL_02_CANONICAL_HISTORICAL_IMPORT_READY`. The phase uses only preserved BallDontLie NFL raw data and makes 0 provider calls, 0 production database mutations, 0 NFL prediction writes and 0 MLB/NBA runtime changes.
+
+The dry-run canonical plan reuses shared platform tables: `sports_teams`, `sport_players`, `sport_events`, `game_results`, `sport_game_stats`, `sport_player_stats`, `sport_standings`, `sport_lineups` and `provider_entity_mappings`. Candidate counts are 32 teams, 13,559 players, 1,360 games, 1,359 completed results, 2,718 team-game stats, 85,749 player-game stats, 9,072 season-stat rows, 160 standings rows and 3,408 forward-only roster rows. The 2022 Week 17 BUF @ CIN cancellation is preserved as a non-final event with no fabricated result.
+
+The 16 historical provider-error payloads remain `PROVIDER_ERROR_EVIDENCE` and produce 0 normalized rows. Season stats and standings are validation/research only until as-of semantics are certified. The 2025 roster supplement remains `FORWARD_ONLY_OR_UNKNOWN` and must not be used as 2021-2025 historical pregame truth. Next: separately authorize a bounded production canonical import, then proceed to NFL-03 temporal feature construction and model training/replay.

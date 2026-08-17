@@ -3628,3 +3628,13 @@ Next: publish/deploy this continuation mechanism, verify production alignment an
 Status: `NBA_03A_CONTINUOUS_SHADOW_OPERATING_POLICY_CERTIFIED_READY_FOR_PUBLICATION`
 
 Continuous NBA Current Era shadow scheduling is not activated automatically. The next gate is publication and production alignment of the default-off continuous guard, then explicit human authorization for `NBA_CURRENT_ERA_SHADOW_CONTINUOUS_ENABLED=true` only if the reviewed policy is accepted. Initial continuous collection remains shadow-only, capped at 3 rows/day and 2 The Odds API calls/day, with soft pause at 60 pending rows and hard guard at 75.
+
+## NFL-02 Canonical Historical Import Readiness
+
+Status: `NFL_02_CANONICAL_HISTORICAL_IMPORT_READY`
+
+Result: NFL-02 now has an offline, local-data-first normalization dry run for the certified BallDontLie NFL historical dataset. The plan reuses shared canonical tables and produces deterministic row identities for teams, players, events, results, team stats, player stats, season stats, standings, forward-only roster supplement rows and provider mappings.
+
+The canonical dry run validates 32 teams, 1,360 games, 1,359 completed results, 2,718 team-game stats, 85,749 player-game stats, 9,072 season-stat rows, 160 standings rows, 3,408 roster supplement rows, 0 orphan stat rows and 0 duplicate canonical IDs. The 16 provider-error payloads are quarantined as `PROVIDER_ERROR_EVIDENCE`; season stats, standings and roster data retain temporal restrictions.
+
+Next: separately authorize the bounded production canonical import. Do not make additional BallDontLie calls, start P2, train NFL models, generate replay predictions or activate NFL production before the import gate.

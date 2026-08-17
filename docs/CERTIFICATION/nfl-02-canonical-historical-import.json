@@ -1,0 +1,84 @@
+{
+  "phase": "NFL-02 Raw Normalization + Canonical Historical Import",
+  "status": "NFL_02_CANONICAL_HISTORICAL_IMPORT_READY",
+  "sourceCommit": "e80ccb8d35510f8452d99e289e1cfcd03060d98a",
+  "providerCallsMade": 0,
+  "productionDatabaseMutationsMade": 0,
+  "rawInventory": {
+    "validProviderDataFiles": 1728,
+    "providerErrorEvidenceFiles": 16,
+    "logFilesExcluded": 10,
+    "normalizedRowsFromProviderErrors": 0
+  },
+  "canonicalCounts": {
+    "teams": 32,
+    "players": 13559,
+    "games": 1360,
+    "completedGames": 1359,
+    "cancelledGames": 1,
+    "gameResults": 1359,
+    "teamGameStats": 2718,
+    "playerGameStats": 85749,
+    "seasonStats": 9072,
+    "standings": 160,
+    "rosterSupplement": 3408,
+    "providerEntityMappings": 14951
+  },
+  "seasonCounts": {
+    "2021": { "events": 272, "finalResults": 272, "teamStatRows": 544, "playerStatRows": 17126, "seasonStatRows": 1838, "standingsRows": 32 },
+    "2022": { "events": 272, "finalResults": 271, "teamStatRows": 542, "playerStatRows": 17009, "seasonStatRows": 1823, "standingsRows": 32 },
+    "2023": { "events": 272, "finalResults": 272, "teamStatRows": 544, "playerStatRows": 16834, "seasonStatRows": 1767, "standingsRows": 32 },
+    "2024": { "events": 272, "finalResults": 272, "teamStatRows": 544, "playerStatRows": 17003, "seasonStatRows": 1816, "standingsRows": 32 },
+    "2025": { "events": 272, "finalResults": 272, "teamStatRows": 544, "playerStatRows": 17777, "seasonStatRows": 1828, "standingsRows": 32 }
+  },
+  "knownException": {
+    "providerGameId": "6686",
+    "event": "BUF @ CIN",
+    "season": "2022",
+    "week": 17,
+    "status": "cancelled",
+    "resultCreated": false
+  },
+  "orphanAudit": {
+    "teamStatsMissingEvent": 0,
+    "teamStatsMissingTeam": 0,
+    "playerStatsMissingEvent": 0,
+    "playerStatsMissingTeam": 0,
+    "playerStatsMissingPlayer": 0,
+    "rosterMissingTeam": 0,
+    "rosterMissingPlayer": 0
+  },
+  "duplicateAudit": {
+    "teams": 0,
+    "players": 0,
+    "events": 0,
+    "results": 0,
+    "teamStats": 0,
+    "playerStats": 0,
+    "seasonStats": 0,
+    "standings": 0,
+    "rosterSupplement": 0,
+    "providerGameIds": 0
+  },
+  "qbReadiness": {
+    "qbPlayersIdentified": 206,
+    "passingStatRows": 3321,
+    "gamesWithAtLeastOnePassingQb": 1359,
+    "gamesMissingPassingQb": 0,
+    "starterInference": "NOT_BUILT_IN_NFL_02"
+  },
+  "temporalContract": {
+    "sameGameStatsAsPregameFeatures": "BANNED",
+    "seasonStatsPregameUse": "RESTRICTED_VALIDATION_ONLY_UNTIL_AS_OF_CERTIFIED",
+    "standingsPregameUse": "RESTRICTED_VALIDATION_ONLY_UNTIL_AS_OF_CERTIFIED",
+    "rosterHistoricalReplayEligible": false,
+    "rosterForwardFeatureEligible": true,
+    "historicalMarketEvidence": "NO_SYNTHETIC_ODDS_OR_LINES_CREATED"
+  },
+  "importBoundary": {
+    "dryRunCertified": true,
+    "productionImportExecuted": false,
+    "requiresSeparateProductionImportAuthorization": true
+  },
+  "nextPhase": "NFL-02-IMPORT_BOUNDED_CANONICAL_PRODUCTION_IMPORT"
+}
