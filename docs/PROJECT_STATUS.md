@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-16 NFL-01 Windows Executor Shutdown Repair
+
+- NFL-01 Windows executor shutdown repair is locally implemented as `NFL_01_BALLDONTLIE_WINDOWS_EXECUTOR_SHUTDOWN_REPAIR_CERTIFIED`. The latest active-trial probe resume durably wrote `data/imports/balldontlie/nfl/probe/03_team_stats.json` with 100 records and `next_cursor=112`, so `remainingEntries=1` is expected because team_stats pagination is not complete.
+- The Windows `UV_HANDLE_CLOSING` assertion is traced to forced `process.exit(...)` calls in the async executor path after fetch/AbortController work. The repair switches to natural `process.exitCode` handling while preserving provider semantics, rate limits, queue order, raw identity and checkpoint behavior. Diagnostic provider calls were 0, production database mutations were 0, MLB/NBA runtime behavior was unchanged, and P0 remains blocked until the team_stats cursor chain completes after publication.
+
 ## 2026-08-16 NFL-01 Raw Payload Collision Repair
 
 - NFL-01 raw payload collision repair is locally implemented as `NFL_01_BALLDONTLIE_RAW_PAYLOAD_COLLISION_REPAIR_CERTIFIED_READY_FOR_PROBE`. The attempted live probe left a valid BallDontLie NFL teams payload at `data/imports/balldontlie/nfl/probe/01_teams.json`, but the executor treated missing `meta.next_cursor` as cursor `0`, so the completed teams request stayed incomplete and retried against the same file.

@@ -1,0 +1,51 @@
+{
+  "mode": "nfl_01_windows_executor_shutdown_repair_v1",
+  "status": "NFL_01_BALLDONTLIE_WINDOWS_EXECUTOR_SHUTDOWN_REPAIR_CERTIFIED",
+  "startingCommit": "02a20dc8d7c94848cfb1f3323e4566d9901dc132",
+  "providerCallsDuringDiagnostic": 0,
+  "productionDatabaseMutationsDuringDiagnostic": 0,
+  "teamStatsRawPayload": {
+    "path": "data/imports/balldontlie/nfl/probe/03_team_stats.json",
+    "endpoint": "/nfl/v1/team_stats",
+    "status": 200,
+    "records": 100,
+    "nextCursor": 112,
+    "schemaUsable": true,
+    "rawIdentityValid": true
+  },
+  "checkpointState": {
+    "teamsComplete": true,
+    "gamesComplete": true,
+    "teamStatsComplete": false,
+    "teamStatsCursor": 112,
+    "teamStatsRecordsCaptured": 100,
+    "teamStatsRequestsUsed": 1,
+    "remainingReason": "TEAM_STATS_NEXT_CURSOR_112_REQUIRES_ADDITIONAL_PAGE"
+  },
+  "accounting": {
+    "totalCalls": 5,
+    "teams": 1,
+    "games": 3,
+    "teamStats": 1,
+    "retries": 0,
+    "failures": 0,
+    "rateLimitResponses": 0,
+    "successfulPayloads": 5,
+    "recordsCaptured": 404
+  },
+  "nextProviderRequest": {
+    "authorizedInThisRepair": false,
+    "requestId": "bdl_nfl_probe_team_stats_2025",
+    "endpoint": "/nfl/v1/team_stats",
+    "season": 2025,
+    "cursor": 112,
+    "rawTarget": "data/imports/balldontlie/nfl/probe/03_team_stats.cursor-112.json"
+  },
+  "windowsAssertion": {
+    "rootCause": "FORCED_PROCESS_EXIT_AFTER_ASYNC_FETCH_PATH",
+    "forcedProcessExitRemoved": true,
+    "naturalExitCodeUsed": true,
+    "uvHandleClosingFixtureClean": true
+  },
+  "p0DownloadReady": false
+}

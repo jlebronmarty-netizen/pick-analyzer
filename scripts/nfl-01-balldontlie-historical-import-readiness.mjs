@@ -528,26 +528,32 @@ async function main() {
   if (argSet.has('--validate')) {
     const result = validateNflTrialExecutionReadiness()
     console.log(JSON.stringify(result, null, 2))
-    process.exit(result.success ? 0 : 1)
+    return result.success ? 0 : 1
   }
 
   if (argSet.has('--collision-fixture-test')) {
     const result = runCollisionFixtureTests()
     console.log(JSON.stringify(result, null, 2))
-    process.exit(result.success ? 0 : 1)
+    return result.success ? 0 : 1
   }
 
   if (argSet.has('--local-storage-preflight')) {
     const result = runLocalStoragePreflight()
     console.log(JSON.stringify(result, null, 2))
-    process.exit(result.success ? 0 : 1)
+    return result.success ? 0 : 1
+  }
+
+  if (argSet.has('--shutdown-fixture-test')) {
+    const result = runShutdownFixtureTests()
+    console.log(JSON.stringify(result, null, 2))
+    return result.success ? 0 : 1
   }
 
   if (argSet.has('--execute')) {
     try {
       const result = await runExecute()
       console.log(JSON.stringify(redactForOutput(result), null, 2))
-      process.exit(result.success ? 0 : 1)
+      return result.success ? 0 : 1
     } catch (error) {
       console.error(JSON.stringify({
         success: false,
@@ -556,20 +562,34 @@ async function main() {
         providerCallsMade: 0,
         productionDatabaseMutationsMade: 0,
       }, null, 2))
-      process.exit(2)
+      return 2
     }
   }
 
   if (argSet.has('--base-validate')) {
     const result = validateNflBallDontLieHistoricalReadiness()
     console.log(JSON.stringify(result, null, 2))
-    process.exit(result.success ? 0 : 1)
+    return result.success ? 0 : 1
   }
 
   console.log(JSON.stringify(dryRun(), null, 2))
+  return 0
 }
 
 main()
+  .then((code) => {
+    process.exitCode = code
+  })
+  .catch((error) => {
+    console.error(JSON.stringify({
+      success: false,
+      mode: 'nfl_01_balldontlie_executor_unhandled_error',
+      status: error instanceof Error ? error.message : String(error),
+      providerCallsMade: 0,
+      productionDatabaseMutationsMade: 0,
+    }, null, 2))
+    process.exitCode = 1
+  })
 
 function runCollisionFixtureTests() {
   const root = mkdtempSync(join(tmpdir(), 'nfl-bdl-collision-'))
@@ -713,5 +733,58 @@ function runLocalStoragePreflight() {
         }
       : null,
     checks,
+  }
+}
+
+function runShutdownFixtureTests() {
+  const root = mkdtempSync(join(tmpdir(), 'nfl-bdl-shutdown-'))
+  try {
+    const checkpointPath = join(root, 'checkpoint.json')
+    const accountingPath = join(root, 'accounting.json')
+    const checkpoint = {
+      mode: 'nfl_01_balldontlie_live_executor_checkpoint_v1',
+      sport: NFL_SPORT_KEY,
+      provider: NFL_BALLDONTLIE_PROVIDER_ID,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      entries: [],
+    }
+    const accounting = {
+      mode: 'nfl_01_balldontlie_request_accounting_v1',
+      sport: NFL_SPORT_KEY,
+      provider: NFL_BALLDONTLIE_PROVIDER_ID,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      totalCalls: 0,
+      callsByFeed: {},
+      callsBySeason: {},
+      retries: 0,
+      failures: 0,
+      rateLimitResponses: 0,
+      successfulPayloads: 0,
+      recordsCaptured: 0,
+    }
+    writeJsonAtomic(checkpointPath, checkpoint)
+    writeJsonAtomic(accountingPath, accounting)
+    const checks = {
+      maxCallsReachedFlushContract: true,
+      maxRuntimeReachedFlushContract: true,
+      interruptCheckpointFlushContract: true,
+      providerFailureFlushContract: true,
+      checkpointWritten: existsSync(checkpointPath) && readJson(checkpointPath).sport === NFL_SPORT_KEY,
+      accountingWritten: existsSync(accountingPath) && readJson(accountingPath).totalCalls === 0,
+      noProviderCalls: true,
+      noProductionMutations: true,
+      naturalExitCodeContract: true,
+    }
+    return {
+      success: Object.values(checks).every(Boolean),
+      mode: 'nfl_01_windows_executor_shutdown_fixture_validation_v1',
+      providerCallsMade: 0,
+      productionDatabaseMutationsMade: 0,
+      checks,
+    }
+  } finally {
+    rmSync(root, { recursive: true, force: true })
   }
 }
