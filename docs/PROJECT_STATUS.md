@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-16 NFL-01 BallDontLie Historical Import Readiness
+
+- NFL-01 is locally implemented as `NFL_01_BALLDONTLIE_HISTORICAL_IMPORT_READINESS_CERTIFIED_WAITING_FOR_TRIAL`. The phase inventories existing NFL support, classifies the old SportsDataIO NFL material as legacy/non-authoritative, and establishes BallDontLie NFL as the sports/statistical source with The Odds API as `americanfootball_nfl` betting-market authority.
+- The bounded readiness package prepares a disabled-by-default NFL BallDontLie manifest for 2021-2025 historical teams, players, games/results, player game stats and team game stats, with P1/P2 feeds separated by tier and replay value. It performs 0 provider calls, 0 production database mutations, 0 NFL production activation, 0 NFL scheduler activation and no MLB/NBA behavior changes. Next: after the user activates the BallDontLie NFL GOAT trial, run one bounded connectivity/schema probe and then the P0 historical download queue.
+
 ## 2026-08-17 NBA-03A Current Era Shadow Settlement Preparation
 
 - NBA-03A Current Era Shadow Settlement Preparation is locally implemented as `NBA_03A_CURRENT_ERA_SHADOW_SETTLEMENT_PREPARATION_CERTIFIED_READY_FOR_ACTIVATION_REVIEW`. The additive preparation service scopes settlement to `basketball_nba` rows with `prediction_origin = CURRENT_ERA_SHADOW`, pending/unsettled state and supported full-game markets only.

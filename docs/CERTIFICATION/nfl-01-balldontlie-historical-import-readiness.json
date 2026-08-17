@@ -1,0 +1,52 @@
+{
+  "status": "NFL_01_BALLDONTLIE_HISTORICAL_IMPORT_READINESS_CERTIFIED_WAITING_FOR_TRIAL",
+  "repositoryBaseline": "8a8871936f56249e86891d45ce63af533ca44f5a",
+  "providerCallsMade": 0,
+  "productionDatabaseMutationsMade": 0,
+  "sportsDataIoNflDependency": "NONE_NEW_ARCHITECTURE_LEGACY_ONLY",
+  "providerAuthority": {
+    "historicalSportsData": "BALLDONTLIE_NFL",
+    "ongoingSportsData": "BALLDONTLIE_NFL_ALL_STAR_WHERE_POSSIBLE",
+    "bettingMarkets": "THE_ODDS_API",
+    "theOddsApiSportKey": "americanfootball_nfl"
+  },
+  "recommendedHistoricalSeasons": [2021, 2022, 2023, 2024, 2025],
+  "estimatedHistoricalVolume": {
+    "regularSeasonGames": 1360,
+    "playoffGames": 70,
+    "totalGames": 1430,
+    "potentialPredictionsAtThreeMarketsPerGame": 4290,
+    "estimateOnly": true
+  },
+  "ballDontLieContractEvidence": {
+    "coverage": "NFL 2002-current per official docs",
+    "trial": "48-hour GOAT trial, 5 requests/minute",
+    "freeEndpoints": ["teams", "players", "games"],
+    "allStarEndpoints": ["player_injuries", "active_players", "standings", "stats", "season_stats", "team_stats", "team_season_stats"],
+    "goatEndpoints": ["advanced_rushing_stats", "advanced_passing_stats", "advanced_receiving_stats", "plays", "betting_odds", "player_props", "daily_fantasy_sports", "team_roster"]
+  },
+  "hardGuard": {
+    "defaultMode": "DRY_RUN",
+    "executeImplemented": false,
+    "providerCallsAllowedByDefault": false,
+    "schedulerActivated": false,
+    "requiresExplicitTrialActivation": true
+  },
+  "checks": {
+    "existingNflArchitectureInventoried": true,
+    "legacySportsDataIoClassified": true,
+    "providerAuthorityDefined": true,
+    "ballDontLieTierMatrixDefined": true,
+    "trialManifestPrepared": true,
+    "rawPreservationRequired": true,
+    "leakageContractDefined": true,
+    "historicalOddsSeparated": true,
+    "nflProductionInactive": true,
+    "mlbIsolation": true,
+    "nbaIsolation": true,
+    "providerCallsZero": true,
+    "productionMutationsZero": true
+  },
+  "nextPhase": "NFL-01-START_BALLDONTLIE_CONNECTIVITY_SCHEMA_PROBE_AND_P0_DOWNLOAD",
+  "finalClassification": "NFL_01_BALLDONTLIE_HISTORICAL_IMPORT_READINESS_CERTIFIED_WAITING_FOR_TRIAL"
+}
