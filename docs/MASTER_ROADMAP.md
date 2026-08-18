@@ -3670,3 +3670,13 @@ Status: `NFL_02_SUPABASE_FETCH_RESILIENCE_REPAIR_CERTIFIED`
 Result: The partial production import safely inserted 32 NFL teams, then paused before player writes because the first `sport_players` existing-row pre-read sent 500 IDs in one Supabase `.in('id', ids)` request. Smaller bounded probes succeeded through 250 IDs, while the 500-ID request failed with `TypeError: fetch failed`, classifying the issue as `URL_OR_FILTER_TOO_LARGE`.
 
 The import executor now keeps write batches unchanged while splitting existing-row pre-reads into 100-ID chunks with bounded read-only retry backoff of 500 ms, 1500 ms and 3000 ms. Write retries remain fail-closed. The native first-player-batch probe now passes in 5 chunks with 0 existing players and 500 `WOULD_INSERT` rows; full dry-run counts remain certified and 2026 The Odds API NFL rows remain preserved. Next: publish/deploy R5, then separately resume the guarded NFL-02 production import from `sport_players` batch 1.
+
+## NFL-03 Temporal Feature Model Foundation
+
+Status: `NFL_03_TEMPORAL_FEATURE_MODEL_FOUNDATION_CERTIFIED`
+
+Result: NFL-03 now has an offline temporal feature builder and first model foundation for 2021-2025 certified NFL canonical history. The split is chronological: 2021-2023 training, 2024 validation/calibration and 2025 holdout. Minimum history is 3 prior completed games per team, yielding 1,311 eligible feature rows with 86 features and 0 leakage violations.
+
+The certified feature contract requires `source_event.start_time < target_event.start_time` and excludes same-game stats, future games, full-season stats, final standings and forward-only roster evidence from historical pregame features. The V1 model foundation uses regularized logistic regression for moneyline and ridge score regressions for home/away score, margin and total diagnostics. NFL-03 remains offline-only: 0 provider calls, 0 production DB mutations, 0 prediction writes, 0 Official Picks and no MLB/NBA runtime changes.
+
+Next: publish NFL-03, verify alignment, then separately authorize NFL-04 current-era shadow and current-market integration using real The Odds API NFL markets. Do not fabricate historical spread/total odds or activate NFL product surfaces before NFL-04 gates pass.

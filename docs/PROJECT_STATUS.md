@@ -2189,3 +2189,11 @@ The failing query was `sport_players.select('*').in('id', ids)` with 500 determi
 The executor now chunks existing-row reads at 100 IDs while preserving the 500-row player write batch, and it applies bounded read-only retry backoff of 500 ms, 1500 ms and 3000 ms. Writes are still not blindly retried after transport failures. The native first-player-batch production read-only probe completed in 5 chunks, found 0 existing players and classified 500 players as `WOULD_INSERT`. The full dry-run still reconciles 32 teams, 13,559 players, 1,360 events, 1,359 results, 2,718 team-game stats, 85,749 player-game stats, 9,072 season-stat rows, 160 standings rows, 3,408 forward-only roster rows and 14,951 provider mappings.
 
 R5 certification made 0 provider calls and 0 production database mutations. The existing 32 teams remain valid, and 75 current/future 2026 NFL The Odds API events plus 75 mappings remain preserved. Next: publish/deploy the R5 repair, then separately authorize the guarded NFL-02 import resume from `sport_players` batch 1.
+
+## 2026-08-18 NFL-03 Temporal Feature Model Foundation
+
+NFL-03 temporal feature/model foundation is locally certified as `NFL_03_TEMPORAL_FEATURE_MODEL_FOUNDATION_CERTIFIED`. The phase uses only certified canonical NFL history for 2021-2025, with a chronological split of 2021-2023 training, 2024 validation/calibration and 2025 holdout.
+
+The offline feature builder produced 1,311 eligible pregame rows from 1,359 completed historical games after enforcing a minimum of 3 prior completed games per team. The certified temporal contract requires `source_event.start_time < target_event.start_time`; same-game stats, future games, final season stats, final standings and forward-only roster evidence are excluded from pregame features. Leakage audit violations: 0.
+
+The selected V1 foundation is a regularized logistic moneyline model plus ridge score regressions, with Platt calibration fit only on 2024 before opening the 2025 holdout. NFL-03 does not fabricate historical spread or total lines, does not write production predictions, does not activate NFL Current Era, does not expose Official Picks, and made 0 provider calls and 0 production database mutations. Next: publish NFL-03, then separately authorize NFL-04 current-era shadow and current-market integration.

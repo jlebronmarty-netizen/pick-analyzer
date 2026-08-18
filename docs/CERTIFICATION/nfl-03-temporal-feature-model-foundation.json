@@ -1,0 +1,790 @@
+{
+  "status": "NFL_03_TEMPORAL_FEATURE_MODEL_FOUNDATION_CERTIFIED",
+  "generatedAt": "2026-08-18T00:00:00.000Z",
+  "sportKey": "americanfootball_nfl",
+  "featureVersion": "nfl_temporal_pregame_feature_set_v1",
+  "modelVersion": "nfl_ml_score_baseline_v1",
+  "existingNflEngineAudit": {
+    "predictionEngine": "src/services/nfl-prediction-engine.service.ts",
+    "featureIntegration": "src/services/nfl-feature-store-integration.service.ts",
+    "sharedSdk": "src/services/sport-prediction-engine-sdk.service.ts",
+    "currentClassification": "PREVIEW",
+    "supportedPreviewMarkets": [
+      "moneyline",
+      "spread",
+      "total",
+      "first_half"
+    ],
+    "reusableCore": [
+      "shared sport prediction SDK",
+      "feature store snapshot contracts",
+      "settlement-compatible market primitives"
+    ]
+  },
+  "temporalDatasetContract": {
+    "rowIdentity": "one row per completed non-cancelled target game with sufficient prior team history",
+    "sourceTimeRule": "source_event.start_time < target_event.start_time",
+    "resultRule": "result-dependent features use prior completed games only",
+    "sameGameLeakageAllowed": false,
+    "futureGameLeakageAllowed": false,
+    "seasonStatsPregameSafe": false,
+    "standingsPregameSafe": false,
+    "rosterHistoricalReplayEligible": false
+  },
+  "split": {
+    "train": [
+      "2021",
+      "2022",
+      "2023"
+    ],
+    "validationCalibration": [
+      "2024"
+    ],
+    "holdout": [
+      "2025"
+    ],
+    "randomShuffleUsed": false
+  },
+  "rowCounts": {
+    "canonicalCompletedGames": 1359,
+    "eligibleFeatureRows": 1311,
+    "insufficientHistoryRows": 48,
+    "train": 767,
+    "validation": 272,
+    "holdout": 272,
+    "featureCount": 86
+  },
+  "minimumHistoryPolicy": {
+    "evaluated": [
+      3,
+      5,
+      8
+    ],
+    "selectedMinimumPriorGamesPerTeam": 3,
+    "earlyRowsWithoutMinimumHistory": 48,
+    "neutralPriorsUsed": false
+  },
+  "featureFamilies": {
+    "team": [
+      "rolling last3",
+      "rolling last5",
+      "season-to-date before kickoff",
+      "home/away splits",
+      "offense",
+      "defense proxy",
+      "form"
+    ],
+    "qb": [
+      "team prior QB aggregate passing/rushing contribution",
+      "starter not inferred from forward roster"
+    ],
+    "playerPersonnel": [
+      "QB aggregate retained in V1",
+      "top receiver/rusher deferred to avoid high-dimensional V1"
+    ],
+    "restSchedule": [
+      "days since previous game",
+      "short week derivable",
+      "bye-like gap derivable"
+    ],
+    "matchup": [
+      "offense-defense differentials",
+      "QB differential",
+      "turnover/form/rest differentials"
+    ]
+  },
+  "leakageAudit": {
+    "violations": 0,
+    "sameGameStatLeakage": 0,
+    "futureGameLeakage": 0,
+    "fullSeasonAggregateLeakage": 0,
+    "finalStandingsLeakage": 0,
+    "rosterTemporalLeakage": 0
+  },
+  "labels": {
+    "moneyline": "home win binary from final result",
+    "ties": "no tied final rows in eligible sample; binary architecture would exclude ties",
+    "spread": "not trained against historical spread lines; no fabricated spread",
+    "total": "not trained against historical total lines; no fabricated total",
+    "scoreOutputs": [
+      "expected home points",
+      "expected away points",
+      "expected total",
+      "expected margin"
+    ]
+  },
+  "modelCandidates": {
+    "selected": "regularized logistic regression for moneyline plus ridge score regressions",
+    "rejectedForV1": [
+      "gradient boosted trees: dependency not present",
+      "Poisson/negative-binomial: deferred challenger"
+    ],
+    "calibrationMethod": "Platt scaling on 2024 only"
+  },
+  "training": {
+    "rows": 767,
+    "featureCount": 86,
+    "classBalanceHomeWinPct": 54.5,
+    "seed": "deterministic-no-random-shuffle",
+    "reproducible": true
+  },
+  "validation2024": {
+    "raw": {
+      "games": 272,
+      "accuracy": 63.97,
+      "brier": 0.2222,
+      "logLoss": 0.6344,
+      "rocAuc": 0.6927,
+      "ece": 3.2,
+      "calibrationBuckets": {
+        "10-20": {
+          "sample": 3,
+          "avgProbability": 18.43,
+          "homeWinRate": 33.33
+        },
+        "20-30": {
+          "sample": 12,
+          "avgProbability": 25.67,
+          "homeWinRate": 25
+        },
+        "30-40": {
+          "sample": 37,
+          "avgProbability": 35.71,
+          "homeWinRate": 35.14
+        },
+        "40-50": {
+          "sample": 53,
+          "avgProbability": 45.04,
+          "homeWinRate": 39.62
+        },
+        "50-60": {
+          "sample": 52,
+          "avgProbability": 55.24,
+          "homeWinRate": 51.92
+        },
+        "60-70": {
+          "sample": 63,
+          "avgProbability": 64.23,
+          "homeWinRate": 61.9
+        },
+        "70-80": {
+          "sample": 32,
+          "avgProbability": 74.92,
+          "homeWinRate": 78.13
+        },
+        "80-90": {
+          "sample": 20,
+          "avgProbability": 84.3,
+          "homeWinRate": 80
+        }
+      },
+      "score": {
+        "homeScoreMae": 7.58,
+        "awayScoreMae": 7.45,
+        "totalMae": 10.21,
+        "marginMae": 10.51,
+        "totalRmse": 13.3,
+        "marginRmse": 13.64,
+        "homeScoreBias": -0.91,
+        "awayScoreBias": -1.32
+      }
+    },
+    "calibrated": {
+      "games": 272,
+      "accuracy": 65.07,
+      "brier": 0.2216,
+      "logLoss": 0.6335,
+      "rocAuc": 0.6927,
+      "ece": 3.45,
+      "calibrationBuckets": {
+        "10-20": {
+          "sample": 4,
+          "avgProbability": 18.12,
+          "homeWinRate": 25
+        },
+        "20-30": {
+          "sample": 15,
+          "avgProbability": 26.09,
+          "homeWinRate": 33.33
+        },
+        "30-40": {
+          "sample": 42,
+          "avgProbability": 35.67,
+          "homeWinRate": 33.33
+        },
+        "40-50": {
+          "sample": 53,
+          "avgProbability": 44.67,
+          "homeWinRate": 39.62
+        },
+        "50-60": {
+          "sample": 65,
+          "avgProbability": 55.49,
+          "homeWinRate": 56.92
+        },
+        "60-70": {
+          "sample": 48,
+          "avgProbability": 64.38,
+          "homeWinRate": 66.67
+        },
+        "70-80": {
+          "sample": 31,
+          "avgProbability": 74.74,
+          "homeWinRate": 70.97
+        },
+        "80-90": {
+          "sample": 14,
+          "avgProbability": 84.44,
+          "homeWinRate": 92.86
+        }
+      },
+      "score": {
+        "homeScoreMae": 7.58,
+        "awayScoreMae": 7.45,
+        "totalMae": 10.21,
+        "marginMae": 10.51,
+        "totalRmse": 13.3,
+        "marginRmse": 13.64,
+        "homeScoreBias": -0.91,
+        "awayScoreBias": -1.32
+      }
+    }
+  },
+  "frozenModelSelection": {
+    "selectedBeforeHoldout": true,
+    "selectionCriteria": [
+      "lower validation Brier/log loss after calibration",
+      "interpretable weights",
+      "no leakage violations",
+      "score model stable enough for future market adapter"
+    ],
+    "modelFrozenBefore2025": true
+  },
+  "holdout2025": {
+    "games": 272,
+    "accuracy": 59.93,
+    "brier": 0.2329,
+    "logLoss": 0.6585,
+    "rocAuc": 0.6574,
+    "ece": 5.63,
+    "calibrationBuckets": {
+      "10-20": {
+        "sample": 4,
+        "avgProbability": 17.57,
+        "homeWinRate": 25
+      },
+      "20-30": {
+        "sample": 15,
+        "avgProbability": 25.26,
+        "homeWinRate": 33.33
+      },
+      "30-40": {
+        "sample": 26,
+        "avgProbability": 35.16,
+        "homeWinRate": 42.31
+      },
+      "40-50": {
+        "sample": 48,
+        "avgProbability": 44.83,
+        "homeWinRate": 43.75
+      },
+      "50-60": {
+        "sample": 54,
+        "avgProbability": 54.78,
+        "homeWinRate": 46.3
+      },
+      "60-70": {
+        "sample": 56,
+        "avgProbability": 64.69,
+        "homeWinRate": 58.93
+      },
+      "70-80": {
+        "sample": 46,
+        "avgProbability": 74.53,
+        "homeWinRate": 73.91
+      },
+      "80-90": {
+        "sample": 23,
+        "avgProbability": 84.1,
+        "homeWinRate": 69.57
+      }
+    },
+    "score": {
+      "homeScoreMae": 7.66,
+      "awayScoreMae": 7.91,
+      "totalMae": 10.97,
+      "marginMae": 10.74,
+      "totalRmse": 13.96,
+      "marginRmse": 13.53,
+      "homeScoreBias": -0.81,
+      "awayScoreBias": -1.94
+    },
+    "splits": {
+      "homeWin": {
+        "games": 146,
+        "accuracy": 73.97,
+        "brier": 0.1785,
+        "logLoss": 0.5379,
+        "rocAuc": null,
+        "ece": 38.95,
+        "calibrationBuckets": {
+          "10-20": {
+            "sample": 1,
+            "avgProbability": 14.21,
+            "homeWinRate": 100
+          },
+          "20-30": {
+            "sample": 5,
+            "avgProbability": 25.4,
+            "homeWinRate": 100
+          },
+          "30-40": {
+            "sample": 11,
+            "avgProbability": 35.57,
+            "homeWinRate": 100
+          },
+          "40-50": {
+            "sample": 21,
+            "avgProbability": 45.5,
+            "homeWinRate": 100
+          },
+          "50-60": {
+            "sample": 25,
+            "avgProbability": 54.76,
+            "homeWinRate": 100
+          },
+          "60-70": {
+            "sample": 33,
+            "avgProbability": 65.35,
+            "homeWinRate": 100
+          },
+          "70-80": {
+            "sample": 34,
+            "avgProbability": 74.72,
+            "homeWinRate": 100
+          },
+          "80-90": {
+            "sample": 16,
+            "avgProbability": 84.99,
+            "homeWinRate": 100
+          }
+        },
+        "score": {
+          "homeScoreMae": 7.74,
+          "awayScoreMae": 7.28,
+          "totalMae": 10.68,
+          "marginMae": 10.03,
+          "totalRmse": 13.52,
+          "marginRmse": 12.88,
+          "homeScoreBias": -4.83,
+          "awayScoreBias": 2.52
+        }
+      },
+      "awayWin": {
+        "games": 126,
+        "accuracy": 43.65,
+        "brier": 0.296,
+        "logLoss": 0.7983,
+        "rocAuc": null,
+        "ece": 51.94,
+        "calibrationBuckets": {
+          "10-20": {
+            "sample": 3,
+            "avgProbability": 18.69,
+            "homeWinRate": 0
+          },
+          "20-30": {
+            "sample": 10,
+            "avgProbability": 25.19,
+            "homeWinRate": 0
+          },
+          "30-40": {
+            "sample": 15,
+            "avgProbability": 34.85,
+            "homeWinRate": 0
+          },
+          "40-50": {
+            "sample": 27,
+            "avgProbability": 44.31,
+            "homeWinRate": 0
+          },
+          "50-60": {
+            "sample": 29,
+            "avgProbability": 54.79,
+            "homeWinRate": 0
+          },
+          "60-70": {
+            "sample": 23,
+            "avgProbability": 63.74,
+            "homeWinRate": 0
+          },
+          "70-80": {
+            "sample": 12,
+            "avgProbability": 74.01,
+            "homeWinRate": 0
+          },
+          "80-90": {
+            "sample": 7,
+            "avgProbability": 82.07,
+            "homeWinRate": 0
+          }
+        },
+        "score": {
+          "homeScoreMae": 7.57,
+          "awayScoreMae": 8.65,
+          "totalMae": 11.3,
+          "marginMae": 11.56,
+          "totalRmse": 14.44,
+          "marginRmse": 14.25,
+          "homeScoreBias": 3.86,
+          "awayScoreBias": -7.1
+        }
+      },
+      "earlySeason": {
+        "games": 93,
+        "accuracy": 60.22,
+        "brier": 0.2379,
+        "logLoss": 0.6722,
+        "rocAuc": 0.6398,
+        "ece": 11.95,
+        "calibrationBuckets": {
+          "10-20": {
+            "sample": 3,
+            "avgProbability": 17.38,
+            "homeWinRate": 33.33
+          },
+          "20-30": {
+            "sample": 7,
+            "avgProbability": 23.77,
+            "homeWinRate": 57.14
+          },
+          "30-40": {
+            "sample": 11,
+            "avgProbability": 34.97,
+            "homeWinRate": 45.45
+          },
+          "40-50": {
+            "sample": 21,
+            "avgProbability": 44.4,
+            "homeWinRate": 42.86
+          },
+          "50-60": {
+            "sample": 18,
+            "avgProbability": 53.87,
+            "homeWinRate": 44.44
+          },
+          "60-70": {
+            "sample": 17,
+            "avgProbability": 64.19,
+            "homeWinRate": 76.47
+          },
+          "70-80": {
+            "sample": 9,
+            "avgProbability": 74.39,
+            "homeWinRate": 88.89
+          },
+          "80-90": {
+            "sample": 7,
+            "avgProbability": 81.83,
+            "homeWinRate": 57.14
+          }
+        },
+        "score": {
+          "homeScoreMae": 7.71,
+          "awayScoreMae": 7.2,
+          "totalMae": 11.05,
+          "marginMae": 10.22,
+          "totalRmse": 13.93,
+          "marginRmse": 13.36,
+          "homeScoreBias": -2.53,
+          "awayScoreBias": -0.41
+        }
+      },
+      "midSeason": {
+        "games": 101,
+        "accuracy": 60.4,
+        "brier": 0.2217,
+        "logLoss": 0.6311,
+        "rocAuc": 0.6939,
+        "ece": 7.14,
+        "calibrationBuckets": {
+          "10-20": {
+            "sample": 1,
+            "avgProbability": 18.13,
+            "homeWinRate": 0
+          },
+          "20-30": {
+            "sample": 7,
+            "avgProbability": 26.38,
+            "homeWinRate": 14.29
+          },
+          "30-40": {
+            "sample": 10,
+            "avgProbability": 35.04,
+            "homeWinRate": 50
+          },
+          "40-50": {
+            "sample": 13,
+            "avgProbability": 45.21,
+            "homeWinRate": 46.15
+          },
+          "50-60": {
+            "sample": 21,
+            "avgProbability": 54.64,
+            "homeWinRate": 38.1
+          },
+          "60-70": {
+            "sample": 24,
+            "avgProbability": 65.59,
+            "homeWinRate": 62.5
+          },
+          "70-80": {
+            "sample": 18,
+            "avgProbability": 73.94,
+            "homeWinRate": 72.22
+          },
+          "80-90": {
+            "sample": 7,
+            "avgProbability": 85.08,
+            "homeWinRate": 85.71
+          }
+        },
+        "score": {
+          "homeScoreMae": 7.55,
+          "awayScoreMae": 7.91,
+          "totalMae": 10.54,
+          "marginMae": 10.69,
+          "totalRmse": 13.8,
+          "marginRmse": 13.26,
+          "homeScoreBias": 0.01,
+          "awayScoreBias": -1.93
+        }
+      },
+      "lateSeason": {
+        "games": 78,
+        "accuracy": 58.97,
+        "brier": 0.2414,
+        "logLoss": 0.6778,
+        "rocAuc": 0.6513,
+        "ece": 12.17,
+        "calibrationBuckets": {
+          "20-30": {
+            "sample": 1,
+            "avgProbability": 27.8,
+            "homeWinRate": 0
+          },
+          "30-40": {
+            "sample": 5,
+            "avgProbability": 35.79,
+            "homeWinRate": 20
+          },
+          "40-50": {
+            "sample": 14,
+            "avgProbability": 45.12,
+            "homeWinRate": 42.86
+          },
+          "50-60": {
+            "sample": 15,
+            "avgProbability": 56.05,
+            "homeWinRate": 60
+          },
+          "60-70": {
+            "sample": 15,
+            "avgProbability": 63.82,
+            "homeWinRate": 33.33
+          },
+          "70-80": {
+            "sample": 19,
+            "avgProbability": 75.16,
+            "homeWinRate": 68.42
+          },
+          "80-90": {
+            "sample": 9,
+            "avgProbability": 85.11,
+            "homeWinRate": 66.67
+          }
+        },
+        "score": {
+          "homeScoreMae": 7.75,
+          "awayScoreMae": 8.77,
+          "totalMae": 11.43,
+          "marginMae": 11.43,
+          "totalRmse": 14.19,
+          "marginRmse": 14.08,
+          "homeScoreBias": 0.19,
+          "awayScoreBias": -3.77
+        }
+      }
+    }
+  },
+  "featureImportance": [
+    {
+      "feature": "home_away_points_for",
+      "signedWeight": 0.2435,
+      "absoluteWeight": 0.2435
+    },
+    {
+      "feature": "home_last3_third_down_rate",
+      "signedWeight": 0.2207,
+      "absoluteWeight": 0.2207
+    },
+    {
+      "feature": "away_home_points_for",
+      "signedWeight": -0.2131,
+      "absoluteWeight": 0.2131
+    },
+    {
+      "feature": "away_last3_turnovers",
+      "signedWeight": -0.2075,
+      "absoluteWeight": 0.2075
+    },
+    {
+      "feature": "home_last3_red_zone_rate",
+      "signedWeight": -0.1919,
+      "absoluteWeight": 0.1919
+    },
+    {
+      "feature": "away_last3_third_down_rate",
+      "signedWeight": 0.1488,
+      "absoluteWeight": 0.1488
+    },
+    {
+      "feature": "away_last3_yards_per_rush",
+      "signedWeight": -0.1485,
+      "absoluteWeight": 0.1485
+    },
+    {
+      "feature": "away_std_points_for",
+      "signedWeight": -0.1413,
+      "absoluteWeight": 0.1413
+    },
+    {
+      "feature": "home_last5_margin",
+      "signedWeight": 0.1322,
+      "absoluteWeight": 0.1322
+    },
+    {
+      "feature": "diff_rest_days",
+      "signedWeight": 0.1317,
+      "absoluteWeight": 0.1317
+    },
+    {
+      "feature": "home_qb_last5_yards",
+      "signedWeight": 0.1245,
+      "absoluteWeight": 0.1245
+    },
+    {
+      "feature": "home_last3_yards_per_pass",
+      "signedWeight": -0.1224,
+      "absoluteWeight": 0.1224
+    },
+    {
+      "feature": "away_qb_last5_ints",
+      "signedWeight": 0.1222,
+      "absoluteWeight": 0.1222
+    },
+    {
+      "feature": "away_last3_red_zone_rate",
+      "signedWeight": 0.1117,
+      "absoluteWeight": 0.1117
+    },
+    {
+      "feature": "away_last5_points_for",
+      "signedWeight": 0.1093,
+      "absoluteWeight": 0.1093
+    },
+    {
+      "feature": "home_last5_points_against",
+      "signedWeight": -0.1047,
+      "absoluteWeight": 0.1047
+    },
+    {
+      "feature": "away_last5_win_rate",
+      "signedWeight": -0.1029,
+      "absoluteWeight": 0.1029
+    },
+    {
+      "feature": "home_std_win_rate",
+      "signedWeight": -0.1002,
+      "absoluteWeight": 0.1002
+    },
+    {
+      "feature": "home_qb_last5_completion_pct",
+      "signedWeight": -0.0999,
+      "absoluteWeight": 0.0999
+    },
+    {
+      "feature": "home_last3_yards_per_rush",
+      "signedWeight": 0.0995,
+      "absoluteWeight": 0.0995
+    }
+  ],
+  "historicalPredictionArtifact": {
+    "persistedToProductionDb": false,
+    "originIfLaterPersisted": "HISTORICAL_REPLAY_SHADOW",
+    "rows": 1311,
+    "includesMarketOdds": false,
+    "artifactManifest": {
+      "featureManifestDigest": "1d4437423c8148c8fe086efb7cef78e0079c21d53af53e6ceb8f19b0135a18c4",
+      "modelArtifactDigest": "8dd324eb803ae0bd3560a4f085d1185111d7e01520f9784e43d087ac6e282691",
+      "predictionArtifactDigest": "a531a9253838be261fc2ea5e65af1f18ca8cef9e495190853900deb95ff9dcf2"
+    }
+  },
+  "existingNflPredictionRowsAudit": {
+    "productionRowsObservedAfterNfl02": 966,
+    "currentEraShadow": 0,
+    "historicalReplayShadow": 0,
+    "classification": "preview/prototype legacy rows excluded from NFL-03 training",
+    "mutated": false
+  },
+  "currentMarketAdapterContract": {
+    "provider": "The Odds API",
+    "sport": "americanfootball_nfl",
+    "markets": [
+      "h2h",
+      "spreads",
+      "totals"
+    ],
+    "moneyline": "model win probability",
+    "spread": "future adapter requires real exact line; derive cover probability from score/margin distribution",
+    "total": "future adapter requires real exact total; derive over probability from score/total distribution",
+    "providerCallsInThisPhase": 0
+  },
+  "futurePredictionEligibility": {
+    "gates": [
+      "minimum history",
+      "feature completeness",
+      "calibration validity",
+      "current odds freshness",
+      "exact market line availability"
+    ],
+    "currentEraActivated": false,
+    "officialPicksActivated": false,
+    "productVisibilityActivated": false
+  },
+  "reproducibility": {
+    "featureDigest": "1d4437423c8148c8fe086efb7cef78e0079c21d53af53e6ceb8f19b0135a18c4",
+    "modelDigest": "8dd324eb803ae0bd3560a4f085d1185111d7e01520f9784e43d087ac6e282691",
+    "predictionDigest": "a531a9253838be261fc2ea5e65af1f18ca8cef9e495190853900deb95ff9dcf2",
+    "deterministicTolerance": 0
+  },
+  "safety": {
+    "providerCalls": {
+      "ballDontLie": 0,
+      "theOddsApi": 0,
+      "sportsDataIo": 0
+    },
+    "productionDbMutations": 0,
+    "currentEraShadowWrites": 0,
+    "historicalReplayShadowWrites": 0,
+    "officialPickWrites": 0,
+    "mlbRuntimeChanged": false,
+    "nbaRuntimeChanged": false,
+    "learningBrainGlobalWeightsChanged": false,
+    "fabricatedHistoricalOdds": false
+  },
+  "readiness": {
+    "nfl04CurrentEraShadowReady": true,
+    "nextPhase": "NFL-04_CURRENT_ERA_SHADOW_AND_CURRENT_MARKET_INTEGRATION"
+  }
+}
