@@ -1,12 +1,14 @@
 import { createHash } from 'node:crypto'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const RAW_ROOT = 'data/imports/balldontlie/nfl'
 const SPORT_KEY = 'americanfootball_nfl'
 const STATUS = 'NFL_03_TEMPORAL_FEATURE_MODEL_FOUNDATION_CERTIFIED'
 const FEATURE_VERSION = 'nfl_temporal_pregame_feature_set_v1'
 const MODEL_VERSION = 'nfl_ml_score_baseline_v1'
+const CALIBRATION_VERSION = 'nfl_ml_score_baseline_platt_2024_v1'
 const CERT_PATH = 'docs/CERTIFICATION/nfl-03-temporal-feature-model-foundation.json'
 const DOC_PATH = 'docs/PRODUCTION_PILOT/NFL_03_TEMPORAL_FEATURE_MODEL_FOUNDATION.md'
 const SEASONS = ['2021', '2022', '2023', '2024', '2025']
@@ -15,6 +17,9 @@ const VALIDATION_SEASONS = new Set(['2024'])
 const HOLDOUT_SEASONS = new Set(['2025'])
 const MIN_PRIOR_GAMES = 3
 const GENERATED_AT = '2026-08-18T00:00:00.000Z'
+const SOURCE_CERTIFICATION_COMMIT = 'c20831a9c33f6e36a71c78c5083b89c96f04d394'
+
+let lastPipelineRuntimeState = null
 
 function round(value, digits = 4) {
   const number = Number(value)
@@ -521,6 +526,177 @@ function splitRows(rows) {
   }
 }
 
+function runtimeFeatureManifest(names, standard) {
+  return names.map((name, index) => ({
+    index,
+    name,
+    type: 'number',
+    preprocessing: 'standardize_with_training_mean_std',
+    missingValue: 0,
+    temporalEligibility: 'source_event.start_time < target_event.start_time',
+    mean: standard.means[index],
+    std: standard.stds[index],
+  }))
+}
+
+function runtimeOutputRow(row) {
+  return {
+    id: row.id,
+    eventId: row.eventId,
+    season: row.season,
+    week: row.week,
+    kickoff: row.kickoff,
+    split: TRAIN_SEASONS.has(row.season) ? 'train' : VALIDATION_SEASONS.has(row.season) ? 'validation' : 'holdout',
+    homeTeamId: row.homeTeamId,
+    awayTeamId: row.awayTeamId,
+    labels: row.labels,
+    features: row.features,
+    rawProbability: row.rawProbability,
+    calibratedProbability: row.probability,
+    expectedHomePoints: row.predictedHomeScore,
+    expectedAwayPoints: row.predictedAwayScore,
+    expectedMargin: row.predictedHomeScore - row.predictedAwayScore,
+    expectedTotal: row.predictedHomeScore + row.predictedAwayScore,
+  }
+}
+
+function residualRows(rows) {
+  return rows.map((row) => ({
+    id: row.id,
+    eventId: row.eventId,
+    season: row.season,
+    split: VALIDATION_SEASONS.has(row.season) ? 'validation' : 'holdout',
+    homeScoreResidual: row.labels.homeScore - row.predictedHomeScore,
+    awayScoreResidual: row.labels.awayScore - row.predictedAwayScore,
+    marginResidual: row.labels.margin - (row.predictedHomeScore - row.predictedAwayScore),
+    totalResidual: row.labels.total - (row.predictedHomeScore + row.predictedAwayScore),
+  }))
+}
+
+function buildRuntimeArtifact({
+  names,
+  standard,
+  mlWeights,
+  homeScoreWeights,
+  awayScoreWeights,
+  plattWeights,
+  rows,
+  splits,
+  artifactManifest,
+  validationCalibrated,
+  holdout,
+}) {
+  const featureManifest = runtimeFeatureManifest(names, standard)
+  const allOutputs = rows.map(runtimeOutputRow)
+  const residualEvidence = {
+    validation2024: residualRows(splits.validation),
+    holdout2025: residualRows(splits.holdout),
+  }
+  const artifact = {
+    schemaVersion: 'nfl_frozen_runtime_model_artifact_v1',
+    status: 'NFL_04R1_FROZEN_MODEL_ARTIFACT_MATERIALIZED',
+    sport: SPORT_KEY,
+    role: 'NFL-03 frozen foundation',
+    sourceCertificationCommit: SOURCE_CERTIFICATION_COMMIT,
+    createdFromCertification: 'NFL_03_TEMPORAL_FEATURE_MODEL_FOUNDATION_CERTIFIED',
+    generatedAt: GENERATED_AT,
+    modelVersion: MODEL_VERSION,
+    featureVersion: FEATURE_VERSION,
+    calibrationVersion: CALIBRATION_VERSION,
+    trainingSeasons: [...TRAIN_SEASONS],
+    validationSeason: [...VALIDATION_SEASONS],
+    holdoutSeason: [...HOLDOUT_SEASONS],
+    minimumHistoryPolicy: {
+      selectedMinimumPriorGamesPerTeam: MIN_PRIOR_GAMES,
+      neutralPriorsUsed: false,
+    },
+    featureManifest,
+    preprocessing: {
+      type: 'standardize',
+      fitOn: 'train_2021_2023_only',
+      missingValueTreatment: 'feature_missing_or_null_is_zero_before_standardization',
+      means: standard.means,
+      standardDeviations: standard.stds,
+    },
+    moneylineModel: {
+      modelType: 'regularized_logistic_regression',
+      modelVersion: MODEL_VERSION,
+      featureVersion: FEATURE_VERSION,
+      intercept: mlWeights[0],
+      coefficients: mlWeights.slice(1),
+      regularization: {
+        type: 'l2',
+        lambda: 0.002,
+      },
+      trainingConfig: {
+        epochs: 1400,
+        learningRate: 0.035,
+        seed: 'deterministic-no-random-shuffle',
+      },
+    },
+    calibration: {
+      calibrationType: 'platt_logistic',
+      calibrationVersion: CALIBRATION_VERSION,
+      inputModelVersion: MODEL_VERSION,
+      fitSeason: '2024',
+      intercept: plattWeights[0],
+      coefficients: plattWeights.slice(1),
+      regularization: {
+        type: 'l2',
+        lambda: 0.001,
+      },
+      trainingConfig: {
+        epochs: 900,
+        learningRate: 0.04,
+      },
+    },
+    scoreModels: {
+      homeScore: {
+        modelType: 'ridge_regression',
+        modelVersion: `${MODEL_VERSION}_home_score_ridge_v1`,
+        featureVersion: FEATURE_VERSION,
+        intercept: homeScoreWeights[0],
+        coefficients: homeScoreWeights.slice(1),
+        regularization: { type: 'l2', lambda: 0.1 },
+      },
+      awayScore: {
+        modelType: 'ridge_regression',
+        modelVersion: `${MODEL_VERSION}_away_score_ridge_v1`,
+        featureVersion: FEATURE_VERSION,
+        intercept: awayScoreWeights[0],
+        coefficients: awayScoreWeights.slice(1),
+        regularization: { type: 'l2', lambda: 0.1 },
+      },
+    },
+    certifiedMetrics: {
+      validation2024: validationCalibrated,
+      holdout2025: holdout,
+    },
+    parityRows: allOutputs,
+    residualEvidence,
+    digests: {
+      ...artifactManifest,
+      runtimeArtifactDigest: stableDigest({
+        featureManifest,
+        preprocessing: { means: standard.means, standardDeviations: standard.stds },
+        moneyline: { intercept: mlWeights[0], coefficients: mlWeights.slice(1) },
+        calibration: { intercept: plattWeights[0], coefficients: plattWeights.slice(1) },
+        homeScore: { intercept: homeScoreWeights[0], coefficients: homeScoreWeights.slice(1) },
+        awayScore: { intercept: awayScoreWeights[0], coefficients: awayScoreWeights.slice(1) },
+        outputDigest: artifactManifest.predictionArtifactDigest,
+      }),
+    },
+    safety: {
+      providerCalls: { ballDontLie: 0, theOddsApi: 0, sportsDataIo: 0 },
+      productionDbMutations: 0,
+      predictionWrites: 0,
+      uses2026Data: false,
+      refitPerformedByMaterialization: false,
+    },
+  }
+  return artifact
+}
+
 function runPipeline() {
   const files = dataFiles().filter((file) => file.season === 'all' || SEASONS.includes(file.season))
   const canonical = buildCanonical(files)
@@ -575,7 +751,21 @@ function runPipeline() {
     predictionArtifactDigest: stableDigest(features.rows.map((row) => ({ id: row.id, rawProbability: round(row.rawProbability, 8), probability: round(row.probability, 8), home: round(row.predictedHomeScore, 8), away: round(row.predictedAwayScore, 8) }))),
   }
 
-  return {
+  const runtimeArtifact = buildRuntimeArtifact({
+    names,
+    standard,
+    mlWeights,
+    homeScoreWeights,
+    awayScoreWeights,
+    plattWeights,
+    rows: features.rows,
+    splits,
+    artifactManifest,
+    validationCalibrated,
+    holdout,
+  })
+
+  const cert = {
     status: STATUS,
     generatedAt: GENERATED_AT,
     sportKey: SPORT_KEY,
@@ -719,6 +909,13 @@ function runPipeline() {
       nextPhase: 'NFL-04_CURRENT_ERA_SHADOW_AND_CURRENT_MARKET_INTEGRATION',
     },
   }
+  lastPipelineRuntimeState = {
+    cert,
+    runtimeArtifact,
+    rows: features.rows,
+    splits,
+  }
+  return cert
 }
 
 function writeArtifacts(cert) {
@@ -779,6 +976,15 @@ authorization-gated.
 `)
 }
 
-const cert = runPipeline()
-if (process.argv.includes('--write')) writeArtifacts(cert)
-console.log(JSON.stringify(cert, null, 2))
+export function materializeNfl03RuntimeState() {
+  runPipeline()
+  return lastPipelineRuntimeState
+}
+
+export { runPipeline }
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const cert = runPipeline()
+  if (process.argv.includes('--write')) writeArtifacts(cert)
+  console.log(JSON.stringify(cert, null, 2))
+}

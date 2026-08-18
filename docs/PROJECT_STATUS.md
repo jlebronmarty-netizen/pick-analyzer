@@ -2197,3 +2197,11 @@ NFL-03 temporal feature/model foundation is locally certified as `NFL_03_TEMPORA
 The offline feature builder produced 1,311 eligible pregame rows from 1,359 completed historical games after enforcing a minimum of 3 prior completed games per team. The certified temporal contract requires `source_event.start_time < target_event.start_time`; same-game stats, future games, final season stats, final standings and forward-only roster evidence are excluded from pregame features. Leakage audit violations: 0.
 
 The selected V1 foundation is a regularized logistic moneyline model plus ridge score regressions, with Platt calibration fit only on 2024 before opening the 2025 holdout. NFL-03 does not fabricate historical spread or total lines, does not write production predictions, does not activate NFL Current Era, does not expose Official Picks, and made 0 provider calls and 0 production database mutations. Next: publish NFL-03, then separately authorize NFL-04 current-era shadow and current-market integration.
+
+## 2026-08-18 NFL-04R1 Frozen Runtime Model Artifact
+
+NFL-04R1 frozen model materialization is locally certified as `NFL_04R1_FROZEN_MODEL_ARTIFACT_MATERIALIZED_CERTIFIED`. The previously certified NFL-03 model was `OFFLINE_SCRIPT_ONLY`; R1 re-materializes the exact deterministic NFL-03 fitted state from the certified pipeline and writes a runtime-loadable JSON artifact at `artifacts/nfl/nfl-03-frozen-runtime-model.json`.
+
+The artifact contains the 86-feature ordered manifest, training means/stds, missing-value semantics, logistic moneyline coefficients/intercept, 2024 Platt calibration parameters, home-score and away-score ridge coefficients/intercepts, source digests, parity rows and 2024/2025 residual evidence. Runtime scoring over all 1,311 certified feature rows matched offline outputs with max delta 0 and reproduced the certified 2024 and 2025 metrics exactly, including 2025 Brier 0.2329, log loss 0.6585, total MAE 10.97 and margin MAE 10.74.
+
+No provider calls, production DB mutations, prediction writes, `CURRENT_ERA_SHADOW` writes, Official Pick mutations, learning/calibration changes, MLB changes or NBA changes were performed. Next: publish NFL-04R1, then separately authorize NFL-04R2 BallDontLie current preflight and fresh The Odds API NFL market refresh.

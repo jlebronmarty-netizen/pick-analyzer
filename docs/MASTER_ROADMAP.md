@@ -3680,3 +3680,11 @@ Result: NFL-03 now has an offline temporal feature builder and first model found
 The certified feature contract requires `source_event.start_time < target_event.start_time` and excludes same-game stats, future games, full-season stats, final standings and forward-only roster evidence from historical pregame features. The V1 model foundation uses regularized logistic regression for moneyline and ridge score regressions for home/away score, margin and total diagnostics. NFL-03 remains offline-only: 0 provider calls, 0 production DB mutations, 0 prediction writes, 0 Official Picks and no MLB/NBA runtime changes.
 
 Next: publish NFL-03, verify alignment, then separately authorize NFL-04 current-era shadow and current-market integration using real The Odds API NFL markets. Do not fabricate historical spread/total odds or activate NFL product surfaces before NFL-04 gates pass.
+
+## NFL-04R1 Frozen Runtime Model Artifact
+
+Status: `NFL_04R1_FROZEN_MODEL_ARTIFACT_MATERIALIZED_CERTIFIED`
+
+Result: NFL-04R1 converts the deterministic NFL-03 offline model state into a runtime-loadable artifact without changing the model. The artifact stores the complete ordered feature manifest, preprocessing means/stds, missing-value semantics, logistic moneyline coefficients, 2024 Platt calibration parameters, home/away score ridge coefficients, source digests, parity rows and validation/holdout residual evidence.
+
+Runtime artifact scoring now reproduces the certified NFL-03 outputs across all 1,311 feature rows with max delta 0 and reproduces the certified validation/holdout metrics exactly. The runtime scorer is provider-free, DB-free and fails closed on missing artifact, checksum mismatch, version mismatch, feature count mismatch, invalid coefficients and missing input features. Next: publish NFL-04R1, then separately authorize NFL-04R2 current BallDontLie forward-data preflight and fresh The Odds API NFL market refresh. Do not write `CURRENT_ERA_SHADOW` predictions until that full forward evidence chain passes.
