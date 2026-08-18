@@ -3662,3 +3662,11 @@ Status: `NFL_02_PRODUCTION_IMPORT_EXECUTOR_CERTIFIED_READY_FOR_PUBLICATION`
 Result: NFL-02 now has a guarded DB-only production import executor around the already-certified canonical normalizer. It writes only historical BallDontLie NFL evidence, keeps dry-run as the default, requires `--execute` plus `NFL_02_CANONICAL_PRODUCTION_IMPORT_AUTHORIZED=true`, uses bounded batches and records local progress while treating deterministic database identities as the source of truth.
 
 The executor preserves 2026 The Odds API NFL rows, uses `game_id` for result idempotency while leaving `game_results.id` database-generated, excludes provider-error payloads, keeps roster forward-only and does not touch prediction/product state. Next: publish/deploy this executor, verify production alignment, then separately authorize the guarded production import execution.
+
+## NFL-02-IMPORT-R5 Supabase Fetch Resilience
+
+Status: `NFL_02_SUPABASE_FETCH_RESILIENCE_REPAIR_CERTIFIED`
+
+Result: The partial production import safely inserted 32 NFL teams, then paused before player writes because the first `sport_players` existing-row pre-read sent 500 IDs in one Supabase `.in('id', ids)` request. Smaller bounded probes succeeded through 250 IDs, while the 500-ID request failed with `TypeError: fetch failed`, classifying the issue as `URL_OR_FILTER_TOO_LARGE`.
+
+The import executor now keeps write batches unchanged while splitting existing-row pre-reads into 100-ID chunks with bounded read-only retry backoff of 500 ms, 1500 ms and 3000 ms. Write retries remain fail-closed. The native first-player-batch probe now passes in 5 chunks with 0 existing players and 500 `WOULD_INSERT` rows; full dry-run counts remain certified and 2026 The Odds API NFL rows remain preserved. Next: publish/deploy R5, then separately resume the guarded NFL-02 production import from `sport_players` batch 1.

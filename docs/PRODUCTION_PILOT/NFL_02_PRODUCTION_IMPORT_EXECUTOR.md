@@ -51,6 +51,37 @@ identity remains the source of truth. On batch failure, the executor stops the
 current entity class and reports the failing class, batch, identity range and DB
 error. A rerun reuses completed rows through deterministic identities.
 
+## Existing-Row Read Resilience
+
+NFL-02-IMPORT-R5 is certified as
+`NFL_02_SUPABASE_FETCH_RESILIENCE_REPAIR_CERTIFIED`.
+
+The production import paused after the 32-team class was validly inserted. The
+next class, `sport_players`, repeatedly failed before any player writes during
+the existing-row pre-read for batch 1. The failing query shape was
+`sport_players.select('*').in('id', ids)` with 500 deterministic player IDs in a
+single request, from
+`americanfootball_nfl_balldontlie_player_101` through
+`americanfootball_nfl_balldontlie_player_13874644`, returning `TypeError: fetch
+failed`.
+
+A bounded read-only probe showed the same query succeeded for 1, 10, 50, 100
+and 250 IDs, while the 500-ID request failed with an encoded filter near 24 KB.
+The R5 root-cause classification is `URL_OR_FILTER_TOO_LARGE`, not a general
+provider outage or canonical identity defect.
+
+The executor now separates write batch size from existing-row read size:
+
+- write batch size for `sport_players`: 500
+- existing-row read chunk size: 100
+- read retry backoff: 500 ms, 1500 ms, 3000 ms
+
+Retries are applied only to safe read-only pre-read operations. Write failures
+still fail closed; they are not blindly retried after an ambiguous transport
+failure. The corrected production read-only probe completed the native first
+player batch in 5 chunks, found 0 existing rows and classified all 500 players
+as `WOULD_INSERT` with 0 provider calls and 0 database mutations.
+
 ## Certification
 
 Local certification exercised:
@@ -64,5 +95,8 @@ Local certification exercised:
 - cancelled-game exclusion
 - roster forward-only semantics
 - partial-failure stop semantics
+- chunked existing-row reads
+- bounded transient read retry
+- no blind write retry
 - zero provider calls
 - zero production database mutations

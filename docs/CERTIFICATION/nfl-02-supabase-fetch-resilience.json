@@ -1,0 +1,139 @@
+{
+  "status": "NFL_02_SUPABASE_FETCH_RESILIENCE_REPAIR_CERTIFIED",
+  "phase": "NFL-02-IMPORT-R5",
+  "sourceCommit": "06d7c961592a9e3e35e3f407914ef3f67f71b414",
+  "scope": "Supabase existing-row pre-read resilience for NFL-02 production import",
+  "exactRepeatedFailure": {
+    "class": "sport_players",
+    "operation": "existing-row pre-read",
+    "batch": 1,
+    "batchSize": 500,
+    "firstIdentity": "americanfootball_nfl_balldontlie_player_101",
+    "lastIdentity": "americanfootball_nfl_balldontlie_player_13874644",
+    "error": "TypeError: fetch failed",
+    "playerWritesBeforeFailure": 0
+  },
+  "playerPreReadQueryShape": {
+    "file": "scripts/nfl-02-canonical-historical-import.mjs",
+    "function": "existingByIdentity",
+    "table": "sport_players",
+    "columnsSelected": "*",
+    "filter": "id IN deterministic player ids",
+    "supabaseShape": "db.from('sport_players').select('*').in('id', ids)"
+  },
+  "boundedReadProbe": [
+    {
+      "ids": 1,
+      "status": "PASS",
+      "rows": 0,
+      "latencyMs": 655,
+      "encodedFilterBytes": 53
+    },
+    {
+      "ids": 10,
+      "status": "PASS",
+      "rows": 0,
+      "latencyMs": 258,
+      "encodedFilterBytes": 467
+    },
+    {
+      "ids": 50,
+      "status": "PASS",
+      "rows": 0,
+      "latencyMs": 247,
+      "encodedFilterBytes": 2307
+    },
+    {
+      "ids": 100,
+      "status": "PASS",
+      "rows": 0,
+      "latencyMs": 239,
+      "encodedFilterBytes": 4607
+    },
+    {
+      "ids": 250,
+      "status": "PASS",
+      "rows": 0,
+      "latencyMs": 191,
+      "encodedFilterBytes": 11657
+    },
+    {
+      "ids": 500,
+      "status": "FAIL",
+      "error": "TypeError: fetch failed",
+      "latencyMs": 8507,
+      "encodedFilterBytes": 24207
+    }
+  ],
+  "rootCauseClassification": "URL_OR_FILTER_TOO_LARGE",
+  "repair": {
+    "existingReadChunkSize": 100,
+    "sportPlayersWriteBatchSize": 500,
+    "readRetryDelaysMs": [
+      500,
+      1500,
+      3000
+    ],
+    "maxReadAttempts": 4,
+    "readRetryScope": "read-only existing-row pre-read operations",
+    "writeRetrySafety": "No blind write retry. Write failures fail closed and require deterministic readback before any future safe retry."
+  },
+  "playerBatchOneProbe": {
+    "status": "PLAYER_BATCH_1_NATIVE_ORDER_PRE_READ_PROBE_PASS",
+    "candidatePlayers": 500,
+    "firstIdentity": "americanfootball_nfl_balldontlie_player_101",
+    "lastIdentity": "americanfootball_nfl_balldontlie_player_13874644",
+    "readChunkSize": 100,
+    "chunks": 5,
+    "failedChunks": 0,
+    "actualExistingPlayers": 0,
+    "expectedExistingPlayers": 0,
+    "wouldInsert": 500,
+    "maxLatencyMs": 724,
+    "maxEncodedFilterBytes": 5102,
+    "providerCallsMade": 0,
+    "productionDatabaseMutationsMade": 0
+  },
+  "fullDryRun": {
+    "status": "NFL_02_CANONICAL_HISTORICAL_IMPORT_READY",
+    "importExecution": "DRY_RUN_ONLY",
+    "teams": 32,
+    "players": 13559,
+    "events": 1360,
+    "results": 1359,
+    "teamGameStats": 2718,
+    "playerGameStats": 85749,
+    "seasonStats": 9072,
+    "standings": 160,
+    "rosterSupplement": 3408,
+    "providerMappings": 14951,
+    "providerCallsMade": 0,
+    "productionDatabaseMutationsMade": 0
+  },
+  "productionStatePreserved": {
+    "sportsTeamsBallDontLieNfl": 32,
+    "sportsTeamsMalformed": 0,
+    "sportsTeamsDuplicateIds": 0,
+    "sportPlayersBallDontLieNfl": 0,
+    "historicalBallDontLieEvents": 0,
+    "historicalBallDontLieMappings": 0,
+    "historicalBallDontLieResults": 0,
+    "historicalBallDontLieTeamStats": 0,
+    "historicalBallDontLiePlayerStats": 0,
+    "historicalBallDontLieStandings": 0,
+    "historicalBallDontLieRoster": 0,
+    "currentFuture2026NflEvents": 75,
+    "currentFuture2026TheOddsApiEventMappings": 75
+  },
+  "isolation": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutationsMadeDuringR5": 0,
+    "predictionHistoryWrites": 0,
+    "officialPickWrites": 0,
+    "currentEraShadowWrites": 0,
+    "historicalReplayPredictionWrites": 0,
+    "mlbRuntimeChanged": false,
+    "nbaRuntimeChanged": false
+  },
+  "nextStep": "Publish and deploy R5, then separately authorize guarded NFL-02 import resume from sport_players batch 1."
+}

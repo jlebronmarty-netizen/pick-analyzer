@@ -33,6 +33,8 @@ const BATCH_SIZES = {
   sport_standings: 100,
   sport_lineups: 250,
 }
+const EXISTING_READ_CHUNK_SIZE = 100
+const READ_RETRY_DELAYS_MS = [500, 1500, 3000]
 
 const args = new Set(process.argv.slice(2))
 
@@ -538,28 +540,59 @@ function batchRows(rows, batchSize) {
   return batches
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function isTransientFetchError(error) {
+  return /fetch failed|terminated|ECONNRESET|ETIMEDOUT|timeout|UND_ERR/i.test(String(error?.message ?? error))
+}
+
+async function retryRead(operation, label) {
+  let lastError = null
+  for (let attempt = 0; attempt <= READ_RETRY_DELAYS_MS.length; attempt += 1) {
+    try {
+      return await operation()
+    } catch (error) {
+      lastError = error
+      if (!isTransientFetchError(error) || attempt === READ_RETRY_DELAYS_MS.length) break
+      await sleep(READ_RETRY_DELAYS_MS[attempt])
+    }
+  }
+  throw new Error(`${label} failed after ${READ_RETRY_DELAYS_MS.length + 1} attempts: ${lastError?.message ?? lastError}`)
+}
+
 async function existingByIdentity(db, table, rows, identity) {
   const ids = rows.map((row) => identityValue(row, identity))
   if (!ids.length) return new Map()
   const column = typeof identity === 'function' ? null : identity
   if (table === 'provider_entity_mappings' && !column) {
-    const providerIds = rows.map((row) => row.provider_id)
-    const { data, error } = await db
-      .from(table)
-      .select('sport_key, entity_type, provider, provider_id, season')
-      .eq('sport_key', SPORT_KEY)
-      .eq('provider', PROVIDER)
-      .in('provider_id', providerIds)
-    if (error) throw new Error(`${table} existing read failed: ${error.message}`)
     const out = new Map()
-    for (const row of data ?? []) out.set(mappingIdentity(row), row)
+    for (const providerIds of batchRows(rows.map((row) => row.provider_id), EXISTING_READ_CHUNK_SIZE)) {
+      const { data, error } = await retryRead(
+        () => db
+          .from(table)
+          .select('sport_key, entity_type, provider, provider_id, season')
+          .eq('sport_key', SPORT_KEY)
+          .eq('provider', PROVIDER)
+          .in('provider_id', providerIds),
+        `${table} existing mapping read`,
+      )
+      if (error) throw new Error(`${table} existing read failed: ${error.message}`)
+      for (const row of data ?? []) out.set(mappingIdentity(row), row)
+    }
     return out
   }
   if (!column) return new Map()
-  const { data, error } = await db.from(table).select('*').in(column, ids)
-  if (error) throw new Error(`${table} existing read failed: ${error.message}`)
   const out = new Map()
-  for (const row of data ?? []) out.set(row[column], row)
+  for (const chunk of batchRows(ids, EXISTING_READ_CHUNK_SIZE)) {
+    const { data, error } = await retryRead(
+      () => db.from(table).select('*').in(column, chunk),
+      `${table} existing ${column} read`,
+    )
+    if (error) throw new Error(`${table} existing read failed: ${error.message}`)
+    for (const row of data ?? []) out.set(row[column], row)
+  }
   return out
 }
 
@@ -594,7 +627,10 @@ async function persistResultClass(db, item, progress) {
   const batches = batchRows(item.rows, item.batchSize)
   for (const [index, batch] of batches.entries()) {
     const gameIds = batch.map((row) => row.game_id)
-    const { data, error } = await db.from('game_results').select('*').in('game_id', gameIds)
+    const { data, error } = await retryRead(
+      () => db.from('game_results').select('*').in('game_id', gameIds),
+      'game_results existing game_id read',
+    )
     if (error) throw new Error(`game_results game_id lookup failed: ${error.message}`)
     const grouped = new Map()
     for (const row of data ?? []) {
@@ -696,6 +732,9 @@ function executorSelfTest() {
     executeGuardRequiresFlag: true,
     executeGuardRequiresEnv: EXECUTION_AUTH_ENV === 'NFL_02_CANONICAL_PRODUCTION_IMPORT_AUTHORIZED',
     boundedBatchSizes: Object.values(BATCH_SIZES).every((value) => value > 0 && value <= 500),
+    existingReadChunkingEnabled: EXISTING_READ_CHUNK_SIZE > 0 && EXISTING_READ_CHUNK_SIZE < BATCH_SIZES.sport_players,
+    existingReadChunkSize100: EXISTING_READ_CHUNK_SIZE === 100,
+    readRetryBounded: READ_RETRY_DELAYS_MS.length === 3 && READ_RETRY_DELAYS_MS.at(-1) === 3000,
     resultPayloadOmitsId: !resultHasId,
     resultIdentityGameId: resultClass.identity === 'game_id',
     noProviderCalls: true,
@@ -714,6 +753,8 @@ function executorSelfTest() {
     providerCallsMade: 0,
     productionDatabaseMutationsMade: 0,
     batchSizes: BATCH_SIZES,
+    existingReadChunkSize: EXISTING_READ_CHUNK_SIZE,
+    readRetryDelaysMs: READ_RETRY_DELAYS_MS,
     importOrder: classes.map((item) => item.key),
     candidateRows: Object.fromEntries(classes.map((item) => [item.key, item.rows.length])),
     identityManifest: dryRunManifest,

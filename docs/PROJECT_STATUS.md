@@ -2179,3 +2179,13 @@ NFL-02 result persistence now omits `id` entirely, sends only semantic result co
 NFL-02-IMPORT-R3 is locally certified as `NFL_02_PRODUCTION_IMPORT_EXECUTOR_CERTIFIED_READY_FOR_PUBLICATION`. The missing runtime was a persistence executor: the canonical normalizer was certified, but `--execute` still returned `BLOCKED_PENDING_SEPARATE_PRODUCTION_IMPORT_AUTHORIZATION`.
 
 The executor is now wired into the existing NFL-02 script without changing normalization. Dry-run remains the default; production writes require both `--execute` and `NFL_02_CANONICAL_PRODUCTION_IMPORT_AUTHORIZED=true`. The executor uses bounded batches, durable local progress metadata, deterministic DB identity for retry/reuse, `game_id` result persistence, provider-error exclusion, cancelled-game exclusion and forward-only roster semantics. Certification made 0 provider calls and 0 production database mutations. Real production import execution remains separately authorization-gated after publication and deployment alignment.
+
+## 2026-08-17 NFL-02-IMPORT-R5 Supabase Fetch Resilience
+
+NFL-02-IMPORT-R5 is locally certified as `NFL_02_SUPABASE_FETCH_RESILIENCE_REPAIR_CERTIFIED`. The guarded production import had already inserted 32 valid BallDontLie NFL teams, then repeatedly paused before any player writes on the `sport_players` existing-row pre-read for batch 1.
+
+The failing query was `sport_players.select('*').in('id', ids)` with 500 deterministic player IDs from `americanfootball_nfl_balldontlie_player_101` through `americanfootball_nfl_balldontlie_player_13874644`. A bounded read-only probe showed 1, 10, 50, 100 and 250 ID reads succeeded, while the 500-ID request failed with `TypeError: fetch failed` and an encoded filter near 24 KB. The root-cause classification is `URL_OR_FILTER_TOO_LARGE`.
+
+The executor now chunks existing-row reads at 100 IDs while preserving the 500-row player write batch, and it applies bounded read-only retry backoff of 500 ms, 1500 ms and 3000 ms. Writes are still not blindly retried after transport failures. The native first-player-batch production read-only probe completed in 5 chunks, found 0 existing players and classified 500 players as `WOULD_INSERT`. The full dry-run still reconciles 32 teams, 13,559 players, 1,360 events, 1,359 results, 2,718 team-game stats, 85,749 player-game stats, 9,072 season-stat rows, 160 standings rows, 3,408 forward-only roster rows and 14,951 provider mappings.
+
+R5 certification made 0 provider calls and 0 production database mutations. The existing 32 teams remain valid, and 75 current/future 2026 NFL The Odds API events plus 75 mappings remain preserved. Next: publish/deploy the R5 repair, then separately authorize the guarded NFL-02 import resume from `sport_players` batch 1.
