@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 
 const script = fs.readFileSync('scripts/mlb-03r1a-first-calibrated-shadow-canary.mjs', 'utf8')
+const statusMigration = fs.readFileSync('supabase/migrations/202608140001_nba_replay_isolation_prediction_origin_v1.sql', 'utf8')
 
 function check(name, pass) {
   if (!pass) throw new Error(`${name} failed`)
@@ -14,6 +15,13 @@ check('pending manual adjustment builder exists', script.includes('buildMlb03r1b
 check('manual adjustment never null in payload', script.includes('const manualAdjustment = buildMlb03r1bPendingManualAdjustment()') && script.includes('manual_adjustment: manualAdjustment'))
 check('manual adjustment false contract enforced', script.includes('manual_adjustment must be explicit false for autonomous pending shadow rows'))
 check('manual adjustment null removed', !script.includes('manual_adjustment: null'))
+check('certification status pending constant exists', script.includes("const PENDING_SHADOW_CERTIFICATION_STATUS = 'SHADOW_PENDING'"))
+check('certification status allowed values encoded', ['SHADOW_PENDING', 'CERTIFIED', 'QUARANTINED', 'INVALID', 'REJECTED'].every((value) => script.includes(`'${value}'`)))
+check('certification status uses controlled pending value', script.includes('certification_status: PENDING_SHADOW_CERTIFICATION_STATUS'))
+check('arbitrary MLB phase not stored as status', !script.includes("certification_status: 'MLB_03_FIRST_CALIBRATED_SHADOW_CANARY'"))
+check('phase classification preserved in metadata', script.includes("phase: 'MLB-03R1C'") && script.includes("phaseClassification: 'MLB_03_FIRST_CALIBRATED_SHADOW_CANARY'"))
+check('certification status migration allows pending shadow', /certification_status[\s\S]+SHADOW_PENDING/.test(statusMigration))
+check('certification status migration rejects arbitrary values', statusMigration.includes('invalid certification_status value'))
 check('pending result remains null', script.includes('result: null') && script.includes('pending shadow row must not contain a result label'))
 check('pending settled_at remains null', script.includes('settled_at: null') && script.includes('pending shadow row must not contain settled_at'))
 check('pending result_id remains null', script.includes('result_id: null') && script.includes('pending shadow row must not contain result_id'))
@@ -32,11 +40,13 @@ check('provider accounting zero', script.includes('theOddsApi: 0') && script.inc
 
 console.log(JSON.stringify({
   success: true,
-  mode: 'mlb_03r1b_full_pending_shadow_contract_validator_v1',
-  checks: 23,
+  mode: 'mlb_03r1c_full_pending_shadow_contract_validator_v1',
+  checks: 30,
   requiredPendingContracts: {
     settlement_details: 'non-null empty pending object',
     manual_adjustment: 'boolean false, no manual override',
+    certification_status: 'SHADOW_PENDING',
+    certification_metadata: 'phase/model/calibration provenance, no secrets or postgame data',
     result: 'null',
     settled_at: 'null',
     result_id: 'null',

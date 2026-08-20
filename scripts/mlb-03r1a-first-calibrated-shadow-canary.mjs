@@ -5,10 +5,18 @@ import { createClient } from '@supabase/supabase-js'
 const SPORT = 'baseball_mlb'
 const ORIGIN = 'CURRENT_ERA_SHADOW'
 const SHADOW_MODEL_VERSION = 'MLB_CALIBRATED_SHADOW_V1'
+const PENDING_SHADOW_CERTIFICATION_STATUS = 'SHADOW_PENDING'
 const SNAPSHOT_TYPE = 'MORNING'
 const ARTIFACT_PATH = 'artifacts/mlb/mlb-03-market-calibration-v1.json'
 const EXPECTED_DIGEST = '8c8fbf9c5da43ea3933119d39e6c8b1de2b17ee20fa72c5bc2cd65650290c66c'
 const MAX_ODDS_AGE_MINUTES = 30
+const CERTIFICATION_STATUS_ALLOWED_VALUES = new Set([
+  'SHADOW_PENDING',
+  'CERTIFIED',
+  'QUARANTINED',
+  'INVALID',
+  'REJECTED',
+])
 
 function loadEnvFile(path = '.env.local') {
   if (!fs.existsSync(path)) return
@@ -119,6 +127,15 @@ function assertNoPendingOutcomeEvidence(row) {
   if (row.profit !== null) throw new Error('pending shadow row must not contain profit')
 }
 
+function assertCertificationStatus(value) {
+  if (value !== PENDING_SHADOW_CERTIFICATION_STATUS) {
+    throw new Error('CURRENT_ERA_SHADOW pending row must use certification_status SHADOW_PENDING')
+  }
+  if (!CERTIFICATION_STATUS_ALLOWED_VALUES.has(value)) {
+    throw new Error(`certification_status is not production-allowed: ${value}`)
+  }
+}
+
 function buildIdentity(candidate, artifact) {
   return [
     SPORT,
@@ -150,6 +167,7 @@ function assertShadowPayload(row) {
   }
   assertMlb03r1aPendingSettlementDetails(row.settlement_details)
   assertMlb03r1bPendingManualAdjustment(row.manual_adjustment)
+  assertCertificationStatus(row.certification_status)
   assertNoPendingOutcomeEvidence(row)
 }
 
@@ -320,14 +338,22 @@ async function main() {
     prediction_epoch_id: null,
     prediction_epoch_key: null,
     prediction_origin: ORIGIN,
-    certification_status: 'MLB_03_FIRST_CALIBRATED_SHADOW_CANARY',
+    certification_status: PENDING_SHADOW_CERTIFICATION_STATUS,
     certification_metadata: {
+      phase: 'MLB-03R1C',
+      phaseClassification: 'MLB_03_FIRST_CALIBRATED_SHADOW_CANARY',
       candidateKey: chosen.identity,
       sourcePredictionId: source.id,
+      shadowModelVersion: SHADOW_MODEL_VERSION,
+      snapshotType: SNAPSHOT_TYPE,
       selectedProbabilityContract: 'CALIBRATED_BASELINE_ONLY',
       rawModelProbability: chosen.rawProbability,
       calibratedProbability: chosen.calibratedProbability,
       calibrationDelta: chosen.calibratedProbability - chosen.rawProbability,
+      calibrationVersion: chosen.calibrationVersion,
+      calibrationDigest: artifact.digest,
+      contextSnapshotId: context?.id ?? null,
+      contextCompleteness: context?.completeness ?? null,
       impliedProbability: chosen.impliedProbability,
       calibratedEdge: chosen.calibratedEdge,
       settlementDetailsContract: 'EMPTY_PENDING_OBJECT',
@@ -374,12 +400,19 @@ async function main() {
       eligibleFreshPositive: candidates.filter((candidate) => candidate.eligible && candidate.calibratedEdge > 0).length,
     },
     chosen,
+    certificationStatusContract: {
+      pendingShadowValue: PENDING_SHADOW_CERTIFICATION_STATUS,
+      allowedValues: Array.from(CERTIFICATION_STATUS_ALLOWED_VALUES),
+      phaseStoredInMetadata: true,
+    },
     pendingSettlementDetailsContract: 'EMPTY_PENDING_OBJECT',
     pendingManualAdjustmentContract: 'BOOLEAN_FALSE_PENDING_NO_OVERRIDE',
     payloadAudit: {
       settlementDetailsNonNull: payload.settlement_details !== null,
       manualAdjustmentNonNull: payload.manual_adjustment !== null,
       manualAdjustmentPendingSafe: payload.manual_adjustment === false,
+      certificationStatusAllowed: CERTIFICATION_STATUS_ALLOWED_VALUES.has(payload.certification_status),
+      certificationStatusPendingSafe: payload.certification_status === PENDING_SHADOW_CERTIFICATION_STATUS,
       pendingOutcomeEvidence: {
         result: payload.result,
         settledAt: payload.settled_at,
