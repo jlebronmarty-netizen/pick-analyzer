@@ -102,6 +102,23 @@ export function assertMlb03r1aPendingSettlementDetails(value) {
   }
 }
 
+export function buildMlb03r1bPendingManualAdjustment() {
+  return false
+}
+
+export function assertMlb03r1bPendingManualAdjustment(value) {
+  if (value !== false) {
+    throw new Error('manual_adjustment must be explicit false for autonomous pending shadow rows')
+  }
+}
+
+function assertNoPendingOutcomeEvidence(row) {
+  if (row.result !== null) throw new Error('pending shadow row must not contain a result label')
+  if (row.settled_at !== null) throw new Error('pending shadow row must not contain settled_at')
+  if (row.result_id !== null) throw new Error('pending shadow row must not contain result_id')
+  if (row.profit !== null) throw new Error('pending shadow row must not contain profit')
+}
+
 function buildIdentity(candidate, artifact) {
   return [
     SPORT,
@@ -132,6 +149,8 @@ function assertShadowPayload(row) {
     throw new Error('exact line required for line market')
   }
   assertMlb03r1aPendingSettlementDetails(row.settlement_details)
+  assertMlb03r1bPendingManualAdjustment(row.manual_adjustment)
+  assertNoPendingOutcomeEvidence(row)
 }
 
 async function count(supabase, table, filter) {
@@ -225,6 +244,7 @@ async function main() {
 
   const generatedAt = new Date().toISOString()
   const settlementDetails = buildMlb03r1aPendingSettlementDetails()
+  const manualAdjustment = buildMlb03r1bPendingManualAdjustment()
   const payload = {
     ...source,
     id: stableUuid(chosen.identity),
@@ -273,7 +293,7 @@ async function main() {
     validation_status: 'valid',
     skip_reason: null,
     settlement_details: settlementDetails,
-    manual_adjustment: null,
+    manual_adjustment: manualAdjustment,
     production_eligible: false,
     trial: false,
     scrambled: false,
@@ -311,6 +331,7 @@ async function main() {
       impliedProbability: chosen.impliedProbability,
       calibratedEdge: chosen.calibratedEdge,
       settlementDetailsContract: 'EMPTY_PENDING_OBJECT',
+      manualAdjustmentContract: 'BOOLEAN_FALSE_PENDING_NO_OVERRIDE',
       productIsolation: {
         recommendedPick: false,
         productionEligible: false,
@@ -325,7 +346,7 @@ async function main() {
     const insertResult = await supabase
       .from('prediction_history')
       .insert(payload)
-      .select('id,game_id,market,selection,line,sportsbook,odds,odds_timestamp,model_probability,implied_probability,edge,ev,prediction_origin,model_role,is_current,recommended_pick,production_eligible,status,validation_status,idempotency_key,settlement_details,certification_status,parent_prediction_id,certification_metadata')
+      .select('id,game_id,market,selection,line,sportsbook,odds,odds_timestamp,model_probability,implied_probability,edge,ev,prediction_origin,model_role,is_current,recommended_pick,production_eligible,status,result,settled_at,manual_adjustment,validation_status,idempotency_key,settlement_details,certification_status,parent_prediction_id,certification_metadata')
       .single()
     if (insertResult.error) throw new Error(`canary insert failed: ${insertResult.error.message}`)
     inserted = insertResult.data
@@ -354,8 +375,17 @@ async function main() {
     },
     chosen,
     pendingSettlementDetailsContract: 'EMPTY_PENDING_OBJECT',
+    pendingManualAdjustmentContract: 'BOOLEAN_FALSE_PENDING_NO_OVERRIDE',
     payloadAudit: {
       settlementDetailsNonNull: payload.settlement_details !== null,
+      manualAdjustmentNonNull: payload.manual_adjustment !== null,
+      manualAdjustmentPendingSafe: payload.manual_adjustment === false,
+      pendingOutcomeEvidence: {
+        result: payload.result,
+        settledAt: payload.settled_at,
+        resultId: payload.result_id,
+        profit: payload.profit,
+      },
       pendingSafe: true,
       missingRequiredFields: 0,
       invalidNullFields: 0,
