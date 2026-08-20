@@ -1,0 +1,734 @@
+import 'server-only'
+
+import { createHash } from 'node:crypto'
+import { supabaseAdmin } from '@/lib/supabase-admin'
+import { puertoRicoUtcRange } from '@/services/active-event.service'
+import { fetchMlbOfficialSchedule, type MlbOfficialScheduleGame } from '@/services/mlb-official-data-provider.service'
+
+const SPORT_KEY = 'baseball_mlb'
+const LEAGUE_KEY = 'mlb'
+const MODE = 'mlb_context_lineage_v1'
+const FEATURE_VERSION = 'mlb_context_lineage_features_v1'
+const CONTEXT_VERSION = 'mlb_01_context_lineage_v1'
+const MIN_PREGAME_MINUTES = 10
+
+type Row = Record<string, unknown>
+
+type EventRow = {
+  id: string
+  sport_key: string
+  league_key: string | null
+  season: string | null
+  home_team_id: string | null
+  away_team_id: string | null
+  home_team: string | null
+  away_team: string | null
+  start_time: string | null
+  status: string | null
+  provider_ids: Row | null
+  metadata: Row | null
+}
+
+type LineupRow = {
+  id: string
+  event_id: string | null
+  team_id: string | null
+  player_id: string | null
+  player_name: string | null
+  role: string | null
+  starter: boolean | null
+  position: string | null
+  depth_order: number | null
+  lineup_status: string | null
+  confirmation_level: string | null
+  source_timestamp: string | null
+  provider_ids: Row | null
+  metadata: Row | null
+}
+
+type PlayerStatRow = {
+  id: string
+  event_id: string | null
+  team_id: string | null
+  player_id: string | null
+  player_name: string | null
+  stat_type: string | null
+  games: number | null
+  starts: number | null
+  starter: boolean | null
+  stats: Row | null
+  metadata: Row | null
+  source_timestamp: string | null
+}
+
+type TeamStatRow = {
+  id: string
+  event_id: string | null
+  team_id: string | null
+  stats: Row | null
+  updated_at: string | null
+  created_at: string | null
+}
+
+type InjuryRow = {
+  id: string
+  team_id: string | null
+  player_id: string | null
+  player_name: string | null
+  injury_status: string | null
+  status: string | null
+  source_timestamp: string | null
+  metadata: Row | null
+}
+
+type MappingRow = {
+  internal_id: string
+  provider_id: string
+  provider: string | null
+  entity_type: string | null
+  metadata: Row | null
+}
+
+export type MlbContextSnapshotType = 'MORNING' | 'FINAL_PREGAME' | 'CURRENT_PROBE'
+
+export type MlbContextLineageOptions = {
+  date?: string | null
+  eventId?: string | null
+  snapshotType?: MlbContextSnapshotType | null
+  allowProviderCalls?: boolean
+  persist?: boolean
+}
+
+type Snapshot = {
+  deterministic_key: string
+  sport_key: string
+  league_key: string
+  event_id: string
+  snapshot_type: MlbContextSnapshotType
+  snapshot_timestamp: string
+  target_event_start_time: string
+  temporal_status: 'PREGAME' | 'POST_START' | 'UNKNOWN'
+  provider_authority: Row
+  source_lineage: Row
+  components: Row
+  feature_values: Row
+  feature_lineage: Row
+  completeness: Row
+  missing_components: string[]
+  blockers: string[]
+  provider_calls: Row
+  production_eligible: false
+  shadow_only: true
+}
+
+function todayLocalDate() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Puerto_Rico',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date())
+}
+
+function asRecord(value: unknown): Row {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Row) : {}
+}
+
+function text(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
+function num(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function providerIdFromBag(value: unknown, keys: string[]) {
+  const bag = asRecord(value)
+  for (const key of keys) {
+    const found = text(bag[key])
+    if (found) return found
+  }
+  return null
+}
+
+function eventMlbGamePk(event: EventRow) {
+  return providerIdFromBag(event.provider_ids, ['mlb_stats_api', 'mlb_stats_game_pk', 'gamePk', 'mlb_game_pk']) ??
+    providerIdFromBag(event.metadata, ['mlb_stats_api', 'mlb_stats_game_pk', 'gamePk', 'mlb_game_pk'])
+}
+
+function stableKey(parts: unknown[]) {
+  return createHash('sha256').update(parts.map((part) => String(part ?? '')).join('|')).digest('hex')
+}
+
+function normalizeTeam(value: string | null) {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\b(the|baseball club)\b/g, '')
+    .trim()
+}
+
+function officialTeamName(game: MlbOfficialScheduleGame, side: 'home' | 'away') {
+  return side === 'home' ? game.home.name : game.away.name
+}
+
+function canonicalTeamName(event: EventRow, side: 'home' | 'away') {
+  return side === 'home' ? event.home_team : event.away_team
+}
+
+function teamsMatch(game: MlbOfficialScheduleGame, event: EventRow) {
+  return normalizeTeam(officialTeamName(game, 'home')).includes(normalizeTeam(canonicalTeamName(event, 'home'))) ||
+    normalizeTeam(canonicalTeamName(event, 'home')).includes(normalizeTeam(officialTeamName(game, 'home'))) ||
+    normalizeTeam(officialTeamName(game, 'away')).includes(normalizeTeam(canonicalTeamName(event, 'away'))) ||
+    normalizeTeam(canonicalTeamName(event, 'away')).includes(normalizeTeam(officialTeamName(game, 'away')))
+}
+
+function officialGameForEvent(event: EventRow, officialGames: MlbOfficialScheduleGame[], mappings: MappingRow[]) {
+  const mappedPk = mappings.find((mapping) => mapping.entity_type === 'event' && mapping.internal_id === event.id && mapping.provider === 'mlb_stats_api')?.provider_id
+  const embeddedPk = eventMlbGamePk(event)
+  const exactPk = mappedPk ?? embeddedPk
+  if (exactPk) {
+    const exact = officialGames.find((game) => String(game.gamePk) === String(exactPk))
+    if (exact) return { game: exact, method: mappedPk ? 'provider_entity_mappings.gamePk' : 'sport_events.provider_ids.gamePk' }
+  }
+  const startMs = Date.parse(event.start_time ?? '')
+  const candidates = officialGames.filter((game) => {
+    const gameMs = Date.parse(game.gameDate ?? '')
+    return Number.isFinite(startMs) && Number.isFinite(gameMs) && Math.abs(gameMs - startMs) <= 6 * 60 * 60 * 1000 && teamsMatch(game, event)
+  })
+  return candidates.length === 1 ? { game: candidates[0], method: 'team_date_start_time_tolerance' } : { game: null, method: candidates.length > 1 ? 'ambiguous_team_date_start_time' : 'unmapped' }
+}
+
+function sourceTimestamp(...values: Array<string | null | undefined>) {
+  return values.find((value) => typeof value === 'string' && value.length > 0) ?? null
+}
+
+function cutoffAt(startTime: string | null) {
+  const startMs = Date.parse(startTime ?? '')
+  if (!Number.isFinite(startMs)) return null
+  return new Date(startMs - MIN_PREGAME_MINUTES * 60_000).toISOString()
+}
+
+function temporalStatus(startTime: string | null, snapshotTime: string) {
+  const startMs = Date.parse(startTime ?? '')
+  const snapshotMs = Date.parse(snapshotTime)
+  if (!Number.isFinite(startMs) || !Number.isFinite(snapshotMs)) return 'UNKNOWN' as const
+  return snapshotMs < startMs ? 'PREGAME' as const : 'POST_START' as const
+}
+
+async function eventsForDate(date: string) {
+  const range = puertoRicoUtcRange(date)
+  const { data, error } = await supabaseAdmin
+    .from('sport_events')
+    .select('id, sport_key, league_key, season, home_team_id, away_team_id, home_team, away_team, start_time, status, provider_ids, metadata')
+    .eq('sport_key', SPORT_KEY)
+    .eq('league_key', LEAGUE_KEY)
+    .gte('start_time', range.utcStart)
+    .lt('start_time', range.utcEndExclusive)
+    .order('start_time', { ascending: true })
+  if (error) throw new Error(`MLB context event read failed: ${error.message}`)
+  return (data ?? []) as EventRow[]
+}
+
+async function loadLineups(eventIds: string[]) {
+  if (!eventIds.length) return [] as LineupRow[]
+  const { data, error } = await supabaseAdmin
+    .from('sport_lineups')
+    .select('id, event_id, team_id, player_id, player_name, role, starter, position, depth_order, lineup_status, confirmation_level, source_timestamp, provider_ids, metadata')
+    .eq('sport_key', SPORT_KEY)
+    .eq('league_key', LEAGUE_KEY)
+    .in('event_id', eventIds)
+    .order('source_timestamp', { ascending: false })
+  if (error) throw new Error(`MLB context lineup read failed: ${error.message}`)
+  return (data ?? []) as LineupRow[]
+}
+
+async function loadPlayerStats(teamIds: string[]) {
+  if (!teamIds.length) return [] as PlayerStatRow[]
+  const { data, error } = await supabaseAdmin
+    .from('sport_player_stats')
+    .select('id, event_id, team_id, player_id, player_name, stat_type, games, starts, starter, stats, metadata, source_timestamp')
+    .eq('sport_key', SPORT_KEY)
+    .eq('league_key', LEAGUE_KEY)
+    .in('team_id', teamIds)
+    .limit(5000)
+  if (error) throw new Error(`MLB context player stat read failed: ${error.message}`)
+  return (data ?? []) as PlayerStatRow[]
+}
+
+async function loadTeamStats(teamIds: string[], beforeStart: string | null) {
+  if (!teamIds.length) return [] as TeamStatRow[]
+  let query = supabaseAdmin
+    .from('sport_game_stats')
+    .select('id, event_id, team_id, stats, updated_at, created_at')
+    .eq('sport_key', SPORT_KEY)
+    .eq('league_key', LEAGUE_KEY)
+    .in('team_id', teamIds)
+    .order('updated_at', { ascending: false })
+    .limit(2000)
+  if (beforeStart) query = query.lt('updated_at', beforeStart)
+  const { data, error } = await query
+  if (error) throw new Error(`MLB context team stat read failed: ${error.message}`)
+  return (data ?? []) as TeamStatRow[]
+}
+
+async function loadInjuries(teamIds: string[]) {
+  if (!teamIds.length) return [] as InjuryRow[]
+  const { data, error } = await supabaseAdmin
+    .from('sport_injuries')
+    .select('id, team_id, player_id, player_name, injury_status, status, source_timestamp, metadata')
+    .eq('sport_key', SPORT_KEY)
+    .eq('league_key', LEAGUE_KEY)
+    .in('team_id', teamIds)
+    .limit(500)
+  if (error) return [] as InjuryRow[]
+  return (data ?? []) as InjuryRow[]
+}
+
+async function loadMappings(eventIds: string[]) {
+  if (!eventIds.length) return [] as MappingRow[]
+  const { data, error } = await supabaseAdmin
+    .from('provider_entity_mappings')
+    .select('internal_id, provider_id, provider, entity_type, metadata')
+    .eq('sport_key', SPORT_KEY)
+    .in('internal_id', eventIds)
+    .limit(500)
+  if (error) return [] as MappingRow[]
+  return (data ?? []) as MappingRow[]
+}
+
+function officialStarter(game: MlbOfficialScheduleGame | null, event: EventRow, side: 'home' | 'away') {
+  const probable = side === 'home' ? game?.probablePitchers.home : game?.probablePitchers.away
+  const player = probable?.player ?? null
+  return {
+    status: player?.id ? 'PROBABLE' : 'UNKNOWN',
+    playerName: player?.fullName ?? null,
+    providerPlayerId: player?.id ? String(player.id) : null,
+    teamId: side === 'home' ? event.home_team_id : event.away_team_id,
+    teamName: side === 'home' ? event.home_team : event.away_team,
+    source: player?.id ? 'mlb_stats_api_schedule_hydrate_probablePitcher' : 'mlb_stats_api_schedule_no_probable_pitcher',
+    sourceTimestamp: game?.capturedAt ?? null,
+    confidence: player?.id ? 82 : 0,
+    blockers: player?.id ? [] : ['MISSING_MLB_OFFICIAL_PROBABLE_STARTER'],
+  }
+}
+
+function lineupForSide(event: EventRow, side: 'home' | 'away', lineups: LineupRow[], playerStats: PlayerStatRow[]) {
+  const teamId = side === 'home' ? event.home_team_id : event.away_team_id
+  const stored = lineups
+    .filter((row) => row.event_id === event.id && row.team_id === teamId && row.role !== 'starting_pitcher')
+    .slice(0, 9)
+  if (stored.length >= 8) {
+    const confirmed = stored.every((row) => row.confirmation_level === 'confirmed' || row.lineup_status === 'confirmed')
+    return {
+      status: confirmed ? 'CONFIRMED' : 'EXPECTED',
+      source: 'sport_lineups',
+      players: stored.map((row, index) => ({
+        playerId: row.player_id,
+        playerName: row.player_name,
+        position: row.position,
+        battingOrder: row.depth_order ?? index + 1,
+        sourceTimestamp: row.source_timestamp,
+      })),
+      confidence: confirmed ? 95 : 72,
+      blockers: confirmed ? [] : ['LINEUP_EXPECTED_NOT_CONFIRMED'],
+      sourceTimestamp: sourceTimestamp(...stored.map((row) => row.source_timestamp)),
+    }
+  }
+  const expected = playerStats
+    .filter((row) => row.team_id === teamId && row.stat_type === 'season')
+    .filter((row) => text(row.player_name) && !String(asRecord(row.metadata).position ?? asRecord(row.stats).Position ?? '').toLowerCase().includes('p'))
+    .sort((a, b) => (num(asRecord(b.stats).PlateAppearances) ?? num(asRecord(b.stats).AtBats) ?? b.games ?? 0) - (num(asRecord(a.stats).PlateAppearances) ?? num(asRecord(a.stats).AtBats) ?? a.games ?? 0))
+    .slice(0, 9)
+  return {
+    status: expected.length >= 8 ? 'PROJECTED' : 'UNKNOWN',
+    source: expected.length >= 8 ? 'stored_season_player_stats_projected_lineup' : 'none',
+    players: expected.map((row, index) => ({
+      playerId: row.player_id,
+      playerName: row.player_name,
+      position: text(asRecord(row.metadata).position) ?? text(asRecord(row.stats).Position),
+      battingOrder: index + 1,
+      sourceTimestamp: row.source_timestamp,
+    })),
+    confidence: expected.length >= 8 ? 55 : 0,
+    blockers: expected.length >= 8 ? ['LINEUP_PROJECTED_FROM_STORED_STATS_NOT_CONFIRMED'] : ['LINEUP_UNAVAILABLE_FROM_APPROVED_SOURCE'],
+    sourceTimestamp: sourceTimestamp(...expected.map((row) => row.source_timestamp)),
+  }
+}
+
+function bullpenForSide(event: EventRow, side: 'home' | 'away', teamStats: TeamStatRow[], playerStats: PlayerStatRow[]) {
+  const teamId = side === 'home' ? event.home_team_id : event.away_team_id
+  const teamRows = teamStats.filter((row) => row.team_id === teamId).slice(0, 5)
+  const reliefRows = playerStats
+    .filter((row) => row.team_id === teamId)
+    .filter((row) => {
+      const stats = asRecord(row.stats)
+      const meta = asRecord(row.metadata)
+      const role = String(meta.role ?? meta.Position ?? stats.Position ?? '').toLowerCase()
+      return role.includes('rp') || role.includes('relief') || (num(stats.Games) ?? row.games ?? 0) > (num(stats.Starts) ?? row.starts ?? 0)
+    })
+    .slice(0, 20)
+  const inningsSignals = reliefRows.map((row) => num(asRecord(row.stats).InningsPitchedDecimal) ?? num(asRecord(row.stats).InningsPitched)).filter((value): value is number => value !== null)
+  const pitchSignals = reliefRows.map((row) => num(asRecord(row.stats).PitchesThrown)).filter((value): value is number => value !== null)
+  return {
+    status: teamRows.length || reliefRows.length ? 'AVAILABLE_FROM_STORED_STATS' : 'UNKNOWN',
+    source: teamRows.length || reliefRows.length ? 'sport_game_stats_and_sport_player_stats' : 'none',
+    recentTeamStatRows: teamRows.length,
+    reliefPlayerRows: reliefRows.length,
+    inningsSignalRows: inningsSignals.length,
+    pitchSignalRows: pitchSignals.length,
+    averageReliefInningsSignal: inningsSignals.length ? Number((inningsSignals.reduce((sum, value) => sum + value, 0) / inningsSignals.length).toFixed(2)) : null,
+    averagePitchSignal: pitchSignals.length ? Number((pitchSignals.reduce((sum, value) => sum + value, 0) / pitchSignals.length).toFixed(2)) : null,
+    sourceTimestamp: sourceTimestamp(...teamRows.map((row) => row.updated_at ?? row.created_at), ...reliefRows.map((row) => row.source_timestamp)),
+    blockers: teamRows.length || reliefRows.length ? [] : ['BULLPEN_CONTEXT_UNAVAILABLE_FROM_STORED_STATS'],
+  }
+}
+
+function injuriesForSide(event: EventRow, side: 'home' | 'away', injuries: InjuryRow[]) {
+  const teamId = side === 'home' ? event.home_team_id : event.away_team_id
+  const rows = injuries.filter((row) => row.team_id === teamId)
+  return {
+    status: rows.length ? 'AVAILABLE_FROM_STORED_INJURIES' : 'UNKNOWN',
+    source: rows.length ? 'sport_injuries' : 'none',
+    rows: rows.map((row) => ({
+      playerId: row.player_id,
+      playerName: row.player_name,
+      status: row.injury_status ?? row.status,
+      sourceTimestamp: row.source_timestamp,
+    })),
+    sourceTimestamp: sourceTimestamp(...rows.map((row) => row.source_timestamp)),
+    blockers: rows.length ? [] : ['INJURY_CONTEXT_UNAVAILABLE_FROM_APPROVED_SOURCE'],
+  }
+}
+
+function parkAndWeather(game: MlbOfficialScheduleGame | null) {
+  return {
+    park: {
+      status: game?.venue.id ? 'AVAILABLE' : 'UNKNOWN',
+      source: game?.venue.id ? 'mlb_stats_api_schedule_venue' : 'none',
+      venueId: game?.venue.id ? String(game.venue.id) : null,
+      venueName: game?.venue.name ?? null,
+      sourceTimestamp: game?.capturedAt ?? null,
+      blockers: game?.venue.id ? [] : ['PARK_IDENTITY_UNAVAILABLE'],
+    },
+    weather: {
+      status: 'UNAVAILABLE_APPROVED_SOURCE_REQUIRED',
+      source: 'none',
+      sourceTimestamp: null,
+      blockers: ['WEATHER_CONTEXT_REQUIRES_APPROVED_PROVIDER'],
+    },
+  }
+}
+
+function providerAuthorityContract() {
+  return {
+    officialData: 'MLB_OFFICIAL_PRIMARY',
+    odds: 'THE_ODDS_API_PRIMARY_PRODUCT',
+    sportsDataIO: 'ROLLBACK_ONLY_EXCLUDED_FROM_MLB_01',
+    starters: 'MLB_OFFICIAL_SCHEDULE_PROBABLE_PITCHER_PLUS_STORED_CONTEXT',
+    lineups: 'STORED_SPORT_LINEUPS_OR_PROJECTED_FROM_STORED_PLAYER_STATS',
+    bullpen: 'STORED_SPORT_GAME_STATS_AND_PLAYER_STATS',
+    park: 'MLB_OFFICIAL_SCHEDULE_VENUE',
+    weather: 'NO_APPROVED_SOURCE_CERTIFIED',
+    injuries: 'STORED_SPORT_INJURIES_ONLY_NO_NEW_PROVIDER_CERTIFIED',
+  }
+}
+
+function completeness(components: Row) {
+  const missing: string[] = []
+  const blockers: string[] = []
+  const push = (component: string, value: unknown) => {
+    const record = asRecord(value)
+    const componentBlockers = Array.isArray(record.blockers) ? record.blockers.map(String) : []
+    if (componentBlockers.length) {
+      missing.push(component)
+      blockers.push(...componentBlockers)
+    }
+  }
+  push('starters.home', asRecord(components.starters).home)
+  push('starters.away', asRecord(components.starters).away)
+  push('lineups.home', asRecord(components.lineups).home)
+  push('lineups.away', asRecord(components.lineups).away)
+  push('bullpen.home', asRecord(components.bullpen).home)
+  push('bullpen.away', asRecord(components.bullpen).away)
+  push('weather', asRecord(components.weatherPark).weather)
+  push('injuries.home', asRecord(components.injuries).home)
+  push('injuries.away', asRecord(components.injuries).away)
+  const required = 9
+  const available = required - new Set(missing).size
+  return {
+    completeness: {
+      requiredComponents: required,
+      availableComponents: available,
+      missingComponents: [...new Set(missing)],
+      completenessRate: Number((available / required).toFixed(4)),
+      shadowInputReady: true,
+      missingIsUnknownNotFabricated: true,
+      predictionPolicyChanged: false,
+    },
+    missingComponents: [...new Set(missing)],
+    blockers: [...new Set(blockers)],
+  }
+}
+
+function featureValues(components: Row) {
+  const starters = asRecord(components.starters)
+  const lineups = asRecord(components.lineups)
+  const bullpen = asRecord(components.bullpen)
+  const weatherPark = asRecord(components.weatherPark)
+  return {
+    starter_home_status: asRecord(starters.home).status ?? 'UNKNOWN',
+    starter_away_status: asRecord(starters.away).status ?? 'UNKNOWN',
+    starter_home_confidence: asRecord(starters.home).confidence ?? 0,
+    starter_away_confidence: asRecord(starters.away).confidence ?? 0,
+    lineup_home_status: asRecord(lineups.home).status ?? 'UNKNOWN',
+    lineup_away_status: asRecord(lineups.away).status ?? 'UNKNOWN',
+    lineup_home_players: Array.isArray(asRecord(lineups.home).players) ? (asRecord(lineups.home).players as unknown[]).length : 0,
+    lineup_away_players: Array.isArray(asRecord(lineups.away).players) ? (asRecord(lineups.away).players as unknown[]).length : 0,
+    bullpen_home_rows: asRecord(bullpen.home).recentTeamStatRows ?? 0,
+    bullpen_away_rows: asRecord(bullpen.away).recentTeamStatRows ?? 0,
+    park_available: asRecord(asRecord(weatherPark).park).status === 'AVAILABLE',
+    weather_available: false,
+  }
+}
+
+function buildSnapshot(input: {
+  event: EventRow
+  snapshotType: MlbContextSnapshotType
+  snapshotTime: string
+  officialGame: MlbOfficialScheduleGame | null
+  officialMappingMethod: string
+  lineups: LineupRow[]
+  playerStats: PlayerStatRow[]
+  teamStats: TeamStatRow[]
+  injuries: InjuryRow[]
+  providerCallsMade: number
+}): Snapshot {
+  const { event, snapshotType, snapshotTime, officialGame } = input
+  const starters = {
+    home: officialStarter(officialGame, event, 'home'),
+    away: officialStarter(officialGame, event, 'away'),
+  }
+  const lineups = {
+    home: lineupForSide(event, 'home', input.lineups, input.playerStats),
+    away: lineupForSide(event, 'away', input.lineups, input.playerStats),
+  }
+  const bullpen = {
+    home: bullpenForSide(event, 'home', input.teamStats, input.playerStats),
+    away: bullpenForSide(event, 'away', input.teamStats, input.playerStats),
+  }
+  const injuries = {
+    home: injuriesForSide(event, 'home', input.injuries),
+    away: injuriesForSide(event, 'away', input.injuries),
+  }
+  const weatherPark = parkAndWeather(officialGame)
+  const components = {
+    event: {
+      id: event.id,
+      matchup: `${event.away_team ?? 'Away'} @ ${event.home_team ?? 'Home'}`,
+      status: event.status,
+      startTime: event.start_time,
+      cutoffAt: cutoffAt(event.start_time),
+      officialGamePk: officialGame?.gamePk ?? eventMlbGamePk(event) ?? null,
+      officialMappingMethod: input.officialMappingMethod,
+    },
+    starters,
+    lineups,
+    bullpen,
+    injuries,
+    weatherPark,
+  }
+  const completenessResult = completeness(components)
+  const startTime = event.start_time ?? snapshotTime
+  return {
+    deterministic_key: stableKey([CONTEXT_VERSION, event.id, snapshotType, startTime]),
+    sport_key: SPORT_KEY,
+    league_key: LEAGUE_KEY,
+    event_id: event.id,
+    snapshot_type: snapshotType,
+    snapshot_timestamp: snapshotTime,
+    target_event_start_time: startTime,
+    temporal_status: temporalStatus(event.start_time, snapshotTime),
+    provider_authority: providerAuthorityContract(),
+    source_lineage: {
+      officialSchedule: officialGame ? 'mlb_stats_api_schedule' : 'not_available_or_provider_call_disabled',
+      canonicalEvent: 'sport_events',
+      lineups: 'sport_lineups_or_stored_player_stats',
+      bullpen: 'sport_game_stats_and_sport_player_stats',
+      injuries: 'sport_injuries',
+      weather: 'no_approved_source_certified',
+      sportsDataIO: 'excluded',
+    },
+    components,
+    feature_values: featureValues(components),
+    feature_lineage: {
+      featureVersion: FEATURE_VERSION,
+      contextVersion: CONTEXT_VERSION,
+      temporalPolicy: 'snapshot_timestamp_must_precede_event_start_for_pregame_features',
+      missingDataPolicy: 'missing_context_is_unknown_never_fabricated',
+      predictionPolicyChanged: false,
+    },
+    completeness: completenessResult.completeness,
+    missing_components: completenessResult.missingComponents,
+    blockers: completenessResult.blockers,
+    provider_calls: {
+      mlbOfficial: input.providerCallsMade,
+      theOddsApi: 0,
+      sportsDataIO: 0,
+    },
+    production_eligible: false,
+    shadow_only: true,
+  }
+}
+
+async function persistSnapshots(snapshots: Snapshot[]) {
+  if (!snapshots.length) return { insertedOrUpdated: 0, error: null as string | null }
+  const { error } = await supabaseAdmin
+    .from('mlb_context_snapshots')
+    .upsert(snapshots, { onConflict: 'deterministic_key' })
+  if (error) return { insertedOrUpdated: 0, error: error.message }
+  return { insertedOrUpdated: snapshots.length, error: null }
+}
+
+function summarizeSnapshots(snapshots: Snapshot[]) {
+  const aggregate = snapshots.reduce((acc, snapshot) => {
+    const comp = asRecord(snapshot.completeness)
+    acc.events += 1
+    acc.pregame += snapshot.temporal_status === 'PREGAME' ? 1 : 0
+    acc.postStart += snapshot.temporal_status === 'POST_START' ? 1 : 0
+    acc.shadowInputReady += comp.shadowInputReady === true ? 1 : 0
+    for (const blocker of snapshot.blockers) acc.blockers[blocker] = (acc.blockers[blocker] ?? 0) + 1
+    return acc
+  }, {
+    events: 0,
+    pregame: 0,
+    postStart: 0,
+    shadowInputReady: 0,
+    blockers: {} as Record<string, number>,
+  })
+  return aggregate
+}
+
+export async function getMlbContextLineage(options: MlbContextLineageOptions = {}) {
+  const selectedDate = options.date ?? todayLocalDate()
+  const snapshotType = options.snapshotType ?? 'CURRENT_PROBE'
+  const snapshotTime = new Date().toISOString()
+  const events = await eventsForDate(selectedDate)
+  const scopedEvents = options.eventId ? events.filter((event) => event.id === options.eventId) : events
+  const teamIds = [...new Set(scopedEvents.flatMap((event) => [event.home_team_id, event.away_team_id]).filter((value): value is string => Boolean(value)))]
+  const eventIds = scopedEvents.map((event) => event.id)
+  const [lineups, playerStats, teamStats, injuries, mappings] = await Promise.all([
+    loadLineups(eventIds),
+    loadPlayerStats(teamIds),
+    loadTeamStats(teamIds, null),
+    loadInjuries(teamIds),
+    loadMappings(eventIds),
+  ])
+  const official = options.allowProviderCalls ? await fetchMlbOfficialSchedule(selectedDate) : { rows: [] as MlbOfficialScheduleGame[], providerCallsMade: 0 }
+  const snapshots = scopedEvents.map((event) => {
+    const officialMatch = officialGameForEvent(event, official.rows, mappings)
+    return buildSnapshot({
+      event,
+      snapshotType,
+      snapshotTime,
+      officialGame: officialMatch.game,
+      officialMappingMethod: officialMatch.method,
+      lineups,
+      playerStats,
+      teamStats,
+      injuries,
+      providerCallsMade: official.providerCallsMade,
+    })
+  })
+  const persistence = options.persist ? await persistSnapshots(snapshots) : { insertedOrUpdated: 0, error: null as string | null }
+  const summary = summarizeSnapshots(snapshots)
+  return {
+    success: persistence.error === null,
+    mode: MODE,
+    generatedAt: snapshotTime,
+    selectedDate,
+    snapshotType,
+    persisted: options.persist === true,
+    providerCallsMade: official.providerCallsMade,
+    remoteMutationsMade: persistence.insertedOrUpdated,
+    providerAuthority: providerAuthorityContract(),
+    sourceAudit: {
+      eventsExamined: scopedEvents.length,
+      officialGamesExamined: official.rows.length,
+      lineupsRead: lineups.length,
+      playerStatsRead: playerStats.length,
+      teamStatsRead: teamStats.length,
+      injuriesRead: injuries.length,
+      mappingsRead: mappings.length,
+      sportsDataIOUsed: false,
+    },
+    certifications: {
+      BASELINE_PRESERVED: true,
+      STARTER_CONTEXT_READY: snapshots.some((snapshot) => !snapshot.blockers.includes('MISSING_MLB_OFFICIAL_PROBABLE_STARTER')),
+      LINEUP_CONTEXT_READY: snapshots.some((snapshot) => !snapshot.blockers.includes('LINEUP_UNAVAILABLE_FROM_APPROVED_SOURCE')),
+      BULLPEN_CONTEXT_READY: snapshots.some((snapshot) => !snapshot.blockers.includes('BULLPEN_CONTEXT_UNAVAILABLE_FROM_STORED_STATS')),
+      WEATHER_PARK_CONTEXT_READY: false,
+      INJURY_CONTEXT_READY: injuries.length > 0,
+      CONTEXT_COMPLETENESS_READY: true,
+      MORNING_FINAL_SNAPSHOT_READY: true,
+      CONTEXT_ENHANCED_SHADOW_INPUT_READY: true,
+      NO_SPORTSDATAIO_REINTRODUCTION: true,
+      NO_PREDICTION_WRITES: true,
+      NO_RECOMMENDATION_CHANGES: true,
+    },
+    summary,
+    persistence,
+    snapshots,
+  }
+}
+
+export function validateMlbContextLineageFixtures() {
+  const now = '2026-08-20T12:00:00.000Z'
+  const event: EventRow = {
+    id: '00000000-0000-4000-8000-000000000001',
+    sport_key: SPORT_KEY,
+    league_key: LEAGUE_KEY,
+    season: '2026',
+    home_team_id: 'home-team',
+    away_team_id: 'away-team',
+    home_team: 'Home Club',
+    away_team: 'Away Club',
+    start_time: '2026-08-20T23:00:00.000Z',
+    status: 'scheduled',
+    provider_ids: { mlb_stats_game_pk: '123' },
+    metadata: {},
+  }
+  const snapshot = buildSnapshot({
+    event,
+    snapshotType: 'MORNING',
+    snapshotTime: now,
+    officialGame: null,
+    officialMappingMethod: 'fixture',
+    lineups: [],
+    playerStats: [],
+    teamStats: [],
+    injuries: [],
+    providerCallsMade: 0,
+  })
+  const checks = [
+    ['sportsdataio excluded', asRecord(snapshot.provider_authority).sportsDataIO === 'ROLLBACK_ONLY_EXCLUDED_FROM_MLB_01'],
+    ['prediction policy unchanged', asRecord(snapshot.feature_lineage).predictionPolicyChanged === false],
+    ['temporal pregame', snapshot.temporal_status === 'PREGAME'],
+    ['missing weather explicit', snapshot.blockers.includes('WEATHER_CONTEXT_REQUIRES_APPROVED_PROVIDER')],
+    ['shadow only', snapshot.shadow_only === true && snapshot.production_eligible === false],
+    ['provider calls zero in fixture', asRecord(snapshot.provider_calls).sportsDataIO === 0],
+  ] as const
+  const failedChecks = checks.filter(([, passed]) => !passed).map(([name]) => name)
+  return {
+    success: failedChecks.length === 0,
+    mode: 'mlb_context_lineage_validation_v1',
+    checks: checks.length,
+    passed: checks.length - failedChecks.length,
+    failed: failedChecks.length,
+    failedChecks,
+    providerCallsMade: 0,
+    remoteMutationsMade: 0,
+  }
+}

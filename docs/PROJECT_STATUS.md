@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-20 MLB-01 Context Lineage
+
+- MLB-01 Context Lineage is locally implemented as `MLB_01_CONTEXT_LINEAGE_PARTIAL_CERTIFICATION`. The additive runtime creates a shadow-only context snapshot contract for current and forward MLB events, preserving the current deployed MLB prediction/recommendation/settlement/calibration state.
+- The new lineage path uses MLB Official schedule evidence for probable starters and park identity, stored canonical lineups/player stats for confirmed or projected lineup context, stored team/player stats for bullpen context and stored injuries only. SportsDataIO remains rollback-only and is explicitly excluded from MLB-01; The Odds API remains the odds authority. Weather, injury and confirmed-lineup completeness remain partial until approved providers are separately certified.
+- No prediction formula, model weight, Official Pick policy, recommendation threshold, settlement formula, learning weight, HR-03 status, odds authority or MLB data-source mode was changed.
+
 ## 2026-08-16 NFL-01 P0 Resume Initialization Repair
 
 - NFL-01 P0 resume initialization repair is locally implemented as `NFL_01_BALLDONTLIE_P0_RESUME_INITIALIZATION_REPAIR_CERTIFIED`. The failed P0 launch made 0 provider calls and was traced to a checkpoint namespace mismatch: the live checkpoint contained completed probe request IDs while the P0 queue introduced new IDs such as `bdl_nfl_teams_all`, leaving `state` undefined before `state.cursor` was read.

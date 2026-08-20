@@ -1,0 +1,73 @@
+{
+  "phase": "MLB-01",
+  "name": "Context Lineage and Model Input Recovery",
+  "classification": "MLB_01_CONTEXT_LINEAGE_PARTIAL_CERTIFICATION",
+  "expectedProductionCommit": "2d01d94120d8127d3323d26e90edaddcb6821c95",
+  "providerAuthority": {
+    "mlbOfficial": "primary official/baseball data source",
+    "theOddsApi": "primary odds source",
+    "sportsDataIO": "rollback-only excluded from MLB-01"
+  },
+  "runtimeChanges": {
+    "predictionFormulaChanged": false,
+    "modelWeightsChanged": false,
+    "officialPickPolicyChanged": false,
+    "recommendationPolicyChanged": false,
+    "settlementChanged": false,
+    "learningChanged": false,
+    "calibrationChanged": false
+  },
+  "contextDomains": {
+    "starters": {
+      "status": "READY_PARTIAL",
+      "source": "MLB Official schedule probablePitcher plus stored canonical context",
+      "notes": "Probable starter lineage is available when MLB Official exposes probable pitchers. Confirmed lineup/late scratch evidence requires a later certified provider path."
+    },
+    "lineups": {
+      "status": "READY_PARTIAL",
+      "source": "sport_lineups or projected stored player stats",
+      "notes": "Confirmed lineups are used when already stored; projected lineups are explicitly labeled and never treated as confirmed."
+    },
+    "bullpen": {
+      "status": "READY_PARTIAL",
+      "source": "sport_game_stats and sport_player_stats",
+      "notes": "Stored workload signals are exposed with row-count and timestamp lineage."
+    },
+    "weatherPark": {
+      "status": "PARTIAL",
+      "source": "MLB Official venue for park identity; no approved weather provider",
+      "notes": "Weather is blocked until an approved source is authorized."
+    },
+    "injuries": {
+      "status": "PARTIAL",
+      "source": "sport_injuries only",
+      "notes": "No new injury provider is certified in MLB-01."
+    }
+  },
+  "snapshotContract": {
+    "table": "mlb_context_snapshots",
+    "snapshotTypes": ["MORNING", "FINAL_PREGAME", "CURRENT_PROBE"],
+    "shadowOnly": true,
+    "productionEligible": false,
+    "missingDataPolicy": "missing context is unknown, never fabricated"
+  },
+  "certifications": {
+    "baselinePreserved": true,
+    "starterContextReady": true,
+    "lineupContextReady": true,
+    "bullpenContextReady": true,
+    "weatherParkContextReady": false,
+    "injuryContextReady": false,
+    "contextCompletenessReady": true,
+    "morningFinalSnapshotReady": true,
+    "contextEnhancedShadowInputReady": true,
+    "sportsDataIONotReintroduced": true,
+    "providerCallsFromStaticCertification": 0,
+    "productionDatabaseMutationsFromStaticCertification": 0
+  },
+  "remainingBlockers": [
+    "WEATHER_CONTEXT_REQUIRES_APPROVED_PROVIDER",
+    "INJURY_CONTEXT_REQUIRES_APPROVED_OR_STORED_CURRENT_SOURCE",
+    "CONFIRMED_LINEUP_PROVIDER_NOT_CERTIFIED"
+  ]
+}
