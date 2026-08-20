@@ -3694,3 +3694,11 @@ Status: `NFL_04R1_FROZEN_MODEL_ARTIFACT_MATERIALIZED_CERTIFIED`
 Result: NFL-04R1 converts the deterministic NFL-03 offline model state into a runtime-loadable artifact without changing the model. The artifact stores the complete ordered feature manifest, preprocessing means/stds, missing-value semantics, logistic moneyline coefficients, 2024 Platt calibration parameters, home/away score ridge coefficients, source digests, parity rows and validation/holdout residual evidence.
 
 Runtime artifact scoring now reproduces the certified NFL-03 outputs across all 1,311 feature rows with max delta 0 and reproduces the certified validation/holdout metrics exactly. The runtime scorer is provider-free, DB-free and fails closed on missing artifact, checksum mismatch, version mismatch, feature count mismatch, invalid coefficients and missing input features. Next: publish NFL-04R1, then separately authorize NFL-04R2 current BallDontLie forward-data preflight and fresh The Odds API NFL market refresh. Do not write `CURRENT_ERA_SHADOW` predictions until that full forward evidence chain passes.
+
+## MLB-03R3B Shadow Immutable Fingerprint Standardization
+
+Status: `MLB_03R3B_FINGERPRINT_STANDARDIZATION_LOCAL_READY`
+
+Result: MLB clean shadow canary preservation now has one shared canonical immutable fingerprint helper for validators and canary tooling. The contract hashes immutable evidence only and excludes lifecycle, settlement and mutable observation fields. Canary 1 reproduces the certified canonical digest `78868b4ef923ee5155cee83c2fa865ccf6c4943ecf31f45176cc7bd9f372be48` locally with deterministic serialization.
+
+Next: publish/deploy the fingerprint standardization, verify production alignment, re-certify canary 1, then perform the separately gated second clean calibrated MLB `CURRENT_ERA_SHADOW` canary write if fresh candidate evidence still passes.

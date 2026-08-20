@@ -1,6 +1,11 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
+import {
+  fingerprintMlbShadowImmutableEvidence,
+  immutableEvidenceFromMlbShadowRow,
+  MLB_SHADOW_IMMUTABLE_FINGERPRINT_VERSION,
+} from './lib/mlb-shadow-immutable-fingerprint.mjs'
 
 const SPORT = 'baseball_mlb'
 const ORIGIN = 'CURRENT_ERA_SHADOW'
@@ -535,6 +540,12 @@ async function main() {
       unsupportedFields: 0,
     },
     inserted,
+    immutableFingerprint: inserted
+      ? {
+          version: MLB_SHADOW_IMMUTABLE_FINGERPRINT_VERSION,
+          digest: fingerprintMlbShadowImmutableEvidence(immutableEvidenceFromMlbShadowRow(inserted)),
+        }
+      : null,
     post,
     deltas: {
       predictionHistory: post.predictionHistory - pre.predictionHistory,

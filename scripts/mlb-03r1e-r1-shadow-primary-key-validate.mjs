@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import fs from 'node:fs'
+import { fingerprintMlbShadowImmutableEvidence } from './lib/mlb-shadow-immutable-fingerprint.mjs'
 
 const script = fs.readFileSync('scripts/mlb-03r1a-first-calibrated-shadow-canary.mjs', 'utf8')
 
@@ -163,6 +164,16 @@ check('product flags closed', shadowPayload.recommended_pick === false && shadow
 check('source lineage is explicit', shadowPayload.parent_prediction_id === sourcePrediction.id && shadowPayload.challenger_of_prediction_id === sourcePrediction.id)
 check('lineage metadata preserves source id', shadowPayload.version_lineage.sourcePredictionId === sourcePrediction.id && shadowPayload.certification_metadata.sourcePredictionId === sourcePrediction.id)
 check('deterministic logical key is selected book identity', shadowPayload.idempotency_key.includes('|draftkings|') && shadowPayload.prediction_group_key === shadowPayload.idempotency_key)
+check('shared immutable fingerprint helper is used', typeof fingerprintMlbShadowImmutableEvidence({
+  ...shadowPayload,
+  raw_model_probability: 0.4098,
+  calibrated_probability: 0.5123,
+  model_version: 'MLB_CALIBRATED_SHADOW_V1',
+  calibration_version: 'mlb_market_empirical_calibration_v1_2026_08_20',
+  candidate_key: shadowPayload.idempotency_key,
+  source_prediction_id: sourcePrediction.id,
+  snapshot_type: 'MORNING',
+}) === 'string')
 
 console.log(JSON.stringify({
   success: true,

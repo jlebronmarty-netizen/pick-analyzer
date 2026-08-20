@@ -1,3 +1,5 @@
+import { fingerprintMlbShadowImmutableEvidence } from './lib/mlb-shadow-immutable-fingerprint.mjs'
+
 function impliedProbability(odds) {
   return odds < 0 ? Math.abs(odds) / (Math.abs(odds) + 100) : 100 / (odds + 100)
 }
@@ -112,6 +114,16 @@ check('draftkings did not leak lowvig', draftKingsPayload.sportsbook !== 'lowvig
 check('multi-book identities differ', draftKingsPayload.idempotency_key !== betMgmPayload.idempotency_key)
 check('multi-book book B does not leak book A', betMgmPayload.sportsbook === 'betmgm' && betMgmPayload.odds === 150)
 check('pending status contract preserved', draftKingsPayload.certification_status === 'SHADOW_PENDING')
+check('shared immutable fingerprint helper is used', typeof fingerprintMlbShadowImmutableEvidence({
+  ...draftKingsPayload,
+  raw_model_probability: 0.4098,
+  calibrated_probability: 0.5123,
+  model_version: 'MLB_CALIBRATED_SHADOW_V1',
+  calibration_version: 'mlb_market_empirical_calibration_v1_2026_08_20',
+  candidate_key: draftKingsPayload.idempotency_key,
+  source_prediction_id: sourceLowVig.id,
+  snapshot_type: 'MORNING',
+}) === 'string')
 
 console.log(JSON.stringify({
   success: true,
