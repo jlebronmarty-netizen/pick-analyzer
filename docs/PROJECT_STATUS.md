@@ -2,6 +2,11 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-20 MLB-01R2C Context Snapshot Service Role Grant
+
+- MLB-01R2C makes the manually applied production `service_role` CRUD repair reproducible in `supabase/migrations/202608200001_mlb_context_snapshots_v1.sql` with `grant select, insert, update, delete on public.mlb_context_snapshots to service_role;`.
+- The migration still preserves RLS, the service-role policy, text `event_id` compatibility with `sport_events(id)`, shadow-only defaults and deterministic snapshot identity. No anon/authenticated CRUD grants were added. No providers were called and no production DB mutations were made by local certification.
+
 ## 2026-08-20 MLB-01R2A Context Snapshot Event ID Type Repair
 
 - MLB-01R2A is locally certified as `MLB_01_CONTEXT_SNAPSHOT_EVENT_ID_TYPE_REPAIR_CERTIFIED`. Manual production SQL proved `public.sport_events.id` is `text` and `public.mlb_context_snapshots` does not yet exist, so the previous blocker is refined to `MLB_CONTEXT_SNAPSHOTS_TABLE_NOT_CREATED` plus `MLB_CONTEXT_SNAPSHOTS_EVENT_ID_TYPE_DEFECT`.

@@ -49,6 +49,10 @@ comment on column public.mlb_context_snapshots.production_eligible is
 
 alter table public.mlb_context_snapshots enable row level security;
 
+grant select, insert, update, delete
+  on public.mlb_context_snapshots
+  to service_role;
+
 drop policy if exists "mlb_context_snapshots_service_role_all" on public.mlb_context_snapshots;
 create policy "mlb_context_snapshots_service_role_all"
   on public.mlb_context_snapshots

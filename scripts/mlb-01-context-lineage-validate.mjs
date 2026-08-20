@@ -30,6 +30,8 @@ const checks = [
   ['base sport_events id is text', /create table if not exists sport_events\s*\([\s\S]*?\bid text primary key/i.test(baseSportsMigration)],
   ['context snapshot event_id is text FK', migration.includes('event_id text not null references public.sport_events(id) on delete cascade')],
   ['context snapshot event_id is not uuid', !migration.includes('event_id uuid not null references public.sport_events(id)')],
+  ['service role CRUD grant reproducible', migration.includes('grant select, insert, update, delete') && migration.includes('to service_role')],
+  ['no anon/authenticated CRUD grants', !/grant\s+(?:select|insert|update|delete|all)[\s\S]{0,120}\b(?:anon|authenticated)\b/i.test(migration)],
   ['runtime keeps event ids as strings', service.includes('event_id: string') && service.includes('event_id: event.id')],
   ['no event id uuid coercion in context service', !/event_id[\s\S]{0,80}(uuid|parseUuid|UUID)/i.test(service)],
   ['snapshot table is shadow only', migration.includes('production_eligible boolean not null default false') && migration.includes('shadow_only boolean not null default true')],

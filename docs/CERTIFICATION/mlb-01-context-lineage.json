@@ -53,6 +53,7 @@
       "productionTableExists": false,
       "productionMigrationApplied": false,
       "manualMigrationReady": true,
+      "serviceRoleCrudGrantReproducible": true,
       "representativeEventId": "baseball_mlb:mlb:sportsdataio:event:79715",
       "eventIdUuidCoercion": 0
     },
@@ -78,7 +79,8 @@
     "r2LineupLiveFeedBounded": true,
     "r2ProductionPersistenceBlocked": true,
     "r2ProductionPersistenceBlocker": "public.mlb_context_snapshots table not created in production before R2A; original unapplied migration used incompatible uuid event_id",
-    "r2aEventIdTypeRepairCertified": true
+    "r2aEventIdTypeRepairCertified": true,
+    "r2cServiceRoleGrantReproducible": true
   },
   "remainingBlockers": [
     "MLB_CONTEXT_SNAPSHOTS_TABLE_NOT_CREATED",

@@ -49,4 +49,4 @@ MLB-01 snapshots are `shadow_only=true` and `production_eligible=false`. Persist
 
 ## Certification Result
 
-The R2 runtime path is ready to skip unsafe rows independently and to acquire bounded MLB Official lineup evidence without SportsDataIO. R2A repaired the unapplied migration so `event_id text` matches the verified production `public.sport_events.id` contract. Production snapshot persistence remains blocked until the corrected migration is manually applied.
+The R2 runtime path is ready to skip unsafe rows independently and to acquire bounded MLB Official lineup evidence without SportsDataIO. R2A repaired the unapplied migration so `event_id text` matches the verified production `public.sport_events.id` contract. R2C makes the production service-role CRUD grant reproducible in the migration without broadening anon or authenticated access.
