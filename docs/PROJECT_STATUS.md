@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-20 MLB-02 Calibration Forensics
+
+- MLB-02 is locally certified as `MLB_02_CALIBRATION_FORENSICS_CERTIFIED` using stored production MLB evidence only. The read-only analyzer reviewed 2,506 MLB prediction rows, 2,276 settled rows, 148 recommended rows, 0 production-eligible rows and 3 certified MLB-01 context snapshots with 0 provider calls and 0 production database mutations.
+- Root cause is identified: all current MLB rows remain `skipped_or_null` for calibration because no eligible production calibration artifact/label source exists for the active model path, `production_eligible` remains 0 and `learning_labels` remains 0. The recommended subset is materially overconfident: 70.22% mean probability versus 47.92% actual win rate.
+- Market-specific calibration and a future `MLB_CONTEXT_ENHANCED_SHADOW_V1` are design-ready. No production probabilities, Official Pick thresholds, settlement, learning, SportsDataIO, NFL or NBA behavior changed.
+
 ## 2026-08-20 MLB-01R2C Context Snapshot Service Role Grant
 
 - MLB-01R2C makes the manually applied production `service_role` CRUD repair reproducible in `supabase/migrations/202608200001_mlb_context_snapshots_v1.sql` with `grant select, insert, update, delete on public.mlb_context_snapshots to service_role;`.
