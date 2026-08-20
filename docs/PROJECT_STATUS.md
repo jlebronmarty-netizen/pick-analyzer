@@ -7,6 +7,7 @@ Last updated: 2026-07-30 20:05:00Z
 - MLB-03 is locally implemented as `MLB_03_CALIBRATED_SHADOW_CERTIFIED_CONTEXT_FORWARD_ONLY`. It materializes `artifacts/mlb/mlb-03-market-calibration-v1.json` as a runtime-loadable, market-specific calibration artifact derived only from stored settled MLB baseline evidence with temporal leakage 0.
 - The selected shadow contract is `CALIBRATED_BASELINE_ONLY`, not a learned context model. Holdout calibration improves Brier/log loss for Moneyline, Run Line and Total versus the raw baseline, while context features remain classified as historical-safe partial and forward-only for MLB-01 lineup/weather/injury evidence. No production probabilities, prediction rows, Official Picks, settlement, learning, provider authority, NFL or NBA behavior changed.
 - The runtime loader in `src/services/mlb-calibrated-shadow-v1.service.ts` fails closed for unsupported markets or invalid probabilities and uses `CURRENT_ERA_SHADOW` identity for future canaries. First production shadow writes remain separately authorization-gated.
+- MLB-03R1A adds a focused canary persistence contract repair after the first write attempt proved `prediction_history.settlement_details` is non-null in production. The repaired canary payload uses the existing pending-safe empty settlement metadata object, blocks outcome/postgame leakage, and passed dry-run validation with 0 provider calls and 0 production mutations. Publication and one-row retry remain gated.
 
 ## 2026-08-20 MLB-02 Calibration Forensics
 

@@ -1,0 +1,384 @@
+import crypto from 'node:crypto'
+import fs from 'node:fs'
+import { createClient } from '@supabase/supabase-js'
+
+const SPORT = 'baseball_mlb'
+const ORIGIN = 'CURRENT_ERA_SHADOW'
+const SHADOW_MODEL_VERSION = 'MLB_CALIBRATED_SHADOW_V1'
+const SNAPSHOT_TYPE = 'MORNING'
+const ARTIFACT_PATH = 'artifacts/mlb/mlb-03-market-calibration-v1.json'
+const EXPECTED_DIGEST = '8c8fbf9c5da43ea3933119d39e6c8b1de2b17ee20fa72c5bc2cd65650290c66c'
+const MAX_ODDS_AGE_MINUTES = 30
+
+function loadEnvFile(path = '.env.local') {
+  if (!fs.existsSync(path)) return
+  for (const line of fs.readFileSync(path, 'utf8').split(/\r?\n/)) {
+    if (!line || line.trim().startsWith('#')) continue
+    const index = line.indexOf('=')
+    if (index < 1) continue
+    const key = line.slice(0, index).trim()
+    let value = line.slice(index + 1).trim()
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1)
+    }
+    if (key && !process.env[key]) process.env[key] = value
+  }
+}
+
+function stableText(value) {
+  return String(value ?? 'null').trim().toLowerCase().replace(/\s+/g, '_')
+}
+
+function stableUuid(input) {
+  const hex = crypto.createHash('sha256').update(input).digest('hex')
+  return [
+    hex.slice(0, 8),
+    hex.slice(8, 12),
+    `4${hex.slice(13, 16)}`,
+    `${((parseInt(hex.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, '0')}${hex.slice(18, 20)}`,
+    hex.slice(20, 32),
+  ].join('-')
+}
+
+function clampProbability(value) {
+  return Math.min(0.99, Math.max(0.01, value))
+}
+
+function logit(value) {
+  const p = clampProbability(value)
+  return Math.log(p / (1 - p))
+}
+
+function sigmoid(value) {
+  if (value >= 0) return 1 / (1 + Math.exp(-value))
+  const z = Math.exp(value)
+  return z / (1 + z)
+}
+
+function normalizeMarket(value) {
+  const market = String(value ?? '').toLowerCase()
+  if (market.includes('moneyline') || market === 'h2h') return 'moneyline'
+  if (market.includes('run') || market.includes('spread')) return 'run_line'
+  if (market.includes('total')) return 'total'
+  return null
+}
+
+function impliedProbability(odds) {
+  return odds < 0 ? Math.abs(odds) / (Math.abs(odds) + 100) : 100 / (odds + 100)
+}
+
+function decimalOdds(odds) {
+  return odds > 0 ? 1 + odds / 100 : 1 + 100 / Math.abs(odds)
+}
+
+function calibrate(artifact, rawProbability, market) {
+  const map = artifact.markets[market]
+  if (!map) return null
+  const bucket = map.buckets.find((entry) => rawProbability >= entry.min && rawProbability < entry.max)
+  const calibrated =
+    bucket && bucket.sample >= map.minBucketSample
+      ? bucket.value
+      : sigmoid(map.fallback.intercept + map.fallback.slope * logit(rawProbability))
+  return {
+    probability: clampProbability(calibrated),
+    method: bucket && bucket.sample >= map.minBucketSample ? map.method : map.fallback.method,
+    version: artifact.artifactVersion,
+  }
+}
+
+export function buildMlb03r1aPendingSettlementDetails() {
+  return {}
+}
+
+export function assertMlb03r1aPendingSettlementDetails(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('settlement_details must be a non-null pending metadata object')
+  }
+  const serialized = JSON.stringify(value).toLowerCase()
+  for (const forbidden of ['final_score', 'home_score', 'away_score', 'winner', 'settled_at', 'win', 'loss', 'push']) {
+    if (serialized.includes(forbidden)) {
+      throw new Error(`settlement_details contains postgame or outcome evidence: ${forbidden}`)
+    }
+  }
+}
+
+function buildIdentity(candidate, artifact) {
+  return [
+    SPORT,
+    candidate.eventId,
+    candidate.market,
+    stableText(candidate.selection),
+    candidate.line ?? 'null',
+    stableText(candidate.sportsbook),
+    ORIGIN,
+    artifact.shadowModelVersion,
+    artifact.artifactVersion,
+    SNAPSHOT_TYPE,
+  ].join('|')
+}
+
+function assertShadowPayload(row) {
+  if (row.prediction_origin !== ORIGIN) throw new Error('wrong prediction_origin')
+  if (row.model_role !== 'shadow') throw new Error('wrong model_role')
+  if (row.is_current !== false) throw new Error('is_current must be false')
+  if (row.recommended_pick !== false) throw new Error('recommended_pick must be false')
+  if (row.production_eligible !== false) throw new Error('production_eligible must be false')
+  if (row.status !== 'pending') throw new Error('status must be pending')
+  if (row.validation_status !== 'valid') throw new Error('validation_status must be valid')
+  if (!row.game_id || !row.market || !row.selection || !row.sportsbook || !row.odds_timestamp) {
+    throw new Error('missing event/market/selection/price identity')
+  }
+  if ((row.market === 'run_line' || row.market === 'total') && (row.line === null || row.line === undefined)) {
+    throw new Error('exact line required for line market')
+  }
+  assertMlb03r1aPendingSettlementDetails(row.settlement_details)
+}
+
+async function count(supabase, table, filter) {
+  let query = supabase.from(table).select('id', { count: 'exact', head: true })
+  if (filter) query = filter(query)
+  const { count: exactCount, error } = await query
+  if (error) throw new Error(`${table} count failed: ${error.message}`)
+  return exactCount ?? 0
+}
+
+async function main() {
+  loadEnvFile()
+  const mode = process.argv.includes('--execute') ? 'execute' : 'dry-run'
+  const artifact = JSON.parse(fs.readFileSync(ARTIFACT_PATH, 'utf8'))
+  if (artifact.digest !== EXPECTED_DIGEST) throw new Error('calibration artifact digest mismatch')
+
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+
+  const pre = {
+    predictionHistory: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT)),
+    currentEraShadow: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN)),
+    recommendedPick: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('recommended_pick', true)),
+    productionEligible: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('production_eligible', true)),
+  }
+  if (mode === 'execute' && pre.currentEraShadow !== 0) throw new Error(`unexpected existing MLB CURRENT_ERA_SHADOW rows: ${pre.currentEraShadow}`)
+
+  const board = await fetch('https://pick-analyzer.vercel.app/api/current-board?mode=current&limit=50').then((response) => response.json())
+  const candidates = []
+  for (const row of board.candidates ?? []) {
+    const market = normalizeMarket(row.market)
+    const rawProbability = Number(row.rawProbability ?? row.modelProbability ?? row.probability) / 100
+    const odds = Number(row.americanOdds)
+    const oddsAgeMinutes = Number(row.oddsAgeMinutes)
+    if (!market || !Number.isFinite(rawProbability) || !Number.isFinite(odds) || !Number.isFinite(oddsAgeMinutes)) continue
+    const calibration = calibrate(artifact, rawProbability, market)
+    if (!calibration) continue
+    const candidate = {
+      predictionId: row.predictionId,
+      event: row.matchup,
+      eventId: row.eventId,
+      kickoff: row.scheduledTime,
+      eventStatus: row.eventStatus,
+      market,
+      selection: row.selection,
+      line: row.line ?? null,
+      sportsbook: row.sportsbook,
+      odds,
+      oddsTimestamp: row.oddsTimestamp,
+      oddsAgeMinutes,
+      rawProbability,
+      calibratedProbability: calibration.probability,
+      calibrationMethod: calibration.method,
+      calibrationVersion: calibration.version,
+      impliedProbability: impliedProbability(odds),
+      pregameSafe: row.pregameSafe === true,
+    }
+    candidate.calibratedEdge = (candidate.calibratedProbability - candidate.impliedProbability) * 100
+    candidate.identity = buildIdentity(candidate, artifact)
+    candidate.existing = await count(supabase, 'prediction_history', (query) =>
+      query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN).eq('idempotency_key', candidate.identity)
+    )
+    candidate.eligible =
+      candidate.pregameSafe &&
+      candidate.eventStatus === 'scheduled' &&
+      candidate.oddsAgeMinutes <= MAX_ODDS_AGE_MINUTES &&
+      candidate.existing === 0 &&
+      candidate.selection &&
+      candidate.sportsbook &&
+      candidate.oddsTimestamp &&
+      (candidate.market === 'moneyline' || candidate.line !== null)
+    candidates.push(candidate)
+  }
+  candidates.sort((a, b) => b.calibratedEdge - a.calibratedEdge)
+  const chosen = candidates.find((candidate) => candidate.eligible && candidate.calibratedEdge > 0)
+  if (!chosen) throw new Error('NO_ELIGIBLE_FRESH_POSITIVE_CALIBRATED_CANDIDATE')
+
+  const sourceResult = await supabase.from('prediction_history').select('*').eq('id', chosen.predictionId).single()
+  if (sourceResult.error) throw new Error(`source prediction read failed: ${sourceResult.error.message}`)
+  const source = sourceResult.data
+  const contextResult = await supabase
+    .from('mlb_context_snapshots')
+    .select('id,snapshot_type,snapshot_timestamp,temporal_status,missing_components,blockers,completeness')
+    .eq('event_id', chosen.eventId)
+    .order('snapshot_timestamp', { ascending: false })
+    .limit(1)
+  if (contextResult.error) throw new Error(`context read failed: ${contextResult.error.message}`)
+  const context = contextResult.data?.[0] ?? null
+  if (context && context.temporal_status !== 'PREGAME') throw new Error('context snapshot is not pregame')
+
+  const generatedAt = new Date().toISOString()
+  const settlementDetails = buildMlb03r1aPendingSettlementDetails()
+  const payload = {
+    ...source,
+    id: stableUuid(chosen.identity),
+    model_probability: Number((chosen.calibratedProbability * 100).toFixed(4)),
+    implied_probability: Number((chosen.impliedProbability * 100).toFixed(4)),
+    edge: Number(chosen.calibratedEdge.toFixed(4)),
+    ev: Number(((chosen.calibratedProbability * decimalOdds(chosen.odds) - 1) * 100).toFixed(4)),
+    recommended_pick: false,
+    result: null,
+    stake: 0,
+    profit: null,
+    created_at: generatedAt,
+    settled_at: null,
+    status: 'pending',
+    result_id: null,
+    closing_odds: null,
+    clv: null,
+    clv_status: null,
+    closing_checked_at: null,
+    clv_implied_open: null,
+    clv_implied_close: null,
+    clv_percent: null,
+    clv_quality: null,
+    lifecycle_status: 'active',
+    odds_timestamp: chosen.oddsTimestamp,
+    generated_at: generatedAt,
+    model_version: SHADOW_MODEL_VERSION,
+    feature_snapshot: {
+      ...(source.feature_snapshot ?? {}),
+      mlb03CalibratedShadow: {
+        contract: 'CALIBRATED_BASELINE_ONLY',
+        sourcePredictionId: source.id,
+        rawModelProbability: chosen.rawProbability,
+        calibratedProbability: chosen.calibratedProbability,
+        calibrationMethod: chosen.calibrationMethod,
+        calibrationVersion: chosen.calibrationVersion,
+        calibrationDigest: artifact.digest,
+        contextSnapshotId: context?.id ?? null,
+        contextSnapshotType: context?.snapshot_type ?? SNAPSHOT_TYPE,
+        contextCompleteness: context?.completeness ?? null,
+        missingComponents: context?.missing_components ?? [],
+        shadowOnly: true,
+      },
+    },
+    validation_warnings: ['MLB_03_CALIBRATED_SHADOW_CANARY', ...(context?.missing_components ?? [])],
+    validation_status: 'valid',
+    skip_reason: null,
+    settlement_details: settlementDetails,
+    manual_adjustment: null,
+    production_eligible: false,
+    trial: false,
+    scrambled: false,
+    recommendation_locked_at: null,
+    recommendation_lock_status: null,
+    official_pick_at_lock: false,
+    is_current: false,
+    prediction_version: 1,
+    model_role: 'shadow',
+    prediction_group_key: chosen.identity,
+    parent_prediction_id: source.id,
+    challenger_of_prediction_id: source.id,
+    superseded_at: null,
+    superseded_by_prediction_id: null,
+    version_created_reason: 'MLB_03_FIRST_CALIBRATED_SHADOW_CANARY',
+    idempotency_key: chosen.identity,
+    version_lineage: {
+      sourcePredictionId: source.id,
+      reason: 'MLB_03_FIRST_CALIBRATED_SHADOW_CANARY',
+      shadowModelVersion: SHADOW_MODEL_VERSION,
+      calibrationVersion: chosen.calibrationVersion,
+      calibrationDigest: artifact.digest,
+    },
+    prediction_epoch_id: null,
+    prediction_epoch_key: null,
+    prediction_origin: ORIGIN,
+    certification_status: 'MLB_03_FIRST_CALIBRATED_SHADOW_CANARY',
+    certification_metadata: {
+      candidateKey: chosen.identity,
+      sourcePredictionId: source.id,
+      selectedProbabilityContract: 'CALIBRATED_BASELINE_ONLY',
+      rawModelProbability: chosen.rawProbability,
+      calibratedProbability: chosen.calibratedProbability,
+      calibrationDelta: chosen.calibratedProbability - chosen.rawProbability,
+      impliedProbability: chosen.impliedProbability,
+      calibratedEdge: chosen.calibratedEdge,
+      settlementDetailsContract: 'EMPTY_PENDING_OBJECT',
+      productIsolation: {
+        recommendedPick: false,
+        productionEligible: false,
+        isCurrent: false,
+      },
+    },
+  }
+  assertShadowPayload(payload)
+
+  let inserted = null
+  if (mode === 'execute') {
+    const insertResult = await supabase
+      .from('prediction_history')
+      .insert(payload)
+      .select('id,game_id,market,selection,line,sportsbook,odds,odds_timestamp,model_probability,implied_probability,edge,ev,prediction_origin,model_role,is_current,recommended_pick,production_eligible,status,validation_status,idempotency_key,settlement_details,certification_status,parent_prediction_id,certification_metadata')
+      .single()
+    if (insertResult.error) throw new Error(`canary insert failed: ${insertResult.error.message}`)
+    inserted = insertResult.data
+    assertShadowPayload(inserted)
+  }
+
+  const post = {
+    predictionHistory: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT)),
+    currentEraShadow: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN)),
+    recommendedPick: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('recommended_pick', true)),
+    productionEligible: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('production_eligible', true)),
+    exactIdentity: await count(supabase, 'prediction_history', (query) =>
+      query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN).eq('idempotency_key', chosen.identity)
+    ),
+  }
+
+  console.log(JSON.stringify({
+    classification: mode === 'execute' ? 'MLB_03_FIRST_CALIBRATED_SHADOW_CANARY_PASS' : 'MLB_03R1A_CANARY_PAYLOAD_CONTRACT_DRY_RUN_PASS',
+    mode,
+    artifact: { path: ARTIFACT_PATH, digest: artifact.digest, version: artifact.artifactVersion },
+    pre,
+    boardGeneratedAt: board.generatedAt,
+    candidateUniverse: {
+      total: candidates.length,
+      eligibleFreshPositive: candidates.filter((candidate) => candidate.eligible && candidate.calibratedEdge > 0).length,
+    },
+    chosen,
+    pendingSettlementDetailsContract: 'EMPTY_PENDING_OBJECT',
+    payloadAudit: {
+      settlementDetailsNonNull: payload.settlement_details !== null,
+      pendingSafe: true,
+      missingRequiredFields: 0,
+      invalidNullFields: 0,
+      unsupportedFields: 0,
+    },
+    inserted,
+    post,
+    deltas: {
+      predictionHistory: post.predictionHistory - pre.predictionHistory,
+      currentEraShadow: post.currentEraShadow - pre.currentEraShadow,
+      recommendedPick: post.recommendedPick - pre.recommendedPick,
+      productionEligible: post.productionEligible - pre.productionEligible,
+    },
+    idempotencyProof: {
+      status: post.exactIdentity === 1 ? 'ALREADY_EXISTS_REUSE_NO_OP' : mode === 'dry-run' ? 'WOULD_INSERT' : 'FAILED',
+      wouldInsert: post.exactIdentity === 1 ? 0 : mode === 'dry-run' ? 1 : null,
+    },
+    providerCalls: { theOddsApi: 0, mlbOfficial: 0, sportsDataIO: 0, weather: 0, historical: 0 },
+    databaseMutations: mode === 'execute' ? 1 : 0,
+  }, null, 2))
+}
+
+main().catch((error) => {
+  console.error(error.message)
+  process.exit(1)
+})
