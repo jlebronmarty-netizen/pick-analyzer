@@ -1,0 +1,357 @@
+{
+  "artifactVersion": "mlb_market_empirical_calibration_v1_2026_08_20",
+  "sourceModelVersion": "baseball_mlb_prospective_preview_v1",
+  "shadowModelVersion": "MLB_CALIBRATED_SHADOW_V1",
+  "featureVersion": "mlb_context_shadow_feature_contract_v1",
+  "method": "MARKET_SPECIFIC_EMPIRICAL_BUCKETS_WITH_PLATT_FALLBACK",
+  "createdAt": "2026-08-20T20:25:33.790Z",
+  "provenance": {
+    "sourceCertification": "MLB_02_CALIBRATION_FORENSICS_CERTIFIED",
+    "sourceCommit": "5184775f8ce1cd6d6e714a78453e0c8ef7c83258",
+    "dataSource": "production prediction_history read-only",
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0
+  },
+  "inputContract": [
+    "raw_model_probability",
+    "market",
+    "exact_line",
+    "selection",
+    "prediction_time_odds",
+    "settled_label",
+    "generated_at",
+    "commence_time"
+  ],
+  "temporalSplit": {
+    "train": {
+      "start": "2026-06-21T23:21:00+00:00",
+      "end": "2026-08-06T01:40:00+00:00",
+      "rows": 1352
+    },
+    "validation": {
+      "start": "2026-08-06T01:40:00+00:00",
+      "end": "2026-08-12T18:15:00+00:00",
+      "rows": 451
+    },
+    "holdout": {
+      "start": "2026-08-12T18:15:00+00:00",
+      "end": "2026-08-20T17:10:00+00:00",
+      "rows": 451
+    },
+    "leakageViolations": 0
+  },
+  "markets": {
+    "moneyline": {
+      "market": "moneyline",
+      "method": "EMPIRICAL_BUCKETS_WITH_PLATT_FALLBACK",
+      "minBucketSample": 30,
+      "fallback": {
+        "method": "PLATT_LOGISTIC",
+        "intercept": 0.07850428,
+        "slope": 0.50899933
+      },
+      "buckets": [
+        {
+          "label": "<40%",
+          "min": 0,
+          "max": 0.4,
+          "sample": 437,
+          "rawObservedRate": 0.4256,
+          "value": 0.4295,
+          "supported": true
+        },
+        {
+          "label": "40-45%",
+          "min": 0.4,
+          "max": 0.45,
+          "sample": 139,
+          "rawObservedRate": 0.518,
+          "value": 0.5123,
+          "supported": true
+        },
+        {
+          "label": "45-50%",
+          "min": 0.45,
+          "max": 0.5,
+          "sample": 102,
+          "rawObservedRate": 0.5294,
+          "value": 0.5195,
+          "supported": true
+        },
+        {
+          "label": "50-55%",
+          "min": 0.5,
+          "max": 0.55,
+          "sample": 57,
+          "rawObservedRate": 0.5439,
+          "value": 0.5238,
+          "supported": true
+        },
+        {
+          "label": "55-60%",
+          "min": 0.55,
+          "max": 0.6,
+          "sample": 28,
+          "rawObservedRate": 0.4286,
+          "value": 0.4582,
+          "supported": false
+        },
+        {
+          "label": "60-65%",
+          "min": 0.6,
+          "max": 0.65,
+          "sample": 41,
+          "rawObservedRate": 0.4634,
+          "value": 0.4729,
+          "supported": true
+        },
+        {
+          "label": "65-70%",
+          "min": 0.65,
+          "max": 0.7,
+          "sample": 45,
+          "rawObservedRate": 0.5333,
+          "value": 0.5143,
+          "supported": true
+        },
+        {
+          "label": "70-75%",
+          "min": 0.7,
+          "max": 0.75,
+          "sample": 35,
+          "rawObservedRate": 0.6286,
+          "value": 0.5627,
+          "supported": true
+        },
+        {
+          "label": "75-80%",
+          "min": 0.75,
+          "max": 0.8,
+          "sample": 39,
+          "rawObservedRate": 0.6667,
+          "value": 0.588,
+          "supported": true
+        },
+        {
+          "label": "80%+",
+          "min": 0.8,
+          "max": 1,
+          "sample": 28,
+          "rawObservedRate": 0.5714,
+          "value": 0.5271,
+          "supported": false
+        }
+      ]
+    },
+    "run_line": {
+      "market": "run_line",
+      "method": "EMPIRICAL_BUCKETS_WITH_PLATT_FALLBACK",
+      "minBucketSample": 30,
+      "fallback": {
+        "method": "PLATT_LOGISTIC",
+        "intercept": 0.408625,
+        "slope": 0.93668618
+      },
+      "buckets": [
+        {
+          "label": "<40%",
+          "min": 0,
+          "max": 0.4,
+          "sample": 253,
+          "rawObservedRate": 0.4229,
+          "value": 0.4302,
+          "supported": true
+        },
+        {
+          "label": "40-45%",
+          "min": 0.4,
+          "max": 0.45,
+          "sample": 114,
+          "rawObservedRate": 0.5702,
+          "value": 0.5538,
+          "supported": true
+        },
+        {
+          "label": "45-50%",
+          "min": 0.45,
+          "max": 0.5,
+          "sample": 39,
+          "rawObservedRate": 0.6923,
+          "value": 0.605,
+          "supported": true
+        },
+        {
+          "label": "50-55%",
+          "min": 0.5,
+          "max": 0.55,
+          "sample": 7,
+          "rawObservedRate": 0.5714,
+          "value": 0.5066,
+          "supported": false
+        },
+        {
+          "label": "55-60%",
+          "min": 0.55,
+          "max": 0.6,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        },
+        {
+          "label": "60-65%",
+          "min": 0.6,
+          "max": 0.65,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        },
+        {
+          "label": "65-70%",
+          "min": 0.65,
+          "max": 0.7,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        },
+        {
+          "label": "70-75%",
+          "min": 0.7,
+          "max": 0.75,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        },
+        {
+          "label": "75-80%",
+          "min": 0.75,
+          "max": 0.8,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        },
+        {
+          "label": "80%+",
+          "min": 0.8,
+          "max": 1,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        }
+      ]
+    },
+    "total": {
+      "market": "total",
+      "method": "EMPIRICAL_BUCKETS_WITH_PLATT_FALLBACK",
+      "minBucketSample": 30,
+      "fallback": {
+        "method": "PLATT_LOGISTIC",
+        "intercept": 0.44718559,
+        "slope": 0.66436066
+      },
+      "buckets": [
+        {
+          "label": "<40%",
+          "min": 0,
+          "max": 0.4,
+          "sample": 292,
+          "rawObservedRate": 0.524,
+          "value": 0.524,
+          "supported": true
+        },
+        {
+          "label": "40-45%",
+          "min": 0.4,
+          "max": 0.45,
+          "sample": 124,
+          "rawObservedRate": 0.5242,
+          "value": 0.5241,
+          "supported": true
+        },
+        {
+          "label": "45-50%",
+          "min": 0.45,
+          "max": 0.5,
+          "sample": 18,
+          "rawObservedRate": 0.6111,
+          "value": 0.5566,
+          "supported": false
+        },
+        {
+          "label": "50-55%",
+          "min": 0.5,
+          "max": 0.55,
+          "sample": 5,
+          "rawObservedRate": 0.2,
+          "value": 0.4776,
+          "supported": false
+        },
+        {
+          "label": "55-60%",
+          "min": 0.55,
+          "max": 0.6,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        },
+        {
+          "label": "60-65%",
+          "min": 0.6,
+          "max": 0.65,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        },
+        {
+          "label": "65-70%",
+          "min": 0.65,
+          "max": 0.7,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        },
+        {
+          "label": "70-75%",
+          "min": 0.7,
+          "max": 0.75,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        },
+        {
+          "label": "75-80%",
+          "min": 0.75,
+          "max": 0.8,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        },
+        {
+          "label": "80%+",
+          "min": 0.8,
+          "max": 1,
+          "sample": 0,
+          "rawObservedRate": null,
+          "value": 0.5,
+          "supported": false
+        }
+      ]
+    }
+  },
+  "lineGroupPolicy": {
+    "runLine": "+1.5 and -1.5 differ materially; MLB-03 keeps market-level calibration with exact-line identity preserved and blocks line-group reuse claims until forward sample supports separate maps.",
+    "total": "Totals use separate market calibration; Over/Under probabilities are not cross-assigned.",
+    "moneyline": "Moneyline uses market calibration; favorite/dog or price-band split remains a future refinement."
+  },
+  "digest": "8c8fbf9c5da43ea3933119d39e6c8b1de2b17ee20fa72c5bc2cd65650290c66c"
+}

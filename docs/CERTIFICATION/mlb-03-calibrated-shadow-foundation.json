@@ -1,0 +1,681 @@
+{
+  "classification": "MLB_03_CALIBRATED_SHADOW_CERTIFIED_CONTEXT_FORWARD_ONLY",
+  "generatedAt": "2026-08-20T20:25:34.073Z",
+  "mlb02Commit": "5184775f8ce1cd6d6e714a78453e0c8ef7c83258",
+  "productionBaseCommit": "3119eea0ecebcaf33d2587fd35a3862af501fabe",
+  "providerCallsMade": 0,
+  "productionDatabaseMutations": 0,
+  "productionModelChanged": false,
+  "officialPickChanged": false,
+  "baselinePreservation": {
+    "sourceModelVersion": "baseball_mlb_prospective_preview_v1",
+    "changedCoefficients": false,
+    "changedProbabilities": false,
+    "changedEdgeEvFormula": false,
+    "changedSettlement": false
+  },
+  "calibrationBootstrapCohort": {
+    "totalRows": 2254,
+    "fitRows": 1803,
+    "holdoutRows": 451,
+    "marketCounts": {
+      "moneyline": 1060,
+      "run_line": 547,
+      "total": 647
+    },
+    "temporalLeakage": 0
+  },
+  "artifact": {
+    "path": "artifacts/mlb/mlb-03-market-calibration-v1.json",
+    "digest": "8c8fbf9c5da43ea3933119d39e6c8b1de2b17ee20fa72c5bc2cd65650290c66c",
+    "version": "mlb_market_empirical_calibration_v1_2026_08_20"
+  },
+  "holdoutMetrics": {
+    "moneyline": {
+      "rawBaseline": {
+        "n": 109,
+        "accuracy": 0.5046,
+        "wins": 55,
+        "losses": 54,
+        "brier": 0.2786,
+        "logLoss": 0.7549,
+        "calibrationError": 0.1334,
+        "meanProbability": 0.3712,
+        "actualRate": 0.5046
+      },
+      "calibratedBaseline": {
+        "n": 109,
+        "accuracy": 0.5046,
+        "wins": 55,
+        "losses": 54,
+        "brier": 0.2551,
+        "logLoss": 0.7034,
+        "calibrationError": 0.0491,
+        "meanProbability": 0.4555,
+        "actualRate": 0.5046
+      },
+      "contextEnhanced": {
+        "status": "NOT_SELECTED",
+        "reason": "Historical-safe context is not sufficient to fit legitimate context coefficients beyond calibrated baseline in MLB-03."
+      }
+    },
+    "run_line": {
+      "rawBaseline": {
+        "n": 134,
+        "accuracy": 0.5746,
+        "wins": 77,
+        "losses": 57,
+        "brier": 0.2919,
+        "logLoss": 0.7821,
+        "calibrationError": 0.2019,
+        "meanProbability": 0.3728,
+        "actualRate": 0.5746
+      },
+      "calibratedBaseline": {
+        "n": 134,
+        "accuracy": 0.5746,
+        "wins": 77,
+        "losses": 57,
+        "brier": 0.2605,
+        "logLoss": 0.7144,
+        "calibrationError": 0.096,
+        "meanProbability": 0.4786,
+        "actualRate": 0.5746
+      },
+      "contextEnhanced": {
+        "status": "NOT_SELECTED",
+        "reason": "Historical-safe context is not sufficient to fit legitimate context coefficients beyond calibrated baseline in MLB-03."
+      }
+    },
+    "total": {
+      "rawBaseline": {
+        "n": 208,
+        "accuracy": 0.5144,
+        "wins": 107,
+        "losses": 101,
+        "brier": 0.2765,
+        "logLoss": 0.7495,
+        "calibrationError": 0.1512,
+        "meanProbability": 0.3632,
+        "actualRate": 0.5144
+      },
+      "calibratedBaseline": {
+        "n": 208,
+        "accuracy": 0.5144,
+        "wins": 107,
+        "losses": 101,
+        "brier": 0.2513,
+        "logLoss": 0.6959,
+        "calibrationError": 0.0129,
+        "meanProbability": 0.5273,
+        "actualRate": 0.5144
+      },
+      "contextEnhanced": {
+        "status": "NOT_SELECTED",
+        "reason": "Historical-safe context is not sufficient to fit legitimate context coefficients beyond calibrated baseline in MLB-03."
+      }
+    }
+  },
+  "contextFeatureAudit": {
+    "historicalSafe": [
+      "prediction-time odds",
+      "market",
+      "exact line",
+      "selection",
+      "settled label",
+      "generated_at",
+      "commence_time",
+      "stored prior-game stats only after dedicated temporal proof"
+    ],
+    "forwardOnly": [
+      "MLB-01 projected/confirmed lineup snapshots",
+      "context completeness",
+      "future approved weather",
+      "future approved injuries"
+    ],
+    "excluded": [
+      "retrospective lineup/weather/injury",
+      "post-start same-game stats",
+      "unproven starter identity from outcome-only evidence"
+    ],
+    "starterHistoricalFeatureState": "PARTIAL_REQUIRES_DEDICATED_STARTER_TEMPORAL_AUDIT",
+    "bullpenHistoricalFeatureState": "PARTIAL_REQUIRES_DEDICATED_BULLPEN_TEMPORAL_AUDIT",
+    "lineupFeatureState": "FORWARD_ONLY_PARTIAL",
+    "weatherInjuryFeatureState": "MISSING_INDICATOR_ONLY"
+  },
+  "contextModel": {
+    "trainable": false,
+    "selected": false,
+    "selectedContract": "CALIBRATED_BASELINE_ONLY",
+    "reason": "No historically legitimate context matrix was certified beyond calibration in this phase."
+  },
+  "currentContextSnapshotReadback": [
+    {
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:79207",
+      "snapshotType": "MORNING",
+      "temporalStatus": "PREGAME",
+      "sourceTimestamp": "2026-08-20T20:08:37.889+00:00",
+      "startTime": "2026-08-20T22:35:00+00:00",
+      "missingComponents": [
+        "lineups.home",
+        "lineups.away",
+        "weather",
+        "injuries.home",
+        "injuries.away"
+      ],
+      "blockers": [
+        "LINEUP_PROJECTED_NOT_CONFIRMED",
+        "LINEUP_PLAYER_IDENTITY_UNMAPPED",
+        "WEATHER_CONTEXT_REQUIRES_APPROVED_PROVIDER",
+        "INJURY_CONTEXT_UNAVAILABLE_FROM_APPROVED_SOURCE"
+      ],
+      "completeness": {
+        "completenessRate": 0.4444,
+        "shadowInputReady": true,
+        "missingComponents": [
+          "lineups.home",
+          "lineups.away",
+          "weather",
+          "injuries.home",
+          "injuries.away"
+        ],
+        "requiredComponents": 9,
+        "availableComponents": 4,
+        "predictionPolicyChanged": false,
+        "missingIsUnknownNotFabricated": true
+      },
+      "shadowOnly": true,
+      "productionEligible": false
+    },
+    {
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:79208",
+      "snapshotType": "MORNING",
+      "temporalStatus": "PREGAME",
+      "sourceTimestamp": "2026-08-20T20:08:37.889+00:00",
+      "startTime": "2026-08-21T00:05:00+00:00",
+      "missingComponents": [
+        "lineups.home",
+        "lineups.away",
+        "weather",
+        "injuries.home",
+        "injuries.away"
+      ],
+      "blockers": [
+        "LINEUP_UNAVAILABLE_FROM_APPROVED_SOURCE",
+        "WEATHER_CONTEXT_REQUIRES_APPROVED_PROVIDER",
+        "INJURY_CONTEXT_UNAVAILABLE_FROM_APPROVED_SOURCE"
+      ],
+      "completeness": {
+        "completenessRate": 0.4444,
+        "shadowInputReady": true,
+        "missingComponents": [
+          "lineups.home",
+          "lineups.away",
+          "weather",
+          "injuries.home",
+          "injuries.away"
+        ],
+        "requiredComponents": 9,
+        "availableComponents": 4,
+        "predictionPolicyChanged": false,
+        "missingIsUnknownNotFabricated": true
+      },
+      "shadowOnly": true,
+      "productionEligible": false
+    },
+    {
+      "eventId": "baseball_mlb:mlb:sportsdataio:event:79202",
+      "snapshotType": "MORNING",
+      "temporalStatus": "PREGAME",
+      "sourceTimestamp": "2026-08-20T20:08:37.889+00:00",
+      "startTime": "2026-08-21T00:10:00+00:00",
+      "missingComponents": [
+        "lineups.home",
+        "lineups.away",
+        "weather",
+        "injuries.home",
+        "injuries.away"
+      ],
+      "blockers": [
+        "LINEUP_UNAVAILABLE_FROM_APPROVED_SOURCE",
+        "WEATHER_CONTEXT_REQUIRES_APPROVED_PROVIDER",
+        "INJURY_CONTEXT_UNAVAILABLE_FROM_APPROVED_SOURCE"
+      ],
+      "completeness": {
+        "completenessRate": 0.4444,
+        "shadowInputReady": true,
+        "missingComponents": [
+          "lineups.home",
+          "lineups.away",
+          "weather",
+          "injuries.home",
+          "injuries.away"
+        ],
+        "requiredComponents": 9,
+        "availableComponents": 4,
+        "predictionPolicyChanged": false,
+        "missingIsUnknownNotFabricated": true
+      },
+      "shadowOnly": true,
+      "productionEligible": false
+    }
+  ],
+  "currentDayDryRun": {
+    "rows": 11,
+    "staleOddsPolicy": "NO_PROVIDER_REFRESH; stored rows only; stale/missing price must fail closed in canary",
+    "candidates": [
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79207",
+        "event": "NYY @ BAL",
+        "market": "run_line",
+        "selection": "NYY",
+        "line": -1.5,
+        "sportsbook": "betonlineag",
+        "odds": 154,
+        "rawBaselineProbability": 0.34369999999999995,
+        "calibratedProbability": 0.4302,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.4302,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.3937,
+        "shadowEdge": 3.65,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79207|run_line|nyy|-1.5|betonlineag|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      },
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79207",
+        "event": "NYY @ BAL",
+        "market": "moneyline",
+        "selection": "NYY",
+        "line": null,
+        "sportsbook": "betonlineag",
+        "odds": -105,
+        "rawBaselineProbability": 0.39039999999999997,
+        "calibratedProbability": 0.4295,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.4295,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.5122,
+        "shadowEdge": -8.27,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79207|moneyline|nyy|null|betonlineag|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      },
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79207",
+        "event": "NYY @ BAL",
+        "market": "total",
+        "selection": "Under",
+        "line": 8,
+        "sportsbook": "fanduel",
+        "odds": -112,
+        "rawBaselineProbability": 0.3446,
+        "calibratedProbability": 0.524,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.524,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.5283,
+        "shadowEdge": -0.43,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79207|total|under|8|fanduel|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      },
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79207",
+        "event": "NYY @ BAL",
+        "market": "total",
+        "selection": "Under",
+        "line": 7.5,
+        "sportsbook": "betonlineag",
+        "odds": -108,
+        "rawBaselineProbability": 0.32939999999999997,
+        "calibratedProbability": 0.524,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.524,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.5192,
+        "shadowEdge": 0.48,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79207|total|under|7.5|betonlineag|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      },
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79208",
+        "event": "WSH @ TEX",
+        "market": "total",
+        "selection": "Under",
+        "line": 8,
+        "sportsbook": "bovada",
+        "odds": -120,
+        "rawBaselineProbability": 0.3851,
+        "calibratedProbability": 0.524,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.524,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.5455,
+        "shadowEdge": -2.15,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79208|total|under|8|bovada|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      },
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79208",
+        "event": "WSH @ TEX",
+        "market": "moneyline",
+        "selection": "WSH",
+        "line": null,
+        "sportsbook": "betonlineag",
+        "odds": 159,
+        "rawBaselineProbability": 0.40950000000000003,
+        "calibratedProbability": 0.5123,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.5123,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.3861,
+        "shadowEdge": 12.62,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79208|moneyline|wsh|null|betonlineag|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      },
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79208",
+        "event": "WSH @ TEX",
+        "market": "total",
+        "selection": "Under",
+        "line": 7.5,
+        "sportsbook": "betonlineag",
+        "odds": -117,
+        "rawBaselineProbability": 0.36950000000000005,
+        "calibratedProbability": 0.524,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.524,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.5392,
+        "shadowEdge": -1.52,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79208|total|under|7.5|betonlineag|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      },
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79208",
+        "event": "WSH @ TEX",
+        "market": "run_line",
+        "selection": "WSH",
+        "line": 1.5,
+        "sportsbook": "betonlineag",
+        "odds": -138,
+        "rawBaselineProbability": 0.4535,
+        "calibratedProbability": 0.605,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.605,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.5798,
+        "shadowEdge": 2.52,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79208|run_line|wsh|1.5|betonlineag|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      },
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79202",
+        "event": "LAA @ HOU",
+        "market": "moneyline",
+        "selection": "LAA",
+        "line": null,
+        "sportsbook": "betonlineag",
+        "odds": 162,
+        "rawBaselineProbability": 0.3419,
+        "calibratedProbability": 0.4295,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.4295,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.38170000000000004,
+        "shadowEdge": 4.78,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79202|moneyline|laa|null|betonlineag|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      },
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79202",
+        "event": "LAA @ HOU",
+        "market": "run_line",
+        "selection": "LAA",
+        "line": 1.5,
+        "sportsbook": "betonlineag",
+        "odds": -133,
+        "rawBaselineProbability": 0.3885,
+        "calibratedProbability": 0.4302,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.4302,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.5708,
+        "shadowEdge": -14.06,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79202|run_line|laa|1.5|betonlineag|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      },
+      {
+        "eventId": "baseball_mlb:mlb:sportsdataio:event:79202",
+        "event": "LAA @ HOU",
+        "market": "total",
+        "selection": "Under",
+        "line": 8.5,
+        "sportsbook": "betonlineag",
+        "odds": -115,
+        "rawBaselineProbability": 0.4337,
+        "calibratedProbability": 0.5241,
+        "contextModelProbability": null,
+        "finalShadowProbability": 0.5241,
+        "finalContract": "CALIBRATED_BASELINE_ONLY",
+        "impliedProbability": 0.5349,
+        "shadowEdge": -1.08,
+        "contextCompleteness": {
+          "completenessRate": 0.4444,
+          "shadowInputReady": true,
+          "missingComponents": [
+            "lineups.home",
+            "lineups.away",
+            "weather",
+            "injuries.home",
+            "injuries.away"
+          ],
+          "requiredComponents": 9,
+          "availableComponents": 4,
+          "predictionPolicyChanged": false,
+          "missingIsUnknownNotFabricated": true
+        },
+        "snapshotType": "MORNING",
+        "shadowIdentity": "baseball_mlb|baseball_mlb:mlb:sportsdataio:event:79202|total|under|8.5|betonlineag|CURRENT_ERA_SHADOW|MLB_CALIBRATED_SHADOW_V1|mlb_market_empirical_calibration_v1_2026_08_20|MORNING",
+        "skipReason": null
+      }
+    ]
+  },
+  "shadowContracts": {
+    "predictionOrigin": "CURRENT_ERA_SHADOW",
+    "modelRole": "shadow",
+    "isCurrent": false,
+    "recommendedPick": false,
+    "productionEligible": false,
+    "productVisible": false,
+    "writeRuntimeReady": false,
+    "firstWriteRequiresExplicitAuthorization": true,
+    "settlementDesign": "event + market + selection + exact line + sportsbook identity is sufficient for future settlement; settlement not activated.",
+    "morningFinalPregame": "MORNING and FINAL_PREGAME identities are separate and immutable.",
+    "whyProbabilityChanged": [
+      "raw baseline",
+      "calibration delta",
+      "context-model delta when certified",
+      "snapshot change",
+      "starter change",
+      "lineup change",
+      "bullpen change",
+      "market line change"
+    ]
+  },
+  "readiness": {
+    "MARKET_CALIBRATION_ARTIFACT_READY": "YES",
+    "CALIBRATION_RUNTIME_READY": "YES",
+    "CALIBRATION_RUNTIME_PARITY": "YES",
+    "HISTORICAL_SAFE_CONTEXT_READY": "PARTIAL",
+    "FORWARD_CONTEXT_CAPTURE_READY": "YES",
+    "CONTEXT_MODEL_TRAINABLE": "NO",
+    "CONTEXT_MODEL_SELECTED": "NO",
+    "CALIBRATED_SHADOW_RUNTIME_READY": "YES",
+    "CONTEXT_ENHANCED_SHADOW_RUNTIME_READY": "NO",
+    "SHADOW_WRITE_RUNTIME_READY": "NO",
+    "PRODUCTION_MODEL_CHANGED": "NO",
+    "OFFICIAL_PICK_CHANGED": "NO",
+    "MLB_04_NRFI_FOUNDATION_READY": "PARTIAL",
+    "MLB_05_PITCHER_PROP_FOUNDATION_READY": "PARTIAL"
+  }
+}
