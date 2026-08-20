@@ -36,13 +36,26 @@ function buildSelectedPriceEvidence(candidate) {
   }
 }
 
+function safeSourcePredictionFields(source) {
+  return {
+    sport_key: source.sport_key,
+    game_id: source.game_id,
+    commence_time: source.commence_time,
+    home_team: source.home_team,
+    away_team: source.away_team,
+    opponent: source.opponent,
+    confidence: source.confidence,
+  }
+}
+
 function buildPayload(source, candidate) {
   const priceEvidence = buildSelectedPriceEvidence(candidate)
   const identity = buildIdentity(priceEvidence)
   return {
-    ...source,
+    ...safeSourcePredictionFields(source),
     market: priceEvidence.market,
     selection: priceEvidence.selection,
+    team: priceEvidence.selection,
     line: priceEvidence.line,
     sportsbook: priceEvidence.sportsbook,
     odds: priceEvidence.odds,
@@ -52,6 +65,7 @@ function buildPayload(source, candidate) {
     prediction_group_key: identity,
     certification_status: 'SHADOW_PENDING',
     certification_metadata: {
+      sourcePredictionId: source.id,
       selectedPriceEvidence: priceEvidence,
     },
   }
@@ -62,6 +76,9 @@ function check(name, pass) {
 }
 
 const sourceLowVig = {
+  id: 'ab11fa9b-7d92-5816-972e-e1186756393b',
+  sport_key: 'baseball_mlb',
+  game_id: 'baseball_mlb:mlb:sportsdataio:event:79208',
   sportsbook: 'lowvig',
   odds: 159,
   odds_timestamp: '2026-08-20T21:27:35.000Z',

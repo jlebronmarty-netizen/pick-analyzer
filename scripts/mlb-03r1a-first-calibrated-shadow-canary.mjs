@@ -37,17 +37,6 @@ function stableText(value) {
   return String(value ?? 'null').trim().toLowerCase().replace(/\s+/g, '_')
 }
 
-function stableUuid(input) {
-  const hex = crypto.createHash('sha256').update(input).digest('hex')
-  return [
-    hex.slice(0, 8),
-    hex.slice(8, 12),
-    `4${hex.slice(13, 16)}`,
-    `${((parseInt(hex.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, '0')}${hex.slice(18, 20)}`,
-    hex.slice(20, 32),
-  ].join('-')
-}
-
 function sameInstant(left, right) {
   return new Date(String(left ?? '')).getTime() === new Date(String(right ?? '')).getTime()
 }
@@ -196,6 +185,41 @@ function assertPriceEvidenceBinding(row, priceEvidence) {
   if (Number(metadataPrice.odds) !== Number(priceEvidence.odds)) throw new Error('metadata odds must match selected price evidence')
 }
 
+function safeSourcePredictionFields(source) {
+  return {
+    sport_key: source.sport_key,
+    game_id: source.game_id,
+    commence_time: source.commence_time,
+    home_team: source.home_team,
+    away_team: source.away_team,
+    opponent: source.opponent,
+    confidence: source.confidence,
+    stake: 0,
+    lifecycle_status: 'active',
+    projected_line: source.projected_line,
+    cutoff_at: source.cutoff_at,
+    feature_snapshot_id: source.feature_snapshot_id,
+    feature_snapshot_key: source.feature_snapshot_key,
+    feature_set_version: source.feature_set_version,
+    feature_snapshot_generated_at: source.feature_snapshot_generated_at,
+    odds_snapshot_id: source.odds_snapshot_id,
+    operating_day_id: source.operating_day_id ?? null,
+  }
+}
+
+function assertPhysicalIdentityIsolation(payload, source) {
+  if (!payload.id) throw new Error('new shadow row must have an explicit fresh physical id')
+  if (payload.id === source.id) throw new Error('new shadow row must not reuse source prediction id')
+  if (payload.result_id !== null) throw new Error('new pending shadow row must not inherit result_id')
+  if (payload.result !== null) throw new Error('new pending shadow row must not inherit result')
+  if (payload.settled_at !== null) throw new Error('new pending shadow row must not inherit settled_at')
+  if (payload.profit !== null) throw new Error('new pending shadow row must not inherit profit')
+  if (payload.parent_prediction_id !== source.id) throw new Error('source prediction lineage must be explicit parent_prediction_id')
+  if (payload.challenger_of_prediction_id !== source.id) throw new Error('source prediction lineage must be explicit challenger_of_prediction_id')
+  if (payload.version_lineage?.sourcePredictionId !== source.id) throw new Error('source prediction lineage missing from version_lineage')
+  if (payload.certification_metadata?.sourcePredictionId !== source.id) throw new Error('source prediction lineage missing from certification_metadata')
+}
+
 function assertShadowPayload(row, priceEvidence) {
   if (row.prediction_origin !== ORIGIN) throw new Error('wrong prediction_origin')
   if (row.model_role !== 'shadow') throw new Error('wrong model_role')
@@ -318,10 +342,11 @@ async function main() {
   const manualAdjustment = buildMlb03r1bPendingManualAdjustment()
   const priceEvidence = buildSelectedPriceEvidence(chosen)
   const payload = {
-    ...source,
-    id: stableUuid(chosen.identity),
+    ...safeSourcePredictionFields(source),
+    id: crypto.randomUUID(),
     market: priceEvidence.market,
     selection: priceEvidence.selection,
+    team: priceEvidence.selection,
     line: priceEvidence.line,
     sportsbook: priceEvidence.sportsbook,
     odds: priceEvidence.odds,
@@ -399,7 +424,7 @@ async function main() {
     prediction_origin: ORIGIN,
     certification_status: PENDING_SHADOW_CERTIFICATION_STATUS,
     certification_metadata: {
-      phase: 'MLB-03R1C',
+      phase: 'MLB-03R1E-R1',
       phaseClassification: 'MLB_03_FIRST_CALIBRATED_SHADOW_CANARY',
       candidateKey: chosen.identity,
       sourcePredictionId: source.id,
@@ -425,6 +450,7 @@ async function main() {
       },
     },
   }
+  assertPhysicalIdentityIsolation(payload, source)
   assertShadowPayload(payload, priceEvidence)
 
   let inserted = null
@@ -450,8 +476,9 @@ async function main() {
     ),
     recommendedPick: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('recommended_pick', true)),
     productionEligible: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('production_eligible', true)),
-    exactIdentity: await count(supabase, 'prediction_history', (query) =>
+    activeExactIdentity: await count(supabase, 'prediction_history', (query) =>
       query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN).eq('idempotency_key', chosen.identity)
+        .neq('certification_status', 'QUARANTINED')
     ),
   }
 
@@ -488,6 +515,14 @@ async function main() {
         identitySportsbook: String(payload.idempotency_key).includes(`|${stableText(priceEvidence.sportsbook)}|`),
         metadataSportsbook: payload.certification_metadata.selectedPriceEvidence.sportsbook === priceEvidence.sportsbook,
       },
+      physicalIdentity: {
+        sourcePredictionId: source.id,
+        newPayloadId: payload.id,
+        sourcePrimaryKeyReused: payload.id === source.id,
+        sourceResultIdLeaked: payload.result_id !== null,
+        sourceOutcomeLeaked: payload.result !== null || payload.settled_at !== null || payload.profit !== null,
+        lineageMetadataPreserved: payload.certification_metadata.sourcePredictionId === source.id,
+      },
       pendingOutcomeEvidence: {
         result: payload.result,
         settledAt: payload.settled_at,
@@ -509,8 +544,8 @@ async function main() {
       productionEligible: post.productionEligible - pre.productionEligible,
     },
     idempotencyProof: {
-      status: post.exactIdentity === 1 ? 'ALREADY_EXISTS_REUSE_NO_OP' : mode === 'dry-run' ? 'WOULD_INSERT' : 'FAILED',
-      wouldInsert: post.exactIdentity === 1 ? 0 : mode === 'dry-run' ? 1 : null,
+      status: post.activeExactIdentity === 1 ? 'ALREADY_EXISTS_REUSE_NO_OP' : mode === 'dry-run' ? 'WOULD_INSERT' : 'FAILED',
+      wouldInsert: post.activeExactIdentity === 1 ? 0 : mode === 'dry-run' ? 1 : null,
     },
     providerCalls: { theOddsApi: 0, mlbOfficial: 0, sportsDataIO: 0, weather: 0, historical: 0 },
     databaseMutations: mode === 'execute' ? 1 : 0,
