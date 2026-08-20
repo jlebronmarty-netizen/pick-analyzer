@@ -1,7 +1,7 @@
 {
   "phase": "MLB-01",
   "name": "Context Lineage and Model Input Recovery",
-  "classification": "MLB_01R2_CONTEXT_SOURCE_REPAIR_BLOCKED",
+  "classification": "MLB_01_CONTEXT_SNAPSHOT_EVENT_ID_TYPE_REPAIR_CERTIFIED",
   "expectedProductionCommit": "4fe4c15c954caabb5918a125a40aed3aef683d1e",
   "providerAuthority": {
     "mlbOfficial": "primary official/baseball data source",
@@ -46,6 +46,16 @@
   },
   "snapshotContract": {
     "table": "mlb_context_snapshots",
+    "schemaRepair": {
+      "productionSportEventsIdType": "text",
+      "contextSnapshotEventIdType": "text",
+      "fkTypeCompatible": true,
+      "productionTableExists": false,
+      "productionMigrationApplied": false,
+      "manualMigrationReady": true,
+      "representativeEventId": "baseball_mlb:mlb:sportsdataio:event:79715",
+      "eventIdUuidCoercion": 0
+    },
     "snapshotTypes": ["MORNING", "FINAL_PREGAME", "CURRENT_PROBE"],
     "shadowOnly": true,
     "productionEligible": false,
@@ -67,10 +77,12 @@
     "r2EligibleSubsetPersistenceDesign": true,
     "r2LineupLiveFeedBounded": true,
     "r2ProductionPersistenceBlocked": true,
-    "r2ProductionPersistenceBlocker": "PGRST205 public.mlb_context_snapshots not visible through Supabase/PostgREST row/column reads"
+    "r2ProductionPersistenceBlocker": "public.mlb_context_snapshots table not created in production before R2A; original unapplied migration used incompatible uuid event_id",
+    "r2aEventIdTypeRepairCertified": true
   },
   "remainingBlockers": [
-    "MLB_CONTEXT_SNAPSHOTS_REST_VISIBILITY_BLOCKED",
+    "MLB_CONTEXT_SNAPSHOTS_TABLE_NOT_CREATED",
+    "MLB_CONTEXT_SNAPSHOTS_MANUAL_MIGRATION_APPLICATION_REQUIRED",
     "WEATHER_CONTEXT_REQUIRES_APPROVED_PROVIDER",
     "INJURY_CONTEXT_REQUIRES_APPROVED_OR_STORED_CURRENT_SOURCE",
     "CONFIRMED_LINEUP_PROVIDER_NOT_CERTIFIED"

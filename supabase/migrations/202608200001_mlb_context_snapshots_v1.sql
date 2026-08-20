@@ -3,7 +3,7 @@ create table if not exists public.mlb_context_snapshots (
   deterministic_key text not null unique,
   sport_key text not null default 'baseball_mlb',
   league_key text not null default 'mlb',
-  event_id uuid not null references public.sport_events(id) on delete cascade,
+  event_id text not null references public.sport_events(id) on delete cascade,
   snapshot_type text not null check (snapshot_type in ('MORNING', 'FINAL_PREGAME', 'CURRENT_PROBE')),
   snapshot_timestamp timestamptz not null,
   target_event_start_time timestamptz not null,

@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-20 MLB-01R2A Context Snapshot Event ID Type Repair
+
+- MLB-01R2A is locally certified as `MLB_01_CONTEXT_SNAPSHOT_EVENT_ID_TYPE_REPAIR_CERTIFIED`. Manual production SQL proved `public.sport_events.id` is `text` and `public.mlb_context_snapshots` does not yet exist, so the previous blocker is refined to `MLB_CONTEXT_SNAPSHOTS_TABLE_NOT_CREATED` plus `MLB_CONTEXT_SNAPSHOTS_EVENT_ID_TYPE_DEFECT`.
+- The unapplied migration `supabase/migrations/202608200001_mlb_context_snapshots_v1.sql` now declares `event_id text not null references public.sport_events(id) on delete cascade` while preserving the UUID surrogate row ID, deterministic key uniqueness, JSONB lineage fields, indexes, RLS and service-role-only policy. Representative production MLB event IDs are canonical text strings such as `baseball_mlb:mlb:sportsdataio:event:79715`; UUID coercion remains 0.
+- No providers were called and no production DB mutations were made. The corrected migration is ready for manual Supabase SQL Editor application before publishing R2 and rerunning persistence/readback/idempotency proof.
+
 ## 2026-08-20 MLB-01R2 Context Source Repair
 
 - MLB-01R2 is locally implemented but production certification is blocked as `MLB_01R2_CONTEXT_SOURCE_REPAIR_BLOCKED`. The repair adds row-by-row persistence decisions (`PERSIST_ELIGIBLE`, post-start/final/cancelled/unmapped/identity/timestamp/other skips), insert-only deterministic snapshot writes and bounded MLB Official live-feed lineup acquisition.

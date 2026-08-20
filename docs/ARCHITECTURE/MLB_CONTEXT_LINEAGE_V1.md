@@ -14,7 +14,7 @@ MLB-01 adds a pregame context lineage surface for current and forward MLB events
 
 ## Snapshot Contract
 
-`mlb_context_snapshots` stores deterministic, shadow-only context snapshots keyed by event, snapshot type and event start time.
+`mlb_context_snapshots` stores deterministic, shadow-only context snapshots keyed by event, snapshot type and event start time. The row `id` is a UUID surrogate key, but `event_id` is canonical text and references `public.sport_events(id)`.
 
 MLB-01R2 evaluates every row independently before persistence. A stale, post-start, final, cancelled or unmapped event is skipped with an explicit decision instead of blocking safe current-forward rows. The write path pre-reads deterministic keys and inserts only new eligible snapshots; it does not use broad upsert semantics that could overwrite earlier context evidence.
 
@@ -49,4 +49,4 @@ MLB-01 snapshots are `shadow_only=true` and `production_eligible=false`. Persist
 
 ## Certification Result
 
-The R2 runtime path is ready to skip unsafe rows independently and to acquire bounded MLB Official lineup evidence without SportsDataIO. Production snapshot persistence remains blocked until `public.mlb_context_snapshots` is visible through the Supabase/PostgREST schema cache.
+The R2 runtime path is ready to skip unsafe rows independently and to acquire bounded MLB Official lineup evidence without SportsDataIO. R2A repaired the unapplied migration so `event_id text` matches the verified production `public.sport_events.id` contract. Production snapshot persistence remains blocked until the corrected migration is manually applied.

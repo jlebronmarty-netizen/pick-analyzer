@@ -20,12 +20,18 @@ const route = read(files.route)
 const migration = read(files.migration)
 const architecture = read(files.architecture)
 const certificationRaw = read(files.certification)
+const baseSportsMigration = read('supabase/migrations/202607110001_nba_data_sync_v1.sql')
 
 const checks = [
   ['service exists', service.length > 0],
   ['route exists', route.length > 0],
   ['script exists', read(files.script).length > 0],
   ['migration creates mlb_context_snapshots', migration.includes('create table if not exists public.mlb_context_snapshots')],
+  ['base sport_events id is text', /create table if not exists sport_events\s*\([\s\S]*?\bid text primary key/i.test(baseSportsMigration)],
+  ['context snapshot event_id is text FK', migration.includes('event_id text not null references public.sport_events(id) on delete cascade')],
+  ['context snapshot event_id is not uuid', !migration.includes('event_id uuid not null references public.sport_events(id)')],
+  ['runtime keeps event ids as strings', service.includes('event_id: string') && service.includes('event_id: event.id')],
+  ['no event id uuid coercion in context service', !/event_id[\s\S]{0,80}(uuid|parseUuid|UUID)/i.test(service)],
   ['snapshot table is shadow only', migration.includes('production_eligible boolean not null default false') && migration.includes('shadow_only boolean not null default true')],
   ['SportsDataIO excluded in authority contract', service.includes('ROLLBACK_ONLY_EXCLUDED_FROM_MLB_01')],
   ['The Odds API not called by service', !service.includes('the-odds') && !service.includes('THE_ODDS_API_KEY')],
