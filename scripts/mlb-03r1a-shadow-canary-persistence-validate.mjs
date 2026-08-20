@@ -22,6 +22,14 @@ check('arbitrary MLB phase not stored as status', !script.includes("certificatio
 check('phase classification preserved in metadata', script.includes("phase: 'MLB-03R1C'") && script.includes("phaseClassification: 'MLB_03_FIRST_CALIBRATED_SHADOW_CANARY'"))
 check('certification status migration allows pending shadow', /certification_status[\s\S]+SHADOW_PENDING/.test(statusMigration))
 check('certification status migration rejects arbitrary values', statusMigration.includes('invalid certification_status value'))
+check('selected price evidence builder exists', script.includes('function buildSelectedPriceEvidence(candidate)'))
+check('payload sportsbook is overridden from selected price evidence', script.includes('sportsbook: priceEvidence.sportsbook'))
+check('payload odds are overridden from selected price evidence', script.includes('odds: priceEvidence.odds'))
+check('payload odds timestamp is overridden from selected price evidence', script.includes('odds_timestamp: priceEvidence.oddsTimestamp'))
+check('payload implied probability derives from selected price evidence', script.includes('implied_probability: priceEvidence.impliedProbabilityPercent'))
+check('price binding assertion exists', script.includes('function assertPriceEvidenceBinding(row, priceEvidence)'))
+check('readback includes asserted fields', script.includes('result_id,profit') && script.includes('prediction_group_key'))
+check('quarantined shadow rows excluded from future active duplicate block', script.includes(".neq('certification_status', 'QUARANTINED')"))
 check('pending result remains null', script.includes('result: null') && script.includes('pending shadow row must not contain a result label'))
 check('pending settled_at remains null', script.includes('settled_at: null') && script.includes('pending shadow row must not contain settled_at'))
 check('pending result_id remains null', script.includes('result_id: null') && script.includes('pending shadow row must not contain result_id'))
@@ -40,8 +48,8 @@ check('provider accounting zero', script.includes('theOddsApi: 0') && script.inc
 
 console.log(JSON.stringify({
   success: true,
-  mode: 'mlb_03r1c_full_pending_shadow_contract_validator_v1',
-  checks: 30,
+  mode: 'mlb_03r1d_full_pending_shadow_contract_validator_v1',
+  checks: 38,
   requiredPendingContracts: {
     settlement_details: 'non-null empty pending object',
     manual_adjustment: 'boolean false, no manual override',

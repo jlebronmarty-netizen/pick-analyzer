@@ -48,6 +48,10 @@ function stableUuid(input) {
   ].join('-')
 }
 
+function sameInstant(left, right) {
+  return new Date(String(left ?? '')).getTime() === new Date(String(right ?? '')).getTime()
+}
+
 function clampProbability(value) {
   return Math.min(0.99, Math.max(0.01, value))
 }
@@ -79,6 +83,10 @@ function decimalOdds(odds) {
   return odds > 0 ? 1 + odds / 100 : 1 + 100 / Math.abs(odds)
 }
 
+function roundPercent(value, digits = 4) {
+  return Number((value * 100).toFixed(digits))
+}
+
 function calibrate(artifact, rawProbability, market) {
   const map = artifact.markets[market]
   if (!map) return null
@@ -91,6 +99,21 @@ function calibrate(artifact, rawProbability, market) {
     probability: clampProbability(calibrated),
     method: bucket && bucket.sample >= map.minBucketSample ? map.method : map.fallback.method,
     version: artifact.artifactVersion,
+  }
+}
+
+function buildSelectedPriceEvidence(candidate) {
+  const implied = impliedProbability(candidate.odds)
+  return {
+    eventId: candidate.eventId,
+    market: candidate.market,
+    selection: candidate.selection,
+    line: candidate.line ?? null,
+    sportsbook: candidate.sportsbook,
+    odds: candidate.odds,
+    oddsTimestamp: candidate.oddsTimestamp,
+    impliedProbability: implied,
+    impliedProbabilityPercent: roundPercent(implied),
   }
 }
 
@@ -136,14 +159,14 @@ function assertCertificationStatus(value) {
   }
 }
 
-function buildIdentity(candidate, artifact) {
+function buildIdentity(priceEvidence, artifact) {
   return [
     SPORT,
-    candidate.eventId,
-    candidate.market,
-    stableText(candidate.selection),
-    candidate.line ?? 'null',
-    stableText(candidate.sportsbook),
+    priceEvidence.eventId,
+    priceEvidence.market,
+    stableText(priceEvidence.selection),
+    priceEvidence.line ?? 'null',
+    stableText(priceEvidence.sportsbook),
     ORIGIN,
     artifact.shadowModelVersion,
     artifact.artifactVersion,
@@ -151,7 +174,29 @@ function buildIdentity(candidate, artifact) {
   ].join('|')
 }
 
-function assertShadowPayload(row) {
+function assertPriceEvidenceBinding(row, priceEvidence) {
+  if (row.sportsbook !== priceEvidence.sportsbook) throw new Error('payload sportsbook must match selected price evidence')
+  if (Number(row.odds) !== Number(priceEvidence.odds)) throw new Error('payload odds must match selected price evidence')
+  if (!sameInstant(row.odds_timestamp, priceEvidence.oddsTimestamp)) throw new Error('payload odds_timestamp must match selected price evidence')
+  if (row.market !== priceEvidence.market) throw new Error('payload market must match selected price evidence')
+  if (row.selection !== priceEvidence.selection) throw new Error('payload selection must match selected price evidence')
+  if ((row.line ?? null) !== (priceEvidence.line ?? null)) throw new Error('payload line must match selected price evidence')
+  if (Number(row.implied_probability) !== Number(priceEvidence.impliedProbabilityPercent)) {
+    throw new Error('payload implied_probability must derive from selected price evidence')
+  }
+  if (!String(row.idempotency_key ?? '').includes(`|${stableText(priceEvidence.sportsbook)}|`)) {
+    throw new Error('idempotency key sportsbook must match selected price evidence')
+  }
+  if (!String(row.prediction_group_key ?? '').includes(`|${stableText(priceEvidence.sportsbook)}|`)) {
+    throw new Error('prediction group key sportsbook must match selected price evidence')
+  }
+  const metadata = row.certification_metadata ?? {}
+  const metadataPrice = metadata.selectedPriceEvidence ?? {}
+  if (metadataPrice.sportsbook !== priceEvidence.sportsbook) throw new Error('metadata sportsbook must match selected price evidence')
+  if (Number(metadataPrice.odds) !== Number(priceEvidence.odds)) throw new Error('metadata odds must match selected price evidence')
+}
+
+function assertShadowPayload(row, priceEvidence) {
   if (row.prediction_origin !== ORIGIN) throw new Error('wrong prediction_origin')
   if (row.model_role !== 'shadow') throw new Error('wrong model_role')
   if (row.is_current !== false) throw new Error('is_current must be false')
@@ -169,6 +214,7 @@ function assertShadowPayload(row) {
   assertMlb03r1bPendingManualAdjustment(row.manual_adjustment)
   assertCertificationStatus(row.certification_status)
   assertNoPendingOutcomeEvidence(row)
+  assertPriceEvidenceBinding(row, priceEvidence)
 }
 
 async function count(supabase, table, filter) {
@@ -192,10 +238,15 @@ async function main() {
   const pre = {
     predictionHistory: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT)),
     currentEraShadow: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN)),
+    activeValidCurrentEraShadow: await count(supabase, 'prediction_history', (query) =>
+      query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN).neq('certification_status', 'QUARANTINED')
+    ),
     recommendedPick: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('recommended_pick', true)),
     productionEligible: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('production_eligible', true)),
   }
-  if (mode === 'execute' && pre.currentEraShadow !== 0) throw new Error(`unexpected existing MLB CURRENT_ERA_SHADOW rows: ${pre.currentEraShadow}`)
+  if (mode === 'execute' && pre.activeValidCurrentEraShadow !== 0) {
+    throw new Error(`unexpected existing active MLB CURRENT_ERA_SHADOW rows: ${pre.activeValidCurrentEraShadow}`)
+  }
 
   const board = await fetch('https://pick-analyzer.vercel.app/api/current-board?mode=current&limit=50').then((response) => response.json())
   const candidates = []
@@ -228,9 +279,11 @@ async function main() {
       pregameSafe: row.pregameSafe === true,
     }
     candidate.calibratedEdge = (candidate.calibratedProbability - candidate.impliedProbability) * 100
-    candidate.identity = buildIdentity(candidate, artifact)
+    const priceEvidence = buildSelectedPriceEvidence(candidate)
+    candidate.identity = buildIdentity(priceEvidence, artifact)
     candidate.existing = await count(supabase, 'prediction_history', (query) =>
       query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN).eq('idempotency_key', candidate.identity)
+        .neq('certification_status', 'QUARANTINED')
     )
     candidate.eligible =
       candidate.pregameSafe &&
@@ -263,11 +316,17 @@ async function main() {
   const generatedAt = new Date().toISOString()
   const settlementDetails = buildMlb03r1aPendingSettlementDetails()
   const manualAdjustment = buildMlb03r1bPendingManualAdjustment()
+  const priceEvidence = buildSelectedPriceEvidence(chosen)
   const payload = {
     ...source,
     id: stableUuid(chosen.identity),
+    market: priceEvidence.market,
+    selection: priceEvidence.selection,
+    line: priceEvidence.line,
+    sportsbook: priceEvidence.sportsbook,
+    odds: priceEvidence.odds,
     model_probability: Number((chosen.calibratedProbability * 100).toFixed(4)),
-    implied_probability: Number((chosen.impliedProbability * 100).toFixed(4)),
+    implied_probability: priceEvidence.impliedProbabilityPercent,
     edge: Number(chosen.calibratedEdge.toFixed(4)),
     ev: Number(((chosen.calibratedProbability * decimalOdds(chosen.odds) - 1) * 100).toFixed(4)),
     recommended_pick: false,
@@ -287,7 +346,7 @@ async function main() {
     clv_percent: null,
     clv_quality: null,
     lifecycle_status: 'active',
-    odds_timestamp: chosen.oddsTimestamp,
+    odds_timestamp: priceEvidence.oddsTimestamp,
     generated_at: generatedAt,
     model_version: SHADOW_MODEL_VERSION,
     feature_snapshot: {
@@ -350,6 +409,7 @@ async function main() {
       rawModelProbability: chosen.rawProbability,
       calibratedProbability: chosen.calibratedProbability,
       calibrationDelta: chosen.calibratedProbability - chosen.rawProbability,
+      selectedPriceEvidence: priceEvidence,
       calibrationVersion: chosen.calibrationVersion,
       calibrationDigest: artifact.digest,
       contextSnapshotId: context?.id ?? null,
@@ -365,23 +425,29 @@ async function main() {
       },
     },
   }
-  assertShadowPayload(payload)
+  assertShadowPayload(payload, priceEvidence)
 
   let inserted = null
   if (mode === 'execute') {
     const insertResult = await supabase
       .from('prediction_history')
       .insert(payload)
-      .select('id,game_id,market,selection,line,sportsbook,odds,odds_timestamp,model_probability,implied_probability,edge,ev,prediction_origin,model_role,is_current,recommended_pick,production_eligible,status,result,settled_at,manual_adjustment,validation_status,idempotency_key,settlement_details,certification_status,parent_prediction_id,certification_metadata')
+      .select('id,game_id,market,selection,line,sportsbook,odds,odds_timestamp,model_probability,implied_probability,edge,ev,prediction_origin,model_role,is_current,recommended_pick,production_eligible,status,result,settled_at,result_id,profit,manual_adjustment,validation_status,idempotency_key,prediction_group_key,settlement_details,certification_status,parent_prediction_id,certification_metadata')
       .single()
     if (insertResult.error) throw new Error(`canary insert failed: ${insertResult.error.message}`)
     inserted = insertResult.data
-    assertShadowPayload(inserted)
+    assertShadowPayload(inserted, priceEvidence)
   }
 
   const post = {
     predictionHistory: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT)),
     currentEraShadow: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN)),
+    activeValidCurrentEraShadow: await count(supabase, 'prediction_history', (query) =>
+      query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN).neq('certification_status', 'QUARANTINED')
+    ),
+    quarantinedCurrentEraShadow: await count(supabase, 'prediction_history', (query) =>
+      query.eq('sport_key', SPORT).eq('prediction_origin', ORIGIN).eq('certification_status', 'QUARANTINED')
+    ),
     recommendedPick: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('recommended_pick', true)),
     productionEligible: await count(supabase, 'prediction_history', (query) => query.eq('sport_key', SPORT).eq('production_eligible', true)),
     exactIdentity: await count(supabase, 'prediction_history', (query) =>
@@ -407,12 +473,21 @@ async function main() {
     },
     pendingSettlementDetailsContract: 'EMPTY_PENDING_OBJECT',
     pendingManualAdjustmentContract: 'BOOLEAN_FALSE_PENDING_NO_OVERRIDE',
+    selectedPriceEvidence: priceEvidence,
     payloadAudit: {
       settlementDetailsNonNull: payload.settlement_details !== null,
       manualAdjustmentNonNull: payload.manual_adjustment !== null,
       manualAdjustmentPendingSafe: payload.manual_adjustment === false,
       certificationStatusAllowed: CERTIFICATION_STATUS_ALLOWED_VALUES.has(payload.certification_status),
       certificationStatusPendingSafe: payload.certification_status === PENDING_SHADOW_CERTIFICATION_STATUS,
+      priceEvidenceBinding: {
+        sportsbook: payload.sportsbook === priceEvidence.sportsbook,
+        odds: Number(payload.odds) === Number(priceEvidence.odds),
+        oddsTimestamp: payload.odds_timestamp === priceEvidence.oddsTimestamp,
+        impliedProbability: Number(payload.implied_probability) === Number(priceEvidence.impliedProbabilityPercent),
+        identitySportsbook: String(payload.idempotency_key).includes(`|${stableText(priceEvidence.sportsbook)}|`),
+        metadataSportsbook: payload.certification_metadata.selectedPriceEvidence.sportsbook === priceEvidence.sportsbook,
+      },
       pendingOutcomeEvidence: {
         result: payload.result,
         settledAt: payload.settled_at,
@@ -429,6 +504,7 @@ async function main() {
     deltas: {
       predictionHistory: post.predictionHistory - pre.predictionHistory,
       currentEraShadow: post.currentEraShadow - pre.currentEraShadow,
+      activeValidCurrentEraShadow: post.activeValidCurrentEraShadow - pre.activeValidCurrentEraShadow,
       recommendedPick: post.recommendedPick - pre.recommendedPick,
       productionEligible: post.productionEligible - pre.productionEligible,
     },
