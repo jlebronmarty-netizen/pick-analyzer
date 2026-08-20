@@ -3,7 +3,13 @@ import 'server-only'
 import { createHash } from 'node:crypto'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { puertoRicoUtcRange } from '@/services/active-event.service'
-import { fetchMlbOfficialSchedule, type MlbOfficialScheduleGame } from '@/services/mlb-official-data-provider.service'
+import {
+  fetchMlbOfficialLiveFeedLineups,
+  fetchMlbOfficialSchedule,
+  type MlbOfficialLineupPlayer,
+  type MlbOfficialLiveFeedLineups,
+  type MlbOfficialScheduleGame,
+} from '@/services/mlb-official-data-provider.service'
 
 const SPORT_KEY = 'baseball_mlb'
 const LEAGUE_KEY = 'mlb'
@@ -96,6 +102,7 @@ export type MlbContextLineageOptions = {
   eventId?: string | null
   snapshotType?: MlbContextSnapshotType | null
   allowProviderCalls?: boolean
+  lineupProbeLimit?: number | null
   persist?: boolean
 }
 
@@ -120,6 +127,16 @@ type Snapshot = {
   production_eligible: false
   shadow_only: true
 }
+
+type PersistenceDecision =
+  | 'PERSIST_ELIGIBLE'
+  | 'SKIP_POST_START'
+  | 'SKIP_FINAL'
+  | 'SKIP_CANCELLED'
+  | 'SKIP_UNMAPPED_EVENT'
+  | 'SKIP_MISSING_REQUIRED_IDENTITY'
+  | 'SKIP_INVALID_TIMESTAMP'
+  | 'SKIP_OTHER_EXPLICIT_REASON'
 
 function todayLocalDate() {
   return new Intl.DateTimeFormat('en-CA', {
@@ -179,10 +196,13 @@ function canonicalTeamName(event: EventRow, side: 'home' | 'away') {
 }
 
 function teamsMatch(game: MlbOfficialScheduleGame, event: EventRow) {
-  return normalizeTeam(officialTeamName(game, 'home')).includes(normalizeTeam(canonicalTeamName(event, 'home'))) ||
-    normalizeTeam(canonicalTeamName(event, 'home')).includes(normalizeTeam(officialTeamName(game, 'home'))) ||
-    normalizeTeam(officialTeamName(game, 'away')).includes(normalizeTeam(canonicalTeamName(event, 'away'))) ||
-    normalizeTeam(canonicalTeamName(event, 'away')).includes(normalizeTeam(officialTeamName(game, 'away')))
+  const homeOfficial = normalizeTeam(officialTeamName(game, 'home'))
+  const homeCanonical = normalizeTeam(canonicalTeamName(event, 'home'))
+  const awayOfficial = normalizeTeam(officialTeamName(game, 'away'))
+  const awayCanonical = normalizeTeam(canonicalTeamName(event, 'away'))
+  const homeMatches = homeOfficial.includes(homeCanonical) || homeCanonical.includes(homeOfficial)
+  const awayMatches = awayOfficial.includes(awayCanonical) || awayCanonical.includes(awayOfficial)
+  return homeMatches && awayMatches
 }
 
 function officialGameForEvent(event: EventRow, officialGames: MlbOfficialScheduleGame[], mappings: MappingRow[]) {
@@ -299,13 +319,34 @@ async function loadMappings(eventIds: string[]) {
   return (data ?? []) as MappingRow[]
 }
 
-function officialStarter(game: MlbOfficialScheduleGame | null, event: EventRow, side: 'home' | 'away') {
+async function loadPlayerMappings(providerIds: string[]) {
+  if (!providerIds.length) return [] as MappingRow[]
+  const { data, error } = await supabaseAdmin
+    .from('provider_entity_mappings')
+    .select('internal_id, provider_id, provider, entity_type, metadata')
+    .eq('sport_key', SPORT_KEY)
+    .eq('entity_type', 'player')
+    .eq('provider', 'mlb_stats_api')
+    .in('provider_id', providerIds)
+    .limit(1000)
+  if (error) return [] as MappingRow[]
+  return (data ?? []) as MappingRow[]
+}
+
+function mappedPlayerId(providerPlayerId: string | null, playerMappings: MappingRow[]) {
+  if (!providerPlayerId) return null
+  return playerMappings.find((mapping) => String(mapping.provider_id) === String(providerPlayerId))?.internal_id ?? null
+}
+
+function officialStarter(game: MlbOfficialScheduleGame | null, event: EventRow, side: 'home' | 'away', playerMappings: MappingRow[]) {
   const probable = side === 'home' ? game?.probablePitchers.home : game?.probablePitchers.away
   const player = probable?.player ?? null
+  const providerPlayerId = player?.id ? String(player.id) : null
   return {
     status: player?.id ? 'PROBABLE' : 'UNKNOWN',
     playerName: player?.fullName ?? null,
-    providerPlayerId: player?.id ? String(player.id) : null,
+    providerPlayerId,
+    canonicalPlayerId: mappedPlayerId(providerPlayerId, playerMappings),
     teamId: side === 'home' ? event.home_team_id : event.away_team_id,
     teamName: side === 'home' ? event.home_team : event.away_team,
     source: player?.id ? 'mlb_stats_api_schedule_hydrate_probablePitcher' : 'mlb_stats_api_schedule_no_probable_pitcher',
@@ -315,7 +356,33 @@ function officialStarter(game: MlbOfficialScheduleGame | null, event: EventRow, 
   }
 }
 
-function lineupForSide(event: EventRow, side: 'home' | 'away', lineups: LineupRow[], playerStats: PlayerStatRow[]) {
+function officialLineupForSide(event: EventRow, side: 'home' | 'away', officialLineup: MlbOfficialLiveFeedLineups | null, playerMappings: MappingRow[]) {
+  const players = officialLineup?.lineups[side] ?? []
+  if (players.length < 9) return null
+  const blockers = [
+    ...(officialLineup?.lineupState === 'PROJECTED' ? ['LINEUP_PROJECTED_NOT_CONFIRMED'] : []),
+    ...(players.some((row) => !mappedPlayerId(row.player.id, playerMappings)) ? ['LINEUP_PLAYER_IDENTITY_UNMAPPED'] : []),
+  ]
+  return {
+    status: officialLineup?.lineupState === 'CONFIRMED' ? 'CONFIRMED' : 'PROJECTED',
+    source: 'mlb_stats_api_live_feed_boxscore_battingOrder',
+    players: players.map((row: MlbOfficialLineupPlayer) => ({
+      playerId: mappedPlayerId(row.player.id, playerMappings),
+      providerPlayerId: row.player.id,
+      playerName: row.player.fullName,
+      position: row.position,
+      battingOrder: row.battingOrder,
+      sourceTimestamp: officialLineup?.capturedAt ?? null,
+    })),
+    confidence: officialLineup?.lineupState === 'CONFIRMED' ? 90 : 65,
+    blockers,
+    sourceTimestamp: officialLineup?.capturedAt ?? null,
+  }
+}
+
+function lineupForSide(event: EventRow, side: 'home' | 'away', lineups: LineupRow[], playerStats: PlayerStatRow[], officialLineup: MlbOfficialLiveFeedLineups | null, playerMappings: MappingRow[]) {
+  const official = officialLineupForSide(event, side, officialLineup, playerMappings)
+  if (official) return official
   const teamId = side === 'home' ? event.home_team_id : event.away_team_id
   const stored = lineups
     .filter((row) => row.event_id === event.id && row.team_id === teamId && row.role !== 'starting_pitcher')
@@ -500,20 +567,22 @@ function buildSnapshot(input: {
   snapshotTime: string
   officialGame: MlbOfficialScheduleGame | null
   officialMappingMethod: string
+  officialLineup: MlbOfficialLiveFeedLineups | null
   lineups: LineupRow[]
   playerStats: PlayerStatRow[]
+  playerMappings: MappingRow[]
   teamStats: TeamStatRow[]
   injuries: InjuryRow[]
   providerCallsMade: number
 }): Snapshot {
   const { event, snapshotType, snapshotTime, officialGame } = input
   const starters = {
-    home: officialStarter(officialGame, event, 'home'),
-    away: officialStarter(officialGame, event, 'away'),
+    home: officialStarter(officialGame, event, 'home', input.playerMappings),
+    away: officialStarter(officialGame, event, 'away', input.playerMappings),
   }
   const lineups = {
-    home: lineupForSide(event, 'home', input.lineups, input.playerStats),
-    away: lineupForSide(event, 'away', input.lineups, input.playerStats),
+    home: lineupForSide(event, 'home', input.lineups, input.playerStats, input.officialLineup, input.playerMappings),
+    away: lineupForSide(event, 'away', input.lineups, input.playerStats, input.officialLineup, input.playerMappings),
   }
   const bullpen = {
     home: bullpenForSide(event, 'home', input.teamStats, input.playerStats),
@@ -533,6 +602,7 @@ function buildSnapshot(input: {
       cutoffAt: cutoffAt(event.start_time),
       officialGamePk: officialGame?.gamePk ?? eventMlbGamePk(event) ?? null,
       officialMappingMethod: input.officialMappingMethod,
+      lineupSource: input.officialLineup ? 'mlb_stats_api_live_feed_boxscore_battingOrder' : null,
     },
     starters,
     lineups,
@@ -583,13 +653,137 @@ function buildSnapshot(input: {
   }
 }
 
+function persistenceDecision(snapshot: Snapshot): { decision: PersistenceDecision; reason: string | null } {
+  const startMs = Date.parse(snapshot.target_event_start_time)
+  const snapshotMs = Date.parse(snapshot.snapshot_timestamp)
+  const event = asRecord(asRecord(snapshot.components).event)
+  const status = String(event.status ?? '').toLowerCase()
+  const gamePk = text(event.officialGamePk)
+  const mapping = text(event.officialMappingMethod)
+  const cutoffMs = Date.parse(String(event.cutoffAt ?? ''))
+  if (!Number.isFinite(startMs) || !Number.isFinite(snapshotMs)) return { decision: 'SKIP_INVALID_TIMESTAMP', reason: 'invalid_start_or_snapshot_timestamp' }
+  if (snapshotMs >= startMs || snapshot.temporal_status === 'POST_START') return { decision: 'SKIP_POST_START', reason: 'snapshot_time_is_not_before_event_start' }
+  if (Number.isFinite(cutoffMs) && snapshotMs >= cutoffMs) return { decision: 'SKIP_OTHER_EXPLICIT_REASON', reason: 'snapshot_time_is_not_before_cutoff' }
+  if (['final', 'completed', 'closed'].some((value) => status.includes(value))) return { decision: 'SKIP_FINAL', reason: 'event_is_final_or_completed' }
+  if (status.includes('cancel')) return { decision: 'SKIP_CANCELLED', reason: 'event_is_cancelled' }
+  if (!gamePk || mapping === 'unmapped') return { decision: 'SKIP_UNMAPPED_EVENT', reason: 'missing_deterministic_mlb_gamepk_mapping' }
+  if (!snapshot.event_id || !snapshot.snapshot_type || !snapshot.target_event_start_time) return { decision: 'SKIP_MISSING_REQUIRED_IDENTITY', reason: 'missing_snapshot_identity' }
+  return { decision: 'PERSIST_ELIGIBLE', reason: null }
+}
+
 async function persistSnapshots(snapshots: Snapshot[]) {
-  if (!snapshots.length) return { insertedOrUpdated: 0, error: null as string | null }
+  const decisions = snapshots.map((snapshot) => ({ snapshot, ...persistenceDecision(snapshot) }))
+  const eligible = decisions.filter((item) => item.decision === 'PERSIST_ELIGIBLE').map((item) => item.snapshot)
+  if (!eligible.length) {
+    return {
+      attempted: snapshots.length,
+      eligible: 0,
+      inserted: 0,
+      reused: 0,
+      skipped: decisions.length,
+      failed: 0,
+      byDecision: decisions.reduce<Record<string, number>>((acc, item) => {
+        acc[item.decision] = (acc[item.decision] ?? 0) + 1
+        return acc
+      }, {}),
+      rowDecisions: decisions.map((item) => ({
+        eventId: item.snapshot.event_id,
+        event: asRecord(asRecord(item.snapshot.components).event).matchup ?? null,
+        decision: item.decision,
+        reason: item.reason,
+      })),
+      error: null as string | null,
+    }
+  }
+  const keys = eligible.map((snapshot) => snapshot.deterministic_key)
+  const existingResult = await supabaseAdmin
+    .from('mlb_context_snapshots')
+    .select('deterministic_key')
+    .in('deterministic_key', keys)
+  if (existingResult.error) {
+    return {
+      attempted: snapshots.length,
+      eligible: eligible.length,
+      inserted: 0,
+      reused: 0,
+      skipped: snapshots.length - eligible.length,
+      failed: eligible.length,
+      byDecision: {},
+      rowDecisions: decisions.map((item) => ({
+        eventId: item.snapshot.event_id,
+        event: asRecord(asRecord(item.snapshot.components).event).matchup ?? null,
+        decision: item.decision,
+        reason: item.reason,
+      })),
+      error: existingResult.error.message,
+    }
+  }
+  const existing = new Set((existingResult.data ?? []).map((row) => row.deterministic_key))
+  const inserts = eligible.filter((snapshot) => !existing.has(snapshot.deterministic_key))
+  if (!inserts.length) {
+    return {
+      attempted: snapshots.length,
+      eligible: eligible.length,
+      inserted: 0,
+      reused: eligible.length,
+      skipped: snapshots.length - eligible.length,
+      failed: 0,
+      byDecision: decisions.reduce<Record<string, number>>((acc, item) => {
+        acc[item.decision] = (acc[item.decision] ?? 0) + 1
+        return acc
+      }, {}),
+      rowDecisions: decisions.map((item) => ({
+        eventId: item.snapshot.event_id,
+        event: asRecord(asRecord(item.snapshot.components).event).matchup ?? null,
+        decision: item.decision,
+        reason: item.reason,
+      })),
+      error: null as string | null,
+    }
+  }
   const { error } = await supabaseAdmin
     .from('mlb_context_snapshots')
-    .upsert(snapshots, { onConflict: 'deterministic_key' })
-  if (error) return { insertedOrUpdated: 0, error: error.message }
-  return { insertedOrUpdated: snapshots.length, error: null }
+    .insert(inserts)
+  if (error) {
+    return {
+      attempted: snapshots.length,
+      eligible: eligible.length,
+      inserted: 0,
+      reused: existing.size,
+      skipped: snapshots.length - eligible.length,
+      failed: inserts.length,
+      byDecision: decisions.reduce<Record<string, number>>((acc, item) => {
+        acc[item.decision] = (acc[item.decision] ?? 0) + 1
+        return acc
+      }, {}),
+      rowDecisions: decisions.map((item) => ({
+        eventId: item.snapshot.event_id,
+        event: asRecord(asRecord(item.snapshot.components).event).matchup ?? null,
+        decision: item.decision,
+        reason: item.reason,
+      })),
+      error: error.message,
+    }
+  }
+  return {
+    attempted: snapshots.length,
+    eligible: eligible.length,
+    inserted: inserts.length,
+    reused: existing.size,
+    skipped: snapshots.length - eligible.length,
+    failed: 0,
+    byDecision: decisions.reduce<Record<string, number>>((acc, item) => {
+      acc[item.decision] = (acc[item.decision] ?? 0) + 1
+      return acc
+    }, {}),
+    rowDecisions: decisions.map((item) => ({
+      eventId: item.snapshot.event_id,
+      event: asRecord(asRecord(item.snapshot.components).event).matchup ?? null,
+      decision: item.decision,
+      reason: item.reason,
+    })),
+    error: null as string | null,
+  }
 }
 
 function summarizeSnapshots(snapshots: Snapshot[]) {
@@ -627,22 +821,51 @@ export async function getMlbContextLineage(options: MlbContextLineageOptions = {
     loadMappings(eventIds),
   ])
   const official = options.allowProviderCalls ? await fetchMlbOfficialSchedule(selectedDate) : { rows: [] as MlbOfficialScheduleGame[], providerCallsMade: 0 }
+  const officialMatches = scopedEvents.map((event) => ({ event, officialMatch: officialGameForEvent(event, official.rows, mappings) }))
+  const starterProviderIds = officialMatches
+    .flatMap(({ officialMatch }) => [
+      officialMatch.game?.probablePitchers.home.player?.id,
+      officialMatch.game?.probablePitchers.away.player?.id,
+    ])
+    .filter((value): value is string => Boolean(value))
+  const lineupLimit = Math.max(0, Math.min(5, Math.floor(Number(options.lineupProbeLimit ?? 0))))
+  const lineupTargets = options.allowProviderCalls && lineupLimit > 0
+    ? officialMatches
+      .filter(({ event, officialMatch }) => officialMatch.game && temporalStatus(event.start_time, snapshotTime) === 'PREGAME')
+      .slice(0, lineupLimit)
+    : []
+  const lineupResponses: MlbOfficialLiveFeedLineups[] = []
+  let lineupProviderCalls = 0
+  for (const target of lineupTargets) {
+    const gamePk = target.officialMatch.game?.gamePk
+    if (!gamePk) continue
+    const response = await fetchMlbOfficialLiveFeedLineups(gamePk)
+    lineupProviderCalls += response.providerCallsMade
+    lineupResponses.push(...response.rows)
+  }
+  const lineupProviderIds = lineupResponses
+    .flatMap((row) => [...row.lineups.home, ...row.lineups.away].map((player) => player.player.id))
+    .filter((value): value is string => Boolean(value))
+  const playerMappings = await loadPlayerMappings([...new Set([...starterProviderIds, ...lineupProviderIds])])
   const snapshots = scopedEvents.map((event) => {
-    const officialMatch = officialGameForEvent(event, official.rows, mappings)
+    const officialMatch = officialMatches.find((match) => match.event.id === event.id)?.officialMatch ?? officialGameForEvent(event, official.rows, mappings)
+    const officialLineup = officialMatch.game ? lineupResponses.find((row) => row.gamePk === officialMatch.game?.gamePk) ?? null : null
     return buildSnapshot({
       event,
       snapshotType,
       snapshotTime,
       officialGame: officialMatch.game,
       officialMappingMethod: officialMatch.method,
+      officialLineup,
       lineups,
       playerStats,
+      playerMappings,
       teamStats,
       injuries,
-      providerCallsMade: official.providerCallsMade,
+      providerCallsMade: official.providerCallsMade + lineupProviderCalls,
     })
   })
-  const persistence = options.persist ? await persistSnapshots(snapshots) : { insertedOrUpdated: 0, error: null as string | null }
+  const persistence = options.persist ? await persistSnapshots(snapshots) : await persistSnapshots([])
   const summary = summarizeSnapshots(snapshots)
   return {
     success: persistence.error === null,
@@ -651,17 +874,19 @@ export async function getMlbContextLineage(options: MlbContextLineageOptions = {
     selectedDate,
     snapshotType,
     persisted: options.persist === true,
-    providerCallsMade: official.providerCallsMade,
-    remoteMutationsMade: persistence.insertedOrUpdated,
+    providerCallsMade: official.providerCallsMade + lineupProviderCalls,
+    remoteMutationsMade: 'inserted' in persistence ? persistence.inserted : 0,
     providerAuthority: providerAuthorityContract(),
     sourceAudit: {
       eventsExamined: scopedEvents.length,
       officialGamesExamined: official.rows.length,
+      officialLineupGamesExamined: lineupResponses.length,
       lineupsRead: lineups.length,
       playerStatsRead: playerStats.length,
       teamStatsRead: teamStats.length,
       injuriesRead: injuries.length,
       mappingsRead: mappings.length,
+      playerMappingsRead: playerMappings.length,
       sportsDataIOUsed: false,
     },
     certifications: {
@@ -706,8 +931,10 @@ export function validateMlbContextLineageFixtures() {
     snapshotTime: now,
     officialGame: null,
     officialMappingMethod: 'fixture',
+    officialLineup: null,
     lineups: [],
     playerStats: [],
+    playerMappings: [],
     teamStats: [],
     injuries: [],
     providerCallsMade: 0,

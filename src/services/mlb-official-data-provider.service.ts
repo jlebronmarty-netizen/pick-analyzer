@@ -63,6 +63,37 @@ export type MlbOfficialScheduleGame = {
   sourceMetadata: Record<string, unknown>
 }
 
+export type MlbOfficialLineupPlayer = {
+  side: 'home' | 'away'
+  team: MlbOfficialTeam
+  player: MlbOfficialPlayer
+  battingOrder: number | null
+  position: string | null
+  status: string | null
+}
+
+export type MlbOfficialLiveFeedLineups = {
+  provider: 'mlb_stats_api'
+  gamePk: string
+  status: {
+    abstractGameState: string | null
+    detailedState: string | null
+    codedGameState: string | null
+    statusCode: string | null
+    canonicalSportEventStatus: string
+    lifecycle: string
+    safeForPregame: boolean
+  }
+  gameDate: string | null
+  lineups: {
+    home: MlbOfficialLineupPlayer[]
+    away: MlbOfficialLineupPlayer[]
+  }
+  lineupState: 'CONFIRMED' | 'PROJECTED' | 'UNKNOWN'
+  capturedAt: string
+  sourceMetadata: Record<string, unknown>
+}
+
 export type MlbOfficialProviderResponse<T> = {
   provider: 'mlb_stats_api'
   endpoint: string
@@ -92,6 +123,31 @@ type MlbStatsGame = {
   teams?: {
     away?: { team?: MlbStatsTeam; score?: number; probablePitcher?: MlbStatsPerson }
     home?: { team?: MlbStatsTeam; score?: number; probablePitcher?: MlbStatsPerson }
+  }
+}
+type MlbStatsLivePlayer = {
+  person?: MlbStatsPerson
+  battingOrder?: string | number
+  position?: { abbreviation?: string; name?: string }
+  status?: { code?: string; description?: string }
+}
+type MlbStatsLiveFeed = {
+  gamePk?: number | string
+  gameData?: {
+    datetime?: { dateTime?: string }
+    status?: MlbStatsGame['status']
+    teams?: {
+      home?: MlbStatsTeam
+      away?: MlbStatsTeam
+    }
+  }
+  liveData?: {
+    boxscore?: {
+      teams?: {
+        home?: { battingOrder?: Array<string | number>; players?: Record<string, MlbStatsLivePlayer> }
+        away?: { battingOrder?: Array<string | number>; players?: Record<string, MlbStatsLivePlayer> }
+      }
+    }
   }
 }
 const BASE_URL = 'https://statsapi.mlb.com'
@@ -222,6 +278,95 @@ export async function fetchMlbOfficialSchedule(date: string, options: { timeoutM
     providerCallsMade: 1,
     rows: normalizeMlbOfficialSchedulePayload(payload, capturedAt),
     warnings: [],
+  }
+}
+
+function normalizeLiveStatus(payload: MlbStatsLiveFeed) {
+  const mapped = mapMlbStatsGameToSportEventStatus({ status: payload.gameData?.status })
+  const canonicalStatus = mapped.status ?? 'scheduled'
+  return {
+    abstractGameState: text(payload.gameData?.status?.abstractGameState),
+    detailedState: text(payload.gameData?.status?.detailedState),
+    codedGameState: text(payload.gameData?.status?.codedGameState),
+    statusCode: text(payload.gameData?.status?.statusCode),
+    canonicalSportEventStatus: canonicalStatus,
+    lifecycle: mapped.lifecycle,
+    safeForPregame: canonicalStatus === 'scheduled',
+  }
+}
+
+function battingSlot(value: unknown) {
+  const parsed = num(value)
+  if (parsed === null) return null
+  return Math.floor(parsed / 100)
+}
+
+function normalizeLineupSide(side: 'home' | 'away', team: MlbOfficialTeam, payload: MlbStatsLiveFeed, capturedAt: string): MlbOfficialLineupPlayer[] {
+  const box = payload.liveData?.boxscore?.teams?.[side]
+  const players = box?.players ?? {}
+  const order = Array.isArray(box?.battingOrder) ? box.battingOrder.map(String) : []
+  const rows = Object.values(players)
+    .filter((player) => player.person?.id && player.person?.fullName && player.battingOrder !== undefined)
+    .map((player) => ({
+      side,
+      team,
+      player: {
+        id: text(player.person?.id) ?? stableMlbOfficialId(['mlb_player', player.person?.fullName, capturedAt]),
+        fullName: text(player.person?.fullName) ?? 'Unknown Player',
+      },
+      battingOrder: battingSlot(player.battingOrder),
+      position: text(player.position?.abbreviation) ?? text(player.position?.name),
+      status: text(player.status?.description) ?? text(player.status?.code),
+    }))
+    .filter((player) => player.battingOrder !== null && player.battingOrder >= 1 && player.battingOrder <= 9)
+    .sort((left, right) => Number(left.battingOrder) - Number(right.battingOrder))
+  if (rows.length) return rows
+  return order.map((id, index): MlbOfficialLineupPlayer | null => {
+    const player = players[`ID${id}`]
+    return player?.person?.fullName ? {
+      side,
+      team,
+      player: { id, fullName: player.person.fullName },
+      battingOrder: index + 1,
+      position: text(player.position?.abbreviation) ?? text(player.position?.name),
+      status: text(player.status?.description) ?? text(player.status?.code),
+    } : null
+  }).filter((player): player is MlbOfficialLineupPlayer => player !== null)
+}
+
+export async function fetchMlbOfficialLiveFeedLineups(gamePk: string, options: { timeoutMs?: number } = {}): Promise<MlbOfficialProviderResponse<MlbOfficialLiveFeedLineups>> {
+  const requestedAt = nowIso()
+  const endpoint = `/api/v1.1/game/${gamePk}/feed/live`
+  const payload = await fetchJson(endpoint, options.timeoutMs ?? DEFAULT_TIMEOUT_MS) as MlbStatsLiveFeed
+  const capturedAt = nowIso()
+  const home = normalizeTeam(payload.gameData?.teams?.home, 'Home Team')
+  const away = normalizeTeam(payload.gameData?.teams?.away, 'Away Team')
+  const lineups = {
+    home: normalizeLineupSide('home', home, payload, capturedAt),
+    away: normalizeLineupSide('away', away, payload, capturedAt),
+  }
+  const lineupState = lineups.home.length >= 9 && lineups.away.length >= 9 ? 'PROJECTED' : 'UNKNOWN'
+  return {
+    provider: 'mlb_stats_api',
+    endpoint,
+    capability: 'boxscore',
+    requestedAt,
+    capturedAt,
+    providerCallsMade: 1,
+    rows: [{
+      provider: 'mlb_stats_api',
+      gamePk,
+      status: normalizeLiveStatus(payload),
+      gameDate: text(payload.gameData?.datetime?.dateTime),
+      lineups,
+      lineupState,
+      capturedAt,
+      sourceMetadata: {
+        gamePk: payload.gamePk ?? gamePk,
+        source: 'mlb_stats_api_live_feed_boxscore_battingOrder',
+      },
+    }],
+    warnings: lineupState === 'UNKNOWN' ? ['LINEUP_BATTING_ORDER_NOT_EXPOSED'] : ['LINEUP_BATTING_ORDER_PROJECTED_NOT_CONFIRMED'],
   }
 }
 

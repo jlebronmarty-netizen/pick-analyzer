@@ -18,6 +18,7 @@ const { getMlbContextLineage } = await import('../src/services/mlb-context-linea
 const date = process.argv.find((arg) => arg.startsWith('--date='))?.slice('--date='.length)
 const eventId = process.argv.find((arg) => arg.startsWith('--eventId='))?.slice('--eventId='.length)
 const snapshotType = process.argv.find((arg) => arg.startsWith('--snapshotType='))?.slice('--snapshotType='.length)
+const lineupProbeLimitArg = process.argv.find((arg) => arg.startsWith('--lineupProbeLimit='))?.slice('--lineupProbeLimit='.length)
 const allowProviderCalls = process.argv.includes('--allow-provider-calls')
 const persist = process.argv.includes('--persist')
 const summaryOnly = process.argv.includes('--summary')
@@ -27,6 +28,7 @@ const result = await getMlbContextLineage({
   eventId,
   snapshotType,
   allowProviderCalls,
+  lineupProbeLimit: lineupProbeLimitArg ? Number(lineupProbeLimitArg) : null,
   persist,
 })
 

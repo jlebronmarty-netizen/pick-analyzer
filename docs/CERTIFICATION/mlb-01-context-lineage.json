@@ -1,8 +1,8 @@
 {
   "phase": "MLB-01",
   "name": "Context Lineage and Model Input Recovery",
-  "classification": "MLB_01_CONTEXT_LINEAGE_PARTIAL_CERTIFICATION",
-  "expectedProductionCommit": "2d01d94120d8127d3323d26e90edaddcb6821c95",
+  "classification": "MLB_01R2_CONTEXT_SOURCE_REPAIR_BLOCKED",
+  "expectedProductionCommit": "4fe4c15c954caabb5918a125a40aed3aef683d1e",
   "providerAuthority": {
     "mlbOfficial": "primary official/baseball data source",
     "theOddsApi": "primary odds source",
@@ -21,12 +21,12 @@
     "starters": {
       "status": "READY_PARTIAL",
       "source": "MLB Official schedule probablePitcher plus stored canonical context",
-      "notes": "Probable starter lineage is available when MLB Official exposes probable pitchers. Confirmed lineup/late scratch evidence requires a later certified provider path."
+      "notes": "Probable starter lineage is available when MLB Official exposes probable pitchers. Confirmed-starter semantics are not claimed without explicit provider evidence."
     },
     "lineups": {
       "status": "READY_PARTIAL",
-      "source": "sport_lineups or projected stored player stats",
-      "notes": "Confirmed lineups are used when already stored; projected lineups are explicitly labeled and never treated as confirmed."
+      "source": "MLB Official live feed boxscore battingOrder, sport_lineups, or projected stored player stats",
+      "notes": "Bounded current live-feed probe found batting-order rows. They are classified PROJECTED unless MLB Official exposes an explicit confirmation state."
     },
     "bullpen": {
       "status": "READY_PARTIAL",
@@ -60,12 +60,17 @@
     "injuryContextReady": false,
     "contextCompletenessReady": true,
     "morningFinalSnapshotReady": true,
-    "contextEnhancedShadowInputReady": true,
+    "contextEnhancedShadowInputReady": false,
     "sportsDataIONotReintroduced": true,
     "providerCallsFromStaticCertification": 0,
-    "productionDatabaseMutationsFromStaticCertification": 0
+    "productionDatabaseMutationsFromStaticCertification": 0,
+    "r2EligibleSubsetPersistenceDesign": true,
+    "r2LineupLiveFeedBounded": true,
+    "r2ProductionPersistenceBlocked": true,
+    "r2ProductionPersistenceBlocker": "PGRST205 public.mlb_context_snapshots not visible through Supabase/PostgREST row/column reads"
   },
   "remainingBlockers": [
+    "MLB_CONTEXT_SNAPSHOTS_REST_VISIBILITY_BLOCKED",
     "WEATHER_CONTEXT_REQUIRES_APPROVED_PROVIDER",
     "INJURY_CONTEXT_REQUIRES_APPROVED_OR_STORED_CURRENT_SOURCE",
     "CONFIRMED_LINEUP_PROVIDER_NOT_CERTIFIED"

@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-20 MLB-01R2 Context Source Repair
+
+- MLB-01R2 is locally implemented but production certification is blocked as `MLB_01R2_CONTEXT_SOURCE_REPAIR_BLOCKED`. The repair adds row-by-row persistence decisions (`PERSIST_ELIGIBLE`, post-start/final/cancelled/unmapped/identity/timestamp/other skips), insert-only deterministic snapshot writes and bounded MLB Official live-feed lineup acquisition.
+- Current proof selected 7 eligible MORNING rows and skipped 3 unsafe rows independently, with 0 SportsDataIO calls and 0 prediction/recommendation/settlement/learning/model mutations. Production writes were not performed because Supabase/PostgREST returned `PGRST205` for real `public.mlb_context_snapshots` row/column reads even though the additive migration exists in the repository.
+- MLB Official batting-order evidence is treated as `PROJECTED` unless explicit confirmation is exposed. Weather and injury remain missing by contract. Next: apply or refresh production visibility for `supabase/migrations/202608200001_mlb_context_snapshots_v1.sql`, then rerun the bounded R2 persistence/idempotency proof.
+
 ## 2026-08-20 MLB-01 Context Lineage
 
 - MLB-01 Context Lineage is locally implemented as `MLB_01_CONTEXT_LINEAGE_PARTIAL_CERTIFICATION`. The additive runtime creates a shadow-only context snapshot contract for current and forward MLB events, preserving the current deployed MLB prediction/recommendation/settlement/calibration state.
