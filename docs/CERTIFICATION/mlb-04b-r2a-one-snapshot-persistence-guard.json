@@ -1,0 +1,115 @@
+{
+  "classification": "MLB_04B_R2A_ONE_SNAPSHOT_PERSISTENCE_GUARD_REPAIR_CERTIFIED",
+  "phase": "MLB-04B-R2A_ONE_SNAPSHOT_PERSISTENCE_GUARD_REPAIR",
+  "generatedAt": "2026-08-21T00:00:00.000Z",
+  "startingCommit": "6002eb2e86304b0ce7f665bc52d0e0a9b94acfd4",
+  "rootCause": [
+    "ROUTE_FORCES_DRY_RUN",
+    "MISSING_EXECUTE_MODE",
+    "MISSING_AUTH_GUARD",
+    "MISSING_ROW_SCOPE",
+    "MISSING_READBACK"
+  ],
+  "repair": {
+    "service": "src/services/mlb-04b-research-snapshot-runtime.service.ts",
+    "route": "src/app/api/mlb/research-snapshot/route.ts",
+    "oldContextLineageRouteRemainsReadOnly": true,
+    "oldUnsafePersistenceHelperNotUsedDirectly": true
+  },
+  "contract": {
+    "defaultMode": "DRY_RUN",
+    "executeRequiresExplicitMode": true,
+    "executeRequiresEnv": "MLB_04B_CONTEXT_SNAPSHOT_AUTHORIZED=true",
+    "protectedRouteAuth": "CRON_SECRET_WHEN_CONFIGURED",
+    "maxNewSnapshotRowsPerExecution": 1,
+    "allowedSnapshotTypes": ["MORNING", "FINAL_PREGAME"],
+    "blockedSnapshotTypes": ["CURRENT_PROBE", "UNKNOWN"],
+    "insertOnly": true,
+    "broadUpsert": false,
+    "updatesExistingSnapshot": false,
+    "deletesExistingSnapshot": false
+  },
+  "temporalSafety": {
+    "snapshotBeforeEventStart": true,
+    "temporalStatusPregameRequired": true,
+    "sourceTimestampsBeforeStartRequired": true,
+    "postStartBlocked": true,
+    "finalBlocked": true,
+    "cancelledBlocked": true,
+    "backdatingAllowed": false,
+    "retrospectiveReconstructionAllowed": false
+  },
+  "identity": {
+    "version": "MLB_04B_RESEARCH_SNAPSHOT_CONTRACT_V1",
+    "methodologyVersion": "MLB_CHAT_METHOD_RESEARCH_SHADOW_V1",
+    "fields": ["version", "sport_key", "event_id", "snapshot_type", "capture_window", "methodology_version"],
+    "zeroMatches": "MAY_INSERT_WHEN_AUTHORIZED",
+    "oneMatch": "ALREADY_EXISTS_REUSE_NO_OP",
+    "moreThanOneMatch": "STOP_DUPLICATE_DEFECT",
+    "morningFinalDistinct": true
+  },
+  "readbackContract": [
+    "id",
+    "deterministic_key",
+    "event_id",
+    "snapshot_type",
+    "snapshot_timestamp",
+    "target_event_start_time",
+    "temporal_status",
+    "provider_authority",
+    "source_lineage",
+    "components",
+    "feature_values",
+    "feature_lineage",
+    "completeness",
+    "missing_components",
+    "blockers",
+    "provider_calls",
+    "production_eligible",
+    "shadow_only"
+  ],
+  "fixtureResults": {
+    "dryRunZeroWrites": "PASS",
+    "executeWithoutEnvGuard": "PASS",
+    "envGuardWithoutExecute": "PASS",
+    "validMorningOneRowInsertSimulation": "PASS",
+    "validFinalPregameOneRowInsertSimulation": "PASS",
+    "currentProbeBlocked": "PASS",
+    "postStartBlocked": "PASS",
+    "finalEventBlocked": "PASS",
+    "cancelledEventBlocked": "PASS",
+    "duplicateIdentityReuseNoOp": "PASS",
+    "moreThanOneSelectedRowBlocked": "PASS",
+    "morningFinalDistinct": "PASS",
+    "readbackContract": "PASS",
+    "missingComponentsPreserved": "PASS",
+    "noPredictionProductSideEffects": "PASS"
+  },
+  "isolation": {
+    "mlb03SettlementRuntimeChanged": false,
+    "mlb04cScorecardRulesChanged": false,
+    "predictionWrites": 0,
+    "currentEraShadowWrites": 0,
+    "chatMethodResearchShadowWrites": 0,
+    "officialPickWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "sportsDataIoCalls": 0,
+    "nflRuntimeChanged": false,
+    "nbaRuntimeChanged": false
+  },
+  "safetyCounters": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0
+  },
+  "readiness": {
+    "MLB_04B_ONE_SNAPSHOT_PERSISTENCE_PATH_READY": "YES",
+    "MLB_04B_EXECUTION_GUARD_READY": "YES",
+    "MLB_04B_ROW_SCOPE_CERTIFIED": "YES",
+    "MLB_04B_READBACK_CONTRACT_READY": "YES",
+    "MLB_04B_IDEMPOTENCY_CONTRACT_READY": "YES",
+    "MORNING_FINAL_IMMUTABILITY_CERTIFIED": "YES",
+    "DRY_RUN_EXECUTE_PAYLOAD_PARITY": "YES"
+  }
+}

@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-21 00:00:00Z
 
+## 2026-08-21 MLB-04B-R2A One-Snapshot Persistence Guard
+
+- MLB-04B-R2A is locally implemented as `MLB_04B_R2A_ONE_SNAPSHOT_PERSISTENCE_GUARD_REPAIR_CERTIFIED`. It repairs the missing deployed execution path for one legitimate forward `MORNING` or `FINAL_PREGAME` MLB research snapshot while preserving the existing MLB-04B dry-run default.
+- Real persistence now requires exactly one scoped event snapshot, `execute=true`, `MLB_04B_CONTEXT_SNAPSHOT_AUTHORIZED=true`, protected route authorization when `CRON_SECRET` is configured, pregame temporal safety, deterministic identity pre-read, insert-only persistence and immediate readback. `CURRENT_PROBE` remains blocked from substituting for research snapshots.
+- Local fixture certification proves dry-run zero writes, execute/env guard behavior, MORNING and FINAL_PREGAME identity separation, duplicate reuse/no-op, duplicate-defect stop, post-start/final/cancelled blocks and no broad upsert/update/delete behavior. Provider calls were 0 and production database mutations were 0. Next: publish MLB-04B-R2A, then separately authorize the first real one-snapshot proof only during a valid forward pregame window.
+
 ## 2026-08-21 MLB-04C Chat-Method Research Scorecard
 
 - MLB-04C is locally implemented as `MLB_04C_CHAT_METHOD_RESEARCH_SCORECARD_CERTIFIED`. It turns the MLB-04A design into a deterministic research-only scorecard service and forward ledger contract for `STARTER_EDGE`, `OFFENSE_EDGE`, `BULLPEN_EDGE`, `SPLIT_EDGE`, `LINEUP_EDGE`, `CONTEXT_EDGE` and `MARKET_VALUE`.
