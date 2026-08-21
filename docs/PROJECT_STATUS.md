@@ -1,6 +1,12 @@
 # Project Status
 
-Last updated: 2026-07-30 20:05:00Z
+Last updated: 2026-08-21 00:00:00Z
+
+## 2026-08-21 MLB-04B Morning / Final-Pregame Snapshot Runtime
+
+- MLB-04B is locally implemented as `MLB_04B_MORNING_FINAL_PREGAME_SNAPSHOT_RUNTIME_CERTIFIED`. It adds a guarded research snapshot runtime for immutable MLB `MORNING` and `FINAL_PREGAME` context evidence using the existing `mlb_context_snapshots` infrastructure.
+- The runtime keeps `CURRENT_PROBE` separate, requires deterministic event/snapshot/capture-window/methodology identity, blocks post-start or retrospective source evidence, records missing weather and injury evidence explicitly, and defaults to dry-run. Future persistence requires `MLB_04B_CONTEXT_SNAPSHOT_AUTHORIZED=true` plus an execute path.
+- Local certification used forward-safe fixtures for one MORNING and one FINAL_PREGAME dry-run. No production prediction rows, `CURRENT_ERA_SHADOW` rows, Official Picks, settlement, learning, calibration, scheduler state, provider authority, MLB-03 runtime, NFL or NBA behavior changed. Provider calls were 0 and production database mutations were 0.
 
 ## 2026-08-20 MLB-04A Chat Methodology Research Shadow Foundation
 

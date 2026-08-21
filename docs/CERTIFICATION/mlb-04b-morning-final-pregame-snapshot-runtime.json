@@ -1,0 +1,117 @@
+{
+  "classification": "MLB_04B_MORNING_FINAL_PREGAME_SNAPSHOT_RUNTIME_CERTIFIED",
+  "phase": "MLB-04B_MORNING_FINAL_PREGAME_SNAPSHOT_AUTOMATION",
+  "generatedAt": "2026-08-21T00:00:00.000Z",
+  "startingCommit": "03cd4b7f6f47168cd3a06a8d2cd493154b8b6ccf",
+  "existingSnapshotInfrastructure": {
+    "table": "mlb_context_snapshots",
+    "migration": "supabase/migrations/202608200001_mlb_context_snapshots_v1.sql",
+    "snapshotTypesSupported": ["MORNING", "FINAL_PREGAME", "CURRENT_PROBE"],
+    "reusedForMlb04b": true,
+    "currentProbeSubstitutionAllowed": false,
+    "serviceRoleOnlyPersistence": true,
+    "anonAuthenticatedCrud": false,
+    "shadowOnlyDefault": true,
+    "productionEligibleDefault": false
+  },
+  "runtime": {
+    "service": "src/services/mlb-04b-research-snapshot-runtime.service.ts",
+    "version": "MLB_04B_RESEARCH_SNAPSHOT_CONTRACT_V1",
+    "methodVersion": "MLB_CHAT_METHOD_RESEARCH_SHADOW_V1",
+    "activationGuard": "MLB_04B_CONTEXT_SNAPSHOT_AUTHORIZED",
+    "dryRunDefault": true,
+    "executeRequiresExplicitAuth": true,
+    "persistenceTarget": "mlb_context_snapshots"
+  },
+  "snapshotIdentityContract": {
+    "fields": ["sport_key", "event_id", "snapshot_type", "capture_window", "methodology_version"],
+    "sportKey": "baseball_mlb",
+    "leagueKey": "mlb",
+    "morningAndFinalPregameDistinct": true,
+    "deterministicIdentity": true,
+    "idempotency": "DETERMINISTIC_IDENTITY_REUSE",
+    "overwriteAllowed": false
+  },
+  "temporalSafety": {
+    "captureTimestampBeforeStartRequired": true,
+    "allSourceTimestampsBeforeStartRequired": true,
+    "postStartSourcesBlocked": true,
+    "retrospectiveMorningFabricationBlocked": true,
+    "finalPregameIsSeparateFromMorning": true
+  },
+  "sourceAuthority": {
+    "scheduleStatusStarters": "MLB_OFFICIAL_BOUNDED_CURRENT_ONLY_WHEN_AUTHORIZED",
+    "odds": "THE_ODDS_API_STORED_EVIDENCE_FIRST",
+    "sportsDataIo": "EXCLUDED_ROLLBACK_ONLY",
+    "weather": "MISSING_UNLESS_SEPARATELY_APPROVED",
+    "injuries": "MISSING_UNLESS_SEPARATELY_APPROVED"
+  },
+  "dryRuns": {
+    "morning": {
+      "eligible": 1,
+      "skipped": 0,
+      "fixtureMode": "FORWARD_SAFE_CURRENT_EVENT_FIXTURE",
+      "decision": "WOULD_CREATE"
+    },
+    "finalPregame": {
+      "eligible": 1,
+      "skipped": 0,
+      "fixtureMode": "FORWARD_SAFE_CURRENT_EVENT_FIXTURE",
+      "decision": "WOULD_CREATE"
+    },
+    "providerCalls": 0,
+    "productionDatabaseMutations": 0,
+    "persistenceWrites": 0
+  },
+  "completenessContract": {
+    "missingWeatherExplicit": true,
+    "missingInjuryExplicit": true,
+    "lineupForwardOnlyUnlessTimestamped": true,
+    "bullpenPartialExplicit": true,
+    "starterPartialExplicit": true
+  },
+  "deltaContract": {
+    "morningVsFinalFields": [
+      "starter_status_delta",
+      "lineup_delta",
+      "market_price_delta",
+      "weather_delta",
+      "blocker_delta"
+    ],
+    "accuracyClaimsRequireFrozenLedger": true,
+    "scorecardCanRankOnly": true,
+    "scorecardEmitsProbability": false
+  },
+  "propAndDerivativePolicy": {
+    "pitcherProps": "FOUNDATION_ONLY_NOT_PRODUCT_READY",
+    "nrfiYrfi": "BLOCKED_NOT_PRODUCT_READY",
+    "playerProps": "NOT_STARTED"
+  },
+  "mutationSafety": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0,
+    "predictionHistoryWrites": 0,
+    "currentEraShadowWrites": 0,
+    "officialPickWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "productRecommendationWrites": 0
+  },
+  "regressionSafety": {
+    "mlb03SettlementRuntimeModified": false,
+    "fourthCanaryCreated": false,
+    "continuousSchedulerAuthorized": false,
+    "sportsDataIoReactivated": false,
+    "nflRuntimeModified": false,
+    "nbaRuntimeModified": false
+  },
+  "readiness": {
+    "MORNING_SNAPSHOT_RUNTIME_READY": "YES",
+    "FINAL_PREGAME_SNAPSHOT_RUNTIME_READY": "YES",
+    "RESEARCH_LEDGER_FOUNDATION_READY": "YES",
+    "PRODUCTION_WRITE_PROOF_COMPLETED": "NO",
+    "PERSISTENCE_AUTHORIZATION_REQUIRED": "YES"
+  },
+  "nextRecommendedPhase": "MLB_04B_PUBLICATION_THEN_BOUNDED_WRITE_PROOF_OR_MLB_04C_RESEARCH_SCORECARD_LEDGER_AFTER_AUTHORIZATION"
+}
