@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-20 MLB-04A Chat Methodology Research Shadow Foundation
+
+- MLB-04A is locally implemented as `MLB_04A_CHAT_METHODOLOGY_RESEARCH_FOUNDATION_CERTIFIED_DESIGN_ONLY`. It formalizes the observable manual ChatGPT-style MLB research workflow as a reproducible, timestamp-safe scorecard and frozen ledger design, not a new probability model and not ground truth.
+- The audit compares the current `CALIBRATED_BASELINE_ONLY` MLB-03 contract against starter, offense, bullpen, split, lineup, injury, weather/park, market, recent-form, props and NRFI/YRFI methodology components. Market price is available and used for core markets; starters, bullpen, splits, weather/park and pitcher-prop outcome evidence are partial; lineups are forward-only unless as-of evidence exists; injuries and NRFI/YRFI remain blocked.
+- No production prediction rows, `CURRENT_ERA_SHADOW` rows, Official Picks, settlement, learning, calibration, scheduler state, MLB-03 settlement runtime, MLB canaries, provider authority, NFL or NBA behavior changed. Provider calls were 0 and production database mutations were 0.
+
 ## 2026-08-20 MLB-03R5 Shadow Settlement Runtime Preparation
 
 - MLB-03R5 is locally implemented as `MLB_03_SHADOW_SETTLEMENT_RUNTIME_CERTIFIED_READY_FOR_PUBLICATION`. It preserves the three clean MLB `CURRENT_ERA_SHADOW` canaries and one quarantined malformed row, stops accumulation at the soft-review threshold, and prepares an isolated MLB shadow settlement runtime without settling production rows.

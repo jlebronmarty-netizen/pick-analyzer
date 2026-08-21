@@ -6,6 +6,7 @@ Certification documentation covers validation records, readiness gates, producti
 
 Current V2 certification documents:
 
+- [MLB-04A Chat Methodology Research Shadow JSON](mlb-04a-chat-methodology-research-shadow.json)
 - [MLB Final Calibration Bootstrap Reachability JSON](mlb-final-calibration-bootstrap-reachability.json)
 - [MLB Production Calibration Bootstrap JSON](mlb-production-calibration-bootstrap.json)
 - [MLB Final Provider Independence + Calibration JSON](mlb-final-provider-independence-calibration.json)

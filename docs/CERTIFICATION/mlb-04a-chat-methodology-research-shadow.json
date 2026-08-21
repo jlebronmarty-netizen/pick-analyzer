@@ -1,0 +1,371 @@
+{
+  "classification": "MLB_04A_CHAT_METHODOLOGY_RESEARCH_FOUNDATION_CERTIFIED_DESIGN_ONLY",
+  "phase": "MLB-04A_CHAT_METHODOLOGY_PARITY_AND_RESEARCH_SHADOW_FOUNDATION",
+  "generatedAt": "2026-08-20T00:00:00.000Z",
+  "productionCommitObserved": "f1d359dfa52109ac054cf05df537fd018d9a2361",
+  "providerCallsMade": 0,
+  "productionDatabaseMutations": 0,
+  "productionPredictionMutations": 0,
+  "currentEraShadowMutations": 0,
+  "officialPickMutations": 0,
+  "settlementMutations": 0,
+  "learningCalibrationMutations": 0,
+  "mlb03SettlementRuntimeModified": false,
+  "fourthCleanCanaryCreated": false,
+  "continuousSchedulerAuthorized": false,
+  "existingModelContract": {
+    "rawBaseline": "baseball_mlb_prospective_preview_v1",
+    "calibratedShadow": "MLB_CALIBRATED_SHADOW_V1",
+    "selectedMlb03Contract": "CALIBRATED_BASELINE_ONLY",
+    "coreMarkets": ["moneyline", "run_line", "total"],
+    "featureSetVersion": "mlb_feature_set_v5",
+    "activeRequiredFeatures": ["event_context", "team_form", "market_odds"],
+    "activeOptionalFeatures": [
+      "starter_status_context",
+      "pitcher_context",
+      "weather_context",
+      "park_context",
+      "injury_context",
+      "lineup_context"
+    ],
+    "knownExcludedOrPartialDomains": [
+      "confirmed_lineup_context",
+      "injury_diagnosis",
+      "bullpen_context",
+      "player_detail_cache",
+      "player_stats_cache",
+      "stadium_metadata_cache"
+    ],
+    "currentCalibrationEvidence": {
+      "cohortRows": 2254,
+      "holdoutRows": 451,
+      "temporalLeakage": 0,
+      "contextModelSelected": false
+    }
+  },
+  "featureGapMatrix": [
+    {
+      "component": "probable_confirmed_starting_pitchers",
+      "status": "PARTIAL",
+      "source": "sport_lineups; sport_events metadata; mlb-starter-intelligence.service.ts; mlb-starter-weather-stadium-intelligence.service.ts",
+      "usedByCurrentModel": "optional preview/context only, not selected in MLB-03 calibration",
+      "historicalSafety": "HISTORICAL_SAFE_PARTIAL_AFTER_SOURCE_TIMESTAMP_AUDIT"
+    },
+    {
+      "component": "starter_era_recent_performance",
+      "status": "PARTIAL",
+      "source": "sport_player_stats; historical_baseball_pitcher_appearances; mlb-player-props-readiness-audit.service.ts",
+      "usedByCurrentModel": "not selected in calibrated shadow",
+      "historicalSafety": "HISTORICAL_SAFE_ONLY_WHEN source_timestamp < event_start"
+    },
+    {
+      "component": "starter_handedness",
+      "status": "PARTIAL",
+      "source": "sport_players.provider_ids/metadata when populated; provider_entity_mappings",
+      "usedByCurrentModel": "not selected in calibrated shadow",
+      "historicalSafety": "UNKNOWN_TEMPORAL_PROVENANCE_FOR_HISTORICAL_SPLITS"
+    },
+    {
+      "component": "pitcher_matchup_quality",
+      "status": "PARTIAL",
+      "source": "starter identity plus opponent team/player stats; no certified combined matchup model",
+      "usedByCurrentModel": "not selected in calibrated shadow",
+      "historicalSafety": "HISTORICAL_SAFE_DESIGN_ONLY"
+    },
+    {
+      "component": "opponent_offensive_strength",
+      "status": "AVAILABLE_NOT_USED",
+      "source": "team_stats; sport_game_stats; feature_store team_form",
+      "usedByCurrentModel": "baseline/shared feature preview only",
+      "historicalSafety": "HISTORICAL_SAFE_WITH_PRIOR_GAME_FILTER"
+    },
+    {
+      "component": "recent_team_performance",
+      "status": "AVAILABLE_NOT_USED",
+      "source": "team_stats; sport_game_stats; feature_store team_form",
+      "usedByCurrentModel": "baseline/shared feature preview only",
+      "historicalSafety": "HISTORICAL_SAFE_WITH_PRIOR_GAME_FILTER"
+    },
+    {
+      "component": "home_away_performance",
+      "status": "AVAILABLE_NOT_USED",
+      "source": "sport_events home/away identity; team_stats/sport_game_stats splits if computed",
+      "usedByCurrentModel": "baseline/shared preview supports event context",
+      "historicalSafety": "HISTORICAL_SAFE_WITH_PRIOR_GAME_FILTER"
+    },
+    {
+      "component": "bullpen_quality",
+      "status": "PARTIAL",
+      "source": "sport_player_stats relief rows; docs/mlb-bullpen-pitcher-intelligence-v1.md",
+      "usedByCurrentModel": "not selected in calibrated shadow",
+      "historicalSafety": "HISTORICAL_SAFE_PARTIAL_AFTER_ROLE_AND_TIMESTAMP_AUDIT"
+    },
+    {
+      "component": "bullpen_recent_workload",
+      "status": "PARTIAL",
+      "source": "sport_player_stats/game stats when role and dates are available",
+      "usedByCurrentModel": "not selected in calibrated shadow",
+      "historicalSafety": "HISTORICAL_SAFE_PARTIAL_WITH_PRIOR_GAME_FILTER"
+    },
+    {
+      "component": "offensive_splits",
+      "status": "PARTIAL",
+      "source": "sport_player_stats and historical batter appearances; no certified split matrix",
+      "usedByCurrentModel": "not selected in calibrated shadow",
+      "historicalSafety": "UNKNOWN_TEMPORAL_PROVENANCE_UNTIL_SPLIT_SOURCE_CERTIFIED"
+    },
+    {
+      "component": "handedness_splits",
+      "status": "PARTIAL",
+      "source": "player metadata plus historical appearances if handedness is certified",
+      "usedByCurrentModel": "not selected in calibrated shadow",
+      "historicalSafety": "UNKNOWN_TEMPORAL_PROVENANCE"
+    },
+    {
+      "component": "lineup_availability",
+      "status": "FORWARD_ONLY",
+      "source": "sport_lineups; mlb-current-lineup-context.service.ts; mlb_context_snapshots",
+      "usedByCurrentModel": "forward context snapshot only",
+      "historicalSafety": "FORWARD_ONLY_UNLESS_AS_OF_LINEUPS_EXIST"
+    },
+    {
+      "component": "batting_order",
+      "status": "FORWARD_ONLY",
+      "source": "sport_lineups.depth_order; mlb-current-lineup-context.service.ts",
+      "usedByCurrentModel": "forward context snapshot only",
+      "historicalSafety": "FORWARD_ONLY_UNLESS_AS_OF_LINEUPS_EXIST"
+    },
+    {
+      "component": "injuries",
+      "status": "MISSING",
+      "source": "sport_injuries contract exists in historical feature guardrails; approved MLB injury source not certified",
+      "usedByCurrentModel": "not used",
+      "historicalSafety": "NOT_TEMPORALLY_CERTIFIED"
+    },
+    {
+      "component": "weather",
+      "status": "PARTIAL",
+      "source": "GamesByDate weather fields and mlb-starter-weather-stadium-intelligence.service.ts; no approved independent forward weather provider in MLB-04A",
+      "usedByCurrentModel": "optional preview/context only",
+      "historicalSafety": "FORWARD_ONLY_OR_PARTIAL"
+    },
+    {
+      "component": "park_environment",
+      "status": "PARTIAL",
+      "source": "sport_events venue/stadium metadata; StadiumID verified; stadium metadata cache pending",
+      "usedByCurrentModel": "optional preview/context only",
+      "historicalSafety": "HISTORICAL_SAFE_PARTIAL"
+    },
+    {
+      "component": "market_price",
+      "status": "AVAILABLE_AND_USED",
+      "source": "sports_odds_snapshots; prediction_history odds/implied_probability",
+      "usedByCurrentModel": "raw baseline and calibrated shadow identity/value comparison",
+      "historicalSafety": "HISTORICAL_SAFE_WHEN odds_timestamp < event_start"
+    },
+    {
+      "component": "alternate_run_lines",
+      "status": "AVAILABLE_NOT_USED",
+      "source": "The Odds API full-market shadow evidence preserved alternate lines; product core model uses exact line only",
+      "usedByCurrentModel": "not selected as recommendation market expansion",
+      "historicalSafety": "HISTORICAL_SAFE_FOR_EXACT_LINE_ONLY"
+    },
+    {
+      "component": "alternate_totals",
+      "status": "AVAILABLE_NOT_USED",
+      "source": "The Odds API full-market shadow evidence preserved alternate lines; product core model uses exact line only",
+      "usedByCurrentModel": "not selected as recommendation market expansion",
+      "historicalSafety": "HISTORICAL_SAFE_FOR_EXACT_LINE_ONLY"
+    },
+    {
+      "component": "nrfi",
+      "status": "MISSING",
+      "source": "no verified NRFI/YRFI odds normalization, first-inning feature model, or settlement contract",
+      "usedByCurrentModel": "not used",
+      "historicalSafety": "NOT_TEMPORALLY_CERTIFIED"
+    },
+    {
+      "component": "pitcher_props",
+      "status": "PARTIAL",
+      "source": "mlb-player-props-readiness-audit.service.ts; historical pitcher appearances; no current prop odds feed certified",
+      "usedByCurrentModel": "not used",
+      "historicalSafety": "HISTORICAL_SAFE_PARTIAL_FOR_OUTCOMES_ONLY"
+    },
+    {
+      "component": "best_available_selection_across_markets",
+      "status": "NOT_TEMPORALLY_CERTIFIED",
+      "source": "requires all market families to have certified odds, models, settlement, and comparison policy",
+      "usedByCurrentModel": "not used",
+      "historicalSafety": "BLOCKED_BY_UNSUPPORTED_MARKETS"
+    }
+  ],
+  "observableChatMethodSpecification": {
+    "starterComponent": "Compare both probable or confirmed starters using only timestamped pregame starter identity, recent prior-game performance, season rates, handedness if certified, and status confidence.",
+    "offenseComponent": "Compare team offense using season and recent prior-game team/player offensive evidence; do not include same-game outcomes.",
+    "bullpenComponent": "Compare relief quality and recent workload from prior games only; missing closer/high-leverage role evidence remains null.",
+    "splitsComponent": "Use offensive/pitcher handedness splits only after player handedness and split source timestamps are certified.",
+    "lineupComponent": "Use MORNING projected/expected lineup only as projected, and FINAL_PREGAME confirmed lineup only if source timestamp is before start.",
+    "injuryComponent": "Use no injury edge until an approved timestamped injury source exists.",
+    "weatherParkComponent": "Use park and weather context only from stored pregame source timestamps; unavailable weather remains missing.",
+    "marketComponent": "Compare only exact event, market, selection, line, sportsbook, and odds timestamp.",
+    "recentFormComponent": "Use rolling prior games only, with source dates strictly before target start.",
+    "priceValueComponent": "Report implied probability and edge versus a calibrated probability only when that probability is derived by a certified model; otherwise report rank/score only."
+  },
+  "scorecardDesign": {
+    "version": "MLB_CHAT_METHOD_RESEARCH_SHADOW_V1",
+    "components": [
+      "STARTER_EDGE",
+      "OFFENSE_EDGE",
+      "BULLPEN_EDGE",
+      "SPLIT_EDGE",
+      "LINEUP_EDGE",
+      "CONTEXT_EDGE",
+      "MARKET_VALUE"
+    ],
+    "computedNow": ["OFFENSE_EDGE_DESIGN", "MARKET_VALUE_FOR_CORE_MARKETS", "CONTEXT_COMPLETENESS_SCORE"],
+    "partialNow": ["STARTER_EDGE", "BULLPEN_EDGE", "LINEUP_EDGE"],
+    "blockedNow": ["SPLIT_EDGE", "INJURY_EDGE", "NRFI_EDGE", "PITCHER_PROP_EDGE"],
+    "probabilityOutputPolicy": "Do not emit calibrated probability until historical or forward frozen ledger evidence supports calibration. Persist score, rank, component evidence, completeness, and confidence tier only."
+  },
+  "temporalContracts": {
+    "historicalRule": "Every feature source timestamp must be strictly before target_event_start_time.",
+    "morningSnapshot": {
+      "snapshotType": "MORNING",
+      "immutable": true,
+      "mayContain": ["probable starter", "projected lineup", "stored market odds", "park context", "missing context blockers"],
+      "mustNotContain": ["post-start odds", "final lineup unless already known", "game result", "same-game stats"]
+    },
+    "finalPregameSnapshot": {
+      "snapshotType": "FINAL_PREGAME",
+      "immutable": true,
+      "mayContain": ["confirmed starter", "confirmed lineup if timestamped pre-start", "latest exact-line market price before cutoff"],
+      "mustNotContain": ["post-start odds", "post-start lineup changes", "game result", "settlement"]
+    },
+    "leakageAudit": {
+      "sameGameOutcomes": "BLOCKED",
+      "futureStats": "BLOCKED",
+      "postStartOdds": "BLOCKED",
+      "retrospectiveLineupBackfill": "BLOCKED",
+      "starterSubstitutionAfterStart": "BLOCKED"
+    }
+  },
+  "comparisonContract": {
+    "compareOnlyWhenSameIdentity": ["event", "market", "selection", "line"],
+    "bookPolicy": "Book-specific comparisons must retain sportsbook identity. Cross-book aggregation requires explicit best-price policy.",
+    "columns": [
+      "raw_model_probability",
+      "calibrated_probability",
+      "chat_method_score",
+      "chat_method_probability_if_calibrated",
+      "market_implied_probability",
+      "actual_outcome_after_settlement"
+    ],
+    "mismatchedLinePolicy": "Do not compare or bind old-line probability to moved-line price."
+  },
+  "evaluationContract": {
+    "ledgerRequiredForAccuracyClaims": true,
+    "accuracyClaimPolicy": "No 80 percent accuracy claim without frozen pregame ledger evidence.",
+    "ledgerFields": [
+      "date",
+      "event",
+      "market",
+      "selection",
+      "line",
+      "sportsbook",
+      "odds",
+      "predicted_probability_if_any",
+      "methodology_version",
+      "prediction_timestamp",
+      "snapshot_type",
+      "result_once_final"
+    ],
+    "futureMetrics": [
+      "accuracy",
+      "brier",
+      "log_loss",
+      "calibration_error",
+      "flat_unit_roi",
+      "market_specific_performance",
+      "probability_buckets",
+      "favorite_underdog",
+      "morning_vs_final_pregame",
+      "sample_size"
+    ]
+  },
+  "researchShadowDesign": {
+    "origin": "MLB_CHAT_METHOD_RESEARCH_SHADOW",
+    "modelRole": "research_shadow",
+    "isCurrent": false,
+    "recommendedPick": false,
+    "productionEligible": false,
+    "officialPick": false,
+    "productVisible": false,
+    "settlementExecution": false,
+    "learningCalibration": false,
+    "persistenceReadiness": "DESIGN_ONLY",
+    "thirdComparison": ["RAW_BASELINE", "CALIBRATED_SHADOW", "CHAT_METHOD_RESEARCH_SHADOW"]
+  },
+  "pitcherPropFoundation": {
+    "overall": "PARTIAL_NOT_READY_FOR_PREDICTIONS",
+    "strikeouts": "PARTIAL_OUTCOME_FOUNDATION_NO_CURRENT_ODDS",
+    "outsRecorded": "PARTIAL_OUTCOME_FOUNDATION_NO_CURRENT_ODDS",
+    "earnedRuns": "PARTIAL_RUNS_ALLOWED_NOT_VERIFIED_EARNED_RUNS",
+    "hitsAllowed": "PARTIAL_OUTCOME_FOUNDATION_NO_CURRENT_ODDS",
+    "walks": "PARTIAL_OUTCOME_FOUNDATION_NO_CURRENT_ODDS",
+    "requiredBeforePrediction": [
+      "player identity",
+      "starter confirmation",
+      "opponent",
+      "handedness",
+      "recent workload",
+      "pitch count",
+      "season/recent rates",
+      "opponent splits",
+      "prop line",
+      "sportsbook odds",
+      "settlement evidence"
+    ]
+  },
+  "nrfiYrfiFoundation": {
+    "nrfi": "NOT_READY",
+    "yrfi": "NOT_READY",
+    "blockers": [
+      "no verified NRFI/YRFI odds normalization",
+      "no first-inning starter split model",
+      "no top-order lineup certainty contract",
+      "no NRFI/YRFI settlement/result evidence"
+    ]
+  },
+  "priorityRecommendation": [
+    {
+      "rank": 1,
+      "phase": "E_MORNING_FINAL_PREGAME_SNAPSHOT_AUTOMATION",
+      "reason": "Highest information value because it freezes observable evidence before any model comparison."
+    },
+    {
+      "rank": 2,
+      "phase": "A_CHAT_METHOD_RESEARCH_SHADOW",
+      "reason": "Ready as scorecard/ledger design, but probability output must wait for calibration."
+    },
+    {
+      "rank": 3,
+      "phase": "D_CONTEXT_SOURCE_COMPLETION",
+      "reason": "Lineup, injury, weather, bullpen role and split provenance limit methodology parity."
+    },
+    {
+      "rank": 4,
+      "phase": "B_PITCHER_PROPS",
+      "reason": "Historical outcome foundation is partial, but sportsbook prop odds and settlement activation are blocked."
+    },
+    {
+      "rank": 5,
+      "phase": "C_NRFI_YRFI",
+      "reason": "More blocked than props due to missing market, first-inning features and settlement evidence."
+    }
+  ],
+  "readiness": {
+    "MLB_CHAT_METHOD_RESEARCH_SHADOW_READY": "DESIGN_READY_NO_PROBABILITY_NO_PERSISTENCE",
+    "MLB_PITCHER_PROP_FOUNDATION_READY": "NO",
+    "MLB_NRFI_FOUNDATION_READY": "NO"
+  }
+}
