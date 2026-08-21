@@ -2,6 +2,12 @@
 
 Last updated: 2026-07-30 20:05:00Z
 
+## 2026-08-20 MLB-03R5 Shadow Settlement Runtime Preparation
+
+- MLB-03R5 is locally implemented as `MLB_03_SHADOW_SETTLEMENT_RUNTIME_CERTIFIED_READY_FOR_PUBLICATION`. It preserves the three clean MLB `CURRENT_ERA_SHADOW` canaries and one quarantined malformed row, stops accumulation at the soft-review threshold, and prepares an isolated MLB shadow settlement runtime without settling production rows.
+- The new runtime scopes strictly to `sport_key = baseball_mlb`, `prediction_origin = CURRENT_ERA_SHADOW`, `model_role = shadow`, non-quarantined rows, and supported full-game Moneyline, Run Line and Total markets. It uses stored canonical `sport_events` plus `game_results` only, makes 0 provider calls, supports dry-run, and requires `MLB_CURRENT_ERA_SHADOW_SETTLEMENT_AUTHORIZED=true` for any future execution.
+- Fixture certification covers moneyline win/loss, run-line win/loss/push, total over/under/push, cancelled/postponed fail-closed behavior, missing result, idempotent already-settled rows, conflicting prior settlement, quarantined exclusion, and immutable fingerprint stability after settlement lifecycle fields change. No Official Picks, product visibility, learning, calibration promotion, bankroll, notifications, NFL or NBA behavior changed.
+
 ## 2026-08-20 MLB-03 Calibrated Shadow Foundation
 
 - MLB-03 is locally implemented as `MLB_03_CALIBRATED_SHADOW_CERTIFIED_CONTEXT_FORWARD_ONLY`. It materializes `artifacts/mlb/mlb-03-market-calibration-v1.json` as a runtime-loadable, market-specific calibration artifact derived only from stored settled MLB baseline evidence with temporal leakage 0.

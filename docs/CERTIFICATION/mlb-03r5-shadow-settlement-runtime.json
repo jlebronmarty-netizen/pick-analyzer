@@ -1,0 +1,55 @@
+{
+  "phase": "MLB-03R5",
+  "status": "MLB_03_SHADOW_SETTLEMENT_RUNTIME_CERTIFIED_READY_FOR_PUBLICATION",
+  "runtime": {
+    "service": "src/services/mlb-current-era-shadow-settlement.service.ts",
+    "version": "mlb_current_era_shadow_settlement_preparation_v1",
+    "sportKey": "baseball_mlb",
+    "predictionOrigin": "CURRENT_ERA_SHADOW",
+    "modelRole": "shadow",
+    "supportedMarkets": ["moneyline", "run_line", "total"],
+    "dryRunSupported": true,
+    "executionGuard": "MLB_CURRENT_ERA_SHADOW_SETTLEMENT_AUTHORIZED=true",
+    "futureExecutionRequiresExplicitAuthorization": true
+  },
+  "settlementContract": {
+    "canonicalResultAuthority": "game_results joined by prediction_history.game_id = game_results.game_id",
+    "eventAuthority": "sport_events joined by prediction_history.game_id = sport_events.id",
+    "moneyline": "Selected team final score greater than opponent final score wins; lower loses.",
+    "runLine": "Selected team final score plus exact persisted line is compared to opponent final score.",
+    "total": "Combined final score is compared to exact persisted total line using Over/Under selection.",
+    "cancelledPostponedSuspended": "fail_closed_no_loss_grading",
+    "quarantinedRows": "excluded_from_clean_shadow_settlement",
+    "profitConvention": "flat_100_unit_research_profit_from_stored_american_odds",
+    "bankrollWrites": 0,
+    "notificationWrites": 0
+  },
+  "isolation": {
+    "officialPickWrites": 0,
+    "productVisibilityWrites": 0,
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "baselinePerformanceMutations": 0,
+    "shadowPerformanceScope": "separate_shadow_cohort_only",
+    "nflWrites": 0,
+    "nbaWrites": 0
+  },
+  "immutability": {
+    "fingerprintVersion": "mlb_current_era_shadow_canary_immutable_fingerprint_v1",
+    "settlementFieldsExcludedFromFingerprint": true
+  },
+  "currentShadowStateAtPreparation": {
+    "currentEraShadowTotal": 4,
+    "cleanActiveValidPending": 3,
+    "quarantined": 1,
+    "cleanSettled": 0,
+    "accumulationPausedForReview": true,
+    "fourthCanaryReady": false,
+    "continuousSchedulerReady": false
+  },
+  "accounting": {
+    "providerCalls": 0,
+    "productionDatabaseMutations": 0,
+    "settlementExecution": 0
+  }
+}
