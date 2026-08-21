@@ -1,0 +1,185 @@
+{
+  "classification": "MLB_04C_CHAT_METHOD_RESEARCH_SCORECARD_CERTIFIED",
+  "phase": "MLB-04C_CHAT_METHOD_RESEARCH_SHADOW_SCORECARD_LEDGER",
+  "generatedAt": "2026-08-21T00:00:00.000Z",
+  "methodologyVersion": "MLB_CHAT_METHOD_RESEARCH_SHADOW_V1",
+  "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V1",
+  "snapshotDependencyVersion": "MLB_04B_RESEARCH_SNAPSHOT_CONTRACT_V1",
+  "existingThreeRowForwardLedger": {
+    "cleanSettledRows": 3,
+    "cleanPendingRows": 0,
+    "quarantinedRowsExcluded": 1,
+    "wins": 1,
+    "losses": 2,
+    "pushes": 0,
+    "profit": -34,
+    "roi": -0.1133,
+    "rawMeanBrier": 0.2688571067,
+    "calibratedMeanBrier": 0.31798218,
+    "rawMeanLogLoss": 0.7348079346,
+    "calibratedMeanLogLoss": 0.830685956,
+    "forwardSampleSufficientForPromotion": false,
+    "chatMethodComparisonAvailableForExistingRows": false,
+    "reason": "NO_FROZEN_PREGAME_CHAT_METHOD_SCORECARD_EXISTS_FOR_THE_ALREADY_FINISHED_THREE_ROW_SAMPLE"
+  },
+  "scorecardContract": {
+    "components": [
+      "STARTER_EDGE",
+      "OFFENSE_EDGE",
+      "BULLPEN_EDGE",
+      "SPLIT_EDGE",
+      "LINEUP_EDGE",
+      "CONTEXT_EDGE",
+      "MARKET_VALUE"
+    ],
+    "range": [-1, 1],
+    "directionality": "positive_favors_displayed_selection_negative_opposes_displayed_selection",
+    "normalization": "bounded_component_scale",
+    "missingDataPolicy": "UNKNOWN_OR_BLOCKED_COMPONENTS_ARE_EXCLUDED_AND_REPORTED_NOT_COERCED_TO_ZERO",
+    "componentWeightPolicy": "EQUAL_RESEARCH_WEIGHTS_OVER_AVAILABLE_TIMESTAMP_SAFE_COMPONENTS",
+    "compositeOptimizationAgainstThreeRows": false,
+    "probabilityPolicy": "NO_CHAT_METHOD_PROBABILITY_UNTIL_FROZEN_LEDGER_CALIBRATION_EXISTS"
+  },
+  "componentContracts": {
+    "STARTER_EDGE": {
+      "source": "mlb_context_snapshots.starter_context plus timestamped prior-game starter performance where certified",
+      "timestampRequirement": "source_timestamp < event_start",
+      "missingBehavior": "UNKNOWN_OR_PARTIAL_WITH_BLOCKER",
+      "range": [-1, 1]
+    },
+    "OFFENSE_EDGE": {
+      "source": "stored prior-game team offense and rolling form",
+      "timestampRequirement": "source_game.start_time < target_event.start_time",
+      "missingBehavior": "UNKNOWN_OR_PARTIAL_WITH_BLOCKER",
+      "range": [-1, 1]
+    },
+    "BULLPEN_EDGE": {
+      "source": "stored prior-game relief workload and aggregate bullpen evidence",
+      "timestampRequirement": "source_game.start_time < target_event.start_time",
+      "missingBehavior": "UNKNOWN_OR_PARTIAL_WITH_BLOCKER",
+      "range": [-1, 1]
+    },
+    "SPLIT_EDGE": {
+      "source": "handedness and split matrix only after source provenance is certified",
+      "timestampRequirement": "source_timestamp < event_start",
+      "missingBehavior": "UNAVAILABLE_TEMPORAL_PROVENANCE",
+      "range": [-1, 1]
+    },
+    "LINEUP_EDGE": {
+      "source": "MORNING projected or FINAL_PREGAME confirmed/projected lineup context",
+      "timestampRequirement": "snapshot_timestamp < event_start",
+      "missingBehavior": "UNKNOWN_OR_PARTIAL_WITH_BLOCKER",
+      "range": [-1, 1]
+    },
+    "CONTEXT_EDGE": {
+      "source": "park, weather, injury, rest and travel only from approved timestamped sources",
+      "timestampRequirement": "source_timestamp < event_start",
+      "missingBehavior": "MISSING_CONTEXT_BLOCKER",
+      "range": [-1, 1]
+    },
+    "MARKET_VALUE": {
+      "source": "sports_odds_snapshots plus prediction_history exact market identity",
+      "timestampRequirement": "odds_timestamp < event_start",
+      "missingBehavior": "BLOCKED_NO_EXACT_PRICE",
+      "range": [-1, 1]
+    }
+  },
+  "snapshotDependency": {
+    "morning": "MORNING score consumes only MORNING snapshot evidence captured before start",
+    "finalPregame": "FINAL_PREGAME score consumes only FINAL_PREGAME evidence captured before start and cutoff",
+    "currentProbeSubstitutionAllowed": false,
+    "whyScoreChangedFields": [
+      "starter_change",
+      "lineup_change",
+      "bullpen_change",
+      "market_odds_change",
+      "line_change",
+      "context_completeness_change",
+      "component_score_change"
+    ]
+  },
+  "forwardLedgerContract": {
+    "immutable": true,
+    "noRetrospectiveRows": true,
+    "fields": [
+      "event",
+      "event_start",
+      "snapshot_type",
+      "snapshot_timestamp",
+      "market",
+      "selection",
+      "line",
+      "sportsbook",
+      "odds",
+      "raw_probability",
+      "calibrated_probability",
+      "chat_method_component_scores",
+      "chat_method_composite_score",
+      "research_rank",
+      "research_completeness",
+      "methodology_version",
+      "result_after_settlement",
+      "profit_after_settlement"
+    ]
+  },
+  "researchOriginContract": {
+    "predictionOrigin": "CHAT_METHOD_RESEARCH_SHADOW",
+    "modelRole": "research_shadow",
+    "isCurrent": false,
+    "recommendedPick": false,
+    "productionEligible": false,
+    "productVisible": false,
+    "officialPick": false
+  },
+  "comparisonContract": {
+    "sameOpportunityKeys": ["event", "market", "selection", "line", "sportsbook", "snapshot_type"],
+    "compare": ["RAW_BASELINE", "CALIBRATED_BASELINE", "CHAT_METHOD_RESEARCH_SCORE"],
+    "chatProbabilityMetricsEnabled": false,
+    "futureMetrics": ["roi", "ranking_hit_rate", "top_n_performance"]
+  },
+  "currentForwardDryRun": {
+    "mode": "FORWARD_SAFE_FIXTURE_NO_PROVIDER_NO_DB",
+    "candidatesEvaluated": 2,
+    "persistenceWrites": 0,
+    "providerCalls": 0,
+    "databaseMutations": 0
+  },
+  "guards": {
+    "noRetrospectiveChatMethodRows": true,
+    "noAccuracyClaimWithoutFrozenLedger": true,
+    "noCopiedChatGptProbabilities": true,
+    "noProductionModelChange": true,
+    "noOfficialPickChange": true,
+    "noCurrentEraShadowWrites": true,
+    "noSettlementWrites": true,
+    "noLearningWrites": true,
+    "noCalibrationWrites": true,
+    "sportsDataIoExcluded": true,
+    "nflIsolation": true,
+    "nbaIsolation": true
+  },
+  "derivativeReuse": {
+    "pitcherProps": "YES_RESEARCH_ONLY",
+    "nrfiYrfi": "YES_RESEARCH_ONLY"
+  },
+  "safetyCounters": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0,
+    "predictionWrites": 0,
+    "currentEraShadowWrites": 0,
+    "officialPickWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "calibrationWrites": 0
+  },
+  "readiness": {
+    "CHAT_METHOD_SCORECARD_READY": "YES",
+    "CHAT_METHOD_FORWARD_LEDGER_READY": "YES",
+    "CHAT_METHOD_PROBABILITY_READY": "NO",
+    "RAW_CALIBRATED_CHAT_COMPARISON_READY": "YES",
+    "NO_RETROSPECTIVE_CHAT_METHOD_ROWS": "YES",
+    "NO_ACCURACY_CLAIM_WITHOUT_FROZEN_LEDGER": "YES",
+    "MLB_PITCHER_PROP_RESEARCH_SCORECARD_REUSE_READY": "YES_RESEARCH_ONLY",
+    "MLB_NRFI_RESEARCH_SCORECARD_REUSE_READY": "YES_RESEARCH_ONLY"
+  }
+}

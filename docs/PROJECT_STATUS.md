@@ -2,6 +2,13 @@
 
 Last updated: 2026-08-21 00:00:00Z
 
+## 2026-08-21 MLB-04C Chat-Method Research Scorecard
+
+- MLB-04C is locally implemented as `MLB_04C_CHAT_METHOD_RESEARCH_SCORECARD_CERTIFIED`. It turns the MLB-04A design into a deterministic research-only scorecard service and forward ledger contract for `STARTER_EDGE`, `OFFENSE_EDGE`, `BULLPEN_EDGE`, `SPLIT_EDGE`, `LINEUP_EDGE`, `CONTEXT_EDGE` and `MARKET_VALUE`.
+- The existing three settled MLB-03 forward canaries remain baseline-only evidence. Chat-Method comparison is not available for those finished rows because no frozen pregame Chat-Method scorecard existed before start, so no retrospective Chat-Method rows or accuracy claims are created.
+- The scorecard uses bounded `-1.0` to `+1.0` component scores, excludes missing or temporally uncertified evidence rather than treating it as neutral, and uses equal research weights over timestamp-safe available components. It does not emit a Chat-Method probability; probability readiness remains blocked until frozen ledger calibration evidence exists.
+- No production prediction rows, `CURRENT_ERA_SHADOW` rows, Official Picks, settlement, learning, calibration, scheduler state, provider calls, database mutations, SportsDataIO, NFL or NBA behavior changed. Next: publish MLB-04C, then separately authorize a future pregame research ledger persistence proof only after MLB-04B has a legitimate MORNING or FINAL_PREGAME window.
+
 ## 2026-08-21 MLB-04B Morning / Final-Pregame Snapshot Runtime
 
 - MLB-04B is locally implemented as `MLB_04B_MORNING_FINAL_PREGAME_SNAPSHOT_RUNTIME_CERTIFIED`. It adds a guarded research snapshot runtime for immutable MLB `MORNING` and `FINAL_PREGAME` context evidence using the existing `mlb_context_snapshots` infrastructure.
