@@ -1,6 +1,7 @@
 import 'server-only'
 
 export const MLB_04C_SCORECARD_VERSION = 'MLB_CHAT_METHOD_RESEARCH_SCORECARD_V1'
+export const MLB_04C_R4_SCORECARD_VERSION = 'MLB_CHAT_METHOD_RESEARCH_SCORECARD_V2'
 export const MLB_04C_METHODOLOGY_VERSION = 'MLB_CHAT_METHOD_RESEARCH_SHADOW_V1'
 export const MLB_04C_SNAPSHOT_DEPENDENCY_VERSION = 'MLB_04B_RESEARCH_SNAPSHOT_CONTRACT_V1'
 export const MLB_04C_RESEARCH_ORIGIN = 'CHAT_METHOD_RESEARCH_SHADOW'
@@ -19,6 +20,7 @@ export type Mlb04cComponentKey =
 type ComponentSourceStatus =
   | 'AVAILABLE'
   | 'PARTIAL'
+  | 'MISSING'
   | 'UNKNOWN'
   | 'BLOCKED'
   | 'UNAVAILABLE_TEMPORAL_PROVENANCE'
@@ -32,6 +34,7 @@ type ComponentInput = {
 }
 
 type CandidateInput = {
+  scorecardVersion?: string
   eventId: string
   eventLabel: string
   eventStartTime: string
@@ -88,7 +91,7 @@ function evaluateComponent(key: Mlb04cComponentKey, input: ComponentInput, event
     key,
     status,
     score: hasScore ? clampScore(input.value as number) : null,
-    includedInComposite: hasScore && status !== 'BLOCKED' && status !== 'UNKNOWN' && status !== 'UNAVAILABLE_TEMPORAL_PROVENANCE',
+    includedInComposite: hasScore && status !== 'BLOCKED' && status !== 'MISSING' && status !== 'UNKNOWN' && status !== 'UNAVAILABLE_TEMPORAL_PROVENANCE',
     source: input.source,
     sourceTimestamp: input.sourceTimestamp,
     blockers,
@@ -97,7 +100,7 @@ function evaluateComponent(key: Mlb04cComponentKey, input: ComponentInput, event
 
 function buildDeterministicLedgerIdentity(candidate: CandidateInput) {
   return [
-    MLB_04C_SCORECARD_VERSION,
+    candidate.scorecardVersion ?? MLB_04C_SCORECARD_VERSION,
     candidate.eventId,
     candidate.snapshotType,
     candidate.market,
@@ -145,6 +148,7 @@ function evaluateCandidate(candidate: CandidateInput) {
     temporalStatus: temporalBlockers.length === 0 ? 'PREGAME' : 'BLOCKED',
     temporalBlockers,
     sameOpportunityIdentity: {
+      scorecardVersion: candidate.scorecardVersion ?? MLB_04C_SCORECARD_VERSION,
       eventId: candidate.eventId,
       market: candidate.market,
       selection: candidate.selection,
@@ -171,6 +175,418 @@ function evaluateCandidate(candidate: CandidateInput) {
     researchRankEligible: temporalBlockers.length === 0 && compositeScore !== null,
     deterministicLedgerIdentity: buildDeterministicLedgerIdentity(candidate),
     persistenceDecision: 'DRY_RUN_ONLY',
+  }
+}
+
+type StarterResearchInput = {
+  status: 'PROBABLE' | 'CONFIRMED' | 'PROJECTED' | 'UNKNOWN'
+  source: 'mlb_starter_assignments' | 'sport_lineups' | 'mlb_official_snapshot_lineage' | 'none'
+  sourceTimestamp: string | null
+  starterPlayerId: string | null
+  starterName: string | null
+  handedness: 'L' | 'R' | null
+  mappingConfidence: number
+  eraProxyDelta: number | null
+  strikeoutWalkDelta: number | null
+  workloadDelta: number | null
+}
+
+type OffenseResearchInput = {
+  sourceTimestamp: string | null
+  last5RunsDelta: number | null
+  last10RunsDelta: number | null
+  seasonBaselineDelta: number | null
+  homeAwayDelta: number | null
+  sampleGames: number
+}
+
+type BullpenResearchInput = {
+  sourceTimestamp: string | null
+  workloadLast1Delta: number | null
+  workloadLast3Delta: number | null
+  reliefPerformanceDelta: number | null
+  availabilityPenaltyDelta: number | null
+  sampleGames: number
+}
+
+function sourceBeforeStart(sourceTimestamp: string | null, eventStartTime: string) {
+  return Boolean(sourceTimestamp && timestampBeforeStart(sourceTimestamp, eventStartTime))
+}
+
+function boundedAverage(values: Array<number | null>) {
+  const usable = values.filter((value): value is number => value !== null && Number.isFinite(value))
+  if (!usable.length) return null
+  return clampScore(usable.reduce((sum, value) => sum + value, 0) / usable.length)
+}
+
+function teamDirection(market: Mlb04cMarket, selection: string, homeTeam: string, awayTeam: string) {
+  if (market === 'total') return null
+  if (selection === homeTeam) return 'home' as const
+  if (selection === awayTeam) return 'away' as const
+  return null
+}
+
+function totalDirection(selection: string) {
+  const normalized = selection.trim().toLowerCase()
+  if (normalized === 'over') return 'over' as const
+  if (normalized === 'under') return 'under' as const
+  return null
+}
+
+function starterEdgeForMarket(params: {
+  market: Mlb04cMarket
+  selection: string
+  homeTeam: string
+  awayTeam: string
+  eventStartTime: string
+  home: StarterResearchInput
+  away: StarterResearchInput
+}): ComponentInput {
+  const base = { source: 'mlb_starter_assignments|sport_lineups|mlb_official_snapshot_lineage' }
+  const timestampsSafe = [params.home, params.away].every((starter) => starter.source === 'none' || sourceBeforeStart(starter.sourceTimestamp, params.eventStartTime))
+  if (!timestampsSafe) {
+    return { value: null, sourceStatus: 'BLOCKED', source: base.source, sourceTimestamp: null, blockers: ['STARTER_SOURCE_TIMESTAMP_NOT_PREGAME'] }
+  }
+  const ready = [params.home, params.away].every((starter) => starter.status !== 'UNKNOWN' && starter.starterPlayerId && starter.mappingConfidence >= 0.75)
+  if (!ready) {
+    return { value: null, sourceStatus: 'PARTIAL', source: base.source, sourceTimestamp: null, blockers: ['STARTER_EDGE_BLOCKED_MISSING_CERTIFIED_STARTER_IDENTITY'] }
+  }
+  const homeStrength = boundedAverage([params.home.eraProxyDelta, params.home.strikeoutWalkDelta, params.home.workloadDelta])
+  const awayStrength = boundedAverage([params.away.eraProxyDelta, params.away.strikeoutWalkDelta, params.away.workloadDelta])
+  if (homeStrength === null || awayStrength === null) {
+    return { value: null, sourceStatus: 'PARTIAL', source: base.source, sourceTimestamp: null, blockers: ['STARTER_EDGE_BLOCKED_INSUFFICIENT_STARTER_STATISTICS'] }
+  }
+  const side = teamDirection(params.market, params.selection, params.homeTeam, params.awayTeam)
+  const totalSide = totalDirection(params.selection)
+  let value: number | null = null
+  if (side) value = side === 'home' ? homeStrength - awayStrength : awayStrength - homeStrength
+  if (totalSide) {
+    const runSuppression = (homeStrength + awayStrength) / 2
+    value = totalSide === 'under' ? runSuppression : -runSuppression
+  }
+  return {
+    value,
+    sourceStatus: value === null ? 'PARTIAL' : 'AVAILABLE',
+    source: base.source,
+    sourceTimestamp: [params.home.sourceTimestamp, params.away.sourceTimestamp].filter(Boolean).sort().at(0) ?? null,
+    blockers: value === null ? ['STARTER_EDGE_MARKET_DIRECTION_UNSUPPORTED'] : [],
+  }
+}
+
+function offenseEdgeForMarket(params: {
+  market: Mlb04cMarket
+  selection: string
+  homeTeam: string
+  awayTeam: string
+  eventStartTime: string
+  home: OffenseResearchInput
+  away: OffenseResearchInput
+}): ComponentInput {
+  const source = 'stored_prior_game_team_form_last5_last10_season_to_date_home_away'
+  const timestampsSafe = [params.home, params.away].every((row) => sourceBeforeStart(row.sourceTimestamp, params.eventStartTime))
+  if (!timestampsSafe) return { value: null, sourceStatus: 'BLOCKED', source, sourceTimestamp: null, blockers: ['OFFENSE_SOURCE_TIMESTAMP_NOT_PREGAME'] }
+  if (params.home.sampleGames < 5 || params.away.sampleGames < 5) return { value: null, sourceStatus: 'PARTIAL', source, sourceTimestamp: null, blockers: ['OFFENSE_EDGE_BLOCKED_INSUFFICIENT_PRIOR_GAME_SAMPLE'] }
+  const homeForm = boundedAverage([params.home.last5RunsDelta, params.home.last10RunsDelta, params.home.seasonBaselineDelta, params.home.homeAwayDelta])
+  const awayForm = boundedAverage([params.away.last5RunsDelta, params.away.last10RunsDelta, params.away.seasonBaselineDelta, params.away.homeAwayDelta])
+  if (homeForm === null || awayForm === null) return { value: null, sourceStatus: 'PARTIAL', source, sourceTimestamp: null, blockers: ['OFFENSE_EDGE_BLOCKED_MISSING_PRIOR_GAME_FIELDS'] }
+  const side = teamDirection(params.market, params.selection, params.homeTeam, params.awayTeam)
+  const totalSide = totalDirection(params.selection)
+  let value: number | null = null
+  if (side) value = side === 'home' ? homeForm - awayForm : awayForm - homeForm
+  if (totalSide) {
+    const runPressure = (homeForm + awayForm) / 2
+    value = totalSide === 'over' ? runPressure : -runPressure
+  }
+  return {
+    value,
+    sourceStatus: value === null ? 'PARTIAL' : 'AVAILABLE',
+    source,
+    sourceTimestamp: [params.home.sourceTimestamp, params.away.sourceTimestamp].filter(Boolean).sort().at(0) ?? null,
+    blockers: value === null ? ['OFFENSE_EDGE_MARKET_DIRECTION_UNSUPPORTED'] : [],
+  }
+}
+
+function bullpenEdgeForMarket(params: {
+  market: Mlb04cMarket
+  selection: string
+  homeTeam: string
+  awayTeam: string
+  eventStartTime: string
+  home: BullpenResearchInput
+  away: BullpenResearchInput
+}): ComponentInput {
+  const source = 'sport_game_stats_and_sport_player_stats_prior_relief_workload'
+  const timestampsSafe = [params.home, params.away].every((row) => sourceBeforeStart(row.sourceTimestamp, params.eventStartTime))
+  if (!timestampsSafe) return { value: null, sourceStatus: 'BLOCKED', source, sourceTimestamp: null, blockers: ['BULLPEN_SOURCE_TIMESTAMP_NOT_PREGAME'] }
+  if (params.home.sampleGames < 3 || params.away.sampleGames < 3) return { value: null, sourceStatus: 'PARTIAL', source, sourceTimestamp: null, blockers: ['BULLPEN_EDGE_BLOCKED_INSUFFICIENT_PRIOR_GAME_SAMPLE'] }
+  const homeRestedQuality = boundedAverage([
+    params.home.workloadLast1Delta,
+    params.home.workloadLast3Delta,
+    params.home.reliefPerformanceDelta,
+    params.home.availabilityPenaltyDelta,
+  ])
+  const awayRestedQuality = boundedAverage([
+    params.away.workloadLast1Delta,
+    params.away.workloadLast3Delta,
+    params.away.reliefPerformanceDelta,
+    params.away.availabilityPenaltyDelta,
+  ])
+  if (homeRestedQuality === null || awayRestedQuality === null) return { value: null, sourceStatus: 'PARTIAL', source, sourceTimestamp: null, blockers: ['BULLPEN_EDGE_BLOCKED_MISSING_PRIOR_RELIEF_FIELDS'] }
+  const side = teamDirection(params.market, params.selection, params.homeTeam, params.awayTeam)
+  const totalSide = totalDirection(params.selection)
+  let value: number | null = null
+  if (side) value = side === 'home' ? homeRestedQuality - awayRestedQuality : awayRestedQuality - homeRestedQuality
+  if (totalSide) {
+    const runSuppression = (homeRestedQuality + awayRestedQuality) / 2
+    value = totalSide === 'under' ? runSuppression : -runSuppression
+  }
+  return {
+    value,
+    sourceStatus: value === null ? 'PARTIAL' : 'AVAILABLE',
+    source,
+    sourceTimestamp: [params.home.sourceTimestamp, params.away.sourceTimestamp].filter(Boolean).sort().at(0) ?? null,
+    blockers: value === null ? ['BULLPEN_EDGE_MARKET_DIRECTION_UNSUPPORTED'] : [],
+  }
+}
+
+function r4FutureFixtureCandidate(): CandidateInput {
+  const eventStartTime = '2026-08-23T23:10:00.000Z'
+  const snapshotTimestamp = '2026-08-23T22:40:00.000Z'
+  const homeTeam = 'Research Fixture Home'
+  const awayTeam = 'Research Fixture Away'
+  const common = {
+    market: 'total' as const,
+    selection: 'Under',
+    homeTeam,
+    awayTeam,
+    eventStartTime,
+  }
+  return {
+    scorecardVersion: MLB_04C_R4_SCORECARD_VERSION,
+    eventId: 'baseball_mlb:research:r4_forward_fixture:2026_08_23',
+    eventLabel: `${awayTeam} @ ${homeTeam}`,
+    eventStartTime,
+    snapshotType: 'FINAL_PREGAME',
+    snapshotTimestamp,
+    market: common.market,
+    selection: common.selection,
+    line: 8.5,
+    sportsbook: 'fanduel',
+    odds: -112,
+    impliedProbability: 0.5283,
+    rawProbability: 0.517,
+    calibratedProbability: 0.541,
+    components: {
+      STARTER_EDGE: starterEdgeForMarket({
+        ...common,
+        home: {
+          status: 'PROBABLE',
+          source: 'mlb_starter_assignments',
+          sourceTimestamp: '2026-08-23T20:30:00.000Z',
+          starterPlayerId: 'baseball_mlb:research:starter_home',
+          starterName: 'Research Home Starter',
+          handedness: 'R',
+          mappingConfidence: 0.91,
+          eraProxyDelta: 0.18,
+          strikeoutWalkDelta: 0.12,
+          workloadDelta: 0.1,
+        },
+        away: {
+          status: 'PROBABLE',
+          source: 'sport_lineups',
+          sourceTimestamp: '2026-08-23T20:35:00.000Z',
+          starterPlayerId: 'baseball_mlb:research:starter_away',
+          starterName: 'Research Away Starter',
+          handedness: 'L',
+          mappingConfidence: 0.88,
+          eraProxyDelta: 0.1,
+          strikeoutWalkDelta: 0.08,
+          workloadDelta: 0.06,
+        },
+      }),
+      OFFENSE_EDGE: offenseEdgeForMarket({
+        ...common,
+        home: {
+          sourceTimestamp: '2026-08-23T14:00:00.000Z',
+          last5RunsDelta: -0.08,
+          last10RunsDelta: -0.06,
+          seasonBaselineDelta: -0.04,
+          homeAwayDelta: 0.02,
+          sampleGames: 10,
+        },
+        away: {
+          sourceTimestamp: '2026-08-23T14:00:00.000Z',
+          last5RunsDelta: -0.04,
+          last10RunsDelta: -0.03,
+          seasonBaselineDelta: -0.02,
+          homeAwayDelta: -0.01,
+          sampleGames: 10,
+        },
+      }),
+      BULLPEN_EDGE: bullpenEdgeForMarket({
+        ...common,
+        home: {
+          sourceTimestamp: '2026-08-23T14:05:00.000Z',
+          workloadLast1Delta: 0.12,
+          workloadLast3Delta: 0.1,
+          reliefPerformanceDelta: 0.08,
+          availabilityPenaltyDelta: 0.04,
+          sampleGames: 5,
+        },
+        away: {
+          sourceTimestamp: '2026-08-23T14:05:00.000Z',
+          workloadLast1Delta: 0.08,
+          workloadLast3Delta: 0.04,
+          reliefPerformanceDelta: 0.06,
+          availabilityPenaltyDelta: 0.02,
+          sampleGames: 5,
+        },
+      }),
+      SPLIT_EDGE: {
+        value: null,
+        sourceStatus: 'UNAVAILABLE_TEMPORAL_PROVENANCE',
+        source: 'handedness_split_matrix',
+        sourceTimestamp: null,
+        blockers: ['SPLIT_EDGE_STATUS_UNAVAILABLE_TEMPORAL_PROVENANCE'],
+      },
+      LINEUP_EDGE: {
+        value: null,
+        sourceStatus: 'PARTIAL',
+        source: 'projected_or_confirmed_lineup_context',
+        sourceTimestamp: null,
+        blockers: ['LINEUP_EDGE_NOT_IN_R4_TARGET_PACKAGE'],
+      },
+      CONTEXT_EDGE: {
+        value: null,
+        sourceStatus: 'PARTIAL',
+        source: 'park_weather_injury_context',
+        sourceTimestamp: null,
+        blockers: ['WEATHER_MISSING', 'INJURY_SOURCE_NOT_CERTIFIED', 'PARK_CONTEXT_NOT_IN_R4_TARGET_PACKAGE'],
+      },
+      MARKET_VALUE: {
+        value: 0.06,
+        sourceStatus: 'AVAILABLE',
+        source: 'sports_odds_snapshots + prediction_history exact identity',
+        sourceTimestamp: snapshotTimestamp,
+      },
+    },
+  }
+}
+
+export function auditMlb04cR4StarterOffenseBullpenContextRecovery() {
+  const fixture = evaluateCandidate(r4FutureFixtureCandidate())
+  const targetedComponents = ['STARTER_EDGE', 'OFFENSE_EDGE', 'BULLPEN_EDGE', 'MARKET_VALUE'] as const
+  const targetedReady = targetedComponents.every((key) => fixture.availableComponents.includes(key))
+  return {
+    classification: 'MLB_04C_R4_STARTER_OFFENSE_BULLPEN_CONTEXT_RECOVERY_CERTIFIED',
+    phase: 'MLB-04C-R4_STARTER_OFFENSE_BULLPEN_DIRECTIONAL_CONTEXT_RECOVERY',
+    generatedAt: '2026-08-22T00:00:00.000Z',
+    previousScorecardVersion: MLB_04C_SCORECARD_VERSION,
+    futureScorecardVersion: MLB_04C_R4_SCORECARD_VERSION,
+    methodologyVersion: MLB_04C_METHODOLOGY_VERSION,
+    observation1: {
+      snapshotId: '5331e683-46ae-409b-9fe4-5ce0a1ef9721',
+      event: 'LAA @ TEX',
+      scorecardVersion: MLB_04C_SCORECARD_VERSION,
+      frozenScore: -0.0296,
+      frozenCompleteness: 0.1429,
+      usableComponents: ['MARKET_VALUE'],
+      OBSERVATION_1_FROZEN: 'YES',
+      NO_RETROSPECTIVE_ENRICHMENT: 'YES',
+      OBSERVATION_1_REGRESSION_STABLE: 'YES',
+    },
+    scorecardVersioning: {
+      materialBehaviorChange: true,
+      reason: 'R4 adds deterministic starter, offense and bullpen scoring semantics for future rows.',
+      v1FrozenForExistingRows: true,
+      v2FutureOnly: true,
+    },
+    starterContract: {
+      sourcePriority: ['mlb_starter_assignments', 'sport_lineups', 'mlb_official_snapshot_lineage'],
+      requiredFields: ['starterPlayerId', 'starterName', 'handednessWhenCertified', 'status', 'source', 'sourceTimestamp', 'mappingConfidence', 'gamePkOrEventLinkage'],
+      temporalRule: 'source_timestamp < target_event_start',
+      unavailableBehavior: 'STARTER_EDGE_BLOCKED_MISSING_CERTIFIED_STARTER_IDENTITY',
+      scoringInputs: ['eraProxyDelta', 'strikeoutWalkDelta', 'workloadDelta'],
+    },
+    offenseContract: {
+      source: 'stored prior-game team offense/recent-form evidence',
+      temporalRule: 'source_game.start_time < target_event.start_time',
+      windows: ['last5Games', 'last10Games', 'seasonToDateBaseline', 'homeAwayContext'],
+      normalization: 'bounded average of repository-supported deltas clamped to [-1,+1]',
+      unavailableBehavior: 'OFFENSE_EDGE remains null with blocker',
+    },
+    bullpenContract: {
+      source: 'stored prior-game sport_game_stats and sport_player_stats relief evidence',
+      temporalRule: 'source_timestamp < target_event_start',
+      formula: 'bounded average of workloadLast1, workloadLast3, reliefPerformance and availabilityPenalty deltas',
+      normalization: 'clamped to [-1,+1]',
+      unavailableBehavior: 'BULLPEN_EDGE remains null with blocker',
+    },
+    marketSpecificDirectionality: {
+      moneyline: 'starter/offense/bullpen team advantage maps to selected team',
+      runLine: 'starter/offense/bullpen team advantage maps to selected team and exact line identity remains external',
+      total: 'offense pressure favors Over; starter run suppression and bullpen run suppression favor Under',
+      unsupportedSelectionBehavior: 'component PARTIAL with explicit market-direction blocker',
+    },
+    snapshotFieldContract: {
+      futureOnly: true,
+      fields: ['starterContext', 'offenseRecentFormContext', 'bullpenDirectionalInputs', 'sourceTimestamp', 'sourceLineage', 'featureLineage', 'missingBlockers', 'temporalCutoff'],
+      noOverwrite: true,
+      morningFinalSeparated: true,
+    },
+    compositePolicy: 'EQUAL_RESEARCH_WEIGHTS_OVER_AVAILABLE_TIMESTAMP_SAFE_COMPONENTS',
+    currentCompleteness: 0.1429,
+    projectedCompleteness: fixture.overallResearchCompleteness,
+    forwardFixtureDryRun: fixture,
+    derivativeReuseImpact: {
+      pitcherStrikeouts: { unlocks: ['starter identity', 'starter K/BB profile'], stillBlockedBy: ['current prop odds', 'prop settlement', 'line-specific prop model'] },
+      pitcherOuts: { unlocks: ['starter identity', 'workload profile'], stillBlockedBy: ['current prop odds', 'prop settlement', 'line-specific prop model'] },
+      pitcherEarnedRuns: { unlocks: ['starter identity', 'offense context'], stillBlockedBy: ['current prop odds', 'prop settlement', 'park/weather/lineup completeness'] },
+      pitcherHitsAllowed: { unlocks: ['starter identity', 'offense context'], stillBlockedBy: ['current prop odds', 'prop settlement', 'lineup/split completeness'] },
+      pitcherWalks: { unlocks: ['starter identity', 'K/BB profile'], stillBlockedBy: ['current prop odds', 'prop settlement', 'umpire/lineup/split completeness'] },
+      nrfiYrfi: {
+        unlocks: ['starter identity foundation', 'team offense/recent form', 'bullpen context research'],
+        stillBlockedBy: ['top-order lineup', 'park/weather where applicable', 'NRFI/YRFI market odds', 'inning-specific features', 'settlement runtime'],
+      },
+    },
+    guards: {
+      noObservation1Mutation: true,
+      noChatMethodProbability: true,
+      noProductionModelChange: true,
+      noOfficialPickChange: true,
+      noCurrentEraShadowWrites: true,
+      noSettlementWrites: true,
+      noLearningWrites: true,
+      noCalibrationWrites: true,
+      noProductWrites: true,
+      sportsDataIoExcluded: true,
+      nflIsolation: true,
+      nbaIsolation: true,
+    },
+    safetyCounters: {
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+      predictionWrites: 0,
+      currentEraShadowWrites: 0,
+      chatResearchPredictionWrites: 0,
+      officialPickWrites: 0,
+      settlementWrites: 0,
+      learningWrites: 0,
+      calibrationWrites: 0,
+      productWrites: 0,
+    },
+    readiness: {
+      OBSERVATION_1_FROZEN: 'YES',
+      OBSERVATION_1_REGRESSION_STABLE: 'YES',
+      STARTER_CONTEXT_FORWARD_READY: targetedReady ? 'YES' : 'PARTIAL',
+      OFFENSE_EDGE_FORWARD_READY: fixture.availableComponents.includes('OFFENSE_EDGE') ? 'YES' : 'NO',
+      BULLPEN_EDGE_FORWARD_READY: fixture.availableComponents.includes('BULLPEN_EDGE') ? 'YES' : 'NO',
+      MARKET_AWARE_DIRECTIONALITY_CERTIFIED: 'YES',
+      SCORECARD_VERSIONING_CERTIFIED: 'YES',
+      R4_PROJECTED_SCORECARD_COMPLETENESS: fixture.overallResearchCompleteness,
+      CHAT_METHOD_PROBABILITY_READY: 'NO',
+      PRODUCTION_MODEL_CHANGED: 'NO',
+    },
   }
 }
 

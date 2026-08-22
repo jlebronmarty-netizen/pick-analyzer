@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-21 00:00:00Z
 
+## 2026-08-22 MLB-04C-R4 Starter Offense Bullpen Context Recovery
+
+- MLB-04C-R4 is locally implemented as `MLB_04C_R4_STARTER_OFFENSE_BULLPEN_CONTEXT_RECOVERY_CERTIFIED`. It adds future-only deterministic research scoring for `STARTER_EDGE`, `OFFENSE_EDGE` and `BULLPEN_EDGE` while preserving `MARKET_VALUE` and leaving `SPLIT_EDGE`, `LINEUP_EDGE` and `CONTEXT_EDGE` fail-closed when timestamp-safe evidence is missing.
+- Because the new scoring semantics materially change future scorecard behavior, R4 introduces `MLB_CHAT_METHOD_RESEARCH_SCORECARD_V2`. Observation #1 (`LAA @ TEX`, snapshot `5331e683-46ae-409b-9fe4-5ce0a1ef9721`) remains frozen on V1 with score `-0.0296`, completeness `0.1429` and usable component `MARKET_VALUE` only.
+- R4 uses only stored or already-captured evidence: certified starter assignments / starter lineup rows / captured MLB Official probable-pitcher lineage, prior-game offense windows, prior-game bullpen workload and exact market value. It makes 0 provider calls, 0 production database mutations and 0 prediction, Official Pick, settlement, learning, calibration or product writes. Projected future scorecard completeness improves to `4 / 7 = 0.5714` when all R4 target components are actually available.
+
 ## 2026-08-21 MLB-04B-R2A One-Snapshot Persistence Guard
 
 - MLB-04B-R2A is locally implemented as `MLB_04B_R2A_ONE_SNAPSHOT_PERSISTENCE_GUARD_REPAIR_CERTIFIED`. It repairs the missing deployed execution path for one legitimate forward `MORNING` or `FINAL_PREGAME` MLB research snapshot while preserving the existing MLB-04B dry-run default.
