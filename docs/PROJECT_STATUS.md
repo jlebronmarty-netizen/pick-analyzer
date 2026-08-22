@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-22 00:00:00Z
 
+## 2026-08-22 MLB-04D-D Forward Automation Preparation
+
+- MLB-04D-D is locally implemented as `MLB_04D_D_FORWARD_AUTOMATION_PREP_CERTIFIED`. It prepares the forward research lifecycle from `MORNING` capture through `FINAL_PREGAME` capture, frozen MLB-04C V2 scorecard ledgering, canonical result detection and read-only research evaluation.
+- The package is preparation-only: no cron route is added, no scheduler is activated, no research ledger migration is applied and no snapshots, observations, predictions, settlement rows, learning labels, calibration rows, Official Picks, bankroll, notifications or product recommendations are written.
+- The future activation model is fail-closed behind `CRON_SECRET`, the existing `MLB_04B_CONTEXT_SNAPSHOT_AUTHORIZED` guard and new default-off kill switches. Stored evidence is first, SportsDataIO is forbidden, weather/injury providers remain unapproved and the deterministic fixture proves lifecycle, exact-line ledger identity, result evaluation and repeated-pass idempotency with 0 provider calls and 0 production database mutations.
+
 ## 2026-08-22 MLB-04D Parallel Context Expansion Master Plan
 
 - MLB-04D is locally certified as `MLB_04D_PARALLEL_CONTEXT_EXPANSION_MASTER_PLAN_CERTIFIED`. It audits the remaining Chat-Method context tracks in parallel: starters, lineups, splits/handedness, park/venue, weather, injuries, pitcher props, NRFI/YRFI and forward observation continuity.

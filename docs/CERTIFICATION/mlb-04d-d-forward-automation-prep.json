@@ -1,0 +1,175 @@
+{
+  "classification": "MLB_04D_D_FORWARD_AUTOMATION_PREP_CERTIFIED",
+  "phase": "MLB-04D-D_FORWARD_AUTOMATION_PREP",
+  "generatedAt": "2026-08-22T00:00:00.000Z",
+  "baseline": {
+    "requiredCommit": "46d46fc5ae739aa804532ad594883ac9584f0cb4",
+    "mlbCoreReadiness": 97,
+    "mlbFullVisionReadiness": 80,
+    "packageDInitialState": "READY_TO_IMPLEMENT"
+  },
+  "schedulerInventory": {
+    "activeCronAdded": false,
+    "jobsReviewed": [
+      "vercel_operating_day_primary",
+      "github_operating_day_fallback",
+      "github_operating_day_heartbeat",
+      "vercel_nba_current_era_shadow",
+      "manual_master_sync",
+      "manual_daily_sync",
+      "manual_capture_predictions"
+    ]
+  },
+  "lifecycle": {
+    "states": [
+      "SCHEDULED",
+      "MORNING_CAPTURE_ELIGIBLE",
+      "MORNING_CAPTURED",
+      "FINAL_PREGAME_CAPTURE_ELIGIBLE",
+      "FINAL_PREGAME_CAPTURED",
+      "FROZEN_SCORECARD_READY",
+      "LEDGER_FROZEN",
+      "WAITING_FOR_CANONICAL_RESULT",
+      "CANONICAL_RESULT_READY",
+      "RESEARCH_EVALUATED",
+      "COHORT_AGGREGATED"
+    ],
+    "failClosedStates": [
+      "AUTOMATION_DISABLED_NO_OP",
+      "CAPTURE_DISABLED_NO_OP",
+      "EVALUATION_DISABLED_NO_OP",
+      "UNAUTHORIZED_NO_OP",
+      "SNAPSHOT_NOT_PREGAME",
+      "SNAPSHOT_DUPLICATE_DEFECT",
+      "LEDGER_DUPLICATE_DEFECT",
+      "LEDGER_STORAGE_NOT_DEPLOYED",
+      "RESULT_NOT_AVAILABLE",
+      "SCORECARD_NOT_PAIRABLE",
+      "PROVIDER_BUDGET_BLOCKED",
+      "UNAPPROVED_PROVIDER_BLOCKED",
+      "UNKNOWN_STATE_BLOCKED"
+    ],
+    "noOverwritePolicy": true
+  },
+  "schedulingContracts": {
+    "morning": {
+      "usesExistingMlb04bWindow": true,
+      "noDuplicateSnapshotPolicy": "0_INSERT_1_REUSE_GT1_FAIL_CLOSED"
+    },
+    "finalPregame": {
+      "usesExistingMlb04bWindow": true,
+      "noDuplicateSnapshotPolicy": "0_INSERT_1_REUSE_GT1_FAIL_CLOSED"
+    },
+    "multiEventExecutionPolicy": "QUEUE_BASED"
+  },
+  "authorization": {
+    "killSwitches": [
+      "MLB_FORWARD_RESEARCH_AUTOMATION_ENABLED",
+      "MLB_MORNING_CAPTURE_ENABLED",
+      "MLB_FINAL_PREGAME_CAPTURE_ENABLED",
+      "MLB_RESEARCH_RESULT_EVALUATION_ENABLED"
+    ],
+    "defaultEnabled": false,
+    "existingManualGuardPreserved": "MLB_04B_CONTEXT_SNAPSHOT_AUTHORIZED",
+    "requiresCronSecret": true
+  },
+  "providerBudget": {
+    "storedEvidenceFirst": true,
+    "sportsDataIoAllowed": false,
+    "weatherAllowed": false,
+    "injuryAllowed": false,
+    "currentPhaseProviderCalls": 0,
+    "failureBehavior": "FAIL_CLOSED_NO_FABRICATION"
+  },
+  "contextCompatibility": {
+    "starterContext": "PRESERVED",
+    "offenseRecentFormContext": "PRESERVED",
+    "bullpenDirectionalInputs": "PRESERVED",
+    "timestamps": "PRESERVED",
+    "lineage": "PRESERVED",
+    "blockers": "PRESERVED",
+    "missingState": "PRESERVED",
+    "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V2"
+  },
+  "ledgerStorage": {
+    "decision": "NEW_ADDITIVE_RESEARCH_LEDGER_TABLE_REQUIRED_BEFORE_ACTIVATION",
+    "migrationApplied": false,
+    "deterministicIdentityIncludes": [
+      "sport",
+      "event",
+      "snapshot_type",
+      "snapshot_id",
+      "market",
+      "selection",
+      "line",
+      "sportsbook",
+      "methodology_version",
+      "scorecard_version"
+    ],
+    "activationBlockedUntilStorageExists": true
+  },
+  "resultEvaluation": {
+    "resultSourceTables": [
+      "sport_events",
+      "game_results"
+    ],
+    "providerCallsRequired": 0,
+    "moneyline": "EXACT_WINNER",
+    "runLine": "EXACT_LINE_ADJUSTED_SCORE",
+    "total": "EXACT_TOTAL_RUNS",
+    "chatBrierOrLogLossAllowed": false
+  },
+  "cohortMetrics": {
+    "checkpoints": [5, 10, 25, 50, 100],
+    "accuracyClaimReady": false,
+    "versionSegmentationRequired": true
+  },
+  "observationFreezeState": {
+    "observation1": "UNCHANGED",
+    "observation2": "UNCHANGED",
+    "observation3": "UNCHANGED",
+    "retrospectiveEnrichment": false
+  },
+  "productIsolation": {
+    "recommendedPick": false,
+    "productionEligible": false,
+    "isCurrent": false,
+    "productVisible": false,
+    "officialPickWrites": 0,
+    "bankrollWrites": 0,
+    "notificationWrites": 0
+  },
+  "learningCalibrationIsolation": {
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "weightsChanged": false
+  },
+  "fixtureProof": {
+    "deterministicLifecycleComplete": true,
+    "repeatedPassNoDuplicates": true,
+    "providerCalls": 0,
+    "dbMutations": 0
+  },
+  "safetyCounters": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0,
+    "predictionWrites": 0,
+    "currentEraShadowWrites": 0,
+    "officialPickWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "productWrites": 0,
+    "bankrollWrites": 0,
+    "notificationWrites": 0
+  },
+  "activationPrerequisites": [
+    "additive research ledger migration",
+    "explicit human authorization",
+    "environment kill switches enabled intentionally",
+    "fresh dry-run against stored evidence",
+    "provider budget reviewed",
+    "result-sync dependency healthy"
+  ],
+  "nextRecommendedPhase": "MLB_04D_D_PUBLICATION_THEN_LEDGER_MIGRATION_OR_PACKAGE_A_INTERNAL_CONTEXT"
+}
