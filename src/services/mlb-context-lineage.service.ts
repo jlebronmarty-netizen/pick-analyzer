@@ -16,6 +16,7 @@ const LEAGUE_KEY = 'mlb'
 const MODE = 'mlb_context_lineage_v1'
 const FEATURE_VERSION = 'mlb_context_lineage_features_v1'
 const CONTEXT_VERSION = 'mlb_01_context_lineage_v1'
+const R6_RESEARCH_CONTEXT_VERSION = 'mlb_04c_r6_research_context_v1'
 const MIN_PREGAME_MINUTES = 10
 
 type Row = Record<string, unknown>
@@ -71,9 +72,33 @@ type TeamStatRow = {
   id: string
   event_id: string | null
   team_id: string | null
+  team_name?: string | null
+  is_home?: boolean | null
+  points_for?: number | null
+  points_against?: number | null
   stats: Row | null
   updated_at: string | null
   created_at: string | null
+  event_start_time?: string | null
+}
+
+type StarterAssignmentRow = {
+  event_id: string | null
+  team_id: string | null
+  pitcher_id: string | null
+  provider_pitcher_id: string | null
+  historical_pitcher_id: string | null
+  role: string | null
+  status: string | null
+  source: string | null
+  source_updated_at: string | null
+  observed_at: string | null
+  valid_from: string | null
+  valid_until: string | null
+  mapping_status: string | null
+  mapping_method: string | null
+  confidence: number | null
+  warnings: string[] | null
 }
 
 type InjuryRow = {
@@ -159,6 +184,12 @@ function text(value: unknown) {
 function num(value: unknown) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : null
+}
+
+function chunks<T>(values: T[], size: number): T[][] {
+  const result: T[][] = []
+  for (let index = 0; index < values.length; index += size) result.push(values.slice(index, index + size))
+  return result
 }
 
 function providerIdFromBag(value: unknown, keys: string[]) {
@@ -278,20 +309,46 @@ async function loadPlayerStats(teamIds: string[]) {
   return (data ?? []) as PlayerStatRow[]
 }
 
-async function loadTeamStats(teamIds: string[], beforeStart: string | null) {
+async function loadTeamStats(teamIds: string[]) {
   if (!teamIds.length) return [] as TeamStatRow[]
-  let query = supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from('sport_game_stats')
-    .select('id, event_id, team_id, stats, updated_at, created_at')
+    .select('id, event_id, team_id, team_name, is_home, points_for, points_against, stats, updated_at, created_at')
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
     .in('team_id', teamIds)
     .order('updated_at', { ascending: false })
     .limit(2000)
-  if (beforeStart) query = query.lt('updated_at', beforeStart)
-  const { data, error } = await query
   if (error) throw new Error(`MLB context team stat read failed: ${error.message}`)
-  return (data ?? []) as TeamStatRow[]
+  const rows = (data ?? []) as TeamStatRow[]
+  const eventIds = [...new Set(rows.map((row) => row.event_id).filter((value): value is string => Boolean(value)))]
+  if (!eventIds.length) return rows
+  const events: Array<{ id: string; start_time: string | null }> = []
+  for (const batch of chunks(eventIds, 100)) {
+    const { data: eventRows, error: eventError } = await supabaseAdmin
+      .from('sport_events')
+      .select('id, start_time')
+      .eq('sport_key', SPORT_KEY)
+      .in('id', batch)
+      .limit(batch.length)
+    if (eventError) throw new Error(`MLB context team stat event read failed: ${eventError.message}`)
+    events.push(...((eventRows ?? []) as Array<{ id: string; start_time: string | null }>))
+  }
+  const starts = new Map((events ?? []).map((event) => [event.id, event.start_time]))
+  return rows.map((row) => ({ ...row, event_start_time: starts.get(row.event_id ?? '') ?? null }))
+}
+
+async function loadStarterAssignments(eventIds: string[]) {
+  if (!eventIds.length) return [] as StarterAssignmentRow[]
+  const { data, error } = await supabaseAdmin
+    .from('mlb_starter_assignments')
+    .select('event_id, team_id, pitcher_id, provider_pitcher_id, historical_pitcher_id, role, status, source, source_updated_at, observed_at, valid_from, valid_until, mapping_status, mapping_method, confidence, warnings')
+    .in('event_id', eventIds)
+    .is('valid_until', null)
+    .order('source_updated_at', { ascending: false })
+    .limit(200)
+  if (error) return [] as StarterAssignmentRow[]
+  return (data ?? []) as StarterAssignmentRow[]
 }
 
 async function loadInjuries(teamIds: string[]) {
@@ -338,7 +395,35 @@ function mappedPlayerId(providerPlayerId: string | null, playerMappings: Mapping
   return playerMappings.find((mapping) => String(mapping.provider_id) === String(providerPlayerId))?.internal_id ?? null
 }
 
-function officialStarter(game: MlbOfficialScheduleGame | null, event: EventRow, side: 'home' | 'away', playerMappings: MappingRow[]) {
+function starterFromAssignment(event: EventRow, side: 'home' | 'away', assignments: StarterAssignmentRow[]) {
+  const teamId = side === 'home' ? event.home_team_id : event.away_team_id
+  const teamName = side === 'home' ? event.home_team : event.away_team
+  const row = assignments.find((item) => item.event_id === event.id && item.team_id === teamId)
+  if (!row) return null
+  const mapped = Boolean(row.pitcher_id) && !['AMBIGUOUS', 'UNMAPPED'].includes(String(row.mapping_status ?? ''))
+  return {
+    status: row.status ?? 'UNKNOWN',
+    playerName: null,
+    providerPlayerId: row.provider_pitcher_id,
+    canonicalPlayerId: row.pitcher_id,
+    historicalPitcherId: row.historical_pitcher_id,
+    teamId,
+    teamName,
+    handedness: null,
+    role: row.role,
+    source: row.source ?? 'mlb_starter_assignments',
+    sourceTimestamp: row.source_updated_at ?? row.valid_from ?? row.observed_at,
+    confidence: row.confidence ?? 0,
+    mappingStatus: row.mapping_status,
+    mappingMethod: row.mapping_method,
+    blockers: mapped ? [] : ['STARTER_ASSIGNMENT_PLAYER_IDENTITY_NOT_CERTIFIED'],
+    warnings: row.warnings ?? [],
+  }
+}
+
+function officialStarter(game: MlbOfficialScheduleGame | null, event: EventRow, side: 'home' | 'away', playerMappings: MappingRow[], assignments: StarterAssignmentRow[]) {
+  const assigned = starterFromAssignment(event, side, assignments)
+  if (assigned) return assigned
   const probable = side === 'home' ? game?.probablePitchers.home : game?.probablePitchers.away
   const player = probable?.player ?? null
   const providerPlayerId = player?.id ? String(player.id) : null
@@ -347,12 +432,18 @@ function officialStarter(game: MlbOfficialScheduleGame | null, event: EventRow, 
     playerName: player?.fullName ?? null,
     providerPlayerId,
     canonicalPlayerId: mappedPlayerId(providerPlayerId, playerMappings),
+    historicalPitcherId: null,
     teamId: side === 'home' ? event.home_team_id : event.away_team_id,
     teamName: side === 'home' ? event.home_team : event.away_team,
+    handedness: null,
+    role: 'STARTER',
     source: player?.id ? 'mlb_stats_api_schedule_hydrate_probablePitcher' : 'mlb_stats_api_schedule_no_probable_pitcher',
     sourceTimestamp: game?.capturedAt ?? null,
     confidence: player?.id ? 82 : 0,
+    mappingStatus: player?.id ? 'MLB_OFFICIAL_PROVIDER_ID' : 'UNMAPPED',
+    mappingMethod: player?.id ? 'mlb_official_schedule_provider_id' : 'none',
     blockers: player?.id ? [] : ['MISSING_MLB_OFFICIAL_PROBABLE_STARTER'],
+    warnings: [],
   }
 }
 
@@ -427,7 +518,15 @@ function lineupForSide(event: EventRow, side: 'home' | 'away', lineups: LineupRo
 
 function bullpenForSide(event: EventRow, side: 'home' | 'away', teamStats: TeamStatRow[], playerStats: PlayerStatRow[]) {
   const teamId = side === 'home' ? event.home_team_id : event.away_team_id
-  const teamRows = teamStats.filter((row) => row.team_id === teamId).slice(0, 5)
+  const teamRows = teamStats
+    .filter((row) => row.team_id === teamId)
+    .filter((row) => {
+      const rowStart = Date.parse(row.event_start_time ?? '')
+      const targetStart = Date.parse(event.start_time ?? '')
+      return Number.isFinite(rowStart) && Number.isFinite(targetStart) && rowStart < targetStart
+    })
+    .sort((a, b) => Date.parse(b.event_start_time ?? '') - Date.parse(a.event_start_time ?? ''))
+    .slice(0, 10)
   const reliefRows = playerStats
     .filter((row) => row.team_id === teamId)
     .filter((row) => {
@@ -450,6 +549,87 @@ function bullpenForSide(event: EventRow, side: 'home' | 'away', teamStats: TeamS
     averagePitchSignal: pitchSignals.length ? Number((pitchSignals.reduce((sum, value) => sum + value, 0) / pitchSignals.length).toFixed(2)) : null,
     sourceTimestamp: sourceTimestamp(...teamRows.map((row) => row.updated_at ?? row.created_at), ...reliefRows.map((row) => row.source_timestamp)),
     blockers: teamRows.length || reliefRows.length ? [] : ['BULLPEN_CONTEXT_UNAVAILABLE_FROM_STORED_STATS'],
+  }
+}
+
+function avg(values: Array<number | null | undefined>) {
+  const usable = values.map(Number).filter((value) => Number.isFinite(value))
+  return usable.length ? usable.reduce((sum, value) => sum + value, 0) / usable.length : null
+}
+
+function clamp(value: number | null, scale = 3) {
+  if (value === null || !Number.isFinite(value)) return null
+  return Math.max(-1, Math.min(1, Number((value / scale).toFixed(4))))
+}
+
+function offenseForSide(event: EventRow, side: 'home' | 'away', teamStats: TeamStatRow[]) {
+  const teamId = side === 'home' ? event.home_team_id : event.away_team_id
+  const isHome = side === 'home'
+  const targetStart = Date.parse(event.start_time ?? '')
+  const rows = teamStats
+    .filter((row) => row.team_id === teamId)
+    .filter((row) => {
+      const rowStart = Date.parse(row.event_start_time ?? '')
+      return Number.isFinite(rowStart) && Number.isFinite(targetStart) && rowStart < targetStart
+    })
+    .sort((a, b) => Date.parse(b.event_start_time ?? '') - Date.parse(a.event_start_time ?? ''))
+  const points = (row: TeamStatRow) => num(row.points_for) ?? num(asRecord(row.stats).runs) ?? num(asRecord(row.stats).Runs)
+  const last5 = rows.slice(0, 5)
+  const last10 = rows.slice(0, 10)
+  const season = rows
+  const homeAway = rows.filter((row) => row.is_home === isHome)
+  const last5Avg = avg(last5.map(points))
+  const last10Avg = avg(last10.map(points))
+  const seasonAvg = avg(season.map(points))
+  const homeAwayAvg = avg(homeAway.map(points))
+  const baseline = seasonAvg ?? last10Avg ?? last5Avg
+  const sourceTimestamp = rows.map((row) => row.event_start_time).filter(Boolean).sort().at(-1) ?? null
+  return {
+    status: rows.length >= 5 && baseline !== null ? 'AVAILABLE_FROM_PRIOR_GAME_STATS' : 'INSUFFICIENT_PRIOR_GAME_STATS',
+    source: 'sport_game_stats_prior_games',
+    sourceTimestamp,
+    sourceCutoff: event.start_time,
+    sampleGames: rows.length,
+    last5: { games: last5.length, averageRunsFor: last5Avg, deltaVsSeason: clamp(last5Avg !== null && baseline !== null ? last5Avg - baseline : null) },
+    last10: { games: last10.length, averageRunsFor: last10Avg, deltaVsSeason: clamp(last10Avg !== null && baseline !== null ? last10Avg - baseline : null) },
+    seasonBaseline: { games: season.length, averageRunsFor: seasonAvg, normalized: clamp(seasonAvg !== null ? seasonAvg - 4.5 : null) },
+    homeAway: { games: homeAway.length, averageRunsFor: homeAwayAvg, deltaVsSeason: clamp(homeAwayAvg !== null && baseline !== null ? homeAwayAvg - baseline : null) },
+    blockers: rows.length >= 5 && baseline !== null ? [] : ['OFFENSE_CONTEXT_INSUFFICIENT_PRIOR_GAME_SAMPLE'],
+  }
+}
+
+function offenseRecentFormContext(event: EventRow, teamStats: TeamStatRow[]) {
+  return {
+    home: offenseForSide(event, 'home', teamStats),
+    away: offenseForSide(event, 'away', teamStats),
+  }
+}
+
+function bullpenDirectionalForSide(event: EventRow, side: 'home' | 'away', bullpen: Row) {
+  const status = String(bullpen.status ?? 'UNKNOWN')
+  const recentTeamStatRows = num(bullpen.recentTeamStatRows) ?? 0
+  const reliefPlayerRows = num(bullpen.reliefPlayerRows) ?? 0
+  const innings = num(bullpen.averageReliefInningsSignal)
+  const pitches = num(bullpen.averagePitchSignal)
+  const available = status === 'AVAILABLE_FROM_STORED_STATS' && recentTeamStatRows >= 3 && reliefPlayerRows >= 3
+  return {
+    status: available ? 'AVAILABLE' : 'PARTIAL',
+    source: bullpen.source ?? 'sport_game_stats_and_sport_player_stats',
+    sourceTimestamp: bullpen.sourceTimestamp ?? null,
+    sampleGames: recentTeamStatRows,
+    reliefRows: reliefPlayerRows,
+    workloadLast1Delta: clamp(innings !== null ? 1.1 - innings : null, 1),
+    workloadLast3Delta: clamp(pitches !== null ? 13 - pitches : null, 10),
+    reliefPerformanceDelta: clamp(innings !== null ? 0.9 - innings : null, 1),
+    availabilityPenaltyDelta: clamp(pitches !== null ? 12 - pitches : null, 10),
+    blockers: available ? [] : ['BULLPEN_DIRECTIONAL_INPUTS_INSUFFICIENT'],
+  }
+}
+
+function bullpenDirectionalInputs(event: EventRow, bullpen: Row) {
+  return {
+    home: bullpenDirectionalForSide(event, 'home', asRecord(bullpen.home)),
+    away: bullpenDirectionalForSide(event, 'away', asRecord(bullpen.away)),
   }
 }
 
@@ -572,13 +752,14 @@ function buildSnapshot(input: {
   playerStats: PlayerStatRow[]
   playerMappings: MappingRow[]
   teamStats: TeamStatRow[]
+  starterAssignments: StarterAssignmentRow[]
   injuries: InjuryRow[]
   providerCallsMade: number
 }): Snapshot {
   const { event, snapshotType, snapshotTime, officialGame } = input
   const starters = {
-    home: officialStarter(officialGame, event, 'home', input.playerMappings),
-    away: officialStarter(officialGame, event, 'away', input.playerMappings),
+    home: officialStarter(officialGame, event, 'home', input.playerMappings, input.starterAssignments),
+    away: officialStarter(officialGame, event, 'away', input.playerMappings, input.starterAssignments),
   }
   const lineups = {
     home: lineupForSide(event, 'home', input.lineups, input.playerStats, input.officialLineup, input.playerMappings),
@@ -593,6 +774,8 @@ function buildSnapshot(input: {
     away: injuriesForSide(event, 'away', input.injuries),
   }
   const weatherPark = parkAndWeather(officialGame)
+  const offenseRecentForm = offenseRecentFormContext(event, input.teamStats)
+  const bullpenDirectional = bullpenDirectionalInputs(event, bullpen)
   const components = {
     event: {
       id: event.id,
@@ -607,6 +790,9 @@ function buildSnapshot(input: {
     starters,
     lineups,
     bullpen,
+    starterContext: starters,
+    offenseRecentFormContext: offenseRecentForm,
+    bullpenDirectionalInputs: bullpenDirectional,
     injuries,
     weatherPark,
   }
@@ -625,6 +811,9 @@ function buildSnapshot(input: {
     source_lineage: {
       officialSchedule: officialGame ? 'mlb_stats_api_schedule' : 'not_available_or_provider_call_disabled',
       canonicalEvent: 'sport_events',
+      starterAssignments: 'mlb_starter_assignments_active_rows',
+      offenseRecentForm: 'sport_game_stats_prior_games',
+      bullpenDirectionalInputs: 'sport_game_stats_and_sport_player_stats_prior_evidence',
       lineups: 'sport_lineups_or_stored_player_stats',
       bullpen: 'sport_game_stats_and_sport_player_stats',
       injuries: 'sport_injuries',
@@ -636,6 +825,8 @@ function buildSnapshot(input: {
     feature_lineage: {
       featureVersion: FEATURE_VERSION,
       contextVersion: CONTEXT_VERSION,
+      researchContextVersion: R6_RESEARCH_CONTEXT_VERSION,
+      scorecardConsumerVersion: 'MLB_CHAT_METHOD_RESEARCH_SCORECARD_V2',
       temporalPolicy: 'snapshot_timestamp_must_precede_event_start_for_pregame_features',
       missingDataPolicy: 'missing_context_is_unknown_never_fabricated',
       predictionPolicyChanged: false,
@@ -813,12 +1004,13 @@ export async function getMlbContextLineage(options: MlbContextLineageOptions = {
   const scopedEvents = options.eventId ? events.filter((event) => event.id === options.eventId) : events
   const teamIds = [...new Set(scopedEvents.flatMap((event) => [event.home_team_id, event.away_team_id]).filter((value): value is string => Boolean(value)))]
   const eventIds = scopedEvents.map((event) => event.id)
-  const [lineups, playerStats, teamStats, injuries, mappings] = await Promise.all([
+  const [lineups, playerStats, teamStats, injuries, mappings, starterAssignments] = await Promise.all([
     loadLineups(eventIds),
     loadPlayerStats(teamIds),
-    loadTeamStats(teamIds, null),
+    loadTeamStats(teamIds),
     loadInjuries(teamIds),
     loadMappings(eventIds),
+    loadStarterAssignments(eventIds),
   ])
   const official = options.allowProviderCalls ? await fetchMlbOfficialSchedule(selectedDate) : { rows: [] as MlbOfficialScheduleGame[], providerCallsMade: 0 }
   const officialMatches = scopedEvents.map((event) => ({ event, officialMatch: officialGameForEvent(event, official.rows, mappings) }))
@@ -861,6 +1053,7 @@ export async function getMlbContextLineage(options: MlbContextLineageOptions = {
       playerStats,
       playerMappings,
       teamStats,
+      starterAssignments: starterAssignments as StarterAssignmentRow[],
       injuries,
       providerCallsMade: official.providerCallsMade + lineupProviderCalls,
     })
@@ -887,6 +1080,7 @@ export async function getMlbContextLineage(options: MlbContextLineageOptions = {
       injuriesRead: injuries.length,
       mappingsRead: mappings.length,
       playerMappingsRead: playerMappings.length,
+      starterAssignmentsRead: (starterAssignments as StarterAssignmentRow[]).length,
       sportsDataIOUsed: false,
     },
     certifications: {
@@ -936,6 +1130,7 @@ export function validateMlbContextLineageFixtures() {
     playerStats: [],
     playerMappings: [],
     teamStats: [],
+    starterAssignments: [],
     injuries: [],
     providerCallsMade: 0,
   })

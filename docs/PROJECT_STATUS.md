@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-21 00:00:00Z
 
+## 2026-08-22 MLB-04C-R6 Context Capture Completeness Repair
+
+- MLB-04C-R6 is locally implemented as `MLB_04C_R6_CONTEXT_CAPTURE_COMPLETENESS_REPAIR_CERTIFIED`. It repairs the forward snapshot capture contract so future MLB-04B `MORNING` and `FINAL_PREGAME` snapshots freeze active starter assignments, prior-game offense/recent-form context and normalized bullpen directional inputs in timestamp-safe structures consumed by the MLB-04C V2 scorecard.
+- Observation #1 and Observation #2 remain immutable. R6 does not reconstruct, enrich or rescore settled snapshots; it only improves future capture/read semantics for snapshots taken after the repair. Missing context remains null or explicitly blocked, never filled from post-start evidence.
+- Certification uses stored evidence and fixtures only: provider calls were 0, production database mutations were 0, prediction writes were 0 and Official Pick, settlement, learning, calibration, SportsDataIO, NFL and NBA behavior were unchanged. The forward completeness target for the repaired capture path is `4 / 7 = 0.5714` when starter, offense, bullpen and market-value evidence are present.
+
 ## 2026-08-22 MLB-04C-R4 Starter Offense Bullpen Context Recovery
 
 - MLB-04C-R4 is locally implemented as `MLB_04C_R4_STARTER_OFFENSE_BULLPEN_CONTEXT_RECOVERY_CERTIFIED`. It adds future-only deterministic research scoring for `STARTER_EDGE`, `OFFENSE_EDGE` and `BULLPEN_EDGE` while preserving `MARKET_VALUE` and leaving `SPLIT_EDGE`, `LINEUP_EDGE` and `CONTEXT_EDGE` fail-closed when timestamp-safe evidence is missing.

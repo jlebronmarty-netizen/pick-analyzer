@@ -66,6 +66,20 @@ function parseTime(value: string | null) {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
+
+function num(value: unknown) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function text(value: unknown) {
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
 function clampScore(value: number) {
   return Math.max(-1, Math.min(1, Number(value.toFixed(4))))
 }
@@ -347,6 +361,165 @@ function bullpenEdgeForMarket(params: {
     sourceTimestamp: [params.home.sourceTimestamp, params.away.sourceTimestamp].filter(Boolean).sort().at(0) ?? null,
     blockers: value === null ? ['BULLPEN_EDGE_MARKET_DIRECTION_UNSUPPORTED'] : [],
   }
+}
+
+function earliestTimestamp(...values: Array<unknown>) {
+  return values.map(text).filter(Boolean).sort().at(0) ?? null
+}
+
+function teamNameFromSnapshot(snapshot: Record<string, unknown>, side: 'home' | 'away') {
+  const components = asRecord(snapshot.components)
+  const starters = asRecord(components.starterContext ?? components.starters)
+  return text(asRecord(starters[side]).teamName) ?? (side === 'home' ? 'Home' : 'Away')
+}
+
+function starterInputFromFrozen(snapshot: Record<string, unknown>, side: 'home' | 'away'): StarterResearchInput {
+  const components = asRecord(snapshot.components)
+  const starters = asRecord(components.starterContext ?? components.starters)
+  const row = asRecord(starters[side])
+  const status = text(row.status)
+  const certified = Boolean(text(row.canonicalPlayerId) ?? text(row.playerId) ?? text(row.providerPlayerId))
+  return {
+    status: status === 'CONFIRMED' || status === 'PROBABLE' || status === 'PROJECTED' ? status : certified ? 'PROBABLE' : 'UNKNOWN',
+    source: text(row.source) === 'sport_lineups' ? 'sport_lineups' : text(row.source) === 'mlb_starter_assignments' ? 'mlb_starter_assignments' : text(row.source) ? 'mlb_official_snapshot_lineage' : 'none',
+    sourceTimestamp: text(row.sourceTimestamp),
+    starterPlayerId: text(row.canonicalPlayerId) ?? text(row.playerId) ?? text(row.providerPlayerId),
+    starterName: text(row.playerName),
+    handedness: text(row.handedness) === 'L' || text(row.handedness) === 'R' ? text(row.handedness) as 'L' | 'R' : null,
+    mappingConfidence: Math.min(1, Math.max(0, (num(row.confidence) ?? 0) / 100)),
+    eraProxyDelta: num(row.eraProxyDelta),
+    strikeoutWalkDelta: num(row.strikeoutWalkDelta),
+    workloadDelta: num(row.workloadDelta),
+  }
+}
+
+function offenseInputFromFrozen(snapshot: Record<string, unknown>, side: 'home' | 'away'): OffenseResearchInput {
+  const offense = asRecord(asRecord(snapshot.components).offenseRecentFormContext)
+  const row = asRecord(offense[side])
+  return {
+    sourceTimestamp: text(row.sourceTimestamp),
+    last5RunsDelta: num(asRecord(row.last5).deltaVsSeason),
+    last10RunsDelta: num(asRecord(row.last10).deltaVsSeason),
+    seasonBaselineDelta: num(asRecord(row.seasonBaseline).normalized),
+    homeAwayDelta: num(asRecord(row.homeAway).deltaVsSeason),
+    sampleGames: num(row.sampleGames) ?? 0,
+  }
+}
+
+function bullpenInputFromFrozen(snapshot: Record<string, unknown>, side: 'home' | 'away'): BullpenResearchInput {
+  const bullpen = asRecord(asRecord(snapshot.components).bullpenDirectionalInputs)
+  const row = asRecord(bullpen[side])
+  return {
+    sourceTimestamp: text(row.sourceTimestamp),
+    workloadLast1Delta: num(row.workloadLast1Delta),
+    workloadLast3Delta: num(row.workloadLast3Delta),
+    reliefPerformanceDelta: num(row.reliefPerformanceDelta),
+    availabilityPenaltyDelta: num(row.availabilityPenaltyDelta),
+    sampleGames: num(row.sampleGames) ?? 0,
+  }
+}
+
+export function evaluateMlb04cR6FrozenSnapshotScorecard(input: {
+  snapshot: Record<string, unknown>
+  market: Mlb04cMarket
+  selection: string
+  line: number | null
+  sportsbook: string
+  odds: number
+  impliedProbability: number
+  rawProbability: number
+  calibratedProbability: number
+  marketValueScore?: number | null
+}) {
+  const snapshot = input.snapshot
+  const components = asRecord(snapshot.components)
+  const event = asRecord(components.event)
+  const eventStartTime = text(snapshot.target_event_start_time) ?? text(event.startTime) ?? ''
+  const snapshotTimestamp = text(snapshot.snapshot_timestamp) ?? ''
+  const homeTeam = teamNameFromSnapshot(snapshot, 'home')
+  const awayTeam = teamNameFromSnapshot(snapshot, 'away')
+  const starterHome = starterInputFromFrozen(snapshot, 'home')
+  const starterAway = starterInputFromFrozen(snapshot, 'away')
+  const offenseHome = offenseInputFromFrozen(snapshot, 'home')
+  const offenseAway = offenseInputFromFrozen(snapshot, 'away')
+  const bullpenHome = bullpenInputFromFrozen(snapshot, 'home')
+  const bullpenAway = bullpenInputFromFrozen(snapshot, 'away')
+
+  return evaluateCandidate({
+    scorecardVersion: MLB_04C_R4_SCORECARD_VERSION,
+    eventId: text(snapshot.event_id) ?? text(event.id) ?? 'unknown_event',
+    eventLabel: text(event.matchup) ?? `${awayTeam} @ ${homeTeam}`,
+    eventStartTime,
+    snapshotType: snapshot.snapshot_type === 'MORNING' ? 'MORNING' : 'FINAL_PREGAME',
+    snapshotTimestamp,
+    market: input.market,
+    selection: input.selection,
+    line: input.line,
+    sportsbook: input.sportsbook,
+    odds: input.odds,
+    impliedProbability: input.impliedProbability,
+    rawProbability: input.rawProbability,
+    calibratedProbability: input.calibratedProbability,
+    components: {
+      STARTER_EDGE: starterEdgeForMarket({
+        market: input.market,
+        selection: input.selection,
+        homeTeam,
+        awayTeam,
+        eventStartTime,
+        home: starterHome,
+        away: starterAway,
+      }),
+      OFFENSE_EDGE: offenseEdgeForMarket({
+        market: input.market,
+        selection: input.selection,
+        homeTeam,
+        awayTeam,
+        eventStartTime,
+        home: offenseHome,
+        away: offenseAway,
+      }),
+      BULLPEN_EDGE: bullpenEdgeForMarket({
+        market: input.market,
+        selection: input.selection,
+        homeTeam,
+        awayTeam,
+        eventStartTime,
+        home: bullpenHome,
+        away: bullpenAway,
+      }),
+      SPLIT_EDGE: {
+        value: null,
+        sourceStatus: 'UNAVAILABLE_TEMPORAL_PROVENANCE',
+        source: 'frozen_snapshot_split_context',
+        sourceTimestamp: null,
+        blockers: ['SPLIT_EDGE_STATUS_UNAVAILABLE_TEMPORAL_PROVENANCE'],
+      },
+      LINEUP_EDGE: {
+        value: null,
+        sourceStatus: 'PARTIAL',
+        source: 'frozen_snapshot_lineup_context',
+        sourceTimestamp: earliestTimestamp(
+          asRecord(asRecord(components.lineups).home).sourceTimestamp,
+          asRecord(asRecord(components.lineups).away).sourceTimestamp,
+        ),
+        blockers: ['LINEUP_EDGE_NOT_IN_R6_TARGET_PACKAGE'],
+      },
+      CONTEXT_EDGE: {
+        value: null,
+        sourceStatus: 'PARTIAL',
+        source: 'frozen_snapshot_park_weather_injury_context',
+        sourceTimestamp: null,
+        blockers: ['WEATHER_MISSING', 'INJURY_SOURCE_NOT_CERTIFIED', 'PARK_CONTEXT_NOT_IN_R6_TARGET_PACKAGE'],
+      },
+      MARKET_VALUE: {
+        value: input.marketValueScore ?? clampScore(input.calibratedProbability - input.impliedProbability),
+        sourceStatus: 'AVAILABLE',
+        source: 'sports_odds_snapshots + prediction_history exact identity',
+        sourceTimestamp: snapshotTimestamp,
+      },
+    },
+  })
 }
 
 function r4FutureFixtureCandidate(): CandidateInput {

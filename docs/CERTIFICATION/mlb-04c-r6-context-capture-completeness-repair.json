@@ -1,0 +1,87 @@
+{
+  "classification": "MLB_04C_R6_CONTEXT_CAPTURE_COMPLETENESS_REPAIR_CERTIFIED",
+  "phase": "MLB-04C-R6_CONTEXT_CAPTURE_COMPLETENESS_REPAIR",
+  "generatedAt": "2026-08-22T00:00:00.000Z",
+  "observationRegression": {
+    "observation1": {
+      "snapshotId": "5331e683-46ae-409b-9fe4-5ce0a1ef9721",
+      "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V1",
+      "score": -0.0296,
+      "completeness": 0.1429,
+      "regressionStable": true
+    },
+    "observation2": {
+      "snapshotId": "f050d4e5-8ec4-44ad-ab1e-e75848a0e0b0",
+      "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V2",
+      "completeness": 0.1429,
+      "regressionStable": true
+    },
+    "noRetrospectiveEnrichment": true
+  },
+  "rootCause": {
+    "starter": "MLB04B_NOT_READING_SOURCE",
+    "offense": "SOURCE_AVAILABLE_NOT_EXTRACTED",
+    "bullpen": "SNAPSHOT_NOT_PERSISTING_NORMALIZED_INPUTS",
+    "scorecard": "MLB04C_NOT_READING_PERSISTED_FIELD"
+  },
+  "snapshotContract": {
+    "researchContextVersion": "mlb_04c_r6_research_context_v1",
+    "existingSnapshotContract": "MLB_04B_RESEARCH_SNAPSHOT_CONTRACT_V1",
+    "schemaMigrationRequired": false,
+    "fieldsAddedInsideComponents": [
+      "starterContext",
+      "offenseRecentFormContext",
+      "bullpenDirectionalInputs"
+    ],
+    "morningFinalSeparated": true,
+    "missingDataPolicy": "NULL_WITH_EXPLICIT_BLOCKER"
+  },
+  "scorecardConsumer": {
+    "function": "evaluateMlb04cR6FrozenSnapshotScorecard",
+    "readsFrozenSnapshotOnly": true,
+    "doesNotRecomputeFromLiveState": true,
+    "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V2"
+  },
+  "fixtureProof": {
+    "availableComponents": [
+      "STARTER_EDGE",
+      "OFFENSE_EDGE",
+      "BULLPEN_EDGE",
+      "MARKET_VALUE"
+    ],
+    "scorecardCompleteness": 0.5714,
+    "componentBounds": [-1, 1],
+    "compositePolicy": "EQUAL_RESEARCH_WEIGHTS_OVER_AVAILABLE_TIMESTAMP_SAFE_COMPONENTS"
+  },
+  "readiness": {
+    "STARTER_CONTEXT_CAPTURE_FORWARD_READY": "PARTIAL",
+    "OFFENSE_CONTEXT_CAPTURE_FORWARD_READY": "YES",
+    "BULLPEN_CONTEXT_CAPTURE_FORWARD_READY": "YES",
+    "MARKET_VALUE_UNCHANGED": "YES",
+    "SCORECARD_READS_FROZEN_SNAPSHOT_NOT_LATER_STATE": "YES",
+    "CHAT_METHOD_PROBABILITY_READY": "NO"
+  },
+  "guards": {
+    "rawModelChanged": false,
+    "calibrationChanged": false,
+    "officialPickChanged": false,
+    "productChanged": false,
+    "learningChanged": false,
+    "settlementChanged": false,
+    "sportsDataIoExcluded": true,
+    "nflIsolation": true,
+    "nbaIsolation": true
+  },
+  "safetyCounters": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0,
+    "predictionWrites": 0,
+    "currentEraShadowWrites": 0,
+    "chatResearchPredictionWrites": 0,
+    "officialPickWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "productWrites": 0
+  }
+}
