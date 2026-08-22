@@ -2,6 +2,13 @@
 
 Last updated: 2026-08-22 00:00:00Z
 
+## 2026-08-22 MLB-04D-A Internal Context Expansion
+
+- MLB-04D-A is locally implemented as `MLB_04D_A_INTERNAL_CONTEXT_EXPANSION_CERTIFIED`. It audits and prepares forward-only internal context for starting pitchers, projected/confirmed lineups and park identity using stored repository evidence only.
+- Starter identity capture is forward-ready from active `mlb_starter_assignments`, stored starting-pitcher lineup evidence or already captured probable-pitcher lineage. Starter scoring remains partial unless pitcher-quality fields are frozen before first pitch.
+- Projected lineup capture is forward-ready from stored lineups or season-stat projection inputs; confirmed lineup capture is partial and requires true pregame batting-order evidence. Park identity is forward-ready from `sport_events.venue` or stored MLB Official venue lineage, but park factors/weather/injuries remain blocked. Splits remain audit-only.
+- Observation #1, Observation #2 and Observation #3 remain immutable. No providers were called, no production database rows were mutated, no snapshots/predictions/settlement/learning/calibration/product rows were written, no cron was added and Package D automation remains inactive.
+
 ## 2026-08-22 MLB-04D-D Forward Automation Preparation
 
 - MLB-04D-D is locally implemented as `MLB_04D_D_FORWARD_AUTOMATION_PREP_CERTIFIED`. It prepares the forward research lifecycle from `MORNING` capture through `FINAL_PREGAME` capture, frozen MLB-04C V2 scorecard ledgering, canonical result detection and read-only research evaluation.

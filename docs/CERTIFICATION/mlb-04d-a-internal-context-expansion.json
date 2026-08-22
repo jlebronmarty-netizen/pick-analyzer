@@ -1,0 +1,150 @@
+{
+  "classification": "MLB_04D_A_INTERNAL_CONTEXT_EXPANSION_CERTIFIED",
+  "phase": "MLB-04D-A_INTERNAL_CONTEXT_EXPANSION",
+  "generatedAt": "2026-08-22T00:00:00.000Z",
+  "baseline": {
+    "startingCommit": "db375f4e9206e9e9f975c9aee8651658e28e294f",
+    "mlbCoreReadiness": 97,
+    "mlbFullVisionReadiness": 80,
+    "currentRealCompleteness": 0.4286,
+    "currentRealComponents": [
+      "OFFENSE_EDGE",
+      "BULLPEN_EDGE",
+      "MARKET_VALUE"
+    ]
+  },
+  "observationRegression": {
+    "observation1": {
+      "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V1",
+      "regressionStable": true
+    },
+    "observation2": {
+      "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V2",
+      "regressionStable": true
+    },
+    "observation3": {
+      "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V2",
+      "regressionStable": true
+    },
+    "noRetrospectiveEnrichment": true
+  },
+  "starter": {
+    "sources": [
+      "mlb_starter_assignments",
+      "sport_lineups_starting_pitcher",
+      "stored_mlb_official_probable_pitcher_lineage"
+    ],
+    "rootCauses": [
+      "NO_ACTIVE_ASSIGNMENT_OR_ASSIGNMENT_NOT_PERSISTED_WHEN_ABSENT",
+      "SOURCE_NOT_CONSUMED_FOR_STARTER_WHEN_ROLE_STARTING_PITCHER_ABSENT",
+      "MLB_OFFICIAL_DATA_NOT_CAPTURED_OR_PROVIDER_CALL_DISABLED_WHEN_ABSENT",
+      "EVENT_GAMEPK_MAPPING_GAP_WHEN_PROVIDER_ID_MISSING",
+      "TIMING_GAP_WHEN_PROBABLE_STARTER_NOT_POSTED_BEFORE_SNAPSHOT"
+    ],
+    "stateContract": [
+      "CONFIRMED",
+      "PROBABLE",
+      "PROJECTED",
+      "UNKNOWN"
+    ],
+    "identityCaptureForwardReady": "YES",
+    "edgeForwardReady": "PARTIAL"
+  },
+  "lineup": {
+    "sources": [
+      "sport_lineups",
+      "stored_mlb_official_batting_order_lineage",
+      "stored_season_player_stats_projected_lineup"
+    ],
+    "stateContract": [
+      "PROJECTED",
+      "CONFIRMED",
+      "UNKNOWN"
+    ],
+    "projectedLineupForwardReady": "YES",
+    "confirmedLineupForwardReady": "PARTIAL",
+    "edgeForwardReady": "PARTIAL",
+    "projectedNeverConfirmed": true
+  },
+  "venue": {
+    "sources": [
+      "sport_events.venue",
+      "stored_mlb_official_schedule_venue"
+    ],
+    "parkIdentityForwardReady": "YES",
+    "parkFactorForwardReady": "NO",
+    "contextEdgeImpact": "PARK_IDENTITY_ONLY_INCREASES_CONTEXT_TRANSPARENCY_NOT_CONTEXT_EDGE_AVAILABILITY"
+  },
+  "splits": {
+    "splitEdgeForwardReady": "AUDIT_ONLY",
+    "blocker": "SPLIT_EDGE_STATUS_UNAVAILABLE_TEMPORAL_PROVENANCE"
+  },
+  "snapshotContract": {
+    "existingSnapshotContract": "MLB_04B_RESEARCH_SNAPSHOT_CONTRACT_V1",
+    "futureInternalContextVersion": "mlb_04d_a_internal_context_v1",
+    "schemaMigrationRequired": false,
+    "representation": "additive fields inside components payload only",
+    "oldRowsMutable": false
+  },
+  "scorecardVersioning": {
+    "scorecardV3Required": "NO_FOR_CAPTURE_ONLY_YES_BEFORE_LINEUP_OR_CONTEXT_EDGE_SCORING_CHANGE",
+    "scorecardV2Preserved": true,
+    "v1Preserved": true
+  },
+  "frozenConsumer": {
+    "scorecardReadsFrozenSnapshotNotLaterState": true,
+    "missingDataPolicy": "NULL_WITH_EXPLICIT_BLOCKER_NO_NEUTRAL_ZERO"
+  },
+  "projectedCompleteness": {
+    "currentRealCompleteness": 0.4286,
+    "postPackageACompleteness": 0.5714,
+    "countedComponents": [
+      "STARTER_EDGE_PARTIAL_WHEN_SCORING_FIELDS_PRESENT",
+      "OFFENSE_EDGE",
+      "BULLPEN_EDGE",
+      "MARKET_VALUE"
+    ],
+    "notCounted": [
+      "LINEUP_EDGE",
+      "SPLIT_EDGE",
+      "CONTEXT_EDGE"
+    ]
+  },
+  "packageDCompatibility": {
+    "compatible": true,
+    "schedulerChanged": false,
+    "automationActivated": false
+  },
+  "propImpact": {
+    "strikeouts": "HELPFUL_NOT_READY",
+    "outs": "HELPFUL_NOT_READY",
+    "earnedRuns": "HELPFUL_NOT_READY",
+    "hitsAllowed": "HELPFUL_NOT_READY",
+    "walks": "HELPFUL_NOT_READY"
+  },
+  "nrfiImpact": {
+    "bothStarters": "PARTIAL_TO_FORWARD_READY_WHEN_BOTH_CERTIFIED",
+    "topOrderLineup": "PROJECTED_READY_CONFIRMED_PARTIAL",
+    "park": "IDENTITY_READY_FACTOR_BLOCKED",
+    "firstInningModel": "NO",
+    "activation": "NO"
+  },
+  "guards": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0,
+    "predictionWrites": 0,
+    "snapshotWrites": 0,
+    "currentEraShadowWrites": 0,
+    "officialPickWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "productWrites": 0,
+    "rawModelChanged": false,
+    "calibratedModelChanged": false,
+    "sportsDataIoExcluded": true,
+    "nflIsolation": true,
+    "nbaIsolation": true
+  },
+  "nextRecommendedPhase": "MLB_04D_A_PUBLICATION_OR_MLB_04D_RESEARCH_LEDGER_STORAGE_DESIGN"
+}
