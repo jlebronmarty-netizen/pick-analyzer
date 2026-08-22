@@ -1,6 +1,12 @@
 # Project Status
 
-Last updated: 2026-08-21 00:00:00Z
+Last updated: 2026-08-22 00:00:00Z
+
+## 2026-08-22 MLB-04D Parallel Context Expansion Master Plan
+
+- MLB-04D is locally certified as `MLB_04D_PARALLEL_CONTEXT_EXPANSION_MASTER_PLAN_CERTIFIED`. It audits the remaining Chat-Method context tracks in parallel: starters, lineups, splits/handedness, park/venue, weather, injuries, pitcher props, NRFI/YRFI and forward observation continuity.
+- The phase is audit/design only. Observation #1, Observation #2 and Observation #3 remain frozen; no retrospective context enrichment, Chat probability, production model change, Official Pick promotion, prop activation, NRFI/YRFI activation, provider call or production database mutation was performed.
+- Package readiness is now explicit: Package A internal context is partial, Package B weather/injury source contracts require external provider approval, Package C props/NRFI foundation remains audit-only, and Package D forward automation prep is ready to implement as a separate bounded package.
 
 ## 2026-08-22 MLB-04C-R6 Context Capture Completeness Repair
 

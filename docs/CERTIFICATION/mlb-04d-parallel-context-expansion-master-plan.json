@@ -1,0 +1,279 @@
+{
+  "classification": "MLB_04D_PARALLEL_CONTEXT_EXPANSION_MASTER_PLAN_CERTIFIED",
+  "phase": "MLB-04D_PARALLEL_CONTEXT_EXPANSION_MASTER_PHASE",
+  "generatedAt": "2026-08-22T00:00:00.000Z",
+  "baseline": {
+    "commit": "337bea82207874302ff2834ad7e338f69ab28493",
+    "mlbFullVision": 79,
+    "mlbCore": 97,
+    "scorecardV1": "FROZEN_OBSERVATION_1_ONLY",
+    "scorecardV2": "PRODUCTION_READY",
+    "currentRealCompleteness": {
+      "available": 3,
+      "required": 7,
+      "value": 0.4286,
+      "availableComponents": [
+        "OFFENSE_EDGE",
+        "BULLPEN_EDGE",
+        "MARKET_VALUE"
+      ],
+      "conditionalComponents": [
+        "STARTER_EDGE"
+      ],
+      "blockedComponents": [
+        "LINEUP_EDGE",
+        "SPLIT_EDGE",
+        "CONTEXT_EDGE"
+      ]
+    }
+  },
+  "observationFreezeState": {
+    "observation1": {
+      "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V1",
+      "state": "FROZEN_SETTLED",
+      "retrospectiveEnrichmentAllowed": false
+    },
+    "observation2": {
+      "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V2",
+      "state": "FROZEN",
+      "retrospectiveEnrichmentAllowed": false
+    },
+    "observation3": {
+      "scorecardVersion": "MLB_CHAT_METHOD_RESEARCH_SCORECARD_V2",
+      "snapshotId": "c0fda54f-a8b3-45d2-8994-efcd9e415e7d",
+      "event": "STL @ PHI",
+      "state": "FROZEN_WAITING_FOR_CANONICAL_RESULT",
+      "retrospectiveEnrichmentAllowed": false
+    }
+  },
+  "tracks": {
+    "A_STARTING_PITCHERS": {
+      "classification": "PARTIAL_IMPLEMENTABLE",
+      "inventory": [
+        "mlb_starter_assignments",
+        "sport_lineups role=starting_pitcher",
+        "MLB Official schedule probablePitcher lineage",
+        "provider_entity_mappings player crosswalk",
+        "sport_players provider metadata",
+        "historical_baseball_pitcher_appearances"
+      ],
+      "rootCause": [
+        "SOURCE_DATA_NOT_PRESENT",
+        "TIMING_GAP",
+        "SOURCE_NOT_CONSUMED_FOR_PRE_R6_OBSERVATIONS",
+        "ASSIGNMENT_NOT_PERSISTED_BY_THIS_PHASE"
+      ],
+      "stateVersioning": [
+        "PROJECTED",
+        "PROBABLE",
+        "CONFIRMED",
+        "UNKNOWN"
+      ],
+      "starterEdgeReadiness": "STARTER_EDGE_PARTIAL"
+    },
+    "B_LINEUPS": {
+      "classification": "PARTIAL_IMPLEMENTABLE",
+      "inventory": [
+        "sport_lineups",
+        "MLB Official live feed boxscore battingOrder parser",
+        "stored season player stats projected lineup fallback"
+      ],
+      "stateContract": [
+        "PROJECTED",
+        "CONFIRMED",
+        "UNKNOWN"
+      ],
+      "finalPregameReadiness": {
+        "projected": "PROJECTED_LINEUP_FORWARD_READY",
+        "confirmed": "CONFIRMED_LINEUP_FORWARD_PARTIAL"
+      },
+      "lineupEdge": "RESEARCH_ONLY_PARTIAL"
+    },
+    "C_SPLITS_HANDEDNESS": {
+      "classification": "AUDIT_ONLY",
+      "availableHints": [
+        "mlb pitcher projection types include handedness",
+        "sportsdataio player metadata may include ThrowHand",
+        "current player stat rows do not certify batter/pitcher split as-of provenance"
+      ],
+      "splitEdgeForwardReady": "NO"
+    },
+    "D_PARK_VENUE": {
+      "classification": "PARTIAL_IMPLEMENTABLE",
+      "inventory": [
+        "sport_events.venue",
+        "MLB Official schedule venue id/name",
+        "legacy SportsDataIO StadiumID evidence excluded from new primary context"
+      ],
+      "parkContextForwardReady": "PARK_IDENTITY_FORWARD_READY_PARK_FACTOR_BLOCKED"
+    },
+    "E_WEATHER": {
+      "classification": "EXTERNAL_PROVIDER_REQUIRED",
+      "existingApprovedProvider": "NO",
+      "requiredContract": [
+        "temperature",
+        "wind speed",
+        "wind direction",
+        "precipitation",
+        "humidity",
+        "roof state",
+        "observation/forecast timestamp",
+        "source",
+        "confidence"
+      ],
+      "providerDecision": "WEATHER_PROVIDER_REQUIRED"
+    },
+    "F_INJURIES": {
+      "classification": "EXTERNAL_PROVIDER_REQUIRED",
+      "currentState": [
+        "sport_injuries table exists",
+        "context lineage can read stored MLB rows",
+        "no approved active MLB injury source certified"
+      ],
+      "sourceDecision": "NO_APPROVED_SOURCE"
+    },
+    "G_PITCHER_PROP_FOUNDATION": {
+      "classification": "PARTIAL_IMPLEMENTABLE",
+      "readinessMatrix": {
+        "pitcherStrikeouts": {
+          "DATA_READY": "PARTIAL",
+          "MODEL_READY": "NO",
+          "ODDS_READY": "PARTIAL",
+          "SETTLEMENT_READY": "NO",
+          "CALIBRATION_READY": "NO",
+          "PRODUCTION_READY": "NO"
+        },
+        "pitcherOuts": {
+          "DATA_READY": "PARTIAL",
+          "MODEL_READY": "PARTIAL",
+          "ODDS_READY": "PARTIAL",
+          "SETTLEMENT_READY": "NO",
+          "CALIBRATION_READY": "NO",
+          "PRODUCTION_READY": "NO"
+        },
+        "pitcherEarnedRuns": {
+          "DATA_READY": "PARTIAL",
+          "MODEL_READY": "NO",
+          "ODDS_READY": "NO",
+          "SETTLEMENT_READY": "NO",
+          "CALIBRATION_READY": "NO",
+          "PRODUCTION_READY": "NO"
+        },
+        "pitcherHitsAllowed": {
+          "DATA_READY": "PARTIAL",
+          "MODEL_READY": "NO",
+          "ODDS_READY": "NO",
+          "SETTLEMENT_READY": "NO",
+          "CALIBRATION_READY": "NO",
+          "PRODUCTION_READY": "NO"
+        },
+        "pitcherWalks": {
+          "DATA_READY": "PARTIAL",
+          "MODEL_READY": "NO",
+          "ODDS_READY": "NO",
+          "SETTLEMENT_READY": "NO",
+          "CALIBRATION_READY": "NO",
+          "PRODUCTION_READY": "NO"
+        }
+      },
+      "propOutcomeFoundationReady": "PARTIAL_RECORDED_OUTS_ONLY"
+    },
+    "H_NRFI_YRFI_FOUNDATION": {
+      "classification": "AUDIT_ONLY",
+      "readinessMatrix": {
+        "STARTER_READY": "PARTIAL",
+        "LINEUP_READY": "NO",
+        "FIRST_INNING_DATA_READY": "NO",
+        "MARKET_ODDS_READY": "NO",
+        "SETTLEMENT_READY": "NO",
+        "CALIBRATION_READY": "NO",
+        "PRODUCTION_READY": "NO"
+      }
+    },
+    "I_FORWARD_OBSERVATION_CONTINUITY": {
+      "classification": "READY_TO_IMPLEMENT",
+      "contract": [
+        "MORNING",
+        "FINAL_PREGAME",
+        "POSTGAME_RESULT"
+      ],
+      "cohortCheckpoints": [5, 10, 25, 50, 100],
+      "accuracyClaimReady": false
+    }
+  },
+  "integration": {
+    "currentRealCompleteness": 0.4286,
+    "projectedAfterInternalTracks": 0.7143,
+    "projectedAfterExternalTracks": 1,
+    "contextEdgeCompositionDecision": "KEEP_V2_UNCHANGED_CONTEXT_EDGE_AS_PARK_WEATHER_INJURY_COMPOSITE_AFTER_SOURCE_CERTIFICATION",
+    "scorecardV3Required": "NO_FOR_MASTER_PLAN_YES_BEFORE_CONTEXT_EDGE_SEMANTIC_CHANGE"
+  },
+  "packages": {
+    "PACKAGE_A_INTERNAL_CONTEXT": {
+      "tracks": [
+        "STARTERS",
+        "PROJECTED_LINEUP",
+        "SPLITS_AUDIT",
+        "PARK_IDENTITY"
+      ],
+      "readiness": "PARTIAL"
+    },
+    "PACKAGE_B_EXTERNAL_CONTEXT": {
+      "tracks": [
+        "WEATHER",
+        "INJURIES"
+      ],
+      "readiness": "EXTERNAL_DEPENDENCY"
+    },
+    "PACKAGE_C_MARKET_EXPANSION_FOUNDATION": {
+      "tracks": [
+        "PITCHER_PROPS",
+        "NRFI_YRFI"
+      ],
+      "readiness": "AUDIT_ONLY"
+    },
+    "PACKAGE_D_FORWARD_AUTOMATION": {
+      "tracks": [
+        "SNAPSHOT_SCHEDULING",
+        "RESULT_EVALUATION",
+        "LEDGER_ACCUMULATION"
+      ],
+      "readiness": "READY_TO_IMPLEMENT"
+    }
+  },
+  "successGates": {
+    "ALL_TRACKS_AUDITED": true,
+    "PARALLEL_PACKAGE_PLAN_READY": true,
+    "INTERNAL_IMPLEMENTATION_PATH_READY": true,
+    "EXTERNAL_DEPENDENCIES_IDENTIFIED": true,
+    "PROP_NRFI_DEPENDENCY_MAP_READY": true,
+    "FORWARD_CAPTURE_CONTINUITY_PRESERVED": true,
+    "NO_RETROSPECTIVE_ENRICHMENT": true,
+    "PRODUCTION_MODEL_CHANGED": false,
+    "PRODUCTION_DB_MUTATIONS": 0
+  },
+  "safetyCounters": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0,
+    "predictionWrites": 0,
+    "currentEraShadowWrites": 0,
+    "chatResearchPredictionWrites": 0,
+    "officialPickWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "productWrites": 0,
+    "bankrollWrites": 0,
+    "notificationWrites": 0
+  },
+  "completionEstimates": {
+    "mlbCore": {
+      "value": 97,
+      "rationale": "Core MLB product remains certified; MLB-04D is research/context expansion and does not change core production readiness."
+    },
+    "mlbFullVision": {
+      "value": 80,
+      "rationale": "Master plan and package decomposition advance full vision by clarifying context, prop and NRFI dependencies, but audit-only/external tracks are not counted as implemented capability."
+    }
+  }
+}
