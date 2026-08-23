@@ -1,6 +1,9 @@
 import 'server-only'
 
-import calibrationArtifact from '../../artifacts/mlb/mlb-03-market-calibration-v1.json'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
+const calibrationArtifact = require('../../artifacts/mlb/mlb-03-market-calibration-v1.json')
 
 export type MlbShadowMarket = 'moneyline' | 'run_line' | 'total'
 
@@ -148,6 +151,7 @@ export function getMlbCalibratedShadowArtifactSummary() {
     sourceModelVersion: calibrationArtifact.sourceModelVersion,
     shadowModelVersion: calibrationArtifact.shadowModelVersion,
     method: calibrationArtifact.method,
+    digest: calibrationArtifact.digest,
     markets: Object.keys(calibrationArtifact.markets),
     productionModelChanged: false,
     officialPickChanged: false,

@@ -1,0 +1,39 @@
+{
+  "classification": "MLB_04D_D3W_FORWARD_OPPORTUNITY_WRITER_LINEAGE_CERTIFIED",
+  "phase": "MLB-04D-D3W_FORWARD_OPPORTUNITY_WRITER_RAW_CALIBRATED_LINEAGE_INTEGRATION",
+  "contractVersion": "MLB_04D_D3W_FORWARD_OPPORTUNITY_WRITER_LINEAGE_V1",
+  "activeForwardWriterIdentified": true,
+  "activeForwardWriter": "generateMlbProspectivePredictionsFromStoredOdds -> writeSnapshotsAndPredictions",
+  "activeScheduledPath": "runAdaptiveRefresh -> generateMlbProspectivePredictionsFromStoredOdds",
+  "writerRootCause": "CERTIFICATION_METADATA_NOT_POPULATED",
+  "forwardStorageContract": {
+    "raw": [
+      "prediction_history.certification_metadata.rawModelProbability",
+      "prediction_history.feature_snapshot.mlb03CalibratedShadow.rawModelProbability"
+    ],
+    "calibrated": [
+      "prediction_history.certification_metadata.calibratedProbability",
+      "prediction_history.feature_snapshot.mlb03CalibratedShadow.calibratedProbability"
+    ],
+    "sameOpportunityBinding": true
+  },
+  "modelProbabilityPolicy": "UNCHANGED_RAW_SDK_PERCENT",
+  "oldRowsMutated": false,
+  "noRetrospectiveRawSynthesis": true,
+  "rawModelChanged": false,
+  "calibrationChanged": false,
+  "learningChanged": false,
+  "settlementChanged": false,
+  "automationActivated": false,
+  "activeCronAdded": false,
+  "providerCalls": 0,
+  "productionDbMutations": 0,
+  "predictionWrites": 0,
+  "snapshotWrites": 0,
+  "ledgerWrites": 0,
+  "officialPickWrites": 0,
+  "productWrites": 0,
+  "readerParity": "MLB_04D_D3R_PAIR_READY",
+  "ledgerPayloadSchemaParity": true,
+  "recommendedNextPhase": "MLB-04D-D3W_PUBLISH_AND_WAIT_FOR_FRESH_RAW_CALIBRATED_PAIR"
+}

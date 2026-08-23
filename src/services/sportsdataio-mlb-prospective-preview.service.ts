@@ -6,6 +6,14 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { probePredictionVersioningSchemaCapabilities } from '@/lib/server-schema-capabilities'
 import { createFeatureSnapshot } from '@/services/feature-store-core.service'
 import { buildProductionCalibrationBootstrapMetadata } from '@/services/mlb-production-calibration-bootstrap.service'
+import {
+  calibrateMlbShadowProbability,
+  getMlbCalibratedShadowArtifactSummary,
+} from '@/services/mlb-calibrated-shadow-v1.service'
+import {
+  buildMlb04dForwardLedgerProbabilityPayload,
+  extractMlb04dProbabilityLineage,
+} from '@/services/mlb-04d-probability-lineage.service'
 import { evaluatePredictionEvaluationPolicy } from '@/services/prediction-evaluation-policy.service'
 import { buildPredictionEpochStamp } from '@/services/prediction-epoch-runtime.service'
 import { evaluateRecommendationEligibility } from '@/services/recommendation-eligibility-policy.service'
@@ -42,6 +50,9 @@ const V7_INTELLIGENCE_VERSION = 'mlb_prediction_engine_v7_confidence_engine_v2'
 const V7_REGENERATION_REASON = 'confidence_engine_v2_verified_intelligence_integration_v1'
 const DEFAULT_TIMEOUT_MS = 15000
 const MAX_CALLS = 6
+export const MLB_04D_D3W_CLASSIFICATION =
+  'MLB_04D_D3W_FORWARD_OPPORTUNITY_WRITER_LINEAGE_CERTIFIED'
+export const MLB_04D_D3W_LINEAGE_VERSION = 'MLB_04D_D3W_FORWARD_OPPORTUNITY_WRITER_LINEAGE_V1'
 
 type Request = {
   dryRun?: boolean | null
@@ -726,6 +737,137 @@ function round(value: number, places = 2) {
   return Math.round(value * factor) / factor
 }
 
+type Mlb04dD3wLineageInput = {
+  event: EventRow
+  market: string
+  selection: string
+  line: number | null
+  sportsbook: string
+  oddsSnapshotId: string
+  oddsTimestamp: string
+  generatedAt: string
+  cutoffAt: string
+  modelVersion: string
+  featureSetVersion: string
+  featureSnapshotId: string
+  predictionId: string
+  predictionKey: string
+  rawModelProbabilityPercent: number
+  forcedCalibratedProbabilityForFixture?: number | null
+}
+
+function normalizeProbabilityUnit(value: number | null | undefined) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return null
+  const unit = parsed > 1 ? parsed / 100 : parsed
+  if (unit < 0 || unit > 1) return null
+  return Number(unit.toFixed(6))
+}
+
+function buildMlb04dD3wProbabilityLineage(input: Mlb04dD3wLineageInput) {
+  const rawModelProbability = normalizeProbabilityUnit(input.rawModelProbabilityPercent)
+  const calibration = calibrateMlbShadowProbability({
+    rawProbability: rawModelProbability,
+    market: input.market,
+  })
+  const calibratedProbability =
+    input.forcedCalibratedProbabilityForFixture === undefined
+      ? normalizeProbabilityUnit(calibration.calibratedProbability)
+      : normalizeProbabilityUnit(input.forcedCalibratedProbabilityForFixture)
+  const calibrationStatus = rawModelProbability === null
+    ? 'INVALID_PROBABILITY'
+    : calibratedProbability === null
+      ? calibration.calibrationStatus
+      : 'CALIBRATED'
+  const artifact = getMlbCalibratedShadowArtifactSummary()
+  const exactOpportunityIdentity = {
+    sportKey: SPORT_KEY,
+    leagueKey: LEAGUE_KEY,
+    eventId: input.event.id,
+    homeTeam: input.event.home_team,
+    awayTeam: input.event.away_team,
+    market: input.market,
+    selection: input.selection,
+    line: input.market === 'moneyline' ? null : input.line,
+    sportsbook: input.sportsbook,
+    oddsSnapshotId: input.oddsSnapshotId,
+    oddsTimestamp: input.oddsTimestamp,
+    generatedAt: input.generatedAt,
+    cutoffAt: input.cutoffAt,
+    eventStartTime: input.event.start_time,
+    predictionId: input.predictionId,
+    predictionKey: input.predictionKey,
+    modelVersion: input.modelVersion,
+    featureSetVersion: input.featureSetVersion,
+    featureSnapshotId: input.featureSnapshotId,
+  }
+  const calibrationDelta =
+    rawModelProbability !== null && calibratedProbability !== null
+      ? Number((calibratedProbability - rawModelProbability).toFixed(6))
+      : null
+  const pairStatus =
+    rawModelProbability === null
+      ? 'RAW_MISSING'
+      : calibratedProbability === null
+        ? 'CALIBRATED_MISSING'
+        : 'PAIR_READY'
+  const shared = {
+    contractVersion: MLB_04D_D3W_LINEAGE_VERSION,
+    exactOpportunityIdentity,
+    rawModelProbability,
+    calibratedProbability,
+    calibrationDelta,
+    rawProbabilityOrigin: 'buildSportPrediction.modelProbability',
+    rawModelVersion: input.modelVersion,
+    calibratedProbabilityOrigin: 'calibrateMlbShadowProbability',
+    calibrationVersion: calibration.calibrationVersion,
+    calibrationMethod: calibration.calibrationMethod,
+    calibrationStatus,
+    calibrationArtifactDigest: artifact.digest,
+    calibrationArtifactSourceModelVersion: artifact.sourceModelVersion,
+    calibrationArtifactShadowModelVersion: artifact.shadowModelVersion,
+    sameOpportunityBinding: true,
+    pregameOnly: true,
+    noRetrospectiveSynthesis: true,
+    status: pairStatus,
+  }
+  return {
+    status: pairStatus,
+    ready: pairStatus === 'PAIR_READY',
+    rawModelProbability,
+    calibratedProbability,
+    calibrationDelta,
+    artifact,
+    certificationMetadata: {
+      mlb04dD3wForwardLineage: shared,
+      rawModelProbability,
+      raw_model_probability: rawModelProbability,
+      calibratedProbability,
+      calibrated_probability: calibratedProbability,
+      calibrationDelta,
+      calibrationStatus,
+      calibrationVersion: calibration.calibrationVersion,
+      calibrationMethod: calibration.calibrationMethod,
+      calibrationArtifactDigest: artifact.digest,
+      selectedPriceEvidence: {
+        eventId: input.event.id,
+        market: input.market,
+        selection: input.selection,
+        line: input.market === 'moneyline' ? null : input.line,
+        sportsbook: input.sportsbook,
+        oddsSnapshotId: input.oddsSnapshotId,
+        oddsTimestamp: input.oddsTimestamp,
+      },
+      sameOpportunityBinding: exactOpportunityIdentity,
+    },
+    featureSnapshotLineage: {
+      mlb03CalibratedShadow: shared,
+      mlb04dD3wProbabilityLineage: shared,
+      probabilityLineageContract: MLB_04D_D3W_LINEAGE_VERSION,
+    },
+  }
+}
+
 function outcomePreference(row: OddsRow) {
   const market = marketForPrediction(row.market)
   const outcome = String(row.outcome).toLowerCase()
@@ -837,6 +979,165 @@ function predictionBaseKey(row: {
   team?: unknown
 }) {
   return `${row.game_id}:${row.market}:${row.team}`
+}
+
+export function getMlb04dD3wForwardWriterAudit() {
+  return {
+    classification: MLB_04D_D3W_CLASSIFICATION,
+    contractVersion: MLB_04D_D3W_LINEAGE_VERSION,
+    activeForwardWriter: 'generateMlbProspectivePredictionsFromStoredOdds -> writeSnapshotsAndPredictions',
+    activeScheduledPath:
+      'runAdaptiveRefresh -> generateMlbProspectivePredictionsFromStoredOdds after stored odds acquisition changes',
+    legacyRollbackPath:
+      'runSportsDataIoMlbProspectivePreview -> writeSnapshotsAndPredictions; skipped in Stage 3 when SportsDataIO is not product authority',
+    rawProbabilityOrigin: 'buildSportPrediction(...).modelProbability',
+    calibrationFlow: 'calibrateMlbShadowProbability(rawProbability, market)',
+    forwardStorageContract: [
+      'prediction_history.certification_metadata.rawModelProbability',
+      'prediction_history.certification_metadata.calibratedProbability',
+      'prediction_history.feature_snapshot.mlb03CalibratedShadow.rawModelProbability',
+      'prediction_history.feature_snapshot.mlb03CalibratedShadow.calibratedProbability',
+    ],
+    modelProbabilityPolicy:
+      'prediction_history.model_probability remains the existing raw SDK percent for prospective rows; D3 ledger consumers use explicit metadata pair fields',
+    oldRowPolicy: 'NO_RETROSPECTIVE_BACKFILL',
+    providerCallsMade: 0,
+    productionDatabaseMutations: 0,
+  }
+}
+
+export function runMlb04dD3wForwardWriterFixture() {
+  const event: EventRow = {
+    id: 'baseball_mlb:fixture:event:d3w',
+    sport_key: SPORT_KEY,
+    league_key: LEAGUE_KEY,
+    season: SEASON,
+    home_team_id: 'tex',
+    away_team_id: 'laa',
+    home_team: 'TEX',
+    away_team: 'LAA',
+    start_time: '2026-08-22T23:20:00.000Z',
+    status: 'scheduled',
+    provider_ids: {},
+    metadata: {},
+  }
+  const baseInput = {
+    event,
+    market: 'total',
+    selection: 'Under',
+    line: 7.5,
+    sportsbook: 'FanDuel',
+    oddsSnapshotId: 'mlb:d3w:odds:1',
+    oddsTimestamp: '2026-08-22T20:00:00.000Z',
+    generatedAt: '2026-08-22T20:05:00.000Z',
+    cutoffAt: '2026-08-22T23:10:00.000Z',
+    modelVersion: 'baseball_mlb_prospective_preview_v1',
+    featureSetVersion: 'baseball_mlb_prospective_feature_set_v1',
+    featureSnapshotId: '0f2bbf50-ef94-4672-94a6-b2835ff54f9a',
+    predictionId: 'b449b1e6-4272-4f96-8cd8-5a3b3a6019f7',
+    predictionKey: 'sportsdataio_mlb_prospective_preview_v1|fixture',
+  }
+  const rawCandidates = [38.51, 44.25, 57.25, 63.8]
+  const rawNotEqualCalibrated = rawCandidates
+    .map((raw) => buildMlb04dD3wProbabilityLineage({ ...baseInput, rawModelProbabilityPercent: raw }))
+    .find((lineage) =>
+      lineage.rawModelProbability !== null &&
+      lineage.calibratedProbability !== null &&
+      Math.abs(lineage.rawModelProbability - lineage.calibratedProbability) > 0.000001
+    ) ?? buildMlb04dD3wProbabilityLineage({ ...baseInput, rawModelProbabilityPercent: 38.51 })
+  const rawEqualCalibrated = buildMlb04dD3wProbabilityLineage({
+    ...baseInput,
+    oddsSnapshotId: 'mlb:d3w:odds:2',
+    predictionId: 'f3de4827-d204-48cc-aaee-964c65fc34c2',
+    predictionKey: 'sportsdataio_mlb_prospective_preview_v1|fixture-equal',
+    rawModelProbabilityPercent: 52.4,
+    forcedCalibratedProbabilityForFixture: 0.524,
+  })
+  const opportunity = {
+    eventId: event.id,
+    market: baseInput.market,
+    selection: baseInput.selection,
+    line: baseInput.line,
+    sportsbook: baseInput.sportsbook,
+    oddsTimestamp: baseInput.oddsTimestamp,
+    snapshotTimestamp: baseInput.generatedAt,
+    cutoffAt: baseInput.cutoffAt,
+  }
+  const row = {
+    id: baseInput.predictionId,
+    game_id: event.id,
+    market: baseInput.market,
+    selection: baseInput.selection,
+    team: baseInput.selection,
+    line: baseInput.line,
+    sportsbook: baseInput.sportsbook,
+    odds_timestamp: baseInput.oddsTimestamp,
+    model_probability: Number(((rawNotEqualCalibrated.rawModelProbability ?? 0) * 100).toFixed(2)),
+    model_version: baseInput.modelVersion,
+    certification_metadata: rawNotEqualCalibrated.certificationMetadata,
+    feature_snapshot: rawNotEqualCalibrated.featureSnapshotLineage,
+  }
+  const sameOpportunityLineage = extractMlb04dProbabilityLineage(row, opportunity)
+  const equalRow = {
+    ...row,
+    id: 'f3de4827-d204-48cc-aaee-964c65fc34c2',
+    odds_snapshot_id: 'mlb:d3w:odds:2',
+    certification_metadata: rawEqualCalibrated.certificationMetadata,
+    feature_snapshot: rawEqualCalibrated.featureSnapshotLineage,
+    model_probability: 52.4,
+  }
+  const missingRawRow = {
+    ...row,
+    certification_metadata: { calibratedProbability: rawNotEqualCalibrated.calibratedProbability },
+    feature_snapshot: {},
+  }
+  const missingCalibratedRow = {
+    ...row,
+    certification_metadata: { rawModelProbability: rawNotEqualCalibrated.rawModelProbability },
+    feature_snapshot: {},
+  }
+  const idempotentPredictionIdBefore = stableUuid([
+    MODE,
+    baseInput.modelVersion,
+    '2026-08-22',
+    baseInput.featureSnapshotId,
+    baseInput.selection,
+  ])
+  const idempotentPredictionIdAfter = stableUuid([
+    MODE,
+    baseInput.modelVersion,
+    '2026-08-22',
+    baseInput.featureSnapshotId,
+    baseInput.selection,
+  ])
+  return {
+    classification: MLB_04D_D3W_CLASSIFICATION,
+    audit: getMlb04dD3wForwardWriterAudit(),
+    rawNotEqualCalibrated,
+    rawEqualCalibrated,
+    sameOpportunityLineage,
+    sameOpportunityLedgerPayload: buildMlb04dForwardLedgerProbabilityPayload(sameOpportunityLineage),
+    rawEqualLineage: extractMlb04dProbabilityLineage(equalRow, {
+      ...opportunity,
+      oddsTimestamp: '2026-08-22T20:00:00.000Z',
+    }),
+    missingRaw: extractMlb04dProbabilityLineage(missingRawRow, opportunity),
+    missingCalibrated: extractMlb04dProbabilityLineage(missingCalibratedRow, opportunity),
+    idempotency: {
+      predictionIdBeforeMetadata: idempotentPredictionIdBefore,
+      predictionIdAfterMetadata: idempotentPredictionIdAfter,
+      stable: idempotentPredictionIdBefore === idempotentPredictionIdAfter,
+    },
+    productIsolation: {
+      recommended_pick: false,
+      production_eligible: false,
+      productVisible: false,
+      ledgerRowsWritten: 0,
+      snapshotRowsWritten: 0,
+    },
+    providerCallsMade: 0,
+    productionDatabaseMutations: 0,
+  }
 }
 
 type TeamGame = {
@@ -2175,6 +2476,23 @@ async function writeSnapshotsAndPredictions(
     const probabilityOrigin = useV6Calculation ? 'calculated' : 'calculated'
     const predictionKey = stableId([MODE, modelVersion, selectedDate, snapshotId, selection])
     const predictionId = stableUuid([MODE, modelVersion, selectedDate, snapshotId, selection])
+    const probabilityLineage = buildMlb04dD3wProbabilityLineage({
+      event: candidate.event,
+      market: candidate.market,
+      selection,
+      line: candidate.market === 'moneyline' ? null : candidate.odds.line,
+      sportsbook: candidate.odds.sportsbook,
+      oddsSnapshotId: candidate.odds.id,
+      oddsTimestamp: candidate.odds.snapshot_time,
+      generatedAt,
+      cutoffAt: cutoff,
+      modelVersion,
+      featureSetVersion: featureSetVersionFor(candidate.market),
+      featureSnapshotId: snapshotId,
+      predictionId,
+      predictionKey,
+      rawModelProbabilityPercent: sdk.modelProbability,
+    })
     const policy = evaluateRecommendationEligibility({
       id: predictionId,
       sport_key: SPORT_KEY,
@@ -2361,10 +2679,12 @@ async function writeSnapshotsAndPredictions(
       feature_snapshot_id: snapshotId,
       feature_snapshot_key: candidate.key,
       feature_snapshot_generated_at: generatedAt,
+      certification_metadata: probabilityLineage.certificationMetadata,
       ...versionColumns,
       feature_snapshot: {
         prospective_preview: true,
         operatingDayId,
+        ...probabilityLineage.featureSnapshotLineage,
         ...(predictionVersioningApplied ? {
           predictionGroupKey: groupKey,
           predictionVersion,
@@ -2470,7 +2790,11 @@ async function writeSnapshotsAndPredictions(
       odds: row.odds,
       impliedProbability: row.implied_probability,
       modelProbability: row.model_probability,
-      calibratedProbability: null,
+      rawModelProbability: probabilityLineage.rawModelProbability,
+      calibratedProbability: probabilityLineage.calibratedProbability,
+      probabilityLineageStatus: probabilityLineage.status,
+      probabilityLineageContract: MLB_04D_D3W_LINEAGE_VERSION,
+      calibrationVersion: probabilityLineage.artifact.artifactVersion,
       edge: row.edge,
       ev: row.ev,
       confidence: row.confidence,

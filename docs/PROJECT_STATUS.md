@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-23 00:00:00Z
 
+## 2026-08-23 MLB-04D-D3W Forward Opportunity Writer Lineage Integration
+
+- MLB-04D-D3W is locally implemented as `MLB_04D_D3W_FORWARD_OPPORTUNITY_WRITER_LINEAGE_CERTIFIED`. It repairs the active forward MLB prospective writer so newly generated eligible prospective rows preserve an explicit raw model probability plus calibrated probability pair in `prediction_history.certification_metadata` and `feature_snapshot.mlb03CalibratedShadow`.
+- The active scheduled path remains `runAdaptiveRefresh -> generateMlbProspectivePredictionsFromStoredOdds -> writeSnapshotsAndPredictions`. The writer still uses the existing `buildSportPrediction` raw SDK output and the existing MLB calibrated-shadow artifact; `prediction_history.model_probability`, EV, confidence, recommendation policy and product exposure remain unchanged.
+- Old rows are not backfilled. Missing raw or calibrated lineage fails closed for the D3 ledger reader. Provider calls were 0, production database mutations were 0, no ledger or snapshot rows were written, no Observation #4 was created and automation remains off.
+
 ## 2026-08-23 MLB-04D-D3R Raw / Calibrated Probability Lineage Repair
 
 - MLB-04D-D3R is locally implemented as `MLB_04D_D3R_RAW_CALIBRATED_PROBABILITY_LINEAGE_REPAIR_CERTIFIED`. It repairs the D3 ledger payload blocker by requiring an explicit raw model probability and calibrated probability pair before any future forward research-ledger serialization.
