@@ -1,0 +1,108 @@
+{
+  "classification": "MLB_04D_D3R_RAW_CALIBRATED_PROBABILITY_LINEAGE_REPAIR_CERTIFIED",
+  "phase": "MLB-04D-D3R_RAW_CALIBRATED_PROBABILITY_LINEAGE_REPAIR",
+  "startingCommit": "34f9905b4f68b3451424bbce98dc1225f488b93c",
+  "blockedInputClassification": "MLB_04D_D3_LEDGER_PAYLOAD_BLOCKED",
+  "rootCause": "CURRENT_PROSPECTIVE_PREVIEW_ROWS_EXPOSE_SINGLE_PROBABILITY_WITHOUT_EXPLICIT_RAW_CALIBRATED_PAIR",
+  "storageRootCause": {
+    "predictionHistoryColumns": {
+      "model_probability": "single stored probability value",
+      "raw_probability": "column absent",
+      "raw_model_probability": "column absent",
+      "calibrated_probability": "column absent",
+      "certification_metadata": "available JSON lineage location"
+    },
+    "oldCurrentRows": "fail closed when explicit raw/calibrated metadata is absent"
+  },
+  "forwardLineageContract": {
+    "contractVersion": "MLB_04D_PROBABILITY_LINEAGE_V1",
+    "rawSource": [
+      "prediction_history.certification_metadata.rawModelProbability",
+      "prediction_history.certification_metadata.raw_model_probability",
+      "prediction_history.feature_snapshot.mlb03CalibratedShadow.rawModelProbability",
+      "prediction_history.feature_snapshot.rawModelProbability"
+    ],
+    "calibratedSource": [
+      "prediction_history.certification_metadata.calibratedProbability",
+      "prediction_history.certification_metadata.calibrated_probability",
+      "prediction_history.feature_snapshot.mlb03CalibratedShadow.calibratedProbability",
+      "prediction_history.model_probability only for explicit calibrated-shadow rows with raw lineage"
+    ],
+    "sameOpportunityBinding": [
+      "event",
+      "market",
+      "selection",
+      "line",
+      "sportsbook",
+      "odds_timestamp",
+      "snapshot_timestamp",
+      "cutoff"
+    ],
+    "copyCalibratedIntoRaw": false,
+    "inferRawFromCalibrated": false,
+    "reverseEngineerCalibration": false,
+    "retrospectiveBackfill": false
+  },
+  "d3Example": {
+    "event": "ATH @ HOU",
+    "snapshotType": "MORNING",
+    "sportsbook": "FanDuel",
+    "market": "total",
+    "selection": "Under",
+    "line": 9,
+    "odds": -122,
+    "calibratedOrModelProbability": 0.4189,
+    "rawProbability": "MISSING",
+    "classification": "FAIL_CLOSED_RAW_MISSING"
+  },
+  "currentStoredDryRun": {
+    "rowId": "66f7c053-2fb3-5c39-9a49-757f300d2ba6",
+    "eventId": "baseball_mlb:mlb:sportsdataio:event:79240",
+    "status": "RAW_MISSING",
+    "rawProbability": null,
+    "calibratedProbability": null,
+    "modelProbabilitySemantics": "AMBIGUOUS_SINGLE_VALUE",
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0
+  },
+  "fixtures": {
+    "explicitPair": "PAIR_READY",
+    "rawMissing": "RAW_MISSING",
+    "calibratedMissing": "CALIBRATED_MISSING",
+    "oldProspectiveRows": "RAW_MISSING",
+    "lineMismatch": "LINE_MISMATCH",
+    "sportsbookMismatch": "SPORTSBOOK_MISMATCH",
+    "timestampViolation": "TIMESTAMP_CUTOFF_VIOLATION"
+  },
+  "isolation": {
+    "modelFormulaChanged": false,
+    "calibrationArtifactChanged": false,
+    "calibrationMappingChanged": false,
+    "productChanged": false,
+    "officialPickChanged": false,
+    "learningChanged": false,
+    "settlementChanged": false,
+    "automationActivated": false,
+    "activeCronChanged": false
+  },
+  "safetyCounters": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0,
+    "predictionWrites": 0,
+    "snapshotWrites": 0,
+    "ledgerWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "officialPickWrites": 0,
+    "productWrites": 0
+  },
+  "readiness": {
+    "D1_PLANNER_PROBABILITY_LINEAGE_READY": "YES",
+    "D3_LEDGER_PAYLOAD_PAIR_CONTRACT_READY": "YES",
+    "D3_CURRENT_STORED_ROWS_FAIL_CLOSED": "YES",
+    "OBSERVATION_4_CREATED": "NO",
+    "AUTOMATION_ACTIVATED": "NO"
+  },
+  "nextRecommendedPhase": "MLB_04D_D3_FORWARD_PREVIEW_RERUN_AFTER_PUBLICATION"
+}

@@ -20,6 +20,10 @@ import {
   type Mlb04dMarketResult,
 } from './mlb-04d-forward-automation-prep.service'
 import { auditMlb04dAInternalContextExpansion } from './mlb-04d-internal-context-expansion.service'
+import {
+  getMlb04dProbabilityLineageContract,
+  runMlb04dD3rProbabilityLineageFixture,
+} from './mlb-04d-probability-lineage.service'
 
 export const MLB_04D_D1_CLASSIFICATION = 'MLB_04D_D1_BOUNDED_FORWARD_AUTOMATION_IMPLEMENTATION_CERTIFIED'
 export const MLB_04D_D1_PHASE = 'MLB-04D-D1_BOUNDED_FORWARD_AUTOMATION_IMPLEMENTATION'
@@ -779,6 +783,8 @@ export function auditMlb04dD1ForwardAutomationImplementation() {
   const idempotency = runMlb04dD1IdempotencyFixture()
   const failureIsolation = runMlb04dD1FailureIsolationFixture()
   const ledgerContract = getMlb04dD1ForwardLedgerRuntimeContract()
+  const probabilityLineage = getMlb04dProbabilityLineageContract()
+  const probabilityLineageFixture = runMlb04dD3rProbabilityLineageFixture()
   const migration = getMlb04dD1ForwardLedgerMigrationState()
   const cohorts = getMlb04dD1CohortMetricContract()
 
@@ -806,6 +812,11 @@ export function auditMlb04dD1ForwardAutomationImplementation() {
     },
     planner: fixture,
     ledgerContract,
+    probabilityLineage: {
+      contract: probabilityLineage,
+      fixture: probabilityLineageFixture,
+      forwardLedgerBlocksWithoutExplicitPair: probabilityLineageFixture.oldProspectiveFailClosed.status === 'RAW_MISSING',
+    },
     migration,
     cohorts,
     idempotency,
@@ -845,6 +856,7 @@ export function auditMlb04dD1ForwardAutomationImplementation() {
       FINAL_PREGAME_PLANNER_READY: 'YES',
       QUEUE_POLICY_IMPLEMENTED: 'YES',
       FORWARD_LEDGER_RUNTIME_CONTRACT_READY: 'YES',
+      FORWARD_LEDGER_PROBABILITY_LINEAGE_READY: probabilityLineageFixture.explicitPair.status === 'PAIR_READY' ? 'YES' : 'NO',
       FORWARD_LEDGER_MIGRATION_READY: migration.ready ? 'YES' : 'PARTIAL',
       FORWARD_LEDGER_MIGRATION_APPLIED: 'NO',
       RESULT_CHECK_PLANNER_READY: 'YES',

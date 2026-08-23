@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-23 00:00:00Z
 
+## 2026-08-23 MLB-04D-D3R Raw / Calibrated Probability Lineage Repair
+
+- MLB-04D-D3R is locally implemented as `MLB_04D_D3R_RAW_CALIBRATED_PROBABILITY_LINEAGE_REPAIR_CERTIFIED`. It repairs the D3 ledger payload blocker by requiring an explicit raw model probability and calibrated probability pair before any future forward research-ledger serialization.
+- The repaired contract reuses the existing MLB calibrated-shadow lineage convention in `prediction_history.certification_metadata` and `feature_snapshot.mlb03CalibratedShadow`; `prediction_history.model_probability` alone is treated as ambiguous unless the row is an explicit calibrated-shadow row with raw lineage present.
+- Existing/current rows that lack the pair, including the D3 `ATH @ HOU` example with `raw_probability = MISSING`, remain fail-closed. No raw values are inferred, copied from calibrated probability, reverse-engineered or retrospectively backfilled. Provider calls were 0, production database mutations were 0, no Observation #4 was created and automation remains off.
+
 ## 2026-08-23 MLB-04D-D1 Bounded Forward Automation Implementation
 
 - MLB-04D-D1 is locally implemented as `MLB_04D_D1_BOUNDED_FORWARD_AUTOMATION_IMPLEMENTATION_CERTIFIED`. It adds an executable default-off planner shell for MLB forward research orchestration covering `MORNING` capture, `FINAL_PREGAME` capture, frozen V2 scorecard planning, forward-ledger planning, canonical result detection and postgame research evaluation planning.
