@@ -1,0 +1,112 @@
+{
+  "classification": "MLB_04D_D1_BOUNDED_FORWARD_AUTOMATION_IMPLEMENTATION_CERTIFIED",
+  "phase": "MLB-04D-D1_BOUNDED_FORWARD_AUTOMATION_IMPLEMENTATION",
+  "commitRequired": true,
+  "automationActivated": false,
+  "activeCronAdded": false,
+  "schedulerWriteExecutionEnabled": false,
+  "executionModes": {
+    "DRY_RUN": "READY",
+    "PREVIEW": "READY",
+    "EXECUTE": "BLOCKED_DEFAULT_OFF_IN_THIS_PHASE"
+  },
+  "killSwitches": {
+    "defaultEnabled": false,
+    "names": [
+      "MLB_FORWARD_RESEARCH_AUTOMATION_ENABLED",
+      "MLB_MORNING_CAPTURE_ENABLED",
+      "MLB_FINAL_PREGAME_CAPTURE_ENABLED",
+      "MLB_RESEARCH_SCORECARD_ENABLED",
+      "MLB_FORWARD_LEDGER_ENABLED",
+      "MLB_RESEARCH_RESULT_EVALUATION_ENABLED"
+    ]
+  },
+  "plannerReadiness": {
+    "forwardAutomationPlanner": "YES",
+    "morningPlanner": "YES",
+    "finalPregamePlanner": "YES",
+    "queuePolicy": "QUEUE_BASED",
+    "scorecardPlanner": "YES",
+    "resultCheckPlanner": "YES",
+    "resultEvaluationPlanner": "YES",
+    "cohortMetricsPlanner": "YES"
+  },
+  "snapshotIdentity": {
+    "reusesMlb04b": true,
+    "zeroMatches": "WOULD_INSERT",
+    "oneMatch": "REUSE_NO_OP",
+    "multipleMatches": "BLOCK_DUPLICATE_DEFECT"
+  },
+  "forwardLedger": {
+    "runtimeContractReady": true,
+    "migrationReady": true,
+    "migrationApplied": false,
+    "migrationFile": "supabase/migrations/202608230001_mlb_forward_research_ledger_v1.sql",
+    "serviceRoleOnlyWrite": true,
+    "productExposure": false,
+    "learningCalibrationTriggers": false
+  },
+  "packageACompatibility": {
+    "compatible": true,
+    "starterIdentityContext": true,
+    "projectedLineupContext": true,
+    "parkIdentity": true,
+    "offenseContext": true,
+    "bullpenContext": true,
+    "marketEvidence": true,
+    "assumesAllComponentsAvailable": false
+  },
+  "observations": {
+    "observation1": "UNCHANGED",
+    "observation2": "UNCHANGED",
+    "observation3": "UNCHANGED",
+    "retrospectiveEnrichment": false
+  },
+  "accuracyGuard": {
+    "noAccuracyClaimWithoutFrozenLedger": true,
+    "eightyPercentClaimForbidden": true,
+    "directionalHitRateLabel": "directional result ratio, not accuracy"
+  },
+  "safetyCounters": {
+    "providerCallsMade": 0,
+    "productionDatabaseMutations": 0,
+    "predictionWrites": 0,
+    "snapshotWrites": 0,
+    "currentEraShadowWrites": 0,
+    "officialPickWrites": 0,
+    "settlementWrites": 0,
+    "learningWrites": 0,
+    "calibrationWrites": 0,
+    "productWrites": 0,
+    "bankrollWrites": 0,
+    "notificationWrites": 0
+  },
+  "isolation": {
+    "rawModelChanged": false,
+    "calibrationChanged": false,
+    "productChanged": false,
+    "officialPickChanged": false,
+    "learningChanged": false,
+    "settlementChanged": false,
+    "sportsDataIoExcluded": true,
+    "nflIsolation": true,
+    "nbaIsolation": true
+  },
+  "readiness": {
+    "FORWARD_AUTOMATION_PLANNER_READY": "YES",
+    "MORNING_PLANNER_READY": "YES",
+    "FINAL_PREGAME_PLANNER_READY": "YES",
+    "QUEUE_POLICY_IMPLEMENTED": "YES",
+    "FORWARD_LEDGER_RUNTIME_CONTRACT_READY": "YES",
+    "FORWARD_LEDGER_MIGRATION_READY": "YES",
+    "FORWARD_LEDGER_MIGRATION_APPLIED": "NO",
+    "RESULT_CHECK_PLANNER_READY": "YES",
+    "RESULT_EVALUATION_PLANNER_READY": "YES",
+    "COHORT_METRICS_PLANNER_READY": "YES",
+    "PACKAGE_A_AUTOMATION_COMPATIBLE": "YES",
+    "AUTOMATION_IDEMPOTENCY_CERTIFIED": "YES",
+    "AUTOMATION_FAILURE_ISOLATION_CERTIFIED": "YES",
+    "AUTOMATION_ACTIVATED": "NO",
+    "ACTIVE_CRON_ADDED": "NO"
+  }
+}

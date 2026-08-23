@@ -1,6 +1,12 @@
 # Project Status
 
-Last updated: 2026-08-22 00:00:00Z
+Last updated: 2026-08-23 00:00:00Z
+
+## 2026-08-23 MLB-04D-D1 Bounded Forward Automation Implementation
+
+- MLB-04D-D1 is locally implemented as `MLB_04D_D1_BOUNDED_FORWARD_AUTOMATION_IMPLEMENTATION_CERTIFIED`. It adds an executable default-off planner shell for MLB forward research orchestration covering `MORNING` capture, `FINAL_PREGAME` capture, frozen V2 scorecard planning, forward-ledger planning, canonical result detection and postgame research evaluation planning.
+- The runtime remains dry-run/preview only in this phase. `EXECUTE` is fail-closed, all automation kill switches are false/unset by default, no cron was added, no scheduler was activated, no Observation #4 was created and no snapshot, forward-ledger, prediction, Official Pick, settlement, learning, calibration, product, bankroll or notification rows were written.
+- D1 prepares the additive `mlb_forward_research_ledger` migration file but does not apply it. The ledger contract is research-only, exact-line deterministic, service-role-write-only, product-invisible and has no learning/calibration trigger. Package A context compatibility, Observation #1/#2/#3 immutability, Raw/calibrated model isolation, SportsDataIO exclusion, NFL isolation and NBA isolation remain certified.
 
 ## 2026-08-22 MLB-04D-A Internal Context Expansion
 
