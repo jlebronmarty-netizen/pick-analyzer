@@ -2,11 +2,17 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-24 MLB-04D-D3S-R3B Immutable Evidence Guard Scope Repair
+
+- MLB-04D-D3S-R3B is locally implemented as `MLB_04D_D3S_R3B_IMMUTABLE_EVIDENCE_GUARD_SCOPE_REPAIR_CERTIFIED`. It repairs the D3S-R3 incident where one-row canary authorization allowed the natural D3W path to persist a full eligible batch of immutable forward opportunity evidence.
+- Continuous natural D3W evidence writes now require `MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZED=true`. One-row canary writes require `MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZED=true`, exactly one row, and an explicit matching deterministic identity. The legacy `MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZED` flag no longer authorizes broad continuous writes.
+- The 18 incident evidence rows are preserved for audit and are not deleted or rewritten. This repair created no provider calls, no production database mutations, no snapshots, no evidence rows, no ledger rows, no prediction/product/learning/calibration/settlement writes, no automation activation and no active cron.
+
 ## 2026-08-24 MLB-04D-D3S-R1 Immutable Opportunity Evidence Repair
 
 - MLB-04D-D3S-R1 is locally implemented as `MLB_04D_D3S_R1_IMMUTABLE_OPPORTUNITY_EVIDENCE_REPAIR_CERTIFIED`. It repairs the D3 ledger preflight blocker by adding a separate append-only forward opportunity evidence contract instead of treating mutable `prediction_history` prospective rows as historical evidence.
 - The prepared additive migration creates `mlb_forward_opportunity_evidence` with deterministic exact-opportunity identity, raw/calibrated probability lineage, frozen book/price/line/timestamp evidence, service-role-only select/insert access and a no-update trigger. It also prepares a nullable `mlb_forward_research_ledger.opportunity_evidence_id` linkage for future one-event ledger writes.
-- The active D3W writer path is wired to append/reuse immutable opportunity evidence only when future execution explicitly sets `MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZED=true`. The guard remains unset in this certification. No old rows were backfilled, no snapshots or ledger rows were written, no automation was activated, provider calls were 0 and production database mutations were 0.
+- The active D3W writer path is wired to append/reuse immutable opportunity evidence only under the scoped continuous guard. One-row canary execution is separated from broad natural execution. No old rows were backfilled, no snapshots or ledger rows were written, no automation was activated, provider calls were 0 and production database mutations were 0.
 
 ## 2026-08-23 MLB-04D-D3W Forward Opportunity Writer Lineage Integration
 

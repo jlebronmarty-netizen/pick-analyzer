@@ -6,7 +6,7 @@ This repair separates mutable prospective current-board rows from frozen researc
 
 Forward research ledger candidates now have a separate append-only storage contract: `mlb_forward_opportunity_evidence`. The table is additive, not applied by this certification, and stores exact event, market, selection, line, sportsbook, odds, odds timestamp, odds snapshot id, generated timestamp, raw probability, calibrated probability and calibration lineage.
 
-Writes are default-off. Future execution requires execute mode plus `MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZED=true`. This phase did not write production data, create ledger rows, create snapshots, activate automation, call providers, backfill old opportunities or create Observation #4.
+Writes are default-off. Continuous/natural D3W evidence execution requires execute mode plus `MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZED=true`. A one-row canary uses `MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZED=true` with a selected deterministic identity and cannot authorize broad natural batches. The legacy `MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZED` flag is retained only for compatibility evidence and does not enable continuous writes. This phase did not write production data, create ledger rows, create snapshots, activate automation, call providers, backfill old opportunities or create Observation #4.
 
 The future one-event canary is:
 

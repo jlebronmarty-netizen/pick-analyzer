@@ -16,7 +16,7 @@ import {
 } from '@/services/mlb-04d-probability-lineage.service'
 import {
   buildMlbForwardOpportunityEvidenceFromPredictionRow,
-  opportunityEvidenceAuthorized,
+  continuousOpportunityEvidenceAuthorized,
   persistMlbForwardOpportunityEvidence,
 } from '@/services/mlb-04d-forward-opportunity-evidence.service'
 import { evaluatePredictionEvaluationPolicy } from '@/services/prediction-evaluation-policy.service'
@@ -2974,7 +2974,7 @@ async function writeSnapshotsAndPredictions(
           throw new Error(`prediction_history upsert failed: ${result.error.message}`)
         }
       }
-      if (!persistenceError && opportunityEvidenceAuthorized()) {
+      if (!persistenceError && continuousOpportunityEvidenceAuthorized()) {
         const evidenceRows = predictionRows.flatMap((row) => {
           try {
             return [buildMlbForwardOpportunityEvidenceFromPredictionRow(row)]
@@ -2984,7 +2984,8 @@ async function writeSnapshotsAndPredictions(
         })
         const evidenceResult = await persistMlbForwardOpportunityEvidence(evidenceRows, {
           execute: true,
-          authorized: true,
+          mode: 'continuous',
+          continuousAuthorized: true,
         })
         immutableOpportunityEvidenceInserted = evidenceResult.inserted
         immutableOpportunityEvidenceReused = evidenceResult.reused
@@ -3071,7 +3072,9 @@ async function writeSnapshotsAndPredictions(
       status: immutableOpportunityEvidenceStatus,
       inserted: immutableOpportunityEvidenceInserted,
       reused: immutableOpportunityEvidenceReused,
-      authorization: 'MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZED',
+      authorization: 'MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZED',
+      canaryAuthorization: 'MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZED',
+      legacyAuthorizationDoesNotEnableContinuousWrites: true,
       currentBoardRowsRemainMutable: true,
     },
     cutoffEnforcement: {

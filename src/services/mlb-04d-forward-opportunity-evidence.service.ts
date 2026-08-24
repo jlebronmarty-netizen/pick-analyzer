@@ -8,6 +8,11 @@ export const MLB_04D_D3S_R1_CLASSIFICATION =
 export const MLB_04D_D3S_R1_PHASE = 'MLB-04D-D3S-R1_IMMUTABLE_FORWARD_OPPORTUNITY_EVIDENCE_REPAIR'
 export const MLB_FORWARD_OPPORTUNITY_EVIDENCE_VERSION = 'MLB_FORWARD_OPPORTUNITY_EVIDENCE_V1'
 export const MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZATION_ENV = 'MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZED'
+export const MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV =
+  'MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZED'
+export const MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZATION_ENV =
+  'MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZED'
+export const MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_MAX_NEW_ROWS = 1
 
 type JsonRecord = Record<string, unknown>
 
@@ -296,15 +301,111 @@ export function opportunityEvidenceAuthorized(env: Record<string, string | undef
   return env[MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZATION_ENV] === 'true'
 }
 
+export function canaryOpportunityEvidenceAuthorized(env: Record<string, string | undefined> = process.env) {
+  return env[MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV] === 'true'
+}
+
+export function continuousOpportunityEvidenceAuthorized(env: Record<string, string | undefined> = process.env) {
+  return env[MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZATION_ENV] === 'true'
+}
+
+export type MlbForwardOpportunityEvidencePersistenceMode = 'canary' | 'continuous'
+
+export function evaluateMlbForwardOpportunityEvidencePersistencePolicy(rows: MlbForwardOpportunityEvidenceRow[], options: {
+  execute?: boolean
+  mode?: MlbForwardOpportunityEvidencePersistenceMode
+  canaryAuthorized?: boolean
+  continuousAuthorized?: boolean
+  selectedDeterministicIdentity?: string | null
+  env?: Record<string, string | undefined>
+} = {}) {
+  const mode = options.mode ?? 'canary'
+  const env = options.env ?? process.env
+  if (rows.length === 0) {
+    return {
+      status: 'NO_ELIGIBLE_ROWS',
+      authorized: false,
+      mode,
+      maxNewRows: 0,
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  if (options.execute !== true) {
+    return {
+      status: 'BLOCKED_BY_EXECUTE_MODE',
+      authorized: false,
+      mode,
+      maxNewRows: 0,
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  if (mode === 'continuous') {
+    const authorized = options.continuousAuthorized === true || continuousOpportunityEvidenceAuthorized(env)
+    return {
+      status: authorized ? 'AUTHORIZED_CONTINUOUS' : 'BLOCKED_BY_CONTINUOUS_AUTHORIZATION',
+      authorized,
+      mode,
+      maxNewRows: authorized ? rows.length : 0,
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  const authorized = options.canaryAuthorized === true || canaryOpportunityEvidenceAuthorized(env)
+  if (!authorized) {
+    return {
+      status: 'BLOCKED_BY_CANARY_AUTHORIZATION',
+      authorized: false,
+      mode,
+      maxNewRows: 0,
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  if (rows.length !== MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_MAX_NEW_ROWS) {
+    return {
+      status: 'BLOCKED_CANARY_ROW_SCOPE',
+      authorized: false,
+      mode,
+      maxNewRows: 0,
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  const selected = text(options.selectedDeterministicIdentity)
+  if (!selected || selected !== rows[0].deterministic_identity) {
+    return {
+      status: 'BLOCKED_CANARY_IDENTITY_MISMATCH',
+      authorized: false,
+      mode,
+      maxNewRows: 0,
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  return {
+    status: 'AUTHORIZED_CANARY_ONE_ROW',
+    authorized: true,
+    mode,
+    maxNewRows: MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_MAX_NEW_ROWS,
+    providerCallsMade: 0,
+    productionDatabaseMutations: 0,
+  }
+}
+
 export async function persistMlbForwardOpportunityEvidence(rows: MlbForwardOpportunityEvidenceRow[], options: {
   execute?: boolean
-  authorized?: boolean
+  mode?: MlbForwardOpportunityEvidencePersistenceMode
+  canaryAuthorized?: boolean
+  continuousAuthorized?: boolean
+  selectedDeterministicIdentity?: string | null
+  env?: Record<string, string | undefined>
 } = {}) {
-  const execute = options.execute === true
-  const authorized = options.authorized === true || opportunityEvidenceAuthorized()
-  if (!execute || !authorized || rows.length === 0) {
+  const policy = evaluateMlbForwardOpportunityEvidencePersistencePolicy(rows, options)
+  if (!policy.authorized) {
     return {
-      status: rows.length === 0 ? 'NO_ELIGIBLE_ROWS' : 'BLOCKED_BY_AUTHORIZATION',
+      status: policy.status,
       inserted: 0,
       reused: 0,
       failed: 0,
@@ -342,6 +443,21 @@ export async function persistMlbForwardOpportunityEvidence(rows: MlbForwardOppor
     providerCallsMade: 0,
     productionDatabaseMutations: inserted,
   }
+}
+
+export async function persistSingleMlbForwardOpportunityEvidenceCanary(row: MlbForwardOpportunityEvidenceRow, options: {
+  execute?: boolean
+  canaryAuthorized?: boolean
+  selectedDeterministicIdentity: string
+  env?: Record<string, string | undefined>
+}) {
+  return persistMlbForwardOpportunityEvidence([row], {
+    execute: options.execute,
+    mode: 'canary',
+    canaryAuthorized: options.canaryAuthorized,
+    selectedDeterministicIdentity: options.selectedDeterministicIdentity,
+    env: options.env,
+  })
 }
 
 function fixtureInput(overrides: Partial<MlbForwardOpportunityEvidenceInput> = {}): MlbForwardOpportunityEvidenceInput {
@@ -415,6 +531,40 @@ export function runMlbForwardOpportunityEvidenceFixture() {
     calibratedProbability: 0.5,
     oddsSnapshotId: 'oddsapi_shadow_fixture_equal',
   }))
+  const broadEvidenceRows = [refreshA, refreshB, refreshC]
+  const broadWithLegacyFlag = evaluateMlbForwardOpportunityEvidencePersistencePolicy(broadEvidenceRows, {
+    execute: true,
+    mode: 'continuous',
+    env: { [MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZATION_ENV]: 'true' },
+  })
+  const broadWithCanaryFlag = evaluateMlbForwardOpportunityEvidencePersistencePolicy(broadEvidenceRows, {
+    execute: true,
+    mode: 'continuous',
+    env: { [MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV]: 'true' },
+  })
+  const canarySelected = evaluateMlbForwardOpportunityEvidencePersistencePolicy([refreshA], {
+    execute: true,
+    mode: 'canary',
+    selectedDeterministicIdentity: refreshA.deterministic_identity,
+    env: { [MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV]: 'true' },
+  })
+  const canaryBroadAttempt = evaluateMlbForwardOpportunityEvidencePersistencePolicy(broadEvidenceRows, {
+    execute: true,
+    mode: 'canary',
+    selectedDeterministicIdentity: refreshA.deterministic_identity,
+    env: { [MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV]: 'true' },
+  })
+  const canaryIdentityMismatch = evaluateMlbForwardOpportunityEvidencePersistencePolicy([refreshA], {
+    execute: true,
+    mode: 'canary',
+    selectedDeterministicIdentity: refreshB.deterministic_identity,
+    env: { [MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV]: 'true' },
+  })
+  const continuousAuthorized = evaluateMlbForwardOpportunityEvidencePersistencePolicy(broadEvidenceRows, {
+    execute: true,
+    mode: 'continuous',
+    env: { [MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZATION_ENV]: 'true' },
+  })
   const morning = {
     id: 'snapshot-morning',
     event_id: refreshA.event_id,
@@ -485,9 +635,25 @@ export function runMlbForwardOpportunityEvidenceFixture() {
       promotion: false,
     },
     writeGuard: {
-      name: MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZATION_ENV,
-      defaultAuthorized: opportunityEvidenceAuthorized({}) === true,
+      legacyName: MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZATION_ENV,
+      canaryName: MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV,
+      continuousName: MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZATION_ENV,
+      legacyDefaultAuthorized: opportunityEvidenceAuthorized({}) === true,
+      canaryDefaultAuthorized: canaryOpportunityEvidenceAuthorized({}) === true,
+      continuousDefaultAuthorized: continuousOpportunityEvidenceAuthorized({}) === true,
       executeRequired: true,
+      legacyFlagDoesNotAuthorizeContinuous: broadWithLegacyFlag.status === 'BLOCKED_BY_CONTINUOUS_AUTHORIZATION',
+      canaryFlagDoesNotAuthorizeContinuous: broadWithCanaryFlag.status === 'BLOCKED_BY_CONTINUOUS_AUTHORIZATION',
+      continuousGuardAuthorizesBroadPath: continuousAuthorized.status === 'AUTHORIZED_CONTINUOUS' && continuousAuthorized.maxNewRows === broadEvidenceRows.length,
+    },
+    canaryScope: {
+      dedicatedCanaryPath: 'persistSingleMlbForwardOpportunityEvidenceCanary',
+      selectedIdentityRequired: true,
+      maxNewRows: MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_MAX_NEW_ROWS,
+      selectedOneRowStatus: canarySelected.status,
+      selectedOneRowMaxNewRows: canarySelected.maxNewRows,
+      broadAttemptStatus: canaryBroadAttempt.status,
+      identityMismatchStatus: canaryIdentityMismatch.status,
     },
     ledgerLinkage: {
       opportunityEvidenceIdFkNeeded: true,
@@ -530,13 +696,13 @@ export function getMlbForwardOpportunityEvidenceRepairAudit() {
     ],
     appendOnly: fixture.immutableOpportunityAppendOnlyCertified,
     currentBoardSeparated: fixture.currentBoardAndFrozenEvidenceSeparated,
-    writeTiming: 'after D3W raw/calibrated generation and current prospective row persistence, only when execute mode and MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZED=true',
+    writeTiming: 'after D3W raw/calibrated generation and current prospective row persistence, only when execute mode and MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZED=true; one-row canary writes require MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZED plus selected deterministic identity',
     snapshotRelationship: 'ledger pairs mlb_context_snapshots.id with mlb_forward_opportunity_evidence.id after temporal cutoff validation',
     temporalContract: 'opportunity odds/generated timestamp <= snapshot timestamp <= evidence cutoff < event start',
     rawCalibratedContract: 'explicit raw_model_probability and calibrated_probability required; no fallback or reconstruction',
     priceEvidenceContract: 'sportsbook, odds, odds_timestamp, exact line and odds_snapshot_id are frozen in immutable row',
     immutabilityEnforcement: 'insert-only service, service-role select/insert grants, no update grant, before-update trigger',
-    d3wIntegration: 'default-off append/reuse path; mutable prediction_history behavior unchanged',
+    d3wIntegration: 'default-off continuous append/reuse path; mutable prediction_history behavior unchanged; legacy authorization cannot enable broad natural writes',
     d3PlannerCompatible: fixture.d3PlannerImmutableEvidenceCompatible,
     oldRowsPolicy: {
       oldRowsMutated: false,

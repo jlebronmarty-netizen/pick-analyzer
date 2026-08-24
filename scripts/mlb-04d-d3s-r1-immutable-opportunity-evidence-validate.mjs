@@ -12,7 +12,8 @@ const CERT_PATH = 'docs/CERTIFICATION/mlb-04d-d3s-r1-immutable-opportunity-evide
 
 const {
   MLB_04D_D3S_R1_CLASSIFICATION,
-  MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZATION_ENV,
+  MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV,
+  MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZATION_ENV,
   getMlbForwardOpportunityEvidenceRepairAudit,
   runMlbForwardOpportunityEvidenceFixture,
 } = await import('../src/services/mlb-04d-forward-opportunity-evidence.service.ts')
@@ -49,10 +50,10 @@ check('ledger linkage', migration.includes('opportunity_evidence_id uuid') && mi
 check('product isolation', Object.values(fixture.productIsolation).every((value) => value === false))
 check('learning calibration isolation', fixture.learningCalibrationIsolation.learningLabels === 0 && fixture.learningCalibrationIsolation.calibrationRefit === false && fixture.learningCalibrationIsolation.settlementSideEffects === false)
 check('old-row preservation', cert.oldRowsMutated === false && cert.noRetrospectiveOpportunityFreeze === true)
-check('authorization guard', service.includes(MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZATION_ENV) && fixture.writeGuard.defaultAuthorized === false && fixture.writeGuard.executeRequired === true)
+check('authorization guard', service.includes(MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV) && service.includes(MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZATION_ENV) && fixture.writeGuard.canaryDefaultAuthorized === false && fixture.writeGuard.continuousDefaultAuthorized === false && fixture.writeGuard.executeRequired === true)
 check('automation off', cert.automationActivated === false && cert.activeCronAdded === false && fixture.automationActivated === false && fixture.activeCronAdded === false)
 check('append-only enforcement', migration.includes('prevent_mlb_forward_opportunity_evidence_update') && migration.includes('grant select, insert') && !migration.includes('grant select, insert, update'))
-check('D3W integration default off', writer.includes('persistMlbForwardOpportunityEvidence') && writer.includes('opportunityEvidenceAuthorized()'))
+check('D3W integration default off', writer.includes('persistMlbForwardOpportunityEvidence') && writer.includes('continuousOpportunityEvidenceAuthorized()'))
 check('SportsDataIO exclusion', cert.sportsDataIoCalls === 0)
 check('NFL isolation', cert.nflIsolation === true)
 check('NBA isolation', cert.nbaIsolation === true)
@@ -60,7 +61,7 @@ check('provider calls zero', cert.providerCalls === 0 && fixture.providerCallsMa
 check('production db mutations zero', cert.productionDbMutations === 0 && fixture.productionDatabaseMutations === 0)
 check('no provider fetch in service', !/fetch\s*\(/.test(service) && !/axios\./.test(service))
 check('no product side-effect objects in migration', !/official_pick|recommended_pick|bankroll|notification|create\s+trigger[\s\S]{0,300}(learning|calibration)/i.test(migration))
-check('docs current', doc.includes(MLB_04D_D3S_R1_CLASSIFICATION) && doc.includes('MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZED=true'))
+check('docs current', doc.includes(MLB_04D_D3S_R1_CLASSIFICATION) && doc.includes('MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZED=true') && doc.includes('MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZED=true'))
 check('secret scan', !/(sk-[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}|SUPABASE_SERVICE_ROLE_KEY\s*=|THE_ODDS_API_KEY\s*=|ODDS_API_KEY\s*=|CRON_SECRET\s*=)/.test([service, writer, migration, doc, JSON.stringify(cert)].join('\n')))
 
 const failed = checks.filter((row) => !row.passed)
