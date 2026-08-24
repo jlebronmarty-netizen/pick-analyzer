@@ -14,6 +14,11 @@ import {
   buildMlb04dForwardLedgerProbabilityPayload,
   extractMlb04dProbabilityLineage,
 } from '@/services/mlb-04d-probability-lineage.service'
+import {
+  buildMlbForwardOpportunityEvidenceFromPredictionRow,
+  opportunityEvidenceAuthorized,
+  persistMlbForwardOpportunityEvidence,
+} from '@/services/mlb-04d-forward-opportunity-evidence.service'
 import { evaluatePredictionEvaluationPolicy } from '@/services/prediction-evaluation-policy.service'
 import { buildPredictionEpochStamp } from '@/services/prediction-epoch-runtime.service'
 import { evaluateRecommendationEligibility } from '@/services/recommendation-eligibility-policy.service'
@@ -2822,6 +2827,9 @@ async function writeSnapshotsAndPredictions(
   let insertedPredictions = 0
   let reusedPredictions = 0
   let persistenceError: string | null = null
+  let immutableOpportunityEvidenceInserted = 0
+  let immutableOpportunityEvidenceReused = 0
+  let immutableOpportunityEvidenceStatus = 'NOT_AUTHORIZED'
   if (predictionRows.length) {
     const epochStamp = await buildPredictionEpochStamp(generatedAt)
     if (epochStamp) {
@@ -2966,6 +2974,22 @@ async function writeSnapshotsAndPredictions(
           throw new Error(`prediction_history upsert failed: ${result.error.message}`)
         }
       }
+      if (!persistenceError && opportunityEvidenceAuthorized()) {
+        const evidenceRows = predictionRows.flatMap((row) => {
+          try {
+            return [buildMlbForwardOpportunityEvidenceFromPredictionRow(row)]
+          } catch {
+            return []
+          }
+        })
+        const evidenceResult = await persistMlbForwardOpportunityEvidence(evidenceRows, {
+          execute: true,
+          authorized: true,
+        })
+        immutableOpportunityEvidenceInserted = evidenceResult.inserted
+        immutableOpportunityEvidenceReused = evidenceResult.reused
+        immutableOpportunityEvidenceStatus = evidenceResult.status
+      }
     }
     insertedPredictions = persistenceError ? 0 : predictionRows.length - reusedPredictions
     const currentLogical = new Set(
@@ -3042,6 +3066,13 @@ async function writeSnapshotsAndPredictions(
       watch: previewCandidates.filter((item) => item.recommendationStatus === 'WATCH').length,
       blocked: previewCandidates.filter((item) => item.recommendationStatus === 'ANALYZED_ONLY' || item.blockers.length > 0).length,
       persistenceError,
+    },
+    immutableOpportunityEvidence: {
+      status: immutableOpportunityEvidenceStatus,
+      inserted: immutableOpportunityEvidenceInserted,
+      reused: immutableOpportunityEvidenceReused,
+      authorization: 'MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZED',
+      currentBoardRowsRemainMutable: true,
     },
     cutoffEnforcement: {
       version: 'prediction_cutoff_enforcement_v1',
