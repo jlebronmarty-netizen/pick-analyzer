@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-24 MLB-04D-D3S-R3E Research Authorization Status Endpoint
+
+- MLB-04D-D3S-R3E is locally implemented as `MLB_04D_D3S_R3E_PRODUCTION_AUTH_STATUS_ENDPOINT_CERTIFIED`. It adds a protected read-only `/api/mlb/research-auth-status` route so Production can report the deployed server-runtime state of `MLB_04B_CONTEXT_SNAPSHOT_AUTHORIZED`, `MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZED` and `MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZED` without exposing secret values.
+- The endpoint requires the existing `CRON_SECRET` protected-route pattern and returns only normalized `TRUE`, `FALSE`, `MISSING` or `INVALID` statuses plus zero-call/zero-mutation counters. It performs no DB reads, DB writes, provider calls, snapshot writes, immutable evidence writes, ledger writes or scheduler work.
+- The route does not execute the R3D canary, does not enable continuous evidence persistence, does not add cron automation and leaves product/model/Official Pick/learning/settlement/calibration behavior unchanged.
+
 ## 2026-08-24 MLB-04D-D3S-R3C One-Row Evidence Canary Readback Contract
 
 - MLB-04D-D3S-R3C is locally implemented as `MLB_04D_D3S_R3C_ONE_ROW_EVIDENCE_CANARY_READBACK_CONTRACT_CERTIFIED`. It completes the missing canary execution contract with explicit deterministic-identity pre-read, `0/1/>1` match semantics, immediate insert/reuse readback, write/readback parity and repeated execution idempotency.
