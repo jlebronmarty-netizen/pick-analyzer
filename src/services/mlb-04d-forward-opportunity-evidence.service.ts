@@ -13,6 +13,10 @@ export const MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV =
 export const MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZATION_ENV =
   'MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZED'
 export const MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_MAX_NEW_ROWS = 1
+export const MLB_04D_D3S_R3C_CLASSIFICATION =
+  'MLB_04D_D3S_R3C_ONE_ROW_EVIDENCE_CANARY_READBACK_CONTRACT_CERTIFIED'
+export const MLB_04D_D3S_R3C_PHASE =
+  'MLB-04D-D3S-R3C_ONE_ROW_IMMUTABLE_EVIDENCE_CANARY_READBACK_CONTRACT_REPAIR'
 
 type JsonRecord = Record<string, unknown>
 
@@ -67,6 +71,15 @@ export type MlbForwardOpportunityEvidenceRow = {
   source_lineage: JsonRecord
   opportunity_evidence: JsonRecord
   evidence_cutoff_at: string
+}
+
+type MlbForwardOpportunityEvidenceReadbackRow = MlbForwardOpportunityEvidenceRow & {
+  created_at?: string | null
+}
+
+type MlbForwardOpportunityEvidenceCanaryStore = {
+  readByDeterministicIdentity(identity: string): Promise<MlbForwardOpportunityEvidenceReadbackRow[]>
+  insert(row: MlbForwardOpportunityEvidenceRow): Promise<{ row?: MlbForwardOpportunityEvidenceReadbackRow | null; duplicate?: boolean }>
 }
 
 type PredictionLike = {
@@ -144,6 +157,112 @@ function requireNumber(name: string, value: unknown) {
   const parsed = numeric(value)
   if (parsed === null) throw new Error(`MLB forward opportunity evidence missing ${name}`)
   return parsed
+}
+
+function evidenceReadbackColumns() {
+  return [
+    'id',
+    'deterministic_identity',
+    'sport_key',
+    'event_id',
+    'prediction_history_id',
+    'market',
+    'selection',
+    'line',
+    'sportsbook',
+    'odds',
+    'odds_timestamp',
+    'odds_snapshot_id',
+    'generated_at',
+    'captured_at',
+    'raw_model_probability',
+    'calibrated_probability',
+    'calibration_delta',
+    'raw_model_version',
+    'calibration_version',
+    'calibration_artifact_digest',
+    'methodology_version',
+    'feature_snapshot_id',
+    'source_lineage',
+    'opportunity_evidence',
+    'evidence_cutoff_at',
+    'created_at',
+  ].join(',')
+}
+
+function normalizeComparable(value: unknown) {
+  if (typeof value === 'number') return Number(value.toFixed(6))
+  return value ?? null
+}
+
+function compareEvidenceReadback(
+  expected: MlbForwardOpportunityEvidenceRow,
+  actual?: MlbForwardOpportunityEvidenceReadbackRow | null
+) {
+  const fields = [
+    'id',
+    'deterministic_identity',
+    'event_id',
+    'market',
+    'selection',
+    'line',
+    'sportsbook',
+    'odds',
+    'odds_timestamp',
+    'raw_model_probability',
+    'calibrated_probability',
+    'calibration_delta',
+    'raw_model_version',
+    'calibration_version',
+    'methodology_version',
+    'source_lineage',
+  ] as const
+  const mismatches = fields.filter((field) => {
+    const left = normalizeComparable(expected[field])
+    const right = normalizeComparable(actual?.[field])
+    return JSON.stringify(left) !== JSON.stringify(right)
+  })
+  return {
+    status: actual && mismatches.length === 0 ? 'PASS' : 'FAIL',
+    mismatches,
+  }
+}
+
+function canaryTemporalSafety(row: MlbForwardOpportunityEvidenceRow, targetEventStartTime?: string | null) {
+  const generatedAt = Date.parse(row.generated_at)
+  const oddsTimestamp = Date.parse(row.odds_timestamp)
+  const cutoffAt = Date.parse(row.evidence_cutoff_at)
+  const startAt = targetEventStartTime ? Date.parse(targetEventStartTime) : null
+  if (![generatedAt, oddsTimestamp, cutoffAt].every(Number.isFinite)) return false
+  if (startAt !== null) {
+    if (!Number.isFinite(startAt)) return false
+    if (generatedAt >= startAt || oddsTimestamp >= startAt || cutoffAt >= startAt) return false
+  }
+  return true
+}
+
+function defaultEvidenceCanaryStore(): MlbForwardOpportunityEvidenceCanaryStore {
+  return {
+    async readByDeterministicIdentity(identity: string) {
+      const { data, error } = await supabaseAdmin
+        .from('mlb_forward_opportunity_evidence')
+        .select(evidenceReadbackColumns())
+        .eq('deterministic_identity', identity)
+        .limit(2)
+      if (error) throw new Error(`MLB forward opportunity evidence pre-read failed: ${error.message}`)
+      return (data ?? []) as unknown as MlbForwardOpportunityEvidenceReadbackRow[]
+    },
+    async insert(row: MlbForwardOpportunityEvidenceRow) {
+      const { data, error } = await supabaseAdmin
+        .from('mlb_forward_opportunity_evidence')
+        .insert(row)
+        .select(evidenceReadbackColumns())
+        .single()
+      if (!error) return { row: data as unknown as MlbForwardOpportunityEvidenceReadbackRow }
+      if (error.code === '23505') return { duplicate: true }
+      throw new Error(`MLB forward opportunity evidence insert failed: ${error.message}`)
+    },
+  }
 }
 
 function requireProbability(name: string, value: unknown) {
@@ -450,14 +569,155 @@ export async function persistSingleMlbForwardOpportunityEvidenceCanary(row: MlbF
   canaryAuthorized?: boolean
   selectedDeterministicIdentity: string
   env?: Record<string, string | undefined>
+  targetEventStartTime?: string | null
+  store?: MlbForwardOpportunityEvidenceCanaryStore
 }) {
-  return persistMlbForwardOpportunityEvidence([row], {
+  const policy = evaluateMlbForwardOpportunityEvidencePersistencePolicy([row], {
     execute: options.execute,
     mode: 'canary',
     canaryAuthorized: options.canaryAuthorized,
     selectedDeterministicIdentity: options.selectedDeterministicIdentity,
     env: options.env,
   })
+  const requestedIdentity = options.selectedDeterministicIdentity
+  const recomputedIdentity = row.deterministic_identity
+  if (!policy.authorized) {
+    return {
+      status: policy.status,
+      requestedDeterministicIdentity: requestedIdentity,
+      recomputedDeterministicIdentity: recomputedIdentity,
+      preReadExactMatches: 0,
+      action: 'BLOCKED',
+      inserted: 0,
+      reused: 0,
+      rowId: null,
+      readbackStatus: 'NOT_ATTEMPTED',
+      writeReadbackParity: 'NOT_ATTEMPTED',
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  if (!canaryTemporalSafety(row, options.targetEventStartTime)) {
+    return {
+      status: 'BLOCK_TEMPORAL_SAFETY',
+      requestedDeterministicIdentity: requestedIdentity,
+      recomputedDeterministicIdentity: recomputedIdentity,
+      preReadExactMatches: 0,
+      action: 'BLOCKED',
+      inserted: 0,
+      reused: 0,
+      rowId: null,
+      readbackStatus: 'NOT_ATTEMPTED',
+      writeReadbackParity: 'NOT_ATTEMPTED',
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  const store = options.store ?? defaultEvidenceCanaryStore()
+  const preRead = await store.readByDeterministicIdentity(row.deterministic_identity)
+  if (preRead.length > 1) {
+    return {
+      status: 'BLOCK_DUPLICATE_DEFECT',
+      requestedDeterministicIdentity: requestedIdentity,
+      recomputedDeterministicIdentity: recomputedIdentity,
+      preReadExactMatches: preRead.length,
+      action: 'BLOCKED',
+      inserted: 0,
+      reused: 0,
+      rowId: null,
+      readbackStatus: 'NOT_ATTEMPTED',
+      writeReadbackParity: 'NOT_ATTEMPTED',
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  if (preRead.length === 1) {
+    const parity = compareEvidenceReadback(row, preRead[0])
+    return {
+      status: 'REUSE_NO_OP',
+      requestedDeterministicIdentity: requestedIdentity,
+      recomputedDeterministicIdentity: recomputedIdentity,
+      preReadExactMatches: 1,
+      action: 'REUSE_NO_OP',
+      inserted: 0,
+      reused: 1,
+      rowId: preRead[0].id,
+      readbackStatus: 'READBACK_EXACT_ONE',
+      writeReadbackParity: parity.status,
+      readbackMismatches: parity.mismatches,
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  const insert = await store.insert(row)
+  if (insert.duplicate) {
+    const raceReadback = await store.readByDeterministicIdentity(row.deterministic_identity)
+    if (raceReadback.length !== 1) {
+      return {
+        status: raceReadback.length > 1 ? 'BLOCK_DUPLICATE_DEFECT' : 'FAILED_READBACK',
+        requestedDeterministicIdentity: requestedIdentity,
+        recomputedDeterministicIdentity: recomputedIdentity,
+        preReadExactMatches: 0,
+        action: 'BLOCKED',
+        inserted: 0,
+        reused: 0,
+        rowId: null,
+        readbackStatus: `READBACK_${raceReadback.length}`,
+        writeReadbackParity: 'NOT_ATTEMPTED',
+        providerCallsMade: 0,
+        productionDatabaseMutations: 0,
+      }
+    }
+    const parity = compareEvidenceReadback(row, raceReadback[0])
+    return {
+      status: 'REUSE_NO_OP',
+      requestedDeterministicIdentity: requestedIdentity,
+      recomputedDeterministicIdentity: recomputedIdentity,
+      preReadExactMatches: 0,
+      action: 'REUSE_NO_OP',
+      inserted: 0,
+      reused: 1,
+      rowId: raceReadback[0].id,
+      readbackStatus: 'READBACK_EXACT_ONE',
+      writeReadbackParity: parity.status,
+      readbackMismatches: parity.mismatches,
+      providerCallsMade: 0,
+      productionDatabaseMutations: 0,
+    }
+  }
+  const readback = await store.readByDeterministicIdentity(row.deterministic_identity)
+  if (readback.length !== 1) {
+    return {
+      status: readback.length > 1 ? 'BLOCK_DUPLICATE_DEFECT' : 'FAILED_READBACK',
+      requestedDeterministicIdentity: requestedIdentity,
+      recomputedDeterministicIdentity: recomputedIdentity,
+      preReadExactMatches: 0,
+      action: 'INSERT_ELIGIBLE',
+      inserted: insert.row ? 1 : 0,
+      reused: 0,
+      rowId: insert.row?.id ?? null,
+      readbackStatus: `READBACK_${readback.length}`,
+      writeReadbackParity: 'FAIL',
+      providerCallsMade: 0,
+      productionDatabaseMutations: insert.row ? 1 : 0,
+    }
+  }
+  const parity = compareEvidenceReadback(row, readback[0])
+  return {
+    status: parity.status === 'PASS' ? 'INSERTED' : 'FAILED_READBACK_PARITY',
+    requestedDeterministicIdentity: requestedIdentity,
+    recomputedDeterministicIdentity: recomputedIdentity,
+    preReadExactMatches: 0,
+    action: 'INSERT_ELIGIBLE',
+    inserted: 1,
+    reused: 0,
+    rowId: readback[0].id,
+    readbackStatus: 'READBACK_EXACT_ONE',
+    writeReadbackParity: parity.status,
+    readbackMismatches: parity.mismatches,
+    providerCallsMade: 0,
+    productionDatabaseMutations: 1,
+  }
 }
 
 function fixtureInput(overrides: Partial<MlbForwardOpportunityEvidenceInput> = {}): MlbForwardOpportunityEvidenceInput {
@@ -659,6 +919,169 @@ export function runMlbForwardOpportunityEvidenceFixture() {
       opportunityEvidenceIdFkNeeded: true,
       migrationPreparedNotApplied: true,
     },
+    providerCallsMade: 0,
+    productionDatabaseMutations: 0,
+  }
+}
+
+function createInMemoryEvidenceCanaryStore(initialRows: MlbForwardOpportunityEvidenceReadbackRow[] = []) {
+  const rows = [...initialRows]
+  let inserts = 0
+  const store: MlbForwardOpportunityEvidenceCanaryStore & {
+    rows: MlbForwardOpportunityEvidenceReadbackRow[]
+    inserts: () => number
+  } = {
+    rows,
+    inserts: () => inserts,
+    async readByDeterministicIdentity(identity: string) {
+      return rows.filter((row) => row.deterministic_identity === identity)
+    },
+    async insert(row: MlbForwardOpportunityEvidenceRow) {
+      if (rows.some((existing) => existing.deterministic_identity === row.deterministic_identity)) {
+        return { duplicate: true }
+      }
+      const readback = {
+        ...row,
+        created_at: '2026-08-24T20:02:00.000Z',
+      }
+      rows.push(readback)
+      inserts += 1
+      return { row: readback }
+    },
+  }
+  return store
+}
+
+export async function runMlbForwardOpportunityEvidenceCanaryContractFixture() {
+  const row = buildMlbForwardOpportunityEvidenceRow(fixtureInput({
+    eventId: 'baseball_mlb:fixture:event:r3c',
+    predictionHistoryId: '33333333-3333-5333-8333-333333333333',
+    market: 'total',
+    selection: 'Under',
+    line: 7.5,
+    sportsbook: 'FanDuel',
+    odds: -124,
+    oddsTimestamp: '2026-08-24T20:00:00.000Z',
+    oddsSnapshotId: 'r3c-one-row',
+    generatedAt: '2026-08-24T20:01:00.000Z',
+    rawModelProbability: 0.3851,
+    calibratedProbability: 0.524,
+    evidenceCutoffAt: '2026-08-24T23:50:00.000Z',
+  }))
+  const startTime = '2026-08-25T00:00:00.000Z'
+  const zeroStore = createInMemoryEvidenceCanaryStore()
+  const zeroMatchInsert = await persistSingleMlbForwardOpportunityEvidenceCanary(row, {
+    execute: true,
+    canaryAuthorized: true,
+    selectedDeterministicIdentity: row.deterministic_identity,
+    targetEventStartTime: startTime,
+    store: zeroStore,
+  })
+  const oneStore = createInMemoryEvidenceCanaryStore([{ ...row, created_at: '2026-08-24T20:02:00.000Z' }])
+  const oneMatchReuse = await persistSingleMlbForwardOpportunityEvidenceCanary(row, {
+    execute: true,
+    canaryAuthorized: true,
+    selectedDeterministicIdentity: row.deterministic_identity,
+    targetEventStartTime: startTime,
+    store: oneStore,
+  })
+  const duplicateStore = createInMemoryEvidenceCanaryStore([
+    { ...row, id: stableUuid(`${row.deterministic_identity}:dup-a`), created_at: '2026-08-24T20:02:00.000Z' },
+    { ...row, id: stableUuid(`${row.deterministic_identity}:dup-b`), created_at: '2026-08-24T20:03:00.000Z' },
+  ])
+  const duplicateDefect = await persistSingleMlbForwardOpportunityEvidenceCanary(row, {
+    execute: true,
+    canaryAuthorized: true,
+    selectedDeterministicIdentity: row.deterministic_identity,
+    targetEventStartTime: startTime,
+    store: duplicateStore,
+  })
+  const identityMismatch = await persistSingleMlbForwardOpportunityEvidenceCanary(row, {
+    execute: true,
+    canaryAuthorized: true,
+    selectedDeterministicIdentity: `${row.deterministic_identity}:mismatch`,
+    targetEventStartTime: startTime,
+    store: createInMemoryEvidenceCanaryStore(),
+  })
+  const postStart = await persistSingleMlbForwardOpportunityEvidenceCanary(row, {
+    execute: true,
+    canaryAuthorized: true,
+    selectedDeterministicIdentity: row.deterministic_identity,
+    targetEventStartTime: '2026-08-24T20:00:30.000Z',
+    store: createInMemoryEvidenceCanaryStore(),
+  })
+  const repeatStore = createInMemoryEvidenceCanaryStore()
+  const repeatFirst = await persistSingleMlbForwardOpportunityEvidenceCanary(row, {
+    execute: true,
+    canaryAuthorized: true,
+    selectedDeterministicIdentity: row.deterministic_identity,
+    targetEventStartTime: startTime,
+    store: repeatStore,
+  })
+  const repeatSecond = await persistSingleMlbForwardOpportunityEvidenceCanary(row, {
+    execute: true,
+    canaryAuthorized: true,
+    selectedDeterministicIdentity: row.deterministic_identity,
+    targetEventStartTime: startTime,
+    store: repeatStore,
+  })
+  const broadRows = [
+    row,
+    buildMlbForwardOpportunityEvidenceRow(fixtureInput({
+      eventId: row.event_id,
+      market: 'moneyline',
+      selection: 'SF',
+      line: null,
+      sportsbook: 'FanDuel',
+      odds: -112,
+      oddsSnapshotId: 'r3c-broad-moneyline',
+    })),
+  ]
+  const canaryFlagBroadWriter = evaluateMlbForwardOpportunityEvidencePersistencePolicy(broadRows, {
+    execute: true,
+    mode: 'continuous',
+    env: { [MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZATION_ENV]: 'true' },
+  })
+  const legacyFlagBroadWriter = evaluateMlbForwardOpportunityEvidencePersistencePolicy(broadRows, {
+    execute: true,
+    mode: 'continuous',
+    env: { [MLB_FORWARD_OPPORTUNITY_EVIDENCE_AUTHORIZATION_ENV]: 'true' },
+  })
+  return {
+    classification: MLB_04D_D3S_R3C_CLASSIFICATION,
+    rowIdentity: row.deterministic_identity,
+    exactIdentityFields: ['event_id', 'market', 'selection', 'line', 'sportsbook', 'odds', 'odds_timestamp', 'deterministic_identity'],
+    zeroMatchInsert,
+    oneMatchReuse,
+    duplicateDefect,
+    identityMismatch,
+    postStart,
+    repeatedExecution: {
+      first: repeatFirst.status,
+      second: repeatSecond.status,
+      totalRows: repeatStore.rows.length,
+      totalInserted: repeatStore.inserts(),
+    },
+    broadWriterFixtures: {
+      canaryFlagStatus: canaryFlagBroadWriter.status,
+      canaryFlagWrites: canaryFlagBroadWriter.maxNewRows,
+      legacyFlagStatus: legacyFlagBroadWriter.status,
+      legacyFlagWrites: legacyFlagBroadWriter.maxNewRows,
+    },
+    observabilityFields: [
+      'requestedDeterministicIdentity',
+      'recomputedDeterministicIdentity',
+      'preReadExactMatches',
+      'action',
+      'inserted',
+      'reused',
+      'rowId',
+      'readbackStatus',
+      'writeReadbackParity',
+      'providerCallsMade',
+      'productionDatabaseMutations',
+    ],
+    maxNewRowsPerCanary: MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_MAX_NEW_ROWS,
     providerCallsMade: 0,
     productionDatabaseMutations: 0,
   }

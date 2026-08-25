@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-24 MLB-04D-D3S-R3C One-Row Evidence Canary Readback Contract
+
+- MLB-04D-D3S-R3C is locally implemented as `MLB_04D_D3S_R3C_ONE_ROW_EVIDENCE_CANARY_READBACK_CONTRACT_CERTIFIED`. It completes the missing canary execution contract with explicit deterministic-identity pre-read, `0/1/>1` match semantics, immediate insert/reuse readback, write/readback parity and repeated execution idempotency.
+- The one-row canary path remains separate from continuous D3W evidence persistence, MLB-04B snapshot writes and forward research-ledger writes. It does not run a real canary during certification, does not write production rows and does not enable continuous evidence persistence.
+- Provider calls were 0, production database mutations were 0, all prediction/snapshot/evidence/ledger/product/learning/calibration/settlement write counters were 0, automation remained off and no active cron was added.
+
 ## 2026-08-24 MLB-04D-D3S-R3B Immutable Evidence Guard Scope Repair
 
 - MLB-04D-D3S-R3B is locally implemented as `MLB_04D_D3S_R3B_IMMUTABLE_EVIDENCE_GUARD_SCOPE_REPAIR_CERTIFIED`. It repairs the D3S-R3 incident where one-row canary authorization allowed the natural D3W path to persist a full eligible batch of immutable forward opportunity evidence.
