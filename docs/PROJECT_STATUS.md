@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-25 MLB-04D-D3S-R3D-L3-R1 Ledger Result Evaluation Guard Repair
+
+- MLB-04D-D3S-R3D-L3-R1 is locally implemented as `MLB_04D_D3S_R3D_L3_R1_RESULT_EVALUATION_GUARD_CERTIFIED`. It adds a dedicated `MLB_FORWARD_RESEARCH_LEDGER_RESULT_EVALUATION_AUTHORIZED` guard for exactly-one `mlb_forward_research_ledger` result/evaluation updates.
+- The result-evaluation path is separate from the ledger insert canary, broad ledger planning, snapshot/evidence authorization, product settlement, learning, calibration and automation. It requires both ledger row ID and deterministic identity, pre-reads the exact row, blocks missing/duplicate/conflicting states, updates only the result-field allowlist and immediately readbacks the row.
+- Certification is code/fixture/read-only only: the real CIN @ SF ledger row was not evaluated in production, no ledger update was executed, no providers were called, no production rows were mutated, automation remains off and no active cron was added.
+
 ## 2026-08-25 MLB-04D-D3S-R3D-L1 Ledger Canary Guard Repair
 
 - MLB-04D-D3S-R3D-L1 is locally implemented as `MLB_04D_D3S_R3D_L1_LEDGER_CANARY_GUARD_CERTIFIED`. It adds a dedicated `MLB_FORWARD_RESEARCH_LEDGER_CANARY_AUTHORIZED` one-row ledger canary guard instead of reusing the broad `MLB_FORWARD_LEDGER_ENABLED` planning switch or any snapshot/evidence authorization.
