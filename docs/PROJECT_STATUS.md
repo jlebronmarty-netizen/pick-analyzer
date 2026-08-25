@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-25 MLB-04D-D3S-R3D-L1 Ledger Canary Guard Repair
+
+- MLB-04D-D3S-R3D-L1 is locally implemented as `MLB_04D_D3S_R3D_L1_LEDGER_CANARY_GUARD_CERTIFIED`. It adds a dedicated `MLB_FORWARD_RESEARCH_LEDGER_CANARY_AUTHORIZED` one-row ledger canary guard instead of reusing the broad `MLB_FORWARD_LEDGER_ENABLED` planning switch or any snapshot/evidence authorization.
+- The new canary service accepts exactly one prepared `mlb_forward_research_ledger` payload, recomputes the deterministic identity, pre-reads exact matches, inserts at most one row for zero matches, reuses exactly one existing row, and fails closed on duplicate defects, identity mismatch, missing authorization or invalid FK evidence.
+- This phase is code/fixture certification only: no real ledger row was inserted, no snapshots or immutable evidence rows were created, no providers were called, no production database rows were mutated, automation remains off and no cron was added.
+
 ## 2026-08-25 MLB-04D-D3S-R3D-R1 JSONB Semantic Readback Parity Repair
 
 - MLB-04D-D3S-R3D-R1 is locally implemented as `MLB_04D_D3S_R3D_R1_JSONB_SEMANTIC_READBACK_PARITY_REPAIR_CERTIFIED`. It repairs the R3D one-row immutable evidence canary parity false negative where Supabase/PostgreSQL JSONB readback reordered `source_lineage` object keys and the prior parity check compared raw JSON string order.

@@ -1,0 +1,60 @@
+{
+  "classification": "MLB_04D_D3S_R3D_L1_LEDGER_CANARY_GUARD_CERTIFIED",
+  "phase": "MLB-04D-D3S-R3D-L1_ONE_ROW_FORWARD_RESEARCH_LEDGER_CANARY_GUARD_REPAIR",
+  "authorization": {
+    "dedicatedGuard": "MLB_FORWARD_RESEARCH_LEDGER_CANARY_AUTHORIZED",
+    "defaultAuthorized": false,
+    "independentFromGeneralLedgerSwitch": true,
+    "independentFromSnapshotGuard": true,
+    "independentFromOpportunityEvidenceCanaryGuard": true,
+    "independentFromOpportunityEvidenceContinuousGuard": true
+  },
+  "oneRowCanaryContract": {
+    "acceptsArrayPayloads": false,
+    "requiresExactRequestedIdentity": true,
+    "preReadSemantics": {
+      "zeroMatches": "INSERT_ELIGIBLE",
+      "oneMatch": "REUSE_NO_OP",
+      "moreThanOneMatch": "BLOCK_DUPLICATE_DEFECT"
+    },
+    "maxNewRowsPerCanary": 1,
+    "immediateReadback": true,
+    "semanticJsonParity": true,
+    "strictNonJsonParity": true,
+    "repeatedIdempotency": "PASS"
+  },
+  "immutability": {
+    "pregameFieldsImmutable": true,
+    "futureMutableResultFieldsOnly": [
+      "result",
+      "result_id",
+      "settled_at",
+      "profit",
+      "raw_brier",
+      "calibrated_brier",
+      "raw_log_loss",
+      "calibrated_log_loss",
+      "chat_directional_result"
+    ],
+    "resultMutationThisPhase": false
+  },
+  "isolation": {
+    "snapshotWritesAuthorized": false,
+    "opportunityEvidenceWritesAuthorized": false,
+    "predictionWritesAuthorized": false,
+    "officialPickWritesAuthorized": false,
+    "learningWritesAuthorized": false,
+    "calibrationWritesAuthorized": false,
+    "settlementWritesAuthorized": false,
+    "productWritesAuthorized": false,
+    "automationActivated": "NO",
+    "activeCronAdded": "NO"
+  },
+  "claims": {
+    "ledgerAccuracyClaimReady": "NO",
+    "chatMethodProbabilityCreated": "NO",
+    "chatMethodProbabilityReady": "NO"
+  },
+  "providerCallsMade": 0,
+  "productionDatabaseMutations": 0
+}

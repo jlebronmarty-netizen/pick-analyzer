@@ -20,6 +20,7 @@ export type MlbResearchAuthStatusPayload = {
   snapshotAuthorized: MlbResearchAuthStatus
   opportunityEvidenceCanaryAuthorized: MlbResearchAuthStatus
   opportunityEvidenceContinuousAuthorized: MlbResearchAuthStatus
+  forwardResearchLedgerCanaryAuthorized: MlbResearchAuthStatus
   automationActivated: 'NO'
   activeCronAdded: 'NO'
   providerCallsMade: 0
@@ -51,6 +52,9 @@ export function buildMlbResearchAuthStatusPayload(
     ),
     opportunityEvidenceContinuousAuthorized: normalizeMlbResearchAuthStatus(
       env.MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZED
+    ),
+    forwardResearchLedgerCanaryAuthorized: normalizeMlbResearchAuthStatus(
+      env.MLB_FORWARD_RESEARCH_LEDGER_CANARY_AUTHORIZED
     ),
     automationActivated: 'NO',
     activeCronAdded: 'NO',
