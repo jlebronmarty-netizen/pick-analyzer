@@ -190,8 +190,25 @@ function evidenceReadbackColumns() {
   ].join(',')
 }
 
+function canonicalizeJsonComparable(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalizeJsonComparable)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as JsonRecord)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, item]) => [key, canonicalizeJsonComparable(item)])
+    )
+  }
+  return value
+}
+
+export function semanticJsonReadbackEqual(left: unknown, right: unknown) {
+  return JSON.stringify(canonicalizeJsonComparable(left)) === JSON.stringify(canonicalizeJsonComparable(right))
+}
+
 function normalizeComparable(value: unknown) {
   if (typeof value === 'number') return Number(value.toFixed(6))
+  if (value && typeof value === 'object') return canonicalizeJsonComparable(value)
   return value ?? null
 }
 
@@ -216,11 +233,12 @@ function compareEvidenceReadback(
     'calibration_version',
     'methodology_version',
     'source_lineage',
+    'opportunity_evidence',
   ] as const
   const mismatches = fields.filter((field) => {
     const left = normalizeComparable(expected[field])
     const right = normalizeComparable(actual?.[field])
-    return JSON.stringify(left) !== JSON.stringify(right)
+    return !semanticJsonReadbackEqual(left, right)
   })
   return {
     status: actual && mismatches.length === 0 ? 'PASS' : 'FAIL',

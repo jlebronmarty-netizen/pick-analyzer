@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-25 MLB-04D-D3S-R3D-R1 JSONB Semantic Readback Parity Repair
+
+- MLB-04D-D3S-R3D-R1 is locally implemented as `MLB_04D_D3S_R3D_R1_JSONB_SEMANTIC_READBACK_PARITY_REPAIR_CERTIFIED`. It repairs the R3D one-row immutable evidence canary parity false negative where Supabase/PostgreSQL JSONB readback reordered `source_lineage` object keys and the prior parity check compared raw JSON string order.
+- The repair is limited to semantic comparison of JSON-compatible parity fields. Object key order is ignored recursively, array order remains significant, primitive types remain strict, and missing keys remain distinct from `null`. Non-JSON fields such as event, market, selection, exact line, sportsbook, odds, timestamps, probabilities, model versions, methodology version and deterministic identity remain strict.
+- Persistence semantics are unchanged: deterministic pre-read, `0/1/>1` semantics, insert/reuse path, duplicate-defect handling, max-one canary cardinality, append-only behavior, canary/continuous guard separation, snapshot separation and ledger separation are preserved. No provider calls, production database mutations, model changes, calibration changes, product writes, learning writes, settlement writes, automation activation or active cron changes were performed during local certification.
+
 ## 2026-08-24 MLB-04D-D3S-R3E Research Authorization Status Endpoint
 
 - MLB-04D-D3S-R3E is locally implemented as `MLB_04D_D3S_R3E_PRODUCTION_AUTH_STATUS_ENDPOINT_CERTIFIED`. It adds a protected read-only `/api/mlb/research-auth-status` route so Production can report the deployed server-runtime state of `MLB_04B_CONTEXT_SNAPSHOT_AUTHORIZED`, `MLB_FORWARD_OPPORTUNITY_EVIDENCE_CANARY_AUTHORIZED` and `MLB_FORWARD_OPPORTUNITY_EVIDENCE_CONTINUOUS_AUTHORIZED` without exposing secret values.

@@ -1,0 +1,42 @@
+{
+  "classification": "MLB_04D_D3S_R3D_R1_JSONB_SEMANTIC_READBACK_PARITY_REPAIR_CERTIFIED",
+  "phase": "MLB-04D-D3S-R3D-R1_JSONB_SEMANTIC_READBACK_PARITY_REPAIR",
+  "rootCause": "JSON_OBJECT_KEY_ORDER_SENSITIVE_COMPARISON",
+  "repair": {
+    "scope": "R3C one-row immutable evidence canary write/readback parity comparison only",
+    "jsonObjectKeyOrderingIgnored": true,
+    "nestedJsonObjectKeyOrderingIgnored": true,
+    "arrayOrderingPreserved": true,
+    "primitiveTypesPreserved": true,
+    "nullDistinctFromMissing": true,
+    "nonJsonFieldsRemainStrict": true,
+    "writePathChanged": false,
+    "persistenceSemanticsChanged": false,
+    "deterministicIdentityChanged": false
+  },
+  "selectedEvidenceRowPreserved": "de7e36a1-058e-5b9e-a711-9ad87ee15c69",
+  "incidentRowsPreserved": true,
+  "providerCalls": 0,
+  "productionDbMutations": 0,
+  "snapshotWrites": 0,
+  "evidenceWrites": 0,
+  "ledgerWrites": 0,
+  "predictionWrites": 0,
+  "productWrites": 0,
+  "learningWrites": 0,
+  "settlementWrites": 0,
+  "calibrationWrites": 0,
+  "rawModelChanged": false,
+  "calibrationChanged": false,
+  "automationActivated": false,
+  "activeCronAdded": false,
+  "sportsDataIoCalls": 0,
+  "nflIsolation": true,
+  "nbaIsolation": true,
+  "futureReuseProof": {
+    "targetEvidenceRowId": "de7e36a1-058e-5b9e-a711-9ad87ee15c69",
+    "expectedAction": "REUSE_NO_OP",
+    "expectedNewEvidenceRows": 0,
+    "expectedLedgerRows": 0
+  }
+}
