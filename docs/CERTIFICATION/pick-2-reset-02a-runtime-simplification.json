@@ -1,0 +1,204 @@
+{
+  "certificationVerdict": "PICK_2_RESET_02A_BOUNDED_RUNTIME_SIMPLIFICATION_CERTIFIED",
+  "phase": "PICK-2.0-RESET-02A",
+  "startingCommit": "972a6be32c22d73b9cdb3e379faa38b000c0b084",
+  "scope": "bounded runtime simplification",
+  "providerCalls": 0,
+  "productionDmlMutations": 0,
+  "productionRowDeletes": 0,
+  "tableDrops": 0,
+  "migrations": 0,
+  "modelFormulaChanges": 0,
+  "calibrationChanges": 0,
+  "officialPickChanges": 0,
+  "learningChanges": 0,
+  "pick2DataImport": 0,
+  "automationActivated": false,
+  "newCron": false,
+  "reset01ManifestAuthority": {
+    "artifact": "docs/CERTIFICATION/pick-2-reset-01-legacy-freeze-inventory.json",
+    "runtimeSimplificationManifestLoaded": true,
+    "apiSimplificationManifestLoaded": true,
+    "uiSimplificationManifestLoaded": true,
+    "databaseResetManifestLoaded": true,
+    "tableDependencyGraphLoaded": true
+  },
+  "coreSafetyInfrastructurePreserved": {
+    "status": "YES",
+    "preserved": [
+      "temporal safety utilities",
+      "as-of semantics",
+      "deterministic identity helpers",
+      "idempotency helpers",
+      "frozen evidence primitives",
+      "readback parity",
+      "canonical event/result linkage",
+      "provider budget accounting",
+      "raw/calibrated separation primitives",
+      "production isolation",
+      "protected internal auth patterns",
+      "system/version"
+    ]
+  },
+  "inventoryBefore": {
+    "apiRouteFiles": 454,
+    "appPageFiles": 30,
+    "topLevelServiceFiles": 316,
+    "activeCronPaths": [
+      "/api/cron/operating-day",
+      "/api/cron/nba-current-era-shadow"
+    ]
+  },
+  "safeDeleteSet": [
+    {
+      "path": "src/app/admin/historical-diagnostics/page.tsx",
+      "type": "app_page",
+      "manifestClassification": "ARCHIVE",
+      "reason": "Experimental internal Retrosheet diagnostics page is outside the Pick 2.0 target runtime, has no live source navigation dependency, and its reusable Retrosheet services remain preserved.",
+      "formerCallers": "No live src links detected.",
+      "replacement": "No runtime replacement in RESET-02A; underlying read-only Retrosheet routes/services remain available for audit until later reset gates."
+    },
+    {
+      "path": "src/services/bsn-predictions.service.ts",
+      "type": "service",
+      "manifestClassification": "ARCHIVE",
+      "reason": "Unused BSN shadow prediction wrapper is outside initial Pick 2.0 MLB scope and has zero active src imports.",
+      "formerCallers": "No active src imports detected.",
+      "replacement": "None. Shared basketball and BSN primitives were not removed."
+    }
+  ],
+  "deferredRuntimeSet": [
+    {
+      "scope": "active cron",
+      "paths": [
+        "/api/cron/operating-day",
+        "/api/cron/nba-current-era-shadow"
+      ],
+      "reason": "Configured cron targets remain active in vercel.json; RESET-02A does not remove active cron without separate proof and config authorization."
+    },
+    {
+      "scope": "AI/product surfaces",
+      "reason": "Several manifest-archive AI routes are still fetched by dashboard panels or operations validators, so they require a later route-to-UI replacement pass."
+    },
+    {
+      "scope": "MLB-04 research runtime",
+      "reason": "Research services are legacy for Pick 2.0 but still referenced by validation scripts and some active lineage/probability paths; removal deferred until audit/archive handoff is explicit."
+    },
+    {
+      "scope": "NBA/NFL runtime",
+      "reason": "Sport-specific runtime is outside initial MLB focus, but current active scheduler/config and recent certified import/model paths make broad removal too risky for RESET-02A."
+    },
+    {
+      "scope": "SportsDataIO runtime",
+      "reason": "Rollback and historical compatibility references remain; removal requires a separate rollback-only archive certification."
+    }
+  ],
+  "inventoryAfterExpected": {
+    "apiRouteFiles": 454,
+    "appPageFiles": 29,
+    "topLevelServiceFiles": 315,
+    "activeCronPaths": [
+      "/api/cron/operating-day",
+      "/api/cron/nba-current-era-shadow"
+    ]
+  },
+  "routeDelta": {
+    "routesBefore": 484,
+    "routesAfter": 483,
+    "apiRoutesBefore": 454,
+    "apiRoutesAfter": 454,
+    "appPagesBefore": 30,
+    "appPagesAfter": 29,
+    "routesRemoved": [
+      "/admin/historical-diagnostics"
+    ],
+    "routesDeferred": [
+      "/api/cron/operating-day",
+      "/api/cron/nba-current-era-shadow",
+      "AI/product routes with live dashboard callers",
+      "MLB-04 research protected routes",
+      "NBA/NFL/BSN runtime routes"
+    ],
+    "coreRoutesRemaining": [
+      "/api/system/version",
+      "/api/current-board",
+      "/api/performance",
+      "/api/operations/health",
+      "/api/results",
+      "/api/odds"
+    ]
+  },
+  "serviceDelta": {
+    "servicesBefore": 316,
+    "servicesAfter": 315,
+    "servicesRemoved": [
+      "src/services/bsn-predictions.service.ts"
+    ],
+    "servicesDeferred": [
+      "active product services",
+      "shared provider/data services",
+      "research services with validator or runtime lineage dependencies",
+      "sport-specific services requiring separate archive certification"
+    ],
+    "sharedPrimitivesRetained": true
+  },
+  "cronDelta": {
+    "activeCronBefore": [
+      "/api/cron/operating-day",
+      "/api/cron/nba-current-era-shadow"
+    ],
+    "activeCronAfter": [
+      "/api/cron/operating-day",
+      "/api/cron/nba-current-era-shadow"
+    ],
+    "removed": [],
+    "deferred": [
+      "/api/cron/operating-day",
+      "/api/cron/nba-current-era-shadow"
+    ]
+  },
+  "sportsdataioRuntimeAudit": {
+    "removablePercent": 0,
+    "remainingDependencies": [
+      "rollback/context compatibility",
+      "historical certification scripts",
+      "provider capability audit records",
+      "legacy route references pending separate archive"
+    ]
+  },
+  "shadowResearchRuntimeAudit": {
+    "CURRENT_ERA_SHADOW": "DEFER",
+    "HISTORICAL_REPLAY_SHADOW": "DEFER",
+    "prospectivePreview": "KEEP_TEMPORARILY_FOR_RESET",
+    "MLB04Research": "DEFER",
+    "forwardCanaryRoutes": "DEFER",
+    "researchLedgersRuntimeEndpoints": "DEFER"
+  },
+  "officialPickRuntimeAudit": "KEEP_LEGACY_READ_ONLY",
+  "learningRuntimeAudit": "DEFER_LEGACY_ORCHESTRATION_REMOVAL_PRESERVE_PRIMITIVES",
+  "calibrationRuntimeAudit": "KEEP_AUDIT_UTILITIES_DEFER_AUTOMATION_ARCHIVE",
+  "sportsScopeAudit": {
+    "NBA": "DEFER",
+    "NFL": "DEFER",
+    "BSN": "DEFER_EXCEPT_UNUSED_BSN_PREDICTIONS_WRAPPER_REMOVED"
+  },
+  "envReferencesNowUnused": [],
+  "importGraphClean": true,
+  "productionDataIsolation": {
+    "dbMutations": 0,
+    "predictionRowsChanged": 0,
+    "officialPickRowsChanged": 0,
+    "legacyRowsChanged": 0,
+    "pick2EraChanged": false
+  },
+  "flags": {
+    "CORE_SAFETY_INFRASTRUCTURE_PRESERVED": "YES",
+    "SAFE_RUNTIME_DELETE_SET_CERTIFIED": "YES",
+    "ROUTE_DEPENDENCY_AUDIT": "PASS",
+    "SERVICE_DEPENDENCY_AUDIT": "PASS",
+    "IMPORT_GRAPH_CLEAN": "YES",
+    "PICK_2_ERA_BOUNDARY_UNCHANGED": "YES",
+    "NEW_DATA_IMPORT_ALLOWED_NOW": "NO",
+    "AUTOMATION_ACTIVATED": "NO"
+  }
+}

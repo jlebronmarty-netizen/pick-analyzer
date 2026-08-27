@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-27 PICK-2.0 RESET-02A Bounded Runtime Simplification
+
+- RESET-02A is locally implemented as `PICK_2_RESET_02A_BOUNDED_RUNTIME_SIMPLIFICATION_CERTIFIED`. It uses the RESET-01 exact inventory manifests as authority and removes only the first leaf-safe archival runtime files: the unlinked `/admin/historical-diagnostics` page and the unused `bsn-predictions.service.ts` wrapper.
+- Core safety infrastructure is preserved, including temporal/as-of utilities, deterministic identity, idempotency, frozen evidence/readback parity, canonical event/result linkage, provider budget accounting, raw/calibrated separation, protected internal auth and `/api/system/version`.
+- Active cron targets, SportsDataIO rollback references, MLB-04 research runtime, AI/product surfaces and broad NBA/NFL/BSN runtime remain deferred for later reset gates. Provider calls, production DML mutations, migrations, model/calibration/Official Pick/learning changes, Pick 2 imports, automation activation and cron changes are all 0.
+
 ## 2026-08-25 MLB-04D-D3S-R3D-L3-R1 Ledger Result Evaluation Guard Repair
 
 - MLB-04D-D3S-R3D-L3-R1 is locally implemented as `MLB_04D_D3S_R3D_L3_R1_RESULT_EVALUATION_GUARD_CERTIFIED`. It adds a dedicated `MLB_FORWARD_RESEARCH_LEDGER_RESULT_EVALUATION_AUTHORIZED` guard for exactly-one `mlb_forward_research_ledger` result/evaluation updates.
