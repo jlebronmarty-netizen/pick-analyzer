@@ -60,7 +60,7 @@ check('operating-day cron preserved', exists('src/app/api/cron/operating-day/rou
 check('NBA shadow cron preserved for explicit later cleanup', exists('src/app/api/cron/nba-current-era-shadow/route.ts'))
 check('vercel cron unchanged', JSON.stringify(vercel.crons?.map((cron) => cron.path).sort()) === JSON.stringify(['/api/cron/nba-current-era-shadow', '/api/cron/operating-day'].sort()))
 check('app page inventory delta matches', countNamedFiles('src/app', 'page.tsx') === artifact.inventoryAfterExpected.appPageFiles)
-check('api route inventory unchanged', countNamedFiles('src/app', 'route.ts') === artifact.inventoryAfterExpected.apiRouteFiles)
+check('api route inventory does not exceed RESET-02A baseline', countNamedFiles('src/app', 'route.ts') <= artifact.inventoryAfterExpected.apiRouteFiles)
 check('top-level service inventory delta matches', countTopLevelServiceFiles() === artifact.inventoryAfterExpected.topLevelServiceFiles)
 check('markdown certification present', markdown.includes('PICK_2_RESET_02A_BOUNDED_RUNTIME_SIMPLIFICATION_CERTIFIED'))
 check('production isolation recorded', artifact.productionDataIsolation.dbMutations === 0 && artifact.productionDataIsolation.pick2EraChanged === false)

@@ -8,6 +8,12 @@ Last updated: 2026-08-24 00:00:00Z
 - Core safety infrastructure is preserved, including temporal/as-of utilities, deterministic identity, idempotency, frozen evidence/readback parity, canonical event/result linkage, provider budget accounting, raw/calibrated separation, protected internal auth and `/api/system/version`.
 - Active cron targets, SportsDataIO rollback references, MLB-04 research runtime, AI/product surfaces and broad NBA/NFL/BSN runtime remain deferred for later reset gates. Provider calls, production DML mutations, migrations, model/calibration/Official Pick/learning changes, Pick 2 imports, automation activation and cron changes are all 0.
 
+## 2026-08-27 PICK-2.0 RESET-02B Route / Service Consolidation
+
+- RESET-02B is locally implemented as `PICK_2_RESET_02B_ROUTE_SERVICE_CONSOLIDATION_CERTIFIED`. It removes five uncalled, manifest-archived API route wrappers: `/api/ai/game-analysis`, `/api/ai-operations/lifecycle`, `/api/ai-performance-center/daily-update`, `/api/autonomous-daily-operations/demo` and `/api/autonomous-daily-operations/simulation`.
+- Underlying services are preserved where they still have active runtime, panel or audit use. `/api/mlb/projections` remains because dashboard panels actively fetch it, and both configured cron routes remain unchanged.
+- Provider calls, production database mutations, schema changes, prediction writes, model/calibration/product changes, automation activation and new cron are all 0. Pick 2 data import remains blocked until later reset gates.
+
 ## 2026-08-25 MLB-04D-D3S-R3D-L3-R1 Ledger Result Evaluation Guard Repair
 
 - MLB-04D-D3S-R3D-L3-R1 is locally implemented as `MLB_04D_D3S_R3D_L3_R1_RESULT_EVALUATION_GUARD_CERTIFIED`. It adds a dedicated `MLB_FORWARD_RESEARCH_LEDGER_RESULT_EVALUATION_AUTHORIZED` guard for exactly-one `mlb_forward_research_ledger` result/evaluation updates.

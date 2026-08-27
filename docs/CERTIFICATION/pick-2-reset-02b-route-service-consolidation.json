@@ -1,0 +1,178 @@
+{
+  "certificationVerdict": "PICK_2_RESET_02B_ROUTE_SERVICE_CONSOLIDATION_CERTIFIED",
+  "phase": "PICK-2.0-RESET-02B",
+  "startingCommit": "3fed7ddf50b94b8256875c23bdb634c0f337aa71",
+  "scope": "route/service consolidation and legacy dependency cleanup",
+  "providerCalls": 0,
+  "productionDbMutations": 0,
+  "productionDml": 0,
+  "tableSchemaChanges": 0,
+  "predictionWrites": 0,
+  "modelChanges": 0,
+  "calibrationChanges": 0,
+  "productWrites": 0,
+  "automationActivated": false,
+  "newCron": false,
+  "manifestAuthority": {
+    "reset01Inventory": "docs/CERTIFICATION/pick-2-reset-01-legacy-freeze-inventory.json",
+    "reset02aArtifact": "docs/CERTIFICATION/pick-2-reset-02a-runtime-simplification.json",
+    "loaded": true
+  },
+  "coreSafetyInfrastructurePreserved": "YES",
+  "routeAuditSummary": {
+    "groupsAudited": [
+      "system/version",
+      "data health",
+      "sports data ingest",
+      "events/results",
+      "odds",
+      "predictions",
+      "performance",
+      "research",
+      "calibration",
+      "learning",
+      "Official Picks",
+      "AI/bet finder",
+      "admin",
+      "cron",
+      "provider diagnostics",
+      "sports-specific legacy"
+    ],
+    "routeConsolidationPlanExecuted": true,
+    "classificationBasis": "RESET-01 archive classification plus static caller scan and cron exclusion"
+  },
+  "routes": {
+    "before": 483,
+    "apiRoutesBefore": 454,
+    "appPagesBefore": 29,
+    "removed": [
+      {
+        "path": "/api/ai/game-analysis",
+        "file": "src/app/api/ai/game-analysis/route.ts",
+        "classification": "ARCHIVE",
+        "duplicateOf": "AI copilot/service-level analysis path",
+        "reason": "No active src fetch/caller; direct phase-era API surface is outside Pick 2 target. Underlying ai-game-analysis service remains because ai-copilot still imports it."
+      },
+      {
+        "path": "/api/ai-operations/lifecycle",
+        "file": "src/app/api/ai-operations/lifecycle/route.ts",
+        "classification": "ARCHIVE",
+        "duplicateOf": "AI operations page direct service import",
+        "reason": "No active src fetch/caller; the page imports the lifecycle service directly."
+      },
+      {
+        "path": "/api/ai-performance-center/daily-update",
+        "file": "src/app/api/ai-performance-center/daily-update/route.ts",
+        "classification": "ARCHIVE",
+        "duplicateOf": "AI performance center status surface",
+        "reason": "No active src fetch/caller; daily update endpoint is phase-specific orchestration, not a Pick 2 target route."
+      },
+      {
+        "path": "/api/autonomous-daily-operations/demo",
+        "file": "src/app/api/autonomous-daily-operations/demo/route.ts",
+        "classification": "ARCHIVE",
+        "duplicateOf": "/api/autonomous-daily-operations/status",
+        "reason": "No active src fetch/caller; demo wrapper duplicates status semantics with extra demo labels."
+      },
+      {
+        "path": "/api/autonomous-daily-operations/simulation",
+        "file": "src/app/api/autonomous-daily-operations/simulation/route.ts",
+        "classification": "ARCHIVE",
+        "duplicateOf": "inactive autonomous lifecycle simulation service path",
+        "reason": "No active src fetch/caller; simulation endpoint is legacy orchestration outside Pick 2 target."
+      }
+    ],
+    "merged": [],
+    "after": 478,
+    "apiRoutesAfter": 449,
+    "appPagesAfter": 29,
+    "deferred": [
+      "/api/mlb/projections alias remains because dashboard panels actively fetch it",
+      "active cron routes remain configured",
+      "AI/bet-finder surfaces with active dashboard callers remain deferred",
+      "MLB-04 research protected routes remain deferred for rollback/audit",
+      "SportsDataIO provider diagnostics remain deferred for rollback/context compatibility",
+      "NBA/NFL/BSN broad runtime remains deferred"
+    ]
+  },
+  "services": {
+    "before": 315,
+    "removed": [],
+    "merged": [],
+    "after": 315,
+    "reason": "No additional top-level service met the RESET-02B safe-removal standard. Candidate services either still have active src imports, active route imports, validator/audit dependencies, or preserve useful safety/data primitives."
+  },
+  "audits": {
+    "researchRoutes": "DEFER unless caller-free and rollback-free; no MLB-04 research route removed in RESET-02B",
+    "aiBetFinderRoutes": "DEFER active product/dashboard callers; five uncalled AI/autonomous route wrappers removed",
+    "officialPickRuntime": "LEGACY_READ_ONLY",
+    "shadowPreviewRuntime": "DEFER; raw/calibrated, temporal, result linkage and idempotency primitives preserved",
+    "sportsDataIoRuntime": {
+      "cumulativeRemovalPercent": 0,
+      "remaining": [
+        "rollback-only compatibility",
+        "diagnostics/audit routes",
+        "historical certification evidence",
+        "stored-data migration context"
+      ]
+    },
+    "nbaRuntime": "DEFER",
+    "nflRuntime": "DEFER",
+    "bsnRuntime": "DEFER after RESET-02A unused wrapper removal",
+    "cronCallGraph": {
+      "/api/cron/operating-day": "DEFER active configured core operating-day path",
+      "/api/cron/nba-current-era-shadow": "DEFER active configured legacy scheduler path; no vercel.json change in RESET-02B"
+    }
+  },
+  "deadImportExportCleanup": {
+    "status": "PASS",
+    "removedRouteImports": [
+      "@/services/ai-game-analysis.service",
+      "@/services/ai-learning-lifecycle.service",
+      "@/lib/server-lazy-diagnostics daily update/demo/simulation loaders"
+    ],
+    "staleBarrels": []
+  },
+  "envReferencesUnusedAfterReset02B": [],
+  "validatorScriptCleanup": {
+    "status": "DEFER",
+    "reason": "Historical certification scripts remain audit evidence. No runtime helper script was proven safe to delete."
+  },
+  "documentationCleanup": {
+    "updated": [
+      "docs/PROJECT_STATUS.md",
+      "docs/MASTER_ROADMAP.md",
+      "docs/CERTIFICATION/PICK_2_RESET_02B_ROUTE_SERVICE_CONSOLIDATION.md"
+    ],
+    "massDocDeletion": false
+  },
+  "runtimeDependencyGraph": "CLEAN",
+  "routeSurfaceProgress": {
+    "reset02aRemoved": 1,
+    "reset02bRemoved": 5,
+    "cumulativeRoutesRemoved": 6,
+    "progress": "Initial leaf route reduction complete; broad product/API consolidation deferred until replacement target APIs exist."
+  },
+  "serviceSurfaceProgress": {
+    "reset02aRemoved": 1,
+    "reset02bRemoved": 0,
+    "cumulativeTopLevelServicesRemoved": 1,
+    "progress": "Service surface audit is stricter than route cleanup; no extra services removed without stronger dependency proof."
+  },
+  "productionDataIsolation": {
+    "dbMutations": 0,
+    "rowDeletes": 0,
+    "schemaChanges": 0,
+    "legacyRowsChanged": 0,
+    "pick2EraBoundaryChanged": false
+  },
+  "flags": {
+    "CORE_SAFETY_INFRASTRUCTURE_PRESERVED": "YES",
+    "ROUTE_CONSOLIDATION_CERTIFIED": "YES",
+    "SERVICE_CONSOLIDATION_CERTIFIED": "YES",
+    "RUNTIME_DEPENDENCY_GRAPH_CLEAN": "YES",
+    "PICK_2_ERA_BOUNDARY_UNCHANGED": "YES",
+    "NEW_DATA_IMPORT_ALLOWED_NOW": "NO",
+    "AUTOMATION_ACTIVATED": "NO"
+  }
+}
