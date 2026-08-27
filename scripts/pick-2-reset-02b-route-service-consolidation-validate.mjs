@@ -51,7 +51,7 @@ check('system version route preserved', exists('src/app/api/system/version/route
 check('active crons preserved', exists('src/app/api/cron/operating-day/route.ts') && exists('src/app/api/cron/nba-current-era-shadow/route.ts'))
 check('vercel cron unchanged', JSON.stringify(vercel.crons?.map((cron) => cron.path).sort()) === JSON.stringify(['/api/cron/nba-current-era-shadow', '/api/cron/operating-day'].sort()))
 check('api route count matches artifact', countNamedFiles('src/app', 'route.ts') === artifact.routes.apiRoutesAfter)
-check('app page count matches artifact', countNamedFiles('src/app', 'page.tsx') === artifact.routes.appPagesAfter)
+check('app page count preserves RESET-02B baseline', countNamedFiles('src/app', 'page.tsx') >= artifact.routes.appPagesAfter)
 check('service count matches artifact', countTopLevelServices() === artifact.services.after)
 check('MLB projections alias preserved due active callers', exists('src/app/api/mlb/projections/route.ts'))
 check('documentation present', exists('docs/CERTIFICATION/PICK_2_RESET_02B_ROUTE_SERVICE_CONSOLIDATION.md'))

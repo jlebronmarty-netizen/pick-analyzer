@@ -1,7 +1,7 @@
-import PerformanceProductClient from '@/components/performance/PerformanceProductClient'
+import Pick2Surface from '@/components/pick2/Pick2Surface'
 
 export const dynamic = 'force-dynamic'
 
 export default function PerformancePage() {
-  return <PerformanceProductClient />
+  return <Pick2Surface area="performance" />
 }

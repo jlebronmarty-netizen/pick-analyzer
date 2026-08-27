@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-27 PICK-2.0 RESET-03 UI Simplification
+
+- RESET-03 is locally implemented as `PICK_2_RESET_03_UI_SIMPLIFICATION_CERTIFIED`. The normal product shell now exposes exactly four primary areas: Today, Performance, Model Lab and Data Health.
+- `/`, `/today`, `/performance`, `/model-lab` and `/data-health` use clean Pick 2.0 zero-state surfaces. Legacy predictions, Official Pick history, research/canary state and old performance metrics are not relabeled as Pick 2 output.
+- Legacy pages and backend APIs are preserved outside normal navigation for audit/bookmark compatibility. No production data, schemas, provider authority, prediction formulas, calibration, Official Picks, learning, cron or automation changed. Provider calls and production database mutations are 0.
+
 ## 2026-08-27 PICK-2.0 RESET-02A Bounded Runtime Simplification
 
 - RESET-02A is locally implemented as `PICK_2_RESET_02A_BOUNDED_RUNTIME_SIMPLIFICATION_CERTIFIED`. It uses the RESET-01 exact inventory manifests as authority and removes only the first leaf-safe archival runtime files: the unlinked `/admin/historical-diagnostics` page and the unused `bsn-predictions.service.ts` wrapper.

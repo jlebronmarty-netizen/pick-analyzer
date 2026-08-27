@@ -1,8 +1,7 @@
 import Pick2Surface from '@/components/pick2/Pick2Surface'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
 
-export default function Home() {
-  return <Pick2Surface area="today" />
+export default function ModelLabPage() {
+  return <Pick2Surface area="model-lab" />
 }
