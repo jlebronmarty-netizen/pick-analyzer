@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-27 PICK-2.0 RESET-04 Data Foundation
+
+- RESET-04 is locally implemented as `PICK_2_RESET_04_DATA_FOUNDATION_CERTIFIED`. It prepares an additive Pick 2 database foundation for raw MLB Statcast, leakage-safe daily features, model registry/training/validation, pure sports predictions, prediction result evaluation, independent market-value evaluation and data-health status.
+- Stable canonical sports identity remains reused through `sports_teams`, `sport_players`, `sport_events` and `game_results`; `sports_odds_snapshots` remains independent market storage. Legacy `prediction_history`, Official Pick, shadow, research-ledger and historical feature data remain `LEGACY_PRE_PICK_2` and are not relabeled as Pick 2 output.
+- The migration package is prepared but not applied. Statcast imports, new sports imports, provider calls, production database mutations, prediction writes, model training, calibration changes, Official Pick writes, learning writes, automation activation, new cron and destructive legacy DML are all 0.
+
 ## 2026-08-27 PICK-2.0 RESET-03 UI Simplification
 
 - RESET-03 is locally implemented as `PICK_2_RESET_03_UI_SIMPLIFICATION_CERTIFIED`. The normal product shell now exposes exactly four primary areas: Today, Performance, Model Lab and Data Health.

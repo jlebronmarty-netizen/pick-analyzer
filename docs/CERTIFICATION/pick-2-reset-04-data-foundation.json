@@ -1,0 +1,196 @@
+{
+  "certificationVerdict": "PICK_2_RESET_04_DATA_FOUNDATION_CERTIFIED",
+  "phase": "PICK-2.0-RESET-04",
+  "startingCommit": "f857d2f23bcd0423fd03f22ea4482e2d58c5547b",
+  "scope": "Database restructure and Pick 2 data foundation preparation",
+  "providerCalls": 0,
+  "productionDbMutations": 0,
+  "statcastImports": 0,
+  "newSportsImports": 0,
+  "predictionWrites": 0,
+  "modelTraining": 0,
+  "calibrationChanges": 0,
+  "officialPickWrites": 0,
+  "learningWrites": 0,
+  "automationActivated": false,
+  "newCron": false,
+  "migrationExecutionState": "PREPARED_NOT_APPLIED",
+  "manifestAuthority": {
+    "reset01Inventory": "docs/CERTIFICATION/pick-2-reset-01-legacy-freeze-inventory.json",
+    "reset02aArtifact": "docs/CERTIFICATION/pick-2-reset-02a-runtime-simplification.json",
+    "reset02bArtifact": "docs/CERTIFICATION/pick-2-reset-02b-route-service-consolidation.json",
+    "reset03Artifact": "docs/CERTIFICATION/pick-2-reset-03-ui-simplification.json",
+    "loaded": true
+  },
+  "currentDbRevalidation": {
+    "source": "RESET-01 exact production inventory plus production version alignment",
+    "status": "YES",
+    "tables": [
+      { "table": "sports_teams", "rows": 117, "classification": "REUSE_FOR_PICK_2" },
+      { "table": "sport_players", "rows": 27164, "classification": "REUSE_FOR_PICK_2" },
+      { "table": "sport_events", "rows": 11459, "classification": "REUSE_FOR_PICK_2" },
+      { "table": "game_results", "rows": 5973, "classification": "REUSE_FOR_PICK_2" },
+      { "table": "sport_game_stats", "rows": 13082, "classification": "KEEP_CORE" },
+      { "table": "sport_player_stats", "rows": 629542, "classification": "KEEP_CORE" },
+      { "table": "sport_lineups", "rows": 4193, "classification": "KEEP_CORE" },
+      { "table": "sport_injuries", "rows": 6, "classification": "KEEP_CORE" },
+      { "table": "sports_odds_snapshots", "rows": 880735, "classification": "KEEP_CORE_MARKET_STORAGE" },
+      { "table": "prediction_history", "rows": 19219, "classification": "LEGACY_ARCHIVE" },
+      { "table": "historical_feature_snapshots", "rows": 103232, "classification": "REPLACE_WITH_PICK_2_TABLE" },
+      { "table": "mlb_starter_assignments", "rows": 25, "classification": "KEEP_CORE" },
+      { "table": "mlb_context_snapshots", "rows": 8, "classification": "LEGACY_ARCHIVE" },
+      { "table": "mlb_forward_opportunity_evidence", "rows": 20, "classification": "LEGACY_ARCHIVE" },
+      { "table": "mlb_forward_research_ledger", "rows": 2, "classification": "LEGACY_ARCHIVE" },
+      { "table": "model_weight_history", "rows": 41, "classification": "LEGACY_ARCHIVE" },
+      { "table": "user_wagers", "rows": 0, "classification": "DELETE_LATER_AFTER_BACKUP" },
+      { "table": "user_wager_legs", "rows": 0, "classification": "DELETE_LATER_AFTER_BACKUP" }
+    ]
+  },
+  "dataDomains": [
+    "CANONICAL_SPORTS_DATA",
+    "RAW_MLB_STATCAST_DATA",
+    "DERIVED_AS_OF_FEATURES",
+    "MODEL_REGISTRY_TRAINING",
+    "SPORTS_PREDICTIONS",
+    "RESULTS_EVALUATION",
+    "MARKET_DATA_VALUE",
+    "LEGACY_ARCHIVE"
+  ],
+  "canonicalSportsDecision": {
+    "sports_teams": "REUSE",
+    "sport_players": "REUSE",
+    "sport_events": "REUSE",
+    "game_results": "REUSE"
+  },
+  "newTables": [
+    "pick2_raw_mlb_statcast_pitches",
+    "pick2_feature_snapshots",
+    "pick2_mlb_pitcher_daily_features",
+    "pick2_mlb_batter_daily_features",
+    "pick2_mlb_team_daily_features",
+    "pick2_mlb_bullpen_daily_features",
+    "pick2_mlb_matchup_daily_features",
+    "pick2_mlb_first_inning_daily_features",
+    "pick2_model_registry",
+    "pick2_model_feature_sets",
+    "pick2_model_versions",
+    "pick2_model_training_runs",
+    "pick2_model_validation_runs",
+    "pick2_game_predictions",
+    "pick2_prediction_results",
+    "pick2_market_value_evaluations",
+    "pick2_data_health_status"
+  ],
+  "migrationFiles": [
+    "supabase/migrations/202608270002_pick2_data_foundation_v1.sql"
+  ],
+  "tableReuseDecisions": {
+    "canonicalSportsData": "USE_EXISTING",
+    "sportsOddsSnapshots": "USE_EXISTING",
+    "rawStatcast": "CREATE_NEW",
+    "dailyFeatures": "CREATE_NEW",
+    "modelRegistry": "CREATE_NEW",
+    "pick2Predictions": "CREATE_NEW",
+    "predictionResults": "CREATE_NEW",
+    "marketValueEvaluations": "CREATE_NEW",
+    "legacyPredictionHistory": "KEEP_LEGACY_READ_ONLY"
+  },
+  "statcastRawStorage": {
+    "status": "READY",
+    "identity": "game_pk + at_bat_number + pitch_number",
+    "dedupe": "REUSE_NO_OP",
+    "conflictPolicy": "BLOCK_OR_AUDIT",
+    "importPerformed": false
+  },
+  "featureContracts": {
+    "dailyFeatureSchema": "READY",
+    "starter": "READY",
+    "bullpen": "READY",
+    "offense": "READY",
+    "splits": "READY",
+    "firstInning": "READY",
+    "leakagePolicy": "AS_OF_ONLY"
+  },
+  "predictionStorage": {
+    "pureSportsPredictionStorageReady": true,
+    "sportsbookOddsRequiredOnPrediction": false,
+    "pregamePredictionImmutable": true,
+    "marketValueSeparated": true
+  },
+  "logicalHardReset": {
+    "status": "READY",
+    "pick2MetricsStartFromZero": true,
+    "legacyRowsArchivedReadOnly": true,
+    "pick2ChampionModel": "NONE",
+    "pick2Predictions": 0,
+    "statcastImported": false
+  },
+  "physicalDeleteLaterManifest": [
+    {
+      "object": "legacy prediction_history product/research rows",
+      "rowCount": 19219,
+      "backupRequired": true,
+      "prerequisite": "Pick 2 replacement reads/writes certified and restore test complete"
+    },
+    {
+      "object": "historical_feature_snapshots",
+      "rowCount": 103232,
+      "backupRequired": true,
+      "prerequisite": "Pick 2 feature snapshots built and validated"
+    },
+    {
+      "object": "user_wagers and user_wager_legs",
+      "rowCount": 0,
+      "backupRequired": true,
+      "prerequisite": "user wager product dependency removed or replaced"
+    }
+  ],
+  "backupGate": {
+    "status": "READY",
+    "requires": [
+      "database export",
+      "schema export",
+      "git tag",
+      "migration archive",
+      "environment inventory",
+      "restore test"
+    ]
+  },
+  "integrationContracts": {
+    "dataHealth": "Statcast through date, mapping percent, feature through date, results through date, odds freshness, model readiness and prediction readiness",
+    "performance": "PICK_2_ERA_V1 evaluations only",
+    "modelLab": "Pick 2 champion/challenger/training/validation state only",
+    "today": "canonical slate plus Pick 2 prediction plus optional market-value evaluation; no legacy fallback"
+  },
+  "storageEstimate": {
+    "rawRows": "2025 and 2026 YTD Statcast expected in the low millions of pitch rows after source validation",
+    "annualGrowth": "roughly one regular-season pitch-level season per year",
+    "indexImplications": "game, event, pitcher, batter and date indexes prepared; partitioning can wait until source row count and query profiles are measured"
+  },
+  "historicalImportContract": [
+    "MLB-DATA-01A 2025 raw validation",
+    "MLB-DATA-01B 2025 raw import",
+    "MLB-DATA-01C 2025 canonical event mapping",
+    "MLB-DATA-01D 2025 derived-feature build",
+    "MLB-DATA-02A 2026 YTD raw validation",
+    "MLB-DATA-02B 2026 YTD import",
+    "MLB-DATA-02C 2026 canonical mapping",
+    "MLB-DATA-02D 2026 derived-feature build"
+  ],
+  "flags": {
+    "CURRENT_DB_REVALIDATED": "YES",
+    "PICK_2_DATA_DOMAINS_READY": "YES",
+    "STATCAST_RAW_STORAGE_READY": "YES",
+    "STATCAST_RAW_IDEMPOTENCY_READY": "YES",
+    "PICK_2_DAILY_FEATURE_SCHEMA_READY": "YES",
+    "PURE_SPORTS_PREDICTION_STORAGE_READY": "YES",
+    "SPORTS_MODEL_MARKET_STORAGE_SEPARATED": "YES",
+    "LEGACY_DB_ISOLATION_READY": "YES",
+    "PICK_2_DATA_SECURITY_MODEL_READY": "YES",
+    "PICK_2_LOGICAL_HARD_RESET_READY": "YES",
+    "PHYSICAL_DELETE_BACKUP_GATE_READY": "YES",
+    "PICK_2_CHAMPION_MODEL": "NONE",
+    "STATCAST_IMPORT_PERFORMED": "NO",
+    "AUTOMATION_ACTIVATED": "NO"
+  }
+}
