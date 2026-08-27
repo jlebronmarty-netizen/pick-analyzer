@@ -7,9 +7,18 @@ create table if not exists public.pick2_raw_mlb_statcast_pitches (
   source_version text not null,
   game_pk bigint not null,
   game_date date not null,
+  source_home_team text,
+  source_away_team text,
+  canonical_home_team_id text references public.sports_teams(id),
+  canonical_away_team_id text references public.sports_teams(id),
   event_id text references public.sport_events(id),
-  pitcher_id text,
-  batter_id text,
+  event_mapping_state text not null default 'UNMAPPED',
+  source_pitcher_id bigint,
+  source_batter_id bigint,
+  canonical_pitcher_id text references public.sport_players(id),
+  canonical_batter_id text references public.sport_players(id),
+  player_mapping_state text not null default 'UNMAPPED',
+  source_player_name text,
   pitch_type text,
   release_speed numeric,
   p_throws text,
@@ -17,6 +26,8 @@ create table if not exists public.pick2_raw_mlb_statcast_pitches (
   balls integer,
   strikes integer,
   outs_when_up integer,
+  post_home_score integer,
+  post_away_score integer,
   events text,
   description text,
   inning integer,
@@ -25,13 +36,19 @@ create table if not exists public.pick2_raw_mlb_statcast_pitches (
   pitch_number integer not null,
   raw_payload jsonb not null default '{}'::jsonb,
   raw_payload_digest text not null,
+  mapping_metadata jsonb not null default '{}'::jsonb,
+  mapped_at timestamptz,
   ingested_at timestamptz not null default timezone('utc', now()),
   created_at timestamptz not null default timezone('utc', now()),
   unique (game_pk, at_bat_number, pitch_number),
   check (pick2_era = 'PICK_2_ERA_V1'),
+  check (event_mapping_state in ('MAPPED', 'UNMAPPED', 'AMBIGUOUS', 'CONFLICT')),
+  check (player_mapping_state in ('MAPPED', 'UNMAPPED', 'AMBIGUOUS', 'CONFLICT')),
   check (balls between 0 and 4),
   check (strikes between 0 and 3),
-  check (outs_when_up between 0 and 3)
+  check (outs_when_up between 0 and 3),
+  check (post_home_score is null or post_home_score >= 0),
+  check (post_away_score is null or post_away_score >= 0)
 );
 
 create index if not exists pick2_raw_mlb_statcast_pitches_game_idx
@@ -41,10 +58,13 @@ create index if not exists pick2_raw_mlb_statcast_pitches_event_idx
   on public.pick2_raw_mlb_statcast_pitches (event_id, game_date);
 
 create index if not exists pick2_raw_mlb_statcast_pitches_pitcher_idx
-  on public.pick2_raw_mlb_statcast_pitches (pitcher_id, game_date);
+  on public.pick2_raw_mlb_statcast_pitches (source_pitcher_id, game_date);
 
 create index if not exists pick2_raw_mlb_statcast_pitches_batter_idx
-  on public.pick2_raw_mlb_statcast_pitches (batter_id, game_date);
+  on public.pick2_raw_mlb_statcast_pitches (source_batter_id, game_date);
+
+create index if not exists pick2_raw_mlb_statcast_pitches_mapping_idx
+  on public.pick2_raw_mlb_statcast_pitches (event_mapping_state, player_mapping_state, game_date);
 
 create table if not exists public.pick2_feature_snapshots (
   id uuid primary key default gen_random_uuid(),

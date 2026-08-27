@@ -29,7 +29,10 @@ const migration = read('supabase/migrations/202608270002_pick2_data_foundation_v
 const architecture = read('docs/ARCHITECTURE/PICK_2_DATA_FOUNDATION_V1.md')
 const certification = read('docs/CERTIFICATION/PICK_2_RESET_04_DATA_FOUNDATION.md')
 
-check('RESET-04 verdict', artifact.certificationVerdict === 'PICK_2_RESET_04_DATA_FOUNDATION_CERTIFIED')
+check(
+  'RESET-04/04R1 verdict',
+  ['PICK_2_RESET_04_DATA_FOUNDATION_CERTIFIED', 'PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED'].includes(artifact.certificationVerdict),
+)
 check('RESET-01 loaded', reset01.certificationVerdict === 'PICK_2_RESET_01_LEGACY_FREEZE_AND_EXACT_INVENTORY_CERTIFIED')
 check('RESET-02A loaded', reset02a.certificationVerdict === 'PICK_2_RESET_02A_BOUNDED_RUNTIME_SIMPLIFICATION_CERTIFIED')
 check('RESET-02B loaded', reset02b.certificationVerdict === 'PICK_2_RESET_02B_ROUTE_SERVICE_CONSOLIDATION_CERTIFIED')
@@ -66,6 +69,12 @@ for (const existing of ['public.sport_events', 'public.sports_teams', 'public.sp
 
 check('statcast unique identity', migration.includes('unique (game_pk, at_bat_number, pitch_number)'))
 check('statcast raw payload digest', migration.includes('raw_payload_digest text not null'))
+check('source player IDs separated', migration.includes('source_pitcher_id bigint') && migration.includes('source_batter_id bigint'))
+check('canonical player IDs separated', migration.includes('canonical_pitcher_id text references public.sport_players(id)') && migration.includes('canonical_batter_id text references public.sport_players(id)'))
+check('team source/canonical separated', migration.includes('source_home_team text') && migration.includes('source_away_team text') && migration.includes('canonical_home_team_id text references public.sports_teams(id)'))
+check('score state preserved', migration.includes('post_home_score integer') && migration.includes('post_away_score integer'))
+check('source player name preserved', migration.includes('source_player_name text'))
+check('mapping states present', migration.includes("event_mapping_state in ('MAPPED', 'UNMAPPED', 'AMBIGUOUS', 'CONFLICT')") && migration.includes("player_mapping_state in ('MAPPED', 'UNMAPPED', 'AMBIGUOUS', 'CONFLICT')"))
 check('feature as-of guard', migration.includes('check (as_of_date <= feature_date)'))
 check('pitcher contract K rate', migration.includes('k_rate numeric'))
 check('pitcher contract velocity l1/l3/l5', migration.includes('velocity_l1 numeric') && migration.includes('velocity_l3 numeric') && migration.includes('velocity_l5 numeric'))
@@ -100,9 +109,20 @@ for (const flag of [
 
 check('champion none', artifact.flags.PICK_2_CHAMPION_MODEL === 'NONE')
 check('statcast not imported', artifact.flags.STATCAST_IMPORT_PERFORMED === 'NO')
+if (artifact.certificationVerdict === 'PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED') {
+  check('source audit row count', artifact.statcastRawStorage.sourceRowsAudited === 591316)
+  check('source games count', artifact.statcastRawStorage.uniqueGames === 2004)
+  check('source columns accounted', artifact.flags.SOURCE_COLUMNS_ACCOUNTED_FOR === '100%' && artifact.statcastRawStorage.sourceColumnMapping.length === 22)
+  check('source canonical separation flag', artifact.flags.STATCAST_PLAYER_IDENTITY_SEPARATION_READY === 'YES')
+  check('score state flag', artifact.flags.STATCAST_SCORE_STATE_STORAGE_READY === 'YES')
+}
 check('no legacy fallback in today contract', artifact.integrationContracts.today.includes('no legacy fallback'))
 check('architecture migration policy', architecture.includes('does not apply it to production'))
-check('certification status recorded', certification.includes('PICK_2_RESET_04_DATA_FOUNDATION_CERTIFIED'))
+check(
+  'certification status recorded',
+  certification.includes('PICK_2_RESET_04_DATA_FOUNDATION_CERTIFIED') ||
+    certification.includes('PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED'),
+)
 
 if (failures.length) {
   console.error(JSON.stringify({ validator: 'pick-2-reset-04-data-foundation-validate', status: 'FAIL', failed: failures }, null, 2))

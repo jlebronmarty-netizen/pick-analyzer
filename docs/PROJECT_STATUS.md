@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-27 PICK-2.0 RESET-04R1 Statcast Schema Compatibility
+
+- RESET-04R1 is locally implemented as `PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED`. It repairs the still-unapplied Pick 2 data-foundation migration after the real 2026 YTD Statcast source audit: 591,316 pitch rows, 2,004 games, 30 teams, date range 2026-03-25 through 2026-08-26, 0 duplicate pitch identities.
+- The raw table now preserves all 22 audited core source columns, separates MLBAM source IDs from nullable canonical Pick IDs, stores source home/away team evidence separately from canonical team IDs, and exposes post-pitch score state for future label reconstruction only.
+- RESET-05 remains blocked pending final migration apply. No Statcast data was imported, no production schema was mutated, no provider was called, no prediction/model/calibration/Official Pick/learning state changed and no automation or cron was activated.
+
 ## 2026-08-27 PICK-2.0 RESET-04 Data Foundation
 
 - RESET-04 is locally implemented as `PICK_2_RESET_04_DATA_FOUNDATION_CERTIFIED`. It prepares an additive Pick 2 database foundation for raw MLB Statcast, leakage-safe daily features, model registry/training/validation, pure sports predictions, prediction result evaluation, independent market-value evaluation and data-health status.
