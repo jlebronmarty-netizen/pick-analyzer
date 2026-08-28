@@ -3774,3 +3774,11 @@ Status: `MLB_DATA_01C_R3_IDENTITY_ACQUISITION_PARTIAL`
 Result: R3 acquired authoritative MLB Official 2025 identity evidence into local resumable artifacts only. Official acquisition covered all 2,430 Statcast games and all 1,469 source MLBAM player IDs, but deterministic reconciliation remains incomplete: 614 games do not have a safe canonical event mapping and 1,469 players still lack exact canonical `sport_players.id` linkage.
 
 Next: run a separately gated canonical event repair / canonical player creation plan. Do not persist crosswalks, write raw canonical mapping columns or start MLB-DATA-01D feature construction until that reconciliation gate passes.
+
+## MLB-DATA-01C-R4 Canonical Reconciliation Plan
+
+Status: `MLB_DATA_01C_R4_CANONICAL_RECONCILIATION_PLAN_PARTIAL`
+
+Result: R4 produced a zero-write event/player repair plan from cached R3 evidence. Event gaps are inventoried and accounted for, but 309 doubleheader/date-time identity gaps remain unsafe; player linkage is also incomplete with 1,292 existing-player identity gaps, 161 confirmed missing canonical players and 16 ambiguous players.
+
+Next: perform a separate deterministic disambiguation proof before authorizing R5 persistence. R5 must not write crosswalks, raw canonical IDs or created canonical identities until R4 is upgraded to a complete deterministic repair plan.
