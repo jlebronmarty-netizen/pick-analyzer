@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-28 00:00:00Z
 
+## 2026-08-28 MLB-DATA-01C-R2 Authoritative Identity Acquisition Plan
+
+- MLB-DATA-01C-R2 is classified as `MLB_DATA_01C_R2_IDENTITY_ACQUISITION_PLAN_BLOCKED` with `NEEDS_ENDPOINT_CONTRACT_VERIFICATION`. The phase is plan-only: MLB Official calls, SportsDataIO calls, Odds API calls, weather calls, production DML, production DDL, canonical mapping writes, feature writes, model writes, prediction writes, automation changes and cron changes all remain 0.
+- The full acquisition inputs are now artifacted: 2,430 Statcast `game_pk` rows with prior event classification/evidence and 1,469 MLBAM source person ids with role breakdown, audit-only names, provider evidence and canonical candidates. The preserved event gap remains 1,816 mapped, 305 unmapped, 309 ambiguous and 0 conflicts; the preserved player gap remains 0 mapped, 1,469 unmapped, 0 ambiguous and 0 conflicts.
+- `provider_entity_mappings` remains the reusable crosswalk infrastructure and no migration is required. MLB Official / MLB Stats API is selected as the authoritative source, game acquisition is ready through schedule contracts, but player acquisition is not execution-ready until an exact person-identity endpoint contract is verified from repository evidence. 01D feature building remains blocked.
+
 ## 2026-08-28 MLB-DATA-01C-R1 Canonical Identity Repair Audit
 
 - MLB-DATA-01C-R1 is classified as `MLB_DATA_01C_R1_IDENTITY_REPAIR_EXTERNAL_ID_GAP`. The repair audit made read-only production checks and reused the certified 01A/01C artifacts; provider calls, production DML, production DDL, automation changes, cron changes, raw-payload rewrites, source-ID rewrites, 2026 imports, feature builds, model runs and prediction writes all remain 0.
