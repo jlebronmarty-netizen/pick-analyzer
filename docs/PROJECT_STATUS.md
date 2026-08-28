@@ -1,6 +1,12 @@
 # Project Status
 
-Last updated: 2026-08-24 00:00:00Z
+Last updated: 2026-08-28 00:00:00Z
+
+## 2026-08-28 MLB-DATA-01C 2025 Canonical Mapping
+
+- MLB-DATA-01C is classified as `MLB_DATA_01C_2025_CANONICAL_MAPPING_BLOCKED` after identity-only mapping audit and bounded team mapping execution. Raw Statcast stability is preserved at 712,528 rows, 712,528 unique pitch identities, 0 duplicates, 2,430 games, 30 teams and 2025-03-18 through 2025-09-28 coverage.
+- Team mapping is certified: 30/30 source abbreviations mapped deterministically, including `AZ -> ARI` and `CWS -> CHW`, and all 712,528 rows now have canonical home/away team IDs. Game mapping was not written because current canonical events expose 0 exact stored MLB gamePk rows, date/home/away leaves 305 unmapped and 309 ambiguous source games, and the mapped subset fails unique event identity. Player mapping was not written because all 1,469 unique source MLBAM persons lack a certified existing canonical-player crosswalk.
+- No source Statcast identity, source IDs, source team abbreviations, pitch values, score state, `raw_payload`, `raw_payload_digest`, features, models, predictions, market-value rows, 2026 rows, providers, schema, automation or cron state changed. 01D feature building remains blocked pending canonical event identity repair and a certified MLBAM-to-`sport_players.id` mapping or player-creation path.
 
 ## 2026-08-27 MLB-DATA-01B 2025 Raw Statcast Import
 

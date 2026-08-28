@@ -1,0 +1,1878 @@
+{
+  "certificationVerdict": "MLB_DATA_01C_2025_CANONICAL_MAPPING_BLOCKED",
+  "phase": "MLB-DATA-01C",
+  "generatedAt": "2026-08-28T17:04:23.607Z",
+  "mode": "EXECUTE",
+  "expected": {
+    "rows": 712528,
+    "games": 2430,
+    "teams": 30,
+    "minDate": "2025-03-18",
+    "maxDate": "2025-09-28"
+  },
+  "deploymentBaseline": "c248456c7396974dbe4e443d95f1baa1ae71e330",
+  "rawStability": {
+    "rawRows": 712528,
+    "scannedRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicatePitchIdentities": 0,
+    "games": 2430,
+    "teams": 30,
+    "minDate": "2025-03-18",
+    "maxDate": "2025-09-28",
+    "pass": true
+  },
+  "mappingMutableFieldAllowlist": [
+    "canonical_home_team_id",
+    "canonical_away_team_id",
+    "event_id",
+    "event_mapping_state",
+    "canonical_pitcher_id",
+    "canonical_batter_id",
+    "player_mapping_state",
+    "mapping_metadata",
+    "mapped_at"
+  ],
+  "rawSourceImmutabilityDenylist": [
+    "game_pk",
+    "game_date",
+    "at_bat_number",
+    "pitch_number",
+    "source_pitcher_id",
+    "source_batter_id",
+    "source_player_name",
+    "source_home_team",
+    "source_away_team",
+    "pitch_type",
+    "pitch_name",
+    "release_speed",
+    "release_spin_rate",
+    "spin_axis",
+    "plate_x",
+    "plate_z",
+    "pfx_x",
+    "pfx_z",
+    "release_extension",
+    "arm_angle",
+    "home_score",
+    "away_score",
+    "post_home_score",
+    "post_away_score",
+    "bat_score",
+    "fld_score",
+    "post_bat_score",
+    "post_fld_score",
+    "raw_payload",
+    "raw_payload_digest",
+    "ingested_at",
+    "created_at"
+  ],
+  "teamCanonicalInventory": {
+    "canonicalTeamCount": 30,
+    "sourceAliases": {
+      "AZ": "ARI",
+      "CWS": "CHW"
+    },
+    "teams": [
+      {
+        "sourceAbbreviation": "ATH",
+        "canonicalAbbreviation": "ATH",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:24",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:24"
+        ]
+      },
+      {
+        "sourceAbbreviation": "ATL",
+        "canonicalAbbreviation": "ATL",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:26",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:26"
+        ]
+      },
+      {
+        "sourceAbbreviation": "AZ",
+        "canonicalAbbreviation": "ARI",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:14",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:14"
+        ]
+      },
+      {
+        "sourceAbbreviation": "BAL",
+        "canonicalAbbreviation": "BAL",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:19",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:19"
+        ]
+      },
+      {
+        "sourceAbbreviation": "BOS",
+        "canonicalAbbreviation": "BOS",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:25",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:25"
+        ]
+      },
+      {
+        "sourceAbbreviation": "CHC",
+        "canonicalAbbreviation": "CHC",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:9",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:9"
+        ]
+      },
+      {
+        "sourceAbbreviation": "CIN",
+        "canonicalAbbreviation": "CIN",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:2",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:2"
+        ]
+      },
+      {
+        "sourceAbbreviation": "CLE",
+        "canonicalAbbreviation": "CLE",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:10",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:10"
+        ]
+      },
+      {
+        "sourceAbbreviation": "COL",
+        "canonicalAbbreviation": "COL",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:23",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:23"
+        ]
+      },
+      {
+        "sourceAbbreviation": "CWS",
+        "canonicalAbbreviation": "CHW",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:16",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:16"
+        ]
+      },
+      {
+        "sourceAbbreviation": "DET",
+        "canonicalAbbreviation": "DET",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:17",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:17"
+        ]
+      },
+      {
+        "sourceAbbreviation": "HOU",
+        "canonicalAbbreviation": "HOU",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:30",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:30"
+        ]
+      },
+      {
+        "sourceAbbreviation": "KC",
+        "canonicalAbbreviation": "KC",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:5",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:5"
+        ]
+      },
+      {
+        "sourceAbbreviation": "LAA",
+        "canonicalAbbreviation": "LAA",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:21",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:21"
+        ]
+      },
+      {
+        "sourceAbbreviation": "LAD",
+        "canonicalAbbreviation": "LAD",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:1",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:1"
+        ]
+      },
+      {
+        "sourceAbbreviation": "MIA",
+        "canonicalAbbreviation": "MIA",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:22",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:22"
+        ]
+      },
+      {
+        "sourceAbbreviation": "MIL",
+        "canonicalAbbreviation": "MIL",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:32",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:32"
+        ]
+      },
+      {
+        "sourceAbbreviation": "MIN",
+        "canonicalAbbreviation": "MIN",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:20",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:20"
+        ]
+      },
+      {
+        "sourceAbbreviation": "NYM",
+        "canonicalAbbreviation": "NYM",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:18",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:18"
+        ]
+      },
+      {
+        "sourceAbbreviation": "NYY",
+        "canonicalAbbreviation": "NYY",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:29",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:29"
+        ]
+      },
+      {
+        "sourceAbbreviation": "PHI",
+        "canonicalAbbreviation": "PHI",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:12",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:12"
+        ]
+      },
+      {
+        "sourceAbbreviation": "PIT",
+        "canonicalAbbreviation": "PIT",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:4",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:4"
+        ]
+      },
+      {
+        "sourceAbbreviation": "SD",
+        "canonicalAbbreviation": "SD",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:33",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:33"
+        ]
+      },
+      {
+        "sourceAbbreviation": "SEA",
+        "canonicalAbbreviation": "SEA",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:13",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:13"
+        ]
+      },
+      {
+        "sourceAbbreviation": "SF",
+        "canonicalAbbreviation": "SF",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:15",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:15"
+        ]
+      },
+      {
+        "sourceAbbreviation": "STL",
+        "canonicalAbbreviation": "STL",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:31",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:31"
+        ]
+      },
+      {
+        "sourceAbbreviation": "TB",
+        "canonicalAbbreviation": "TB",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:11",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:11"
+        ]
+      },
+      {
+        "sourceAbbreviation": "TEX",
+        "canonicalAbbreviation": "TEX",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:28",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:28"
+        ]
+      },
+      {
+        "sourceAbbreviation": "TOR",
+        "canonicalAbbreviation": "TOR",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:3",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:3"
+        ]
+      },
+      {
+        "sourceAbbreviation": "WSH",
+        "canonicalAbbreviation": "WSH",
+        "classification": "MAPPED",
+        "canonicalTeamId": "baseball_mlb:mlb:sportsdataio:team:35",
+        "candidateIds": [
+          "baseball_mlb:mlb:sportsdataio:team:35"
+        ]
+      }
+    ]
+  },
+  "teamMappingDryRun": {
+    "counts": {
+      "MAPPED": 30,
+      "UNMAPPED": 0,
+      "AMBIGUOUS": 0,
+      "CONFLICT": 0
+    },
+    "status": "PASS"
+  },
+  "eventInventory": {
+    "canonical2025Events": 2462,
+    "sportEventsWithGamePk": 0,
+    "providerCrosswalkGamePkRows": 227,
+    "dateHomeAwayIdentities": 2175,
+    "ready": true
+  },
+  "gameMappingStrategy": [
+    "EXACT_GAMEPK",
+    "EXACT_PROVIDER_CROSSWALK",
+    "EXACT_DATE_HOME_AWAY",
+    "OTHER_CERTIFIED_DETERMINISTIC"
+  ],
+  "gameMappingDryRun": {
+    "counts": {
+      "MAPPED": 1816,
+      "UNMAPPED": 305,
+      "AMBIGUOUS": 309,
+      "CONFLICT": 0
+    },
+    "methodCounts": {
+      "EXACT_GAMEPK": 0,
+      "EXACT_PROVIDER_CROSSWALK": 0,
+      "EXACT_DATE_HOME_AWAY": 1816,
+      "OTHER_CERTIFIED_DETERMINISTIC": 0,
+      "EXACT_MLBAM_STORED_ON_PLAYER": 0
+    },
+    "parityPass": true,
+    "uniqueEventIdentityPass": false,
+    "status": "PARTIAL_OR_BLOCKED",
+    "unmappedGames": [
+      {
+        "gamePk": "776135",
+        "sourceDate": "2025-09-28",
+        "sourceHomeTeam": "LAA",
+        "sourceAwayTeam": "HOU",
+        "sourceRows": 315,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76724",
+          "baseball_mlb:mlb:sportsdataio:event:76735"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776136",
+        "sourceDate": "2025-09-28",
+        "sourceHomeTeam": "SD",
+        "sourceAwayTeam": "AZ",
+        "sourceRows": 346,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76723",
+          "baseball_mlb:mlb:sportsdataio:event:76738"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776138",
+        "sourceDate": "2025-09-28",
+        "sourceHomeTeam": "ATH",
+        "sourceAwayTeam": "KC",
+        "sourceRows": 313,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76726",
+          "baseball_mlb:mlb:sportsdataio:event:76733"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776139",
+        "sourceDate": "2025-09-28",
+        "sourceHomeTeam": "SEA",
+        "sourceAwayTeam": "LAD",
+        "sourceRows": 305,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76725",
+          "baseball_mlb:mlb:sportsdataio:event:76739"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776146",
+        "sourceDate": "2025-09-27",
+        "sourceHomeTeam": "SF",
+        "sourceAwayTeam": "COL",
+        "sourceRows": 264,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76711",
+          "baseball_mlb:mlb:sportsdataio:event:76715"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776153",
+        "sourceDate": "2025-09-27",
+        "sourceHomeTeam": "MIL",
+        "sourceAwayTeam": "CIN",
+        "sourceRows": 349,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76706",
+          "baseball_mlb:mlb:sportsdataio:event:76721"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776166",
+        "sourceDate": "2025-09-26",
+        "sourceHomeTeam": "SF",
+        "sourceAwayTeam": "COL",
+        "sourceRows": 286,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776168",
+        "sourceDate": "2025-09-26",
+        "sourceHomeTeam": "SEA",
+        "sourceAwayTeam": "LAD",
+        "sourceRows": 317,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776169",
+        "sourceDate": "2025-09-26",
+        "sourceHomeTeam": "LAA",
+        "sourceAwayTeam": "HOU",
+        "sourceRows": 290,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776170",
+        "sourceDate": "2025-09-26",
+        "sourceHomeTeam": "SD",
+        "sourceAwayTeam": "AZ",
+        "sourceRows": 350,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776171",
+        "sourceDate": "2025-09-26",
+        "sourceHomeTeam": "MIL",
+        "sourceAwayTeam": "CIN",
+        "sourceRows": 264,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776172",
+        "sourceDate": "2025-09-26",
+        "sourceHomeTeam": "ATH",
+        "sourceAwayTeam": "KC",
+        "sourceRows": 294,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776182",
+        "sourceDate": "2025-09-25",
+        "sourceHomeTeam": "ATH",
+        "sourceAwayTeam": "HOU",
+        "sourceRows": 323,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76684",
+          "baseball_mlb:mlb:sportsdataio:event:76690"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776183",
+        "sourceDate": "2025-09-25",
+        "sourceHomeTeam": "TEX",
+        "sourceAwayTeam": "MIN",
+        "sourceRows": 266,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76680",
+          "baseball_mlb:mlb:sportsdataio:event:76689"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776185",
+        "sourceDate": "2025-09-25",
+        "sourceHomeTeam": "AZ",
+        "sourceAwayTeam": "LAD",
+        "sourceRows": 312,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76671",
+          "baseball_mlb:mlb:sportsdataio:event:76686"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776187",
+        "sourceDate": "2025-09-25",
+        "sourceHomeTeam": "CHC",
+        "sourceAwayTeam": "NYM",
+        "sourceRows": 280,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76679",
+          "baseball_mlb:mlb:sportsdataio:event:76694"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776198",
+        "sourceDate": "2025-09-24",
+        "sourceHomeTeam": "SD",
+        "sourceAwayTeam": "MIL",
+        "sourceRows": 313,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76667",
+          "baseball_mlb:mlb:sportsdataio:event:76673"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776205",
+        "sourceDate": "2025-09-24",
+        "sourceHomeTeam": "CHC",
+        "sourceAwayTeam": "NYM",
+        "sourceRows": 278,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776207",
+        "sourceDate": "2025-09-23",
+        "sourceHomeTeam": "LAA",
+        "sourceAwayTeam": "KC",
+        "sourceRows": 303,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776208",
+        "sourceDate": "2025-09-23",
+        "sourceHomeTeam": "ATH",
+        "sourceAwayTeam": "HOU",
+        "sourceRows": 266,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776210",
+        "sourceDate": "2025-09-23",
+        "sourceHomeTeam": "TEX",
+        "sourceAwayTeam": "MIN",
+        "sourceRows": 294,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776212",
+        "sourceDate": "2025-09-23",
+        "sourceHomeTeam": "SEA",
+        "sourceAwayTeam": "COL",
+        "sourceRows": 275,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776213",
+        "sourceDate": "2025-09-23",
+        "sourceHomeTeam": "AZ",
+        "sourceAwayTeam": "LAD",
+        "sourceRows": 275,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776220",
+        "sourceDate": "2025-09-22",
+        "sourceHomeTeam": "SF",
+        "sourceAwayTeam": "STL",
+        "sourceRows": 288,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776222",
+        "sourceDate": "2025-09-22",
+        "sourceHomeTeam": "SD",
+        "sourceAwayTeam": "MIL",
+        "sourceRows": 364,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776227",
+        "sourceDate": "2025-09-21",
+        "sourceHomeTeam": "LAD",
+        "sourceAwayTeam": "SF",
+        "sourceRows": 254,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76636",
+          "baseball_mlb:mlb:sportsdataio:event:76651"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776230",
+        "sourceDate": "2025-09-21",
+        "sourceHomeTeam": "AZ",
+        "sourceAwayTeam": "PHI",
+        "sourceRows": 309,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76626",
+          "baseball_mlb:mlb:sportsdataio:event:76641"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776232",
+        "sourceDate": "2025-09-21",
+        "sourceHomeTeam": "COL",
+        "sourceAwayTeam": "LAA",
+        "sourceRows": 253,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76635",
+          "baseball_mlb:mlb:sportsdataio:event:76650"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776242",
+        "sourceDate": "2025-09-20",
+        "sourceHomeTeam": "TEX",
+        "sourceAwayTeam": "MIA",
+        "sourceRows": 288,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76617",
+          "baseball_mlb:mlb:sportsdataio:event:76631"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776243",
+        "sourceDate": "2025-09-20",
+        "sourceHomeTeam": "MIN",
+        "sourceAwayTeam": "CLE",
+        "sourceRows": 275,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76618",
+          "baseball_mlb:mlb:sportsdataio:event:76632",
+          "baseball_mlb:mlb:sportsdataio:event:76760"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776244",
+        "sourceDate": "2025-09-20",
+        "sourceHomeTeam": "STL",
+        "sourceAwayTeam": "MIL",
+        "sourceRows": 283,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76620",
+          "baseball_mlb:mlb:sportsdataio:event:76634"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776248",
+        "sourceDate": "2025-09-20",
+        "sourceHomeTeam": "HOU",
+        "sourceAwayTeam": "SEA",
+        "sourceRows": 299,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76610",
+          "baseball_mlb:mlb:sportsdataio:event:76625"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776251",
+        "sourceDate": "2025-09-19",
+        "sourceHomeTeam": "TEX",
+        "sourceAwayTeam": "MIA",
+        "sourceRows": 356,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776253",
+        "sourceDate": "2025-09-19",
+        "sourceHomeTeam": "COL",
+        "sourceAwayTeam": "LAA",
+        "sourceRows": 285,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776255",
+        "sourceDate": "2025-09-19",
+        "sourceHomeTeam": "AZ",
+        "sourceAwayTeam": "PHI",
+        "sourceRows": 330,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776262",
+        "sourceDate": "2025-09-19",
+        "sourceHomeTeam": "HOU",
+        "sourceAwayTeam": "SEA",
+        "sourceRows": 278,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776263",
+        "sourceDate": "2025-09-19",
+        "sourceHomeTeam": "MIN",
+        "sourceAwayTeam": "CLE",
+        "sourceRows": 296,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776265",
+        "sourceDate": "2025-09-19",
+        "sourceHomeTeam": "STL",
+        "sourceAwayTeam": "MIL",
+        "sourceRows": 312,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776270",
+        "sourceDate": "2025-09-18",
+        "sourceHomeTeam": "COL",
+        "sourceAwayTeam": "MIA",
+        "sourceRows": 286,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76595",
+          "baseball_mlb:mlb:sportsdataio:event:76602"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776271",
+        "sourceDate": "2025-09-18",
+        "sourceHomeTeam": "LAD",
+        "sourceAwayTeam": "SF",
+        "sourceRows": 300,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776279",
+        "sourceDate": "2025-09-17",
+        "sourceHomeTeam": "AZ",
+        "sourceAwayTeam": "SF",
+        "sourceRows": 309,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76572",
+          "baseball_mlb:mlb:sportsdataio:event:76587"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776293",
+        "sourceDate": "2025-09-16",
+        "sourceHomeTeam": "COL",
+        "sourceAwayTeam": "MIA",
+        "sourceRows": 253,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776307",
+        "sourceDate": "2025-09-16",
+        "sourceHomeTeam": "WSH",
+        "sourceAwayTeam": "ATL",
+        "sourceRows": 302,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76574",
+          "baseball_mlb:mlb:sportsdataio:event:76761"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776309",
+        "sourceDate": "2025-09-15",
+        "sourceHomeTeam": "AZ",
+        "sourceAwayTeam": "SF",
+        "sourceRows": 300,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776311",
+        "sourceDate": "2025-09-15",
+        "sourceHomeTeam": "LAD",
+        "sourceAwayTeam": "PHI",
+        "sourceRows": 331,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776317",
+        "sourceDate": "2025-09-14",
+        "sourceHomeTeam": "SEA",
+        "sourceAwayTeam": "LAA",
+        "sourceRows": 303,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76541",
+          "baseball_mlb:mlb:sportsdataio:event:76556"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776319",
+        "sourceDate": "2025-09-15",
+        "sourceHomeTeam": "HOU",
+        "sourceAwayTeam": "TEX",
+        "sourceRows": 253,
+        "classification": "UNMAPPED",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [],
+        "parity": null
+      },
+      {
+        "gamePk": "776323",
+        "sourceDate": "2025-09-14",
+        "sourceHomeTeam": "SD",
+        "sourceAwayTeam": "COL",
+        "sourceRows": 306,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76540",
+          "baseball_mlb:mlb:sportsdataio:event:76557"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776325",
+        "sourceDate": "2025-09-14",
+        "sourceHomeTeam": "SF",
+        "sourceAwayTeam": "LAD",
+        "sourceRows": 351,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76530",
+          "baseball_mlb:mlb:sportsdataio:event:76555"
+        ],
+        "parity": null
+      },
+      {
+        "gamePk": "776326",
+        "sourceDate": "2025-09-14",
+        "sourceHomeTeam": "MIL",
+        "sourceAwayTeam": "STL",
+        "sourceRows": 322,
+        "classification": "AMBIGUOUS",
+        "method": null,
+        "eventId": null,
+        "candidateEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76538",
+          "baseball_mlb:mlb:sportsdataio:event:76552"
+        ],
+        "parity": null
+      }
+    ]
+  },
+  "playerCanonicalInventory": {
+    "canonicalPlayers": 7389,
+    "providerMappingRows": 7567,
+    "mlbamStoredOnPlayerCount": 0,
+    "mlbamProviderCrosswalkCount": 177,
+    "ready": true
+  },
+  "sourcePlayerInventory": {
+    "uniqueSourcePlayers": 1469,
+    "priorObservedUniqueSourcePlayers": 1469
+  },
+  "playerMappingDryRun": {
+    "counts": {
+      "MAPPED": 0,
+      "UNMAPPED": 1469,
+      "AMBIGUOUS": 0,
+      "CONFLICT": 0
+    },
+    "methodCounts": {
+      "EXACT_GAMEPK": 0,
+      "EXACT_PROVIDER_CROSSWALK": 0,
+      "EXACT_DATE_HOME_AWAY": 0,
+      "OTHER_CERTIFIED_DETERMINISTIC": 0,
+      "EXACT_MLBAM_STORED_ON_PLAYER": 0
+    },
+    "uniquePlayersMapped": 0,
+    "uniquePlayersTotal": 1469,
+    "pitcherRowsMapped": 0,
+    "batterRowsMapped": 0,
+    "gapReasons": {
+      "PROVIDER_CROSSWALK_MISSING": 1469
+    },
+    "unmappedSample": [
+      {
+        "sourceId": "434378",
+        "sourceNames": [
+          "Verlander, Justin"
+        ],
+        "pitcherRows": 2612,
+        "batterRows": 0,
+        "totalRows": 2612,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "445276",
+        "sourceNames": [
+          "Jansen, Kenley"
+        ],
+        "pitcherRows": 878,
+        "batterRows": 0,
+        "totalRows": 878,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "445926",
+        "sourceNames": [
+          "Chavez, Jesse"
+        ],
+        "pitcherRows": 171,
+        "batterRows": 0,
+        "totalRows": 171,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "448179",
+        "sourceNames": [
+          "Hill, Rich"
+        ],
+        "pitcherRows": 171,
+        "batterRows": 0,
+        "totalRows": 171,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "450203",
+        "sourceNames": [
+          "Morton, Charlie"
+        ],
+        "pitcherRows": 2559,
+        "batterRows": 0,
+        "totalRows": 2559,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "453286",
+        "sourceNames": [
+          "Scherzer, Max"
+        ],
+        "pitcherRows": 1392,
+        "batterRows": 0,
+        "totalRows": 1392,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "455117",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 571,
+        "totalRows": 571,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "455119",
+        "sourceNames": [
+          "Martin, Chris"
+        ],
+        "pitcherRows": 651,
+        "batterRows": 0,
+        "totalRows": 651,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "456781",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 704,
+        "totalRows": 704,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "457705",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 2287,
+        "totalRows": 2287,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "457759",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 801,
+        "totalRows": 801,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "458677",
+        "sourceNames": [
+          "Wilson, Justin"
+        ],
+        "pitcherRows": 832,
+        "batterRows": 0,
+        "totalRows": 832,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "467793",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 1985,
+        "totalRows": 1985,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "471911",
+        "sourceNames": [
+          "Carrasco, Carlos"
+        ],
+        "pitcherRows": 779,
+        "batterRows": 0,
+        "totalRows": 779,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "472610",
+        "sourceNames": [
+          "García, Luis"
+        ],
+        "pitcherRows": 914,
+        "batterRows": 0,
+        "totalRows": 914,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "476594",
+        "sourceNames": [
+          "Stock, Robert"
+        ],
+        "pitcherRows": 59,
+        "batterRows": 0,
+        "totalRows": 59,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "477132",
+        "sourceNames": [
+          "Kershaw, Clayton"
+        ],
+        "pitcherRows": 1772,
+        "batterRows": 0,
+        "totalRows": 1772,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "489119",
+        "sourceNames": [
+          "Miley, Wade"
+        ],
+        "pitcherRows": 205,
+        "batterRows": 0,
+        "totalRows": 205,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "489446",
+        "sourceNames": [
+          "Yates, Kirby"
+        ],
+        "pitcherRows": 762,
+        "batterRows": 0,
+        "totalRows": 762,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "493329",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 148,
+        "totalRows": 148,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "493603",
+        "sourceNames": [
+          "Ottavino, Adam"
+        ],
+        "pitcherRows": 42,
+        "batterRows": 0,
+        "totalRows": 42,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "500743",
+        "sourceNames": [
+          "Rojas, Miguel"
+        ],
+        "pitcherRows": 69,
+        "batterRows": 1171,
+        "totalRows": 1240,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "500779",
+        "sourceNames": [
+          "Quintana, Jose"
+        ],
+        "pitcherRows": 2177,
+        "batterRows": 0,
+        "totalRows": 2177,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "502043",
+        "sourceNames": [
+          "Gibson, Kyle"
+        ],
+        "pitcherRows": 280,
+        "batterRows": 0,
+        "totalRows": 280,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "502054",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 1715,
+        "totalRows": 1715,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "502085",
+        "sourceNames": [
+          "Robertson, David"
+        ],
+        "pitcherRows": 308,
+        "batterRows": 0,
+        "totalRows": 308,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "502671",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 2109,
+        "totalRows": 2109,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "506433",
+        "sourceNames": [
+          "Darvish, Yu"
+        ],
+        "pitcherRows": 1160,
+        "batterRows": 0,
+        "totalRows": 1160,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "506702",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 41,
+        "totalRows": 41,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "514888",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 2334,
+        "totalRows": 2334,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "516782",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 1256,
+        "totalRows": 1256,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "518397",
+        "sourceNames": [
+          "Alexander, Scott"
+        ],
+        "pitcherRows": 313,
+        "batterRows": 0,
+        "totalRows": 313,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "518489",
+        "sourceNames": [
+          "Brasier, Ryan"
+        ],
+        "pitcherRows": 404,
+        "batterRows": 0,
+        "totalRows": 404,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "518585",
+        "sourceNames": [
+          "Cruz, Fernando"
+        ],
+        "pitcherRows": 793,
+        "batterRows": 0,
+        "totalRows": 793,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "518595",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 873,
+        "totalRows": 873,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "518692",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 2407,
+        "totalRows": 2407,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "518792",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 347,
+        "totalRows": 347,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "518876",
+        "sourceNames": [
+          "Kelly, Merrill"
+        ],
+        "pitcherRows": 2835,
+        "batterRows": 0,
+        "totalRows": 2835,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "518886",
+        "sourceNames": [
+          "Kimbrel, Craig"
+        ],
+        "pitcherRows": 232,
+        "batterRows": 0,
+        "totalRows": 232,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "518934",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 539,
+        "totalRows": 539,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "519008",
+        "sourceNames": [
+          "McFarland, T.J."
+        ],
+        "pitcherRows": 272,
+        "batterRows": 0,
+        "totalRows": 272,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "519141",
+        "sourceNames": [
+          "Pomeranz, Drew"
+        ],
+        "pitcherRows": 805,
+        "batterRows": 0,
+        "totalRows": 805,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "519151",
+        "sourceNames": [
+          "Pressly, Ryan"
+        ],
+        "pitcherRows": 661,
+        "batterRows": 0,
+        "totalRows": 661,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "519242",
+        "sourceNames": [
+          "Sale, Chris"
+        ],
+        "pitcherRows": 2031,
+        "batterRows": 0,
+        "totalRows": 2031,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "519317",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 1222,
+        "totalRows": 1222,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "519326",
+        "sourceNames": [
+          "Strickland, Hunter"
+        ],
+        "pitcherRows": 341,
+        "batterRows": 0,
+        "totalRows": 341,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "521230",
+        "sourceNames": [
+          "Hendriks, Liam"
+        ],
+        "pitcherRows": 232,
+        "batterRows": 0,
+        "totalRows": 232,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "521692",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 2287,
+        "totalRows": 2287,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "527038",
+        "sourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 1922,
+        "totalRows": 1922,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      },
+      {
+        "sourceId": "527048",
+        "sourceNames": [
+          "Pérez, Martín"
+        ],
+        "pitcherRows": 904,
+        "batterRows": 0,
+        "totalRows": 904,
+        "classification": "UNMAPPED",
+        "method": null,
+        "canonicalPlayerId": null,
+        "candidatePlayerIds": [],
+        "gapReason": "PROVIDER_CROSSWALK_MISSING"
+      }
+    ],
+    "status": "BLOCKED"
+  },
+  "canonicalPlayerCreationPerformed": false,
+  "canonicalPlayerCreationState": "NO_CERTIFIED_2025_MLBAM_PLAYER_CREATION_PATH_USED_IN_01C",
+  "writeReadiness": {
+    "teamMappingWriteReady": true,
+    "gameMappingWriteReady": false,
+    "playerMappingWriteReady": false
+  },
+  "updateAccounting": {
+    "team": {
+      "physicalRowsTouched": 712528,
+      "fieldAssignments": 2137584,
+      "gamesUpdated": 2430
+    },
+    "game": {
+      "physicalRowsTouched": 0,
+      "fieldAssignments": 0,
+      "gamesUpdated": 0
+    },
+    "player": {
+      "uniquePlayersUpdated": 0,
+      "pitcherRowsTouched": 0,
+      "batterRowsTouched": 0,
+      "fieldAssignments": 0
+    },
+    "productionDmlMutations": 712528,
+    "productionSchemaMutations": 0,
+    "inserts": 0,
+    "deletes": 0
+  },
+  "postMappingReadback": {
+    "teamHomeRowsMapped": 712528,
+    "teamAwayRowsMapped": 712528,
+    "eventRowsMapped": 0,
+    "pitcherRowsMapped": 0,
+    "batterRowsMapped": 0,
+    "eventStateUnmappedRows": 712528,
+    "playerStateMappedRows": 0,
+    "eventIdentityCollisions": [],
+    "imported2026Rows": 0,
+    "cleanTableCounts": {
+      "pick2_feature_snapshots": 0,
+      "pick2_mlb_pitcher_daily_features": 0,
+      "pick2_mlb_batter_daily_features": 0,
+      "pick2_mlb_team_daily_features": 0,
+      "pick2_mlb_bullpen_daily_features": 0,
+      "pick2_mlb_matchup_daily_features": 0,
+      "pick2_mlb_first_inning_daily_features": 0,
+      "pick2_model_registry": 0,
+      "pick2_model_feature_sets": 0,
+      "pick2_model_versions": 0,
+      "pick2_model_training_runs": 0,
+      "pick2_model_validation_runs": 0,
+      "pick2_game_predictions": 0,
+      "pick2_prediction_results": 0,
+      "pick2_market_value_evaluations": 0,
+      "pick2_data_health_status": 0
+    },
+    "featureTablesRemainEmpty": true,
+    "modelTablesRemainEmpty": true,
+    "predictionTablesRemainEmpty": true,
+    "sourcePlayersTotal": 1469
+  },
+  "rawImmutability": {
+    "sampledRows": 200,
+    "beforeDigest": "07d0ecc3529158d247604cb24bbb7cacf9979eececca0f67dae94ae0c7be130c",
+    "afterDigest": "07d0ecc3529158d247604cb24bbb7cacf9979eececca0f67dae94ae0c7be130c",
+    "status": "PASS"
+  },
+  "sourceProductionParityPreserved": true,
+  "providerCalls": 0,
+  "automationActivated": false,
+  "activeCronAdded": false,
+  "featureBuildPerformed": false,
+  "modelWorkPerformed": false,
+  "predictionWrites": 0,
+  "import2026Performed": false,
+  "legacyIsolation": "PRESERVED",
+  "dataHealthReadback": {
+    "rawStatcastRows": 712528,
+    "teamMappingCoverageRows": 712528,
+    "gameMappingCoverageRows": 0,
+    "pitcherMappingCoverageRows": 0,
+    "batterMappingCoverageRows": 0,
+    "dataHealthWritePerformed": false
+  },
+  "mlbData01dFeatureBuildReady": false,
+  "flags": {
+    "MAPPING_MUTABLE_FIELD_ALLOWLIST_CERTIFIED": "YES",
+    "RAW_SOURCE_FIELDS_IMMUTABLE_DURING_MAPPING": "YES",
+    "2025_TEAM_CANONICAL_MAPPING_DRY_RUN": "PASS",
+    "2025_TEAM_CANONICAL_MAPPING_CERTIFIED": "YES",
+    "2025_CANONICAL_EVENT_INVENTORY_READY": "YES",
+    "2025_GAME_MAPPING_PARITY": "PASS",
+    "GAME_MAPPING_WRITE_READY": "NO",
+    "2025_GAME_CANONICAL_MAPPING_CERTIFIED": "BLOCKED",
+    "MLBAM_PLAYER_IDENTITY_SOURCE_INVENTORY_READY": "YES",
+    "2025_PLAYER_MAPPING_PARITY": "PASS",
+    "CANONICAL_PLAYER_CREATION_PERFORMED": "NO",
+    "2025_PLAYER_CANONICAL_MAPPING_CERTIFIED": "BLOCKED",
+    "2025_RAW_IMMUTABILITY_AFTER_MAPPING": "PASS",
+    "FEATURE_BUILD_PERFORMED": "NO",
+    "MODEL_WORK_PERFORMED": "NO",
+    "2026_IMPORT_PERFORMED": "NO",
+    "AUTOMATION_ACTIVATED": "NO",
+    "ACTIVE_CRON_ADDED": "NO",
+    "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO"
+  },
+  "remainingBlockers": [
+    "Complete deterministic canonical sport_events coverage for all 2025 Statcast game_pk values.",
+    "Add a certified no-provider 2025 MLBAM -> sport_players canonical identity path, or explicitly authorize canonical player creation from stored/source MLBAM evidence."
+  ]
+}
