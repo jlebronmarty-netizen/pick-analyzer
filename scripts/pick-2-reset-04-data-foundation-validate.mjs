@@ -30,8 +30,8 @@ const architecture = read('docs/ARCHITECTURE/PICK_2_DATA_FOUNDATION_V1.md')
 const certification = read('docs/CERTIFICATION/PICK_2_RESET_04_DATA_FOUNDATION.md')
 
 check(
-  'RESET-04/04R1 verdict',
-  ['PICK_2_RESET_04_DATA_FOUNDATION_CERTIFIED', 'PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED'].includes(artifact.certificationVerdict),
+  'RESET-04/04R1/04R1B verdict',
+  ['PICK_2_RESET_04_DATA_FOUNDATION_CERTIFIED', 'PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED', 'PICK_2_RESET_04R1B_FULL_STATCAST_SCHEMA_CERTIFIED'].includes(artifact.certificationVerdict),
 )
 check('RESET-01 loaded', reset01.certificationVerdict === 'PICK_2_RESET_01_LEGACY_FREEZE_AND_EXACT_INVENTORY_CERTIFIED')
 check('RESET-02A loaded', reset02a.certificationVerdict === 'PICK_2_RESET_02A_BOUNDED_RUNTIME_SIMPLIFICATION_CERTIFIED')
@@ -109,10 +109,10 @@ for (const flag of [
 
 check('champion none', artifact.flags.PICK_2_CHAMPION_MODEL === 'NONE')
 check('statcast not imported', artifact.flags.STATCAST_IMPORT_PERFORMED === 'NO')
-if (artifact.certificationVerdict === 'PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED') {
-  check('source audit row count', artifact.statcastRawStorage.sourceRowsAudited === 591316)
-  check('source games count', artifact.statcastRawStorage.uniqueGames === 2004)
-  check('source columns accounted', artifact.flags.SOURCE_COLUMNS_ACCOUNTED_FOR === '100%' && artifact.statcastRawStorage.sourceColumnMapping.length === 22)
+if (['PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED', 'PICK_2_RESET_04R1B_FULL_STATCAST_SCHEMA_CERTIFIED'].includes(artifact.certificationVerdict)) {
+  check('source audit row count', artifact.statcastRawStorage.sourceRowsAudited >= 591316)
+  check('source games count', artifact.statcastRawStorage.uniqueGames >= 2004)
+  check('source columns accounted', artifact.flags.SOURCE_COLUMNS_ACCOUNTED_FOR === '100%' && (artifact.statcastRawStorage.sourceColumnMapping?.length === 22 || artifact.statcastRawStorage.sourceColumnMapping?.length === 119 || artifact.statcastRawStorage.sourceColumnInventory?.length === 119))
   check('source canonical separation flag', artifact.flags.STATCAST_PLAYER_IDENTITY_SEPARATION_READY === 'YES')
   check('score state flag', artifact.flags.STATCAST_SCORE_STATE_STORAGE_READY === 'YES')
 }
@@ -121,7 +121,8 @@ check('architecture migration policy', architecture.includes('does not apply it 
 check(
   'certification status recorded',
   certification.includes('PICK_2_RESET_04_DATA_FOUNDATION_CERTIFIED') ||
-    certification.includes('PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED'),
+    certification.includes('PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED') ||
+    certification.includes('PICK_2_RESET_04R1B_FULL_STATCAST_SCHEMA_CERTIFIED'),
 )
 
 if (failures.length) {

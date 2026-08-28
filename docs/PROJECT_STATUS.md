@@ -4,6 +4,10 @@ Last updated: 2026-08-24 00:00:00Z
 
 ## 2026-08-27 PICK-2.0 RESET-04R1 Statcast Schema Compatibility
 
+- RESET-04R1B is locally implemented as `PICK_2_RESET_04R1B_FULL_STATCAST_SCHEMA_CERTIFIED`. It supersedes only the reduced-source assumptions from R1 after the complete original Baseball Savant files for 2025 and 2026 YTD were audited: 1,303,844 combined pitch rows, 4,434 games, 30 teams, 119 columns in both seasons and 0 duplicate pitch identities.
+- The still-unapplied raw migration now preserves every source field in `raw_payload`, explicitly types high-value pitch shape, movement, contact, bat-tracking and score-label fields, keeps MLBAM source IDs separate from canonical Pick IDs, and locks same-target-game score/win/run-expectancy fields out of pregame features.
+- RESET-05 remains blocked pending publication and explicit migration apply/readback. No Statcast data was imported, no production schema was mutated, no provider was called, no prediction/model/calibration/Official Pick/learning state changed and no automation or cron was activated.
+
 - RESET-04R1 is locally implemented as `PICK_2_RESET_04R1_STATCAST_SCHEMA_COMPATIBILITY_CERTIFIED`. It repairs the still-unapplied Pick 2 data-foundation migration after the real 2026 YTD Statcast source audit: 591,316 pitch rows, 2,004 games, 30 teams, date range 2026-03-25 through 2026-08-26, 0 duplicate pitch identities.
 - The raw table now preserves all 22 audited core source columns, separates MLBAM source IDs from nullable canonical Pick IDs, stores source home/away team evidence separately from canonical team IDs, and exposes post-pitch score state for future label reconstruction only.
 - RESET-05 remains blocked pending final migration apply. No Statcast data was imported, no production schema was mutated, no provider was called, no prediction/model/calibration/Official Pick/learning state changed and no automation or cron was activated.
