@@ -1,0 +1,721 @@
+{
+  "certificationVerdict": "MLB_DATA_01B_2025_RAW_STATCAST_IMPORT_CERTIFIED",
+  "phase": "MLB-DATA-01B",
+  "generatedAt": "2026-08-28T02:44:29.178Z",
+  "mode": "READBACK_ONLY",
+  "sourcePackageUnchanged": true,
+  "sourceDigests": [
+    {
+      "fileName": "Angels.csv",
+      "sha256": "e80c9d589c155e1ba34cf1e9bd8a920b1ad5cda5a1fd177675497ffce9252e01",
+      "rows": 24299
+    },
+    {
+      "fileName": "Astros.csv",
+      "sha256": "5d58a1a3d7d5a8c0fa5074ab655a9095a401df2f71168aa437a467ab64ce9d89",
+      "rows": 23601
+    },
+    {
+      "fileName": "Athletics.csv",
+      "sha256": "bc74a5c8db78e6d4cf2aa0546ea876d65f5d85b039772cd7a21fe5fde641c4ce",
+      "rows": 24861
+    },
+    {
+      "fileName": "Blue Jays.csv",
+      "sha256": "6133b5f91a8f8e6cfe66ea8f9776bfbfc8f71c8eabb150bbce43fe867357b2ab",
+      "rows": 23822
+    },
+    {
+      "fileName": "Braves.csv",
+      "sha256": "bc7ea03702973a6db252f0bfa4ab19ea0cebffa3a4381f73e5a508a00b3ea8db",
+      "rows": 24053
+    },
+    {
+      "fileName": "Brewers.csv",
+      "sha256": "1372530eff8c81c0421429804818aaea293c0b42d0493fb35d79f2495cd522f2",
+      "rows": 23806
+    },
+    {
+      "fileName": "Cardinals.csv",
+      "sha256": "f696225afeb100301bbe77eba00908fd54a190496928de5a62968b65e5c41bce",
+      "rows": 23127
+    },
+    {
+      "fileName": "Cubs.csv",
+      "sha256": "abd12f5d05192c1b8f2fac16c4a2f0b75e82e05b4bdb6770bd70f0226b3b4d43",
+      "rows": 22594
+    },
+    {
+      "fileName": "D-backs.csv",
+      "sha256": "30d55445c169a049e4d908a89a04cc8740b333c0f50150142116310cac2c7022",
+      "rows": 23917
+    },
+    {
+      "fileName": "Dodgers.csv",
+      "sha256": "660191e424e9842732808291c8d134b026442dfe09d49f529ca35eef5d188796",
+      "rows": 24107
+    },
+    {
+      "fileName": "Giants.csv",
+      "sha256": "2d5a25906f60f1615a2176f45df754a34cd0e4c888fec2a6a58f677513e1f8f4",
+      "rows": 23635
+    },
+    {
+      "fileName": "Guardians.csv",
+      "sha256": "4206a98ab078ccc0afbba084297e512c2ecab93d8a1f2c5e9a6097cd4fef7142",
+      "rows": 23873
+    },
+    {
+      "fileName": "Mariners.csv",
+      "sha256": "940647e548d74a79c12f8c5a78220400cfe9c8d00457fd992a02da79461dbb60",
+      "rows": 23737
+    },
+    {
+      "fileName": "Marlins.csv",
+      "sha256": "25c9126d478aa2efd8d6234336c2baf071a8f1fbebd3ddd7f1106351c3a92739",
+      "rows": 24033
+    },
+    {
+      "fileName": "Mets.csv",
+      "sha256": "02269eb05d68a7e9d69710cffdf01424ac1bf94cc76088bbd67ba43b847a7a9d",
+      "rows": 24207
+    },
+    {
+      "fileName": "Nationals.csv",
+      "sha256": "d2a7fa4bf59d6243594c46c3301249cce459a27d211c20a242505f51ed7a16f7",
+      "rows": 24477
+    },
+    {
+      "fileName": "Orioles.csv",
+      "sha256": "837b9bb154c4ce613fcfdb5811096893c067adfffbd494415c8f6d98375cf2bb",
+      "rows": 23932
+    },
+    {
+      "fileName": "Padres.csv",
+      "sha256": "0b8cef9c42a20412d30526b82593f217dca84b7a1df12abc92558663cb7901a5",
+      "rows": 23566
+    },
+    {
+      "fileName": "Phillies.csv",
+      "sha256": "0b12dbbf9a515e031d181d49867487a8f41ce1e41356c1781dd86cda458d751f",
+      "rows": 23310
+    },
+    {
+      "fileName": "Pirates.csv",
+      "sha256": "22275037f799b014b18433b74cdd32668b5e83dc9730688a30e1ae16ecf41b3d",
+      "rows": 23361
+    },
+    {
+      "fileName": "Rangers.csv",
+      "sha256": "f0ba3cb6856955f9f0319c5ade5cbcb8defc35fdf91c4d5175aa61372b83e34c",
+      "rows": 23011
+    },
+    {
+      "fileName": "Rays.csv",
+      "sha256": "06c30486bca3c70a42d3203615e0f6b370a956eef2a1cfc1855fb11886c7e168",
+      "rows": 23013
+    },
+    {
+      "fileName": "Red Sox.csv",
+      "sha256": "a5e50f573b45b2128759381bcd672123782fae6b579b88c28f9715f373ade8d6",
+      "rows": 23711
+    },
+    {
+      "fileName": "Reds.csv",
+      "sha256": "8913953951e68e7e55719c7007612a1114e201ecf0d6ff89e8b544158f33b3a4",
+      "rows": 23820
+    },
+    {
+      "fileName": "Rockies.csv",
+      "sha256": "881414832686a12c90d6380ce0f5cb7140c5bd2bba649dc7fcf589c326b5ab8f",
+      "rows": 24086
+    },
+    {
+      "fileName": "Royals.csv",
+      "sha256": "985fc1dd0c08f50b5c14e7afde42c30565a3c8720656d527a516fc9fb7cf10d7",
+      "rows": 23349
+    },
+    {
+      "fileName": "Tigers.csv",
+      "sha256": "eae98ddef96e292cccbac99dc2555869f22d2f49772c26201725cb6856e008a7",
+      "rows": 23395
+    },
+    {
+      "fileName": "Twins.csv",
+      "sha256": "ae073fc16ab5c896fb1bc96e6a75a91d75723ca6fb16a065deb8aa7709d5107c",
+      "rows": 23961
+    },
+    {
+      "fileName": "White Sox.csv",
+      "sha256": "940bac9e6e8966fea754dda9511c399c8cdac08889e2f6a0d825793db87789a3",
+      "rows": 24019
+    },
+    {
+      "fileName": "Yankees.csv",
+      "sha256": "a23286001bb635335ed2442956ef72dbe4c0baa2ba11eff2aeb12bfc48037362",
+      "rows": 23845
+    }
+  ],
+  "batchSize": 250,
+  "expectedBatchCount": 2851,
+  "checkpointPath": ".tmp/mlb-data-01b-2025-raw-statcast-import-checkpoint.json",
+  "checkpointResumeActive": true,
+  "preImportRawCount": 0,
+  "currentRawCountAtCertificationStart": 712528,
+  "filesProcessed": [
+    {
+      "fileName": "Angels.csv",
+      "digest": "e80c9d589c155e1ba34cf1e9bd8a920b1ad5cda5a1fd177675497ffce9252e01",
+      "rowsRead": 24299,
+      "rowsTransformed": 24299,
+      "rowsInserted": 24299,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Astros.csv",
+      "digest": "5d58a1a3d7d5a8c0fa5074ab655a9095a401df2f71168aa437a467ab64ce9d89",
+      "rowsRead": 23601,
+      "rowsTransformed": 23601,
+      "rowsInserted": 23601,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Athletics.csv",
+      "digest": "bc74a5c8db78e6d4cf2aa0546ea876d65f5d85b039772cd7a21fe5fde641c4ce",
+      "rowsRead": 24861,
+      "rowsTransformed": 24861,
+      "rowsInserted": 24861,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Blue Jays.csv",
+      "digest": "6133b5f91a8f8e6cfe66ea8f9776bfbfc8f71c8eabb150bbce43fe867357b2ab",
+      "rowsRead": 23822,
+      "rowsTransformed": 23822,
+      "rowsInserted": 23822,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Braves.csv",
+      "digest": "bc7ea03702973a6db252f0bfa4ab19ea0cebffa3a4381f73e5a508a00b3ea8db",
+      "rowsRead": 24053,
+      "rowsTransformed": 24053,
+      "rowsInserted": 16053,
+      "rowsReused": 8000,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Brewers.csv",
+      "digest": "1372530eff8c81c0421429804818aaea293c0b42d0493fb35d79f2495cd522f2",
+      "rowsRead": 23806,
+      "rowsTransformed": 23806,
+      "rowsInserted": 23806,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Cardinals.csv",
+      "digest": "f696225afeb100301bbe77eba00908fd54a190496928de5a62968b65e5c41bce",
+      "rowsRead": 23127,
+      "rowsTransformed": 23127,
+      "rowsInserted": 927,
+      "rowsReused": 22200,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Cubs.csv",
+      "digest": "abd12f5d05192c1b8f2fac16c4a2f0b75e82e05b4bdb6770bd70f0226b3b4d43",
+      "rowsRead": 22594,
+      "rowsTransformed": 22594,
+      "rowsInserted": 22594,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "D-backs.csv",
+      "digest": "30d55445c169a049e4d908a89a04cc8740b333c0f50150142116310cac2c7022",
+      "rowsRead": 23917,
+      "rowsTransformed": 23917,
+      "rowsInserted": 23917,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Dodgers.csv",
+      "digest": "660191e424e9842732808291c8d134b026442dfe09d49f529ca35eef5d188796",
+      "rowsRead": 24107,
+      "rowsTransformed": 24107,
+      "rowsInserted": 24107,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Giants.csv",
+      "digest": "2d5a25906f60f1615a2176f45df754a34cd0e4c888fec2a6a58f677513e1f8f4",
+      "rowsRead": 23635,
+      "rowsTransformed": 23635,
+      "rowsInserted": 23635,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Guardians.csv",
+      "digest": "4206a98ab078ccc0afbba084297e512c2ecab93d8a1f2c5e9a6097cd4fef7142",
+      "rowsRead": 23873,
+      "rowsTransformed": 23873,
+      "rowsInserted": 23873,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Mariners.csv",
+      "digest": "940647e548d74a79c12f8c5a78220400cfe9c8d00457fd992a02da79461dbb60",
+      "rowsRead": 23737,
+      "rowsTransformed": 23737,
+      "rowsInserted": 23737,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Marlins.csv",
+      "digest": "25c9126d478aa2efd8d6234336c2baf071a8f1fbebd3ddd7f1106351c3a92739",
+      "rowsRead": 24033,
+      "rowsTransformed": 24033,
+      "rowsInserted": 24033,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Mets.csv",
+      "digest": "02269eb05d68a7e9d69710cffdf01424ac1bf94cc76088bbd67ba43b847a7a9d",
+      "rowsRead": 24207,
+      "rowsTransformed": 24207,
+      "rowsInserted": 24207,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Nationals.csv",
+      "digest": "d2a7fa4bf59d6243594c46c3301249cce459a27d211c20a242505f51ed7a16f7",
+      "rowsRead": 24477,
+      "rowsTransformed": 24477,
+      "rowsInserted": 24477,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Orioles.csv",
+      "digest": "837b9bb154c4ce613fcfdb5811096893c067adfffbd494415c8f6d98375cf2bb",
+      "rowsRead": 23932,
+      "rowsTransformed": 23932,
+      "rowsInserted": 23932,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Padres.csv",
+      "digest": "0b8cef9c42a20412d30526b82593f217dca84b7a1df12abc92558663cb7901a5",
+      "rowsRead": 23566,
+      "rowsTransformed": 23566,
+      "rowsInserted": 23566,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Phillies.csv",
+      "digest": "0b12dbbf9a515e031d181d49867487a8f41ce1e41356c1781dd86cda458d751f",
+      "rowsRead": 23310,
+      "rowsTransformed": 23310,
+      "rowsInserted": 23310,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Pirates.csv",
+      "digest": "22275037f799b014b18433b74cdd32668b5e83dc9730688a30e1ae16ecf41b3d",
+      "rowsRead": 23361,
+      "rowsTransformed": 23361,
+      "rowsInserted": 23361,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Rangers.csv",
+      "digest": "f0ba3cb6856955f9f0319c5ade5cbcb8defc35fdf91c4d5175aa61372b83e34c",
+      "rowsRead": 23011,
+      "rowsTransformed": 23011,
+      "rowsInserted": 23011,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Rays.csv",
+      "digest": "06c30486bca3c70a42d3203615e0f6b370a956eef2a1cfc1855fb11886c7e168",
+      "rowsRead": 23013,
+      "rowsTransformed": 23013,
+      "rowsInserted": 23013,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Red Sox.csv",
+      "digest": "a5e50f573b45b2128759381bcd672123782fae6b579b88c28f9715f373ade8d6",
+      "rowsRead": 23711,
+      "rowsTransformed": 23711,
+      "rowsInserted": 23711,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Reds.csv",
+      "digest": "8913953951e68e7e55719c7007612a1114e201ecf0d6ff89e8b544158f33b3a4",
+      "rowsRead": 23820,
+      "rowsTransformed": 23820,
+      "rowsInserted": 23820,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Rockies.csv",
+      "digest": "881414832686a12c90d6380ce0f5cb7140c5bd2bba649dc7fcf589c326b5ab8f",
+      "rowsRead": 24086,
+      "rowsTransformed": 24086,
+      "rowsInserted": 24086,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Royals.csv",
+      "digest": "985fc1dd0c08f50b5c14e7afde42c30565a3c8720656d527a516fc9fb7cf10d7",
+      "rowsRead": 23349,
+      "rowsTransformed": 23349,
+      "rowsInserted": 23349,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Tigers.csv",
+      "digest": "eae98ddef96e292cccbac99dc2555869f22d2f49772c26201725cb6856e008a7",
+      "rowsRead": 23395,
+      "rowsTransformed": 23395,
+      "rowsInserted": 23395,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Twins.csv",
+      "digest": "ae073fc16ab5c896fb1bc96e6a75a91d75723ca6fb16a065deb8aa7709d5107c",
+      "rowsRead": 23961,
+      "rowsTransformed": 23961,
+      "rowsInserted": 23961,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "White Sox.csv",
+      "digest": "940bac9e6e8966fea754dda9511c399c8cdac08889e2f6a0d825793db87789a3",
+      "rowsRead": 24019,
+      "rowsTransformed": 24019,
+      "rowsInserted": 24019,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    },
+    {
+      "fileName": "Yankees.csv",
+      "digest": "a23286001bb635335ed2442956ef72dbe4c0baa2ba11eff2aeb12bfc48037362",
+      "rowsRead": 23845,
+      "rowsTransformed": 23845,
+      "rowsInserted": 23845,
+      "rowsReused": 0,
+      "rowsRejected": 0,
+      "identityConflicts": 0,
+      "payloadConflicts": 0,
+      "quarantinedRows": 0,
+      "complete": true
+    }
+  ],
+  "totals": {
+    "rowsRead": 742728,
+    "rowsTransformed": 742728,
+    "rowsInserted": 712528,
+    "rowsReused": 30200,
+    "rowsRejected": 0,
+    "identityConflicts": 0,
+    "payloadConflicts": 0,
+    "quarantinedRows": 0
+  },
+  "postImport": {
+    "totalRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicateProductionIdentities": 0,
+    "uniquenessEvidence": "enforced by pick2_raw_mlb_statcast_pitches unique(game_pk, at_bat_number, pitch_number) plus exact row count",
+    "games": 2430,
+    "teams": [
+      "ATH",
+      "ATL",
+      "AZ",
+      "BAL",
+      "BOS",
+      "CHC",
+      "CIN",
+      "CLE",
+      "COL",
+      "CWS",
+      "DET",
+      "HOU",
+      "KC",
+      "LAA",
+      "LAD",
+      "MIA",
+      "MIL",
+      "MIN",
+      "NYM",
+      "NYY",
+      "PHI",
+      "PIT",
+      "SD",
+      "SEA",
+      "SF",
+      "STL",
+      "TB",
+      "TEX",
+      "TOR",
+      "WSH"
+    ],
+    "minDate": "2025-03-18",
+    "maxDate": "2025-09-28",
+    "cleanTableCounts": {
+      "pick2_feature_snapshots": 0,
+      "pick2_mlb_pitcher_daily_features": 0,
+      "pick2_mlb_batter_daily_features": 0,
+      "pick2_mlb_team_daily_features": 0,
+      "pick2_mlb_bullpen_daily_features": 0,
+      "pick2_mlb_matchup_daily_features": 0,
+      "pick2_mlb_first_inning_daily_features": 0,
+      "pick2_model_registry": 0,
+      "pick2_model_feature_sets": 0,
+      "pick2_model_versions": 0,
+      "pick2_model_training_runs": 0,
+      "pick2_model_validation_runs": 0,
+      "pick2_game_predictions": 0,
+      "pick2_prediction_results": 0,
+      "pick2_market_value_evaluations": 0,
+      "pick2_data_health_status": 0
+    },
+    "advancedNonNull": {
+      "release_speed": 709968,
+      "release_spin_rate": 708197,
+      "spin_axis": 708194,
+      "plate_x": 709909,
+      "plate_z": 709909,
+      "pfx_x": 709831,
+      "pfx_z": 709964,
+      "release_extension": 709873,
+      "arm_angle": 708798,
+      "launch_speed": 235711,
+      "launch_angle": 236097,
+      "estimated_woba_using_speedangle": 181286,
+      "bat_speed": 330422,
+      "swing_length": 330422,
+      "attack_angle": 330422
+    },
+    "scoreNonNull": {
+      "home_score": "SOURCE_CERTIFIED_IMPORTED_BY_TYPED_TRANSFORM",
+      "away_score": "SOURCE_CERTIFIED_IMPORTED_BY_TYPED_TRANSFORM",
+      "post_home_score": "SOURCE_CERTIFIED_IMPORTED_BY_TYPED_TRANSFORM",
+      "post_away_score": "SOURCE_CERTIFIED_IMPORTED_BY_TYPED_TRANSFORM",
+      "bat_score": "SOURCE_CERTIFIED_IMPORTED_BY_TYPED_TRANSFORM",
+      "fld_score": "SOURCE_CERTIFIED_IMPORTED_BY_TYPED_TRANSFORM",
+      "post_bat_score": "SOURCE_CERTIFIED_IMPORTED_BY_TYPED_TRANSFORM",
+      "post_fld_score": "SOURCE_CERTIFIED_IMPORTED_BY_TYPED_TRANSFORM"
+    }
+  },
+  "sourceProductionParity": "PASS",
+  "rawPayloadReadbackCertified": true,
+  "rawPayloadSampleReadback": {
+    "status": "PASS",
+    "samples": 60,
+    "matches": 60,
+    "mismatches": []
+  },
+  "advancedFieldImportParity": "PASS",
+  "scoreStateImportParity": "PASS",
+  "canonicalMappingDeferredTo01c": true,
+  "featureBuildPerformed": false,
+  "modelWorkPerformed": false,
+  "predictionWrites": 0,
+  "legacyIsolation": "PRESERVED",
+  "import2026Performed": false,
+  "idempotencyProof": {
+    "status": "PASS",
+    "sampleRows": 250,
+    "reuseNoOp": 250,
+    "wouldInsert": 0
+  },
+  "conflicts": {
+    "identityConflicts": 0,
+    "payloadConflicts": 0,
+    "quarantinedRows": 0,
+    "rejectedRows": 0
+  },
+  "storageImpact": {
+    "rowCount": 712528,
+    "tableSize": "NOT_OBSERVED_WITHOUT_SQL_SIZE_FUNCTION",
+    "indexSize": "NOT_OBSERVED_WITHOUT_SQL_SIZE_FUNCTION",
+    "priorEstimate": {
+      "method": "bounded estimate from 2025 source file bytes and full-row JSONB preservation",
+      "sourceBytes": 489740364,
+      "estimatedTableAndRawPayload": "approximately 1.0-1.8 GB before indexes, depending on JSONB compression/toast behavior",
+      "estimatedIndexes": "approximately 250-600 MB for primary key, unique pitch identity, event/date, pitcher/date, batter/date and mapping indexes",
+      "expectedIngestDuration": "tens of minutes; depends on Supabase network/write throughput and conflict-read batching",
+      "dbIndexConsiderations": "Use 1000-row write batches, retry bounded transient failures, and monitor unique constraint conflicts by batch."
+    }
+  },
+  "dataHealthReadback": {
+    "statcastRows": 712528,
+    "throughDate": "2025-09-28",
+    "rawSeasonCoverage": "2025_COMPLETE",
+    "tableUpdatePerformed": false
+  },
+  "providerCalls": 0,
+  "productionRawDmlMutations": 712528,
+  "otherProductionDmlMutations": 0,
+  "productionSchemaMutations": 0,
+  "automationActivated": false,
+  "cronChanges": 0,
+  "flags": {
+    "2025_SOURCE_PACKAGE_UNCHANGED": "YES",
+    "POSTIMPORT_RAW_COUNT": "712528",
+    "PRODUCTION_2025_RAW_IDENTITY_CERTIFIED": "YES",
+    "2025_SOURCE_PRODUCTION_PARITY": "PASS",
+    "2025_RAW_PAYLOAD_READBACK_CERTIFIED": "YES",
+    "2025_ADVANCED_FIELD_IMPORT_PARITY": "PASS",
+    "2025_SCORE_STATE_IMPORT_PARITY": "PASS",
+    "CANONICAL_MAPPING_DEFERRED_TO_01C": "YES",
+    "FEATURE_BUILD_PERFORMED": "NO",
+    "MODEL_WORK_PERFORMED": "NO",
+    "2026_IMPORT_PERFORMED": "NO",
+    "2025_RAW_IMPORT_IDEMPOTENCY": "PASS"
+  },
+  "failed": []
+}

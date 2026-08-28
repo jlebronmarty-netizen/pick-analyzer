@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-27 MLB-DATA-01B 2025 Raw Statcast Import
+
+- MLB-DATA-01B is certified as `MLB_DATA_01B_2025_RAW_STATCAST_IMPORT_CERTIFIED` after importing the certified 2025 Baseball Savant Statcast package into `pick2_raw_mlb_statcast_pitches`: 712,528 raw pitch rows, 2,430 games, 30 teams and 119 source fields preserved through typed columns plus `raw_payload`.
+- The import used deterministic `game_pk + at_bat_number + pitch_number` identity, checkpoint/resume, raw payload digests and conflict-aware reuse. Production readback found 712,528 unique production pitch identities, 0 duplicate identities, 0 rejected rows, 0 payload conflicts and bounded idempotency reuse with 0 would-insert rows.
+- Canonical game/player mapping remains deferred to `MLB-DATA-01C`. Feature tables, model tables, prediction/evaluation/market-value tables, 2026 raw import, provider calls, schema mutations, automation and cron changes all remain 0.
+
 ## 2026-08-27 MLB-DATA-01A 2025 Raw Statcast Validation
 
 - MLB-DATA-01A is certified as `MLB_DATA_01A_2025_RAW_STATCAST_VALIDATION_CERTIFIED` after validating the complete original 2025 Baseball Savant Statcast source package from `data/statcast/2025/raw`: 30 CSV files, 712,528 pitch rows, 2,430 games, 119 source columns, 30 MLB teams, regular-season date range 2025-03-18 through 2025-09-28 and 0 duplicate/null pitch identities.
