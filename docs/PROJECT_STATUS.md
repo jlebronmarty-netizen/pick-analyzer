@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-27 MLB-DATA-01A 2025 Raw Statcast Validation
+
+- MLB-DATA-01A is certified as `MLB_DATA_01A_2025_RAW_STATCAST_VALIDATION_CERTIFIED` after validating the complete original 2025 Baseball Savant Statcast source package from `data/statcast/2025/raw`: 30 CSV files, 712,528 pitch rows, 2,430 games, 119 source columns, 30 MLB teams, regular-season date range 2025-03-18 through 2025-09-28 and 0 duplicate/null pitch identities.
+- The phase prepares the raw import contract only. The dry-run transformation produced 712,528 unique candidate identities with all 119 source fields preserved in `raw_payload`, deterministic payload digests, leakage denylist classification, label reconstruction for full-game/F5/NRFI-YRFI outcomes and no production writes.
+- Pick 2 remains at the clean RESET-05 baseline: raw Statcast rows 0, feature/model/prediction/evaluation/market-value rows 0, champion none, provider calls 0, production DML/schema mutations 0, automation off and no cron changes. Next allowed phase is `MLB-DATA-01B_2025_RAW_STATCAST_IMPORT`; raw import remains separately authorization-gated.
+
 ## 2026-08-27 PICK-2.0 RESET-05 Clean Baseline
 
 - RESET-05 is certified as `PICK_2_RESET_05_CLEAN_BASELINE_CERTIFIED` after the user manually applied `supabase/migrations/202608270002_pick2_data_foundation_v1.sql` through the approved Supabase Production SQL Editor. Codex did not reapply the migration and made 0 DDL and 0 DML mutations during certification.

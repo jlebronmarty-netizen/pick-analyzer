@@ -50,3 +50,6 @@ next-env.d.ts
 
 # local certification response captures
 /.tmp/odds-shadow-certification/
+
+# Local Statcast datasets - do not commit
+data/statcast/
