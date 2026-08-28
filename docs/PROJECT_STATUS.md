@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-28 00:00:00Z
 
+## 2026-08-28 MLB-DATA-01C-R1 Canonical Identity Repair Audit
+
+- MLB-DATA-01C-R1 is classified as `MLB_DATA_01C_R1_IDENTITY_REPAIR_EXTERNAL_ID_GAP`. The repair audit made read-only production checks and reused the certified 01A/01C artifacts; provider calls, production DML, production DDL, automation changes, cron changes, raw-payload rewrites, source-ID rewrites, 2026 imports, feature builds, model runs and prediction writes all remain 0.
+- Event identity remains blocked by exact external ID coverage, not by table shape: 2,430 Statcast `game_pk` values face 2,462 canonical MLB 2025 event rows, only 2,175 unique date/home/away identities, 287 duplicate/excess canonical date-home-away rows, 227 partial MLB game mapping rows, 305 unmapped source games and 309 ambiguous source games. No `event_id` rows were written.
+- Player identity remains blocked because 1,469 source MLBAM players still have no certified existing MLBAM-to-`sport_players.id` path: 796 pitcher-only, 596 batter-only and 77 two-role source ids. Existing `provider_entity_mappings` is sufficient as the reusable crosswalk contract, so no migration was required or applied; 01D feature building remains blocked.
+
 ## 2026-08-28 MLB-DATA-01C 2025 Canonical Mapping
 
 - MLB-DATA-01C is classified as `MLB_DATA_01C_2025_CANONICAL_MAPPING_BLOCKED` after identity-only mapping audit and bounded team mapping execution. Raw Statcast stability is preserved at 712,528 rows, 712,528 unique pitch identities, 0 duplicates, 2,430 games, 30 teams and 2025-03-18 through 2025-09-28 coverage.
