@@ -3782,3 +3782,11 @@ Status: `MLB_DATA_01C_R4_CANONICAL_RECONCILIATION_PLAN_PARTIAL`
 Result: R4 produced a zero-write event/player repair plan from cached R3 evidence. Event gaps are inventoried and accounted for, but 309 doubleheader/date-time identity gaps remain unsafe; player linkage is also incomplete with 1,292 existing-player identity gaps, 161 confirmed missing canonical players and 16 ambiguous players.
 
 Next: perform a separate deterministic disambiguation proof before authorizing R5 persistence. R5 must not write crosswalks, raw canonical IDs or created canonical identities until R4 is upgraded to a complete deterministic repair plan.
+
+## MLB-DATA-01C-R4A Deterministic Disambiguation Proof
+
+Status: `MLB_DATA_01C_R4A_DETERMINISTIC_DISAMBIGUATION_PARTIAL`
+
+Result: R4A extended the R4 plan with an exact-only stored identity graph and confirmed no safe broad persistence path yet. The 7 remaining event gaps still lack exact stored game_pk/provider mapping evidence, the 1,292 existing-player gaps remain name-audit-only with no exact provider-ID path to a current `sport_players.id`, the 16 ambiguous players remain unresolved, and the 161 true-missing players remain the only safe future player-create set.
+
+Next: repair or acquire deterministic stored identity edges in a separate zero-write proof before R5. R5 persistence remains blocked, and MLB-DATA-01D feature construction remains prohibited until identity persistence is separately authorized, executed and readback-certified.
