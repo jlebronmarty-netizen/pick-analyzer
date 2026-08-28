@@ -3766,3 +3766,11 @@ Status: `MLB_03R3B_FINGERPRINT_STANDARDIZATION_LOCAL_READY`
 Result: MLB clean shadow canary preservation now has one shared canonical immutable fingerprint helper for validators and canary tooling. The contract hashes immutable evidence only and excludes lifecycle, settlement and mutable observation fields. Canary 1 reproduces the certified canonical digest `78868b4ef923ee5155cee83c2fa865ccf6c4943ecf31f45176cc7bd9f372be48` locally with deterministic serialization.
 
 Next: publish/deploy the fingerprint standardization, verify production alignment, re-certify canary 1, then perform the separately gated second clean calibrated MLB `CURRENT_ERA_SHADOW` canary write if fresh candidate evidence still passes.
+
+## MLB-DATA-01C-R3 Read-Only Identity Acquisition
+
+Status: `MLB_DATA_01C_R3_IDENTITY_ACQUISITION_PARTIAL`
+
+Result: R3 acquired authoritative MLB Official 2025 identity evidence into local resumable artifacts only. Official acquisition covered all 2,430 Statcast games and all 1,469 source MLBAM player IDs, but deterministic reconciliation remains incomplete: 614 games do not have a safe canonical event mapping and 1,469 players still lack exact canonical `sport_players.id` linkage.
+
+Next: run a separately gated canonical event repair / canonical player creation plan. Do not persist crosswalks, write raw canonical mapping columns or start MLB-DATA-01D feature construction until that reconciliation gate passes.

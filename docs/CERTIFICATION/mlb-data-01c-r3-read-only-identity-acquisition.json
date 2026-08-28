@@ -1,0 +1,1204 @@
+{
+  "certification": "MLB_DATA_01C_R3_READ_ONLY_AUTHORITATIVE_IDENTITY_ACQUISITION",
+  "certificationVerdict": "MLB_DATA_01C_R3_IDENTITY_ACQUISITION_PARTIAL",
+  "generatedAt": "2026-08-28T22:29:18.916Z",
+  "targetCommit": "7cf33b3750c75476a35bd40402f35229965cb2e8",
+  "acquisitionVersion": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+  "alignment": {
+    "requiredCommit": "7cf33b3750c75476a35bd40402f35229965cb2e8",
+    "productionAlignmentVerifiedSeparately": true
+  },
+  "contracts": {
+    "GAME_IDENTITY_ACQUISITION_PLAN_READY": "YES",
+    "PLAYER_IDENTITY_ACQUISITION_PLAN_READY": "YES",
+    "IDENTITY_ACQUISITION_CACHE_CONTRACT_READY": "YES",
+    "PLAYER_PROVIDER_CALL_DEDUP_PLAN_READY": "YES",
+    "GAME_RECONCILIATION_CONTRACT_READY": "YES",
+    "PLAYER_RECONCILIATION_CONTRACT_READY": "YES",
+    "MLB_OFFICIAL_SINGLE_PERSON_ENDPOINT_CONTRACT": "PASS",
+    "MLB_OFFICIAL_BULK_PERSON_ENDPOINT_STATE": "SUPPORTED",
+    "EXTERNAL_IDENTITY_ACQUISITION_EXECUTION_READY": "YES"
+  },
+  "rawStability": {
+    "PRE_R3_RAW_STABILITY": "PASS",
+    "rawRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicateIdentities": 0,
+    "games": 2430,
+    "teams": 30,
+    "minDate": "2025-03-18",
+    "maxDate": "2025-09-28",
+    "rawPayloadUnchangedByR3": true,
+    "rawPayloadDigestUnchangedByR3": true,
+    "sourcePitcherBatterIdsUnchangedByR3": true,
+    "sourceTeamEvidenceUnchangedByR3": true,
+    "scoreStateUnchangedByR3": true
+  },
+  "teamMapping": {
+    "preserved": true,
+    "canonicalHomeRows": 712528,
+    "canonicalAwayRows": 712528,
+    "writes": 0
+  },
+  "gameAcquisition": {
+    "strategy": "one bulk/range schedule call: /api/v1/schedule?sportId=1&startDate=2025-03-18&endDate=2025-09-28&gameType=R&hydrate=team,venue",
+    "statcastGamePkCount": 2430,
+    "officialGameIdentityCount": 2430,
+    "officialExactGamePkCoverage": 2430,
+    "missingOfficialGameCount": 0,
+    "duplicateOfficialGameIdentityCount": 0,
+    "sourceParity": "PASS",
+    "parityMismatchCategories": {}
+  },
+  "eventReconciliation": {
+    "counts": {
+      "MAPPED": 1816,
+      "CANONICAL_EVENT_MISSING": 614,
+      "CANONICAL_DUPLICATE_DEFECT": 0,
+      "AMBIGUOUS": 0,
+      "CONFLICT": 0
+    },
+    "previousGapResolution": {
+      "previousMappedNowMapped": 1816,
+      "previousUnmappedResolved": 0,
+      "previousAmbiguousResolved": 0,
+      "remainingUnmapped": 614,
+      "remainingAmbiguous": 0,
+      "newConflicts": 0
+    },
+    "methodCounts": {
+      "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS": 309,
+      "OFFICIAL_DATE_HOME_AWAY": 1816,
+      "NONE": 305
+    },
+    "sampleUnmapped": [
+      {
+        "gamePk": "776135",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-28",
+          "gameDate": "2025-09-28T19:07:00Z",
+          "home": "LAA",
+          "away": "HOU",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776136",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-28",
+          "gameDate": "2025-09-28T19:10:00Z",
+          "home": "SD",
+          "away": "AZ",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776138",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-28",
+          "gameDate": "2025-09-28T19:05:00Z",
+          "home": "ATH",
+          "away": "KC",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776139",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-28",
+          "gameDate": "2025-09-28T19:10:00Z",
+          "home": "SEA",
+          "away": "LAD",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776146",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-27",
+          "gameDate": "2025-09-27T20:05:00Z",
+          "home": "SF",
+          "away": "COL",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776153",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-27",
+          "gameDate": "2025-09-27T23:15:00Z",
+          "home": "MIL",
+          "away": "CIN",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776166",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-26",
+          "gameDate": "2025-09-27T02:15:00Z",
+          "home": "SF",
+          "away": "COL",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776168",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-26",
+          "gameDate": "2025-09-27T01:40:00Z",
+          "home": "SEA",
+          "away": "LAD",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776169",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-26",
+          "gameDate": "2025-09-27T01:38:00Z",
+          "home": "LAA",
+          "away": "HOU",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776170",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-26",
+          "gameDate": "2025-09-27T01:40:00Z",
+          "home": "SD",
+          "away": "AZ",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776171",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-26",
+          "gameDate": "2025-09-27T00:10:00Z",
+          "home": "MIL",
+          "away": "CIN",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776172",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-26",
+          "gameDate": "2025-09-27T02:05:00Z",
+          "home": "ATH",
+          "away": "KC",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776182",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-25",
+          "gameDate": "2025-09-25T19:35:00Z",
+          "home": "ATH",
+          "away": "HOU",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776183",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-25",
+          "gameDate": "2025-09-25T18:35:00Z",
+          "home": "TEX",
+          "away": "MIN",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776185",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-25",
+          "gameDate": "2025-09-25T19:40:00Z",
+          "home": "AZ",
+          "away": "LAD",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776187",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-25",
+          "gameDate": "2025-09-25T23:40:00Z",
+          "home": "CHC",
+          "away": "NYM",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776198",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "OFFICIAL_DATE_HOME_AWAY_AMBIGUOUS",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-24",
+          "gameDate": "2025-09-24T20:10:00Z",
+          "home": "SD",
+          "away": "MIL",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776205",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-24",
+          "gameDate": "2025-09-25T00:05:00Z",
+          "home": "CHC",
+          "away": "NYM",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776207",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-23",
+          "gameDate": "2025-09-24T01:38:00Z",
+          "home": "LAA",
+          "away": "KC",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776208",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-23",
+          "gameDate": "2025-09-24T02:05:00Z",
+          "home": "ATH",
+          "away": "HOU",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776210",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-23",
+          "gameDate": "2025-09-24T00:05:00Z",
+          "home": "TEX",
+          "away": "MIN",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776212",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-23",
+          "gameDate": "2025-09-24T01:40:00Z",
+          "home": "SEA",
+          "away": "COL",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776213",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-23",
+          "gameDate": "2025-09-24T01:40:00Z",
+          "home": "AZ",
+          "away": "LAD",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776220",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-22",
+          "gameDate": "2025-09-23T01:45:00Z",
+          "home": "SF",
+          "away": "STL",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      },
+      {
+        "gamePk": "776222",
+        "sourceClassification": "OFFICIAL_EXACT",
+        "classification": "CANONICAL_EVENT_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalEventIds": [],
+        "parityIssues": [],
+        "official": {
+          "officialDate": "2025-09-22",
+          "gameDate": "2025-09-23T01:40:00Z",
+          "home": "SD",
+          "away": "MIL",
+          "gameNumber": 1,
+          "doubleHeader": "N",
+          "status": {
+            "abstractGameState": "Final",
+            "detailedState": "Final",
+            "codedGameState": "F",
+            "statusCode": "F"
+          }
+        }
+      }
+    ]
+  },
+  "playerAcquisition": {
+    "sourceMlbamPlayerCount": 1469,
+    "roleCounts": {
+      "pitcherOnly": 796,
+      "batterOnly": 596,
+      "both": 77
+    },
+    "existingPlayerCacheHits": 0,
+    "officialPlayerIdsFound": 1469,
+    "officialPlayerIdsMissing": 0,
+    "partialBulkResponseCount": 0,
+    "playerCallFailures": 0,
+    "playerRetryCalls": 0
+  },
+  "playerReconciliation": {
+    "counts": {
+      "MAPPED": 0,
+      "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING": 1292,
+      "CANONICAL_PLAYER_MISSING": 161,
+      "AMBIGUOUS": 16,
+      "CONFLICT": 0
+    },
+    "canonicalPlayerCreationRequiredCount": 1453,
+    "sampleUnresolved": [
+      {
+        "personId": "434378",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 2612,
+        "batterRows": 0,
+        "totalRows": 2612,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Justin Verlander"
+      },
+      {
+        "personId": "445276",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 878,
+        "batterRows": 0,
+        "totalRows": 878,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Kenley Jansen"
+      },
+      {
+        "personId": "445926",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 171,
+        "batterRows": 0,
+        "totalRows": 171,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Jesse Chavez"
+      },
+      {
+        "personId": "448179",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 171,
+        "batterRows": 0,
+        "totalRows": 171,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Rich Hill"
+      },
+      {
+        "personId": "450203",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 2559,
+        "batterRows": 0,
+        "totalRows": 2559,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Charlie Morton"
+      },
+      {
+        "personId": "453286",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 1392,
+        "batterRows": 0,
+        "totalRows": 1392,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Max Scherzer"
+      },
+      {
+        "personId": "455117",
+        "sourceRole": "batter_only",
+        "pitcherRows": 0,
+        "batterRows": 571,
+        "totalRows": 571,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Martín Maldonado"
+      },
+      {
+        "personId": "455119",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 651,
+        "batterRows": 0,
+        "totalRows": 651,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Chris Martin"
+      },
+      {
+        "personId": "456781",
+        "sourceRole": "batter_only",
+        "pitcherRows": 0,
+        "batterRows": 704,
+        "totalRows": 704,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Donovan Solano"
+      },
+      {
+        "personId": "457705",
+        "sourceRole": "batter_only",
+        "pitcherRows": 0,
+        "batterRows": 2287,
+        "totalRows": 2287,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Andrew McCutchen"
+      },
+      {
+        "personId": "457759",
+        "sourceRole": "batter_only",
+        "pitcherRows": 0,
+        "batterRows": 801,
+        "totalRows": 801,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Justin Turner"
+      },
+      {
+        "personId": "458677",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 832,
+        "batterRows": 0,
+        "totalRows": 832,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Justin Wilson"
+      },
+      {
+        "personId": "467793",
+        "sourceRole": "batter_only",
+        "pitcherRows": 0,
+        "batterRows": 1985,
+        "totalRows": 1985,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Carlos Santana"
+      },
+      {
+        "personId": "471911",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 779,
+        "batterRows": 0,
+        "totalRows": 779,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Carlos Carrasco"
+      },
+      {
+        "personId": "472610",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 914,
+        "batterRows": 0,
+        "totalRows": 914,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Luis García"
+      },
+      {
+        "personId": "476594",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 59,
+        "batterRows": 0,
+        "totalRows": 59,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Robert Stock"
+      },
+      {
+        "personId": "477132",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 1772,
+        "batterRows": 0,
+        "totalRows": 1772,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Clayton Kershaw"
+      },
+      {
+        "personId": "489119",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 205,
+        "batterRows": 0,
+        "totalRows": 205,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Wade Miley"
+      },
+      {
+        "personId": "489446",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 762,
+        "batterRows": 0,
+        "totalRows": 762,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Kirby Yates"
+      },
+      {
+        "personId": "493329",
+        "sourceRole": "batter_only",
+        "pitcherRows": 0,
+        "batterRows": 148,
+        "totalRows": 148,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Yuli Gurriel"
+      },
+      {
+        "personId": "493603",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 42,
+        "batterRows": 0,
+        "totalRows": 42,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Adam Ottavino"
+      },
+      {
+        "personId": "500743",
+        "sourceRole": "both",
+        "pitcherRows": 69,
+        "batterRows": 1171,
+        "totalRows": 1240,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Miguel Rojas"
+      },
+      {
+        "personId": "500779",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 2177,
+        "batterRows": 0,
+        "totalRows": 2177,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Jose Quintana"
+      },
+      {
+        "personId": "502043",
+        "sourceRole": "pitcher_only",
+        "pitcherRows": 280,
+        "batterRows": 0,
+        "totalRows": 280,
+        "classification": "CANONICAL_PLAYER_MISSING",
+        "mappingMethod": "NONE",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 0,
+        "officialName": "Kyle Gibson"
+      },
+      {
+        "personId": "502054",
+        "sourceRole": "batter_only",
+        "pitcherRows": 0,
+        "batterRows": 1715,
+        "totalRows": 1715,
+        "classification": "CANONICAL_PLAYER_EXISTS_IDENTITY_MISSING",
+        "mappingMethod": "EXACT_NAME_AUDIT_ONLY_NOT_USED_AS_KEY",
+        "canonicalPlayerIds": [],
+        "nameAuditCandidateCount": 1,
+        "officialName": "Tommy Pham"
+      }
+    ]
+  },
+  "crosswalkDryRuns": {
+    "game": {
+      "ready": true,
+      "rows": 1816,
+      "conflicts": {
+        "compatibleExisting": 0,
+        "newSafeMapping": 1816,
+        "conflictingMapping": 0,
+        "duplicateDefect": 0,
+        "totalConflicts": 0
+      },
+      "sampleRows": [
+        {
+          "provider": "mlb_stats_api",
+          "entity_type": "event",
+          "provider_entity_id": "776137",
+          "canonical_entity_id": "baseball_mlb:mlb:sportsdataio:event:76732",
+          "season": "2025",
+          "mapping_method": "OFFICIAL_DATE_HOME_AWAY",
+          "mapping_version": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+          "mapping_evidence": {
+            "source": "R3_DRY_RUN",
+            "responseDigest": "6803db8b40270866ed01449ca6700bb71cd57df231626310c4aff54aecc9b4ad"
+          }
+        },
+        {
+          "provider": "mlb_stats_api",
+          "entity_type": "event",
+          "provider_entity_id": "776140",
+          "canonical_entity_id": "baseball_mlb:mlb:sportsdataio:event:76729",
+          "season": "2025",
+          "mapping_method": "OFFICIAL_DATE_HOME_AWAY",
+          "mapping_version": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+          "mapping_evidence": {
+            "source": "R3_DRY_RUN",
+            "responseDigest": "bd3055852a3fbceb4830059eec4f87ac2cf2d874934f13f9854081e5c458c6d9"
+          }
+        },
+        {
+          "provider": "mlb_stats_api",
+          "entity_type": "event",
+          "provider_entity_id": "776141",
+          "canonical_entity_id": "baseball_mlb:mlb:sportsdataio:event:76731",
+          "season": "2025",
+          "mapping_method": "OFFICIAL_DATE_HOME_AWAY",
+          "mapping_version": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+          "mapping_evidence": {
+            "source": "R3_DRY_RUN",
+            "responseDigest": "18138fb83d2b64baf445b50ccbef3948b7118406107e2b58382351a3f2aedf43"
+          }
+        },
+        {
+          "provider": "mlb_stats_api",
+          "entity_type": "event",
+          "provider_entity_id": "776142",
+          "canonical_entity_id": "baseball_mlb:mlb:sportsdataio:event:76741",
+          "season": "2025",
+          "mapping_method": "OFFICIAL_DATE_HOME_AWAY",
+          "mapping_version": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+          "mapping_evidence": {
+            "source": "R3_DRY_RUN",
+            "responseDigest": "7508e2452bca2ab581265e2119e594dd7cf1aa8b464587a64d13a74b556aa0a8"
+          }
+        },
+        {
+          "provider": "mlb_stats_api",
+          "entity_type": "event",
+          "provider_entity_id": "776143",
+          "canonical_entity_id": "baseball_mlb:mlb:sportsdataio:event:76730",
+          "season": "2025",
+          "mapping_method": "OFFICIAL_DATE_HOME_AWAY",
+          "mapping_version": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+          "mapping_evidence": {
+            "source": "R3_DRY_RUN",
+            "responseDigest": "b74fca661aee4898770e0128ab647d7d0d64746cf4fdfd235c3e50a48c6a0ae5"
+          }
+        },
+        {
+          "provider": "mlb_stats_api",
+          "entity_type": "event",
+          "provider_entity_id": "776144",
+          "canonical_entity_id": "baseball_mlb:mlb:sportsdataio:event:76737",
+          "season": "2025",
+          "mapping_method": "OFFICIAL_DATE_HOME_AWAY",
+          "mapping_version": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+          "mapping_evidence": {
+            "source": "R3_DRY_RUN",
+            "responseDigest": "8528807607c94dfcee4a1099b16dcf34f348a648722135cd9f94894f6758a341"
+          }
+        },
+        {
+          "provider": "mlb_stats_api",
+          "entity_type": "event",
+          "provider_entity_id": "776145",
+          "canonical_entity_id": "baseball_mlb:mlb:sportsdataio:event:76734",
+          "season": "2025",
+          "mapping_method": "OFFICIAL_DATE_HOME_AWAY",
+          "mapping_version": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+          "mapping_evidence": {
+            "source": "R3_DRY_RUN",
+            "responseDigest": "80dd77898e346c3e8f57b3f57d74f48d5f3e19d8c0b26d392d4dbec0e3f0107c"
+          }
+        },
+        {
+          "provider": "mlb_stats_api",
+          "entity_type": "event",
+          "provider_entity_id": "776147",
+          "canonical_entity_id": "baseball_mlb:mlb:sportsdataio:event:76728",
+          "season": "2025",
+          "mapping_method": "OFFICIAL_DATE_HOME_AWAY",
+          "mapping_version": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+          "mapping_evidence": {
+            "source": "R3_DRY_RUN",
+            "responseDigest": "95c256c66a307153c359c9488e79e7a01ae6f103dae7847bc4b06661c8d4f52d"
+          }
+        },
+        {
+          "provider": "mlb_stats_api",
+          "entity_type": "event",
+          "provider_entity_id": "776148",
+          "canonical_entity_id": "baseball_mlb:mlb:sportsdataio:event:76736",
+          "season": "2025",
+          "mapping_method": "OFFICIAL_DATE_HOME_AWAY",
+          "mapping_version": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+          "mapping_evidence": {
+            "source": "R3_DRY_RUN",
+            "responseDigest": "13ef21d03cfd7a75eeb42f76d53d74e2d5e8a616da25a19389f622d46959563f"
+          }
+        },
+        {
+          "provider": "mlb_stats_api",
+          "entity_type": "event",
+          "provider_entity_id": "776149",
+          "canonical_entity_id": "baseball_mlb:mlb:sportsdataio:event:76740",
+          "season": "2025",
+          "mapping_method": "OFFICIAL_DATE_HOME_AWAY",
+          "mapping_version": "MLB_DATA_01C_R3_READ_ONLY_IDENTITY_ACQUISITION_V1",
+          "mapping_evidence": {
+            "source": "R3_DRY_RUN",
+            "responseDigest": "31aac9ba49744a9f6ad0e8907f89cf35d4b15fcb5b64c6b4f470f59a9b15e6be"
+          }
+        }
+      ]
+    },
+    "player": {
+      "ready": false,
+      "rows": 0,
+      "conflicts": {
+        "compatibleExisting": 0,
+        "newSafeMapping": 0,
+        "conflictingMapping": 0,
+        "duplicateDefect": 0,
+        "totalConflicts": 0
+      },
+      "sampleRows": []
+    }
+  },
+  "rawCoverageProjection": {
+    "eventIdMappableRows": 531535,
+    "eventIdMappablePercent": 74.5985,
+    "canonicalPitcherMappableRows": 0,
+    "canonicalPitcherMappablePercent": 0,
+    "canonicalBatterMappableRows": 0,
+    "canonicalBatterMappablePercent": 0
+  },
+  "readiness": {
+    "MLB_DATA_01D_IDENTITY_PREREQUISITES_PROJECTED_READY": "NO",
+    "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO"
+  },
+  "reuse": {
+    "season2026": {
+      "uniqueSourcePlayers": 0,
+      "cacheHits": 0,
+      "newIdentitiesRequireFutureAcquisition": 0,
+      "note": "No local 2026 source inventory was imported or read from Production beyond confirming zero 2026 raw rows."
+    },
+    "gamePathReusableFor2026": "YES",
+    "dailyIngestReusable": "YES"
+  },
+  "safety": {
+    "eventIdRowsMapped": 0,
+    "pitcherRowsMapped": 0,
+    "batterRowsMapped": 0,
+    "featureRows": 0,
+    "modelRows": 0,
+    "modelRegistry": 0,
+    "modelFeatureSets": 0,
+    "modelVersions": 0,
+    "modelTrainingRuns": 0,
+    "modelValidationRuns": 0,
+    "champion": "NONE",
+    "gamePredictions": 0,
+    "predictionResults": 0,
+    "marketValueEvaluations": 0,
+    "imported2026Rows": 0,
+    "crosswalkPersistenceAuthorizedNow": false,
+    "crosswalkWritePerformed": false,
+    "rawCanonicalMappingWritePerformed": false,
+    "canonicalPlayerCreationPerformed": false,
+    "productionDmlMutations": 0,
+    "productionSchemaMutations": 0,
+    "automationActivated": false,
+    "activeCronAdded": false
+  },
+  "providerAccounting": {
+    "gameProviderCalls": 5,
+    "playerProviderCalls": 490,
+    "successfulProviderCalls": 494,
+    "failedProviderCalls": 1,
+    "retryCalls": 0,
+    "partialBulkResponses": 0,
+    "otherProviderCalls": 0,
+    "totalMlbOfficialCalls": 495,
+    "cacheHits": 0,
+    "externalDiagnosticScheduleProbes": 3
+  },
+  "resume": {
+    "R3_ACQUISITION_RESUME_READY": "YES",
+    "cachePath": "docs/CERTIFICATION/mlb-data-01c-r3-acquisition-cache.json",
+    "artifactPath": "docs/CERTIFICATION/mlb-data-01c-r3-read-only-identity-acquisition.json",
+    "cacheDigest": "28e763a64372ee460b759f6a56c2054f9a2595c3f12dfa7c657c3121eff5a60b"
+  },
+  "flags": {
+    "GAME_OFFICIAL_IDENTITY_ACQUISITION_CERTIFIED": "YES",
+    "PLAYER_OFFICIAL_IDENTITY_ACQUISITION_CERTIFIED": "YES",
+    "GAME_CROSSWALK_DRY_RUN_READY": "YES",
+    "PLAYER_CROSSWALK_DRY_RUN_READY": "NO",
+    "GAME_CROSSWALK_PERSISTENCE_READY": "YES",
+    "PLAYER_CROSSWALK_PERSISTENCE_READY": "NO",
+    "CROSSWALK_PERSISTENCE_AUTHORIZED_NOW": "NO",
+    "CROSSWALK_WRITE_PERFORMED": "NO",
+    "RAW_CANONICAL_MAPPING_WRITE_PERFORMED": "NO",
+    "CANONICAL_PLAYER_CREATION_PERFORMED": "NO",
+    "R3_ACQUISITION_RESUME_READY": "YES",
+    "MLB_DATA_01D_IDENTITY_PREREQUISITES_PROJECTED_READY": "NO",
+    "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO"
+  },
+  "priorGapEvidence": {
+    "eventDryRun": {
+      "MAPPED": 1816,
+      "UNMAPPED": 305,
+      "AMBIGUOUS": 309,
+      "CONFLICT": 0
+    },
+    "playerDryRun": {
+      "MAPPED": 0,
+      "UNMAPPED": 1469,
+      "AMBIGUOUS": 0,
+      "CONFLICT": 0
+    }
+  }
+}
