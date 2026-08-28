@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-24 00:00:00Z
 
+## 2026-08-27 PICK-2.0 RESET-05 Clean Baseline
+
+- RESET-05 is certified as `PICK_2_RESET_05_CLEAN_BASELINE_CERTIFIED` after the user manually applied `supabase/migrations/202608270002_pick2_data_foundation_v1.sql` through the approved Supabase Production SQL Editor. Codex did not reapply the migration and made 0 DDL and 0 DML mutations during certification.
+- Production readback at commit `4a1ca1913d9f21631151bb90a05bc010ef635cfd` found all 17 Pick 2 foundation tables visible and readable, including raw Statcast pitch storage, feature snapshots/daily feature tables, model registry/training/validation tables, pure sports predictions, prediction evaluations, market-value evaluations and data-health status.
+- Every new Pick 2 table is at a zero-row baseline: Statcast rows 0, features 0, models 0, champion none, predictions 0, evaluations 0 and market-value rows 0. Legacy data remains isolated as `LEGACY_PRE_PICK_2`, no provider was called, no Statcast import occurred, no model work started and no automation or cron was activated. Next allowed phase is `MLB-DATA-01A_2025_RAW_STATCAST_VALIDATION`; raw import remains blocked.
+
 ## 2026-08-27 PICK-2.0 RESET-04R1 Statcast Schema Compatibility
 
 - RESET-04R1B is locally implemented as `PICK_2_RESET_04R1B_FULL_STATCAST_SCHEMA_CERTIFIED`. It supersedes only the reduced-source assumptions from R1 after the complete original Baseball Savant files for 2025 and 2026 YTD were audited: 1,303,844 combined pitch rows, 4,434 games, 30 teams, 119 columns in both seasons and 0 duplicate pitch identities.
