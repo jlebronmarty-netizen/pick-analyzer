@@ -79,3 +79,11 @@ Future raw canonical mapping remains separately gated and may only write `event_
 `MLB_DATA_01D_2025_FEATURE_BUILD_READY = NO`.
 
 R2 does not authorize identity acquisition execution, crosswalk persistence or raw canonical mapping writes. The next safe phase is a bounded endpoint-contract verification plan for MLB Official player identity.
+
+## R2A Supersession
+
+`MLB-DATA-01C-R2A` supersedes only the endpoint-contract blocker. It verified `GET /api/v1/people/{personId}` and the bounded 3-ID bulk people endpoint as authoritative MLBAM person identity contracts. The R2 plan history remains blocked at creation time, but the current follow-on state is:
+
+- `PLAYER_IDENTITY_ACQUISITION_PLAN_READY = YES`
+- `EXTERNAL_IDENTITY_ACQUISITION_EXECUTION_READY = YES`
+- `CROSSWALK_PERSISTENCE_AUTHORIZED_NOW = NO`

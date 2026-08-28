@@ -80163,8 +80163,8 @@
       "noFuzzyMatching": true
     },
     "player": {
-      "ready": false,
-      "strategy": "Blocked until an exact MLB Official person endpoint or repository-supported bulk person identity contract is verified. Existing live feed/lineup contracts are useful supplemental evidence but do not cover all source person IDs as a certified person identity endpoint.",
+      "ready": true,
+      "strategy": "Use verified MLB Official people endpoint identity by person_id, prefer verified 3-ID bulk batches conservatively, then reconcile official people.id through exact provider/canonical evidence to sport_players.id.",
       "allowedEvidenceOrderAfterContract": [
         "existing MLBAM provider mapping",
         "official person_id response identity",
@@ -80183,11 +80183,12 @@
       "retryAllowance": "UNKNOWN provider limit; one retry per failed date/range with conservative backoff."
     },
     "playerCallsPlanned": {
-      "contractStatus": "NEEDS_ENDPOINT_CONTRACT_VERIFICATION",
-      "individualPersonCallsIfVerified": 1469,
-      "bulkCalls": "UNKNOWN",
+      "contractStatus": "VERIFIED_BY_R2A",
+      "bulkEndpointState": "SUPPORTED",
+      "conservativeVerifiedBatchSize": 3,
+      "plannedCalls": 490,
       "cacheHitsExpectedBeforeExecution": 0,
-      "retryAllowance": "UNKNOWN provider limit; no player calls authorized before endpoint contract verification."
+      "retryAllowance": "At most one retry for retryable failures; no name fallback."
     },
     "totalCallsPlanned": {
       "minimumAfterPlayerContractVerification": "1 game range call + player contract-dependent calls",
@@ -80413,10 +80414,11 @@
     }
   },
   "authorizationGates": {
-    "externalIdentityAcquisitionExecutionReady": false,
+    "externalIdentityAcquisitionExecutionReady": true,
     "reasonExecutionNotReady": "Game acquisition is ready, but player acquisition still needs exact endpoint contract verification from repository evidence.",
     "crosswalkPersistenceAuthorizedNow": false,
-    "rawMappingAuthorizedNow": false
+    "rawMappingAuthorizedNow": false,
+    "reasonExecutionReady": "R2A verified single-person and 3-ID bulk MLB Official people endpoint identity contracts."
   },
   "downstreamReadiness": {
     "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO"
@@ -80426,9 +80428,9 @@
     "EVENT_IDENTITY_ACQUISITION_INPUT_READY": "YES",
     "PLAYER_IDENTITY_ACQUISITION_INPUT_READY": "YES",
     "AUTHORITATIVE_IDENTITY_SOURCE_SELECTED": "MLB Official / MLB Stats API",
-    "NEEDS_ENDPOINT_CONTRACT_VERIFICATION": "YES",
+    "NEEDS_ENDPOINT_CONTRACT_VERIFICATION": "NO_SUPERSEDED_BY_R2A",
     "GAME_IDENTITY_ACQUISITION_PLAN_READY": "YES",
-    "PLAYER_IDENTITY_ACQUISITION_PLAN_READY": "NO",
+    "PLAYER_IDENTITY_ACQUISITION_PLAN_READY": "YES",
     "IDENTITY_ACQUISITION_CACHE_CONTRACT_READY": "YES",
     "GAME_RECONCILIATION_CONTRACT_READY": "YES",
     "PLAYER_RECONCILIATION_CONTRACT_READY": "YES",
@@ -80441,7 +80443,7 @@
     "PLAYER_MAPPING_COMPLETENESS_TARGET_READY": "YES",
     "IDENTITY_ACQUISITION_PLAN_REUSABLE_FOR_2026": "YES",
     "IDENTITY_ACQUISITION_PLAN_REUSABLE_FOR_DAILY_INGEST": "YES",
-    "EXTERNAL_IDENTITY_ACQUISITION_EXECUTION_READY": "NO",
+    "EXTERNAL_IDENTITY_ACQUISITION_EXECUTION_READY": "YES",
     "CROSSWALK_PERSISTENCE_AUTHORIZED_NOW": "NO",
     "PROVIDER_CALLS": "0",
     "PRODUCTION_DML_MUTATIONS": "0",
@@ -80450,5 +80452,14 @@
     "ACTIVE_CRON_ADDED": "NO",
     "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO"
   },
-  "priorArtifactDigest": "48c1aa87d3be55266847794746c891846cf679aec0858d3a868d145f1485865e"
+  "priorArtifactDigest": "48c1aa87d3be55266847794746c891846cf679aec0858d3a868d145f1485865e",
+  "r2aSupersession": {
+    "supersededBlocker": "NEEDS_ENDPOINT_CONTRACT_VERIFICATION",
+    "supersededBy": "MLB_DATA_01C_R2A_MLB_OFFICIAL_PERSON_ENDPOINT_CERTIFIED",
+    "r2aArtifact": "docs/CERTIFICATION/mlb-data-01c-r2a-person-endpoint-contract.json",
+    "playerIdentityAcquisitionPlanReady": true,
+    "externalIdentityAcquisitionExecutionReady": true,
+    "crosswalkPersistenceAuthorizedNow": false,
+    "providerCallsMadeInR2A": 4
+  }
 }

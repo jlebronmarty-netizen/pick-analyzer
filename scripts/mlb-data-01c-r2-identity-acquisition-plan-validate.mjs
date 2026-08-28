@@ -22,8 +22,9 @@ const doc = read(docPath)
 const planner = read(plannerPath)
 const status = read(statusPath)
 const roadmap = read(roadmapPath)
+const supersededByR2a = artifact.r2aSupersession?.supersededBy === 'MLB_DATA_01C_R2A_MLB_OFFICIAL_PERSON_ENDPOINT_CERTIFIED'
 
-check('blocked verdict is explicit', artifact.certificationVerdict === 'MLB_DATA_01C_R2_IDENTITY_ACQUISITION_PLAN_BLOCKED')
+check('R2 verdict/history is explicit', artifact.certificationVerdict === 'MLB_DATA_01C_R2_IDENTITY_ACQUISITION_PLAN_BLOCKED')
 check('baseline commit target preserved', artifact.baselineCommit === 'b1b53d38fc4eb00bbb0a69ae862e0223108cd034')
 check('plan only scope', artifact.scope.planOnly === true)
 check('provider calls zero', artifact.scope.providerCallsMade === 0 && artifact.scope.mlbOfficialCallsMade === 0 && artifact.flags.PROVIDER_CALLS === '0')
@@ -51,9 +52,9 @@ check('player dry-run counts preserved', artifact.playerAcquisitionInput.counts.
 check('player canonical inventory preserved', artifact.playerAcquisitionInput.canonicalMlbPlayerRows === 7389 && artifact.playerAcquisitionInput.providerPlayerMappingRows === 7567 && artifact.playerAcquisitionInput.mlbamStoredOnPlayerRows === 0 && artifact.playerAcquisitionInput.mlbamProviderCrosswalkRows === 177)
 
 check('authoritative source selected', artifact.flags.AUTHORITATIVE_IDENTITY_SOURCE_SELECTED === 'MLB Official / MLB Stats API')
-check('endpoint contract gap explicit', artifact.flags.NEEDS_ENDPOINT_CONTRACT_VERIFICATION === 'YES' && artifact.endpointRequestPlan.players.contractStatus === 'NEEDS_ENDPOINT_CONTRACT_VERIFICATION')
+check('endpoint contract gap explicit or superseded', supersededByR2a || (artifact.flags.NEEDS_ENDPOINT_CONTRACT_VERIFICATION === 'YES' && artifact.endpointRequestPlan.players.contractStatus === 'NEEDS_ENDPOINT_CONTRACT_VERIFICATION'))
 check('game plan ready', artifact.flags.GAME_IDENTITY_ACQUISITION_PLAN_READY === 'YES')
-check('player plan blocked safely', artifact.flags.PLAYER_IDENTITY_ACQUISITION_PLAN_READY === 'NO' && artifact.authorizationGates.externalIdentityAcquisitionExecutionReady === false)
+check('player plan blocked safely or superseded ready', supersededByR2a ? artifact.flags.PLAYER_IDENTITY_ACQUISITION_PLAN_READY === 'YES' && artifact.authorizationGates.externalIdentityAcquisitionExecutionReady === true : artifact.flags.PLAYER_IDENTITY_ACQUISITION_PLAN_READY === 'NO' && artifact.authorizationGates.externalIdentityAcquisitionExecutionReady === false)
 check('cache contract ready', artifact.flags.IDENTITY_ACQUISITION_CACHE_CONTRACT_READY === 'YES')
 check('reconciliation contracts ready', artifact.flags.GAME_RECONCILIATION_CONTRACT_READY === 'YES' && artifact.flags.PLAYER_RECONCILIATION_CONTRACT_READY === 'YES')
 check('player creation policy ready', artifact.flags.CANONICAL_PLAYER_CREATION_POLICY_READY === 'YES')

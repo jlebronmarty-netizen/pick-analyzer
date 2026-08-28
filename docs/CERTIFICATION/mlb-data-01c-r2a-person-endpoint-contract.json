@@ -1,0 +1,325 @@
+{
+  "certification": "MLB_DATA_01C_R2A_MLB_OFFICIAL_PERSON_ENDPOINT_CONTRACT",
+  "certificationVerdict": "MLB_DATA_01C_R2A_MLB_OFFICIAL_PERSON_ENDPOINT_CERTIFIED",
+  "generatedAt": "2026-08-28T21:09:33.978Z",
+  "baselineLocalHead": "60f48d7cd3ca1480d63759a8df3dd0869f49a1e0",
+  "baselineOriginMain": "b1b53d38fc4eb00bbb0a69ae862e0223108cd034",
+  "baselineProduction": "b1b53d38fc4eb00bbb0a69ae862e0223108cd034",
+  "probeSet": {
+    "certified": true,
+    "selectedPlayers": [
+      {
+        "personId": "434378",
+        "sourceRole": "pitcher_only",
+        "auditOnlySourceNames": [
+          "Verlander, Justin"
+        ],
+        "pitcherRows": 2612,
+        "batterRows": 0,
+        "totalRows": 2612
+      },
+      {
+        "personId": "455117",
+        "sourceRole": "batter_only",
+        "auditOnlySourceNames": [],
+        "pitcherRows": 0,
+        "batterRows": 571,
+        "totalRows": 571
+      },
+      {
+        "personId": "500743",
+        "sourceRole": "both",
+        "auditOnlySourceNames": [
+          "Rojas, Miguel"
+        ],
+        "pitcherRows": 69,
+        "batterRows": 1171,
+        "totalRows": 1240
+      }
+    ]
+  },
+  "singlePersonEndpoint": {
+    "endpointTemplate": "/api/v1/people/{personId}",
+    "contract": "PASS",
+    "responseShape": "top-level people array with one row for requested person_id",
+    "identityRule": "people[0].id == requested person_id",
+    "probes": [
+      {
+        "personId": "434378",
+        "sourceRole": "pitcher_only",
+        "endpoint": "/api/v1/people/434378",
+        "httpStatus": 200,
+        "ok": true,
+        "topLevelPeopleArray": true,
+        "peopleLength": 1,
+        "contract": {
+          "requestedPersonId": "434378",
+          "responseId": "434378",
+          "identityParity": true,
+          "fields": {
+            "id": true,
+            "fullName": true,
+            "firstName": true,
+            "lastName": true,
+            "primaryPosition": true,
+            "batSide": true,
+            "pitchHand": true,
+            "active": true,
+            "currentTeam": false
+          },
+          "fieldTypes": {
+            "id": "number",
+            "fullName": "string",
+            "firstName": "string",
+            "lastName": "string",
+            "primaryPosition": "object",
+            "batSide": "object",
+            "pitchHand": "object",
+            "active": "boolean"
+          },
+          "responseDigest": "a7e22979c7b221dff3ab6d847a4567abdb82814d8eee4aea529ac4930ec46c85"
+        }
+      },
+      {
+        "personId": "455117",
+        "sourceRole": "batter_only",
+        "endpoint": "/api/v1/people/455117",
+        "httpStatus": 200,
+        "ok": true,
+        "topLevelPeopleArray": true,
+        "peopleLength": 1,
+        "contract": {
+          "requestedPersonId": "455117",
+          "responseId": "455117",
+          "identityParity": true,
+          "fields": {
+            "id": true,
+            "fullName": true,
+            "firstName": true,
+            "lastName": true,
+            "primaryPosition": true,
+            "batSide": true,
+            "pitchHand": true,
+            "active": true,
+            "currentTeam": false
+          },
+          "fieldTypes": {
+            "id": "number",
+            "fullName": "string",
+            "firstName": "string",
+            "lastName": "string",
+            "primaryPosition": "object",
+            "batSide": "object",
+            "pitchHand": "object",
+            "active": "boolean"
+          },
+          "responseDigest": "84074327dc5e908d4a4aece29a24b1fbb3edd1d17d6d30c47e539f431dfd237e"
+        }
+      },
+      {
+        "personId": "500743",
+        "sourceRole": "both",
+        "endpoint": "/api/v1/people/500743",
+        "httpStatus": 200,
+        "ok": true,
+        "topLevelPeopleArray": true,
+        "peopleLength": 1,
+        "contract": {
+          "requestedPersonId": "500743",
+          "responseId": "500743",
+          "identityParity": true,
+          "fields": {
+            "id": true,
+            "fullName": true,
+            "firstName": true,
+            "lastName": true,
+            "primaryPosition": true,
+            "batSide": true,
+            "pitchHand": true,
+            "active": true,
+            "currentTeam": false
+          },
+          "fieldTypes": {
+            "id": "number",
+            "fullName": "string",
+            "firstName": "string",
+            "lastName": "string",
+            "primaryPosition": "object",
+            "batSide": "object",
+            "pitchHand": "object",
+            "active": "boolean"
+          },
+          "responseDigest": "8c7a0f828c45c212fd0b86264803923adfec45b9bda7b63ef108247471eec598"
+        }
+      }
+    ]
+  },
+  "minimumIdentityFields": {
+    "ready": true,
+    "required": [
+      "id"
+    ],
+    "availability": {
+      "id": true,
+      "fullName": true,
+      "firstName": true,
+      "lastName": true,
+      "primaryPosition": true,
+      "batSide": true,
+      "pitchHand": true,
+      "active": true,
+      "currentTeam": false
+    },
+    "optionalMetadataDoesNotBlockIdentity": true
+  },
+  "bulkPersonEndpoint": {
+    "endpointTemplate": "/api/v1/people?personIds={comma-separated-personIds}",
+    "state": "SUPPORTED",
+    "probe": {
+      "endpoint": "/api/v1/people?personIds=434378,455117,500743",
+      "httpStatus": 200,
+      "ok": true,
+      "topLevelPeopleArray": true,
+      "peopleLength": 3,
+      "requestedIds": [
+        "434378",
+        "455117",
+        "500743"
+      ],
+      "returnedIds": [
+        "434378",
+        "455117",
+        "500743"
+      ],
+      "returnedIdsUnique": true,
+      "noUnexpectedIdentities": true,
+      "allRequestedRepresented": true,
+      "state": "SUPPORTED",
+      "orderDependency": "NO"
+    },
+    "responseOrderDependency": "NO",
+    "maxVerifiedPersonIdsPerRequest": 3,
+    "productionAcquisitionBatchSizeNotYetMaximized": true
+  },
+  "futurePlayerCallPlan": {
+    "ready": true,
+    "sourcePlayers": 1469,
+    "bulkSupported": true,
+    "conservativeBatchSize": 3,
+    "plannedCalls": 490,
+    "note": "Batch size 3 is verified by R2A and is not an API maximum."
+  },
+  "failureContract": {
+    "ready": true,
+    "emptyPeopleArray": "QUARANTINE_EMPTY_IDENTITY_RESPONSE",
+    "http404": "QUARANTINE_NOT_FOUND_NO_NAME_FALLBACK",
+    "http429": "RETRY_ONCE_WITH_BACKOFF_THEN_QUARANTINE",
+    "http5xx": "RETRY_ONCE_WITH_BACKOFF_THEN_QUARANTINE",
+    "timeout": "RETRY_ONCE_WITH_BACKOFF_THEN_QUARANTINE",
+    "partialBulkResponse": "QUARANTINE_MISSING_IDS_AND_DO_NOT_PERSIST_GROUP",
+    "duplicateResponseId": "BLOCK_DUPLICATE_RESPONSE_ID_DEFECT",
+    "requestedResponseMismatch": "BLOCK_IDENTITY_CONFLICT",
+    "nameFallbackAllowed": false
+  },
+  "cacheContract": {
+    "ready": true,
+    "provider": "mlb_stats_api",
+    "entityType": "player",
+    "providerEntityId": "person_id",
+    "requiredFields": [
+      "requestedId",
+      "responseId",
+      "responseDigest",
+      "retrievedAt",
+      "acquisitionVersion"
+    ]
+  },
+  "providerCallDedupPlan": {
+    "ready": true,
+    "preReads": [
+      "local acquisition cache by person_id",
+      "provider_entity_mappings by sport_key/entity_type/provider/provider_id/season"
+    ],
+    "skipWhen": "compatible cached or persisted exact identity exists"
+  },
+  "playerReconciliationContract": {
+    "ready": true,
+    "chain": [
+      "Statcast MLBAM person_id",
+      "MLB Official people.id",
+      "existing provider/canonical evidence",
+      "sport_players.id"
+    ],
+    "namesAreAuditOnly": true
+  },
+  "gameAcquisitionPlanPreserved": {
+    "ready": true,
+    "preferred": "bulk/range schedule acquisition",
+    "eventWrites": 0
+  },
+  "authorization": {
+    "externalIdentityAcquisitionExecutionReady": true,
+    "crosswalkPersistenceAuthorizedNow": false,
+    "crosswalkWritePerformed": false,
+    "rawCanonicalMappingWrites": 0
+  },
+  "rawProductSafety": {
+    "rawRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicateIdentities": 0,
+    "canonicalHomeRows": 712528,
+    "canonicalAwayRows": 712528,
+    "eventRowsMapped": 0,
+    "pitcherRowsMapped": 0,
+    "batterRowsMapped": 0,
+    "featureTables": 0,
+    "modelRegistry": 0,
+    "modelFeatureSets": 0,
+    "modelVersions": 0,
+    "modelTrainingRuns": 0,
+    "modelValidationRuns": 0,
+    "gamePredictions": 0,
+    "predictionResults": 0,
+    "marketValueEvaluations": 0,
+    "imported2026Rows": 0
+  },
+  "providerAccounting": {
+    "mlbOfficialCalls": 4,
+    "successfulProviderCalls": 4,
+    "failedProviderCalls": 0,
+    "retryCalls": 0,
+    "otherProviderCalls": 0
+  },
+  "productionSafety": {
+    "productionDmlMutations": 0,
+    "productionSchemaMutations": 0,
+    "providerEntityMappingsWrites": 0,
+    "rawMappingWrites": 0,
+    "automationActivated": false,
+    "activeCronAdded": false
+  },
+  "flags": {
+    "PERSON_PROBE_SET_CERTIFIED": "YES",
+    "MLB_OFFICIAL_SINGLE_PERSON_ENDPOINT_CONTRACT": "PASS",
+    "MLB_OFFICIAL_PERSON_MINIMUM_IDENTITY_FIELDS_READY": "YES",
+    "MLB_OFFICIAL_BULK_PERSON_ENDPOINT_STATE": "SUPPORTED",
+    "BULK_PERSON_RESPONSE_ORDER_DEPENDENCY": "NO",
+    "MAX_VERIFIED_PERSON_IDS_PER_REQUEST": "3",
+    "PRODUCTION_ACQUISITION_BATCH_SIZE_NOT_YET_MAXIMIZED": "YES",
+    "PERSON_ACQUISITION_FAILURE_CONTRACT_READY": "YES",
+    "MLBAM_PERSON_CACHE_CONTRACT_READY": "YES",
+    "PLAYER_IDENTITY_ACQUISITION_PLAN_READY": "YES",
+    "PLAYER_CALLS_PLANNED": "490",
+    "PLAYER_PROVIDER_CALL_DEDUP_PLAN_READY": "YES",
+    "PLAYER_RECONCILIATION_CONTRACT_READY": "YES",
+    "GAME_IDENTITY_ACQUISITION_PLAN_READY": "YES",
+    "EXTERNAL_IDENTITY_ACQUISITION_EXECUTION_READY": "YES",
+    "CROSSWALK_PERSISTENCE_AUTHORIZED_NOW": "NO",
+    "CROSSWALK_WRITE_PERFORMED": "NO",
+    "MLB_OFFICIAL_CALLS": "4",
+    "PRODUCTION_DML_MUTATIONS": "0",
+    "PRODUCTION_SCHEMA_MUTATIONS": "0",
+    "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO"
+  },
+  "evidenceDigest": "61089b4beafd3e4032d0754865fc43d75f864d115602ff8b78a3f3f267603eec"
+}

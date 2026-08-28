@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-28 00:00:00Z
 
+## 2026-08-28 MLB-DATA-01C-R2A MLB Official Person Endpoint Contract
+
+- MLB-DATA-01C-R2A is certified as `MLB_DATA_01C_R2A_MLB_OFFICIAL_PERSON_ENDPOINT_CERTIFIED`. The phase made exactly 4 authorized read-only MLB Official calls: 3 single-person `GET /api/v1/people/{personId}` probes and 1 bounded bulk `GET /api/v1/people?personIds=434378,455117,500743` probe.
+- The single-person contract passed for one pitcher-only, one batter-only and one both-role source MLBAM id. Each response returned HTTP 200, a top-level `people` array of length 1 and `people[0].id` equal to the requested `personId`. The bulk endpoint is classified as `MLB_OFFICIAL_BULK_PERSON_ENDPOINT_STATE = SUPPORTED`; identity matching must remain ID-set based, not response-order based. Maximum verified batch size is 3 and is not claimed as an API maximum.
+- R2A supersedes only the R2 endpoint-contract blocker: `PLAYER_IDENTITY_ACQUISITION_PLAN_READY = YES` and `EXTERNAL_IDENTITY_ACQUISITION_EXECUTION_READY = YES` for a future read-only acquisition phase. Crosswalk persistence is still not authorized, no canonical player/raw mapping writes occurred, and 01D feature building remains blocked.
+
 ## 2026-08-28 MLB-DATA-01C-R2 Authoritative Identity Acquisition Plan
 
 - MLB-DATA-01C-R2 is classified as `MLB_DATA_01C_R2_IDENTITY_ACQUISITION_PLAN_BLOCKED` with `NEEDS_ENDPOINT_CONTRACT_VERIFICATION`. The phase is plan-only: MLB Official calls, SportsDataIO calls, Odds API calls, weather calls, production DML, production DDL, canonical mapping writes, feature writes, model writes, prediction writes, automation changes and cron changes all remain 0.
