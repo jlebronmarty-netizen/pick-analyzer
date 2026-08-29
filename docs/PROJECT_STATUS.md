@@ -2,9 +2,15 @@
 
 Last updated: 2026-08-29 00:00:00Z
 
+## 2026-08-29 MLB-DATA-01D 2025 Feature Build Dry Run
+
+- MLB-DATA-01D is dry-run certified as `MLB_DATA_01D_2025_FEATURE_BUILD_DRY_RUN_CERTIFIED`. The phase used the R5B native identity baseline at production commit `875b46d34553bc3618067fec202a2f780a39b2d8`: 712,528 raw rows, 2,430 native games, 1,469 native players and full pitcher/batter native coverage.
+- The 01D dry-run inventories the actual Pick 2 feature tables and certifies a conservative pregame as-of contract: `source_game_date < target_game_date`. Because native games do not yet expose scheduled timestamps, same-day and doubleheader history is excluded rather than guessed. The projected dry-run output is 2,249 eligible games, 181 insufficient-history games and 67,433 feature snapshot rows across team, starter, bullpen, batter, offense, matchup and first-inning foundations.
+- Leakage violations and identity conflicts are 0; feature sanity and temporal spot checks pass. No feature rows were persisted, no models were trained or validated, no champion was promoted, no predictions/market-value rows were written, no providers were called, no 2026 import occurred and no automation or cron changed. `MLB_DATA_01D_FEATURE_DRY_RUN_READY_FOR_PERSISTENCE = YES`; feature persistence remains separately authorization-gated.
+
 ## 2026-08-29 MLB-DATA-01C-R5B 2025 Native Identity Backfill
 
-- MLB-DATA-01C-R5B is certified as `MLB_DATA_01C_R5B_2025_NATIVE_IDENTITY_BACKFILL_CERTIFIED`. Production remains aligned at `f78b59a9f12b6bd7c7bc3df1b4c57322ba0dc7f6`; R5B made 0 provider calls, 0 production schema mutations, did not reapply the migration and did not start features, models, predictions, 2026 import, automation or cron changes.
+- MLB-DATA-01C-R5B is certified as `MLB_DATA_01C_R5B_2025_NATIVE_IDENTITY_BACKFILL_CERTIFIED`. Production remains aligned at `875b46d34553bc3618067fec202a2f780a39b2d8`; R5B made 0 provider calls, 0 production schema mutations, did not reapply the migration and did not start features, models, predictions, 2026 import, automation or cron changes.
 - R5B populated native Pick 2 MLB identity only. Final production readback found 2,430 native `pick2_mlb_games`, 1,469 native `pick2_mlb_players`, 712,528 raw `mlbam_pitcher_id` rows and 712,528 raw `mlbam_batter_id` rows. Cross-domain game, pitcher and batter parity passed with 0 identity conflicts.
 - Raw Statcast stability and immutability passed: row count remains 712,528, unique pitch identities remain 712,528, duplicates remain 0, `event_id`, `canonical_pitcher_id`, `canonical_batter_id`, source IDs, `game_pk`, raw payload evidence and score/team source evidence remained unchanged. Result, market, feature, model, prediction, prediction-result and market-value tables remain at 0; champion remains `NONE`. `MLB_DATA_01D_2025_FEATURE_BUILD_READY = YES`, but 01D has not begun.
 

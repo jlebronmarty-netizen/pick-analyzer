@@ -1,0 +1,321 @@
+{
+  "generatedAt": "2026-08-29T23:19:23.827Z",
+  "project": "MLB_DATA_01D_2025_FEATURE_BUILD",
+  "certificationVerdict": "MLB_DATA_01D_2025_FEATURE_BUILD_DRY_RUN_CERTIFIED",
+  "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+  "alignment": {
+    "targetCommit": "875b46d34553bc3618067fec202a2f780a39b2d8",
+    "productionCommit": "875b46d34553bc3618067fec202a2f780a39b2d8",
+    "providerCallsMade": 0
+  },
+  "identityBaseline": {
+    "rawRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicatePitchIdentities": 0,
+    "sourceGames": 2430,
+    "nativeGames": 2430,
+    "nativePlayers": 1469,
+    "pitcherNativeCoverage": "712528 / 712528",
+    "batterNativeCoverage": "712528 / 712528"
+  },
+  "featureTableInventory": [
+    {
+      "domain": "generic snapshots",
+      "table": "pick2_feature_snapshots",
+      "nativeKey": "target_game_pk + mlbam_person_id/mlbam_pitcher_id/mlbam_batter_id",
+      "asOfField": "as_of_date/as_of_timestamp",
+      "payloadStrategy": "features jsonb + domain table rows",
+      "uniqueConstraints": [
+        "deterministic_identity"
+      ],
+      "indexes": [
+        "subject",
+        "event",
+        "native game",
+        "native person"
+      ],
+      "rls": "enabled",
+      "currentRowCount": 0
+    },
+    {
+      "domain": "team daily",
+      "table": "pick2_mlb_team_daily_features",
+      "nativeKey": "target_game_pk + team_id",
+      "asOfField": "as_of_date/as_of_timestamp",
+      "payloadStrategy": "typed rate fields + handedness_splits/lineup_proxy jsonb",
+      "uniqueConstraints": [
+        "legacy team_id/date/version",
+        "native target_game_pk/team_id/date/version"
+      ],
+      "indexes": [
+        "native unique index"
+      ],
+      "rls": "enabled",
+      "currentRowCount": 0
+    },
+    {
+      "domain": "starter daily",
+      "table": "pick2_mlb_pitcher_daily_features",
+      "nativeKey": "target_game_pk + mlbam_pitcher_id",
+      "asOfField": "as_of_date/as_of_timestamp",
+      "payloadStrategy": "typed pitcher rate/velocity fields + pitch mix/splits jsonb",
+      "uniqueConstraints": [
+        "legacy player_id/date/version",
+        "native target_game_pk/mlbam_pitcher_id/date/version"
+      ],
+      "indexes": [
+        "native unique index"
+      ],
+      "rls": "enabled",
+      "currentRowCount": 0
+    },
+    {
+      "domain": "bullpen daily",
+      "table": "pick2_mlb_bullpen_daily_features",
+      "nativeKey": "target_game_pk + team_id + mlbam_pitcher_ids",
+      "asOfField": "as_of_date/as_of_timestamp",
+      "payloadStrategy": "typed workload/rate fields + reliever workload jsonb",
+      "uniqueConstraints": [
+        "legacy team_id/date/version",
+        "native target_game_pk/team_id/date/version"
+      ],
+      "indexes": [
+        "native unique index"
+      ],
+      "rls": "enabled",
+      "currentRowCount": 0
+    },
+    {
+      "domain": "batter daily",
+      "table": "pick2_mlb_batter_daily_features",
+      "nativeKey": "target_game_pk + mlbam_batter_id",
+      "asOfField": "as_of_date/as_of_timestamp",
+      "payloadStrategy": "typed batter rates + splits/matchups jsonb",
+      "uniqueConstraints": [
+        "legacy player_id/date/version",
+        "native target_game_pk/mlbam_batter_id/date/version"
+      ],
+      "indexes": [
+        "native unique index"
+      ],
+      "rls": "enabled",
+      "currentRowCount": 0
+    },
+    {
+      "domain": "offense daily",
+      "table": "pick2_mlb_team_daily_features",
+      "nativeKey": "target_game_pk + team_id",
+      "asOfField": "as_of_date/as_of_timestamp",
+      "payloadStrategy": "team offense is a feature family in team daily + snapshot domain offense",
+      "uniqueConstraints": [
+        "native target_game_pk/team_id/date/version"
+      ],
+      "indexes": [
+        "native unique index"
+      ],
+      "rls": "enabled",
+      "currentRowCount": 0
+    },
+    {
+      "domain": "matchup daily",
+      "table": "pick2_mlb_matchup_daily_features",
+      "nativeKey": "target_game_pk + mlbam_pitcher_id/mlbam_batter_id context",
+      "asOfField": "as_of_date/as_of_timestamp",
+      "payloadStrategy": "pitcher_batter_mix/handedness/park/lineup jsonb",
+      "uniqueConstraints": [
+        "legacy event/date/version",
+        "native target_game_pk/date/version"
+      ],
+      "indexes": [
+        "native unique index"
+      ],
+      "rls": "enabled",
+      "currentRowCount": 0
+    },
+    {
+      "domain": "first-inning daily",
+      "table": "pick2_mlb_first_inning_daily_features",
+      "nativeKey": "target_game_pk + home/away starter MLBAM IDs",
+      "asOfField": "as_of_date/as_of_timestamp",
+      "payloadStrategy": "team/starter first-inning jsonb families",
+      "uniqueConstraints": [
+        "legacy event/date/version",
+        "native target_game_pk/date/version"
+      ],
+      "indexes": [
+        "native unique index"
+      ],
+      "rls": "enabled",
+      "currentRowCount": 0
+    }
+  ],
+  "contracts": {
+    "asOf": "source_game_date < target_game_date; as_of_date is target_game_date minus one day when scheduled timestamps are unavailable",
+    "sameDayDoubleheader": {
+      "rule": "strict_prior_date_only",
+      "sameDaySequentialGameCandidates": 28,
+      "doubleheaderPolicy": "exclude same-day source games from target-game features unless future phase certifies completed-before-start timestamps",
+      "pass": true
+    },
+    "leakageDenylist": [
+      "same-target-game pitch events",
+      "same-target-game scores",
+      "post scores",
+      "win/run expectancy",
+      "labels/results",
+      "sportsbook prices"
+    ],
+    "windows": [
+      "last_3_games",
+      "last_5_games",
+      "last_10_games",
+      "season_to_date",
+      "7_day",
+      "14_day",
+      "30_day",
+      "starter_last_1_3_5",
+      "bullpen_last_1_3_5_7_days"
+    ],
+    "minimumHistory": "target game eligible when both teams and both inferred starters have strictly prior-date samples; unavailable evidence remains null with sample-size flags",
+    "nullPolicy": "true zero, no sample, unavailable field and insufficient history remain distinct; missing evidence is not coerced to zero"
+  },
+  "dryRun": {
+    "targetGames": 2430,
+    "eligibleGames": 2249,
+    "insufficientHistoryGames": 181,
+    "rowCounts": {
+      "teamRows": 4498,
+      "starterRows": 4498,
+      "bullpenRows": 4498,
+      "batterRows": 44943,
+      "offenseRows": 4498,
+      "matchupRows": 2249,
+      "firstInningRows": 2249,
+      "snapshotRows": 67433
+    },
+    "nullSummary": {
+      "teamRowsWithInsufficientHistory": 362,
+      "starterRowsWithNoPriorAppearance": 362,
+      "batterRowsUseNullsForNoPriorSample": "YES",
+      "noSampleValuesWrittenAsZero": "NO"
+    },
+    "sampleSummary": {
+      "min": 1,
+      "median": 25,
+      "mean": 48.452312138728324,
+      "max": 161
+    },
+    "sameDayOrdering": {
+      "rule": "strict_prior_date_only",
+      "sameDaySequentialGameCandidates": 28,
+      "doubleheaderPolicy": "exclude same-day source games from target-game features unless future phase certifies completed-before-start timestamps",
+      "pass": true
+    },
+    "leakageViolations": 0,
+    "identityConflicts": 0,
+    "temporalSpotChecks": [
+      {
+        "gamePk": 778563,
+        "targetDate": "2025-03-18",
+        "asOfDate": "2025-03-17",
+        "sourceRule": "source_game_date < target_game_date",
+        "pass": true
+      },
+      {
+        "gamePk": 777764,
+        "targetDate": "2025-05-26",
+        "asOfDate": "2025-05-25",
+        "sourceRule": "source_game_date < target_game_date",
+        "pass": true
+      },
+      {
+        "gamePk": 776945,
+        "targetDate": "2025-07-29",
+        "asOfDate": "2025-07-28",
+        "sourceRule": "source_game_date < target_game_date",
+        "pass": true
+      },
+      {
+        "gamePk": 776151,
+        "targetDate": "2025-09-28",
+        "asOfDate": "2025-09-27",
+        "sourceRule": "source_game_date < target_game_date",
+        "pass": true
+      }
+    ]
+  },
+  "featureTableCounts": {
+    "pick2_feature_snapshots": 0,
+    "pick2_mlb_team_daily_features": 0,
+    "pick2_mlb_pitcher_daily_features": 0,
+    "pick2_mlb_bullpen_daily_features": 0,
+    "pick2_mlb_batter_daily_features": 0,
+    "pick2_mlb_matchup_daily_features": 0,
+    "pick2_mlb_first_inning_daily_features": 0
+  },
+  "modelTableCounts": {
+    "pick2_model_registry": 0,
+    "pick2_model_feature_sets": 0,
+    "pick2_model_versions": 0,
+    "pick2_model_training_runs": 0,
+    "pick2_model_validation_runs": 0
+  },
+  "predictionTableCounts": {
+    "pick2_game_predictions": 0,
+    "pick2_prediction_results": 0,
+    "pick2_market_value_evaluations": 0
+  },
+  "safety": {
+    "providerCalls": 0,
+    "productionSchemaMutations": 0,
+    "productionDmlMutations": 0,
+    "featureWrites": 0,
+    "modelWork": "NO",
+    "predictionWork": "NO",
+    "import2026": "NO",
+    "automationActivated": "NO",
+    "activeCronAdded": "NO"
+  },
+  "flags": {
+    "MLB_DATA_01D_ALIGNMENT": "PASS",
+    "MLB_DATA_01D_IDENTITY_BASELINE": "PASS",
+    "MLB_DATA_01D_FEATURE_TABLE_INVENTORY_COMPLETE": "YES",
+    "MLB_DATA_01D_ASOF_CONTRACT_READY": "YES",
+    "MLB_DATA_01D_SAMEDAY_ORDERING_GUARD": "PASS",
+    "MLB_DATA_01D_LEAKAGE_DENYLIST_ENFORCED": "YES",
+    "MLB_DATA_01D_WINDOW_CONTRACT_READY": "YES",
+    "MLB_DATA_01D_TEAM_FEATURES_READY": "YES",
+    "MLB_DATA_01D_SERIES_CONTEXT_READY": "YES",
+    "MLB_DATA_01D_STARTER_APPEARANCE_CONTRACT_READY": "YES",
+    "MLB_DATA_01D_STARTER_CORE_FEATURES_READY": "YES",
+    "MLB_DATA_01D_STARTER_PITCH_SHAPE_FEATURES_READY": "YES",
+    "MLB_DATA_01D_STARTER_SPLIT_FEATURES_READY": "YES",
+    "MLB_DATA_01D_BULLPEN_ROLE_CONTRACT_READY": "YES",
+    "MLB_DATA_01D_BULLPEN_WORKLOAD_FEATURES_READY": "YES",
+    "MLB_DATA_01D_BULLPEN_PERFORMANCE_FEATURES_READY": "YES",
+    "MLB_DATA_01D_BATTER_FEATURES_READY": "YES",
+    "MLB_DATA_01D_BATTER_SPLIT_FEATURES_READY": "YES",
+    "MLB_DATA_01D_OFFENSE_AGGREGATION_CONTRACT_READY": "YES",
+    "MLB_DATA_01D_OFFENSE_FEATURES_READY": "YES",
+    "MLB_DATA_01D_STARTER_OFFENSE_MATCHUP_READY": "YES",
+    "MLB_DATA_01D_PITCH_TYPE_MATCHUP_READY": "YES",
+    "MLB_DATA_01D_PLATOON_MATCHUP_READY": "YES",
+    "MLB_DATA_01D_FIRST_INNING_HISTORY_READY": "YES",
+    "MLB_DATA_01D_STARTER_FIRST_INNING_FEATURES_READY": "YES",
+    "MLB_DATA_01D_OFFENSE_FIRST_INNING_FEATURES_READY": "YES",
+    "MLB_DATA_01D_F5_FEATURE_FOUNDATION_READY": "YES",
+    "MLB_DATA_01D_RUN_DISTRIBUTION_FEATURE_FOUNDATION_READY": "YES",
+    "MLB_DATA_01D_NRFI_YRFI_FEATURE_FOUNDATION_READY": "YES",
+    "MLB_DATA_01D_MONTE_CARLO_INPUT_FOUNDATION_READY": "YES",
+    "MLB_DATA_01D_MINIMUM_HISTORY_CONTRACT_READY": "YES",
+    "MLB_DATA_01D_FEATURE_NULL_POLICY_READY": "YES",
+    "MLB_DATA_01D_FEATURE_VERSION_CONTRACT_READY": "YES",
+    "MLB_DATA_01D_FEATURE_SANITY_AUDIT": "PASS",
+    "MLB_DATA_01D_TEMPORAL_SPOTCHECK": "PASS",
+    "MLB_DATA_01D_FEATURE_WRITE_AUTHORIZED": "NO",
+    "MLB_DATA_01D_FEATURE_DRY_RUN_READY_FOR_PERSISTENCE": "YES",
+    "MLB_DATA_01D_RAW_IMMUTABILITY": "PASS",
+    "MODEL_WORK_PERFORMED": "NO",
+    "PREDICTION_WORK_PERFORMED": "NO"
+  }
+}
