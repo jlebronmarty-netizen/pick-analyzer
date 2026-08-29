@@ -1,0 +1,11 @@
+{
+  "phase": "COMPLETE",
+  "gamesComplete": true,
+  "playersComplete": true,
+  "rawBackfillComplete": true,
+  "postReadbackComplete": true,
+  "idempotencyProofComplete": true,
+  "rawRowsProcessed": 712528,
+  "batchSize": 5000,
+  "updatedAt": "2026-08-29T20:15:17.396Z"
+}
