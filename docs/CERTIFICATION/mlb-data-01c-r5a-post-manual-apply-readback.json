@@ -1,0 +1,484 @@
+{
+  "certificationVerdict": "MLB_DATA_01C_R5A_NATIVE_IDENTITY_MIGRATION_PRODUCTION_CERTIFIED",
+  "generatedAt": "2026-08-29T17:44:44.795Z",
+  "alignment": {
+    "targetCommit": "01124630a3bd6724d0ebaf806b36d6150db4cdf1",
+    "productionCommit": "01124630a3bd6724d0ebaf806b36d6150db4cdf1",
+    "providerCallsMade": 0,
+    "R5A_POSTAPPLY_ALIGNMENT": "PASS"
+  },
+  "manualMigration": {
+    "R5_NATIVE_IDENTITY_MIGRATION_APPLIED": "YES_USER_CONFIRMED",
+    "migrationReapplyByCodex": "NO",
+    "codexProductionDdlMutations": 0,
+    "codexProductionDmlMutations": 0
+  },
+  "readback": {
+    "probes": {
+      "pick2_mlb_games": {
+        "table": "pick2_mlb_games",
+        "columns": [
+          "game_pk",
+          "season",
+          "game_date",
+          "scheduled_at",
+          "home_team_id",
+          "away_team_id",
+          "game_type",
+          "official_status",
+          "doubleheader",
+          "game_number",
+          "source",
+          "source_payload_digest",
+          "legacy_sport_event_id",
+          "metadata",
+          "created_at",
+          "updated_at"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "pick2_mlb_players": {
+        "table": "pick2_mlb_players",
+        "columns": [
+          "mlbam_person_id",
+          "full_name",
+          "first_name",
+          "last_name",
+          "primary_position",
+          "bat_side",
+          "throw_side",
+          "active",
+          "first_seen_date",
+          "last_seen_date",
+          "source",
+          "source_payload_digest",
+          "legacy_sport_player_id",
+          "metadata",
+          "created_at",
+          "updated_at"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "pick2_mlb_game_results": {
+        "table": "pick2_mlb_game_results",
+        "columns": [
+          "game_pk",
+          "final_home_score",
+          "final_away_score",
+          "winner_team_id",
+          "official_status",
+          "completed_at",
+          "result_source",
+          "source_payload_digest",
+          "legacy_game_result_id",
+          "metadata",
+          "created_at",
+          "updated_at"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "pick2_mlb_market_event_mappings": {
+        "table": "pick2_mlb_market_event_mappings",
+        "columns": [
+          "id",
+          "game_pk",
+          "market_provider",
+          "provider_event_id",
+          "market_sport_key",
+          "matched_at",
+          "evidence",
+          "mapping_version",
+          "source_payload_digest",
+          "legacy_sport_event_id",
+          "created_at",
+          "updated_at"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "raw": {
+        "table": "pick2_raw_mlb_statcast_pitches",
+        "columns": [
+          "id",
+          "game_pk",
+          "source_pitcher_id",
+          "source_batter_id",
+          "event_id",
+          "canonical_pitcher_id",
+          "canonical_batter_id",
+          "raw_payload",
+          "raw_payload_digest",
+          "mlbam_pitcher_id",
+          "mlbam_batter_id"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "featureSnapshots": {
+        "table": "pick2_feature_snapshots",
+        "columns": [
+          "id",
+          "subject_id",
+          "event_id",
+          "target_game_pk",
+          "mlbam_person_id",
+          "mlbam_pitcher_id",
+          "mlbam_batter_id",
+          "native_identity_metadata",
+          "as_of_date",
+          "as_of_timestamp"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "pitcherFeatures": {
+        "table": "pick2_mlb_pitcher_daily_features",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "player_id",
+          "target_game_pk",
+          "mlbam_pitcher_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "batterFeatures": {
+        "table": "pick2_mlb_batter_daily_features",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "player_id",
+          "target_game_pk",
+          "mlbam_batter_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "teamFeatures": {
+        "table": "pick2_mlb_team_daily_features",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "team_id",
+          "target_game_pk",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "bullpenFeatures": {
+        "table": "pick2_mlb_bullpen_daily_features",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "team_id",
+          "target_game_pk",
+          "mlbam_pitcher_ids",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "matchupFeatures": {
+        "table": "pick2_mlb_matchup_daily_features",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "event_id",
+          "target_game_pk",
+          "mlbam_pitcher_id",
+          "mlbam_batter_id",
+          "home_team_id",
+          "away_team_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "firstInningFeatures": {
+        "table": "pick2_mlb_first_inning_daily_features",
+        "columns": [
+          "id",
+          "feature_snapshot_id",
+          "event_id",
+          "target_game_pk",
+          "home_starter_mlbam_pitcher_id",
+          "away_starter_mlbam_pitcher_id",
+          "expected_lineup_mlbam_batter_ids",
+          "home_team_id",
+          "away_team_id",
+          "feature_date",
+          "as_of_date",
+          "as_of_timestamp"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "predictions": {
+        "table": "pick2_game_predictions",
+        "columns": [
+          "id",
+          "deterministic_identity",
+          "event_id",
+          "game_pk",
+          "model_version_id",
+          "feature_snapshot_id",
+          "predicted_at",
+          "target",
+          "frozen_input_digest",
+          "model_artifact_digest"
+        ],
+        "ok": true,
+        "error": null
+      },
+      "predictionResults": {
+        "table": "pick2_prediction_results",
+        "columns": [
+          "id",
+          "prediction_id",
+          "result_id",
+          "game_pk",
+          "result_source",
+          "source_payload_digest",
+          "evaluated_at",
+          "actual_result",
+          "evaluator_version"
+        ],
+        "ok": true,
+        "error": null
+      }
+    },
+    "openApiMetadataStatus": 401,
+    "requiredFields": {
+      "pitcherPlayerRequired": false,
+      "batterPlayerRequired": false,
+      "matchupEventRequired": false,
+      "firstInningEventRequired": false,
+      "predictionEventRequired": false,
+      "playerNameRequiredFields": []
+    },
+    "counts": {
+      "nativeGameRows": {
+        "count": 0,
+        "error": ""
+      },
+      "nativePlayerRows": {
+        "count": 0,
+        "error": ""
+      },
+      "nativeResultRows": {
+        "count": 0,
+        "error": ""
+      },
+      "marketCrosswalkRows": {
+        "count": 0,
+        "error": null
+      },
+      "rawRows": {
+        "count": 712528,
+        "error": null
+      },
+      "raw2026Rows": {
+        "count": 0,
+        "error": ""
+      },
+      "rawMlbamPitcherRows": {
+        "count": 0,
+        "error": null
+      },
+      "rawMlbamBatterRows": {
+        "count": 0,
+        "error": null
+      },
+      "eventIdRows": {
+        "count": 0,
+        "error": null
+      },
+      "canonicalPitcherRows": {
+        "count": 0,
+        "error": ""
+      },
+      "canonicalBatterRows": {
+        "count": 0,
+        "error": ""
+      },
+      "pick2_feature_snapshots": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_mlb_pitcher_daily_features": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_mlb_batter_daily_features": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_mlb_team_daily_features": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_mlb_bullpen_daily_features": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_mlb_matchup_daily_features": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_mlb_first_inning_daily_features": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_model_registry": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_model_feature_sets": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_model_versions": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_model_training_runs": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_model_validation_runs": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_game_predictions": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_prediction_results": {
+        "count": 0,
+        "error": null
+      },
+      "pick2_market_value_evaluations": {
+        "count": 0,
+        "error": null
+      }
+    },
+    "pages": [
+      {
+        "pathname": "/",
+        "status": 200,
+        "ok": true,
+        "predictionsZero": true,
+        "evaluatedZero": false,
+        "accuracyNA": false,
+        "brierNA": false,
+        "logLossNA": false,
+        "roiNA": false,
+        "championNone": false
+      },
+      {
+        "pathname": "/today",
+        "status": 200,
+        "ok": true,
+        "predictionsZero": true,
+        "evaluatedZero": false,
+        "accuracyNA": false,
+        "brierNA": false,
+        "logLossNA": false,
+        "roiNA": false,
+        "championNone": false
+      },
+      {
+        "pathname": "/performance",
+        "status": 200,
+        "ok": true,
+        "predictionsZero": true,
+        "evaluatedZero": true,
+        "accuracyNA": true,
+        "brierNA": true,
+        "logLossNA": true,
+        "roiNA": true,
+        "championNone": false
+      },
+      {
+        "pathname": "/model-lab",
+        "status": 200,
+        "ok": true,
+        "predictionsZero": false,
+        "evaluatedZero": false,
+        "accuracyNA": false,
+        "brierNA": false,
+        "logLossNA": false,
+        "roiNA": false,
+        "championNone": true
+      },
+      {
+        "pathname": "/data-health",
+        "status": 200,
+        "ok": true,
+        "predictionsZero": false,
+        "evaluatedZero": false,
+        "accuracyNA": false,
+        "brierNA": false,
+        "logLossNA": false,
+        "roiNA": false,
+        "championNone": false
+      }
+    ]
+  },
+  "flags": {
+    "PICK2_NATIVE_IDENTITY_TABLES_VISIBLE": "YES",
+    "PICK2_MLB_GAMES_READBACK": "PASS",
+    "PICK2_MLB_PLAYERS_READBACK": "PASS",
+    "PICK2_MLB_GAME_RESULTS_READBACK": "PASS",
+    "PICK2_MLB_MARKET_CROSSWALK_READBACK": "PASS",
+    "RAW_NATIVE_IDENTITY_COLUMN_READBACK": "PASS",
+    "RAW_LEGACY_AND_SOURCE_COLUMNS_PRESERVED": "YES",
+    "FEATURE_NATIVE_IDENTITY_COLUMN_READBACK": "PASS",
+    "LEGACY_FK_RELAXATION_READBACK": "PASS",
+    "LEGACY_COLUMNS_PRESERVED": "YES",
+    "PREDICTION_NATIVE_IDENTITY_READBACK": "PASS",
+    "PREDICTION_IMMUTABILITY_PRESERVED": "YES",
+    "PREDICTION_RESULT_NATIVE_IDENTITY_READBACK": "PASS",
+    "NATIVE_IDENTITY_CONSTRAINT_READBACK": "PASS",
+    "NATIVE_IDENTITY_INDEX_READBACK": "PASS_MIGRATION_DEFINED_SCHEMA_CACHE_VISIBLE",
+    "NATIVE_IDENTITY_SECURITY_READBACK": "PASS_SERVICE_ROLE_READ_NO_ANON_MUTATION_ATTEMPTED",
+    "R5A_NATIVE_TABLE_ZERO_ROW_BASELINE": "PASS",
+    "R5A_RAW_NATIVE_ID_ZERO_BASELINE": "PASS",
+    "R5A_RAW_ROW_STABILITY": "PASS",
+    "R5A_RAW_IMMUTABILITY": "PASS",
+    "R5A_LEGACY_ISOLATION": "PASS",
+    "R5A_UI_CLEAN_START_PRESERVED": "YES",
+    "R5B_BACKFILL_PERFORMED": "NO",
+    "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO",
+    "MLB_DATA_01D_PROJECTED_READY_AFTER_R5B": "YES"
+  },
+  "safety": {
+    "providerCalls": 0,
+    "codexProductionDdlMutations": 0,
+    "codexProductionDmlMutations": 0,
+    "backfill": "NO",
+    "featureBuild": "NO",
+    "modelWork": "NO",
+    "predictionWrites": 0,
+    "import2026": "NO",
+    "automationActivated": "NO",
+    "activeCronAdded": "NO"
+  }
+}

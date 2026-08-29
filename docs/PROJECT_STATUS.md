@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-29 00:00:00Z
 
+## 2026-08-29 MLB-DATA-01C-R5A Native Identity Migration Production Readback
+
+- MLB-DATA-01C-R5A is certified as `MLB_DATA_01C_R5A_NATIVE_IDENTITY_MIGRATION_PRODUCTION_CERTIFIED` after the user manually applied `supabase/migrations/202608290001_pick2_mlb_native_identity_foundation_v1.sql` through the Supabase Production SQL Editor. Codex did not reapply the migration and made 0 production DDL and 0 production DML mutations during certification.
+- Production runtime is aligned at `01124630a3bd6724d0ebaf806b36d6150db4cdf1`. Read-only production probes confirmed `pick2_mlb_games`, `pick2_mlb_players`, `pick2_mlb_game_results`, `pick2_mlb_market_event_mappings`, raw MLBAM identity columns, native feature identity columns, `pick2_game_predictions.game_pk` and `pick2_prediction_results.game_pk` are visible through the production schema cache.
+- R5A preserved the empty native baseline: native game/player/result/market-crosswalk rows are all 0; raw `mlbam_pitcher_id` and `mlbam_batter_id` populated rows are 0; raw Statcast remains 712,528 rows with 0 2026 rows; feature/model/prediction/evaluation/market-value tables remain 0 and champion remains `NONE`. R5B remains separately gated, and actual `MLB_DATA_01D_2025_FEATURE_BUILD_READY` remains `NO`.
+
 ## 2026-08-29 MLB-DATA-01C-R5 Native MLB Identity Foundation Migration
 
 - MLB-DATA-01C-R5 is locally certified as `MLB_DATA_01C_R5_NATIVE_IDENTITY_FOUNDATION_MIGRATION_CERTIFIED`. It adds one additive repository migration package for native Pick 2 MLB identity rooted in MLB Official/Statcast `game_pk`, MLBAM `person_id` and existing certified canonical team ids. The migration is prepared only; it was not applied to Production.
