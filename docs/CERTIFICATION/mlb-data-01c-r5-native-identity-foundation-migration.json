@@ -1,0 +1,138 @@
+{
+  "certificationVerdict": "MLB_DATA_01C_R5_NATIVE_IDENTITY_FOUNDATION_MIGRATION_CERTIFIED",
+  "generatedAt": "2026-08-29T00:00:00.000Z",
+  "baseline": {
+    "branch": "main",
+    "localHeadBeforeR5": "cae0be91bbff5872a0529601f2d65cca62e548b7",
+    "originMainBeforeR5": "cae0be91bbff5872a0529601f2d65cca62e548b7",
+    "productionCommitVerified": "cae0be91bbff5872a0529601f2d65cca62e548b7",
+    "worktreeAtStart": "clean",
+    "R5_BASELINE_ALIGNMENT": "PASS"
+  },
+  "r4dAuthority": {
+    "SPORTSDATAIO_MLB_REQUIRED_BY_PICK2": "NO",
+    "PICK2_MLB_GAMEPK_CANONICAL_IDENTITY_READY": "YES",
+    "PICK2_NATIVE_GAME_IDENTITY_COVERAGE": "2430 / 2430",
+    "PICK2_MLBAM_PLAYER_CANONICAL_IDENTITY_READY": "YES",
+    "PICK2_NATIVE_PLAYER_IDENTITY_COVERAGE": "1469 / 1469",
+    "RAW_LEGACY_MAPPING_FIELDS_REQUIRED_FOR_PICK2": "NO",
+    "PICK2_FEATURE_NATIVE_IDENTITY_CONTRACT_READY": "YES",
+    "PICK2_RESULT_GAMEPK_EVALUATION_READY": "YES",
+    "R4D_ADDITIVE_MIGRATION_CONTRACT": "PASS",
+    "R4D_NATIVE_IDENTITY_BACKFILL_PLAN_READY": "YES",
+    "LEGACY_R5_PERSISTENCE_PLAN_RETIRED": "YES"
+  },
+  "currentSchemaGapAudit": {
+    "source": "supabase/migrations/202608270002_pick2_data_foundation_v1.sql plus R4D production readback",
+    "R5_CURRENT_SCHEMA_GAP_AUDIT_COMPLETE": "YES",
+    "legacyBlockingColumns": [
+      "pick2_mlb_pitcher_daily_features.player_id NOT NULL -> sport_players.id",
+      "pick2_mlb_batter_daily_features.player_id NOT NULL -> sport_players.id",
+      "pick2_mlb_matchup_daily_features.event_id NOT NULL -> sport_events.id",
+      "pick2_mlb_first_inning_daily_features.event_id NOT NULL -> sport_events.id",
+      "pick2_game_predictions.event_id NOT NULL -> sport_events.id"
+    ],
+    "nonBlockingLegacyColumns": [
+      "pick2_raw_mlb_statcast_pitches.event_id nullable",
+      "pick2_raw_mlb_statcast_pitches.canonical_pitcher_id nullable",
+      "pick2_raw_mlb_statcast_pitches.canonical_batter_id nullable",
+      "pick2_feature_snapshots.event_id nullable",
+      "pick2_prediction_results.result_id nullable"
+    ],
+    "tableCountAudited": 22
+  },
+  "migration": {
+    "file": "supabase/migrations/202608290001_pick2_mlb_native_identity_foundation_v1.sql",
+    "tablesCreated": [
+      "pick2_mlb_games",
+      "pick2_mlb_players",
+      "pick2_mlb_game_results",
+      "pick2_mlb_market_event_mappings"
+    ],
+    "legacyBlockingColumnsRelaxed": [
+      "pick2_mlb_pitcher_daily_features.player_id",
+      "pick2_mlb_batter_daily_features.player_id",
+      "pick2_mlb_matchup_daily_features.event_id",
+      "pick2_mlb_first_inning_daily_features.event_id",
+      "pick2_game_predictions.event_id"
+    ],
+    "appliedToProduction": false,
+    "R5_NATIVE_MIGRATION_ADDITIVE_ONLY": "YES",
+    "R5_NATIVE_MIGRATION_FAILURE_SAFETY_READY": "YES"
+  },
+  "nativeContracts": {
+    "PICK2_MLB_GAMES_SCHEMA_READY": "YES",
+    "PICK2_MLB_GAMES_CONSTRAINTS_READY": "YES",
+    "PICK2_MLB_PLAYERS_SCHEMA_READY": "YES",
+    "PICK2_MLB_PLAYERS_CONSTRAINTS_READY": "YES",
+    "RAW_NATIVE_IDENTITY_COLUMNS_READY": "YES",
+    "R5_RAW_NATIVE_IDENTITY_SEMANTICS_READY": "YES",
+    "PICK2_TEAM_FEATURE_NATIVE_SCHEMA_READY": "YES",
+    "PICK2_STARTER_FEATURE_NATIVE_SCHEMA_READY": "YES",
+    "PICK2_BULLPEN_FEATURE_NATIVE_SCHEMA_READY": "YES",
+    "PICK2_BATTER_FEATURE_NATIVE_SCHEMA_READY": "YES",
+    "PICK2_OFFENSE_FEATURE_NATIVE_SCHEMA_READY": "YES",
+    "PICK2_MATCHUP_FEATURE_NATIVE_SCHEMA_READY": "YES",
+    "PICK2_FIRST_INNING_NATIVE_SCHEMA_READY": "YES",
+    "PICK2_FEATURE_SNAPSHOT_NATIVE_SCHEMA_READY": "YES",
+    "LEGACY_FK_RELAXATION_SAFE": "YES",
+    "PICK2_PREDICTION_NATIVE_SCHEMA_READY": "YES",
+    "PICK2_PREDICTION_NATIVE_IDEMPOTENCY_READY": "YES",
+    "PICK2_RESULT_NATIVE_SCHEMA_READY": "YES",
+    "PICK2_NATIVE_RESULT_CONTRACT_READY": "YES",
+    "PICK2_MARKET_CROSSWALK_SCHEMA_READY": "YES",
+    "R5_PROVIDER_MARKET_SEPARATION_PRESERVED": "YES",
+    "NATIVE_IDENTITY_INDEX_PLAN_READY": "YES",
+    "NATIVE_IDENTITY_SECURITY_MODEL_READY": "YES"
+  },
+  "backfillPreparation": {
+    "script": "scripts/mlb-data-01c-r5b-2025-native-identity-backfill.mjs",
+    "expectedGames": 2430,
+    "expectedPlayers": 1469,
+    "expectedRawRows": 712528,
+    "expectedPitcherIdentityRows": 712528,
+    "expectedBatterIdentityRows": 712528,
+    "sourceContract": [
+      "existing production raw Statcast",
+      "certified source identity semantics",
+      "certified R3/R4D MLB Official identity artifacts if metadata is needed"
+    ],
+    "checkpoint": "data/checkpoints/mlb-data-01c-r5b-native-identity-backfill-checkpoint.json",
+    "batchSize": 5000,
+    "conflicts": [
+      "REUSE_NO_OP",
+      "BLOCK_CONFLICT",
+      "UPDATE_ELIGIBLE"
+    ],
+    "R5B_2025_NATIVE_BACKFILL_SCRIPT_READY": "YES",
+    "R5B_BACKFILL_SOURCE_CONTRACT_READY": "YES",
+    "R5B_BACKFILL_CHECKPOINT_CONTRACT_READY": "YES",
+    "R5B_NATIVE_BACKFILL_CONFLICT_CONTRACT_READY": "YES",
+    "R5B_NATIVE_BACKFILL_IDEMPOTENCY_READY": "YES"
+  },
+  "readiness": {
+    "remainingBlockersAfterR5AR5B": [],
+    "MLB_DATA_01D_PROJECTED_READY_AFTER_R5A_R5B": "YES",
+    "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO",
+    "R5_NATIVE_RUNTIME_PREPARATION_READY": "YES",
+    "R5_NATIVE_FOUNDATION_SPORTSDATAIO_INDEPENDENT": "YES",
+    "R5_UI_CLEAN_START_PRESERVED": "YES"
+  },
+  "safety": {
+    "providerCalls": 0,
+    "sportsDataIoCalls": 0,
+    "mlbOfficialCalls": 0,
+    "theOddsApiCalls": 0,
+    "ballDontLieCalls": 0,
+    "productionDdlMutations": 0,
+    "productionDmlMutations": 0,
+    "migrationApplied": "NO",
+    "backfillPerformed": "NO",
+    "featureBuild": "NO",
+    "modelWork": "NO",
+    "predictionWrites": 0,
+    "imports2026": 0,
+    "automationActivated": "NO",
+    "activeCronAdded": "NO"
+  }
+}

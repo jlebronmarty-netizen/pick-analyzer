@@ -1,6 +1,12 @@
 # Project Status
 
-Last updated: 2026-08-28 00:00:00Z
+Last updated: 2026-08-29 00:00:00Z
+
+## 2026-08-29 MLB-DATA-01C-R5 Native MLB Identity Foundation Migration
+
+- MLB-DATA-01C-R5 is locally certified as `MLB_DATA_01C_R5_NATIVE_IDENTITY_FOUNDATION_MIGRATION_CERTIFIED`. It adds one additive repository migration package for native Pick 2 MLB identity rooted in MLB Official/Statcast `game_pk`, MLBAM `person_id` and existing certified canonical team ids. The migration is prepared only; it was not applied to Production.
+- The new migration creates `pick2_mlb_games`, `pick2_mlb_players`, `pick2_mlb_game_results` and `pick2_mlb_market_event_mappings`; adds nullable native identity columns to raw, feature, prediction and result tables; and relaxes only the legacy `sport_events.id` / `sport_players.id` hard requirements that would block native Pick 2 writes. No legacy columns are deleted, no rows are rewritten and no SportsDataIO identity dependency is introduced.
+- The future R5B backfill script is dry-run/restartable by default and separately authorization-gated. Expected future backfill counts remain 2,430 games, 1,469 MLBAM players, 712,528 raw rows, 712,528 pitcher identity rows and 712,528 batter identity rows. R5 made 0 provider calls, 0 production DDL mutations, 0 production DML mutations, 0 feature/model/prediction writes, 0 2026 imports and no automation or cron changes. Actual `MLB_DATA_01D_2025_FEATURE_BUILD_READY` remains `NO` until migration apply/readback and R5B backfill are separately certified.
 
 ## 2026-08-28 MLB-DATA-01C-R4D Pick 2 MLBAM Native Identity Plan
 
