@@ -1,0 +1,901 @@
+{
+  "certification": "MLB_DATA_01C_R4B_EXACT_IDENTITY_EDGE_RECOVERY_PLAN",
+  "certificationVerdict": "MLB_DATA_01C_R4B_EXACT_IDENTITY_EDGE_RECOVERY_PLAN_CERTIFIED",
+  "generatedAt": "2026-08-29T00:21:39.364Z",
+  "targetCommit": "b0bbe27fa28e6b685db46745a96422f47ff0dc34",
+  "alignment": {
+    "branch": "main",
+    "localHead": "b0bbe27fa28e6b685db46745a96422f47ff0dc34",
+    "originHead": "b0bbe27fa28e6b685db46745a96422f47ff0dc34",
+    "productionRequiredCommit": "b0bbe27fa28e6b685db46745a96422f47ff0dc34",
+    "productionCommitObservedBeforeGeneration": "b0bbe27fa28e6b685db46745a96422f47ff0dc34",
+    "worktreeCleanAtPhaseStart": false
+  },
+  "evidence": {
+    "r4aArtifactDigest": "da24ed9b53ba69139f728d63d2880de3c0f39510fd03e519df19049ad7a2787d",
+    "sportsDataIoCatalogDigest": "0fee287c84df811147588df1ad7eb14eb0b3028284b4c3b7631f3275ddff61cb",
+    "sportsDataIoMlbTypesDigest": "1dc1fc64b200d00ac836cef56550e308b94d570c2694facb61244a1286b48151",
+    "providerCalls": 0,
+    "productionDmlMutations": 0,
+    "productionSchemaMutations": 0,
+    "noProviderCalls": true
+  },
+  "baseline": {
+    "rawRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicatePitchIdentities": 0,
+    "games": 2430,
+    "teams": 30,
+    "canonicalHomeRows": 712528,
+    "canonicalAwayRows": 712528,
+    "eventRowsMapped": 0,
+    "pitcherRowsMapped": 0,
+    "batterRowsMapped": 0,
+    "featureRows": 0,
+    "modelRows": 0,
+    "gamePredictions": 0,
+    "predictionResults": 0,
+    "marketValueEvaluations": 0,
+    "imported2026Rows": 0,
+    "R4B_BASELINE_STABLE": "YES",
+    "teamMappingComplete": true
+  },
+  "eventGaps": {
+    "count": 7,
+    "R4B_EVENT_7_BASELINE_PRESERVED": "YES",
+    "missingEdgeTypes": [
+      {
+        "gamePk": "776676",
+        "officialGameDate": "2025-08-19",
+        "officialStartTimestamp": "2025-08-20T00:05:00Z",
+        "homeTeam": "CHC",
+        "awayTeam": "MIL",
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76188",
+          "baseball_mlb:mlb:sportsdataio:event:76776"
+        ],
+        "candidateSportEventCount": 2,
+        "missingEdgeType": "DOUBLEHEADER_GAME_NUMBER_EDGE_MISSING",
+        "evidence": {
+          "reasonR4CouldNotResolve": "EXISTING_EVENT_DOUBLEHEADER_IDENTITY_GAP",
+          "candidateProviderGamePkValues": [
+            null,
+            null
+          ],
+          "candidateGameNumberValues": [
+            null,
+            null
+          ],
+          "existingProviderEntityMappings": 0,
+          "exactProviderGamePkMatches": 0,
+          "exactProviderMappingMatches": 0
+        },
+        "minimumExactEdgeRequired": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path."
+      },
+      {
+        "gamePk": "777458",
+        "officialGameDate": "2025-06-19",
+        "officialStartTimestamp": "2025-06-19T18:15:00Z",
+        "homeTeam": "CWS",
+        "awayTeam": "STL",
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:75424",
+          "baseball_mlb:mlb:sportsdataio:event:76768"
+        ],
+        "candidateSportEventCount": 2,
+        "missingEdgeType": "DOUBLEHEADER_GAME_NUMBER_EDGE_MISSING",
+        "evidence": {
+          "reasonR4CouldNotResolve": "EXISTING_EVENT_DOUBLEHEADER_IDENTITY_GAP",
+          "candidateProviderGamePkValues": [
+            null,
+            null
+          ],
+          "candidateGameNumberValues": [
+            null,
+            null
+          ],
+          "existingProviderEntityMappings": 0,
+          "exactProviderGamePkMatches": 0,
+          "exactProviderMappingMatches": 0
+        },
+        "minimumExactEdgeRequired": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path."
+      },
+      {
+        "gamePk": "777938",
+        "officialGameDate": "2025-05-14",
+        "officialStartTimestamp": "2025-05-14T16:10:00Z",
+        "homeTeam": "BAL",
+        "awayTeam": "MIN",
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76759",
+          "baseball_mlb:mlb:sportsdataio:event:74951"
+        ],
+        "candidateSportEventCount": 2,
+        "missingEdgeType": "DOUBLEHEADER_GAME_NUMBER_EDGE_MISSING",
+        "evidence": {
+          "reasonR4CouldNotResolve": "EXISTING_EVENT_DOUBLEHEADER_IDENTITY_GAP",
+          "candidateProviderGamePkValues": [
+            null,
+            null
+          ],
+          "candidateGameNumberValues": [
+            null,
+            null
+          ],
+          "existingProviderEntityMappings": 0,
+          "exactProviderGamePkMatches": 0,
+          "exactProviderMappingMatches": 0
+        },
+        "minimumExactEdgeRequired": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path."
+      },
+      {
+        "gamePk": "778029",
+        "officialGameDate": "2025-05-08",
+        "officialStartTimestamp": "2025-05-08T19:15:00Z",
+        "homeTeam": "COL",
+        "awayTeam": "DET",
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:74865",
+          "baseball_mlb:mlb:sportsdataio:event:74872",
+          "baseball_mlb:mlb:sportsdataio:event:76757"
+        ],
+        "candidateSportEventCount": 3,
+        "missingEdgeType": "DOUBLEHEADER_GAME_NUMBER_EDGE_MISSING",
+        "evidence": {
+          "reasonR4CouldNotResolve": "EXISTING_EVENT_DOUBLEHEADER_IDENTITY_GAP",
+          "candidateProviderGamePkValues": [
+            null,
+            null,
+            null
+          ],
+          "candidateGameNumberValues": [
+            null,
+            null,
+            null
+          ],
+          "existingProviderEntityMappings": 0,
+          "exactProviderGamePkMatches": 0,
+          "exactProviderMappingMatches": 0
+        },
+        "minimumExactEdgeRequired": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path."
+      },
+      {
+        "gamePk": "778046",
+        "officialGameDate": "2025-05-06",
+        "officialStartTimestamp": "2025-05-06T19:40:00Z",
+        "homeTeam": "WSH",
+        "awayTeam": "CLE",
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:74840",
+          "baseball_mlb:mlb:sportsdataio:event:76756"
+        ],
+        "candidateSportEventCount": 2,
+        "missingEdgeType": "DOUBLEHEADER_GAME_NUMBER_EDGE_MISSING",
+        "evidence": {
+          "reasonR4CouldNotResolve": "EXISTING_EVENT_DOUBLEHEADER_IDENTITY_GAP",
+          "candidateProviderGamePkValues": [
+            null,
+            null
+          ],
+          "candidateGameNumberValues": [
+            null,
+            null
+          ],
+          "existingProviderEntityMappings": 0,
+          "exactProviderGamePkMatches": 0,
+          "exactProviderMappingMatches": 0
+        },
+        "minimumExactEdgeRequired": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path."
+      },
+      {
+        "gamePk": "778170",
+        "officialGameDate": "2025-04-27",
+        "officialStartTimestamp": "2025-04-27T17:40:00Z",
+        "homeTeam": "NYY",
+        "awayTeam": "TOR",
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:74719",
+          "baseball_mlb:mlb:sportsdataio:event:76753"
+        ],
+        "candidateSportEventCount": 2,
+        "missingEdgeType": "DOUBLEHEADER_GAME_NUMBER_EDGE_MISSING",
+        "evidence": {
+          "reasonR4CouldNotResolve": "EXISTING_EVENT_DOUBLEHEADER_IDENTITY_GAP",
+          "candidateProviderGamePkValues": [
+            null,
+            null
+          ],
+          "candidateGameNumberValues": [
+            null,
+            null
+          ],
+          "existingProviderEntityMappings": 0,
+          "exactProviderGamePkMatches": 0,
+          "exactProviderMappingMatches": 0
+        },
+        "minimumExactEdgeRequired": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path."
+      },
+      {
+        "gamePk": "778195",
+        "officialGameDate": "2025-04-24",
+        "officialStartTimestamp": "2025-04-24T18:15:00Z",
+        "homeTeam": "KC",
+        "awayTeam": "COL",
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:74683",
+          "baseball_mlb:mlb:sportsdataio:event:76750"
+        ],
+        "candidateSportEventCount": 2,
+        "missingEdgeType": "DOUBLEHEADER_GAME_NUMBER_EDGE_MISSING",
+        "evidence": {
+          "reasonR4CouldNotResolve": "EXISTING_EVENT_DOUBLEHEADER_IDENTITY_GAP",
+          "candidateProviderGamePkValues": [
+            null,
+            null
+          ],
+          "candidateGameNumberValues": [
+            null,
+            null
+          ],
+          "existingProviderEntityMappings": 0,
+          "exactProviderGamePkMatches": 0,
+          "exactProviderMappingMatches": 0
+        },
+        "minimumExactEdgeRequired": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path."
+      }
+    ],
+    "sourceMatrix": [
+      {
+        "sourceName": "MLB Official / Stats API cached R3 evidence",
+        "canSupplyGamePk": "YES",
+        "canSupplyProviderEventId": "NO",
+        "canSupplyCanonicalRelevantId": "NO",
+        "historical2025Coverage": "2430 cached game_pk identities",
+        "providerCallRequired": "NO",
+        "localDataAvailable": "YES",
+        "deterministicEdgePossible": "NO_TO_LEGACY_SPORT_EVENTS_WITHOUT_PROVIDER_EVENT_ID",
+        "notes": "R3 cache proves official game_pk, gameNumber, teams, venue and status, but it does not contain SportsDataIO GameID or sport_events.id."
+      },
+      {
+        "sourceName": "SportsDataIO MLB schedule endpoints configured in Pick",
+        "canSupplyGamePk": "NO",
+        "canSupplyProviderEventId": "YES",
+        "canSupplyCanonicalRelevantId": "NO",
+        "historical2025Coverage": "REQUIRES_BOUNDED_PROBE_OR_ENTITLEMENT_CONFIRMATION",
+        "providerCallRequired": "YES_FOR_FUTURE_R4C_ONLY",
+        "localDataAvailable": "CATALOG_ONLY",
+        "deterministicEdgePossible": "REQUIRES_PROOF_OF_MLB_GAMEPK_OR_OTHER_EXACT_BRIDGE",
+        "notes": "Cataloged GamesByDate/Games endpoints return provider Game objects, but repository evidence does not prove a stored MLB game_pk field in those payloads."
+      },
+      {
+        "sourceName": "existing sport_events.provider_ids / metadata",
+        "canSupplyGamePk": "NO",
+        "canSupplyProviderEventId": "YES",
+        "canSupplyCanonicalRelevantId": "YES",
+        "historical2025Coverage": "candidate rows exist for the seven games",
+        "providerCallRequired": "NO",
+        "localDataAvailable": "YES",
+        "deterministicEdgePossible": "NO_FOR_THE_SEVEN_GAPS",
+        "notes": "R4A found candidate sport_events rows, but providerGamePk and gameNumber evidence were null for these unresolved doubleheader cases."
+      },
+      {
+        "sourceName": "provider_entity_mappings",
+        "canSupplyGamePk": "NO_FOR_THE_SEVEN_GAPS",
+        "canSupplyProviderEventId": "YES_WHEN_POPULATED",
+        "canSupplyCanonicalRelevantId": "YES",
+        "historical2025Coverage": "partial prior coverage only",
+        "providerCallRequired": "NO",
+        "localDataAvailable": "YES",
+        "deterministicEdgePossible": "NO_CURRENT_EXACT_ROW_FOR_THE_SEVEN_GAPS",
+        "notes": "R4A found zero exact mapping matches for the seven game_pk values."
+      },
+      {
+        "sourceName": "game_results lineage",
+        "canSupplyGamePk": "NO",
+        "canSupplyProviderEventId": "NO",
+        "canSupplyCanonicalRelevantId": "NO",
+        "historical2025Coverage": "local result lineage inspected by R4/R4A",
+        "providerCallRequired": "NO",
+        "localDataAvailable": "YES",
+        "deterministicEdgePossible": "NO_FOR_THE_SEVEN_GAPS",
+        "notes": "No exact game_pk to canonical event edge was proven for these games."
+      },
+      {
+        "sourceName": "local R3 cache",
+        "canSupplyGamePk": "YES",
+        "canSupplyProviderEventId": "NO",
+        "canSupplyCanonicalRelevantId": "NO",
+        "historical2025Coverage": "2430 cached game_pk identities",
+        "providerCallRequired": "NO",
+        "localDataAvailable": "YES",
+        "deterministicEdgePossible": "NO_TO_LEGACY_SPORT_EVENTS_WITHOUT_A_SECOND_EDGE",
+        "notes": "Reusable as the authoritative MLB side of a future crosswalk."
+      },
+      {
+        "sourceName": "historical local exports / legacy DB metadata",
+        "canSupplyGamePk": "NO",
+        "canSupplyProviderEventId": "NO",
+        "canSupplyCanonicalRelevantId": "NO",
+        "historical2025Coverage": "searched repository-accessible files only",
+        "providerCallRequired": "NO",
+        "localDataAvailable": "YES_METADATA_ONLY",
+        "deterministicEdgePossible": "NO_CERTIFIED_EXACT_EDGE_FOUND",
+        "notes": "No standalone exact MLB game_pk to sport_events.id crosswalk file is present in repo-accessible sources."
+      }
+    ],
+    "recoveryPlan": [
+      {
+        "gamePk": "776676",
+        "missingEdge": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path.",
+        "preferredSource": "bounded R4C exact external/local edge acquisition, using R3 MLB game_pk plus any provider-owned event ID crosswalk that can target the existing candidate sport_events.id",
+        "fallbackSource": "separately authorized Pick 2 gamePk-rooted canonical event creation for this game only if no exact legacy edge exists",
+        "providerCallNeeded": "YES_FOR_LEGACY_EDGE_PROBE_NO_FOR_NAMESPACE_FALLBACK",
+        "expectedDeterministicOutput": "Exactly one MLB game_pk to sport_events.id edge, or an explicit no-legacy-edge result that keeps the game out of R5 persistence."
+      },
+      {
+        "gamePk": "777458",
+        "missingEdge": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path.",
+        "preferredSource": "bounded R4C exact external/local edge acquisition, using R3 MLB game_pk plus any provider-owned event ID crosswalk that can target the existing candidate sport_events.id",
+        "fallbackSource": "separately authorized Pick 2 gamePk-rooted canonical event creation for this game only if no exact legacy edge exists",
+        "providerCallNeeded": "YES_FOR_LEGACY_EDGE_PROBE_NO_FOR_NAMESPACE_FALLBACK",
+        "expectedDeterministicOutput": "Exactly one MLB game_pk to sport_events.id edge, or an explicit no-legacy-edge result that keeps the game out of R5 persistence."
+      },
+      {
+        "gamePk": "777938",
+        "missingEdge": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path.",
+        "preferredSource": "bounded R4C exact external/local edge acquisition, using R3 MLB game_pk plus any provider-owned event ID crosswalk that can target the existing candidate sport_events.id",
+        "fallbackSource": "separately authorized Pick 2 gamePk-rooted canonical event creation for this game only if no exact legacy edge exists",
+        "providerCallNeeded": "YES_FOR_LEGACY_EDGE_PROBE_NO_FOR_NAMESPACE_FALLBACK",
+        "expectedDeterministicOutput": "Exactly one MLB game_pk to sport_events.id edge, or an explicit no-legacy-edge result that keeps the game out of R5 persistence."
+      },
+      {
+        "gamePk": "778029",
+        "missingEdge": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path.",
+        "preferredSource": "bounded R4C exact external/local edge acquisition, using R3 MLB game_pk plus any provider-owned event ID crosswalk that can target the existing candidate sport_events.id",
+        "fallbackSource": "separately authorized Pick 2 gamePk-rooted canonical event creation for this game only if no exact legacy edge exists",
+        "providerCallNeeded": "YES_FOR_LEGACY_EDGE_PROBE_NO_FOR_NAMESPACE_FALLBACK",
+        "expectedDeterministicOutput": "Exactly one MLB game_pk to sport_events.id edge, or an explicit no-legacy-edge result that keeps the game out of R5 persistence."
+      },
+      {
+        "gamePk": "778046",
+        "missingEdge": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path.",
+        "preferredSource": "bounded R4C exact external/local edge acquisition, using R3 MLB game_pk plus any provider-owned event ID crosswalk that can target the existing candidate sport_events.id",
+        "fallbackSource": "separately authorized Pick 2 gamePk-rooted canonical event creation for this game only if no exact legacy edge exists",
+        "providerCallNeeded": "YES_FOR_LEGACY_EDGE_PROBE_NO_FOR_NAMESPACE_FALLBACK",
+        "expectedDeterministicOutput": "Exactly one MLB game_pk to sport_events.id edge, or an explicit no-legacy-edge result that keeps the game out of R5 persistence."
+      },
+      {
+        "gamePk": "778170",
+        "missingEdge": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path.",
+        "preferredSource": "bounded R4C exact external/local edge acquisition, using R3 MLB game_pk plus any provider-owned event ID crosswalk that can target the existing candidate sport_events.id",
+        "fallbackSource": "separately authorized Pick 2 gamePk-rooted canonical event creation for this game only if no exact legacy edge exists",
+        "providerCallNeeded": "YES_FOR_LEGACY_EDGE_PROBE_NO_FOR_NAMESPACE_FALLBACK",
+        "expectedDeterministicOutput": "Exactly one MLB game_pk to sport_events.id edge, or an explicit no-legacy-edge result that keeps the game out of R5 persistence."
+      },
+      {
+        "gamePk": "778195",
+        "missingEdge": "Store or acquire an exact MLB game_pk to one existing sport_events.id edge, or fail closed and route the game to a separately authorized gamePk-rooted Pick 2 event creation path.",
+        "preferredSource": "bounded R4C exact external/local edge acquisition, using R3 MLB game_pk plus any provider-owned event ID crosswalk that can target the existing candidate sport_events.id",
+        "fallbackSource": "separately authorized Pick 2 gamePk-rooted canonical event creation for this game only if no exact legacy edge exists",
+        "providerCallNeeded": "YES_FOR_LEGACY_EDGE_PROBE_NO_FOR_NAMESPACE_FALLBACK",
+        "expectedDeterministicOutput": "Exactly one MLB game_pk to sport_events.id edge, or an explicit no-legacy-edge result that keeps the game out of R5 persistence."
+      }
+    ],
+    "R4B_EVENT_EDGE_RECOVERY_PLAN_READY": "YES",
+    "EVENT_EDGE_PROVIDER_CALLS_REQUIRED": "YES",
+    "eventProviderCallRequirement": {
+      "provider": "SportsDataIO or another already-configured event provider only if it can expose an exact provider event ID bridge",
+      "endpointFamily": "MLB schedule/game identity endpoint family; no odds, projections or features",
+      "scope": "seven unresolved game_pk identities and their candidate provider event IDs only",
+      "executedNow": false
+    }
+  },
+  "playerGaps": {
+    "sourceMlbamPlayers": 1469,
+    "existingPlayerGapCount": 1292,
+    "exactProviderPaths": 0,
+    "nameAuditOnlyCount": 1292,
+    "R4B_R4A_PLAYER_NEGATIVE_PROOF_ACCEPTED": "YES",
+    "acceptableExactPlayerEdgeContract": {
+      "R4B_ACCEPTABLE_PLAYER_EDGE_CONTRACT_READY": "YES",
+      "allowedChains": [
+        "MLBAM person_id to exact provider player ID to sport_players.id",
+        "MLBAM person_id to exact authoritative identity already stored on canonical row to sport_players.id",
+        "MLBAM person_id to another deterministic stored provider chain with exactly one current sport_players.id target"
+      ],
+      "forbidden": [
+        "name-only",
+        "normalized-name-only",
+        "name plus team",
+        "name plus position",
+        "surname matching",
+        "fuzzy score",
+        "probabilistic linkage"
+      ]
+    },
+    "sourceMatrix": [
+      {
+        "sourceName": "MLB Official / MLB Stats API cached R3 people evidence",
+        "containsMlbamPersonId": "YES",
+        "containsProviderPlayerId": "NO",
+        "containsSportPlayersRelevantProviderId": "NO",
+        "historical2025Coverage": "1469 cached person identities",
+        "bulkCapability": "SUPPORTED_BY_R2A_FOR_MLBAM_IDENTITY",
+        "providerCallRequired": "NO",
+        "subscriptionDependency": "NO",
+        "deterministicUsability": "NO_TO_CURRENT_SPORT_PLAYERS_WITHOUT_PROVIDER_OR_CANONICAL_EDGE",
+        "localDataAvailable": "YES"
+      },
+      {
+        "sourceName": "SportsDataIO MLB Players endpoint catalog",
+        "containsMlbamPersonId": "UNKNOWN_NOT_PROVEN_BY_REPOSITORY_TYPES",
+        "containsProviderPlayerId": "YES",
+        "containsSportPlayersRelevantProviderId": "YES",
+        "historical2025Coverage": "CURRENT_ROSTER_OR_PROVIDER_AVAILABLE_SCOPE_REQUIRES_PROBE",
+        "bulkCapability": "YES_ENDPOINT_CATALOGED",
+        "providerCallRequired": "YES_FOR_FUTURE_R4C_ONLY",
+        "subscriptionDependency": "CONFIRMED_TRIAL_FOR_DISCOVERY_LAB_BUT_FIELD_CONTRACT_UNPROVEN",
+        "deterministicUsability": "REQUIRES_BOUNDED_PROBE"
+      },
+      {
+        "sourceName": "provider_entity_mappings",
+        "containsMlbamPersonId": "NO",
+        "containsProviderPlayerId": "YES_WHEN_POPULATED",
+        "containsSportPlayersRelevantProviderId": "YES",
+        "historical2025Coverage": "177 MLBAM-like rows previously observed, but no current sport_players exact targets for R4A source set",
+        "bulkCapability": "UNKNOWN",
+        "providerCallRequired": "NO",
+        "subscriptionDependency": "NO",
+        "deterministicUsability": "NO_CURRENT_EXACT_EDGE_FOR_1292",
+        "localDataAvailable": "YES"
+      },
+      {
+        "sourceName": "sport_players.provider_ids / metadata",
+        "containsMlbamPersonId": "NO",
+        "containsProviderPlayerId": "YES",
+        "containsSportPlayersRelevantProviderId": "YES",
+        "historical2025Coverage": "current canonical player rows inspected by R4A",
+        "bulkCapability": "UNKNOWN",
+        "providerCallRequired": "NO",
+        "subscriptionDependency": "NO",
+        "deterministicUsability": "NO_MLBAM_FIELD_FOUND_FOR_SOURCE_SET",
+        "localDataAvailable": "YES"
+      },
+      {
+        "sourceName": "R3 cache",
+        "containsMlbamPersonId": "YES",
+        "containsProviderPlayerId": "NO",
+        "containsSportPlayersRelevantProviderId": "NO",
+        "historical2025Coverage": "1469 source MLBAM identities",
+        "bulkCapability": "UNKNOWN",
+        "providerCallRequired": "NO",
+        "subscriptionDependency": "NO",
+        "deterministicUsability": "NO_TO_CURRENT_SPORT_PLAYERS_BY_ITSELF",
+        "localDataAvailable": "YES"
+      },
+      {
+        "sourceName": "repo-accessible local player master/crosswalk files",
+        "containsMlbamPersonId": "YES_SEPARATE_MLBAM_ARTIFACTS",
+        "containsProviderPlayerId": "YES_SEPARATE_SPORTSDATAIO_ARTIFACTS",
+        "containsSportPlayersRelevantProviderId": "YES_SEPARATE_CANONICAL_ARTIFACTS",
+        "historical2025Coverage": "NO_SINGLE_EXACT_PAIR_FILE_FOUND",
+        "bulkCapability": "UNKNOWN",
+        "providerCallRequired": "NO",
+        "subscriptionDependency": "NO",
+        "deterministicUsability": "NO_SINGLE_MLBAM_TO_PROVIDER_TO_SPORT_PLAYER_EDGE_SOURCE",
+        "localDataAvailable": "YES"
+      }
+    ],
+    "mlbOfficialDirectEdge": {
+      "MLB_OFFICIAL_DIRECT_TO_CURRENT_CANONICAL_EDGE_AVAILABLE": "NO",
+      "reason": "R3 people evidence supplies MLBAM person_id and identity attributes, but current sport_players rows do not store matching MLBAM identities for the 1292 candidate set."
+    },
+    "sportsDataIoCrosswalkCapability": {
+      "SPORTSDATAIO_MLBAM_CROSSWALK_CAPABILITY": "REQUIRES_BOUNDED_PROBE",
+      "smallestFutureProbe": "One read-only identity-only MLB Players payload contract probe, checking only whether PlayerID and MLBAM/person_id coexist in the same records and whether those PlayerID values match current sport_players/provider_entity_mappings IDs."
+    },
+    "otherProviderCrosswalkCapability": [
+      {
+        "provider": "The Odds API",
+        "state": "NO_PLAYER_MASTER_CROSSWALK_CAPABILITY_FOUND_IN_REPOSITORY_FOR_MLBAM_TO_SPORT_PLAYERS"
+      },
+      {
+        "provider": "Retrosheet / local historical source references",
+        "state": "NO_REPO_ACCESSIBLE_EXACT_MLBAM_TO_CURRENT_SPORT_PLAYERS_CROSSWALK_FOUND"
+      }
+    ],
+    "localExactPlayerCrosswalk": {
+      "LOCAL_EXACT_PLAYER_CROSSWALK_SOURCE_AVAILABLE": "NO",
+      "searchedFileCount": 100,
+      "relevantFiles": [
+        "docs\\ARCHITECTURE\\SPORTSDATAIO_EXIT_ARCHITECTURE_V1.md",
+        "docs\\CERTIFICATION\\MLB_DATA_01C_R4A_DETERMINISTIC_DISAMBIGUATION_PROOF.md",
+        "docs\\CERTIFICATION\\mlb-data-01c-r3-acquisition-cache.json",
+        "docs\\CERTIFICATION\\mlb-data-01c-r4a-deterministic-disambiguation-proof.json",
+        "docs\\CERTIFICATION\\sdio-exit-05r-sportsdataio-odds-suppression.json",
+        "docs\\MULTI_SPORT_RESULTS_CROSSWALK_FOUNDATION_V1.md",
+        "docs\\PRODUCTION_PILOT\\SDIO_EXIT_05R_SPORTSDATAIO_ODDS_SUPPRESSION.md",
+        "docs\\SPORTSDATAIO_DISCOVERY_INTEGRATION.md",
+        "docs\\SPORTSDATAIO_ENDPOINT_CAPABILITIES.md",
+        "docs\\SPORTSDATAIO_ENTITLEMENT_DISCOVERY_AND_SAFE_EXTRACTION.md",
+        "docs\\SPORTSDATAIO_FIELD_QUALITY.md",
+        "docs\\SPORTSDATAIO_HISTORICAL_AVAILABILITY.md",
+        "docs\\SPORTSDATAIO_IDENTITY_MAPPING.md",
+        "docs\\SPORTSDATAIO_MLB_DATA_MAXIMIZATION_BUDGET_FIX_AND_CONTROLLED_EXTRACTION.md",
+        "docs\\SPORTSDATAIO_PLAYER_GAME_STATS_ENDPOINT_OPTIMIZATION.md",
+        "docs\\SPORTSDATAIO_QUOTA_PLAN.md",
+        "docs\\SPORTSDATAIO_SCRAMBLED_DATA_POLICY.md",
+        "docs\\SPORTSDATAIO_STARTER_RESOLUTION.md",
+        "docs\\SPORTSDATAIO_SUBSCRIPTION_MAXIMIZATION_AUDIT.md",
+        "docs\\THE_ODDS_API_EVENT_CROSSWALK_AND_PROP_SYNC_V1.md",
+        "docs\\UNIVERSAL_EVENT_IDENTITY_CROSSWALK_ENGINE_V1.md",
+        "docs\\multi-sport-results-crosswalk-foundation-v1.json",
+        "docs\\providers\\sportsdataio\\CAPABILITY_MATRIX.md",
+        "docs\\providers\\sportsdataio\\MLB.md",
+        "docs\\providers\\sportsdataio\\NBA.md",
+        "docs\\providers\\sportsdataio\\NFL.md",
+        "docs\\providers\\sportsdataio\\NHL.md",
+        "docs\\providers\\sportsdataio\\README.md",
+        "docs\\providers\\sportsdataio\\SOCCER.md",
+        "docs\\sportsdataio-adapter-contract-v1.md",
+        "docs\\sportsdataio-historical-import-execution-readiness-v1.md",
+        "docs\\sportsdataio-nba-depth-lineups-pilot-v1.md",
+        "docs\\sportsdataio-nba-injuries-pilot-v1.md",
+        "docs\\sportsdataio-nba-integration-readiness-v1.md",
+        "docs\\sportsdataio-nba-observability-integration-v1.md",
+        "docs\\sportsdataio-nba-odds-readiness-v1.md",
+        "docs\\sportsdataio-nba-pilot-import-v1.md",
+        "docs\\sportsdataio-nba-pilot-import-v2.md",
+        "docs\\sportsdataio-nba-player-props-readiness-v1.md",
+        "docs\\sportsdataio-nba-player-stats-pilot-v1.md",
+        "docs\\sportsdataio-nba-player-stats-readiness-v1.md",
+        "docs\\sportsdataio-nba-players-pilot-v1.md",
+        "docs\\sportsdataio-nba-priced-game-odds-pilot-v1.md",
+        "docs\\sportsdataio-nba-trial-isolation-audit-v1.md",
+        "scripts\\mlb-data-01c-r4a-deterministic-disambiguation-proof-validate.mjs",
+        "scripts\\mlb-data-01c-r4a-deterministic-disambiguation-proof.mjs",
+        "scripts\\multi-sport-results-crosswalk-foundation-v1.mjs",
+        "scripts\\sdio-exit-05r-sportsdataio-odds-suppression-validate.mjs",
+        "src\\app\\api\\data-foundation\\results-crosswalk\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\capabilities\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\contract\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\discovery\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\execution-readiness\\validation\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\maximization-audit\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\nba\\approval-packet\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\nba\\blocker-resolution\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\nba\\completion-audit\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\nba\\completion-evidence\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\nba\\contract-audit\\route.ts",
+        "src\\app\\api\\providers\\sportsdataio\\nba\\domain-proof\\route.ts"
+      ],
+      "reason": "Repo-accessible files provide separate certified MLBAM and SportsDataIO/canonical evidence, but no single exact crosswalk source linking MLBAM person_id to one current sport_players.id."
+    },
+    "recoveryProjection": {
+      "RESOLVABLE_WITH_EXISTING_LOCAL_EXACT_EDGE": 0,
+      "RESOLVABLE_WITH_EXISTING_PROVIDER_CAPABILITY": 0,
+      "REQUIRES_BOUNDED_PROVIDER_ACQUISITION": 1292,
+      "NO_KNOWN_EXACT_EDGE_SOURCE": 0,
+      "note": "Counts are projection buckets only; no player is claimed resolved in R4B."
+    },
+    "PLAYER_EDGE_PROVIDER_CALLS_REQUIRED": "YES",
+    "playerProviderCallRequirement": {
+      "provider": "SportsDataIO first, because Pick already stores SportsDataIO player IDs on legacy canonical player rows",
+      "endpointFamily": "MLB Players identity master endpoint only",
+      "bulkStrategy": "single bulk roster/master payload if contract exposes both PlayerID and MLBAM/person_id; otherwise stop",
+      "identityOnlyScope": true,
+      "estimatedBoundedCallCount": 1,
+      "executedNow": false
+    },
+    "ambiguousPlayerEvidenceRequirements": [
+      {
+        "personId": "518585",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10006086",
+          "baseball_mlb:mlb:sportsdataio:player:10016648"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "571970",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10001955",
+          "baseball_mlb:mlb:sportsdataio:player:10012504"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "622491",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10012180",
+          "baseball_mlb:mlb:sportsdataio:player:10007245"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "657097",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10009577",
+          "baseball_mlb:mlb:sportsdataio:player:10012859"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "665742",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10006794",
+          "baseball_mlb:mlb:sportsdataio:player:10012065"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "671922",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10011725",
+          "baseball_mlb:mlb:sportsdataio:player:10015804"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "674444",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10013637",
+          "baseball_mlb:mlb:sportsdataio:player:10016654"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "677651",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10008767",
+          "baseball_mlb:mlb:sportsdataio:player:10017910"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "678246",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10010953",
+          "baseball_mlb:mlb:sportsdataio:player:10019863"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "679922",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10018281",
+          "baseball_mlb:mlb:sportsdataio:player:10013182"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "686681",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10010411",
+          "baseball_mlb:mlb:sportsdataio:player:10017393"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "690928",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10012856",
+          "baseball_mlb:mlb:sportsdataio:player:10018635"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "691777",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10001955",
+          "baseball_mlb:mlb:sportsdataio:player:10012504"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "692230",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10012906",
+          "baseball_mlb:mlb:sportsdataio:player:10015478"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "695243",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10012582",
+          "baseball_mlb:mlb:sportsdataio:player:10016080"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      },
+      {
+        "personId": "806960",
+        "candidateSportPlayerIds": [
+          "baseball_mlb:mlb:sportsdataio:player:10014542",
+          "baseball_mlb:mlb:sportsdataio:player:10019868"
+        ],
+        "exactMissingDiscriminator": "An exact provider-ID edge that chooses one candidate sport_players.id; names, teams, positions and fuzzy scores are not acceptable discriminators.",
+        "evidenceRequirement": "MLBAM person_id to SportsDataIO PlayerID crosswalk, or another authoritative stored provider chain that points to exactly one current sport_players.id.",
+        "recoveryClassification": "RESOLVABLE_WITH_PLANNED_PROVIDER_EDGE"
+      }
+    ],
+    "R4B_AMBIGUOUS_PLAYER_EDGE_RECOVERY_PLAN_READY": "YES",
+    "safePlayerCreateSet": {
+      "R4B_SAFE_PLAYER_CREATE_SET": "PRESERVED",
+      "trueCanonicalMissing": 161,
+      "officialMlbamEvidenceComplete": true,
+      "safeCreationInputsComplete": "YES",
+      "noNameMatchingPerformed": true
+    }
+  },
+  "externalAcquisitionPlan": {
+    "R4B_MINIMUM_EXTERNAL_EDGE_ACQUISITION_PLAN_READY": "YES",
+    "principles": [
+      "already-paid or already-configured provider first",
+      "bulk identity endpoints before per-entity calls",
+      "identity-only data",
+      "cache and artifact every response digest",
+      "stop on missing field contract"
+    ],
+    "excludedData": [
+      "predictive statistics",
+      "odds",
+      "advanced game features",
+      "historical performance not needed for identity proof"
+    ],
+    "plannedEventCalls": {
+      "R4B_PLANNED_EVENT_CALLS": "0_TO_7",
+      "estimate": "0 if the Players probe resolves player-only architecture first and event fallback is selected; up to 7 date/game identity probes if a provider can expose exact event bridge fields."
+    },
+    "plannedPlayerCalls": {
+      "R4B_PLANNED_PLAYER_CALLS": 1,
+      "estimate": "One bulk MLB Players identity-master probe if SportsDataIO field contract is available."
+    },
+    "plannedTotalCalls": {
+      "R4B_PLANNED_TOTAL_CALLS": "1_TO_8",
+      "providerSpecificCalls": {
+        "sportsdataioPlayers": 1,
+        "sportsdataioEventIdentity": "0_TO_7"
+      }
+    }
+  },
+  "architectureDecision": {
+    "legacyLinkRecoveryVsPick2Namespace": {
+      "pathARecoverLegacyCanonicalLinks": {
+        "identityCorrectness": "BEST_IF_EXACT_MLBAM_TO_PROVIDER_TO_SPORT_PLAYERS_EDGE_EXISTS",
+        "duplicateRealWorldEntityRisk": "LOW_ONLY_AFTER_EXACT_EDGE_PROOF",
+        "legacyReferenceImpact": "preserves current sport_players references",
+        "futureStatcastJoins": "good after crosswalk persistence",
+        "sportsDataIoJoins": "best if SportsDataIO crosswalk exists",
+        "reuse2026": "yes if crosswalk remains exact and cached",
+        "dailyIngest": "yes after identity master cache is maintained",
+        "uiDuplicationRisk": "low",
+        "migrationComplexity": "moderate",
+        "modelFeatureStability": "best"
+      },
+      "pathBPick2MlbamRootedCanonicalPlayers": {
+        "identityCorrectness": "STRONG_FOR_STATCAST_BECAUSE_MLBAM_PERSON_ID_IS_SOURCE_IDENTITY",
+        "duplicateRealWorldEntityRisk": "controlled only if Pick 2 namespace is isolated from legacy rows",
+        "legacyReferenceImpact": "legacy rows remain audit-only until exact mappings are proven",
+        "futureStatcastJoins": "best native fit",
+        "sportsDataIoJoins": "requires later provider mappings",
+        "reuse2026": "yes",
+        "dailyIngest": "yes",
+        "uiDuplicationRisk": "must hide legacy duplicates from Pick 2 surfaces",
+        "migrationComplexity": "higher but safer than weak legacy links",
+        "modelFeatureStability": "stable if Pick 2 queries select only MLBAM-rooted namespace"
+      }
+    },
+    "CANONICAL_PLAYER_RECREATION_STRATEGY_SAFE": "YES_CONDITIONALLY",
+    "canonicalPlayerRecreationSafetyReason": "Safe only as an isolated Pick 2 MLBAM-rooted namespace after the R4C exact-edge probe fails or returns incomplete; R4B does not recommend weak duplicate creation against visible legacy rows.",
+    "PICK2_MLBAM_ROOTED_PLAYER_NAMESPACE_FEASIBLE": "YES",
+    "pick2NamespaceControls": {
+      "duplicateIsolation": "New rows must be tagged Pick 2 MLBAM-rooted and legacy sport_players must remain audit-only for Pick 2 feature joins.",
+      "featureIsolation": "Pick 2 feature builders select MLBAM-rooted rows or exact provider mappings only.",
+      "futureProviderMappings": "Attach to provider_entity_mappings after exact provider IDs are acquired.",
+      "uiDuplicateAvoidance": "Pick 2 product surfaces query the active namespace only; legacy duplicates stay hidden from Pick 2 user lists.",
+      "reuse2026DailyIngest": "Use game_pk/person_id as first-class ingest identity and cache crosswalks incrementally."
+    },
+    "PICK2_GAMEPK_ROOTED_EVENT_FALLBACK_FEASIBLE": "YES",
+    "pick2EventFallbackReason": "MLB game_pk is authoritative and can safely root a Pick 2 event, but R4C must still distinguish no-legacy-edge from duplicate-existing-event before inserts are authorized.",
+    "R4B_RECOMMENDED_IDENTITY_RECOVERY_PATH": "PATH_A_EXTERNAL_EXACT_EDGE_ACQUISITION",
+    "recommendedPathReason": "Run the smallest exact-edge probe first because existing sport_players already carry SportsDataIO IDs and a single confirmed MLBAM-to-SportsDataIO player master would preserve legacy links without namespace duplication. If that exact bridge is absent, switch to the MLBAM-rooted Pick 2 namespace plan.",
+    "recommendedR4CPhase": "MLB_DATA_01C_R4C_EXTERNAL_EXACT_EDGE_ACQUISITION"
+  },
+  "readiness": {
+    "MLB_DATA_01C_R5_PERSISTENCE_READY": "NO",
+    "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO",
+    "MLB_DATA_01D_PROJECTED_READY_AFTER_R5": "NO"
+  },
+  "reuse": {
+    "R4B_RECOVERY_REUSABLE_FOR_2026": "YES",
+    "R4B_RECOVERY_REUSABLE_FOR_DAILY_INGEST": "YES"
+  },
+  "safety": {
+    "providerCalls": 0,
+    "productionDmlMutations": 0,
+    "productionSchemaMutations": 0,
+    "crosswalkWrites": 0,
+    "canonicalInserts": 0,
+    "rawMappingWrites": 0,
+    "featureWrites": 0,
+    "modelWrites": 0,
+    "predictionWrites": 0,
+    "imports2026": 0,
+    "automationActivated": false,
+    "cronChanges": 0
+  },
+  "validators": {
+    "created": [
+      "scripts/mlb-data-01c-r4b-exact-identity-edge-recovery-plan-validate.mjs"
+    ],
+    "requiredChain": [
+      "R4A",
+      "R4",
+      "R3",
+      "R2A",
+      "R2",
+      "R1",
+      "01C",
+      "01B artifact readback",
+      "RESET-04R1B",
+      "RESET-04"
+    ]
+  },
+  "flags": {
+    "R4B_BASELINE_STABLE": "YES",
+    "R4B_EVENT_7_BASELINE_PRESERVED": "YES",
+    "R4B_EVENT_EDGE_RECOVERY_PLAN_READY": "YES",
+    "EVENT_EDGE_PROVIDER_CALLS_REQUIRED": "YES",
+    "R4B_R4A_PLAYER_NEGATIVE_PROOF_ACCEPTED": "YES",
+    "R4B_ACCEPTABLE_PLAYER_EDGE_CONTRACT_READY": "YES",
+    "MLB_OFFICIAL_DIRECT_TO_CURRENT_CANONICAL_EDGE_AVAILABLE": "NO",
+    "SPORTSDATAIO_MLBAM_CROSSWALK_CAPABILITY": "REQUIRES_BOUNDED_PROBE",
+    "LOCAL_EXACT_PLAYER_CROSSWALK_SOURCE_AVAILABLE": "NO",
+    "PLAYER_EDGE_PROVIDER_CALLS_REQUIRED": "YES",
+    "R4B_AMBIGUOUS_PLAYER_EDGE_RECOVERY_PLAN_READY": "YES",
+    "R4B_SAFE_PLAYER_CREATE_SET": "PRESERVED",
+    "R4B_MINIMUM_EXTERNAL_EDGE_ACQUISITION_PLAN_READY": "YES",
+    "R4B_PLANNED_EVENT_CALLS": "0_TO_7",
+    "R4B_PLANNED_PLAYER_CALLS": 1,
+    "R4B_PLANNED_TOTAL_CALLS": "1_TO_8",
+    "CANONICAL_PLAYER_RECREATION_STRATEGY_SAFE": "YES_CONDITIONALLY",
+    "PICK2_MLBAM_ROOTED_PLAYER_NAMESPACE_FEASIBLE": "YES",
+    "PICK2_GAMEPK_ROOTED_EVENT_FALLBACK_FEASIBLE": "YES",
+    "R4B_RECOMMENDED_IDENTITY_RECOVERY_PATH": "PATH_A_EXTERNAL_EXACT_EDGE_ACQUISITION",
+    "MLB_DATA_01C_R5_PERSISTENCE_READY": "NO",
+    "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO",
+    "R4B_RECOVERY_REUSABLE_FOR_2026": "YES",
+    "R4B_RECOVERY_REUSABLE_FOR_DAILY_INGEST": "YES"
+  }
+}

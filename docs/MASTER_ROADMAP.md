@@ -3790,3 +3790,11 @@ Status: `MLB_DATA_01C_R4A_DETERMINISTIC_DISAMBIGUATION_PARTIAL`
 Result: R4A extended the R4 plan with an exact-only stored identity graph and confirmed no safe broad persistence path yet. The 7 remaining event gaps still lack exact stored game_pk/provider mapping evidence, the 1,292 existing-player gaps remain name-audit-only with no exact provider-ID path to a current `sport_players.id`, the 16 ambiguous players remain unresolved, and the 161 true-missing players remain the only safe future player-create set.
 
 Next: repair or acquire deterministic stored identity edges in a separate zero-write proof before R5. R5 persistence remains blocked, and MLB-DATA-01D feature construction remains prohibited until identity persistence is separately authorized, executed and readback-certified.
+
+## MLB-DATA-01C-R4B Exact Identity Edge Recovery Plan
+
+Status: `MLB_DATA_01C_R4B_EXACT_IDENTITY_EDGE_RECOVERY_PLAN_CERTIFIED`
+
+Result: R4B converts the R4A blockers into an exact-edge recovery architecture. The seven event gaps require one deterministic `MLB game_pk -> sport_events.id` edge per game or a later Pick 2 gamePk-rooted event fallback. The 1,292 existing-player candidates remain unlinked because name evidence is explicitly rejected; the only acceptable player recovery is MLBAM person ID to exact provider player ID to one current `sport_players.id`, or an equally deterministic stored chain. The 16 ambiguous players require the same exact discriminator, and the 161 true-missing players remain safe create candidates.
+
+Next: `MLB_DATA_01C_R4C_EXTERNAL_EXACT_EDGE_ACQUISITION`. Run a bounded, read-only, identity-only probe against already configured provider/local sources, starting with SportsDataIO MLB Players only if the call is separately authorized. If no exact MLBAM-to-SportsDataIO/current-canonical bridge exists, switch to an isolated Pick 2 MLBAM-rooted canonical namespace plan. R5 persistence and MLB-DATA-01D feature construction remain blocked.
