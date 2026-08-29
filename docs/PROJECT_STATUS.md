@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-28 00:00:00Z
 
+## 2026-08-28 MLB-DATA-01C-R4D Pick 2 MLBAM Native Identity Plan
+
+- MLB-DATA-01C-R4D is certified as `MLB_DATA_01C_R4D_PICK2_MLBAM_NATIVE_IDENTITY_PLAN_CERTIFIED`. SportsDataIO MLB is intentionally cancelled and deprecated as a required Pick 2 MLB identity dependency; no credential repair, provider call, production DML, production DDL, crosswalk write, canonical insert, raw mapping write, feature/model/prediction write, 2026 import, automation activation or cron change occurred.
+- The current Pick 2 foundation audit found the raw table already has authoritative non-null `game_pk`, while several prepared feature/prediction tables still hard-require legacy `sport_events.id` or `sport_players.id`. R4D therefore retires the old legacy R5 persistence approach and certifies an additive native identity plan rooted in MLB Official/Statcast `game_pk` for games and MLBAM `person_id` for players.
+- Native coverage projects to 2,430/2,430 games and 1,469/1,469 players without reimporting 2025 raw Statcast. The seven unresolved legacy event edges, 1,292 name-audit-only player candidates, 16 ambiguous legacy players and 161 missing legacy sport_players rows no longer block Pick 2 by design. Actual 01D feature building remains `NO` until the next migration/backfill phases add native registries and native identity columns.
+
 ## 2026-08-28 MLB-DATA-01C-R2A MLB Official Person Endpoint Contract
 
 - MLB-DATA-01C-R2A is certified as `MLB_DATA_01C_R2A_MLB_OFFICIAL_PERSON_ENDPOINT_CERTIFIED`. The phase made exactly 4 authorized read-only MLB Official calls: 3 single-person `GET /api/v1/people/{personId}` probes and 1 bounded bulk `GET /api/v1/people?personIds=434378,455117,500743` probe.
