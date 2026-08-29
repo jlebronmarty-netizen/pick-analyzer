@@ -3798,3 +3798,11 @@ Status: `MLB_DATA_01C_R4B_EXACT_IDENTITY_EDGE_RECOVERY_PLAN_CERTIFIED`
 Result: R4B converts the R4A blockers into an exact-edge recovery architecture. The seven event gaps require one deterministic `MLB game_pk -> sport_events.id` edge per game or a later Pick 2 gamePk-rooted event fallback. The 1,292 existing-player candidates remain unlinked because name evidence is explicitly rejected; the only acceptable player recovery is MLBAM person ID to exact provider player ID to one current `sport_players.id`, or an equally deterministic stored chain. The 16 ambiguous players require the same exact discriminator, and the 161 true-missing players remain safe create candidates.
 
 Next: `MLB_DATA_01C_R4C_EXTERNAL_EXACT_EDGE_ACQUISITION`. Run a bounded, read-only, identity-only probe against already configured provider/local sources, starting with SportsDataIO MLB Players only if the call is separately authorized. If no exact MLBAM-to-SportsDataIO/current-canonical bridge exists, switch to an isolated Pick 2 MLBAM-rooted canonical namespace plan. R5 persistence and MLB-DATA-01D feature construction remain blocked.
+
+## MLB-DATA-01C-R4C External Exact Identity Edge Acquisition
+
+Status: `MLB_DATA_01C_R4C_EXTERNAL_EDGE_ACQUISITION_BLOCKED`
+
+Result: R4C attempted the authorized bounded identity-only acquisition and stopped without persistence. The one SportsDataIO MLB `Players` master/list call and seven SportsDataIO `GamesByDate` event identity calls all returned HTTP 401, so no certifiable player MLBAM/person field, player crosswalk, event edge or event crosswalk could be produced. The 1,292 existing-player gap, 16 ambiguous-player gap, 161 safe-create set and seven event edge gaps remain unchanged.
+
+Next: recheck SportsDataIO MLB credential/entitlement out of band, then rerun only the bounded R4C provider-auth recheck if authorized. Do not proceed to R4D namespace planning unless a successful identity payload proves there is no exact MLBAM bridge, and do not start R5 or MLB-DATA-01D.

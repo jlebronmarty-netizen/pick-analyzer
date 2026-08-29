@@ -1,0 +1,473 @@
+{
+  "certification": "MLB_DATA_01C_R4C_EXTERNAL_EXACT_IDENTITY_EDGE_ACQUISITION",
+  "certificationVerdict": "MLB_DATA_01C_R4C_EXTERNAL_EDGE_ACQUISITION_BLOCKED",
+  "generatedAt": "2026-08-29T01:17:49.392Z",
+  "targetCommit": "0ac505d0303c67b76cf6fd467514b3b3f5136b98",
+  "alignment": {
+    "branch": "main",
+    "localHead": "0ac505d0303c67b76cf6fd467514b3b3f5136b98",
+    "originHead": "0ac505d0303c67b76cf6fd467514b3b3f5136b98",
+    "productionRequiredCommit": "0ac505d0303c67b76cf6fd467514b3b3f5136b98",
+    "worktreeCleanAtPhaseStart": false,
+    "currentWorktreeHasR4CChanges": true
+  },
+  "baseline": {
+    "rawRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicatePitchIdentities": 0,
+    "games": 2430,
+    "teams": 30,
+    "canonicalHomeRows": 712528,
+    "canonicalAwayRows": 712528,
+    "eventRowsMapped": 0,
+    "pitcherRowsMapped": 0,
+    "batterRowsMapped": 0,
+    "featureRows": 0,
+    "modelRows": 0,
+    "gamePredictions": 0,
+    "predictionResults": 0,
+    "marketValueEvaluations": 0,
+    "imported2026Rows": 0,
+    "R4B_BASELINE_STABLE": "YES",
+    "teamMappingComplete": true,
+    "R4C_PRE_ACQUISITION_BASELINE": "PASS"
+  },
+  "providerContracts": {
+    "sportsDataIoPlayerEndpointContract": {
+      "SPORTSDATAIO_PLAYER_ENDPOINT_CONTRACT_DISCOVERED": "YES",
+      "endpointFamily": "/api/mlb/fantasy/json/Players",
+      "method": "GET",
+      "responseSchema": "array provider payload inspected from one bounded call",
+      "expectedPlayerIdField": "PlayerID",
+      "playerMasterList": true,
+      "oneCallInventoryCapable": true
+    },
+    "eventProviderEdgeContract": {
+      "EVENT_PROVIDER_EDGE_CONTRACT_DISCOVERED": "YES",
+      "endpointFamily": "/api/mlb/odds/json/GamesByDate/{date}",
+      "method": "GET",
+      "strategy": "one GamesByDate call per unresolved official game date"
+    }
+  },
+  "playerProbe": {
+    "executed": true,
+    "httpStatus": 401,
+    "result": "HTTP_FAILED",
+    "rowCount": 1,
+    "fieldInventory": [
+      {
+        "field": "message",
+        "presentRows": 1,
+        "nonNullRows": 1,
+        "type": "string",
+        "identityCandidate": false
+      },
+      {
+        "field": "statusCode",
+        "presentRows": 1,
+        "nonNullRows": 1,
+        "type": "number",
+        "identityCandidate": false
+      }
+    ],
+    "exactMlbamFieldPresent": "NO",
+    "mlbamFieldContractCertified": "NO",
+    "mlbamFieldUsed": null,
+    "sportsDataIoPlayerIdFieldUsed": null
+  },
+  "playerDryRun": {
+    "mlbamToSportsDataIoPlayerIdCoverage": {
+      "EXACT_PROVIDER_BRIDGE": 0,
+      "MLBAM_NOT_PRESENT": 1469,
+      "DUPLICATE_MLBAM_ID": 0,
+      "DUPLICATE_SPORTSDATAIO_PLAYER_ID": 0,
+      "CONFLICT": 0
+    },
+    "sportsDataIoPlayerIdToCanonicalCoverage": {
+      "EXACT_CANONICAL_LINK": 0,
+      "NO_CURRENT_CANONICAL_PROVIDER_EDGE": 0,
+      "MULTIPLE_CANONICAL_TARGETS": 0,
+      "CONFLICT": 0
+    },
+    "existing1292": {
+      "exactCanonicalLinksRecovered": 0,
+      "remainingNoExactPath": 1292,
+      "multiplePaths": 0,
+      "conflicts": 0
+    },
+    "ambiguous16": {
+      "resolvedExactly": 0,
+      "remainingAmbiguous": 16,
+      "conflicts": 0
+    },
+    "safeCreateSet": {
+      "R4C_TRUE_CANONICAL_PLAYER_MISSING_COUNT": 161,
+      "preservedSafeCreateCount": 161,
+      "exactExistingCanonicalLinksDiscovered": 0
+    },
+    "playerCrosswalkRows": [],
+    "R4C_PLAYER_CROSSWALK_DRY_RUN_READY": "NO",
+    "PROJECTED_PLAYER_CROSSWALK_CONFLICTS": 0,
+    "failClosedBehavior": {
+        "SPORTSDATAIO_MLBAM_CROSSWALK_CAPABILITY": "BLOCKED_BY_PROVIDER_AUTH",
+        "stoppedNameRecovery": true,
+        "recommendedFallback": "MLB_DATA_01C_R4C_PROVIDER_AUTH_RECHECK"
+      }
+  },
+  "eventAcquisition": {
+    "inputCount": 7,
+    "gamePks": [
+      "776676",
+      "777458",
+      "777938",
+      "778029",
+      "778046",
+      "778170",
+      "778195"
+    ],
+    "allPriorClassification": "DOUBLEHEADER_GAME_NUMBER_EDGE_MISSING",
+    "strategy": "bounded SportsDataIO GamesByDate identity/schedule calls only",
+    "eventCalls": [
+      {
+        "gamePk": "776676",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-AUG-19",
+        "status": 401,
+        "rowCount": 1
+      },
+      {
+        "gamePk": "777458",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-JUN-19",
+        "status": 401,
+        "rowCount": 1
+      },
+      {
+        "gamePk": "777938",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-MAY-14",
+        "status": 401,
+        "rowCount": 1
+      },
+      {
+        "gamePk": "778029",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-MAY-08",
+        "status": 401,
+        "rowCount": 1
+      },
+      {
+        "gamePk": "778046",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-MAY-06",
+        "status": 401,
+        "rowCount": 1
+      },
+      {
+        "gamePk": "778170",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-APR-27",
+        "status": 401,
+        "rowCount": 1
+      },
+      {
+        "gamePk": "778195",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-APR-24",
+        "status": 401,
+        "rowCount": 1
+      }
+    ],
+    "results": [
+      {
+        "gamePk": "776676",
+        "officialGameDate": "2025-08-19",
+        "officialGameNumber": 2,
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76188",
+          "baseball_mlb:mlb:sportsdataio:event:76776"
+        ],
+        "matchingProviderCandidateRows": [],
+        "classification": "NO_EXACT_PROVIDER_EDGE",
+        "recoveredSportEventId": null
+      },
+      {
+        "gamePk": "777458",
+        "officialGameDate": "2025-06-19",
+        "officialGameNumber": 2,
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:75424",
+          "baseball_mlb:mlb:sportsdataio:event:76768"
+        ],
+        "matchingProviderCandidateRows": [],
+        "classification": "NO_EXACT_PROVIDER_EDGE",
+        "recoveredSportEventId": null
+      },
+      {
+        "gamePk": "777938",
+        "officialGameDate": "2025-05-14",
+        "officialGameNumber": 2,
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:76759",
+          "baseball_mlb:mlb:sportsdataio:event:74951"
+        ],
+        "matchingProviderCandidateRows": [],
+        "classification": "NO_EXACT_PROVIDER_EDGE",
+        "recoveredSportEventId": null
+      },
+      {
+        "gamePk": "778029",
+        "officialGameDate": "2025-05-08",
+        "officialGameNumber": 2,
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:74865",
+          "baseball_mlb:mlb:sportsdataio:event:74872",
+          "baseball_mlb:mlb:sportsdataio:event:76757"
+        ],
+        "matchingProviderCandidateRows": [],
+        "classification": "NO_EXACT_PROVIDER_EDGE",
+        "recoveredSportEventId": null
+      },
+      {
+        "gamePk": "778046",
+        "officialGameDate": "2025-05-06",
+        "officialGameNumber": 2,
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:74840",
+          "baseball_mlb:mlb:sportsdataio:event:76756"
+        ],
+        "matchingProviderCandidateRows": [],
+        "classification": "NO_EXACT_PROVIDER_EDGE",
+        "recoveredSportEventId": null
+      },
+      {
+        "gamePk": "778170",
+        "officialGameDate": "2025-04-27",
+        "officialGameNumber": 2,
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:74719",
+          "baseball_mlb:mlb:sportsdataio:event:76753"
+        ],
+        "matchingProviderCandidateRows": [],
+        "classification": "NO_EXACT_PROVIDER_EDGE",
+        "recoveredSportEventId": null
+      },
+      {
+        "gamePk": "778195",
+        "officialGameDate": "2025-04-24",
+        "officialGameNumber": 2,
+        "candidateSportEventIds": [
+          "baseball_mlb:mlb:sportsdataio:event:74683",
+          "baseball_mlb:mlb:sportsdataio:event:76750"
+        ],
+        "matchingProviderCandidateRows": [],
+        "classification": "NO_EXACT_PROVIDER_EDGE",
+        "recoveredSportEventId": null
+      }
+    ],
+    "counts": {
+      "recoveredExistingCanonicalEvents": 0,
+      "trueMissingCanonicalEvents": 0,
+      "remainingAmbiguous": 0,
+      "noExactProviderEdge": 7,
+      "conflicts": 0
+    },
+    "eventCrosswalkRows": [],
+    "R4C_EVENT_CROSSWALK_DRY_RUN_READY": "NO",
+    "PROJECTED_EVENT_CROSSWALK_CONFLICTS": 0
+  },
+  "finalGameClassification": {
+    "counts": {
+      "EXACT_EXISTING_CANONICAL_LINK": 2118,
+      "SAFE_CANONICAL_CREATE": 305,
+      "REMAINS_UNMAPPED": 0,
+      "REMAINS_AMBIGUOUS": 7,
+      "CONFLICT": 0
+    },
+    "countSum": 2430,
+    "projectedFinalGameCoverage": 2423,
+    "projectedFinalGameCoveragePct": 99.7119,
+    "R4C_GAME_REPAIR_PROJECTED_COMPLETE": "NO"
+  },
+  "finalPlayerClassification": {
+    "counts": {
+      "EXACT_EXISTING_CANONICAL_LINK": 0,
+      "SAFE_CANONICAL_CREATE": 161,
+      "REMAINS_UNMAPPED": 1292,
+      "REMAINS_AMBIGUOUS": 16,
+      "CONFLICT": 0
+    },
+    "countSum": 1469,
+    "projectedUniquePlayerCoverage": 161,
+    "projectedUniquePlayerCoveragePct": 10.9598,
+    "projectedPitcherRawCoverage": 45465,
+    "projectedPitcherRawCoveragePct": 6.3808,
+    "projectedBatterRawCoverage": 24689,
+    "projectedBatterRawCoveragePct": 3.465,
+    "R4C_PLAYER_REPAIR_PROJECTED_COMPLETE": "NO"
+  },
+  "mutationCaps": {
+    "EVENT_INSERT_CAP": 305,
+    "EVENT_CROSSWALK_INSERT_CAP": 2118,
+    "EVENT_CROSSWALK_REUSE_COUNT": 0,
+    "RAW_EVENT_ROWS_TOUCH_CAP": 531535,
+    "PLAYER_INSERT_CAP": 161,
+    "PLAYER_CROSSWALK_INSERT_CAP": 161,
+    "PLAYER_CROSSWALK_REUSE_COUNT": 0,
+    "RAW_PITCHER_ROWS_TOUCH_CAP": 45465,
+    "RAW_BATTER_ROWS_TOUCH_CAP": 24689,
+    "eventWriteCapsExact": true,
+    "playerWriteCapsExact": true,
+    "rawTouchCapsExact": true
+  },
+  "readiness": {
+    "MLB_DATA_01C_R5_PERSISTENCE_READY": "NO",
+    "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO",
+    "MLB_DATA_01D_PROJECTED_READY_AFTER_R5": "NO"
+  },
+  "reuse": {
+    "R4C_RECOVERY_REUSABLE_FOR_2026": "YES",
+    "R4C_RECOVERY_REUSABLE_FOR_DAILY_INGEST": "YES"
+  },
+  "providerAccounting": {
+    "sportsDataIoPlayerCalls": 1,
+    "sportsDataIoEventCalls": 7,
+    "mlbOfficialEventCalls": 0,
+    "totalProviderCalls": 8,
+    "successfulCalls": 0,
+    "failedCalls": 8,
+    "retryCalls": 0,
+    "otherProviderCalls": 0,
+    "calls": [
+      {
+        "provider": "sportsdataio",
+        "endpoint": "/api/mlb/fantasy/json/Players",
+        "method": "GET",
+        "purpose": "player_identity_master_probe",
+        "status": 401,
+        "ok": false,
+        "startedAt": "2026-08-29T01:17:47.518Z",
+        "completedAt": "2026-08-29T01:17:48.310Z",
+        "responseShape": "object",
+        "rowCount": 1,
+        "responseDigest": "0ca2298f9a0ff13847bf3d8bbc8b9781b6a385966fa22b37db40a894d328c924"
+      },
+      {
+        "provider": "sportsdataio",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-AUG-19",
+        "method": "GET",
+        "purpose": "event_identity_probe",
+        "status": 401,
+        "ok": false,
+        "startedAt": "2026-08-29T01:17:48.323Z",
+        "completedAt": "2026-08-29T01:17:48.658Z",
+        "responseShape": "object",
+        "rowCount": 1,
+        "responseDigest": "0ca2298f9a0ff13847bf3d8bbc8b9781b6a385966fa22b37db40a894d328c924"
+      },
+      {
+        "provider": "sportsdataio",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-JUN-19",
+        "method": "GET",
+        "purpose": "event_identity_probe",
+        "status": 401,
+        "ok": false,
+        "startedAt": "2026-08-29T01:17:48.658Z",
+        "completedAt": "2026-08-29T01:17:48.797Z",
+        "responseShape": "object",
+        "rowCount": 1,
+        "responseDigest": "0ca2298f9a0ff13847bf3d8bbc8b9781b6a385966fa22b37db40a894d328c924"
+      },
+      {
+        "provider": "sportsdataio",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-MAY-14",
+        "method": "GET",
+        "purpose": "event_identity_probe",
+        "status": 401,
+        "ok": false,
+        "startedAt": "2026-08-29T01:17:48.797Z",
+        "completedAt": "2026-08-29T01:17:48.911Z",
+        "responseShape": "object",
+        "rowCount": 1,
+        "responseDigest": "0ca2298f9a0ff13847bf3d8bbc8b9781b6a385966fa22b37db40a894d328c924"
+      },
+      {
+        "provider": "sportsdataio",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-MAY-08",
+        "method": "GET",
+        "purpose": "event_identity_probe",
+        "status": 401,
+        "ok": false,
+        "startedAt": "2026-08-29T01:17:48.911Z",
+        "completedAt": "2026-08-29T01:17:49.033Z",
+        "responseShape": "object",
+        "rowCount": 1,
+        "responseDigest": "0ca2298f9a0ff13847bf3d8bbc8b9781b6a385966fa22b37db40a894d328c924"
+      },
+      {
+        "provider": "sportsdataio",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-MAY-06",
+        "method": "GET",
+        "purpose": "event_identity_probe",
+        "status": 401,
+        "ok": false,
+        "startedAt": "2026-08-29T01:17:49.034Z",
+        "completedAt": "2026-08-29T01:17:49.139Z",
+        "responseShape": "object",
+        "rowCount": 1,
+        "responseDigest": "0ca2298f9a0ff13847bf3d8bbc8b9781b6a385966fa22b37db40a894d328c924"
+      },
+      {
+        "provider": "sportsdataio",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-APR-27",
+        "method": "GET",
+        "purpose": "event_identity_probe",
+        "status": 401,
+        "ok": false,
+        "startedAt": "2026-08-29T01:17:49.140Z",
+        "completedAt": "2026-08-29T01:17:49.269Z",
+        "responseShape": "object",
+        "rowCount": 1,
+        "responseDigest": "0ca2298f9a0ff13847bf3d8bbc8b9781b6a385966fa22b37db40a894d328c924"
+      },
+      {
+        "provider": "sportsdataio",
+        "endpoint": "/api/mlb/odds/json/GamesByDate/2025-APR-24",
+        "method": "GET",
+        "purpose": "event_identity_probe",
+        "status": 401,
+        "ok": false,
+        "startedAt": "2026-08-29T01:17:49.269Z",
+        "completedAt": "2026-08-29T01:17:49.391Z",
+        "responseShape": "object",
+        "rowCount": 1,
+        "responseDigest": "0ca2298f9a0ff13847bf3d8bbc8b9781b6a385966fa22b37db40a894d328c924"
+      }
+    ]
+  },
+  "safety": {
+    "productionDmlMutations": 0,
+    "productionSchemaMutations": 0,
+    "crosswalkWrites": 0,
+    "canonicalEventInserts": 0,
+    "canonicalPlayerInserts": 0,
+    "rawMappingWrites": 0,
+    "featureWrites": 0,
+    "modelWrites": 0,
+    "predictionWrites": 0,
+    "imports2026": 0,
+    "automationActivated": false,
+    "activeCronAdded": false,
+    "rawImmutability": "PRESERVED_BY_ZERO_WRITE_R4C"
+  },
+  "flags": {
+    "R4C_PRE_ACQUISITION_BASELINE": "PASS",
+    "SPORTSDATAIO_PLAYER_ENDPOINT_CONTRACT_DISCOVERED": "YES",
+    "SPORTSDATAIO_EXACT_MLBAM_FIELD_PRESENT": "NO",
+    "SPORTSDATAIO_MLBAM_FIELD_CONTRACT_CERTIFIED": "NO",
+    "R4C_PLAYER_CROSSWALK_DRY_RUN_READY": "NO",
+    "R4C_EVENT_CROSSWALK_DRY_RUN_READY": "NO",
+    "R4C_GAME_REPAIR_PROJECTED_COMPLETE": "NO",
+    "R4C_PLAYER_REPAIR_PROJECTED_COMPLETE": "NO",
+    "PROJECTED_EVENT_CROSSWALK_CONFLICTS": 0,
+    "PROJECTED_PLAYER_CROSSWALK_CONFLICTS": 0,
+    "MLB_DATA_01C_R5_PERSISTENCE_READY": "NO",
+    "MLB_DATA_01D_2025_FEATURE_BUILD_READY": "NO",
+    "MLB_DATA_01D_PROJECTED_READY_AFTER_R5": "NO",
+    "R4C_RECOVERY_REUSABLE_FOR_2026": "YES",
+    "R4C_RECOVERY_REUSABLE_FOR_DAILY_INGEST": "YES"
+  }
+}
