@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-08-30T00:00:00.000Z",
+  "project": "MLB_DATA_01D_R1C_POST_MIGRATION_RECOVERY_VALIDATOR",
+  "certificationVerdict": "MLB_DATA_01D_R1C_POST_MIGRATION_RECOVERY_VALIDATOR_BLOCKED",
+  "alignment": {
+    "localHeadAtStart": "0703bb39539a6c6ce8ff0e9911b3de90a642c35a",
+    "originMainAtStart": "61aeb84a58d0ae71ec02bbf044f70f3c60854d33",
+    "productionAtStart": "61aeb84a58d0ae71ec02bbf044f70f3c60854d33",
+    "worktreeAtStart": "clean",
+    "R1C_BASELINE_ALIGNMENT": "PASS"
+  },
+  "inheritedEvidence": {
+    "R1A_MIGRATION_NONDESTRUCTIVE": "YES",
+    "R1A_CONSTRAINT_DROP_SCOPE_CERTIFIED": "YES",
+    "R1A_REPLACEMENT_KEY_UNIQUENESS": "PASS",
+    "R1A_EXISTING_SNAPSHOTS_PRESERVED_BY_MIGRATION": "YES",
+    "R1A_POST_MIGRATION_RESUME_PROJECTION": "PASS",
+    "R1B_NATIVE_UNIQUENESS_MIGRATION_APPLIED": "YES_USER_CONFIRMED",
+    "R1B_EXISTING_SNAPSHOTS_PRESERVED": "YES",
+    "R1B_DAILY_FEATURE_ZERO_STATE": "PASS",
+    "R1B_RAW_NATIVE_STATE_PRESERVED": "PASS",
+    "R1C_INHERITED_EVIDENCE_READY": "YES"
+  },
+  "partialProductionState": {
+    "snapshots": 67433,
+    "teamDaily": 0,
+    "starterDaily": 0,
+    "bullpenDaily": 0,
+    "batterDaily": 0,
+    "matchupDaily": 0,
+    "firstInningDaily": 0,
+    "rawRows": 712528,
+    "rawMlbamPitcherRows": 712528,
+    "rawMlbamBatterRows": 712528,
+    "nativeGames": 2430,
+    "nativePlayers": 1469,
+    "models": 0,
+    "champion": "NONE",
+    "predictions": 0,
+    "R1C_PARTIAL_STATE_READBACK": "PASS"
+  },
+  "uniquenessObservability": {
+    "R1C_UNIQUENESS_OBSERVABILITY_PATH": "E_PURE_READ_ONLY_DRY_RUN_AGAINST_PERSISTENCE_CONTRACT_PLUS_R1A_R1B_EVIDENCE",
+    "catalogLimitation": "Supabase REST does not expose pg_indexes, pg_constraint, or information_schema.table_constraints through the available channel.",
+    "rollbackProbePerformed": "NO",
+    "productionFeatureDmlPerformed": "NO",
+    "R1C_TEAM_NATIVE_UNIQUENESS_BEHAVIOR": "INCOMPLETE",
+    "R1C_BULLPEN_NATIVE_UNIQUENESS_BEHAVIOR": "INCOMPLETE",
+    "R1C_UNAFFECTED_DAILY_KEY_BEHAVIOR": "INCOMPLETE"
+  },
+  "staleAlignmentRepair": {
+    "R1C_STALE_ALIGNMENT_REFERENCES_INVENTORIED": "YES",
+    "historicalBaselineOnly": [
+      "docs/CERTIFICATION historical artifacts that record 875b46d34553bc3618067fec202a2f780a39b2d8"
+    ],
+    "incorrectRuntimeGate": [
+      "scripts/mlb-data-01d-2025-feature-persistence.mjs plan-only recovery gate was pinned to 875b46d34553bc3618067fec202a2f780a39b2d8"
+    ],
+    "repair": "Plan-only recovery validation now accepts 61aeb84a58d0ae71ec02bbf044f70f3c60854d33; --execute remains pinned to 875b46d34553bc3618067fec202a2f780a39b2d8.",
+    "R1C_POST_R1B_ALIGNMENT_CONTRACT_REPAIRED": "YES",
+    "R1C_HISTORICAL_ARTIFACT_IMMUTABILITY": "PASS"
+  },
+  "recoveryDryRun": {
+    "command": "node scripts/mlb-data-01d-2025-feature-persistence.mjs",
+    "mode": "PLAN_ONLY",
+    "rawRowsScanned": 712528,
+    "result": "BLOCKED",
+    "blocker": "BLOCK_CONFLICT:SNAPSHOT_REUSE_MISMATCH:23200",
+    "R1C_POSTMIGRATION_RECOVERY_DRY_RUN": "FAIL_BLOCK_CONFLICT",
+    "R1C_TEAM_COLLISION_RECHECK": "NOT_REACHED",
+    "R1C_BULLPEN_COLLISION_RECHECK": "NOT_REACHED",
+    "R1C_NATIVE_KEY_UNIQUENESS": "NOT_CERTIFIED",
+    "R1C_RECOVERY_IDEMPOTENCY_PROJECTED": "NOT_CERTIFIED"
+  },
+  "snapshotState": {
+    "rowCount": 67433,
+    "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "duplicateDeterministicIdentities": 0,
+    "asOfViolations": 0,
+    "sameDayLeakageViolations": 0,
+    "R1C_SNAPSHOT_STATE": "PASS",
+    "R1C_SNAPSHOT_RECOVERY_POLICY": "FAIL_BLOCK_CONFLICT"
+  },
+  "featureContract": {
+    "R1C_ASOF_CONTRACT": "PASS",
+    "R1C_LEAKAGE_AUDIT": "PASS",
+    "R1C_FEATURE_DEFINITIONS_UNCHANGED": "YES"
+  },
+  "rawIdentityProductSafety": {
+    "R1C_RAW_NATIVE_STATE": "PASS",
+    "R1C_MODEL_PREDICTION_BOUNDARY": "PASS",
+    "providerCalls": 0,
+    "import2026": "NO",
+    "automationActivated": "NO",
+    "activeCronAdded": "NO"
+  },
+  "dmlBoundary": {
+    "MLB_DATA_01D_R1C_FEATURE_DML_RESUME_AUTHORIZED": "NO",
+    "productionDmlMutationsInR1C": 0,
+    "productionDdlMutationsInR1C": 0,
+    "featureWrites": 0,
+    "snapshotWrites": 0,
+    "rawWrites": 0,
+    "nativeIdentityWrites": 0
+  },
+  "nextPhase": "MLB_DATA_01D_R1D_SNAPSHOT_REUSE_DIGEST_RECONCILIATION",
+  "nextInstruction": "Investigate the 23200 snapshot input_digest mismatches with read-only sampled diff evidence before authorizing any feature DML resume."
+}

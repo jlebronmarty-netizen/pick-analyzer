@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-29 00:00:00Z
 
+## 2026-08-30 MLB-DATA-01D-R1C Post-Migration Recovery Validator
+
+- MLB-DATA-01D-R1C is blocked as `MLB_DATA_01D_R1C_POST_MIGRATION_RECOVERY_VALIDATOR_BLOCKED`. The stale plan-only recovery gate in `scripts/mlb-data-01d-2025-feature-persistence.mjs` now accepts the R1B deployed baseline `61aeb84a58d0ae71ec02bbf044f70f3c60854d33`, while `--execute` remains pinned to the prior authorized feature-DML baseline and feature persistence was not resumed.
+- The repaired read-only recovery dry-run scanned all 712,528 production raw Statcast rows and stopped at snapshot reuse reconciliation with `BLOCK_CONFLICT:SNAPSHOT_REUSE_MISMATCH:23200`. Existing state remains preserved: 67,433 snapshots, 0 daily feature rows, 2,430 native games, 1,469 native players, 0 models, champion `NONE` and 0 predictions.
+- R1C made 0 provider calls, 0 production DDL mutations, 0 production DML mutations, 0 feature writes, 0 snapshot writes, 0 raw/native identity writes and no 2026/automation/cron changes. Next: `MLB_DATA_01D_R1D_SNAPSHOT_REUSE_DIGEST_RECONCILIATION`; do not resume feature DML until the 23,200 digest conflicts are explained and a safe reuse contract is certified.
+
 ## 2026-08-30 MLB-DATA-01D-R1B Feature Native Uniqueness Migration Readback
 
 - MLB-DATA-01D-R1B is recorded as `MLB_DATA_01D_R1B_FEATURE_NATIVE_UNIQUENESS_MIGRATION_READBACK_PARTIAL` after the user reported successful manual application of `supabase/migrations/202608290002_pick2_mlb_feature_native_uniqueness_v1.sql`. Production is aligned at `61aeb84a58d0ae71ec02bbf044f70f3c60854d33`; Codex did not reapply the migration and made 0 production DDL mutations, 0 production DML mutations and 0 provider calls.
