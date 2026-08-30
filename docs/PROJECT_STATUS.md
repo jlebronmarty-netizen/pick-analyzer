@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-29 00:00:00Z
 
+## 2026-08-30 MLB-DATA-01D-R1A Feature Native Uniqueness Migration Prep
+
+- MLB-DATA-01D-R1A is certified as `MLB_DATA_01D_R1A_FEATURE_NATIVE_UNIQUENESS_MIGRATION_CERTIFIED`. It adds one non-applied forward migration, `supabase/migrations/202608290002_pick2_mlb_feature_native_uniqueness_v1.sql`, to replace only the R1-certified incompatible legacy team and bullpen daily-feature uniqueness constraints with native `target_game_pk`-rooted unique indexes.
+- The migration is bounded to constraint/index repair only: no table drops, no column drops, no feature row updates/deletes/inserts, no snapshot table changes, no raw/native identity changes, no feature definition changes and no model/prediction/2026/automation/cron work. It was not applied to production and feature DML was not resumed.
+- The current partial production state remains 67,433 feature snapshots, 0 daily feature rows, 2,430 native games, 1,469 native players, 0 models, champion `NONE` and 0 predictions. Next: separately authorize migration application/readback, then separately authorize guarded feature persistence resume.
+
 ## 2026-08-29 MLB-DATA-01D-R1 Feature Persistence Key Repair
 
 - MLB-DATA-01D-R1 is blocked as `MLB_DATA_01D_R1_FEATURE_PERSISTENCE_KEY_REPAIR_BLOCKED`. Read-only production audit confirmed the partial state is stable: 67,433 feature snapshots, 0 daily feature rows, 2,430 native games, 1,469 native players and 0 result/market/model/prediction rows at production commit `875b46d34553bc3618067fec202a2f780a39b2d8`.

@@ -1,0 +1,115 @@
+{
+  "generatedAt": "2026-08-30T00:00:00.000Z",
+  "project": "MLB_DATA_01D_R1A_FEATURE_NATIVE_UNIQUENESS_MIGRATION_PREP",
+  "certificationVerdict": "MLB_DATA_01D_R1A_FEATURE_NATIVE_UNIQUENESS_MIGRATION_CERTIFIED",
+  "migrationPath": "supabase/migrations/202608290002_pick2_mlb_feature_native_uniqueness_v1.sql",
+  "alignment": {
+    "localHeadBeforeR1A": "d4ecbb0974c6001b535d0f2757b894de9409e91d",
+    "originMain": "875b46d34553bc3618067fec202a2f780a39b2d8",
+    "production": "875b46d34553bc3618067fec202a2f780a39b2d8"
+  },
+  "partialProductionState": {
+    "pick2_feature_snapshots": 67433,
+    "dailyFeatureTables": 0,
+    "rawRows": 712528,
+    "nativeGames": 2430,
+    "nativePlayers": 1469,
+    "models": 0,
+    "champion": "NONE",
+    "predictions": 0
+  },
+  "affectedConstraintInventory": {
+    "team": {
+      "oldConstraint": "unique (team_id, feature_date, feature_version)",
+      "observedConstraintName": "pick2_mlb_team_daily_features_team_id_feature_date_feature__key",
+      "dropNames": [
+        "pick2_mlb_team_daily_features_team_id_feature_date_feature__key",
+        "pick2_mlb_team_daily_features_team_id_feature_date_feature_vers",
+        "pick2_mlb_team_daily_features_team_id_feature_date_feature_version_key"
+      ],
+      "replace": true
+    },
+    "bullpen": {
+      "oldConstraint": "unique (team_id, feature_date, feature_version)",
+      "dropNames": [
+        "pick2_mlb_bullpen_daily_features_team_id_feature_date_feature_key",
+        "pick2_mlb_bullpen_daily_features_team_id_feature_date_feature_v",
+        "pick2_mlb_bullpen_daily_features_team_id_feature_date_feature_version_key"
+      ],
+      "replace": true
+    },
+    "starter": {
+      "oldConstraint": "unique (player_id, feature_date, feature_version)",
+      "replace": false
+    },
+    "batter": {
+      "oldConstraint": "unique (player_id, feature_date, feature_version)",
+      "replace": false
+    },
+    "matchup": {
+      "oldConstraint": "unique (event_id, feature_date, feature_version)",
+      "replace": false
+    },
+    "firstInning": {
+      "oldConstraint": "unique (event_id, feature_date, feature_version)",
+      "replace": false
+    }
+  },
+  "nativeKeys": {
+    "team": "target_game_pk + team_id + feature_version",
+    "starter": "target_game_pk + mlbam_pitcher_id + feature_version",
+    "bullpen": "target_game_pk + team_id + feature_version",
+    "batter": "target_game_pk + mlbam_batter_id + feature_version",
+    "matchup": "target_game_pk + feature_version",
+    "firstInning": "target_game_pk + feature_version",
+    "snapshot": "deterministic_identity"
+  },
+  "collisionRationale": {
+    "teamCollisions": 42,
+    "bullpenCollisions": 42,
+    "offenseFamilyCollisions": 42,
+    "affectedGames": 42,
+    "affectedTeams": 19,
+    "resolvedByTargetGamePk": true
+  },
+  "futureResumeProjection": {
+    "team": "4498 inserts / 0 reuses",
+    "starter": "4498 inserts / 0 reuses",
+    "bullpen": "4498 inserts / 0 reuses",
+    "batter": "44943 inserts / 0 reuses",
+    "offense": "4498 logical rows as team/snapshot family",
+    "matchup": "2249 inserts / 0 reuses",
+    "firstInning": "2249 inserts / 0 reuses",
+    "snapshots": "0 inserts / 67433 reuses",
+    "conflicts": 0
+  },
+  "flags": {
+    "R1A_BASELINE": "PASS",
+    "R1A_AFFECTED_CONSTRAINT_INVENTORY_COMPLETE": "YES",
+    "R1A_NATIVE_KEY_CONTRACT_CERTIFIED": "YES",
+    "R1A_MIGRATION_NONDESTRUCTIVE": "YES",
+    "R1A_CONSTRAINT_DROP_SCOPE_CERTIFIED": "YES",
+    "R1A_REPLACEMENT_KEY_UNIQUENESS": "PASS",
+    "R1A_EXISTING_DATA_COMPATIBILITY": "PASS",
+    "R1A_EXISTING_SNAPSHOTS_PRESERVED_BY_MIGRATION": "YES",
+    "R1A_POST_MIGRATION_RESUME_PROJECTION": "PASS",
+    "R1A_POST_RESUME_IDEMPOTENCY_PROJECTED": "PASS",
+    "R1A_FEATURE_DEFINITIONS_UNCHANGED": "YES",
+    "R1A_ASOF_AND_LEAKAGE_CONTRACT_PRESERVED": "YES"
+  },
+  "safety": {
+    "migrationApplied": "NO",
+    "featureDmlResumed": "NO",
+    "providerCalls": 0,
+    "productionDdlMutations": 0,
+    "productionDmlMutations": 0,
+    "snapshotWrites": 0,
+    "rawStatcastMutations": 0,
+    "nativeIdentityMutations": 0,
+    "modelWork": "NO",
+    "predictionWork": "NO",
+    "import2026": "NO",
+    "automation": "NO",
+    "cronChanges": 0
+  }
+}
