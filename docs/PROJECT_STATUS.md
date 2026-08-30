@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-29 00:00:00Z
 
+## 2026-08-30 MLB-DATA-01D-R1D Snapshot Reuse Digest Reconciliation
+
+- MLB-DATA-01D-R1D is certified as `MLB_DATA_01D_R1D_SNAPSHOT_REUSE_DIGEST_RECONCILIATION_CERTIFIED`. The prior `BLOCK_CONFLICT:SNAPSHOT_REUSE_MISMATCH:23200` was explained as an unordered PostgREST range-pagination readback defect in the recovery validator, not a real snapshot digest or feature-output conflict.
+- After repairing snapshot readback to order by `id` before range pagination, the fresh read-only recovery pass scanned all 712,528 raw Statcast rows and reconciled all 67,433 existing snapshots as `REUSE_NO_OP`: 67,433 exact digest matches, 0 digest mismatches, 0 missing snapshots, 0 unexpected snapshots, 0 duplicate deterministic identities and 0 recovery conflicts.
+- R1D made 0 provider calls, 0 production DDL mutations, 0 production DML mutations, 0 feature writes, 0 snapshot writes, 0 raw/native identity writes and no model/prediction/2026/automation/cron changes. Feature DML resume remains separately unauthorized; next phase is a bounded R1E recovery-readiness certification for daily native feature rows only.
+
 ## 2026-08-30 MLB-DATA-01D-R1C Post-Migration Recovery Validator
 
 - MLB-DATA-01D-R1C is blocked as `MLB_DATA_01D_R1C_POST_MIGRATION_RECOVERY_VALIDATOR_BLOCKED`. The stale plan-only recovery gate in `scripts/mlb-data-01d-2025-feature-persistence.mjs` now accepts the R1B deployed baseline `61aeb84a58d0ae71ec02bbf044f70f3c60854d33`, while `--execute` remains pinned to the prior authorized feature-DML baseline and feature persistence was not resumed.

@@ -1,0 +1,130 @@
+{
+  "generatedAt": "2026-08-30T15:43:39.513Z",
+  "project": "MLB_DATA_01D_R1D_SNAPSHOT_REUSE_DIGEST_RECONCILIATION",
+  "certificationVerdict": "MLB_DATA_01D_R1D_SNAPSHOT_REUSE_DIGEST_RECONCILIATION_CERTIFIED",
+  "alignment": {
+    "localDryRunCommit": "6e7f4185d13045aa1ff0ef9bede82614bc41b8a9",
+    "targetProductionCommit": "875b46d34553bc3618067fec202a2f780a39b2d8",
+    "r1bPostMigrationProductionCommit": "61aeb84a58d0ae71ec02bbf044f70f3c60854d33",
+    "planOnlyAcceptedProductionCommits": [
+      "875b46d34553bc3618067fec202a2f780a39b2d8",
+      "61aeb84a58d0ae71ec02bbf044f70f3c60854d33"
+    ],
+    "productionCommit": "61aeb84a58d0ae71ec02bbf044f70f3c60854d33",
+    "providerCallsMade": 0
+  },
+  "baseArtifact": {
+    "mode": "PLAN_ONLY",
+    "productionCommit": "61aeb84a58d0ae71ec02bbf044f70f3c60854d33",
+    "providerCallsMade": 0
+  },
+  "blockerReconciliation": {
+    "priorR1cBlocker": "BLOCK_CONFLICT:SNAPSHOT_REUSE_MISMATCH:23200",
+    "observedCause": "UNORDERED_POSTGREST_RANGE_PAGINATION_FALSE_MISMATCH",
+    "repair": "readAll now applies order(id ascending) before range pagination",
+    "freshOrderedReadback": {
+      "exactDigestMatches": 67433,
+      "digestMismatches": 0,
+      "missingSnapshots": 0,
+      "unexpectedExtraSnapshots": 0,
+      "duplicateDeterministicIdentities": 0
+    }
+  },
+  "snapshotReuseDiagnostics": {
+    "totalExistingSnapshots": 67433,
+    "totalPlannedSnapshots": 67433,
+    "exactDigestMatches": 67433,
+    "digestMismatches": 0,
+    "missingSnapshots": 0,
+    "unexpectedExtraSnapshots": 0,
+    "duplicateDeterministicIdentities": 0,
+    "conflictCountFromRecovery": 0,
+    "domainDistribution": {},
+    "temporalDistribution": {
+      "month": {},
+      "seasonBucket": {},
+      "sameDayDoubleheaderTargetGames": 0,
+      "normalSingleGameDates": 0
+    },
+    "affectedCounts": {
+      "games": 0,
+      "teams": 0,
+      "players": 0,
+      "dates": 0
+    },
+    "digestContracts": {
+      "stored": {
+        "algorithm": "sha256",
+        "storedColumn": "input_digest",
+        "originalInputObject": "hashJson({ native, sample, features }) before JSONB persistence",
+        "serialization": "JSON.stringify(sortJson(value))",
+        "nullBehavior": "explicit nulls preserved when present",
+        "undefinedBehavior": "undefined object properties omitted by JSON.stringify",
+        "objectKeyOrdering": "recursive lexical key sort",
+        "arrayOrdering": "preserved"
+      },
+      "current": {
+        "algorithm": "sha256",
+        "inputObject": "hashJson({ native, sample, features }) reconstructed from current recovery build",
+        "serialization": "JSON.stringify(sortJson(value))",
+        "nullBehavior": "explicit nulls preserved when present",
+        "undefinedBehavior": "undefined object properties omitted by JSON.stringify",
+        "objectKeyOrdering": "recursive lexical key sort",
+        "arrayOrdering": "preserved"
+      },
+      "differences": [
+        "stored input_digest is compared against freshly reconstructed digest; R1D shows whether JSONB readback payload and reconstructed payload remain semantically equivalent"
+      ]
+    },
+    "sampleDesign": {
+      "requestedMinimum": 100,
+      "actualSize": 0,
+      "method": "deterministic stride over full mismatch inventory after production reconstruction"
+    },
+    "sample": [],
+    "aggregateInputDiffResults": {},
+    "featureOutputComparison": {
+      "outputIdentical": 0,
+      "outputEquivalent": 0,
+      "trueFeatureOutputDifference": 0,
+      "unverifiable": 0
+    },
+    "canonicalDigestReconciliation": {
+      "canonicalExactMatches": 0,
+      "canonicalRemainingMismatches": 0,
+      "percentageReconciled": 100
+    },
+    "rootCauseDistribution": {}
+  },
+  "safety": {
+    "providerCalls": 0,
+    "productionDdlMutations": 0,
+    "productionDmlMutations": 0,
+    "featureWrites": 0,
+    "snapshotWrites": 0,
+    "rawWrites": 0,
+    "nativeIdentityWrites": 0,
+    "featureDmlResumeAuthorized": "NO"
+  },
+  "flags": {
+    "R1D_FRESH_MISMATCH_INVENTORY_READY": "YES",
+    "R1D_MISMATCH_INVENTORY_COMPLETE": "YES",
+    "R1D_STORED_DIGEST_CONTRACT_IDENTIFIED": "YES",
+    "R1D_CURRENT_DIGEST_CONTRACT_IDENTIFIED": "YES",
+    "R1D_DIGEST_CONTRACT_DIFF_COMPLETE": "YES",
+    "R1D_SAMPLE_FEATURE_OUTPUT_COMPARISON": "PASS",
+    "R1D_CANONICAL_DIGEST_CONTRACT_READY": "YES",
+    "R1D_CANONICAL_DIGEST_RECONCILIATION_READY": "YES",
+    "R1D_OUTPUT_EQUIVALENCE_CLASSIFICATION_READY": "YES",
+    "R1D_FEATURE_DEFINITION_DRIFT_STATE": "NO",
+    "R1D_MISMATCH_ASOF_LEAKAGE_STATE": "PASS",
+    "R1D_SNAPSHOT_REUSE_CLASSIFICATION_READY": "YES",
+    "R1D_DIGEST_GUARD_PRESERVED": "YES",
+    "R1D_FUTURE_IDEMPOTENCY_CONTRACT_READY": "YES",
+    "R1D_PRODUCTION_SNAPSHOTS_UNTOUCHED": "YES",
+    "R1D_DAILY_FEATURE_STATE_UNTOUCHED": "YES",
+    "R1D_RAW_NATIVE_STATE": "PASS",
+    "MLB_DATA_01D_R1D_FEATURE_DML_RESUME_AUTHORIZED": "NO"
+  },
+  "recommendation": "OPTION_A_REUSE_WHEN_DETERMINISTIC_IDENTITY_AND_CANONICAL_PAYLOAD_EQUIVALENCE_PASS_WITH_ORDERED_READBACK_REQUIRED"
+}

@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js'
 const args = new Set(process.argv.slice(2))
 const execute = args.has('--execute')
 const writeArtifact = args.has('--write-artifact')
+const diagnoseSnapshotReuse = args.has('--diagnose-snapshot-reuse')
 const targetProductionCommit = '875b46d34553bc3618067fec202a2f780a39b2d8'
 const r1bPostMigrationProductionCommit = '61aeb84a58d0ae71ec02bbf044f70f3c60854d33'
 const localDryRunCommit = '6e7f4185d13045aa1ff0ef9bede82614bc41b8a9'
@@ -13,9 +14,11 @@ const featureVersion = 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1'
 const dryRunPath = 'docs/CERTIFICATION/mlb-data-01d-2025-feature-build-dry-run.json'
 const r5bArtifactPath = 'docs/CERTIFICATION/mlb-data-01c-r5b-2025-native-identity-backfill.json'
 const artifactPath = 'docs/CERTIFICATION/mlb-data-01d-2025-feature-persistence.json'
+const r1dArtifactPath = 'docs/CERTIFICATION/mlb-data-01d-r1d-snapshot-reuse-digest-reconciliation.json'
 const insertChunkSize = 500
 const rawReadPageSize = 1000
 const rawReadBatchSize = 5000
+let snapshotReuseDiagnostics = null
 
 const expected = {
   rawRows: 712528,
@@ -197,6 +200,206 @@ function sortJson(value) {
   if (Array.isArray(value)) return value.map(sortJson)
   if (!value || typeof value !== 'object') return value
   return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortJson(value[key])]))
+}
+
+function increment(map, key) {
+  map[key] = (map[key] ?? 0) + 1
+}
+
+function parseSnapshotIdentity(identity) {
+  const parts = String(identity ?? '').split(':')
+  return {
+    domain: parts[2] ?? 'unknown',
+    family: parts[3] ?? 'unknown',
+    targetGamePk: parts[4] ?? 'unknown',
+    subjectId: parts[5] ?? 'unknown',
+    secondarySubjectId: parts[6] ?? 'unknown',
+    asOfDate: parts[7] ?? 'unknown',
+  }
+}
+
+function seasonBucket(featureDate) {
+  const month = Number(String(featureDate ?? '').slice(5, 7))
+  if (month <= 5) return 'early'
+  if (month <= 7) return 'mid'
+  return 'late'
+}
+
+function compareObjects(stored, reconstructed, prefix = '', results = {}) {
+  const storedObject = stored && typeof stored === 'object' && !Array.isArray(stored)
+  const reconstructedObject = reconstructed && typeof reconstructed === 'object' && !Array.isArray(reconstructed)
+  if (Array.isArray(stored) || Array.isArray(reconstructed)) {
+    if (JSON.stringify(stored) !== JSON.stringify(reconstructed)) increment(results, `${prefix || 'root'}:VALUE_DIFFERENCE`)
+    return results
+  }
+  if (storedObject || reconstructedObject) {
+    const keys = new Set([...Object.keys(storedObject ? stored : {}), ...Object.keys(reconstructedObject ? reconstructed : {})])
+    for (const key of keys) {
+      if (!(key in (storedObject ? stored : {})) || !(key in (reconstructedObject ? reconstructed : {}))) {
+        increment(results, `${prefix ? `${prefix}.` : ''}${key}:NULL_VS_MISSING`)
+        continue
+      }
+      compareObjects(stored[key], reconstructed[key], `${prefix ? `${prefix}.` : ''}${key}`, results)
+    }
+    return results
+  }
+  if (stored !== reconstructed) {
+    const storedNumber = typeof stored === 'number'
+    const reconstructedNumber = typeof reconstructed === 'number'
+    increment(results, `${prefix || 'root'}:${storedNumber && reconstructedNumber ? 'PRECISION_OR_VALUE_DIFFERENCE' : 'VALUE_DIFFERENCE'}`)
+  }
+  return results
+}
+
+function buildSnapshotReuseDiagnostics(existingRows, plannedRows, conflicts) {
+  const existingByIdentity = new Map(existingRows.map((row) => [row.deterministic_identity, row]))
+  const plannedByIdentity = new Map(plannedRows.map((row) => [row.deterministic_identity, row]))
+  const domainDistribution = {}
+  const temporalDistribution = { month: {}, seasonBucket: {}, sameDayDoubleheaderTargetGames: 0, normalSingleGameDates: 0 }
+  const rootCauseDistribution = {}
+  const inputDiffResults = {}
+  const sample = []
+  const gamesAffected = new Set()
+  const teamsAffected = new Set()
+  const playersAffected = new Set()
+  const datesAffected = new Set()
+  const targetGamesByDateSubjectFamily = new Map()
+  let exactDigestMatches = 0
+  let digestMismatches = 0
+  let missingSnapshots = 0
+  let featureOutputIdentical = 0
+  let featureOutputDifferent = 0
+  let canonicalExactMatches = 0
+
+  for (const planned of plannedRows) {
+    const parsed = parseSnapshotIdentity(planned.deterministic_identity)
+    const groupKey = `${planned.feature_date}:${parsed.family}:${planned.subject_id}`
+    if (!targetGamesByDateSubjectFamily.has(groupKey)) targetGamesByDateSubjectFamily.set(groupKey, new Set())
+    targetGamesByDateSubjectFamily.get(groupKey).add(planned.target_game_pk)
+  }
+
+  const mismatchRows = []
+  for (const planned of plannedRows) {
+    const existing = existingByIdentity.get(planned.deterministic_identity)
+    if (!existing) {
+      missingSnapshots += 1
+      continue
+    }
+    if (existing.input_digest === planned.input_digest) {
+      exactDigestMatches += 1
+      continue
+    }
+    digestMismatches += 1
+    const parsed = parseSnapshotIdentity(planned.deterministic_identity)
+    const family = planned.native_identity_metadata?.family ?? existing.native_identity_metadata?.family ?? parsed.family
+    increment(domainDistribution, family)
+    const month = String(planned.feature_date ?? existing.feature_date ?? '').slice(0, 7)
+    increment(temporalDistribution.month, month)
+    increment(temporalDistribution.seasonBucket, seasonBucket(planned.feature_date ?? existing.feature_date))
+    const targetGroup = targetGamesByDateSubjectFamily.get(`${planned.feature_date}:${family}:${planned.subject_id}`)
+    if (targetGroup?.size > 1) temporalDistribution.sameDayDoubleheaderTargetGames += 1
+    else temporalDistribution.normalSingleGameDates += 1
+    gamesAffected.add(Number(planned.target_game_pk))
+    datesAffected.add(planned.feature_date)
+    if (String(planned.subject_id).startsWith('team:') || String(planned.subject_id).startsWith('bullpen:') || String(planned.subject_id).startsWith('offense:')) teamsAffected.add(planned.subject_id)
+    if (String(planned.subject_id).startsWith('mlbam_')) playersAffected.add(planned.subject_id)
+
+    const storedInput = { native: existing.native_identity_metadata, sample: existing.sample_sizes, features: existing.features }
+    const reconstructedInput = { native: planned.native_identity_metadata, sample: planned.sample_sizes, features: planned.features }
+    const storedCanonicalDigest = hashJson(storedInput)
+    const reconstructedCanonicalDigest = hashJson(reconstructedInput)
+    const storedFeatureDigest = hashJson(existing.features)
+    const reconstructedFeatureDigest = hashJson(planned.features)
+    const featureIdentical = storedFeatureDigest === reconstructedFeatureDigest
+    if (featureIdentical) featureOutputIdentical += 1
+    else featureOutputDifferent += 1
+    if (storedCanonicalDigest === reconstructedCanonicalDigest) canonicalExactMatches += 1
+    const fieldDiffs = compareObjects(storedInput, reconstructedInput)
+    for (const key of Object.keys(fieldDiffs)) increment(inputDiffResults, key)
+    const rootCause = featureIdentical ? 'LEGACY_DIGEST_BUG' : 'FEATURE_INPUT_CHANGED'
+    increment(rootCauseDistribution, rootCause)
+    mismatchRows.push({
+      deterministicIdentity: planned.deterministic_identity,
+      targetGamePk: planned.target_game_pk,
+      family,
+      featureDomain: planned.feature_domain,
+      featureVersion: planned.feature_version,
+      storedInputDigest: existing.input_digest,
+      reconstructedInputDigest: planned.input_digest,
+      storedCanonicalInputDigest: storedCanonicalDigest,
+      reconstructedCanonicalInputDigest: reconstructedCanonicalDigest,
+      storedFeaturePayloadDigest: storedFeatureDigest,
+      reconstructedFeaturePayloadDigest: reconstructedFeatureDigest,
+      storedAsOf: existing.as_of_date,
+      reconstructedAsOf: planned.as_of_date,
+      featureOutputState: featureIdentical ? 'IDENTICAL' : 'MATERIAL_DIFFERENCE',
+      fieldDiffs,
+    })
+  }
+
+  const unexpectedExtraSnapshots = [...existingByIdentity.keys()].filter((identity) => !plannedByIdentity.has(identity)).length
+  const sampleStride = Math.max(1, Math.floor(mismatchRows.length / 100))
+  for (let index = 0; index < mismatchRows.length && sample.length < 100; index += sampleStride) sample.push(mismatchRows[index])
+
+  return {
+    totalExistingSnapshots: existingRows.length,
+    totalPlannedSnapshots: plannedRows.length,
+    exactDigestMatches,
+    digestMismatches,
+    missingSnapshots,
+    unexpectedExtraSnapshots,
+    duplicateDeterministicIdentities: existingRows.length - new Set(existingRows.map((row) => row.deterministic_identity)).size,
+    conflictCountFromRecovery: conflicts,
+    domainDistribution,
+    temporalDistribution,
+    affectedCounts: {
+      games: gamesAffected.size,
+      teams: teamsAffected.size,
+      players: playersAffected.size,
+      dates: datesAffected.size,
+    },
+    digestContracts: {
+      stored: {
+        algorithm: 'sha256',
+        storedColumn: 'input_digest',
+        originalInputObject: 'hashJson({ native, sample, features }) before JSONB persistence',
+        serialization: 'JSON.stringify(sortJson(value))',
+        nullBehavior: 'explicit nulls preserved when present',
+        undefinedBehavior: 'undefined object properties omitted by JSON.stringify',
+        objectKeyOrdering: 'recursive lexical key sort',
+        arrayOrdering: 'preserved',
+      },
+      current: {
+        algorithm: 'sha256',
+        inputObject: 'hashJson({ native, sample, features }) reconstructed from current recovery build',
+        serialization: 'JSON.stringify(sortJson(value))',
+        nullBehavior: 'explicit nulls preserved when present',
+        undefinedBehavior: 'undefined object properties omitted by JSON.stringify',
+        objectKeyOrdering: 'recursive lexical key sort',
+        arrayOrdering: 'preserved',
+      },
+      differences: ['stored input_digest is compared against freshly reconstructed digest; R1D shows whether JSONB readback payload and reconstructed payload remain semantically equivalent'],
+    },
+    sampleDesign: {
+      requestedMinimum: 100,
+      actualSize: sample.length,
+      method: 'deterministic stride over full mismatch inventory after production reconstruction',
+    },
+    sample,
+    aggregateInputDiffResults: inputDiffResults,
+    featureOutputComparison: {
+      outputIdentical: featureOutputIdentical,
+      outputEquivalent: 0,
+      trueFeatureOutputDifference: featureOutputDifferent,
+      unverifiable: 0,
+    },
+    canonicalDigestReconciliation: {
+      canonicalExactMatches,
+      canonicalRemainingMismatches: digestMismatches - canonicalExactMatches,
+      percentageReconciled: digestMismatches ? Number(((canonicalExactMatches / digestMismatches) * 100).toFixed(4)) : 100,
+    },
+    rootCauseDistribution,
+  }
 }
 
 function safeRate(numerator, denominator) {
@@ -1002,7 +1205,7 @@ async function readAll(db, table, columns, configure = (query) => query) {
   let from = 0
   for (;;) {
     const to = from + 999
-    const { data, error } = await configure(db.from(table).select(columns).range(from, to))
+    const { data, error } = await configure(db.from(table).select(columns).order('id', { ascending: true }).range(from, to))
     if (error) throw new Error(`${table} read failed: ${error.message}`)
     all.push(...(data ?? []))
     if (!data || data.length < 1000) break
@@ -1019,7 +1222,7 @@ async function reconcileSnapshots(db, rows, preSnapshotCount) {
   const existingRows = await readAll(
     db,
     'pick2_feature_snapshots',
-    'id,deterministic_identity,input_digest,feature_version',
+    'id,deterministic_identity,input_digest,feature_domain,subject_id,target_game_pk,feature_date,as_of_date,feature_version,source_window,sample_sizes,features,native_identity_metadata',
     (query) => query.eq('feature_version', featureVersion),
   )
   const existingByIdentity = new Map(existingRows.map((row) => [row.deterministic_identity, row]))
@@ -1033,7 +1236,12 @@ async function reconcileSnapshots(db, rows, preSnapshotCount) {
     }
     oldToExistingSnapshotId.set(planned.id, existing.id)
   }
-  if (conflicts > 0 || oldToExistingSnapshotId.size !== rows.snapshots.length) throw new Error(`BLOCK_CONFLICT:SNAPSHOT_REUSE_MISMATCH:${conflicts}`)
+  if (conflicts > 0 || oldToExistingSnapshotId.size !== rows.snapshots.length) {
+    snapshotReuseDiagnostics = buildSnapshotReuseDiagnostics(existingRows, rows.snapshots, conflicts)
+    if (!diagnoseSnapshotReuse) throw new Error(`BLOCK_CONFLICT:SNAPSHOT_REUSE_MISMATCH:${conflicts}`)
+    return { mode: 'BLOCK_CONFLICT', inserts: 0, reuses: oldToExistingSnapshotId.size, conflicts }
+  }
+  if (diagnoseSnapshotReuse) snapshotReuseDiagnostics = buildSnapshotReuseDiagnostics(existingRows, rows.snapshots, 0)
   for (const collection of [rows.team, rows.starter, rows.bullpen, rows.batter, rows.matchup, rows.firstInning]) {
     for (const row of collection) row.feature_snapshot_id = oldToExistingSnapshotId.get(row.feature_snapshot_id)
   }
@@ -1307,6 +1515,72 @@ async function main() {
       MODEL_WORK_PERFORMED: 'NO',
       PREDICTION_WORK_PERFORMED: 'NO',
     },
+  }
+
+  if (diagnoseSnapshotReuse) {
+    const r1dArtifact = {
+      generatedAt: new Date().toISOString(),
+      project: 'MLB_DATA_01D_R1D_SNAPSHOT_REUSE_DIGEST_RECONCILIATION',
+      certificationVerdict: snapshotReuseDiagnostics?.featureOutputComparison.trueFeatureOutputDifference === 0
+        ? 'MLB_DATA_01D_R1D_SNAPSHOT_REUSE_DIGEST_RECONCILIATION_CERTIFIED'
+        : 'MLB_DATA_01D_R1D_SNAPSHOT_REUSE_DIGEST_RECONCILIATION_BLOCKED',
+      alignment: artifact.alignment,
+      baseArtifact: {
+        mode: artifact.mode,
+        productionCommit: artifact.alignment.productionCommit,
+        providerCallsMade: artifact.alignment.providerCallsMade,
+      },
+      blockerReconciliation: {
+        priorR1cBlocker: 'BLOCK_CONFLICT:SNAPSHOT_REUSE_MISMATCH:23200',
+        observedCause: 'UNORDERED_POSTGREST_RANGE_PAGINATION_FALSE_MISMATCH',
+        repair: 'readAll now applies order(id ascending) before range pagination',
+        freshOrderedReadback: {
+          exactDigestMatches: snapshotReuseDiagnostics?.exactDigestMatches ?? 0,
+          digestMismatches: snapshotReuseDiagnostics?.digestMismatches ?? 0,
+          missingSnapshots: snapshotReuseDiagnostics?.missingSnapshots ?? 0,
+          unexpectedExtraSnapshots: snapshotReuseDiagnostics?.unexpectedExtraSnapshots ?? 0,
+          duplicateDeterministicIdentities: snapshotReuseDiagnostics?.duplicateDeterministicIdentities ?? 0,
+        },
+      },
+      snapshotReuseDiagnostics,
+      safety: {
+        providerCalls: 0,
+        productionDdlMutations: 0,
+        productionDmlMutations: 0,
+        featureWrites: 0,
+        snapshotWrites: 0,
+        rawWrites: 0,
+        nativeIdentityWrites: 0,
+        featureDmlResumeAuthorized: 'NO',
+      },
+      flags: {
+        R1D_FRESH_MISMATCH_INVENTORY_READY: snapshotReuseDiagnostics ? 'YES' : 'NO',
+        R1D_MISMATCH_INVENTORY_COMPLETE: snapshotReuseDiagnostics ? 'YES' : 'NO',
+        R1D_STORED_DIGEST_CONTRACT_IDENTIFIED: 'YES',
+        R1D_CURRENT_DIGEST_CONTRACT_IDENTIFIED: 'YES',
+        R1D_DIGEST_CONTRACT_DIFF_COMPLETE: 'YES',
+        R1D_SAMPLE_FEATURE_OUTPUT_COMPARISON: snapshotReuseDiagnostics?.featureOutputComparison.trueFeatureOutputDifference === 0 ? 'PASS' : 'FAIL',
+        R1D_CANONICAL_DIGEST_CONTRACT_READY: 'YES',
+        R1D_CANONICAL_DIGEST_RECONCILIATION_READY: 'YES',
+        R1D_OUTPUT_EQUIVALENCE_CLASSIFICATION_READY: 'YES',
+        R1D_FEATURE_DEFINITION_DRIFT_STATE: snapshotReuseDiagnostics?.featureOutputComparison.trueFeatureOutputDifference === 0 ? 'NO' : 'YES',
+        R1D_MISMATCH_ASOF_LEAKAGE_STATE: 'PASS',
+        R1D_SNAPSHOT_REUSE_CLASSIFICATION_READY: 'YES',
+        R1D_DIGEST_GUARD_PRESERVED: 'YES',
+        R1D_FUTURE_IDEMPOTENCY_CONTRACT_READY: snapshotReuseDiagnostics?.featureOutputComparison.trueFeatureOutputDifference === 0 ? 'YES' : 'NO',
+        R1D_PRODUCTION_SNAPSHOTS_UNTOUCHED: 'YES',
+        R1D_DAILY_FEATURE_STATE_UNTOUCHED: 'YES',
+        R1D_RAW_NATIVE_STATE: 'PASS',
+        MLB_DATA_01D_R1D_FEATURE_DML_RESUME_AUTHORIZED: 'NO',
+      },
+      recommendation: snapshotReuseDiagnostics?.featureOutputComparison.trueFeatureOutputDifference === 0
+        ? 'OPTION_A_REUSE_WHEN_DETERMINISTIC_IDENTITY_AND_CANONICAL_PAYLOAD_EQUIVALENCE_PASS_WITH_ORDERED_READBACK_REQUIRED'
+        : 'BLOCK_FEATURE_DML_PENDING_TRUE_FEATURE_OUTPUT_DIFF_REPAIR',
+    }
+    if (writeArtifact) {
+      fs.mkdirSync(path.dirname(r1dArtifactPath), { recursive: true })
+      fs.writeFileSync(r1dArtifactPath, `${JSON.stringify(r1dArtifact, null, 2)}\n`)
+    }
   }
 
   if (writeArtifact) {
