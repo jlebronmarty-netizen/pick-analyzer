@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-30T15:43:39.513Z",
+  "generatedAt": "2026-08-30T16:50:16.679Z",
   "project": "MLB_DATA_01D_2025_FEATURE_PERSISTENCE",
   "mode": "PLAN_ONLY",
   "certificationVerdict": "MLB_DATA_01D_2025_FEATURE_PERSISTENCE_PARTIAL",
@@ -7,11 +7,13 @@
     "localDryRunCommit": "6e7f4185d13045aa1ff0ef9bede82614bc41b8a9",
     "targetProductionCommit": "875b46d34553bc3618067fec202a2f780a39b2d8",
     "r1bPostMigrationProductionCommit": "61aeb84a58d0ae71ec02bbf044f70f3c60854d33",
+    "r1dVerificationProductionCommit": "fcde1844e5de8fc38da18862ca675f76edee3551",
     "planOnlyAcceptedProductionCommits": [
       "875b46d34553bc3618067fec202a2f780a39b2d8",
-      "61aeb84a58d0ae71ec02bbf044f70f3c60854d33"
+      "61aeb84a58d0ae71ec02bbf044f70f3c60854d33",
+      "fcde1844e5de8fc38da18862ca675f76edee3551"
     ],
-    "productionCommit": "61aeb84a58d0ae71ec02bbf044f70f3c60854d33",
+    "productionCommit": "fcde1844e5de8fc38da18862ca675f76edee3551",
     "providerCallsMade": 0
   },
   "dryRunRevalidation": {

@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-29 00:00:00Z
 
+## 2026-08-30 MLB-DATA-01D-R1E Daily Feature Recovery Readiness
+
+- MLB-DATA-01D-R1E is certified as `MLB_DATA_01D_R1E_DAILY_FEATURE_RECOVERY_READINESS_CERTIFIED`. The three local verification commits through `fcde1844e5de8fc38da18862ca675f76edee3551` were published to `origin/main`, production aligned to that commit, and `/api/system/version` reported `providerCallsMade = 0`.
+- The post-deploy read-only recovery pass rebuilt the certified 2025 pregame feature row plan from production raw/native data: 67,433 existing snapshots reuse exactly, 0 snapshot conflicts, team 4,498 insert-eligible, starter 4,498, bullpen 4,498, batter 44,943, matchup 2,249 and first-inning 2,249, with 4,498 logical offense rows represented by existing offense-family snapshots.
+- R1E made 0 feature writes, 0 snapshot writes, 0 raw/native identity writes, 0 production schema mutations, 0 production DML mutations and no model/prediction/2026/automation/cron changes. Feature DML remains separately unauthorized; next phase is `MLB_DATA_01D_R1F_DAILY_FEATURE_RECOVERY_DML_EXECUTION`.
+
 ## 2026-08-30 MLB-DATA-01D-R1D Snapshot Reuse Digest Reconciliation
 
 - MLB-DATA-01D-R1D is certified as `MLB_DATA_01D_R1D_SNAPSHOT_REUSE_DIGEST_RECONCILIATION_CERTIFIED`. The prior `BLOCK_CONFLICT:SNAPSHOT_REUSE_MISMATCH:23200` was explained as an unordered PostgREST range-pagination readback defect in the recovery validator, not a real snapshot digest or feature-output conflict.

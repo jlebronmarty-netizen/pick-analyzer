@@ -9,6 +9,7 @@ const writeArtifact = args.has('--write-artifact')
 const diagnoseSnapshotReuse = args.has('--diagnose-snapshot-reuse')
 const targetProductionCommit = '875b46d34553bc3618067fec202a2f780a39b2d8'
 const r1bPostMigrationProductionCommit = '61aeb84a58d0ae71ec02bbf044f70f3c60854d33'
+const r1dVerificationProductionCommit = 'fcde1844e5de8fc38da18862ca675f76edee3551'
 const localDryRunCommit = '6e7f4185d13045aa1ff0ef9bede82614bc41b8a9'
 const featureVersion = 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1'
 const dryRunPath = 'docs/CERTIFICATION/mlb-data-01d-2025-feature-build-dry-run.json'
@@ -1079,7 +1080,7 @@ function ensure(condition, message) {
 
 function productionAlignmentAllowedForMode(commit) {
   if (execute) return commit === targetProductionCommit
-  return commit === targetProductionCommit || commit === r1bPostMigrationProductionCommit
+  return commit === targetProductionCommit || commit === r1bPostMigrationProductionCommit || commit === r1dVerificationProductionCommit
 }
 
 function quantiles(values) {
@@ -1394,7 +1395,8 @@ async function main() {
       localDryRunCommit,
       targetProductionCommit,
       r1bPostMigrationProductionCommit,
-      planOnlyAcceptedProductionCommits: [targetProductionCommit, r1bPostMigrationProductionCommit],
+      r1dVerificationProductionCommit,
+      planOnlyAcceptedProductionCommits: [targetProductionCommit, r1bPostMigrationProductionCommit, r1dVerificationProductionCommit],
       productionCommit: version.gitCommit,
       providerCallsMade: version.providerCallsMade,
     },

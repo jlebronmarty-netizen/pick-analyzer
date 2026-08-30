@@ -1,0 +1,154 @@
+{
+  "generatedAt": "2026-08-30T16:50:16.679Z",
+  "project": "MLB_DATA_01D_R1E_DAILY_FEATURE_RECOVERY_READINESS",
+  "certificationVerdict": "MLB_DATA_01D_R1E_DAILY_FEATURE_RECOVERY_READINESS_CERTIFIED",
+  "publication": {
+    "publishedCommit": "fcde1844e5de8fc38da18862ca675f76edee3551",
+    "originMainAfterPush": "fcde1844e5de8fc38da18862ca675f76edee3551",
+    "productionCommit": "fcde1844e5de8fc38da18862ca675f76edee3551",
+    "productionAlignment": "PASS",
+    "providerCallsMade": 0
+  },
+  "commitChainScope": {
+    "R1B": "partial readback certification only",
+    "R1C": "recovery-validator repair and blocked artifact only",
+    "R1D": "ordered pagination and digest reconciliation only",
+    "featureDmlActivation": "NO",
+    "modelPredictionActivation": "NO",
+    "R1E_COMMIT_CHAIN_SCOPE_CERTIFIED": "YES"
+  },
+  "postDeployPartialState": {
+    "pick2_feature_snapshots": 67433,
+    "pick2_mlb_team_daily_features": 0,
+    "pick2_mlb_pitcher_daily_features": 0,
+    "pick2_mlb_bullpen_daily_features": 0,
+    "pick2_mlb_batter_daily_features": 0,
+    "pick2_mlb_matchup_daily_features": 0,
+    "pick2_mlb_first_inning_daily_features": 0,
+    "rawRows": 712528,
+    "nativeGames": 2430,
+    "nativePlayers": 1469,
+    "models": 0,
+    "champion": "NONE",
+    "predictions": 0,
+    "R1E_POSTDEPLOY_PARTIAL_STATE": "PASS"
+  },
+  "orderedSnapshotReadback": {
+    "existingSnapshots": 67433,
+    "plannedSnapshots": 67433,
+    "exactInputDigestMatches": 67433,
+    "digestMismatches": 0,
+    "missingSnapshots": 0,
+    "unexpectedSnapshots": 0,
+    "duplicateDeterministicIdentities": 0,
+    "R1E_ORDERED_SNAPSHOT_READBACK": "PASS"
+  },
+  "snapshotReuseReadiness": {
+    "INSERT_ELIGIBLE": 0,
+    "REUSE_NO_OP": 67433,
+    "BLOCK_CONFLICT": 0,
+    "R1E_SNAPSHOT_REUSE_READINESS": "PASS"
+  },
+  "dailyRecoveryReadiness": {
+    "team": {
+      "INSERT_ELIGIBLE": 4498,
+      "REUSE_NO_OP": 0,
+      "BLOCK_CONFLICT": 0,
+      "nativeKey": "target_game_pk + team_id + feature_version"
+    },
+    "starter": {
+      "INSERT_ELIGIBLE": 4498,
+      "REUSE_NO_OP": 0,
+      "BLOCK_CONFLICT": 0
+    },
+    "bullpen": {
+      "INSERT_ELIGIBLE": 4498,
+      "REUSE_NO_OP": 0,
+      "BLOCK_CONFLICT": 0,
+      "nativeKey": "target_game_pk + team_id + feature_version"
+    },
+    "batter": {
+      "INSERT_ELIGIBLE": 44943,
+      "REUSE_NO_OP": 0,
+      "BLOCK_CONFLICT": 0
+    },
+    "offense": {
+      "logicalRows": 4498,
+      "physicalTableImpact": "no separate offense daily table; represented as team-domain snapshots with native family offense"
+    },
+    "matchup": {
+      "INSERT_ELIGIBLE": 2249,
+      "REUSE_NO_OP": 0,
+      "BLOCK_CONFLICT": 0
+    },
+    "firstInning": {
+      "INSERT_ELIGIBLE": 2249,
+      "REUSE_NO_OP": 0,
+      "BLOCK_CONFLICT": 0
+    },
+    "totalBlockConflict": 0,
+    "R1E_COMPLETE_RECOVERY_PLAN": "PASS"
+  },
+  "guards": {
+    "R1E_NATIVE_KEY_UNIQUENESS": "PASS",
+    "R1E_SAMEDAY_RECOVERY_GUARD": "PASS",
+    "R1E_ASOF_LEAKAGE_STATE": "PASS",
+    "R1E_FEATURE_DEFINITIONS_UNCHANGED": "YES",
+    "R1E_RECOVERY_IDEMPOTENCY_PROJECTED": "PASS",
+    "R1E_RAW_NATIVE_STATE": "PASS",
+    "R1E_MODEL_PREDICTION_BOUNDARY": "PASS"
+  },
+  "futureDmlCaps": {
+    "team": 4498,
+    "starter": 4498,
+    "bullpen": 4498,
+    "batter": 44943,
+    "matchup": 2249,
+    "firstInning": 2249,
+    "snapshots": 0,
+    "offensePhysicalTableImpact": "0 separate daily rows; 4498 logical offense snapshots already reusable",
+    "R1E_DML_CAPS_CERTIFIED": "YES"
+  },
+  "safety": {
+    "featureDml": 0,
+    "snapshotWrites": 0,
+    "rawWrites": 0,
+    "nativeIdentityWrites": 0,
+    "schemaMutations": 0,
+    "migrationApply": "NO",
+    "modelWork": "NO",
+    "predictionWork": "NO",
+    "providerCalls": 0,
+    "import2026": "NO",
+    "automation": "NO",
+    "cronChanges": 0,
+    "MLB_DATA_01D_R1E_FEATURE_DML_RESUME_AUTHORIZED": "NO"
+  },
+  "flags": {
+    "R1E_PREPUBLISH_STATE": "PASS",
+    "R1E_COMMIT_CHAIN_SCOPE_CERTIFIED": "YES",
+    "PRODUCTION_ALIGNMENT": "PASS",
+    "R1E_POSTDEPLOY_PARTIAL_STATE": "PASS",
+    "R1E_ORDERED_SNAPSHOT_READBACK": "PASS",
+    "R1E_SNAPSHOT_REUSE_READINESS": "PASS",
+    "R1E_TEAM_RECOVERY_READINESS": "PASS",
+    "R1E_STARTER_RECOVERY_READINESS": "PASS",
+    "R1E_BULLPEN_RECOVERY_READINESS": "PASS",
+    "R1E_BATTER_RECOVERY_READINESS": "PASS",
+    "R1E_OFFENSE_RECOVERY_READINESS": "PASS",
+    "R1E_MATCHUP_RECOVERY_READINESS": "PASS",
+    "R1E_FIRST_INNING_RECOVERY_READINESS": "PASS",
+    "R1E_COMPLETE_RECOVERY_PLAN": "PASS",
+    "R1E_NATIVE_KEY_UNIQUENESS": "PASS",
+    "R1E_SAMEDAY_RECOVERY_GUARD": "PASS",
+    "R1E_ASOF_LEAKAGE_STATE": "PASS",
+    "R1E_FEATURE_DEFINITIONS_UNCHANGED": "YES",
+    "R1E_RECOVERY_IDEMPOTENCY_PROJECTED": "PASS",
+    "R1E_RAW_NATIVE_STATE": "PASS",
+    "R1E_MODEL_PREDICTION_BOUNDARY": "PASS",
+    "R1E_DML_CAPS_CERTIFIED": "YES",
+    "MLB_DATA_01D_R1E_FEATURE_DML_RESUME_AUTHORIZED": "NO"
+  },
+  "recommendedNextPhase": "MLB_DATA_01D_R1F_DAILY_FEATURE_RECOVERY_DML_EXECUTION",
+  "recommendedNextInstruction": "Separately authorize bounded daily-feature recovery DML using the certified R1E caps, with no model training or predictions."
+}
