@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-29 00:00:00Z
 
+## 2026-08-29 MLB-DATA-01D 2025 Feature Persistence Blocked
+
+- MLB-DATA-01D feature persistence is blocked as `MLB_DATA_01D_2025_FEATURE_PERSISTENCE_BLOCKED`. The authorized production DML run revalidated the dry-run artifact, confirmed production alignment at `875b46d34553bc3618067fec202a2f780a39b2d8`, confirmed the feature-table zero baseline and rebuilt the exact certified 2,249 eligible-game row plan before writing.
+- The run inserted the 67,433 certified `pick2_feature_snapshots` rows, then stopped at the first `pick2_mlb_team_daily_features` batch because the legacy unique constraint `pick2_mlb_team_daily_features_team_id_feature_date_feature__key` conflicts with native target-game persistence for same-team same-date rows. Daily feature tables remain at 0 rows.
+- Post-stop readback confirms native games remain 2,430, native players remain 1,469, result/market/model/prediction tables remain 0, provider calls remain 0, no schema/raw/native identity/model/prediction/2026/automation/cron work occurred. Next phase is `MLB_DATA_01D_R1_FEATURE_PERSISTENCE_KEY_REPAIR`; do not train models from the snapshot-only partial state.
+
 ## 2026-08-29 MLB-DATA-01D 2025 Feature Build Dry Run
 
 - MLB-DATA-01D is dry-run certified as `MLB_DATA_01D_2025_FEATURE_BUILD_DRY_RUN_CERTIFIED`. The phase used the R5B native identity baseline at production commit `875b46d34553bc3618067fec202a2f780a39b2d8`: 712,528 raw rows, 2,430 native games, 1,469 native players and full pitcher/batter native coverage.

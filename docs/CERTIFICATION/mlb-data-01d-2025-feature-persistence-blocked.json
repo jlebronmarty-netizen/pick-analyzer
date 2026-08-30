@@ -1,0 +1,102 @@
+{
+  "generatedAt": "2026-08-29T23:59:00.000Z",
+  "project": "MLB_DATA_01D_2025_FEATURE_PERSISTENCE",
+  "certificationVerdict": "MLB_DATA_01D_2025_FEATURE_PERSISTENCE_BLOCKED",
+  "productionCommit": "875b46d34553bc3618067fec202a2f780a39b2d8",
+  "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+  "prewrite": {
+    "dryRunRevalidated": "YES",
+    "featureZeroBaseline": "PASS",
+    "rawRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicatePitchIdentities": 0,
+    "nativeGames": 2430,
+    "nativePlayers": 1469,
+    "eligibleTargetGames": 2249,
+    "insufficientHistoryGames": 181,
+    "leakageViolations": 0,
+    "identityConflicts": 0
+  },
+  "writeAccounting": {
+    "pick2_feature_snapshots": {
+      "inserts": 67433,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "pick2_mlb_team_daily_features": {
+      "inserts": 0,
+      "reuses": 0,
+      "conflicts": 1,
+      "blockedAtBatchStart": 0,
+      "blockingConstraint": "pick2_mlb_team_daily_features_team_id_feature_date_feature__key"
+    },
+    "pick2_mlb_pitcher_daily_features": {
+      "inserts": 0,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "pick2_mlb_bullpen_daily_features": {
+      "inserts": 0,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "pick2_mlb_batter_daily_features": {
+      "inserts": 0,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "pick2_mlb_matchup_daily_features": {
+      "inserts": 0,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "pick2_mlb_first_inning_daily_features": {
+      "inserts": 0,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "otherProductionDml": 0
+  },
+  "postStopReadback": {
+    "pick2_feature_snapshots": 67433,
+    "pick2_mlb_team_daily_features": 0,
+    "pick2_mlb_pitcher_daily_features": 0,
+    "pick2_mlb_bullpen_daily_features": 0,
+    "pick2_mlb_batter_daily_features": 0,
+    "pick2_mlb_matchup_daily_features": 0,
+    "pick2_mlb_first_inning_daily_features": 0,
+    "pick2_mlb_games": 2430,
+    "pick2_mlb_players": 1469,
+    "pick2_mlb_game_results": 0,
+    "pick2_mlb_market_event_mappings": 0,
+    "pick2_model_registry": 0,
+    "pick2_model_feature_sets": 0,
+    "pick2_model_versions": 0,
+    "pick2_model_training_runs": 0,
+    "pick2_model_validation_runs": 0,
+    "pick2_game_predictions": 0,
+    "pick2_prediction_results": 0,
+    "pick2_market_value_evaluations": 0,
+    "raw2026": 0
+  },
+  "blocker": {
+    "type": "BLOCK_CONFLICT",
+    "message": "duplicate key value violates unique constraint \"pick2_mlb_team_daily_features_team_id_feature_date_feature__key\"",
+    "cause": "legacy daily-feature uniqueness does not include target_game_pk and cannot represent same-team same-date multiple target games under the certified native key contract"
+  },
+  "safety": {
+    "providerCalls": 0,
+    "productionSchemaMutations": 0,
+    "rawStatcastMutations": 0,
+    "nativeIdentityMutations": 0,
+    "modelTraining": "NO",
+    "modelValidation": "NO",
+    "championPromotion": "NO",
+    "predictionGeneration": "NO",
+    "marketValueWrites": 0,
+    "import2026": "NO",
+    "automationActivated": "NO",
+    "cronChanges": 0
+  },
+  "recommendedNextPhase": "MLB_DATA_01D_R1_FEATURE_PERSISTENCE_KEY_REPAIR"
+}
