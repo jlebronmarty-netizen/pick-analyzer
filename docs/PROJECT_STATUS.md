@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-29 00:00:00Z
 
+## 2026-08-30 MLB-DATA-01D-R1B Feature Native Uniqueness Migration Readback
+
+- MLB-DATA-01D-R1B is recorded as `MLB_DATA_01D_R1B_FEATURE_NATIVE_UNIQUENESS_MIGRATION_READBACK_PARTIAL` after the user reported successful manual application of `supabase/migrations/202608290002_pick2_mlb_feature_native_uniqueness_v1.sql`. Production is aligned at `61aeb84a58d0ae71ec02bbf044f70f3c60854d33`; Codex did not reapply the migration and made 0 production DDL mutations, 0 production DML mutations and 0 provider calls.
+- Read-only production state remains intact: 67,433 feature snapshots, 0 daily feature rows, 712,528 raw rows, 712,528 populated raw MLBAM pitcher ids, 712,528 populated raw MLBAM batter ids, 2,430 native games, 1,469 native players, 0 models, champion `NONE` and 0 predictions. Snapshot identity, as-of, same-day leakage and projected native key uniqueness checks passed.
+- Full R1B certification remains blocked because Supabase REST does not expose `pg_indexes`, `pg_constraint` or `information_schema.table_constraints` through the available channel, and the existing feature persistence dry-run script is still pinned to production commit `875b46d34553bc3618067fec202a2f780a39b2d8`. Next: add a bounded post-R1B recovery validator/catalog readback path, then separately authorize daily feature DML resume.
+
 ## 2026-08-30 MLB-DATA-01D-R1A Feature Native Uniqueness Migration Prep
 
 - MLB-DATA-01D-R1A is certified as `MLB_DATA_01D_R1A_FEATURE_NATIVE_UNIQUENESS_MIGRATION_CERTIFIED`. It adds one non-applied forward migration, `supabase/migrations/202608290002_pick2_mlb_feature_native_uniqueness_v1.sql`, to replace only the R1-certified incompatible legacy team and bullpen daily-feature uniqueness constraints with native `target_game_pk`-rooted unique indexes.
