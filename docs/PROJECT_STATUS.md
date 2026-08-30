@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-29 00:00:00Z
 
+## 2026-08-29 MLB-DATA-01D-R1 Feature Persistence Key Repair
+
+- MLB-DATA-01D-R1 is blocked as `MLB_DATA_01D_R1_FEATURE_PERSISTENCE_KEY_REPAIR_BLOCKED`. Read-only production audit confirmed the partial state is stable: 67,433 feature snapshots, 0 daily feature rows, 2,430 native games, 1,469 native players and 0 result/market/model/prediction rows at production commit `875b46d34553bc3618067fec202a2f780a39b2d8`.
+- Snapshot integrity passed: 67,433 rows for `MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1`, 0 duplicate deterministic identities, 0 as-of violations, 0 same-day leakage violations and 2,249 target games covered. The legacy uniqueness defect is proven: team, bullpen and offense same-team same-date row plans each have 42 collisions across 42 affected games and 19 teams, all safely distinguished by `target_game_pk`.
+- Future persistence resume logic now treats existing snapshots as `REUSE_NO_OP` after deterministic identity/input digest parity and remaps daily rows to existing snapshot IDs. Adding the required forward migration to drop/replace legacy UNIQUE constraints remains blocked pending direct authorization; R1 made 0 provider calls, 0 production schema mutations, 0 production DML mutations and no feature/model/prediction/automation/cron work.
+
 ## 2026-08-29 MLB-DATA-01D 2025 Feature Persistence Blocked
 
 - MLB-DATA-01D feature persistence is blocked as `MLB_DATA_01D_2025_FEATURE_PERSISTENCE_BLOCKED`. The authorized production DML run revalidated the dry-run artifact, confirmed production alignment at `875b46d34553bc3618067fec202a2f780a39b2d8`, confirmed the feature-table zero baseline and rebuilt the exact certified 2,249 eligible-game row plan before writing.

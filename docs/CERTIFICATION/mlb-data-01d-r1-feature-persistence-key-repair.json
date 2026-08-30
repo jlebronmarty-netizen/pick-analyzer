@@ -1,0 +1,195 @@
+{
+  "generatedAt": "2026-08-30T00:13:27.236Z",
+  "project": "MLB_DATA_01D_R1_FEATURE_PERSISTENCE_KEY_REPAIR",
+  "certificationVerdict": "MLB_DATA_01D_R1_FEATURE_PERSISTENCE_KEY_REPAIR_BLOCKED",
+  "blocker": "Direct authorization is required before adding a forward migration that drops/replaces legacy UNIQUE constraints.",
+  "alignment": {
+    "expectedLocalHead": "9599d82d9e76f480b658dc3c70e0dc3f1f8da60c",
+    "expectedProductionCommit": "875b46d34553bc3618067fec202a2f780a39b2d8",
+    "productionCommit": "875b46d34553bc3618067fec202a2f780a39b2d8",
+    "providerCallsMade": 0
+  },
+  "partialProductionState": {
+    "pick2_feature_snapshots": 67433,
+    "pick2_mlb_team_daily_features": 0,
+    "pick2_mlb_pitcher_daily_features": 0,
+    "pick2_mlb_bullpen_daily_features": 0,
+    "pick2_mlb_batter_daily_features": 0,
+    "pick2_mlb_matchup_daily_features": 0,
+    "pick2_mlb_first_inning_daily_features": 0,
+    "pick2_mlb_games": 2430,
+    "pick2_mlb_players": 1469,
+    "pick2_mlb_game_results": 0,
+    "pick2_mlb_market_event_mappings": 0,
+    "pick2_model_registry": 0,
+    "pick2_model_feature_sets": 0,
+    "pick2_model_versions": 0,
+    "pick2_model_training_runs": 0,
+    "pick2_model_validation_runs": 0,
+    "pick2_game_predictions": 0,
+    "pick2_prediction_results": 0,
+    "pick2_market_value_evaluations": 0
+  },
+  "uniqueConstraintInventory": {
+    "currentLegacyConstraints": {
+      "team": "unique (team_id, feature_date, feature_version)",
+      "starter": "unique (player_id, feature_date, feature_version)",
+      "bullpen": "unique (team_id, feature_date, feature_version)",
+      "batter": "unique (player_id, feature_date, feature_version)",
+      "matchup": "unique (event_id, feature_date, feature_version)",
+      "firstInning": "unique (event_id, feature_date, feature_version)"
+    },
+    "nativeUniqueIndexesAlreadyDefined": {
+      "team": "target_game_pk + team_id + feature_date + feature_version",
+      "starter": "target_game_pk + mlbam_pitcher_id + feature_date + feature_version",
+      "bullpen": "target_game_pk + team_id + feature_date + feature_version",
+      "batter": "target_game_pk + mlbam_batter_id + feature_date + feature_version",
+      "matchup": "target_game_pk + feature_date + feature_version",
+      "firstInning": "target_game_pk + feature_date + feature_version",
+      "snapshot": "deterministic_identity"
+    },
+    "affectedLegacyConstraints": [
+      "team",
+      "bullpen"
+    ],
+    "nullableLegacyConstraintsDoNotCurrentlyCollide": [
+      "starter",
+      "batter",
+      "matchup",
+      "firstInning"
+    ]
+  },
+  "nativeKeys": {
+    "TEAM_NATIVE_UNIQUE_KEY": "target_game_pk + team_id + feature_version",
+    "STARTER_NATIVE_UNIQUE_KEY": "target_game_pk + mlbam_pitcher_id + feature_version",
+    "BULLPEN_NATIVE_UNIQUE_KEY": "target_game_pk + team_id + feature_version",
+    "BATTER_NATIVE_UNIQUE_KEY": "target_game_pk + mlbam_batter_id + feature_version",
+    "OFFENSE_NATIVE_UNIQUE_KEY": "target_game_pk + team_id + feature_version",
+    "MATCHUP_NATIVE_UNIQUE_KEY": "target_game_pk + feature_version",
+    "FIRST_INNING_NATIVE_UNIQUE_KEY": "target_game_pk + feature_version",
+    "SNAPSHOT_NATIVE_UNIQUE_KEY": "deterministic_identity"
+  },
+  "legacyKeyDefect": {
+    "team": {
+      "family": "team",
+      "rowCount": 4498,
+      "collidingLegacyGroups": 42,
+      "sameTeamSameDateCollisions": 42,
+      "affectedGames": 42,
+      "affectedSubjects": 19,
+      "allDistinctTargetGamePk": true
+    },
+    "bullpen": {
+      "family": "bullpen",
+      "rowCount": 4498,
+      "collidingLegacyGroups": 42,
+      "sameTeamSameDateCollisions": 42,
+      "affectedGames": 42,
+      "affectedSubjects": 19,
+      "allDistinctTargetGamePk": true
+    },
+    "offense": {
+      "family": "offense",
+      "rowCount": 4498,
+      "collidingLegacyGroups": 42,
+      "sameTeamSameDateCollisions": 42,
+      "affectedGames": 42,
+      "affectedSubjects": 19,
+      "allDistinctTargetGamePk": true
+    },
+    "exactObservedProductionBlocker": "pick2_mlb_team_daily_features_team_id_feature_date_feature__key",
+    "explainedBySameDayDoubleheaderStructure": true
+  },
+  "snapshotAudit": {
+    "rowCount": 67433,
+    "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "duplicateSnapshotNativeKeys": 0,
+    "asOfViolations": 0,
+    "sameDayLeakageViolations": 0,
+    "targetGameCoverage": 2249,
+    "state": "PASS"
+  },
+  "recoveryPlan": {
+    "snapshots": {
+      "inserts": 0,
+      "reuses": 67433,
+      "conflicts": 0
+    },
+    "team": {
+      "inserts": 4498,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "starter": {
+      "inserts": 4498,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "bullpen": {
+      "inserts": 4498,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "batter": {
+      "inserts": 44943,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "offense": {
+      "inserts": 4498,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "matchup": {
+      "inserts": 2249,
+      "reuses": 0,
+      "conflicts": 0
+    },
+    "firstInning": {
+      "inserts": 2249,
+      "reuses": 0,
+      "conflicts": 0
+    }
+  },
+  "repairDesign": {
+    "dailyFeatureConstraintRepairRequired": "YES",
+    "nonDestructiveContract": "YES",
+    "migrationReady": "NO_BLOCKED_PENDING_DIRECT_AUTHORIZATION",
+    "migrationScopeSafe": "NOT_CERTIFIED_WITHOUT_MIGRATION_FILE",
+    "schemaApplyAuthorized": "NO",
+    "dmlResumeAuthorized": "NO"
+  },
+  "flags": {
+    "MLB_DATA_01D_R1_BASELINE": "PASS",
+    "MLB_DATA_01D_R1_PARTIAL_STATE_CERTIFIED": "YES",
+    "MLB_DATA_01D_R1_UNIQUE_CONSTRAINT_INVENTORY_COMPLETE": "YES",
+    "MLB_DATA_01D_R1_LEGACY_KEY_DEFECT_PROVEN": "YES",
+    "MLB_DATA_01D_R1_GAMEPK_DOUBLEHEADER_DISAMBIGUATION": "PASS",
+    "MLB_DATA_01D_R1_EXISTING_SNAPSHOT_STATE": "PASS",
+    "MLB_DATA_01D_R1_SNAPSHOT_RECOVERY_POLICY_READY": "YES",
+    "DAILY_FEATURE_CONSTRAINT_REPAIR_REQUIRED": "YES",
+    "MLB_DATA_01D_R1_CONSTRAINT_REPAIR_NONDESTRUCTIVE": "YES",
+    "MLB_DATA_01D_R1_MIGRATION_READY": "NO",
+    "MLB_DATA_01D_R1_MIGRATION_SCOPE_SAFE": "NO",
+    "MLB_DATA_01D_R1_NATIVE_ONCONFLICT_CONTRACT_READY": "YES",
+    "MLB_DATA_01D_R1_RESUME_CONTRACT_READY": "YES",
+    "MLB_DATA_01D_R1_RECOVERY_DRY_RUN": "PASS",
+    "MLB_DATA_01D_R1_NATIVE_KEY_UNIQUENESS_PROOF": "PASS",
+    "MLB_DATA_01D_R1_PERSISTENCE_IDEMPOTENCY_PROJECTED": "PASS",
+    "MLB_DATA_01D_R1_FEATURE_DEFINITIONS_UNCHANGED": "YES",
+    "MLB_DATA_01D_R1_ASOF_CONTRACT_PRESERVED": "YES",
+    "MLB_DATA_01D_R1_LEAKAGE_STATE": "PASS",
+    "MLB_DATA_01D_R1_SCHEMA_APPLY_AUTHORIZED": "NO",
+    "MLB_DATA_01D_R1_DML_RESUME_AUTHORIZED": "NO"
+  },
+  "safety": {
+    "providerCalls": 0,
+    "productionSchemaMutations": 0,
+    "productionDmlMutations": 0,
+    "featureWritesInR1": 0,
+    "modelWork": "NO",
+    "predictionWork": "NO",
+    "automation": "NO",
+    "cronChanges": 0
+  }
+}
