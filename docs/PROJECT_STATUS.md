@@ -1,6 +1,12 @@
 # Project Status
 
-Last updated: 2026-08-29 00:00:00Z
+Last updated: 2026-08-31 01:06:26Z
+
+## 2026-08-31 MLB-DATA-01D-R1F Pre-DML Alignment Guard Repair
+
+- MLB-DATA-01D-R1F pre-DML alignment guard repair is certified as `MLB_DATA_01D_R1F_PRE_DML_ALIGNMENT_GUARD_REPAIR_CERTIFIED`. The active 01D feature persistence guard now recognizes only the current certified R1E production baseline `7d5cc1798e799b5048d5cccfd35db1822ea6ebc6` for both read-only preflight and execute-guard validation.
+- The prior active execute/preflight target `875b46d34553bc3618067fec202a2f780a39b2d8` is preserved only as historical 01D dry-run/initial persistence evidence, alongside R1B `61aeb84a58d0ae71ec02bbf044f70f3c60854d33` and R1D/R1E `fcde1844e5de8fc38da18862ca675f76edee3551`. The guard remains fail-closed and does not accept arbitrary future commits or ancestry-based newer commits.
+- Repaired read-only preflight and no-write execute-guard validation both passed against production `7d5cc1798e799b5048d5cccfd35db1822ea6ebc6`, preserving 67,433 snapshot `REUSE_NO_OP`, 0 conflicts and the daily insert-eligible row plan. No feature DML, snapshot writes, raw/native identity writes, schema mutations, provider calls, model/prediction work, 2026 import, automation or cron changes occurred. Next: publish this repair, wait for production alignment, then separately reissue bounded R1F daily-feature DML authorization.
 
 ## 2026-08-30 MLB-DATA-01D-R1E Daily Feature Recovery Readiness
 

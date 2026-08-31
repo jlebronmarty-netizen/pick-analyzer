@@ -1,0 +1,155 @@
+{
+  "generatedAt": "2026-08-31T01:06:26.425Z",
+  "project": "MLB_DATA_01D_R1F_PRE_DML_ALIGNMENT_GUARD_REPAIR",
+  "certificationVerdict": "MLB_DATA_01D_R1F_PRE_DML_ALIGNMENT_GUARD_REPAIR_CERTIFIED",
+  "repositoryProductionAlignment": {
+    "branch": "main",
+    "localHead": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "originMain": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "production": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "worktreeBeforeRepair": "clean",
+    "R1F_GUARD_REPAIR_BASELINE": "PASS"
+  },
+  "rootCause": "The active 01D feature persistence production-alignment guard still pinned execute to the original feature-persistence production baseline 875b46d34553bc3618067fec202a2f780a39b2d8 after R1E had been published and deployed at 7d5cc1798e799b5048d5cccfd35db1822ea6ebc6, causing PRODUCTION_ALIGNMENT_CHANGED before any R1F feature DML could run.",
+  "staleAlignmentReferences": [
+    {
+      "file": "scripts/mlb-data-01d-2025-feature-persistence.mjs",
+      "symbol": "targetProductionCommit",
+      "value": "875b46d34553bc3618067fec202a2f780a39b2d8",
+      "classification": "HISTORICAL_ARTIFACT_REFERENCE",
+      "action": "preserved as historical dry-run/initial persistence evidence"
+    },
+    {
+      "file": "scripts/mlb-data-01d-2025-feature-persistence.mjs",
+      "symbol": "productionAlignmentAllowedForMode execute branch",
+      "value": "875b46d34553bc3618067fec202a2f780a39b2d8",
+      "classification": "STALE_RUNTIME_GUARD_REPAIRED",
+      "action": "replaced as active execute/preflight target by r1fCertifiedProductionCommit"
+    },
+    {
+      "file": "scripts/mlb-data-01d-2025-feature-persistence.mjs",
+      "symbol": "r1bPostMigrationProductionCommit",
+      "value": "61aeb84a58d0ae71ec02bbf044f70f3c60854d33",
+      "classification": "VALID_OLD_PHASE_REFERENCE",
+      "action": "preserved as historical R1B evidence only"
+    },
+    {
+      "file": "scripts/mlb-data-01d-2025-feature-persistence.mjs",
+      "symbol": "r1dVerificationProductionCommit",
+      "value": "fcde1844e5de8fc38da18862ca675f76edee3551",
+      "classification": "VALID_OLD_PHASE_REFERENCE",
+      "action": "preserved as historical R1D/R1E evidence only"
+    }
+  ],
+  "currentAlignmentContract": {
+    "acceptedCommit": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "activeAcceptedProductionCommits": [
+      "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6"
+    ],
+    "preflightTargetBeforeRepair": "875b46d34553bc3618067fec202a2f780a39b2d8",
+    "preflightTargetAfterRepair": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "executeTargetBeforeRepair": "875b46d34553bc3618067fec202a2f780a39b2d8",
+    "executeTargetAfterRepair": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "acceptsArbitraryFutureCommits": "NO",
+    "acceptsStaleProductionCommits": "NO",
+    "acceptsNewerProductionCommitsByAncestry": "NO"
+  },
+  "repairedPreflight": {
+    "command": "node scripts/mlb-data-01d-2025-feature-persistence.mjs --diagnose-snapshot-reuse",
+    "status": "PASS",
+    "mode": "PLAN_ONLY",
+    "productionCommit": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "providerCallsMade": 0,
+    "snapshots": {
+      "existing": 67433,
+      "planned": 67433,
+      "mode": "REUSE_NO_OP",
+      "inserts": 0,
+      "reuses": 67433,
+      "conflicts": 0
+    },
+    "dailyFeaturePlan": {
+      "team": 4498,
+      "starter": 4498,
+      "bullpen": 4498,
+      "batter": 44943,
+      "offenseLogicalRows": 4498,
+      "matchup": 2249,
+      "firstInning": 2249,
+      "BLOCK_CONFLICT": 0
+    }
+  },
+  "executePathDryValidation": {
+    "command": "node scripts/mlb-data-01d-2025-feature-persistence.mjs --validate-execute-guard --diagnose-snapshot-reuse",
+    "status": "PASS",
+    "mode": "EXECUTE_GUARD_DRY_VALIDATION",
+    "productionCommit": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "providerCallsMade": 0,
+    "executeGuardDryValidation": "PASS",
+    "physicalWrites": {
+      "pick2_feature_snapshots": 0,
+      "pick2_mlb_team_daily_features": 0,
+      "pick2_mlb_pitcher_daily_features": 0,
+      "pick2_mlb_bullpen_daily_features": 0,
+      "pick2_mlb_batter_daily_features": 0,
+      "pick2_mlb_matchup_daily_features": 0,
+      "pick2_mlb_first_inning_daily_features": 0
+    }
+  },
+  "productionStateUnchanged": {
+    "snapshots": 67433,
+    "dailyFeatureRows": 0,
+    "rawRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicatePitchIdentities": 0,
+    "nativeGames": 2430,
+    "nativePlayers": 1469,
+    "models": 0,
+    "champion": "NONE",
+    "predictions": 0
+  },
+  "contractsPreserved": {
+    "rowPlanUnchanged": "YES",
+    "snapshotReuseContract": "YES",
+    "orderedPaginationFix": "YES",
+    "asOfRule": "source_game_date < target_game_date",
+    "sameDayDoubleheaderPolicy": "strict_prior_date_only",
+    "featureDefinitionsUnchanged": "YES",
+    "featureVersionUnchanged": "YES",
+    "nullPolicyUnchanged": "YES",
+    "sampleSizeSemanticsUnchanged": "YES"
+  },
+  "safety": {
+    "productionDmlMutations": 0,
+    "productionDdlMutations": 0,
+    "featureWrites": 0,
+    "snapshotWrites": 0,
+    "rawWrites": 0,
+    "nativeIdentityWrites": 0,
+    "providerCalls": 0,
+    "modelWork": "NO",
+    "predictionWork": "NO",
+    "import2026": "NO",
+    "automationActivated": "NO",
+    "activeCronAdded": "NO"
+  },
+  "flags": {
+    "R1F_GUARD_REPAIR_BASELINE": "PASS",
+    "R1F_ALIGNMENT_GUARD_INVENTORY_COMPLETE": "YES",
+    "R1F_HISTORICAL_COMMIT_EVIDENCE_PRESERVED": "YES",
+    "R1F_CURRENT_ALIGNMENT_CONTRACT_READY": "YES",
+    "R1F_PREFLIGHT_ALIGNMENT_GUARD_REPAIRED": "YES",
+    "R1F_EXECUTE_ALIGNMENT_GUARD_REPAIRED": "YES",
+    "R1F_PREFLIGHT_EXECUTE_ALIGNMENT_PARITY": "PASS",
+    "R1F_ALIGNMENT_GUARD_FAIL_CLOSED": "PASS",
+    "R1F_CERTIFIED_ROW_PLAN_UNCHANGED": "YES",
+    "R1F_SNAPSHOT_REUSE_CONTRACT_PRESERVED": "YES",
+    "R1F_ASOF_LEAKAGE_CONTRACT_PRESERVED": "YES",
+    "R1F_FEATURE_DEFINITIONS_UNCHANGED": "YES",
+    "R1F_REPAIRED_PREFLIGHT": "PASS",
+    "R1F_EXECUTE_PATH_GUARD_DRY_VALIDATION": "PASS",
+    "R1F_GUARD_REPAIR_PRODUCTION_STATE_UNCHANGED": "YES"
+  },
+  "recommendedNextPhase": "MLB_DATA_01D_R1F_DAILY_FEATURE_RECOVERY_DML_EXECUTION",
+  "recommendedNextInstruction": "After this guard repair commit is published and production aligns, explicitly reissue bounded R1F daily-feature DML authorization against the new certified commit."
+}

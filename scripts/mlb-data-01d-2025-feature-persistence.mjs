@@ -5,11 +5,13 @@ import { createClient } from '@supabase/supabase-js'
 
 const args = new Set(process.argv.slice(2))
 const execute = args.has('--execute')
+const validateExecuteGuard = args.has('--validate-execute-guard')
 const writeArtifact = args.has('--write-artifact')
 const diagnoseSnapshotReuse = args.has('--diagnose-snapshot-reuse')
 const targetProductionCommit = '875b46d34553bc3618067fec202a2f780a39b2d8'
 const r1bPostMigrationProductionCommit = '61aeb84a58d0ae71ec02bbf044f70f3c60854d33'
 const r1dVerificationProductionCommit = 'fcde1844e5de8fc38da18862ca675f76edee3551'
+const r1fCertifiedProductionCommit = '7d5cc1798e799b5048d5cccfd35db1822ea6ebc6'
 const localDryRunCommit = '6e7f4185d13045aa1ff0ef9bede82614bc41b8a9'
 const featureVersion = 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1'
 const dryRunPath = 'docs/CERTIFICATION/mlb-data-01d-2025-feature-build-dry-run.json'
@@ -1079,8 +1081,8 @@ function ensure(condition, message) {
 }
 
 function productionAlignmentAllowedForMode(commit) {
-  if (execute) return commit === targetProductionCommit
-  return commit === targetProductionCommit || commit === r1bPostMigrationProductionCommit || commit === r1dVerificationProductionCommit
+  if (execute || validateExecuteGuard) return commit === r1fCertifiedProductionCommit
+  return commit === r1fCertifiedProductionCommit
 }
 
 function quantiles(values) {
@@ -1343,6 +1345,7 @@ async function main() {
     physicalWrites.pick2_mlb_first_inning_daily_features = await insertRows(db, 'pick2_mlb_first_inning_daily_features', rows.firstInning)
   }
 
+  const executeGuardDryValidation = validateExecuteGuard && !execute
   const audit = execute ? await persistedAudit(db, scan, built) : null
   const finalCounts = audit?.postCounts ?? preCounts
   const finalModelCounts = await modelCounts(db)
@@ -1389,16 +1392,20 @@ async function main() {
   const artifact = {
     generatedAt: new Date().toISOString(),
     project: 'MLB_DATA_01D_2025_FEATURE_PERSISTENCE',
-    mode: execute ? 'EXECUTE' : 'PLAN_ONLY',
+    mode: execute ? 'EXECUTE' : (validateExecuteGuard ? 'EXECUTE_GUARD_DRY_VALIDATION' : 'PLAN_ONLY'),
     certificationVerdict: certified ? 'MLB_DATA_01D_2025_FEATURE_PERSISTENCE_CERTIFIED' : 'MLB_DATA_01D_2025_FEATURE_PERSISTENCE_PARTIAL',
     alignment: {
       localDryRunCommit,
       targetProductionCommit,
       r1bPostMigrationProductionCommit,
       r1dVerificationProductionCommit,
-      planOnlyAcceptedProductionCommits: [targetProductionCommit, r1bPostMigrationProductionCommit, r1dVerificationProductionCommit],
+      r1fCertifiedProductionCommit,
+      activeAcceptedProductionCommits: [r1fCertifiedProductionCommit],
+      historicalProductionCommitReferences: [targetProductionCommit, r1bPostMigrationProductionCommit, r1dVerificationProductionCommit],
+      planOnlyAcceptedProductionCommits: [r1fCertifiedProductionCommit],
       productionCommit: version.gitCommit,
       providerCallsMade: version.providerCallsMade,
+      executeGuardDryValidation: executeGuardDryValidation ? 'PASS' : 'NOT_REQUESTED',
     },
     dryRunRevalidation: {
       status: 'YES',
