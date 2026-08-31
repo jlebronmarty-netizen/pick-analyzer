@@ -1,0 +1,174 @@
+{
+  "generatedAt": "2026-08-31T00:00:00.000Z",
+  "project": "MLB_DATA_01D_R1F_PRODUCTION_ENV_AUTHORITY_READBACK_ROUTE",
+  "certificationVerdict": "MLB_DATA_01D_R1F_PRODUCTION_ENV_AUTHORITY_READBACK_ROUTE_CERTIFIED",
+  "repositoryProductionAlignment": {
+    "baselineLocalHead": "9f77516e3ab4e421e097e3dbcaf82549dae326ec",
+    "baselineOriginMain": "9f77516e3ab4e421e097e3dbcaf82549dae326ec",
+    "baselineProduction": "9f77516e3ab4e421e097e3dbcaf82549dae326ec",
+    "worktreeBeforeChange": "clean",
+    "R1F_ENV_READBACK_ROUTE_BASELINE": "PASS"
+  },
+  "route": {
+    "path": "/api/system/pick2/r1f-manifest-authority",
+    "method": "GET",
+    "runtime": "nodejs",
+    "dynamic": "force-dynamic",
+    "exposurePolicy": "PUBLIC_READ_ONLY_CERTIFICATION_STATUS",
+    "exposureRationale": "The route exposes only non-secret certification booleans, digest metadata already approved as certification evidence, mismatch counts and the already-public production git commit."
+  },
+  "responseContract": {
+    "allowedFields": [
+      "manifestContractId",
+      "manifestDigest",
+      "expectedDigestConfigured",
+      "expectedDigestMatchesManifest",
+      "criticalCodeIntegrity",
+      "criticalFileMismatchCount",
+      "featureVersion",
+      "productionAuthorityReady",
+      "failureCode",
+      "gitCommit"
+    ],
+    "implicitApiContractFields": [
+      "requestId"
+    ],
+    "prohibitedFields": [
+      "raw environment variable value",
+      "unrelated environment variables",
+      "provider credentials",
+      "database credentials",
+      "tokens",
+      "headers",
+      "secrets",
+      "featureDmlAuthorized"
+    ]
+  },
+  "manifest": {
+    "contractId": "PICK2_MLB_01D_R1F_RECOVERY_MANIFEST_V1",
+    "sha256": "1c7532aa5aaf09d2c05ffb4df752bb5eee2e4f9c719489b70a97f9d14d587352",
+    "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "expectedDigestEnvironmentVariable": "PICK2_MLB_R1F_EXPECTED_MANIFEST_SHA256",
+    "digestDisclosurePolicy": "manifestDigest is certification metadata and is not secret"
+  },
+  "authorityReadyLogic": {
+    "expectedDigestConfigured": "runtime env value exists after trim",
+    "expectedDigestMatchesManifest": "runtime env value is normalized internally and compared to the recomputed canonical manifest payload SHA-256",
+    "manifestCanonicalDigestValid": "recomputed canonical payload digest equals manifest_sha256 and the certified digest",
+    "criticalCodeIntegrity": "all manifest-listed critical file digests match deployed file bytes",
+    "featureVersion": "manifest feature_version equals MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "contractId": "manifest contract id equals PICK2_MLB_01D_R1F_RECOVERY_MANIFEST_V1",
+    "productionAuthorityReady": "true only when all authority checks pass"
+  },
+  "failureCodes": [
+    "R1F_EXPECTED_MANIFEST_SHA256_MISSING",
+    "R1F_EXPECTED_MANIFEST_SHA256_INVALID",
+    "R1F_EXPECTED_MANIFEST_SHA256_MISMATCH",
+    "R1F_MANIFEST_CONTRACT_ID_MISMATCH",
+    "R1F_MANIFEST_DIGEST_INVALID",
+    "R1F_MANIFEST_DIGEST_MISMATCH",
+    "R1F_FEATURE_VERSION_MISMATCH",
+    "R1F_CRITICAL_FILE_INVENTORY_EMPTY",
+    "R1F_CRITICAL_FILE_MISSING",
+    "R1F_CRITICAL_FILE_DIGEST_INVALID",
+    "R1F_CRITICAL_FILE_DIGEST_MISMATCH"
+  ],
+  "testMatrix": {
+    "missingEnv": {
+      "expectedDigestConfigured": false,
+      "expectedDigestMatchesManifest": false,
+      "productionAuthorityReady": false,
+      "failureCode": "R1F_EXPECTED_MANIFEST_SHA256_MISSING",
+      "status": "PASS"
+    },
+    "validEnv": {
+      "expectedDigestConfigured": true,
+      "expectedDigestMatchesManifest": true,
+      "criticalCodeIntegrity": "PASS",
+      "productionAuthorityReady": true,
+      "status": "PASS"
+    },
+    "wrongEnv": {
+      "expectedDigestConfigured": true,
+      "expectedDigestMatchesManifest": false,
+      "productionAuthorityReady": false,
+      "failureCode": "R1F_EXPECTED_MANIFEST_SHA256_MISMATCH",
+      "status": "PASS"
+    },
+    "codeDrift": {
+      "criticalCodeIntegrity": "FAIL",
+      "criticalFileMismatchCount": 1,
+      "productionAuthorityReady": false,
+      "status": "PASS"
+    },
+    "manifestTamper": {
+      "productionAuthorityReady": false,
+      "failureCode": "R1F_MANIFEST_DIGEST_MISMATCH",
+      "status": "PASS"
+    }
+  },
+  "productionState": {
+    "snapshots": 67433,
+    "dailyFeatureRows": 0,
+    "rawRows": 712528,
+    "nativeGames": 2430,
+    "nativePlayers": 1469,
+    "models": 0,
+    "champion": "NONE",
+    "predictions": 0,
+    "state": "PRESERVED_READ_ONLY_BASELINE"
+  },
+  "safety": {
+    "productionDmlMutations": 0,
+    "productionDdlMutations": 0,
+    "featureWrites": 0,
+    "snapshotWrites": 0,
+    "rawWrites": 0,
+    "nativeIdentityWrites": 0,
+    "providerCalls": 0,
+    "modelWork": "NO",
+    "predictionWork": "NO",
+    "import2026": "NO",
+    "automation": "NO",
+    "cronChanges": 0,
+    "environmentMutations": 0,
+    "fileMutationsAtRuntime": 0
+  },
+  "validators": [
+    "node scripts/mlb-data-01d-r1f-production-env-authority-readback-route-validate.mjs",
+    "node scripts/mlb-data-01d-r1f-signed-deployment-certification-manifest-validate.mjs",
+    "node scripts/mlb-data-01d-r1f-pre-dml-alignment-guard-repair-validate.mjs",
+    "node scripts/mlb-data-01d-r1e-daily-feature-recovery-readiness-validate.mjs",
+    "node scripts/mlb-data-01d-r1d-snapshot-reuse-digest-reconciliation-validate.mjs",
+    "node scripts/mlb-data-01d-r1c-post-migration-recovery-validator-validate.mjs",
+    "node scripts/mlb-data-01d-r1b-post-manual-migration-readback-validate.mjs",
+    "node scripts/mlb-data-01d-r1a-feature-native-uniqueness-migration-validate.mjs",
+    "node scripts/mlb-data-01d-r1-feature-persistence-key-repair-validate.mjs",
+    "node scripts/mlb-data-01d-2025-feature-build-dry-run-validate.mjs",
+    "node scripts/mlb-data-01c-r5b-production-validate.mjs",
+    "node scripts/mlb-data-01c-r5b-backfill-design-validate.mjs",
+    "git diff --check",
+    "npx eslint src/app/api/system/pick2/r1f-manifest-authority/route.ts src/lib/pick2-r1f-manifest-authority.ts",
+    "targeted secret scan",
+    "npm.cmd run build"
+  ],
+  "flags": {
+    "R1F_ENV_READBACK_ROUTE_BASELINE": "PASS",
+    "R1F_ENV_READBACK_ROUTE_DESIGN_READY": "YES",
+    "R1F_ENV_READBACK_SECRET_SAFE_CONTRACT": "PASS",
+    "R1F_ENV_READBACK_DIGEST_MATCH_CHECK": "PASS",
+    "R1F_ENV_READBACK_CRITICAL_CODE_CHECK": "PASS",
+    "R1F_ENV_READBACK_AUTHORITY_LOGIC": "PASS",
+    "R1F_ENV_READBACK_ROUTE_READ_ONLY": "YES",
+    "R1F_ENV_READBACK_ROUTE_EXPOSURE_CERTIFIED": "YES",
+    "R1F_ENV_READBACK_MISSING_ENV_TEST": "PASS",
+    "R1F_ENV_READBACK_VALID_ENV_TEST": "PASS",
+    "R1F_ENV_READBACK_WRONG_ENV_TEST": "PASS",
+    "R1F_ENV_READBACK_CODE_DRIFT_TEST": "PASS",
+    "R1F_ENV_READBACK_MANIFEST_TAMPER_TEST": "PASS",
+    "R1F_ENV_READBACK_NOT_DML_AUTHORITY": "PASS",
+    "R1F_ENV_READBACK_PRODUCTION_STATE": "PASS"
+  },
+  "recommendedNextPhase": "MLB_DATA_01D_R1F_READBACK_ROUTE_PUBLISH_ALIGNMENT_AND_RUNTIME_OBSERVATION",
+  "recommendedNextInstruction": "Publish this read-only route, wait for production alignment, then call /api/system/pick2/r1f-manifest-authority to prove production observes the configured expected manifest digest before separately authorizing any R1F feature DML."
+}

@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-31 02:20:00Z
 
+## 2026-08-31 MLB-DATA-01D-R1F Production Env Authority Readback Route
+
+- MLB-DATA-01D-R1F production env authority readback route is locally certified as `MLB_DATA_01D_R1F_PRODUCTION_ENV_AUTHORITY_READBACK_ROUTE_CERTIFIED`. It adds one dedicated read-only endpoint, `GET /api/system/pick2/r1f-manifest-authority`, to report secret-safe R1F manifest authority status from the deployed runtime.
+- The route exposes only bounded certification evidence: manifest contract id, certified manifest digest, expected-digest configured/match booleans, critical-code integrity status, mismatch count, feature version, authority-ready boolean, failure code and the already-public production git commit. It does not expose the raw environment value, unrelated environment variables, provider/database credentials, tokens, headers or DML authorization.
+- The helper recomputes the canonical manifest digest, compares runtime `PICK2_MLB_R1F_EXPECTED_MANIFEST_SHA256` internally, verifies the manifest-listed critical file digests and fails closed on missing/malformed/mismatched env values, manifest tamper or code drift. No feature DML, snapshot writes, raw/native identity writes, schema mutations, provider calls, model/prediction work, 2026 import, automation, cron or environment changes occurred. Next: publish this route and call it in production to convert the manual env confirmation into deployed runtime evidence.
+
 ## 2026-08-31 MLB-DATA-01D-R1F Signed Deployment Certification Manifest
 
 - MLB-DATA-01D-R1F signed deployment certification manifest design is locally certified as `MLB_DATA_01D_R1F_SIGNED_DEPLOYMENT_CERTIFICATION_MANIFEST_CERTIFIED`. The prior self-referential deployed-SHA equality guard and token-only authority are retired for active R1F write authority.
