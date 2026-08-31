@@ -1,6 +1,12 @@
 # Project Status
 
-Last updated: 2026-08-31 23:40:00Z
+Last updated: 2026-08-31 23:55:00Z
+
+## 2026-08-31 MLB-DATA-01D-R1H Schema Readback Authority Prep
+
+- MLB-DATA-01D-R1H schema readback authority prep is locally certified as `MLB_DATA_01D_R1H_SCHEMA_READBACK_AUTHORITY_PREP_CERTIFIED`. Production remains aligned to `b9bc7e9fd0544b2cc5681af86bb5d3f6fd2862ba`; the user confirmed manual application of the R1G bullpen uniqueness migration, but exact catalog readback was unavailable through Supabase REST.
+- R1H prep adds one SELECT-only manual SQL packet, `docs/CERTIFICATION/mlb-data-01d-r1h-schema-readback-authority-prep.sql`, for Supabase Production SQL Editor. It inspects only PostgreSQL catalog sources for `public.pick2_mlb_bullpen_daily_features`, proving whether the legacy constraint is absent, whether the native `target_game_pk + team_id + feature_version` unique object exists and whether any contradictory legacy unique object remains.
+- No schema or data changes were executed by Codex in this phase. Feature DML remains stopped, and provider calls, production DML, production DDL, 2026 import, automation and cron changes remain 0.
 
 ## 2026-08-31 MLB-DATA-01D-R1G Bullpen Native Uniqueness Repair Plan
 

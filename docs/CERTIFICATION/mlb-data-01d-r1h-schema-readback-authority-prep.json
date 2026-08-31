@@ -1,0 +1,117 @@
+{
+  "generatedAt": "2026-08-31T23:55:00.000Z",
+  "project": "MLB_DATA_01D_R1H_SCHEMA_READBACK_AUTHORITY_PREP",
+  "certificationVerdict": "MLB_DATA_01D_R1H_SCHEMA_READBACK_AUTHORITY_PREP_CERTIFIED",
+  "alignment": {
+    "branch": "main",
+    "localHead": "b9bc7e9fd0544b2cc5681af86bb5d3f6fd2862ba",
+    "originMain": "b9bc7e9fd0544b2cc5681af86bb5d3f6fd2862ba",
+    "production": "b9bc7e9fd0544b2cc5681af86bb5d3f6fd2862ba",
+    "worktreeBefore": "clean",
+    "R1H_SCHEMA_READBACK_PREP_BASELINE": "PASS"
+  },
+  "bullpenTable": {
+    "schema": "public",
+    "table": "pick2_mlb_bullpen_daily_features",
+    "R1H_BULLPEN_TABLE_IDENTITY": "PASS"
+  },
+  "manualSqlPacket": {
+    "path": "docs/CERTIFICATION/mlb-data-01d-r1h-schema-readback-authority-prep.sql",
+    "catalogSources": [
+      "pg_catalog.pg_constraint",
+      "pg_catalog.pg_class",
+      "pg_catalog.pg_namespace",
+      "pg_catalog.pg_attribute",
+      "pg_catalog.pg_index"
+    ],
+    "statementType": "SELECT_ONLY",
+    "label": "READ-ONLY CATALOG VERIFICATION - NO DML / NO DDL",
+    "R1H_SCHEMA_READBACK_SQL_READ_ONLY": "PASS"
+  },
+  "queries": {
+    "legacyConstraint": {
+      "object": "pick2_mlb_bullpen_daily_featu_team_id_feature_date_feature__key",
+      "expectedRows": 0,
+      "returnContract": "R1H_EXPECTED_LEGACY_CONSTRAINT_ROWS = 0"
+    },
+    "nativeUniqueObject": {
+      "object": "pick2_mlb_bullpen_daily_features_target_game_team_version_key",
+      "expectedRows": 1,
+      "expectedUnique": true,
+      "expectedOrderedColumns": [
+        "target_game_pk",
+        "team_id",
+        "feature_version"
+      ],
+      "returnContract": "R1H_EXPECTED_NATIVE_UNIQUENESS_ROWS = 1"
+    },
+    "fullUniquenessInventory": {
+      "table": "public.pick2_mlb_bullpen_daily_features",
+      "returns": [
+        "constraint/index name",
+        "object type",
+        "uniqueness",
+        "ordered indexed/key columns",
+        "table name",
+        "schema name",
+        "predicate"
+      ]
+    }
+  },
+  "successInterpretation": {
+    "R1H_SCHEMA_READBACK_SUCCESS_CONTRACT": "READY",
+    "requires": [
+      "legacy exact object count = 0",
+      "native exact object count = 1",
+      "native object is unique",
+      "native ordered columns exactly target_game_pk, team_id, feature_version",
+      "contradictory legacy unique object count on team_id, feature_date, feature_version = 0",
+      "target table count = 1"
+    ]
+  },
+  "blockedInterpretation": {
+    "blockIf": [
+      "legacy object still exists",
+      "native object missing",
+      "native object not unique",
+      "native columns differ",
+      "multiple contradictory unique objects exist",
+      "catalog output is ambiguous"
+    ]
+  },
+  "requiredManualOutputFields": [
+    "section",
+    "check_name",
+    "observed",
+    "expected",
+    "pass",
+    "object_type",
+    "object_name",
+    "schema_name",
+    "table_name",
+    "is_unique",
+    "ordered_columns",
+    "predicate"
+  ],
+  "followUpCertificationMapping": {
+    "R1H_LEGACY_BULLPEN_UNIQUENESS_REMOVED": "PASS when R1H_EXPECTED_LEGACY_CONSTRAINT_ROWS pass=true and observed=0",
+    "R1H_BULLPEN_NATIVE_UNIQUENESS_READBACK": "PASS when R1H_EXPECTED_NATIVE_UNIQUENESS_ROWS pass=true and observed=1 and inventory shows target_game_pk, team_id, feature_version",
+    "R1H_UNAFFECTED_SCHEMA_PRESERVED": "PASS when full inventory has no contradictory legacy unique key and no unexpected ambiguous unique object",
+    "R1H_BULLPEN_POSTMIGRATION_RECOVERY_READINESS": "Eligible for final read-only recovery readiness after schema readback contract passes"
+  },
+  "safety": {
+    "productionDmlMutations": 0,
+    "productionDdlMutations": 0,
+    "featureDml": 0,
+    "providerCalls": 0,
+    "import2026": "NO",
+    "automation": "NO",
+    "cronChanges": 0
+  },
+  "flags": {
+    "R1H_SCHEMA_READBACK_PREP_BASELINE": "PASS",
+    "R1H_BULLPEN_TABLE_IDENTITY": "PASS",
+    "R1H_SCHEMA_READBACK_SQL_READ_ONLY": "PASS",
+    "R1H_SCHEMA_READBACK_SUCCESS_CONTRACT": "READY"
+  }
+}
