@@ -1,0 +1,126 @@
+{
+  "manifest_schema_version": 1,
+  "certification_contract_id": "PICK2_MLB_01D_R1F_RECOVERY_MANIFEST_V1",
+  "manifest_sha256": "1c7532aa5aaf09d2c05ffb4df752bb5eee2e4f9c719489b70a97f9d14d587352",
+  "payload": {
+    "authority_design": "DIGEST_BOUND_DEPLOYMENT_CERTIFICATION_MANIFEST",
+    "manifest_generation_version": "pick2-mlb-r1f-manifest-v1",
+    "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "critical_file_digest_contract": {
+      "algorithm": "sha256",
+      "byte_contract": "exact repository file bytes",
+      "ordering": "path ascending",
+      "normalization": "none"
+    },
+    "critical_file_digests": [
+      {
+        "path": "docs/CERTIFICATION/mlb-data-01c-r5b-2025-native-identity-backfill.json",
+        "sha256": "c6b6b95d6579b5b9bd96c8f1b345154a31624c707000147bcd31c3705f7d9428"
+      },
+      {
+        "path": "docs/CERTIFICATION/mlb-data-01d-2025-feature-build-dry-run.json",
+        "sha256": "760d531ec70df99f26046900fe7a74ee2cd73f6dcdc2d3a328b57862184652ed"
+      },
+      {
+        "path": "scripts/mlb-data-01d-2025-feature-persistence.mjs",
+        "sha256": "8bcbd0f20bedb587f20a95a0b19d2c57bf40312faefc09657f74fa9b00192be0"
+      }
+    ],
+    "canonicalization": {
+      "encoding": "utf-8",
+      "object_key_order": "lexicographic",
+      "array_order": "explicit manifest order",
+      "null_handling": "explicit JSON null only when present",
+      "timestamp_policy": "no generated timestamp in payload",
+      "environment_path_policy": "relative repository paths only"
+    },
+    "external_expected_digest_authority": {
+      "environment_variable": "PICK2_MLB_R1F_EXPECTED_MANIFEST_SHA256",
+      "normalization": "trim and lowercase",
+      "missing_value": "reject",
+      "blank_value": "reject",
+      "malformed_value": "reject",
+      "mismatch": "reject"
+    },
+    "row_plan": {
+      "team": 4498,
+      "starter": 4498,
+      "bullpen": 4498,
+      "batter": 44943,
+      "offense_logical": 4498,
+      "matchup": 2249,
+      "first_inning": 2249,
+      "snapshots": 67433,
+      "snapshot_inserts": 0,
+      "BLOCK_CONFLICT": 0
+    },
+    "dml_caps": {
+      "pick2_feature_snapshots": 0,
+      "pick2_mlb_team_daily_features": 4498,
+      "pick2_mlb_pitcher_daily_features": 4498,
+      "pick2_mlb_bullpen_daily_features": 4498,
+      "pick2_mlb_batter_daily_features": 44943,
+      "pick2_mlb_matchup_daily_features": 2249,
+      "pick2_mlb_first_inning_daily_features": 2249
+    },
+    "snapshot_contract": {
+      "existing": 67433,
+      "planned": 67433,
+      "exact_digest_matches": 67433,
+      "mismatches": 0,
+      "missing": 0,
+      "unexpected": 0,
+      "reuse_no_op": 67433,
+      "new_inserts": 0
+    },
+    "native_key_contract": {
+      "team": "target_game_pk + team_id + feature_version",
+      "starter": "target_game_pk + mlbam_pitcher_id + feature_version",
+      "bullpen": "target_game_pk + team_id + feature_version",
+      "batter": "target_game_pk + mlbam_batter_id + feature_version",
+      "matchup": "target_game_pk + feature_version",
+      "first_inning": "target_game_pk + feature_version",
+      "snapshot": "deterministic_identity"
+    },
+    "as_of_contract": {
+      "rule": "source_game_date < target_game_date",
+      "same_day_policy": "strict prior-date only",
+      "leakage_violations": 0,
+      "same_day_leakage": 0
+    },
+    "leakage_contract": {
+      "denylist": [
+        "post_pitch_score_state",
+        "same_target_game_results",
+        "market_value_outputs",
+        "model_outputs",
+        "prediction_outputs"
+      ],
+      "violations": 0
+    },
+    "raw_native_invariants": {
+      "raw_rows": 712528,
+      "unique_pitch_identities": 712528,
+      "duplicate_pitch_identities": 0,
+      "native_games": 2430,
+      "native_players": 1469
+    },
+    "explicit_dml_authorization_requirement": {
+      "required_for_execute": true,
+      "runtime_flag": "--r1f-dml-authorized",
+      "authorization_persisted_in_manifest": false,
+      "manifest_alone_authorizes_dml": false
+    },
+    "fail_closed_contract": {
+      "missing_expected_digest": "reject",
+      "wrong_expected_digest": "reject",
+      "modified_critical_file": "reject",
+      "modified_manifest_payload": "reject",
+      "row_plan_drift": "reject",
+      "snapshot_drift": "reject",
+      "leakage": "reject",
+      "BLOCK_CONFLICT": "reject",
+      "missing_explicit_dml_authorization": "reject_before_write"
+    }
+  }
+}

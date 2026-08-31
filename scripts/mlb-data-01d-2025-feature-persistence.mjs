@@ -5,15 +5,18 @@ import { createClient } from '@supabase/supabase-js'
 
 const args = new Set(process.argv.slice(2))
 const execute = args.has('--execute')
+const explicitDmlAuthorization = args.has('--r1f-dml-authorized')
 const validateExecuteGuard = args.has('--validate-execute-guard')
 const writeArtifact = args.has('--write-artifact')
 const diagnoseSnapshotReuse = args.has('--diagnose-snapshot-reuse')
 const targetProductionCommit = '875b46d34553bc3618067fec202a2f780a39b2d8'
 const r1bPostMigrationProductionCommit = '61aeb84a58d0ae71ec02bbf044f70f3c60854d33'
 const r1dVerificationProductionCommit = 'fcde1844e5de8fc38da18862ca675f76edee3551'
-const r1fCertifiedProductionCommit = '2560a3c9c6c147f3aaf7b83c8811648663c9cc1b'
 const localDryRunCommit = '6e7f4185d13045aa1ff0ef9bede82614bc41b8a9'
 const featureVersion = 'MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1'
+const manifestContractId = 'PICK2_MLB_01D_R1F_RECOVERY_MANIFEST_V1'
+const expectedManifestDigestEnvName = 'PICK2_MLB_R1F_EXPECTED_MANIFEST_SHA256'
+const manifestPath = 'config/pick2/mlb/r1f-deployment-certification-manifest.json'
 const dryRunPath = 'docs/CERTIFICATION/mlb-data-01d-2025-feature-build-dry-run.json'
 const r5bArtifactPath = 'docs/CERTIFICATION/mlb-data-01c-r5b-2025-native-identity-backfill.json'
 const artifactPath = 'docs/CERTIFICATION/mlb-data-01d-2025-feature-persistence.json'
@@ -126,8 +129,118 @@ function requireEnv(name) {
   return value
 }
 
+function canonicalize(value) {
+  if (Array.isArray(value)) return `[${value.map((item) => canonicalize(item)).join(',')}]`
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalize(value[key])}`).join(',')}}`
+  }
+  return JSON.stringify(value)
+}
+
+function sha256Hex(value) {
+  return crypto.createHash('sha256').update(value).digest('hex')
+}
+
+function normalizedFileBytes(filePath) {
+  return fs.readFileSync(path.join(process.cwd(), filePath))
+}
+
+function fileSha256(filePath) {
+  return crypto.createHash('sha256').update(normalizedFileBytes(filePath)).digest('hex')
+}
+
+function assertDigestShape(name, value) {
+  ensure(typeof value === 'string' && /^[a-f0-9]{64}$/.test(value), `${name}_MALFORMED`)
+}
+
 function readJsonIfExists(filePath) {
   return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, 'utf8')) : null
+}
+
+function readCertificationManifest() {
+  const manifest = readJsonIfExists(manifestPath)
+  ensure(manifest, 'R1F_CERTIFICATION_MANIFEST_MISSING')
+  ensure(manifest.manifest_schema_version === 1, 'R1F_CERTIFICATION_MANIFEST_SCHEMA_CHANGED')
+  ensure(manifest.certification_contract_id === manifestContractId, 'R1F_CERTIFICATION_CONTRACT_CHANGED')
+  ensure(manifest.payload?.feature_version === featureVersion, 'R1F_CERTIFICATION_FEATURE_VERSION_CHANGED')
+  return manifest
+}
+
+function verifyManifestContracts(manifest) {
+  const payload = manifest.payload
+  ensure(payload.authority_design === 'DIGEST_BOUND_DEPLOYMENT_CERTIFICATION_MANIFEST', 'R1F_MANIFEST_AUTHORITY_DESIGN_CHANGED')
+  ensure(payload.row_plan?.team === expected.rows.team, 'R1F_MANIFEST_TEAM_ROW_PLAN_CHANGED')
+  ensure(payload.row_plan?.starter === expected.rows.starter, 'R1F_MANIFEST_STARTER_ROW_PLAN_CHANGED')
+  ensure(payload.row_plan?.bullpen === expected.rows.bullpen, 'R1F_MANIFEST_BULLPEN_ROW_PLAN_CHANGED')
+  ensure(payload.row_plan?.batter === expected.rows.batter, 'R1F_MANIFEST_BATTER_ROW_PLAN_CHANGED')
+  ensure(payload.row_plan?.offense_logical === expected.rows.offense, 'R1F_MANIFEST_OFFENSE_ROW_PLAN_CHANGED')
+  ensure(payload.row_plan?.matchup === expected.rows.matchup, 'R1F_MANIFEST_MATCHUP_ROW_PLAN_CHANGED')
+  ensure(payload.row_plan?.first_inning === expected.rows.firstInning, 'R1F_MANIFEST_FIRST_INNING_ROW_PLAN_CHANGED')
+  ensure(payload.row_plan?.snapshots === expected.rows.snapshots, 'R1F_MANIFEST_SNAPSHOT_ROW_PLAN_CHANGED')
+  ensure(payload.row_plan?.snapshot_inserts === 0, 'R1F_MANIFEST_SNAPSHOT_INSERT_PLAN_CHANGED')
+  ensure(payload.row_plan?.BLOCK_CONFLICT === 0, 'R1F_MANIFEST_BLOCK_CONFLICT_CHANGED')
+  ensure(payload.snapshot_contract?.existing === expected.rows.snapshots, 'R1F_MANIFEST_SNAPSHOT_EXISTING_CHANGED')
+  ensure(payload.snapshot_contract?.planned === expected.rows.snapshots, 'R1F_MANIFEST_SNAPSHOT_PLANNED_CHANGED')
+  ensure(payload.snapshot_contract?.exact_digest_matches === expected.rows.snapshots, 'R1F_MANIFEST_SNAPSHOT_DIGEST_MATCHES_CHANGED')
+  ensure(payload.snapshot_contract?.mismatches === 0, 'R1F_MANIFEST_SNAPSHOT_MISMATCHES_CHANGED')
+  ensure(payload.snapshot_contract?.missing === 0, 'R1F_MANIFEST_SNAPSHOT_MISSING_CHANGED')
+  ensure(payload.snapshot_contract?.unexpected === 0, 'R1F_MANIFEST_SNAPSHOT_UNEXPECTED_CHANGED')
+  ensure(payload.snapshot_contract?.reuse_no_op === expected.rows.snapshots, 'R1F_MANIFEST_SNAPSHOT_REUSE_CHANGED')
+  ensure(payload.snapshot_contract?.new_inserts === 0, 'R1F_MANIFEST_SNAPSHOT_NEW_INSERTS_CHANGED')
+  ensure(payload.as_of_contract?.rule === 'source_game_date < target_game_date', 'R1F_MANIFEST_ASOF_RULE_CHANGED')
+  ensure(payload.as_of_contract?.same_day_policy === 'strict prior-date only', 'R1F_MANIFEST_SAMEDAY_POLICY_CHANGED')
+  ensure(payload.as_of_contract?.leakage_violations === 0, 'R1F_MANIFEST_LEAKAGE_CHANGED')
+  ensure(payload.as_of_contract?.same_day_leakage === 0, 'R1F_MANIFEST_SAMEDAY_LEAKAGE_CHANGED')
+  ensure(payload.raw_native_invariants?.raw_rows === expected.rawRows, 'R1F_MANIFEST_RAW_ROWS_CHANGED')
+  ensure(payload.raw_native_invariants?.unique_pitch_identities === expected.uniquePitchIdentities, 'R1F_MANIFEST_UNIQUE_PITCH_IDENTITIES_CHANGED')
+  ensure(payload.raw_native_invariants?.duplicate_pitch_identities === expected.duplicatePitchIdentities, 'R1F_MANIFEST_DUPLICATE_PITCH_IDENTITIES_CHANGED')
+  ensure(payload.raw_native_invariants?.native_games === expected.nativeGames, 'R1F_MANIFEST_NATIVE_GAMES_CHANGED')
+  ensure(payload.raw_native_invariants?.native_players === expected.nativePlayers, 'R1F_MANIFEST_NATIVE_PLAYERS_CHANGED')
+  ensure(payload.native_key_contract?.team === 'target_game_pk + team_id + feature_version', 'R1F_MANIFEST_TEAM_KEY_CHANGED')
+  ensure(payload.native_key_contract?.starter === 'target_game_pk + mlbam_pitcher_id + feature_version', 'R1F_MANIFEST_STARTER_KEY_CHANGED')
+  ensure(payload.native_key_contract?.bullpen === 'target_game_pk + team_id + feature_version', 'R1F_MANIFEST_BULLPEN_KEY_CHANGED')
+  ensure(payload.native_key_contract?.batter === 'target_game_pk + mlbam_batter_id + feature_version', 'R1F_MANIFEST_BATTER_KEY_CHANGED')
+  ensure(payload.native_key_contract?.matchup === 'target_game_pk + feature_version', 'R1F_MANIFEST_MATCHUP_KEY_CHANGED')
+  ensure(payload.native_key_contract?.first_inning === 'target_game_pk + feature_version', 'R1F_MANIFEST_FIRST_INNING_KEY_CHANGED')
+  ensure(payload.explicit_dml_authorization_requirement?.required_for_execute === true, 'R1F_MANIFEST_DML_AUTH_REQUIREMENT_CHANGED')
+  ensure(payload.explicit_dml_authorization_requirement?.manifest_alone_authorizes_dml === false, 'R1F_MANIFEST_DML_AUTHORITY_CHANGED')
+  ensure(payload.explicit_dml_authorization_requirement?.authorization_persisted_in_manifest === false, 'R1F_MANIFEST_DML_AUTH_PERSISTENCE_CHANGED')
+}
+
+function verifyCertificationAuthority() {
+  const manifest = readCertificationManifest()
+  const declaredDigest = manifest.manifest_sha256
+  const expectedDigest = process.env[expectedManifestDigestEnvName]
+  ensure(expectedDigest && expectedDigest.trim(), 'R1F_EXPECTED_MANIFEST_SHA256_MISSING')
+  const normalizedExpectedDigest = expectedDigest.trim().toLowerCase()
+  assertDigestShape('R1F_EXPECTED_MANIFEST_SHA256', normalizedExpectedDigest)
+  assertDigestShape('R1F_DECLARED_MANIFEST_SHA256', declaredDigest)
+
+  const computedManifestDigest = sha256Hex(canonicalize(manifest.payload))
+  ensure(computedManifestDigest === declaredDigest, 'R1F_MANIFEST_DECLARED_DIGEST_MISMATCH')
+  ensure(computedManifestDigest === normalizedExpectedDigest, 'R1F_EXPECTED_MANIFEST_SHA256_MISMATCH')
+  verifyManifestContracts(manifest)
+
+  const criticalFileDigests = [...(manifest.payload.critical_file_digests ?? [])].sort((a, b) => a.path.localeCompare(b.path))
+  ensure(criticalFileDigests.length > 0, 'R1F_CRITICAL_FILE_INVENTORY_EMPTY')
+  for (const entry of criticalFileDigests) {
+    assertDigestShape(`R1F_CRITICAL_FILE_DIGEST_${entry.path}`, entry.sha256)
+    ensure(fs.existsSync(path.join(process.cwd(), entry.path)), `R1F_CRITICAL_FILE_MISSING:${entry.path}`)
+    ensure(fileSha256(entry.path) === entry.sha256, `R1F_CRITICAL_FILE_DIGEST_MISMATCH:${entry.path}`)
+  }
+
+  return {
+    status: 'PASS',
+    design: manifest.payload.authority_design,
+    manifestPath,
+    contractId: manifest.certification_contract_id,
+    manifestSchemaVersion: manifest.manifest_schema_version,
+    manifestSha256: computedManifestDigest,
+    expectedDigestEnvName: expectedManifestDigestEnvName,
+    criticalFileCount: criticalFileDigests.length,
+    criticalFiles: criticalFileDigests.map((entry) => entry.path),
+    explicitDmlAuthorization: explicitDmlAuthorization ? 'PRESENT' : 'MISSING',
+  }
 }
 
 function client() {
@@ -1080,9 +1193,8 @@ function ensure(condition, message) {
   if (!condition) throw new Error(message)
 }
 
-function productionAlignmentAllowedForMode(commit) {
-  if (execute || validateExecuteGuard) return commit === r1fCertifiedProductionCommit
-  return commit === r1fCertifiedProductionCommit
+function productionAlignmentAllowedForMode() {
+  return verifyCertificationAuthority()
 }
 
 function quantiles(values) {
@@ -1286,7 +1398,7 @@ async function main() {
     raw2026: await countRawYear(db, 2026),
   }
 
-  ensure(productionAlignmentAllowedForMode(version.gitCommit), 'PRODUCTION_ALIGNMENT_CHANGED')
+  const certificationAuthority = productionAlignmentAllowedForMode()
   const zeroOrRecoverableSnapshotBaseline =
     (preCounts.pick2_feature_snapshots === 0 || preCounts.pick2_feature_snapshots === expected.rows.snapshots) &&
     preCounts.pick2_mlb_team_daily_features === 0 &&
@@ -1334,6 +1446,7 @@ async function main() {
   }
 
   if (execute) {
+    ensure(explicitDmlAuthorization, 'EXPLICIT_DML_AUTHORIZATION_REQUIRED')
     if (snapshotPolicy.mode === 'INSERT_ELIGIBLE') {
       physicalWrites.pick2_feature_snapshots = await insertRows(db, 'pick2_feature_snapshots', rows.snapshots)
     }
@@ -1399,13 +1512,17 @@ async function main() {
       targetProductionCommit,
       r1bPostMigrationProductionCommit,
       r1dVerificationProductionCommit,
-      r1fCertifiedProductionCommit,
-      activeAcceptedProductionCommits: [r1fCertifiedProductionCommit],
+      activeWriteAuthority: 'DIGEST_BOUND_DEPLOYMENT_CERTIFICATION_MANIFEST',
+      activeAcceptedProductionCommits: [],
       historicalProductionCommitReferences: [targetProductionCommit, r1bPostMigrationProductionCommit, r1dVerificationProductionCommit],
-      planOnlyAcceptedProductionCommits: [r1fCertifiedProductionCommit],
+      planOnlyAcceptedProductionCommits: [],
       productionCommit: version.gitCommit,
       providerCallsMade: version.providerCallsMade,
+      certificationAuthority,
       executeGuardDryValidation: executeGuardDryValidation ? 'PASS' : 'NOT_REQUESTED',
+      executeBoundary: execute
+        ? (explicitDmlAuthorization ? 'EXPLICIT_DML_AUTHORIZATION_PRESENT' : 'EXPLICIT_DML_AUTHORIZATION_REQUIRED')
+        : (validateExecuteGuard ? 'EXPLICIT_DML_AUTHORIZATION_REQUIRED' : 'NOT_REQUESTED'),
     },
     dryRunRevalidation: {
       status: 'YES',
@@ -1491,7 +1608,11 @@ async function main() {
       activeCronAdded: 'NO',
     },
     flags: {
-      MLB_DATA_01D_PERSISTENCE_BASELINE: productionAlignmentAllowedForMode(version.gitCommit) ? 'PASS' : 'FAIL',
+      MLB_DATA_01D_PERSISTENCE_BASELINE: certificationAuthority.status === 'PASS' ? 'PASS' : 'FAIL',
+      R1F_SELECTED_MANIFEST_AUTHORITY: 'DIGEST_BOUND_DEPLOYMENT_CERTIFICATION_MANIFEST',
+      R1F_MANIFEST_RUNTIME_DIGEST_GATE: certificationAuthority.status,
+      R1F_DEPLOYED_CODE_INTEGRITY_GATE: certificationAuthority.status,
+      R1F_MANIFEST_DML_AUTHORIZED: explicitDmlAuthorization ? 'YES' : 'NO',
       MLB_DATA_01D_DRY_RUN_REVALIDATED: 'YES',
       MLB_DATA_01D_PREWRITE_ZERO_BASELINE: zeroOrRecoverableSnapshotBaseline ? 'PASS' : 'FAIL',
       MLB_DATA_01D_PREWRITE_IDENTITY_BASELINE: scan.rawRows === expected.rawRows && scan.uniquePitchIdentities === expected.uniquePitchIdentities && scan.duplicatePitchIdentities === 0 && preNativeCounts.games === expected.nativeGames && preNativeCounts.players === expected.nativePlayers && scan.nullNativePitcher === 0 && scan.nullNativeBatter === 0 ? 'PASS' : 'FAIL',

@@ -1,6 +1,12 @@
 # Project Status
 
-Last updated: 2026-08-31 01:06:26Z
+Last updated: 2026-08-31 02:20:00Z
+
+## 2026-08-31 MLB-DATA-01D-R1F Signed Deployment Certification Manifest
+
+- MLB-DATA-01D-R1F signed deployment certification manifest design is locally certified as `MLB_DATA_01D_R1F_SIGNED_DEPLOYMENT_CERTIFICATION_MANIFEST_CERTIFIED`. The prior self-referential deployed-SHA equality guard and token-only authority are retired for active R1F write authority.
+- The new authority is `DIGEST_BOUND_DEPLOYMENT_CERTIFICATION_MANIFEST`: runtime preflight loads `config/pick2/mlb/r1f-deployment-certification-manifest.json`, canonicalizes the payload, verifies manifest SHA-256 `1c7532aa5aaf09d2c05ffb4df752bb5eee2e4f9c719489b70a97f9d14d587352`, compares it to future external env `PICK2_MLB_R1F_EXPECTED_MANIFEST_SHA256`, and verifies exact digests for the runtime-critical persistence script and certified input artifacts.
+- Feature DML remains unauthorized and production configuration was not changed. The execute path still requires separate per-run `--r1f-dml-authorized` in addition to manifest integrity, production invariant checks and zero `BLOCK_CONFLICT`. No feature writes, snapshot writes, raw/native identity writes, production DDL/DML, provider calls, model/prediction work, 2026 import, automation or cron changes occurred. Next: publish this certification commit, align production, configure the expected digest only under separate authorization, then separately authorize R1F daily-feature recovery DML.
 
 ## 2026-08-31 MLB-DATA-01D-R1F Guard Repair Target Advance
 

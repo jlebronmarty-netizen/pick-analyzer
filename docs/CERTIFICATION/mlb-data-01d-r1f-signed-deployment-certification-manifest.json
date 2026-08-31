@@ -1,0 +1,211 @@
+{
+  "generatedAt": "2026-08-31T00:00:00.000Z",
+  "project": "MLB_DATA_01D_R1F_SIGNED_DEPLOYMENT_CERTIFICATION_MANIFEST_DESIGN",
+  "certificationVerdict": "MLB_DATA_01D_R1F_SIGNED_DEPLOYMENT_CERTIFICATION_MANIFEST_CERTIFIED",
+  "repositoryProductionAlignment": {
+    "baselineLocalHead": "ae738c0e5e0fc6890d0dc5b5c7c88d30b0735699",
+    "baselineOriginMain": "ae738c0e5e0fc6890d0dc5b5c7c88d30b0735699",
+    "baselineProduction": "ae738c0e5e0fc6890d0dc5b5c7c88d30b0735699",
+    "worktreeBeforeChange": "clean",
+    "R1F_MANIFEST_BASELINE": "PASS"
+  },
+  "authorityRequirement": {
+    "R1F_SELF_REFERENTIAL_SHA_GUARD_LOOP_CONFIRMED": "YES",
+    "tokenOnlyAuthorityRejected": "YES",
+    "R1F_CODE_INTEGRITY_AUTHORITY_REQUIRED": "YES"
+  },
+  "manifest": {
+    "path": "config/pick2/mlb/r1f-deployment-certification-manifest.json",
+    "authority": "DIGEST_BOUND_DEPLOYMENT_CERTIFICATION_MANIFEST",
+    "contractId": "PICK2_MLB_01D_R1F_RECOVERY_MANIFEST_V1",
+    "schemaVersion": 1,
+    "sha256": "1c7532aa5aaf09d2c05ffb4df752bb5eee2e4f9c719489b70a97f9d14d587352",
+    "selfDigestExclusion": "payload only; manifest_sha256 is outside the canonical payload",
+    "commitShaInPayload": "NO",
+    "signatureState": "DIGEST_BOUND_V1",
+    "externalExpectedDigestEnvironmentVariable": "PICK2_MLB_R1F_EXPECTED_MANIFEST_SHA256"
+  },
+  "criticalFileInventory": {
+    "R1F_MANIFEST_CRITICAL_FILE_INVENTORY_COMPLETE": "YES",
+    "includedRuntimeCriticalFiles": [
+      {
+        "path": "docs/CERTIFICATION/mlb-data-01c-r5b-2025-native-identity-backfill.json",
+        "sha256": "c6b6b95d6579b5b9bd96c8f1b345154a31624c707000147bcd31c3705f7d9428"
+      },
+      {
+        "path": "docs/CERTIFICATION/mlb-data-01d-2025-feature-build-dry-run.json",
+        "sha256": "760d531ec70df99f26046900fe7a74ee2cd73f6dcdc2d3a328b57862184652ed"
+      },
+      {
+        "path": "scripts/mlb-data-01d-2025-feature-persistence.mjs",
+        "sha256": "8bcbd0f20bedb587f20a95a0b19d2c57bf40312faefc09657f74fa9b00192be0"
+      }
+    ],
+    "evaluatedNonRuntimeCertificationFiles": [
+      "scripts/mlb-data-01d-r1f-signed-deployment-certification-manifest-validate.mjs",
+      "scripts/mlb-data-01d-r1f-pre-dml-alignment-guard-repair-validate.mjs",
+      "scripts/mlb-data-01d-r1e-daily-feature-recovery-readiness-validate.mjs",
+      "scripts/mlb-data-01d-r1d-snapshot-reuse-digest-reconciliation-validate.mjs",
+      "scripts/mlb-data-01d-r1c-post-migration-recovery-validator-validate.mjs"
+    ],
+    "R1F_CRITICAL_FILE_DIGEST_CONTRACT": "PASS"
+  },
+  "contracts": {
+    "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "rowPlan": {
+      "team": 4498,
+      "starter": 4498,
+      "bullpen": 4498,
+      "batter": 44943,
+      "offenseLogical": 4498,
+      "matchup": 2249,
+      "firstInning": 2249,
+      "snapshots": 67433,
+      "snapshotInserts": 0,
+      "BLOCK_CONFLICT": 0
+    },
+    "nativeKeys": {
+      "team": "target_game_pk + team_id + feature_version",
+      "starter": "target_game_pk + mlbam_pitcher_id + feature_version",
+      "bullpen": "target_game_pk + team_id + feature_version",
+      "batter": "target_game_pk + mlbam_batter_id + feature_version",
+      "matchup": "target_game_pk + feature_version",
+      "firstInning": "target_game_pk + feature_version",
+      "snapshot": "deterministic_identity"
+    },
+    "snapshotContract": {
+      "existing": 67433,
+      "planned": 67433,
+      "exactDigestMatches": 67433,
+      "mismatches": 0,
+      "missing": 0,
+      "unexpected": 0,
+      "reuseNoOp": 67433,
+      "newInserts": 0
+    },
+    "asOfLeakage": {
+      "rule": "source_game_date < target_game_date",
+      "sameDayPolicy": "strict prior-date only",
+      "leakageViolations": 0,
+      "sameDayLeakage": 0
+    },
+    "rawNative": {
+      "rawRows": 712528,
+      "uniquePitchIdentities": 712528,
+      "duplicatePitchIdentities": 0,
+      "nativeGames": 2430,
+      "nativePlayers": 1469
+    }
+  },
+  "runtimeGates": {
+    "manifestDigest": "load manifest, canonicalize payload, recompute SHA-256, compare to manifest_sha256, compare to PICK2_MLB_R1F_EXPECTED_MANIFEST_SHA256",
+    "codeIntegrity": "verify every runtime-critical file digest exactly before preflight or execute can continue",
+    "productionInvariants": "raw/native/row-plan/snapshot/as-of/leakage/BLOCK_CONFLICT checks remain required",
+    "execute": "execute requires all preflight gates plus direct per-run --r1f-dml-authorized flag"
+  },
+  "failClosedMatrix": {
+    "missingExpectedDigest": "PASS",
+    "wrongExpectedDigest": "PASS",
+    "modifiedCriticalFile": "PASS",
+    "modifiedManifest": "PASS",
+    "rowPlanDrift": "PASS",
+    "snapshotDrift": "PASS",
+    "leakage": "PASS",
+    "BLOCK_CONFLICT": "PASS",
+    "missingDmlAuthorization": "PASS"
+  },
+  "productionConfigurationPlan": {
+    "configureNow": "NO",
+    "futureEnvironmentVariable": "PICK2_MLB_R1F_EXPECTED_MANIFEST_SHA256",
+    "futureValue": "1c7532aa5aaf09d2c05ffb4df752bb5eee2e4f9c719489b70a97f9d14d587352",
+    "updatePolicy": "Any safety-critical file or contract change requires manifest regeneration, digest change, review/certification and explicit production expected-digest update.",
+    "revocation": "Remove or invalidate PICK2_MLB_R1F_EXPECTED_MANIFEST_SHA256."
+  },
+  "productionState": {
+    "snapshots": 67433,
+    "dailyFeatureRows": 0,
+    "rawRows": 712528,
+    "nativeGames": 2430,
+    "nativePlayers": 1469,
+    "models": 0,
+    "champion": "NONE",
+    "predictions": 0,
+    "state": "UNCHANGED_READ_ONLY_BASELINE"
+  },
+  "safety": {
+    "productionDmlMutations": 0,
+    "productionDdlMutations": 0,
+    "featureWrites": 0,
+    "snapshotWrites": 0,
+    "rawWrites": 0,
+    "nativeIdentityWrites": 0,
+    "providerCalls": 0,
+    "modelWork": "NO",
+    "predictionWork": "NO",
+    "import2026": "NO",
+    "automation": "NO",
+    "cronChanges": 0
+  },
+  "validators": [
+    "node scripts/mlb-data-01d-r1f-signed-deployment-certification-manifest-validate.mjs",
+    "node scripts/mlb-data-01d-r1f-pre-dml-alignment-guard-repair-validate.mjs",
+    "node scripts/mlb-data-01d-r1e-daily-feature-recovery-readiness-validate.mjs",
+    "node scripts/mlb-data-01d-r1d-snapshot-reuse-digest-reconciliation-validate.mjs",
+    "node scripts/mlb-data-01d-r1c-post-migration-recovery-validator-validate.mjs",
+    "node scripts/mlb-data-01d-r1b-post-manual-migration-readback-validate.mjs",
+    "node scripts/mlb-data-01d-r1a-feature-native-uniqueness-migration-validate.mjs",
+    "node scripts/mlb-data-01d-r1-feature-persistence-key-repair-validate.mjs",
+    "node scripts/mlb-data-01d-2025-feature-build-dry-run-validate.mjs",
+    "node scripts/mlb-data-01c-r5b-production-validate.mjs",
+    "node scripts/mlb-data-01c-r5b-backfill-design-validate.mjs",
+    "npm.cmd run lint -- <changed scripts>",
+    "npm.cmd run build"
+  ],
+  "flags": {
+    "R1F_CODE_INTEGRITY_AUTHORITY_REQUIRED": "YES",
+    "R1F_SELECTED_MANIFEST_AUTHORITY": "DIGEST_BOUND_DEPLOYMENT_CERTIFICATION_MANIFEST",
+    "R1F_MANIFEST_CRITICAL_FILE_INVENTORY_COMPLETE": "YES",
+    "R1F_MANIFEST_CONTRACT_READY": "YES",
+    "R1F_CRITICAL_FILE_DIGEST_CONTRACT": "PASS",
+    "R1F_MANIFEST_SELF_REFERENCE_ELIMINATED": "YES",
+    "R1F_MANIFEST_CANONICALIZATION": "PASS",
+    "R1F_EXPECTED_MANIFEST_DIGEST_AUTHORITY_READY": "YES",
+    "R1F_MANIFEST_RUNTIME_DIGEST_GATE_READY": "YES",
+    "R1F_DEPLOYED_CODE_INTEGRITY_GATE_READY": "YES",
+    "R1F_REJECTS_CODE_DRIFT": "PASS",
+    "R1F_REJECTS_MANIFEST_TAMPER": "PASS",
+    "R1F_FUTURE_DEPLOYMENT_FAIL_CLOSED": "PASS",
+    "R1F_MANIFEST_FEATURE_VERSION": "PASS",
+    "R1F_MANIFEST_ROW_PLAN": "PASS",
+    "R1F_MANIFEST_NATIVE_KEY_CONTRACT": "PASS",
+    "R1F_MANIFEST_SNAPSHOT_CONTRACT": "PASS",
+    "R1F_MANIFEST_ASOF_LEAKAGE_CONTRACT": "PASS",
+    "R1F_MANIFEST_RAW_NATIVE_CONTRACT": "PASS",
+    "R1F_MANIFEST_PREFLIGHT_CONTRACT_READY": "YES",
+    "R1F_MANIFEST_EXECUTE_CONTRACT_READY": "YES",
+    "R1F_MANIFEST_PREFLIGHT_EXECUTE_PARITY": "PASS",
+    "R1F_MANIFEST_NOT_DML_AUTHORITY_ALONE": "PASS",
+    "R1F_DML_AUTHORIZATION_NOT_PERSISTED": "YES",
+    "R1F_REJECTS_MISSING_EXPECTED_MANIFEST_DIGEST": "PASS",
+    "R1F_REJECTS_WRONG_EXPECTED_MANIFEST_DIGEST": "PASS",
+    "R1F_REJECTS_MODIFIED_CRITICAL_FILE": "PASS",
+    "R1F_REJECTS_MODIFIED_MANIFEST": "PASS",
+    "R1F_REJECTS_MANIFEST_ROW_PLAN_DRIFT": "PASS",
+    "R1F_REJECTS_MANIFEST_SNAPSHOT_DRIFT": "PASS",
+    "R1F_REJECTS_MANIFEST_LEAKAGE": "PASS",
+    "R1F_REJECTS_MANIFEST_BLOCK_CONFLICT": "PASS",
+    "R1F_REJECTS_MANIFEST_WITHOUT_DML_AUTH": "PASS",
+    "R1F_MANIFEST_ARTIFACT_CREATED": "YES",
+    "R1F_MANIFEST_SHA256_READY": "YES",
+    "R1F_MANIFEST_VALID_DIGEST_TEST": "PASS",
+    "R1F_MANIFEST_WRONG_DIGEST_TEST": "PASS",
+    "R1F_MANIFEST_EXECUTE_DRY_VALIDATION": "PASS",
+    "R1F_MANIFEST_PRODUCTION_CONFIG_READY": "YES",
+    "R1F_MANIFEST_UPDATE_POLICY_READY": "YES",
+    "R1F_MANIFEST_REVOCATION_READY": "YES",
+    "R1F_MANIFEST_PRODUCTION_STATE": "PASS",
+    "MLB_DATA_01D_R1F_MANIFEST_DML_AUTHORIZED": "NO"
+  },
+  "recommendedNextPhase": "MLB_DATA_01D_R1F_SIGNED_MANIFEST_PUBLISH_ALIGNMENT_AND_PRODUCTION_CONFIG",
+  "recommendedNextInstruction": "Publish this manifest certification commit, wait for production alignment, then explicitly configure PICK2_MLB_R1F_EXPECTED_MANIFEST_SHA256 to the certified digest before any separately authorized R1F daily-feature DML execution."
+}
