@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-08-31T01:06:26.425Z",
-  "project": "MLB_DATA_01D_R1F_PRE_DML_ALIGNMENT_GUARD_REPAIR",
-  "certificationVerdict": "MLB_DATA_01D_R1F_PRE_DML_ALIGNMENT_GUARD_REPAIR_CERTIFIED",
+  "generatedAt": "2026-08-31T01:30:00.000Z",
+  "project": "MLB_DATA_01D_R1F_GUARD_REPAIR_TARGET_ADVANCE",
+  "certificationVerdict": "MLB_DATA_01D_R1F_GUARD_REPAIR_TARGET_ADVANCE_CERTIFIED",
   "repositoryProductionAlignment": {
     "branch": "main",
-    "localHead": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
-    "originMain": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
-    "production": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "localHead": "2560a3c9c6c147f3aaf7b83c8811648663c9cc1b",
+    "originMain": "2560a3c9c6c147f3aaf7b83c8811648663c9cc1b",
+    "production": "2560a3c9c6c147f3aaf7b83c8811648663c9cc1b",
     "worktreeBeforeRepair": "clean",
-    "R1F_GUARD_REPAIR_BASELINE": "PASS"
+    "R1F_TARGET_ADVANCE_BASELINE": "PASS"
   },
-  "rootCause": "The active 01D feature persistence production-alignment guard still pinned execute to the original feature-persistence production baseline 875b46d34553bc3618067fec202a2f780a39b2d8 after R1E had been published and deployed at 7d5cc1798e799b5048d5cccfd35db1822ea6ebc6, causing PRODUCTION_ALIGNMENT_CHANGED before any R1F feature DML could run.",
+  "rootCause": "After the guard-repair commit was published and deployed, production advanced from the pre-repair R1E baseline 7d5cc1798e799b5048d5cccfd35db1822ea6ebc6 to the certified guard-repair commit 2560a3c9c6c147f3aaf7b83c8811648663c9cc1b. The active 01D feature persistence production-alignment target still accepted only 7d5cc1798e799b5048d5cccfd35db1822ea6ebc6, causing PRODUCTION_ALIGNMENT_CHANGED before any DML.",
   "staleAlignmentReferences": [
     {
       "file": "scripts/mlb-data-01d-2025-feature-persistence.mjs",
@@ -21,10 +21,10 @@
     },
     {
       "file": "scripts/mlb-data-01d-2025-feature-persistence.mjs",
-      "symbol": "productionAlignmentAllowedForMode execute branch",
-      "value": "875b46d34553bc3618067fec202a2f780a39b2d8",
+      "symbol": "r1fCertifiedProductionCommit before target advance",
+      "value": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
       "classification": "STALE_RUNTIME_GUARD_REPAIRED",
-      "action": "replaced as active execute/preflight target by r1fCertifiedProductionCommit"
+      "action": "advanced to the deployed certified guard-repair commit"
     },
     {
       "file": "scripts/mlb-data-01d-2025-feature-persistence.mjs",
@@ -42,14 +42,14 @@
     }
   ],
   "currentAlignmentContract": {
-    "acceptedCommit": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "acceptedCommit": "2560a3c9c6c147f3aaf7b83c8811648663c9cc1b",
     "activeAcceptedProductionCommits": [
-      "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6"
+      "2560a3c9c6c147f3aaf7b83c8811648663c9cc1b"
     ],
-    "preflightTargetBeforeRepair": "875b46d34553bc3618067fec202a2f780a39b2d8",
-    "preflightTargetAfterRepair": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
-    "executeTargetBeforeRepair": "875b46d34553bc3618067fec202a2f780a39b2d8",
-    "executeTargetAfterRepair": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "preflightTargetBeforeRepair": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "preflightTargetAfterRepair": "2560a3c9c6c147f3aaf7b83c8811648663c9cc1b",
+    "executeTargetBeforeRepair": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "executeTargetAfterRepair": "2560a3c9c6c147f3aaf7b83c8811648663c9cc1b",
     "acceptsArbitraryFutureCommits": "NO",
     "acceptsStaleProductionCommits": "NO",
     "acceptsNewerProductionCommitsByAncestry": "NO"
@@ -58,7 +58,7 @@
     "command": "node scripts/mlb-data-01d-2025-feature-persistence.mjs --diagnose-snapshot-reuse",
     "status": "PASS",
     "mode": "PLAN_ONLY",
-    "productionCommit": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "productionCommit": "2560a3c9c6c147f3aaf7b83c8811648663c9cc1b",
     "providerCallsMade": 0,
     "snapshots": {
       "existing": 67433,
@@ -83,7 +83,7 @@
     "command": "node scripts/mlb-data-01d-2025-feature-persistence.mjs --validate-execute-guard --diagnose-snapshot-reuse",
     "status": "PASS",
     "mode": "EXECUTE_GUARD_DRY_VALIDATION",
-    "productionCommit": "7d5cc1798e799b5048d5cccfd35db1822ea6ebc6",
+    "productionCommit": "2560a3c9c6c147f3aaf7b83c8811648663c9cc1b",
     "providerCallsMade": 0,
     "executeGuardDryValidation": "PASS",
     "physicalWrites": {
@@ -134,22 +134,23 @@
     "activeCronAdded": "NO"
   },
   "flags": {
-    "R1F_GUARD_REPAIR_BASELINE": "PASS",
-    "R1F_ALIGNMENT_GUARD_INVENTORY_COMPLETE": "YES",
-    "R1F_HISTORICAL_COMMIT_EVIDENCE_PRESERVED": "YES",
-    "R1F_CURRENT_ALIGNMENT_CONTRACT_READY": "YES",
-    "R1F_PREFLIGHT_ALIGNMENT_GUARD_REPAIRED": "YES",
-    "R1F_EXECUTE_ALIGNMENT_GUARD_REPAIRED": "YES",
-    "R1F_PREFLIGHT_EXECUTE_ALIGNMENT_PARITY": "PASS",
-    "R1F_ALIGNMENT_GUARD_FAIL_CLOSED": "PASS",
-    "R1F_CERTIFIED_ROW_PLAN_UNCHANGED": "YES",
-    "R1F_SNAPSHOT_REUSE_CONTRACT_PRESERVED": "YES",
-    "R1F_ASOF_LEAKAGE_CONTRACT_PRESERVED": "YES",
-    "R1F_FEATURE_DEFINITIONS_UNCHANGED": "YES",
-    "R1F_REPAIRED_PREFLIGHT": "PASS",
-    "R1F_EXECUTE_PATH_GUARD_DRY_VALIDATION": "PASS",
-    "R1F_GUARD_REPAIR_PRODUCTION_STATE_UNCHANGED": "YES"
+    "R1F_TARGET_ADVANCE_BASELINE": "PASS",
+    "R1F_TARGET_ADVANCE_ROOT_CAUSE_CONFIRMED": "YES",
+    "R1F_ACTIVE_ALIGNMENT_TARGET_INVENTORY_COMPLETE": "YES",
+    "R1F_PHASE_TARGET_CONTRACT_READY": "YES",
+    "R1F_PREFLIGHT_TARGET_ADVANCED": "YES",
+    "R1F_EXECUTE_TARGET_ADVANCED": "YES",
+    "R1F_TARGET_PARITY": "PASS",
+    "R1F_TARGET_FAIL_CLOSED": "PASS",
+    "R1F_TARGET_ADVANCE_HISTORICAL_EVIDENCE_PRESERVED": "YES",
+    "R1F_TARGET_ADVANCE_ROW_PLAN_UNCHANGED": "YES",
+    "R1F_TARGET_ADVANCE_SNAPSHOT_CONTRACT": "PASS",
+    "R1F_TARGET_ADVANCE_ASOF_LEAKAGE": "PASS",
+    "R1F_TARGET_ADVANCE_PREFLIGHT": "PASS",
+    "R1F_TARGET_ADVANCE_EXECUTE_GUARD": "PASS",
+    "R1F_TARGET_ADVANCE_PRODUCTION_STATE": "PASS",
+    "MLB_DATA_01D_R1F_TARGET_ADVANCE_DML_AUTHORIZED": "NO"
   },
   "recommendedNextPhase": "MLB_DATA_01D_R1F_DAILY_FEATURE_RECOVERY_DML_EXECUTION",
-  "recommendedNextInstruction": "After this guard repair commit is published and production aligns, explicitly reissue bounded R1F daily-feature DML authorization against the new certified commit."
+  "recommendedNextInstruction": "After this target-advance commit is published and production aligns, explicitly reissue bounded R1F daily-feature DML authorization against the new certified commit."
 }

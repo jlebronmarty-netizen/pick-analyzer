@@ -9,21 +9,21 @@ function check(label, condition) {
   if (!condition) errors.push(label)
 }
 
-const target = '7d5cc1798e799b5048d5cccfd35db1822ea6ebc6'
-const stale = '875b46d34553bc3618067fec202a2f780a39b2d8'
+const target = '2560a3c9c6c147f3aaf7b83c8811648663c9cc1b'
+const stale = '7d5cc1798e799b5048d5cccfd35db1822ea6ebc6'
 const logical = persistence.writeAccounting.logical
 const snapshots = persistence.prewrite.snapshotPolicy
 
-check('verdict', artifact.certificationVerdict === 'MLB_DATA_01D_R1F_PRE_DML_ALIGNMENT_GUARD_REPAIR_CERTIFIED')
+check('verdict', artifact.certificationVerdict === 'MLB_DATA_01D_R1F_GUARD_REPAIR_TARGET_ADVANCE_CERTIFIED')
 check('baseline alignment', artifact.repositoryProductionAlignment.localHead === target && artifact.repositoryProductionAlignment.originMain === target && artifact.repositoryProductionAlignment.production === target)
 check('current target', artifact.currentAlignmentContract.acceptedCommit === target)
 check('no arbitrary future commits', artifact.currentAlignmentContract.acceptsArbitraryFutureCommits === 'NO')
-check('historical preserved', artifact.flags.R1F_HISTORICAL_COMMIT_EVIDENCE_PRESERVED === 'YES')
+check('historical preserved', artifact.flags.R1F_TARGET_ADVANCE_HISTORICAL_EVIDENCE_PRESERVED === 'YES')
 check('stale classified', artifact.staleAlignmentReferences.some((entry) => entry.value === stale && entry.classification === 'STALE_RUNTIME_GUARD_REPAIRED'))
-check('preflight repaired', artifact.flags.R1F_PREFLIGHT_ALIGNMENT_GUARD_REPAIRED === 'YES')
-check('execute repaired', artifact.flags.R1F_EXECUTE_ALIGNMENT_GUARD_REPAIRED === 'YES')
-check('parity', artifact.flags.R1F_PREFLIGHT_EXECUTE_ALIGNMENT_PARITY === 'PASS')
-check('fail closed', artifact.flags.R1F_ALIGNMENT_GUARD_FAIL_CLOSED === 'PASS')
+check('preflight target advanced', artifact.flags.R1F_PREFLIGHT_TARGET_ADVANCED === 'YES')
+check('execute target advanced', artifact.flags.R1F_EXECUTE_TARGET_ADVANCED === 'YES')
+check('parity', artifact.flags.R1F_TARGET_PARITY === 'PASS')
+check('fail closed', artifact.flags.R1F_TARGET_FAIL_CLOSED === 'PASS')
 check('script current commit const', script.includes(`const r1fCertifiedProductionCommit = '${target}'`))
 check('script execute parity guard', /if \(execute \|\| validateExecuteGuard\) return commit === r1fCertifiedProductionCommit/.test(script))
 check('script preflight current only', /return commit === r1fCertifiedProductionCommit/.test(script))
