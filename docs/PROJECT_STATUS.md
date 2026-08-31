@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-31 02:20:00Z
 
+## 2026-08-31 MLB-DATA-01D-R1F Production Manifest Authority
+
+- MLB-DATA-01D-R1F production manifest authority is certified as `MLB_DATA_01D_R1F_PRODUCTION_MANIFEST_AUTHORITY_CERTIFIED`. Commit `e39bb7631ab642c992576cc8a3b2e6ef99654f8c` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` continued to report `providerCallsMade = 0`.
+- The live production `GET /api/system/pick2/r1f-manifest-authority` readback returned HTTP 200 with `expectedDigestConfigured = true`, `expectedDigestMatchesManifest = true`, manifest contract `PICK2_MLB_01D_R1F_RECOVERY_MANIFEST_V1`, manifest digest `1c7532aa5aaf09d2c05ffb4df752bb5eee2e4f9c719489b70a97f9d14d587352`, critical code integrity `PASS`, mismatch count 0, feature version `MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1` and `productionAuthorityReady = true`.
+- Full read-only R1F preflight passed against production with 67,433 snapshot `REUSE_NO_OP`, 0 snapshot conflicts, 0 `BLOCK_CONFLICT`, daily insert eligibility of team 4,498, starter 4,498, bullpen 4,498, batter 44,943, matchup 2,249 and first-inning 2,249, plus 4,498 logical offense rows. Execute-path dry validation stopped at `EXPLICIT_DML_AUTHORIZATION_REQUIRED`; feature DML remains unauthorized. No production DML/DDL, feature writes, snapshot writes, raw/native identity writes, provider calls, model/prediction work, 2026 import, automation or cron changes occurred.
+
 ## 2026-08-31 MLB-DATA-01D-R1F Production Env Authority Readback Route
 
 - MLB-DATA-01D-R1F production env authority readback route is locally certified as `MLB_DATA_01D_R1F_PRODUCTION_ENV_AUTHORITY_READBACK_ROUTE_CERTIFIED`. It adds one dedicated read-only endpoint, `GET /api/system/pick2/r1f-manifest-authority`, to report secret-safe R1F manifest authority status from the deployed runtime.
