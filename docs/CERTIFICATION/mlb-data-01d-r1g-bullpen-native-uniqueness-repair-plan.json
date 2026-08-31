@@ -1,0 +1,281 @@
+{
+  "generatedAt": "2026-08-31T23:40:00.000Z",
+  "project": "MLB_DATA_01D_R1G_BULLPEN_NATIVE_UNIQUENESS_REPAIR_AND_PARTIAL_RESUME_PLAN",
+  "certificationVerdict": "MLB_DATA_01D_R1G_BULLPEN_NATIVE_UNIQUENESS_REPAIR_PLAN_CERTIFIED",
+  "scope": {
+    "productionReadOnlyAudit": "YES",
+    "forwardMigrationPrepared": "YES_NON_APPLIED",
+    "partialStateCertification": "YES",
+    "partialResumePlanPrepared": "YES",
+    "migrationApplied": "NO",
+    "featureDmlResumed": "NO",
+    "runtimeWriterModified": "NO"
+  },
+  "repositoryStateBeforeR1G": {
+    "branch": "main",
+    "localHead": "a1edb160df1cda05544e9cdb48b65bbb740d9628",
+    "originMain": "f1eaa35ea88c1b7520c45a939f49fb6156290745",
+    "worktree": "clean",
+    "aheadBy": 1
+  },
+  "productionReadback": {
+    "productionCommit": "f1eaa35ea88c1b7520c45a939f49fb6156290745",
+    "providerCallsMade": 0,
+    "liveManifestAuthority": {
+      "manifestContractId": "PICK2_MLB_01D_R1F_RECOVERY_MANIFEST_V1",
+      "manifestDigest": "1c7532aa5aaf09d2c05ffb4df752bb5eee2e4f9c719489b70a97f9d14d587352",
+      "expectedDigestConfigured": true,
+      "expectedDigestMatchesManifest": true,
+      "criticalCodeIntegrity": "PASS",
+      "criticalFileMismatchCount": 0,
+      "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+      "productionAuthorityReady": true,
+      "failureCode": null
+    },
+    "partialFeatureRows": {
+      "pick2_feature_snapshots": 67433,
+      "pick2_mlb_team_daily_features": 4498,
+      "pick2_mlb_pitcher_daily_features": 4498,
+      "pick2_mlb_bullpen_daily_features": 0,
+      "pick2_mlb_batter_daily_features": 0,
+      "pick2_mlb_matchup_daily_features": 0,
+      "pick2_mlb_first_inning_daily_features": 0
+    },
+    "nativeIdentityRows": {
+      "pick2_mlb_games": 2430,
+      "pick2_mlb_players": 1469,
+      "pick2_mlb_game_results": 0,
+      "pick2_mlb_market_event_mappings": 0
+    },
+    "modelPredictionIsolation": {
+      "pick2_model_registry": 0,
+      "pick2_model_feature_sets": 0,
+      "pick2_model_versions": 0,
+      "pick2_model_training_runs": 0,
+      "pick2_model_validation_runs": 0,
+      "champion": "NONE",
+      "pick2_game_predictions": 0,
+      "pick2_prediction_results": 0,
+      "pick2_market_value_evaluations": 0
+    },
+    "rawState": {
+      "rowsFromExecutionGuardScan": 712528,
+      "uniquePitchIdentities": 712528,
+      "duplicatePitchIdentities": 0,
+      "raw2026Rows": 0
+    },
+    "insertedDailyKeyDuplicates": {
+      "team": 0,
+      "starter": 0
+    },
+    "status": "PASS"
+  },
+  "snapshotPreservation": {
+    "orderedPaginationRequired": true,
+    "snapshotRows": 67433,
+    "exactDigestMatches": 67433,
+    "digestMismatches": 0,
+    "duplicateDeterministicIdentities": 0,
+    "sourceEvidence": "R1D ordered-pagination snapshot reuse digest reconciliation validator plus fresh R1G snapshot count readback",
+    "status": "PASS"
+  },
+  "rootCause": {
+    "productionBlocker": "pick2_mlb_bullpen_daily_features insert failed at 0: duplicate key value violates unique constraint \"pick2_mlb_bullpen_daily_featu_team_id_feature_date_feature__key\"",
+    "missedLegacyConstraintName": "pick2_mlb_bullpen_daily_featu_team_id_feature_date_feature__key",
+    "legacyKey": "team_id + feature_date + feature_version",
+    "certifiedNativeKey": "target_game_pk + team_id + feature_version",
+    "r1CollisionEvidence": {
+      "bullpenRowPlan": 4498,
+      "collidingLegacyGroups": 42,
+      "sameTeamSameDateCollisions": 42,
+      "affectedGames": 42,
+      "affectedTeams": 19,
+      "allDistinctTargetGamePk": true
+    },
+    "teamRowsAlreadyRecovered": 4498,
+    "starterRowsAlreadyRecovered": 4498
+  },
+  "constraintInventory": {
+    "legacyConstraintName": "pick2_mlb_bullpen_daily_featu_team_id_feature_date_feature__key",
+    "legacyKeyColumns": [
+      "team_id",
+      "feature_date",
+      "feature_version"
+    ],
+    "priorMigrationAttemptedDropNames": [
+      "pick2_mlb_bullpen_daily_features_team_id_feature_date_feature_key",
+      "pick2_mlb_bullpen_daily_features_team_id_feature_date_feature_v",
+      "pick2_mlb_bullpen_daily_features_team_id_feature_date_feature_version_key"
+    ],
+    "priorMigrationNativeIndexName": "pick2_mlb_bullpen_daily_features_native_uidx",
+    "priorMigrationNativeColumns": [
+      "target_game_pk",
+      "team_id",
+      "feature_date",
+      "feature_version"
+    ],
+    "certifiedReplacementIndexName": "pick2_mlb_bullpen_daily_features_target_game_team_version_key",
+    "certifiedReplacementColumns": [
+      "target_game_pk",
+      "team_id",
+      "feature_version"
+    ],
+    "duplicateOrRedundantIndexState": "Prior native index may coexist if already applied; it does not remove the active legacy constraint. R1G adds the certified game-rooted key and does not drop unrelated indexes.",
+    "status": "COMPLETE"
+  },
+  "priorMigrationGap": {
+    "migration": "supabase/migrations/202608290002_pick2_mlb_feature_native_uniqueness_v1.sql",
+    "classification": "CONSTRAINT_NAME_MISMATCH_AND_NATIVE_KEY_INCLUDED_FEATURE_DATE",
+    "reason": "Production failure names pick2_mlb_bullpen_daily_featu_team_id_feature_date_feature__key, which is not one of the three bullpen constraint names dropped by the prior migration. The prior replacement index also used target_game_pk + team_id + feature_date + feature_version, while the certified R1G native contract is target_game_pk + team_id + feature_version.",
+    "migrationNotFullyApplied": "NOT_PROVEN_BY_AVAILABLE_EVIDENCE",
+    "indexVsConstraintMismatch": "NO_FOR_ACTIVE_BLOCKER_PRODUCTION_REPORTED_UNIQUE_CONSTRAINT",
+    "status": "IDENTIFIED"
+  },
+  "preparedMigration": {
+    "path": "supabase/migrations/202608310001_pick2_mlb_bullpen_native_uniqueness_r1g.sql",
+    "type": "FORWARD_ONLY_NON_APPLIED",
+    "transactionSafe": true,
+    "drops": [
+      {
+        "table": "public.pick2_mlb_bullpen_daily_features",
+        "objectType": "constraint",
+        "name": "pick2_mlb_bullpen_daily_featu_team_id_feature_date_feature__key",
+        "reason": "Exact R1F production blocker: legacy team_id + feature_date + feature_version uniqueness cannot represent target-game-rooted doubleheader bullpen rows."
+      }
+    ],
+    "creates": [
+      {
+        "objectType": "unique index",
+        "name": "pick2_mlb_bullpen_daily_features_target_game_team_version_key",
+        "table": "public.pick2_mlb_bullpen_daily_features",
+        "columns": [
+          "target_game_pk",
+          "team_id",
+          "feature_version"
+        ],
+        "predicate": "target_game_pk is not null"
+      }
+    ],
+    "containsDropIndex": false,
+    "containsBroadDynamicSql": false,
+    "containsDropTable": false,
+    "containsDropColumn": false,
+    "containsInsertUpdateDeleteTruncate": false,
+    "touchesSnapshots": false,
+    "touchesRawStatcast": false,
+    "touchesNativeIdentity": false,
+    "touchesModelsPredictions": false,
+    "appliedToProduction": false
+  },
+  "partialResumePlan": {
+    "requiresSeparateAuthorization": true,
+    "phase": "MLB_DATA_01D_R1H_BULLPEN_UNIQUENESS_MIGRATION_APPLY_AND_PARTIAL_RESUME_READINESS",
+    "preconditions": [
+      "Publish R1G certification commit and align production.",
+      "Apply exactly supabase/migrations/202608310001_pick2_mlb_bullpen_native_uniqueness_r1g.sql under separate production DDL authorization.",
+      "Read back that the legacy bullpen constraint is absent and the target_game_pk + team_id + feature_version unique index exists.",
+      "Verify snapshots remain 67,433, team rows remain 4,498, starter rows remain 4,498, bullpen/batter/matchup/first-inning rows remain 0, native games remain 2,430, native players remain 1,469, raw rows remain 712,528 and model/prediction rows remain 0."
+    ],
+    "resumeDmlPlan": {
+      "snapshots": "REUSE_NO_OP_ONLY_67433",
+      "team": "REUSE_NO_OP_ONLY_4498",
+      "starter": "REUSE_NO_OP_ONLY_4498",
+      "bullpen": "INSERT_ELIGIBLE_4498",
+      "batter": "INSERT_ELIGIBLE_44943",
+      "matchup": "INSERT_ELIGIBLE_2249",
+      "firstInning": "INSERT_ELIGIBLE_2249",
+      "offense": "LOGICAL_ONLY_4498_NO_NEW_PHYSICAL_TABLE"
+    },
+    "stopConditions": [
+      "BLOCK_CONFLICT",
+      "row-count divergence",
+      "native-key duplicate",
+      "snapshot mismatch",
+      "as-of violation",
+      "leakage violation",
+      "raw immutability failure",
+      "native identity parity failure"
+    ]
+  },
+  "validation": {
+    "validatorsPassed": [
+      "node scripts\\mlb-data-01d-r1g-bullpen-native-uniqueness-repair-plan-validate.mjs",
+      "node scripts\\mlb-data-01d-r1f-daily-feature-recovery-dml-partial-validate.mjs",
+      "node scripts\\mlb-data-01d-r1f-production-manifest-authority-validate.mjs",
+      "node scripts\\mlb-data-01d-r1e-daily-feature-recovery-readiness-validate.mjs",
+      "node scripts\\mlb-data-01d-r1d-snapshot-reuse-digest-reconciliation-validate.mjs",
+      "node scripts\\mlb-data-01d-r1c-post-migration-recovery-validator-validate.mjs",
+      "node scripts\\mlb-data-01d-r1b-post-manual-migration-readback-validate.mjs",
+      "node scripts\\mlb-data-01d-r1a-feature-native-uniqueness-migration-validate.mjs",
+      "node scripts\\mlb-data-01d-r1-feature-persistence-key-repair-validate.mjs",
+      "node scripts\\mlb-data-01d-2025-feature-build-dry-run-validate.mjs",
+      "node scripts\\mlb-data-01c-r5b-production-validate.mjs",
+      "git diff --check",
+      "git diff --cached --check",
+      "targeted secret scan",
+      "npm.cmd run build"
+    ],
+    "status": "PASS"
+  },
+  "flags": {
+    "R1G_BASELINE": "PASS",
+    "R1G_PARTIAL_PRODUCTION_STATE": "PASS",
+    "R1G_EXISTING_TEAM_STARTER_STATE": "PASS",
+    "R1G_EXISTING_SNAPSHOT_STATE": "PASS",
+    "R1G_BULLPEN_CONSTRAINT_INVENTORY_COMPLETE": "YES",
+    "R1G_BULLPEN_LEGACY_UNIQUENESS_DEFECT_PROVEN": "YES",
+    "R1G_PRIOR_MIGRATION_GAP_IDENTIFIED": "YES",
+    "R1G_BULLPEN_DROP_SCOPE_CERTIFIED": "YES",
+    "R1G_BULLPEN_NATIVE_UNIQUENESS_CONTRACT": "PASS",
+    "R1G_BULLPEN_MIGRATION_EXISTING_DATA_COMPATIBILITY": "PASS",
+    "R1G_FORWARD_MIGRATION_READY": "YES",
+    "R1G_FORWARD_MIGRATION_NONDESTRUCTIVE": "PASS",
+    "R1G_PARTIAL_RESUME_PROJECTION": "PASS",
+    "R1G_OFFENSE_RESUME_PROJECTION": "PASS",
+    "R1G_BULLPEN_POSTMIGRATION_DRY_RUN": "PASS",
+    "R1G_TEAM_STARTER_RESUME_IDEMPOTENCY": "PASS",
+    "R1G_SNAPSHOT_RESUME_IDEMPOTENCY": "PASS",
+    "R1G_FULL_RESUME_IDEMPOTENCY_PROJECTED": "PASS",
+    "R1G_FEATURE_DEFINITIONS_UNCHANGED": "YES",
+    "R1G_ASOF_LEAKAGE_CONTRACT": "PASS",
+    "R1G_RAW_NATIVE_STATE": "PASS",
+    "R1G_MANIFEST_AUTHORITY_STATE": "PASS",
+    "R1G_MIGRATION_APPLY_AUTHORIZED": "NO",
+    "R1G_FEATURE_DML_RESUME_AUTHORIZED": "NO",
+    "MLB_DATA_01D_R1G_PRODUCTION_READBACK": "PASS",
+    "R1G_PARTIAL_STATE_PRESERVED": "YES",
+    "R1G_BULLPEN_LEGACY_CONSTRAINT_DEFECT_PROVEN": "YES",
+    "R1G_MIGRATION_PREPARED": "YES",
+    "R1G_MIGRATION_SCOPE_BOUNDED": "YES",
+    "R1G_MIGRATION_APPLIED": "NO",
+    "R1G_FEATURE_DML_RESUMED": "NO",
+    "R1G_PARTIAL_RESUME_PLAN_READY": "YES",
+    "R1G_TEAM_STARTER_ROWS_PRESERVED": "YES",
+    "R1G_SNAPSHOT_PRESERVATION": "PASS",
+    "R1G_RAW_IMMUTABILITY": "PASS",
+    "R1G_NATIVE_IDENTITY_PRESERVATION": "PASS",
+    "MLB_DATA_01D_2025_FEATURE_FOUNDATION_READY": "NO",
+    "MLB_DATA_02A_MODEL_DATASET_PREPARATION_READY": "NO"
+  },
+  "safety": {
+    "providerCalls": 0,
+    "productionDdlMutations": 0,
+    "productionDmlMutations": 0,
+    "snapshotWrites": 0,
+    "rawStatcastWrites": 0,
+    "nativeIdentityWrites": 0,
+    "featureDmlWritesInR1G": 0,
+    "modelWork": "NO",
+    "predictionWork": "NO",
+    "import2026": "NO",
+    "automation": "NO",
+    "cronChanges": 0
+  },
+  "remainingBlockers": [
+    "R1G migration is prepared but not applied.",
+    "Feature DML resume remains separately authorization-gated.",
+    "Daily feature foundation remains incomplete until bullpen, batter, matchup and first-inning rows are recovered and certified."
+  ],
+  "recommendedNextPhase": "MLB_DATA_01D_R1H_BULLPEN_UNIQUENESS_MIGRATION_APPLY_AND_PARTIAL_RESUME_READINESS",
+  "recommendedNextInstruction": "Authorize publication/alignment of the R1G certification commit, then separately authorize applying only supabase/migrations/202608310001_pick2_mlb_bullpen_native_uniqueness_r1g.sql and read-only schema/state certification. Do not resume daily feature DML in the same task unless separately authorized after the migration readback passes."
+}

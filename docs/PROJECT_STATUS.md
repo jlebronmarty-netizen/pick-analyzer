@@ -1,6 +1,12 @@
 # Project Status
 
-Last updated: 2026-08-31 02:20:00Z
+Last updated: 2026-08-31 23:40:00Z
+
+## 2026-08-31 MLB-DATA-01D-R1G Bullpen Native Uniqueness Repair Plan
+
+- MLB-DATA-01D-R1G is locally certified as `MLB_DATA_01D_R1G_BULLPEN_NATIVE_UNIQUENESS_REPAIR_PLAN_CERTIFIED`. Fresh read-only production readback preserved the R1F partial state: snapshots 67,433; team rows 4,498; starter rows 4,498; bullpen/batter/matchup/first-inning rows 0; raw guard rows 712,528; native games 2,430; native players 1,469; models 0; champion `NONE`; predictions 0; 2026 raw rows 0.
+- The exact remaining blocker is the production legacy constraint `pick2_mlb_bullpen_daily_featu_team_id_feature_date_feature__key`, which the earlier R1A migration did not name. R1G prepares one non-applied forward migration, `supabase/migrations/202608310001_pick2_mlb_bullpen_native_uniqueness_r1g.sql`, to drop only that exact bullpen constraint and add `target_game_pk + team_id + feature_version` uniqueness for bullpen rows.
+- No migration was applied, feature DML was not resumed, and the runtime persistence script was not changed. R1G made 0 provider calls, 0 production DDL mutations, 0 production DML mutations, 0 snapshot writes, 0 raw/native identity writes and no model/prediction/2026/automation/cron changes. Next: publish R1G, align production, then separately authorize applying only the prepared bullpen uniqueness migration and read-only readback before any daily-feature DML resume.
 
 ## 2026-08-31 MLB-DATA-01D-R1F Daily Feature Recovery DML Partial
 
