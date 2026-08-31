@@ -1,0 +1,226 @@
+{
+  "generatedAt": "2026-08-31T22:58:00.000Z",
+  "project": "MLB_DATA_01D_R1F_DAILY_FEATURE_RECOVERY_DML_EXECUTION",
+  "certificationVerdict": "MLB_DATA_01D_R1F_DAILY_FEATURE_RECOVERY_DML_PARTIAL",
+  "repositoryStateBeforePublication": {
+    "branch": "main",
+    "localHead": "f1eaa35ea88c1b7520c45a939f49fb6156290745",
+    "originMain": "e39bb7631ab642c992576cc8a3b2e6ef99654f8c",
+    "worktree": "clean",
+    "R1F_DML_PREPUBLISH_STATE": "PASS"
+  },
+  "certificationCommitScope": {
+    "commit": "f1eaa35ea88c1b7520c45a939f49fb6156290745",
+    "scope": [
+      "production manifest-authority certification artifact",
+      "production authority validator",
+      "PROJECT_STATUS",
+      "MASTER_ROADMAP"
+    ],
+    "runtimeFeatureLogicChanges": "NO",
+    "dmlActivationChanges": "NO",
+    "R1F_DML_CERTIFICATION_COMMIT_SCOPE": "PASS"
+  },
+  "publication": {
+    "push": "PASS",
+    "localHeadAfterPush": "f1eaa35ea88c1b7520c45a939f49fb6156290745",
+    "originMainAfterPush": "f1eaa35ea88c1b7520c45a939f49fb6156290745"
+  },
+  "productionAlignment": {
+    "targetCommit": "f1eaa35ea88c1b7520c45a939f49fb6156290745",
+    "productionCommit": "f1eaa35ea88c1b7520c45a939f49fb6156290745",
+    "pollAttempts": 8,
+    "providerCallsMade": 0,
+    "status": "PASS"
+  },
+  "liveManifestAuthority": {
+    "route": "/api/system/pick2/r1f-manifest-authority",
+    "httpStatus": 200,
+    "expectedDigestConfigured": true,
+    "expectedDigestMatchesManifest": true,
+    "criticalCodeIntegrity": "PASS",
+    "criticalFileMismatchCount": 0,
+    "manifestContractId": "PICK2_MLB_01D_R1F_RECOVERY_MANIFEST_V1",
+    "manifestDigest": "1c7532aa5aaf09d2c05ffb4df752bb5eee2e4f9c719489b70a97f9d14d587352",
+    "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "productionAuthorityReady": true,
+    "failureCode": null,
+    "gitCommit": "f1eaa35ea88c1b7520c45a939f49fb6156290745",
+    "R1F_DML_LIVE_AUTHORITY": "PASS"
+  },
+  "prewriteReadOnlyPreflight": {
+    "R1F_DML_PREWRITE_PREFLIGHT": "PASS",
+    "R1F_DML_PREWRITE_TABLE_STATE": "PASS",
+    "R1F_DML_SNAPSHOT_GUARD": "PASS",
+    "snapshots": 67433,
+    "snapshotMode": "REUSE_NO_OP",
+    "snapshotInserts": 0,
+    "snapshotReuses": 67433,
+    "snapshotConflicts": 0,
+    "teamInsertEligible": 4498,
+    "starterInsertEligible": 4498,
+    "bullpenInsertEligible": 4498,
+    "batterInsertEligible": 44943,
+    "matchupInsertEligible": 2249,
+    "firstInningInsertEligible": 2249,
+    "offenseLogical": 4498,
+    "BLOCK_CONFLICT": 0,
+    "rawRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicatePitchIdentities": 0,
+    "nativeGames": 2430,
+    "nativePlayers": 1469,
+    "asOfRule": "source_game_date < target_game_date",
+    "leakageViolations": 0,
+    "sameDayLeakage": 0
+  },
+  "execution": {
+    "authorized": true,
+    "commandMode": "EXECUTE",
+    "explicitDmlAuthorizationFlag": "PRESENT",
+    "status": "STOPPED_ON_CONFLICT",
+    "stopError": "pick2_mlb_bullpen_daily_features insert failed at 0: duplicate key value violates unique constraint \"pick2_mlb_bullpen_daily_featu_team_id_feature_date_feature__key\"",
+    "automaticRepairSqlAttempted": "NO",
+    "rerunAttempted": "NO"
+  },
+  "dmlAccounting": {
+    "team": {
+      "inserts": 4498,
+      "reuses": 0,
+      "conflicts": 0,
+      "finalRows": 4498,
+      "duplicateKeys": 0,
+      "R1F_TEAM_RECOVERY": "PASS"
+    },
+    "starter": {
+      "inserts": 4498,
+      "reuses": 0,
+      "conflicts": 0,
+      "finalRows": 4498,
+      "duplicateKeys": 0,
+      "R1F_STARTER_RECOVERY": "PASS"
+    },
+    "bullpen": {
+      "inserts": 0,
+      "reuses": 0,
+      "conflicts": 1,
+      "finalRows": 0,
+      "R1F_BULLPEN_RECOVERY": "FAIL"
+    },
+    "batter": {
+      "inserts": 0,
+      "reuses": 0,
+      "conflicts": 0,
+      "finalRows": 0,
+      "R1F_BATTER_RECOVERY": "NOT_RUN"
+    },
+    "matchup": {
+      "inserts": 0,
+      "reuses": 0,
+      "conflicts": 0,
+      "finalRows": 0,
+      "R1F_MATCHUP_RECOVERY": "NOT_RUN"
+    },
+    "firstInning": {
+      "inserts": 0,
+      "reuses": 0,
+      "conflicts": 0,
+      "finalRows": 0,
+      "R1F_FIRST_INNING_RECOVERY": "NOT_RUN"
+    },
+    "offense": {
+      "logicalCoverage": 4498,
+      "physicalTableCreated": "NO",
+      "R1F_OFFENSE_RECOVERY": "PARTIAL_PREWRITE_ONLY"
+    },
+    "snapshots": {
+      "inserts": 0,
+      "reuses": 67433,
+      "updates": 0,
+      "deletes": 0,
+      "finalRows": 67433,
+      "R1F_SNAPSHOT_FINAL_STATE": "PASS"
+    },
+    "otherProductionDml": 0
+  },
+  "partialReadback": {
+    "status": "PASS",
+    "counts": {
+      "pick2_feature_snapshots": 67433,
+      "pick2_mlb_team_daily_features": 4498,
+      "pick2_mlb_pitcher_daily_features": 4498,
+      "pick2_mlb_bullpen_daily_features": 0,
+      "pick2_mlb_batter_daily_features": 0,
+      "pick2_mlb_matchup_daily_features": 0,
+      "pick2_mlb_first_inning_daily_features": 0,
+      "pick2_mlb_games": 2430,
+      "pick2_mlb_players": 1469,
+      "pick2_mlb_game_results": 0,
+      "pick2_mlb_market_event_mappings": 0,
+      "pick2_model_registry": 0,
+      "pick2_model_feature_sets": 0,
+      "pick2_model_versions": 0,
+      "pick2_model_training_runs": 0,
+      "pick2_model_validation_runs": 0,
+      "pick2_game_predictions": 0,
+      "pick2_prediction_results": 0,
+      "pick2_market_value_evaluations": 0,
+      "rawRowsFromExecutionGuardScan": 712528,
+      "raw2026": 0
+    },
+    "duplicateKeys": {
+      "team": 0,
+      "starter": 0
+    }
+  },
+  "safety": {
+    "productionSchemaMutations": 0,
+    "migrationApply": "NO",
+    "snapshotWrites": 0,
+    "rawStatcastWrites": 0,
+    "nativeIdentityWrites": 0,
+    "providerCalls": 0,
+    "modelTraining": "NO",
+    "modelValidation": "NO",
+    "championPromotion": "NO",
+    "predictionGeneration": "NO",
+    "predictionResultWrites": 0,
+    "marketValueWrites": 0,
+    "import2026": "NO",
+    "automation": "NO",
+    "cronChanges": 0
+  },
+  "flags": {
+    "R1F_DML_LIVE_AUTHORITY": "PASS",
+    "R1F_DML_PREWRITE_PREFLIGHT": "PASS",
+    "R1F_DML_PREWRITE_TABLE_STATE": "PASS",
+    "R1F_DML_SNAPSHOT_GUARD": "PASS",
+    "R1F_TEAM_RECOVERY": "PASS",
+    "R1F_STARTER_RECOVERY": "PASS",
+    "R1F_BULLPEN_RECOVERY": "FAIL",
+    "R1F_BATTER_RECOVERY": "NOT_RUN",
+    "R1F_MATCHUP_RECOVERY": "NOT_RUN",
+    "R1F_FIRST_INNING_RECOVERY": "NOT_RUN",
+    "R1F_OFFENSE_RECOVERY": "PARTIAL_PREWRITE_ONLY",
+    "R1F_SNAPSHOT_FINAL_STATE": "PASS",
+    "R1F_FEATURE_ROW_PARITY": "FAIL",
+    "R1F_NATIVE_KEY_UNIQUENESS": "PASS_FOR_INSERTED_DOMAINS",
+    "R1F_TARGET_GAME_COVERAGE": "PARTIAL",
+    "R1F_POSTWRITE_ASOF": "NOT_FULLY_AUDITABLE_AFTER_PARTIAL_STOP",
+    "R1F_POSTWRITE_LEAKAGE": "NOT_FULLY_AUDITABLE_AFTER_PARTIAL_STOP",
+    "R1F_SAMEDAY_GUARD": "BLOCKED_BY_BULLPEN_LEGACY_UNIQUENESS",
+    "R1F_NULL_POLICY": "NOT_FULLY_AUDITABLE_AFTER_PARTIAL_STOP",
+    "R1F_FEATURE_SANITY": "NOT_FULLY_AUDITABLE_AFTER_PARTIAL_STOP",
+    "R1F_RAW_STABILITY": "PASS_FROM_EXECUTION_GUARD_SCAN",
+    "R1F_RAW_IMMUTABILITY": "PRESERVED_BY_NO_RAW_WRITE_PATH",
+    "R1F_NATIVE_IDENTITY_PRESERVATION": "PASS",
+    "R1F_RECOVERY_IDEMPOTENCY": "BLOCKED_PENDING_PARTIAL_RESUME_REPAIR",
+    "MLB_DATA_01D_2025_FEATURE_FOUNDATION_READY": "NO",
+    "MLB_DATA_02A_MODEL_DATASET_PREPARATION_READY": "NO",
+    "MODEL_WORK_PERFORMED": "NO",
+    "PREDICTION_WORK_PERFORMED": "NO"
+  },
+  "remainingBlocker": "The prepared native uniqueness migration repaired team uniqueness but production still has legacy bullpen uniqueness constraint pick2_mlb_bullpen_daily_featu_team_id_feature_date_feature__key, which blocks target_game_pk-rooted bullpen rows.",
+  "recommendedNextPhase": "MLB_DATA_01D_R1G_BULLPEN_NATIVE_UNIQUENESS_REPAIR_AND_PARTIAL_RESUME_PLAN",
+  "recommendedNextInstruction": "Authorize a bounded schema audit and forward migration preparation for the remaining bullpen native uniqueness defect, preserving the 4,498 team rows and 4,498 starter rows already inserted and without resuming DML until separately certified."
+}

@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-31 02:20:00Z
 
+## 2026-08-31 MLB-DATA-01D-R1F Daily Feature Recovery DML Partial
+
+- MLB-DATA-01D-R1F daily feature recovery DML is classified as `MLB_DATA_01D_R1F_DAILY_FEATURE_RECOVERY_DML_PARTIAL`. The authorized execution published and aligned `f1eaa35ea88c1b7520c45a939f49fb6156290745`, rechecked the live R1F manifest authority route successfully, and passed the fresh read-only prewrite plan: 67,433 snapshot `REUSE_NO_OP`, 0 snapshot conflicts, 0 `BLOCK_CONFLICT`, raw/native counts stable and the certified daily insert plan intact.
+- Production DML inserted exactly 4,498 team daily feature rows and 4,498 starter daily feature rows, each with 0 duplicate native logical keys. The run then stopped on the first bullpen insert with `pick2_mlb_bullpen_daily_features insert failed at 0: duplicate key value violates unique constraint "pick2_mlb_bullpen_daily_featu_team_id_feature_date_feature__key"`.
+- No automatic repair SQL, retry, migration, snapshot write, raw Statcast write, native identity write, provider call, model work, prediction work, 2026 import, automation or cron change occurred. Read-only partial readback now shows snapshots 67,433; team 4,498; starter 4,498; bullpen/batter/matchup/first-inning all 0; native games 2,430; native players 1,469; models 0; champion `NONE`; predictions 0. Feature foundation readiness remains `NO`; next is a bounded bullpen native uniqueness repair and partial-resume plan.
+
 ## 2026-08-31 MLB-DATA-01D-R1F Production Manifest Authority
 
 - MLB-DATA-01D-R1F production manifest authority is certified as `MLB_DATA_01D_R1F_PRODUCTION_MANIFEST_AUTHORITY_CERTIFIED`. Commit `e39bb7631ab642c992576cc8a3b2e6ef99654f8c` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` continued to report `providerCallsMade = 0`.
