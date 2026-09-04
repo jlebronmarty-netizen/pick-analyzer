@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-09-04 21:40:25Z
+Last updated: 2026-09-04 22:01:27Z
+
+## 2026-09-04 MLB-DATA-02G Moneyline Prediction DML Prep
+
+- MLB-DATA-02G is certified as `MLB_DATA_02G_MONEYLINE_PREDICTION_DML_PREP_CERTIFIED`. The certified 02F commit `fd0ec977c0a7505a9758295df179f55fe25925ac` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported provider calls 0.
+- Fresh production readback found exactly 1 active MLB moneyline Champion: `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, feature set `MLB_ML_FEATURE_SET_V1`, artifact digest `9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616` and dataset digest `4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209`.
+- The prediction persistence contract is prepared in dry-run/read-only mode only: native identity is rooted in `game_pk`, market is `moneyline`, away probability is stored as the complement of home probability, `as_of` means the complete inference payload freeze timestamp, and deterministic prediction identity is `game_pk + market + model_version + feature_input_digest`.
+- The future writer contract is fail-closed: exact same payload is `REUSE_NO_OP`, same deterministic identity with material payload/probability/model/feature differences is `BLOCK_CONFLICT`, slate writes require a bounded expected eligible count before execution, and `--execute-predictions` is forbidden in 02G with `PREDICTION_DML_EXECUTION_FORBIDDEN_IN_02G_PREP`.
+- Historical 2025 persistence dry-run built 24 sample rows and a full 2,249-row identity audit with 0 duplicate deterministic identities, 0 invalid rows and 0 block conflicts. Production predictions, prediction results and market-value evaluations remain 0.
+- Feature and raw/native state stayed unchanged: team 4,498; starter 4,498; bullpen 4,498; batter 44,943; matchup 2,249; first inning 2,249; snapshots 67,433; raw rows 712,528; unique pitch identities 712,528; native games 2,430; native players 1,469; 2026 raw rows 0. 02G made 0 prediction writes, 0 prediction-result writes, 0 market-value writes, 0 feature/raw/model/champion/schema mutations, 0 provider calls, no automation and no cron changes. Next: prepare current 2026 MLB native ingest and pregame feature foundation under separate authorization; do not persist predictions or calculate value from 02G alone.
 
 ## 2026-09-04 MLB-DATA-02F Moneyline Prediction Generation Prep
 
