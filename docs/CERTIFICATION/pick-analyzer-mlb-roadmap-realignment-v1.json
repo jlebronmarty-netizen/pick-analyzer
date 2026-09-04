@@ -1,0 +1,379 @@
+{
+  "generatedAt": "2026-09-04T00:00:00.000Z",
+  "project": "PICK_ANALYZER_MLB_ROADMAP_REALIGNMENT_FROM_PARLAY_AUTOMATION_TO_PICK_ANALYSIS",
+  "certificationVerdict": "PICK_ANALYZER_MLB_ROADMAP_REALIGNMENT_FROM_PARLAY_AUTOMATION_TO_PICK_ANALYSIS_CERTIFIED",
+  "baseline": {
+    "branch": "main",
+    "localHeadBefore": "9636da08e2b20f65e83b3d26f5ad4a34ae546eaf",
+    "originMainBefore": "b9bc7e9fd0544b2cc5681af86bb5d3f6fd2862ba",
+    "productionCommitObserved": "b9bc7e9fd0544b2cc5681af86bb5d3f6fd2862ba",
+    "worktreeBefore": "clean",
+    "PICK_ROADMAP_REALIGNMENT_BASELINE": "PASS"
+  },
+  "previousDirection": {
+    "classification": "LEGACY_EXPERIMENTAL_NOT_CURRENT_ROADMAP_AUTHORITY",
+    "retiredActiveObjectives": [
+      "mandatory 100 MLB parlays per day",
+      "Portfolio 101 as required daily product layer",
+      "full-slate combinatorial parlay generation",
+      "parlay count as model objective",
+      "automatic parlay output as core product promise"
+    ],
+    "PICK_MLB_100_PARLAY_PRIMARY_OBJECTIVE_RETIRED": true
+  },
+  "newDirection": {
+    "coreProduct": "sports-betting pick analysis and value-scoring platform",
+    "primaryFocus": [
+      "individual pick analysis",
+      "probability estimation",
+      "implied and no-vig market comparison",
+      "edge and expected-value scoring",
+      "matchup intelligence",
+      "selective Official Picks",
+      "Value Board"
+    ],
+    "PICK_MLB_CORE_PRODUCT_OBJECTIVE_REALIGNED": true,
+    "PICK_INDIVIDUAL_PICK_FIRST_CONTRACT": "PASS"
+  },
+  "roadmapGoalInventory": [
+    {
+      "goal": "certified MLB raw Statcast and native identity foundation",
+      "classification": "KEEP"
+    },
+    {
+      "goal": "01D feature persistence and recovery work",
+      "classification": "KEEP_USEFUL_FOR_PICK_ANALYSIS"
+    },
+    {
+      "goal": "mandatory 100 daily MLB parlays",
+      "classification": "RETIRE"
+    },
+    {
+      "goal": "Portfolio 101 mandatory daily parlay layer",
+      "classification": "RETIRE"
+    },
+    {
+      "goal": "full-slate combinatorial parlay generation",
+      "classification": "RETIRE"
+    },
+    {
+      "goal": "optional user-selected or bounded parlay analysis",
+      "classification": "MODIFY_DEFER_DOWNSTREAM"
+    },
+    {
+      "goal": "SportsDataIO as required Pick 2 MLB dependency",
+      "classification": "RETIRE"
+    },
+    {
+      "goal": "Official Picks and Value Board",
+      "classification": "KEEP_MODIFY_ACTIVE_DIRECTION"
+    },
+    {
+      "goal": "Factor Edge and pick detail explanations",
+      "classification": "KEEP_MODIFY_ACTIVE_DIRECTION"
+    }
+  ],
+  "markets": {
+    "PICK_MLB_MARKET_ANALYSIS_SCOPE_READY": true,
+    "supportedPlanningScope": [
+      "moneyline",
+      "run line",
+      "game total",
+      "team total",
+      "NRFI/YRFI",
+      "pitcher strikeouts",
+      "pitcher outs",
+      "pitcher earned runs",
+      "pitcher hits allowed",
+      "batter hits",
+      "batter total bases",
+      "batter home runs"
+    ],
+    "additionalMarketsPolicy": "ONLY_AFTER_DATA_MAPPING_LABEL_REPLAY_VALIDATION_AND_UI_CONTRACTS"
+  },
+  "valueContract": {
+    "sequence": [
+      "odds",
+      "implied_probability",
+      "no_vig_fair_probability",
+      "model_probability",
+      "edge",
+      "expected_value",
+      "value_score",
+      "confidence",
+      "recommendation_gate"
+    ],
+    "probabilityPriceRecommendationSeparated": true,
+    "PICK_MLB_VALUE_CONTRACT_READY": true
+  },
+  "officialPicks": {
+    "selective": true,
+    "fixedDailyCount": false,
+    "zeroOfficialPicksAllowed": true,
+    "PICK_MLB_OFFICIAL_PICKS_CONTRACT_READY": true
+  },
+  "valueBoard": {
+    "fields": [
+      "sport",
+      "slate",
+      "event",
+      "market",
+      "selection",
+      "odds",
+      "implied_probability",
+      "no_vig_probability",
+      "model_probability",
+      "edge",
+      "expected_value",
+      "value_score",
+      "confidence",
+      "risk_flags",
+      "data_freshness",
+      "recommendation_status",
+      "explanation_factors"
+    ],
+    "PICK_MLB_VALUE_BOARD_CONTRACT_READY": true
+  },
+  "explanationLayer": {
+    "PICK_MLB_EXPLANATION_LAYER_READY": true,
+    "requiredEvidenceFamilies": [
+      "matchup",
+      "team_form",
+      "starter",
+      "bullpen",
+      "player_prop_context",
+      "price_no_vig",
+      "data_sufficiency",
+      "freshness",
+      "recommendation_blockers"
+    ]
+  },
+  "factorEdgeTable": {
+    "PICK_MLB_FACTOR_EDGE_TABLE_READY": true,
+    "separates": [
+      "model_inputs",
+      "market_price_evidence",
+      "confidence_risk_flags",
+      "recommendation_policy"
+    ]
+  },
+  "optionalParlayLayer": {
+    "PICK_MLB_OPTIONAL_PARLAY_LAYER_READY": true,
+    "automatic100ParlaysAuthorized": false,
+    "downstreamOnly": true,
+    "requiresIndividualLegAnalysis": true,
+    "PICK_MLB_PARLAY_CORRELATION_CONTRACT_READY": true
+  },
+  "providerResponsibilityMatrix": {
+    "MLB_OFFICIAL_STATS_API": [
+      "identity",
+      "schedule",
+      "status",
+      "metadata",
+      "official game/player evidence"
+    ],
+    "STATCAST_BASEBALL_SAVANT": [
+      "pitch-level performance history",
+      "certified raw and feature foundation"
+    ],
+    "THE_ODDS_API": [
+      "market prices for supported betting markets"
+    ],
+    "BALLDONTLIE": [
+      "supplemental sports data only where contract supports"
+    ],
+    "SPORTSDATAIO": [
+      "not required by Pick 2 MLB",
+      "do not restart MLB credential repair"
+    ],
+    "SPORTSDATAIO_MLB_REQUIRED_BY_PICK2": "NO",
+    "PICK_MLB_PROVIDER_RESPONSIBILITY_MATRIX_REALIGNED": true,
+    "PICK_MLB_SPORTSDATAIO_REMAINS_RETIRED": true
+  },
+  "existingFoundation": {
+    "rawRows": 712528,
+    "uniquePitchIdentities": 712528,
+    "duplicatePitchIdentities": 0,
+    "nativeGames": 2430,
+    "nativePlayers": 1469,
+    "featureSnapshots": 67433,
+    "teamFeatureRows": 4498,
+    "starterFeatureRows": 4498,
+    "bullpenFeatureRows": 0,
+    "batterFeatureRows": 0,
+    "matchupFeatureRows": 0,
+    "firstInningFeatureRows": 0,
+    "modelRows": 0,
+    "champion": "NONE",
+    "predictionRows": 0,
+    "raw2026Rows": 0,
+    "PICK_MLB_EXISTING_DATA_FOUNDATION_REUSED": true,
+    "PICK_MLB_01D_FEATURE_WORK_STILL_RELEVANT": true,
+    "PICK_MLB_NO_DATA_ROLLBACK_REQUIRED": true
+  },
+  "modelObjective": {
+    "PICK_MLB_MODEL_OBJECTIVE_REALIGNED": true,
+    "primaryObjective": "calibrated individual-selection probability and market-relative value",
+    "metrics": [
+      "log_loss",
+      "brier_score",
+      "auc_where_suitable",
+      "calibration",
+      "market_relative_edge",
+      "closing_line_value",
+      "downstream_roi_after_safe_evidence"
+    ],
+    "notObjective": "daily parlay count"
+  },
+  "marketSpecificModelPlan": {
+    "PICK_MLB_MARKET_SPECIFIC_MODEL_PLAN_READY": true,
+    "families": [
+      "moneyline",
+      "run_line",
+      "game_total",
+      "team_total",
+      "nrfi_yrfi",
+      "pitcher_props",
+      "batter_props"
+    ]
+  },
+  "individualPredictionContract": {
+    "PICK_MLB_INDIVIDUAL_PREDICTION_CONTRACT_READY": true,
+    "requiredFields": [
+      "event_identity",
+      "market",
+      "selection",
+      "line",
+      "odds",
+      "price_timestamp",
+      "model_version",
+      "feature_version",
+      "model_probability",
+      "implied_probability",
+      "no_vig_probability",
+      "edge",
+      "expected_value",
+      "confidence",
+      "recommendation_status",
+      "explanation_factors"
+    ]
+  },
+  "dailyPickCountPolicy": {
+    "PICK_MLB_SELECTIVITY_CONTRACT": "PASS",
+    "fixedDailyPickCount": false,
+    "allowZeroOfficialPicks": true
+  },
+  "userWorkflow": {
+    "PICK_MLB_USER_WORKFLOW_REALIGNED": true,
+    "flow": [
+      "open slate",
+      "review Value Board",
+      "inspect pick detail",
+      "compare probability/value/risk",
+      "see Official Pick or blocker status",
+      "optionally build user-selected parlay"
+    ]
+  },
+  "uiDirection": {
+    "PICK_MLB_UI_DIRECTION_REALIGNED": true,
+    "surfaces": [
+      "Value Board",
+      "Official Picks",
+      "pick detail",
+      "Factor Edge table",
+      "optional parlay builder"
+    ]
+  },
+  "automationPolicy": {
+    "PICK_MLB_AUTOMATION_POLICY_REALIGNED": true,
+    "futureAllowedOnlyAfterAuthorization": [
+      "refresh data",
+      "refresh odds",
+      "rescore picks",
+      "settle results",
+      "update Value Board"
+    ],
+    "automatic100ParlayGeneration": "RETIRED",
+    "currentAutomationState": "OFF",
+    "PICK_MLB_AUTOMATION_STATE_PRESERVED": true
+  },
+  "newPhaseSequence": [
+    "MLB_DATA_01D_R1H_MANUAL_SCHEMA_READBACK_COMPLETION",
+    "MLB_DATA_01D_R1I_PARTIAL_FEATURE_DML_RESUME_EXECUTION",
+    "MLB_DATA_01D_FEATURE_PERSISTENCE_COMPLETION",
+    "MLB_DATA_02A_MARKET_SPECIFIC_MODEL_DATASET_PREPARATION",
+    "MLB_DATA_02B_MARKET_SPECIFIC_PROBABILITY_MODEL_TRAINING",
+    "MLB_DATA_02C_VALUE_SCORING_AND_NO_VIG_PRICE_LAYER",
+    "MLB_PRODUCT_03A_VALUE_BOARD_AND_PICK_DETAIL",
+    "MLB_PRODUCT_03B_SELECTIVE_OFFICIAL_PICK_CERTIFICATION",
+    "MLB_PRODUCT_04_OPTIONAL_USER_SELECTED_PARLAY_ANALYSIS"
+  ],
+  "productionStateReadback": {
+    "PICK_MLB_REALIGNMENT_PRODUCTION_STATE": "PASS",
+    "productionCommit": "b9bc7e9fd0544b2cc5681af86bb5d3f6fd2862ba",
+    "providerCallsMadeFromVersionEndpoint": 0,
+    "counts": {
+      "pick2_feature_snapshots": 67433,
+      "pick2_mlb_team_daily_features": 4498,
+      "pick2_mlb_pitcher_daily_features": 4498,
+      "pick2_mlb_bullpen_daily_features": 0,
+      "pick2_mlb_batter_daily_features": 0,
+      "pick2_mlb_matchup_daily_features": 0,
+      "pick2_mlb_first_inning_daily_features": 0,
+      "pick2_mlb_games": 2430,
+      "pick2_mlb_players": 1469,
+      "pick2_model_registry": 0,
+      "pick2_model_versions": 0,
+      "pick2_model_training_runs": 0,
+      "pick2_model_validation_runs": 0,
+      "pick2_game_predictions": 0,
+      "rawRowsFromExecutionGuardScan": 712528,
+      "raw2026": 0
+    }
+  },
+  "safety": {
+    "repositoryOnly": true,
+    "providerCalls": 0,
+    "productionDmlMutations": 0,
+    "productionDdlMutations": 0,
+    "featureDml": 0,
+    "modelTraining": "NO",
+    "modelValidation": "NO",
+    "championPromotion": "NO",
+    "predictionWrites": 0,
+    "import2026": "NO",
+    "automation": "NO",
+    "cronChanges": 0
+  },
+  "flags": {
+    "PICK_ROADMAP_REALIGNMENT_BASELINE": "PASS",
+    "PICK_MLB_PRODUCT_GOAL_INVENTORY_COMPLETE": "YES",
+    "PICK_MLB_100_PARLAY_PRIMARY_OBJECTIVE_RETIRED": "YES",
+    "PICK_MLB_CORE_PRODUCT_OBJECTIVE_REALIGNED": "YES",
+    "PICK_INDIVIDUAL_PICK_FIRST_CONTRACT": "PASS",
+    "PICK_MLB_MARKET_ANALYSIS_SCOPE_READY": "YES",
+    "PICK_MLB_VALUE_CONTRACT_READY": "YES",
+    "PICK_MLB_OFFICIAL_PICKS_CONTRACT_READY": "YES",
+    "PICK_MLB_VALUE_BOARD_CONTRACT_READY": "YES",
+    "PICK_MLB_EXPLANATION_LAYER_READY": "YES",
+    "PICK_MLB_FACTOR_EDGE_TABLE_READY": "YES",
+    "PICK_MLB_OPTIONAL_PARLAY_LAYER_READY": "YES",
+    "PICK_MLB_PARLAY_CORRELATION_CONTRACT_READY": "YES",
+    "PICK_MLB_PROVIDER_RESPONSIBILITY_MATRIX_REALIGNED": "YES",
+    "PICK_MLB_SPORTSDATAIO_REMAINS_RETIRED": "YES",
+    "PICK_MLB_EXISTING_DATA_FOUNDATION_REUSED": "YES",
+    "PICK_MLB_01D_FEATURE_WORK_STILL_RELEVANT": "YES",
+    "PICK_MLB_MODEL_OBJECTIVE_REALIGNED": "YES",
+    "PICK_MLB_MARKET_SPECIFIC_MODEL_PLAN_READY": "YES",
+    "PICK_MLB_INDIVIDUAL_PREDICTION_CONTRACT_READY": "YES",
+    "PICK_MLB_SELECTIVITY_CONTRACT": "PASS",
+    "PICK_MLB_USER_WORKFLOW_REALIGNED": "YES",
+    "PICK_MLB_UI_DIRECTION_REALIGNED": "YES",
+    "PICK_MLB_AUTOMATION_POLICY_REALIGNED": "YES",
+    "PICK_MLB_AUTOMATION_STATE_PRESERVED": "YES",
+    "PICK_MLB_ROADMAP_UPDATED": "YES",
+    "PICK_MLB_NEW_PHASE_SEQUENCE_READY": "YES",
+    "PICK_MLB_NO_DATA_ROLLBACK_REQUIRED": "YES",
+    "PICK_MLB_REALIGNMENT_PRODUCTION_STATE": "PASS"
+  }
+}

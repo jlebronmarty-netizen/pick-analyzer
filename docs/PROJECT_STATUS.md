@@ -1,6 +1,13 @@
 # Project Status
 
-Last updated: 2026-08-31 23:55:00Z
+Last updated: 2026-09-04 00:00:00Z
+
+## 2026-09-04 Pick Analyzer MLB Roadmap Realignment
+
+- Pick Analyzer MLB is certified as `PICK_ANALYZER_MLB_ROADMAP_REALIGNMENT_FROM_PARLAY_AUTOMATION_TO_PICK_ANALYSIS_CERTIFIED`. Pick Analyzer MLB is an individual-pick/value-analysis system. 100-daily-parlay generation is not a core product requirement.
+- The active MLB direction is individual pick analysis, calibrated probability estimation, implied/no-vig market comparison, edge and expected-value scoring, matchup intelligence, selective Official Picks and a sortable Value Board. Historical 100-daily-parlay, Portfolio 101 and full-slate combinatorial parlay references are preserved only as legacy or experimental context, not active roadmap authority.
+- Existing MLB data work is preserved and remains useful for pick analysis: 712,528 raw Statcast rows, 2,430 native MLB games, 1,469 native MLBAM players, 67,433 snapshots, 4,498 team feature rows and 4,498 starter feature rows. Read-only production checks during this repository-only realignment observed production commit `b9bc7e9fd0544b2cc5681af86bb5d3f6fd2862ba`, provider calls 0, bullpen/batter/matchup/first-inning feature rows 0, models 0, champion `NONE`, predictions 0 and 2026 raw rows 0.
+- Optional parlay analysis is downstream only: user-selected or tightly bounded candidates after individual-leg value and correlation contracts exist. No provider calls, production DML, production DDL, feature DML, model training, prediction writes, 2026 import, automation activation or cron changes occurred. Next: finish R1H schema readback and, only under separate authorization, resume partial daily feature DML as `MLB_DATA_01D_R1I_PARTIAL_FEATURE_DML_RESUME_EXECUTION`.
 
 ## 2026-08-31 MLB-DATA-01D-R1H Schema Readback Authority Prep
 
