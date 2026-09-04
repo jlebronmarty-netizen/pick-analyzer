@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-04 20:51:50Z
+Last updated: 2026-09-04 21:24:04Z
+
+## 2026-09-04 MLB-DATA-02E Moneyline Champion Promotion Execution
+
+- MLB-DATA-02E is certified as `MLB_DATA_02E_MONEYLINE_CHAMPION_PROMOTION_CERTIFIED`. The certified 02D promotion-prep commit `87830c2ef2bc2d2a3c961e0016c9595ec6558665` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported provider calls 0 before promotion DML.
+- Production prewrite model state was exactly zero: registry 0, feature sets 0, model versions 0, training runs 0, validation runs 0, Champion `NONE`, predictions 0, prediction results 0 and market-value evaluations 0. The model artifact digest remained `9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616`; dataset digest remained `4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209`; feature set remained `MLB_ML_FEATURE_SET_V1`.
+- Authorized production model DML inserted 5 physical rows: one `pick2_model_registry` row, one `pick2_model_feature_sets` row, one `pick2_model_versions` row, one `pick2_model_training_runs` row and one `pick2_model_validation_runs` row. Champion activation is encoded by the model version row with `role = champion` and `status = promoted`, giving exactly 1 active MLB moneyline Champion.
+- Champion readback resolves to `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, candidate `regularized_logistic_C_1`, artifact digest `9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616` and feature set `MLB_ML_FEATURE_SET_V1`. A second read-only persistence pass projected 0 new writes, all exact records as `REUSE_NO_OP` and 0 conflicts.
+- Feature foundation and raw/native identity state stayed unchanged: team 4,498; starter 4,498; bullpen 4,498; batter 44,943; matchup 2,249; first inning 2,249; snapshots 67,433; raw rows 712,528; native games 2,430; native players 1,469. 02E made 0 prediction writes, 0 Official Picks, 0 market-value writes, 0 feature writes, 0 raw writes, 0 production DDL, 0 provider calls, 0 2026 import, no automation and no cron changes. This Champion is outcome-probability only; EV, ROI, CLV, Value Board and Official Picks remain not certified. Next: `MLB_DATA_02F_MONEYLINE_PREDICTION_GENERATION_PREP`, under separate authorization only.
 
 ## 2026-09-04 MLB-DATA-02D Moneyline Model Promotion Prep
 
