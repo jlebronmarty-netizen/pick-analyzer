@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-09-04 19:27:12Z
+Last updated: 2026-09-04 20:27:00Z
+
+## 2026-09-04 MLB-DATA-02C Moneyline Model Training Execution
+
+- MLB-DATA-02C is certified as `MLB_DATA_02C_MONEYLINE_MODEL_TRAINING_EXECUTION_CERTIFIED`. The 02B certification commit `c15cb8929d5fe26930513119bf3868b0fe5971f8` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported provider calls 0 before training began.
+- The certified 2025 moneyline dataset was rebuilt deterministically with 2,249 rows, 0 duplicate `game_pk`, 0 label ambiguity and dataset digest `4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209`. The chronological split reproduced exactly: train 1,574 rows, validation 337 rows and final holdout test 338 rows. Train-only median imputation and standardization were fit only on train rows.
+- Bounded local model training compared the train-fold empirical constant baseline, standard logistic regression and the predeclared L2 logistic grid `C = 0.01, 0.1, 1, 10`. No tree model was trained because no already-supported safe gradient boosting dependency was present. Validation selected `regularized_logistic_C_1` by log loss and Brier/calibration: validation log loss 0.688104, Brier 0.247492, AUC 0.563029, accuracy 0.545994 and ECE 0.022065.
+- The selected final-holdout candidate was evaluated once on test: log loss 0.683101, Brier 0.245035, AUC 0.551172, accuracy 0.568047, balanced accuracy 0.536436 and ECE 0.023464. Test deltas versus the trivial baseline were log loss -0.006612, Brier -0.003250, AUC +0.063670 and accuracy +0.026627.
+- Reliability, feature-signal, dominant-feature, probability-range, extreme-probability, class-segment, temporal-stability, confidence-bucket and walk-forward audits passed. Walk-forward average metrics were log loss 0.688920, Brier 0.247893 and AUC 0.566162 over 4 folds. Local model artifact digest: `9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616`.
+- `MLB_02C_CHAMPION_ELIGIBILITY = ELIGIBLE`, but champion promotion was not authorized and was not performed. 02C made 0 production model persistence writes, 0 predictions, 0 Official Picks, 0 Value Board publication, 0 market-value writes, 0 provider calls, 0 production DML, 0 production DDL, 0 feature/raw writes, 0 2026 import, no automation and no cron changes. This is outcome-probability model validation only, not betting-value certification. Next: `MLB_DATA_02D_MONEYLINE_MODEL_PROMOTION_PREP`, under separate authorization only.
 
 ## 2026-09-04 MLB-DATA-02B Moneyline Model Training Prep
 

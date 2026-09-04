@@ -1,0 +1,718 @@
+{
+  "generatedAt": "2026-09-04T20:27:00.460Z",
+  "project": "MLB_DATA_02C_MONEYLINE_MODEL_TRAINING_EXECUTION",
+  "certificationVerdict": "MLB_DATA_02C_MONEYLINE_MODEL_TRAINING_EXECUTION_CERTIFIED",
+  "publication": {
+    "productionCommit": "c15cb8929d5fe26930513119bf3868b0fe5971f8",
+    "providerCallsMade": 0,
+    "MLB_02C_PREPUBLISH_STATE": "PASS",
+    "MLB_02C_02B_COMMIT_SCOPE_CERTIFIED": "YES",
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "dataset": {
+    "rows": 2249,
+    "digest": "4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209",
+    "gamePkDigest": "7cdd1272ed5aa461949fdda36cfc40ac0d00568849d31ea7b1f47a215e7436d1",
+    "labelDigest": "068690ca1a68fb29557e780baf48d3c7ddb8c2eb8feebbe6134d463e0bc912b2",
+    "splitDigest": "75415d05fb5075f37be2f6f317f47a84127267cb679ce8fb57e560c8ae5defaa",
+    "datasetDigest": "4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209",
+    "duplicateGamePk": 0,
+    "labelAmbiguity": 0,
+    "MLB_02C_DATASET_DIGEST": "PASS"
+  },
+  "split": {
+    "train": {
+      "start": "2025-04-01",
+      "end": "2025-08-08",
+      "rows": 1574
+    },
+    "validation": {
+      "start": "2025-08-08",
+      "end": "2025-09-03",
+      "rows": 337
+    },
+    "test": {
+      "start": "2025-09-03",
+      "end": "2025-09-28",
+      "rows": 338
+    },
+    "MLB_02C_SPLIT_REPRODUCTION": "PASS",
+    "MLB_02C_TEST_HOLDOUT_ISOLATION": "PASS"
+  },
+  "leakage": {
+    "sourceGameDateLtTargetGameDate": true,
+    "identifierLeakage": 0,
+    "outcomeDerivedInputFields": 0,
+    "futureLeakage": 0,
+    "MLB_02C_TRAINING_LEAKAGE_GUARD": "PASS",
+    "MLB_02C_PREPROCESSING_ISOLATION": "PASS",
+    "MLB_02C_MISSINGNESS_HANDLING": "PASS"
+  },
+  "baselines": {
+    "featureCounts": {
+      "team": 4498,
+      "starter": 4498,
+      "bullpen": 4498,
+      "batter": 44943,
+      "matchup": 2249,
+      "firstInning": 2249,
+      "snapshots": 67433
+    },
+    "modelCounts": {
+      "registry": 0,
+      "featureSets": 0,
+      "versions": 0,
+      "trainingRuns": 0,
+      "validationRuns": 0
+    },
+    "predictionCounts": {
+      "predictions": 0,
+      "predictionResults": 0,
+      "marketValueEvaluations": 0
+    },
+    "rawRows": 712528,
+    "uniquePitchIdentities": 712528
+  },
+  "modelResults": {
+    "trivialBaseline": {
+      "MLB_02C_TRIVIAL_BASELINE": "PASS",
+      "validation": {
+        "probability": 0.540661,
+        "rows": 337,
+        "logLoss": 0.692837,
+        "brier": 0.249843,
+        "auc": 0.472473,
+        "accuracy": 0.522255,
+        "balancedAccuracy": 0.5,
+        "intercept": 0.506708,
+        "slope": 0.095378,
+        "ece": 0.018406
+      },
+      "test": {
+        "probability": 0.540661,
+        "rows": 338,
+        "logLoss": 0.689713,
+        "brier": 0.248285,
+        "auc": 0.487502,
+        "accuracy": 0.54142,
+        "balancedAccuracy": 0.5,
+        "intercept": 0.559116,
+        "slope": -0.10856,
+        "ece": 0.000759
+      }
+    },
+    "standardLogistic": {
+      "MLB_02C_LOGISTIC_BASELINE_TRAINED": "YES",
+      "MLB_02C_LOGISTIC_VALIDATION": "PASS",
+      "validation": {
+        "rows": 337,
+        "logLoss": 0.690543,
+        "brier": 0.248362,
+        "auc": 0.557348,
+        "accuracy": 0.540059,
+        "balancedAccuracy": 0.531603,
+        "intercept": 0.504261,
+        "slope": 0.139774,
+        "ece": 0.041254
+      }
+    },
+    "regularizedLogistic": {
+      "MLB_02C_REGULARIZED_LOGISTIC_TRAINED": "YES",
+      "MLB_02C_REGULARIZED_LOGISTIC_SELECTION": "PASS",
+      "candidates": [
+        {
+          "c": 0.01,
+          "validation": {
+            "rows": 337,
+            "logLoss": 0.695597,
+            "brier": 0.251208,
+            "auc": 0.565817,
+            "accuracy": 0.522255,
+            "balancedAccuracy": 0.5,
+            "intercept": -2.903903,
+            "slope": 13.133083,
+            "ece": 0.042597
+          }
+        },
+        {
+          "c": 0.1,
+          "validation": {
+            "rows": 337,
+            "logLoss": 0.690976,
+            "brier": 0.248919,
+            "auc": 0.565535,
+            "accuracy": 0.522255,
+            "balancedAccuracy": 0.5,
+            "intercept": 0.280698,
+            "slope": 1.540642,
+            "ece": 0.016851
+          }
+        },
+        {
+          "c": 1,
+          "validation": {
+            "rows": 337,
+            "logLoss": 0.688104,
+            "brier": 0.247492,
+            "auc": 0.563029,
+            "accuracy": 0.545994,
+            "balancedAccuracy": 0.530138,
+            "intercept": 0.473106,
+            "slope": 0.328424,
+            "ece": 0.022065
+          }
+        },
+        {
+          "c": 10,
+          "validation": {
+            "rows": 337,
+            "logLoss": 0.689624,
+            "brier": 0.248067,
+            "auc": 0.556183,
+            "accuracy": 0.52819,
+            "balancedAccuracy": 0.518387,
+            "intercept": 0.500182,
+            "slope": 0.161281,
+            "ece": 0.039498
+          }
+        }
+      ],
+      "best": {
+        "name": "regularized_logistic_C_1",
+        "c": 1,
+        "validation": {
+          "rows": 337,
+          "logLoss": 0.688104,
+          "brier": 0.247492,
+          "auc": 0.563029,
+          "accuracy": 0.545994,
+          "balancedAccuracy": 0.530138,
+          "intercept": 0.473106,
+          "slope": 0.328424,
+          "ece": 0.022065
+        }
+      }
+    },
+    "treeBaseline": {
+      "state": "SKIPPED_DEPENDENCY_NOT_PRESENT",
+      "MLB_02C_TREE_BASELINE_STATE": "SKIPPED"
+    },
+    "validationRanking": [
+      {
+        "rank": 1,
+        "name": "regularized_logistic_C_1",
+        "validation": {
+          "rows": 337,
+          "logLoss": 0.688104,
+          "brier": 0.247492,
+          "auc": 0.563029,
+          "accuracy": 0.545994,
+          "balancedAccuracy": 0.530138,
+          "intercept": 0.473106,
+          "slope": 0.328424,
+          "ece": 0.022065
+        }
+      },
+      {
+        "rank": 2,
+        "name": "standard_logistic",
+        "validation": {
+          "rows": 337,
+          "logLoss": 0.690543,
+          "brier": 0.248362,
+          "auc": 0.557348,
+          "accuracy": 0.540059,
+          "balancedAccuracy": 0.531603,
+          "intercept": 0.504261,
+          "slope": 0.139774,
+          "ece": 0.041254
+        }
+      },
+      {
+        "rank": 3,
+        "name": "trivial_constant",
+        "validation": {
+          "probability": 0.540661,
+          "rows": 337,
+          "logLoss": 0.692837,
+          "brier": 0.249843,
+          "auc": 0.472473,
+          "accuracy": 0.522255,
+          "balancedAccuracy": 0.5,
+          "intercept": 0.506708,
+          "slope": 0.095378,
+          "ece": 0.018406
+        }
+      }
+    ],
+    "finalHoldoutCandidate": "regularized_logistic_C_1",
+    "validationMetrics": {
+      "rows": 337,
+      "logLoss": 0.688104,
+      "brier": 0.247492,
+      "auc": 0.563029,
+      "accuracy": 0.545994,
+      "balancedAccuracy": 0.530138,
+      "intercept": 0.473106,
+      "slope": 0.328424,
+      "ece": 0.022065
+    },
+    "testMetrics": {
+      "rows": 338,
+      "logLoss": 0.683101,
+      "brier": 0.245035,
+      "auc": 0.551172,
+      "accuracy": 0.568047,
+      "balancedAccuracy": 0.536436,
+      "intercept": 0.474249,
+      "slope": 0.422838,
+      "ece": 0.023464
+    },
+    "testVsTrivial": {
+      "deltaLogLoss": -0.006612,
+      "deltaBrier": -0.00325,
+      "deltaAuc": 0.06367,
+      "deltaAccuracy": 0.026627,
+      "result": "PASS"
+    }
+  },
+  "diagnostics": {
+    "reliability": {
+      "validation": [
+        {
+          "bin": 4,
+          "min": 0.3,
+          "max": 0.4,
+          "count": 1,
+          "predictedProbability": 0.386388,
+          "observedFrequency": 1
+        },
+        {
+          "bin": 5,
+          "min": 0.4,
+          "max": 0.5,
+          "count": 47,
+          "predictedProbability": 0.479569,
+          "observedFrequency": 0.404255
+        },
+        {
+          "bin": 6,
+          "min": 0.5,
+          "max": 0.6,
+          "count": 277,
+          "predictedProbability": 0.544007,
+          "observedFrequency": 0.534296
+        },
+        {
+          "bin": 7,
+          "min": 0.6,
+          "max": 0.7,
+          "count": 12,
+          "predictedProbability": 0.617272,
+          "observedFrequency": 0.666667
+        }
+      ],
+      "test": [
+        {
+          "bin": 4,
+          "min": 0.3,
+          "max": 0.4,
+          "count": 1,
+          "predictedProbability": 0.373684,
+          "observedFrequency": 0
+        },
+        {
+          "bin": 5,
+          "min": 0.4,
+          "max": 0.5,
+          "count": 38,
+          "predictedProbability": 0.480377,
+          "observedFrequency": 0.394737
+        },
+        {
+          "bin": 6,
+          "min": 0.5,
+          "max": 0.6,
+          "count": 282,
+          "predictedProbability": 0.543245,
+          "observedFrequency": 0.546099
+        },
+        {
+          "bin": 7,
+          "min": 0.6,
+          "max": 0.7,
+          "count": 17,
+          "predictedProbability": 0.617764,
+          "observedFrequency": 0.823529
+        }
+      ],
+      "MLB_02C_RELIABILITY_ANALYSIS": "PASS"
+    },
+    "calibrationState": "CALIBRATION_ACCEPTABLE",
+    "featureSignalAudit": {
+      "strongestPositive": [
+        {
+          "feature": "home_team.recent_bb_rate",
+          "coefficient": 0.020885
+        },
+        {
+          "feature": "diff.team.recent_bb_rate",
+          "coefficient": 0.019245
+        },
+        {
+          "feature": "away_team.recent_k_rate",
+          "coefficient": 0.018485
+        },
+        {
+          "feature": "home_starter.previous_pitch_count",
+          "coefficient": 0.018458
+        },
+        {
+          "feature": "diff.starter.strike_rate",
+          "coefficient": 0.018077
+        },
+        {
+          "feature": "diff.starter.previous_pitch_count",
+          "coefficient": 0.015617
+        },
+        {
+          "feature": "diff.starter.k_rate",
+          "coefficient": 0.013727
+        },
+        {
+          "feature": "home_bullpen.bullpen_k_minus_bb_rate",
+          "coefficient": 0.013613
+        },
+        {
+          "feature": "diff.bullpen.bullpen_k_minus_bb_rate",
+          "coefficient": 0.01282
+        },
+        {
+          "feature": "away_starter.days_rest",
+          "coefficient": 0.012583
+        }
+      ],
+      "strongestNegative": [
+        {
+          "feature": "diff.team.recent_k_rate",
+          "coefficient": -0.016417
+        },
+        {
+          "feature": "diff.bullpen.bullpen_bb_rate",
+          "coefficient": -0.016117
+        },
+        {
+          "feature": "away_starter.k_rate",
+          "coefficient": -0.01416
+        },
+        {
+          "feature": "diff.starter.days_rest",
+          "coefficient": -0.01387
+        },
+        {
+          "feature": "away_starter.strike_rate",
+          "coefficient": -0.012801
+        },
+        {
+          "feature": "home_bullpen.bullpen_bb_rate",
+          "coefficient": -0.011905
+        },
+        {
+          "feature": "away_starter.k_minus_bb_rate",
+          "coefficient": -0.008923
+        },
+        {
+          "feature": "diff.bullpen.bullpen_whiff_rate",
+          "coefficient": -0.008711
+        },
+        {
+          "feature": "home_starter.bb_rate",
+          "coefficient": -0.008343
+        },
+        {
+          "feature": "away_team.recent_runs_per_game",
+          "coefficient": -0.00803
+        }
+      ],
+      "MLB_02C_FEATURE_SIGNAL_AUDIT": "PASS"
+    },
+    "dominantFeatureRisk": "PASS",
+    "probabilitySanity": {
+      "min": 0.3736839154645424,
+      "max": 0.6638190887859418,
+      "nan": 0,
+      "inf": 0,
+      "MLB_02C_PROBABILITY_SANITY": "PASS"
+    },
+    "extremeProbabilityAudit": {
+      "pLt020": 0,
+      "pLt030": 0,
+      "pGt070": 0,
+      "pGt080": 0,
+      "state": "PASS"
+    },
+    "classSegmentAudit": {
+      "actualHomeWins": {
+        "rows": 183,
+        "meanPredictedHomeWinProbability": 0.54367,
+        "accuracy": 0.918033
+      },
+      "actualAwayWins": {
+        "rows": 155,
+        "meanPredictedHomeWinProbability": 0.534409,
+        "accuracy": 0.154839
+      },
+      "MLB_02C_CLASS_SEGMENT_AUDIT": "PASS"
+    },
+    "temporalStability": {
+      "blocks": [
+        {
+          "block": 1,
+          "range": {
+            "start": "2025-09-03",
+            "end": "2025-09-12",
+            "rows": 113
+          },
+          "metrics": {
+            "rows": 113,
+            "logLoss": 0.681236,
+            "brier": 0.244109,
+            "auc": 0.511032,
+            "accuracy": 0.610619,
+            "balancedAccuracy": 0.54218,
+            "intercept": 0.569965,
+            "slope": 0.147297,
+            "ece": 0.066996
+          }
+        },
+        {
+          "block": 2,
+          "range": {
+            "start": "2025-09-12",
+            "end": "2025-09-20",
+            "rows": 113
+          },
+          "metrics": {
+            "rows": 113,
+            "logLoss": 0.688551,
+            "brier": 0.247743,
+            "auc": 0.574248,
+            "accuracy": 0.513274,
+            "balancedAccuracy": 0.516604,
+            "intercept": 0.416959,
+            "slope": 0.510549,
+            "ece": 0.060499
+          }
+        },
+        {
+          "block": 3,
+          "range": {
+            "start": "2025-09-20",
+            "end": "2025-09-28",
+            "rows": 112
+          },
+          "metrics": {
+            "rows": 112,
+            "logLoss": 0.679485,
+            "brier": 0.243238,
+            "auc": 0.568269,
+            "accuracy": 0.580357,
+            "balancedAccuracy": 0.551923,
+            "intercept": 0.440923,
+            "slope": 0.568237,
+            "ece": 0.031858
+          }
+        }
+      ],
+      "MLB_02C_TEMPORAL_STABILITY_AUDIT": "PASS"
+    },
+    "confidenceBuckets": {
+      "buckets": [
+        {
+          "bucket": "50-55%",
+          "rows": 203,
+          "accuracy": 0.566502,
+          "meanPredictedProbability": 0.524322,
+          "observedWinRate": 0.566502
+        },
+        {
+          "bucket": "55-60%",
+          "rows": 117,
+          "accuracy": 0.529915,
+          "meanPredictedProbability": 0.568405,
+          "observedWinRate": 0.529915
+        },
+        {
+          "bucket": "60-65%",
+          "rows": 17,
+          "accuracy": 0.823529,
+          "meanPredictedProbability": 0.615557,
+          "observedWinRate": 0.823529
+        },
+        {
+          "bucket": "65-70%",
+          "rows": 1,
+          "accuracy": 1,
+          "meanPredictedProbability": 0.663819,
+          "observedWinRate": 1
+        },
+        {
+          "bucket": "70%+",
+          "rows": 0,
+          "accuracy": null,
+          "meanPredictedProbability": null,
+          "observedWinRate": null
+        }
+      ],
+      "MLB_02C_CONFIDENCE_BUCKET_AUDIT": "PASS"
+    },
+    "walkForward": {
+      "MLB_02C_WALK_FORWARD_VALIDATION": "PASS",
+      "MLB_02C_WALK_FORWARD_STABILITY": "PASS",
+      "folds": 4,
+      "averageLogLoss": 0.68892,
+      "averageBrier": 0.247893,
+      "averageAuc": 0.566162,
+      "foldsDetail": [
+        {
+          "fold": 1,
+          "trainRows": 900,
+          "testRows": 112,
+          "range": {
+            "start": "2025-06-13",
+            "end": "2025-06-22",
+            "rows": 112
+          },
+          "metrics": {
+            "rows": 112,
+            "logLoss": 0.694794,
+            "brier": 0.250766,
+            "auc": 0.529693,
+            "accuracy": 0.535714,
+            "balancedAccuracy": 0.52235,
+            "intercept": 0.481844,
+            "slope": 0.15377,
+            "ece": 0.039974
+          }
+        },
+        {
+          "fold": 2,
+          "trainRows": 1200,
+          "testRows": 112,
+          "range": {
+            "start": "2025-07-06",
+            "end": "2025-07-19",
+            "rows": 112
+          },
+          "metrics": {
+            "rows": 112,
+            "logLoss": 0.686503,
+            "brier": 0.246693,
+            "auc": 0.516798,
+            "accuracy": 0.553571,
+            "balancedAccuracy": 0.51581,
+            "intercept": 0.585378,
+            "slope": 0.030599,
+            "ece": 0.075723
+          }
+        },
+        {
+          "fold": 3,
+          "trainRows": 1500,
+          "testRows": 112,
+          "range": {
+            "start": "2025-08-02",
+            "end": "2025-08-10",
+            "rows": 112
+          },
+          "metrics": {
+            "rows": 112,
+            "logLoss": 0.688376,
+            "brier": 0.247701,
+            "auc": 0.577671,
+            "accuracy": 0.526786,
+            "balancedAccuracy": 0.53445,
+            "intercept": 0.408661,
+            "slope": 0.418289,
+            "ece": 0.067508
+          }
+        },
+        {
+          "fold": 4,
+          "trainRows": 1800,
+          "testRows": 112,
+          "range": {
+            "start": "2025-08-25",
+            "end": "2025-09-03",
+            "rows": 112
+          },
+          "metrics": {
+            "rows": 112,
+            "logLoss": 0.686009,
+            "brier": 0.246413,
+            "auc": 0.640485,
+            "accuracy": 0.553571,
+            "balancedAccuracy": 0.56705,
+            "intercept": 0.362093,
+            "slope": 0.768919,
+            "ece": 0.056621
+          }
+        }
+      ]
+    }
+  },
+  "artifact": {
+    "path": "artifacts/mlb/mlb-02c-moneyline-baseline-model.json",
+    "digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+    "featureSetVersion": "MLB_ML_FEATURE_SET_V1",
+    "algorithm": "regularized_logistic_regression",
+    "hyperparameters": {
+      "l2": 1,
+      "learningRate": 0.04,
+      "epochs": 900,
+      "seed": 20260904
+    },
+    "MLB_02C_MODEL_ARTIFACT_READY": "YES",
+    "MLB_02C_MODEL_ARTIFACT_DIGEST_READY": "YES"
+  },
+  "assessment": {
+    "MLB_02C_CHAMPION_ELIGIBILITY": "ELIGIBLE",
+    "MLB_02C_CHAMPION_PROMOTION_PERFORMED": "NO",
+    "MLB_02C_NO_UNSUPPORTED_VALUE_CLAIMS": "PASS",
+    "MLB_02C_OUTCOME_MODEL_BOUNDARY": "PASS"
+  },
+  "safety": {
+    "PREDICTION_WORK_PERFORMED": "NO",
+    "PRODUCTION_MODEL_PERSISTENCE_PERFORMED": "NO",
+    "providerCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "featureDml": 0,
+    "rawWrites": 0,
+    "import2026": "NO",
+    "automation": "OFF",
+    "cronChanges": 0
+  },
+  "flags": {
+    "MLB_02C_DATASET_DIGEST": "PASS",
+    "MLB_02C_SPLIT_REPRODUCTION": "PASS",
+    "MLB_02C_TRAINING_LEAKAGE_GUARD": "PASS",
+    "MLB_02C_PREPROCESSING_ISOLATION": "PASS",
+    "MLB_02C_TRIVIAL_BASELINE": "PASS",
+    "MLB_02C_LOGISTIC_BASELINE_TRAINED": "YES",
+    "MLB_02C_REGULARIZED_LOGISTIC_TRAINED": "YES",
+    "MLB_02C_REGULARIZED_LOGISTIC_SELECTION": "PASS",
+    "MLB_02C_TEST_HOLDOUT_ISOLATION": "PASS",
+    "MLB_02C_RELIABILITY_ANALYSIS": "PASS",
+    "MLB_02C_FEATURE_SIGNAL_AUDIT": "PASS",
+    "MLB_02C_PROBABILITY_SANITY": "PASS",
+    "MLB_02C_WALK_FORWARD_VALIDATION": "PASS",
+    "MLB_02C_MODEL_ARTIFACT_READY": "YES",
+    "MLB_02C_MODEL_ARTIFACT_DIGEST_READY": "YES",
+    "MLB_02C_CHAMPION_PROMOTION_PERFORMED": "NO",
+    "MLB_02C_NO_UNSUPPORTED_VALUE_CLAIMS": "PASS",
+    "MLB_02C_OUTCOME_MODEL_BOUNDARY": "PASS",
+    "PREDICTION_WORK_PERFORMED": "NO",
+    "PRODUCTION_MODEL_PERSISTENCE_PERFORMED": "NO"
+  }
+}
