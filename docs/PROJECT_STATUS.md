@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-09-04 20:27:00Z
+Last updated: 2026-09-04 20:51:50Z
+
+## 2026-09-04 MLB-DATA-02D Moneyline Model Promotion Prep
+
+- MLB-DATA-02D is certified as `MLB_DATA_02D_MONEYLINE_MODEL_PROMOTION_PREP_CERTIFIED`. The 02C certification commit `5c9bfde15e49321118fa95c23fbc66a0d7912593` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported provider calls 0.
+- The certified moneyline candidate is `regularized_logistic_C_1`, algorithm `regularized_logistic_regression`, feature set `MLB_ML_FEATURE_SET_V1`, dataset digest `4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209` and model artifact digest `9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616`. Artifact reproducibility passed with 76 ordered features, train-only preprocessing metadata, hyperparameters and training commit identity present.
+- 02D revalidated the 02C metrics: validation log loss 0.688104, Brier 0.247492 and AUC 0.563029; test log loss 0.683101, Brier 0.245035, AUC 0.551172, accuracy 0.568047 and ECE 0.023464; walk-forward average log loss 0.688920, Brier 0.247893 and AUC 0.566162. Baseline improvement and calibration readiness passed.
+- Production model schema inventory is complete for `pick2_model_registry`, `pick2_model_feature_sets`, `pick2_model_versions`, `pick2_model_training_runs`, `pick2_model_validation_runs` and prediction linkage. Fresh production zero baseline passed: registry 0, feature sets 0, model versions 0, training runs 0, validation runs 0, champion rows 0, predictions 0, prediction results 0 and market-value rows 0.
+- Future promotion persistence plans are prepared but not executed: model registry, feature set, model version, training run, validation run and champion pointer/status, capped at 6 future model/promotion writes and 0 prediction/feature/market-value rows. Idempotency is `REUSE_NO_OP` for the same artifact digest and `BLOCK_CONFLICT` for digest/dataset/metric/champion conflicts.
+- `MLB_02D_PROMOTION_ELIGIBILITY = ELIGIBLE`, but champion promotion was not authorized and was not performed. 02D made 0 production model writes, 0 prediction writes, 0 production DML, 0 production DDL, 0 provider calls, 0 feature/raw DML, 0 2026 import, no automation and no cron changes. Historical sportsbook odds remain missing, so this is probability champion prep only, not betting-value certification. Next: `MLB_DATA_02E_MONEYLINE_CHAMPION_PROMOTION_EXECUTION`, under separate authorization only.
 
 ## 2026-09-04 MLB-DATA-02C Moneyline Model Training Execution
 

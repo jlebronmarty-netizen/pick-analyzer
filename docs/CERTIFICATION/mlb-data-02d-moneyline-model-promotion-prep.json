@@ -1,0 +1,859 @@
+{
+  "generatedAt": "2026-09-04T20:51:50.251Z",
+  "project": "MLB_DATA_02D_MONEYLINE_MODEL_PROMOTION_PREP",
+  "certificationVerdict": "MLB_DATA_02D_MONEYLINE_MODEL_PROMOTION_PREP_CERTIFIED",
+  "publication": {
+    "publishedCommit": "5c9bfde15e49321118fa95c23fbc66a0d7912593",
+    "originMain": "5c9bfde15e49321118fa95c23fbc66a0d7912593",
+    "productionCommit": "5c9bfde15e49321118fa95c23fbc66a0d7912593",
+    "providerCallsMade": 0,
+    "MLB_02D_PREPUBLISH_STATE": "PASS",
+    "MLB_02D_02C_COMMIT_SCOPE_CERTIFIED": "YES",
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "model": {
+    "candidate": "regularized_logistic_C_1",
+    "algorithm": "regularized_logistic_regression",
+    "featureSetVersion": "MLB_ML_FEATURE_SET_V1",
+    "datasetDigest": "4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209",
+    "artifactPath": "artifacts/mlb/mlb-02c-moneyline-baseline-model.json",
+    "artifactDigest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+    "hyperparameters": {
+      "l2": 1,
+      "learningRate": 0.04,
+      "epochs": 900,
+      "seed": 20260904
+    },
+    "featureCount": 76,
+    "MLB_02D_MODEL_ARTIFACT_PRESENT": "YES",
+    "MLB_02D_MODEL_ARTIFACT_DIGEST": "PASS",
+    "MLB_02D_MODEL_DATASET_IDENTITY": "PASS",
+    "MLB_02D_MODEL_REPRODUCIBILITY": "PASS"
+  },
+  "performance": {
+    "metricReadback": {
+      "validationLogLoss": 0.688104,
+      "validationBrier": 0.247492,
+      "testLogLoss": 0.683101,
+      "testBrier": 0.245035,
+      "testAuc": 0.551172,
+      "testEce": 0.023464,
+      "walkForwardAverageLogLoss": 0.68892,
+      "walkForwardAverageBrier": 0.247893,
+      "walkForwardAverageAuc": 0.566162
+    },
+    "validation": {
+      "rows": 337,
+      "logLoss": 0.688104,
+      "brier": 0.247492,
+      "auc": 0.563029,
+      "accuracy": 0.545994,
+      "balancedAccuracy": 0.530138,
+      "intercept": 0.473106,
+      "slope": 0.328424,
+      "ece": 0.022065
+    },
+    "test": {
+      "rows": 338,
+      "logLoss": 0.683101,
+      "brier": 0.245035,
+      "auc": 0.551172,
+      "accuracy": 0.568047,
+      "balancedAccuracy": 0.536436,
+      "intercept": 0.474249,
+      "slope": 0.422838,
+      "ece": 0.023464
+    },
+    "walkForward": {
+      "MLB_02C_WALK_FORWARD_VALIDATION": "PASS",
+      "MLB_02C_WALK_FORWARD_STABILITY": "PASS",
+      "folds": 4,
+      "averageLogLoss": 0.68892,
+      "averageBrier": 0.247893,
+      "averageAuc": 0.566162,
+      "foldsDetail": [
+        {
+          "fold": 1,
+          "trainRows": 900,
+          "testRows": 112,
+          "range": {
+            "start": "2025-06-13",
+            "end": "2025-06-22",
+            "rows": 112
+          },
+          "metrics": {
+            "rows": 112,
+            "logLoss": 0.694794,
+            "brier": 0.250766,
+            "auc": 0.529693,
+            "accuracy": 0.535714,
+            "balancedAccuracy": 0.52235,
+            "intercept": 0.481844,
+            "slope": 0.15377,
+            "ece": 0.039974
+          }
+        },
+        {
+          "fold": 2,
+          "trainRows": 1200,
+          "testRows": 112,
+          "range": {
+            "start": "2025-07-06",
+            "end": "2025-07-19",
+            "rows": 112
+          },
+          "metrics": {
+            "rows": 112,
+            "logLoss": 0.686503,
+            "brier": 0.246693,
+            "auc": 0.516798,
+            "accuracy": 0.553571,
+            "balancedAccuracy": 0.51581,
+            "intercept": 0.585378,
+            "slope": 0.030599,
+            "ece": 0.075723
+          }
+        },
+        {
+          "fold": 3,
+          "trainRows": 1500,
+          "testRows": 112,
+          "range": {
+            "start": "2025-08-02",
+            "end": "2025-08-10",
+            "rows": 112
+          },
+          "metrics": {
+            "rows": 112,
+            "logLoss": 0.688376,
+            "brier": 0.247701,
+            "auc": 0.577671,
+            "accuracy": 0.526786,
+            "balancedAccuracy": 0.53445,
+            "intercept": 0.408661,
+            "slope": 0.418289,
+            "ece": 0.067508
+          }
+        },
+        {
+          "fold": 4,
+          "trainRows": 1800,
+          "testRows": 112,
+          "range": {
+            "start": "2025-08-25",
+            "end": "2025-09-03",
+            "rows": 112
+          },
+          "metrics": {
+            "rows": 112,
+            "logLoss": 0.686009,
+            "brier": 0.246413,
+            "auc": 0.640485,
+            "accuracy": 0.553571,
+            "balancedAccuracy": 0.56705,
+            "intercept": 0.362093,
+            "slope": 0.768919,
+            "ece": 0.056621
+          }
+        }
+      ]
+    },
+    "calibrationState": "CALIBRATION_ACCEPTABLE",
+    "baselineImprovement": {
+      "deltaLogLoss": -0.006612,
+      "deltaBrier": -0.00325,
+      "deltaAuc": 0.06367,
+      "deltaAccuracy": 0.026627,
+      "result": "PASS"
+    },
+    "MLB_02D_METRIC_READBACK": "PASS",
+    "MLB_02D_PRIMARY_BASELINE_IMPROVEMENT": "PASS",
+    "MLB_02D_CALIBRATION_READINESS": "PASS",
+    "MLB_02D_WALK_FORWARD_READINESS": "PASS"
+  },
+  "eligibility": {
+    "MLB_02D_PROMOTION_ELIGIBILITY": "ELIGIBLE",
+    "MLB_02D_VALUE_METRICS_NOT_REQUIRED_FOR_PROBABILITY_CHAMPION": "PASS",
+    "historicalOddsLimitation": "Historical sportsbook odds remain missing; ROI, EV, CLV and profitability are excluded from probability champion prep."
+  },
+  "productionSchema": {
+    "inventory": {
+      "pick2_model_registry": {
+        "identity": [
+          "sport_key",
+          "model_family",
+          "target"
+        ],
+        "columns": [
+          "id",
+          "model_family",
+          "sport_key",
+          "target",
+          "purpose",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "futureUse": "one MLB moneyline model registry row if absent"
+      },
+      "pick2_model_feature_sets": {
+        "identity": [
+          "sport_key",
+          "feature_set_version"
+        ],
+        "columns": [
+          "id",
+          "deterministic_identity",
+          "sport_key",
+          "feature_set_version",
+          "feature_domains",
+          "leakage_policy",
+          "input_contract",
+          "created_at"
+        ],
+        "futureUse": "one feature-set row for MLB_ML_FEATURE_SET_V1"
+      },
+      "pick2_model_versions": {
+        "identity": [
+          "model_id",
+          "model_version"
+        ],
+        "columns": [
+          "id",
+          "deterministic_identity",
+          "model_id",
+          "feature_set_id",
+          "model_version",
+          "role",
+          "status",
+          "training_window",
+          "validation_window",
+          "sealed_holdout_window",
+          "hyperparameters",
+          "artifact_uri",
+          "artifact_digest",
+          "metrics",
+          "created_at",
+          "promoted_at"
+        ],
+        "futureUse": "one candidate/champion model-version row after separate authorization"
+      },
+      "pick2_model_training_runs": {
+        "identity": [
+          "deterministic_identity"
+        ],
+        "columns": [
+          "id",
+          "deterministic_identity",
+          "model_version_id",
+          "sport_key",
+          "target",
+          "training_window",
+          "feature_set_version",
+          "row_counts",
+          "hyperparameters",
+          "artifact_digest",
+          "status",
+          "created_at",
+          "completed_at"
+        ],
+        "futureUse": "one completed audit row for local 02C training"
+      },
+      "pick2_model_validation_runs": {
+        "identity": [
+          "deterministic_identity"
+        ],
+        "columns": [
+          "id",
+          "deterministic_identity",
+          "model_version_id",
+          "validation_window",
+          "sealed_holdout",
+          "metrics",
+          "calibration_metrics",
+          "status",
+          "created_at"
+        ],
+        "futureUse": "one completed validation/holdout/walk-forward audit row"
+      },
+      "pick2_game_predictions": {
+        "identity": [
+          "deterministic_identity"
+        ],
+        "futureUse": "not written by promotion; prediction generation remains separate"
+      }
+    },
+    "zeroBaseline": {
+      "registry": 0,
+      "featureSets": 0,
+      "versions": 0,
+      "trainingRuns": 0,
+      "validationRuns": 0,
+      "championVersions": 0,
+      "predictions": 0,
+      "predictionResults": 0,
+      "marketValueEvaluations": 0
+    },
+    "MLB_02D_MODEL_SCHEMA_INVENTORY_COMPLETE": "YES",
+    "MLB_02D_PRODUCTION_MODEL_ZERO_BASELINE": "PASS"
+  },
+  "persistencePlan": {
+    "records": {
+      "featureSet": {
+        "deterministic_identity": "baseball_mlb::feature_set::MLB_ML_FEATURE_SET_V1::4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209",
+        "sport_key": "baseball_mlb",
+        "feature_set_version": "MLB_ML_FEATURE_SET_V1",
+        "feature_domains": [
+          "team",
+          "starter",
+          "bullpen",
+          "matchup",
+          "first_inning_context"
+        ],
+        "leakage_policy": "source_game_date_lt_target_game_date",
+        "input_contract": {
+          "dataset_digest": "4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209",
+          "feature_version": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+          "feature_ordering_digest": "3c2d35edcbeb5fd9cdbd7c2598af91f6ae9dbd19286d6a7381a03781a1c97ce4",
+          "preprocessing": "train_only_median_impute_then_standardize",
+          "excluded": [
+            "identifiers",
+            "outcomes",
+            "postgame_fields",
+            "odds",
+            "closing_lines"
+          ]
+        }
+      },
+      "registry": {
+        "model_family": "moneyline",
+        "sport_key": "baseball_mlb",
+        "target": "home_win_probability",
+        "purpose": "sports_probability",
+        "status": "candidate"
+      },
+      "modelVersion": {
+        "deterministic_identity": "baseball_mlb::moneyline::regularized_logistic_C_1::9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+        "model_version": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+        "role": "champion_candidate_until_separate_promotion",
+        "status": "validated_pending_promotion_authorization",
+        "training_window": {
+          "start": "2025-04-01",
+          "end": "2025-08-08",
+          "rows": 1574
+        },
+        "validation_window": {
+          "start": "2025-08-08",
+          "end": "2025-09-03",
+          "rows": 337
+        },
+        "sealed_holdout_window": {
+          "start": "2025-09-03",
+          "end": "2025-09-28",
+          "rows": 338
+        },
+        "hyperparameters": {
+          "l2": 1,
+          "learningRate": 0.04,
+          "epochs": 900,
+          "seed": 20260904
+        },
+        "artifact_uri": "artifacts/mlb/mlb-02c-moneyline-baseline-model.json",
+        "artifact_digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+        "metrics": {
+          "validation": {
+            "rows": 337,
+            "logLoss": 0.688104,
+            "brier": 0.247492,
+            "auc": 0.563029,
+            "accuracy": 0.545994,
+            "balancedAccuracy": 0.530138,
+            "intercept": 0.473106,
+            "slope": 0.328424,
+            "ece": 0.022065
+          },
+          "test": {
+            "rows": 338,
+            "logLoss": 0.683101,
+            "brier": 0.245035,
+            "auc": 0.551172,
+            "accuracy": 0.568047,
+            "balancedAccuracy": 0.536436,
+            "intercept": 0.474249,
+            "slope": 0.422838,
+            "ece": 0.023464
+          },
+          "test_vs_trivial": {
+            "deltaLogLoss": -0.006612,
+            "deltaBrier": -0.00325,
+            "deltaAuc": 0.06367,
+            "deltaAccuracy": 0.026627,
+            "result": "PASS"
+          },
+          "walk_forward": {
+            "MLB_02C_WALK_FORWARD_VALIDATION": "PASS",
+            "MLB_02C_WALK_FORWARD_STABILITY": "PASS",
+            "folds": 4,
+            "averageLogLoss": 0.68892,
+            "averageBrier": 0.247893,
+            "averageAuc": 0.566162,
+            "foldsDetail": [
+              {
+                "fold": 1,
+                "trainRows": 900,
+                "testRows": 112,
+                "range": {
+                  "start": "2025-06-13",
+                  "end": "2025-06-22",
+                  "rows": 112
+                },
+                "metrics": {
+                  "rows": 112,
+                  "logLoss": 0.694794,
+                  "brier": 0.250766,
+                  "auc": 0.529693,
+                  "accuracy": 0.535714,
+                  "balancedAccuracy": 0.52235,
+                  "intercept": 0.481844,
+                  "slope": 0.15377,
+                  "ece": 0.039974
+                }
+              },
+              {
+                "fold": 2,
+                "trainRows": 1200,
+                "testRows": 112,
+                "range": {
+                  "start": "2025-07-06",
+                  "end": "2025-07-19",
+                  "rows": 112
+                },
+                "metrics": {
+                  "rows": 112,
+                  "logLoss": 0.686503,
+                  "brier": 0.246693,
+                  "auc": 0.516798,
+                  "accuracy": 0.553571,
+                  "balancedAccuracy": 0.51581,
+                  "intercept": 0.585378,
+                  "slope": 0.030599,
+                  "ece": 0.075723
+                }
+              },
+              {
+                "fold": 3,
+                "trainRows": 1500,
+                "testRows": 112,
+                "range": {
+                  "start": "2025-08-02",
+                  "end": "2025-08-10",
+                  "rows": 112
+                },
+                "metrics": {
+                  "rows": 112,
+                  "logLoss": 0.688376,
+                  "brier": 0.247701,
+                  "auc": 0.577671,
+                  "accuracy": 0.526786,
+                  "balancedAccuracy": 0.53445,
+                  "intercept": 0.408661,
+                  "slope": 0.418289,
+                  "ece": 0.067508
+                }
+              },
+              {
+                "fold": 4,
+                "trainRows": 1800,
+                "testRows": 112,
+                "range": {
+                  "start": "2025-08-25",
+                  "end": "2025-09-03",
+                  "rows": 112
+                },
+                "metrics": {
+                  "rows": 112,
+                  "logLoss": 0.686009,
+                  "brier": 0.246413,
+                  "auc": 0.640485,
+                  "accuracy": 0.553571,
+                  "balancedAccuracy": 0.56705,
+                  "intercept": 0.362093,
+                  "slope": 0.768919,
+                  "ece": 0.056621
+                }
+              }
+            ]
+          },
+          "calibration_state": "CALIBRATION_ACCEPTABLE"
+        }
+      },
+      "trainingRun": {
+        "deterministic_identity": "baseball_mlb::moneyline::02c_training::9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+        "sport_key": "baseball_mlb",
+        "target": "home_win_probability",
+        "training_window": {
+          "start": "2025-04-01",
+          "end": "2025-08-08",
+          "rows": 1574
+        },
+        "feature_set_version": "MLB_ML_FEATURE_SET_V1",
+        "row_counts": {
+          "train": 1574,
+          "validation": 337,
+          "test": 338,
+          "total": 2249
+        },
+        "hyperparameters": {
+          "l2": 1,
+          "learningRate": 0.04,
+          "epochs": 900,
+          "seed": 20260904
+        },
+        "artifact_digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+        "status": "completed"
+      },
+      "validationRun": {
+        "deterministic_identity": "baseball_mlb::moneyline::02c_validation::9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+        "validation_window": {
+          "validation": {
+            "start": "2025-08-08",
+            "end": "2025-09-03",
+            "rows": 337
+          },
+          "test": {
+            "start": "2025-09-03",
+            "end": "2025-09-28",
+            "rows": 338
+          },
+          "walk_forward_folds": 4
+        },
+        "sealed_holdout": true,
+        "metrics": {
+          "validation": {
+            "rows": 337,
+            "logLoss": 0.688104,
+            "brier": 0.247492,
+            "auc": 0.563029,
+            "accuracy": 0.545994,
+            "balancedAccuracy": 0.530138,
+            "intercept": 0.473106,
+            "slope": 0.328424,
+            "ece": 0.022065
+          },
+          "test": {
+            "rows": 338,
+            "logLoss": 0.683101,
+            "brier": 0.245035,
+            "auc": 0.551172,
+            "accuracy": 0.568047,
+            "balancedAccuracy": 0.536436,
+            "intercept": 0.474249,
+            "slope": 0.422838,
+            "ece": 0.023464
+          },
+          "baseline_comparison": {
+            "deltaLogLoss": -0.006612,
+            "deltaBrier": -0.00325,
+            "deltaAuc": 0.06367,
+            "deltaAccuracy": 0.026627,
+            "result": "PASS"
+          },
+          "walk_forward": {
+            "MLB_02C_WALK_FORWARD_VALIDATION": "PASS",
+            "MLB_02C_WALK_FORWARD_STABILITY": "PASS",
+            "folds": 4,
+            "averageLogLoss": 0.68892,
+            "averageBrier": 0.247893,
+            "averageAuc": 0.566162,
+            "foldsDetail": [
+              {
+                "fold": 1,
+                "trainRows": 900,
+                "testRows": 112,
+                "range": {
+                  "start": "2025-06-13",
+                  "end": "2025-06-22",
+                  "rows": 112
+                },
+                "metrics": {
+                  "rows": 112,
+                  "logLoss": 0.694794,
+                  "brier": 0.250766,
+                  "auc": 0.529693,
+                  "accuracy": 0.535714,
+                  "balancedAccuracy": 0.52235,
+                  "intercept": 0.481844,
+                  "slope": 0.15377,
+                  "ece": 0.039974
+                }
+              },
+              {
+                "fold": 2,
+                "trainRows": 1200,
+                "testRows": 112,
+                "range": {
+                  "start": "2025-07-06",
+                  "end": "2025-07-19",
+                  "rows": 112
+                },
+                "metrics": {
+                  "rows": 112,
+                  "logLoss": 0.686503,
+                  "brier": 0.246693,
+                  "auc": 0.516798,
+                  "accuracy": 0.553571,
+                  "balancedAccuracy": 0.51581,
+                  "intercept": 0.585378,
+                  "slope": 0.030599,
+                  "ece": 0.075723
+                }
+              },
+              {
+                "fold": 3,
+                "trainRows": 1500,
+                "testRows": 112,
+                "range": {
+                  "start": "2025-08-02",
+                  "end": "2025-08-10",
+                  "rows": 112
+                },
+                "metrics": {
+                  "rows": 112,
+                  "logLoss": 0.688376,
+                  "brier": 0.247701,
+                  "auc": 0.577671,
+                  "accuracy": 0.526786,
+                  "balancedAccuracy": 0.53445,
+                  "intercept": 0.408661,
+                  "slope": 0.418289,
+                  "ece": 0.067508
+                }
+              },
+              {
+                "fold": 4,
+                "trainRows": 1800,
+                "testRows": 112,
+                "range": {
+                  "start": "2025-08-25",
+                  "end": "2025-09-03",
+                  "rows": 112
+                },
+                "metrics": {
+                  "rows": 112,
+                  "logLoss": 0.686009,
+                  "brier": 0.246413,
+                  "auc": 0.640485,
+                  "accuracy": 0.553571,
+                  "balancedAccuracy": 0.56705,
+                  "intercept": 0.362093,
+                  "slope": 0.768919,
+                  "ece": 0.056621
+                }
+              }
+            ]
+          }
+        },
+        "calibration_metrics": {
+          "state": "CALIBRATION_ACCEPTABLE",
+          "validation_bins": [
+            {
+              "bin": 4,
+              "min": 0.3,
+              "max": 0.4,
+              "count": 1,
+              "predictedProbability": 0.386388,
+              "observedFrequency": 1
+            },
+            {
+              "bin": 5,
+              "min": 0.4,
+              "max": 0.5,
+              "count": 47,
+              "predictedProbability": 0.479569,
+              "observedFrequency": 0.404255
+            },
+            {
+              "bin": 6,
+              "min": 0.5,
+              "max": 0.6,
+              "count": 277,
+              "predictedProbability": 0.544007,
+              "observedFrequency": 0.534296
+            },
+            {
+              "bin": 7,
+              "min": 0.6,
+              "max": 0.7,
+              "count": 12,
+              "predictedProbability": 0.617272,
+              "observedFrequency": 0.666667
+            }
+          ],
+          "test_bins": [
+            {
+              "bin": 4,
+              "min": 0.3,
+              "max": 0.4,
+              "count": 1,
+              "predictedProbability": 0.373684,
+              "observedFrequency": 0
+            },
+            {
+              "bin": 5,
+              "min": 0.4,
+              "max": 0.5,
+              "count": 38,
+              "predictedProbability": 0.480377,
+              "observedFrequency": 0.394737
+            },
+            {
+              "bin": 6,
+              "min": 0.5,
+              "max": 0.6,
+              "count": 282,
+              "predictedProbability": 0.543245,
+              "observedFrequency": 0.546099
+            },
+            {
+              "bin": 7,
+              "min": 0.6,
+              "max": 0.7,
+              "count": 17,
+              "predictedProbability": 0.617764,
+              "observedFrequency": 0.823529
+            }
+          ]
+        },
+        "status": "completed"
+      },
+      "championPointer": {
+        "deterministic_identity": "baseball_mlb::moneyline::champion::9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+        "max_active_champions": 1,
+        "promotion_action": "set model version role/status to champion/promoted only after separate authorization"
+      }
+    },
+    "MLB_02D_FEATURE_SET_PERSISTENCE_PLAN": "READY",
+    "MLB_02D_MODEL_VERSION_PERSISTENCE_PLAN": "READY",
+    "MLB_02D_TRAINING_RUN_PERSISTENCE_PLAN": "READY",
+    "MLB_02D_VALIDATION_RUN_PERSISTENCE_PLAN": "READY"
+  },
+  "championContract": {
+    "identity": {
+      "sport": "baseball_mlb",
+      "marketFamily": "moneyline",
+      "modelArtifactDigest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+      "featureSetVersion": "MLB_ML_FEATURE_SET_V1"
+    },
+    "singleChampionGuarantee": "maximum one active Champion for MLB moneyline; block on multiple active champions",
+    "immutability": "historical model metrics/artifacts remain immutable; promotion may only change explicit status/pointer state",
+    "rollback": "Champion -> NONE or previous certified model if one exists; never delete model history",
+    "MLB_02D_CHAMPION_IDENTITY_CONTRACT": "READY",
+    "MLB_02D_SINGLE_CHAMPION_CONTRACT": "PASS",
+    "MLB_02D_CHAMPION_IMMUTABILITY_CONTRACT": "PASS",
+    "MLB_02D_CHAMPION_ROLLBACK_CONTRACT": "READY",
+    "MLB_02D_CHAMPION_PROMOTION_PERFORMED": "NO"
+  },
+  "predictionBoundary": {
+    "promotionPredictionSeparation": "future promotion must not automatically generate predictions",
+    "inferenceInputContract": [
+      "game_pk",
+      "pregame feature set",
+      "as_of",
+      "model artifact digest",
+      "feature ordering",
+      "missingness contract"
+    ],
+    "inferenceOutputContract": [
+      "home_win_probability",
+      "away_win_probability = 1 - home",
+      "model version",
+      "feature version",
+      "as_of",
+      "no Official Pick flag until value layer exists"
+    ],
+    "probabilityValueSeparation": "probability champion can be certified independently; Value Board requires live market odds, implied/no-vig probability, edge and value score",
+    "officialPickBoundary": "Official Picks remain 0; no recommendation generation",
+    "MLB_02D_PROMOTION_PREDICTION_SEPARATION": "PASS",
+    "MLB_02D_INFERENCE_INPUT_CONTRACT": "READY",
+    "MLB_02D_INFERENCE_OUTPUT_CONTRACT": "READY",
+    "MLB_02D_PROBABILITY_CHAMPION_VALUE_SEPARATION": "PASS",
+    "MLB_02D_OFFICIAL_PICK_BOUNDARY": "PASS"
+  },
+  "dryRun": {
+    "dmlCaps": {
+      "featureSetRows": 1,
+      "modelRegistryRows": 1,
+      "modelVersionRows": 1,
+      "trainingRunRows": 1,
+      "validationRunRows": 1,
+      "championPointerOrStatusRows": 1,
+      "predictionRows": 0,
+      "featureRows": 0,
+      "marketValueRows": 0,
+      "maximumFuturePromotionWrites": 6
+    },
+    "conflicts": 0,
+    "requiredIdentitiesResolvable": true,
+    "productionWriteExecuted": false,
+    "idempotency": {
+      "exactSameArtifactDigest": "REUSE_NO_OP",
+      "differentArtifactSameIdentity": "BLOCK_CONFLICT",
+      "secondIdenticalPromotion": "0 new logical writes"
+    },
+    "conflictContract": [
+      "artifact digest mismatch",
+      "dataset digest mismatch",
+      "feature-set mismatch",
+      "metric mismatch",
+      "multiple active champions",
+      "unexpected existing model identity"
+    ],
+    "executionFailClosed": "PROMOTION_EXECUTION_FORBIDDEN_IN_02D_PREP",
+    "MLB_02D_PROMOTION_DML_CAPS_READY": "YES",
+    "MLB_02D_PROMOTION_IDEMPOTENCY_CONTRACT": "PASS",
+    "MLB_02D_PROMOTION_CONFLICT_CONTRACT": "PASS",
+    "MLB_02D_PROMOTION_DRY_RUN": "PASS",
+    "MLB_02D_PROMOTION_EXECUTION_FAIL_CLOSED": "PASS"
+  },
+  "safety": {
+    "productionModelWrites": 0,
+    "productionPredictionWrites": 0,
+    "featureDml": 0,
+    "rawDml": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "import2026": "NO",
+    "automation": "OFF",
+    "cronChanges": 0
+  },
+  "flags": {
+    "MLB_02D_MODEL_ARTIFACT_PRESENT": "YES",
+    "MLB_02D_MODEL_ARTIFACT_DIGEST": "PASS",
+    "MLB_02D_MODEL_DATASET_IDENTITY": "PASS",
+    "MLB_02D_MODEL_REPRODUCIBILITY": "PASS",
+    "MLB_02D_METRIC_READBACK": "PASS",
+    "MLB_02D_PRIMARY_BASELINE_IMPROVEMENT": "PASS",
+    "MLB_02D_CALIBRATION_READINESS": "PASS",
+    "MLB_02D_WALK_FORWARD_READINESS": "PASS",
+    "MLB_02D_PROMOTION_ELIGIBILITY": "ELIGIBLE",
+    "MLB_02D_MODEL_SCHEMA_INVENTORY_COMPLETE": "YES",
+    "MLB_02D_PRODUCTION_MODEL_ZERO_BASELINE": "PASS",
+    "MLB_02D_FEATURE_SET_PERSISTENCE_PLAN": "READY",
+    "MLB_02D_MODEL_VERSION_PERSISTENCE_PLAN": "READY",
+    "MLB_02D_TRAINING_RUN_PERSISTENCE_PLAN": "READY",
+    "MLB_02D_VALIDATION_RUN_PERSISTENCE_PLAN": "READY",
+    "MLB_02D_CHAMPION_IDENTITY_CONTRACT": "READY",
+    "MLB_02D_SINGLE_CHAMPION_CONTRACT": "PASS",
+    "MLB_02D_CHAMPION_IMMUTABILITY_CONTRACT": "PASS",
+    "MLB_02D_CHAMPION_ROLLBACK_CONTRACT": "READY",
+    "MLB_02D_PROMOTION_PREDICTION_SEPARATION": "PASS",
+    "MLB_02D_PROBABILITY_CHAMPION_VALUE_SEPARATION": "PASS",
+    "MLB_02D_PROMOTION_DML_CAPS_READY": "YES",
+    "MLB_02D_PROMOTION_IDEMPOTENCY_CONTRACT": "PASS",
+    "MLB_02D_PROMOTION_CONFLICT_CONTRACT": "PASS",
+    "MLB_02D_PROMOTION_DRY_RUN": "PASS",
+    "MLB_02D_PROMOTION_EXECUTION_FAIL_CLOSED": "PASS",
+    "MLB_02D_CHAMPION_PROMOTION_PERFORMED": "NO"
+  }
+}
