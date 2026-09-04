@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-04 17:56:08Z
+Last updated: 2026-09-04 19:05:40Z
+
+## 2026-09-04 MLB-DATA-02A Individual Pick Model Dataset Preparation
+
+- MLB-DATA-02A is certified as `MLB_DATA_02A_INDIVIDUAL_PICK_MODEL_DATASET_PREPARATION_CERTIFIED`. The R1I certification commit `215896e7fc62c95260782fd2ccc77f1c522219b1` was published to `origin/main`, production aligned to the same commit, and live manifest authority remained ready with critical code integrity `PASS`.
+- Fresh read-only production baselines passed: team 4,498; starter 4,498; bullpen 4,498; batter 44,943; matchup 2,249; first inning 2,249; snapshots 67,433; duplicate native feature keys 0; raw rows 712,528; unique pitch identities 712,528; duplicate pitch identities 0; native games 2,430; native players 1,469; model rows 0; champion `NONE`; predictions 0.
+- The 02A dataset audit prepared individual-pick outcome dataset contracts only. READY outcome families are moneyline, NRFI/YRFI, pitcher strikeouts, pitcher hits allowed, batter hits, batter total bases and batter home runs. PARTIAL families are run line, game total and team total because outcome labels are derivable but historical sportsbook lines are missing. Pitcher outs is PARTIAL pending exact official pitching-line validation, and pitcher earned runs is BLOCKED pending a result adapter or official pitching-line evidence.
+- Exact sample inventory: moneyline 2,249 games; run-line outcome 2,249 games; game-total outcome 2,249 games; team-total outcome 4,498 team-game rows; NRFI/YRFI 2,249 games; pitcher K/hits-allowed 4,498 starter-game rows across 360 pitchers; batter hit/total-bases/home-run 44,943 batter-game rows across 658 batters. Historical odds are currently classified MISSING across the audited 2025 MLB markets, so outcome probability modeling can proceed but edge/EV/CLV validation remains dependent on separately certified market-price history.
+- `MLB_02A_RECOMMENDED_FIRST_MODEL_FAMILY = moneyline` based on label quality, complete feature coverage, temporal integrity and the simplest individual-pick target. 02A made 0 production DML, 0 production DDL, 0 provider calls, 0 feature writes, 0 model training, 0 validation runs, 0 predictions, 0 Official Picks, 0 Value Board publication, 0 2026 import, no automation and no cron changes. Next: `MLB_DATA_02B_MONEYLINE_MODEL_TRAINING_PREP`, under separate authorization only.
 
 ## 2026-09-04 MLB-DATA-01D-R1I Partial Feature DML Resume
 

@@ -1,0 +1,779 @@
+{
+  "generatedAt": "2026-09-04T19:05:40.972Z",
+  "project": "MLB_DATA_02A_INDIVIDUAL_PICK_MODEL_DATASET_PREPARATION",
+  "certificationVerdict": "MLB_DATA_02A_INDIVIDUAL_PICK_MODEL_DATASET_PREPARATION_CERTIFIED",
+  "publication": {
+    "publishedCommit": "215896e7fc62c95260782fd2ccc77f1c522219b1",
+    "originMain": "215896e7fc62c95260782fd2ccc77f1c522219b1",
+    "productionCommit": "215896e7fc62c95260782fd2ccc77f1c522219b1",
+    "providerCallsMade": 0,
+    "MLB_02A_PREPUBLISH_STATE": "PASS",
+    "MLB_02A_R1I_COMMIT_SCOPE_CERTIFIED": "YES",
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "liveAuthority": {
+    "manifestContractId": "PICK2_MLB_01D_R1F_RECOVERY_MANIFEST_V1",
+    "manifestDigest": "1c7532aa5aaf09d2c05ffb4df752bb5eee2e4f9c719489b70a97f9d14d587352",
+    "expectedDigestConfigured": true,
+    "expectedDigestMatchesManifest": true,
+    "criticalCodeIntegrity": "PASS",
+    "criticalFileMismatchCount": 0,
+    "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "productionAuthorityReady": true,
+    "failureCode": null,
+    "gitCommit": "215896e7fc62c95260782fd2ccc77f1c522219b1",
+    "requestId": "ff8e17e8-7537-4ce5-b953-2265bd3ff7f9",
+    "MLB_02A_LIVE_AUTHORITY": "PASS"
+  },
+  "baselines": {
+    "featureCounts": {
+      "team": 4498,
+      "starter": 4498,
+      "bullpen": 4498,
+      "batter": 44943,
+      "matchup": 2249,
+      "firstInning": 2249,
+      "snapshots": 67433
+    },
+    "duplicateNativeKeys": {
+      "team": 0,
+      "starter": 0,
+      "bullpen": 0,
+      "batter": 0,
+      "matchup": 0,
+      "firstInning": 0
+    },
+    "raw": {
+      "rawRows": 712528,
+      "uniquePitchIdentities": 712528,
+      "duplicatePitchIdentities": 0
+    },
+    "nativeCounts": {
+      "games": 2430,
+      "players": 1469
+    },
+    "modelCounts": {
+      "registry": 0,
+      "featureSets": 0,
+      "versions": 0,
+      "trainingRuns": 0,
+      "validationRuns": 0
+    },
+    "predictionCounts": {
+      "predictions": 0,
+      "predictionResults": 0,
+      "marketValueEvaluations": 0
+    },
+    "MLB_02A_FEATURE_FOUNDATION_READBACK": "PASS",
+    "MLB_02A_RAW_NATIVE_BASELINE": "PASS",
+    "MLB_02A_MODEL_PREDICTION_ZERO_BASELINE": "PASS"
+  },
+  "datasetPrepOnlyContract": {
+    "definesSupervisedDatasets": true,
+    "fitsModels": false,
+    "validationRuns": false,
+    "predictions": false,
+    "officialPicks": false,
+    "valueBoardPublication": false,
+    "parlayLabels": false,
+    "fullSlateCombinatorialLabels": false,
+    "MLB_02A_DATASET_PREP_ONLY_CONTRACT": "PASS",
+    "MLB_02A_INDIVIDUAL_PICK_TARGET_CONTRACT": "PASS"
+  },
+  "datasetFamilies": {
+    "moneyline": {
+      "state": "READY",
+      "target": "home_win / away_win from final Statcast score reconstruction",
+      "rowIdentity": "game_pk + market + selection",
+      "sampleCount": {
+        "rows": 2249,
+        "uniqueGames": 2249,
+        "missingLabelExclusions": 0
+      },
+      "labelSource": "DERIVABLE_FROM_STATCAST",
+      "featureFamilies": [
+        "team",
+        "starter",
+        "bullpen",
+        "offense",
+        "matchup",
+        "first_inning_context"
+      ],
+      "marketPriceDependency": "MISSING_FOR_EDGE_EV_CLV"
+    },
+    "runLine": {
+      "state": "PARTIAL",
+      "target": "final run differential outcome ready; exact sportsbook spread-line dataset missing",
+      "rowIdentity": "game_pk + line + selection",
+      "sampleCount": {
+        "rows": 2249,
+        "uniqueGames": 2249,
+        "missingLabelExclusions": 0,
+        "sportsbookLineState": "MISSING"
+      },
+      "labelSource": "DERIVABLE_FROM_STATCAST",
+      "featureFamilies": [
+        "team",
+        "starter",
+        "bullpen",
+        "offense",
+        "matchup"
+      ],
+      "marketPriceDependency": "MISSING"
+    },
+    "gameTotal": {
+      "state": "PARTIAL",
+      "target": "final total runs outcome ready; exact sportsbook total-line dataset missing",
+      "rowIdentity": "game_pk + total_line + over_under_selection",
+      "sampleCount": {
+        "rows": 2249,
+        "uniqueGames": 2249,
+        "missingLabelExclusions": 0,
+        "sportsbookLineState": "MISSING"
+      },
+      "labelSource": "DERIVABLE_FROM_STATCAST",
+      "featureFamilies": [
+        "team_offense",
+        "starter_run_prevention",
+        "bullpen",
+        "first_inning",
+        "run_environment"
+      ],
+      "marketPriceDependency": "MISSING"
+    },
+    "teamTotal": {
+      "state": "PARTIAL",
+      "target": "team runs scored outcome ready; exact sportsbook team-total-line dataset missing",
+      "rowIdentity": "game_pk + team_id + team_total_line + over_under_selection",
+      "sampleCount": {
+        "rows": 4498,
+        "uniqueGames": 2249,
+        "missingLabelExclusions": 0,
+        "sportsbookLineState": "MISSING"
+      },
+      "labelSource": "DERIVABLE_FROM_STATCAST",
+      "featureFamilies": [
+        "team_offense",
+        "opposing_starter",
+        "opposing_bullpen",
+        "matchup"
+      ],
+      "marketPriceDependency": "MISSING"
+    },
+    "nrfiYrfi": {
+      "state": "READY",
+      "target": "first inning run occurred",
+      "rowIdentity": "game_pk + market + selection",
+      "sampleCount": {
+        "rows": 2249,
+        "uniqueGames": 2249,
+        "missingLabelExclusions": 0
+      },
+      "labelSource": "DERIVABLE_FROM_STATCAST",
+      "featureFamilies": [
+        "starter",
+        "first_inning",
+        "top_of_order_offense",
+        "home_away_context"
+      ],
+      "marketPriceDependency": "MISSING_FOR_EDGE_EV_CLV"
+    },
+    "pitcherStrikeouts": {
+      "state": "READY",
+      "target": "starter strikeouts from Statcast PA events",
+      "rowIdentity": "game_pk + mlbam_pitcher_id + market",
+      "sampleCount": {
+        "rows": 4498,
+        "uniqueGames": 2249,
+        "uniquePitchers": 360,
+        "noPriorHistoryExclusions": 0,
+        "missingLabelExclusions": 0
+      },
+      "labelSource": "DERIVABLE_FROM_STATCAST",
+      "featureFamilies": [
+        "starter",
+        "opponent_batter",
+        "opponent_offense",
+        "pitch_counts",
+        "recent_workload",
+        "rest",
+        "matchup"
+      ],
+      "marketPriceDependency": "MISSING_FOR_PROP_LINE_AND_VALUE"
+    },
+    "pitcherOuts": {
+      "state": "PARTIAL",
+      "target": "outs recorded requires exact official pitching-line validation; event-derived approximation available",
+      "rowIdentity": "game_pk + mlbam_pitcher_id + market",
+      "sampleCount": {
+        "rows": 4498,
+        "uniqueGames": 2249,
+        "uniquePitchers": 360,
+        "noPriorHistoryExclusions": 0,
+        "missingLabelExclusions": 0,
+        "exactness": "PARTIAL_APPROXIMATED_FROM_EVENTS_PENDING_OFFICIAL_PITCHING_LINE"
+      },
+      "labelSource": "REQUIRES_RESULT_ADAPTER",
+      "featureFamilies": [
+        "starter",
+        "opponent_offense",
+        "pitch_counts",
+        "recent_workload",
+        "rest",
+        "matchup"
+      ],
+      "marketPriceDependency": "MISSING"
+    },
+    "pitcherEarnedRuns": {
+      "state": "BLOCKED",
+      "target": "earned runs allowed",
+      "rowIdentity": "game_pk + mlbam_pitcher_id + market",
+      "sampleCount": {
+        "rows": 0,
+        "uniqueGames": 0,
+        "uniquePitchers": 0,
+        "noPriorHistoryExclusions": 0,
+        "missingLabelExclusions": 4498,
+        "exactness": "MISSING_EXACT_EARNED_RUNS_REQUIRES_OFFICIAL_PITCHING_LINE_OR_RESULT_ADAPTER"
+      },
+      "labelSource": "REQUIRES_RESULT_ADAPTER",
+      "featureFamilies": [
+        "starter",
+        "opponent_offense",
+        "bullpen_context",
+        "matchup"
+      ],
+      "marketPriceDependency": "MISSING"
+    },
+    "pitcherHitsAllowed": {
+      "state": "READY",
+      "target": "hits allowed from batter hit events charged to pitcher",
+      "rowIdentity": "game_pk + mlbam_pitcher_id + market",
+      "sampleCount": {
+        "rows": 4498,
+        "uniqueGames": 2249,
+        "uniquePitchers": 360,
+        "noPriorHistoryExclusions": 0,
+        "missingLabelExclusions": 0
+      },
+      "labelSource": "DERIVABLE_FROM_STATCAST",
+      "featureFamilies": [
+        "starter",
+        "opponent_batter",
+        "opponent_offense",
+        "matchup"
+      ],
+      "marketPriceDependency": "MISSING_FOR_PROP_LINE_AND_VALUE"
+    },
+    "batterHits": {
+      "state": "READY",
+      "target": "batter >= 1 hit and raw hit count",
+      "rowIdentity": "game_pk + mlbam_batter_id + market",
+      "sampleCount": {
+        "rows": 44943,
+        "uniqueGames": 2249,
+        "uniqueBatters": 658,
+        "missingFeatureExclusions": 0,
+        "missingLabelExclusions": 0
+      },
+      "labelSource": "DERIVABLE_FROM_STATCAST",
+      "featureFamilies": [
+        "batter_recent_form",
+        "season_form",
+        "opposing_starter",
+        "handedness_matchup",
+        "bullpen_context"
+      ],
+      "marketPriceDependency": "MISSING_FOR_PROP_LINE_AND_VALUE"
+    },
+    "batterTotalBases": {
+      "state": "READY",
+      "target": "total bases from single/double/triple/home run events",
+      "rowIdentity": "game_pk + mlbam_batter_id + market",
+      "sampleCount": {
+        "rows": 44943,
+        "uniqueGames": 2249,
+        "uniqueBatters": 658,
+        "missingFeatureExclusions": 0,
+        "missingLabelExclusions": 0
+      },
+      "labelSource": "DERIVABLE_FROM_STATCAST",
+      "featureFamilies": [
+        "batter_recent_form",
+        "season_form",
+        "opposing_starter",
+        "handedness_matchup",
+        "bullpen_context"
+      ],
+      "marketPriceDependency": "MISSING_FOR_PROP_LINE_AND_VALUE"
+    },
+    "batterHomeRuns": {
+      "state": "READY",
+      "target": "home run >= 1",
+      "rowIdentity": "game_pk + mlbam_batter_id + market",
+      "sampleCount": {
+        "rows": 44943,
+        "uniqueGames": 2249,
+        "uniqueBatters": 658,
+        "missingFeatureExclusions": 0,
+        "missingLabelExclusions": 0
+      },
+      "labelSource": "DERIVABLE_FROM_STATCAST",
+      "featureFamilies": [
+        "batter_recent_form",
+        "season_form",
+        "opposing_starter",
+        "handedness_matchup",
+        "bullpen_context"
+      ],
+      "marketPriceDependency": "MISSING_FOR_PROP_LINE_AND_VALUE"
+    }
+  },
+  "labelSourceInventory": {
+    "gameWinner": "DERIVABLE_FROM_STATCAST",
+    "finalScore": "DERIVABLE_FROM_STATCAST",
+    "firstInningRuns": "DERIVABLE_FROM_STATCAST",
+    "pitcherStrikeouts": "DERIVABLE_FROM_STATCAST",
+    "pitcherOuts": "REQUIRES_RESULT_ADAPTER",
+    "pitcherEarnedRuns": "REQUIRES_RESULT_ADAPTER",
+    "pitcherHitsAllowed": "DERIVABLE_FROM_STATCAST",
+    "batterHits": "DERIVABLE_FROM_STATCAST",
+    "batterTotalBases": "DERIVABLE_FROM_STATCAST",
+    "batterHomeRuns": "DERIVABLE_FROM_STATCAST"
+  },
+  "resultLabelStrategy": {
+    "pick2MlbGameResultsRows": 0,
+    "strategy": "Prepare labels directly from certified historical Statcast/raw evidence for 02A; future result backfill remains separate and not written here.",
+    "MLB_02A_RESULT_LABEL_STRATEGY_READY": "YES"
+  },
+  "outcomeMarketSeparation": {
+    "outcomeDatasets": "AVAILABLE_FOR_READY_FAMILIES",
+    "marketValueDatasets": "LIMITED_UNTIL_HISTORICAL_MARKET_PRICE_HISTORY_CERTIFIED",
+    "MLB_02A_OUTCOME_MARKET_SEPARATION": "PASS"
+  },
+  "temporalSplitContract": {
+    "chronological": "READY",
+    "randomShuffle": "FORBIDDEN",
+    "exactBoundaries": "DEFER_UNTIL_02B_AFTER_SAMPLE_INVENTORY_REVIEW",
+    "groupingKey": "game_pk",
+    "playerPropRowsFromSameGameSameSplit": true,
+    "doubleheaderSafety": "USE_GAME_PK_NOT_DATE",
+    "asOfRule": "source_game_date < target_game_date",
+    "leakageDenylist": [
+      "final_score",
+      "final_winner",
+      "postgame_pitcher_line",
+      "postgame_batter_line",
+      "future_games",
+      "future_season_aggregates",
+      "target_outcome_encoded_in_input",
+      "closing_result_derived_fields"
+    ],
+    "MLB_02A_CHRONOLOGICAL_SPLIT_CONTRACT": "READY",
+    "MLB_02A_GAME_GROUP_SPLIT_GUARD": "PASS",
+    "MLB_02A_DOUBLEHEADER_SPLIT_GUARD": "PASS",
+    "MLB_02A_DATASET_ASOF_CONTRACT": "PASS",
+    "MLB_02A_DATASET_LEAKAGE_DENYLIST": "PASS"
+  },
+  "sampleCounts": {
+    "gameLevel": {
+      "moneyline": {
+        "rows": 2249,
+        "uniqueGames": 2249,
+        "missingLabelExclusions": 0
+      },
+      "runLineOutcome": {
+        "rows": 2249,
+        "uniqueGames": 2249,
+        "missingLabelExclusions": 0,
+        "sportsbookLineState": "MISSING"
+      },
+      "gameTotalOutcome": {
+        "rows": 2249,
+        "uniqueGames": 2249,
+        "missingLabelExclusions": 0,
+        "sportsbookLineState": "MISSING"
+      },
+      "teamTotalOutcome": {
+        "rows": 4498,
+        "uniqueGames": 2249,
+        "missingLabelExclusions": 0,
+        "sportsbookLineState": "MISSING"
+      },
+      "nrfiYrfi": {
+        "rows": 2249,
+        "uniqueGames": 2249,
+        "missingLabelExclusions": 0
+      }
+    },
+    "pitcher": {
+      "strikeouts": {
+        "rows": 4498,
+        "uniqueGames": 2249,
+        "uniquePitchers": 360,
+        "noPriorHistoryExclusions": 0,
+        "missingLabelExclusions": 0
+      },
+      "outs": {
+        "rows": 4498,
+        "uniqueGames": 2249,
+        "uniquePitchers": 360,
+        "noPriorHistoryExclusions": 0,
+        "missingLabelExclusions": 0,
+        "exactness": "PARTIAL_APPROXIMATED_FROM_EVENTS_PENDING_OFFICIAL_PITCHING_LINE"
+      },
+      "earnedRuns": {
+        "rows": 0,
+        "uniqueGames": 0,
+        "uniquePitchers": 0,
+        "noPriorHistoryExclusions": 0,
+        "missingLabelExclusions": 4498,
+        "exactness": "MISSING_EXACT_EARNED_RUNS_REQUIRES_OFFICIAL_PITCHING_LINE_OR_RESULT_ADAPTER"
+      },
+      "hitsAllowed": {
+        "rows": 4498,
+        "uniqueGames": 2249,
+        "uniquePitchers": 360,
+        "noPriorHistoryExclusions": 0,
+        "missingLabelExclusions": 0
+      }
+    },
+    "batter": {
+      "hits": {
+        "rows": 44943,
+        "uniqueGames": 2249,
+        "uniqueBatters": 658,
+        "missingFeatureExclusions": 0,
+        "missingLabelExclusions": 0
+      },
+      "totalBases": {
+        "rows": 44943,
+        "uniqueGames": 2249,
+        "uniqueBatters": 658,
+        "missingFeatureExclusions": 0,
+        "missingLabelExclusions": 0
+      },
+      "homeRuns": {
+        "rows": 44943,
+        "uniqueGames": 2249,
+        "uniqueBatters": 658,
+        "missingFeatureExclusions": 0,
+        "missingLabelExclusions": 0
+      }
+    }
+  },
+  "featureFamilyContracts": {
+    "moneyline": "READY",
+    "totals": "READY",
+    "nrfi": "READY",
+    "pitcherProp": "READY",
+    "batterProp": "READY"
+  },
+  "dataQuality": {
+    "missingnessMatrix": {
+      "moneyline": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0
+      },
+      "runLine": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0,
+        "marketLineMissing": 2249
+      },
+      "gameTotal": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0,
+        "marketLineMissing": 2249
+      },
+      "teamTotal": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0,
+        "marketLineMissing": 4498
+      },
+      "nrfiYrfi": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0
+      },
+      "pitcherStrikeouts": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0
+      },
+      "pitcherOuts": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0,
+        "exactLabelAdapterRequired": true
+      },
+      "pitcherEarnedRuns": {
+        "featureMissing": 0,
+        "labelMissing": 4498,
+        "identityMissing": 0,
+        "exactLabelAdapterRequired": true
+      },
+      "pitcherHitsAllowed": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0
+      },
+      "batterHits": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0
+      },
+      "batterTotalBases": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0
+      },
+      "batterHomeRuns": {
+        "featureMissing": 0,
+        "labelMissing": 0,
+        "identityMissing": 0
+      }
+    },
+    "classBalanceAudit": {
+      "homeWin": {
+        "positive": 1210,
+        "negative": 1039,
+        "positiveRate": 0.538017
+      },
+      "nrfi": {
+        "positive": 1114,
+        "negative": 1135,
+        "positiveRate": 0.495331
+      },
+      "yrfi": {
+        "positive": 1135,
+        "negative": 1114,
+        "positiveRate": 0.504669
+      },
+      "batterHitAtLeastOne": {
+        "positive": 27366,
+        "negative": 17577,
+        "positiveRate": 0.608905
+      },
+      "batterHomeRunAtLeastOne": {
+        "positive": 4865,
+        "negative": 40078,
+        "positiveRate": 0.108248
+      }
+    },
+    "distributions": {
+      "finalTotalRuns": {
+        "count": 2249,
+        "min": 1,
+        "p25": 5,
+        "median": 8,
+        "mean": 8.8715,
+        "p75": 12,
+        "max": 33
+      },
+      "runDifferentialHomeMinusAway": {
+        "count": 2249,
+        "min": -21,
+        "p25": -3,
+        "median": 1,
+        "mean": 0.0436,
+        "p75": 3,
+        "max": 19
+      },
+      "teamRuns": {
+        "count": 4498,
+        "min": 0,
+        "p25": 2,
+        "median": 4,
+        "mean": 4.4357,
+        "p75": 6,
+        "max": 22
+      },
+      "pitcherStrikeouts": {
+        "count": 4498,
+        "min": 0,
+        "p25": 3,
+        "median": 5,
+        "mean": 4.7968,
+        "p75": 6,
+        "max": 14
+      },
+      "pitcherApproximateOuts": {
+        "count": 4498,
+        "min": 0,
+        "p25": 14,
+        "median": 16,
+        "mean": 15.4438,
+        "p75": 18,
+        "max": 27
+      },
+      "pitcherHitsAllowed": {
+        "count": 4498,
+        "min": 0,
+        "p25": 4,
+        "median": 5,
+        "mean": 5.3655,
+        "p75": 7,
+        "max": 14
+      },
+      "pitcherRunsAllowedProxy": {
+        "count": 4498,
+        "min": 0,
+        "p25": 1,
+        "median": 2,
+        "mean": 2.4222,
+        "p75": 4,
+        "max": 12
+      },
+      "batterHits": {
+        "count": 44943,
+        "min": 0,
+        "p25": 0,
+        "median": 1,
+        "mean": 0.8978,
+        "p75": 1,
+        "max": 6
+      },
+      "batterTotalBases": {
+        "count": 44943,
+        "min": 0,
+        "p25": 0,
+        "median": 1,
+        "mean": 1.5051,
+        "p75": 2,
+        "max": 19
+      },
+      "batterHomeRuns": {
+        "count": 44943,
+        "min": 0,
+        "p25": 0,
+        "median": 0,
+        "mean": 0.1161,
+        "p75": 0,
+        "max": 4
+      }
+    },
+    "MLB_02A_MISSINGNESS_MATRIX_READY": "YES",
+    "MLB_02A_CLASS_BALANCE_AUDIT": "PASS",
+    "MLB_02A_TARGET_DISTRIBUTION_AUDIT": "PASS"
+  },
+  "historicalOddsAvailability": {
+    "moneyline": "MISSING",
+    "runLine": "MISSING",
+    "gameTotal": "MISSING",
+    "teamTotal": "MISSING",
+    "nrfiYrfi": "MISSING",
+    "pitcherProps": "MISSING",
+    "batterProps": "MISSING",
+    "note": "No provider calls were made. Outcome datasets can proceed, but historical edge/EV/CLV validation requires separately certified market-price history."
+  },
+  "marketHistoryDependency": {
+    "MLB_02A_MARKET_HISTORY_DEPENDENCY_DOCUMENTED": "YES",
+    "note": "Outcome probability model development can proceed for READY families, but historical edge/EV/CLV validation is limited until market-price history exists."
+  },
+  "datasetArtifactPolicy": {
+    "giantDataExportCommitted": false,
+    "artifacts": [
+      "specification",
+      "sample counts",
+      "distributions",
+      "readiness classifications",
+      "builder dry-run evidence"
+    ],
+    "MLB_02A_DATASET_ARTIFACT_POLICY": "PASS",
+    "MLB_02A_DATASET_BUILD_DRY_RUN": "PASS"
+  },
+  "initialModelFamilyRanking": [
+    {
+      "rank": 1,
+      "family": "moneyline",
+      "state": "READY",
+      "reason": "2,249 game-level rows, complete final-score labels, complete team/starter/bullpen/matchup context and simplest individual pick target."
+    },
+    {
+      "rank": 2,
+      "family": "NRFI_YRFI",
+      "state": "READY",
+      "reason": "2,249 first-inning labels with certified first-inning/starter/team context; market history still needed for value validation."
+    },
+    {
+      "rank": 3,
+      "family": "pitcher_strikeouts",
+      "state": "READY",
+      "reason": "Starter strikeout labels are derivable with strong starter/opponent context, but prop line history is missing."
+    },
+    {
+      "rank": 4,
+      "family": "batter_hits_total_bases_home_runs",
+      "state": "READY",
+      "reason": "Large labeled batter sample, but per-player sparsity and prop line history make it less suitable than moneyline first."
+    },
+    {
+      "rank": 5,
+      "family": "run_line_game_total_team_total",
+      "state": "PARTIAL",
+      "reason": "Outcome labels exist, but exact historical market lines are missing."
+    },
+    {
+      "rank": 6,
+      "family": "pitcher_outs_earned_runs",
+      "state": "PARTIAL_OR_BLOCKED",
+      "reason": "Requires official pitching-line/result adapter for exact outs and earned runs."
+    }
+  ],
+  "recommendedFirstModelFamily": {
+    "MLB_02A_RECOMMENDED_FIRST_MODEL_FAMILY": "moneyline",
+    "reason": "2,249 game-level rows, complete final-score labels, complete team/starter/bullpen/matchup context and simplest individual pick target."
+  },
+  "productAlignment": {
+    "valueBoard": "PASS",
+    "officialPicks": "PASS",
+    "parlayPolicy": "PASS",
+    "productDirection": "INDIVIDUAL_PICK_FIRST",
+    "mandatory100DailyParlays": "RETIRED_AS_CORE_OBJECTIVE"
+  },
+  "safety": {
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "featureWrites": 0,
+    "rawWrites": 0,
+    "modelTraining": 0,
+    "modelValidationRuns": 0,
+    "championPromotion": 0,
+    "predictionGeneration": 0,
+    "officialPicksGeneration": 0,
+    "valueBoardPublication": 0,
+    "import2026": 0,
+    "automation": "OFF",
+    "cronChanges": 0
+  },
+  "flags": {
+    "MLB_02A_FEATURE_FOUNDATION_READBACK": "PASS",
+    "MLB_02A_RAW_NATIVE_BASELINE": "PASS",
+    "MLB_02A_MODEL_PREDICTION_ZERO_BASELINE": "PASS",
+    "MLB_02A_DATASET_PREP_ONLY_CONTRACT": "PASS",
+    "MLB_02A_INDIVIDUAL_PICK_TARGET_CONTRACT": "PASS",
+    "MLB_02A_LABEL_SOURCE_INVENTORY_COMPLETE": "YES",
+    "MLB_02A_RESULT_LABEL_STRATEGY_READY": "YES",
+    "MLB_02A_OUTCOME_MARKET_SEPARATION": "PASS",
+    "MLB_02A_CHRONOLOGICAL_SPLIT_CONTRACT": "READY",
+    "MLB_02A_GAME_GROUP_SPLIT_GUARD": "PASS",
+    "MLB_02A_DOUBLEHEADER_SPLIT_GUARD": "PASS",
+    "MLB_02A_DATASET_ASOF_CONTRACT": "PASS",
+    "MLB_02A_DATASET_LEAKAGE_DENYLIST": "PASS",
+    "MLB_02A_MISSINGNESS_MATRIX_READY": "YES",
+    "MLB_02A_CLASS_BALANCE_AUDIT": "PASS",
+    "MLB_02A_TARGET_DISTRIBUTION_AUDIT": "PASS",
+    "MLB_02A_MARKET_HISTORY_DEPENDENCY_DOCUMENTED": "YES",
+    "MLB_02A_INITIAL_MODEL_FAMILY_RANKING_READY": "YES",
+    "MLB_02A_VALUE_BOARD_ALIGNMENT": "PASS",
+    "MLB_02A_OFFICIAL_PICK_ALIGNMENT": "PASS",
+    "MLB_02A_PARLAY_POLICY": "PASS",
+    "MODEL_WORK_PERFORMED": "NO",
+    "PREDICTION_WORK_PERFORMED": "NO"
+  }
+}
