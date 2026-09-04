@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-04 00:00:00Z
+Last updated: 2026-09-04 17:56:08Z
+
+## 2026-09-04 MLB-DATA-01D-R1I Partial Feature DML Resume
+
+- MLB-DATA-01D-R1I is certified as `MLB_DATA_01D_R1I_PARTIAL_FEATURE_DML_RESUME_CERTIFIED`. R1H final certification accepted the user-supplied SELECT-only Supabase catalog readback: the exact legacy bullpen uniqueness object is absent, contradictory `team_id + feature_date + feature_version` bullpen uniqueness count is 0, and the native `target_game_pk + team_id + feature_version` uniqueness object is present. The existing wider native index is preserved as non-blocking.
+- The audited local certification/roadmap chain was published and production aligned to `ac3fc83c4effd9d97d24b8eda32e6354b14b431e`. Live manifest authority passed with configured digest match, critical code integrity `PASS`, 0 critical file mismatches and `productionAuthorityReady = true`.
+- R1I reused existing team, starter and snapshot rows without writes: team 4,498 `REUSE_NO_OP`, starter 4,498 `REUSE_NO_OP`, snapshots 67,433 `REUSE_NO_OP`, with 0 snapshot inserts, updates, deletes or conflicts. Authorized production DML inserted only the remaining certified daily domains: bullpen 4,498, batter 44,943, matchup 2,249 and first inning 2,249 rows.
+- Final readback passed: snapshots 67,433; team 4,498; starter 4,498; bullpen 4,498; batter 44,943; matchup 2,249; first inning 2,249; 0 duplicate native keys; 0 as-of/leakage/same-day/null-policy/payload-shape violations; raw rows 712,528; unique pitch identities 712,528; duplicate pitch identities 0; native games 2,430; native players 1,469. Models remain 0, champion `NONE`, predictions 0, market-value rows 0, provider calls 0, production DDL mutations 0, 2026 raw rows 0, automation off and cron unchanged.
+- `MLB_DATA_01D_2025_FEATURE_FOUNDATION_READY = YES` and `MLB_DATA_02A_INDIVIDUAL_PICK_MODEL_DATASET_PREPARATION_READY = YES`. Do not train models or generate predictions automatically; the next phase is dataset preparation for individual-pick, market-specific modeling.
 
 ## 2026-09-04 Pick Analyzer MLB Roadmap Realignment
 

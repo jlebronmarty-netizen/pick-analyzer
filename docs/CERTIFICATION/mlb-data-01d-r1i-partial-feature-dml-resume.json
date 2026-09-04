@@ -1,0 +1,427 @@
+{
+  "generatedAt": "2026-09-04T17:56:08.022Z",
+  "project": "MLB_DATA_01D_R1H_FINAL_CERTIFICATION_AND_R1I_PARTIAL_FEATURE_DML_RESUME",
+  "mode": "EXECUTE",
+  "certificationVerdict": "MLB_DATA_01D_R1I_PARTIAL_FEATURE_DML_RESUME_CERTIFIED",
+  "repositoryBaseline": {
+    "localHead": "ac3fc83c4effd9d97d24b8eda32e6354b14b431e",
+    "originMain": "ac3fc83c4effd9d97d24b8eda32e6354b14b431e",
+    "production": "ac3fc83c4effd9d97d24b8eda32e6354b14b431e",
+    "R1I_REPOSITORY_BASELINE_AUDITED": "PASS"
+  },
+  "r1hManualCatalogEvidence": {
+    "source": "USER_SUPPLIED_SELECT_ONLY_SUPABASE_CATALOG_READBACK",
+    "R1H_BULLPEN_UNIQUENESS_MIGRATION_APPLIED": "YES_USER_CONFIRMED",
+    "R1H_EXPECTED_BULLPEN_TABLE_ROWS": {
+      "observed": 1,
+      "expected": 1,
+      "pass": true
+    },
+    "R1H_EXPECTED_CONTRADICTORY_LEGACY_UNIQUE_ROWS": {
+      "observed": 0,
+      "expected": 0,
+      "pass": true
+    },
+    "R1H_EXPECTED_LEGACY_CONSTRAINT_ROWS": {
+      "observed": 0,
+      "expected": 0,
+      "pass": true
+    },
+    "R1H_EXPECTED_NATIVE_UNIQUENESS_ROWS": {
+      "observed": 1,
+      "expected": 1,
+      "pass": true
+    },
+    "uniqueInventory": [
+      {
+        "object_type": "unique_index",
+        "object_name": "pick2_mlb_bullpen_daily_features_native_uidx",
+        "schema": "public",
+        "table": "pick2_mlb_bullpen_daily_features",
+        "is_unique": true,
+        "ordered_columns": [
+          "target_game_pk",
+          "team_id",
+          "feature_date",
+          "feature_version"
+        ],
+        "predicate": "target_game_pk IS NOT NULL",
+        "policy": "NON_BLOCKING_EXISTING_WIDER_NATIVE_INDEX_PRESERVE"
+      },
+      {
+        "object_type": "unique_index",
+        "object_name": "pick2_mlb_bullpen_daily_features_pkey",
+        "schema": "public",
+        "table": "pick2_mlb_bullpen_daily_features",
+        "is_unique": true,
+        "ordered_columns": [
+          "id"
+        ],
+        "predicate": null
+      },
+      {
+        "object_type": "unique_index",
+        "object_name": "pick2_mlb_bullpen_daily_features_target_game_team_version_key",
+        "schema": "public",
+        "table": "pick2_mlb_bullpen_daily_features",
+        "is_unique": true,
+        "ordered_columns": [
+          "target_game_pk",
+          "team_id",
+          "feature_version"
+        ],
+        "predicate": "target_game_pk IS NOT NULL"
+      }
+    ],
+    "R1H_MANUAL_CATALOG_EVIDENCE_CERTIFIED": "YES",
+    "R1H_BULLPEN_NATIVE_KEY_PRODUCTION_CERTIFIED": "YES",
+    "R1H_BULLPEN_LEGACY_DEFECT_CLOSED": "YES",
+    "R1H_EXISTING_WIDER_NATIVE_INDEX_POLICY": "PRESERVE",
+    "R1H_LEGACY_BULLPEN_UNIQUENESS_REMOVED": "PASS",
+    "R1H_BULLPEN_NATIVE_UNIQUENESS_READBACK": "PASS",
+    "R1H_UNAFFECTED_SCHEMA_PRESERVED": "PASS",
+    "R1H_BULLPEN_POSTMIGRATION_RECOVERY_READINESS": "PASS",
+    "R1H_PARTIAL_RESUME_READINESS": "PASS",
+    "R1H_PARTIAL_RESUME_IDEMPOTENCY_PROJECTED": "PASS",
+    "r1hFinalCertificationVerdict": "MLB_DATA_01D_R1H_BULLPEN_UNIQUENESS_MIGRATION_PRODUCTION_CERTIFIED"
+  },
+  "roadmapRealignment": {
+    "certification": "PICK_ANALYZER_MLB_ROADMAP_REALIGNMENT_FROM_PARLAY_AUTOMATION_TO_PICK_ANALYSIS_CERTIFIED",
+    "activeProductDirection": "INDIVIDUAL_PICK_FIRST",
+    "mandatory100DailyParlays": "RETIRED_AS_CORE_OBJECTIVE"
+  },
+  "liveManifestAuthority": {
+    "manifestContractId": "PICK2_MLB_01D_R1F_RECOVERY_MANIFEST_V1",
+    "manifestDigest": "1c7532aa5aaf09d2c05ffb4df752bb5eee2e4f9c719489b70a97f9d14d587352",
+    "expectedDigestConfigured": true,
+    "expectedDigestMatchesManifest": true,
+    "criticalCodeIntegrity": "PASS",
+    "criticalFileMismatchCount": 0,
+    "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "productionAuthorityReady": true,
+    "failureCode": null,
+    "gitCommit": "ac3fc83c4effd9d97d24b8eda32e6354b14b431e",
+    "requestId": "5ff3e9d3-84cc-4d73-b136-cdb8deed3538"
+  },
+  "manifestCriticalCodeState": {
+    "R1I_MANIFEST_CRITICAL_CODE_UNCHANGED": "YES",
+    "criticalCodeIntegrity": "PASS",
+    "criticalFileMismatchCount": 0
+  },
+  "dryRunRevalidation": {
+    "eligibleGames": 2249,
+    "insufficientHistoryGames": 181,
+    "leakageViolations": 0,
+    "identityConflicts": 0
+  },
+  "prewrite": {
+    "featureTableCounts": {
+      "pick2_feature_snapshots": 67433,
+      "pick2_mlb_team_daily_features": 4498,
+      "pick2_mlb_pitcher_daily_features": 4498,
+      "pick2_mlb_bullpen_daily_features": 0,
+      "pick2_mlb_batter_daily_features": 0,
+      "pick2_mlb_matchup_daily_features": 0,
+      "pick2_mlb_first_inning_daily_features": 0
+    },
+    "nativeCounts": {
+      "games": 2430,
+      "players": 1469,
+      "results": 0,
+      "marketMappings": 0,
+      "raw2026": 0
+    },
+    "raw": {
+      "rawRows": 712528,
+      "uniquePitchIdentities": 712528,
+      "duplicatePitchIdentities": 0
+    },
+    "teamReuse": {
+      "planned": 4498,
+      "exactMatches": 4498,
+      "inserts": 0,
+      "reuses": 4498,
+      "conflicts": 0
+    },
+    "starterReuse": {
+      "planned": 4498,
+      "exactMatches": 4498,
+      "inserts": 0,
+      "reuses": 4498,
+      "conflicts": 0
+    },
+    "snapshotReuse": {
+      "mode": "REUSE_NO_OP",
+      "inserts": 0,
+      "reuses": 67433,
+      "conflicts": 0
+    },
+    "plan": {
+      "team": {
+        "inserts": 0,
+        "reuses": 4498,
+        "conflicts": 0
+      },
+      "starter": {
+        "inserts": 0,
+        "reuses": 4498,
+        "conflicts": 0
+      },
+      "bullpen": {
+        "inserts": 4498,
+        "reuses": 0,
+        "conflicts": 0
+      },
+      "batter": {
+        "inserts": 44943,
+        "reuses": 0,
+        "conflicts": 0
+      },
+      "matchup": {
+        "inserts": 2249,
+        "reuses": 0,
+        "conflicts": 0
+      },
+      "firstInning": {
+        "inserts": 2249,
+        "reuses": 0,
+        "conflicts": 0
+      },
+      "offense": {
+        "logicalRows": 4498
+      },
+      "snapshots": {
+        "inserts": 0,
+        "reuses": 67433,
+        "updates": 0,
+        "deletes": 0,
+        "conflicts": 0
+      }
+    },
+    "BLOCK_CONFLICT": 0
+  },
+  "execution": {
+    "dmlAuthorized": true,
+    "team": {
+      "inserts": 0,
+      "reuses": 4498,
+      "conflicts": 0,
+      "finalRows": 4498
+    },
+    "starter": {
+      "inserts": 0,
+      "reuses": 4498,
+      "conflicts": 0,
+      "finalRows": 4498
+    },
+    "bullpen": {
+      "inserts": 4498,
+      "reuses": 0,
+      "conflicts": 0,
+      "finalRows": 4498
+    },
+    "batter": {
+      "inserts": 44943,
+      "reuses": 0,
+      "conflicts": 0,
+      "finalRows": 44943
+    },
+    "matchup": {
+      "inserts": 2249,
+      "reuses": 0,
+      "conflicts": 0,
+      "finalRows": 2249
+    },
+    "firstInning": {
+      "inserts": 2249,
+      "reuses": 0,
+      "conflicts": 0,
+      "finalRows": 2249
+    },
+    "offense": {
+      "logicalRows": 4498,
+      "physicalDml": 0
+    },
+    "snapshots": {
+      "inserts": 0,
+      "reuses": 67433,
+      "updates": 0,
+      "deletes": 0,
+      "conflicts": 0,
+      "finalRows": 67433
+    },
+    "physicalWrites": {
+      "pick2_mlb_bullpen_daily_features": 4498,
+      "pick2_mlb_batter_daily_features": 44943,
+      "pick2_mlb_matchup_daily_features": 2249,
+      "pick2_mlb_first_inning_daily_features": 2249
+    }
+  },
+  "postwrite": {
+    "finalCounts": {
+      "pick2_feature_snapshots": 67433,
+      "pick2_mlb_team_daily_features": 4498,
+      "pick2_mlb_pitcher_daily_features": 4498,
+      "pick2_mlb_bullpen_daily_features": 4498,
+      "pick2_mlb_batter_daily_features": 44943,
+      "pick2_mlb_matchup_daily_features": 2249,
+      "pick2_mlb_first_inning_daily_features": 2249
+    },
+    "targetGameCoverage": {
+      "targetGames": 2430,
+      "eligible": 2249,
+      "insufficientHistory": 181
+    },
+    "nativeDuplicateKeys": {
+      "team": 0,
+      "starter": 0,
+      "bullpen": 0,
+      "batter": 0,
+      "matchup": 0,
+      "firstInning": 0,
+      "snapshots": 0
+    },
+    "asOfViolations": 0,
+    "leakageViolations": 0,
+    "sameDayViolations": 0,
+    "nullPolicyViolations": 0,
+    "malformedPayloads": 0,
+    "raw": {
+      "rawRows": 712528,
+      "uniquePitchIdentities": 712528,
+      "duplicatePitchIdentities": 0,
+      "rawPayloadDigestUnchanged": true,
+      "rawIdentityDigestUnchanged": true
+    },
+    "nativeCounts": {
+      "games": 2430,
+      "players": 1469,
+      "results": 0,
+      "marketMappings": 0,
+      "raw2026": 0
+    },
+    "modelCounts": {
+      "pick2_model_registry": 0,
+      "pick2_model_feature_sets": 0,
+      "pick2_model_versions": 0,
+      "pick2_model_training_runs": 0,
+      "pick2_model_validation_runs": 0
+    },
+    "predictionCounts": {
+      "pick2_game_predictions": 0,
+      "pick2_prediction_results": 0,
+      "pick2_market_value_evaluations": 0
+    },
+    "secondPass": {
+      "team": {
+        "planned": 4498,
+        "exactMatches": 4498,
+        "inserts": 0,
+        "reuses": 4498,
+        "conflicts": 0
+      },
+      "starter": {
+        "planned": 4498,
+        "exactMatches": 4498,
+        "inserts": 0,
+        "reuses": 4498,
+        "conflicts": 0
+      },
+      "bullpen": {
+        "planned": 4498,
+        "exactMatches": 4498,
+        "inserts": 0,
+        "reuses": 4498,
+        "conflicts": 0
+      },
+      "batter": {
+        "planned": 44943,
+        "exactMatches": 44943,
+        "inserts": 0,
+        "reuses": 44943,
+        "conflicts": 0
+      },
+      "matchup": {
+        "planned": 2249,
+        "exactMatches": 2249,
+        "inserts": 0,
+        "reuses": 2249,
+        "conflicts": 0
+      },
+      "firstInning": {
+        "planned": 2249,
+        "exactMatches": 2249,
+        "inserts": 0,
+        "reuses": 2249,
+        "conflicts": 0
+      },
+      "snapshots": {
+        "inserts": 0,
+        "reuses": 67433,
+        "conflicts": 0
+      }
+    }
+  },
+  "safety": {
+    "providerCalls": 0,
+    "productionDmlMutations": 53939,
+    "productionDdlMutations": 0,
+    "snapshotWrites": 0,
+    "rawStatcastWrites": 0,
+    "nativeIdentityWrites": 0,
+    "modelTraining": "NO",
+    "modelValidation": "NO",
+    "championPromotion": "NO",
+    "predictionGeneration": "NO",
+    "marketValueWrites": 0,
+    "import2026": "NO",
+    "automation": "NO",
+    "cronChanges": 0
+  },
+  "flags": {
+    "R1I_REPOSITORY_BASELINE_AUDITED": "PASS",
+    "R1H_MANUAL_CATALOG_EVIDENCE_CERTIFIED": "YES",
+    "R1H_BULLPEN_NATIVE_KEY_PRODUCTION_CERTIFIED": "YES",
+    "R1H_BULLPEN_LEGACY_DEFECT_CLOSED": "YES",
+    "R1H_EXISTING_WIDER_NATIVE_INDEX_POLICY": "PRESERVE",
+    "R1H_FINAL_PRODUCTION_STATE": "PASS",
+    "R1H_FINAL_SNAPSHOT_STATE": "PASS",
+    "R1H_BULLPEN_POSTMIGRATION_RECOVERY_READINESS": "PASS",
+    "R1H_PARTIAL_RESUME_READINESS": "PASS",
+    "R1I_LIVE_MANIFEST_AUTHORITY": "PASS",
+    "R1I_MANIFEST_CRITICAL_CODE_UNCHANGED": "YES",
+    "R1I_PREWRITE_FEATURE_STATE": "PASS",
+    "R1I_TEAM_REUSE_GUARD": "PASS",
+    "R1I_STARTER_REUSE_GUARD": "PASS",
+    "R1I_SNAPSHOT_REUSE_GUARD": "PASS",
+    "R1I_REMAINING_INSERT_PLAN": "PASS",
+    "R1I_RAW_NATIVE_BASELINE": "PASS",
+    "R1I_PREWRITE_ASOF_LEAKAGE": "PASS",
+    "R1I_PREWRITE_BLOCK_CONFLICT": "PASS",
+    "R1I_BULLPEN_RECOVERY": "PASS",
+    "R1I_BATTER_RECOVERY": "PASS",
+    "R1I_MATCHUP_RECOVERY": "PASS",
+    "R1I_FIRST_INNING_RECOVERY": "PASS",
+    "R1I_FEATURE_ROW_PARITY": "PASS",
+    "R1I_TARGET_GAME_COVERAGE": "PASS",
+    "R1I_NATIVE_KEY_UNIQUENESS": "PASS",
+    "R1I_POSTWRITE_ASOF": "PASS",
+    "R1I_POSTWRITE_LEAKAGE": "PASS",
+    "R1I_SAMEDAY_DOUBLEHEADER_GUARD": "PASS",
+    "R1I_NULL_POLICY": "PASS",
+    "R1I_FEATURE_SANITY": "PASS",
+    "R1I_SNAPSHOT_FINAL_STATE": "PASS",
+    "R1I_TEAM_FINAL_STATE": "PASS",
+    "R1I_STARTER_FINAL_STATE": "PASS",
+    "R1I_RAW_STABILITY": "PASS",
+    "R1I_RAW_IMMUTABILITY": "PASS",
+    "R1I_NATIVE_IDENTITY_PRESERVATION": "PASS",
+    "R1I_FEATURE_PERSISTENCE_IDEMPOTENCY": "PASS",
+    "R1I_01D_FEATURE_FOUNDATION": "PASS",
+    "R1I_INDIVIDUAL_PICK_PRODUCT_ALIGNMENT": "PASS",
+    "MLB_DATA_01D_2025_FEATURE_FOUNDATION_READY": "YES",
+    "MLB_DATA_02A_INDIVIDUAL_PICK_MODEL_DATASET_PREPARATION_READY": "YES",
+    "MODEL_WORK_PERFORMED": "NO",
+    "PREDICTION_WORK_PERFORMED": "NO"
+  }
+}
