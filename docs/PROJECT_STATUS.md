@@ -1,6 +1,15 @@
 # Project Status
 
-Last updated: 2026-09-04 19:05:40Z
+Last updated: 2026-09-04 19:27:12Z
+
+## 2026-09-04 MLB-DATA-02B Moneyline Model Training Prep
+
+- MLB-DATA-02B is certified as `MLB_DATA_02B_MONEYLINE_MODEL_TRAINING_PREP_CERTIFIED`. The 02A certification commit `b229387c0fa5dc2eee3d27e89993dff07cfa0967` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported provider calls 0.
+- Fresh read-only production baselines passed: team 4,498; starter 4,498; bullpen 4,498; batter 44,943; matchup 2,249; first inning 2,249; snapshots 67,433; raw rows 712,528; unique pitch identities 712,528; duplicate pitch identities 0; native games 2,430; native players 1,469; model rows 0; champion `NONE`; predictions 0.
+- The moneyline training-prep contract defines one canonical row per `game_pk` with `home_win = 1` when the home final score exceeds the away final score and 0 otherwise. The certified dataset has 2,249 rows, 0 duplicate games, 0 ties, 0 unresolved finals and deterministic dataset digest `4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209`.
+- The chronological split is train 1,574 rows from 2025-04-01 through 2025-08-08, validation 337 rows from 2025-08-08 through 2025-09-03 and final holdout test 338 rows from 2025-09-03 through 2025-09-28. Home-win prevalence is 54.0661% train, 52.2255% validation and 54.1420% test; major feature-distribution drift audit passed.
+- Candidate feature inventory includes 76 pregame inputs across paired home/away team, starter, bullpen, matchup, first-inning context, sample-size and missingness namespaces. Identifiers, outcome-derived fields, settlement fields, postgame stats, odds and closing lines are excluded. Missing-value handling is prepared only as future model-native missing handling, explicit indicators or fold-safe imputation fit on the training fold.
+- Future baseline shortlist is logistic regression, regularized logistic regression and a gradient-boosted tree model only if existing dependencies support safe training. Required future metrics are log loss, Brier score and calibration; accuracy is secondary only. Historical sportsbook odds remain missing, so EV, edge, CLV and market-relative profitability are not historically certified. 02B made 0 production DML, 0 production DDL, 0 provider calls, 0 model training, 0 validation runs, 0 predictions, 0 Official Picks, 0 Value Board publication, 0 2026 import, no automation and no cron changes. Next: `MLB_DATA_02C_MONEYLINE_MODEL_TRAINING_EXECUTION`, under separate authorization only.
 
 ## 2026-09-04 MLB-DATA-02A Individual Pick Model Dataset Preparation
 

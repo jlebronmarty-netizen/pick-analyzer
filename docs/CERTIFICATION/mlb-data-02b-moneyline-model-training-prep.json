@@ -1,0 +1,518 @@
+{
+  "generatedAt": "2026-09-04T19:27:12.811Z",
+  "project": "MLB_DATA_02B_MONEYLINE_MODEL_TRAINING_PREP",
+  "certificationVerdict": "MLB_DATA_02B_MONEYLINE_MODEL_TRAINING_PREP_CERTIFIED",
+  "publication": {
+    "publishedCommit": "b229387c0fa5dc2eee3d27e89993dff07cfa0967",
+    "originMain": "b229387c0fa5dc2eee3d27e89993dff07cfa0967",
+    "productionCommit": "b229387c0fa5dc2eee3d27e89993dff07cfa0967",
+    "providerCallsMade": 0,
+    "MLB_02B_PREPUBLISH_STATE": "PASS",
+    "MLB_02B_02A_COMMIT_SCOPE_CERTIFIED": "YES",
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "liveAuthority": {
+    "productionAuthorityReady": true,
+    "criticalCodeIntegrity": "PASS",
+    "expectedDigestMatchesManifest": true,
+    "MLB_02B_LIVE_AUTHORITY": "PASS"
+  },
+  "baselines": {
+    "featureCounts": {
+      "team": 4498,
+      "starter": 4498,
+      "bullpen": 4498,
+      "batter": 44943,
+      "matchup": 2249,
+      "firstInning": 2249,
+      "snapshots": 67433
+    },
+    "duplicateNativeKeys": {
+      "team": 0,
+      "starter": 0,
+      "bullpen": 0,
+      "matchup": 0,
+      "firstInning": 0
+    },
+    "raw": {
+      "rawRows": 712528,
+      "uniquePitchIdentities": 712528,
+      "duplicatePitchIdentities": 0
+    },
+    "nativeCounts": {
+      "games": 2430,
+      "players": 1469
+    },
+    "modelCounts": {
+      "registry": 0,
+      "featureSets": 0,
+      "versions": 0,
+      "trainingRuns": 0,
+      "validationRuns": 0
+    },
+    "predictionCounts": {
+      "predictions": 0,
+      "predictionResults": 0,
+      "marketValueEvaluations": 0
+    },
+    "MLB_02B_FEATURE_FOUNDATION": "PASS",
+    "MLB_02B_MODEL_ZERO_BASELINE": "PASS"
+  },
+  "moneylineDataset": {
+    "datasetVersion": "MLB_MONEYLINE_DATASET_V1",
+    "featureVersion": "MLB_DATA_01D_2025_PREGAME_FEATURE_DRY_RUN_V1",
+    "featureSetVersion": "MLB_ML_FEATURE_SET_V1",
+    "splitVersion": "MLB_MONEYLINE_CHRONO_SPLIT_V1",
+    "rows": 2249,
+    "targetGames": 2249,
+    "targetContract": "home_win = 1 if home final score > away final score; otherwise 0",
+    "rowIdentity": "one canonical training row per game_pk",
+    "labelAmbiguity": 0,
+    "ties": 0,
+    "unresolvedFinals": 0,
+    "gamePkDigest": "7cdd1272ed5aa461949fdda36cfc40ac0d00568849d31ea7b1f47a215e7436d1",
+    "labelDigest": "068690ca1a68fb29557e780baf48d3c7ddb8c2eb8feebbe6134d463e0bc912b2",
+    "splitDigest": "75415d05fb5075f37be2f6f317f47a84127267cb679ce8fb57e560c8ae5defaa",
+    "datasetDigest": "4d2080fe524d49e2feb97bff14032db9f1b7c402d2aaec74b22a0c7463078209",
+    "MLB_02B_MONEYLINE_TARGET_CONTRACT": "PASS",
+    "MLB_02B_MONEYLINE_ROW_IDENTITY": "PASS",
+    "MLB_02B_MONEYLINE_DATASET_DIGEST_READY": "YES"
+  },
+  "homeAwayRepresentation": {
+    "state": "READY",
+    "contract": "Paired home_* and away_* feature namespaces with optional symmetric difference features computed as home minus away.",
+    "MLB_02B_HOME_AWAY_REPRESENTATION": "READY",
+    "MLB_02B_SYMMETRY_CONTRACT": "READY"
+  },
+  "featureInventory": {
+    "candidateFeatures": {
+      "INCLUDE_CANDIDATE": [
+        "home_team.recent_k_rate",
+        "away_team.recent_k_rate",
+        "diff.team_recent_k_rate",
+        "home_team.recent_bb_rate",
+        "away_team.recent_bb_rate",
+        "diff.team_recent_bb_rate",
+        "home_team.recent_runs_per_game",
+        "away_team.recent_runs_per_game",
+        "diff.team_recent_runs_per_game",
+        "home_team.recent_iso",
+        "away_team.recent_iso",
+        "diff.team_recent_iso",
+        "home_starter.k_rate",
+        "away_starter.k_rate",
+        "diff.starter_k_rate",
+        "home_starter.bb_rate",
+        "away_starter.bb_rate",
+        "diff.starter_bb_rate",
+        "home_starter.k_minus_bb_rate",
+        "away_starter.k_minus_bb_rate",
+        "diff.starter_k_minus_bb_rate",
+        "home_starter.whiff_rate",
+        "away_starter.whiff_rate",
+        "diff.starter_whiff_rate",
+        "home_starter.csw_rate",
+        "away_starter.csw_rate",
+        "diff.starter_csw_rate",
+        "home_starter.avg_release_speed",
+        "away_starter.avg_release_speed",
+        "diff.starter_avg_release_speed",
+        "home_starter.velocity_delta",
+        "away_starter.velocity_delta",
+        "diff.starter_velocity_delta",
+        "home_starter.previous_pitch_count",
+        "away_starter.previous_pitch_count",
+        "diff.starter_previous_pitch_count",
+        "home_starter.days_rest",
+        "away_starter.days_rest",
+        "diff.starter_days_rest",
+        "home_bullpen.pitches_previous_24h",
+        "away_bullpen.pitches_previous_24h",
+        "diff.bullpen_pitches_previous_24h",
+        "home_bullpen.pitches_previous_72h",
+        "away_bullpen.pitches_previous_72h",
+        "diff.bullpen_pitches_previous_72h",
+        "home_bullpen.high_workload_reliever_count",
+        "away_bullpen.high_workload_reliever_count",
+        "diff.bullpen_high_workload_reliever_count",
+        "home_bullpen.bullpen_k_rate",
+        "away_bullpen.bullpen_k_rate",
+        "diff.bullpen_k_rate",
+        "home_bullpen.bullpen_bb_rate",
+        "away_bullpen.bullpen_bb_rate",
+        "diff.bullpen_bb_rate",
+        "home_bullpen.bullpen_k_minus_bb_rate",
+        "away_bullpen.bullpen_k_minus_bb_rate",
+        "diff.bullpen_k_minus_bb_rate",
+        "home_bullpen.bullpen_whiff_rate",
+        "away_bullpen.bullpen_whiff_rate",
+        "diff.bullpen_whiff_rate",
+        "matchup.pitcher_batter_mix",
+        "matchup.handedness_context",
+        "matchup.park_context",
+        "matchup.lineup_context",
+        "first_inning.team_first_inning_scoring_rate",
+        "first_inning.starter_first_inning_k_rate",
+        "first_inning.starter_first_inning_bb_rate",
+        "first_inning.starter_first_inning_baserunner_proxy",
+        "first_inning.starter_first_inning_pitch_count",
+        "sample_size.team",
+        "sample_size.starter",
+        "sample_size.bullpen",
+        "sample_size.matchup",
+        "missing_indicator.no_prior_starter",
+        "missing_indicator.limited_team_history",
+        "missing_indicator.limited_bullpen_history"
+      ],
+      "EXCLUDE": [
+        "game_pk",
+        "id",
+        "feature_snapshot_id",
+        "player_id",
+        "mlbam_pitcher_id",
+        "mlbam_batter_id",
+        "target_game_pk",
+        "event_id",
+        "provider ids",
+        "deterministic_identity",
+        "input_digest",
+        "final_home_score",
+        "final_away_score",
+        "winner_team_id",
+        "home_win",
+        "run_differential",
+        "settlement_status",
+        "postgame stats",
+        "target-game actual result",
+        "odds",
+        "closing_line"
+      ],
+      "AUDIT_ONLY": [
+        "feature_date",
+        "as_of_date",
+        "source_window",
+        "feature_version",
+        "created_at",
+        "native_identity_metadata",
+        "game_number",
+        "doubleheader"
+      ]
+    },
+    "candidateFeatureCount": 76,
+    "includedCandidateFamilies": [
+      "team recent form",
+      "season-to-date team strength proxies",
+      "home/away context",
+      "starter recent/season form",
+      "starter workload/rest",
+      "bullpen performance/workload",
+      "offense logical coverage",
+      "matchup context",
+      "first-inning context",
+      "sample sizes",
+      "missingness indicators"
+    ],
+    "excludedIdentifierFields": [
+      "game_pk",
+      "id",
+      "feature_snapshot_id",
+      "player_id",
+      "mlbam_pitcher_id",
+      "mlbam_batter_id",
+      "target_game_pk",
+      "event_id",
+      "provider ids",
+      "deterministic_identity",
+      "input_digest"
+    ],
+    "excludedOutcomeFields": [
+      "final_home_score",
+      "final_away_score",
+      "winner_team_id",
+      "home_win",
+      "run_differential",
+      "settlement_status",
+      "postgame stats",
+      "target-game actual result"
+    ],
+    "MLB_02B_MONEYLINE_FEATURE_INVENTORY_COMPLETE": "YES",
+    "MLB_02B_IDENTIFIER_LEAKAGE_GUARD": "PASS",
+    "MLB_02B_OUTCOME_FIELD_GUARD": "PASS",
+    "MLB_02B_FEATURE_ASOF_GUARD": "PASS"
+  },
+  "missingValueContract": {
+    "state": "READY",
+    "policy": "No silent unknown-evidence zero-fill. Future training may use model-native missing handling, explicit missing indicators and fold-safe median imputation fit only on the training fold.",
+    "noPriorStarterAppearance": "missing indicator plus model-native missing or train-fold imputation",
+    "limitedTeamHistory": "sample-size feature plus missing/limited-history indicator",
+    "limitedBullpenHistory": "sample-size feature plus missing/limited-history indicator",
+    "MLB_02B_MISSING_VALUE_CONTRACT": "READY"
+  },
+  "transformations": {
+    "scalingContract": {
+      "state": "READY",
+      "logisticRegression": "fold-safe numeric scaling required in future training",
+      "regularizedLogisticRegression": "fold-safe numeric scaling required in future training",
+      "treeModels": "scaling not required but numeric sanity checks still required",
+      "MLB_02B_SCALING_CONTRACT": "READY"
+    },
+    "categoricalContract": {
+      "state": "READY",
+      "fields": [
+        "home_away indicator is implicit in paired representation",
+        "park_context low-cardinality fields only if extracted safely"
+      ],
+      "exclusions": [
+        "game_pk",
+        "raw player ids",
+        "MLBAM ids",
+        "database ids",
+        "provider ids"
+      ],
+      "MLB_02B_CATEGORICAL_CONTRACT": "READY"
+    }
+  },
+  "splitDesign": {
+    "splitVersion": "MLB_MONEYLINE_CHRONO_SPLIT_V1",
+    "method": "chronological 70/15/15 by ordered 2025 eligible game_pk rows",
+    "train": {
+      "start": "2025-04-01",
+      "end": "2025-08-08",
+      "rows": 1574
+    },
+    "validation": {
+      "start": "2025-08-08",
+      "end": "2025-09-03",
+      "rows": 337
+    },
+    "test": {
+      "start": "2025-09-03",
+      "end": "2025-09-28",
+      "rows": 338
+    },
+    "classBalance": {
+      "train": {
+        "positive": 851,
+        "negative": 723,
+        "positiveRate": 0.540661
+      },
+      "validation": {
+        "positive": 176,
+        "negative": 161,
+        "positiveRate": 0.522255
+      },
+      "test": {
+        "positive": 183,
+        "negative": 155,
+        "positiveRate": 0.54142
+      }
+    },
+    "featureDistributionAudit": {
+      "teamRecentRunsPerGame": {
+        "train": {
+          "count": 3148,
+          "min": 1.833333,
+          "p25": 3.925,
+          "median": 4.297297,
+          "mean": 4.3447,
+          "p75": 4.730769,
+          "max": 10.25
+        },
+        "validation": {
+          "count": 674,
+          "min": 3.507813,
+          "p25": 4.169355,
+          "median": 4.372263,
+          "mean": 4.4329,
+          "p75": 4.80597,
+          "max": 5.274074
+        },
+        "test": {
+          "count": 676,
+          "min": 3.548387,
+          "p25": 4.227848,
+          "median": 4.384106,
+          "mean": 4.4633,
+          "p75": 4.85,
+          "max": 5.292857
+        }
+      },
+      "starterKRate": {
+        "train": {
+          "count": 3148,
+          "min": 0,
+          "p25": 0.177305,
+          "median": 0.211382,
+          "mean": 0.2176,
+          "p75": 0.254237,
+          "max": 0.5
+        },
+        "validation": {
+          "count": 674,
+          "min": 0,
+          "p25": 0.181818,
+          "median": 0.213018,
+          "mean": 0.2197,
+          "p75": 0.251799,
+          "max": 0.47619
+        },
+        "test": {
+          "count": 676,
+          "min": 0.05,
+          "p25": 0.187713,
+          "median": 0.219081,
+          "mean": 0.2235,
+          "p75": 0.256065,
+          "max": 0.52381
+        }
+      },
+      "bullpenWhiffRate": {
+        "train": {
+          "count": 3148,
+          "min": 0.15,
+          "p25": 0.222374,
+          "median": 0.243513,
+          "mean": 0.2416,
+          "p75": 0.255605,
+          "max": 0.321168
+        },
+        "validation": {
+          "count": 674,
+          "min": 0.202267,
+          "p25": 0.223152,
+          "median": 0.2379,
+          "mean": 0.2392,
+          "p75": 0.249568,
+          "max": 0.2976
+        },
+        "test": {
+          "count": 676,
+          "min": 0.207275,
+          "p25": 0.223487,
+          "median": 0.237719,
+          "mean": 0.2403,
+          "p75": 0.252277,
+          "max": 0.298698
+        }
+      }
+    },
+    "materialClassDriftFlag": "NO",
+    "MLB_02B_CHRONOLOGICAL_SPLIT_READY": "YES",
+    "MLB_02B_SPLIT_CLASS_BALANCE": "PASS",
+    "MLB_02B_SPLIT_DISTRIBUTION_AUDIT": "PASS",
+    "MLB_02B_FINAL_HOLDOUT_CONTRACT": "PASS"
+  },
+  "modelPrep": {
+    "algorithmShortlist": [
+      "logistic_regression_baseline",
+      "regularized_logistic_regression",
+      "gradient_boosted_trees_if_existing_dependencies_support_safe_training"
+    ],
+    "trivialBaseline": "constant home-team empirical win-rate from training fold only; optional team-strength benchmark in a later training phase",
+    "primaryMetrics": [
+      "log_loss",
+      "brier_score",
+      "calibration"
+    ],
+    "secondaryMetrics": [
+      "roc_auc",
+      "accuracy_at_0_5",
+      "balanced_accuracy"
+    ],
+    "calibrationPlan": [
+      "reliability_diagram",
+      "calibration_slope_intercept",
+      "expected_calibration_error",
+      "validation-safe Platt or isotonic only if separately trained"
+    ],
+    "walkForwardPlan": "train earlier chronological block, predict next block, expand or roll, repeat without using final holdout for model selection",
+    "trainingConfigContract": [
+      "algorithm",
+      "hyperparameters",
+      "seed",
+      "dataset_digest",
+      "feature_set_version",
+      "split_version",
+      "code_commit",
+      "metrics"
+    ],
+    "championPromotionContract": "Future champion must beat the trivial baseline on primary probability metrics, show acceptable calibration, preserve final-holdout performance, pass leakage checks and have reproducible artifacts.",
+    "futurePredictionSemantics": [
+      "game_pk",
+      "home_win_probability",
+      "away_win_probability = 1 - home_win_probability",
+      "model_version",
+      "feature_version",
+      "as_of",
+      "confidence_or_uncertainty_metadata"
+    ],
+    "MLB_02B_ALGORITHM_SHORTLIST_READY": "YES",
+    "MLB_02B_TRIVIAL_BASELINE_CONTRACT": "READY",
+    "MLB_02B_PRIMARY_METRIC_CONTRACT": "PASS",
+    "MLB_02B_SECONDARY_METRIC_CONTRACT": "PASS",
+    "MLB_02B_CALIBRATION_PLAN": "READY",
+    "MLB_02B_WALK_FORWARD_PLAN": "READY",
+    "MLB_02B_FEATURE_SET_VERSION_READY": "YES",
+    "MLB_02B_TRAINING_CONFIG_CONTRACT": "READY",
+    "MLB_02B_CHAMPION_PROMOTION_CONTRACT": "READY",
+    "MLB_02B_MONEYLINE_PREDICTION_SEMANTICS": "READY",
+    "MLB_02B_PROBABILITY_VALUE_SEPARATION": "PASS",
+    "MLB_02B_TRAINING_RUNNER_PREP": "PASS",
+    "MLB_02B_TRAINING_EXECUTION_FAIL_CLOSED": "PASS"
+  },
+  "marketLimitation": {
+    "historicalOdds": "MISSING",
+    "oddsAsTrainingFeature": "EXCLUDED",
+    "valueValidationLimitation": "EV, edge, CLV and market-relative profitability cannot be fully historically certified until valid market-price history exists.",
+    "MLB_02B_HISTORICAL_ODDS_ABSENCE_HANDLED": "PASS",
+    "MLB_02B_VALUE_VALIDATION_LIMITATION_DOCUMENTED": "YES"
+  },
+  "safety": {
+    "modelTraining": "NO",
+    "modelValidationExecution": "NO",
+    "modelPersistence": "NO",
+    "championPromotion": "NO",
+    "predictionGeneration": "NO",
+    "officialPicks": "NO",
+    "valueBoard": "NO",
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "featureDml": 0,
+    "rawWrites": 0,
+    "import2026": "NO",
+    "automation": "OFF",
+    "cronChanges": 0,
+    "MODEL_WORK_PERFORMED": "NO",
+    "PREDICTION_WORK_PERFORMED": "NO"
+  },
+  "flags": {
+    "PRODUCTION_ALIGNMENT": "PASS",
+    "MLB_02B_FEATURE_FOUNDATION": "PASS",
+    "MLB_02B_MODEL_ZERO_BASELINE": "PASS",
+    "MLB_02B_MONEYLINE_TARGET_CONTRACT": "PASS",
+    "MLB_02B_MONEYLINE_ROW_IDENTITY": "PASS",
+    "MLB_02B_HOME_AWAY_REPRESENTATION": "READY",
+    "MLB_02B_MONEYLINE_FEATURE_INVENTORY_COMPLETE": "YES",
+    "MLB_02B_IDENTIFIER_LEAKAGE_GUARD": "PASS",
+    "MLB_02B_OUTCOME_FIELD_GUARD": "PASS",
+    "MLB_02B_FEATURE_ASOF_GUARD": "PASS",
+    "MLB_02B_MISSING_VALUE_CONTRACT": "READY",
+    "MLB_02B_CHRONOLOGICAL_SPLIT_READY": "YES",
+    "MLB_02B_ALGORITHM_SHORTLIST_READY": "YES",
+    "MLB_02B_TRIVIAL_BASELINE_CONTRACT": "READY",
+    "MLB_02B_PRIMARY_METRIC_CONTRACT": "PASS",
+    "MLB_02B_CALIBRATION_PLAN": "READY",
+    "MLB_02B_HISTORICAL_ODDS_ABSENCE_HANDLED": "PASS",
+    "MLB_02B_WALK_FORWARD_PLAN": "READY",
+    "MLB_02B_FINAL_HOLDOUT_CONTRACT": "PASS",
+    "MLB_02B_MONEYLINE_DATASET_DIGEST_READY": "YES",
+    "MLB_02B_TRAINING_CONFIG_CONTRACT": "READY",
+    "MLB_02B_CHAMPION_PROMOTION_CONTRACT": "READY",
+    "MLB_02B_PROBABILITY_VALUE_SEPARATION": "PASS",
+    "MLB_02B_TRAINING_RUNNER_PREP": "PASS",
+    "MLB_02B_TRAINING_EXECUTION_FAIL_CLOSED": "PASS",
+    "MODEL_WORK_PERFORMED": "NO",
+    "PREDICTION_WORK_PERFORMED": "NO"
+  }
+}
