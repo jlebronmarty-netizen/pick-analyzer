@@ -1,0 +1,358 @@
+{
+  "generatedAt": "2026-09-04T21:40:25.700Z",
+  "project": "MLB_DATA_02F_MONEYLINE_PREDICTION_GENERATION_PREP",
+  "certificationVerdict": "MLB_DATA_02F_MONEYLINE_PREDICTION_GENERATION_PREP_CERTIFIED",
+  "publication": {
+    "publishedCommit": "9102cabeb6ff1a255c3012ccfacc78c4ddb6efbd",
+    "originMain": "9102cabeb6ff1a255c3012ccfacc78c4ddb6efbd",
+    "productionCommit": "9102cabeb6ff1a255c3012ccfacc78c4ddb6efbd",
+    "providerCallsMade": 0,
+    "MLB_02F_PREPUBLISH_STATE": "PASS",
+    "MLB_02F_02E_COMMIT_SCOPE_CERTIFIED": "YES",
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "champion": {
+    "count": 1,
+    "modelVersion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+    "role": "champion",
+    "status": "promoted",
+    "artifactDigest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+    "featureSet": "MLB_ML_FEATURE_SET_V1",
+    "MLB_02F_CHAMPION_READBACK": "PASS"
+  },
+  "modelArtifact": {
+    "path": "artifacts/mlb/mlb-02c-moneyline-baseline-model.json",
+    "digest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+    "featureSetVersion": "MLB_ML_FEATURE_SET_V1",
+    "featureCount": 76,
+    "featureOrderingDigest": "3c2d35edcbeb5fd9cdbd7c2598af91f6ae9dbd19286d6a7381a03781a1c97ce4",
+    "preprocessing": "train_only_median_impute_then_standardize",
+    "MLB_02F_MODEL_ARTIFACT_INTEGRITY": "PASS",
+    "MLB_02F_FEATURE_ORDERING": "PASS",
+    "MLB_02F_PREPROCESSING_READBACK": "PASS"
+  },
+  "inputContract": {
+    "gameIdentity": "game_pk with exactly one native game row",
+    "asOf": "source_game_date < target_game_date; stricter timestamp rule may supersede when live timestamps exist",
+    "requiredFeatureDomains": [
+      "team",
+      "starter",
+      "bullpen",
+      "matchup",
+      "offense logical features",
+      "first_inning_context"
+    ],
+    "missingness": "no silent zero-fill; use certified train-fitted median imputation and block missing structural identity",
+    "MLB_02F_GAME_IDENTITY_CONTRACT": "PASS",
+    "MLB_02F_INFERENCE_ASOF_CONTRACT": "PASS",
+    "MLB_02F_REQUIRED_FEATURE_DOMAINS": "READY",
+    "MLB_02F_MISSINGNESS_CONTRACT": "PASS"
+  },
+  "replay": {
+    "sample": {
+      "rows": 24,
+      "homeWins": 12,
+      "awayWins": 12,
+      "gamePks": [
+        776468,
+        776469,
+        776453,
+        776454,
+        776417,
+        776399,
+        776392,
+        776403,
+        776368,
+        776360,
+        776366,
+        776329,
+        776332,
+        776305,
+        776287,
+        776291,
+        776263,
+        776273,
+        776258,
+        776209,
+        776212,
+        776178,
+        776179,
+        776181
+      ],
+      "probabilitySanity": {
+        "rows": 24,
+        "finite": 24,
+        "invalidRange": 0,
+        "complementViolations": 0,
+        "nan": 0,
+        "inf": 0,
+        "tolerance": 1e-12
+      }
+    },
+    "full": {
+      "rows": 2249,
+      "probabilitySanity": {
+        "rows": 2249,
+        "finite": 2249,
+        "invalidRange": 0,
+        "complementViolations": 0,
+        "nan": 0,
+        "inf": 0,
+        "tolerance": 1e-12
+      },
+      "distribution": {
+        "min": 0.304475,
+        "max": 0.671837,
+        "mean": 0.539309,
+        "median": 0.539357,
+        "stddev": 0.041087,
+        "p10": 0.490165,
+        "p25": 0.513401,
+        "p75": 0.566019,
+        "p90": 0.589433,
+        "buckets": {
+          "lt040": 7,
+          "p040To045": 36,
+          "p045To050": 301,
+          "p050To055": 1019,
+          "p055To060": 743,
+          "gt060": 143
+        }
+      },
+      "metricParity": {
+        "replayTest": {
+          "rows": 338,
+          "logLoss": 0.683101,
+          "brier": 0.245035,
+          "auc": 0.551172,
+          "accuracy": 0.568047,
+          "ece": 0.023464
+        },
+        "certifiedTest": {
+          "rows": 338,
+          "logLoss": 0.683101,
+          "brier": 0.245035,
+          "auc": 0.551172,
+          "accuracy": 0.568047,
+          "balancedAccuracy": 0.536436,
+          "intercept": 0.474249,
+          "slope": 0.422838,
+          "ece": 0.023464
+        },
+        "tolerance": 0.000001
+      }
+    },
+    "reproducibility": {
+      "failures": 0,
+      "tolerance": 1e-15
+    },
+    "MLB_02F_REPLAY_SAMPLE_READY": "YES",
+    "MLB_02F_REPLAY_FEATURE_REBUILD": "PASS",
+    "MLB_02F_REPLAY_PROBABILITY_SANITY": "PASS",
+    "MLB_02F_INFERENCE_REPRODUCIBILITY": "PASS",
+    "MLB_02F_FULL_REPLAY_ROWS": 2249,
+    "MLB_02F_FULL_PROBABILITY_SANITY": "PASS",
+    "MLB_02F_PROBABILITY_DISTRIBUTION_AUDIT": "PASS",
+    "MLB_02F_REPLAY_METRIC_PARITY": "PASS"
+  },
+  "liveContract": {
+    "prerequisites": [
+      "game_pk",
+      "scheduled start time",
+      "home team",
+      "away team",
+      "probable or confirmed starters",
+      "team features",
+      "starter features",
+      "bullpen features",
+      "matchup context",
+      "as_of timestamp"
+    ],
+    "starterStatusPolicy": {
+      "confirmed": "READY_CONFIRMED",
+      "probable": "READY_PROBABLE_WITH_FLAG",
+      "unknown": "BLOCK_STARTER_UNKNOWN",
+      "changed": "BLOCK_STARTER_CHANGED_REBUILD_REQUIRED"
+    },
+    "lineupDependency": "LINEUP_NOT_REQUIRED_FOR_MONEYLINE_V1",
+    "featureFreshness": {
+      "team": "through latest completed game before target",
+      "bullpen": "through latest completed game before target",
+      "starter": "through latest completed appearance before target",
+      "targetGamePerformance": "FORBIDDEN"
+    },
+    "MLB_02F_LIVE_INPUT_CONTRACT": "READY",
+    "MLB_02F_STARTER_STATUS_POLICY": "READY",
+    "MLB_02F_LINEUP_DEPENDENCY": "CERTIFIED",
+    "MLB_02F_FEATURE_FRESHNESS_CONTRACT": "READY"
+  },
+  "outputContract": {
+    "fields": [
+      "game_pk",
+      "sport",
+      "market",
+      "home_team_id",
+      "away_team_id",
+      "home_win_probability",
+      "away_win_probability",
+      "model_version",
+      "feature_set",
+      "artifact_digest",
+      "as_of",
+      "starter_status",
+      "data_completeness",
+      "reason_flags",
+      "status_flags"
+    ],
+    "sport": "MLB",
+    "market": "moneyline",
+    "recommendationIncluded": false,
+    "complementTolerance": 1e-12,
+    "confidenceSemantics": [
+      "data completeness",
+      "model calibration",
+      "sample support",
+      "input freshness",
+      "prediction extremity"
+    ],
+    "rawProbabilityIsConfidence": false,
+    "MLB_02F_PREDICTION_OUTPUT_CONTRACT": "READY",
+    "MLB_02F_PROBABILITY_COMPLEMENT_CONTRACT": "PASS",
+    "MLB_02F_CONFIDENCE_SEMANTICS": "READY"
+  },
+  "persistencePrep": {
+    "schemaInventory": {
+      "table": "pick2_game_predictions",
+      "nativeGamePkSupport": "game_pk present via R5 native identity migration",
+      "market": "target = home_win_probability; market moneyline carried in metadata until schema broadens",
+      "selectionSideSemantics": "home/away probabilities only; no recommendation side",
+      "modelVersionLinkage": "model_version_id foreign key to pick2_model_versions",
+      "featureVersionLinkage": "feature_snapshot_id plus frozen_input_digest; feature version in metadata",
+      "asOf": "predicted_at plus metadata.as_of",
+      "probabilityFields": [
+        "home_probability",
+        "away_probability"
+      ],
+      "immutability": "new material input state creates new deterministic_identity"
+    },
+    "deterministicIdentity": [
+      "game_pk",
+      "moneyline",
+      "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+      "as_of_or_inference_version"
+    ],
+    "immutability": "future persisted predictions are immutable; material input change creates a new version/identity",
+    "idempotency": "same deterministic identity and payload is REUSE_NO_OP; payload drift is BLOCK_CONFLICT",
+    "stalePredictionGuard": "block serving stale predictions when starter status, feature freshness or artifact digest changes",
+    "MLB_02F_PREDICTION_SCHEMA_INVENTORY_COMPLETE": "YES",
+    "MLB_02F_PREDICTION_IDENTITY_CONTRACT": "READY",
+    "MLB_02F_PREDICTION_IMMUTABILITY_CONTRACT": "PASS",
+    "MLB_02F_PREDICTION_IDEMPOTENCY_CONTRACT": "PASS",
+    "MLB_02F_STALE_PREDICTION_GUARD": "PASS"
+  },
+  "marketBoundary": {
+    "oddsIndependentInference": "PASS",
+    "noMarketRecommendation": "PASS",
+    "evCertification": "NO",
+    "valueBoardReady": "NO",
+    "officialPicksReady": "NO",
+    "MLB_02F_ODDS_INDEPENDENT_INFERENCE": "PASS",
+    "MLB_02F_NO_MARKET_RECOMMENDATION": "PASS"
+  },
+  "runnerPrep": {
+    "state": "DRY_RUN_ONLY",
+    "currentSlateDryRunState": "NO_CURRENT_SLATE_PREDICTIONS_GENERATED",
+    "executionFailClosed": "PREDICTION_EXECUTION_FORBIDDEN_IN_02F_PREP",
+    "MLB_02F_PREDICTION_RUNNER_PREP": "PASS",
+    "MLB_02F_PREDICTION_EXECUTION_FAIL_CLOSED": "PASS"
+  },
+  "preservation": {
+    "championUnchanged": "PASS",
+    "featureFoundation": {
+      "team": 4498,
+      "starter": 4498,
+      "bullpen": 4498,
+      "batter": 44943,
+      "matchup": 2249,
+      "firstInning": 2249,
+      "snapshots": 67433
+    },
+    "rawNative": {
+      "raw": 712528,
+      "nativeGames": 2430,
+      "nativePlayers": 1469,
+      "uniquePitchIdentities": 712528,
+      "duplicatePitchIdentities": 0
+    },
+    "productionPredictionStateBefore": {
+      "predictions": 0,
+      "predictionResults": 0,
+      "marketValueEvaluations": 0
+    },
+    "productionPredictionStateAfter": {
+      "predictions": 0,
+      "predictionResults": 0,
+      "marketValueEvaluations": 0
+    },
+    "MLB_02F_CHAMPION_UNCHANGED": "PASS",
+    "MLB_02F_FEATURE_FOUNDATION_UNCHANGED": "PASS",
+    "MLB_02F_RAW_NATIVE_UNCHANGED": "PASS",
+    "MLB_02F_PRODUCTION_PREDICTION_ZERO_STATE": "PASS"
+  },
+  "safety": {
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "predictionWrites": 0,
+    "predictionResultWrites": 0,
+    "marketValueWrites": 0,
+    "officialPicks": 0,
+    "featureWrites": 0,
+    "rawWrites": 0,
+    "modelWrites": 0,
+    "championChanges": 0,
+    "import2026": "NO",
+    "automation": "OFF",
+    "cronChanges": 0,
+    "parlay100Generation": "NO"
+  },
+  "flags": {
+    "MLB_02F_CHAMPION_READBACK": "PASS",
+    "MLB_02F_MODEL_ARTIFACT_INTEGRITY": "PASS",
+    "MLB_02F_FEATURE_ORDERING": "PASS",
+    "MLB_02F_PREPROCESSING_READBACK": "PASS",
+    "MLB_02F_GAME_IDENTITY_CONTRACT": "PASS",
+    "MLB_02F_INFERENCE_ASOF_CONTRACT": "PASS",
+    "MLB_02F_REQUIRED_FEATURE_DOMAINS": "READY",
+    "MLB_02F_MISSINGNESS_CONTRACT": "PASS",
+    "MLB_02F_REPLAY_SAMPLE_READY": "YES",
+    "MLB_02F_REPLAY_FEATURE_REBUILD": "PASS",
+    "MLB_02F_REPLAY_PROBABILITY_SANITY": "PASS",
+    "MLB_02F_INFERENCE_REPRODUCIBILITY": "PASS",
+    "MLB_02F_FULL_REPLAY_ROWS": 2249,
+    "MLB_02F_FULL_PROBABILITY_SANITY": "PASS",
+    "MLB_02F_PROBABILITY_DISTRIBUTION_AUDIT": "PASS",
+    "MLB_02F_REPLAY_METRIC_PARITY": "PASS",
+    "MLB_02F_LIVE_INPUT_CONTRACT": "READY",
+    "MLB_02F_STARTER_STATUS_POLICY": "READY",
+    "MLB_02F_LINEUP_DEPENDENCY": "CERTIFIED",
+    "MLB_02F_FEATURE_FRESHNESS_CONTRACT": "READY",
+    "MLB_02F_PREDICTION_OUTPUT_CONTRACT": "READY",
+    "MLB_02F_PROBABILITY_COMPLEMENT_CONTRACT": "PASS",
+    "MLB_02F_CONFIDENCE_SEMANTICS": "READY",
+    "MLB_02F_PREDICTION_SCHEMA_INVENTORY_COMPLETE": "YES",
+    "MLB_02F_PREDICTION_IDENTITY_CONTRACT": "READY",
+    "MLB_02F_PREDICTION_IMMUTABILITY_CONTRACT": "PASS",
+    "MLB_02F_PREDICTION_IDEMPOTENCY_CONTRACT": "PASS",
+    "MLB_02F_ODDS_INDEPENDENT_INFERENCE": "PASS",
+    "MLB_02F_NO_MARKET_RECOMMENDATION": "PASS",
+    "MLB_02F_PREDICTION_RUNNER_PREP": "PASS",
+    "MLB_02F_PREDICTION_EXECUTION_FAIL_CLOSED": "PASS",
+    "MLB_02F_STALE_PREDICTION_GUARD": "PASS",
+    "MLB_02F_CHAMPION_UNCHANGED": "PASS",
+    "MLB_02F_FEATURE_FOUNDATION_UNCHANGED": "PASS",
+    "MLB_02F_RAW_NATIVE_UNCHANGED": "PASS",
+    "MLB_02F_PRODUCTION_PREDICTION_ZERO_STATE": "PASS",
+    "PREDICTION_WORK_PERFORMED": "NO"
+  }
+}

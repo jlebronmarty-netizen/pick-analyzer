@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-04 21:24:04Z
+Last updated: 2026-09-04 21:40:25Z
+
+## 2026-09-04 MLB-DATA-02F Moneyline Prediction Generation Prep
+
+- MLB-DATA-02F is certified as `MLB_DATA_02F_MONEYLINE_PREDICTION_GENERATION_PREP_CERTIFIED`. The certified 02E Champion-promotion commit `9102cabeb6ff1a255c3012ccfacc78c4ddb6efbd` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported provider calls 0.
+- Fresh production readback found exactly 1 active MLB moneyline Champion: `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, role `champion`, status `promoted`, feature set `MLB_ML_FEATURE_SET_V1`, artifact digest `9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616`. The local model artifact digest, 76-feature ordering and train-fitted median/scale preprocessing state all matched the certified Champion.
+- The dry-run inference path rebuilt features from persisted 2025 feature tables only, requiring `game_pk`, pregame as-of safety, team/starter/bullpen/matchup/offense logical/first-inning feature domains and no silent zero-fill. A deterministic 24-game replay sample included 12 home wins and 12 away wins, with 0 probability range, complement, NaN or Inf violations.
+- Full 2025 dry replay produced 2,249 local-only probabilities with range 0.304475 to 0.671837, mean 0.539309, median 0.539357 and stddev 0.041087. Test replay metric parity matched 02C exactly within tolerance: log loss 0.683101, Brier 0.245035, AUC 0.551172, accuracy 0.568047 and ECE 0.023464.
+- Future live inference contracts are prepared: starter confirmed/probable/unknown/changed states, lineup not required for moneyline V1, domain freshness through latest completed game or starter appearance, output probability shape, immutable deterministic prediction identity and stale-prediction guard. 02F made 0 prediction writes, 0 prediction-result writes, 0 market-value writes, 0 model writes, 0 Champion changes, 0 feature/raw writes, 0 DDL, 0 provider calls, 0 2026 import, no automation and no cron changes. Next: `MLB_DATA_02G_MONEYLINE_PREDICTION_DML_PREP_OR_EXECUTION`, under separate authorization only.
 
 ## 2026-09-04 MLB-DATA-02E Moneyline Champion Promotion Execution
 
