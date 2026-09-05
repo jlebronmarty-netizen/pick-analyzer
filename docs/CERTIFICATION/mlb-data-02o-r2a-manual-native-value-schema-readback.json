@@ -1,0 +1,110 @@
+{
+  "generatedAt": "2026-09-05T23:53:50.392Z",
+  "project": "MLB_DATA_02O_R2A_MANUAL_NATIVE_VALUE_SCHEMA_MIGRATION_APPLY_READBACK",
+  "certificationVerdict": "MLB_DATA_02O_R2A_NATIVE_VALUE_SCHEMA_PRODUCTION_CERTIFIED",
+  "repository": {
+    "branch": "main",
+    "localHead": "c417d6b5519ff371ac79a78c88c59605e26fcffe",
+    "originMain": "46f5c70666e8f05c89203c6da417bd88aea7d05b",
+    "worktreeCleanBeforeR2A": false,
+    "expectedLocalHead": "c417d6b5519ff371ac79a78c88c59605e26fcffe",
+    "expectedProductionCommit": "46f5c70666e8f05c89203c6da417bd88aea7d05b",
+    "MLB_02O_R2A_ALIGNMENT": "PASS"
+  },
+  "production": {
+    "commit": "46f5c70666e8f05c89203c6da417bd88aea7d05b",
+    "providerCallsMade": 0,
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "manualMigration": {
+    "path": "supabase/migrations/202609050003_pick2_mlb_native_market_value_evaluations_v1.sql",
+    "MLB_02O_R2A_NATIVE_VALUE_MIGRATION_APPLIED": "YES_USER_CONFIRMED",
+    "MLB_02O_R2A_MANUAL_MIGRATION_STATE": "PASS",
+    "codexReappliedMigration": false
+  },
+  "schema": {
+    "source": "USER_SUPPLIED_SQL_CATALOG_READBACK_PLUS_READONLY_REST_TABLE_PROBES",
+    "MLB_02O_R2A_NATIVE_VALUE_TABLE_READBACK": "PASS",
+    "MLB_02O_R2A_NATIVE_VALUE_COLUMN_CONTRACT": "PASS_USER_SQL_EVIDENCE",
+    "fks": {
+      "prediction": "PASS_USER_SQL_EVIDENCE",
+      "game": "PASS_USER_SQL_EVIDENCE",
+      "homeMarket": "PASS_USER_SQL_EVIDENCE",
+      "awayMarket": "PASS_USER_SQL_EVIDENCE",
+      "selectedMarket": "PASS_USER_SQL_EVIDENCE",
+      "modelVersion": "PASS_USER_SQL_EVIDENCE",
+      "overall": "PASS_USER_SQL_EVIDENCE"
+    },
+    "MLB_02O_R2A_VALUE_IDENTITY_UNIQUENESS": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_UPDATE_GUARD": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_DELETE_GUARD": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_IMMUTABILITY": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_PROBABILITY_STORAGE": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_VALUE_NUMERIC_STORAGE": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_AMERICAN_ODDS_STORAGE": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_CHECK_CONTRACT": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_ELIGIBILITY_FLAGS": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_RISK_FLAGS": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_TEMPORAL_FIELDS": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_RLS": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_WRITE_SECURITY": "PASS_USER_SQL_EVIDENCE",
+    "MLB_02O_R2A_INDEX_CONTRACT": "PASS_USER_SQL_EVIDENCE"
+  },
+  "legacy": {
+    "table": "public.pick2_market_value_evaluations",
+    "exists": true,
+    "count": 0,
+    "MLB_02O_R2A_LEGACY_TABLE_PRESERVED": "PASS",
+    "MLB_02O_R2A_LEGACY_NATIVE_COEXISTENCE": "PASS"
+  },
+  "native": {
+    "table": "public.pick2_mlb_market_value_evaluations",
+    "exists": true,
+    "count": 0,
+    "restError": null
+  },
+  "dryFit": {
+    "MLB_02O_R2A_02N_PLAN_REBUILD": "PASS",
+    "MLB_02O_R2A_SOURCE_LINKAGE_DRY_RUN": "PASS",
+    "MLB_02O_R2A_LIVE_SCHEMA_DRY_FIT": "PASS",
+    "MLB_02O_R2A_MATH_PAYLOAD_DRY_FIT": "PASS",
+    "planRows": 386,
+    "eligibleGames": 21,
+    "bookLevelPairs": 193,
+    "validRows": 386,
+    "invalidRows": 0,
+    "missingSourceLinkages": 0,
+    "duplicateValueIdentities": 0,
+    "sourceQueryErrors": [],
+    "nativeValueQueryErrors": []
+  },
+  "prewriteClassification": {
+    "MLB_02O_R2A_VALUE_PREWRITE_CLASSIFICATION": "PASS",
+    "INSERT_ELIGIBLE": 386,
+    "REUSE_NO_OP": 0,
+    "BLOCK_CONFLICT": 0,
+    "MLB_02O_R2A_FUTURE_VALUE_DML_CAP_READY": "YES",
+    "VALUE_INSERT_CAP": 386,
+    "MLB_02O_R2A_VALUE_IDEMPOTENCY_PROJECTED": "PASS",
+    "secondPassProjection": {
+      "INSERT_ELIGIBLE": 0,
+      "REUSE_NO_OP": 386,
+      "BLOCK_CONFLICT": 0
+    }
+  },
+  "mutations": {
+    "MLB_02O_R2A_PRODUCTION_DML": 0,
+    "nativeValueDml": 0,
+    "otherProductionDml": 0,
+    "userManualProductionDdl": "YES_USER_CONFIRMED",
+    "codexProductionDdl": 0,
+    "providerCalls": 0,
+    "officialPicks": 0,
+    "valueBoard": "NO"
+  },
+  "readiness": {
+    "MLB_DATA_02O_R3_NATIVE_VALUE_PERSISTENCE_READY": "YES",
+    "MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_READY": "NO",
+    "MLB_DATA_02Q_VALUE_BOARD_PREP_READY": "NO"
+  }
+}

@@ -1,12 +1,20 @@
 # Project Status
 
-Last updated: 2026-09-05 23:05:00Z
+Last updated: 2026-09-05 23:20:00Z
+
+## 2026-09-05 MLB-DATA-02O-R2A Manual Native Value Schema Migration Readback
+
+- MLB-DATA-02O-R2A is certified as `MLB_DATA_02O_R2A_NATIVE_VALUE_SCHEMA_PRODUCTION_CERTIFIED`. The user manually applied exactly `supabase/migrations/202609050003_pick2_mlb_native_market_value_evaluations_v1.sql` through the approved Supabase Production SQL Editor; Codex did not reapply the migration and performed 0 production DDL.
+- Repository alignment is preserved for this manual-readback phase: local HEAD is the unpushed R2 blocked-certification commit `c417d6b5519ff371ac79a78c88c59605e26fcffe`, `origin/main` remains the published R1 commit `46f5c70666e8f05c89203c6da417bd88aea7d05b`, and production is aligned to `46f5c70666e8f05c89203c6da417bd88aea7d05b`.
+- User-supplied SQL catalog readback certifies the native value table column contract, prediction/game/market-observation/model-version FKs, unique `value_identity`, update/delete immutability triggers, numeric storage, check constraints, eligibility/risk/temporal fields, RLS and indexes. Live read-only REST confirms `public.pick2_mlb_market_value_evaluations` exists with 0 rows and the legacy `public.pick2_market_value_evaluations` table remains present with 0 rows.
+- The certified 02N plan rebuild and live dry-run passed: 386 value rows, 21 eligible games, 193 book-level pairs, 386 valid rows, 0 invalid rows, 0 missing source linkages and 0 duplicate value identities. Prewrite classification is 386 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP`, 0 `BLOCK_CONFLICT`; future value DML cap is 386 and second-pass idempotency projects 0 inserts, 386 reuses and 0 conflicts.
+- Native value DML, legacy value DML, market observation/mapping DML, prediction/result/model/raw/feature DML, provider calls, Official Picks and Value Board publication all remained 0/off. `MLB_DATA_02O_R3_NATIVE_VALUE_PERSISTENCE_READY = YES`; `MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_READY = NO` and `MLB_DATA_02Q_VALUE_BOARD_PREP_READY = NO` until value rows are actually persisted.
 
 ## 2026-09-05 MLB-DATA-02O-R2 Native Value Schema Migration Apply Readback Blocked
 
 - MLB-DATA-02O-R2 is classified as `MLB_DATA_02O_R2_NATIVE_VALUE_SCHEMA_MIGRATION_APPLY_READBACK_BLOCKED`. The certified R1 commit `46f5c70666e8f05c89203c6da417bd88aea7d05b` was published to `origin/main`, production aligned to that same commit on bounded poll attempt 5, and the prepared migration file passed integrity checks.
 - Codex did not apply the migration because this environment has no approved production SQL apply channel available: no Supabase CLI, no `psql`, no direct database URL channel and no protected SQL-apply route/RPC surfaced for this repo. No ad hoc SQL path was invented.
-- `public.pick2_market_value_evaluations` remains the preserved legacy value table. The stricter native full-column REST projection returns `PGRST205`, so `public.pick2_mlb_market_value_evaluations` is classified as `NOT_PRESENT` from the approved read-only surface. The 02N plan remains 386 future value rows, but live post-schema dry-fit, source-linkage classification, future value DML cap and idempotency projection are not ready until the migration is applied and catalog readback is completed.
+- `public.pick2_market_value_evaluations` remains the preserved legacy value table. At that time, the stricter native full-column REST projection returned `PGRST205`, so `public.pick2_mlb_market_value_evaluations` was classified as `NOT_PRESENT` from the approved read-only surface. The 02N plan remained 386 future value rows, but live post-schema dry-fit, source-linkage classification, future value DML cap and idempotency projection were not ready until the migration was applied and catalog readback completed.
 - Native value DML, other production DML, Codex-performed production DDL, provider calls, Official Picks and Value Board publication all remained 0/off. `MLB_DATA_02O_R3_NATIVE_VALUE_PERSISTENCE_READY = NO`, `MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_READY = NO` and `MLB_DATA_02Q_VALUE_BOARD_PREP_READY = NO`.
 
 ## 2026-09-05 MLB-DATA-02O-R1 Native Value Schema Repair Prep
