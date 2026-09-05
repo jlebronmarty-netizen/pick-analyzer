@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 15:53:00Z
+Last updated: 2026-09-05 16:06:20Z
+
+## 2026-09-05 MLB-DATA-02L Current Moneyline Market Persistence Schema Prep
+
+- MLB-DATA-02L is locally certified as `MLB_DATA_02L_CURRENT_MONEYLINE_MARKET_PERSISTENCE_SCHEMA_PREP_CERTIFIED`. The 02K commit `e898201f35dcbb4b672acab1b73d9452a194dcaf` was published to `origin/main`, production aligned on bounded poll attempt 11, and `/api/system/version` reported provider calls 0.
+- Existing market schema inventory is complete. `pick2_mlb_market_event_mappings` remains crosswalk-only, `sports_odds_snapshots` remains legacy `event_id`-rooted odds storage, and `pick2_market_value_evaluations` remains evaluated model-vs-market output rather than raw price observation storage.
+- Selected storage strategy is `OPTION_A`: add dedicated immutable table `public.pick2_mlb_market_price_observations` through the non-applied forward migration `supabase/migrations/202609050002_pick2_mlb_market_price_observations_v1.sql`. The proposed schema is native `game_pk`-rooted, references `pick2_mlb_games(game_pk)`, preserves provider event/book/market/side/timestamp/provenance fields, stores American odds as integer, uses unique `observation_identity`, enables RLS, and blocks update/delete through immutability triggers.
+- Application contracts are prepared in `src/types/pick2-market-observations.ts`: normalized observation type, insert classifications `INSERT_ELIGIBLE` / `REUSE_NO_OP` / `BLOCK_CONFLICT`, and readback shape. The cached 02K sample was reused with 0 provider calls; the proposed schema dry-run passed for the certified 286 normalized rows, 143 two-sided markets, 11 books and 13 matched `game_pk` values with 0 invalid rows, 0 duplicate observation identities and 0 conflicts.
+- Future first persistence is capped, not executed: up to 13 market-event mapping inserts/reuses and 286 immutable market-price observation inserts for the certified 02K sample; second pass projects 0 inserts, 286 reuses and 0 conflicts. Market DML, market-value writes, edge/EV work, Official Picks, Value Board, prediction/result writes, raw/feature/model/champion mutations, production DDL, provider calls, automation and cron changes remained 0/off. Next: `MLB_DATA_02M_CURRENT_MONEYLINE_MARKET_PERSISTENCE_EXECUTION`, under separate authorization only.
 
 ## 2026-09-05 MLB-DATA-02K Moneyline Market Price Acquisition Prep
 
