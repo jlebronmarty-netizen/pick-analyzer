@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 16:06:20Z
+Last updated: 2026-09-05 16:24:57Z
+
+## 2026-09-05 MLB-DATA-02M Market Schema Migration Manual Readback
+
+- MLB-DATA-02M manual schema readback is certified as `MLB_DATA_02M_MARKET_SCHEMA_MIGRATION_PRODUCTION_CERTIFIED_DML_READINESS_BLOCKED`. The user manually applied exactly `supabase/migrations/202609050002_pick2_mlb_market_price_observations_v1.sql` in the approved Supabase Production SQL Editor; Codex did not reapply the migration and performed 0 production DDL.
+- Repository and production remain aligned to `2152d6a8da62fe1a29dd7a3654b43427e630baa5`. User-supplied SQL evidence confirms `public.pick2_mlb_market_price_observations` exists with the 02L column contract, native `game_pk` FK, nullable market-event-mapping FK, unique `observation_identity`, certified query indexes, pair index, RLS enabled and update/delete immutability triggers.
+- Read-only production counts through Supabase REST confirmed predictions 24, prediction results 0, market-value rows 0, market event mappings 0 and market price observations 0. Market DML, market-value writes, prediction writes, raw/feature/model writes, provider calls, edge/EV work, Official Picks, Value Board, automation and cron changes remained 0/off.
+- The certified 02K/02L market sample cannot be reconstructed exactly for DML from committed evidence: 02K preserved 286 normalized row count and 143 two-sided markets, but only 25 row-level normalized observations are committed. Therefore post-schema observation classification, exact 286-row identity parity and future persistence DML readiness remain blocked on `EXACT_286_ROW_LEVEL_MARKET_SAMPLE_NOT_COMMITTED`.
+- `MLB_DATA_02M_CURRENT_MONEYLINE_MARKET_DML_READY = NO` and `MLB_DATA_02N_CURRENT_MONEYLINE_VALUE_EVALUATION_PREP_READY = NO`. Next: prepare a bounded exact row-level market sample artifact, either by recovering the original 02K raw response/cache or by separately authorizing one fresh provider acquisition that becomes the new frozen persistence sample.
 
 ## 2026-09-05 MLB-DATA-02L Current Moneyline Market Persistence Schema Prep
 
