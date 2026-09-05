@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 21:55:01Z
+Last updated: 2026-09-05 22:15:44Z
+
+## 2026-09-05 MLB-DATA-02M-R3 Fresh Market Sample Persistence
+
+- MLB-DATA-02M-R3 is certified as `MLB_DATA_02M_R3_FRESH_MARKET_SAMPLE_PERSISTENCE_CERTIFIED`. The R2 commit `09c2605e75a3341971f80f9cf120fd400101d194` was published to `origin/main`, production aligned on bounded poll attempt 14, and no provider refresh occurred.
+- The persisted sample is exactly the frozen R2 current MLB moneyline sample: sample id `MLB_MONEYLINE_MARKET_SAMPLE_2026-09-05_215501709Z_b88656b393ee`, source response digest `6cd70d8e720a4efb1b0eb00dcec430dd48546ce388aa251eeb15261c5a7f550a`, normalized sample digest `b88656b393eec8dc08d6a57ea37316497a8e2ca6bafde517c2e0806bc1703730`, 492 observations, 29 native `game_pk` values, 11 books and 246 complete two-sided markets.
+- Authorized production DML inserted 29 `pick2_mlb_market_event_mappings` rows and 492 immutable `pick2_mlb_market_price_observations` rows, with 0 reuses, 0 conflicts and 0 failures. DML caps of 29 mappings and 492 observations were respected.
+- Postwrite readback passed: 492 final observations, 29 final mappings, payload parity PASS, price parity PASS, game coverage PASS, book coverage PASS, 246 complete two-sided pairs with HOME 246 and AWAY 246, duplicate observation identities 0, no overwrite and immutability preserved. Second pass idempotency projected 0 mapping inserts / 29 reuses / 0 conflicts and 0 observation inserts / 492 reuses / 0 conflicts.
+- Prediction intersection is ready for value prep only: 24 current predictions preserved, 21 matched complete two-sided markets, 0 partial markets, 2 no-provider-event games, 0 ambiguous games and 1 started-game classification. Market-value writes remain 0, prediction result writes 0, edge/EV/value work NO, Official Picks 0, Value Board NO, Champion `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1` preserved, provider calls 0, production DDL 0 and automation OFF. `MLB_DATA_02N_CURRENT_MONEYLINE_VALUE_EVALUATION_PREP_READY = YES`; next: `MLB_DATA_02N_CURRENT_MONEYLINE_VALUE_EVALUATION_PREP`.
 
 ## 2026-09-05 MLB-DATA-02M-R2 Fresh Market Sample Acquisition
 
