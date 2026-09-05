@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 16:24:57Z
+Last updated: 2026-09-05 17:07:16Z
+
+## 2026-09-05 MLB-DATA-02M-R1 Exact Market Sample Recovery
+
+- MLB-DATA-02M-R1 is certified as `MLB_DATA_02M_R1_FRESH_MARKET_SAMPLE_ACQUISITION_REQUIRED_CERTIFIED`. Commit `d0a02ae49538577c2437d30f7ae393e68bc0bec9` was published to `origin/main`; production aligned to the same commit and `/api/system/version` reported provider calls 0.
+- Recovery evidence inventory is complete across committed 02K/02L/02M certification artifacts, `.tmp`, `artifacts`, `data/checkpoints`, `.codex`, `.git/logs`, `.next/cache` and git history. No full 286 row-level original 02K market sample was found.
+- Exact recovery is rejected without fabrication: only 25 row-level normalized observations remain in the committed 02K artifact, while the certified aggregate remains 286 rows, 143 two-sided markets, 11 books and 13 matched `game_pk` values. The missing 261 observations cannot be inferred from aggregate evidence.
+- The recovered partial sample has 0 duplicate observation identities and unmatched provider events remain excluded, but aggregate parity, price parity, source-digest parity, full observation identity rebuild and frozen sample SHA-256 all fail for the original 286-row set.
+- Fresh sample contract is ready for a future separately authorized acquisition: one coherent provider response, new timestamp, provider response digest, complete row-level observations, row source digests, canonical sample SHA-256 and future DML caps. R1 made 0 provider calls, 0 market DML, 0 value/edge/EV work, 0 Official Picks, 0 Value Board changes and 0 other production mutations. `MLB_DATA_02M_CURRENT_MONEYLINE_MARKET_DML_READY = NO`; next: `MLB_DATA_02M_R2_FRESH_MARKET_SAMPLE_ACQUISITION_CERTIFICATION`.
 
 ## 2026-09-05 MLB-DATA-02M Market Schema Migration Manual Readback
 

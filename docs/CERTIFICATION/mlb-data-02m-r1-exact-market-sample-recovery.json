@@ -1,0 +1,147 @@
+{
+  "generatedAt": "2026-09-05T17:07:16.227Z",
+  "project": "MLB_DATA_02M_R1_EXACT_MARKET_SAMPLE_RECOVERY_OR_REFRESH_PREP",
+  "certificationVerdict": "MLB_DATA_02M_R1_FRESH_MARKET_SAMPLE_ACQUISITION_REQUIRED_CERTIFIED",
+  "publication": {
+    "branch": "main",
+    "localHead": "d0a02ae49538577c2437d30f7ae393e68bc0bec9",
+    "originMain": "d0a02ae49538577c2437d30f7ae393e68bc0bec9",
+    "productionCommit": "d0a02ae49538577c2437d30f7ae393e68bc0bec9",
+    "worktreeCleanAtStartRequired": true,
+    "MLB_02M_R1_REPOSITORY_BASELINE": "PASS",
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "recoveryEvidenceInventory": {
+    "MLB_02M_R1_RECOVERY_EVIDENCE_INVENTORY": "COMPLETE",
+    "searched": [
+      {
+        "path": "docs/CERTIFICATION/mlb-data-02k-moneyline-market-price-acquisition-prep.json",
+        "status": "PARTIAL_ROW_LEVEL",
+        "rowLevelRows": 25,
+        "certifiedRows": 286
+      },
+      {
+        "path": "docs/CERTIFICATION/mlb-data-02l-market-persistence-schema-prep.json",
+        "status": "AGGREGATE_DRY_RUN_ONLY",
+        "rowLevelRows": 25,
+        "certifiedRows": 286
+      },
+      {
+        "path": "docs/CERTIFICATION/mlb-data-02m-market-schema-migration-manual-readback.json",
+        "status": "SCHEMA_READBACK_ONLY",
+        "rowLevelRows": 0,
+        "certifiedRows": 0
+      },
+      {
+        "path": ".tmp",
+        "status": "SEARCHED_NO_02K_MARKET_SAMPLE_FOUND"
+      },
+      {
+        "path": "artifacts",
+        "status": "SEARCHED_NO_02K_MARKET_SAMPLE_FOUND"
+      },
+      {
+        "path": "data/checkpoints",
+        "status": "SEARCHED_NO_02K_MARKET_SAMPLE_FOUND"
+      },
+      {
+        "path": ".codex",
+        "status": "SEARCHED_NO_02K_MARKET_SAMPLE_FOUND"
+      },
+      {
+        "path": ".git/logs",
+        "status": "SEARCHED_NO_02K_MARKET_SAMPLE_FOUND"
+      },
+      {
+        "path": "git history for 02K artifact",
+        "status": "ONLY_25_ROW_LEVEL_SAMPLE_COMMITTED"
+      }
+    ]
+  },
+  "originalAcquisitionIdentity": {
+    "MLB_02M_R1_ORIGINAL_ACQUISITION_IDENTITY": "PARTIAL",
+    "acquiredAt": "2026-09-05T15:53:00.505Z",
+    "providerEventCount": 15,
+    "providerResponseDigest": null,
+    "providerResponseDigestState": "NOT_FOUND"
+  },
+  "exactRowRecovery": {
+    "recoveredRowCount": 25,
+    "missingRows": 261,
+    "MLB_02M_R1_EXACT_ROW_RECOVERY": "FAIL",
+    "reason": "Committed 02K evidence contains only 25 row-level normalized observations; missing 261 rows cannot be inferred."
+  },
+  "parity": {
+    "MLB_02M_R1_RECOVERED_SAMPLE_AGGREGATE_PARITY": "FAIL",
+    "rows": 286,
+    "twoSidedMarkets": 143,
+    "books": 11,
+    "gamePks": 13,
+    "homeRows": null,
+    "awayRows": null,
+    "MLB_02M_R1_RECOVERED_PRICE_PARITY": "FAIL",
+    "MLB_02M_R1_SOURCE_DIGEST_PARITY": "FAIL"
+  },
+  "identityAndPairing": {
+    "MLB_02M_R1_OBSERVATION_IDENTITY_REBUILD": "FAIL",
+    "duplicateObservationIdentities": 0,
+    "MLB_02M_R1_TWO_SIDED_PAIR_RECOVERY": "FAIL",
+    "MLB_02M_R1_GAMEPK_RECOVERY": "FAIL",
+    "MLB_02M_R1_UNMATCHED_EVENT_EXCLUSION": "PASS"
+  },
+  "frozenSample": {
+    "MLB_02M_R1_EXACT_286_SAMPLE_FROZEN": "NO",
+    "MLB_02M_R1_RECOVERED_SAMPLE_SHA256": null
+  },
+  "dryClassification": {
+    "MLB_02M_R1_MAPPING_DRY_CLASSIFICATION": "BLOCKED",
+    "mapping": {
+      "insertEligible": null,
+      "reuseNoOp": null,
+      "blockConflict": null
+    },
+    "MLB_02M_R1_OBSERVATION_DRY_CLASSIFICATION": "BLOCKED",
+    "observations": {
+      "insertEligible": null,
+      "reuseNoOp": null,
+      "blockConflict": null
+    },
+    "MLB_02M_R1_IDEMPOTENCY_PROJECTED": "BLOCKED",
+    "MLB_DATA_02M_CURRENT_MONEYLINE_MARKET_DML_READY": "NO"
+  },
+  "freshSample": {
+    "MLB_02M_R1_EXACT_SAMPLE_RECOVERY_FAILED": "YES",
+    "MLB_02M_R1_FRESH_SAMPLE_CONTRACT_READY": "YES",
+    "sampleRule": "one internally coherent acquisition response, never mixed with recovered partial rows",
+    "futureAuthorizationRequired": true,
+    "providerCallInR1": 0,
+    "requiredFutureArtifact": [
+      "provider response digest",
+      "acquired_at",
+      "full provider event set",
+      "full bookmaker set",
+      "full normalized row-level observations",
+      "source_payload_digest for every row",
+      "canonical ordered sample SHA-256",
+      "future DML caps"
+    ],
+    "MLB_02M_R1_FRESH_PROVIDER_CALL_AUTHORIZED": "NO"
+  },
+  "boundaries": {
+    "MLB_02M_R1_VALUE_WORK": "NO",
+    "MLB_02M_R1_MARKET_DML": 0,
+    "MLB_02M_R1_OTHER_MUTATIONS": 0,
+    "MLB_02M_R1_PROVIDER_CALLS": 0,
+    "marketValueWrites": 0,
+    "predictionWrites": 0,
+    "predictionResultWrites": 0,
+    "productionDdl": 0,
+    "providerCalls": 0
+  },
+  "productionBaseline": {
+    "observations": 0,
+    "mappings": 0,
+    "predictions": 24,
+    "marketValues": 0
+  }
+}
