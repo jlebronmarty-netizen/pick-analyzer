@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-09-05T23:39:06.694Z",
+  "project": "MLB_DATA_02O_R2_NATIVE_VALUE_SCHEMA_MIGRATION_APPLY_READBACK",
+  "certificationVerdict": "MLB_DATA_02O_R2_NATIVE_VALUE_SCHEMA_MIGRATION_APPLY_READBACK_BLOCKED",
+  "blocker": "APPROVED_PRODUCTION_SQL_APPLY_CHANNEL_UNAVAILABLE",
+  "repository": {
+    "branch": "main",
+    "localHead": "46f5c70666e8f05c89203c6da417bd88aea7d05b",
+    "originMain": "46f5c70666e8f05c89203c6da417bd88aea7d05b",
+    "worktreeClean": false,
+    "previousOriginMain": "863e0a3825114b2fae1d52c76a72e2bf96e9fb94",
+    "MLB_02O_R2_PREPUBLISH_STATE": "FAIL",
+    "MLB_02O_R2_R1_COMMIT_SCOPE_CERTIFIED": "YES"
+  },
+  "production": {
+    "commit": "46f5c70666e8f05c89203c6da417bd88aea7d05b",
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "migration": {
+    "path": "supabase/migrations/202609050003_pick2_mlb_native_market_value_evaluations_v1.sql",
+    "state": "NOT_APPLIED_BLOCKED",
+    "MLB_02O_R2_MIGRATION_FILE_INTEGRITY": "PASS",
+    "requiredPresent": true,
+    "forbiddenAbsent": true,
+    "MLB_DATA_02O_R2_NATIVE_VALUE_SCHEMA_MIGRATION_APPLY_BLOCKED": true
+  },
+  "applyChannel": {
+    "supabaseCli": false,
+    "psql": false,
+    "directDbUrlPresent": false,
+    "protectedSqlRoute": false,
+    "approvedProductionSqlApplyChannelAvailable": false,
+    "approvedCatalogReadbackChannelAvailable": false
+  },
+  "legacyValueTable": {
+    "table": "public.pick2_market_value_evaluations",
+    "exists": true,
+    "count": 0,
+    "errorCode": null,
+    "MLB_02O_R2_LEGACY_VALUE_BASELINE": "PASS",
+    "MLB_02O_R2_LEGACY_TABLE_PRESERVATION": "PASS"
+  },
+  "nativeValueTable": {
+    "table": "public.pick2_mlb_market_value_evaluations",
+    "prestate": "NOT_PRESENT",
+    "exists": false,
+    "count": null,
+    "errorCode": "PGRST205",
+    "readback": "NOT_RUN_MIGRATION_NOT_APPLIED"
+  },
+  "postMigrationReadback": {
+    "columnContract": "NOT_RUN_MIGRATION_NOT_APPLIED",
+    "fks": "NOT_RUN_CATALOG_READBACK_UNAVAILABLE",
+    "uniqueKey": "NOT_RUN_MIGRATION_NOT_APPLIED",
+    "updateGuard": "NOT_RUN_CATALOG_READBACK_UNAVAILABLE",
+    "deleteGuard": "NOT_RUN_CATALOG_READBACK_UNAVAILABLE",
+    "immutability": "NOT_RUN_CATALOG_READBACK_UNAVAILABLE",
+    "numericStorage": "NOT_RUN_CATALOG_READBACK_UNAVAILABLE",
+    "checks": "NOT_RUN_CATALOG_READBACK_UNAVAILABLE",
+    "flags": "NOT_RUN_MIGRATION_NOT_APPLIED",
+    "temporalFields": "NOT_RUN_MIGRATION_NOT_APPLIED",
+    "rls": "NOT_RUN_CATALOG_READBACK_UNAVAILABLE",
+    "indexes": "NOT_RUN_CATALOG_READBACK_UNAVAILABLE",
+    "legacyNativeCoexistence": "NOT_ESTABLISHED_MIGRATION_NOT_APPLIED"
+  },
+  "dryFit": {
+    "planRows": 386,
+    "eligibleGames": 21,
+    "bookLevelPairs": 193,
+    "r1ValidRows": 386,
+    "livePostSchemaValidRows": 0,
+    "livePostSchemaInvalidRows": 0,
+    "missingSourceLinkages": 0,
+    "duplicateValueIdentities": 0,
+    "mathPayloadDryFit": "NOT_RUN_MIGRATION_NOT_APPLIED",
+    "classification": {
+      "INSERT_ELIGIBLE": 0,
+      "REUSE_NO_OP": 0,
+      "BLOCK_CONFLICT": 0
+    },
+    "futureValueDmlCap": "NOT_READY",
+    "idempotencyProjection": "NOT_READY"
+  },
+  "mutations": {
+    "nativeValueDml": 0,
+    "otherProductionDml": 0,
+    "productionDdl": 0,
+    "unrelatedProductionDdl": 0,
+    "providerCalls": 0,
+    "officialPicks": 0,
+    "valueBoard": "NO"
+  },
+  "readiness": {
+    "MLB_DATA_02O_R3_NATIVE_VALUE_PERSISTENCE_READY": "NO",
+    "MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_READY": "NO",
+    "MLB_DATA_02Q_VALUE_BOARD_PREP_READY": "NO"
+  }
+}

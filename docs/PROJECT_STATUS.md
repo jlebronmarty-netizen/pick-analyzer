@@ -1,6 +1,13 @@
 # Project Status
 
-Last updated: 2026-09-05 22:45:00Z
+Last updated: 2026-09-05 23:05:00Z
+
+## 2026-09-05 MLB-DATA-02O-R2 Native Value Schema Migration Apply Readback Blocked
+
+- MLB-DATA-02O-R2 is classified as `MLB_DATA_02O_R2_NATIVE_VALUE_SCHEMA_MIGRATION_APPLY_READBACK_BLOCKED`. The certified R1 commit `46f5c70666e8f05c89203c6da417bd88aea7d05b` was published to `origin/main`, production aligned to that same commit on bounded poll attempt 5, and the prepared migration file passed integrity checks.
+- Codex did not apply the migration because this environment has no approved production SQL apply channel available: no Supabase CLI, no `psql`, no direct database URL channel and no protected SQL-apply route/RPC surfaced for this repo. No ad hoc SQL path was invented.
+- `public.pick2_market_value_evaluations` remains the preserved legacy value table. The stricter native full-column REST projection returns `PGRST205`, so `public.pick2_mlb_market_value_evaluations` is classified as `NOT_PRESENT` from the approved read-only surface. The 02N plan remains 386 future value rows, but live post-schema dry-fit, source-linkage classification, future value DML cap and idempotency projection are not ready until the migration is applied and catalog readback is completed.
+- Native value DML, other production DML, Codex-performed production DDL, provider calls, Official Picks and Value Board publication all remained 0/off. `MLB_DATA_02O_R3_NATIVE_VALUE_PERSISTENCE_READY = NO`, `MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_READY = NO` and `MLB_DATA_02Q_VALUE_BOARD_PREP_READY = NO`.
 
 ## 2026-09-05 MLB-DATA-02O-R1 Native Value Schema Repair Prep
 
