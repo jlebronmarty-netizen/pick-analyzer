@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 15:38:29Z
+Last updated: 2026-09-05 15:53:00Z
+
+## 2026-09-05 MLB-DATA-02K Moneyline Market Price Acquisition Prep
+
+- MLB-DATA-02K is certified as `MLB_DATA_02K_MONEYLINE_MARKET_PRICE_ACQUISITION_PREP_PARTIAL`. The 02J-R3 commit `502782e8ecfc71add9cef00242b647e798c83b42` was published to `origin/main`, production aligned on bounded poll attempt 12, and `/api/system/version` reported provider calls 0.
+- The Odds API was used once in dry-run/contract mode only for `baseball_mlb` `h2h` moneyline pricing. The provider returned 15 events and 11 books; local normalization produced 143 two-sided moneyline markets and 286 in-memory price rows with 0 American-odds, implied-probability or no-vig validation violations.
+- Provider event crosswalk to native `game_pk` passed using normalized home/away teams and start-time disambiguation: 13 matched games, 0 ambiguous events and 2 unmatched provider events. Frozen-24 prediction intersection found 13 matched games and 11 games with no provider event in the current response.
+- Market event crosswalk schema fit is `PASS` through `pick2_mlb_market_event_mappings`, but price storage schema fit is `PARTIAL`: `sports_odds_snapshots` is legacy `event_id`-rooted storage and no Pick 2-native immutable `game_pk + provider_event_id + bookmaker + market + side + timestamp/price` observation table is encoded directly. Therefore market persistence remains blocked on `PICK2_IMMUTABLE_MARKET_PRICE_STORAGE_SCHEMA_REQUIRED`.
+- Edge, EV, Official Picks, Value Board, market DML, market-value writes, prediction writes, feature/raw/model/champion mutations, production DDL, 2026 import, automation and cron changes remained 0/off. Champion `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1` and the 24 persisted current moneyline predictions are preserved. Next: `MLB_DATA_02L_CURRENT_MONEYLINE_MARKET_PERSISTENCE_SCHEMA_PREP`; do not persist prices or calculate value until that schema is certified.
 
 ## 2026-09-05 MLB-DATA-02J-R3 Current Moneyline Prediction Persistence
 
