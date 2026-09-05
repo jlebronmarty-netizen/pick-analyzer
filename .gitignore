@@ -51,6 +51,8 @@ next-env.d.ts
 # local certification response captures
 /.tmp/odds-shadow-certification/
 /.tmp/mlb-data-01b-2025-raw-statcast-import-checkpoint.json
+/.tmp/mlb-data-02h-statcast-2026/
+/.tmp/mlb-data-02h-r2-raw-resume-checkpoint.json
 
 # Local Statcast datasets - do not commit
 data/statcast/

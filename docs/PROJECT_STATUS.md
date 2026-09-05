@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 01:17:06Z
+Last updated: 2026-09-05 01:55:23Z
+
+## 2026-09-05 MLB-DATA-02I Current Moneyline Dry Inference Prep
+
+- MLB-DATA-02I is locally certified as `MLB_DATA_02I_CURRENT_MONEYLINE_DRY_INFERENCE_CERTIFIED`. The phase first published/aligned the prior 02H-R2 foundation commit `8f3c419ddc55ee218aea5dfacda4b0bec274381b`, then prepared current moneyline inference in dry-run/read-only mode only.
+- The active Champion remains `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, feature set `MLB_ML_FEATURE_SET_V1`, artifact digest `9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616`, with 76 model features and train-only median-impute/standardize preprocessing preserved.
+- Current inventory found 45 games: 24 `READY_PROBABLE_WITH_FLAG`, 0 `READY_CONFIRMED`, 8 `BLOCK_STARTER_UNKNOWN`, 0 `BLOCK_STARTER_CHANGED`, 0 `BLOCK_REQUIRED_FEATURE_MISSING` and 13 blocked by game-status/as-of guard. The 24 dry inference rows rebuilt current vectors from stored 2026 raw/native evidence with semantic parity, freshness, as-of and same-day leakage checks passing.
+- Dry probabilities are fair model probabilities only, not bets or value recommendations: home probability range 0.469129 to 0.611680, mean 0.550271, median 0.552555, stddev 0.038545, all 24 in range, 0 reproducibility failures, 0 duplicate input digests and 0 duplicate deterministic identities.
+- Future prediction DML remains unexecuted but is prepared for the next gated phase with 24 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP` and 0 `BLOCK_CONFLICT` rows. Prediction writes, prediction-result writes, market-value rows, Official Picks, odds/provider calls, feature/raw/model/champion mutations, production DDL, automation and cron changes remained 0/off. Next: `MLB_DATA_02J_CURRENT_MONEYLINE_PREDICTION_PERSISTENCE_EXECUTION`, under separate authorization only.
 
 ## 2026-09-05 MLB-DATA-02H-R2 2026 Raw Resume And Feature Completion
 
