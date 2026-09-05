@@ -1,6 +1,13 @@
 # Project Status
 
-Last updated: 2026-09-05 02:17:06Z
+Last updated: 2026-09-05 14:35:21Z
+
+## 2026-09-05 MLB-DATA-02J-R2 Manual Prediction Schema Migration Readback
+
+- MLB-DATA-02J-R2 is certified as `MLB_DATA_02J_R2_PREDICTION_SCHEMA_MIGRATION_PRODUCTION_CERTIFIED`. The user manually applied only `supabase/migrations/202609050001_pick2_game_predictions_nullable_feature_snapshot_id_r1.sql` in the approved Supabase Production SQL Editor; Codex did not reapply the migration and performed 0 production DDL.
+- User-supplied SQL readback proves `public.pick2_game_predictions.feature_snapshot_id` still exists as `uuid`, is now nullable, and preserves FK `pick2_game_predictions_feature_snapshot_id_fkey` to `public.pick2_feature_snapshots(id)`.
+- Fresh read-only certification confirmed local HEAD, origin/main and production remain aligned to `f07ec6147caed095daab42bc09cc9dc898b51a36`, provider calls remain 0, and production prediction state remains zero: predictions 0, prediction results 0 and market-value rows 0.
+- Frozen 02I prediction readiness was rebuilt without writes for the exact 24 rows at `2026-09-05T01:51:21.667Z`; postmigration dry classification is 24 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP`, 0 `BLOCK_CONFLICT`, 0 nullability violations, 0 FK violations and 0 schema violations. Champion `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, raw 2025 rows 712,528, raw 2026 rows 622,364 and feature foundations are preserved. Next: `MLB_DATA_02J_R3_CURRENT_MONEYLINE_PREDICTION_DML_RETRY`, under separate authorization only.
 
 ## 2026-09-05 MLB-DATA-02J-R1 Prediction Feature Snapshot Contract Repair
 

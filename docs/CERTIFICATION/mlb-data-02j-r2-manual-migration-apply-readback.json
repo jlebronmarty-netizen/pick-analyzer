@@ -1,0 +1,144 @@
+{
+  "generatedAt": "2026-09-05T14:35:21.453Z",
+  "project": "MLB_DATA_02J_R2_MANUAL_MIGRATION_APPLY_READBACK",
+  "certificationVerdict": "MLB_DATA_02J_R2_PREDICTION_SCHEMA_MIGRATION_PRODUCTION_CERTIFIED",
+  "repository": {
+    "branch": "main",
+    "localHead": "f07ec6147caed095daab42bc09cc9dc898b51a36",
+    "originMain": "f07ec6147caed095daab42bc09cc9dc898b51a36",
+    "statusShort": "## main...origin/main\n?? scripts/mlb-data-02j-r2-manual-migration-apply-readback-validate.mjs\n?? scripts/mlb-data-02j-r2-manual-migration-apply-readback.mjs",
+    "targetCommit": "f07ec6147caed095daab42bc09cc9dc898b51a36"
+  },
+  "production": {
+    "productionCommit": "f07ec6147caed095daab42bc09cc9dc898b51a36",
+    "providerCallsMade": 0,
+    "alignment": "PASS"
+  },
+  "manualMigration": {
+    "state": "YES_USER_CONFIRMED",
+    "migrationPath": "supabase/migrations/202609050001_pick2_game_predictions_nullable_feature_snapshot_id_r1.sql",
+    "codexReappliedMigration": "NO",
+    "authorizedEffect": "DROP_NOT_NULL_ONLY",
+    "logicalSchemaMutationCount": 1
+  },
+  "userManualReadback": {
+    "column": {
+      "table_schema": "public",
+      "table_name": "pick2_game_predictions",
+      "column_name": "feature_snapshot_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    "foreignKey": {
+      "constraint_name": "pick2_game_predictions_feature_snapshot_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "feature_snapshot_id",
+      "foreign_table_schema": "public",
+      "foreign_table_name": "pick2_feature_snapshots",
+      "foreign_column_name": "id"
+    }
+  },
+  "migrationFileIntegrity": {
+    "path": "supabase/migrations/202609050001_pick2_game_predictions_nullable_feature_snapshot_id_r1.sql",
+    "exactPreparedMigration": true,
+    "targetTable": "public.pick2_game_predictions",
+    "targetColumn": "feature_snapshot_id",
+    "operation": "DROP NOT NULL",
+    "unrelatedMutationCount": 0
+  },
+  "applicationContract": {
+    "selectedRepair": "OPTION_A",
+    "nativeNullSnapshotContract": "PASS",
+    "legacyCompatibility": "PASS",
+    "nullableNativeRowsPreserve": [
+      "game_pk",
+      "model_version_id",
+      "model_version",
+      "feature_set",
+      "model_artifact_digest",
+      "frozen_input_digest",
+      "as_of",
+      "probabilities",
+      "starter_status",
+      "data_completeness"
+    ],
+    "legacyRowsMayStillPopulateFeatureSnapshotId": true
+  },
+  "frozen24": {
+    "rebuild": "PASS",
+    "rowCount": 24,
+    "asOf": "2026-09-05T01:51:21.667Z",
+    "gamePkCount": 24,
+    "inputDigestCount": 24,
+    "duplicateIdentities": 0,
+    "probabilityMismatches": 0,
+    "postmigrationDryRun": {
+      "insertEligible": 24,
+      "reuseNoOp": 0,
+      "blockConflict": 0,
+      "featureSnapshotNullabilityViolations": 0,
+      "fkViolations": 0,
+      "schemaViolations": 0
+    },
+    "idempotencyProjection": {
+      "firstExecution": {
+        "inserts": 24,
+        "reuseNoOp": 0,
+        "blockConflict": 0
+      },
+      "secondExecution": {
+        "inserts": 0,
+        "reuseNoOp": 24,
+        "blockConflict": 0
+      }
+    }
+  },
+  "productionReadback": {
+    "matchingFrozenIdentities": 0,
+    "counts": {
+      "predictions": 0,
+      "predictionResults": 0,
+      "marketValueRows": 0,
+      "raw2025": 712528,
+      "raw2026": 622364,
+      "featureSnapshots": 126464
+    },
+    "champion": {
+      "count": 1,
+      "modelVersion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+      "artifactDigest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+      "featureSet": "MLB_ML_FEATURE_SET_V1"
+    }
+  },
+  "mutationAccounting": {
+    "userManualProductionDdl": "YES_USER_CONFIRMED",
+    "authorizedSchemaEffect": "1 nullable-state change",
+    "codexProductionDdl": 0,
+    "codexProductionDml": 0,
+    "predictionWrites": 0,
+    "predictionResultWrites": 0,
+    "marketValueWrites": 0,
+    "modelWrites": 0,
+    "featureWrites": 0,
+    "rawWrites": 0,
+    "providerCalls": 0
+  },
+  "flags": {
+    "MLB_02J_R2_MANUAL_READBACK_ALIGNMENT": "PASS",
+    "MLB_02J_R2_MANUAL_MIGRATION_APPLIED": "YES_USER_CONFIRMED",
+    "MLB_02J_R2_FEATURE_SNAPSHOT_NULLABILITY": "PASS",
+    "MLB_02J_R2_FEATURE_SNAPSHOT_FK_PRESERVED": "PASS",
+    "MLB_02J_R2_FEATURE_SNAPSHOT_COLUMN_STATE": "PASS",
+    "MLB_02J_R2_NATIVE_NULL_SNAPSHOT_CONTRACT": "PASS",
+    "MLB_02J_R2_LEGACY_COMPATIBILITY": "PASS",
+    "MLB_02J_R2_FROZEN24_REBUILD": "PASS",
+    "MLB_02J_R2_FROZEN24_POSTMIGRATION_DRY_RUN": "PASS",
+    "MLB_02J_R2_PREDICTION_IDENTITY_PRESERVED": "PASS",
+    "MLB_02J_R2_PREDICTION_IDEMPOTENCY_PROJECTED": "PASS",
+    "MLB_02J_R2_PREDICTION_ZERO_STATE": "PASS",
+    "MLB_02J_R2_CHAMPION_PRESERVED": "PASS",
+    "MLB_02J_R2_DATA_FOUNDATION_PRESERVED": "PASS",
+    "MLB_02J_R2_MANUAL_DDL_ACCOUNTING": "PASS",
+    "MLB_02J_R2_PROVIDER_CALLS": 0
+  }
+}
