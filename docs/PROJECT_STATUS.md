@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 22:15:44Z
+Last updated: 2026-09-05 22:25:00Z
+
+## 2026-09-05 MLB-DATA-02N Current Moneyline Value Evaluation Prep
+
+- MLB-DATA-02N is certified as `MLB_DATA_02N_CURRENT_MONEYLINE_VALUE_EVALUATION_PREP_CERTIFIED`. The certified 02M-R3 commit `55589982cd56dd767f72b967d704785a628700db` was published to `origin/main`, production aligned on bounded poll attempt 6, and value prep used only persisted predictions, persisted R3 market observations, persisted market mappings and the active Champion.
+- Live read-only baselines passed: Champion `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, 24 persisted predictions, 492 immutable market observations, 29 market event mappings, 246 complete two-sided market states, 11 books, 0 duplicate prediction identities, 0 duplicate observation identities and 0 market-value rows.
+- Prediction-market intersection produced 21 eligible pregame predictions, 2 `NO_PROVIDER_EVENT` exclusions, 1 started-game exclusion, 0 partial markets, 0 ambiguous crosswalks, 0 stale-market exclusions and 0 other temporal blockers. Same-book pairing rebuilt 193 complete book-level pairs and 386 side-level analytical candidates; no cross-book no-vig pairing was used.
+- Implied probability, overround, no-vig, side alignment, edge, unit-EV, best-price, consensus and dispersion audits passed. Edge rows: 386 candidates, 193 positive, 193 negative, max positive edge 0.095882 and median edge approximately 0. Unit-EV rows: 137 positive, 249 negative, max EV 0.240928 and median EV -0.034990. Consensus uses simple median no-vig probability across valid fresh books.
+- 02N remains analytical only: no market-value rows were written, no Official Picks were created, no Value Board was published, no provider calls were made, no odds refresh occurred, no bankroll/Kelly/stake recommendation was produced, no prediction/result/model/raw/feature/schema mutation occurred and automation/cron remained off. Historical value limitation is explicit because 2025 market prices remain unavailable and the Champion test AUC is approximately 0.551. `MLB_DATA_02O_CURRENT_MONEYLINE_VALUE_EVALUATION_PERSISTENCE_READY = YES`; `MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_READY = YES`.
 
 ## 2026-09-05 MLB-DATA-02M-R3 Fresh Market Sample Persistence
 
