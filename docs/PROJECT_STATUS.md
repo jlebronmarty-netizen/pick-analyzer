@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 17:07:16Z
+Last updated: 2026-09-05 21:55:01Z
+
+## 2026-09-05 MLB-DATA-02M-R2 Fresh Market Sample Acquisition
+
+- MLB-DATA-02M-R2 is certified as `MLB_DATA_02M_R2_FRESH_MARKET_SAMPLE_ACQUISITION_CERTIFIED`. The R1 commit `13ae2002fd7c84b94ff0c531380082d503e1057f` was published to `origin/main`, production aligned on bounded poll attempt 12, and then exactly one authorized The Odds API current MLB `h2h` moneyline call was made.
+- The fresh sample is isolated from the old partial 02K evidence. It has sample id `MLB_MONEYLINE_MARKET_SAMPLE_2026-09-05_215501709Z_b88656b393ee`, source response digest `6cd70d8e720a4efb1b0eb00dcec430dd48546ce388aa251eeb15261c5a7f550a`, normalized sample digest `b88656b393eec8dc08d6a57ea37316497a8e2ca6bafde517c2e0806bc1703730` and complete row-level artifact coverage with no 25-row truncation.
+- Provider response inventory: 29 current MLB events, 11 books, 29 matched native `game_pk`, 0 unmatched events, 0 ambiguous events and doubleheader-safe matching by home team, away team and scheduled start. The frozen normalized sample contains 492 valid MONEYLINE rows: 246 HOME, 246 AWAY, 246 complete two-sided markets, 0 partial markets, 0 invalid odds rows and 0 duplicate observation identities.
+- Read-only production prewrite classification passed: market event mappings 29 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP`, 0 `BLOCK_CONFLICT`; market price observations 492 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP`, 0 `BLOCK_CONFLICT`. Future DML caps are derived only from the fresh sample: mapping insert cap 29 and observation insert cap 492; projected second pass is 0 inserts, all reuses and 0 conflicts.
+- Market DML remains 0, market-value writes 0, edge/EV work NO, Official Picks 0, Value Board NO, prediction mutations 0, model/raw/feature/DDL mutations 0 and all non-Odds providers 0 calls. `MLB_DATA_02M_R3_FRESH_MARKET_SAMPLE_PERSISTENCE_READY = YES`; `MLB_DATA_02N_CURRENT_MONEYLINE_VALUE_EVALUATION_PREP_READY = NO` until the fresh market observations are actually persisted.
 
 ## 2026-09-05 MLB-DATA-02M-R1 Exact Market Sample Recovery
 
