@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-04 22:01:27Z
+Last updated: 2026-09-05 01:17:06Z
+
+## 2026-09-05 MLB-DATA-02H-R2 2026 Raw Resume And Feature Completion
+
+- MLB-DATA-02H-R2 is certified as `MLB_DATA_02H_R2_2026_RAW_INSERT_TIMEOUT_RESUME_AND_FEATURE_DML_COMPLETION_CERTIFIED`. Production remained aligned to `cc85c0d777511fcad9f9ecc8c2dec32a175ca268`; the R2 executor used date-partitioned source-identity reconciliation and a 100-row raw insert batch size to avoid the prior production timeout path.
+- The rebuilt 2026 source plan contains 622,364 certified raw Statcast pitch identities across 2,108 completed games, with digest `6ebfea5753706781db16f486bd8ad386d67f4e5ab214f3bde77ab7ac18c0f767`, 0 duplicate source identities and 0 missing represented games. The cumulative R2 resume completed the prior 465,864 missing raw identities; final readback is 622,364 2026 raw rows, 622,364 certified identities, 0 missing, 0 unexpected, 0 duplicate existing identities and 0 conflicts.
+- The native 2026 inventory is preserved with 2,154 2026 native games and 1,794 total native players; the final raw identity readback has 0 missing pitcher MLBAM ids and 0 missing batter MLBAM ids. The 2025 foundation is preserved with 712,528 raw rows and 67,433 2025 snapshots.
+- 2026 feature DML completed only the certified pregame feature foundation: snapshots 59,031; team 3,902; starter 3,902; bullpen 3,902; batter 39,521; matchup 1,951; first inning 1,951; offense 3,902 logical rows. Feature row parity, native-key uniqueness, as-of, leakage, null-policy, sanity and idempotency checks passed.
+- Current moneyline dry-inference inventory is ready for 37 games with complete certified feature inputs; 8 current/future games remain blocked by unknown starter state. No predictions, prediction results, market-value rows, Official Picks, model writes, Champion changes, production DDL, odds/value work, automation or cron changes occurred. Next: `MLB_DATA_02I_CURRENT_MONEYLINE_DRY_INFERENCE_PREP`; do not write predictions or calculate market value without separate authorization.
 
 ## 2026-09-04 MLB-DATA-02G Moneyline Prediction DML Prep
 
