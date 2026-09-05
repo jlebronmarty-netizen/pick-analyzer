@@ -1,0 +1,195 @@
+{
+  "generatedAt": "2026-09-05T23:21:47.752Z",
+  "project": "MLB_DATA_02O_R1_NATIVE_VALUE_SCHEMA_REPAIR_PREP",
+  "certificationVerdict": "MLB_DATA_02O_R1_NATIVE_VALUE_SCHEMA_REPAIR_PREP_CERTIFIED",
+  "publication": {
+    "branch": "main",
+    "localHead": "863e0a3825114b2fae1d52c76a72e2bf96e9fb94",
+    "originMain": "863e0a3825114b2fae1d52c76a72e2bf96e9fb94",
+    "productionCommit": "863e0a3825114b2fae1d52c76a72e2bf96e9fb94",
+    "MLB_02O_R1_PREPUBLISH_STATE": "PASS",
+    "MLB_02O_R1_02O_COMMIT_SCOPE_CERTIFIED": "YES",
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "legacySchema": {
+    "table": "public.pick2_market_value_evaluations",
+    "definition": "\n  id uuid primary key default gen_random_uuid(),\n  deterministic_identity text not null unique,\n  prediction_id uuid not null references public.pick2_game_predictions(id),\n  odds_snapshot_id text not null references public.sports_odds_snapshots(id),\n  sportsbook text not null,\n  market text not null,\n  selection text not null,\n  line numeric,\n  odds numeric,\n  implied_probability numeric,\n  no_vig_probability numeric,\n  pick_probability numeric not null,\n  edge numeric,\n  expected_value numeric,\n  action text not null default 'NO_BET',\n  evaluated_at timestamptz not null default timezone('utc', now()),\n  metadata jsonb not null default '{}'::jsonb,\n  created_at timestamptz not null default timezone('utc', now()),\n  check (action in ('BET', 'NO_BET', 'REVIEW', 'UNAVAILABLE')),\n  check (implied_probability is null or (implied_probability >= 0 and implied_probability <= 1)),\n  check (no_vig_probability is null or (no_vig_probability >= 0 and no_vig_probability <= 1)),\n  check (pick_probability >= 0 and pick_probability <= 1)",
+    "columns": [
+      "id",
+      "deterministic_identity",
+      "prediction_id",
+      "odds_snapshot_id",
+      "sportsbook",
+      "market",
+      "selection",
+      "line",
+      "odds",
+      "implied_probability",
+      "no_vig_probability",
+      "pick_probability",
+      "edge",
+      "expected_value",
+      "action",
+      "evaluated_at",
+      "metadata",
+      "created_at"
+    ],
+    "fks": [
+      "prediction_id -> public.pick2_game_predictions(id)",
+      "odds_snapshot_id -> public.sports_odds_snapshots(id)"
+    ],
+    "uniqueConstraints": [
+      "deterministic_identity"
+    ],
+    "indexes": [
+      "primary key id",
+      "unique deterministic_identity"
+    ],
+    "timestamps": [
+      "evaluated_at",
+      "created_at"
+    ],
+    "oddsSnapshotIdContract": "odds_snapshot_id text not null references public.sports_odds_snapshots(id)",
+    "predictionLinkage": "prediction_id uuid not null references public.pick2_game_predictions(id)",
+    "immutabilityAssumptions": "No dedicated legacy update/delete trigger in foundation migration.",
+    "MLB_02O_R1_LEGACY_VALUE_SCHEMA_INVENTORY": "COMPLETE",
+    "MLB_02O_R1_LEGACY_ODDS_SNAPSHOT_ROOT": "PASS",
+    "MLB_02O_R1_LEGACY_VALUE_STATE_PRESERVED": "PASS"
+  },
+  "storageStrategy": {
+    "options": {
+      "OPTION_A": "new dedicated native MLB value-evaluation table",
+      "OPTION_B": "additive extension to legacy odds-snapshot table",
+      "OPTION_C": "reuse existing native value table"
+    },
+    "selected": "OPTION_A",
+    "MLB_02O_R1_SELECTED_NATIVE_VALUE_STORAGE_STRATEGY": "OPTION_A",
+    "nativeTableName": "public.pick2_mlb_market_value_evaluations",
+    "MLB_02O_R1_NATIVE_VALUE_TABLE_NAME": "public.pick2_mlb_market_value_evaluations"
+  },
+  "nativeContract": {
+    "requiredFields": [
+      "id",
+      "value_identity",
+      "prediction_id",
+      "game_pk",
+      "side",
+      "model_version",
+      "model_probability",
+      "provider",
+      "bookmaker_key",
+      "bookmaker_name",
+      "market",
+      "american_odds",
+      "home_market_observation_id",
+      "away_market_observation_id",
+      "selected_side_market_observation_id",
+      "raw_implied_probability",
+      "no_vig_probability",
+      "edge",
+      "unit_ev",
+      "consensus_probability",
+      "consensus_edge",
+      "market_dispersion",
+      "book_count",
+      "market_freshness",
+      "starter_status",
+      "temporal_eligibility",
+      "eligibility_flags",
+      "risk_flags",
+      "evaluation_method_version",
+      "prediction_as_of",
+      "provider_last_update",
+      "market_acquired_at",
+      "evaluated_at",
+      "source_payload_digest",
+      "evaluation_payload_digest",
+      "created_at"
+    ],
+    "probabilityStorageType": "numeric(18,15)",
+    "edgeEvStorageType": "numeric(18,15)",
+    "americanOddsStorage": "integer",
+    "marketScope": "MLB MONEYLINE HOME/AWAY",
+    "MLB_02O_R1_NATIVE_VALUE_FIELD_CONTRACT": "PASS",
+    "MLB_02O_R1_PREDICTION_FK_CONTRACT": "PASS",
+    "MLB_02O_R1_GAME_FK_CONTRACT": "PASS",
+    "MLB_02O_R1_MARKET_OBSERVATION_FK_CONTRACT": "PASS",
+    "MLB_02O_R1_MARKET_PAIR_CONSISTENCY_CONTRACT": "PASS",
+    "MLB_02O_R1_VALUE_IDENTITY_CONTRACT": "PASS",
+    "MLB_02O_R1_VALUE_IDENTITY_COLLISION_GUARD": "PASS",
+    "MLB_02O_R1_VALUE_UNIQUE_KEY_CONTRACT": "PASS",
+    "MLB_02O_R1_VALUE_IMMUTABILITY_CONTRACT": "PASS",
+    "MLB_02O_R1_VALUE_ROW_MUTATION_GUARD": "PASS",
+    "MLB_02O_R1_PROBABILITY_STORAGE_CONTRACT": "PASS",
+    "MLB_02O_R1_VALUE_NUMERIC_STORAGE_CONTRACT": "PASS",
+    "MLB_02O_R1_AMERICAN_ODDS_STORAGE": "PASS",
+    "MLB_02O_R1_MARKET_SCOPE_CONTRACT": "PASS",
+    "MLB_02O_R1_VALUE_CHECK_CONTRACT": "PASS",
+    "MLB_02O_R1_BOOK_IDENTITY_CONTRACT": "PASS",
+    "MLB_02O_R1_PRICE_REFERENCE_SEPARATION": "PASS",
+    "MLB_02O_R1_TEMPORAL_FIELD_CONTRACT": "PASS",
+    "MLB_02O_R1_TEMPORAL_ELIGIBILITY_CONTRACT": "PASS",
+    "MLB_02O_R1_ELIGIBILITY_FLAG_CONTRACT": "PASS",
+    "MLB_02O_R1_RISK_FLAG_CONTRACT": "PASS",
+    "MLB_02O_R1_MODEL_VERSION_PROVENANCE": "PASS",
+    "MLB_02O_R1_NO_UNSUPPORTED_PROFITABILITY_SEMANTICS": "PASS",
+    "MLB_02O_R1_VALUE_RLS_CONTRACT": "PASS",
+    "MLB_02O_R1_VALUE_READ_POLICY": "READY",
+    "MLB_02O_R1_VALUE_INDEX_PLAN": "PASS"
+  },
+  "migration": {
+    "required": true,
+    "path": "supabase/migrations/202609050003_pick2_mlb_native_market_value_evaluations_v1.sql",
+    "MLB_02O_R1_FORWARD_MIGRATION_READY": "YES",
+    "MLB_02O_R1_MIGRATION_SAFETY": "PASS",
+    "additiveOnly": true,
+    "legacyTablePreserved": true,
+    "productionApplied": false
+  },
+  "applicationContracts": {
+    "typePath": "src/types/pick2-native-market-value.ts",
+    "MLB_02O_R1_VALUE_TYPE_CONTRACT": "READY",
+    "MLB_02O_R1_VALUE_INSERT_CLASSIFIER": "READY",
+    "MLB_02O_R1_VALUE_READBACK_CONTRACT": "READY"
+  },
+  "dryFit": {
+    "planRows": 386,
+    "eligibleGames": 21,
+    "bookLevelPairs": 193,
+    "validRows": 386,
+    "invalidRows": 0,
+    "duplicateValueIdentities": 0,
+    "missingSourceLinkages": 0,
+    "mathPayloadRows": 386,
+    "MLB_02O_R1_02N_PLAN_REBUILD": "PASS",
+    "MLB_02O_R1_NATIVE_SCHEMA_DRY_FIT": "PASS",
+    "MLB_02O_R1_SOURCE_LINKAGE_DRY_RUN": "PASS",
+    "MLB_02O_R1_MATH_PAYLOAD_DRY_RUN": "PASS"
+  },
+  "futureDml": {
+    "firstPersistenceCap": 386,
+    "secondPassProjection": {
+      "inserts": 0,
+      "reuses": 386,
+      "conflicts": 0
+    },
+    "MLB_02O_R1_FUTURE_VALUE_DML_CAP_READY": "YES",
+    "MLB_02O_R1_VALUE_IDEMPOTENCY_PROJECTED": "PASS"
+  },
+  "coexistence": {
+    "MLB_02O_R1_LEGACY_NATIVE_COEXISTENCE": "PASS",
+    "MLB_02O_R1_VALUE_CONSUMER_ROUTING": "READY",
+    "routing": "Pick Analyzer MLB value layer reads public.pick2_mlb_market_value_evaluations; legacy consumers remain on public.pick2_market_value_evaluations unless separately migrated."
+  },
+  "boundaries": {
+    "MLB_02O_R1_OFFICIAL_PICK_WORK": "NO",
+    "MLB_02O_R1_VALUE_BOARD_WORK": "NO",
+    "MLB_02O_R1_PRODUCTION_DML": 0,
+    "MLB_02O_R1_PRODUCTION_DDL": 0,
+    "MLB_02O_R1_PROVIDER_CALLS": 0
+  },
+  "readiness": {
+    "MLB_DATA_02O_R2_NATIVE_VALUE_SCHEMA_MIGRATION_APPLY_READY": "YES",
+    "MLB_DATA_02O_NATIVE_VALUE_PERSISTENCE_READY": "NO"
+  }
+}

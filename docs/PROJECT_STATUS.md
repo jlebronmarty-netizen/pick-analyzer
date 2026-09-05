@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 22:35:00Z
+Last updated: 2026-09-05 22:45:00Z
+
+## 2026-09-05 MLB-DATA-02O-R1 Native Value Schema Repair Prep
+
+- MLB-DATA-02O-R1 is certified as `MLB_DATA_02O_R1_NATIVE_VALUE_SCHEMA_REPAIR_PREP_CERTIFIED`. The 02O blocked commit `863e0a3825114b2fae1d52c76a72e2bf96e9fb94` was published to `origin/main`, production aligned on bounded poll attempt 8, and R1 performed repo-only schema/contract preparation with 0 production DML, 0 production DDL and 0 provider calls.
+- Legacy value schema inventory is complete. `public.pick2_market_value_evaluations` remains preserved for legacy `sports_odds_snapshots`-rooted flows, including required `odds_snapshot_id`; no legacy table, column, FK, row or historical migration was dropped or rewritten.
+- Selected strategy is `OPTION_A`: a new additive native table, `public.pick2_mlb_market_value_evaluations`, prepared in non-applied migration `supabase/migrations/202609050003_pick2_mlb_native_market_value_evaluations_v1.sql`. The table is rooted in persisted prediction IDs, native `game_pk`, same-book HOME/AWAY market observation FKs, selected-side observation FK, model version, bookmaker identity, American odds, raw implied probability, no-vig probability, edge, unit EV, consensus fields, dispersion, freshness, temporal eligibility, machine-readable eligibility/risk flags, payload digests and immutable timestamps.
+- Migration safety passed: additive-only, legacy table preserved, no destructive DDL, no DML, RLS enabled, service-role insert/select policy, authenticated read policy, unique `value_identity`, query indexes and update/delete blocking triggers prepared. Application type/classifier/readback contracts are ready in `src/types/pick2-native-market-value.ts`.
+- The certified 02N plan dry-fit passed against the proposed native schema: 386 planned rows, 386 valid rows, 0 invalid rows, 0 duplicate value identities, 0 missing source linkages, 21 eligible games and 193 book-level pairs. Future first persistence cap is 386 rows; projected second pass is 0 inserts, 386 reuses and 0 conflicts. `MLB_DATA_02O_R2_NATIVE_VALUE_SCHEMA_MIGRATION_APPLY_READY = YES`; `MLB_DATA_02O_NATIVE_VALUE_PERSISTENCE_READY = NO` until the migration is applied and read back.
 
 ## 2026-09-05 MLB-DATA-02O Current Moneyline Value Persistence Blocked
 
