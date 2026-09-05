@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 22:25:00Z
+Last updated: 2026-09-05 22:35:00Z
+
+## 2026-09-05 MLB-DATA-02O Current Moneyline Value Persistence Blocked
+
+- MLB-DATA-02O is blocked as `MLB_DATA_02O_CURRENT_MONEYLINE_VALUE_EVALUATION_PERSISTENCE_BLOCKED` with blocker `MLB_DATA_02O_VALUE_SCHEMA_FIT_BLOCKED`. The certified 02N commit `29508243802a2298f026ca4af1be8626e0138333` was published to `origin/main`, production aligned on bounded poll attempt 6, and live source baselines passed.
+- The certified 02N value row plan remains reproducible as an analytical input set: 386 side-level value rows from 21 eligible pregame predictions and 193 complete same-book market pairs, with top analytical candidate game `823904`, AWAY at `betrivers`, edge 0.095882 and unit EV 0.240928. These remain model-market discrepancies only, not Official Picks or profitability claims.
+- Production schema fit failed safely before any value DML. Existing `pick2_market_value_evaluations` is legacy `sports_odds_snapshots`-rooted: `odds_snapshot_id` is required and references `sports_odds_snapshots(id)`, while the certified 02N source rows are linked to immutable native `pick2_mlb_market_price_observations`. The table also lacks first-class native value payload columns such as `game_pk`, side, bookmaker key, American odds, raw implied probability, unit EV, consensus fields, market observation linkage, market pair identity and evaluation method/version.
+- Value inserts attempted 0, inserted 0, reused 0, conflicts 0, failures 0, updates 0 and deletes 0. Market observation writes 0, mapping writes 0, prediction writes 0, prediction-result writes 0, model/raw/feature writes 0, provider calls 0, production DDL 0, Official Picks 0, auto recommendation NO, Value Board publication NO and automation/cron remained off.
+- `MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_READY = NO` and `MLB_DATA_02Q_VALUE_BOARD_PREP_READY = NO` until a separately authorized native value-evaluation schema repair is prepared/applied and value persistence is retried from the certified 02N artifact.
 
 ## 2026-09-05 MLB-DATA-02N Current Moneyline Value Evaluation Prep
 

@@ -1,0 +1,318 @@
+{
+  "generatedAt": "2026-09-05T22:53:27.076Z",
+  "project": "MLB_DATA_02O_CURRENT_MONEYLINE_VALUE_EVALUATION_PERSISTENCE",
+  "certificationVerdict": "MLB_DATA_02O_CURRENT_MONEYLINE_VALUE_EVALUATION_PERSISTENCE_BLOCKED",
+  "blocker": "MLB_DATA_02O_VALUE_SCHEMA_FIT_BLOCKED",
+  "publication": {
+    "branch": "main",
+    "localHead": "29508243802a2298f026ca4af1be8626e0138333",
+    "originMain": "29508243802a2298f026ca4af1be8626e0138333",
+    "productionCommit": "29508243802a2298f026ca4af1be8626e0138333",
+    "MLB_02O_PREPUBLISH_STATE": "PASS",
+    "MLB_02O_02N_COMMIT_SCOPE_CERTIFIED": "YES",
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "baselines": {
+    "champion": {
+      "count": 1,
+      "modelVersion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+      "MLB_02O_CHAMPION_BASELINE": "PASS"
+    },
+    "predictions": {
+      "count": 24,
+      "duplicateIdentities": 0,
+      "MLB_02O_PREDICTION_BASELINE": "PASS"
+    },
+    "market": {
+      "observations": 492,
+      "mappings": 29,
+      "duplicateObservationIdentities": 0,
+      "MLB_02O_MARKET_BASELINE": "PASS"
+    },
+    "valueTable": {
+      "totalRows": 0,
+      "mlbMoneylineRows": 0,
+      "matching02NCandidateIdentities": 0,
+      "MLB_02O_VALUE_TABLE_BASELINE": "PASS"
+    }
+  },
+  "schemaInventory": {
+    "source": "supabase/migrations/202608270002_pick2_data_foundation_v1.sql",
+    "liveSupportedColumnProbe": {
+      "columns": "id,deterministic_identity,prediction_id,odds_snapshot_id,sportsbook,market,selection,odds,implied_probability,no_vig_probability,pick_probability,edge,expected_value,action,evaluated_at,metadata,created_at",
+      "ok": true,
+      "error": null
+    },
+    "liveNativeColumnProbe": {
+      "columns": "game_pk,side,bookmaker_key,american_odds,raw_implied_probability,unit_ev,consensus_probability,consensus_edge,market_observation_id,market_pair_identity,evaluation_method_version,eligibility_flags,risk_flags",
+      "ok": false,
+      "error": ""
+    },
+    "columns": [
+      {
+        "name": "id",
+        "definition": "uuid primary key default gen_random_uuid()",
+        "nullable": false,
+        "references": null
+      },
+      {
+        "name": "deterministic_identity",
+        "definition": "text not null unique",
+        "nullable": false,
+        "references": null
+      },
+      {
+        "name": "prediction_id",
+        "definition": "uuid not null references public.pick2_game_predictions(id)",
+        "nullable": false,
+        "references": "public.pick2_game_predictions(id)"
+      },
+      {
+        "name": "odds_snapshot_id",
+        "definition": "text not null references public.sports_odds_snapshots(id)",
+        "nullable": false,
+        "references": "public.sports_odds_snapshots(id)"
+      },
+      {
+        "name": "sportsbook",
+        "definition": "text not null",
+        "nullable": false,
+        "references": null
+      },
+      {
+        "name": "market",
+        "definition": "text not null",
+        "nullable": false,
+        "references": null
+      },
+      {
+        "name": "selection",
+        "definition": "text not null",
+        "nullable": false,
+        "references": null
+      },
+      {
+        "name": "line",
+        "definition": "numeric",
+        "nullable": true,
+        "references": null
+      },
+      {
+        "name": "odds",
+        "definition": "numeric",
+        "nullable": true,
+        "references": null
+      },
+      {
+        "name": "implied_probability",
+        "definition": "numeric",
+        "nullable": true,
+        "references": null
+      },
+      {
+        "name": "no_vig_probability",
+        "definition": "numeric",
+        "nullable": true,
+        "references": null
+      },
+      {
+        "name": "pick_probability",
+        "definition": "numeric not null",
+        "nullable": false,
+        "references": null
+      },
+      {
+        "name": "edge",
+        "definition": "numeric",
+        "nullable": true,
+        "references": null
+      },
+      {
+        "name": "expected_value",
+        "definition": "numeric",
+        "nullable": true,
+        "references": null
+      },
+      {
+        "name": "action",
+        "definition": "text not null default 'NO_BET'",
+        "nullable": false,
+        "references": null
+      },
+      {
+        "name": "evaluated_at",
+        "definition": "timestamptz not null default timezone('utc', now())",
+        "nullable": false,
+        "references": null
+      },
+      {
+        "name": "metadata",
+        "definition": "jsonb not null default '{}'::jsonb",
+        "nullable": false,
+        "references": null
+      },
+      {
+        "name": "created_at",
+        "definition": "timestamptz not null default timezone('utc', now())",
+        "nullable": false,
+        "references": null
+      }
+    ],
+    "checks": [
+      "check (action in ('BET', 'NO_BET', 'REVIEW', 'UNAVAILABLE')),",
+      "check (implied_probability is null or (implied_probability >= 0 and implied_probability <= 1)),",
+      "check (no_vig_probability is null or (no_vig_probability >= 0 and no_vig_probability <= 1)),",
+      "check (pick_probability >= 0 and pick_probability <= 1)"
+    ],
+    "uniqueConstraints": [
+      "deterministic_identity text not null unique"
+    ],
+    "foreignKeys": [
+      "prediction_id -> pick2_game_predictions(id)",
+      "odds_snapshot_id -> sports_odds_snapshots(id)"
+    ],
+    "indexes": [
+      "implicit primary key id",
+      "implicit unique deterministic_identity"
+    ],
+    "immutabilitySemantics": "No dedicated no-update/no-delete trigger found in foundation migration for pick2_market_value_evaluations.",
+    "MLB_02O_VALUE_SCHEMA_INVENTORY": "COMPLETE"
+  },
+  "schemaFit": {
+    "MLB_02O_VALUE_SCHEMA_FIT": "BLOCKED",
+    "MLB_DATA_02O_VALUE_SCHEMA_FIT_BLOCKED": true,
+    "blockers": [
+      {
+        "code": "LEGACY_ODDS_SNAPSHOT_ID_REQUIRED",
+        "evidence": "pick2_market_value_evaluations.odds_snapshot_id is NOT NULL and references sports_odds_snapshots(id), but certified 02N rows are linked to pick2_mlb_market_price_observations and no sports_odds_snapshot row is part of the certified source state."
+      },
+      {
+        "code": "NATIVE_MARKET_OBSERVATION_LINKAGE_MISSING",
+        "evidence": "live column probe rejected native value columns: "
+      },
+      {
+        "code": "NATIVE_VALUE_PAYLOAD_COLUMNS_MISSING",
+        "evidence": "existing table lacks first-class game_pk, side, bookmaker_key, american_odds, raw_implied_probability, unit_ev, consensus_probability, consensus_edge, market pair identity and evaluation method/version columns."
+      }
+    ]
+  },
+  "certified02N": {
+    "artifactVerdict": "MLB_DATA_02N_CURRENT_MONEYLINE_VALUE_EVALUATION_PREP_CERTIFIED",
+    "valueRowPlanCount": 386,
+    "eligibleGameCount": 21,
+    "evaluatedBookLevelPairCount": 193,
+    "candidateRows": 386,
+    "positiveEdgeCount": 193,
+    "maximumEdge": 0.09588225856366206,
+    "medianEdge": -2.7755575615628914e-17,
+    "positiveEvCount": 137,
+    "maximumEv": 0.24092813941250002,
+    "medianEv": -0.03498981521906108,
+    "topAnalyticalCandidate": {
+      "evaluation_identity": "f363158eb6beb71146a3060a5aea929118efe53cc29fedbf1adc30d1376da746",
+      "prediction_id": "f8ce5fd4-56e6-4272-9888-4b30bd587f5a",
+      "game_pk": 823904,
+      "teams": "baseball_mlb:mlb:sportsdataio:team:35 @ baseball_mlb:mlb:sportsdataio:team:1",
+      "side": "AWAY",
+      "model_probability": 0.43541338225,
+      "bookmaker_key": "betrivers",
+      "bookmaker_name": "BetRivers",
+      "american_odds": 185,
+      "raw_implied_probability": 0.3508771929824561,
+      "no_vig_probability": 0.3395311236863379,
+      "model_edge": 0.09588225856366206,
+      "decimal_odds": 2.85,
+      "unit_ev": 0.24092813941250002,
+      "break_even_probability": 0.3508771929824561,
+      "ev_positive_matches_break_even": true,
+      "provider_last_update": "2026-09-05T21:54:54.000Z",
+      "acquired_at": "2026-09-05T21:55:01.709Z",
+      "commence_time": "2026-09-06T01:11:00.000Z",
+      "freshness": "FRESH",
+      "freshness_age_minutes": 0.12848333333333334,
+      "starter_status": "READY_PROBABLE_WITH_FLAG",
+      "temporal_eligibility": "PREGAME_VALID_AT_MARKET_ACQUISITION",
+      "observation_identity": "311a529f352ad225a8036defd1934d925b2db97105b591c9584c37bb304425df",
+      "pair_identity": "823904::the-odds-api::ab0bc299e48e6a4feb43688eda780998::betrivers::MONEYLINE::h2h::2026-09-05T21:54:54.000Z::2026-09-05T21:55:01.709Z",
+      "consensus_probability": 0.35347776510832385,
+      "consensus_edge": 0.08193561714167613,
+      "market_dispersion": 0.020283964718561254,
+      "best_available_price": 185,
+      "worst_available_price": 166,
+      "book_count": 11,
+      "market_disagreement": "MODERATE_DISPERSION",
+      "best_bookmaker_key": "betrivers",
+      "source_book_rows": 11,
+      "rank": 1
+    },
+    "MLB_02O_02N_VALUE_REBUILD": "NOT_EXECUTED_SCHEMA_BLOCKED",
+    "MLB_02O_VALUE_MATH_PARITY": "NOT_EXECUTED_SCHEMA_BLOCKED"
+  },
+  "valueIdentity": {
+    "valueIdentityCount": 386,
+    "duplicateValueIdentities": 0,
+    "MLB_02O_VALUE_IDENTITY_CONTRACT": "PASS",
+    "MLB_02O_VALUE_IDENTITY_UNIQUENESS": "PASS"
+  },
+  "prewriteClassification": {
+    "VALUE_ROW_PLAN_COUNT": 386,
+    "INSERT_ELIGIBLE": 0,
+    "REUSE_NO_OP": 0,
+    "BLOCK_CONFLICT": 0,
+    "MLB_02O_VALUE_PREWRITE_CLASSIFICATION": "NOT_EXECUTED_SCHEMA_BLOCKED",
+    "MLB_02O_VALUE_DML_CAP_READY": "NO",
+    "VALUE_INSERT_CAP": 0
+  },
+  "execution": {
+    "MLB_02O_VALUE_PERSISTENCE": "NOT_EXECUTED_SCHEMA_BLOCKED",
+    "attempted": 0,
+    "inserted": 0,
+    "reused": 0,
+    "conflicts": 0,
+    "failures": 0,
+    "updates": 0,
+    "deletes": 0,
+    "MLB_02O_VALUE_DML_ACCOUNTING": "PASS_ZERO_DML"
+  },
+  "readback": {
+    "finalValueRowCount": 0,
+    "MLB_02O_VALUE_ROW_PARITY": "NOT_EXECUTED_SCHEMA_BLOCKED",
+    "MLB_02O_VALUE_PAYLOAD_READBACK": "NOT_EXECUTED_SCHEMA_BLOCKED",
+    "MLB_02O_VALUE_SOURCE_LINKAGE": "NOT_EXECUTED_SCHEMA_BLOCKED",
+    "MLB_02O_VALUE_BOOK_IDENTITY": "NOT_EXECUTED_SCHEMA_BLOCKED",
+    "MLB_02O_VALUE_MATH_READBACK": "NOT_EXECUTED_SCHEMA_BLOCKED",
+    "MLB_02O_VALUE_NO_OVERWRITE": "PASS",
+    "MLB_02O_VALUE_IMMUTABILITY": "NOT_EXECUTED_SCHEMA_BLOCKED",
+    "MLB_02O_VALUE_IDEMPOTENCY": "NOT_EXECUTED_SCHEMA_BLOCKED"
+  },
+  "limitations": {
+    "MLB_02O_MODEL_LIMITATION_PRESERVED": "PASS",
+    "modelLimitation": "Champion test AUC approximately 0.551; model-market discrepancy is not proven mispricing.",
+    "MLB_02O_HISTORICAL_LIMITATION_PRESERVED": "PASS",
+    "historicalLimitation": "No historical ROI, validated profitability, CLV advantage or proven winning threshold is certified."
+  },
+  "boundaries": {
+    "MLB_02O_OFFICIAL_PICK_WORK": "NO",
+    "officialPicksCreated": 0,
+    "promotedOfficialPicks": 0,
+    "MLB_02O_AUTO_RECOMMENDATION": "NO",
+    "MLB_02O_VALUE_BOARD_PUBLICATION": "NO",
+    "MLB_02O_PROVIDER_CALLS": 0,
+    "MLB_02O_MARKET_SOURCE_WRITES": 0,
+    "MLB_02O_PREDICTION_WRITES": 0,
+    "predictionResultWrites": 0,
+    "MLB_02O_FOUNDATION_PRESERVED": "PASS",
+    "MLB_02O_PRODUCTION_DML_BOUNDARY": "PASS_ZERO_DML",
+    "MLB_02O_PRODUCTION_DDL": 0,
+    "MLB_02O_AUTOMATION_STATE": "OFF",
+    "cronChanges": 0
+  },
+  "readiness": {
+    "MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_READY": "NO",
+    "MLB_DATA_02Q_VALUE_BOARD_PREP_READY": "NO"
+  },
+  "humanReadableAudit": {
+    "path": "docs/CERTIFICATION/mlb-data-02o-current-moneyline-value-persistence-audit.md",
+    "MLB_02O_HUMAN_READABLE_VALUE_PERSISTENCE_AUDIT": "READY"
+  }
+}
