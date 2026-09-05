@@ -1,0 +1,144 @@
+{
+  "generatedAt": "2026-09-05T15:38:29.607Z",
+  "project": "MLB_DATA_02J_R3_CURRENT_MONEYLINE_PREDICTION_DML_RETRY",
+  "certificationVerdict": "MLB_DATA_02J_R3_CURRENT_MONEYLINE_PREDICTION_PERSISTENCE_CERTIFIED",
+  "publication": {
+    "publicationRecovered": "PASS",
+    "localHead": "c8de8a17746ef8ab607862ccb8e64c2a3129b209",
+    "originMain": "c8de8a17746ef8ab607862ccb8e64c2a3129b209",
+    "productionCommit": "c8de8a17746ef8ab607862ccb8e64c2a3129b209",
+    "deploymentPollAttempts": 12,
+    "providerCallsMade": 0
+  },
+  "schemaRepairReadback": {
+    "dataType": "uuid",
+    "nullable": "YES",
+    "fkTarget": "public.pick2_feature_snapshots(id)",
+    "MLB_02J_R3_SCHEMA_REPAIR_READBACK": "PASS"
+  },
+  "frozen": {
+    "count": 24,
+    "asOf": "2026-09-05T01:51:21.667Z",
+    "gameSetCount": 24,
+    "payloadParity": "PASS",
+    "MLB_02J_R3_FROZEN24_ARTIFACT_READBACK": "PASS",
+    "MLB_02J_R3_FROZEN24_PAYLOAD_PARITY": "PASS"
+  },
+  "champion": {
+    "count": 1,
+    "modelVersion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+    "featureSet": "MLB_ML_FEATURE_SET_V1",
+    "artifactDigest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+    "MLB_02J_R3_CHAMPION_READBACK": "PASS",
+    "MLB_02J_R3_CHAMPION_PRESERVED": "PASS"
+  },
+  "prewrite": {
+    "counts": {
+      "predictions": 0,
+      "matchingFrozenIdentities": 0,
+      "predictionResults": 0,
+      "marketValueRows": 0,
+      "raw2025": 712528,
+      "raw2026": 622364
+    },
+    "insertEligible": 24,
+    "reuseNoOp": 0,
+    "blockConflict": 0,
+    "actualDmlCap": 24,
+    "MLB_02J_R3_PREWRITE_BASELINE": "PASS",
+    "MLB_02J_R3_PREWRITE_CLASSIFICATION": "PASS",
+    "MLB_02J_R3_DML_CAP_READY": "YES"
+  },
+  "insertExecution": {
+    "attempted": 24,
+    "inserted": 24,
+    "reused": 0,
+    "conflicts": 0,
+    "failed": 0,
+    "updates": 0,
+    "deletes": 0,
+    "insertedIdentities": [
+      "baseball_mlb::prediction::moneyline::823905::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::f1b2a046d8f66a535cffd8618dc70866fcbbe950202ab9d306e45ad58f931d5b",
+      "baseball_mlb::prediction::moneyline::823093::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::3669f28c70bf77d5cb02c19cfe453317a933f8cf6d72a827f792ae4a75db0a9b",
+      "baseball_mlb::prediction::moneyline::823577::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::9c7c91563909e065f8211f4cf65abba6d1b9bcc85e1dd8984e5de9756594cec1",
+      "baseball_mlb::prediction::moneyline::823419::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::b72894fca666415e3847a908075df1708eabf509f1b61effd37608fcf4d0bf55",
+      "baseball_mlb::prediction::moneyline::824389::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::fedf08be5ee33c711501229c67e603774adfa6173b5f94da18cf2cca15e71477",
+      "baseball_mlb::prediction::moneyline::823335::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::e751c4f27dadd6482ac0cefa0421ddf053655a57e8967b7074fefffe40fa6cc2",
+      "baseball_mlb::prediction::moneyline::824468::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::8f563b1f050fc96a97cbf4bf095026db0234284acfa45295d9f669a9c847226d",
+      "baseball_mlb::prediction::moneyline::824795::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::985cb3206dd9be75c37f41dfb9df8d8b837167fce2de2e0da2c55bcfddb93c35",
+      "baseball_mlb::prediction::moneyline::822850::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::e2b1221a011a30139315867602708a3380e0d5ee5c3ca971a749d61519852f10",
+      "baseball_mlb::prediction::moneyline::824066::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::74f5e5ae53a9967ac74cf8ca1cf626adb69d8f163936c92a17294bd8b96564a3",
+      "baseball_mlb::prediction::moneyline::824553::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::27fff76ae6013e5e2a68c60b50a4aba541bc4ff56187dfe66d1fd901f8cf6436",
+      "baseball_mlb::prediction::moneyline::824145::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::e3d97964268f0b1ed06f42da7a1753e9e8b79189d01e43a58d2d1f41f3f72fc4",
+      "baseball_mlb::prediction::moneyline::823257::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::130b8294b06264b32e99dbd5a6bbd67cc99f389f385f2201bce79c048c94764d",
+      "baseball_mlb::prediction::moneyline::824310::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::3f0ac829b1f87952d342d01fe1c7205cc8c4bc7091d7e854a47dfbe62121f5ff",
+      "baseball_mlb::prediction::moneyline::823904::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::d6027bc6d5643992f8f3349a907f5b70be253ecaa6d418d75ed2d7b266089be6",
+      "baseball_mlb::prediction::moneyline::824469::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::c90b7f8282b932534289f425241b84c8182be82d6885bf5bac617f2a003be6fb",
+      "baseball_mlb::prediction::moneyline::823417::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::9a5fdac402142398f0607c7269f58c8fb24062278907411bd4dfc56f1f8eb727",
+      "baseball_mlb::prediction::moneyline::824794::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::68baea5a2c6e99931091bda64ae9ac45541d9c310a2fd330205c4e7d1aa5f17b",
+      "baseball_mlb::prediction::moneyline::823336::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::4b5b926123125b1ee21b7472b8703003c3f2e591eddfc34352adeb93b9c0d262",
+      "baseball_mlb::prediction::moneyline::824385::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::cc078c20038541b2560a6b2be2567fef239d0234225a695fbf5277b2828bb777",
+      "baseball_mlb::prediction::moneyline::824142::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::9abfcac5d0a7857d6b1a9fddfc1d9b41f27196c31cdffb08cc483544300b4fc2",
+      "baseball_mlb::prediction::moneyline::824309::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::3d055fd82bfb9ea67f0da3face27df11e42fe05023e7c5fd056ba9a0aef4d013",
+      "baseball_mlb::prediction::moneyline::823091::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::25601a5819f191eec8d191fbfc314478f9d28b203d54cfba1b818061498a0477",
+      "baseball_mlb::prediction::moneyline::824552::MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1::85613791d32d1e6925a41f016b80fdc55a1fab4d049a6d61632daf626a9a950f"
+    ],
+    "MLB_02J_R3_PREDICTION_INSERT_EXECUTION": "PASS",
+    "MLB_02J_R3_PREDICTION_DML_ACCOUNTING": "PASS"
+  },
+  "postwrite": {
+    "finalFrozenPredictionCount": 24,
+    "rowParity": "PASS",
+    "payloadReadback": "PASS",
+    "probabilityReadback": "PASS",
+    "nullSnapshotReadback": "PASS",
+    "nullSnapshotCount": 24,
+    "duplicateIdentities": 0,
+    "idempotency": {
+      "insertEligible": 0,
+      "reuseNoOp": 24,
+      "blockConflict": 0
+    },
+    "finalCounts": {
+      "predictions": 24,
+      "predictionResults": 0,
+      "marketValueRows": 0,
+      "raw2025": 712528,
+      "raw2026": 622364
+    },
+    "MLB_02J_R3_PREDICTION_ROW_PARITY": "PASS",
+    "MLB_02J_R3_PREDICTION_PAYLOAD_READBACK": "PASS",
+    "MLB_02J_R3_PROBABILITY_READBACK": "PASS",
+    "MLB_02J_R3_NATIVE_NULL_SNAPSHOT_READBACK": "PASS",
+    "MLB_02J_R3_PREDICTION_IDENTITY_UNIQUENESS": "PASS",
+    "MLB_02J_R3_PREDICTION_IDEMPOTENCY": "PASS"
+  },
+  "boundaries": {
+    "predictionResultWrites": 0,
+    "marketValueWrites": 0,
+    "officialPicksCreated": 0,
+    "providerCalls": 0,
+    "rawWrites": 0,
+    "featureWrites": 0,
+    "modelWrites": 0,
+    "productionDml": 24,
+    "productionDdl": 0,
+    "MLB_02J_R3_RESULT_SEPARATION": "PASS",
+    "MLB_02J_R3_MARKET_VALUE_SEPARATION": "PASS",
+    "MLB_02J_R3_OFFICIAL_PICK_SEPARATION": "PASS",
+    "MLB_02J_R3_PROVIDER_CALLS": 0,
+    "MLB_02J_R3_FOUNDATION_PRESERVED": "PASS",
+    "MLB_02J_R3_PRODUCTION_DML_BOUNDARY": "PASS",
+    "MLB_02J_R3_PRODUCTION_DDL": 0
+  },
+  "semantics": {
+    "frozenAsOfSemantics": "PASS",
+    "futureRefreshContract": "READY",
+    "oddsApiAuthorized": "NO",
+    "marketLayerPrepReadiness": "YES",
+    "MLB_02J_R3_FROZEN_ASOF_SEMANTICS": "PASS",
+    "MLB_02J_R3_FUTURE_REFRESH_CONTRACT": "READY",
+    "MLB_DATA_02K_MONEYLINE_MARKET_PRICE_ACQUISITION_PREP_READY": "YES",
+    "MLB_02J_R3_THE_ODDS_API_AUTHORIZED": "NO"
+  }
+}

@@ -1,6 +1,13 @@
 # Project Status
 
-Last updated: 2026-09-05 14:35:21Z
+Last updated: 2026-09-05 15:38:29Z
+
+## 2026-09-05 MLB-DATA-02J-R3 Current Moneyline Prediction Persistence
+
+- MLB-DATA-02J-R3 is certified as `MLB_DATA_02J_R3_CURRENT_MONEYLINE_PREDICTION_PERSISTENCE_CERTIFIED`. The R2 certification commit `c8de8a17746ef8ab607862ccb8e64c2a3129b209` was published to `origin/main`, production aligned on bounded poll attempt 12, and `/api/system/version` reported provider calls 0.
+- The resumed R3 workflow reused only the frozen 02I prediction artifact: 24 moneyline rows, as-of `2026-09-05T01:51:21.667Z`, Champion `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, feature set `MLB_ML_FEATURE_SET_V1`, artifact digest `9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616`, unchanged game set, probabilities, input digests and deterministic identities.
+- Fresh prewrite classification found 0 existing predictions, 24 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP` and 0 `BLOCK_CONFLICT`; the actual DML cap was 24. Execution inserted exactly 24 prediction rows with `feature_snapshot_id = null`, 0 failures, 0 conflicts, 0 updates and 0 deletes.
+- Postwrite readback confirmed all 24 frozen identities exist exactly once, payload parity PASS, probability complement PASS, null snapshot readback PASS with 24 nulls, and second-pass idempotency as 0 inserts, 24 reuses and 0 conflicts. Prediction results remain 0, market-value rows remain 0, Official Picks remain 0, provider calls remain 0, production DDL remains 0, and raw/feature/model/Champion state is preserved. `MLB_DATA_02K_MONEYLINE_MARKET_PRICE_ACQUISITION_PREP_READY = YES`; odds/value work remains unauthorized.
 
 ## 2026-09-05 MLB-DATA-02J-R2 Manual Prediction Schema Migration Readback
 
