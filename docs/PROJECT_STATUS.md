@@ -1,6 +1,13 @@
 # Project Status
 
-Last updated: 2026-09-05 02:07:40Z
+Last updated: 2026-09-05 02:17:06Z
+
+## 2026-09-05 MLB-DATA-02J-R1 Prediction Feature Snapshot Contract Repair
+
+- MLB-DATA-02J-R1 is locally certified as `MLB_DATA_02J_R1_PREDICTION_FEATURE_SNAPSHOT_CONTRACT_REPAIR_CERTIFIED`. The root cause remains the 02J production blocker: `pick2_game_predictions.feature_snapshot_id` is `NOT NULL`, while the frozen 24 current-state 02I predictions have no one singular feature snapshot row representing the full ordered 76-feature inference payload.
+- The snapshot audit classifies `pick2_feature_snapshots` as domain/entity/as-of feature snapshots, not a current full-game prediction input bundle. For the frozen 24 02I predictions, candidate full-payload prediction snapshots = 0 and single-snapshot 76-feature coverage = FAIL, so arbitrary team/starter/bullpen/matchup snapshot linking is rejected.
+- Selected repair is `OPTION_A`: make `pick2_game_predictions.feature_snapshot_id` nullable for native prediction rows while preserving the FK for legacy/domain-linked rows. Provenance remains rooted in `game_pk`, market, model version, feature set, frozen input digest, model artifact digest, as-of timestamp, starter/data readiness metadata and immutable deterministic prediction identity.
+- Prepared but did not apply `supabase/migrations/202609050001_pick2_game_predictions_nullable_feature_snapshot_id_r1.sql`, containing only `ALTER TABLE public.pick2_game_predictions ALTER COLUMN feature_snapshot_id DROP NOT NULL;` inside a transaction. Post-repair dry run projects 24 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP`, 0 `BLOCK_CONFLICT`, then 0/24/0 on the second pass. Production DML, production DDL, prediction writes, result writes, market-value writes, provider calls, Champion/model/feature/raw mutations, automation and cron changes remained 0/off. Next: publish/align R1 and separately authorize applying the prepared migration before retrying 02J prediction persistence.
 
 ## 2026-09-05 MLB-DATA-02J Current Moneyline Prediction Persistence
 

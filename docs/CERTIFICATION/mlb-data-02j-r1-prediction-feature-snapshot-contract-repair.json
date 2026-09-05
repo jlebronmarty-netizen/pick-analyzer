@@ -1,0 +1,384 @@
+{
+  "generatedAt": "2026-09-05T02:17:06.891Z",
+  "project": "MLB_DATA_02J_R1_PREDICTION_FEATURE_SNAPSHOT_CONTRACT_REPAIR",
+  "certificationVerdict": "MLB_DATA_02J_R1_PREDICTION_FEATURE_SNAPSHOT_CONTRACT_REPAIR_CERTIFIED",
+  "rootCause": "PREDICTION_INSERT_FAILED:null value in column \"feature_snapshot_id\" of relation \"pick2_game_predictions\" violates not-null constraint",
+  "repository": {
+    "branch": "main",
+    "localHead": "f1a841ccbeaa16bb46655b8575c57f0b683709f5",
+    "originMain": "c6d9963ec26c401d3e6442f7daa81ef38102a848",
+    "worktreeCleanBeforeR1": "PASS_CONFIRMED_BEFORE_REPAIR_EDITS",
+    "expectedRepairFilesInProgress": [
+      "docs/CERTIFICATION/mlb-data-02j-r1-prediction-feature-snapshot-contract-repair.json",
+      "scripts/mlb-data-02j-r1-prediction-feature-snapshot-contract-repair-validate.mjs",
+      "scripts/mlb-data-02j-r1-prediction-feature-snapshot-contract-repair.mjs",
+      "supabase/migrations/202609050001_pick2_game_predictions_nullable_feature_snapshot_id_r1.sql"
+    ],
+    "MLB_02J_R1_REPOSITORY_BASELINE": "PASS"
+  },
+  "production": {
+    "productionCommit": "c6d9963ec26c401d3e6442f7daa81ef38102a848",
+    "providerCallsMade": 0,
+    "MLB_02J_R1_PRODUCTION_BASELINE": "PASS"
+  },
+  "predictionSchemaAudit": {
+    "table": "public.pick2_game_predictions",
+    "columns": [
+      "id uuid primary key default gen_random_uuid()",
+      "deterministic_identity text not null unique",
+      "pick2_era text not null default PICK_2_ERA_V1",
+      "sport_key text not null default baseball_mlb",
+      "event_id text nullable after R5 native migration, FK sport_events(id)",
+      "game_pk bigint nullable after R5 native migration",
+      "model_version_id uuid not null FK pick2_model_versions(id)",
+      "feature_snapshot_id uuid not null FK pick2_feature_snapshots(id) in current production blocker state",
+      "predicted_at timestamptz not null",
+      "target text not null",
+      "home_probability numeric",
+      "away_probability numeric",
+      "expected score/total/margin numeric nullable",
+      "frozen_input_digest text not null",
+      "model_artifact_digest text not null",
+      "metadata jsonb not null default {}",
+      "created_at timestamptz not null default timezone(utc, now())"
+    ],
+    "uniqueConstraints": [
+      "deterministic_identity"
+    ],
+    "indexes": [
+      "pick2_game_predictions_event_idx",
+      "pick2_game_predictions_game_pk_idx"
+    ],
+    "triggers": [
+      "pick2_game_predictions_no_update before update"
+    ],
+    "rlsPolicies": [
+      "RLS enabled",
+      "service_role all",
+      "authenticated select"
+    ],
+    "immutabilityBehavior": "updates raise pick2_game_predictions are immutable; write a new prediction version instead",
+    "MLB_02J_R1_PREDICTION_SCHEMA_AUDIT_COMPLETE": "YES"
+  },
+  "featureSnapshotColumnAudit": {
+    "columnType": "uuid",
+    "currentNotNullState": "NOT_NULL",
+    "proposedNotNullState": "NULLABLE_FOR_NATIVE_PREDICTIONS",
+    "fkTarget": "public.pick2_feature_snapshots(id)",
+    "fkPreserved": true,
+    "historicalPurpose": "legacy/domain prediction linkage to a persisted feature snapshot row",
+    "currentNativeRequirement": "NO_SINGLE_FEATURE_SNAPSHOT_ID_REQUIRED_WHEN_FROZEN_INPUT_DIGEST_AND_METADATA_PRESERVE_FULL_INPUT",
+    "MLB_02J_R1_FEATURE_SNAPSHOT_COLUMN_AUDIT": "PASS"
+  },
+  "snapshotSchemaAudit": {
+    "table": "public.pick2_feature_snapshots",
+    "identity": "deterministic_identity unique",
+    "domains": [
+      "pitcher",
+      "batter",
+      "team",
+      "bullpen",
+      "matchup",
+      "first_inning",
+      "prediction_bundle"
+    ],
+    "semanticUnit": "DOMAIN_ENTITY_ASOF_FEATURE_SNAPSHOT",
+    "gameLinkage": "event_id legacy plus target_game_pk native migration column",
+    "payloadFields": [
+      "features jsonb",
+      "input_digest",
+      "sample_sizes",
+      "source_window",
+      "feature_version",
+      "as_of_timestamp"
+    ],
+    "MLB_02J_R1_SNAPSHOT_SCHEMA_AUDIT_COMPLETE": "YES",
+    "MLB_02J_R1_SNAPSHOT_SEMANTIC_UNIT": "DOMAIN_ENTITY_ASOF_FEATURE_SNAPSHOT"
+  },
+  "snapshotCoverage": {
+    "representativeGamePk": 823905,
+    "associatedSnapshotsForFrozen24": 0,
+    "candidateFullPayloadSnapshots": 0,
+    "singleSnapshot76FeatureCoverage": "FAIL",
+    "frozen24": [
+      {
+        "gamePk": 823905,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 823093,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 823577,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 823419,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824389,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 823335,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824468,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824795,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 822850,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824066,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824553,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824145,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 823257,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824310,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 823904,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824469,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 823417,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824794,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 823336,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824385,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824142,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824309,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 823091,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      },
+      {
+        "gamePk": 824552,
+        "associatedSnapshots": 0,
+        "domains": [],
+        "candidateFullPayloadSnapshotCount": 0,
+        "exactlyOneValidPredictionLevelSnapshot": false
+      }
+    ],
+    "MLB_02J_R1_SINGLE_SNAPSHOT_76_FEATURE_COVERAGE": "FAIL",
+    "MLB_02J_R1_FROZEN24_SNAPSHOT_MAPPING_COMPLETE": "YES",
+    "MLB_02J_R1_ARBITRARY_SNAPSHOT_LINK_GUARD": "PASS"
+  },
+  "nativePredictionInputContract": {
+    "fields": [
+      "game_pk",
+      "market",
+      "model_version",
+      "feature_set",
+      "feature_input_digest",
+      "as_of",
+      "ordered_76_feature_payload",
+      "starter_status",
+      "data_completeness"
+    ],
+    "inputDigestProvenanceSufficient": "YES",
+    "explanation": "The frozen_input_digest is computed from the complete ordered input payload plus model/feature/as_of/game/starter metadata; model_artifact_digest and model_version identify the immutable model transform.",
+    "MLB_02J_R1_NATIVE_PREDICTION_INPUT_CONTRACT": "PASS",
+    "MLB_02J_R1_INPUT_DIGEST_PROVENANCE_SUFFICIENT": "YES"
+  },
+  "optionAudits": {
+    "optionA": {
+      "decision": "SAFE",
+      "rationale": "Drops only NOT NULL, preserves FK for rows that have a domain snapshot, preserves immutable prediction identity and does not affect settlement by game_pk/prediction identity.",
+      "MLB_02J_R1_OPTION_A_NULLABLE_AUDIT": "SAFE"
+    },
+    "optionB": {
+      "decision": "REQUIRES_SCHEMA_EXTENSION",
+      "rationale": "A true prediction-level aggregate snapshot would require either new prediction_bundle persistence semantics or additional payload binding; current rows do not exist.",
+      "MLB_02J_R1_OPTION_B_AGGREGATE_SNAPSHOT_AUDIT": "REQUIRES_SCHEMA_EXTENSION"
+    },
+    "optionC": {
+      "decision": "NOT_AVAILABLE",
+      "rationale": "No existing single snapshot maps to each frozen prediction input digest with all 76 ordered Champion features.",
+      "MLB_02J_R1_OPTION_C_EXISTING_SNAPSHOT_AUDIT": "NOT_AVAILABLE"
+    }
+  },
+  "selectedRepair": {
+    "value": "OPTION_A",
+    "schemaMigrationRequired": "YES",
+    "legacyCompatibility": "PASS",
+    "resultLinkagePreserved": "PASS",
+    "consumerAuditComplete": "YES",
+    "applicationContractRepair": "READY",
+    "MLB_02J_R1_SELECTED_REPAIR": "OPTION_A",
+    "MLB_02J_R1_LEGACY_COMPATIBILITY": "PASS",
+    "MLB_02J_R1_RESULT_LINKAGE_PRESERVED": "PASS",
+    "MLB_02J_R1_CONSUMER_AUDIT_COMPLETE": "YES",
+    "MLB_02J_R1_SCHEMA_MIGRATION_REQUIRED": "YES",
+    "MLB_02J_R1_APPLICATION_CONTRACT_REPAIR": "READY"
+  },
+  "migration": {
+    "path": "supabase/migrations/202609050001_pick2_game_predictions_nullable_feature_snapshot_id_r1.sql",
+    "dropsNotNull": true,
+    "keepsForeignKey": true,
+    "tableDrops": 0,
+    "columnDrops": 0,
+    "dataDeletes": 0,
+    "dataUpdates": 0,
+    "dataInserts": 0,
+    "unsafePatternCount": 0,
+    "productionApplied": false,
+    "predictionInserts": 0,
+    "MLB_02J_R1_MIGRATION_SAFETY": "PASS"
+  },
+  "frozen24RecoveryDryRun": {
+    "frozen24Rebuild": "PASS",
+    "postRepairInsertEligible": 24,
+    "postRepairReuseNoOp": 0,
+    "postRepairBlockConflict": 0,
+    "requiredSnapshotLinkViolations": 0,
+    "projectedSecondPassInsertEligible": 0,
+    "projectedSecondPassReuseNoOp": 24,
+    "projectedSecondPassBlockConflict": 0,
+    "MLB_02J_R1_FROZEN24_REBUILD": "PASS",
+    "MLB_02J_R1_FROZEN24_POSTREPAIR_DRY_RUN": "PASS",
+    "MLB_02J_R1_POSTREPAIR_IDEMPOTENCY_PROJECTED": "PASS"
+  },
+  "provenanceAndImmutability": {
+    "predictionProvenance": "PASS",
+    "predictionImmutability": "PASS",
+    "MLB_02J_R1_PREDICTION_PROVENANCE": "PASS",
+    "MLB_02J_R1_PREDICTION_IMMUTABILITY": "PASS"
+  },
+  "preservation": {
+    "counts": {
+      "predictions": 0,
+      "predictionResults": 0,
+      "marketValueRows": 0,
+      "raw2025": 712528,
+      "raw2026": 622364
+    },
+    "champion": {
+      "modelVersion": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+      "artifactDigest": "9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616",
+      "featureSet": "MLB_ML_FEATURE_SET_V1"
+    },
+    "predictionWrites": 0,
+    "predictionResultWrites": 0,
+    "marketValueWrites": 0,
+    "modelWrites": 0,
+    "featureWrites": 0,
+    "rawWrites": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "MLB_02J_R1_PRODUCTION_DML": 0,
+    "MLB_02J_R1_PRODUCTION_DDL": 0,
+    "MLB_02J_R1_CHAMPION_PRESERVED": "PASS"
+  }
+}
