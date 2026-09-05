@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-09-05T02:07:40.848Z",
+  "project": "MLB_DATA_02J_CURRENT_MONEYLINE_PREDICTION_PERSISTENCE_EXECUTION",
+  "certificationVerdict": "MLB_DATA_02J_CURRENT_MONEYLINE_PREDICTION_PERSISTENCE_BLOCKED",
+  "failure": "PREDICTION_INSERT_FAILED:null value in column \"feature_snapshot_id\" of relation \"pick2_game_predictions\" violates not-null constraint",
+  "insertExecution": {
+    "attempted": 24,
+    "inserted": 0,
+    "reused": 0,
+    "conflicts": 0,
+    "failed": 24,
+    "updates": 0,
+    "deletes": 0,
+    "insertedIdentities": [],
+    "errors": [
+      "null value in column \"feature_snapshot_id\" of relation \"pick2_game_predictions\" violates not-null constraint"
+    ]
+  },
+  "safety": {
+    "noRepairSqlAttempted": true,
+    "noProviderCalls": true,
+    "noOddsCalls": true,
+    "noValueWork": true,
+    "noOfficialPicks": true,
+    "noModelTraining": true,
+    "noSchemaMutation": true,
+    "automation": "OFF",
+    "cronChanges": 0
+  }
+}

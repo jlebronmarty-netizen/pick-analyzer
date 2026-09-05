@@ -1,6 +1,13 @@
 # Project Status
 
-Last updated: 2026-09-05 01:55:23Z
+Last updated: 2026-09-05 02:07:40Z
+
+## 2026-09-05 MLB-DATA-02J Current Moneyline Prediction Persistence
+
+- MLB-DATA-02J is blocked as `MLB_DATA_02J_CURRENT_MONEYLINE_PREDICTION_PERSISTENCE_BLOCKED`. The frozen 02I commit `c6d9963ec26c401d3e6442f7daa81ef38102a848` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported provider calls 0.
+- Frozen 02I artifact readback passed for as-of `2026-09-05T01:51:21.667Z`, 24 authorized moneyline dry prediction rows, 24-game set, Champion `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, feature set `MLB_ML_FEATURE_SET_V1`, artifact digest `9275408e6f92d1405941eb7e277bc9018fd91c1d4a4e6f429cc26161ad2bf616`, input digests, probabilities and deterministic identities.
+- The bounded production insert attempted exactly the 24 frozen rows and failed atomically because live `pick2_game_predictions.feature_snapshot_id` still has a not-null constraint while the frozen current-state 02I records have no feature snapshot id. No repair SQL was attempted.
+- Post-failure readback confirmed 0 matching frozen prediction identities, 0 total prediction rows, 0 prediction-result rows, 0 market-value rows, 712,528 preserved 2025 raw rows and 622,364 preserved 2026 raw rows. Provider calls, odds/value work, Official Picks, model/feature/raw writes, Champion changes, production DDL, automation and cron changes remained 0/off. Next: prepare a bounded `MLB_DATA_02J_R1_PREDICTION_FEATURE_SNAPSHOT_CONTRACT_REPAIR` before any retry.
 
 ## 2026-09-05 MLB-DATA-02I Current Moneyline Dry Inference Prep
 
