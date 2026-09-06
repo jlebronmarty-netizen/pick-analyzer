@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 20:32:00Z
+Last updated: 2026-09-06 21:05:00Z
+
+## 2026-09-06 MLB-DATA-02Q-R2 Gated Value Board Deployment Readback
+
+- MLB-DATA-02Q-R2 is certified as `MLB_DATA_02Q_R2_GATED_VALUE_BOARD_DEPLOYMENT_CERTIFIED`. Repository alignment passed with local HEAD and `origin/main` at `7d5e5321e3e60d1d4534874e86b5d78af658b8a2`; production `/api/system/version` aligned to the same commit with 0 provider calls.
+- The deployed package contains the gated `/mlb-value-board` route, `MlbValueBoardClient`, the server-only Value Board service and R1 supporting artifacts. The feature gate `PICK2_MLB_VALUE_BOARD_ENABLED` remains default-off and production gate state is certified `OFF` without changing environment configuration.
+- Production direct-route readback for `/mlb-value-board` is classified `OTHER_FAIL_CLOSED`: the response renders the 404 shell behavior and exposes none of the Value Board markers, top-pick identifiers or board counts. Public navigation remains hidden with no `/mlb-value-board` link or `MLB Value Board` CTA on the production homepage.
+- Read-only preservation passed: Official Picks remain 5, native value evaluations remain 386 and the deterministic board still resolves to 42 rows: 5 `OFFICIAL_PICK`, 14 `VALUE_CANDIDATE`, 23 `WATCHLIST` and 0 `BLOCKED`. Top pick parity remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`.
+- Boundaries held: Value Board publication `NO`, production DML 0, production DDL 0, provider calls 0, odds refresh 0, Official Pick changes 0, market/value/prediction/result/model/raw/feature writes 0, automation off and cron changes 0. `MLB_DATA_02Q_R3_VALUE_BOARD_ACTIVATION_PREP_READY = YES`; `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY = NO`.
 
 ## 2026-09-06 MLB-DATA-02Q-R1 Value Board UI Implementation
 
