@@ -1,0 +1,3648 @@
+{
+  "generatedAt": "2026-09-06T00:24:28.434Z",
+  "project": "MLB_DATA_02O_R3_NATIVE_VALUE_PERSISTENCE_EXECUTION",
+  "certificationVerdict": "MLB_DATA_02O_R3_NATIVE_VALUE_PERSISTENCE_CERTIFIED",
+  "repository": {
+    "branch": "main",
+    "localHead": "d3cafbdf353a6198b2b09354f7330d9affc717cd",
+    "originMain": "d3cafbdf353a6198b2b09354f7330d9affc717cd",
+    "worktreeCleanBefore": true,
+    "MLB_02O_R3_PREPUBLISH_STATE": "PASS",
+    "MLB_02O_R3_R2A_COMMIT_SCOPE_CERTIFIED": "YES"
+  },
+  "production": {
+    "commit": "d3cafbdf353a6198b2b09354f7330d9affc717cd",
+    "providerCallsMade": 0,
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "baselines": {
+    "preCounts": {
+      "nativeValue": 0,
+      "legacyValue": 0,
+      "predictions": 24,
+      "marketObservations": 492,
+      "marketMappings": 29,
+      "champions": 1
+    },
+    "MLB_02O_R3_NATIVE_VALUE_TABLE": "PASS",
+    "MLB_02O_R3_NATIVE_VALUE_BASELINE": "PASS",
+    "MLB_02O_R3_LEGACY_VALUE_PRESERVATION": "PASS",
+    "MLB_02O_R3_CHAMPION_BASELINE": "PASS",
+    "MLB_02O_R3_PREDICTION_BASELINE": "PASS",
+    "MLB_02O_R3_MARKET_SOURCE_BASELINE": "PASS"
+  },
+  "plan": {
+    "rows": 386,
+    "eligibleGames": 21,
+    "bookLevelPairs": 193,
+    "valueIdentityCount": 386,
+    "duplicateValueIdentities": 0,
+    "invalidPlanRows": 0,
+    "missingSourceLinkages": 0,
+    "sideInversions": 0,
+    "MLB_02O_R3_VALUE_PLAN_REBUILD": "PASS",
+    "MLB_02O_R3_SOURCE_LINKAGE": "PASS",
+    "MLB_02O_R3_VALUE_MATH_PARITY": "PASS",
+    "MLB_02O_R3_SIDE_ALIGNMENT": "PASS",
+    "MLB_02O_R3_TEMPORAL_ELIGIBILITY": "PASS",
+    "MLB_02O_R3_VALUE_IDENTITY_REBUILD": "PASS",
+    "MLB_02O_R3_VALUE_DIGEST_PARITY": "PASS"
+  },
+  "prewriteClassification": {
+    "rows": [
+      {
+        "value_identity": "c2eed5fb19734e64f6130418249e9c6a5c84c7afcbcfaf2d455928a49c5078a3",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "99044b3c88ce5b549172c6ea2a79ac335ee035f4adc1c013951a298e4d983a74",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ff2f18f4bf9786e0f717a7d1413fac8e9aa02d09d777c6c86392607513dc5635",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "301c9ec7ca3b6893d6ac204250ce83663623e379b6c432eec305e0f7c8d7d860",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "728c8473076c30e934d8189b9021ec9d32533a99e70f80befa41e4adff7fe467",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "062c78eabd3620e1d00416d7208d61944c4bfcefcc70073500481c5d30fd0acd",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "fed88fe05986714f3db11fdbe0e73d21d02469db4b43544c89bd97069d826e5c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4cf7219250329b9c4b07e402703a49cddf817b69ffd72494f473a49751ed2a98",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "84aea6d91b23f9de15615c7a64a3472f584a854d33949499f2357ebb168c4f1b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d8d8b3aad956ff73aaa27b68be943809fceff2c8316f9e71e409d4fc587d99f0",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a1b5977e7484e81e538ab004ae5bb0a51bae2bf373c4d3146e7c4ea72c5961da",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "294283b6c5e76cea92f62453eb07d12224a594404002bc88d895261c8bf1b60b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a5252b7eb8dc18c5779b41564a1c5d8f720eb4fd913a3f6e31a43edcf7dc47be",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9f45ad89be8454085ad8729d8d73ebb4f75ca632b093bf5aea5a412ec4a652f4",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "34d9d01abd4328f9346fcb86341a913478c0ecc135ad8e6c4756bc174b00cd0d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "086bada901ed39772db88012085c9a8a57d83c9c249cbe8a65172fa342264347",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "143d29fc2c08680dada182782a28329b00e9ff9facfbd02ece7ba7320c36e242",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d466ec9027138f10bdc32a71decfe689c1274db4a9a40fb5608c36337563223f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "fef9bae156608cf2b769bb052be0fb550d2495f1da362a2d29f7de511d02240a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "daf841d8edb289284cd1a198c7f058f1e4e9a9eb865bdf5d07b4db61cd3acb41",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c42a57314ce9279e45b6ea5cac1526c1ef1ad7ff652c5d216e5b1b3a1fa59735",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5f1c98388f4d578aedb3e728b0a2693eb31e1024dd46c0bf0fdb154e50a12a50",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6e0a7e1484a1f87a0d40316bc7a322551f60d3f6cfba461854a038199757d64d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b06372102c4b3996f6acc3a6c85129587d82619a287ffbf328261a0a9f0788ce",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c0e97808591c36143f5de37019ebf78dd053b32bd76c6b4fb50f467881fe32d9",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b71b5b5bc3b1d4375a22d67e300fa98c2e93061c3d98010efd29d5dd3a44ac03",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5101eb7ce8e624d5148fc3693103f0071ec650b7069b11f0768dcc6cbecb0408",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4f96bac20052c8b2803bdf326c121e99a99d94097e9bfabf09d086d94f1d51ff",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2ae98f005df7805f5fad7c3bbf141a159d7d0771e5ac86fda4e7e121b9c864c1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "914eeaec775a5894eeb99a380c5c4a5d2fe6dd655bd28b4f7d4eeb28aefba2b1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "40f35cc2507c5b38fec8f64bffa4effb6ad7b54fb7911ba0f66266eed27ae06a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "581faa5748c8066ac69c599ee84b3e0b03c25144ef226d4b3449a0346176f75f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5ede6dba200a5ddf964d818029666b324d0990a2c078642d9ff396a60e82779a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9c2f5c144d162c4f493dc6a4e814843d97bd65ce487658671e1b619867198a93",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b596df622efdaf419712ac4bc5b851aaa8280871944ff6b9cf5ac6374f8b3cef",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "abe72c4e689aea8658d0cec7ccf7904e078e54b02901592f232e46de5f979638",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1bb58944be54fd51819ea2f3578f64617d5e2a012430e38230ba2fc71b1f71ac",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e0a400361246b98a7dff9991874af38d6b77896f35b790ae95fed0c35ef3d020",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c723de6ff49cc824be7c7e76e0ee430f335f7fd403b366375ff723fc6a3e138d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a1f10a5a574a1d381d173083fbd5a9ad2aabe8fe632e40fe0efd7cf0d292992b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6371543806df0ef622fe56ce1d333c578c16d9fb11b455be82754eed784b7c3e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c13054d40f3f40b10deb31077ad656121c76a9bab5c588055779675397484b32",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3e5b31b02fdc5ff779fb6b4d88b67227cf448a5b6041b8293b43977460280706",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "852ece07ce4e64a1de62a0a3447fb7b412db5b5453bb4b006cd624b5815171d6",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9883865004cda35de59de4625324ae6c9408cbd5dc2221f16cb657186ada157e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "df1081d7e8d72e32dbefe5f7917b4635debc1b7c89b28305bc2cec5d6970eacf",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b573464fbd669b2330cf30004e2596864290850e7c616a7be8d108fc2e65ba25",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b4c9f37e17a071a4a1971d6e8b92e3f57289194fdf528deb6cf3ff11fda014e3",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7935801b4f8e15cf0efad551c9d0555691581661d581577a69d33b7e51578c58",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "fb8ee8613ff547c2ccd70368f6d6fe6dbb93882d2109b37b121e055ae8f8ba30",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "55f5a9409ab7bf726ee0b85d929a46510e601a1e05f175157be16b9f78e62103",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d945638ad829de94967aaa7a96c08a02156343d7bb05199a9939db75ae0d3cff",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6aa55c74e0ec6b2a4a66e1c388dbcd899169bbed872fc89b4362cf267abdfe96",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6843837e069cbb476a884b4bce01ced9d51cbd48ef6deb6660aee1758e0323cf",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5d0269c94a13a2153c62c71695bb05addd572cf8b168975be6804231d877fdba",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4ea13f18fc7f5ad2783b97efd837c98b0e2f77b3df3925ed687167de9d6d8d4c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1266fadc31699b9783fef059d20e10120ea12d800573fc0d2eb0222faf920320",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1d8cd9488014b9dffc46627930270b33c55c06c25d527bac2e2a492df75f3705",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "fee3b3722442699bcaedef317fba16cf56f70a06883face93c620156562bb6a9",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b78f6ee08a0ace9c348ba12ee1b34e9eb6c3c22247d6407ab3c1ab5073ebcf44",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a17c3208a6ef7908f66b0884b53fce455918880c428c259b1225d371d58c2cfc",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6e1cc46b26fac7c2406d104b14ad3cfc963efadff80f3ee8acfa0e63d2f6c295",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "0c1df86a89ce9c9139db718b24b7234ad1c1b3a58fc90f5532af890a1b203588",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1eea83fb46567fcb353c73bf70a32f187273eeb4c47ecb4536f4841295a32ac3",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b6b6bc4f6235fc6110d79e6622b5c2ddf6096a5d9256a1bad485b5ef29b7a742",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5767918e175e7ddd3894b2af605a0134263004f66115af71be416c7f8f696c51",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2d18aac623e1d38f5a9fee1ff1ba975cf854db68aa5679f30ab2d1f1fd760c11",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "37a8fe35e3be8d1ee3cee360d5fab9fa88dbf76e3640ca703b35ea79e43bb3be",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4c7cff4eb986209ec6a530bfded2f4a591ca1c31ef734bdcbd0691936934a68a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "f760deb055eabcd524638e0ff625abcffa5b23f65b5b556e121473d20374980a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1aeb8194ad744f25ab3a390f6a889bbc1199636eaee1a649b23759be8699e98f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7b42452cf5b20acf2606b26c73c06c296fd54185048354d6c917f01fb1f742ef",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "129d85115f64f9f74f149111bd518b509e3770b15f49069df62ba844815bf5dd",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1e37406be389fde3d58e25b02c32dd8025d8d717aba631c69e189fe07b303155",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "aa7a56d54e3f018a46463aeadb9578adef5fdfbc606fbb1f0019d76c64d69203",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b94d59aa5e120d04dccf66ecfc353deb58ab0e4c2a9ea6d1fee9749443ff1c0b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3199c0e55a90bdaf2e2e35f4595e032db37257c15dae9224637d9e5472f8824e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9fefebce56b40dd0cbf12703dd7f998110fb439568cbde4cc537f995a506a316",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "616161937f950b0e01e40dd8af90634fad6a21075f3e240fd0c4c4cc3be7685e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6b4880fb83df2472f0d96ce1a1d748933733b8b1acd0ef4aefc7a50e8a75b4f6",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7bb16ecf2f8706f5b27367411552b31f5fb416b8bc61479dc5e85228a7dc03a7",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "621576f3cd6c82fb58b3912f185f550110756925f06617a2cc98d48328009ef3",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a285375d65bf2fbc8cfc9a961b849192e861f21e640fdf1fc66c96af951d0a80",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1e23a74cc282e3b242daffebad9097dfc1b52c368a24839f758c8dba63021e05",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c4e132a4fdfd492095c7bc12aca694e4bdd312feab583d0e438ae06ce91b5f7c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ba4c33418621d8232cdcfd199c4211da8aa9444749d676e48da1c26f028c440c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ae26dc49a802470da6ef2cd92a40143411f7c864ead1717c8368c247c7b181d6",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "88ee8355196aa07dada62223799e5ce259f360d5382df91bd56ab81b9bcbe8fe",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "cb395887c1117829a4dd9ca5408bb3a09f96459959562ac51393f85ff819cbcf",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "633d26b2b704899511481b8ee47598ed0d14f79435365fc627875d438f423bc1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3b543a38a2b58fb78cd7e77209c668c36fb97a8649a77996a45ed405d3ffe7a1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a7cc15428c2b3220f789eedd3c8173c6e205f8c8bf699d92a0741b653b451507",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "766501632ace414d1967850111fdc977dceccb6a04b08d12723b85b84dee9c2e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a1bd7c9d88ca1b2b4c7a5902316f5fe983b2c109eac0d7266d796a11d33760f5",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "05d7ad09215b54e0549a5021b8a2e8bf57d0b30c65911ba41dc806543d895885",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7ca253613754e7f83c2f964f139eef7607c0c9125c2e912097c7c9b711892e74",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "695d72a8d47f91bf6dae7bd7dd3647247891fcb026002aa981a845e735b3910f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b21af564a7184e5f21adbefe2eced4e31103ce43aa806cdefa119b42f09b55fa",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "0b3a39b8f10ed5b9ff96c41012a8f4b069f4ff4fa0d619496d217e1183323719",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b1b11bf005ecd0df72286eeb58f19d37c2a212cb1728f6453bb929d1183a7c9f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "f29885b87b230bf994aeca96feacdbd43d361a522eb4af76c3941b0df275e55e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "01921af80bcb6322510e8eb7467e45292e2aea8aacefccc8755a496075b214d9",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b66eda72be138d2b8b6157f5d0b1e36bd364790c0c9e6111231b7bd1c3afcc9d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6aba4a1e9708a103bab924802335f99834d0d05125f0fb9bfa8ed83b25c3a0e6",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6d5e99e1aff068116cd93548f78406e9319f948cc1cb3321e5f53ae10658950d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "8c59f28cc59988c9e439e967993f03e93580043308fef5574163ebd19962b9e1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "88d8719fb5bdf4f1fe2d31bb3bef66eca803ad03e22c9dae8d7a2b1afb3fdd0e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "0a9fe9d7905ca2af5e7626e3711dac2fc9ecfc000b7260c32f9d1b8c08c63cc6",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "80323d363b223d258a3dd8e4278ad7aabae8861d7ac066ebb36b1b1d5aa9dceb",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "725d8994e92806efc28fe73226c188fe145fdbedaeb2c6f1bc0d757946f99079",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7a2c1ca58cfd3c51e2dbaf024e3b4f8e9611ba2f9b7312279281c4a41e1df6d0",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3731240b800b098615617b2c3d58be7054a0b085f68f478beb33cb51109451d6",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2c7d4288c5c3dcc708b12f37ba30190490f249d95dae7f379cd5423e2e249ca9",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2d2a38cfe01b004748313341e2d98f4b771a66bd2d521353d2c4a04170618066",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5eeb00da25e35c4d2823035e4f72843bc6561d2fffb22d2833df218b5ea18130",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "0cef475719ee0d3640034a6f34f01792b87719828b7ef8b4f5d667aeb44e6526",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "54b54bd6f648551b1f14183d6ddb7788910c4ee00ae2b3e3dc7073b5c1c2ea1c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "405f9c0d2cfeac9ad76318cd94ee10a13e38702229a242ef1c3c7dc64f3328ac",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d008cbd61dd39896af21c2c747f6a6847865206710f4a66fa5abedc3a76d0a04",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6eececbc4a523b5e366d8e42aab1c60dd97c0e4f37f4a08aad393f294af944e9",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "f2738d1313ebea00fc3d7326deb191439bd2f4420f27a1b84fc22244a7ba034b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "52728d34d9e2816ac8b66b45b80b4adef22d3b79240414569de1051fd41a26ef",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "074f0d47030a5b47f6437ff5be8163c47055874d01c0bb8ddb83dd9209964c26",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "59fcc58ec491139521ef385f82f3d43a59e882a6a4d2b6116cce481e7a3baad2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "0d8a26c4b71ddd9189ecef8b6b754ae7f33b6fddfd7ae746caa5f984fb825c83",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5a9e0d79b97603181098da13f9ea6633ff346a7ccf40948f0a9d09f0cdb9bcaa",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "474b589e56aaf0690825d2025e65e3765f8d903969bc636e67e9dbacd9395c92",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "df5da8c7d49bba695b95e7f4a9e016e85ac456e9d9614bcfe9a0cb9f8648eecc",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d87e30190d09373332547a5b6b0ddb8f0c1a0258a81d7755a43f6c493e8aa32d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "bfbf70755ee27f9932f68ba5824be41727a6ee32c07cd8b72aba8b8e5251fa61",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "603a52aa1e5a506988ba184228a52d9b6d8bf43dfe34284a912a4194ccb682b2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "0b71c28e956feccabe50e593b71dbe20fedc0050b145e5e07517486ab731abba",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a2342cb30704f0380d36c2b72b63ab891329bae5f15b94d5c1bb4c9385808ec7",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9cea91131582433bd36aa948c0c1ddbd8f2775290903937de0e7b5bdc8a9d951",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "401307dca865f15e82e84fb164689709914cecd4ac11b9c4e27bf17961cef304",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "f363158eb6beb71146a3060a5aea929118efe53cc29fedbf1adc30d1376da746",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7832b88197b6266396d06dff9aeaff61b9d79019819e7aafac6f9272fac60cec",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3bc5eac301f1f35af5523686618595e23952ed6ecf17b35be88df503f133a642",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7a060e04c5faf050ed7fef11130b033a7fc0d188753e2e60385875eee3888db1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7c8a610b8628189c871670ef07d58bee392778b89fcdb0f91562e4d007d7e8bc",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3166242cc14e6f7fe6b08dddb499f33b4a6c2cf0469c3ac160a757ba3e0d0715",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a22a7b0ee58e3fd829f2cf44f53dcae8582052e0609a9ee4e544ee99c032a37c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ced4566ed5e545c3c25458e3408a73e59d13a8c5a6f6d71d772e76f851c1c4a7",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7d6914263b30cf6572a2e536a614d4c4ac1d4056d0d3f383817e11128dcce137",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5c3e85b11946f1b15f594bec7a8864fb8db6d9899db2bd3781d301dab46c3395",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3bea98d847060e8df0b971c6b278d85618913be702e1add1f18ad3b01c69fbcb",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d3077d1f06e843b205e1b5cc4a32337f9597d800bf44178822b53f97f48824b2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d81cf7661ed74c2fa52036507908043f3f789d1d7a0bdda31725c06ffce1715f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a0d16e9d0c48543bfa7d69afa966567322e48fa29c19719fb0396688efb0a702",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1b9c73d64ec88d8330c28a76c78099bb51db85a97ca479cfad36d02e7c8fc596",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "aa189f35f8fcb3c11bdfcb460d586f4c3e1a04369bdc095ba964f687f60c0a61",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5413a95c0a87a5555233fbe659c5f7da2bafa27c1c9e9043e1d42f9f41a622d0",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "44235605d1d580e603a7da2c6d1bcacb4ba9862796990d3973026f1f089ec031",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c56fe3f3a63b2d2b9da12a0499cef0e1d35013dad4f13d6a551d2a5f68fa3e61",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "40ec5ab411402c8180a6614f65c6a55374f24de358d4ee36727400e6d8a29836",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6b837e756f3e55a9e2ca83e2280d4e904a93b1d6cfca0d07346b9fb86c5f91c5",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e1ddd80ec6bcd92dae3c609c1663418b3d3589c684d4f3d4432ca281c8b12344",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c0a4c2b64a38f05a1a9adce200b9c4a31fa17a731e366fcc347243a8b2e49602",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e3f7cc24c220e4174b114825553ff4ef033ff8413049820cf858f9fc9d3573ad",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "f7689ad3a1c2416c7b3058650bf656c3b567f5a3a40dc78be0a55713399211ed",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ce70880492416b76c35bc016e7b97864467c3c0c4be2208b390a45cb895b1798",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a6e2ba57136e984102ea0c290ee8f674b25fe574020c0cad46fddac9b7a5d396",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "f0d5a2c8000aa468bb16d51ce5ab85ea9ffda316874346d807b72383685452ef",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4e6608c0a448c9e25385462ead450f09914206730face7f20101f4b3e559560d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "8617169f14f56c101b0dd8264eb2bd18462e790f48e278e4f24b2f64853bd6c8",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3d002c9d136786b7a32ce2edbfaa0de3fb880a1c8e5e2ce4c514b3f7bc34b45c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "be39626ccee599334d819add4306e2717b0aaecbfefac1cf94d013fce01e6a6d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "02e4c447881b741962498c6f9882c213369a21909253200b9d42606d98d64ab3",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "0e48c1e6315e19da98dea8c4e07ad6c861b59e27c5da19da1eae6dab68043c9b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4f9838914f6bc3998a7411299bd2435ef632e0ecc7379a96081331b7f4c47246",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ff2d77bf82601cc0e878c82e1b614bcb94c29529eb2e674d7007132222c6e18a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3db86bd186f3d30fbaeb4ba61b748a8b7428c13ecbd7b4a08899e88e70af8efa",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e5fe6d49098e9463e15b4c79cd4fe2fa202cad3d600ef131dfcda329808bd956",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "cd74ec550e70d6fae98bff444ce56dc5f6143d3ae3d6d47b557d1393e9575386",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "25f6e1a922f86c9c3f39da4f646d3dfa70cb38927a6447af92ae9cc9f5c63d1d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d2c1e8e6fe4da03731a1eed65a8a989b2237be579f93d8f3713d457f575f5a6f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6d33743870dcded0314ba908171c3bb58ab4acf9cdb8e37d59905a7cba1797e2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "0d8971fe28d37e8e73620e6fadcb6bf30bf9531cb9b2b879fd9156491c0d3895",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "64e986610b5449a72ddb703d5a2923d64079bd4cf304f21970451c68c589899c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b7fcca1eae9206d441f7ca7ed0e4a10c555fc602168f0d9d6fb22f583adca6e2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1358b5e4635b3062b1b50055c1cd31bb1fe5685c44b327954439e9efa2ab9d2e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a0dd568e2710784cae99d467eb7646ec502150e7c311df214e1ad439a9c5dea6",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "196ee9b67184ece6223d60730800de65671b313bb40921289f53e370acc87416",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "dee8698995440b65cc989bb794acbec09785672b35386c9a821d0d6e8919298d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d3ffa4e4a54b90ff0b37e20661579067c560a9b16c13da4d29501cd814f3feba",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c65a222964ba8f8f61f927c7dbc63380bfdbcf2bd67537fa535ff67959d8ea49",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7c248ed4de0f93a87564038a8f530a71469045eb01cfa05b44ddc67fc388c640",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7a82dc12d74f81d296e7e4617d5e748e6d248c41bfc8e6140753c144c2d011f1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e96acf07dba04a0568b1deef60da5a2eca035416ba25fb6af488398647fee4e3",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2c8bd259bd876a4a0b561f370e200d18c0b415552e3b50500ee4fb5d60b8b8a2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4d7ef2e9cf00bc07ba0b3a86602023ac27a1fc48ce31c0311c11f2dc90a6e272",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2149a2c7107f036c5684ecaccbab11e02eddcfdd0ccd7a251b73563d47cf9b7f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "0cd92e216134f72e152f6d4de57423e886e100452ea2f0cc60b3044482971ac6",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "98e6efee60c6e2821223a17a66bdd762a29dafff042ce0c455492a988f4af391",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3db46500295d1fc319b2ac8123a74b382bd4dc4bcf92e2b31a42a74707d379d3",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c97392d379a44c004569a26e0453cdaf5f4dd437deea3e5ab010957c58d525d8",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ab78ca4e7f416140fbee8cfb3a8e453cfa598ed43763eb70af982998d527204d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "259dc93b0ebd099b8f3acf117475d3c87c71ccaf506c3253547682ddfe5cc338",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "8c9598c3867de39ca07097d0ae710735d3b82ac6fe67afd40f4bcb2dbd6c4156",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3f06917d10bf4537cd2af359cc1c6096f084384099dfb6b21312b5b21471bd53",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3955e2254703755d7cd723aa2d5d22a10fcc81bd3c4e1a4a1003a6dfeee0208a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9cd7d634078cdb0a7db6ed5502ecb6d4b65fb574369768876ac361aa4e791ffa",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9a509ddda25a03aac2fc363fb4ceced9130db7985c3647ff7a8c4bf536b7a8bc",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2fc4a3cfcecff4f23cb66a497c7207be04f242e9825eddb45a1f0a1284e6ac4e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "28e3ed2df56d87e5659da10e79d961cf19b6e3bcfd13f0c354cc42f7f9c9709d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4af8edae5bf7b92f3373592066e81a654d8ae39b4dc1d591556b08be37008f4b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b82faf392328cc06dcb2005bdc7828dcd113e1ca500055d0c55c0e3f81f1931a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "480db2cbed4658879bd7a08fa8ff3ab03a89263a73e520d0f66ca2e0c3c9556b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a77cb40c95a7b983a7a02c35636c053c200a8d0b4eaeed2f8ec2741c6e4598f2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "235e3ed22c7e234ab2c7228b60b7adfc5124b2898cd92c2b7d6fdca1bf08d35a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "8e6347fe283d723e997b2cc52714f6d5fc164c8a7e5f25faa569b399310b2d18",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d2d9e096a2f384c4373c8cb09ff449f5c85c44fdcdf819b3bcf7f7ef034530a3",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ca6656433adfb3710b6052791434b90b8c9c7790f01167627792dfb3f481d208",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "fb3710c469d4656ad3ada52a1691276fc5dc04624bad325dbfa764952522926b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c2dae1577d11e69813b876269741a54c9702806a9aeb8468ce9e3d4b10117297",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4b72cc88a0564707943d1098f4eae8a0138ef2a9af49e18e2d9baca329c7e233",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "cda9a2a4b9aa741a8255f6a9997ce881093581ec3e6a5c598ac609752ef5fa1f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "09eaaf8ec711ea38447eb3a7d7fd54835d1d737593ad55ffbaa6d073dbc75261",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b810e0a85302535289e53ba1215994e13525bc77f7f57b3dae2cba5ea790c468",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "507982234c775e17cde675d0f4d043c1987dd7806367a5998f0277cccc83bee2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1ce8966214c8f7634ed0b3285940323b59ec7295a7d4182874bddd7212515fd0",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "509f25883266530f41c16ac4da1026fc852dbaf0eda5ada042a4e829928f400f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "fb40674654552a5d27acb1ed9a5ea104e0e0a1c077b64bfb326cf5865eeb1276",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "0947d74c8159fa5a8285154945c72f9a50a2f8593c8351fc355decd96aab9955",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3f752529bab222406872ea879531eb53378a6ea1d8a0b0b7962a505afe044d59",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2ff6e1631b931af43a06c90cc094f4f5a18742f3f4e5ba95debc0e19b23d995d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d5a1daafb98f373495cf8e5c74efdc6c15b53cfc13157c6ab34ca061027a6ab7",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "da4bafdb060c2c5fc39a52cd82df110c780bff4ffe31f3abf45349df6e78989e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a857e5482f06a4e624c8c095850fd77fa427f15e84b25fa4ef135e4dfe3cedd2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "cd012d52af3cb6da9bebd3309d1d3dfaa97d7f4a1c097514b7633babd908df22",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "61fd1d72c005192f653f5fa1b7b22c51f0e88dc2c7c0fa32fee5eb16ed5f95ab",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d133f86024d5b804c63dc78cfc15e404aa5c6f9df3970b3700e9298fde449d40",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3556989ac6859c67b3f6ab8775a0c2b08c645906852349a39385b3fbfbc2e835",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4d41067b7c12642301ebaff099d2debd781fcb583911b038f99516dabaa41380",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "56282e787d15633b0b80ba31622deaecdacd12c243c2f4f2211d80edc47c111a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "09f0ba7c14691b3972deed06e922f51c34990b6098bbbc10534067036625a2d1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "78cc6ddb2cf376c5916d3cb2fe931c2a1087811757b88d135f26c29ac8be3521",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "855a2d2637befef2a2c7bf04a7739aeef4ac60f9148e158a32527cb1baba1e69",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "f085dfd98f7aba103845615e2d49d90eca334e3662788b60c752d2b0f4dbf5de",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "502e05ec8567cc5ca4c80c21e22856815ff0bf2de4fcab2b735c01c093071991",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e4aff5a1ff6b68b129c89d27de16089990c11d1c6d65c13339dcfd2d4ba55ec1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "29d594e017a1d0aa5a9ab81adb814bec69069ad186475aab27a9076e3d040999",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ec35277aa1e721ae2085b2578dcee12208963476838b9b10ae90aa58f3c91524",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a828c34a53e02abf4651f6620a4f29eaf36cf2f414fd56c16b1e76002566ce9f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "97f5e3755ffd12e5389e7edb52482674e64d53627a8bdf87a9a1b25cbca3f425",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c0ab7d15ff1f43e1315ae9d2c6d68961453c633419e00bb5639489643a32be5d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "bffdddd916595b76508373722bff029c54ec9d36b42d1c1b46900ba41e36f0c9",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "8e11d3f31a165298222f94d25313f05334351f4bd6a285219c511f70337f539b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c32be2b51a2149639e973d794582f66d5f8b6655ea0c6a481a82aa511774798a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c9c1141a164d5e9cbb1ff6c4d9566923bf979db6188d03c4cbddc77cadac541a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2d2ff30f91f6bcb4a87fa791d183e56bc8d802cd790208b78421e39a67486f6b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1a3009cbf081ef4eb49b7841d5141d627ecf81c5a7d1469b4044236436be4bb8",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b635c7975fc704586550855f03db0b9264bc9b811788afc1705bed49b95fd910",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "18aa1f86ebb947a4df8aa92a7cab57c03d9c2c0150c564a5311d4c9454149aac",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "16168c365e21c1be453ef9c64f5d4980122252a4504b7f52f0c8a06c7d7f93a6",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c01bf9689155caaf7455027ab7352fa36a090f68d265766bca9ce927367cb298",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5748a4cc2cf1dd6da9f8128cfade00c82286be3b3994371fa186438091283e04",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7d6df0c2793b6f8742f7157f4aa080eeeea2d8c538af1d80e1aa9789364661a2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "137131fee1fe744a9c5cb73e05c22a0d1c233fb22618e45429c36163903cd35a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "900aea2d80374ae9bf2b06ec98a5a10cff50a98c8823d841272865270785ce75",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "8d7745f91cf6d5bd1d7ec49651c373b8cad3bb230ee29fa8f3bb5c698791d7c7",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a46ce8d529a6d6ef9df7025f0b2e13005565459924c3144b48c7285d0216c6c6",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "8397533f4c67a49365bb73060c9673910af1422bc03b2c945ce78a353b6f846f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d9a30771406610225c9613b9eeee854341dd6c16d43b217aef8c795f687b9426",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "19c9fbd32758a9476520de340e3adfc59f3b58db0cfc264279e0f16dee9c3d1d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3ce2f0913969c46e99125feda7c37a303896eba899a15e94f119624b4deeac95",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "cb57455821eb6d8930de3230ea7bcd631645a599a730295156a78fadea81be08",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "bf943657eaf863d10715f93256f336b697273065191c2c2181477a18f6170dd9",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "985ff80cd8979701c1fcdaf81f5d08745297262dddc1712d47b3f40051ed0c3c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "95801f160651b8513fc10d163adb86b5bac27fe560cfe4f6aed5e997663bce13",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "23d1f3d98de6a1eeac1c735f12eb040001259e50846e27caac77df3d7724ae5a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b93d9da545b49ebdf35ab672c8b12c371821ab6af1efaf1c376e1f2e9221a60a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "317a661051b498b3c2185eed7c042019df67252d1f3dca36d7e70a17b7ae8178",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "fe91ba44f380ea8d81e146bd50864eab21ab08a028e768ac89243e85e0bc6b24",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "cab26e5e7a1e02625ca1841177e174c8c954cd591a16ba5dbf3a579fd65ace69",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2306f0f2468afef67a6df085ae439e55c72fb61a3116442e8e1c832ce11396fd",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c26bced6fd311661f38d6ffb17d6d48979111ee297ac1e7b11400a09ff67b592",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2207aebcf240d975be68ca33e4cbbfe179b981bbf39ec803ea47bb27016849af",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9e3894b9dced6aaa0bd80717b790cb7b460cb50f9991c0cc6a329c2a615c80d9",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9e24fab98e7522c6b19445d25cf279afe1cdd9d91287a6118d75315b1f83b593",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ae9e2de47d448f65abe81028cf6c62f95f639ad322961bf65803ac004c2caa8b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9e221dfa9211ea1711266495487ac1a2756d64ee3905124987fa52b37e825cd1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "cbb0cf0f09a25ec8eef37fc4656c6816acb66d820c54bc6c334b1d72fce94fd7",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6f973fcf17fe499eeccb268ec27da2664795a278773957925844999d6cc1b390",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "52190a880492b1902741a40a5322e9c980af60e3acb11bc9fededea475608368",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "43297aac03a47811b81346970c91dbed2c6b0eee2e9de11b79897bb5b9695bfe",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "41a72c1e28991bea24fad79ca21ba8a389c556532f4c77c44b74e08ab2861d18",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "56967960b2e6dfc66dd744abef29449facf676cc3ac0538969af714eabb0efc5",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "8981ba871c882934d4b88e600550fcfe4d9c19ae19c622a288b2b314131d7327",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6a43dc5c9300238f4a358d4b4927466743eeda90ded5806a2f3944354ffadc25",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "13b47c3d68d5513fab1ea0a075ff6c7ad2066b42892ec7b64d57866be5fdacb1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "241e8ade780995a862a9d4e608b0a71df0dd0aec89c74b20b775b3a9f39388da",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "835030c06f20fc8996967bba30d5a543edbe01a3d0060919d91e256b96c98e54",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6b123068b103e9f63f50480ac78c7af691c03cc0c67991a30ff0dd64f7f415f0",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3a013ecd87d6f70e80b46ca6cf8243647a46b4b0e6edcfa909c42674ac212689",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "27ad67517ed3228a22a798930dd7002e6a66fb1f6fd3617f851aa2e74c564565",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2144e8257d008394b828679571a376a794f913577ae8ed2be43da443cbca0cce",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d86053d6cae228de2de2f4fec3ea655c509df39de8b75a8be69219fd1abb160d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a0d96294657de296532004f0e2bcb68b53215bc0c4a0fc53cd8bca75d45e89a4",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d8035488f3d06adc3ac0cb30af13dab9fa222f8f953c094bf775802fead89c14",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "203e5b629f084a5800606acec87956dd49dce05d5a08d51b9f7266cb69f85f5f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "129594a11103cf49ec89fae1e1576d9407b1bf39e57aa62f893413f98e70b440",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "57ef9d9c9a3ed1446729a1908e4f00cb196ce745a59fea94dd17a8ba1c52beeb",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6750fd6dee7d5574ad39d8ced39f4a7fb30d4d8e30fb7aa3d79876dd6fc22e3f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "41c3de6e080dc15bd419864a48e902c58b725048df40c79eaec540f7f017fb3a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "cf7592917000b2adac8805424fa05ca47b95ad5ba8fc8a28214e5d34361556f2",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "21cfa1eb251c9cbe70813cef5a3f9d44f3630804d585b929473bbc84cfffe0e1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "1aaeef3a40345e01897893c47ec7e0ec5891a518907ce525c5667d9d87761522",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "768004486049b464c42152f33c8d584b69420253da49c50b3c907d4359b39103",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "aee7b9d5160099a2c70cfdd59e3a663475e6d11a0b023c2e7a40853b537ade7b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e6161c25d66fbdc69ff8ffe8394daa57790dcb2603e05d53d86c12754339c2e4",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c446f72463d722eab30c440488f47e8caae5e06b890e91a1868b7919aedd19b3",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "376c80a443a24b63ffd7eec5a3200381b67e629d61bc9eeca11aea47251691ee",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "59c36ea105df31213cd55613bc185d81e738fd365d48b257c81be00642388311",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2340b4330b4324b36585762d0863b65169917c8c51f5df13c360d6d42b24bca7",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "675c89ffe26a6b7f630c347f7fa904d5841e61b069b932be2a83abaecd9c8be1",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "006fd4aecb759142c19618850bc609fbd07e08baa30bcf03e32474bdc2749d10",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5c53c4b49eac31e2dc5205fb85a0390caf1117148a86a5a67d045189858af0bc",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "73b4e4d213578435cd67960e9df27fc37c2f9b2ec6e7ae3152db89766a0226c8",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "13496b7dba5ba56ba9a4c29f45a5b787275ce17712d6c36141c614dc30f9da48",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4df439fd75dcf2aaa7ce2e3531593e2638a5c67f15abda504d854a9aaabd27a3",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "96836cc295ab425687c631090b6fe6c98db5bd0980683b3fdc6ab6c1972cb855",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "172e68af9edbe4a5ef84eb2382ea01b26faa4693e60c4a0586c08d167e644d3c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "de3cbd5e5df976a604b9d7b87d9aa0c20924748aa51dc541b4020a4c2da508e5",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "204f5b15d8d7e230a71f4e3e6a59390a16ff2998f8aa31f20a36a177279d61a7",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "3a5c7a2baa76a363a5dcffe5f731091c7b3a2a54d3d7e5d8a6cff290faba4e0d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d745e0ba7402e93f72bc09aa6a56326f86efd9d313339d8375ff5ab0e83bbf55",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "358ba303dd21b46b666836d825e064bcd92ae27deda83ce0dbeca7267835d362",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a033226e8404de663eda7ce406365e9b3eeeb85786fee635c783c609afc1f3a8",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "83f3b97f233aa7dfb85e3809eec61f84b3c2fc6c34d6c8d2265051458333d20a",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "12934af6d564a911d944c21292c3928a67beddb6fac526229ad38316c83e9a01",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "786cc7853a48dcc7c42dc0c8dc31777df18cfcccf7ba78d5b0886022a8b66e03",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "40a3ecd65529e0214ec823b3c1b582ae1ef772aed99df5a2a566313ab6868773",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "334d8c0bcbbc9ec26e9f384ca2106dd05b68288fdf785f17146f8f2a0c7c98e4",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7440ef7d48e39ebe137c17a67fdcd9872aafa7321656ba240ea842568d56b914",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "63719c9a6f4b879b698abcda2a0dac68b9f90d04d0cd2a2d2b319aeaaae6c3d7",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9e727d6dc52eed99eba83b0e3eca88a7093ecee17e158d28c511f5483854d8ee",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "f1d25e72ffe5f0eea9641b30385928ce48240fdb1aefd28ac42b42dea69024ab",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "70e8d9b22545ca1572e17531142817b5380f6f590fbc6cb0ef692c9ff8005566",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "db7f927c3e532935d32239fbd0e9fe85dbc8d275a50a1b9b2042f1cba18a4d3f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "bb35a8c22ed07d7c7c82d9edc95fbca25a3827f7d3c8e8c20aae6757cb378ab8",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "b0e50e2f1c32d6fbe246b568daaee278f057e45a163cac16c545260686ecc562",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "431ea012a03b93faa2f5153a967679477161ef8caadda48862229ebae4a04a13",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e44e927a5da9d961a049a5a06b3b564cf495e53c337bc0874cdcb70a98375761",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a6186531613cfa2938f80d5fc5a570d194f93a7fb53017680306b81e1add2c63",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "6a2aaed44c32d9955e64a448c073f8e4a792754633ef735cd0945d86276ded2c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "9c76febd389d7ea6ecaa2a3f5ac0d339e067b94080a8d31b69ad166fbb0aaaa8",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "34f5a5e689aba49c52b46a093a92a0ea0304b1978b78da28f2b36e26525defab",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "47e2be3599a4682af7575a02dc628b5b0381131d463d5518b7b16d629095d420",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "843899f198c2a53f3958dd03268cca34d84c68cc6c56ef44f780f36bdcc3dcf9",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c48f5f44a4a9c4e1c34f8cfb2d8c224af9d4db894cfc827cab6c709198514935",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "10b6d359ae09d65934ecc5f3e5613be57571605afd01fcddd650a9d11654b21f",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5512d676d085c20686a4ac02e0d9da43bc5e821222f54285c536d877baddb772",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c69e11baf36f2a64039646d60e4b60c636e86ceb5b700e6a98ff2c7526740c71",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4c9f1d7e3719d942040fea3cba29848428f30fb566f5bbfe918fcd4952bcfdab",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "356cce5d96f7ef6e5d3cb8d2b89dd190e9154c7bd08ec949b5f0fafacbd03606",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "5588f2b24393fa51e54e079b55246475b9ba704ddf057e739009fff9229491ab",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "4598d6ad3179809032d365cf970b04a884f117517acc28a387c94b4ac4d0f482",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "bfc5fbad4ed84fd981031365be9af426fb18b476ccf4a2f550761d6b0c1e6576",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "ba7140645af06e0c44bb2901c855e566c8aac0f51688340b1be034fab62a0a51",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "bc001b4193466810ed9f82fa7e7cd9e56128baddecba5546543cf679562404e0",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "91afb81bc5d4d271d01b506285da4f9912c300b5165a5604e95bb71c18dfc42b",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a461f8a2f8556521dd4cd1dd5414fb102e45d70f52f8421e2f3af098705a433c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2cd28d7ad589f5fff2282e573d3aee8a33630bbfd9f143d6d97544ddad766830",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "dfa5dfe4b08bc8829c2865eb8f20a605c6d70172f589e0584799cd4f79d459ba",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "a7a1004c72b2a7ebd3ad03dbfe1365e1843483654883009003d24a2ec51f62e5",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "2262d84cb3fd626665228e027b20bf09c41f63021a642962b8af4cc7aeedeb45",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "fd848727af177810c65a71202bffeb63f179cba148f79d8aa3a28ca1d01b93df",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "7a550b81788b41df8066a28be982ecd738e377584bc9702054a39fee269925ca",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "c61112dff12eb612548002b45bc390e4dd4a5f2aa05f115d75b7ffd4fd7a3f33",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "107146e8b28c02cd4e0f51221fac66cb8485d2d6b3dba94bc6ef008436ec958d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e678634ce3a2dab3de38b83fb0e2c505b98dae5775817bf16106174108a66f3c",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "153a596bf5cf6bbf0258275088b61b6497ae1c627187ea44097f939e4b4da626",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "83875be3889ef89b3ce3340b4e93849d70133b9d5fd836c109c633316778c618",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "83988e0ff43ac326dae2d5a58cbbf8f3017063cd81579d86a893354b490f3875",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "d5da68049241b72426ca821f092fbed03613a1bc987f873ff69f1bc3398eaffe",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "f16fcb77d3bfa8de069d900b51072dd085a893cef6f6f5c5aba863e239a75d92",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e72243278c3f75899c130c59c3ef2ff4700bc735aea30992b9ac1374a441988e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "fdda68d29c7b3031ba97aad5bd9a2a78c1d0e1a0ba6a7e326210b525f9c29665",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "39b65f3a25dd0dbdf6cdb7b13477ff02943170d99e558d13d5ca6f5f179ac5ff",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "58f3fbc29ebe7f79227f34ffc83f154b463f17ae56fd2295c884815ac8d4119d",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "74b98e828269ae30cb4fab6a5cfb5b4e64c92ad09258468469541e4cc55b2005",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "82fc5e2a96089fb3e3e7d917b29d4523da947256ccaff9bd26c3bf9123a8e988",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "e77b7683a2519eb355491682ad52f0eb13e8a897678a9d7e14964bfaf4e20874",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "03cba67fd1882633caba2ed635577e7860716e5091daefd329f49dcc857d8f2e",
+        "classification": "INSERT_ELIGIBLE"
+      },
+      {
+        "value_identity": "32810372897447442ed7727989b6c1ff98405a5b34a0e3d1400762c9d3fc6c22",
+        "classification": "INSERT_ELIGIBLE"
+      }
+    ],
+    "INSERT_ELIGIBLE": 386,
+    "REUSE_NO_OP": 0,
+    "BLOCK_CONFLICT": 0,
+    "MLB_02O_R3_VALUE_PREWRITE_CLASSIFICATION": "PASS",
+    "MLB_02O_R3_VALUE_DML_CAP_READY": "YES",
+    "VALUE_INSERT_CAP": 386
+  },
+  "execution": {
+    "attempted": 386,
+    "inserted": 386,
+    "reused": 0,
+    "conflicts": 0,
+    "failures": 0,
+    "updates": 0,
+    "deletes": 0,
+    "MLB_02O_R3_VALUE_PERSISTENCE": "PASS",
+    "MLB_02O_R3_VALUE_DML_ACCOUNTING": "PASS"
+  },
+  "readback": {
+    "finalCounts": {
+      "nativeValue": 386,
+      "legacyValue": 0,
+      "predictions": 24,
+      "predictionResults": 0,
+      "marketObservations": 492,
+      "marketMappings": 29,
+      "champions": 1,
+      "modelVersions": 1,
+      "raw2025": 712528,
+      "features": 126464
+    },
+    "finalNativeValueRowCount": 386,
+    "rowParity": "PASS",
+    "payloadMismatches": 0,
+    "sourceLinkageReadback": "PASS",
+    "bookIdentityFailures": 0,
+    "numericParityFailures": 0,
+    "duplicatePersistedIdentities": 0,
+    "MLB_02O_R3_VALUE_ROW_PARITY": "PASS",
+    "MLB_02O_R3_VALUE_PAYLOAD_READBACK": "PASS",
+    "MLB_02O_R3_VALUE_SOURCE_LINKAGE_READBACK": "PASS",
+    "MLB_02O_R3_BOOK_IDENTITY_READBACK": "PASS",
+    "MLB_02O_R3_NUMERIC_PARITY": "PASS"
+  },
+  "distribution": {
+    "rows": 386,
+    "positiveEdgeCount": 193,
+    "maximumEdge": 0.09588225856366206,
+    "medianEdge": -2.7755575615628914e-17,
+    "positiveEvCount": 137,
+    "maximumEv": 0.24092813941250002,
+    "medianEv": -0.03498981521906108,
+    "topCandidate": {
+      "game_pk": 823904,
+      "side": "AWAY",
+      "bookmaker_key": "betrivers",
+      "edge": 0.09588225856366206,
+      "unit_ev": 0.24092813941250002
+    },
+    "MLB_02O_R3_EDGE_DISTRIBUTION": "PASS",
+    "MLB_02O_R3_EV_DISTRIBUTION": "PASS",
+    "MLB_02O_R3_TOP_ANALYTICAL_CANDIDATE": "PASS"
+  },
+  "immutability": {
+    "MLB_02O_R3_VALUE_NO_OVERWRITE": "PASS",
+    "MLB_02O_R3_VALUE_IMMUTABILITY": "PASS_USER_SQL_EVIDENCE_R2A",
+    "updates": 0,
+    "deletes": 0
+  },
+  "idempotency": {
+    "rows": [
+      {
+        "value_identity": "c2eed5fb19734e64f6130418249e9c6a5c84c7afcbcfaf2d455928a49c5078a3",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f19daa22-ae77-4126-a834-ec7e9cbe06c1"
+      },
+      {
+        "value_identity": "99044b3c88ce5b549172c6ea2a79ac335ee035f4adc1c013951a298e4d983a74",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f954ca9d-c14c-46aa-96d1-7ce8de5a0a37"
+      },
+      {
+        "value_identity": "ff2f18f4bf9786e0f717a7d1413fac8e9aa02d09d777c6c86392607513dc5635",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "64cd99a5-9ba3-459b-bf96-36d342127292"
+      },
+      {
+        "value_identity": "301c9ec7ca3b6893d6ac204250ce83663623e379b6c432eec305e0f7c8d7d860",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "bc1404bf-7bfd-4c55-831c-89328eb9d442"
+      },
+      {
+        "value_identity": "728c8473076c30e934d8189b9021ec9d32533a99e70f80befa41e4adff7fe467",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "357f8165-8b4e-41b2-ae69-dfe2c5277c2e"
+      },
+      {
+        "value_identity": "062c78eabd3620e1d00416d7208d61944c4bfcefcc70073500481c5d30fd0acd",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "22d25161-f48c-4770-a40d-8a9f75dba9d4"
+      },
+      {
+        "value_identity": "fed88fe05986714f3db11fdbe0e73d21d02469db4b43544c89bd97069d826e5c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "cd66304a-5e4d-496a-9697-0362ffd9566d"
+      },
+      {
+        "value_identity": "4cf7219250329b9c4b07e402703a49cddf817b69ffd72494f473a49751ed2a98",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f9f52d4d-2fba-4ffe-9d49-67e7b7cca807"
+      },
+      {
+        "value_identity": "84aea6d91b23f9de15615c7a64a3472f584a854d33949499f2357ebb168c4f1b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7c69e254-a711-4ff8-8948-a7d4c2a11860"
+      },
+      {
+        "value_identity": "d8d8b3aad956ff73aaa27b68be943809fceff2c8316f9e71e409d4fc587d99f0",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "cefb9d79-0e45-4669-8085-3e096e9c60f6"
+      },
+      {
+        "value_identity": "a1b5977e7484e81e538ab004ae5bb0a51bae2bf373c4d3146e7c4ea72c5961da",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e9b49846-09d6-4ff1-8220-1f80971df5fe"
+      },
+      {
+        "value_identity": "294283b6c5e76cea92f62453eb07d12224a594404002bc88d895261c8bf1b60b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "809fede0-e010-49dc-a8eb-8ff8f16b5aff"
+      },
+      {
+        "value_identity": "a5252b7eb8dc18c5779b41564a1c5d8f720eb4fd913a3f6e31a43edcf7dc47be",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b7ff48fd-c75c-43a5-85fa-2e35809b2008"
+      },
+      {
+        "value_identity": "9f45ad89be8454085ad8729d8d73ebb4f75ca632b093bf5aea5a412ec4a652f4",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9f43e239-a36c-49fb-996d-ebf4b5f234f7"
+      },
+      {
+        "value_identity": "34d9d01abd4328f9346fcb86341a913478c0ecc135ad8e6c4756bc174b00cd0d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "54157b04-14dd-4081-8844-5bd9f8b7a3e1"
+      },
+      {
+        "value_identity": "086bada901ed39772db88012085c9a8a57d83c9c249cbe8a65172fa342264347",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5094d9f1-c0f1-4ac5-8b70-bd77a9afedff"
+      },
+      {
+        "value_identity": "143d29fc2c08680dada182782a28329b00e9ff9facfbd02ece7ba7320c36e242",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "55323843-daba-41ac-8299-2cf48645745a"
+      },
+      {
+        "value_identity": "d466ec9027138f10bdc32a71decfe689c1274db4a9a40fb5608c36337563223f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5d4d3497-f5bb-4d6b-8298-c1eea1556ac3"
+      },
+      {
+        "value_identity": "fef9bae156608cf2b769bb052be0fb550d2495f1da362a2d29f7de511d02240a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "943d3e0c-5986-48e8-a0ec-514601cee8a6"
+      },
+      {
+        "value_identity": "daf841d8edb289284cd1a198c7f058f1e4e9a9eb865bdf5d07b4db61cd3acb41",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6b3278f6-4643-4aeb-ba11-752a7774d121"
+      },
+      {
+        "value_identity": "c42a57314ce9279e45b6ea5cac1526c1ef1ad7ff652c5d216e5b1b3a1fa59735",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0122aaf1-27ef-4556-9ebc-bb32b9f7fc0f"
+      },
+      {
+        "value_identity": "5f1c98388f4d578aedb3e728b0a2693eb31e1024dd46c0bf0fdb154e50a12a50",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "07d4d31c-fe3b-46c1-8b9c-ebf7cd716448"
+      },
+      {
+        "value_identity": "6e0a7e1484a1f87a0d40316bc7a322551f60d3f6cfba461854a038199757d64d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8907075c-8698-4213-a999-63c83afa39a5"
+      },
+      {
+        "value_identity": "b06372102c4b3996f6acc3a6c85129587d82619a287ffbf328261a0a9f0788ce",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "81002e2b-df36-4fb2-afdb-a2bd8392ddea"
+      },
+      {
+        "value_identity": "c0e97808591c36143f5de37019ebf78dd053b32bd76c6b4fb50f467881fe32d9",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "26aec692-9691-48d9-9bc3-c9c36be00ea8"
+      },
+      {
+        "value_identity": "b71b5b5bc3b1d4375a22d67e300fa98c2e93061c3d98010efd29d5dd3a44ac03",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "11f90a7e-d656-4585-8e3c-6c55f6a9d249"
+      },
+      {
+        "value_identity": "5101eb7ce8e624d5148fc3693103f0071ec650b7069b11f0768dcc6cbecb0408",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5c109b24-88c9-4a26-8c07-387d112626e0"
+      },
+      {
+        "value_identity": "4f96bac20052c8b2803bdf326c121e99a99d94097e9bfabf09d086d94f1d51ff",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f1c08f8a-9594-4e49-881e-75a9614c0656"
+      },
+      {
+        "value_identity": "2ae98f005df7805f5fad7c3bbf141a159d7d0771e5ac86fda4e7e121b9c864c1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7cb93e4e-bcbf-4bdf-ac22-fce9b7f565a0"
+      },
+      {
+        "value_identity": "914eeaec775a5894eeb99a380c5c4a5d2fe6dd655bd28b4f7d4eeb28aefba2b1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "07329eb8-364d-476e-95b7-0697fe59eec1"
+      },
+      {
+        "value_identity": "40f35cc2507c5b38fec8f64bffa4effb6ad7b54fb7911ba0f66266eed27ae06a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d3c1e674-ff27-4e9e-b1ee-7f82c5a022a8"
+      },
+      {
+        "value_identity": "581faa5748c8066ac69c599ee84b3e0b03c25144ef226d4b3449a0346176f75f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7b197757-5773-4b4a-ae08-8ccafdbb315e"
+      },
+      {
+        "value_identity": "5ede6dba200a5ddf964d818029666b324d0990a2c078642d9ff396a60e82779a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "bcbfabf6-f02e-49ba-851f-16d89cdbe67f"
+      },
+      {
+        "value_identity": "9c2f5c144d162c4f493dc6a4e814843d97bd65ce487658671e1b619867198a93",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "55cc4408-19aa-4622-bf9a-89e56cdf3079"
+      },
+      {
+        "value_identity": "b596df622efdaf419712ac4bc5b851aaa8280871944ff6b9cf5ac6374f8b3cef",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "68e24ca3-2a8c-49ec-912e-5add0dae3141"
+      },
+      {
+        "value_identity": "abe72c4e689aea8658d0cec7ccf7904e078e54b02901592f232e46de5f979638",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ccad0dc6-3e43-488d-a3a3-9b88d1a95673"
+      },
+      {
+        "value_identity": "1bb58944be54fd51819ea2f3578f64617d5e2a012430e38230ba2fc71b1f71ac",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "99afe57e-900d-42ac-960e-c02bc55d0200"
+      },
+      {
+        "value_identity": "e0a400361246b98a7dff9991874af38d6b77896f35b790ae95fed0c35ef3d020",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "dd379d45-2f77-4ca8-bb81-b68cad82a5d1"
+      },
+      {
+        "value_identity": "c723de6ff49cc824be7c7e76e0ee430f335f7fd403b366375ff723fc6a3e138d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "bcb2fbd7-0bf3-4eb4-bc68-31181bac959d"
+      },
+      {
+        "value_identity": "a1f10a5a574a1d381d173083fbd5a9ad2aabe8fe632e40fe0efd7cf0d292992b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9846a38e-3579-49d7-a2c6-9c92544cbc69"
+      },
+      {
+        "value_identity": "6371543806df0ef622fe56ce1d333c578c16d9fb11b455be82754eed784b7c3e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8e3b1b1a-a9b6-4807-86df-5139939eafc8"
+      },
+      {
+        "value_identity": "c13054d40f3f40b10deb31077ad656121c76a9bab5c588055779675397484b32",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "cac468c5-95f5-4a74-b861-6431a0ea49ae"
+      },
+      {
+        "value_identity": "3e5b31b02fdc5ff779fb6b4d88b67227cf448a5b6041b8293b43977460280706",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b96b798f-4a17-448e-82c4-93b3ab182888"
+      },
+      {
+        "value_identity": "852ece07ce4e64a1de62a0a3447fb7b412db5b5453bb4b006cd624b5815171d6",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d00e8eca-b854-4a04-8702-ec8e51979acc"
+      },
+      {
+        "value_identity": "9883865004cda35de59de4625324ae6c9408cbd5dc2221f16cb657186ada157e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8aa003bf-8489-404a-bc71-64ee5405cfc9"
+      },
+      {
+        "value_identity": "df1081d7e8d72e32dbefe5f7917b4635debc1b7c89b28305bc2cec5d6970eacf",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "defcd8d2-3ae1-4813-845b-9e681167138f"
+      },
+      {
+        "value_identity": "b573464fbd669b2330cf30004e2596864290850e7c616a7be8d108fc2e65ba25",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d0ad72da-5cd7-4e88-94dc-e8a53409c4f0"
+      },
+      {
+        "value_identity": "b4c9f37e17a071a4a1971d6e8b92e3f57289194fdf528deb6cf3ff11fda014e3",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "34cc586b-be37-4608-b7c4-5be2f600e976"
+      },
+      {
+        "value_identity": "7935801b4f8e15cf0efad551c9d0555691581661d581577a69d33b7e51578c58",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b9478688-1b3a-4866-afa9-59f9d30ce759"
+      },
+      {
+        "value_identity": "fb8ee8613ff547c2ccd70368f6d6fe6dbb93882d2109b37b121e055ae8f8ba30",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a1811896-900b-4790-9f34-ba83250f8f96"
+      },
+      {
+        "value_identity": "55f5a9409ab7bf726ee0b85d929a46510e601a1e05f175157be16b9f78e62103",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "aadf3138-fa19-4b89-bab9-f8bf315bbbd9"
+      },
+      {
+        "value_identity": "d945638ad829de94967aaa7a96c08a02156343d7bb05199a9939db75ae0d3cff",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e7d0e266-9307-4e5a-81d3-42ff1b669171"
+      },
+      {
+        "value_identity": "6aa55c74e0ec6b2a4a66e1c388dbcd899169bbed872fc89b4362cf267abdfe96",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "46166d9d-da92-4bfd-ac9c-d23c594f380d"
+      },
+      {
+        "value_identity": "6843837e069cbb476a884b4bce01ced9d51cbd48ef6deb6660aee1758e0323cf",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "247b941c-c685-4357-972f-b9f8d879ffbf"
+      },
+      {
+        "value_identity": "5d0269c94a13a2153c62c71695bb05addd572cf8b168975be6804231d877fdba",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "436ec5d4-c65b-42a4-b5d6-c8fda865524f"
+      },
+      {
+        "value_identity": "4ea13f18fc7f5ad2783b97efd837c98b0e2f77b3df3925ed687167de9d6d8d4c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "2117d88b-07bc-432c-820a-6808b48d2d82"
+      },
+      {
+        "value_identity": "1266fadc31699b9783fef059d20e10120ea12d800573fc0d2eb0222faf920320",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "634fc851-e073-4d3a-bde8-8e550a809fdc"
+      },
+      {
+        "value_identity": "1d8cd9488014b9dffc46627930270b33c55c06c25d527bac2e2a492df75f3705",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0e487b16-1292-46dc-968d-955673e459b2"
+      },
+      {
+        "value_identity": "fee3b3722442699bcaedef317fba16cf56f70a06883face93c620156562bb6a9",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "323e2ec7-d8ec-4ca4-80c8-e18b57ca4185"
+      },
+      {
+        "value_identity": "b78f6ee08a0ace9c348ba12ee1b34e9eb6c3c22247d6407ab3c1ab5073ebcf44",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c4941250-809f-4bd4-8eef-170da87e0808"
+      },
+      {
+        "value_identity": "a17c3208a6ef7908f66b0884b53fce455918880c428c259b1225d371d58c2cfc",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0a517cf8-cc19-4036-9a8e-c5a8f1c61cc6"
+      },
+      {
+        "value_identity": "6e1cc46b26fac7c2406d104b14ad3cfc963efadff80f3ee8acfa0e63d2f6c295",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "032deb2c-8f3b-432c-8afc-7418a91732b5"
+      },
+      {
+        "value_identity": "0c1df86a89ce9c9139db718b24b7234ad1c1b3a58fc90f5532af890a1b203588",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d9ea99cc-15c7-42e0-8a59-e0b1d1b1b46f"
+      },
+      {
+        "value_identity": "1eea83fb46567fcb353c73bf70a32f187273eeb4c47ecb4536f4841295a32ac3",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "232efbd4-a7d2-462f-9a3f-95ebaa7bc9b2"
+      },
+      {
+        "value_identity": "b6b6bc4f6235fc6110d79e6622b5c2ddf6096a5d9256a1bad485b5ef29b7a742",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "fe9a1741-70ac-4f8e-aba4-5e4dd66f9429"
+      },
+      {
+        "value_identity": "5767918e175e7ddd3894b2af605a0134263004f66115af71be416c7f8f696c51",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b1006e87-c238-4115-9db4-2c3e963bae9a"
+      },
+      {
+        "value_identity": "2d18aac623e1d38f5a9fee1ff1ba975cf854db68aa5679f30ab2d1f1fd760c11",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "2caeb046-06ae-4940-9ebd-1db31e4990a1"
+      },
+      {
+        "value_identity": "37a8fe35e3be8d1ee3cee360d5fab9fa88dbf76e3640ca703b35ea79e43bb3be",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c21c8d83-2ebb-4b84-8a78-47bf00600986"
+      },
+      {
+        "value_identity": "4c7cff4eb986209ec6a530bfded2f4a591ca1c31ef734bdcbd0691936934a68a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f8e5cd4e-50ca-4873-bb1f-1a9a677c13d6"
+      },
+      {
+        "value_identity": "f760deb055eabcd524638e0ff625abcffa5b23f65b5b556e121473d20374980a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5916d9aa-74f4-4db7-bb62-1738a08e6985"
+      },
+      {
+        "value_identity": "1aeb8194ad744f25ab3a390f6a889bbc1199636eaee1a649b23759be8699e98f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "dce02a66-d191-4eeb-a074-b7657b3e1e4a"
+      },
+      {
+        "value_identity": "7b42452cf5b20acf2606b26c73c06c296fd54185048354d6c917f01fb1f742ef",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5bdfe965-002d-4d31-b79d-d1779476b1f8"
+      },
+      {
+        "value_identity": "129d85115f64f9f74f149111bd518b509e3770b15f49069df62ba844815bf5dd",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d018418f-bc75-4961-b492-de9fe3d896ff"
+      },
+      {
+        "value_identity": "1e37406be389fde3d58e25b02c32dd8025d8d717aba631c69e189fe07b303155",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e2b7d3bf-494e-4941-8b6a-4245968fadf5"
+      },
+      {
+        "value_identity": "aa7a56d54e3f018a46463aeadb9578adef5fdfbc606fbb1f0019d76c64d69203",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ba77b83f-8d0f-47d8-a5d8-5910632d354e"
+      },
+      {
+        "value_identity": "b94d59aa5e120d04dccf66ecfc353deb58ab0e4c2a9ea6d1fee9749443ff1c0b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6c59496f-b76c-4d95-a1c8-72d7c914b87b"
+      },
+      {
+        "value_identity": "3199c0e55a90bdaf2e2e35f4595e032db37257c15dae9224637d9e5472f8824e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ab276fbd-ed18-41a5-b484-3ce65e08037d"
+      },
+      {
+        "value_identity": "9fefebce56b40dd0cbf12703dd7f998110fb439568cbde4cc537f995a506a316",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "434bffa6-992e-425d-b016-37402b8ca10f"
+      },
+      {
+        "value_identity": "616161937f950b0e01e40dd8af90634fad6a21075f3e240fd0c4c4cc3be7685e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b44f8725-67fa-43db-aa68-2cb7ca326b53"
+      },
+      {
+        "value_identity": "6b4880fb83df2472f0d96ce1a1d748933733b8b1acd0ef4aefc7a50e8a75b4f6",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8e237e8e-92fa-4aff-ae2c-599140c2b331"
+      },
+      {
+        "value_identity": "7bb16ecf2f8706f5b27367411552b31f5fb416b8bc61479dc5e85228a7dc03a7",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "cc4a03ac-b7a4-42ec-af36-519e5853f67f"
+      },
+      {
+        "value_identity": "621576f3cd6c82fb58b3912f185f550110756925f06617a2cc98d48328009ef3",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3bdefd5b-d2b3-4608-a6a0-677da56ae5f8"
+      },
+      {
+        "value_identity": "a285375d65bf2fbc8cfc9a961b849192e861f21e640fdf1fc66c96af951d0a80",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "409584c9-b7e1-42c9-85fb-3920f330ca11"
+      },
+      {
+        "value_identity": "1e23a74cc282e3b242daffebad9097dfc1b52c368a24839f758c8dba63021e05",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6fc6f836-840b-4b73-b40b-ac92cf0a56dc"
+      },
+      {
+        "value_identity": "c4e132a4fdfd492095c7bc12aca694e4bdd312feab583d0e438ae06ce91b5f7c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4da05d57-ccc5-4ead-ae30-cfa6d04b9cc7"
+      },
+      {
+        "value_identity": "ba4c33418621d8232cdcfd199c4211da8aa9444749d676e48da1c26f028c440c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4970b1dd-5685-44a4-a933-85fae4a59b8b"
+      },
+      {
+        "value_identity": "ae26dc49a802470da6ef2cd92a40143411f7c864ead1717c8368c247c7b181d6",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f6b8de7f-e1f4-4224-a155-ff8a849578db"
+      },
+      {
+        "value_identity": "88ee8355196aa07dada62223799e5ce259f360d5382df91bd56ab81b9bcbe8fe",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5a1593fb-7b1b-4b53-957e-329f78ab4af0"
+      },
+      {
+        "value_identity": "cb395887c1117829a4dd9ca5408bb3a09f96459959562ac51393f85ff819cbcf",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "fafd7a5f-39a5-4df3-a6c8-7e3fea396665"
+      },
+      {
+        "value_identity": "633d26b2b704899511481b8ee47598ed0d14f79435365fc627875d438f423bc1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "fd0167b6-cbdc-4fef-8778-b017841143f5"
+      },
+      {
+        "value_identity": "3b543a38a2b58fb78cd7e77209c668c36fb97a8649a77996a45ed405d3ffe7a1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "db03fdc1-7574-43f1-8135-9d6a6e3fec45"
+      },
+      {
+        "value_identity": "a7cc15428c2b3220f789eedd3c8173c6e205f8c8bf699d92a0741b653b451507",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "2fb61c4c-972a-4b66-9476-404b33f942d7"
+      },
+      {
+        "value_identity": "766501632ace414d1967850111fdc977dceccb6a04b08d12723b85b84dee9c2e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8c43730c-dbc6-4bc6-96d5-da45d89848f2"
+      },
+      {
+        "value_identity": "a1bd7c9d88ca1b2b4c7a5902316f5fe983b2c109eac0d7266d796a11d33760f5",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "91378542-e99c-4f2c-b81d-a1c470fe09d9"
+      },
+      {
+        "value_identity": "05d7ad09215b54e0549a5021b8a2e8bf57d0b30c65911ba41dc806543d895885",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5529984e-6e62-4ddf-8193-addedd2a6411"
+      },
+      {
+        "value_identity": "7ca253613754e7f83c2f964f139eef7607c0c9125c2e912097c7c9b711892e74",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "723c270b-c864-4f48-85e3-3b4f8272b613"
+      },
+      {
+        "value_identity": "695d72a8d47f91bf6dae7bd7dd3647247891fcb026002aa981a845e735b3910f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "61939a7b-c584-402d-97f9-eafb2d876fb4"
+      },
+      {
+        "value_identity": "b21af564a7184e5f21adbefe2eced4e31103ce43aa806cdefa119b42f09b55fa",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "84b6ceab-4b3d-4029-a1a3-9a4af28cc5b2"
+      },
+      {
+        "value_identity": "0b3a39b8f10ed5b9ff96c41012a8f4b069f4ff4fa0d619496d217e1183323719",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c210cb20-c794-4895-8173-01233e440ac8"
+      },
+      {
+        "value_identity": "b1b11bf005ecd0df72286eeb58f19d37c2a212cb1728f6453bb929d1183a7c9f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e7cb614c-5bad-4217-b131-3bac7aa28b89"
+      },
+      {
+        "value_identity": "f29885b87b230bf994aeca96feacdbd43d361a522eb4af76c3941b0df275e55e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7ba01bd7-359b-4b45-a5a4-7a85e5378fc4"
+      },
+      {
+        "value_identity": "01921af80bcb6322510e8eb7467e45292e2aea8aacefccc8755a496075b214d9",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a006cce9-ff51-48c0-ad4b-b882f4a7783a"
+      },
+      {
+        "value_identity": "b66eda72be138d2b8b6157f5d0b1e36bd364790c0c9e6111231b7bd1c3afcc9d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c5b0f04f-feea-4bdb-8e71-2cf5e031844f"
+      },
+      {
+        "value_identity": "6aba4a1e9708a103bab924802335f99834d0d05125f0fb9bfa8ed83b25c3a0e6",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "24a73c5b-d80a-4060-b5b4-3ae9446c851c"
+      },
+      {
+        "value_identity": "6d5e99e1aff068116cd93548f78406e9319f948cc1cb3321e5f53ae10658950d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "547ee1f6-b94b-4226-9451-8cb3428f1fe4"
+      },
+      {
+        "value_identity": "8c59f28cc59988c9e439e967993f03e93580043308fef5574163ebd19962b9e1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1b5abab1-f30b-4063-97ac-86ca61f9e100"
+      },
+      {
+        "value_identity": "88d8719fb5bdf4f1fe2d31bb3bef66eca803ad03e22c9dae8d7a2b1afb3fdd0e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c52246b4-1672-4b9f-acb1-313741975182"
+      },
+      {
+        "value_identity": "0a9fe9d7905ca2af5e7626e3711dac2fc9ecfc000b7260c32f9d1b8c08c63cc6",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "78855123-0930-41c2-83fa-31094bd6befb"
+      },
+      {
+        "value_identity": "80323d363b223d258a3dd8e4278ad7aabae8861d7ac066ebb36b1b1d5aa9dceb",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f5f27c3e-5133-45cd-a0db-82ff13c4f085"
+      },
+      {
+        "value_identity": "725d8994e92806efc28fe73226c188fe145fdbedaeb2c6f1bc0d757946f99079",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8df6c253-a125-4f36-8610-d1bf47b9d169"
+      },
+      {
+        "value_identity": "7a2c1ca58cfd3c51e2dbaf024e3b4f8e9611ba2f9b7312279281c4a41e1df6d0",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ed4933b0-5463-4211-b86b-0aae52cae2fa"
+      },
+      {
+        "value_identity": "3731240b800b098615617b2c3d58be7054a0b085f68f478beb33cb51109451d6",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "256a87b7-13ae-45ad-986f-81014b1877d0"
+      },
+      {
+        "value_identity": "2c7d4288c5c3dcc708b12f37ba30190490f249d95dae7f379cd5423e2e249ca9",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e598eeb4-e259-42b9-944d-b071ae41a5f1"
+      },
+      {
+        "value_identity": "2d2a38cfe01b004748313341e2d98f4b771a66bd2d521353d2c4a04170618066",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "dcd4de48-eb59-4389-94a4-c578b9f9cc7c"
+      },
+      {
+        "value_identity": "5eeb00da25e35c4d2823035e4f72843bc6561d2fffb22d2833df218b5ea18130",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e9791813-0b6f-498a-bb78-938a0009724f"
+      },
+      {
+        "value_identity": "0cef475719ee0d3640034a6f34f01792b87719828b7ef8b4f5d667aeb44e6526",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a4219833-9018-43e5-b6da-9ea90e83a3f3"
+      },
+      {
+        "value_identity": "54b54bd6f648551b1f14183d6ddb7788910c4ee00ae2b3e3dc7073b5c1c2ea1c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9481ea38-6c5a-4c4a-b396-b22e07f883f5"
+      },
+      {
+        "value_identity": "405f9c0d2cfeac9ad76318cd94ee10a13e38702229a242ef1c3c7dc64f3328ac",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4bfee9cf-5f4b-4b74-b158-5897325b1723"
+      },
+      {
+        "value_identity": "d008cbd61dd39896af21c2c747f6a6847865206710f4a66fa5abedc3a76d0a04",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "acc4a5c6-da57-485d-8142-e33a49e3a9c9"
+      },
+      {
+        "value_identity": "6eececbc4a523b5e366d8e42aab1c60dd97c0e4f37f4a08aad393f294af944e9",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e3d2291e-73ac-4a29-9614-f667ff47b2d7"
+      },
+      {
+        "value_identity": "f2738d1313ebea00fc3d7326deb191439bd2f4420f27a1b84fc22244a7ba034b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "47596bb6-50c6-4cd2-84cd-edf5b272c894"
+      },
+      {
+        "value_identity": "52728d34d9e2816ac8b66b45b80b4adef22d3b79240414569de1051fd41a26ef",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a8ba695c-2f1a-4a53-bd18-f2e9e461af67"
+      },
+      {
+        "value_identity": "074f0d47030a5b47f6437ff5be8163c47055874d01c0bb8ddb83dd9209964c26",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "59b09eb7-b060-4576-bbc2-3afacabcc6a1"
+      },
+      {
+        "value_identity": "59fcc58ec491139521ef385f82f3d43a59e882a6a4d2b6116cce481e7a3baad2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "428e758c-fa65-492f-98f5-31021730749e"
+      },
+      {
+        "value_identity": "0d8a26c4b71ddd9189ecef8b6b754ae7f33b6fddfd7ae746caa5f984fb825c83",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8cbe7bb3-00f3-44d7-b8bc-59c15370341a"
+      },
+      {
+        "value_identity": "5a9e0d79b97603181098da13f9ea6633ff346a7ccf40948f0a9d09f0cdb9bcaa",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a9e546c9-1b03-4094-8f66-f9dc48cf4d4a"
+      },
+      {
+        "value_identity": "474b589e56aaf0690825d2025e65e3765f8d903969bc636e67e9dbacd9395c92",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7aab83ce-b221-4145-8141-2855e2d3930f"
+      },
+      {
+        "value_identity": "df5da8c7d49bba695b95e7f4a9e016e85ac456e9d9614bcfe9a0cb9f8648eecc",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "eff0208a-09dd-4e80-ac0d-d47d794bf072"
+      },
+      {
+        "value_identity": "d87e30190d09373332547a5b6b0ddb8f0c1a0258a81d7755a43f6c493e8aa32d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "06d5694e-b53f-4989-a77c-cdec8d2b69dd"
+      },
+      {
+        "value_identity": "bfbf70755ee27f9932f68ba5824be41727a6ee32c07cd8b72aba8b8e5251fa61",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ab633a49-2218-456d-8fae-faa271f8fc85"
+      },
+      {
+        "value_identity": "603a52aa1e5a506988ba184228a52d9b6d8bf43dfe34284a912a4194ccb682b2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3d67c8e0-1171-4f69-8f74-2eac13f08deb"
+      },
+      {
+        "value_identity": "0b71c28e956feccabe50e593b71dbe20fedc0050b145e5e07517486ab731abba",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8c464e1b-fa51-4e4d-9a24-ac79eddf24b5"
+      },
+      {
+        "value_identity": "a2342cb30704f0380d36c2b72b63ab891329bae5f15b94d5c1bb4c9385808ec7",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "35bafb1c-1076-4cac-a5d5-080038fb4433"
+      },
+      {
+        "value_identity": "9cea91131582433bd36aa948c0c1ddbd8f2775290903937de0e7b5bdc8a9d951",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b44940e9-3e25-4de3-af6d-a1acc9bcd2d9"
+      },
+      {
+        "value_identity": "401307dca865f15e82e84fb164689709914cecd4ac11b9c4e27bf17961cef304",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "65f7959e-ae0f-44fe-a96e-c4a72b9e9324"
+      },
+      {
+        "value_identity": "f363158eb6beb71146a3060a5aea929118efe53cc29fedbf1adc30d1376da746",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ac27f633-b396-43ac-a0a2-b9baafb51247"
+      },
+      {
+        "value_identity": "7832b88197b6266396d06dff9aeaff61b9d79019819e7aafac6f9272fac60cec",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "975e2352-1a12-4900-ab79-062d85ccc847"
+      },
+      {
+        "value_identity": "3bc5eac301f1f35af5523686618595e23952ed6ecf17b35be88df503f133a642",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "66ccd5eb-4300-4e57-929b-8261e348d3d8"
+      },
+      {
+        "value_identity": "7a060e04c5faf050ed7fef11130b033a7fc0d188753e2e60385875eee3888db1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6a18832d-625e-46e1-9b80-d4ae8ab79288"
+      },
+      {
+        "value_identity": "7c8a610b8628189c871670ef07d58bee392778b89fcdb0f91562e4d007d7e8bc",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6405e779-ef8d-4fa6-b29b-573c35365839"
+      },
+      {
+        "value_identity": "3166242cc14e6f7fe6b08dddb499f33b4a6c2cf0469c3ac160a757ba3e0d0715",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1ace2fc6-7a0f-484a-8f6e-e2100d51197d"
+      },
+      {
+        "value_identity": "a22a7b0ee58e3fd829f2cf44f53dcae8582052e0609a9ee4e544ee99c032a37c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3c881ad0-de77-4b5f-b3de-e7f4d142eb2d"
+      },
+      {
+        "value_identity": "ced4566ed5e545c3c25458e3408a73e59d13a8c5a6f6d71d772e76f851c1c4a7",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4aec32ff-a181-4b45-88db-a7dce056ce46"
+      },
+      {
+        "value_identity": "7d6914263b30cf6572a2e536a614d4c4ac1d4056d0d3f383817e11128dcce137",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "dfe32c48-3464-47fd-9053-5dbc74f9e5c0"
+      },
+      {
+        "value_identity": "5c3e85b11946f1b15f594bec7a8864fb8db6d9899db2bd3781d301dab46c3395",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "2f1cf66f-3ded-4534-861f-771557628982"
+      },
+      {
+        "value_identity": "3bea98d847060e8df0b971c6b278d85618913be702e1add1f18ad3b01c69fbcb",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "26f5e852-80bf-4ba6-8124-559a6aeef74a"
+      },
+      {
+        "value_identity": "d3077d1f06e843b205e1b5cc4a32337f9597d800bf44178822b53f97f48824b2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4c18a3f7-30aa-487b-98c5-2aff217eec61"
+      },
+      {
+        "value_identity": "d81cf7661ed74c2fa52036507908043f3f789d1d7a0bdda31725c06ffce1715f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1b878e25-7c4e-40fb-a344-184de26cf839"
+      },
+      {
+        "value_identity": "a0d16e9d0c48543bfa7d69afa966567322e48fa29c19719fb0396688efb0a702",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "491d04d5-b9c5-46a4-b7a5-2898cdb486ef"
+      },
+      {
+        "value_identity": "1b9c73d64ec88d8330c28a76c78099bb51db85a97ca479cfad36d02e7c8fc596",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "02eddbe4-afb7-48d4-92ae-87ab785f62ce"
+      },
+      {
+        "value_identity": "aa189f35f8fcb3c11bdfcb460d586f4c3e1a04369bdc095ba964f687f60c0a61",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0e0011d9-da1b-4f96-9364-3c7404cc5381"
+      },
+      {
+        "value_identity": "5413a95c0a87a5555233fbe659c5f7da2bafa27c1c9e9043e1d42f9f41a622d0",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7531b53a-85bf-4ca5-b2b5-40cd6be505ea"
+      },
+      {
+        "value_identity": "44235605d1d580e603a7da2c6d1bcacb4ba9862796990d3973026f1f089ec031",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7b0ca4bf-31c2-4301-8ec3-96536e3dc8d2"
+      },
+      {
+        "value_identity": "c56fe3f3a63b2d2b9da12a0499cef0e1d35013dad4f13d6a551d2a5f68fa3e61",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ea6f4115-49ab-43fd-b664-7da5aefcfa5a"
+      },
+      {
+        "value_identity": "40ec5ab411402c8180a6614f65c6a55374f24de358d4ee36727400e6d8a29836",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "286e81e0-0634-4685-b86e-a918a9a24dcb"
+      },
+      {
+        "value_identity": "6b837e756f3e55a9e2ca83e2280d4e904a93b1d6cfca0d07346b9fb86c5f91c5",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "66726379-22e1-440a-834a-02f385f9e2e4"
+      },
+      {
+        "value_identity": "e1ddd80ec6bcd92dae3c609c1663418b3d3589c684d4f3d4432ca281c8b12344",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "189f18af-d337-47c7-9cb3-9d467f2e9bd8"
+      },
+      {
+        "value_identity": "c0a4c2b64a38f05a1a9adce200b9c4a31fa17a731e366fcc347243a8b2e49602",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "51bd7681-2b25-46af-be99-dcceb66adcdb"
+      },
+      {
+        "value_identity": "e3f7cc24c220e4174b114825553ff4ef033ff8413049820cf858f9fc9d3573ad",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3d651a8e-3290-469c-a59a-7a9714c12501"
+      },
+      {
+        "value_identity": "f7689ad3a1c2416c7b3058650bf656c3b567f5a3a40dc78be0a55713399211ed",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a8e1721d-220b-42fb-b884-b76a58634761"
+      },
+      {
+        "value_identity": "ce70880492416b76c35bc016e7b97864467c3c0c4be2208b390a45cb895b1798",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4af293f8-bc52-4f50-90b6-3ea39ae22b0e"
+      },
+      {
+        "value_identity": "a6e2ba57136e984102ea0c290ee8f674b25fe574020c0cad46fddac9b7a5d396",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d805d80c-48db-4dba-b6d7-785252b991ea"
+      },
+      {
+        "value_identity": "f0d5a2c8000aa468bb16d51ce5ab85ea9ffda316874346d807b72383685452ef",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d3d3d256-ed97-46b8-8815-ca1517f47c40"
+      },
+      {
+        "value_identity": "4e6608c0a448c9e25385462ead450f09914206730face7f20101f4b3e559560d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "da54638a-72a7-4e3d-b75b-f6c15e8c6744"
+      },
+      {
+        "value_identity": "8617169f14f56c101b0dd8264eb2bd18462e790f48e278e4f24b2f64853bd6c8",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "418afb5c-a566-4d12-a107-294dc38304ff"
+      },
+      {
+        "value_identity": "3d002c9d136786b7a32ce2edbfaa0de3fb880a1c8e5e2ce4c514b3f7bc34b45c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3cba55f4-f4db-4a7b-9166-6e6a0db688b9"
+      },
+      {
+        "value_identity": "be39626ccee599334d819add4306e2717b0aaecbfefac1cf94d013fce01e6a6d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1ca4bec2-4f23-439b-9b22-5dbfac6028f7"
+      },
+      {
+        "value_identity": "02e4c447881b741962498c6f9882c213369a21909253200b9d42606d98d64ab3",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "eee4d80e-2144-43fc-9fdc-ee723915202c"
+      },
+      {
+        "value_identity": "0e48c1e6315e19da98dea8c4e07ad6c861b59e27c5da19da1eae6dab68043c9b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "300cc6b9-37ce-48ad-ae4e-f0c66abb7190"
+      },
+      {
+        "value_identity": "4f9838914f6bc3998a7411299bd2435ef632e0ecc7379a96081331b7f4c47246",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "67fcb6f6-3948-4952-a35d-e2e2e5b6fa98"
+      },
+      {
+        "value_identity": "ff2d77bf82601cc0e878c82e1b614bcb94c29529eb2e674d7007132222c6e18a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6feeeb3a-0273-44a0-bbc5-a003ea844ecf"
+      },
+      {
+        "value_identity": "3db86bd186f3d30fbaeb4ba61b748a8b7428c13ecbd7b4a08899e88e70af8efa",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "63ec69d3-a51d-4614-8705-c7cabfb4c4aa"
+      },
+      {
+        "value_identity": "e5fe6d49098e9463e15b4c79cd4fe2fa202cad3d600ef131dfcda329808bd956",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e88eeaac-01ad-4099-8ffc-7180d1fdbd90"
+      },
+      {
+        "value_identity": "cd74ec550e70d6fae98bff444ce56dc5f6143d3ae3d6d47b557d1393e9575386",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4c778db1-b9c3-4067-a25d-2d76382d8b34"
+      },
+      {
+        "value_identity": "25f6e1a922f86c9c3f39da4f646d3dfa70cb38927a6447af92ae9cc9f5c63d1d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "58cf76e6-0dfd-4c69-b670-648e6daf9265"
+      },
+      {
+        "value_identity": "d2c1e8e6fe4da03731a1eed65a8a989b2237be579f93d8f3713d457f575f5a6f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ab36e961-a8e4-4ac7-838e-702432150e60"
+      },
+      {
+        "value_identity": "6d33743870dcded0314ba908171c3bb58ab4acf9cdb8e37d59905a7cba1797e2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a1f1e4aa-d3e2-4617-ab9c-84df2a2694e1"
+      },
+      {
+        "value_identity": "0d8971fe28d37e8e73620e6fadcb6bf30bf9531cb9b2b879fd9156491c0d3895",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d9066c3d-764b-4fd6-b9b8-744820dacc96"
+      },
+      {
+        "value_identity": "64e986610b5449a72ddb703d5a2923d64079bd4cf304f21970451c68c589899c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "2cbb688f-460e-4c65-9353-ed37721e6bef"
+      },
+      {
+        "value_identity": "b7fcca1eae9206d441f7ca7ed0e4a10c555fc602168f0d9d6fb22f583adca6e2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "872d0be7-8b8b-43e1-901b-2d849645badc"
+      },
+      {
+        "value_identity": "1358b5e4635b3062b1b50055c1cd31bb1fe5685c44b327954439e9efa2ab9d2e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c9c16ef9-f0f7-4931-9d58-d397868df097"
+      },
+      {
+        "value_identity": "a0dd568e2710784cae99d467eb7646ec502150e7c311df214e1ad439a9c5dea6",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9d286d5e-2426-44d3-b541-3784a1f64fbf"
+      },
+      {
+        "value_identity": "196ee9b67184ece6223d60730800de65671b313bb40921289f53e370acc87416",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a922a973-bb12-40bc-aa94-9ec770aab441"
+      },
+      {
+        "value_identity": "dee8698995440b65cc989bb794acbec09785672b35386c9a821d0d6e8919298d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a172d0e8-4cad-46ef-91c8-32373112d60f"
+      },
+      {
+        "value_identity": "d3ffa4e4a54b90ff0b37e20661579067c560a9b16c13da4d29501cd814f3feba",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e561523a-badf-4713-822d-95c135537268"
+      },
+      {
+        "value_identity": "c65a222964ba8f8f61f927c7dbc63380bfdbcf2bd67537fa535ff67959d8ea49",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3d33f4b0-5429-438c-9036-b008eda0c857"
+      },
+      {
+        "value_identity": "7c248ed4de0f93a87564038a8f530a71469045eb01cfa05b44ddc67fc388c640",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9fd2c2cf-cdc1-49dd-abb2-8cbeede169ba"
+      },
+      {
+        "value_identity": "7a82dc12d74f81d296e7e4617d5e748e6d248c41bfc8e6140753c144c2d011f1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b5dc0e34-4c0f-49e2-b442-2160aebaefb2"
+      },
+      {
+        "value_identity": "e96acf07dba04a0568b1deef60da5a2eca035416ba25fb6af488398647fee4e3",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1bfb9652-0095-4e0a-865b-239f056a0d46"
+      },
+      {
+        "value_identity": "2c8bd259bd876a4a0b561f370e200d18c0b415552e3b50500ee4fb5d60b8b8a2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f0ec6046-76e8-48ee-be6e-bb863884b6c3"
+      },
+      {
+        "value_identity": "4d7ef2e9cf00bc07ba0b3a86602023ac27a1fc48ce31c0311c11f2dc90a6e272",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8c0f0ac3-05ea-4d32-8867-3c5529d9234d"
+      },
+      {
+        "value_identity": "2149a2c7107f036c5684ecaccbab11e02eddcfdd0ccd7a251b73563d47cf9b7f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "44bb005f-0a1b-40f1-a504-23b49ebd9cbb"
+      },
+      {
+        "value_identity": "0cd92e216134f72e152f6d4de57423e886e100452ea2f0cc60b3044482971ac6",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9c70bffd-0a4c-4172-a4d4-49cc9531c861"
+      },
+      {
+        "value_identity": "98e6efee60c6e2821223a17a66bdd762a29dafff042ce0c455492a988f4af391",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ac0fb1b5-38ad-43c7-a6e2-e095446f1c36"
+      },
+      {
+        "value_identity": "3db46500295d1fc319b2ac8123a74b382bd4dc4bcf92e2b31a42a74707d379d3",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "28050360-90f0-4b7e-a914-caa0e1ff17f1"
+      },
+      {
+        "value_identity": "c97392d379a44c004569a26e0453cdaf5f4dd437deea3e5ab010957c58d525d8",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1a3aa95d-7774-4e21-8404-25d4e2f8e8a7"
+      },
+      {
+        "value_identity": "ab78ca4e7f416140fbee8cfb3a8e453cfa598ed43763eb70af982998d527204d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "52ebb192-b7ab-4771-b2b3-69c353d1c569"
+      },
+      {
+        "value_identity": "259dc93b0ebd099b8f3acf117475d3c87c71ccaf506c3253547682ddfe5cc338",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "feb748e8-2cd0-45be-9e0f-658ecce4b3ec"
+      },
+      {
+        "value_identity": "8c9598c3867de39ca07097d0ae710735d3b82ac6fe67afd40f4bcb2dbd6c4156",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7b12d895-7f6f-4b02-97b8-7df649c579f9"
+      },
+      {
+        "value_identity": "3f06917d10bf4537cd2af359cc1c6096f084384099dfb6b21312b5b21471bd53",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "da72db9d-4adc-4ec2-9bb8-c7a6230730ef"
+      },
+      {
+        "value_identity": "3955e2254703755d7cd723aa2d5d22a10fcc81bd3c4e1a4a1003a6dfeee0208a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f4206fd5-0ade-4f9b-a789-84d1399572db"
+      },
+      {
+        "value_identity": "9cd7d634078cdb0a7db6ed5502ecb6d4b65fb574369768876ac361aa4e791ffa",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d6f6949a-d678-40fd-9c3d-00102bb09aed"
+      },
+      {
+        "value_identity": "9a509ddda25a03aac2fc363fb4ceced9130db7985c3647ff7a8c4bf536b7a8bc",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8e665a6a-bc33-4799-a445-6c4451a83cfd"
+      },
+      {
+        "value_identity": "2fc4a3cfcecff4f23cb66a497c7207be04f242e9825eddb45a1f0a1284e6ac4e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4b33bcb7-95f8-4877-b9de-74772a10fa3a"
+      },
+      {
+        "value_identity": "28e3ed2df56d87e5659da10e79d961cf19b6e3bcfd13f0c354cc42f7f9c9709d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "bbb773ea-5ac8-4cd1-b36b-c3c29b8204ce"
+      },
+      {
+        "value_identity": "4af8edae5bf7b92f3373592066e81a654d8ae39b4dc1d591556b08be37008f4b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a35e5ede-5297-4522-b886-77b0b30a4fc3"
+      },
+      {
+        "value_identity": "b82faf392328cc06dcb2005bdc7828dcd113e1ca500055d0c55c0e3f81f1931a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "646ad476-4fed-48c3-b862-a7ea38f52ef3"
+      },
+      {
+        "value_identity": "480db2cbed4658879bd7a08fa8ff3ab03a89263a73e520d0f66ca2e0c3c9556b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "fad8431e-4b33-4dd3-b71d-bb1d15336ea6"
+      },
+      {
+        "value_identity": "a77cb40c95a7b983a7a02c35636c053c200a8d0b4eaeed2f8ec2741c6e4598f2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "2e1a6587-609b-4188-8f86-ac99028818fb"
+      },
+      {
+        "value_identity": "235e3ed22c7e234ab2c7228b60b7adfc5124b2898cd92c2b7d6fdca1bf08d35a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c5621b35-16ff-43fc-8736-3dfcdbb28358"
+      },
+      {
+        "value_identity": "8e6347fe283d723e997b2cc52714f6d5fc164c8a7e5f25faa569b399310b2d18",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a0c4e617-32f0-4a97-829d-07c09d6be8ba"
+      },
+      {
+        "value_identity": "d2d9e096a2f384c4373c8cb09ff449f5c85c44fdcdf819b3bcf7f7ef034530a3",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "69bb2d88-4a4d-44fd-bbdd-70b1e2fa6628"
+      },
+      {
+        "value_identity": "ca6656433adfb3710b6052791434b90b8c9c7790f01167627792dfb3f481d208",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "cd428d8a-480b-40b5-b16a-b65c61a9055b"
+      },
+      {
+        "value_identity": "fb3710c469d4656ad3ada52a1691276fc5dc04624bad325dbfa764952522926b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1a970009-9619-414a-a96c-357c7f8d85cf"
+      },
+      {
+        "value_identity": "c2dae1577d11e69813b876269741a54c9702806a9aeb8468ce9e3d4b10117297",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b8336fdb-c017-4cf2-be07-0729df19d7f8"
+      },
+      {
+        "value_identity": "4b72cc88a0564707943d1098f4eae8a0138ef2a9af49e18e2d9baca329c7e233",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a17ce072-a6e1-471c-89db-5664a9995726"
+      },
+      {
+        "value_identity": "cda9a2a4b9aa741a8255f6a9997ce881093581ec3e6a5c598ac609752ef5fa1f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ed162007-a221-4cf9-8bff-ee6a548f6abd"
+      },
+      {
+        "value_identity": "09eaaf8ec711ea38447eb3a7d7fd54835d1d737593ad55ffbaa6d073dbc75261",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8901f053-ad93-4aa8-99b2-d0703ce6d416"
+      },
+      {
+        "value_identity": "b810e0a85302535289e53ba1215994e13525bc77f7f57b3dae2cba5ea790c468",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "19529417-f9f3-4a0f-8e96-2e77e136faa8"
+      },
+      {
+        "value_identity": "507982234c775e17cde675d0f4d043c1987dd7806367a5998f0277cccc83bee2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ab2f9960-6182-4913-9196-c1dd53774429"
+      },
+      {
+        "value_identity": "1ce8966214c8f7634ed0b3285940323b59ec7295a7d4182874bddd7212515fd0",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ee889e30-e7b6-49aa-ac53-07e4b3b2a4bf"
+      },
+      {
+        "value_identity": "509f25883266530f41c16ac4da1026fc852dbaf0eda5ada042a4e829928f400f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0af55739-b9c8-460a-8722-b6f25ba69f33"
+      },
+      {
+        "value_identity": "fb40674654552a5d27acb1ed9a5ea104e0e0a1c077b64bfb326cf5865eeb1276",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9f407003-4de8-4053-b118-0043a1a490b4"
+      },
+      {
+        "value_identity": "0947d74c8159fa5a8285154945c72f9a50a2f8593c8351fc355decd96aab9955",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "2fada1f9-5b77-4648-a950-a98d42cf193d"
+      },
+      {
+        "value_identity": "3f752529bab222406872ea879531eb53378a6ea1d8a0b0b7962a505afe044d59",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "00361072-e5ae-4df1-bdd2-ebe9ccf54dca"
+      },
+      {
+        "value_identity": "2ff6e1631b931af43a06c90cc094f4f5a18742f3f4e5ba95debc0e19b23d995d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5b73514e-ac56-4720-ae29-269c4b8e227b"
+      },
+      {
+        "value_identity": "d5a1daafb98f373495cf8e5c74efdc6c15b53cfc13157c6ab34ca061027a6ab7",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a5747f4c-ed62-44f3-bdb1-6c52b9d554f9"
+      },
+      {
+        "value_identity": "da4bafdb060c2c5fc39a52cd82df110c780bff4ffe31f3abf45349df6e78989e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "79c86d78-8b04-447c-b5da-ce38947c9feb"
+      },
+      {
+        "value_identity": "a857e5482f06a4e624c8c095850fd77fa427f15e84b25fa4ef135e4dfe3cedd2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "23870189-f266-4549-b9fd-4153e5bd7d39"
+      },
+      {
+        "value_identity": "cd012d52af3cb6da9bebd3309d1d3dfaa97d7f4a1c097514b7633babd908df22",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1ff94135-ba71-4fbc-a521-263c1a31afd7"
+      },
+      {
+        "value_identity": "61fd1d72c005192f653f5fa1b7b22c51f0e88dc2c7c0fa32fee5eb16ed5f95ab",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5bed2e0e-d723-43ca-8c8f-f5e684c5a443"
+      },
+      {
+        "value_identity": "d133f86024d5b804c63dc78cfc15e404aa5c6f9df3970b3700e9298fde449d40",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5ab7a59f-57bd-474b-b638-3421dff1a487"
+      },
+      {
+        "value_identity": "3556989ac6859c67b3f6ab8775a0c2b08c645906852349a39385b3fbfbc2e835",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6abb76cf-9e84-4df5-a6f5-2d9fac84f2ab"
+      },
+      {
+        "value_identity": "4d41067b7c12642301ebaff099d2debd781fcb583911b038f99516dabaa41380",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "18b9b295-5bef-4ac9-8ca9-c69883e5bb61"
+      },
+      {
+        "value_identity": "56282e787d15633b0b80ba31622deaecdacd12c243c2f4f2211d80edc47c111a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a31a9bbe-4611-4feb-8712-19b56a1ed8cf"
+      },
+      {
+        "value_identity": "09f0ba7c14691b3972deed06e922f51c34990b6098bbbc10534067036625a2d1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c1014283-8b1d-4e76-b1eb-891b4dd6ce59"
+      },
+      {
+        "value_identity": "78cc6ddb2cf376c5916d3cb2fe931c2a1087811757b88d135f26c29ac8be3521",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "68d2200d-9da5-4c83-89d0-54956e3b4529"
+      },
+      {
+        "value_identity": "855a2d2637befef2a2c7bf04a7739aeef4ac60f9148e158a32527cb1baba1e69",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b06702a4-8c3a-4339-aa7c-0d42d0fab968"
+      },
+      {
+        "value_identity": "f085dfd98f7aba103845615e2d49d90eca334e3662788b60c752d2b0f4dbf5de",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6a01ebed-7599-4786-8285-eed1c7093ac5"
+      },
+      {
+        "value_identity": "502e05ec8567cc5ca4c80c21e22856815ff0bf2de4fcab2b735c01c093071991",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9fff9923-d587-4983-b5f6-33ab2abc5a6f"
+      },
+      {
+        "value_identity": "e4aff5a1ff6b68b129c89d27de16089990c11d1c6d65c13339dcfd2d4ba55ec1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7b354b55-0677-482d-9da0-c25353cf2b60"
+      },
+      {
+        "value_identity": "29d594e017a1d0aa5a9ab81adb814bec69069ad186475aab27a9076e3d040999",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "2e1f2939-e4af-460e-83cc-ea96887e1033"
+      },
+      {
+        "value_identity": "ec35277aa1e721ae2085b2578dcee12208963476838b9b10ae90aa58f3c91524",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3619d525-2c4f-4dd1-a0bc-4e06976abe15"
+      },
+      {
+        "value_identity": "a828c34a53e02abf4651f6620a4f29eaf36cf2f414fd56c16b1e76002566ce9f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f0b70047-844b-4862-9e93-3ba2abcc40fa"
+      },
+      {
+        "value_identity": "97f5e3755ffd12e5389e7edb52482674e64d53627a8bdf87a9a1b25cbca3f425",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d8cae3ae-8443-4e5c-85a4-f228e1f6eaba"
+      },
+      {
+        "value_identity": "c0ab7d15ff1f43e1315ae9d2c6d68961453c633419e00bb5639489643a32be5d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "fbeb3028-dcf8-44ad-8989-44b04d909099"
+      },
+      {
+        "value_identity": "bffdddd916595b76508373722bff029c54ec9d36b42d1c1b46900ba41e36f0c9",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a1674ce2-7a23-4780-a847-3c12171dcf90"
+      },
+      {
+        "value_identity": "8e11d3f31a165298222f94d25313f05334351f4bd6a285219c511f70337f539b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1d5fafbf-a0fa-4930-9f64-533aceb5d4ac"
+      },
+      {
+        "value_identity": "c32be2b51a2149639e973d794582f66d5f8b6655ea0c6a481a82aa511774798a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7b0386d0-7d36-4284-a28b-3023eb40c81e"
+      },
+      {
+        "value_identity": "c9c1141a164d5e9cbb1ff6c4d9566923bf979db6188d03c4cbddc77cadac541a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ad547a65-8dcb-489e-8159-49fa91859759"
+      },
+      {
+        "value_identity": "2d2ff30f91f6bcb4a87fa791d183e56bc8d802cd790208b78421e39a67486f6b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b0bf479a-239e-4d20-a29e-4951bcab6ac8"
+      },
+      {
+        "value_identity": "1a3009cbf081ef4eb49b7841d5141d627ecf81c5a7d1469b4044236436be4bb8",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7fa941fd-049b-4f31-97ba-447cf0494b29"
+      },
+      {
+        "value_identity": "b635c7975fc704586550855f03db0b9264bc9b811788afc1705bed49b95fd910",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b450b150-19a9-4908-bd88-2e434f10170f"
+      },
+      {
+        "value_identity": "18aa1f86ebb947a4df8aa92a7cab57c03d9c2c0150c564a5311d4c9454149aac",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7f241342-6226-4167-b437-a24d274146d4"
+      },
+      {
+        "value_identity": "16168c365e21c1be453ef9c64f5d4980122252a4504b7f52f0c8a06c7d7f93a6",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f77148a4-0f41-45c0-b8ad-e58e8d9251a5"
+      },
+      {
+        "value_identity": "c01bf9689155caaf7455027ab7352fa36a090f68d265766bca9ce927367cb298",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6a16b4f2-0481-443f-811f-becbcf2e17a6"
+      },
+      {
+        "value_identity": "5748a4cc2cf1dd6da9f8128cfade00c82286be3b3994371fa186438091283e04",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7eabc976-4672-40fb-8431-4be5cbcb3a64"
+      },
+      {
+        "value_identity": "7d6df0c2793b6f8742f7157f4aa080eeeea2d8c538af1d80e1aa9789364661a2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "73cde36a-904f-4b66-95bb-7142b170517a"
+      },
+      {
+        "value_identity": "137131fee1fe744a9c5cb73e05c22a0d1c233fb22618e45429c36163903cd35a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c0eef828-d9fd-4e09-9fa4-b3197e2a29f1"
+      },
+      {
+        "value_identity": "900aea2d80374ae9bf2b06ec98a5a10cff50a98c8823d841272865270785ce75",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7db9caf0-2d23-417b-a3c2-ae0de93163e5"
+      },
+      {
+        "value_identity": "8d7745f91cf6d5bd1d7ec49651c373b8cad3bb230ee29fa8f3bb5c698791d7c7",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d0559690-89f0-4abe-b90a-5c6c23d4d201"
+      },
+      {
+        "value_identity": "a46ce8d529a6d6ef9df7025f0b2e13005565459924c3144b48c7285d0216c6c6",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "60aa60ee-dc2c-4d47-90ab-f791fd1cb9f7"
+      },
+      {
+        "value_identity": "8397533f4c67a49365bb73060c9673910af1422bc03b2c945ce78a353b6f846f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9cb5c5a7-90fb-4472-b9b2-135fea489d4a"
+      },
+      {
+        "value_identity": "d9a30771406610225c9613b9eeee854341dd6c16d43b217aef8c795f687b9426",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "990cacc7-2185-4e6f-a1cc-7fe3baa4f191"
+      },
+      {
+        "value_identity": "19c9fbd32758a9476520de340e3adfc59f3b58db0cfc264279e0f16dee9c3d1d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4a72895f-75c4-414a-8a1e-01160af0c848"
+      },
+      {
+        "value_identity": "3ce2f0913969c46e99125feda7c37a303896eba899a15e94f119624b4deeac95",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "035de97c-a156-4f81-9e70-c24ce7e479c8"
+      },
+      {
+        "value_identity": "cb57455821eb6d8930de3230ea7bcd631645a599a730295156a78fadea81be08",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6a599d65-779b-4ad0-9633-bc58534e9971"
+      },
+      {
+        "value_identity": "bf943657eaf863d10715f93256f336b697273065191c2c2181477a18f6170dd9",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "41dbd4b5-f449-4856-a511-562670e7a9f4"
+      },
+      {
+        "value_identity": "985ff80cd8979701c1fcdaf81f5d08745297262dddc1712d47b3f40051ed0c3c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b9991677-ffba-4e1e-9e8d-142075674251"
+      },
+      {
+        "value_identity": "95801f160651b8513fc10d163adb86b5bac27fe560cfe4f6aed5e997663bce13",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "17571016-ff0b-46b9-a57c-e5584f67f898"
+      },
+      {
+        "value_identity": "23d1f3d98de6a1eeac1c735f12eb040001259e50846e27caac77df3d7724ae5a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0003530e-2e94-4fc6-bfa3-fdca2365b394"
+      },
+      {
+        "value_identity": "b93d9da545b49ebdf35ab672c8b12c371821ab6af1efaf1c376e1f2e9221a60a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c7ff3bff-5af4-42a0-97f8-84d292a49f0b"
+      },
+      {
+        "value_identity": "317a661051b498b3c2185eed7c042019df67252d1f3dca36d7e70a17b7ae8178",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "82cd4eb9-5cbf-4bb4-96a1-909533cbb979"
+      },
+      {
+        "value_identity": "fe91ba44f380ea8d81e146bd50864eab21ab08a028e768ac89243e85e0bc6b24",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9f935bfb-ce71-465e-972f-fed3c056676d"
+      },
+      {
+        "value_identity": "cab26e5e7a1e02625ca1841177e174c8c954cd591a16ba5dbf3a579fd65ace69",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "14a3cfd5-003c-4712-976f-7ba526229406"
+      },
+      {
+        "value_identity": "2306f0f2468afef67a6df085ae439e55c72fb61a3116442e8e1c832ce11396fd",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1471932e-0e7b-42fb-8081-7423fccab296"
+      },
+      {
+        "value_identity": "c26bced6fd311661f38d6ffb17d6d48979111ee297ac1e7b11400a09ff67b592",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "13020514-fc15-42bf-9c02-698d945bb7a4"
+      },
+      {
+        "value_identity": "2207aebcf240d975be68ca33e4cbbfe179b981bbf39ec803ea47bb27016849af",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9f5200d9-fc5c-44c9-8d7d-a602d4885171"
+      },
+      {
+        "value_identity": "9e3894b9dced6aaa0bd80717b790cb7b460cb50f9991c0cc6a329c2a615c80d9",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0ca317de-bdd9-40c2-91bc-6e89f10e2826"
+      },
+      {
+        "value_identity": "9e24fab98e7522c6b19445d25cf279afe1cdd9d91287a6118d75315b1f83b593",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b24a75ea-ab3a-4fc9-b608-cc377c832b5c"
+      },
+      {
+        "value_identity": "ae9e2de47d448f65abe81028cf6c62f95f639ad322961bf65803ac004c2caa8b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "fd983c6e-4e30-4b4e-8e27-c9d18989a0ea"
+      },
+      {
+        "value_identity": "9e221dfa9211ea1711266495487ac1a2756d64ee3905124987fa52b37e825cd1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "03f2d345-c0a2-438a-8ad2-50156b056ab3"
+      },
+      {
+        "value_identity": "cbb0cf0f09a25ec8eef37fc4656c6816acb66d820c54bc6c334b1d72fce94fd7",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "cc972f1c-e18a-4d12-a2f6-0451337f9c3f"
+      },
+      {
+        "value_identity": "6f973fcf17fe499eeccb268ec27da2664795a278773957925844999d6cc1b390",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3673d9ef-0326-487c-b7c8-527e32919b13"
+      },
+      {
+        "value_identity": "52190a880492b1902741a40a5322e9c980af60e3acb11bc9fededea475608368",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c4ebd086-e447-48c8-a1a1-de2a58f3df6e"
+      },
+      {
+        "value_identity": "43297aac03a47811b81346970c91dbed2c6b0eee2e9de11b79897bb5b9695bfe",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "00cf3212-2e2e-4b65-be42-cf540c8ae7b0"
+      },
+      {
+        "value_identity": "41a72c1e28991bea24fad79ca21ba8a389c556532f4c77c44b74e08ab2861d18",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c9a09d31-99f0-4369-a963-a2dde7e4cb6c"
+      },
+      {
+        "value_identity": "56967960b2e6dfc66dd744abef29449facf676cc3ac0538969af714eabb0efc5",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0c51e6de-00e4-4d7f-83a9-851d8ab29b0c"
+      },
+      {
+        "value_identity": "8981ba871c882934d4b88e600550fcfe4d9c19ae19c622a288b2b314131d7327",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b63723fa-5ad7-4dbd-8a7f-113c6543ae85"
+      },
+      {
+        "value_identity": "6a43dc5c9300238f4a358d4b4927466743eeda90ded5806a2f3944354ffadc25",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "8b1c8ce5-3d4d-4ea7-be86-ac38ac182541"
+      },
+      {
+        "value_identity": "13b47c3d68d5513fab1ea0a075ff6c7ad2066b42892ec7b64d57866be5fdacb1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b411bc18-771c-40a3-b84c-8ca04b7e4ac7"
+      },
+      {
+        "value_identity": "241e8ade780995a862a9d4e608b0a71df0dd0aec89c74b20b775b3a9f39388da",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d1d8f51e-40e7-42fc-8c15-735ca3c8b219"
+      },
+      {
+        "value_identity": "835030c06f20fc8996967bba30d5a543edbe01a3d0060919d91e256b96c98e54",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "27469712-a3a9-4c40-8b96-46a53ff80a30"
+      },
+      {
+        "value_identity": "6b123068b103e9f63f50480ac78c7af691c03cc0c67991a30ff0dd64f7f415f0",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "264cfa8c-7c0b-4e40-bd0b-b5931d67b902"
+      },
+      {
+        "value_identity": "3a013ecd87d6f70e80b46ca6cf8243647a46b4b0e6edcfa909c42674ac212689",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "dd024195-aeed-4d75-ac80-2f92abbe4186"
+      },
+      {
+        "value_identity": "27ad67517ed3228a22a798930dd7002e6a66fb1f6fd3617f851aa2e74c564565",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "24c7ad43-3d49-4556-91db-a1702a5e6e4f"
+      },
+      {
+        "value_identity": "2144e8257d008394b828679571a376a794f913577ae8ed2be43da443cbca0cce",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3505c6e0-4b74-45fb-90cd-da67c03f7504"
+      },
+      {
+        "value_identity": "d86053d6cae228de2de2f4fec3ea655c509df39de8b75a8be69219fd1abb160d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "27bf7588-1bdf-400b-9f56-aa7024d512db"
+      },
+      {
+        "value_identity": "a0d96294657de296532004f0e2bcb68b53215bc0c4a0fc53cd8bca75d45e89a4",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1209e34d-585b-46af-9bd2-d1077d35bc82"
+      },
+      {
+        "value_identity": "d8035488f3d06adc3ac0cb30af13dab9fa222f8f953c094bf775802fead89c14",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f1f5e027-6517-4657-b8fd-ffde779f63f3"
+      },
+      {
+        "value_identity": "203e5b629f084a5800606acec87956dd49dce05d5a08d51b9f7266cb69f85f5f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f6be0471-58b5-498e-a8d0-f65a4338da1b"
+      },
+      {
+        "value_identity": "129594a11103cf49ec89fae1e1576d9407b1bf39e57aa62f893413f98e70b440",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b53632bb-2258-473a-818e-6274d553928d"
+      },
+      {
+        "value_identity": "57ef9d9c9a3ed1446729a1908e4f00cb196ce745a59fea94dd17a8ba1c52beeb",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "07ee95df-9d0a-48ff-960b-194f7baeeb84"
+      },
+      {
+        "value_identity": "6750fd6dee7d5574ad39d8ced39f4a7fb30d4d8e30fb7aa3d79876dd6fc22e3f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5374afd4-382e-4e60-a120-c160a190bb98"
+      },
+      {
+        "value_identity": "41c3de6e080dc15bd419864a48e902c58b725048df40c79eaec540f7f017fb3a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "84ca96ce-391d-4fca-9079-22faeb5fa717"
+      },
+      {
+        "value_identity": "cf7592917000b2adac8805424fa05ca47b95ad5ba8fc8a28214e5d34361556f2",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a6343f97-319a-45bc-a467-8f6260a67aa1"
+      },
+      {
+        "value_identity": "21cfa1eb251c9cbe70813cef5a3f9d44f3630804d585b929473bbc84cfffe0e1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "56497943-d3f3-4bb6-9d22-b0e6b7ecd9c8"
+      },
+      {
+        "value_identity": "1aaeef3a40345e01897893c47ec7e0ec5891a518907ce525c5667d9d87761522",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d74a2f91-f684-4cc4-88d4-38b8f982c437"
+      },
+      {
+        "value_identity": "768004486049b464c42152f33c8d584b69420253da49c50b3c907d4359b39103",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0204fb61-ce1a-4f39-9e70-33d6d20541dc"
+      },
+      {
+        "value_identity": "aee7b9d5160099a2c70cfdd59e3a663475e6d11a0b023c2e7a40853b537ade7b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "95ea82e8-e04d-4120-b3b6-eccd18da4e22"
+      },
+      {
+        "value_identity": "e6161c25d66fbdc69ff8ffe8394daa57790dcb2603e05d53d86c12754339c2e4",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "6a176c08-afeb-45d6-a2ca-d3d350b5d452"
+      },
+      {
+        "value_identity": "c446f72463d722eab30c440488f47e8caae5e06b890e91a1868b7919aedd19b3",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b885f387-1bd6-489c-891b-e04b332fc82c"
+      },
+      {
+        "value_identity": "376c80a443a24b63ffd7eec5a3200381b67e629d61bc9eeca11aea47251691ee",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "205784ea-dfb9-4044-a38c-0498928607b1"
+      },
+      {
+        "value_identity": "59c36ea105df31213cd55613bc185d81e738fd365d48b257c81be00642388311",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d6a55b32-072e-4f87-8ca9-79e4a8211640"
+      },
+      {
+        "value_identity": "2340b4330b4324b36585762d0863b65169917c8c51f5df13c360d6d42b24bca7",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3f8fa4df-2032-4be6-804a-526ec7918930"
+      },
+      {
+        "value_identity": "675c89ffe26a6b7f630c347f7fa904d5841e61b069b932be2a83abaecd9c8be1",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "92d9ec85-302f-4314-a4cb-b5250009e9cc"
+      },
+      {
+        "value_identity": "006fd4aecb759142c19618850bc609fbd07e08baa30bcf03e32474bdc2749d10",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a59b93c9-6408-44ac-876b-50da3a9fc940"
+      },
+      {
+        "value_identity": "5c53c4b49eac31e2dc5205fb85a0390caf1117148a86a5a67d045189858af0bc",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "bd5f8a46-6c31-4d60-b316-754ab0a37069"
+      },
+      {
+        "value_identity": "73b4e4d213578435cd67960e9df27fc37c2f9b2ec6e7ae3152db89766a0226c8",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b590de99-079c-450a-956b-f82c4640d172"
+      },
+      {
+        "value_identity": "13496b7dba5ba56ba9a4c29f45a5b787275ce17712d6c36141c614dc30f9da48",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4c279cfc-d5d1-4b92-84c5-e435f1b7dd77"
+      },
+      {
+        "value_identity": "4df439fd75dcf2aaa7ce2e3531593e2638a5c67f15abda504d854a9aaabd27a3",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9607cad2-ddcd-4b01-9198-5f6b4bb6e26c"
+      },
+      {
+        "value_identity": "96836cc295ab425687c631090b6fe6c98db5bd0980683b3fdc6ab6c1972cb855",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "7f12bd23-7eca-4675-9da3-d9428df93c57"
+      },
+      {
+        "value_identity": "172e68af9edbe4a5ef84eb2382ea01b26faa4693e60c4a0586c08d167e644d3c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "836552e7-d3c8-44d3-b8c9-6407958b04e9"
+      },
+      {
+        "value_identity": "de3cbd5e5df976a604b9d7b87d9aa0c20924748aa51dc541b4020a4c2da508e5",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e60fb5ab-7ef2-4053-a01a-f92e85b1f72f"
+      },
+      {
+        "value_identity": "204f5b15d8d7e230a71f4e3e6a59390a16ff2998f8aa31f20a36a177279d61a7",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ad116627-62ae-4f48-b887-8f5eacf53f52"
+      },
+      {
+        "value_identity": "3a5c7a2baa76a363a5dcffe5f731091c7b3a2a54d3d7e5d8a6cff290faba4e0d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a565f80b-c824-4c1b-9ddf-97e7fc5c8ee4"
+      },
+      {
+        "value_identity": "d745e0ba7402e93f72bc09aa6a56326f86efd9d313339d8375ff5ab0e83bbf55",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f91e3eed-b3a8-4f97-ab84-d2ceda4f8f71"
+      },
+      {
+        "value_identity": "358ba303dd21b46b666836d825e064bcd92ae27deda83ce0dbeca7267835d362",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c8600cd7-8391-456d-92f0-66dd57943089"
+      },
+      {
+        "value_identity": "a033226e8404de663eda7ce406365e9b3eeeb85786fee635c783c609afc1f3a8",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "35daf1f7-3a94-47ec-8a32-a879e6322d2b"
+      },
+      {
+        "value_identity": "83f3b97f233aa7dfb85e3809eec61f84b3c2fc6c34d6c8d2265051458333d20a",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f64518a5-5792-49bd-9848-09bd29d67e9a"
+      },
+      {
+        "value_identity": "12934af6d564a911d944c21292c3928a67beddb6fac526229ad38316c83e9a01",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "4873954c-a057-4b8c-801a-f997ac2b34cd"
+      },
+      {
+        "value_identity": "786cc7853a48dcc7c42dc0c8dc31777df18cfcccf7ba78d5b0886022a8b66e03",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "b70a2c9d-6a8e-4a49-870f-429991b1858f"
+      },
+      {
+        "value_identity": "40a3ecd65529e0214ec823b3c1b582ae1ef772aed99df5a2a566313ab6868773",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "53706d56-6395-48a4-8192-8891ffa1af78"
+      },
+      {
+        "value_identity": "334d8c0bcbbc9ec26e9f384ca2106dd05b68288fdf785f17146f8f2a0c7c98e4",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "28887b71-c43b-4823-803e-89a6200d8eb8"
+      },
+      {
+        "value_identity": "7440ef7d48e39ebe137c17a67fdcd9872aafa7321656ba240ea842568d56b914",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f5971e59-234d-461a-83b6-509b18caeb3e"
+      },
+      {
+        "value_identity": "63719c9a6f4b879b698abcda2a0dac68b9f90d04d0cd2a2d2b319aeaaae6c3d7",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0cfa80ea-d33c-4710-9831-a503032be4d7"
+      },
+      {
+        "value_identity": "9e727d6dc52eed99eba83b0e3eca88a7093ecee17e158d28c511f5483854d8ee",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c67e8bca-075a-4359-8b43-e0bf49acc264"
+      },
+      {
+        "value_identity": "f1d25e72ffe5f0eea9641b30385928ce48240fdb1aefd28ac42b42dea69024ab",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "eb863019-d728-414c-898e-7321190a9b74"
+      },
+      {
+        "value_identity": "70e8d9b22545ca1572e17531142817b5380f6f590fbc6cb0ef692c9ff8005566",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3214d8d3-1dcf-4af2-8dbb-234215049552"
+      },
+      {
+        "value_identity": "db7f927c3e532935d32239fbd0e9fe85dbc8d275a50a1b9b2042f1cba18a4d3f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d2788332-4abb-469f-a819-d1a357d1308c"
+      },
+      {
+        "value_identity": "bb35a8c22ed07d7c7c82d9edc95fbca25a3827f7d3c8e8c20aae6757cb378ab8",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "50926acd-b322-4e4b-a527-f72a765b850f"
+      },
+      {
+        "value_identity": "b0e50e2f1c32d6fbe246b568daaee278f057e45a163cac16c545260686ecc562",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "d8fabce2-b9cb-4bcf-bec2-51825c615587"
+      },
+      {
+        "value_identity": "431ea012a03b93faa2f5153a967679477161ef8caadda48862229ebae4a04a13",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f9b7c456-a44a-4fd6-b444-0ac80b9565a3"
+      },
+      {
+        "value_identity": "e44e927a5da9d961a049a5a06b3b564cf495e53c337bc0874cdcb70a98375761",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "36977e4c-4647-4e5d-ab82-c99c8eff9ca9"
+      },
+      {
+        "value_identity": "a6186531613cfa2938f80d5fc5a570d194f93a7fb53017680306b81e1add2c63",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0173370f-6f9b-45bd-8ddb-4db597c05770"
+      },
+      {
+        "value_identity": "6a2aaed44c32d9955e64a448c073f8e4a792754633ef735cd0945d86276ded2c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9b0a983c-c97d-45b9-b668-1864674edaee"
+      },
+      {
+        "value_identity": "9c76febd389d7ea6ecaa2a3f5ac0d339e067b94080a8d31b69ad166fbb0aaaa8",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "c6709d63-3c2f-43a8-89b4-fd644ec512b2"
+      },
+      {
+        "value_identity": "34f5a5e689aba49c52b46a093a92a0ea0304b1978b78da28f2b36e26525defab",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ca6269ee-100a-47a6-8bd4-8660cbb3408a"
+      },
+      {
+        "value_identity": "47e2be3599a4682af7575a02dc628b5b0381131d463d5518b7b16d629095d420",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a05026e6-edd9-4389-be74-62f012e064a2"
+      },
+      {
+        "value_identity": "843899f198c2a53f3958dd03268cca34d84c68cc6c56ef44f780f36bdcc3dcf9",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "0736d9e9-f585-4574-ad19-1f9d74929d5d"
+      },
+      {
+        "value_identity": "c48f5f44a4a9c4e1c34f8cfb2d8c224af9d4db894cfc827cab6c709198514935",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "995a6644-b48e-4160-9108-7d1756358239"
+      },
+      {
+        "value_identity": "10b6d359ae09d65934ecc5f3e5613be57571605afd01fcddd650a9d11654b21f",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "9295cb99-4f9b-4b7d-9a2a-3ea8e9406f06"
+      },
+      {
+        "value_identity": "5512d676d085c20686a4ac02e0d9da43bc5e821222f54285c536d877baddb772",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "cb1a7fb1-00a5-46d4-9d6d-9e498ff99d72"
+      },
+      {
+        "value_identity": "c69e11baf36f2a64039646d60e4b60c636e86ceb5b700e6a98ff2c7526740c71",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "2ca691f0-3206-4bfd-b0ea-570ba5990374"
+      },
+      {
+        "value_identity": "4c9f1d7e3719d942040fea3cba29848428f30fb566f5bbfe918fcd4952bcfdab",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "10c7a897-d629-41d0-8061-ca3570f77861"
+      },
+      {
+        "value_identity": "356cce5d96f7ef6e5d3cb8d2b89dd190e9154c7bd08ec949b5f0fafacbd03606",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ccfa66c6-e28a-474b-b774-24cdd2b3aa30"
+      },
+      {
+        "value_identity": "5588f2b24393fa51e54e079b55246475b9ba704ddf057e739009fff9229491ab",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "82d13b3d-84bc-4619-8348-1f2509ff52e8"
+      },
+      {
+        "value_identity": "4598d6ad3179809032d365cf970b04a884f117517acc28a387c94b4ac4d0f482",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "62cbbaa4-5beb-46c4-a949-6d2a2262e688"
+      },
+      {
+        "value_identity": "bfc5fbad4ed84fd981031365be9af426fb18b476ccf4a2f550761d6b0c1e6576",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "a87ef097-53d7-474a-8879-94e74d41ce14"
+      },
+      {
+        "value_identity": "ba7140645af06e0c44bb2901c855e566c8aac0f51688340b1be034fab62a0a51",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "73066ef1-5d81-4ff8-affb-64fe28e9a173"
+      },
+      {
+        "value_identity": "bc001b4193466810ed9f82fa7e7cd9e56128baddecba5546543cf679562404e0",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "10bec7d7-990b-42f3-b454-31860c8b9b6e"
+      },
+      {
+        "value_identity": "91afb81bc5d4d271d01b506285da4f9912c300b5165a5604e95bb71c18dfc42b",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "405fa279-e519-45ac-93c5-38e4b6723745"
+      },
+      {
+        "value_identity": "a461f8a2f8556521dd4cd1dd5414fb102e45d70f52f8421e2f3af098705a433c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "446ec0f1-ad6b-4a7c-8417-bf91e0c4609a"
+      },
+      {
+        "value_identity": "2cd28d7ad589f5fff2282e573d3aee8a33630bbfd9f143d6d97544ddad766830",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "685a65c5-bb43-4780-8692-136ddbdf31e0"
+      },
+      {
+        "value_identity": "dfa5dfe4b08bc8829c2865eb8f20a605c6d70172f589e0584799cd4f79d459ba",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "984e0460-467b-4137-9ff7-35d48c3d4f97"
+      },
+      {
+        "value_identity": "a7a1004c72b2a7ebd3ad03dbfe1365e1843483654883009003d24a2ec51f62e5",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "27c629be-bd89-4809-ab02-b8d4e7a033da"
+      },
+      {
+        "value_identity": "2262d84cb3fd626665228e027b20bf09c41f63021a642962b8af4cc7aeedeb45",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e1c1ec5d-c796-43e0-b0e0-5bacb59cbeca"
+      },
+      {
+        "value_identity": "fd848727af177810c65a71202bffeb63f179cba148f79d8aa3a28ca1d01b93df",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f021aa3e-a5c3-4ea2-829c-e9f6fccade09"
+      },
+      {
+        "value_identity": "7a550b81788b41df8066a28be982ecd738e377584bc9702054a39fee269925ca",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ff251c22-e480-47a4-a845-8fd474a7c9bf"
+      },
+      {
+        "value_identity": "c61112dff12eb612548002b45bc390e4dd4a5f2aa05f115d75b7ffd4fd7a3f33",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "2c5e0274-fdd3-4aed-8f6b-12f59568a014"
+      },
+      {
+        "value_identity": "107146e8b28c02cd4e0f51221fac66cb8485d2d6b3dba94bc6ef008436ec958d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "57550670-8a74-4c0a-9f6b-5a78f70abbd1"
+      },
+      {
+        "value_identity": "e678634ce3a2dab3de38b83fb0e2c505b98dae5775817bf16106174108a66f3c",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "1b2f9641-dd94-49b3-a6ac-c449618bb8bf"
+      },
+      {
+        "value_identity": "153a596bf5cf6bbf0258275088b61b6497ae1c627187ea44097f939e4b4da626",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5c83a6e2-7652-4f02-8272-57dd99a67398"
+      },
+      {
+        "value_identity": "83875be3889ef89b3ce3340b4e93849d70133b9d5fd836c109c633316778c618",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "86675fdc-4723-429c-b7ae-fcfe02ab38b8"
+      },
+      {
+        "value_identity": "83988e0ff43ac326dae2d5a58cbbf8f3017063cd81579d86a893354b490f3875",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "f4de4ee8-b778-4b8c-94be-2d35bb75e748"
+      },
+      {
+        "value_identity": "d5da68049241b72426ca821f092fbed03613a1bc987f873ff69f1bc3398eaffe",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "322f1a3c-f62f-4f84-999a-ad0eb970fd04"
+      },
+      {
+        "value_identity": "f16fcb77d3bfa8de069d900b51072dd085a893cef6f6f5c5aba863e239a75d92",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "90754737-3b0d-413b-a847-e0bd81a34b2e"
+      },
+      {
+        "value_identity": "e72243278c3f75899c130c59c3ef2ff4700bc735aea30992b9ac1374a441988e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "3993990a-8de1-4ff2-950d-918af47eb840"
+      },
+      {
+        "value_identity": "fdda68d29c7b3031ba97aad5bd9a2a78c1d0e1a0ba6a7e326210b525f9c29665",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "e40754a0-5bed-4e40-8615-f3df4de394c0"
+      },
+      {
+        "value_identity": "39b65f3a25dd0dbdf6cdb7b13477ff02943170d99e558d13d5ca6f5f179ac5ff",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ead1238a-e217-4d6e-82e9-05906a25cb12"
+      },
+      {
+        "value_identity": "58f3fbc29ebe7f79227f34ffc83f154b463f17ae56fd2295c884815ac8d4119d",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "ea79533e-0869-4365-b113-5db9e8722178"
+      },
+      {
+        "value_identity": "74b98e828269ae30cb4fab6a5cfb5b4e64c92ad09258468469541e4cc55b2005",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "225111cd-e2e0-475a-8280-583dcf85c560"
+      },
+      {
+        "value_identity": "82fc5e2a96089fb3e3e7d917b29d4523da947256ccaff9bd26c3bf9123a8e988",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5b2839f5-527f-4165-858c-e351d24c0cd9"
+      },
+      {
+        "value_identity": "e77b7683a2519eb355491682ad52f0eb13e8a897678a9d7e14964bfaf4e20874",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "5322c454-56b8-4c03-b9bf-904c9c56449f"
+      },
+      {
+        "value_identity": "03cba67fd1882633caba2ed635577e7860716e5091daefd329f49dcc857d8f2e",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "cff890ca-9050-42bd-878a-7f73b90c4974"
+      },
+      {
+        "value_identity": "32810372897447442ed7727989b6c1ff98405a5b34a0e3d1400762c9d3fc6c22",
+        "classification": "REUSE_NO_OP",
+        "existing_id": "662d486a-b2dc-443a-a059-bd472d2a3233"
+      }
+    ],
+    "INSERT_ELIGIBLE": 0,
+    "REUSE_NO_OP": 386,
+    "BLOCK_CONFLICT": 0,
+    "MLB_02O_R3_VALUE_IDEMPOTENCY": "PASS"
+  },
+  "limitations": {
+    "championTestAucApprox": 0.551,
+    "MLB_02O_R3_MODEL_LIMITATION": "PASS",
+    "MLB_02O_R3_HISTORICAL_LIMITATION": "PASS",
+    "historicalRoiCertified": false,
+    "clvCertified": false,
+    "profitabilityCertified": false
+  },
+  "boundaries": {
+    "officialPicks": 0,
+    "autoRecommendation": "NO",
+    "valueBoardPublication": "NO",
+    "providerCalls": 0,
+    "marketSourceWrites": 0,
+    "predictionWrites": 0,
+    "predictionResultWrites": 0,
+    "championChanges": 0,
+    "modelWrites": 0,
+    "rawWrites": 0,
+    "featureWrites": 0,
+    "otherDml": 0,
+    "productionDdl": 0,
+    "automation": "OFF",
+    "cronChanges": 0,
+    "MLB_02O_R3_OFFICIAL_PICK_WORK": "NO",
+    "MLB_02O_R3_AUTO_RECOMMENDATION": "NO",
+    "MLB_02O_R3_VALUE_BOARD_PUBLICATION": "NO",
+    "MLB_02O_R3_PROVIDER_CALLS": 0,
+    "MLB_02O_R3_MARKET_SOURCE_WRITES": 0,
+    "MLB_02O_R3_PREDICTION_WRITES": 0,
+    "MLB_02O_R3_FOUNDATION_PRESERVED": "PASS",
+    "MLB_02O_R3_PRODUCTION_DML_BOUNDARY": "PASS",
+    "MLB_02O_R3_PRODUCTION_DDL": 0,
+    "MLB_02O_R3_AUTOMATION_STATE": "OFF"
+  },
+  "readiness": {
+    "MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_READY": "YES",
+    "MLB_DATA_02Q_VALUE_BOARD_PREP_READY": "YES"
+  },
+  "humanReadableAudit": {
+    "MLB_02O_R3_HUMAN_READABLE_AUDIT": "READY",
+    "path": "docs/CERTIFICATION/mlb-data-02o-r3-current-moneyline-native-value-persistence-audit.md"
+  }
+}

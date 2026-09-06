@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-05 23:20:00Z
+Last updated: 2026-09-06 00:20:00Z
+
+## 2026-09-06 MLB-DATA-02O-R3 Native Value Persistence
+
+- MLB-DATA-02O-R3 is certified as `MLB_DATA_02O_R3_NATIVE_VALUE_PERSISTENCE_CERTIFIED`. The R2A commit `d3cafbdf353a6198b2b09354f7330d9affc717cd` was published to `origin/main`, production aligned to that same commit, and the bounded native value persistence executor inserted exactly 386 certified analytical moneyline value rows into `public.pick2_mlb_market_value_evaluations`.
+- The certified 02N plan rebuilt exactly: 386 value rows, 21 eligible games, 193 book-level pairs, 386 deterministic value identities, 0 duplicate value identities, 0 missing source linkages, 0 invalid rows and 0 side inversions. Prewrite classification was 386 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP` and 0 `BLOCK_CONFLICT`; the authorized value DML cap was 386 rows.
+- DML accounting passed: attempted 386, inserted 386, reused 0, conflicts 0, failures 0, updates 0 and deletes 0. Final readback passed with 386 native value rows, 0 duplicate persisted identities, row parity PASS, payload readback PASS, source linkage readback PASS, book identity PASS and numeric parity PASS. Second-run idempotency projected 0 inserts, 386 reuses and 0 conflicts.
+- Analytical distribution is certified only as model-vs-market evaluation: 193 positive-edge rows, maximum edge 0.095882, median edge approximately 0, 137 positive-EV rows, maximum unit EV 0.240928 and median unit EV -0.034990. The top analytical candidate is game `823904`, AWAY at `betrivers`, edge 0.095882 and unit EV 0.240928.
+- Boundaries held: no Official Picks, no auto recommendations, no Value Board publication, no provider calls, no market source writes, no prediction/result/model/raw/feature writes, no production DDL and automation/cron remained off. Historical value backtesting remains limited by unavailable 2025 market prices and the Champion remains a modest baseline. `MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_READY = YES` and `MLB_DATA_02Q_VALUE_BOARD_PREP_READY = YES`; neither phase has begun.
 
 ## 2026-09-05 MLB-DATA-02O-R2A Manual Native Value Schema Migration Readback
 
