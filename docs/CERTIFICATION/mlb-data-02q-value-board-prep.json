@@ -1,0 +1,4636 @@
+{
+  "generatedAt": "2026-09-06T20:35:54.806Z",
+  "project": "MLB_DATA_02Q_VALUE_BOARD_PREP",
+  "certificationVerdict": "MLB_DATA_02Q_VALUE_BOARD_PREP_CERTIFIED",
+  "repository": {
+    "branch": "main",
+    "localHead": "abdff498104180ddfc0b6fa4e9c45b943b080b0f",
+    "originMain": "abdff498104180ddfc0b6fa4e9c45b943b080b0f",
+    "trackedWorktreeCleanBeforePrep": false,
+    "worktreeStatusAtPrep": "?? scripts/mlb-data-02q-value-board-prep-validate.mjs\n?? scripts/mlb-data-02q-value-board-prep.mjs\n?? src/services/pick2-mlb-value-board.service.ts\n?? src/types/pick2-value-board.ts",
+    "MLB_02Q_PREPUBLISH_STATE": "PASS",
+    "MLB_02Q_R2_COMMIT_SCOPE_CERTIFIED": "YES"
+  },
+  "publication": {
+    "state": "PASS",
+    "publishedCommit": "abdff498104180ddfc0b6fa4e9c45b943b080b0f"
+  },
+  "production": {
+    "commit": "abdff498104180ddfc0b6fa4e9c45b943b080b0f",
+    "providerCallsMade": 0,
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "sources": {
+    "officialPickCount": 5,
+    "nativeValueCount": 386,
+    "predictionCount": 24,
+    "marketObservationCount": 492,
+    "linkedPredictionCount": 21,
+    "linkedMarketObservationCount": 386,
+    "MLB_02Q_OFFICIAL_PICK_SOURCE": "PASS",
+    "MLB_02Q_NATIVE_VALUE_SOURCE": "PASS",
+    "MLB_02Q_PREDICTION_SOURCE": "PASS",
+    "MLB_02Q_MARKET_SOURCE": "PASS"
+  },
+  "statusModel": {
+    "statuses": [
+      "OFFICIAL_PICK",
+      "VALUE_CANDIDATE",
+      "WATCHLIST",
+      "BLOCKED"
+    ],
+    "MLB_02Q_BOARD_STATUS_MODEL": "PASS"
+  },
+  "statusCounts": {
+    "OFFICIAL_PICK": 5,
+    "VALUE_CANDIDATE": 14,
+    "WATCHLIST": 23,
+    "BLOCKED": 0,
+    "MLB_02Q_STATUS_COUNT_PARITY": "PASS"
+  },
+  "boardArchitecture": {
+    "rowCount": 42,
+    "duplicateGameSide": 0,
+    "duplicateOfficialPickGame": 0,
+    "sideConflictHandling": "ONE_ACTIONABLE_SIDE_PER_GAME_FOR_OFFICIAL_PICKS_OPPOSITES_DEMOTED_OR_EXPLAINED",
+    "rowContractFields": [
+      "game_pk",
+      "game_date",
+      "start_time",
+      "home_team",
+      "away_team",
+      "side",
+      "market",
+      "status",
+      "status_rank",
+      "board_rank",
+      "value_score",
+      "best_book",
+      "bookmaker_name",
+      "american_odds",
+      "model_probability",
+      "consensus_probability",
+      "consensus_edge",
+      "unit_ev",
+      "book_count",
+      "market_dispersion",
+      "market_freshness",
+      "starter_status",
+      "risk_flags",
+      "reason_codes",
+      "blocker_codes",
+      "why",
+      "risk_explanation",
+      "blocker_explanation",
+      "factor_edge",
+      "policy_version",
+      "prediction_id",
+      "value_evaluation_id",
+      "official_pick_identity",
+      "prediction_as_of",
+      "market_acquired_at",
+      "evaluated_at",
+      "decision_at"
+    ],
+    "statusPriority": [
+      "OFFICIAL_PICK",
+      "VALUE_CANDIDATE",
+      "WATCHLIST",
+      "BLOCKED"
+    ],
+    "withinStatusRanking": "status_rank,value_score,consensus_edge,unit_ev,game_pk",
+    "valueScore": "monotonic bounded score from consensus_edge, unit_ev, book_count, market_dispersion, freshness, starter status and risk penalties; not win probability or confidence",
+    "MLB_02Q_GAME_SIDE_COLLAPSE": "PASS",
+    "MLB_02Q_SIDE_CONFLICT_POLICY": "READY",
+    "MLB_02Q_BOARD_ROW_CONTRACT": "READY",
+    "MLB_02Q_STATUS_PRIORITY": "PASS",
+    "MLB_02Q_WITHIN_STATUS_RANKING": "READY",
+    "MLB_02Q_VALUE_SCORE_CONTRACT": "READY"
+  },
+  "explanationLayer": {
+    "whyExamples": [
+      "Model probability exceeds market consensus by 8.2 percentage points.",
+      "Best current price is available at betrivers.",
+      "Best-price unit EV is 24.1%.",
+      "11 books support the current market view.",
+      "Starter is probable, so the row carries an explicit risk flag."
+    ],
+    "riskExamples": [
+      "Starter is probable rather than confirmed.",
+      "Books disagree enough to mark market dispersion as moderate.",
+      "The best price is in a more volatile plus-money range."
+    ],
+    "blockerBehavior": "BLOCKED_ROWS_SHOW_EXACT_BLOCKER_AND_NO_RECOMMENDATION",
+    "factorEdgeFamilies": [
+      "market_consensus",
+      "market_dispersion",
+      "starter_certainty",
+      "team_form_strength",
+      "starter_context",
+      "bullpen_context",
+      "offense_context",
+      "matchup_context",
+      "first_inning_context"
+    ],
+    "MLB_02Q_WHY_EXPLANATION": "READY",
+    "MLB_02Q_RISK_EXPLANATION": "READY",
+    "MLB_02Q_BLOCKER_EXPLANATION": "READY",
+    "MLB_02Q_FACTOR_EDGE_CONTRACT": "READY",
+    "MLB_02Q_FACTOR_EDGE_SEMANTICS": "PASS"
+  },
+  "presentation": {
+    "pickDetailContract": "READY",
+    "officialPickCard": "READY",
+    "valueCandidateCard": "READY",
+    "watchlistCard": "READY",
+    "blockedCard": "READY",
+    "noMisleadingLanguage": "PASS",
+    "filters": [
+      "status",
+      "game",
+      "team",
+      "side",
+      "bookmaker",
+      "starter_status",
+      "freshness",
+      "minimum_edge",
+      "minimum_ev",
+      "risk_flags"
+    ],
+    "sorting": [
+      "board_priority",
+      "edge",
+      "EV",
+      "model_probability",
+      "start_time",
+      "best_odds"
+    ],
+    "mobileFirst": "PASS",
+    "staleStateUi": "READY",
+    "timestampUi": "READY",
+    "modelLimitationPresentation": "READY",
+    "profitabilityClaimState": "NO_HISTORICAL_PROFITABILITY_CLAIM",
+    "MLB_02Q_PICK_DETAIL_CONTRACT": "READY",
+    "MLB_02Q_OFFICIAL_PICK_CARD": "READY",
+    "MLB_02Q_VALUE_CANDIDATE_CARD": "READY",
+    "MLB_02Q_WATCHLIST_CARD": "READY",
+    "MLB_02Q_BLOCKED_CARD": "READY",
+    "MLB_02Q_NO_MISLEADING_PICK_LANGUAGE": "PASS",
+    "MLB_02Q_FILTER_CONTRACT": "READY",
+    "MLB_02Q_SORT_CONTRACT": "READY",
+    "MLB_02Q_MOBILE_FIRST_CONTRACT": "PASS",
+    "MLB_02Q_STALE_STATE_UI": "READY",
+    "MLB_02Q_TIMESTAMP_UI": "READY",
+    "MLB_02Q_MODEL_LIMITATION_PRESENTATION": "READY",
+    "MLB_02Q_NO_PROFITABILITY_CLAIM": "PASS"
+  },
+  "queryLayer": {
+    "implementation": "src/services/pick2-mlb-value-board.service.ts",
+    "routePublished": false,
+    "deterministicForSamePersistedState": true,
+    "MLB_02Q_VALUE_BOARD_QUERY_LAYER": "READY",
+    "MLB_02Q_BOARD_QUERY_REPRODUCIBILITY": "PASS"
+  },
+  "dryBoard": {
+    "rows": [
+      {
+        "game_pk": 823904,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-06T01:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:1",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:35",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "OFFICIAL_PICK",
+        "status_rank": 1,
+        "board_rank": 1,
+        "value_score": 78.095,
+        "best_book": "betrivers",
+        "bookmaker_name": "BetRivers",
+        "american_odds": 185,
+        "model_probability": 0.43541338225,
+        "consensus_probability": 0.353477765108324,
+        "consensus_edge": 0.081935617141676,
+        "unit_ev": 0.2409281394125,
+        "book_count": 11,
+        "market_dispersion": 0.020283964718561,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "EXTREME_PRICE"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 8.2 percentage points.",
+          "Best current price is available at betrivers.",
+          "Best-price unit EV is 24.1%.",
+          "11 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate.",
+          "The best price is in a more volatile plus-money range."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "f8ce5fd4-56e6-4272-9888-4b30bd587f5a",
+        "value_evaluation_id": "ac27f633-b396-43ac-a0a2-b9baafb51247",
+        "official_pick_identity": "6767ea71f01ebb06183a2ec8cf1db371571074e19882e27fc8438aef0e4f6b21",
+        "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+        "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+        "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+        "decision_at": "2026-09-05T21:55:01.709+00:00"
+      },
+      {
+        "game_pk": 824468,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T22:40:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:2",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:32",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "OFFICIAL_PICK",
+        "status_rank": 1,
+        "board_rank": 2,
+        "value_score": 57.68,
+        "best_book": "lowvig",
+        "bookmaker_name": "LowVig.ag",
+        "american_odds": 134,
+        "model_probability": 0.480063146508,
+        "consensus_probability": 0.417454830082839,
+        "consensus_edge": 0.062608316425161,
+        "unit_ev": 0.12334776282872,
+        "book_count": 11,
+        "market_dispersion": 0.014742940491307,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 6.3 percentage points.",
+          "Best current price is available at lowvig.",
+          "Best-price unit EV is 12.3%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "29b41cba-86bb-416b-bffd-83c34837ec17",
+        "value_evaluation_id": "1209e34d-585b-46af-9bd2-d1077d35bc82",
+        "official_pick_identity": "cd7e76fde6287f2210065c513b8002563e4c9c266e678e2bcc3a979aea3809f0",
+        "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+        "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+        "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+        "decision_at": "2026-09-05T21:55:01.709+00:00"
+      },
+      {
+        "game_pk": 824795,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:05:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:19",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:25",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "OFFICIAL_PICK",
+        "status_rank": 1,
+        "board_rank": 3,
+        "value_score": 57.032,
+        "best_book": "betrivers",
+        "bookmaker_name": "BetRivers",
+        "american_odds": 118,
+        "model_probability": 0.524486550995,
+        "consensus_probability": 0.465165228372974,
+        "consensus_edge": 0.059321322622026,
+        "unit_ev": 0.1433806811691,
+        "book_count": 11,
+        "market_dispersion": 0.028056191957137,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 5.9 percentage points.",
+          "Best current price is available at betrivers.",
+          "Best-price unit EV is 14.3%.",
+          "11 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "5241c42d-2a3a-46ee-9351-0770c848e5db",
+        "value_evaluation_id": "57550670-8a74-4c0a-9f6b-5a78f70abbd1",
+        "official_pick_identity": "abf92df84ae9f74c5f851455f0b703838490430c4e0927d307c0728dc4531220",
+        "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+        "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+        "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+        "decision_at": "2026-09-05T21:55:01.709+00:00"
+      },
+      {
+        "game_pk": 823335,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T22:40:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:4",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:21",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "OFFICIAL_PICK",
+        "status_rank": 1,
+        "board_rank": 4,
+        "value_score": 51.438,
+        "best_book": "betonlineag",
+        "bookmaker_name": "BetOnline.ag",
+        "american_odds": 163,
+        "model_probability": 0.418117300461,
+        "consensus_probability": 0.374435119431892,
+        "consensus_edge": 0.043682181029108,
+        "unit_ev": 0.09964850021243,
+        "book_count": 11,
+        "market_dispersion": 0.009299897466309,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 4.4 percentage points.",
+          "Best current price is available at betonlineag.",
+          "Best-price unit EV is 10.0%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "607bc33b-58ee-4f1c-9d65-fd010d2c3d50",
+        "value_evaluation_id": "232efbd4-a7d2-462f-9a3f-95ebaa7bc9b2",
+        "official_pick_identity": "3623f2db4791e4370e156fccd11eb4cdaef95aac955d518295f394e6af4b112e",
+        "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+        "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+        "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+        "decision_at": "2026-09-05T21:55:01.709+00:00"
+      },
+      {
+        "game_pk": 824310,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-06T00:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:23",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:31",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "OFFICIAL_PICK",
+        "status_rank": 1,
+        "board_rank": 5,
+        "value_score": 49.264,
+        "best_book": "williamhill_us",
+        "bookmaker_name": "Caesars",
+        "american_odds": 110,
+        "model_probability": 0.517545231369,
+        "consensus_probability": 0.467289719626168,
+        "consensus_edge": 0.050255511742832,
+        "unit_ev": 0.0868449858749,
+        "book_count": 11,
+        "market_dispersion": 0.013266375339872,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 5.0 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is 8.7%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "c71f78a0-9830-444f-a142-41284a44d983",
+        "value_evaluation_id": "d8cae3ae-8443-4e5c-85a4-f228e1f6eaba",
+        "official_pick_identity": "fb4dae3619779765782d4e2e02c7d2c80554e52724593fa7ab65619248ddccbb",
+        "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+        "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+        "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+        "decision_at": "2026-09-05T21:55:01.709+00:00"
+      },
+      {
+        "game_pk": 823091,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T20:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:13",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:24",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 6,
+        "value_score": 63.751,
+        "best_book": "fanduel",
+        "bookmaker_name": null,
+        "american_odds": 180,
+        "model_probability": 0.432721963541,
+        "consensus_probability": 0.366536232601912,
+        "consensus_edge": 0.066185730939088,
+        "unit_ev": 0.2116214979148,
+        "book_count": 7,
+        "market_dispersion": 0.0290271339717,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "EXTREME_PRICE",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 6.6 percentage points.",
+          "Best current price is available at fanduel.",
+          "Best-price unit EV is 21.2%.",
+          "7 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate.",
+          "The best price is in a more volatile plus-money range.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "0f547d49-2a79-40a4-874f-7dec6fd42ffe",
+        "value_evaluation_id": "7b197757-5773-4b4a-ae08-8ccafdbb315e",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824309,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T19:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:23",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:31",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 7,
+        "value_score": 63.613,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": 115,
+        "model_probability": 0.537067413308,
+        "consensus_probability": 0.457256461232604,
+        "consensus_edge": 0.079810952075396,
+        "unit_ev": 0.1546949386122,
+        "book_count": 7,
+        "market_dispersion": 0.009072944850203,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 8.0 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is 15.5%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "e5c2a5f4-fe36-420c-9f11-691556900aa9",
+        "value_evaluation_id": "00361072-e5ae-4df1-bdd2-ebe9ccf54dca",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824794,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T17:35:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:19",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:25",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 8,
+        "value_score": 58.467,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": 120,
+        "model_probability": 0.518223372246,
+        "consensus_probability": 0.445736434108527,
+        "consensus_edge": 0.072486938137473,
+        "unit_ev": 0.1400914189412,
+        "book_count": 7,
+        "market_dispersion": 0.005319401807809,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 7.2 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is 14.0%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "553300bb-631b-4eb3-b00a-24f1a5c92746",
+        "value_evaluation_id": "984e0460-467b-4137-9ff7-35d48c3d4f97",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824469,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T16:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:2",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:32",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 9,
+        "value_score": 56.575,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": 143,
+        "model_probability": 0.46912924475,
+        "consensus_probability": 0.408685343482873,
+        "consensus_edge": 0.060443901267127,
+        "unit_ev": 0.1399840647425,
+        "book_count": 7,
+        "market_dispersion": 0.008971226252551,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 6.0 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is 14.0%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "26969708-f103-40fa-a103-99ee766ab538",
+        "value_evaluation_id": "a59b93c9-6408-44ac-876b-50da3a9fc940",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823336,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T17:35:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:4",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:21",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 10,
+        "value_score": 50.21,
+        "best_book": "lowvig",
+        "bookmaker_name": null,
+        "american_odds": 167,
+        "model_probability": 0.416454562184,
+        "consensus_probability": 0.364856261325236,
+        "consensus_edge": 0.051598300858764,
+        "unit_ev": 0.11193368103128,
+        "book_count": 7,
+        "market_dispersion": 0.008435326510799,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 5.2 percentage points.",
+          "Best current price is available at lowvig.",
+          "Best-price unit EV is 11.2%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "2ad14cbe-5aa1-4bbe-b22e-b91b9cf8f0b1",
+        "value_evaluation_id": "91378542-e99c-4f2c-b81d-a1c470fe09d9",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823417,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T17:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:12",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:26",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 11,
+        "value_score": 49.951,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": -105,
+        "model_probability": 0.560523814629,
+        "consensus_probability": 0.5,
+        "consensus_edge": 0.060523814629,
+        "unit_ev": 0.094356019037571,
+        "book_count": 7,
+        "market_dispersion": 0.006971556051311,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 6.1 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is 9.4%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "88de29ca-71fa-4413-95cd-cfdfcff96363",
+        "value_evaluation_id": "c52246b4-1672-4b9f-acb1-313741975182",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824142,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T18:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:30",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:14",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 12,
+        "value_score": 41.551,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": -105,
+        "model_probability": 0.544586314971,
+        "consensus_probability": 0.5,
+        "consensus_edge": 0.044586314971,
+        "unit_ev": 0.063239948276714,
+        "book_count": 7,
+        "market_dispersion": 0.004452359750668,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 4.5 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is 6.3%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "93a6ce3a-fee8-469a-aa7a-f18ccb2b408b",
+        "value_evaluation_id": "9fd2c2cf-cdc1-49dd-abb2-8cbeede169ba",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 822850,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:05:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:28",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:11",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 13,
+        "value_score": 34.466,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": -105,
+        "model_probability": 0.528667709337,
+        "consensus_probability": 0.505450422952821,
+        "consensus_edge": 0.023217286384179,
+        "unit_ev": 0.032160765848429,
+        "book_count": 11,
+        "market_dispersion": 0.011627906976744,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "WEAK_CONSENSUS_EDGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 2.3 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is 3.2%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "weak consensus edge"
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "cd65ee10-4f3a-4bf7-abde-6565af059d5e",
+        "value_evaluation_id": "0122aaf1-27ef-4556-9ebc-bb32b9f7fc0f",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824066,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:5",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:3",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 14,
+        "value_score": 34.156,
+        "best_book": "lowvig",
+        "bookmaker_name": null,
+        "american_odds": -103,
+        "model_probability": 0.524042378484,
+        "consensus_probability": 0.496730316505362,
+        "consensus_edge": 0.027312061978638,
+        "unit_ev": 0.032821386720893,
+        "book_count": 11,
+        "market_dispersion": 0.010948397167843,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "WEAK_CONSENSUS_EDGE",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 2.7 percentage points.",
+          "Best current price is available at lowvig.",
+          "Best-price unit EV is 3.3%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "weak consensus edge",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "82150f93-9ac6-498e-be1b-77cb8544842f",
+        "value_evaluation_id": "300cc6b9-37ce-48ad-ae4e-f0c66abb7190",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824389,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T22:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:10",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:17",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 15,
+        "value_score": 32.463,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": 147,
+        "model_probability": 0.422701314333,
+        "consensus_probability": 0.40597472232861,
+        "consensus_edge": 0.01672659200439,
+        "unit_ev": 0.04407224640251,
+        "book_count": 11,
+        "market_dispersion": 0.018294392088032,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "WEAK_CONSENSUS_EDGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 1.7 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is 4.4%.",
+          "11 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate.",
+          "weak consensus edge"
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "527d93ed-7bc0-4360-9c8e-944480f4f0a0",
+        "value_evaluation_id": "03f2d345-c0a2-438a-8ad2-50156b056ab3",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823419,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T22:05:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:12",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:26",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 16,
+        "value_score": 26.057,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": 147,
+        "model_probability": 0.407659449127,
+        "consensus_probability": 0.403491694665118,
+        "consensus_edge": 0.004167754461882,
+        "unit_ev": 0.00691883934369,
+        "book_count": 11,
+        "market_dispersion": 0.01022564901195,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "WEAK_CONSENSUS_EDGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 0.4 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is 0.7%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "weak consensus edge"
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "d09ab029-6d83-42a7-81f2-9ece74d64e1b",
+        "value_evaluation_id": "ab633a49-2218-456d-8fae-faa271f8fc85",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823257,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:15:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:33",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:29",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 17,
+        "value_score": 25.648,
+        "best_book": "betus",
+        "bookmaker_name": null,
+        "american_odds": 117,
+        "model_probability": 0.465085038089,
+        "consensus_probability": 0.455696202531646,
+        "consensus_edge": 0.009388835557354,
+        "unit_ev": 0.00923453265313,
+        "book_count": 11,
+        "market_dispersion": 0.015846194355989,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "WEAK_CONSENSUS_EDGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 0.9 percentage points.",
+          "Best current price is available at betus.",
+          "Best-price unit EV is 0.9%.",
+          "11 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate.",
+          "weak consensus edge"
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "c16eefa2-3dd0-4ba9-96e7-0a6c9cb0ff59",
+        "value_evaluation_id": "d00e8eca-b854-4a04-8702-ec8e51979acc",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824553,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:16",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:20",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 18,
+        "value_score": 22.643,
+        "best_book": "lowvig",
+        "bookmaker_name": null,
+        "american_odds": 111,
+        "model_probability": 0.476889396959,
+        "consensus_probability": 0.467211747038211,
+        "consensus_edge": 0.009677649920789,
+        "unit_ev": 0.00623662758349,
+        "book_count": 11,
+        "market_dispersion": 0.027123715807561,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "WEAK_CONSENSUS_EDGE",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 1.0 percentage points.",
+          "Best current price is available at lowvig.",
+          "Best-price unit EV is 0.6%.",
+          "11 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate.",
+          "weak consensus edge",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "9dd296c9-06f3-45a0-b75c-5a1582a100f2",
+        "value_evaluation_id": "9b0a983c-c97d-45b9-b668-1864674edaee",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824385,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T17:40:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:10",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:17",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "VALUE_CANDIDATE",
+        "status_rank": 2,
+        "board_rank": 19,
+        "value_score": 22.316,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": -157,
+        "model_probability": 0.611679882498,
+        "consensus_probability": 0.601420617565409,
+        "consensus_edge": 0.010259264932591,
+        "unit_ev": 0.001284903197363,
+        "book_count": 7,
+        "market_dispersion": 0.003052698757102,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE",
+          "WEAK_CONSENSUS_EDGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 1.0 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is 0.1%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold.",
+          "weak consensus edge"
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "364dc74b-05cf-4599-a145-778cc75bb531",
+        "value_evaluation_id": "c0eef828-d9fd-4e09-9fa4-b3197e2a29f1",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823335,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T22:40:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:4",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:21",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 20,
+        "value_score": 25.57,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": -177,
+        "model_probability": 0.581882699539,
+        "consensus_probability": 0.625564880568108,
+        "consensus_edge": -0.043682181029108,
+        "unit_ev": -0.089370012585859,
+        "book_count": 11,
+        "market_dispersion": 0.009299897466309,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -4.4 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is -8.9%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "607bc33b-58ee-4f1c-9d65-fd010d2c3d50",
+        "value_evaluation_id": "cc4a03ac-b7a4-42ec-af36-519e5853f67f",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823419,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T22:05:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:12",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:26",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 21,
+        "value_score": 25.477,
+        "best_book": "betus",
+        "bookmaker_name": null,
+        "american_odds": -156,
+        "model_probability": 0.592340550873,
+        "consensus_probability": 0.596508305334882,
+        "consensus_edge": -0.004167754461882,
+        "unit_ev": -0.027953967798154,
+        "book_count": 11,
+        "market_dispersion": 0.01022564901195,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -0.4 percentage points.",
+          "Best current price is available at betus.",
+          "Best-price unit EV is -2.8%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "d09ab029-6d83-42a7-81f2-9ece74d64e1b",
+        "value_evaluation_id": "e9791813-0b6f-498a-bb78-938a0009724f",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 822850,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:05:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:28",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:11",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 22,
+        "value_score": 25.337,
+        "best_book": "betonlineag",
+        "bookmaker_name": null,
+        "american_odds": 100,
+        "model_probability": 0.471332290663,
+        "consensus_probability": 0.494549577047179,
+        "consensus_edge": -0.023217286384179,
+        "unit_ev": -0.057335418674,
+        "book_count": 11,
+        "market_dispersion": 0.011627906976744,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -2.3 percentage points.",
+          "Best current price is available at betonlineag.",
+          "Best-price unit EV is -5.7%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "cd65ee10-4f3a-4bf7-abde-6565af059d5e",
+        "value_evaluation_id": "bc1404bf-7bfd-4c55-831c-89328eb9d442",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824066,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:5",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:3",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 23,
+        "value_score": 23.905,
+        "best_book": "fanduel",
+        "bookmaker_name": null,
+        "american_odds": -106,
+        "model_probability": 0.475957621516,
+        "consensus_probability": 0.503269683494638,
+        "consensus_edge": -0.027312061978638,
+        "unit_ev": -0.075025754412302,
+        "book_count": 11,
+        "market_dispersion": 0.010948397167843,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -2.7 percentage points.",
+          "Best current price is available at fanduel.",
+          "Best-price unit EV is -7.5%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "82150f93-9ac6-498e-be1b-77cb8544842f",
+        "value_evaluation_id": "eee4d80e-2144-43fc-9fdc-ee723915202c",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824145,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:15:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:30",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:14",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 24,
+        "value_score": 23.899,
+        "best_book": "betrivers",
+        "bookmaker_name": null,
+        "american_odds": -105,
+        "model_probability": 0.498231013715,
+        "consensus_probability": 0.502322988292139,
+        "consensus_edge": -0.004091974577139,
+        "unit_ev": -0.027263258937381,
+        "book_count": 11,
+        "market_dispersion": 0.011011729446979,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -0.4 percentage points.",
+          "Best current price is available at betrivers.",
+          "Best-price unit EV is -2.7%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "2bf399aa-cb86-44a2-926e-dc340d00429c",
+        "value_evaluation_id": "ac0fb1b5-38ad-43c7-a6e2-e095446f1c36",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824310,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-06T00:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:23",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:31",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 25,
+        "value_score": 23.673,
+        "best_book": "betonlineag",
+        "bookmaker_name": null,
+        "american_odds": -120,
+        "model_probability": 0.482454768631,
+        "consensus_probability": 0.532710280373832,
+        "consensus_edge": -0.050255511742832,
+        "unit_ev": -0.115499590843167,
+        "book_count": 11,
+        "market_dispersion": 0.013266375339872,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -5.0 percentage points.",
+          "Best current price is available at betonlineag.",
+          "Best-price unit EV is -11.5%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "c71f78a0-9830-444f-a142-41284a44d983",
+        "value_evaluation_id": "1ff94135-ba71-4fbc-a521-263c1a31afd7",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824468,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T22:40:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:2",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:32",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 26,
+        "value_score": 23.526,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": -142,
+        "model_probability": 0.519936853492,
+        "consensus_probability": 0.582545169917161,
+        "consensus_edge": -0.062608316425161,
+        "unit_ev": -0.113910432781239,
+        "book_count": 11,
+        "market_dispersion": 0.014742940491307,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -6.3 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is -11.4%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "29b41cba-86bb-416b-bffd-83c34837ec17",
+        "value_evaluation_id": "a6343f97-319a-45bc-a467-8f6260a67aa1",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824145,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:15:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:30",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:14",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 27,
+        "value_score": 23.422,
+        "best_book": "betus",
+        "bookmaker_name": null,
+        "american_odds": -103,
+        "model_probability": 0.501768986285,
+        "consensus_probability": 0.497677011707861,
+        "consensus_edge": 0.004091974577139,
+        "unit_ev": -0.011076658098495,
+        "book_count": 11,
+        "market_dispersion": 0.011011729446979,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "WEAK_CONSENSUS_EDGE",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 0.4 percentage points.",
+          "Best current price is available at betus.",
+          "Best-price unit EV is -1.1%.",
+          "11 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "weak consensus edge",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "2bf399aa-cb86-44a2-926e-dc340d00429c",
+        "value_evaluation_id": "28050360-90f0-4b7e-a914-caa0e1ff17f1",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823257,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:15:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:33",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:29",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 28,
+        "value_score": 23.415,
+        "best_book": "betrivers",
+        "bookmaker_name": null,
+        "american_odds": -122,
+        "model_probability": 0.534914961911,
+        "consensus_probability": 0.544303797468354,
+        "consensus_edge": -0.009388835557354,
+        "unit_ev": -0.026630151276705,
+        "book_count": 11,
+        "market_dispersion": 0.015846194355989,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -0.9 percentage points.",
+          "Best current price is available at betrivers.",
+          "Best-price unit EV is -2.7%.",
+          "11 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "c16eefa2-3dd0-4ba9-96e7-0a6c9cb0ff59",
+        "value_evaluation_id": "8e3b1b1a-a9b6-4807-86df-5139939eafc8",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824389,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T22:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:10",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:17",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 29,
+        "value_score": 23.171,
+        "best_book": "betus",
+        "bookmaker_name": null,
+        "american_odds": -156,
+        "model_probability": 0.577298685667,
+        "consensus_probability": 0.59402527767139,
+        "consensus_edge": -0.01672659200439,
+        "unit_ev": -0.052638054290051,
+        "book_count": 11,
+        "market_dispersion": 0.018294392088032,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -1.7 percentage points.",
+          "Best current price is available at betus.",
+          "Best-price unit EV is -5.3%.",
+          "11 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "527d93ed-7bc0-4360-9c8e-944480f4f0a0",
+        "value_evaluation_id": "6a599d65-779b-4ad0-9633-bc58534e9971",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823904,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-06T01:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:1",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:35",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 30,
+        "value_score": 21.472,
+        "best_book": "lowvig",
+        "bookmaker_name": null,
+        "american_odds": -195,
+        "model_probability": 0.56458661775,
+        "consensus_probability": 0.646522234891676,
+        "consensus_edge": -0.081935617141676,
+        "unit_ev": -0.145881783403846,
+        "book_count": 11,
+        "market_dispersion": 0.020283964718561,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "EXTREME_PRICE"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -8.2 percentage points.",
+          "Best current price is available at lowvig.",
+          "Best-price unit EV is -14.6%.",
+          "11 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate.",
+          "The best price is in a more volatile plus-money range."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "f8ce5fd4-56e6-4272-9888-4b30bd587f5a",
+        "value_evaluation_id": "4c18a3f7-30aa-487b-98c5-2aff217eec61",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824385,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T17:40:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:10",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:17",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 31,
+        "value_score": 21.058,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": 147,
+        "model_probability": 0.388320117502,
+        "consensus_probability": 0.398579382434591,
+        "consensus_edge": -0.010259264932591,
+        "unit_ev": -0.04084930977006,
+        "book_count": 7,
+        "market_dispersion": 0.003052698757102,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -1.0 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is -4.1%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "364dc74b-05cf-4599-a145-778cc75bb531",
+        "value_evaluation_id": "7db9caf0-2d23-417b-a3c2-ae0de93163e5",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824142,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T18:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:30",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:14",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 32,
+        "value_score": 20.918,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": -105,
+        "model_probability": 0.455413685029,
+        "consensus_probability": 0.5,
+        "consensus_edge": -0.044586314971,
+        "unit_ev": -0.110858995895762,
+        "book_count": 7,
+        "market_dispersion": 0.004452359750668,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -4.5 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is -11.1%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "93a6ce3a-fee8-469a-aa7a-f18ccb2b408b",
+        "value_evaluation_id": "b5dc0e34-4c0f-49e2-b442-2160aebaefb2",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824553,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:16",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:20",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 33,
+        "value_score": 20.788,
+        "best_book": "betrivers",
+        "bookmaker_name": null,
+        "american_odds": -114,
+        "model_probability": 0.523110603041,
+        "consensus_probability": 0.532788252961789,
+        "consensus_edge": -0.009677649920789,
+        "unit_ev": -0.018020446923035,
+        "book_count": 11,
+        "market_dispersion": 0.027123715807561,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -1.0 percentage points.",
+          "Best current price is available at betrivers.",
+          "Best-price unit EV is -1.8%.",
+          "11 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "9dd296c9-06f3-45a0-b75c-5a1582a100f2",
+        "value_evaluation_id": "f5971e59-234d-461a-83b6-509b18caeb3e",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824795,
+        "game_date": "2026-09-05",
+        "start_time": "2026-09-05T23:05:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:19",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:25",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 34,
+        "value_score": 20.694,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": -121,
+        "model_probability": 0.475513449005,
+        "consensus_probability": 0.534834771627026,
+        "consensus_edge": -0.059321322622026,
+        "unit_ev": -0.131500229503265,
+        "book_count": 11,
+        "market_dispersion": 0.028056191957136,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "STRONG_BOOK_SUPPORT",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -5.9 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is -13.2%.",
+          "11 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "5241c42d-2a3a-46ee-9351-0770c848e5db",
+        "value_evaluation_id": "662d486a-b2dc-443a-a059-bd472d2a3233",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823417,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T17:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:12",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:26",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 35,
+        "value_score": 20.666,
+        "best_book": "lowvig",
+        "bookmaker_name": null,
+        "american_odds": -102,
+        "model_probability": 0.439476185371,
+        "consensus_probability": 0.5,
+        "consensus_edge": -0.060523814629,
+        "unit_ev": -0.129664809363314,
+        "book_count": 7,
+        "market_dispersion": 0.006971556051311,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -6.1 percentage points.",
+          "Best current price is available at lowvig.",
+          "Best-price unit EV is -13.0%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "88de29ca-71fa-4413-95cd-cfdfcff96363",
+        "value_evaluation_id": "1b5abab1-f30b-4063-97ac-86ca61f9e100",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824469,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T16:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:2",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:32",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 36,
+        "value_score": 20.467,
+        "best_book": "lowvig",
+        "bookmaker_name": null,
+        "american_odds": -150,
+        "model_probability": 0.53087075525,
+        "consensus_probability": 0.591314656517127,
+        "consensus_edge": -0.060443901267127,
+        "unit_ev": -0.115215407916667,
+        "book_count": 7,
+        "market_dispersion": 0.008971226252551,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -6.0 percentage points.",
+          "Best current price is available at lowvig.",
+          "Best-price unit EV is -11.5%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "26969708-f103-40fa-a103-99ee766ab538",
+        "value_evaluation_id": "92d9ec85-302f-4314-a4cb-b5250009e9cc",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824309,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T19:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:23",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:31",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 37,
+        "value_score": 20.456,
+        "best_book": "lowvig",
+        "bookmaker_name": null,
+        "american_odds": -125,
+        "model_probability": 0.462932586692,
+        "consensus_probability": 0.542743538767396,
+        "consensus_edge": -0.079810952075396,
+        "unit_ev": -0.1667213439544,
+        "book_count": 7,
+        "market_dispersion": 0.009072944850203,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -8.0 percentage points.",
+          "Best current price is available at lowvig.",
+          "Best-price unit EV is -16.7%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "e5c2a5f4-fe36-420c-9f11-691556900aa9",
+        "value_evaluation_id": "0af55739-b9c8-460a-8722-b6f25ba69f33",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824552,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T22:20:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:16",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:20",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 38,
+        "value_score": 19.745,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": -140,
+        "model_probability": 0.581585665313,
+        "consensus_probability": 0.571627642919814,
+        "consensus_edge": 0.009958022393187,
+        "unit_ev": -0.002996002320571,
+        "book_count": 5,
+        "market_dispersion": 0.007901494112852,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE",
+          "WEAK_CONSENSUS_EDGE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by 1.0 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is -0.3%.",
+          "5 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold.",
+          "weak consensus edge"
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "supports_pick",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "612aa09f-6d63-4c57-9b57-560eeeed8a47",
+        "value_evaluation_id": "35daf1f7-3a94-47ec-8a32-a879e6322d2b",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824794,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T17:35:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:19",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:25",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 39,
+        "value_score": 19.332,
+        "best_book": "lowvig",
+        "bookmaker_name": null,
+        "american_odds": -130,
+        "model_probability": 0.481776627754,
+        "consensus_probability": 0.554263565891473,
+        "consensus_edge": -0.072486938137473,
+        "unit_ev": -0.147625966281385,
+        "book_count": 7,
+        "market_dispersion": 0.005319401807809,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -7.2 percentage points.",
+          "Best current price is available at lowvig.",
+          "Best-price unit EV is -14.8%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold.",
+          "The model probability is close to a coin-flip zone."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "553300bb-631b-4eb3-b00a-24f1a5c92746",
+        "value_evaluation_id": "685a65c5-bb43-4780-8692-136ddbdf31e0",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823336,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T17:35:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:4",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:21",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 40,
+        "value_score": 19.02,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": -180,
+        "model_probability": 0.583545437816,
+        "consensus_probability": 0.635143738674764,
+        "consensus_edge": -0.051598300858764,
+        "unit_ev": -0.092262652286222,
+        "book_count": 7,
+        "market_dispersion": 0.008435326510799,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "EXTREME_PRICE",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -5.2 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is -9.2%.",
+          "7 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "The best price is in a more volatile plus-money range.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "2ad14cbe-5aa1-4bbe-b22e-b91b9cf8f0b1",
+        "value_evaluation_id": "5529984e-6e62-4ddf-8193-addedd2a6411",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 824552,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T22:20:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:16",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:20",
+        "side": "AWAY",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 41,
+        "value_score": 18.755,
+        "best_book": "williamhill_us",
+        "bookmaker_name": null,
+        "american_odds": 130,
+        "model_probability": 0.418414334687,
+        "consensus_probability": 0.428372357080186,
+        "consensus_edge": -0.009958022393186,
+        "unit_ev": -0.0376470302199,
+        "book_count": 5,
+        "market_dispersion": 0.007901494112852,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -1.0 percentage points.",
+          "Best current price is available at williamhill_us.",
+          "Best-price unit EV is -3.8%.",
+          "5 books support the current market view.",
+          "Market dispersion is low.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "612aa09f-6d63-4c57-9b57-560eeeed8a47",
+        "value_evaluation_id": "f64518a5-5792-49bd-9848-09bd29d67e9a",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      },
+      {
+        "game_pk": 823091,
+        "game_date": "2026-09-06",
+        "start_time": "2026-09-06T20:10:00+00:00",
+        "home_team": "baseball_mlb:mlb:sportsdataio:team:13",
+        "away_team": "baseball_mlb:mlb:sportsdataio:team:24",
+        "side": "HOME",
+        "market": "MONEYLINE",
+        "status": "WATCHLIST",
+        "status_rank": 3,
+        "board_rank": 42,
+        "value_score": 15.461,
+        "best_book": "betonlineag",
+        "bookmaker_name": null,
+        "american_odds": -180,
+        "model_probability": 0.567278036459,
+        "consensus_probability": 0.633463767398088,
+        "consensus_edge": -0.066185730939088,
+        "unit_ev": -0.117567498841556,
+        "book_count": 7,
+        "market_dispersion": 0.0290271339717,
+        "market_freshness": "FRESH",
+        "starter_status": "PROBABLE",
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "EXTREME_PRICE",
+          "LOW_BOOK_COVERAGE"
+        ],
+        "reason_codes": [
+          "BOOK_COVERAGE_BELOW_OFFICIAL_THRESHOLD",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "why": [
+          "Model probability exceeds market consensus by -6.6 percentage points.",
+          "Best current price is available at betonlineag.",
+          "Best-price unit EV is -11.8%.",
+          "7 books support the current market view.",
+          "Starter is probable, so the row carries an explicit risk flag."
+        ],
+        "risk_explanation": [
+          "Starter is probable rather than confirmed.",
+          "Books disagree enough to mark market dispersion as moderate.",
+          "The best price is in a more volatile plus-money range.",
+          "Book coverage is below the Official Pick threshold."
+        ],
+        "blocker_explanation": [],
+        "factor_edge": [
+          {
+            "family": "market_consensus",
+            "direction": "adds_risk",
+            "label": "Market consensus"
+          },
+          {
+            "family": "market_dispersion",
+            "direction": "supports_pick",
+            "label": "Market dispersion"
+          },
+          {
+            "family": "starter_certainty",
+            "direction": "adds_risk",
+            "label": "Starter certainty"
+          },
+          {
+            "family": "team_form_strength",
+            "direction": "context_only",
+            "label": "Team form / strength"
+          },
+          {
+            "family": "starter_context",
+            "direction": "context_only",
+            "label": "Starter context"
+          },
+          {
+            "family": "bullpen_context",
+            "direction": "context_only",
+            "label": "Bullpen context"
+          },
+          {
+            "family": "offense_context",
+            "direction": "context_only",
+            "label": "Offense context"
+          },
+          {
+            "family": "matchup_context",
+            "direction": "context_only",
+            "label": "Matchup context"
+          },
+          {
+            "family": "first_inning_context",
+            "direction": "context_only",
+            "label": "First-inning context"
+          }
+        ],
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "prediction_id": "0f547d49-2a79-40a4-874f-7dec6fd42ffe",
+        "value_evaluation_id": "26aec692-9691-48d9-9bc3-c9c36be00ea8",
+        "official_pick_identity": null,
+        "prediction_as_of": "",
+        "market_acquired_at": "",
+        "evaluated_at": "",
+        "decision_at": null
+      }
+    ],
+    "topPick": {
+      "game_pk": 823904,
+      "game_date": "2026-09-05",
+      "start_time": "2026-09-06T01:10:00+00:00",
+      "home_team": "baseball_mlb:mlb:sportsdataio:team:1",
+      "away_team": "baseball_mlb:mlb:sportsdataio:team:35",
+      "side": "AWAY",
+      "market": "MONEYLINE",
+      "status": "OFFICIAL_PICK",
+      "status_rank": 1,
+      "board_rank": 1,
+      "value_score": 78.095,
+      "best_book": "betrivers",
+      "bookmaker_name": "BetRivers",
+      "american_odds": 185,
+      "model_probability": 0.43541338225,
+      "consensus_probability": 0.353477765108324,
+      "consensus_edge": 0.081935617141676,
+      "unit_ev": 0.2409281394125,
+      "book_count": 11,
+      "market_dispersion": 0.020283964718561,
+      "market_freshness": "FRESH",
+      "starter_status": "PROBABLE",
+      "risk_flags": [
+        "PROBABLE_STARTER",
+        "MODERATE_MARKET_DISPERSION",
+        "EXTREME_PRICE"
+      ],
+      "blocker_codes": [],
+      "why": [
+        "Model probability exceeds market consensus by 8.2 percentage points.",
+        "Best current price is available at betrivers.",
+        "Best-price unit EV is 24.1%.",
+        "11 books support the current market view.",
+        "Starter is probable, so the row carries an explicit risk flag."
+      ],
+      "risk_explanation": [
+        "Starter is probable rather than confirmed.",
+        "Books disagree enough to mark market dispersion as moderate.",
+        "The best price is in a more volatile plus-money range."
+      ],
+      "blocker_explanation": [],
+      "factor_edge": [
+        {
+          "family": "market_consensus",
+          "direction": "supports_pick",
+          "label": "Market consensus"
+        },
+        {
+          "family": "market_dispersion",
+          "direction": "supports_pick",
+          "label": "Market dispersion"
+        },
+        {
+          "family": "starter_certainty",
+          "direction": "adds_risk",
+          "label": "Starter certainty"
+        },
+        {
+          "family": "team_form_strength",
+          "direction": "context_only",
+          "label": "Team form / strength"
+        },
+        {
+          "family": "starter_context",
+          "direction": "context_only",
+          "label": "Starter context"
+        },
+        {
+          "family": "bullpen_context",
+          "direction": "context_only",
+          "label": "Bullpen context"
+        },
+        {
+          "family": "offense_context",
+          "direction": "context_only",
+          "label": "Offense context"
+        },
+        {
+          "family": "matchup_context",
+          "direction": "context_only",
+          "label": "Matchup context"
+        },
+        {
+          "family": "first_inning_context",
+          "direction": "context_only",
+          "label": "First-inning context"
+        }
+      ],
+      "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+      "prediction_id": "f8ce5fd4-56e6-4272-9888-4b30bd587f5a",
+      "value_evaluation_id": "ac27f633-b396-43ac-a0a2-b9baafb51247",
+      "official_pick_identity": "6767ea71f01ebb06183a2ec8cf1db371571074e19882e27fc8438aef0e4f6b21",
+      "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+      "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+      "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+      "decision_at": "2026-09-05T21:55:01.709+00:00"
+    },
+    "MLB_02Q_CURRENT_BOARD_DRY_BUILD": "PASS",
+    "MLB_02Q_TOP_PICK_PARITY": "PASS"
+  },
+  "boundaries": {
+    "valueBoardPublication": "NO",
+    "featureGate": "READY_DISABLED",
+    "officialPickWrites": 0,
+    "nativeValueWrites": 0,
+    "marketWrites": 0,
+    "predictionWrites": 0,
+    "modelWrites": 0,
+    "rawFeatureWrites": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "automation": "OFF",
+    "cronChanges": 0,
+    "MLB_02Q_VALUE_BOARD_PUBLICATION": "NO",
+    "MLB_02Q_VALUE_BOARD_FEATURE_GATE": "READY",
+    "MLB_02Q_PRODUCTION_DML": 0,
+    "MLB_02Q_PRODUCTION_DDL": 0,
+    "MLB_02Q_PROVIDER_CALLS": 0,
+    "MLB_02Q_AUTOMATION_STATE": "OFF"
+  },
+  "readiness": {
+    "MLB_DATA_02Q_R1_VALUE_BOARD_UI_IMPLEMENTATION_READY": "YES",
+    "MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY": "NO"
+  },
+  "humanReadableAudit": {
+    "path": "docs/CERTIFICATION/mlb-data-02q-value-board-prep-audit.md",
+    "MLB_02Q_HUMAN_READABLE_AUDIT": "READY"
+  }
+}

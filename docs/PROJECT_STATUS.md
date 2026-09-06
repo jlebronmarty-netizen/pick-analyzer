@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 19:43:00Z
+Last updated: 2026-09-06 20:05:00Z
+
+## 2026-09-06 MLB-DATA-02Q Value Board Prep
+
+- MLB-DATA-02Q is certified as `MLB_DATA_02Q_VALUE_BOARD_PREP_CERTIFIED`. The certified 02P-R2 commit `abdff498104180ddfc0b6fa4e9c45b943b080b0f` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
+- The Value Board prep used only persisted certified sources: 5 Official Picks, 386 native value evaluations, 24 persisted predictions and 492 market observations. Prediction and market source linkage passed with no provider calls, odds refreshes, Official Pick changes, value writes or prediction writes.
+- The current dry board is 42 collapsed game/side rows with status-count parity: 5 `OFFICIAL_PICK`, 14 `VALUE_CANDIDATE`, 23 `WATCHLIST` and 0 `BLOCKED`. The top Official Pick remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`.
+- Prepared non-public Value Board contracts in `src/types/pick2-value-board.ts` and `src/services/pick2-mlb-value-board.service.ts`: statuses, row shape, ranking, Value Score semantics, why/risk/blocker explanations, Factor Edge, detail payloads, filters, sorting, stale/timestamp behavior and mobile-first presentation rules.
+- Value Board publication remains `NO`, feature gate is `READY_DISABLED`, production DML and DDL remained 0, automation stayed off and cron changes remained 0. `MLB_DATA_02Q_R1_VALUE_BOARD_UI_IMPLEMENTATION_READY = YES`; `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY = NO`.
 
 ## 2026-09-06 MLB-DATA-02P-R2 Official Pick Persistence Execution
 
