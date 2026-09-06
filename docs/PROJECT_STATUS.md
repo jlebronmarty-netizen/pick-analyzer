@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-06 01:15:00Z
 
+## 2026-09-06 MLB-DATA-02P-R2A Official Pick Table Schema Readback
+
+- MLB-DATA-02P-R2A is classified as `MLB_DATA_02P_R2A_OFFICIAL_PICK_SCHEMA_DIAGNOSIS_BLOCKED`. It performed read-only diagnosis only after R2 failed closed on a Supabase REST schema-cache miss for `public.pick2_mlb_official_picks`.
+- Repository and production alignment passed at `728ed2a1771f522ffab1b29363f40ab31b4bfb29`, and `/api/system/version` reported 0 provider calls. No Official Pick DML, other production DML, production DDL, provider calls, odds refresh, Value Board publication, automation or cron changes occurred.
+- Current REST readback now sees `public.pick2_mlb_official_picks` with the required R1 column projection and 0 rows, which indicates the prior `PGRST205` blocker is no longer present on the REST surface. However, `information_schema` and `pg_catalog` are not exposed through the available Supabase REST channel (`PGRST106`), so exact production catalog state could not be certified in R2A.
+- Repo search found no committed forward migration that creates `public.pick2_mlb_official_picks`; table evidence is currently in the R1 probe/artifact and live REST visibility rather than a tracked migration definition. The frozen 5 Official Pick payloads and `MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1` remain preserved, with Official Pick writes still 0.
+- The two untracked R2 helper files remain useful for a future bounded R2 retry after explicit authorization. Recommended next phase: `MLB_DATA_02P_R2_RETRY_OFFICIAL_PICK_PERSISTENCE_EXECUTION`; do not insert the 5 Official Picks without a fresh explicit execution authorization.
+
 ## 2026-09-06 MLB-DATA-02P-R1 Official Pick Execution Prep
 
 - MLB-DATA-02P-R1 is certified as `MLB_DATA_02P_R1_OFFICIAL_PICK_EXECUTION_PREP_CERTIFIED`. The 02P policy-prep commit `75ca90f2a6c567bd2199bf295c25497106939297` was published to `origin/main`, production aligned to that same commit, and `/api/system/version` reported 0 provider calls.

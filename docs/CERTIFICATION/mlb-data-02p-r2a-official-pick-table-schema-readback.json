@@ -1,0 +1,283 @@
+{
+  "generatedAt": "2026-09-06T17:48:13.062Z",
+  "project": "MLB_DATA_02P_R2A_OFFICIAL_PICK_TABLE_SCHEMA_READBACK_REPAIR",
+  "certificationVerdict": "MLB_DATA_02P_R2A_OFFICIAL_PICK_SCHEMA_DIAGNOSIS_BLOCKED",
+  "repository": {
+    "branch": "main",
+    "localHead": "728ed2a1771f522ffab1b29363f40ab31b4bfb29",
+    "originMain": "728ed2a1771f522ffab1b29363f40ab31b4bfb29",
+    "statusShort": "?? docs/CERTIFICATION/mlb-data-02p-r2a-official-pick-table-schema-readback-audit.md\n?? docs/CERTIFICATION/mlb-data-02p-r2a-official-pick-table-schema-readback.json\n?? scripts/mlb-data-02p-r2-official-pick-persistence-execution-validate.mjs\n?? scripts/mlb-data-02p-r2-official-pick-persistence-execution.mjs\n?? scripts/mlb-data-02p-r2a-official-pick-table-schema-readback-validate.mjs\n?? scripts/mlb-data-02p-r2a-official-pick-table-schema-readback.mjs",
+    "MLB_02P_R2A_ALIGNMENT": "PASS"
+  },
+  "production": {
+    "commit": "728ed2a1771f522ffab1b29363f40ab31b4bfb29",
+    "providerCallsMade": 0,
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "repoSchema": {
+    "matchCount": 72,
+    "migrationLines": [],
+    "migrationState": "NO_NATIVE_OFFICIAL_PICK_TABLE_MIGRATION_FOUND",
+    "repoTableDefinition": "NOT_FOUND",
+    "intendedTableName": "public.pick2_mlb_official_picks",
+    "alternateNamesObserved": [
+      "official_picks",
+      "pick2_mlb_official_pick",
+      "pick2_official_picks"
+    ],
+    "MLB_02P_R2A_REPO_TABLE_DEFINITION": "NOT_FOUND",
+    "MLB_02P_R2A_TABLE_NAME_CONTRACT": "PASS"
+  },
+  "catalog": {
+    "informationSchemaTableCount": "NOT_AVAILABLE",
+    "pgClassTableCount": "NOT_AVAILABLE",
+    "columnReadback": "NOT_AVAILABLE",
+    "constraintReadback": "NOT_AVAILABLE",
+    "indexReadback": "NOT_AVAILABLE",
+    "rlsReadback": "NOT_AVAILABLE",
+    "triggerReadback": "NOT_AVAILABLE",
+    "probes": {
+      "informationSchemaTables": {
+        "schema": "information_schema",
+        "table": "tables",
+        "state": "NOT_AVAILABLE",
+        "count": null,
+        "error": {
+          "code": "PGRST106",
+          "message": "Invalid schema: information_schema"
+        }
+      },
+      "informationSchemaColumns": {
+        "schema": "information_schema",
+        "table": "columns",
+        "state": "NOT_AVAILABLE",
+        "count": null,
+        "error": {
+          "code": "PGRST106",
+          "message": "Invalid schema: information_schema"
+        }
+      },
+      "informationSchemaConstraints": {
+        "schema": "information_schema",
+        "table": "table_constraints",
+        "state": "NOT_AVAILABLE",
+        "count": null,
+        "error": {
+          "code": "PGRST106",
+          "message": "Invalid schema: information_schema"
+        }
+      },
+      "informationSchemaTriggers": {
+        "schema": "information_schema",
+        "table": "triggers",
+        "state": "NOT_AVAILABLE",
+        "count": null,
+        "error": {
+          "code": "PGRST106",
+          "message": "Invalid schema: information_schema"
+        }
+      },
+      "pgClass": {
+        "schema": "pg_catalog",
+        "table": "pg_class",
+        "state": "NOT_AVAILABLE",
+        "count": null,
+        "error": {
+          "code": "PGRST106",
+          "message": "Invalid schema: pg_catalog"
+        }
+      },
+      "pgIndexes": {
+        "schema": "pg_catalog",
+        "table": "pg_indexes",
+        "state": "NOT_AVAILABLE",
+        "count": null,
+        "error": {
+          "code": "PGRST106",
+          "message": "Invalid schema: pg_catalog"
+        }
+      },
+      "pgTables": {
+        "schema": "pg_catalog",
+        "table": "pg_tables",
+        "state": "NOT_AVAILABLE",
+        "count": null,
+        "error": {
+          "code": "PGRST106",
+          "message": "Invalid schema: pg_catalog"
+        }
+      }
+    },
+    "MLB_02P_R2A_INFORMATION_SCHEMA_TABLE_COUNT": "NOT_AVAILABLE",
+    "MLB_02P_R2A_PG_CLASS_TABLE_COUNT": "NOT_AVAILABLE",
+    "MLB_02P_R2A_COLUMN_READBACK": "NOT_AVAILABLE",
+    "MLB_02P_R2A_CONSTRAINT_READBACK": "NOT_AVAILABLE",
+    "MLB_02P_R2A_INDEX_READBACK": "NOT_AVAILABLE",
+    "MLB_02P_R2A_RLS_READBACK": "NOT_AVAILABLE",
+    "MLB_02P_R2A_TRIGGER_READBACK": "NOT_AVAILABLE"
+  },
+  "rest": {
+    "intended": {
+      "table": "pick2_mlb_official_picks",
+      "state": "REST_VISIBLE",
+      "count": 0,
+      "error": null
+    },
+    "alternatePick2": {
+      "table": "pick2_official_picks",
+      "state": "REST_VISIBLE",
+      "count": 0,
+      "error": null
+    },
+    "alternateLegacy": {
+      "table": "official_picks",
+      "state": "REST_VISIBLE",
+      "count": 0,
+      "error": null
+    },
+    "singular": {
+      "table": "pick2_mlb_official_pick",
+      "state": "REST_VISIBLE",
+      "count": 0,
+      "error": null
+    },
+    "MLB_02P_R2A_REST_VISIBILITY": "REST_VISIBLE"
+  },
+  "diagnosis": {
+    "MLB_02P_R2A_ROOT_CAUSE": "PRIOR_PGRST205_SCHEMA_CACHE_MISS_NOW_REST_VISIBLE_CATALOG_READBACK_NOT_AVAILABLE",
+    "MLB_02P_R2A_OFFICIAL_PICK_MIGRATION_STATE": "NO_NATIVE_OFFICIAL_PICK_TABLE_MIGRATION_FOUND",
+    "MLB_02P_R2A_EXISTING_MIGRATION_SAFETY": "N/A",
+    "MLB_02P_R2A_SCHEMA_PREP_REQUIRED": "NO_REST_SCHEMA_PRESENT_PENDING_CATALOG_PROOF",
+    "MLB_02P_R2A_SCHEMA_CACHE_REPAIR_REQUIRED": "NO_CURRENT_REST_CACHE_MISS",
+    "MLB_02P_R2A_TABLE_NAME_REPAIR_REQUIRED": "POSSIBLE_PENDING_SEMANTIC_AUDIT"
+  },
+  "contracts": {
+    "requiredColumns": [
+      "id",
+      "official_pick_identity",
+      "prediction_id",
+      "value_evaluation_id",
+      "game_pk",
+      "sport",
+      "market",
+      "side",
+      "bookmaker_key",
+      "bookmaker_name",
+      "american_odds",
+      "model_version",
+      "model_probability",
+      "consensus_probability",
+      "consensus_edge",
+      "unit_ev",
+      "policy_version",
+      "decision_status",
+      "eligibility_flags",
+      "risk_flags",
+      "reason_codes",
+      "blocker_codes",
+      "prediction_as_of",
+      "market_acquired_at",
+      "evaluated_at",
+      "decision_at",
+      "source_payload_digest",
+      "decision_payload_digest",
+      "metadata",
+      "created_at"
+    ],
+    "sourceFks": [
+      "prediction_id -> public.pick2_game_predictions(id)",
+      "value_evaluation_id -> public.pick2_mlb_market_value_evaluations(id)",
+      "game_pk -> public.pick2_mlb_games(game_pk)"
+    ],
+    "identity": "UNIQUE(official_pick_identity)",
+    "immutability": "immutable snapshot semantics with no-update/no-delete guards",
+    "MLB_02P_R2A_REQUIRED_SCHEMA_CONTRACT": "READY",
+    "MLB_02P_R2A_REQUIRED_FK_CONTRACT": "READY",
+    "MLB_02P_R2A_REQUIRED_IMMUTABILITY_CONTRACT": "READY"
+  },
+  "frozenSet": {
+    "count": 5,
+    "policyVersion": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+    "topCandidate": {
+      "rank": 1,
+      "prediction_id": "f8ce5fd4-56e6-4272-9888-4b30bd587f5a",
+      "value_evaluation_id": "ac27f633-b396-43ac-a0a2-b9baafb51247",
+      "game_pk": 823904,
+      "teams": "baseball_mlb:mlb:sportsdataio:team:35 @ baseball_mlb:mlb:sportsdataio:team:1",
+      "side": "AWAY",
+      "market": "MONEYLINE",
+      "bookmaker_key": "betrivers",
+      "bookmaker_name": "BetRivers",
+      "american_odds": 185,
+      "model_probability": 0.43541338225,
+      "consensus_probability": 0.353477765108324,
+      "consensus_edge": 0.081935617141676,
+      "unit_ev": 0.2409281394125,
+      "book_count": 11,
+      "market_freshness": "FRESH",
+      "market_dispersion": 0.020283964718561,
+      "starter_status": "PROBABLE",
+      "eligibility_flags": [
+        "ANALYTICAL_ONLY",
+        "PREGAME_VALID_AT_MARKET_ACQUISITION",
+        "PERSISTED_SOURCE_ROWS_ONLY"
+      ],
+      "risk_flags": [
+        "PROBABLE_STARTER",
+        "MODERATE_MARKET_DISPERSION",
+        "EXTREME_PRICE"
+      ],
+      "reason_codes": [
+        "MODEL_EDGE_OVER_CONSENSUS",
+        "POSITIVE_BEST_PRICE_EV",
+        "STRONG_BOOK_SUPPORT",
+        "ACCEPTABLE_MARKET_DISPERSION",
+        "FRESH_MARKET",
+        "PROBABLE_STARTER_WITH_RISK_FLAG"
+      ],
+      "source_digests": {
+        "source_payload_digest": "eacdaeb5bab4ca3ac66e7a24908b2df2121d40c45ef27f3a2a40d4c9872622e5",
+        "evaluation_payload_digest": "02209ae1402cefa18a4ea6af1de9e3819ba54a06b98ebf232e3f36d1e0ca4ac9",
+        "decision_payload_digest": "bf491ce81fb4e9ea2563b1090e11ee67512cbb997bafa90de7c4400ea392035b"
+      },
+      "official_pick_identity": "ed82db62d6dc18a1614c2b0c48a8799f3afc496cfb57e4f46ab063b21b40ff0c"
+    },
+    "MLB_02P_R2A_FROZEN_PICK_SET_PRESERVED": "PASS",
+    "MLB_02P_R2A_POLICY_PRESERVED": "PASS"
+  },
+  "boundaries": {
+    "officialPickInserts": 0,
+    "officialPickUpdates": 0,
+    "officialPickDeletes": 0,
+    "otherProductionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "MLB_02P_R2A_OFFICIAL_PICK_DML": 0,
+    "MLB_02P_R2A_PRODUCTION_MUTATIONS": 0,
+    "MLB_02P_R2A_PROVIDER_CALLS": 0
+  },
+  "untrackedHelpers": {
+    "classification": "USEFUL_FOR_FUTURE_R2",
+    "files": [
+      {
+        "file": "scripts/mlb-data-02p-r2-official-pick-persistence-execution.mjs",
+        "exists": true,
+        "tracked": false
+      },
+      {
+        "file": "scripts/mlb-data-02p-r2-official-pick-persistence-execution-validate.mjs",
+        "exists": true,
+        "tracked": false
+      }
+    ],
+    "MLB_02P_R2A_UNTRACKED_HELPER_STATE": "USEFUL_FOR_FUTURE_R2"
+  },
+  "futureRepairPlan": {
+    "recommendedNextPhase": "MLB_DATA_02P_R2_RETRY_OFFICIAL_PICK_PERSISTENCE_EXECUTION",
+    "notes": [
+      "Do not insert Official Picks until public.pick2_mlb_official_picks is REST-visible with the required schema.",
+      "If catalog proves absence, prepare an additive table migration only.",
+      "If catalog proves presence, diagnose PostgREST exposure/cache without creating a duplicate table."
+    ]
+  }
+}
