@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, parseBooleanParam, parseIntegerParam, requestId } from '@/lib/api-contract'
-import { syncMlbPlayerProps } from '@/services/mlb-player-prop-sync.service'
+import { syncMlbDecisionBoardPlayerProps } from '@/services/mlb-decision-board-player-prop-sync.service'
 import type { MlbPlayerPropIngestionProvider } from '@/types/mlb-player-prop-ingestion'
 
 export const dynamic = 'force-dynamic'
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     if (!dryRun && !authorized(request)) {
       return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized MLB player prop sync request.', status: 401 })
     }
-    const result = await syncMlbPlayerProps({
+    const result = await syncMlbDecisionBoardPlayerProps({
       date: typeof body?.date === 'string' ? body.date : null,
       dryRun,
       confirmed: body?.confirmed === true,
