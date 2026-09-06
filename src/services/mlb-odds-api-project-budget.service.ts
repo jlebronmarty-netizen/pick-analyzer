@@ -192,7 +192,7 @@ export async function finalizeMlbOddsApiProjectUsage(input: {
   status: 'completed' | 'partial'
 }) {
   const allHeadersPresent = input.requestsLast.length === input.providerCallsMade && input.requestsLast.every((value) => finiteNumber(value) !== null)
-  const observedCredits = input.requestsLast.reduce((sum, value) => sum + (finiteNumber(value) ?? 0), 0)
+  const observedCredits = input.requestsLast.reduce<number>((sum, value) => sum + (finiteNumber(value) ?? 0), 0)
   const accountedCredits = allHeadersPresent ? observedCredits : Math.max(observedCredits, input.estimatedCredits)
   const creditAccountingStatus = allHeadersPresent ? 'CONFIRMED' : 'ESTIMATED_FAIL_CLOSED'
   const updatedAt = new Date().toISOString()
