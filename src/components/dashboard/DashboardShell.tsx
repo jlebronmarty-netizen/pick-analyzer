@@ -8,6 +8,7 @@ import { ProductStatusBadge } from '@/components/product/ProductStatus'
 
 const productNavItems = [
   { href: '/today', label: 'Today', icon: 'T' },
+  { href: '/mlb', label: 'MLB', icon: 'B' },
   { href: '/performance', label: 'Performance', icon: 'P' },
   { href: '/model-lab', label: 'Model Lab', icon: 'M' },
   { href: '/data-health', label: 'Data Health', icon: 'D' },
@@ -16,6 +17,7 @@ const productNavItems = [
 const titleByPath: Record<string, string> = {
   '/': 'Today',
   '/today': 'Today',
+  '/mlb': 'MLB Decision Board',
   '/performance': 'Performance',
   '/model-lab': 'Model Lab',
   '/data-health': 'Data Health',
@@ -134,7 +136,7 @@ export default function DashboardShell({
           data-b5-1-mobile-bottom-nav="true"
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.5rem)' }}
         >
-          <div className="mx-auto grid max-w-2xl grid-cols-4 gap-1">
+          <div className="mx-auto grid max-w-2xl grid-cols-5 gap-1">
             {productNavItems.map((item) => {
               const active = pathname === item.href || (pathname === '/' && item.href === '/today')
               const baseClasses = 'flex min-h-14 min-w-0 flex-col items-center gap-1 rounded-lg px-2 py-2 text-center text-[11px] font-black outline-none focus-visible:ring-2 focus-visible:ring-sky-300'
