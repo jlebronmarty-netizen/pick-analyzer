@@ -31,6 +31,12 @@ const ODDS_API_MARKET = 'pitcher_outs'
 const SOURCE_VERSION = 'mlb_player_prop_multi_market_v1'
 const ODDS_API_BASE_URL = 'https://api.the-odds-api.com/v4'
 const LIVE_CONFIRMATION = 'MLB_PLAYER_PROP_SYNC'
+const V1_DEFAULT_MARKETS: MlbPlayerPropIngestionMarket[] = [
+  'pitcher_outs_recorded',
+  'pitcher_strikeouts',
+  'batter_hits',
+  'batter_total_bases',
+]
 
 type SyncOptions = {
   date?: string | null
@@ -127,11 +133,13 @@ function normalizeName(value: unknown) {
 }
 
 function marketDefinitionsForOptions(markets?: string[] | null) {
-  if (!markets?.length) return [MLB_PLAYER_PROP_MARKETS.find((market) => market.key === MARKET)!]
+  if (!markets?.length) {
+    return V1_DEFAULT_MARKETS.map((key) => MLB_PLAYER_PROP_MARKETS.find((market) => market.key === key)!)
+  }
   const selected = markets
     .map((market) => MLB_PLAYER_PROP_MARKETS.find((item) => item.key === market || item.providerMarketKeys.includes(market)))
     .filter(Boolean) as typeof MLB_PLAYER_PROP_MARKETS
-  return selected.length ? selected : [MLB_PLAYER_PROP_MARKETS.find((market) => market.key === MARKET)!]
+  return selected.length ? selected : V1_DEFAULT_MARKETS.map((key) => MLB_PLAYER_PROP_MARKETS.find((market) => market.key === key)!)
 }
 
 export function americanToDecimal(american: number | null) {
@@ -207,12 +215,12 @@ function snapshotFromOddsApi(input: {
   const marketDefinition = playerPropMarketFromProvider(input.market.key)
   if (!marketDefinition) return null
   const line = supportedLine(marketDefinition.key, input.outcome.point)
-  if (!eventId || !providerEventId || !selection || line === null) return null
+  const playerName = text(input.outcome.description)
+  if (!eventId || !providerEventId || !selection || line === null || !playerName) return null
   const providerTimestamp = normalizeProviderTimestamp(input.market.last_update ?? input.bookmaker.last_update, input.storedTimestamp)
   const americanOdds = num(input.outcome.price)
   const sportsbook = normalizeBookmaker(input.bookmaker.title ?? input.bookmaker.key)
   const bookmakerId = text(input.bookmaker.key)
-  const playerName = text(input.outcome.description)
   const id = snapshotId({
     provider: 'the-odds-api',
     eventId,
@@ -294,6 +302,7 @@ function toStorageRow(snapshot: MlbPlayerPropSnapshot) {
       playerName: snapshot.playerName ?? null,
       pitcherId: snapshot.market.startsWith('pitcher_') ? snapshot.playerId : null,
       providerPitcherId: snapshot.market.startsWith('pitcher_') ? snapshot.providerPlayerId : null,
+      identityStatus: snapshot.playerId ? 'CANONICAL_PLAYER_ID' : 'PROVIDER_NAME_ONLY',
       selection: snapshot.selection,
       decimalOdds: snapshot.decimalOdds,
       impliedProbability: snapshot.impliedProbability,
@@ -327,6 +336,7 @@ function validateSnapshots(snapshots: MlbPlayerPropSnapshot[]) {
     if (!['OVER', 'UNDER'].includes(snapshot.selection)) failedChecks.push(`${snapshot.id} unsupported selection`)
     if (!snapshot.sportsbook) failedChecks.push(`${snapshot.id} missing sportsbook`)
     if (!snapshot.eventId) failedChecks.push(`${snapshot.id} missing event`)
+    if (!snapshot.playerName) failedChecks.push(`${snapshot.id} missing player name`)
   }
   return { success: failedChecks.length === 0, failedChecks }
 }
@@ -447,7 +457,7 @@ export async function getMlbPlayerPropIngestionProviderAudit() {
         updateCadence: 'provider documentation says every few minutes for events within 24h; not verified against this account',
         limitations: [
           'Business plan or higher is required for documented player props.',
-          'Current event ID crosswalk from stored SportsDataIO events to The Odds API event IDs is not proven in this repository.',
+          'Protected live sync requires a certified pregame The Odds API event mapping.',
         ],
       },
     ],
@@ -516,7 +526,9 @@ export function validateMlbPlayerPropIngestionFixtures() {
   const validation = validateSnapshots(fixture.snapshots)
   const rows = fixture.snapshots.map(toStorageRow)
   const outsSnapshots = fixture.snapshots.filter((row) => row.market === MARKET)
+  const defaultMarkets = marketDefinitionsForOptions().map((market) => market.key)
   const checks = [
+    ['V1 defaults include pitcher and batter markets', V1_DEFAULT_MARKETS.every((market) => defaultMarkets.includes(market)) && defaultMarkets.length === V1_DEFAULT_MARKETS.length],
     ['only supported half-out lines are normalized', outsSnapshots.length === 2 && outsSnapshots.every((row) => row.line === 16.5)],
     ['all requested provider keys have a canonical contract', MLB_PLAYER_PROP_MARKETS.length === 12 && MLB_PLAYER_PROP_PROVIDER_MARKET_KEYS.includes('batter_rbis') && MLB_PLAYER_PROP_PROVIDER_MARKET_KEYS.includes('batter_runs_scored')],
     ['over and under normalize distinctly', new Set(fixture.snapshots.map((row) => row.selection)).size === 2],
@@ -524,6 +536,7 @@ export function validateMlbPlayerPropIngestionFixtures() {
     ['American odds decimal converts', fixture.snapshots[0]?.decimalOdds === 1.8696],
     ['storage markets are comparison-compatible', rows.every((row) => String(row.market).startsWith('player_props:'))],
     ['provider aliases map to canonical batter markets', rows.some((row) => row.market === 'player_props:batter_rbi') && rows.some((row) => row.market === 'player_props:batter_runs')],
+    ['batter rows preserve provider-name identity', rows.filter((row) => String(row.market).includes('batter_')).every((row) => row.metadata.playerName === 'Fixture Batter' && row.metadata.identityStatus === 'PROVIDER_NAME_ONLY')],
     ['storage outcome is lowercase over under', rows.every((row) => ['over', 'under'].includes(row.outcome))],
     ['idempotent IDs are unique', duplicateCount(fixture.snapshots) === 0],
     ['no recommendation metadata is emitted', rows.every((row) => row.metadata.noRecommendation === true && row.metadata.evCalculated === false && row.metadata.officialPickEligible === false && row.metadata.portfolioEligible === false)],
@@ -763,7 +776,8 @@ export async function syncMlbPlayerProps(options: SyncOptions = {}) {
   })
   const confirmed = options.confirmed === true || options.confirm === LIVE_CONFIRMATION
   const isOddsApi = provider === ODDS_API_PROVIDER
-  const blocked = !isOddsApi && providerAudit.blockers.length > 0
+  const providerContract = providerAudit.supportedProviders.find((item) => item.provider === provider)
+  const blocked = providerContract?.legalStatus !== 'CONTRACT_READY'
   const status: MlbPlayerPropIngestionStatus = dryRun
     ? 'DRY_RUN'
     : blocked
@@ -818,29 +832,33 @@ export async function syncMlbPlayerProps(options: SyncOptions = {}) {
       if (result.payload) providerPayloads.push(result.payload)
     }
     const normalized = normalizeOddsApiPayload(providerPayloads, nowIso(), eventMap)
-    const identity = await resolvePitchers(normalized.snapshots).catch(async (error) => {
-      const fallback = await resolvePitchersFromStoredProjections(normalized.snapshots).then(async (stored) => {
-        if (stored.resolved.length) return stored
-        return resolvePitchersFromProviderMappings(normalized.snapshots)
-      }).catch((fallbackError) => ({
-        resolved: [] as MlbPlayerPropSnapshot[],
-        exact: 0,
-        normalized: 0,
-        unresolved: normalized.snapshots.length,
-        fallbackError: errorText(fallbackError),
-      }))
-      const recovered = fallback.resolved.length > 0
-      return {
-        ...fallback,
-        error: recovered
-          ? `PITCHER_IDENTITY_PREVIEW_FAILED_CERTIFIED_MAPPING_FALLBACK_USED: ${errorText(error)}`
-          : `PITCHER_IDENTITY_RESOLUTION_FAILED: ${errorText(error)}${'fallbackError' in fallback ? `; fallback: ${fallback.fallbackError}` : ''}`,
-      }
-    })
-    const rows = identity.resolved
+    const pitcherSnapshots = normalized.snapshots.filter((snapshot) => snapshot.market.startsWith('pitcher_'))
+    const batterSnapshots = normalized.snapshots.filter((snapshot) => snapshot.market.startsWith('batter_'))
+    const identity = pitcherSnapshots.length
+      ? await resolvePitchers(pitcherSnapshots).catch(async (error) => {
+        const fallback = await resolvePitchersFromStoredProjections(pitcherSnapshots).then(async (stored) => {
+          if (stored.resolved.length) return stored
+          return resolvePitchersFromProviderMappings(pitcherSnapshots)
+        }).catch((fallbackError) => ({
+          resolved: [] as MlbPlayerPropSnapshot[],
+          exact: 0,
+          normalized: 0,
+          unresolved: pitcherSnapshots.length,
+          fallbackError: errorText(fallbackError),
+        }))
+        const recovered = fallback.resolved.length > 0
+        return {
+          ...fallback,
+          error: recovered
+            ? `PITCHER_IDENTITY_PREVIEW_FAILED_CERTIFIED_MAPPING_FALLBACK_USED: ${errorText(error)}`
+            : `PITCHER_IDENTITY_RESOLUTION_FAILED: ${errorText(error)}${'fallbackError' in fallback ? `; fallback: ${fallback.fallbackError}` : ''}`,
+        }
+      })
+      : { resolved: [] as MlbPlayerPropSnapshot[], exact: 0, normalized: 0, unresolved: 0 }
+    const rows = [...identity.resolved, ...batterSnapshots]
     const rowValidation = validateSnapshots(rows)
     const persisted = await persistRows(rows, rowValidation.success)
-    const identityBlocked = normalized.snapshots.length > 0 && rows.length === 0
+    const identityBlocked = pitcherSnapshots.length > 0 && identity.resolved.length === 0
     const identityError = 'error' in identity ? [identity.error] : []
     const identityWarnings = !identityBlocked ? identityError : []
     const identityBlockers = identityBlocked ? ['ALL_PITCHER_IDENTITIES_UNRESOLVED', ...identityError] : []
@@ -883,6 +901,11 @@ export async function syncMlbPlayerProps(options: SyncOptions = {}) {
         unresolved: identity.unresolved,
         ambiguous: 0,
       },
+      batterIdentity: {
+        providerNameAccepted: batterSnapshots.length,
+        canonicalIdsAssigned: batterSnapshots.filter((row) => Boolean(row.playerId)).length,
+        unresolved: 0,
+      },
       quota: {
         requestsRemainingBefore: calls[0]?.requestsRemaining ?? null,
         requestsRemainingAfter: calls.at(-1)?.requestsRemaining ?? null,
@@ -892,6 +915,7 @@ export async function syncMlbPlayerProps(options: SyncOptions = {}) {
       blockers: [...errors, ...identityBlockers],
       warnings: [
         ...identityWarnings,
+        ...(batterSnapshots.length ? ['Batter props are retained by provider player name when a canonical player ID is unavailable; downstream matching remains event + normalized-name gated.'] : []),
         'Manual live sync only; no scheduled ingestion was enabled.',
         'No sportsbook lines were fabricated.',
         'No EV, Kelly, Official Pick or Portfolio Intelligence output is produced.',
@@ -926,6 +950,7 @@ export async function syncMlbPlayerProps(options: SyncOptions = {}) {
     healthBefore,
     validation,
     blockers: Array.from(new Set([
+      ...(blocked ? [`${provider}_PLAYER_PROP_CONTRACT_NOT_READY`] : []),
       ...providerAudit.blockers,
       budget.blockedReason,
       !dryRun && !confirmed ? 'confirm=MLB_PLAYER_PROP_SYNC required for protected live sync' : null,
