@@ -23,6 +23,12 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Build-only placeholders. They prevent import-time Supabase client construction
+      # from failing during Next.js page-data collection without exposing real secrets.
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
