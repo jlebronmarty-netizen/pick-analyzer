@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 00:20:00Z
+Last updated: 2026-09-06 00:45:00Z
+
+## 2026-09-06 MLB-DATA-02P Official Pick Policy Prep
+
+- MLB-DATA-02P is certified as `MLB_DATA_02P_OFFICIAL_PICK_POLICY_PREP_CERTIFIED`. The 02O-R3 commit `04775ead64f62d4d056cd6edf1a8be78d6433541` was published to `origin/main`, production aligned to that same commit on bounded poll attempt 12, and `/api/system/version` reported 0 provider calls.
+- The phase performed policy/read-only analysis only against the persisted native moneyline value rows. Baselines passed: 386 native value rows, 21 eligible games, 193 book-level market pairs, 386 unique value identities, 0 missing source linkages, 0 math-parity failures, 0 two-sided-market failures and 0 Official Picks.
+- Prepared policy version `MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1`. The selected initial conservative gates require pregame validity, FRESH market state, complete same-book HOME/AWAY market, model probability within certified inference range, feature completeness, consensus edge >= 0.04, best-price unit EV >= 0.08, at least 8 valid books, market dispersion <= 0.03 and CONFIRMED or PROBABLE starter status with a risk flag for probable starters. Zero picks is explicitly valid and there is no fixed daily pick count.
+- Current dry-run classification after collapsing duplicate book rows to best game/side candidates: 42 game-side rows evaluated, 5 `OFFICIAL_PICK_ELIGIBLE_DRY_RUN`, 14 `VALUE_CANDIDATE_ONLY`, 23 `WATCHLIST` and 0 `BLOCKED`. The top prior analytical candidate, game `823904` AWAY at `betrivers`, remains dry-run eligible only, not persisted as an Official Pick.
+- Boundaries held: Official Pick writes 0, value writes 0, market writes 0, prediction/result/model/raw/feature writes 0, production DDL 0, provider calls 0, automation off and cron changes 0. `MLB_DATA_02P_R1_OFFICIAL_PICK_EXECUTION_PREP_READY = YES` and `MLB_DATA_02Q_VALUE_BOARD_PREP_READY = YES`; execution/publication remains separately unauthorized.
 
 ## 2026-09-06 MLB-DATA-02O-R3 Native Value Persistence
 
