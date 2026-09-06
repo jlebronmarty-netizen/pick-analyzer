@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 01:15:00Z
+Last updated: 2026-09-06 19:43:00Z
+
+## 2026-09-06 MLB-DATA-02P-R2 Official Pick Persistence Execution
+
+- MLB-DATA-02P-R2 is certified as `MLB_DATA_02P_R2_OFFICIAL_PICK_PERSISTENCE_CERTIFIED`. The R2C certification commit `b60cea1f5633042dcade4df4df88d24dbd675144` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
+- The exact frozen 5 Official Pick payloads certified by R1/R2C under `MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1` were rebuilt without provider calls, odds refreshes or policy changes. Baselines passed: `public.pick2_mlb_official_picks` existed with 0 matching frozen rows, native value evaluations remained 386, Champion remained `MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1`, predictions remained 24 and prediction results remained 0.
+- Prewrite classification was 5 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP`, 0 `BLOCK_CONFLICT`; the Official Pick DML cap was 5. Authorized insert-only DML persisted exactly 5 rows into `public.pick2_mlb_official_picks`, with 0 updates, 0 deletes, 0 conflicts and 0 failures.
+- Postwrite readback passed: all 5 frozen identities exist exactly once, payload parity and source linkage passed, book/price and policy evidence matched, immutability/no-overwrite checks passed and second-pass idempotency classified 0 inserts, 5 reuses and 0 conflicts.
+- Boundaries held: no provider calls, no odds refresh, no market/value/prediction/result/model/raw/feature writes outside the 5 Official Pick inserts, no production DDL, no Value Board publication, automation off and cron changes 0. `MLB_DATA_02Q_VALUE_BOARD_PREP_READY = YES`; `MLB_DATA_02P_R3_OFFICIAL_PICK_REFRESH_CONTRACT_PREP_READY = YES`.
 
 ## 2026-09-06 MLB-DATA-02P-R2C Manual Official Pick Schema Apply Readback
 
