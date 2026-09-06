@@ -5,9 +5,7 @@ export type MlbPropGroup = 'pitcher' | 'batter'
 
 export type MlbBookQuote = {
   book: 'FanDuel' | 'Caesars'
-  // The raw odds snapshot schema permits null prices. Decision construction filters
-  // unusable quotes before comparison, but this boundary intentionally mirrors the source.
-  odds: any
+  odds: number
   line: number | null
   observedAt: string | null
 }
