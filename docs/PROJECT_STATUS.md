@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-06 01:15:00Z
 
+## 2026-09-06 MLB-DATA-02P-R2B Official Pick Table Schema Prep
+
+- MLB-DATA-02P-R2B is certified as `MLB_DATA_02P_R2B_OFFICIAL_PICK_TABLE_SCHEMA_PREP_CERTIFIED`. The R2A diagnosis commit `f4cd2e01a769d68a379c602c30dbeb9da7a8a632` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
+- The accepted root cause is `TABLE_NOT_CREATED` based on the user-supplied production catalog evidence: `information_schema`, `pg_catalog` and wildcard Official Pick catalog searches found no intended native Official Pick object, and repo search found no committed migration creating `public.pick2_mlb_official_picks`.
+- Prepared non-applied additive migration `supabase/migrations/202609050004_pick2_mlb_official_picks_v1.sql`. The table is rooted in `prediction_id`, `value_evaluation_id`, native `game_pk`, `MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1` and immutable Official Pick decision state, with required FK links to `pick2_game_predictions`, `pick2_mlb_market_value_evaluations` and `pick2_mlb_games`.
+- The migration prepares `UNIQUE(official_pick_identity)`, semantic checks for MLB moneyline Official Picks, JSON array flag/code contracts, RLS, service-role insert/select, authenticated select, targeted indexes and before-update/before-delete immutability guards. It is additive only and contains no Official Pick inserts, no legacy table mutation and no unrelated DML/DDL.
+- Application contract `src/types/pick2-official-picks.ts` defines native Official Pick rows, future `INSERT_ELIGIBLE` / `REUSE_NO_OP` / `BLOCK_CONFLICT` classification and readback parity shape. Frozen 5 dry fit passed with 5 valid rows, 0 invalid, 0 duplicate proposed identities and 0 missing prediction/value/game linkages. R2B performed 0 production DML, 0 production DDL, 0 provider calls, no Value Board publication, no automation and no cron changes. `MLB_DATA_02P_R2C_OFFICIAL_PICK_SCHEMA_MIGRATION_APPLY_READY = YES`; `MLB_DATA_02P_R2_OFFICIAL_PICK_PERSISTENCE_READY = NO` until migration apply/readback.
+
 ## 2026-09-06 MLB-DATA-02P-R2A Official Pick Table Schema Readback
 
 - MLB-DATA-02P-R2A is classified as `MLB_DATA_02P_R2A_OFFICIAL_PICK_SCHEMA_DIAGNOSIS_BLOCKED`. It performed read-only diagnosis only after R2 failed closed on a Supabase REST schema-cache miss for `public.pick2_mlb_official_picks`.
