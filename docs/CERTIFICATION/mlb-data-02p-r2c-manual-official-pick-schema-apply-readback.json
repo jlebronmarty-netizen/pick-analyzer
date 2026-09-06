@@ -1,0 +1,418 @@
+{
+  "generatedAt": "2026-09-06T19:32:13.804Z",
+  "project": "MLB_DATA_02P_R2C_MANUAL_OFFICIAL_PICK_SCHEMA_APPLY_READBACK",
+  "certificationVerdict": "MLB_DATA_02P_R2C_OFFICIAL_PICK_SCHEMA_PRODUCTION_CERTIFIED",
+  "repository": {
+    "branch": "main",
+    "localHead": "4c9442e8a3e894d7bd42681e96126f6d8c56e9e2",
+    "originMain": "4c9442e8a3e894d7bd42681e96126f6d8c56e9e2",
+    "trackedWorktreeClean": false,
+    "MLB_02P_R2C_MANUAL_ALIGNMENT": "PASS"
+  },
+  "production": {
+    "commit": "4c9442e8a3e894d7bd42681e96126f6d8c56e9e2",
+    "providerCallsMade": 0,
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "manualMigration": {
+    "path": "supabase/migrations/202609050004_pick2_mlb_official_picks_v1.sql",
+    "MLB_02P_R2C_MANUAL_MIGRATION_APPLIED": "YES_USER_CONFIRMED",
+    "MLB_02P_R2C_MANUAL_MIGRATION_STATE": "PASS",
+    "codexReappliedMigration": "NO",
+    "migrationContainsExpectedTable": true
+  },
+  "schema": {
+    "table": "public.pick2_mlb_official_picks",
+    "liveRestRowCount": 0,
+    "projectionRows": 0,
+    "userSuppliedCatalogEvidenceAccepted": true,
+    "columns": "USER_SUPPLIED_SQL_EVIDENCE_ACCEPTED_PLUS_REST_PROJECTION_PASS",
+    "fks": {
+      "prediction": "prediction_id -> public.pick2_game_predictions(id)",
+      "value": "value_evaluation_id -> public.pick2_mlb_market_value_evaluations(id)",
+      "game": "game_pk -> public.pick2_mlb_games(game_pk)"
+    },
+    "uniqueIdentity": "UNIQUE(official_pick_identity)",
+    "updateGuard": "pick2_mlb_official_picks_no_update",
+    "deleteGuard": "pick2_mlb_official_picks_no_delete",
+    "checks": "USER_SUPPLIED_SQL_EVIDENCE_ACCEPTED",
+    "numericStorage": "numeric(18,15)",
+    "americanOddsStorage": "integer",
+    "rls": true,
+    "indexes": [
+      "pick2_mlb_official_picks_book_side_idx",
+      "pick2_mlb_official_picks_game_decision_idx",
+      "pick2_mlb_official_picks_official_pick_identity_key",
+      "pick2_mlb_official_picks_pkey",
+      "pick2_mlb_official_picks_policy_status_idx",
+      "pick2_mlb_official_picks_prediction_idx",
+      "pick2_mlb_official_picks_value_evaluation_idx"
+    ],
+    "MLB_02P_R2C_TABLE_READBACK": "PASS",
+    "MLB_02P_R2C_COLUMN_CONTRACT": "PASS",
+    "MLB_02P_R2C_PREDICTION_FK": "PASS",
+    "MLB_02P_R2C_VALUE_FK": "PASS",
+    "MLB_02P_R2C_GAME_FK": "PASS",
+    "MLB_02P_R2C_IDENTITY_UNIQUENESS": "PASS",
+    "MLB_02P_R2C_UPDATE_GUARD": "PASS",
+    "MLB_02P_R2C_DELETE_GUARD": "PASS",
+    "MLB_02P_R2C_IMMUTABILITY": "PASS",
+    "MLB_02P_R2C_NUMERIC_STORAGE": "PASS",
+    "MLB_02P_R2C_AMERICAN_ODDS_STORAGE": "PASS",
+    "MLB_02P_R2C_CHECK_CONTRACT": "PASS",
+    "MLB_02P_R2C_RLS": "PASS",
+    "MLB_02P_R2C_INDEX_CONTRACT": "PASS",
+    "MLB_02P_R2C_OFFICIAL_PICK_ZERO_BASELINE": "PASS"
+  },
+  "frozenDryFit": {
+    "policyVersion": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+    "frozenPickCount": 5,
+    "validRows": 5,
+    "invalidRows": [],
+    "duplicateOfficialPickIdentity": 0,
+    "missingPredictionLinkages": 0,
+    "missingValueLinkages": 0,
+    "missingGameLinkages": 0,
+    "proposedRows": [
+      {
+        "official_pick_identity": "6767ea71f01ebb06183a2ec8cf1db371571074e19882e27fc8438aef0e4f6b21",
+        "prediction_id": "f8ce5fd4-56e6-4272-9888-4b30bd587f5a",
+        "value_evaluation_id": "ac27f633-b396-43ac-a0a2-b9baafb51247",
+        "game_pk": 823904,
+        "sport": "MLB",
+        "market": "MONEYLINE",
+        "side": "AWAY",
+        "bookmaker_key": "betrivers",
+        "bookmaker_name": "BetRivers",
+        "american_odds": 185,
+        "model_version": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+        "model_probability": 0.43541338225,
+        "consensus_probability": 0.353477765108324,
+        "consensus_edge": 0.081935617141676,
+        "unit_ev": 0.2409281394125,
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "decision_status": "OFFICIAL_PICK",
+        "eligibility_flags": [
+          "ANALYTICAL_ONLY",
+          "PREGAME_VALID_AT_MARKET_ACQUISITION",
+          "PERSISTED_SOURCE_ROWS_ONLY"
+        ],
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "EXTREME_PRICE"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "ACCEPTABLE_MARKET_DISPERSION",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+        "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+        "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+        "decision_at": "2026-09-05T21:55:01.709+00:00",
+        "source_payload_digest": "eacdaeb5bab4ca3ac66e7a24908b2df2121d40c45ef27f3a2a40d4c9872622e5",
+        "decision_payload_digest": "4bdc8cc480947830d8a808b3526d5fad4bae773d78785d43ce9c0cfc0030f6d9",
+        "metadata": {
+          "execution_phase": "MLB_DATA_02P_R2C_MANUAL_OFFICIAL_PICK_SCHEMA_APPLY_READBACK",
+          "execution_prep_only": true,
+          "no_official_pick_written": true,
+          "teams": "baseball_mlb:mlb:sportsdataio:team:35 @ baseball_mlb:mlb:sportsdataio:team:1",
+          "policy_config_digest": "27f1edf91f27b68d79928ac6bea6e22f537ff073f4090fb2c5a8dc5795922d60",
+          "schema_readback_only": true,
+          "r1_frozen_identity": "ed82db62d6dc18a1614c2b0c48a8799f3afc496cfb57e4f46ab063b21b40ff0c",
+          "decision_at_source": "EVALUATED_AT_DERIVED_FOR_NOT_NULL_SCHEMA_CONTRACT"
+        }
+      },
+      {
+        "official_pick_identity": "cd7e76fde6287f2210065c513b8002563e4c9c266e678e2bcc3a979aea3809f0",
+        "prediction_id": "29b41cba-86bb-416b-bffd-83c34837ec17",
+        "value_evaluation_id": "1209e34d-585b-46af-9bd2-d1077d35bc82",
+        "game_pk": 824468,
+        "sport": "MLB",
+        "market": "MONEYLINE",
+        "side": "HOME",
+        "bookmaker_key": "lowvig",
+        "bookmaker_name": "LowVig.ag",
+        "american_odds": 134,
+        "model_version": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+        "model_probability": 0.480063146508,
+        "consensus_probability": 0.417454830082839,
+        "consensus_edge": 0.062608316425161,
+        "unit_ev": 0.12334776282872,
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "decision_status": "OFFICIAL_PICK",
+        "eligibility_flags": [
+          "ANALYTICAL_ONLY",
+          "PREGAME_VALID_AT_MARKET_ACQUISITION",
+          "PERSISTED_SOURCE_ROWS_ONLY"
+        ],
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "LOW_MARKET_DISPERSION",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+        "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+        "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+        "decision_at": "2026-09-05T21:55:01.709+00:00",
+        "source_payload_digest": "026456e9c1b405acf769c79d3c128a9c8683f35c2666b775bd2e97b2078fe8a4",
+        "decision_payload_digest": "b4b32da1e4d4a87484a31bd1d75d3a2e8487606c7dc261041fe9304c423c26ff",
+        "metadata": {
+          "execution_phase": "MLB_DATA_02P_R2C_MANUAL_OFFICIAL_PICK_SCHEMA_APPLY_READBACK",
+          "execution_prep_only": true,
+          "no_official_pick_written": true,
+          "teams": "baseball_mlb:mlb:sportsdataio:team:32 @ baseball_mlb:mlb:sportsdataio:team:2",
+          "policy_config_digest": "27f1edf91f27b68d79928ac6bea6e22f537ff073f4090fb2c5a8dc5795922d60",
+          "schema_readback_only": true,
+          "r1_frozen_identity": "5006c9a75e757f426c1c8915431dbb22b2c6535325ed0bd87aa4b2ddccb43204",
+          "decision_at_source": "EVALUATED_AT_DERIVED_FOR_NOT_NULL_SCHEMA_CONTRACT"
+        }
+      },
+      {
+        "official_pick_identity": "abf92df84ae9f74c5f851455f0b703838490430c4e0927d307c0728dc4531220",
+        "prediction_id": "5241c42d-2a3a-46ee-9351-0770c848e5db",
+        "value_evaluation_id": "57550670-8a74-4c0a-9f6b-5a78f70abbd1",
+        "game_pk": 824795,
+        "sport": "MLB",
+        "market": "MONEYLINE",
+        "side": "HOME",
+        "bookmaker_key": "betrivers",
+        "bookmaker_name": "BetRivers",
+        "american_odds": 118,
+        "model_version": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+        "model_probability": 0.524486550995,
+        "consensus_probability": 0.465165228372974,
+        "consensus_edge": 0.059321322622026,
+        "unit_ev": 0.1433806811691,
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "decision_status": "OFFICIAL_PICK",
+        "eligibility_flags": [
+          "ANALYTICAL_ONLY",
+          "PREGAME_VALID_AT_MARKET_ACQUISITION",
+          "PERSISTED_SOURCE_ROWS_ONLY"
+        ],
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODERATE_MARKET_DISPERSION",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "ACCEPTABLE_MARKET_DISPERSION",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+        "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+        "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+        "decision_at": "2026-09-05T21:55:01.709+00:00",
+        "source_payload_digest": "205a33d0f334070fe18de5754f90c1258008091170ab855336c92acdd40d583f",
+        "decision_payload_digest": "7c9a91784f782b44a29d2759620677fa739385c92519dc4b72c9ae3c682722ac",
+        "metadata": {
+          "execution_phase": "MLB_DATA_02P_R2C_MANUAL_OFFICIAL_PICK_SCHEMA_APPLY_READBACK",
+          "execution_prep_only": true,
+          "no_official_pick_written": true,
+          "teams": "baseball_mlb:mlb:sportsdataio:team:25 @ baseball_mlb:mlb:sportsdataio:team:19",
+          "policy_config_digest": "27f1edf91f27b68d79928ac6bea6e22f537ff073f4090fb2c5a8dc5795922d60",
+          "schema_readback_only": true,
+          "r1_frozen_identity": "338808d59ccfcd2b83a29e8241b8d97003e7c94066163145c776603114d5dcdc",
+          "decision_at_source": "EVALUATED_AT_DERIVED_FOR_NOT_NULL_SCHEMA_CONTRACT"
+        }
+      },
+      {
+        "official_pick_identity": "fb4dae3619779765782d4e2e02c7d2c80554e52724593fa7ab65619248ddccbb",
+        "prediction_id": "c71f78a0-9830-444f-a142-41284a44d983",
+        "value_evaluation_id": "d8cae3ae-8443-4e5c-85a4-f228e1f6eaba",
+        "game_pk": 824310,
+        "sport": "MLB",
+        "market": "MONEYLINE",
+        "side": "HOME",
+        "bookmaker_key": "williamhill_us",
+        "bookmaker_name": "Caesars",
+        "american_odds": 110,
+        "model_version": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+        "model_probability": 0.517545231369,
+        "consensus_probability": 0.467289719626168,
+        "consensus_edge": 0.050255511742832,
+        "unit_ev": 0.0868449858749,
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "decision_status": "OFFICIAL_PICK",
+        "eligibility_flags": [
+          "ANALYTICAL_ONLY",
+          "PREGAME_VALID_AT_MARKET_ACQUISITION",
+          "PERSISTED_SOURCE_ROWS_ONLY"
+        ],
+        "risk_flags": [
+          "PROBABLE_STARTER",
+          "MODEL_PROBABILITY_NEAR_50"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "LOW_MARKET_DISPERSION",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+        "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+        "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+        "decision_at": "2026-09-05T21:55:01.709+00:00",
+        "source_payload_digest": "02d68e88cedd0d92d6017fac399bc2ebb14352a452922eccabb39e7e1622cde3",
+        "decision_payload_digest": "eafb3f6eb497f7a2256e74691a5f7593194b4922fa616efb6a2020d5694bad5a",
+        "metadata": {
+          "execution_phase": "MLB_DATA_02P_R2C_MANUAL_OFFICIAL_PICK_SCHEMA_APPLY_READBACK",
+          "execution_prep_only": true,
+          "no_official_pick_written": true,
+          "teams": "baseball_mlb:mlb:sportsdataio:team:31 @ baseball_mlb:mlb:sportsdataio:team:23",
+          "policy_config_digest": "27f1edf91f27b68d79928ac6bea6e22f537ff073f4090fb2c5a8dc5795922d60",
+          "schema_readback_only": true,
+          "r1_frozen_identity": "b21e123f3f17787542026606ddd68a5ce3e115fad6fb72134734d4a6a3349044",
+          "decision_at_source": "EVALUATED_AT_DERIVED_FOR_NOT_NULL_SCHEMA_CONTRACT"
+        }
+      },
+      {
+        "official_pick_identity": "3623f2db4791e4370e156fccd11eb4cdaef95aac955d518295f394e6af4b112e",
+        "prediction_id": "607bc33b-58ee-4f1c-9d65-fd010d2c3d50",
+        "value_evaluation_id": "232efbd4-a7d2-462f-9a3f-95ebaa7bc9b2",
+        "game_pk": 823335,
+        "sport": "MLB",
+        "market": "MONEYLINE",
+        "side": "AWAY",
+        "bookmaker_key": "betonlineag",
+        "bookmaker_name": "BetOnline.ag",
+        "american_odds": 163,
+        "model_version": "MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1",
+        "model_probability": 0.418117300461,
+        "consensus_probability": 0.374435119431892,
+        "consensus_edge": 0.043682181029108,
+        "unit_ev": 0.09964850021243,
+        "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+        "decision_status": "OFFICIAL_PICK",
+        "eligibility_flags": [
+          "ANALYTICAL_ONLY",
+          "PREGAME_VALID_AT_MARKET_ACQUISITION",
+          "PERSISTED_SOURCE_ROWS_ONLY"
+        ],
+        "risk_flags": [
+          "PROBABLE_STARTER"
+        ],
+        "reason_codes": [
+          "MODEL_EDGE_OVER_CONSENSUS",
+          "POSITIVE_BEST_PRICE_EV",
+          "STRONG_BOOK_SUPPORT",
+          "LOW_MARKET_DISPERSION",
+          "FRESH_MARKET",
+          "PROBABLE_STARTER_WITH_RISK_FLAG"
+        ],
+        "blocker_codes": [],
+        "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+        "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+        "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+        "decision_at": "2026-09-05T21:55:01.709+00:00",
+        "source_payload_digest": "dab4f8aa1908fbb47de795f9d5020b1f9bf8ac6b341bb13b68f0f10d98715c1e",
+        "decision_payload_digest": "08a5b31f89ab73205e7f00cecd54f3b65850cde6f1f967b2addad87af9b0d14e",
+        "metadata": {
+          "execution_phase": "MLB_DATA_02P_R2C_MANUAL_OFFICIAL_PICK_SCHEMA_APPLY_READBACK",
+          "execution_prep_only": true,
+          "no_official_pick_written": true,
+          "teams": "baseball_mlb:mlb:sportsdataio:team:21 @ baseball_mlb:mlb:sportsdataio:team:4",
+          "policy_config_digest": "27f1edf91f27b68d79928ac6bea6e22f537ff073f4090fb2c5a8dc5795922d60",
+          "schema_readback_only": true,
+          "r1_frozen_identity": "83790ca07dfdea436909be327e44ec41eda1dc398ad25322017b10162a074a21",
+          "decision_at_source": "EVALUATED_AT_DERIVED_FOR_NOT_NULL_SCHEMA_CONTRACT"
+        }
+      }
+    ],
+    "MLB_02P_R2C_FROZEN_PICK_REBUILD": "PASS",
+    "MLB_02P_R2C_SOURCE_LINKAGE": "PASS",
+    "MLB_02P_R2C_LIVE_SCHEMA_DRY_FIT": "PASS",
+    "MLB_02P_R2C_PAYLOAD_DRY_FIT": "PASS"
+  },
+  "prewrite": {
+    "rows": [
+      {
+        "official_pick_identity": "6767ea71f01ebb06183a2ec8cf1db371571074e19882e27fc8438aef0e4f6b21",
+        "status": "INSERT_ELIGIBLE",
+        "conflictFields": []
+      },
+      {
+        "official_pick_identity": "cd7e76fde6287f2210065c513b8002563e4c9c266e678e2bcc3a979aea3809f0",
+        "status": "INSERT_ELIGIBLE",
+        "conflictFields": []
+      },
+      {
+        "official_pick_identity": "abf92df84ae9f74c5f851455f0b703838490430c4e0927d307c0728dc4531220",
+        "status": "INSERT_ELIGIBLE",
+        "conflictFields": []
+      },
+      {
+        "official_pick_identity": "fb4dae3619779765782d4e2e02c7d2c80554e52724593fa7ab65619248ddccbb",
+        "status": "INSERT_ELIGIBLE",
+        "conflictFields": []
+      },
+      {
+        "official_pick_identity": "3623f2db4791e4370e156fccd11eb4cdaef95aac955d518295f394e6af4b112e",
+        "status": "INSERT_ELIGIBLE",
+        "conflictFields": []
+      }
+    ],
+    "INSERT_ELIGIBLE": 5,
+    "REUSE_NO_OP": 0,
+    "BLOCK_CONFLICT": 0,
+    "MLB_02P_R2C_PICK_PREWRITE_CLASSIFICATION": "PASS",
+    "OFFICIAL_PICK_INSERT_CAP": 5,
+    "MLB_02P_R2C_FUTURE_PICK_DML_CAP_READY": "YES"
+  },
+  "idempotency": {
+    "projectedSecondPass": {
+      "INSERT_ELIGIBLE": 0,
+      "REUSE_NO_OP": 5,
+      "BLOCK_CONFLICT": 0
+    },
+    "MLB_02P_R2C_IDEMPOTENCY_PROJECTED": "PASS"
+  },
+  "boundaries": {
+    "officialPickInserts": 0,
+    "officialPickUpdates": 0,
+    "officialPickDeletes": 0,
+    "nativeValueWrites": 0,
+    "marketWrites": 0,
+    "predictionWrites": 0,
+    "predictionResultWrites": 0,
+    "modelWrites": 0,
+    "rawWrites": 0,
+    "featureWrites": 0,
+    "userManualProductionDdl": "YES_USER_CONFIRMED",
+    "codexProductionDdl": 0,
+    "providerCalls": 0,
+    "valueBoardPublication": "NO",
+    "automation": "OFF",
+    "cronChanges": 0,
+    "MLB_02P_R2C_OFFICIAL_PICK_DML": 0,
+    "MLB_02P_R2C_OTHER_PRODUCTION_DML": 0,
+    "MLB_02P_R2C_DDL_ACCOUNTING": "PASS",
+    "MLB_02P_R2C_PROVIDER_CALLS": 0,
+    "MLB_02P_R2C_VALUE_BOARD_PUBLICATION": "NO"
+  },
+  "readiness": {
+    "MLB_DATA_02P_R2_OFFICIAL_PICK_PERSISTENCE_READY": "YES"
+  }
+}

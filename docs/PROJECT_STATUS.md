@@ -2,6 +2,14 @@
 
 Last updated: 2026-09-06 01:15:00Z
 
+## 2026-09-06 MLB-DATA-02P-R2C Manual Official Pick Schema Apply Readback
+
+- MLB-DATA-02P-R2C is certified as `MLB_DATA_02P_R2C_OFFICIAL_PICK_SCHEMA_PRODUCTION_CERTIFIED`. The user manually applied exactly `supabase/migrations/202609050004_pick2_mlb_official_picks_v1.sql` through the approved Supabase Production SQL Editor; Codex did not reapply the migration and performed 0 production DDL.
+- Repository, origin and production are aligned to `4c9442e8a3e894d7bd42681e96126f6d8c56e9e2`, and `/api/system/version` reported 0 provider calls. Read-only REST confirmed `public.pick2_mlb_official_picks` is visible with 0 rows.
+- User-supplied SQL catalog evidence certifies the full column/type/nullability contract, prediction/value/game FKs, primary key, `UNIQUE(official_pick_identity)`, numeric precision, American-odds storage, CHECK contracts, RLS, target indexes and before-update/before-delete immutability triggers for `public.pick2_mlb_official_picks`.
+- The exact frozen 5 Official Pick candidate set was rebuilt from the R1 artifact under `MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1` without provider calls or odds refresh. Live schema dry fit passed with 5 valid rows, 0 invalid rows, 0 duplicate proposed identities and 0 missing prediction/value/game linkages.
+- Prewrite classification against the live Official Pick table is 5 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP`, 0 `BLOCK_CONFLICT`; future Official Pick DML cap is 5 and projected second pass is 0 inserts, 5 reuses and 0 conflicts. Official Pick DML, other production DML, provider calls, odds refresh, Value Board publication, automation and cron changes all remained 0/off. `MLB_DATA_02P_R2_OFFICIAL_PICK_PERSISTENCE_READY = YES`.
+
 ## 2026-09-06 MLB-DATA-02P-R2B Official Pick Table Schema Prep
 
 - MLB-DATA-02P-R2B is certified as `MLB_DATA_02P_R2B_OFFICIAL_PICK_TABLE_SCHEMA_PREP_CERTIFIED`. The R2A diagnosis commit `f4cd2e01a769d68a379c602c30dbeb9da7a8a632` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
