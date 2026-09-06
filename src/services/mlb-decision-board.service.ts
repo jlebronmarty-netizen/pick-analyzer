@@ -181,6 +181,31 @@ function countSideProbability(lambda: number, line: number, side: 'over' | 'unde
   return side === 'over' ? over / noPush : under / noPush
 }
 
+function runLineSideProbability(awayRuns: number, homeRuns: number, side: 'away' | 'home', line: number) {
+  const awayLambda = Math.max(0.01, awayRuns)
+  const homeLambda = Math.max(0.01, homeRuns)
+  const maxRuns = Math.max(
+    30,
+    Math.ceil(Math.max(awayLambda, homeLambda) + 10 * Math.sqrt(Math.max(awayLambda, homeLambda, 1)))
+  )
+  let cover = 0
+  let lose = 0
+  let push = 0
+  for (let away = 0; away <= maxRuns; away += 1) {
+    const awayProbability = poissonPmf(awayLambda, away)
+    for (let home = 0; home <= maxRuns; home += 1) {
+      const probability = awayProbability * poissonPmf(homeLambda, home)
+      const adjustedMargin = side === 'away' ? away + line - home : home + line - away
+      if (adjustedMargin > 0) cover += probability
+      else if (adjustedMargin < 0) lose += probability
+      else push += probability
+    }
+  }
+  const decisionMass = cover + lose
+  if (decisionMass <= 0 || !Number.isFinite(decisionMass + push)) return null
+  return cover / decisionMass
+}
+
 function gameWinProbability(awayRuns: number, homeRuns: number, side: 'away' | 'home') {
   const awayStrength = Math.max(0.05, awayRuns) ** PYTHAGOREAN_EXPONENT
   const homeStrength = Math.max(0.05, homeRuns) ** PYTHAGOREAN_EXPONENT
@@ -191,6 +216,7 @@ function gameWinProbability(awayRuns: number, homeRuns: number, side: 'away' | '
 function canonicalGameMarket(value: unknown) {
   const market = normalize(value).replace(/ /g, '_')
   if (['moneyline', 'ml', 'h2h'].includes(market)) return 'moneyline'
+  if (['run_line', 'runline', 'spread', 'spreads'].includes(market)) return 'run_line'
   if (['total', 'totals', 'over_under'].includes(market)) return 'total'
   return null
 }
@@ -477,6 +503,61 @@ function buildGameMarketDecisions(events: EventRow[], oddsRows: RawOddsRow[], pr
         }
       }
 
+      const runLineRows = bookRows.filter((row) => canonicalGameMarket(row.market) === 'run_line' && row.price !== null && row.line !== null)
+      const runLinePair = latestTwoWayPair(runLineRows, (row) => {
+        const selection = resolveTeamSelection(row.outcome, event)
+        return selection === 'away' ? 'first' : selection === 'home' ? 'second' : null
+      })
+      if (
+        runLinePair &&
+        runLinePair.first.price !== null &&
+        runLinePair.second.price !== null &&
+        runLinePair.first.line !== null &&
+        runLinePair.second.line !== null &&
+        Math.abs(runLinePair.first.line + runLinePair.second.line) < 0.0001
+      ) {
+        const awayQuote = runLinePair.first
+        const homeQuote = runLinePair.second
+        const [awayNoVig, homeNoVig] = noVigPair(awayQuote.price, homeQuote.price)
+        for (const side of ['away', 'home'] as const) {
+          const quote = side === 'away' ? awayQuote : homeQuote
+          const quotePrice = quote.price
+          const quoteLine = quote.line
+          if (quotePrice === null || quoteLine === null) continue
+          const modelProbability = awayRuns !== null && homeRuns !== null
+            ? runLineSideProbability(awayRuns, homeRuns, side, quoteLine)
+            : null
+          const noVigProbability = side === 'away' ? awayNoVig : homeNoVig
+          const edge = modelProbability !== null && noVigProbability !== null ? modelProbability - noVigProbability : null
+          const projectedMargin = awayRuns !== null && homeRuns !== null
+            ? side === 'away' ? awayRuns - homeRuns : homeRuns - awayRuns
+            : null
+          const itemBlockers = [...blockers]
+          if (modelProbability === null) itemBlockers.push('NO_MODEL_PROJECTION')
+          const classification = decisionFromEdge({ edge, confidenceScore, dataSufficiency: sufficiency, featureQuality: quality, blockers: itemBlockers })
+          const team = side === 'away' ? event.away_team : event.home_team
+          const lineLabel = `${quoteLine > 0 ? '+' : ''}${quoteLine}`
+          candidates.push({
+            id: stable(['market', event.id, 'run_line', team, quoteLine, book]),
+            kind: 'market', eventId: event.id, matchup, scheduledTime: event.start_time, eventStatus: event.status,
+            category: 'Run Line', marketKey: 'run_line', label: `${team} ${lineLabel}`, subject: team, propGroup: null,
+            side: team, line: quoteLine, bestBook: book, bestOdds: quotePrice,
+            quotes: [{ book, odds: quotePrice, line: quoteLine, observedAt: quote.snapshot_time }],
+            projectedValue: projectedMargin, modelProbability, noVigProbability, edge,
+            confidence: classification.confidence, decision: classification.decision,
+            reasons: [
+              projectedMargin !== null ? `Projected run margin ${projectedMargin >= 0 ? '+' : ''}${projectedMargin.toFixed(2)} for ${team}.` : 'No run-margin projection available.',
+              modelProbability !== null ? `Shadow cover probability ${(modelProbability * 100).toFixed(1)}% at ${lineLabel}.` : 'No cover probability available.',
+              edge !== null ? `Edge vs ${book} no-vig ${(edge * 100).toFixed(1)} pp.` : 'No edge calculation available.',
+            ],
+            risks: ['Run Line cover probability uses independent Poisson team-run distributions from projected runs.', 'Official-pick persistence remains disabled.'],
+            blockers: itemBlockers, modelVersion: 'mlb_run_line_shadow_v1', capturedAt: quote.snapshot_time,
+            maxPrice: maxAcceptablePrice(modelProbability), lineupStatus: null, starterStatus: null,
+            dataSufficiency: sufficiency, featureQuality: quality,
+          })
+        }
+      }
+
       const totalRows = bookRows.filter((row) => canonicalGameMarket(row.market) === 'total' && row.price !== null && row.line !== null)
       const lines = Array.from(new Set(totalRows.map((row) => row.line).filter((line): line is number => line !== null)))
       for (const line of lines) {
@@ -721,6 +802,7 @@ export async function getMlbDecisionBoard(date?: string | null): Promise<MlbDeci
       notes: [
         'Read-only MLB Decision Board. No Official Pick writes are performed.',
         'APOSTAR is intentionally disabled while V1 models remain shadow/informational; qualifying edges are capped at LEAN.',
+        'Game-market V1 covers the registry-supported core families: Moneyline, Run Line and Total; unavailable provider families are not fabricated.',
         `FanDuel/Caesars rows must be FRESH or AGING under the MLB market-price policy (maximum ${MARKET_STALE_MINUTES} minutes) and pregame for the event.`,
         'No-vig is calculated only from a complete two-way pair from the same provider, raw sportsbook identity, market and exact provider snapshot timestamp.',
       ],
