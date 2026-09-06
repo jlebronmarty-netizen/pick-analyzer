@@ -27,6 +27,20 @@ function finiteNumber(value: unknown) {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null
 }
 
+function baseMetadata(input: { selectedDate: string; markets: string[]; estimatedCredits: number }) {
+  return {
+    projectBudgetKey: MLB_ODDS_API_PROJECT_BUDGET_KEY,
+    projectCreditLimit: MLB_ODDS_API_PROJECT_CREDIT_LIMIT,
+    accountCreditTotal: MLB_ODDS_API_ACCOUNT_CREDIT_TOTAL,
+    accountCreditsOutsideProjectScope: MLB_ODDS_API_ACCOUNT_CREDITS_OUTSIDE_SCOPE,
+    estimatedCreditsBeforeCall: input.estimatedCredits,
+    bookmakers: [...MLB_ODDS_API_BOOKMAKER_KEYS],
+    markets: input.markets,
+    selectedDate: input.selectedDate,
+    source: MLB_ODDS_API_PLAYER_PROP_JOB_TYPE,
+  }
+}
+
 export function estimateMlbOddsApiCredits({
   eventCount,
   marketCount,
@@ -119,7 +133,49 @@ export async function authorizeMlbOddsApiProjectCredits(estimatedCredits: number
   }
 }
 
-export async function recordMlbOddsApiProjectUsage(input: {
+export async function reserveMlbOddsApiProjectCredits(input: {
+  selectedDate: string
+  markets: string[]
+  providerCallsPlanned: number
+  estimatedCredits: number
+}) {
+  const reservationId = randomUUID()
+  const startedAt = new Date().toISOString()
+  const { error } = await supabaseAdmin.from('sports_sync_jobs').insert({
+    id: reservationId,
+    job_type: MLB_ODDS_API_PLAYER_PROP_JOB_TYPE,
+    sport_key: SPORT_KEY,
+    league_key: LEAGUE_KEY,
+    provider: PROVIDER,
+    season: input.selectedDate.slice(0, 4),
+    started_at: startedAt,
+    status: 'running',
+    records_fetched: 0,
+    records_inserted: 0,
+    records_updated: 0,
+    records_skipped: 0,
+    error_count: 0,
+    metadata: {
+      ...baseMetadata(input),
+      providerCallsPlanned: input.providerCallsPlanned,
+      providerCallsMade: 0,
+      providerCreditsConsumed: 0,
+      accountedCredits: input.estimatedCredits,
+      creditAccountingStatus: 'RESERVED',
+    },
+    updated_at: startedAt,
+  })
+
+  return {
+    success: !error,
+    reservationId: error ? null : reservationId,
+    startedAt,
+    error: error?.message ?? null,
+  }
+}
+
+export async function finalizeMlbOddsApiProjectUsage(input: {
+  reservationId: string
   startedAt: string
   completedAt: string
   selectedDate: string
@@ -140,41 +196,29 @@ export async function recordMlbOddsApiProjectUsage(input: {
   const accountedCredits = allHeadersPresent ? observedCredits : Math.max(observedCredits, input.estimatedCredits)
   const creditAccountingStatus = allHeadersPresent ? 'CONFIRMED' : 'ESTIMATED_FAIL_CLOSED'
   const updatedAt = new Date().toISOString()
-  const { error } = await supabaseAdmin.from('sports_sync_jobs').insert({
-    id: randomUUID(),
-    job_type: MLB_ODDS_API_PLAYER_PROP_JOB_TYPE,
-    sport_key: SPORT_KEY,
-    league_key: LEAGUE_KEY,
-    provider: PROVIDER,
-    season: input.selectedDate.slice(0, 4),
-    started_at: input.startedAt,
-    completed_at: input.completedAt,
-    status: input.status,
-    records_fetched: input.recordsFetched,
-    records_inserted: input.recordsPersisted,
-    records_updated: 0,
-    records_skipped: input.recordsSkipped,
-    error_count: input.errorCount,
-    metadata: {
-      projectBudgetKey: MLB_ODDS_API_PROJECT_BUDGET_KEY,
-      projectCreditLimit: MLB_ODDS_API_PROJECT_CREDIT_LIMIT,
-      accountCreditTotal: MLB_ODDS_API_ACCOUNT_CREDIT_TOTAL,
-      accountCreditsOutsideProjectScope: MLB_ODDS_API_ACCOUNT_CREDITS_OUTSIDE_SCOPE,
-      estimatedCreditsBeforeCall: input.estimatedCredits,
-      providerCreditsConsumed: observedCredits,
-      accountedCredits,
-      creditAccountingStatus,
-      providerCallsMade: input.providerCallsMade,
-      requestsLast: input.requestsLast,
-      requestsRemainingBefore: input.requestsRemainingBefore,
-      requestsRemainingAfter: input.requestsRemainingAfter,
-      bookmakers: [...MLB_ODDS_API_BOOKMAKER_KEYS],
-      markets: input.markets,
-      selectedDate: input.selectedDate,
-      source: MLB_ODDS_API_PLAYER_PROP_JOB_TYPE,
-    },
-    updated_at: updatedAt,
-  })
+  const { error } = await supabaseAdmin
+    .from('sports_sync_jobs')
+    .update({
+      completed_at: input.completedAt,
+      status: input.status,
+      records_fetched: input.recordsFetched,
+      records_inserted: input.recordsPersisted,
+      records_updated: 0,
+      records_skipped: input.recordsSkipped,
+      error_count: input.errorCount,
+      metadata: {
+        ...baseMetadata(input),
+        providerCreditsConsumed: observedCredits,
+        accountedCredits,
+        creditAccountingStatus,
+        providerCallsMade: input.providerCallsMade,
+        requestsLast: input.requestsLast,
+        requestsRemainingBefore: input.requestsRemainingBefore,
+        requestsRemainingAfter: input.requestsRemainingAfter,
+      },
+      updated_at: updatedAt,
+    })
+    .eq('id', input.reservationId)
 
   return {
     success: !error,
