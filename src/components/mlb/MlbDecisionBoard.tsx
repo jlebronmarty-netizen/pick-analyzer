@@ -90,6 +90,12 @@ function QuotePills({ item }: { item: MlbDecisionItem }) {
 }
 
 function DecisionCard({ item }: { item: MlbDecisionItem }) {
+  const projectionValue = item.projectedValue === null
+    ? 'N/D'
+    : item.kind === 'market' && item.marketKey === 'moneyline'
+      ? percent(item.projectedValue)
+      : item.projectedValue.toFixed(2)
+
   return (
     <article className="rounded-2xl border border-slate-800 bg-slate-900/55 p-4 shadow-sm md:p-5">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -110,7 +116,7 @@ function DecisionCard({ item }: { item: MlbDecisionItem }) {
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
-        <Metric label="Proyección" value={item.projectedValue === null ? 'N/D' : item.kind === 'market' && item.marketKey === 'moneyline' ? percent(item.projectedValue) : item.projectedValue.toFixed(2)} />
+        <Metric label="Proyección" value={projectionValue} />
         <Metric label="Modelo" value={percent(item.modelProbability)} />
         <Metric label="No-vig" value={percent(item.noVigProbability)} />
         <Metric label="Edge" value={edgeText(item.edge)} />
@@ -182,7 +188,6 @@ export default function MlbDecisionBoard({ initialData }: { initialData: MlbDeci
   useEffect(() => {
     const interval = window.setInterval(() => void refresh(), Math.max(60, data.refreshSeconds) * 1000)
     return () => window.clearInterval(interval)
-    // The selected date is stable for one operating day; a page reload advances the date.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.refreshSeconds, data.selectedDate])
 
