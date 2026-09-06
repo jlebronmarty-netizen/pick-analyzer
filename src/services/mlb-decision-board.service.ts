@@ -292,7 +292,7 @@ function quoteCycleKey(row: RawOddsRow) {
 function latestTwoWayPair(
   rows: RawOddsRow[],
   sideForRow: (row: RawOddsRow) => 'first' | 'second' | null
-) {
+): { first: RawOddsRow; second: RawOddsRow; observedAt: string } | null {
   const cycles = new Map<string, {
     first?: RawOddsRow
     second?: RawOddsRow
@@ -318,9 +318,13 @@ function latestTwoWayPair(
     cycles.set(cycleKey, cycle)
   }
 
-  return Array.from(cycles.values())
-    .filter((cycle) => !cycle.ambiguous && cycle.first && cycle.second)
-    .sort((a, b) => b.observedAt.localeCompare(a.observedAt))[0] ?? null
+  const ordered = Array.from(cycles.values()).sort((a, b) => b.observedAt.localeCompare(a.observedAt))
+  for (const cycle of ordered) {
+    if (!cycle.ambiguous && cycle.first && cycle.second) {
+      return { first: cycle.first, second: cycle.second, observedAt: cycle.observedAt }
+    }
+  }
+  return null
 }
 
 function isPregameSnapshot(row: RawOddsRow, event: EventRow) {
@@ -437,7 +441,7 @@ function buildGameMarketDecisions(events: EventRow[], oddsRows: RawOddsRow[], pr
         const selection = resolveTeamSelection(row.outcome, event)
         return selection === 'away' ? 'first' : selection === 'home' ? 'second' : null
       })
-      if (moneylinePair && moneylinePair.first?.price !== null && moneylinePair.second?.price !== null) {
+      if (moneylinePair && moneylinePair.first.price !== null && moneylinePair.second.price !== null) {
         const awayQuote = moneylinePair.first
         const homeQuote = moneylinePair.second
         const [awayNoVig, homeNoVig] = noVigPair(awayQuote.price, homeQuote.price)
@@ -480,7 +484,7 @@ function buildGameMarketDecisions(events: EventRow[], oddsRows: RawOddsRow[], pr
           const side = sideFromRow(row)
           return side === 'over' ? 'first' : side === 'under' ? 'second' : null
         })
-        if (!pair || pair.first?.price === null || pair.second?.price === null) continue
+        if (!pair || pair.first.price === null || pair.second.price === null) continue
         const over = pair.first
         const under = pair.second
         const [overNoVig, underNoVig] = noVigPair(over.price, under.price)
@@ -572,7 +576,7 @@ function buildPropDecisions(events: EventRow[], oddsRows: RawOddsRow[], playerEn
       const side = sideFromRow(row)
       return side === 'over' ? 'first' : side === 'under' ? 'second' : null
     })
-    if (!pair || !pair.first || !pair.second) continue
+    if (!pair) continue
     pairedGroups.push({ ...group, over: pair.first, under: pair.second })
   }
 
