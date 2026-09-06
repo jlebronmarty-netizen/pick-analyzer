@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { isActiveBettingEvent, puertoRicoUtcRange } from '@/services/active-event.service'
+import { activeEventBlockingReasons, isActiveBettingEvent, puertoRicoUtcRange } from '@/services/active-event.service'
 import { getMlbPlayerProjectionEngine } from '@/services/mlb-player-projection-engine.service'
 import { getUniversalMarketInventory } from '@/services/universal-market-intelligence.service'
 import { getUniversalProjectionEngine, type UniversalProjection } from '@/services/universal-projection-engine.service'
@@ -22,6 +22,8 @@ const MIN_LEAN_EDGE = 0.05
 
 type EventRow = {
   id: string
+  sport_key: string
+  league_key: string | null
   home_team: string
   away_team: string
   home_team_id: string | null
@@ -286,7 +288,7 @@ async function loadEvents(date: string) {
   const range = puertoRicoUtcRange(date)
   const { data, error } = await supabaseAdmin
     .from('sport_events')
-    .select('id, home_team, away_team, home_team_id, away_team_id, start_time, status, metadata')
+    .select('id, sport_key, league_key, home_team, away_team, home_team_id, away_team_id, start_time, status, metadata')
     .eq('sport_key', SPORT_KEY)
     .eq('league_key', LEAGUE_KEY)
     .gte('start_time', range.utcStart)
@@ -324,12 +326,11 @@ function buildRunProjectionMap(result: ProjectionEngineResult) {
 }
 
 function buildGameMarketDecisions(events: EventRow[], oddsRows: RawOddsRow[], projections: ProjectionEngineResult) {
-  const eventById = new Map(events.map((event) => [event.id, event]))
   const runsByEvent = buildRunProjectionMap(projections)
   const candidates: MlbDecisionItem[] = []
 
   for (const event of events) {
-    const blockers = isActiveBettingEvent(event, { sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY }) ? [] : ['EVENT_STARTED']
+    const blockers = activeEventBlockingReasons(event, { sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY })
     const runPair = runsByEvent.get(event.id)
     const awayRuns = runPair?.away?.projectedValue ?? null
     const homeRuns = runPair?.home?.projectedValue ?? null
@@ -462,7 +463,7 @@ function buildPropDecisions(events: EventRow[], oddsRows: RawOddsRow[], playerEn
     if (!projection) continue
     const [overNoVig, underNoVig] = noVigPair(group.over.price, group.under.price)
     const matchup = `${event.away_team} @ ${event.home_team}`
-    const eventBlockers = isActiveBettingEvent(event, { sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY }) ? [] : ['EVENT_STARTED']
+    const eventBlockers = activeEventBlockingReasons(event, { sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY })
     for (const side of ['over', 'under'] as const) {
       const quote = side === 'over' ? group.over : group.under
       const noVigProbability = side === 'over' ? overNoVig : underNoVig
