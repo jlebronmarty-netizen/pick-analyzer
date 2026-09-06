@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const live = parseBooleanParam(request.nextUrl.searchParams.get('live'), false) || body?.live === true
     const dryRun = live ? false : body?.dryRun === undefined ? true : parseBooleanParam(String(body.dryRun), true)
     if (!dryRun && !syncSecret()) {
-      return apiError({ id, code: 'CONFIGURATION_REQUIRED', message: 'CRON_SECRET must be configured before live MLB player prop sync can run.', status: 503 })
+      return apiError({ id, code: 'AUTH_REQUIRED', message: 'CRON_SECRET must be configured before live MLB player prop sync can run.', status: 503 })
     }
     if (!dryRun && !authorized(request)) {
       return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized MLB player prop sync request.', status: 401 })
