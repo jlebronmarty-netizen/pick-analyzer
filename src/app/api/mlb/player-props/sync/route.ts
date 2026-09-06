@@ -6,9 +6,13 @@ import type { MlbPlayerPropIngestionProvider } from '@/types/mlb-player-prop-ing
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+function syncSecret() {
+  return process.env.CRON_SECRET?.trim() ?? ''
+}
+
 function authorized(request: NextRequest) {
-  const secret = process.env.CRON_SECRET
-  if (!secret) return true
+  const secret = syncSecret()
+  if (!secret) return false
   return request.headers.get('authorization') === `Bearer ${secret}` || request.nextUrl.searchParams.get('secret') === secret
 }
 
@@ -23,6 +27,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}))
     const live = parseBooleanParam(request.nextUrl.searchParams.get('live'), false) || body?.live === true
     const dryRun = live ? false : body?.dryRun === undefined ? true : parseBooleanParam(String(body.dryRun), true)
+    if (!dryRun && !syncSecret()) {
+      return apiError({ id, code: 'CONFIGURATION_REQUIRED', message: 'CRON_SECRET must be configured before live MLB player prop sync can run.', status: 503 })
+    }
     if (!dryRun && !authorized(request)) {
       return apiError({ id, code: 'UNAUTHORIZED', message: 'Unauthorized MLB player prop sync request.', status: 401 })
     }
