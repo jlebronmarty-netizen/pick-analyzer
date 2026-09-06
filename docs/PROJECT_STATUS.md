@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 00:45:00Z
+Last updated: 2026-09-06 01:15:00Z
+
+## 2026-09-06 MLB-DATA-02P-R1 Official Pick Execution Prep
+
+- MLB-DATA-02P-R1 is certified as `MLB_DATA_02P_R1_OFFICIAL_PICK_EXECUTION_PREP_CERTIFIED`. The 02P policy-prep commit `75ca90f2a6c567bd2199bf295c25497106939297` was published to `origin/main`, production aligned to that same commit, and `/api/system/version` reported 0 provider calls.
+- Exact policy parity passed for `MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1`: consensus edge >= 0.04, unit EV >= 0.08, minimum 8 books, `FRESH` market, dispersion <= 0.03, complete same-book two-sided market, pregame-valid, model in certified range, feature-complete, one side per game and CONFIRMED or PROBABLE starter with visible risk flag.
+- Current dry-run classification rebuilt exactly from persisted native value rows: 5 `OFFICIAL_PICK_ELIGIBLE_DRY_RUN`, 14 `VALUE_CANDIDATE_ONLY`, 23 `WATCHLIST` and 0 `BLOCKED`. The frozen 5 eligible candidate payloads have 5 deterministic official-pick identities, 0 duplicates, prediction linkage PASS, native value linkage PASS, game identity PASS, gate evidence PASS, reason-code build PASS and risk-flag build PASS.
+- Production Official Pick schema inventory is complete and fits the native persistence contract through `public.pick2_mlb_official_picks`, with required decision columns readable for `official_pick_identity`, `prediction_id`, `value_evaluation_id`, `game_pk`, side/book/odds, model/value fields, policy version, decision status, flags, reason/blocker codes, source digests and timestamps. Current-pipeline Official Pick baseline remains 0.
+- Future Official Pick DML cap is exactly 5; first-pass prewrite classification is 5 `INSERT_ELIGIBLE`, 0 `REUSE_NO_OP`, 0 `BLOCK_CONFLICT`, and projected second pass is 0/5/0. No Official Picks were written, no value/market/prediction/result/model/raw/feature rows changed, no production DDL occurred, no providers were called, and automation/cron remained off. `MLB_DATA_02P_R2_OFFICIAL_PICK_PERSISTENCE_READY = YES`; R2 write execution is still separately unauthorized.
 
 ## 2026-09-06 MLB-DATA-02P Official Pick Policy Prep
 
