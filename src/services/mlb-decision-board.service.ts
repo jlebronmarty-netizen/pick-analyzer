@@ -180,13 +180,8 @@ function gameWinProbability(awayRuns: number, homeRuns: number, side: 'away' | '
 
 function canonicalGameMarket(value: unknown) {
   const market = normalize(value).replace(/ /g, '_')
-  if (['moneyline', 'ml', 'h2h'].some((key) => market === key || market.includes(key))) return 'moneyline'
-  if (
-    ['total', 'totals', 'over_under'].some((key) => market === key || market.includes(key)) &&
-    !market.includes('team') &&
-    !market.includes('first') &&
-    !market.includes('inning')
-  ) return 'total'
+  if (['moneyline', 'ml', 'h2h'].includes(market)) return 'moneyline'
+  if (['total', 'totals', 'over_under'].includes(market)) return 'total'
   return null
 }
 
