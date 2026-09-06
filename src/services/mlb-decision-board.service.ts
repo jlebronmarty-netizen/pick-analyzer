@@ -2,6 +2,7 @@ import 'server-only'
 
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { activeEventBlockingReasons, isActiveBettingEvent, puertoRicoUtcRange } from '@/services/active-event.service'
+import { evaluateFreshness, MLB_FRESHNESS_POLICY_REGISTRY } from '@/services/mlb-freshness-policy.service'
 import { getMlbPlayerProjectionEngine } from '@/services/mlb-player-projection-engine.service'
 import { getUniversalMarketInventory } from '@/services/universal-market-intelligence.service'
 import { getUniversalProjectionEngine, type UniversalProjection } from '@/services/universal-projection-engine.service'
@@ -19,6 +20,7 @@ const LEAGUE_KEY = 'mlb'
 const REFRESH_SECONDS = 300
 const PYTHAGOREAN_EXPONENT = 1.83
 const MIN_LEAN_EDGE = 0.05
+const MARKET_STALE_MINUTES = MLB_FRESHNESS_POLICY_REGISTRY.market_prices.staleMinutes ?? 6 * 60
 
 type EventRow = {
   id: string
@@ -126,9 +128,15 @@ function stable(value: unknown) {
 
 function normalizeBook(value: unknown): 'FanDuel' | 'Caesars' | null {
   const book = normalize(value)
-  if (book.includes('fanduel')) return 'FanDuel'
-  if (book.includes('caesars')) return 'Caesars'
+  if (['fanduel', 'fan duel', 'fanduel sportsbook', 'fan duel sportsbook'].includes(book)) return 'FanDuel'
+  if (['caesars', 'caesars sportsbook', 'caesars sports book'].includes(book)) return 'Caesars'
   return null
+}
+
+function normalizedTimestamp(value: unknown) {
+  if (!value) return null
+  const parsed = new Date(String(value))
+  return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : null
 }
 
 function impliedProbability(odds: number | null) {
@@ -214,6 +222,23 @@ function sideFromRow(row: RawOddsRow): 'over' | 'under' | null {
 }
 
 function findPlayerName(row: RawOddsRow, projectionNames: Map<string, string>) {
+  const metadata = asRecord(row.metadata)
+  const explicitCandidates = [
+    metadata.playerName,
+    metadata.player_name,
+    metadata.pitcherName,
+    metadata.pitcher_name,
+    metadata.batterName,
+    metadata.batter_name,
+  ].filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+  if (explicitCandidates.length) {
+    for (const candidate of explicitCandidates) {
+      const exact = projectionNames.get(normalize(candidate))
+      if (exact) return exact
+    }
+    return null
+  }
+
   const candidates = [row.outcome, ...stringLeaves(row.metadata)]
   for (const candidate of candidates) {
     const exact = projectionNames.get(normalize(candidate))
@@ -240,11 +265,69 @@ function resolveTeamSelection(selection: string | null, event: EventRow): 'away'
 function latestRows(rows: RawOddsRow[]) {
   const seen = new Map<string, RawOddsRow>()
   for (const row of rows) {
-    const key = [row.event_id, normalizeBook(row.sportsbook), normalize(row.market), normalize(row.outcome), row.line, JSON.stringify(row.metadata ?? {})].join('|')
+    const key = [
+      row.event_id,
+      normalize(row.provider),
+      normalize(row.sportsbook),
+      normalize(row.market),
+      normalize(row.outcome),
+      row.line,
+      JSON.stringify(row.metadata ?? {}),
+    ].join('|')
     const current = seen.get(key)
     if (!current || String(row.snapshot_time ?? '') > String(current.snapshot_time ?? '')) seen.set(key, row)
   }
   return Array.from(seen.values())
+}
+
+function quoteCycleKey(row: RawOddsRow) {
+  const provider = normalize(row.provider)
+  const sportsbook = normalize(row.sportsbook)
+  const market = normalize(row.market)
+  const observedAt = normalizedTimestamp(row.snapshot_time)
+  if (!provider || !sportsbook || !market || !observedAt) return null
+  return [provider, sportsbook, market, observedAt].join('|')
+}
+
+function latestTwoWayPair(
+  rows: RawOddsRow[],
+  sideForRow: (row: RawOddsRow) => 'first' | 'second' | null
+) {
+  const cycles = new Map<string, {
+    first?: RawOddsRow
+    second?: RawOddsRow
+    observedAt: string
+    ambiguous: boolean
+  }>()
+
+  for (const row of rows) {
+    if (row.price === null) continue
+    const side = sideForRow(row)
+    const cycleKey = quoteCycleKey(row)
+    const observedAt = normalizedTimestamp(row.snapshot_time)
+    if (!side || !cycleKey || !observedAt) continue
+    const cycle = cycles.get(cycleKey) ?? { observedAt, ambiguous: false }
+    const existing = side === 'first' ? cycle.first : cycle.second
+    if (existing && (existing.price !== row.price || existing.line !== row.line)) {
+      cycle.ambiguous = true
+    } else if (side === 'first') {
+      cycle.first = row
+    } else {
+      cycle.second = row
+    }
+    cycles.set(cycleKey, cycle)
+  }
+
+  return Array.from(cycles.values())
+    .filter((cycle) => !cycle.ambiguous && cycle.first && cycle.second)
+    .sort((a, b) => b.observedAt.localeCompare(a.observedAt))[0] ?? null
+}
+
+function isPregameSnapshot(row: RawOddsRow, event: EventRow) {
+  const quoteTime = normalizedTimestamp(row.snapshot_time)
+  const eventTime = normalizedTimestamp(event.start_time)
+  if (!quoteTime || !eventTime) return false
+  return Date.parse(quoteTime) < Date.parse(eventTime)
 }
 
 function decisionFromEdge(params: {
@@ -301,17 +384,24 @@ async function loadEvents(date: string) {
 async function loadOdds(date: string, eventIds: string[]) {
   if (!eventIds.length) return [] as RawOddsRow[]
   const range = puertoRicoUtcRange(date)
+  const lookbackStart = new Date(Date.parse(range.utcStart) - MARKET_STALE_MINUTES * 60_000).toISOString()
   const { data, error } = await supabaseAdmin
     .from('sports_odds_snapshots')
     .select('id, event_id, provider, sportsbook, market, outcome, price, line, snapshot_time, metadata')
     .eq('sport_key', SPORT_KEY)
     .in('event_id', eventIds)
-    .gte('snapshot_time', range.utcStart)
+    .gte('snapshot_time', lookbackStart)
     .lt('snapshot_time', range.utcEndExclusive)
     .order('snapshot_time', { ascending: false })
     .limit(5000)
   if (error) return [] as RawOddsRow[]
-  return latestRows((data ?? []) as RawOddsRow[]).filter((row) => normalizeBook(row.sportsbook) !== null)
+  const now = new Date()
+  return latestRows((data ?? []) as RawOddsRow[])
+    .filter((row) => normalizeBook(row.sportsbook) !== null)
+    .filter((row) => {
+      const freshness = evaluateFreshness({ dataClass: 'market_prices', sourceTimestamp: row.snapshot_time, now })
+      return freshness.status === 'FRESH' || freshness.status === 'AGING'
+    })
 }
 
 function buildRunProjectionMap(result: ProjectionEngineResult) {
@@ -338,17 +428,23 @@ function buildGameMarketDecisions(events: EventRow[], oddsRows: RawOddsRow[], pr
     const sufficiency = Math.min(runPair?.away?.dataSufficiency ?? 0, runPair?.home?.dataSufficiency ?? 0)
     const confidenceScore = Math.min(runPair?.away?.confidence ?? 0, runPair?.home?.confidence ?? 0)
     const matchup = `${event.away_team} @ ${event.home_team}`
-    const eventOdds = oddsRows.filter((row) => row.event_id === event.id)
+    const eventOdds = oddsRows.filter((row) => row.event_id === event.id && isPregameSnapshot(row, event))
 
     for (const book of ['FanDuel', 'Caesars'] as const) {
       const bookRows = eventOdds.filter((row) => normalizeBook(row.sportsbook) === book)
       const moneylineRows = bookRows.filter((row) => canonicalGameMarket(row.market) === 'moneyline' && row.price !== null)
-      const awayQuote = moneylineRows.filter((row) => resolveTeamSelection(row.outcome, event) === 'away').sort((a, b) => String(b.snapshot_time ?? '').localeCompare(String(a.snapshot_time ?? '')))[0]
-      const homeQuote = moneylineRows.filter((row) => resolveTeamSelection(row.outcome, event) === 'home').sort((a, b) => String(b.snapshot_time ?? '').localeCompare(String(a.snapshot_time ?? '')))[0]
-      if (awayQuote && homeQuote && awayQuote.price !== null && homeQuote.price !== null) {
+      const moneylinePair = latestTwoWayPair(moneylineRows, (row) => {
+        const selection = resolveTeamSelection(row.outcome, event)
+        return selection === 'away' ? 'first' : selection === 'home' ? 'second' : null
+      })
+      if (moneylinePair && moneylinePair.first?.price !== null && moneylinePair.second?.price !== null) {
+        const awayQuote = moneylinePair.first
+        const homeQuote = moneylinePair.second
         const [awayNoVig, homeNoVig] = noVigPair(awayQuote.price, homeQuote.price)
         for (const side of ['away', 'home'] as const) {
           const quote = side === 'away' ? awayQuote : homeQuote
+          const quotePrice = quote.price
+          if (quotePrice === null) continue
           const modelProbability = awayRuns !== null && homeRuns !== null ? gameWinProbability(awayRuns, homeRuns, side) : null
           const noVigProbability = side === 'away' ? awayNoVig : homeNoVig
           const edge = modelProbability !== null && noVigProbability !== null ? modelProbability - noVigProbability : null
@@ -360,8 +456,8 @@ function buildGameMarketDecisions(events: EventRow[], oddsRows: RawOddsRow[], pr
             id: stable(['market', event.id, 'moneyline', team, book]),
             kind: 'market', eventId: event.id, matchup, scheduledTime: event.start_time, eventStatus: event.status,
             category: 'Moneyline', marketKey: 'moneyline', label: `${team} ML`, subject: team, propGroup: null,
-            side: team, line: null, bestBook: book, bestOdds: quote.price,
-            quotes: [{ book, odds: quote.price, line: null, observedAt: quote.snapshot_time }],
+            side: team, line: null, bestBook: book, bestOdds: quotePrice,
+            quotes: [{ book, odds: quotePrice, line: null, observedAt: quote.snapshot_time }],
             projectedValue: modelProbability, modelProbability, noVigProbability, edge,
             confidence: classification.confidence, decision: classification.decision,
             reasons: [
@@ -380,13 +476,19 @@ function buildGameMarketDecisions(events: EventRow[], oddsRows: RawOddsRow[], pr
       const totalRows = bookRows.filter((row) => canonicalGameMarket(row.market) === 'total' && row.price !== null && row.line !== null)
       const lines = Array.from(new Set(totalRows.map((row) => row.line).filter((line): line is number => line !== null)))
       for (const line of lines) {
-        const over = totalRows.filter((row) => row.line === line && sideFromRow(row) === 'over').sort((a, b) => String(b.snapshot_time ?? '').localeCompare(String(a.snapshot_time ?? '')))[0]
-        const under = totalRows.filter((row) => row.line === line && sideFromRow(row) === 'under').sort((a, b) => String(b.snapshot_time ?? '').localeCompare(String(a.snapshot_time ?? '')))[0]
-        if (!over || !under || over.price === null || under.price === null) continue
+        const pair = latestTwoWayPair(totalRows.filter((row) => row.line === line), (row) => {
+          const side = sideFromRow(row)
+          return side === 'over' ? 'first' : side === 'under' ? 'second' : null
+        })
+        if (!pair || pair.first?.price === null || pair.second?.price === null) continue
+        const over = pair.first
+        const under = pair.second
         const [overNoVig, underNoVig] = noVigPair(over.price, under.price)
         const expectedTotal = awayRuns !== null && homeRuns !== null ? awayRuns + homeRuns : null
         for (const side of ['over', 'under'] as const) {
           const quote = side === 'over' ? over : under
+          const quotePrice = quote.price
+          if (quotePrice === null) continue
           const modelProbability = expectedTotal !== null ? countSideProbability(expectedTotal, line, side) : null
           const noVigProbability = side === 'over' ? overNoVig : underNoVig
           const edge = modelProbability !== null && noVigProbability !== null ? modelProbability - noVigProbability : null
@@ -397,8 +499,8 @@ function buildGameMarketDecisions(events: EventRow[], oddsRows: RawOddsRow[], pr
             id: stable(['market', event.id, 'total', line, side, book]), kind: 'market', eventId: event.id,
             matchup, scheduledTime: event.start_time, eventStatus: event.status, category: 'Total', marketKey: 'total',
             label: `${side === 'over' ? 'Over' : 'Under'} ${line}`, subject: matchup, propGroup: null,
-            side: side.toUpperCase(), line, bestBook: book, bestOdds: quote.price,
-            quotes: [{ book, odds: quote.price, line, observedAt: quote.snapshot_time }],
+            side: side.toUpperCase(), line, bestBook: book, bestOdds: quotePrice,
+            quotes: [{ book, odds: quotePrice, line, observedAt: quote.snapshot_time }],
             projectedValue: expectedTotal, modelProbability, noVigProbability, edge,
             confidence: classification.confidence, decision: classification.decision,
             reasons: [
@@ -438,25 +540,47 @@ function buildPropDecisions(events: EventRow[], oddsRows: RawOddsRow[], playerEn
   for (const projection of projections) projectionNames.set(normalize(projection.playerName), projection.playerName)
 
   const latestPropRows = oddsRows.filter((row) => canonicalPropMarket(row.market) !== null && row.price !== null && row.line !== null)
-  const pairedGroups = new Map<string, { over?: RawOddsRow; under?: RawOddsRow; playerName: string; market: NonNullable<ReturnType<typeof canonicalPropMarket>>; book: 'FanDuel' | 'Caesars'; line: number }>()
+  const baseGroups = new Map<string, {
+    rows: RawOddsRow[]
+    playerName: string
+    market: NonNullable<ReturnType<typeof canonicalPropMarket>>
+    book: 'FanDuel' | 'Caesars'
+    line: number
+  }>()
   for (const row of latestPropRows) {
+    const event = eventById.get(row.event_id)
     const market = canonicalPropMarket(row.market)
     const book = normalizeBook(row.sportsbook)
     const playerName = findPlayerName(row, projectionNames)
-    const side = sideFromRow(row)
-    if (!market || !book || !playerName || !side || row.line === null) continue
+    if (!event || !market || !book || !playerName || row.line === null || !isPregameSnapshot(row, event)) continue
     const key = [row.event_id, book, market.key, normalize(playerName), row.line].join('|')
-    const group = pairedGroups.get(key) ?? { playerName, market, book, line: row.line }
-    const current = group[side]
-    if (!current || String(row.snapshot_time ?? '') > String(current.snapshot_time ?? '')) group[side] = row
-    pairedGroups.set(key, group)
+    const group = baseGroups.get(key) ?? { rows: [], playerName, market, book, line: row.line }
+    group.rows.push(row)
+    baseGroups.set(key, group)
+  }
+
+  const pairedGroups: Array<{
+    over: RawOddsRow
+    under: RawOddsRow
+    playerName: string
+    market: NonNullable<ReturnType<typeof canonicalPropMarket>>
+    book: 'FanDuel' | 'Caesars'
+    line: number
+  }> = []
+  for (const group of baseGroups.values()) {
+    const pair = latestTwoWayPair(group.rows, (row) => {
+      const side = sideFromRow(row)
+      return side === 'over' ? 'first' : side === 'under' ? 'second' : null
+    })
+    if (!pair || !pair.first || !pair.second) continue
+    pairedGroups.push({ ...group, over: pair.first, under: pair.second })
   }
 
   const candidates: MlbDecisionItem[] = []
-  for (const [groupKey, group] of pairedGroups.entries()) {
-    const [eventId] = groupKey.split('|')
+  for (const group of pairedGroups) {
+    const eventId = group.over.event_id
     const event = eventById.get(eventId)
-    if (!event || !group.over || !group.under || group.over.price === null || group.under.price === null) continue
+    if (!event || group.over.price === null || group.under.price === null) continue
     const projection = projections.find((row) =>
       row.eventId === event.id && row.projectionType === group.market.key && normalize(row.playerName) === normalize(group.playerName)
     )
@@ -466,6 +590,8 @@ function buildPropDecisions(events: EventRow[], oddsRows: RawOddsRow[], playerEn
     const eventBlockers = activeEventBlockingReasons(event, { sportKey: SPORT_KEY, leagueKey: LEAGUE_KEY })
     for (const side of ['over', 'under'] as const) {
       const quote = side === 'over' ? group.over : group.under
+      const quotePrice = quote.price
+      if (quotePrice === null) continue
       const noVigProbability = side === 'over' ? overNoVig : underNoVig
       const modelProbability = projection.expectedValue !== null ? countSideProbability(projection.expectedValue, group.line, side) : null
       const edge = modelProbability !== null && noVigProbability !== null ? modelProbability - noVigProbability : null
@@ -484,8 +610,8 @@ function buildPropDecisions(events: EventRow[], oddsRows: RawOddsRow[], playerEn
         kind: 'prop', eventId: event.id, matchup, scheduledTime: event.start_time, eventStatus: event.status,
         category: group.market.label, marketKey: group.market.key, label: `${projection.playerName} ${side === 'over' ? 'O' : 'U'}${group.line}`,
         subject: projection.playerName, propGroup: group.market.group, side: side.toUpperCase(), line: group.line,
-        bestBook: group.book, bestOdds: quote.price,
-        quotes: [{ book: group.book, odds: quote.price, line: group.line, observedAt: quote.snapshot_time }],
+        bestBook: group.book, bestOdds: quotePrice,
+        quotes: [{ book: group.book, odds: quotePrice, line: group.line, observedAt: quote.snapshot_time }],
         projectedValue: projection.expectedValue, modelProbability, noVigProbability, edge,
         confidence: classification.confidence, decision: classification.decision,
         reasons: [
@@ -521,7 +647,7 @@ function buildPropDecisions(events: EventRow[], oddsRows: RawOddsRow[], playerEn
   return {
     items: Array.from(consolidated.values()).sort((a, b) => (b.edge ?? -99) - (a.edge ?? -99)),
     rawRows: latestPropRows.length,
-    pairedGroups: Array.from(pairedGroups.values()).filter((group) => group.over && group.under).length,
+    pairedGroups: pairedGroups.length,
   }
 }
 
@@ -591,7 +717,8 @@ export async function getMlbDecisionBoard(date?: string | null): Promise<MlbDeci
       notes: [
         'Read-only MLB Decision Board. No Official Pick writes are performed.',
         'APOSTAR is intentionally disabled while V1 models remain shadow/informational; qualifying edges are capped at LEAN.',
-        'Only FanDuel/Caesars rows captured on the selected Puerto Rico date are eligible for display.',
+        `FanDuel/Caesars rows must be FRESH or AGING under the MLB market-price policy (maximum ${MARKET_STALE_MINUTES} minutes) and pregame for the event.`,
+        'No-vig is calculated only from a complete two-way pair from the same provider, raw sportsbook identity, market and exact provider snapshot timestamp.',
       ],
     },
   }
