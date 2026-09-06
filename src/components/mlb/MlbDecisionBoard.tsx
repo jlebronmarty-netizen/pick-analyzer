@@ -118,8 +118,8 @@ function DecisionCard({ item }: { item: MlbDecisionItem }) {
       <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
         <Metric label="Proyección" value={projectionValue} />
         <Metric label="Modelo" value={percent(item.modelProbability)} />
-        <Metric label="No-vig" value={percent(item.noVigProbability)} />
-        <Metric label="Edge" value={edgeText(item.edge)} />
+        <Metric label="No-vig" value={percent(item.noVigProbability)} detail={item.bestBook ? `precio ${item.bestBook}` : undefined} />
+        <Metric label="Edge" value={edgeText(item.edge)} detail={item.bestBook ? `vs ${item.bestBook}` : undefined} />
         <Metric label="Confianza" value={confidenceLabel(item.confidence)} />
         <Metric label="Hasta" value={american(item.maxPrice)} detail="precio aprox." />
       </div>
@@ -197,14 +197,14 @@ export default function MlbDecisionBoard({ initialData }: { initialData: MlbDeci
   const visibleProps = useMemo(() => data.props.filter((item) => {
     if (propFilter !== 'all' && item.propGroup !== propFilter) return false
     if (propMarket !== 'all' && item.category !== propMarket) return false
-    if (bookFilter !== 'all' && !item.quotes.some((quote) => quote.book === bookFilter)) return false
+    if (bookFilter !== 'all' && item.bestBook !== bookFilter) return false
     if (decisionFilter === 'recommendations' && !['APOSTAR', 'LEAN'].includes(item.decision)) return false
     return true
   }), [data.props, propFilter, propMarket, bookFilter, decisionFilter])
 
   const visibleMarkets = useMemo(() => data.markets.filter((item) => {
     if (marketFilter !== 'all' && item.category !== marketFilter) return false
-    if (bookFilter !== 'all' && !item.quotes.some((quote) => quote.book === bookFilter)) return false
+    if (bookFilter !== 'all' && item.bestBook !== bookFilter) return false
     if (decisionFilter === 'recommendations' && !['APOSTAR', 'LEAN'].includes(item.decision)) return false
     return true
   }), [data.markets, marketFilter, bookFilter, decisionFilter])
@@ -344,10 +344,10 @@ export default function MlbDecisionBoard({ initialData }: { initialData: MlbDeci
 
 function BookControls({ value, onChange }: { value: BookFilter; onChange: (value: BookFilter) => void }) {
   return (
-    <div className="flex gap-1 rounded-full border border-slate-700 bg-slate-950 p-1">
+    <div className="flex gap-1 rounded-full border border-slate-700 bg-slate-950 p-1" aria-label="Filtrar por mejor precio">
       {(['all', 'FanDuel', 'Caesars'] as BookFilter[]).map((book) => (
         <button key={book} onClick={() => onChange(book)} className={`rounded-full px-3 py-1.5 text-xs font-black ${value === book ? 'bg-sky-400 text-slate-950' : 'text-slate-400'}`}>
-          {book === 'all' ? 'Todas casas' : book}
+          {book === 'all' ? 'Mejor: todas' : `Mejor ${book}`}
         </button>
       ))}
     </div>
