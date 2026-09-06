@@ -1,0 +1,33 @@
+name: MLB Decision Board Validate
+
+on:
+  push:
+    branches:
+      - feature/mlb-decision-board-v1
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/app/mlb/**'
+      - 'src/app/api/mlb/**'
+      - 'src/components/mlb/**'
+      - 'src/services/mlb-decision-board.service.ts'
+      - 'src/types/mlb-decision-board.ts'
+      - 'src/components/dashboard/DashboardShell.tsx'
+      - '.github/workflows/mlb-decision-board-validate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
