@@ -1,0 +1,268 @@
+{
+  "generatedAt": "2026-09-06T20:55:21.280Z",
+  "project": "MLB_DATA_02Q_R1_VALUE_BOARD_UI_IMPLEMENTATION",
+  "certificationVerdict": "MLB_DATA_02Q_R1_VALUE_BOARD_UI_IMPLEMENTATION_CERTIFIED",
+  "repository": {
+    "branch": "main",
+    "localHead": "972e29764a87b9df6b59be7739e3da83fbac3453",
+    "originMain": "972e29764a87b9df6b59be7739e3da83fbac3453",
+    "worktreeStatusAtCertification": "M src/services/pick2-mlb-value-board.service.ts\n?? scripts/mlb-data-02q-r1-value-board-ui-implementation-validate.mjs\n?? scripts/mlb-data-02q-r1-value-board-ui-implementation.mjs\n?? src/app/mlb-value-board/\n?? src/components/pick2/MlbValueBoardClient.tsx",
+    "MLB_02Q_R1_PREPUBLISH_STATE": "PASS",
+    "MLB_02Q_R1_02Q_COMMIT_SCOPE_CERTIFIED": "YES"
+  },
+  "publication": {
+    "state": "PASS",
+    "publishedCommit": "972e29764a87b9df6b59be7739e3da83fbac3453"
+  },
+  "production": {
+    "commit": "972e29764a87b9df6b59be7739e3da83fbac3453",
+    "providerCallsMade": 0,
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "uiAudit": {
+    "existingDashboardShell": "src/components/dashboard/DashboardShell.tsx",
+    "navigationHiddenFromNormalUsers": true,
+    "mobileNavigationHidden": true,
+    "sharedCardsTablesFiltersBadgesObserved": true,
+    "loadingStates": "READY",
+    "errorStates": "READY",
+    "responsiveUtilities": "READY",
+    "MLB_02Q_R1_EXISTING_UI_AUDIT": "COMPLETE",
+    "MLB_02Q_R1_DESIGN_SYSTEM_COMPATIBILITY": "PASS"
+  },
+  "featureGate": {
+    "route": "/mlb-value-board",
+    "default": "OFF",
+    "envFlag": "PICK2_MLB_VALUE_BOARD_ENABLED",
+    "publicNavigationHidden": "PASS",
+    "gateOffTest": "PASS",
+    "gateOnTest": "PASS_CONTROLLED_LOCAL",
+    "MLB_02Q_R1_FEATURE_GATE_CONTRACT": "PASS",
+    "MLB_02Q_R1_FEATURE_GATE_DEFAULT_OFF": "PASS",
+    "MLB_02Q_R1_PUBLIC_NAV_HIDDEN": "PASS",
+    "MLB_02Q_R1_GATE_OFF_TEST": "PASS",
+    "MLB_02Q_R1_GATE_ON_TEST": "PASS"
+  },
+  "page": {
+    "title": "MLB Value Board",
+    "sections": [
+      "Official Picks",
+      "Value Candidates",
+      "Watchlist",
+      "Blocked"
+    ],
+    "summary": "READY",
+    "MLB_02Q_R1_VALUE_BOARD_PAGE": "READY",
+    "MLB_02Q_R1_BOARD_SUMMARY": "READY",
+    "MLB_02Q_R1_OFFICIAL_PICK_SECTION": "READY",
+    "MLB_02Q_R1_VALUE_CANDIDATE_SECTION": "READY",
+    "MLB_02Q_R1_WATCHLIST_SECTION": "READY",
+    "MLB_02Q_R1_BLOCKED_SECTION": "READY",
+    "MLB_02Q_R1_PICK_LANGUAGE": "PASS"
+  },
+  "layout": {
+    "mobileCardCore": "PASS",
+    "mobileExpansion": "READY",
+    "desktopLayout": "READY",
+    "responsiveValidation": "PASS",
+    "accessibility": "PASS",
+    "MLB_02Q_R1_MOBILE_CARD_CORE": "PASS",
+    "MLB_02Q_R1_MOBILE_EXPANSION": "READY",
+    "MLB_02Q_R1_DESKTOP_LAYOUT": "READY",
+    "MLB_02Q_R1_RESPONSIVE_VALIDATION": "PASS",
+    "MLB_02Q_R1_ACCESSIBILITY": "PASS"
+  },
+  "presentation": {
+    "valueScoreUi": "PASS",
+    "whyUi": "READY",
+    "riskUi": "READY",
+    "blockerUi": "READY",
+    "factorEdgeUi": "READY",
+    "factorEdgeIntegrity": "PASS",
+    "pickDetailUi": "READY",
+    "filterUi": "READY",
+    "mobileFilterUi": "PASS",
+    "sortUi": "READY",
+    "statusVisualHierarchy": "PASS",
+    "freshnessUi": "READY",
+    "timestampUi": "READY",
+    "loadingState": "READY",
+    "errorState": "READY",
+    "emptyState": "READY",
+    "modelNote": "READY",
+    "noProfitabilityClaim": "PASS",
+    "MLB_02Q_R1_VALUE_SCORE_UI": "PASS",
+    "MLB_02Q_R1_WHY_UI": "READY",
+    "MLB_02Q_R1_RISK_UI": "READY",
+    "MLB_02Q_R1_BLOCKER_UI": "READY",
+    "MLB_02Q_R1_FACTOR_EDGE_UI": "READY",
+    "MLB_02Q_R1_FACTOR_EDGE_INTEGRITY": "PASS",
+    "MLB_02Q_R1_PICK_DETAIL_UI": "READY",
+    "MLB_02Q_R1_FILTER_UI": "READY",
+    "MLB_02Q_R1_MOBILE_FILTER_UI": "PASS",
+    "MLB_02Q_R1_SORT_UI": "READY",
+    "MLB_02Q_R1_STATUS_VISUAL_HIERARCHY": "PASS",
+    "MLB_02Q_R1_FRESHNESS_UI": "READY",
+    "MLB_02Q_R1_TIMESTAMP_UI": "READY",
+    "MLB_02Q_R1_LOADING_STATE": "READY",
+    "MLB_02Q_R1_ERROR_STATE": "READY",
+    "MLB_02Q_R1_EMPTY_STATE": "READY",
+    "MLB_02Q_R1_MODEL_NOTE": "READY",
+    "MLB_02Q_R1_NO_PROFITABILITY_CLAIM": "PASS"
+  },
+  "query": {
+    "integration": "PASS",
+    "readOnly": "PASS",
+    "service": "src/services/pick2-mlb-value-board.service.ts",
+    "MLB_02Q_R1_QUERY_INTEGRATION": "PASS",
+    "MLB_02Q_R1_QUERY_READ_ONLY": "PASS"
+  },
+  "currentData": {
+    "officialPickCount": 5,
+    "valueCandidateCount": 14,
+    "watchlistCount": 23,
+    "blockedCount": 0,
+    "totalBoardRows": 42,
+    "topPick": {
+      "game_pk": 823904,
+      "game_date": "2026-09-05",
+      "start_time": "2026-09-06T01:10:00+00:00",
+      "home_team": "baseball_mlb:mlb:sportsdataio:team:1",
+      "away_team": "baseball_mlb:mlb:sportsdataio:team:35",
+      "side": "AWAY",
+      "market": "MONEYLINE",
+      "status": "OFFICIAL_PICK",
+      "status_rank": 1,
+      "board_rank": 1,
+      "value_score": 78.095,
+      "best_book": "betrivers",
+      "bookmaker_name": "BetRivers",
+      "american_odds": 185,
+      "model_probability": 0.43541338225,
+      "consensus_probability": 0.353477765108324,
+      "consensus_edge": 0.081935617141676,
+      "unit_ev": 0.2409281394125,
+      "book_count": 11,
+      "market_dispersion": 0.020283964718561,
+      "market_freshness": "FRESH",
+      "starter_status": "PROBABLE",
+      "risk_flags": [
+        "PROBABLE_STARTER",
+        "MODERATE_MARKET_DISPERSION",
+        "EXTREME_PRICE"
+      ],
+      "blocker_codes": [],
+      "why": [
+        "Model probability exceeds market consensus by 8.2 percentage points.",
+        "Best current price is available at betrivers.",
+        "Best-price unit EV is 24.1%.",
+        "11 books support the current market view.",
+        "Starter is probable, so the row carries an explicit risk flag."
+      ],
+      "risk_explanation": [
+        "Starter is probable rather than confirmed.",
+        "Books disagree enough to mark market dispersion as moderate.",
+        "The best price is in a more volatile plus-money range."
+      ],
+      "blocker_explanation": [],
+      "factor_edge": [
+        {
+          "family": "market_consensus",
+          "direction": "supports_pick",
+          "label": "Market consensus"
+        },
+        {
+          "family": "market_dispersion",
+          "direction": "supports_pick",
+          "label": "Market dispersion"
+        },
+        {
+          "family": "starter_certainty",
+          "direction": "adds_risk",
+          "label": "Starter certainty"
+        },
+        {
+          "family": "team_form_strength",
+          "direction": "context_only",
+          "label": "Team form / strength"
+        },
+        {
+          "family": "starter_context",
+          "direction": "context_only",
+          "label": "Starter context"
+        },
+        {
+          "family": "bullpen_context",
+          "direction": "context_only",
+          "label": "Bullpen context"
+        },
+        {
+          "family": "offense_context",
+          "direction": "context_only",
+          "label": "Offense context"
+        },
+        {
+          "family": "matchup_context",
+          "direction": "context_only",
+          "label": "Matchup context"
+        },
+        {
+          "family": "first_inning_context",
+          "direction": "context_only",
+          "label": "First-inning context"
+        }
+      ],
+      "policy_version": "MLB_MONEYLINE_OFFICIAL_PICK_POLICY_V1",
+      "prediction_id": "f8ce5fd4-56e6-4272-9888-4b30bd587f5a",
+      "value_evaluation_id": "ac27f633-b396-43ac-a0a2-b9baafb51247",
+      "official_pick_identity": "6767ea71f01ebb06183a2ec8cf1db371571074e19882e27fc8438aef0e4f6b21",
+      "prediction_as_of": "2026-09-05T01:51:21.667+00:00",
+      "market_acquired_at": "2026-09-05T21:55:01.709+00:00",
+      "evaluated_at": "2026-09-05T21:55:01.709+00:00",
+      "decision_at": "2026-09-05T21:55:01.709+00:00"
+    },
+    "MLB_02Q_R1_CURRENT_BOARD_PARITY": "PASS",
+    "MLB_02Q_R1_TOP_PICK_PARITY": "PASS"
+  },
+  "boundaries": {
+    "valueBoardPublication": "NO",
+    "publicationReady": "NO",
+    "officialPickWrites": 0,
+    "nativeValueWrites": 0,
+    "marketWrites": 0,
+    "predictionWrites": 0,
+    "modelWrites": 0,
+    "rawFeatureWrites": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "automation": "OFF",
+    "cronChanges": 0,
+    "MLB_02Q_R1_VALUE_BOARD_PUBLICATION": "NO",
+    "MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY": "NO",
+    "MLB_02Q_R1_PRODUCTION_DML": 0,
+    "MLB_02Q_R1_PRODUCTION_DDL": 0,
+    "MLB_02Q_R1_PROVIDER_CALLS": 0,
+    "MLB_02Q_R1_AUTOMATION_STATE": "OFF"
+  },
+  "tests": {
+    "validator": "scripts/mlb-data-02q-r1-value-board-ui-implementation-validate.mjs",
+    "statusRendering": "PASS",
+    "countParity": "PASS",
+    "sorting": "PASS",
+    "filters": "PASS",
+    "featureGate": "PASS",
+    "riskReasonDisplay": "PASS",
+    "zeroPickEmptyState": "PASS",
+    "topPickParity": "PASS",
+    "MLB_02Q_R1_UI_TESTS": "PASS"
+  },
+  "docs": {
+    "roadmapMentions": true,
+    "statusMentions": true
+  },
+  "humanReadableAudit": {
+    "path": "docs/CERTIFICATION/mlb-data-02q-r1-value-board-ui-implementation-audit.md",
+    "MLB_02Q_R1_HUMAN_AUDIT": "READY"
+  }
+}

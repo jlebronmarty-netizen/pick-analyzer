@@ -1,6 +1,10 @@
 import 'server-only'
 
+import fs from 'node:fs/promises'
+import path from 'node:path'
+
 import type {
+  Pick2MlbValueBoardContract,
   Pick2MlbValueBoardFactorEdge,
   Pick2MlbValueBoardMarket,
   Pick2MlbValueBoardRow,
@@ -22,6 +26,10 @@ export const PICK2_MLB_VALUE_BOARD_STATUS_RANK: Record<Pick2MlbValueBoardStatus,
   VALUE_CANDIDATE: 2,
   WATCHLIST: 3,
   BLOCKED: 4,
+}
+
+export function isPick2MlbValueBoardEnabled(): boolean {
+  return process.env.PICK2_MLB_VALUE_BOARD_ENABLED === 'true'
 }
 
 export type Pick2MlbValueBoardSourceStatus =
@@ -258,4 +266,46 @@ export function buildPick2MlbValueBoardRows(sourceRows: Pick2MlbValueBoardSource
       a.game_pk - b.game_pk,
     )
     .map((row, index) => ({ ...row, board_rank: index + 1 }))
+}
+
+export async function getPreparedPick2MlbValueBoard(): Promise<Pick2MlbValueBoardContract> {
+  const artifactPath = path.join(process.cwd(), 'docs', 'CERTIFICATION', 'mlb-data-02q-value-board-prep.json')
+  const artifact = JSON.parse(await fs.readFile(artifactPath, 'utf8')) as {
+    dryBoard: { rows: Pick2MlbValueBoardRow[] }
+    presentation: { filters: string[] }
+    queryLayer: { MLB_02Q_VALUE_BOARD_QUERY_LAYER: string }
+    boundaries: { valueBoardPublication: string; featureGate: string; productionDml: number }
+  }
+
+  if (artifact.queryLayer.MLB_02Q_VALUE_BOARD_QUERY_LAYER !== 'READY') {
+    throw new Error('PICK2_MLB_VALUE_BOARD_QUERY_LAYER_NOT_READY')
+  }
+  if (artifact.boundaries.valueBoardPublication !== 'NO' || artifact.boundaries.productionDml !== 0) {
+    throw new Error('PICK2_MLB_VALUE_BOARD_PUBLICATION_BOUNDARY_FAILED')
+  }
+
+  const rows = artifact.dryBoard.rows.map((row) => ({
+    ...row,
+    factor_edge: row.factor_edge.map((factor) => ({
+      ...factor,
+      detail: factor.detail ?? `${factor.label} is shown as directional context only.`,
+    })),
+  }))
+
+  return {
+    policy_version: PICK2_MLB_VALUE_BOARD_POLICY_VERSION,
+    statuses: PICK2_MLB_VALUE_BOARD_STATUSES,
+    rows,
+    filters: {
+      statuses: PICK2_MLB_VALUE_BOARD_STATUSES,
+    },
+    default_sort: {
+      key: 'board_priority',
+      direction: 'asc',
+    },
+    publication_state: 'PREPARED_NOT_PUBLIC',
+    feature_gate: 'READY_DISABLED',
+    model_limitation_note: 'Current MLB moneyline Champion has modest predictive discrimination; board rows are not guaranteed outcomes.',
+    profitability_claim_state: 'NO_HISTORICAL_PROFITABILITY_CLAIM',
+  }
 }

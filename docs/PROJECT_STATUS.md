@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 20:05:00Z
+Last updated: 2026-09-06 20:32:00Z
+
+## 2026-09-06 MLB-DATA-02Q-R1 Value Board UI Implementation
+
+- MLB-DATA-02Q-R1 is certified as `MLB_DATA_02Q_R1_VALUE_BOARD_UI_IMPLEMENTATION_CERTIFIED`. The certified 02Q prep commit `972e29764a87b9df6b59be7739e3da83fbac3453` was published to `origin/main`, production aligned to the same commit, and `/api/system/version` reported 0 provider calls.
+- Implemented the real MLB Value Board UI behind default-off feature gate `PICK2_MLB_VALUE_BOARD_ENABLED`. The route `/mlb-value-board` returns `notFound()` while the gate is off, no public navigation or CTA was added, and production Value Board publication remains `NO`.
+- The gated UI uses the certified 02Q contracts in `src/types/pick2-value-board.ts` and the server-only query/composition service in `src/services/pick2-mlb-value-board.service.ts`. It renders the board summary, Official Picks, Value Candidates, Watchlist, Blocked state, mobile-first cards, desktop detail density, filters, sorting, expandable pick detail, Why/Risk/Blocker explanations, Factor Edge context, freshness/timestamps, loading, error and empty states.
+- Current data parity passed from the certified board state: 42 total rows, 5 `OFFICIAL_PICK`, 14 `VALUE_CANDIDATE`, 23 `WATCHLIST` and 0 `BLOCKED`. Top pick parity remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`.
+- Boundaries held: production DML 0, production DDL 0, provider calls 0, odds refresh 0, Official Pick changes 0, market/value/prediction/result/model/raw/feature writes 0, automation off and cron changes 0. `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_READY = NO`.
 
 ## 2026-09-06 MLB-DATA-02Q Value Board Prep
 
