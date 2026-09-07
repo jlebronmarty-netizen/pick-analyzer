@@ -19,6 +19,13 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 12
+    env:
+      # Build-only placeholders. Keep this workflow aligned with the main MLB
+      # validation workflow so Next.js page-data collection never depends on
+      # real Supabase credentials during CI builds.
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
