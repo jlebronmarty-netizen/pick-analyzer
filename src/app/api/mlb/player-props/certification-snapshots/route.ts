@@ -26,6 +26,8 @@ export async function GET(request: NextRequest) {
       .eq('league_key', LEAGUE_KEY)
       .eq('provider', PROVIDER)
       .eq('event_id', eventId)
+      .eq('odds_classification', 'player_prop_pregame')
+      .like('market', 'player_props:%')
       .order('snapshot_time', { ascending: false })
       .limit(100)
 
