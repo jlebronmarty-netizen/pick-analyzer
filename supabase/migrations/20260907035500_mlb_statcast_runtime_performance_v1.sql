@@ -86,6 +86,24 @@ create unique index if not exists mlb_statcast_coverage_mv_season_uidx
 revoke all on public.mlb_statcast_coverage_mv from public, anon, authenticated;
 grant select on public.mlb_statcast_coverage_mv to service_role;
 
+-- Preserve the existing API contract while routing it through the small,
+-- precomputed relation. Callers do not need to know that coverage is cached.
+create or replace view public.mlb_statcast_coverage_v
+with (security_invoker = true) as
+select
+  season,
+  first_game_date,
+  last_game_date,
+  pitches,
+  games,
+  pitchers,
+  batters,
+  batting_teams
+from public.mlb_statcast_coverage_mv;
+
+revoke all on public.mlb_statcast_coverage_v from public, anon, authenticated;
+grant select on public.mlb_statcast_coverage_v to service_role;
+
 create or replace function public.refresh_mlb_statcast_coverage_mv()
 returns void
 language plpgsql
