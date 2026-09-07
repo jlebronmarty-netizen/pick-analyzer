@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { apiError, apiOk, errorMessage, requestId } from '@/lib/api-contract'
-import { getMlbGameModelsBacktest } from '@/services/mlb-game-models-backtest.service'
+import { getMlbGameModelsBacktest } from '@/services/mlb-game-models-backtest-v2.service'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 3600
