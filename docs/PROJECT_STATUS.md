@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-07 14:30:00Z
+Last updated: 2026-09-07 15:05:00Z
+
+## 2026-09-07 MLB-DATA-02R-R2E Component Interface Refactor Plan
+
+- MLB-DATA-02R-R2E is locally certified as `MLB_DATA_02R_R2E_COMPONENT_INTERFACE_REFACTOR_PLAN_CERTIFIED`. This phase is a read-only design response to the R2B live retry blocker: the R2D thin wrappers are scope guards, but the existing certified component scripts do not yet expose real bounded callable interfaces for current-slate execution.
+- Completed the component-interface inventory across all 13 R2 stages: schedule, native game/player reconciliation, raw Statcast reconciliation, feature refresh, starter readiness, moneyline inference, prediction persistence, odds acquisition, market persistence, native value evaluation, Official Pick policy, Official Pick persistence and Value Board readback. The actual business logic is mostly embedded in CLI scripts, with the Value Board already service-backed.
+- Designed the canonical future `executeStage` contract around explicit mode, frozen run context, `eligibleGamePks`, `runAsOf`, provider budgets, dynamic DML caps, checkpoint state and injected evidence. The plan separates pure calculation from persistence, keeps provider clients injectable, and requires real parsers/classifiers in dry certification rather than synthetic PASS constants.
+- Future implementation is split into six waves: pure/read-only interfaces; bounded native/raw/feature planning; bounded persistence interfaces; executor binding; real dry integration certification; and a separately authorized live run. No live code, executor, production-capable component, migration, provider call, production DML/DDL, Official Pick write, automation change, cron change or push occurred.
+- R2B live execution remains blocked until the real interfaces are implemented and dry-certified. Next recommended phase is `MLB_DATA_02R_R2F_COMPONENT_INTERFACE_REFACTOR_IMPLEMENTATION`.
 
 ## 2026-09-07 MLB-DATA-02R-R2A Live Refresh Executor
 
