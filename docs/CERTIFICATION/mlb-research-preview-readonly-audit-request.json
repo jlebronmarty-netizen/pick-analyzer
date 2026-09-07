@@ -1,0 +1,10 @@
+{
+  "authorized": true,
+  "paidProviderCallsAllowed": false,
+  "mutationsAllowed": false,
+  "targetUrl": "https://pick-analyzer-git-feature-mlb-nrfi-backtest-v1-pick-analyzer.vercel.app/api/mlb/research/nrfi/backtest",
+  "expectedModelVersion": "MLB_NRFI_RESEARCH_V1",
+  "expectedMarket": "NRFI_YRFI",
+  "expectedStatus": "RESEARCH_ONLY_NOT_READY_FOR_SHADOW",
+  "reason": "Zero-cost end-to-end validation of the leakage-safe NRFI/YRFI research endpoint on its protected Vercel preview."
+}
