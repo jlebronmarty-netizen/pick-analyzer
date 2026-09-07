@@ -1,0 +1,155 @@
+{
+  "generatedAt": "2026-09-07T01:50:24.873Z",
+  "project": "MLB_DATA_02Q_R5_VALUE_BOARD_NAVIGATION_PUBLICATION_PREP",
+  "certificationVerdict": "MLB_DATA_02Q_R5_VALUE_BOARD_NAVIGATION_PUBLICATION_PREP_CERTIFIED",
+  "repository": {
+    "branch": "main",
+    "r4ActivationCommit": "2de22c11059b6a0574da9c4f1050f9d1a3d02c5f",
+    "localHead": "8b94e854a2fed1d99e9f82bda3d92ed41a3e32bc",
+    "originMain": "2de22c11059b6a0574da9c4f1050f9d1a3d02c5f",
+    "localContainsR4ActivationCommit": true,
+    "preR5GateWorktreeClean": true,
+    "trackedWorktreeCleanAtGeneration": false,
+    "worktreeStatusAtGeneration": "M scripts/mlb-data-02q-r5-value-board-navigation-prep-validate.mjs\n M scripts/mlb-data-02q-r5-value-board-navigation-prep.mjs"
+  },
+  "production": {
+    "baseUrl": "https://pick-analyzer.vercel.app",
+    "commit": "2de22c11059b6a0574da9c4f1050f9d1a3d02c5f",
+    "providerCallsMade": 0,
+    "PRODUCTION_ALIGNMENT": "PASS"
+  },
+  "navigation": {
+    "inventory": {
+      "shell": "src/components/dashboard/DashboardShell.tsx",
+      "renderer": "src/components/dashboard/DashboardShellClient.tsx",
+      "existingItemsBeforeR5": [
+        "Today",
+        "Performance",
+        "Model Lab",
+        "Data Health"
+      ],
+      "productionStateBeforeR5": "HIDDEN"
+    },
+    "recommendedPlacement": "Primary navigation, immediately after Today and before Performance",
+    "label": "MLB Value Board",
+    "icon": "V",
+    "order": [
+      "Today",
+      "MLB Value Board",
+      "Performance",
+      "Model Lab",
+      "Data Health"
+    ],
+    "gateContract": "PICK2_MLB_VALUE_BOARD_ENABLED=true AND PICK2_MLB_VALUE_BOARD_NAVIGATION_ENABLED=true",
+    "failClosedNavigation": "PASS",
+    "desktopNavPrep": "PASS",
+    "mobileNavPrep": "PASS",
+    "activeRouteState": "ACTIVE_DIRECT_ROUTE_ONLY",
+    "directRouteIndependence": "PASS",
+    "accessibility": "PASS",
+    "navigationLanguage": "PASS",
+    "controlledNavOnTest": "PASS",
+    "controlledNavOffTest": "PASS",
+    "localRuntimeSmoke": {
+      "gateOn": {
+        "routeGate": "true",
+        "navGate": "true",
+        "todayActualAnchorVisible": true,
+        "directRouteStatus": 200
+      },
+      "directRouteOnly": {
+        "routeGate": "true",
+        "navGate": "false",
+        "todayActualAnchorVisible": false,
+        "directRouteStatus": 200,
+        "serializedTitleMetadataOnly": true
+      }
+    },
+    "productionNavPublication": "NO",
+    "directRouteState": "ACTIVE",
+    "controlledGateMatrix": [
+      {
+        "routeGate": "false",
+        "navGate": "false",
+        "navigation": "HIDDEN",
+        "directRoute": "FAIL_CLOSED"
+      },
+      {
+        "routeGate": "false",
+        "navGate": "true",
+        "navigation": "HIDDEN",
+        "directRoute": "FAIL_CLOSED"
+      },
+      {
+        "routeGate": "true",
+        "navGate": "false",
+        "navigation": "HIDDEN",
+        "directRoute": "ACTIVE"
+      },
+      {
+        "routeGate": "true",
+        "navGate": "true",
+        "navigation": "VISIBLE",
+        "directRoute": "ACTIVE"
+      }
+    ],
+    "sourceChecks": {
+      "serverWrapper": true,
+      "separateNavigationGate": true,
+      "routeGateRequiredForNav": true,
+      "navGateRequiredForNav": true,
+      "labelPrepared": true,
+      "iconPrepared": true,
+      "routePrepared": true,
+      "insertedAfterToday": true,
+      "desktopUsesSharedNav": true,
+      "mobileUsesSharedNav": true,
+      "directRouteGateUnchanged": true
+    }
+  },
+  "board": {
+    "officialPickCount": 5,
+    "valueCandidateCount": 14,
+    "watchlistCount": 23,
+    "blockedCount": 0,
+    "totalBoardRows": 42,
+    "topPick": {
+      "game_pk": 823904,
+      "side": "AWAY",
+      "best_book": "betrivers",
+      "consensus_edge": 0.081935617141676,
+      "unit_ev": 0.2409281394125
+    },
+    "boardParity": "PASS",
+    "topPickParity": "PASS"
+  },
+  "safety": {
+    "productionDml": 0,
+    "productionDdl": 0,
+    "providerCalls": 0,
+    "envChanges": 0,
+    "valueBoardPublication": "NO",
+    "automation": "OFF",
+    "cronChanges": 0
+  },
+  "readiness": {
+    "R6_NAVIGATION_PUBLICATION_READINESS": "YES",
+    "MLB_DATA_02Q_R5_VALUE_BOARD_NAVIGATION_PUBLICATION_PREP_READY": "YES"
+  },
+  "changedFiles": [
+    "src/config/pick2-value-board-navigation.ts",
+    "src/components/dashboard/DashboardShell.tsx",
+    "src/components/dashboard/DashboardShellClient.tsx",
+    "scripts/mlb-data-02q-r5-value-board-navigation-prep.mjs",
+    "scripts/mlb-data-02q-r5-value-board-navigation-prep-validate.mjs",
+    "docs/CERTIFICATION/mlb-data-02q-r5-value-board-navigation-prep.json",
+    "docs/CERTIFICATION/mlb-data-02q-r5-value-board-navigation-prep-audit.md",
+    "docs/PROJECT_STATUS.md",
+    "docs/MASTER_ROADMAP.md"
+  ],
+  "validators": [
+    "node scripts/mlb-data-02q-r5-value-board-navigation-prep.mjs",
+    "node scripts/mlb-data-02q-r5-value-board-navigation-prep-validate.mjs",
+    "npm.cmd run build"
+  ]
+}

@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 22:05:00Z
+Last updated: 2026-09-06 22:24:00Z
+
+## 2026-09-06 MLB-DATA-02Q-R5 Value Board Navigation Publication Prep
+
+- MLB-DATA-02Q-R5 is certified as `MLB_DATA_02Q_R5_VALUE_BOARD_NAVIGATION_PUBLICATION_PREP_CERTIFIED`. R4 activation certification remains published and production-aligned at `2de22c11059b6a0574da9c4f1050f9d1a3d02c5f`; `/api/system/version` reported 0 provider calls.
+- Prepared the future Value Board navigation exposure behind a separate fail-closed gate: `PICK2_MLB_VALUE_BOARD_ENABLED=true` and `PICK2_MLB_VALUE_BOARD_NAVIGATION_ENABLED=true` are both required before the shared dashboard shell includes `/mlb-value-board`.
+- Recommended navigation placement is Primary navigation immediately after `Today` and before `Performance`, with label `MLB Value Board` and existing text-icon convention `V`. Desktop rail and mobile bottom navigation are wired through the same nav item list, with mobile expanding to five stable columns only when the nav gate is on.
+- Production navigation remains unpublished during R5: no nav link, CTA or dashboard discovery was exposed. The direct route remains independently active as `ACTIVE_DIRECT_ROUTE_ONLY`.
+- Board parity remains unchanged: 42 total rows, 5 Official Picks, 14 Value Candidates, 23 Watchlist and 0 Blocked; top pick remains game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`. Production DML/DDL, provider calls, odds refresh, Official Pick changes, env changes, automation and cron changes remained 0/off. `MLB_DATA_02Q_R6_VALUE_BOARD_NAVIGATION_PUBLICATION_EXECUTION_READY = YES`.
 
 ## 2026-09-06 MLB-DATA-02Q-R4 Value Board Direct-Route Activation
 
