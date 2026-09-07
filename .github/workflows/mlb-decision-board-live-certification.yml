@@ -1,0 +1,287 @@
+name: MLB Decision Board Live Certification
+
+on:
+  push:
+    branches:
+      - feature/mlb-decision-board-v1
+    paths:
+      - 'docs/CERTIFICATION/mlb-decision-board-live-cert-request.json'
+
+permissions:
+  contents: read
+  statuses: read
+  id-token: write
+
+concurrency:
+  group: mlb-decision-board-live-certification
+  cancel-in-progress: false
+
+jobs:
+  certify-one-event:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MLB_PREVIEW_URL: https://pick-analyzer-git-feature-mlb-decision-board-v1-pick-analyzer.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate explicit certification request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs')
+          const path = 'docs/CERTIFICATION/mlb-decision-board-live-cert-request.json'
+          if (!fs.existsSync(path)) throw new Error('LIVE_CERT_REQUEST_FILE_MISSING')
+          const request = JSON.parse(fs.readFileSync(path, 'utf8'))
+          const assertions = [
+            [request.authorized === true, 'authorized must be true'],
+            [request.branch === 'feature/mlb-decision-board-v1', 'branch must match certification branch'],
+            [request.maximumEvents === 1, 'maximumEvents must equal 1'],
+            [request.maximumEstimatedCredits === 4, 'maximumEstimatedCredits must equal 4'],
+            [request.mode === 'shadow-read-only', 'mode must remain shadow-read-only'],
+            [request.officialPickWritesAllowed === false, 'Official Pick writes must remain prohibited'],
+            [request.productionActivationAllowed === false, 'production activation must remain prohibited'],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          if (failures.length) throw new Error(`LIVE_CERT_REQUEST_INVALID: ${failures.join('; ')}`)
+          console.log('PASS: explicit one-event shadow certification request validated.')
+          NODE
+
+      - name: Verify Actions-side sync credential is configured
+        shell: bash
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo 'CRON_SECRET_ACTIONS_SECRET_NOT_AVAILABLE'
+            exit 1
+          fi
+          echo 'PASS: CRON_SECRET is configured in GitHub Actions (value not displayed).'
+
+      - name: Mint GitHub OIDC token for protected preview
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput('token', token)
+
+      - name: Wait for matching Vercel deployment
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 36); do
+            status_json="$(curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status")"
+            vercel_state="$(printf '%s' "$status_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);const v=(j.statuses||[]).find(x=>x.context==='Vercel');process.stdout.write(v?.state||'pending')})")"
+            if [ "$vercel_state" = 'success' ]; then
+              echo 'PASS: matching Vercel deployment is READY.'
+              exit 0
+            fi
+            if [ "$vercel_state" = 'failure' ] || [ "$vercel_state" = 'error' ]; then
+              echo 'VERCEL_DEPLOYMENT_FAILED'
+              exit 1
+            fi
+            if [ "$attempt" = '36' ]; then
+              echo 'VERCEL_DEPLOYMENT_NOT_READY'
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Require zero-credit protected preview preflight
+        id: preflight
+        shell: bash
+        env:
+          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          headers_file="$(mktemp)"
+          http_code="$(curl -sS \
+            --connect-timeout 10 \
+            --max-time 45 \
+            -D "$headers_file" \
+            -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" \
+            -o "$response_file" \
+            -w '%{http_code}' \
+            "${MLB_PREVIEW_URL}/api/mlb/player-props/preflight?maximumEvents=1")"
+
+          if [ "$http_code" != '200' ]; then
+            echo "PREVIEW_PREFLIGHT_HTTP_${http_code}"
+            exit 1
+          fi
+
+          RESPONSE_FILE="$response_file" node <<'NODE'
+          const fs = require('fs')
+          const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
+          const expectedMarkets = new Set([
+            'pitcher_outs_recorded',
+            'pitcher_strikeouts',
+            'batter_hits',
+            'batter_total_bases',
+          ])
+          const actualMarkets = new Set(Array.isArray(payload.selectedMarkets) ? payload.selectedMarkets : [])
+          const blockers = Array.isArray(payload.blockers) ? payload.blockers.filter(Boolean) : []
+          const assertions = [
+            [payload.dryRun === true, 'dryRun must be true'],
+            [payload.status === 'DRY_RUN', 'status must be DRY_RUN'],
+            [payload.provider === 'the-odds-api', 'provider must be the-odds-api'],
+            [payload.providerCallsMade === 0, 'preflight must make zero provider calls'],
+            [payload.providerCreditsConsumed === 0, 'preflight must consume zero provider credits'],
+            [payload.remoteMutationsMade === 0, 'preflight must make zero remote mutations'],
+            [payload.estimatedCredits === 4, 'one-event four-market estimate must equal 4 credits'],
+            [Number(payload.certifiedMappingsAvailable) > 0, 'at least one certified pregame mapping is required'],
+            [blockers.length === 0, `preflight blockers present: ${blockers.join(', ')}`],
+            [expectedMarkets.size === actualMarkets.size && [...expectedMarkets].every((market) => actualMarkets.has(market)), 'selected markets must exactly match Decision Board V1'],
+            [Array.isArray(payload.bookmakerKeys) && payload.bookmakerKeys.length === 2 && payload.bookmakerKeys.includes('fanduel') && payload.bookmakerKeys.includes('williamhill_us'), 'bookmakers must be FanDuel + Caesars only'],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          console.log(JSON.stringify({
+            status: payload.status,
+            estimatedCredits: payload.estimatedCredits,
+            certifiedMappingsAvailable: payload.certifiedMappingsAvailable,
+            bookmakerKeys: payload.bookmakerKeys,
+            selectedMarkets: payload.selectedMarkets,
+            blockers,
+          }, null, 2))
+          if (failures.length) throw new Error(`PREFLIGHT_CERTIFICATION_FAILED: ${failures.join('; ')}`)
+          NODE
+
+      - name: Execute exactly one bounded live player-prop sync
+        id: live_sync
+        shell: bash
+        env:
+          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          http_code="$(curl -sS \
+            --connect-timeout 10 \
+            --max-time 60 \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            --data '{"live":true,"provider":"the-odds-api","maximumEvents":1,"confirm":"MLB_PLAYER_PROP_SYNC"}' \
+            -o "$response_file" \
+            -w '%{http_code}' \
+            "${MLB_PREVIEW_URL}/api/mlb/player-props/sync")"
+
+          if [ "$http_code" != '200' ]; then
+            echo "LIVE_SYNC_HTTP_${http_code}"
+            if [ "$http_code" = '409' ]; then
+              RESPONSE_FILE="$response_file" node <<'NODE'
+              const fs = require('fs')
+              try {
+                const p = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
+                console.log(JSON.stringify({ status: p.status ?? null, blockers: p.blockers ?? [] }, null, 2))
+              } catch {}
+              NODE
+            fi
+            exit 1
+          fi
+
+          RESPONSE_FILE="$response_file" node <<'NODE'
+          const fs = require('fs')
+          const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
+          const expectedMarkets = new Set([
+            'pitcher_outs',
+            'pitcher_strikeouts',
+            'batter_hits',
+            'batter_total_bases',
+          ])
+          const actualMarkets = new Set(Array.isArray(payload.selectedMarkets) ? payload.selectedMarkets : [])
+          const blockers = Array.isArray(payload.blockers) ? payload.blockers.filter(Boolean) : []
+          const accounted = Number(payload.accountedProjectCredits)
+          const observed = payload.providerCreditsConsumed == null ? null : Number(payload.providerCreditsConsumed)
+          const remaining = payload.accountCreditsRemainingAfter == null ? null : Number(payload.accountCreditsRemainingAfter)
+          const assertions = [
+            [payload.success === true, 'sync success must be true'],
+            [payload.status === 'SYNCED', 'sync status must be SYNCED'],
+            [payload.dryRun === false, 'live sync must not be dry-run'],
+            [payload.confirmed === true, 'live confirmation must be active'],
+            [payload.provider === 'the-odds-api', 'provider must be the-odds-api'],
+            [payload.paidProviderCallsMade === 1, 'exactly one paid event call is allowed'],
+            [payload.freeQuotaProbeCallsMade === 1, 'exactly one zero-cost quota probe is expected'],
+            [Number.isFinite(accounted) && accounted >= 0 && accounted <= 4, 'accounted project credits must be within 0..4'],
+            [observed === null || (Number.isFinite(observed) && observed >= 0 && observed <= 4), 'observed provider credits must be within 0..4 when present'],
+            [remaining === null || (Number.isFinite(remaining) && remaining >= 15000), 'at least 15,000 account credits must remain outside project scope'],
+            [Number(payload.rowsPersisted) > 0, 'at least one real prop row must persist'],
+            [blockers.length === 0, `live sync blockers present: ${blockers.join(', ')}`],
+            [expectedMarkets.size === actualMarkets.size && [...expectedMarkets].every((market) => actualMarkets.has(market)), 'canonical persisted markets must exactly match Decision Board V1'],
+            [Array.isArray(payload.bookmakerKeys) && payload.bookmakerKeys.length === 2 && payload.bookmakerKeys.includes('fanduel') && payload.bookmakerKeys.includes('williamhill_us'), 'bookmakers must remain FanDuel + Caesars only'],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          const summary = {
+            status: payload.status,
+            selectedDate: payload.selectedDate,
+            paidProviderCallsMade: payload.paidProviderCallsMade,
+            providerCreditsConsumed: payload.providerCreditsConsumed,
+            accountedProjectCredits: payload.accountedProjectCredits,
+            creditAccountingStatus: payload.creditAccountingStatus,
+            requestsLast: payload.diagnostics?.requestsLast ?? payload.requestsLast ?? null,
+            accountCreditsRemainingAfter: payload.accountCreditsRemainingAfter,
+            rowsRead: payload.rowsRead,
+            rowsNormalized: payload.rowsNormalized,
+            rowsPersisted: payload.rowsPersisted,
+            selectedMarkets: payload.selectedMarkets,
+            bookmakerKeys: payload.bookmakerKeys,
+            blockers,
+          }
+          console.log(JSON.stringify(summary, null, 2))
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## MLB one-event live sync\n\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`)
+          if (failures.length) throw new Error(`LIVE_SYNC_CERTIFICATION_FAILED: ${failures.join('; ')}`)
+          NODE
+
+      - name: Verify Decision Board remains shadow/read-only after sync
+        shell: bash
+        env:
+          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          http_code="$(curl -sS \
+            --connect-timeout 10 \
+            --max-time 45 \
+            -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" \
+            -o "$response_file" \
+            -w '%{http_code}' \
+            "${MLB_PREVIEW_URL}/api/mlb/decision-board")"
+          if [ "$http_code" != '200' ]; then
+            echo "DECISION_BOARD_READBACK_HTTP_${http_code}"
+            exit 1
+          fi
+          RESPONSE_FILE="$response_file" node <<'NODE'
+          const fs = require('fs')
+          const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
+          const assertions = [
+            [payload.mode === 'mlb_decision_board_v1', 'Decision Board mode mismatch'],
+            [payload.productionActivationEnabled === false, 'production activation must remain disabled'],
+            [Number(payload.summary?.betCount ?? -1) === 0, 'APOSTAR count must remain zero'],
+            [Array.isArray(payload.props), 'props must be an array'],
+            [Array.isArray(payload.markets), 'markets must be an array'],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          const summary = {
+            mode: payload.mode,
+            selectedDate: payload.selectedDate,
+            productionActivationEnabled: payload.productionActivationEnabled,
+            betCount: payload.summary?.betCount ?? null,
+            propRowsVisible: Array.isArray(payload.props) ? payload.props.length : null,
+            marketRowsVisible: Array.isArray(payload.markets) ? payload.markets.length : null,
+            blockers: payload.blockers ?? [],
+          }
+          console.log(JSON.stringify(summary, null, 2))
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Decision Board readback\n\n\`\`\`json\n${JSON.stringify(summary, null, 2)}\n\`\`\`\n`)
+          if (failures.length) throw new Error(`DECISION_BOARD_READBACK_FAILED: ${failures.join('; ')}`)
+          NODE
