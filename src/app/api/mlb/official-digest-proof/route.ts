@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'invalid date' }, { status: 400 })
   }
 
-  const endpoint = `/api/v1/schedule?sportId=1&date=${encodeURIComponent(date)}&hydrate=probablePitcher,team,venue`
+  const endpoint = `/api/v1/schedule?sportId=1&startDate=${encodeURIComponent(date)}&endDate=${encodeURIComponent(date)}&hydrate=probablePitcher,team,venue`
   const response = await fetch(`${BASE_URL}${endpoint}`, { cache: 'no-store' })
   if (!response.ok) {
     return NextResponse.json({ error: `MLB Stats API HTTP ${response.status}`, endpoint }, { status: 502 })
