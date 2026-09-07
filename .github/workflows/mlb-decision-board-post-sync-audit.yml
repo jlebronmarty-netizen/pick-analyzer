@@ -71,6 +71,7 @@ jobs:
           NODE
 
       - name: Read stored player prop health
+        continue-on-error: true
         shell: bash
         env:
           OIDC: ${{ steps.oidc.outputs.token }}
@@ -78,7 +79,11 @@ jobs:
           set -euo pipefail
           f="$(mktemp)"
           code="$(curl -sS --connect-timeout 10 --max-time 45 -H "x-vercel-trusted-oidc-idp-token: ${OIDC}" -o "$f" -w '%{http_code}' "${MLB_PREVIEW_URL}/api/mlb/player-props/health")"
-          test "$code" = '200'
+          echo "PLAYER_PROP_HEALTH_HTTP_${code}"
+          if [ "$code" != '200' ]; then
+            RESPONSE_FILE="$f" node -e "const fs=require('fs');const s=fs.readFileSync(process.env.RESPONSE_FILE,'utf8');try{const p=JSON.parse(s);console.log(JSON.stringify({healthError:{code:p.code??null,message:p.message??null,error:p.error??null,requestId:p.requestId??null}},null,2))}catch{console.log('healthErrorBody='+s.slice(0,1000))}"
+            exit 1
+          fi
           RESPONSE_FILE="$f" node - <<'NODE'
           const fs=require('fs')
           const p=JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE,'utf8'))
@@ -88,6 +93,7 @@ jobs:
           NODE
 
       - name: Read Decision Board shadow state
+        if: always()
         shell: bash
         env:
           OIDC: ${{ steps.oidc.outputs.token }}
@@ -95,13 +101,19 @@ jobs:
           set -euo pipefail
           f="$(mktemp)"
           code="$(curl -sS --connect-timeout 10 --max-time 45 -H "x-vercel-trusted-oidc-idp-token: ${OIDC}" -o "$f" -w '%{http_code}' "${MLB_PREVIEW_URL}/api/mlb/decision-board")"
-          test "$code" = '200'
+          echo "DECISION_BOARD_HTTP_${code}"
+          if [ "$code" != '200' ]; then
+            RESPONSE_FILE="$f" node -e "const fs=require('fs');const s=fs.readFileSync(process.env.RESPONSE_FILE,'utf8');try{const p=JSON.parse(s);console.log(JSON.stringify({decisionBoardError:{code:p.code??null,message:p.message??null,error:p.error??null,requestId:p.requestId??null}},null,2))}catch{console.log('decisionBoardErrorBody='+s.slice(0,1000))}"
+            exit 1
+          fi
           RESPONSE_FILE="$f" node - <<'NODE'
           const fs=require('fs')
           const p=JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE,'utf8'))
           const props=Array.isArray(p.props)?p.props:[]
+          const markets=Array.isArray(p.markets)?p.markets:[]
           const propSummary=props.map(x=>({eventId:x.eventId,marketKey:x.marketKey,propGroup:x.propGroup,subject:x.subject,side:x.side,line:x.line,bestBook:x.bestBook,bestOdds:x.bestOdds,quotes:Array.isArray(x.quotes)?x.quotes.map(q=>({book:q.book,odds:q.odds,line:q.line,observedAt:q.observedAt})):[],decision:x.decision,edge:x.edge,noVigProbability:x.noVigProbability,blockers:x.blockers??[]}))
-          const out={mode:p.mode,selectedDate:p.selectedDate,productionActivationEnabled:p.productionActivationEnabled,summary:p.summary,diagnostics:p.diagnostics,blockers:p.blockers??[],propRows:propSummary}
+          const marketSummary=markets.map(x=>({eventId:x.eventId,marketKey:x.marketKey,subject:x.subject,side:x.side,line:x.line,bestBook:x.bestBook,bestOdds:x.bestOdds,quotes:Array.isArray(x.quotes)?x.quotes.map(q=>({book:q.book,odds:q.odds,line:q.line,observedAt:q.observedAt})):[],decision:x.decision,edge:x.edge,noVigProbability:x.noVigProbability,blockers:x.blockers??[]}))
+          const out={mode:p.mode,selectedDate:p.selectedDate,productionActivationEnabled:p.productionActivationEnabled,summary:p.summary,diagnostics:p.diagnostics,blockers:p.blockers??[],propRows:propSummary,marketRows:marketSummary}
           console.log(JSON.stringify({decisionBoardAfterSync:out},null,2))
           if(p.productionActivationEnabled!==false||Number(p.summary?.betCount??-1)!==0) process.exit(1)
           NODE
