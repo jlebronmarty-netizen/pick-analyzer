@@ -1,0 +1,4 @@
+-- Historical migration ledger entry.
+-- pg_net was enabled temporarily to execute the one-time Statcast 2026-09-04/05 gap fill.
+-- The extension was removed by the immediately following cleanup migration.
+-- No persistent schema change is required when replaying the final repository state.
