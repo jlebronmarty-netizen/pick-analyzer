@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-09-06 22:24:00Z
+Last updated: 2026-09-06 22:51:00Z
+
+## 2026-09-06 MLB-DATA-02Q-R6 Value Board Navigation Publication
+
+- MLB-DATA-02Q-R6 is certified as `MLB_DATA_02Q_R6_VALUE_BOARD_NAVIGATION_PUBLICATION_CERTIFIED`. The user manually configured Vercel Production with `PICK2_MLB_VALUE_BOARD_NAVIGATION_ENABLED=true` and completed the required runtime refresh; Codex performed read-only production readback only.
+- Repository, origin and production are aligned to `29d1bd05bd11b293887a5ffe63b3951b56a8310d`, and `/api/system/version` reported 0 provider calls. The existing route gate `PICK2_MLB_VALUE_BOARD_ENABLED=true` remained effectively ON and unchanged.
+- Production navigation is now active: Primary navigation exposes `MLB Value Board` targeting `/mlb-value-board`, ordered after `Today` and before `Performance`, with icon `V`. Desktop rail, mobile five-column bottom navigation, active `aria-current`, focus visibility, tap target sizing and responsive no-overflow checks passed.
+- Board parity remained unchanged: 42 total rows, 5 Official Picks, 14 Value Candidates, 23 Watchlist and 0 Blocked. Top pick parity remained game `823904`, AWAY at `betrivers`, consensus edge `0.081935617141676` and unit EV `0.2409281394125`.
+- R6 remained read-only: no production DML/DDL, no provider calls, no odds refresh, no Official Pick/native value/market/prediction/model/raw/feature writes, no automation and no cron changes. `MLB_DATA_02Q_VALUE_BOARD_PUBLICATION_STATE = ACTIVE_WITH_NAVIGATION`; `MLB_DATA_02Q_VALUE_BOARD_NAVIGATION_STATE = ACTIVE`; `MLB_DATA_02R_DAILY_REFRESH_PIPELINE_PREP_READY = YES`.
 
 ## 2026-09-06 MLB-DATA-02Q-R5 Value Board Navigation Publication Prep
 
