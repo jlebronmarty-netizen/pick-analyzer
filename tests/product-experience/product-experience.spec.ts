@@ -14,6 +14,7 @@ const viewports: Viewport[] = [
 
 const mainRoutes: RouteSpec[] = [
   { name: 'dashboard', path: '/dashboard', main: true, interactive: true },
+  { name: 'mlb-decision-board', path: '/mlb', main: true, interactive: true },
   { name: 'game-intelligence', path: '/game-intelligence', main: true, interactive: true },
   { name: 'player-projections', path: '/player-projections', main: true, interactive: true },
   { name: 'performance', path: '/performance', main: true },
@@ -177,7 +178,7 @@ test.describe('Phase 7 rendered viewport certification', () => {
   }
 
   test('keyboard navigation exposes visible focus on representative pages', async ({ page }) => {
-    for (const route of ['/dashboard', '/game-intelligence', '/player-projections', '/most-likely']) {
+    for (const route of ['/dashboard', '/mlb', '/game-intelligence', '/player-projections', '/most-likely']) {
       await page.setViewportSize({ width: 390, height: 844 })
       await page.goto(route)
       await waitForReady(page)
@@ -210,6 +211,42 @@ test.describe('Phase 7 rendered viewport certification', () => {
       expect(page.url()).toContain('/player-projections/')
     } else {
       await expect(page.locator('main')).toContainText(/No player projections|Loading MLB player projections|Player projections failed/i)
+    }
+  })
+
+  test('mlb decision board exposes the shadow safety contract', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/mlb')
+    await waitForReady(page)
+    await expect(page.getByText('MLB Decision Board V1', { exact: true })).toBeVisible()
+    await expect(page.getByText('SHADOW V1', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Player Props' }).click()
+    await expect(page.getByRole('button', { name: 'Player Props' })).toBeVisible()
+    await page.getByRole('button', { name: 'Markets' }).click()
+    await expect(page.getByRole('button', { name: 'Markets' })).toBeVisible()
+    await assertNoHorizontalOverflow(page)
+  })
+
+  test('mlb decision board api preserves read-only quote semantics', async ({ request }) => {
+    const response = await request.get('/api/mlb/decision-board')
+    expect(response.ok()).toBe(true)
+    const body = await response.json()
+    expect(body.mode).toBe('mlb_decision_board_v1')
+    expect(body.productionActivationEnabled).toBe(false)
+    expect(body.refreshSeconds).toBeGreaterThanOrEqual(60)
+    expect(body.summary?.betCount).toBe(0)
+    expect(Array.isArray(body.props)).toBe(true)
+    expect(Array.isArray(body.markets)).toBe(true)
+    expect(Array.isArray(body.blockers)).toBe(true)
+
+    for (const item of [...(body.props ?? []), ...(body.markets ?? [])]) {
+      expect(['LEAN', 'NO_BET', 'BLOCKED']).toContain(item.decision)
+      expect(item.bestBook === null || ['FanDuel', 'Caesars'].includes(item.bestBook)).toBe(true)
+      for (const quote of item.quotes ?? []) {
+        expect(['FanDuel', 'Caesars']).toContain(quote.book)
+        expect(typeof quote.odds).toBe('number')
+        expect(Number.isFinite(quote.odds)).toBe(true)
+      }
     }
   })
 

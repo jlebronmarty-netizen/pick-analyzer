@@ -1,0 +1,10 @@
+{
+  "authorized": true,
+  "paidProviderCallsAllowed": false,
+  "mutationsAllowed": false,
+  "scope": "protected-preview responsive, accessibility, API safety, health readback, and persisted canary verification",
+  "expectedCanaryEventId": "baseball_mlb:mlb:sportsdataio:event:79431",
+  "expectedPersistedCanaryRows": 14,
+  "attempt": 5,
+  "reason": "Re-run zero-cost product QA after synchronizing MLB Decision Board navigation with current main."
+}

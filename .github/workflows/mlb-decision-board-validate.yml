@@ -1,0 +1,255 @@
+name: MLB Decision Board Validate
+
+on:
+  push:
+    branches:
+      - feature/mlb-decision-board-v1
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/app/mlb/**'
+      - 'src/app/api/mlb/**'
+      - 'src/components/mlb/**'
+      - 'src/services/mlb-*.service.ts'
+      - 'src/types/mlb-*.ts'
+      - 'src/components/dashboard/DashboardShell.tsx'
+      - '.github/workflows/mlb-decision-board-validate.yml'
+
+permissions:
+  contents: read
+  statuses: read
+  id-token: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Build-only placeholders. They prevent import-time Supabase client construction
+      # from failing during Next.js page-data collection without exposing real secrets.
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder-publishable-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-role-key
+      MLB_PREVIEW_URL: https://pick-analyzer-git-feature-mlb-decision-board-v1-pick-analyzer.vercel.app
+      MLB_PUBLIC_URL: https://pick-analyzer.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      - name: Probe canonical Odds API credential at zero cost
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          http_code="$(curl -sS -L \
+            --connect-timeout 10 \
+            --max-time 45 \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            --data '{"live":true,"persist":false,"confirm":"ODDS_API_CURRENT_ODDS_V1","maxCalls":1,"maxSports":1}' \
+            -o "$response_file" \
+            -w '%{http_code}' \
+            "${MLB_PUBLIC_URL}/api/providers/the-odds-api/current-odds")"
+
+          if [ "$http_code" != "200" ]; then
+            echo "Canonical credential probe returned HTTP ${http_code}."
+            head -c 600 "$response_file" || true
+            echo
+            exit 1
+          fi
+
+          RESPONSE_FILE="$response_file" node <<'NODE'
+          const fs = require('fs')
+          const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
+          const firstCall = Array.isArray(payload.planObserved) ? payload.planObserved[0] : null
+          const assertions = [
+            [payload.providerCallsMade === 1, 'canonical credential probe must make exactly one provider call'],
+            [firstCall?.label === 'catalog_credit_read', 'the single call must be the zero-cost /sports catalog probe'],
+            [firstCall?.requestsLast === 0, 'catalog probe must report x-requests-last=0'],
+            [payload.productionMutationsMade === 0, 'probe must make zero production mutations'],
+            [payload.remoteMutationsMade === 0, 'probe must make zero remote mutations'],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          console.log(JSON.stringify({
+            credentialContract: 'THE_ODDS_API_KEY',
+            providerCallsMade: payload.providerCallsMade,
+            requestsRemaining: firstCall?.requestsRemaining ?? null,
+            requestsUsed: firstCall?.requestsUsed ?? null,
+            requestsLast: firstCall?.requestsLast ?? null,
+            status: payload.status,
+            blockers: payload.blockers,
+            productionMutationsMade: payload.productionMutationsMade,
+          }, null, 2))
+          if (failures.length) {
+            console.error(`Canonical credential probe assertions failed: ${failures.join('; ')}`)
+            process.exit(1)
+          }
+          NODE
+
+      - name: Audit upcoming MLB event crosswalk at zero cost
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          response_file="$(mktemp)"
+          http_code="$(curl -sS -L \
+            --connect-timeout 10 \
+            --max-time 45 \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            --data '{"live":true,"persist":false,"confirm":"ODDS_API_EVENT_CROSSWALK","maxCalls":1}' \
+            -o "$response_file" \
+            -w '%{http_code}' \
+            "${MLB_PUBLIC_URL}/api/providers/the-odds-api/event-crosswalk")"
+
+          if [ "$http_code" != "200" ]; then
+            echo "Crosswalk audit returned HTTP ${http_code}."
+            head -c 600 "$response_file" || true
+            echo
+            exit 1
+          fi
+
+          RESPONSE_FILE="$response_file" node <<'NODE'
+          const fs = require('fs')
+          const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
+          const assertions = [
+            [payload.providerCallsMade === 1, 'crosswalk audit must make exactly one /events call'],
+            [payload.remoteMutationsMade === 0, 'crosswalk audit must make zero remote mutations'],
+            [payload.rowsPersisted === 0, 'crosswalk audit must persist zero rows'],
+            [payload.quota?.requestsLast === 0, '/events must report x-requests-last=0'],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          console.log(JSON.stringify({
+            status: payload.status,
+            providerCallsMade: payload.providerCallsMade,
+            requestsLast: payload.quota?.requestsLast ?? null,
+            existingProviderMappings: payload.rootCause?.existingProviderMappings ?? null,
+            providerEventsEvaluated: payload.providerEventsEvaluated ?? null,
+            internalEventsEvaluated: payload.internalEventsEvaluated ?? null,
+            exactMatches: payload.exactMatches ?? null,
+            deterministicMatches: payload.deterministicMatches ?? null,
+            ambiguousMatches: payload.ambiguousMatches ?? null,
+            unmatchedProviderEvents: payload.unmatchedProviderEvents ?? null,
+            persistableMappingCount: Array.isArray(payload.persistableMappings) ? payload.persistableMappings.length : null,
+            persistableMappings: Array.isArray(payload.persistableMappings)
+              ? payload.persistableMappings.slice(0, 20).map((row) => ({
+                  providerEventId: row.providerEventId,
+                  internalEventId: row.internalEventId,
+                  providerCommenceTime: row.providerCommenceTime,
+                  internalStartTime: row.internalStartTime,
+                  matchMethod: row.matchMethod,
+                  matchConfidence: row.matchConfidence,
+                }))
+              : [],
+            blockers: payload.blockers,
+            warnings: payload.warnings,
+          }, null, 2))
+          if (failures.length) {
+            console.error(`Crosswalk audit assertions failed: ${failures.join('; ')}`)
+            process.exit(1)
+          }
+          NODE
+
+      - name: Mint GitHub OIDC token for protected preview
+        id: vercel_oidc
+        if: github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput('token', token)
+
+      - name: Verify zero-credit preview preflight
+        id: runtime_preflight
+        if: github.event_name == 'push'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.vercel_oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          for attempt in $(seq 1 36); do
+            status_json="$(curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status")"
+            vercel_state="$(printf '%s' "$status_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);const v=(j.statuses||[]).find(x=>x.context==='Vercel');process.stdout.write(v?.state||'pending')})")"
+            if [ "$vercel_state" = "success" ]; then
+              break
+            fi
+            if [ "$vercel_state" = "failure" ] || [ "$vercel_state" = "error" ]; then
+              echo "Vercel deployment failed for ${GITHUB_SHA}."
+              exit 1
+            fi
+            if [ "$attempt" = "36" ]; then
+              echo "Vercel deployment was not ready for ${GITHUB_SHA}."
+              exit 1
+            fi
+            sleep 5
+          done
+
+          response_file="$(mktemp)"
+          http_code="$(curl -sS -L \
+            --connect-timeout 10 \
+            --max-time 45 \
+            -H "x-vercel-trusted-oidc-idp-token: ${VERCEL_GITHUB_OIDC_TOKEN}" \
+            -o "$response_file" \
+            -w '%{http_code}' \
+            "${MLB_PREVIEW_URL}/api/mlb/player-props/preflight?maximumEvents=1")"
+
+          if [ "$http_code" != "200" ]; then
+            echo "Preview preflight returned HTTP ${http_code}."
+            head -c 600 "$response_file" || true
+            echo
+            exit 1
+          fi
+
+          RESPONSE_FILE="$response_file" node <<'NODE'
+          const fs = require('fs')
+          const payload = JSON.parse(fs.readFileSync(process.env.RESPONSE_FILE, 'utf8'))
+          const expectedMarkets = new Set([
+            'pitcher_outs_recorded',
+            'pitcher_strikeouts',
+            'batter_hits',
+            'batter_total_bases',
+          ])
+          const actualMarkets = new Set(Array.isArray(payload.selectedMarkets) ? payload.selectedMarkets : [])
+          const assertions = [
+            [payload.dryRun === true, 'dryRun must be true'],
+            [payload.status === 'DRY_RUN', 'status must be DRY_RUN'],
+            [payload.provider === 'the-odds-api', 'provider must be the-odds-api'],
+            [payload.providerCallsMade === 0, 'providerCallsMade must be 0'],
+            [payload.providerCreditsConsumed === 0, 'providerCreditsConsumed must be 0'],
+            [payload.remoteMutationsMade === 0, 'remoteMutationsMade must be 0'],
+            [payload.estimatedCredits === 4, 'one-event four-market estimate must be 4 credits'],
+            [expectedMarkets.size === actualMarkets.size && [...expectedMarkets].every((market) => actualMarkets.has(market)), 'selected markets must match Decision Board V1'],
+            [Array.isArray(payload.bookmakerKeys) && payload.bookmakerKeys.includes('fanduel') && payload.bookmakerKeys.includes('williamhill_us'), 'FanDuel and Caesars bookmaker keys must be present'],
+          ]
+          const failures = assertions.filter(([ok]) => !ok).map(([, message]) => message)
+          console.log(JSON.stringify({
+            status: payload.status,
+            dryRun: payload.dryRun,
+            providerCallsMade: payload.providerCallsMade,
+            providerCreditsConsumed: payload.providerCreditsConsumed,
+            remoteMutationsMade: payload.remoteMutationsMade,
+            estimatedCredits: payload.estimatedCredits,
+            certifiedMappingsAvailable: payload.certifiedMappingsAvailable,
+            blockers: payload.blockers,
+          }, null, 2))
+          if (failures.length) {
+            console.error(`Runtime preflight assertions failed: ${failures.join('; ')}`)
+            process.exit(1)
+          }
+          NODE
+
+      - name: Runtime preflight outcome
+        if: always() && github.event_name == 'push'
+        run: echo "runtime_preflight=${{ steps.runtime_preflight.outcome }}"

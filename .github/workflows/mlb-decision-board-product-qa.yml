@@ -1,0 +1,103 @@
+name: MLB Decision Board Product QA
+
+on:
+  push:
+    branches:
+      - feature/mlb-decision-board-v1
+    paths:
+      - 'docs/CERTIFICATION/mlb-decision-board-product-qa-request.json'
+
+permissions:
+  contents: read
+  statuses: read
+  id-token: write
+
+concurrency:
+  group: mlb-decision-board-product-qa
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      MLB_PREVIEW_URL: https://pick-analyzer-git-feature-mlb-decision-board-v1-pick-analyzer.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate read-only QA request
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const request = require('./docs/CERTIFICATION/mlb-decision-board-product-qa-request.json')
+          if (request.authorized !== true) throw new Error('QA_NOT_AUTHORIZED')
+          if (request.paidProviderCallsAllowed !== false) throw new Error('PAID_PROVIDER_CALLS_MUST_BE_FALSE')
+          if (request.mutationsAllowed !== false) throw new Error('MUTATIONS_MUST_BE_FALSE')
+          console.log('PASS: protected-preview QA request is read-only and zero-paid-call.')
+          NODE
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Mint GitHub OIDC token for protected preview
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken()
+            core.setSecret(token)
+            core.setOutput('token', token)
+
+      - name: Wait for matching Vercel deployment
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            status_json="$(curl -fsSL \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status")"
+            state="$(printf '%s' "$status_json" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);const v=(j.statuses||[]).find(x=>x.context==='Vercel');process.stdout.write(v?.state||'pending')})")"
+            if [ "$state" = 'success' ]; then
+              echo 'PASS: matching Vercel deployment is READY.'
+              exit 0
+            fi
+            if [ "$state" = 'failure' ] || [ "$state" = 'error' ]; then
+              echo 'VERCEL_DEPLOYMENT_FAILED'
+              exit 1
+            fi
+            if [ "$attempt" = '60' ]; then
+              echo 'VERCEL_DEPLOYMENT_NOT_READY'
+              exit 1
+            fi
+            sleep 5
+          done
+
+      - name: Run focused MLB Decision Board responsive and accessibility QA
+        env:
+          PLAYWRIGHT_EXTERNAL_SERVER: 'true'
+          PLAYWRIGHT_BASE_URL: ${{ env.MLB_PREVIEW_URL }}
+          VERCEL_GITHUB_OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: npx playwright test tests/product-experience/mlb-decision-board-certification.spec.ts --config=playwright.config.ts
+
+      - name: Upload QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-decision-board-product-qa-${{ github.run_id }}
+          path: |
+            test-results/product-experience
+          if-no-files-found: ignore
+          retention-days: 7

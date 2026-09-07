@@ -1,0 +1,10 @@
+{
+  "authorized": true,
+  "branch": "feature/mlb-decision-board-v1",
+  "maximumEvents": 1,
+  "maximumEstimatedCredits": 4,
+  "mode": "shadow-read-only",
+  "officialPickWritesAllowed": false,
+  "productionActivationAllowed": false,
+  "purpose": "One-event bounded MLB Decision Board V1 Player Props runtime certification after zero-credit preflight and certified mapping gate passed."
+}

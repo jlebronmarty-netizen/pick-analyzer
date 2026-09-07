@@ -1,0 +1,11 @@
+{
+  "authorized": true,
+  "branch": "feature/mlb-decision-board-v1",
+  "provider": "the-odds-api",
+  "maximumProviderCalls": 1,
+  "expectedProviderCredits": 0,
+  "targetTable": "provider_entity_mappings",
+  "officialPickWritesAllowed": false,
+  "productionActivationAllowed": false,
+  "purpose": "Persist current unambiguous MLB event crosswalk mappings required by the shadow/read-only Decision Board Player Props preflight. No paid Player Props call is authorized by this request."
+}
