@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/mlb-statcast-daily",
-      "schedule": "*/5 * * * *"
+      "schedule": "20 12 * * *"
     }
   ]
 }
