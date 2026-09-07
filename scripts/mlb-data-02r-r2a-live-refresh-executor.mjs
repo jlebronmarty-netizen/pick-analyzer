@@ -13,6 +13,7 @@ import {
   wrapperNames,
 } from './mlb-data-02r-r2d-current-slate-wrappers.mjs'
 import { runR2HFullDryIntegration } from './mlb-data-02r-r2h-full-dry-integration.mjs'
+import { createTestRepository, runR2ILiveExecution } from './mlb-data-02r-r2i-live-execution-interfaces.mjs'
 
 const BASE_URL = 'https://pick-analyzer.vercel.app'
 const MODEL_VERSION = 'MLB_MONEYLINE_REG_LOGISTIC_C1_2025_V1'
@@ -60,6 +61,80 @@ if (args.has('--r2h-full-dry-integration')) {
       }, null, 2))
       process.exit(1)
     })
+}
+
+if (args.has('--r2i-live-branch-simulation')) {
+  const authorization = {
+    authorized: true,
+    execution_package_sha: localPackageShaForSimulation(),
+    run_id: 'mlb-02r-r2i-test-live',
+    providerCaps: {
+      MLB_OFFICIAL: { allowed: true, maxCalls: 1 },
+      STATCAST: { allowed: true, maxCalls: 1 },
+      THE_ODDS_API: { allowed: true, maxCalls: 1 },
+      BALLDONTLIE: { allowed: false, maxCalls: 0 },
+      SPORTSDATAIO: { allowed: false, maxCalls: 0 },
+      OTHER: { allowed: false, maxCalls: 0 },
+    },
+    dmlCaps: {
+      nativeGames: 1,
+      nativePlayers: 2,
+      rawStatcast: 1,
+      features: { snapshots: 1, team: 2, starter: 2, bullpen: 2, batter: 1, matchup: 1, firstInning: 1 },
+      predictions: 1,
+      marketMappings: 1,
+      marketObservations: 2,
+      nativeValues: 2,
+      officialPicks: 1,
+    },
+    authorizedDmlTargets: [],
+    ddlAllowed: false,
+    settlementAllowed: false,
+    automationAllowed: false,
+  }
+  runR2ILiveExecution({
+    mode: 'LIVE_EXECUTE',
+    authorization,
+    executionPackageSha: authorization.execution_package_sha,
+    repository: createTestRepository(),
+    providers: {
+      mlbOfficial: { async getSchedule() { return { dates: [{ date: '2026-09-07', games: [{ gamePk: 700001, gameDate: '2026-09-07T23:05:00.000Z', officialDate: '2026-09-07', season: 2026, status: { abstractGameState: 'Preview', detailedState: 'Pre-Game', statusCode: 'P' }, teams: { away: { team: { id: 110, abbreviation: 'AWY', name: 'Away Team' }, probablePitcher: { id: 660001, fullName: 'Away Starter', confirmed: false } }, home: { team: { id: 111, abbreviation: 'HME', name: 'Home Team' }, probablePitcher: { id: 660002, fullName: 'Home Starter', confirmed: true } } } }] }] } } },
+      statcast: { async fetchRowsForGames() { return [{ game_pk: 700001, game_date: '2026-09-07', game_year: 2026, at_bat_number: 1, pitch_number: 1, source_pitcher_id: 660001, source_batter_id: 770001, raw_payload: { pitch_type: 'FF' } }] } },
+      odds: { async getMoneylineOdds() { return { events: [{ id: 'odds-event-700001', sport_key: 'baseball_mlb', commence_time: '2026-09-07T23:05:00.000Z', home_team: 'Home Team', away_team: 'Away Team', bookmakers: [{ key: 'book_a', title: 'Book A', markets: [{ key: 'h2h', last_update: '2026-09-07T15:01:00.000Z', outcomes: [{ name: 'Home Team', price: -120 }, { name: 'Away Team', price: 110 }] }] }] }] } } },
+    },
+  })
+    .then((artifact) => {
+      console.log(JSON.stringify({
+        certificationVerdict: artifact.certificationVerdict,
+        mode: artifact.mode,
+        liveBranchTraversed: artifact.liveBranchTraversed,
+        stages: artifact.stages.length,
+        realProviderCalls: artifact.safety.realProviderCalls,
+        productionDml: artifact.safety.productionDml,
+        productionDdl: artifact.safety.productionDdl,
+        testProviderCalls: artifact.safety.testProviderCalls,
+        testDml: artifact.safety.testDml,
+      }, null, 2))
+      process.exit(0)
+    })
+    .catch((error) => {
+      console.error(JSON.stringify({
+        certificationVerdict: 'MLB_DATA_02R_R2I_LIVE_BRANCH_SIMULATION_FAILED',
+        error: error.message,
+        realProviderCalls: 0,
+        productionDml: 0,
+        productionDdl: 0,
+      }, null, 2))
+      process.exit(1)
+    })
+}
+
+function localPackageShaForSimulation() {
+  try {
+    return git(['rev-parse', 'HEAD'])
+  } catch {
+    return '8cfd91f626e0e914d2e3abb07dc140b793a39c73'
+  }
 }
 
 function valueAfter(flag) {
@@ -568,7 +643,7 @@ R2D thin-wrapper repair is active for current-slate execution: broad component c
   }, null, 2))
 }
 
-if (!args.has('--r2h-full-dry-integration')) {
+if (!args.has('--r2h-full-dry-integration') && !args.has('--r2i-live-branch-simulation')) {
   main().catch((error) => {
     console.error(JSON.stringify({
       certificationVerdict: 'MLB_DATA_02R_R2A_LIVE_REFRESH_EXECUTOR_BLOCKED',

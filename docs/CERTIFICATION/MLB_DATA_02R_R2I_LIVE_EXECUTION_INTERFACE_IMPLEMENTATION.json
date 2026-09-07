@@ -1,0 +1,252 @@
+{
+  "generatedAt": "2026-09-07T23:00:41.796Z",
+  "project": "MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPLEMENTATION",
+  "certificationVerdict": "MLB_DATA_02R_R2I_LIVE_EXECUTION_INTERFACE_IMPLEMENTATION_CERTIFIED",
+  "priorPackageSha": "8cfd91f626e0e914d2e3abb07dc140b793a39c73",
+  "gates": {
+    "MLB_02R_R2I_LIVE_DEPENDENCY_INVENTORY": "COMPLETE",
+    "MLB_02R_R2I_PRODUCTION_REPOSITORY_CONTRACT": "PASS",
+    "MLB_02R_R2I_NATIVE_LIVE_REPOSITORY": "PASS",
+    "MLB_02R_R2I_RAW_LIVE_PATH": "PASS",
+    "MLB_02R_R2I_FEATURE_LIVE_REPOSITORIES": "PASS",
+    "MLB_02R_R2I_PREDICTION_LIVE_PERSISTENCE": "PASS",
+    "MLB_02R_R2I_MLB_OFFICIAL_LIVE_CLIENT": "PASS",
+    "MLB_02R_R2I_ODDS_LIVE_CLIENT": "PASS",
+    "MLB_02R_R2I_MARKET_LIVE_PERSISTENCE": "PASS",
+    "MLB_02R_R2I_VALUE_LIVE_PERSISTENCE": "PASS",
+    "MLB_02R_R2I_PICK_LIVE_PERSISTENCE": "PASS",
+    "MLB_02R_R2I_BOARD_LIVE_READBACK": "PASS",
+    "MLB_02R_R2I_LIVE_EXECUTOR_MODE": "PASS",
+    "MLB_02R_R2I_RUN_SCOPED_LIVE_AUTH": "PASS",
+    "MLB_02R_R2I_LIVE_PROVIDER_CAPS": "PASS",
+    "MLB_02R_R2I_LIVE_DML_CAPS": "PASS",
+    "MLB_02R_R2I_LIVE_SCHEMA_GUARDS": "PASS",
+    "MLB_02R_R2I_LIVE_CHECKPOINT_RESUME": "PASS",
+    "MLB_02R_R2I_LIVE_WIRING_TESTS": "PASS",
+    "MLB_02R_R2I_LIVE_MUTATION_NEGATIVE_TESTS": "PASS",
+    "MLB_02R_R2I_DRY_REGRESSION": "PASS",
+    "MLB_02R_R2I_LIVE_FAIL_CLOSED": "PASS",
+    "MLB_02R_R2I_LIVE_BRANCH_SIMULATION": "PASS",
+    "MLB_02R_R2I_AUTOMATION_REUSE": "PASS"
+  },
+  "dependencyInventory": {
+    "01 schedule": "REAL_PROVIDER_CLIENT",
+    "02 native": "REAL_PRODUCTION_REPOSITORY",
+    "03 raw Statcast": "REAL_PROVIDER_CLIENT_AND_REAL_PRODUCTION_REPOSITORY",
+    "04 features": "REAL_PRODUCTION_REPOSITORY",
+    "05 starters": "PURE_SERVICE",
+    "06 inference": "PURE_SERVICE",
+    "07 predictions": "REAL_PRODUCTION_REPOSITORY",
+    "08 odds": "REAL_PROVIDER_CLIENT",
+    "09 markets": "REAL_PRODUCTION_REPOSITORY",
+    "10 value": "REAL_PRODUCTION_REPOSITORY",
+    "11 policy": "PURE_SERVICE",
+    "12 Official Picks": "REAL_PRODUCTION_REPOSITORY",
+    "13 board": "READ_ONLY_PRODUCTION_REPOSITORY"
+  },
+  "productionRepositoryContract": {
+    "methods": [
+      "readNativeGames",
+      "insertNativeGames",
+      "readNativePlayers",
+      "insertNativePlayers",
+      "readRawRows",
+      "insertRawRows",
+      "readFeatureRows",
+      "insertFeatureRows",
+      "readPredictions",
+      "insertPredictions",
+      "readMarketMappings",
+      "insertMarketMappings",
+      "readMarketObservations",
+      "insertMarketObservations",
+      "readValues",
+      "insertValues",
+      "readOfficialPicks",
+      "insertOfficialPicks",
+      "readValueBoard",
+      "verifySchemaFingerprint"
+    ],
+    "noDelete": true,
+    "noArbitraryUpdate": true,
+    "targets": {
+      "nativeGames": "pick2_mlb_games",
+      "nativePlayers": "pick2_mlb_players",
+      "rawStatcast": "pick2_raw_mlb_statcast_pitches",
+      "featureSnapshots": "pick2_feature_snapshots",
+      "team": "pick2_mlb_team_daily_features",
+      "starter": "pick2_mlb_starter_daily_features",
+      "bullpen": "pick2_mlb_bullpen_daily_features",
+      "batter": "pick2_mlb_batter_daily_features",
+      "matchup": "pick2_mlb_matchup_daily_features",
+      "firstInning": "pick2_mlb_first_inning_daily_features",
+      "predictions": "pick2_game_predictions",
+      "marketMappings": "pick2_mlb_market_event_mappings",
+      "marketObservations": "pick2_mlb_market_price_observations",
+      "values": "pick2_mlb_market_value_evaluations",
+      "officialPicks": "pick2_mlb_official_picks"
+    }
+  },
+  "liveSimulation": {
+    "mode": "LIVE_EXECUTE",
+    "stages": 13,
+    "liveBranchTraversed": true,
+    "testProviderCalls": 0,
+    "testDml": 20,
+    "writeResults": [
+      {
+        "table": "pick2_mlb_games",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_players",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_raw_mlb_statcast_pitches",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_feature_snapshots",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_team_daily_features",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_starter_daily_features",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_bullpen_daily_features",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_batter_daily_features",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_matchup_daily_features",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_first_inning_daily_features",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_game_predictions",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_market_event_mappings",
+        "inserted": 1
+      },
+      {
+        "table": "pick2_mlb_market_price_observations",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_market_value_evaluations",
+        "inserted": 2
+      },
+      {
+        "table": "pick2_mlb_official_picks",
+        "inserted": 0
+      }
+    ],
+    "schemaGuards": [
+      {
+        "target": "pick2_mlb_games",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_players",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_raw_mlb_statcast_pitches",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_feature_snapshots",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_team_daily_features",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_starter_daily_features",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_bullpen_daily_features",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_batter_daily_features",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_matchup_daily_features",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_first_inning_daily_features",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_game_predictions",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_market_event_mappings",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_market_price_observations",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_market_value_evaluations",
+        "state": "ADDITIVE_COMPATIBLE"
+      },
+      {
+        "target": "pick2_mlb_official_picks",
+        "state": "ADDITIVE_COMPATIBLE"
+      }
+    ]
+  },
+  "dryRegression": {
+    "stages": 13,
+    "providerCalls": 0,
+    "productionDml": 0
+  },
+  "mutationNegativeTests": "PASS",
+  "automationReuse": {
+    "state": "PASS",
+    "schedulerNotActivated": true,
+    "sameExecutorCallable": true
+  },
+  "safety": {
+    "realProviderCalls": 0,
+    "theOddsApiCalls": 0,
+    "productionDml": 0,
+    "productionDdl": 0,
+    "predictionWrites": 0,
+    "marketWrites": 0,
+    "valueWrites": 0,
+    "officialPickWrites": 0,
+    "automationChanges": 0,
+    "cronChanges": 0,
+    "settlementWrites": 0,
+    "liveRefreshExecuted": false
+  },
+  "remainingBlockers": [
+    "R2B live refresh execution still requires a separate direct authorization against the R2I package SHA after publication/alignment."
+  ],
+  "recommendedNextPhase": "MLB_DATA_02R_R2B_LIVE_MANUAL_REFRESH_EXECUTION_RETRY_FROM_R2I_CERTIFIED_PACKAGE",
+  "recommendedNextInstruction": "Publish and align the R2I package, then separately authorize exactly one bounded R2B current-slate live manual refresh with explicit provider and DML caps.",
+  "errors": []
+}

@@ -77,8 +77,8 @@ export async function persistPredictions({
   return stageResult({ stage: '07 prediction persistence', mode, plannedRows: plan.plannedRows, insertEligible: plan.insertEligible, reuseNoOp: plan.reuseNoOp, blockConflict: plan.blockConflict, artifact: { target: R2G_TARGETS.predictions, plan } })
 }
 
-export function acceptOddsEvidence({ mode = 'DRY_RUN', providerResponse, responseDigest, acquiredAt, providerAccounting = {}, eligibleGamePks = [] } = {}) {
-  assertNoLiveExecute(mode, false)
+export function acceptOddsEvidence({ mode = 'DRY_RUN', providerResponse, responseDigest, acquiredAt, providerAccounting = {}, eligibleGamePks = [], liveAuthorization = false } = {}) {
+  assertNoLiveExecute(mode, liveAuthorization)
   assertIsoTimestamp(acquiredAt, 'acquired_at')
   requireValue(responseDigest, 'ODDS_RESPONSE_DIGEST')
   const events = Array.isArray(providerResponse) ? providerResponse : providerResponse?.events
