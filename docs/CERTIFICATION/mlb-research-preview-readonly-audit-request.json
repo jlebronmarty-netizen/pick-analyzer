@@ -2,13 +2,9 @@
   "authorized": true,
   "paidProviderCallsAllowed": false,
   "mutationsAllowed": false,
-  "targetUrl": "https://pick-analyzer-git-feature-mlb-game-models-347e7a-pick-analyzer.vercel.app/api/mlb/research/game-models/backtest",
-  "expectedModelVersion": "MLB_GAME_MODELS_RESEARCH_V1",
-  "expectedStatus": "RESEARCH_COMPLETE",
-  "expectedMarkets": {
-    "moneyline": "ANY",
-    "runLine": "ANY",
-    "totals": "ANY"
-  },
-  "reason": "Zero-cost protected-preview rerun after numerical-stability repair of the leakage-safe MLB Moneyline, Run Line and Totals research backtest."
+  "targetUrl": "https://pick-analyzer-git-feature-mlb-moneyline-shadow-v1-pick-analyzer.vercel.app/api/mlb/research/moneyline/artifact",
+  "expectedModelVersion": "MLB_MONEYLINE_V1",
+  "expectedMarket": "MONEYLINE",
+  "expectedStatus": "VALIDATED_SHADOW_ARTIFACT",
+  "reason": "Zero-cost protected-preview validation of the frozen leakage-safe Moneyline shadow artifact before registry persistence or forward research use."
 }
