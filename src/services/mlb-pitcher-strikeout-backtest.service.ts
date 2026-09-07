@@ -77,7 +77,7 @@ async function fetchPaged(table: string, columns: string, orderColumns: string[]
     for (const column of orderColumns) query = query.order(column, { ascending: true })
     const { data, error } = await query
     if (error) throw new Error(`${table} read failed: ${error.message}`)
-    const page = (data ?? []) as RawRow[]
+    const page = (data ?? []) as unknown as RawRow[]
     rows.push(...page)
     if (page.length < PAGE_SIZE) break
   }
